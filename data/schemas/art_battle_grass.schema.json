@@ -1,0 +1,692 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_battle_grass.schema.json",
+  "title": "Herbe des batailles en vrais brins (lot FA7)",
+  "description": "Catalogue `data/art/battle_grass.json` : atlas de brins photographiés (ambientCG, CC0), composition des touffes par `game/assets/textures/battle/build_fa_grass.py` et réglages du rendu (`BattleVegetation`, `battle_grass.gdshader`).",
+  "type": "object",
+  "required": [
+    "source_url",
+    "atlas",
+    "sources",
+    "flowers",
+    "variants",
+    "render"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string",
+      "pattern": "^https://.*\\{asset\\}",
+      "description": "Adresse du zip d'un atlas, `{asset}` = identifiant ambientCG."
+    },
+    "atlas": {
+      "type": "object",
+      "required": [
+        "columns",
+        "rows",
+        "cell_width",
+        "cell_height",
+        "padding",
+        "pixels_per_metre",
+        "work_grey",
+        "neutral_pull"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Cases par ligne."
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "cell_width": {
+          "type": "integer",
+          "enum": [
+            128,
+            256,
+            512,
+            1024
+          ],
+          "description": "Largeur d'une case (px)."
+        },
+        "cell_height": {
+          "type": "integer",
+          "enum": [
+            128,
+            256,
+            512,
+            1024
+          ]
+        },
+        "padding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "Marge transparente autour de chaque case (px) : les mipmaps ne mêlent pas deux touffes."
+        },
+        "pixels_per_metre": {
+          "type": "number",
+          "minimum": 256,
+          "maximum": 4096,
+          "description": "Échelle de travail de la composition (px par mètre), avant réduction à la case."
+        },
+        "work_grey": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 220,
+          "description": "Valeur sRGB donnée au brin moyen avant le recentrage final."
+        },
+        "neutral_pull": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du rappel de la couleur moyenne vers le gris (1 = carte neutre, la teinte vient toute du sol)."
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "asset",
+          "axis"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+[0-9]{3}$",
+            "description": "Identifiant ambientCG."
+          },
+          "axis": {
+            "enum": [
+              "vertical",
+              "horizontal"
+            ],
+            "description": "Sens des brins dans l'atlas (horizontal : pied à gauche)."
+          },
+          "min_pixels": {
+            "type": "integer",
+            "minimum": 100,
+            "description": "Surface minimale d'un morceau détouré (3000 par défaut)."
+          },
+          "max_aspect": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 10,
+            "description": "Rapport largeur/hauteur maximal d'un morceau (écarte les brins fourchus)."
+          },
+          "gain": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 1.5,
+            "description": "Clarté de la source par rapport au brin moyen."
+          },
+          "tone": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 1.5
+            },
+            "description": "Facteur par canal (rappel de teinte)."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "flowers": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "radius_m",
+          "height_m",
+          "petals",
+          "heart",
+          "petal_rgb",
+          "heart_rgb",
+          "stem_rgb",
+          "luma_ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "radius_m": {
+            "type": "number",
+            "minimum": 0.004,
+            "maximum": 0.05,
+            "description": "Rayon du capitule (m)."
+          },
+          "height_m": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0.02,
+              "maximum": 1.0
+            },
+            "description": "Hauteur de la tige (m)."
+          },
+          "petals": {
+            "type": "integer",
+            "minimum": 4,
+            "maximum": 30
+          },
+          "heart": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 0.9,
+            "description": "Rayon du cœur (part du capitule)."
+          },
+          "petal_rgb": {
+            "$ref": "#/$defs/rgb"
+          },
+          "heart_rgb": {
+            "$ref": "#/$defs/rgb"
+          },
+          "stem_rgb": {
+            "$ref": "#/$defs/rgb"
+          },
+          "luma_ref": {
+            "type": "integer",
+            "minimum": 32,
+            "maximum": 255,
+            "description": "Valeur sRGB tenue pour la clarté du brin moyen."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "height_m",
+          "feet",
+          "foot_span",
+          "back_shade",
+          "weight_open",
+          "weight_clump",
+          "layers"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "height_m": {
+            "type": "number",
+            "minimum": 0.05,
+            "maximum": 2.0,
+            "description": "Hauteur de la touffe (m) : hauteur de la carte en jeu."
+          },
+          "feet": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Pieds resserrés répartis sur la largeur de la carte."
+          },
+          "foot_span": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Part de la largeur de la carte occupée par les pieds."
+          },
+          "back_shade": {
+            "type": "number",
+            "minimum": 0.4,
+            "maximum": 1,
+            "description": "Clarté des brins du fond (les plus longs)."
+          },
+          "weight_open": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Poids du tirage hors des bouquets."
+          },
+          "weight_clump": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Poids du tirage au cœur des bouquets."
+          },
+          "layers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/layer"
+            }
+          },
+          "flowers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "count"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 12
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "render": {
+      "type": "object",
+      "required": [
+        "tex_lum",
+        "card",
+        "layers",
+        "size",
+        "height_var",
+        "gap_fill",
+        "patch_fill",
+        "tint_gain",
+        "tint_var",
+        "hue_mix",
+        "contrast",
+        "luma_clamp",
+        "foot_shade",
+        "foot_height",
+        "up_normal",
+        "far_luma",
+        "mip_boost",
+        "backlight",
+        "fields",
+        "flat_height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tex_lum": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 0.6,
+          "description": "Luminance linéaire moyenne de l'atlas (visée par le script, lue par le shader)."
+        },
+        "card": {
+          "type": "object",
+          "required": [
+            "width_m",
+            "foot_ratio",
+            "count",
+            "bend_m"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "width_m": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 2.0,
+              "description": "Largeur d'une carte au sommet (m)."
+            },
+            "foot_ratio": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 1.0,
+              "description": "Largeur du pied par rapport au sommet."
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4,
+              "description": "Cartes croisées par touffe."
+            },
+            "bend_m": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.2,
+              "description": "Cintrage des cartes (m)."
+            }
+          }
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "Grilles de touffes : [maille (m), rayon (m), échelle des touffes, rayon intérieur (m)]."
+        },
+        "size": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0.3,
+            "maximum": 2.5
+          },
+          "description": "Taille d'une touffe (tirage uniforme)."
+        },
+        "height_var": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part gardée des variations de hauteur par plaques de DA6."
+        },
+        "gap_fill": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Densité gardée entre les bouquets (1 = nappe continue)."
+        },
+        "patch_fill": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Densité gardée dans les trouées à ~25 m."
+        },
+        "tint_gain": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 2.0
+          },
+          "description": "Couleur du sol → couleur de l'herbe (par canal)."
+        },
+        "tint_var": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part gardée des écarts de teinte et de clarté entre touffes."
+        },
+        "hue_mix": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la teinte propre des brins (0 = luminance seule)."
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5,
+          "description": "Contraste clair/sombre des brins autour de la moyenne."
+        },
+        "luma_clamp": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 4.0
+          },
+          "description": "Bornes de la clarté relative d'un brin."
+        },
+        "foot_shade": {
+          "type": "number",
+          "minimum": 0.4,
+          "maximum": 1,
+          "description": "Clarté du pied de touffe (1 = pas d'assombrissement)."
+        },
+        "foot_height": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1,
+          "description": "Part de la carte sur laquelle le pied s'éclaircit."
+        },
+        "up_normal": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normale ramenée vers la verticale (1 = éclairée comme le sol)."
+        },
+        "far_luma": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.5,
+          "description": "Clarté vers laquelle tendent les touffes lointaines."
+        },
+        "mip_boost": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Alpha relevé par niveau de mipmap (couverture des brins au loin)."
+        },
+        "backlight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Lumière traversante (multiplie celle de DA6)."
+        },
+        "fields": {
+          "type": "object",
+          "required": [
+            "wheat_variants",
+            "wheat_height",
+            "fallow_height",
+            "stubble_variants",
+            "stubble_height",
+            "seedling_height",
+            "wheat_gain",
+            "wheat_foot_shade",
+            "seedling_gain"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "wheat_variants": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "description": "Touffes des parcelles de blé."
+            },
+            "stubble_variants": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "description": "Touffes du chaume et des semis."
+            },
+            "wheat_height": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 4,
+              "description": "Hauteur relative dans le blé."
+            },
+            "fallow_height": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 4,
+              "description": "Hauteur relative dans la jachère."
+            },
+            "stubble_height": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 4,
+              "description": "Hauteur relative dans le chaume."
+            },
+            "seedling_height": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 4,
+              "description": "Hauteur relative dans les semis."
+            },
+            "wheat_gain": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.3,
+                "maximum": 2.0
+              },
+              "description": "Teinte du blé par rapport à celle de DA6 (par canal)."
+            },
+            "wheat_foot_shade": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 1.0,
+              "description": "Clarté du pied des tiges de blé (ombre entre les tiges)."
+            },
+            "seedling_gain": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.3,
+                "maximum": 2.0
+              },
+              "description": "Teinte des jeunes pousses des semis par rapport au sol (par canal)."
+            }
+          }
+        },
+        "flat_height": {
+          "type": "number",
+          "minimum": 0.02,
+          "maximum": 0.5,
+          "description": "Hauteur (m) d'une touffe couchée par les troupes (BV3)."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      }
+    },
+    "layer": {
+      "type": "object",
+      "required": [
+        "source",
+        "count",
+        "length_m",
+        "width_scale",
+        "foot_sigma_m",
+        "fan",
+        "lean",
+        "curve",
+        "tone"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 400,
+          "description": "Brins posés."
+        },
+        "length_m": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0.02,
+            "maximum": 2.0
+          },
+          "description": "Longueur d'un brin (m)."
+        },
+        "width_scale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3,
+          "description": "Largeur du brin par rapport à la photo (1 = proportions réelles)."
+        },
+        "foot_sigma_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3,
+          "description": "Écart type des brins autour de leur pied (m)."
+        },
+        "fan": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Éventail : écartement des brins à mesure qu'ils s'éloignent du pied."
+        },
+        "lean": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5,
+          "description": "Inclinaison aléatoire maximale (tangente)."
+        },
+        "curve": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5,
+          "description": "Courbure maximale (retombée de la pointe)."
+        },
+        "tone": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0.4,
+            "maximum": 1.6
+          },
+          "description": "Clarté d'un brin (tirage)."
+        }
+      }
+    }
+  }
+}

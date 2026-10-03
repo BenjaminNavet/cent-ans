@@ -774,6 +774,14 @@ pub(crate) fn apply_outcome(
     if let Some(winner) = &winner {
         let amount = data.naval.rules.control_victory;
         state.naval.win_sea(&request.sea, winner, amount);
+        // JR4: a sea fight is a battle for the crusade's fervour (the
+        // intercepting squadron is the attacker).
+        let loser = if winner == &request.interceptor {
+            &army_faction
+        } else {
+            &request.interceptor
+        };
+        crate::crusade::on_battle(state, data, winner, loser, &request.interceptor);
     }
     let destroyed = state
         .armies

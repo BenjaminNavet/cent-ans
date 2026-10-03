@@ -7,7 +7,10 @@ extends SceneTree
 ## Usage (avec affichage) :
 ##   godot --path game --resolution 1600x900 --script res://tests/sg3_siege_shot.gd -- \
 ##     --out=<dossier> [--landmark=avignon --attacker=fac_england] [--prefix=sg3] \
-##     [--only=bombard,treb,push,lod]
+##     [--only=bombard,treb,push,lod] [--flipbooks=<dossier>]
+## Lot FA2 : `--flipbooks` remplace les planches de feu et de fumée (A/B, `fx_flipbook_override.gd`).
+
+const FLIPBOOKS := preload("res://tests/fx_flipbook_override.gd")
 
 var _out := ""
 var _prefix := "sg3"
@@ -15,6 +18,7 @@ var _landmark := ""
 var _attacker := "fac_france"
 var _engines := "unit_trebuchet,unit_bombard,unit_mangonel,unit_siege_tower"
 var _only: PackedStringArray = []
+var _textures := {}
 var scene: Node
 var battle: Object
 var engines: SiegeEnginesFx
@@ -34,6 +38,8 @@ func _init() -> void:
 			_engines = arg.trim_prefix("--engines=")
 		elif arg.begins_with("--only="):
 			_only = arg.trim_prefix("--only=").split(",", false)
+		elif arg.begins_with("--flipbooks="):
+			_textures = FLIPBOOKS.load_textures(arg.trim_prefix("--flipbooks="))
 	if _out == "":
 		push_error("sg3_siege_shot: --out=<dossier> required")
 		quit(1)
@@ -250,10 +256,12 @@ func _frames(n: int) -> void:
 func _wait(seconds: float) -> void:
 	var end := Time.get_ticks_msec() + int(seconds * 1000.0)
 	while Time.get_ticks_msec() < end:
+		FLIPBOOKS.apply(scene, _textures)
 		await process_frame
 
 
 func _shot(file: String) -> void:
+	FLIPBOOKS.apply(scene, _textures)
 	await RenderingServer.frame_post_draw
 	var img := root.get_viewport().get_texture().get_image()
 	var path := _out.path_join("%s_%s" % [_prefix, file])

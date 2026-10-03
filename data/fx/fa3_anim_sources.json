@@ -1,0 +1,115 @@
+{
+  "description": "Lot FA3 : clips d'animation CC0 reciblés sur le rig fin `human` par tools/blender_scripts/fa3_anim_retarget.py et cuits dans game/assets/models/battle_fine/fa3_anim/ (lus avec `--fa-anim` après `--`). `skeletons` : os du rig fin -> [os source, os source enfant donnant la direction du membre au repos, ou null] ; `scale_by` : hauteur (hanches ou tête) dont le rapport met les déplacements à l'échelle. `clips` : `default` = clip substitué sans option (les autres seulement avec `--fa-anim` ; `--no-fa-anim` : aucun) ; clip du jeu substitué <- morceaux de clips source mis bout à bout (`first`/`last` en images source à 24 i/s, `last` négatif = depuis la fin ; `frames` = longueur rééchantillonnée du morceau). `return_frames` : fondu de retour vers la première image ; `root_motion` : part gardée du déplacement de l'os racine de la source (défaut 1) ; `left_arm` : bras du bouclier pris de la source, de la garde keyframée ou de la première image du clip `guard` FA3 ; `ground` : aucun joint sous le sol (chutes) ; `prop.aim` : lacet du corps tel que l'arme pointe vers l'avant à la première image (`weapon` : l'arme portée par le poignet droit, `hands` : la ligne du poing droit au poing gauche, hampe tenue en travers) ; `prop.axis` : direction fixe de l'arme (repère Blender, -Y = avant), portée par le seul poing droit de la source ; `prop.left_hand` : main gauche posée sur la hampe ; `bow` : images (du clip cuit) où la main droite tire la corde, `release` = décoche (1,55 s = image 37 pour `bow_shoot`).",
+  "fps": 24,
+  "loop_blend_frames": 6,
+  "skeletons": {
+    "m2m_human": {
+      "note": "Mesh2Motion human rig, 66 bones, T pose, faces -Y in Blender",
+      "root": "root",
+      "bones": {
+        "Body": ["pelvis", null],
+        "Hips": ["pelvis", null],
+        "Abdomen": ["spine_01", "spine_02"],
+        "Torso": ["spine_02", "spine_03"],
+        "Chest": ["spine_03", "neck_01"],
+        "Neck": ["neck_01", "head"],
+        "Head": ["head", null],
+        "Shoulder.L": ["clavicle_l", "upperarm_l"],
+        "UpperArm.L": ["upperarm_l", "lowerarm_l"],
+        "LowerArm.L": ["lowerarm_l", "hand_l"],
+        "Wrist.L": ["hand_l", null],
+        "Shoulder.R": ["clavicle_r", "upperarm_r"],
+        "UpperArm.R": ["upperarm_r", "lowerarm_r"],
+        "LowerArm.R": ["lowerarm_r", "hand_r"],
+        "Wrist.R": ["hand_r", null],
+        "UpperLeg.L": ["thigh_l", "calf_l"],
+        "LowerLeg.L": ["calf_l", "foot_l"],
+        "Foot.L": ["foot_l", null],
+        "UpperLeg.R": ["thigh_r", "calf_r"],
+        "LowerLeg.R": ["calf_r", "foot_r"],
+        "Foot.R": ["foot_r", null]
+      }
+    },
+    "kaykit_medium": {
+      "note": "KayKit Rig_Medium, 23 bones (no neck, no clavicles), T pose, faces -Y in Blender",
+      "root": "root",
+      "scale_by": "head",
+      "bones": {
+        "Body": ["hips", null],
+        "Hips": ["hips", null],
+        "Abdomen": ["spine", "chest"],
+        "Torso": ["chest", null],
+        "Chest": ["chest", "head"],
+        "Neck": ["head", null],
+        "Head": ["head", null],
+        "Shoulder.L": ["chest", null],
+        "UpperArm.L": ["upperarm.l", "lowerarm.l"],
+        "LowerArm.L": ["lowerarm.l", "wrist.l"],
+        "Wrist.L": ["hand.l", null],
+        "Shoulder.R": ["chest", null],
+        "UpperArm.R": ["upperarm.r", "lowerarm.r"],
+        "LowerArm.R": ["lowerarm.r", "wrist.r"],
+        "Wrist.R": ["hand.r", null],
+        "UpperLeg.L": ["upperleg.l", "lowerleg.l"],
+        "LowerLeg.L": ["lowerleg.l", "foot.l"],
+        "Foot.L": ["foot.l", null],
+        "UpperLeg.R": ["upperleg.r", "lowerleg.r"],
+        "LowerLeg.R": ["lowerleg.r", "foot.r"],
+        "Foot.R": ["foot.r", null]
+      }
+    }
+  },
+  "sources": {
+    "m2m_base": {
+      "title": "Mesh2Motion human base animations",
+      "author": "Mesh2Motion (Scott Petrovic and contributors)",
+      "license": "CC0-1.0",
+      "license_proof": "README of the mesh2motion-app repository: \"The art assets (3d models, rigs, animations) are all licensed under CC0\"",
+      "url": "https://github.com/Mesh2Motion/mesh2motion-app",
+      "file": "m2m-app-glb/human-base-animations.glb",
+      "skeleton": "m2m_human"
+    },
+    "m2m_addon": {
+      "title": "Mesh2Motion human add-on animations",
+      "author": "Mesh2Motion (Scott Petrovic and contributors)",
+      "license": "CC0-1.0",
+      "license_proof": "README of the mesh2motion-app repository: \"The art assets (3d models, rigs, animations) are all licensed under CC0\"",
+      "url": "https://github.com/Mesh2Motion/mesh2motion-app",
+      "file": "m2m-app-glb/human-addon-animations.glb",
+      "skeleton": "m2m_human"
+    },
+    "m2m_mocap": {
+      "title": "Mesh2Motion human motion capture animations",
+      "author": "Mesh2Motion (Scott Petrovic and contributors)",
+      "license": "CC0-1.0",
+      "license_proof": "README of the mesh2motion-app repository: \"The art assets (3d models, rigs, animations) are all licensed under CC0\"",
+      "url": "https://github.com/Mesh2Motion/mesh2motion-app",
+      "file": "m2m-app-glb/human-mocap-animations.glb",
+      "skeleton": "m2m_human"
+    },
+    "kaykit_melee": {
+      "title": "KayKit Character Animations 1.1, Rig_Medium combat melee",
+      "author": "Kay Lousberg (www.kaylousberg.com)",
+      "license": "CC0-1.0",
+      "license_proof": "KayKit-CC0-License.txt shipped with the pack",
+      "url": "https://kaylousberg.com/game-assets/character-animations",
+      "file": "kaykit-character-animations-1.1/Animations/gltf/Rig_Medium/Rig_Medium_CombatMelee.glb",
+      "skeleton": "kaykit_medium"
+    }
+  },
+  "clips": [
+    {"clip": "guard", "default": false, "family": "melee", "loop": true, "note": "upright, shield held before the chest, sword low at the side", "parts": [{"source": "m2m_base", "action": "Idle_Shield"}]},
+    {"clip": "slash", "default": false, "family": "melee", "loop": false, "note": "diagonal cut on the spot, shield kept up (Mesh2Motion's Sword_Attack drops to a knee and switches stance, its Sword_Regular clips travel 0.8 m)", "left_arm": "clip_guard", "parts": [{"source": "kaykit_melee", "action": "Melee_1H_Attack_Slice_Diagonal", "first": 2, "last": 22}]},
+    {"clip": "overhead", "default": false, "family": "melee", "loop": false, "note": "one-handed chop from above (Mesh2Motion has no in-place overhead cut)", "left_arm": "clip_guard", "parts": [{"source": "kaykit_melee", "action": "Melee_1H_Attack_Chop", "first": 3, "last": 20}]},
+    {"clip": "parry", "default": true, "family": "melee", "loop": false, "note": "shield thrown across the chest, then back", "parts": [{"source": "m2m_base", "action": "Shield_OneShot", "first": 0, "last": -1, "frames": 24}]},
+    {"clip": "hit", "default": false, "family": "melee", "loop": false, "note": "blow to the chest", "left_arm": "clip_guard", "parts": [{"source": "m2m_base", "action": "Hit_Chest", "first": 0, "last": -1, "frames": 14}]},
+    {"clip": "hit_b", "default": false, "family": "melee", "loop": false, "note": "blow to the head", "left_arm": "clip_guard", "parts": [{"source": "m2m_base", "action": "Hit_Head", "first": 0, "last": -1}]},
+    {"clip": "death", "default": true, "family": "melee", "loop": false, "ground": true, "note": "staggers (played x2.5: a corpse is thrown back at once by the game), falls on the back, settles", "parts": [{"source": "m2m_base", "action": "Death_D", "first": 0, "last": 19, "frames": 8}, {"source": "m2m_base", "action": "Death_D", "first": 20, "last": -1}]},
+    {"clip": "death_back", "default": true, "family": "melee", "loop": false, "ground": true, "note": "lifted off the feet (played x1.6) and thrown backwards", "parts": [{"source": "m2m_addon", "action": "Death_B", "first": 0, "last": 11, "frames": 8}, {"source": "m2m_addon", "action": "Death_B", "first": 12, "last": -1}]},
+    {"clip": "pike_level", "default": false, "family": "polearm", "loop": true, "note": "two-handed weapon levelled, ready", "prop": {"aim": "hands", "axis": [0.08, -1.0, 0.06], "left_hand": true}, "parts": [{"source": "kaykit_melee", "action": "Melee_2H_Idle"}]},
+    {"clip": "pike_thrust", "default": false, "family": "polearm", "loop": false, "note": "two-handed stab", "prop": {"aim": "hands", "axis": [0.08, -1.0, 0.06], "left_hand": true}, "parts": [{"source": "kaykit_melee", "action": "Melee_2H_Attack_Stab", "first": 0, "last": -1, "frames": 28}]},
+    {"clip": "bow_shoot", "default": false, "family": "bow", "loop": false, "note": "draw (30), hold (7), loose at 1.55 s (12), back to the first pose (11)", "bow": {"draw_from": 12, "release": 37, "elevation_deg": 32.0}, "return_frames": 11, "parts": [{"source": "m2m_addon", "action": "Bow Pull Back", "frames": 30}, {"source": "m2m_addon", "action": "Bow Pull Hold", "frames": 7}, {"source": "m2m_addon", "action": "Bow Release", "frames": 12}]},
+    {"clip": "victory", "default": false, "family": "cheer", "loop": true, "note": "right arm (weapon) pumped overhead, motion capture", "parts": [{"source": "m2m_mocap", "action": "Cheer_One_arm"}]},
+    {"clip": "victory_b", "default": false, "family": "cheer", "loop": true, "note": "both arms raised, motion capture", "parts": [{"source": "m2m_mocap", "action": "Cheering_Two_Hands"}]}
+  ]
+}

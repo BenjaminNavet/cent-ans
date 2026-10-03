@@ -5,10 +5,11 @@ extends Node3D
 ## remplacement des houppiers « sucette » (boule de cartes sur un bâton) de `BattleMeshes.tree`.
 ## - Squelette : tronc, charpentières, branches, rameaux (récursif, graine par essence), tenu dans
 ##   l'enveloppe du houppier de l'essence ; les rameaux terminaux portent des bouquets de deux
-##   cartes (`leaf_spray.png`) : une dans l'axe du rameau, une tournée vers l'extérieur. Normales
+##   cartes (`leaf_spray_<essence>.png`, vraies feuilles photographiées, lot FA1 ; à défaut le
+##   rameau dessiné `leaf_spray.png`) : une dans l'axe du rameau, une tournée vers l'extérieur. Normales
 ##   arrondies (houppier + bouquet), ombre propre cuite dans la couleur de sommet (cœur et bas du
 ##   houppier plus sombres). Hiver : ramilles nues (`twig_spray.png`), chêne marcescent
-##   (`dead_leaves.png`).
+##   (`dead_leaves_oak.png`).
 ## - Trois niveaux par arbre, choisis par instance dans les shaders (`battle_tree_lod.gdshaderinc`,
 ##   distance à la caméra principale, fondu tramé) : maillage complet jusqu'à `LOD1_DISTANCE`,
 ##   maillage allégé (même squelette, moitié des bouquets agrandis, rameaux sans écorce) jusqu'à
@@ -21,7 +22,9 @@ const BARK_TEXTURE := preload("res://assets/textures/battle/bark_brown_02_diff.j
 const BARK_NORMAL := preload("res://assets/textures/battle/bark_brown_02_nor.jpg")
 const LEAF_TEXTURE := preload("res://assets/textures/battle/leaf_spray.png")
 const TWIG_TEXTURE := preload("res://assets/textures/battle/twig_spray.png")
-const DEAD_TEXTURE := preload("res://assets/textures/battle/dead_leaves.png")
+const DEAD_TEXTURE := preload("res://assets/textures/battle/dead_leaves_oak.png")
+## Rameau de l'essence (`data/art/battle_tree_leaves.json`, `build_fa_leaf_sprays.py`).
+const SPECIES_LEAF_PATH := "res://assets/textures/battle/leaf_spray_%s.png"
 const FOLIAGE_SHADER := preload("res://shaders/battle_tree_foliage.gdshader")
 const BARK_SHADER := preload("res://shaders/battle_tree_bark.gdshader")
 const IMPOSTOR_SHADER := preload("res://shaders/battle_tree_impostor.gdshader")
@@ -99,7 +102,7 @@ static func foliage_material(species: String, winter: bool, lod_near: float, lod
 	var p: Dictionary = SPECIES[species]
 	var mat := ShaderMaterial.new()
 	mat.shader = FOLIAGE_SHADER
-	var texture: Texture2D = LEAF_TEXTURE
+	var texture: Texture2D = leaf_texture(species)
 	var tint: Color = p["leaf"]
 	if winter:
 		texture = DEAD_TEXTURE if bool(p["marcescent"]) else TWIG_TEXTURE
@@ -113,6 +116,15 @@ static func foliage_material(species: String, winter: bool, lod_near: float, lod
 	mat.set_shader_parameter("lod_far", lod_far)
 	mat.set_shader_parameter("lod_band", LOD_BAND)
 	return mat
+
+
+## Rameau feuillu de `species` : sa carte de vraies feuilles, sinon le rameau dessiné commun.
+static func leaf_texture(species: String) -> Texture2D:
+	var path := SPECIES_LEAF_PATH % species
+	# `--no-fa` après `--` : rameau dessiné d'avant FA1 (captures A/B).
+	if not OS.get_cmdline_user_args().has("--no-fa") and ResourceLoader.exists(path):
+		return load(path)
+	return LEAF_TEXTURE
 
 
 ## Squelette et bouquets (même tirage aléatoire quel que soit le niveau de détail : le maillage

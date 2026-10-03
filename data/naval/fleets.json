@@ -165,6 +165,17 @@
       "seas": [
         "sea_mediterranean"
       ]
+    },
+    {
+      "faction": "fac_crusaders",
+      "ships": {
+        "ship_nef": 4,
+        "ship_galley": 2
+      },
+      "seas": [
+        "sea_levantine"
+      ],
+      "note": "Transports affrétés pour le passage de 1336 et restés à Limassol avec les croisés."
     }
   ],
   "port_waters": {

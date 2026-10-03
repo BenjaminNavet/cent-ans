@@ -121,6 +121,8 @@ pub mod folders {
     pub const REPLENISHMENT_RULES: &str = "replenishment.json";
     /// Mercenary companies (lot TW2-T3), inside `rules/`; optional.
     pub const MERCENARY_RULES: &str = "mercenaries.json";
+    /// The crusader faction's fervour (lot JR1), inside `rules/`; optional.
+    pub const CRUSADE_RULES: &str = "crusade.json";
     pub const ARMY_RULES: &str = "armies.json";
     pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
     /// Short-term campaign missions (lot NT3), at the data root; optional.
@@ -131,6 +133,8 @@ pub mod folders {
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Living map scenes and figurines (lot FK1), inside `rules/`; optional.
     pub const MAP_SCENE_RULES: &str = "map_scenes.json";
+    /// Bounds of the battle history (chantier TB), inside `rules/`; optional.
+    pub const BATTLE_HISTORY_RULES: &str = "battle_history.json";
     /// River crossing battles (chantier RC), inside `rules/`; optional.
     pub const RIVER_CROSSING_RULES: &str = "river_crossings.json";
     /// Trade hubs and routes (lot C5); optional folder.
@@ -366,6 +370,9 @@ pub struct GameData {
     /// `data/rules/mercenaries.json` (lot TW2-T3, mercenary companies); the
     /// bundled file when absent.
     pub mercenary_rules: crate::entities::mercenaries::MercenaryRules,
+    /// `data/rules/crusade.json` (lot JR1, ADR 0165: the crusader faction's
+    /// fervour); `None` when absent: the mechanic is inert.
+    pub crusade_rules: Option<crate::entities::crusade::CrusadeRules>,
     /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled
     /// file when absent.
     pub army_rules: crate::entities::army_rules::ArmyRules,
@@ -384,6 +391,9 @@ pub struct GameData {
     /// `data/rules/map_scenes.json` (lot FK1, living map);
     /// [`crate::MapSceneRules::default`] when absent.
     pub map_scene_rules: crate::entities::map_scenes::MapSceneRules,
+    /// `data/rules/battle_history.json` (chantier TB, battle history bounds);
+    /// [`crate::BattleHistoryRules::default`] when absent.
+    pub battle_history_rules: crate::entities::battle_history::BattleHistoryRules,
     /// `data/rules/river_crossings.json` (chantier RC, ADR 0141); the
     /// bundled file when absent.
     pub river_crossing_rules: crate::entities::river_crossing::RiverCrossingRules,
@@ -487,12 +497,14 @@ impl GameData {
             capture_rules: Default::default(),
             replenishment_rules: Default::default(),
             mercenary_rules: Default::default(),
+            crusade_rules: None,
             army_rules: Default::default(),
             siege_engine_rules: Default::default(),
             mission_rules: Default::default(),
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             map_scene_rules: Default::default(),
+            battle_history_rules: Default::default(),
             river_crossing_rules: Default::default(),
             crossings: Vec::new(),
             river_names: BTreeMap::new(),
@@ -631,6 +643,10 @@ impl GameData {
         if mercenary_path.is_file() {
             data.mercenary_rules = read_json(&mercenary_path)?;
         }
+        let crusade_path = root.join(folders::RULES).join(folders::CRUSADE_RULES);
+        if crusade_path.is_file() {
+            data.crusade_rules = Some(read_json(&crusade_path)?);
+        }
         let army_rules_path = root.join(folders::RULES).join(folders::ARMY_RULES);
         if army_rules_path.is_file() {
             data.army_rules = read_json(&army_rules_path)?;
@@ -658,6 +674,12 @@ impl GameData {
         let map_scenes_path = root.join(folders::RULES).join(folders::MAP_SCENE_RULES);
         if map_scenes_path.is_file() {
             data.map_scene_rules = read_json(&map_scenes_path)?;
+        }
+        let battle_history_path = root
+            .join(folders::RULES)
+            .join(folders::BATTLE_HISTORY_RULES);
+        if battle_history_path.is_file() {
+            data.battle_history_rules = read_json(&battle_history_path)?;
         }
         let crossing_rules_path = root
             .join(folders::RULES)

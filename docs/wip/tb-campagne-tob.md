@@ -56,8 +56,11 @@ références à récupérer en ligne.
   (rouge réservé aux ennemis), FA (assets de bataille). TB ne touche pas leurs fichiers.
 
 ## Prochaine étape
-1. Fusionner l'historique des batailles (`../gp-tb8`, `feat/tb-battles`) : vérification
-   fmt / clippy / cargo test / Godot en cours sur une base à jour de main ; puis `--ff-only`.
+1. Fait le 03/10 : historique des batailles dans `core/` fusionné dans main (6d11d4b81,
+   `docs/wip/tb-battles.md`, ADR 0157 révisé) ; test `m2_free_movement` d'une autre session
+   corrigé au passage (assertion fausse quand la marche épuise le mouvement). Capture de contrôle
+   de main avec les arbres HC : `~/.cache/cent_ans/tb/final2-sheet.jpg`. **Chantier TB terminé**
+   hors restes ci-dessous.
 2. Restes TB3 : murs bruns du kit contre murs clairs GC ; suie et enceinte construites en jeu
    invisibles sur la maquette GC (matériau partagé, à voir avec la session GC) ; pas de
    bâtiments hors les murs pour villages, châteaux, abbayes ; mine jamais vue en situation ;

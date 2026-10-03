@@ -291,8 +291,8 @@ fn attack_within_reach_and_out_of_reach() {
         .iter()
         .any(|e| e.kind == EventKind::Battle));
     assert_eq!(state.armies[&english].total_strength(), english_before);
-    // No movement left: still refused, nothing changes.
-    let before = state.save_json();
+    // No movement left: still refused, nothing changes (the march above may already have
+    // spent the whole allowance, so the state is not required to differ from before).
     state.armies.get_mut(&french).unwrap().movement_left = 0;
     let exhausted = state.save_json();
     assert_eq!(
@@ -306,7 +306,6 @@ fn attack_within_reach_and_out_of_reach() {
         Err(OrderError::NoMovementLeft)
     );
     assert_eq!(state.save_json(), exhausted);
-    assert_ne!(before, exhausted);
     // Within reach: the attacker closes in (through the target's own zone
     // of control) and fights at once.
     let (mut state, french, english) = duel(&data, start, east(&data, start, 40.0));

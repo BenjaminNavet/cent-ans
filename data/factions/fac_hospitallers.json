@@ -64,6 +64,11 @@
       "faction": "fac_mentese",
       "status": "war",
       "note": "Menteşe, voisin continental de Rhodes, harcèle l'île."
+    },
+    {
+      "faction": "fac_crusaders",
+      "status": "peace",
+      "note": "Frères d'armes de la Chrétienté d'Orient."
     }
   ],
   "ai_personality": {

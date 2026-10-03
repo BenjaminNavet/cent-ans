@@ -415,6 +415,9 @@ func _connect_ui() -> void:
 	ui.cancel_build_requested.connect(_on_cancel_build)
 	ui.tax_rate_changed.connect(_on_tax_rate_changed)
 	ui.faction_panel_requested.connect(_on_faction_panel_requested)
+	# JR3 : le passage se prêche par la voie commune des ordres (son, toast, rafraîchissement).
+	ui.faction_panel.crusade_section.submit = func(order: Dictionary) -> Dictionary:
+		return _submit(order, "Le passage est prêché : des volontaires prennent la croix.")
 	ui.court_panel_requested.connect(_on_court_panel_requested)
 	ui.province_court_requested.connect(_on_province_court_requested)
 	ui.character_selected.connect(_on_character_selected)
@@ -558,6 +561,7 @@ func _refresh_top_bar() -> void:
 	if _economy_available():
 		economy = sim.call("get_faction_economy", player_faction)
 	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
+	ui.set_crusade(sim.call("get_crusade") if sim.has_method("get_crusade") else {})  # JR3
 
 
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
@@ -1859,6 +1863,12 @@ func _focus_capital() -> void:
 	var index := map_data.index_of_id(capital)
 	if index == 0:
 		index = mini(3, map_data.province_count)
+	# JR3 : une faction sans terre (les croisés à Limassol) a sa capitale chez autrui : la vue va
+	# sur son ost, qui campe dans sa colonie, sans sélectionner la province d'un autre.
+	elif sim != null and not player_army_ids().is_empty() \
+			and str((sim.call("get_province_state", capital) as Dictionary).get("owner", player_faction)) != player_faction:
+		_focus_first_player_army()
+		return
 	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
 	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
 	camera_rig.snap()
@@ -1920,6 +1930,9 @@ func _stage_screenshot_budget() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
+	# Le survol suit la dernière position connue de la souris, même hors de la fenêtre : pas
+	# d'étiquette de province parasite sur les captures.
+	RenderingServer.frame_pre_draw.connect(func() -> void: ui.hover_label.hide(), CONNECT_ONE_SHOT)
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())

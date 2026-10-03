@@ -36,6 +36,7 @@ pub mod ai_minimal;
 pub mod ai_replay;
 pub mod battle_auto;
 pub mod battle_forecast;
+pub mod battle_history;
 pub mod battle_outcome;
 pub mod battle_request;
 pub mod buildings;
@@ -44,6 +45,7 @@ pub mod characters;
 pub mod chivalry;
 pub mod chronicle;
 pub mod coinage;
+pub mod crusade;
 pub mod difficulty;
 pub mod diplomacy;
 pub mod dynasty;
@@ -120,6 +122,7 @@ pub use chronicle::{
     PlagueWave,
 };
 pub use coinage::{CoinageError, CoinageLevel, CoinageParams};
+pub use crusade::{CrusadeError, CrusadeState, CrusadeView, FervorChange, PendingPassage};
 pub use diplomacy::{
     Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
     RelationKind,

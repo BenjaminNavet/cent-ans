@@ -13,6 +13,15 @@ const GRASS_TEXTURE := preload("res://assets/textures/battle/grass_clump.png")
 const GRASS_TEXTURE_DA6 := preload("res://assets/textures/battle/grass_blades.png")
 const GRASS_TEX_LUM_DA6 := 0.21
 const MAX_CAMERA_HEIGHT := 170.0
+## FA7 : atlas de touffes faites de vrais brins photographiés (`build_fa_grass.py`), catalogue et
+## réglages du rendu dans `data/art/battle_grass.json` (schéma `art_battle_grass.schema.json`).
+const FA_TEXTURE_PATH := "res://assets/textures/battle/grass_tufts.png"
+const FA_FILE := "art/battle_grass.json"
+const FA_MAX_VARIANTS := 16  # taille des tableaux du shader
+const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
+
+static var _fa_catalogue: Dictionary = {}
+static var _fa_loaded: bool = false
 
 ## [maille (m), rayon (m), échelle des touffes, rayon intérieur (m)]
 const LAYERS := [[0.5, 40.0, 1.0, 0.0], [1.1, 95.0, 1.35, 34.0]]
@@ -20,14 +29,40 @@ const LAYERS := [[0.5, 40.0, 1.0, 0.0], [1.1, 95.0, 1.35, 34.0]]
 var _layers: Array[MultiMeshInstance3D] = []
 var _materials: Array[ShaderMaterial] = []
 var _ground_y: float = 0.0
+var _fa_ab: bool = false  # banc A/B : les deux herbes sont construites
+var _fa_view: bool = true
 
 
 ## `da6_on` : −1 = selon le terrain (`BattleTerrain.da6`), 0/1 forcé (banc A/B DA6).
 func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 	_ground_y = terrain.height_at(terrain.FIELD_W * 0.5, terrain.FIELD_D * 0.5)
 	var da6 := terrain.da6 if da6_on < 0 else da6_on == 1
+	# FA7 : touffes de vrais brins (au-dessus de DA6). `--no-fa-grass` après `--` : herbe d'avant.
+	var use_fa := da6 and fa_grass_enabled()
+	_build_set(terrain, weather, da6, use_fa)
+	for arg in OS.get_cmdline_user_args():
+		if use_fa and arg.begins_with("--bench-ab=") and arg.contains("fa-grass"):
+			# Banc A/B (`--bench-ab=fa-grass,no-fa-grass`) : l'herbe d'avant, masquée.
+			_build_set(terrain, weather, da6, false)
+			_fa_ab = true
+			set_fa_view(true)
+
+
+## FA7 : bascule du banc A/B entre l'herbe en vrais brins et celle d'avant.
+func set_fa_view(on: bool) -> void:
+	if _fa_ab:
+		_fa_view = on
+
+
+func _build_set(terrain: BattleTerrain, weather: String, da6: bool, use_fa: bool) -> void:
 	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
-	for layer in LAYERS:
+	var fa: Dictionary = fa_catalogue() if use_fa else {}
+	var render: Dictionary = fa.get("render", {})
+	var layers: Array = LAYERS
+	if not fa.is_empty():
+		mesh = _clump_mesh_fa(render["card"])
+		layers = render["layers"]
+	for layer in layers:
 		var spacing: float = layer[0]
 		# PF1 : rayon (donc nombre de touffes, au carré) selon le préréglage de qualité.
 		var radius: float = float(layer[1]) * float(RenderQuality.preset().get("grass", 1.0))
@@ -38,6 +73,8 @@ func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 			mat.set_shader_parameter("da6_on", 1.0)
 			mat.set_shader_parameter("decor_saturation", terrain.decor_saturation())
 			mat.set_shader_parameter("tex_lum", GRASS_TEX_LUM_DA6)
+		if not fa.is_empty():
+			_apply_fa(mat, fa)
 		mat.set_shader_parameter("height_map", terrain.height_texture)
 		var hr := terrain.SPLAT_RECT
 		var t := BattleTerrain.HEIGHT_TEXEL
@@ -107,6 +144,7 @@ func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 		instance.layers |= BattleTerrain.DECAL_LAYER  # CR1 : le contour de formation passe sur l'herbe
 		add_child(instance)
 		instance.set_meta("spacing", spacing)
+		instance.set_meta("fa", not fa.is_empty())
 		_layers.append(instance)
 		_materials.append(mat)
 
@@ -134,8 +172,8 @@ func _process(_delta: float) -> void:
 	var high := camera.global_position.y - focus.y > MAX_CAMERA_HEIGHT
 	for k in _layers.size():
 		var instance := _layers[k]
-		instance.visible = not high
-		if high:
+		instance.visible = not high and (not _fa_ab or bool(instance.get_meta("fa")) == _fa_view)
+		if not instance.visible:
 			continue
 		var spacing: float = instance.get_meta("spacing")
 		instance.global_position = Vector3(snappedf(focus.x, spacing), 0.0, snappedf(focus.z, spacing))
@@ -153,6 +191,84 @@ static func _focus_point(camera: Camera3D, ground_y: float) -> Vector3:
 	var hit := origin + forward * clampf(t, 0.0, 600.0)
 	var cam_ground := Vector3(origin.x, hit.y, origin.z)
 	return cam_ground.lerp(hit, 0.72)
+
+
+## FA7 : catalogue de l'herbe (dossier de données du jeu) ; vide s'il manque ou si l'atlas manque.
+static func fa_catalogue() -> Dictionary:
+	if _fa_loaded:
+		return _fa_catalogue
+	_fa_loaded = true
+	var dir := MAP_PATHS_SCRIPT.default_data_dir()
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		var map_paths := tree.root.get_node_or_null("MapPaths")
+		if map_paths != null:
+			dir = str(map_paths.get("data_dir"))
+	var path := dir.path_join(FA_FILE)
+	if FileAccess.file_exists(path) and ResourceLoader.exists(FA_TEXTURE_PATH):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if parsed is Dictionary and (parsed as Dictionary).get("render") is Dictionary:
+			_fa_catalogue = parsed
+	if _fa_catalogue.is_empty():
+		push_warning("BattleVegetation: %s or %s missing, drawn grass kept" % [path, FA_TEXTURE_PATH])
+	return _fa_catalogue
+
+
+static func fa_grass_enabled() -> bool:
+	return not OS.get_cmdline_user_args().has("--no-fa-grass")
+
+
+## FA7 : paramètres du shader tirés du catalogue (cases de l'atlas, tirage, fondu dans le sol).
+static func _apply_fa(mat: ShaderMaterial, fa: Dictionary) -> void:
+	var atlas: Dictionary = fa["atlas"]
+	var render: Dictionary = fa["render"]
+	var variants: Array = fa["variants"]
+	var heights := PackedFloat32Array()
+	var cum_open := PackedFloat32Array()
+	var cum_clump := PackedFloat32Array()
+	heights.resize(FA_MAX_VARIANTS)
+	cum_open.resize(FA_MAX_VARIANTS)
+	cum_clump.resize(FA_MAX_VARIANTS)
+	var total_open := 0.0
+	var total_clump := 0.0
+	var index_of := {}
+	for i in variants.size():
+		total_open += float(variants[i]["weight_open"])
+		total_clump += float(variants[i]["weight_clump"])
+		index_of[str(variants[i]["name"])] = i
+	var sum_open := 0.0
+	var sum_clump := 0.0
+	for i in FA_MAX_VARIANTS:
+		if i < variants.size():
+			heights[i] = float(variants[i]["height_m"])
+			sum_open += float(variants[i]["weight_open"]) / maxf(total_open, 0.001)
+			sum_clump += float(variants[i]["weight_clump"]) / maxf(total_clump, 0.001)
+		cum_open[i] = sum_open
+		cum_clump[i] = sum_clump
+	mat.set_shader_parameter("grass_texture", load(FA_TEXTURE_PATH))
+	mat.set_shader_parameter("tex_lum", float(render["tex_lum"]))
+	mat.set_shader_parameter("fa_on", 1.0)
+	mat.set_shader_parameter("fa_grid", Vector2(float(atlas["columns"]), float(atlas["rows"])))
+	mat.set_shader_parameter("fa_pad", Vector2(float(atlas["padding"]) / float(atlas["cell_width"]), float(atlas["padding"]) / float(atlas["cell_height"])))
+	mat.set_shader_parameter("fa_count", variants.size())
+	mat.set_shader_parameter("fa_height", heights)
+	mat.set_shader_parameter("fa_cum_open", cum_open)
+	mat.set_shader_parameter("fa_cum_clump", cum_clump)
+	var fields: Dictionary = render["fields"]
+	mat.set_shader_parameter("fa_wheat", Vector2i(int(index_of[fields["wheat_variants"][0]]), int(index_of[fields["wheat_variants"][1]])))
+	mat.set_shader_parameter("fa_stubble", Vector2i(int(index_of[fields["stubble_variants"][0]]), int(index_of[fields["stubble_variants"][1]])))
+	mat.set_shader_parameter("fa_field_height", Vector4(float(fields["wheat_height"]), float(fields["fallow_height"]), float(fields["stubble_height"]), float(fields["seedling_height"])))
+	mat.set_shader_parameter("fa_size", Vector2(float(render["size"][0]), float(render["size"][1])))
+	mat.set_shader_parameter("fa_luma_clamp", Vector2(float(render["luma_clamp"][0]), float(render["luma_clamp"][1])))
+	var gain: Array = render["tint_gain"]
+	mat.set_shader_parameter("fa_tint_gain", Vector3(float(gain[0]), float(gain[1]), float(gain[2])))
+	var wheat: Array = fields["wheat_gain"]
+	mat.set_shader_parameter("fa_wheat_gain", Vector3(float(wheat[0]), float(wheat[1]), float(wheat[2])))
+	mat.set_shader_parameter("fa_wheat_foot", float(fields["wheat_foot_shade"]))
+	var sown: Array = fields["seedling_gain"]
+	mat.set_shader_parameter("fa_sown_gain", Vector3(float(sown[0]), float(sown[1]), float(sown[2])))
+	for key in ["flat_height", "height_var", "gap_fill", "patch_fill", "tint_var", "hue_mix", "contrast", "foot_shade", "foot_height", "up_normal", "far_luma", "mip_boost", "backlight"]:
+		mat.set_shader_parameter("fa_" + key, float(render[key]))
 
 
 ## Touffe : trois cartes croisées à 60°, 0,6 m de large, 0,42 m de haut, pied à l'origine.
@@ -201,6 +317,43 @@ static func _clump_mesh_da6() -> ArrayMesh:
 			var g: Array = grid[idx]
 			st.set_normal(g[2])
 			st.set_uv(g[1])
+			st.set_color(Color(n.x * 0.5 + 0.5, 0.5, n.z * 0.5 + 0.5))
+			st.add_vertex(g[0])
+	st.index()
+	return st.commit()
+
+
+## FA7 : touffe de `count` cartes croisées, hautes d'un mètre (le shader les ramène à la hauteur
+## de la case tirée), larges de `width_m` au sommet et de `foot_ratio` fois moins au pied, cintrées
+## de `bend_m`. Mêmes normales arrondies et normale de carte dans COLOR que DA6 ; rang de la carte
+## dans UV2.x (chaque carte tire sa case de l'atlas).
+static func _clump_mesh_fa(card: Dictionary) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var count := int(card["count"])
+	var half_top := float(card["width_m"]) * 0.5
+	var half_foot := half_top * float(card["foot_ratio"])
+	for k in count:
+		var a := PI * float(k) / float(count) + 0.2
+		var along := Vector3(cos(a), 0.0, sin(a))
+		var n := Vector3(-sin(a), 0.0, cos(a))
+		var bend := float(card["bend_m"]) * (1.0 if k % 2 == 0 else -1.0)
+		var grid := []
+		for row in 2:
+			var y := float(row)
+			var half := half_foot if row == 0 else half_top
+			for col in 3:
+				var u := float(col) * 0.5
+				var off := bend * (0.4 if row == 0 else 1.0) if col == 1 else 0.0
+				var p := along * (u * 2.0 - 1.0) * half + n * off + Vector3(0, y, 0)
+				var radial := Vector3(p.x, 0.0, p.z)
+				var normal := (Vector3.UP * 0.8 + (radial.normalized() * 0.55 if radial.length() > 0.01 else n * 0.2)).normalized()
+				grid.append([p, Vector2(u, 1.0 - float(row)), normal])
+		for idx in [0, 1, 4, 0, 4, 3, 1, 2, 5, 1, 5, 4]:
+			var g: Array = grid[idx]
+			st.set_normal(g[2])
+			st.set_uv(g[1])
+			st.set_uv2(Vector2(float(k), 0.0))
 			st.set_color(Color(n.x * 0.5 + 0.5, 0.5, n.z * 0.5 + 0.5))
 			st.add_vertex(g[0])
 	st.index()

@@ -1,0 +1,30 @@
+{
+  "description": "Lot FA2 : planches de flammes et de fumée cuites depuis les séquences simulées d'Unity Labs Paris (« Free VFX image sequences & flipbooks », CC0 d'après le billet `licence_url`), par `tools/cent_ans_tools/vfx_flipbooks.py`. Même codage que les planches synthétiques du lot V3 (`fire_flipbooks.py`) : 8×8 images ; flammes RVB = chaleur, A = couverture ; fumée R/A = densité, V = éclairage auto-ombré, image = âge.",
+  "licence_url": "https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks",
+  "source_url": "https://unity3d.com/files/labs/downloads/vfx/assets01/{name}/{name}-flipbooks.zip",
+  "flame": {
+    "name": "Flame03",
+    "columns": 16,
+    "rows": 4,
+    "frame_px": 256,
+    "heat_gamma": 1.0,
+    "heat_max": 0.85,
+    "white_percentile": 99.9,
+    "coverage_gamma": 0.5,
+    "width_scale": 1.15,
+    "base_fade_px": 12
+  },
+  "smoke": {
+    "name": "WispySmoke03",
+    "columns": 8,
+    "rows": 8,
+    "frame_px": 128,
+    "young_scale": 0.62,
+    "fade_power": 1.3,
+    "old_density": 0.38,
+    "density_floor": 0.04,
+    "density_gamma": 0.42,
+    "edge_fade": 0.25,
+    "lighting_floor": 0.25
+  }
+}

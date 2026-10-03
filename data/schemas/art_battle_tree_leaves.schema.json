@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_battle_tree_leaves.schema.json",
+  "title": "Rameaux feuillus des arbres de bataille (lot FA1)",
+  "description": "Catalogue `data/art/battle_tree_leaves.json` : atlas de feuilles photographiées (ambientCG, CC0) par essence de `BattleTrees`, et réglages de `game/assets/textures/battle/build_fa_leaf_sprays.py`.",
+  "type": "object",
+  "required": ["source_url", "size", "target_rgb", "hue_pull", "coverage", "species", "dead"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "source_url": {"type": "string", "pattern": "^https://.*\\{asset\\}", "description": "Adresse du zip d'un atlas, `{asset}` = identifiant ambientCG."},
+    "size": {"type": "integer", "enum": [512, 1024, 2048], "description": "Côté des cartes produites (px)."},
+    "target_rgb": {"$ref": "#/$defs/rgb", "description": "Couleur moyenne visée des feuilles (celle du rameau dessiné, sur laquelle les teintes de saison sont réglées)."},
+    "hue_pull": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part du rappel de teinte vers `target_rgb` (0 = couleur de la photo à luminance égale, 1 = teinte cible)."},
+    "coverage": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.8, "description": "Part opaque visée de la carte."},
+    "species": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"enum": ["oak", "beech", "ash", "poplar", "willow", "fruit", "bush"]},
+      "additionalProperties": {"$ref": "#/$defs/leaf"}
+    },
+    "dead": {
+      "type": "object",
+      "required": ["asset", "axis", "leaf_px", "count", "target_rgb"],
+      "additionalProperties": false,
+      "properties": {
+        "asset": {"$ref": "#/$defs/asset"},
+        "axis": {"$ref": "#/$defs/axis"},
+        "leaf_px": {"$ref": "#/$defs/leaf_px"},
+        "count": {"type": "integer", "minimum": 1, "description": "Feuilles sèches posées sur les ramilles."},
+        "target_rgb": {"$ref": "#/$defs/rgb"},
+        "note": {"type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 0, "maximum": 255}},
+    "asset": {"type": "string", "pattern": "^[A-Za-z]+[0-9]{3}$", "description": "Identifiant ambientCG."},
+    "axis": {"enum": ["vertical", "horizontal"], "description": "Sens du grand axe des feuilles dans l'atlas."},
+    "leaf_px": {"type": "integer", "minimum": 8, "maximum": 400, "description": "Longueur moyenne d'une feuille sur la carte (px)."},
+    "leaf": {
+      "type": "object",
+      "required": ["asset", "axis", "leaf_px", "tone"],
+      "additionalProperties": false,
+      "properties": {
+        "asset": {"$ref": "#/$defs/asset"},
+        "axis": {"$ref": "#/$defs/axis"},
+        "leaf_px": {"$ref": "#/$defs/leaf_px"},
+        "tone": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0.5, "maximum": 1.5}, "description": "Facteur par canal appliqué à `target_rgb` pour cette essence."},
+        "note": {"type": "string"}
+      }
+    }
+  }
+}

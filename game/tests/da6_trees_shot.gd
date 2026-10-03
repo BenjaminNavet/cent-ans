@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot DA6 : planche des essences d'arbres de bataille (maillage complet, allégé, imposteur côte à
 ## côte) et atlas des imposteurs. Usage (avec affichage) :
-##   godot --path game --resolution 1600x900 --script res://tests/da6_trees_shot.gd -- --out=<png> [--winter]
+##   godot --path game --resolution 1600x900 --script res://tests/da6_trees_shot.gd -- --out=<png> [--winter] [--cam=x,y,z,tx,ty,tz]
 ## Écrit aussi `<png sans extension>_atlas.png`.
 
 const SPECIES := ["oak", "beech", "ash", "poplar", "willow", "fruit", "bush"]
@@ -11,11 +11,18 @@ const SPECIES := ["oak", "beech", "ash", "poplar", "willow", "fruit", "bush"]
 func _init() -> void:
 	var out := "user://da6_trees.png"
 	var winter := false
+	var cam_from := Vector3(0, 9, 62)
+	var cam_to := Vector3(0, 8, -20)
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.trim_prefix("--out=")
 		elif arg == "--winter":
 			winter = true
+		elif arg.begins_with("--cam="):
+			var c := arg.trim_prefix("--cam=").split_floats(",")
+			if c.size() == 6:
+				cam_from = Vector3(c[0], c[1], c[2])
+				cam_to = Vector3(c[3], c[4], c[5])
 	var world := Node3D.new()
 	root.add_child(world)
 	var sun := DirectionalLight3D.new()
@@ -63,7 +70,7 @@ func _init() -> void:
 	trees.impostor_material.set_shader_parameter("lod_near", 0.0)
 	var camera := Camera3D.new()
 	world.add_child(camera)
-	camera.look_at_from_position(Vector3(0, 9, 62), Vector3(0, 8, -20))
+	camera.look_at_from_position(cam_from, cam_to)
 	camera.fov = 62
 	await process_frame
 	await trees.bake_impostors(winter)

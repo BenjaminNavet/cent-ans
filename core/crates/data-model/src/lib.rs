@@ -53,6 +53,7 @@ pub use entities::battle_ability::{
     AbilityCondition, AbilityKind, BattleAbility, BattleAbilityAi, BattleAbilityEffects,
     BattleAbilityFilter,
 };
+pub use entities::battle_history::BattleHistoryRules;
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
@@ -70,6 +71,10 @@ pub use entities::capture::{
 };
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
+pub use entities::crusade::{
+    CrusadeAlms, CrusadeDesertion, CrusadeFervor, CrusadePassage, CrusadePassageUnit,
+    CrusadeRelief, CrusadeRules, CrusadeZeal,
+};
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
 pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
 pub use entities::diplomacy_rules::{DiplomacyRules, OpinionMotive};
@@ -127,7 +132,7 @@ pub use entities::retinue::{
 pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
 pub use entities::settlement::{
     CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
-    SettlementGraph, SettlementKind, SettlementRules,
+    SettlementGraph, SettlementKind, SettlementRules, StartingBudget,
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};

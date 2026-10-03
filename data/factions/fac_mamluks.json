@@ -79,6 +79,11 @@
       "faction": "fac_barqa",
       "status": "peace",
       "note": "Suzeraineté mamelouke nominale sur les tribus de Cyrénaïque."
+    },
+    {
+      "faction": "fac_crusaders",
+      "status": "war",
+      "note": "Les croisés de Limassol menacent la Terre sainte."
     }
   ],
   "ai_personality": {

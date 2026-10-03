@@ -54,6 +54,11 @@
       "faction": "fac_milan",
       "status": "peace",
       "note": "Les Visconti, excommuniés, sont en délicatesse avec Avignon."
+    },
+    {
+      "faction": "fac_crusaders",
+      "status": "peace",
+      "note": "Le pape tolère ceux qui ont gardé leur vœu de 1336."
     }
   ],
   "ai_personality": {
