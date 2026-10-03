@@ -9,10 +9,11 @@ Branche `feat/rj-c`, worktree `../gp-rj-c`. Chantier : `docs/wip/rj-retours-joue
 4. Tests GDScript, cargo test, smoke.
 
 ## État
-- [ ] 1 cœur + pont
-- [ ] 2 UI explication
-- [ ] 3 bannières
-- [ ] 4 ADR + tests
+- [x] 1 cœur + pont (`cargo test --test rj_possession` vert)
+- [x] 2 UI explication (panneaux, survol, codex `mech_conquest`, infobulle `province_possession`)
+- [x] 3 bannières (shader + `settlement_layer.gd` + `parchment_overlay.gd`)
+- [x] ADR 0175 (sections RJ-c ; section RJ-d vide)
+- [ ] 4 tests : `game/tests/rj_possession_test.gd` à faire passer après `core/build.sh` ; clippy + cargo test complets ; smoke
 
 ## Prochaine étape
-Cœur + pont (en cours).
+Build, `godot --headless --path game --script res://tests/rj_possession_test.gd`, smoke.
