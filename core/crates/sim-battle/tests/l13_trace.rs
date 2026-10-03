@@ -85,7 +85,10 @@ fn trace() {
     if let Ok(path) = std::env::var("L13_ROUT") {
         sim.set_rout_rules(serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap());
     }
-    if let Some(f) = std::env::var("L13_AMMO").ok().and_then(|v| v.parse::<f64>().ok()) {
+    if let Some(f) = std::env::var("L13_AMMO")
+        .ok()
+        .and_then(|v| v.parse::<f64>().ok())
+    {
         for u in sim.units_mut() {
             u.ammo = (f64::from(u.ammo) * f).round() as u32;
         }
@@ -100,6 +103,7 @@ fn trace() {
             for side in [SideId::Attacker, SideId::Defender] {
                 let us: Vec<_> = sim.units().iter().filter(|u| u.side == side).collect();
                 let routing = us.iter().filter(|u| u.state == UnitState::Routing).count();
+                let _melee0 = 0;
                 let melee = us.iter().filter(|u| u.state == UnitState::Melee).count();
                 let morale: f64 = us.iter().map(|u| u.morale).sum::<f64>() / us.len() as f64;
                 let _ = write!(
@@ -109,9 +113,18 @@ fn trace() {
                 );
             }
             println!("{line}");
-            if std::env::var("L13_UNITS").is_ok() && sim.elapsed() > 255.0 {
+            if std::env::var("L13_UNITS").is_ok()
+                && sim.elapsed()
+                    > std::env::var("L13_FROM")
+                        .ok()
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(255.0)
+            {
                 for u in sim.units().iter().filter(|u| u.side == SideId::Defender) {
-                    print!(" [{:.0}/{:.0} {:?}]", u.hp, u.morale, u.state);
+                    print!(
+                        " [{:.0}/{:.0} f{:.0} fl{} {:?}]",
+                        u.hp, u.morale, u.fatigue, u.flanked, u.state
+                    );
                 }
                 println!();
             }

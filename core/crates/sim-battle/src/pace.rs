@@ -49,3 +49,18 @@ impl PaceRules {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bundled_rules_load_and_sieges_keep_their_original_pace() {
+        let rules = PaceRules::bundled();
+        assert_eq!(rules.siege.melee_rate, 0.035);
+        assert_eq!(rules.siege.ranged_rate, 0.3);
+        assert_eq!(rules.siege.loss_morale_factor, 60.0);
+        assert_eq!(rules.siege.rout_morale, 20.0);
+        assert!(rules.field.rout_morale < rules.field.rally_morale);
+    }
+}

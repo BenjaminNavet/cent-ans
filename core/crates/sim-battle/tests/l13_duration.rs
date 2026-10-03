@@ -73,9 +73,20 @@ fn finish(name: &str, seed: u64, mut sim: BattleSim) -> Row {
         let rules = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
         sim.set_pace(rules);
     }
-    if let Some(factor) = std::env::var("L13_AMMO").ok().and_then(|v| v.parse::<f64>().ok()) {
+    if let Some(factor) = std::env::var("L13_AMMO")
+        .ok()
+        .and_then(|v| v.parse::<f64>().ok())
+    {
         for u in sim.units_mut() {
             u.ammo = (f64::from(u.ammo) * factor).round() as u32;
+        }
+    }
+    if let Some(f) = std::env::var("L13_SPEED")
+        .ok()
+        .and_then(|v| v.parse::<f64>().ok())
+    {
+        for u in sim.units_mut() {
+            u.stats.speed = (f64::from(u.stats.speed) * f).round().clamp(1.0, 255.0) as u8;
         }
     }
     if let Ok(path) = std::env::var("L13_PUSH") {
@@ -94,12 +105,19 @@ fn finish(name: &str, seed: u64, mut sim: BattleSim) -> Row {
     let (mut contact, mut first_rout) = (f64::NAN, f64::NAN);
     while !sim.is_finished() && sim.elapsed() < 3600.0 {
         sim.step();
-        if contact.is_nan() && sim.units().iter().any(|u| u.state == sim_battle::UnitState::Melee)
+        if contact.is_nan()
+            && sim
+                .units()
+                .iter()
+                .any(|u| u.state == sim_battle::UnitState::Melee)
         {
             contact = sim.elapsed();
         }
         if first_rout.is_nan()
-            && sim.units().iter().any(|u| u.state == sim_battle::UnitState::Routing)
+            && sim
+                .units()
+                .iter()
+                .any(|u| u.state == sim_battle::UnitState::Routing)
         {
             first_rout = sim.elapsed();
         }
@@ -159,9 +177,9 @@ fn survey() {
         let data = &data;
         let mut handles = Vec::new();
         for s in &scenarios {
-            handles.push(scope.spawn(move || {
-                (0..seeds).map(|k| field(data, s, k)).collect::<Vec<_>>()
-            }));
+            handles.push(
+                scope.spawn(move || (0..seeds).map(|k| field(data, s, k)).collect::<Vec<_>>()),
+            );
         }
         for id in ["crecy", "azincourt", "poitiers"] {
             handles.push(scope.spawn(move || {
