@@ -123,6 +123,9 @@ pub mod folders {
     pub const MERCENARY_RULES: &str = "mercenaries.json";
     /// The crusader faction's fervour (lot JR1), inside `rules/`; optional.
     pub const CRUSADE_RULES: &str = "crusade.json";
+    /// Starting armies and garrisons of 1337 (lot A6-L3b), inside `rules/`;
+    /// optional.
+    pub const STARTING_ARMIES: &str = "starting_armies.json";
     pub const ARMY_RULES: &str = "armies.json";
     pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
     /// Short-term campaign missions (lot NT3), at the data root; optional.
@@ -373,6 +376,9 @@ pub struct GameData {
     /// `data/rules/crusade.json` (lot JR1, ADR 0165: the crusader faction's
     /// fervour); `None` when absent: the mechanic is inert.
     pub crusade_rules: Option<crate::entities::crusade::CrusadeRules>,
+    /// `data/rules/starting_armies.json` (lot A6-L3b, ADR 0179); without
+    /// it the 1337 start raises no army and no city garrison.
+    pub starting_armies: Option<crate::entities::starting_armies::StartingArmies>,
     /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled
     /// file when absent.
     pub army_rules: crate::entities::army_rules::ArmyRules,
@@ -498,6 +504,7 @@ impl GameData {
             replenishment_rules: Default::default(),
             mercenary_rules: Default::default(),
             crusade_rules: None,
+            starting_armies: None,
             army_rules: Default::default(),
             siege_engine_rules: Default::default(),
             mission_rules: Default::default(),
@@ -646,6 +653,10 @@ impl GameData {
         let crusade_path = root.join(folders::RULES).join(folders::CRUSADE_RULES);
         if crusade_path.is_file() {
             data.crusade_rules = Some(read_json(&crusade_path)?);
+        }
+        let starting_armies_path = root.join(folders::RULES).join(folders::STARTING_ARMIES);
+        if starting_armies_path.is_file() {
+            data.starting_armies = Some(read_json(&starting_armies_path)?);
         }
         let army_rules_path = root.join(folders::RULES).join(folders::ARMY_RULES);
         if army_rules_path.is_file() {

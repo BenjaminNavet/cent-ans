@@ -3,9 +3,6 @@
 Branche `a6-l3b` (depuis `a6-merge`). ADR : addendum à `docs/decisions/0179-economie-a-l-echelle.md`.
 
 ## État
-- Problème 1 (milice) : mécanisme `share_caps` dans `data/ai/doctrines.json` (schéma `ai_doctrine.schema.json`), appliqué par `ai::doctrine::pick_recruit` ; la composition comptée inclut les garnisons (`ai/src/campaign.rs`). Réglage retenu : unit_urban_militia max_share 0,7 à partir de 4 régiments.
-- Cause trouvée : les factions sans armée de campagne recrutaient des milices dans leurs garnisons à chaque tour (la composition ne voyait que les armées) ; un plafond sur les seules armées n'avait aucun effet.
-- Problème 2 (armées de départ en données) : à faire.
-
-## Prochaine étape
-Problème 2 : `data/rules/starting_armies.json` + schéma + chargeur data-model + `setup_1337.rs`, puis finition (fmt, clippy, tests, sonde, ADR, supprimer core/target).
+- Problème 1 (milice) : fait. `share_caps` dans `data/ai/doctrines.json`, appliqué par `ai::doctrine::pick_recruit` ; la composition comptée inclut les garnisons (`ai/src/campaign.rs`). unit_urban_militia max_share 0,7 dès 4 régiments. Sonde 6 graines x 200 tours : milice 46,6 -> 27,6 %, banqueroutes 0,28 -> 0,30, révoltes 6,0 -> 6,3.
+- Problème 2 : fait. `data/rules/starting_armies.json` + schéma + `GameData::starting_armies` + `setup_1337.rs`.
+- Reste : vérification finale (tests), suppression de `core/target`. Pas de fusion.

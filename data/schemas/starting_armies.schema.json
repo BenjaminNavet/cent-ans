@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/starting_armies.schema.json",
+  "title": "Armées de départ de 1337",
+  "description": "Fichier data/rules/starting_armies.json (lot A6-L3b, ADR 0179) : armée principale par faction et garnison de départ par rôle de province.",
+  "type": "object",
+  "$defs": {
+    "unit_list": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+      "minItems": 1
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default_army": {
+      "$ref": "#/$defs/unit_list",
+      "description": "Armée principale des factions absentes de `factions`."
+    },
+    "factions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/unit_list" }
+    },
+    "garrisons": {
+      "type": "object",
+      "description": "Garnison de départ selon le rôle de la province (capitale, frontière, intérieur).",
+      "properties": {
+        "capital": { "$ref": "#/$defs/unit_list" },
+        "frontier": { "$ref": "#/$defs/unit_list" },
+        "interior": { "$ref": "#/$defs/unit_list" }
+      },
+      "required": ["capital", "frontier", "interior"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["default_army", "garrisons"],
+  "additionalProperties": false
+}

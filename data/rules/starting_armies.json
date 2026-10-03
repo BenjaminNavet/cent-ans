@@ -1,0 +1,30 @@
+{
+  "description": "Armées de départ de 1337 (lot A6-L3b, ADR 0179) : composition de l'armée principale de chaque faction (types d'unités, répétables) et des garnisons de départ selon le rôle de la province. Une faction absente de `factions` reçoit `default_army`. Le budget de départ (settlements/rules.json § starting_budget) retire ensuite les unités que la faction ne peut pas entretenir.",
+  "default_army": ["unit_knights", "unit_men_at_arms_foot", "unit_crossbowmen"],
+  "factions": {
+    "fac_france": [
+      "unit_knights",
+      "unit_knights",
+      "unit_knights",
+      "unit_men_at_arms_foot",
+      "unit_men_at_arms_foot",
+      "unit_crossbowmen",
+      "unit_crossbowmen",
+      "unit_mounted_sergeants"
+    ],
+    "fac_england": [
+      "unit_knights",
+      "unit_knights",
+      "unit_men_at_arms_foot",
+      "unit_longbowmen",
+      "unit_longbowmen",
+      "unit_mounted_archers"
+    ],
+    "fac_burgundy": ["unit_knights", "unit_men_at_arms_foot", "unit_crossbowmen"]
+  },
+  "garrisons": {
+    "capital": ["unit_urban_militia", "unit_urban_militia", "unit_crossbowmen", "unit_men_at_arms_foot"],
+    "frontier": ["unit_urban_militia", "unit_urban_militia", "unit_crossbowmen"],
+    "interior": ["unit_urban_militia", "unit_urban_militia"]
+  }
+}
