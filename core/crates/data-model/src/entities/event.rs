@@ -12,7 +12,8 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::common::{HistoricalDate, Sources};
 use crate::entities::faction::ClaimKind;
 use crate::ids::{
-    CharacterId, ChivalricOrderId, EventId, FactionId, ProvinceId, ReligionId, TraitId, UnitTypeId,
+    CharacterId, ChivalricOrderId, EventId, FactionId, ProvinceId, ReligionId, TitleId, TraitId,
+    UnitTypeId,
 };
 
 /// Historical (dated, fires at most once), random (per-turn chance) or
@@ -462,7 +463,44 @@ pub enum EventEffect {
         faction: Option<FactionId>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         from: Option<FactionId>,
+        /// LR-17: sale price, paid by `payer` (default: the recipient) to
+        /// the former owner when the province changes hands (nothing is
+        /// paid otherwise).
+        #[serde(default, skip_serializing_if = "is_zero")]
+        price: i64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        payer: Option<FactionId>,
     },
+    /// LR-17: sale or cession of `title` to `faction` (default: the deciding
+    /// faction), with the title's own provinces still owned by the seller,
+    /// even its capital; a seller left without any title vanishes into the
+    /// recipient (lands, armies, court, treasury). With `from`, only when
+    /// that faction holds the title. `price` is paid by `payer` (default:
+    /// the recipient) when the title changes hands: to the seller if it
+    /// survives the sale, otherwise to a crown off the map.
+    TransferTitle {
+        title: TitleId,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        from: Option<FactionId>,
+        #[serde(default, skip_serializing_if = "is_zero")]
+        price: i64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        payer: Option<FactionId>,
+    },
+    /// LR-17: `character`, alive and of `faction` (default: the deciding
+    /// faction), seizes or is elected to its throne; the former ruler lives
+    /// on, deposed, and the heir is chosen again by the succession law.
+    SetRuler {
+        character: CharacterId,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+    },
+}
+
+fn is_zero(value: &i64) -> bool {
+    *value == 0
 }
 
 /// One choice of an event.

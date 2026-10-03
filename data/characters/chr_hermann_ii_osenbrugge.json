@@ -1,0 +1,39 @@
+{
+  "id": "chr_hermann_ii_osenbrugge",
+  "name": {
+    "display": "Hermann II Osenbrügge",
+    "local": "Hermann Osenbrügge",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Évêché d'Ösel-Wiek",
+  "faction": "fac_osel_wiek",
+  "role": "prelate",
+  "birth": {
+    "value": "1295",
+    "uncertain": true,
+    "note": "Naissance inconnue ; date de jeu."
+  },
+  "death": {
+    "value": "1362",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_ambitious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_osel_wiek",
+  "status": "at_court",
+  "description": "Chanoine de l'évêché, élu évêque d'Ösel-Wiek en 1338 après Jakob II ; il tiendra le siège de Hapsal jusqu'à sa mort, entre l'Ordre et les vassaux de la Wiek.",
+  "sources": [
+    "Évêché d'Ösel-Wiek",
+    "Liste des évêques d'Ösel-Wiek"
+  ]
+}
