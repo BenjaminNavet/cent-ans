@@ -49,3 +49,9 @@ def test_north_framed_south_stone() -> None:
     for region in ("aquitaine", "languedoc", "provence_alpes"):
         assert regions[region]["framed"] <= 0.1, region
         assert regions[region]["southern"], region
+
+
+def test_province_overrides_are_known_provinces() -> None:
+    """Every key of ``provinces`` is an existing province file."""
+    for province in _document().get("provinces", {}):
+        assert (DATA / "provinces" / f"{province}.json").exists(), province

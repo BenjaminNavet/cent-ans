@@ -1,5 +1,8 @@
 {
   "default": {"framed": 0.35, "southern": false},
+  "provinces": {
+    "prov_lorraine": {"framed": 0.3, "southern": false, "note": "Lorraine : maisons surtout en pierre (calcaire de Jaumont), colombage minoritaire ; ne suit pas le Fachwerk rhénan d'empire_rhin"}
+  },
   "regions": {
     "france_nord": {"framed": 0.85, "southern": false, "note": "Normandie, Île-de-France, Picardie, Artois : pans de bois courants"},
     "france_ouest": {"framed": 0.4, "southern": false, "note": "Maine, Anjou : colombage en ville ; Bretagne : granit ; Poitou : moellons calcaires"},
@@ -13,7 +16,7 @@
     "galles": {"framed": 0.2, "southern": false},
     "ecosse": {"framed": 0.1, "southern": false},
     "irlande": {"framed": 0.15, "southern": false},
-    "empire_rhin": {"framed": 0.8, "southern": false, "note": "Fachwerk rhénan et alsacien ; Lorraine surtout en pierre, toits de tuiles creuses"},
+    "empire_rhin": {"framed": 0.8, "southern": false, "note": "Fachwerk rhénan et alsacien (la Lorraine, surtout en pierre, a son exception dans `provinces`)"},
     "empire_nord": {"framed": 0.8, "southern": false, "note": "Fachwerk de Basse-Saxe, Westphalie"},
     "empire_sud": {"framed": 0.65, "southern": false, "note": "Souabe, Franconie"},
     "empire_est": {"framed": 0.45, "southern": false},
