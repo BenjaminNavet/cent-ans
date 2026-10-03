@@ -10,7 +10,7 @@
   "mercenary": true,
   "soldiers": 80,
   "cost": {
-    "money": 720
+    "money": 690
   },
   "upkeep": 80,
   "recruit_time_turns": 1,
