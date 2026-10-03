@@ -71,7 +71,7 @@ fn new_1337_matches_game_data() {
     assert_eq!(state.player_faction(), &fac("fac_france"));
 
     let france_state = state.faction_state(&fac("fac_france")).unwrap();
-    assert_eq!(france_state.treasury, 60_000);
+    assert_eq!(france_state.treasury, 28_000);
     assert!(france_state.at_war_with.contains(&fac("fac_england")));
     assert!(france_state.allies.contains(&fac("fac_scotland")));
     // ADR 0114: the feudal tie of Burgundy stands for an alliance.
@@ -102,7 +102,7 @@ fn new_1337_matches_game_data() {
         set("set_londres")
     );
     let burgundy = main_army(&state, "fac_burgundy");
-    assert_eq!(state.army(&burgundy).unwrap().units.len(), 4);
+    assert_eq!(state.army(&burgundy).unwrap().units.len(), 3);
 
     let paris = state.city_state(&prov("prov_ile_de_france")).unwrap();
     assert_eq!(paris.garrison.len(), 4, "capital garrison");

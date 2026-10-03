@@ -283,6 +283,9 @@ fn ransom_follows_rank_prestige_and_wealth() {
         ransom::captive_rank(&state, &heir),
         ransom::CaptiveRank::Heir
     );
+    // A6-L3: the income cap is lifted to check the formula itself.
+    let mut data = data;
+    data.economy_rules.ransom.income_cap_percent = 1_000_000;
     let king_ransom = ransom::ransom_amount(&state, &data, &king);
     let heir_ransom = ransom::ransom_amount(&state, &data, &heir);
     assert!(king_ransom > heir_ransom, "{king_ransom} vs {heir_ransom}");

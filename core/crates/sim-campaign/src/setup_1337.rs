@@ -134,7 +134,9 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
     state.difficulty = crate::difficulty::Difficulty::Normal;
     let factions: Vec<FactionId> = state.factions.keys().cloned().collect();
     for faction in factions {
-        if state.controlled_provinces(&faction).len() < rule.min_provinces {
+        if state.controlled_provinces(&faction).len() < rule.min_provinces
+            || crate::crusade::starting_army(state, data, &faction).is_some()
+        {
             continue;
         }
         // A6-L3 (ADR 0179): the treasury is capped at a few seasons of income.
@@ -179,12 +181,11 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
                     break;
                 }
                 // A6-L3 (ADR 0179): no garrison left to trim, the starting
-                // host sends home its costliest unit (and is not raised at all when
-                // even its last unit is beyond the receipts).
+                // host sends home its costliest unit (never an army's last).
                 let costliest_unit = state
                     .armies
                     .iter()
-                    .filter(|(_, a)| a.faction == faction && !a.units.is_empty())
+                    .filter(|(_, a)| a.faction == faction && a.units.len() > 1)
                     .flat_map(|(id, a)| {
                         a.units.iter().enumerate().map(move |(index, unit)| {
                             (crate::economy::unit_upkeep(data, unit), id.clone(), index)
@@ -251,14 +252,6 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
                 };
                 if let Some(a) = state.armies.get_mut(&army) {
                     a.units.remove(index);
-                    // A host that cannot pay even its last unit is not raised.
-                    if a.units.is_empty() {
-                        let general = a.general.clone();
-                        if let Some(general) = general {
-                            state.detach_general(&general);
-                        }
-                        state.armies.remove(&army);
-                    }
                 }
                 continue;
             };
