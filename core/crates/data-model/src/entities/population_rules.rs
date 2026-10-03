@@ -90,7 +90,7 @@ fn default_revolt_threshold() -> f64 {
 
 /// RS-B (ADR 0100): 3 before.
 fn default_revolt_seasons() -> u32 {
-    4
+    5
 }
 
 fn default_revolt_control_threshold() -> f64 {

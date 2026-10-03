@@ -9,7 +9,7 @@
   "disorder_unrest_weight": 0.5,
   "disorder_unrest_max": 20.0,
   "revolt_unrest_threshold": 75.0,
-  "revolt_seasons": 4,
+  "revolt_seasons": 5,
   "revolt_control_threshold": 90.0,
   "disorder_decay_flat": 2,
   "disorder_decay_percent": 10
