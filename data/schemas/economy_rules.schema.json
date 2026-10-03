@@ -292,6 +292,23 @@
         "additionalProperties": false
       }
     },
+    "ransom": {
+      "type": "object",
+      "description": "Plafond des rançons et capture des souverains (lot A6-L3, ADR 0179).",
+      "properties": {
+        "income_cap_percent": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Une rançon ne dépasse jamais cette part (en %) du revenu de saison du payeur."
+        },
+        "sovereign_capture_only_if_routed": {
+          "type": "boolean",
+          "description": "Un souverain à la tête d'une armée battue n'est pris que si cette armée est en déroute."
+        }
+      },
+      "required": ["income_cap_percent", "sovereign_capture_only_if_routed"],
+      "additionalProperties": false
+    },
     "ai_demolition": {
       "type": "object",
       "description": "Quand l'IA rase ses bâtiments (lot RS-C).",

@@ -5,7 +5,7 @@
   },
   "branch": "military",
   "tier": 3,
-  "cost": 320,
+  "cost": 480,
   "prerequisites": [
     "tech_gunpowder"
   ],

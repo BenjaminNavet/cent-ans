@@ -5,7 +5,7 @@
   },
   "branch": "military",
   "tier": 3,
-  "cost": 400,
+  "cost": 600,
   "prerequisites": [
     "tech_coat_of_plates"
   ],

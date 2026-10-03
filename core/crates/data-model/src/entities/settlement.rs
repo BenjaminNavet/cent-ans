@@ -225,7 +225,13 @@ pub struct SettlementRules {
 #[serde(deny_unknown_fields)]
 pub struct StartingBudget {
     pub min_provinces: usize,
+    /// May be negative (A6-L3): -10 asks for a surplus of 10 % of receipts.
     pub max_deficit_percent: i64,
+    /// A6-L3 (ADR 0179): no faction starts with more than this many seasons
+    /// of gross income in its treasury (an explicit `treasury` below it
+    /// stays); absent: no cap.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub treasury_max_income_seasons: Option<i64>,
 }
 
 /// Household guard of a faction's capital city (lot OMR R3, ADR 0117,

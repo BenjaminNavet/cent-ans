@@ -5,7 +5,7 @@
   },
   "branch": "medicine",
   "tier": 5,
-  "cost": 700,
+  "cost": 1050,
   "prerequisites": [
     "tech_theriac",
     "tech_montpellier"

@@ -70,9 +70,12 @@ fn general_captured_in_assault_has_a_captor() {
     let controller = state.settlements[&guyenne].controller.clone();
     let units = state.armies[&army].units.len();
     let garrison = state.settlements[&guyenne].garrison.len();
+    // A6-L3: a ruler is taken only when his army routed.
+    let mut attacker = outcome(units, true);
+    attacker.routed = true;
     let result = BattleResult {
         winner: Winner::Defender,
-        attacker: outcome(units, true),
+        attacker,
         defender: outcome(garrison, false),
     };
     let mut events = Vec::new();
@@ -139,12 +142,12 @@ fn ally_against(state: &mut CampaignState, a: &str, b: &str, enemy: &str) {
 fn allied_besieger_keeps_the_siege_progress() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
-    ally_against(&mut state, "fac_france", "fac_scotland", "fac_england");
+    ally_against(&mut state, "fac_france", "fac_burgundy", "fac_england");
     let french = led_army(&state, "fac_france");
     let scots = state
         .armies
         .iter()
-        .find(|(_, a)| a.faction == fac("fac_scotland"))
+        .find(|(_, a)| a.faction == fac("fac_burgundy"))
         .map(|(id, _)| id.clone())
         .unwrap();
     let guyenne = city(&state, "prov_guyenne");
@@ -166,10 +169,10 @@ fn allied_besieger_keeps_the_siege_progress() {
     let mut events = Vec::new();
     crate::siege::resolve_sieges(&mut state, &data, &mut events);
     if let Some(siege) = state.settlements[&guyenne].siege.clone() {
-        assert_eq!(siege.attacker, fac("fac_scotland"));
+        assert_eq!(siege.attacker, fac("fac_burgundy"));
         assert!(siege.breach >= 40 && siege.supplies <= 50);
     } else {
-        assert_eq!(state.settlements[&guyenne].controller, fac("fac_scotland"));
+        assert_eq!(state.settlements[&guyenne].controller, fac("fac_burgundy"));
     }
 }
 

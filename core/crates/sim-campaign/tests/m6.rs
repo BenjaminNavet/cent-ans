@@ -336,8 +336,8 @@ fn technologies_raise_income() {
 fn anachronistic_technologies_cost_more() {
     let data = data();
     let field_artillery = &data.technologies["tech_field_artillery"];
-    assert_eq!(effective_cost(field_artillery, 1337), 750);
-    assert_eq!(effective_cost(field_artillery, 1430), 600);
+    assert_eq!(effective_cost(field_artillery, 1337), 1125);
+    assert_eq!(effective_cost(field_artillery, 1430), 900);
     let longbow = &data.technologies["tech_longbow_drill"];
     assert_eq!(effective_cost(longbow, 1337), 120);
     // 1356 is within 20 years of 1337: no surcharge.

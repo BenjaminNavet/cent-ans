@@ -1279,7 +1279,11 @@ pub(crate) fn apply_outcome(
     let general = army.general.clone();
     let destroyed = army.units.is_empty();
 
-    if outcome.general_captured {
+    let taken = outcome.general_captured
+        && general
+            .as_ref()
+            .is_none_or(|g| crate::ransom::capture_allowed(state, data, g, outcome.routed));
+    if taken {
         if let Some(general) = &general {
             state.detach_general(general);
             if let Some(character) = state.characters.get_mut(general) {

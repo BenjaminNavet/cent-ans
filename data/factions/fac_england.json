@@ -29,7 +29,7 @@
     "Duc d'Aquitaine",
     "Comte de Ponthieu"
   ],
-  "treasury": 45000,
+  "treasury": 12000,
   "prestige": 75,
   "starting_technologies": [
     "tech_water_mills",

@@ -3,7 +3,7 @@
   "default": {
     "description": "Ost féodal ordinaire : milices et arbalétriers des villes, gens d'armes à pied et à cheval.",
     "mix": {
-      "unit_urban_militia": 25,
+      "unit_urban_militia": 3,
       "unit_crossbowmen": 20,
       "unit_men_at_arms_foot": 20,
       "unit_mounted_sergeants": 15,
@@ -24,7 +24,7 @@
         "unit_mamluk_cavalry": 35,
         "unit_mounted_sergeants": 20,
         "unit_crossbowmen": 20,
-        "unit_urban_militia": 25
+        "unit_urban_militia": 3
       }
     },
     "fac_golden_horde": {
@@ -33,7 +33,7 @@
         "unit_steppe_horse_archers": 55,
         "unit_mounted_sergeants": 15,
         "unit_druzhina": 10,
-        "unit_urban_militia": 20
+        "unit_urban_militia": 2
       }
     },
     "fac_ottoman": {
@@ -42,7 +42,7 @@
         "unit_akinci": 25,
         "unit_steppe_horse_archers": 25,
         "unit_yaya": 30,
-        "unit_urban_militia": 20
+        "unit_urban_militia": 2
       }
     },
     "fac_byzantium": {
@@ -50,7 +50,7 @@
       "mix": {
         "unit_pronoiars": 25,
         "unit_crossbowmen": 25,
-        "unit_urban_militia": 30,
+        "unit_urban_militia": 4,
         "unit_mounted_sergeants": 10,
         "unit_men_at_arms_foot": 10
       }
@@ -61,7 +61,7 @@
         "unit_serbian_heavy_cavalry": 30,
         "unit_mounted_sergeants": 15,
         "unit_crossbowmen": 20,
-        "unit_urban_militia": 25,
+        "unit_urban_militia": 3,
         "unit_men_at_arms_foot": 10
       }
     },
@@ -70,7 +70,7 @@
       "mix": {
         "unit_lithuanian_light_cavalry": 40,
         "unit_druzhina": 20,
-        "unit_urban_militia": 25,
+        "unit_urban_militia": 3,
         "unit_crossbowmen": 15
       }
     },
@@ -81,7 +81,7 @@
         "unit_knights": 10,
         "unit_mounted_sergeants": 20,
         "unit_crossbowmen": 30,
-        "unit_urban_militia": 20
+        "unit_urban_militia": 2
       }
     },
     "fac_livonian_order": {
@@ -90,14 +90,14 @@
         "unit_teutonic_knights": 20,
         "unit_mounted_sergeants": 20,
         "unit_crossbowmen": 30,
-        "unit_urban_militia": 30
+        "unit_urban_militia": 4
       }
     },
     "fac_moscow": {
       "description": "Droujine d'Ivan Kalita, levées et arbalétriers des villes.",
       "mix": {
         "unit_druzhina": 40,
-        "unit_urban_militia": 35,
+        "unit_urban_militia": 4,
         "unit_crossbowmen": 25
       }
     },
@@ -112,7 +112,7 @@
         "unit_welsh_spearmen": 6,
         "unit_gascon_crossbowmen": 6,
         "unit_knights": 6,
-        "unit_urban_militia": 5,
+        "unit_urban_militia": 1,
         "unit_crossbowmen": 2
       }
     },
@@ -124,7 +124,7 @@
         "unit_men_at_arms_foot": 16,
         "unit_crossbowmen": 13,
         "unit_genoese_crossbowmen": 9,
-        "unit_urban_militia": 15,
+        "unit_urban_militia": 2,
         "unit_mounted_sergeants": 11,
         "unit_breton_knights": 4,
         "unit_francs_archers": 8,
@@ -140,7 +140,7 @@
         "unit_men_at_arms_foot": 24,
         "unit_knights": 20,
         "unit_crossbowmen": 18,
-        "unit_urban_militia": 17,
+        "unit_urban_militia": 2,
         "unit_mounted_sergeants": 13,
         "unit_goedendag_militia": 4,
         "unit_culveriners": 4
@@ -152,7 +152,7 @@
         "unit_flemish_pikemen": 35,
         "unit_goedendag_militia": 20,
         "unit_crossbowmen": 20,
-        "unit_urban_militia": 10,
+        "unit_urban_militia": 1,
         "unit_men_at_arms_foot": 15
       }
     },
@@ -161,7 +161,7 @@
       "mix": {
         "unit_scottish_spearmen": 40,
         "unit_men_at_arms_foot": 20,
-        "unit_urban_militia": 10,
+        "unit_urban_militia": 1,
         "unit_mounted_sergeants": 10,
         "unit_knights": 10,
         "unit_crossbowmen": 10
@@ -171,7 +171,7 @@
       "description": "Arbalétriers génois, la meilleure infanterie de trait à louer.",
       "mix": {
         "unit_genoese_crossbowmen": 45,
-        "unit_urban_militia": 25,
+        "unit_urban_militia": 3,
         "unit_men_at_arms_foot": 20,
         "unit_mounted_sergeants": 10
       }
@@ -179,7 +179,7 @@
     "fac_swiss": {
       "description": "Cantons : infanterie de choc à pied, hallebardes et piques.",
       "mix": {
-        "unit_urban_militia": 45,
+        "unit_urban_militia": 6,
         "unit_men_at_arms_foot": 30,
         "unit_crossbowmen": 25
       }
@@ -189,7 +189,7 @@
       "mix": {
         "unit_jinetes": 25,
         "unit_crossbowmen": 25,
-        "unit_urban_militia": 15,
+        "unit_urban_militia": 2,
         "unit_knights": 15,
         "unit_men_at_arms_foot": 12,
         "unit_mounted_sergeants": 8
@@ -199,7 +199,7 @@
       "description": "Almogavares, arbalétriers catalans et chevalerie.",
       "mix": {
         "unit_crossbowmen": 30,
-        "unit_urban_militia": 20,
+        "unit_urban_militia": 2,
         "unit_almogavars": 15,
         "unit_mounted_sergeants": 15,
         "unit_knights": 12,
@@ -211,7 +211,7 @@
       "mix": {
         "unit_jinetes": 35,
         "unit_crossbowmen": 30,
-        "unit_urban_militia": 25,
+        "unit_urban_militia": 3,
         "unit_men_at_arms_foot": 10
       }
     },
@@ -221,7 +221,7 @@
         "unit_breton_knights": 25,
         "unit_men_at_arms_foot": 20,
         "unit_crossbowmen": 20,
-        "unit_urban_militia": 20,
+        "unit_urban_militia": 2,
         "unit_mounted_sergeants": 10,
         "unit_routiers": 5
       }

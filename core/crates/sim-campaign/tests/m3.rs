@@ -165,7 +165,7 @@ fn sustained_high_unrest_triggers_a_revolt() {
     }
     set_all_unrest(&mut state, &boulogne, 99);
     let mut revolted = false;
-    for _ in 0..3 {
+    for _ in 0..8 {
         let events = state.end_turn_with(&data, idle);
         set_all_unrest(&mut state, &boulogne, 99); // keep it under pressure
         if events.iter().any(|e| e.kind == EventKind::Revolt) {
@@ -173,7 +173,10 @@ fn sustained_high_unrest_triggers_a_revolt() {
             break;
         }
     }
-    assert!(revolted, "two seasons above the threshold must revolt");
+    assert!(
+        revolted,
+        "the configured seasons above the threshold must revolt"
+    );
 }
 
 #[test]

@@ -5,7 +5,7 @@
   },
   "branch": "military",
   "tier": 4,
-  "cost": 480,
+  "cost": 720,
   "prerequisites": [
     "tech_handgonnes"
   ],
