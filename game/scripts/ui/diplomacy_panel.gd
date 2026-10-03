@@ -20,6 +20,8 @@ signal offer_answered(offer_id: int, accept: bool)
 ## FE6 : verdict sur une guerre privée entre deux vassaux (« impose_peace », « take_side », « let_be »).
 signal arbitration_requested(offer_id: int, verdict: String, side: String)
 signal closed
+## U16 : ouvre la couche des routes commerciales (même vue que la touche V).
+signal trade_view_requested
 
 ## FA5 : côté du sceau de cire réel (bouton « Proposer le traité », traités signés).
 const TREATY_SEAL_SIZE := 28
@@ -228,6 +230,14 @@ func _build_header() -> Control:
 	donate.pressed.connect(func() -> void:
 		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
 	header.add_child(donate)
+	var trade := Button.new()
+	trade.name = "TradeButton"
+	trade.text = "Commerce"
+	trade.tooltip_text = "Affiche les routes commerciales sur la carte (touche V)."
+	trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	trade.pressed.connect(func() -> void:
+		trade_view_requested.emit())
+	header.add_child(trade)
 	var close := Button.new()
 	close.text = "×"
 	RichTooltip.attach_plain(close, "close_escape")
@@ -479,6 +489,9 @@ func _article_column(title: String) -> Array:
 	var row := HBoxContainer.new()
 	var label := _label(title, UiType.HEADING, HudStyle.RUBRIC)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# U15 : le titre passe à la ligne plutôt que d'élargir la colonne (le menu sortait du cadre).
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(40, 0)
 	row.add_child(label)
 	var menu := _add_menu("+ Ajouter")
 	row.add_child(menu)
@@ -948,7 +961,12 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	var label := _label(label_text, UiType.BODY, HudStyle.INK)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(70, 0)
+	# U15 : largeur plancher = le plus long mot (jamais de coupure au milieu d'un mot) ; une clause
+	# commune, dans un conteneur à retour automatique, garde sa phrase entière jusqu'à 220 px.
+	var floor_width := _longest_word_width(label, label_text)
+	if str(article.get("giver", "")) == "":
+		floor_width = maxf(floor_width, minf(_text_width(label, label_text), 220.0))
+	label.custom_minimum_size = Vector2(floor_width, 0)
 	var tips := PackedStringArray()
 	for reason in value.get("reasons", []):
 		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
@@ -974,6 +992,19 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	return row
 
 
+func _text_width(label: Label, text: String) -> float:
+	var font := label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	return font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x + 4.0
+
+
+func _longest_word_width(label: Label, text: String) -> float:
+	var widest := 40.0
+	for word in text.split(" ", false):
+		widest = maxf(widest, _text_width(label, word))
+	return widest
+
+
 func _fallback_label(article: Dictionary) -> String:
 	return str(article.get("kind", "?")).replace("_", " ")
 
@@ -993,8 +1024,9 @@ func _render_chance() -> void:
 	_chance_bar.value = chance
 	fill.bg_color = HudStyle.gauge_color(chance / 100.0)
 	_chance_bar.add_theme_stylebox_override("fill", fill)
-	var word := "accepterait" if chance >= 66 else ("hésite" if chance >= 34 else "refuserait")
-	_chance_label.text = "Chance d'acceptation : %d %% (%s)" % [chance, word]
+	# M6 (ADR 0178) : acceptation déterministe, score signé (accepté ssi score >= 0).
+	var accepts := bool(_verdict.get("accept", false))
+	_chance_label.text = "%s (%+d)" % ["Accepterait" if accepts else "Refuserait", int(_verdict.get("score", 0))]
 	if _render_explanation():
 		return
 	var text := ""
@@ -1040,7 +1072,7 @@ func _render_explanation() -> bool:
 	var counter: Array = _explanation.get("counter", [])
 	if not accept and not counter.is_empty():
 		_counter_articles = counter
-		_counter_label.text = "Leur contre-offre (%d %%) : %s." % [int(_explanation.get("counter_chance", 0)), _explanation.get("counter_text", "")]
+		_counter_label.text = "Leur contre-offre (ils accepteraient) : %s." % _explanation.get("counter_text", "")
 		_counter_box.show()
 	return true
 
