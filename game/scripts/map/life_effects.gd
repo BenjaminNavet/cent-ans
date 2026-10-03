@@ -26,7 +26,9 @@ const CHIMNEYS := {"city": 3, "town": 2, "village": 1, "abbey": 1, "castle": 1}
 ## Taille d'un panache de cheminée (largeur, hauteur ; × `MapPropScale.chimney_ratio`, VT2) et
 ## d'incendie (unités monde à l'échelle de la carte, × `fire_scale`).
 const CHIMNEY_SIZE := Vector2(1.3, 4.0)
-const FIRE_SIZE := Vector2(3.0, 13.0)
+const FIRE_SIZE := Vector2(6.0, 13.0)
+## LR-14 : planche de fumée libre (FA, WispySmoke03) des panaches d'incendie.
+const FIRE_SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 ## VT-G (villes à l'échelle 1:1) : le rayon de colonie est le rayon réel. Cheminées réparties dans
 ## 70 % de l'emprise, au niveau du faîte ; incendies de siège dans les faubourgs (90 %) ; moulins
 ## sur une couronne à 1,6-2,2 rayons (hors faubourgs et enceinte).
@@ -102,6 +104,10 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	_terrain = terrain
 	_chimney_material = _smoke_material(0.55)
 	_fire_material = _smoke_material(0.9)
+	if ResourceLoader.exists(FIRE_SMOKE_FLIPBOOK):
+		_fire_material.set_shader_parameter("use_flipbook", true)
+		_fire_material.set_shader_parameter("flipbook", load(FIRE_SMOKE_FLIPBOOK))
+		_fire_material.set_shader_parameter("aspect", FIRE_SIZE.y / FIRE_SIZE.x)
 	_chimneys = _make_instance("Chimneys", _chimney_material)
 	_fires = _make_instance("Fires", _fire_material)
 	_windmill_bodies = _make_instance("WindmillBodies", null)

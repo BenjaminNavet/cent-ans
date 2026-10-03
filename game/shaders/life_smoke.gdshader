@@ -19,6 +19,16 @@ uniform float prop_scale = 1.0;
 // Lumière ambiante approximative (unshaded) : teinte chaude de la carte.
 uniform vec3 sun_tint = vec3(1.0, 0.96, 0.9);
 
+// LR-14 : panaches d'incendie en bouffées de la planche de fumée libre FA (WispySmoke03, CC0) au
+// lieu du bruit procédural (traits noirs droits vus de dessus). Désactivé si `use_flipbook` = faux.
+uniform bool use_flipbook = false;
+uniform sampler2D flipbook : filter_linear_mipmap, repeat_disable;
+uniform float frames_h = 8.0;
+uniform float frames_v = 8.0;
+// Hauteur / largeur du quad (corrige l'aspect des bouffées).
+uniform float aspect = 2.2;
+uniform int puffs = 6;
+
 varying vec4 v_custom;
 varying vec2 v_uv;
 
@@ -58,7 +68,51 @@ void vertex() {
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 }
 
+vec4 puff_sample(vec2 uv, float frame) {
+	float f = clamp(frame, 0.0, frames_h * frames_v - 1.001);
+	float first = floor(f);
+	float next = min(first + 1.0, frames_h * frames_v - 1.0);
+	vec2 a = (vec2(mod(first, frames_h), floor(first / frames_h)) + uv) / vec2(frames_h, frames_v);
+	vec2 b = (vec2(mod(next, frames_h), floor(next / frames_h)) + uv) / vec2(frames_h, frames_v);
+	return mix(texture(flipbook, a), texture(flipbook, b), f - first);
+}
+
+void flipbook_plume(float seed, float dark) {
+	float speed = mix(0.08, 0.14, v_custom.a);
+	float total = 0.0;
+	float light = 0.0;
+	for (int k = 0; k < puffs; k++) {
+		float phase = fract(TIME * speed + float(k) / float(puffs) + seed * 7.0);
+		float cy = 0.06 + phase * 0.82;
+		float cx = 0.5 + sin(seed * 31.0 + float(k) * 2.4) * 0.12 * (0.4 + phase);
+		float half_t = 0.10 + 0.16 * phase;
+		float half_x = min(half_t * aspect, 0.5);
+		vec2 local = vec2((v_uv.x - cx) / (2.0 * half_x) + 0.5, 1.0 - ((v_uv.y - cy) / (2.0 * half_t) + 0.5));
+		if (local.x < 0.0 || local.x > 1.0 || local.y < 0.0 || local.y > 1.0) {
+			continue;
+		}
+		vec4 texel = puff_sample(local, phase * (frames_h * frames_v - 1.0));
+		float life = smoothstep(0.0, 0.08, phase) * (1.0 - smoothstep(0.6, 1.0, phase));
+		float a = texel.a * life;
+		total += a;
+		light += texel.g * a;
+	}
+	float alpha = clamp(total * 0.9, 0.0, 1.0) * v_custom.b * fade;
+	if (alpha < 0.01) {
+		discard;
+	}
+	float lit = total > 0.001 ? light / total : 0.5;
+	vec3 col = mix(light_smoke, dark_smoke * 2.2, dark) * sun_tint * (0.6 + 0.6 * lit);
+	col += ember * dark * (1.0 - smoothstep(0.0, 0.12, v_uv.y)) * (0.6 + 0.4 * sin(TIME * 7.0 + seed * 30.0));
+	ALBEDO = col;
+	ALPHA = alpha;
+}
+
 void fragment() {
+	if (use_flipbook) {
+		flipbook_plume(v_custom.r, v_custom.g);
+		return;
+	}
 	float seed = v_custom.r;
 	float dark = v_custom.g;
 	float speed = mix(0.25, 0.45, v_custom.a);
