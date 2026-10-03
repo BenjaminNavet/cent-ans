@@ -19,8 +19,8 @@ Demande joueur 2026-10-03 : on voit encore l'estompage IGN (petites ombres de re
 | RV-D | Occlusion de vallée précalculée (outil tools/geo + échantillonnage shader) | feat/rv-d | en cours |
 | RV-F | Vie visible en vue régionale (fumées, reflets d'eau, vent forêts) | feat/rv-f | en cours |
 
-ADR : 0167 (rendu du relief de campagne).
+ADR : 0168 (rendu du relief de campagne).
 
 ## Prochaine étape
 Intégration des branches dans feat/rv (worktree gp-rv), import Godot, smoke, captures avant/après
-(≤ 10), ADR 0167, fusion ff-only dans main.
+(≤ 10), ADR 0168, fusion ff-only dans main.
