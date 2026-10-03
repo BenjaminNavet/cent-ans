@@ -5,7 +5,7 @@
   },
   "branch": "medicine",
   "tier": 4,
-  "cost": 450,
+  "cost": 675,
   "prerequisites": [
     "tech_soporific_sponge",
     "tech_montpellier"

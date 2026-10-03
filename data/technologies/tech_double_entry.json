@@ -5,7 +5,7 @@
   },
   "branch": "civil",
   "tier": 4,
-  "cost": 420,
+  "cost": 630,
   "prerequisites": [
     "tech_bookkeeping"
   ],

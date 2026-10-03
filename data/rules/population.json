@@ -4,7 +4,7 @@
   "garrison_relief_per_100_men": 1.0,
   "garrison_relief_max": 10.0,
   "goods_relief_max": 10.0,
-  "occupation_unrest": 20.0,
+  "occupation_unrest": 24.0,
   "foreign_religion_unrest": 10.0,
   "disorder_unrest_weight": 0.5,
   "disorder_unrest_max": 20.0,

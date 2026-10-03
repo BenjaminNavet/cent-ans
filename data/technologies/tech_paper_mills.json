@@ -5,7 +5,7 @@
   },
   "branch": "civil",
   "tier": 3,
-  "cost": 280,
+  "cost": 420,
   "prerequisites": [
     "tech_water_mills",
     "tech_universities"

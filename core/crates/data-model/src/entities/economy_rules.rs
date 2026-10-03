@@ -175,6 +175,9 @@ pub struct EconomyRules {
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,
+    /// A6-L3 (ADR 0179): ceiling of a ransom and capture of rulers.
+    #[serde(default)]
+    pub ransom: RansomRules,
     /// OM3 (ADR 0116): forage by province terrain (steppe, desert); a
     /// terrain left out feeds an army normally.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -245,14 +248,35 @@ impl Default for AiDemolition {
     }
 }
 
+/// A6-L3 (ADR 0179): ransoms are capped and a ruler is not taken on a
+/// plain defeat.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RansomRules {
+    /// A ransom never exceeds this share (percent) of the payer's seasonal
+    /// income.
+    pub income_cap_percent: i64,
+    /// A ruler leading a beaten army is captured only if that army routed.
+    pub sovereign_capture_only_if_routed: bool,
+}
+
+impl Default for RansomRules {
+    fn default() -> Self {
+        RansomRules {
+            income_cap_percent: 100,
+            sovereign_capture_only_if_routed: true,
+        }
+    }
+}
+
 fn default_administration_base() -> f64 {
     0.08
 }
 fn default_administration_per_province() -> f64 {
-    0.01
+    0.007
 }
 fn default_administration_max() -> f64 {
-    0.35
+    0.28
 }
 fn default_opulence_seasons() -> i64 {
     6
@@ -313,6 +337,7 @@ impl Default for EconomyRules {
             garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
             demolition_refund_percent: default_demolition_refund_percent(),
             ai_demolition: AiDemolition::default(),
+            ransom: RansomRules::default(),
             terrain_supply: [
                 (
                     Terrain::Steppe,

@@ -47,6 +47,9 @@ fn fid(s: &str) -> FactionId {
 }
 
 fn data_root() -> PathBuf {
+    if let Ok(root) = std::env::var("DATA_ROOT") {
+        return PathBuf::from(root);
+    }
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data")
 }
 
@@ -132,6 +135,16 @@ struct CampaignRun {
     /// EQ1 (C5): trade income and total income of all factions, summed over
     /// the samples taken every 20 turns.
     trade_income: (i64, i64),
+    /// A6-L3: rulers taken prisoner (a ruler newly captive), all factions.
+    sovereign_captures: u32,
+    /// A6-L3: Edward III (`chr_edouard_iii`) captured at least once.
+    edward_captured: bool,
+    /// A6-L3: Edward III captured during the first 4 turns.
+    edward_captured_early: bool,
+    /// A6-L3: (gross income, net balance, treasury) of each major at turn 0.
+    economy_turn0: BTreeMap<String, (i64, i64, i64)>,
+    /// A6-L3: largest ransom asked of a captive, in livres.
+    max_ransom: i64,
 }
 
 /// EQ1: context of one revolt.
@@ -204,6 +217,20 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
         log(f, &orders);
         orders
     };
+    for major in MAJORS {
+        let id = fid(major);
+        if let Some(economy) = state.faction_economy(data, &id) {
+            run.economy_turn0.insert(
+                (*major).to_owned(),
+                (
+                    economy.projected_income + economy.trade_income,
+                    economy.net_income(),
+                    state.factions.get(&id).map_or(0, |f| f.treasury),
+                ),
+            );
+        }
+    }
+    let mut ruler_captive: BTreeMap<FactionId, bool> = BTreeMap::new();
     let mut prev_buildings = building_set(&state);
     let mut prev_owner = owners(&state);
     let mut high_tax_samples = (0u32, 0u32);
@@ -319,6 +346,28 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                         run.battles.0 += 1;
                     }
                 }
+            }
+        }
+        for (id, faction) in &state.factions {
+            let captive = faction
+                .ruler
+                .as_ref()
+                .and_then(|r| state.characters.get(r))
+                .is_some_and(|c| c.alive && c.captive);
+            if captive && !ruler_captive.get(id).copied().unwrap_or(false) {
+                run.sovereign_captures += 1;
+                if id.as_str() == "fac_england" {
+                    run.edward_captured = true;
+                    run.edward_captured_early |= turn < 4;
+                }
+            }
+            ruler_captive.insert(id.clone(), captive);
+        }
+        for (id, c) in &state.characters {
+            if c.alive && c.captive {
+                run.max_ransom = run
+                    .max_ransom
+                    .max(sim_campaign::ransom::ransom_amount(&state, data, id));
             }
         }
         if state.is_at_war(&france, &england) {
@@ -465,6 +514,11 @@ fn run_json(run: &CampaignRun) -> Value {
             "before4": r.before4, "before1": r.before1, "at": r.at, "occupied": r.occupied,
         })).collect::<Vec<_>>(),
         "bankruptcies": run.bankruptcies,
+        "sovereign_captures": run.sovereign_captures,
+        "edward_captured": run.edward_captured,
+        "edward_captured_early": run.edward_captured_early,
+        "max_ransom": run.max_ransom,
+        "economy_turn0": run.economy_turn0,
         "edicts": run.edicts,
         "trade_income": [run.trade_income.0, run.trade_income.1],
     })
@@ -615,6 +669,27 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
         "| Banqueroutes / faction / décennie | {:.2} | < 0,5 (EQ1) |",
         bankrupt / alive.max(1.0) / decades.max(0.1)
     );
+    let _ = writeln!(
+        md,
+        "| Souverains capturés par partie / Édouard III capturé (parties, dont 4 premiers tours) | {:.1} / {} sur {} ({}) | Édouard < 10 % |",
+        runs.iter().map(|r| f64::from(r.sovereign_captures)).sum::<f64>() / n,
+        runs.iter().filter(|r| r.edward_captured).count(),
+        runs.len(),
+        runs.iter().filter(|r| r.edward_captured_early).count()
+    );
+    let _ = writeln!(
+        md,
+        "| Plus forte rançon demandée | {} | — |",
+        runs.iter().map(|r| r.max_ransom).max().unwrap_or(0)
+    );
+    if let Some(first) = runs.first() {
+        for (major, (gross, net, treasury)) in &first.economy_turn0 {
+            let _ = writeln!(
+                md,
+                "| Tour 0 {major} : revenu brut / solde net / trésor | {gross} / {net} / {treasury} | solde >= 10 % du revenu |"
+            );
+        }
+    }
     let (trade, total) = runs.iter().fold((0, 0), |(a, b), r| {
         (a + r.trade_income.0, b + r.trade_income.1)
     });

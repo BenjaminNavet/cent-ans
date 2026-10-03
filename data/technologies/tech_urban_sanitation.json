@@ -5,7 +5,7 @@
   },
   "branch": "civil",
   "tier": 3,
-  "cost": 320,
+  "cost": 480,
   "prerequisites": [
     "tech_hospital_reform"
   ],

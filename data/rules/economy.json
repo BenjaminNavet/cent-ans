@@ -3,8 +3,8 @@
   "event_treasury_reference_income": 4000,
   "event_treasury_min_scale": 0.25,
   "administration_base": 0.08,
-  "administration_per_province": 0.01,
-  "administration_max": 0.35,
+  "administration_per_province": 0.007,
+  "administration_max": 0.28,
   "opulence_seasons": 6,
   "opulence_percent": 20,
   "bankruptcy_morale_penalty": 10,
@@ -45,6 +45,10 @@
   "garrison_reinforce_percent_per_point": 5,
   "garrison_reinforce_max_percent": 50,
   "demolition_refund_percent": 10,
+  "ransom": {
+    "income_cap_percent": 100,
+    "sovereign_capture_only_if_routed": true
+  },
   "ai_demolition": {
     "deficit_seasons": 4,
     "max_upkeep_percent": 40,

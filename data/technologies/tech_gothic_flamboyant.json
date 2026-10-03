@@ -5,7 +5,7 @@
   },
   "branch": "civil",
   "tier": 3,
-  "cost": 300,
+  "cost": 450,
   "prerequisites": [
     "tech_masonry"
   ],

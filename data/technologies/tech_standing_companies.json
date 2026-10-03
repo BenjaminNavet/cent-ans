@@ -5,7 +5,7 @@
   },
   "branch": "military",
   "tier": 5,
-  "cost": 800,
+  "cost": 1200,
   "prerequisites": [
     "tech_compagnies_d_ordonnance",
     "tech_field_artillery"
