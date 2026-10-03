@@ -448,6 +448,27 @@ pub(crate) fn spawn_ruler(
     data: &GameData,
     faction: &FactionId,
 ) -> CharacterId {
+    spawn_head(state, data, faction, None)
+}
+
+/// Brings an adult kinsman of `house` (a cadet branch the data does not
+/// model) to the head of `faction` when its direct line dies out (LR-05,
+/// `feudal_rules.collateral_line_percent`).
+pub(crate) fn spawn_cadet(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    house: &str,
+) -> CharacterId {
+    spawn_head(state, data, faction, Some(house))
+}
+
+fn spawn_head(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    house_of: Option<&str>,
+) -> CharacterId {
     let first_name = pick_name(data, faction, Sex::Male, &mut state.rng);
     let elective = data
         .factions
@@ -467,10 +488,10 @@ pub(crate) fn spawn_ruler(
                 .map(|p| p.name.display.clone())
         })
         .unwrap_or_else(|| faction.to_string());
-    let house = if elective {
-        format!("élu de {seat}")
-    } else {
-        seat.clone()
+    let house = match house_of {
+        Some(house) => house.to_owned(),
+        None if elective => format!("élu de {seat}"),
+        None => seat.clone(),
     };
     let age = 30 + state.rng.below(20) as i32;
     let id = next_generated_id(state);
@@ -478,7 +499,7 @@ pub(crate) fn spawn_ruler(
     skills.command += 2;
     skills.governance += 2;
     skills.court += 2;
-    let name = if elective {
+    let name = if elective && house_of.is_none() {
         first_name.clone()
     } else {
         generated_full_name(&first_name, &house)

@@ -93,7 +93,12 @@ fn the_victim_marches_in_column_along_the_road() {
     let column = victims(&sim);
     assert_eq!(column.len(), VICTIM.len());
     for unit in &column {
-        assert_eq!(unit.formation, Formation::Column, "{} in column", unit.name);
+        assert_eq!(
+            unit.formation,
+            Formation::of("column"),
+            "{} in column",
+            unit.name
+        );
         let d = distance_to(&layout.path, (unit.x, unit.z));
         assert!(d < 1.0, "{} stands on the road ({d:.1} m off)", unit.name);
     }
@@ -431,7 +436,7 @@ fn an_old_setup_without_the_fields_opens_as_before() {
     assert!(sim
         .units()
         .iter()
-        .all(|u| u.formation == Formation::Line && u.fatigue == 0.0 && !u.stakes_planted));
+        .all(|u| u.formation == Formation::of("line") && u.fatigue == 0.0 && !u.stakes_planted));
     for side in SideId::BOTH {
         assert!(sim.can_deploy(side));
         assert_eq!(sim.deployment_zones(side), vec![sim.deployment_zone(side)]);

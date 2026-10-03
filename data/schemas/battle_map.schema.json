@@ -72,7 +72,7 @@
               "wave": { "type": "integer", "minimum": 0, "description": "Indice de la vague (« bataille ») de l'armée." },
               "hold": { "type": "boolean", "description": "Tient sa position : l'IA ne l'éloigne pas de plus de leash_m." },
               "leash_m": { "type": "number", "minimum": 0, "maximum": 2000 },
-              "formation": { "enum": ["line", "column", "square", "wedge"] },
+              "formation": { "enum": ["line", "thin_line", "battle", "column", "square", "herse", "wedge", "conroi"], "description": "Clé de data/rules/unit_formations.json (ADR 0174)." },
               "dismounted": { "type": "boolean" },
               "morale": { "type": "integer", "minimum": 1, "maximum": 100 },
               "experience": { "type": "integer", "minimum": 0, "maximum": 10 },

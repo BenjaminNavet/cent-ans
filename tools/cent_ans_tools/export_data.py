@@ -22,6 +22,8 @@ disk space until a file changes.
 
 from __future__ import annotations
 
+import json
+import re
 import shutil
 import subprocess
 import sys
@@ -46,6 +48,31 @@ class StageResult:
     data_bytes: int
     relief_bytes: int
     report: relief_cache.CacheReport
+
+
+def unused_relief_shade_pngs(map_dir: Path) -> set[str]:
+    """Names of the ``relief_shade_<band>.png`` files the exported game never reads.
+
+    The terrain loads the BC5 GPU copy (``relief_shade_bc5_<part>.bin``, ADR 0118) first and
+    falls back on the PNG bands only when it is missing (``relief_landcover.gd``): when every
+    BC5 part listed in ``map.json`` is present, the bands (about 130 MB) are dead weight.
+    Returns an empty set when the BC5 copy is absent or incomplete (the PNGs then stay).
+    """
+    try:
+        shade = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))[
+            "relief_shade"
+        ]
+        bc5 = shade["bc5"]
+        pattern = bc5["pattern"]
+        parts = len(bc5["part_bytes"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return set()
+    if not parts or not all(
+        (map_dir / pattern.format(part=part)).is_file() for part in range(parts)
+    ):
+        return set()
+    band_pattern = re.compile(r"relief_shade(_\d+)?\.png")
+    return {p.name for p in map_dir.iterdir() if band_pattern.fullmatch(p.name)}
 
 
 def _tree_bytes(path: Path) -> int:
@@ -119,8 +146,9 @@ def stage(
 def _copy_map(source: Path, target: Path) -> None:
     """``data/map`` without ``pyramid/`` (placed separately by :func:`stage`)."""
     target.mkdir(parents=True)
+    skipped = unused_relief_shade_pngs(source)
     for entry in sorted(source.iterdir()):
-        if entry.name == PYRAMID.name:
+        if entry.name == PYRAMID.name or entry.name in skipped:
             continue
         if entry.is_dir():
             copy_tree(entry, target / entry.name)

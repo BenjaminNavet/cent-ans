@@ -44,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 45000,
+        "count": 112500,
         "unrest": 20,
         "health": 55,
         "wealth": 35,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 1350,
+        "count": 3375,
         "unrest": 20,
         "health": 52,
         "wealth": 50,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1125,
+        "count": 2812,
         "unrest": 15,
         "health": 60,
         "wealth": 55,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 540,
+        "count": 1350,
         "unrest": 15,
         "health": 60,
         "wealth": 60,
@@ -73,7 +73,7 @@
       }
     },
     "uncertain": true,
-    "note": "Vallée du Sous et Anti-Atlas : canne à sucre, cuivre, tribus chleuhs. Chiffres estimés (uncertain)."
+    "note": "Vallée du Sous et Anti-Atlas : canne à sucre, cuivre, tribus chleuhs. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market",

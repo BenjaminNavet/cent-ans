@@ -47,6 +47,8 @@ const ZONE_RECTS := {
 const TOAST_SECONDS := 6.0
 ## NT6b : lignes visibles au plus d'un avis (le reste : points de suspension).
 const TOAST_MAX_LINES := 3
+## LR-09 : au-delà, l'avis reçoit une infobulle avec son texte complet.
+const TOAST_TOOLTIP_CHARS := 60
 const MAX_TOASTS := 3
 ## Voile des fenêtres modales (bible § 12.1 : noir 45 %).
 const MODAL_DIM := Color(0.0, 0.0, 0.0, 0.45)
@@ -238,6 +240,9 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.mouse_filter = Control.MOUSE_FILTER_STOP
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	RichTooltip.attach_plain(entry, "click_to_close")
+	if text.length() > TOAST_TOOLTIP_CHARS:
+		# LR-09 : un avis long est tronqué à `TOAST_MAX_LINES` lignes ; l'infobulle porte le texte entier.
+		entry.tooltip_text = text + "\n\nCliquer pour fermer."
 	entry.add_theme_stylebox_override("panel", HudStyle.note_box(8))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)

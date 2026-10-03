@@ -539,11 +539,17 @@ func _on_bridge(pos: Vector3) -> bool:
 
 ## PB3c : `_wet_span` relu seulement quand le régiment a bougé (position, cap, profondeur) : la
 ## simulation n'avance que par pas de 0,1 s, les images intermédiaires reprennent le résultat.
+const WET_CACHE_MOVE_M := 0.5
+const WET_CACHE_TURN_RAD := 0.05
+
+
 func _wet_span_cached(id: int, unit: Dictionary, pos: Vector3) -> Vector2:
 	var facing := float(unit.get("facing", 0.0))
 	var depth := float(unit.get("depth", 6.0))
 	var cached: Array = _wet_cache.get(id, [])
-	if not cached.is_empty() and cached[0] == pos and float(cached[1]) == facing and float(cached[2]) == depth:
+	# RJ-b : positions interpolées à chaque image ; l'emprise mouillée n'est recalculée qu'après
+	# un déplacement sensible (0,5 m, ~3° de cap) et non à chaque image.
+	if not cached.is_empty() and (cached[0] as Vector3).distance_squared_to(pos) < WET_CACHE_MOVE_M * WET_CACHE_MOVE_M and absf(angle_difference(float(cached[1]), facing)) < WET_CACHE_TURN_RAD and float(cached[2]) == depth:
 		return cached[3]
 	var span := _wet_span(unit, pos)
 	_wet_cache[id] = [pos, facing, depth, span]

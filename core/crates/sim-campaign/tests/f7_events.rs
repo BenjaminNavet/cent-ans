@@ -245,10 +245,11 @@ fn nevilles_cross_captures_david_and_berwick_frees_him() {
 #[test]
 fn montereau_leads_to_the_alliance_then_troyes() {
     let data = data();
-    // Seed 7 (seed 6 before the HV8 data): the chain depends on the random
-    // stream, which any new random event or character shifts (seeds 4 and 9
-    // miss the alliance within three turns).
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 7).unwrap();
+    // Seed 1 (2 before the LR merge, 7 before LR-17, 6 before the HV8 data):
+    // the chain depends on the random stream, which any new random event or
+    // character shifts (after LR, seeds 1 and 3-12 pass, seed 2 misses the
+    // alliance within three turns).
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 1).unwrap();
     state.year = 1419;
     state.season = Season::Autumn;
     for _ in 0..3 {
@@ -276,7 +277,8 @@ fn montereau_leads_to_the_alliance_then_troyes() {
 #[test]
 fn nicopolis_leads_to_the_ransom_of_nevers() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 5).unwrap();
+    // Seed 3 (5 before LR-17's new character shifted the random stream).
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 3).unwrap();
     state.year = 1396;
     state.season = Season::Autumn;
     state.end_turn_with(&data, idle);
@@ -292,6 +294,77 @@ fn nicopolis_leads_to_the_ransom_of_nevers() {
         .chronicle
         .fired_events
         .contains(&evt("evt_rancon_de_nevers")));
+}
+
+/// HV10 historical events of the East and the South (1337-1354):
+/// (event, year, season, player faction used for the start).
+const HV10_HISTORICAL: &[(&str, i32, Season)] = &[
+    ("evt_chute_de_tlemcen", 1337, Season::Spring),
+    ("evt_mort_d_ivan_kalita", 1340, Season::Spring),
+    ("evt_mort_d_an_nasir", 1341, Season::Summer),
+    ("evt_mort_d_andronic_iii", 1341, Season::Summer),
+    ("evt_mort_d_ozbeg", 1341, Season::Spring),
+    ("evt_mort_de_gediminas", 1341, Season::Winter),
+    ("evt_nuit_de_la_saint_georges", 1343, Season::Spring),
+    ("evt_paix_de_kalisz", 1343, Season::Summer),
+    ("evt_prise_d_algesiras", 1344, Season::Spring),
+    ("evt_sainte_ligue_a_smyrne", 1344, Season::Autumn),
+    ("evt_dusan_prend_serres", 1345, Season::Autumn),
+    ("evt_couronnement_de_dusan", 1346, Season::Spring),
+    ("evt_siege_de_caffa", 1346, Season::Summer),
+    ("evt_bataille_de_la_streva", 1347, Season::Winter),
+    ("evt_desastre_de_kairouan", 1348, Season::Spring),
+    ("evt_zakonik", 1349, Season::Spring),
+    ("evt_tzympe", 1352, Season::Autumn),
+    ("evt_seisme_de_gallipoli", 1354, Season::Spring),
+];
+
+/// Each HV10 event fires on its date in a plausible state (the 1337 start,
+/// idle AI, the player being a faction with no stake in the East).
+#[test]
+fn hv10_events_fire_on_their_date_in_a_plausible_state() {
+    let data = data();
+    for (id, year, season) in HV10_HISTORICAL {
+        let event = &data.events[&evt(id)];
+        assert_eq!(event.kind, EventCategory::Historical, "{id}");
+        let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+        state.year = *year;
+        state.season = *season;
+        state.end_turn_with(&data, idle);
+        assert!(
+            state.chronicle.fired_events.contains(&evt(id)),
+            "{id} did not fire in {year} {season:?}"
+        );
+    }
+}
+
+/// The conditions matter: without them an HV10 event stays silent.
+#[test]
+fn hv10_events_stay_silent_when_their_conditions_fail() {
+    let data = data();
+    // Algeciras no longer Marinid.
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+    state.year = 1344;
+    state.season = Season::Spring;
+    let province = data_model::ProvinceId::new("prov_algeciras").unwrap();
+    let city = state.provinces[&province].city.clone();
+    let settlement = state.settlements.get_mut(&city).unwrap();
+    settlement.owner = fac("fac_castile");
+    settlement.controller = fac("fac_castile");
+    state.end_turn_with(&data, idle);
+    assert!(!state
+        .chronicle
+        .fired_events
+        .contains(&evt("evt_prise_d_algesiras")));
+    // Out of its window (after `until_year`).
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+    state.year = 1360;
+    state.season = Season::Spring;
+    state.end_turn_with(&data, idle);
+    assert!(!state
+        .chronicle
+        .fired_events
+        .contains(&evt("evt_chute_de_tlemcen")));
 }
 
 /// A planner that does nothing: only the chronicle moves the world.

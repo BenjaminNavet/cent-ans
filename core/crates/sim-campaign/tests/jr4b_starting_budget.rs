@@ -59,14 +59,23 @@ fn the_great_realms_start_within_their_means_and_the_others_untouched() {
 
     for (id, place) in &raw.settlements {
         let now = &fitted.settlements[id];
-        // Never a settlement's last unit, never the capital's garrison.
+        // Never a settlement's last unit; the capital's garrison only as a
+        // last resort, down to `min_capital_units` (LR-15).
         if !place.garrison.is_empty() {
             assert!(!now.garrison.is_empty(), "{id}");
         }
-        // A6-L3: only a realm still in deficit loses its capital's garrison.
+        // A6-L3: only a realm still in deficit loses its capital's garrison,
+        // and then down to `min_capital_units` (LR-15) at most.
         let (capital_net, _) = structural(&raw, &raw_data, &place.controller);
-        if fitted.faction_capital_city(&place.controller) == Some(id) && capital_net >= 0 {
-            assert_eq!(now.garrison, place.garrison, "{id}");
+        if fitted.faction_capital_city(&place.controller) == Some(id) {
+            let floor = rule.min_capital_units.unwrap_or(usize::MAX);
+            assert!(
+                now.garrison == place.garrison || now.garrison.len() >= floor,
+                "{id}"
+            );
+            if capital_net >= 0 {
+                assert_eq!(now.garrison, place.garrison, "{id}");
+            }
         }
         // Sound or small realms keep their garrisons.
         let faction = &place.controller;

@@ -17,8 +17,8 @@ ADR réservés : 0174 (formations historiques et reformation), 0175 (lisibilité
 
 | Lot | Contenu | Worktree | État |
 |---|---|---|---|
-| a | Formations historiques (données + core), menu avec infobulles, reformation progressive, état on/off des boutons d'ordre | `../gp-rj-a` | lancé |
-| b | Interpolation des poses entre pas de simulation (démarche) | `../gp-rj-b` | lancé |
+| a | Formations historiques (données + core), menu avec infobulles, reformation progressive, état on/off des boutons d'ordre | `../gp-rj-a` | fusionné (1a7e8a12a) |
+| b | Interpolation des poses entre pas de simulation (démarche) | `../gp-rj-b` | fusionné (1a7e8a12a) |
 | c | Explication conquête (infobulle province, panneaux, codex) + bannières possesseur/occupant sur les villes | `../gp-rj-c` | fusionné (a40fe9a90) ; en_stance_cues_test rouge déjà sur main avant RJ-c (anneau rouge des armées ennemies) |
 | d | Remplissage par position diplomatique en vue 3D | `../gp-rj-d` | fusionné (321809b0f) |
 

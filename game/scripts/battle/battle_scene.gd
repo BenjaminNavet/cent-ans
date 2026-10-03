@@ -176,6 +176,7 @@ var _bench_process_ms: Array = []
 ## PB3e : durée de `_process` (scripts + pont) des images avec un pas de simulation et des autres.
 var _bench_step_frame_ms: Array = []
 var _bench_plain_frame_ms: Array = []
+var _bench_plain_soldiers_ms: Array = []  # RJ-b : figurines, images sans pas de simulation
 var _bench_proc_start_us: int = 0
 var _bench_ticks_before: int = -1
 var _bench_soldiers_ms: Array = []
@@ -238,6 +239,10 @@ var replay_mode: bool = false
 ## PB3e : pas de simulation calculé sur un fil (`--no-pb3e` : synchrone, mesures A/B).
 var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
 var _step_thread_on: bool = false
+## RJ-b : figurines et régiments interpolés entre deux pas de simulation (démarche continue) ;
+## `--no-pose-lerp` après `--` : poses du pas courant (mesures A/B). Coupé en headless (tests).
+var pose_lerp_enabled: bool = not OS.get_cmdline_user_args().has("--no-pose-lerp")
+var _pose_lerp_on: bool = false
 var replay_bar: BattleReplayBar = null
 var replay_error: String = ""
 var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
@@ -476,6 +481,9 @@ func begin_custom(config: Dictionary) -> bool:
 			battle.call("set_start_phase", _hour_override)
 	if not _build_scene():
 		return false
+	# LR-12 (NT4) : l'adversaire du joueur tient sa position (option du cœur, enregistrée au rejeu).
+	if bool(config.get("hold_opponent", false)) and player_side != "" and battle.has_method("set_hold"):
+		battle.call("set_hold", enemy_side, true)
 	var attacker := str((setup.get("attacker", {}) as Dictionary).get("faction_name", ""))
 	var defender := str((setup.get("defender", {}) as Dictionary).get("faction_name", ""))
 	_title_text = "Bataille personnalisée : %s contre %s" % [attacker, defender]
@@ -776,6 +784,9 @@ func _build_scene() -> bool:
 	# CB4 : textes des capacités pour les infobulles des boutons de carte.
 	if battle.has_method("get_ability_catalog"):
 		hud.ability_catalog = battle.call("get_ability_catalog")
+	# RJ-a : formations de régiment (menu du bouton « Formation », infobulles).
+	if battle.has_method("unit_formations"):
+		hud.setup_formations(battle.call("unit_formations"), battle.call("formation_reform_rules"))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
@@ -1303,17 +1314,30 @@ func _process(delta: float) -> void:
 				_bench_step_frame_ms.append(proc_ms)
 			else:
 				_bench_plain_frame_ms.append(proc_ms)
+				_bench_plain_soldiers_ms.append(_bench_soldiers_last_ms)
 
 
 ## PB3e (ADR 0090) : le pas de simulation suivant se calcule sur un fil pendant que l'image
 ## montre le pas courant (même bataille, au bit près). Synchrone en headless (tests), pendant un
 ## rejeu et avec `--no-pb3e` après `--` (mesures A/B).
 func _configure_step_thread() -> void:
+	_configure_pose_lerp()
 	var wanted := pb3e_enabled and not replay_mode and DisplayServer.get_name() != "headless"
 	if wanted == _step_thread_on or not battle.has_method("set_step_thread"):
 		return
 	_step_thread_on = wanted
 	battle.call("set_step_thread", wanted)
+
+
+## RJ-b : poses interpolées entre deux pas (fraction du pas en cours, `step_fraction` du cœur).
+## `--pose-lerp` force l'interpolation en headless (test, banc).
+func _configure_pose_lerp() -> void:
+	var forced := OS.get_cmdline_user_args().has("--pose-lerp")
+	var wanted := pose_lerp_enabled and (forced or DisplayServer.get_name() != "headless")
+	if wanted == _pose_lerp_on or not battle.has_method("set_pose_lerp"):
+		return
+	_pose_lerp_on = wanted
+	battle.call("set_pose_lerp", wanted)
 
 
 ## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
@@ -1441,6 +1465,8 @@ func _bench_finish() -> void:
 		"proc_step_ms_median": _median(_bench_step_frame_ms),
 		"proc_step_ms_p99": _percentile(_sorted(_bench_step_frame_ms), 0.99),
 		"proc_plain_ms_median": _median(_bench_plain_frame_ms),
+		"soldiers_plain_ms_median": _median(_bench_plain_soldiers_ms),
+		"pose_lerp": _pose_lerp_on,
 		"proc_plain_ms_p99": _percentile(_sorted(_bench_plain_frame_ms), 0.99),
 		"step_stats": battle.call("get_step_stats") if battle.has_method("get_step_stats") else {},
 		"quality": RenderQuality.current(),

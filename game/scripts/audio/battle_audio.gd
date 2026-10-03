@@ -74,6 +74,11 @@ var bed_levels: Dictionary = {}
 
 var _voices: Array = []  # [{player, event, priority, started}]
 var _last_played: Dictionary = {}  # événement → temps
+## LR-16 : cris joués à la fois par `_detect_events` (transition d'état) et par la colonne d'alertes
+## CB5 : un même cri au même endroit dans la fenêtre n'est joué qu'une fois (événement → fenêtre s).
+const DEDUP_EVENTS := {"rout_cry": 2.0, "general_death": 2.0}
+const DEDUP_RADIUS_M := 40.0
+var _dedup_last: Dictionary = {}  # événement → {time, position}
 var _scheduled: Array = []  # [{time, event, position, gain}]
 var _beds: Dictionary = {}  # nom → AudioStreamPlayer3D
 var _ambience: Dictionary = {}  # nom → AudioStreamPlayer (2D)
@@ -189,6 +194,8 @@ func schedule(event_name: String, position: Vector3, delay: float, gain_db: floa
 func play_event(event_name: String, position: Vector3, gain_db: float = 0.0) -> bool:
 	if bank == null or not bank.has_event(event_name):
 		return false
+	if _is_duplicate_cry(event_name, position):
+		return true  # déjà sonné : pas de repli « ui_alert » côté colonne d'alertes
 	var entry: Dictionary = bank.event(event_name)
 	var played := false
 	for layer in entry.get("layers", []):
@@ -395,6 +402,19 @@ static func missile_kind(unit: Dictionary) -> String:
 	if type.contains("crossbow"):
 		return "bolt"
 	return "arrow"
+
+
+## LR-16 : vrai si le même cri vient d'être joué près de `position` (fenêtre `DEDUP_EVENTS`) ; sinon
+## mémorise celui-ci.
+func _is_duplicate_cry(event_name: String, position: Vector3) -> bool:
+	if not DEDUP_EVENTS.has(event_name):
+		return false
+	var last: Dictionary = _dedup_last.get(event_name, {})
+	if not last.is_empty() and _time - float(last["time"]) < float(DEDUP_EVENTS[event_name]) \
+			and position.distance_to(last["position"]) <= DEDUP_RADIUS_M:
+		return true
+	_dedup_last[event_name] = {"time": _time, "position": position}
+	return false
 
 
 func _detect_events(units: Array, elapsed: float) -> void:

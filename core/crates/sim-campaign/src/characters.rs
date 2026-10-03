@@ -180,6 +180,20 @@ pub(crate) fn succeed(
             .as_ref()
             .and_then(|ruler| dynasty::pick_heir_by_law(state, data, faction, ruler))
     });
+    // LR-05: an elective realm (republic, see, order) has no line to die
+    // out: it elects a new head below and keeps its titles.
+    let elective = data
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.succession_law == data_model::SuccessionLaw::Elective);
+    // LR-05: a dynastic realm without heir nor kin abroad may pass to a
+    // cadet branch of the house instead of escheating.
+    let successor = match successor {
+        None if !elective => {
+            crate::feudal::cadet_branch(state, data, faction, dead_ruler.as_ref(), events)
+        }
+        other => other,
+    };
     // FE: an heir living in another faction comes home (or takes the realm
     // into his own, greater one).
     if let Some(heir) = &successor {
@@ -210,17 +224,20 @@ pub(crate) fn succeed(
             state.factions.get_mut(faction).expect("exists").ruler = None;
             // FE (F3): each title passes to kin abroad or escheats; a
             // faction left without title has vanished into its heir's.
-            if crate::feudal::inherit_titles_on_extinction(
-                state,
-                data,
-                faction,
-                dead_ruler.as_ref(),
-                events,
-            ) {
+            if !elective
+                && crate::feudal::inherit_titles_on_extinction(
+                    state,
+                    data,
+                    faction,
+                    dead_ruler.as_ref(),
+                    events,
+                )
+            {
                 return;
             }
             if let Some(house) = dead_ruler
                 .as_ref()
+                .filter(|_| !elective)
                 .and_then(|r| state.characters.get(r))
                 .map(|c| c.house.clone())
             {
@@ -236,10 +253,6 @@ pub(crate) fn succeed(
                 .filter(|(_, c)| c.alive && &c.faction == faction && c.is_major(year))
                 .min_by_key(|(id, c)| (c.birth_year, (*id).clone()))
                 .map(|(id, _)| id.clone());
-            let elective = data
-                .factions
-                .get(faction)
-                .is_some_and(|f| f.succession_law == data_model::SuccessionLaw::Elective);
             let (ruler, text) = match fallback {
                 Some(ruler) => {
                     let text = format!(

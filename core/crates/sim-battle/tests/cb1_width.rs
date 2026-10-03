@@ -76,7 +76,7 @@ fn a_width_sets_the_files_of_the_line() {
     sim.apply_command(go(vec![0], (300.0, 360.0), Some(0.0), Some(width)), None)
         .unwrap();
     let u = &sim.units()[0];
-    assert_eq!(u.formation, Formation::Line);
+    assert_eq!(u.formation, Formation::of("line"));
     let files = u.line_files.expect("a width sets the files");
     let (ranks, f) = ranks_files(&sim, 0);
     assert_eq!(f, files);
@@ -150,7 +150,7 @@ fn without_width_the_formation_is_unchanged() {
     sim.apply_command(
         Command::Formation {
             units: vec![0],
-            kind: Formation::Line,
+            kind: Formation::of("line"),
         },
         None,
     )

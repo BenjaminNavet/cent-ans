@@ -35,22 +35,25 @@ func _check_screen() -> void:
 	print("nt2: screen minimum size %s" % str(needed))
 	_check(needed.x <= 1280.0 and needed.y <= 720.0, "screen fits 1280×720: %s" % str(needed))
 	_check(screen.factions.size() > 20, "playable factions listed (%d)" % screen.factions.size())
-	_check(int(screen.rules.get("default_budget", 0)) == 6000, "default budget 6000")
+	_check(int(screen.rules.get("default_budget", 0)) == 12000, "default budget 12000")
 	var french: Array = screen.roster("fac_france")
 	_check(not french.is_empty(), "French roster loaded")
 	_check(screen.roster_entry("fac_france", "unit_crossbowmen").get("cost", 0) == 450, "crossbowmen cost 450")
 	_check(screen.roster_entry("fac_france", "unit_akinci").is_empty(), "no akinci for France")
 	_check(not bool(screen.report.get("ok", true)) and screen.launch_button.disabled, "empty armies: cannot launch")
-	# Achat jusqu'au budget : 1000 points = 2 arbalétriers (900), le 3e est refusé.
-	screen.config["attacker"]["budget"] = 1000
+	# Achat jusqu'au budget : 2000 points (minimum des règles) = 4 arbalétriers (1800), le 5e est refusé.
+	screen.config["attacker"]["budget"] = 2000
 	screen.refresh()
-	_check(screen.buy("attacker", "unit_crossbowmen"), "buy 1")
-	_check(screen.buy("attacker", "unit_crossbowmen"), "buy 2")
-	_check(not screen.buy("attacker", "unit_crossbowmen"), "third crossbowmen over budget refused")
-	_check(int(screen.report["attacker"]["cost"]) == 900, "attacker cost 900 (%s)" % str(screen.report.get("attacker")))
+	for i in 4:
+		_check(screen.buy("attacker", "unit_crossbowmen"), "buy %d" % (i + 1))
+	_check(not screen.buy("attacker", "unit_crossbowmen"), "fifth crossbowmen over budget refused")
+	_check(int(screen.report["attacker"]["cost"]) == 1800, "attacker cost 1800 (%s)" % str(screen.report.get("attacker")))
 	_check(not screen.buy("attacker", "unit_akinci"), "unit outside the roster refused")
 	screen.remove("attacker", 0)
-	_check((screen.config["attacker"]["units"] as Array).size() == 1 and int(screen.report["attacker"]["cost"]) == 450, "remove refunds")
+	_check((screen.config["attacker"]["units"] as Array).size() == 3 and int(screen.report["attacker"]["cost"]) == 1350, "remove refunds")
+	# Un seul arbalétrier gardé pour la suite (contrôles « other units kept », composition mémorisée).
+	screen.remove("attacker", 0)
+	screen.remove("attacker", 0)
 	_check(screen.buy("defender", "unit_crossbowmen"), "defender buys")
 	_check(bool(screen.report.get("ok", false)), "valid composition: %s" % str(screen.report.get("errors")))
 	_check(not screen.launch_button.disabled, "launch enabled")
@@ -66,12 +69,22 @@ func _check_screen() -> void:
 	_check(int(screen.config["year"]) == 1337 and int(screen.year_spin.value) == 1337, "default year 1337")
 	_check(screen.roster_entry("fac_france", "unit_francs_archers").is_empty(), "no francs-archers in 1337")
 	screen.set_year(1450)
-	_check(not screen.roster_entry("fac_france", "unit_francs_archers").is_empty(), "francs-archers in 1450")
+	# LR-12 : les francs-archers exigent une technologie que la France n'a pas au départ.
+	_check(screen.roster_entry("fac_france", "unit_francs_archers").is_empty(), "francs-archers need their technology")
+	_check(screen.grantable_technologies("attacker").any(func(t: Dictionary) -> bool: return str(t["id"]) == "tech_francs_archers"), "tech_francs_archers offered")
+	screen.toggle_technology("attacker", "tech_francs_archers")
+	_check(not screen.roster_entry("fac_france", "unit_francs_archers", ["tech_francs_archers"]).is_empty(), "francs-archers in 1450 with the technology")
 	_check(screen.buy("attacker", "unit_francs_archers"), "buy francs-archers in 1450")
+	_check(screen.tech_buttons["attacker"].text == "Technologies (1)", "technology button summary")
 	_check(bool(screen.report.get("ok", false)), "1450 composition valid: %s" % str(screen.report.get("errors")))
 	screen.set_year(1337)
 	_check(not (screen.config["attacker"]["units"] as Array).has("unit_francs_archers"), "francs-archers dropped back in 1337")
+	screen.toggle_technology("attacker", "tech_francs_archers")
 	_check((screen.config["attacker"]["units"] as Array).size() == 1, "other units kept")
+	_check(not bool(screen.battle_config().get("hold_opponent", true)), "hold opponent off by default")
+	screen.hold_check.button_pressed = true
+	_check(bool(screen.battle_config().get("hold_opponent", false)), "hold opponent option set")
+	screen.hold_check.button_pressed = false
 	var engines: Dictionary = screen.config["engines"]
 	_check(bool(engines["ladders"]) and bool(engines["ram"]) and int(engines["towers"]) == 0, "default engines: ladders and ram")
 	_check(screen.engines_button.disabled, "engines menu greyed out without siege")

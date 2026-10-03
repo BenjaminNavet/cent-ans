@@ -17,7 +17,7 @@ use data_model::UnitCategory;
 use super::{BattleSim, DT};
 use crate::hydro::{Crossing, Water, WaterRules};
 use crate::impact::LossCause;
-use crate::unit::{Formation, Unit};
+use crate::unit::Unit;
 
 /// A regiment this close to the near end of a crossing heads for its far end.
 const AT_CROSSING: f64 = 4.0;
@@ -213,7 +213,7 @@ impl BattleSim {
             k *= (b.width / unit.extent().0.max(1.0)).clamp(m.bridge_min_squeeze, 1.0);
         }
         if self.field.road_at(unit.x, unit.z).is_some() {
-            k *= if unit.formation == Formation::Column {
+            k *= if unit.formation.def().road_march {
                 m.road_column
             } else {
                 m.road_other

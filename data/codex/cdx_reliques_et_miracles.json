@@ -1,0 +1,31 @@
+{
+  "id": "cdx_reliques_et_miracles",
+  "title": "Reliques et miracles locaux",
+  "category": "religion",
+  "aliases": [
+    "reliques miraculeuses",
+    "invention de reliques",
+    "châsse",
+    "miracle",
+    "miracles",
+    "culte local"
+  ],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Un ossement trouvé sous un autel peut lancer un culte local : les fidèles affluent, les offrandes s'accumulent, et l'évêque doit décider s'il y a sainteté ou superstition.",
+  "body": "La relique, corps ou objet d'un saint, est au centre de la piété médiévale. Elle protège, guérit, attire les pèlerins et enrichit le sanctuaire qui la conserve : les offrandes financent des reconstructions, et les foires associées à la fête du saint font prospérer la ville. Les corps se vendent, s'échangent et se volent, au point que le cas du transfert illicite, la « translation furtive », est un genre littéraire.\n\nAu XIIIe siècle, l'Église encadre ces cultes : le concile de Latran IV (1215) interdit de vénérer de nouvelles reliques sans l'approbation du pape, et la canonisation devient une procédure pontificale. Dans les faits, les cultes locaux naissent régulièrement ; l'évêque envoie des enquêteurs, consigne les miracles et accepte ou interdit. Les reliques douteuses suscitent des railleries, y compris de clercs.\n\nPour le seigneur, soutenir un culte rapporte prestige et revenus, mais l'imposture dévoilée ou le désordre d'un rassemblement pèsent sur son crédit.",
+  "gameplay": "Événement aléatoire de province, avec une scène de fête : faire bâtir un reliquaire, faire examiner la relique par l'évêque ou interdire le culte jusqu'à preuve. Voir [[cdx_reliques]] et [[cdx_pelerinage]].",
+  "entity": "evt_reliques_miraculeuses",
+  "see_also": [
+    "cdx_reliques",
+    "cdx_pelerinage",
+    "cdx_fetes_chretiennes"
+  ],
+  "sources": [
+    "Relique",
+    "Canonisation",
+    "Furta sacra"
+  ]
+}

@@ -304,7 +304,10 @@ func pin_native_tooltip() -> bool:
 	window.hide()
 	var entry := RichTooltip.title_entry(RichTooltip.last_bbcode)
 	var hovered := get_viewport().gui_get_hovered_control()
-	var view := _detailed_view(_tooltip_at(hovered, hovered.get_local_mouse_position()) if hovered != null else "")
+	var view: Control = null
+	if hovered != null:
+		var local_pos := hovered.get_local_mouse_position()
+		view = _detailed_view(_tooltip_at(hovered, local_pos), _tooltip_source(hovered, local_pos))
 	if view != null:
 		open_view(view, at, entry)
 	else:
@@ -330,7 +333,7 @@ func pin_control_tooltip(control: Control, local_pos: Vector2 = Vector2.ZERO) ->
 		return false
 	var at := _hide_native_tooltips()
 	var formatted := CodexText.format(text, true)
-	var view := _detailed_view(text)
+	var view := _detailed_view(text, _tooltip_source(control, local_pos))
 	if view != null:
 		open_view(view, at, RichTooltip.title_entry(formatted))
 	else:
@@ -353,16 +356,37 @@ func _tooltip_at(control: Control, local_pos: Vector2) -> String:
 	return text
 
 
-## IB3 : version détaillée d'une infobulle (`TooltipView.build(RichTooltip.spec_for(text),
-## true)`) quand IB1 fournit `RichTooltip.spec_for` ; null sinon (repli BBCode).
-func _detailed_view(text: String) -> Control:
-	if text.strip_edges() == "":
+## Contrôle qui porte l'infobulle vue au point `local_pos` de `control` (lui-même ou le parent
+## auquel Godot remonte) ; null si aucun.
+func _tooltip_source(control: Control, local_pos: Vector2) -> Control:
+	var current := control
+	var pos := local_pos
+	while current != null:
+		if current.get_tooltip(pos) != "":
+			return current
+		if current.mouse_filter == Control.MOUSE_FILTER_STOP or current.top_level:
+			return null
+		pos = current.get_transform() * pos
+		current = current.get_parent() as Control
+	return null
+
+
+## IB3 : version détaillée d'une infobulle (`TooltipView.build(RichTooltip.spec_for(clé, live),
+## true)`) quand IB1 fournit `RichTooltip.spec_for` ; null sinon (repli BBCode). Seule la clé
+## « ib:<kind>:<id> » (première ligne) est passée à `spec_for` : le BBCode de repli qui la suit
+## n'est pas l'id. `source` : contrôle porteur de l'infobulle, dont la donnée `live` est reprise.
+func _detailed_view(text: String, source: Control = null) -> Control:
+	var key := RichTooltip.key_of(text)
+	if key == "":
 		return null
 	var rich: Script = RichTooltip
 	var view_script: Script = TooltipView
 	if not _script_has(rich, "spec_for") or not _script_has(view_script, "build"):
 		return null
-	var spec: Variant = rich.call("spec_for", text)
+	var live: Dictionary = {}
+	if source != null and source.has_meta(RichTooltip.LIVE_META):
+		live = source.get_meta(RichTooltip.LIVE_META)
+	var spec: Variant = rich.call("spec_for", key, live)
 	if not spec is Dictionary or (spec as Dictionary).is_empty():
 		return null
 	var view: Variant = view_script.call("build", spec, true)

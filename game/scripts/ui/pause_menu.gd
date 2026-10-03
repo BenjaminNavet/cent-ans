@@ -45,15 +45,15 @@ func _ready() -> void:
 	var parchment := load("res://scenes/ui/parchment_theme.tres")
 	_menu_panel = PanelContainer.new()
 	_menu_panel.theme = parchment
-	_menu_panel.custom_minimum_size = Vector2(340, 0)
+	_menu_panel.custom_minimum_size = Vector2(240, 0)
 	add_child(_menu_panel)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
+	box.add_theme_constant_override("separation", 3)
 	_menu_panel.add_child(box)
 	var title := Label.new()
 	title.text = "Pause"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UiType.apply(title, UiType.TITLE)
+	UiType.apply(title, UiType.HEADING)
 	box.add_child(title)
 	difficulty_label = Label.new()
 	difficulty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -74,9 +74,11 @@ func _ready() -> void:
 	]:
 		var button := Button.new()
 		button.text = spec[1]
-		UiType.apply(button, UiType.HEADING)
+		# Menu compact (retour joueur 10-03 : fenêtre trop grande) : corps de texte, boutons serrés.
+		UiType.apply(button, UiType.BODY)
 		button.pressed.connect(spec[2])
 		box.add_child(button)
+		_tighten(button)  # après l'ajout : le style lu doit être celui du thème parchemin
 		buttons[spec[0]] = button
 	_build_confirm(parchment)
 	save_dialog = (load(SAVE_DIALOG_SCENE) as PackedScene).instantiate()
@@ -102,6 +104,15 @@ func refresh_difficulty() -> void:
 		difficulty_label.text = ""
 		return
 	difficulty_label.text = "Difficulté : %s" % str(facade.call("difficulty_label", str(facade.call("current_difficulty"))))
+
+
+## Réduit les marges verticales des styles du bouton (le thème parchemin vise les grands panneaux).
+func _tighten(button: Button) -> void:
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var style := button.get_theme_stylebox(state).duplicate() as StyleBox
+		style.content_margin_top = 3
+		style.content_margin_bottom = 3
+		button.add_theme_stylebox_override(state, style)
 
 
 func _build_confirm(parchment: Theme) -> void:

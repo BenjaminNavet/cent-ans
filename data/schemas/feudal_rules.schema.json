@@ -40,6 +40,7 @@
       "additionalProperties": false
     },
     "forfeiture_win_war_score": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Score de guerre du suzerain contre le félon, à la paix, nécessaire pour saisir les titres commis (§ 4.4)." },
+    "collateral_line_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Chance (%) qu'un fief dynastique dont la lignée directe s'éteint, sans parent dans une autre faction, passe à une branche cadette de la maison au lieu de faire retour au suzerain (LR-05). 0 : déshérence systématique." },
     "title_loss_penalty": { "type": "integer", "minimum": 0, "description": "Valeur, en points de négociation, d'un titre exigé dans un traité, en plus de ses provinces (§ 4.6)." },
     "arbitration": {
       "type": "object",

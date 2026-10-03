@@ -10,16 +10,16 @@
   "mercenary": true,
   "soldiers": 100,
   "cost": {
-    "money": 700
+    "money": 660
   },
-  "upkeep": 65,
+  "upkeep": 60,
   "recruit_time_turns": 1,
   "stats": {
     "melee": 58,
     "ranged": 0,
     "range": 0,
     "armor": 55,
-    "morale": 58,
+    "morale": 60,
     "speed": 42,
     "ammo": 0
   },

@@ -524,8 +524,12 @@ F1 : ne part que programmé par `schedule_event`), `trigger`,
   `capture_character {id, faction?, captor}`, `release_character {id, faction?, ransom?}` (rançon versée
   au geôlier), `schedule_event {event, delay}` (l'événement part `delay` tours plus tard pour la même
   faction et province, conditions vérifiées alors), `marry {a, b}` (mariage historique) ; G1 :
-  `transfer_province {province, faction?, from?}` (propriété et contrôle ; `from` doit la tenir ; jamais
-  une capitale).
+  `transfer_province {province, faction?, from?, price?, payer?}` (propriété et contrôle ; `from` doit la
+  tenir ; jamais une capitale ; LR-17 : `price` versé par `payer`, défaut l'acquéreur, à l'ancien
+  propriétaire) ; LR-17 : `transfer_title {title, faction?, from?, price?, payer?}` (vente ou cession d'un
+  titre et de ses provinces, capitale comprise ; vendeur sans titre absorbé ; prix au vendeur s'il
+  subsiste, sinon hors carte), `set_ruler {character, faction?}` (usurpation ou élection : l'ancien
+  souverain vit, héritier recalculé).
 
 **Chargement.** Erreur (`DataError::InvalidEvent`) : 0 ou plus de 3 options, historique sans `date`,
 aléatoire sans `mean_time_to_happen`/`chance_permille`, `mean_time_to_happen` nul, `schedule_event` de

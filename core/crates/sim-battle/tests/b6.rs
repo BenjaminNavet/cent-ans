@@ -195,6 +195,9 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// IA night (the attacker's horse under the arrows waits behind its foot,
 /// not ahead of it): seed 3 stays French (227 s), seed 11 goes back to the
 /// English (317 s); over seeds 0-63 the French win 62/64 instead of 57/64.
+/// RJ-a (ADR 0174, progressive change of formation, horse detours ride
+/// 25 m out past a hedge): seed 3 stays French (203 s), seed 11 goes to
+/// the French (230 s).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [

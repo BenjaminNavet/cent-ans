@@ -88,6 +88,35 @@ func _check_pure() -> void:
 	_check(not bool(state["skirmish"]["on"]) and bool(state["skirmish"]["able"]), "skirmish available, off")
 	_check(not bool(state["breach"]["able"]), "no engine: breach greyed")
 
+	# RJ-a : état on/off des boutons d'ordre, cycle T, menu et infobulle des formations.
+	var orders := [
+		{"id": 1, "present": true, "can_shoot": true, "fire_at_will": true, "formation": "herse", "formation_short": "Herse", "formations": PackedStringArray(["line", "column", "thin_line", "herse"]), "reforming": true, "reform_progress": 0.4},
+		{"id": 2, "present": true, "can_shoot": false, "fire_at_will": false, "formation": "line", "formation_short": "Ligne", "formations": PackedStringArray(["line", "column", "square"])},
+		{"id": 3, "present": true, "can_shoot": true, "fire_at_will": false, "formation": "line", "formation_short": "Ligne", "formations": PackedStringArray(["line", "column", "herse"])},
+	]
+	var buttons := BattleHud.command_button_state(orders, [1, 2])
+	_check(bool(buttons["fire_at_will"]["on"]) and bool(buttons["fire_at_will"]["able"]), "fire at will shown on (every chosen shooter)")
+	_check(bool(buttons["formation"]["on"]) and is_equal_approx(float(buttons["formation"]["progress"]), 0.4), "formation shown on while reforming (%s)" % [buttons])
+	_check(str(buttons["formation"]["label"]) == "", "mixed formations: no common label")
+	buttons = BattleHud.command_button_state(orders, [2, 3])
+	_check(not bool(buttons["fire_at_will"]["on"]) and not bool(buttons["formation"]["on"]), "held fire, default line: both off (%s)" % [buttons])
+	_check(str(buttons["formation"]["label"]) == "Ligne", "common formation label")
+	_check(not bool(BattleHud.command_button_state(orders, [2])["fire_at_will"]["able"]), "no shooter: fire at will greyed")
+	_check(BattleInput.next_formation(orders[1]) == "column" and BattleInput.next_formation(orders[0]) == "line", "T cycles the allowed formations")
+	_check(BattleInput.next_formation({"formation": "line", "formations": PackedStringArray(["line"])}) == "", "a single formation: no order")
+	var core: Object = ClassDB.instantiate("BattleSim") if ClassDB.class_exists("BattleSim") else null
+	var catalog: Array = core.call("unit_formations") if core != null else []
+	_check(catalog.size() >= 8, "core formation catalogue (%d)" % catalog.size())
+	var menu := BattleFormationMenu.menu_state(catalog, orders, [1, 3])
+	_check(bool(menu.get("herse", {}).get("able", false)) and not bool(menu.get("herse", {}).get("current", true)), "herse able, not common (%s)" % [menu.get("herse")])
+	_check(not bool(menu.get("wedge", {}).get("able", true)), "no rider: wedge greyed")
+	for entry in catalog:
+		if str(entry["key"]) == "square":
+			var spec := RichTooltip.spec_for(RichTooltip.tooltip_key("formation", "square", ""), BattleFormationMenu.tooltip_live(entry, core.call("formation_reform_rules")))
+			_check(str(spec.get("title", "")) == "Schiltron" and (spec.get("effects", []) as Array).size() >= 4, "schiltron tooltip: name, history and effects (%s)" % [spec.get("effects")])
+	if core is Node:
+		(core as Node).free()
+
 	var base := {"state": "idle", "fatigue": 0.0}
 	var badges := BattleUnitMarkers.state_badges(base.merged({"wavering": true, "under_fire": true, "charging": true, "guard": true}))
 	_check(badges == ["wavering", "under_fire", "charge"], "priority and cap of three (%s)" % [badges])

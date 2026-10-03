@@ -1,0 +1,77 @@
+{
+  "id": "evt_election_d_osel_wiek",
+  "title": "L'élection de Hapsal",
+  "text": "L'épiscopat de Jakob II s'achève. Le chapitre d'Ösel-Wiek élit Hermann Osenbrügge, qui doit tenir l'évêché entre les vassaux de la Wiek et l'ordre Livonien, maître d'une commanderie sur Ösel.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1338,
+      "season": "spring"
+    },
+    "until_year": 1339,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_osel_wiek"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_osel_wiek",
+        "character": "chr_jakob_ii_d_osel_wiek"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_hermann_ii_osenbrugge"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_osel_wiek"
+  },
+  "options": [
+    {
+      "text": "Confirmer l'élu du chapitre",
+      "effects": [
+        {
+          "type": "set_ruler",
+          "character": "chr_hermann_ii_osenbrugge"
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_livonian_order",
+          "amount": -5,
+          "reason": "Évêque élu sans l'Ordre"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Laisser le vieil évêque achever son temps",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "prov_osel_wiek",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1338",
+    "uncertain": true
+  },
+  "sources": [
+    "Évêché d'Ösel-Wiek",
+    "Liste des évêques d'Ösel-Wiek"
+  ]
+}

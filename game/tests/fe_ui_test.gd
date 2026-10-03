@@ -353,7 +353,13 @@ func _test_faction_chooser() -> void:
 	await process_frame
 	_check(picker.size.x > 100 and picker.provinces.size() > 100, "map picker laid out with provinces")
 	var framed := picker.playable_bounds()
-	_check(framed.size.x < 4096.0 * 0.9, "map picker framed on the playable lands: %s" % framed)
+	# Depuis OM (ADR 0115), les factions jouables couvrent presque toute la carte : le cadrage se
+	# juge contre l'emprise réelle des terres jouables (+ marge), pas contre une fraction fixe.
+	var lands := _playable_lands(picker)
+	var margin := picker.FRAME_MARGIN * 2.0 + 0.01
+	_check(lands.has_area() and framed.encloses(lands) and framed.size.x <= lands.size.x * (1.0 + margin)
+		and framed.size.y <= lands.size.y * (1.0 + margin),
+		"map picker framed on the playable lands: %s (lands %s)" % [framed, lands])
 	_check(not picker.kingdoms().is_empty() and select.kingdom_filter.item_count == picker.kingdoms().size() + 1, "kingdom filter filled")
 	var center := picker.faction_center("fac_foix_bearn")
 	_check(picker.faction_at(center) == "fac_foix_bearn", "Foix-Béarn found under its centre")
@@ -381,3 +387,20 @@ func _find(node: Node, node_name: String) -> Node:
 		if found != null:
 			return found
 	return null
+
+
+## Emprise brute des provinces tenues par une faction jouable et des foyers des sans-terre.
+func _playable_lands(picker) -> Rect2:
+	var bounds := Rect2()
+	var first := true
+	for province in picker.provinces:
+		if not picker.sheets.has(str(province["owner"])):
+			continue
+		for polygon in province["polygons"]:
+			for point in polygon:
+				bounds = Rect2(point, Vector2.ZERO) if first else bounds.expand(point)
+				first = false
+	for id in picker.landless:
+		bounds = Rect2(picker.landless[id], Vector2.ZERO) if first else bounds.expand(picker.landless[id])
+		first = false
+	return bounds

@@ -90,7 +90,8 @@
         "truce_binds_allies": {"type": "boolean", "description": "Une paix met aussi fin aux guerres des alliés et vassaux entrés dans ce conflit : ils signent la même trêve (trêve de Leulinghem, 1389, qui liait l'Écosse)."},
         "long_war_years": {"type": "integer", "minimum": 0, "description": "EQ6 (ADR 0085) : au-delà de ce nombre d'années de guerre, les deux camps, vainqueur compris, penchent vers un traité qui y met fin (« Guerre interminable ») : une guerre que personne ne gagne finit en trêve (Brétigny, Leulinghem). 0 : désactivé."},
         "long_war_points_per_year": {"type": "integer", "minimum": 0, "description": "EQ6 : points de traité en faveur de la paix par année de guerre au-delà de long_war_years."},
-        "long_war_max_points": {"type": "integer", "minimum": 0, "description": "EQ6 : plafond de ces points."}
+        "long_war_max_points": {"type": "integer", "minimum": 0, "description": "EQ6 : plafond de ces points."},
+        "bastion_war_points": {"type": "integer", "minimum": 0, "description": "LR-11 : points de traité en faveur de la paix, des deux côtés, pour une guerre contre un royaume réduit à ses derniers bastions (jamais assiégés sans prétention, F4) qui dure depuis min_war_turns sans vainqueur net (« Guerre sans enjeu »). 0 : désactivé."}
       },
       "additionalProperties": false
     },

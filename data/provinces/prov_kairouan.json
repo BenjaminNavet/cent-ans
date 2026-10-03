@@ -45,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 50000,
+        "count": 125000,
         "unrest": 20,
         "health": 55,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 4000,
+        "count": 10000,
         "unrest": 20,
         "health": 52,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1250,
+        "count": 3125,
         "unrest": 15,
         "health": 60,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 600,
+        "count": 1500,
         "unrest": 15,
         "health": 60,
         "wealth": 65,
@@ -74,7 +74,7 @@
       }
     },
     "uncertain": true,
-    "note": "Steppes de la Tunisie centrale : ville sainte de Kairouan, Le Kef, Tébessa. Chiffres estimés (uncertain)."
+    "note": "Steppes de la Tunisie centrale : ville sainte de Kairouan, Le Kef, Tébessa. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market",

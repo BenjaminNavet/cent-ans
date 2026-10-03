@@ -240,6 +240,8 @@ fn transfer_province_hands_over_ownership_and_control() {
         province: dauphine.clone(),
         faction: None,
         from: Some(fac(from)),
+        price: 0,
+        payer: None,
     };
     // `from` must hold it: England does not.
     apply(&mut state, &data, "fac_france", transfer("fac_england"));
@@ -257,6 +259,8 @@ fn transfer_province_hands_over_ownership_and_control() {
         province: paris.clone(),
         faction: Some(fac("fac_england")),
         from: None,
+        price: 0,
+        payer: None,
     };
     apply(&mut state, &data, "fac_france", seize);
     assert_eq!(state.province_owner(&paris), Some(&fac("fac_france")));

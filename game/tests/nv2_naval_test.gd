@@ -13,6 +13,12 @@ var _failures: int = 0
 
 func _init() -> void:
 	await process_frame
+	# Réglages par défaut : la mise en page du bandeau suit l'échelle d'interface, qui ne doit pas
+	# dépendre de la « Taille de l'interface » choisie dans le `settings.cfg` du joueur.
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("_apply_ui_scale")
 	await _run_hud()
 	await _run_materials()
 	_run_campaign()
@@ -59,7 +65,7 @@ func _run_hud() -> void:
 		var used := columns * (width + 5.0) - 5.0
 		var label := "%d×%d, %d navires" % [screen.x, screen.y, count]
 		if count <= 8 and screen.x >= 1920:
-			_check(not bool(layout["compact"]) and columns == count, "%s : cartes pleines sur une ligne" % label)
+			_check(not bool(layout["compact"]) and columns == count, "%s : cartes pleines sur une ligne (%s)" % [label, layout])
 		elif count <= 14:
 			_check(bool(layout["compact"]) and columns == ceili(count / 2.0), "%s : cartes compactes sur deux lignes (%d colonnes)" % [label, columns])
 			_check(used <= float(layout["strip_width"]) + 0.5 and not bool(layout["scroll"]), "%s : le bandeau tient dans l'écran (%d px sur %d)" % [label, int(used), int(layout["strip_width"])])

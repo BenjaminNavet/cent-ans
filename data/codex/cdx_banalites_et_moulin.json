@@ -1,0 +1,29 @@
+{
+  "id": "cdx_banalites_et_moulin",
+  "title": "Le moulin banal et la mouture",
+  "category": "economie",
+  "aliases": [
+    "banalité du moulin",
+    "moulin à bras",
+    "moulins à bras"
+  ],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Le seigneur impose à ses paysans de faire moudre leur grain à son moulin contre une part de farine. Cette banalité, source de revenus, suscite plaintes et fraudes, notamment le recours aux petites meules à bras.",
+  "body": "Parmi les banalités, droits que le seigneur exerce par son pouvoir de ban, figurent le four, le pressoir et surtout le moulin à eau (voir [[cdx_moulin_a_eau]] et [[cdx_four_banal]]). L'investissement est coûteux, la roue, l'écluse et la meule exigent un entretien constant ; en échange, le seigneur se réserve le monopole. Le meunier prélève sa « mouture », une fraction du grain, de l'ordre du seizième au douzième, et passe pour s'enrichir aux dépens des paysans, d'où sa mauvaise réputation dans la littérature.\n\nLes paysans cherchent à échapper à la banalité : meules à bras clandestines, moulins éloignés, fraude sur le poids. Les seigneurs répondent par des amendes, des perquisitions, des bris de meules. Les litiges débouchent sur des procès, des transactions ou des révoltes : Marc Bloch voit dans l'histoire du moulin à eau un des grands enjeux des rapports entre seigneurs et communautés.\n\nAprès la peste de 1348, avec la baisse du nombre de paysans, beaucoup de seigneurs doivent baisser les redevances pour garder leurs tenanciers.",
+  "gameplay": "Événement aléatoire de province : baisser la redevance de mouture, faire briser les meules à bras ou faire trancher par la cour du seigneur.",
+  "entity": "evt_moulin_banal_conteste",
+  "see_also": [
+    "cdx_moulin_a_eau",
+    "cdx_four_banal",
+    "cdx_pressoir_banal",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Banalités",
+    "Moulin à eau",
+    "Meunier"
+  ]
+}

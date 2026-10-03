@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/unit_formations_rules.schema.json",
+  "title": "Formations des régiments en bataille",
+  "description": "Fichier data/rules/unit_formations.json (lot RJ-a, ADR 0174) : formations historiques d'un régiment (nom, contexte pour l'infobulle, troupes permises, géométrie, modificateurs) et règles de reformation progressive. Lu par sim-battle (FormationRules).",
+  "type": "object",
+  "$defs": {
+    "factor": { "type": "number", "minimum": 0.05, "maximum": 5 },
+    "ranks": { "type": "integer", "minimum": 1, "maximum": 32 },
+    "formation": {
+      "type": "object",
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Clé stable (commandes, scénarios, replays)." },
+        "name": { "type": "string", "minLength": 1, "description": "Nom historique (infobulle, menu)." },
+        "short": { "type": "string", "minLength": 1, "maxLength": 12, "description": "Libellé court (bouton, carte d'unité)." },
+        "description": { "type": "string", "minLength": 40, "description": "Contexte historique pour l'infobulle ; dire quand l'usage est débattu." },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["infantry", "ranged", "cavalry", "siege"] },
+          "description": "Catégories d'unités permises."
+        },
+        "foot_only": { "type": "boolean", "description": "Refusée aux régiments montés." },
+        "mounted_only": { "type": "boolean", "description": "Refusée aux régiments à pied (dont les cavaliers démontés)." },
+        "shape": { "enum": ["line", "column", "square", "wedge", "herse"], "description": "Forme : front droit (ligne ou bloc), colonne, carré sans flanc, coin, herse (rangs en quinconce)." },
+        "ranks": {
+          "type": "object",
+          "properties": {
+            "infantry": { "$ref": "#/$defs/ranks" },
+            "ranged": { "$ref": "#/$defs/ranks" },
+            "cavalry": { "$ref": "#/$defs/ranks", "description": "Régiments montés (tireurs montés compris)." },
+            "siege": { "$ref": "#/$defs/ranks" }
+          },
+          "additionalProperties": false,
+          "description": "Rangs des formes ligne et herse par classe."
+        },
+        "files": {
+          "type": "object",
+          "properties": {
+            "foot": { "$ref": "#/$defs/ranks" },
+            "mounted": { "$ref": "#/$defs/ranks" }
+          },
+          "required": ["foot", "mounted"],
+          "additionalProperties": false,
+          "description": "Files d'une colonne."
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "lateral": { "$ref": "#/$defs/factor" },
+            "depth": { "$ref": "#/$defs/factor" }
+          },
+          "additionalProperties": false,
+          "description": "Multiplicateurs de l'espacement de base entre les hommes."
+        },
+        "modifiers": {
+          "type": "object",
+          "properties": {
+            "speed": { "$ref": "#/$defs/factor", "description": "Allure." },
+            "charge": { "$ref": "#/$defs/factor", "description": "Bonus et poids de la charge." },
+            "melee_taken": { "$ref": "#/$defs/factor", "description": "Dégâts subis en mêlée." },
+            "missile_taken": { "$ref": "#/$defs/factor", "description": "Pertes subies sous le tir." },
+            "shooting": { "$ref": "#/$defs/factor", "description": "Pertes infligées par son tir." },
+            "morale_loss": { "$ref": "#/$defs/factor", "description": "Moral perdu avec les pertes." },
+            "push_drive": { "$ref": "#/$defs/factor", "description": "Poussée exercée en mêlée." },
+            "push_resistance": { "$ref": "#/$defs/factor", "description": "Poussée encaissée en mêlée." },
+            "horse_blows": { "$ref": "#/$defs/factor", "description": "Coups des cavaliers contre elle (formations « braced » seulement)." },
+            "fighting_ranks": { "type": "number", "minimum": 1, "maximum": 8, "description": "Hommes qui combattent par file du front (2 par défaut)." }
+          },
+          "additionalProperties": false
+        },
+        "all_round": { "type": "boolean", "description": "Ni flanc ni dos : tout coup porte de face." },
+        "braced": { "type": "boolean", "description": "Hérissée contre la cavalerie : personne renversé, pas de choc au moral, la cavalerie évite de la charger." },
+        "road_march": { "type": "boolean", "description": "Profite du bonus de route (battle_water.json, road_column)." },
+        "width_adjustable": { "type": "boolean", "description": "Un glisser-droit règle sa largeur sans quitter la formation (forme ligne seulement)." },
+        "ai_role": { "enum": ["default", "march", "anti_cavalry", "charge"], "description": "Usage par l'IA de bataille." },
+        "reform_s": { "type": "number", "minimum": 0, "maximum": 120, "description": "Secondes de base pour prendre cette formation." }
+      },
+      "required": ["key", "name", "short", "description", "categories", "shape", "reform_s"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default": { "type": "string", "description": "Formation de départ de tout régiment ; doit permettre toutes les troupes." },
+    "reform": {
+      "type": "object",
+      "properties": {
+        "size_reference": { "type": "number", "minimum": 1, "description": "Effectif pour lequel reform_s vaut tel quel." },
+        "size_exponent": { "type": "number", "minimum": 0, "maximum": 2 },
+        "size_min": { "$ref": "#/$defs/factor" },
+        "size_max": { "$ref": "#/$defs/factor" },
+        "experience_step": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Durée × (1 − pas × expérience)." },
+        "experience_min": { "$ref": "#/$defs/factor" },
+        "walk_mps": {
+          "type": "object",
+          "properties": {
+            "foot": { "type": "number", "minimum": 0.1, "maximum": 10 },
+            "mounted": { "type": "number", "minimum": 0.1, "maximum": 20 }
+          },
+          "required": ["foot", "mounted"],
+          "additionalProperties": false,
+          "description": "Pas des hommes vers leur nouvelle place (relevé s'il faut arriver à temps)."
+        },
+        "speed": { "$ref": "#/$defs/factor", "description": "Allure pendant la reformation." },
+        "melee_taken": { "$ref": "#/$defs/factor" },
+        "missile_taken": { "$ref": "#/$defs/factor" },
+        "morale_loss": { "$ref": "#/$defs/factor" }
+      },
+      "required": ["size_reference", "size_exponent", "size_min", "size_max", "experience_step", "experience_min", "walk_mps", "speed", "melee_taken", "missile_taken", "morale_loss"],
+      "additionalProperties": false
+    },
+    "formations": { "type": "array", "minItems": 1, "maxItems": 255, "items": { "$ref": "#/$defs/formation" } }
+  },
+  "required": ["default", "reform", "formations"],
+  "additionalProperties": false
+}

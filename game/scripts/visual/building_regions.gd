@@ -6,6 +6,7 @@ extends RefCounted
 ## champ `region`) : part des maisons à colombage (`framed`, 0..1) et variantes du Midi
 ## (`southern` : enduit ou pierre, tuiles canal, faible pente). Normandie, Île-de-France, Picardie,
 ## Flandre, Angleterre : colombage courant ; Guyenne, Languedoc, Provence : pierre et enduit.
+## `provinces` : exceptions par province, prioritaires sur la région (ex. Lorraine en pierre).
 ## Purement visuel ; lu une fois, sans repli chiffré (fichier absent : style vide = choix d'avant).
 
 const DATA_FILE := "art/building_regions.json"
@@ -67,4 +68,7 @@ static func style_for_region(region: String) -> Dictionary:
 static func style_for_province(province_id: String) -> Dictionary:
 	if province_id == "":
 		return {}
+	var overrides: Dictionary = document().get("provinces", {})
+	if overrides.has(province_id):
+		return overrides[province_id]
 	return style_for_region(region_of(province_id))

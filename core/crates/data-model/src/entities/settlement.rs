@@ -220,7 +220,11 @@ pub struct SettlementRules {
 /// `max_deficit_percent` % of them starts with lighter garrisons: the
 /// costliest garrison units are sent home, never a settlement's last one nor
 /// the capital's (the idle hoard's share of the court is not counted: it
-/// melts with the treasury).
+/// melts with the treasury). Lot LR-15: when the garrisons are down to that
+/// floor and the deficit remains, the costliest units of its starting field
+/// armies go home too, down to `min_field_units` (absent: the field armies
+/// are left whole); and last the costliest of the capital's garrison, down
+/// to `min_capital_units` (absent: the capital's garrison is left whole).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct StartingBudget {
@@ -232,6 +236,10 @@ pub struct StartingBudget {
     /// stays); absent: no cap.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub treasury_max_income_seasons: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_field_units: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_capital_units: Option<usize>,
 }
 
 /// Household guard of a faction's capital city (lot OMR R3, ADR 0117,

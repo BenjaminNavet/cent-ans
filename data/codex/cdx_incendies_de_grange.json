@@ -1,0 +1,29 @@
+{
+  "id": "cdx_incendies_de_grange",
+  "title": "Les incendies de granges et de récoltes",
+  "category": "vie_quotidienne",
+  "aliases": [
+    "incendie de grange",
+    "grange dîmière",
+    "grange à dîme",
+    "feu de grange"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Granges, greniers et meules sont de bois et de chaume. Un incendie ruine en une nuit le travail d'une année et peut dresser une paroisse contre son seigneur, soupçonné d'avoir négligé la garde ou provoqué le feu.",
+  "body": "Une grange médiévale est une grande charpente couverte de chaume ou de bardeaux, où l'on entasse gerbes, foin et outils. La grange dîmière sert à entreposer la part de récolte due à l'Église ; les granges seigneuriales stockent les redevances en nature. Une étincelle, une lanterne, la foudre ou une main malveillante suffisent pour qu'un bâtiment brûle avec toute sa récolte.\n\nL'incendie volontaire est un crime grave, parfois puni du bûcher, et un moyen de vengeance fréquent : en temps de guerre, il est aussi une arme, car les troupes brûlent les récoltes pour affamer l'adversaire. En temps de paix, la perte d'un grenier collectif entraîne des procès entre le seigneur, qui réclame ses redevances, et les paysans, qui n'ont plus rien à payer.\n\nLes secours reposent sur la solidarité locale et sur la charité du seigneur : prêt de grain pour les semailles, remise de redevances, aide à la reconstruction. Faute de quoi, la disette suit.",
+  "gameplay": "Événement aléatoire de province : secourir les sinistrés, rechercher l'incendiaire ou faire payer la reconstruction aux paroissiens. Voir [[cdx_jeu_incendies]] et [[cdx_eglise_paroissiale]].",
+  "entity": "evt_feu_de_grange",
+  "see_also": [
+    "cdx_jeu_incendies",
+    "cdx_eglise_paroissiale",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Dîme",
+    "Grange",
+    "Incendie"
+  ]
+}

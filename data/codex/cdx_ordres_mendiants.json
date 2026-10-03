@@ -1,0 +1,33 @@
+{
+  "id": "cdx_ordres_mendiants",
+  "title": "Les ordres mendiants et la quête",
+  "category": "religion",
+  "aliases": [
+    "frères mendiants",
+    "ordres mendiants",
+    "mendiants",
+    "franciscains",
+    "dominicains",
+    "carmes",
+    "augustins",
+    "quête des frères"
+  ],
+  "era": {
+    "from": "1210",
+    "to": "1500"
+  },
+  "summary": "Franciscains, dominicains, carmes et augustins vivent d'aumônes et prêchent dans les villes. Leurs quêteurs parcourent les campagnes, ce qui les rend populaires, mais aussi coûteux et parfois critiqués.",
+  "body": "Au début du XIIIe siècle, François d'Assise et Dominique de Guzmán fondent des communautés qui renoncent à la propriété et vivent de la charité : franciscains (ordre approuvé en 1210), dominicains (1216). Les carmes et les augustins suivent. Contrairement aux moines des abbayes, ils s'installent en ville, prêchent, confessent, enseignent à l'université, et fournissent les inquisiteurs et les confesseurs des princes.\n\nPour vivre, les couvents envoient leurs frères dans une circonscription, la « terminée », collecter vivres et aumônes : on les voit passer, besace au flanc, de ferme en ferme. En échange, ils promettent leurs prières et, parfois, la sépulture dans leur église. Les curés s'en plaignent : les mendiants leur disputent les dons, les obsèques et le droit de prêcher, et la querelle remonte à l'Université de Paris au XIIIe siècle.\n\nÀ la fin du Moyen Âge, la réputation des mendiants se ternit : Chaucer et Boccace se moquent des frères avides, et les observants, au XVe siècle, réclament le retour à la règle primitive.",
+  "gameplay": "Événement aléatoire de province : ouvrir la bourse du seigneur, laisser les frères quêter chez les seuls habitants, ou les renvoyer. Le geste pèse sur la piété et sur le trésor.",
+  "entity": "evt_moines_quetes",
+  "see_also": [
+    "cdx_eglise_paroissiale",
+    "cdx_trois_ordres",
+    "cdx_hotel_dieu"
+  ],
+  "sources": [
+    "Ordres mendiants",
+    "Ordre des Frères mineurs",
+    "Ordre des Prêcheurs"
+  ]
+}

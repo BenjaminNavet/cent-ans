@@ -749,6 +749,22 @@ fn context_reasons(
                     (beyond * rules.long_war_points_per_year).min(rules.long_war_max_points),
                 ));
             }
+            // LR-11: a war against a realm down to its last bastions, which
+            // the other side never besieges without a claim (F4), has nothing
+            // left to fight for once the campaign seasons are over.
+            let lasted = rec
+                .war_started
+                .get(proposer)
+                .is_some_and(|started| state.turn >= started + rules.min_war_turns);
+            if rules.bastion_war_points > 0
+                && lasted
+                && bastion_stalemate(state, data, recipient, proposer)
+            {
+                reasons.push((
+                    "Guerre sans enjeu : derniers bastions".to_owned(),
+                    rules.bastion_war_points,
+                ));
+            }
             // A pretender does not give up a crown for nothing.
             let gains_land = articles.iter().any(|a| {
                 matches!(
@@ -795,6 +811,36 @@ fn context_reasons(
     reasons.push(("Prudence".to_owned(), -3));
     reasons.retain(|(_, v)| *v != 0);
     reasons
+}
+
+/// A realm down to this many provinces is not besieged there by an enemy
+/// without a claim on them: peace decides its fate (F4, the AI planner's
+/// rule; Scotland survives Edward III).
+pub const LAST_BASTIONS: usize = 2;
+
+/// LR-11: is the war between `a` and `b` a stalemate before last bastions?
+/// One side holds at most [`LAST_BASTIONS`] provinces, the other has no
+/// claim on it (so never besieges them), and neither wins clearly (war
+/// score under `demand_score` either way).
+pub fn bastion_stalemate(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> bool {
+    let held = |f: &FactionId| {
+        state
+            .provinces
+            .keys()
+            .filter(|p| state.holds_province(f, p))
+            .take(LAST_BASTIONS + 1)
+            .count()
+    };
+    let cornered = |small: &FactionId, big: &FactionId| {
+        held(small) <= LAST_BASTIONS && !diplomacy::claim_stakes(state, big, small).any()
+    };
+    (cornered(a, b) || cornered(b, a))
+        && state.war_score(data, a, b).abs() < rules(data).demand_score
 }
 
 /// Value of one article for `recipient`.

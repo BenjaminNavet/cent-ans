@@ -1,0 +1,32 @@
+{
+  "id": "cdx_sources_sacrees",
+  "title": "Sources guérisseuses et dévotions populaires",
+  "category": "religion",
+  "aliases": [
+    "source guérisseuse",
+    "sources guérisseuses",
+    "fontaine miraculeuse",
+    "fontaines sacrées",
+    "source sacrée",
+    "dévotions populaires",
+    "vieux chêne"
+  ],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Fontaines, sources et arbres vénérés sont les héritiers de cultes très anciens que l'Église a christianisés en les rattachant à un saint. Les pèlerins y viennent guérir fièvres et maux d'yeux, sans toujours passer par la messe.",
+  "body": "Dans tout l'Occident, des sources sont réputées guérir : la fièvre, les maladies des yeux, la stérilité. Beaucoup sont placées sous le patronage d'un saint (Notre-Dame, saint Martin, saint Fiacre), et l'Église a souvent bâti une chapelle ou une croix à proximité pour en prendre le contrôle. Certains arbres, comme le chêne, sont aussi objets de dévotion, ce qui inquiète les clercs, qui y voient des survivances païennes.\n\nLes visiteurs laissent des ex-voto, des chiffons noués aux branches, des pièces de monnaie. Les curés s'en plaignent quand les fidèles préfèrent la source à l'église, ou quand les pratiques tournent à la magie ; les conciles et les synodes diocésains condamnent régulièrement les dévotions « superstitieuses » aux fontaines et aux arbres.\n\nLe seigneur qui encadre le culte (bénédiction, croix, chapelle) gagne la faveur de l'évêque et des fidèles ; celui qui le réprime risque de heurter la population.",
+  "gameplay": "Événement aléatoire de province : faire bénir la source et y dresser une croix, laisser faire ou combler la source. Voir [[cdx_reliques]] et [[cdx_pelerinage]].",
+  "entity": "evt_source_guerisseuse",
+  "see_also": [
+    "cdx_reliques",
+    "cdx_pelerinage",
+    "cdx_eglise_paroissiale"
+  ],
+  "sources": [
+    "Source sacrée",
+    "Culte des sources",
+    "Fontaine miraculeuse"
+  ]
+}

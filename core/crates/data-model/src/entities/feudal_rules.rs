@@ -36,6 +36,10 @@ pub struct FeudalRules {
     /// Treaty value (negotiation points) of a title demanded in a peace,
     /// on top of its provinces (§ 4.6, lot F3).
     pub title_loss_penalty: i32,
+    /// Chance (%) that a dynastic realm whose direct line dies out, with no
+    /// kin in another faction, passes to a cadet branch of the house instead
+    /// of escheating to its liege (LR-05). `0`: always escheats.
+    pub collateral_line_percent: u32,
     /// How a suzerain arbitrates a contested succession (§ 4.5, lot F3).
     pub arbitration: ArbitrationWeights,
     /// War escalation and private war (§ 4.3, lot F2).
@@ -106,6 +110,7 @@ impl Default for FeudalRules {
             loyalty: LoyaltyWeights::default(),
             forfeiture_win_war_score: 10,
             title_loss_penalty: 30,
+            collateral_line_percent: 0,
             arbitration: ArbitrationWeights::default(),
             escalation: EscalationRules::default(),
             host: HostRules::default(),

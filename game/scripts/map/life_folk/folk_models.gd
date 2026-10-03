@@ -18,6 +18,8 @@ extends RefCounted
 ##   Emplacements des figurines autour d'un accessoire : `slots` du manifeste (`slot`).
 
 const PROP_SHADER := preload("res://shaders/folk_prop.gdshader")
+## LR-18 : nappe de crue translucide (matériau propre, bord adouci).
+const FLOOD_SHADER := preload("res://shaders/folk_flood.gdshader")
 
 ## Rôle → candidats [famille, variante] (ordre de préférence), livrée et couleurs des habits.
 const ROLES := {
@@ -288,8 +290,7 @@ static func _fallback_mesh(kind: String) -> ArrayMesh:
 			_box(st, Vector3(0, 1.6, 0), Vector3(0.08, 3.2, 0.08), wood)
 			_box(st, Vector3(0, 2.8, 0), Vector3(0.06, 0.8, 0.8), Color(0.75, 0.62, 0.3))
 		"water":
-			# Nappe de crue (30 m, eau boueuse), à peine au-dessus du sol.
-			_box(st, Vector3(0, 0.06, 0), Vector3(30.0, 0.12, 30.0), Color(0.3, 0.38, 0.4))
+			return _flood_mesh()
 		"cow":
 			_box(st, Vector3(0, 1.0, 0), Vector3(0.8, 0.8, 1.9), Color(0.5, 0.33, 0.2))
 			_box(st, Vector3(0, 1.2, 1.15), Vector3(0.4, 0.4, 0.5), Color(0.45, 0.3, 0.18))
@@ -298,6 +299,48 @@ static func _fallback_mesh(kind: String) -> ArrayMesh:
 			_box(st, Vector3(0, 0.5, 0), Vector3(1, 1, 1), wood)
 	var mesh := st.commit()
 	mesh.surface_set_material(0, _prop_material(null, true))
+	return mesh
+
+
+## LR-18 : disque de crue (rayon moyen 15 m, contour irrégulier), alpha de sommet 1 au centre et
+## 0 au bord ; posé 0,3 m au-dessus du point d'eau, le relief plus haut le coupe (et le shader
+## efface la frange à l'affleurement).
+static func _flood_mesh() -> ArrayMesh:
+	const SEGMENTS := 28
+	const RINGS := 4
+	const RADIUS := 15.0
+	var verts := PackedVector3Array([Vector3(0, 0.3, 0)])
+	var colors := PackedColorArray([Color(1, 1, 1, 1)])
+	var normals := PackedVector3Array([Vector3.UP])
+	for ring in range(1, RINGS + 1):
+		var t := float(ring) / float(RINGS)
+		for i in SEGMENTS:
+			var a := TAU * float(i) / float(SEGMENTS)
+			var wobble := 0.78 + 0.22 * sin(a * 3.0 + 1.3) * cos(a * 5.0) + 0.1 * sin(a * 7.0 + 0.4)
+			var r := RADIUS * t * wobble
+			verts.append(Vector3(cos(a) * r, 0.3, sin(a) * r))
+			colors.append(Color(1, 1, 1, 1.0 - t * t))
+			normals.append(Vector3.UP)
+	var indices := PackedInt32Array()
+	for i in SEGMENTS:
+		indices.append_array([0, 1 + (i + 1) % SEGMENTS, 1 + i])
+	for ring in range(1, RINGS):
+		var inner := 1 + (ring - 1) * SEGMENTS
+		var outer := 1 + ring * SEGMENTS
+		for i in SEGMENTS:
+			var j := (i + 1) % SEGMENTS
+			indices.append_array([inner + i, inner + j, outer + i, inner + j, outer + j, outer + i])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var material := ShaderMaterial.new()
+	material.shader = FLOOD_SHADER
+	mesh.surface_set_material(0, material)
 	return mesh
 
 

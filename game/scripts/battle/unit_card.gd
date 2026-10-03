@@ -371,7 +371,10 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 		warnings.append("Épuisée")
 	if bool(unit["can_shoot"]):
 		effects.append({"text": "Munitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"], "sign": 0})
-	var formation := "Formation : %s" % formation_label(str(unit["formation"]))
+	# RJ-a : nom historique de la formation (cœur), reformation en cours.
+	var formation := "Formation : %s" % str(unit.get("formation_name", formation_label(str(unit["formation"]))))
+	if bool(unit.get("reforming", false)):
+		formation += " (reformation : %d %%)" % roundi(float(unit.get("reform_progress", 0.0)) * 100.0)
 	var modes := BattleModeIcons.active_modes(unit)
 	if not modes.is_empty():
 		var names: PackedStringArray = []

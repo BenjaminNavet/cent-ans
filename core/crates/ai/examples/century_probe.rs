@@ -17,7 +17,8 @@
 //! events and unexplained treasury moves every turn; `TRESPASS_TRACE=1`
 //! lists the armies standing on foreign lands without right of passage;
 //! `DEBUG_ARMY=army_0012` prints that army's orders (and, for France, their
-//! result).
+//! result). `DEATH_TRACE=1` prints every faction that vanishes, with the turn
+//! and the cause (LR-05).
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
@@ -935,6 +936,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     // without right of passage at the end of each turn.
     let trespass_trace = std::env::var("TRESPASS_TRACE").is_ok();
     let war_trace = std::env::var("WAR_TRACE").is_ok();
+    let death_trace = std::env::var("DEATH_TRACE").is_ok();
     let debug_army = std::env::var("DEBUG_ARMY").ok();
     let econ_trace = std::env::var("ECON_TRACE").ok().map(|f| id(&f));
     for _ in 0..turns {
@@ -1100,7 +1102,16 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 EventKind::ArmyDestroyed if event.text_fr.contains("se disperse") => {
                     report.eq4.retreat_dispersed += 1;
                 }
-                EventKind::FactionDestroyed => report.destroyed += 1,
+                EventKind::FactionDestroyed => {
+                    report.destroyed += 1;
+                    // LR-05: `DEATH_TRACE=1` lists every vanished faction and how
+                    // (« n'a plus de titre » = absorbed by succession or escheat,
+                    // « disparaît de la carte » = lost its last city and army).
+                    if death_trace {
+                        let year = 1337 + state.turn / 4;
+                        println!("DEATH [{seed}] t{} ({year}) {}", state.turn, event.text_fr);
+                    }
+                }
                 EventKind::WarDeclared if event.text_fr.contains("répond à l'appel") => {
                     report.calls_honoured += 1;
                 }

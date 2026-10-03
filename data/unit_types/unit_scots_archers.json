@@ -10,9 +10,9 @@
   "mercenary": true,
   "soldiers": 100,
   "cost": {
-    "money": 620
+    "money": 680
   },
-  "upkeep": 55,
+  "upkeep": 60,
   "recruit_time_turns": 1,
   "stats": {
     "melee": 42,

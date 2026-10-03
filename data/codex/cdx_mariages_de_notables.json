@@ -1,0 +1,30 @@
+{
+  "id": "cdx_mariages_de_notables",
+  "title": "Les noces de notables",
+  "category": "societe",
+  "aliases": [
+    "noces",
+    "mariage de notables",
+    "noces de notables",
+    "mariage bourgeois",
+    "dot"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Mariage et alliance vont ensemble : on s'unit entre familles pour des terres, de l'argent ou du crédit. Le banquet de noces, auquel le seigneur est attendu, est autant une démonstration de rang qu'une cérémonie.",
+  "body": "Depuis le XIIe siècle, l'Église fait du mariage un sacrement fondé sur le consentement des époux, mais les familles décident encore largement du choix. La dot de la mariée, le douaire promis par l'époux et les contrats notariés règlent les intérêts. Dans la bourgeoisie enrichie, l'union d'un fils de marchand avec la fille d'un chevalier est un moyen d'ascension : l'un apporte l'argent, l'autre la considération et les terres.\n\nLes noces sont une affaire publique. Cortège, messe devant le portail de l'église, banquet de plusieurs services, danses et jeux durent des jours ; les ordonnances somptuaires tentent de limiter le nombre de plats et d'invités. Le seigneur du lieu, par sa présence et ses présents, fait honneur à la famille et rappelle les liens de dépendance.\n\nRefuser d'y paraître peut être pris pour une offense : les chroniques et les registres de comptes montrent que les princes budgètent régulièrement des dons de noces à leurs vassaux et à leurs serviteurs.",
+  "gameplay": "Événement aléatoire de province, avec une scène de fête sur la carte : offrir un banquet et y paraître, envoyer un présent ou ne rien donner. Voir [[cdx_trois_ordres]] et [[cdx_chevalerie]].",
+  "entity": "evt_mariage_de_notables",
+  "see_also": [
+    "cdx_trois_ordres",
+    "cdx_chevalerie",
+    "cdx_fetes_chretiennes"
+  ],
+  "sources": [
+    "Mariage au Moyen Âge",
+    "Dot",
+    "Douaire"
+  ]
+}

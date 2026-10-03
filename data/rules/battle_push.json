@@ -12,7 +12,6 @@
     "min_freshness": 0.4,
     "fatigue_scale": 300,
     "charge_factor": 1.0,
-    "square_factor": 1.6,
     "stakes_factor": 10,
     "pikes_against_horse_factor": 2.5,
     "follow_share": 1.0,

@@ -1,0 +1,33 @@
+{
+  "id": "cdx_ponts_et_bacs",
+  "title": "Ponts, bacs et crues",
+  "category": "batiment",
+  "aliases": [
+    "pont effondré",
+    "pont de bois",
+    "pont de pierre",
+    "bac",
+    "bacs",
+    "passeur",
+    "passeurs",
+    "arche rompue"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Un pont est coûteux à construire et à entretenir, et les crues le menacent chaque printemps. Seigneurs, villes et confréries lèvent des péages pour le réparer ; à défaut, on passe par le gué ou par le bac.",
+  "body": "Au Moyen Âge, la plupart des ponts sont de bois et reposent sur pilotis ; ceux en pierre, plus durables, exigent des fondations dans le lit du fleuve et des avant-becs contre le courant. La charge d'entretien revient au seigneur, à la ville ou à une confrérie de pontifes, comme les frères pontifes qui construisent le pont d'Avignon à la fin du XIIe siècle. Le financement passe par un péage, des indulgences, des legs ou des taxes locales.\n\nLes crues, les glaces et les accidents emportent des arches. Le vieux pont de Paris, le Grand Pont, est emporté plusieurs fois et reconstruit. Tant qu'il n'est pas réparé, on traverse à gué quand le niveau le permet, ou par un bac, qui est lui-même une source de revenus, tenu en fief par un passeur.\n\nLa guerre ajoute les destructions volontaires : on rompt les ponts devant l'ennemi, on les fortifie ou on les prend, et les passages deviennent des positions stratégiques que les armées se disputent (voir [[cdx_ponts_gues]]).",
+  "gameplay": "Événement aléatoire de province, avec une scène de crue : rebâtir le pont en pierre, rétablir un passage de planches ou rétablir un bac contre péage.",
+  "entity": "evt_pont_effondre",
+  "see_also": [
+    "cdx_ponts_gues",
+    "cdx_pont_saint_esprit",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Pont",
+    "Bac (bateau)",
+    "Pont d'Avignon"
+  ]
+}

@@ -109,7 +109,7 @@ pub const DONATION_FAVOR: u8 = 70;
 
 /// A realm down to this many free provinces is not besieged there by an
 /// enemy without a claim on them: peace decides its fate (F4).
-pub const LAST_BASTIONS: usize = 2;
+pub const LAST_BASTIONS: usize = sim_campaign::negotiation::LAST_BASTIONS;
 
 const REBELS: &str = "fac_rebels";
 
@@ -709,7 +709,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Lot C7a: garrisons are a fixed cost of the realm like buildings (a
     // hundred places since the settlements); the share applies to what
     // both leave, and the garrisons are paid on top.
-    let garrisons = garrison_upkeep(ctx).min(ctx.army_upkeep);
+    // LR-04: the capital city's garrison is where recruits muster, not a
+    // fixed cost: counted on top, every recruit kept there raised the target
+    // by as much as it cost, and a county's garrison grew until it ate the
+    // whole net income (no margin left for an event or a war).
+    let garrisons = garrison_upkeep_outside_capital(ctx).min(ctx.army_upkeep);
     let target_upkeep = garrisons
         + ((ctx.income - ctx.building_upkeep - garrisons).max(0) as f64 * share) as i64
         + hoard / HOARD_SPENDING_TURNS;
@@ -728,11 +732,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Recruitment: the capital's city first, then the cities (and castles)
     // of threatened border provinces.
-    let mut sites: Vec<SettlementId> = state
-        .province_city_id(&me.capital)
-        .cloned()
-        .into_iter()
-        .collect();
+    // LR-15: the seat, never another realm's city (cityless faction).
+    let mut sites: Vec<SettlementId> = state.faction_seat(ctx.faction).into_iter().collect();
     let mut borders: Vec<(SettlementId, i64)> = state
         .provinces
         .keys()
@@ -749,7 +750,13 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         })
         .collect();
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
-    sites.extend(borders.into_iter().map(|(id, _)| id));
+    let seat = sites.first().cloned();
+    sites.extend(
+        borders
+            .into_iter()
+            .map(|(id, _)| id)
+            .filter(|id| Some(id) != seat.as_ref()),
+    );
     // JR1: a host that holds no city at all (based in a town of another
     // realm's province) recruits in, and musters from, the places it holds.
     let cityless = !state
@@ -989,6 +996,25 @@ fn garrison_upkeep(ctx: &Context) -> i64 {
         .sum()
 }
 
+/// [`garrison_upkeep`] without the capital city's garrison (LR-04).
+fn garrison_upkeep_outside_capital(ctx: &Context) -> i64 {
+    use sim_campaign::economy::{garrison_share, unit_upkeep};
+    let capital = ctx.state.faction_capital_city(ctx.faction);
+    ctx.state
+        .settlements
+        .iter()
+        .filter(|(id, s)| &s.controller == ctx.faction && capital != Some(*id))
+        .map(|(_, s)| {
+            garrison_share(
+                ctx.data,
+                s.kind,
+                false,
+                s.garrison.iter().map(|u| unit_upkeep(ctx.data, u)),
+            )
+        })
+        .sum()
+}
+
 /// Power per livre of a unit type.
 fn unit_value(data: &GameData, unit_type: &UnitTypeId, cost: u32) -> f64 {
     data.unit_types.get(unit_type).map_or(0.0, |t| {
@@ -1153,7 +1179,8 @@ fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
         Garrison(SettlementId),
     }
     let state = ctx.state;
-    let capital = state.province_city_id(&state.factions[ctx.faction].capital);
+    let seat = state.faction_seat(ctx.faction);
+    let capital = seat.as_ref();
     // (upkeep, is_garrison, holder index, unit index)
     let mut holders: Vec<Holder> = Vec::new();
     let mut candidates: Vec<(i64, bool, usize, usize)> = Vec::new();
@@ -1624,14 +1651,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let enemy_capitals: BTreeSet<SettlementId> = ctx
         .enemies
         .iter()
-        .filter_map(|e| state.factions.get(e))
-        .filter_map(|f| state.province_city_id(&f.capital).cloned())
+        .filter_map(|e| state.faction_capital_city(e).cloned())
         .collect();
-    let my_capital = state
-        .factions
-        .get(ctx.faction)
-        .and_then(|f| state.province_city_id(&f.capital))
-        .cloned();
+    let my_capital = state.faction_seat(ctx.faction);
     let largest = armies.first().map(|(id, p)| (id.clone(), *p));
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();

@@ -48,8 +48,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     }
     // Diplomacy first (M5): peace, alliances, wars change what the armies do.
     let mut orders = crate::diplomacy::plan_diplomacy(state, data, faction);
-    let capital = faction_state.capital.clone();
-    let capital_city = state.province_city_id(&capital).cloned();
+    // LR-15: the seat, never another realm's city (cityless faction).
+    let capital_city = state.faction_seat(faction);
 
     // Research (M6): pick the cheapest available technology when idle.
     if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
@@ -77,10 +77,12 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     }
 
     // Recruit the cheapest affordable unit in the capital's city.
-    if let Some(city) = capital_city
-        .as_ref()
-        .filter(|_| state.holds_province(faction, &capital))
-    {
+    if let Some(city) = capital_city.as_ref().filter(|city| {
+        state
+            .settlements
+            .get(*city)
+            .is_some_and(|s| &s.owner == faction && &s.controller == faction)
+    }) {
         let cheapest = state
             .recruitable(data, city)
             .into_iter()

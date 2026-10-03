@@ -218,6 +218,30 @@ impl CampaignSim {
         demolition_preview_array(state, data, &id, &live.buildings)
     }
 
+    /// LR-08: places lying in ruins after a razing (no recruitment, no
+    /// building): `[{id, name, turns_left}]`, sorted by id. Empty before a
+    /// campaign exists. Drives the ruin sign of the campaign map.
+    #[func]
+    fn get_ruined_places(&self) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        state
+            .captures
+            .ruins
+            .iter()
+            .filter(|(id, until)| **until > state.turn && data.settlements.contains_key(*id))
+            .map(|(id, until)| {
+                vdict! {
+                    "id" => id.as_str(),
+                    "name" => data.settlements[id].name.display.as_str(),
+                    "turns_left" => i64::from(*until - state.turn),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// Settlement ids of a province, the city first then by id (lot C4).
     #[func]
     fn province_settlements(&self, province: GString) -> PackedStringArray {

@@ -1,0 +1,31 @@
+{
+  "id": "cdx_pelerins_et_maladies",
+  "title": "Les pèlerins malades et l'hospitalité",
+  "category": "societe",
+  "aliases": [
+    "pèlerins malades",
+    "hospitalité",
+    "hospices",
+    "hôpitaux de pèlerins",
+    "chemins de Compostelle",
+    "fièvre des pèlerins"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Les routes de pèlerinage voient passer des foules de voyageurs fatigués, parfois malades. Hôpitaux, hospices et confréries les accueillent, tandis que les autorités craignent la contagion.",
+  "body": "Les pèlerins vers Saint-Jacques-de-Compostelle, Rome ou Jérusalem franchissent des centaines de kilomètres à pied et dorment dans des étapes sommaires. Des hôpitaux jalonnent les chemins, tenus par des ordres hospitaliers, des chapitres ou des confréries : Roncevaux, Aubrac, Saint-Jacques-du-Haut-Pas à Paris. L'hospitalité est un devoir chrétien : on y reçoit les voyageurs, on soigne les malades, on enterre les morts.\n\nLe pèlerinage est aussi un vecteur de maladies : fièvres, dysenterie, lèpre, peste. Les villes prennent des mesures de défense quand une épidémie menace ; après 1348, quarantaines et surveillance des portes deviennent fréquentes (voir [[cdx_peste_noire]]). Entre charité et prudence, le seigneur doit choisir : héberger aux frais de la communauté, installer les malades hors les murs ou les renvoyer.\n\nLa guerre complique les choses, car les routes sont moins sûres, et beaucoup de pèlerins se déplacent sous sauf-conduit.",
+  "gameplay": "Événement aléatoire de province : héberger les pèlerins à l'hôpital aux frais du seigneur, les loger hors des murs ou les faire repartir. Voir [[cdx_pelerinage]] et [[cdx_hotel_dieu]].",
+  "entity": "evt_pelerins_malades",
+  "see_also": [
+    "cdx_pelerinage",
+    "cdx_hotel_dieu",
+    "cdx_peste_noire"
+  ],
+  "sources": [
+    "Pèlerinage de Compostelle",
+    "Hôpital (Moyen Âge)",
+    "Chemin de Saint-Jacques-de-Compostelle"
+  ]
+}

@@ -95,6 +95,10 @@ class LakesParams:
     reservoir_radius_px: int = 3
     #: Search radius around a Natural Earth label point.
     name_radius_px: int = 2
+    #: A historical lake sheet is raised to this quantile of the rendered
+    #: heights of its basin, so that most of it shows above the ground
+    #: (heightmap_render.png blends narrow lakes with their banks).
+    historical_display_quantile: float = 0.75
 
 
 @dataclass
@@ -108,6 +112,7 @@ class LakesResult:
     below_sea: int = 0
     not_flat: int = 0
     named: int = 0
+    historical: list[str] = field(default_factory=list)
 
 
 def inland_water_labels(land: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -375,6 +380,79 @@ def extract(
     return lakes, skipped
 
 
+def historical_sheets(
+    land: np.ndarray,
+    heights: np.ndarray,
+    grid: project.MapGrid,
+    entries: list[dict],
+    params: LakesParams,
+) -> list[tuple[dict, np.ndarray]]:
+    """Water sheets of ``historical_lakes.json`` (lot LR-10).
+
+    The basin of a lake with a ``level_m`` is its envelope on the water of the
+    land mask (largest connected part); no flatness test. The level is
+    ``level_m`` raised to :attr:`LakesParams.historical_display_quantile` of
+    the rendered heights of the basin.
+
+    Returns:
+        ``[(record, basin)]``: lake records (empty ``id``) and full-size masks.
+    """
+    from cent_ans_tools.geo import historical_water
+
+    sheets: list[tuple[dict, np.ndarray]] = []
+    for entry in entries:
+        if entry.get("level_m") is None:
+            continue
+        basin = historical_water.envelope_raster(entry, grid) & ~land
+        cores, count = ndimage.label(basin)
+        if count == 0:
+            continue
+        sizes = np.bincount(cores.ravel())
+        sizes[0] = 0
+        basin = cores == int(sizes.argmax())
+        level = max(
+            float(entry["level_m"]),
+            float(np.quantile(heights[basin], params.historical_display_quantile)),
+        )
+        box = ndimage.find_objects(basin.astype(np.int32))[0]
+        crop = basin[box]
+        polygon, islands = outline(crop, params.simplify_px)
+        x0, y0 = box[1].start, box[0].start
+        coords = np.asarray(polygon.exterior.coords)[:-1] + (x0, y0)
+        cy, cx = ndimage.center_of_mass(crop)
+        record = {
+            "id": "",
+            "name": entry["name"],
+            "level_m": round(level, 1),
+            "area_km2": round(float(crop.sum()) * grid.meters_per_px**2 / 1e6, 1),
+            "center_px": [round(cx + x0 + 0.5, 2), round(cy + y0 + 0.5, 2)],
+            "islands": islands,
+            "polygon_px": [[round(x, 2), round(y, 2)] for x, y in coords],
+            "historical": entry["id"],
+        }
+        sheets.append((record, basin))
+    return sheets
+
+
+def merge_historical(
+    lakes: list[dict], sheets: list[tuple[dict, np.ndarray]]
+) -> list[dict]:
+    """Replace the extracted lakes centred in a historical basin by its sheet.
+
+    Records are sorted by decreasing area and renumbered ``lake_NNN``.
+    """
+    merged = []
+    for lake in lakes:
+        x, y = (int(v) for v in lake["center_px"])
+        if not any(basin[y, x] for _, basin in sheets):
+            merged.append(lake)
+    merged.extend(record for record, _ in sheets)
+    merged.sort(key=lambda lake: -lake["area_km2"])
+    for index, lake in enumerate(merged):
+        lake["id"] = f"lake_{index:03d}"
+    return merged
+
+
 def build(
     output: Path = OUTPUT_FILE,
     params: LakesParams | None = None,
@@ -414,12 +492,25 @@ def build(
         names=names,
         labels=labelled,
     )
+    from cent_ans_tools.geo import historical_water
+
+    sheets = historical_sheets(
+        land,
+        heights,
+        grid,
+        historical_water.load_historical(
+            MAP_DIR / historical_water.HISTORICAL_FILE.name
+        ),
+        params,
+    )
+    lakes = merge_historical(lakes, sheets)
     document = {
         "description": (
             "Lacs de la carte de campagne (lot SS3, ADR 0142) : eau intérieure de "
             "land_mask.png non reliée à la mer, au-dessus du niveau de la mer, hors "
             "retenues modernes ; contour simplifié en px carte, niveau en mètres "
-            f"({render}). Généré par `cent-ans geo lakes`. Rendu seulement."
+            f"({render}). Plus les nappes de historical_lakes.json (champ "
+            "`historical`, LR-10). Généré par `cent-ans geo lakes`. Rendu seulement."
         ),
         "params": {
             "min_area_px": params.min_area_px,
@@ -442,4 +533,5 @@ def build(
         below_sea=skipped["below_sea"],
         not_flat=skipped["not_flat"],
         named=sum(1 for lake in lakes if lake["name"]),
+        historical=[record["historical"] for record, _ in sheets],
     )

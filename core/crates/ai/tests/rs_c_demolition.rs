@@ -19,8 +19,8 @@ fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
 }
 
-/// The Swiss with a university (and its collegiate church) in every city
-/// and town: far more upkeep than their income bears.
+/// The Swiss with a university (and its collegiate church) and a cathedral
+/// in every city and town: far more upkeep than their income bears.
 fn overbuilt_swiss(data: &GameData) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).expect("1337 start");
     state.chronicle.disabled = true;
@@ -35,6 +35,9 @@ fn overbuilt_swiss(data: &GameData) -> CampaignState {
             bld("bld_parish_church"),
             bld("bld_collegiate_church"),
             bld("bld_university"),
+            // LR-04: the lord's demesne raised the Swiss income; a cathedral
+            // keeps the upkeep far above what it bears.
+            bld("bld_cathedral"),
         ];
         place.construction = None;
     }

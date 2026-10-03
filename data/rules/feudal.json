@@ -28,6 +28,7 @@
     "rival_claimant": -15
   },
   "forfeiture_win_war_score": 10,
+  "collateral_line_percent": 75,
   "title_loss_penalty": 30,
   "arbitration": {
     "family_tie": 20,

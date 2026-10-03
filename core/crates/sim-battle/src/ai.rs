@@ -91,7 +91,7 @@ use crate::setup::SideId;
 use crate::siege::SiegeWorks;
 use crate::sim::{attack_angle, BattleSim};
 use crate::site::{Obstacle, OBSTACLE_REACH};
-use crate::unit::{Formation, Unit, UnitState};
+use crate::unit::{Unit, UnitState};
 
 /// Distance at which the line closes in at the run.
 pub const CHARGE_DISTANCE: f64 = 60.0;
@@ -210,7 +210,7 @@ fn is_melee_troop(unit: &Unit) -> bool {
 
 /// Dangerous to charge head on for cavalry.
 fn bristling(unit: &Unit) -> bool {
-    unit.stakes_planted || unit.formation == Formation::Square || unit.has(Ability::PikeSquare)
+    unit.stakes_planted || unit.braced() || unit.has(Ability::PikeSquare)
 }
 
 /// SG4: enemy horse this close to one of our shooters draws our horse's
@@ -1157,8 +1157,8 @@ fn detour_past(probe: (f64, f64), to: (f64, f64), blocking: &Obstacle) -> Option
         .map(|(end, other)| {
             let out = ((end.0 - other.0) / len, (end.1 - other.1) / len);
             (
-                end.0 + out.0 * DETOUR_CLEARANCE + normal.0 * 10.0,
-                end.1 + out.1 * DETOUR_CLEARANCE + normal.1 * 10.0,
+                end.0 + out.0 * DETOUR_CLEARANCE + normal.0 * DETOUR_DEPTH,
+                end.1 + out.1 * DETOUR_CLEARANCE + normal.1 * DETOUR_DEPTH,
             )
         })
         .map(|w| {
@@ -1204,6 +1204,10 @@ fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
 
 /// B6: horsemen ride this far past the end of a hedge before charging.
 const DETOUR_CLEARANCE: f64 = 35.0;
+/// RJ-a: ... and this far out on the target's side, so that the charge is
+/// not ridden along the hedge (within its reach it would break; the old
+/// 10 m only worked while an instant wedge lengthened the riders' reach).
+const DETOUR_DEPTH: f64 = 25.0;
 
 /// B6: charge `j` when the charge is clear; otherwise ride round the
 /// obstacle in the way. `false` when neither is possible (the caller moves
@@ -2168,7 +2172,7 @@ fn plan_horse(
         .filter(|&j| {
             let e = &units[j];
             e.state == UnitState::Melee
-                && e.formation != Formation::Square
+                && !e.braced()
                 && !e.has(Ability::PikeSquare)
                 && !stakes_in_path(units, (unit.x, unit.z), e)
                 && !charge_breaks(view, i, j)

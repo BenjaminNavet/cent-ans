@@ -656,31 +656,43 @@ pub fn assault_coalition(state: &CampaignState, army: &ArmyId) -> Vec<ArmyId> {
     crate::movement::settlement_coalition(state, army, &controller)
 }
 
-/// Auto-resolved assault of `army` (and its allies, G1) on the settlement
-/// it besieges.
-pub(crate) fn auto_assault(
-    state: &mut CampaignState,
+/// Everything an auto-resolved assault is fought with, built once for the
+/// resolver and for the pre-battle forecast (LR-13).
+pub(crate) struct AssaultSetup {
+    pub settlement: SettlementId,
+    pub attackers: Vec<ArmyId>,
+    pub attacker_side: crate::battle_auto::Side,
+    pub defender_side: crate::battle_auto::Side,
+    pub attacker_profiles: Vec<crate::battle_auto::UnitProfile>,
+    pub defender_profiles: Vec<crate::battle_auto::UnitProfile>,
+    pub context: crate::battle_auto::BattleContext,
+    pub garrison_is_player: bool,
+}
+
+/// Sides and situation of the assault of `army` (and its allies, G1) on the
+/// settlement it besieges; `None` without a garrison.
+pub(crate) fn assault_setup(
+    state: &CampaignState,
     data: &GameData,
     army: &ArmyId,
-    events: &mut Vec<GameEvent>,
-) {
-    let Some(settlement) = state.armies.get(army).and_then(|a| a.settlement().cloned()) else {
-        return;
-    };
+) -> Option<AssaultSetup> {
+    let settlement = state
+        .armies
+        .get(army)
+        .and_then(|a| a.settlement().cloned())?;
     let walls = walls_stand(state, data, army, &settlement);
-    let Some(garrison) = garrison_army(state, &settlement) else {
-        return;
-    };
+    let garrison = garrison_army(state, &settlement)?;
     let attackers = assault_coalition(state, army);
     let mut attacker_side = crate::movement::coalition_side(state, data, &attackers);
     let mut defender_side = crate::movement::side_from_army(state, data, &garrison);
+    let garrison_is_player = garrison.faction == state.player_faction;
     // DF1: the AI's morale against the player follows the difficulty.
     state.apply_difficulty_morale(
         data,
         &mut attacker_side,
         state.coalition_has_player(&attackers),
         &mut defender_side,
-        garrison.faction == state.player_faction,
+        garrison_is_player,
     );
     let context = crate::battle_auto::BattleContext {
         defender_terrain_bonus: false,
@@ -690,19 +702,48 @@ pub(crate) fn auto_assault(
         wall: state.wall_stand(data, &settlement),
         crossing: None,
     };
+    Some(AssaultSetup {
+        attacker_profiles: crate::battle_auto::coalition_profiles(state, data, &attackers),
+        defender_profiles: crate::battle_auto::army_profiles(data, &garrison),
+        settlement,
+        attackers,
+        attacker_side,
+        defender_side,
+        context,
+        garrison_is_player,
+    })
+}
+
+/// Auto-resolved assault of `army` (and its allies, G1) on the settlement
+/// it besieges.
+pub(crate) fn auto_assault(
+    state: &mut CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(setup) = assault_setup(state, data, army) else {
+        return;
+    };
     // N1: phased auto-resolve; walls stand for the terrain, the season
     // still brings its weather.
-    let attacker_profiles = crate::battle_auto::coalition_profiles(state, data, &attackers);
-    let defender_profiles = crate::battle_auto::army_profiles(data, &garrison);
     let result = crate::battle_auto::resolve_profiled(
         state,
         data,
-        (&attacker_side, &attacker_profiles),
-        (&defender_side, &defender_profiles),
-        &context,
+        (&setup.attacker_side, &setup.attacker_profiles),
+        (&setup.defender_side, &setup.defender_profiles),
+        &setup.context,
         None,
     );
-    apply_assault_result(state, data, &attackers, &settlement, &result, walls, events);
+    apply_assault_result(
+        state,
+        data,
+        &setup.attackers,
+        &setup.settlement,
+        &result,
+        setup.context.walls,
+        events,
+    );
 }
 
 /// Applies an assault result (auto-resolved or fought in 3D): losses on
@@ -974,6 +1015,27 @@ fn sortie(
             if let Some(army) = state.armies.get_mut(id) {
                 army.stance = Stance::Normal;
             }
+        }
+        // LR-11: the besiegers put to flight fall back like any beaten army
+        // (they stayed under the walls, out of the siege stance, and the AI
+        // could neither resume the siege nor march off it).
+        let battlefield = data.settlement_point(settlement).unwrap_or(camp);
+        for id in &targets {
+            let before = strength_before.get(id).copied().unwrap_or(0);
+            let after = state.armies.get(id).map_or(0, |a| a.total_strength());
+            let losses_percent = if before == 0 {
+                0
+            } else {
+                (u64::from(before.saturating_sub(after)) * 100 / u64::from(before)) as u32
+            };
+            crate::movement::retreat_beaten_army(
+                state,
+                data,
+                id,
+                battlefield,
+                losses_percent,
+                events,
+            );
         }
         // The siege is lifted only when no other army still besieges.
         if besiegers_of(state, settlement).is_empty() {

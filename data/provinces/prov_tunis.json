@@ -44,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 70000,
+        "count": 175000,
         "unrest": 12,
         "health": 55,
         "wealth": 60,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 12600,
+        "count": 31500,
         "unrest": 12,
         "health": 52,
         "wealth": 75,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1750,
+        "count": 4375,
         "unrest": 7,
         "health": 60,
         "wealth": 80,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 840,
+        "count": 2100,
         "unrest": 7,
         "health": 60,
         "wealth": 85,
@@ -73,7 +73,7 @@
       }
     },
     "uncertain": true,
-    "note": "Capitale hafside : grande ville marchande et port d'Ifriqiya. Chiffres estimés (uncertain)."
+    "note": "Capitale hafside : grande ville marchande et port d'Ifriqiya. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market",

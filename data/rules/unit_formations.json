@@ -1,0 +1,123 @@
+{
+  "description": "Formations d'un régiment en bataille (lot RJ-a, ADR 0174, révise ADR 0095). Chaque formation : clé, nom historique, contexte (infobulle), catégories permises, géométrie (forme, rangs, files, espacement), modificateurs et durée de reformation. Le passage d'une formation à l'autre n'est pas instantané : les hommes marchent vers leur nouvelle place pendant `reform_s` secondes (× taille et expérience, bloc `reform`), plus lents et plus vulnérables. Lu par sim-battle (FormationRules). Ordre du fichier = ordre du menu et du cycle de la touche T (parmi les formations permises). Sources : docs/research/rj-formations.md.",
+  "default": "line",
+  "reform": {
+    "size_reference": 100,
+    "size_exponent": 0.5,
+    "size_min": 0.6,
+    "size_max": 1.8,
+    "experience_step": 0.06,
+    "experience_min": 0.6,
+    "walk_mps": { "foot": 1.3, "mounted": 2.5 },
+    "speed": 0.5,
+    "melee_taken": 1.25,
+    "missile_taken": 1.1,
+    "morale_loss": 1.2
+  },
+  "formations": [
+    {
+      "key": "line",
+      "name": "Rangés en bataille",
+      "short": "Ligne",
+      "description": "L'ordre ordinaire des chroniques (« rangés et ordonnés ») : le régiment tient un front droit de quelques rangs, quatre pour les gens de pied, trois pour les tireurs, deux pour les cavaliers. Équilibré, il se règle en largeur au glisser.",
+      "categories": ["infantry", "ranged", "cavalry", "siege"],
+      "shape": "line",
+      "ranks": { "infantry": 4, "ranged": 3, "cavalry": 2, "siege": 1 },
+      "width_adjustable": true,
+      "ai_role": "default",
+      "reform_s": 8
+    },
+    {
+      "key": "wedge",
+      "name": "Coin",
+      "short": "Coin",
+      "description": "Les chroniques latines parlent de cavaliers rangés « en coin » (cuneus) pour percer une ligne ; l'usage réel de cette forme en Occident est discuté. La pointe frappe plus fort à la charge, mais seuls les bords combattent ensuite.",
+      "categories": ["cavalry"],
+      "mounted_only": true,
+      "shape": "wedge",
+      "modifiers": { "charge": 1.2, "fighting_ranks": 3 },
+      "ai_role": "charge",
+      "reform_s": 6
+    },
+    {
+      "key": "column",
+      "name": "En ordre de marche",
+      "short": "Marche",
+      "description": "L'armée chemine « en route », bannière après bannière, sur six files (quatre à cheval). Plus rapide, surtout sur les chemins, mais à peine deux files font face à l'ennemi. Le mot « colonne » est moderne (XVIIe siècle).",
+      "categories": ["infantry", "ranged", "cavalry"],
+      "shape": "column",
+      "files": { "foot": 6, "mounted": 4 },
+      "modifiers": { "speed": 1.15 },
+      "road_march": true,
+      "ai_role": "march",
+      "reform_s": 10
+    },
+    {
+      "key": "square",
+      "name": "Schiltron",
+      "short": "Schiltron",
+      "description": "Le cercle ou carré de piques des Écossais (Falkirk 1298, Bannockburn 1314) : aucun flanc, la cavalerie s'y brise, mais il avance à peine et les archers l'accablent (Falkirk, Halidon Hill 1333).",
+      "categories": ["infantry"],
+      "foot_only": true,
+      "shape": "square",
+      "modifiers": { "speed": 0.3, "missile_taken": 1.2, "push_resistance": 1.6, "horse_blows": 0.4, "fighting_ranks": 4 },
+      "all_round": true,
+      "braced": true,
+      "ai_role": "anti_cavalry",
+      "reform_s": 16
+    },
+    {
+      "key": "thin_line",
+      "name": "En haie",
+      "short": "Haie",
+      "description": "Un front mince de deux rangs (un seul pour les cavaliers), « en haie » : chaque homme frappe ou tire, mais la ligne plie vite sous la poussée. L'expression « en haye » est surtout attestée à la fin du XVe siècle pour les gens d'armes des compagnies d'ordonnance.",
+      "categories": ["infantry", "ranged", "cavalry"],
+      "shape": "line",
+      "ranks": { "infantry": 2, "ranged": 2, "cavalry": 1 },
+      "modifiers": { "push_resistance": 0.75, "morale_loss": 1.1 },
+      "width_adjustable": true,
+      "reform_s": 8
+    },
+    {
+      "key": "battle",
+      "name": "Bataille serrée",
+      "short": "Bataille",
+      "description": "La « bataille » est le gros corps d'une armée ; à Crécy (1346), Poitiers (1356) et Azincourt (1415), les hommes d'armes mis à pied s'y serrent sur huit rangs et plus. Le bloc pousse et tient, se démoralise moins, mais marche lentement et offre une belle cible aux tireurs.",
+      "categories": ["infantry"],
+      "foot_only": true,
+      "shape": "line",
+      "ranks": { "infantry": 8 },
+      "spacing": { "lateral": 0.9, "depth": 0.9 },
+      "modifiers": { "speed": 0.85, "push_drive": 1.15, "push_resistance": 1.3, "morale_loss": 0.85, "missile_taken": 1.1 },
+      "width_adjustable": true,
+      "reform_s": 14
+    },
+    {
+      "key": "herse",
+      "name": "Herse",
+      "short": "Herse",
+      "description": "Froissart place les archers anglais de Crécy « en manière de herse » : rangs en quinconce, chacun tirant entre les épaules du rang de devant. Le sens exact (quinconce, saillants en coin sur les ailes) reste débattu. Tir plus nourri, mais l'ordre lâche souffre en mêlée.",
+      "categories": ["ranged"],
+      "foot_only": true,
+      "shape": "herse",
+      "ranks": { "ranged": 4 },
+      "spacing": { "lateral": 1.4, "depth": 1.1 },
+      "modifiers": { "shooting": 1.1, "melee_taken": 1.15, "push_resistance": 0.8 },
+      "reform_s": 12
+    },
+    {
+      "key": "conroi",
+      "name": "En conroi",
+      "short": "Conroi",
+      "description": "Le conroi est le petit corps de chevaliers qui charge genou contre genou derrière une bannière (XIIe-XIVe siècle). Rangs serrés sur trois de profondeur : la charge porte davantage et les cavaliers se couvrent l'un l'autre, au prix d'un peu de vitesse.",
+      "categories": ["cavalry"],
+      "mounted_only": true,
+      "shape": "line",
+      "ranks": { "cavalry": 3 },
+      "spacing": { "lateral": 0.8, "depth": 0.9 },
+      "modifiers": { "speed": 0.95, "charge": 1.1, "melee_taken": 0.95 },
+      "width_adjustable": true,
+      "reform_s": 6
+    }
+  ]
+}

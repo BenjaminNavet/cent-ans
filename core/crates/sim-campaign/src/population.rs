@@ -148,6 +148,7 @@ fn update_class(
         foreign_religion,
         disorder,
         garrison_strength,
+        population_total,
         overpopulation: overpopulation(population_total, cap),
     };
     let health_target = health_target(effects, class, f64::from(entry.goods_satisfaction), &shared);
@@ -182,6 +183,8 @@ struct SharedModifiers {
     foreign_religion: bool,
     disorder: u8,
     garrison_strength: u32,
+    /// LR-07: inhabitants of the province (the garrison soothes per head).
+    population_total: u64,
     overpopulation: f64,
 }
 
@@ -239,10 +242,8 @@ fn unrest_target(
     rules: &data_model::PopulationRules,
 ) -> f64 {
     // E2 (`data/rules/population.json`): taxes bite, garrisons and plenty
-    // soothe only so much.
-    let garrison_relief = (f64::from(shared.garrison_strength / 100)
-        * rules.garrison_relief_per_100_men)
-        .min(rules.garrison_relief_max);
+    // soothe only so much; LR-07: a garrison soothes per head.
+    let garrison_relief = rules.garrison_relief(shared.garrison_strength, shared.population_total);
     let mut unrest_target = shared.tax_burden * rules.tax_unrest_weight
         + f64::from(shared.devastation) / 2.0
         + ((50.0 - goods_satisfaction) / 3.0).max(-rules.goods_relief_max)
@@ -388,6 +389,7 @@ pub fn equilibrium(
         foreign_religion: inputs.foreign_religion,
         disorder: inputs.disorder,
         garrison_strength: inputs.garrison_strength,
+        population_total: population.total(),
         overpopulation: overpopulation(population.total(), inputs.cap),
     };
     Some(

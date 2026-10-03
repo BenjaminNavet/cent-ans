@@ -9,6 +9,8 @@
     "tax_unrest_weight": { "type": "number", "minimum": 0, "maximum": 200, "description": "Mécontentement par unité de charge fiscale (Bas 0,2 ; Normal 0,35 ; Haut 0,5)." },
     "garrison_relief_per_100_men": { "type": "number", "minimum": 0, "maximum": 10, "description": "Apaisement par tranche de 100 hommes de garnison dans la province." },
     "garrison_relief_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "Apaisement maximal de la garnison." },
+    "garrison_relief_reference_population": { "type": "integer", "minimum": 0, "maximum": 10000000, "description": "LR-07 : habitants pour lesquels une garnison est taillée ; l'apaisement est pondéré par cette population sur celle de la province (cent hommes tiennent un village, pas Paris) ; 0 : pas de pondération." },
+    "garrison_relief_max_weight": { "type": "number", "minimum": 0, "maximum": 10, "description": "LR-07 : plafond de ce poids (référence / population) dans une province peu peuplée ; 1 : pas de bonus sous la population de référence." },
     "goods_relief_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "Apaisement maximal dû à l'abondance des biens." },
     "occupation_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province tenue par une autre faction que son propriétaire." },
     "foreign_religion_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province dont le souverain est d'une autre foi." },

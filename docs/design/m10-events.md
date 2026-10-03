@@ -119,3 +119,21 @@ Empire, remplace la prétention), le traité de Guérande (`evt_auray`, option M
 bretonnes rendues au duc) et Formigny (option « Abandonner la Normandie » : les provinces normandes tenues
 par l'Angleterre passent à la France). Écarts : `evt_valdemar_iv` (pas de faction Danemark), la paix de
 Venise (Trévise n'est pas une province).
+
+## LR-17 — ventes, cessions de titres et changements de souverain
+- `transfer_province` gagne `price` (livres, défaut 0) et `payer` (défaut : l'acquéreur) : le prix n'est
+  versé, à l'ancien propriétaire, que si la province change de mains.
+- `transfer_title { title, faction?, from?, price?, payer? }` : le titre passe par le transfert féodal
+  (F3) ; ses provinces de jure tenues par le vendeur suivent, **capitale comprise** ; un vendeur laissé
+  sans titre se fond dans l'acquéreur (terres, armées, cour, trésor). Avec `from`, seulement si cette
+  faction tient le titre. Le prix est payé (même à découvert) au vendeur s'il subsiste, sinon il quitte
+  la carte (couronne non jouable, vendeur absorbé). L'IA compte le prix dans le coût d'une option quand
+  la faction qui décide paie.
+- `set_ruler { character, faction? }` : un personnage vivant de la faction prend le trône ; l'ancien
+  souverain vit (déposé) ; l'héritier est recalculé par la loi de succession. Sans effet pour un mort,
+  un personnage d'une autre faction ou le souverain en place.
+- Événements : `evt_vente_de_l_estonie` (été 1346, l'Estonie danoise décide ; la vente donne le titre à
+  l'ordre Livonien, payée 6 000 ₶ par l'ordre Teutonique, et fait disparaître la faction),
+  `evt_algirdas_grand_duc` (printemps 1345, si Jaunutis règne), `evt_election_d_osel_wiek` (printemps
+  1338, si Jakob II règne encore ; nouveau personnage `chr_hermann_ii_osenbrugge`). Test :
+  `core/crates/sim-campaign/tests/lr17_sales.rs`.
