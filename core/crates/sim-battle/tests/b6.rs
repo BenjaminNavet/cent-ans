@@ -76,7 +76,7 @@ fn probe() {
     for o in &f.obstacles {
         println!("  {o:?}");
     }
-    println!("contact {:?}", first_contact(&mut sim, 300.0));
+    println!("contact {:?}", first_contact(&mut sim, 420.0));
     for seed in [3, 11] {
         let mut s = no_site_sim(seed);
         assert!(s.field().obstacles.is_empty() && s.field().village.is_none());
@@ -99,9 +99,9 @@ fn bocage_battles_still_engage() {
         let mut sim = BattleSim::new(battle, seed).unwrap();
         sim.set_ai(SideId::Attacker, true);
         covered += usize::from(defensive_cover(sim.field(), SideId::Defender).is_some());
-        let contact = first_contact(&mut sim, 300.0);
+        let contact = first_contact(&mut sim, 420.0);
         assert!(
-            contact.is_some_and(|t| t < 180.0),
+            contact.is_some_and(|t| t < 320.0),
             "seed {seed}: contact at {contact:?}"
         );
     }
@@ -143,9 +143,9 @@ fn the_site_reads_in_one_line() {
 #[test]
 fn demo_contact_stays_near_seventy_seconds() {
     let mut sim = demo_sim();
-    let contact = first_contact(&mut sim, 300.0);
+    let contact = first_contact(&mut sim, 420.0);
     assert!(
-        contact.is_some_and(|t| (55.0..=160.0).contains(&t)),
+        contact.is_some_and(|t| (120.0..=320.0).contains(&t)),
         "contact at {contact:?}"
     );
 }
@@ -190,6 +190,8 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// range of loaded archers): seeds 3 and 11 go to the French (268 s and
 /// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
 /// (`eq7_cavalry::probe_mixed_battle`).
+/// A6-L13b (approach pace x0.45, patience clocks x1.9, melee x0.57): seed 3
+/// French in 388 s, seed 11 French in 523 s (final pace values of ADR 0180).
 /// IA night (the attacker's horse under the arrows waits behind its foot,
 /// not ahead of it): seed 3 stays French (227 s), seed 11 goes back to the
 /// English (317 s); over seeds 0-63 the French win 62/64 instead of 57/64.
@@ -198,11 +200,11 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "227 Some(Attacker) [44, 33, 41, 100, 100, 37, 0, 107, 20, 4]",
+            "388 Some(Attacker) [42, 31, 62, 100, 100, 33, 37, 95, 106, 20]",
         ),
         (
             11,
-            "317 Some(Defender) [5, 20, 0, 100, 100, 15, 52, 87, 109, 0]",
+            "523 Some(Attacker) [50, 67, 72, 87, 69, 22, 56, 86, 95, 30]",
         ),
     ];
     for (seed, digest_before) in expected {
@@ -243,7 +245,9 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
     ];
     let mut battle = setup(units(&data, &french), units(&data, &english), None);
     battle.village = Some(false);
-    let mut sim = BattleSim::new(battle, seed).unwrap();
+    // The hedge and the village are laid for the standard 300 m line gap (ADR 0180
+    // widened the field battles' gap).
+    let mut sim = BattleSim::new_scaled(battle, seed, sim_battle::BattleScale::default()).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     sim.set_weather(Weather::Clear);
@@ -275,7 +279,8 @@ fn defensive_archers_stand_behind_the_hedge() {
     assert!(cover.breaks_charge);
     // March to the hedge before the French close in.
     let mut covered_at = None;
-    while sim.elapsed() < 150.0 && covered_at.is_none() {
+    // L13b: the approach pace is x0.45 while the armies are apart.
+    while sim.elapsed() < 330.0 && covered_at.is_none() {
         sim.step();
         if english_archers(&sim).iter().all(|u| behind_hedge(u)) {
             covered_at = Some(sim.elapsed());
@@ -327,7 +332,7 @@ fn a_village_edge_is_cover_too() {
     let cover = defensive_cover(sim.field(), SideId::Defender).expect("the village is cover");
     assert_eq!(cover.kind, CoverKind::Village);
     assert!(sim.field().in_village(cover.center.0, cover.center.1));
-    run(&mut sim, 120.0);
+    run(&mut sim, 270.0);
     let inside = english_archers(&sim)
         .iter()
         .filter(|u| sim.field().in_village(u.x, u.z))
@@ -374,7 +379,7 @@ fn probe_shots() {
             defensive_cover(sim.field(), SideId::Defender),
             sim.field().site_label_fr()
         );
-        println!("  contact {:?}", first_contact(&mut sim, 300.0));
+        println!("  contact {:?}", first_contact(&mut sim, 420.0));
     }
 }
 
@@ -479,8 +484,8 @@ fn bocage_village_seed_5_engages_near_seventy_seconds() {
     battle.river = false;
     let mut sim = BattleSim::new(battle, 5).unwrap();
     sim.set_ai(SideId::Attacker, true);
-    let contact = first_contact(&mut sim, 300.0);
-    assert!(contact.is_some_and(|t| t < 90.0), "contact at {contact:?}");
+    let contact = first_contact(&mut sim, 420.0);
+    assert!(contact.is_some_and(|t| t < 260.0), "contact at {contact:?}");
 }
 
 /// B8: a horse that has already chased a rout far beyond its own battle

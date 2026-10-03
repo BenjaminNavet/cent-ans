@@ -196,6 +196,9 @@ pub struct BattleSim {
     rout: crate::rout::RoutRules,
     /// A6-L13: lethality of the melee and of the missiles.
     pace: crate::pace::PaceRules,
+    /// Nearest distance between the two armies, refreshed every step while the
+    /// approach pace applies (`Pace::approach_range_m`).
+    approach_gap: f64,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
     /// EP7: scenario of a historical battle (waves, posts, weather).
@@ -536,6 +539,7 @@ impl BattleSim {
             duel: crate::duel::DuelRules::bundled().clone(),
             rout: crate::rout::RoutRules::bundled().clone(),
             pace: crate::pace::PaceRules::bundled().clone(),
+            approach_gap: 0.0,
             clock: Default::default(),
             end: None,
             scenario: None,
@@ -1476,6 +1480,12 @@ impl BattleSim {
             unit.flanked = 0;
         }
         self.advance_day();
+        // A6-L13b: the approach lasts until the two armies are within range.
+        self.approach_gap = if self.pace().move_speed_factor == 1.0 {
+            0.0
+        } else {
+            self.army_gap().unwrap_or(0.0)
+        };
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
@@ -1586,11 +1596,24 @@ impl BattleSim {
     /// Movement speed of `unit` heading along `dir`, in m/s.
     fn speed(&self, unit: &Unit, dir: (f64, f64)) -> f64 {
         let mut speed = f64::from(unit.stats.speed) * 0.04;
+        let pace = self.pace();
+        if unit.state != UnitState::Routing
+            && !unit.running
+            && unit.state != UnitState::Charging
+            && pace.move_speed_factor != 1.0
+            && self.approach_gap > pace.approach_range_m
+        {
+            speed *= pace.move_speed_factor;
+        }
         if unit.siege_tower() {
             // Pushed along by the assault troops.
             speed = speed.max(0.55);
         }
-        if unit.running || unit.state == UnitState::Routing {
+        let routing = unit.state == UnitState::Routing;
+        if unit.running || routing {
+            if !routing {
+                speed *= self.pace().run_speed_factor;
+            }
             speed *= if unit.is_cavalry() && unit.state == UnitState::Charging {
                 2.5
             } else {
@@ -2782,10 +2805,18 @@ impl BattleSim {
         self.incendiary_volley(i, p.midpoint());
     }
 
+    /// Slowing of the AI patience clocks of this battle (`Pace::ai_patience_factor`).
+    pub(crate) fn ai_patience_factor(&self) -> f64 {
+        self.pace().ai_patience_factor
+    }
+
     /// Fighting rates of this battle: sieges keep their own pace.
     pub(crate) fn pace(&self) -> &crate::pace::Pace {
         if self.siege.is_some() {
             &self.pace.siege
+        } else if self.scenario.is_some() {
+            // Historical maps keep the pace their order of battle was tuned for.
+            &self.pace.historical
         } else {
             &self.pace.field
         }
@@ -3035,6 +3066,9 @@ impl BattleSim {
             rear_morale_per_s,
             rout_morale,
             rally_morale,
+            melee_fatigue_per_s,
+            contagion_factor,
+            melee_resolve_per_s,
             ..
         } = *self.pace();
         // T4 (ADR 0108): the garrison's last stand on the square.
@@ -3108,7 +3142,8 @@ impl BattleSim {
                     nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -= contagion.morale_rate(routing_weight) * DT * stand_contagion;
+            morale -=
+                contagion.morale_rate(routing_weight) * DT * stand_contagion * contagion_factor;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
@@ -3137,6 +3172,13 @@ impl BattleSim {
             } else if morale < unit.morale_cap + 10.0 {
                 morale += aura;
             }
+            if unit.state == UnitState::Melee
+                && unit.flanked == 0
+                && unit.hp >= f64::from(unit.max_soldiers) * 0.5
+                && morale < unit.morale_cap
+            {
+                morale = (morale + melee_resolve_per_s * DT).min(unit.morale_cap);
+            }
             unit.morale = morale.clamp(0.0, 100.0);
 
             // Fatigue.
@@ -3146,7 +3188,7 @@ impl BattleSim {
                 UnitState::Marching if unit.running || unit.withdrawing => 0.25,
                 UnitState::Marching => 0.05,
                 UnitState::Charging => 0.4,
-                UnitState::Melee | UnitState::Climbing => 0.3,
+                UnitState::Melee | UnitState::Climbing => melee_fatigue_per_s,
                 UnitState::Routing => 0.3,
             };
             if rate > 0.0 {

@@ -153,7 +153,8 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let defender = ["unit_men_at_arms_foot", "unit_longbowmen"];
     let mut sim = ridge_sim(&data, &attacker, &defender, 525.0);
     sim.set_ai(SideId::Attacker, false);
-    run(&mut sim, 120.0);
+    // L13b (ADR 0180): approach pace x0.45 while the armies are apart.
+    run(&mut sim, 270.0);
     let field = sim.field();
     let of = |kind: &str| {
         sim.units()

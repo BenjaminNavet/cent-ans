@@ -216,7 +216,9 @@ fn distance_walked(match_speed: bool) -> (f64, f64) {
     };
     sim.apply_command(order, None).unwrap();
     let start: Vec<P> = sim.units().iter().map(|u| (u.x, u.z)).collect();
-    run(&mut sim, 20.0);
+    // L13b (ADR 0180): the approach pace is x0.45, the start-up loss of a
+    // regiment weighs more on 20 s: 60 s.
+    run(&mut sim, 60.0);
     let d = |id: usize| (sim.units()[id].x - start[id].0).hypot(sim.units()[id].z - start[id].1);
     (d(2), d(3))
 }
@@ -231,7 +233,7 @@ fn match_speed_keeps_the_pace_of_the_slowest() {
     let (bows_m, knights_m) = distance_walked(true);
     assert!((bows_m - bows).abs() < 1e-6, "the slowest walks as before");
     assert!(
-        (knights_m - bows_m).abs() < bows_m * 0.03,
+        (knights_m - bows_m).abs() < bows_m * 0.05,
         "knights {knights_m} keep the bows' pace {bows_m}"
     );
 }
@@ -421,8 +423,10 @@ fn a_replay_recorded_before_cb1_still_reads() {
     // part any earlier.
     // IA night: the attacker's horse under the arrows now waits behind its
     // foot; the sample parts from the rules at tick 704 (1 min 10 s).
+    // A6-L13b (ADR 0180): the approach pace of the field battles (x0.45 while
+    // the armies are apart) parts it from the first marches, tick 100 (10 s).
     assert!(
-        player.divergence().is_none_or(|d| d.tick >= 704),
+        player.divergence().is_none_or(|d| d.tick >= 100),
         "{:?}",
         player.divergence()
     );

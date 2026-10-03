@@ -121,7 +121,7 @@ impl BattleSim {
     }
 
     /// Nearest distance between two able regiments of opposite sides.
-    fn army_gap(&self) -> Option<f64> {
+    pub(super) fn army_gap(&self) -> Option<f64> {
         let mut best: Option<f64> = None;
         let able: Vec<_> = self
             .units
@@ -195,7 +195,7 @@ impl BattleSim {
         let Some(gap) = self.army_gap() else {
             return;
         };
-        let window = self.decision.approach_window_seconds;
+        let window = self.decision.approach_window_seconds * self.ai_patience_factor();
         match self.clock.gap_mark {
             Some((mark, _)) if gap <= mark - self.decision.approach_meters => {
                 self.clock.last = self.elapsed;
@@ -229,11 +229,13 @@ impl BattleSim {
             }
             [false, false] => {}
         }
-        let patience = if self.clock.melee_seen {
-            self.decision.lull_seconds
-        } else {
-            self.decision.refusal_seconds
-        };
+        // A6-L13b: the clocks of a slower battle run slower (`Pace::ai_patience_factor`).
+        let patience = self.ai_patience_factor()
+            * if self.clock.melee_seen {
+                self.decision.lull_seconds
+            } else {
+                self.decision.refusal_seconds
+            };
         if self.quiet_time() < patience {
             return None;
         }

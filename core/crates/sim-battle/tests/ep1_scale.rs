@@ -166,7 +166,7 @@ fn ai_handles_sixty_regiments_a_side() {
     assert!(melee_seen >= 10, "at most {melee_seen} regiments in melee");
     assert!(fought >= 25, "only {fought} regiments fought hand to hand");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
-    assert!(sim.elapsed() <= 720.0, "over at {:.0} s", sim.elapsed());
+    assert!(sim.elapsed() <= 1200.0, "over at {:.0} s", sim.elapsed());
     println!(
         "60/side: {melee_seen} regiments in melee at most, over at {:.0} s, winner {:?}",
         sim.elapsed(),

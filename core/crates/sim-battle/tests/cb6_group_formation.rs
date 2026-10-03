@@ -531,7 +531,8 @@ fn places_become_individual_group_moves() {
         )
         .unwrap();
     }
-    run(&mut sim, 240.0);
+    // L13b (ADR 0180): approach pace x0.45.
+    run(&mut sim, 600.0);
     for s in &slots {
         let u = &sim.units()[s.id as usize];
         let d = ((u.x - s.x).powi(2) + (u.z - s.z).powi(2)).sqrt();
