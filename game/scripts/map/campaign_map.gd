@@ -106,6 +106,7 @@ var zoom_tiers: ZoomTiers = null
 var lakes: LakesRenderer = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
+var ruin_markers: RuinMarkers = null  # LR-08
 var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
@@ -484,6 +485,7 @@ func refresh_all() -> void:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
 	_refresh_construction_markers()
+	_refresh_ruin_markers()
 	if settlements_ctl != null:  # C5
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
@@ -1235,6 +1237,17 @@ func _refresh_construction_markers() -> void:
 		return
 	_construction_ids = building
 	construction_markers.refresh(building, func(_id: String) -> bool: return true, _construction_marker_position)
+
+
+## LR-08 : signe de ruine sur les colonies rasées.
+func _refresh_ruin_markers() -> void:
+	if settlement_layer == null:
+		return
+	if ruin_markers == null:
+		ruin_markers = RuinMarkers.new()
+		ruin_markers.name = "RuinMarkers"
+		add_child(ruin_markers)
+	ruin_markers.refresh(sim, settlement_layer.world_position_of)
 
 
 func _is_under_construction(province_id: String) -> bool:
