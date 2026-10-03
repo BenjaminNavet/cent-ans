@@ -45,15 +45,19 @@ func open_window() -> bool:
 	var captures := pending()
 	if captures.is_empty():
 		window.hide()
+		map.ui.modal_queue.cancel("capture")
 		return false
 	show_capture(captures[0], captures.size())
 	return true
 
 
 func show_capture(capture: Dictionary, queue_size: int) -> void:
-	_shown = capture
 	_offered[int(capture.get("id", -1))] = true
-	window.show_decision(capture, queue_size)
+	# A6-L6 (U10) : file modale unique (la décision passe avant le rapport de saison).
+	map.ui.modal_queue.request("capture", ModalQueue.PRIORITY_DECISION, window, func() -> bool:
+		_shown = capture
+		window.show_decision(capture, queue_size)
+		return true)
 
 
 ## Après tout changement d'état (un ordre de marche ou un assaut peut avoir pris une place) :
@@ -65,6 +69,7 @@ func refresh() -> void:
 	if captures.is_empty():
 		if window.visible:
 			window.hide()
+		map.ui.modal_queue.cancel("capture")
 		return
 	if window.visible:
 		return

@@ -104,6 +104,15 @@ func setup(campaign_map: Node) -> void:
 	map.add_child(markers)
 	_build_bar()
 	_build_registry()
+	var province_panel: Control = map.ui.province_panel
+	province_panel.visibility_changed.connect(func() -> void:
+		if province_panel.visible:
+			close_for_panel())
+	var colony_panel: Control = map.settlements_ctl.panel if map.settlements_ctl != null else null
+	if colony_panel != null:
+		colony_panel.visibility_changed.connect(func() -> void:
+			if colony_panel.visible:
+				close_for_panel())
 	if map.picker != null:
 		var previous_click: Callable = map.picker.click_interceptor
 		map.picker.click_interceptor = func(screen_position: Vector2) -> bool:
@@ -285,6 +294,20 @@ func order_move(agent_id: String, settlement_id: String) -> Dictionary:
 	return result
 
 
+## A6-L6 (U8) : Échap ferme la barre d'agents (et le registre) avant tout autre panneau.
+func _shortcut_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and not event.is_echo() and available() and bar != null \
+			and (bar.visible or selected_agent != ""):
+		deselect()
+		get_viewport().set_input_as_handled()
+
+
+## A6-L6 (U8) : un panneau de province ou de colonie qui s'ouvre referme la barre d'agents.
+func close_for_panel() -> void:
+	if bar != null and bar.visible:
+		deselect()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not available():
 		return
@@ -370,6 +393,9 @@ func _show_bar(agent: Dictionary) -> void:
 	bar.show()
 	bar.reset_size()
 	bar.position.x = (bar.get_parent_area_size().x - bar.size.x) * 0.5  # centred, never off screen (Q3)
+	# A6-L6 (U8) : jamais sous la pile de lettres (zone latérale droite) ni sur son bouton ✕.
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	bar.position.x = maxf(minf(bar.position.x, side.position.x - bar.size.x - 8.0), 4.0)
 
 
 func _action_button(option: Dictionary) -> Button:
@@ -483,7 +509,7 @@ func toggle_registry() -> void:
 	_fill_registry()
 	registry.show()
 	registry.size = Vector2.ZERO
-	registry.call_deferred("reset_size")
+	_fit_registry()
 
 
 ## Colonie où recruter : celle du panneau de colonie ouvert (si elle est au joueur), sinon la
@@ -500,9 +526,13 @@ func recruit_place() -> String:
 
 
 func _fill_registry() -> void:
+	# A6-L6 (U17) : retirés avant d'être libérés, sinon leur hauteur compte jusqu'à la fin de la
+	# frame et la fenêtre reste haute et presque vide.
 	for child in _registry_list.get_children():
+		_registry_list.remove_child(child)
 		child.queue_free()
 	for child in _registry_recruit.get_children():
+		_registry_recruit.remove_child(child)
 		child.queue_free()
 	var mine := 0
 	for entry in map.sim.call("get_agents"):
@@ -536,6 +566,13 @@ func _fill_registry() -> void:
 		var kind := str(option.get("kind", ""))
 		button.pressed.connect(func() -> void: recruit(place, kind))
 		_registry_recruit.add_child(button)
+	_fit_registry()
+
+
+## A6-L6 (U17) : hauteur de la fenêtre des agents ajustée à son contenu.
+func _fit_registry() -> void:
+	registry.size = Vector2(registry.size.x, 0.0)
+	registry.reset_size()
 	registry.call_deferred("reset_size")
 
 

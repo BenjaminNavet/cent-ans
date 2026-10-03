@@ -227,7 +227,12 @@ func offer_pending() -> bool:
 		return false
 	if _report_open():
 		return false
-	window.show_encounter(open[0], open.size())
+	var first: Dictionary = open[0]
+	var count: int = open.size()
+	# A6-L6 (U10) : file modale unique (jamais deux fenêtres l'une sur l'autre).
+	map.ui.modal_queue.request("encounter", ModalQueue.PRIORITY_DECISION, window, func() -> bool:
+		window.show_encounter(first, count)
+		return true)
 	return true
 
 

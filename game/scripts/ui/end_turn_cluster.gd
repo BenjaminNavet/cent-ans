@@ -85,6 +85,11 @@ var _badges: Array[AlertBadge] = []
 var _button: Button
 var _hover := false
 var _enabled := true
+## Lot A6-L6 (U20) : `() -> bool`, vrai quand une fenêtre modale est ouverte (file de `MapUI`) ;
+## la cloche se désactive alors (avec infobulle) au lieu d'ignorer le clic. Le menu pause
+## (arbre en pause) compte aussi.
+var modal_check: Callable = Callable()
+var _modal := false
 var _down := false
 ## DA5 : états du médaillon enluminé de la cloche (`IconLibrary.medallion_states`), vide si absent
 ## (repli : cloche dessinée au trait).
@@ -103,6 +108,7 @@ func _ready() -> void:
 	_button.pressed.connect(_on_button_pressed)
 	_button.mouse_entered.connect(func() -> void:
 		_hover = true
+		refresh_modal()
 		queue_redraw())
 	_button.mouse_exited.connect(func() -> void:
 		_hover = false
@@ -150,8 +156,28 @@ func set_alerts(new_alerts: Array) -> void:
 func set_end_turn_enabled(enabled: bool) -> void:
 	_enabled = enabled
 	if _button != null:
-		_button.disabled = not enabled
+		_button.disabled = not enabled or _modal
 	queue_redraw()
+
+
+func _process(_delta: float) -> void:
+	refresh_modal()
+
+
+## Lot A6-L6 (U20) : cloche désactivée tant qu'une fenêtre modale ou le menu pause est ouvert.
+func refresh_modal() -> void:
+	var now := (modal_check.is_valid() and bool(modal_check.call())) or (is_inside_tree() and get_tree().paused)
+	if now == _modal:
+		return
+	_modal = now
+	if _button != null:
+		_button.disabled = not _enabled or _modal
+	_update_tooltip()
+	queue_redraw()
+
+
+func is_modal_blocked() -> bool:
+	return _modal
 
 
 ## Première alerte bloquante, ou `{}`.
@@ -297,14 +323,16 @@ func _update_tooltip() -> void:
 	if _button == null:
 		return
 	var blocking := blocking_alert()
-	if not blocking.is_empty():
-		RichTooltip.attach_plain(_button, "end_turn_blocked", {"body": str(blocking.get("text", ""))})
+	if _modal:
+		RichTooltip.attach_plain(_button, "end_turn_modal", {"body": "Fermez la fenêtre ouverte pour terminer la saison."})
+	elif not blocking.is_empty():
+		RichTooltip.attach_plain(_button, "end_turn_blocked",{"body": str(blocking.get("text", ""))})
 	else:
 		RichTooltip.attach_plain(_button, "end_turn_finish")
 
 
 func _on_button_pressed() -> void:
-	if not _enabled:
+	if not _enabled or _modal:
 		return
 	var blocking := blocking_alert()
 	if not blocking.is_empty():
@@ -334,7 +362,7 @@ func _draw() -> void:
 	draw_arc(center, BUTTON_RADIUS - 1.5, 0.0, TAU, 64, ring, 3.0, true)
 	draw_arc(center, BUTTON_RADIUS - 7.0, 0.0, TAU, 64, HudStyle.GOLD, 1.5, true)
 	# Cloche.
-	var ink := HudStyle.INK_FADED if not _enabled else (HudStyle.RUBRIC if blocked else HudStyle.INK)
+	var ink := HudStyle.INK_FADED if (not _enabled or _modal) else (HudStyle.RUBRIC if blocked else HudStyle.INK)
 	_draw_bell(center + Vector2(0, -20), 38.0, ink)
 	# Saison / année (ou « Décision »).
 	var font := get_theme_default_font()
@@ -351,7 +379,7 @@ func _draw() -> void:
 ## portant la saison et l'année (ou « Décision en attente », filet rubrique autour du disque).
 func _draw_medallion(center: Vector2, blocked: bool) -> void:
 	var state := "normal"
-	if not _enabled:
+	if not _enabled or _modal:
 		state = "disabled"
 	elif _down:
 		state = "pressed"
@@ -368,7 +396,7 @@ func _draw_medallion(center: Vector2, blocked: bool) -> void:
 	var parts := date_label.split(" ", false)
 	var line1 := "Décision" if blocked else (parts[0] if parts.size() > 0 else "Fin de tour")
 	var line2 := "en attente" if blocked else (" ".join(parts.slice(1)) if parts.size() > 1 else "")
-	var ink := HudStyle.INK_FADED if not _enabled else (HudStyle.RUBRIC if blocked else HudStyle.INK)
+	var ink := HudStyle.INK_FADED if (not _enabled or _modal) else (HudStyle.RUBRIC if blocked else HudStyle.INK)
 	var band := Rect2(center + Vector2(-50, BUTTON_RADIUS * 0.50), Vector2(100, 34 if line2 != "" else 20))
 	draw_rect(Rect2(band.position + Vector2(1.5, 2.0), band.size), HudStyle.SHADOW)
 	draw_rect(band, HudStyle.PARCHMENT_LIGHT if _hover and _enabled else HudStyle.PARCHMENT)

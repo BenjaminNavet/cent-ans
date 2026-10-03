@@ -45,6 +45,7 @@ func setup(campaign_map: Node) -> void:
 	season_report = (load(SEASON_REPORT_SCENE) as PackedScene).instantiate()
 	season_report.name = "SeasonReport"
 	ui.add_child(season_report)
+	PanelStack.mark_blocking(season_report)  # A6-L6 (U10) : le conseiller s'efface devant le rapport
 	# Q6 : juste au-dessus de la zone `MODAL` (diplomatie, Cour, techniques…) et de son voile : la
 	# fin de tour ouvre la diplomatie sur une offre nouvelle dans l'image du rapport, qui doit
 	# rester cliquable par-dessus (même étage `MODAL`, `restack` garde cet ordre). L'ancien
@@ -245,6 +246,7 @@ func _on_save_requested(save_name: String) -> void:
 func _on_load_requested(_path: String) -> void:
 	_last_saved_turn = _turn()
 	last_events = []
+	map.get("ui").modal_queue.clear()  # A6-L6 : plus de fenêtre en attente de l'ancienne partie
 	if season_report != null:
 		season_report.hide()
 	apply_settings()
@@ -331,6 +333,7 @@ func confirm_end_turn() -> void:
 ## Après `end_turn` : sauvegarde auto, alertes, rapport de saison.
 func after_end_turn(events: Array) -> void:
 	last_events = events
+	map.get("ui").ensure_relevance(events)  # A6-L6 : un seul appel au cœur pour tout le lot
 	autosave()
 	refresh()
 	if bool(_setting("interface/season_report", true)):
@@ -369,7 +372,12 @@ func show_season_report(events: Array) -> bool:
 	var sim: Object = map.get("sim")
 	if sim == null or season_report == null:
 		return false
-	return season_report.show_report(str(sim.call("get_date_label")), report_groups(events))
+	# A6-L6 (U10) : le rapport (début de tour) passe par la file modale, après toute décision ;
+	# il est construit au moment de son tour, avec les événements tardifs déjà fusionnés.
+	var date_label := str(sim.call("get_date_label"))
+	map.get("ui").modal_queue.request("report", ModalQueue.PRIORITY_REPORT, season_report, func() -> bool:
+		return season_report.show_report(date_label, report_groups(last_events)))
+	return true
 
 
 ## Bataille résolue après la fin du tour (dialogue d'avant-bataille, combat ou résolution
@@ -378,8 +386,11 @@ func show_season_report(events: Array) -> bool:
 func report_late_events(events: Array) -> void:
 	if events.is_empty() or season_report == null:
 		return
+	map.get("ui").ensure_relevance(events)
 	last_events += events
-	if bool(_setting("interface/season_report", true)):
+	# A6-L6 (U10) : le rapport n'est montré qu'au début du tour : une bataille livrée en milieu de
+	# tour s'y fusionne sans le rouvrir (il se met à jour s'il est encore à l'écran).
+	if bool(_setting("interface/season_report", true)) and season_report.visible:
 		var sim: Object = map.get("sim")
 		season_report.add_events(events, _concerns_player, Callable(map.get("ui"), "keeps_news"), str(map.get("player_faction")),
 			str(sim.call("get_date_label")) if sim != null else "")

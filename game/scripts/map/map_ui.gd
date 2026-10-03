@@ -98,12 +98,22 @@ var docked_right_x: float = 0.0
 @onready var trade_button: Button = %TradeButton
 
 var _log_lines: PackedStringArray = PackedStringArray()
+## A6-L6 (U6) : onglet « Monde » du journal (nouvelles sans rapport avec le joueur), replié.
+var _world_lines: PackedStringArray = PackedStringArray()
+var _world_open := false
+var world_toggle: Button
+var world_scroll: ScrollContainer
+var world_text: RichTextLabel
 var _toast_timer: SceneTreeTimer
 var _toast_shown_at := 0
 ## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
 var panels := PanelStack.new()
 ## Province affichée par le panneau de province (une autre province = nouvelle sélection).
 var _province_panel_id: String = ""
+## Lot A6-L6 (U10) : file unique des fenêtres modales (une à la fois, décisions avant rapports) ;
+## les avis (toasts) attendent la fermeture de la fenêtre active.
+var modal_queue := ModalQueue.new()
+var _held_toasts: Array = []
 
 
 func _ready() -> void:
@@ -112,8 +122,11 @@ func _ready() -> void:
 	if bubbles != null:
 		bubbles.call("attach", log_text)
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
+	modal_queue.drained.connect(_flush_held_toasts)
+	end_turn_cluster.modal_check = func() -> bool: return modal_queue.is_busy()
 	# « Son… » (Q2) : ajouté par `FlowController`, ouvre l'onglet Son des réglages.
 	log_toggle.pressed.connect(_toggle_log)
+	_build_world_tab()
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
 	province_panel.create_army_requested.connect(func(p: String, i: Array) -> void: create_army_requested.emit(p, i))
@@ -479,12 +492,23 @@ func set_hover_trade(text: String) -> void:
 ## PO1 : avis éphémère dans la zone `TOASTS` de `UiLayout` (6 s, 3 au plus, clic pour fermer).
 ## Le libellé `toast` de la scène reste masqué ; il garde le dernier texte (scripts de partie test).
 func show_toast(text: String, is_error: bool = false) -> void:
+	if modal_queue.is_busy():  # U10 : pas d'avis par-dessus une fenêtre modale
+		if _held_toasts.size() < UiZones.MAX_TOASTS:
+			_held_toasts.append([text, is_error])
+		return
 	toast.text = text
 	toast.hide()
 	var entry: Control = UiZones.layout().toast(text)
 	var label := entry.find_child("Text", true, false) as Label
 	if label != null and is_error:
 		label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10))
+
+
+func _flush_held_toasts() -> void:
+	var held := _held_toasts
+	_held_toasts = []
+	for entry: Array in held:
+		show_toast(str(entry[0]), bool(entry[1]))
 
 
 # --- Journal des événements ------------------------------------------------------------
@@ -507,11 +531,63 @@ const FOREIGN_MINOR_KINDS := [
 var news_interest: NewsInterest = null
 
 
+## A6-L6 (U6/U7) : pertinence d'un événement pour le joueur, calculée par le cœur
+## (`CampaignSim.classify_news` : sa faction, suzerain/vassaux, alliés, ennemis en guerre,
+## provinces voisines). Clés : `player`, `related`, `neighbor`, `far` (« Monde »). Le classeur
+## est posé par `HudController.update_interest` ; nul (maquette, ancien cœur) = repli sur
+## `news_interest`.
+const RELEVANCE_FAR := "far"
+const RELEVANCE_KEY := "relevance"
+var news_classifier: Callable = Callable()
+
+
+## Marque chaque événement de sa pertinence (un seul appel au cœur pour tout le lot).
+func ensure_relevance(events: Array) -> void:
+	if not news_classifier.is_valid() or events.is_empty():
+		return
+	var pending: Array = []
+	for event in events:
+		if event is Dictionary and not (event as Dictionary).has(RELEVANCE_KEY):
+			pending.append(event)
+	if pending.is_empty():
+		return
+	var classes: PackedStringArray = news_classifier.call(pending)
+	for i in mini(pending.size(), classes.size()):
+		(pending[i] as Dictionary)[RELEVANCE_KEY] = classes[i]
+
+
+## Pertinence d'un événement (`player`, `related`, `neighbor`, `far`) ; `player` quand elle est
+## inconnue (aucun classeur) pour ne rien cacher par erreur.
+func relevance_of(event: Dictionary) -> String:
+	if not event.has(RELEVANCE_KEY):
+		if not news_classifier.is_valid():
+			return "player" if news_interest == null or news_interest.keeps(event) else RELEVANCE_FAR
+		ensure_relevance([event])
+	return str(event.get(RELEVANCE_KEY, "player"))
+
+
+static func relevance_label(relevance: String) -> String:
+	match relevance:
+		"player":
+			return "Votre royaume"
+		"related":
+			return "Allié, ennemi ou vassal"
+		"neighbor":
+			return "Voisin"
+	return "Nouvelle lointaine"
+
+
 ## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
 func keeps_news(event: Dictionary) -> bool:
 	if SeasonReport.is_public(event):  # JR5 : nouvelle publique (champ `public`), lue par tous
 		return true
-	return news_interest == null or news_interest.keeps(event)
+	var mode := news_interest.mode if news_interest != null else NewsInterest.MODE_INTEREST
+	if mode == NewsInterest.MODE_ALL:
+		return true
+	var relevance := relevance_of(event)
+	if mode == NewsInterest.MODE_OWN:
+		return relevance == "player"
+	return relevance != RELEVANCE_FAR
 
 
 ## Vrai si l'événement doit figurer au journal du joueur.
@@ -536,76 +612,29 @@ func journal_text(event: Dictionary) -> String:
 	return "%s — %s" % [name, text]
 
 
-## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
+## Ajoute les événements d'un tour en tête du journal (plus récents en haut). A6-L6 (U6/U7) :
+## ce qui ne concerne pas le joueur (calcul du cœur, `classify_news`) va dans l'onglet « Monde »,
+## replié, et ne pousse aucune lettre.
 func add_events(events: Array, date_text: String) -> void:
+	ensure_relevance(events)
 	var new_lines := PackedStringArray()
+	var new_world := PackedStringArray()
 	var new_news: Array = []  # lettres du tour, poussées en un seul lot (une reconstruction, un son)
 	for event in events:
 		if not journal_keeps(event):
 			continue
-		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
-		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt
-			if news_interest != null:
-				news["interest"] = NewsInterest.interest_label(news_interest.event_interest(event))
-			new_news.append(news)
-		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
+		var is_world := relevance_of(event) == RELEVANCE_FAR and not SeasonReport.is_public(event)
+		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
+		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt (« Toute l'Europe » garde tout)
+			news["interest"] = relevance_label(relevance_of(event))
+			new_news.append(news)
 		if text == "":
 			continue
-		text = CodexText.format(text, true)  # BP1 : liens du Codex
-		var line: String
-		if kind == "battle" or kind == "siege_started" or kind == "province_captured":
-			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
-		elif kind == "revolt":
-			line = "[color=#a1121a][b]⚑ %s[/b][/color]" % text
-		elif kind == "plague":
-			line = "[color=#4a6b2a][b]☠ %s[/b][/color]" % text
-		elif kind == "famine":
-			line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
-		elif kind == "building_completed":
-			line = "[color=#1a5c8b]⚒ %s[/color]" % text
-		elif kind == "birth":
-			line = "[color=#2a7a4a]✚ %s[/color]" % text
-		elif kind == "marriage":
-			line = "[color=#8a3a8a][b]♥ %s[/b][/color]" % text
-		elif kind == "death":
-			line = "[color=#3a3a3a][b]✝ %s[/b][/color]" % text
-		elif kind == "succession":
-			line = "[color=#7a5a10][b]♔ %s[/b][/color]" % text
-		elif kind == "regency":
-			line = "[color=#7a5a10]⚖ %s[/color]" % text
-		elif kind == "trait_acquired":
-			line = "[color=#2a5a7a]✦ %s[/color]" % text
-		elif kind == "skill_learned":
-			line = "[color=#2a5a7a]★ %s[/color]" % text
-		elif kind == "appointment":
-			line = "[color=#4a3a10]⚑ %s[/color]" % text
-		elif kind == "war_declared":
-			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
-		elif kind == "peace_signed":
-			line = "[color=#2a6a2a][b]☮ %s[/b][/color]" % text
-		elif kind == "alliance_formed" or kind == "vassalage":
-			line = "[color=#1a3a8b][b]⚜ %s[/b][/color]" % text
-		elif kind == "alliance_broken" or kind == "vassal_rebellion":
-			line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
-		elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
-			line = "[color=#4a3a10]✉ %s[/color]" % text
-		elif kind == "trade":  # C5
-			line = "[color=#4a3a10]⚓ %s[/color]" % text
-		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
-			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
-		elif kind == "chronicle":  # M10
-			line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
-		elif kind == "technology_researched":
-			line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
-		elif kind == "income":
-			line = "[color=#4a3a10]%s[/color]" % text
-		elif SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
-			var style: Dictionary = SeasonReport.KIND_STYLES[kind]
-			line = "[color=%s]%s %s[/color]" % [style["color"], style["glyph"], text]
-		else:
-			line = text
-		new_lines.append(line)
+		if is_world:
+			new_world.append(_journal_line(event, CodexText.format(text, true)))
+			continue
+		new_lines.append(_journal_line(event, CodexText.format(text, true)))  # BP1 : liens du Codex
 	news_letters.push_news_batch(new_news)
 	if new_lines.is_empty():
 		new_lines.append("[i]Rien à signaler.[/i]")
@@ -614,12 +643,77 @@ func add_events(events: Array, date_text: String) -> void:
 	block.append_array(new_lines)
 	block.append_array(_log_lines)
 	_log_lines = block.slice(0, mini(block.size(), MAX_LOG_LINES))
+	if not new_world.is_empty():
+		var world_block := PackedStringArray(["[b]— %s —[/b]" % date_text])
+		world_block.append_array(new_world)
+		world_block.append_array(_world_lines)
+		_world_lines = world_block.slice(0, mini(world_block.size(), MAX_LOG_LINES))
 	_render_log()
 	log_title.text = "Journal (%d)" % new_lines.size()
 
 
+## Ligne mise en forme (BBCode) d'un événement du journal.
+func _journal_line(event: Dictionary, text: String) -> String:
+	var kind: String = str(event.get("kind", ""))
+	var line: String
+	if kind == "battle" or kind == "siege_started" or kind == "province_captured":
+		line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
+	elif kind == "revolt":
+		line = "[color=#a1121a][b]⚑ %s[/b][/color]" % text
+	elif kind == "plague":
+		line = "[color=#4a6b2a][b]☠ %s[/b][/color]" % text
+	elif kind == "famine":
+		line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
+	elif kind == "building_completed":
+		line = "[color=#1a5c8b]⚒ %s[/color]" % text
+	elif kind == "birth":
+		line = "[color=#2a7a4a]✚ %s[/color]" % text
+	elif kind == "marriage":
+		line = "[color=#8a3a8a][b]♥ %s[/b][/color]" % text
+	elif kind == "death":
+		line = "[color=#3a3a3a][b]✝ %s[/b][/color]" % text
+	elif kind == "succession":
+		line = "[color=#7a5a10][b]♔ %s[/b][/color]" % text
+	elif kind == "regency":
+		line = "[color=#7a5a10]⚖ %s[/color]" % text
+	elif kind == "trait_acquired":
+		line = "[color=#2a5a7a]✦ %s[/color]" % text
+	elif kind == "skill_learned":
+		line = "[color=#2a5a7a]★ %s[/color]" % text
+	elif kind == "appointment":
+		line = "[color=#4a3a10]⚑ %s[/color]" % text
+	elif kind == "war_declared":
+		line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
+	elif kind == "peace_signed":
+		line = "[color=#2a6a2a][b]☮ %s[/b][/color]" % text
+	elif kind == "alliance_formed" or kind == "vassalage":
+		line = "[color=#1a3a8b][b]⚜ %s[/b][/color]" % text
+	elif kind == "alliance_broken" or kind == "vassal_rebellion":
+		line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
+	elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
+		line = "[color=#4a3a10]✉ %s[/color]" % text
+	elif kind == "trade":  # C5
+		line = "[color=#4a3a10]⚓ %s[/color]" % text
+	elif kind == "excommunication" or kind == "schism" or kind == "heresy":
+		line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
+	elif kind == "chronicle":  # M10
+		line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
+	elif kind == "technology_researched":
+		line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
+	elif kind == "income":
+		line = "[color=#4a3a10]%s[/color]" % text
+	elif SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
+		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
+		line = "[color=%s]%s %s[/color]" % [style["color"], style["glyph"], text]
+	else:
+		line = text
+	return line
+
+
 func clear_log() -> void:
 	_log_lines = PackedStringArray()
+	_world_lines = PackedStringArray()
+	_render_world()
 	news_letters.clear()
 	log_text.text = "[i]Aucun événement pour l'instant.[/i]"
 	log_title.text = "Journal"
@@ -628,6 +722,54 @@ func clear_log() -> void:
 func _render_log() -> void:
 	log_text.text = "\n".join(_log_lines)
 	log_scroll.scroll_vertical = 0
+	_render_world()
+
+
+## Onglet « Monde » : bouton de dépli (visible journal déplié, s'il y a des nouvelles lointaines).
+func _build_world_tab() -> void:
+	var box := log_scroll.get_parent()
+	world_toggle = Button.new()
+	world_toggle.name = "WorldToggle"
+	world_toggle.flat = true
+	world_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	world_toggle.focus_mode = Control.FOCUS_NONE
+	world_toggle.pressed.connect(func() -> void:
+		_world_open = not _world_open
+		_render_world()
+		queue_layout())
+	box.add_child(world_toggle)
+	world_scroll = ScrollContainer.new()
+	world_scroll.name = "WorldScroll"
+	world_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	world_scroll.custom_minimum_size = Vector2(0, 120)
+	world_text = RichTextLabel.new()
+	world_text.bbcode_enabled = true
+	world_text.fit_content = true
+	world_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	world_text.add_theme_color_override("default_color", Color(0.30, 0.24, 0.16))
+	world_scroll.add_child(world_text)
+	box.add_child(world_scroll)
+	_render_world()
+
+
+func _render_world() -> void:
+	if world_toggle == null:
+		return
+	var has_world := not _world_lines.is_empty()
+	var expanded := log_scroll.visible
+	world_toggle.visible = expanded and has_world
+	world_toggle.text = "%s Monde (%d)" % ["▾" if _world_open else "▸", world_line_count()]
+	world_scroll.visible = expanded and has_world and _world_open
+	world_text.text = "\n".join(_world_lines)
+
+
+## Nombre de nouvelles lointaines gardées (sans les lignes de date).
+func world_line_count() -> int:
+	var count := 0
+	for line in _world_lines:
+		if not line.begins_with("[b]—"):
+			count += 1
+	return count
 
 
 func _toggle_log() -> void:
@@ -638,6 +780,7 @@ func _toggle_log() -> void:
 func set_log_expanded(expanded: bool) -> void:
 	log_scroll.visible = expanded
 	log_toggle.text = "Replier" if expanded else "Déplier"
+	_render_world()
 	queue_layout()
 
 
