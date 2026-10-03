@@ -11,7 +11,6 @@ extends Node3D
 ## `chimney_max_distance`).
 
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
-const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
 ## Moulins à vent par type de colonie, échelle monde, position du moyeu (repère du corps).
 const WINDMILLS := {"city": 1, "town": 1, "village": 1}
@@ -66,9 +65,6 @@ var _windmill_sails: MultiMeshInstance3D
 ## Moulins : [Vector2 px (courant), lacet, graine, tourne (bool), hauteur du sol courante (SZ4),
 ## colonie, décalage à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle (SZ4b)].
 var _windmill_points: Array = []
-var _overlay: ShaderMaterial
-var _overlay_snowy := false
-var _ruin_overlays: Dictionary = {}
 ## Ruine (0-1) par indice de colonie.
 var _ruin: Dictionary = {}
 var _season_boost := 1.0
@@ -114,8 +110,6 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	if not is_in_group(RenderQuality.CLIENT_GROUP):
 		add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
-	_overlay = ShaderMaterial.new()
-	_overlay.shader = OVERLAY_SHADER
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_surface_changed)
 
@@ -197,7 +191,7 @@ func rebuild(province_states: Dictionary) -> void:
 
 
 ## Entrées effectives de `rebuild` : sièges, seuils de dévastation (feux, moulins, ruines),
-## palier de ruine par colonie (seul `_overlay_for` le lit, par paliers de 0,2), taille et
+## palier de ruine par colonie (paliers de 0,2), taille et
 ## maquette affichée des colonies, hameaux brûlés.
 func _rebuild_key(province_states: Dictionary) -> String:
 	var data := _layer.data
@@ -437,40 +431,6 @@ func _apply_ruins(province_states: Dictionary) -> void:
 				# Village en ruine : fumée d'incendie au-dessus.
 				_fire_points.append(_settlement_point(i, Vector2.ZERO, 0.3, float(i % 97) / 97.0))
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
-	_update_overlays()
-
-
-## Surcouche pour un degré de ruine (paliers de 0,2 : peu de matériaux distincts).
-func _overlay_for(amount: float) -> ShaderMaterial:
-	var step := int(round(amount * 5.0))
-	if step == 0:
-		return _overlay
-	if not _ruin_overlays.has(step):
-		var material := ShaderMaterial.new()
-		material.shader = OVERLAY_SHADER
-		material.set_shader_parameter("ruin", step / 5.0)
-		_ruin_overlays[step] = material
-	return _ruin_overlays[step]
-
-
-## Pose la surcouche (neige, suie) sur les maquettes des colonies, seulement là où elle sert
-## (hiver, ruine) : c'est une passe de rendu de plus par maquette. Les hameaux (petits, nombreux,
-## reconstruits par tuile) n'en ont pas. Rappelée quand l'hiver arrive ou s'en va.
-func _update_overlays() -> void:
-	if _layer == null or _layer.data == null:
-		return
-	var snowy := _snow > 0.01
-	_overlay_snowy = snowy
-	for i in _layer.data.settlements.size():
-		var holder := _layer.model_holder(i)
-		if holder == null:
-			continue
-		var amount: float = _ruin.get(i, 0.0)
-		var wanted: ShaderMaterial = _overlay_for(amount) if snowy or amount > 0.0 else null
-		for geometry in holder.find_children("*", "GeometryInstance3D", true, false):
-			var g := geometry as GeometryInstance3D
-			if g.material_overlay != wanted:
-				g.material_overlay = wanted
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
@@ -750,8 +710,6 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	_windmill_bodies.visible = show_models
 	_windmill_sails.visible = show_models
 	_apply_prop_scale(camera_distance)
-	if (_snow > 0.01) != _overlay_snowy:
-		_update_overlays()
 	if _reground_timer >= 0.0:
 		_reground_timer -= get_process_delta_time()
 		if _reground_timer < 0.0:
