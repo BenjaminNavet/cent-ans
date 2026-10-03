@@ -652,9 +652,10 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // trajectory leaves seed 1 with no ambush in 60 turns (checked: not the
     // army cap; ladders ready at once bring it back). NT9 (one attack per
     // enemy army and turn, ram in the auto-resolve): seed 1 lies in wait
-    // again, alone as before NT5.
-    // LR-02: the boatmen's strike now needs a river, which shifted the random
-    // stream and left seed 1 alone without an ambush: seeds 1 and 2 together.
+    // again, alone as before NT5. LR (02/07/11): the river condition, the
+    // garrison-per-head unrest and the bastion peace each shift the random
+    // stream; one seed alone may have no ambush, so several seeds together
+    // (seed 3 shows refused Verona/Venice ambush orders at turns 5-6: open point).
     let log: Vec<(u32, String, bool)> = [1, 2]
         .into_iter()
         .flat_map(|seed| campaign_stance_orders(&data, seed, 60))

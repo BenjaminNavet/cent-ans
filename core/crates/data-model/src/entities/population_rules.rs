@@ -14,6 +14,15 @@ pub struct PopulationRules {
     pub garrison_relief_per_100_men: f64,
     /// ... up to this much.
     pub garrison_relief_max: f64,
+    /// LR-07: inhabitants a garrison is sized for. The relief is weighed by
+    /// this over the province's population (a hundred men keep a village
+    /// in order, not Paris). 0: no weighting.
+    #[serde(default)]
+    pub garrison_relief_reference_population: u64,
+    /// LR-07: ceiling of that weight in a thinly peopled province (1: no
+    /// bonus below the reference population).
+    #[serde(default = "default_garrison_relief_max_weight")]
+    pub garrison_relief_max_weight: f64,
     /// Ceiling of the relief brought by well-supplied goods (the term
     /// `(50 - goods satisfaction) / 3` never goes below minus this).
     pub goods_relief_max: f64,
@@ -53,16 +62,33 @@ pub struct PopulationRules {
     pub description: Option<String>,
 }
 
+impl PopulationRules {
+    /// Unrest relief of `garrison_men` (already weighted by place) in a
+    /// province of `population` inhabitants (E2, RS-B, LR-07).
+    pub fn garrison_relief(&self, garrison_men: u32, population: u64) -> f64 {
+        let relief = f64::from(garrison_men / 100) * self.garrison_relief_per_100_men;
+        let reference = self.garrison_relief_reference_population;
+        let weight = if reference > 0 {
+            (reference as f64 / population.max(1) as f64).min(self.garrison_relief_max_weight)
+        } else {
+            1.0
+        };
+        (relief * weight).min(self.garrison_relief_max)
+    }
+}
+
 impl Default for PopulationRules {
     /// Fallback when `data/rules/population.json` is absent; kept equal to
     /// that file (checked by `tests/real_data.rs`).
     fn default() -> Self {
         PopulationRules {
             tax_unrest_weight: 130.0,
-            garrison_relief_per_100_men: 1.0,
-            garrison_relief_max: 10.0,
+            garrison_relief_per_100_men: 1.5,
+            garrison_relief_max: 15.0,
+            garrison_relief_reference_population: 100_000,
+            garrison_relief_max_weight: 3.0,
             goods_relief_max: 10.0,
-            occupation_unrest: 20.0,
+            occupation_unrest: 12.0,
             foreign_religion_unrest: 10.0,
             disorder_unrest_weight: default_disorder_weight(),
             disorder_unrest_max: default_disorder_max(),
@@ -74,6 +100,10 @@ impl Default for PopulationRules {
             description: None,
         }
     }
+}
+
+fn default_garrison_relief_max_weight() -> f64 {
+    1.0
 }
 
 fn default_disorder_weight() -> f64 {
@@ -103,4 +133,41 @@ fn default_disorder_decay_flat() -> u8 {
 
 fn default_disorder_decay_percent() -> u8 {
     10
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PopulationRules;
+
+    #[test]
+    fn a_garrison_soothes_per_head() {
+        let rules = PopulationRules {
+            garrison_relief_per_100_men: 1.0,
+            garrison_relief_max: 10.0,
+            garrison_relief_reference_population: 100_000,
+            garrison_relief_max_weight: 1.0,
+            ..PopulationRules::default()
+        };
+        // A small or average province: 1 point per 100 men, capped.
+        assert_eq!(rules.garrison_relief(600, 50_000), 6.0);
+        assert_eq!(rules.garrison_relief(600, 100_000), 6.0);
+        assert_eq!(rules.garrison_relief(5_000, 80_000), 10.0);
+        // Twice the reference population: half the relief.
+        assert_eq!(rules.garrison_relief(600, 200_000), 3.0);
+        // Without weighting, as before LR-07.
+        let flat = PopulationRules {
+            garrison_relief_reference_population: 0,
+            ..rules.clone()
+        };
+        assert_eq!(flat.garrison_relief(600, 200_000), 6.0);
+        // A thinly peopled province: a bonus up to the weight ceiling.
+        let bonus = PopulationRules {
+            garrison_relief_max_weight: 3.0,
+            garrison_relief_max: 15.0,
+            ..rules.clone()
+        };
+        assert_eq!(bonus.garrison_relief(300, 50_000), 6.0);
+        assert_eq!(bonus.garrison_relief(300, 10_000), 9.0);
+        assert_eq!(bonus.garrison_relief(5_000, 10_000), 15.0);
+    }
 }
