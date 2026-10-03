@@ -129,13 +129,17 @@ func _test_golden_light(map: Node3D) -> void:
 		var fog: Color = preset["fog_color"]
 		_check(fog.b > fog.r, "%s: aerial perspective should stay bluish away from the sun" % season)
 		# Les valeurs arrivent sur le soleil de la scène.
+		# RV-B : la lumière glisse vers la cible (saison modulée par la phase du tour, bornée).
 		atmosphere.apply_season(season)
+		atmosphere.settle_light()
 		await process_frame
+		var target := atmosphere.light_target()
+		_check(absf(float(target["elevation"]) - elevation) <= 3.01, "%s: turn variation drifts too far from the season sun" % season)
 		if sun != null and not atmosphere._sun_dirty:
 			var applied := rad_to_deg(asin(clampf(sun.global_basis.z.y, -1.0, 1.0)))
-			_check(absf(applied - elevation) < 0.5, "%s: sun node elevation %.1f, expected %.1f" % [season, applied, elevation])
-			_check(sun.light_color.is_equal_approx(color), "%s: sun node colour %s" % [season, sun.light_color])
-			_check(is_equal_approx(sun.light_energy, float(preset["sun_energy"])), "%s: sun node energy" % season)
+			_check(absf(applied - float(target["elevation"])) < 0.5, "%s: sun node elevation %.1f, expected %.1f" % [season, applied, float(target["elevation"])])
+			_check(sun.light_color.is_equal_approx(target["color"]), "%s: sun node colour %s" % [season, sun.light_color])
+			_check(is_equal_approx(sun.light_energy, float(target["energy"])), "%s: sun node energy" % season)
 		print("tb6 light %s: elevation %.0f (was %.0f), shadows %.2f x height, sun %s x %.2f, scatter %.2f" % [
 			season, elevation, float(former[season]), shadow_length, color.to_html(false), float(preset["sun_energy"]), float(preset["fog_sun_scatter"])])
 	atmosphere.apply_season(initial)

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_campaign_lighting.schema.json",
+  "title": "Éclairage de la carte de campagne",
+  "description": "Fichier data/fx/campaign_lighting.json (lot RV-B) lu par game/scripts/visual/campaign_lighting.gd et appliqué par CampaignAtmosphere. Le soleil de base par saison vit dans fx/atmosphere.json. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "pair": {
+      "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2,
+      "description": "[vue basse inclinée, vue de dessus], interpolé selon le tangage de la caméra."
+    },
+    "ambient_override": {
+      "type": "object",
+      "properties": {
+        "color": { "$ref": "#/$defs/rgb" },
+        "energy": { "type": "number", "minimum": 0, "maximum": 2 },
+        "sky_contribution": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "transition_s": {
+      "type": "object",
+      "description": "Durée (s) pour combler ≈ 95 % de l'écart de lumière au changement de saison ou de tour.",
+      "properties": {
+        "season": { "type": "number", "exclusiveMinimum": 0, "maximum": 60 },
+        "turn": { "type": "number", "exclusiveMinimum": 0, "maximum": 60 }
+      },
+      "required": ["season", "turn"],
+      "additionalProperties": false
+    },
+    "elevation_bounds_deg": {
+      "type": "array", "items": { "type": "number", "minimum": 5, "maximum": 60 }, "minItems": 2, "maxItems": 2,
+      "description": "Bornes de la hauteur du soleil après variation du tour (degrés)."
+    },
+    "turn_variation": {
+      "type": "object",
+      "description": "Variation déterministe d'un tour à l'autre, phase dans [-1, 1] : -1 début d'après-midi (plus haut, plus au sud), +1 fin d'après-midi (plus bas, plus à l'ouest, plus chaud).",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "elevation_deg": { "type": "number", "minimum": 0, "maximum": 10 },
+        "azimuth_deg": { "type": "number", "minimum": 0, "maximum": 30 },
+        "warmth": { "type": "number", "minimum": 0, "maximum": 0.3, "description": "Part de bleu retirée au soleil en fin d'après-midi (et 40 % de cette part sur le vert)." },
+        "energy": { "type": "number", "minimum": 0, "maximum": 0.3, "description": "Baisse relative d'énergie en fin d'après-midi (hausse au début)." }
+      },
+      "required": ["enabled", "elevation_deg", "azimuth_deg"],
+      "additionalProperties": false
+    },
+    "ambient": {
+      "type": "object",
+      "description": "Lumière ambiante de la carte (versants à l'ombre) : couleur froide de ciel, énergie, part du ciel HDRI ; surcharges par saison.",
+      "properties": {
+        "color": { "$ref": "#/$defs/rgb" },
+        "energy": { "type": "number", "minimum": 0, "maximum": 2 },
+        "sky_contribution": { "type": "number", "minimum": 0, "maximum": 1 },
+        "seasons": {
+          "type": "object",
+          "propertyNames": { "enum": ["spring", "summer", "autumn", "winter"] },
+          "additionalProperties": { "$ref": "#/$defs/ambient_override" }
+        }
+      },
+      "required": ["color", "energy", "sky_contribution"],
+      "additionalProperties": false
+    },
+    "exposure": {
+      "type": "object",
+      "properties": {
+        "tonemap_exposure": { "type": "number", "minimum": 0.3, "maximum": 3 },
+        "tonemap_white": { "type": "number", "minimum": 1, "maximum": 16 }
+      },
+      "additionalProperties": false
+    },
+    "aerial": {
+      "type": "object",
+      "description": "Perspective aérienne (brouillard de profondeur de l'Environment) selon le tangage : nette en vue basse, légère de dessus (ADR 0142 : une brume forte délave la carte). Facteurs de début et de fin en multiples de la distance caméra.",
+      "properties": {
+        "low_pitch_deg": { "type": "number", "minimum": 0, "maximum": 90 },
+        "top_pitch_deg": { "type": "number", "minimum": 0, "maximum": 90 },
+        "blue": { "$ref": "#/$defs/rgb" },
+        "blue_mix": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de `blue` mêlée à la couleur de brume de la saison." },
+        "density": { "allOf": [{ "$ref": "#/$defs/pair" }], "items": { "maximum": 1 } },
+        "aerial_perspective": { "allOf": [{ "$ref": "#/$defs/pair" }], "items": { "maximum": 1 } },
+        "begin_factor": { "$ref": "#/$defs/pair" },
+        "end_factor": { "$ref": "#/$defs/pair" },
+        "sky_affect": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["low_pitch_deg", "top_pitch_deg", "density", "aerial_perspective", "begin_factor", "end_factor"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["transition_s", "turn_variation", "ambient", "aerial"],
+  "additionalProperties": false
+}
