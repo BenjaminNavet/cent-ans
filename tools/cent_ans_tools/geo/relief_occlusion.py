@@ -13,9 +13,12 @@ Method (horizon-based ambient occlusion, multi-scale):
   smoothed with a Gaussian of ``R / 6`` (no fine detail), then for ``N``
   directions the horizon tangent is the maximum, over geometric sample
   distances in ``[R / 4, R]``, of ``Δh · exaggeration / distance``;
-* the band value is the mean over directions of ``sin(horizon angle)``:
-  positive in a valley (the horizon rises around it), negative on a crest or a
-  summit (the horizon falls away), 0 on a plain; bands are averaged.
+* for each direction the highest and lowest sight lines over those samples
+  are averaged (``(sin max + sin min) / 2``): a uniform slope cancels out, so
+  rugged massifs carry no overall bias; the band value is the mean over
+  directions: positive in a valley (the horizon rises around it), negative on
+  a crest or a summit (the horizon falls away), 0 on a plain or a regular
+  slope; bands are averaged, smoothed, then compressed by ``|x| ** 0.75``.
 
 Output ``data/map/relief_occlusion.png``: L8, half the map grid (one texel =
 2 x 2 map pixels, like ``splat.png``), ``value = 128 + 127 · clip(o · gain)``
@@ -39,14 +42,15 @@ MAP_DIR = REPO_DIR / "data" / "map"
 OUTPUT_NAME = "relief_occlusion.png"
 
 OCCLUSION_FACTOR = 2  # map pixels per occlusion texel (per side)
-DEFAULT_RADII_M = (3_000.0, 8_000.0, 20_000.0)  # scale bands (horizon search radius)
+DEFAULT_RADII_M = (6_000.0, 12_000.0, 25_000.0)  # scale bands (horizon search radius)
 DEFAULT_DIRECTIONS = 16
 DEFAULT_EXAGGERATION = (
     3.0  # between the strategic (x4.3) and close (x1.5) display scales
 )
 SAMPLES_PER_BAND = 4
 NORMALISE_PERCENTILE = 99.5
-FINAL_SMOOTH_SIGMA = 1.0  # texels
+FINAL_SMOOTH_SIGMA = 1.5  # texels
+RESPONSE_GAMMA = 0.75  # < 1 lifts hill country against the Alps
 
 
 @dataclass(frozen=True)
@@ -86,7 +90,8 @@ def band_openness(
         smooth: Pre-smooth the heights with a Gaussian of ``radius / 6``.
 
     Returns:
-        ``float32`` grid: mean over azimuths of ``sin(horizon angle)``, > 0 in
+        ``float32`` grid: mean over azimuths of the mean of the highest and
+        lowest sight line sines, > 0 in
         valleys, < 0 on crests, 0 on a plain.
     """
     radius_px = max(radius_m / meters_per_px, 1.0)
@@ -102,6 +107,7 @@ def band_openness(
         azimuth = 2.0 * np.pi * k / directions
         ux, uy = np.cos(azimuth), np.sin(azimuth)
         best = np.full(heights.shape, -np.inf, dtype=np.float32)
+        worst = np.full(heights.shape, np.inf, dtype=np.float32)
         for distance in distances:
             dx = int(round(ux * distance))
             dy = int(round(uy * distance))
@@ -109,9 +115,16 @@ def band_openness(
                 continue
             ground = float(np.hypot(dx, dy)) * meters_per_px
             rise = _shifted(padded, pad, dy, dx, heights.shape) - heights
-            np.maximum(best, rise * np.float32(exaggeration / ground), out=best)
+            tangent = rise * np.float32(exaggeration / ground)
+            np.maximum(best, tangent, out=best)
+            np.minimum(worst, tangent, out=worst)
         best[~np.isfinite(best)] = 0.0
-        total += best / np.sqrt(1.0 + best * best)  # sin(arctan(t))
+        worst[~np.isfinite(worst)] = 0.0
+        # Highest and lowest sight line, sin(arctan(t)): a uniform slope cancels out,
+        # so rugged massifs carry no overall bias (valleys > 0, crests < 0).
+        total += 0.5 * (
+            best / np.sqrt(1.0 + best * best) + worst / np.sqrt(1.0 + worst * worst)
+        )
     return total / np.float32(directions)
 
 
@@ -159,6 +172,7 @@ def encode_occlusion(
         top = float(np.percentile(sample, NORMALISE_PERCENTILE)) if sample.size else 0.0
         gain = 1.0 / top if top > 1e-6 else 1.0
     scaled = np.clip(occlusion * gain, -1.0, 1.0)
+    scaled = np.sign(scaled) * np.abs(scaled) ** RESPONSE_GAMMA
     encoded = np.rint(128.0 + 127.0 * scaled)
     encoded[~land] = 128.0
     return encoded.astype(np.uint8), gain
