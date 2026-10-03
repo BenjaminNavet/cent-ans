@@ -12,15 +12,17 @@ kit. Five architecture families around 1340, five settlement kinds, two variants
 
 The models are meant to be read from far away (stylised maquettes at a constant world size):
 few but large elements, bold silhouettes, light and contrasted flat colours. Unlike the western
-kit, houses are plain primitives, not ``building_kit`` houses; the new palette materials are not
-atlas layers, so Godot keeps their flat colour. Same contract as the western kit: one joined
-mesh, a ``Banner`` material, foundations below ``z = 0``, same ground footprint per kind.
+kit, houses are plain primitives, not ``building_kit`` houses, and every part is a flat palette
+colour. Same contract as the western kit: one joined mesh, banners tinted by Godot, foundations
+below ``z = 0``, same ground footprint per kind. At export the palette colours are baked into
+the corner colours of a single ``Kit`` surface (lot GC6-perf, :func:`bake_kit`).
 """
 
 import math
 import random
 from functools import partial
 
+import bpy
 import models as m
 from mathutils import Matrix, Vector
 
@@ -2277,3 +2279,94 @@ def centre_footprint(obj):
     shift = world.to_3x3().inverted() @ Vector((cx, cy, 0.0))
     obj.data.transform(Matrix.Translation(-shift))
     return cx, cy
+
+
+# --- Single surface (lot GC6-perf) ------------------------------------------------------
+
+KIT_MATERIAL = "Kit"
+KIT_ROUGHNESS = 0.9
+KIT_COLORS = "Color"
+BANNER_MATERIAL = "Banner"
+# Colours baked instead of the palette one. ``Wood`` used to go through the ``Planks`` layer of
+# the building atlas: mean linear colour of that layer times its alias tint
+# (``kit_campaign.ALIAS``), far darker than the palette brown.
+KIT_TINTS = {"Wood": (0.096, 0.058, 0.033)}
+# Same wall shading as ``kit_campaign.finish_parts`` (which these models went through before):
+# upright faces darken from full colour ``WALL_SHADE_TOP`` metres above the ground down to
+# ``WALL_SHADE`` at their buried foot.
+METERS_PER_UNIT = 60.0
+WALL_SHADE = 0.6
+WALL_SHADE_FROM, WALL_SHADE_TOP = -0.2, 1.6
+
+
+def wall_shade(normal_z, height):
+    """Baked occlusion of a corner: 1 on roofs and floors, darker at the foot of walls."""
+    if abs(normal_z) >= 0.5:
+        return 1.0
+    t = (height * METERS_PER_UNIT - WALL_SHADE_FROM) / (
+        WALL_SHADE_TOP - WALL_SHADE_FROM
+    )
+    t = min(max(t, 0.0), 1.0)
+    return WALL_SHADE + (1.0 - WALL_SHADE) * t * t * (3.0 - 2.0 * t)
+
+
+def kit_material():
+    """The one material of the maquette families: base colour read from the corner colours."""
+    mat = bpy.data.materials.get(KIT_MATERIAL)
+    if mat is not None:
+        return mat
+    mat = bpy.data.materials.new(KIT_MATERIAL)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    bsdf = next(node for node in nodes if node.type == "BSDF_PRINCIPLED")
+    bsdf.inputs["Roughness"].default_value = KIT_ROUGHNESS
+    bsdf.inputs["Metallic"].default_value = 0.0
+    colors = nodes.new("ShaderNodeVertexColor")
+    colors.layer_name = KIT_COLORS
+    mat.node_tree.links.new(colors.outputs["Color"], bsdf.inputs["Base Color"])
+    mat.roughness = KIT_ROUGHNESS
+    return mat
+
+
+def bake_kit(obj):
+    """Bake the palette colour of every face into the corner colours (linear RGB, times the
+    wall shading) and leave one ``Kit`` material on the joined model: one surface, one draw
+    call per MultiMesh in Godot. Faces of the ``Banner`` material get alpha 0 (1 elsewhere):
+    ``maquette_kit.gdshader`` paints them with the controller's colour.
+    """  # noqa: D205
+    mesh = obj.data
+    names = [
+        slot.material.name.split(".")[0] if slot.material else ""
+        for slot in obj.material_slots
+    ]
+    tints = [KIT_TINTS.get(name) or m.PALETTE[name][0] for name in names]
+    existing = mesh.color_attributes.get(KIT_COLORS)
+    if existing is not None:
+        mesh.color_attributes.remove(existing)
+    colors = mesh.color_attributes.new(
+        name=KIT_COLORS, type="FLOAT_COLOR", domain="CORNER"
+    )
+    mesh.color_attributes.active_color = colors
+    mesh.color_attributes.render_color_index = mesh.color_attributes.find(KIT_COLORS)
+    world = obj.matrix_world
+    rotation = world.to_3x3()
+    for poly in mesh.polygons:
+        tint = tints[poly.material_index]
+        alpha = 0.0 if names[poly.material_index] == BANNER_MATERIAL else 1.0
+        normal_z = (rotation @ poly.normal).normalized().z
+        for li in poly.loop_indices:
+            height = (world @ mesh.vertices[mesh.loops[li].vertex_index].co).z
+            shade = 1.0 if alpha == 0.0 else wall_shade(normal_z, height)
+            colors.data[li].color = (
+                tint[0] * shade,
+                tint[1] * shade,
+                tint[2] * shade,
+                alpha,
+            )
+    # The metric UVs of the atlas are useless on a flat-coloured surface.
+    while mesh.uv_layers:
+        mesh.uv_layers.remove(mesh.uv_layers[0])
+    mesh.materials.clear()
+    mesh.materials.append(kit_material())
+    mesh.polygons.foreach_set("material_index", [0] * len(mesh.polygons))
+    mesh.update()

@@ -398,6 +398,25 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
   bruit + terrain, essarts autour des villes et hameaux), `wetlands.png` (RGB : marais, étangs,
   prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 demi-grille, part
   de résineux, pour le rendu des forêts). ≈ 70 s.
+  - Jeux de données (lot R1, étendus à toute la carte par le lot HC5, ADR 0161) :
+    `historical_forests.json` (146 massifs, landes et parcours ; `kind` broadleaf / mixed / conifer /
+    heath) et `wetlands.json` (77 zones ; marsh / ponds / wet_meadow, `max_height_m` pour les marais
+    de fond de vallée ou de littoral). Ellipses ou polygones lon/lat, bornes des schémas = emprise
+    de la carte (lon −11..61, lat 28..66). Chaque entrée cite une source (ouvrage ou notice, langue
+    de la notice indiquée) ; état d'avant les assèchements et plantations modernes.
+  - Effets sur les règles : un massif boisé relève `splat.png` B (case de forêt de `navgrid.png`,
+    coût 18, et couvert) ; une lande le baisse et nourrit le canal A (sur une colline, la case
+    devient montagne dès 0,45 de roche : garder les landes d'altitude sous 0,5 de densité) ; un
+    marais ou pays d'étangs de densité ≥ 0,5 donne des cases de marais (coût 25) ; les prés
+    humides ne ralentissent pas. Après toute retouche : `geo landcover` → `geo navgrid` →
+    `geo colormap` → `geo horizon`, puis mesurer l'écart (parts, coût des liaisons entre lieux ;
+    méthode et résultats du lot HC5 dans `docs/wip/hc5-massifs-zones-humides.md`).
+  - Allocation dans un massif nommé (lot HC5) : le score est reclassé parmi les pixels de
+    l'emprise (`named_forest_score`), la lisière bruitée garde l'aire nominale
+    (`area_mask(centred=True)`) : la part boisée vaut `densité × √potentiel` moins les essarts,
+    où que tombe le bruit régional. Restent sous leur densité les massifs en steppe, sur la
+    côte, en province « lande » ou au-dessus de la limite des arbres ; la bande aride au sud de
+    32,5° N annule tout massif de plaine.
 - `cent-ans geo gpu-textures` (`block_compress.py`, lot OMR-R2, ADR 0118) : copies GPU lues par le
   jeu à la place des PNG : `relief_shade_bc5_<i>.bin` (BC5 + mipmaps, `map.json.relief_shade.bc5`)
   et `wetlands_bc1_<i>.bin` (BC1, `map.json.wetlands_gpu`), parts zlib de ≤ 32 Mo bruts. Refaites

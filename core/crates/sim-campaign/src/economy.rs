@@ -494,6 +494,8 @@ impl CampaignState {
         let net = (gross as f64 * self.embargo_income_factor(faction)).round() as i64;
         // DF1: difficulty (AI or player income).
         crate::difficulty::scale_i64(net, self.difficulty_income_percent(data, faction))
+            // JR1: the alms of the crusade (0 for every other faction).
+            + crate::crusade::alms(self, data, faction)
     }
 
     /// Seasonal tax `faction` collects in `province` before embargoes and

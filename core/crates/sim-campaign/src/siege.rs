@@ -737,6 +737,22 @@ pub(crate) fn apply_assault_result(
         .settlements
         .get(settlement)
         .map_or(0, |s| s.garrison.iter().map(|u| u.strength).sum::<u32>());
+    // TB: the assault enters the battle history (place: the besiegers' camp).
+    if let Some(camp) = attackers.first().and_then(|id| state.armies.get(id)) {
+        let camp = state.army_point(data, camp);
+        crate::battle_history::record(
+            state,
+            data,
+            crate::battle_history::BattleKind::Assault,
+            &province,
+            camp,
+            (
+                (&faction, strength_before.values().sum()),
+                (&defender_faction, garrison_strength),
+            ),
+            result,
+        );
+    }
     for (id, outcome) in crate::movement::split_outcome(state, attackers, &result.attacker) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
@@ -787,6 +803,7 @@ pub(crate) fn apply_assault_result(
     );
     if won {
         state.record_battle(&faction, &defender_faction, true);
+        crate::crusade::on_battle(state, data, &faction, &defender_faction, &faction);
         capture(state, data, settlement, &faction, events);
         if let Some(general) = general {
             dynasty::on_siege_won(state, data, &general);
@@ -801,6 +818,7 @@ pub(crate) fn apply_assault_result(
         }
     } else {
         state.record_battle(&defender_faction, &faction, false);
+        crate::crusade::on_battle(state, data, &defender_faction, &faction, &faction);
     }
 }
 
@@ -864,6 +882,20 @@ fn sortie(
     );
     apply_garrison_losses(state, settlement, &result.attacker);
     let strength_before = crate::traditions::strengths(state, &targets);
+    // TB: the sortie enters the battle history (place: the besiegers' camp).
+    let camp = state.army_point(data, &state.armies[lead]);
+    crate::battle_history::record(
+        state,
+        data,
+        crate::battle_history::BattleKind::Sortie,
+        &province_of(state, settlement),
+        camp,
+        (
+            (&garrison.faction, garrison.total_strength()),
+            (&besieger_faction, strength_before.values().sum()),
+        ),
+        &result,
+    );
     for (id, outcome) in crate::movement::split_outcome(state, &targets, &result.defender) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
@@ -908,6 +940,27 @@ fn sortie(
             &besieger_faction
         },
     );
+    // JR1: a sortie is a battle for the crusade's fervour too. JR5: it
+    // answers the siege, so the besiegers are the side that sought the
+    // fight (a besieged crusade sallying against brothers in faith only
+    // defends itself).
+    if won {
+        crate::crusade::on_battle(
+            state,
+            data,
+            &garrison.faction,
+            &besieger_faction,
+            &besieger_faction,
+        );
+    } else {
+        crate::crusade::on_battle(
+            state,
+            data,
+            &besieger_faction,
+            &garrison.faction,
+            &besieger_faction,
+        );
+    }
     if won {
         state.record_battle(&garrison.faction, &besieger_faction, false);
         for id in &targets {
@@ -1002,6 +1055,8 @@ pub(crate) fn capture(
         .province(&province_id)
         .faction(new_controller),
     );
+    // JR1: a place of the Holy Land, or the city of the vow.
+    crate::crusade::on_settlement_taken(state, data, new_controller, settlement_id, events);
     // TW2-T1: the fate of the place (player's choice, or the AI's at once).
     crate::capture::on_captured(
         state,

@@ -249,6 +249,9 @@ func _fit_map_width(body: Control) -> void:
 
 ## Liste des factions qui passent les filtres, groupées par royaume ; survol = surbrillance sur
 ## la carte, clic = choix (comme sur la carte).
+const LANDLESS_HEADER := "Sans terre"
+
+
 func _rebuild_faction_list() -> void:
 	if _faction_list == null:
 		return
@@ -270,7 +273,8 @@ func _rebuild_faction_list() -> void:
 		var count_b := (groups[b] as Array).size()
 		return count_a > count_b if count_a != count_b else a < b)
 	for kingdom_name in order:
-		var header := FrontEndStyle.label(str(kingdom_name), UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.title_font())
+		# JR3 : les factions sans terre (croisés) n'ont pas de royaume.
+		var header := FrontEndStyle.label(str(kingdom_name) if str(kingdom_name) != "" else LANDLESS_HEADER, UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.title_font())
 		_faction_list.add_child(header)
 		var flow := HFlowContainer.new()
 		flow.add_theme_constant_override("h_separation", 6)

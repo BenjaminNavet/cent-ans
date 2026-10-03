@@ -47,3 +47,21 @@ def test_siege_engines_cover_the_rules_and_existing_models() -> None:
         model = entry.get("model")
         if model:
             assert (ROOT / "game" / model.removeprefix("res://")).exists(), model
+
+
+def test_battle_history_rules_match_schema() -> None:
+    """The bounds of the core battle history match their schema."""
+    schema = _load("schemas/battle_history_rules.schema.json")
+    Draft202012Validator.check_schema(schema)
+    errors = list(
+        Draft202012Validator(schema).iter_errors(_load("rules/battle_history.json"))
+    )
+    assert not errors, [error.message for error in errors]
+
+
+def test_core_remembers_battles_as_long_as_the_map_marks_them() -> None:
+    """A battlefield mark never outlives its record in the core history."""
+    marked_turns = _load("ui/war_scars.json")["battlefield"]["turns"]
+    rules = _load("rules/battle_history.json")
+    assert marked_turns <= rules["max_age_turns"]
+    assert rules["max_records"] >= 1

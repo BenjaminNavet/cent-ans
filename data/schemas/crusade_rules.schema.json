@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/crusade_rules.schema.json",
+  "title": "Règles de la Ferveur (faction croisée)",
+  "description": "Fichier data/rules/crusade.json (lot JR1, ADR 0165). Voir docs/superpowers/specs/2026-10-02-jr-croises-jerusalem-design.md § 4. Fichier optionnel : sans lui la mécanique est inerte.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "faction": {
+      "$ref": "common.schema.json#/$defs/faction_id",
+      "description": "La faction qui vit de la Ferveur."
+    },
+    "base_settlement": {
+      "$ref": "common.schema.json#/$defs/settlement_id",
+      "description": "Colonie où se tient l'armée de départ (la faction ne tient pas la cité de sa capitale)."
+    },
+    "target_province": {
+      "$ref": "common.schema.json#/$defs/province_id",
+      "description": "Province du vœu."
+    },
+    "holy_land": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/province_id" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Provinces de Terre sainte : y prendre une colonie relève la Ferveur."
+    },
+    "coastal_holy_land": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/province_id" },
+      "uniqueItems": true,
+      "description": "Provinces côtières de Terre sainte : un port tenu là reçoit les contingents en priorité."
+    },
+    "fervor": {
+      "type": "object",
+      "description": "Barème de la jauge 0-100 : points signés, sauf `start` et `target_floor` (niveaux) et `decay_per_turn` (points perdus par tour).",
+      "properties": {
+        "start": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "decay_per_turn": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "decay_above_high": {
+          "type": "integer", "minimum": 0, "maximum": 20,
+          "description": "Points perdus en plus chaque tour quand la Ferveur atteint le seuil haut de l'Élan (`zeal.high_threshold`) : l'exaltation retombe."
+        },
+        "battle_won_other_faith": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "battle_lost": { "type": "integer", "minimum": -100, "maximum": 0 },
+        "holy_land_settlement_taken": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "target_taken": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "target_floor": {
+          "type": "integer", "minimum": 0, "maximum": 100,
+          "description": "Plancher de la Ferveur tant que la province du vœu est tenue."
+        },
+        "preach": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "war_declared_same_faith": { "type": "integer", "minimum": -100, "maximum": 0 },
+        "battle_same_faith": { "type": "integer", "minimum": -100, "maximum": 0 },
+        "truce_with_target_holder_per_turn": {
+          "type": "integer", "minimum": -100, "maximum": 0,
+          "description": "Par tour de paix ou de trêve avec le maître de la province du vœu, sans la tenir."
+        }
+      },
+      "required": [
+        "start", "decay_per_turn", "battle_won_other_faith", "battle_lost",
+        "holy_land_settlement_taken", "target_taken", "target_floor", "preach",
+        "war_declared_same_faith", "battle_same_faith", "truce_with_target_holder_per_turn"
+      ],
+      "additionalProperties": false
+    },
+    "alms": {
+      "type": "object",
+      "description": "Aumônes par tour : base + per_fervor × Ferveur, en livres.",
+      "properties": {
+        "base": { "type": "integer", "minimum": 0 },
+        "per_fervor": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["base", "per_fervor"],
+      "additionalProperties": false
+    },
+    "passage": {
+      "type": "object",
+      "description": "Prêcher le passage : coût, recharge, délai et taille du contingent (units_base + Ferveur / fervor_per_extra_unit, borné par max_units).",
+      "properties": {
+        "cost": { "type": "integer", "minimum": 0 },
+        "cooldown_turns": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "delay_turns": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "units_base": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "fervor_per_extra_unit": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "max_units": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "unit_table": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+              "weight": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["unit", "weight"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "cost", "cooldown_turns", "delay_turns", "units_base",
+        "fervor_per_extra_unit", "max_units", "unit_table"
+      ],
+      "additionalProperties": false
+    },
+    "zeal": {
+      "type": "object",
+      "description": "Élan de la Croix : moral des armées de la faction (points du moral 0-100).",
+      "properties": {
+        "high_threshold": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "high_morale": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "low_threshold": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "low_morale": { "type": "integer", "minimum": -50, "maximum": 0 }
+      },
+      "required": ["high_threshold", "high_morale", "low_threshold", "low_morale"],
+      "additionalProperties": false
+    },
+    "desertion": {
+      "type": "object",
+      "description": "Débandade : sous le seuil, une part des hommes de chaque unité rentre chez elle chaque tour ; à 0, la part est multipliée.",
+      "properties": {
+        "threshold": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "men_percent_per_turn": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "zero_multiplier": { "type": "integer", "minimum": 1, "maximum": 10 }
+      },
+      "required": ["threshold", "men_percent_per_turn", "zero_multiplier"],
+      "additionalProperties": false
+    },
+    "starting_army": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+      "description": "Types d'unités de l'armée de départ, placée dans `base_settlement`."
+    },
+    "target_taken_prestige": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "relief": {
+      "type": "object",
+      "description": "Lot JR4b, « appel à défendre » : quand les croisés assiègent une place de Terre sainte, son maître y jette une levée de secours tirée de la table (une fois par siège, au plus une fois tous les cooldown_turns tours ; plafond de garnison de la place).",
+      "properties": {
+        "units": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "cooldown_turns": { "type": "integer", "minimum": 0, "maximum": 40 },
+        "unit_table": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+              "weight": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["unit", "weight"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["units", "cooldown_turns", "unit_table"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "faction", "base_settlement", "target_province", "holy_land", "coastal_holy_land",
+    "fervor", "alms", "passage", "zeal", "desertion", "starting_army", "target_taken_prestige"
+  ],
+  "additionalProperties": false
+}

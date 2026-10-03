@@ -1157,6 +1157,8 @@ pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {
                 "province" => event.province.as_ref().map_or("", |id| id.as_str()),
                 "army" => event.army.as_ref().map_or("", |id| id.as_str()),
                 "faction" => event.faction.as_ref().map_or("", |id| id.as_str()),
+                "public" => event.public,
+                "loss" => event.loss,
             }
             .to_variant()
         })

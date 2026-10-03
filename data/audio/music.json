@@ -2,13 +2,24 @@
   "playlists": {
     "campaign": {
       "primary": [
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
+        "assets/third_party/music/wikimedia/le_roy_bransles.mp3",
+        "assets/third_party/music/wikimedia/le_roy_je_nay_point_plus.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv996_sarabande.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv997_sarabande.mp3",
+        "assets/third_party/music/wikimedia/mudarra_moreno_vihuela.mp3",
+        "assets/third_party/music/wikimedia/kapsberger_capona.mp3",
+        "assets/third_party/music/wikimedia/hume_loves_farewell.mp3",
+        "assets/third_party/music/wikimedia/greensleeves_juglaresa.mp3",
+        "assets/third_party/music/wikimedia/cabezon_duviensela.mp3"
+      ],
+      "fallback": [
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
         "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
         "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
-        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
-      ],
-      "fallback": [
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/kevin_macleod/lord_of_the_land.mp3",
         "assets/third_party/music/kevin_macleod/village_consort.mp3",
         "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3",
@@ -23,14 +34,22 @@
     },
     "campaign_france": {
       "primary": [
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
+        "assets/third_party/music/wikimedia/le_roy_bransles.mp3",
+        "assets/third_party/music/wikimedia/le_roy_je_nay_point_plus.mp3",
+        "assets/third_party/music/wikimedia/moulinie_fantasia_violes.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv996_sarabande.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv998_prelude.mp3",
+        "assets/third_party/music/wikimedia/kapsberger_capona.mp3"
+      ],
+      "fallback": [
         "assets/third_party/music/ars_nova/onques_ne_fut.ogg",
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
         "assets/third_party/music/ars_nova/pierrekin_chancon_fas.ogg",
         "assets/third_party/music/ars_nova/he_robinet.ogg",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
-        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
-      ],
-      "fallback": [
+        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
         "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3",
         "assets/third_party/music/wikimedia/machaut_riches_damour.mp3",
         "assets/third_party/music/wikimedia/solage_fumeux_fume.mp3",
@@ -41,24 +60,39 @@
     },
     "campaign_england": {
       "primary": [
+        "assets/third_party/music/wikimedia/greensleeves_juglaresa.mp3",
+        "assets/third_party/music/wikimedia/gibbons_pavan_mb16.mp3",
+        "assets/third_party/music/wikimedia/hume_loves_farewell.mp3",
+        "assets/third_party/music/wikimedia/hume_pavan.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
+        "assets/third_party/music/wikimedia/le_roy_je_nay_point_plus.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv997_sarabande.mp3"
+      ],
+      "fallback": [
         "assets/third_party/music/ars_nova/bryd_one_brere.ogg",
         "assets/third_party/music/wikimedia/sumer_is_icumen_in.mp3",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
-        "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
-      ],
-      "fallback": [
+        "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3",
         "assets/third_party/music/kevin_macleod/thatched_villagers.mp3",
         "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3"
       ]
     },
     "campaign_burgundy": {
       "primary": [
+        "assets/third_party/music/wikimedia/bach_bwv996_sarabande.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv996_allemande.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv997_sarabande.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv998_prelude.mp3",
+        "assets/third_party/music/wikimedia/le_roy_bransles.mp3",
+        "assets/third_party/music/wikimedia/moulinie_fantasia_violes.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
+        "assets/third_party/music/wikimedia/hume_loves_farewell.mp3"
+      ],
+      "fallback": [
         "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
         "assets/third_party/music/ars_nova/dufay_adieu_mamour.ogg",
         "assets/third_party/music/wikimedia/dufay_ave_regina.mp3",
-        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
-      ],
-      "fallback": [
+        "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
         "assets/third_party/music/wikimedia/binchois_dueil_angoisseux.mp3",
         "assets/third_party/music/kevin_macleod/village_consort.mp3",
         "assets/third_party/music/kevin_macleod/galway.mp3"
@@ -66,29 +100,56 @@
     },
     "campaign_iberia": {
       "primary": [
-        "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
-        "assets/third_party/music/wikimedia/cantigas_santa_maria.mp3",
-        "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3"
+        "assets/third_party/music/wikimedia/mudarra_moreno_vihuela.mp3",
+        "assets/third_party/music/wikimedia/mudarra_tiento_harpa.mp3",
+        "assets/third_party/music/wikimedia/cabezon_duviensela.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3"
       ],
       "fallback": [
+        "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
+        "assets/third_party/music/wikimedia/cantigas_santa_maria.mp3",
         "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3"
       ]
     },
     "campaign_italy": {
       "primary": [
-        "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
-        "assets/third_party/music/ars_nova/saltarello_trecento.ogg",
-        "assets/third_party/music/ars_nova/faenza_bel_fiore_danca.ogg",
-        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
-        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
+        "assets/third_party/music/wikimedia/kapsberger_capona.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
+        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv996_allemande.mp3",
+        "assets/third_party/music/wikimedia/mudarra_tiento_harpa.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
+        "assets/third_party/music/ars_nova/faenza_bel_fiore_danca.ogg"
       ],
       "fallback": [
+        "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
+        "assets/third_party/music/ars_nova/saltarello_trecento.ogg",
+        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/landini_ecco_la_primavera.mp3",
         "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
         "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3"
       ]
     },
     "war": {
+      "primary": [
+        "assets/third_party/music/wikimedia/hume_pavan.mp3",
+        "assets/third_party/music/wikimedia/moulinie_fantasia_violes.mp3",
+        "assets/third_party/music/wikimedia/bach_bwv996_allemande.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
+        "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3",
+        "assets/third_party/music/kevin_macleod/crusade.mp3",
+        "assets/third_party/music/kevin_macleod/celtic_impulse.mp3",
+        "assets/third_party/music/kevin_macleod/achaidh_cheide.mp3",
+        "assets/third_party/music/kevin_macleod/angevin_b.mp3",
+        "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3",
+        "assets/audio/music/war.ogg"
+      ]
+    },
+    "battle": {
       "primary": [
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
@@ -104,13 +165,18 @@
     },
     "court": {
       "primary": [
+        "assets/third_party/music/wikimedia/bach_bwv997_sarabande.mp3",
+        "assets/third_party/music/wikimedia/gibbons_pavan_mb16.mp3",
+        "assets/third_party/music/wikimedia/cabezon_duviensela.mp3",
+        "assets/third_party/music/wikimedia/hume_pavan.mp3",
+        "assets/third_party/music/wikimedia/moulinie_fantasia_violes.mp3",
+        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
+      ],
+      "fallback": [
         "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
         "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
         "assets/third_party/music/ars_nova/he_robinet.ogg",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
-        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
-      ],
-      "fallback": [
         "assets/third_party/music/wikimedia/landini_si_dolce_non_sono.mp3",
         "assets/third_party/music/wikimedia/binchois_triste_plaisir.mp3",
         "assets/third_party/music/wikimedia/solage_fumeux_fume.mp3",

@@ -1,0 +1,46 @@
+{
+  "id": "chr_pierre_de_la_palud",
+  "name": {
+    "display": "Pierre de la Palud",
+    "local": "Petrus de Palude",
+    "local_language": "latin"
+  },
+  "sex": "male",
+  "house": "La Palud",
+  "faction": "fac_crusaders",
+  "role": "ruler",
+  "birth": {
+    "value": "1277",
+    "uncertain": true,
+    "note": "Naissance vers 1277."
+  },
+  "death": {
+    "value": "1342-01-31"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Patriarche latin de Jérusalem",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 6,
+    "court": 7
+  },
+  "traits": [
+    "trait_pious",
+    "trait_scholar",
+    "trait_crusader"
+  ],
+  "piety": 95,
+  "starting_location": "prov_cyprus",
+  "status": "at_court",
+  "description": "Dominicain, patriarche latin de Jérusalem depuis 1329, ambassadeur auprès du sultan puis prédicateur de la croisade ; il mourra en 1342. Uchronie de jeu : il conduit à Limassol les croisés restés fidèles à leur vœu.",
+  "sources": [
+    "Pierre de la Palud"
+  ]
+}

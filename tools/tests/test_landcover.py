@@ -157,3 +157,47 @@ def test_dryness_clears_steppes_and_deserts_but_not_the_west() -> None:
     assert paris == 0.0 and kostroma == 0.0
     assert don_steppe > 0.8 and anatolia > 0.8 and egypt > 0.9
     assert caucasus < 0.1  # montagnes boisées
+
+
+def test_named_forest_in_a_noise_trough_reaches_its_density() -> None:
+    """Lot HC5: a named forest is wooded at its density wherever the regional score is low."""
+    rng = np.random.default_rng(7)
+    shape = (120, 120)
+    land = np.ones(shape, dtype=bool)
+    rows, cols = np.mgrid[0:120, 0:120]
+    mask = (np.hypot(rows - 60, cols - 60) < 30).astype(np.float32)
+    # Regional score: a trough (ranks below 0.1) over the whole footprint.
+    blend = rng.random(shape).astype(np.float32)
+    score = (0.1 * blend).astype(np.float32)
+    density = 0.85
+    target = np.where(mask > 0, density, 0.0)
+    before = (score > 1.0 - target)[mask > 0].mean()
+    fixed = landcover.named_forest_score(score, blend, mask, land)
+    after = (fixed > 1.0 - target)[mask > 0].mean()
+    assert before == 0.0
+    assert after >= 0.7 * density
+    assert abs(after - density) < 0.02
+    # Outside the footprint the regional score is untouched.
+    assert np.array_equal(fixed[mask == 0], score[mask == 0])
+
+
+def test_centred_area_mask_keeps_the_nominal_area() -> None:
+    """Lot HC5: a slow edge noise must not shrink a small named forest as a whole."""
+    grid = default_grid()
+    lon, lat = grid.pixel_to_lonlat(
+        np.array([grid.width_px / 2]), np.array([grid.height_px / 2])
+    )
+    area = {
+        "ellipse": {
+            "center": [float(lon[0]), float(lat[0])],
+            "radii_km": [9.0, 7.0],
+            "angle_deg": 0.0,
+        }
+    }
+    low_noise = np.full(grid.shape, 0.1, dtype=np.float32)
+    dist, _ = landcover.area_signed_distance(area, grid)
+    nominal = float((dist > 0).sum())
+    raw, _ = landcover.area_mask(area, grid, low_noise)
+    centred, _ = landcover.area_mask(area, grid, low_noise, centred=True)
+    assert raw.sum() < 0.6 * nominal
+    assert abs(centred.sum() - nominal) < 0.1 * nominal

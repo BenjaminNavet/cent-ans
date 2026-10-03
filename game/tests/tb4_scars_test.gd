@@ -9,6 +9,9 @@ extends SceneTree
 ##     sans pictogramme ; retirées quand la peste cesse ;
 ##  3. champ de bataille : tertre, corbeaux, débris à l'endroit de la bataille, corbeaux puis
 ##     débris partis, puis plus rien après `battlefield.turns` tours (`data/ui/war_scars.json`) ;
+##  3 bis. historique du cœur (`get_battle_history`, vraie simulation) : bataille, sauvegarde,
+##     rechargement dans un rendu neuf : la marque revient au même endroit avec son âge, puis
+##     disparaît à l'échéance ; une sauvegarde sans historique se charge (aucune marque) ;
 ##  4. siège : engins du camp selon l'avancement (`get_assault_odds().engines`).
 ## Usage : godot --headless --path game --script res://tests/tb4_scars_test.gd
 
@@ -78,6 +81,7 @@ func _init() -> void:
 	_check(not WarScars.settings().is_empty(), "war_scars.json read")
 	_check_plague(data["plague"])
 	_check_battlefield(data["battlefield"])
+	_check_history(data["battlefield"])
 	_check_siege(data["siege"])
 	WarScarMeshes.clear_cache()
 	FolkModels.clear_cache()
@@ -276,6 +280,149 @@ func _check_battlefield(block: Dictionary) -> void:
 	_check(scars.battlefield_keys().is_empty(), "reset forgets the marked fields")
 	scars.free()
 	armies.free()
+
+
+## Point 3 bis : les marques viennent de l'historique des batailles du cœur et survivent au
+## rechargement. Vraie simulation (France, graine 1337) : bataille rangée auto-résolue au tour 0,
+## un tour, sauvegarde, rechargement dans une autre simulation et un rendu neuf.
+func _check_history(block: Dictionary) -> void:
+	if not _check(ClassDB.class_exists("CampaignSim"), "CampaignSim not registered (run core/build.sh)"):
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.has_method("get_battle_history"), "bridge lacks get_battle_history (run core/build.sh)"):
+		return
+	var data_dir := MAP_PATHS.default_data_dir()
+	if not _check(sim.new_campaign(data_dir, "fac_france", 1337), "new_campaign failed"):
+		return
+	_check((sim.get_battle_history() as Array).is_empty(), "no battle in the history at the start")
+	var rules: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join("rules/battle_history.json")))
+	var turns := int(block["turns"])
+	_check(turns <= int(rules["max_age_turns"]), "the core keeps battles at least as long as the map marks them (%d ≤ %d)" % [turns, int(rules["max_age_turns"])])
+	# Une armée française attaque une armée anglaise amenée à elle ; résolution automatique.
+	var french := ""
+	var english := ""
+	for id in sim.get_army_ids():
+		var faction := str(sim.get_army(id).get("faction", ""))
+		if faction == "fac_france" and french == "":
+			french = id
+		elif faction == "fac_england" and english == "":
+			english = id
+	if not _check(french != "" and english != "", "a French and an English army at the start"):
+		return
+	var index: int = sim.debug_stage_battle(french, english)
+	if not _check(index >= 0, "debug_stage_battle failed"):
+		return
+	var fought_turn: int = sim.get_turn()
+	_check(not (sim.auto_resolve_battle(index) as Array).is_empty(), "battle auto-resolved")
+	var history: Array = sim.get_battle_history()
+	if not _check(history.size() == 1, "one battle in the history: %s" % [history]):
+		return
+	var record: Dictionary = history[0]
+	var province := str(record.get("province", ""))
+	_check(int(record.get("turn", -1)) == fought_turn and int(record.get("age", -1)) == 0, "record of this turn: %s" % record)
+	_check(province != "" and record.get("position") is Vector2 and str(record.get("kind", "")) == "field", "record place and kind: %s" % record)
+	_check(str(record.get("attacker", "")) == "fac_france" and str(record.get("defender", "")) == "fac_england"
+		and str(record.get("winner", "")) in ["fac_france", "fac_england"], "record sides: %s" % record)
+	_check(int(record.get("attacker_strength", 0)) > 0 and int(record.get("attacker_losses", 0)) + int(record.get("defender_losses", 0)) > 0, "record strengths and losses: %s" % record)
+	var place: Vector2 = record["position"]
+	# La marque est posée tout de suite (bataille de la main du joueur), au lieu de l'historique.
+	var armies := FakeArmies.new()
+	root.add_child(armies)
+	var scars := _new_scars(armies)
+	scars.refresh(sim)
+	_check(scars.battlefield_keys() == [province], "field marked from the history: %s" % [scars.battlefield_keys()])
+	var at := scars.battlefield_at(province)
+	_check(at.distance_to(place) <= WarScars.FIELD_OFFSET + 0.01, "field at the recorded place: %s vs %s" % [at, place])
+	_check(_count(scars.battlefield_node(province), "Crow_") == int(block["crows"]), "fresh field: crows")
+	# Un tour passe, puis sauvegarde.
+	sim.end_turn()
+	scars.refresh(sim)
+	var saved: String = sim.save_to_string()
+	_check(saved.contains("\"battle_history\""), "history written in the save")
+	scars.free()
+	# Rechargement : autre simulation, rendu neuf (aucune mémoire des tours passés).
+	var loaded: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(loaded.load_from_string(saved), "save with a battle history loads"):
+		armies.free()
+		return
+	scars = _new_scars(armies)
+	scars.refresh(loaded)
+	var last := _last_battle_turn(loaded, province)
+	var age: int = int(loaded.get_turn()) - last
+	_check(last >= fought_turn and age <= 1, "history kept across the reload: last battle of %s at turn %d" % [province, last])
+	if last == fought_turn:
+		_check(scars.battlefield_at(province).is_equal_approx(at), "reloaded field at the same place: %s vs %s" % [scars.battlefield_at(province), at])
+	if _check(scars.battlefield_keys().has(province), "field still marked after the reload: %s" % [scars.battlefield_keys()]):
+		_check(int(scars._fields[province]["turn"]) == last, "reloaded field keeps the turn of the battle (age %d)" % age)
+		_check_stage(scars.battlefield_node(province), block, age)
+	# Les tours passent : la marque suit l'âge de la bataille puis part à l'échéance.
+	var expired := false
+	for _i in turns + 2:
+		loaded.end_turn()
+		scars.refresh(loaded)
+		last = _last_battle_turn(loaded, province)
+		age = int(loaded.get_turn()) - last
+		if last < 0 or age >= turns:
+			_check(not scars.battlefield_keys().has(province), "field gone %d turns after its last battle" % turns)
+			expired = last == fought_turn or last < 0
+			if expired:
+				_check(int(loaded.get_turn()) - fought_turn >= turns, "field not dropped early")
+			break
+		if _check(scars.battlefield_keys().has(province), "field still marked at age %d" % age):
+			_check(int(scars._fields[province]["turn"]) == last, "field turn follows the history at age %d" % age)
+			_check_stage(scars.battlefield_node(province), block, age)
+	print("tb4_scars_test: history: battle at turn %d in %s, mark gone at turn %d (%s)" % [fought_turn, province, int(loaded.get_turn()),
+		"its own deadline" if expired else "after later battles there"])
+	# Toutes les marques viennent de batailles encore dans l'historique, d'âge inférieur à `turns`.
+	for key in scars.battlefield_keys():
+		var key_age: int = int(loaded.get_turn()) - _last_battle_turn(loaded, str(key))
+		_check(key_age >= 0 and key_age < turns, "mark %s backed by a recent battle (age %d)" % [key, key_age])
+	# Sauvegarde d'avant l'historique (clé absente) : elle se charge, aucune marque.
+	# La clé est ôtée dans le texte (les entiers de la sauvegarde restent tels quels).
+	var start := saved.find(",\"battle_history\":[")
+	var end := _matching_bracket(saved, saved.find("[", start)) if start >= 0 else -1
+	if _check(start >= 0 and end > start, "battle_history key found in the save text"):
+		var old: Object = ClassDB.instantiate("CampaignSim")
+		if _check(old.load_from_string(saved.substr(0, start) + saved.substr(end + 1)), "a save without battle_history loads"):
+			_check((old.get_battle_history() as Array).is_empty(), "older save: empty history")
+			_check(int(old.get_turn()) == fought_turn + 1, "older save: same game otherwise")
+			scars.reset()
+			scars.refresh(old)
+			_check(scars.battlefield_keys().is_empty(), "older save: no mark, no error")
+	scars.free()
+	armies.free()
+
+
+## Position du crochet fermant qui répond au crochet ouvrant en `open` (hors chaînes : les
+## enregistrements de l'historique n'ont ni crochet ni guillemet échappé dans leurs textes).
+func _matching_bracket(text: String, open: int) -> int:
+	var depth := 0
+	for i in range(open, text.length()):
+		var c := text[i]
+		if c == "[":
+			depth += 1
+		elif c == "]":
+			depth -= 1
+			if depth == 0:
+				return i
+	return -1
+
+
+## Tour de la dernière bataille avec des morts de `province` dans l'historique du pont (-1 sans).
+func _last_battle_turn(sim: Object, province: String) -> int:
+	var last := -1
+	for record in sim.get_battle_history():
+		if str(record.get("province", "")) == province and int(record.get("attacker_losses", 0)) + int(record.get("defender_losses", 0)) > 0:
+			last = maxi(last, int(record.get("turn", -1)))
+	return last
+
+
+## Tertre présent, corbeaux et débris selon l'âge (`crow_turns`, `debris_turns`).
+func _check_stage(node: Node3D, block: Dictionary, age: int) -> void:
+	if not _check(node != null and node.get_node_or_null("Mound") != null, "mound at age %d" % age):
+		return
+	_check((_count(node, "Crow_") > 0) == (age < int(block["crow_turns"])), "crows at age %d: %d" % [age, _count(node, "Crow_")])
+	_check((_count(node, "Debris_") > 0) == (age < int(block["debris_turns"])), "debris at age %d: %d" % [age, _count(node, "Debris_")])
 
 
 func _count(node: Node, prefix: String) -> int:

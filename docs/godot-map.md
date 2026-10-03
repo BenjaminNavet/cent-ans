@@ -1700,6 +1700,40 @@ la section suivante ne sont plus créées, sauf avec `--town-style=real`.
   1,2).
 - Captures : `tests/gc_shots.gd` (15 vues) ; test : `tests/gc_maquettes_test.gd`.
 
+## Habillage généralisé : arbres grossis, eaux lisibles (chantier HC, ADR 0161)
+
+Prolonge la carte généralisée (ADR 0158) : à hauteur de jeu, forêts, bosquets, lacs et étangs se
+lisent en volume au lieu de teintes plates.
+
+- **Arbres** (`map.tree_style` de `data/ui/campaign_map.json`, `generalised` par défaut,
+  `--tree-style=real` pour les arbres 1:1 de VT3). Réglages `generalised_*` de
+  `resources/map_prop_scale.tres` : hauteur monde constante d'un feuillu adulte
+  (`generalised_tree_height`), pas du semis (`generalised_spacing`), portée
+  (`generalised_max_distance`, fondu `generalised_fade`), zone de dessin en avant du point visé
+  (`generalised_view_*`), éclaircie au-delà de `generalised_thin_start` (les arbres restants
+  grossissent de 1/√part ; `generalised_far_density` = 1 pour une taille strictement constante),
+  ombres sous `generalised_shadow_distance`. Imposteurs à toutes les distances ; `forest_detail`
+  et les cartes proches 1:1 sont éteints dans ce style.
+- **Hors forêt** : bosquets (`generalised_grove_*`), arbres épars (`generalised_isolated_gain`,
+  `generalised_hedge_boost` en bocage), vergers, ripisylves, garrigue. Les haies alignées sur la
+  trame du parcellaire ne sont pas dessinées (enclos de GC5 plus petits qu'un arbre).
+- **Dégagements** (`tree_clearance.gd`, en tâche de fond après le semis) : emprises de
+  `SettlementLayer.vegetation_exclusions()` élargies d'un rayon de houppier, fleuves, lacs, mer,
+  routes principales (`generalised_crown_clearance`, `generalised_road_clearance`).
+- **Lacs** : `data/map/lakes.json` régénéré avec `min_area_px` 8 (1231 lacs) ; eau peinte et nappe
+  éclaircies (`lake_color`, `lake_sky_color`, `lake_sky_reflect`, `lake_bank_color` de
+  `terrain.gdshader`).
+- **Étangs et mares** (`relief_landcover.gdshaderinc`) : cellules doublées par paliers d'empreinte
+  (`rl_pond_*`, `rl_pool_*`) pour que les zones d'étangs de `wetlands.png` gardent des nappes
+  distinctes au dézoom ; taille minimale en pixels d'un écran de référence
+  (`rl_water_ref_height`).
+- **Données** (HC5, changent les règles) : `historical_forests.json` (146 massifs et landes) et
+  `wetlands.json` (77 zones) ; `landcover.py` boise chaque massif nommé à sa densité par un rang
+  local. Recuisson : `geo landcover` → `navgrid` → `colormap` → `horizon` (`docs/geo.md`).
+- **Tests et planches** : `tests/hc_forest_test.gd`, `tests/hc_water_test.gd` ;
+  `tests/hc_shots.gd` et `tests/hc_water_shots.gd` (planches 2×2, fenêtre réelle),
+  `tests/hc_density_probe.gd` (densités sans image).
+
 ## Villes 1:1 à toutes les hauteurs (chantier VT, ADR 0138)
 
 Plus aucune maquette agrandie sur la carte de campagne : les 2 141 villes (2 134 colonies de
@@ -1872,6 +1906,94 @@ passe à d = 150 sous charge) ; sections les plus chères de la sonde inchangée
 `settlements`, `life`), la forêt dense n'y apparaît pas. Chargement de la carte inchangé
 (5,3-6,4 s). Après le passage de l'herbe au 1:1, de la teinte de canopée et du fondu : une passe
 VT3 à d = 5 donne 559 appels de dessin, 3,71 M primitives, 74 i/s, pire image 28 ms.
+
+## Bâtiments hors les murs et croissance des villes (lot TB3, ADR 0162)
+
+Rendu seulement ; les règles restent dans `core/`. Données : `data/map/building_models.json`
+(schéma `building_models.schema.json`).
+
+- **Bâtiments hors les murs** (`OutbuildingLayer`, enfant `Outbuildings` de `SettlementLayer`) :
+  ferme, moulin, vignoble, mine, saline, abbaye, marché, port. Pour chaque colonie, le plus haut
+  niveau (1 à 3) de chaque famille dont les groupes `require` comptent assez de bâtiments
+  construits (`get_settlements_live`, sinon `settlement_detail`) et dont la province produit une
+  des `resources` ; au plus `render.max_per_settlement` maquettes par colonie. Maquettes de
+  `game/assets/models/outbuildings/` (`tools/blender_scripts/tb3_outbuildings.py`).
+- **Site** : calculé une fois par famille et par colonie, entre `ring_min_m` et `ring_max_m` du
+  bâti, dans le secteur de la famille (tiré de l'identifiant de la colonie), hors des emprises
+  voisines, des lits de fleuve, de la mer et des routes des portes, pente ≤ `max_slope`. `site` :
+  `field` (le plus plat), `slope` (coteau), `water` (près d'un fleuve), `road` (au plus près),
+  `coast` (grève la plus proche, sinon champ), `shore` (grève obligatoire : pas de port sans eau
+  à moins de `shore_reach_m`). La maquette grandit sur place ; sa façade regarde la ville, ou
+  l'eau.
+- **Rendu** : un `MultiMesh` par maillage pour le voisinage de la caméra (rayon `load_factor` ×
+  distance du rig, entre `load_min_units` et `load_max_units`), reconstruit par tranches de
+  1,5 ms quand la caméra s'éloigne de son centre, que le palier de distance change ou que l'état
+  de la simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief
+  plus fines arrivent. Ombres sous `shadow_range_units` (90). `--no-tb3` après `--` coupe la
+  couche.
+- **Taille tenue à l'écran** (`render.screen`, ADR 0162) : échelle réelle sous `real_below` (10) ;
+  à partir de `full_from` (15) chaque maquette garde une largeur d'écran selon son niveau
+  (`fractions` : 4,4 %, 6 %, 8 % de la hauteur d'écran, soit 40 / 54 / 72 px au centre en
+  900 px), son grossissement suivant la distance du rig (`model_factor`) ; fondu de sortie de
+  `fade_from_units` (120) à `view_range_units` (160). De loin, les maquettes s'écartent de la
+  ville dans la même proportion (`_layout`, `_far_spot`) : anneau au bord de la ville dans la
+  direction du site réel, sans recouvrement entre elles ni avec les colonies voisines, hors mer
+  et lits de fleuve, routes principales et routes des portes évitées tant qu'il reste de la
+  place. La mise en place est calculée par palier géométrique de distance (`band_top`,
+  `band_ratio` 1,5) et gardée par colonie ; les cités passent avant les villes, les niveaux hauts
+  avant les bas ; une maquette sans place est retirée à ce palier ; au-delà de `minor_until`
+  (60), seules les cités et les villes gardent les leurs. Faubourgs ajoutés : quartier grossi
+  depuis son départ sur la route (`house_fraction`) ; enceinte ajoutée : tracé inchangé,
+  épaisseur tenue à l'écran (`wall_fraction`, au plus `wall_max_share` du rayon), tours
+  éclaircies.
+- **Signes en volume** : maquettes faites de quelques pièces grosses et hautes, une silhouette
+  par famille ; de loin, volumes relevés (`screen.vertical`), teintes éclaircies (`brighten`),
+  usure réduite (`aging`), façade vers la caméra de jeu (ou vers l'eau pour un port, posé sur la
+  grève la plus proche à `shore_reach_far` unités au plus).
+- **Signe de colonie** (`screen.signs` par genre : `sign_village`, `sign_town` / `sign_walled`,
+  `sign_city`, `sign_castle`, abbaye) : maquette tenue à l'écran qui recouvre la ville 1:1 dès
+  que celle-ci est plus petite qu'elle ; l'anneau des maquettes et les faubourgs ajoutés partent
+  de son bord ; l'enceinte ajoutée passe par la variante murée. Gardé sous le brouillard.
+- **Pose par pièce** : `manifest.json` liste les pièces rigides de chaque maquette (`pieces`) ;
+  `OutbuildingLayer.with_pieces` écrit le centre de sa pièce dans `CUSTOM0` de chaque sommet et
+  `town_building.gdshader` (`drape`, `drape_heightmap` = heightmap du terrain) pose chaque pièce
+  sur le sol sous son centre : rien d'enterré dans un versant.
+- **Brouillard de guerre** : rien n'est posé dans une province hors de vue
+  (`ArmyMarkers.hidden_provinces` ; `OutbuildingLayer.fog_source`, `is_hidden(id)`).
+- **Style `maquette`** (défaut, ADR 0158 ; `render.maquette`) : mêmes maquettes autour de la
+  maquette de GC, à taille monde constante (formules de taille évaluées à `size_distance` 50 :
+  2,3 / 3,1 / 4,2 unités), visibles jusqu'à 330 (fondu depuis 260) ; pas de signe de colonie ni
+  d'enceinte ajoutée ; faubourgs en groupes `sign_suburb` au bord de la maquette ; cités et
+  villes seulement (`kinds`) ; moulin seulement s'il est construit en cours de partie
+  (`built_in_game_only`, les moulins du décor sont ceux de GC5) ; suie sur ces pièces seulement.
+  `--town-style=real` rend le comportement décrit ci-dessus (signes, taille tenue à l'écran).
+- **Croissance de la ville 1:1** (`TownGrowth`, mêmes `MultiMesh`) : quartiers de faubourg (maisons
+  de `town_kit/`) le long des routes des portes selon la population de la province rapportée à
+  celle de 1337 ; enceinte (pans, tours, portes aux dimensions de `towns_1340.json`) quand un
+  bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan et les
+  bâtiments de départ. `SettlementLayer.growth_of(id)` résume la croissance d'une colonie.
+- **Suie par ville** (`TownSoot`, `SettlementLayer.town_soot` / `set_town_soot`) : dévastation de
+  la province, siège, prise de la place (mémoire de session). Portée par le paramètre d'instance
+  `town_soot` des nœuds de la ville (`TownBuilder.set_soot`), le masque `soot_mask` du maillage
+  lointain et `INSTANCE_CUSTOM.b` des instances partagées. Effet borné dans les shaders : toits
+  brun-noir à 60 % au plus (`soot_roof_max`), murs et sol à 15 % (`soot_wall_max`).
+- **Chantier** : `ConstructionMarkers` pose la maquette `worksite_1` (taille constante à l'écran,
+  couche « Signes ») ; la cité en chantier reçoit aussi un chantier parmi ses maquettes.
+
+Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, Agen, états imposés), couche
+masquée → affichée : d = 20 : 642 → 692 appels de dessin (23 instances, 15 nœuds, ombres
+comprises) ; d = 45 : 449 → 528 (196 instances, 26 nœuds) ; d = 90 : 478 → 506 (282 instances,
+31 nœuds) ; d = 400 : 398 → 398 (hors de portée). Temps par image inchangé (16,7 ms, synchro
+verticale). Mise en place d'un voisinage (hors image, par tranches de 1,5 ms) : 0,4 à 0,9 s
+pour 9 à 64 colonies ; lecture groupée de l'état 6 à 10 ms par changement d'état. Largeurs à
+l'écran (`tb3_growth_test`, autour du point visé, en 900 px de haut) : 34,5 à 62,1 px à 20 ;
+29,7 à 62,2 px à 45 ; 29,6 à 64,2 px à 90 ; aucune paire en recouvrement.
+Captures de contrôle : `godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd
+-- --out=<dossier>` : Agen, Fleurance et La Rochelle (port, saline) aux distances 20, 45 et 90,
+chaque cadrage en `-avant.png` (sans le lot) et `-apres.png`, plus une planche par ville
+(`tb3-planche-<id>.png`). Planche catalogue des maquettes sur sol neutre, à leur taille d'écran :
+`godot --path game --resolution 1600x900 --script res://tests/tb3_catalogue_shot.gd --
+--out=<dossier> [--zoom=2]`.
 
 ## Interface des colonies (lot C5)
 

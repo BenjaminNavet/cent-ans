@@ -70,6 +70,11 @@
       "faction": "fac_cilicia",
       "status": "alliance",
       "note": "Liens dynastiques des Lusignan avec l'Arménie cilicienne."
+    },
+    {
+      "faction": "fac_crusaders",
+      "status": "alliance",
+      "note": "Les Lusignan hébergent le patriarche et son ost."
     }
   ],
   "ai_personality": {

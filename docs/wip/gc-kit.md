@@ -102,6 +102,13 @@ Villes des autres familles : med 3,63 / 3,36 ; byz 3,40 / 3,39 ; rus 3,19 / 3,36
 - `west` : 8 à 12 surfaces par modèle (une par teinte), comme les autres familles.
 - Abbaye `west` 1,97 de large pour un contrat de 2,2 (les autres familles : 2,00 à 2,28).
 
+## GC6-perf (02/10) : une surface par modèle
+`settlements_east.bake_kit` : teintes de palette cuites en couleur de coin (`COLOR_0` linéaire,
+alpha 0 sur les bannières), matériau unique `Kit`, rugosité 0,9 ; plus d'atlas ni d'UV pour les
+six familles (`KIT_TINTS` : couleur unie des pièces `Wood`). Les « 5 à 12 surfaces par modèle »
+des points ouverts ci-dessus sont réglées. La planche applique la même finition (elle montre ce
+que Godot dessine). Détail et mesures : `docs/wip/gc-carte-generalisee.md`, section GC6-perf.
+
 ## Prochaine étape
 Aucune dans ce lot. À l'orchestrateur : import Godot (`.import`), câblage de la famille `west`
 comme défaut (GC2), jugement en jeu.

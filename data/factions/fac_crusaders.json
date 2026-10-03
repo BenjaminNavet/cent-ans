@@ -1,0 +1,122 @@
+{
+  "id": "fac_crusaders",
+  "name": {
+    "display": "Croisade du Saint-Sépulcre",
+    "local": "Crux Sancti Sepulchri",
+    "local_language": "latin"
+  },
+  "short_name": "Croisés",
+  "adjective": "croisé",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_pierre_de_la_palud",
+  "capital": "prov_cyprus",
+  "capital_city": "Limassol",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "elective",
+  "heraldry": {
+    "blazon": "D'argent à la croix potencée d'or cantonnée de quatre croisettes du même.",
+    "description": "Croix de Jérusalem d'or sur fond d'argent, armes du royaume latin de Jérusalem reprises par les croisés du patriarche.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C9A227",
+    "uncertain": true,
+    "note": "Uchronie de jeu : la croisade de 1337 n'a pas eu lieu ; ces armes sont celles du royaume latin de Jérusalem."
+  },
+  "titles": [
+    "Patriarche latin de Jérusalem"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hospital_reform",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "war",
+      "note": "But de la croisade : arracher Jérusalem au sultan du Caire."
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "alliance",
+      "note": "Les Lusignan accueillent le patriarche et les croisés à Limassol."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "peace",
+      "note": "Frères d'armes de la Chrétienté d'Orient, voisins à Rhodes."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Le pape a annulé le passage de 1336 mais n'a pas condamné ceux qui ont gardé leur vœu."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 85,
+    "diplomacy": 40,
+    "trade": 20,
+    "piety": 100
+  },
+  "description": "Uchronie de jeu. En 1336, Benoît XII annule le passage général prêché par Jean XXII ; les croisés qui refusent d'être relevés de leur vœu suivent le patriarche Pierre de la Palud à Limassol. Sans terres, vivant des aumônes de la Chrétienté et de l'élan de leur vœu, ils n'ont qu'un but : prendre et tenir Jérusalem.",
+  "sources": [
+    "Pierre de la Palud",
+    "Passagium generale",
+    "Croisade de 1336 (projet de Philippe VI)",
+    "Patriarcat latin de Jérusalem"
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_jerusalem",
+      "note": "Jérusalem et le Saint-Sépulcre : but de la croisade."
+    },
+    {
+      "kind": "province",
+      "province": "prov_gaza",
+      "note": "Port de Terre sainte, tête de pont pour les pèlerins."
+    },
+    {
+      "kind": "province",
+      "province": "prov_safad",
+      "note": "Galilée, ancienne seigneurie franque."
+    }
+  ],
+  "victory": {
+    "end_year": 1453,
+    "hold_turns": 20,
+    "summary": "Délivrer Jérusalem, s'assurer un port en Terre sainte et tenir le tout jusqu'au terme de la partie.",
+    "objectives": [
+      {
+        "id": "obj_cr_jerusalem",
+        "title": "Délivrer Jérusalem",
+        "description": "La Ville sainte doit passer sous la bannière de la Croix.",
+        "condition": {
+          "kind": "control_all",
+          "provinces": [
+            "prov_jerusalem"
+          ]
+        }
+      },
+      {
+        "id": "obj_cr_port",
+        "title": "Un port pour les pèlerins",
+        "description": "Tenir au moins un port de Terre sainte : Gaza, Safad ou Tripoli.",
+        "condition": {
+          "kind": "control_count",
+          "count": 1,
+          "provinces": [
+            "prov_gaza",
+            "prov_safad",
+            "prov_tripoli"
+          ]
+        }
+      }
+    ]
+  }
+}

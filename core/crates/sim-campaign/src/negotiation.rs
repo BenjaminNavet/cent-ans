@@ -837,6 +837,11 @@ fn article_value(
                 }
             }
             reasons.extend(r);
+            // JR4: the vow of an AI-led crusade allows no peace with the
+            // master of its goal.
+            if crate::crusade::ai_vow_forbids_peace(state, data, recipient, proposer) {
+                blocked = Some("le vœu de croisade interdit la paix".to_owned());
+            }
         }
         Article::Alliance => {
             let (r, hard) = legacy(&Proposal::Alliance);
@@ -1842,6 +1847,10 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
     let cornered = diplomacy::is_cornered(state, data, faction);
     for enemy in enemies {
         let enemy_is_player = enemy == &state.player_faction;
+        // JR4: an AI-led crusade never treats with the master of its goal.
+        if crate::crusade::ai_vow_forbids_peace(state, data, faction, enemy) {
+            continue;
+        }
         // A campaign season does not end a war: no treaty before
         // `min_war_turns`, unless the realm is down to its last lands.
         let started = me.war_started.get(enemy).copied().unwrap_or(0);

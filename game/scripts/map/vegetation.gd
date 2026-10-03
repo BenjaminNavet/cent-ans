@@ -107,6 +107,15 @@ var forest_detail: ForestDetail
 var terrain: TerrainBuilder
 ## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
 var extra_exclusions: PackedVector3Array = PackedVector3Array()
+## Lot HC1 (ADR 0161) : style généralisé (`MapPropScale.trees_generalised()`, lu à `build`) :
+## arbres à taille monde constante grossie, dessinés jusqu'à la vue stratégique ; forêt dense et
+## cartes proches 1:1 éteintes. Faux : rendu VT3 inchangé.
+var generalised: bool = false
+## Lot HC1 : contours des lacs (px carte ; vide : lus dans `lakes.json`) et polylignes des routes
+## principales à dégager, à poser avant `build`.
+var clearance_lakes: Array = []
+var clearance_roads: Array = []
+var clearance: TreeClearance = null
 var chunk_px: int = 0
 ## Grille des tuiles de terrain (`TerrainBuilder.chunk_grid_for`, ADR 0115).
 var chunks_x: int = TerrainBuilder.LEGACY_CHUNKS
@@ -190,9 +199,12 @@ func build(data: MapData) -> void:
 	mask = VegetationMask.new()
 	mask.setup(data)
 	stats["source"] = mask.source
+	var props := MapPropScale.shared()
+	generalised = MapPropScale.trees_generalised()
+	stats["style"] = MapPropScale.tree_style()
 	species = null
 	if use_species and TreeSpecies.shared().ok:
-		species = TreeSpecies.shared()
+		species = _generalised_species(props) if generalised else TreeSpecies.shared()
 		mask.default_biome = int(species.d("default_biome", 2.0))
 		if _native != null:
 			if not _native.has_method("set_species") or not bool(_native.call("set_species", species.table())):
@@ -206,7 +218,7 @@ func build(data: MapData) -> void:
 	_cards_material = null
 	# GA3-L2 : imposteurs générés aussi pour les arbres proches (pas de cartes de feuillage).
 	ga3_near_impostors = _impostor_material != null and Ga3Vegetation.near_impostors()
-	if use_near_cards and not ga3_near_impostors and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
+	if use_near_cards and not generalised and not ga3_near_impostors and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
 		_cards_material = ShaderMaterial.new()
 		_cards_material.shader = CARDS_SHADER
 		_cards_material.set_shader_parameter("card_texture", load(Ga3Vegetation.pick(Ga3Vegetation.LEAF_CARDS, VegetationMeshes.CARD_TEXTURE)))
@@ -214,6 +226,12 @@ func build(data: MapData) -> void:
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_bind_forest_cover(data)
+	if generalised:  # HC1 : variation de taille par arbre (`scale_jitter` du feuillage)
+		_set_foliage_param("scale_jitter", props.generalised_size_variation)
+		# Lisières : la rampe de la couverture réduite (≈ 7 px par texel) est large devant un bois
+		# généralisé ; arbres à peine plus bas et peu éclaircis, sinon la canopée s'ouvre.
+		_set_foliage_param("edge_height", props.generalised_edge_height)
+		_set_foliage_param("edge_thin", props.generalised_edge_thin)
 	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.
@@ -222,10 +240,45 @@ func build(data: MapData) -> void:
 		if capital.x >= 0.0:
 			_exclusions.append(Vector3(capital.x, capital.y, 11.0))
 	_exclusions.append_array(extra_exclusions)
-	if _native != null and use_forest_detail:
+	clearance = null
+	if generalised:
+		# HC1 : clairières des lieux (telles que `SettlementLayer.vegetation_exclusions()` les
+		# renvoie) élargies du rayon d'un houppier ; eau et routes : `TreeClearance`.
+		var crown := props.generalised_crown_radius()
+		for i in _exclusions.size():
+			_exclusions[i] += Vector3(0.0, 0.0, crown)
+		clearance = TreeClearance.new()
+		clearance.crown_radius = crown
+		clearance.tree_scale = props.generalised_scale()
+		clearance.crown_clearance = props.generalised_crown_clearance
+		clearance.crown_widen = props.generalised_crown_widen
+		clearance.road_clearance = props.generalised_road_clearance
+		clearance.setup(data, clearance_lakes, clearance_roads)
+	stats["cleared"] = 0
+	if _native != null and use_forest_detail and not generalised:
 		forest_detail = ForestDetail.new()
 		add_child(forest_detail)
 		forest_detail.setup(self, terrain)
+
+
+## Lot HC1 : table des essences du style généralisé : copie de la table partagée dont les
+## probabilités hors forêt (réglées pour le pas 1:1) sont multipliées par les gains de
+## `MapPropScale` (`generalised_*_gain`, indices de `TreeSpecies.BIOME_KEYS`) ; le poids du bocage
+## sur les arbres épars (`hedge_boost`) remplace les haies alignées, non dessinées dans ce style.
+static func _generalised_species(props: MapPropScale) -> TreeSpecies:
+	var table := TreeSpecies.new()
+	if not table.load_file(TreeSpecies.data_path()):
+		return TreeSpecies.shared()
+	var gains := {1: props.generalised_isolated_gain, 2: props.generalised_grove_gain, 3: props.generalised_orchard_gain,
+		5: props.generalised_orchard_gain, 6: props.generalised_riparian_gain, 8: props.generalised_scrub_gain}
+	for b in range(1, TreeSpecies.BIOME_COUNT):
+		for key: int in gains:
+			var k := b * TreeSpecies.BIOME_STRIDE + key
+			table.biome_params[k] = clampf(table.biome_params[k] * float(gains[key]), 0.0, 1.0)
+	table.dist = table.dist.duplicate()
+	table.dist["hedge_boost"] = props.generalised_hedge_boost
+	table.dist["grove_core"] = props.generalised_grove_core
+	return table
 
 
 ## Lot FC2 : matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
@@ -261,10 +314,15 @@ static func _make_impostor_material() -> ShaderMaterial:
 ## pixels : ombres indiscernables mais payées dans chaque cascade).
 func tree_shadow_limit() -> float:
 	var limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
-	return minf(limit, MapPropScale.shared().tree_shadow_distance)
+	var props := MapPropScale.shared()
+	return minf(limit, props.generalised_shadow_distance if generalised else props.tree_shadow_distance)
 
 
 func effective_max_distance() -> float:
+	if generalised:
+		# HC1 : portée du style généralisé, plafonnée par le préréglage (`veg_max_distance`).
+		var reach := MapPropScale.shared().generalised_max_distance
+		return minf(reach, quality_max_distance) if quality_max_distance > 0.0 else reach
 	var legacy := max_camera_distance
 	if quality_max_distance > 0.0 and use_impostors and (_impostor_material != null or map_data == null):
 		legacy = quality_max_distance
@@ -311,6 +369,32 @@ func lod_census() -> Dictionary:
 				else:
 					census["low"] += 1
 					census["low_triangles"] += triangles
+	return census
+
+
+## Lot HC1 (tests, mesures) : tuiles et instances réellement soumises au rendu (parties visibles,
+## `visible_instance_count`), avant le tri par le champ de la caméra.
+func visible_census() -> Dictionary:
+	var census := {"tiles": 0, "parts": 0, "instances": 0, "shadow_parts": 0}
+	if not visible:
+		return census
+	for entry: Dictionary in _tiles.values():
+		if not (entry["node"] as Node3D).visible:
+			continue
+		census["tiles"] += 1
+		for part: Dictionary in entry["parts"]:
+			if not (part["node"] as Node3D).visible:
+				continue
+			census["parts"] += 1
+			var shadows := false
+			for mmi: MultiMeshInstance3D in part["mmis"]:
+				if mmi == null:
+					continue
+				var multimesh := mmi.multimesh
+				census["instances"] += multimesh.visible_instance_count if multimesh.visible_instance_count >= 0 else multimesh.instance_count
+				shadows = shadows or mmi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if shadows:
+				census["shadow_parts"] += 1
 	return census
 
 
@@ -456,9 +540,9 @@ func _process(_delta: float) -> void:
 	if camera == null:
 		return
 	var distance: float = _rig.get("distance") if _rig != null else camera.global_position.y
-	update_view(camera.global_position, distance)
+	var focus: Variant = _rig.get("focus") if _rig != null else null
+	update_view(camera.global_position, distance, focus if focus is Vector3 else Vector3.INF)
 	if forest_detail != null:
-		var focus: Variant = _rig.get("focus") if _rig != null else null
 		var at := Vector2(focus.x, focus.z) if focus is Vector3 else Vector2(camera.global_position.x, camera.global_position.z)
 		forest_detail.update_view(at, distance, cast_shadows and distance < tree_shadow_limit())
 	if _frame % 30 == 1:
@@ -530,8 +614,8 @@ func max_ground_error(stride: int = 7) -> float:
 
 
 ## Met à jour tuiles, LOD et éclaircissement pour une caméra en `camera_position`, à
-## `camera_distance` de son point visé.
-func update_view(camera_position: Vector3, camera_distance: float) -> void:
+## `camera_distance` de son point visé `focus` (HC1 ; inconnu : sous la caméra).
+func update_view(camera_position: Vector3, camera_distance: float, focus: Vector3 = Vector3.INF) -> void:
 	_frame += 1
 	_collect_jobs()
 	_collect_ground_jobs()
@@ -540,18 +624,43 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	visible = active
 	if not active or _material == null:
 		return
-	# VT3 : arbres 1:1 dessinés jusqu'à la distance caméra où ils font ≈ 1 px
-	# (`MapPropScale.tree_view_range`, éteints par graine sur `tree_view_fade`) ; au voisinage de
-	# la portée du rig, la portée se referme : les arbres s'effacent (la canopée du terrain reste).
 	var props := MapPropScale.shared()
-	var closing := props.range_weight(camera_distance, max_distance)
-	var fade_end := props.tree_view_range * quality_detail * closing
-	var fade_start := fade_end * (1.0 - props.tree_view_fade)
-	_set_foliage_param("view_origin", camera_position)
+	var camera_xz := Vector2(camera_position.x, camera_position.z)
+	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
+	var lift := absf(camera_position.y) * 0.5
+	var view_origin := camera_position
+	var view_xz := camera_xz
+	var view_lift := lift
+	var fade_start: float
+	var fade_end: float
+	var density := quality_density
+	if generalised:
+		# HC1 : arbres à taille constante, dessinés autour d'un centre en avant du point visé (la
+		# caméra regarde loin devant elle : un disque autour d'elle sèmerait surtout derrière),
+		# sur un rayon qui croît avec la distance du rig ; fondu en approchant de la portée.
+		if not focus.is_finite():
+			focus = Vector3(camera_position.x, 0.0, camera_position.z)
+		var ahead := Vector2(focus.x - camera_position.x, focus.z - camera_position.z)
+		ahead = ahead.normalized() if ahead.length() > 1e-3 else Vector2.ZERO
+		view_xz = Vector2(focus.x, focus.z) + ahead * props.generalised_view_lead * camera_distance
+		view_origin = Vector3(view_xz.x, focus.y, view_xz.y)
+		view_lift = 0.0
+		var fade := maxf(max_distance * props.generalised_fade, 1e-3)
+		var closing := 1.0 - smoothstep(max_distance - fade, max_distance, camera_distance)
+		fade_end = props.generalised_view_range(camera_distance) * closing
+		fade_start = fade_end * (1.0 - props.generalised_view_fade)
+		density *= props.generalised_density(camera_distance)
+	else:
+		# VT3 : arbres 1:1 dessinés jusqu'à la distance caméra où ils font ≈ 1 px
+		# (`MapPropScale.tree_view_range`, éteints par graine sur `tree_view_fade`) ; au voisinage de
+		# la portée du rig, la portée se referme : les arbres s'effacent (la canopée du terrain reste).
+		var closing := props.range_weight(camera_distance, max_distance)
+		fade_end = props.tree_view_range * quality_detail * closing
+		fade_start = fade_end * (1.0 - props.tree_view_fade)
+	_set_foliage_param("view_origin", view_origin)
 	_set_foliage_param("fade_start", fade_start)
 	_set_foliage_param("fade_end", maxf(fade_end, fade_start + 1.0))
 	# VT3 : plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
-	var density := quality_density
 	_set_foliage_param("density", density)
 	if _cards_material != null:
 		# Sans imposteurs (`--no-fc2`), cartes jusqu'au bout des parties proches.
@@ -559,13 +668,10 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 		_cards_material.set_shader_parameter("near_end", near_end)
 		_cards_material.set_shader_parameter("near_start", near_end - near_fade)
 	var wanted: Array = []
-	var camera_xz := Vector2(camera_position.x, camera_position.z)
-	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
-	var lift := absf(camera_position.y) * 0.5
 	for cy in chunks_y:
 		for cx in chunks_x:
 			var index := cy * chunks_x + cx
-			var d := _rect_distance(Rect2(cx * chunk_px, cy * chunk_px, chunk_px, chunk_px), camera_xz) + lift
+			var d := _rect_distance(Rect2(cx * chunk_px, cy * chunk_px, chunk_px, chunk_px), view_xz) + view_lift
 			var in_range := d < fade_end
 			if _tiles.has(index):
 				var entry: Dictionary = _tiles[index]
@@ -574,10 +680,12 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 					entry["last_seen"] = _frame
 				if in_range:
 					for part: Dictionary in entry["parts"]:
-						var part_d := _rect_distance(part["rect"], camera_xz) + lift
+						var part_d := _rect_distance(part["rect"], view_xz) + view_lift
 						(part["node"] as Node3D).visible = part_d < fade_end
 						if part_d < fade_end:
-							_apply_lod(part, part_d, fade_start, fade_end, density, camera_distance)
+							# Paliers (maillage, ombres) : toujours selon la distance à la caméra.
+							var lod_d := part_d if not generalised else _rect_distance(part["rect"], camera_xz) + lift
+							_apply_lod(part, part_d, fade_start, fade_end, density, camera_distance, lod_d)
 			elif d < maxf(fade_end, tile_prefetch_distance) and not _jobs.has(index):
 				wanted.append([d, index])
 	_start_ground_jobs()
@@ -605,6 +713,9 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 			while not _native_ids.is_empty():
 				OS.delay_usec(200)
 				_poll_native()
+			for item: Dictionary in _jobs.values():  # HC1 : dégagements en cours
+				if item.has("filter"):
+					WorkerThreadPool.wait_for_task_completion(item["filter"])
 		var ready_jobs := _jobs.duplicate()
 		_jobs.clear()
 		for index in ready_jobs:
@@ -622,11 +733,15 @@ static func _rect_distance(rect: Rect2, point: Vector2) -> float:
 
 ## Maillage selon la distance et nombre d'instances visibles : les graines (triées) inférieures
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
-func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float) -> void:
-	var detailed := d < detail_distance * quality_detail
+## `lod_d` : distance des paliers (HC1 : distance à la caméra, `d` étant mesurée au centre de vue).
+func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float, lod_d: float = -1.0) -> void:
+	if lod_d < 0.0:
+		lod_d = d
+	var detail_limit := MapPropScale.shared().generalised_mesh_distance if generalised else detail_distance
+	var detailed := lod_d < detail_limit * quality_detail
 	var lod: int = Lod.FAR
 	if detailed:
-		lod = Lod.NEAR if _cards_material != null and d < near_distance * quality_detail else Lod.DETAILED
+		lod = Lod.NEAR if _cards_material != null and lod_d < near_distance * quality_detail else Lod.DETAILED
 	var mmis: Array = entry["mmis"]
 	if entry.get("lod", -1) != lod:
 		entry["lod"] = lod
@@ -720,7 +835,14 @@ func _start_job(index: int) -> void:
 	job.tile_index = index
 	job.origin_px = Vector2i((index % chunks_x) * chunk_px, (index / chunks_x) * chunk_px)
 	job.size_px = chunk_px
-	job.spacing = spacing * float(chunk_px) / 256.0 if chunk_px < 256 else spacing
+	var pitch := MapPropScale.shared().generalised_spacing if generalised else spacing
+	job.spacing = pitch * float(chunk_px) / 256.0 if chunk_px < 256 else pitch
+	if generalised:
+		job.drop_hedges = true
+		job.grove_low = MapPropScale.shared().generalised_grove_low
+		job.grove_high = MapPropScale.shared().generalised_grove_high
+		if clearance != null:
+			job.clearance = clearance.for_tile(Rect2(Vector2(job.origin_px), Vector2(chunk_px, chunk_px)))
 	job.tree_scale = tree_scale
 	job.exclusions = _exclusions_for(Rect2(Vector2(job.origin_px), Vector2(chunk_px, chunk_px)))
 	var level := -1
@@ -747,6 +869,12 @@ func _exclusions_for(rect: Rect2) -> PackedVector3Array:
 func _collect_jobs() -> void:
 	for index in _jobs.keys():
 		var item: Dictionary = _jobs[index]
+		if item.has("filter"):  # HC1 : semis natif reçu, dégagements en cours
+			if WorkerThreadPool.is_task_completed(item["filter"]):
+				WorkerThreadPool.wait_for_task_completion(item["filter"])
+				_jobs.erase(index)
+				_install_tile(index, item["job"], item["level"])
+			continue
 		if item.has("native") or not WorkerThreadPool.is_task_completed(item["task"]):
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
@@ -820,6 +948,11 @@ func _poll_native() -> void:
 			continue
 		var job: VegetationTileJob = item["job"]
 		job.apply_native(result)
+		stats["native_ms_max"] = maxf(float(stats.get("native_ms_max", 0.0)), float(result["ms"]))
+		if job.clearance != null or job.drop_hedges:
+			# HC1 : houppiers hors de l'eau et des routes, filtrés hors du fil principal.
+			item["filter"] = WorkerThreadPool.add_task(job.apply_clearance, false, "vegetation clearance %d" % index)
+			continue
 		_jobs.erase(index)
 		_install_tile(index, job, item["level"])
 		if _jobs.is_empty() and _log_bursts:
@@ -828,7 +961,9 @@ func _poll_native() -> void:
 
 func _wait_all_jobs() -> void:
 	for item: Dictionary in _jobs.values():
-		if not item.has("native"):  # tâche déjà attendue avant la requête native
+		if item.has("filter"):
+			WorkerThreadPool.wait_for_task_completion(item["filter"])
+		elif not item.has("native"):  # tâche déjà attendue avant la requête native
 			WorkerThreadPool.wait_for_task_completion(item["task"])
 	_jobs.clear()
 	_native_ids.clear()
@@ -970,13 +1105,17 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 		_ground_dirty[index] = true
 	stats["tiles"] = _tiles.size()
 	stats["instances"] = int(stats["instances"]) + job.instance_total()
+	if job.clearance != null:
+		stats["cleared"] = int(stats.get("cleared", 0)) + job.clearance.removed
+		stats["clearance_ms_max"] = maxf(float(stats.get("clearance_ms_max", 0.0)), job.clearance.filter_ms)
 	stats["build_ms_total"] = float(stats["build_ms_total"]) + job.build_ms
 	stats["build_ms_max"] = maxf(float(stats["build_ms_max"]), job.build_ms)
 
 
 ## Libère les tuiles hors champ les plus anciennes au-delà de `max_cached_tiles`.
 func _evict() -> void:
-	if _tiles.size() <= max_cached_tiles:
+	var limit := maxi(max_cached_tiles, MapPropScale.shared().generalised_max_cached_tiles) if generalised else max_cached_tiles
+	if _tiles.size() <= limit:
 		return
 	var idle: Array = []
 	for index in _tiles:
@@ -984,7 +1123,7 @@ func _evict() -> void:
 		if not (entry["node"] as Node3D).visible:
 			idle.append([int(entry["last_seen"]), index])
 	idle.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var excess := _tiles.size() - max_cached_tiles
+	var excess := _tiles.size() - limit
 	for i in mini(excess, idle.size()):
 		var index: int = idle[i][1]
 		var entry: Dictionary = _tiles[index]

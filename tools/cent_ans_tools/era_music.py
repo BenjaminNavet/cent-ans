@@ -34,11 +34,13 @@ WIKIMEDIA_DIR = REPO_DIR / "game" / "assets" / "third_party" / "music" / "wikime
 BATTLE_LAYERS_DIR = REPO_DIR / "game" / "assets" / "audio" / "music" / "battle_layers"
 CACHE_DIR = Path.home() / ".cache" / "cent_ans" / "era_music"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+USER_AGENT = "CentAnsTools/1.0 (https://github.com/BenjaminNavet/cent-ans)"
 ACCEPTED_LICENSES = {
     "Public domain",
     "CC0",
     "CC BY 3.0",
     "CC BY 4.0",
+    "CC BY-SA 2.0",
     "CC BY-SA 2.5",
     "CC BY-SA 3.0",
     "CC BY-SA 4.0",
@@ -259,6 +261,161 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Public domain",
         150.0,
     ),
+    # MU (2026-10-02, ADR 0166): calm lute / vihuela / theorbo / lute-harpsichord / clavichord /
+    # viol recordings for the campaign map (real period instruments, no synth, no voices).
+    WikimediaTrack(
+        "File:Anonymous -- Prelude (Magdalena Tomsinska).ogg",
+        "tomsinska_prelude",
+        "Anonyme — Prélude pour luth (France, XVIe s.)",
+        "Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz)",
+        "france",
+        "campaign_france",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:Anonymous -- C'est mon amy (Magdalena Tomsinska).opus",
+        "tomsinska_cest_mon_amy",
+        "Anonyme — « C'est mon amy », luth seul (France, XVIe s.)",
+        "Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz)",
+        "france",
+        "campaign_france",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:Adrien Le Roy -- Bransles (Magdalena Tomsinska).opus",
+        "le_roy_bransles",
+        "Adrian Le Roy — Bransle de Bourgogne et Bransle de Poictou, luth (v. 1551)",
+        "Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz)",
+        "france",
+        "campaign_france",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:Adrien Le Roy -- Je n'ay point plus (Magdalena Tomsinska).opus",
+        "le_roy_je_nay_point_plus",
+        "Adrian Le Roy — « Je n'ay point plus d'affection », luth (v. 1551)",
+        "Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz)",
+        "france",
+        "campaign_france",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:Étienne Moulinié (1599–1676) – Fantasia à4, VdGS No.2 for 2 Treble Viols, Tenor & Bass Viols (1639).ogg",
+        "moulinie_fantasia_violes",
+        "Étienne Moulinié — Fantaisie à 4 pour consort de violes (1639)",
+        "Phillip W. Serna, violes de gambe",
+        "france",
+        "campaign_france",
+        "CC BY-SA 4.0",
+    ),
+    WikimediaTrack(
+        "File:Johann Sebastian Bach - Suite BWV 996, E Minor - IV (Sarabande).ogg",
+        "bach_bwv996_sarabande",
+        "J. S. Bach — Suite pour luth BWV 996, Sarabande, au luth-clavecin (Lautenwerk)",
+        "Martha Goldstein, luth-clavecin",
+        "burgundy",
+        "campaign_burgundy",
+        "CC BY-SA 2.0",
+    ),
+    WikimediaTrack(
+        "File:Johann Sebastian Bach - Suite BWV 996, E Minor - II Allemande.ogg",
+        "bach_bwv996_allemande",
+        "J. S. Bach — Suite pour luth BWV 996, Allemande, au luth-clavecin (Lautenwerk)",
+        "Martha Goldstein, luth-clavecin",
+        "burgundy",
+        "campaign_burgundy",
+        "CC BY-SA 2.0",
+    ),
+    WikimediaTrack(
+        "File:Johann Sebastian Bach - BWV 997 - Lute Suite No. 2 in C minor - III Sarabande.ogg",
+        "bach_bwv997_sarabande",
+        "J. S. Bach — Suite pour luth BWV 997, Sarabande, au luth-clavecin (Lautenwerk)",
+        "Martha Goldstein, luth-clavecin",
+        "burgundy",
+        "campaign_burgundy",
+        "CC BY-SA 2.0",
+    ),
+    WikimediaTrack(
+        "File:Johann Sebastian Bach - BWV 998 - I Prelude.ogg",
+        "bach_bwv998_prelude",
+        "J. S. Bach — Prélude BWV 998 pour luth, au luth-clavecin (Lautenwerk)",
+        "Martha Goldstein, luth-clavecin",
+        "burgundy",
+        "campaign_burgundy",
+        "CC BY-SA 2.0",
+    ),
+    WikimediaTrack(
+        "File:Orlando Gibbons Pavan MB16.wav",
+        "gibbons_pavan_mb16",
+        "Orlando Gibbons — Pavane MB 16, clavecin flamand",
+        "David Joseph Stith, clavecin",
+        "england",
+        "campaign_england",
+        "CC0",
+    ),
+    WikimediaTrack(
+        "File:Captaine Hume’s Pavan, No.46, the First Part of Ayres (1605).ogg",
+        "hume_pavan",
+        "Tobias Hume — « Captaine Hume's Pavan », *The First Part of Ayres* (1605), viole seule",
+        "Phillip W. Serna, viole de gambe",
+        "england",
+        "campaign_england",
+        "CC BY-SA 3.0",
+    ),
+    WikimediaTrack(
+        "File:Love’s Farewell, No.47, the First Part of Ayres (1605).ogg",
+        "hume_loves_farewell",
+        "Tobias Hume — « Love's Farewell », *The First Part of Ayres* (1605), viole seule",
+        "Phillip W. Serna, viole de gambe",
+        "england",
+        "campaign_england",
+        "CC BY-SA 3.0",
+    ),
+    WikimediaTrack(
+        "File:Greensleeves. La Juglaresa.opus",
+        "greensleeves_juglaresa",
+        "« Greensleeves » (Angleterre, XVIe s.), instruments anciens",
+        "Emilio Villalba et Sara Marina (*La Pequeña Juglaresa*, 2020)",
+        "england",
+        "campaign_england",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:José Miguel Moreno interpreta a Alonso de Mudarra.opus",
+        "mudarra_moreno_vihuela",
+        "Alonso Mudarra — Pavana de Alexandre, fantaisies, *Tres libros de música* (1546), vihuela",
+        "José Miguel Moreno, vihuela (Jornadas de Guitarra de Valencia)",
+        "iberia",
+        "campaign_iberia",
+        "CC BY 3.0",
+    ),
+    WikimediaTrack(
+        "File:Tiento Mudarra.ogg",
+        "mudarra_tiento_harpa",
+        "Alonso Mudarra — « Tiento para harpa » (Séville, 1546)",
+        "Metzner",
+        "iberia",
+        "campaign_iberia",
+        "CC BY-SA 3.0",
+    ),
+    WikimediaTrack(
+        "File:Antonio de Cabezon - Duuiensela.ogg",
+        "cabezon_duviensela",
+        "Antonio de Cabezón — « Duviensela », clavicorde",
+        "Joan Benson, clavicorde (1973)",
+        "iberia",
+        "campaign_iberia",
+        "CC BY-SA 2.0",
+    ),
+    WikimediaTrack(
+        "File:Capona.ogg",
+        "kapsberger_capona",
+        "G. G. Kapsberger — « Capona », *Libro quarto d'intavolatura di chitarrone* (1640), théorbe et orgue",
+        "Y. Nagai (théorbe) et K. Mieno (orgue), 2005",
+        "italy",
+        "campaign_italy",
+        "CC BY-SA 3.0",
+    ),
 ]
 
 
@@ -295,7 +452,10 @@ SHAWM_OUT_NAME = "shawm_note"
 
 
 def _curl(url: str, out: Path | None = None) -> str:
-    args = ["curl", "-sL", "-m", "60", "-A", "Mozilla/5.0"]
+    # Wikimedia's user-agent policy: a generic browser string gets an HTML rate-limit page on
+    # upload.wikimedia.org; a descriptive agent with a contact URL is served. Large WAV
+    # originals need more than a minute.
+    args = ["curl", "-sL", "-m", "300", "-A", USER_AGENT]
     if out is not None:
         out.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run([*args, "-o", str(out), url], check=True)
@@ -464,6 +624,8 @@ def write_wikimedia_source_md() -> None:
         "`extmetadata.LicenseShortName`)",
         "- **Traitement** : fichier d'origine réencodé en MP3 128 kbit/s (ffmpeg/libmp3lame), "
         "normalisé à -16 LUFS (`loudnorm`). Aucune modification musicale.",
+        "- **Ajout du 2026-10-02 (MU, ADR 0166)** : luth, vihuela, théorbe, luth-clavecin, "
+        "clavicorde et violes pour une carte de campagne plus calme.",
         "- **Retirés le 2026-09-25** : six mouvements de Vivaldi et la Badinerie de Bach (cordes "
         "baroques, trop « Grand Siècle » pour la guerre de Cent Ans).",
         "",

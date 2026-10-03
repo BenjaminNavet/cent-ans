@@ -1,0 +1,20 @@
+{
+  "description": "Arêtes maritimes forcées du graphe des colonies : ajoutées par `cent-ans geo settlements` / `geo roads` après la génération normale (coût = 100 + km à vol d'oiseau). Sert aux ports qui ne sont pas les plus proches de leur province voisine.",
+  "edges": [
+    {
+      "a": "set_limassol",
+      "b": "set_acre",
+      "note": "Traversée de Limassol vers Acre, port des pèlerins."
+    },
+    {
+      "a": "set_limassol",
+      "b": "set_gaza",
+      "note": "Traversée de Limassol vers Gaza."
+    },
+    {
+      "a": "set_limassol",
+      "b": "set_tripoli_levant",
+      "note": "Traversée de Limassol vers Tripoli du Levant."
+    }
+  ]
+}

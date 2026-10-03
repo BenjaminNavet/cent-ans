@@ -19,7 +19,10 @@ Lot GC3 (ADR 0158) adds the flat-coloured maquette families, named ``<kind>_<fam
 battles). Their ground footprint is centred on the origin.
 
 Each model is one joined mesh (< 5 000 triangles, cities of the maquette families < 12 000)
-whose ``Banner`` material is tinted by Godot with the controller's colour. Buildings extend below ``z = 0`` so that they sit on slopes.
+whose ``Banner`` material is tinted by Godot with the controller's colour. Buildings extend
+below ``z = 0`` so that they sit on slopes. The maquette families export a single surface
+(lot GC6-perf, ``settlements_east.bake_kit``): one ``Kit`` material, palette colours in
+``COLOR_0`` (linear), banner faces marked by alpha 0.
 A line ``MODEL <name> <triangles>`` is printed per model and ``OK`` at the end.
 """
 
@@ -476,9 +479,11 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     m.reset_scene()
     parts = MODELS[name]()
-    if name in settlements_east.MODELS and len(parts) != len(bpy.context.scene.objects):
+    maquette = name in settlements_east.MODELS
+    if maquette and len(parts) != len(bpy.context.scene.objects):
         raise RuntimeError(f"{name}: parts left out of the joined mesh")
-    if m.KIT:
+    # Maquette families (lot GC6-perf): flat colours baked into one ``Kit`` surface, no atlas.
+    if m.KIT and not maquette:
         import kit_campaign
 
         kit_campaign.finish_parts(parts)
@@ -490,9 +495,10 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.object.join()
     obj = bpy.context.active_object
     obj.name = name
-    if name in settlements_east.MODELS:
+    if maquette:
         settlements_east.centre_footprint(obj)
-    if m.KIT:
+        settlements_east.bake_kit(obj)
+    elif m.KIT:
         import kit_campaign
 
         kit_campaign.atlas(obj)

@@ -352,6 +352,9 @@ pub enum Order {
     FoundChivalricOrder {
         order: data_model::ChivalricOrderId,
     },
+    /// JR1: the crusader faction preaches the passage (a paid call for
+    /// volunteers who land in one of its ports, `crusade.rs`).
+    PreachPassage,
     // ----- C6: agents (`agents.rs`) -----------------------------------------
     /// Recruits a spy, herald or preacher on a settlement of ours.
     RecruitAgent {
@@ -562,6 +565,8 @@ pub enum OrderError {
     Ransom(#[from] crate::ransom::RansomError),
     #[error(transparent)]
     Chivalry(#[from] crate::chivalry::ChivalryError),
+    #[error(transparent)]
+    Crusade(#[from] crate::crusade::CrusadeError),
     #[error(transparent)]
     Agent(#[from] crate::agents::AgentError),
     #[error(transparent)]
@@ -970,6 +975,10 @@ impl CampaignState {
             }
             Order::FoundChivalricOrder { order } => {
                 crate::chivalry::found_order(self, data, faction, &order)?;
+                Ok(())
+            }
+            Order::PreachPassage => {
+                crate::crusade::preach_passage(self, data, faction)?;
                 Ok(())
             }
             Order::RecruitAgent { settlement, kind } => {
