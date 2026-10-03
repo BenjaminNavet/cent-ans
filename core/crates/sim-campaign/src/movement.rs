@@ -585,6 +585,7 @@ pub(crate) fn auto_fight_with_opening(
         river_crossing: crossing.is_none() && province.is_some_and(|p| !p.rivers.is_empty()),
         walls: false,
         assault_bonus_percent: 0,
+        wall: Default::default(),
         crossing: crossing.as_ref().map(|c| c.effect()),
     };
     let attackers = battle_coalition(state, data, attacker_id, &defender.faction);

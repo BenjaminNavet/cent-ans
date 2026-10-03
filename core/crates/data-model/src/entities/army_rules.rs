@@ -57,6 +57,10 @@ pub struct SiegeEngineRule {
     pub name: String,
     /// Work points to finish it (0: ready when the siege begins).
     pub work: u32,
+    /// A6-L2: extra work points per wall level of the besieged place, from
+    /// `SiegeEngineRules::scaling_min_wall_level` up (0: none).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub work_per_wall_level: u32,
     /// Unit type of the siege tower in battle (`kind: tower`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tower_unit_type: Option<UnitTypeId>,
@@ -81,8 +85,28 @@ pub struct SiegeEngineRules {
     pub men_per_work_point: u32,
     /// Work points per turn at least.
     pub min_work_per_turn: u32,
+    /// A6-L2: engines cost `work_per_wall_level` more per wall level only
+    /// against walls of at least this level (a palisade needs no build-up).
+    #[serde(default = "default_scaling_min_wall_level")]
+    pub scaling_min_wall_level: u32,
     /// Engines, in building order.
     pub engines: Vec<SiegeEngineRule>,
+}
+
+fn default_scaling_min_wall_level() -> u32 {
+    3
+}
+
+impl SiegeEngineRule {
+    /// Work points to finish this engine against walls of `walls` level.
+    pub fn cost(&self, scaling_min_wall_level: u32, walls: u32) -> u32 {
+        if walls >= scaling_min_wall_level {
+            self.work
+                .saturating_add(self.work_per_wall_level.saturating_mul(walls))
+        } else {
+            self.work
+        }
+    }
 }
 
 impl Default for SiegeEngineRules {

@@ -820,6 +820,7 @@ fn scenario_context(scenario: &Scenario) -> BattleContext {
         river_crossing: scenario.river,
         walls: false,
         assault_bonus_percent: 0,
+        wall: Default::default(),
         crossing: None,
     }
 }

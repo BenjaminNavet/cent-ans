@@ -63,6 +63,8 @@
     "river_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui franchit une rivière." },
     "walls_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui donne l'assaut à des murailles." },
     "walls_defender_ranged": { "$ref": "#/$defs/factor", "description": "Multiplicateur du tir du défenseur depuis ses murailles." },
+    "wall_defence_per_level": { "type": "number", "minimum": 0, "description": "A6-L2 : défense supplémentaire de la garnison par niveau de murailles (l'assaut est 1 + niveau × valeur fois plus dur), réduite par la brèche (nulle à 50 %) et les engins prêts." },
+    "wall_engine_relief": { "type": "number", "minimum": 0, "maximum": 1, "description": "A6-L2 : part de la défense des murailles ôtée quand tous les engins sont prêts." },
     "legacy_defender_bonus": { "$ref": "#/$defs/factor", "description": "Bonus du défenseur quand seul l'indicateur de relief est connu (terrain inconnu)." },
     "weather": {
       "type": "object",

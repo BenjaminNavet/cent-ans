@@ -653,7 +653,9 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // army cap; ladders ready at once bring it back). NT9 (one attack per
     // enemy army and turn, ram in the auto-resolve): seed 1 lies in wait
     // again, alone as before NT5.
-    let log: Vec<(u32, String, bool)> = [1]
+    // A6-L2 (engines scale with the walls, assaults are rarer early): the
+    // trajectory moved again, two seeds make sure one lies in wait.
+    let log: Vec<(u32, String, bool)> = [1, 2]
         .into_iter()
         .flat_map(|seed| campaign_stance_orders(&data, seed, 60))
         .collect();

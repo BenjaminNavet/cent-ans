@@ -35,13 +35,17 @@ pub fn work_per_turn(data: &GameData, men: u32, siege_speed_percent: f64) -> u32
 }
 
 /// Engines of a siege with `work` points done, at `rate` points per turn.
-pub fn statuses(data: &GameData, work: u32, rate: u32) -> Vec<EngineStatus> {
+///
+/// A6-L2: against walls of `walls` level the engines cost more work (see
+/// `SiegeEngineRule::cost`).
+pub fn statuses(data: &GameData, work: u32, rate: u32, walls: u32) -> Vec<EngineStatus> {
+    let min_level = data.siege_engine_rules.scaling_min_wall_level;
     let mut needed = 0u32;
     data.siege_engine_rules
         .engines
         .iter()
         .map(|engine| {
-            needed = needed.saturating_add(engine.work);
+            needed = needed.saturating_add(engine.cost(min_level, walls));
             let left = needed.saturating_sub(work);
             EngineStatus {
                 id: engine.id.clone(),
@@ -55,8 +59,8 @@ pub fn statuses(data: &GameData, work: u32, rate: u32) -> Vec<EngineStatus> {
 }
 
 /// The engine kinds ready with `work` points done.
-pub fn ready_kinds(data: &GameData, work: u32) -> Vec<BuiltEngineKind> {
-    statuses(data, work, 1)
+pub fn ready_kinds(data: &GameData, work: u32, walls: u32) -> Vec<BuiltEngineKind> {
+    statuses(data, work, 1, walls)
         .into_iter()
         .filter(|s| s.ready)
         .map(|s| s.kind)
@@ -114,6 +118,7 @@ impl CampaignState {
             data,
             self.engine_work(settlement),
             self.engine_rate(data, settlement),
+            self.fortification_level(data, settlement),
         )
     }
 
@@ -122,10 +127,12 @@ impl CampaignState {
     /// standing walls (the ram breaks the gate).
     pub(crate) fn engine_assault_bonus(&self, data: &GameData, settlement: &SettlementId) -> u32 {
         let work = self.engine_work(settlement);
+        let walls = self.fortification_level(data, settlement);
+        let min_level = data.siege_engine_rules.scaling_min_wall_level;
         let mut needed = 0u32;
         let mut bonus = 0u32;
         for engine in &data.siege_engine_rules.engines {
-            needed = needed.saturating_add(engine.work);
+            needed = needed.saturating_add(engine.cost(min_level, walls));
             if work < needed {
                 break;
             }
@@ -134,12 +141,43 @@ impl CampaignState {
         bonus
     }
 
+    /// A6-L2: share (percent) of the engines of the siege of `settlement`
+    /// that are ready against its walls.
+    pub(crate) fn engines_ready_percent(&self, data: &GameData, settlement: &SettlementId) -> u32 {
+        let work = self.engine_work(settlement);
+        let walls = self.fortification_level(data, settlement);
+        let statuses = statuses(data, work, 1, walls);
+        let ready = statuses.iter().filter(|s| s.ready).count();
+        (100 * ready / statuses.len().max(1)) as u32
+    }
+
+    /// A6-L2: the walls of `settlement` for the assault resolution.
+    pub(crate) fn wall_stand(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+    ) -> crate::battle_auto::WallStand {
+        crate::battle_auto::WallStand {
+            level: self.fortification_level(data, settlement),
+            breach_percent: self
+                .settlements
+                .get(settlement)
+                .and_then(|s| s.siege.as_ref())
+                .map_or(0, |s| u32::from(s.breach)),
+            engines_ready_percent: self.engines_ready_percent(data, settlement),
+        }
+    }
+
     /// Siege towers built at the siege of `settlement`.
     pub(crate) fn built_towers(&self, data: &GameData, settlement: &SettlementId) -> usize {
-        ready_kinds(data, self.engine_work(settlement))
-            .into_iter()
-            .filter(|k| *k == BuiltEngineKind::Tower)
-            .count()
+        ready_kinds(
+            data,
+            self.engine_work(settlement),
+            self.fortification_level(data, settlement),
+        )
+        .into_iter()
+        .filter(|k| *k == BuiltEngineKind::Tower)
+        .count()
     }
 
     /// NT5: why `army` may not storm the place it besieges yet (French), or
@@ -170,10 +208,12 @@ impl CampaignState {
         settlement: &SettlementId,
     ) -> sim_battle::SiegeEngineSetup {
         let work = self.engine_work(settlement);
+        let walls = self.fortification_level(data, settlement);
+        let min_level = data.siege_engine_rules.scaling_min_wall_level;
         let mut setup = sim_battle::SiegeEngineSetup::default();
         let mut needed = 0u32;
         for engine in &data.siege_engine_rules.engines {
-            needed = needed.saturating_add(engine.work);
+            needed = needed.saturating_add(engine.cost(min_level, walls));
             if work < needed {
                 break;
             }

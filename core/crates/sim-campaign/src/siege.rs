@@ -459,7 +459,13 @@ impl CampaignState {
         let walls = walls_stand(self, data, army, place);
         // NT9: a ready ram (gate broken) softens the walls, as in `auto_assault`.
         let walls_factor = if walls {
+            let stand = self.wall_stand(data, place);
             0.7 * (1.0 + f64::from(self.engine_assault_bonus(data, place)) / 100.0)
+                * data.auto_resolve.wall_attacker_factor(
+                    stand.level,
+                    stand.breach_percent,
+                    stand.engines_ready_percent,
+                )
         } else {
             1.0
         };
@@ -681,6 +687,7 @@ pub(crate) fn auto_assault(
         river_crossing: false,
         walls,
         assault_bonus_percent: state.engine_assault_bonus(data, &settlement),
+        wall: state.wall_stand(data, &settlement),
         crossing: None,
     };
     // N1: phased auto-resolve; walls stand for the terrain, the season
