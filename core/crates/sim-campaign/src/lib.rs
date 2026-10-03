@@ -144,8 +144,8 @@ pub use march::{MoveReport, StopReason};
 pub use mercenaries::{MercenaryMarket, MercenaryOption, MercenaryState};
 pub use navigation::{Cell, GridPath};
 pub use orders::{
-    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, RecruitPrice,
-    BASE_RECRUIT_SLOTS,
+    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitGroup, RecruitOption,
+    RecruitPrice, BASE_RECRUIT_SLOTS,
 };
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};

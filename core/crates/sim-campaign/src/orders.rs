@@ -630,6 +630,50 @@ pub struct RecruitOption {
     pub pool: crate::recruit_pool::PoolView,
 }
 
+/// U13: where a recruitment line belongs in the settlement panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RecruitGroup {
+    /// Can be recruited now.
+    Ready,
+    /// Blocked for a passing reason (treasury, full queue, empty reserve...).
+    Blocked,
+    /// Waits for a technology, a building or a date: shown under « Bientôt ».
+    Soon,
+    /// Reserved to other factions or cultures: not shown.
+    Elsewhere,
+}
+
+impl RecruitGroup {
+    /// Stable name for the interface.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ready => "ready",
+            Self::Blocked => "blocked",
+            Self::Soon => "soon",
+            Self::Elsewhere => "elsewhere",
+        }
+    }
+}
+
+impl RecruitOption {
+    /// U13: the panel group of this line, from its blocker.
+    pub fn group(&self) -> RecruitGroup {
+        let Some(reason) = self.reason.as_deref().filter(|_| !self.available) else {
+            return RecruitGroup::Ready;
+        };
+        if reason.starts_with("réservé à") || reason.starts_with("culture locale") {
+            RecruitGroup::Elsewhere
+        } else if reason.starts_with("bâtiment requis")
+            || reason.starts_with("technologie requise")
+            || reason.starts_with("disponible à partir")
+        {
+            RecruitGroup::Soon
+        } else {
+            RecruitGroup::Blocked
+        }
+    }
+}
+
 /// SV2: full price of one recruit — money cost plus the import of the
 /// resource units the faction's free supply lacks.
 #[derive(Debug, Clone, PartialEq, Default)]

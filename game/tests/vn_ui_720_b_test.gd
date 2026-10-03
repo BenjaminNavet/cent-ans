@@ -124,9 +124,14 @@ func _settlement() -> void:
 		_check(panel != null and panel.is_visible_in_tree(), "settlement panel not shown at %s" % size)
 		if panel == null:
 			continue
-		var rect := panel.get_global_rect()
+		# A6-U11 : un seul défilement, celui de l'enveloppe de la zone ; le panneau peut être plus
+		# haut que la zone, mais l'enveloppe, elle, reste dans la zone et au-dessus de la minicarte.
+		var scroll := panel.get_parent() as ScrollContainer
+		_check(scroll != null, "settlement panel is not inside the side-zone scroll at %s" % size)
+		var rect := (scroll if scroll != null else panel).get_global_rect()
 		_check(rect.end.y <= side.end.y + 1.0, "settlement panel bottom %s below its zone %s at %s" % [rect.end.y, side.end.y, size])
 		_check(rect.end.y <= mini.get_global_rect().position.y, "settlement panel %s runs under the minimap at %s" % [rect, size])
+		_check(panel.find_children("*", "ScrollContainer", true, false).is_empty(), "nested scroll inside the settlement panel at %s" % size)
 		for check: CheckBox in panel.find_children("*", "CheckBox", true, false):
 			_check(not check.clip_text and check.size.y >= check.get_minimum_size().y, "settlement garrison row '%s' is cut at %s" % [check.text, size])
 		var tabs := panel.find_child("Tabs", true, false) as Control

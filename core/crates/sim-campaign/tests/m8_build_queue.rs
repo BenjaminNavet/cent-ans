@@ -165,3 +165,28 @@ fn old_saves_load_without_a_queue() {
     let loaded = CampaignState::load_json(&state.save_json()).unwrap();
     assert_eq!(loaded.settlements[&town].build_queue.len(), 1);
 }
+
+#[test]
+fn recruit_lines_fall_in_u13_groups() {
+    use sim_campaign::RecruitGroup;
+    let data = data();
+    let (state, town) = setup(&data);
+    let options = state.recruitable(&data, &town);
+    let groups: Vec<RecruitGroup> = options.iter().map(|o| o.group()).collect();
+    assert!(groups.contains(&RecruitGroup::Ready));
+    for option in &options {
+        let reason = option.reason.clone().unwrap_or_default();
+        match option.group() {
+            RecruitGroup::Ready => assert!(option.available),
+            RecruitGroup::Elsewhere => assert!(
+                reason.starts_with("réservé") || reason.starts_with("culture"),
+                "{reason}"
+            ),
+            RecruitGroup::Soon => assert!(
+                reason.contains("requis") || reason.starts_with("disponible"),
+                "{reason}"
+            ),
+            RecruitGroup::Blocked => assert!(!option.available),
+        }
+    }
+}

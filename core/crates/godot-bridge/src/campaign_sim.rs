@@ -513,6 +513,8 @@ impl CampaignSim {
                     "upkeep" => i64::from(option.upkeep),
                     "available" => option.available,
                     "reason" => option.reason.as_deref().unwrap_or(""),
+                    // U13: ready / blocked / soon / elsewhere.
+                    "group" => option.group().as_str(),
                     // SV2: resource units the unit needs, the livres of
                     // `cost` spent importing what the faction lacks, and
                     // the units imported (B7c rule, ADR 0053).
