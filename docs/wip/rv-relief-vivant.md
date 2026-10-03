@@ -15,7 +15,7 @@ Demande joueur 2026-10-03 : on voit encore l'estompage IGN (petites ombres de re
 |---|---|---|---|
 | RV-A | Volume : normales moins exagérées, micro-relief filtré, exagération du maillage | feat/rv-a | fusionné (2aae70a36) |
 | RV-B | Soleil de jeu (25-35°, chaud/froid, varie saison/tour) + perspective atmosphérique | feat/rv-b | fusionné (9f7098b78) ; soleil déjà rasant 18-21° via atmosphere.json (ADR 0156), le 45° du tscn n’était qu’un défaut |
-| RV-C | Ombres de nuages crédibles, dérivant, liées aux nuages visibles | feat/rv-c | en cours |
+| RV-C | Ombres de nuages crédibles, dérivant, liées aux nuages visibles | feat/rv-c | fusionné (35343960f) ; cause : amount 0 par temps clair (TB2), levée pour les cumulus |
 | RV-D | Occlusion de vallée précalculée (outil tools/geo + échantillonnage shader) | feat/rv-d | fusionné (f50fb614e) ; data/map/relief_occlusion.png 3,4 Mo, `cent-ans geo relief-occlusion` |
 | RV-F | Vie visible en vue régionale (fumées, reflets d'eau, vent forêts) | feat/rv-f | en cours |
 
