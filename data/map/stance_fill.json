@@ -4,13 +4,13 @@
     "other": "#8a8478"
   },
   "alpha": {
-    "self": 0.62,
-    "enemy": 0.52,
-    "friend": 0.45,
+    "self": 0.5,
+    "enemy": 0.45,
+    "friend": 0.38,
     "other": 0.1
   },
   "saturation": 1.0,
-  "flat_mix": 0.35,
+  "flat_mix": 0.15,
   "zoom": {
     "near_distance": 60.0,
     "far_distance": 260.0,
