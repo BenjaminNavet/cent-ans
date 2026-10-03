@@ -101,7 +101,9 @@ static func collect(map: Node, last_events: Array) -> Array:
 			"id": "building:%s:%d" % [province_id, result.size()], "kind": "construction_done", "severity": "info",
 			"province_id": province_id, "text": str(event.get("text_fr", "Bâtiment terminé")),
 		})
-	result.append_array(table_medicine_alerts(sim, player, last_events))
+	var ui: Object = map.get("ui")
+	var relevance: Callable = Callable(ui, "relevance_of") if ui != null and ui.has_method("relevance_of") else Callable()
+	result.append_array(table_medicine_alerts(sim, player, last_events, relevance))
 	result.append_array(ransom_alerts(sim))
 	return result
 
@@ -142,7 +144,9 @@ static var _herb_events_key: int = 0
 static var _herb_alert: Dictionary = {}
 
 
-static func table_medicine_alerts(sim: Object, player: String, last_events: Array) -> Array:
+## A6-L6 (U7) : `relevance` (`MapUI.relevance_of`, calcul du cœur) écarte les nouvelles sans
+## rapport avec le joueur (sauf publiques, JR5).
+static func table_medicine_alerts(sim: Object, player: String, last_events: Array, relevance: Callable = Callable()) -> Array:
 	var result: Array = []
 	var researched := false
 	for event in last_events:
@@ -154,6 +158,8 @@ static func table_medicine_alerts(sim: Object, player: String, last_events: Arra
 			researched = true
 		# JR5 : une nouvelle publique (cité du vœu, appel à défendre) alerte tous les joueurs.
 		if not SeasonReport.KIND_STYLES.has(kind) or (faction != "" and faction != player and not SeasonReport.is_public(event)):
+			continue
+		if faction != player and not SeasonReport.is_public(event) and relevance.is_valid() and str(relevance.call(event)) == "far":
 			continue
 		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
 		result.append({

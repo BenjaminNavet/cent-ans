@@ -1,7 +1,7 @@
 //! `CampaignSim` chronicle API (spec M10 § 3), in a secondary `#[godot_api]`
 //! block so that each milestone keeps its own file.
 
-use data_model::{EventId, ProvinceId};
+use data_model::{EventId, FactionId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::Order;
 
@@ -103,5 +103,42 @@ impl CampaignSim {
         state
             .debug_offer_decision(data, &event, province.as_ref())
             .map_or(-1, i64::from)
+    }
+
+    /// A6 (U6/U7): how much each journal entry concerns the player, one key
+    /// per entry (`player`, `related`, `neighbor`, `far`); `far` entries go to
+    /// the folded « Monde » tab and are never pushed as letters. Entries are
+    /// the turn journal dictionaries (`faction`, `province`, `public`).
+    #[func]
+    fn classify_news(&self, events: VarArray) -> PackedStringArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return events
+                .iter_shared()
+                .map(|_| GString::from("player"))
+                .collect();
+        };
+        let relevance =
+            sim_campaign::news_relevance::NewsRelevance::new(state, data, state.player_faction());
+        let text = |dict: &VarDictionary, keys: &[&str]| -> String {
+            keys.iter()
+                .find_map(|key| dict.get(*key).map(|v| v.to_string()))
+                .unwrap_or_default()
+        };
+        events
+            .iter_shared()
+            .map(|entry| {
+                let Ok(dict) = entry.try_to::<VarDictionary>() else {
+                    return GString::from("far");
+                };
+                let faction = FactionId::new(text(&dict, &["faction", "faction_id"])).ok();
+                let province = ProvinceId::new(text(&dict, &["province", "province_id"])).ok();
+                let public = dict.get("public").is_some_and(|v| v.booleanize());
+                GString::from(
+                    relevance
+                        .classify(faction.as_ref(), province.as_ref(), public)
+                        .as_str(),
+                )
+            })
+            .collect()
     }
 }

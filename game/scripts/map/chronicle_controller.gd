@@ -14,8 +14,6 @@ const EXPIRED_MARK := "(délai écoulé)"
 var map: Node = null  # CampaignMap
 var window: ChronicleWindow
 var button: Button
-## Q2 : rapport de saison surveillé (la décision s'ouvre quand il est fermé).
-var _watched_report: Control = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -61,11 +59,19 @@ func open_window(modal_only: bool = false) -> bool:
 	var decisions := modal_pending() if modal_only else pending()
 	if decisions.is_empty():
 		window.hide()
+		map.ui.modal_queue.cancel("chronicle")
 		if available() and not modal_only:
 			map.ui.show_toast("Aucun événement n'attend votre décision.")
 		return false
-	window.show_decision(decisions[0], pending().size())
+	_present(decisions[0], pending().size())
 	return true
+
+
+## A6-L6 (U10) : la décision passe par la file modale unique (avant tout rapport de saison).
+func _present(decision: Dictionary, queue_size: int) -> void:
+	map.ui.modal_queue.request("chronicle", ModalQueue.PRIORITY_DECISION, window, func() -> bool:
+		window.show_decision(decision, queue_size)
+		return true)
 
 
 ## FK5 : ouvre la fenêtre sur la décision `decision_id` (clic sur le sceau d'un incident) ;
@@ -74,7 +80,7 @@ func open_decision(decision_id: int) -> bool:
 	var decisions := pending()
 	for decision: Dictionary in decisions:
 		if int(decision.get("id", -1)) == decision_id:
-			window.show_decision(decision, decisions.size())
+			_present(decision, decisions.size())
 			return true
 	return false
 
@@ -147,22 +153,7 @@ func notify_expired(events: Array) -> PackedStringArray:
 
 
 func _open_after_report() -> void:
-	var flow: Node = map.get("flow")
-	var report: Control = flow.get("season_report") if flow != null else null
-	if report != null and report.visible:
-		if _watched_report != report:
-			_watched_report = report
-			report.visibility_changed.connect(_on_report_visibility)
-		return
-	if not modal_pending().is_empty() and not window.visible:
-		open_window(true)
-
-
-func _on_report_visibility() -> void:
-	if _watched_report == null or _watched_report.visible:
-		return
-	_watched_report.visibility_changed.disconnect(_on_report_visibility)
-	_watched_report = null
+	# A6-L6 (U10) : la file modale passe les décisions avant le rapport de saison.
 	if not modal_pending().is_empty() and not window.visible:
 		open_window(true)
 

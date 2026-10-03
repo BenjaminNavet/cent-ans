@@ -546,6 +546,7 @@
     "encyclopedia_previous_entry": {"title": "Fiche précédente"},
     "close_escape_k": {"title": "Fermer", "hint": "Échap ou K"},
     "end_turn_blocked": {"title": "Décision en attente"},
+    "end_turn_modal": {"title": "Fenêtre ouverte"},
     "end_turn_finish": {"title": "Finir la saison", "hint": "Entrée"},
     "trade_income_detail": {"title": "Revenus du commerce"},
     "table_upkeep_detail": {"title": "La Table"},

@@ -47,6 +47,12 @@ func update_interest() -> void:
 	var settings := map.get_node_or_null("/root/Settings")
 	var mode := str(settings.call("get_value", "interface/news_filter")) if settings != null else NewsInterest.MODE_INTEREST
 	ui.news_interest = NewsInterest.build(sim, map.get("map_data"), str(map.get("player_faction")), mode)
+	# A6-L6 (U6/U7) : la pertinence vient du cœur (`classify_news`), `news_interest` ne sert plus
+	# que de repli (ancien cœur) et de réglage de portée.
+	if sim.has_method("classify_news"):
+		ui.news_classifier = func(events: Array) -> PackedStringArray: return sim.call("classify_news", events)
+	else:
+		ui.news_classifier = Callable()
 
 
 func _sim() -> Object:

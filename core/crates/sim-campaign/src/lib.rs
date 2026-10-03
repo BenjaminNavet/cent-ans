@@ -67,6 +67,7 @@ pub mod movement;
 pub mod naval;
 pub mod navigation;
 pub mod negotiation;
+pub mod news_relevance;
 pub mod orders;
 pub mod passage;
 pub mod path_plan;
