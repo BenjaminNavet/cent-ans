@@ -95,3 +95,26 @@ vec2 campaign_display_gradient(float h_m, vec2 grad_m, vec2 xz) {
 		- above_floor * (g * gf + campaign_relief_gain * campaign_relief_squash * gk * (h_m - fields.x));
 	return campaign_vertical_scale * d;
 }
+
+// RV-A : `campaign_display_gradient` pour deux gradients d'altitude au même point (champs lus une
+// fois) : `grad_m` (pente vraie : falaises, roche) et `grad_shade` (gradient filtré de l'ombrage).
+// La surface affichée est affine en `grad_m`, d'où `disp_shade = disp + s·A·(grad_shade − grad_m)`.
+vec2 campaign_display_gradient_pair(float h_m, vec2 grad_m, vec2 grad_shade, vec2 xz, out vec2 disp_shade) {
+	if (!campaign_relief_active()) {
+		disp_shade = grad_shade * campaign_vertical_scale;
+		return grad_m * campaign_vertical_scale;
+	}
+	vec2 gf;
+	vec2 gb;
+	vec2 gk;
+	vec3 fields = campaign_relief_fields_grad(xz, gf, gb, gk);
+	float above_floor = step(fields.x, h_m);
+	float above_base = step(fields.y, h_m);
+	float k = campaign_relief_squash * fields.z;
+	float g = campaign_relief_gain * (1.0 - k);
+	float a = 1.0 - k * above_base + g * above_floor;
+	vec2 rest = above_base * (k * gb - campaign_relief_squash * gk * (h_m - fields.y))
+		- above_floor * (g * gf + campaign_relief_gain * campaign_relief_squash * gk * (h_m - fields.x));
+	disp_shade = campaign_vertical_scale * (grad_shade * a + rest);
+	return campaign_vertical_scale * (grad_m * a + rest);
+}

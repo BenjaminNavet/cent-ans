@@ -6,7 +6,7 @@
 script = ExtResource("1_relief")
 enabled = true
 near_exaggeration = 2.5
-gain_far = -0.4
+gain_far = 0.0
 gain_near = -0.1
 floor_cell_px = 8
 floor_sample_step = 2
