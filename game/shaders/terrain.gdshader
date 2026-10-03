@@ -389,6 +389,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 // Lot CM2 : vue stratégique parchemin (fondu au zoom maximal) et météo de campagne.
 #include "res://shaders/parchment_map.gdshaderinc"
 #include "res://shaders/campaign_weather.gdshaderinc"
+#define CS_WITH_WEATHER  // RV-C : ombres de nuages liées à la météo par province
 #include "res://shaders/campaign_cloud_shadow.gdshaderinc"  // RV-C : ombres de nuages
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près

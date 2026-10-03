@@ -84,7 +84,7 @@
     "cumulus_edge": 0.12,
     "cumulus_drift": 0.3,
     "cumulus_tint": [0.94, 0.97, 1.06],
-    "cumulus_fade_px": [10, 4]
+    "cumulus_fade_px": [16, 5]
   },
   "forest_masses": {
     "description": "TB6 : massifs forestiers de la carte de couleur du sol (vue moyenne et large), presque noirs à bord net avant ce réglage. floor : luminance linéaire plancher des masses sombres (0 : carte inchangée) ; knee : au-delà de floor × knee, la carte n'est pas touchée ; feather : flou du masque en niveaux de mip (lisière fondue sur quelques pixels de carte) ; keep : part du contraste d'origine gardée sous le plancher ; canopy : amplitude du modelé de canopée.",

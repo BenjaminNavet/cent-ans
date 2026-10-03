@@ -81,8 +81,11 @@ uniform float storm_rain_share = 0.4;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : couleur de profondeur
+#include "res://shaders/campaign_cloud_shadow.gdshaderinc"  // RV-C : ombres de cumulus
 
 varying float v_far;
+// RV-C : lumière directe gardée sous les cumulus (1 = plein soleil), calculée dans fragment().
+varying vec3 v_cloud_sun;
 
 varying vec3 world_pos;
 
@@ -155,6 +158,7 @@ void fragment() {
 	float footprint = max(length(dFdx(p)), length(dFdy(p)));
 	float far_t = smoothstep(0.6, 2.5, footprint);
 	v_far = far_t;
+	v_cloud_sun = cs_light_factor(cloud_shadow_fair(p, footprint, 1.0 - pm_weight()));  // RV-C
 
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
 	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
@@ -289,9 +293,9 @@ void fragment() {
 
 void light() {
 	float ndl = max(dot(NORMAL, LIGHT), 0.0);
-	DIFFUSE_LIGHT += ndl * ATTENUATION * LIGHT_COLOR / PI;
+	DIFFUSE_LIGHT += ndl * ATTENUATION * LIGHT_COLOR / PI * v_cloud_sun;  // RV-C : ombre des cumulus
 	vec3 h = normalize(VIEW + LIGHT);
 	float power = mix(sun_spec_power, sun_spec_power * 0.25, v_far);
 	float spec = pow(max(dot(NORMAL, h), 0.0), power) * sun_spec_intensity * (1.0 - 0.7 * v_far);
-	SPECULAR_LIGHT += min(spec, sun_spec_max) * ATTENUATION * LIGHT_COLOR / PI * (1.0 - pm_weight());  // CM2
+	SPECULAR_LIGHT += min(spec, sun_spec_max) * ATTENUATION * LIGHT_COLOR / PI * (1.0 - pm_weight()) * v_cloud_sun;  // CM2, RV-C
 }

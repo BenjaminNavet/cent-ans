@@ -51,6 +51,7 @@ var valley_mist: Dictionary = {}
 ## RV-C : bloc `clouds` des données (clés `cumulus_*` : ombres de cumulus, aussi par beau temps).
 var cumulus: Dictionary = {}
 var _shadow_sun := Vector3.ZERO
+var _shadow_material_count := -1
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -192,15 +193,35 @@ func _apply_cumulus_tuning(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("cloud_shadow_height", cloud_height - 2.0)  # sol moyen ≈ 2 (cf. `cloud_clear_ground_y`)
 
 
+## RV-C : matériaux qui portent les ombres de cumulus (campaign_cloud_shadow.gdshaderinc) : sol,
+## mer, imposteurs d'arbres (créés après la météo : relus à chaque image).
+func _cloud_shadow_materials() -> Array[ShaderMaterial]:
+	var out: Array[ShaderMaterial] = []
+	var sea := _map.get("sea") as MeshInstance3D if _map != null else null
+	var vegetation := _map.get_node_or_null("Vegetation") if _map != null else null
+	for material: Variant in [_terrain.material if _terrain != null else null,
+			sea.material_override if sea != null else null,
+			vegetation.get("_impostor_material") if vegetation != null else null]:
+		if material is ShaderMaterial:
+			out.append(material)
+	return out
+
+
 ## RV-C : direction vers le soleil pour décaler les ombres de nuages (le soleil change de saison
-## en saison et au fil du tour, `turn_light.gd`).
+## en saison et au fil du tour, `turn_light.gd`) ; réglages reposés sur tout nouveau matériau.
 func _update_cloud_shadow_sun() -> void:
-	if _sun == null or _terrain == null or _terrain.material == null:
-		return
-	var to_sun := _sun.global_transform.basis.z.normalized()
-	if not to_sun.is_equal_approx(_shadow_sun):
+	var materials := _cloud_shadow_materials()
+	var to_sun := _sun.global_transform.basis.z.normalized() if _sun != null else _shadow_sun
+	var fresh := materials.size() != _shadow_material_count
+	if fresh:
+		_shadow_material_count = materials.size()
+		for material in materials:
+			if _terrain == null or material != _terrain.material:  # le sol reçoit les siens avec le masque météo
+				_apply_cumulus_tuning(material)
+	if (fresh or not to_sun.is_equal_approx(_shadow_sun)) and to_sun != Vector3.ZERO:
 		_shadow_sun = to_sun
-		_terrain.material.set_shader_parameter("cloud_shadow_sun", to_sun)
+		for material in materials:
+			material.set_shader_parameter("cloud_shadow_sun", to_sun)
 
 
 ## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,

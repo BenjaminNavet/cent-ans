@@ -12,6 +12,7 @@ render_mode world_vertex_coords, cull_disabled, diffuse_lambert_wrap, specular_s
 
 #include "res://shaders/foliage_common.gdshaderinc"
 #include "res://shaders/campaign_tree_impostor.gdshaderinc"
+#include "res://shaders/campaign_cloud_shadow.gdshaderinc"  // RV-C : ombres de cumulus (même champ que le sol)
 
 varying vec2 v_uv0;
 varying vec2 v_uv1;
@@ -24,6 +25,7 @@ varying vec2 v_local;
 varying float v_seed;
 varying float v_essence;
 varying float v_world_y;
+varying vec3 v_world;  // RV-C
 
 void vertex() {
 	ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, MAIN_CAM_INV_VIEW_MATRIX[3].xyz, UV, impostor_row(INSTANCE_CUSTOM, UV2.x), INSTANCE_CUSTOM.a, species_tint(INSTANCE_CUSTOM));
@@ -39,6 +41,7 @@ void vertex() {
 	v_seed = INSTANCE_CUSTOM.a;
 	v_essence = species_season(INSTANCE_CUSTOM, UV2.x);
 	v_world_y = MODEL_MATRIX[3].y;
+	v_world = iv.world;
 }
 
 void fragment() {
@@ -47,12 +50,14 @@ void fragment() {
 		discard;
 	}
 	NORMAL = normalize((VIEW_MATRIX * vec4(f.world_normal, 0.0)).xyz);
-	ALBEDO = f.albedo;
+	// RV-C : sous un cumulus, l'arbre perd la même part de lumière que le sol voisin.
+	vec3 cloud = cs_light_factor(cloud_shadow_fair(v_world.xz, max(length(dFdx(v_world)), length(dFdy(v_world))), 1.0));
+	ALBEDO = f.albedo * cloud;
 	ALPHA = f.alpha;
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
 	ROUGHNESS = roughness_value;
 	SPECULAR = 0.25;
 	AO = f.ao;
 	AO_LIGHT_AFFECT = 0.4;
-	BACKLIGHT = f.albedo * (season_deciduous(v_essence) ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+	BACKLIGHT = f.albedo * cloud * (season_deciduous(v_essence) ? mix(0.35, 0.1, campaign_season.w) : 0.35);
 }
