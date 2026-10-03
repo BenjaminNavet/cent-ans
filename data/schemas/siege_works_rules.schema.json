@@ -32,9 +32,12 @@
     "engine": {
       "type": "object",
       "properties": {
-        "wall_damage_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 20, "description": "PV de mur ôtés par tir d'engin, par point de siege_attack, équipage complet." }
+        "wall_damage_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 20, "description": "PV de mur ôtés par tir d'engin, par point de siege_attack, équipage complet." },
+        "kills_per_siege_attack": { "type": "number", "minimum": 0, "maximum": 1, "description": "Hommes abattus par tir d'engin sur un régiment, par point de siege_attack, équipage complet, à bout portant, sans armure." },
+        "armor_weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'armure de la cible qui compte contre un boulet (0 : ignorée, 1 : comme contre une flèche)." },
+        "morale_shock": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral ôté au régiment touché par chaque tir d'engin." }
       },
-      "required": ["wall_damage_per_siege_attack"],
+      "required": ["wall_damage_per_siege_attack", "kills_per_siege_attack", "armor_weight", "morale_shock"],
       "additionalProperties": false
     }
   },
