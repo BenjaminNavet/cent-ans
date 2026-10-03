@@ -17,10 +17,14 @@ extends RefCounted
 const DATA_PATH := "fx/campaign_lighting.json"
 
 static var _data: Dictionary = {}
+static var _loaded: bool = false
 
 
+## Données lues une seule fois ({} et un seul avertissement si le fichier manque : les jeux de
+## données de test n'en ont pas, la lumière de la scène reste alors telle quelle).
 static func data() -> Dictionary:
-	if _data.is_empty():
+	if not _loaded:
+		_loaded = true
 		var path := AtmosphereLibrary._data_dir().path_join(DATA_PATH)
 		if FileAccess.file_exists(path):
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
