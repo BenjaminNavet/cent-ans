@@ -47,11 +47,14 @@ def test_water_detail_json_matches_schema():
     assert sorted(document["materials"]) == sorted(IDS)
 
 
-def test_repo_ledger_ends_with_rc_section():
-    """The RC section is the active (last) table of docs/budget.md, with a 5 $ envelope."""
+def test_repo_ledger_has_rc_section():
+    """docs/budget.md keeps the RC section with its 5 $ envelope.
+
+    It was the last table while RC5 ran; later chantiers append their own sections after it,
+    and a new RC5 run must first reopen its section at the end (the paid-call guard checks it).
+    """
     ledger = budget.BudgetLedger()
-    assert (ledger.current_session.title or "").startswith(RC_SECTION)
-    assert "5 $" in (ledger.current_session.title or "")
+    assert "5 $" in (ledger.find_session(RC_SECTION).title or "")
 
 
 def _ledger(tmp_path: Path, spent: str = "0,00") -> Path:

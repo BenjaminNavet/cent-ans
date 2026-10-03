@@ -72,7 +72,7 @@ plat au milieu d'une liste de miniatures. » Les icônes d'entité restaient des
    d'azur diaprés atténués, léger biais central, somme maximale par image intégrale).
 3. **Générer seulement ce qui manque** : une entrée `subject` (pas d'illustration) est générée
    une fois (`openai/gpt-5-image-mini` via `portraits.generate`, image de référence
-   `docs/img/da5b/reference_miniature.png`, prompt = amorce + sujet puis bloc de style commun,
+   `tools/da5b_raw/reference_miniature.png`, prompt = amorce + sujet puis bloc de style commun,
    un seul sujet lisible à 32 px sur fond d'azur diapré). Source brute gardée dans
    `tools/da5b_raw/` (jamais régénérée). Enveloppe du lot 6 $ (lignes « DA5b » de
    `docs/budget.md`).
