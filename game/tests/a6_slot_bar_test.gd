@@ -53,7 +53,7 @@ func _run() -> void:
 		map.queue_free()
 		return
 	var ctl: Node = map.settlements_ctl
-	var bar: SettlementSlotBar = ctl.slot_bar
+	var bar: Control = ctl.slot_bar  # sans type : ce script se compile avant les autoloads
 	if not _check(bar != null, "no slot bar on the settlement controller"):
 		map.queue_free()
 		return
@@ -66,7 +66,7 @@ func _run() -> void:
 	if not _check(bar.is_visible_in_tree(), "slot bar should be visible once Paris is selected"):
 		map.queue_free()
 		return
-	_check(bar.cell_count() == expected.size(), "bar has %d cells, core has %d slots" % [bar.cell_count(), expected.size()])
+	_check(bar.call("cell_count") == expected.size(), "bar has %d cells, core has %d slots" % [bar.call("cell_count"), expected.size()])
 	var states := {}
 	for slot in expected:
 		states[str(slot["state"])] = true
@@ -76,14 +76,17 @@ func _run() -> void:
 	var rect := bar.get_global_rect()
 	_check(view.encloses(rect), "bar %s leaves the screen %s" % [rect, view])
 	var end_turn: Control = map.ui.end_turn_cluster
-	_check(not rect.intersects(end_turn.get_global_rect()), "bar %s overlaps the end-turn cluster %s" % [rect, end_turn.get_global_rect()])
+	# La cloche (bord gauche réel : `fan_left_edge`) ; le reste du cadre du nœud est transparent.
+	var bell_left: float = end_turn.get_global_rect().position.x + float(end_turn.call("fan_left_edge"))
+	_check(rect.end.x <= bell_left, "bar %s overlaps the end-turn bell (left edge %.1f)" % [rect, bell_left])
+	print("a6_slot_bar: view %s bar %s bell_left %.1f" % [view, rect, bell_left])
 	if map.ui.minimap != null and map.ui.minimap.is_visible_in_tree():
 		_check(not rect.intersects(map.ui.minimap.get_global_rect()), "bar overlaps the minimap")
 	if ctl.panel.is_visible_in_tree():
 		_check(not rect.intersects(ctl.panel.get_global_rect()), "bar overlaps the settlement panel")
 	# Chaque case offre une infobulle ; clic sur une case utile → onglet des bâtiments.
 	var clicked := false
-	for cell in bar.cells_box.get_children():
+	for cell in (bar.get("cells_box") as Node).get_children():
 		var button := cell as Button
 		_check(button.tooltip_text != "", "cell %s has no tooltip" % button.name)
 		if not clicked and not button.disabled:
