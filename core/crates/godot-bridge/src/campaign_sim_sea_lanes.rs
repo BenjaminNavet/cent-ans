@@ -82,4 +82,49 @@ impl CampaignSim {
         };
         sim_campaign::movement::is_sea_crossing(data, &from, &to)
     }
+
+    /// Lot EM (ADR 0167): ports of call of the voyage of `army_id` from the
+    /// port it stands in to `to_port` this season (destination last; empty
+    /// when the army is not in a port or no voyage reaches `to_port`).
+    #[func]
+    fn sea_voyage(&self, army_id: GString, to_port: GString) -> PackedStringArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return PackedStringArray::new();
+        };
+        let Some(army) =
+            sim_campaign::ArmyId::parse(&army_id.to_string()).and_then(|id| state.armies.get(&id))
+        else {
+            return PackedStringArray::new();
+        };
+        let (Some(from), Ok(to)) = (
+            army.settlement(),
+            data_model::SettlementId::new(to_port.to_string()),
+        ) else {
+            return PackedStringArray::new();
+        };
+        sim_campaign::voyage::sea_voyage(state, data, &army.faction, from, &to)
+            .unwrap_or_default()
+            .iter()
+            .map(|id| GString::from(id.as_str()))
+            .collect()
+    }
+
+    /// Lot EM: the port `army_id` can sail to this season nearest map pixel
+    /// `(x, y)` (a right click on the water); "" when none.
+    #[func]
+    fn sea_port_near(&self, army_id: GString, x: f64, y: f64) -> GString {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return GString::new();
+        };
+        let Some(army) =
+            sim_campaign::ArmyId::parse(&army_id.to_string()).and_then(|id| state.armies.get(&id))
+        else {
+            return GString::new();
+        };
+        let Some(from) = army.settlement() else {
+            return GString::new();
+        };
+        sim_campaign::voyage::port_near(state, data, &army.faction, from, [x as f32, y as f32])
+            .map_or_else(GString::new, |port| GString::from(port.as_str()))
+    }
 }

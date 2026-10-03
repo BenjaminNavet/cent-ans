@@ -219,6 +219,45 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   détail ; couches 0-7 des tableaux `game/assets/models/battle_fine/textures/fine_detail_*.png`
   (détail dans son `SOURCE.md`).
 
+### Feuillages des arbres de bataille — CC0 1.0 (FA1)
+
+- **ambientCG** ([ambientcg.com](https://ambientcg.com), Lennart Demes) : atlas de feuilles
+  photographiées LeafSet016 (chêne), LeafSet014 (hêtre), LeafSet022 (frêne), LeafSet004
+  (peuplier), LeafSet001 (saule), LeafSet024 (fruitiers), LeafSet005 (haies), LeafSet012 (feuilles
+  de chêne sèches), 2K-JPG. Feuilles détourées, ramenées à la teinte du décor et posées sur des
+  brindilles dessinées par `game/assets/textures/battle/build_fa_leaf_sprays.py` (catalogue
+  `data/art/battle_tree_leaves.json`) : `leaf_spray_<essence>.png`, `dead_leaves_oak.png`.
+
+### Herbe des batailles — CC0 1.0 (FA7)
+
+- **ambientCG** ([ambientcg.com](https://ambientcg.com), Lennart Demes) : atlas de brins et
+  d'herbes photographiés Foliage001 (longs brins), Foliage006 et Foliage008 (brins de pelouse),
+  Foliage005 (feuilles de graminée), Foliage002 et Foliage004 (panicules, épis barbus), Foliage003
+  et Foliage007 (herbes folles), LeafSet020 (feuilles de pissenlit), 2K-JPG. Brins détourés,
+  ramenés à une couleur moyenne neutre (la teinte vient du sol) et composés en touffes par
+  `game/assets/textures/battle/build_fa_grass.py` (catalogue `data/art/battle_grass.json`) :
+  `grass_tufts.png`. Les capitules de pissenlit et de pâquerette sont dessinés par le script.
+
+### Flammes et fumée — CC0 1.0 (FA2)
+
+- **Unity Labs Paris** — « Free VFX image sequences & flipbooks »
+  ([billet](https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks) : « we release
+  some of these sequences under CC0 license ») : séquences simulées Flame03 et WispySmoke03, recodées
+  (chaleur / couverture ; densité / éclairage) par `tools/cent_ans_tools/vfx_flipbooks.py`
+  (réglages `data/fx/fire_flipbooks.json`) en `game/assets/textures/fx/flame_flipbook.png` et
+  `smoke_flipbook.png`.
+
+### Ornements de portulan de la vue parchemin — domaine public (FA6)
+
+- **Atlas catalan** (attribué à Abraham Cresques, Majorque, 1375 ; Bibliothèque nationale de
+  France, Espagnol 30), numérisations de Wikimedia Commons marquées « Public domain » :
+  [1375 Atlas Catalan, Europe 01](https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg)
+  (rose des vents),
+  [Taprobane in the Catalan Atlas (1375)](https://commons.wikimedia.org/wiki/File:Taprobane_in_the_Catalan_Atlas_(1375).jpg)
+  (sirène). Ornements détourés (vélin retiré) par `tools/cent_ans_tools/parchment_ornaments.py`
+  (découpes `data/map/parchment_ornaments.json`) : `game/assets/textures/parchment/` (détail
+  dans son `SOURCE.md`).
+
 ### Détail proche du sol de bataille — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,
@@ -244,6 +283,19 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 
 - **Fantasy UI Borders** — Kenney ([kenney.nl](https://kenney.nl)).
 - **Parchment GUI** — zwonky ([OpenGameArt](https://opengameart.org/content/parchment-gui)).
+
+### Ornements d'interface — domaine public et CC0 1.0 (FA5)
+
+Dérivés découpés et réduits (`game/assets/ui/fa/`) par `tools/cent_ans_tools/fa_ui_assets.py`
+depuis le catalogue `data/ui/fa_ui_assets.json` ; détail fichier par fichier dans
+`game/assets/ui/fa/SOURCE.md`.
+
+- **Sceaux de cire** — empreintes de sceau *Saint Giles* (Angleterre, fin du XIIIe siècle,
+  [466080](https://www.metmuseum.org/art/collection/search/466080)) et *Bishop* (Pays-Bas,
+  XIVe siècle, [466082](https://www.metmuseum.org/art/collection/search/466082), reteintée en
+  cire rouge), The Metropolitan Museum of Art, domaine public (Open Access, CC0 1.0).
+- **Cuir et laiton des boutons d'accueil** — Leather030 et Metal007,
+  [ambientCG](https://ambientcg.com) (Lennart Demes), CC0 1.0.
 
 ### Sons de bataille et ambiances — Freesound, CC0 1.0
 
@@ -417,6 +469,22 @@ mention « Public domain » ou CC0). Recadrées et réduites par `tools/cent_ans
 
 Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_treasury`, `vg_trade`) : OpenRouter
 (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md` (session 7).
+
+## Animations de combat (`game/assets/models/battle_fine/fa3_anim/`, lot FA3)
+
+Clips reciblés sur le squelette des figurines fines et cuits en matrices d'os par
+`tools/blender_scripts/fa3_anim_retarget.py` (table `data/fx/fa3_anim_sources.json`) ; seuls ces
+dérivés sont versionnés, les fichiers d'origine restent hors dépôt. Les deux sources sont en
+CC0 1.0 (aucune attribution requise, créditées par courtoisie). Par défaut : parade (`parry`) et
+deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne sont lus qu'avec
+`--fa-anim`.
+
+- **Mesh2Motion**, animations humaines (Scott Petrovic et contributeurs) —
+  https://github.com/Mesh2Motion/mesh2motion-app. CC0 ; README du dépôt : « The art assets (3d
+  models, rigs, animations) are all licensed under CC0 ».
+- **KayKit Character Animations 1.1** (Kay Lousberg, www.kaylousberg.com) — CC0 ; source de la
+  licence : fichier `KayKit-CC0-License.txt` du pack (« License: (Creative Commons Zero, CC0) »).
+  Clips d'essai seulement (`slash`, `overhead`, `pike_level`, `pike_thrust`).
 
 ## Assets produits par le projet
 

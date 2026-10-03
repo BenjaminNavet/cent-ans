@@ -1,0 +1,56 @@
+{
+  "description": "Lot FA6 : ornements de portulan de la vue parchemin (carte de campagne, caméra > 1200), découpés dans des numérisations d'œuvres du domaine public par `tools/cent_ans_tools/parchment_ornaments.py`. Coordonnées en pixels du fichier source. `display` : indications lues par le jeu (`ParchmentDecor`).",
+  "output_dir": "game/assets/textures/parchment",
+  "preview_colours": [[214, 196, 150], [150, 165, 155]],
+  "use": {"rose": "real", "ship": "drawn", "monster": "real"},
+  "sources": {
+    "catalan_europe": {
+      "file": "commons/1375_Atlas_Catalan,_Europe_01.jpg",
+      "title": "File:1375 Atlas Catalan, Europe 01.jpg",
+      "page_url": "https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/1375_Atlas_Catalan%2C_Europe_01.jpg",
+      "work": "Atlas catalan, feuillets de l'Europe et de la Méditerranée (BnF, Espagnol 30)",
+      "author": "Abraham Cresques (attribué)",
+      "date": "1375",
+      "institution": "Bibliothèque nationale de France",
+      "licence": "Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)"
+    },
+    "catalan_taprobane": {
+      "file": "commons/Taprobane_in_the_Catalan_Atlas_(1375).jpg",
+      "title": "File:Taprobane in the Catalan Atlas (1375).jpg",
+      "page_url": "https://commons.wikimedia.org/wiki/File:Taprobane_in_the_Catalan_Atlas_(1375).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Taprobane_in_the_Catalan_Atlas_%281375%29.jpg",
+      "work": "Atlas catalan, feuillet 12 (mer des Indes, île de Taprobane)",
+      "author": "Abraham Cresques (attribué)",
+      "date": "1375",
+      "institution": "Bibliothèque nationale de France",
+      "licence": "Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)"
+    }
+  },
+  "ornaments": [
+    {
+      "id": "rose_catalan",
+      "kind": "rose",
+      "note": "rose des vents à huit pointes, la plus ancienne rose connue sur une carte (le cercle occupe 0,9 du demi-côté ; nord en haut)",
+      "source": "catalan_europe",
+      "file": "rose_catalan.png",
+      "crop": [280, 1698, 660, 2078],
+      "size": 384,
+      "mask": {"shape": "disk", "center": [470, 1888], "radius": 186, "feather": 3},
+      "key": {"low": 0.16, "high": 0.34, "paper_radius": 120, "percentile": 80, "reject_blue": [0.0, 0.04], "reject_except": {"shape": "disk", "center": [470, 1888], "radius": 172}},
+      "saturation": 1.2,
+      "display": {"anchor": [0.5, 0.5]}
+    },
+    {
+      "id": "siren_catalan",
+      "kind": "monster",
+      "note": "sirène à deux queues de la mer des Indes",
+      "source": "catalan_taprobane",
+      "file": "siren_catalan.png",
+      "crop": [80, 1100, 650, 1580],
+      "size": 384,
+      "mask": {"shape": "polygon", "feather": 2, "points": [[350, 1122], [397, 1140], [417, 1190], [430, 1250], [457, 1283], [500, 1227], [521, 1190], [507, 1170], [473, 1157], [493, 1133], [553, 1120], [573, 1133], [553, 1170], [567, 1193], [563, 1227], [603, 1270], [627, 1330], [637, 1383], [620, 1450], [600, 1510], [520, 1557], [447, 1547], [387, 1530], [353, 1540], [307, 1537], [260, 1567], [193, 1570], [127, 1537], [97, 1470], [93, 1390], [100, 1323], [113, 1290], [140, 1263], [130, 1237], [127, 1203], [140, 1190], [120, 1157], [167, 1150], [183, 1197], [197, 1233], [253, 1283], [270, 1293], [290, 1237], [297, 1170], [320, 1133]], "holes": [[[203, 1333], [260, 1380], [292, 1363], [290, 1427], [263, 1420], [230, 1387], [207, 1357]], [[430, 1317], [467, 1313], [530, 1250], [533, 1283], [527, 1337], [500, 1383], [460, 1417], [433, 1423], [413, 1383], [417, 1337]]]},
+      "display": {"anchor": [0.5, 0.6], "height": 4.6, "faces": "left"}
+    }
+  ]
+}

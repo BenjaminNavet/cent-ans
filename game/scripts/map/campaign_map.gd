@@ -1930,6 +1930,9 @@ func _stage_screenshot_budget() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
+	# Le survol suit la dernière position connue de la souris, même hors de la fenêtre : pas
+	# d'étiquette de province parasite sur les captures.
+	RenderingServer.frame_pre_draw.connect(func() -> void: ui.hover_label.hide(), CONNECT_ONE_SHOT)
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())

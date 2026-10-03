@@ -135,10 +135,12 @@ static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text
 		var stance := str(army.get("stance", ""))
 		var in_field := army.has("position") and str(army.get("settlement", "")) == ""
 		var moving := ArmyMarker.army_status(army) == "moving"
+		# GC (ADR 0158) : camps réglés par rapport aux maquettes des lieux (camp de siège ≈ un bourg,
+		# bivouac ≈ un village à hauteur de jeu), `map.siege_camp_scale` / `map.bivouac_scale`.
 		if stance == "siege":
-			figures._build_camp("siege_camp", SIEGE_CAMP_SLOT, 1.3)
+			figures._build_camp("siege_camp", SIEGE_CAMP_SLOT, float(map_settings().get("siege_camp_scale", 1.3)))
 		elif in_field and not moving:
-			figures._build_camp("fleet/bivouac", CAMP_SLOT, 0.75)
+			figures._build_camp("fleet/bivouac", CAMP_SLOT, float(map_settings().get("bivouac_scale", 0.75)))
 	return figures
 
 

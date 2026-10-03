@@ -490,6 +490,10 @@ pub enum OrderError {
     NotAtWar,
     #[error("l'armée doit stationner dans un port pour embarquer")]
     NotInPort,
+    #[error("aucune route maritime de {from} à {to} en une saison")]
+    NoSeaRoute { from: String, to: String },
+    #[error("l'embarquement prend toute la saison : l'armée ne doit pas avoir bougé ce tour")]
+    EmbarkNeedsFullTurn,
     #[error("l'armée doit stationner dans cette colonie")]
     NotInSettlement,
     #[error("recrutement impossible : {0}")]

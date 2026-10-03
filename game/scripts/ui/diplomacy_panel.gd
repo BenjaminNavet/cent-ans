@@ -21,6 +21,8 @@ signal offer_answered(offer_id: int, accept: bool)
 signal arbitration_requested(offer_id: int, verdict: String, side: String)
 signal closed
 
+## FA5 : côté du sceau de cire réel (bouton « Proposer le traité », traités signés).
+const TREATY_SEAL_SIZE := 28
 const STATUS_LABELS := {
 	"war": "En guerre", "truce": "Trêve", "peace": "Paix", "alliance": "Alliance",
 	"vassal": "Notre vassal", "suzerain": "Notre suzerain",
@@ -443,6 +445,10 @@ func _build_negotiation() -> Control:
 	send.name = "SendTreaty"
 	send.text = "Proposer le traité"
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# FA5 : sceau de cire réel sur le bouton qui engage la parole du prince.
+	send.icon = FaUi.seal("treaty")
+	send.expand_icon = false
+	send.add_theme_constant_override("icon_max_width", TREATY_SEAL_SIZE)
 	send.pressed.connect(_send_treaty)
 	buttons.add_child(send)
 	_treaty_buttons = buttons  # Q6 : hors de la page défilante (voir `_build_detail_column`)
@@ -1339,7 +1345,16 @@ func _render_history() -> void:
 			continue
 		var accepted := bool(record.get("accepted", false))
 		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""), "signé" if accepted else "refusé"]
-		_history_page.add_child(_label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC))
+		var head_label := _label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC)
+		var wax := FaUi.seal_rect("treaty", float(TREATY_SEAL_SIZE)) if accepted else null
+		if wax != null:  # FA5 : un traité signé porte son sceau
+			var head_row := HBoxContainer.new()
+			head_row.add_theme_constant_override("separation", 6)
+			head_row.add_child(wax)
+			head_row.add_child(head_label)
+			_history_page.add_child(head_row)
+		else:
+			_history_page.add_child(head_label)
 		var body := _label(str(record.get("text", "")), UiType.CAPTION, HudStyle.INK_SOFT)
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_history_page.add_child(body)

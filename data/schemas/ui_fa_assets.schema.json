@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui_fa_assets.schema.json",
+  "title": "Ornements d'interface du domaine public (lot FA5)",
+  "description": "Catalogue des découpes de `tools/cent_ans_tools/fa_ui_assets.py` (initiales enluminées, ornements de bordure, sceaux de cire, matières), écrites dans `game/assets/ui/fa/<genre>/<id>.png`. Lu aussi par `game/scripts/ui/fa_ui.gd` (initiales disponibles et réglages de pose).",
+  "type": "object",
+  "required": ["sources", "initials", "ornaments", "seals", "materials", "display"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "sources": {
+      "type": "object",
+      "description": "Photographies d'origine (hors dépôt), par identifiant.",
+      "propertyNames": {"$ref": "#/$defs/id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["file", "institution", "object", "origin", "url", "licence"],
+        "additionalProperties": false,
+        "properties": {
+          "file": {"type": "string", "pattern": "^[a-zA-Z0-9_./-]+\\.(jpg|png)$", "description": "Chemin relatif au dossier des brutes."},
+          "institution": {"type": "string", "minLength": 1},
+          "object": {"type": "string", "minLength": 1, "description": "Titre de l'objet (et numéro d'inventaire)."},
+          "origin": {"type": "string", "minLength": 1, "description": "Lieu et date de l'objet, ou auteur de la matière."},
+          "url": {"type": "string", "pattern": "^https://"},
+          "licence": {"type": "string", "enum": ["CC0 1.0", "Domaine public (Met Open Access, CC0 1.0)"]}
+        }
+      }
+    },
+    "initials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "letter", "source", "box", "size", "mode"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "letter": {"type": "string", "pattern": "^[A-Z]$", "description": "Lettre lue par le joueur (capitale sans accent)."},
+          "source": {"$ref": "#/$defs/id"},
+          "box": {"$ref": "#/$defs/box"},
+          "size": {"$ref": "#/$defs/size"},
+          "mode": {"type": "string", "enum": ["framed", "matte"], "description": "`framed` : initiale avec son champ peint ; `matte` : détourée du parchemin."},
+          "edge_px": {"type": "number", "minimum": 0, "maximum": 8, "description": "Fondu des bords d'une initiale `framed` (px de sortie)."},
+          "matte": {"$ref": "#/$defs/matte"}
+        }
+      }
+    },
+    "ornaments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "box", "size", "matte"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "source": {"$ref": "#/$defs/id"},
+          "box": {"$ref": "#/$defs/box"},
+          "size": {"$ref": "#/$defs/size"},
+          "rotate": {"$ref": "#/$defs/rotate"},
+          "flip_h": {"type": "boolean"},
+          "fade_ends_px": {"type": "integer", "minimum": 0, "maximum": 256, "description": "Fondu des extrémités gauche et droite (px de sortie) d'un bandeau coupé net."},
+          "matte": {"$ref": "#/$defs/matte"}
+        }
+      }
+    },
+    "seals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "box", "size", "matte"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "source": {"$ref": "#/$defs/id"},
+          "box": {"$ref": "#/$defs/box"},
+          "size": {"$ref": "#/$defs/size"},
+          "rotate": {"$ref": "#/$defs/rotate"},
+          "matte": {"$ref": "#/$defs/matte"},
+          "tint": {"$ref": "#/$defs/colour"},
+          "tint_strength": {"$ref": "#/$defs/unit"},
+          "saturation": {"type": "number", "minimum": 0, "maximum": 3},
+          "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+          "shadow": {
+            "type": "object",
+            "required": ["offset_px", "blur_px", "opacity"],
+            "additionalProperties": false,
+            "properties": {
+              "offset_px": {"type": "array", "items": {"type": "integer", "minimum": -16, "maximum": 16}, "minItems": 2, "maxItems": 2},
+              "blur_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 24},
+              "opacity": {"$ref": "#/$defs/unit"}
+            }
+          }
+        }
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "size"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "source": {"$ref": "#/$defs/id"},
+          "box": {"$ref": "#/$defs/box"},
+          "size": {"$ref": "#/$defs/size"},
+          "tint": {"$ref": "#/$defs/colour"},
+          "tint_strength": {"$ref": "#/$defs/unit"},
+          "saturation": {"type": "number", "minimum": 0, "maximum": 3},
+          "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+          "rim": {
+            "type": "object",
+            "description": "Bord de métal : la tuile devient une plaque en 9 tranches (bord = `width_px`, centre = une période de la matière).",
+            "required": ["source", "width_px"],
+            "additionalProperties": false,
+            "properties": {
+              "source": {"$ref": "#/$defs/id"},
+              "width_px": {"type": "integer", "minimum": 1, "maximum": 32},
+              "tint": {"$ref": "#/$defs/colour"},
+              "tint_strength": {"$ref": "#/$defs/unit"},
+              "saturation": {"type": "number", "minimum": 0, "maximum": 3},
+              "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+              "outline": {"$ref": "#/$defs/unit", "description": "Assombrissement du filet extérieur du bord."},
+              "groove": {"$ref": "#/$defs/unit", "description": "Assombrissement du filet intérieur du bord."},
+              "inner_shadow": {"$ref": "#/$defs/unit", "description": "Ombre du bord sur la matière (au contact)."},
+              "inner_shadow_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 32}
+            }
+          }
+        }
+      }
+    },
+    "display": {
+      "type": "object",
+      "description": "Réglages de pose lus par le jeu (`FaUi`).",
+      "required": ["initial_scale", "title_spray", "title_spray_opacity", "title_spray_height", "title_spray_min_width_px", "seals"],
+      "additionalProperties": false,
+      "properties": {
+        "initial_scale": {"type": "number", "minimum": 1, "maximum": 2, "description": "Agrandissement d'une initiale réelle par rapport au champ de la lettrine dessinée."},
+        "title_spray": {"type": "string", "pattern": "^([a-z][a-z0-9_]*)?$", "description": "Rinceau posé à la suite des titres à lettrine quand la place le permet (id d'`ornaments`), vide : aucun."},
+        "title_spray_opacity": {"$ref": "#/$defs/unit"},
+        "title_spray_height": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Hauteur du rinceau, en part du champ de la lettrine."},
+        "title_spray_min_width_px": {"type": "integer", "minimum": 16, "maximum": 512, "description": "Largeur libre minimale après le titre pour poser le rinceau."},
+        "seals": {
+          "type": "object",
+          "description": "Sceau réel de chaque moment solennel (id de `seals`) : `treaty` (traité proposé ou signé), `chronicle` (décision historique de la chronique).",
+          "required": ["treaty", "chronicle"],
+          "additionalProperties": false,
+          "properties": {
+            "treaty": {"$ref": "#/$defs/id"},
+            "chronicle": {"$ref": "#/$defs/id"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "box": {
+      "type": "array",
+      "description": "Rectangle de découpe dans la photographie d'origine : x0, y0, x1, y1 (px).",
+      "items": {"type": "integer", "minimum": 0},
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "size": {"type": "integer", "minimum": 16, "maximum": 512, "description": "Plus grand côté du fichier produit (px), avant ombre."},
+    "rotate": {"type": "integer", "enum": [0, 90, 180, 270], "description": "Quarts de tour, sens trigonométrique."},
+    "unit": {"type": "number", "minimum": 0, "maximum": 1},
+    "colour": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}, "minItems": 3, "maxItems": 3},
+    "matte": {
+      "type": "object",
+      "description": "Détourage : distance de couleur au support (parchemin, fond de musée).",
+      "required": ["low", "high"],
+      "additionalProperties": false,
+      "properties": {
+        "low": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.8, "description": "Distance RVB (0..√3) sous laquelle le pixel est du support."},
+        "high": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.8, "description": "Distance à partir de laquelle le pixel est opaque."},
+        "background_percentile": {"type": "number", "minimum": 0, "maximum": 99, "description": "Centile de luminance au-dessus duquel les pixels donnent la couleur de référence du support."},
+        "background_blur_px": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon du flou qui suit les nuances locales du support."},
+        "fill_holes_px": {"type": "integer", "minimum": 0, "description": "Aire maximale des rehauts clairs enclos rebouchés."},
+        "min_blob_px": {"type": "integer", "minimum": 0, "description": "Aire minimale d'une tache conservée."},
+        "join_px": {"type": "integer", "minimum": 0, "description": "Dilatation qui relie les taches voisines avant le tri par aire."},
+        "keep_largest": {"type": "boolean", "description": "Ne garder que la plus grande tache (sceaux)."},
+        "feather_px": {"type": "number", "minimum": 0, "maximum": 8},
+        "ellipse": {
+          "type": "array",
+          "description": "Ellipse limite dans la découpe : centre x, centre y, rayon x, rayon y (px source, après rotation).",
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    }
+  }
+}

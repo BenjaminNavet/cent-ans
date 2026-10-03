@@ -813,8 +813,11 @@ impl CampaignState {
         }
     }
 
-    /// Order `Embark` (lot M2): a port-to-port crossing along a `sea` edge
-    /// of the settlement graph (C3); costs the whole turn.
+    /// Order `Embark` (lot M2): a voyage from the army's port to `to_port`
+    /// along sea edges of the settlement graph (C3, SL1), with up to
+    /// `max_voyage_legs` legs (lot EM, ADR 0167); costs the whole turn. Each
+    /// leg may be intercepted and brings its gales; the army puts in at the
+    /// ports on the way.
     pub(crate) fn order_embark(
         &mut self,
         data: &GameData,
@@ -828,15 +831,16 @@ impl CampaignState {
         if !data.settlements.contains_key(to_port) {
             return Err(OrderError::UnknownSettlement(to_port.clone()));
         }
-        if !crate::movement::is_sea_crossing(data, &from, to_port) {
-            return Err(OrderError::NotAdjacent {
-                from: from.to_string(),
-                to: to_port.to_string(),
-            });
-        }
+        let army_faction = entry.faction.clone();
         let full = self.army_grid_allowance(data, entry);
-        if entry.movement_left < full {
-            return Err(OrderError::NoMovementLeft);
+        let movement_left = entry.movement_left;
+        let voyage = crate::voyage::sea_voyage(self, data, &army_faction, &from, to_port)
+            .ok_or_else(|| OrderError::NoSeaRoute {
+                from: settlement_label(data, &from),
+                to: settlement_label(data, to_port),
+            })?;
+        if movement_left < full {
+            return Err(OrderError::EmbarkNeedsFullTurn);
         }
         if let Some(a) = self.armies.get_mut(army) {
             a.movement_left = 0;
@@ -844,16 +848,28 @@ impl CampaignState {
         }
         let besieged = self.besieged_by(army);
         crate::posture::leave_static_stance(self, army);
-        // Lot NV1: an enemy squadron may bar the way.
-        match crate::naval::intercept(self, data, army, &from, to_port, events) {
-            crate::naval::Crossing::Clear | crate::naval::Crossing::Fought(true) => {}
-            crate::naval::Crossing::Pending | crate::naval::Crossing::Fought(false) => {
-                return Ok(());
-            }
-        }
-        self.land_crossing(data, army, to_port, events);
         if let Some(settlement) = besieged {
             crate::siege::leave_siege(self, data, army, &settlement, events);
+        }
+        let mut leg_from = from;
+        for (index, leg_to) in voyage.iter().enumerate() {
+            // Lot NV1: an enemy squadron may bar the way.
+            match crate::naval::intercept(self, data, army, &leg_from, leg_to, events) {
+                crate::naval::Crossing::Clear | crate::naval::Crossing::Fought(true) => {}
+                crate::naval::Crossing::Pending | crate::naval::Crossing::Fought(false) => {
+                    return Ok(());
+                }
+            }
+            if index + 1 == voyage.len() {
+                self.land_crossing(data, army, leg_to, events);
+            } else {
+                // Lot EM: a port of call on the way (never an enemy's).
+                crate::sea_lanes::weather_the_crossing(self, data, army, leg_to, events);
+                if let Some(a) = self.armies.get_mut(army) {
+                    a.position = ArmyPosition::Settlement(leg_to.clone());
+                }
+            }
+            leg_from = leg_to.clone();
         }
         Ok(())
     }
@@ -977,4 +993,11 @@ pub fn settlements_near(
         })
         .cloned()
         .collect()
+}
+
+/// Display name of a settlement (its id when unknown), for order errors.
+fn settlement_label(data: &GameData, id: &SettlementId) -> String {
+    data.settlements
+        .get(id)
+        .map_or_else(|| id.to_string(), |s| s.name.display.clone())
 }

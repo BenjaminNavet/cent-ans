@@ -23,6 +23,10 @@ const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
 const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
 ## NT14 : clips de mêlée par défaut (meilleure source par geste), voir `melee_default_enabled`.
 const MELEE_DIR := "res://assets/models/battle_fine/melee/"
+## FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`, posés par-dessus les
+## clips en place : ceux marqués `default` dans le manifeste par défaut, tous avec `--fa-anim`,
+## aucun avec `--no-fa-anim` (voir `fa_anim_mode`).
+const FA_ANIM_DIR := "res://assets/models/battle_fine/fa3_anim/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -42,6 +46,10 @@ static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (c
 static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
 static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
 static var melee_forced: int = -1  # NT14 : voir `melee_default_enabled`
+static var fa_anim_forced: int = -1  # FA3 : voir `fa_anim_mode`
+const FA_NONE := 0
+const FA_DEFAULT := 1
+const FA_ALL := 2
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -335,6 +343,11 @@ static func _merge_fine(base: Dictionary) -> void:
 		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
 	elif melee_default_enabled():
 		_merge_mocap_trial(rigs, MELEE_DIR)
+	# FA3 : les clips par défaut ne recouvrent pas un essai demandé (`--video-trial`,
+	# `--mocap-trial`) ; `--fa-anim` se pose par-dessus toute couche.
+	var fa_mode := fa_anim_mode()
+	if fa_mode == FA_ALL or (fa_mode == FA_DEFAULT and not video_trial_enabled() and not mocap_trial_enabled()):
+		_merge_mocap_trial(rigs, FA_ANIM_DIR, fa_mode == FA_DEFAULT)
 	if ga3_figures_enabled():
 		_merge_ga3(figures)
 
@@ -430,6 +443,24 @@ static func mocap_trial_enabled() -> bool:
 	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
 
 
+## FA3 : couche de clips libres reciblés (figurines fines seulement). `FA_DEFAULT` (sans option) :
+## seuls les clips marqués `default` dans `fa3_anim/manifest.json` (champ recopié de la table
+## `data/fx/fa3_anim_sources.json` à la cuisson) ; `FA_ALL` (`--fa-anim` après `--`) : tous ;
+## `FA_NONE` (`--no-fa-anim`) : aucun, pour l'A/B. La couche se pose par-dessus la couche déjà
+## fusionnée (défaut NT14) : un clip que FA3 ne couvre pas reste celui de cette couche.
+## `fa_anim_forced` : -1 = ligne de commande, sinon le mode forcé (tests, captures A/B), puis
+## `reload_caches()`.
+static func fa_anim_mode() -> int:
+	if not fine_enabled():
+		return FA_NONE
+	if fa_anim_forced >= 0:
+		return fa_anim_forced
+	var args := OS.get_cmdline_user_args()
+	if args.has("--no-fa-anim"):
+		return FA_NONE
+	return FA_ALL if args.has("--fa-anim") else FA_DEFAULT
+
+
 ## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
 ## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
 static func video_trial_enabled() -> bool:
@@ -451,7 +482,7 @@ static func reload_caches() -> void:
 ## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
 ## images du rig (même os ; la texture est concaténée par `bone_texture`). NT13 : `dir` = dossier
 ## de l'essai (`MOCAP_TRIAL_DIR` CMU ou `VIDEO_TRIAL_DIR` vidéo).
-static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) -> void:
+static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR, only_default: bool = false) -> void:
 	var text := FileAccess.get_file_as_string(dir + "manifest.json")
 	var parsed = JSON.parse_string(text) if text != "" else null
 	if not parsed is Dictionary:
@@ -468,17 +499,29 @@ static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) 
 	var base_frames := _texture_frames(_path(str(entry.get("texture", ""))))
 	if base_frames <= 0:
 		return
+	# FA3 : plusieurs couches possibles, chacune après les images des précédentes.
+	var layers: Array = entry.get("mocap_textures", [])
+	for layer in layers:
+		base_frames += _texture_frames(str(layer))
 	var clips: Dictionary = entry.get("clips", {})
 	var substituted: Array = []
 	for clip_name in trial.get("clips", {}):
 		if not clips.has(clip_name):
 			continue  # l'essai ne crée pas de clip : il remplace
 		var c: Dictionary = (trial["clips"][clip_name] as Dictionary).duplicate()
+		# FA3 : `only_default` ne garde que les clips marqués `default` par la table.
+		if only_default and not bool(c.get("default", false)):
+			continue
+		c.erase("default")
 		c["start"] = base_frames + int(c["start"])
 		clips[clip_name] = c
 		substituted.append(clip_name)
+	if substituted.is_empty():
+		return
 	entry["clips"] = clips
 	entry["mocap_texture"] = dir + str(trial.get("texture", ""))
+	layers.append(entry["mocap_texture"])
+	entry["mocap_textures"] = layers
 	entry["mocap_clips"] = substituted
 	entry["mocap_trial_dir"] = dir
 
@@ -618,13 +661,14 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 		var frames: int = cab[1]
 		var raw: PackedByteArray = cab[2]
 		# NT12 : images mocap à la suite de celles du rig (`--mocap-trial`).
-		if entry.has("mocap_texture"):
-			var extra := _read_cab(str(entry["mocap_texture"]))
+		# FA3 : une ou plusieurs couches (`mocap_textures`, dans l'ordre de fusion).
+		for layer in entry.get("mocap_textures", []):
+			var extra := _read_cab(str(layer))
 			if not extra.is_empty() and int(extra[0]) == bones:
 				raw.append_array(extra[2])
 				frames += int(extra[1])
 			else:
-				push_warning("BattleSkinned: texture mocap illisible %s" % entry["mocap_texture"])
+				push_warning("BattleSkinned: texture mocap illisible %s" % layer)
 		var image := Image.create_from_data(bones * 3, frames, false, Image.FORMAT_RGBAF, raw)
 		tex = ImageTexture.create_from_image(image)
 	else:

@@ -65,6 +65,23 @@ tierce ; `uv run --with pillow --with numpy python build_da6_textures.py`) :
 - `twig_spray.png` : ramilles nues (feuillus en hiver) ;
 - `dead_leaves.png` : feuilles sèches (chêne marcescent en hiver).
 
+Rameaux de **vraies feuilles** du lot FA1 (`build_fa_leaf_sprays.py`, catalogue
+`data/art/battle_tree_leaves.json` ; atlas ambientCG LeafSet, CC0, téléchargés par le script hors
+dépôt ; `uv run --with pillow --with numpy --with scipy python build_fa_leaf_sprays.py`) :
+- `leaf_spray_<essence>.png` (1024², mipmaps, compression haute qualité) : rameau feuillu par
+  essence de `BattleTrees` ; `leaf_spray.png` ne sert plus que de repli (`--no-fa` après `--`) ;
+- `dead_leaves_oak.png` : feuilles de chêne sèches sur `twig_spray.png` (remplace
+  `dead_leaves.png`, qui n'est plus chargé).
+
+Herbe en **vrais brins** du lot FA7 (`build_fa_grass.py`, catalogue `data/art/battle_grass.json` ;
+atlas ambientCG Foliage001 à Foliage008 et LeafSet020, CC0, téléchargés par le script hors dépôt ;
+`uv run --with pillow --with numpy --with scipy python build_fa_grass.py`) :
+- `grass_tufts.png` (2048 × 768, 4 × 3 cases de 512 × 256, mipmaps, compression haute qualité,
+  ~2 Mo en mémoire) : douze touffes (herbe rase, touffes hautes, graminées à épis, herbes folles
+  avec pissenlit et pâquerettes, blé) faites de brins détourés, penchés et courbés. Carte neutre en
+  moyenne : la couleur vient du sol sous la touffe (`battle_grass.gdshader`, chemin `fa_on`).
+  `grass_blades.png` ne sert plus que de repli (`--no-fa-grass` après `--`, ou `--no-da6`).
+
 Régénérer : télécharger, pour chaque couche du sol de `data/fx/battle_ground_layers.json`, les
 fichiers `<id>_diff_2k.jpg` et `<id>_nor_gl_1k.jpg`, et pour les textures uniques ci-dessus
 `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg`, tous dans un même dossier, puis

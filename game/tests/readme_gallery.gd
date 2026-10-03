@@ -53,6 +53,9 @@ func _init() -> void:
 		args.append("--")
 		for option: String in view[2]:
 			args.append(option % written if option.contains("%s") else option)
+		# Le vrai curseur, s'il tombe sur la fenêtre, ouvre une infobulle de province : coin de l'écran.
+		if OS.get_name() == "macOS":
+			OS.execute("osascript", ["-l", "JavaScript", "-e", "ObjC.import('CoreGraphics'); $.CGWarpMouseCursorPosition({x: 2, y: 2})"])
 		var before := FileAccess.get_modified_time(written)
 		var started := Time.get_ticks_msec()
 		var output := []
