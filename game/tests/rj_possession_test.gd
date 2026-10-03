@@ -117,7 +117,7 @@ func _run() -> void:
 	await process_frame
 	var panel: Control = map.ui.province_panel
 	_check(panel.visible and panel.owner_value.text == line, "province panel status (got '%s')" % panel.owner_value.text)
-	_check(panel.possession_held != null and panel.possession_held.visible and panel.possession_held.text.begins_with("Places tenues : "), "province panel held line")
+	_check(panel.held_text().begins_with("Places tenues : "), "province panel held line (tooltip, LR-09 short header)")
 	_check(panel.possession_help().contains("donne le contrôle de la province"), "province panel help sentence")
 	var rows: Array = map.settlements_ctl.rows_for_province(province)
 	var city_row := {}
