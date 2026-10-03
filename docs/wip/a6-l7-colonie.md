@@ -1,3 +1,3 @@
-# A6-L7 colonie : file de construction + panneau
+# A6-L7 colonie
 
-Etat : M8 core + pont faits (build_queue, Order::CancelQueuedBuild, economy.json construction_queue_size=3, dicts "build_queue"). Reste : U11-U14 GDScript (settlement_panel.gd, panel_widgets.gd, settlement_controller.gd), tutoriel texte, smoke.
+Fait : M8 (core+pont+UI file), U11-U14 (GDScript), tests. Voir rapport. Reste : verification visuelle par la session principale.
