@@ -109,7 +109,7 @@ pub const DONATION_FAVOR: u8 = 70;
 
 /// A realm down to this many free provinces is not besieged there by an
 /// enemy without a claim on them: peace decides its fate (F4).
-pub const LAST_BASTIONS: usize = 2;
+pub const LAST_BASTIONS: usize = sim_campaign::negotiation::LAST_BASTIONS;
 
 const REBELS: &str = "fac_rebels";
 
