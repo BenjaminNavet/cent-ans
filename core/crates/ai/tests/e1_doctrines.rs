@@ -95,3 +95,26 @@ fn militia_is_no_longer_the_only_choice() {
     assert!(picked.iter().any(|p| p == "unit_knights"));
     assert!(picked.iter().any(|p| p == "unit_crossbowmen"));
 }
+
+/// A6-L3b: the share cap of `data/ai/doctrines.json` keeps the militia out
+/// of a host that is already mostly militia, and never blocks a small one.
+#[test]
+fn militia_share_cap_blocks_a_militia_heavy_host() {
+    let data = data();
+    let cap = data.ai_doctrines.as_ref().unwrap().share_caps
+        [&UnitTypeId::new("unit_urban_militia").unwrap()]
+        .clone();
+    let france = FactionId::new("fac_france").unwrap();
+    let options = [option(&data, "unit_urban_militia")];
+    let refs: Vec<&RecruitOption> = options.iter().collect();
+    let value = |_: &RecruitOption| 1.0;
+    // Only militia on offer, all of a big host already militia: refused.
+    let heavy = units(&[("unit_urban_militia", cap.min_field_units + 6)]);
+    assert!(pick_recruit(&data, &france, &refs, &heavy, value).is_none());
+    // Below the threshold the cap does not apply.
+    let small = units(&[("unit_urban_militia", cap.min_field_units - 1)]);
+    assert!(pick_recruit(&data, &france, &refs, &small, value).is_some());
+    // A host with plenty of other regiments takes militia again.
+    let mixed = units(&[("unit_urban_militia", 2), ("unit_knights", 20)]);
+    assert!(pick_recruit(&data, &france, &refs, &mixed, value).is_some());
+}

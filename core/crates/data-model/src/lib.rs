@@ -36,7 +36,7 @@ pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules,
     WarPlanningRules,
 };
-pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy};
+pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy, ShareCap};
 pub use entities::ai_feudal::AiFeudal;
 pub use entities::ai_grid::{
     AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
@@ -135,6 +135,7 @@ pub use entities::settlement::{
     SettlementGraph, SettlementKind, SettlementRules, StartingBudget,
 };
 pub use entities::skill::{Skill, SkillBranch};
+pub use entities::starting_armies::{StartingArmies, StartingGarrisons};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::title::{
     FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,

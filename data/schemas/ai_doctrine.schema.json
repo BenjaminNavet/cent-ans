@@ -41,6 +41,20 @@
       "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
       "additionalProperties": { "$ref": "#/$defs/doctrine" }
     },
+    "share_caps": {
+      "type": "object",
+      "description": "Plafond de part d'un type d'unité parmi les régiments d'une faction, armées et garnisons ensemble (lot A6-L3b, ADR 0179). Une option qui dépasserait le plafond n'est pas recrutée.",
+      "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "max_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Part maximale (0-1), le recrutement compris." },
+          "min_field_units": { "type": "integer", "minimum": 0, "description": "Le plafond s'applique à partir de ce nombre de régiments (armées et garnisons)." }
+        },
+        "required": ["max_share", "min_field_units"],
+        "additionalProperties": false
+      }
+    },
     "rank_strategies": {
       "type": "object",
       "description": "Doctrine stratégique par rang du titre principal (lot FE5).",

@@ -778,6 +778,13 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
         .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
     let mut composition = crate::doctrine::field_composition(state, ctx.faction);
+    // A6-L3b: garrisons count too, for the share caps (a faction with no
+    // field army raised militia into its garrisons turn after turn).
+    for settlement in state.settlements.values().filter(|s| ctx.holds(s)) {
+        for unit in &settlement.garrison {
+            *composition.entry(unit.unit_type.clone()).or_default() += 1;
+        }
+    }
     // SV2: the resource units this turn's recruits draw (siege engines:
     // wood, iron) leave the faction's free supply; the next ones of the
     // same kind are priced with their import (B7c rule, ADR 0053).

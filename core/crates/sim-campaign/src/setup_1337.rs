@@ -36,15 +36,6 @@ pub const DEFAULT_TREASURY: i64 = 5_000;
 /// Duration in turns of the truces active at the start.
 pub const INITIAL_TRUCE_TURNS: u32 = 8;
 
-const MILITIA: &str = "unit_urban_militia";
-const CROSSBOWMEN: &str = "unit_crossbowmen";
-const MEN_AT_ARMS: &str = "unit_men_at_arms_foot";
-const KNIGHTS: &str = "unit_knights";
-const MOUNTED_SERGEANTS: &str = "unit_mounted_sergeants";
-const LONGBOWMEN: &str = "unit_longbowmen";
-const MOUNTED_ARCHERS: &str = "unit_mounted_archers";
-
-/// Composition of the main army of `faction` (unit type ids, may repeat).
 /// Whether a recorded death falls before the campaign opens in spring 1337:
 /// a death later in 1337 (Frederick III of Sicily in June) or dated to the
 /// year only leaves the character alive at start.
@@ -60,39 +51,34 @@ fn dead_before_start(death: &HistoricalDate) -> bool {
     }
 }
 
-fn main_army_composition(faction: &Faction) -> Vec<&'static str> {
-    match faction.id.as_str() {
-        "fac_france" => vec![
-            KNIGHTS,
-            KNIGHTS,
-            KNIGHTS,
-            MEN_AT_ARMS,
-            MEN_AT_ARMS,
-            CROSSBOWMEN,
-            CROSSBOWMEN,
-            MOUNTED_SERGEANTS,
-        ],
-        "fac_england" => vec![
-            KNIGHTS,
-            KNIGHTS,
-            MEN_AT_ARMS,
-            LONGBOWMEN,
-            LONGBOWMEN,
-            MOUNTED_ARCHERS,
-        ],
-        // A6-L3 (ADR 0179): the duchy's host cost 68 % of its receipts.
-        "fac_burgundy" => vec![KNIGHTS, MEN_AT_ARMS, CROSSBOWMEN],
-        _ => vec![KNIGHTS, MEN_AT_ARMS, CROSSBOWMEN],
-    }
+/// Composition of the main army of `faction` (unit type ids, may repeat),
+/// from `data/rules/starting_armies.json` (A6-L3b): its own entry, or the
+/// default one; empty when the file is absent.
+fn main_army_composition<'a>(data: &'a GameData, faction: &Faction) -> Vec<&'a str> {
+    data.starting_armies
+        .as_ref()
+        .map(|armies| {
+            armies
+                .army_of(&faction.id)
+                .iter()
+                .map(|u| u.as_str())
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
-/// Units of a starting garrison; its size is [`GarrisonRole::garrison_size`].
-fn garrison_composition(role: GarrisonRole) -> Vec<&'static str> {
-    match role {
-        GarrisonRole::Capital => vec![MILITIA, MILITIA, CROSSBOWMEN, MEN_AT_ARMS],
-        GarrisonRole::Frontier => vec![MILITIA, MILITIA, CROSSBOWMEN],
-        GarrisonRole::Interior => vec![MILITIA, MILITIA],
-    }
+/// Units of a starting garrison, from `data/rules/starting_armies.json`;
+/// its size is [`GarrisonRole::garrison_size`].
+fn garrison_composition(data: &GameData, role: GarrisonRole) -> Vec<&str> {
+    let Some(armies) = data.starting_armies.as_ref() else {
+        return Vec::new();
+    };
+    let units = match role {
+        GarrisonRole::Capital => &armies.garrisons.capital,
+        GarrisonRole::Frontier => &armies.garrisons.frontier,
+        GarrisonRole::Interior => &armies.garrisons.interior,
+    };
+    units.iter().map(|u| u.as_str()).collect()
 }
 
 /// Balance of the season `faction` would pay from the start, without the
@@ -447,7 +433,7 @@ impl CampaignState {
             } else {
                 GarrisonRole::Interior
             };
-            let garrison = units_from(data, &garrison_composition(role))?;
+            let garrison = units_from(data, &garrison_composition(data, role))?;
             city_garrisons.insert(id.clone(), garrison);
         }
         for (id, garrison) in city_garrisons {
@@ -731,7 +717,10 @@ impl CampaignState {
                             faction.capital
                         )));
                     };
-                    (station, units_from(data, &main_army_composition(faction))?)
+                    (
+                        station,
+                        units_from(data, &main_army_composition(data, faction))?,
+                    )
                 }
             };
             let army_id = state.allocate_army_id();
