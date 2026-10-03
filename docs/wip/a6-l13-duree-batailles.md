@@ -13,3 +13,6 @@
   leviers `move_speed_factor`, `run_speed_factor`, `melee_fatigue_per_s` dans `battle_pace.json`.
 - Mesure : écart + marche x0,75 = x1,61 (24/24 vainqueurs, historiques intacts), mais la phase de mêlée reste ~86 s.
 - Prochaine étape : allonger la mêlée (létalité, moral progressif, recul), puis réétalonner les tests de réglage.
+
+## L13b : fait
+- Valeurs appliquées et tests réétalonnés (ADR 0180, section L13b). Reste : suite finale, pytest `-k pace`, suppression de core/target.

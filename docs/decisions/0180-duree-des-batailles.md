@@ -1,7 +1,7 @@
 # 0180 — Durée des batailles : mesure, cadence en données, et limite des leviers de combat
 
 Date : 2026-10-03 (lot A6-L13, constat B1 de `docs/audit/a6-audit-joueur.md`).
-Statut : **piste 1 mesurée, mécanisme livré, valeurs NON appliquées** (voir « Décision retenue » et « Retombées »).
+Statut : **appliqué par le lot A6-L13b** (voir la section « L13b » en fin de document ; les sections précédentes restent l'historique du lot L13).
 
 ## Contexte
 
@@ -140,4 +140,79 @@ Si la piste 3 est retenue, multiplier `ammo` par l'inverse du facteur appliqué 
 cd core
 L13_OUT=/tmp/l13.tsv cargo test --release -p sim-battle --test l13_duration -- --ignored --nocapture survey
 L13_TRACE=campagne cargo test --release -p sim-battle --test l13_trace -- --ignored --nocapture
+```
+
+
+## L13b : valeurs appliquées (2026-10-03)
+
+Cible : médiane des 24 cas ×1,6 avec un combat plus long, historiques intacts.
+
+### Ce qui change
+
+Tout vit dans `data/rules/battle_pace.json` (schéma `battle_pace_rules.schema.json`) et `battle_scale.json`.
+Trois jeux de cadence : `field` (batailles de campagne et personnalisées), `historical` (cartes EP7, cadence
+d'origine, donc Crécy, Azincourt et Poitiers inchangés sur 20 graines) et `siege` (inchangé).
+
+| Levier | Valeur `field` | Avant |
+|---|---|---|
+| `field_line_gap_m` (battle_scale) | 450 / 510 / 570 | 300 / 340 / 380 |
+| `move_speed_factor` (marche d'approche) | 0,45 | 1 |
+| `approach_range_m` (écart entre armées sous lequel on marche à pleine vitesse) | 345 | n/a |
+| `ai_patience_factor` (horloges de patience de l'IA et du refus/accalmie) | 1,9 | 1 |
+| `melee_rate` | 0,02 | 0,035 |
+| `melee_resolve_per_s` (moral regagné par un régiment qui tient en mêlée) | 0,4 | 0 |
+| `contagion_factor` (cascade de déroute) | 0,8 | 1 |
+| `run_speed_factor`, `melee_fatigue_per_s`, `ranged_rate`, seuils de moral | inchangés (1, 0,3, 0,3, ...) | |
+
+Enseignements de la mesure :
+- La marche ralentie doit rester **en dehors de la portée des tirs** (`approach_range_m` : tout le monde
+  accélère quand les armées sont à moins de 345 m, charges et courses non touchées) : sinon l'attaquant subit
+  plus de volées et l'équilibre bascule (IA active contre passive, 14/32 en plaine).
+- **Cause cachée des bascules** : les horloges de patience de l'IA (`ATTACKER_WAIT`, `DEFENDER_PATIENCE`,
+  durées de duel) et les délais de bataille refusée/accalmie sont des temps absolus. Une approche plus longue
+  faisait quitter son terrain au défenseur de Crécy avant le contact (Anglais 1/16 au lieu de 14/16). Elles
+  courent désormais `ai_patience_factor` fois plus lentement.
+- Le moral devient plus progressif sans changer les seuils : `melee_resolve_per_s` (un régiment non pris de
+  flanc, à plus de la moitié de ses hommes, regagne du moral) et `contagion_factor` 0,8. Mêlée ×0,57.
+- Le résultat de la bataille symétrique à 60 régiments (`ep9b_duel`) est sur le fil du rasoir selon
+  `approach_range_m` (320 : 1/10, 345 : 4/10, 370 : 9/10 victoires de l'attaquant) ; 345 donne 4/10.
+
+### Résultats (6 graines, release, sondes `l13_duration`, `l13b_behaviour`)
+
+| Mesure | Avant (a6-merge) | Après |
+|---|---|---|
+| Médiane des médianes, 24 cas | 274 s | 452 s (×1,65) |
+| Campagne 600/550 | 260 s | 358 s (×1,38) |
+| Phase de mêlée (contact à la fin), médiane | 63 s | 117 s (×1,9) |
+| Vainqueurs conservés (majorité par cas) | 24/24 | 23/24 (« piquiers contre hommes d'armes » : 3/3) |
+| Crécy, Azincourt, Poitiers (cartes historiques) | anglais | anglais, durées identiques |
+| IA active contre passive (plaine/bocage/colline/montagne, sur 32) | 30/24/27/30 | 31/27/28/31 |
+| Crécy générique (`ep9_decisive`), Anglais | 14/16 | 15/16 |
+
+La bataille de campagne gagne moins (×1,38) que la médiane : ses 7 régiments par camp se heurtent plus vite.
+
+### Tests réétalonnés (géométrie ou timing seulement)
+
+- Géométrie, via `BattleScale::default()` (écart de lignes standard, comme `ai_relief::ridge_sim`) :
+  `b6` (haies, village : `english_on_the_defensive`), `ep3_water` (`river_lab`, pont), `r4` (`crest_field`, crête et haies).
+  `ep9_decisive::crecy` : la crête est posée 20 m devant la ligne anglaise réelle (et non `DEFENDER_LINE_Z`).
+  `cb6_group_formation` : fichier d'or `cb6_deploy_golden.json` réenregistré (placement du déploiement élargi).
+- Timing (marche à ×0,45, patience ×1,9) : `ai` et `ai_relief` (90/120 s portés à 200/270 s pour planter les pieux),
+  `b6` (fenêtres de premier contact 120-320 s au lieu de 55-160 s ; `bocage_*` < 320 / < 260 s ; haie atteinte en 330 s),
+  `f5d` (contact < 320 s), `cb1_width` (`match_speed` mesuré sur 60 s, tolérance 5 % : la perte au démarrage pèse plus
+  sur 20 s), `cb6_group_formation` (600 s), `cb_preview` (pont, 700 s), `ep9_decisive` (limites de fin 12/15 min portées
+  à 20/23 min, refus attendu entre `refusal_seconds` et 2,5 fois, car l'horloge court ×1,9), `ep1_scale` (60 régiments, ≤ 1200 s),
+  `ep9b_duel` (duel gagné mesuré à 460 s au lieu de 270 s), `r4` (crête 400 s, contact < 800 s).
+- Empreintes : `b6::battles_without_a_site_are_unchanged` (graines 3 et 11 : 388 s et 523 s, attaquant français),
+  `cb1_width`, `cb2_modes`, `cb4_abilities` (rejeu échantillon : divergence dès le tick 100 au lieu de 704, la
+  marche d'approche a changé ; ces tests vérifient seulement que l'ancien format se lit encore).
+- Aucun test ne défendait un comportement perdu : les deux comportements de jeu à risque (IA active contre
+  passive, Anglais sur la crête) sont mesurés par `l13b_behaviour` et restent dans leurs seuils.
+
+### Reproduire
+
+```
+cd core
+cargo test --release -p sim-battle --test l13b_behaviour -- --ignored --nocapture   # comportements
+L13_OUT=/tmp/l13.tsv cargo test --release -p sim-battle --test l13_duration -- --ignored --nocapture survey
 ```

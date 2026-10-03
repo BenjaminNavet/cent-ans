@@ -95,9 +95,61 @@ fn crecy(seed: u64) -> BattleSim {
     sim
 }
 
+/// `ep9b_duel.rs` symmetric epic battle: attacker wins out of 10 (3..7 expected).
+fn symmetric() -> usize {
+    use data_model::Ability;
+    const KINDS: [&str; 5] = [
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_urban_militia",
+        "unit_crossbowmen",
+    ];
+    let data = data();
+    let mut wins = 0;
+    for seed in 1..11 {
+        let army: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
+        let mut setup = setup(units(&data, &army), units(&data, &army), None);
+        setup.village = Some(false);
+        for unit in setup
+            .attacker
+            .units
+            .iter_mut()
+            .chain(setup.defender.units.iter_mut())
+        {
+            unit.soldiers = 120;
+            unit.max_soldiers = 120;
+            unit.abilities.retain(|a| *a != Ability::Stakes);
+        }
+        let mut sim = BattleSim::new(setup, seed).unwrap();
+        with_pace(&mut sim);
+        sim.set_weather(sim_battle::Weather::Clear);
+        sim.set_ai(SideId::Attacker, true);
+        sim.set_ai(SideId::Defender, true);
+        let field = sim.field_mut();
+        field.forests.clear();
+        field.forest_parts.clear();
+        field.mud.clear();
+        field.mud_parts.clear();
+        field.pools.clear();
+        field.obstacles.clear();
+        field.river = None;
+        field.bridges.clear();
+        for h in field.heights.iter_mut() {
+            *h = 0.0;
+        }
+        while !sim.is_finished() && sim.elapsed() < 1800.0 {
+            sim.step();
+        }
+        wins += usize::from(sim.winner() == Some(SideId::Attacker));
+    }
+    wins
+}
+
 #[test]
 #[ignore = "survey"]
 fn survey() {
+    println!("symmetric epic: attacker {}/10", symmetric());
     let data = data();
     let seeds: u64 = std::env::var("L13_SEEDS")
         .ok()
@@ -113,7 +165,11 @@ fn survey() {
         }
         times.push(sim.elapsed());
         if std::env::var("L13_VERBOSE").is_ok() {
-            println!("crecy seed {seed}: {:?} {:.0} s", sim.winner(), sim.elapsed());
+            println!(
+                "crecy seed {seed}: {:?} {:.0} s",
+                sim.winner(),
+                sim.elapsed()
+            );
             for e in sim.events().iter().filter(|e| !e.text_fr.contains("pieux")) {
                 println!("   {:>4.0}s {}", e.time, e.text_fr);
             }

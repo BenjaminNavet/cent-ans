@@ -3142,7 +3142,8 @@ impl BattleSim {
                     nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -= contagion.morale_rate(routing_weight) * DT * stand_contagion * contagion_factor;
+            morale -=
+                contagion.morale_rate(routing_weight) * DT * stand_contagion * contagion_factor;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {

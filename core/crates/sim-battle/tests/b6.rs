@@ -190,6 +190,8 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// range of loaded archers): seeds 3 and 11 go to the French (268 s and
 /// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
 /// (`eq7_cavalry::probe_mixed_battle`).
+/// A6-L13b (approach pace x0.45, patience clocks x1.9, melee x0.57): seed 3
+/// French in 388 s, seed 11 French in 523 s (final pace values of ADR 0180).
 /// IA night (the attacker's horse under the arrows waits behind its foot,
 /// not ahead of it): seed 3 stays French (227 s), seed 11 goes back to the
 /// English (317 s); over seeds 0-63 the French win 62/64 instead of 57/64.
@@ -198,11 +200,11 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "484 Some(Attacker) [38, 35, 58, 100, 100, 31, 41, 98, 103, 19]",
+            "388 Some(Attacker) [42, 31, 62, 100, 100, 33, 37, 95, 106, 20]",
         ),
         (
             11,
-            "317 Some(Defender) [5, 20, 0, 100, 100, 15, 52, 87, 109, 0]",
+            "523 Some(Attacker) [50, 67, 72, 87, 69, 22, 56, 86, 95, 30]",
         ),
     ];
     for (seed, digest_before) in expected {
@@ -558,15 +560,4 @@ fn cavalry_waits_rather_than_charge_through_a_ditch() {
     run(&mut sim, 60.0);
     assert!(!has_event(&sim, "se brise sur la haie"));
     assert_ne!(sim.units()[0].state, UnitState::Melee);
-}
-
-#[test]
-#[ignore]
-fn tmp_seed11() {
-    let mut sim = no_site_sim(11);
-    run_to_end(&mut sim);
-    for e in sim.events() {
-        println!("EV {:>4.0}s {}", e.time, e.text_fr);
-    }
-    println!("{:?} {:?}", sim.end_kind(), sim.winner());
 }

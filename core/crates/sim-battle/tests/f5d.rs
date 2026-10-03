@@ -124,8 +124,9 @@ fn first_contact(sim: &mut BattleSim, limit: f64) -> Option<f64> {
 #[test]
 fn demo_battle_reaches_contact_quickly() {
     let mut sim = demo_sim();
-    let contact = first_contact(&mut sim, 300.0);
-    assert!(contact.is_some_and(|t| t < 180.0), "contact at {contact:?}");
+    let contact = first_contact(&mut sim, 420.0);
+    // L13b (ADR 0180): wider gap and slower approach, about 3 min 40 s.
+    assert!(contact.is_some_and(|t| t < 320.0), "contact at {contact:?}");
 }
 
 #[test]

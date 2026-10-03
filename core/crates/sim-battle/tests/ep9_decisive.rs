@@ -221,18 +221,19 @@ fn q3_demo_battle_without_orders_ends() {
         let (t, w, last) = play(&mut sim);
         println!("demo seed {seed}: {t:.0} s {w:?} « {last} »");
         assert!(sim.is_finished(), "seed {seed}: still running at {t:.0} s");
-        assert!(t <= 720.0, "seed {seed}: {t:.0} s");
+        // L13b (ADR 0180): longer battles (approach x0.45), 20 minutes at most.
+        assert!(t <= 1200.0, "seed {seed}: {t:.0} s");
     }
 }
 
 /// Standard tier, no order from the player (or both AIs), four seeds:
-/// every battle ends within 12 minutes (15 with a river to cross).
+/// every battle ends within 20 minutes (23 with a river to cross, ADR 0180).
 #[test]
 fn battles_without_orders_end_in_time() {
     for (terrain, river, limit) in [
-        (Terrain::Plains, false, 720.0),
-        (Terrain::Hills, false, 720.0),
-        (Terrain::Plains, true, 900.0),
+        (Terrain::Plains, false, 1200.0),
+        (Terrain::Hills, false, 1200.0),
+        (Terrain::Plains, true, 1380.0),
     ] {
         for mode in [Mode::AiVsAi, Mode::IdleAttacker, Mode::IdleDefender] {
             for seed in 0..4 {
@@ -262,7 +263,7 @@ fn large_and_epic_battles_without_orders_end_in_time() {
         let mut sim = sim(tier, terrain, false, mode, seed);
         let (t, _, last) = play(&mut sim);
         assert!(
-            sim.is_finished() && t <= 720.0,
+            sim.is_finished() && t <= 1200.0,
             "{tier:?} {} {mode:?} seed {seed}: {t:.0} s « {last} »",
             terrain.key()
         );
@@ -297,7 +298,13 @@ fn an_unfought_battle_is_refused() {
     let (t, winner, last) = play(&mut sim);
     let rules = sim.decision_rules().clone();
     assert_eq!(sim.end_kind(), Some(BattleEnd::Refused), "« {last} »");
-    assert!((t - rules.refusal_seconds).abs() < 1.0, "{t:.0} s");
+    // L13b (ADR 0180): the refusal clock runs at the patience factor of the
+    // field pace (x1.5); a regiment of the defender repositioning slowly may
+    // restart it once.
+    assert!(
+        (rules.refusal_seconds..=rules.refusal_seconds * 2.5).contains(&t),
+        "{t:.0} s"
+    );
     assert_eq!(winner, Some(SideId::Defender));
     assert!(last.contains("Bataille refusée"), "« {last} »");
     let outcome = sim.outcome().unwrap();
@@ -389,7 +396,15 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
     battle.defender.general = Some(general("Edouard"));
     battle.defender.general.as_mut().unwrap().unit_index = 4;
     let mut sim = BattleSim::new(battle, seed).unwrap();
-    let crest = sim_battle::DEFENDER_LINE_Z - 20.0;
+    // The ridge lies 20 m in front of the English line wherever the field
+    // battle scale puts it (ADR 0180: wider gap).
+    let crest = sim
+        .units()
+        .iter()
+        .filter(|u| u.side == SideId::Defender)
+        .map(|u| u.z)
+        .fold(f64::INFINITY, f64::min)
+        - 20.0;
     let field = sim.field_mut();
     field.forests.clear();
     field.forest_parts.clear();

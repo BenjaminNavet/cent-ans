@@ -216,7 +216,9 @@ fn crest_field(data: &GameData, crest_z: f64, hedges: &[Obstacle]) -> BattleSim 
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
-    let mut sim = BattleSim::new(battle, 5).unwrap();
+    // The crest and its hedges are laid for the standard 300 m line gap (ADR 0180
+    // widened the field battles' gap).
+    let mut sim = BattleSim::new_scaled(battle, 5, sim_battle::BattleScale::default()).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
     shape(&mut sim, ridge(crest_z));
     sim.field_mut().obstacles.extend_from_slice(hedges);
@@ -299,8 +301,8 @@ fn english_archers_take_the_hedge_on_the_crest() {
     let b6 = sim_battle::ai::defensive_cover(sim.field(), SideId::Defender).unwrap();
     assert!(b6.center.1 > 570.0, "B6 alone takes the hollow hedge");
     sim.set_ai(SideId::Attacker, false);
-    // Uphill to the crest: a slow march.
-    run(&mut sim, 180.0);
+    // Uphill to the crest: a slow march (L13b, ADR 0180: approach pace x0.45).
+    run(&mut sim, 400.0);
     for u in sim
         .units()
         .iter()
@@ -400,13 +402,14 @@ fn an_attacker_above_shooters_waits_then_attacks() {
     );
     // Then it attacks: no frozen battle.
     let mut engaged = false;
-    while sim.elapsed() < 420.0 && !sim.is_finished() && !engaged {
+    // L13b (ADR 0180): approach pace x0.45 and patience clocks x1.9.
+    while sim.elapsed() < 800.0 && !sim.is_finished() && !engaged {
         sim.step();
         engaged = sim.units().iter().any(|u| u.state == UnitState::Melee);
     }
     assert!(
         engaged || sim.is_finished(),
-        "contact before 7 minutes (foot at z {:.0})",
+        "contact before 13 minutes (foot at z {:.0})",
         foot_z(&sim)
     );
 }
@@ -442,7 +445,8 @@ fn archers_leave_no_dead_ground_below_a_rounded_crest() {
         );
     }
     sim.set_ai(SideId::Attacker, false);
-    run(&mut sim, 180.0);
+    // L13b (ADR 0180): approach pace x0.45.
+    run(&mut sim, 400.0);
     let field = sim.field();
     for u in sim
         .units()

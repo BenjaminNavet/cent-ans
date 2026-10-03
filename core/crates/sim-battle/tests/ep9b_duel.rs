@@ -321,9 +321,10 @@ fn won_duel(limited: bool, at: f64) -> (f64, Option<BattleEnd>, f64) {
 /// does not walk into the arrows at 180 s); the battle still ends, and is
 /// not refused (the defender's losses keep the engagement clock going).
 #[test]
+// L13b (ADR 0180): the duel clocks run x1.9 slower, measured at 460 s instead of 270 s.
 fn a_won_duel_holds_the_line_then_the_battle_ends() {
-    let (held, end, t) = won_duel(false, 270.0);
-    let (walked, _, _) = won_duel(true, 270.0);
+    let (held, end, t) = won_duel(false, 460.0);
+    let (walked, _, _) = won_duel(true, 460.0);
     assert!(
         walked - held > 20.0,
         "men-at-arms at {held:.0} (duel prolonged) vs {walked:.0} (limited)"

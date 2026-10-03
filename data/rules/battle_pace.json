@@ -1,5 +1,5 @@
 {
-  "description": "Cadence des combats (lots A6-L13 et L13b, ADR 0180) : létalité par coup de mêlée et par volée, moral, vitesse de marche d'approche, patience de l'IA. « field » : batailles de campagne et personnalisées (approche à 45 % de la vitesse tant que les armées sont à plus de 250 m, mêlée ×0,57, cascade de déroute ×0,7, les régiments qui tiennent bon regagnent du moral) ; « historical » : cartes historiques (cadence d'origine, réglées pour elle) ; « siege » : sièges (cadence d'origine).",
+  "description": "Cadence des combats (lots A6-L13 et L13b, ADR 0180) : létalité par coup de mêlée et par volée, moral, vitesse de marche d'approche, patience de l'IA. « field » : batailles de campagne et personnalisées (approche à 45 % de la vitesse tant que les armées sont à plus de 345 m, mêlée ×0,57, cascade de déroute ×0,8, les régiments qui tiennent bon regagnent du moral) ; « historical » : cartes historiques (cadence d'origine, réglées pour elle) ; « siege » : sièges (cadence d'origine).",
   "field": {
     "melee_rate": 0.02,
     "ranged_rate": 0.3,
@@ -11,10 +11,10 @@
     "move_speed_factor": 0.45,
     "run_speed_factor": 1.0,
     "melee_fatigue_per_s": 0.3,
-    "contagion_factor": 0.7,
+    "contagion_factor": 0.8,
     "melee_resolve_per_s": 0.4,
-    "approach_range_m": 250.0,
-    "ai_patience_factor": 1.5
+    "approach_range_m": 345.0,
+    "ai_patience_factor": 1.9
   },
   "siege": {
     "melee_rate": 0.035,
