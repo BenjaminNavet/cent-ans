@@ -266,15 +266,20 @@ func _test_faction_chooser() -> void:
 	root.add_child(select)
 	await process_frame
 	await process_frame
+	# JR6 : onglet « Défis singuliers » avec la grande carte des Croisés, avant la carte.
+	_check(select.special_page != null and select.special_page.get_index() == 1, "the singular challenges tab comes second")
+	_check(select._cards.has(CRUSADERS) and select.special_page.is_ancestor_of(select._cards[CRUSADERS]), "the crusaders have a large card in that tab")
 	var picker := select.map_picker
 	if not _check(picker != null and picker.sheets.has(CRUSADERS), "the map picker lists the crusaders"):
 		select.queue_free()
 		return
-	select.start_tabs.current_tab = 1
+	select.start_tabs.current_tab = select.map_tab_index()
 	await process_frame
 	await process_frame
 	_check(picker.landless.has(CRUSADERS), "the landless faction has a banner on the map")
 	_check(select._faction_buttons.has(CRUSADERS), "the crusaders are in the faction list")
+	var first_header := select._faction_list.get_child(0) as Label
+	_check(first_header != null and first_header.text == FactionSelect.LANDLESS_HEADER, "the landless group heads the faction list")
 	var center := picker.faction_center(CRUSADERS)
 	_check(Rect2(Vector2.ZERO, picker.size).has_point(center), "the banner is inside the framed map: %s in %s" % [center, picker.size])
 	_check(picker.faction_at(center) == CRUSADERS, "the banner is found under its centre")

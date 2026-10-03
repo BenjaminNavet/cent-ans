@@ -342,13 +342,13 @@ func _test_faction_chooser() -> void:
 	root.add_child(select)
 	await process_frame
 	await process_frame
-	_check(select.start_tabs != null and select.start_tabs.get_tab_count() == 2, "two tabs: recommended starts and the map")
+	_check(select.start_tabs != null and select.start_tabs.get_tab_count() == (3 if select.special_page != null else 2), "tabs: recommended starts, singular challenges, the map")
 	_check(select.card_count() >= 3 and select.card_count() <= 6, "recommended cards only: %d" % select.card_count())
 	var picker := select.map_picker
 	if not _check(picker != null and picker.sheets.size() >= 60, "map picker loaded the start sheets"):
 		select.queue_free()
 		return
-	select.start_tabs.current_tab = 1
+	select.start_tabs.current_tab = select.map_tab_index()
 	await process_frame
 	await process_frame
 	_check(picker.size.x > 100 and picker.provinces.size() > 100, "map picker laid out with provinces")

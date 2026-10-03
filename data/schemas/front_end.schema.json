@@ -362,6 +362,22 @@
       },
       "maxItems": 6
     },
+    "special_starts": {
+      "type": "object",
+      "description": "JR6 : onglet « Défis singuliers » du choix de faction : factions à mécanique propre (cartes), seules les factions présentées s'affichent.",
+      "additionalProperties": false,
+      "required": ["title", "factions"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "text": { "type": "string" },
+        "factions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": { "type": "string", "pattern": "^fac_" }
+        }
+      }
+    },
     "factions": {
       "type": "array",
       "minItems": 1,

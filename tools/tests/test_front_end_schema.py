@@ -61,3 +61,12 @@ def test_all_playable_factions_are_presented() -> None:
         if json.loads(path.read_text(encoding="utf-8")).get("playable")
     }
     assert playable == presented
+
+
+def test_special_starts_are_presented() -> None:
+    """JR6: the singular challenges tab only names presented (playable) factions."""
+    front_end = _load("ui/front_end.json")
+    presented = {faction["id"] for faction in front_end["factions"]}
+    special = front_end.get("special_starts", {}).get("factions", [])
+    assert "fac_crusaders" in special
+    assert set(special) <= presented

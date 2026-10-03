@@ -53,6 +53,19 @@ static func faction(faction_id: String) -> Dictionary:
 	return {}
 
 
+## JR6 : onglet « Défis singuliers » (factions à mécanique propre, ex. les Croisés) : titre, texte
+## et factions, réduites aux factions présentées ; dictionnaire vide si l'onglet n'a rien à montrer.
+static func special_starts() -> Dictionary:
+	var entry: Dictionary = data().get("special_starts", {})
+	var ids := PackedStringArray()
+	for id in entry.get("factions", []):
+		if not faction(str(id)).is_empty():
+			ids.append(str(id))
+	if ids.is_empty():
+		return {}
+	return {"title": str(entry.get("title", "Défis singuliers")), "text": str(entry.get("text", "")), "factions": ids}
+
+
 ## FE6 : départs recommandés (cartes du menu), dans l'ordre des données, réduits aux factions
 ## présentées (jouables) ; à défaut, les trois premières présentations.
 static func recommended() -> PackedStringArray:

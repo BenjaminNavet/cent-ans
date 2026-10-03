@@ -11,6 +11,8 @@ extends Control
 ## Double-clic sur une carte : commencer.
 ## FE6 : deux onglets — « Départs recommandés » (cartes, `recommended_factions`) et « Toutes les
 ## factions » (carte de 1337 cliquable, `FactionMapPicker`, filtres par royaume et par rang).
+## JR6 : entre les deux, « Défis singuliers » (`special_starts`) : grandes cartes des factions à
+## mécanique propre (les Croisés), pour qu'elles ne se perdent pas dans la liste.
 
 signal back_requested
 signal start_requested(faction_id: String, seed_value: int, start_date: String)
@@ -43,6 +45,10 @@ var _difficulty_description: Label = null
 ## FE6 : onglets (cartes / carte des factions), carte et filtres.
 var start_tabs: TabContainer = null
 var map_picker: FactionMapPicker = null
+## JR6 : page de l'onglet « Toutes les factions » (son rang dépend des onglets présents).
+var _map_page: Control = null
+## JR6 : page de l'onglet « Défis singuliers », `null` si `special_starts` est vide.
+var special_page: Control = null
 var kingdom_filter: OptionButton = null
 var rank_filter: OptionButton = null
 var _faction_list: VBoxContainer = null
@@ -172,7 +178,11 @@ func _build() -> void:
 		# Données d'accueil manquantes : cartes minimales des trois couronnes.
 		for faction_id in ["fac_france", "fac_england", "fac_burgundy"]:
 			cards.add_child(_build_card({"id": faction_id}))
-	start_tabs.add_child(_build_map_tab())
+	special_page = _build_special_tab()
+	if special_page != null:
+		start_tabs.add_child(special_page)
+	_map_page = _build_map_tab()
+	start_tabs.add_child(_map_page)
 
 	column.add_child(_build_detail())
 	column.add_child(_build_difficulty_selector())
@@ -180,6 +190,36 @@ func _build() -> void:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(spacer)
 	column.add_child(_build_actions())
+
+
+## JR6 : onglet « Défis singuliers » : texte d'accroche puis les grandes cartes des factions à
+## mécanique propre, centrées comme les départs recommandés.
+func _build_special_tab() -> Control:
+	var entry := FrontEndData.special_starts()
+	if entry.is_empty():
+		return null
+	var page := VBoxContainer.new()
+	page.name = str(entry["title"])
+	page.add_theme_constant_override("separation", 8)
+	var text := str(entry.get("text", ""))
+	if text != "":
+		var caption := FrontEndStyle.label(text, UiType.size(UiType.BODY), Color(0.97, 0.92, 0.80))
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		page.add_child(caption)
+	var cards := HBoxContainer.new()
+	cards.name = "SpecialCards"
+	cards.alignment = BoxContainer.ALIGNMENT_CENTER
+	cards.add_theme_constant_override("separation", 22)
+	page.add_child(cards)
+	for faction_id in entry["factions"]:
+		cards.add_child(_build_card(FrontEndData.faction(str(faction_id))))
+	return page
+
+
+## JR6 : rang de l'onglet « Toutes les factions ».
+func map_tab_index() -> int:
+	return _map_page.get_index() if _map_page != null else 0
 
 
 ## FE6 : onglet « Toutes les factions » : filtres (royaume, rang), carte cliquable de 1337 à ses
@@ -267,8 +307,11 @@ func _rebuild_faction_list() -> void:
 			groups[kingdom_name] = []
 			order.append(kingdom_name)
 		(groups[kingdom_name] as Array).append(id)
-	# Les grands royaumes (le plus de factions) d'abord, puis par nom.
+	# JR6 : les factions sans terre (Croisés) en tête, puis les grands royaumes (le plus de
+	# factions) d'abord, puis par nom.
 	order.sort_custom(func(a: String, b: String) -> bool:
+		if (a == "") != (b == ""):
+			return a == ""
 		var count_a := (groups[a] as Array).size()
 		var count_b := (groups[b] as Array).size()
 		return count_a > count_b if count_a != count_b else a < b)
@@ -301,7 +344,7 @@ func _rebuild_faction_list() -> void:
 func stage_map(faction_id: String) -> void:
 	if start_tabs == null or map_picker == null:
 		return
-	start_tabs.current_tab = 1
+	start_tabs.current_tab = map_tab_index()
 	select(faction_id)
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -374,6 +417,25 @@ func _build_card(entry: Dictionary) -> Control:
 		art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		art_holder.add_child(art)
+	else:
+		# JR6 : sans miniature (Croisés), l'écu de la faction en grand sur fond d'encre.
+		var ground := ColorRect.new()
+		ground.color = FrontEndStyle.INK
+		ground.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		art_holder.add_child(ground)
+		var arms_texture := PortraitLoader.heraldry_texture(faction_id)
+		if arms_texture != null:
+			var arms := TextureRect.new()
+			arms.name = "ArtShield"
+			arms.texture = arms_texture
+			arms.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			arms.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			arms.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			arms.offset_top = 18.0
+			arms.offset_bottom = -18.0
+			arms.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			art_holder.add_child(arms)
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.0)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

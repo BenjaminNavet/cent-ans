@@ -281,7 +281,8 @@ func _run_start_menu() -> void:
 	root.add_child(menu)
 	await process_frame
 	# FE6 : une carte par départ recommandé (jouable) ; toutes les factions présentées sur la carte.
-	var presented := FrontEndData.recommended().size()
+	# JR6 : plus une carte par défi singulier (onglet « Défis singuliers »).
+	var presented := FrontEndData.recommended().size() + (FrontEndData.special_starts().get("factions", []) as Array).size()
 	_check(presented >= 3 and menu.card_count() == presented, "start menu should show %d faction cards, got %d" % [presented, menu.card_count()])
 	var map_picker: Variant = menu.faction_select.get("map_picker") if menu.faction_select != null else null
 	_check(map_picker != null, "faction select should carry the faction map")
