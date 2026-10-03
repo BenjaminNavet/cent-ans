@@ -19,6 +19,13 @@ uniform float max_lod = 2.5;
 // Lot HB4 : atlas d'une ligne par essence du catalogue ; la ligne vient de la donnée d'instance
 // (`species_row`) au lieu de l'essence du maillage.
 uniform bool species_rows = false;
+// Lot RV-F : vent. Rafales partagées avec le couvert forestier du terrain (`campaign_wind`) : le
+// houppier plie dans le sens du vent (part de la hauteur de l'arbre au sommet, sous la rafale et au
+// calme) et s'éclaircit sous la rafale (feuilles retournées).
+#include "res://shaders/campaign_wind.gdshaderinc"
+uniform float impostor_wind_bend = 0.07;
+uniform float impostor_wind_calm = 0.018;
+uniform float impostor_wind_light = 0.1;
 
 float impostor_row(vec4 custom, float essence) {
 	return species_rows ? species_row(custom, essence) : essence;
@@ -65,6 +72,11 @@ ImpostorVertex impostor_vertex(mat4 model, vec3 cam, vec2 corner, float essence,
 	o.world = origin + right * local.x * width * variety.x * s + up * (local.y - foot) * height * variety.y * s;
 	// Lot SZ4b : pied enfoncé comme le feuillage maillé (`FOLIAGE_GROUND_SINK`).
 	o.world += by * FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
+	// RV-F : flexion au vent (pied fixe, sommet le plus déporté), frémissement propre à l'arbre.
+	float gust = wind_gust(origin.xz);
+	float flex = local.y * local.y * height * variety.y * s;
+	float shiver = sin(TIME * 1.7 + seed * 23.0) * (0.4 + 0.6 * gust);
+	o.world += vec3(wind_gust_dir.x, 0.0, wind_gust_dir.y) * flex * (impostor_wind_bend * gust + impostor_wind_calm * shiver);
 	float row = clamp(floor(essence + 0.5), 0.0, float(rows - 1));
 	vec2 cell = vec2(float(views), float(rows));
 	o.uv0 = (vec2(float(k0), row) + corner) / cell;
@@ -72,7 +84,7 @@ ImpostorVertex impostor_vertex(mat4 model, vec3 cam, vec2 corner, float essence,
 	o.right = right;
 	o.up = up;
 	o.face = face;
-	o.tint = custom_tint * tone;
+	o.tint = custom_tint * tone * (1.0 + impostor_wind_light * gust);  // RV-F
 	o.local = local;
 	return o;
 }

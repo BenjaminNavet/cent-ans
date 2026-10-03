@@ -425,6 +425,7 @@ func update_view(camera_distance: float) -> void:
 		if _off.has("smoke"):
 			effects.get_node("Chimneys").visible = false
 			effects.get_node("Fires").visible = false
+			effects.get_node("RegionalPlumes").visible = false  # RV-F
 		if _off.has("mills"):
 			effects.get_node("WindmillBodies").visible = false
 			effects.get_node("WindmillSails").visible = false

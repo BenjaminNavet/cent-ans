@@ -13,6 +13,20 @@ extends Node3D
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
+## RV-F : panaches régionaux (vue moyenne, caméra haute), taille fixée à l'écran.
+const PLUME_SHADER := preload("res://shaders/life_plume.gdshader")
+## RV-F : un panache régional par colonie de ces types (les autres : un sur deux) ; un hameau sur
+## `PLUME_HAMLET_ONE_IN` ; incendie régional au-dessus des hameaux brûlés, un sur
+## `PLUME_HAMLET_FIRE_ONE_IN`.
+const PLUME_KINDS := {"city": 1, "town": 1, "village": 1, "abbey": 1}
+const PLUME_HAMLET_ONE_IN := 6
+const PLUME_HAMLET_FIRE_ONE_IN := 6
+## RV-F : part des foyers qui fument par point de `_season_boost` (0,55 l'été → 1,15 l'hiver), et
+## repli au grand dézoom (part gardée à `strategic_threshold`).
+const PLUME_DENSITY_PER_BOOST := 0.42
+const PLUME_FAR_KEEP := 0.55
+## RV-F : entrée en fondu des panaches régionaux au-delà du palier près (unités de distance).
+const PLUME_FADE_IN := 120.0
 ## Moulins à vent par type de colonie, échelle monde, position du moyeu (repère du corps).
 const WINDMILLS := {"city": 1, "town": 1, "village": 1}
 ## Une colonie sur N seulement a ses moulins, par type (carte moins chargée en éléments animés).
@@ -53,6 +67,14 @@ var _chimneys: MultiMeshInstance3D
 var _fires: MultiMeshInstance3D
 var _chimney_material: ShaderMaterial
 var _fire_material: ShaderMaterial
+## RV-F : panaches régionaux (même format de points que les cheminées).
+var _plumes: MultiMeshInstance3D
+var _plume_material: ShaderMaterial
+var _plume_points: Array = []
+## RV-F : par point de `_plume_points` : noirceur (0 foyer, 1 incendie).
+var _plume_dark: PackedFloat32Array = PackedFloat32Array()
+## RV-F : interrupteur des panaches régionaux (A/B de `tests/rv_life_shot.gd`).
+var regional_plumes_enabled := true
 ## Points des panaches : [Vector2 px (courant), hauteur au-dessus du sol, graine, colonie (-1 :
 ## hameau), décalage au centre à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle]
 ## (lot SZ4b : les points d'une colonie suivent l'échelle de sa maquette, `_settlement_pose`).
@@ -104,6 +126,11 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	_fire_material = _smoke_material(0.9)
 	_chimneys = _make_instance("Chimneys", _chimney_material)
 	_fires = _make_instance("Fires", _fire_material)
+	_plume_material = ShaderMaterial.new()
+	_plume_material.shader = PLUME_SHADER
+	_plume_material.render_priority = 1
+	_plumes = _make_instance("RegionalPlumes", _plume_material)
+	_plumes.visible = false
 	_windmill_bodies = _make_instance("WindmillBodies", null)
 	_windmill_bodies.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	var sails_material := ShaderMaterial.new()
@@ -153,6 +180,8 @@ func rebuild(province_states: Dictionary) -> void:
 	_begin_pass()
 	_chimney_points.clear()
 	_fire_points.clear()
+	_plume_points.clear()
+	_plume_dark.clear()
 	var data := _layer.data
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
@@ -169,6 +198,13 @@ func rebuild(province_states: Dictionary) -> void:
 			var angle := float((seed_value / (k + 3)) % 628) / 100.0
 			var r := radius * float((seed_value / (k + 7)) % 100) / 100.0
 			_chimney_points.append(_settlement_point(i, Vector2(cos(angle), sin(angle)) * r, top, float((seed_value / (k + 11)) % 1000) / 1000.0))
+		# RV-F : panache régional (incendie si siège ou province ravagée, sinon foyer).
+		var besieged := bool(state.get("siege", false)) and (kind == "city" or kind == "town")
+		var ravaged := float(state.get("devastation", 0.0)) >= RUIN_MIN_DEVASTATION and kind != "castle"
+		if besieged or ravaged:
+			_add_plume(_settlement_point(i, Vector2.ZERO, top, float(seed_value % 1000) / 1000.0), 1.0)
+		elif chimneys > 0 and (PLUME_KINDS.has(kind) or seed_value % 2 == 0):
+			_add_plume(_settlement_point(i, Vector2.ZERO, top, float(seed_value % 1000) / 1000.0), 0.0)
 		# Ville assiégée : incendies dans les faubourgs.
 		if bool(state.get("siege", false)) and (kind == "city" or kind == "town"):
 			for k in 3:
@@ -183,17 +219,23 @@ func rebuild(province_states: Dictionary) -> void:
 		if _layer.hamlet_burned(h):
 			if devastation >= FIRE_MIN_DEVASTATION and hseed % 3 == 0:
 				_fire_points.append(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0))
-		elif hseed % 2 == 0:
-			_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * TownMaquetteData.prop("hamlet_ratio", MapPropScale.shared().hamlet_scale(0.0)), float(hseed % 1000) / 1000.0))
+			if devastation >= FIRE_MIN_DEVASTATION and hseed % PLUME_HAMLET_FIRE_ONE_IN == 0:
+				_add_plume(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0), 1.0)
+		else:
+			if hseed % PLUME_HAMLET_ONE_IN == 1:
+				_add_plume(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0), 0.0)
+			if hseed % 2 == 0:
+				_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * TownMaquetteData.prop("hamlet_ratio", MapPropScale.shared().hamlet_scale(0.0)), float(hseed % 1000) / 1000.0))
 	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
 	for k in scene_fires.size():
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * TownMaquetteData.prop("chimney_ratio", MapPropScale.shared().chimney_scale()), 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
+	_fill_plumes()
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
 	_end_pass()
-	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size(), "windmills": _windmill_points.size(), "ruins": _ruin.size()}
+	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size(), "plumes": _plume_points.size(), "windmills": _windmill_points.size(), "ruins": _ruin.size()}
 
 
 ## Entrées effectives de `rebuild` : sièges, seuils de dévastation (feux, moulins, ruines),
@@ -603,7 +645,7 @@ func _reground_pass(changed: Dictionary) -> void:
 			point[4] = _pose_y(pose)
 		if not mills.is_empty():
 			_write_windmills(mills)
-	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"]]:
+	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"], [_plumes, _plume_points, "plumes"]]:
 		var mmi: MultiMeshInstance3D = triple[0]
 		var points: Array = triple[1]
 		if mmi.multimesh == null:
@@ -694,6 +736,58 @@ func _on_surface_changed(index: int) -> void:
 		_reground_timer = 0.4
 
 
+## RV-F : panache régional ajouté (point au format des cheminées, noirceur 0 foyer / 1 incendie).
+func _add_plume(point: Array, darkness: float) -> void:
+	_plume_points.append(point)
+	_plume_dark.append(darkness)
+
+
+## RV-F : instances des panaches régionaux. Données : graine, noirceur, rang de densité (tirage
+## décorrélé de la graine : le shader ne dessine que les rangs sous `density`), vitesse.
+func _fill_plumes() -> void:
+	_points_version += 1
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE
+	quad.center_offset = Vector3(0.0, 0.5, 0.0)
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data = true
+	multimesh.mesh = quad
+	multimesh.instance_count = _plume_points.size()
+	var buffer := PackedFloat32Array()
+	buffer.resize(_plume_points.size() * 16)
+	for n in _plume_points.size():
+		var point: Array = _plume_points[n]
+		var seed_value: float = point[2]
+		# Taille portée par le shader (part de l'écran) ; base unitaire, levée en colonne z.
+		var basis := Basis(Vector3.RIGHT, Vector3.UP, Vector3(0.0, float(point[1]), 1.0))
+		_write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
+		var rank := fposmod(seed_value * 31.7 + float(n % 13) * 0.071, 1.0)
+		_write_custom(buffer, n * 16 + 12, Color(seed_value, _plume_dark[n], rank, fposmod(seed_value * 13.0, 1.0)))
+	multimesh.buffer = buffer
+	_plumes.multimesh = multimesh
+	_cpu_buffers[_plumes] = buffer
+
+
+## RV-F : fondu et densité des panaches régionaux : palier moyen seulement (relais des cheminées
+## 1:1 au-delà du palier près, effacés sous le parchemin) ; plus de foyers l'hiver, moins au grand
+## dézoom (la carte reste lisible).
+func _update_plumes(camera_distance: float, tiers: ZoomTiers, medium: float) -> void:
+	if _plumes == null:
+		return
+	var near_end := tiers.near_threshold if tiers != null else 150.0
+	var far_end := tiers.strategic_threshold if tiers != null else 1200.0
+	var fade := medium * clampf((camera_distance - near_end) / PLUME_FADE_IN, 0.0, 1.0)
+	_plumes.visible = regional_plumes_enabled and fade > 0.02 and not _plume_points.is_empty()
+	if not _plumes.visible:
+		return
+	var far := smoothstep(far_end * 0.4, far_end, camera_distance)
+	var density := clampf(PLUME_DENSITY_PER_BOOST * _season_boost, 0.0, 1.0) * lerpf(1.0, PLUME_FAR_KEEP, far)
+	_plume_material.set_shader_parameter("fade", fade)
+	_plume_material.set_shader_parameter("density", density)
+	_plume_material.set_shader_parameter("focus_distance", camera_distance)
+
+
 ## Plus de feux de cheminée l'hiver et à l'automne (poids de saison x, y, z, w).
 func set_season(weights: Vector4) -> void:
 	_snow = weights.w
@@ -744,6 +838,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
 	_fires.visible = fire_alpha > 0.02
 	_fire_material.set_shader_parameter("fade", fire_alpha)
+	_update_plumes(camera_distance, tiers, medium)
 	# VT2 : moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
 	var mill_range := TownMaquetteData.prop("windmill_range", -1.0)  # GC : portée des moulins grossis
 	var show_models := near_weight > 0.35 and (props.windmills_visible(camera_distance) if mill_range < 0.0 else camera_distance < mill_range)
