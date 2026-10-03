@@ -52,7 +52,22 @@
         },
         "tree_style": {
           "description": "HC1 (ADR 0161) : rendu des arbres de la carte de campagne. generalised : arbres à taille monde constante grossie, visibles jusqu'à la vue stratégique (réglages generalised_* de game/resources/map_prop_scale.tres) ; real : arbres 1:1 coupés au-delà de la distance de rig 30 (VT3). `--tree-style=real|generalised` le remplace.",
-          "enum": ["generalised", "real"]
+          "enum": [
+            "generalised",
+            "real"
+          ]
+        },
+        "siege_camp_scale": {
+          "description": "GC (ADR 0158) : échelle du camp de siège (modèle siege_camp, × ARMY_SCALE × échelle du pion) ; 0,8 ≈ un bourg à hauteur de jeu.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 4
+        },
+        "bivouac_scale": {
+          "description": "GC (ADR 0158) : échelle du bivouac d'une armée à l'arrêt en campagne ; 0,5 ≈ un village à hauteur de jeu.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 4
         }
       }
     },

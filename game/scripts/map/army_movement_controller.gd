@@ -306,15 +306,21 @@ func order_target(army_id: String, target: Dictionary) -> Dictionary:
 				return order_attack(army_id, str(target["id"]))
 			return order_move_point(army_id, target["point"])
 		"settlement":
-			# SL1 : port relié par la mer au port où se tient l'armée (route maritime ou court
-			# passage) : on embarque, plutôt que de faire le tour par les terres.
-			var crossing := _try_embark(army_id, str(target["id"]))
-			if crossing.get("ok", false):
-				return crossing
+			# SL1 / EM (ADR 0167) : port atteint par la mer depuis le port où se tient l'armée
+			# (une ou plusieurs traversées) : on embarque, plutôt que de faire le tour par les
+			# terres. Un refus du cœur (saison entamée) est montré tel quel.
+			if prefers_sea(army_id, target):
+				return order_embark(army_id, str(target["id"]))
 			if relation_to(target_faction(target)) == "war":
 				return order_attack_settlement(army_id, str(target["id"]))
 			return order_move_settlement(army_id, str(target["id"]))
 		"ground":
+			# EM : clic sur la mer depuis un port : traversée vers le port le plus proche du point.
+			var port := sea_port_at(army_id, target["point"])
+			if port != "":
+				return order_embark(army_id, port)
+			if is_water(target["point"]):
+				return {"ok": false, "error": _water_refusal(army_id)}
 			return order_move_point(army_id, target["point"])
 	return {"ok": false, "error": "Aucune cible."}
 
@@ -368,22 +374,73 @@ func order_assault(army_id: String) -> Dictionary:
 	return result
 
 
-## SL1 : traversée vers `port` si l'armée se tient dans un port qui lui est relié par la mer
-## (`is_sea_link`) ; `{}` sinon (le cœur valide le reste : saison entière, interception).
-func _try_embark(army_id: String, port: String) -> Dictionary:
-	if not map.sim.has_method("embark_army"):
-		return {}
+## EM (ADR 0167) : escales de la traversée de `army_id`, depuis le port où elle se tient,
+## vers `port` cette saison (destination en dernier) ; vide sans voyage possible.
+func sea_voyage(army_id: String, port: String) -> PackedStringArray:
+	if army_id == "" or port == "" or not map.sim.has_method("sea_voyage"):
+		return PackedStringArray()
+	return map.sim.call("sea_voyage", army_id, port)
+
+
+## EM : la colonie `target` se rejoint par la mer : un voyage l'atteint et la marche n'y
+## arrive pas ce tour (un port voisin le long de la côte reste une marche).
+func prefers_sea(army_id: String, target: Dictionary) -> bool:
+	if sea_voyage(army_id, str(target.get("id", ""))).is_empty():
+		return false
+	var point: Vector2 = target["point"]
+	var walk: Dictionary = map.sim.call("find_path_points", army_id, point.x, point.y)
+	return not (walk.get("ok", false) and bool(walk.get("reachable_this_turn", false)))
+
+
+## EM : port de destination d'un clic sur la mer en `point` ("" si le point est à terre ou
+## si l'armée ne se tient pas dans un port d'où une traversée l'atteint).
+func sea_port_at(army_id: String, point: Vector2) -> String:
+	if not is_water(point) or not map.sim.has_method("sea_port_near"):
+		return ""
+	return str(map.sim.call("sea_port_near", army_id, point.x, point.y))
+
+
+## Point sur l'eau (masque terre/mer du rendu : sert à lire le clic, pas à juger l'ordre).
+func is_water(point: Vector2) -> bool:
+	return map.map_data != null and not map.map_data.is_land_px(int(point.x), int(point.y))
+
+
+func _water_refusal(army_id: String) -> String:
 	var army: Dictionary = map.sim.call("get_army", army_id)
-	var from := str(army.get("settlement", ""))
-	if from == "" or from == port:
-		return {}
-	if map.sim.has_method("is_sea_link") and not bool(map.sim.call("is_sea_link", from, port)):
-		return {}
-	return order_embark(army_id, port)
+	if str(army.get("settlement", "")) == "":
+		return "Pour prendre la mer, l'armée doit d'abord entrer dans un port."
+	return "Aucune route maritime depuis ce port."
 
 
 func order_embark(army_id: String, port: String) -> Dictionary:
-	return _run(army_id, map.sim.call("embark_army", army_id, port))
+	var army: Dictionary = map.sim.call("get_army", army_id)
+	var from := str(army.get("settlement", ""))
+	var stops := sea_voyage(army_id, port)
+	var report := _run(army_id, map.sim.call("embark_army", army_id, port))
+	if report.get("ok", false):
+		var route := sea_route_points(from, stops)
+		if route.size() >= 2:
+			animate(army_id, route)
+	return report
+
+
+## EM : tracé d'un voyage (routes maritimes de `SeaLaneLayer`, trait droit pour les courts
+## passages), du port `from` jusqu'à la dernière escale de `stops`.
+func sea_route_points(from: String, stops: PackedStringArray) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	if map.map_data == null:
+		return points
+	var lanes: SeaLaneLayer = map.get("sea_lanes_layer")
+	var leg_from := from
+	for leg_to in stops:
+		var leg := lanes.lane_points(leg_from, leg_to) if lanes != null else PackedVector2Array()
+		if leg.size() < 2:
+			leg = PackedVector2Array([map.map_data.settlement_px(leg_from), map.map_data.settlement_px(leg_to)])
+		var start := 1 if not points.is_empty() else 0
+		for i in range(start, leg.size()):
+			points.append(leg[i])
+		leg_from = leg_to
+	return points
 
 
 func _run(army_id: String, report: Dictionary) -> Dictionary:
@@ -537,6 +594,8 @@ func preview_target(target: Dictionary) -> void:
 	if key == _last_hover_key:
 		return
 	_last_hover_key = key
+	if _preview_voyage(target):
+		return
 	preview = map.sim.call("find_path_points", map.selected_army, point.x, point.y)
 	if not preview.get("ok", false):
 		path_line.hide_path()
@@ -555,6 +614,40 @@ func preview_target(target: Dictionary) -> void:
 	if warning != "":
 		text += "\n⚠ %s." % warning
 	_set_hover_text(text)
+
+
+## EM (ADR 0167) : aperçu d'une traversée (port atteint par la mer, ou mer survolée depuis un
+## port) ; faux si la cible ne relève pas de la mer.
+func _preview_voyage(target: Dictionary) -> bool:
+	var army_id: String = map.selected_army
+	var port := ""
+	match str(target.get("kind", "")):
+		"settlement":
+			if not prefers_sea(army_id, target):
+				return false
+			port = str(target["id"])
+		"ground":
+			port = sea_port_at(army_id, target["point"])
+			if port == "" and is_water(target["point"]):
+				preview = {}
+				path_line.hide_path()
+				_set_hover_text(_water_refusal(army_id))
+				return true
+	var stops := sea_voyage(army_id, port)
+	if stops.is_empty():
+		return false
+	preview = {}
+	var army: Dictionary = map.sim.call("get_army", army_id)
+	var route := sea_route_points(str(army.get("settlement", "")), stops)
+	path_line.show_plan(route, route.size() - 1, PackedInt32Array(), map.camera_rig.distance, false)
+	var calls := PackedStringArray()
+	for i in range(stops.size() - 1):
+		calls.append(_settlement_name(stops[i]))
+	var text := "⚓ → %s : traversée, toute la saison" % _settlement_name(port)
+	if not calls.is_empty():
+		text += " (escales : %s)" % ", ".join(calls)
+	_set_hover_text(text + " — clic droit pour embarquer")
+	return true
 
 
 ## Consigne du survol : attaque, assaut (avec déclaration de guerre s'il le faut) ou marche.

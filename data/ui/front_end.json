@@ -286,6 +286,13 @@
     "fac_flanders",
     "fac_navarre"
   ],
+  "special_starts": {
+    "title": "Défis singuliers",
+    "text": "Des factions qui ne se jouent pas comme un royaume : une mécanique propre, un seul but.",
+    "factions": [
+      "fac_crusaders"
+    ]
+  },
   "factions": [
     {
       "id": "fac_france",

@@ -556,7 +556,7 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
     state.armies.get_mut(&army).unwrap().movement_left -= 1;
     assert!(matches!(
         state.submit_order(&data, embark(&army, &to)),
-        Err(OrderError::NoMovementLeft)
+        Err(OrderError::EmbarkNeedsFullTurn)
     ));
     state.armies.get_mut(&army).unwrap().movement_left += 1;
     let before = state.army(&army).unwrap().total_strength();
