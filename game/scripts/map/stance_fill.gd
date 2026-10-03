@@ -41,6 +41,7 @@ func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	_cli_disabled = OS.get_cmdline_user_args().has("--no-stance-fill")
 	tuning = load_tuning()
 	_set_param("sf_saturation", float(tuning.get("saturation", 0.6)))
+	_set_param("sf_flat", float(tuning.get("flat_mix", 0.0)))
 	_set_param("sf_parchment_scale", float(tuning.get("parchment_scale", 0.55)))
 	var settings: Node = get_node_or_null("/root/Settings") if is_inside_tree() else null
 	if settings != null:

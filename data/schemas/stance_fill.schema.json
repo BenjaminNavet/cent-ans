@@ -43,6 +43,7 @@
         "near_scale": {"$ref": "#/$defs/unit"}
       }
     },
+    "flat_mix": {"$ref": "#/$defs/unit", "description": "A6-C1 : part d'aplat de couleur de position (luminance non conservée) ajoutée à la teinte, pour que le territoire se lise en vue moyenne et lointaine. 0 = teinte seule."},
     "parchment_scale": {"$ref": "#/$defs/unit", "description": "Facteur d'opacité sur le parchemin, qui a déjà son lavis héraldique."},
     "modes": {
       "type": "object",

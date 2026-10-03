@@ -11,6 +11,7 @@ uniform sampler2D sf_colors : filter_nearest, repeat_disable, hint_default_trans
 uniform float sf_alpha = 0.0;            // option × mode de carte × atténuation de près
 uniform float sf_saturation = 0.6;
 uniform float sf_parchment_scale = 0.55;
+uniform float sf_flat = 0.0;             // A6-C1 : part d'aplat de couleur (data/map/stance_fill.json)
 
 // Teinte à luminance conservée (colore sans délaver ni assombrir le relief), comme la teinte de
 // faction du terrain ; même opération sur l'émission (part du papier en vue parchemin).
@@ -33,4 +34,6 @@ void sf_fill(int id, inout vec3 albedo, inout vec3 emission) {
 	float a = c.a * sf_alpha * mix(1.0, sf_parchment_scale, pm_weight());
 	albedo = sf_tint(albedo, ratio, a);
 	emission = sf_tint(emission, ratio, a);
+	// A6-C1 : aplat de couleur de position (sans conserver la luminance), proportionnel à l'opacité.
+	albedo = mix(albedo, lin * 0.8, a * sf_flat);
 }
