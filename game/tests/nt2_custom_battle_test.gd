@@ -103,8 +103,8 @@ func _check_menu_entry() -> void:
 	var menu: Control = (load("res://scenes/start_menu.tscn") as PackedScene).instantiate()
 	root.add_child(menu)
 	await process_frame
-	var button: Button = menu.get("custom_battle_button")
-	_check(button != null and button.text == "Bataille personnalisée", "menu entry")
+	var button: Button = menu.get("battles_button")
+	_check(button != null and button.text == "Batailles", "menu entry")
 	menu.call("open_custom_battle")
 	await process_frame
 	_check(bool(menu.call("overlay_open")), "custom battle screen opened from the menu")

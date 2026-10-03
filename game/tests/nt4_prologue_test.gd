@@ -94,7 +94,7 @@ func _check_menu_entry() -> void:
 	var start_menu: Control = (load("res://scenes/start_menu.tscn") as PackedScene).instantiate()
 	root.add_child(start_menu)
 	await process_frame
-	_check(start_menu.get("historical_button") != null, "historical battles entry kept in the main menu")
+	_check(start_menu.get("battles_button") != null, "battles submenu entry in the main menu")
 	start_menu.queue_free()
 	menu.queue_free()
 	await process_frame

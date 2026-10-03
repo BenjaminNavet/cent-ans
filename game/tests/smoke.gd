@@ -301,6 +301,24 @@ func _run_start_menu() -> void:
 	await process_frame
 	_check(menu.overlay_open(), "prologue overlay should open")
 	_check(not FrontEndData.random_quote().is_empty() and FrontEndData.random_tip() != "", "loading quotes and tips expected")
+	# A6-L11 (U3) : citations filtrées par culture de la faction (pas de Radonège pour la France).
+	var french_quotes := FrontEndData.quotes_for("fac_france")
+	var russian_quotes := FrontEndData.quotes_for("fac_briansk")
+	var has_radonege := func(quotes: Array) -> bool:
+		return quotes.any(func(q: Dictionary) -> bool: return str(q["author"]).begins_with("Serge de Radon"))
+	_check(not french_quotes.is_empty() and not has_radonege.call(french_quotes), "French loading quotes must not include Radonège")
+	_check(has_radonege.call(russian_quotes), "Muscovite loading quotes include Radonège")
+	_check(not FrontEndData.random_quote(null, "fac_france").is_empty(), "French quote drawn")
+	# A6-L11 (U1) : le sous-menu « Batailles » regroupe les quatre modes.
+	menu.open_battles()
+	await process_frame
+	_check(menu.overlay_open() and menu._overlay is BattlesMenu, "battles submenu should open")
+	var battles_menu := menu._overlay as BattlesMenu
+	if battles_menu != null:
+		_check(battles_menu.buttons.size() == 4, "battles submenu: four modes")
+		battles_menu.buttons["historical"].pressed.emit()
+		await process_frame
+		_check(menu._overlay is HistoricalBattlesMenu, "historical battles opened from the submenu")
 	# SG2 : batailles de démonstration (sièges d'Avignon et de Bruges dans leur plan).
 	menu.open_demos()
 	await process_frame

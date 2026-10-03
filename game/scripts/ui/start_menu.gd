@@ -4,8 +4,8 @@ extends Control
 ## Écran titre et menu principal (F3, refait par MM1) : décor 3D vivant (`MenuBackdrop3D` : Paris
 ## au crépuscule, l'ost et ses bannières, plans de caméra lents enchaînés en fondu), titre enluminé
 ## (`IlluminatedTitle`), colonne de boutons à gauche (Nouvelle partie, Continuer, Charger une
-## partie, Prologue, Codex, Batailles historiques, Bataille personnalisée, Batailles de démonstration,
-## Rejeux, Réglages, Crédits, Quitter), légende du plan en bas à droite.
+## partie, Prologue, Codex, Batailles [sous-menu : personnalisée, historiques, démonstration,
+## rejeux], Réglages, Crédits, Quitter), légende du plan en bas à droite.
 ## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
 ## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
@@ -30,10 +30,7 @@ var new_game_button: Button
 var load_button: Button
 var intro_button: Button
 var codex_button: Button
-var demos_button: Button
-var historical_button: Button  # EP7
-var custom_battle_button: Button  # NT2
-var replays_button: Button  # EP13
+var battles_button: Button  # A6-L11 : sous-menu (personnalisée, historiques, démos, rejeux)
 var settings_button: Button
 var credits_button: Button
 var quit_button: Button
@@ -245,10 +242,7 @@ func _build_main_column() -> void:
 	load_button = _menu_button(column, "Charger une partie", func() -> void: save_load_dialog.open_load())
 	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
 	codex_button = _menu_button(column, "Codex", open_codex)
-	historical_button = _menu_button(column, "Batailles historiques", open_historical)  # EP7
-	custom_battle_button = _menu_button(column, "Bataille personnalisée", open_custom_battle)  # NT2
-	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
-	replays_button = _menu_button(column, "Rejeux", open_replays)  # EP13
+	battles_button = _menu_button(column, "Batailles", open_battles)  # A6-L11 (U1)
 	settings_button = _menu_button(column, "Réglages", open_settings)
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
@@ -406,6 +400,25 @@ func open_intro() -> void:
 		_overlay = null
 		new_game_button.grab_focus.call_deferred())
 	_open_overlay(intro, false)
+
+
+## A6-L11 (U1) : sous-menu « Batailles » (personnalisée, historiques, démonstrations, rejeux).
+func open_battles() -> void:
+	var menu := BattlesMenu.new()
+	menu.chosen.connect(_on_battle_mode_chosen)
+	_open_overlay(menu)
+
+
+func _on_battle_mode_chosen(mode: String) -> void:
+	match mode:
+		"custom":
+			open_custom_battle()
+		"historical":
+			open_historical()
+		"demos":
+			open_demos()
+		"replays":
+			open_replays()
 
 
 ## EP7 : batailles historiques (Crécy, Poitiers, Azincourt) sur leur site réel.
