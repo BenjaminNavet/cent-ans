@@ -25,3 +25,4 @@ def test_ai_doctrines_match_schema() -> None:
     for doctrine in all_doctrines:
         assert set(doctrine["mix"]) <= units
     assert set(doctrines.get("factions", {})) <= factions
+    assert set(doctrines.get("share_caps", {})) <= units

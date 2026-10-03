@@ -1,5 +1,8 @@
 {
   "description": "Doctrines de recrutement de l'IA (lot E1) : poids relatif de chaque type d'unité parmi les régiments de campagne. L'IA recrute ce qui manque le plus à ce mélange, parmi les unités levables sur place ; la valeur de l'unité ne sert qu'à départager. Les types qu'une faction ne peut pas lever (culture, bâtiment, technologie) sont ignorés et les poids renormalisés.",
+  "share_caps": {
+    "unit_urban_militia": { "max_share": 0.7, "min_field_units": 4 }
+  },
   "default": {
     "description": "Ost féodal ordinaire : milices et arbalétriers des villes, gens d'armes à pied et à cheval.",
     "mix": {

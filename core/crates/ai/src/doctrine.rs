@@ -39,6 +39,29 @@ pub fn pick_recruit<'a>(
     composition: &BTreeMap<UnitTypeId, u32>,
     value: impl Fn(&RecruitOption) -> f64,
 ) -> Option<&'a RecruitOption> {
+    // A6-L3b: a type above its share cap (data/ai/doctrines.json) is not
+    // recruited; `composition` then counts garrisons too (see campaign.rs).
+    let uncapped: Vec<&'a RecruitOption>;
+    let options: &[&'a RecruitOption] = match data.ai_doctrines.as_ref() {
+        Some(d) if !d.share_caps.is_empty() => {
+            let field_total: u32 = composition.values().sum();
+            uncapped = options
+                .iter()
+                .copied()
+                .filter(|o| {
+                    d.share_caps.get(&o.unit_type).is_none_or(|cap| {
+                        // Share counting the recruit itself.
+                        let share =
+                            f64::from(composition.get(&o.unit_type).copied().unwrap_or(0) + 1)
+                                / f64::from(field_total + 1);
+                        field_total < cap.min_field_units || share <= cap.max_share
+                    })
+                })
+                .collect();
+            &uncapped
+        }
+        _ => options,
+    };
     let by_value = || {
         options.iter().copied().max_by(|a, b| {
             value(a)

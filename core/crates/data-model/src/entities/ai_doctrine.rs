@@ -31,8 +31,24 @@ pub struct AiDoctrines {
     /// `kingdom`), lot FE5: « survival first » for the counties.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub rank_strategies: BTreeMap<String, RankStrategy>,
+    /// Cap on the share of a unit type among a faction's regiments, field
+    /// armies and garrisons together (lot A6-L3b, ADR 0179): an option whose
+    /// recruit would push the type above its cap is not taken.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub share_caps: BTreeMap<UnitTypeId, ShareCap>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Cap of one unit type's share of the field regiments.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ShareCap {
+    /// Highest share (0-1) of the regiments, the recruit counted.
+    pub max_share: f64,
+    /// The cap applies once the faction holds at least this many
+    /// regiments (a small host may be all militia).
+    pub min_field_units: u32,
 }
 
 /// Strategic doctrine of the factions of one rank (lot FE5, spec § 5).
