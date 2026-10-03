@@ -514,7 +514,11 @@ impl CampaignState {
         let Some(city) = self.faction_capital_city(faction) else {
             return 0;
         };
-        if self.settlements.get(city).is_some_and(|s| s.siege.is_some()) {
+        if self
+            .settlements
+            .get(city)
+            .is_some_and(|s| s.siege.is_some())
+        {
             return 0;
         }
         amount
