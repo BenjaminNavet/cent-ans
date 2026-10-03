@@ -2,18 +2,13 @@
 
 Tableau des constats : `docs/audit/a6-audit-joueur.md`. Notes par lot : `docs/wip/a6-l*.md`, `a6-integration-murs.md`.
 
-## État (03/10, session en pause)
-Tous les lots sont dans la branche **`a6-merge`** (worktree `/Users/jean_hubert/dev/gp-a6-merge`, HEAD c046a54bc), qui inclut main 651d4e6e6 (chantier LR).
-- **Rust :** suite complète verte d'après l'agent d'intégration, mais pas relancée par la session principale après c046a54bc. Formatage OK.
-- **Godot :** smoke, a6_slot_bar, a6_l7_panel, a6_l6_modal_queue, a6_l8 et a6_diplomacy_layout sont OK.
-- **Non fusionnée dans main :** le `--ff-only` est bloqué par des modifications non commitées d'une autre session dans le checkout principal (`sim-campaign/src/state.rs`, `march.rs`, `m2_free_movement.rs` : mouvement libre). Ne pas les toucher.
-
-## Reprise
-1. Dans gp-a6-merge : `cargo test --workspace --no-fail-fast` pour confirmer le vert.
-2. Si main a avancé : `git merge main` dans gp-a6-merge, puis tests.
-3. Quand l'autre session a commité ou libéré `state.rs` : `git merge --ff-only a6-merge` dans main. Dans main, `uv run --project tools pytest tools/tests -q` : 6 tests échouent dans le worktree car des fichiers ignorés par git y manquent ; ils passent sur main.
-4. Vérification visuelle : bataille (sol L14, durée L13b), barre d'emplacements, choix de faction, carte (`a6_map_shots.gd`).
-5. Mettre à jour `docs/audit/a6-audit-joueur.md` (état par constat), puis supprimer le worktree gp-a6-merge et les branches a6-merge et a6-l3b.
+## État (03/10) : FUSIONNÉ dans main
+- **Rust :** suite complète verte sur a6-merge (212 binaires de test, clippy propre).
+- **main :** pytest 1616 passés ; smoke et tests Godot A6 OK. Le smoke a été corrigé après la fusion : la limite de la bataille sans ordre passe de 720 s à 1 200 s (ADR 0184, addendum).
+- **Modifications sur le mouvement libre :** elles étaient non commitées dans le checkout principal (03/10 06:29) et sont sauvegardées sur la branche `wip/free-movement-orphan`.
+- **Reste à faire :**
+  - vérification visuelle : bataille, barre d'emplacements, choix de faction, carte (`a6_map_shots.gd`) ;
+  - mettre à jour l'état par constat dans `docs/audit/a6-audit-joueur.md`.
 
 ## Lots
 | Lot | Constats | État |
@@ -38,6 +33,7 @@ Tous les lots sont dans la branche **`a6-merge`** (worktree `/Users/jean_hubert/
 Les ADR de l'audit ont été renumérotés de 0181 à 0185, car leurs numéros entraient en collision avec ceux du chantier LR.
 
 ## Points ouverts
+- **Bataille sans ordre :** elle se termine en environ 17 minutes (horloges de refus et d'accalmie ×1,9) ; voir l'addendum de l'ADR 0184.
 - **Durée des batailles :**
   - la bataille de campagne type n'est allongée que de ×1,38 ;
   - les cartes historiques (Crécy, Azincourt, Poitiers) gardent l'ancien rythme ;

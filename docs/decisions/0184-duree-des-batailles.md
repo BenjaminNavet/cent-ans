@@ -216,3 +216,6 @@ cd core
 cargo test --release -p sim-battle --test l13b_behaviour -- --ignored --nocapture   # comportements
 L13_OUT=/tmp/l13.tsv cargo test --release -p sim-battle --test l13_duration -- --ignored --nocapture survey
 ```
+
+## Addendum (03/10, fusion dans main) : bataille sans ordre
+Le smoke (recette Q3, EP9) vérifiait qu'une bataille sans aucun ordre du joueur se décide en moins de 720 s simulées. Avec `ai_patience_factor` 1,9, les horloges de refus et d'accalmie passent à 570 s et 285 s, et la marche d'approche est plus lente : la bataille du smoke se termine désormais à 1 016 s, par accalmie avec victoire du défenseur. La limite du smoke passe à 1 200 s. Point à juger en partie pilote : un joueur passif attend environ 17 minutes de bataille. Si c'est trop long, sortir les horloges de `decision.rs` de la patience de l'IA et ne la garder que pour `ai.rs`.
