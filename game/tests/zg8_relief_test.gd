@@ -53,8 +53,8 @@ func _test_formula() -> void:
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	var s := MapData.vertical_scale()
 	var g := MapData.relief_gain()
-	# HB6 (ADR 0143) : gain lointain négatif (collines aplanies au-dessus du fond, carte moins
-	# « papier froissé ») ; il doit seulement être celui du profil, et laisser 1 + g > 0.
+	# HB6 (ADR 0143) : gain lointain négatif, puis RV-A (ADR 0167) : 0 (volume des collines rendu
+	# au maillage) ; il doit seulement être celui du profil, et laisser 1 + g > 0.
 	_check(absf(g - ReliefExaggerationProfile.load_default().gain_far) < 1e-6 and 1.0 + g > 0.0, "gain = gain_far with a published floor (%f)" % g)
 	# Centre de la cellule (2, 2) : x = 2·8 + 3,5.
 	var x := 19.5
