@@ -5,7 +5,7 @@ extends SceneTree
 ## proche (une couche masquée à la fois). Fenêtre réelle obligatoire (le rendu headless renvoie 0) :
 ##   godot --path game --resolution 1920x1080 --script res://tests/a6_drawcalls_probe.gd --
 ##     [--out=/chemin/sortie.json] [--distances=300,150,60,0] [--at=2213,3204] [--quality=high]
-##     [--no-ablation] [--prop=<champ de MapPropScale>=<valeur>]…
+##     [--no-ablation] [--force] [--keep-ui] [--prop=<champ de MapPropScale>=<valeur>]…
 ## Distance 0 = au plus près permis par la caméra (`min_distance_at`). Les appels de dessin et
 ## primitives sont déterministes (à météo et heure figées), pas les temps d'image.
 
@@ -17,6 +17,8 @@ func _init() -> void:
 	var distances: Array = [300.0, 150.0, 60.0, 0.0]
 	var at := Vector2(2213.0, 3204.0)
 	var ablation := true
+	var force := false
+	var keep_ui := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_path = arg.trim_prefix("--out=")
@@ -27,6 +29,10 @@ func _init() -> void:
 		elif arg.begins_with("--at="):
 			var xz := arg.trim_prefix("--at=").split(",")
 			at = Vector2(float(xz[0]), float(xz[1]))
+		elif arg == "--keep-ui":
+			keep_ui = true
+		elif arg == "--force":
+			force = true
 		elif arg == "--no-ablation":
 			ablation = false
 		elif arg.begins_with("--prop="):
@@ -56,19 +62,27 @@ func _init() -> void:
 	var terrain: TerrainBuilder = map.get("terrain")
 	var settlements: SettlementLayer = map.get("settlement_layer")
 	var vegetation: Vegetation = map.get_node_or_null("Vegetation")
-	for layer in root.find_children("*", "CanvasLayer", true, false):
-		(layer as CanvasLayer).visible = false
+	if not keep_ui:
+		for layer in root.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
 	var report := {"quality": RenderQuality.current(), "window": [root.size.x, root.size.y], "at": [at.x, at.y], "views": [], "ablation": {}}
 	var focus := Vector3(at.x, data.surface_world_at(at.x, at.y), at.y)
 	var closest := 0.0
 	for d: float in distances:
 		var dist := maxf(d, rig.min_distance_at(focus))
+		if force and d > 0.0:
+			# Contourne le plancher de la caméra (essai sans pyramide complète, ou plus près que le jeu).
+			rig.floor_distance = 0.0
+			rig.min_distance = minf(rig.min_distance, d)
+			dist = d
 		rig.look_at_point(focus, dist)
 		rig.snap()
 		await _settle(terrain, settlements, vegetation)
 		var info := await _read()
 		info["distance"] = dist
 		info["requested"] = d
+		if vegetation != null:
+			info["vegetation_census"] = vegetation.visible_census()
 		report["views"].append(info)
 		print("A6 view d=%.1f %s" % [dist, JSON.stringify(info)])
 		closest = dist
@@ -85,8 +99,20 @@ func _init() -> void:
 			info["delta_primitives"] = int(base["primitives"]) - int(info["primitives"])
 			info["delta_objects"] = int(base["objects"]) - int(info["objects"])
 			info["nodes"] = _count_visuals(target)
+			# Part des ombres : même couche, ombres portées coupées (récursif), sans la masquer.
+			var shadow_nodes := _geometry_nodes(target)
+			if not shadow_nodes.is_empty():
+				var previous: Array = []
+				for geometry: GeometryInstance3D in shadow_nodes:
+					previous.append(geometry.cast_shadow)
+					geometry.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				var no_shadow := await _read()
+				for g in shadow_nodes.size():
+					(shadow_nodes[g] as GeometryInstance3D).cast_shadow = previous[g]
+				info["shadow_calls"] = int(base["draw_calls"]) - int(no_shadow["draw_calls"])
+				info["shadow_primitives"] = int(base["primitives"]) - int(no_shadow["primitives"])
 			report["ablation"][path] = info
-			print("A6 ablation %s -%d calls -%d prims" % [path, info["delta_draw_calls"], info["delta_primitives"]])
+			print("A6 ablation %s -%d calls -%d prims (shadows %d calls %d prims)" % [path, info["delta_draw_calls"], info["delta_primitives"], info.get("shadow_calls", 0), info.get("shadow_primitives", 0)])
 		report["ablation_distance"] = closest
 	var file := FileAccess.open(out_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(report, "  "))
@@ -109,6 +135,19 @@ func _ablation_targets(map: Node3D) -> Array:
 			for sub in node.get_children():
 				if sub is Node3D and _count_visuals(sub) > 0:
 					out.append(sub)
+					if sub.name in ["Effects", "TownMaquettes"]:
+						for leaf in sub.get_children():
+							if leaf is Node3D and sub.name == "Effects":
+								out.append(leaf)
+	return out
+
+
+func _geometry_nodes(node: Node) -> Array:
+	var out: Array = []
+	if node is GeometryInstance3D:
+		out.append(node)
+	for child in node.get_children():
+		out.append_array(_geometry_nodes(child))
 	return out
 
 

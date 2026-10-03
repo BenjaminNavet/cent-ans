@@ -133,17 +133,20 @@ const PRESETS := {
 		"model_shadow_distance": 250.0, "veg_max_distance": 900.0, "clutter_density": 1.0,
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
+	# A6-L10 (P3) : Ultra à 15 i/s (Q8). Plafonné : relief à 6 px par sommet (4 avant), ombres des
+	# arbres et moulins à 200 (400), MetalFX spatial 0,85 au lieu du natif (−28 % de pixels). Primitives
+	# au zoom max de Paris : 8,4 M → 6,3 M (a6_drawcalls_probe, 1080p).
 	"ultra": {
 		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "map_msaa": Viewport.MSAA_2X,
 		"shadow_splits": 4, "shadow_distance": 1.35, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
 		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_HIGH, "volumetric": "always", "sdfgi": true,
 		"glow": true, "fog_grid": [128, 64],
-		"relief_vertex_px": 4.0, "relief_items": 900, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 2,
+		"relief_vertex_px": 6.0, "relief_items": 900, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 2,
 		"fine_relief": true, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
-		"veg_shadow_distance": 400.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
+		"veg_shadow_distance": 200.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "battle_lod": 1.3, "grass": 1.2, "particles": 1.0,
 		"model_shadow_distance": 500.0, "veg_max_distance": 1100.0, "clutter_density": 1.5,
-		"upscale_mode": "off", "upscale_scale": 1.0,
+		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.85,
 	},
 }
 
