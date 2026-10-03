@@ -17,15 +17,15 @@ extends Control
 signal back_requested
 signal start_requested(faction_id: String, seed_value: int, start_date: String)
 
-const CARD_SIZE := Vector2(288, 392)
+const CARD_SIZE := Vector2(236, 360)
 ## A6-L11 (U2) : tailles de texte de l'écran (pixels de base ; × 0,9 à 720p donne au moins 16 px
 ## de corps) et largeur de la colonne de droite (fiche + difficulté).
 const BODY_PX := 18
 const CAPTION_PX := 16
 const HEADING_PX := 22
 const TITLE_PX := 28
-const SIDE_WIDTH := 460.0
-const ART_HEIGHT := 194.0
+const SIDE_WIDTH := 420.0
+const ART_HEIGHT := 150.0
 ## Q2 : taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
 const FIT_SIZE := Vector2(1280.0, 720.0)
 
@@ -226,6 +226,7 @@ func _build_special_tab() -> Control:
 		var caption := FrontEndStyle.label(text, BODY_PX, Color(0.97, 0.92, 0.80))
 		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		caption.custom_minimum_size = Vector2(320, 0)  # A6-L11 : évite un repli à une colonne de mots
 		page.add_child(caption)
 	var cards := HBoxContainer.new()
 	cards.name = "SpecialCards"
@@ -498,9 +499,11 @@ func _build_card(entry: Dictionary) -> Control:
 	var name_text := str(info.get("name", faction_id)) if not info.is_empty() else faction_id
 	var name_label := FrontEndStyle.label(name_text, HEADING_PX, FrontEndStyle.INK, FrontEndStyle.title_font())
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # A6-L11 : la carte reste étroite
 	names.add_child(name_label)
 	var tagline := FrontEndStyle.label(str(entry.get("tagline", "")), BODY_PX, FrontEndStyle.GULES, FrontEndStyle.body_italic())
 	tagline.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tagline.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	names.add_child(tagline)
 
 	text_box.add_child(_ruler_row(str(info.get("ruler", ""))))
@@ -579,7 +582,7 @@ func _difficulty_row(level: int) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	RichTooltip.attach_plain(row, "faction_challenge_indicative")
-	row.add_child(FrontEndStyle.label("Défi de la faction :", CAPTION_PX, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
+	row.add_child(FrontEndStyle.label("Défi :", CAPTION_PX, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
