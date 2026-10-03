@@ -233,6 +233,21 @@ def geo_splat() -> None:
     _report_landcover()
 
 
+@geo_app.command("relief-occlusion")
+def geo_relief_occlusion(
+    exaggeration: float = typer.Option(
+        3.0, "--exaggeration", help="Exagération verticale appliquée aux dénivelés"
+    ),
+    directions: int = typer.Option(16, "--directions", help="Nombre d'azimuts"),
+) -> None:
+    """Occlusion de vallée (lot RV-D) : relief_occlusion.png, demi-grille de la carte."""
+    from cent_ans_tools.geo import relief_occlusion as geo_occlusion_step
+
+    result = geo_occlusion_step.build(exaggeration=exaggeration, directions=directions)
+    console.print(f"{result.size[0]}×{result.size[1]} texels, gain {result.gain:.2f}")
+    _print_sizes("Occlusion de vallée", [result.path])
+
+
 @geo_app.command("kk10")
 def geo_kk10() -> None:
     """Extrait KK10 (usage anthropique du sol, 1330-1349) par requêtes HTTP partielles.
