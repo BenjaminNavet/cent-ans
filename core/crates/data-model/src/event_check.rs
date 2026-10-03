@@ -187,7 +187,8 @@ impl EventRefs<'_> {
                 self.faction("conditions.faction", faction.as_ref());
             }
             Condition::ProvinceUnrestAbove { province, .. }
-            | Condition::ProvinceCoastal { province } => {
+            | Condition::ProvinceCoastal { province }
+            | Condition::ProvinceOnRiver { province } => {
                 self.province("conditions.province", province.as_ref());
             }
             Condition::ProvinceBesieged { province, by } => {
