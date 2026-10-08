@@ -91,8 +91,8 @@ fn landing_on_a_hostile_shore_costs_men_and_movement() {
     use sim_campaign::movement::{edge_cost, edges, is_sea_crossing};
     let mut data = game_data().clone();
     // Landing cost only: no interception at sea, whatever the RNG stream.
-    data.naval.rules.intercept_base = 0.0;
-    data.naval.rules.intercept_per_control = 0.0;
+    std::sync::Arc::make_mut(&mut data.naval.rules).intercept_base = 0.0;
+    std::sync::Arc::make_mut(&mut data.naval.rules).intercept_per_control = 0.0;
     let england = fac("fac_england");
     let mut state = CampaignState::new_1337(&data, england.clone(), 1).unwrap();
     // An English port facing a hostile (French) port across the sea.

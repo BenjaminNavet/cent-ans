@@ -1,4 +1,4 @@
-//! A ship in a naval battle (lot NV1): hull, fire, crew groups, orders.
+//! A ship in a naval battle: hull, fire, crew groups.
 
 use data_model::{Ability, Propulsion, ShipClass, UnitCategory};
 use serde::Serialize;
@@ -31,7 +31,7 @@ pub struct Crew {
 
 impl Crew {
     pub fn from_unit(unit_index: usize, unit: &UnitSetup, men: u32, rules: &RangeRules) -> Crew {
-        // Lot UR2: the missile declared by the unit type wins over the id heuristic.
+        // The missile declared by the unit type wins over the id heuristic.
         let bolt = match unit.missile {
             Some(missile) => missile == data_model::Missile::Bolt,
             None => {
@@ -79,54 +79,6 @@ pub struct RangeRules {
     pub crossbow: f64,
 }
 
-/// What a ship has been told to do.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum ShipOrder {
-    /// Keep station, shoot at will, fight back.
-    Hold,
-    MoveTo {
-        x: f64,
-        z: f64,
-    },
-    /// Close, throw grapples and board.
-    Board {
-        target: u32,
-    },
-    /// Close to bow range and shoot.
-    Shoot {
-        target: u32,
-    },
-    /// Galleys: drive the spur into the target.
-    Ram {
-        target: u32,
-    },
-    /// Cut the grapples and sail away.
-    Disengage,
-}
-
-impl ShipOrder {
-    pub fn key(self) -> &'static str {
-        match self {
-            ShipOrder::Hold => "hold",
-            ShipOrder::MoveTo { .. } => "move",
-            ShipOrder::Board { .. } => "board",
-            ShipOrder::Shoot { .. } => "shoot",
-            ShipOrder::Ram { .. } => "ram",
-            ShipOrder::Disengage => "disengage",
-        }
-    }
-
-    pub fn target(self) -> Option<u32> {
-        match self {
-            ShipOrder::Board { target }
-            | ShipOrder::Shoot { target }
-            | ShipOrder::Ram { target } => Some(target),
-            _ => None,
-        }
-    }
-}
-
 /// Where a ship stands in the battle.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 #[serde(tag = "state", rename_all = "snake_case")]
@@ -147,19 +99,6 @@ pub enum ShipStatus {
     Escaped,
 }
 
-impl ShipStatus {
-    pub fn key(self) -> &'static str {
-        match self {
-            ShipStatus::Afloat => "afloat",
-            ShipStatus::Captured { .. } => "captured",
-            ShipStatus::Abandoned => "abandoned",
-            ShipStatus::Sinking { .. } => "sinking",
-            ShipStatus::Sunk => "sunk",
-            ShipStatus::Escaped => "escaped",
-        }
-    }
-}
-
 /// A ship during the battle.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Ship {
@@ -169,11 +108,6 @@ pub struct Ship {
     pub index: usize,
     pub name: String,
     pub class: ShipClass,
-    pub x: f64,
-    pub z: f64,
-    /// Radians, direction (cos, sin) in the x-z plane.
-    pub heading: f64,
-    pub speed: f64,
     pub hull: f64,
     /// 0-1: share of the ship aflame.
     pub fire: f64,
@@ -181,17 +115,11 @@ pub struct Ship {
     pub crew: Vec<Crew>,
     pub sailors: f64,
     pub sailors_initial: f64,
-    /// Rowers' stamina, seconds of full stroke left.
-    pub stamina: f64,
     /// 0-100.
     pub morale: f64,
-    pub order: ShipOrder,
-    /// Ids of the ships grappled to this one.
-    pub grappled: Vec<u32>,
     pub chain: Option<u32>,
     pub fireship: bool,
     pub fire_arrows: bool,
-    pub flagship: bool,
     /// Running away (broken morale): no more orders.
     pub fleeing: bool,
     /// Men in the water after the ship went down or burnt out: rescued if
@@ -201,15 +129,41 @@ pub struct Ship {
     pub drowned: Vec<f64>,
     /// Men taken prisoner (crew of a captured ship).
     pub prisoners: Vec<f64>,
-    /// Last shooting target (rendering).
-    pub last_target: Option<u32>,
-    /// Seconds spent in melee (rendering, AI).
-    pub melee_time: f64,
 }
 
 impl Ship {
     pub fn is_afloat(&self) -> bool {
         self.status == ShipStatus::Afloat
+    }
+
+    /// Gone from the battle (sunk, sinking or escaped): nothing burns or fights.
+    pub fn is_out(&self) -> bool {
+        matches!(
+            self.status,
+            ShipStatus::Sunk | ShipStatus::Escaped | ShipStatus::Sinking { .. }
+        )
+    }
+
+    /// The crew leaves the ship for the water: each group drowns
+    /// `base + armour / 100 × armor` of its men (at most all), the rest swim.
+    pub fn cast_into_sea(&mut self, base: f64, armor: f64) {
+        for (k, crew) in self.crew.iter_mut().enumerate() {
+            let drown = (base + crew.armor / 100.0 * armor).min(1.0);
+            self.drowned[k] += crew.men * drown;
+            self.swimmers[k] += crew.men * (1.0 - drown);
+            crew.men = 0.0;
+        }
+        self.sailors = 0.0;
+    }
+
+    /// The crew strikes its colours: the men are prisoners of `by`.
+    pub fn strike(&mut self, by: SideId) {
+        for (k, crew) in self.crew.iter_mut().enumerate() {
+            self.prisoners[k] += crew.men;
+            crew.men = 0.0;
+        }
+        self.sailors = 0.0;
+        self.status = ShipStatus::Captured { by };
     }
 
     /// In the fight: afloat, not running away.
@@ -242,22 +196,8 @@ impl Ship {
         self.class.castle_height()
     }
 
-    /// Radius of the circle used for spacing and grapples.
-    pub fn radius(&self) -> f64 {
-        0.3 * self.class.length_m + 0.25 * self.class.beam_m
-    }
-
     pub fn is_galley(&self) -> bool {
         self.class.ram > 0.0 && self.class.propulsion == Propulsion::Oars
-    }
-
-    pub fn distance_to(&self, other: &Ship) -> f64 {
-        ((self.x - other.x).powi(2) + (self.z - other.z).powi(2)).sqrt()
-    }
-
-    /// Gap between the two spacing circles.
-    pub fn gap_to(&self, other: &Ship) -> f64 {
-        self.distance_to(other) - self.radius() - other.radius()
     }
 
     /// Average armour of the men aboard (sailors count as 10).
@@ -326,9 +266,5 @@ impl Ship {
         let loss = self.sailors * share;
         self.sailors -= loss;
         killed + loss
-    }
-
-    pub fn forward(&self) -> (f64, f64) {
-        (self.heading.cos(), self.heading.sin())
     }
 }

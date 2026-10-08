@@ -1,83 +1,11 @@
-//! Naval combat formulas shared by the real-time battle ([`super::NavalSim`])
-//! and the auto-resolve ([`super::auto_resolve`]): volleys between ships,
-//! boarding melee, fire. Pure functions over [`Ship`]s and [`NavalRules`].
+//! Naval combat formulas of the auto-resolve ([`super::auto_resolve`]):
+//! volleys between ships, boarding melee, fire. Pure functions over
+//! [`Ship`]s and [`NavalRules`].
 
 use data_model::NavalRules;
-use serde::Serialize;
 
 use super::ship::{Crew, Ship};
 use crate::shot::MissileKind;
-
-/// Wind over the battle.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
-pub struct Wind {
-    /// Direction the wind blows towards, radians (x-z plane).
-    pub to: f64,
-    /// 0-1.
-    pub strength: f64,
-}
-
-impl Wind {
-    pub fn vector(self) -> (f64, f64) {
-        (self.to.cos(), self.to.sin())
-    }
-
-    /// +1 when `to` lies straight downwind of `from`, -1 straight upwind.
-    pub fn alignment(self, from: (f64, f64), to: (f64, f64)) -> f64 {
-        let (dx, dz) = (to.0 - from.0, to.1 - from.1);
-        let len = (dx * dx + dz * dz).sqrt();
-        if len < 1e-6 {
-            return 0.0;
-        }
-        let (wx, wz) = self.vector();
-        (dx * wx + dz * wz) / len
-    }
-
-    /// Speed factor of a square-rigged ship on `heading`: 0 in the wind's
-    /// eye (within `close_hauled_deg`), best on a broad reach.
-    pub fn sail_factor(self, heading: f64, rules: &NavalRules) -> f64 {
-        let (wx, wz) = self.vector();
-        let cos = heading.cos() * wx + heading.sin() * wz;
-        // 0° = running before the wind, 180° = head to wind.
-        let off = cos.clamp(-1.0, 1.0).acos().to_degrees();
-        let limit = 180.0 - rules.close_hauled_deg;
-        let polar = if off <= 90.0 {
-            0.85 + 0.15 * off / 90.0
-        } else if off <= limit {
-            1.0 - 0.55 * (off - 90.0) / (limit - 90.0).max(1.0)
-        } else {
-            0.0
-        };
-        polar * (rules.wind_speed_min + (1.0 - rules.wind_speed_min) * self.strength)
-    }
-
-    /// The heading nearest `desired` a sail ship can hold (tacking when the
-    /// course lies in the wind's eye).
-    pub fn best_heading(self, desired: f64, rules: &NavalRules) -> f64 {
-        let eye = self.to + std::f64::consts::PI;
-        let off = wrap(desired - eye);
-        let limit = rules.close_hauled_deg.to_radians();
-        if off.abs() >= limit {
-            desired
-        } else if off >= 0.0 {
-            eye + limit
-        } else {
-            eye - limit
-        }
-    }
-}
-
-/// Angle wrapped to `(-π, π]`.
-pub fn wrap(angle: f64) -> f64 {
-    let tau = std::f64::consts::TAU;
-    let mut a = angle % tau;
-    if a > std::f64::consts::PI {
-        a -= tau;
-    } else if a <= -std::f64::consts::PI {
-        a += tau;
-    }
-    a
-}
 
 /// Accuracy factor of shooting from `height` onto a deck at `target` height.
 pub fn height_factor(height: f64, target: f64, rules: &NavalRules) -> f64 {
@@ -91,7 +19,7 @@ pub fn climb_factor(climb: f64, rules: &NavalRules) -> f64 {
 }
 
 /// Factor of the morale losses of `ship` to volleys and to the loss of
-/// other ships: chained crews cannot run and fight on (lot NV2).
+/// other ships: chained crews cannot run and fight on.
 pub fn morale_factor(ship: &Ship, rules: &NavalRules) -> f64 {
     if ship.chain.is_some() {
         rules.chain_morale
@@ -132,13 +60,13 @@ pub fn volley(
     group: usize,
     target: &Ship,
     distance: f64,
-    wind: Wind,
+    wind_strength: f64,
     alignment: f64,
     rain: bool,
     rules: &NavalRules,
 ) -> Volley {
     let crew: &Crew = &shooter.crew[group];
-    let gauge = alignment * wind.strength * rules.wind_gauge;
+    let gauge = alignment * wind_strength * rules.wind_gauge;
     let range = crew.range * (1.0 + gauge);
     let empty = Volley {
         missiles: 0.0,
@@ -155,11 +83,15 @@ pub fn volley(
     let height = (castle * height_factor(shooter.castle_height(), target_deck, rules)
         + deck * height_factor(shooter.deck_height(), target_deck, rules))
         / crew.men.max(1.0);
-    let falloff = 1.0 - 0.6 * (distance / range).powi(2);
-    let weather = if rain && crew.rain_penalty { 0.6 } else { 1.0 };
+    let falloff = 1.0 - rules.volley_falloff * (distance / range).powi(2);
+    let weather = if rain && crew.rain_penalty {
+        rules.rain_accuracy
+    } else {
+        1.0
+    };
     // Men sheltering in the target's castles take less of the fire.
     let men = target.fighting_men().max(1.0);
-    let sheltered = (f64::from(target.class.castle_capacity) / men).min(1.0) * 0.5;
+    let sheltered = (f64::from(target.class.castle_capacity) / men).min(1.0) * rules.castle_shelter;
     let exposure = 1.0 - sheltered * (1.0 - rules.castle_cover);
     let hits = crew.men
         * crew.ranged
@@ -233,7 +165,7 @@ pub fn melee_exchange(
 
 /// One step of a fire aboard `ship`: growth with the wind, the sailors
 /// fighting it, hull and crew burnt. Returns the men killed.
-pub fn burn(ship: &mut Ship, wind: Wind, dt: f64, rules: &NavalRules) -> f64 {
+pub fn burn(ship: &mut Ship, wind_strength: f64, dt: f64, rules: &NavalRules) -> f64 {
     if ship.fire <= 0.0 {
         return 0.0;
     }
@@ -247,13 +179,13 @@ pub fn burn(ship: &mut Ship, wind: Wind, dt: f64, rules: &NavalRules) -> f64 {
     } else {
         0.0
     };
-    let growth = ship.fire * rules.fire_growth * (0.5 + wind.strength);
+    let growth = ship.fire * rules.fire_growth * (0.5 + wind_strength);
     ship.fire = (ship.fire + (growth - fighting) * dt).clamp(0.0, 1.0);
     if ship.fire < 0.01 {
         ship.fire = 0.0;
         return 0.0;
     }
     ship.hull -= ship.fire * rules.fire_hull * (1.0 - ship.class.fire_resistance) * dt;
-    ship.morale = (ship.morale - ship.fire * 3.0 * dt).max(0.0);
+    ship.morale = (ship.morale - ship.fire * rules.fire_morale * dt).max(0.0);
     ship.take_share(ship.fire * rules.fire_crew * dt)
 }

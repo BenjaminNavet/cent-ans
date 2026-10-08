@@ -1,11 +1,11 @@
-//! Naval war on the campaign map (lot NV1, ADR 0028).
+//! Naval war on the campaign map (ADR 0028).
 //!
 //! No fleet walks the sea: each faction keeps a pool of warships per class
 //! (`data/naval/fleets.json`) and a control of each sea (0-100). A crossing
 //! (`Embark`) may be intercepted by a faction at war that arms ships in that
-//! sea; the naval battle follows ([`sim_battle::naval`]): fought in 3D or
-//! auto-resolved when the player's army crosses (pending in
-//! [`NavalState::pending`]), auto-resolved otherwise. Its consequences:
+//! sea; the naval battle follows ([`sim_battle::naval`]), always
+//! auto-resolved (pending in [`NavalState::pending`] while the player
+//! chooses to fight or withdraw). Its consequences:
 //! losses of the embarked regiments, ships sunk and taken (they change
 //! pools), control of the sea to the victor, blockade of the enemy's ports
 //! of a sea held (treasury toll each season).
@@ -532,9 +532,6 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
                 fireship: false,
                 chain: None,
                 fire_arrows: false,
-                position: None,
-                heading_deg: None,
-                flagship: n == 0,
             });
             n += 1;
         }
@@ -565,7 +562,6 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         admiral: String::new(),
         units,
         ships,
-        hold: false,
     };
     let defender = transport_side(state, data, &request.army, &request.from, request.seed);
     let player = &state.player_faction;
@@ -585,10 +581,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         place_name: waters_name(data, request),
         season: battle_season(state.season),
         rain: state.season == Season::Autumn || state.season == Season::Winter,
-        wind_to_deg: None,
-        wind_strength: None,
         gauge: None,
-        shore: false,
         attacker,
         defender,
         player_side,
@@ -613,7 +606,6 @@ fn transport_side(
             admiral: String::new(),
             units: Vec::new(),
             ships: Vec::new(),
-            hold: false,
         };
     };
     let side = crate::battle_request::side_setup(state, data, army_id, army);
@@ -674,9 +666,6 @@ fn transport_side(
             fireship: false,
             chain: None,
             fire_arrows: false,
-            position: None,
-            heading_deg: None,
-            flagship: n == 0,
         });
     }
     NavalSideSetup {
@@ -686,7 +675,6 @@ fn transport_side(
         admiral: side.general.map(|g| g.name).unwrap_or_default(),
         units,
         ships,
-        hold: false,
     }
 }
 
@@ -865,7 +853,7 @@ impl CampaignState {
             .collect()
     }
 
-    /// Setup of pending naval battle `index` for the 3D battle.
+    /// Setup of pending naval battle `index` for the pre-battle dialog.
     pub fn naval_battle_setup(
         &self,
         data: &GameData,
@@ -887,7 +875,7 @@ impl CampaignState {
         self.naval.pending.get(index).map(|r| r.seed)
     }
 
-    /// Applies the result of the 3D naval battle `index`; the crossing goes
+    /// Applies the result of naval battle `index`; the crossing goes
     /// on if the army holds the sea.
     pub fn resolve_naval_battle(
         &mut self,

@@ -832,9 +832,6 @@ fn hired_cogs_lost_at_sea_are_not_the_fleets() {
         fireship: false,
         chain: None,
         fire_arrows: false,
-        position: None,
-        heading_deg: None,
-        flagship: n == 0,
     };
     let side = NavalSideSetup {
         faction: en.to_string(),
@@ -843,7 +840,6 @@ fn hired_cogs_lost_at_sea_are_not_the_fleets() {
         admiral: String::new(),
         units: Vec::new(),
         ships: (0..4).map(ship).collect(),
-        hold: false,
     };
     let fates = [
         ShipFate::Kept,
