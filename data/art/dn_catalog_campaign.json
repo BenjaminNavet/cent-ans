@@ -23,7 +23,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/west"
+    "target": "town_maquettes:town/west",
+    "region": "Gothic northern France circa 1340, bustling,"
   },
   {
     "id": "city_west",
@@ -36,7 +37,8 @@
       "target_width_m": 3.6,
       "class": "major_building"
     },
-    "target": "town_maquettes:city/west"
+    "target": "town_maquettes:city/west",
+    "region": "Gothic northern France circa 1340, prosperous,"
   },
   {
     "id": "castle_west",
@@ -49,7 +51,8 @@
       "target_width_m": 1.9,
       "class": "major_building"
     },
-    "target": "town_maquettes:castle/west"
+    "target": "town_maquettes:castle/west",
+    "region": "Gothic northern France circa 1340, imposing,"
   },
   {
     "id": "village_west",
@@ -75,7 +78,8 @@
       "target_width_m": 2.2,
       "class": "major_building"
     },
-    "target": "town_maquettes:abbey/west"
+    "target": "town_maquettes:abbey/west",
+    "region": "Gothic northern France circa 1340, monastic,"
   },
   {
     "id": "town_med",
@@ -88,7 +92,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/med"
+    "target": "town_maquettes:town/med",
+    "region": "Mediterranean Italian hill town circa 1340, dense,"
   },
   {
     "id": "town_isl",
@@ -101,7 +106,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/isl"
+    "target": "town_maquettes:town/isl",
+    "region": "Maghreb Islamic medina circa 1340, dense,"
   },
   {
     "id": "town_byz",
@@ -114,7 +120,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/byz"
+    "target": "town_maquettes:town/byz",
+    "region": "Byzantine Balkan walled town circa 1340, solid,"
   },
   {
     "id": "town_rus",
@@ -127,7 +134,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/rus"
+    "target": "town_maquettes:town/rus",
+    "region": "Rus' timber fortified town circa 1340, rugged,"
   },
   {
     "id": "town_steppe",
@@ -140,7 +148,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:town/steppe"
+    "target": "town_maquettes:town/steppe",
+    "region": "Golden Horde steppe encampment circa 1340, nomadic,"
   },
   {
     "id": "city_med",
@@ -153,7 +162,8 @@
       "target_width_m": 3.6,
       "class": "major_building"
     },
-    "target": "town_maquettes:city/med"
+    "target": "town_maquettes:city/med",
+    "region": "Mediterranean Italian seaport city circa 1340, prosperous,"
   },
   {
     "id": "city_isl",
@@ -166,7 +176,8 @@
       "target_width_m": 3.6,
       "class": "major_building"
     },
-    "target": "town_maquettes:city/isl"
+    "target": "town_maquettes:city/isl",
+    "region": "Islamic Mediterranean city circa 1340, monumental,"
   },
   {
     "id": "castle_med",
@@ -179,7 +190,8 @@
       "target_width_m": 1.9,
       "class": "major_building"
     },
-    "target": "town_maquettes:castle/med"
+    "target": "town_maquettes:castle/med",
+    "region": "Mediterranean Italian hilltop castle circa 1340, austere,"
   },
   {
     "id": "castle_isl",
@@ -192,7 +204,8 @@
       "target_width_m": 1.9,
       "class": "major_building"
     },
-    "target": "town_maquettes:castle/isl"
+    "target": "town_maquettes:castle/isl",
+    "region": "Maghreb Islamic qasr fortress circa 1340, austere,"
   },
   {
     "id": "village_med",
@@ -205,7 +218,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:village/med"
+    "target": "town_maquettes:village/med",
+    "region": "Mediterranean hillside village circa 1340, humble,"
   },
   {
     "id": "village_isl",
@@ -218,7 +232,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:village/isl"
+    "target": "town_maquettes:village/isl",
+    "region": "Maghreb Islamic mud-brick village circa 1340, humble,"
   },
   {
     "id": "village_rus",
@@ -231,7 +246,8 @@
       "target_width_m": 2.0,
       "class": "major_building"
     },
-    "target": "town_maquettes:village/rus"
+    "target": "town_maquettes:village/rus",
+    "region": "Rus' timber village circa 1340, humble,"
   },
   {
     "id": "cathedral_west",
@@ -244,7 +260,8 @@
       "target_height_m": 45,
       "class": "major_building"
     },
-    "target": "landmarks:cathedral / town_maquettes:city monument"
+    "target": "landmarks:cathedral / town_maquettes:city monument",
+    "region": "Gothic northern France circa 1340, monumental,"
   },
   {
     "id": "ship_cog",
@@ -257,7 +274,8 @@
       "target_width_m": 24,
       "class": "ship"
     },
-    "target": "fleet:cog"
+    "target": "fleet:cog",
+    "region": "Hanseatic North Sea circa 1340, sturdy,"
   },
   {
     "id": "ship_nef",
@@ -270,7 +288,8 @@
       "target_width_m": 30,
       "class": "ship"
     },
-    "target": "fleet:nef"
+    "target": "fleet:nef",
+    "region": "Atlantic and Mediterranean circa 1400, sturdy,"
   },
   {
     "id": "ship_galley",
@@ -283,7 +302,8 @@
       "target_width_m": 36,
       "class": "ship"
     },
-    "target": "fleet:galley"
+    "target": "fleet:galley",
+    "region": "Mediterranean circa 1340, slender,"
   },
   {
     "id": "siege_camp",
@@ -296,7 +316,8 @@
       "target_width_m": 60,
       "class": "prop"
     },
-    "target": "siege_camp.glb"
+    "target": "siege_camp.glb",
+    "region": "Medieval European army camp circa 1340, makeshift,"
   },
   {
     "id": "bivouac",
@@ -309,7 +330,8 @@
       "target_width_m": 30,
       "class": "prop"
     },
-    "target": "fleet:bivouac"
+    "target": "fleet:bivouac",
+    "region": "Medieval European army camp circa 1340, makeshift,"
   },
   {
     "id": "bridge_stone",
@@ -322,7 +344,8 @@
       "target_width_m": 40,
       "class": "bridge"
     },
-    "target": "bridge_meshes:stone"
+    "target": "bridge_meshes:stone",
+    "region": "Medieval France circa 1340, sturdy,"
   },
   {
     "id": "bridge_wood",
@@ -348,7 +371,8 @@
       "target_width_m": 36,
       "class": "bridge"
     },
-    "target": "bridge_meshes:gate"
+    "target": "bridge_meshes:gate",
+    "region": "Medieval fortified France circa 1340, imposing,"
   },
   {
     "id": "windmill_post",
@@ -387,7 +411,8 @@
       "target_width_m": 30,
       "class": "prop"
     },
-    "target": "outbuildings:port"
+    "target": "outbuildings:port",
+    "region": "Medieval northern European harbour circa 1340, busy,"
   },
   {
     "id": "farmstead",
@@ -465,7 +490,8 @@
       "target_height_m": 14,
       "class": "prop"
     },
-    "target": "outbuildings:worksite_1"
+    "target": "outbuildings:worksite_1",
+    "region": "Gothic northern France circa 1340, monumental,"
   },
   {
     "id": "ruin_castle",
@@ -478,7 +504,8 @@
       "target_width_m": 24,
       "class": "prop"
     },
-    "target": "ruin_markers:castle"
+    "target": "ruin_markers:castle",
+    "region": "Medieval France circa 1340, ruined,"
   },
   {
     "id": "watchtower",
@@ -491,7 +518,8 @@
       "target_height_m": 14,
       "class": "prop"
     },
-    "target": "outbuildings:watchtower"
+    "target": "outbuildings:watchtower",
+    "region": "Medieval France circa 1340, austere,"
   },
   {
     "id": "chapel_romanesque",
@@ -504,7 +532,8 @@
       "target_height_m": 9,
       "class": "prop"
     },
-    "target": "outbuildings:chapel"
+    "target": "outbuildings:chapel",
+    "region": "Romanesque France circa 1340, humble,"
   },
   {
     "id": "vineyard_hut",
