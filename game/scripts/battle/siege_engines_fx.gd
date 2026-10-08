@@ -20,6 +20,7 @@ extends Node3D
 ## mêmes nœuds animés, `--no-ga3` pour les modèles procéduraux).
 
 const SETTINGS_FILE := "fx/siege_engines.json"
+const SWING_CURVE_FILE := "fx/trebuchet_swing_curve.json"  # AS8d, CC BY-SA 3.0 (fichier propre)
 const WOOD_TINTS := {
 	"Timber": Color(0.72, 0.58, 0.44),
 	"TimberDark": Color(0.45, 0.35, 0.26),
@@ -59,8 +60,20 @@ static func settings() -> Dictionary:
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 			if parsed is Dictionary:
 				_settings = parsed
+				_attach_swing_curve(dir)
 				return _settings
 	return {}
+
+
+## Courbe de bascule mesurée (fichier à part, licence propre) : posée sous `trebuchet.swing_curve`
+## si présente ; sinon `_swing_progress` retombe sur la courbe procédurale d'origine.
+static func _attach_swing_curve(dir: String) -> void:
+	var path := dir.path_join(SWING_CURVE_FILE)
+	if not FileAccess.file_exists(path) or not _settings.get("trebuchet") is Dictionary:
+		return
+	var curve: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if curve is Dictionary:
+		_settings["trebuchet"]["swing_curve"] = curve
 
 
 ## Modèle d'engin d'un type d'unité (`""` : pas de modèle animé).

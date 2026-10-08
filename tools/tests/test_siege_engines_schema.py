@@ -92,3 +92,11 @@ def test_ga3_variants_have_their_models() -> None:
         assert engine in (*settings["engines"].values(), "ram", "siege_tower"), engine
         for suffix in ("", "_lod"):
             assert (MODELS / f"{variant['model']}{suffix}.glb").is_file(), variant
+
+
+def test_trebuchet_swing_curve_matches_schema() -> None:
+    """The measured swing curve (own file, own licence) matches its schema."""
+    curve = _load("fx/trebuchet_swing_curve.json")
+    _check("fx_trebuchet_swing_curve.schema.json", curve)
+    assert "swing_curve" not in _load("fx/siege_engines.json")["trebuchet"]
+    assert "CC BY-SA" in curve["licence"]

@@ -490,10 +490,13 @@ deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne
 
 Les vidéos restent hors dépôt ; seuls des nombres mesurés (`data/fx/siege_engines.json`,
 `data/fx/map_fire_wind.json`, champ `source`) et une planche de flammes (CC0) sont versionnés.
-Les données dérivées de vidéos CC BY-SA portent la même licence (fichiers de données seuls).
+La courbe de bascule du trébuchet (série d'angles suivie image par image, œuvre dérivée) est
+isolée dans son propre fichier `data/fx/trebuchet_swing_curve.json`, seul concerné par la
+licence CC BY-SA 3.0 ci-dessous ; les autres entrées sont de simples valeurs scalaires mesurées
+(durées, fréquences), sans reprise de l'œuvre.
 
 - **Blide31.ogv**, Michael Sachse, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Blide31.ogv),
-  CC BY-SA 3.0 : courbe de bascule du bras du trébuchet (`trebuchet.swing_curve`).
+  CC BY-SA 3.0 : courbe de bascule du bras du trébuchet (`data/fx/trebuchet_swing_curve.json`).
 - **Canon firing mvi 3662.ogv**, Rama, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Canon_firing_mvi_3662.ogv),
   CC BY-SA 2.0 fr : durées d'éclair et de fumée de la bombarde (`bombard.flash_s`, `smoke_s`).
 - **Flag of Finland.webm**, SFootage, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Flag_of_Finland.webm),
