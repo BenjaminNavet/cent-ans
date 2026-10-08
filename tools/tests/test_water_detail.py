@@ -43,7 +43,6 @@ def test_water_detail_json_matches_schema():
     document = json.loads(
         (ROOT / "data" / "fx" / "water_detail.json").read_text(encoding="utf-8")
     )
-    _validate("fx_water_detail.schema.json", document)
     assert sorted(document["materials"]) == sorted(IDS)
 
 

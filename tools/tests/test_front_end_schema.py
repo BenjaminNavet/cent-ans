@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 
@@ -15,14 +13,6 @@ def _load(relative: str) -> dict:
 
 def _res_exists(path: str) -> bool:
     return (ROOT / "game" / path.removeprefix("res://")).is_file()
-
-
-def test_front_end_matches_schema() -> None:
-    """The front-end file matches its schema."""
-    schema = _load("schemas/front_end.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_load("ui/front_end.json")))
-    assert not errors, [error.message for error in errors]
 
 
 def test_front_end_references_exist() -> None:

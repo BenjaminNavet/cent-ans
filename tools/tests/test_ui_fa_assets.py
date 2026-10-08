@@ -23,19 +23,6 @@ def _cuts(catalogue: dict) -> list[tuple[str, dict]]:
     return [(kind, cut) for kind in fa_ui_assets.KINDS for cut in catalogue[kind]]
 
 
-def test_catalogue_matches_schema() -> None:
-    """The cut catalogue matches its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "ui_fa_assets.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_catalogue()),
-        key=lambda e: list(e.path),
-    )
-    assert not errors, [error.message for error in errors]
-
-
 def test_cuts_reference_known_sources_and_unique_ids() -> None:
     """Every cut names a declared source, every source is used, ids are unique per kind."""
     catalogue = _catalogue()

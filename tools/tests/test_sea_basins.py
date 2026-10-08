@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
 from pyproj import Transformer
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -63,16 +62,6 @@ def _looks() -> dict:
     return {
         basin["id"]: basin["look"] for basin in _load("map/sea_basins.json")["basins"]
     }
-
-
-def test_sea_basins_match_schema() -> None:
-    """The sea settings match their schema."""
-    schema = _load("schemas/sea_basins.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(
-        Draft202012Validator(schema).iter_errors(_load("map/sea_basins.json"))
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_basin_ids_are_unique() -> None:

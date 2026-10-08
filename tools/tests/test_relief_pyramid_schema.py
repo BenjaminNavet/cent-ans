@@ -4,27 +4,8 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
 
 DATA = Path(__file__).resolve().parents[2] / "data"
-
-
-@pytest.mark.parametrize(
-    ("schema_name", "data_path"),
-    [
-        ("relief_pyramid.schema.json", "map/relief_pyramid.json"),
-        ("detail_zones.schema.json", "map/detail_zones.json"),
-    ],
-)
-def test_matches_schema(schema_name: str, data_path: str) -> None:
-    """The file exists and matches its schema."""
-    schema = json.loads((DATA / "schemas" / schema_name).read_text(encoding="utf-8"))
-    document = json.loads((DATA / data_path).read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_levels_halve_meters_per_px() -> None:

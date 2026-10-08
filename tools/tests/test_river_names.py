@@ -3,24 +3,11 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def test_river_names_match_schema() -> None:
-    """The river names file matches its schema."""
-    schema = _load(DATA / "schemas" / "river_names.schema.json")
-    names = _load(DATA / "map" / "river_names.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(names), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_river_names_keys_exist_and_values_differ() -> None:

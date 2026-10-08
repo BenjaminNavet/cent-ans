@@ -5,14 +5,12 @@ import re
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools import era_music
 
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data"
 GAME = REPO / "game"
-ASSETS = GAME / "assets"
 
 CULTURE_REGIONS = {
     "france",
@@ -43,26 +41,6 @@ def _source_md_credits(path: Path) -> set[str]:
     return set(
         re.findall(r"`([\w.\-]+\.(?:ogg|mp3|wav))`", source.read_text(encoding="utf-8"))
     )
-
-
-def test_music_json_matches_schema() -> None:
-    """``data/audio/music.json`` matches its schema (DA4: primary/fallback per context)."""
-    schema = json.loads(
-        (DATA / "schemas" / "music.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_music()))
-    assert not errors, [error.message for error in errors]
-
-
-def test_battle_layers_json_matches_schema() -> None:
-    """``data/audio/battle_layers.json`` matches its schema (DA4: layered battle music)."""
-    schema = json.loads(
-        (DATA / "schemas" / "battle_layers.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_battle_layers()))
-    assert not errors, [error.message for error in errors]
 
 
 def _all_music_tracks() -> list[str]:

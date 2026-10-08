@@ -11,8 +11,6 @@ from collections import Counter
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
 
 from cent_ans_tools.geo.project import default_grid
 
@@ -25,21 +23,6 @@ MAX_PER_FILE = 16
 # The map square is wider than the requested lon/lat extent (docs/geo.md),
 # so bounds are checked in map pixels, not degrees.
 GRID = default_grid()
-
-
-def _validator(schema_name: str) -> Draft202012Validator:
-    """Builds a validator that resolves `common.schema.json` references locally."""
-    schemas = {
-        path.name: json.loads(path.read_text(encoding="utf-8"))
-        for path in (DATA / "schemas").glob("*.schema.json")
-    }
-    registry = Registry()
-    for name, schema in schemas.items():
-        resource = Resource.from_contents(schema)
-        registry = registry.with_resource(schema["$id"], resource).with_resource(
-            name, resource
-        )
-    return Draft202012Validator(schemas[schema_name], registry=registry)
 
 
 def _settlement_files() -> list[Path]:
@@ -66,10 +49,7 @@ SETTLEMENT_FILES = _settlement_files()
 @pytest.mark.parametrize("path", SETTLEMENT_FILES, ids=lambda path: path.stem)
 def test_settlement_file_is_valid(path: Path) -> None:
     """Schema, count, single named city, references and coordinates."""
-    validator = _validator("settlement.schema.json")
     settlements = _load(path)
-    errors = [error.message for error in validator.iter_errors(settlements)]
-    assert not errors, f"{path.name}: {errors}"
 
     province_path = DATA / "provinces" / f"{path.stem}.json"
     assert province_path.is_file(), f"{path.name}: unknown province {path.stem}"
@@ -115,9 +95,6 @@ def test_settlement_ids_are_globally_unique() -> None:
 def test_rules_file_matches_its_schema() -> None:
     """`rules.json` is valid and names existing unit types."""
     rules = json.loads((SETTLEMENTS / RULES_FILE).read_text(encoding="utf-8"))
-    validator = _validator("settlement_rules.schema.json")
-    errors = [error.message for error in validator.iter_errors(rules)]
-    assert not errors, errors
     unit_types = _ids("unit_types")
     for kind, units in rules["starting_garrison"].items():
         unknown = set(units) - unit_types

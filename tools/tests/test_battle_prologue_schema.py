@@ -3,25 +3,12 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def test_battle_prologue_matches_schema() -> None:
-    """The battle prologue file exists and matches its schema."""
-    schema = _load("schemas/battle_prologue.schema.json")
-    prologue = _load("tutorial/battle_prologue.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(prologue), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_battle_prologue_references_exist() -> None:

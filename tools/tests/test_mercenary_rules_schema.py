@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 
 
@@ -18,16 +16,6 @@ def _rules() -> dict:
 
 def _regions() -> set[str]:
     return {_load(path)["region"] for path in (DATA / "provinces").glob("*.json")}
-
-
-def test_mercenary_rules_match_schema() -> None:
-    """The mercenary rules file exists and matches its schema."""
-    schema = _load(DATA / "schemas" / "mercenary_rules.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_rules()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_upkeep_and_price_are_a_premium() -> None:

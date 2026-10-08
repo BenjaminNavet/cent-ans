@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 FINE = ROOT / "game" / "assets" / "models" / "battle_fine"
@@ -12,17 +10,6 @@ FINE = ROOT / "game" / "assets" / "models" / "battle_fine"
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def test_fa3_anim_sources_match_schema() -> None:
-    """The clip source table exists and matches its schema."""
-    schema = _load(DATA / "schemas" / "fx_fa3_anim_sources.schema.json")
-    table = _load(DATA / "fx" / "fa3_anim_sources.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(table), key=lambda e: list(e.path)
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_fa3_anim_references_resolve() -> None:

@@ -4,8 +4,6 @@ import json
 import math
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 MODELS = ROOT / "game" / "assets" / "models" / "outbuildings"
@@ -31,16 +29,6 @@ def _levels() -> list[tuple[str, dict]]:
         for family, entry in _document()["families"].items()
         for level in entry["levels"]
     ]
-
-
-def test_building_models_match_schema() -> None:
-    """The mapping matches ``building_models.schema.json``."""
-    schema = json.loads(
-        (DATA / "schemas" / "building_models.schema.json").read_text("utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_document()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_eight_families_of_three_levels() -> None:

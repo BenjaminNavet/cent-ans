@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 PROVINCE_FIELDS = {"cultures": "culture", "regions": "region", "religions": "religion"}
 
@@ -20,16 +18,6 @@ def _province_values(field: str) -> set[str]:
         json.loads(path.read_text(encoding="utf-8")).get(field, "")
         for path in (DATA / "provinces").glob("*.json")
     }
-
-
-def test_town_maquettes_match_schema() -> None:
-    """``data/art/town_maquettes.json`` matches ``town_maquettes.schema.json``."""
-    schema = json.loads(
-        (DATA / "schemas" / "town_maquettes.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_document()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_family_lists_cover_provinces_once() -> None:

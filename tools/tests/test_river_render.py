@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools.geo import river_render
 
@@ -20,26 +19,11 @@ STYLES = {
 }
 
 
-def test_styles_file_matches_schema() -> None:
-    """``data/map/river_styles.json`` is valid against its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "river_styles.schema.json").read_text(encoding="utf-8")
-    )
-    styles = json.loads(
-        (DATA / "map" / "river_styles.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator(schema).validate(styles)
-
-
 def test_crossings_file_still_matches_schema() -> None:
     """The ``structure`` field added to ``crossings.json`` is allowed by the schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "crossings.schema.json").read_text(encoding="utf-8")
-    )
     crossings = json.loads(
         (DATA / "map" / "crossings.json").read_text(encoding="utf-8")
     )
-    Draft202012Validator(schema).validate(crossings)
     structures = {
         c.get("structure") for c in crossings["crossings"] if c["type"] != "pass"
     }

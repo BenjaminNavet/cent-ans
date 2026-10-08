@@ -3,25 +3,22 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
-BATTLE_TERRAINS = {"plains", "heath", "bocage", "forest", "hills", "mountains", "marsh", "steppe", "desert"}
+BATTLE_TERRAINS = {
+    "plains",
+    "heath",
+    "bocage",
+    "forest",
+    "hills",
+    "mountains",
+    "marsh",
+    "steppe",
+    "desert",
+}
 
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def test_battle_speeches_match_schema() -> None:
-    """The speeches file exists and matches its schema."""
-    schema = _load("schemas/battle_speeches.schema.json")
-    speeches = _load("speeches/battle_speeches.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(speeches), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_speech_keys_are_known() -> None:

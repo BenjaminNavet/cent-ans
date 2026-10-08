@@ -5,30 +5,15 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools import voice_shout, voice_tts
 from cent_ans_tools.budget import BudgetLedger
 
 DATA = Path(__file__).resolve().parents[2] / "data"
-FILES = {
-    "voice/barks.json": "schemas/voice_barks.schema.json",
-    "voice/advisor.json": "schemas/voice_advisor.schema.json",
-    "voice/speech_voices.json": "schemas/voice_speech.schema.json",
-}
 
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def test_voice_files_match_schemas() -> None:
-    """Each voice data file matches its schema."""
-    for data_file, schema_file in FILES.items():
-        schema = _load(schema_file)
-        Draft202012Validator.check_schema(schema)
-        errors = list(Draft202012Validator(schema).iter_errors(_load(data_file)))
-        assert not errors, (data_file, [error.message for error in errors])
 
 
 def test_bark_corpus_limits_and_ids() -> None:

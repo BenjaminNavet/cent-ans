@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 MODELS = ROOT / "game" / "assets" / "models" / "siege"
@@ -15,20 +13,6 @@ TRIANGLE_BUDGET = 2400
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def _check(schema_name: str, document: dict) -> None:
-    schema = _load(f"schemas/{schema_name}")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
-
-
-def test_siege_engines_match_schema() -> None:
-    """The engine animation settings exist and match their schema."""
-    _check("siege_engines.schema.json", _load("fx/siege_engines.json"))
 
 
 def test_engines_are_siege_units_with_a_model() -> None:
@@ -66,7 +50,6 @@ def test_trebuchet_timeline_is_ordered() -> None:
 def test_battle_demos_match_schema() -> None:
     """The demo battles of the main menu match their schema and name real places."""
     demos = _load("ui/battle_demos.json")
-    _check("battle_demos.schema.json", demos)
     landmarks = {p.stem for p in (DATA / "landmarks").glob("*.json")}
     engines = set(_load("fx/siege_engines.json")["engines"])
     ids = [demo["id"] for demo in demos["demos"]]

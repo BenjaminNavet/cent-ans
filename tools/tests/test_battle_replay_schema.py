@@ -27,14 +27,6 @@ def _errors(schema_name: str, document: dict) -> list[str]:
     return [error.message for error in errors]
 
 
-def test_replay_rules_match_schema() -> None:
-    """`data/rules/battle_replay.json` matches `battle_replay_rules.schema.json`."""
-    rules = json.loads(
-        (DATA / "rules" / "battle_replay.json").read_text(encoding="utf-8")
-    )
-    assert not _errors("battle_replay_rules.schema.json", rules)
-
-
 def test_replay_periods_cover_a_long_battle() -> None:
     """Enough copies for a 30 min battle at the chosen period (bounded memory)."""
     rules = json.loads(

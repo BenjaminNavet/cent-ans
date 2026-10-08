@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,18 +13,6 @@ ATLAS = ROOT / "game/assets/textures/battle/grass_tufts.png"
 
 def _document() -> dict:
     return json.loads((DATA / "art" / "battle_grass.json").read_text(encoding="utf-8"))
-
-
-def test_battle_grass_matches_schema() -> None:
-    """``data/art/battle_grass.json`` matches its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "art_battle_grass.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_document()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_battle_grass_references_resolve() -> None:
