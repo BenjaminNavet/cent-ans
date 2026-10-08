@@ -11,11 +11,9 @@
 //! block `reform`) during which every man walks from his old place to his
 //! new one, the regiment moving and fighting worse (`reform` modifiers).
 
-use std::fmt;
-use std::sync::OnceLock;
-
 use data_model::UnitCategory;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 use crate::unit::Unit;
 
@@ -260,20 +258,9 @@ pub struct FormationRules {
     pub formations: Vec<FormationDef>,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/unit_formations.json");
+data_model::bundled_rules!(FormationRules, "rules/unit_formations.json");
 
 impl FormationRules {
-    /// `data/rules/unit_formations.json` as compiled into the crate.
-    pub fn bundled() -> &'static FormationRules {
-        static RULES: OnceLock<FormationRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            let rules: FormationRules =
-                serde_json::from_str(BUNDLED).expect("data/rules/unit_formations.json is valid");
-            rules.check().expect("data/rules/unit_formations.json");
-            rules
-        })
-    }
-
     /// Consistency the schema cannot express.
     pub fn check(&self) -> Result<(), String> {
         if self.formations.is_empty() || self.formations.len() > usize::from(u8::MAX) {

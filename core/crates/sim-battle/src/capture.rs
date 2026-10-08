@@ -14,8 +14,6 @@
 //! (`data/schemas/siege_capture_rules.schema.json`). The step itself is in
 //! `sim/capture.rs`.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Rules of one capture point.
@@ -97,17 +95,9 @@ pub struct AssaultRules {
     pub committed_radius_m: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/siege_capture.json");
+data_model::bundled_rules!(CaptureRules, "rules/siege_capture.json");
 
 impl CaptureRules {
-    /// `data/rules/siege_capture.json` as compiled into the crate.
-    pub fn bundled() -> &'static CaptureRules {
-        static RULES: OnceLock<CaptureRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/siege_capture.json is valid")
-        })
-    }
-
     pub fn point(&self, kind: CapturePointKind) -> &PointRules {
         match kind {
             CapturePointKind::Square => &self.square,

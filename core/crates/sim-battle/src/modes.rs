@@ -19,10 +19,8 @@
 //! `sim/modes.rs`. The display states of the regiment (charging, under
 //! fire, engaged, wavering) are computed here too ([`UnitStatus`]).
 
-use std::collections::BTreeMap;
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// A persistent mode of a regiment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -133,17 +131,7 @@ pub struct UnitModeRules {
     pub ai: ModeAiRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/unit_modes.json");
-
-impl UnitModeRules {
-    /// `data/rules/unit_modes.json` as compiled into the crate.
-    pub fn bundled() -> &'static UnitModeRules {
-        static RULES: OnceLock<UnitModeRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/unit_modes.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(UnitModeRules, "rules/unit_modes.json");
 
 /// Display states of a regiment, computed by the core (badges over the
 /// banners and on the cards).

@@ -86,59 +86,7 @@ pub struct CoverRules {
     pub wetland_threshold: f64,
 }
 
-impl Default for PostureRules {
-    /// Fallback when `data/rules/postures.json` is absent; kept equal to that
-    /// file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        PostureRules {
-            ambush: AmbushRules {
-                min_movement_left_percent: 25.0,
-                detect_radius_army_km: 3.0,
-                detect_radius_spy_km: 8.0,
-                base_chance: 0.55,
-                per_skill: 0.03,
-                scout_malus: 0.4,
-                scout_unit_types: [
-                    "unit_hobelars",
-                    "unit_jinetes",
-                    "unit_akinci",
-                    "unit_lithuanian_light_cavalry",
-                    "unit_steppe_horse_archers",
-                    "unit_mounted_archers",
-                    "unit_mounted_sergeants",
-                ]
-                .into_iter()
-                .map(str::to_owned)
-                .collect(),
-                chance_min: 0.10,
-                chance_max: 0.90,
-                terrain_bonus: [
-                    (CoverClass::Forest, 0.10),
-                    (CoverClass::Bocage, 0.05),
-                    (CoverClass::Marsh, 0.05),
-                ]
-                .into_iter()
-                .collect(),
-                auto_attack_percent: 25.0,
-            },
-            forced_march: ForcedMarchRules {
-                movement_bonus_percent: 50.0,
-                supply_cost: 10,
-                start_fatigue: 60.0,
-                ambush_bonus: 0.10,
-            },
-            entrenched: EntrenchedRules {
-                auto_defense_percent: 15.0,
-                supply_saving_percent: 30.0,
-            },
-            cover: CoverRules {
-                forest_threshold: 0.5,
-                wetland_threshold: 0.4,
-            },
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(PostureRules, "rules/postures.json", default);
 
 #[cfg(test)]
 mod tests {

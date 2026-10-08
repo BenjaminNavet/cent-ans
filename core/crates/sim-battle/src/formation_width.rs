@@ -11,8 +11,6 @@
 //! drag shares the width between the regiments in proportion to their
 //! strength ([`split_widths`]).
 
-use std::sync::OnceLock;
-
 use data_model::{Ability, UnitCategory};
 use serde::Deserialize;
 
@@ -49,17 +47,9 @@ pub struct FormationWidthRules {
     pub classes: WidthClasses,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/formation_width.json");
+data_model::bundled_rules!(FormationWidthRules, "rules/formation_width.json");
 
 impl FormationWidthRules {
-    /// `data/rules/formation_width.json` as compiled into the crate.
-    pub fn bundled() -> &'static FormationWidthRules {
-        static RULES: OnceLock<FormationWidthRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/formation_width.json is valid")
-        })
-    }
-
     /// Rank bounds of `unit`: engines, then horsemen, then pikemen
     /// (`pike_square`), then shooters, then foot.
     pub fn bounds(&self, unit: &Unit) -> RankBounds {

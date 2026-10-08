@@ -410,8 +410,9 @@ fn an_ai_capture_is_applied_at_once() {
 #[test]
 fn defaults_mirror_the_data_file() {
     let data = game_data();
-    let mut from_file = data.capture_rules.clone();
-    assert!(from_file.description.is_some(), "capture.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::CaptureRules::default());
+    assert!(
+        data.capture_rules.description.is_some(),
+        "capture.json not read"
+    );
+    assert_eq!(data.capture_rules, data_model::CaptureRules::default());
 }

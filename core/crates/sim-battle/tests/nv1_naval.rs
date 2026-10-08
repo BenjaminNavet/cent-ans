@@ -128,9 +128,7 @@ const MILITIA: &str = "unit_urban_militia";
 #[test]
 fn rules_file_matches_defaults() {
     let data = data();
-    let mut rules = data.naval.rules.clone();
-    rules.description = None;
-    assert_eq!(rules, NavalRules::default());
+    assert_eq!(data.naval.rules, NavalRules::default());
     assert_eq!(data.naval.ship_classes.len(), 4);
     let england = data_model::FactionId::new("fac_england").unwrap();
     assert!(data.naval.fleet_of(&england).is_some());

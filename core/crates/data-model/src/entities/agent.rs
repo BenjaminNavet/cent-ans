@@ -172,7 +172,7 @@ pub struct AgentActionRules {
 
 /// Magnitudes of the action effects.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(default, deny_unknown_fields)]
+#[serde(deny_unknown_fields)]
 pub struct AgentEffects {
     /// Seasons a successful scouting keeps the target province in sight.
     pub intel_turns: u32,
@@ -205,37 +205,7 @@ pub struct AgentEffects {
     pub curia_favor_per_level: u8,
 }
 
-impl Default for AgentEffects {
-    fn default() -> Self {
-        AgentEffects {
-            intel_turns: 4,
-            sabotage_breach: 25,
-            sabotage_supplies: 15,
-            sabotage_delay_turns: 2,
-            sabotage_morale: 15,
-            incite_unrest: 12,
-            parley_opinion: 10,
-            parley_opinion_per_level: 2,
-            parley_turns: 12,
-            truce_turns: 8,
-            bribe_base_cost: 150,
-            bribe_cost_per_man_percent: 50,
-            bribe_men_per_malus: 100,
-            bribe_fail_opinion: -10,
-            ransom_price_percent: 70,
-            ransom_price_per_level: 5,
-            ransom_price_floor: 45,
-            preach_heresy: 8,
-            preach_heresy_per_level: 3,
-            preach_unrest: 5,
-            denounce_clergy_unrest: 10,
-            denounce_peasant_unrest: 5,
-            denounce_favor: 3,
-            curia_favor: 3,
-            curia_favor_per_level: 1,
-        }
-    }
-}
+crate::bundled_rules!(AgentEffects, "rules/agents.json", at "/effects", default);
 
 /// Contents of `data/rules/agents.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -318,97 +288,7 @@ fn default_passive_counter_cap() -> i32 {
     60
 }
 
-#[allow(clippy::too_many_arguments)]
-fn type_rules(
-    name: &str,
-    cost: u32,
-    upkeep: u32,
-    max_per_faction: u32,
-    movement_steps: u32,
-    vision_range: u32,
-    settlement_kinds: &[SettlementKind],
-    requires_religious_building: bool,
-) -> AgentTypeRules {
-    AgentTypeRules {
-        name: name.to_owned(),
-        cost,
-        upkeep,
-        max_per_faction,
-        movement_steps,
-        vision_range,
-        settlement_kinds: settlement_kinds.to_vec(),
-        requires_religious_building,
-        names: Vec::new(),
-        description: None,
-    }
-}
-
-fn action_rules(name: &str, base_chance: i32, per_level: i32, death_risk: u32) -> AgentActionRules {
-    AgentActionRules {
-        name: name.to_owned(),
-        base_chance,
-        per_level,
-        death_risk,
-        cost: 0,
-        description: None,
-    }
-}
-
-impl Default for AgentRules {
-    /// The values of `docs/design/2026-09-24-agents.md`, used when
-    /// `data/rules/agents.json` is absent (tests with synthetic data).
-    fn default() -> Self {
-        use AgentActionKind as A;
-        use SettlementKind as S;
-        let fortified = [S::City, S::Town, S::Castle, S::Abbey];
-        let types = BTreeMap::from([
-            (
-                AgentKind::Spy,
-                type_rules("Espion", 250, 20, 3, 4, 1, &fortified, false),
-            ),
-            (
-                AgentKind::Emissary,
-                type_rules("Héraut", 300, 25, 2, 4, 0, &[S::City], false),
-            ),
-            (
-                AgentKind::Preacher,
-                type_rules("Prédicateur", 200, 15, 2, 3, 0, &fortified, true),
-            ),
-        ]);
-        let actions = BTreeMap::from([
-            (A::Scout, action_rules("Renseigner", 75, 5, 10)),
-            (A::Sabotage, action_rules("Saboter", 45, 7, 35)),
-            (A::Incite, action_rules("Soulever", 40, 7, 35)),
-            (A::Counter, action_rules("Contre-espionnage", 50, 8, 0)),
-            (A::Parley, action_rules("Ambassade", 70, 5, 0)),
-            (A::Truce, action_rules("Trêve", 55, 6, 0)),
-            (A::Bribe, action_rules("Soudoyer", 35, 7, 40)),
-            (A::Ransom, action_rules("Rançon", 60, 6, 0)),
-            (A::Preach, action_rules("Prêcher", 70, 5, 0)),
-            (A::Denounce, action_rules("Dénoncer", 50, 6, 15)),
-            (A::Curia, action_rules("Plaider à la Curie", 60, 6, 0)),
-        ]);
-        AgentRules {
-            types,
-            actions,
-            experience_thresholds: vec![2, 5, 9, 14],
-            xp_success: default_xp_success(),
-            xp_failure: default_xp_failure(),
-            min_chance: default_min_chance(),
-            max_chance: default_max_chance(),
-            fortification_malus: default_fortification_malus(),
-            counter_spy_malus: default_counter_spy_malus(),
-            counter_spy_malus_per_level: default_counter_spy_malus_per_level(),
-            counter_spy_malus_cap: default_counter_spy_malus_cap(),
-            passive_counter_base: default_passive_counter_base(),
-            passive_counter_per_level: default_passive_counter_per_level(),
-            passive_counter_cap: default_passive_counter_cap(),
-            ai_network_min_income: 0,
-            effects: AgentEffects::default(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(AgentRules, "rules/agents.json", default);
 
 #[cfg(test)]
 mod tests {

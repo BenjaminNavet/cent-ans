@@ -74,40 +74,4 @@ impl MapSceneRules {
     }
 }
 
-impl Default for MapSceneRules {
-    /// Fallback when `data/rules/map_scenes.json` is absent; kept equal to
-    /// that file.
-    fn default() -> Self {
-        let durations = [
-            (SceneKind::Plague, 4),
-            (SceneKind::Famine, 3),
-            (SceneKind::Revolt, 2),
-            (SceneKind::Devastation, 3),
-            (SceneKind::Siege, 1),
-            (SceneKind::Construction, 2),
-            (SceneKind::Fair, 1),
-            (SceneKind::Celebration, 2),
-            (SceneKind::Flood, 2),
-            (SceneKind::Muster, 1),
-        ]
-        .into_iter()
-        .collect();
-        MapSceneRules {
-            durations,
-            devastation_threshold: 25,
-            pool_cap: 260,
-            activity_radius: 60.0,
-            figure_max_distance: 3.0,
-            road_folk_per_unit: 0.05,
-            field_work_probability: 0.18,
-            herd_probability: 0.07,
-            woodcutter_probability: 0.04,
-            pilgrim_probability: 0.05,
-            carts_per_trade_value: 0.01,
-            guard_value: 40.0,
-            scene_figures_min: 4,
-            scene_figures_max: 16,
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(MapSceneRules, "rules/map_scenes.json", default);

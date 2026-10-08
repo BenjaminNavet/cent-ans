@@ -5,10 +5,6 @@
 
 use serde::{Deserialize, Serialize};
 
-/// The rules file as bundled at build time: the fallback when
-/// `data/rules/army_traditions.json` is absent (test fixtures).
-const BUNDLED: &str = include_str!("../../../../../data/rules/army_traditions.json");
-
 /// Contents of `data/rules/army_traditions.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -21,11 +17,7 @@ pub struct ArmyTraditionRules {
     pub description: Option<String>,
 }
 
-impl Default for ArmyTraditionRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED).expect("bundled data/rules/army_traditions.json is valid")
-    }
-}
+crate::bundled_rules!(ArmyTraditionRules, "rules/army_traditions.json", default);
 
 impl ArmyTraditionRules {
     /// The tradition `id`, if any.

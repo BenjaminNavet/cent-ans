@@ -18,8 +18,6 @@
 //!   for the melee once the enemy is [`DuelRules::second_echelon_closes_m`]
 //!   away.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/battle_duel.json`.
@@ -49,17 +47,9 @@ pub struct DuelRules {
     pub second_echelon_closes_m: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_duel.json");
+data_model::bundled_rules!(DuelRules, "rules/battle_duel.json");
 
 impl DuelRules {
-    /// `data/rules/battle_duel.json` as compiled into the crate.
-    pub fn bundled() -> &'static DuelRules {
-        static RULES: OnceLock<DuelRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_duel.json is valid")
-        })
-    }
-
     /// Whether a side that lost `own` of its soldiers over the window while
     /// the enemy lost `enemy` (shares of the initial soldiers) is winning
     /// the duel.

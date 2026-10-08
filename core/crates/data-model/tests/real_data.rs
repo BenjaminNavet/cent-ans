@@ -40,69 +40,35 @@ fn data_root() -> PathBuf {
     data_dir()
 }
 
-/// Lot N1: `data/rules/auto_resolve.json` is read and the built-in fallback
-/// mirrors it.
+/// Every rules file under `data/rules/` is read by `GameData::load` and is
+/// the one embedded as the type's `Default` (single source of truth).
 #[test]
-fn auto_resolve_rules_match_their_default() {
+fn rules_files_are_read_and_embedded() {
     let data = game_data();
-    let mut from_file = data.auto_resolve.clone();
-    assert!(
-        from_file.description.is_some(),
-        "auto_resolve.json not read"
+    assert_eq!(data.auto_resolve, data_model::AutoResolveRules::default());
+    assert_eq!(
+        data.population_rules,
+        data_model::PopulationRules::default()
     );
-    from_file.description = None;
-    assert_eq!(from_file, data_model::AutoResolveRules::default());
-}
-
-/// Lot E2: `data/rules/population.json` is read and mirrored by the default.
-#[test]
-fn population_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.population_rules.clone();
-    assert!(from_file.description.is_some(), "population.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::PopulationRules::default());
-}
-
-/// Lot EP5: `data/rules/battle_standards.json` is read and mirrored by the default.
-#[test]
-fn battle_standard_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.battle_standard_rules.clone();
-    assert!(
-        from_file.description.is_some(),
-        "battle_standards.json not read"
+    assert_eq!(
+        data.battle_standard_rules,
+        data_model::BattleStandardRules::default()
     );
-    from_file.description = None;
-    assert_eq!(from_file, data_model::BattleStandardRules::default());
-}
-
-/// Lot DF1: `data/rules/difficulty.json` is read and mirrored by the default.
-#[test]
-fn difficulty_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.difficulty.clone();
-    assert!(from_file.description.is_some(), "difficulty.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::DifficultyRules::default());
-}
-
-#[test]
-fn economy_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.economy_rules.clone();
-    assert!(from_file.description.is_some(), "economy.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::EconomyRules::default());
-}
-
-#[test]
-fn diplomacy_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.diplomacy_rules.clone();
-    assert!(from_file.description.is_some(), "diplomacy.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::DiplomacyRules::default());
+    assert_eq!(data.difficulty, data_model::DifficultyRules::default());
+    assert_eq!(data.economy_rules, data_model::EconomyRules::default());
+    assert_eq!(data.diplomacy_rules, data_model::DiplomacyRules::default());
+    assert_eq!(data.posture_rules, data_model::PostureRules::default());
+    assert_eq!(
+        data.battle_outcome_rules,
+        data_model::BattleOutcomeRules::default()
+    );
+    assert_eq!(data.map_scene_rules, data_model::MapSceneRules::default());
+    for kind in data_model::SceneKind::ALL {
+        assert!(
+            data.map_scene_rules.durations.contains_key(&kind),
+            "{kind:?}"
+        );
+    }
 }
 
 #[test]
@@ -315,43 +281,6 @@ fn every_province_has_exactly_one_city() {
             .map(Vec::len)
             .sum::<usize>()
     );
-}
-
-/// Lot CV3-1: `data/rules/postures.json` is read and mirrored by the default.
-#[test]
-fn posture_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.posture_rules.clone();
-    assert!(from_file.description.is_some(), "postures.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::PostureRules::default());
-}
-
-/// Lot CV3-1: `data/rules/battle_outcome.json` is read and mirrored by the default.
-#[test]
-fn battle_outcome_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.battle_outcome_rules.clone();
-    assert!(
-        from_file.description.is_some(),
-        "battle_outcome.json not read"
-    );
-    from_file.description = None;
-    assert_eq!(from_file, data_model::BattleOutcomeRules::default());
-}
-
-/// Lot FK1: `data/rules/map_scenes.json` is read, mirrored by the default
-/// and times every scene kind.
-#[test]
-fn map_scene_rules_match_their_default() {
-    let data = game_data();
-    let mut from_file = data.map_scene_rules.clone();
-    assert!(from_file.description.is_some(), "map_scenes.json not read");
-    from_file.description = None;
-    assert_eq!(from_file, data_model::MapSceneRules::default());
-    for kind in data_model::SceneKind::ALL {
-        assert!(from_file.durations.contains_key(&kind), "{kind:?}");
-    }
 }
 
 /// Lot CV3-1: the cover map is decoded from the real rasters and finds

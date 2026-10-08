@@ -30,7 +30,7 @@ pub struct AiFeudal {
 /// A suzerain called to protect a vassal (§ 4.3.4): it intervenes when
 /// the score reaches `threshold`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ProtectionWeights {
     /// Duty and prestige at stake in shirking.
     pub base: i32,
@@ -56,29 +56,11 @@ pub struct ProtectionWeights {
     pub certainty_margin: i32,
 }
 
-impl Default for ProtectionWeights {
-    fn default() -> Self {
-        ProtectionWeights {
-            base: 30,
-            power_weight: 20,
-            max_power_doublings: 3.0,
-            attitude_divisor: 2,
-            loyalty_pivot: 50,
-            loyalty_divisor: 3,
-            empty_treasury: -20,
-            per_ongoing_war: -15,
-            allied_with_aggressor: -60,
-            aggression_weight: 10,
-            diplomacy_weight: 10,
-            threshold: 20,
-            certainty_margin: 15,
-        }
-    }
-}
+crate::bundled_rules!(ProtectionWeights, "ai/feudal.json", at "/protection", default);
 
 /// A lord arbitrating the private war of two direct vassals (§ 4.3.5).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ArbitrationAi {
     /// Attitude gap between the two parties to take a side.
     pub take_side_attitude_gap: i32,
@@ -90,21 +72,12 @@ pub struct ArbitrationAi {
     pub max_wars_to_impose: usize,
 }
 
-impl Default for ArbitrationAi {
-    fn default() -> Self {
-        ArbitrationAi {
-            take_side_attitude_gap: 40,
-            aggression_weight: 10,
-            impose_peace_power_ratio: 1.5,
-            max_wars_to_impose: 1,
-        }
-    }
-}
+crate::bundled_rules!(ArbitrationAi, "ai/feudal.json", at "/arbitration", default);
 
 /// A direct vassal summoned to the host (§ 4.1): it answers when the score
 /// reaches `threshold`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct HostWeights {
     /// Loyalty points above this count for, below it against.
     pub loyalty_pivot: u8,
@@ -123,26 +96,11 @@ pub struct HostWeights {
     pub threshold: i32,
 }
 
-impl Default for HostWeights {
-    fn default() -> Self {
-        HostWeights {
-            loyalty_pivot: 30,
-            loyalty_weight: 1,
-            fear_power_ratio: 4.0,
-            fear_bonus: 10,
-            lost_cause_power_ratio: 3.0,
-            lost_cause: -15,
-            enemy_attitude_divisor: 4,
-            allied_with_enemy: -60,
-            aggression_weight: 5,
-            threshold: 0,
-        }
-    }
-}
+crate::bundled_rules!(HostWeights, "ai/feudal.json", at "/host", default);
 
 /// A liege with an open felony case declaring forfeiture (§ 4.4).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct CommiseWeights {
     /// Liege's power over the felon, its allies and its direct vassals.
     pub min_power_ratio: f64,
@@ -154,20 +112,11 @@ pub struct CommiseWeights {
     pub min_treasury: i64,
 }
 
-impl Default for CommiseWeights {
-    fn default() -> Self {
-        CommiseWeights {
-            min_power_ratio: 2.0,
-            aggression_shift: 0.3,
-            max_wars: 1,
-            min_treasury: 0,
-        }
-    }
-}
+crate::bundled_rules!(CommiseWeights, "ai/feudal.json", at "/commise", default);
 
 /// A disloyal AI vassal (below `feudal.json:rebellion_loyalty`) revolting.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct RevoltWeights {
     /// Vassal and its allies against its liege.
     pub min_power_ratio: f64,
@@ -177,20 +126,12 @@ pub struct RevoltWeights {
     pub aggression_permille: i32,
 }
 
-impl Default for RevoltWeights {
-    fn default() -> Self {
-        RevoltWeights {
-            min_power_ratio: 0.6,
-            chance_permille: 250,
-            aggression_permille: 3,
-        }
-    }
-}
+crate::bundled_rules!(RevoltWeights, "ai/feudal.json", at "/revolt", default);
 
 /// A disloyal vassal (below `feudal.json:disloyal_threshold`), or a
 /// threatened sovereign county, paying homage to another lord (§ 4.2).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct AllegianceWeights {
     /// Attitude of the vassal towards its new lord.
     pub min_attitude: i32,
@@ -200,19 +141,11 @@ pub struct AllegianceWeights {
     pub chance_permille: u32,
 }
 
-impl Default for AllegianceWeights {
-    fn default() -> Self {
-        AllegianceWeights {
-            min_attitude: 10,
-            min_power_ratio: 1.0,
-            chance_permille: 150,
-        }
-    }
-}
+crate::bundled_rules!(AllegianceWeights, "ai/feudal.json", at "/allegiance", default);
 
 /// A lord granting a spare title to a loyal direct vassal (§ 4.4).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct GrantWeights {
     /// Titles a lord keeps besides its primary one.
     pub max_kept_titles: usize,
@@ -222,64 +155,38 @@ pub struct GrantWeights {
     pub period_turns: u32,
 }
 
-impl Default for GrantWeights {
-    fn default() -> Self {
-        GrantWeights {
-            max_kept_titles: 3,
-            min_vassal_loyalty: 50,
-            period_turns: 8,
-        }
-    }
-}
+crate::bundled_rules!(GrantWeights, "ai/feudal.json", at "/grant", default);
 
 /// A winner demanding titles at the peace (§ 4.6, `Article::DemandTitle`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct DemandTitleWeights {
     pub enabled: bool,
     /// Share (%) of the title's own provinces the winner controls.
     pub min_controlled_percent: u32,
 }
 
-impl Default for DemandTitleWeights {
-    fn default() -> Self {
-        DemandTitleWeights {
-            enabled: true,
-            min_controlled_percent: 50,
-        }
-    }
-}
+crate::bundled_rules!(DemandTitleWeights, "ai/feudal.json", at "/demand_title", default);
 
 /// May a vassal ally outside its liege (ADR 0110)?
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ForeignAllianceRules {
     /// A vassal whose liege is neither the courter's enemy nor allied to
     /// it may be courted; allying with its liege's enemy stays a felony.
     pub allowed: bool,
 }
 
-impl Default for ForeignAllianceRules {
-    fn default() -> Self {
-        ForeignAllianceRules { allowed: true }
-    }
-}
+crate::bundled_rules!(ForeignAllianceRules, "ai/feudal.json", at "/foreign_alliance", default);
 
 /// Lighter feudal planning for the factions with no army and no war
 /// (spec § 5, performance fallback).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct LightEvaluation {
     pub enabled: bool,
     /// Such factions plan their feudal decisions one turn in `period`.
     pub period: u32,
 }
 
-impl Default for LightEvaluation {
-    fn default() -> Self {
-        LightEvaluation {
-            enabled: false,
-            period: 2,
-        }
-    }
-}
+crate::bundled_rules!(LightEvaluation, "ai/feudal.json", at "/light_evaluation", default);

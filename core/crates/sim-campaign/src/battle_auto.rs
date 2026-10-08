@@ -864,7 +864,6 @@ pub fn resolve_with(
     rules: &AutoResolveRules,
     rng: &mut CampaignRng,
 ) -> BattleResult {
-    static BUNDLED_CROSSINGS: std::sync::OnceLock<RiverCrossingRules> = std::sync::OnceLock::new();
     resolve_with_crossings(
         attacker,
         attacker_profiles,
@@ -873,7 +872,7 @@ pub fn resolve_with(
         context,
         conditions,
         rules,
-        BUNDLED_CROSSINGS.get_or_init(RiverCrossingRules::default),
+        RiverCrossingRules::bundled(),
         rng,
     )
 }

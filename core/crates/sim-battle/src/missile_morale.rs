@@ -8,8 +8,6 @@
 //! `data/rules/missile_morale.json` (schema
 //! `data/schemas/missile_morale_rules.schema.json`).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/missile_morale.json`.
@@ -23,18 +21,9 @@ pub struct MissileMoraleRules {
     pub mounted_panic_per_loss: f64,
 }
 
-/// The rules file, embedded at compile time.
-const BUNDLED: &str = include_str!("../../../../data/rules/missile_morale.json");
+data_model::bundled_rules!(MissileMoraleRules, "rules/missile_morale.json");
 
 impl MissileMoraleRules {
-    /// `data/rules/missile_morale.json` as compiled into the crate.
-    pub fn bundled() -> &'static MissileMoraleRules {
-        static RULES: OnceLock<MissileMoraleRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/missile_morale.json is valid")
-        })
-    }
-
     /// Extra morale a regiment loses when missiles kill `kills` of its
     /// `max_soldiers` men: nothing on foot, the panic of the horses mounted.
     pub fn panic(&self, mounted: bool, kills: f64, max_soldiers: u32) -> f64 {

@@ -42,16 +42,4 @@ impl DiplomacyRules {
     }
 }
 
-impl Default for DiplomacyRules {
-    /// Fallback when `data/rules/diplomacy.json` is absent; kept equal to that
-    /// file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        DiplomacyRules {
-            opinion_caps: BTreeMap::from([
-                (OpinionMotive::Marriage, 30),
-                (OpinionMotive::HeraldEmbassy, 20),
-            ]),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(DiplomacyRules, "rules/diplomacy.json", default);

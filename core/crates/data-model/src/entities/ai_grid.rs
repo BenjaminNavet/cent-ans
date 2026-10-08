@@ -39,21 +39,7 @@ pub struct AiGrid {
     pub description: Option<String>,
 }
 
-impl Default for AiGrid {
-    fn default() -> Self {
-        Self {
-            attack_ratio: 1.5,
-            attack_reach_share: 0.8,
-            avoid_ratio: 1.0,
-            avoid_radius_km: 12.0,
-            max_legs_per_turn: 6,
-            trespass_route_factor: default_trespass_route_factor(),
-            postures: AiPostures::default(),
-            encounters: AiEncounters::default(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(AiGrid, "ai/grid.json", default);
 
 /// CV3-6: the AI's stance tuning (`postures` of `data/ai/grid.json`).
 /// Without it, the AI takes none of the CV3 stances.
@@ -86,16 +72,7 @@ pub struct AiRest {
     pub watch_radius_km: f64,
 }
 
-impl Default for AiRest {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            below_percent: 60.0,
-            until_percent: 85.0,
-            watch_radius_km: 60.0,
-        }
-    }
-}
+crate::bundled_rules!(AiRest, "ai/grid.json", at "/postures/rest", default);
 
 /// CV3-6: an AI army weaker than an enemy army marching on its lands lies
 /// in wait in cover by the enemy's foreseeable route.
@@ -128,20 +105,7 @@ pub struct AiAmbush {
     pub occupied_lands: bool,
 }
 
-impl Default for AiAmbush {
-    fn default() -> Self {
-        Self {
-            weight_permille: 0,
-            weight_per_aggression: 0.0,
-            max_power_ratio: 0.9,
-            min_power_ratio: 0.35,
-            route_zoc_share: 0.75,
-            route_turns: 1.0,
-            watch_radius_km: 80.0,
-            occupied_lands: false,
-        }
-    }
-}
+crate::bundled_rules!(AiAmbush, "ai/grid.json", at "/postures/ambush", default);
 
 /// CV3-6: forced march to relieve a besieged place or join a siege out of
 /// normal reach but within reach with the bonus.
@@ -161,16 +125,7 @@ pub struct AiForcedMarch {
     pub danger_ratio: f64,
 }
 
-impl Default for AiForcedMarch {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            reach_margin: 0.9,
-            danger_radius_km: 12.0,
-            danger_ratio: 1.0,
-        }
-    }
-}
+crate::bundled_rules!(AiForcedMarch, "ai/grid.json", at "/postures/forced_march", default);
 
 /// CV3-6: entrenched camp of an idle army outnumbered on a threatened
 /// border, outside any place.
@@ -184,14 +139,7 @@ pub struct AiEntrenched {
     pub inferiority_ratio: f64,
 }
 
-impl Default for AiEntrenched {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            inferiority_ratio: 1.0,
-        }
-    }
-}
+crate::bundled_rules!(AiEntrenched, "ai/grid.json", at "/postures/entrenched", default);
 
 /// CV3-6: an AI army without urgent business walks to a map encounter it
 /// can reach this turn.
@@ -209,15 +157,7 @@ pub struct AiEncounters {
     pub detour_at_war: bool,
 }
 
-impl Default for AiEncounters {
-    fn default() -> Self {
-        Self {
-            detour_permille: 0,
-            sight_km: 30.0,
-            detour_at_war: false,
-        }
-    }
-}
+crate::bundled_rules!(AiEncounters, "ai/grid.json", at "/encounters", default);
 
 fn default_trespass_route_factor() -> f64 {
     1.0

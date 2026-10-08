@@ -9,10 +9,6 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-/// The rules file as bundled at build time: the fallback when
-/// `data/rules/river_crossings.json` is absent (test fixtures).
-const BUNDLED: &str = include_str!("../../../../../data/rules/river_crossings.json");
-
 /// Contents of `data/rules/river_crossings.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -34,11 +30,7 @@ pub struct RiverCrossingRules {
     pub defender_ranged_factor: CrossingFactors,
 }
 
-impl Default for RiverCrossingRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED).expect("bundled data/rules/river_crossings.json is valid")
-    }
-}
+crate::bundled_rules!(RiverCrossingRules, "rules/river_crossings.json", default);
 
 fn default_min_width_px() -> f64 {
     0.2

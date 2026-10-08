@@ -29,16 +29,7 @@ impl TaxPerHead {
     }
 }
 
-impl Default for TaxPerHead {
-    fn default() -> Self {
-        TaxPerHead {
-            peasants: 0.02,
-            burghers: 0.08,
-            clergy: 0.01,
-            nobility: 0.03,
-        }
-    }
-}
+crate::bundled_rules!(TaxPerHead, "rules/economy.json", at "/tax_per_head", default);
 
 /// RS-B: one tax bracket (spec § 1.4).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -59,24 +50,7 @@ pub struct TaxBrackets {
     pub high: TaxBracket,
 }
 
-impl Default for TaxBrackets {
-    fn default() -> Self {
-        TaxBrackets {
-            low: TaxBracket {
-                multiplier: 0.7,
-                burden: 0.2,
-            },
-            normal: TaxBracket {
-                multiplier: 1.0,
-                burden: 0.35,
-            },
-            high: TaxBracket {
-                multiplier: 1.4,
-                burden: 0.5,
-            },
-        }
-    }
-}
+crate::bundled_rules!(TaxBrackets, "rules/economy.json", at "/tax_rates", default);
 
 /// Contents of `data/rules/economy.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -258,15 +232,7 @@ pub struct AiDemolition {
     pub max_per_turn: usize,
 }
 
-impl Default for AiDemolition {
-    fn default() -> Self {
-        AiDemolition {
-            deficit_seasons: 4,
-            max_upkeep_percent: 40,
-            max_per_turn: 1,
-        }
-    }
-}
+crate::bundled_rules!(AiDemolition, "rules/economy.json", at "/ai_demolition", default);
 
 /// A6-L3 (ADR 0183): ransoms are capped and a ruler is not taken on a
 /// plain defeat.
@@ -280,14 +246,7 @@ pub struct RansomRules {
     pub sovereign_capture_only_if_routed: bool,
 }
 
-impl Default for RansomRules {
-    fn default() -> Self {
-        RansomRules {
-            income_cap_percent: 100,
-            sovereign_capture_only_if_routed: true,
-        }
-    }
-}
+crate::bundled_rules!(RansomRules, "rules/economy.json", at "/ransom", default);
 
 fn default_administration_base() -> f64 {
     0.08
@@ -332,69 +291,7 @@ impl EconomyRules {
     }
 }
 
-impl Default for EconomyRules {
-    /// Fallback when `data/rules/economy.json` is absent; kept equal to that
-    /// file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        EconomyRules {
-            event_treasury_reference_income: 4000,
-            event_treasury_min_scale: 0.03,
-            administration_base: default_administration_base(),
-            administration_per_province: default_administration_per_province(),
-            administration_max: default_administration_max(),
-            opulence_seasons: default_opulence_seasons(),
-            opulence_percent: default_opulence_percent(),
-            research_reserve_turns: default_research_reserve_turns(),
-            research_queue_max: default_research_queue_max(),
-            domain_income: default_domain_income(),
-            bankruptcy_morale_penalty: default_bankruptcy_morale_penalty(),
-            supply_devastation_loss_percent: default_supply_devastation_loss_percent(),
-            supply_devastation_recovery_cut_percent:
-                default_supply_devastation_recovery_cut_percent(),
-            resource_import_multiplier: default_resource_import_multiplier(),
-            construction_queue_size: default_construction_queue_size(),
-            supply_loss: default_supply_loss(),
-            supply_loss_winter: default_supply_loss_winter(),
-            supply_recovery: default_supply_recovery(),
-            starvation_loss_percent: default_starvation_loss_percent(),
-            devastation_decay: default_devastation_decay(),
-            tax_efficiency: default_tax_efficiency(),
-            tax_per_head: TaxPerHead::default(),
-            tax_rates: TaxBrackets::default(),
-            production_tax_share: default_production_tax_share(),
-            upkeep_months_per_season: default_upkeep_months_per_season(),
-            garrison_upkeep_percent: default_garrison_upkeep_percent(),
-            garrison_relief_percent_per_point: default_garrison_relief_percent_per_point(),
-            garrison_relief_max_percent: default_garrison_relief_max_percent(),
-            garrison_reinforce_percent_per_point: default_garrison_reinforce_percent_per_point(),
-            garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
-            demolition_refund_percent: default_demolition_refund_percent(),
-            ai_demolition: AiDemolition::default(),
-            ransom: RansomRules::default(),
-            terrain_supply: [
-                (
-                    Terrain::Steppe,
-                    TerrainSupply {
-                        recovery_percent: 70.0,
-                        loss_percent: 125.0,
-                        summer_loss: 0,
-                    },
-                ),
-                (
-                    Terrain::Desert,
-                    TerrainSupply {
-                        recovery_percent: 35.0,
-                        loss_percent: 175.0,
-                        summer_loss: 15,
-                    },
-                ),
-            ]
-            .into_iter()
-            .collect(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(EconomyRules, "rules/economy.json", default);
 
 fn default_demolition_refund_percent() -> u32 {
     10

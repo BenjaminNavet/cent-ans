@@ -17,8 +17,6 @@
 //! [`ReplayRules::keyframe_seconds`]; a jump back restarts from the nearest
 //! earlier copy, a jump forward simulates ahead.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::command::Command;
@@ -49,17 +47,9 @@ pub struct ReplayRules {
     pub max_keyframes: usize,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_replay.json");
+data_model::bundled_rules!(ReplayRules, "rules/battle_replay.json");
 
 impl ReplayRules {
-    /// `data/rules/battle_replay.json` as compiled into the crate.
-    pub fn bundled() -> &'static ReplayRules {
-        static RULES: OnceLock<ReplayRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_replay.json is valid")
-        })
-    }
-
     fn period_ticks(seconds: f64) -> u64 {
         ((seconds / DT).round() as u64).max(1)
     }

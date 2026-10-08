@@ -83,12 +83,11 @@ fn rules(max_age_turns: u32, max_records: u32) -> BattleHistoryRules {
 
 #[test]
 fn rules_are_read_from_data_and_match_their_default() {
-    let mut from_file = game_data().battle_history_rules.clone();
+    let from_file = game_data().battle_history_rules.clone();
     assert!(
         from_file.description.is_some(),
         "battle_history.json not read"
     );
-    from_file.description = None;
     assert_eq!(from_file, BattleHistoryRules::default());
     assert!(from_file.max_age_turns > 0 && from_file.max_records > 0);
 }

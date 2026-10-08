@@ -19,8 +19,6 @@
 //!
 //! Siege battles keep their own end (the square held, the garrison beaten).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Campaign morale after a refused battle.
@@ -62,17 +60,7 @@ pub struct DecisionRules {
     pub refused_morale: RefusedMorale,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_decision.json");
-
-impl DecisionRules {
-    /// `data/rules/battle_decision.json` as compiled into the crate.
-    pub fn bundled() -> &'static DecisionRules {
-        static RULES: OnceLock<DecisionRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_decision.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(DecisionRules, "rules/battle_decision.json");
 
 /// How a battle ended (result screen, campaign chronicle).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]

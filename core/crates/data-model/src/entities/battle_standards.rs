@@ -53,27 +53,4 @@ pub struct BattleStandardRules {
     pub description: Option<String>,
 }
 
-impl Default for BattleStandardRules {
-    /// Fallback when `data/rules/battle_standards.json` is absent; kept equal
-    /// to that file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        BattleStandardRules {
-            two_bearers_from_soldiers: 120,
-            heavy_losses_below: 0.5,
-            fall_chance_per_loss_percent: 0.015,
-            rout_drop_chance: 0.35,
-            raise_seconds: 5.0,
-            capture_radius_m: 15.0,
-            fall_morale_shock: 6.0,
-            fallen_morale_per_second: 0.5,
-            fallen_melee_factor: 0.85,
-            enemy_morale_bonus: 4.0,
-            enemy_bonus_radius_m: 60.0,
-            capture_morale_shock: 5.0,
-            captor_morale_bonus: 8.0,
-            general_factor: 2.0,
-            lost_morale_cap: 10.0,
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(BattleStandardRules, "rules/battle_standards.json", default);

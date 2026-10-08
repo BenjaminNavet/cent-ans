@@ -7,7 +7,7 @@
 
 use std::collections::BTreeMap;
 use std::path::Path;
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{Arc, RwLock};
 
 use serde::{Deserialize, Serialize};
 
@@ -219,9 +219,7 @@ pub struct BurnChoice {
     pub distance_m: f64,
 }
 
-/// The rules file, embedded at compile time: the default of the tests and
-/// the fallback until the game data is loaded (RS-F, ADR 0099).
-const BUNDLED: &str = include_str!("../../../../data/rules/siege_fire.json");
+data_model::bundled_rules!(FireRules, "rules/siege_fire.json");
 
 /// Path of the rules file under the data folder.
 pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
@@ -231,14 +229,6 @@ pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
 static INSTALLED: RwLock<Option<Arc<FireRules>>> = RwLock::new(None);
 
 impl FireRules {
-    /// `data/rules/siege_fire.json` as compiled into the crate.
-    pub fn bundled() -> &'static FireRules {
-        static RULES: OnceLock<FireRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/siege_fire.json is valid")
-        })
-    }
-
     /// Parses the contents of a rules file.
     pub fn from_json(text: &str) -> Result<FireRules, String> {
         serde_json::from_str(text).map_err(|e| format!("{FIRE_RULES_PATH}: {e}"))
