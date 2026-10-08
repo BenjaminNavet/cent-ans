@@ -746,7 +746,7 @@ func phase_siege() -> void:
 	await dismiss_dialogs()
 
 
-## Naval (NV1) : une escadre intercepte la traversée (mise en scène `debug_stage_naval`).
+## Naval : une escadre intercepte la traversée (mise en scène `debug_stage_naval`).
 func phase_naval() -> void:
 	if not map.sim.has_method("debug_stage_naval"):
 		log_q("naval: staging unavailable")
@@ -770,52 +770,9 @@ func phase_naval() -> void:
 		log_q("naval: no pre-battle dialog")
 		return
 	await wait(60)
-	if not dialog.fight_button.visible:
-		# Bataille navale 3D retirée (PLAYABLE_3D = false) : résolution automatique, comme un joueur.
-		await click(dialog.auto_button)
-		await wait(30)
-		log_q("naval: auto-resolved, dialog visible %s" % dialog.visible)
-		await dismiss_dialogs()
-		return
-	var t := Time.get_ticks_msec()
-	await click(dialog.fight_button)
-	if dialog.visible:
-		log_q("naval: first click on Combattre ignored, clicking again")
-		await wait(30)
-		await click(dialog.fight_button)
-	var scene: Node = null
-	while scene == null and Time.get_ticks_msec() - t < 60000:
-		await wait(1)
-		for child in root.get_children():
-			if child is NavalScene:
-				scene = child
-	if scene == null:
-		log_q("naval: scene did not open")
-		return
-	await wait(120)
-	log_q("naval scene loaded in %d ms" % (Time.get_ticks_msec() - t))
-	await shot("naval-start")
-	await fps_probe("naval-start")
-	await key(KEY_3)
-	var t_fight := Time.get_ticks_msec()
-	var next_shot := 15000
-	while not scene.get("_finished_shown") and Time.get_ticks_msec() - t_fight < 300000:
-		await wait(10)
-		if Time.get_ticks_msec() - t_fight > next_shot:
-			await shot("naval-%ds" % (next_shot / 1000))
-			next_shot += 30000
-	log_q("naval: finished %s after %d s" % [scene.get("_finished_shown"), (Time.get_ticks_msec() - t_fight) / 1000])
+	await click(dialog.auto_button)
 	await wait(30)
-	await shot("naval-result")
-	var back := find_button(scene, "Retour")
-	if back == null:
-		back = find_button(scene, "Quitter")
-	if back != null:
-		await click(back)
-	else:
-		await key(KEY_ESCAPE)
-	await wait(90)
-	await shot("after-naval")
+	log_q("naval: auto-resolved, dialog visible %s" % dialog.visible)
 	await dismiss_dialogs()
 
 

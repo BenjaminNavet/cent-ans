@@ -1,14 +1,12 @@
 class_name NavalCampaign
 extends Node
 
-## Batailles navales depuis la carte de campagne (lot NV1) : quand une escadre ennemie
+## Batailles navales depuis la carte de campagne : quand une escadre ennemie
 ## intercepte une traversée (ordre « Embarquer », cœur `sim-campaign::naval`), l'écran
-## d'avant-bataille navale s'ouvre avec « Combattre » (scène `naval_battle.tscn`),
-## « Résolution automatique » ou « Retraite » ; le résultat est appliqué par le cœur
-## (`resolve_naval_battle`, `auto_resolve_naval_battle`, `withdraw_naval_battle`).
+## d'avant-bataille navale s'ouvre avec « Résolution automatique » ou « Retraite » ; le
+## résultat est appliqué par le cœur (`auto_resolve_naval_battle`, `withdraw_naval_battle`).
 ## Un nœud enfant de la carte ; `campaign_map.gd` l'appelle en tête de `_offer_pending_battles`.
 
-const NAVAL_SCENE := "res://scenes/naval/naval_battle.tscn"
 
 var map: Node = null
 var dialog: NavalPreBattleDialog = null
@@ -40,7 +38,6 @@ func _offer() -> bool:
 		dialog = NavalPreBattleDialog.new()
 		dialog.name = "NavalPreBattleDialog"
 		(map.get("ui") as Node).add_child(dialog)
-		dialog.fight_requested.connect(_on_fight)
 		dialog.auto_requested.connect(_on_auto)
 		dialog.withdraw_requested.connect(_on_withdraw)
 	dialog.show_naval(sim, pending[0])
@@ -78,27 +75,6 @@ func _on_withdraw(index: int) -> void:
 		_report(result.get("events", []), "")
 	else:
 		_toast(str(result.get("error", "?")))
-	_after()
-
-
-func _on_fight(index: int, seed: int) -> void:
-	var card := BattleLoadingCard.open(get_tree(), "naval")  # AR1
-	await card.drawn
-	var scene: Node = load(NAVAL_SCENE).instantiate()
-	scene.call("configure", map.get("sim"), index, seed)
-	scene.connect("returned", _on_returned.bind(scene))
-	map.call("_set_campaign_active", false)
-	get_tree().root.add_child(scene)
-	card.close()
-
-
-func _on_returned(result: Dictionary, scene: Node) -> void:
-	scene.queue_free()
-	map.call("_set_campaign_active", true)
-	if bool(result.get("ok", false)):
-		_report(result.get("events", []), " (bataille navale)")
-	else:
-		_toast("Résultat de bataille navale refusé : %s" % result.get("error", "?"))
 	_after()
 
 
