@@ -251,19 +251,13 @@ impl BattleSim {
         unit.climbing = Some(piece);
         unit.climb_progress = 0.0;
         unit.state = UnitState::Climbing;
-        let text = if tower {
-            format!(
-                "Les {} s'élancent de la tour de siège sur le rempart.",
-                self.unit_label(i)
-            )
-        } else {
-            format!(
-                "Les {} dressent leurs échelles contre la muraille.",
-                self.unit_label(i)
-            )
-        };
-        let side = self.units[i].side;
-        self.log(text, Some(side));
+        self.log_unit(i, |label| {
+            if tower {
+                format!("Les {label} s'élancent de la tour de siège sur le rempart.")
+            } else {
+                format!("Les {label} dressent leurs échelles contre la muraille.")
+            }
+        });
         if !tower {
             let unit = self.units[i].id;
             self.push_fx(crate::siege_fx::SiegeFxKind::LaddersRaised { unit, piece });

@@ -408,6 +408,11 @@ pub struct Area {
 }
 
 impl Area {
+    /// Rules of this kind of area.
+    pub fn effect(&self) -> &'static AreaEffect {
+        DecorRules::bundled().effects.of(self.kind)
+    }
+
     pub fn footprint(&self) -> Footprint {
         Footprint::new(self.x, self.z, self.length, self.width, self.yaw)
     }
@@ -737,7 +742,7 @@ impl Battlefield {
 
     /// Places one building as given (hand placement: no check). A zero
     /// size takes the usual size of the kind. Its index.
-    pub fn place_building(
+    pub(crate) fn place_building(
         &mut self,
         kind: HouseKind,
         x: f64,
@@ -766,17 +771,17 @@ impl Battlefield {
     }
 
     /// Places a post mill at (x, z), on a mound when `mound`.
-    pub fn place_windmill(&mut self, x: f64, z: f64, yaw: f64, mound: bool) {
+    pub(crate) fn place_windmill(&mut self, x: f64, z: f64, yaw: f64, mound: bool) {
         self.with_layout(0, |l| l.windmill(Some((x, z, yaw)), Some(mound)));
     }
 
     /// Places a water mill whose front (wheel) faces `(-sin yaw, cos yaw)`.
-    pub fn place_watermill(&mut self, x: f64, z: f64, yaw: f64) {
+    pub(crate) fn place_watermill(&mut self, x: f64, z: f64, yaw: f64) {
         self.with_layout(0, |l| l.watermill(Some((x, z, yaw))));
     }
 
     /// Places a parish church in its walled churchyard.
-    pub fn place_church(&mut self, x: f64, z: f64, yaw: f64) {
+    pub(crate) fn place_church(&mut self, x: f64, z: f64, yaw: f64) {
         self.with_layout(0, |l| l.church(x, z, yaw));
     }
 
@@ -789,7 +794,7 @@ impl Battlefield {
     /// (0: the usual count), laid round the roads, the water and what is
     /// already there; a street hamlet follows the road nearest (x, z).
     /// `false` when nothing fits.
-    pub fn place_hamlet(
+    pub(crate) fn place_hamlet(
         &mut self,
         layout: HamletLayout,
         x: f64,
@@ -839,7 +844,7 @@ impl Battlefield {
     }
 
     /// Places a prop (haystack, cart, tent…) at its usual size.
-    pub fn place_prop(&mut self, kind: DecorPropKind, x: f64, z: f64, yaw: f64) {
+    pub(crate) fn place_prop(&mut self, kind: DecorPropKind, x: f64, z: f64, yaw: f64) {
         let s = &DecorRules::bundled().placement.prop_size_m;
         let size = match kind {
             DecorPropKind::Haystack => s.haystack,
@@ -870,7 +875,7 @@ impl Battlefield {
 
     /// Places the camp of `side` centred on (x, z) (front towards
     /// `(-sin yaw, cos yaw)`, the enemy), replacing its current camp.
-    pub fn place_camp(&mut self, side: SideId, x: f64, z: f64, yaw: f64, seed: u64) -> bool {
+    pub(crate) fn place_camp(&mut self, side: SideId, x: f64, z: f64, yaw: f64, seed: u64) -> bool {
         self.decor.camps.retain(|c| c.side != side);
         self.with_layout(seed, |l| l.camp(side, Some((x, z, yaw))))
     }
@@ -968,8 +973,7 @@ impl Battlefield {
 
     /// Effect of the decor at (x, z), if any.
     pub fn decor_effect_at(&self, x: f64, z: f64) -> Option<&'static AreaEffect> {
-        self.decor_area_at(x, z)
-            .map(|a| DecorRules::bundled().effects.of(a.kind))
+        self.decor_area_at(x, z).map(|a| a.effect())
     }
 
     /// Speed multiplier of the decor at (x, z); `wet`: rain or soaked
@@ -999,7 +1003,7 @@ impl Battlefield {
     /// (« dans le hameau », « dans les vignes »…).
     pub fn decor_breaks_charge(&self, x: f64, z: f64) -> Option<&'static str> {
         let area = self.decor_area_at(x, z)?;
-        if !DecorRules::bundled().effects.of(area.kind).breaks_charge {
+        if !area.effect().breaks_charge {
             return None;
         }
         Some(match area.kind {
