@@ -267,10 +267,11 @@ impl BattleSim {
             } else {
                 "flèches"
             };
-            let text = format!("Les {} sont à court de {missiles}.", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| {
+                format!("Les {label} sont à court de {missiles}.")
+            });
             let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+            let side = self.units[i].side;
             self.alert(
                 crate::alerts::AlertKind::AmmoOut,
                 x,

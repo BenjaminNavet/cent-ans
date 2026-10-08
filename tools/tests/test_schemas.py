@@ -43,6 +43,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
         "battle_maps/crecy.json",
         "battle_maps/poitiers.json",
     ),
+    "battle_morale_rules.schema.json": ("rules/battle_morale.json",),
     "battle_opening_rules.schema.json": ("rules/battle_opening.json",),
     "battle_order.schema.json": ("battle_orders/*.json",),
     "battle_outcome_rules.schema.json": ("rules/battle_outcome.json",),

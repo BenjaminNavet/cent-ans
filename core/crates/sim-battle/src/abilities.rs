@@ -464,6 +464,7 @@ impl BattleSim {
     /// (morale recovered at the banner, fatigue of the close ranks, no run).
     pub(crate) fn tick_abilities(&mut self) {
         let now = self.elapsed();
+        let melee_rate = self.pace().melee_fatigue_per_s;
         for i in 0..self.units().len() {
             let Some(active) = self.units()[i].ability_state.active.clone() else {
                 continue;
@@ -509,8 +510,9 @@ impl BattleSim {
                 unit.morale = (unit.morale + effects.morale_recovery * DT).min(unit.morale_cap);
             }
             if effects.melee_fatigue_factor != 1.0 && unit.state == UnitState::Melee {
-                // Melee fatigue is 0.3 a second (`resolve_morale_and_fatigue`).
-                unit.fatigue = (unit.fatigue + 0.3 * (effects.melee_fatigue_factor - 1.0) * DT)
+                // Extra melee fatigue on top of `MoraleRules::next_fatigue`.
+                unit.fatigue = (unit.fatigue
+                    + melee_rate * (effects.melee_fatigue_factor - 1.0) * DT)
                     .clamp(0.0, 100.0);
             }
         }

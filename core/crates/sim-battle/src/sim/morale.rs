@@ -1,6 +1,7 @@
 //! Morale, fatigue, routs and end-of-battle checks.
 
 use super::*;
+use crate::morale::{MoraleContext, MoraleRules};
 
 impl BattleSim {
     pub(super) fn resolve_morale_and_fatigue(&mut self, contacts: &[Vec<usize>]) {
@@ -29,17 +30,8 @@ impl BattleSim {
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
-        let Pace {
-            loss_morale_factor,
-            flank_morale_per_s,
-            rear_morale_per_s,
-            rout_morale,
-            rally_morale,
-            melee_fatigue_per_s,
-            contagion_factor,
-            melee_resolve_per_s,
-            ..
-        } = *self.pace();
+        let pace = *self.pace();
+        let morale_rules = MoraleRules::bundled();
         // T4 (ADR 0108): the garrison's last stand on the square.
         let stand = &crate::capture::CaptureRules::bundled().last_stand;
         let last_stand: Vec<bool> = self
@@ -52,40 +44,9 @@ impl BattleSim {
                 continue;
             }
             let unit = &mut self.units[i];
-            let mut morale = unit.morale;
-            let (stand_loss, stand_contagion) = if last_stand[i] {
-                (stand.loss_morale_factor, stand.contagion_factor)
-            } else {
-                (1.0, 1.0)
-            };
-            // Behind battlements the garrison takes its losses more calmly.
-            let cover = if unit.ram || unit.siege_tower() {
-                0.3
-            } else if unit.on_wall {
-                0.7
-            } else {
-                1.0
-            };
-            morale -= unit.tick_losses / f64::from(unit.max_soldiers)
-                * loss_morale_factor
-                * cover
-                * stand_loss
-                * unit.morale_loss_factor();
-            if unit.flanked & 1 != 0 {
-                morale -= flank_morale_per_s * DT;
-            }
-            if unit.flanked & 2 != 0 {
-                morale -= rear_morale_per_s * DT;
-            }
-            if unit.fatigue > EXHAUSTED_FATIGUE {
-                morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
-            }
-            if unit.state == UnitState::Melee && unit.hp < f64::from(unit.max_soldiers) * 0.5 {
-                morale -= 0.3 * DT;
-            }
             // EP10: routing friends weigh by where they are (fully beside or
             // in front, little once behind and running away); in a siege
-            // every one within reach counts fully (unchanged).
+            // every one within reach counts fully.
             let contagion = &self.rout.contagion;
             let forward = {
                 let (rx, rz) = Self::rear_of(unit.side);
@@ -112,69 +73,26 @@ impl BattleSim {
                     nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -=
-                contagion.morale_rate(routing_weight) * DT * stand_contagion * contagion_factor;
-            let mut aura = 0.0;
-            if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
-                if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
-                    aura = (0.1 + command * 0.05) * DT;
-                }
-            }
-            let engaged = !contacts[i].is_empty();
-            if unit.state == UnitState::Routing {
-                if nearest_enemy > RALLY_SAFE_DISTANCE {
-                    morale += 0.8 * DT + aura;
-                }
-            } else if !engaged && nearest_enemy > 100.0 {
-                if morale < unit.morale_cap {
-                    morale = (morale + 0.3 * DT + aura).min(unit.morale_cap);
-                }
-            } else if unit.on_wall && unit.side == SideId::Defender {
-                // Behind their walls the burghers stand firm.
-                if morale < unit.morale_cap {
-                    morale = (morale + 0.2 * DT + aura).min(unit.morale_cap);
-                }
-            } else if last_stand[i] {
-                // T4: the last stand, even in the melee.
-                if morale < unit.morale_cap {
-                    morale = (morale + stand.morale_per_s * DT + aura).min(unit.morale_cap);
-                }
-            } else if morale < unit.morale_cap + 10.0 {
-                morale += aura;
-            }
-            if unit.state == UnitState::Melee
-                && unit.flanked == 0
-                && unit.hp >= f64::from(unit.max_soldiers) * 0.5
-                && morale < unit.morale_cap
-            {
-                morale = (morale + melee_resolve_per_s * DT).min(unit.morale_cap);
-            }
-            unit.morale = morale.clamp(0.0, 100.0);
-
-            // Fatigue.
-            let mut rate: f64 = match unit.state {
-                UnitState::Idle | UnitState::Rallied => -0.8,
-                UnitState::Shooting => 0.02,
-                UnitState::Marching if unit.running || unit.withdrawing => 0.25,
-                UnitState::Marching => 0.05,
-                UnitState::Charging => 0.4,
-                UnitState::Melee | UnitState::Climbing => melee_fatigue_per_s,
-                UnitState::Routing => 0.3,
+            let aura = general_pos[unit.side.index()].map_or(0.0, |(gx, gz, command)| {
+                morale_rules.aura(command, (gx - unit.x).powi(2) + (gz - unit.z).powi(2))
+            });
+            let context = MoraleContext {
+                pace: &pace,
+                contagion,
+                last_stand: last_stand[i].then_some(stand),
+                routing_weight,
+                nearest_enemy,
+                aura,
+                engaged: !contacts[i].is_empty(),
             };
-            if rate > 0.0 {
-                // CB2: a run under the run mode (1 in the bundled data).
-                rate *= unit.run_mode_fatigue();
-                if self.weather == Weather::Snow {
-                    rate *= 1.3;
-                }
-                if unit.mounted {
-                    rate *= 0.8;
-                }
-            }
-            unit.fatigue = (unit.fatigue + rate * DT).clamp(0.0, 100.0);
+            unit.morale = morale_rules.next_morale(unit, &context);
+            unit.fatigue = morale_rules.next_fatigue(unit, &pace, self.weather);
 
             // Rout and rally.
-            if unit.state != UnitState::Routing && unit.morale < rout_morale && !unit.withdrawing {
+            if unit.state != UnitState::Routing
+                && unit.morale < pace.rout_morale
+                && !unit.withdrawing
+            {
                 unit.state = UnitState::Routing;
                 unit.target = None;
                 unit.destination = None;
@@ -188,22 +106,17 @@ impl BattleSim {
                     new_events.push((i, "abandonnent le rempart !"));
                 }
                 new_events.push((i, "sont en déroute !"));
-            } else if unit.state == UnitState::Routing
-                && unit.morale > rally_morale
-                && nearest_enemy > RALLY_SAFE_DISTANCE
-                && unit.hp >= f64::from(unit.max_soldiers) * 0.2
-            {
+            } else if morale_rules.can_rally(unit, &pace, nearest_enemy) {
                 unit.state = UnitState::Rallied;
-                unit.rally_timer = RALLY_PAUSE;
+                unit.rally_timer = morale_rules.rally.pause_s;
                 new_events.push((i, "se rallient."));
             }
         }
         for (i, what) in new_events {
-            let text = format!("Les {} {what}", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| format!("Les {label} {what}"));
             if what == "sont en déroute !" {
                 let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+                let side = self.units[i].side;
                 self.alert(crate::alerts::AlertKind::Rout, x, z, Some(side), Some(id));
             }
         }

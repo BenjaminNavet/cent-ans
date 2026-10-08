@@ -55,7 +55,6 @@ use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
-use crate::pace::Pace;
 use crate::queue::QueuedOrder;
 use crate::rng::BattleRng;
 use crate::scale::BattleScale;
@@ -76,23 +75,13 @@ const MAX_STEPS_PER_CALL: u32 = 600;
 
 /// Gap below which two enemy regiments are in contact (metres).
 pub const CONTACT_GAP: f64 = 2.5;
-/// Radius of the general's morale aura (metres).
-pub const GENERAL_AURA: f64 = 150.0;
-/// Enemies closer than this prevent rallying (metres).
-pub const RALLY_SAFE_DISTANCE: f64 = 150.0;
 /// Duration of the charge impact bonus (seconds).
 pub const CHARGE_IMPACT: f64 = 4.0;
 /// Seconds an archer unit must stand still before its stakes are planted.
 pub const STAKES_DELAY: f64 = 15.0;
-/// Seconds a rallied regiment stays in the `Rallied` state.
-pub const RALLY_PAUSE: f64 = 5.0;
 /// Speed ceiling of knights dismounted for a siege assault when the order
 /// catalogue has no `dismount` order.
 const ASSAULT_DISMOUNT_SPEED: u8 = 35;
-
-/// Fatigue above which a unit loses morale over time (SV4: named so the
-/// battle markers show "exhausted" from the same threshold).
-pub const EXHAUSTED_FATIGUE: f64 = 60.0;
 
 /// Why a setup cannot start a battle.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -608,6 +597,14 @@ impl BattleSim {
             text_fr,
             side,
         });
+    }
+
+    /// Logs a line about regiment `index`, to its own side; `text` receives
+    /// the regiment's label ("Archers anglais").
+    pub(crate) fn log_unit(&mut self, index: usize, text: impl FnOnce(&str) -> String) {
+        let side = self.units[index].side;
+        let line = text(&self.unit_label(index));
+        self.log(line, Some(side));
     }
 
     pub(crate) fn unit_label(&self, index: usize) -> String {

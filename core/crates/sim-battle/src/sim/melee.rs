@@ -63,9 +63,7 @@ impl BattleSim {
             unit.charge_timer = 0.0;
             unit.loss_cause = LossCause::Stakes;
             unit.loss_by = Some(defender_id);
-            let text = format!("Les {} s'empalent sur les pieux !", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| format!("Les {label} s'empalent sur les pieux !"));
             self.record_impact(ImpactEvent {
                 kind: ImpactKind::Stakes,
                 unhorsed: loss.round() as u32,
@@ -408,9 +406,7 @@ impl BattleSim {
         if self.units[i].is_general && self.general_alive[self.units[i].side.index()] {
             self.kill_general(self.units[i].side);
         }
-        let text = format!("Les {} sont anéantis.", self.unit_label(i));
-        let side = self.units[i].side;
-        self.log(text, Some(side));
+        self.log_unit(i, |label| format!("Les {label} sont anéantis."));
     }
 
     pub(super) fn kill_general(&mut self, side: SideId) {

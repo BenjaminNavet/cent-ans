@@ -1,0 +1,27 @@
+{
+  "description": "Moral et fatigue des régiments en bataille (lot BA3) : valeurs reprises telles quelles du code. Les cadences par mode de combat (pertes, flanc, déroute, mêlée) sont dans battle_pace.json.",
+  "exhausted_fatigue": 60.0,
+  "cover": { "siege_machine": 0.3, "on_wall": 0.7 },
+  "exhaustion_morale_per_s": 0.02,
+  "outnumbered_melee": { "hp_fraction": 0.5, "morale_per_s": 0.3 },
+  "general_aura": { "radius_m": 150.0, "base_per_s": 0.1, "per_command_per_s": 0.05 },
+  "recovery": {
+    "routing_per_s": 0.8,
+    "calm_per_s": 0.3,
+    "calm_enemy_distance_m": 100.0,
+    "behind_walls_per_s": 0.2,
+    "aura_cap_margin": 10.0,
+    "resolve_hp_fraction": 0.5
+  },
+  "rally": { "safe_distance_m": 150.0, "pause_s": 5.0, "min_hp_fraction": 0.2 },
+  "fatigue_per_s": {
+    "rest": -0.8,
+    "shooting": 0.02,
+    "run": 0.25,
+    "march": 0.05,
+    "charge": 0.4,
+    "rout": 0.3,
+    "snow_factor": 1.3,
+    "mounted_factor": 0.8
+  }
+}

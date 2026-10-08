@@ -114,9 +114,7 @@ impl BattleSim {
                         self.standard_taken(i, captor, &rules);
                     } else if self.units[i].able() {
                         self.units[i].standard = StandardState::Carried;
-                        let text = format!("L'étendard des {} est relevé.", self.unit_label(i));
-                        let side = self.units[i].side;
-                        self.log(text, Some(side));
+                        self.log_unit(i, |label| format!("L'étendard des {label} est relevé."));
                     } else if !self.units[i].present() {
                         self.units[i].standard = StandardState::Lost { x, z };
                     } else {

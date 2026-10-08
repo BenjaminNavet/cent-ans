@@ -68,6 +68,7 @@ pub mod impact;
 pub mod missile_arc;
 pub mod missile_morale;
 pub mod modes;
+pub mod morale;
 pub mod naval;
 pub mod opening;
 pub mod orders;
@@ -124,6 +125,7 @@ pub use hydro::{
 };
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use modes::{UnitMode, UnitModeRules, UnitStatus};
+pub use morale::MoraleRules;
 pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
