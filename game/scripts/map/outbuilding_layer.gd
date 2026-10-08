@@ -114,6 +114,7 @@ var _grid: Dictionary = {}  # Vector2i → PackedInt32Array (indices de colonies
 ## sommet par sommet : jusqu'à 80 ms par maquette sinon, à sa première apparition).
 var _warm_task := -1
 var _warmed: Dictionary = {}
+var _warmed_resources: Dictionary = {}
 
 
 ## Dossier `data/` du jeu : celui de l'autoload `MapPaths`, sinon le dossier par défaut (scripts
@@ -280,14 +281,22 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	stats = {"instances": 0, "nodes": 0, "settlements": 0, "build_ms": 0.0}
 	if enabled and _warm_task < 0:
-		_warm_task = WorkerThreadPool.add_task(_warm_meshes.bind(manifest.duplicate(true)), false, "outbuilding meshes")
+		_warm_task = WorkerThreadPool.add_task(_warm_meshes.bind(manifest.duplicate(true), data_dir().path_join("provinces")), false, "outbuilding meshes")
 
 
 ## Fil de travail : maillages `out:` de toutes les maquettes du manifeste, dans `_warmed` (lu par
 ## le fil principal seulement après la fin de la tâche).
-func _warm_meshes(models: Dictionary) -> void:
+## Ressources des provinces aussi (`data/provinces/*.json`, statiques) : `get_province_city`
+## coûtait 20 à 40 ms par province à sa première apparition (économie complète de la ville).
+func _warm_meshes(models: Dictionary, provinces_dir: String) -> void:
 	for model: String in models:
 		_warmed["out:" + model] = with_pieces(_load_glb_mesh(MODEL_DIR + model + ".glb"), (models[model] as Dictionary).get("pieces", []))
+	for file in DirAccess.get_files_at(provinces_dir):
+		if file.get_extension() != "json":
+			continue
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(provinces_dir.path_join(file)))
+		if parsed is Dictionary and (parsed as Dictionary).has("resources"):
+			_warmed_resources[str((parsed as Dictionary).get("id", file.get_basename()))] = Array((parsed as Dictionary)["resources"])
 
 
 func _finish_warm() -> void:
@@ -299,6 +308,10 @@ func _finish_warm() -> void:
 		if not _meshes.has(key):
 			_meshes[key] = _warmed[key]
 	_warmed = {}
+	for province: String in _warmed_resources:
+		if not _resources.has(province):
+			_resources[province] = _warmed_resources[province]
+	_warmed_resources = {}
 
 
 func _exit_tree() -> void:
@@ -452,6 +465,10 @@ func _state_of(i: int) -> Dictionary:
 func _resources_of(province: String) -> Array:
 	if _resources.has(province):
 		return _resources[province]
+	if _warm_task >= 0:
+		_finish_warm()
+		if _resources.has(province):
+			return _resources[province]
 	var out: Array = []
 	if _sim != null and _sim.has_method("get_province_city"):
 		out = Array((_sim.call("get_province_city", province) as Dictionary).get("resources", []))
