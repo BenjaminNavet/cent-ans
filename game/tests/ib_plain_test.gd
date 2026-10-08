@@ -5,7 +5,7 @@ extends SceneTree
 ##   (titre + corps), pas un simple texte natif ;
 ## - un contrôle natif sans script dédié reçoit `plain_tooltip_host.gd` (`_make_custom_tooltip`) ;
 ## - aucun `tooltip_text = "…"` littéral ne reste dans `game/scripts` hors la liste d'exceptions
-##   ci-dessous (textes purement dynamiques sans titre possible, documentés dans `docs/wip/ib2.md`) ;
+##   ci-dessous (textes purement dynamiques sans titre possible, documentés dans `docs/archive/chantiers.md`) ;
 ## - chaque clé `ib:plain:<key>` référencée depuis le GDScript existe dans `data/ui/tooltips.json`
 ##   (bloc `plain`) et a un titre.
 ## Usage : godot --headless --path game --script res://tests/ib_plain_test.gd
@@ -13,7 +13,7 @@ extends SceneTree
 const ENABLED := true
 
 ## Fichiers où un `tooltip_text = "…"` littéral peut légitimement rester (§ 2.4 : textes purement
-## dynamiques sans titre possible, ou migration IB2 restante — voir docs/wip/ib2.md « reste »).
+## dynamiques sans titre possible, ou migration IB2 restante — voir docs/archive/chantiers.md « reste »).
 ## Chemins relatifs à `res://`. Se réduit lot par lot au fil de la migration.
 const LITERAL_EXCEPTIONS: Array[String] = []
 

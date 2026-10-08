@@ -1,6 +1,6 @@
 # OMR — restes de la carte Oural–Méditerranée (orchestration)
 
-Suite de `docs/wip/om.md` (section « Reste »), spec `docs/superpowers/specs/2026-09-28-oural-mediterranee-design.md`.
+Suite de `docs/archive/chantiers.md` (section « Reste »), spec `docs/superpowers/specs/2026-09-28-oural-mediterranee-design.md`.
 Mandat du joueur (2026-09-29) : traiter les quatre groupes (équilibre Est, perf, relecture
 historienne, contenu Est), lots enchaînés sans redemander.
 
@@ -41,7 +41,7 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   corrigées, Mazovie, anachronismes de noms, Volok/Gorokhovets/Kamianiets rattachées. Géo partielle
   (provinces, settlements, navgrid ; 8a1fbb9a5). Test cv3_ai_stances recalé (graine 2).
   À l'intégration : portrait Hızır Bey (enveloppe OM) ; conflits possibles avec R3 (données factions D).
-  Incertitudes restantes : docs/wip/omr-r4.md.
+  Incertitudes restantes : docs/archive/chantiers.md.
 - R5 fini (feat/omr-r5, fb9e75774) : 10 unités de l'Est (mamelouks, archers des steppes, akıncı, yaya,
   cavalerie serbe, pronoïaires, droujina, cavalerie lituanienne, frères teutoniques, almogavres),
   doctrines IA, unit_looks.json (livrées/robes), emblèmes locaux, codex. Pas de règle core. Conflit
@@ -67,7 +67,7 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
 - Bourgogne éliminée avant 1400 sur 1/10 graines (incite 12) ; ≈ 100 factions disparues en 1453 ;
   fac_brandenburg sans province au tour 0 (prov_brandenburg à fac_empire depuis FE0).
 - Brabançons 12 %, archers écossais 84 % (hors bande 20-80, préexistant).
-- Incertitudes historiques : docs/wip/omr-r4.md ; colonies > 40 km : Illueca, Vestervig, Isaccea,
+- Incertitudes historiques : docs/archive/chantiers.md ; colonies > 40 km : Illueca, Vestervig, Isaccea,
   Lemsal, Kronach, Nyköping.
 - Pas de musique steppe/nordique ; 2 pistes islamiques bloquées par la limite de débit Commons ;
   écoute humaine des nouvelles pistes à faire.

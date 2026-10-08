@@ -1,7 +1,7 @@
 # EP2 — Horizon des batailles
 
 Branche : `worktree-agent-a5e4208be5556aa24`. ADR : `docs/decisions/0032-horizon-de-bataille.md`.
-Plan d'ensemble : `docs/wip/epic.md`.
+Plan d'ensemble : `docs/archive/chantiers.md`.
 
 ## Conception retenue
 - **Relief réel** : `cent-ans geo horizon` cuit, par province (centroïde, ou point à 3-5 km de la

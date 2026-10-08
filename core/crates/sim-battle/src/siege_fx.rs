@@ -1,4 +1,4 @@
-//! Siege assault events for the renderer (SG1, `docs/wip/sg1-sieges.md`).
+//! Siege assault events for the renderer (SG1, `docs/archive/chantiers.md`).
 //!
 //! The battle journal ([`crate::BattleEvent`]) speaks French to the player;
 //! these events speak to the 3D view: which engine shot which wall piece and

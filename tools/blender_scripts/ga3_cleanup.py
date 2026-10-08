@@ -10,7 +10,7 @@ Run headless from the repository root:
         [--island-min 0.01] [--stats PATH.json]
 
 Writes ``OUT_DIR/NAME_lod0.glb``, ``NAME_lod1.glb`` and ``NAME_lod2.glb`` (plan
-``docs/wip/ga.md`` section GA3, probe S1 in ``docs/wip/ga3.md``):
+``docs/wip/ga.md`` section GA3, probe S1 in ``docs/archive/chantiers.md``):
 
 1. Import, join, apply transforms; merge duplicate vertices, drop small loose islands
    (floating TRELLIS debris) and recompute outward normals.

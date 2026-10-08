@@ -151,4 +151,4 @@ Une case est vue si elle est à moins de `vision_army_km` (30) d'une armée alli
 | M4 | Pont + UI : bulle, clic au sol, chemin, animation | M2 |
 | M5 | Vision par rayon, équilibrage sur 50 tours, `manuel.md`, codex | M3, M4 |
 
-Suivi : `docs/wip/mouvement-libre.md`. Coût cloud prévu : 0 $.
+Suivi : `docs/archive/chantiers.md`. Coût cloud prévu : 0 $.

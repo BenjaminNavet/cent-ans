@@ -45,6 +45,6 @@ Défauts observés (mesures dans `mocap_trial/manifest.json`, planche Blender) :
 Verdict provisoire (à confirmer par la session principale sur `docs/audit/captures/nt/nt12_*.png`) :
 la mocap CMU ne bat **pas nettement** nos clips — plus vivante en mouvement de jambes et de
 buste, mais geste inadapté (deux mains), sans vrais impacts. Un pack dédié épée et bouclier
-(payant, voir `docs/wip/nt.md`) ou T.C. Sword (à télécharger à la main) reste le vrai test ; le
+(payant, voir `docs/archive/chantiers.md`) ou T.C. Sword (à télécharger à la main) reste le vrai test ; le
 pipeline de reciblage est prêt pour du FBX à condition d'ajouter un lecteur FBX (import Blender
 natif) à la place du lecteur ASF/AMC.

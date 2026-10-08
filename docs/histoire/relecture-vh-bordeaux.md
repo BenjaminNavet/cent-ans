@@ -1,7 +1,7 @@
 # Relecture historique — Bordeaux vers 1340 (ville 1:1, VH8 / RS-G) — 28 septembre 2026
 
 Relecture indépendante de `data/landmarks_v2/bordeaux.json` (ADR 0078, `docs/landmarks-v2.md` ;
-suivi d'auteur `docs/wip/rs-g-bordeaux.md`) : faits marqués `probable` ou `hypothetical` d'abord,
+suivi d'auteur `docs/archive/chantiers.md`) : faits marqués `probable` ou `hypothetical` d'abord,
 puis dates clés (1337-1453) et gabarits. Source principale relue **en texte intégral** : L. Drouyn,
 *Bordeaux vers 1450* (1874, domaine public, texte OCR d'archive.org), que l'auteur n'avait utilisé
 que par extraits. Les sources sous droits (Wikipédia, Bordeaux Métropole, Boutoulle) servent aux

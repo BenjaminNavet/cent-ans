@@ -341,7 +341,7 @@ const MAX_BANKRUPT_SEASONS: u32 = 2;
 const MAX_BANKRUPT_SEASONS_TOTAL: u32 = 4;
 
 /// Spec § 7: 50 turns of AI against AI on 8 seeds stay in the band measured
-/// after C7a (`docs/wip/c7a-settlements-balance.md`, `docs/wip/m3-tour-ia.md`).
+/// after C7a (`docs/archive/chantiers.md`, `docs/archive/chantiers.md`).
 /// About a minute in release; run with
 /// `cargo test --release -p ai --test m3_grid_ai -- --ignored`.
 #[test]

@@ -1,6 +1,6 @@
 # PB3e — pas de bataille dans un fil, piétinement en Rust
 
-Branche `worktree-agent-aacdb076cb5ce2218` (worktree d'agent). Plan : `docs/wip/pb3-performance.md`.
+Branche `worktree-agent-aacdb076cb5ce2218` (worktree d'agent). Plan : `docs/archive/chantiers.md`.
 ADR : `docs/decisions/0090-pas-de-bataille-dans-un-fil.md`.
 Objectif : supprimer les à-coups (pas de sim toutes les ~6 images) et le CPU restant en
 bataille, résultat identique.

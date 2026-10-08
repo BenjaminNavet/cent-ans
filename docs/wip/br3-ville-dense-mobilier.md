@@ -1,7 +1,7 @@
 # BR3 — ville de siège dense et mobilier de rue solide
 
 ADR 0047 (`docs/decisions/0047-ville-de-siege-dense-et-mobilier-solide.md`). Branche d'agent
-`worktree-agent-ad517ea3d995810c7`. Suite de BR1/BR2 (`docs/wip/br1-batiments.md`).
+`worktree-agent-ad517ea3d995810c7`. Suite de BR1/BR2 (`docs/archive/chantiers.md`).
 
 ## Plan
 

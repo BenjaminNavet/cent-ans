@@ -1,5 +1,5 @@
 //! Lot C7a: 50 turns of AI against AI on several seeds, measured on the
-//! settlements (`docs/wip/c7a-settlements-balance.md`).
+//! settlements (`docs/archive/chantiers.md`).
 //!
 //! Per seed: treasury of the great crowns (every 10 turns, minimum, end),
 //! bankruptcies, settlements and provinces held by the majors (start / end),

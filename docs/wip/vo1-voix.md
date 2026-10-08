@@ -1,8 +1,8 @@
 # VO1 — voix (répliques d'unités, discours du général, conseiller)
 
 Agent VO1 (session 7). Branche `worktree-agent-ae1c20a86b355d930`.
-Sources : `docs/wip/au1-audio.md` (bus Voix, `BattleAudio.play_at`, `duck_music`),
-`docs/wip/bv3-finitions-bataille.md` (discours), `docs/wip/ub1-interface-bataille.md`.
+Sources : `docs/archive/chantiers.md` (bus Voix, `BattleAudio.play_at`, `duck_music`),
+`docs/wip/bv3-finitions-bataille.md` (discours), `docs/archive/chantiers.md`.
 Plafond de dépense du lot : **3 $** (estimation avant tout appel, consignée dans `docs/budget.md`).
 
 ## État

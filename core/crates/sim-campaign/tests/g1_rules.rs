@@ -1,6 +1,6 @@
 //! G1 « dernières règles inertes » integration tests: recruitment slots,
 //! piety, levy armour/ranged bonuses, `transfer_province`, player ransoms and
-//! allies joining siege assaults. See `docs/wip/g1-rules.md`.
+//! allies joining siege assaults. See `docs/archive/chantiers.md`.
 
 use std::path::PathBuf;
 

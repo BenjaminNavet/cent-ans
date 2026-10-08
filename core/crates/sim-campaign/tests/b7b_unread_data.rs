@@ -1,7 +1,7 @@
 //! Lot B7b: data shown to the player that the simulation used to ignore —
 //! the `construction_speed` of traits and skills (Bâtisseur, Urbaniste) and
 //! the units' `recruit_time_turns`. The edicts' piety is tested in
-//! `edicts.rs`. See `docs/wip/b7b-unread-data.md`.
+//! `edicts.rs`. See `docs/archive/chantiers.md`.
 
 use std::path::PathBuf;
 

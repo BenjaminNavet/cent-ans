@@ -1642,7 +1642,7 @@ section : `var t := Time.get_ticks_usec()` … `t = PerfProbe.lap("nom", t)` (co
 
 **Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; 4 passes alternées
 main c4064c29 / SZ6, médianes) : parcours complet p99 91 → 38 ms, pire image 182 → 52 ms, images
-> 50 ms 231 → 3, p50 20 → 19 ms ; descente p99 93 → 38 ms, scripts p99 87 → 29 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
+> 50 ms 231 → 3, p50 20 → 19 ms ; descente p99 93 → 38 ms, scripts p99 87 → 29 ms. Détail et limites : `docs/archive/chantiers.md`.
 
 ## Villes emblématiques à l'échelle 1:1 (lots VH0/VH4, ADR 0078)
 

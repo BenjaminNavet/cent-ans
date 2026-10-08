@@ -1,6 +1,6 @@
 # H3 « La Table » et H4 « Médecine » — règles, données et API du pont
 
-Conception : `docs/design/2026-09-23-histoire-et-savoir.md` § 2-3. Suivi : `docs/wip/h3-h4-table-medecine.md`.
+Conception : `docs/design/2026-09-23-histoire-et-savoir.md` § 2-3. Suivi : `docs/archive/chantiers.md`.
 Règles : `core/crates/sim-campaign/src/table.rs` et `medicine.rs`. Pont :
 `core/crates/godot-bridge/src/campaign_sim_table.rs` (nouveau) et `campaign_sim_tech.rs`.
 

@@ -150,7 +150,7 @@ vec3 body_dir(vec3 n, float twist, float lean) {
 }
 
 // Pose d'arc (lot B4) : torsion, inclinaison, bras gauche, bras droit (cf. `tools/` : angles
-// trouvés par optimisation des positions des mains, `docs/wip/b4-effets-animations.md`).
+// trouvés par optimisation des positions des mains, `docs/archive/chantiers.md`).
 struct Pose {
 	float twist;
 	float lean;

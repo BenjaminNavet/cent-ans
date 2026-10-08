@@ -1,5 +1,5 @@
 //! Precomputed paths of the trade routes (review point 18c,
-//! `docs/wip/revue-code.md`).
+//! `docs/archive/chantiers.md`).
 //!
 //! A trade route's path only depends on the static movement graph and on
 //! its two hubs, so it is computed once, when [`GameData::build_movement_graph`]

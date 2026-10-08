@@ -1,5 +1,5 @@
 //! SG1: siege assault events for the renderer, the ram's blows, boiling oil
-//! and the garrison falling back to the square (`docs/wip/sg1-sieges.md`).
+//! and the garrison falling back to the square (`docs/archive/chantiers.md`).
 
 mod common;
 

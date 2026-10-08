@@ -13,4 +13,4 @@ intermédiaires (images, poses brutes, suivi du disque) restent hors dépôt
 
 Outils : MediaPipe Pose Landmarker « heavy » (Apache 2.0, modèle Apache 2.0), OpenCV
 (Apache 2.0), NumPy (BSD-3), Blender (GPL, outil seulement). Aucune dépendance SMPL, SMPL-X,
-AMASS ni HumanML3D. Détails : `docs/wip/nt13-video-mocap.md`, `docs/wip/nt14-video-set2.md`.
+AMASS ni HumanML3D. Détails : `docs/archive/chantiers.md`, `docs/archive/chantiers.md`.

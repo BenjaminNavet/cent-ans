@@ -1,12 +1,12 @@
 # Réalisme — suite des lots (plan approuvé par le joueur le 30/09)
 
-Chantiers de référence : `docs/wip/sr.md` (SR, fusionné), `docs/wip/cr.md` (cavaliers),
+Chantiers de référence : `docs/wip/sr.md` (SR, fusionné), `docs/archive/chantiers.md` (cavaliers),
 `docs/wip/fc.md` (FPS et décor campagne). Mandat : autonomie, semi-réaliste, NB2 ≈ 20 $ au
 total (3,52 $ dépensés). La conversion image → 3D des soldats (fal.ai) se fait dans une AUTRE
 session : ne pas la lancer ici ; fusionner vite pour la débloquer.
 
 ## Consigne de reprise
-> Lis ce fichier, `docs/wip/cr.md`, `docs/wip/fc.md`, `git log --oneline -15`, puis continue au
+> Lis ce fichier, `docs/archive/chantiers.md`, `docs/wip/fc.md`, `git log --oneline -15`, puis continue au
 > premier lot non coché. Brutes hors dépôt : `~/dev/cent-ans-raw/`.
 
 ## Lots

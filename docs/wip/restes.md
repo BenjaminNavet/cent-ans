@@ -8,7 +8,7 @@ FXAA, retrait de `--coarse-figures` (point 17, choix du joueur).
 ## Décisions du joueur en attente (30/09, chantier NT)
 
 Mocap payante, clé fal.ai (GA3), chantier guerre civile / prétendants : détail et pistes d'achat dans
-`docs/wip/nt.md` § « Pour le joueur ».
+`docs/archive/chantiers.md` § « Pour le joueur ».
 
 ## Reprendre
 
@@ -36,7 +36,7 @@ Suites possibles (état au 28/09 soir) :
   bannière réduite sous 760 px, re-layout au changement de minimum ; C2 de `p2d_ui_test` bloquant.
 - ~~Icône dédiée « Raser »~~ — FAIT 28/09 : `act_raze` (`raze.png`, 0,04 $).
 - Écrans de siège en bataille (`battle_siege.gd`, points de capture) après TW2 T4.
-- Pics carte restants ~8 ms (`settle/labels`, `settle/declutter`), `docs/wip/rs-k2-perf.md`.
+- Pics carte restants ~8 ms (`settle/labels`, `settle/declutter`), `docs/archive/chantiers.md`.
 - FE F8 : ost d'Empire sans distance, banqueroutes ×20 ; remonter le plancher c7a (ADR 0113) si l'ost est restreint.
 
 ## Reprise (28/09 ~15 h)
@@ -74,7 +74,7 @@ Suites possibles (état au 28/09 soir) :
 
 - **B Ordre public** — `feat/rs-b-order` (worktree `.claude/worktrees/agent-a90b4dd66bed1d599`, cible privée
   `core/target-rs-b` à supprimer après fusion), dernier commit ae5d94f1. ADR **0100** écrit (seuil de révolte 75,
-  2 saisons). Wip : `docs/wip/rs-b-order.md` (chiffres avant/après). À vérifier avant fusion : sonde release
+  2 saisons). Wip : `docs/archive/chantiers.md` (chiffres avant/après). À vérifier avant fusion : sonde release
   `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (trésor France 38 297 < 40 000 avant B), critères eq6 (guerre
   55-75 % à chaque difficulté), test cv3 passé de la graine 7 à 4 (la 7 n'embusque plus). Puis intégration complète.
 - **P2c Codex** — `feat/p2c-codex` (worktree `.claude/worktrees/agent-a90707317064d725a`), dernier commit 6f9a2e32
@@ -125,3 +125,105 @@ G : recuisson à lancer par le joueur (`cent-ans geo relief-all --check`, `geo r
 - G Villes/fleuves : VH8 (Bordeaux, Avignon, Calais, Bruges), rives et couloirs de fleuve.
 - I PO phase 2 (P2a-f) : après E et F (fichiers d'UI communs).
 - Perf scripts restants (TownLayer, étendards, audio) ; suites EP (seules, marges minces).
+
+## Restes issus des chantiers archivés (ménage SC, 2026-10-08)
+
+Détail dans `docs/archive/chantiers.md` ; texte complet via `git log -- docs/wip/<x>.md`.
+
+### f5a-battle-sim
+- 5. [ ] Renforts échelonnés au-delà de 20 régiments : **non fait**.
+
+### c1-settlements-skeleton
+- Smoke Godot : échec **préexistant** (reproduit sur 64dec0b sans ce lot) :
+- La garnison de la cité est vide dans `SettlementState` (la garnison de province reste la vraie
+- Règle « au moins un port par province côtière » (§ 3.1) non vérifiée par le test Python (non
+
+### c4-edits-chaines
+- Données de colonies d'avant C4 : plusieurs paliers d'une même chaîne restent
+- Pas de condition de taille de colonie au-delà de `settlement_kinds` et des
+- L'arbre de construction reste une liste triée (rang affiché, prérequis en
+
+### p2a-court
+- **Choix pris pour ce lot (mécanique, sans trancher la question) :** `CourtPanel` et
+- **À trancher plus tard** (orchestrateur / PO6b) : soit modifier `map_ui.gd` pour réclamer
+
+### dp1-diplomatie
+- Graines 4 (48 %) et 3 (52 %) du siècle sous la cible : cause non analysée (`dp1_probe` affiche
+- L'accès militaire ne joue que sur le ravitaillement (pas de règle d'intrusion en paix).
+- Accord commercial autonome : à relier à C5 (`integration/tw`) quand il sera sur main.
+
+### tw2-t3
+- La surprime n'apparaît pas dans le budget de l'interface (`economy.rs`, lot RS) : panneau et journal.
+- Pas d'illustration propre pour les deux nouvelles unités (icônes recadrées).
+- Pistes : compagnies allemandes en Italie, gallowglass, licenciement volontaire d'une compagnie.
+
+### ub1-interface-bataille
+- Prévision d'équilibre = estimation simple (mêmes pièces que l'auto-résolution actuelle, sans
+- Retraite avant bataille : seul l'assaillant peut refuser (−10 moral) ; un assaut remis garde le
+- Butin : aucune règle de butin en bataille rangée ; l'encart montre les rançons à percevoir.
+
+### zg3-palier3
+- Le plancher `MIN_LAND_M` reste une valeur plate (0,5 m) là où le rehaussement creuse fort
+- Le seuil `LAND_GAP_ALERT_M` (5 m) déclenche sur la quasi-totalité des zones : attendu vu leur
+
+### zg7a-perf-finitions
+- Le relief E1-E4 (ZG1) plaque les fonds de vallée proches de plateaux à 0,5 m (rehaussement de
+- Tamise fine : niveau d'eau -7,8 m à Londres (PAVA mêlé à la bathymétrie de l'estuaire).
+
+### epic
+- Équilibrage : avec R4, le défenseur gagne à forces égales à l'échelle épique (graines 3, 5, 11) ;
+- `--standard-shot=foot` cadre parfois dans une pile de pont sur un site EP3 : décaler la caméra.
+- `battle_skinned_poses.py` : défauts ruff (docstrings) antérieurs, venus d'EP5.
+
+### pb3c-bataille-cpu
+- `get_units` et les tampons renvoyés entre deux pas sont partagés : lecture seule côté GDScript.
+- `_find_braced` laissé tel quel (déjà O(n) hors charge de cavalerie).
+- Pistes suivantes : `soldiers.update` (~3,3 ms, boucles GDScript), étendards 1,7 ms, audio
+
+### vh6-londres
+- Tracé du mur entre Newgate et Aldersgate et position d'Aldersgate ; point de départ à la Tour.
+- Position et axe d'Old St Paul's (−4° grille, centre 15 m à l'est de la cathédrale de Wren),
+- London Bridge : extrémités (à l'est de St Magnus), hauteur du tablier (5,5 m au-dessus de
+
+### vh7-orleans
+- **Butte** : le relief réel monte de 20-25 m entre la Loire (87 m) et la cathédrale (115 m, RGE
+- **Loire sans nappe d'eau** au palier site (SZ2b en cours) : le pont franchit un pré ; les quais et
+- Entre le mur de Loire (47,8983 N) et l'eau fine, une bande de 50-80 m (quais du XVIIIe s. gagnés
+
+### fe6-ui
+- Bretagne, Flandre, Navarre (départs recommandés de la spec) ne sont pas jouables dans les données
+
+### fk3-folk
+- Trajets rectilignes en boucle (pas de suivi de polyligne en shader) : une charrette parcourt un
+- Clés lues dans `map_scenes.json` (premier niveau, `folk` ou `densities`) : `pool_cap`,
+
+### fk5-incidents
+- Pictogramme unique (`hud_chronicle_decision`) pour tous les incidents : un pictogramme par
+- L'avis d'expiration repère l'entrée de chronique par la marque « (délai écoulé) » du cœur
+- `--no-folk` coupe aussi les sceaux (repli sur la fenêtre de début de tour).
+
+### nt1-sieges
+- Bourg moins dense que la cité (≈ 40 îlots) : à juger visuellement, réglable dans `places.borough`.
+- Donjon rendu en tour ronde agrandie (pas de maquette de donjon carré dans le kit).
+- Équilibre d'un assaut de château (petite enceinte, garnison serrée) à surveiller en partie pilote.
+
+### nt11
+- Escalier et palier hors de l'emprise de la simulation (rendu seul, ~3,4 m devant la façade).
+- Pas de capture faite (consigne) : escalier et terrasse à juger à l'œil (`nt1_siege_shot.gd`).
+- Dans le prologue, l'ennemi peut toujours se débander sous la charge et les flèches.
+
+### omr-r4
+- Kholmogory (1355), Kotelnitch, Vychni Volotchek (cité au XVe s.) : gardés comme localités
+- Sozopolis : bulgare ou byzantine en 1337 (laissée avec Anchialos, bulgare).
+- Mourom rattachée à Souzdal (principauté de Mourom autonome), Tchernigov à Briansk.
+
+### tf
+- Atlas `Building` plein : une nouvelle matière demandera 32 tranches.
+- Maquettes de colonies CV1 et monuments non réexportés (panneaux `Plaster`).
+- Toits du Midi : seules les variantes `southern` ont des tuiles canal ; longères, granges et
+
+### vn
+- 147 factions sans miniature d'encyclopédie (~12 $ en fal.ai) + bld_collegiate_church : non fait
+- Tours de siège énormes (rayon 5+fortif m, cœur `siege_layouts.rs`) : règle du cœur, session
+- `q6_ui_test` (SimFacade introuvable avec --script) et `fe_ui_test` échouent aussi sur main.
+

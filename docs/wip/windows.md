@@ -43,8 +43,8 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
 - main poussée sur origin jusqu'à 6e68ed1b (export construit depuis bc89fe91, même code).
 - `export/Cent Ans Windows.zip` (805 Mo, sans relief, se décompresse en `Cent Ans/`) prêt.
 - **Release GitHub non créée** (permission refusée à l'agent) : commande à lancer par le joueur,
-  notes dans `docs/wip/windows-release-notes.md` :
-  `gh release create preview-windows-2026-09-26 "export/Cent Ans Windows.zip" --target 6e68ed1b --prerelease --title "Cent Ans — préversion Windows (26/09/2026)" --notes-file docs/wip/windows-release-notes.md`
+  notes dans `docs/archive/chantiers.md` :
+  `gh release create preview-windows-2026-09-26 "export/Cent Ans Windows.zip" --target 6e68ed1b --prerelease --title "Cent Ans — préversion Windows (26/09/2026)" --notes-file docs/archive/chantiers.md`
 
 ## Vérification 2026-09-30
 - CI Windows run 36664599846 vert sur `main` d95f45b9 (≈ 575 commits après le portage) : DLL

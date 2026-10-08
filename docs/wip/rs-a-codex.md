@@ -10,7 +10,7 @@ Branche : `feat/rs-a-codex`, worktree agent. Lot de données : pas de build carg
 ## État
 - [x] 8 fiches écrites : cdx_menagier_de_paris, cdx_forme_of_cury, cdx_verjus, cdx_cervoise,
   cdx_tranchoir, cdx_uroscopie, cdx_saignee, cdx_hildegarde_de_bingen.
-- [x] `data/codex/_h10_links.md` supprimé (plus aucun id en attente) ; `docs/wip/h10-codex-table-medecine.md`
+- [x] `data/codex/_h10_links.md` supprimé (plus aucun id en attente) ; `docs/archive/chantiers.md`
   mis à jour (lots 7-8 cochés, chantier clos).
 - [x] `pytest tools/tests/test_codex.py tools/tests/test_codex_homonyms.py` : verts après l'écriture
   des 8 fiches.

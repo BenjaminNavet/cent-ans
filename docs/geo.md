@@ -629,7 +629,7 @@ par `geo pyramid`, restent identiques octet pour octet).
   au-dessus des zones (immeubles de la Cité de Londres : bosses de 25-50 m en E3-E4 sous un
   E5-E7 LiDAR plat). La terre boostée ne descend jamais
   sous `MIN_LAND_M` (0,5 m), comme `relief_shade.enforce_coast` pour E0-E4 (correctif ZG3b,
-  `docs/wip/zg3-palier3.md`) : sans ce plancher, une base régionale plus haute que la source
+  `docs/archive/chantiers.md`) : sans ce plancher, une base régionale plus haute que la source
   fine (collines à quelques km, ancienne fuite GLO-90 dans les petites emprises E6-E7) pouvait
   faire passer de la terre réelle sous le niveau de la mer. Depuis SZ2, ce plancher est celui de
   tous les étages (voir « Fonds de vallée non creusés »).

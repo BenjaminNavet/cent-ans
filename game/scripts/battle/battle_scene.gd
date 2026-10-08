@@ -346,7 +346,7 @@ func _ready() -> void:
 			push_error("BattleScene: cannot stage a demo battle")
 			# T8 : un banc d'essai qui ne peut pas se lancer doit échouer bruyamment (JSON +
 			# code de sortie ≠ 0) plutôt que laisser une fenêtre ouverte sans jamais quitter
-			# (l'une des causes des exécutions « sans résultat », cf. docs/wip/t2-perf.md).
+			# (l'une des causes des exécutions « sans résultat », cf. docs/archive/chantiers.md).
 			if _benchmark:
 				_bench_fail("cannot stage a demo battle")
 			return
@@ -1365,7 +1365,7 @@ func _poll_weather(delta: float) -> void:
 ## répétitions sont regroupés pour la médiane / p95 finales. Un budget de temps réel
 ## (`--bench-timeout=`, `_bench_wall_start_ms`) fait échouer proprement le banc (JSON + code de
 ## sortie ≠ 0) au lieu de bloquer indéfiniment si la simulation n'avance pas (120 régiments, cf.
-## `docs/wip/t2-perf.md`). V3 : temps GPU/CPU mesurés et banc A/B (`--bench-ab=`, `_bench_ab_step`)
+## `docs/archive/chantiers.md`). V3 : temps GPU/CPU mesurés et banc A/B (`--bench-ab=`, `_bench_ab_step`)
 ## sur un compteur dédié `_bench_measured` qui ne repart pas à zéro entre répétitions.
 func _run_benchmark_frame(delta: float) -> void:
 	if _bench_failed:
@@ -1610,7 +1610,7 @@ func _bench_ab_step(gpu_ms: float) -> void:
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris. Abandonne
 ## (T8 : `_bench_fail`) si le budget de temps réel du banc est dépassé pendant l'avance rapide,
 ## pour ne jamais bloquer indéfiniment (120 régiments en lib debug : jadis sans résultat après
-## 98-220 s, cf. `docs/wip/t2-perf.md`).
+## 98-220 s, cf. `docs/archive/chantiers.md`).
 func _fast_forward(seconds: float) -> void:
 	while float(battle.call("get_elapsed")) < seconds and not battle.call("is_finished"):
 		if _benchmark and _bench_timed_out():

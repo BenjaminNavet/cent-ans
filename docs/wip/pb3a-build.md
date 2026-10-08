@@ -1,6 +1,6 @@
 # PB3a — Profil de build Rust (Apple Silicon)
 
-Lot de PB3 (`docs/wip/pb3-performance.md`), vague 1. Worktree dédié
+Lot de PB3 (`docs/archive/chantiers.md`), vague 1. Worktree dédié
 `agent-ac2766f2955685575`. Symlinks non versionnés créés : `data/map/pyramid`,
 `tools/geo/raw` (absent du dépôt, non nécessaire à ce lot). `CARGO_TARGET_DIR`
 partagé : `/Users/jean_hubert/dev/game_project/core/target`.

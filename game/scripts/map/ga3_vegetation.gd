@@ -2,7 +2,7 @@ class_name Ga3Vegetation
 extends RefCounted
 
 ## Lot GA3-L2 : végétation réaliste de la carte de campagne (images générées, voir
-## `tools/blender_scripts/ga3_vegetation.py` et `docs/wip/ga3.md`). Purement visuel.
+## `tools/blender_scripts/ga3_vegetation.py` et `docs/archive/chantiers.md`). Purement visuel.
 ##
 ## - Imposteurs des chênes, hêtres et sapins : grille `IMPOSTOR_ALBEDO` / `IMPOSTOR_NORMAL`, même
 ##   format que l'atlas FC2 (3 lignes × 8 azimuts de 256², cadrage `ortho` / `foot` identique).

@@ -1,6 +1,6 @@
 //! UR1 « variété des unités » integration tests: regional, faction and
 //! period units (`available_from` / `available_until`). See
-//! `docs/wip/ur1-unites.md`.
+//! `docs/archive/chantiers.md`.
 
 use std::path::PathBuf;
 
