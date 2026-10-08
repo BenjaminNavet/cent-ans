@@ -174,7 +174,7 @@
     {"id": "trait_wrathful", "label": "Colérique", "group": "trait", "subject": "a clenched fist above a table with an overturned goblet", "targets": ["trait_wrathful"]},
     {"id": "rel_catholic", "label": "Catholicisme", "group": "religion", "subject": "a Latin cross with a small mitre and a pair of crossed keys at its foot", "targets": ["rel_catholic"]},
     {"id": "rel_catholic_rome", "label": "Obédience de Rome", "group": "religion", "subject": "a papal tiara above two crossed keys", "targets": ["rel_catholic_rome"]},
-    {"id": "rel_orthodox", "label": "Orthodoxie", "group": "religion", "subject": "an Orthodox cross with three bars, the lower one slanted, above a small onion dome", "targets": ["rel_orthodox"]},
+    {"id": "rel_orthodox", "label": "Orthodoxie", "group": "religion", "subject": "an Orthodox cross with three horizontal bars, the lowest bar slanted, standing upright on a small stepped base", "targets": ["rel_orthodox"]},
     {"id": "rel_islam", "label": "Islam", "group": "religion", "subject": "a crescent moon cradling a small eight-pointed star above a pointed arch", "targets": ["rel_islam"]},
     {"id": "rel_judaism", "label": "Judaïsme", "group": "religion", "subject": "a seven-branched menorah candelabrum", "targets": ["rel_judaism"]},
     {"id": "rel_lollard", "label": "Lollards", "group": "religion", "subject": "an open book with a bare plain cross, a quill lying across it", "targets": ["rel_lollard"]},
@@ -201,7 +201,7 @@
     {"id": "glyph_flag", "label": "Étendard", "group": "glyph", "subject": "a small pennant flag on a short staff", "targets": ["glyph_flag"]},
     {"id": "glyph_hammer", "label": "Marteau", "group": "glyph", "subject": "a mason hammer crossed with a trowel", "targets": ["glyph_hammer"]},
     {"id": "glyph_letter", "label": "Lettre scellée", "group": "glyph", "subject": "a folded letter sealed with a round wax seal", "targets": ["glyph_letter"]},
-    {"id": "glyph_hand", "label": "Main", "group": "glyph", "subject": "a single open hand with the index finger pointing upward, medieval manicule style", "targets": ["glyph_hand"]},
+    {"id": "glyph_hand", "label": "Main", "group": "glyph", "subject": "a single pointing hand with a cuff, index finger extended to the right, medieval manicule drawn in the margin of a manuscript, isolated on the plain background", "targets": ["glyph_hand"]},
     {"id": "glyph_ship", "label": "Nef", "group": "glyph", "subject": "a small single-masted medieval cog ship with a square sail", "targets": ["glyph_ship"]}
   ],
   "cursors": [
