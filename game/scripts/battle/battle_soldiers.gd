@@ -117,6 +117,9 @@ var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entr
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
+var _turn: Dictionary = {}  # AS3 : unit id -> variation d'orientation lissée (rad/s, > 0 = vers la gauche)
+var _facing_prev: Dictionary = {}  # AS3 : unit id -> orientation de l'image précédente
+var _gait_mem: Dictionary = {}  # AS3 : unit id -> mémoire d'allure (BattleCavalryGaits.pick)
 var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
 ## AN1b : camp vainqueur une fois la bataille finie ("" avant ; posé par la scène). Ses
 ## régiments jouent `victory` ; les autres gardent leur dernière pose (horloge figée).
@@ -406,6 +409,12 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 				v = minf(step / anim_dt, 30.0)
 			_speed[uid] = float(_speed.get(uid, v)) + (v - float(_speed.get(uid, v))) * smooth
 		_unit_pos[uid] = pos
+		if unit.has("facing"):
+			var facing := float(unit["facing"])
+			if anim_dt > 0.0 and _facing_prev.has(uid):
+				var rate := BattleCavalryGaits.turn_rate(float(_facing_prev[uid]), facing, anim_dt)
+				_turn[uid] = float(_turn.get(uid, rate)) + (rate - float(_turn.get(uid, rate))) * smooth
+			_facing_prev[uid] = facing
 		if str(unit.get("state", "")) == "melee":
 			_melee_time[uid] = float(_melee_time.get(uid, 0.0)) + anim_dt
 	_advance_lags(anim_dt)
@@ -609,7 +618,12 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var config: Dictionary = {}
 	if skinned:
 		var shown_state := _shown_state(unit, id, kind, state)
-		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), shown_state, bool(unit.get("running", false)))
+		var running := bool(unit.get("running", false))
+		if kind == "cavalry" and shown_state == "marching" and BattleCavalryGaits.enabled():
+			# AS3 : pas, trot, galop et virages d'après la vitesse et l'orientation du régiment.
+			shown_state = BattleCavalryGaits.pick(_gait_mem.get_or_add(id, {}), float(_speed.get(id, 0.0)), running, float(_turn.get(id, 0.0)))
+			running = false
+		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), shown_state, running)
 		if victor_side != "" and shown_state != "victory":
 			# AN1b : l'horloge des autres régiments reste figée après la fin (comme avant).
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt

@@ -701,10 +701,13 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 	if _configs.has(cache_key):
 		return _configs[cache_key]
 	var sets: Dictionary = STYLES.get(_style(kind, variant), STYLES["sword"])
+	var rig_entry := rig(kind, variant)
+	# AS3 : allure ou virage absent du style ou du rig (kit antérieur) -> allure de base.
+	while GAIT_FALLBACK.has(key) and (not sets.has(key) or _present(rig_entry, sets[key]["set"]).is_empty()):
+		key = GAIT_FALLBACK[key]
 	if not sets.has(key):
 		key = "idle"
 	var entry: Dictionary = sets[key]
-	var rig_entry := rig(kind, variant)
 	var names := _present(rig_entry, entry["set"])
 	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
 	if entry.has("fallback") and (names.is_empty() or str(names[0]) != str((entry["set"] as Array)[0])):
@@ -943,6 +946,10 @@ static func sever_table(kind: String, variant: int) -> Array[Vector4i]:
 		table[int(entry[0])] = Vector4i(lo, hi, extra, -1)
 	return table
 
+## AS3 : états de rendu de la cavalerie (cf. `BattleCavalryGaits`) et leur repli quand le style ou
+## le rig n'a pas le clip.
+const GAIT_FALLBACK := {"trotting": "marching", "turn_l": "marching", "turn_r": "marching", "trot_turn_l": "trotting", "trot_turn_r": "trotting"}
+
 ## AN1b : charge des lanciers en cycles de six foulées de galop (90 images, 3,75 s) : un cycle
 ## sur huit est un trébuchement (`c_stumble`, même galop avant et après) ; sans ce clip (kit
 ## grossier), le jeu se réduit à `c_charge` et le galop reste continu d'un cycle à l'autre.
@@ -1014,6 +1021,11 @@ const STYLES := {
 		"charging": CAVALRY_CHARGE,
 		"melee": {"set": ["c_thrust", "c_thrust", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"melee_pikes": {"set": ["c_rear", "c_thrust", "c_rear", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"trotting": {"set": ["c_trot"]},
+		"turn_l": {"set": ["c_turn_l"]},
+		"turn_r": {"set": ["c_turn_r"]},
+		"trot_turn_l": {"set": ["c_trot_turn_l"]},
+		"trot_turn_r": {"set": ["c_trot_turn_r"]},
 		"routing": {"set": ["c_gallop"]},
 		"victory": {"set": ["c_victory"]},
 	},
@@ -1025,6 +1037,11 @@ const STYLES := {
 		"shooting": {"set": ["c_bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["c_thrust", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"melee_pikes": {"set": ["c_rear", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"trotting": {"set": ["c_bow_trot"]},
+		"turn_l": {"set": ["c_bow_turn_l"]},
+		"turn_r": {"set": ["c_bow_turn_r"]},
+		"trot_turn_l": {"set": ["c_bow_trot_turn_l"]},
+		"trot_turn_r": {"set": ["c_bow_trot_turn_r"]},
 		"routing": {"set": ["c_gallop"]},
 		"victory": {"set": ["c_victory"]},
 	},
@@ -1061,6 +1078,11 @@ const STYLES := {
 		"shooting": {"set": ["c_javelin_throw"], "mode": M_VOLLEY, "release": 0.69},
 		"melee": {"set": ["c_thrust", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"melee_pikes": {"set": ["c_rear", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"trotting": {"set": ["c_javelin_trot"]},
+		"turn_l": {"set": ["c_javelin_turn_l"]},
+		"turn_r": {"set": ["c_javelin_turn_r"]},
+		"trot_turn_l": {"set": ["c_javelin_trot_turn_l"]},
+		"trot_turn_r": {"set": ["c_javelin_trot_turn_r"]},
 		"routing": {"set": ["c_gallop"]},
 		"victory": {"set": ["c_victory"]},
 	},

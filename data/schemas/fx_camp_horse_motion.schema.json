@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_camp_horse_motion.schema.json",
+  "title": "Mouvement des chevaux de camp, mesuré sur vidéos CC BY-SA (lot AS8c)",
+  "description": "Réglages du shader `camp_horse.gdshader`, mâchonnement du cheval de la campagne et mesures brutes, tirés de vidéos de Rama (CC BY-SA 2.0 fr). Fichier de données seul sous cette licence (ADR 0189). Mètres du modèle, radians, secondes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "licence",
+    "license_note",
+    "camp_horse",
+    "campaign_horse",
+    "horse_rest"
+  ],
+  "properties": {
+    "source": {
+      "type": "object",
+      "required": [
+        "videos",
+        "author",
+        "tool"
+      ],
+      "properties": {
+        "videos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "author": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "measured_keys": {
+          "type": "string"
+        },
+        "assumed_keys": {
+          "type": "string"
+        }
+      }
+    },
+    "licence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license_note": {
+      "type": "string"
+    },
+    "camp_horse": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "number"
+        }
+      }
+    },
+    "campaign_horse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chew_hz": {
+          "type": "number"
+        },
+        "chew_rad": {
+          "type": "number"
+        }
+      },
+      "description": "Mâchonnement du cheval de la campagne, fusionné dans `animal_motion.json` `campaign.models.horse`."
+    },
+    "horse_rest": {
+      "type": "object"
+    },
+    "clips": {
+      "type": "object"
+    }
+  }
+}

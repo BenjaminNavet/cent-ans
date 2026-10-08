@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_trebuchet_swing_curve.schema.json",
+  "title": "Courbe de bascule du trébuchet (lot AS8d)",
+  "description": "Courbe de progression du bras mesurée sur la vidéo d'un vrai trébuchet. Fichier de données seul, dérivé d'une œuvre CC BY-SA 3.0 : il porte la même licence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "licence",
+    "lut"
+  ],
+  "properties": {
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "licence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "measured_swing_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "measured_arc_deg": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "measured_vertical_phase": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "lut": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1.2
+      },
+      "description": "Part de l'arc (0 armé, 1 fin du dépassement) à phases régulières 0..1 du basculement ; interpolée linéairement."
+    }
+  }
+}

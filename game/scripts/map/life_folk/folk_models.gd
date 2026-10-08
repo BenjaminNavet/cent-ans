@@ -149,6 +149,9 @@ static func prop_mesh(role: String) -> ArrayMesh:
 		mesh = _mesh_from_scene(path)
 		if mesh != null:
 			_prop_sources[role] = path
+			# Lot AS1 : allure des bêtes et roues des attelages (mesures de `animal_motion.json`).
+			for s in mesh.get_surface_count():
+				AnimalMotion.apply_prop(mesh.surface_get_material(s) as ShaderMaterial, str(entry.get("model", role)))
 	if mesh == null:
 		mesh = _fallback_mesh(str(entry.get("fallback", "open_cart")))
 		_prop_sources[role] = "fallback:%s" % entry.get("fallback", "open_cart")

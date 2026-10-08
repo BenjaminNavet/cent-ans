@@ -10,6 +10,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Python (`tools/`) : `uv`, `uvx ruff check --fix`, `uvx ruff format`.
 - Godot : `godot --headless --path game --import` une fois après un clone, puis `godot --headless --path game --script res://tests/smoke.gd` doit passer.
 - Garde-fou headless (`game/scripts/debug/headless_watchdog.gd`) : un processus Godot headless s'arrête (code 124) au-delà de 20 000 erreurs, un script `res://tests/` au-delà de 45 min. Variables `CENT_ANS_MAX_ERRORS` / `CENT_ANS_TEST_TIMEOUT_S` (0 = sans limite) ; ne les lever que pour un outil long connu. Origine : un test bloqué a écrit 206 Go de journaux (03/10).
+- **Ne jamais voler le focus du joueur** : tout Godot lancé par un agent avec une fenêtre (bancs `--bench-map`, captures `*_shot.gd`, sondes) passe par `tools/godot_bg.sh <arguments godot>` (macOS `open -g` : fenêtre en arrière-plan, journal sur la sortie standard, pas de code de sortie). Jamais `godot --path game …` fenêtré en direct, jamais d'`osascript … frontmost`. Les tests `--headless` n'ouvrent pas de fenêtre. Seul `tools/launch.sh` (le joueur lance le jeu) prend le focus.
 - Toute dépense cloud est consignée dans `docs/budget.md` (plafond 50 $ v1).
 - Décisions d'architecture : un fichier ADR dans `docs/decisions/NNNN-titre.md`.
 - Pas de ligne Co-Authored-By dans les commits.
@@ -18,6 +19,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Build GDExtension : `core/build.sh` (build cargo + copie de la dylib/.so/.dll dans `game/bin/` si elle a changé)
 - Lancer le jeu : `tools/launch.sh` (recompile et réimporte ce qui a changé, ADR 0117) ou `godot --path game`
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
+- Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)
 - Commencer chaque tâche par le squelette (API publique, fichiers vides, tests désactivés) et le commiter avant d'implémenter.

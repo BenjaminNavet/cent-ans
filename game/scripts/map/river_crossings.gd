@@ -41,6 +41,9 @@ var _gates_hidden := false
 ## Lot ZG4b : ouvrages à remettre en forme après une bascule de mode (index dans `items`),
 ## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
 var _reshape_queue: Array[int] = []
+## FL3 : ouvrages à construire (tuile passée au niveau proche), étalés comme `_reshape_queue` : un
+## maillage de pont bâti sur le fil principal coûtait jusqu'à 20 ms dans l'image de la bascule.
+var _spawn_queue: Array[int] = []
 ## Lot ZG7a : maillages fins préparés dans un fil dès `set_fine_anchors` (clé du cache
 ## `BridgeMeshes` → tableaux) : la bascule n'a plus qu'à créer les `ArrayMesh` (≤ 1 ms par
 ## ouvrage au lieu de 5-16 ms de `SurfaceTool` sous charge).
@@ -306,10 +309,15 @@ func _on_chunk_surface_changed(index: int) -> void:
 	for i in _by_chunk.get(index, []):
 		var item: Dictionary = items[i]
 		if item["node"] == null:
-			if near:
-				_instantiate(item)
+			if near and not _spawn_queue.has(i):
+				_spawn_queue.append(i)
 		else:
 			_ground(item)
+	if not _spawn_queue.is_empty():
+		if FrameBudget.in_frame():
+			set_process(true)  # image suivante : pas cumulé avec les autres recalages de la bascule
+		else:
+			pump_reshape(true)
 
 
 # --- Lot ZG5b : ancrages fins -------------------------------------------------------------
@@ -404,6 +412,11 @@ func set_fine_mode(on: bool) -> void:
 ## Remet en forme les ouvrages en attente (voir `set_fine_mode`) ; `all` : tous (captures).
 func pump_reshape(all: bool = false) -> void:
 	var first := true
+	while not _spawn_queue.is_empty() and (all or first or FrameBudget.has_time()):
+		var spawn: Dictionary = items[_spawn_queue.pop_front()]
+		first = false
+		if spawn["node"] == null:
+			_instantiate(spawn)
 	while not _reshape_queue.is_empty() and (all or first or FrameBudget.has_time()):
 		var item: Dictionary = items[_reshape_queue.pop_back()]
 		first = false
@@ -413,7 +426,7 @@ func pump_reshape(all: bool = false) -> void:
 		var t0 := Time.get_ticks_usec()
 		_shape(item)
 		reshape_ms_max = maxf(reshape_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
-	set_process(not _reshape_queue.is_empty())
+	set_process(not _reshape_queue.is_empty() or not _spawn_queue.is_empty())
 
 
 func _process(_delta: float) -> void:
@@ -422,7 +435,7 @@ func _process(_delta: float) -> void:
 
 ## Nombre d'ouvrages en attente de remise en forme (tests, mesures).
 func pending_reshapes() -> int:
-	return _reshape_queue.size()
+	return _reshape_queue.size() + _spawn_queue.size()
 
 
 ## Ponts-portes et ponts de zone (tracé V4) cachés quand `FineGeoLayer` pose les siens.

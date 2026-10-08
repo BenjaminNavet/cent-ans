@@ -346,6 +346,12 @@ func add_impostor_tile(name_: String, transforms: Array, tints: Array, rows: Arr
 			cells[i] = CELL_WORLD / _bake_scale(IMPOSTOR_SPECIES[i])
 		impostor_material.set_shader_parameter("cell_m", cells)
 		impostor_material.set_shader_parameter("foot", FOOT)
+		# AS5 : balancement au vent (data/fx/map_fire_wind.json), fixe si éteint.
+		var sway := MapFireWind.section("battle_tree_impostor")
+		impostor_material.set_shader_parameter("sway", float(sway.get("sway", 0.0)))
+		impostor_material.set_shader_parameter("sway_frequency", float(sway.get("frequency", 1.15)))
+		impostor_material.set_shader_parameter("sway_second", float(sway.get("second_harmonic", 0.25)))
+		impostor_material.set_shader_parameter("flutter", float(sway.get("flutter", 0.0)))
 		impostor_material.set_shader_parameter("lod_near", IMPOSTOR_DISTANCE)
 		impostor_material.set_shader_parameter("lod_band", LOD_BAND)
 	var mm := MultiMesh.new()

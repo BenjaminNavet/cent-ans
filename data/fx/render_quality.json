@@ -1,6 +1,6 @@
 {
   "description": "Préréglages de qualité du rendu (Basse, Moyenne, Haute, Ultra ; `legacy` = référence des bancs) et choix de mise à l'échelle 3D du joueur. Lus par RenderQuality.",
-  "upscale": {"reference_pixels": 2073600, "min_scale": 0.5, "player_choices": {"off": {"mode": "off", "scale": 1.0}, "quality": {"mode": "metalfx_spatial", "scale": 0.75}, "performance": {"mode": "metalfx_spatial", "scale": 0.5}}},
+  "upscale": {"reference_pixels": 2073600, "min_scale": 0.4, "player_choices": {"off": {"mode": "off", "scale": 1.0}, "quality": {"mode": "metalfx_spatial", "scale": 0.75}, "performance": {"mode": "metalfx_spatial", "scale": 0.5}}},
   "presets": {
     "legacy": {
       "note": "Réglages d'avant la V3 (project.godot) : référence des mesures (`--bench-ab=`), hors menu.",

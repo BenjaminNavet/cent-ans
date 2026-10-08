@@ -1,0 +1,58 @@
+{
+  "description": "Lots AS1 puis AS8c : mouvement procédural en shader de sommets des bêtes de la carte vivante (boeufs, vaches, moutons, chevaux de trait) et des chevaux au piquet des camps de bataille. Longueurs en mètres du modèle, angles en radians. Les courbes de pas, la cadence de mâchonnement, la descente de la tête, le cahot et le roulis des charrettes sont mesurés sur des vidéos libres (data/fx/animal_motion_measured.json, tools/video_mocap/as8c_measure.py, SOURCE.md et CREDITS.md pour les licences).",
+  "enabled": true,
+  "source": {
+    "measured_file": "fx/animal_motion_measured.json",
+    "camp_horse_file": "fx/camp_horse_motion.json",
+    "tool": "tools/video_mocap/as8c_measure.py",
+    "videos": [
+      "Passage d'un troupeau de montbéliardes à Boissia (Jura) en juillet 2018.webm (CC0)",
+      "Sheeps near Elbe river.webm (CC0)",
+      "Two Horse Drawn Covered Wagons.webm (CC0)"
+    ],
+    "license_note": "Toutes les vidéos sources de ce fichier sont CC0. Les valeurs tirées des vidéos CC BY-SA 2.0 fr de Rama (chevaux de camp, mâchonnement du cheval de la campagne) vivent à part dans `fx/camp_horse_motion.json`, seul fichier de données sous cette licence.",
+    "measured_keys": "stride_m (bovins : 0,614 garrot ; chevaux de trait : 1,76 m), swing_lut, lift_lut, nod_rad, graze_rad, graze_ramp_s, jolt_lines, roll_rad",
+    "assumed_keys": "swing_m (rapport de marche 0,6 admis), lift_m, bob_m, shift_m, tail_*, breath_* de la campagne, graze_cycle_s, graze_share, stride_m des moutons (non mesurés ou non mesurables sur ces vidéos)"
+  },
+  "campaign": {
+    "defaults": {
+      "anchor_m": 0.0,
+      "stride_m": 0.86,
+      "swing_m": 0.26,
+      "lift_m": 0.07,
+      "bob_m": 0.012,
+      "graze_rad": 1.1,
+      "graze_share": 0.7,
+      "graze_cycle_s": 12.0,
+      "graze_ramp_s": 1.0,
+      "nod_rad": 0.063,
+      "chew_hz": 0.84,
+      "chew_rad": 0.12,
+      "tail_len_m": 0.08,
+      "tail_swing_m": 0.08,
+      "tail_hz": 0.5,
+      "tail_walk_gain": 2.0,
+      "shift_m": 0.012,
+      "breath_m": 0.008,
+      "breath_hz": 0.28,
+      "swing_lut": [0.0, 0.564, 0.991, 1.011, 0.719, 0.432, 0.203, -0.005, -0.087, -0.119, -0.285, -0.525, -0.751, -0.888, -0.79, -0.469],
+      "lift_lut": [0.645, 0.739, 0.767, 0.833, 0.951, 0.999, 0.999, 1.0, 1.0, 0.91, 0.637, 0.327, 0.111, 0.0, 0.085, 0.386],
+      "roll_rad": 0.0093,
+      "jolt_lines": [
+        {"amp_m": 0.0127, "stride_ratio": 1.35},
+        {"amp_m": 0.0096, "stride_ratio": 0.96},
+        {"amp_m": 0.0066, "stride_ratio": 0.75}
+      ],
+      "jolt_period_m": 1.76
+    },
+    "models": {
+      "ox": {"half_m": 0.8, "belly_m": 0.77, "withers_m": 1.4, "neck_start_m": 0.64, "neck_len_m": 0.4, "neck_pivot_m": 1.19, "stride_m": 0.86, "swing_m": 0.26},
+      "cow": {"half_m": 0.775, "belly_m": 0.715, "withers_m": 1.3, "neck_start_m": 0.62, "neck_len_m": 0.4, "neck_pivot_m": 1.1, "stride_m": 0.8, "swing_m": 0.24},
+      "horse": {"half_m": 0.725, "belly_m": 0.8, "withers_m": 1.45, "neck_start_m": 0.58, "neck_len_m": 0.42, "neck_pivot_m": 1.22, "stride_m": 1.76, "swing_m": 0.26, "lift_m": 0.09, "graze_share": 0.35, "tail_swing_m": 0.1},
+      "sheep": {"half_m": 0.44, "belly_m": 0.35, "withers_m": 0.72, "neck_start_m": 0.3, "neck_len_m": 0.15, "neck_pivot_m": 0.58, "tail_len_m": 0.07, "stride_m": 0.8, "swing_m": 0.09, "lift_m": 0.035, "bob_m": 0.008, "graze_cycle_s": 8.0, "graze_rad": 0.75, "graze_share": 0.8, "chew_hz": 1.05, "chew_rad": 0.045, "tail_swing_m": 0.04, "shift_m": 0.006, "breath_m": 0.006},
+      "stone_cart": {"base": "ox", "anchor_m": 3.0, "wheel_radius_m": 0.55, "wheel_x_min_m": 0.65},
+      "merchant_cart": {"base": "horse", "anchor_m": 3.0, "wheel_radius_m": 0.62, "wheel_x_min_m": 0.67},
+      "dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.5, "wheel_x_min_m": 0.61}
+    }
+  }
+}

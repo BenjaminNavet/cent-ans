@@ -706,10 +706,14 @@ func _player_army_in(settlement_id: String) -> String:
 ## écu, anneau d'emprise) et éteint la province survolée tant qu'un objet est visé. Recalculé
 ## quand la souris ou la caméra bouge. Avec une armée du joueur sélectionnée, la visée ignore
 ## cette armée (on vise une cible pour elle) et le curseur reste celui du déplacement.
+## FL : curseur simulé du banc (`--bench-hover`, coordonnées écran) ; x < 0 : vraie souris.
+var bench_mouse := Vector2(-1.0, -1.0)
+
+
 func _update_object_hover() -> void:
 	if armies == null or camera == null:
 		return
-	var mouse := get_viewport().get_mouse_position()
+	var mouse := get_viewport().get_mouse_position() if bench_mouse.x < 0.0 else bench_mouse
 	var view := camera.global_transform
 	if not _hover_dirty and mouse == _hover_mouse and view.is_equal_approx(_hover_camera):
 		return
@@ -722,7 +726,7 @@ func _update_object_hover() -> void:
 	_hover_dirty = false
 	_hover_mouse = mouse
 	_hover_camera = view
-	var on_map := get_viewport().gui_get_hovered_control() == null and get_viewport().get_visible_rect().has_point(mouse)
+	var on_map := bench_mouse.x >= 0.0 or (get_viewport().gui_get_hovered_control() == null and get_viewport().get_visible_rect().has_point(mouse))
 	hover_at(mouse, on_map)
 
 
@@ -1541,11 +1545,15 @@ func _process(_delta: float) -> void:
 		lakes.update_view(zoom_tiers.strategic_weight(camera_rig.distance))
 	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
+	tp = PerfProbe.lap("misc/path_preview", tp)
 	armies.update_scale(camera_rig.distance)
+	tp = PerfProbe.lap("misc/army_scale", tp)
 	_update_object_hover()  # SA
+	tp = PerfProbe.lap("misc/object_hover", tp)
 	_update_trade_hover()  # C5
+	tp = PerfProbe.lap("misc/trade_hover", tp)
 	_update_sea_lane_hover()  # SL1
-	tp = PerfProbe.lap("map.misc", tp)
+	tp = PerfProbe.lap("misc/sea_lane_hover", tp)
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():

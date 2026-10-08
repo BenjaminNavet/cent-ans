@@ -17,6 +17,7 @@ extends Node
 ## SZ6 : `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
 ## VT-I : `--bench-pan-only` s'arrête après le panoramique (mesure à une seule distance) ; le rapport
 ## donne aussi `startup_total_ms` (chargement de la carte) et `town_far` (statistiques du lointain).
+## FL : `--bench-hover` simule le curseur au centre de la vue (survol des armées et colonies).
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
@@ -128,6 +129,8 @@ func _ready() -> void:
 		elif arg.begins_with("--bench-ab="):
 			_ab_configs = arg.trim_prefix("--bench-ab=").split(";")
 	PerfProbe.enabled = OS.get_cmdline_user_args().has("--bench-probe")
+	if OS.get_cmdline_user_args().has("--bench-hover"):  # FL : survol avec le curseur au centre
+		get_parent().set("bench_mouse", get_viewport().get_visible_rect().size * 0.5)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	camera_rig.edge_pan_enabled = false
@@ -135,7 +138,7 @@ func _ready() -> void:
 	_place(PAN_PATH[0], pan_distance)
 
 
-## PF `--bench-set=scale:0.25,noshadow,relief_cast:1,tparam:nom=valeur` : réglages de rendu
+## PF `--bench-set=scale:0.25,noshadow,relief_cast:1,tparam:nom=valeur,prop:nœud.propriété=valeur` : réglages de rendu
 ## imposés à chaque image du banc (échelle 3D, ombres du soleil, cascades du relief, paramètre du
 ## shader du terrain).
 func _apply_bench_sets() -> void:
@@ -154,6 +157,18 @@ func _apply_bench_sets() -> void:
 				if not _ab_defaults.is_empty():
 					_ab_defaults["hidden"][node] = true
 				node.set("visible", false)
+		elif item.begins_with("prop:"):
+			# FL : `prop:settlement_layer.use_cells=false` : propriété d'un nœud de la carte.
+			var kv := item.trim_prefix("prop:").split("=")
+			var head := kv[0].get_slice(".", 0)
+			var target := get_parent().get(head) as Node  # membre de la carte, sinon nœud enfant (Sun)
+			if target == null:
+				target = get_parent().get_node_or_null(head)
+			var prop := kv[0].get_slice(".", 1)
+			if target != null:
+				if not _ab_defaults.is_empty() and not (_ab_defaults["props"] as Dictionary).has(kv[0]):
+					_ab_defaults["props"][kv[0]] = [target, target.get(prop)]
+				target.set(prop, kv[1] == "true" if kv[1] in ["true", "false"] else (float(kv[1]) if "." in kv[1] else int(kv[1])))
 		elif item == "msaa_off":
 			get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 		elif item.begins_with("terrain:"):
@@ -193,7 +208,7 @@ func _ab_tick(now: int) -> void:
 func _restore_bench_sets() -> void:
 	if _ab_defaults.is_empty():
 		var sun := get_parent().find_child("Sun", true, false) as DirectionalLight3D
-		_ab_defaults = {"scale": get_viewport().scaling_3d_scale, "shadow": sun.shadow_enabled if sun != null else true, "params": {}, "qt": {}, "hidden": {}, "terrain": {}, "msaa": get_viewport().msaa_3d}
+		_ab_defaults = {"scale": get_viewport().scaling_3d_scale, "shadow": sun.shadow_enabled if sun != null else true, "params": {}, "qt": {}, "hidden": {}, "terrain": {}, "props": {}, "msaa": get_viewport().msaa_3d}
 	get_viewport().scaling_3d_scale = float(_ab_defaults["scale"])
 	var sun := get_parent().find_child("Sun", true, false) as DirectionalLight3D
 	if sun != null:
@@ -207,6 +222,10 @@ func _restore_bench_sets() -> void:
 		if is_instance_valid(node):
 			node.set("visible", true)
 	_ab_defaults["hidden"] = {}
+	for key: String in _ab_defaults["props"]:
+		var saved: Array = _ab_defaults["props"][key]
+		if is_instance_valid(saved[0]):
+			(saved[0] as Node).set(key.get_slice(".", 1), saved[1])
 	var props: Dictionary = _ab_defaults["terrain"]
 	for name: String in props:
 		terrain.set(name, props[name])

@@ -1,0 +1,51 @@
+{
+  "description": "Lot AS5 (ADR 0187, doctrine docs/design/2026-10-08-sources-animation.md) : restes statiques passés en shader. Rendu seulement, aucune règle de jeu. `fire` : flammes de la carte de campagne (flipbook FA2 `flame_flipbook.png`, 8x8 images) sur les foyers d'incendie existants (sièges, hameaux brûlés, villages en ruine, bûchers). `maquette_banner` : onde de vent des bannières des maquettes de villes (rafales partagées `campaign_wind.gdshaderinc`). `battle_tree_impostor` : balancement des imposteurs d'arbres de bataille (même phase que `battle_tree_foliage.gdshader`). Éteint par `enabled` ou par l'argument `--no-as5` (banc A/B).",
+  "enabled": true,
+  "fire": {
+    "flame_size": [3.0, 4.6],
+    "frames": [8, 8],
+    "flipbook": "res://assets/textures/fx/flame_flipbook.png",
+    "flicker_hz": 1.17,
+    "source": "AS8d : vacillement de la lueur mesuré sur Fire آتش 01 (Mostafameraji, CC0) : pics à 1,0 et 1,33 Hz (mesure tools/video_mocap/measure_motion_fx.py flame) ; ancien réglage 8 rad/s = 1,27 Hz. Planche alternative tirée de la même vidéo : res://assets/textures/fx/flame_flipbook_video.png (8x8, 64 px), à mettre dans `flipbook` pour l'essayer.",
+    "loops_per_s": 0.55,
+    "emission": 2.6,
+    "opacity": 0.85,
+    "lean": 0.22,
+    "color_cold": [0.35, 0.03, 0.0],
+    "color_mid": [1.0, 0.32, 0.04],
+    "color_hot": [1.0, 0.72, 0.28],
+    "color_core": [1.0, 0.93, 0.78],
+    "light": {
+      "enabled": true,
+      "max_lights": 4,
+      "max_camera_distance": 260.0,
+      "update_period_s": 0.4,
+      "color": [1.0, 0.52, 0.18],
+      "energy": 2.2,
+      "range": 9.0,
+      "height": 1.6,
+      "flicker_speed": 9.0,
+      "flicker_amount": 0.35
+    }
+  },
+  "maquette_banner": {
+    "amplitude": 0.16,
+    "wave_speed": 4.6,
+    "wave_length": 0.4,
+    "source": "AS8d : Flag of Finland.webm (SFootage, CC BY-SA 4.0), drapeau rendu sur fond noir, silhouette suivie image par image : ondulation à 0,73 Hz (4,6 rad/s) et longueur d'onde 0,40 largeur de drapeau (2 à 3 ondes sur la largeur ; mesure tools/video_mocap/measure_motion_fx.py flag). Valeurs dérivées sous CC BY-SA 4.0.",
+    "gust_gain": 0.9,
+    "calm": 0.45
+  },
+  "grass_measured": {
+    "source": "AS8d : Calmly waving grass and flowers.ogv (Pixelmaniac pictures, domaine public), prairie en gros plan, 24 i/s : balancement dominant à 0,17-0,25 Hz (période 4 à 6 s), centroïde spectral 0,52 Hz, rafales de 4,4 fois la moyenne ; très calme (0,04 px d'écart type). Mesure seule : les arbres (1,15 Hz) et les rafales de campagne (échelle stylisée) ne sont pas recalés dessus.",
+    "sway_hz": [0.249, 0.166, 0.207],
+    "spectral_centroid_hz": 0.519,
+    "gust_peak_over_mean": 4.38
+  },
+  "battle_tree_impostor": {
+    "sway": 0.018,
+    "frequency": 1.15,
+    "second_harmonic": 0.25,
+    "flutter": 0.004
+  }
+}

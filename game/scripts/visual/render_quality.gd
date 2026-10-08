@@ -195,7 +195,7 @@ static func upscale(p: Dictionary = {}, pixels: float = 0.0) -> Dictionary:
 
 ## Les échelles des préréglages sont réglées pour une définition de référence (1920 x 1080). Au-delà
 ## (Retina, 4K), « Automatique » garde le même nombre de pixels rendus, sans descendre sous
-## `min_upscale_scale`. Les choix explicites du joueur restent tels quels.
+## `min_upscale_scale` (0,4, ADR 0191). Les choix explicites du joueur restent tels quels.
 static func budget_scale(mode: String, scale: float, pixels: float) -> float:
 	var reference := float(data()["upscale"]["reference_pixels"])
 	if mode == UPSCALE_OFF or pixels <= reference:

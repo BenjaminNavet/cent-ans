@@ -112,6 +112,14 @@ var _shield_until: PackedFloat32Array = PackedFloat32Array()
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
 var _priority_order: PackedInt32Array = PackedInt32Array()
+## FL3 : grille des ancres (`_marker_world`) : dé-encombrement et survol limités aux colonies du
+## champ (marques `_view_mark`) ou proches du curseur (`_pick_mark`).
+var _cells := SettlementCells.new()
+## Banc FL (`--bench-set=prop:settlement_layer.use_cells=false`) : sans la grille, comme avant.
+var use_cells := true
+var _view_mark: PackedByteArray = PackedByteArray()
+var _pick_mark: PackedByteArray = PackedByteArray()
+var _max_text_px := -1.0
 var _placer := MarkerDeclutter.new()
 var _capital_index := -1
 var _hovered_index := -1
@@ -550,6 +558,7 @@ func _build_icons() -> void:
 	_apply_banner_uniforms()  # RJ-c
 	declutter_interval = float(markers.declutter_value("interval_seconds", declutter_interval))
 	_build_priority_order()
+	_cells.build(_marker_world)
 	_icon_material.render_priority = 2
 	_icons = MultiMeshInstance3D.new()
 	_icons.name = "Icons"
@@ -1002,6 +1011,7 @@ func _sync_shield(i: int) -> void:
 	var k := _icon_instance(i)
 	if _marker_world[i] != at:
 		_marker_world[i] = at
+		_cells.mark_heights_dirty()
 		_icons.multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, at))
 	var custom := _icons.multimesh.get_instance_custom_data(k)
 	var lift := _shield_lift(i)
@@ -1127,8 +1137,14 @@ func _declutter_begin() -> bool:
 	_dc_scale = _label_screen_scale(camera)
 	_dc_focal = _focal_px(camera)
 	_dc_sequence = PackedInt32Array(_dc_pins)
+	# FL3 : seulement les colonies des cases du champ élargi (marge : plus grand décalage possible
+	# d'un nom et de son écu, cf. le test « loin hors de l'écran » de `_declutter_step`) et celles
+	# encore affichées (à masquer). Les autres, hors champ, gardent leur état sans être vues.
+	var spill_px := spill * maxf(screen.size.x, screen.size.y)
+	var reach_px := _max_label_text_px() * _dc_scale + LABEL_GAP_PX + LABEL_FOOTPRINT_MAX_PX + _max_marker_px * icon_size_scale + _dc_label_margin + _dc_marker_margin + _shield_gap
+	_cells.mark_in_view(camera, screen.size.y, spill_px + 2.0 * reach_px, _marker_world, _view_mark)
 	for i in _priority_order:
-		if not _dc_pins.has(i):
+		if (not use_cells or _view_mark[i] == 1 or _labels[i].visible or _marker_screen[i].x > -1.0e5) and not _dc_pins.has(i):
 			_dc_sequence.append(i)
 	_dc_pos = 0
 	PerfProbe.lap("settle/declutter/prep", tp)
@@ -1147,6 +1163,16 @@ func label_safe_rect() -> Rect2:
 	# Fenêtre plus petite que ses marges (headless) : zone vide, pas un rectangle négatif.
 	safe.size = safe.size.max(Vector2.ZERO)
 	return safe
+
+
+## FL3 : plus grand texte de nom (px d'étiquette, échelle 1), calculé une fois.
+func _max_label_text_px() -> float:
+	if _max_text_px < 0.0:
+		_max_text_px = 0.0
+		for i in _labels.size():
+			var size := _label_text_size(i)
+			_max_text_px = maxf(_max_text_px, maxf(size.x, size.y))
+	return _max_text_px
 
 
 ## RS-K3 : point écran de `p` avec la caméra figée de la passe (`Camera3D.unproject_position`).
@@ -1736,7 +1762,13 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var eye := camera.global_position
 	var model_range_sq := tiers.model_range * tiers.model_range
 	var focal := _focal_px(camera)
+	# FL3 : seulement les colonies des cases proches du rayon du curseur (marge : nom entier, écu,
+	# emprise ; avant, les 2 134 colonies à chaque survol).
+	var reach_px := _max_label_text_px() * scale + LABEL_GAP_PX + LABEL_FOOTPRINT_MAX_PX + _max_marker_px * icon_size_scale + PICK_MIN_PX
+	_cells.mark_near_ray(camera, get_viewport().get_visible_rect().size.y, screen_position, 2.0 * reach_px, _marker_world, _pick_mark)
 	for i in data.settlements.size():
+		if use_cells and _pick_mark[i] == 0:
+			continue
 		var score := INF
 		# GC2 : une maquette hors de portée (type masqué à cette hauteur) ne se clique pas.
 		if near and (maquettes == null or _camera_distance <= maquettes.range_of(i)):
