@@ -486,6 +486,26 @@ deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne
   licence : fichier `KayKit-CC0-License.txt` du pack (« License: (Creative Commons Zero, CC0) »).
   Clips d'essai seulement (`slash`, `overhead`, `pike_level`, `pike_thrust`).
 
+## Mouvements mesurés sur vidéos libres (lot AS8d, ADR 0189)
+
+Les vidéos restent hors dépôt ; seuls des nombres mesurés (`data/fx/siege_engines.json`,
+`data/fx/map_fire_wind.json`, champ `source`) et une planche de flammes (CC0) sont versionnés.
+Les données dérivées de vidéos CC BY-SA portent la même licence (fichiers de données seuls).
+
+- **Blide31.ogv**, Michael Sachse, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Blide31.ogv),
+  CC BY-SA 3.0 : courbe de bascule du bras du trébuchet (`trebuchet.swing_curve`).
+- **Canon firing mvi 3662.ogv**, Rama, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Canon_firing_mvi_3662.ogv),
+  CC BY-SA 2.0 fr : durées d'éclair et de fumée de la bombarde (`bombard.flash_s`, `smoke_s`).
+- **Flag of Finland.webm**, SFootage, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Flag_of_Finland.webm),
+  CC BY-SA 4.0 : fréquence et longueur d'onde des bannières de maquette (`maquette_banner`).
+- **Warwick Castle trebuchet - from the bank.webm**, mittfh, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Warwick_Castle_trebuchet_-_from_the_bank.webm),
+  CC BY 3.0 : durée et allure du treuillage (mesure seule, `docs/research/as8d-mesures.md`).
+- **Fire آتش 01.ogv**, Mostafameraji, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Fire_آتش_01.ogv),
+  CC0 : planche de flammes `flame_flipbook_video.png` et vacillement (`fire.flicker_hz`).
+- **Calmly waving grass and flowers.ogv**, Pixelmaniac pictures,
+  [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Calmly_waving_grass_and_flowers.ogv),
+  domaine public : balancement de l'herbe (`grass_measured`, mesure seule).
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons

@@ -465,12 +465,26 @@ func _cup_at_release(node: Node3D, c: Dictionary) -> Vector3:
 	return pos
 
 
+## Part de l'arc (0 : armé, 1 : fin du dépassement) à la phase `u`. Courbe mesurée sur la vidéo
+## d'un vrai trébuchet (`swing_curve.lut`, lot AS8d) quand elle est fournie, sinon la courbe
+## procédurale d'origine (verge qui accélère sous le contrepoids).
+static func _swing_progress(c: Dictionary, u: float) -> float:
+	var curve: Variant = c.get("swing_curve", null)
+	if curve is Dictionary:
+		var lut: Array = curve.get("lut", [])
+		if lut.size() >= 2:
+			var x := clampf(u, 0.0, 1.0) * float(lut.size() - 1)
+			var i := mini(int(x), lut.size() - 2)
+			return lerpf(float(lut[i]), float(lut[i + 1]), x - float(i))
+	return u * u * (2.2 - 1.2 * u)
+
+
 ## Pose (verge, fronde relative) en radians à la phase `u` (0-1) du basculement du trébuchet :
 ## la verge accélère (contrepoids qui tombe), la fronde traîne puis fouette par-dessus.
 static func _trebuchet_swing(c: Dictionary, u: float) -> Vector2:
 	var cocked := float(c["cocked_deg"])
 	var over := float(c["overswing_deg"])
-	var theta := lerpf(cocked, over, u * u * (2.2 - 1.2 * u))
+	var theta := lerpf(cocked, over, _swing_progress(c, u))
 	var u_rel := float(c["release_phase"])
 	var phi: float
 	if u <= u_rel:
