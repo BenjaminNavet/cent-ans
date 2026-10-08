@@ -20,25 +20,34 @@ uniform float wave_amplitude = 0.22;
 uniform float wave_speed = 3.2;
 // Décalage vers la caméra (mode 2) : la bannière passe devant la hampe.
 uniform float front_offset = 0.18;
+// Lot AS2 : direction monde de la hampe (inclinée par la marche ou le tangage) et rafale de marche.
+uniform vec3 pole_dir = vec3(0.0, 1.0, 0.0);
+uniform float gust = 0.0;
 
 varying float v_fold;
 
 void vertex() {
 	float phase_seed = MODEL_MATRIX[3].x * 0.1 + MODEL_MATRIX[3].z * 0.07;
+	float amp = wave_amplitude * (1.0 + gust);
 	if (mode == 2) {
 		// Suspendue par le haut : l'ondulation croît vers le bas et court en travers.
 		float along = UV.y;
 		float phase = TIME * wave_speed * 0.8 - along * 3.5 + UV.x * 1.6 + phase_seed;
-		VERTEX.z += sin(phase) * wave_amplitude * along + front_offset;
-		VERTEX.x += sin(phase * 0.7 + 1.3) * wave_amplitude * 0.35 * along;
+		VERTEX.z += sin(phase) * amp * along + front_offset;
+		VERTEX.x += sin(phase * 0.7 + 1.3) * amp * 0.35 * along;
 		v_fold = cos(phase) * along;
 	} else {
 		float u = UV.x;
 		float phase = TIME * wave_speed - u * 5.5 + phase_seed;
-		VERTEX.z += sin(phase) * wave_amplitude * u;
+		VERTEX.z += sin(phase) * amp * u;
 		VERTEX.y -= u * u * 0.12;
 		v_fold = cos(phase) * u;
 	}
+	// AS2 : le tissu penche avec la hampe (angle vu de la caméra) et claque plus fort en marche.
+	float lean = atan(dot(pole_dir, INV_VIEW_MATRIX[0].xyz), max(pole_dir.y, 0.05));
+	float lean_c = cos(lean);
+	float lean_s = sin(lean);
+	VERTEX.xy = vec2(VERTEX.x * lean_c + VERTEX.y * lean_s, -VERTEX.x * lean_s + VERTEX.y * lean_c);
 	// Billboard vertical (comme BILLBOARD_FIXED_Y), échelle du nœud conservée.
 	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
 		vec4(normalize(cross(vec3(0.0, 1.0, 0.0), INV_VIEW_MATRIX[2].xyz)), 0.0),
