@@ -1089,6 +1089,9 @@ def assets_ink_icons(
         "--budget-cap",
         help="Plafond du lot en dollars (défaut : budget_cap_usd du catalogue, lot DA5)",
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """DA5 : icônes d'action à l'encre et boutons-médaillons (une image par icône).
 
@@ -1098,11 +1101,11 @@ def assets_ink_icons(
     """
     from decimal import Decimal
 
-    from cent_ans_tools import ink_icons
+    from cent_ans_tools import ink_icons, local_art
     from cent_ans_tools.budget import BudgetLedger
 
     catalog = ink_icons.load_catalog()
-    model = catalog["model"]
+    model = local_art.MODEL_ID if local else catalog["model"]
     budget_session = catalog.get("budget_session")
     subject_line = subject or ink_icons.BUDGET_SUBJECT
     prefix = subject_line.split(" :")[0] + " :"
@@ -1140,6 +1143,7 @@ def assets_ink_icons(
                 subject_line,
                 convert,
                 budget_session=budget_session,
+                aspect_ratio="1:1",
             )
             remaining -= ink_icons.lot_spent(BudgetLedger(), prefix) - before
         if dry_run:
@@ -1172,11 +1176,14 @@ def assets_entity_icons(
     envelope: float | None = typer.Option(
         None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5b)"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """DA5b : icônes d'entité en miniatures peintes (dérivées des illustrations, sinon générées)."""
     from decimal import Decimal
 
-    from cent_ans_tools import entity_icons
+    from cent_ans_tools import entity_icons, local_art
     from cent_ans_tools.budget import BudgetLedger
 
     catalog = entity_icons.load_catalog()
@@ -1191,12 +1198,13 @@ def assets_entity_icons(
         jobs = entity_icons.plan(catalog, only=only or None, limit=limit)
         _run_art_batch(
             jobs,
-            catalog["model"],
+            local_art.MODEL_ID if local else catalog["model"],
             float(remaining),
             dry_run,
             "miniature(s)",
             entity_icons.BUDGET_SUBJECT,
             entity_icons.to_raw,
+            aspect_ratio="1:1",
         )
         if dry_run:
             return
@@ -1284,19 +1292,22 @@ def assets_portraits(
     envelope: float = typer.Option(
         10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Génère les portraits manquants (256×256) dans game/assets/portraits/."""
     from decimal import Decimal
 
-    from cent_ans_tools import portraits
+    from cent_ans_tools import local_art, portraits
 
-    model = model or portraits.DEFAULT_MODEL
+    model = local_art.MODEL_ID if local else model or portraits.DEFAULT_MODEL
     jobs = portraits.plan(limit=limit)
     if dry_run:
         for job in jobs:
             console.rule(job.character_id)
             console.print(job.prompt)
-        unit = portraits.KNOWN_PRICES.get(model)
+        unit = Decimal("0") if local else portraits.KNOWN_PRICES.get(model)
         cost = (
             f"≈ {unit * len(jobs):.2f} $"
             if unit is not None
@@ -1316,6 +1327,7 @@ def assets_portraits(
         on_progress=lambda job, spent: console.print(
             f"{job.character_id} ({spent:.4f} $)"
         ),
+        image_config={"aspect_ratio": "3:4"} if local else None,
     )
     console.print(
         f"[green]OK[/green] : {len(result.written)} portrait(s), estimé {result.estimated:.4f} $, réel {result.actual:.4f} $"
@@ -1341,11 +1353,14 @@ def assets_portrait_archetypes(
     envelope: float = typer.Option(
         8.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """DA2 : archétypes de portraits et variantes âgées (512×512 JPEG)."""
-    from cent_ans_tools import portrait_archetypes, portraits
+    from cent_ans_tools import local_art, portrait_archetypes, portraits
 
-    model = model or portraits.DEFAULT_MODEL
+    model = local_art.MODEL_ID if local else model or portraits.DEFAULT_MODEL
     jobs = portrait_archetypes.plan(
         archetypes=not no_archetypes,
         aged=not no_aged,
@@ -1360,6 +1375,7 @@ def assets_portrait_archetypes(
         "portrait(s) vivant(s)",
         "DA2 : portraits vivants (archétypes et variantes âgées)",
         portrait_archetypes.to_archetype_jpg,
+        aspect_ratio="3:4",
     )
 
 
@@ -1389,7 +1405,11 @@ def _run_art_batch(
         for job in jobs:
             console.rule(job.character_id)
             console.print(job.prompt)
-        unit = portraits.KNOWN_PRICES.get(model)
+        unit = (
+            Decimal("0")
+            if model == local_art.MODEL_ID
+            else portraits.KNOWN_PRICES.get(model)
+        )
         cost = (
             f"≈ {unit * len(jobs):.2f} $"
             if unit is not None
@@ -1435,18 +1455,22 @@ def assets_event_art(
     envelope: float = typer.Option(
         10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Génère les miniatures d'événements manquantes (768×432) dans game/assets/events/."""
-    from cent_ans_tools import event_art, portraits
+    from cent_ans_tools import event_art, local_art, portraits
 
     _run_art_batch(
         event_art.plan(limit=limit),
-        model or portraits.DEFAULT_MODEL,
+        local_art.MODEL_ID if local else model or portraits.DEFAULT_MODEL,
         envelope,
         dry_run,
         "miniature(s)",
         "Miniatures d'événements",
         event_art.to_miniature_jpg,
+        aspect_ratio="16:9",
     )
 
 
@@ -1502,17 +1526,29 @@ def assets_horizon_panoramas(
         False, "--generate", help="Appels payants OpenRouter (sinon traitement seul)"
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Affiche les invites"),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Panoramas d'horizon peints des batailles (EP2) : génération puis détourage."""
-    from cent_ans_tools import horizon_panoramas
+    from cent_ans_tools import horizon_panoramas, local_art
 
     data = horizon_panoramas.load_data()
     wanted = [i.strip() for i in ids.split(",") if i.strip()] or list(data["panoramas"])
     if generate or dry_run:
-        horizon_panoramas.generate(wanted, dry_run=dry_run, data=data)
+        horizon_panoramas.generate(
+            wanted,
+            local_art.MODEL_ID if local else horizon_panoramas.DEFAULT_MODEL,
+            dry_run=dry_run,
+            data=data,
+        )
     if not dry_run:
         meta = horizon_panoramas.process_all(data)
         console.print(f"{len(meta['panoramas'])} panoramas traités")
+
+
+# Local (mflux) aspect per plate family, closest to the final crop (ADR 0190).
+ART_PLATE_ASPECTS = {"loading": "16:9", "vignette": "21:9", "ending": "16:9"}
 
 
 @assets_app.command("art-plates")
@@ -1532,9 +1568,12 @@ def assets_art_plates(
     envelope: float = typer.Option(
         8.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """AR1 : planches illustrées (chargements, vignettes, fins) dans game/assets/art/."""
-    from cent_ans_tools import art_plates, portraits
+    from cent_ans_tools import art_plates, local_art, portraits
 
     written = art_plates.build_commons(force=recrop)
     console.print(f"Commons : {len(written)} planche(s) écrite(s)")
@@ -1547,12 +1586,13 @@ def assets_art_plates(
             continue
         _run_art_batch(
             family_jobs,
-            portraits.DEFAULT_MODEL,
+            local_art.MODEL_ID if local else portraits.DEFAULT_MODEL,
             envelope,
             dry_run,
             "planche(s)",
             f"AR1 : planches illustrées ({family})",
             lambda image, family=family: art_plates.convert_generated(image, family),
+            aspect_ratio=ART_PLATE_ASPECTS[family],
         )
 
 
@@ -1575,9 +1615,12 @@ def assets_codex_art(
     envelope: float = typer.Option(
         10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Génère les miniatures des fiches du Codex sans image d'entité (640×360)."""
-    from cent_ans_tools import codex_art, portraits
+    from cent_ans_tools import codex_art, local_art, portraits
 
     categories = (
         tuple(part.strip() for part in category.split(","))
@@ -1586,12 +1629,13 @@ def assets_codex_art(
     )
     _run_art_batch(
         codex_art.plan(categories=categories, limit=limit),
-        model or portraits.DEFAULT_MODEL,
+        local_art.MODEL_ID if local else model or portraits.DEFAULT_MODEL,
         envelope,
         dry_run,
         "illustration(s)",
         "Illustrations du Codex",
         codex_art.convert,
+        aspect_ratio="16:9",
     )
 
 
@@ -1639,6 +1683,9 @@ def assets_materials(
         "--dry-run",
         help="Affiche les prompts et le coût estimé, sans appel payant",
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """GA/SR/RC5 : matières tuilables (--config), générées ou scannées, + cartes dérivées.
 
@@ -1665,7 +1712,7 @@ def assets_materials(
         raise typer.BadParameter(f"Matière inconnue dans {path} : {', '.join(unknown)}")
     cap = envelope if envelope is None else Decimal(str(envelope))
     if dry_run:
-        report = material_gen.plan(ids, out_dir, materials_path=path)
+        report = material_gen.plan(ids, out_dir, materials_path=path, local=local)
         for item in report["items"]:
             state = "brute réutilisée" if item["reuse"] else f"{item['cost']} $"
             console.print(f"[bold]{item['id']}[/bold] ({state})\n{item['prompt']}\n")
@@ -1682,7 +1729,12 @@ def assets_materials(
     tiles = {}
     for material_id in ids:
         albedo = material_gen.generate(
-            material_id, out_dir, lot=lot, materials_path=path, envelope=cap
+            material_id,
+            out_dir,
+            lot=lot,
+            materials_path=path,
+            envelope=cap,
+            local=local,
         )
         tiles[material_id] = np.asarray(Image.open(albedo).convert("RGB"))
         console.print(f"[green]OK[/green] : {material_id} -> {albedo}")
@@ -1709,6 +1761,9 @@ def assets_ui_ornaments(
     ),
     install: bool = typer.Option(
         False, "--install", help="Installer les variantes `selected` dans nb/"
+    ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
     ),
 ) -> None:
     """NB : kit d'interface redessiné (data/art/ui_ornaments.yaml)."""
@@ -1739,7 +1794,13 @@ def assets_ui_ornaments(
         }
     anchor = orn.ANCHOR_PATH.read_bytes() if orn.ANCHOR_PATH.exists() else b""
     requests = orn.build_requests(kit, anchor, config)
-    orn.generate(requests, dry_run=dry_run, model=config["model"])
+    from cent_ans_tools import local_art
+
+    orn.generate(
+        requests,
+        dry_run=dry_run,
+        model=local_art.MODEL_ID if local else config["model"],
+    )
     console.print(f"Cumul : {budget.total()} $")
 
 
@@ -1765,18 +1826,21 @@ def ground_generate(
     dry_run: bool = typer.Option(
         False, "--dry-run", help="Affiche les appels et leur coût, sans appel payant"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Génère les images brutes manquantes (hors dépôt, jamais payées deux fois)."""
-    from cent_ans_tools import ground_materials
+    from cent_ans_tools import ground_materials, local_art
 
     catalog = ground_materials.load_catalog()
     report = ground_materials.generate(
-        catalog, only=only or None, attempt=attempt, dry_run=dry_run
+        catalog, only=only or None, attempt=attempt, dry_run=dry_run, local=local
     )
     verb = "prévus" if dry_run else "faits"
     console.print(
         f"{len(report['planned'])} appel(s) {verb}, {report['cost']:.3f} $ "
-        f"({catalog['model']})"
+        f"({local_art.MODEL_ID if local else catalog['model']})"
     )
     if dry_run:
         for name in report["planned"]:

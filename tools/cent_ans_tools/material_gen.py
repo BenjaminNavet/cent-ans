@@ -286,6 +286,7 @@ def generate(
     materials_path: Path = MATERIALS_PATH,
     budget_path: Path = budget.DEFAULT_BUDGET_PATH,
     envelope: Decimal | None = None,
+    local: bool = False,
 ) -> Path:
     """Generate one material (paid unless its raw image exists) and return its albedo tile.
 
@@ -295,8 +296,10 @@ def generate(
     reused without any call, so an interrupted batch never pays twice (delete it to
     retry a bad draw). The spend is recorded by :func:`openrouter.generate_image` in
     the ledger. ``envelope`` lowers the section cap of a ``budget`` block (RC5).
+    ``local`` renders with the free mflux model (square 1:1, no ledger check or row,
+    ADR 0190).
     """
-    from cent_ans_tools import openrouter
+    from cent_ans_tools import local_art, openrouter
 
     out_dir = Path(out_dir)
     document = load_materials(materials_path)
@@ -308,7 +311,12 @@ def generate(
     settings = budget_settings(document)
     lot = lot or settings["lot"] or "GA1"
     raw_path = out_dir / f"{material_id}_raw.png"
-    if not raw_path.exists():
+    if not raw_path.exists() and local:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        raw_path.write_bytes(
+            local_art.render_image(entry["prompt"], aspect_ratio="1:1")
+        )
+    elif not raw_path.exists():
         cap = settings["cap"]
         if cap is not None and envelope is not None:
             cap = min(cap, envelope)
@@ -540,20 +548,26 @@ def process_scan(
         paths[name] = out_dir / f"{material_id}_{name}.png"
         Image.fromarray(values).save(paths[name])
     return paths
+
+
 def plan(
     ids: list[str] | None,
     out_dir: Path,
     *,
     materials_path: Path = MATERIALS_PATH,
+    local: bool = False,
 ) -> dict[str, Any]:
     """Dry run: prompts and estimated cost of a batch, without any API call.
 
     Returns ``{"model", "items": [{"id", "prompt", "reuse", "cost"}], "total", "cap"}``;
     an image whose raw file already exists in ``out_dir`` costs nothing.
     """
+    from cent_ans_tools import local_art
+
+    local_model = local_art.MODEL_ID
     document = load_materials(materials_path)
     settings = budget_settings(document)
-    per_image = settings["estimate"] or Decimal("0.00")
+    per_image = Decimal("0.00") if local else settings["estimate"] or Decimal("0.00")
     wanted = ids or [entry["id"] for entry in document["materials"]]
     items = []
     for material_id in wanted:
@@ -568,7 +582,7 @@ def plan(
             }
         )
     return {
-        "model": document["model"],
+        "model": local_model if local else document["model"],
         "items": items,
         "total": sum((item["cost"] for item in items), Decimal("0.00")),
         "cap": settings["cap"],

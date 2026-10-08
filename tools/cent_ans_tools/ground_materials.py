@@ -117,8 +117,12 @@ def generate(
     attempt: int | None = None,
     dry_run: bool = False,
     raw_dir: Path = RAW_DIR,
+    local: bool = False,
 ) -> dict[str, Any]:
     """Generate the missing raw images; returns ``{"planned": [...], "cost": usd}``.
+
+    ``local`` renders each image with the free mflux model (1:1, same prompt and seed
+    rule, no fal call, cost 0, ADR 0190).
 
     ``attempt`` None = the attempt kept by the catalogue (``attempt``, default 1).
     Attempt ``n`` uses seed ``seed + 1000 * (n - 1)``.
@@ -129,13 +133,15 @@ def generate(
         target = raw_path(entry, number, raw_dir)
         if not target.exists():
             planned.append((entry, number, target))
-    unit = call_cost(document)
+    unit = 0.0 if local else call_cost(document)
     report = {
         "planned": [f"{e['id']}_{n}" for e, n, _ in planned],
         "cost": round(unit * len(planned), 4),
     }
     if dry_run or not planned:
         return report
+    if local:
+        return _generate_local(document, planned, raw_dir, report)
     import fal_client  # only needed for paid calls
 
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -165,6 +171,27 @@ def generate(
         )
         log_path.write_text(json.dumps(log, indent=1))
         print(f"HB2 {target.name} ({unit} $)")
+    return report
+
+
+def _generate_local(
+    document: dict[str, Any],
+    planned: list[tuple[dict[str, Any], int, Path]],
+    raw_dir: Path,
+    report: dict[str, Any],
+) -> dict[str, Any]:
+    """Free local rendering of the planned raw images (no cost log, ADR 0190)."""
+    from cent_ans_tools import local_art
+
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    for entry, number, target in planned:
+        image = local_art.render_image(
+            build_prompt(document, entry, number),
+            aspect_ratio="1:1",
+            seed=entry["seed"] + 1000 * (number - 1),
+        )
+        target.write_bytes(image)
+        print(f"HB2 {target.name} (local, 0 $)")
     return report
 
 
