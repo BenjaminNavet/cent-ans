@@ -111,47 +111,13 @@ pub struct AiDiplomacy {
     pub description: Option<String>,
 }
 
-impl Default for AiDiplomacy {
-    /// The F4 constants, in force before G5.
-    fn default() -> Self {
-        Self {
-            menacing_neighbour: MenacingNeighbourRules {
-                power_ratio: 1.5,
-                attitude: -15,
-                counterweight: 10,
-            },
-            war: WarPlanningRules {
-                front_share: 0.5,
-                pretender_ratio: 0.5,
-                pretender_ratio_alone: 0.8,
-                main_claim_first: false,
-                claim_war_ignores_difficulty: false,
-                claim_war_ignores_kinship: false,
-            },
-            join_war: JoinWarRules {
-                ratio: 0.6,
-                min_attitude: 10,
-                min_ally_power_ratio: 0.0,
-                border_only_claim_wars: false,
-                weary_stay_out: false,
-            },
-            peace: PeaceRules {
-                keep_capital: false,
-                cornered_provinces: 0,
-                cornered_waits_for_defeat: false,
-            },
-            negotiation: NegotiationRules::default(),
-            passage: PassageRules::default(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(AiDiplomacy, "ai/diplomacy.json", default);
 
 /// Lot DP1 (ADR 0025): how treaties are valued, war goals scored and war
 /// weariness accumulated. `enabled: false` (the default without the data
 /// file) keeps the G5 peace of `plan_diplomacy`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct NegotiationRules {
     /// War goals, war weariness and the AI's treaty peace are active.
     pub enabled: bool,
@@ -235,52 +201,14 @@ pub struct NegotiationRules {
     pub bastion_war_points: i32,
 }
 
-impl Default for NegotiationRules {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            chance_scale: 8.0,
-            livres_per_point: 250,
-            max_gold_points: 60,
-            war_goal_count: 2,
-            war_goal_score: 12,
-            settlement_score: 3,
-            province_cost: 20,
-            capital_cost: 60,
-            settlement_cost: 6,
-            occupied_cost_percent: 50,
-            war_goal_bonus: 10,
-            weariness_per_war: 1,
-            weariness_losing: 1,
-            weariness_occupied: 1,
-            weariness_bankrupt: 1,
-            weariness_recovery: 3,
-            weariness_unrest_divisor: 5,
-            weariness_peace_divisor: 3,
-            max_weariness_to_declare: 40,
-            unmet_goals_reluctance: 15,
-            demand_score: 20,
-            ai_min_chance: 60,
-            peace_truce_turns: 12,
-            pretender_reluctance: 20,
-            max_weariness_gain: 3,
-            sue_weariness: 60,
-            min_war_turns: 0,
-            truce_binds_allies: false,
-            long_war_years: 0,
-            long_war_points_per_year: 0,
-            long_war_max_points: 0,
-            bastion_war_points: 0,
-        }
-    }
-}
+crate::bundled_rules!(NegotiationRules, "ai/diplomacy.json", at "/negotiation", default);
 
 /// Lot DP2 (ADR 0029): an army ending its season in the lands of a faction
 /// at peace, without military access, creates a diplomatic incident whose
 /// malus grows with its duration and gives the victim a casus belli.
 /// `enabled: false` (the default without the data file) ignores trespass.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct PassageRules {
     /// Trespass incidents are recorded.
     pub enabled: bool,
@@ -306,20 +234,4 @@ pub struct PassageRules {
     pub tension_attitude: i32,
 }
 
-impl Default for PassageRules {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            base_penalty: 10,
-            per_season_penalty: 5,
-            max_penalty: 40,
-            memory_turns: 12,
-            casus_belli_seasons: 2,
-            truce_grace_seasons: 2,
-            ai_violate_aggression: 70,
-            ai_violate_attitude: -40,
-            ai_violate_power_ratio: 2.0,
-            tension_attitude: -20,
-        }
-    }
-}
+crate::bundled_rules!(PassageRules, "ai/diplomacy.json", at "/passage", default);

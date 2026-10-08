@@ -3,10 +3,6 @@
 
 use serde::{Deserialize, Serialize};
 
-/// The missions file as bundled at build time: the fallback when
-/// `data/missions.json` is absent (test fixtures).
-const BUNDLED: &str = include_str!("../../../../../data/missions.json");
-
 /// Contents of `data/missions.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -24,11 +20,7 @@ pub struct MissionRules {
     pub templates: Vec<MissionTemplate>,
 }
 
-impl Default for MissionRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED).expect("bundled data/missions.json is valid")
-    }
-}
+crate::bundled_rules!(MissionRules, "missions.json", default);
 
 /// What a mission asks for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]

@@ -284,18 +284,7 @@ fn default_heavy_defeat_losses_percent() -> u32 {
     100
 }
 
-impl Default for RetreatRules {
-    fn default() -> Self {
-        RetreatRules {
-            friendly_radius_steps: 2.0,
-            neutral_radius_steps: 1.0,
-            neutral_loss_percent: 10,
-            rout_loss_percent: 50,
-            rout_dissolve_below_percent: 30,
-            heavy_defeat_losses_percent: default_heavy_defeat_losses_percent(),
-        }
-    }
-}
+crate::bundled_rules!(RetreatRules, "settlements/rules.json", at "/retreat", default);
 
 /// Movement tuning of `rules.json` (lot C4). The unit of edge costs and
 /// movement points is the kilometre of plain: great-circle distance times
@@ -335,17 +324,7 @@ fn baked_road_factor() -> f64 {
     BAKED_ROAD_COST_FACTOR
 }
 
-impl Default for MovementRules {
-    fn default() -> Self {
-        MovementRules {
-            points_per_step: 70.0,
-            sea_crossing_steps: 2.0,
-            fallback_links_per_neighbor: 2,
-            season_scale: 1.0,
-            road_cost_factor: BAKED_ROAD_COST_FACTOR,
-        }
-    }
-}
+crate::bundled_rules!(MovementRules, "settlements/rules.json", at "/movement", default);
 
 /// One edge of the settlement movement graph (spec § 4.4).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

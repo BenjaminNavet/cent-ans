@@ -3,8 +3,6 @@
 //! the rules are in `data/rules/battle_crest.json` (schema
 //! `data/schemas/battle_crest_rules.schema.json`).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/battle_crest.json`.
@@ -23,16 +21,9 @@ pub struct CrestRules {
     pub max_height_m: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_crest.json");
+data_model::bundled_rules!(CrestRules, "rules/battle_crest.json");
 
 impl CrestRules {
-    /// `data/rules/battle_crest.json` as compiled into the crate.
-    pub fn bundled() -> &'static CrestRules {
-        static RULES: OnceLock<CrestRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_crest.json is valid")
-        })
-    }
 
     /// Melee damage factor of a regiment standing `height_over` metres above
     /// its enemy (negative: below it).
@@ -58,18 +49,7 @@ pub struct CrestDefenceRules {
     pub min_line_regiments: usize,
 }
 
-const BUNDLED_DEFENCE: &str = include_str!("../../../../data/rules/battle_crest_defence.json");
-
-impl CrestDefenceRules {
-    /// `data/rules/battle_crest_defence.json` as compiled into the crate.
-    pub fn bundled() -> &'static CrestDefenceRules {
-        static RULES: OnceLock<CrestDefenceRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED_DEFENCE)
-                .expect("data/rules/battle_crest_defence.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(CrestDefenceRules, "rules/battle_crest_defence.json");
 
 #[cfg(test)]
 mod tests {

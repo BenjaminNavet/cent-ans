@@ -4,8 +4,6 @@
 //! of the missiles, morale lost per man killed. Field battles and sieges have
 //! their own values (the sieges keep their original pace).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/battle_pace.json`.
@@ -62,17 +60,7 @@ pub struct Pace {
     pub ai_patience_factor: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_pace.json");
-
-impl PaceRules {
-    /// `data/rules/battle_pace.json` as compiled into the crate.
-    pub fn bundled() -> &'static PaceRules {
-        static RULES: OnceLock<PaceRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_pace.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(PaceRules, "rules/battle_pace.json");
 
 #[cfg(test)]
 mod tests {

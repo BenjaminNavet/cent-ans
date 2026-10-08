@@ -32,8 +32,6 @@
 //! never assumed to be 1200 × 800.
 
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
-
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
@@ -274,16 +272,9 @@ pub struct DecorRules {
     pub camp: CampRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_decor.json");
+data_model::bundled_rules!(DecorRules, "rules/battle_decor.json");
 
 impl DecorRules {
-    /// `data/rules/battle_decor.json` as compiled into the crate.
-    pub fn bundled() -> &'static DecorRules {
-        static RULES: OnceLock<DecorRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_decor.json is valid")
-        })
-    }
 
     /// Key of the landscape of `province` (else of `terrain`).
     pub fn profile_key(&self, province: &str, terrain: Terrain) -> &str {

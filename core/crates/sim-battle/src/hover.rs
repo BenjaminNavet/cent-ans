@@ -10,8 +10,6 @@
 //! GDScript. Read-only and cheap (no path search): called as the mouse
 //! moves. Numbers from `data/rules/battle_hover.json` ([`HoverRules`]).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::hydro::Water;
@@ -168,17 +166,7 @@ impl RangeArcRules {
     }
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_hover.json");
-
-impl HoverRules {
-    /// `data/rules/battle_hover.json` as compiled into the crate.
-    pub fn bundled() -> &'static HoverRules {
-        static RULES: OnceLock<HoverRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_hover.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(HoverRules, "rules/battle_hover.json");
 
 impl BattleSim {
     /// CB-M2: what a right click at (x, z) would do with regiments

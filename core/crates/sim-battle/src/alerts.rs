@@ -20,8 +20,6 @@
 //! (`data/schemas/battle_alerts_rules.schema.json`), loaded the way
 //! [`crate::rout::RoutRules`] loads `battle_rout.json`.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::setup::SideId;
@@ -97,16 +95,9 @@ pub struct AlertRules {
     pub max_shown: u32,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_alerts.json");
+data_model::bundled_rules!(AlertRules, "rules/battle_alerts.json");
 
 impl AlertRules {
-    /// `data/rules/battle_alerts.json` as compiled into the crate.
-    pub fn bundled() -> &'static AlertRules {
-        static RULES: OnceLock<AlertRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_alerts.json is valid")
-        })
-    }
 
     /// Importance of `kind` (0 if absent from the table).
     pub fn importance(&self, kind: AlertKind) -> u32 {

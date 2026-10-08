@@ -8,10 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::ids::UnitTypeId;
 
-/// The rules file as bundled at build time: the fallback when
-/// `data/rules/mercenaries.json` is absent (test fixtures).
-const BUNDLED: &str = include_str!("../../../../../data/rules/mercenaries.json");
-
 /// Contents of `data/rules/mercenaries.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -36,11 +32,7 @@ pub struct MercenaryRules {
     pub bands: Vec<MercenaryBand>,
 }
 
-impl Default for MercenaryRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED).expect("bundled data/rules/mercenaries.json is valid")
-    }
-}
+crate::bundled_rules!(MercenaryRules, "rules/mercenaries.json", default);
 
 impl MercenaryRules {
     /// The band `id`.

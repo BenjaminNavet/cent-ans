@@ -7,6 +7,7 @@
 //!
 //! Entry point: [`GameData::load`].
 
+pub mod bundled;
 pub mod common;
 pub mod cover;
 pub mod entities;

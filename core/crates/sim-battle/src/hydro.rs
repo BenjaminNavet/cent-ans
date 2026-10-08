@@ -22,8 +22,6 @@
 //! `data/schemas/battle_water_rules.schema.json`).
 
 use std::f64::consts::TAU;
-use std::sync::OnceLock;
-
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
@@ -200,17 +198,7 @@ pub struct WaterRules {
     pub crossing: CrossingSiteRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_water.json");
-
-impl WaterRules {
-    /// `data/rules/battle_water.json` as compiled into the crate.
-    pub fn bundled() -> &'static WaterRules {
-        static RULES: OnceLock<WaterRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_water.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(WaterRules, "rules/battle_water.json");
 
 // ----- features ------------------------------------------------------------------
 

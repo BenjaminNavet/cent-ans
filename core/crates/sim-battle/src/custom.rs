@@ -11,8 +11,6 @@
 //! the replay start (`ReplayStart::weather`), not by the setup.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::OnceLock;
-
 use data_model::{
     BattleAbility, BattleOrder, BattleStandardRules, Faction, FactionId, TechnologyId, Terrain,
     UnitType, UnitTypeId,
@@ -68,17 +66,7 @@ pub struct CustomEngines {
     pub towers: u32,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/custom_battle.json");
-
-impl CustomBattleRules {
-    /// `data/rules/custom_battle.json` as compiled into the crate.
-    pub fn bundled() -> &'static CustomBattleRules {
-        static RULES: OnceLock<CustomBattleRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/custom_battle.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(CustomBattleRules, "rules/custom_battle.json");
 
 /// One side of a custom battle as composed in the screen.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

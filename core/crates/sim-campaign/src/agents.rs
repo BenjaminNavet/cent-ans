@@ -12,7 +12,6 @@ use data_model::util::splitmix64;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt;
-use std::sync::OnceLock;
 
 use data_model::{
     AgentActionKind, AgentKind, AgentRules, BuildingCategory, CharacterId, FactionId, GameData,
@@ -40,10 +39,9 @@ pub const MAX_LEVEL: u8 = 5;
 
 /// Rules in use: `data/rules/agents.json`, or the defaults of the design.
 pub fn rules(data: &GameData) -> &AgentRules {
-    static DEFAULT: OnceLock<AgentRules> = OnceLock::new();
     data.agent_rules
         .as_ref()
-        .unwrap_or_else(|| DEFAULT.get_or_init(AgentRules::default))
+        .unwrap_or_else(|| AgentRules::bundled())
 }
 
 // ----- identifiers and state ------------------------------------------------

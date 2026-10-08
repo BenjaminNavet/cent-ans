@@ -13,8 +13,6 @@
 //!
 //! The placement itself is in `sim/opening.rs`.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::field::Battlefield;
@@ -88,17 +86,7 @@ pub struct OpeningRules {
     pub palisade: PalisadeRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_opening.json");
-
-impl OpeningRules {
-    /// `data/rules/battle_opening.json` as compiled into the crate.
-    pub fn bundled() -> &'static OpeningRules {
-        static RULES: OnceLock<OpeningRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_opening.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(OpeningRules, "rules/battle_opening.json");
 
 /// Length of a polyline.
 pub fn polyline_length(points: &[(f64, f64)]) -> f64 {

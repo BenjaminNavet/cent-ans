@@ -45,19 +45,7 @@ impl TerrainCosts {
     }
 }
 
-impl Default for TerrainCosts {
-    fn default() -> Self {
-        TerrainCosts {
-            plains: 10,
-            hills: 15,
-            forest: 18,
-            marsh: 25,
-            mountains: 30,
-            steppe: default_steppe_cost(),
-            desert: default_desert_cost(),
-        }
-    }
-}
+crate::bundled_rules!(TerrainCosts, "movement/rules.json", at "/terrain_costs", default);
 
 /// How much of the turn a port-to-port crossing costs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -109,22 +97,4 @@ fn default_max_voyage_legs() -> u32 {
     1
 }
 
-impl Default for FreeMovementRules {
-    fn default() -> Self {
-        FreeMovementRules {
-            description: None,
-            zoc_radius_km: 8.0,
-            engage_radius_km: 5.0,
-            retreat_fallback_km: 15.0,
-            vision_army_km: 30.0,
-            vision_settlement_km: 20.0,
-            terrain_costs: TerrainCosts::default(),
-            road_cost_factor: 0.75,
-            minor_river_extra: 10,
-            slope_impassable_threshold: 0.3,
-            road_crossing_radius_km: None,
-            embark_cost: EmbarkCost::All,
-            max_voyage_legs: default_max_voyage_legs(),
-        }
-    }
-}
+crate::bundled_rules!(FreeMovementRules, "movement/rules.json", default);

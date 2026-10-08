@@ -12,8 +12,6 @@
 //! (midday: full visibility, so the older battles are unchanged).
 
 use data_model::util::splitmix64;
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// One phase of the day.
@@ -78,7 +76,7 @@ pub struct TimeOfDayRules {
     pub campaign_draw: Vec<PhaseWeight>,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_time_of_day.json");
+data_model::bundled_rules!(TimeOfDayRules, "rules/battle_time_of_day.json");
 
 /// `hour` brought back to `[0, 24)`.
 pub fn wrap_hour(hour: f64) -> f64 {
@@ -94,13 +92,6 @@ pub fn wrap_hour(hour: f64) -> f64 {
 }
 
 impl TimeOfDayRules {
-    /// `data/rules/battle_time_of_day.json` as compiled into the crate.
-    pub fn bundled() -> &'static TimeOfDayRules {
-        static RULES: OnceLock<TimeOfDayRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_time_of_day.json is valid")
-        })
-    }
 
     /// Hour of the day `elapsed_s` battle seconds after `start_hour`.
     pub fn hour_after(&self, start_hour: f64, elapsed_s: f64) -> f64 {

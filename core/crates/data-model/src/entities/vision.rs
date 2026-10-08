@@ -54,19 +54,4 @@ fn default_province_seen_percent() -> u32 {
     25
 }
 
-impl Default for VisionRules {
-    /// Fallback when `data/rules/vision.json` is absent: allies shared, a
-    /// quarter of a province seen makes it visible.
-    fn default() -> Self {
-        VisionRules {
-            controlled_range: 0,
-            army_range: 0,
-            general_bonus: 0,
-            share_allied_vision: true,
-            province_seen_percent: default_province_seen_percent(),
-            own_provinces_visible: default_own_provinces_visible(),
-            edge_feather_km: default_edge_feather_km(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(VisionRules, "rules/vision.json", default);

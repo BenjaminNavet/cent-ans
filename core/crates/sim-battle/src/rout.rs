@@ -18,8 +18,6 @@
 //!   enemy. The morale loss is [`ContagionRules::morale_per_second`] per unit
 //!   of weight, at most [`ContagionRules::max_weight`].
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/battle_rout.json`.
@@ -72,17 +70,7 @@ pub struct FlightRules {
     pub friend_weight: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_rout.json");
-
-impl RoutRules {
-    /// `data/rules/battle_rout.json` as compiled into the crate.
-    pub fn bundled() -> &'static RoutRules {
-        static RULES: OnceLock<RoutRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_rout.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(RoutRules, "rules/battle_rout.json");
 
 impl ContagionRules {
     /// Weight of a routing friend at offset `(dx, dz)` from a regiment whose

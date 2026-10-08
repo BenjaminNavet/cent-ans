@@ -90,16 +90,9 @@ pub struct SiegeWorkRules {
     pub engine: EngineRules,
 }
 
-const BUNDLED_WORKS: &str = include_str!("../../../../data/rules/siege_works.json");
+data_model::bundled_rules!(SiegeWorkRules, "rules/siege_works.json");
 
 impl SiegeWorkRules {
-    /// `data/rules/siege_works.json` as compiled into the crate.
-    pub fn bundled() -> &'static SiegeWorkRules {
-        static RULES: std::sync::OnceLock<SiegeWorkRules> = std::sync::OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED_WORKS).expect("data/rules/siege_works.json is valid")
-        })
-    }
 
     /// Wall and gate HP at fortification `fortification` (capped at 5).
     pub fn hp(&self, fortification: u32) -> (f64, f64) {

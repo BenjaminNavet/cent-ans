@@ -17,8 +17,6 @@
 //! shooters 45 m behind the foot (or on the line without foot), the horse
 //! on the wings, alternately right and left, the engines behind.
 
-use std::sync::OnceLock;
-
 use data_model::UnitCategory;
 use serde::{Deserialize, Serialize};
 
@@ -255,19 +253,12 @@ pub struct GroupFormationRules {
     pub presets: Vec<Preset>,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/group_formations.json");
+data_model::bundled_rules!(GroupFormationRules, "rules/group_formations.json");
 
 /// Id of the preset of the initial deployment.
 pub const BATTLE_LINE: &str = "battle_line";
 
 impl GroupFormationRules {
-    /// `data/rules/group_formations.json` as compiled into the crate.
-    pub fn bundled() -> &'static GroupFormationRules {
-        static RULES: OnceLock<GroupFormationRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/group_formations.json is valid")
-        })
-    }
 
     pub fn preset(&self, id: &str) -> Option<&Preset> {
         self.presets.iter().find(|p| p.id == id)

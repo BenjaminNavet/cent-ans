@@ -22,14 +22,4 @@ pub struct BattleHistoryRules {
     pub description: Option<String>,
 }
 
-impl Default for BattleHistoryRules {
-    /// Fallback when `data/rules/battle_history.json` is absent; kept equal
-    /// to that file.
-    fn default() -> Self {
-        BattleHistoryRules {
-            max_age_turns: 8,
-            max_records: 256,
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(BattleHistoryRules, "rules/battle_history.json", default);

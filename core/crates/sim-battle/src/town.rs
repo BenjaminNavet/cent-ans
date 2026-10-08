@@ -17,8 +17,6 @@
 //! facade) faces `(-sin yaw, cos yaw)`.
 
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// An oriented rectangle: centre, half sizes along its own axes and yaw.
@@ -357,17 +355,7 @@ pub struct TownRules {
     pub places: crate::siege_layouts::PlaceRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/siege_town.json");
-
-impl TownRules {
-    /// `data/rules/siege_town.json` as compiled into the crate.
-    pub fn bundled() -> &'static TownRules {
-        static RULES: OnceLock<TownRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/siege_town.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(TownRules, "rules/siege_town.json");
 
 /// Deterministic draw in [0, 1) from a key and a salt (SplitMix64), for the
 /// layout of the furniture: it never touches the battle's random stream.
