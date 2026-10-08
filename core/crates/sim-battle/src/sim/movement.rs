@@ -2,36 +2,30 @@
 
 use super::*;
 
+/// Regiments further apart than this (centre to centre) never touch (metres).
+const CONTACT_RANGE: f64 = 250.0;
+
 impl BattleSim {
     /// For each unit, the enemy units in contact with it (in id order).
     pub(super) fn contacts(&self) -> Vec<Vec<usize>> {
-        let n = self.units.len();
-        let mut result = vec![Vec::new(); n];
-        for i in 0..n {
-            if !self.units[i].present() {
+        let mut result = vec![Vec::new(); self.units.len()];
+        for (i, j) in self.near_pairs(CONTACT_RANGE, Unit::present) {
+            let (a, b) = (&self.units[i], &self.units[j]);
+            if a.side == b.side {
                 continue;
             }
-            for j in (i + 1)..n {
-                let (a, b) = (&self.units[i], &self.units[j]);
-                if a.side == b.side || !b.present() {
-                    continue;
-                }
-                let (dx, dz) = (b.x - a.x, b.z - a.z);
-                let dist = (dx * dx + dz * dz).sqrt();
-                if dist > 250.0 {
-                    continue;
-                }
-                let dir = if dist > 1e-6 {
-                    (dx / dist, dz / dist)
-                } else {
-                    (0.0, 1.0)
-                };
-                let gap_ab = a.distance_to_rect(b.x, b.z) - b.support(dir);
-                let gap_ba = b.distance_to_rect(a.x, a.z) - a.support(dir);
-                if gap_ab.max(gap_ba) < CONTACT_GAP && !self.wall_between(a, b) {
-                    result[i].push(j);
-                    result[j].push(i);
-                }
+            let (dx, dz) = (b.x - a.x, b.z - a.z);
+            let dist = (dx * dx + dz * dz).sqrt();
+            let dir = if dist > 1e-6 {
+                (dx / dist, dz / dist)
+            } else {
+                (0.0, 1.0)
+            };
+            let gap_ab = a.distance_to_rect(b.x, b.z) - b.support(dir);
+            let gap_ba = b.distance_to_rect(a.x, a.z) - a.support(dir);
+            if gap_ab.max(gap_ba) < CONTACT_GAP && !self.wall_between(a, b) {
+                result[i].push(j);
+                result[j].push(i);
             }
         }
         result

@@ -119,7 +119,7 @@ pub struct Unit {
     pub category: UnitCategory,
     pub mounted: bool,
     pub stats: UnitStats,
-    pub abilities: Vec<Ability>,
+    pub abilities: std::sync::Arc<[Ability]>,
     /// Missile loosed by a shooting unit (lot UR2: data-driven, see
     /// `BattleSim::missile_kind`).
     #[serde(default)]
@@ -306,7 +306,7 @@ impl Unit {
             category: setup.category,
             mounted: setup.mounted,
             stats: setup.stats.clone(),
-            abilities: setup.abilities.clone(),
+            abilities: setup.abilities.as_slice().into(),
             missile: setup.missile,
             experience: setup.experience,
             initial_soldiers: setup.soldiers,
@@ -400,6 +400,16 @@ impl Unit {
     /// Living soldiers.
     pub fn soldiers(&self) -> u32 {
         self.hp.max(0.0).ceil() as u32
+    }
+
+    /// Strips `ability` from the regiment (laboratory set-ups).
+    pub fn remove_ability(&mut self, ability: Ability) {
+        self.abilities = self
+            .abilities
+            .iter()
+            .copied()
+            .filter(|a| *a != ability)
+            .collect();
     }
 
     pub fn has(&self, ability: Ability) -> bool {

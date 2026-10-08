@@ -340,9 +340,7 @@ fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
     place(&mut sim, 2, 1100.0, 750.0, std::f64::consts::PI);
     place(&mut sim, 0, 600.0, HEDGE_Z - 150.0, 0.0);
     // No stakes: the knights would not charge them head on anyway.
-    sim.units_mut()[1]
-        .abilities
-        .retain(|a| *a != data_model::Ability::Stakes);
+    sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
     hold_fire(&mut sim, SideId::Defender);
     sim
 }

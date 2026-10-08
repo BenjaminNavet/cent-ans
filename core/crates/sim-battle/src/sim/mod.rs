@@ -17,6 +17,7 @@ mod melee;
 mod modes;
 mod morale;
 mod movement;
+mod neighbours;
 mod obstacles;
 mod opening;
 mod pathing;

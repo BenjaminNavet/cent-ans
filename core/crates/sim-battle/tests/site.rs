@@ -338,9 +338,7 @@ fn a_hedge_breaks_a_cavalry_charge() {
         place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
         place(&mut sim, 0, 600.0, 250.0, 0.0);
         sim.units_mut()[1].ammo = 0;
-        sim.units_mut()[1]
-            .abilities
-            .retain(|a| *a != data_model::Ability::Stakes);
+        sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
         sim.issue_command(Command::Attack {
             units: vec![0],
             target: 1,

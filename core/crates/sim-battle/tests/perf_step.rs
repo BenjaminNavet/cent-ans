@@ -79,5 +79,9 @@ fn measure(label: &str, make: fn() -> BattleSim, steps: u32) {
 #[ignore]
 fn time_steps_and_forks() {
     measure("demo", demo_sim, 3000);
-    measure("epic", epic_sim, 1500);
+    measure(
+        "epic",
+        epic_sim,
+        std::env::var("PERF_STEPS").map_or(1500, |s| s.parse().unwrap()),
+    );
 }
