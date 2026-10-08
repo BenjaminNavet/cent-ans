@@ -356,3 +356,13 @@ static func unit_label(unit: Dictionary) -> String:
 		return name
 	return str(unit.get("unit_type", "?")).trim_prefix("unit_").capitalize()
 
+
+## Nom d'une faction : `display_name` s'il est fourni, sinon `label_of(faction_id)`, « — » si vide.
+static func faction_label(faction_id: String, display_name: String, label_of: Callable) -> String:
+	if faction_id == "":
+		return "—"
+	if display_name != "":
+		return display_name
+	if label_of.is_valid():
+		return str(label_of.call(faction_id))
+	return faction_id

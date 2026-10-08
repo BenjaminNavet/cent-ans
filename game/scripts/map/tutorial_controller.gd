@@ -714,12 +714,12 @@ func stage_screenshot(stage: String) -> void:
 	match stage:
 		"tutorial":
 			map.call("_stage_screenshot")
-			start(TutorialSteps.STEP_IDS.find("move_army"))
+			start(TutorialSteps.step_ids().find("move_army"))
 			overlay.set_target(resolve_target("royal_army"))
 		"tutorial_toc":  # UX2 : sommaire ouvert, cible dans la barre du haut
 			map.call("_focus_capital")
 			map.get("ui").call("hide_province")
-			start(TutorialSteps.STEP_IDS.find("research"))
+			start(TutorialSteps.step_ids().find("research"))
 			overlay.set_toc_open(true)
 			overlay.set_target(resolve_target("research"))
 		"encyclopedia":
