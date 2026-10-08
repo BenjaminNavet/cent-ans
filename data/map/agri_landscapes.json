@@ -1,0 +1,1022 @@
+{
+ "description": "ME8 (DN) : paysages agricoles régionaux de la carte de campagne. Chaque paysage est une ligne de la table du sol (hb_table, lignes 8 et suivantes) ; les régions (ellipses lon/lat, comme wetlands.json) sont cuites en data/map/agri_regions.png par `cent-ans geo agri-regions` et prennent le pas sur le biome pour le parcellaire. open_to_farm : part de la prairie du splat convertie en cultures (Provence : prés verts devenus oliveraies et vignes). material_fallbacks : matière souhaitée -> matière existante tant que la texture dédiée n'est pas générée ; ajouter la matière dans ground_materials.yaml suffit à la brancher. seasonal_variants : modèles glb saisonniers du catalogue, utilisés quand ils sont ingérés (sinon teinte de saison du shader). Rendu seulement.",
+ "landscapes": {
+  "openfield_north": {
+   "label": "Openfields du nord (lanières)",
+   "cell_m": 260,
+   "strip": 5.0,
+   "hedge": 0.0,
+   "farm": 1.0,
+   "open_to_farm": 0.0,
+   "crops": {
+    "wheat_ripe": 3.0,
+    "barley_green": 2.0,
+    "rye_field": 1.5,
+    "ploughed": 2.0,
+    "fallow": 1.2
+   },
+   "wild": [
+    "hay_meadow",
+    "pasture"
+   ],
+   "canopy": "broadleaf_canopy",
+   "rock": "limestone_rock",
+   "tint": [
+    1.02,
+    1.0,
+    0.94
+   ]
+  },
+  "bocage_west": {
+   "label": "Bocage de l'ouest",
+   "cell_m": 110,
+   "strip": 1.2,
+   "hedge": 1.7,
+   "farm": 1.0,
+   "open_to_farm": 0.0,
+   "crops": {
+    "bocage_meadow": 3.0,
+    "pasture": 2.0,
+    "apple_orchard": 1.5,
+    "hay_meadow": 1.0,
+    "buckwheat_field": 1.0,
+    "ploughed": 0.8
+   },
+   "wild": [
+    "bocage_meadow",
+    "heather_moor"
+   ],
+   "canopy": "broadleaf_canopy",
+   "rock": "granite_rock",
+   "tint": [
+    0.99,
+    1.02,
+    0.95
+   ]
+  },
+  "vineyard_terraces": {
+   "label": "Vignes en terrasses (Bourgogne, Rhin, Douro, Loire)",
+   "cell_m": 75,
+   "strip": 3.5,
+   "hedge": 0.5,
+   "farm": 1.0,
+   "open_to_farm": 0.6,
+   "crops": {
+    "vineyard_rows": 5.0,
+    "med_terraces": 1.5,
+    "ploughed": 0.5,
+    "fallow": 0.5
+   },
+   "wild": [
+    "limestone_garrigue",
+    "maquis"
+   ],
+   "canopy": "broadleaf_canopy",
+   "rock": "limestone_rock",
+   "tint": [
+    1.03,
+    0.98,
+    0.92
+   ]
+  },
+  "olive_orchard_south": {
+   "label": "Oliveraies, vergers et vignes du sud",
+   "cell_m": 140,
+   "strip": 1.5,
+   "hedge": 0.3,
+   "farm": 1.0,
+   "open_to_farm": 0.85,
+   "crops": {
+    "olive_grove": 3.5,
+    "vineyard_rows": 1.5,
+    "fruit_orchard_rows": 1.2,
+    "med_terraces": 1.2,
+    "wheat_ripe": 1.0
+   },
+   "wild": [
+    "limestone_garrigue",
+    "maquis"
+   ],
+   "canopy": "med_pine_open",
+   "rock": "limestone_rock",
+   "tint": [
+    1.04,
+    1.0,
+    0.9
+   ]
+  },
+  "irrigated_huerta": {
+   "label": "Huertas, rizières et prés irrigués",
+   "cell_m": 65,
+   "strip": 2.5,
+   "hedge": 0.2,
+   "farm": 1.0,
+   "open_to_farm": 0.9,
+   "crops": {
+    "rice_paddy": 3.0,
+    "huerta_plots": 2.5,
+    "fruit_orchard_rows": 1.0,
+    "hay_meadow": 1.0
+   },
+   "wild": [
+    "pasture",
+    "limestone_garrigue"
+   ],
+   "canopy": "broadleaf_canopy",
+   "rock": "limestone_rock",
+   "tint": [
+    1.0,
+    1.0,
+    0.95
+   ]
+  },
+  "swidden_east": {
+   "label": "Brûlis et essarts de l'est",
+   "cell_m": 200,
+   "strip": 1.3,
+   "hedge": 0.15,
+   "farm": 0.7,
+   "open_to_farm": 0.4,
+   "crops": {
+    "swidden_ash": 2.0,
+    "rye_field": 2.0,
+    "buckwheat_field": 1.5,
+    "fallow": 2.0,
+    "hay_meadow": 1.0
+   },
+   "wild": [
+    "heather_moor",
+    "pasture"
+   ],
+   "canopy": "boreal_mixed",
+   "rock": "granite_rock",
+   "tint": [
+    0.95,
+    0.95,
+    0.9
+   ]
+  }
+ },
+ "material_fallbacks": {
+  "rice_paddy": "barley_green",
+  "huerta_plots": "hay_meadow",
+  "fruit_orchard_rows": "apple_orchard",
+  "swidden_ash": "ploughed"
+ },
+ "regions": [
+  {
+   "id": "beauce",
+   "landscape": "openfield_north",
+   "name": "Beauce",
+   "ellipse": {
+    "center": [
+     1.8,
+     48.3
+    ],
+    "radii_km": [
+     70,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "santerre",
+   "landscape": "openfield_north",
+   "name": "Picardie et Santerre",
+   "ellipse": {
+    "center": [
+     2.6,
+     49.8
+    ],
+    "radii_km": [
+     60,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "champagne_crayeuse",
+   "landscape": "openfield_north",
+   "name": "Champagne crayeuse",
+   "ellipse": {
+    "center": [
+     4.4,
+     49.1
+    ],
+    "radii_km": [
+     60,
+     30
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "brie",
+   "landscape": "openfield_north",
+   "name": "Brie",
+   "ellipse": {
+    "center": [
+     3.2,
+     48.7
+    ],
+    "radii_km": [
+     40,
+     25
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "flandre_hainaut",
+   "landscape": "openfield_north",
+   "name": "Flandre et Hainaut",
+   "ellipse": {
+    "center": [
+     3.3,
+     50.6
+    ],
+    "radii_km": [
+     55,
+     30
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "east_anglia",
+   "landscape": "openfield_north",
+   "name": "East Anglia",
+   "ellipse": {
+    "center": [
+     0.9,
+     52.4
+    ],
+    "radii_km": [
+     70,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "midlands",
+   "landscape": "openfield_north",
+   "name": "Midlands anglais",
+   "ellipse": {
+    "center": [
+     -1.2,
+     52.6
+    ],
+    "radii_km": [
+     80,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "boerde",
+   "landscape": "openfield_north",
+   "name": "Börde de Saxe",
+   "ellipse": {
+    "center": [
+     10.5,
+     52.0
+    ],
+    "radii_km": [
+     70,
+     30
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "kuyavia",
+   "landscape": "openfield_north",
+   "name": "Cujavie et Grande-Pologne",
+   "ellipse": {
+    "center": [
+     18.3,
+     52.5
+    ],
+    "radii_km": [
+     120,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "bretagne",
+   "landscape": "bocage_west",
+   "name": "Bretagne",
+   "ellipse": {
+    "center": [
+     -3.0,
+     48.1
+    ],
+    "radii_km": [
+     120,
+     60
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "normandie_bocage",
+   "landscape": "bocage_west",
+   "name": "Bocage normand",
+   "ellipse": {
+    "center": [
+     -0.8,
+     48.9
+    ],
+    "radii_km": [
+     90,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "maine",
+   "landscape": "bocage_west",
+   "name": "Maine et Mayenne",
+   "ellipse": {
+    "center": [
+     -0.5,
+     48.0
+    ],
+    "radii_km": [
+     60,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "poitou_bocage",
+   "landscape": "bocage_west",
+   "name": "Gâtine vendéenne et poitevine",
+   "ellipse": {
+    "center": [
+     -0.8,
+     46.8
+    ],
+    "radii_km": [
+     80,
+     40
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "devon",
+   "landscape": "bocage_west",
+   "name": "Devon et Cornouailles",
+   "ellipse": {
+    "center": [
+     -3.8,
+     50.7
+    ],
+    "radii_km": [
+     80,
+     35
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "galicia",
+   "landscape": "bocage_west",
+   "name": "Galice",
+   "ellipse": {
+    "center": [
+     -8.0,
+     42.8
+    ],
+    "radii_km": [
+     90,
+     45
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "asturias",
+   "landscape": "bocage_west",
+   "name": "Asturies",
+   "ellipse": {
+    "center": [
+     -5.8,
+     43.3
+    ],
+    "radii_km": [
+     80,
+     20
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "weald",
+   "landscape": "bocage_west",
+   "name": "Weald du Kent et du Sussex",
+   "ellipse": {
+    "center": [
+     0.4,
+     51.1
+    ],
+    "radii_km": [
+     50,
+     20
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "cote_or",
+   "landscape": "vineyard_terraces",
+   "name": "Côte de Bourgogne",
+   "ellipse": {
+    "center": [
+     4.85,
+     47.1
+    ],
+    "radii_km": [
+     55,
+     8
+    ],
+    "angle_deg": 70
+   }
+  },
+  {
+   "id": "champagne_vigne",
+   "landscape": "vineyard_terraces",
+   "name": "Vignoble de Champagne",
+   "ellipse": {
+    "center": [
+     3.9,
+     49.05
+    ],
+    "radii_km": [
+     30,
+     18
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "alsace",
+   "landscape": "vineyard_terraces",
+   "name": "Vignoble d'Alsace",
+   "ellipse": {
+    "center": [
+     7.4,
+     48.2
+    ],
+    "radii_km": [
+     70,
+     8
+    ],
+    "angle_deg": 80
+   }
+  },
+  {
+   "id": "palatinat",
+   "landscape": "vineyard_terraces",
+   "name": "Palatinat viticole",
+   "ellipse": {
+    "center": [
+     8.1,
+     49.4
+    ],
+    "radii_km": [
+     40,
+     8
+    ],
+    "angle_deg": 80
+   }
+  },
+  {
+   "id": "moselle",
+   "landscape": "vineyard_terraces",
+   "name": "Moselle et Rhin moyen",
+   "ellipse": {
+    "center": [
+     7.2,
+     50.0
+    ],
+    "radii_km": [
+     75,
+     10
+    ],
+    "angle_deg": 30
+   }
+  },
+  {
+   "id": "douro",
+   "landscape": "vineyard_terraces",
+   "name": "Haut Douro",
+   "ellipse": {
+    "center": [
+     -7.6,
+     41.15
+    ],
+    "radii_km": [
+     60,
+     10
+    ],
+    "angle_deg": 5
+   }
+  },
+  {
+   "id": "loire_vigne",
+   "landscape": "vineyard_terraces",
+   "name": "Vignoble de Loire",
+   "ellipse": {
+    "center": [
+     0.0,
+     47.3
+    ],
+    "radii_km": [
+     100,
+     10
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "bordelais",
+   "landscape": "vineyard_terraces",
+   "name": "Bordelais",
+   "ellipse": {
+    "center": [
+     -0.5,
+     44.9
+    ],
+    "radii_km": [
+     55,
+     30
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "rhone_nord",
+   "landscape": "vineyard_terraces",
+   "name": "Côtes du Rhône",
+   "ellipse": {
+    "center": [
+     4.8,
+     45.0
+    ],
+    "radii_km": [
+     40,
+     8
+    ],
+    "angle_deg": 80
+   }
+  },
+  {
+   "id": "tokaj",
+   "landscape": "vineyard_terraces",
+   "name": "Tokaj",
+   "ellipse": {
+    "center": [
+     21.4,
+     48.15
+    ],
+    "radii_km": [
+     20,
+     10
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "wachau",
+   "landscape": "vineyard_terraces",
+   "name": "Wachau et Autriche viticole",
+   "ellipse": {
+    "center": [
+     15.7,
+     48.4
+    ],
+    "radii_km": [
+     40,
+     12
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "chianti",
+   "landscape": "vineyard_terraces",
+   "name": "Chianti",
+   "ellipse": {
+    "center": [
+     11.3,
+     43.5
+    ],
+    "radii_km": [
+     40,
+     25
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "provence",
+   "landscape": "olive_orchard_south",
+   "name": "Provence",
+   "ellipse": {
+    "center": [
+     5.75,
+     43.65
+    ],
+    "radii_km": [
+     115,
+     55
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "comtat",
+   "landscape": "olive_orchard_south",
+   "name": "Comtat et vallée du Rhône sud",
+   "ellipse": {
+    "center": [
+     4.95,
+     44.0
+    ],
+    "radii_km": [
+     45,
+     35
+    ],
+    "angle_deg": 80
+   }
+  },
+  {
+   "id": "languedoc",
+   "landscape": "olive_orchard_south",
+   "name": "Languedoc méditerranéen",
+   "ellipse": {
+    "center": [
+     3.3,
+     43.5
+    ],
+    "radii_km": [
+     100,
+     30
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "liguria",
+   "landscape": "olive_orchard_south",
+   "name": "Ligurie",
+   "ellipse": {
+    "center": [
+     8.6,
+     44.2
+    ],
+    "radii_km": [
+     70,
+     20
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "toscana",
+   "landscape": "olive_orchard_south",
+   "name": "Toscane et Latium",
+   "ellipse": {
+    "center": [
+     11.8,
+     42.6
+    ],
+    "radii_km": [
+     130,
+     60
+    ],
+    "angle_deg": -30
+   }
+  },
+  {
+   "id": "puglia",
+   "landscape": "olive_orchard_south",
+   "name": "Pouilles",
+   "ellipse": {
+    "center": [
+     16.5,
+     41.0
+    ],
+    "radii_km": [
+     130,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "jaen",
+   "landscape": "olive_orchard_south",
+   "name": "Haute Andalousie",
+   "ellipse": {
+    "center": [
+     -3.8,
+     37.8
+    ],
+    "radii_km": [
+     120,
+     45
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "catalunya",
+   "landscape": "olive_orchard_south",
+   "name": "Catalogne méridionale",
+   "ellipse": {
+    "center": [
+     0.9,
+     41.2
+    ],
+    "radii_km": [
+     80,
+     45
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "alentejo",
+   "landscape": "olive_orchard_south",
+   "name": "Alentejo",
+   "ellipse": {
+    "center": [
+     -7.8,
+     38.3
+    ],
+    "radii_km": [
+     100,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "sicilia",
+   "landscape": "olive_orchard_south",
+   "name": "Sicile",
+   "ellipse": {
+    "center": [
+     14.0,
+     37.5
+    ],
+    "radii_km": [
+     150,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "morea",
+   "landscape": "olive_orchard_south",
+   "name": "Péloponnèse",
+   "ellipse": {
+    "center": [
+     22.2,
+     37.6
+    ],
+    "radii_km": [
+     100,
+     50
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "huerta_valencia",
+   "landscape": "irrigated_huerta",
+   "name": "Huerta de Valence et Albufera",
+   "ellipse": {
+    "center": [
+     -0.4,
+     39.4
+    ],
+    "radii_km": [
+     45,
+     25
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "huerta_murcia",
+   "landscape": "irrigated_huerta",
+   "name": "Huerta de Murcie",
+   "ellipse": {
+    "center": [
+     -1.1,
+     38.0
+    ],
+    "radii_km": [
+     40,
+     20
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "vega_granada",
+   "landscape": "irrigated_huerta",
+   "name": "Vega de Grenade",
+   "ellipse": {
+    "center": [
+     -3.6,
+     37.15
+    ],
+    "radii_km": [
+     30,
+     15
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "ebre",
+   "landscape": "irrigated_huerta",
+   "name": "Delta de l'Èbre et Ribera",
+   "ellipse": {
+    "center": [
+     0.75,
+     40.75
+    ],
+    "radii_km": [
+     30,
+     15
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "lombardia",
+   "landscape": "irrigated_huerta",
+   "name": "Plaine irriguée lombarde (marcite)",
+   "ellipse": {
+    "center": [
+     9.0,
+     45.3
+    ],
+    "radii_km": [
+     75,
+     35
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "piemont_riz",
+   "landscape": "irrigated_huerta",
+   "name": "Plaine du Pô piémontaise",
+   "ellipse": {
+    "center": [
+     8.3,
+     45.2
+    ],
+    "radii_km": [
+     45,
+     20
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "lituanie",
+   "landscape": "swidden_east",
+   "name": "Forêts de Lituanie et Biélorussie",
+   "ellipse": {
+    "center": [
+     26.5,
+     55.0
+    ],
+    "radii_km": [
+     170,
+     80
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "russie_nord",
+   "landscape": "swidden_east",
+   "name": "Forêts de Novgorod et Tver",
+   "ellipse": {
+    "center": [
+     34.0,
+     57.5
+    ],
+    "radii_km": [
+     230,
+     100
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "moscovie",
+   "landscape": "swidden_east",
+   "name": "Forêts de Moscovie",
+   "ellipse": {
+    "center": [
+     40.0,
+     57.0
+    ],
+    "radii_km": [
+     220,
+     100
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "karelie",
+   "landscape": "swidden_east",
+   "name": "Carélie et Finlande",
+   "ellipse": {
+    "center": [
+     28.0,
+     62.0
+    ],
+    "radii_km": [
+     200,
+     110
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "smaland",
+   "landscape": "swidden_east",
+   "name": "Småland et Suède forestière",
+   "ellipse": {
+    "center": [
+     14.8,
+     57.3
+    ],
+    "radii_km": [
+     110,
+     60
+    ],
+    "angle_deg": 0
+   }
+  },
+  {
+   "id": "perm",
+   "landscape": "swidden_east",
+   "name": "Perm et Zavolotchie",
+   "ellipse": {
+    "center": [
+     53.0,
+     58.5
+    ],
+    "radii_km": [
+     200,
+     100
+    ],
+    "angle_deg": 0
+   }
+  }
+ ],
+ "seasonal_variants": [
+  {
+   "tree_class": "oak",
+   "season": "autumn",
+   "model_id": "env_autumn_oak_gold"
+  },
+  {
+   "tree_class": "beech",
+   "season": "autumn",
+   "model_id": "env_autumn_beech_copper"
+  },
+  {
+   "tree_class": "golden",
+   "season": "autumn",
+   "model_id": "env_autumn_larch_gold"
+  },
+  {
+   "tree_class": "evergreen",
+   "season": "winter",
+   "model_id": "env_snow_conifer"
+  }
+ ]
+}

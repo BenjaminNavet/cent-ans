@@ -176,6 +176,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "voice_barks.schema.json": ("voice/barks.json",),
     "voice_speech.schema.json": ("voice/speech_voices.json",),
     "war_scars_ui.schema.json": ("ui/war_scars.json",),
+    "agri_landscapes.schema.json": ("map/agri_landscapes.json",),
     "wetlands.schema.json": ("map/wetlands.json",),
 }
 
