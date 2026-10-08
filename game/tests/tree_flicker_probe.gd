@@ -96,7 +96,9 @@ func _init() -> void:
 					var a: Array = prev_state[key]
 					var b: Array = state[key]
 					diff["lod"] += int(a[0] != b[0])
-					diff["shadow"] += int(a[1] != b[1])
+					# FL1 : seulement les parties visibles aux deux images (une partie qui apparaît au bord du
+					# fondu reçoit son ombre en même temps, arbres de taille nulle).
+					diff["shadow"] += int(a[1] != b[1] and a[2] and b[2])
 					diff["vis"] += int(a[2] != b[2])
 			var level_changes := 0
 			for i in levels.size():

@@ -145,6 +145,12 @@ var _generation: int = 0
 var _exclusions := PackedVector3Array()
 var _rig: Node3D
 var _frame: int = 0
+## FL1 : ombres des arbres allumées pour la vue entière (seuil de zoom avec hystérésis), pas
+## partie par partie : en style généralisé, une partie qui franchissait la distance des paliers
+## allumait ou coupait d'un coup l'ombre de tout un paquet d'arbres en panoramique (clignotement).
+var _tree_shadows_on: bool = false
+## Écart relatif du seuil d'ombres entre allumage et extinction (évite le va-et-vient au zoom).
+const SHADOW_HYSTERESIS := 0.08
 var _log_bursts := false
 var _warm := false
 var _built_frame := 0
@@ -624,6 +630,8 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	visible = active
 	if not active or _material == null:
 		return
+	var shadow_limit := tree_shadow_limit() * (1.0 + SHADOW_HYSTERESIS if _tree_shadows_on else 1.0 - SHADOW_HYSTERESIS)
+	_tree_shadows_on = cast_shadows and camera_distance < shadow_limit
 	var props := MapPropScale.shared()
 	var camera_xz := Vector2(camera_position.x, camera_position.z)
 	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
@@ -757,10 +765,11 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
 	# GPU. Réévalué chaque image (pas seulement au changement de LOD) : ne dépend pas de `detailed`
 	# seul, mais aussi du zoom global qui peut varier sans que `detailed` change.
-	var shadow_on := cast_shadows and detailed and camera_distance < tree_shadow_limit()
+	# FL1 : en style généralisé, les ombres ne dépendent plus de la partie (voir `_tree_shadows_on`).
+	var shadow_on := _tree_shadows_on and (generalised or detailed)
 	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for mmi in mmis:
-		if mmi != null:
+		if mmi != null and (mmi as MultiMeshInstance3D).cast_shadow != shadow_setting:
 			(mmi as MultiMeshInstance3D).cast_shadow = shadow_setting
 	var t := clampf((d - fade_start) / maxf(fade_end - fade_start, 1.0), 0.0, 1.0)
 	var fraction := clampf(minf(1.0 - t, density) + 0.02, 0.0, 1.0)

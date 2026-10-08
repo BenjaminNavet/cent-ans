@@ -16,7 +16,13 @@ Reprend `docs/wip/arbres-clignotants.md` et `docs/wip/fps-carte.md` (PF, ADR 016
   316 et 391 pics** ; `settle/declutter` 3,9 / 6,2 ms ; `map.update_lod` 2,2 / 2,6 ms ; non attribué
   4,7 / 8,6 ms ; `life/reground` pics à 35 ms. Descente : 249 des 253 pics dominés par les scripts.
   → Le FPS est d'abord limité par le **GDScript du fil principal**, pas par le GPU.
-- [ ] FL1 arbres qui clignotent.
+- [x] FL1 arbres qui clignotent : ombres des arbres allumées pour toute la vue selon le zoom
+  (`_tree_shadows_on`, hystérésis 8 %), plus partie par partie. Sonde `tree_flicker_probe --keys`
+  (bascules d'ombre de parties visibles aux deux images) : rig 60 **22 → 0**, rig 40 **30 → 0**.
+  Tests ga3_l2_vegetation, hc_forest, fc1_shadows OK ; tf_far_layer échoue sur un seuil de temps
+  (124 ms > 8, charge 231 : SC). Coût des ombres en plus à rig < 64 : à mesurer en A/B (FL3).
+  Restes possibles du clignotement : changements de niveau du relief (64 en 150 images) et
+  recalages d'arbres une image après (≤ 22 % de la hauteur) — à revoir si le joueur en voit encore.
 - [ ] FL2 appels de dessin et primitives.
 - [ ] FL3 images p50/p99 de la carte (shader du terrain, pics de scripts).
 
@@ -34,4 +40,4 @@ Session SC (`../gp-sc`, `feat/sc`, simplification de tout le code, 20 agents) d�
 elle peut toucher les fichiers FL. Bancs FL : uniquement `--bench-ab` en processus (charge).
 
 ## Prochaine étape
-Correctif FL1 (ombres des arbres), puis décomposer `map.misc`.
+Décomposer `map.misc` (campaign_map.gd:1548) et `settle/declutter` ; A/B du coût d'ombres FL1.
