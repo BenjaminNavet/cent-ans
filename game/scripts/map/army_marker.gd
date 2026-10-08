@@ -72,6 +72,8 @@ var _flag_material: ShaderMaterial
 var figures: ArmyFigures
 ## Hauteurs de repos de la hampe, du fleuron et du drapeau (avant décalage vers le porteur).
 var _rest_y: Array = []
+## AS2 : la hampe a été déplacée par le balancement (à remettre droite à l'arrêt).
+var _bearer_moving: bool = false
 var _selected := false
 var _hovered := false
 var _standoff_on := true
@@ -267,13 +269,32 @@ func face(direction: Vector2) -> void:
 
 
 ## Lot CV2 : la hampe suit le porte-étendard (ou la hampe de poupe du navire amiral).
+## Lot AS2 : et son balancement (rebond/roulis de la marche, tangage du navire) : le pied de la
+## hampe est à `anchor`, la hampe, le fleuron et le drapeau pivotent autour avec `bearer_tilt`.
 func _follow_bearer() -> void:
 	var anchor := figures.bearer_anchor()
 	if _rest_y.size() < 3:
 		return
-	pole.position = Vector3(anchor.x, float(_rest_y[0]) + anchor.y, anchor.z)
-	$Finial.position = Vector3(anchor.x, float(_rest_y[1]) + anchor.y, anchor.z)
-	flag.position = Vector3(anchor.x, float(_rest_y[2]) + anchor.y, anchor.z)
+	var tilt := figures.bearer_tilt()
+	pole.position = anchor + tilt * Vector3(0.0, float(_rest_y[0]), 0.0)
+	pole.basis = tilt * Basis.from_scale(pole.basis.get_scale())
+	$Finial.position = anchor + tilt * Vector3(0.0, float(_rest_y[1]), 0.0)
+	flag.position = anchor + tilt * Vector3(0.0, float(_rest_y[2]), 0.0)
+	# Le tissu tourne avec la hampe (vue de la caméra) et s'agite en marche.
+	_flag_material.set_shader_parameter("pole_dir", (global_transform.basis.orthonormalized() * (tilt * Vector3.UP)).normalized())
+	_flag_material.set_shader_parameter("gust", figures.bearer_gust())
+
+
+## Lot AS2 : n'anime la hampe que pendant la marche (et son fondu) ou en mer.
+func _process(_delta: float) -> void:
+	if figures == null or not is_visible_in_tree():
+		return
+	if figures.bearer_dynamic():
+		_follow_bearer()
+		_bearer_moving = true
+	elif _bearer_moving:
+		_bearer_moving = false
+		_follow_bearer()
 
 
 ## Lot CV2 : marche (animation du déplacement) ou repos des figurines.

@@ -131,3 +131,37 @@ def test_codex_plan_skips_entities_with_art_and_orders_by_category(tmp_path):
     assert "period 1337-1453" in jobs[0].prompt
     assert "Capitale de Charles V et du cdx_parlement." in jobs[0].prompt
     assert jobs[0].out_path == assets_dir / "illustrations" / "cdx_paris.jpg"
+
+
+def test_faction_prompt_uses_capital_province_scenery(tmp_path: Path) -> None:
+    """A faction prompt describes its capital province and a stable scene."""
+    from cent_ans_tools import entry_art
+
+    data_dir = tmp_path / "data"
+    _write(
+        data_dir / "factions",
+        "fac_x",
+        {
+            "id": "fac_x",
+            "name": {"display": "Alanie"},
+            "capital": "prov_x",
+            "capital_city": "Alagir",
+            "description": "Montagnards.",
+        },
+    )
+    _write(
+        data_dir / "provinces",
+        "prov_x",
+        {"terrain": "mountains", "religion": "rel_orthodox", "rivers": ["Terek"]},
+    )
+    jobs = entry_art.plan(data_dir, tmp_path / "out", categories=("factions",))
+    prompt = jobs[0].prompt
+    assert "snow-capped mountains" in prompt
+    assert "Byzantine-style domed churches" in prompt
+    assert "the river Terek" in prompt
+    assert (
+        prompt
+        == entry_art.plan(data_dir, tmp_path / "out", categories=("factions",))[
+            0
+        ].prompt
+    )

@@ -9,6 +9,20 @@
     "description": {"type": "string"},
     "cycle_blend_s": {"type": "number", "minimum": 0.0, "maximum": 0.6},
     "role_blend_s": {"type": "number", "minimum": 0.0, "maximum": 0.6},
+    "cavalry_gaits": {
+      "type": "object",
+      "required": ["trot_min_speed", "gallop_min_speed", "turn_min_rate"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "enabled": {"type": "boolean"},
+        "trot_min_speed": {"type": "number", "exclusiveMinimum": 0.0},
+        "gallop_min_speed": {"type": "number", "exclusiveMinimum": 0.0},
+        "hysteresis_mps": {"type": "number", "minimum": 0.0, "maximum": 2.0},
+        "turn_min_rate": {"type": "number", "exclusiveMinimum": 0.0},
+        "turn_hysteresis": {"type": "number", "minimum": 0.0, "maximum": 1.0}
+      }
+    },
     "role_clips": {
       "type": "object",
       "additionalProperties": false,

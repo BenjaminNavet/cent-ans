@@ -2,6 +2,15 @@
   "description": "Lot NT7 (ADR 0129) : fondus des figurines skinnées. `cycle_blend_s` : fondu entre deux clips successifs d'un cycle de mêlée (mode CYCLE du shader, 0 = changement sec) ; `role_clips` : clips propres des porte-étendards et musiciens par état (charge, victoire, variante d'attente), repli sur le jeu d'origine quand le rig ne les a pas ; les servants d'engins sont dans siege_engines.json (`crew.clips`). Lot NT10 : `role_blend_s` : fondu au changement de clip des porte-étendards, musiciens et servants (mode CUSTOM, 0 = sec).",
   "cycle_blend_s": 0.2,
   "role_blend_s": 0.25,
+  "cavalry_gaits": {
+    "description": "Lot AS3 (docs/wip/as3.md) : allures de la cavalerie de bataille d'après la vitesse du régiment (m/s, mesurée sur le centre, lissée) et son virage (rad/s, variation de l'orientation). Le pas va jusqu'à trot_min_speed, le trot jusqu'à gallop_min_speed, le galop au-delà (un régiment qui court plus lentement trotte). hysteresis_mps et turn_hysteresis évitent les va-et-vient de clip. Les clips (c_trot, c_turn_l...) sont cuits dans la texture d'os ; --no-as3 après -- rétablit pas/galop seuls.",
+    "enabled": true,
+    "trot_min_speed": 3.2,
+    "gallop_min_speed": 5.6,
+    "hysteresis_mps": 0.4,
+    "turn_min_rate": 0.16,
+    "turn_hysteresis": 0.05
+  },
   "role_clips": {
     "standard": {"charging": "std_charge", "victory": "std_victory", "idle_alt": "std_plant"},
     "standard_mounted": {"charging": "c_std_charge", "victory": "c_std_wave"},

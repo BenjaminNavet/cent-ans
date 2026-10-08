@@ -44,7 +44,10 @@
     "mantlet_raised_deg": -78.0,
     "mantlet_s": 1.2,
     "stagger_s": 0.25,
-    "smoke_scale": 1.6
+    "smoke_scale": 1.6,
+    "flash_s": 0.15,
+    "smoke_s": 5.5,
+    "source": "Canon firing mvi 3662.ogv (Rama, CC BY-SA 2.0 fr, Wikimedia Commons), canon à roues XVIIe tiré à blanc, 30 i/s : éclair 0,133 s (4 images), fumée au maximum 0,83 s après le tir et retombée à 20 % en 5,47 s (tools/video_mocap/measure_motion_fx.py cannon). Recul du fût non mesurable (< 0,01 longueur de fût, canon calé) : recoil_* inchangés."
   },
   "ram": {
     "wheel_radius": 0.55,
@@ -221,6 +224,171 @@
           "figure": 0
         }
       ]
+    },
+    "haul": {
+      "enabled": true,
+      "walk_clip": "walk",
+      "carry_clip": "carry",
+      "grab_clip": "load",
+      "drop_clip": "load",
+      "objects": {
+        "stone_heavy": {
+          "shape": "sphere",
+          "radius": 0.26,
+          "y_scale": 0.85,
+          "color": "#8a8478"
+        },
+        "stone_small": {
+          "shape": "sphere",
+          "radius": 0.16,
+          "y_scale": 0.85,
+          "color": "#8f897d"
+        },
+        "bombard_ball": {
+          "shape": "sphere",
+          "radius": 0.13,
+          "y_scale": 1.0,
+          "color": "#3a3a3c"
+        },
+        "powder_keg": {
+          "shape": "cylinder",
+          "radius": 0.15,
+          "height": 0.28,
+          "color": "#6b4a2b"
+        }
+      },
+      "by_engine": {
+        "trebuchet": {
+          "piles": [
+            {
+              "object": "stone_heavy",
+              "x": 4.4,
+              "z": -4.6,
+              "count": 5,
+              "spread": 0.55
+            }
+          ],
+          "haulers": [
+            {
+              "pile": 0,
+              "post": [
+                2.7,
+                -3.0,
+                -90
+              ],
+              "figure": 0,
+              "trip": [
+                0.08,
+                0.3,
+                0.38,
+                0.62,
+                0.8
+              ],
+              "hold": [
+                0.12,
+                1.38,
+                0.05
+              ]
+            }
+          ]
+        },
+        "mangonel": {
+          "piles": [
+            {
+              "object": "stone_small",
+              "x": 3.4,
+              "z": -3.0,
+              "count": 6,
+              "spread": 0.5
+            }
+          ],
+          "haulers": [
+            {
+              "pile": 0,
+              "post": [
+                2.2,
+                -0.9,
+                -90
+              ],
+              "figure": 0,
+              "trip": [
+                0.08,
+                0.3,
+                0.38,
+                0.62,
+                0.8
+              ],
+              "hold": [
+                0.1,
+                1.3,
+                0.12
+              ]
+            }
+          ]
+        },
+        "bombard": {
+          "piles": [
+            {
+              "object": "bombard_ball",
+              "x": 3.7,
+              "z": 2.4,
+              "count": 5,
+              "spread": 0.4
+            },
+            {
+              "object": "powder_keg",
+              "x": 3.4,
+              "z": 0.3,
+              "count": 3,
+              "spread": 0.4
+            }
+          ],
+          "haulers": [
+            {
+              "pile": 1,
+              "post": [
+                2.0,
+                0.5,
+                -90
+              ],
+              "figure": 0,
+              "trip": [
+                0.04,
+                0.18,
+                0.24,
+                0.42,
+                0.52
+              ],
+              "hold": [
+                0.1,
+                1.15,
+                0.25
+              ]
+            },
+            {
+              "pile": 0,
+              "post": [
+                2.0,
+                2.3,
+                -90
+              ],
+              "figure": 0,
+              "trip": [
+                0.2,
+                0.34,
+                0.4,
+                0.58,
+                0.7
+              ],
+              "hold": [
+                0.1,
+                1.15,
+                0.25
+              ]
+            }
+          ]
+        }
+      }
     }
   },
   "lod": {

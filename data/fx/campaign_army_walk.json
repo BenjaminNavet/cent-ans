@@ -1,0 +1,19 @@
+{
+  "description": "Lot AS2 — cadence de marche des figurines V2 sur la carte (calée sur la vitesse réelle à l'écran, comme BV2 en bataille) et balancement de la hampe de l'étendard (marche, tangage des navires). Rendu seulement. Vitesses nominales des clips : data/fx/battle_gore.json, cadence. Désactivé par `enabled` ou par --no-as2 (banc A/B).",
+  "enabled": true,
+  "cadence": {
+    "min_factor": 0.35,
+    "max_factor": 1.8,
+    "smoothing_per_s": 5.0,
+    "default_nominal_mps": 1.35
+  },
+  "standard_sway": {
+    "step_hz": 1.9,
+    "bob": 0.05,
+    "roll_deg": 3.0,
+    "lean_deg": 2.0,
+    "fade_per_s": 6.0,
+    "ship_tilt_gain": 1.0,
+    "cloth_gust": 0.6
+  }
+}

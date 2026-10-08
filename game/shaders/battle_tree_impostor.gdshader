@@ -17,6 +17,13 @@ uniform float cell_m[8];
 uniform float foot = 0.04;
 uniform float decor_saturation = 0.6;
 uniform vec3 backlight = vec3(0.25, 0.28, 0.12);
+// Lot AS5 : balancement du houppier, même phase que battle_tree_foliage.gdshader (sinus de
+// TIME + position) : l'imposteur et l'arbre en maillage ondulent d'un même mouvement au passage de
+// l'un à l'autre. `sway` = déplacement de la cime en part de la hauteur de la cellule (0 : fixe).
+uniform float sway = 0.0;
+uniform float sway_frequency = 1.15;
+uniform float sway_second = 0.25;
+uniform float flutter = 0.004;
 
 varying vec2 v_uv;
 varying vec2 v_local;
@@ -43,7 +50,16 @@ void vertex() {
 		vec3 up = normalize(vec3(0.0, 1.0, 0.0) - face * elev * 0.5);
 		float size = cell_m[row] * scale;
 		vec2 local = vec2(UV.x - 0.5, 1.0 - UV.y);
-		VERTEX = origin + right * local.x * size + up * (local.y - foot) * size;
+		vec3 offset = right * local.x * size + up * (local.y - foot) * size;
+		if (sway > 0.0) {
+			// Pied fixe, cime pleine (h² comme le maillage) ; la direction suit le vent du feuillage.
+			float h = clamp(local.y, 0.0, 1.0);
+			float t = TIME * sway_frequency + origin.x * 0.061 + origin.z * 0.047;
+			float bend = (sin(t) * 0.6 + sin(t * 2.3 + 1.7) * sway_second) * h * h * sway;
+			offset += vec3(0.85, 0.0, 0.53) * bend * size;
+			offset += right * sin(TIME * 4.0 + local.x * 3.1 + local.y * 2.3) * flutter * h * size;
+		}
+		VERTEX = origin + offset;
 		v_uv = (vec2(float(col), float(row)) + UV) / vec2(float(cols), float(rows));
 		v_local = local;
 		v_right = right;

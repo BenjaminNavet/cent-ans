@@ -376,6 +376,8 @@ func _build_camp(camp: Dictionary) -> void:
 	var batch := BuildingKit.Batch.new("snow" if _snowy else "", CAMP_RANGE * lod)
 	var horses := BuildingKit.Batch.new("", HORSE_RANGE * lod)
 	var horse_models := BuildingKit.models_of("horse")
+	# Lot AS1 : chevaux animés (respiration, queue, tête), un MultiMesh par modèle.
+	var horse_moves: Variant = {} if AnimalMotion.enabled() else null
 	var tents: Array = []
 	var fires: Array[Vector3] = []
 	var posts := PackedVector3Array()
@@ -387,7 +389,7 @@ func _build_camp(camp: Dictionary) -> void:
 		var y := _terrain.height_at(p.x, p.y) - 0.03
 		match kind:
 			"horse_line":
-				_horse_line(item, horses, horse_models, posts)
+				_horse_line(item, horses, horse_models, posts, horse_moves)
 			_:
 				var model := BuildingKit.prop_model(kind, k)
 				if model == "":
@@ -410,6 +412,8 @@ func _build_camp(camp: Dictionary) -> void:
 	batch.build(root)
 	ga3_count += batch.ga3_count()
 	horses.build(root)
+	if horse_moves != null:
+		AnimalMotion.build_camp_horses(root, horse_moves, HORSE_RANGE * lod)
 	_build_posts(root, posts)
 	_build_fires(root, fires)
 	_camps[side] = {"batch": batch, "tents": tents, "fires": fires, "looted": false, "root": root}
@@ -418,7 +422,8 @@ func _build_camp(camp: Dictionary) -> void:
 
 
 ## Chevaux au piquet des deux côtés d'une corde tendue entre deux poteaux, tête vers la corde.
-func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, posts: PackedVector3Array) -> void:
+## `moves` (lot AS1) : non nul, il recueille les poses par modèle pour les chevaux animés.
+func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, posts: PackedVector3Array, moves: Variant) -> void:
 	var c := Vector2(float(item["x"]), float(item["z"]))
 	var yaw := float(item["yaw"])
 	var length := float(item["length"])
@@ -439,7 +444,14 @@ func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, post
 		var nose := -front * side
 		var ang := atan2(-nose.y, -nose.x) + BuildingKit.hash01(i, int(c.x)) * 0.5 - 0.25
 		var xform := Transform3D(Basis(Vector3.UP, -ang), Vector3(p.x, _terrain.height_at(p.x, p.y) - 0.02, p.y))
-		batch.add(models[(i + int(c.x)) % models.size()], xform)
+		var model: String = models[(i + int(c.x)) % models.size()]
+		if moves == null:
+			batch.add(model, xform)
+		else:
+			# Lot AS1 : posé par `AnimalMotion.build_camp_horses` (shader de sommets).
+			if not moves.has(model):
+				moves[model] = []
+			(moves[model] as Array).append(xform)
 		horse_count += 1
 
 

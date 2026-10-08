@@ -232,6 +232,10 @@ say "Godot $GODOT_VERSION ($GODOT_BIN)"
 if [[ "$GODOT_VERSION" != "$GODOT_SERIES".* ]]; then
     say "Attention : le projet attend Godot $GODOT_SERIES.x, le lancement peut échouer."
 fi
+# Development checkout on main: the CI follows the Godot installed here (ADR 0186).
+if [[ -z "${CI:-}" && "$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" == "main" ]]; then
+    bash "$ROOT/tools/sync_godot_version.sh" "$GODOT_VERSION" || true
+fi
 
 # --- 1. Rust GDExtension ---------------------------------------------------------------------
 

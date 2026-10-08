@@ -11,6 +11,7 @@ import math
 import os
 
 import battle_skinned as bs
+import battle_skinned_gaits as gaits
 import battle_skinned_equipment as eq
 import battle_skinned_poses as poses
 import battle_skinned_weapons as weapons
@@ -131,36 +132,53 @@ def cavalry_alias(name):
 
 def clip_specs():
     """(clip, horse action, rider action, rider pose, mirror, frames)."""
-    return [
-        ("c_idle", "Idle", "Idle", poses.ride_lance_up, False, None),
-        ("c_walk", "Walk", "Idle", poses.ride_lance_up, False, None),
-        ("c_gallop", "Gallop", "Idle", poses.ride_lance_raised, False, None),
-        ("c_charge", "Gallop", "Idle", poses.ride_lance_couched, False, None),
-        ("c_thrust", "Idle_2", "Idle", poses.ride_lance_thrust, False, 28),
-        ("c_bow_idle", "Idle", "Idle", poses.ride_bow_rest, False, None),
-        ("c_bow_walk", "Walk", "Idle", poses.ride_bow_rest, False, None),
-        ("c_bow_shoot", "Idle", "Idle", poses.ride_bow_shoot, False, 60),
-        # UR2: jinetes throw javelins rather than shoot a bow (skirmish ability).
-        ("c_javelin_idle", "Idle", "Idle", poses.ride_javelin_rest, False, None),
-        ("c_javelin_walk", "Walk", "Idle", poses.ride_javelin_rest, False, None),
-        ("c_javelin_throw", "Idle", "Idle", poses.ride_javelin_throw, False, 30),
-        ("c_death", "Death", "Death", poses.ride_death, False, 30),
-        ("c_death_m", "Death", "Death", poses.ride_death, True, 30),
-        ("c_fall", "Idle_HitReact_Right", "Death", poses.ride_fall, False, 30),
-        # Lot EP5: mounted standard bearer (appended: earlier rows keep their place).
-        ("c_std_idle", "Idle", "Idle", poses.ride_std_up, False, None),
-        ("c_std_walk", "Walk", "Idle", poses.ride_std_up, False, None),
-        ("c_std_gallop", "Gallop", "Idle", poses.ride_std_gallop, False, None),
-        ("c_std_wave", "Idle_2", "Idle", poses.ride_std_wave, False, 58),
-        ("c_std_death", "Death", "Death", poses.ride_std_death, False, 30),
-        # Lot AN1b: horse rearing before pikes, stumbling at the charge, mounted victory
-        # (the rider poses carry a `horse` override run before the rider is seated).
-        ("c_rear", "Idle", "Idle", poses.ride_rear, False, 32),
-        ("c_stumble", "Gallop", "Idle", poses.ride_stumble, False, 90),
-        ("c_victory", "Idle_2", "Idle", poses.ride_victory, False, None),
-        # Lot NT7: mounted standard bearer at the charge (two gallop strides).
-        ("c_std_charge", "Gallop", "Idle", poses.ride_std_charge, False, 30),
-    ]
+    return gaits.free_rows(_clip_rows())
+
+
+def _clip_rows():
+    """Rows of `clip_specs` before the AS8b gallops are substituted."""
+    return (
+        [
+            ("c_idle", "Idle", "Idle", poses.ride_lance_up, False, None),
+            ("c_walk", "Walk", "Idle", poses.ride_lance_up, False, None),
+            ("c_gallop", "Gallop", "Idle", poses.ride_lance_raised, False, None),
+            ("c_charge", "Gallop", "Idle", poses.ride_lance_couched, False, None),
+            ("c_thrust", "Idle_2", "Idle", poses.ride_lance_thrust, False, 28),
+            ("c_bow_idle", "Idle", "Idle", poses.ride_bow_rest, False, None),
+            ("c_bow_walk", "Walk", "Idle", poses.ride_bow_rest, False, None),
+            ("c_bow_shoot", "Idle", "Idle", poses.ride_bow_shoot, False, 60),
+            # UR2: jinetes throw javelins rather than shoot a bow (skirmish ability).
+            ("c_javelin_idle", "Idle", "Idle", poses.ride_javelin_rest, False, None),
+            ("c_javelin_walk", "Walk", "Idle", poses.ride_javelin_rest, False, None),
+            ("c_javelin_throw", "Idle", "Idle", poses.ride_javelin_throw, False, 30),
+            ("c_death", "Death", "Death", poses.ride_death, False, 30),
+            ("c_death_m", "Death", "Death", poses.ride_death, True, 30),
+            # Lot AS3: the unhorsed rider falls as before, then the clip goes on for the horse that bolts
+            # riderless (startle, then gallop; the shader carries it away at code 6).
+            (
+                "c_fall",
+                "Idle_HitReact_Right",
+                "Death",
+                gaits.ride_fall_free,
+                False,
+                gaits.FALL_FRAMES,
+            ),
+            # Lot EP5: mounted standard bearer (appended: earlier rows keep their place).
+            ("c_std_idle", "Idle", "Idle", poses.ride_std_up, False, None),
+            ("c_std_walk", "Walk", "Idle", poses.ride_std_up, False, None),
+            ("c_std_gallop", "Gallop", "Idle", poses.ride_std_gallop, False, None),
+            ("c_std_wave", "Idle_2", "Idle", poses.ride_std_wave, False, 58),
+            ("c_std_death", "Death", "Death", poses.ride_std_death, False, 30),
+            # Lot AN1b: horse rearing before pikes, stumbling at the charge, mounted victory
+            # (the rider poses carry a `horse` override run before the rider is seated).
+            ("c_rear", "Idle", "Idle", poses.ride_rear, False, 32),
+            ("c_stumble", "Gallop", "Idle", poses.ride_stumble, False, 90),
+            ("c_victory", "Idle_2", "Idle", poses.ride_victory, False, None),
+            # Lot NT7: mounted standard bearer at the charge (two gallop strides).
+            ("c_std_charge", "Gallop", "Idle", poses.ride_std_charge, False, 30),
+        ]
+        + gaits.clip_specs()
+    )  # Lot AS3: trot, turns (appended: earlier rows keep their place)
 
 
 def bake_cavalry_rig():
@@ -223,6 +241,7 @@ def bake_cavalry_rig():
                 "c_std_wave",
                 "c_victory",
                 "c_std_charge",
+                *gaits.loop_names(),
             ),
         )
     rig.write()

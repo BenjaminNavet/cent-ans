@@ -247,7 +247,8 @@ func _build_troop(army: Dictionary) -> void:
 		var material := _make_material(figure_kind, variant)
 		instance.material_override = material
 		troop.add_child(instance)
-		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material}
+		# AS2 : horloge propre au groupe (cadence de marche calée sur la vitesse réelle).
+		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material, "clock": _anim_time, "factor": 1.0}
 
 
 ## Lot CV3-5 : vrai quand le général agrandi porte l'étendard (réglage > 1).
@@ -307,9 +308,138 @@ func set_walking(value: bool) -> void:
 	walking = value
 	for key in _groups:
 		var group: Dictionary = _groups[key]
-		BattleSkinned.apply_config(group["material"], _state_config(str(group["kind"]), int(group["variant"])), _anim_time)
+		BattleSkinned.apply_config(group["material"], _state_config(str(group["kind"]), int(group["variant"])), float(group["clock"]))
 	for smoke in _smokes:
 		smoke.emitting = not walking
+
+
+# --- Lot AS2 : cadence de marche et balancement de la hampe ----------------------------
+
+const WALK_DATA := "fx/campaign_army_walk.json"
+static var _walk_settings: Dictionary = {}
+## Vitesse au sol lissée (unités monde / s) et dernière position, mesurées sur le marqueur.
+var _ground_speed: float = 0.0
+var _last_position: Vector3 = Vector3.INF
+## Balancement de l'étendard : amplitude lissée (0 à l'arrêt), phase de pas, pose courante.
+var _sway_amp: float = 0.0
+var _sway_phase: float = 0.0
+var _bearer_tilt: Basis = Basis.IDENTITY
+var _bearer_bob: float = 0.0
+
+
+static func walk_settings() -> Dictionary:
+	if _walk_settings.is_empty():
+		var parsed: Variant = null
+		var path := _data_dir().path_join(WALK_DATA)
+		if not FileAccess.file_exists(path):
+			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(WALK_DATA)
+		if FileAccess.file_exists(path):
+			parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		_walk_settings = parsed if parsed is Dictionary else {"enabled": false}
+	return _walk_settings
+
+
+## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).
+static func as2_enabled() -> bool:
+	return bool(walk_settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as2")
+
+
+## Facteur de cadence pour une vitesse au sol `ground_speed` (unités monde / s) d'un groupe dont
+## le clip de marche avance à `nominal_mps` (m/s à la vitesse 1) à l'échelle monde `world_scale`.
+static func cadence_factor(ground_speed: float, nominal_mps: float, world_scale: float) -> float:
+	var cfg: Dictionary = walk_settings().get("cadence", {})
+	var nominal := maxf(nominal_mps * world_scale, 0.001)
+	return clampf(ground_speed / nominal, float(cfg.get("min_factor", 0.35)), float(cfg.get("max_factor", 1.8)))
+
+
+## Vitesse nominale (m/s) du clip de locomotion actif du groupe ; repli des données.
+func _nominal_mps(group: Dictionary) -> float:
+	var config := _state_config(str(group["kind"]), int(group["variant"]))
+	var names: Array = config.get("names", [])
+	var table: Dictionary = BattleGore.settings().get("cadence", {})
+	var fallback := float(walk_settings().get("cadence", {}).get("default_nominal_mps", 1.35))
+	if names.is_empty():
+		return fallback
+	return float(table.get(str(names[0]), fallback)) * float(config.get("speed", 1.0))
+
+
+## Échelle monde des figurines d'un groupe (taille de figurine × échelle du marqueur).
+func _group_world_scale(key: String) -> float:
+	var marker := get_parent() as Node3D
+	var marker_scale := marker.scale.x if marker != null else 1.0
+	var size := lord_scale if (key == "cavalry_0" and is_lord()) else 1.0
+	return FIGURE_SCALE * size * marker_scale
+
+
+## Horloges des groupes : en marche, le temps avance de (vitesse écran / vitesse du clip) ;
+## à l'arrêt, au rythme normal (le fondu idle/walk du shader fait la transition).
+func _update_cadence(delta: float) -> void:
+	var marker := get_parent() as Node3D
+	var enabled := as2_enabled() and marker != null and delta > 0.0
+	if enabled:
+		var here := marker.global_position
+		if _last_position != Vector3.INF:
+			var flat := Vector2(here.x - _last_position.x, here.z - _last_position.z)
+			var instant := flat.length() / delta
+			var k := 1.0 - exp(-float(walk_settings().get("cadence", {}).get("smoothing_per_s", 5.0)) * delta)
+			_ground_speed = lerpf(_ground_speed, instant if walking else 0.0, k)
+		_last_position = here
+	for key in _groups:
+		var group: Dictionary = _groups[key]
+		var target := 1.0
+		if enabled and walking:
+			target = cadence_factor(_ground_speed, _nominal_mps(group), _group_world_scale(str(key)))
+		var factor := float(group["factor"])
+		factor = lerpf(factor, target, 1.0 - exp(-8.0 * delta)) if enabled else 1.0
+		group["factor"] = factor
+		group["clock"] = float(group["clock"]) + delta * factor
+
+
+## Facteur de cadence courant du groupe `key` (tests, réglage) ; 1 si absent.
+func group_factor(key: String) -> float:
+	return float(_groups[key]["factor"]) if _groups.has(key) else 1.0
+
+
+## Balancement de l'étendard : à pied, rebond et roulis au rythme des pas (cadence incluse) ;
+## en mer, inclinaison réelle du navire amiral (le calcul est dans `bearer_anchor`).
+func _update_bearer_sway(delta: float) -> void:
+	var cfg: Dictionary = walk_settings().get("standard_sway", {})
+	var local := Basis.IDENTITY
+	_bearer_bob = 0.0
+	if not as2_enabled():
+		_sway_amp = 0.0
+	elif kind == "fleet":
+		if not _ships.is_empty():
+			local = Basis.from_euler(_ships[0].rotation * float(cfg.get("ship_tilt_gain", 1.0)))
+	else:
+		_sway_amp = move_toward(_sway_amp, 1.0 if walking else 0.0, float(cfg.get("fade_per_s", 6.0)) * delta)
+		if _sway_amp > 0.0:
+			var key := "cavalry_0" if is_lord() else "infantry_0"
+			_sway_phase = fposmod(_sway_phase + delta * float(cfg.get("step_hz", 1.9)) * group_factor(key) * TAU, TAU * 2.0)
+			# Un pas = un demi-tour de `_sway_phase * 0.5` : rebond à chaque pas, roulis d'un pied à l'autre.
+			_bearer_bob = absf(sin(_sway_phase * 0.5)) * float(cfg.get("bob", 0.05)) * FIGURE_SCALE * _sway_amp
+			var roll := sin(_sway_phase * 0.5) * deg_to_rad(float(cfg.get("roll_deg", 3.0))) * _sway_amp
+			var lean := deg_to_rad(float(cfg.get("lean_deg", 2.0))) * _sway_amp
+			# Repère de la figurine : le groupe regarde +X ; roulis autour de X, penché vers l'avant.
+			local = Basis.from_euler(Vector3(roll, 0.0, -lean))
+	var yaw := Basis(Vector3.UP, rotation.y)
+	_bearer_tilt = yaw * local * yaw.inverse()
+
+
+## L'étendard bouge-t-il à cette image (marche en cours ou fondu, navire) ? Sert à n'animer la
+## hampe du marqueur que lorsqu'il le faut.
+func bearer_dynamic() -> bool:
+	return as2_enabled() and (kind == "fleet" or _sway_amp > 0.0 or walking)
+
+
+## Inclinaison de la hampe dans le repère du marqueur (identité si AS2 est coupé).
+func bearer_tilt() -> Basis:
+	return _bearer_tilt
+
+
+## Amplitude de rafale transmise au tissu (0 à l'arrêt) : le drapeau s'agite en marche.
+func bearer_gust() -> float:
+	return _sway_amp * float(walk_settings().get("standard_sway", {}).get("cloth_gust", 0.0))
 
 
 ## Pied de la hampe de l'étendard dans le repère du marqueur (suit le porte-étendard quand la
@@ -317,15 +447,20 @@ func set_walking(value: bool) -> void:
 func bearer_anchor() -> Vector3:
 	if kind == "fleet":
 		# Hampe enfoncée dans le château de poupe (étendard au-dessus du mât, lisible).
-		return Basis(Vector3.UP, rotation.y) * (STERN_STAFF * SHIP_SCALE) - Vector3(0.0, 3.0, 0.0)
+		var stern := STERN_STAFF * SHIP_SCALE
+		if as2_enabled() and not _ships.is_empty():
+			# AS2 : le pied de la hampe suit le tangage, le roulis et le pilonnement du navire.
+			var ship := _ships[0]
+			stern = Basis.from_euler(ship.rotation) * stern + Vector3(0.0, ship.position.y, 0.0)
+		return Basis(Vector3.UP, rotation.y) * stern - Vector3(0.0, 3.0, 0.0)
 	if is_lord():
 		# Lot CV3-5 : dans la main du général ; suit le fondu des figurines (au loin, la hampe
 		# redescend au pied du marqueur).
 		var slot := lord_slot()
 		var hand := Vector3(slot.x + LORD_HAND.x * lord_scale, LORD_HAND.y * lord_scale, slot.y + LORD_HAND.z * lord_scale)
-		return Basis(Vector3.UP, rotation.y) * (hand * clampf(_weight, 0.0, 1.0))
+		return Basis(Vector3.UP, rotation.y) * (hand * clampf(_weight, 0.0, 1.0)) + Vector3(0.0, _bearer_bob, 0.0)
 	var local := Vector3(BEARER_SLOT.x + POLE_IN_HAND.x, 0.0, BEARER_SLOT.y + POLE_IN_HAND.y)
-	return Basis(Vector3.UP, rotation.y) * local
+	return Basis(Vector3.UP, rotation.y) * local + Vector3(0.0, _bearer_bob, 0.0)
 
 
 # --- Flotte --------------------------------------------------------------------------
@@ -498,8 +633,11 @@ func _process(delta: float) -> void:
 	if not is_visible_in_tree():
 		return
 	_anim_time += delta
+	_update_cadence(delta)
+	_update_bearer_sway(delta)
 	for key in _groups:
-		(_groups[key]["material"] as ShaderMaterial).set_shader_parameter("anim_time", _anim_time)
+		var group: Dictionary = _groups[key]
+		(group["material"] as ShaderMaterial).set_shader_parameter("anim_time", float(group["clock"]))
 	# Léger tangage et roulis, déphasés d'un navire à l'autre.
 	for i in _ships.size():
 		var t := _anim_time + i * 1.7

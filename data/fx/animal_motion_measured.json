@@ -1,0 +1,183 @@
+{
+ "assumptions": {
+  "cattle_withers_m": 1.4,
+  "horse_withers_m": 1.7,
+  "wagon_px_per_m": 208,
+  "note": "Les echelles viennent de la taille de la race (garrot) ou du rayon de roue (0,6 m) : hypotheses, pas des mesures."
+ },
+ "clips": {
+  "cow_walk": {
+   "video": "boissia/boissia.webm",
+   "start_s": 1.3,
+   "end_s": 4.0
+  },
+  "cow_speed": {
+   "video": "boissia/boissia.webm",
+   "start_s": 1.3,
+   "end_s": 2.4
+  },
+  "cow_period_a": {
+   "video": "boissia/boissia.webm",
+   "start_s": 1.3,
+   "end_s": 5.0
+  },
+  "cow_period_b": {
+   "video": "boissia/boissia.webm",
+   "start_s": 1.3,
+   "end_s": 4.5
+  },
+  "cow_graze": {
+   "video": "boissia/boissia.webm",
+   "start_s": 57.5,
+   "end_s": 62.0
+  },
+  "sheep_graze": {
+   "video": "sheep_elbe/sheep_elbe.webm",
+   "start_s": 41.0,
+   "end_s": 58.0
+  },
+  "wagon_box": {
+   "video": "wagons/wagons.webm",
+   "start_s": 6.5,
+   "end_s": 8.4
+  },
+  "wagon_speed": {
+   "video": "wagons/wagons.webm",
+   "start_s": 6.5,
+   "end_s": 7.3
+  },
+  "wagon_horses": {
+   "video": "wagons/wagons.webm",
+   "start_s": 6.5,
+   "end_s": 9.5
+  }
+ },
+ "cattle": {
+  "source": "boissia (CC0)",
+  "stride_period_s": [
+   1.417,
+   1.0
+  ],
+  "cadence_hz": 0.853,
+  "speed_withers_per_s": 0.524,
+  "stride_withers": 0.614,
+  "walk_head_below_horizontal_deg": 9.6,
+  "head_nod_half_rad": 0.0631,
+  "graze_head_below_horizontal_deg": 72.8,
+  "graze_delta_rad": 1.103,
+  "bite_peaks_hz": [
+   [
+    0.844,
+    2.1
+   ],
+   [
+    0.656,
+    1.7
+   ],
+   [
+    1.031,
+    1.5
+   ]
+  ],
+  "bite_amp_rad": 0.226,
+  "shank_rear_swing_half_withers": 0.229,
+  "swing_lut": [
+   0.0,
+   0.564,
+   0.991,
+   1.011,
+   0.719,
+   0.432,
+   0.203,
+   -0.005,
+   -0.087,
+   -0.119,
+   -0.285,
+   -0.525,
+   -0.751,
+   -0.888,
+   -0.79,
+   -0.469
+  ],
+  "lift_lut": [
+   0.645,
+   0.739,
+   0.767,
+   0.833,
+   0.951,
+   0.999,
+   0.999,
+   1.0,
+   1.0,
+   0.91,
+   0.637,
+   0.327,
+   0.111,
+   0.0,
+   0.085,
+   0.386
+  ]
+ },
+ "sheep": {
+  "source": "sheep_elbe (CC0)",
+  "graze_head_below_horizontal_deg": 52.7,
+  "graze_delta_rad": 0.752,
+  "head_down_share": 1.0,
+  "bite_peaks_hz": [
+   [
+    1.392,
+    2.2
+   ],
+   [
+    1.055,
+    2.2
+   ],
+   [
+    0.835,
+    1.8
+   ]
+  ],
+  "bite_amp_rad": 0.045,
+  "step_peaks_hz": [
+   [
+    1.553,
+    2.4
+   ],
+   [
+    1.392,
+    2.3
+   ],
+   [
+    0.85,
+    1.8
+   ]
+  ]
+ },
+ "wagon": {
+  "source": "wagons (CC0)",
+  "speed_m_per_s": 1.39,
+  "box_rms_m": 0.0122,
+  "jolt_lines": [
+   {
+    "hz": 0.587,
+    "spatial_period_m": 2.37,
+    "amp_m": 0.0127
+   },
+   {
+    "hz": 0.821,
+    "spatial_period_m": 1.69,
+    "amp_m": 0.0096
+   },
+   {
+    "hz": 1.056,
+    "spatial_period_m": 1.32,
+    "amp_m": 0.0066
+   }
+  ],
+  "roll_half_rad": 0.0093,
+  "roll_hz": 0.587,
+  "horse_half_cycle_s": 0.633,
+  "horse_stride_period_s": 1.27,
+  "horse_stride_m": 1.76
+ }
+}

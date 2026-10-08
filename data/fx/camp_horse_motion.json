@@ -1,0 +1,90 @@
+{
+ "source": {
+  "videos": [
+   "Horse standing MVI 7491.MOV.ogv",
+   "Horse chewing MVI 7493.MOV.ogv",
+   "Horse eating MVI 7496.MOV.ogv"
+  ],
+  "author": "Rama (Wikimedia Commons)",
+  "tool": "tools/video_mocap/as8c_measure.py",
+  "measured_keys": "camp_horse : head_lift_rad, head_ramp_s, chew_hz, chew_rad, tail_swing_m, tail_hz, breath_m (borne haute)",
+  "assumed_keys": "shift_period_s, tail_swish_period_s, head_cycle_s, head_up_share et les cotes du modèle"
+ },
+ "licence": "CC BY-SA 2.0 fr",
+ "license_note": "Ce fichier de données seul dérive de vidéos CC BY-SA 2.0 fr (Rama) : il est sous la même licence, avec attribution ; le reste du jeu n'est pas concerné (ADR 0189).",
+ "camp_horse": {
+  "head_pivot_x_m": -0.75,
+  "head_pivot_y_m": 1.35,
+  "head_start_x_m": -0.75,
+  "head_end_x_m": -1.15,
+  "head_lift_rad": 0.549,
+  "head_ramp_s": 1.0,
+  "head_cycle_s": 15.0,
+  "head_up_share": 0.22,
+  "head_nod_rad": 0.04,
+  "head_nod_hz": 0.7,
+  "chew_hz": 1.11,
+  "chew_rad": 0.034,
+  "tail_start_x_m": 0.6,
+  "tail_end_x_m": 0.9,
+  "tail_top_y_m": 1.45,
+  "tail_len_m": 0.75,
+  "tail_swing_m": 0.042,
+  "tail_hz": 0.322,
+  "tail_swish_period_s": 20.0,
+  "shift_period_s": 22.0,
+  "shift_lift_m": 0.045,
+  "shift_back_m": 0.04,
+  "shift_sway_m": 0.018,
+  "breath_m": 0.004,
+  "breath_side": 0.04,
+  "breath_hz": 0.3
+ },
+ "horse_rest": {
+  "chew_peaks_hz": [
+   [
+    1.113,
+    3.6
+   ],
+   [
+    0.938,
+    2.1
+   ],
+   [
+    2.373,
+    1.7
+   ]
+  ],
+  "chew_amp_rad": 0.034,
+  "head_up_deg": 1.5,
+  "head_down_deg": 32.9,
+  "head_lift_rad": 0.549,
+  "head_lowering_s": 1.03,
+  "tail_swing_half_rad": 0.0558,
+  "tail_hz": 0.322,
+  "stand_hoof_motion_half_body": 0.0012,
+  "stand_barrel_half_body": 0.0006,
+  "note": "Aucun report de poids ni souffle resolu en 7 s (< 0,5 px) : bornes superieures seulement."
+ },
+ "clips": {
+  "horse_stand": {
+   "video": "rama7491/rama7491.ogv",
+   "start_s": 0.1,
+   "end_s": 7.0
+  },
+  "horse_chew": {
+   "video": "rama7493/rama7493.ogv",
+   "start_s": 0.3,
+   "end_s": 6.4
+  },
+  "horse_eat": {
+   "video": "rama7496/rama7496.ogv",
+   "start_s": 10.0,
+   "end_s": 18.0
+  }
+ },
+ "campaign_horse": {
+  "chew_hz": 1.11,
+  "chew_rad": 0.034
+ }
+}
