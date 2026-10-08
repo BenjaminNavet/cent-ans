@@ -50,42 +50,51 @@ def albedo_stats(rgb: np.ndarray) -> dict[str, float]:
     }
 
 
+def _apply_gamma(rgb: np.ndarray, gamma: float, saturation_cap: float) -> np.ndarray:
+    """Apply ``x ** (1 / gamma)`` then re-cap saturation (brightening desaturates nothing, darkening can raise S)."""
+    out = rgb ** (1.0 / gamma) if gamma != 1.0 else rgb
+    hsv = rgb_to_hsv(out)
+    hsv[..., 1] = np.minimum(hsv[..., 1], saturation_cap)
+    return hsv_to_rgb(hsv)
+
+
+def auto_gamma(
+    rgb: np.ndarray, luma_range: tuple[float, float], saturation_cap: float = 0.40
+) -> float:
+    """Gamma (>1 brightens) bringing mean luminance into the window; 1.0 when already inside.
+
+    Bisects so the mean lands 10 % of the window width inside the nearest edge.
+    """
+    low, high = luma_range
+    mean = float((rgb @ LUMA).mean())
+    if low <= mean <= high or mean <= 0:
+        return 1.0
+    goal = low + 0.1 * (high - low) if mean < low else high - 0.1 * (high - low)
+    lo_g, hi_g = 0.2, 6.0
+    for _ in range(40):
+        mid = (lo_g + hi_g) / 2
+        if float((_apply_gamma(rgb, mid, saturation_cap) @ LUMA).mean()) < goal:
+            lo_g = mid
+        else:
+            hi_g = mid
+    return round((lo_g + hi_g) / 2, 4)
+
+
 def grade_albedo(
     rgb: np.ndarray,
     saturation_cap: float = 0.40,
     luma_range: tuple[float, float] | None = None,
-    gamma: float = 1.0,
+    gamma: float | None = None,
 ) -> tuple[np.ndarray, dict]:
-    """Cap saturation at ``saturation_cap`` and pull mean luminance into ``luma_range``.
+    """Cap saturation at ``saturation_cap`` and fit mean luminance into ``luma_range``.
 
-    Returns the graded pixels and a report (``before`` / ``after`` statistics and the
-    gain applied). Saturation above the cap is clipped (hue and value kept); the luminance
-    window is reached by a single multiplicative gain, never beyond what keeps values <= 1.
+    ``gamma`` None = automatic (needs ``luma_range``), a number = forced. Saturation above
+    the cap is clipped (hue and value kept) before and after gamma. Returns the graded pixels
+    and a report (``before`` / ``after`` statistics and the gamma used).
     """
     before = albedo_stats(rgb)
-    out = np.clip(rgb, 0.0, 1.0)
-    if gamma != 1.0:
-        out = out ** (1.0 / gamma)
-    hsv = rgb_to_hsv(out)
-    hsv[..., 1] = np.minimum(hsv[..., 1], saturation_cap)
-    out = hsv_to_rgb(hsv)
-    gain = 1.0
-    if luma_range is not None:
-        mean = float((out @ LUMA).mean())
-        low, high = luma_range
-        if mean > 0 and not low <= mean <= high:
-            gain = (low if mean < low else high) / mean
-            headroom = 1.0 / max(float(out.max()), 1e-6)
-            gain = min(gain, headroom)
-            out = np.clip(out * gain, 0.0, 1.0)
-            mean = float((out @ LUMA).mean())
-            if (
-                mean < low and 0 < mean < 1
-            ):  # gain was limited by headroom: lift mid-tones
-                out = out ** (np.log(low) / np.log(mean))
-    return out, {
-        "before": before,
-        "after": albedo_stats(out),
-        "gain": round(gain, 4),
-        "gamma": gamma,
-    }
+    out = _apply_gamma(np.clip(rgb, 0.0, 1.0), 1.0, saturation_cap)
+    if gamma is None:
+        gamma = auto_gamma(out, luma_range, saturation_cap) if luma_range else 1.0
+    out = _apply_gamma(out, gamma, saturation_cap)
+    return out, {"before": before, "after": albedo_stats(out), "gamma": gamma}

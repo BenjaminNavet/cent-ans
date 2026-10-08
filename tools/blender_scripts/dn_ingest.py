@@ -50,6 +50,107 @@ def import_joined(path: str) -> "bpy.types.Object":
     return obj
 
 
+def clean(obj: "bpy.types.Object", island_min: float) -> int:
+    """Drop debris islands (< ``island_min`` of the vertices) and fix normals; return vertices removed.
+
+    Islands are computed on positions, not on vertex indices: UV seams split vertices, and a
+    chart cut by a seam must not be mistaken for debris. The mesh itself is not welded
+    (welding breaks the later collapse decimation).
+    """
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.verts.ensure_lookup_table()
+    key = [tuple(round(c, 5) for c in v.co) for v in bm.verts]
+    parent: dict = {}
+
+    def find(item):
+        parent.setdefault(item, item)
+        while parent[item] != item:
+            parent[item] = parent[parent[item]]
+            item = parent[item]
+        return item
+
+    for k in key:
+        find(k)
+    for edge in bm.edges:
+        parent[find(key[edge.verts[0].index])] = find(key[edge.verts[1].index])
+    sizes: dict = {}
+    for k in key:
+        root = find(k)
+        sizes[root] = sizes.get(root, 0) + 1
+    threshold = island_min * len(key)
+    debris = [
+        v for v, k in zip(bm.verts, key, strict=True) if sizes[find(k)] < threshold
+    ]
+    bmesh.ops.delete(bm, geom=debris, context="VERTS")
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(obj.data)
+    bm.free()
+    return len(debris)
+
+
+def strip_base(obj: "bpy.types.Object") -> int:
+    """Remove a parasitic ground plate (TRELLIS models the image's floor); return faces removed.
+
+    Detected when the vertices in the lowest 4 % of the height spread more than 8 % wider than
+    the body (vertices above 12 % of the height) in X or Y. Then faces entirely outside the body
+    footprint (+2 %) in the low zone, and faces entirely within the lowest 1.5 %, are deleted.
+    """
+    verts = [v.co for v in obj.data.vertices]
+    low_z = min(c.z for c in verts)
+    height = max(c.z for c in verts) - low_z
+    body = [c for c in verts if c.z > low_z + 0.12 * height]
+    foot = [c for c in verts if c.z < low_z + 0.04 * height]
+    if not body or not foot or height <= 0:
+        return 0
+    span = {a: max(c[a] for c in body) - min(c[a] for c in body) for a in (0, 1)}
+    wider = any(
+        max(c[a] for c in foot) - min(c[a] for c in foot) > 1.08 * span[a]
+        for a in (0, 1)
+    )
+    if not wider:
+        return 0
+    margin = {a: 0.02 * span[a] for a in (0, 1)}
+    lo = {a: min(c[a] for c in body) - margin[a] for a in (0, 1)}
+    hi = {a: max(c[a] for c in body) + margin[a] for a in (0, 1)}
+    zone = low_z + 0.12 * height
+
+    def outside(co) -> bool:
+        return co.z < zone and not all(lo[a] <= co[a] <= hi[a] for a in (0, 1))
+
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    doomed = [
+        f
+        for f in bm.faces
+        if all(v.co.z < low_z + 0.015 * height for v in f.verts)
+        or all(outside(v.co) for v in f.verts)
+    ]
+    bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    bmesh.ops.delete(
+        bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS"
+    )
+    bm.to_mesh(obj.data)
+    bm.free()
+    return len(doomed)
+
+
+def set_surface(obj: "bpy.types.Object", roughness: float) -> None:
+    """Constant roughness, metallic 0 (bible 14.4): drop metallic-roughness textures."""
+    for slot in obj.material_slots:
+        if not (slot.material and slot.material.use_nodes):
+            continue
+        tree = slot.material.node_tree
+        for node in tree.nodes:
+            if node.type != "BSDF_PRINCIPLED":
+                continue
+            for name in ("Roughness", "Metallic"):
+                for link in list(node.inputs[name].links):
+                    tree.links.remove(link)
+            node.inputs["Roughness"].default_value = roughness
+            node.inputs["Metallic"].default_value = 0.0
+
+
 def triangulate(obj: "bpy.types.Object") -> None:
     """Triangulate the mesh in place."""
     mesh = obj.data
@@ -72,8 +173,11 @@ def normalise(obj: "bpy.types.Object", spec: dict) -> dict:
     """Yaw, scale to target metres, pivot to ground centre. Blender Z is up (glTF exporter maps to +Y)."""
     yaw = spec.get("yaw_deg", 0.0)
     if yaw:
-        obj.rotation_euler = (0.0, 0.0, math.radians(yaw))
-        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        cos, sin = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+        for vertex in obj.data.vertices:
+            x, y = vertex.co.x, vertex.co.y
+            vertex.co.x, vertex.co.y = x * cos - y * sin, x * sin + y * cos
+        obj.data.update()
     low, high = bounds(obj)
     size = [high[i] - low[i] for i in range(3)]  # x, y (depth), z (height)
     extent = {"length": max(size[0], size[1]), "width": size[0], "height": size[2]}
@@ -125,7 +229,7 @@ def grade_and_resize(obj: "bpy.types.Object", spec: dict) -> dict | None:
                 luma_range=tuple(spec["luma_range"])
                 if spec.get("luma_range")
                 else None,
-                gamma=spec.get("gamma", 1.0),
+                gamma=spec.get("gamma"),
             )
             if spec.get("grade", True)
             else (pixels[:, :3], {"after": dn_grade.albedo_stats(pixels[:, :3])})
@@ -139,7 +243,7 @@ def grade_and_resize(obj: "bpy.types.Object", spec: dict) -> dict | None:
 
 def decimate(obj: "bpy.types.Object", target: int) -> int:
     """Collapse-decimate to roughly ``target`` triangles (two passes), return the count."""
-    for _ in range(3):
+    for _ in range(8):
         current = len(obj.data.polygons)
         if current <= target * 1.02:
             break
@@ -190,9 +294,16 @@ def main() -> None:
     clear_scene()
     obj = import_joined(spec["raw"])
     raw_tris = None
+    removed_debris = clean(obj, spec.get("island_min", 0.01))
     triangulate(obj)
     raw_tris = len(obj.data.polygons)
     dims = normalise(obj, spec)
+    stripped = 0
+    if spec.get("strip_base"):
+        stripped = strip_base(obj)
+        if stripped:
+            dims = normalise(obj, {**spec, "yaw_deg": 0.0})
+    set_surface(obj, spec["roughness"])
     grade = grade_and_resize(obj, spec)
     out_dir = Path(spec["out_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -222,6 +333,8 @@ def main() -> None:
                 "dimensions_m": dims,
                 "triangles": triangles,
                 "raw_triangles": raw_tris,
+                "debris_vertices": removed_debris,
+                "base_faces_removed": stripped,
                 "grade": grade,
                 "bbox_drift": drift,
             }

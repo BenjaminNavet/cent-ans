@@ -103,9 +103,9 @@ def blender_smoke() -> None:
 
 @app.command("dn-ingest")
 def dn_ingest_command(
-    raw: Path = typer.Argument(
+    raw: Path = typer.Argument(  # noqa: B008
         ..., exists=True, dir_okay=False, help="Glb brut TRELLIS/SF3D"
-    ),  # noqa: B008
+    ),
     asset_id: str = typer.Option(..., "--id", help="Identifiant snake_case anglais"),
     asset_class: str = typer.Option(
         ..., "--class", help="Classe (data/art/dn_ingest_classes.json)"
@@ -116,19 +116,21 @@ def dn_ingest_command(
     yaw: float = typer.Option(0.0, help="Lacet de correction en degrés (SF3D : 180)"),
     lods: int = typer.Option(3, help="Nombre de LOD (1 à 3)"),
     tex: int | None = typer.Option(None, help="Taille de texture (défaut : classe)"),
-    gamma: float = typer.Option(1.0, help="Gamma d'albédo avant plafonnement"),
+    gamma: float | None = typer.Option(
+        None, help="Gamma d'albédo forcé (défaut : automatique, fenêtre de luminance)"
+    ),
     no_grade: bool = typer.Option(
         False, "--no-grade", help="Pas d'étalonnage de l'albédo"
     ),
     source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
     model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
     cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
-    out_dir: Path | None = typer.Option(
+    out_dir: Path | None = typer.Option(  # noqa: B008
         None, help="Racine de sortie (défaut game/assets/models/dn)"
-    ),  # noqa: B008
-    manifest: Path = typer.Option(
+    ),
+    manifest: Path = typer.Option(  # noqa: B008
         dn_ingest.MANIFEST_PATH, help="Manifeste à mettre à jour"
-    ),  # noqa: B008
+    ),
 ) -> None:
     """Transforme un glb brut en asset de jeu (échelle, pivot, LOD, albédo) et l'inscrit au manifeste."""
     classes = dn_ingest.load_classes()
@@ -699,7 +701,7 @@ def geo_towns() -> None:
 
 @geo_app.command("landmarks")
 def geo_landmarks(
-    city: list[str] = typer.Option(  # noqa: B008
+    city: list[str] = typer.Option(
         None, "--city", help="Identifiant de ville (répétable)"
     ),
     refresh_osm: bool = typer.Option(
@@ -1090,7 +1092,7 @@ def assets_ink_icons(
     kind: str = typer.Option(
         "all", "--kind", help="icon, medallion ou all (les deux, icônes d'abord)"
     ),
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à générer seuls (sonde), répétable"
     ),
     limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
@@ -1190,7 +1192,7 @@ def assets_ink_icons(
 
 @assets_app.command("entity-icons")
 def assets_entity_icons(
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à générer seuls (sonde), répétable"
     ),
     limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
@@ -1366,7 +1368,7 @@ def assets_portraits(
 @assets_app.command("portrait-archetypes")
 def assets_portrait_archetypes(
     limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Clés à générer seules (sonde), répétable"
     ),
     no_aged: bool = typer.Option(False, "--no-aged", help="Archétypes seulement"),
@@ -1670,15 +1672,15 @@ def assets_codex_art(
 
 @assets_app.command("materials")
 def assets_materials(
-    out_dir: Path = typer.Option(  # noqa: B008
+    out_dir: Path = typer.Option(
         ...,
         "--out",
         help="Dossier des images brutes et tuiles (hors dépôt, ex. scratch)",
     ),
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à générer seuls (sonde), répétable"
     ),
-    sheet: Path | None = typer.Option(  # noqa: B008
+    sheet: Path | None = typer.Option(
         None, "--sheet", help="Planche de contrôle PNG à écrire"
     ),
     lot: str | None = typer.Option(
@@ -1694,10 +1696,10 @@ def assets_materials(
         "--build",
         help="Reconstruire les tableaux des figurines (couches sans tuile : conservées)",
     ),
-    layers_sheet: Path | None = typer.Option(  # noqa: B008
+    layers_sheet: Path | None = typer.Option(
         None, "--layers-sheet", help="Planche JPEG des couches construites (--build)"
     ),
-    config: Path | None = typer.Option(  # noqa: B008
+    config: Path | None = typer.Option(
         None,
         "--config",
         help="Fichier de matières (défaut data/art/materials.yaml ; RC5 : water_materials.yaml)",
@@ -1782,10 +1784,10 @@ def assets_materials(
 @assets_app.command("ui-ornaments")
 def assets_ui_ornaments(
     dry_run: bool = typer.Option(False, "--dry-run", help="Estime sans appel payant"),
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à traiter seuls, répétable"
     ),
-    sheet: Path | None = typer.Option(  # noqa: B008
+    sheet: Path | None = typer.Option(
         None, "--sheet", help="Planche avant/après PNG à écrire"
     ),
     install: bool = typer.Option(
@@ -1846,7 +1848,7 @@ assets_app.add_typer(ground_app, name="ground-materials")
 
 @ground_app.command("generate")
 def ground_generate(
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à générer seuls, répétable"
     ),
     attempt: int | None = typer.Option(
@@ -1878,7 +1880,7 @@ def ground_generate(
 
 @ground_app.command("seamless")
 def ground_seamless(
-    only: list[str] = typer.Option(  # noqa: B008
+    only: list[str] = typer.Option(
         None, "--only", help="Identifiants à traiter seuls, répétable"
     ),
 ) -> None:

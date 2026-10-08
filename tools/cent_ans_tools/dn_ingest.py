@@ -43,7 +43,7 @@ def build_job(
     lods: int = 3,
     tex: int | None = None,
     grade: bool = True,
-    gamma: float = 1.0,
+    gamma: float | None = None,
 ) -> dict:
     """Validate the request against the class table and return the Blender job document."""
     if asset_class not in classes["classes"]:
@@ -80,6 +80,9 @@ def build_job(
         "tex": tex or spec["tex"],
         "grade": grade,
         "gamma": gamma,
+        "roughness": spec["roughness"],
+        "strip_base": spec["strip_base"],
+        "island_min": classes["island_min"],
         "saturation_cap": classes["grade"]["saturation_cap"],
         "luma_range": [
             classes["grade"]["albedo_mean_min"],

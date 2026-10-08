@@ -132,3 +132,28 @@ def test_grade_caps_saturation_and_lifts_luma() -> None:
     assert 0.17 <= report["after"]["mean_luma"] <= 0.36
     grey = np.full((10, 3), 0.25)
     assert np.allclose(dn_grade.grade_albedo(grey, 0.4, (0.18, 0.35))[0], grey)
+
+
+def test_auto_gamma_reaches_window_and_keeps_inside() -> None:
+    """Automatic gamma lifts a dark albedo into the window, a bright one down, and leaves a good one."""
+    window = (0.18, 0.35)
+    rng = np.random.default_rng(3)
+    for scale in (0.15, 1.0):
+        rgb = rng.random((3000, 3)) * scale
+        graded, report = dn_grade.grade_albedo(rgb, 0.40, window)
+        assert window[0] <= report["after"]["mean_luma"] <= window[1], scale
+        assert dn_grade.rgb_to_hsv(graded)[..., 1].max() <= 0.40 + 1e-9
+    inside = np.full((10, 3), 0.25)
+    assert dn_grade.auto_gamma(inside, window) == 1.0
+
+
+def test_job_carries_surface_and_cleanup_settings() -> None:
+    """Roughness, base stripping and island threshold come from the class table."""
+    job = _job()
+    assert (
+        job["roughness"] == 0.9
+        and job["strip_base"] is True
+        and job["island_min"] == 0.01
+    )
+    assert _job(asset_class="rock")["strip_base"] is False
+    assert _job()["gamma"] is None

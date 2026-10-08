@@ -125,7 +125,7 @@ TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul app
 Un seul outil transforme un glb brut TRELLIS/SF3D en asset de jeu (bible § 14.4-14.6) :
 ```
 uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <classe> \
-    (--length|--width|--height <m>) [--yaw 180] [--lods 3] [--tex 1024] [--gamma 1.0] [--no-grade] \
+    (--length|--width|--height <m>) [--yaw 180] [--lods 3] [--tex 1024] [--gamma auto] [--no-grade] \
     [--source-image ...] [--model-3d trellis-fal] [--cost-usd 0.02]
 ```
 - Classes et budgets lus dans `data/art/dn_ingest_classes.json` (prop, house, major_building,
@@ -134,13 +134,15 @@ uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <cl
 - Étapes (`tools/blender_scripts/dn_ingest.py`, Blender headless) : fusion des maillages, lacet
   `--yaw` (SF3D sort tourné de 180°), échelle uniforme à la taille cible, pivot au sol au centre,
   +Y haut, texture réduite à la taille de la classe, étalonnage de l'albédo
-  (`dn_grade.py` : plafond de S, fenêtre de luminance), décimation quadrique LOD0/1/2.
+  (`dn_grade.py` : plafond de S, gamma automatique vers la fenêtre de luminance, `--gamma` pour forcer), nettoyage du brut (îlots < 1 % des sommets calculés par position, donc sans confondre une coupe d'UV avec un débris ; socle parasite supprimé quand la base est > 8 % plus large que le corps, `strip_base` de la classe), rugosité constante par classe et métallique 0, décimation quadrique LOD0/1/2.
 - Sorties : `game/assets/models/dn/<categorie>/<id>_lod{0,1,2}.glb` (un glb par LOD, texture JPEG
   embarquée) et entrée dans `data/art/dn_manifest.json` (classe, chemins, dimensions, triangles par
   LOD, texture, brut, image source, modèle 3D, coût, statistiques d'étalonnage). Code de sortie 2 si
   un LOD dépasse son budget ou si S p95 > plafond. Aucune génération : l'outil ne touche pas au GPU.
 - Le contour des LOD dérive d'environ 1 % de la hauteur (mesuré sur une maison TRELLIS), sous la
-  limite de 3 % de la bible.
+  limite de 3 % de la bible. Ne pas souder les sommets avant la décimation (les LOD bloquent).
+- Lacet SF3D : `--yaw 180` tourne bien le maillage (vérifié sur les sommets) ; le sens « avant »
+  des glb `sf3d/out/norm/` (déjà normalisés) semble déjà être −Z : vérifier à l'œil avant d'appliquer 180.
 
 ### Figurines de bataille : glb → jeu
 

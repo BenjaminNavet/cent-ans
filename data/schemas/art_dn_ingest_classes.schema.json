@@ -3,7 +3,7 @@
   "$id": "art_dn_ingest_classes.schema.json",
   "title": "Classes d'ingestion d'assets 3D (lot DN ingest)",
   "type": "object",
-  "required": ["grade", "lod_ratio_tolerance", "classes"],
+  "required": ["grade", "lod_ratio_tolerance", "island_min", "classes"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
@@ -18,6 +18,7 @@
         "albedo_mean_max": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },
+    "island_min": {"type": "number", "minimum": 0, "maximum": 0.2},
     "lod_ratio_tolerance": {"type": "number", "minimum": 0, "maximum": 0.5, "description": "Écart relatif toléré entre triangles visés et obtenus par LOD."},
     "classes": {
       "type": "object",
@@ -25,14 +26,16 @@
       "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
       "additionalProperties": {
         "type": "object",
-        "required": ["label", "category", "lod_tris", "tex", "scale_axis"],
+        "required": ["label", "category", "lod_tris", "tex", "scale_axis", "roughness", "strip_base"],
         "additionalProperties": false,
         "properties": {
           "label": {"type": "string"},
           "category": {"$ref": "common.schema.json#/$defs/snake_id"},
           "lod_tris": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 50}},
           "tex": {"type": "integer", "enum": [256, 512, 1024, 2048]},
-          "scale_axis": {"enum": ["length", "width", "height"]}
+          "scale_axis": {"enum": ["length", "width", "height"]},
+          "roughness": {"type": "number", "minimum": 0, "maximum": 1},
+          "strip_base": {"type": "boolean"}
         }
       }
     }
