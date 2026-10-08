@@ -2,9 +2,8 @@ extends Node
 
 ## Autoload `SimFacade` : point d'accès unique de l'UI à la simulation.
 ##
-## `sim` est la vraie `CampaignSim` (GDExtension Rust) quand elle expose l'API M2
-## (`get_army_ids`), sinon `CampaignSimMock` (même API, données factices). `store`
-## est un `GameDataStore` chargé sur `MapPaths.data_dir` (null si la GDExtension
+## `sim` est la `CampaignSim` native (GDExtension Rust), null si la GDExtension manque
+## (`is_real` faux). `store` est un `GameDataStore` chargé sur `MapPaths.data_dir` (null si la GDExtension
 ## manque ou si le dossier n'est pas un jeu de données complet, ex. fixtures).
 ##
 ## Transporte aussi la requête de démarrage entre `start_menu.tscn` et
@@ -34,7 +33,7 @@ var pending_load_path: String = ""
 func _ready() -> void:
 	_init_store()
 	_init_sim()
-	print("SimFacade: using %s" % ("real CampaignSim" if is_real else "CampaignSimMock"))
+	print("SimFacade: %s" % ("CampaignSim ready" if is_real else "CampaignSim unavailable (run core/build.sh)"))
 
 
 ## Vrai si `data_dir` contient les données de jeu complètes (pas seulement `map/`).
@@ -57,22 +56,17 @@ func _init_store() -> void:
 
 
 func _init_sim() -> void:
-	if ClassDB.class_exists("CampaignSim"):
-		var candidate: Object = ClassDB.instantiate("CampaignSim")
-		if candidate.has_method("get_army_ids"):
-			sim = candidate
-			is_real = true
-			return
-	sim = CampaignSimMock.new()
-	is_real = false
+	is_real = ClassDB.class_exists("CampaignSim")
+	sim = ClassDB.instantiate("CampaignSim") if is_real else null
 
 
 func store_loaded() -> bool:
 	return store != null
 
 
+## Libellé du moteur (encore lu par `campaign_map.gd`, gelé ; à retirer après le dégel).
 func engine_label() -> String:
-	return "réelle" if is_real else "factice"
+	return "réelle"
 
 
 ## T2 : isole les sauvegardes (smoke test) dans un dossier dédié à cette exécution.
@@ -88,25 +82,18 @@ func set_data_dir(data_dir: String) -> void:
 	_init_sim()
 
 
-## Démarre une nouvelle campagne sur une simulation neuve (réelle si disponible) ;
-## l'échec de la vraie sim (ex. dossier de données incomplet) retombe sur le mock.
+## Démarre une nouvelle campagne sur une simulation neuve ; faux si la sim est absente
+## ou refuse le dossier de données.
 func new_campaign(faction: String, seed: int) -> bool:
 	_init_sim()
-	if is_real and not has_game_data(MapPaths.data_dir):
-		push_warning("SimFacade: %s has no game data; using mock" % MapPaths.data_dir)
-		sim = CampaignSimMock.new()
-		is_real = false
-	if sim.call("new_campaign", MapPaths.data_dir, faction, seed):
-		_apply_pending_difficulty()
-		return true
-	if is_real:
-		push_warning("SimFacade: real CampaignSim refused %s; falling back to mock" % MapPaths.data_dir)
-		sim = CampaignSimMock.new()
-		is_real = false
-		if sim.new_campaign(MapPaths.data_dir, faction, seed):
-			_apply_pending_difficulty()
-			return true
-	return false
+	if sim == null:
+		push_error("SimFacade: CampaignSim unavailable (run core/build.sh)")
+		return false
+	if not sim.call("new_campaign", MapPaths.data_dir, faction, seed):
+		push_warning("SimFacade: CampaignSim refused %s" % MapPaths.data_dir)
+		return false
+	_apply_pending_difficulty()
+	return true
 
 
 # --- Difficulté (DF1) -----------------------------------------------------------
@@ -125,7 +112,7 @@ func difficulty_levels() -> Array:
 	var levels: Array = []
 	if sim != null and sim.has_method("get_difficulty_levels"):
 		levels = sim.call("get_difficulty_levels")
-	# Mock sur un jeu de données partiel (tests) : le cœur connaît les niveaux par défaut.
+	# Sim absente ou sans campagne (tests) : le cœur connaît les niveaux par défaut.
 	if levels.is_empty() and ClassDB.class_exists("CampaignSim"):
 		var core: Object = ClassDB.instantiate("CampaignSim")
 		if core.has_method("get_difficulty_levels"):
@@ -183,6 +170,8 @@ func save_path(save_name: String) -> String:
 
 ## Écrit `user://saves/<nom>.json` : état de la sim + métadonnées.
 func save_game(save_name: String) -> bool:
+	if sim == null:
+		return false
 	var state := str(sim.call("save_to_string"))
 	if state.is_empty():
 		push_error("SimFacade: no campaign state, refusing to overwrite %s" % save_name)
@@ -190,7 +179,6 @@ func save_game(save_name: String) -> bool:
 	DirAccess.make_dir_recursive_absolute(SAVES_DIR)
 	var wrapper := {
 		"version": SAVE_VERSION,
-		"engine": "real" if is_real else "mock",
 		"faction": str(sim.call("get_player_faction")),
 		"date": str(sim.call("get_date_label")),
 		"turn": int(sim.call("get_turn")),
@@ -222,24 +210,15 @@ func load_game(path: String) -> bool:
 	if wrapper.is_empty():
 		push_error("SimFacade: invalid save %s" % path)
 		return false
-	var engine: String = str(wrapper.get("engine", "mock"))
+	if sim == null or str(wrapper.get("engine", "real")) == "mock":
+		push_error("SimFacade: save %s cannot be loaded (no CampaignSim, or legacy mock save)" % path)
+		return false
 	# The running campaign is only replaced once the save has loaded: a refused
 	# save must not leave an empty sim that the next autosave would write out.
 	var previous_sim: Object = sim
-	var previous_is_real := is_real
 	_init_sim()
-	if engine == "mock" and is_real:
-		push_warning("SimFacade: save made with the mock; loading with mock")
-		sim = CampaignSimMock.new()
-		is_real = false
-	elif engine == "real" and not is_real:
-		push_error("SimFacade: save made with the real simulation, unavailable here")
-		sim = previous_sim
-		is_real = previous_is_real
-		return false
 	if not bool(sim.call("load_from_string", str(wrapper["state"]))):
 		sim = previous_sim
-		is_real = previous_is_real
 		return false
 	return true
 
@@ -263,7 +242,6 @@ func list_saves() -> Array[Dictionary]:
 			"faction": str(wrapper.get("faction", "")),
 			"date": str(wrapper.get("date", "")),
 			"timestamp": str(wrapper.get("timestamp", "")),
-			"engine": str(wrapper.get("engine", "mock")),
 		})
 	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["timestamp"] > b["timestamp"])
 	return result
