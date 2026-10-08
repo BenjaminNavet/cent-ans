@@ -97,8 +97,8 @@ func _run() -> void:
 	if not ClassDB.class_exists("CampaignSim"):
 		_check(false, "CampaignSim missing (run core/build.sh)")
 		return
-	# Chaque écran a son propre `CampaignSim` (même approche que `ub1_ui_test.gd` /
-	# `nv1_naval_test.gd`) : `debug_stage_siege`/`debug_stage_naval` déplacent des armées et
+	# Chaque écran a son propre `CampaignSim` (même approche que `ub1_ui_test.gd`) :
+	# `debug_stage_siege`/`debug_stage_naval` déplacent des armées et
 	# entrent en guerre, ce qui invaliderait les batailles mises en scène par les autres écrans
 	# si le même `CampaignSim` (ou la même carte) était réutilisé.
 	await _check_siege_dialog()
@@ -277,7 +277,7 @@ func _check_naval_dialog() -> void:
 		dialog.show_naval(sim, pending[0])
 		await process_frame
 		await process_frame
-		_check(dialog.visible and not dialog.fight_button.visible, "naval dialog: only auto-resolve is offered (PLAYABLE_3D = false)")
+		_check(dialog.visible and not dialog.fight_button.visible, "naval dialog: only auto-resolve is offered")
 		_check(not dialog.chance_label.text.is_empty(), "naval dialog: estimated chances missing")
 		if first:
 			_collect(dialog)

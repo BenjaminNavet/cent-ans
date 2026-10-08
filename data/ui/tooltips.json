@@ -647,10 +647,6 @@
       "body": "Cinq combats résolus automatiquement avec les mêmes flottes (navires, hauteur de bord, archers aux châteaux, hommes d'armes pour l'abordage)."
     },
     "naval_withdraw": {"title": "Se dérober"},
-    "naval_scroll_ships": {"title": "Faire défiler les navires"},
-    "naval_ship_card": {"title": "Navire"},
-    "naval_ship_name": {"title": "Navire"},
-    "naval_hull": {"title": "Coque"},
     "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"},
     "feudal_title_crumb": {"title": "Titre"},
     "feudal_tree_open": {"title": "Suzerains, vassaux, loyautés et actions féodales"},

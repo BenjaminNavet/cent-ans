@@ -76,7 +76,6 @@ mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
-pub use naval_sim::NavalBattleSim;
 pub use relief_decoder::ReliefDecoder;
 pub use relief_lod_bridge::ReliefLod;
 pub use vegetation_scatter::VegetationScatter;
