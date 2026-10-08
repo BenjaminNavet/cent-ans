@@ -18,17 +18,7 @@ static var _character_house: Dictionary = {}  # id de personnage → maison (fic
 
 ## Fichier de `data/` : dossier de données du jeu (`MapPaths.data_dir`), puis `data/` du dépôt.
 static func data_path(relative: String) -> String:
-	var dirs: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		dirs.append(str(paths.get("data_dir")))
-	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in dirs:
-		var path := dir.path_join(relative)
-		if FileAccess.file_exists(path):
-			return path
-	return ""
+	return DataFile.path_of(relative) if DataFile.exists(relative) else ""
 
 
 static func _ensure_loaded() -> void:
@@ -36,7 +26,7 @@ static func _ensure_loaded() -> void:
 		return
 	_loaded = true
 	var path := data_path(DATA_FILE)
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if path != "" else null
+	var parsed: Variant = DataFile.parse_file(path) if path != "" else null
 	if not parsed is Dictionary:
 		push_warning("HouseArms: %s introuvable, armes de faction seulement" % DATA_FILE)
 		return
@@ -91,7 +81,7 @@ static func house_of(character_id: String, sim: Object = null) -> String:
 	var house := ""
 	var path := data_path("characters/%s.json" % character_id)
 	if path != "":
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var parsed: Variant = DataFile.parse_file(path)
 		if parsed is Dictionary:
 			house = str((parsed as Dictionary).get("house", ""))
 	_character_house[character_id] = house

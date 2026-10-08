@@ -22,7 +22,6 @@ extends RefCounted
 
 ## Lu comme `CameraFeel` : `MapPaths` donne le dossier `data/`.
 const DATA_FILE := "ui/tooltip_style.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const FALLBACK := {
 	"width_px": 360, "max_height_screen_share": 0.7, "header_icon_px": 48, "short_max_body_lines": 8,
 	"kind_colors": {}, "headline": {}, "lower_is_better": [],
@@ -175,10 +174,7 @@ static func blocks_for(spec: Dictionary, detailed: bool) -> Array:
 static func style() -> Dictionary:
 	if _cache.is_empty():
 		_cache = FALLBACK.duplicate(true)
-		var path := _data_dir().path_join(DATA_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(DATA_FILE) if DataFile.exists(DATA_FILE) else null
 		if parsed is Dictionary:
 			_cache.merge(parsed, true)
 		else:
@@ -214,15 +210,6 @@ static func _screen_height() -> float:
 	if tree != null and tree.root != null:
 		return tree.root.get_visible_rect().size.y
 	return 900.0
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
 
 
 # --- Blocs ---------------------------------------------------------------------------------

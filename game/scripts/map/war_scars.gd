@@ -23,7 +23,6 @@ extends Node3D
 ## Branché par `CampaignLife` (`--life-off=scars` le coupe).
 
 const DATA_PATH := "ui/war_scars.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const DEFAULT_METERS_PER_UNIT := 719.0
 ## Recalage au sol et recherche des plans de ville : au plus une fois par intervalle (s).
 const REGROUND_INTERVAL := 0.25
@@ -72,13 +71,12 @@ var _door_timer := 0.0
 static func settings() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var path := _data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if DataFile.exists(DATA_PATH):
+			var parsed: Variant = DataFile.read_json(DATA_PATH)
 			if parsed is Dictionary:
 				_settings = parsed
 			else:
-				push_warning("WarScars: %s invalid" % path)
+				push_warning("WarScars: %s invalid" % DATA_PATH)
 	return _settings
 
 
@@ -86,15 +84,6 @@ static func settings() -> Dictionary:
 static func reload() -> void:
 	_loaded = false
 	_settings = {}
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 static func _block(key: String) -> Dictionary:

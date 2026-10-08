@@ -7,7 +7,6 @@ extends RefCounted
 ## noms de région (`region_labels`), nuées (`clouds`). Les valeurs de repli sont celles du fichier.
 ## Purement visuel : aucune règle de jeu.
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const FILE := "ui/campaign_map.json"
 
 static var _catalog: Dictionary = {}
@@ -20,14 +19,11 @@ static var signs_layer_on: bool = false
 static func section(name: String) -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(FILE) if DataFile.exists(FILE) else null
 		if parsed is Dictionary:
 			_catalog = parsed
 		else:
-			push_warning("MapReadability: %s missing or invalid" % path)
+			push_warning("MapReadability: %s missing or invalid" % FILE)
 	var block: Variant = _catalog.get(name, {})
 	return block if block is Dictionary else {}
 

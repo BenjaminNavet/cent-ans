@@ -41,7 +41,7 @@ static func load_from(data_dir: String, map_dir: String) -> SettlementData:
 static func _read_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null
-	return JSON.parse_string(FileAccess.get_file_as_string(path))
+	return DataFile.parse_file(path)
 
 
 func _load_settlements(data_dir: String, map_dir: String) -> void:

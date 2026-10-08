@@ -44,7 +44,7 @@ var _check_timer := 0.0
 
 
 static func data_path() -> String:
-	return HistoricalBattlesMenu.data_dir().path_join(DATA_FILE)
+	return DataFile.data_dir().path_join(DATA_FILE)
 
 
 ## Contenu de `data/tutorial/battle_prologue.json` ({} s'il manque ou est illisible).

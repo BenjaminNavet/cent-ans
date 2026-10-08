@@ -267,7 +267,7 @@ func _load_anchors(anchors: Dictionary) -> void:
 static func _read_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null
-	return JSON.parse_string(FileAccess.get_file_as_string(path))
+	return DataFile.parse_file(path)
 
 
 class TileJob:

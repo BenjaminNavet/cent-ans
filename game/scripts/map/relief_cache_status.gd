@@ -232,7 +232,7 @@ static func _sample(count: int) -> PackedInt32Array:
 static func _read_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null
-	return JSON.parse_string(FileAccess.get_file_as_string(path))
+	return DataFile.parse_file(path)
 
 
 static func _sorted_keys(dict: Dictionary) -> Array:

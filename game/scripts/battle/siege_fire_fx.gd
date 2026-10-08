@@ -13,7 +13,6 @@ extends Node3D
 ## (`fire_ember.gdshader`) qui dérivent au vent, lumière qui vacille (bruit, couleur, position).
 
 const FX_PATH := "fx/siege_fire.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const FLAME_SHADER := preload("res://shaders/fire_flame.gdshader")
 const SMOKE_SHADER := preload("res://shaders/fire_smoke.gdshader")
 const EMBER_SHADER := preload("res://shaders/fire_ember.gdshader")
@@ -81,10 +80,9 @@ func setup(p_siege_view: Node3D, p_height_at: Callable) -> void:
 
 static func _load_params() -> Dictionary:
 	var merged: Dictionary = DEFAULTS.duplicate(true)
-	var path: String = _data_dir().path_join(FX_PATH)
-	if not FileAccess.file_exists(path):
+	if not DataFile.exists(FX_PATH):
 		return merged
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.read_json(FX_PATH)
 	if not parsed is Dictionary:
 		return merged
 	for key in parsed:
@@ -93,16 +91,6 @@ static func _load_params() -> Dictionary:
 		else:
 			merged[key] = parsed[key]
 	return merged
-
-
-## Dossier `data/` (autoload `MapPaths` s'il existe : le smoke test tourne sans autoloads nommés).
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 static func _color(values: Array) -> Color:

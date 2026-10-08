@@ -13,7 +13,6 @@ extends RefCounted
 ## est teinté à la couleur de la faction.
 
 const MODELS_DIR := "res://assets/models/"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 ## Échelle monde des modèles de ville (lot V3 : une ville fortifiée ≈ 2,1 unités Blender
 ## → ≈ 10 px de carte ; maisons de la taille des arbres, cohérentes avec le relief).
 const CITY_SCALE := 4.8
@@ -108,25 +107,16 @@ static func _tinted_material(material: BaseMaterial3D, color: Color) -> BaseMate
 # --- Villes ------------------------------------------------------------------------
 
 
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
-
-
 static func _read_json(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	return parsed if parsed is Dictionary else {}
 
 
 static func _load_capitals() -> void:
 	_capitals_loaded = true
-	var factions_dir := _data_dir().path_join("factions")
+	var factions_dir := DataFile.data_dir().path_join("factions")
 	var dir := DirAccess.open(factions_dir)
 	if dir == null:
 		return
@@ -144,7 +134,7 @@ static func city_kind(province_id: String) -> String:
 	if not _capitals_loaded:
 		_load_capitals()
 	var kind := "village"
-	var province := _read_json(_data_dir().path_join("provinces").path_join(province_id + ".json"))
+	var province := _read_json(DataFile.data_dir().path_join("provinces").path_join(province_id + ".json"))
 	var buildings: Array = province.get("buildings", [])
 	if _capitals.has(province_id):
 		kind = "castle"
@@ -216,7 +206,7 @@ static func army_kind(army: Dictionary) -> String:
 static func unit_category(unit_type: String) -> String:
 	if _unit_categories.has(unit_type):
 		return _unit_categories[unit_type]
-	var data := _read_json(_data_dir().path_join("unit_types").path_join(unit_type + ".json"))
+	var data := _read_json(DataFile.data_dir().path_join("unit_types").path_join(unit_type + ".json"))
 	var category := str(data.get("category", "infantry"))
 	_unit_categories[unit_type] = category
 	return category
@@ -313,5 +303,5 @@ static func dress_army_marker(marker: Node3D, army: Dictionary, color: Color) ->
 ## Dirigeant d'une faction d'après les données (`data/factions/<id>.json`, champ `ruler`), "" sinon.
 static func faction_ruler(faction_id: String) -> String:
 	if not _rulers.has(faction_id):
-		_rulers[faction_id] = str(_read_json(_data_dir().path_join("factions").path_join(faction_id + ".json")).get("ruler", ""))
+		_rulers[faction_id] = str(_read_json(DataFile.data_dir().path_join("factions").path_join(faction_id + ".json")).get("ruler", ""))
 	return _rulers[faction_id]

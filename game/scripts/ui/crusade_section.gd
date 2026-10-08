@@ -270,12 +270,12 @@ static func _morale_note(marks: Dictionary, key: String) -> String:
 
 
 static func _rules() -> Dictionary:
-	var dir := GameCatalog.data_dir()
+	var dir := DataFile.data_dir()
 	if dir != _rules_dir:
 		_rules_dir = dir
 		_rules_cache = {}
 		var path := dir.path_join(RULES_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.parse_file(path) if FileAccess.file_exists(path) else null
 		if parsed is Dictionary:
 			_rules_cache = parsed
 	return _rules_cache

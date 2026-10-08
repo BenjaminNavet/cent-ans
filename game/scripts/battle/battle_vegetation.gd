@@ -18,7 +18,6 @@ const MAX_CAMERA_HEIGHT := 170.0
 const FA_TEXTURE_PATH := "res://assets/textures/battle/grass_tufts.png"
 const FA_FILE := "art/battle_grass.json"
 const FA_MAX_VARIANTS := 16  # taille des tableaux du shader
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
 static var _fa_catalogue: Dictionary = {}
 static var _fa_loaded: bool = false
@@ -198,19 +197,12 @@ static func fa_catalogue() -> Dictionary:
 	if _fa_loaded:
 		return _fa_catalogue
 	_fa_loaded = true
-	var dir := MAP_PATHS_SCRIPT.default_data_dir()
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			dir = str(map_paths.get("data_dir"))
-	var path := dir.path_join(FA_FILE)
-	if FileAccess.file_exists(path) and ResourceLoader.exists(FA_TEXTURE_PATH):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if DataFile.exists(FA_FILE) and ResourceLoader.exists(FA_TEXTURE_PATH):
+		var parsed: Variant = DataFile.read_json(FA_FILE)
 		if parsed is Dictionary and (parsed as Dictionary).get("render") is Dictionary:
 			_fa_catalogue = parsed
 	if _fa_catalogue.is_empty():
-		push_warning("BattleVegetation: %s or %s missing, drawn grass kept" % [path, FA_TEXTURE_PATH])
+		push_warning("BattleVegetation: %s or %s missing, drawn grass kept" % [FA_FILE, FA_TEXTURE_PATH])
 	return _fa_catalogue
 
 

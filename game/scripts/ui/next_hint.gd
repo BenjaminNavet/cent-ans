@@ -14,7 +14,6 @@ extends RefCounted
 ## Aucune règle de jeu : un seul conseil, le plus prioritaire, expliqué en une phrase.
 
 const DATA_PATH := "ui/next_hints.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 ## Conditions servies par une alerte de la cloche du même type (`kind`).
 const ALERT_KINDS := ["chronicle_decision", "siege", "enemy_army", "debt", "research_idle"]
 
@@ -23,26 +22,12 @@ static var _data: Dictionary = {}
 
 static func data() -> Dictionary:
 	if _data.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		# Jeux de données réduits (fixtures des tests) : textes du jeu complet.
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
+		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
+		if parsed is Dictionary:
+			_data = parsed
 		if _data.is_empty():
-			push_warning("NextHint: %s missing or invalid" % path)
+			push_warning("NextHint: %s missing or invalid" % DATA_PATH)
 	return _data
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 ## Conseil à afficher pour `state` : `{id, title, text, action, alert?, army_id?}`, ou `{}`.

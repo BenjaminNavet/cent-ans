@@ -122,9 +122,7 @@ func close() -> void:
 ## Contenu de `CREDITS.md` (dépôt, puis jeu exporté), texte intégré à défaut.
 func load_credits() -> String:
 	var candidates: Array[String] = [ProjectSettings.globalize_path("res://").path_join("../CREDITS.md").simplify_path()]
-	var paths := get_node_or_null("/root/MapPaths")
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")).path_join("../CREDITS.md").simplify_path())
+	candidates.append(DataFile.data_dir().path_join("../CREDITS.md").simplify_path())
 	candidates.append("res://CREDITS.md")
 	for candidate in candidates:
 		if FileAccess.file_exists(candidate):

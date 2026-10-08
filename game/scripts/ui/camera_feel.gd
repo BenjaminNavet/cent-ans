@@ -7,7 +7,6 @@ extends RefCounted
 ## animations » est actif. Les valeurs de repli ne servent que si le fichier manque.
 
 const DATA_FILE := "ui/camera_feel.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const FALLBACK := {
 	"campaign": {
 		"pan_accel": 14.0, "pan_friction": 5.5, "follow_damping": 12.0, "zoom_damping": 9.0,
@@ -40,10 +39,7 @@ static func get_value(block: String, key: String) -> float:
 static func settings() -> Dictionary:
 	if _cache.is_empty():
 		_cache = FALLBACK.duplicate(true)
-		var path := _data_dir().path_join(DATA_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(DATA_FILE) if DataFile.exists(DATA_FILE) else null
 		if parsed is Dictionary:
 			for block: String in ["campaign", "battle", "reduce_motion"]:
 				if (parsed as Dictionary).get(block) is Dictionary:
@@ -60,10 +56,3 @@ static func reload() -> void:
 	loaded_from_data = false
 
 
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")

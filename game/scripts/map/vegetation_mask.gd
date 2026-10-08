@@ -119,7 +119,7 @@ func _load_splat() -> void:
 ## en option, raster des essences (chêne, hêtre, conifères).
 func _load_forest_cover() -> void:
 	var path := map_data.map_dir.path_join(FOREST_COVER_FILE)
-	var config: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	var config: Variant = DataFile.parse_file(path) if FileAccess.file_exists(path) else null
 	if not (config is Dictionary):
 		return
 	var cover: Dictionary = config.get("cover", {})
@@ -251,7 +251,7 @@ func _load_province_terrains() -> void:
 		if terrain == "":
 			var path := provinces_dir.path_join(str(province.get("id", "")) + ".json")
 			if FileAccess.file_exists(path):
-				var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+				var parsed: Variant = DataFile.parse_file(path)
 				if parsed is Dictionary:
 					terrain = str(parsed.get("terrain", ""))
 		if index >= 0 and index < _terrain_by_index.size():

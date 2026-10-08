@@ -129,12 +129,11 @@ func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -
 ## `MapSceneRules` du cœur) ; lus dans le fichier car le réservoir existe avant la campagne.
 ## Dictionnaire vide si absent (les fournisseurs gardent alors leurs valeurs de repli).
 static func load_settings() -> Dictionary:
-	var path := ArmyFigures._data_dir().path_join(DATA_FILE)
-	if not FileAccess.file_exists(path):
+	if not DataFile.exists(DATA_FILE):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.read_json(DATA_FILE)
 	if not (parsed is Dictionary):
-		push_warning("FolkPool: %s invalid" % path)
+		push_warning("FolkPool: %s invalid" % DATA_FILE)
 		return {}
 	return (parsed as Dictionary).duplicate()
 

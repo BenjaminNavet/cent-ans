@@ -58,19 +58,8 @@ static func _ensure_data() -> void:
 	if _data_loaded:
 		return
 	_data_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(DATA_FILE)
-		if not FileAccess.file_exists(path):
-			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if not (parsed is Dictionary):
-			continue
+	var parsed: Variant = DataFile.read_json(DATA_FILE) if DataFile.exists(DATA_FILE) else null
+	if parsed is Dictionary:
 		var doc := parsed as Dictionary
 		for entry_v in doc.get("textured", []):
 			var entry := entry_v as Dictionary

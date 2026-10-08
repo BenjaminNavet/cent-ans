@@ -68,7 +68,7 @@ func load_table() -> bool:
 	if not FileAccess.file_exists(TABLE_PATH):
 		push_warning("IconLibrary: %s missing (run cent-ans assets icons)" % TABLE_PATH)
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(TABLE_PATH))
+	var parsed: Variant = DataFile.parse_file(TABLE_PATH)
 	if not (parsed is Dictionary):
 		push_warning("IconLibrary: invalid %s" % TABLE_PATH)
 		return false
@@ -82,7 +82,7 @@ func _read_index(path: String, directory: String) -> Dictionary:
 	var result := {}
 	if not FileAccess.file_exists(path):
 		return result
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		push_warning("IconLibrary: invalid %s" % path)
 		return result

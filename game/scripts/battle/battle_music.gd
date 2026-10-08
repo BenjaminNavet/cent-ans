@@ -95,7 +95,7 @@ static func _load_config() -> Dictionary:
 	var path := SoundBank.data_path(CONFIG_PATH)
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	return parsed if parsed is Dictionary else {}
 
 

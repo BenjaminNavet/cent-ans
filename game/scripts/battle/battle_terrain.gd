@@ -89,26 +89,18 @@ static func ground_layers() -> Array:
 	if _ground_layers_loaded:
 		return _ground_layers
 	_ground_layers_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(GROUND_LAYERS_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
-				_ground_layers = (parsed as Dictionary)["layers"]
-				var tints: Variant = (parsed as Dictionary).get("terrain_tints", {})
-				if tints is Dictionary:
-					_terrain_tints = tints
-				for i in _ground_layers.size():
-					var role := str((_ground_layers[i] as Dictionary).get("role", ""))
-					if role != "":
-						_ground_role_index[role] = i
-				return _ground_layers
+	if DataFile.exists(GROUND_LAYERS_FILE):
+		var parsed: Variant = DataFile.read_json(GROUND_LAYERS_FILE)
+		if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
+			_ground_layers = (parsed as Dictionary)["layers"]
+			var tints: Variant = (parsed as Dictionary).get("terrain_tints", {})
+			if tints is Dictionary:
+				_terrain_tints = tints
+			for i in _ground_layers.size():
+				var role := str((_ground_layers[i] as Dictionary).get("role", ""))
+				if role != "":
+					_ground_role_index[role] = i
+			return _ground_layers
 	push_warning("BattleTerrain: %s introuvable, sol replié sur les couches historiques" % GROUND_LAYERS_FILE)
 	return _ground_layers
 
@@ -139,19 +131,11 @@ static func ground_noise() -> Dictionary:
 	if _ground_noise_loaded:
 		return _ground_noise
 	_ground_noise_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(GROUND_NOISE_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_ground_noise = parsed
-				return _ground_noise
+	if DataFile.exists(GROUND_NOISE_FILE):
+		var parsed: Variant = DataFile.read_json(GROUND_NOISE_FILE)
+		if parsed is Dictionary:
+			_ground_noise = parsed
+			return _ground_noise
 	push_warning("BattleTerrain: %s introuvable, échelles de sol historiques" % GROUND_NOISE_FILE)
 	return _ground_noise
 

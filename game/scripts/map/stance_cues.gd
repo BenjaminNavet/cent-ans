@@ -7,7 +7,6 @@ extends RefCounted
 ## chaque faction vient de `CampaignSim.get_faction_stances_for` (règle dans `sim_campaign::stance`).
 ## Réglages : `data/map/stance_cues.json` (schéma `stance_cues.schema.json`).
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/stance_cues.json"
 const SELF := "self"
 const ENEMY := "enemy"
@@ -22,13 +21,12 @@ static var _loaded: bool = false
 static func tuning() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(TUNING_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if DataFile.exists(TUNING_PATH):
+			var parsed: Variant = DataFile.read_json(TUNING_PATH)
 			if parsed is Dictionary:
 				_tuning = parsed
 		else:
-			push_warning("StanceCues: %s missing" % path)
+			push_warning("StanceCues: %s missing" % TUNING_PATH)
 	return _tuning
 
 

@@ -102,18 +102,10 @@ static func fx() -> Dictionary:
 ## Lit un fichier JSON de `data/` (dossier de données du jeu, puis `data/` du dépôt), comme
 ## `BattleGore.settings()`.
 static func read_data(relative: String) -> Dictionary:
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(relative)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				return parsed
+	if DataFile.exists(relative):
+		var parsed: Variant = DataFile.read_json(relative)
+		if parsed is Dictionary:
+			return parsed
 	push_warning("BattleStandards: %s introuvable" % relative)
 	return {}
 
