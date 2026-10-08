@@ -7,6 +7,7 @@ Graines : 1, seconde graine seulement si D5 refuse. Plafond fal : 29,50 $ (garde
 Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copiée dans `dn_manifest.json` (`generation`).
 
 ## Fait
+- TOTAL : 667 objets 3D ingérés (data/art/dn_manifest.json), 308 illustrations. Dépense fal ≈ 28,6 $ (plafond 29,50 $).
 - campagne : 38 objets ingérés + table `dn_campaign_models.json` remplie (villes, villages, châteaux, abbaye).
 - nature, animaux et env_* de map_extra, décors de bataille : ingérés (manifeste), refusés D5 repassés avec 2 graines puis `--charter warn` (animaux/arbres naturellement chauds, s_mean 0,41-0,42 > 0,40 ; l'étalonnage d'ingestion plafonne la saturation).
 
@@ -15,7 +16,16 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 - illus : 308 images générées (1 graine, fal Z-Image, recadrées à `ingest.size`), provenance dans `data/art/dn_illus_generation.json`.
 
 ## En cours
-- nature_extra, battle_extra (fal, 1 graine).
+- (rien : tout est généré ; voir « Non générés »).
+
+## Non générés (D5 refusé deux fois ou échec fal) — journalisés
+- campaign : ship_nef
+- map_extra : env_cliff_chalk_coast, env_autumn_oak_gold, env_harvest_sheaves
+- architecture : house_andalus_courtyard, house_maghreb_dar
+- mobile : ship_galley_genoese, ship_galley_aragonese, cart_relic_procession, pack_camel_laden, pack_camel_bactrian_laden
+- economy : econ_saltpan_mediterranean
+- nature_extra : tree_spruce_siberian, tree_carob, tree_oak_kermes, tree_orange_bitter, shrub_osier_coppice, env_fallen_log_forest_mossy, env_root_plate_windthrow, crop_wheat_ripe, crop_barley_ripe, crop_oats, crop_millet_steppe, crop_hemp_tall, crop_vine_stakes_row, tree_mulberry_silk, crop_rice_paddy
+- battle_extra : camp_pitched_tent_pilgrim
 
 ## Restant
 nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
