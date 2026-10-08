@@ -6,7 +6,7 @@ use data_model::EncounterId;
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -16,7 +16,7 @@ impl CampaignSim {
     /// expires_turn, expires_in, claimed}]`.
     #[func]
     fn get_encounter_sites(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -45,7 +45,7 @@ impl CampaignSim {
     /// effects_text, outcome ("", "battle", "join"), default}]}]`.
     #[func]
     fn get_pending_encounters(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -91,7 +91,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("choose_encounter_option") {
             return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
         let Some(army) = ArmyId::parse(&army.to_string()) else {
@@ -112,7 +112,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_place_encounter") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let Ok(id) = EncounterId::new(encounter.to_string()) else {

@@ -9,7 +9,7 @@ use godot::prelude::*;
 use sim_campaign::coinage::{self, CoinageLevel};
 use sim_campaign::{chivalry, ransom, CampaignState, RansomTerms};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn terms_dict(terms: &RansomTerms) -> VarDictionary {
     let province = match terms {
@@ -68,7 +68,7 @@ impl CampaignSim {
     /// this season in livres.
     #[func]
     fn get_coinage(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let id = if faction.is_empty() {
@@ -121,7 +121,7 @@ impl CampaignSim {
     /// missed}`.
     #[func]
     fn get_ransoms(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let player = state.player_faction().clone();
@@ -164,7 +164,7 @@ impl CampaignSim {
     /// yearly_prestige, min_year, available, reason, founder}]}`.
     #[func]
     fn get_chivalric_orders(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let player = state.player_faction().clone();

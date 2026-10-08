@@ -6,7 +6,7 @@
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -18,7 +18,7 @@ impl CampaignSim {
     /// Empty for an unknown army.
     #[func]
     fn get_army_traditions(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -68,7 +68,7 @@ impl CampaignSim {
     /// (notification « une tradition est à choisir »).
     #[func]
     fn get_armies_with_pending_traditions(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let player = state.player_faction();
@@ -97,7 +97,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("choose_army_tradition") {
             return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -117,7 +117,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_grant_army_xp") {
             return false;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return false;
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {

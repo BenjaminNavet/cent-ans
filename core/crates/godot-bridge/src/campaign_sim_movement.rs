@@ -11,7 +11,7 @@ use serde_json::Value;
 use sim_campaign::navigation::Cell;
 use sim_campaign::{ArmyId, CampaignState, MoveReport, Order, OrderOutcome};
 
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 /// Empty cells kept around the bubble in the mask (smooth contour).
 const MASK_MARGIN: u32 = 2;
@@ -27,7 +27,7 @@ impl CampaignSim {
     #[func]
     fn get_stance_options(&self, army_id: GString) -> VarDictionary {
         let mut dict = VarDictionary::new();
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return dict;
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -60,7 +60,7 @@ impl CampaignSim {
     /// when the army is unknown.
     #[func]
     fn get_reachable_area(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -157,7 +157,7 @@ impl CampaignSim {
     /// `{ok: false}` when unreachable.
     #[func]
     fn find_path_points(&self, army_id: GString, x: f64, y: f64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return vdict! { "ok" => false };
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -185,7 +185,7 @@ impl CampaignSim {
     }
 
     /// Order `move_army` to map pixel `(x, y)`, executed at once; returns the
-    /// march report (see `submit_order_report`).
+    /// march report.
     #[func]
     fn move_army_to(&mut self, army_id: GString, x: f64, y: f64) -> VarDictionary {
         let order = serde_json::json!({
@@ -236,7 +236,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_place_army") {
             return false;
         }
-        let Some(state) = &mut self.state else {
+        let Some(CtxMut { state, .. }) = self.ctx_mut() else {
             return false;
         };
         let Some(army) =
@@ -255,7 +255,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("run_order_json") {
             return failure(crate::campaign_sim_turn::TURN_PENDING_FR);
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return failure("aucune campagne en cours");
         };
         let order = match serde_json::from_value::<Order>(json) {

@@ -7,7 +7,7 @@
 use godot::prelude::*;
 use sim_campaign::trade::{trade_routes, TradeMode, TradeRouteView};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn mode_key(mode: TradeMode) -> &'static str {
     match mode {
@@ -64,7 +64,7 @@ impl CampaignSim {
     /// fog on its own: the caller (map layer) filters by `get_visible_provinces`.
     #[func]
     fn get_trade_routes(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         trade_routes(state, data)

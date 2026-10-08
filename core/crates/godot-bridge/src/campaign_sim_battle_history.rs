@@ -4,7 +4,7 @@
 
 use godot::prelude::*;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -17,7 +17,7 @@ impl CampaignSim {
     /// before a campaign starts and for a save older than the history.
     #[func]
     fn get_battle_history(&self) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         let turn = state.turn();

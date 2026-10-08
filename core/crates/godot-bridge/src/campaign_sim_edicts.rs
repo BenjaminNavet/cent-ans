@@ -5,7 +5,7 @@
 
 use godot::prelude::*;
 
-use crate::campaign_sim::{effects_array, CampaignSim};
+use crate::campaign_sim::{effects_array, CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -15,7 +15,7 @@ impl CampaignSim {
     /// unknown province.
     #[func]
     fn get_province_edict(&self, province: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(id) = data_model::ProvinceId::new(province.to_string()) else {
@@ -48,7 +48,7 @@ impl CampaignSim {
     /// actually in effect right now.
     #[func]
     fn get_edict_options(&self, province: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = data_model::ProvinceId::new(province.to_string()) else {

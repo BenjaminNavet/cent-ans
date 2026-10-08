@@ -10,17 +10,8 @@ use sim_campaign::feudal::{self, Arbitration, FeudalNode, Likelihood};
 use sim_campaign::orders::Order;
 use sim_campaign::state::CampaignState;
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
 use crate::GameDataStore;
-
-/// Short display name of a faction (its id when unknown: factions founded
-/// in play by a grant may have no data).
-pub(crate) fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions.get(id).map_or_else(
-        || id.as_str().to_owned(),
-        |f| f.short_or_display_name().to_owned(),
-    )
-}
 
 fn title_name(data: &GameData, id: &TitleId) -> String {
     data.titles
@@ -81,7 +72,7 @@ fn factions_array(data: &GameData, factions: &[FactionId]) -> VarArray {
     factions
         .iter()
         .map(|f| {
-            vdict! { "id" => f.as_str(), "name" => faction_name(data, f).as_str() }.to_variant()
+            vdict! { "id" => f.as_str(), "name" => data.faction_name(f).as_str() }.to_variant()
         })
         .collect()
 }
@@ -116,10 +107,10 @@ pub(crate) fn sheet_dict(
     let liege_name = sheet
         .liege
         .as_ref()
-        .map_or_else(String::new, |f| faction_name(data, f));
+        .map_or_else(String::new, |f| data.faction_name(f));
     vdict! {
         "id" => faction.as_str(),
-        "name" => faction_name(data, faction).as_str(),
+        "name" => data.faction_name(faction).as_str(),
         "ruler" => ruler.as_str(),
         "primary" => sheet.primary.as_ref().map_or("", |t| t.as_str()),
         "primary_name" => text(&sheet.primary).as_str(),
@@ -130,7 +121,7 @@ pub(crate) fn sheet_dict(
         "liege_name" => liege_name.as_str(),
         "liege_chain" => &factions_array(data, &sheet.liege_chain),
         "sovereign" => sheet.sovereign.as_str(),
-        "sovereign_name" => faction_name(data, &sheet.sovereign).as_str(),
+        "sovereign_name" => data.faction_name(&sheet.sovereign).as_str(),
         "direct_vassals" => &factions_array(data, &sheet.direct_vassals),
         "title_vassals" => &factions_array(data, &sheet.title_vassals),
         "loyalty" => sheet.loyalty.map_or(-1, i64::from),
@@ -165,7 +156,7 @@ fn node_dict(state: &CampaignState, data: &GameData, node: &FeudalNode) -> VarDi
         .collect();
     vdict! {
         "faction" => node.faction.as_str(),
-        "name" => faction_name(data, &node.faction).as_str(),
+        "name" => data.faction_name(&node.faction).as_str(),
         "rank" => rank_key(feudal::primary_rank(state, data, &node.faction)),
         "titles" => &titles_array(data, &node.titles),
         "loyalty" => loyalty,
@@ -195,9 +186,9 @@ fn felonies_array(
         .map(|c| {
             vdict! {
                 "vassal" => c.vassal.as_str(),
-                "vassal_name" => faction_name(data, &c.vassal).as_str(),
+                "vassal_name" => data.faction_name(&c.vassal).as_str(),
                 "liege" => c.liege.as_str(),
-                "liege_name" => faction_name(data, &c.liege).as_str(),
+                "liege_name" => data.faction_name(&c.liege).as_str(),
                 "reason" => felony_reason_label(c.reason),
                 "turns_left" => i64::from(c.expires_turn.saturating_sub(state.turn)),
             }
@@ -227,7 +218,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending(method) {
             return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
         let Some(order) = order else {
@@ -250,7 +241,7 @@ impl CampaignSim {
     /// disloyal_threshold, alive}`; empty for an unknown faction.
     #[func]
     fn get_feudal_sheet(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match faction_id(&faction) {
@@ -263,7 +254,7 @@ impl CampaignSim {
     /// status, status_label, player, vassals [...]}` recursively.
     #[func]
     fn get_feudal_tree(&self, root: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match faction_id(&root) {
@@ -279,7 +270,7 @@ impl CampaignSim {
     /// Bourgogne › Comté de Charolais »).
     #[func]
     fn get_province_breadcrumb(&self, province: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = ProvinceId::new(province.to_string()) else {
@@ -291,7 +282,7 @@ impl CampaignSim {
                 let holder_name = link
                     .holder
                     .as_ref()
-                    .map_or_else(String::new, |f| faction_name(data, f));
+                    .map_or_else(String::new, |f| data.faction_name(f));
                 vdict! {
                     "title" => link.title.as_str(),
                     "title_name" => title_name(data, &link.title).as_str(),
@@ -307,7 +298,7 @@ impl CampaignSim {
     /// Allegiance chain of `province` (holder first, then its lords).
     #[func]
     fn get_province_lieges(&self, province: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let Ok(id) = ProvinceId::new(province.to_string()) else {
@@ -327,7 +318,7 @@ impl CampaignSim {
     /// [{id, name}]}`.
     #[func]
     fn get_feudal_obligations(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(id) = faction_id(&faction).filter(|f| state.factions.contains_key(f)) else {
@@ -340,7 +331,7 @@ impl CampaignSim {
             .map(|p| {
                 vdict! {
                     "id" => p.vassal.as_str(),
-                    "name" => faction_name(data, &p.vassal).as_str(),
+                    "name" => data.faction_name(&p.vassal).as_str(),
                     "attackers" => &factions_array(data, &p.attackers),
                 }
                 .to_variant()
@@ -349,7 +340,7 @@ impl CampaignSim {
         let liege_name = o
             .liege
             .as_ref()
-            .map_or_else(String::new, |f| faction_name(data, f));
+            .map_or_else(String::new, |f| data.faction_name(f));
         vdict! {
             "liege" => opt_id(o.liege.as_ref()).as_str(),
             "liege_name" => liege_name.as_str(),
@@ -370,7 +361,7 @@ impl CampaignSim {
     /// likelihood_label, reason}]`, link by link.
     #[func]
     fn get_war_escalation_preview(&self, attacker: GString, target: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let (Some(attacker), Some(target)) = (faction_id(&attacker), faction_id(&target)) else {
@@ -384,7 +375,7 @@ impl CampaignSim {
             .map(|step| {
                 vdict! {
                     "faction" => step.faction.as_str(),
-                    "name" => faction_name(data, &step.faction).as_str(),
+                    "name" => data.faction_name(&step.faction).as_str(),
                     "likelihood" => likelihood_key(step.likelihood),
                     "likelihood_label" => likelihood_label(step.likelihood),
                     "reason" => step.reason.as_str(),
@@ -399,7 +390,7 @@ impl CampaignSim {
     /// unknown id.
     #[func]
     fn get_feudal_map(&self, province_ids: PackedStringArray) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let cells = feudal::feudal_map(state, data);
@@ -429,13 +420,13 @@ impl CampaignSim {
     /// expires_in}]`.
     #[func]
     fn get_feudal_offers(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Some(player) = state.factions.get(state.player_faction()) else {
             return VarArray::new();
         };
-        let name_of = |f: Option<&FactionId>| f.map_or_else(String::new, |f| faction_name(data, f));
+        let name_of = |f: Option<&FactionId>| f.map_or_else(String::new, |f| data.faction_name(f));
         player
             .offers
             .iter()
@@ -550,7 +541,7 @@ impl GameDataStore {
         playable.sort_by_cached_key(|id| {
             (
                 feudal::liege_of(&state, data, id).is_some(),
-                faction_name(data, id),
+                data.faction_name(id),
             )
         });
         playable

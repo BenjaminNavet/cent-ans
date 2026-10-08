@@ -7,7 +7,7 @@ use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
 use crate::convert::variant_to_json;
 
 #[godot_api(secondary)]
@@ -16,7 +16,7 @@ impl CampaignSim {
     /// towards `faction`).
     #[func]
     fn get_diplomacy(&self, faction: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -73,7 +73,7 @@ impl CampaignSim {
     /// lists the motive and the reputation cost.
     #[func]
     fn evaluate_proposal(&self, order: VarDictionary) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return verdict(false, 0, &[("aucune campagne en cours".to_owned(), 0)]);
         };
         let parsed = variant_to_json(&order.to_variant())
@@ -116,7 +116,7 @@ impl CampaignSim {
     /// Offers waiting for the player's answer.
     #[func]
     fn get_offers(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Some(player) = state.factions.get(state.player_faction()) else {
@@ -147,7 +147,7 @@ impl CampaignSim {
     /// schism, obedience_choice_pending}`.
     #[func]
     fn get_religion_state(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -175,7 +175,7 @@ impl CampaignSim {
     /// `{religion, religion_name, heresy, heresy_religion, heresy_name}` of a province.
     #[func]
     fn get_province_religion(&self, province: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(id) = ProvinceId::new(province.to_string()) else {
@@ -203,7 +203,7 @@ impl CampaignSim {
     /// "truce", "peace", "alliance", "vassal", "suzerain", "" if unknown.
     #[func]
     fn get_province_relations(&self, province_ids: PackedStringArray) -> PackedStringArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let player = state.player_faction().clone();
@@ -232,7 +232,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("answer_offer") {
             return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
         let order = Order::AnswerOffer {

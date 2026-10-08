@@ -17,7 +17,7 @@ use sim_campaign::negotiation::{
 };
 use sim_campaign::{CampaignState, Season};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 use crate::convert::variant_to_json;
 
 #[godot_api(secondary)]
@@ -27,7 +27,7 @@ impl CampaignSim {
     /// reasons[{text, value}]}], context[{text, value}]}`.
     #[func]
     fn evaluate_treaty(&self, target: GString, articles: VarArray) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return error_dict("aucune campagne en cours");
         };
         let (target, articles) = match parse(state, &target, &articles) {
@@ -43,7 +43,7 @@ impl CampaignSim {
     /// `{ok: false, error}` when nothing the player holds would do.
     #[func]
     fn counter_treaty(&self, target: GString, articles: VarArray) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return error_dict("aucune campagne en cours");
         };
         let (target, articles) = match parse(state, &target, &articles) {
@@ -82,7 +82,7 @@ impl CampaignSim {
     /// other side's men this side holds).
     #[func]
     fn treaty_options(&self, target: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(target) = FactionId::new(target.to_string()) else {
@@ -113,7 +113,7 @@ impl CampaignSim {
     /// `[{turn, date, with, with_name, proposed, accepted, articles[], text}]`.
     #[func]
     fn get_treaty_history(&self, faction: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -132,7 +132,7 @@ impl CampaignSim {
                     "turn" => i64::from(record.turn),
                     "date" => date_of(state, record.turn).as_str(),
                     "with" => record.with.as_str(),
-                    "with_name" => faction_label(data, &record.with).as_str(),
+                    "with_name" => data.faction_name(&record.with).as_str(),
                     "proposed" => record.proposed,
                     "accepted" => record.accepted,
                     "articles" => &keys,
@@ -147,7 +147,7 @@ impl CampaignSim {
     /// weariness_theirs, goals_ours[{id, name, held}], goals_theirs[...]}`.
     #[func]
     fn get_war_summary(&self, enemy: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(enemy) = FactionId::new(enemy.to_string()) else {
@@ -167,7 +167,7 @@ impl CampaignSim {
                         .map(|p| {
                             vdict! {
                                 "id" => p.as_str(),
-                                "name" => province_label(data, p).as_str(),
+                                "name" => data.province_name(p).as_str(),
                                 "held" => state.controls_province(a, p),
                             }
                             .to_variant()
@@ -273,18 +273,6 @@ pub(crate) fn articles_array(articles: &[Article]) -> VarArray {
         .collect()
 }
 
-pub(crate) fn faction_label(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
-pub(crate) fn province_label(data: &GameData, id: &data_model::ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 fn date_of(state: &CampaignState, turn: u32) -> String {
     let now = Season::ALL
         .iter()
@@ -312,7 +300,7 @@ fn side_dict(
         .map(|p| {
             vdict! {
                 "id" => p.as_str(),
-                "name" => province_label(data, p).as_str(),
+                "name" => data.province_name(p).as_str(),
                 "capital" => &f.capital == p,
                 "occupied" => state.controls_province(other, p),
                 "war_goal" => is_war_goal(state, other, side, p),
@@ -332,7 +320,7 @@ fn side_dict(
             vdict! {
                 "id" => id.as_str(),
                 "name" => name.as_str(),
-                "province" => province_label(data, &s.province).as_str(),
+                "province" => data.province_name(&s.province).as_str(),
                 "occupied" => &s.controller == other,
             }
             .to_variant()
@@ -382,7 +370,7 @@ fn side_dict(
         .collect();
     vdict! {
         "id" => side.as_str(),
-        "name" => faction_label(data, side).as_str(),
+        "name" => data.faction_name(side).as_str(),
         "ruler" => ruler_name(state, data, side).as_str(),
         "treasury" => f.treasury,
         "income" => f.income_last_turn,

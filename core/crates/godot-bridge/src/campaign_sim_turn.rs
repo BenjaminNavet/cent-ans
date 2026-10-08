@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 use godot::prelude::*;
 
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx};
 use crate::turn_job::TurnJob;
 
 /// French message of an order refused during the end of turn.
@@ -68,7 +68,7 @@ impl CampaignSim {
             godot_warn!("CampaignSim.begin_end_turn: an end of turn is already running");
             return false;
         }
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             godot_warn!("CampaignSim.begin_end_turn called before new_campaign");
             return false;
         };

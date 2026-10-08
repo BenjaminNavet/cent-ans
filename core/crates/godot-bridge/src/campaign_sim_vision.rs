@@ -7,11 +7,11 @@ use godot::classes::Image;
 use godot::prelude::*;
 use sim_campaign::vision::Vision;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 impl CampaignSim {
     fn faction_vision(&self, faction: &GString) -> Option<Vision> {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return None;
         };
         let faction = FactionId::new(faction.to_string()).ok()?;
@@ -53,7 +53,7 @@ impl CampaignSim {
     /// seen_share: float}`. Empty before a campaign starts.
     #[func]
     fn get_vision(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(vision) = self.faction_vision(&faction) else {

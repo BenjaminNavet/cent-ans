@@ -14,7 +14,7 @@ use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
 use crate::battle_pose_lerp::push_pose;
 use crate::battle_replay::{note, REPLAY_REFUSAL};
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 use crate::convert::variant_to_json;
 
 /// Converts JSON into plain Godot values (integers stay integers).
@@ -1705,7 +1705,7 @@ impl CampaignSim {
     /// defender_name, player_side, attacker_strength, defender_strength, seed}]`.
     #[func]
     fn get_pending_battles(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -1765,7 +1765,7 @@ impl CampaignSim {
     /// Setup of pending battle `index` for `BattleSim.setup` (empty if unknown).
     #[func]
     fn get_battle_setup(&self, index: i64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match state.battle_setup(data, index.max(0) as usize) {
@@ -1809,7 +1809,7 @@ impl CampaignSim {
     /// modifiers, can_withdraw, siege}`; empty if unknown.
     #[func]
     fn get_battle_forecast(&self, index: i64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match state.battle_forecast(data, index.max(0) as usize) {
@@ -1828,7 +1828,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("withdraw_pending_battle") {
             return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
         match state.withdraw_pending_battle(data, index.max(0) as usize) {
@@ -1847,7 +1847,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("resolve_battle") {
             return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
         let before = state.last_battle_outcome.clone();
@@ -1890,7 +1890,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("auto_resolve_battle") {
             return VarArray::new();
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return VarArray::new();
         };
         match state.auto_resolve_pending(data, index.max(0) as usize) {
@@ -1927,7 +1927,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_siege") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
@@ -1953,7 +1953,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_place_siege") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
@@ -1976,7 +1976,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_landmark_siege") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
@@ -1998,7 +1998,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_battle") {
             return -1;
         }
-        let Some(state) = &mut self.state else {
+        let Some(CtxMut { state, .. }) = self.ctx_mut() else {
             return -1;
         };
         let (Some(a), Some(d)) = (

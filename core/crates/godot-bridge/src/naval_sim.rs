@@ -4,7 +4,7 @@
 use godot::prelude::*;
 
 use crate::battle_sim::{result_dict, to_dict};
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -14,7 +14,7 @@ impl CampaignSim {
     /// army_men, win_chance, player_side, seed}]`.
     #[func]
     fn get_pending_naval_battles(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -33,7 +33,7 @@ impl CampaignSim {
     /// Setup of pending naval battle `index` for the pre-battle dialog.
     #[func]
     fn get_naval_battle_setup(&self, index: i64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match state.naval_battle_setup(data, index.max(0) as usize) {
@@ -51,7 +51,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("auto_resolve_naval_battle") {
             return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
         match state.auto_resolve_naval_battle(data, index.max(0) as usize) {
@@ -70,7 +70,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("withdraw_naval_battle") {
             return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
         match state.withdraw_naval_battle(data, index.max(0) as usize) {
@@ -87,7 +87,7 @@ impl CampaignSim {
     /// level, name}}, blockaded: [settlement]}`.
     #[func]
     fn get_naval_state(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let mut naval = state.naval.clone();
@@ -115,7 +115,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_naval") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let (Some(army), Ok(to), Ok(by)) = (

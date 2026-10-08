@@ -3,7 +3,7 @@
 
 use godot::prelude::*;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -12,7 +12,7 @@ impl CampaignSim {
     /// labels; `province` is `""` when the mission has no target province).
     #[func]
     fn get_missions(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -40,7 +40,7 @@ impl CampaignSim {
     /// "failed", mission, text}]`, for the toasts.
     #[func]
     fn get_mission_notices(&self) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         state
