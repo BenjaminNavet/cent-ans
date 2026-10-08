@@ -71,7 +71,9 @@ def main() -> int:
         scale = args.long_side / max(h, w)
         if scale < 1.0:
             frame = cv2.resize(
-                frame, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA
+                frame,
+                (round(w * scale), round(h * scale)),
+                interpolation=cv2.INTER_AREA,
             )
         size = (frame.shape[1], frame.shape[0])
         bboxes = model.det_model(frame)
