@@ -255,3 +255,9 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 ## Fusion main (FL) dans feat/sc
 - render_quality : plancher 0,4 (ADR 0191 main) porté dans data/fx/render_quality.json ; siege_engines_fx : swing curve via DataFile ; tree_flicker_probe.gd gardé (modifié par main).
 - ADR SC : bloc 0200-0209.
+
+## BATTLEDEV (vague 4, fusionné)
+- CliFlags (game/scripts/util/cli_flags.gd) pour les scripts de bataille ; battle_bone_anim.gdshaderinc (skinned + drapeau) ; bt_luma dans battle_common.gdshaderinc ; --no-ga3 et --no-sr5 supprimés.
+- Gardés : RenderQuality.override_level/upscale_override (tests + bench_ep1.sh), da6/site_render/fa_on (lus par battle_vegetation.gd, fichier sale de main) → à retirer après fusion des modifs de main.
+- Non fait : SH8 (dFdx change le rendu), SH9 (flipbook dupliqué dans fire_*/life_* : piste carte).
+- Après fusion main : army_figures/map_fire_wind (code main) passés à DataFile.
