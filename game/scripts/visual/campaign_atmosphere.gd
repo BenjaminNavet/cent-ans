@@ -97,9 +97,8 @@ func _ready() -> void:
 
 ## RV-B : numéro du tour (`--light-turn=N` force la phase pour les captures), -1 sans simulation.
 func current_turn() -> int:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--light-turn="):
-			return int(arg.trim_prefix("--light-turn="))
+	if CmdArgs.has("--light-turn"):
+		return int(CmdArgs.number("--light-turn"))
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_turn"):
@@ -109,9 +108,8 @@ func current_turn() -> int:
 
 ## Saison de la simulation (libellé de date) ; ciel et étalonnage changent avec elle.
 func current_season() -> String:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--season="):  # captures : saison forcée (rendu seulement)
-			return AtmosphereLibrary.normalize_season(arg.trim_prefix("--season="))
+	if CmdArgs.has("--season"):  # captures : saison forcée (rendu seulement)
+		return AtmosphereLibrary.normalize_season(CmdArgs.value("--season"))
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_date_label"):

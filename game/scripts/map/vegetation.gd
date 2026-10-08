@@ -172,19 +172,18 @@ func _ready() -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
-			_log_bursts = true
-		elif arg == "--no-native-vegetation":  # PB2 : comparaisons avec le semis GDScript
-			use_native_scatter = false
-		elif arg == "--no-forest-detail":  # SZ4b : captures « avant », mesures A/B
-			use_forest_detail = false
-		elif arg == "--no-fc2":  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
-			use_impostors = false
-		elif arg == "--no-fc5":  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
-			use_near_cards = false
-		elif arg == "--no-hb4-species":  # HB4 : semis V4 sans essences par biome (A/B)
-			use_species = false
+	if CmdArgs.has("--screenshot") or CmdArgs.has("--vegetation-stats"):
+		_log_bursts = true
+	if CmdArgs.has("--no-native-vegetation"):  # PB2 : comparaisons avec le semis GDScript
+		use_native_scatter = false
+	if CmdArgs.has("--no-forest-detail"):  # SZ4b : captures « avant », mesures A/B
+		use_forest_detail = false
+	if CmdArgs.has("--no-fc2"):  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
+		use_impostors = false
+	if CmdArgs.has("--no-fc5"):  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
+		use_near_cards = false
+	if CmdArgs.has("--no-hb4-species"):  # HB4 : semis V4 sans essences par biome (A/B)
+		use_species = false
 
 
 

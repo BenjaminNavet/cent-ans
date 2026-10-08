@@ -12,13 +12,10 @@ func _init() -> void:
 	var out := "user://fl_weather"
 	var height := 300.0
 	var exaggerate := true
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out = arg.trim_prefix("--out=")
-		elif arg.begins_with("--height="):
-			height = float(arg.trim_prefix("--height="))
-		elif arg == "--natural":
-			exaggerate = false
+	out = CmdArgs.value("--out", out)
+	height = CmdArgs.number("--height", height)
+	if CmdArgs.has("--natural"):
+		exaggerate = false
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:

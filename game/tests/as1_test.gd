@@ -48,7 +48,7 @@ func _mask_counts(verts: PackedVector3Array, p: Dictionary) -> Dictionary:
 
 
 func _init() -> void:
-	var off := OS.get_cmdline_user_args().has("--no-as1")
+	var off := CmdArgs.has("--no-as1")
 	_check(AnimalMotion.enabled() == not off, "enabled() ne suit pas --no-as1")
 	var settings := AnimalMotion.settings()
 	_check(settings.has("campaign") and settings.has("camp_horse"), "données absentes")

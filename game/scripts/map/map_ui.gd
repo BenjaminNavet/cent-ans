@@ -192,11 +192,9 @@ func _apply_access_args() -> void:
 	if settings == null:
 		return
 	var keys := {"colorblind": Accessibility.KEY_COLORBLIND, "contrast": Accessibility.KEY_HIGH_CONTRAST, "motion": Accessibility.KEY_REDUCE_MOTION}
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--access="):
-			for word in arg.trim_prefix("--access=").split(","):
-				if keys.has(word):
-					settings.call("set_value", keys[word], true, false)
+	for word in CmdArgs.list("--access"):
+		if keys.has(word):
+			settings.call("set_value", keys[word], true, false)
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------

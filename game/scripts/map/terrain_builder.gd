@@ -621,13 +621,12 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 func _setup_quadtree() -> void:
 	pyramid = null
 	var manifest := pyramid_manifest_path
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-pyramid":
-			return
-		if arg.begins_with("--pyramid-dir="):
-			manifest = arg.trim_prefix("--pyramid-dir=").path_join("relief_pyramid.json")
-		if arg.begins_with("--qt-debug="):
-			material.set_shader_parameter("qt_debug", int(arg.trim_prefix("--qt-debug=")))
+	if CmdArgs.has("--no-pyramid"):
+		return
+	if CmdArgs.has("--pyramid-dir"):
+		manifest = CmdArgs.value("--pyramid-dir").path_join("relief_pyramid.json")
+	if CmdArgs.has("--qt-debug"):
+		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()

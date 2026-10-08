@@ -91,13 +91,13 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 			terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 		if not terrain.vertical_scale_changed.is_connected(_on_vertical_scale_changed):
 			terrain.vertical_scale_changed.connect(_on_vertical_scale_changed)
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--town-lod=blocks":
+	match CmdArgs.value("--town-lod"):
+		"blocks":
 			_detail_override = 0.001
-		elif arg == "--town-lod=detail":
+		"detail":
 			_detail_override = 10.0
-		elif arg == "--no-towns":
-			_disabled = true
+	if CmdArgs.has("--no-towns"):
+		_disabled = true
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {"towns": _ids.size()}

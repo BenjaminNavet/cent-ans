@@ -58,9 +58,7 @@ static func document() -> Dictionary:
 static func style() -> String:
 	if _style == "":
 		_style = str(ArmyFigures.map_settings().get("town_style", STYLE_REAL))
-		for argument in OS.get_cmdline_user_args():
-			if argument.begins_with("--town-style="):
-				_style = argument.get_slice("=", 1)
+		_style = CmdArgs.value("--town-style", _style)
 		if _style != STYLE_MAQUETTE:
 			_style = STYLE_REAL
 		if _style == STYLE_MAQUETTE and document().is_empty():

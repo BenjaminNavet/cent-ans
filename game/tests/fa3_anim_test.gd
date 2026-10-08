@@ -40,8 +40,7 @@ func _row(image: Image, row: int) -> PackedFloat32Array:
 
 
 func _init() -> void:
-	var args := OS.get_cmdline_user_args()
-	var cmd_mode := BattleSkinned.FA_ALL if args.has("--fa-anim") else BattleSkinned.FA_DEFAULT
+	var cmd_mode := BattleSkinned.FA_ALL if CmdArgs.has("--fa-anim") else BattleSkinned.FA_DEFAULT
 	if not BattleSkinned.fine_enabled():
 		_check(BattleSkinned.fa_anim_mode() == BattleSkinned.FA_NONE, "couche inactive sur le kit grossier")
 		print("FA3 anim (coarse): %s" % ("OK" if ok else "FAIL"))

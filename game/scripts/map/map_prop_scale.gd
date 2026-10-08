@@ -229,9 +229,7 @@ static func shared() -> MapPropScale:
 static func tree_style() -> String:
 	if _tree_style == "":
 		_tree_style = str(ArmyFigures.map_settings().get("tree_style", TREE_STYLE_REAL))
-		for argument in OS.get_cmdline_user_args():
-			if argument.begins_with("--tree-style="):
-				_tree_style = argument.get_slice("=", 1)
+		_tree_style = CmdArgs.value("--tree-style", _tree_style)
 		if _tree_style != TREE_STYLE_GENERALISED:
 			_tree_style = TREE_STYLE_REAL
 	return _tree_style

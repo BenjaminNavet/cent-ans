@@ -92,11 +92,10 @@ func setup(map: Node) -> void:
 	_map = map
 	_map_data = map.get("map_data")
 	_terrain = map.get("terrain")
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-map-weather":
-			enabled = false
-		elif arg.begins_with("--map-weather="):
-			forced = arg.trim_prefix("--map-weather=")
+	if CmdArgs.has("--no-map-weather"):
+		enabled = false
+	if CmdArgs.has("--map-weather"):
+		forced = CmdArgs.value("--map-weather")
 	if not enabled or _map_data == null:
 		return
 	_load_tuning()  # TB2

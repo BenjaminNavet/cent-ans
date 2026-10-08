@@ -18,7 +18,7 @@ func _check(cond: bool, what: String) -> void:
 
 
 func _init() -> void:
-	var off := "--no-as4" in OS.get_cmdline_user_args()
+	var off := CmdArgs.has("--no-as4")
 	var crew := SiegeCrewFx.new()
 	crew.cfg = SiegeEnginesFx.settings().get("crew", {})
 	_check(not crew.cfg.is_empty() and crew.cfg.has("haul"), "réglages crew.haul")

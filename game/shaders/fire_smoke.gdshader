@@ -7,10 +7,9 @@
 shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled;
 
-uniform sampler2D flipbook : filter_linear_mipmap, repeat_disable;
+#include "res://shaders/fx_flipbook.gdshaderinc"
+
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
-uniform float frames_h = 8.0;
-uniform float frames_v = 8.0;
 uniform vec3 smoke_color : source_color = vec3(0.16, 0.15, 0.14);
 uniform vec3 ember_glow : source_color = vec3(1.0, 0.38, 0.08);
 uniform float ember_glow_energy = 0.15;
@@ -28,12 +27,6 @@ varying vec2 uv_b;
 varying float frame_blend;
 varying float age;
 
-vec2 frame_uv(vec2 uv, float frame) {
-	float column = mod(frame, frames_h);
-	float row = floor(frame / frames_h);
-	return (vec2(column, row) + uv) / vec2(frames_h, frames_v);
-}
-
 void vertex() {
 	mat4 world = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);
 	float angle = INSTANCE_CUSTOM.x;
@@ -45,16 +38,14 @@ void vertex() {
 		vec4(0.0, 0.0, 0.0, 1.0));
 	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 	age = clamp(INSTANCE_CUSTOM.y, 0.0, 1.0);
-	float total = frames_h * frames_v;
-	float f = age * (total - 1.0);
-	float first = floor(f);
-	frame_blend = f - first;
-	uv_a = frame_uv(UV, first);
-	uv_b = frame_uv(UV, min(first + 1.0, total - 1.0));
+	vec3 frames = flipbook_clamped(age * (frames_h * frames_v - 1.0));
+	uv_a = frame_uv(UV, frames.x);
+	uv_b = frame_uv(UV, frames.y);
+	frame_blend = frames.z;
 }
 
 void fragment() {
-	vec4 texel = mix(texture(flipbook, uv_a), texture(flipbook, uv_b), frame_blend);
+	vec4 texel = flipbook_texel(uv_a, uv_b, frame_blend);
 	float fade_in = smoothstep(0.0, 0.06, age);
 	float alpha = texel.a * COLOR.a * density * fade_in;
 	float depth = texture(depth_texture, SCREEN_UV).r;

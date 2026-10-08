@@ -17,20 +17,15 @@ func _init() -> void:
 	var frames := 120
 	var yaw := 0.0
 	var keys := false
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--step="):
-			step = float(arg.trim_prefix("--step="))
-		elif arg.begins_with("--frames="):
-			frames = int(arg.trim_prefix("--frames="))
-		elif arg == "--keys":
-			keys = true
-		elif arg.begins_with("--yaw="):
-			yaw = float(arg.trim_prefix("--yaw="))
-		elif arg.begins_with("--views="):
-			views.clear()
-			for item in arg.trim_prefix("--views=").split(";", false):
-				var parts := item.split(",")
-				views.append([float(parts[0]), float(parts[1]), float(parts[2])])
+	step = CmdArgs.number("--step", step)
+	frames = int(CmdArgs.number("--frames", frames))
+	keys = CmdArgs.has("--keys")
+	yaw = CmdArgs.number("--yaw", yaw)
+	if CmdArgs.has("--views"):
+		views.clear()
+		for item in CmdArgs.list("--views", ";"):
+			var parts := item.split(",")
+			views.append([float(parts[0]), float(parts[1]), float(parts[2])])
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:

@@ -14,15 +14,10 @@ var _fps_seconds := 0.0
 
 
 func _init() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			_out = arg.trim_prefix("--out=")
-		elif arg.begins_with("--scene="):
-			_scene = arg.trim_prefix("--scene=")
-		elif arg.begins_with("--wait="):
-			_wait = float(arg.trim_prefix("--wait="))
-		elif arg.begins_with("--fps-seconds="):
-			_fps_seconds = float(arg.trim_prefix("--fps-seconds="))
+	_out = CmdArgs.value("--out", _out)
+	_scene = CmdArgs.value("--scene", _scene)
+	_wait = CmdArgs.number("--wait", _wait)
+	_fps_seconds = CmdArgs.number("--fps-seconds", _fps_seconds)
 	_run.call_deferred()
 	# Garde-fou : jamais plus de deux minutes (fenêtre masquée, erreur de script).
 	create_timer(120.0).timeout.connect(func() -> void:

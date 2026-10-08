@@ -94,9 +94,8 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	tiers = p_tiers if p_tiers != null else ZoomTiers.new()
 	sources = p_sources
 	profile = TownRenderProfile.load_default()
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-town-far":
-			_disabled = true
+	if CmdArgs.has("--no-town-far"):
+		_disabled = true
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_mpu = data.meters_per_unit
 	_wall_params = data.params.get("walls", {})

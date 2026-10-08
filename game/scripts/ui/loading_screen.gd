@@ -281,16 +281,16 @@ func run() -> void:
 
 
 func _maybe_screenshot() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--loading-shot="):
-			var path := arg.trim_prefix("--loading-shot=")
-			await RenderingServer.frame_post_draw
-			var image := get_viewport().get_texture().get_image()
-			DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-			var err := image.save_png(path)
-			print("LoadingScreen: screenshot %s (%s)" % [path, error_string(err)])
-			get_tree().quit(0 if err == OK else 1)
-			await get_tree().process_frame
+	if not CmdArgs.has("--loading-shot"):
+		return
+	var path := CmdArgs.value("--loading-shot")
+	await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var err := image.save_png(path)
+	print("LoadingScreen: screenshot %s (%s)" % [path, error_string(err)])
+	get_tree().quit(0 if err == OK else 1)
+	await get_tree().process_frame
 
 
 ## Capture : `-- --loading-plate` impose une enluminure AR1 (écran reproductible).

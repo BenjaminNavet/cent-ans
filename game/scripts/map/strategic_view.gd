@@ -35,11 +35,10 @@ var _markers_hidden: bool = false
 
 func setup(map: Node) -> void:
 	_map = map
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-parchment":
-			enabled = false
-		elif arg.begins_with("--parchment="):
-			forced = clampf(float(arg.trim_prefix("--parchment=")), 0.0, 1.0)
+	if CmdArgs.has("--no-parchment"):
+		enabled = false
+	if CmdArgs.has("--parchment"):
+		forced = clampf(CmdArgs.number("--parchment"), 0.0, 1.0)
 	RenderingServer.global_shader_parameter_set("campaign_parchment", 0.0)
 	if not enabled:
 		return

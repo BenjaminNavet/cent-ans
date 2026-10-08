@@ -93,28 +93,24 @@ func _ready() -> void:
 	# RL1 : `-- --journey` (parcours de vérification du jeu exporté, `scripts/dev/release_journey.gd`).
 	if ReleaseJourney.maybe_start(get_tree()):
 		return
-	var args := OS.get_cmdline_user_args()
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
-	for arg in args:
-		if arg.begins_with("--autostart"):
-			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
-			if faction != "":
-				faction_select.select(faction)
-			_autostart.call_deferred()
-			return
+	if CmdArgs.has("--autostart"):
+		var faction := CmdArgs.value("--autostart")
+		if faction != "":
+			faction_select.select(faction)
+		_autostart.call_deferred()
+		return
 	var staged := false
-	for arg in args:
-		if arg == "--menu-stage=faction":
-			show_faction_select(true)
-			staged = true
-	for arg in args:
-		if arg.begins_with("--screenshot="):
-			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
-			staged = true
+	if CmdArgs.value("--menu-stage") == "faction":
+		show_faction_select(true)
+		staged = true
+	if CmdArgs.value("--screenshot") != "":
+		_screenshot_then_quit(CmdArgs.value("--screenshot"))
+		staged = true
 	# Premier lancement (sans option de ligne de commande) : le prologue.
 	var settings := get_node_or_null("/root/Settings")
-	if not staged and args.is_empty() and not _headless() and settings != null and not bool(settings.call("get_value", "interface/intro_seen")):
+	if not staged and CmdArgs.args().is_empty() and not _headless() and settings != null and not bool(settings.call("get_value", "interface/intro_seen")):
 		settings.call("set_value", "interface/intro_seen", true)
 		open_intro()
 	else:
