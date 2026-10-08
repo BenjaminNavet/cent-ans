@@ -141,15 +141,6 @@ impl GameDataStore {
         self.data.is_some()
     }
 
-    /// Sorted province ids.
-    #[func]
-    fn get_province_ids(&self) -> PackedStringArray {
-        self.data
-            .as_ref()
-            .map(|data| ids_of(data.provinces.keys()))
-            .unwrap_or_default()
-    }
-
     /// Province summary, or an empty dictionary for an unknown id.
     #[func]
     fn get_province(&self, id: GString) -> VarDictionary {

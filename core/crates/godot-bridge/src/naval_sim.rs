@@ -83,31 +83,6 @@ impl CampaignSim {
         }
     }
 
-    /// `{fleets: {faction: {class: count}}, control: {sea: {faction,
-    /// level, name}}, blockaded: [settlement]}`.
-    #[func]
-    fn get_naval_state(&self) -> VarDictionary {
-        let Some(Ctx { state, data }) = self.ctx() else {
-            return VarDictionary::new();
-        };
-        let mut naval = state.naval.clone();
-        naval.ensure(data);
-        let mut control = VarDictionary::new();
-        for (sea, c) in &naval.control {
-            control.set(
-                sea.as_str(),
-                &vdict! {
-                    "faction" => c.faction.as_str(),
-                    "level" => i64::from(c.level),
-                    "name" => data.naval.sea_name(sea).as_str(),
-                },
-            );
-        }
-        let mut dict = to_dict(&naval);
-        dict.set("control", &control);
-        dict
-    }
-
     /// Debug (smoke test, screenshots): `interceptor` bars `army`'s crossing
     /// to `to_port`; returns the index of the pending naval battle or -1.
     #[func]

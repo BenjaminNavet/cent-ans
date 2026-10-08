@@ -200,18 +200,6 @@ impl StampMap {
         self.marks.sample(x, z, channel)
     }
 
-    /// True when a stamp changed the map since the last upload.
-    #[func]
-    fn is_dirty(&self) -> bool {
-        self.marks.dirty
-    }
-
-    /// The bytes (tests, captures).
-    #[func]
-    fn get_bytes(&self) -> PackedByteArray {
-        PackedByteArray::from(self.marks.bytes.as_slice())
-    }
-
     /// Sends the map to `texture` through `image` if it changed (full
     /// upload: Godot 4.7 has no partial texture update). True if sent.
     #[func]
@@ -220,7 +208,7 @@ impl StampMap {
             return false;
         }
         self.marks.dirty = false;
-        let bytes = self.get_bytes();
+        let bytes = PackedByteArray::from(self.marks.bytes.as_slice());
         let m = &self.marks;
         image.set_data(m.width as i32, m.height as i32, false, m.format(), &bytes);
         texture.update(&image);
