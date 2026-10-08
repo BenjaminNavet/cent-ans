@@ -21,7 +21,11 @@ docs 58 940 (508 notes wip, 163 ADR).
 - Vérification : `cargo test`, `cargo clippy -D warnings`, pytest ; Godot seulement en headless (scripts de test ciblés par les agents, `smoke.gd` complet aux fusions). **Jamais de lancement fenêtré du jeu ni de capture** (demande du joueur 08/10).
 
 ## État
-- [ ] Vague 0 audit
+- [x] Vague 0 audit (18/20 zones ; MS et DT en cours) → `docs/wip/sc/lots.md` (catalogue des lots par zone)
+- [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0187), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
+- Veto joueur 10-08 : garder l'issue bataille des rencontres (CB2) et les 4 issues de prise + ruines (CB3).
+- Réserve : main a des modifs non commitées sur landmarks_v2/towns_1340 (sauvegarde scratchpad main-dirty.patch) → MA1/MA2 (suppression style real / landmarks v2) en attente de vérif.
+- Disque : builds avec `CARGO_PROFILE_DEV_DEBUG=0 CARGO_INCREMENTAL=0`, `core/target` supprimé en fin de lot.
 
 ## Coordination FL (session parallèle, `../gp-fl`)
 Gel jusqu'à la fusion de FL : `game/scripts/map/vegetation.gd`, `campaign_map.gd` (_process /
