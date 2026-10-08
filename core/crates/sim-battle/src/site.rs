@@ -217,14 +217,7 @@ impl Obstacle {
 
     /// `true` when the segment from `p` to `q` crosses the obstacle.
     pub fn crosses(&self, p: (f64, f64), q: (f64, f64)) -> bool {
-        let orient = |a: (f64, f64), b: (f64, f64), c: (f64, f64)| {
-            (b.0 - a.0) * (c.1 - a.1) - (b.1 - a.1) * (c.0 - a.0)
-        };
-        let d1 = orient(self.a, self.b, p);
-        let d2 = orient(self.a, self.b, q);
-        let d3 = orient(p, q, self.a);
-        let d4 = orient(p, q, self.b);
-        d1 * d2 < 0.0 && d3 * d4 < 0.0
+        crate::geom::segments_intersect(p, q, self.a, self.b)
     }
 
     pub fn length(&self) -> f64 {

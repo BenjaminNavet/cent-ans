@@ -58,6 +58,7 @@ pub mod fire;
 pub mod formation_ai;
 pub mod formation_width;
 pub mod formations;
+pub mod geom;
 pub mod group_formation;
 pub mod historical;
 pub mod horse_wait;

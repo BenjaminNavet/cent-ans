@@ -1,6 +1,7 @@
 //! Shared view of the battle for one side and its command helpers.
 
 use super::*;
+use crate::geom::segment_distance;
 
 pub(super) fn dist(a: &Unit, b: &Unit) -> f64 {
     ((a.x - b.x).powi(2) + (a.z - b.z).powi(2)).sqrt()
@@ -78,18 +79,6 @@ pub(super) fn stakes_on_ride(
             && attack_angle(k, from.0, from.1) == 0
             && segment_distance((k.x, k.z), from, to) < STAKES_GUARD
     })
-}
-
-/// Distance from `p` to the segment `a`-`b`.
-pub(super) fn segment_distance(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = dx * dx + dz * dz;
-    let t = if len2 < 1e-9 {
-        0.0
-    } else {
-        (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
-    };
-    (p.0 - a.0 - dx * t).hypot(p.1 - a.1 - dz * t)
 }
 
 /// Snapshot of the battle from one side's point of view.
