@@ -63,6 +63,14 @@ elle peut toucher les fichiers FL. Bancs FL : uniquement `--bench-ab` en process
   résolution à chaque tour (frange comprise) → 1 lecture au lieu de 2 fbm + 3 lectures.
 - Bancs : `--bench-set/--bench-ab=prop:nœud.propriété=valeur` (ex. `prop:settlement_layer.use_cells=false`).
 
+- **Plancher 0,4** (choix du joueur, ADR 0191, 2a351e6af) : plein écran Dell 4096×2304 **38-43 → 26 ms**.
+- **Météo cuite par tour** (ADR 0192, 598edcf83) : −0,8 ms en A/B (26,3 → 25,5) ; rendu identique au
+  bruit de capture près (`tests/fl_weather_field_shot.gd`, effets forcés).
+- **Pics de bascule de niveau** : écouteurs de `chunk_surface_changed` chronométrés un à un ; seuls
+  les ponts (`Crossings`, 20 ms : maillage bâti sur le fil principal) comptent → construction étalée à
+  l'image suivante (6c26a1901). Pic Landmark_rouen 121 ms non reproduit (charge machine).
+  `life/reground` ≤ 10 ms (déjà découpé, RS-K2).
+
 ## Prochaine étape
-Choix du joueur : plancher d'échelle en plein écran HiDPI (0,5 → 0,35 : −37 %, plus flou) ;
-puis cuisson de la météo ; pics `life/reground`, `lod/level_emits` ; FL2 appels de dessin.
+FL2 appels de dessin : `a6_drawcalls_probe` (ablation par couche, d 150/60) en cours ; s'attaquer aux
+une ou deux couches dominantes. Puis fusion dans main (worktree dédié, --ff-only), mémoire FL.
