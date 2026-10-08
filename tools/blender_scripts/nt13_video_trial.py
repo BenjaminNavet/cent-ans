@@ -92,6 +92,7 @@ def clip(name, video, first, last, speed, loop, yaw, note, **opts):
         "reach": None,
         "yaw_range": None,
         "set": "nt13",
+        "source": None,
     }
     spec.update(opts)
     return spec
@@ -164,6 +165,21 @@ CLIPS_NT14 = [
         "lunge and one-handed thrust",
         **NT14,
     ),
+]
+# AS8a (ADR 0189): free Wikimedia Commons video, Roscheiderhof 2018 (CC BY-SA 3.0, Helge Klaus
+# Rieder), 33-50 s of the film re-encoded at 25 fps (``vf_fight``). Black-armoured swordsman with
+# a buckler: handheld camera, so the ground tilt is fitted per clip; one-handed grip, keyframed
+# shield arm (no disc to track). Baked into ``vf/`` (not wired by default, see docs/wip/as8.md).
+AS8A = {
+    "grip": "right_hand",
+    "shield": "keyframed",
+    "set": "as8a",
+    "source": "Roscheiderhof Spaetmittelter 2018 (Helge Klaus Rieder, CC BY-SA 3.0)",
+}
+CLIPS_AS8A = [
+    clip("vf_thrust", "vf_fight", 104, 150, 1.0, False, 90.0, "lunge, sword thrust", **AS8A),
+    clip("vf_guard", "vf_fight", 148, 172, 1.0, True, 20.0, "guard with buckler", **AS8A),
+    clip("vf_strike", "vf_fight", 358, 392, 1.0, False, 80.0, "sword raised, step and cut", **AS8A),
 ]
 # Baked into ``video_trial/``: per gesture the better of NT13 and NT14 (docs/wip/nt14-video-set2.md).
 CLIPS = [CLIPS_NT13[2]] + CLIPS_NT14
@@ -312,6 +328,10 @@ class Clip:
         rate = float(data["fps"])
         world = data["world"][first : last + 1]
         image = data["image"][first : last + 1]
+        cam_path = os.path.join(POSE_DIR, f"{video}_cam.npz")
+        if os.path.exists(cam_path):  # AS8a: handheld camera, feet's image speed minus the pan
+            image = image.copy()
+            image[..., :2] -= np.load(cam_path)["shift"][first : last + 1, None, :]
         extra, normals = {}, None
         if spec["shield"] == "disc":
             extra["disc"], normals = disc_track(data, video, first, last, rate * speed)
@@ -831,7 +851,7 @@ def video_entry(tgt, rest, spec):
     fps = round(clip.rate)
     record = {
         "source": (
-            f"player video {spec['video']} frames {spec['first']}-{spec['last']} "
+            f"{spec['source'] or 'player video'} {spec['video']} frames {spec['first']}-{spec['last']} "
             f"@{fps}fps, x{spec['speed']} speed"
         ),
         "set": spec["set"],
@@ -925,6 +945,22 @@ def bake_melee():
     )
 
 
+VF_DIR = os.path.join(bf.FINE_DIR, "vf")
+# AS8a: role of each free-video clip, to compare it with the current clips of that role.
+VF_ROLES = {"vf_thrust": "thrust", "vf_guard": "guard", "vf_strike": "overhead"}
+
+
+def bake_vf():
+    """AS8a: bake the free-video clips (``CLIPS_AS8A``) into ``VF_DIR`` (not wired by default)."""
+    bake_entries(
+        [(s["name"], "video", s) for s in CLIPS_AS8A],
+        VF_DIR,
+        "tools/blender_scripts/nt13_video_trial.py (bake-vf) - free Wikimedia Commons video "
+        "(CC BY-SA 3.0), MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/as8.md "
+        "and ADR 0189",
+    )
+
+
 def keyframed_solved(arm, name):
     """Armature-space matrices of every frame of a keyframed ``human`` clip."""
     import battle_fine_proto as fp
@@ -966,6 +1002,11 @@ def measure_all(path):
         res[name] = row
         for src, q in row.items():
             print("MEASURE", name, src, json.dumps(q))
+    for spec in CLIPS_AS8A:  # AS8a: next to the current clip of the same role
+        _b, _l, record = video_entry(tgt, rest, spec)
+        row = res.setdefault(VF_ROLES[spec["name"]], {})
+        row[spec["name"]] = dict(record["quality"], yaw_deg=record["yaw_deg"])
+        print("MEASURE", VF_ROLES[spec["name"]], spec["name"], json.dumps(row[spec["name"]]))
     with open(path, "w") as f:
         json.dump(res, f, indent=1, sort_keys=True)
     print("OK", path)
@@ -1063,6 +1104,8 @@ def main():
         render(args[1] if len(args) > 1 else "/tmp/nt14_render", args[2:] or None)
     elif args and args[0] == "measure":
         measure_all(args[1] if len(args) > 1 else "/tmp/nt14_measures.json")
+    elif args and args[0] == "bake-vf":
+        bake_vf()
     elif args and args[0] == "bake-melee":
         bake_melee()
     else:
