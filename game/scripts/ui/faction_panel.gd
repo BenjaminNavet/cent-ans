@@ -168,9 +168,9 @@ func _add_trade_row() -> void:
 
 ## Revenu des routes commerciales (projection courante) ; détail des routes en infobulle.
 func _show_trade_income(economy: Dictionary) -> void:
-	trade_income_value.text = "%s ℔" % _thousands(int(economy.get("trade_income", 0)))
+	trade_income_value.text = "%s ℔" % Money.digits(int(economy.get("trade_income", 0)))
 	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt (lot C5).",
-		"Saison passée : %s ℔" % _thousands(int(economy.get("trade_income_last_turn", 0)))])
+		"Saison passée : %s ℔" % Money.digits(int(economy.get("trade_income_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_trade_routes"):
@@ -182,7 +182,7 @@ func _show_trade_income(economy: Dictionary) -> void:
 			if bool(route.get("cut", false)):
 				lines.append("• %s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
 			else:
-				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], _thousands(int(route["total_value"]))])
+				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], Money.digits(int(route["total_value"]))])
 	RichTooltip.attach_plain(trade_income_value, "trade_income_detail", {"body": "\n".join(lines)})
 
 
@@ -439,11 +439,3 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 static func _signed(value: int) -> String:
 	return Money.signed(value)
 
-
-static func _thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out

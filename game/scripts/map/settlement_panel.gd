@@ -296,7 +296,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
 	# Garnison et recrutement.
 	var garrison: Array = detail.get("garrison", [])
-	garrison_header.text = "Garnison (%d unité%s, %s hommes)" % [garrison.size(), "s" if garrison.size() > 1 else "", PanelWidgets.thousands(int(detail.get("garrison_strength", 0)))]
+	garrison_header.text = "Garnison (%d unité%s, %s hommes)" % [garrison.size(), "s" if garrison.size() > 1 else "", Money.digits(int(detail.get("garrison_strength", 0)))]
 	_garrison_checks = PanelWidgets.fill_garrison(garrison_list, garrison, player_owner)
 	if garrison.is_empty():
 		PanelWidgets.placeholder(garrison_list, "Aucune garnison.")

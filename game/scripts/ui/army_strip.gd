@@ -265,9 +265,9 @@ func _refresh() -> void:
 	_title_label.visible = _title_label.text != ""
 	_count_label.text = "%d/%d" % [units.size(), capacity]
 	_count_label.add_theme_color_override("font_color", HudStyle.RUBRIC if units.size() > capacity else HudStyle.INK)
-	_men_label.text = "%s hommes" % HudStyle.thousands(men)
+	_men_label.text = "%s hommes" % Money.digits(men)
 	var upkeep := total_upkeep()
-	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
+	_upkeep_label.text = "Entretien %s ₶" % Money.digits(upkeep)
 	RichTooltip.attach_plain(_upkeep_label, "army_upkeep_per_season", {"body": "%s (livres tournois)" % Money.amount(upkeep)})
 
 	var layout := card_layout(units.size())
@@ -372,7 +372,7 @@ func tooltip_for(unit: Dictionary) -> String:
 	else:
 		lines.append("Moral : %d" % int(unit.get("morale", 0)))
 	var upkeep := unit_upkeep(unit)
-	lines.append("Entretien : %s ₶ par saison" % HudStyle.thousands(upkeep) if upkeep > 0 else "Entretien : —")
+	lines.append("Entretien : %s ₶ par saison" % Money.digits(upkeep) if upkeep > 0 else "Entretien : —")
 	return "\n".join(lines)
 
 

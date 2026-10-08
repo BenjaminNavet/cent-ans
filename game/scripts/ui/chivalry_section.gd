@@ -103,7 +103,7 @@ func _show_options(options: Array) -> void:
 		return
 	for option in options:
 		var id := str(option.get("id", ""))
-		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), RichTooltip.thousands(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], UiType.CAPTION))
+		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), Money.digits(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], UiType.CAPTION))
 		var button := RichButton.new()
 		button.text = "Fonder l'ordre"
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT

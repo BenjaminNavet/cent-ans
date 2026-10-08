@@ -140,7 +140,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 		current_chip.icon_rect.texture = library.call("get_icon", diet_id, "resource")
 	current_chip.tooltip_text = RichTooltip.diet(current) if not current.is_empty() else ""
 	var cost := int(diet.get("cost", 0))
-	cost_label.text = "%s %s / saison" % [RichTooltip.thousands(cost), RichTooltip.POUND] if cost > 0 else "gratuit"
+	cost_label.text = "%s %s / saison" % [Money.digits(cost), RichTooltip.POUND] if cost > 0 else "gratuit"
 	var changed := bool(diet.get("changed_this_turn", false))
 	changed_label.visible = changed and player_owned
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
@@ -170,7 +170,7 @@ func _fill_options(changed: bool) -> void:
 		line.add_theme_constant_override("separation", 6)
 		var button := RichButton.new()
 		var cost := int(option.get("cost", 0))
-		button.text = "%s — %s" % [str(option.get("name", id)), "%s %s" % [RichTooltip.thousands(cost), RichTooltip.POUND] if cost > 0 else "gratuit"]
+		button.text = "%s — %s" % [str(option.get("name", id)), "%s %s" % [Money.digits(cost), RichTooltip.POUND] if cost > 0 else "gratuit"]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

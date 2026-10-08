@@ -900,7 +900,7 @@ func _render_detail() -> void:
 	_head.add_child(top)
 	var facts := PackedStringArray()
 	facts.append("Religion : %s" % entry.get("religion_name", "?"))
-	facts.append("Puissance : %s" % HudStyle.thousands(int(entry.get("power", 0))))
+	facts.append("Puissance : %s" % Money.digits(int(entry.get("power", 0))))
 	if int(entry.get("truce_turns_left", 0)) > 0:
 		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
 	if bool(entry.get("trade_agreement", false)):

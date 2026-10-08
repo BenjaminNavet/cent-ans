@@ -373,7 +373,7 @@ static func _province_name(province_id: String) -> String:
 
 
 static func _pounds(value: int) -> String:
-	return "%s %s" % [RichTooltip.thousands(value), RichTooltip.POUND]
+	return "%s %s" % [Money.digits(value), RichTooltip.POUND]
 
 
 func _facade_sim() -> Object:

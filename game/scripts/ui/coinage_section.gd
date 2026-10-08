@@ -188,7 +188,7 @@ func request_level(level: String) -> Dictionary:
 
 static func _pounds(value: int, signed := false) -> String:
 	var sign := "+" if signed and value > 0 else ""
-	return "%s%s %s" % [sign, RichTooltip.thousands(value), RichTooltip.POUND]
+	return "%s%s %s" % [sign, Money.digits(value), RichTooltip.POUND]
 
 
 func _facade_sim() -> Object:

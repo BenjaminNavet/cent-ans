@@ -552,7 +552,7 @@ func hover_text(province_id: String) -> String:
 		"wealth":
 			return "%d livres par saison (impôt de base)" % roundi(float(row.get("income", 0.0)))
 		"population":
-			return "%s habitants" % HudStyle.thousands(int(row.get("population", 0)))
+			return "%s habitants" % Money.digits(int(row.get("population", 0)))
 		"loyalty":
 			var loyalty := int(row.get("vassal_loyalty", -1))
 			if loyalty < 0:
