@@ -1,23 +1,16 @@
 //! Lot CT1: the record of the AI turn replayed on the campaign map (ADR
 //! 0073) — deterministic, harmless to the game, and telling which moves
 //! concern the player.
+use data_model::test_support::{fac, game_data};
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_campaign::{
     AiMoveKind, AiMoveNotability, AiMoveRecord, ArmyId, ArmyPosition, CampaignState, Order,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
@@ -47,14 +40,14 @@ fn play(data: &GameData, seed: u64, turns: u32, record: bool) -> (Vec<Vec<AiMove
 #[test]
 fn the_record_is_deterministic_and_does_not_change_the_game() {
     let data = data();
-    let _ = play(&data, 3, 1, false); // warm-up (lazy rasters)
+    let _ = play(data, 3, 1, false); // warm-up (lazy rasters)
     let started = std::time::Instant::now();
-    let (off, save_off) = play(&data, 3, 3, false);
+    let (off, save_off) = play(data, 3, 3, false);
     let off_time = started.elapsed();
     let started = std::time::Instant::now();
-    let (first, save_on) = play(&data, 3, 3, true);
+    let (first, save_on) = play(data, 3, 3, true);
     let on_time = started.elapsed();
-    let (second, _) = play(&data, 3, 3, true);
+    let (second, _) = play(data, 3, 3, true);
     eprintln!("3 turns: record on {on_time:?}, off {off_time:?}");
     assert_eq!(first, second, "same seed, same records");
     assert!(
@@ -93,7 +86,7 @@ fn the_record_is_deterministic_and_does_not_change_the_game() {
 #[test]
 fn an_ai_attack_on_the_player_is_a_visible_notable_battle() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     for (a, b) in [("fac_england", "fac_france"), ("fac_france", "fac_england")] {
         state
             .factions
@@ -107,13 +100,13 @@ fn an_ai_attack_on_the_player_is_a_visible_notable_battle() {
     let meaux = data
         .settlement_point(&SettlementId::new("set_meaux").unwrap())
         .unwrap();
-    let km = sim_campaign::march::px_per_km(&data);
+    let km = sim_campaign::march::px_per_km(data);
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
     state.armies.get_mut(&french).unwrap().position =
         ArmyPosition::field([meaux[0] + 15.0 * km, meaux[1]]);
     state.set_ai_replay_recording(true, 60.0);
     let (attacker, target) = (english.clone(), french.clone());
-    state.end_turn_with(&data, move |_, _, faction| {
+    state.end_turn_with(data, move |_, _, faction| {
         if faction.as_str() == "fac_england" {
             vec![Order::Attack {
                 army: attacker.clone(),

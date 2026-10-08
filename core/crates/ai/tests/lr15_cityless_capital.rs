@@ -1,20 +1,14 @@
 //! Lot LR-15: the capital of a faction that holds no city (ADR 0165) — the
 //! seat that stands for it never is another realm's city, the start and both
 //! AIs neither panic nor act in a place the faction does not control.
-
-use std::path::PathBuf;
+use data_model::test_support::{fac, game_data};
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementKind};
 use sim_campaign::{CampaignState, Order, Place};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 /// Brittany loses every city to France; its towns and castles stay.
@@ -58,7 +52,7 @@ fn assert_orders_at_home(state: &CampaignState, faction: &FactionId, orders: &[O
 #[test]
 fn the_seat_of_a_cityless_realm_is_a_place_it_holds() {
     let data = data();
-    let (state, realm) = cityless_brittany(&data);
+    let (state, realm) = cityless_brittany(data);
     let capital = state.factions[&realm].capital.clone();
     assert!(!state.controls_province(&realm, &capital));
     let seat = state
@@ -81,18 +75,18 @@ fn the_seat_of_a_cityless_realm_is_a_place_it_holds() {
 #[test]
 fn both_ais_plan_a_cityless_realm_at_home() {
     let data = data();
-    let (mut state, realm) = cityless_brittany(&data);
+    let (mut state, realm) = cityless_brittany(data);
     state.factions.get_mut(&realm).unwrap().treasury = 5_000;
-    let orders = ai::plan_turn(&state, &data, &realm);
+    let orders = ai::plan_turn(&state, data, &realm);
     assert_orders_at_home(&state, &realm, &orders);
-    let orders = sim_campaign::ai_minimal::plan_turn(&state, &data, &realm);
+    let orders = sim_campaign::ai_minimal::plan_turn(&state, data, &realm);
     assert_orders_at_home(&state, &realm, &orders);
 }
 
 #[test]
 fn a_realm_that_holds_nothing_has_no_seat_and_plans_without_panic() {
     let data = data();
-    let (mut state, realm) = cityless_brittany(&data);
+    let (mut state, realm) = cityless_brittany(data);
     let france = fac("fac_france");
     for place in state.settlements.values_mut() {
         if place.controller == realm {
@@ -101,9 +95,9 @@ fn a_realm_that_holds_nothing_has_no_seat_and_plans_without_panic() {
         }
     }
     assert_eq!(state.faction_seat(&realm), None);
-    let orders = ai::plan_turn(&state, &data, &realm);
+    let orders = ai::plan_turn(&state, data, &realm);
     assert_orders_at_home(&state, &realm, &orders);
-    let orders = sim_campaign::ai_minimal::plan_turn(&state, &data, &realm);
+    let orders = sim_campaign::ai_minimal::plan_turn(&state, data, &realm);
     assert_orders_at_home(&state, &realm, &orders);
 }
 
@@ -111,7 +105,7 @@ fn a_realm_that_holds_nothing_has_no_seat_and_plans_without_panic() {
 fn a_capital_held_by_another_realm_does_not_station_the_starting_army_there() {
     // Data whose capital lies in another realm's province (as the crusade's
     // Cyprus): the main army starts in a place of its own.
-    let mut data = data();
+    let mut data = data().clone();
     let poland = fac("fac_poland");
     let bohemia = ProvinceId::new("prov_bohemia").unwrap();
     assert_ne!(data.provinces[&bohemia].owner, poland);
@@ -135,10 +129,10 @@ fn a_capital_held_by_another_realm_does_not_station_the_starting_army_there() {
 #[test]
 fn a_cityless_realm_plays_turns_without_panic() {
     let data = data();
-    let (mut state, realm) = cityless_brittany(&data);
+    let (mut state, realm) = cityless_brittany(data);
     state.interactive_battles = false;
     for _ in 0..2 {
-        state.end_turn_with(&data, ai::plan_turn);
+        state.end_turn_with(data, ai::plan_turn);
     }
     if let Some(seat) = state.faction_seat(&realm) {
         assert_eq!(state.settlements[&seat].controller, realm);

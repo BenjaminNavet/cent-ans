@@ -3,17 +3,14 @@
 //! (`plan_turn_sequential`), the other on the pool (`plan_turn`), must keep
 //! the same state and the same events turn after turn; and on every state
 //! reached, both planners give each faction the same orders.
-
-use std::path::PathBuf;
+use data_model::test_support::game_data;
 
 use data_model::{FactionId, GameData};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
+    game_data()
 }
 
 /// Turns played per seed: long enough for wars, sieges and debts.
@@ -22,7 +19,7 @@ const TURNS: u32 = 12;
 fn campaigns_agree(seed: u64) {
     let data = data();
     let player = FactionId::new("fac_france").unwrap();
-    let start = CampaignState::new_1337(&data, player.clone(), seed).expect("1337 start");
+    let start = CampaignState::new_1337(data, player.clone(), seed).expect("1337 start");
     let mut sequential = start.clone();
     let mut parallel = start;
     sequential.interactive_battles = false;
@@ -37,20 +34,20 @@ fn campaigns_agree(seed: u64) {
             .collect();
         for faction in &factions {
             assert_eq!(
-                ai::plan_turn(&parallel, &data, faction),
-                ai::plan_turn_sequential(&parallel, &data, faction),
+                ai::plan_turn(&parallel, data, faction),
+                ai::plan_turn_sequential(&parallel, data, faction),
                 "seed {seed}, turn {turn}: orders of {faction} differ"
             );
         }
         // The player's side is played by the same AI.
-        for order in ai::plan_turn_sequential(&sequential, &data, &player) {
-            let _ = sequential.submit_order(&data, order);
+        for order in ai::plan_turn_sequential(&sequential, data, &player) {
+            let _ = sequential.submit_order(data, order);
         }
-        for order in ai::plan_turn(&parallel, &data, &player) {
-            let _ = parallel.submit_order(&data, order);
+        for order in ai::plan_turn(&parallel, data, &player) {
+            let _ = parallel.submit_order(data, order);
         }
-        let sequential_events = sequential.end_turn_with(&data, ai::plan_turn_sequential);
-        let parallel_events = parallel.end_turn_with(&data, ai::plan_turn);
+        let sequential_events = sequential.end_turn_with(data, ai::plan_turn_sequential);
+        let parallel_events = parallel.end_turn_with(data, ai::plan_turn);
         assert_eq!(
             parallel_events, sequential_events,
             "seed {seed}: events differ at turn {turn}"

@@ -1,19 +1,12 @@
 //! F4 « guerre de Cent Ans vivante » AI tests (`docs/design/m9-ai.md` § F4).
+use data_model::test_support::{fac, game_data};
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, UnitTypeId};
+use data_model::{GameData, UnitTypeId};
 use sim_campaign::{CampaignState, Order, Season, Unit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 /// 1345, France and England at peace, their truce just expired.
@@ -60,7 +53,7 @@ fn declares_on(state: &mut CampaignState, data: &GameData, who: &str, target: &s
 #[test]
 fn england_presses_its_claim_on_france_without_superiority() {
     let data = data();
-    let mut state = peace_after_truce(&data);
+    let mut state = peace_after_truce(data);
     // The pre-F4 rule (coalition ratio >= 1.5) would never declare here.
     let ratio =
         state.coalition_power(&fac("fac_england")) / state.coalition_power(&fac("fac_france"));
@@ -72,12 +65,12 @@ fn england_presses_its_claim_on_france_without_superiority() {
     let pretender =
         state.coalition_power(&fac("fac_england")) / state.faction_power(&fac("fac_france"));
     assert!(
-        declares_on(&mut state, &data, "fac_england", "fac_france"),
+        declares_on(&mut state, data, "fac_england", "fac_france"),
         "ratio vs crown {pretender}, ready {}, wars {:?}, attitude {}",
         sim_campaign::diplomacy::war_ready(&state, &fac("fac_england")),
         wars,
         state
-            .attitude(&data, &fac("fac_england"), &fac("fac_france"))
+            .attitude(data, &fac("fac_england"), &fac("fac_france"))
             .0
     );
 }
@@ -85,7 +78,7 @@ fn england_presses_its_claim_on_france_without_superiority() {
 #[test]
 fn no_claim_war_during_a_truce_a_regency_or_a_bankruptcy() {
     let data = data();
-    let mut truce = peace_after_truce(&data);
+    let mut truce = peace_after_truce(data);
     let until = truce.turn + 10;
     truce
         .factions
@@ -93,9 +86,9 @@ fn no_claim_war_during_a_truce_a_regency_or_a_bankruptcy() {
         .unwrap()
         .truces
         .insert(fac("fac_france"), until);
-    assert!(!declares_on(&mut truce, &data, "fac_england", "fac_france"));
+    assert!(!declares_on(&mut truce, data, "fac_england", "fac_france"));
 
-    let mut regency = peace_after_truce(&data);
+    let mut regency = peace_after_truce(data);
     regency
         .factions
         .get_mut(&fac("fac_england"))
@@ -103,24 +96,24 @@ fn no_claim_war_during_a_truce_a_regency_or_a_bankruptcy() {
         .regency = true;
     assert!(!declares_on(
         &mut regency,
-        &data,
+        data,
         "fac_england",
         "fac_france"
     ));
 
-    let mut broke = peace_after_truce(&data);
+    let mut broke = peace_after_truce(data);
     broke
         .factions
         .get_mut(&fac("fac_england"))
         .unwrap()
         .treasury = -500;
-    assert!(!declares_on(&mut broke, &data, "fac_england", "fac_france"));
+    assert!(!declares_on(&mut broke, data, "fac_england", "fac_france"));
 }
 
 #[test]
 fn claims_follow_the_crown() {
     let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let claimed = sim_campaign::diplomacy::claimed_provinces(&state, &fac("fac_england"));
     let paris = state.factions[&fac("fac_france")].capital.clone();
     assert!(claimed.contains(&paris), "the throne claim covers Paris");
@@ -132,10 +125,10 @@ fn claims_follow_the_crown() {
 #[test]
 fn the_auld_alliance_answers_the_call_to_arms() {
     let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     assert!(sim_campaign::diplomacy::answers_call_to_arms(
         &state,
-        &data,
+        data,
         &fac("fac_scotland"),
         &fac("fac_france"),
         &fac("fac_england"),
@@ -145,14 +138,14 @@ fn the_auld_alliance_answers_the_call_to_arms() {
 #[test]
 fn a_hoarding_realm_spends() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let empire = fac("fac_france");
     // Lot C4: 300 000 (was 400 000). The settlements' buildings add upkeep,
     // and at 400 000 the court's opulence (20 % of the excess) made the war
     // runway rule dismiss troops before the hoard could be spent.
     state.factions.get_mut(&empire).unwrap().treasury = 300_000;
     state.season = Season::Autumn;
-    let orders = ai::plan_turn(&state, &data, &empire);
+    let orders = ai::plan_turn(&state, data, &empire);
     assert!(orders.iter().any(|o| matches!(o, Order::Recruit { .. })));
     assert!(
         orders.iter().any(|o| matches!(o, Order::Build { .. })),
@@ -172,7 +165,7 @@ fn a_hoarding_realm_spends() {
 #[test]
 fn a_small_realm_dismisses_troops_before_bankruptcy() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let swiss = fac("fac_swiss");
     let capital = state.factions[&swiss].capital.clone();
     let unit_type = data
@@ -186,7 +179,7 @@ fn a_small_realm_dismisses_troops_before_bankruptcy() {
     }
     // Positive but short treasury: not bankrupt yet.
     state.factions.get_mut(&swiss).unwrap().treasury = 300;
-    let orders = ai::plan_turn(&state, &data, &swiss);
+    let orders = ai::plan_turn(&state, data, &swiss);
     assert!(orders
         .iter()
         .any(|o| matches!(o, Order::DisbandUnit { .. })));
@@ -196,13 +189,13 @@ fn a_small_realm_dismisses_troops_before_bankruptcy() {
 #[test]
 fn rulers_and_heirs_are_married_by_the_ai() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.season = Season::Spring;
     let proposals: usize = state
         .factions
         .keys()
         .map(|f| {
-            ai::plan_turn(&state, &data, f)
+            ai::plan_turn(&state, data, f)
                 .iter()
                 .filter(|o| {
                     matches!(

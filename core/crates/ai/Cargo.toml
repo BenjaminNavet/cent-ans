@@ -11,5 +11,6 @@ data-model = { path = "../data-model" }
 rayon.workspace = true
 
 [dev-dependencies]
+data-model = { path = "../data-model", features = ["test-support"] }
 serde.workspace = true
 serde_json.workspace = true
