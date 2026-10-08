@@ -1,6 +1,7 @@
 //! Lot C7: the general's retinue (acquisition, effects, cap, inheritance,
 //! transfer), the year of death, and old saves without the new fields.
 
+use data_model::EffectKind;
 use data_model::{AcquisitionTrigger, BuildingId, CharacterId, CompanionId, GameData};
 use sim_campaign::state::ArmyId;
 use sim_campaign::{characters, retinue, skills, CampaignState, Order, OrderError};
@@ -159,9 +160,12 @@ fn companions_add_their_effects() {
         .retinue
         .extend([ret("ret_maitre_engins"), ret("ret_heraut")]);
     let after = skills::character_effects(&state, data, &edward);
-    assert_eq!(after.siege_speed.percent - before.siege_speed.percent, 15.0);
+    assert_eq!(
+        after[EffectKind::SiegeSpeed].percent - before[EffectKind::SiegeSpeed].percent,
+        15.0
+    );
     // Prestige is paid yearly, not folded into the effects.
-    assert_eq!(after.prestige, before.prestige);
+    assert_eq!(after[EffectKind::Prestige], before[EffectKind::Prestige]);
     assert_eq!(retinue::yearly_prestige(&state, data, &edward), 2);
 }
 

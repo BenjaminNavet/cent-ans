@@ -18,6 +18,7 @@
 //! breaks even within a year. Undoing 30 points of inflation takes fifteen
 //! seasons of strong money.
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, SocialClass};
 use serde::{Deserialize, Serialize};
 
@@ -365,11 +366,13 @@ pub fn class_effects(
     };
     let excess = f64::from(f.price_level.saturating_sub(PRICE_BASE));
     if matches!(class, SocialClass::Burghers | SocialClass::Clergy) && excess > 0.0 {
-        totals.unrest.flat += (excess / INFLATION_UNREST_DIVISOR).min(INFLATION_UNREST_MAX);
-        totals.wealth.flat -= (excess / INFLATION_WEALTH_DIVISOR).min(INFLATION_WEALTH_MAX);
+        totals[EffectKind::Unrest].flat +=
+            (excess / INFLATION_UNREST_DIVISOR).min(INFLATION_UNREST_MAX);
+        totals[EffectKind::Wealth].flat -=
+            (excess / INFLATION_WEALTH_DIVISOR).min(INFLATION_WEALTH_MAX);
     }
     if class == SocialClass::Burghers {
-        totals.unrest.flat += f.coinage.params().burgher_unrest;
+        totals[EffectKind::Unrest].flat += f.coinage.params().burgher_unrest;
     }
     totals
 }

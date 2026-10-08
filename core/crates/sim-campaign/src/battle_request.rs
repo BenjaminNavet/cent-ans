@@ -9,6 +9,7 @@
 //! ([`CampaignState::auto_resolve_pending`]). Whatever is still pending when
 //! the next turn starts is auto-resolved first.
 
+use data_model::EffectKind;
 use data_model::{
     Ability, CharacterId, FactionId, GameData, ProvinceId, SettlementId, Terrain, UnitCategory,
     UnitStats,
@@ -329,10 +330,10 @@ pub(crate) fn side_setup(
             name: state.character_name(data, character),
             command: c.skills.command,
             unit_index,
-            morale_bonus: effects.army_morale.apply(0.0),
-            charge_percent: effects.battle_charge.apply(0.0),
-            ranged_percent: effects.battle_ranged.apply(0.0),
-            defense_percent: effects.battle_defense.apply(0.0),
+            morale_bonus: effects[EffectKind::ArmyMorale].apply(0.0),
+            charge_percent: effects[EffectKind::BattleCharge].apply(0.0),
+            ranged_percent: effects[EffectKind::BattleRanged].apply(0.0),
+            defense_percent: effects[EffectKind::BattleDefense].apply(0.0),
             sovereign: state
                 .factions
                 .get(&army.faction)

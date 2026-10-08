@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
-    BuildingId, CharacterId, Effect, FactionId, GameData, PopulationClass, ProvinceId,
+    BuildingId, CharacterId, Effect, EffectKind, FactionId, GameData, PopulationClass, ProvinceId,
     ResourceCategory, Role, SettlementId, Skill, SkillBranch,
 };
 use godot::classes::RefCounted;
@@ -1007,32 +1007,40 @@ fn effect_value_dict(value: EffectValue) -> VarDictionary {
     }
 }
 
+/// Kinds the UI reads from a province's `effects`, keyed by their snake_case name.
+const UI_EFFECT_KINDS: [(&str, EffectKind); 14] = [
+    ("tax_income", EffectKind::TaxIncome),
+    ("trade_income", EffectKind::TradeIncome),
+    ("health", EffectKind::Health),
+    ("unrest", EffectKind::Unrest),
+    ("wealth", EffectKind::Wealth),
+    ("goods_satisfaction", EffectKind::GoodsSatisfaction),
+    ("growth", EffectKind::Growth),
+    ("garrison", EffectKind::Garrison),
+    ("fortification_level", EffectKind::FortificationLevel),
+    ("recruit_cost", EffectKind::RecruitCost),
+    ("supply", EffectKind::Supply),
+    ("production", EffectKind::Production),
+    ("siege_resistance", EffectKind::SiegeResistance),
+    ("plague_resistance", EffectKind::PlagueResistance),
+];
+
 fn effect_totals_dict(effects: &EffectTotals) -> VarDictionary {
-    vdict! {
-        "tax_income" => &effect_value_dict(effects.tax_income),
-        "trade_income" => &effect_value_dict(effects.trade_income),
-        "health" => &effect_value_dict(effects.health),
-        "unrest" => &effect_value_dict(effects.unrest),
-        "wealth" => &effect_value_dict(effects.wealth),
-        "goods_satisfaction" => &effect_value_dict(effects.goods_satisfaction),
-        "growth" => &effect_value_dict(effects.growth),
-        "garrison" => &effect_value_dict(effects.garrison),
-        "fortification_level" => &effect_value_dict(effects.fortification_level),
-        "recruit_cost" => &effect_value_dict(effects.recruit_cost),
-        "supply" => &effect_value_dict(effects.supply),
-        "production" => &effect_value_dict(effects.production),
-        "siege_resistance" => &effect_value_dict(effects.siege_resistance),
-        "plague_resistance" => &effect_value_dict(effects.plague_resistance),
-        // F1: effects aimed at one social class.
-        "by_class" => &vdict! {
+    let mut dict = VarDictionary::new();
+    for (key, kind) in UI_EFFECT_KINDS {
+        dict.set(key, &effect_value_dict(effects[kind]));
+    }
+    dict.set(
+        "by_class",
+        &vdict! {
             "peasants" => &class_effects_dict(&effects.classes.peasants),
             "burghers" => &class_effects_dict(&effects.classes.burghers),
             "clergy" => &class_effects_dict(&effects.classes.clergy),
             "nobility" => &class_effects_dict(&effects.classes.nobility),
         },
-    }
+    );
+    dict
 }
-
 fn class_effects_dict(effects: &sim_campaign::buildings::ClassEffects) -> VarDictionary {
     vdict! {
         "wealth" => &effect_value_dict(effects.wealth),

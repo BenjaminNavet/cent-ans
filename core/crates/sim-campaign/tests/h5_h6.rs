@@ -4,11 +4,13 @@
 //! cession, captive ruler), chivalric orders (foundation, members, morale,
 //! collapse, Garter and Star events), old saves and determinism.
 
+use data_model::EffectKind;
 use data_model::{
     CharacterId, ChivalricOrderId, EventEffect, EventId, FactionId, GameData, SocialClass,
 };
 use sim_campaign::chronicle::{self, EventContext};
 use sim_campaign::coinage::{self, CoinageLevel, PRICE_BASE};
+use sim_campaign::effects;
 use sim_campaign::{
     chivalry, ransom, CampaignState, ChivalryError, CoinageError, EventKind, Order, OrderError,
     RansomError, RansomTerms,
@@ -153,9 +155,9 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     let burghers = coinage::class_effects(&state, &france_id, SocialClass::Burghers);
     let clergy = coinage::class_effects(&state, &france_id, SocialClass::Clergy);
     let peasants = coinage::class_effects(&state, &france_id, SocialClass::Peasants);
-    assert_eq!(burghers.unrest.flat, 10.0);
-    assert_eq!(clergy.wealth.flat, -7.5);
-    assert_eq!(peasants.unrest.flat, 0.0);
+    assert_eq!(burghers[EffectKind::Unrest].flat, 10.0);
+    assert_eq!(clergy[EffectKind::Wealth].flat, -7.5);
+    assert_eq!(peasants[EffectKind::Unrest].flat, 0.0);
     let mut calm = france(data, 5);
     for _ in 0..6 {
         state.factions.get_mut(&france_id).unwrap().price_level = 160;
@@ -185,9 +187,7 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     assert!(f.recoinage_last_turn > 0);
     assert!(strong.characters[&ruler].prestige > prestige);
     assert_eq!(
-        coinage::class_effects(&strong, &france_id, SocialClass::Burghers)
-            .unrest
-            .flat,
+        coinage::class_effects(&strong, &france_id, SocialClass::Burghers)[EffectKind::Unrest].flat,
         -6.0 + 8.0 / 6.0
     );
     // Never below 100.
@@ -327,7 +327,7 @@ fn full_ransom_frees_the_captive_once() {
         faction: Some(france_id.clone()),
         province: None,
     };
-    chronicle::apply_effect(&mut state, data, &effect, &ctx, &mut Vec::new());
+    effects::apply_effect(&mut state, data, &effect, &ctx, &mut Vec::new());
     assert_eq!(state.factions[&france_id].treasury, 10);
 }
 
@@ -609,7 +609,7 @@ fn members_are_named_and_gain_loyalty_and_morale() {
     );
     assert_eq!(chivalry::member_morale(&state, data, &edward), 0.0);
     let effects = sim_campaign::skills::character_effects(&state, data, &member);
-    assert!(effects.army_morale.flat >= f64::from(garter.member_morale));
+    assert!(effects[EffectKind::ArmyMorale].flat >= f64::from(garter.member_morale));
     // Best first: nobody outside the order has more merit than a member.
     let worst = order
         .members
@@ -681,7 +681,7 @@ fn choose_found_option(state: &mut CampaignState, data: &GameData, event: &str, 
         province: None,
     };
     for effect in &definition.options[0].effects {
-        chronicle::apply_effect(state, data, effect, &ctx, &mut Vec::new());
+        effects::apply_effect(state, data, effect, &ctx, &mut Vec::new());
     }
 }
 

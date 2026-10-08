@@ -101,6 +101,17 @@ impl PopulationClasses {
             .map(|class| (class, self.get(class)))
     }
 
+    /// Iterates mutably over the four entries in schema order.
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut PopulationClass> {
+        [
+            &mut self.peasants,
+            &mut self.burghers,
+            &mut self.clergy,
+            &mut self.nobility,
+        ]
+        .into_iter()
+    }
+
     /// Total head count across all classes.
     pub fn total(&self) -> u64 {
         self.iter().map(|(_, entry)| entry.count).sum()

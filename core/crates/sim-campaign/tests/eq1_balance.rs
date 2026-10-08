@@ -3,7 +3,7 @@
 //! English opening economy.
 
 use data_model::ProvinceId;
-use sim_campaign::{chronicle, population, CampaignState, EventKind};
+use sim_campaign::{effects, population, CampaignState, EventKind};
 
 use data_model::test_support::{fac, game_data};
 
@@ -72,10 +72,10 @@ fn event_costs_scale_with_income() {
     let france = fac("fac_france");
     let swiss = fac("fac_swiss");
     assert_eq!(
-        chronicle::event_treasury_amount(&state, data, Some(&france), -2000),
+        effects::event_treasury_amount(&state, data, Some(&france), -2000),
         -2000
     );
-    let small = chronicle::event_treasury_amount(&state, data, Some(&swiss), -2000);
+    let small = effects::event_treasury_amount(&state, data, Some(&swiss), -2000);
     let floor = (-2000.0 * data.economy_rules.event_treasury_min_scale).round() as i64;
     assert!(small > -2000 && small <= floor, "{small}");
 }

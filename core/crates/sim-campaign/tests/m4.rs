@@ -2,6 +2,7 @@
 //! traits, generals and governors, marriages, births, succession, regency,
 //! and the version-3 save format. See `docs/design/m4-characters-dynasties.md` § 2.
 
+use data_model::EffectKind;
 use data_model::{CharacterId, FactionId, GameData, SkillBranch, SkillId, TraitId};
 use sim_campaign::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
 use sim_campaign::{CampaignRng, CampaignState, EventKind, Order, OrderError};
@@ -233,7 +234,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
     let data = game_data();
     let mut state = france(data, 4);
     let rouen = prov("prov_normandie");
-    let before = state.province_effects(data, &rouen).unrest;
+    let before = state.province_effects(data, &rouen)[EffectKind::Unrest];
     let governor = chr("chr_raoul_de_brienne");
     // Grant a governance skill that reduces unrest.
     let skill = data
@@ -274,7 +275,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
         )
         .unwrap();
     assert_eq!(state.province_governor(&rouen), Some(&governor));
-    let after = state.province_effects(data, &rouen).unrest;
+    let after = state.province_effects(data, &rouen)[EffectKind::Unrest];
     assert!(
         after.flat + after.percent < before.flat + before.percent,
         "governor effect: {before:?} -> {after:?}"

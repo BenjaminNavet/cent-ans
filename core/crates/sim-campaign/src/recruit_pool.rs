@@ -13,6 +13,7 @@
 //! from the map is full. Old saves (no map) and the 1337 start therefore
 //! begin with every reserve full.
 
+use data_model::EffectKind;
 use data_model::{GameData, SettlementId, UnitTypeId};
 use serde::{Deserialize, Serialize};
 
@@ -67,8 +68,7 @@ impl CampaignState {
     /// `recruit_slots` points of the settlement's own buildings, governor
     /// and edict (muster field, stables, armoury...).
     fn pool_slot_points(&self, data: &GameData, settlement: &SettlementId) -> u32 {
-        self.settlement_effects(data, settlement)
-            .recruit_slots
+        self.settlement_effects(data, settlement)[EffectKind::RecruitSlots]
             .flat
             .max(0.0) as u32
     }

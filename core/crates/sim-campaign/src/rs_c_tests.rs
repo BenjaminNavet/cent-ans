@@ -301,7 +301,7 @@ fn an_event_opinion_of_a_capped_motive_is_capped() {
     let ctx = crate::chronicle::EventContext::default();
     let mut events = Vec::new();
     for _ in 0..4 {
-        crate::chronicle::apply_effect(&mut state, data, &effect, &ctx, &mut events);
+        crate::effects::apply_effect(&mut state, data, &effect, &ctx, &mut events);
     }
     assert_eq!(
         running(&state, "fac_england", "fac_france", MARRIAGE_REASON).0,

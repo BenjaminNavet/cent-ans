@@ -19,6 +19,7 @@
 //! traditions raise the rate.
 //! Garrisons keep their own reinforcement (`economy`, `garrison` effect).
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
@@ -244,9 +245,9 @@ impl CampaignState {
         if territory == Territory::Own {
             if let Some(province) = self.army_province(data, army) {
                 let effects = self.province_building_effects(data, &province);
-                let buildings = (effects.garrison.flat.max(0.0)
+                let buildings = (effects[EffectKind::Garrison].flat.max(0.0)
                     * f64::from(rules.building_garrison_point_percent)
-                    + effects.recruit_slots.flat.max(0.0)
+                    + effects[EffectKind::RecruitSlots].flat.max(0.0)
                         * f64::from(rules.building_recruit_slot_percent))
                 .round() as i32;
                 let buildings = buildings.min(rules.building_bonus_max_percent);

@@ -14,6 +14,7 @@
 //! the whole province) plus its own ([`CampaignState::settlement_tax`]).
 //! Garrisons, recruits and building upkeep are counted per settlement.
 
+use data_model::EffectKind;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -163,7 +164,8 @@ pub fn province_income_with(
     // F1 `Production` (mills, forges, workshops; water/wind mill
     // technologies): the produce of peasants and burghers is worth more,
     // half of the gain reaching the crown (`production_tax_share`).
-    let production = 1.0 + rules.production_tax_share * effects.production.percent / 100.0;
+    let production =
+        1.0 + rules.production_tax_share * effects[EffectKind::Production].percent / 100.0;
     for (class, entry) in province.population.iter() {
         let mut share =
             entry.count as f64 * tax_per_head(rules, class) * f64::from(entry.wealth) / 50.0;
@@ -175,11 +177,12 @@ pub fn province_income_with(
             burgher_base = share;
         }
     }
-    base += effects.production.flat;
+    base += effects[EffectKind::Production].flat;
     base *= tax_rate.multiplier(rules);
-    base *= 1.0 + effects.tax_income.percent / 100.0;
-    base += effects.tax_income.flat;
-    let trade = burgher_base * (effects.trade_income.percent / 100.0) + effects.trade_income.flat;
+    base *= 1.0 + effects[EffectKind::TaxIncome].percent / 100.0;
+    base += effects[EffectKind::TaxIncome].flat;
+    let trade = burgher_base * (effects[EffectKind::TradeIncome].percent / 100.0)
+        + effects[EffectKind::TradeIncome].flat;
     ((base + trade) * (1.0 - f64::from(province.devastation) / 100.0) * rules.tax_efficiency)
         .max(0.0)
 }
@@ -257,7 +260,7 @@ pub fn garrison_upkeep(data: &GameData, units: &[Unit]) -> i64 {
 /// (walls and castles house and feed their garrison), up to
 /// `garrison_relief_max_percent` (`economy.json`).
 pub fn garrison_relief_percent(rules: &EconomyRules, effects: &EffectTotals) -> i64 {
-    let points = effects.garrison.apply(0.0).max(0.0).round() as i64;
+    let points = effects[EffectKind::Garrison].apply(0.0).max(0.0).round() as i64;
     (points * rules.garrison_relief_percent_per_point).min(rules.garrison_relief_max_percent)
 }
 
@@ -365,7 +368,7 @@ impl CampaignState {
     pub fn faction_upkeep(&self, data: &GameData, faction: &data_model::FactionId) -> i64 {
         let tech = crate::research::faction_tech_effects(self, data, faction);
         let unit_cost = |unit: &Unit| -> i64 {
-            let mut percent = tech.army_upkeep.percent;
+            let mut percent = tech[EffectKind::ArmyUpkeep].percent;
             if let Some(unit_type) = data.unit_types.get(&unit.unit_type) {
                 percent += tech
                     .unit_categories
@@ -384,9 +387,7 @@ impl CampaignState {
             .map(|a| {
                 let raw: i64 = a.units.iter().map(unit_cost).sum();
                 let relief = a.general.as_ref().map_or(0.0, |g| {
-                    crate::skills::character_effects(self, data, g)
-                        .army_upkeep
-                        .percent
+                    crate::skills::character_effects(self, data, g)[EffectKind::ArmyUpkeep].percent
                 });
                 if relief == 0.0 {
                     raw
@@ -786,7 +787,7 @@ pub(crate) fn resolve_economy(
 /// its governor and of the controller's technologies (standing companies).
 pub fn recruit_experience(effects: &EffectTotals, category: data_model::UnitCategory) -> u8 {
     let targeted = effects.unit_categories.get(category).army_experience;
-    (effects.army_experience.flat + targeted.flat)
+    (effects[EffectKind::ArmyExperience].flat + targeted.flat)
         .round()
         .clamp(0.0, 10.0) as u8
 }
@@ -799,7 +800,7 @@ fn reinforce_garrison(
     settlement: &mut SettlementState,
     effects: &EffectTotals,
 ) {
-    let points = effects.garrison.apply(0.0).max(0.0).round() as u32;
+    let points = effects[EffectKind::Garrison].apply(0.0).max(0.0).round() as u32;
     if points == 0 || settlement.siege.is_some() || settlement.owner != settlement.controller {
         return;
     }
@@ -840,16 +841,17 @@ fn supply_modifiers(
         .map_or(0.0, |p| f64::from(p.devastation.min(100)) / 100.0);
     if friendly {
         let province_fx = state.province_effects(data, location);
-        let bonus = province_fx.supply.apply(0.0) + general_fx.supply.flat;
+        let bonus =
+            province_fx[EffectKind::Supply].apply(0.0) + general_fx[EffectKind::Supply].flat;
         let cut = (f64::from(rules.supply_recovery) + bonus).max(0.0)
             * devastation
             * rules.supply_devastation_recovery_cut_percent
             / 100.0;
         (bonus - cut, 0.0)
     } else {
-        let relief = general_fx.supply.percent
-            + general_fx.attrition_resistance.percent
-            + general_fx.attrition_resistance.flat;
+        let relief = general_fx[EffectKind::Supply].percent
+            + general_fx[EffectKind::AttritionResistance].percent
+            + general_fx[EffectKind::AttritionResistance].flat;
         // A negative relief is an extra loss (-100: the loss doubles).
         let ravaged = devastation * rules.supply_devastation_loss_percent;
         (0.0, (relief.clamp(-100.0, 90.0) - ravaged).max(-100.0))

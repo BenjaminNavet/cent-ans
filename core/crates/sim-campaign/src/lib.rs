@@ -53,6 +53,7 @@ pub mod dynasty;
 pub mod economy;
 pub mod economy_balance;
 pub mod edicts;
+pub mod effects;
 pub mod encounter;
 pub mod events;
 pub mod feudal;

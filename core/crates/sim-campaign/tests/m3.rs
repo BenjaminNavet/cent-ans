@@ -2,6 +2,7 @@
 //! goods, taxes, revolt/plague/famine events, and the version-2 save format.
 //! See `docs/design/m3-cities-economy.md` § 1.6.
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{CampaignState, EventKind, Order, Season, TaxRate};
@@ -361,7 +362,10 @@ fn completed_building_effects_apply_to_the_province() {
         after.unrest
     );
     // Untargeted totals do not move: the other classes are unaffected.
-    assert_eq!(effects_after.wealth, effects_before.wealth);
+    assert_eq!(
+        effects_after[EffectKind::Wealth],
+        effects_before[EffectKind::Wealth]
+    );
     assert_eq!(
         effects_after.classes.peasants,
         effects_before.classes.peasants

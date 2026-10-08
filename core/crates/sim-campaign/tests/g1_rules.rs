@@ -213,7 +213,7 @@ fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: Even
         faction: Some(fac(faction)),
         province: None,
     };
-    sim_campaign::chronicle::apply_effect(state, data, &effect, &ctx, &mut Vec::new());
+    sim_campaign::effects::apply_effect(state, data, &effect, &ctx, &mut Vec::new());
 }
 
 #[test]

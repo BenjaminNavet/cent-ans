@@ -275,7 +275,11 @@ pub fn yearly_edict_piety(state: &CampaignState, data: &GameData, faction: &Fact
         .controlled_provinces(faction)
         .iter()
         .filter(|id| state.holds_whole_province(faction, id))
-        .map(|id| edict_effects(state, data, id).piety.flat.round() as i32)
+        .map(|id| {
+            edict_effects(state, data, id)[EffectKind::Piety]
+                .flat
+                .round() as i32
+        })
         .max()
         .unwrap_or(0)
         .max(0)
@@ -557,14 +561,15 @@ mod tests {
         set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
         // edict_feudal_aid has delay_turns: 0, so it is active immediately.
         let after = edict_effects(&state, data, &province);
-        assert_eq!(before.tax_income.percent, 0.0);
-        assert_eq!(after.tax_income.percent, 20.0);
-        assert_eq!(after.unrest.flat, 6.0);
+        assert_eq!(before[EffectKind::TaxIncome].percent, 0.0);
+        assert_eq!(after[EffectKind::TaxIncome].percent, 20.0);
+        assert_eq!(after[EffectKind::Unrest].flat, 6.0);
         // Merged into the province's full effect totals too, on top of
         // whatever the buildings/governor already contribute.
         let merged_after = state.province_effects(data, &province);
         assert_eq!(
-            merged_after.tax_income.percent - merged_before.tax_income.percent,
+            merged_after[EffectKind::TaxIncome].percent
+                - merged_before[EffectKind::TaxIncome].percent,
             20.0
         );
     }

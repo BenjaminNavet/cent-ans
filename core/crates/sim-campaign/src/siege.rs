@@ -8,6 +8,7 @@
 //! otherwise it is stormed at once (no walls) and besieged by any hostile
 //! army standing on it, whatever its stance.
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, SettlementKind};
 
 use crate::dynasty;
@@ -317,9 +318,7 @@ pub(crate) fn siege_speed_percent(state: &CampaignState, data: &GameData, army: 
         return 0.0;
     };
     a.general.as_ref().map_or(0.0, |g| {
-        skills::character_effects(state, data, g)
-            .siege_speed
-            .apply(0.0)
+        skills::character_effects(state, data, g)[EffectKind::SiegeSpeed].apply(0.0)
     }) + crate::traditions::siege_speed_percent(data, a)
 }
 
