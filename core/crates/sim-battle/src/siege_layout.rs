@@ -174,7 +174,7 @@ fn simplify(ring: &mut Vec<(f64, f64)>, tolerance: f64) {
         let n = ring.len();
         let (mut best, mut best_d) = (0, f64::INFINITY);
         for i in 0..n {
-            let d = geom::distance_to_segment(ring[(i + n - 1) % n], ring[(i + 1) % n], ring[i]);
+            let d = geom::segment_distance(ring[i], ring[(i + n - 1) % n], ring[(i + 1) % n]);
             if d < best_d {
                 best = i;
                 best_d = d;
@@ -345,7 +345,7 @@ impl SiegeWorks {
         let edge = (0..n)
             .min_by(|&i, &j| {
                 let d = |k: usize| {
-                    geom::distance_to_segment(layout.ring[k], layout.ring[(k + 1) % n], gate_plan)
+                    geom::segment_distance(gate_plan, layout.ring[k], layout.ring[(k + 1) % n])
                 };
                 d(i).total_cmp(&d(j)).then(i.cmp(&j))
             })
@@ -525,7 +525,7 @@ impl SiegeWorks {
             Some((a, b)) => (0..pieces.len())
                 .filter(|&i| {
                     let (mx, mz) = pieces[i].midpoint();
-                    geom::distance_to_segment(a, b, (mx, mz)) < 2.0
+                    geom::segment_distance((mx, mz), a, b) < 2.0
                 })
                 .collect(),
             None => Vec::new(),

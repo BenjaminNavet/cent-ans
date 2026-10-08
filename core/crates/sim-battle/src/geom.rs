@@ -16,14 +16,7 @@ pub fn closest_on_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> (f64, 
     (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
 }
 
-/// Distance from `p` to the segment `a`-`b`, through the closest point.
-pub fn distance_to_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
-    let (cx, cz) = closest_on_segment(a, b, p);
-    ((p.0 - cx).powi(2) + (p.1 - cz).powi(2)).sqrt()
-}
-
-/// Distance from `p` to the segment `a`-`b` (`hypot` form of the river and
-/// AI code).
+/// Distance from `p` to the segment `a`-`b`.
 pub fn segment_distance(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
     let (dx, dz) = (b.0 - a.0, b.1 - a.1);
     let len2 = dx * dx + dz * dz;
@@ -176,16 +169,16 @@ mod tests {
     #[test]
     fn distances_clamp_to_the_ends() {
         let (a, b) = ((0.0, 0.0), (10.0, 0.0));
-        assert_eq!(distance_to_segment(a, b, (5.0, 3.0)), 3.0);
-        assert_eq!(distance_to_segment(a, b, (13.0, 4.0)), 5.0);
+        assert_eq!(segment_distance((5.0, 3.0), a, b), 3.0);
         assert_eq!(segment_distance((13.0, 4.0), a, b), 5.0);
         assert_eq!(closest_on_segment(a, b, (-4.0, 1.0)), a);
-        assert_eq!(distance_to_segment(a, a, (3.0, 4.0)), 5.0);
+        assert_eq!(segment_distance((3.0, 4.0), a, a), 5.0);
     }
 
     #[test]
     fn grid_matches_the_exhaustive_scan() {
-        let lines: [(Vec<(f64, f64)>, f64, u32); 3] = [
+        type Line = (Vec<(f64, f64)>, f64, u32);
+        let lines: [Line; 3] = [
             (vec![(10.0, 10.0), (200.0, 40.0), (260.0, 300.0)], 5.0, 0),
             (vec![(0.0, 150.0), (300.0, 160.0)], 3.0, 1),
             (vec![(120.0, 120.0)], 6.0, 2),

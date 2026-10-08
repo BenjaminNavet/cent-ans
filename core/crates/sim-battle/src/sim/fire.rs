@@ -441,10 +441,10 @@ impl BattleSim {
         let smoky = works.houses.iter().any(|h| {
             h.fire.burning()
                 && h.fire.intensity >= rules.smoke.min_intensity
-                && crate::geom::distance_to_segment(
+                && crate::geom::segment_distance(
+                    (h.x, h.z),
                     (shooter.x, shooter.z),
                     (target.x, target.z),
-                    (h.x, h.z),
                 ) < h.radius + rules.smoke.margin_m
         });
         if smoky {
