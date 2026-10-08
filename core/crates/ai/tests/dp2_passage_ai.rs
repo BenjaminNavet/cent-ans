@@ -5,6 +5,7 @@ use ai::grid::GridPlanner;
 use data_model::{FactionId, GameData, SettlementId};
 use sim_campaign::movement::edges;
 use sim_campaign::passage::trespassed_owner;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
@@ -49,7 +50,8 @@ fn routes_avoid_neutral_lands_unless_the_temper_allows_it() {
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     let (from, into, _owner) = border_crossing(&state, &data);
     let reachable = |state: &CampaignState, data: &GameData| {
-        let planner = GridPlanner::new(state, data, &fr);
+        let cache = PlanCache::new(state);
+        let planner = GridPlanner::new(&cache, data, &fr);
         planner
             .table(&from, u32::MAX / 4, u32::MAX / 4, 1e9)
             .contains_key(&into)

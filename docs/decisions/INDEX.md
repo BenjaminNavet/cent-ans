@@ -111,7 +111,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0117 | [Garde du seigneur : l'unité de la capitale entretenue par le domaine (lot OMR R3)](0117-garde-du-seigneur.md) | accepté |
 | 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
 | 0118 | [Copies GPU compressées des rasters monde de la carte de campagne](0118-copies-gpu-compressees-de-la-carte.md) | accepté |
-| 0119 | [Portée de planification de l'IA (index partagés en lecture seule)](0119-portee-de-planification-ia.md) | n/d |
+| 0119 | [Portée de planification de l'IA (index partagés en lecture seule)](0119-portee-de-planification-ia.md) | remplacé (0205) |
 | 0121 | [Relief fin dans le cadre monde, palier 1 étendu à tout le monde OM](0121-relief-fin-cadre-monde.md) | accepté |
 | 0122 | [Une décision expirée applique l'option de l'IA](0122-expiration-par-choix-ia.md) | accepté |
 | 0123 | [Budget de pixels de la mise à l'échelle 3D sur écran HiDPI](0123-budget-de-pixels-hidpi.md) | acceptée |
@@ -178,3 +178,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0200 | [Chantier SC : une seule voie de code](0200-chantier-simplification.md) | n/d |
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
+| 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |

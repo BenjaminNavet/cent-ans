@@ -3,6 +3,7 @@
 
 use data_model::{CrusadeRules, FactionId, GameData};
 use sim_campaign::crusade::{self, crusade_view};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{ArmyPosition, CampaignState, EventKind, Order};
 
 use data_model::test_support::{fac, game_data};
@@ -423,7 +424,7 @@ fn the_vow_binds_the_ai_to_no_peace_with_the_master_of_its_goal() {
     assert_eq!(verdict.chance, 0);
     for turn in 0..4 {
         state.turn += turn;
-        let offer = plan_peace(&state, data, &faction);
+        let offer = plan_peace(&PlanCache::new(&state), data, &faction);
         assert!(
             !matches!(&offer, Some(Order::ProposeTreaty { target, .. }) if *target == holder),
             "{offer:?}"

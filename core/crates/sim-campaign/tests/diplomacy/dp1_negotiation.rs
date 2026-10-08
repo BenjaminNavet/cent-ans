@@ -5,6 +5,7 @@
 use sim_campaign::negotiation::{
     self, answer_roll, counter_proposal, evaluate_treaty, Article, Party, HOSTAGE_TURNS,
 };
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::test_support::{idle, start};
 use sim_campaign::{CampaignState, Order, SettlementState};
 
@@ -448,7 +449,7 @@ fn the_ai_winner_demands_what_it_holds() {
     state.factions.get_mut(&en).unwrap().ledger.weariness = 80;
     // Past the minimum length of a war.
     state.turn = 40;
-    let order = negotiation::plan_peace(&state, data, &fr).expect("France treats");
+    let order = negotiation::plan_peace(&PlanCache::new(&state), data, &fr).expect("France treats");
     let Order::ProposeTreaty { target, articles } = order else {
         panic!("a treaty");
     };

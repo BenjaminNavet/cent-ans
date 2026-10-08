@@ -1,6 +1,7 @@
 //! G2 « IA : alignement historique » tests (`docs/design/m9-ai.md` § G2).
 
 use data_model::{FactionId, GameData};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
@@ -65,11 +66,14 @@ fn flanders_under_the_wool_embargo_turns_to_england_in_some_campaigns() {
         .embargoes
         .contains(&flanders));
     assert_eq!(
-        ai::alignment::side_change(&state, data, &flanders),
+        ai::alignment::side_change(&PlanCache::new(&state), data, &flanders),
         Some((fac("fac_france"), fac("fac_england")))
     );
     let state = CampaignState::new_1337(data, fac("fac_papacy"), no[0]).unwrap();
-    assert_eq!(ai::alignment::side_change(&state, data, &flanders), None);
+    assert_eq!(
+        ai::alignment::side_change(&PlanCache::new(&state), data, &flanders),
+        None
+    );
 }
 
 /// England holds Paris and 8 provinces of the French crown.
@@ -105,13 +109,19 @@ fn burgundy_abandons_a_dominated_france_in_some_campaigns() {
     ));
     state.factions.get_mut(&burgundy).unwrap().loyalty = 80;
     assert_eq!(
-        ai::alignment::side_change(&state, data, &burgundy),
+        ai::alignment::side_change(&PlanCache::new(&state), data, &burgundy),
         Some((france.clone(), england.clone()))
     );
     // A loyal duke stays, and so does history in other campaigns.
     state.factions.get_mut(&burgundy).unwrap().loyalty = 95;
-    assert_eq!(ai::alignment::side_change(&state, data, &burgundy), None);
+    assert_eq!(
+        ai::alignment::side_change(&PlanCache::new(&state), data, &burgundy),
+        None
+    );
     let mut state = english_france(data, no[0]);
     state.factions.get_mut(&burgundy).unwrap().loyalty = 80;
-    assert_eq!(ai::alignment::side_change(&state, data, &burgundy), None);
+    assert_eq!(
+        ai::alignment::side_change(&PlanCache::new(&state), data, &burgundy),
+        None
+    );
 }

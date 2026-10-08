@@ -803,8 +803,9 @@ pub fn agent_dijkstra(
     AgentTable::search(data, start, budget, cap, None).into_reaches()
 }
 
-/// [`agent_dijkstra`] as it was before OMR R1 (settlement ids in maps): the
-/// reference of the equality tests.
+/// [`agent_dijkstra`] with settlement ids in maps: the reference of the
+/// equality tests.
+#[cfg(feature = "test-support")]
 pub fn agent_dijkstra_by_ids(
     data: &GameData,
     start: &SettlementId,

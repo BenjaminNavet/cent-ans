@@ -5,6 +5,7 @@
 use data_model::{AiDiplomacy, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::plan_diplomacy;
 use sim_campaign::movement::land_neighbors;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
@@ -101,7 +102,7 @@ fn scottish_surrender(data: &GameData) -> Vec<Vec<ProvinceId>> {
     let mut offers = Vec::new();
     for turn in 8..16 {
         state.turn = turn;
-        for order in plan_diplomacy(&state, data, &scotland) {
+        for order in plan_diplomacy(&PlanCache::new(&state), data, &scotland) {
             match order {
                 Order::ProposePeace {
                     target, provinces, ..

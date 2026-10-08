@@ -1,6 +1,7 @@
 //! Regression tests for the fixes of the 2026-09-26 code review
 //! (`docs/archive/chantiers.md`, section « Corrections sim-campaign »).
 
+use crate::plan_cache::PlanCache;
 use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 
 use crate::battle_auto::{BattleResult, SideOutcome, Winner};
@@ -726,7 +727,11 @@ fn the_winner_demands_its_unheld_war_goals_first() {
         .war_goals
         .insert(en.clone(), vec![goal.clone()]);
     set_war_score(&mut state, data, 100);
-    let provinces = ceded(crate::negotiation::plan_peace(&state, data, &fr));
+    let provinces = ceded(crate::negotiation::plan_peace(
+        &PlanCache::new(&state),
+        data,
+        &fr,
+    ));
     assert_eq!(provinces.first(), Some(&goal), "{provinces:?}");
     assert!(provinces.contains(&held), "{provinces:?}");
 }
@@ -744,7 +749,7 @@ fn a_crown_beaten_at_minus_fifty_sues_for_peace() {
         let state = anglo_french_war(&data, "fac_england", score);
         assert_eq!(state.war_score(&data, &fr, &fac("fac_england")), score);
         assert!(!crate::diplomacy::is_cornered(&state, &data, &fr));
-        crate::negotiation::plan_peace(&state, &data, &fr)
+        crate::negotiation::plan_peace(&PlanCache::new(&state), &data, &fr)
     };
     assert_eq!(at(threshold + 1), None);
     assert!(at(threshold).is_some());
@@ -795,7 +800,7 @@ fn a_poor_herald_does_not_wait_for_a_ransom() {
         agent.movement_points = 500;
     }
     let action_of = |state: &CampaignState| {
-        crate::agents::plan_agents(state, data, &fr)
+        crate::agents::plan_agents(&PlanCache::new(state), data, &fr)
             .into_iter()
             .find_map(|o| match o {
                 crate::Order::AgentAction { agent, action, .. } if agent == herald => Some(action),

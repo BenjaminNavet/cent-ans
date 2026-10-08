@@ -1,5 +1,6 @@
 //! F4 « guerre de Cent Ans vivante » AI tests (`docs/design/m9-ai.md` § F4).
 use data_model::test_support::{fac, game_data};
+use sim_campaign::plan_cache::PlanCache;
 
 use data_model::{GameData, UnitTypeId};
 use sim_campaign::{CampaignState, Order, Season, Unit};
@@ -44,7 +45,7 @@ fn peace_after_truce(data: &GameData) -> CampaignState {
 fn declares_on(state: &mut CampaignState, data: &GameData, who: &str, target: &str) -> bool {
     (0..2).any(|offset| {
         state.turn = 32 + offset;
-        sim_campaign::diplomacy::plan_diplomacy(state, data, &fac(who))
+        sim_campaign::diplomacy::plan_diplomacy(&PlanCache::new(state), data, &fac(who))
             .iter()
             .any(|o| matches!(o, Order::DeclareWar { target: t } if t == &fac(target)))
     })
