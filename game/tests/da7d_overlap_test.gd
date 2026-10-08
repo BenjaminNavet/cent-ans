@@ -15,8 +15,10 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## province, province rapprochée, moyen près du palier comté.
 const REGIONS := {"flandre": Vector2(2330, 2910), "ile_de_france": Vector2(2213, 3203), "normandie": Vector2(2030, 3120)}
 const DISTANCES := [1100.0, 600.0, 330.0, 200.0]
-## Borne du temps moyen d'un recalcul complet (ms), machine de dev partagée.
-const MAX_DECLUTTER_MS := 4.0
+## Plafond du meilleur temps d'un recalcul complet (ms). Large exprès : sur machine chargée le
+## temps mesuré varie du simple au triple ; la borne ne sert qu'à attraper une dérive
+## algorithmique (quadratique), pas un réglage fin. Le chevauchement, lui, reste exact.
+const MAX_DECLUTTER_MS := 30.0
 
 var _failures := 0
 var _measure := false
