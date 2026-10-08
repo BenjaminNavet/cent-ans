@@ -1,7 +1,7 @@
 class_name BuildingKit
 extends RefCounted
 
-## Lot BR1 (ADR 0021) : bâtiments réalistes du kit Blender (`game/assets/models/buildings/`,
+## Bâtiments réalistes du kit Blender (`game/assets/models/buildings/`,
 ## `manifest.json` : type, ruine, emprise murs `length` × `depth`, hauteur, triangles).
 ## Choisit le modèle qui épouse le mieux une emprise de la simulation, et pose les bâtiments par
 ## `MultiMesh` (une instance par bâtiment, un appel de dessin par surface de modèle) à travers un
@@ -36,16 +36,16 @@ static func available() -> bool:
 	return not manifest().is_empty()
 
 
-## Lot TF : style régional des maisons de la bataille en cours (`BuildingRegions.style_for_province`,
+## Style régional des maisons de la bataille en cours (`BuildingRegions.style_for_province`,
 ## posé par `BattleTerrain.build`) : `framed` (part de colombage), `southern` (variantes du Midi).
-## Vide : choix d'avant TF (colombage selon les modèles, sans variantes du Midi).
+## Vide : colombage selon les modèles, sans variantes du Midi.
 static var region_style: Dictionary = {}
 ## Types dont le kit exporte des variantes à colombage et du Midi (`manifest.json` : `framed`,
 ## `southern`).
 const REGIONAL_KINDS: Array[String] = ["cottage", "timber", "townhouse"]
 
 
-## Modèles d'un type (`cottage`, `timber`, `townhouse`…), intacts ou en ruine. Lot TF : les
+## Modèles d'un type (`cottage`, `timber`, `townhouse`…), intacts ou en ruine. Les
 ## variantes du Midi (`southern`) ne sortent que si `southern` le demande.
 static func models_of(kind: String, ruined: bool = false, southern: bool = false) -> Array:
 	var out := []
@@ -58,7 +58,7 @@ static func models_of(kind: String, ruined: bool = false, southern: bool = false
 	return out
 
 
-## Lot TF : candidats d'un type selon le style régional (`region_style`) ; tire à pied de colombage
+## Candidats d'un type selon le style régional (`region_style`) ; tire à pied de colombage
 ## ou non (`framed`), puis garde les modèles de ce genre (variantes du Midi si `southern`). Sans
 ## modèle qui convienne : maisons de pierre pour `timber`/`townhouse`, sinon tous les modèles.
 static func regional_candidates(kind: String, rng: RandomNumberGenerator, style: Dictionary) -> Array:
@@ -76,7 +76,7 @@ static func regional_candidates(kind: String, rng: RandomNumberGenerator, style:
 
 
 ## Le modèle de `kind` dont les proportions épousent le mieux `length` × `width` (tirage parmi
-## les deux meilleurs pour varier) ; "" si aucun. Lot TF : maisons intactes des types régionaux
+## les deux meilleurs pour varier) ; "" si aucun. Maisons intactes des types régionaux
 ## choisies selon `region_style` (colombage au nord, enduit et pierre au Midi).
 static func pick(kind: String, length: float, width: float, rng: RandomNumberGenerator, ruined: bool = false) -> String:
 	var candidates := models_of(kind, ruined)
@@ -105,7 +105,7 @@ static func fit_scale(model_name: String, length: float, width: float) -> Vector
 	return Vector3(sx, sy, sz)
 
 
-## BR3 : modèle du kit pour une pièce de mobilier du cœur (`kind` : `stall`, `cart`, `barrels`,
+## Modèle du kit pour une pièce de mobilier du cœur (`kind` : `stall`, `cart`, `barrels`,
 ## `woodpile`, `well`), choisi par son indice (déterministe) ; "" si aucun.
 static func prop_model(kind: String, index: int) -> String:
 	var models := models_of(kind)
@@ -114,7 +114,7 @@ static func prop_model(kind: String, index: int) -> String:
 	return models[int(hash01(index, 29) * models.size()) % models.size()]
 
 
-## BR3 : transformation d'une pièce de mobilier du cœur `{x, z, yaw}` (lacet du cœur : longueur
+## Transformation d'une pièce de mobilier du cœur `{x, z, yaw}` (lacet du cœur : longueur
 ## le long de (cos, sin), face avant (+Z du modèle) vers (-sin, cos)), posée à la hauteur `y`.
 ## Taille réelle : les emprises des données (`data/rules/siege_town.json`) sont celles du manifeste.
 static func prop_transform(prop: Dictionary, y: float) -> Transform3D:
@@ -159,14 +159,14 @@ class Batch:
 	var visibility_end := 0.0
 	var _items: Dictionary = {}  # nom → Array[Transform3D]
 	var _instances: Dictionary = {}  # nom → MultiMeshInstance3D (après build)
-	var _ga3: Ga3Kit.Batch = null  # variantes générées (GA3-L1), null sans elles
+	var _ga3: Ga3Kit.Batch = null  # variantes générées, null sans elles
 
 	func _init(p_variant: String = "", p_visibility_end: float = 0.0) -> void:
 		variant = p_variant
 		visibility_end = p_visibility_end
 
-	## Ajoute un bâtiment ; renvoie sa poignée [nom, indice] (pour le cacher plus tard). Lot
-	## GA3-L1 : le modèle peut être remplacé par sa variante générée (`Ga3Kit.variant_for`, pas
+	## Ajoute un bâtiment ; renvoie sa poignée [nom, indice] (pour le cacher plus tard). Le
+	## modèle peut être remplacé par sa variante générée (`Ga3Kit.variant_for`, pas
 	## sous la neige) ; la poignée désigne alors l'instance GA3 (nom en `ga3_`).
 	func add(model_name: String, xform: Transform3D) -> Array:
 		if variant != "snow":

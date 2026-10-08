@@ -1,7 +1,7 @@
 class_name CampaignAmbience
 extends Node
 
-## AU1 — ambiances de la carte de campagne, en boucles 2D sur le bus « Ambiance » :
+## Ambiances de la carte de campagne, en boucles 2D sur le bus « Ambiance » :
 ## mer, campagne (oiseaux), grillons, forêt, ville, vent d'altitude, vent d'hiver, pluie.
 ##
 ## Toutes les 0,25 s, le terrain sous la caméra est échantillonné (grille 3 × 3 autour du point
@@ -11,7 +11,7 @@ extends Node
 ## (au ras de la carte : les sons du lieu ; en vue haute : le vent d'altitude et la mer au loin),
 ## la saison (oiseaux au printemps, grillons l'été, vent l'hiver) et la météo.
 ##
-## Météo : celle de la province sous la caméra, tirée par le cœur (lot CM2, ADR 0027 :
+## Météo : celle de la province sous la caméra, tirée par le cœur (
 ## `CampaignWeatherView.weather_at`, `clear`, `fog`, `rain`, `snow`, `storm`). Sans campagne
 ## (maquette de simulation), repli sur un tirage déterministe par saison et par date
 ## (`seasonal_weather`). `weather_override` permet de l'imposer (tests).

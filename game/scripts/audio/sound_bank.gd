@@ -1,7 +1,7 @@
 class_name SoundBank
 extends RefCounted
 
-## AU1 — banque sonore décrite par `data/audio/sound_bank.json` (schéma
+## Banque sonore décrite par `data/audio/sound_bank.json` (schéma
 ## `data/schemas/sound_bank.schema.json`) : événements ponctuels (variantes, priorité, limites de
 ## voix, hauteur aléatoire, portée), nappes 3D en boucle (`beds`) et ambiances 2D (`ambience`).
 ## Fichiers sous `res://assets/audio/<chemin>.ogg` ; absent = silence, sans erreur.
@@ -24,8 +24,10 @@ const EVENT_DEFAULTS := {
 }
 
 var voices: Dictionary = {"max_voices": 28, "near_distance_m": 70.0}
-## EP4 : paramètres des émetteurs par front de mêlée (`data/audio/sound_bank.json`, clé `fronts`).
+## Paramètres des émetteurs par front de mêlée (`data/audio/sound_bank.json`, clé `fronts`).
 var fronts: Dictionary = {"max_emitters": 6, "near_m": 40.0, "mid_m": 200.0, "engaged_full": 250.0, "event_period_s": [0.5, 1.6], "beds": ["melee_bed_1", "melee_bed_2"]}
+## Réglages de bataille (clé `battle` : `missile_speed_mps`, `near_events`, `dedup_window_s`).
+var battle: Dictionary = {"missile_speed_mps": {}, "near_events": [], "dedup_window_s": {}}
 var events: Dictionary = {}
 var beds: Dictionary = {}
 var ambience: Dictionary = {}
@@ -59,6 +61,7 @@ func load_file(path: String) -> bool:
 	var data: Dictionary = parsed
 	voices.merge(data.get("voices", {}), true)
 	fronts.merge(data.get("fronts", {}), true)
+	battle.merge(data.get("battle", {}), true)
 	for event_name in data.get("events", {}):
 		var entry: Dictionary = EVENT_DEFAULTS.duplicate(true)
 		entry.merge(data["events"][event_name], true)

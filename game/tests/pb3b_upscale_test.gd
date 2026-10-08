@@ -11,7 +11,7 @@ var _failures := 0
 func _init() -> void:
 	await process_frame
 	for level: String in RenderQuality.LEVELS:
-		var p: Dictionary = RenderQuality.PRESETS[level]
+		var p: Dictionary = RenderQuality.presets()[level]
 		_check(p.has("upscale_mode") and p.has("upscale_scale"), "%s: upscale keys" % level)
 		var mode := str(p["upscale_mode"])
 		_check(mode in [RenderQuality.UPSCALE_OFF, RenderQuality.UPSCALE_SPATIAL, RenderQuality.UPSCALE_TEMPORAL], "%s: known upscale mode %s" % [level, mode])
@@ -29,7 +29,7 @@ func _init() -> void:
 	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 1440.0 * 900.0), 0.75), "budget: smaller window never upscales")
 	var retina := RenderQuality.budget_scale(spatial, 0.75, 2624.0 * 1644.0)
 	_check(retina > 0.51 and retina < 0.53, "budget: Retina 2624x1644 at 0.52 (%.3f)" % retina)
-	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 3840.0 * 2160.0), RenderQuality.UPSCALE_MIN_SCALE), "budget: 4K floored")
+	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 3840.0 * 2160.0), RenderQuality.min_upscale_scale()), "budget: 4K floored")
 	_check(RenderQuality.budget_scale(RenderQuality.UPSCALE_OFF, 1.0, 3840.0 * 2160.0) == 1.0, "budget: off stays native")
 	# Configurations des bancs.
 	var parsed := RenderQuality.parse_upscale("metalfx_t:0.67")
@@ -67,7 +67,7 @@ func _init() -> void:
 	# Le temporel coupe MSAA et FXAA ; le spatial garde l'anticrénelage du préréglage.
 	var viewport := SubViewport.new()
 	root.add_child(viewport)
-	var high: Dictionary = RenderQuality.PRESETS["high"]
+	var high: Dictionary = RenderQuality.presets()["high"]
 	RenderQuality.upscale_override = "metalfx_t:0.75"
 	RenderQuality.apply_upscale(viewport, high)
 	_check(viewport.msaa_3d == Viewport.MSAA_DISABLED and viewport.screen_space_aa == Viewport.SCREEN_SPACE_AA_DISABLED, "temporal disables MSAA and FXAA")

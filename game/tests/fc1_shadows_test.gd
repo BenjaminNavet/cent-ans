@@ -19,9 +19,9 @@ func _init() -> void:
 func _test_preset_values() -> void:
 	var expected := {"low": 0.0, "medium": 150.0, "high": 250.0, "ultra": 500.0, "legacy": 500.0}
 	for level: String in expected:
-		_check(is_equal_approx(float(RenderQuality.PRESETS[level]["model_shadow_distance"]), expected[level]), "%s model_shadow_distance" % level)
+		_check(is_equal_approx(float(RenderQuality.presets()[level]["model_shadow_distance"]), expected[level]), "%s model_shadow_distance" % level)
 	# Legacy : seuil d'avant FC1 (l'ancien `ZoomTiers.model_shadow_distance`, VT-G : retiré).
-	_check(is_equal_approx(float(RenderQuality.PRESETS["legacy"]["model_shadow_distance"]), 500.0), "legacy keeps the zoom tier threshold")
+	_check(is_equal_approx(float(RenderQuality.presets()["legacy"]["model_shadow_distance"]), 500.0), "legacy keeps the zoom tier threshold")
 
 
 func _test_windmills() -> void:
