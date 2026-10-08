@@ -18,7 +18,9 @@ const HERB_HEADER := "__herbier__"
 ## Miniature en tête de fiche : la sienne, sinon l'image de son `entity` (portraits en entier).
 const ART_SIZE := Vector2(0, 220)
 const OWN_ART := "res://assets/illustrations/%s.jpg"
-const ENTITY_ART := ["res://assets/events/%s.jpg", "res://assets/illustrations/%s.jpg", "res://assets/portraits/%s.png"]
+const ENTITY_ART := ["res://assets/events/%s.jpg", "res://assets/illustrations/%s.jpg", "res://assets/portraits/%s.png", "res://assets/icons/entity/%s.png"]
+## Repli par identifiant : fiche `cdx_<x>` d'un personnage dont le portrait est `chr_<x>`.
+const SLUG_ART := ["res://assets/portraits/chr_%s.png"]
 
 ## Lot U11 : vue intégrée à `CodexHub` (onglet « Histoire ») : sans cadre, titre, recherche ni
 ## bouton de fermeture propres ; la recherche commune passe par `set_query`.
@@ -345,6 +347,8 @@ static func art_path_of(id: String, entity: String) -> String:
 	if entity != "":
 		for pattern in ENTITY_ART:
 			candidates.append(pattern % entity)
+	for pattern in SLUG_ART:
+		candidates.append(pattern % id.trim_prefix("cdx_"))
 	for path in candidates:
 		if ResourceLoader.exists(path) or FileAccess.file_exists(ProjectSettings.globalize_path(path)):
 			return path
