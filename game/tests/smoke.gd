@@ -1141,7 +1141,7 @@ func _run_diplomacy() -> void:
 	panel.select_faction("fac_england")
 	panel.stage_example()
 	await process_frame
-	_check(str(panel.get("_reasons").text) != "", "diplomacy panel should explain the verdict")
+	_check(str(panel.get("negotiation").get("_reasons").text) != "", "diplomacy panel should explain the verdict")
 	panel.queue_free()
 
 	# 20 tours : pas d'erreur ; offres et religion lisibles.

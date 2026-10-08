@@ -107,8 +107,8 @@ func _test_send_treaty_for(label: String, target: String, clause: String) -> voi
 	var panel: Control = controller.panel
 	if not _check(str(panel.get("_selected")) == target, "%s: %s not selected" % [label, target]):
 		return
-	var clause_menu: MenuButton = panel.get("_clause_menu")
-	panel.call("_fill_menu", clause_menu)
+	var clause_menu: MenuButton = panel.get("negotiation").get("clause_menu")
+	panel.get("negotiation").call("fill_menu", clause_menu)
 	var popup := clause_menu.get_popup()
 	var picked := false
 	for index in popup.item_count:
@@ -117,7 +117,7 @@ func _test_send_treaty_for(label: String, target: String, clause: String) -> voi
 			picked = true
 	_check(picked, "%s: « %s » clause missing" % [label, clause])
 	await _wait(5)
-	panel.call("_ask_counter")
+	panel.get("negotiation").call("ask_counter")
 	await _wait(10)
 	var send := panel.find_child("SendTreaty", true, false) as Button
 	if _check(send != null and send.is_visible_in_tree(), "%s: SendTreaty missing or hidden" % label):

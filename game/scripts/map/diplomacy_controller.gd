@@ -62,7 +62,6 @@ func open_panel(faction_id: String = "") -> void:
 		return
 	panel.sim = map.sim
 	panel.player_faction = map.player_faction
-	panel.province_name_of = map.province_name_of
 	panel.map_data = map.map_data  # DP1 : carte des relations de l'écran
 	panel.refresh()
 	# Panneau central : ferme les panneaux latéraux qu'il recouvrirait.
