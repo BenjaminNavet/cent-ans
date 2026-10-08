@@ -618,6 +618,31 @@
      "loop": false,
      "start": 278
     },
+    "c_bow_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1110
+    },
+    "c_bow_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1287
+    },
+    "c_bow_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1334
+    },
+    "c_bow_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1258
+    },
+    "c_bow_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1305
+    },
     "c_bow_walk": {
      "frames": 29,
      "loop": true,
@@ -639,7 +664,7 @@
      "start": 508
     },
     "c_fall": {
-     "frames": 30,
+     "frames": 108,
      "loop": false,
      "start": 538
     },
@@ -663,40 +688,115 @@
      "loop": false,
      "start": 448
     },
+    "c_javelin_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1128
+    },
+    "c_javelin_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1381
+    },
+    "c_javelin_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1428
+    },
+    "c_javelin_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1352
+    },
+    "c_javelin_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1399
+    },
     "c_javelin_walk": {
      "frames": 29,
      "loop": true,
      "start": 419
     },
+    "c_rear": {
+     "frames": 32,
+     "loop": false,
+     "start": 859
+    },
+    "c_std_charge": {
+     "frames": 30,
+     "loop": true,
+     "start": 1062
+    },
     "c_std_death": {
      "frames": 30,
      "loop": false,
-     "start": 751
+     "start": 829
     },
     "c_std_gallop": {
      "frames": 15,
      "loop": true,
-     "start": 678
+     "start": 756
     },
     "c_std_idle": {
      "frames": 81,
      "loop": true,
-     "start": 568
+     "start": 646
+    },
+    "c_std_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1146
     },
     "c_std_walk": {
      "frames": 29,
      "loop": true,
-     "start": 649
+     "start": 727
     },
     "c_std_wave": {
      "frames": 58,
      "loop": true,
-     "start": 693
+     "start": 771
+    },
+    "c_stumble": {
+     "frames": 90,
+     "loop": false,
+     "start": 891
     },
     "c_thrust": {
      "frames": 28,
      "loop": false,
      "start": 140
+    },
+    "c_trot": {
+     "frames": 18,
+     "loop": true,
+     "start": 1092
+    },
+    "c_trot_turn_l": {
+     "frames": 18,
+     "loop": true,
+     "start": 1193
+    },
+    "c_trot_turn_r": {
+     "frames": 18,
+     "loop": true,
+     "start": 1240
+    },
+    "c_turn_l": {
+     "frames": 29,
+     "loop": true,
+     "start": 1164
+    },
+    "c_turn_r": {
+     "frames": 29,
+     "loop": true,
+     "start": 1211
+    },
+    "c_victory": {
+     "frames": 81,
+     "loop": true,
+     "start": 981
     },
     "c_walk": {
      "frames": 29,
