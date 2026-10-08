@@ -64,6 +64,11 @@ func store_loaded() -> bool:
 	return store != null
 
 
+## Libellé du moteur (encore lu par `campaign_map.gd`, gelé ; à retirer après le dégel).
+func engine_label() -> String:
+	return "réelle"
+
+
 ## T2 : isole les sauvegardes (smoke test) dans un dossier dédié à cette exécution.
 func use_test_saves_dir(dir: String) -> void:
 	SAVES_DIR = dir
