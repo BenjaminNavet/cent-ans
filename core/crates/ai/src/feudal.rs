@@ -95,9 +95,7 @@ fn coalition_power(state: &CampaignState, faction: &FactionId, except: &[&Factio
 }
 
 fn label(data: &GameData, faction: &FactionId) -> String {
-    data.factions
-        .get(faction)
-        .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+    data.faction_label(faction)
 }
 
 // =========================================================================

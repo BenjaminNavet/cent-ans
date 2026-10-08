@@ -1401,15 +1401,7 @@ impl CampaignState {
             parts.push(format!("armées : {}", armies.join(", ")));
         }
         if !s.buildings.is_empty() {
-            let names: Vec<String> = s
-                .buildings
-                .iter()
-                .map(|b| {
-                    data.buildings
-                        .get(b)
-                        .map_or_else(|| b.to_string(), |d| d.name.display.clone())
-                })
-                .collect();
+            let names: Vec<String> = s.buildings.iter().map(|b| data.building_name(b)).collect();
             parts.push(format!("bâtiments : {}", names.join(", ")));
         }
         if let Some(siege) = &s.siege {

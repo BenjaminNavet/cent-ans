@@ -212,11 +212,7 @@ pub fn resolve_trespass(state: &mut CampaignState, data: &GameData, events: &mut
         }
         let where_ = provinces
             .iter()
-            .map(|p| {
-                data.provinces
-                    .get(p)
-                    .map_or_else(|| p.to_string(), |d| d.name.display.clone())
-            })
+            .map(|p| data.province_name(p))
             .collect::<Vec<_>>()
             .join(", ");
         let mut text = format!(

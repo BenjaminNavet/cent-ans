@@ -327,11 +327,7 @@ pub(crate) fn spring_ambush(
     if let Some(army) = state.armies.get_mut(ambusher) {
         army.stance = Stance::Normal;
     }
-    let name = |f: &FactionId| {
-        data.factions
-            .get(f)
-            .map_or_else(|| f.to_string(), |f| f.short_or_display_name().to_owned())
-    };
+    let name = |f: &FactionId| data.faction_name(f);
     let near = place.map_or_else(String::new, |p| format!(" près de {p}"));
     let text = if sprung {
         format!(

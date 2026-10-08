@@ -736,11 +736,7 @@ pub(crate) fn apply_battle_result(
 
     let province_name =
         province.map_or_else(|| province_id.to_string(), |p| p.name.display.clone());
-    let faction_name = |id: &FactionId| -> String {
-        data.factions
-            .get(id)
-            .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-    };
+    let faction_name = |id: &FactionId| -> String { data.faction_name(id) };
     let winner_faction = match result.winner {
         Winner::Attacker => &attacker_faction,
         Winner::Defender => &defender_faction,

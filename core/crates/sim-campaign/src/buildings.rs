@@ -872,28 +872,19 @@ impl CampaignState {
         }
         if let Some(from) = &building.upgrades_from {
             if !state.buildings.contains(from) {
-                let name = data
-                    .buildings
-                    .get(from)
-                    .map_or_else(|| from.to_string(), |b| b.name.display.clone());
+                let name = data.building_name(from);
                 return Some(format!("nécessite {name}"));
             }
         }
         if let Some(required) = &building.required_building {
             if !data.has_building(&state.buildings, required) {
-                let name = data
-                    .buildings
-                    .get(required)
-                    .map_or_else(|| required.to_string(), |b| b.name.display.clone());
+                let name = data.building_name(required);
                 return Some(format!("bâtiment requis : {name}"));
             }
         }
         if let Some(tech) = &building.required_technology {
             if !faction.technologies.contains(tech) {
-                let name = data
-                    .technologies
-                    .get(tech)
-                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                let name = data.tech_name(tech);
                 return Some(format!("technologie requise : {name}"));
             }
         }
@@ -1113,10 +1104,7 @@ pub(crate) fn resolve_construction(
         let controller = settlement.controller.clone();
         let province = settlement.province.clone();
         if controller == player {
-            let name = data
-                .buildings
-                .get(&building)
-                .map_or_else(|| building.to_string(), |b| b.name.display.clone());
+            let name = data.building_name(&building);
             events.push(
                 GameEvent::new(
                     EventKind::BuildingCompleted,

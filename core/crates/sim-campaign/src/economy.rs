@@ -964,9 +964,7 @@ pub(crate) fn resolve_attrition(
                     },
                     format!(
                         "{army_label} souffre de la disette en {} : {lost} hommes perdus.",
-                        data.provinces
-                            .get(&location)
-                            .map_or_else(|| location.to_string(), |p| p.name.display.clone())
+                        data.province_name(&location)
                     ),
                 )
                 .province(&location)

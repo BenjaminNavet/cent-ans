@@ -379,10 +379,7 @@ pub fn start_research(
         .iter()
         .find(|p| !f.technologies.contains(*p))
     {
-        let name = data
-            .technologies
-            .get(missing)
-            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        let name = data.tech_name(missing);
         return Err(ResearchError::MissingPrerequisite(name));
     }
     if f.research.as_ref() == Some(technology) {
@@ -451,10 +448,7 @@ pub(crate) fn resolve_research(
         // `start_research`, which carries it over).
         f.research_progress -= effective_cost(tech, year);
         promote_queued_research(state, data, &faction_id);
-        let faction_name = data
-            .factions
-            .get(&faction_id)
-            .map_or_else(|| faction_id.to_string(), |d| d.name.display.clone());
+        let faction_name = data.faction_label(&faction_id);
         events.push(
             GameEvent::new(
                 EventKind::TechnologyResearched,
@@ -519,10 +513,7 @@ pub fn queue_research(
             && f.research.as_ref() != Some(*p)
             && !f.research_queue.contains(p)
     }) {
-        let name = data
-            .technologies
-            .get(missing)
-            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        let name = data.tech_name(missing);
         return Err(ResearchError::MissingPrerequisite(name));
     }
     if f.research_queue.len() >= data.economy_rules.research_queue_max as usize {

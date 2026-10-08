@@ -1305,6 +1305,13 @@ impl GameData {
             .map_or_else(|| id.to_string(), |s| s.name.display.clone())
     }
 
+    /// Display name of a technology (its id when unknown).
+    pub fn tech_name(&self, id: &TechnologyId) -> String {
+        self.technologies
+            .get(id)
+            .map_or_else(|| id.to_string(), |t| t.name.display.clone())
+    }
+
     /// Display name of a building (its id when unknown).
     pub fn building_name(&self, id: &BuildingId) -> String {
         self.buildings

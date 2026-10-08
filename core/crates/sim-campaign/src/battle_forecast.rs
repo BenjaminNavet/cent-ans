@@ -373,10 +373,7 @@ impl CampaignState {
                 let army = self.armies.get(id)?;
                 Some(Reinforcement {
                     army: id.to_string(),
-                    faction_name: data.factions.get(&army.faction).map_or_else(
-                        || army.faction.to_string(),
-                        |f| f.short_or_display_name().to_owned(),
-                    ),
+                    faction_name: data.faction_name(&army.faction),
                     soldiers: army.total_strength(),
                     regiments: army.units.len() as u32,
                     general: army

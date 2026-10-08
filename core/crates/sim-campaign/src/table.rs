@@ -142,10 +142,7 @@ pub fn diet_blockers(
     }
     if let Some(tech) = &requirements.technology {
         if !faction_state.is_some_and(|f| f.technologies.contains(tech)) {
-            let name = data
-                .technologies
-                .get(tech)
-                .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+            let name = data.tech_name(tech);
             reasons.push(format!("technologie requise : {name}"));
         }
     }
@@ -161,11 +158,7 @@ pub fn diet_blockers(
         let names: Vec<String> = requirements
             .any_building
             .iter()
-            .map(|b| {
-                data.buildings
-                    .get(b)
-                    .map_or_else(|| b.to_string(), |x| x.name.display.clone())
-            })
+            .map(|b| data.building_name(b))
             .collect();
         reasons.push(format!("bâtiment requis : {}", names.join(" ou ")));
     }

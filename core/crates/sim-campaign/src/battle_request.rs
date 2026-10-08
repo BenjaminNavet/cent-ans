@@ -370,12 +370,7 @@ fn trophies_event(
     if result.standards_taken.is_empty() {
         return None;
     }
-    let name = |faction: &FactionId| {
-        data.factions.get(faction).map_or_else(
-            || faction.to_string(),
-            |f| f.short_or_display_name().to_owned(),
-        )
-    };
+    let name = |faction: &FactionId| data.faction_name(faction);
     let taken = result.standards_taken.len();
     let what = if taken == 1 {
         "un étendard".to_owned()
@@ -673,12 +668,7 @@ impl CampaignState {
         // EP9: a refused battle (nobody engaged) is told as such; the
         // attacker withdraws like a beaten army, without rout or losses.
         if outcome.end == sim_battle::BattleEnd::Refused {
-            let name = |faction: &FactionId| {
-                data.factions.get(faction).map_or_else(
-                    || faction.to_string(),
-                    |f| f.short_or_display_name().to_owned(),
-                )
-            };
+            let name = |faction: &FactionId| data.faction_name(faction);
             events.push(
                 GameEvent::new(
                     EventKind::Battle,
@@ -751,10 +741,7 @@ impl CampaignState {
         province: &ProvinceId,
         events: &mut Vec<GameEvent>,
     ) {
-        let faction_name = data.factions.get(faction).map_or_else(
-            || faction.to_string(),
-            |f| f.short_or_display_name().to_owned(),
-        );
+        let faction_name = data.faction_name(faction);
         let alive_general = general.filter(|id| self.characters.get(*id).is_some_and(|c| c.alive));
         let text = match alive_general {
             Some(id) => {

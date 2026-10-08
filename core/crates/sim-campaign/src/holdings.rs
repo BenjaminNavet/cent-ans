@@ -164,10 +164,7 @@ pub fn holdings_overview(
         }
 
         let weighted = population::weighted_unrest(&province.population);
-        let name = data
-            .provinces
-            .get(province_id)
-            .map_or_else(|| province_id.to_string(), |p| p.name.display.clone());
+        let name = data.province_name(province_id);
 
         provinces.push(ProvinceRow {
             province: province_id.clone(),
@@ -221,10 +218,7 @@ fn settlement_row(
     };
 
     let construction = live.construction.as_ref().map(|c| {
-        let name = data
-            .buildings
-            .get(&c.building)
-            .map_or_else(|| c.building.to_string(), |b| b.name.display.clone());
+        let name = data.building_name(&c.building);
         ConstructionRow {
             building: c.building.clone(),
             name,

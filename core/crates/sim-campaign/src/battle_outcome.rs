@@ -164,11 +164,7 @@ pub(crate) fn apply(
     // NT3: a won battle counts towards the player's missions.
     crate::missions::note_battle_won(state, winner.faction);
     if winner_class != BattleOutcomeClass::Victory || loser_class != BattleOutcomeClass::Defeat {
-        let name = |f: &FactionId| {
-            data.factions
-                .get(f)
-                .map_or_else(|| f.to_string(), |f| f.short_or_display_name().to_owned())
-        };
+        let name = |f: &FactionId| data.faction_name(f);
         let loser_label = rules.consequence(loser_class).label;
         let text = format!(
             "{} de l'ost {} à {place} ; {} pour l'ost {}.",

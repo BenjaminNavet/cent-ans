@@ -530,10 +530,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             if p.heresy_religion.is_none() && p.heresy == 0 {
                 p.heresy = 10;
                 p.heresy_religion = Some(id.clone());
-                let province_name = data
-                    .provinces
-                    .get(province)
-                    .map_or_else(|| province.to_string(), |d| d.name.display.clone());
+                let province_name = data.province_name(province);
                 events.push(
                     GameEvent::new(
                         EventKind::Heresy,
@@ -592,10 +589,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             ] {
                 entry.unrest = entry.unrest.saturating_add(15).min(100);
             }
-            let province_name = data
-                .provinces
-                .get(id)
-                .map_or_else(|| id.to_string(), |d| d.name.display.clone());
+            let province_name = data.province_name(id);
             events.push(
                 GameEvent::new(
                     EventKind::Heresy,

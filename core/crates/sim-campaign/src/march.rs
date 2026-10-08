@@ -994,7 +994,5 @@ pub fn settlements_near(
 
 /// Display name of a settlement (its id when unknown), for order errors.
 fn settlement_label(data: &GameData, id: &SettlementId) -> String {
-    data.settlements
-        .get(id)
-        .map_or_else(|| id.to_string(), |s| s.name.display.clone())
+    data.settlement_name(id)
 }

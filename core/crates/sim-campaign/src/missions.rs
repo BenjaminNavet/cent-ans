@@ -464,11 +464,7 @@ fn candidates(
         .keys()
         .filter(|p| state.controls_province(player, p))
         .collect();
-    let province_name = |p: &ProvinceId| {
-        data.provinces
-            .get(p)
-            .map_or_else(|| p.to_string(), |p| p.name.display.clone())
-    };
+    let province_name = |p: &ProvinceId| data.province_name(p);
     let enemy_held = |p: &ProvinceId| {
         state
             .province_controller(p)
@@ -641,10 +637,7 @@ fn progress_of(state: &CampaignState, data: &GameData, mission: &Mission) -> (St
             match holder {
                 Some(h) if h == player => ("prise".to_owned(), 1.0),
                 Some(h) => {
-                    let name = data
-                        .factions
-                        .get(h)
-                        .map_or_else(|| h.to_string(), |f| f.short_or_display_name().to_owned());
+                    let name = data.faction_name(h);
                     (format!("tenue par {name}"), 0.0)
                 }
                 None => ("introuvable".to_owned(), 0.0),
