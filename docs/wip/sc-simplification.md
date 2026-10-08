@@ -42,3 +42,5 @@ Gel jusqu'à la fusion de FL : `game/scripts/map/vegetation.gd`, `campaign_map.g
 map.misc), déclutter des villes (settlement), `outbuilding_layer.gd`, life reground,
 `terrain.gdshader` + includes, `dev/map_bench.gd`. Tout portage Rust d'un point chaud de la carte
 est annoncé à FL avant de commencer. Base FL : d30 p50 31 ms, d150 p50 46 ms (map.misc 8-12 ms).
+- Vague 3 : effects + rulesdata fusionnés (10-08) ; treaty en cours (ADR 0193 réservé). ADR SC renumérotés 0191/0192 (main a pris 0186-0190).
+- Vague 4 (patterns/perf) lancée : movperf (sim-battle resolve_movement + geom), battlerules (moral/fatigue, tables terrain → data, decor_gen, rng ; ADR 0195 si besoin), naval (NV2/BB2/BB3/BB13 ; ADR 0194 si besoin), aiturn (ArmyTurn, constantes IA → data, PlanCache ; ADR 0196 si besoin), uikit2 (TooltipHost, diplomacy sous-vues, tutoriel → data).
