@@ -97,3 +97,6 @@ multi (fal)** ; les planches SR3 viennent de NB2 via OpenRouter (`google/gemini-
   `<sks> [azimut] [élévation] [distance]`, ex. `<sks> back view eye-level shot medium shot`.
 - But : depuis la vue ¾ avant Z-Image du cavalier, produire profil et dos cohérents, puis TRELLIS
   multi et SF3D.
+- **Enjeu (joueur, 08/10)** : si Qwen est bon, le procédé standard des assets 3D devient
+  Qwen-Image-Edit (image vérifiée selon la charte) → TRELLIS gratuit (Space HF) en premier → SF3D
+  local en second. Il sera adopté après l'essai et l'avis du joueur.
