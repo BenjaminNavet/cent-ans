@@ -238,3 +238,20 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Défauts Rust divergents du JSON (météo, AgentRules, FeudalRules, FreeMovement, AiDiplomacy, AiGrid, settlements/rules) : le JSON gagne partout ; jeu réel inchangé (chargeait déjà le JSON).
 - Plus de `#[serde(default)]` de conteneur sur FeudalRules et sous-structures, AiDiplomacy, NegotiationRules, AiFeudal subs, AgentEffects (interblocage OnceLock) : JSON complets requis.
 - Non vérifié : FileTable, SpacingFactors vs JSON.
+
+## BATTLERULES (vague 4, fusionné)
+- MoraleRules + MoraleContext (data/rules/battle_morale.json), log_unit, TerrainRules::of (data/rules/battle_terrain.json), decor_gen/{hamlets,landmarks,plots,camps}, rng::{unit_float,hash01,Fnv1a} + util::splitmix_mix, Area::effect().
+- Reste : siege_fx::hash01 garde son flux (fusion = valeurs changées) ; place_plot/place_manor pub (tests ep6).
+
+## MOVPERF (vague 4, fusionné)
+- SegmentGrid (geom.rs) + Derived<RoadIndex> ; geom::segment_distance unique. demo 27,5 → ~12 µs/pas, epic 1121 → 206-367 µs/pas ; digests inchangés.
+- Piste : Stream::in_water / water_kind par SegmentGrid (déplacer water_kind hors Battlefield).
+
+## TREATY (vague 3, fusionné) — ADR 0202, mécanique changée
+- Proposal supprimé → Treaty{articles} (Composite : check/value/apply/label), ReasonList, TreatyWeights en data (bundled_rules! à la fusion), Order::proposal.
+- Paix de repli G5 supprimée ; propositions simples via evaluate_treaty + answer_roll entre IA ; cv3_ai_stances graines 2,4,5.
+- Bug préexistant : get_offers renvoie "peace_summons", diplomacy_panel.gd attend "summons".
+
+## Fusion main (FL) dans feat/sc
+- render_quality : plancher 0,4 (ADR 0191 main) porté dans data/fx/render_quality.json ; siege_engines_fx : swing curve via DataFile ; tree_flicker_probe.gd gardé (modifié par main).
+- ADR SC : bloc 0200-0209.
