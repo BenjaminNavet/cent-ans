@@ -19,8 +19,8 @@
 //! `sim/modes.rs`. The display states of the regiment (charging, under
 //! fire, engaged, wavering) are computed here too ([`UnitStatus`]).
 
-use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// A persistent mode of a regiment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

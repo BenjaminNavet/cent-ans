@@ -16,8 +16,8 @@
 //! length runs along `(cos yaw, sin yaw)` and the front (the model's +Z, the
 //! facade) faces `(-sin yaw, cos yaw)`.
 
-use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// An oriented rectangle: centre, half sizes along its own axes and yaw.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]

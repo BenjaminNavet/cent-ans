@@ -11,9 +11,9 @@
 //! block `reform`) during which every man walks from his old place to his
 //! new one, the regiment moving and fighting worse (`reform` modifiers).
 
-use std::fmt;
 use data_model::UnitCategory;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 use crate::unit::Unit;
 
@@ -261,7 +261,6 @@ pub struct FormationRules {
 data_model::bundled_rules!(FormationRules, "rules/unit_formations.json");
 
 impl FormationRules {
-
     /// Consistency the schema cannot express.
     pub fn check(&self) -> Result<(), String> {
         if self.formations.is_empty() || self.formations.len() > usize::from(u8::MAX) {

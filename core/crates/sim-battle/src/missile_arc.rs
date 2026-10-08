@@ -45,7 +45,6 @@ pub struct MissileArcRules {
 data_model::bundled_rules!(MissileArcRules, "rules/missile_arc.json");
 
 impl MissileArcRules {
-
     /// May this missile be lobbed over a crest?
     pub fn lobs(&self, kind: MissileKind) -> bool {
         self.indirect_missiles.iter().any(|k| k == kind.key())

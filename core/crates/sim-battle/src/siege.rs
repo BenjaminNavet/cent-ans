@@ -93,7 +93,6 @@ pub struct SiegeWorkRules {
 data_model::bundled_rules!(SiegeWorkRules, "rules/siege_works.json");
 
 impl SiegeWorkRules {
-
     /// Wall and gate HP at fortification `fortification` (capped at 5).
     pub fn hp(&self, fortification: u32) -> (f64, f64) {
         let fort = f64::from(fortification.min(5));

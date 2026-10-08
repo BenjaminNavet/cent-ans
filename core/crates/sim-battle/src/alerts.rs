@@ -98,7 +98,6 @@ pub struct AlertRules {
 data_model::bundled_rules!(AlertRules, "rules/battle_alerts.json");
 
 impl AlertRules {
-
     /// Importance of `kind` (0 if absent from the table).
     pub fn importance(&self, kind: AlertKind) -> u32 {
         self.importance.get(kind.key()).copied().unwrap_or(0)

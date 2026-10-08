@@ -50,7 +50,6 @@ pub struct DuelRules {
 data_model::bundled_rules!(DuelRules, "rules/battle_duel.json");
 
 impl DuelRules {
-
     /// Whether a side that lost `own` of its soldiers over the window while
     /// the enemy lost `enemy` (shares of the initial soldiers) is winning
     /// the duel.

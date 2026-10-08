@@ -229,7 +229,6 @@ pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
 static INSTALLED: RwLock<Option<Arc<FireRules>>> = RwLock::new(None);
 
 impl FireRules {
-
     /// Parses the contents of a rules file.
     pub fn from_json(text: &str) -> Result<FireRules, String> {
         serde_json::from_str(text).map_err(|e| format!("{FIRE_RULES_PATH}: {e}"))

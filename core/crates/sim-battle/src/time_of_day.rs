@@ -92,7 +92,6 @@ pub fn wrap_hour(hour: f64) -> f64 {
 }
 
 impl TimeOfDayRules {
-
     /// Hour of the day `elapsed_s` battle seconds after `start_hour`.
     pub fn hour_after(&self, start_hour: f64, elapsed_s: f64) -> f64 {
         wrap_hour(start_hour + elapsed_s.max(0.0) * self.minutes_per_battle_second / 60.0)

@@ -24,7 +24,6 @@ pub struct MissileMoraleRules {
 data_model::bundled_rules!(MissileMoraleRules, "rules/missile_morale.json");
 
 impl MissileMoraleRules {
-
     /// Extra morale a regiment loses when missiles kill `kills` of its
     /// `max_soldiers` men: nothing on foot, the panic of the horses mounted.
     pub fn panic(&self, mounted: bool, kills: f64, max_soldiers: u32) -> f64 {

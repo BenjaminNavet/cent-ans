@@ -21,9 +21,9 @@
 //! numbers come from `data/rules/battle_water.json` (schema
 //! `data/schemas/battle_water_rules.schema.json`).
 
-use std::f64::consts::TAU;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
+use std::f64::consts::TAU;
 
 use crate::field::{Battlefield, River, Zone};
 use crate::rng::BattleRng;

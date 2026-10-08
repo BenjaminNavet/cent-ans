@@ -154,7 +154,6 @@ pub struct PushShape {
 data_model::bundled_rules!(PushRules, "rules/battle_push.json");
 
 impl PushRules {
-
     /// False when the rules switch the push off (no recoil and no wrap):
     /// the step skips it entirely (A/B probes).
     pub fn enabled(&self) -> bool {

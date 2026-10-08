@@ -50,7 +50,6 @@ pub struct FormationWidthRules {
 data_model::bundled_rules!(FormationWidthRules, "rules/formation_width.json");
 
 impl FormationWidthRules {
-
     /// Rank bounds of `unit`: engines, then horsemen, then pikemen
     /// (`pike_square`), then shooters, then foot.
     pub fn bounds(&self, unit: &Unit) -> RankBounds {

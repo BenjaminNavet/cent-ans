@@ -54,4 +54,3 @@ pub struct QueueRules {
 }
 
 data_model::bundled_rules!(QueueRules, "rules/battle_queue.json");
-

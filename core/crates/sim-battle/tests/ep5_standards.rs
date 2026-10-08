@@ -55,13 +55,7 @@ fn always_fall() -> BattleStandardRules {
 #[test]
 fn data_rules_match_the_default() {
     let data = data();
-    assert_eq!(
-        BattleStandardRules {
-            description: None,
-            ..data.battle_standard_rules.clone()
-        },
-        BattleStandardRules::default()
-    );
+    assert_eq!(data.battle_standard_rules, BattleStandardRules::default());
 }
 
 #[test]

@@ -259,7 +259,6 @@ data_model::bundled_rules!(GroupFormationRules, "rules/group_formations.json");
 pub const BATTLE_LINE: &str = "battle_line";
 
 impl GroupFormationRules {
-
     pub fn preset(&self, id: &str) -> Option<&Preset> {
         self.presets.iter().find(|p| p.id == id)
     }

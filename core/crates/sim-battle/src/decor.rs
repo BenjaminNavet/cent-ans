@@ -31,9 +31,9 @@
 //! street hamlets), and every size is read from the field ([`FieldSize`]),
 //! never assumed to be 1200 × 800.
 
-use std::collections::BTreeMap;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 use crate::decor_gen::Layout;
 use crate::field::Battlefield;
@@ -275,7 +275,6 @@ pub struct DecorRules {
 data_model::bundled_rules!(DecorRules, "rules/battle_decor.json");
 
 impl DecorRules {
-
     /// Key of the landscape of `province` (else of `terrain`).
     pub fn profile_key(&self, province: &str, terrain: Terrain) -> &str {
         self.profiles

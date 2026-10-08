@@ -168,7 +168,6 @@ pub struct BattleScaleRules {
 data_model::bundled_rules!(BattleScaleRules, "rules/battle_scale.json");
 
 impl BattleScaleRules {
-
     /// The first tier covering `soldiers` (the last one beyond).
     pub fn tier_for(&self, soldiers: u32) -> &ScaleTier {
         self.tiers

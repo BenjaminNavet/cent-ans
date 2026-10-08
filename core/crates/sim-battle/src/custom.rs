@@ -10,12 +10,12 @@
 //! ([`CustomBattle::battle_setup`]). The weather, when forced, is carried by
 //! the replay start (`ReplayStart::weather`), not by the setup.
 
-use std::collections::{BTreeMap, BTreeSet};
 use data_model::{
     BattleAbility, BattleOrder, BattleStandardRules, Faction, FactionId, TechnologyId, Terrain,
     UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::field::Weather;
 use crate::setup::{

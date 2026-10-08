@@ -98,7 +98,6 @@ pub struct AssaultRules {
 data_model::bundled_rules!(CaptureRules, "rules/siege_capture.json");
 
 impl CaptureRules {
-
     pub fn point(&self, kind: CapturePointKind) -> &PointRules {
         match kind {
             CapturePointKind::Square => &self.square,

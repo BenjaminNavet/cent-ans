@@ -24,7 +24,6 @@ pub struct CrestRules {
 data_model::bundled_rules!(CrestRules, "rules/battle_crest.json");
 
 impl CrestRules {
-
     /// Melee damage factor of a regiment standing `height_over` metres above
     /// its enemy (negative: below it).
     pub fn melee_factor(&self, height_over: f64) -> f64 {

@@ -50,7 +50,6 @@ pub struct ReplayRules {
 data_model::bundled_rules!(ReplayRules, "rules/battle_replay.json");
 
 impl ReplayRules {
-
     fn period_ticks(seconds: f64) -> u64 {
         ((seconds / DT).round() as u64).max(1)
     }
