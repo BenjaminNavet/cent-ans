@@ -18,7 +18,7 @@ Plantagenêts ou la Bourgogne, et menez un siècle de guerre, de diplomatie, de 
 
 ![Écran d'accueil : Notre-Dame au crépuscule](docs/img/readme/menu.jpg)
 
-*Captures en jeu. Pour les refaire : `godot --path game --script res://tests/readme_gallery.gd`.*
+*Captures en jeu. Pour les refaire : `godot --headless --path game --script res://tests/readme_gallery.gd`.*
 
 ## Fonctionnalités
 
