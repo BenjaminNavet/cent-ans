@@ -1,0 +1,32 @@
+//! Tests d'intégration de sim-campaign : economy (un seul binaire, données chargées une fois).
+
+mod a6_building_slots;
+mod a6_l4_research_queue;
+mod b7a_economy_order;
+mod b7b_unread_data;
+mod b7c_buildings;
+mod c1_settlements;
+mod c4_chains;
+mod c4_settlements;
+mod c5_settlement_panel;
+mod c5_trade;
+mod dc3_province_effects;
+mod dc6b_weighted_sums;
+mod economy_balance;
+mod eq1_balance;
+mod eq2_balance;
+mod f1_effects;
+mod g1_rules;
+mod h3_h4;
+mod h5_h6;
+mod jr4b_starting_budget;
+mod lr04_domain_income;
+mod m10_balance;
+mod m3;
+mod m6;
+mod m8_build_queue;
+mod p1_tin;
+mod rs_b_weighted_sums;
+mod sv2_unit_resources;
+mod u3_budget;
+mod ur1_units;
