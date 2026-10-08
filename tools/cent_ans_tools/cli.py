@@ -1454,17 +1454,36 @@ def assets_illustrations(
     envelope: float = typer.Option(
         10.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
     ),
+    local: bool = typer.Option(
+        False, "--local", help="Génération locale gratuite (mflux, ADR 0190)"
+    ),
 ) -> None:
     """Génère les miniatures de l'encyclopédie (640×360) dans game/assets/illustrations/."""
-    from cent_ans_tools import entry_art, portraits
+    from cent_ans_tools import entry_art, local_art, portraits
 
     categories = (
         tuple(part.strip() for part in category.split(","))
         if category
         else entry_art.CATEGORIES
     )
+    jobs = entry_art.plan(categories=categories, limit=limit)
+    if local:
+        typer.echo(f"{len(jobs)} illustration(s) à générer localement")
+        if dry_run:
+            return
+        written, failed = local_art.generate(
+            jobs,
+            entry_art.convert,
+            on_progress=lambda job: typer.echo(f"  {job.out_path.name}"),
+        )
+        typer.echo(f"{len(written)} écrite(s), {len(failed)} échec(s)")
+        for job, reason in failed:
+            typer.echo(f"  échec {job.character_id} : {reason}", err=True)
+        if failed:
+            raise typer.Exit(1)
+        return
     _run_art_batch(
-        entry_art.plan(categories=categories, limit=limit),
+        jobs,
         model or portraits.DEFAULT_MODEL,
         envelope,
         dry_run,
