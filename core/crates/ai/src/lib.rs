@@ -14,6 +14,7 @@ pub mod feudal;
 pub mod grid;
 mod mercenaries;
 pub mod parallel;
+mod salts;
 pub mod stances;
 pub mod support;
 pub mod traditions;

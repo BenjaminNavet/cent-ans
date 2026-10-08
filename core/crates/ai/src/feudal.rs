@@ -25,9 +25,6 @@ use sim_campaign::{CampaignState, Order};
 
 use crate::alignment::campaign_roll;
 
-/// Salt of the per-turn feudal rolls (revolt, homage).
-const FEUDAL_SALT: u64 = 0xFE05;
-
 /// The feudal decisions of this crate, as the core calls them.
 pub const POLICY: FeudalPolicy = FeudalPolicy {
     protection: protection_score,
@@ -376,7 +373,7 @@ fn roll(state: &CampaignState, faction: &FactionId, kind: u64) -> u64 {
     campaign_roll(
         state,
         faction,
-        FEUDAL_SALT ^ (kind << 32) ^ u64::from(state.turn),
+        crate::salts::FEUDAL ^ (kind << 32) ^ u64::from(state.turn),
     )
 }
 
