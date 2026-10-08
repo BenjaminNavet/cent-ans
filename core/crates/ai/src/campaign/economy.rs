@@ -223,6 +223,124 @@ fn target_upkeep(ctx: &Context, hoard: i64) -> i64 {
         + hoard / eco.hoard_spending_turns
 }
 
+/// The running state of this turn's recruitment.
+struct Recruiting<'c, 'a> {
+    ctx: &'c Context<'a>,
+    budget: i64,
+    planned_upkeep: i64,
+    /// Seasonal upkeep the armies may reach.
+    target_upkeep: i64,
+    recruits: usize,
+    max_recruits: usize,
+    /// Regiments by unit type, for the doctrine's shares.
+    composition: BTreeMap<UnitTypeId, u32>,
+    /// SV2: the resource units this turn's recruits draw (siege engines:
+    /// wood, iron) leave the faction's free supply; the next ones of the
+    /// same kind are priced with their import (B7c rule, ADR 0053).
+    supply: BTreeMap<data_model::ResourceId, u32>,
+}
+
+impl<'c, 'a> Recruiting<'c, 'a> {
+    fn new(ctx: &'c Context<'a>, free_supply: &BTreeMap<data_model::ResourceId, u32>) -> Self {
+        let (state, data, eco) = (ctx.state, ctx.data, &ctx.rules.economy);
+        let hoard = ctx.hoard();
+        // B7b: recruits still training (`recruit_time_turns` > 1) are already
+        // paid for and will soon cost their upkeep; count them like this
+        // turn's recruits (same measure: the unit type's `upkeep`).
+        let training_upkeep: i64 = state
+            .settlements
+            .iter()
+            .filter(|(_, s)| ctx.holds(s))
+            .flat_map(|(_, s)| s.recruit_queue.iter())
+            .filter_map(|r| data.unit_types.get(&r.unit_type))
+            .map(|t| i64::from(t.upkeep))
+            .sum();
+        let mut composition = crate::doctrine::field_composition(state, ctx.faction);
+        // A6-L3b: garrisons count too, for the share caps (a faction with no
+        // field army raised militia into its garrisons turn after turn).
+        for settlement in state.settlements.values().filter(|s| ctx.holds(s)) {
+            for unit in &settlement.garrison {
+                *composition.entry(unit.unit_type.clone()).or_default() += 1;
+            }
+        }
+        Recruiting {
+            ctx,
+            budget: ctx.treasury - ctx.reserve(),
+            planned_upkeep: ctx.army_upkeep + training_upkeep,
+            target_upkeep: target_upkeep(ctx, hoard),
+            recruits: 0,
+            // G2: a hoard buys troops at its own pace (a crushed realm
+            // sitting on ransoms and loot raises companies, it does not
+            // bank them).
+            max_recruits: (ctx.income / eco.income_per_recruit
+                + hoard / eco.hoard_spending_turns / eco.hoard_livres_per_recruit)
+                .clamp(1, eco.max_recruits_per_turn) as usize,
+            composition,
+            supply: free_supply.clone(),
+        }
+    }
+
+    /// Recruits at `site` among `options` while the budget, the upkeep and
+    /// the slots allow. At peace, two recruits end the turn's effort there.
+    fn fill_site(
+        &mut self,
+        site: &SettlementId,
+        options: &[sim_campaign::RecruitOption],
+        orders: &mut Vec<Order>,
+    ) {
+        let ctx = self.ctx;
+        let (state, data) = (ctx.state, ctx.data);
+        // G1: no more than the settlement's free recruitment slots.
+        let mut free_slots = state.recruit_slots_free(data, site);
+        // TW2-T2: no more of a unit type than the settlement's reserve.
+        let mut drawn: BTreeMap<UnitTypeId, u32> = BTreeMap::new();
+        while self.recruits < self.max_recruits && free_slots > 0 {
+            let upkeep_cap = |upkeep: i64| {
+                if self.planned_upkeep == 0 && ctx.surplus() >= upkeep {
+                    self.target_upkeep.max(upkeep)
+                } else {
+                    self.target_upkeep
+                }
+            };
+            let repriced = reprice_recruits(state, data, ctx.faction, site, options, &self.supply);
+            let fitting: Vec<&sim_campaign::RecruitOption> = repriced
+                .iter()
+                .filter(|o| {
+                    self.planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
+                        && self.budget >= i64::from(o.cost)
+                        && drawn.get(&o.unit_type).copied().unwrap_or(0) < o.pool.available
+                })
+                .collect();
+            let Some(option) = crate::doctrine::pick_recruit(
+                data,
+                ctx.faction,
+                &fitting,
+                &self.composition,
+                |o| unit_value(data, &o.unit_type, o.cost),
+            ) else {
+                break;
+            };
+            orders.push(Order::Recruit {
+                settlement: site.into(),
+                unit_type: option.unit_type.clone(),
+            });
+            *self
+                .composition
+                .entry(option.unit_type.clone())
+                .or_default() += 1;
+            *drawn.entry(option.unit_type.clone()).or_default() += 1;
+            draw_supply(&mut self.supply, &option.resources);
+            self.budget -= i64::from(option.cost);
+            self.planned_upkeep += i64::from(option.upkeep);
+            self.recruits += 1;
+            free_slots -= 1;
+            if !ctx.at_war() && self.recruits.is_multiple_of(2) {
+                return;
+            }
+        }
+    }
+}
+
 /// Recruitment, site by site, within the upkeep and the budget.
 fn recruit(
     ctx: &Context,
@@ -230,41 +348,9 @@ fn recruit(
     free_supply: &BTreeMap<data_model::ResourceId, u32>,
     orders: &mut Vec<Order>,
 ) -> Spending {
-    let (state, data, eco) = (ctx.state, ctx.data, &ctx.rules.economy);
-    let hoard = ctx.hoard();
-    let mut budget = ctx.treasury - ctx.reserve();
-    let target_upkeep = target_upkeep(ctx, hoard);
-    // B7b: recruits still training (`recruit_time_turns` > 1) are already
-    // paid for and will soon cost their upkeep; count them like this turn's
-    // recruits (same measure: the unit type's `upkeep`).
-    let training_upkeep: i64 = state
-        .settlements
-        .iter()
-        .filter(|(_, s)| ctx.holds(s))
-        .flat_map(|(_, s)| s.recruit_queue.iter())
-        .filter_map(|r| data.unit_types.get(&r.unit_type))
-        .map(|t| i64::from(t.upkeep))
-        .sum();
-    let mut planned_upkeep = ctx.army_upkeep + training_upkeep;
+    let (state, data) = (ctx.state, ctx.data);
+    let mut recruiting = Recruiting::new(ctx, free_supply);
     let sites = recruit_sites(ctx, cityless);
-    let mut recruits = 0;
-    // G2: a hoard buys troops at its own pace (a crushed realm sitting on
-    // ransoms and loot raises companies, it does not bank them).
-    let max_recruits = (ctx.income / eco.income_per_recruit
-        + hoard / eco.hoard_spending_turns / eco.hoard_livres_per_recruit)
-        .clamp(1, eco.max_recruits_per_turn) as usize;
-    let mut composition = crate::doctrine::field_composition(state, ctx.faction);
-    // A6-L3b: garrisons count too, for the share caps (a faction with no
-    // field army raised militia into its garrisons turn after turn).
-    for settlement in state.settlements.values().filter(|s| ctx.holds(s)) {
-        for unit in &settlement.garrison {
-            *composition.entry(unit.unit_type.clone()).or_default() += 1;
-        }
-    }
-    // SV2: the resource units this turn's recruits draw (siege engines:
-    // wood, iron) leave the faction's free supply; the next ones of the
-    // same kind are priced with their import (B7c rule, ADR 0053).
-    let mut supply = free_supply.clone();
     // PB3f: the recruitment options of every site (a read of the state),
     // on the planner's pool; the loop below spends the budget in order.
     let site_options: Vec<Vec<sim_campaign::RecruitOption>> = ctx.mode.map(&sites, |site| {
@@ -277,61 +363,15 @@ fn recruit(
             .filter(|o| o.available)
             .collect()
     });
-    'sites: for (site, options) in sites.iter().zip(site_options) {
-        if !ctx.owns_settlement(site) {
-            continue;
-        }
+    for (site, options) in sites.iter().zip(site_options) {
         // E1: the doctrine's mix decides, among what fits the budget.
-        if options.is_empty() {
-            continue;
-        }
-        // G1: no more than the settlement's free recruitment slots.
-        let mut free_slots = state.recruit_slots_free(data, site);
-        // TW2-T2: no more of a unit type than the settlement's reserve.
-        let mut drawn: BTreeMap<UnitTypeId, u32> = BTreeMap::new();
-        while recruits < max_recruits && free_slots > 0 {
-            let upkeep_cap = |upkeep: i64| {
-                if planned_upkeep == 0 && ctx.surplus() >= upkeep {
-                    target_upkeep.max(upkeep)
-                } else {
-                    target_upkeep
-                }
-            };
-            let repriced = reprice_recruits(state, data, ctx.faction, site, &options, &supply);
-            let fitting: Vec<&sim_campaign::RecruitOption> = repriced
-                .iter()
-                .filter(|o| {
-                    planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
-                        && budget >= i64::from(o.cost)
-                        && drawn.get(&o.unit_type).copied().unwrap_or(0) < o.pool.available
-                })
-                .collect();
-            let Some(option) =
-                crate::doctrine::pick_recruit(data, ctx.faction, &fitting, &composition, |o| {
-                    unit_value(data, &o.unit_type, o.cost)
-                })
-            else {
-                break;
-            };
-            orders.push(Order::Recruit {
-                settlement: site.into(),
-                unit_type: option.unit_type.clone(),
-            });
-            *composition.entry(option.unit_type.clone()).or_default() += 1;
-            *drawn.entry(option.unit_type.clone()).or_default() += 1;
-            draw_supply(&mut supply, &option.resources);
-            budget -= i64::from(option.cost);
-            planned_upkeep += i64::from(option.upkeep);
-            recruits += 1;
-            free_slots -= 1;
-            if !ctx.at_war() && recruits % 2 == 0 {
-                continue 'sites;
-            }
+        if ctx.owns_settlement(site) && !options.is_empty() {
+            recruiting.fill_site(site, &options, orders);
         }
     }
     Spending {
-        budget,
-        planned_upkeep,
+        budget: recruiting.budget,
+        planned_upkeep: recruiting.planned_upkeep,
     }
 }
 
@@ -391,7 +431,7 @@ fn construct(
     free_supply: &BTreeMap<data_model::ResourceId, u32>,
     orders: &mut Vec<Order>,
 ) {
-    let (state, data, eco) = (ctx.state, ctx.data, &ctx.rules.economy);
+    let (data, eco) = (ctx.data, &ctx.rules.economy);
     let Spending {
         mut budget,
         planned_upkeep,
@@ -410,6 +450,40 @@ fn construct(
     // (Buildings that pay for themselves in taxes or trade escape the cap.)
     let mut upkeep_room =
         ctx.gross_income * eco.max_building_upkeep_percent / 100 - ctx.building_upkeep;
+    let options = ranked_builds(ctx, free_supply);
+    let mut used = BTreeSet::new();
+    for (_, settlement, building, cost) in options {
+        let upkeep = data
+            .buildings
+            .get(&building)
+            .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)));
+        if used.len() >= builds || used.contains(&settlement) || budget < cost || upkeep > spare {
+            continue;
+        }
+        let pays_for_itself = building_income(ctx, &settlement, &building) >= upkeep as f64;
+        if !pays_for_itself {
+            if upkeep > upkeep_room {
+                continue;
+            }
+            upkeep_room -= upkeep;
+        }
+        spare -= upkeep;
+        budget -= cost;
+        used.insert(settlement.clone());
+        orders.push(Order::Build {
+            settlement: settlement.into(),
+            building,
+        });
+    }
+}
+
+/// Every building that could be started on a settlement held with no works
+/// under way, best yield per livre first: (yield, settlement, building, cost).
+fn ranked_builds(
+    ctx: &Context,
+    free_supply: &BTreeMap<data_model::ResourceId, u32>,
+) -> Vec<(f64, SettlementId, data_model::BuildingId, i64)> {
+    let (state, data) = (ctx.state, ctx.data);
     // PB3f: each settlement's options are valued on the planner's pool, then
     // gathered in the settlements' order (the sort below is stable).
     let idle: Vec<(&SettlementId, &sim_campaign::SettlementState)> = state
@@ -417,7 +491,7 @@ fn construct(
         .iter()
         .filter(|(_, s)| ctx.holds(s) && s.construction.is_none())
         .collect();
-    let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = ctx
+    let mut options: Vec<_> = ctx
         .mode
         .map(&idle, |(id, settlement)| {
             let Some(province) = state.provinces.get(&settlement.province) else {
@@ -450,30 +524,7 @@ fn construct(
             .then_with(|| a.1.cmp(&b.1))
             .then_with(|| a.2.cmp(&b.2))
     });
-    let mut used = BTreeSet::new();
-    for (_, settlement, building, cost) in options {
-        let upkeep = data
-            .buildings
-            .get(&building)
-            .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)));
-        if used.len() >= builds || used.contains(&settlement) || budget < cost || upkeep > spare {
-            continue;
-        }
-        let pays_for_itself = building_income(ctx, &settlement, &building) >= upkeep as f64;
-        if !pays_for_itself {
-            if upkeep > upkeep_room {
-                continue;
-            }
-            upkeep_room -= upkeep;
-        }
-        spare -= upkeep;
-        budget -= cost;
-        used.insert(settlement.clone());
-        orders.push(Order::Build {
-            settlement: settlement.into(),
-            building,
-        });
-    }
+    options
 }
 
 /// Seasonal upkeep of the faction's garrisons (share paid by the crown by

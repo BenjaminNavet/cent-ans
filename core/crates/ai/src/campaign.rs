@@ -425,6 +425,46 @@ fn state_plans(
     }
 }
 
+/// The orders of the state-only planners, in the order they are issued; the
+/// gifts among them leave the treasury the economy then plans with.
+fn state_orders(ctx: &mut Context, plans: StatePlans) -> Vec<Order> {
+    let mut orders = plans.diplomacy;
+    if let Some(order) = plans.money_fief {
+        ctx.treasury -= gift_amount(&order);
+        orders.push(order);
+    }
+    orders.extend(plans.embargoes);
+    for order in plans.subsidies {
+        ctx.treasury -= gift_amount(&order);
+        orders.push(order);
+    }
+    orders.extend(plans.research);
+    orders.extend(plans.diets);
+    orders.extend(plans.edicts);
+    // G2: a realm whose buildings eat half its income does not debase: the
+    // inflation of their upkeep outweighs the seigniorage (Scots spiral).
+    // EQ5: a third is enough: the prices stay up after the money is sound
+    // again (Swiss buildings 158 → 201 after two years of debasement).
+    // F8: the garrisons are a fixed cost inflated alike (a county whose
+    // single garrison eats its income sank into a spiral of debasement and
+    // debt: Connacht, prices 100 -> 360 in 50 turns).
+    let fixed_upkeep = ctx.building_upkeep + economy::garrison_upkeep(ctx).min(ctx.army_upkeep);
+    let upkeep_heavy = 3 * fixed_upkeep > ctx.gross_income;
+    orders.extend(plans.coinage.into_iter().filter(|o| {
+        !upkeep_heavy
+            || !matches!(
+                o,
+                Order::SetCoinage {
+                    level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
+                }
+            )
+    }));
+    orders.extend(plans.ransoms);
+    orders.extend(plans.chivalry);
+    orders.extend(plans.agents);
+    orders
+}
+
 fn plan_turn_in(
     mode: Mode,
     state: &CampaignState,
@@ -450,40 +490,7 @@ fn plan_turn_in(
     let Some(mut ctx) = ctx else {
         return Vec::new();
     };
-    let mut orders = plans.diplomacy;
-    if let Some(order) = plans.money_fief {
-        ctx.treasury -= gift_amount(&order);
-        orders.push(order);
-    }
-    orders.extend(plans.embargoes);
-    for order in plans.subsidies {
-        ctx.treasury -= gift_amount(&order);
-        orders.push(order);
-    }
-    orders.extend(plans.research);
-    orders.extend(plans.diets);
-    orders.extend(plans.edicts);
-    // G2: a realm whose buildings eat half its income does not debase: the
-    // inflation of their upkeep outweighs the seigniorage (Scots spiral).
-    // EQ5: a third is enough: the prices stay up after the money is sound
-    // again (Swiss buildings 158 → 201 after two years of debasement).
-    // F8: the garrisons are a fixed cost inflated alike (a county whose
-    // single garrison eats its income sank into a spiral of debasement and
-    // debt: Connacht, prices 100 -> 360 in 50 turns).
-    let fixed_upkeep = ctx.building_upkeep + economy::garrison_upkeep(&ctx).min(ctx.army_upkeep);
-    let upkeep_heavy = 3 * fixed_upkeep > ctx.gross_income;
-    orders.extend(plans.coinage.into_iter().filter(|o| {
-        !upkeep_heavy
-            || !matches!(
-                o,
-                Order::SetCoinage {
-                    level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
-                }
-            )
-    }));
-    orders.extend(plans.ransoms);
-    orders.extend(plans.chivalry);
-    orders.extend(plans.agents);
+    let mut orders = state_orders(&mut ctx, plans);
     economy::plan_economy(&ctx, &mut orders);
     characters::plan_characters(&ctx, &mut orders);
     // TW2-T3: companies for the threatened armies of a rich realm, hired
