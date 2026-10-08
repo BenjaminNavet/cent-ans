@@ -1,0 +1,1178 @@
+[
+  {
+    "id": "ship_hulk_hourque",
+    "kind": "decor",
+    "prompt": "Hanseatic and Flemish hulk (hourque), banana-shaped clinker hull, rounded ends, one square sail furled in plain undyed canvas, stout mast, weathered oak, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 22,
+      "class": "ship"
+    },
+    "target": "fleet:hulk (Flandre, Hanse, Mer du Nord)",
+    "region": "Flemish and Baltic coast circa 1380, sturdy,"
+  },
+  {
+    "id": "ship_cog_baltic_large",
+    "kind": "decor",
+    "prompt": "large late 14th-century Baltic cog with high castles fore and aft, tarred clinker hull, one square sail in plain undyed canvas, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 28,
+      "class": "ship"
+    },
+    "target": "fleet:cog variante Baltique (Lübeck, Gdansk, Riga)",
+    "region": "Teutonic and Baltic ports circa 1400, heavy,"
+  },
+  {
+    "id": "ship_galley_venetian",
+    "kind": "decor",
+    "prompt": "Venetian war galley, long low hull, banks of oars, single lateen sail furled, raised stern platform, ram prow, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 36,
+      "class": "ship"
+    },
+    "target": "fleet:galley_venetian (Venise, Dalmatie)",
+    "region": "Venetian lagoon circa 1400, elegant but worn,"
+  },
+  {
+    "id": "ship_galley_genoese",
+    "kind": "decor",
+    "prompt": "Genoese war galley, slender dark hull, oar ports in a row, lateen yard lowered, crossbowmen platform at the bow, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 34,
+      "class": "ship"
+    },
+    "target": "fleet:galley_genoese (Gênes, Ligurie)",
+    "region": "Ligurian coast circa 1350, tarred,"
+  },
+  {
+    "id": "ship_galley_merchant_venetian",
+    "kind": "decor",
+    "prompt": "Venetian merchant great galley, broad deep hull with a single mast pair of lateen sails and oars, cargo hatches, high stern, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 40,
+      "class": "ship"
+    },
+    "target": "fleet:galley_merchant (convois de Flandres, Levant)",
+    "region": "Venetian trade circa 1420, broad,"
+  },
+  {
+    "id": "ship_galley_aragonese",
+    "kind": "decor",
+    "prompt": "Catalan-Aragonese war galley, sleek hull painted tar black, oars shipped, lateen sail furled, boarding platform at the bow, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 33,
+      "class": "ship"
+    },
+    "target": "fleet:galley_catalan (Barcelone, Majorque, Valence)",
+    "region": "Catalan coast circa 1350, tarred,"
+  },
+  {
+    "id": "ship_dromon_byzantine",
+    "kind": "decor",
+    "prompt": "Byzantine chelandion war galley, long hull with a covered rowing deck, two lateen masts, fore deck for siphon, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 32,
+      "class": "ship"
+    },
+    "target": "fleet:galley_byzantine (Constantinople, Trébizonde)",
+    "region": "Byzantine Aegean circa 1350, worn,"
+  },
+  {
+    "id": "ship_galley_mamluk_ghurab",
+    "kind": "decor",
+    "prompt": "Mamluk ghurab galley, narrow hull with a tall curved prow, lateen sail furled, double-bank oars, painted rail, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 30,
+      "class": "ship"
+    },
+    "target": "fleet:galley_mamluk (Alexandrie, Beyrouth)",
+    "region": "Mamluk Egypt circa 1380, dry timber,"
+  },
+  {
+    "id": "ship_fusta_ottoman",
+    "kind": "decor",
+    "prompt": "Turkish fusta light galley, slim open hull, single lateen sail, single bank of oars, curved prow, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 24,
+      "class": "ship"
+    },
+    "target": "fleet:galley_ottoman (Gallipoli, Smyrne, Aydin)",
+    "region": "Anatolian Aegean circa 1400, light,"
+  },
+  {
+    "id": "ship_nao_castilian",
+    "kind": "decor",
+    "prompt": "Castilian nao, round-bellied single-masted ship, square sail furled to plain canvas, high forecastle, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 26,
+      "class": "ship"
+    },
+    "target": "fleet:nao (Castille, Séville, Santander)",
+    "region": "Cantabrian coast circa 1400, rounded,"
+  },
+  {
+    "id": "ship_carrack_genoese",
+    "kind": "decor",
+    "prompt": "early 15th-century Genoese carrack, bulky three-masted hull with a square main sail and lateen mizzen, high castles, clinker-free smooth planks, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 34,
+      "class": "ship"
+    },
+    "target": "fleet:carrack (Gênes, Venise, Ragusa, après 1400)",
+    "region": "Mediterranean circa 1430, bulky,"
+  },
+  {
+    "id": "ship_caravel_iberian",
+    "kind": "decor",
+    "prompt": "Portuguese early caravel of 1440s, small slim hull, two lateen sails furled, low freeboard, no crew, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 20,
+      "class": "ship"
+    },
+    "target": "fleet:caravel (Portugal, côte atlantique marocaine)",
+    "region": "Portuguese Atlantic circa 1450, light,"
+  },
+  {
+    "id": "ship_balinger_english",
+    "kind": "decor",
+    "prompt": "English balinger, long clinker oared sailing ship, single square sail furled, a dozen oars shipped, low castle at the stern, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 20,
+      "class": "ship"
+    },
+    "target": "fleet:balinger (Angleterre, Normandie, Écosse)",
+    "region": "English Channel circa 1370, narrow,"
+  },
+  {
+    "id": "ship_keel_humber",
+    "kind": "decor",
+    "prompt": "English Humber keel, broad open clinker cargo boat with one square sail on a stout mast, loaded with bales, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 18,
+      "class": "ship"
+    },
+    "target": "fleet:keel (Humber, Tyne, Tamise)",
+    "region": "North Sea English coast circa 1380, tarred,"
+  },
+  {
+    "id": "ship_knarr_norse",
+    "kind": "decor",
+    "prompt": "Norse knarr merchant ship, broad clinker oak hull, single square wool sail in plain undyed wool, steering oar at the stern, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 16,
+      "class": "ship"
+    },
+    "target": "fleet:knarr (Norvège, Islande, Gotland)",
+    "region": "Scandinavian coast circa 1340, pine tar,"
+  },
+  {
+    "id": "ship_lodka_rus",
+    "kind": "decor",
+    "prompt": "Russian river lodka, large plank boat with a high curved bow, single mast with a small square sail, oars along the sides, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 14,
+      "class": "ship"
+    },
+    "target": "fleet:lodka (Volga, Dniepr, Dvina, Novgorod)",
+    "region": "Rus river circa 1380, plain pine,"
+  },
+  {
+    "id": "ship_ushkuy_novgorod",
+    "kind": "decor",
+    "prompt": "Novgorod ushkuy river raider, long slender plank boat with a high prow, shields rack bare, single square sail furled, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 16,
+      "class": "ship"
+    },
+    "target": "fleet:ushkuy (Novgorod, Volga, Kama)",
+    "region": "Novgorod Rus circa 1370, pine,"
+  },
+  {
+    "id": "ship_sambuk_redsea",
+    "kind": "decor",
+    "prompt": "Red Sea sambuk, sewn-plank hull with a pointed prow, one large lateen sail furled, low open deck, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 16,
+      "class": "ship"
+    },
+    "target": "fleet:dhow_redsea (Aden, Djeddah, Qusayr)",
+    "region": "Red Sea coast circa 1400, coir lashings,"
+  },
+  {
+    "id": "ship_felucca_nile",
+    "kind": "decor",
+    "prompt": "Egyptian Nile felucca, light wooden river sailing boat with two angled lateen sails furled, tapered prow, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 12,
+      "class": "ship"
+    },
+    "target": "fleet:felucca (Nil, Le Caire, Damiette)",
+    "region": "Nile valley circa 1400, light,"
+  },
+  {
+    "id": "ship_barca_mediterranean",
+    "kind": "decor",
+    "prompt": "small Mediterranean coastal barca, open single lateen sail trading boat with a bundle of cargo, painted bow eye, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 12,
+      "class": "ship"
+    },
+    "target": "fleet:barca (cabotage Provence, Italie, Maghreb)",
+    "region": "Mediterranean coastal trade circa 1380, weathered,"
+  },
+  {
+    "id": "ship_horse_transport_uissier",
+    "kind": "decor",
+    "prompt": "medieval horse-transport ship (uissier), wide flat-bottomed hull with a stern ramp door, single square sail furled, stalls visible, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 24,
+      "class": "ship"
+    },
+    "target": "fleet:horse_transport (invasions, expéditions anglaises)",
+    "region": "English and Norman ports circa 1346, bulky,"
+  },
+  {
+    "id": "ship_ferry_cable",
+    "kind": "decor",
+    "prompt": "river chain-ferry flat barge with a rope guide and a loading ramp at each end, plank deck, low rail, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9,
+      "class": "ship"
+    },
+    "target": "nouveau : traversées de fleuves (Loire, Rhône, Danube)",
+    "region": "European river crossing circa 1380, pine,"
+  },
+  {
+    "id": "ship_barge_rhine",
+    "kind": "decor",
+    "prompt": "long Rhine river cargo barge with a covered cargo hold and a steering sweep, towing mast with a rope, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 16,
+      "class": "ship"
+    },
+    "target": "fleet:river_barge (Rhin, Seine, Rhône, Pô)",
+    "region": "Rhine valley circa 1390, tarred,"
+  },
+  {
+    "id": "ship_barge_volga_ladia",
+    "kind": "decor",
+    "prompt": "Volga cargo barge with a high stern and one large square sail furled, stacked sacks, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 18,
+      "class": "ship"
+    },
+    "target": "fleet:river_barge_east (Volga, Don, Dniepr)",
+    "region": "Pontic river trade circa 1400, plain timber,"
+  },
+  {
+    "id": "ship_pontoon_bridge_boat",
+    "kind": "decor",
+    "prompt": "flat-bottomed pontoon boat for army bridging, thick planks, iron rings, two stacked with cross beams, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "ship"
+    },
+    "target": "nouveau : traversée d'armée sans pont (Armée en marche)",
+    "region": "Medieval army engineering circa 1350, plain,"
+  },
+  {
+    "id": "ship_dugout_canoe_nordic",
+    "kind": "decor",
+    "prompt": "large Finnish-Karelian plank-extended dugout boat, narrow, with two oars, small cargo of furs, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "ship"
+    },
+    "target": "fleet:dugout_north (Carélie, Finlande, lacs lituaniens)",
+    "region": "Northern lakes circa 1380, split pine,"
+  },
+  {
+    "id": "cart_litter_noble",
+    "kind": "decor",
+    "prompt": "noble litter carried between two mules, curtained wooden cabin with a painted roof and poles, no animals, no passenger, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "cart"
+    },
+    "target": "folk:litter (suite des dames, évêques, convois nobles)",
+    "region": "French and Burgundian court circa 1380, elegant,"
+  },
+  {
+    "id": "cart_litter_palanquin",
+    "kind": "decor",
+    "prompt": "Ottoman-Mamluk covered litter palanquin on two poles with silk-free plain cloth curtains, no bearers, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "cart"
+    },
+    "target": "folk:litter_east (suites seldjoukides, mamelouks)",
+    "region": "Anatolian court circa 1380, plain cloth,"
+  },
+  {
+    "id": "wagon_supply_convoy",
+    "kind": "decor",
+    "prompt": "heavy four-wheel supply wagon loaded with flour sacks and barrels under a canvas cover, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "cart"
+    },
+    "target": "army_train:supply_convoy (ravitaillement)",
+    "region": "Medieval army train circa 1350, rugged,"
+  },
+  {
+    "id": "wagon_booty_loot",
+    "kind": "decor",
+    "prompt": "open four-wheel wagon heaped with looted chests, tapestries, barrels and a church bell tied with rope, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "cart"
+    },
+    "target": "army_train:loot (chariot de butin après pillage)",
+    "region": "Medieval army train after a sack circa 1360, piled,"
+  },
+  {
+    "id": "wagon_ammunition_bombard",
+    "kind": "decor",
+    "prompt": "heavy two-axle wagon carrying a bombard barrel lashed on timber with stone cannonballs in a box, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 7,
+      "class": "cart"
+    },
+    "target": "army_train:artillery (convoi de bombardes)",
+    "region": "Late medieval siege train circa 1420, heavy,"
+  },
+  {
+    "id": "wagon_forge_army",
+    "kind": "decor",
+    "prompt": "army field forge wagon with a bellows, anvil and coal bin, canvas lean-to, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "cart"
+    },
+    "target": "army_train:forge",
+    "region": "Medieval army train circa 1380, soot-dark,"
+  },
+  {
+    "id": "wagon_hussite_war",
+    "kind": "decor",
+    "prompt": "Hussite war wagon with raised timber side boards, firing slits and chains, four wheels, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "cart"
+    },
+    "target": "army_train:war_wagon (Bohême, Hussites, Wagenburg)",
+    "region": "Bohemian circa 1425, boarded,"
+  },
+  {
+    "id": "cart_arba_steppe",
+    "kind": "decor",
+    "prompt": "Tatar arba, two huge spoked wheels, wicker-and-felt box, long pole, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "cart"
+    },
+    "target": "folk:arba (Horde d'Or, Crimée, steppe)",
+    "region": "Pontic steppe circa 1380, felt and wicker,"
+  },
+  {
+    "id": "cart_carreta_iberian",
+    "kind": "decor",
+    "prompt": "Iberian carreta, two solid disc wheels, woven wicker side rails, ox yoke pole, no animals, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "cart"
+    },
+    "target": "folk:carreta (Castille, Aragon, Portugal)",
+    "region": "Castilian meseta circa 1380, solid wheels,"
+  },
+  {
+    "id": "cart_prisoner_cage",
+    "kind": "decor",
+    "prompt": "wooden prisoner transport cart with a bar cage on a two-wheel frame, iron fittings, shafts empty, no people, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "cart"
+    },
+    "target": "army_train:prisoners (otages, rançons)",
+    "region": "Medieval war circa 1360, grim,"
+  },
+  {
+    "id": "cart_relic_procession",
+    "kind": "decor",
+    "prompt": "ornate wooden procession cart bearing a reliquary shrine with gilded wooden gable roof and carrying poles, no figures, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "cart"
+    },
+    "target": "folk:relic (processions, pèlerinages)",
+    "region": "French and Italian devotion circa 1380, gilded,"
+  },
+  {
+    "id": "cart_treasure_chest_guarded",
+    "kind": "decor",
+    "prompt": "iron-bound war chest on a two-wheel cart with padlocks, canvas half cover, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.5,
+      "class": "cart"
+    },
+    "target": "army_train:treasury (trésor, solde)",
+    "region": "Medieval royal finance circa 1380, iron bands,"
+  },
+  {
+    "id": "cart_wine_barrel_wagon",
+    "kind": "decor",
+    "prompt": "long wagon carrying six large wine barrels strapped with ropes, four wheels, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "cart"
+    },
+    "target": "folk:wine_wagon (Bordeaux, Bourgogne, Rhin)",
+    "region": "Burgundy and Gascony circa 1380, oak,"
+  },
+  {
+    "id": "cart_wool_bales",
+    "kind": "decor",
+    "prompt": "two-wheel cart stacked with large burlap wool bales and rope netting, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4.5,
+      "class": "cart"
+    },
+    "target": "folk:wool (Angleterre, Flandre, Castille)",
+    "region": "English wool trade circa 1350, rough,"
+  },
+  {
+    "id": "sled_horse_nordic",
+    "kind": "decor",
+    "prompt": "wooden horse sled with two runners, side boards and a loaded canvas bundle, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "cart"
+    },
+    "target": "folk:sled (Scandinavie, Russie, Pologne en hiver)",
+    "region": "Nordic winter travel circa 1380, plain birch,"
+  },
+  {
+    "id": "sled_reindeer_sami",
+    "kind": "decor",
+    "prompt": "Sami reindeer pulka sled, boat-shaped hide-and-wood sled with a pole, covered cargo, no animal, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.5,
+      "class": "cart"
+    },
+    "target": "folk:sled_north (Laponie, Carélie)",
+    "region": "Arctic Scandinavia circa 1380, hide,"
+  },
+  {
+    "id": "sled_hand_pulled",
+    "kind": "decor",
+    "prompt": "low wooden hand-pulled sled with a pull rope, loaded with firewood and sacks, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.5,
+      "class": "cart"
+    },
+    "target": "folk:sled_hand (Alpes, Carpates, neige)",
+    "region": "Alpine circa 1380, worn,"
+  },
+  {
+    "id": "cart_dray_two_wheel_brewer",
+    "kind": "decor",
+    "prompt": "two-wheel dray cart carrying ale kegs, lashing ropes, shafts empty, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.5,
+      "class": "cart"
+    },
+    "target": "folk:dray (Flandre, Angleterre)",
+    "region": "North Sea towns circa 1380, oak,"
+  },
+  {
+    "id": "pack_horse_laden",
+    "kind": "decor",
+    "prompt": "single packhorse loaded with panniers and a bedroll, rope halter, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.2,
+      "class": "animal"
+    },
+    "target": "folk:pack_horse (colporteurs, courriers)",
+    "region": "European roads circa 1380, plain harness,"
+  },
+  {
+    "id": "pack_camel_laden",
+    "kind": "decor",
+    "prompt": "single dromedary camel with a wooden pack saddle loaded with sacks and water skins, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "animal"
+    },
+    "target": "folk:camel_pack (caravanes d'Égypte, Maghreb, Syrie)",
+    "region": "Saharan and Levantine trade circa 1380, plain cloth,"
+  },
+  {
+    "id": "pack_camel_bactrian_laden",
+    "kind": "decor",
+    "prompt": "single Bactrian camel with a wooden pack frame loaded with bales, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "animal"
+    },
+    "target": "folk:camel_pack_east (route de la soie, Horde d'Or)",
+    "region": "Central Asian trade circa 1380, woollen bales,"
+  },
+  {
+    "id": "pack_donkey_laden",
+    "kind": "decor",
+    "prompt": "single donkey with large reed panniers and a bundle, standing in three-quarter view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1.8,
+      "class": "animal"
+    },
+    "target": "folk:donkey_pack (Italie, Espagne, Levant)",
+    "region": "Mediterranean villages circa 1380, reed,"
+  },
+  {
+    "id": "pack_mule_string_med",
+    "kind": "decor",
+    "prompt": "string of four pack mules roped together with wicker panniers, standing in line, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 7,
+      "class": "animal"
+    },
+    "target": "folk:mule_string (Pyrénées, Alpes, Sicile)",
+    "region": "Mountain trade circa 1380, plain harness,"
+  },
+  {
+    "id": "herd_drover_cattle",
+    "kind": "decor",
+    "prompt": "small drove of five horned cattle walking in a loose group, three-quarter side view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "animal"
+    },
+    "target": "folk:drove (convoi de bétail, ravitaillement d'armée)",
+    "region": "European droving road circa 1380, mixed breeds,"
+  },
+  {
+    "id": "herd_sheep_flock",
+    "kind": "decor",
+    "prompt": "small flock of seven woolly sheep grouped close, three-quarter side view, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "animal"
+    },
+    "target": "folk:flock (troupeaux menés, transhumance)",
+    "region": "Pastoral Europe circa 1380, dull fleece,"
+  },
+  {
+    "id": "herd_geese_flock",
+    "kind": "decor",
+    "prompt": "flock of six white geese walking in a group, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "animal"
+    },
+    "target": "folk:geese (marchés, routes)",
+    "region": "Northern Europe circa 1380, plain,"
+  },
+  {
+    "id": "herd_horses_remount",
+    "kind": "decor",
+    "prompt": "four riderless remount horses linked by a lead rope, walking in file, plain halters, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9,
+      "class": "animal"
+    },
+    "target": "army_train:remounts (chevaux de rechange)",
+    "region": "Medieval cavalry army circa 1380, mixed coats,"
+  },
+  {
+    "id": "tent_lord_pavilion_round",
+    "kind": "decor",
+    "prompt": "large round lord's pavilion with a conical roof, plain undyed canvas striped by wear, a finial on top, guy ropes, no flag, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "prop"
+    },
+    "target": "fleet/siege_camp:lord_tent (camp de siège, bivouac)",
+    "region": "French and Burgundian camp circa 1380, plain canvas,"
+  },
+  {
+    "id": "tent_bell_french",
+    "kind": "decor",
+    "prompt": "bell tent of heavy undyed canvas with a central pole and wooden pegs, door flap tied open, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "prop"
+    },
+    "target": "army_camp:tent_bell",
+    "region": "French camp circa 1380, canvas,"
+  },
+  {
+    "id": "tent_ridge_english",
+    "kind": "decor",
+    "prompt": "English ridge tent for archers, long low canvas ridge tent on two poles with rope guys, door flap tied, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "prop"
+    },
+    "target": "army_camp:tent_ridge",
+    "region": "English camp circa 1346, plain linen,"
+  },
+  {
+    "id": "tent_felt_steppe_small",
+    "kind": "decor",
+    "prompt": "small steppe felt tent on a lattice frame with a smoke hole, felt covers lashed with rope, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "prop"
+    },
+    "target": "army_camp:tent_steppe (Horde, Lituanie, Tatars)",
+    "region": "Pontic steppe army circa 1380, felt,"
+  },
+  {
+    "id": "tent_bedouin_black",
+    "kind": "decor",
+    "prompt": "Bedouin black goat-hair tent, long low canopy on poles with open front, rope guys, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "prop"
+    },
+    "target": "army_camp:tent_bedouin (Mamelouks, Maghreb, Arabes)",
+    "region": "Arabian army circa 1380, dark goat hair,"
+  },
+  {
+    "id": "tent_ottoman_pavilion",
+    "kind": "decor",
+    "prompt": "Ottoman conical command tent in plain cloth with a scalloped valance and a metal finial ball, ropes, no embroidery, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 7,
+      "class": "prop"
+    },
+    "target": "army_camp:tent_ottoman (Anatolie, Balkans)",
+    "region": "Ottoman army circa 1390, plain cloth,"
+  },
+  {
+    "id": "tent_hospital_cloister",
+    "kind": "decor",
+    "prompt": "army infirmary tent, long open-sided canvas awning with straw pallets, a few water barrels, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "prop"
+    },
+    "target": "army_camp:hospital (soins, peste)",
+    "region": "Medieval camp circa 1380, canvas,"
+  },
+  {
+    "id": "camp_horse_picket_line",
+    "kind": "decor",
+    "prompt": "horse picket line, a long rope tied between two posts with hay bundles and saddles on a rail, no horses, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "prop"
+    },
+    "target": "army_camp:horse_lines (enclos à chevaux, cavalerie)",
+    "region": "Medieval cavalry camp circa 1380, rough,"
+  },
+  {
+    "id": "camp_horse_corral_rope",
+    "kind": "decor",
+    "prompt": "rope horse corral with wooden stakes around a small trampled pen, a water trough and hay rack, no horses, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9,
+      "class": "prop"
+    },
+    "target": "army_camp:horse_corral",
+    "region": "Medieval army camp circa 1380, rough,"
+  },
+  {
+    "id": "camp_baggage_pile",
+    "kind": "decor",
+    "prompt": "tidy pile of army baggage, sacks, chests, saddles, shields and bundles of arrows covered by a tarp, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.5,
+      "class": "prop"
+    },
+    "target": "army_camp:baggage",
+    "region": "Medieval army camp circa 1380, worn,"
+  },
+  {
+    "id": "camp_cooking_spit",
+    "kind": "decor",
+    "prompt": "army camp kitchen with a long iron spit over a trench fire, two large cauldrons on tripods and a stack of firewood, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "prop"
+    },
+    "target": "army_camp:kitchen (fumée de campement)",
+    "region": "Medieval army camp circa 1380, soot,"
+  },
+  {
+    "id": "camp_lean_to_branches",
+    "kind": "decor",
+    "prompt": "makeshift soldier's lean-to shelter of branches and a cloak roof with straw bedding, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "prop"
+    },
+    "target": "army_camp:lean_to (armée en marche, pillards)",
+    "region": "Medieval army on campaign circa 1360, rough,"
+  },
+  {
+    "id": "camp_standard_pole",
+    "kind": "decor",
+    "prompt": "tall camp standard pole with a crossbar, stone cairn base and a plain undyed cloth pennant, no emblem, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "prop"
+    },
+    "target": "army_camp:standard (poteau de commandement)",
+    "region": "Medieval army camp circa 1380, plain,"
+  },
+  {
+    "id": "camp_palisade_stakes",
+    "kind": "decor",
+    "prompt": "short camp palisade section of sharpened logs lashed with rope, a small gate of two planks, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "prop"
+    },
+    "target": "army_camp:palisade (camp retranché)",
+    "region": "Medieval entrenched camp circa 1380, raw logs,"
+  },
+  {
+    "id": "camp_wagon_laager",
+    "kind": "decor",
+    "prompt": "camp circle of four chained wagons arranged in a square with a tent in the middle, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 12,
+      "class": "prop"
+    },
+    "target": "army_camp:laager (camp de chariots, Hussites, Horde)",
+    "region": "Central European army circa 1425, chained,"
+  },
+  {
+    "id": "camp_smith_tents_marching",
+    "kind": "decor",
+    "prompt": "marching camp bundle: furled tent poles, folded canvas and rolled blankets on a wooden rack, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "prop"
+    },
+    "target": "army_camp:packed (campement plié, armée en marche)",
+    "region": "Medieval army on the march circa 1380, rolled,"
+  },
+  {
+    "id": "camp_butchery_rack",
+    "kind": "decor",
+    "prompt": "camp butchery rack with hanging carcasses on a wooden frame, a chopping block and blood bucket, no people, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.5,
+      "class": "prop"
+    },
+    "target": "army_camp:butchery",
+    "region": "Medieval army camp circa 1380, rough,"
+  },
+  {
+    "id": "camp_fire_signal_pile",
+    "kind": "decor",
+    "prompt": "stacked firewood bonfire pile with an iron basket on a tripod, unlit, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2,
+      "class": "prop"
+    },
+    "target": "army_camp:beacon (feux d'alerte)",
+    "region": "Medieval army camp circa 1380, charred,"
+  },
+  {
+    "id": "fig_messenger_rider",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a courier on a lean riding horse with a leather dispatch bag and a plain hat, arms raised, hands off the reins",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2.4,
+      "class": "figure"
+    },
+    "target": "folk:rider (messagers à cheval)"
+  },
+  {
+    "id": "fig_pilgrim_scallop",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a pilgrim in a coarse grey cloak with a wide hat, a scallop shell badge, a bundle on the back, staff absent, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:pilgrim (pèlerins)"
+  },
+  {
+    "id": "fig_peddler_pack",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a peddler with a large wooden-framed backpack of cloth, pots and ribbons, simple hood, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:peddler (colporteurs)"
+  },
+  {
+    "id": "fig_drover_herdsman",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a herdsman in a short wool tunic with a felt hat, a hooded cloak, a leather bag at the belt, crook absent, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:drover (troupeaux menés)"
+  },
+  {
+    "id": "fig_camel_driver",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a camel driver in a loose long robe and head wrap, sandals, water skin on the belt, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:camel_driver (caravanes)"
+  },
+  {
+    "id": "fig_litter_bearer",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a bearer in a plain livery tunic and cap with a shoulder pad, bare forearms, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:litter_bearer (litières)"
+  },
+  {
+    "id": "fig_sailor_deckhand",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a sailor in a short canvas tunic and cap, barefoot, rope belt, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "fleet:crew (équipage des navires, pont)"
+  },
+  {
+    "id": "fig_sled_driver_north",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a northern sled driver in a fur-trimmed hood and wool coat with felt boots, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "folk:sled_driver (Scandinavie, Russie)"
+  },
+  {
+    "id": "fig_army_cook_sutler",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: an army sutler in a stained apron over a wool tunic with a cap, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.7,
+      "class": "figure"
+    },
+    "target": "army_camp:sutler (cuisiniers et vivandiers)"
+  },
+  {
+    "id": "fig_camp_follower_washerwoman",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a woman camp follower in a long wool dress, apron and linen head cover, arms raised",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.65,
+      "class": "figure"
+    },
+    "target": "army_camp:follower (suivantes de camp)"
+  },
+  {
+    "id": "fig_army_lord_mounted_byzantine",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Byzantine commander on a bay horse in a plain tunic, fur-trimmed cap and mail shirt, arms raised, hands off the reins",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2.7,
+      "class": "figure"
+    },
+    "target": "army_figures:lord (cultures byzantines)"
+  },
+  {
+    "id": "fig_army_lord_mounted_islamic",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Mamluk or Moorish commander on a horse in a quilted coat and mail with a turban, arms raised, hands off the reins",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2.7,
+      "class": "figure"
+    },
+    "target": "army_figures:lord (cultures islamiques)"
+  },
+  {
+    "id": "fig_army_lord_mounted_steppe",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Tatar or Turkic commander on a stocky steppe horse in a quilted coat and fur cap, arms raised, hands off the reins",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2.5,
+      "class": "figure"
+    },
+    "target": "army_figures:lord (cultures de steppe)"
+  },
+  {
+    "id": "fig_army_lord_mounted_rus",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Russian boyar commander on a horse in a mail coat and pointed helmet with fur cuffs, arms raised, hands off the reins",
+    "seeds": 2,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2.7,
+      "class": "figure"
+    },
+    "target": "army_figures:lord (cultures rus)"
+  }
+]

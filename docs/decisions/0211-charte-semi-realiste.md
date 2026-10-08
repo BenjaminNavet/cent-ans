@@ -27,6 +27,8 @@ clarté ni contrôle, budgets triangles limités aux figurines.
   seulement. Lot DA3 et « marqueurs de carte » (§ 8) abandonnés.
 - **D5** : saturation S ≤ 0,40 hors livrées = règle, contrôlée automatiquement à l'étape image
   (moyenne et percentile 95 HSV sur le détouré, hors pixels vert/bleu purs de livrée), pas sur le rendu.
+  Calibrage au banc DN (2026-10-08) : le seuil 0,40 vaut pour la **moyenne** ; le percentile 95 est
+  plafonné à 0,90, car le bois et la pierre chauds, corrects à l'œil, mesurent p95 0,68-0,86.
 
 Application : bible révisée (§ 1 bis, 3.3, 6, 7, 8, 10, nouveau § 14), `style_prefix`/`style_suffix`
 de `data/art/ga3_decor.json`, `docs/pipeline-assets-3d.md` § 2.

@@ -271,3 +271,13 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul TB |
 |---|---|---|---|---|---|
+
+## Nuit DN (08→09/10) — fal.ai TRELLIS, enveloppe propre ≤ 10 $ (ADR 0210)
+
+Journal automatique : `~/dev/cent-ans-raw/dn/fal_spend.jsonl` (une ligne par appel `fal-ai/trellis`, 0,02 $).
+Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est périmée).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul DN |
+|---|---|---|---|---|---|
+| 2026-10-08 | fal.ai | banc `dn_batch.py` : test de solde (cavalier I3D) + moulin + chariot, 3 × `fal-ai/trellis` | 0,06 $ | 0,06 $ | 0,06 $ |
+| 2026-10-08 | fal.ai | comparatif cavalier `fal-ai/trellis` (1024) vs `fal-ai/trellis-2` (1024, 100 k faces), `cent-ans-raw/cmp-trellis/cav/` | 0,32 $ | 0,32 $ | 0,38 $ |

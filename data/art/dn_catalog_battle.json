@@ -10,7 +10,8 @@
       "target_width_m": 3,
       "class": "siege_engine"
     },
-    "target": "siege:mangonel"
+    "target": "siege:mangonel",
+    "region": "Medieval European siege works circa 1340, crude,"
   },
   {
     "id": "bombard",
@@ -23,7 +24,8 @@
       "target_width_m": 4,
       "class": "siege_engine"
     },
-    "target": "siege:bombard"
+    "target": "siege:bombard",
+    "region": "Medieval European siege works circa 1400, heavy,"
   },
   {
     "id": "siege_tower",
@@ -36,7 +38,8 @@
       "target_height_m": 12,
       "class": "siege_engine"
     },
-    "target": "siege:siege_tower"
+    "target": "siege:siege_tower",
+    "region": "Medieval European siege works circa 1340, crude,"
   },
   {
     "id": "scaling_ladder",
@@ -49,7 +52,8 @@
       "target_width_m": 8,
       "class": "siege_engine"
     },
-    "target": "siege:ladder"
+    "target": "siege:ladder",
+    "region": "Medieval European siege works circa 1340, crude,"
   },
   {
     "id": "mantlet",
@@ -62,7 +66,8 @@
       "target_height_m": 2,
       "class": "siege_engine"
     },
-    "target": "siege:mantlet"
+    "target": "siege:mantlet",
+    "region": "Medieval European siege works circa 1340, crude,"
   },
   {
     "id": "curtain_wall_segment",
@@ -75,7 +80,8 @@
       "target_width_m": 6,
       "class": "major_building"
     },
-    "target": "battle_siege:wall"
+    "target": "battle_siege:wall",
+    "region": "Medieval fortified France circa 1340, imposing,"
   },
   {
     "id": "round_tower",
@@ -88,7 +94,8 @@
       "target_height_m": 14,
       "class": "major_building"
     },
-    "target": "battle_siege:tower"
+    "target": "battle_siege:tower",
+    "region": "Medieval fortified France circa 1340, imposing,"
   },
   {
     "id": "town_gate",
@@ -101,7 +108,8 @@
       "target_height_m": 12,
       "class": "major_building"
     },
-    "target": "battle_siege:gate"
+    "target": "battle_siege:gate",
+    "region": "Medieval fortified France circa 1340, imposing,"
   },
   {
     "id": "wall_breach_rubble",
@@ -114,7 +122,8 @@
       "target_width_m": 5,
       "class": "prop"
     },
-    "target": "battle_siege:breach"
+    "target": "battle_siege:breach",
+    "region": "Medieval fortified France circa 1340, ruined,"
   },
   {
     "id": "hoarding",
@@ -127,7 +136,8 @@
       "target_width_m": 6,
       "class": "major_building"
     },
-    "target": "battle_siege:hoarding"
+    "target": "battle_siege:hoarding",
+    "region": "Medieval fortified France circa 1340, austere,"
   },
   {
     "id": "townhouse_siege",
@@ -140,7 +150,8 @@
       "target_width_m": 6,
       "class": "house"
     },
-    "target": "battle_siege:townhouse"
+    "target": "battle_siege:townhouse",
+    "region": "Medieval urban northern France circa 1340, narrow,"
   },
   {
     "id": "bridge_stone_arch",
@@ -153,7 +164,8 @@
       "target_width_m": 14,
       "class": "bridge"
     },
-    "target": "battle_siege:bridge"
+    "target": "battle_siege:bridge",
+    "region": "Medieval France circa 1340, sturdy,"
   },
   {
     "id": "field_rocks",
@@ -231,7 +243,8 @@
       "target_width_m": 8,
       "class": "prop"
     },
-    "target": "battle_kit:pavilion"
+    "target": "battle_kit:pavilion",
+    "region": "Medieval European army camp circa 1340, lordly,"
   },
   {
     "id": "field_tent",
@@ -244,7 +257,8 @@
       "target_width_m": 3,
       "class": "prop"
     },
-    "target": "battle_kit:tent"
+    "target": "battle_kit:tent",
+    "region": "Medieval European army camp circa 1340, makeshift,"
   },
   {
     "id": "baggage_wagon",
@@ -257,7 +271,8 @@
       "target_width_m": 6,
       "class": "prop"
     },
-    "target": "battle_kit:wagon"
+    "target": "battle_kit:wagon",
+    "region": "Medieval European army train circa 1340, rugged,"
   },
   {
     "id": "campfire_cauldron",
@@ -270,7 +285,8 @@
       "target_width_m": 1,
       "class": "prop"
     },
-    "target": "battle_kit:campfire"
+    "target": "battle_kit:campfire",
+    "region": "Medieval European army camp circa 1340, makeshift,"
   },
   {
     "id": "pavise_stack",
@@ -283,7 +299,8 @@
       "target_width_m": 2,
       "class": "prop"
     },
-    "target": "battle_kit:stores"
+    "target": "battle_kit:stores",
+    "region": "Medieval European army camp circa 1340, makeshift,"
   },
   {
     "id": "wayside_cross",
