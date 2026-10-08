@@ -284,3 +284,6 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : images Z-Image fal (`fal-ai/z-image/turbo`), 285 appels | 1.43 $ | 1.43 $ | 1.81 $ |
 | 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : vues dos/côté `fal-ai/flux-2/edit`, 68 appels | 1.63 $ | 1.63 $ | 3.44 $ |
 | 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : 3D `fal-ai/trellis` / `trellis/multi`, 190 appels | 3.80 $ | 3.80 $ | 7.24 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : images Z-Image fal (`fal-ai/z-image/turbo`), 257 appels | 1.28 $ | 1.28 $ | 8.52 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : vues dos/côté `fal-ai/flux-2/edit`, 175 appels | 4.20 $ | 4.20 $ | 12.72 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : 3D `fal-ai/trellis` / `trellis/multi`, 205 appels | 4.10 $ | 4.10 $ | 16.82 $ |

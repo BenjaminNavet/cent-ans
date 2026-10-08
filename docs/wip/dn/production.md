@@ -8,13 +8,13 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 
 ## Fait
 - campagne : 38 objets ingérés + table `dn_campaign_models.json` remplie (villes, villages, châteaux, abbaye).
-- nature (1re graine) et animaux de map_extra (1re graine) ingérés ; secondes graines en cours pour les refusés D5.
+- nature, animaux et env_* de map_extra, décors de bataille : ingérés (manifeste), refusés D5 repassés avec 2 graines puis `--charter warn` (animaux/arbres naturellement chauds, s_mean 0,41-0,42 > 0,40 ; l'étalonnage d'ingestion plafonne la saturation).
 
 ## En cours
-- env_* de map_extra, battle (décors), secondes graines nature / animaux.
+- architecture, mobile, economy (fal en cours, 1 graine, multi-vues).
 
 ## Restant
-architecture, mobile, economy, nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
+nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
 
 ## Ratés / retirés
 - ship_nef (galion à 3 mâts, anachronique pour 1340) retiré.
