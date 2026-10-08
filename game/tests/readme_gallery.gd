@@ -12,7 +12,7 @@ const WIDTH := 1600
 const BATTLE := "res://scenes/battle/battle.tscn"
 const MAP := "res://scenes/campaign_map.tscn"
 
-## Nord de la France et Manche (px carte), distance de la vue régionale de `po3_shot.gd`.
+## Nord de la France et Manche (px carte).
 const CAMPAIGN_FOCUS := "--focus=2180,3050,491"
 
 

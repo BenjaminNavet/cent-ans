@@ -22,10 +22,6 @@ const MAX_QUEUE := 2
 ## Une réplique qui attend la fermeture d'une fenêtre est oubliée au-delà.
 const MAX_WAIT_S := 120.0
 const BLOCK_CHECK_S := 0.2
-## Largeur de la bulle et place (bord gauche, au-dessus du bas d'écran : hors des boutons
-## d'action du panneau de province, de la barre d'unités et des ordres du chef).
-const BUBBLE_WIDTH := 420.0  # plus utilisé pour la place (zone `TOASTS`)
-const BUBBLE_BOTTOM := 0.62
 
 var silent := false
 ## Faux en capture et en test : les « premières fois » ne sont pas enregistrées.

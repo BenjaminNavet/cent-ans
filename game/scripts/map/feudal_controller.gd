@@ -605,7 +605,7 @@ func _process(delta: float) -> void:
 		advance_tutorial()
 
 
-# --- Captures (`campaign_map.gd --stage=feudal_*`, `tests/fe_shot.gd`) ------------------------
+# --- Captures (`campaign_map.gd --stage=feudal_*`) ------------------------
 
 
 ## Mise en scène : arbre ouvert sur un vassal (actions visibles), filtre « Féodalité » cadré sur

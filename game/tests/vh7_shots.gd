@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
-## défaut est `maquette`, voir `gc_shots.gd`).
+## défaut est `maquette`).
 ## Captures et mesure du lot VH7 (Orléans vers 1340-1429 à l'échelle 1:1, ADR 0078) : vue
 ## stratégique (colonie ordinaire), palier vallée, palier site, pont et Tourelles, Sainte-Croix,
 ## enceinte ; mesure d'images par seconde au-dessus d'Orléans et de Rouen à la même distance.

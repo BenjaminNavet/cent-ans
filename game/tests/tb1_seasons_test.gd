@@ -25,7 +25,7 @@ func _init() -> void:
 
 ## Point 1 : delta saisonnier appliqué par-dessus la carte de couleur (SS2) et les matières (HB3).
 ## Les réglages existent, et l'écart de saison est bien passé aux deux crochets : il n'est plus
-## effacé par la carte (les chiffres de rendu viennent de `ss_shot.gd --stats --season=`).
+## effacé par la carte.
 func _check_ground_delta() -> bool:
 	var ok := true
 	var uniforms := _uniforms(TERRAIN_SHADER)
