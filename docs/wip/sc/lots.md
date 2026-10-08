@@ -186,3 +186,26 @@ MA12 settlement_controller stage_screenshot/morts -90
 TL1 proto_moteur, experiments, paris_v2_author, disk_cleanup -19.4k ; TL2 9 modules one-shot -1.3k ; TL3 map_markers + *_raw (après TL6) -26 Mo ; TL4 GA3/HB blender -6.2k ; TL9 world_frame reframe -300  => vague 1 (tl-del)
 TL8 test_schemas paramétré -2k => vague 1 (tl-schemas)
 TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k (+pydantic) ; TL7 audio/UI art gen -5.9k [ADR] ; TL10 cli split (après) ; TL11=BT3 ; TL12 battle_skinned vs fine doublons ; TL13 kit_geometry ; TL14 paths.py/imaging.py (dernier)
+
+## MS — scripts divers (audio, codex, debug, dev, sim, visual, assets)
+- MS1 suppression CampaignSimMock + replis SimFacade (`is_real`, `engine`) + gardes `has_method` de campaign_map (gelé FL) → = lot vague 1 `mock` ; reste campaign_map après FL.
+- MS2 suppression MapBench/PerfProbe/`--bench-map`/gen_synthetic_map (-1100 l) → touche map_bench.gd et campaign_map.gd (gelés FL) : après FL.
+- MS3 helper unique `data_dir()` + `load_json` → = lot vague 1 `jsondata` ; étendre ensuite aux fichiers battle/ui restants.
+- MS4 codex_bubbles : (a) extraire BubbleLayout / fils d'Ariane, (b) `set_process` seulement si bulles. (c) suppression repliement/verrou Alt REFUSÉE (IB approuvé par le joueur).
+- MS5 VoicePool commun (UiSounds/BattleAudio/AudioDirector), volumes dans Settings seul, accesseurs test-only, EVENT_SFX en JSON (-200 l).
+- MS6 render_quality PRESETS → data/fx/render_quality.json + schéma (-130 l).
+- MS7 assets sans référence : third_party/{vegetation,characters,animals}, quaternius_medieval_village (54 Mo), textures/buildings brutes (26 Mo, entrées build_textures.py) : vérifier SOURCE.md et tools/blender* avant.
+- MS8 LUT d'étalonnage (atmosphere_library.grade_lut) : port Rust ou précuisson.
+- MS9 release_journey.gd : retirer options A/B (`--map-ab`, `--ab-configs`, `--uncapped`) (-250 l).
+- MS10 passe commentaires visual/ + audio/, constantes battle_audio → sound_bank.json (-150 l).
+- Morts : advisor.gd BUBBLE_WIDTH/BUBBLE_BOTTOM ; ~20 accesseurs test-only (liste dans rapport MS).
+
+## DT — data/ et schémas
+- DT1 test de conformité paramétré `data → schema` (-2500 l) → = lot vague 1 `tlschemas` ; y ajouter les 4 schémas orphelins (DT8).
+- DT2 relief_shade_[0-3].png (131 Mo) : repli quand le BC5 manque → supprimer repli (relief_landcover.gd, export_data.py) et dé-suivre.
+- DT3 fusion landmarks v1→v2 (-2500 l GDScript) : change l'aspect des maquettes (GC approuvé) et main a des modifs non commitées sur landmarks_v2 → REPORTÉ (pas dans ce chantier sans vérif).
+- DT4 chargeur Rust GDExtension pour rivières/routes/côte/provinces (22 Mo JSON parsés en GDScript, provinces.geojson parsé 3×) : gros gain de chargement ; touche map/ (après FL pour la partie campaign_map).
+- DT5 defs communes (`color_hex`, `rgb3`, `snake_id`, refs ids) dans common.schema.json (-500 l JSON) ; après DT1.
+- DT6 sortir data/map/height de git → REFUSÉ (le clone doit rester jouable hors ligne).
+- DT7 codex : bundle généré au lieu de 477 fichiers lus au démarrage.
+- DT8 schémas town_footprint, forced_sea_edges ; brancher les 4 schémas orphelins.
