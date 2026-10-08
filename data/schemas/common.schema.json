@@ -4,6 +4,11 @@
   "title": "Définitions communes",
   "description": "Types partagés par tous les schémas de données de Cent Ans. Les autres schémas y font référence via `common.schema.json#/$defs/...`.",
   "$defs": {
+    "snake_id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "color_hex": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "rgb3": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "rgb255": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 }, "minItems": 3, "maxItems": 3 },
+    "vec3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
     "faction_id": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
     "province_id": { "type": "string", "pattern": "^prov_[a-z0-9_]+$" },
     "title_id": { "type": "string", "pattern": "^tit_[a-z0-9_]+$" },

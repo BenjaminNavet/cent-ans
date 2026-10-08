@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/forced_sea_edges.schema.json",
+  "title": "Arêtes maritimes forcées du graphe des colonies",
+  "description": "Fichier data/map/forced_sea_edges.json : traversées ajoutées par `cent-ans geo settlements` / `geo roads` après la génération normale (coût = 100 + km à vol d'oiseau).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "a": { "$ref": "common.schema.json#/$defs/settlement_id" },
+          "b": { "$ref": "common.schema.json#/$defs/settlement_id" },
+          "note": { "type": "string" }
+        },
+        "required": ["a", "b"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["edges"],
+  "additionalProperties": false
+}

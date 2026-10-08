@@ -38,8 +38,8 @@
       "properties": {
         "blazon": { "type": "string", "description": "Blasonnement en français héraldique." },
         "description": { "type": "string", "description": "Description en français courant." },
-        "primary_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
-        "secondary_color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "primary_color": { "$ref": "common.schema.json#/$defs/color_hex" },
+        "secondary_color": { "$ref": "common.schema.json#/$defs/color_hex" },
         "uncertain": { "type": "boolean", "default": false },
         "note": { "type": "string" }
       },

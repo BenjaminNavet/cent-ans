@@ -19,7 +19,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "faction": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+          "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
           "names": { "$ref": "#/$defs/names", "description": "Noms sans port d'attache, tirés dans l'ordre (décalé par la graine de la bataille)." },
           "ports": {
             "type": "object",

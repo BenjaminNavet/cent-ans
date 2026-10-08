@@ -10,7 +10,7 @@
     "formation": {
       "type": "object",
       "properties": {
-        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Clé stable (commandes, scénarios, replays)." },
+        "key": { "description": "Clé stable (commandes, scénarios, replays).", "$ref": "common.schema.json#/$defs/snake_id" },
         "name": { "type": "string", "minLength": 1, "description": "Nom historique (infobulle, menu)." },
         "short": { "type": "string", "minLength": 1, "maxLength": 12, "description": "Libellé court (bouton, carte d'unité)." },
         "description": { "type": "string", "minLength": 40, "description": "Contexte historique pour l'infobulle ; dire quand l'usage est débattu." },

@@ -57,7 +57,7 @@
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
           "name": { "type": "string", "minLength": 1 },
-          "unit": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+          "unit": { "$ref": "common.schema.json#/$defs/unit_type_id" },
           "regions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
           "from": { "type": "integer", "minimum": 1300, "maximum": 1500 },
           "until": { "type": "integer", "minimum": 1300, "maximum": 1500 },

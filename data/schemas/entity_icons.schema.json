@@ -7,7 +7,7 @@
   "required": ["version", "model", "budget_cap_usd", "size", "frame", "picture", "crop", "generation", "icons"],
   "additionalProperties": false,
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "colour": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
     "px": {"type": "number", "minimum": 0, "maximum": 16},
     "entry": {

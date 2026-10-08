@@ -105,7 +105,7 @@
         "opacity": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
       }
     },
-    "rgb255": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 0, "maximum": 255}},
+    "rgb255": { "$ref": "common.schema.json#/$defs/rgb255" },
     "point": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
     "polygon": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/point"}},
     "shape": {

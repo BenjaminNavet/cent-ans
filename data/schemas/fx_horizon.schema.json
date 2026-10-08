@@ -5,7 +5,7 @@
   "description": "Fichier data/fx/horizon.json (lot EP2, ADR 0032) : relief réel lointain, brume, panoramas peints et silhouettes, lus par game/scripts/battle/battle_horizon.gd ; invites des panoramas lues par tools/cent_ans_tools/horizon_panoramas.py. Aucune règle de jeu.",
   "type": "object",
   "$defs": {
-    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "weather_map": {
       "type": "object",
       "properties": {

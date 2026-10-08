@@ -7,7 +7,7 @@
   "required": ["albedo_size", "normal_size", "tile_screen_px", "layers", "macro", "water"],
   "additionalProperties": false,
   "$defs": {
-    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "vec2": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}
   },
   "properties": {
@@ -24,7 +24,7 @@
         "additionalProperties": false,
         "properties": {
           "id": {"enum": ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]},
-          "poly_haven_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "poly_haven_id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "mean_linear": {"$ref": "#/$defs/rgb"}
         }
       }

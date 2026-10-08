@@ -84,7 +84,7 @@
       "required": ["clip", "default", "family", "loop", "parts"],
       "additionalProperties": false,
       "properties": {
-        "clip": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "clip": { "$ref": "common.schema.json#/$defs/snake_id" },
         "default": {"type": "boolean"},
         "family": {"enum": ["melee", "polearm", "bow", "cheer"]},
         "loop": {"type": "boolean"},
@@ -100,7 +100,7 @@
           "additionalProperties": false,
           "properties": {
             "aim": {"enum": ["weapon", "hands"]},
-            "axis": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+            "axis": { "$ref": "common.schema.json#/$defs/vec3" },
             "left_hand": {"type": "boolean"}
           }
         },

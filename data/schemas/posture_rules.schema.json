@@ -19,7 +19,7 @@
         "base_chance": { "$ref": "#/$defs/share" },
         "per_skill": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Chance ajoutée par point de compétence d'embuscade du général (max du Commandement et de l'intrigue)." },
         "scout_malus": { "$ref": "#/$defs/share", "description": "Retiré × part d'éclaireurs (cavalerie légère) de la victime." },
-        "scout_unit_types": { "type": "array", "items": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" }, "uniqueItems": true },
+        "scout_unit_types": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/unit_type_id" }, "uniqueItems": true },
         "chance_min": { "$ref": "#/$defs/share" },
         "chance_max": { "$ref": "#/$defs/share" },
         "terrain_bonus": {

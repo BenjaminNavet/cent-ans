@@ -5,7 +5,7 @@
   "description": "Fichier data/fx/unit_looks.json (lot OMR R5) : rendu seulement, lu par game/scripts/battle/battle_unit_looks.gd.",
   "type": "object",
   "$defs": {
-    "colour": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "colour": { "$ref": "common.schema.json#/$defs/color_hex" },
     "look": {
       "type": "object",
       "properties": {

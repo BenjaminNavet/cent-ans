@@ -80,10 +80,7 @@
   },
   "additionalProperties": false,
   "$defs": {
-    "rgb": {
-      "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 },
-      "minItems": 3, "maxItems": 3
-    },
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "by_importance": {
       "type": "array", "items": { "type": "number", "minimum": 0 },
       "minItems": 7, "maxItems": 7

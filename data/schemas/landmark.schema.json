@@ -5,9 +5,9 @@
   "description": "Fichier data/landmarks/<id>.json (lot L1) : plan d'une ville emblématique (Paris, Londres…) rendue par une maquette dédiée au lieu de la maquette générique de sa colonie. Coordonnées locales en mètres réels : x vers l'est, y vers le nord (nord vrai), origine = `anchor.lonlat`. Le générateur Blender (`tools/blender_scripts/landmark_city.py`) déforme ce plan par une loupe radiale (`scale`) pour exagérer le centre, pose les monuments à leur propre échelle et remplit les quartiers de maisons. Rendu seulement : aucune règle de jeu.",
   "type": "object",
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "name": { "type": "string", "minLength": 1 },
-    "settlement": { "type": "string", "pattern": "^set_[a-z0-9_]+$", "description": "Colonie dont la maquette est remplacée." },
+    "settlement": { "description": "Colonie dont la maquette est remplacée.", "$ref": "common.schema.json#/$defs/settlement_id" },
     "period": { "type": "string", "description": "État représenté, en français (ex. « vers 1340-1380 »)." },
     "province": { "type": "string", "pattern": "^prov_[a-z0-9_]+$", "description": "Province de la colonie (bataille de siège : la toile de fond s'affiche quand le siège a lieu dans cette province)." },
     "siege": {
@@ -55,7 +55,7 @@
         },
         "palette": {
           "type": "object",
-          "additionalProperties": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 }
+          "additionalProperties": { "$ref": "common.schema.json#/$defs/rgb3" }
         }
       },
       "additionalProperties": false
@@ -204,7 +204,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "name": { "type": "string" },
           "model": {
             "enum": ["notre_dame", "sainte_chapelle", "palais_cite", "louvre", "chatelet", "bastille", "market_halls", "church", "abbey", "keep", "windmill", "tower", "gothic_cathedral", "castle", "papal_palace", "belfry", "royal_palace", "gate_tower", "cog"],
@@ -247,7 +247,7 @@
       "maxItems": 2
     },
     "point": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
-    "point_width": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3, "description": "[x, y, largeur m]" },
+    "point_width": { "description": "[x, y, largeur m]", "$ref": "common.schema.json#/$defs/vec3" },
     "area": {
       "type": "object",
       "properties": {

@@ -95,10 +95,7 @@
     "sources": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9_]*$"
-      },
+      "propertyNames": { "$ref": "common.schema.json#/$defs/snake_id" },
       "additionalProperties": {
         "type": "object",
         "required": [
@@ -155,10 +152,7 @@
     },
     "flowers": {
       "type": "object",
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9_]*$"
-      },
+      "propertyNames": { "$ref": "common.schema.json#/$defs/snake_id" },
       "additionalProperties": {
         "type": "object",
         "required": [
@@ -240,10 +234,7 @@
         ],
         "additionalProperties": false,
         "properties": {
-          "name": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
-          },
+          "name": { "$ref": "common.schema.json#/$defs/snake_id" },
           "height_m": {
             "type": "number",
             "minimum": 0.05,
@@ -297,10 +288,7 @@
               ],
               "additionalProperties": false,
               "properties": {
-                "kind": {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9_]*$"
-                },
+                "kind": { "$ref": "common.schema.json#/$defs/snake_id" },
                 "count": {
                   "type": "integer",
                   "minimum": 1,
@@ -519,20 +507,14 @@
               "type": "array",
               "minItems": 2,
               "maxItems": 2,
-              "items": {
-                "type": "string",
-                "pattern": "^[a-z][a-z0-9_]*$"
-              },
+              "items": { "$ref": "common.schema.json#/$defs/snake_id" },
               "description": "Touffes des parcelles de blé."
             },
             "stubble_variants": {
               "type": "array",
               "minItems": 2,
               "maxItems": 2,
-              "items": {
-                "type": "string",
-                "pattern": "^[a-z][a-z0-9_]*$"
-              },
+              "items": { "$ref": "common.schema.json#/$defs/snake_id" },
               "description": "Touffes du chaume et des semis."
             },
             "wheat_height": {
@@ -599,16 +581,7 @@
     }
   },
   "$defs": {
-    "rgb": {
-      "type": "array",
-      "minItems": 3,
-      "maxItems": 3,
-      "items": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 255
-      }
-    },
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb255" },
     "layer": {
       "type": "object",
       "required": [
@@ -624,10 +597,7 @@
       ],
       "additionalProperties": false,
       "properties": {
-        "source": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$"
-        },
+        "source": { "$ref": "common.schema.json#/$defs/snake_id" },
         "count": {
           "type": "integer",
           "minimum": 1,
