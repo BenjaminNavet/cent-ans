@@ -495,11 +495,6 @@ impl Selector {
         }
     }
 
-    pub fn clear_pages(&mut self) {
-        self.pages.clear();
-        self.residency_version += 1;
-    }
-
     pub fn has_page(&self, key: i64) -> bool {
         self.pages.contains_key(&key)
     }
@@ -522,11 +517,6 @@ impl Selector {
             }
         }
         best.map_or(-1, |(_, _, key)| key)
-    }
-
-    /// Forgets the shown nodes (the GDScript side freed or hid them all).
-    pub fn clear_slots(&mut self) {
-        self.slots.clear();
     }
 
     pub fn items(&self) -> &[Item] {

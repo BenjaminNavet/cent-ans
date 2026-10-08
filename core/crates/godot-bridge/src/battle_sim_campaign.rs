@@ -244,11 +244,6 @@ impl CampaignSim {
         }
     }
 
-    #[func]
-    fn get_interactive_battles(&self) -> bool {
-        self.state.as_ref().is_some_and(|s| s.interactive_battles)
-    }
-
     /// Debug (smoke test, screenshots): puts `army` in siege of `province`
     /// (garrisoned if empty) and records a pending siege battle; returns its
     /// index or -1.

@@ -117,7 +117,7 @@ impl<'a> Battle<'a> {
                 .map(|s| s.id as usize)
                 .collect();
             for f in fireships {
-                if let Some(t) = strongest(&self.ships, side.other()) {
+                if let Some(t) = strongest(&self.ships, side.other(), rules) {
                     if self.rng.unit() < chance {
                         let target = &mut self.ships[t];
                         let resist = target.class.fire_resistance;
@@ -196,7 +196,7 @@ impl<'a> Battle<'a> {
                 continue;
             }
             let before = ship.fighting_men();
-            let killed = ship.take_losses(loss, rules.armor_vs_melee);
+            let killed = ship.take_losses(loss, rules, rules.armor_vs_melee);
             if before > 0.0 {
                 ship.morale = (ship.morale
                     - killed / before * 100.0 * rules.morale_per_loss_percent)
@@ -219,7 +219,7 @@ impl<'a> Battle<'a> {
                 .filter(|s| {
                     s.side == side && s.is_afloat() && !s.fireship && s.fighting_men() >= 1.0
                 })
-                .map(Ship::melee_power)
+                .map(|s| s.melee_power(self.rules))
                 .sum::<f64>()
         };
         let initial = |side: SideId| {
@@ -326,7 +326,8 @@ impl<'a> Battle<'a> {
                     .min(ships[i].crew[g].ammo);
                 ships[i].crew[g].ammo -= count;
                 let before = ships[t].fighting_men();
-                let killed = ships[t].take_losses(v.hits * count * luck, rules.armor_vs_ranged);
+                let killed =
+                    ships[t].take_losses(v.hits * count * luck, rules, rules.armor_vs_ranged);
                 if before > 0.0 {
                     let factor = combat::morale_factor(&ships[t], rules);
                     let morale = &mut ships[t].morale;
@@ -415,8 +416,8 @@ fn pair_ships(ships: &[Ship], rules: &NavalRules) -> Vec<(usize, usize)> {
             .collect();
         ids.sort_by(|&x, &y| {
             ships[y]
-                .melee_power()
-                .total_cmp(&ships[x].melee_power())
+                .melee_power(rules)
+                .total_cmp(&ships[x].melee_power(rules))
                 .then(x.cmp(&y))
         });
         ids
@@ -438,7 +439,7 @@ fn pair_ships(ships: &[Ship], rules: &NavalRules) -> Vec<(usize, usize)> {
             // Extra ships go for the enemy they can climb onto best.
             let appeal = |x: usize| {
                 climb_factor(ships[x].deck_height() - ships[i].deck_height(), rules)
-                    / ships[x].melee_power().max(rules.auto_min_power)
+                    / ships[x].melee_power(rules).max(rules.auto_min_power)
             };
             *small
                 .iter()
@@ -481,13 +482,13 @@ fn ram(ships: &mut [Ship], a: usize, b: usize, rules: &NavalRules) {
     ships[b].morale = (ships[b].morale - rules.ram_morale).max(0.0);
 }
 
-fn strongest(ships: &[Ship], side: SideId) -> Option<usize> {
+fn strongest(ships: &[Ship], side: SideId, rules: &NavalRules) -> Option<usize> {
     ships
         .iter()
         .filter(|s| s.side == side && s.is_afloat() && !s.fireship)
         .max_by(|a, b| {
-            a.melee_power()
-                .total_cmp(&b.melee_power())
+            a.melee_power(rules)
+                .total_cmp(&b.melee_power(rules))
                 .then(b.id.cmp(&a.id))
         })
         .map(|s| s.id as usize)
