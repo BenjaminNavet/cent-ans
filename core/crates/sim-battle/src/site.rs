@@ -13,6 +13,7 @@ use crate::field::{Weather, Zone};
 use crate::rng::BattleRng;
 use crate::scale::FieldSize;
 use crate::setup::BattleSeason;
+use crate::terrain_rules::TerrainRules;
 
 /// State of the ground at the time of the battle (season and weather).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -314,32 +315,7 @@ pub struct FieldSite {
 
 /// Tree density of the woods of a terrain, 0-1 (rendering).
 pub fn woodland(terrain: Terrain) -> f64 {
-    match terrain {
-        Terrain::Forest => 1.0,
-        Terrain::Bocage => 0.75,
-        Terrain::Hills => 0.7,
-        Terrain::Plains => 0.55,
-        Terrain::Mountains => 0.5,
-        Terrain::Heath => 0.35,
-        Terrain::Marsh => 0.3,
-        Terrain::Steppe => 0.1,
-        Terrain::Desert => 0.02,
-    }
-}
-
-/// Chance of a village or a farm on the field.
-fn village_chance(terrain: Terrain) -> f64 {
-    match terrain {
-        Terrain::Plains => 0.7,
-        Terrain::Bocage => 0.75,
-        Terrain::Hills => 0.5,
-        Terrain::Heath => 0.4,
-        Terrain::Forest => 0.35,
-        Terrain::Marsh => 0.35,
-        Terrain::Mountains => 0.3,
-        Terrain::Steppe => 0.25,
-        Terrain::Desert => 0.15,
-    }
+    TerrainRules::of(terrain).woodland
 }
 
 /// The features of the site, drawn by [`SiteFeatures::draw`].
@@ -445,7 +421,7 @@ impl SiteFeatures {
         }
         let wants_village = site
             .village
-            .unwrap_or_else(|| rng.unit() < village_chance(site.terrain));
+            .unwrap_or_else(|| rng.unit() < TerrainRules::of(site.terrain).village_chance);
         if wants_village {
             let farm = !matches!(site.village, Some(true)) && rng.unit() < 0.4;
             features.village = draw_village(farm, site.terrain, &features, occupied, rng);
@@ -574,10 +550,7 @@ fn draw_village(
 fn house_kind(terrain: Terrain, rng: &mut BattleRng) -> HouseKind {
     // Timber framing in the bocage and the plains of the north, cob and
     // thatch elsewhere.
-    let timbered = match terrain {
-        Terrain::Bocage | Terrain::Plains | Terrain::Forest => 0.5,
-        _ => 0.25,
-    };
+    let timbered = TerrainRules::of(terrain).timbered_share;
     if rng.unit() < timbered {
         HouseKind::Timbered
     } else {

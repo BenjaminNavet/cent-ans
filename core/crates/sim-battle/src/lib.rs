@@ -93,6 +93,7 @@ pub mod siege_layout;
 pub mod siege_layouts;
 pub mod sim;
 pub mod site;
+pub mod terrain_rules;
 pub mod time_of_day;
 pub mod town;
 pub mod unit;

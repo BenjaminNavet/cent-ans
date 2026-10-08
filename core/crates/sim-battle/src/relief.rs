@@ -24,17 +24,21 @@
 //! The anchor disc of each zone keeps its index in `forests` / `mud`, the
 //! extra lobes go to `forest_parts` / `mud_parts`.
 
+use data_model::util::splitmix_mix;
 use data_model::Terrain;
+use serde::{Deserialize, Serialize};
 
 use crate::field::{River, Zone};
 use crate::rng::BattleRng;
 use crate::scale::{FieldSize, GRID_RESOLUTION};
+use crate::terrain_rules::TerrainRules;
 
 /// Salt of the derived stream of the relief (lot R2).
 pub(crate) const RELIEF_STREAM: u64 = 0x5232;
 
 /// Style of the relief of a province terrain.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ReliefStyle {
     /// Amplitude (m, ±) of the large landforms.
     pub macro_amp: f64,
@@ -70,120 +74,7 @@ pub struct ReliefStyle {
 
 impl ReliefStyle {
     pub fn of(terrain: Terrain) -> ReliefStyle {
-        let base = ReliefStyle {
-            macro_amp: 3.0,
-            macro_wavelength: 700.0,
-            ridged: 0.0,
-            warp: 0.35,
-            micro_amp: 1.2,
-            micro_wavelength: 110.0,
-            valleys: (1, 1),
-            valley_depth: 4.0,
-            valley_width: 90.0,
-            scarps: (0, 2),
-            scarp_height: 1.8,
-            scarp_width: 8.0,
-            flights: true,
-            line_slope: 0.07,
-            defender_rise: 0.0,
-        };
-        match terrain {
-            // OM3 (ADR 0116): steppe and desert reuse the plains relief.
-            Terrain::Plains | Terrain::Steppe | Terrain::Desert => base,
-            Terrain::Heath => ReliefStyle {
-                macro_amp: 4.5,
-                macro_wavelength: 600.0,
-                ridged: 0.25,
-                warp: 0.45,
-                micro_amp: 1.1,
-                micro_wavelength: 90.0,
-                valleys: (1, 2),
-                valley_depth: 5.0,
-                valley_width: 80.0,
-                scarps: (0, 1),
-                scarp_height: 2.5,
-                line_slope: 0.08,
-                ..base
-            },
-            Terrain::Bocage => ReliefStyle {
-                macro_amp: 5.0,
-                macro_wavelength: 520.0,
-                ridged: 0.1,
-                warp: 0.4,
-                micro_wavelength: 100.0,
-                valleys: (1, 2),
-                valley_depth: 7.0,
-                valley_width: 100.0,
-                scarps: (1, 3),
-                scarp_height: 1.6,
-                scarp_width: 6.0,
-                line_slope: 0.08,
-                ..base
-            },
-            Terrain::Forest => ReliefStyle {
-                macro_amp: 5.5,
-                macro_wavelength: 560.0,
-                ridged: 0.2,
-                warp: 0.4,
-                micro_amp: 1.2,
-                micro_wavelength: 90.0,
-                valleys: (1, 2),
-                valley_depth: 6.0,
-                scarps: (0, 1),
-                scarp_height: 2.5,
-                scarp_width: 10.0,
-                flights: false,
-                line_slope: 0.09,
-                ..base
-            },
-            Terrain::Hills => ReliefStyle {
-                macro_amp: 12.0,
-                macro_wavelength: 650.0,
-                ridged: 0.55,
-                warp: 0.5,
-                micro_amp: 1.6,
-                micro_wavelength: 90.0,
-                valleys: (1, 2),
-                valley_depth: 12.0,
-                valley_width: 120.0,
-                scarps: (1, 2),
-                scarp_height: 5.0,
-                scarp_width: 12.0,
-                flights: false,
-                line_slope: 0.14,
-                defender_rise: 8.0,
-            },
-            Terrain::Mountains => ReliefStyle {
-                macro_amp: 26.0,
-                macro_wavelength: 700.0,
-                ridged: 0.8,
-                warp: 0.55,
-                micro_amp: 2.4,
-                micro_wavelength: 90.0,
-                valleys: (2, 2),
-                valley_depth: 22.0,
-                valley_width: 150.0,
-                scarps: (1, 3),
-                scarp_height: 9.0,
-                scarp_width: 14.0,
-                flights: false,
-                line_slope: 0.2,
-                defender_rise: 16.0,
-            },
-            Terrain::Marsh => ReliefStyle {
-                macro_amp: 1.0,
-                macro_wavelength: 600.0,
-                warp: 0.3,
-                micro_amp: 0.35,
-                micro_wavelength: 70.0,
-                valleys: (1, 2),
-                valley_depth: 1.4,
-                valley_width: 45.0,
-                scarps: (0, 0),
-                line_slope: 0.05,
-                ..base
-            },
-        }
+        TerrainRules::of(terrain).relief
     }
 }
 
@@ -211,15 +102,9 @@ const GRADIENTS: [(f64, f64); 16] = [
     (0.923_879_532_5, -0.382_683_432_4),
 ];
 
-fn mix64(mut z: u64) -> u64 {
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
-}
-
 fn lattice_hash(seed: u64, ix: i64, iz: i64) -> u64 {
-    let h = mix64(seed ^ (ix as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15));
-    mix64(h ^ (iz as u64).wrapping_mul(0xC2B2_AE3D_27D4_EB4F))
+    let h = splitmix_mix(seed ^ (ix as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15));
+    splitmix_mix(h ^ (iz as u64).wrapping_mul(0xC2B2_AE3D_27D4_EB4F))
 }
 
 fn fade(t: f64) -> f64 {

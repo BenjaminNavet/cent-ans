@@ -2,7 +2,7 @@
 //! facades facing the square, barrels, carts and woodpiles on the street
 //! side, the market (a well and groups of stalls leaving the streets open),
 //! the props of the suburbs and of the battle village. Deterministic from the
-//! houses (index and position, [`crate::town::hash01`]), never from the
+//! houses (index and position, [`crate::rng::hash01`]), never from the
 //! battle's random stream, so that laying them out shifts no other draw.
 //!
 //! A prop stands against the front of its house, back to the wall with a
@@ -10,10 +10,11 @@
 //! round the houses, so it never closes a street. Props of the market stand
 //! on the square with passages left open in front of every street.
 
+use crate::rng::hash01;
 use crate::siege::{House, SiegeWorks};
 use crate::siege_layouts::PlaceKind;
 use crate::site::Village;
-use crate::town::{hash01, Footprint, Prop, PropKind, TownRules};
+use crate::town::{Footprint, Prop, PropKind, TownRules};
 
 const SALT_COUNT: u64 = 0xB3_0001;
 const SALT_KIND: u64 = 0xB3_0002;

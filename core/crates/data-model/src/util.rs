@@ -21,12 +21,16 @@ pub fn segment_distance(p: [f32; 2], a: [f32; 2], b: [f32; 2]) -> f32 {
     dist(p, [a[0] + t * dx, a[1] + t * dy])
 }
 
+/// SplitMix64 output stage: spreads the bits of `z` (no increment).
+pub fn splitmix_mix(mut z: u64) -> u64 {
+    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    z ^ (z >> 31)
+}
+
 /// SplitMix64 finaliser (well spread bits from a plain hash).
-pub fn splitmix64(mut x: u64) -> u64 {
-    x = x.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    x = (x ^ (x >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    x = (x ^ (x >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    x ^ (x >> 31)
+pub fn splitmix64(x: u64) -> u64 {
+    splitmix_mix(x.wrapping_add(0x9E37_79B9_7F4A_7C15))
 }
 
 /// `text` with its first character lowercased.

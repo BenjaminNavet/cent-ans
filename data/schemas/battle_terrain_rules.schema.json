@@ -1,0 +1,1725 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_terrain_rules.schema.json",
+  "title": "Profils des terrains de bataille",
+  "description": "Fichier data/rules/battle_terrain.json (lot BB6) : relief, couvert, villages et semis de décor de chaque terrain de province. Lu par sim-battle (TerrainRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "terrains": {
+      "type": "object",
+      "properties": {
+        "plains": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "heath": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "bocage": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "forest": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "hills": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "mountains": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "marsh": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "steppe": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        },
+        "desert": {
+          "type": "object",
+          "properties": {
+            "relief": {
+              "type": "object",
+              "properties": {
+                "macro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Amplitude (m, ±) des grandes formes."
+                },
+                "macro_wavelength": {
+                  "type": "number",
+                  "minimum": 50,
+                  "maximum": 5000,
+                  "description": "Longueur d'onde (m) des grandes formes."
+                },
+                "ridged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Part de bruit en crêtes."
+                },
+                "warp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Déformation du domaine, en longueurs d'onde."
+                },
+                "micro_amp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Amplitude (m, ±) des micro-ondulations."
+                },
+                "micro_wavelength": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 1000,
+                  "description": "Longueur d'onde (m) des micro-ondulations."
+                },
+                "valleys": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de vallées (min, max)."
+                },
+                "valley_depth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Profondeur (m) d'une vallée à son débouché."
+                },
+                "valley_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 500,
+                  "description": "Demi-largeur (m) d'une vallée."
+                },
+                "scarps": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "Nombre de ruptures de pente (min, max)."
+                },
+                "scarp_height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Hauteur (m) d'une rupture de pente."
+                },
+                "scarp_width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "description": "Demi-largeur (m) de la partie raide."
+                },
+                "flights": {
+                  "type": "boolean",
+                  "description": "Les ruptures de pente forment des rangées parallèles (lynchets)."
+                },
+                "line_slope": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Pente maximale au centre des lignes de déploiement."
+                },
+                "defender_rise": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Élévation minimale (m) de la ligne du défenseur sur celle de l'attaquant."
+                }
+              },
+              "required": [
+                "macro_amp",
+                "macro_wavelength",
+                "ridged",
+                "warp",
+                "micro_amp",
+                "micro_wavelength",
+                "valleys",
+                "valley_depth",
+                "valley_width",
+                "scarps",
+                "scarp_height",
+                "scarp_width",
+                "flights",
+                "line_slope",
+                "defender_rise"
+              ],
+              "additionalProperties": false
+            },
+            "woodland": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Densité d'arbres des bois (rendu)."
+            },
+            "village_chance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Chance d'un village ou d'une ferme."
+            },
+            "timbered_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Part des maisons à colombage."
+            },
+            "scatter": {
+              "type": "object",
+              "properties": {
+                "hills": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Collines sur un champ standard."
+                },
+                "hill_height_m": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "description": "Hauteur maximale d'une colline (m)."
+                },
+                "forests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Bois sur un champ standard."
+                },
+                "mud": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50,
+                  "description": "Zones boueuses sur un champ standard."
+                }
+              },
+              "required": [
+                "hills",
+                "hill_height_m",
+                "forests",
+                "mud"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "relief",
+            "woodland",
+            "village_chance",
+            "timbered_share",
+            "scatter"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "plains",
+        "heath",
+        "bocage",
+        "forest",
+        "hills",
+        "mountains",
+        "marsh",
+        "steppe",
+        "desert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "terrains"
+  ],
+  "additionalProperties": false
+}
