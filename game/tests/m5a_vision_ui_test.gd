@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Test headless du lot M5a (vision par rayon) sur la vraie simulation et les vraies données :
-##  1. brouillard par case actif : texture de vue 512² (R8) posée sur le terrain et la minicarte,
+##  1. brouillard par case actif : texture de vue (R8, une case par cellule du cœur) posée sur le terrain et la minicarte,
 ##     une partie seulement de la carte vue ;
 ##  2. une armée étrangère placée hors de vue n'a ni marqueur ni point sur la minicarte ;
 ##  3. une armée du joueur placée à 15 km la révèle.
@@ -58,7 +58,7 @@ func _run() -> void:
 	var texture: ImageTexture = ctl.fog_texture
 	if _check(texture != null, "fog texture missing"):
 		var image := texture.get_image()
-		_check(image.get_width() == 512 and image.get_height() == 512, "fog texture should be 512², got %s" % [image.get_size()])
+		_check(image.get_width() >= 256 and image.get_height() >= 256, "fog texture should cover the map grid, got %s" % [image.get_size()])
 		_check(image.get_format() == Image.FORMAT_R8, "fog texture should be R8")
 	_check(ctl.seen_share > 0.0 and ctl.seen_share < 0.6, "part of the map only should be seen (%.3f)" % ctl.seen_share)
 	var terrain_material: ShaderMaterial = map.terrain.material
