@@ -107,13 +107,13 @@ pub(crate) fn defer_player_battle(
             EventKind::Battle,
             format!(
                 "Pendant le tour {}, bataille livrée{} : {} contre {} (résolution automatique).",
-                crate::events::de(&faction_name(data, &ai)),
+                crate::events::de(&data.faction_name(&ai)),
                 place.map_or_else(String::new, |p| format!(
                     " près de {}",
-                    crate::siege::settlement_name(data, &p)
+                    data.settlement_name(&p)
                 )),
-                faction_name(data, &attacker.faction),
-                faction_name(data, &defender.faction)
+                data.faction_name(&attacker.faction),
+                data.faction_name(&defender.faction)
             ),
         )
         .army(attacker_id)
@@ -139,9 +139,9 @@ pub(crate) fn defer_player_battle(
             EventKind::Battle,
             format!(
                 "Bataille en vue à {} : {} contre {}.",
-                crate::siege::settlement_name(data, &location),
-                faction_name(data, &attacker.faction),
-                faction_name(data, &defender.faction)
+                data.settlement_name(&location),
+                data.faction_name(&attacker.faction),
+                data.faction_name(&defender.faction)
             ),
         )
         .province(&province)
@@ -212,18 +212,6 @@ pub(crate) fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
         (Some(a), Some(d)) => state.is_at_war(&a.faction, &d.faction),
         _ => false,
     }
-}
-
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
 /// L3 (ADR 0026): the besieged town of a landmark city is drawn from its plan
@@ -357,7 +345,7 @@ pub(crate) fn side_setup(
     let forced_march = army.stance == crate::state::Stance::ForcedMarch;
     SideSetup {
         faction: army.faction.to_string(),
-        faction_name: faction_name(data, &army.faction),
+        faction_name: data.faction_name(&army.faction),
         army: id.to_string(),
         units,
         general,
@@ -382,12 +370,7 @@ fn trophies_event(
     if result.standards_taken.is_empty() {
         return None;
     }
-    let name = |faction: &FactionId| {
-        data.factions.get(faction).map_or_else(
-            || faction.to_string(),
-            |f| f.short_or_display_name().to_owned(),
-        )
-    };
+    let name = |faction: &FactionId| data.faction_name(faction);
     let taken = result.standards_taken.len();
     let what = if taken == 1 {
         "un étendard".to_owned()
@@ -508,7 +491,7 @@ impl CampaignState {
                     self.player_side_of(data, request)
                 };
                 let name =
-                    |f: Option<FactionId>| f.map_or_else(String::new, |f| faction_name(data, &f));
+                    |f: Option<FactionId>| f.map_or_else(String::new, |f| data.faction_name(&f));
                 PendingBattle {
                     index,
                     attacker: request.attacker.clone(),
@@ -552,7 +535,7 @@ impl CampaignState {
                 .map(|site| site.battle_crossing());
         let mut setup = BattleSetup {
             province: request.province.to_string(),
-            province_name: province_name(data, &request.province),
+            province_name: data.province_name(&request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
             river: crossing.is_some() || province.is_some_and(|p| !p.rivers.is_empty()),
             crossing,
@@ -685,12 +668,7 @@ impl CampaignState {
         // EP9: a refused battle (nobody engaged) is told as such; the
         // attacker withdraws like a beaten army, without rout or losses.
         if outcome.end == sim_battle::BattleEnd::Refused {
-            let name = |faction: &FactionId| {
-                data.factions.get(faction).map_or_else(
-                    || faction.to_string(),
-                    |f| f.short_or_display_name().to_owned(),
-                )
-            };
+            let name = |faction: &FactionId| data.faction_name(faction);
             events.push(
                 GameEvent::new(
                     EventKind::Battle,
@@ -763,10 +741,7 @@ impl CampaignState {
         province: &ProvinceId,
         events: &mut Vec<GameEvent>,
     ) {
-        let faction_name = data.factions.get(faction).map_or_else(
-            || faction.to_string(),
-            |f| f.short_or_display_name().to_owned(),
-        );
+        let faction_name = data.faction_name(faction);
         let alive_general = general.filter(|id| self.characters.get(*id).is_some_and(|c| c.alive));
         let text = match alive_general {
             Some(id) => {
@@ -823,7 +798,7 @@ impl CampaignState {
         let mut setup = BattleSetup {
             crossing: None,
             province: request.province.to_string(),
-            province_name: province_name(data, &request.province),
+            province_name: data.province_name(&request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
             river: false,
             season: battle_season(self.season),

@@ -186,24 +186,6 @@ pub struct CaptureDecisionView {
     pub options: Vec<CaptureOptionView>,
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
-fn building_name(data: &GameData, id: &BuildingId) -> String {
-    data.buildings
-        .get(id)
-        .map_or_else(|| id.to_string(), |b| b.name.display.clone())
-}
-
 fn scaled_u8(value: u8, share: f64) -> u8 {
     (f64::from(value) * share).round().clamp(0.0, 100.0) as u8
 }
@@ -352,7 +334,7 @@ pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId)
         let names: Vec<String> = effects
             .buildings_lost
             .iter()
-            .map(|b| building_name(data, b))
+            .map(|b| data.building_name(b))
             .collect();
         lines.push(format!("Bâtiments détruits : {}", names.join(", ")));
     }
@@ -387,7 +369,7 @@ pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId)
     if effects.victim_opinion != 0 {
         lines.push(format!(
             "Attitude de {} {:+}",
-            faction_name(data, previous),
+            data.faction_name(previous),
             effects.victim_opinion
         ));
     }
@@ -578,7 +560,7 @@ pub(crate) fn apply_outcome(
     if effects.papal_favor != 0 {
         crate::religion::change_favor(state, captor, effects.papal_favor);
     }
-    let place_name = crate::siege::settlement_name(data, settlement);
+    let place_name = data.settlement_name(settlement);
     let turns = outcome_rules(&data.capture_rules, outcome).map_or(0, |r| r.opinion_turns);
     let reason = match outcome {
         CaptureOutcome::Ransom => format!("A rançonné {place_name}"),
@@ -606,9 +588,9 @@ pub(crate) fn apply_outcome(
             state.add_modifier(&other, captor, effects.others_opinion, &reason, turns);
         }
     }
-    let who = faction_name(data, captor);
+    let who = data.faction_name(captor);
     let place_label = if kind == SettlementKind::City {
-        province_name(data, &province_id)
+        data.province_name(&province_id)
     } else {
         place_name.clone()
     };
@@ -646,9 +628,9 @@ impl CampaignState {
             .filter(|p| &p.faction == faction)
             .filter_map(|pending| {
                 let place = self.settlements.get(&pending.settlement)?;
-                let settlement_name = crate::siege::settlement_name(data, &pending.settlement);
-                let province_name = province_name(data, &place.province);
-                let previous_name = faction_name(data, &pending.previous);
+                let settlement_name = data.settlement_name(&pending.settlement);
+                let province_name = data.province_name(&place.province);
+                let previous_name = data.faction_name(&pending.previous);
                 let refusal = raze_refusal(self, data, &pending.settlement);
                 let options = CaptureOutcome::ALL
                     .into_iter()
@@ -676,7 +658,7 @@ impl CampaignState {
                 // RJ-c (ADR 0175): taking a place occupies it; possession
                 // changes only by treaty.
                 let is_city = self.province_city_id(&place.province) == Some(&pending.settlement);
-                let owner_name = faction_name(data, &place.owner);
+                let owner_name = data.faction_name(&place.owner);
                 let reminder = occupation_reminder(
                     is_city,
                     &province_name,

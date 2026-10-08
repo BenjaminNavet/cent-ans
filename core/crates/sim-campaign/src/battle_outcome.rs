@@ -11,6 +11,7 @@
 //! chronicle tells the class. The last classification is kept in
 //! [`CampaignState::last_battle_outcome`] for the UI.
 
+use data_model::util::lowercase_first;
 use data_model::{BattleOutcomeClass, BattleOutcomeRules, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
 
@@ -163,11 +164,7 @@ pub(crate) fn apply(
     // NT3: a won battle counts towards the player's missions.
     crate::missions::note_battle_won(state, winner.faction);
     if winner_class != BattleOutcomeClass::Victory || loser_class != BattleOutcomeClass::Defeat {
-        let name = |f: &FactionId| {
-            data.factions
-                .get(f)
-                .map_or_else(|| f.to_string(), |f| f.short_or_display_name().to_owned())
-        };
+        let name = |f: &FactionId| data.faction_name(f);
         let loser_label = rules.consequence(loser_class).label;
         let text = format!(
             "{} de l'ost {} à {place} ; {} pour l'ost {}.",
@@ -194,12 +191,4 @@ pub(crate) fn apply(
         rules.consequence(attacker_class).xp_multiplier,
         rules.consequence(defender_class).xp_multiplier,
     )
-}
-
-fn lowercase_first(text: &str) -> String {
-    let mut chars = text.chars();
-    match chars.next() {
-        Some(first) => first.to_lowercase().chain(chars).collect(),
-        None => String::new(),
-    }
 }

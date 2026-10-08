@@ -11,6 +11,7 @@
 //! Without either, the battle starts at [`TimeOfDayRules::default_hour`]
 //! (midday: full visibility, so the older battles are unchanged).
 
+use data_model::util::splitmix64;
 use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
@@ -138,7 +139,7 @@ impl TimeOfDayRules {
         if total == 0 {
             return self.default_hour;
         }
-        let mut roll = splitmix(key) % total;
+        let mut roll = splitmix64(key) % total;
         for entry in &self.campaign_draw {
             let weight = u64::from(entry.weight);
             if roll < weight {
@@ -150,14 +151,6 @@ impl TimeOfDayRules {
         }
         self.default_hour
     }
-}
-
-/// SplitMix64 finaliser (well spread bits from a plain hash).
-fn splitmix(mut x: u64) -> u64 {
-    x = x.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    x = (x ^ (x >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    x = (x ^ (x >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    x ^ (x >> 31)
 }
 
 /// Key of a campaign battle for [`TimeOfDayRules::campaign_hour`]: turn,

@@ -49,12 +49,6 @@ pub const PRESTIGE_TITLE: i32 = 10;
 const FALLBACK_MALE_NAMES: &[&str] = &["Jean", "Guillaume", "Pierre", "Robert", "Thomas"];
 const FALLBACK_FEMALE_NAMES: &[&str] = &["Jeanne", "Marguerite", "Isabelle", "Agnès", "Blanche"];
 
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
 // =========================================================================
 // Marriage (spec § 2 `propose_marriage`)
 // =========================================================================
@@ -806,7 +800,7 @@ pub(crate) fn resolve_births(
                 EventKind::Birth,
                 format!(
                     "Naissance de {full_name} ({}), {} de {}.",
-                    faction_name(data, &faction),
+                    data.faction_name(&faction),
                     if sex == Sex::Male { "fils" } else { "fille" },
                     state.character_name(data, &father_id)
                 ),
@@ -874,12 +868,12 @@ pub(crate) fn resolve_regencies(
                         if captive_ruler {
                             format!(
                                 "{ruler_name} est captif : une régence gouverne {}.",
-                                faction_name(data, &faction_id)
+                                data.faction_name(&faction_id)
                             )
                         } else {
                             format!(
                                 "{ruler_name} est mineur : une régence gouverne {}.",
-                                faction_name(data, &faction_id)
+                                data.faction_name(&faction_id)
                             )
                         },
                     )
@@ -892,7 +886,7 @@ pub(crate) fn resolve_regencies(
                     EventKind::Regency,
                     format!(
                         "{ruler_name} gouverne de nouveau : fin de la régence en {}.",
-                        faction_name(data, &faction_id)
+                        data.faction_name(&faction_id)
                     ),
                 )
                 .faction(&faction_id),

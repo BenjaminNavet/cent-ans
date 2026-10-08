@@ -111,8 +111,6 @@ pub const DONATION_FAVOR: u8 = 70;
 /// enemy without a claim on them: peace decides its fate (F4).
 pub const LAST_BASTIONS: usize = sim_campaign::negotiation::LAST_BASTIONS;
 
-const REBELS: &str = "fac_rebels";
-
 /// Everything the planner derives once per faction and turn.
 struct Context<'a> {
     state: &'a CampaignState,
@@ -196,7 +194,7 @@ impl<'a> Context<'a> {
     }
 
     fn at_war(&self) -> bool {
-        self.enemies.iter().any(|e| e.as_str() != REBELS)
+        self.enemies.iter().any(|e| !e.is_rebels())
     }
 
     fn upkeep(&self) -> i64 {
@@ -490,7 +488,7 @@ fn plan_turn_in(
     // OMR R1: the state is read-only for the whole plan; repeated questions
     // (faction power, neighbours) are answered from indexes built once.
     let _scope = state.planning_scope();
-    if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
+    if faction.is_rebels() || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
     let upkeep = (
@@ -1450,7 +1448,7 @@ fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId,
         .marriage_candidates(data, single)
         .into_iter()
         .filter_map(|id| state.characters.get(&id).map(|c| (id, c)))
-        .filter(|(_, c)| !c.captive && c.faction.as_str() != REBELS)
+        .filter(|(_, c)| !c.captive && !c.faction.is_rebels())
         .filter(|(_, c)| (c.age(year) - me.age(year)).abs() <= 15)
         .filter(|(_, c)| {
             let wife = if c.sex == data_model::Sex::Female {
@@ -1640,7 +1638,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let last_bastions: BTreeSet<ProvinceId> = ctx
         .enemies
         .iter()
-        .filter(|e| e.as_str() != REBELS)
+        .filter(|e| !e.is_rebels())
         .flat_map(|enemy| {
             let held: Vec<ProvinceId> = state
                 .provinces

@@ -14,6 +14,7 @@
 //!
 //! Purely visual for now: no rule reads it (ADR 0027).
 
+use data_model::util::splitmix64;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -112,7 +113,7 @@ pub fn compute_weather(
     let shift_x = rules.drift_deg_per_turn[0] * f64::from(turn);
     let shift_y = rules.drift_deg_per_turn[1] * f64::from(turn);
     let turn_seed =
-        splitmix(seed ^ 0x0057_4541_5448_4552_u64 ^ u64::from(turn).wrapping_mul(0x9E37_79B9));
+        splitmix64(seed ^ 0x0057_4541_5448_4552_u64 ^ u64::from(turn).wrapping_mul(0x9E37_79B9));
     let mut raw: Vec<(f64, &ProvinceId)> = provinces
         .iter()
         .map(|(id, province)| {
@@ -122,7 +123,7 @@ pub fn compute_weather(
             // Fronts that drift (fixed field) and change shape (per-turn field).
             let front = 0.62 * value_noise(x, y, seed)
                 + 0.38 * value_noise(x * 1.7 + 11.3, y * 1.7 - 4.1, turn_seed);
-            let local = unit(splitmix(turn_seed ^ hash_str(id.as_str())));
+            let local = unit(splitmix64(turn_seed ^ hash_str(id.as_str())));
             ((1.0 - jitter) * front + jitter * local, id)
         })
         .collect();
@@ -215,20 +216,13 @@ fn value_noise(x: f64, y: f64, seed: u64) -> f64 {
     let corner = |dx: f64, dy: f64| {
         let cx = (ix + dx) as i64 as u64;
         let cy = (iy + dy) as i64 as u64;
-        unit(splitmix(
+        unit(splitmix64(
             seed ^ cx.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ cy.wrapping_mul(0xC2B2_AE3D_27D4_EB4F),
         ))
     };
     let top = corner(0.0, 0.0) + (corner(1.0, 0.0) - corner(0.0, 0.0)) * sx;
     let bottom = corner(0.0, 1.0) + (corner(1.0, 1.0) - corner(0.0, 1.0)) * sx;
     top + (bottom - top) * sy
-}
-
-fn splitmix(mut z: u64) -> u64 {
-    z = z.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
 }
 
 fn unit(h: u64) -> f64 {

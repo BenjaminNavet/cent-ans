@@ -1423,10 +1423,7 @@ impl CampaignState {
         }
         if let Some(tech) = &unit_type.required_technology {
             if !faction_state.technologies.contains(tech) {
-                let name = data
-                    .technologies
-                    .get(tech)
-                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                let name = data.tech_name(tech);
                 return Some(format!("technologie requise : {name}"));
             }
         }

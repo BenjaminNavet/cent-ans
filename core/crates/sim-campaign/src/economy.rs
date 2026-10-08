@@ -633,7 +633,7 @@ pub(crate) fn resolve_economy(
     for faction_id in factions {
         // EQ1: the rebels are not a realm: they levy no taxes, pay no
         // upkeep and cannot go bankrupt (their garrisons live off the land).
-        if !state.factions[&faction_id].alive || crate::diplomacy::is_rebels(&faction_id) {
+        if !state.factions[&faction_id].alive || faction_id.is_rebels() {
             continue;
         }
         // H5: seigniorage is income, the recoinage of strong money upkeep.
@@ -770,7 +770,7 @@ pub(crate) fn resolve_economy(
                         format!(
                             "{} rejoignent la garnison de {}.",
                             unit_type.name.display,
-                            crate::siege::settlement_name(data, settlement_id)
+                            data.settlement_name(settlement_id)
                         ),
                     )
                     .province(&settlement.province)
@@ -964,9 +964,7 @@ pub(crate) fn resolve_attrition(
                     },
                     format!(
                         "{army_label} souffre de la disette en {} : {lost} hommes perdus.",
-                        data.provinces
-                            .get(&location)
-                            .map_or_else(|| location.to_string(), |p| p.name.display.clone())
+                        data.province_name(&location)
                     ),
                 )
                 .province(&location)

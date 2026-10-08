@@ -20,6 +20,7 @@
 //! Only the enemies the army's faction sees count (`Vision::sees_army`):
 //! the area must not betray a hidden ambush.
 
+use data_model::util::dist;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::GameData;
@@ -41,10 +42,6 @@ pub struct ReachableCells {
     pub budget: u32,
     /// Full movement of the next turn (base allowance, no stance bonus).
     pub next_budget: u32,
-}
-
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
 }
 
 impl CampaignState {
@@ -74,7 +71,7 @@ impl CampaignState {
             enemies
                 .iter()
                 .enumerate()
-                .filter(|(_, p)| distance(**p, point) <= zoc_px)
+                .filter(|(_, p)| dist(**p, point) <= zoc_px)
                 .map(|(i, _)| i)
                 .collect()
         };
@@ -87,7 +84,7 @@ impl CampaignState {
                 .collect();
             move |cell: Cell| {
                 let point = cell.center(grid);
-                active.iter().any(|p| distance(*p, point) <= zoc_px)
+                active.iter().any(|p| dist(*p, point) <= zoc_px)
             }
         };
 

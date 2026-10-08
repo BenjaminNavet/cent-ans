@@ -221,7 +221,7 @@ pub(crate) fn resolve_feudal(
                 EventKind::Diplomacy,
                 format!(
                     "{} atteint son objectif : {title}.",
-                    crate::diplomacy::faction_name(data, &progress.faction)
+                    data.faction_name(&progress.faction)
                 ),
             )
             .faction(&progress.faction),

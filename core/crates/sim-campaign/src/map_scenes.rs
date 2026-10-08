@@ -81,7 +81,7 @@ fn province_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mut 
         };
         let rebels_hold = state
             .province_controller(id)
-            .is_some_and(crate::diplomacy::is_rebels);
+            .is_some_and(|faction| faction.is_rebels());
         let unrest = weighted_unrest(&province.population);
         if rebels_hold {
             out.push(scene(

@@ -23,7 +23,7 @@ use data_model::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{faction_name, Claim, REBELS_FACTION};
+use crate::diplomacy::Claim;
 use crate::events::{EventKind, GameEvent};
 use crate::population::weighted_unrest;
 use crate::state::{Army, CampaignState, Season, Unit, TURNS_PER_YEAR};
@@ -168,23 +168,13 @@ pub struct DecisionView {
     pub presentation: EventPresentation,
 }
 
-fn season_of(season: Season) -> EventSeason {
+pub(crate) fn season_of(season: Season) -> EventSeason {
     match season {
         Season::Spring => EventSeason::Spring,
         Season::Summer => EventSeason::Summer,
         Season::Autumn => EventSeason::Autumn,
         Season::Winter => EventSeason::Winter,
     }
-}
-
-fn is_rebels(faction: &FactionId) -> bool {
-    faction.as_str() == REBELS_FACTION
-}
-
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
 // =========================================================================
@@ -226,7 +216,7 @@ impl CampaignState {
                     None => self
                         .factions
                         .get(&a)
-                        .is_some_and(|f| f.at_war_with.iter().any(|enemy| !is_rebels(enemy))),
+                        .is_some_and(|f| f.at_war_with.iter().any(|enemy| !enemy.is_rebels())),
                 }
             }
             Condition::Controls { faction, province } => {
@@ -359,7 +349,7 @@ impl CampaignState {
                     province_name: decision
                         .province
                         .as_ref()
-                        .map(|p| province_name(data, p))
+                        .map(|p| data.province_name(p))
                         .unwrap_or_default(),
                     presentation: event.presentation(),
                 })
@@ -415,13 +405,13 @@ impl CampaignState {
             explicit
                 .as_ref()
                 .filter(|f| Some(*f) != ctx.faction.as_ref())
-                .map(|f| format!(" ({})", faction_name(data, f)))
+                .map(|f| format!(" ({})", data.faction_name(f)))
                 .unwrap_or_default()
         };
         let where_ = |target: &Option<ProvinceRef>| match (target, &ctx.province) {
             (Some(ProvinceRef::All), _) | (None, None) => " (toutes vos provinces)".to_owned(),
             (Some(ProvinceRef::Id(p)), _) | (None, Some(p)) => {
-                format!(" ({})", province_name(data, p))
+                format!(" ({})", data.province_name(p))
             }
         };
         let who = |character: &CharacterRef, faction: &Option<FactionId>| {
@@ -505,24 +495,24 @@ impl CampaignState {
                 let towards = towards
                     .as_ref()
                     .or(ctx.faction.as_ref())
-                    .map(|f| format!(" envers {}", faction_name(data, f)))
+                    .map(|f| format!(" envers {}", data.faction_name(f)))
                     .unwrap_or_default();
                 format!(
                     "Attitude de {}{} {}",
-                    faction_name(data, faction),
+                    data.faction_name(faction),
                     towards,
                     signed(i64::from(*amount))
                 )
             }
             EventEffect::DeclareWar { a, b } => format!(
                 "Guerre : {} contre {}",
-                faction_name(data, a),
-                faction_name(data, b)
+                data.faction_name(a),
+                data.faction_name(b)
             ),
             EventEffect::Peace { a, b } => format!(
                 "Paix entre {} et {}",
-                faction_name(data, a),
-                faction_name(data, b)
+                data.faction_name(a),
+                data.faction_name(b)
             ),
             EventEffect::AddTrait {
                 character,
@@ -546,7 +536,7 @@ impl CampaignState {
                 let place = province
                     .as_ref()
                     .or(ctx.province.as_ref())
-                    .map(|p| format!(" en {}", province_name(data, p)))
+                    .map(|p| format!(" en {}", data.province_name(p)))
                     .unwrap_or_default();
                 format!(
                     "Nouvelle armée de {} unités{}{}",
@@ -562,10 +552,10 @@ impl CampaignState {
             } => {
                 let target_name = match kind {
                     ClaimKind::Throne => FactionId::new(target.clone())
-                        .map(|f| format!("le trône de {}", faction_name(data, &f)))
+                        .map(|f| format!("le trône de {}", data.faction_name(&f)))
                         .unwrap_or_else(|_| target.clone()),
                     ClaimKind::Province => ProvinceId::new(target.clone())
-                        .map(|p| province_name(data, &p))
+                        .map(|p| data.province_name(&p))
                         .unwrap_or_else(|_| target.clone()),
                 };
                 format!("Prétention sur {target_name}{}", faction_label(faction))
@@ -573,7 +563,7 @@ impl CampaignState {
             EventEffect::Loyalty { vassal, amount } => {
                 let who = vassal
                     .as_ref()
-                    .map(|v| format!(" de {}", faction_name(data, v)))
+                    .map(|v| format!(" de {}", data.faction_name(v)))
                     .unwrap_or_else(|| " des vassaux".to_owned());
                 format!("Loyauté{who} {}", signed(i64::from(*amount)))
             }
@@ -589,7 +579,7 @@ impl CampaignState {
             } => format!(
                 "Captivité{} aux mains de {}",
                 who(id, faction),
-                faction_name(data, captor)
+                data.faction_name(captor)
             ),
             EventEffect::ReleaseCharacter {
                 id,
@@ -629,10 +619,10 @@ impl CampaignState {
                 let text = match faction {
                     Some(f) => format!(
                         "{} passe à {}",
-                        province_name(data, province),
-                        faction_name(data, f)
+                        data.province_name(province),
+                        data.faction_name(f)
                     ),
-                    None => format!("{} rejoint le domaine", province_name(data, province)),
+                    None => format!("{} rejoint le domaine", data.province_name(province)),
                 };
                 format!("{text}{}", price_label(data, *price, payer))
             }
@@ -648,7 +638,7 @@ impl CampaignState {
                     .get(title)
                     .map_or_else(|| title.to_string(), |t| t.name.display.clone());
                 let text = match faction {
-                    Some(f) => format!("{name} passe à {}", faction_name(data, f)),
+                    Some(f) => format!("{name} passe à {}", data.faction_name(f)),
                     None => format!("{name} rejoint le domaine"),
                 };
                 format!("{text}{}", price_label(data, *price, payer))
@@ -657,7 +647,7 @@ impl CampaignState {
                 let realm = faction
                     .as_ref()
                     .or(ctx.faction.as_ref())
-                    .map(|f| format!(" de {}", faction_name(data, f)))
+                    .map(|f| format!(" de {}", data.faction_name(f)))
                     .unwrap_or_default();
                 format!(
                     "{} prend la tête{realm}",
@@ -949,8 +939,8 @@ pub fn apply_effect(
                     EventKind::Chronicle,
                     format!(
                         "Une nouvelle armée de {} se lève en {}.",
-                        faction_name(data, &faction),
-                        province_name(data, &location)
+                        data.faction_name(&faction),
+                        data.province_name(&location)
                     ),
                 )
                 .faction(&faction)
@@ -1133,9 +1123,9 @@ pub fn transfer_province(
             EventKind::ProvinceCaptured,
             format!(
                 "{} passe de {} à {}.",
-                province_name(data, province),
-                faction_name(data, &previous),
-                faction_name(data, faction)
+                data.province_name(province),
+                data.faction_name(&previous),
+                data.faction_name(faction)
             ),
         )
         .province(province)
@@ -1153,7 +1143,7 @@ fn price_label(data: &GameData, price: i64, payer: &Option<FactionId>) -> String
     let amount = crate::economy_balance::signed_livres(price);
     let amount = amount.trim_start_matches('+');
     match payer {
-        Some(p) => format!(" contre {amount}, payés par {}", faction_name(data, p)),
+        Some(p) => format!(" contre {amount}, payés par {}", data.faction_name(p)),
         None => format!(" contre {amount}"),
     }
 }
@@ -1203,12 +1193,12 @@ fn pay_sale_price(
     let text = match receiver {
         Some(r) => format!(
             "{} verse {amount} à {}.",
-            faction_name(data, payer),
-            faction_name(data, r)
+            data.faction_name(payer),
+            data.faction_name(r)
         ),
         None => format!(
             "{} verse {amount} pour son achat.",
-            faction_name(data, payer)
+            data.faction_name(payer)
         ),
     };
     events.push(GameEvent::new(EventKind::Chronicle, text).faction(payer));
@@ -1250,7 +1240,7 @@ pub fn set_ruler(
             format!(
                 "{} prend la tête de {}{deposed}.",
                 state.character_name(data, character),
-                faction_name(data, faction)
+                data.faction_name(faction)
             ),
         )
         .faction(faction),
@@ -1286,7 +1276,7 @@ pub fn capture_character(
             format!(
                 "{} est retenu prisonnier par {}.",
                 state.character_name(data, id),
-                faction_name(data, captor)
+                data.faction_name(captor)
             ),
         )
         .faction(&owner),
@@ -1571,7 +1561,7 @@ fn fire(
                         EventKind::Medicine,
                         format!(
                             "Une fièvre s'est déclarée à {} : les médecins l'ont circonscrite.",
-                            province_name(data, p)
+                            data.province_name(p)
                         ),
                     )
                     .province(p)
@@ -1619,7 +1609,7 @@ fn fire(
     if historical {
         let who = decider
             .as_ref()
-            .map(|f| format!(" ({})", faction_name(data, f)))
+            .map(|f| format!(" ({})", data.faction_name(f)))
             .unwrap_or_default();
         let chosen = event.options.get(option).map_or("", |o| o.text.as_str());
         let mut entry = GameEvent::new(
@@ -1670,7 +1660,7 @@ fn living_factions(state: &CampaignState) -> Vec<FactionId> {
     state
         .factions
         .iter()
-        .filter(|(id, f)| f.alive && !is_rebels(id))
+        .filter(|(id, f)| f.alive && !id.is_rebels())
         .map(|(id, _)| id.clone())
         .collect()
 }
@@ -1687,7 +1677,7 @@ fn matching_provinces(
         .keys()
         .filter_map(|id| state.province_controller(id).map(|c| (id, c)))
         .filter(|(_, controller)| {
-            faction.is_none_or(|f| *controller == f) && !is_rebels(controller)
+            faction.is_none_or(|f| *controller == f) && !controller.is_rebels()
         })
         .filter(|(id, controller)| {
             let ctx = EventContext {
@@ -1754,7 +1744,7 @@ fn targets(
                         return Vec::new();
                     };
                     let allowed = restrict.as_ref().is_none_or(|r| r == &controller)
-                        && !is_rebels(&controller);
+                        && !controller.is_rebels();
                     let ctx = EventContext {
                         faction: Some(controller),
                         province: Some(p.clone()),
@@ -2017,7 +2007,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
                     EventKind::Medicine,
                     format!(
                         "La Grande Mortalité épargne {} : quarantaine, fumigations et apothicaires ont tenu.",
-                        province_name(data, id)
+                        data.province_name(id)
                     ),
                 )
                 .province(id)
@@ -2026,7 +2016,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         }
     }
     if !struck.is_empty() {
-        let names: Vec<String> = struck.iter().map(|p| province_name(data, p)).collect();
+        let names: Vec<String> = struck.iter().map(|p| data.province_name(p)).collect();
         let mut entry = GameEvent::new(
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),

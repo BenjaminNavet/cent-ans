@@ -16,7 +16,7 @@
 use data_model::{CharacterId, ClaimKind, FactionId, GameData, Sex, SuccessionLaw, TitleId};
 
 use super::{holder_of, liege_of, titles_of, SuccessionDispute};
-use crate::diplomacy::{faction_name, Claim};
+use crate::diplomacy::Claim;
 use crate::events::{EventKind, GameEvent};
 use crate::state::{CampaignState, CharacterState};
 
@@ -97,11 +97,11 @@ pub(crate) fn contested_succession(
             EventKind::Succession,
             format!(
                 "Succession contestée en {} : {} et {} se disputent {} ; {} tranche en faveur de {}.",
-                faction_name(data, faction),
+                data.faction_name(faction),
                 state.character_name(data, &winner),
                 state.character_name(data, &loser),
                 title_name(data, &title),
-                faction_name(data, &arbiter),
+                data.faction_name(&arbiter),
                 state.character_name(data, &winner)
             ),
         )
@@ -134,7 +134,7 @@ pub(crate) fn contested_succession(
         let text = format!(
             "{} se réfugie auprès de {} et revendique {}.",
             state.character_name(data, &loser),
-            faction_name(data, sponsor),
+            data.faction_name(sponsor),
             title_name(data, &title)
         );
         state
@@ -247,7 +247,7 @@ pub(crate) fn cadet_branch(
             EventKind::Succession,
             format!(
                 "La branche aînée de {} s'éteint : {}, d'une branche cadette, relève ses titres.",
-                faction_name(data, faction),
+                data.faction_name(faction),
                 state.character_name(data, &ruler)
             ),
         )
@@ -294,10 +294,10 @@ pub(crate) fn inherit_titles_on_extinction(
                     EventKind::Succession,
                     format!(
                         "La lignée de {} s'éteint : {} hérite de {}, uni aux possessions de {}.",
-                        faction_name(data, faction),
+                        data.faction_name(faction),
                         state.character_name(data, &heir),
                         title_name(data, &title),
-                        faction_name(data, &to)
+                        data.faction_name(&to)
                     ),
                 )
                 .faction(&to),
@@ -319,7 +319,7 @@ pub(crate) fn inherit_titles_on_extinction(
                     format!(
                         "Déshérence : faute d'héritier, {} revient à {}.",
                         title_name(data, &title),
-                        faction_name(data, &liege)
+                        data.faction_name(&liege)
                     ),
                 )
                 .faction(&liege),
@@ -362,8 +362,8 @@ pub(crate) fn heir_comes_home(
                 format!(
                     "{} hérite de {}, uni aux possessions de {}.",
                     state.character_name(data, heir),
-                    faction_name(data, faction),
-                    faction_name(data, &home)
+                    data.faction_name(faction),
+                    data.faction_name(&home)
                 ),
             )
             .faction(&home),
@@ -381,8 +381,8 @@ pub(crate) fn heir_comes_home(
                 format!(
                     "{} hérite de {} : {} y est réuni.",
                     state.character_name(data, heir),
-                    faction_name(data, faction),
-                    faction_name(data, &home)
+                    data.faction_name(faction),
+                    data.faction_name(&home)
                 ),
             )
             .faction(faction),

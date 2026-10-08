@@ -206,19 +206,13 @@ fn establish(
             EventKind::Chivalry,
             format!(
                 "{} fonde {}.",
-                faction_label(data, faction),
+                data.faction_label(faction),
                 definition.name.display
             ),
         )
         .faction(faction),
     );
     fill_members(state, data, faction, events);
-}
-
-fn faction_label(data: &GameData, faction: &FactionId) -> String {
-    data.factions
-        .get(faction)
-        .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
 }
 
 /// A character who may sit in the order: alive, free, adult man of the

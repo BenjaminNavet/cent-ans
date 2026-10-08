@@ -519,10 +519,7 @@ fn resolve_arrears(
                 .saturating_add(arrears.pillage_devastation)
                 .min(100);
         }
-        let name = data
-            .provinces
-            .get(&province)
-            .map_or_else(|| province.to_string(), |p| p.name.display.clone());
+        let name = data.province_name(&province);
         if is_player || state.provinces.contains_key(&province) {
             events.push(
                 GameEvent::new(

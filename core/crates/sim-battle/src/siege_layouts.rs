@@ -17,6 +17,7 @@
 //! from the battle's random stream: a province always gets the same plan.
 //! The side of the attacked gate always faces the attacker (−z).
 
+use data_model::util::dist_xz;
 use std::collections::BTreeMap;
 use std::f64::consts::{PI, TAU};
 
@@ -169,10 +170,6 @@ fn signed(seed: u64, salt: u64) -> f64 {
     hash01(seed, salt) * 2.0 - 1.0
 }
 
-fn dist(a: (f64, f64), b: (f64, f64)) -> f64 {
-    (a.0 - b.0).hypot(a.1 - b.1)
-}
-
 fn lerp(a: (f64, f64), b: (f64, f64), t: f64) -> (f64, f64) {
     (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
 }
@@ -208,7 +205,7 @@ fn enceinte(
             )
         })
         .collect();
-    let len = dist(vertices[0], vertices[1]);
+    let len = dist_xz(vertices[0], vertices[1]);
     let jamb = 4.0;
     let room = (len * 0.5 - GATE_WIDTH * 0.5 - jamb).max(0.0);
     let gate_along = len * 0.5 + signed(seed, 12) * gate_offset * room;
@@ -220,7 +217,7 @@ fn enceinte(
 
 /// Wall pieces of at most [`MAX_PIECE`] metres from `a` to `b`.
 fn push_split(pieces: &mut Vec<WallPiece>, a: (f64, f64), b: (f64, f64), hp: f64) {
-    let pieces_count = (dist(a, b) / MAX_PIECE).ceil().max(1.0) as usize;
+    let pieces_count = (dist_xz(a, b) / MAX_PIECE).ceil().max(1.0) as usize;
     for k in 0..pieces_count {
         let t0 = k as f64 / pieces_count as f64;
         let t1 = (k + 1) as f64 / pieces_count as f64;
@@ -259,7 +256,7 @@ fn ring_works(
     for k in 0..n {
         let (a, b) = (v[k], v[(k + 1) % n]);
         if k == 0 {
-            let len = dist(a, b).max(1e-9);
+            let len = dist_xz(a, b).max(1e-9);
             let g0 = lerp(a, b, (shape.gate_along - GATE_WIDTH * 0.5) / len);
             let g1 = lerp(a, b, (shape.gate_along + GATE_WIDTH * 0.5) / len);
             push_split(&mut pieces, a, g0, wall_hp);
@@ -290,7 +287,7 @@ fn ring_works(
         if p.kind == PieceKind::Gate || next_is_gate {
             continue;
         }
-        let at_gatehouse = gatehouse.is_some_and(|g| dist(g, p.b) < 0.5);
+        let at_gatehouse = gatehouse.is_some_and(|g| dist_xz(g, p.b) < 0.5);
         towers.push(Tower {
             x: p.b.0,
             z: p.b.1,
@@ -390,7 +387,7 @@ fn borough(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
     // The main street, bent half way on both sides of the market.
     let bend = |salt: u64, from: (f64, f64), to: (f64, f64)| {
         let mid = lerp(from, to, 0.5);
-        let len = dist(from, to).max(1e-9);
+        let len = dist_xz(from, to).max(1e-9);
         let (nx, nz) = (-(to.1 - from.1) / len, (to.0 - from.0) / len);
         let off = signed(seed, salt) * b.street_bend_m;
         (mid.0 + nx * off, mid.1 + nz * off)
@@ -404,7 +401,7 @@ fn borough(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
     ];
     let mut streets = vec![main];
     // Back lanes parallel to the axis gate → far gate, on both sides.
-    let axis_len = dist(start, far).max(1e-9);
+    let axis_len = dist_xz(start, far).max(1e-9);
     let (ax, az) = ((far.0 - start.0) / axis_len, (far.1 - start.1) / axis_len);
     let (px, pz) = (-az, ax);
     for (salt, side) in [(6, 1.0), (7, -1.0)] {
@@ -477,7 +474,7 @@ fn open_church(houses: &mut Vec<House>, plan: &TownPlan, rules: &TownRules) {
             spots.push((target.0 + i as f64 * 3.0, target.1 + j as f64 * 3.0));
         }
     }
-    spots.sort_by(|a, b| dist(*a, target).total_cmp(&dist(*b, target)));
+    spots.sort_by(|a, b| dist_xz(*a, target).total_cmp(&dist_xz(*b, target)));
     for (x, z) in spots {
         let (dx, dz) = (plan.center.0 - x, plan.center.1 - z);
         let d = dx.hypot(dz).max(1e-9);
@@ -766,7 +763,7 @@ mod tests {
             let r = w
                 .vertices
                 .iter()
-                .map(|v| dist(*v, w.center))
+                .map(|v| dist_xz(*v, w.center))
                 .fold(0.0, f64::max);
             assert!(r < 110.0, "{province}: tight enceinte ({r})");
         }

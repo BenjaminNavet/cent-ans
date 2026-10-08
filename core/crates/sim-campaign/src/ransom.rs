@@ -266,10 +266,7 @@ pub fn pay_ransom(
         RansomTerms::Province { province } => {
             check_ceded_province(state, data, faction, &captor, &province)?;
             cede_province(state, faction, &captor, &province);
-            let province_name = data
-                .provinces
-                .get(&province)
-                .map_or_else(|| province.to_string(), |p| p.name.display.clone());
+            let province_name = data.province_name(&province);
             crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
             let text = format!(
                 "{name} est libéré contre la cession de la province {}.",
@@ -430,12 +427,7 @@ pub fn set_ransom_terms(
         ),
         RansomTerms::Province { province } => format!(
             "Pour libérer {name}, son geôlier exige la province {}.",
-            crate::events::de(
-                &data
-                    .provinces
-                    .get(province)
-                    .map_or_else(|| province.to_string(), |p| p.name.display.clone())
-            )
+            crate::events::de(&data.province_name(province))
         ),
         RansomTerms::Hold => format!("{name} restera captif : son geôlier refuse toute rançon."),
         RansomTerms::Parole => unreachable!("handled above"),
@@ -499,9 +491,7 @@ pub fn release_on_parole(
     let text = format!(
         "{} est libéré sur parole par {}.",
         state.character_name(data, character),
-        data.factions
-            .get(faction)
-            .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+        data.faction_label(faction)
     );
     push_news(state, &owner, faction, text);
     Ok(())

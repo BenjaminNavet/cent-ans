@@ -196,6 +196,16 @@ define_id!(
     "enc_"
 );
 
+impl FactionId {
+    /// Id of the pseudo-faction holding rebel provinces.
+    pub const REBELS: &'static str = "fac_rebels";
+
+    /// Whether this is the rebels pseudo-faction.
+    pub fn is_rebels(&self) -> bool {
+        self.as_str() == Self::REBELS
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

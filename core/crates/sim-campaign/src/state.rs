@@ -848,10 +848,7 @@ impl CampaignState {
         }
         let owner = match &army.general {
             Some(general) => self.character_name(data, general),
-            None => data.factions.get(&army.faction).map_or_else(
-                || army.faction.to_string(),
-                |f| f.short_or_display_name().to_owned(),
-            ),
+            None => data.faction_name(&army.faction),
         };
         format!("l'ost {}", crate::events::de(&owner))
     }

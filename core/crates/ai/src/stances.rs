@@ -24,6 +24,7 @@
 //! turn and army ([`crate::alignment::campaign_roll`]), so the plan stays
 //! deterministic.
 
+use data_model::util::{dist, segment_distance};
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::posture;
 use sim_campaign::{
@@ -38,26 +39,11 @@ const ROUTE_SAMPLE_KM: f32 = 4.0;
 /// Ambush cells tried with a full march preview at most.
 const AMBUSH_CANDIDATES: usize = 4;
 
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
-
-/// Distance from `p` to the segment `a`-`b`.
-fn segment_distance(p: [f32; 2], a: [f32; 2], b: [f32; 2]) -> f32 {
-    let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
-    let len2 = dx * dx + dy * dy;
-    if len2 <= f32::EPSILON {
-        return distance(p, a);
-    }
-    let t = (((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2).clamp(0.0, 1.0);
-    distance(p, [a[0] + t * dx, a[1] + t * dy])
-}
-
 /// Distance from `p` to the polyline `route`.
 fn route_distance(p: [f32; 2], route: &[[f32; 2]]) -> f32 {
     match route {
         [] => f32::INFINITY,
-        [only] => distance(p, *only),
+        [only] => dist(p, *only),
         _ => route
             .windows(2)
             .map(|w| segment_distance(p, w[0], w[1]))
@@ -74,7 +60,7 @@ fn truncate_route(route: &[[f32; 2]], length: f32) -> Vec<[f32; 2]> {
     out.push(*first);
     let mut left = length;
     for w in route.windows(2) {
-        let d = distance(w[0], w[1]);
+        let d = dist(w[0], w[1]);
         if d >= left {
             let t = if d > 0.0 { left / d } else { 0.0 };
             out.push([
@@ -145,7 +131,7 @@ fn threatening_route(
     // Does it cross our lands? Sampled every few kilometres.
     let step = ROUTE_SAMPLE_KM * px_per_km;
     let crosses = route.windows(2).any(|w| {
-        let d = distance(w[0], w[1]);
+        let d = dist(w[0], w[1]);
         let n = (d / step).ceil().max(1.0) as usize;
         (0..=n).any(|i| {
             let t = i as f32 / n as f32;
@@ -183,7 +169,7 @@ fn threats(
         .filter(|(_, e)| state.is_at_war(faction, &e.faction) && !e.units.is_empty())
         .filter(|(_, e)| !posture::is_hidden_from(state, data, e, faction))
         .filter_map(|(id, e)| {
-            let d = distance(here, state.army_point(data, e));
+            let d = dist(here, state.army_point(data, e));
             if d > watch {
                 return None;
             }
@@ -242,7 +228,7 @@ pub fn ambush_orders(
     let fits = |point: [f32; 2]| {
         targets
             .iter()
-            .any(|(at, route)| distance(point, *at) > zoc && route_distance(point, route) <= near)
+            .any(|(at, route)| dist(point, *at) > zoc && route_distance(point, route) <= near)
     };
     let posture_rules = &data.posture_rules;
     let covered = |point: [f32; 2]| {
@@ -330,7 +316,7 @@ pub fn keep_ambush(
         .into_iter()
         .any(|(enemy, route)| {
             let e = &state.armies[&enemy];
-            distance(here, state.army_point(data, e)) > zoc
+            dist(here, state.army_point(data, e)) > zoc
                 && route_distance(here, &route) <= zoc
                 && posture::is_hidden_from(state, data, army, &e.faction)
         })
@@ -378,7 +364,7 @@ pub fn forced_march_orders(
         .armies
         .iter()
         .filter(|(_, e)| state.is_at_war(faction, &e.faction))
-        .filter(|(_, e)| distance(state.army_point(data, e), point) <= radius)
+        .filter(|(_, e)| dist(state.army_point(data, e), point) <= radius)
         .map(|(id, _)| state.army_power(data, id))
         .sum();
     if waiting > state.army_power(data, army_id) * rules.danger_ratio {
@@ -514,7 +500,7 @@ pub fn rest_plan(
     let menaced = state.armies.values().any(|other| {
         !other.units.is_empty()
             && state.is_at_war(faction, &other.faction)
-            && distance(here, state.army_point(data, other)) <= radius
+            && dist(here, state.army_point(data, other)) <= radius
     });
     if menaced {
         return RestPlan::None;
@@ -569,13 +555,7 @@ pub fn encounter_detour(
             sim_campaign::passage::trespassed_owner(state, faction, &s.province).is_none()
                 && !state.is_hostile_territory(faction, &s.province)
         })
-        .map(|s| {
-            (
-                distance(here, s.cell.center(grid)),
-                s.id,
-                s.cell.center(grid),
-            )
-        })
+        .map(|s| (dist(here, s.cell.center(grid)), s.id, s.cell.center(grid)))
         .filter(|(d, _, _)| *d <= sight)
         .collect();
     if sites.is_empty() {

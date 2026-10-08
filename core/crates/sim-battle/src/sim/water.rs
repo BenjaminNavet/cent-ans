@@ -12,6 +12,7 @@
 //!
 //! Deterministic: no random draw (drowning is a share of the regiment).
 
+use data_model::util::dist_xz;
 use data_model::UnitCategory;
 
 use super::{BattleSim, DT};
@@ -25,10 +26,6 @@ const AT_CROSSING: f64 = 4.0;
 const SWIM_PENALTY: f64 = 400.0;
 /// Closer than this to its target, a regiment goes straight at it.
 const CLOSE_QUARTERS: f64 = 40.0;
-
-fn dist(a: (f64, f64), b: (f64, f64)) -> f64 {
-    (a.0 - b.0).hypot(a.1 - b.1)
-}
 
 impl BattleSim {
     /// EP3: crossings of the main river (bridges and fords), read once.
@@ -111,7 +108,7 @@ impl BattleSim {
         }
         let north_to = river.north_of(tx, tz);
         // Close combat: straight at the enemy.
-        if dist(from, to) < CLOSE_QUARTERS {
+        if dist_xz(from, to) < CLOSE_QUARTERS {
             return Some(to);
         }
         // A target in the river or on a bridge is met where it stands.
@@ -123,7 +120,7 @@ impl BattleSim {
             if b.stream.is_none() {
                 let [a, e] = b.ends();
                 let end = if (e.1 > a.1) == north_to { e } else { a };
-                if dist(from, end) > 1.0 && dist(from, (tx, tz)) > 1.0 {
+                if dist_xz(from, end) > 1.0 && dist_xz(from, (tx, tz)) > 1.0 {
                     return Some(end);
                 }
             }
@@ -149,7 +146,7 @@ impl BattleSim {
             .iter()
             .map(|c| {
                 let (near, far) = crossing_ends(river, c, meet, north_from);
-                let cost = dist(from, near) + dist(near, far) + dist(far, to);
+                let cost = dist_xz(from, near) + dist_xz(near, far) + dist_xz(far, to);
                 (near, far, cost)
             })
             .min_by(|a, b| a.2.total_cmp(&b.2));
@@ -159,13 +156,13 @@ impl BattleSim {
         // Swimming: the width of the water at the swimmer's pace, and the
         // danger.
         let rules = WaterRules::bundled();
-        let swim = dist(from, to)
+        let swim = dist_xz(from, to)
             + river.width_at(meet.0) * (1.0 / rules.movement.deep_foot.max(0.05) - 1.0)
             + SWIM_PENALTY;
         if !stopped && swim < cost {
             return Some(to);
         }
-        Some(if dist(from, near) > AT_CROSSING {
+        Some(if dist_xz(from, near) > AT_CROSSING {
             near
         } else {
             far
@@ -196,7 +193,7 @@ impl BattleSim {
                 let holds = b
                     .ends()
                     .iter()
-                    .any(|&e| dist(e, (attacker.x, attacker.z)) <= c.bridge_head_reach_m);
+                    .any(|&e| dist_xz(e, (attacker.x, attacker.z)) <= c.bridge_head_reach_m);
                 if holds {
                     k *= c.bridge_holder_bonus;
                 }

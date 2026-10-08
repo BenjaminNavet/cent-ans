@@ -12,6 +12,7 @@
 //!
 //! Tuning: `data/ai/grid.json` ([`data_model::AiGrid`]).
 
+use data_model::util::dist;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 use std::sync::{Arc, Mutex};
@@ -86,10 +87,6 @@ struct RoadLands {
 const ROAD_SAMPLE_PX: f32 = 8.0;
 
 type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
-
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
 
 impl<'a> GridPlanner<'a> {
     pub fn new(state: &'a CampaignState, data: &'a GameData, faction: &'a FactionId) -> Self {
@@ -178,7 +175,7 @@ impl<'a> GridPlanner<'a> {
                 beyond_passage: false,
                 near: points
                     .iter()
-                    .filter(|(_, p)| distance(*p, point) <= avoid_px)
+                    .filter(|(_, p)| dist(*p, point) <= avoid_px)
                     .map(|(s, _)| s.clone())
                     .collect(),
             };
@@ -470,9 +467,9 @@ impl<'a> GridPlanner<'a> {
                     .as_ref()
                     .is_none_or(|s| !state.is_hostile_settlement(self.faction, s))
             })
-            .filter(|e| engaged.iter().all(|p| distance(*p, e.point) > engage_px))
+            .filter(|e| engaged.iter().all(|p| dist(*p, e.point) > engage_px))
             .filter_map(|e| {
-                let d = distance(here, e.point);
+                let d = dist(here, e.point);
                 if d > reach_px {
                     return None;
                 }
@@ -481,7 +478,7 @@ impl<'a> GridPlanner<'a> {
                 let (mut ours, mut theirs) = (power, 0.0);
                 for (id, other) in &state.armies {
                     if id == army_id
-                        || distance(state.army_point(self.data, other), e.point) > engage_px
+                        || dist(state.army_point(self.data, other), e.point) > engage_px
                     {
                         continue;
                     }

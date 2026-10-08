@@ -245,22 +245,6 @@ pub enum DiplomacyError {
 /// Refusal of an alliance between a suzerain and its direct vassal (ADR 0114).
 pub const FEUDAL_TIE_ALLIANCE: &str = "le lien féodal tient déjà lieu d'alliance";
 
-pub(crate) fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
-pub(crate) fn is_rebels(id: &FactionId) -> bool {
-    id.as_str() == REBELS_FACTION
-}
-
 impl CampaignState {
     /// Military weight of a faction: field armies count fully, garrisons half.
     pub fn faction_power(&self, faction: &FactionId) -> f64 {
@@ -467,7 +451,7 @@ impl CampaignState {
                 ClaimKind::Province => {
                     if let Some(p) = &claim.province {
                         if self.province_owner(p) == Some(b) {
-                            return Some(format!("prétention sur {}", province_name(data, p)));
+                            return Some(format!("prétention sur {}", data.province_name(p)));
                         }
                     }
                 }
@@ -574,7 +558,7 @@ impl CampaignState {
         let common_enemy = fa
             .at_war_with
             .iter()
-            .any(|e| !is_rebels(e) && self.is_at_war(b, e));
+            .any(|e| !e.is_rebels() && self.is_at_war(b, e));
         if common_enemy {
             add("Ennemi commun", 20);
         }
@@ -739,7 +723,7 @@ impl CampaignState {
     }
 
     fn living_faction(&self, id: &FactionId) -> Result<(), DiplomacyError> {
-        if is_rebels(id) {
+        if id.is_rebels() {
             return Err(DiplomacyError::Rebels);
         }
         if self.factions.get(id).is_some_and(|f| f.alive) {
@@ -813,14 +797,11 @@ pub fn evaluate(
                         20
                     };
                     reasons.push((
-                        format!("Cession de {}", province_name(data, province)),
+                        format!("Cession de {}", data.province_name(province)),
                         -cost,
                     ));
                 } else if owner == proposer {
-                    reasons.push((
-                        format!("Obtention de {}", province_name(data, province)),
-                        15,
-                    ));
+                    reasons.push((format!("Obtention de {}", data.province_name(province)), 15));
                 }
             }
             // F4: a beaten realm that gives up everything we hold of it
@@ -916,7 +897,7 @@ pub fn evaluate(
             let common = state.factions.get(proposer).is_some_and(|f| {
                 f.at_war_with
                     .iter()
-                    .any(|e| !is_rebels(e) && state.is_at_war(recipient, e))
+                    .any(|e| !e.is_rebels() && state.is_at_war(recipient, e))
             });
             if common {
                 reasons.push(("Ennemi commun".to_owned(), 25));
@@ -1062,7 +1043,9 @@ fn peace_reasons(
     // pretender does not give up its claim lightly.
     let other_front = state.factions.get(recipient).is_some_and(|f| {
         f.at_war_with.iter().any(|e| {
-            e != proposer && !is_rebels(e) && state.faction_power(e) > state.faction_power(proposer)
+            e != proposer
+                && !e.is_rebels()
+                && state.faction_power(e) > state.faction_power(proposer)
         })
     });
     if other_front {
@@ -1115,7 +1098,7 @@ impl CampaignState {
         let others: Vec<FactionId> = self
             .factions
             .keys()
-            .filter(|f| *f != attacker && !is_rebels(f))
+            .filter(|f| *f != attacker && !f.is_rebels())
             .cloned()
             .collect();
         let mut motive = casus_belli
@@ -1165,8 +1148,8 @@ impl CampaignState {
         let feudal_liege = crate::feudal::liege_of(self, data, target);
         let text = format!(
             "{} déclare la guerre à {} ({motive}).",
-            faction_name(data, attacker),
-            faction_name(data, target)
+            data.faction_name(attacker),
+            data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(attacker));
         if excommunicate {
@@ -1239,7 +1222,7 @@ impl CampaignState {
                 || &ally == aggressor
                 || !self.factions.get(&ally).is_some_and(|f| f.alive)
                 || self.is_at_war(&ally, aggressor)
-                || is_rebels(&ally)
+                || ally.is_rebels()
             {
                 continue;
             }
@@ -1251,9 +1234,9 @@ impl CampaignState {
                 self.start_war(&ally, aggressor);
                 let text = format!(
                     "{} répond à l'appel aux armes de {} contre {}.",
-                    faction_name(data, &ally),
-                    faction_name(data, defender),
-                    faction_name(data, aggressor)
+                    data.faction_name(&ally),
+                    data.faction_name(defender),
+                    data.faction_name(aggressor)
                 );
                 self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&ally));
             } else {
@@ -1273,8 +1256,8 @@ impl CampaignState {
                 self.add_modifier(defender, &ally, -30, "A refusé l'appel aux armes", 40);
                 let text = format!(
                     "{} refuse de soutenir {} : l'alliance est rompue.",
-                    faction_name(data, &ally),
-                    faction_name(data, defender)
+                    data.faction_name(&ally),
+                    data.faction_name(defender)
                 );
                 self.push_order_event(
                     GameEvent::new(EventKind::AllianceBroken, text).faction(&ally),
@@ -1326,7 +1309,7 @@ impl CampaignState {
                 continue;
             };
             for (id, f) in &self.factions {
-                if id == a || id == b || is_rebels(id) || !f.alive {
+                if id == a || id == b || id.is_rebels() || !f.alive {
                     continue;
                 }
                 let joined = f.war_started.get(enemy).is_some_and(|t| *t >= began);
@@ -1409,8 +1392,8 @@ impl CampaignState {
                 });
             ceded_names.push(format!(
                 "{} à {}",
-                province_name(data, province),
-                faction_name(data, &to)
+                data.province_name(province),
+                data.faction_name(&to)
             ));
         }
         // Occupied settlements return to their owner.
@@ -1439,8 +1422,8 @@ impl CampaignState {
         }
         let mut text = format!(
             "Paix entre {} et {} ; trêve de {} ans.",
-            faction_name(data, a),
-            faction_name(data, b),
+            data.faction_name(a),
+            data.faction_name(b),
             truce_turns / 4
         );
         if !ceded_names.is_empty() {
@@ -1465,8 +1448,8 @@ impl CampaignState {
             .insert(a.clone());
         let text = format!(
             "Alliance conclue entre {} et {}.",
-            faction_name(data, a),
-            faction_name(data, b)
+            data.faction_name(a),
+            data.faction_name(b)
         );
         self.push_order_event(GameEvent::new(EventKind::AllianceFormed, text).faction(a));
     }
@@ -1486,8 +1469,8 @@ impl CampaignState {
         crate::feudal::drop_alliance(self, vassal, suzerain);
         let text = format!(
             "{} devient vassal de {}.",
-            faction_name(data, vassal),
-            faction_name(data, suzerain)
+            data.faction_name(vassal),
+            data.faction_name(suzerain)
         );
         self.push_order_event(GameEvent::new(EventKind::Vassalage, text).faction(vassal));
     }
@@ -1640,7 +1623,7 @@ impl CampaignState {
                 .collect();
             return Err(DiplomacyError::Refused(format!(
                 "{} refuse : {}",
-                faction_name(data, recipient),
+                data.faction_name(recipient),
                 top.join(", ")
             )));
         }
@@ -1737,14 +1720,14 @@ impl CampaignState {
             let text = if active {
                 format!(
                     "{} impose un embargo commercial à {}.",
-                    faction_name(data, faction),
-                    faction_name(data, target)
+                    data.faction_name(faction),
+                    data.faction_name(target)
                 )
             } else {
                 format!(
                     "{} lève son embargo contre {}.",
-                    faction_name(data, faction),
-                    faction_name(data, target)
+                    data.faction_name(faction),
+                    data.faction_name(target)
                 )
             };
             self.push_order_event(GameEvent::new(EventKind::Embargo, text).faction(faction));
@@ -1775,8 +1758,8 @@ impl CampaignState {
         self.add_modifier(target, faction, -30, "Trahison de l'alliance", 40);
         let text = format!(
             "{} rompt son alliance avec {}.",
-            faction_name(data, faction),
-            faction_name(data, target)
+            data.faction_name(faction),
+            data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(faction));
         Ok(())
@@ -1809,8 +1792,8 @@ impl CampaignState {
             .remove(faction);
         let text = format!(
             "{} rompt son accord commercial avec {}.",
-            faction_name(data, faction),
-            faction_name(data, target)
+            data.faction_name(faction),
+            data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(faction));
         Ok(())
@@ -1830,8 +1813,8 @@ impl CampaignState {
         self.add_modifier(target, faction, 40, "Indépendance accordée", 80);
         let text = format!(
             "{} rend son indépendance à {}.",
-            faction_name(data, faction),
-            faction_name(data, target)
+            data.faction_name(faction),
+            data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::Vassalage, text).faction(faction));
         Ok(())
@@ -1857,8 +1840,8 @@ impl CampaignState {
         self.add_capped_modifier(data, target, faction, value, GIFT_REASON, 20);
         let text = format!(
             "{} envoie {amount} livres de présents à {}.",
-            faction_name(data, faction),
-            faction_name(data, target)
+            data.faction_name(faction),
+            data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(faction));
         Ok(())
@@ -1880,7 +1863,7 @@ impl CampaignState {
     pub fn diplomacy_view(&self, data: &GameData, faction: &FactionId) -> Vec<DiplomacyEntry> {
         self.factions
             .iter()
-            .filter(|(id, f)| *id != faction && f.alive && !is_rebels(id))
+            .filter(|(id, f)| *id != faction && f.alive && !id.is_rebels())
             .map(|(id, f)| {
                 let (attitude, reasons) = self.attitude(data, id, faction);
                 let claims = self.factions[faction]
@@ -1951,12 +1934,12 @@ fn offer_text(
     from: &FactionId,
     proposal: &Proposal,
 ) -> String {
-    let name = faction_name(data, from);
+    let name = data.faction_name(from);
     match proposal {
         Proposal::Peace { provinces, tribute } => {
             let mut text = format!("{name} propose la paix");
             if !provinces.is_empty() {
-                let list: Vec<String> = provinces.iter().map(|p| province_name(data, p)).collect();
+                let list: Vec<String> = provinces.iter().map(|p| data.province_name(p)).collect();
                 text.push_str(&format!(" contre {}", list.join(", ")));
             }
             if *tribute > 0 {
@@ -1995,16 +1978,16 @@ fn offer_text(
         ),
         Proposal::Protection { aggressor } => format!(
             "{name} est attaqué par {} et réclame votre protection.",
-            faction_name(data, aggressor)
+            data.faction_name(aggressor)
         ),
         Proposal::Arbitration { attacker, target } => format!(
             "Guerre privée : {} attaque {}, tous deux vos vassaux.",
-            faction_name(data, attacker),
-            faction_name(data, target)
+            data.faction_name(attacker),
+            data.faction_name(target)
         ),
         Proposal::PeaceSummons { target } => format!(
             "{name} vous somme de faire la paix avec {}.",
-            faction_name(data, target)
+            data.faction_name(target)
         ),
     }
 }
@@ -2052,7 +2035,7 @@ pub(crate) fn resolve_diplomacy(
         events.push(
             GameEvent::new(
                 EventKind::DiplomaticOffer,
-                format!("L'offre de {} a expiré.", faction_name(data, &offer.from)),
+                format!("L'offre de {} a expiré.", data.faction_name(&offer.from)),
             )
             .faction(&offer.from),
         );
@@ -2103,8 +2086,8 @@ pub(crate) fn resolve_diplomacy(
                     EventKind::VassalRebellion,
                     format!(
                         "{} se révolte contre son suzerain {} et proclame son indépendance.",
-                        faction_name(data, &vassal),
-                        faction_name(data, &suzerain)
+                        data.faction_name(&vassal),
+                        data.faction_name(&suzerain)
                     ),
                 )
                 .faction(&vassal),
@@ -2203,13 +2186,13 @@ pub(crate) fn on_line_extinct(
     let Some((character, claimant_faction)) = claimant else {
         return;
     };
-    if is_rebels(&claimant_faction) {
+    if claimant_faction.is_rebels() {
         return;
     }
     let text = format!(
         "{} hérite d'une prétention au trône de {} par sa mère.",
         state.character_name(data, &character),
-        faction_name(data, faction)
+        data.faction_name(faction)
     );
     state
         .factions
@@ -2233,8 +2216,8 @@ pub(crate) fn on_line_extinct(
                 EventKind::Vassalage,
                 format!(
                     "Union personnelle : {} passe sous l'autorité de {}.",
-                    faction_name(data, faction),
-                    faction_name(data, &claimant_faction)
+                    data.faction_name(faction),
+                    data.faction_name(&claimant_faction)
                 ),
             )
             .faction(faction),
@@ -2348,7 +2331,7 @@ pub fn rivals_walk(state: &CampaignState, faction: &FactionId) -> BTreeSet<Facti
     state
         .factions
         .iter()
-        .filter(|(id, f)| *id != faction && f.alive && !is_rebels(id))
+        .filter(|(id, f)| *id != faction && f.alive && !id.is_rebels())
         .filter(|(id, _)| {
             me.at_war_with.contains(*id)
                 || claim_stakes(state, faction, id).any()
@@ -2384,7 +2367,7 @@ fn enemy_power(state: &CampaignState, data: &GameData, faction: &FactionId) -> f
     state.factions.get(faction).map_or(0.0, |f| {
         f.at_war_with
             .iter()
-            .filter(|e| !is_rebels(e))
+            .filter(|e| !e.is_rebels())
             .filter(|e| {
                 state.are_neighbors(data, faction, e)
                     || state.provinces.keys().any(|id| {
@@ -2458,7 +2441,7 @@ pub fn answers_call_to_arms(
 /// Diplomatic orders of an AI faction for this turn (spec § 2.3, F4).
 pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
     let mut orders = Vec::new();
-    if is_rebels(faction) {
+    if faction.is_rebels() {
         return orders;
     }
     let Some(me) = state.factions.get(faction) else {
@@ -2484,7 +2467,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         orders.extend(crate::negotiation::plan_peace(state, data, faction));
     }
     if !treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
-        for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
+        for enemy in me.at_war_with.iter().filter(|e| !e.is_rebels()) {
             // JR4: an AI-led crusade never treats with the master of its goal.
             if crate::crusade::ai_vow_forbids_peace(state, data, faction, enemy) {
                 continue;
@@ -2715,7 +2698,7 @@ fn war_target(
         .filter(|(id, f)| {
             *id != faction
                 && f.alive
-                && !is_rebels(id)
+                && !id.is_rebels()
                 && id.as_str() != PAPACY_FACTION
                 && !state.is_allied(faction, id)
                 && !state.is_at_war(faction, id)
@@ -2803,7 +2786,7 @@ fn ally_war_to_join(
         {
             continue;
         }
-        for enemy in ally_state.at_war_with.iter().filter(|e| !is_rebels(e)) {
+        for enemy in ally_state.at_war_with.iter().filter(|e| !e.is_rebels()) {
             if enemy == faction
                 || state.is_allied(faction, enemy)
                 || state.is_at_war(faction, enemy)
@@ -2852,7 +2835,7 @@ fn plan_alliances(
         .filter(|(id, f)| {
             *id != faction
                 && f.alive
-                && !is_rebels(id)
+                && !id.is_rebels()
                 && id.as_str() != PAPACY_FACTION
                 && !state.is_allied(faction, id)
                 && !state.is_at_war(faction, id)
@@ -2897,7 +2880,7 @@ fn desert_losing_suzerain(
     let winner = state.factions[&lord]
         .at_war_with
         .iter()
-        .filter(|e| !is_rebels(e) && *e != faction)
+        .filter(|e| !e.is_rebels() && *e != faction)
         .find(|e| {
             state.war_score(data, &lord, e) <= DESERTION_WAR_SCORE
                 && state.coalition_power(e) > state.coalition_power(&lord)
