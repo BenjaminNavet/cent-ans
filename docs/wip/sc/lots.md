@@ -219,3 +219,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - SIMSPLIT (fait) : `ai/plan_field.rs` reste à 897 lignes, découpage plus fin possible.
 - AUDIO (fait) : `AudioDirector.play_sfx` reste en round-robin, hors VoicePool (MS5a partiel).
 - HOOKS (fait) : après levée du gel FL, retirer le tronc `--screenshot=`/`--stage=` de campaign_map.gd et tous les `stage_screenshot()`/`stage_example` avec vn_ui_720_b/c_test et smoke.gd:1150.
+- BATTLEDEV (fait, −1330) : suite après levée de l'interdit sur battle_vegetation.gd : `--no-fa-grass`, `--bench-ab=fa-grass`, `set_fa_view`, param `da6_on`, puis `da6`/`site_render` de battle_terrain.gd, `fa_on` du shader herbe, `RenderQuality.override_level`/`upscale_override`. Hors battle : `--no-ga3`, `--no-sr5` (+ tests ga3_l1, ga3_l5, sr5). cb0_input_equivalence_test : golden à vérifier.
