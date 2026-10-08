@@ -20,6 +20,10 @@ docs 58 940 (508 notes wip, 163 ADR).
   simultanés (disque : une cible cargo par worktree), commits sur branche, fusion ff-only ici.
 - Vérification : `cargo test`, `cargo clippy -D warnings`, pytest ; Godot seulement en headless (scripts de test ciblés par les agents, `smoke.gd` complet aux fusions). **Jamais de lancement fenêtré du jeu ni de capture** (demande du joueur 08/10).
 
+## Consigne ajoutée (08/10)
+
+Le propriétaire précise : le chantier n'est pas que de la suppression ; il faut optimiser et appliquer des design patterns. À partir de la vague 3, chaque lot introduit une abstraction (classe de base, trait, table de données, builder, stratégie) et y fait passer tous les sites ; les lots de pure suppression passent après.
+
 ## État
 - [x] Vague 0 audit (18/20 zones ; MS et DT en cours) → `docs/wip/sc/lots.md` (catalogue des lots par zone)
 - [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0187), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
