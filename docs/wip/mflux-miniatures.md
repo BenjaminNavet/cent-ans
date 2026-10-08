@@ -35,10 +35,25 @@
 - Essai réel 10-08 (`--stop-before-3d`, 0 $) : archer longbowman, planche 3 vues (face, profil
   3/4, dos) cohérentes, réalistes (gambison, chapeau de fer, arc long), détourage rembg propre,
   3 vues découpées. Bras le long du corps plutôt qu'en A-pose stricte ; arc tenu derrière en vue
-  de dos. Prochaine étape : TRELLIS multi (0,02 $) sur ces vues et comparaison avec l'archer L3.
+  de dos. Essai 2 (`--attempt 2 --strength 0.3`, prompt « A-pose stricte, mains vides ») : arc retiré,
+  couleurs proches de L3 (gambison vert, chausses bleues), mais bras toujours le long du corps.
+  TRELLIS bloqué : compte fal.ai sans crédit (403, cf. ADR 0152). Choix joueur en attente :
+  recréditer fal.ai ou essayer une 3D locale (TripoSR/Stable Fast 3D sur Mac ; TRELLIS exige CUDA ;
+  Hunyuan3D exclu, licence hors UE).
 - Essai réel à lancer GPU libre (une unité) :
   `uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy python
   tools/experiments/ga3_fal_figure.py ~/dev/cent-ans-raw/ga3/local --unit longbowman
   --sheet-backend local --cut-backend local` (ajouter `--model multi` par défaut ; pour juger la
   planche seule, interrompre avant TRELLIS ou ouvrir `sheet.png`/`sheet_cut.png`). Risque : la force
   0.45 peut ne pas suffire à imposer la A-pose 3 vues ; ajuster `--strength` (0.3-0.6) et `--attempt`.
+
+## Stable Fast 3D local (10-08, essai)
+- Installé dans `~/models/stable-fast-3d` (venv 3.11, torch 2.6 ; compiler avec
+  `CFLAGS=CXXFLAGS=-Wno-invalid-specialization` ; lancer avec `PYTORCH_ENABLE_MPS_FALLBACK=1`,
+  `HF_TOKEN`). Licence Stability Community (gratuite < 1 M$ de revenu ; sorties à nous).
+- Archer L3 (front.png A-pose) : 32 s, 12 862 triangles, 141 parties (TRELLIS : 15 260, 242).
+  Forme et A-pose fidèles, carquois et dague présents ; texture plus claire/délavée que la
+  référence, visage flou ; dos deviné (une seule vue en entrée). Modèle tourné de 180° (yaw).
+  Comparaison : `ga3_compare_render.py --panel …/sf3d/out/0/mesh.glb "SF3D" --yaw 180`.
+- Pistes : corriger la teinte (gamma/saturation de l'albédo), essayer `--remesh_option triangle`,
+  câbler un `--model sf3d` dans `ga3_fal_figure.py` si le joueur valide.

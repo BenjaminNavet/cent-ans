@@ -81,3 +81,22 @@ quotidien). SF3D/TripoSR locaux : replis hors ligne seulement.
   TRELLIS multi n'apporte que si les vues sont vraiment différentes (archer) ; avec des vues
   quasi identiques (ville) il fait moins bien que SF3D en vue unique. Choix inchangé : TRELLIS d'abord,
   SF3D en repli, toujours nourri d'une vue ¾ avant.
+
+## Galerie des modèles 3D (08/10)
+`~/dev/cent-ans-raw/galerie-3d/` (hors dépôt) : liens symboliques vers les 98 glb générés (GA3 S1-S5,
+L1-L4, I3D essais 1-3), rangés `1-figurines/`, `2-decor/`, `3-vegetation/`, `4-comparatifs/<essai>/`,
+nommés `<objet>__<modèle image>__<modèle 3D>[__variante].glb`, avec images sources et rendus.
+`README.md` = légende des codes + index complet. Régénérer : `python3 -I build.py`.
+Rappel : les figurines GA3 du jeu sortent déjà d'un pipeline **Nano Banana 2 edit (fal) → TRELLIS
+multi (fal)** ; les planches SR3 viennent de NB2 via OpenRouter (`google/gemini-3.1-flash-image`).
+
+## Essai 4 (en cours) : Qwen-Image-Edit-2511 pour les vues manquantes
+- Modèle `Qwen/Qwen-Image-Edit-2511` (Apache 2.0, 20 B) en local via mflux
+  (`mflux-generate-qwen-edit`), sauvé quantifié q6 dans `~/models/mflux/qwen-image-edit-2511-q6`.
+- LoRA `fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA` (Apache 2.0) : prompt
+  `<sks> [azimut] [élévation] [distance]`, ex. `<sks> back view eye-level shot medium shot`.
+- But : depuis la vue ¾ avant Z-Image du cavalier, produire profil et dos cohérents, puis TRELLIS
+  multi et SF3D.
+- **Enjeu (joueur, 08/10)** : si Qwen est bon, le procédé standard des assets 3D devient
+  Qwen-Image-Edit (image vérifiée selon la charte) → TRELLIS gratuit (Space HF) en premier → SF3D
+  local en second. Pour les modèles gratuits seulement, on garde la meilleure de plusieurs images (graines), puis le meilleur de plusieurs modèles 3D par image (meilleur-de-N). Il sera adopté après l'essai et l'avis du joueur.
