@@ -80,12 +80,6 @@ pub struct EdictOption {
     pub active: bool,
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 fn edict_name(data: &GameData, id: &EdictId) -> String {
     data.edicts
         .get(id)
@@ -179,7 +173,7 @@ pub fn set_edict(
         .edicts
         .get(edict)
         .ok_or_else(|| EdictError::UnknownEdict(edict.clone()))?;
-    let name = province_name(data, province);
+    let name = data.province_name(province);
     if !state.controls_province(faction, province) {
         return Err(EdictError::NotControlled(name));
     }
@@ -242,7 +236,7 @@ pub(crate) fn resolve_requirements(
         }
         let text = format!(
             "Édits : {} n'est plus entièrement tenue ; l'édit « {} » cesse.",
-            province_name(data, &id),
+            data.province_name(&id),
             edict_name(data, &choice.edict),
         );
         if let Some(p) = state.provinces.get_mut(&id) {

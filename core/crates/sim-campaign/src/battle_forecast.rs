@@ -401,7 +401,7 @@ impl CampaignState {
             return Err(BattleRequestError::CannotWithdraw(index));
         }
         let request: BattleRequest = self.pending_battles.remove(index);
-        let place = crate::siege::settlement_name(data, &request.location);
+        let place = data.settlement_name(&request.location);
         let mut event = if request.siege {
             GameEvent::new(
                 EventKind::Battle,

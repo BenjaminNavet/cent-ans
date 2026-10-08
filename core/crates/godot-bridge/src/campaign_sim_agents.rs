@@ -6,7 +6,6 @@
 use data_model::{FactionId, SettlementId};
 use godot::prelude::*;
 use sim_campaign::agents::{self, Agent, AgentId, AgentReport};
-use sim_campaign::siege::settlement_name;
 
 use crate::campaign_sim::CampaignSim;
 
@@ -40,7 +39,7 @@ impl CampaignSim {
             "kind_name" => type_name.as_str(),
             "name" => agent.name.as_str(),
             "location" => agent.location.as_str(),
-            "location_name" => settlement_name(data, &agent.location).as_str(),
+            "location_name" => data.settlement_name(&agent.location).as_str(),
             "province" => state.settlement_province(&agent.location).map_or("", |p| p.as_str()),
             "movement_points" => i64::from(agent.movement_points),
             "max_movement_points" => i64::from(state.agent_movement_allowance(data, agent.kind)),
@@ -144,7 +143,7 @@ impl CampaignSim {
                 let target_name = option
                     .target
                     .as_ref()
-                    .map(|t| settlement_name(data, t))
+                    .map(|t| data.settlement_name(t))
                     .unwrap_or_default();
                 vdict! {
                     "action" => option.action.key(),

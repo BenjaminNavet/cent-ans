@@ -1274,6 +1274,45 @@ where
     Ok(loaded)
 }
 
+/// Display names with an id fallback, shared by every crate that words
+/// messages (an unknown id is shown as is).
+impl GameData {
+    /// Display name of a province (its id when unknown).
+    pub fn province_name(&self, id: &ProvinceId) -> String {
+        self.provinces
+            .get(id)
+            .map_or_else(|| id.to_string(), |p| p.name.display.clone())
+    }
+
+    /// Short name of a faction (its id when unknown).
+    pub fn faction_name(&self, id: &FactionId) -> String {
+        self.factions
+            .get(id)
+            .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
+    }
+
+    /// Full display name of a faction (its id when unknown).
+    pub fn faction_label(&self, id: &FactionId) -> String {
+        self.factions
+            .get(id)
+            .map_or_else(|| id.to_string(), |f| f.name.display.clone())
+    }
+
+    /// Display name of a settlement (its id when unknown).
+    pub fn settlement_name(&self, id: &SettlementId) -> String {
+        self.settlements
+            .get(id)
+            .map_or_else(|| id.to_string(), |s| s.name.display.clone())
+    }
+
+    /// Display name of a building (its id when unknown).
+    pub fn building_name(&self, id: &BuildingId) -> String {
+        self.buildings
+            .get(id)
+            .map_or_else(|| id.to_string(), |b| b.name.display.clone())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

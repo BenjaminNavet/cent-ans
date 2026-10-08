@@ -8,6 +8,7 @@
 //! attacker's damage and the defender's ranged damage
 //! (`data/rules/river_crossings.json`), instead of the province river flag.
 
+use data_model::util::dist;
 use data_model::{CrossingFactors, GameData, MapCrossing, RiverCrossingRules};
 use serde::{Deserialize, Serialize};
 use sim_battle::{BattleCrossing, CrossingStructure};
@@ -128,10 +129,6 @@ pub fn factor(factors: &CrossingFactors, structure: CrossingStructure) -> f64 {
     }
 }
 
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
-
 /// Signed distance of `point` to the river line of `crossing` (sign = bank).
 fn bank_side(crossing: &MapCrossing, point: [f32; 2]) -> f32 {
     let [dx, dy] = crossing.dir;
@@ -169,7 +166,7 @@ pub fn crossing_between(
     data.crossings
         .iter()
         .filter_map(|c| {
-            let d = distance(c.px, defender).min(distance(c.px, middle));
+            let d = dist(c.px, defender).min(dist(c.px, middle));
             if d > radius || !opposite_banks(c, attacker, defender) {
                 return None;
             }

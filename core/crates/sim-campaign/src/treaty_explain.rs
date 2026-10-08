@@ -11,7 +11,6 @@
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::faction_name;
 use crate::negotiation::{
     self, chance_of, counter_proposal, evaluate_treaty, Article, Party, TreatyEvaluation,
 };
@@ -200,7 +199,7 @@ pub fn explain_treaty(
 ) -> TreatyExplanation {
     let verdict = chance(state, data, proposer, recipient, articles);
     let lines = explanation_lines(&verdict);
-    let name = faction_name(data, recipient);
+    let name = data.faction_name(recipient);
     let mut explanation = TreatyExplanation {
         chance: verdict.chance,
         accept: verdict.accept,

@@ -34,8 +34,8 @@ pub fn revolt(
             EventKind::VassalRebellion,
             format!(
                 "{} se révolte contre son suzerain {} et proclame son indépendance.",
-                crate::diplomacy::faction_name(data, vassal),
-                crate::diplomacy::faction_name(data, &liege)
+                data.faction_name(vassal),
+                data.faction_name(&liege)
             ),
         )
         .faction(vassal),
@@ -92,14 +92,14 @@ pub fn switch_allegiance(
     let text = match &former {
         Some(former) => format!(
             "{} renie {} et prête hommage à {}.",
-            crate::diplomacy::faction_name(data, vassal),
-            crate::diplomacy::faction_name(data, former),
-            crate::diplomacy::faction_name(data, lord)
+            data.faction_name(vassal),
+            data.faction_name(former),
+            data.faction_name(lord)
         ),
         None => format!(
             "{} se place sous la protection de {} et lui prête hommage.",
-            crate::diplomacy::faction_name(data, vassal),
-            crate::diplomacy::faction_name(data, lord)
+            data.faction_name(vassal),
+            data.faction_name(lord)
         ),
     };
     state.push_order_event(GameEvent::new(EventKind::Vassalage, text).faction(vassal));

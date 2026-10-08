@@ -11,6 +11,7 @@
 //! chronicle tells the class. The last classification is kept in
 //! [`CampaignState::last_battle_outcome`] for the UI.
 
+use data_model::util::lowercase_first;
 use data_model::{BattleOutcomeClass, BattleOutcomeRules, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
 
@@ -194,12 +195,4 @@ pub(crate) fn apply(
         rules.consequence(attacker_class).xp_multiplier,
         rules.consequence(defender_class).xp_multiplier,
     )
-}
-
-fn lowercase_first(text: &str) -> String {
-    let mut chars = text.chars();
-    match chars.next() {
-        Some(first) => first.to_lowercase().chain(chars).collect(),
-        None => String::new(),
-    }
 }

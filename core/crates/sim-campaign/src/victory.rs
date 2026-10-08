@@ -153,7 +153,7 @@ pub(crate) fn resolve_victory(
         return;
     }
     let player = state.player_faction.clone();
-    let name = crate::diplomacy::faction_name(data, &player);
+    let name = data.faction_name(&player);
     // Lands as in `characters::resolve_faction_deaths`: any settlement held
     // (a castle or a town is enough, not only a province's city).
     let alive = state.factions.get(&player).is_some_and(|f| f.alive)

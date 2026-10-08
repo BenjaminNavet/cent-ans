@@ -4,8 +4,8 @@
 use data_model::{BuildingCategory, FactionId, GameData, ProvinceId, ReligionId, ReligionKind};
 
 use crate::diplomacy::{
-    faction_name, DiplomacyError, Proposal, MEDIATION_COST, MEDIATION_MIN_FAVOR,
-    MEDIATION_TRUCE_TURNS, PAPACY_FACTION,
+    DiplomacyError, Proposal, MEDIATION_COST, MEDIATION_MIN_FAVOR, MEDIATION_TRUCE_TURNS,
+    PAPACY_FACTION,
 };
 use crate::events::{EventKind, GameEvent};
 use crate::state::{CampaignState, Season};
@@ -143,7 +143,7 @@ pub(crate) fn excommunicate(state: &mut CampaignState, data: &GameData, faction:
     }
     let text = format!(
         "Le pape excommunie le souverain de {} : l'interdit frappe le royaume.",
-        faction_name(data, faction)
+        data.faction_name(faction)
     );
     state.push_order_event(GameEvent::new(EventKind::Excommunication, text).faction(faction));
 }
@@ -168,7 +168,7 @@ pub(crate) fn set_obedience(
     state.factions.get_mut(faction).expect("exists").religion = Some(religion.clone());
     let text = format!(
         "{} se range derrière {}.",
-        faction_name(data, faction),
+        data.faction_name(faction),
         religion_display(state, data, religion)
     );
     state.push_order_event(GameEvent::new(EventKind::Schism, text).faction(faction));
@@ -499,7 +499,7 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
                     EventKind::Excommunication,
                     format!(
                         "Le pape lève l'excommunication du souverain de {}.",
-                        faction_name(data, &faction)
+                        data.faction_name(&faction)
                     ),
                 )
                 .faction(&faction),

@@ -111,12 +111,6 @@ pub enum NavalRequestError {
     BadOutcome(String),
 }
 
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
 fn battle_season(season: Season) -> BattleSeason {
     match season {
         Season::Spring => BattleSeason::Spring,
@@ -308,7 +302,7 @@ pub(crate) fn intercept(
                 EventKind::Battle,
                 format!(
                     "En mer, une escadre {} barre la route de {}.",
-                    crate::events::de(&faction_name(data, &hostile)),
+                    crate::events::de(&data.faction_name(&hostile)),
                     state.army_name(data, army)
                 ),
             )
@@ -566,7 +560,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         .collect();
     let attacker = NavalSideSetup {
         faction: request.interceptor.to_string(),
-        faction_name: faction_name(data, &request.interceptor),
+        faction_name: data.faction_name(&request.interceptor),
         army: String::new(),
         admiral: String::new(),
         units,
@@ -687,7 +681,7 @@ fn transport_side(
     }
     NavalSideSetup {
         faction: army.faction.to_string(),
-        faction_name: faction_name(data, &army.faction),
+        faction_name: data.faction_name(&army.faction),
         army: army_id.to_string(),
         admiral: side.general.map(|g| g.name).unwrap_or_default(),
         units,
@@ -791,9 +785,9 @@ pub(crate) fn apply_outcome(
     let army_name = state.army_name(data, &request.army);
     let text = format!(
         "Bataille navale dans {sea} : l'escadre {} contre {} ({}). {} Navires pris : {} ; coulés : {} ({} contre {}). Pertes : {} hommes contre {}.",
-        crate::events::de(&faction_name(data, &request.interceptor)),
+        crate::events::de(&data.faction_name(&request.interceptor)),
         army_name,
-        faction_name(data, &army_faction),
+        data.faction_name(&army_faction),
         match &winner {
             Some(w) if w == &request.interceptor => "La traversée est brisée.".to_owned(),
             Some(_) => "L'escadre est repoussée, la traversée continue.".to_owned(),
@@ -801,8 +795,8 @@ pub(crate) fn apply_outcome(
         },
         outcome.attacker.prizes.len() + outcome.defender.prizes.len(),
         outcome.attacker.count(ShipFate::Sunk) + outcome.defender.count(ShipFate::Sunk),
-        faction_name(data, &request.interceptor),
-        faction_name(data, &army_faction),
+        data.faction_name(&request.interceptor),
+        data.faction_name(&army_faction),
         outcome.attacker.men_lost,
         outcome.defender.men_lost,
     );
@@ -857,9 +851,9 @@ impl CampaignState {
                     sea: request.sea.clone(),
                     sea_name: data.naval.sea_name(&request.sea),
                     interceptor: request.interceptor.clone(),
-                    interceptor_name: faction_name(data, &request.interceptor),
+                    interceptor_name: data.faction_name(&request.interceptor),
                     faction: army.faction.clone(),
-                    faction_name: faction_name(data, &army.faction),
+                    faction_name: data.faction_name(&army.faction),
                     interceptor_ships: setup.attacker.ships.len() as u32,
                     transport_ships: setup.defender.ships.len() as u32,
                     interceptor_men: setup.attacker.men(),
@@ -950,7 +944,7 @@ impl CampaignState {
         let text = format!(
             "La flotte de {} rentre au port de {} sans combattre.",
             self.army_name(data, &request.army),
-            crate::siege::settlement_name(data, &request.from)
+            data.settlement_name(&request.from)
         );
         let mut event = GameEvent::new(EventKind::Battle, text).army(&request.army);
         if let Some(army) = self.armies.get(&request.army) {

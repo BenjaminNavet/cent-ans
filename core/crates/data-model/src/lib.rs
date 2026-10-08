@@ -20,6 +20,7 @@ pub mod settlement_grid;
 pub mod settlement_load;
 pub mod title_check;
 pub mod trade_paths;
+pub mod util;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,

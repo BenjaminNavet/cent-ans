@@ -543,7 +543,7 @@ fn candidates(
                     if option.available && option.turns < template.duration {
                         targets.push(Target {
                             target_name: option.name.clone(),
-                            place_name: crate::siege::settlement_name(data, city),
+                            place_name: data.settlement_name(city),
                             province: Some((*p).clone()),
                             settlement: Some(city.clone()),
                             building: Some(option.building.clone()),

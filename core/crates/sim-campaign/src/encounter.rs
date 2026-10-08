@@ -12,22 +12,24 @@
 //! beside the army (fought through `movement::fight`, 3D or auto, whose
 //! result applies `on_win` / `on_loss`), or regiments joining the army.
 
+use data_model::util::dist;
 use std::collections::BTreeSet;
 
 use data_model::{
     Effect, EffectKind, EffectMode, Encounter, EncounterId, EncounterOption, EncounterOutcome,
-    EncounterResult, EncounterUnits, EventSeason, FactionId, GameData, ProvinceId, SpawnWar,
+    EncounterResult, EncounterUnits, FactionId, GameData, ProvinceId, SpawnWar,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::battle_auto::Winner;
+use crate::chronicle::season_of;
 use crate::chronicle::{apply_effect, EventContext};
 use crate::diplomacy::REBELS_FACTION;
 use crate::events::{EventKind, GameEvent};
 use crate::march::px_per_km;
 use crate::navigation::Cell;
 use crate::rng::CampaignRng;
-use crate::state::{Army, ArmyId, ArmyPosition, CampaignState, Season, Unit};
+use crate::state::{Army, ArmyId, ArmyPosition, CampaignState, Unit};
 
 /// Encounter part of the campaign state (`#[serde(default)]`: older saves
 /// load without it).
@@ -170,31 +172,12 @@ fn derived_rng(state: &CampaignState, salt: u64, extra: u64) -> CampaignRng {
     CampaignRng::from_seed(mixed)
 }
 
-fn season_of(season: Season) -> EventSeason {
-    match season {
-        Season::Spring => EventSeason::Spring,
-        Season::Summer => EventSeason::Summer,
-        Season::Autumn => EventSeason::Autumn,
-        Season::Winter => EventSeason::Winter,
-    }
-}
-
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
-
 fn km_px(data: &GameData, km: f64) -> f32 {
     km as f32 * px_per_km(data)
 }
 
 fn rebels() -> FactionId {
     FactionId::new(REBELS_FACTION).expect("well-formed id")
-}
-
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
 fn unit_name(data: &GameData, units: &EncounterUnits) -> String {
@@ -428,7 +411,7 @@ pub fn cell_fits(
         .encounters
         .sites
         .iter()
-        .all(|s| distance(s.cell.center(grid), center) >= gap)
+        .all(|s| dist(s.cell.center(grid), center) >= gap)
 }
 
 // =========================================================================
@@ -469,7 +452,7 @@ pub(crate) fn on_march_end(
         .sites
         .iter()
         .filter(|s| s.claimed_by.is_none() && data.encounters.contains_key(&s.encounter))
-        .map(|s| (distance(s.cell.center(grid), point), s))
+        .map(|s| (dist(s.cell.center(grid), point), s))
         .filter(|(d, _)| *d <= radius)
         .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
         .map(|(_, s)| s.clone())
@@ -495,7 +478,7 @@ pub(crate) fn on_march_end(
                 EventKind::Chronicle,
                 format!(
                     "Rencontre {} : {}.",
-                    crate::events::de(&province_name(data, &site.province)),
+                    crate::events::de(&data.province_name(&site.province)),
                     encounter.title
                 ),
             )
@@ -906,7 +889,7 @@ fn start_battle(
     // The troop stands on the site, or beside the army when the site is a
     // stub or out of reach.
     let engage = km_px(data, data.free_movement_rules().engage_radius_km);
-    let point = if site.cell != Cell::new(0, 0) && distance(site_point, army_point) <= engage {
+    let point = if site.cell != Cell::new(0, 0) && dist(site_point, army_point) <= engage {
         site_point
     } else {
         [army_point[0] + engage * 0.5, army_point[1]]
@@ -1092,7 +1075,7 @@ impl CampaignState {
                     .map_or_else(|| s.encounter.to_string(), |e| e.title.clone()),
                 point: s.cell.center(grid),
                 province: s.province.clone(),
-                province_name: province_name(data, &s.province),
+                province_name: data.province_name(&s.province),
                 expires_turn: s.expires_turn,
                 expires_in: s.expires_turn.saturating_sub(self.turn),
                 claimed: s.claimed_by.is_some(),
@@ -1148,7 +1131,7 @@ impl CampaignState {
                     title: encounter.title.clone(),
                     text: encounter.text.clone(),
                     province: p.province.clone(),
-                    province_name: province_name(data, &p.province),
+                    province_name: data.province_name(&p.province),
                     options,
                 })
             })

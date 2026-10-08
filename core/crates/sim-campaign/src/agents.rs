@@ -8,6 +8,7 @@
 //! action serial): the main [`CampaignState::rng`] stream is never consumed,
 //! so a game without agents keeps exactly the same draws.
 
+use data_model::util::splitmix64;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt;
@@ -19,12 +20,11 @@ use data_model::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{faction_name, Proposal, PAPACY_FACTION, REBELS_FACTION};
+use crate::diplomacy::{Proposal, PAPACY_FACTION, REBELS_FACTION};
 use crate::events::{EventKind, GameEvent};
 use crate::movement;
 use crate::orders::Order;
 use crate::rng::CampaignRng;
-use crate::siege::settlement_name;
 use crate::state::CampaignState;
 
 /// Opinion reason of an embassy (herald `parley`, `truce`).
@@ -202,19 +202,11 @@ pub enum AgentError {
 
 // ----- derived generator ----------------------------------------------------
 
-fn splitmix(mut x: u64) -> u64 {
-    x = x.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    let mut z = x;
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
-}
-
 /// Generator of one roll: depends only on the game seed, the turn, the agent
 /// and a salt (action serial, phase).
 pub fn derived_rng(seed: u64, turn: u32, agent: u32, salt: u32) -> CampaignRng {
-    let mixed = splitmix(
-        splitmix(seed ^ 0xA6E5_7C6A_6E75_0000)
+    let mixed = splitmix64(
+        splitmix64(seed ^ 0xA6E5_7C6A_6E75_0000)
             ^ (u64::from(turn) << 40)
             ^ (u64::from(agent) << 20)
             ^ u64::from(salt),
@@ -1158,7 +1150,7 @@ impl CampaignState {
                     .types
                     .get(&agent.kind)
                     .map_or("Un agent", |t| t.name.as_str()),
-                faction_name(data, faction)
+                data.faction_name(faction)
             );
             self.push_order_event(
                 GameEvent::new(EventKind::Agent, format!("{who} : {text}"))
@@ -1183,8 +1175,8 @@ impl CampaignState {
     ) -> String {
         let effects = rules(data).effects.clone();
         let faction = &agent.faction;
-        let place = settlement_name(data, &plan.target);
-        let province_label = province_name(data, &plan.province);
+        let place = data.settlement_name(&plan.target);
+        let province_label = data.province_name(&plan.province);
         match action {
             AgentActionKind::Scout => {
                 let text = self.scouting_report(data, &plan.target);
@@ -1256,7 +1248,7 @@ impl CampaignState {
                 format!(
                     "{} est reçu en ambassade par {} : opinion +{value} pour {} saisons.",
                     agent.name,
-                    faction_name(data, &plan.target_faction),
+                    data.faction_name(&plan.target_faction),
                     effects.parley_turns
                 )
             }
@@ -1281,7 +1273,7 @@ impl CampaignState {
                         turns: effects.truce_turns,
                     },
                 );
-                let enemy = faction_name(data, &target);
+                let enemy = data.faction_name(&target);
                 match result {
                     Ok(()) if target == self.player_faction => {
                         format!("{} porte une proposition de trêve à {enemy}.", agent.name)
@@ -1359,7 +1351,7 @@ impl CampaignState {
                 format!(
                     "{} tonne en chaire contre {} : le clergé {} s'agite et le pape s'en émeut.",
                     agent.name,
-                    faction_name(data, &plan.target_faction),
+                    data.faction_name(&plan.target_faction),
                     crate::events::de(&province_label)
                 )
             }
@@ -1383,7 +1375,7 @@ impl CampaignState {
         let Some(s) = self.settlements.get(target) else {
             return String::new();
         };
-        let mut parts = vec![format!("tenue par {}", faction_name(data, &s.controller))];
+        let mut parts = vec![format!("tenue par {}", data.faction_name(&s.controller))];
         let men = s.garrison_strength();
         parts.push(if men == 0 {
             "aucune garnison".to_owned()
@@ -1400,7 +1392,7 @@ impl CampaignState {
             .map(|a| {
                 format!(
                     "{} ({} hommes)",
-                    faction_name(data, &a.faction),
+                    data.faction_name(&a.faction),
                     a.total_strength()
                 )
             })
@@ -1423,7 +1415,7 @@ impl CampaignState {
         if let Some(siege) = &s.siege {
             parts.push(format!(
                 "assiégée par {} (vivres {} %, brèche {} %)",
-                faction_name(data, &siege.attacker),
+                data.faction_name(&siege.attacker),
                 siege.supplies,
                 siege.breach
             ));
@@ -1465,13 +1457,13 @@ impl CampaignState {
             return format!(
                 "{} fouille les auberges {} : aucun agent étranger démasqué.",
                 agent.name,
-                crate::events::de(&province_name(data, &plan.province))
+                crate::events::de(&data.province_name(&plan.province))
             );
         }
         let names: Vec<String> = caught
             .iter()
             .filter_map(|id| self.agents.agents.get(id))
-            .map(|a| format!("{} ({})", a.name, faction_name(data, &a.faction)))
+            .map(|a| format!("{} ({})", a.name, data.faction_name(&a.faction)))
             .collect();
         for id in &caught {
             if let Some(victim) = self.agents.agents.remove(id) {
@@ -1482,7 +1474,7 @@ impl CampaignState {
                             format!(
                                 "{} est démasqué {} et exécuté.",
                                 victim.name,
-                                crate::events::de(&province_name(data, &plan.province))
+                                crate::events::de(&data.province_name(&plan.province))
                             ),
                         )
                         .province(&plan.province)
@@ -1495,12 +1487,6 @@ impl CampaignState {
     }
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 fn failure_text(
     data: &GameData,
     agent: &Agent,
@@ -1508,7 +1494,7 @@ fn failure_text(
     plan: &ActionPlan,
     state: &CampaignState,
 ) -> String {
-    let place = settlement_name(data, &plan.target);
+    let place = data.settlement_name(&plan.target);
     let action_name = rules(data)
         .actions
         .get(&action)
@@ -1517,7 +1503,7 @@ fn failure_text(
         AgentActionKind::Bribe => format!(" ({} livres perdues)", plan.cost),
         AgentActionKind::Truce | AgentActionKind::Parley => format!(
             " : {} ne le reçoit pas",
-            faction_name(data, &plan.target_faction)
+            data.faction_name(&plan.target_faction)
         ),
         AgentActionKind::Ransom => format!(
             " : le geôlier de {} refuse",
@@ -1643,13 +1629,13 @@ pub(crate) fn resolve_agents(
                 format!(
                     "{} est démasqué par les espions {} et pendu.",
                     victim.name,
-                    crate::events::de(&faction_name(data, &master))
+                    crate::events::de(&data.faction_name(&master))
                 )
             } else {
                 format!(
                     "Vos espions démasquent {}, agent {}, qui est pendu.",
                     victim.name,
-                    crate::events::de(&faction_name(data, &victim.faction))
+                    crate::events::de(&data.faction_name(&victim.faction))
                 )
             };
             events.push(

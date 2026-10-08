@@ -77,7 +77,7 @@ fn temper(value: i32, weight: i32) -> i32 {
 
 fn wars(state: &CampaignState, faction: &FactionId) -> usize {
     state.factions.get(faction).map_or(0, |f| {
-        f.at_war_with.iter().filter(|e| !is_rebels(e)).count()
+        f.at_war_with.iter().filter(|e| !e.is_rebels()).count()
     })
 }
 
@@ -98,10 +98,6 @@ fn label(data: &GameData, faction: &FactionId) -> String {
     data.factions
         .get(faction)
         .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
-}
-
-fn is_rebels(faction: &FactionId) -> bool {
-    faction.as_str() == sim_campaign::diplomacy::REBELS_FACTION
 }
 
 // =========================================================================
@@ -424,7 +420,7 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
             let threats: Vec<&FactionId> = me
                 .at_war_with
                 .iter()
-                .filter(|e| !is_rebels(e))
+                .filter(|e| !e.is_rebels())
                 .filter(|e| coalition_power(state, e, &[faction]) >= ratio * ours)
                 .collect();
             if threats.is_empty() {
@@ -448,7 +444,7 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
                 && *id != faction
                 && Some(*id) != liege.as_ref()
                 && **id != state.player_faction
-                && !is_rebels(id)
+                && !id.is_rebels()
         })
         .filter(|(id, _)| primary_rank(state, data, id).is_some_and(|r| r > own_rank))
         .filter(|(id, _)| !state.is_at_war(faction, id))

@@ -180,15 +180,15 @@ pub fn set_coinage(
     let text = match level {
         CoinageLevel::Strong => format!(
             "{} ordonne une monnaie forte : refonte des espèces, les prix baisseront lentement.",
-            faction_label(data, faction)
+            data.faction_label(faction)
         ),
         CoinageLevel::Sound => format!(
             "{} revient à une monnaie saine.",
-            faction_label(data, faction)
+            data.faction_label(faction)
         ),
         CoinageLevel::Debased | CoinageLevel::HeavilyDebased => format!(
             "{} mue la monnaie ({}) : le seigneuriage remplit le trésor, les prix montent.",
-            faction_label(data, faction),
+            data.faction_label(faction),
             level.label_fr().to_lowercase()
         ),
     };
@@ -196,12 +196,6 @@ pub fn set_coinage(
         .pending_events
         .push(GameEvent::new(EventKind::Coinage, text).faction(faction));
     Ok(())
-}
-
-fn faction_label(data: &GameData, faction: &FactionId) -> String {
-    data.factions
-        .get(faction)
-        .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
 }
 
 /// Cost multiplier of the faction's prices (`price_level / 100`).

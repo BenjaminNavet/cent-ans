@@ -1120,10 +1120,7 @@ pub(crate) fn resolve_construction(
             events.push(
                 GameEvent::new(
                     EventKind::BuildingCompleted,
-                    format!(
-                        "{name} achevé à {}.",
-                        crate::siege::settlement_name(data, &id)
-                    ),
+                    format!("{name} achevé à {}.", data.settlement_name(&id)),
                 )
                 .province(&province)
                 .faction(&controller),

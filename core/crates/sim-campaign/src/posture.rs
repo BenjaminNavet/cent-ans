@@ -321,7 +321,7 @@ pub(crate) fn spring_ambush(
     let (a_faction, v_faction) = (a.faction.clone(), v.faction.clone());
     let province = state.army_province(data, a);
     let place = crate::march::nearest_settlement(data, state.army_point(data, a))
-        .map(|p| crate::siege::settlement_name(data, &p));
+        .map(|p| data.settlement_name(&p));
     let permille = (chance * 1000.0).round().clamp(0.0, 1000.0) as u32;
     let sprung = state.rng.chance_permille(permille);
     if let Some(army) = state.armies.get_mut(ambusher) {

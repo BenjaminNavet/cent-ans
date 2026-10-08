@@ -479,7 +479,7 @@ pub(crate) fn resolve_population(
         let rules = &data.population_rules;
         let weighted = weighted_unrest(&province.population);
         // EQ1: a province the rebels already hold does not rise against them.
-        if weighted > rules.revolt_unrest_threshold && !crate::diplomacy::is_rebels(&controller) {
+        if weighted > rules.revolt_unrest_threshold && !controller.is_rebels() {
             province.revolt_seasons += 1;
         } else {
             province.revolt_seasons = 0;

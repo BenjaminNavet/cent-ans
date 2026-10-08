@@ -18,6 +18,7 @@
 //!   the stormy seasons ([`trade_sea_legs`]);
 //! - **view** for the map layer and its tooltip ([`sea_lanes`]).
 
+use data_model::util::lowercase_first;
 use data_model::{FactionId, GameData, SeaLane, SeaLaneKind, SeaZoneId, SettlementId};
 use serde::{Deserialize, Serialize};
 
@@ -145,14 +146,6 @@ fn sea_name_between(
 ) -> String {
     crate::naval::crossing_sea(state, data, from, to)
         .map_or_else(|| "la mer".to_owned(), |sea| data.naval.sea_name(&sea))
-}
-
-fn lowercase_first(text: &str) -> String {
-    let mut chars = text.chars();
-    match chars.next() {
-        Some(first) => first.to_lowercase().collect::<String>() + chars.as_str(),
-        None => String::new(),
-    }
 }
 
 /// Effect of the sea legs of a trade route's `path` on its value: `factor`

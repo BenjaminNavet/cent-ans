@@ -103,12 +103,6 @@ pub struct DietOption {
     pub current: bool,
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 fn diet_name(data: &GameData, id: &DietId) -> String {
     data.diets
         .get(id)
@@ -279,7 +273,7 @@ pub fn set_diet(
         .diets
         .get(diet)
         .ok_or_else(|| DietError::UnknownDiet(diet.clone()))?;
-    let name = province_name(data, province);
+    let name = data.province_name(province);
     let Some(p) = state.provinces.get(province) else {
         return Err(DietError::NotControlled(name));
     };
@@ -363,7 +357,7 @@ pub(crate) fn resolve_requirements(
         revert_to_default(state, &id);
         let text = format!(
             "La Table : {} ne peut plus tenir le régime « {} » ({}) ; retour au {}.",
-            province_name(data, &id),
+            data.province_name(&id),
             diet_name(data, &diet_id),
             reasons.join(" ; "),
             diet_name(data, &default_diet()).to_lowercase(),
@@ -399,7 +393,7 @@ pub(crate) fn pay_table(
         let text = format!(
             "La Table : le trésor ne peut payer le régime « {} » de {} ({cost} livres) ; retour au {}.",
             diet_name(data, &diet),
-            province_name(data, &id),
+            data.province_name(&id),
             diet_name(data, &default_diet()).to_lowercase(),
         );
         push_player_event(state, faction, Some(&id), text, events);
@@ -551,7 +545,7 @@ pub(crate) fn resolve_lent(
             }
         }
         if !breaking.is_empty() {
-            let names: Vec<String> = breaking.iter().map(|p| province_name(data, p)).collect();
+            let names: Vec<String> = breaking.iter().map(|p| data.province_name(p)).collect();
             push_player_event(
                 state,
                 &faction,

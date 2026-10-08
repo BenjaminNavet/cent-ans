@@ -17,6 +17,7 @@
 //! Attacks, embarkations and the continuation of multi-turn marches live
 //! here too; the battles themselves are `movement::fight`.
 
+use data_model::util::dist;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{FactionId, GameData, NavGrid, ProvinceId, SettlementId, SettlementKind};
@@ -76,10 +77,6 @@ pub fn km_to_grid_points(data: &GameData, km: f64) -> u32 {
     (km / grid.cell_km.max(1e-6) * f64::from(data_model::PLAIN_COST)).round() as u32
 }
 
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
-
 /// The settlement nearest to map pixel `point` (ties by id).
 pub fn nearest_settlement(data: &GameData, point: [f32; 2]) -> Option<SettlementId> {
     // OMR R1: read on the settlement grid (same answer as the walk).
@@ -106,7 +103,7 @@ pub fn nearest_settlement_where(
             point.map(|p| (p, id))
         })
         .filter(|(_, id)| accept(id))
-        .map(|(p, id)| (distance(p, point), id))
+        .map(|(p, id)| (dist(p, point), id))
         .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
         .map(|(_, id)| id.clone())
 }
@@ -156,7 +153,7 @@ impl CampaignState {
         let radius = radius_km as f32 * px_per_km(data);
         self.armies
             .iter()
-            .filter(|(_, a)| distance(self.army_point(data, a), point) <= radius)
+            .filter(|(_, a)| dist(self.army_point(data, a), point) <= radius)
             .map(|(id, _)| id.clone())
             .collect()
     }
@@ -172,7 +169,7 @@ impl CampaignState {
 
     /// Distance in kilometres between two armies.
     pub fn army_distance_km(&self, data: &GameData, a: &Army, b: &Army) -> f64 {
-        f64::from(distance(self.army_point(data, a), self.army_point(data, b)))
+        f64::from(dist(self.army_point(data, a), self.army_point(data, b)))
             / f64::from(px_per_km(data))
     }
 
@@ -392,7 +389,7 @@ fn simulate(
         })
         .map(|(id, a)| (id.clone(), state.army_point(data, a)))
         // An army already inside a zone of control may walk out of it.
-        .filter(|(_, p)| distance(*p, start_point) > zoc_px)
+        .filter(|(_, p)| dist(*p, start_point) > zoc_px)
         .collect();
     let mut current = state.army_cell(data, army);
     let mut left = army.movement_left;
@@ -402,7 +399,7 @@ fn simulate(
         stop: StopReason::Arrived,
         next_waypoint: 0,
     };
-    if approach.is_some_and(|a| distance(start_point, a.point) <= a.radius) {
+    if approach.is_some_and(|a| dist(start_point, a.point) <= a.radius) {
         return Some(walk);
     }
     while walk.next_waypoint < waypoints.len() {
@@ -428,13 +425,13 @@ fn simulate(
             walk.cells.push(next);
             current = next;
             let point = next.center(grid);
-            if let Some((enemy, _)) = enemies.iter().find(|(_, p)| distance(*p, point) <= zoc_px) {
+            if let Some((enemy, _)) = enemies.iter().find(|(_, p)| dist(*p, point) <= zoc_px) {
                 walk.stop = StopReason::EnemyZoneOfControl {
                     army: enemy.clone(),
                 };
                 return Some(walk);
             }
-            if approach.is_some_and(|a| distance(point, a.point) <= a.radius) {
+            if approach.is_some_and(|a| dist(point, a.point) <= a.radius) {
                 return Some(walk);
             }
         }
@@ -731,7 +728,7 @@ impl CampaignState {
             || self.army_point(data, &self.armies[army]),
             |c| c.center(grid),
         );
-        if distance(end, approach.point) > approach.radius {
+        if dist(end, approach.point) > approach.radius {
             if walk.cells.is_empty() {
                 return Err(OrderError::OutOfRange);
             }
@@ -989,7 +986,7 @@ pub fn settlements_near(
         .keys()
         .filter(|id| {
             data.settlement_point(id)
-                .is_some_and(|p| distance(p, point) <= radius)
+                .is_some_and(|p| dist(p, point) <= radius)
         })
         .cloned()
         .collect()

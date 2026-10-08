@@ -29,7 +29,7 @@ use data_model::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{self, faction_name, DiplomacyError, Proposal, RelationKind};
+use crate::diplomacy::{self, DiplomacyError, Proposal, RelationKind};
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
 use crate::state::CampaignState;
@@ -298,27 +298,11 @@ fn rules(data: &GameData) -> &NegotiationRules {
     &data.ai_diplomacy.negotiation
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
-fn settlement_name(data: &GameData, id: &SettlementId) -> String {
-    data.settlements
-        .get(id)
-        .map_or_else(|| id.to_string(), |s| s.name.display.clone())
-}
-
 fn party_id<'a>(party: Party, proposer: &'a FactionId, recipient: &'a FactionId) -> &'a FactionId {
     match party {
         Party::Proposer => proposer,
         Party::Recipient => recipient,
     }
-}
-
-fn is_rebels(id: &FactionId) -> bool {
-    id.as_str() == diplomacy::REBELS_FACTION
 }
 
 /// Score at or above which a proposal of the player is accepted (ADR 0182).
@@ -553,7 +537,7 @@ pub fn check_treaty(
                 if crate::feudal::holder_of(state, title) != Some(giver) {
                     return Err(DiplomacyError::Refused(format!(
                         "{} ne détient pas ce titre",
-                        faction_name(data, giver)
+                        data.faction_name(giver)
                     )));
                 }
                 let held = crate::feudal::titles_of(state, giver).len();
@@ -576,7 +560,7 @@ pub fn check_treaty(
                 if Some(&s.owner) != giver || s.kind == SettlementKind::City {
                     return Err(DiplomacyError::Refused(format!(
                         "{} ne peut pas être cédée seule",
-                        settlement_name(data, settlement)
+                        data.settlement_name(settlement)
                     )));
                 }
             }
@@ -1009,7 +993,7 @@ fn article_value(
                 if data.ai_diplomacy.peace.keep_capital && capital {
                     blocked = Some(format!(
                         "{} ne cédera jamais sa capitale",
-                        faction_name(data, recipient)
+                        data.faction_name(recipient)
                     ));
                 }
                 let occupied = state.controls_province(taker, province);
@@ -1145,8 +1129,8 @@ pub fn article_label(
     recipient: &FactionId,
     article: &Article,
 ) -> String {
-    let who = |p: &Party| faction_name(data, party_id(*p, proposer, recipient));
-    let to = |p: &Party| faction_name(data, party_id(p.other(), proposer, recipient));
+    let who = |p: &Party| data.faction_name(party_id(*p, proposer, recipient));
+    let to = |p: &Party| data.faction_name(party_id(p.other(), proposer, recipient));
     match article {
         Article::Peace => format!(
             "Paix (trêve de {} ans)",
@@ -1180,13 +1164,13 @@ pub fn article_label(
         Article::CedeProvince { giver, province } => format!(
             "{} cède {} à {}",
             who(giver),
-            province_name(data, province),
+            data.province_name(province),
             to(giver)
         ),
         Article::CedeSettlement { giver, settlement } => format!(
             "{} cède la place de {} à {}",
             who(giver),
-            settlement_name(data, settlement),
+            data.settlement_name(settlement),
             to(giver)
         ),
         Article::Vassalage { giver } => {
@@ -1227,8 +1211,8 @@ pub fn treaty_text(
         .collect();
     format!(
         "Traité entre {} et {} : {}.",
-        faction_name(data, proposer),
-        faction_name(data, recipient),
+        data.faction_name(proposer),
+        data.faction_name(recipient),
         list.join(" ; ")
     )
 }
@@ -1405,7 +1389,7 @@ pub fn propose_treaty(
             .collect();
         return Err(DiplomacyError::Refused(format!(
             "{} refuse (score {:+}, il en fallait {:+}) : {}",
-            faction_name(data, recipient),
+            data.faction_name(recipient),
             verdict.score,
             ACCEPT_SCORE,
             top.join(", ")
@@ -1768,13 +1752,13 @@ pub(crate) fn resolve_negotiation(
     }
     // War goals of new wars.
     for id in &ids {
-        if !state.factions[id].alive || is_rebels(id) {
+        if !state.factions[id].alive || id.is_rebels() {
             continue;
         }
         let enemies: Vec<FactionId> = state.factions[id]
             .at_war_with
             .iter()
-            .filter(|e| !is_rebels(e))
+            .filter(|e| !e.is_rebels())
             .filter(|e| !state.factions[id].ledger.war_goals.contains_key(*e))
             .cloned()
             .collect();
@@ -1791,7 +1775,7 @@ pub(crate) fn resolve_negotiation(
     }
     // War weariness.
     for id in &ids {
-        if !state.factions[id].alive || is_rebels(id) {
+        if !state.factions[id].alive || id.is_rebels() {
             continue;
         }
         // Only wars that press on us tire the realm: a bordering enemy, or
@@ -1799,7 +1783,7 @@ pub(crate) fn resolve_negotiation(
         let enemies: Vec<FactionId> = state.factions[id]
             .at_war_with
             .iter()
-            .filter(|e| !is_rebels(e))
+            .filter(|e| !e.is_rebels())
             .filter(|e| {
                 (state.are_neighbors(data, id, e)
                     && state.faction_power(e) >= 0.25 * state.faction_power(id))
@@ -1891,7 +1875,7 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
     let rules = rules(data);
     let me = state.factions.get(faction)?;
     let min_chance = rules.ai_min_chance;
-    let mut enemies: Vec<&FactionId> = me.at_war_with.iter().filter(|e| !is_rebels(e)).collect();
+    let mut enemies: Vec<&FactionId> = me.at_war_with.iter().filter(|e| !e.is_rebels()).collect();
     // The strongest enemy first.
     enemies.sort_by(|a, b| {
         state

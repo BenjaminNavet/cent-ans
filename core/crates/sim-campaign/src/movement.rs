@@ -836,10 +836,8 @@ pub(crate) fn apply_battle_result(
         ),
         result,
     );
-    let place = crate::march::nearest_settlement(data, battlefield).map_or_else(
-        || province_name.clone(),
-        |s| crate::siege::settlement_name(data, &s),
-    );
+    let place = crate::march::nearest_settlement(data, battlefield)
+        .map_or_else(|| province_name.clone(), |s| data.settlement_name(&s));
     let (attacker_xp, defender_xp) = crate::battle_outcome::apply(
         state,
         data,

@@ -30,25 +30,6 @@ pub const RAID_LOOT_SHARE: f64 = 0.5;
 /// `data/rules/capture.json`; kept for reference.
 pub const CAPTURE_UNREST: u8 = 20;
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
-/// Display name of a settlement (its id when unknown).
-pub fn settlement_name(data: &GameData, id: &SettlementId) -> String {
-    data.settlements
-        .get(id)
-        .map_or_else(|| id.to_string(), |s| s.name.display.clone())
-}
-
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
 /// Armies on `settlement` besieging its controller, sorted by id: armies in
 /// `Siege` stance, or any hostile army when the settlement is a village.
 pub(crate) fn besiegers(
@@ -96,7 +77,7 @@ fn lift_siege(
             EventKind::SiegeLifted,
             format!(
                 "Le siège {} est levé.",
-                crate::events::de(&settlement_name(data, settlement))
+                crate::events::de(&data.settlement_name(settlement))
             ),
         )
         .province(&province_of(state, settlement))
@@ -204,7 +185,7 @@ pub(crate) fn resolve_sieges(
                             EventKind::ProvinceCaptured,
                             format!(
                                 "Affamée, la garnison de {} capitule.",
-                                settlement_name(data, &settlement_id)
+                                data.settlement_name(&settlement_id)
                             ),
                         )
                         .province(&province_id)
@@ -319,8 +300,8 @@ pub(crate) fn begin_siege(
             EventKind::SiegeStarted,
             format!(
                 "{} met le siège devant {}.",
-                faction_name(data, attacker),
-                settlement_name(data, settlement_id)
+                data.faction_name(attacker),
+                data.settlement_name(settlement_id)
             ),
         )
         .province(&province_id)
@@ -558,8 +539,8 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
                     EventKind::Battle,
                     format!(
                         "{} se prépare à donner l'assaut à {}.",
-                        faction_name(data, &faction),
-                        settlement_name(data, &settlement)
+                        data.faction_name(&faction),
+                        data.settlement_name(&settlement)
                     ),
                 )
                 .province(&province)
@@ -827,8 +808,8 @@ pub(crate) fn apply_assault_result(
     };
     let text = format!(
         "Assaut {}{allies} contre {}{} : {}. Pertes : {} contre {}.",
-        crate::events::de(&faction_name(data, &faction)),
-        settlement_name(data, settlement),
+        crate::events::de(&data.faction_name(&faction)),
+        data.settlement_name(settlement),
         if walls {
             " (murailles intactes)"
         } else if state.fortification_level(data, settlement) == 0 {
@@ -968,7 +949,7 @@ fn sortie(
             EventKind::Battle,
             format!(
                 "Sortie de la garnison de {} : {}.",
-                settlement_name(data, settlement),
+                data.settlement_name(settlement),
                 if won {
                     "les assiégeants sont mis en fuite"
                 } else {
@@ -1104,12 +1085,12 @@ pub(crate) fn capture(
         province.unrest = province.unrest.saturating_add(unrest).min(100);
     }
     let place = if is_city {
-        province_name(data, &province_id)
+        data.province_name(&province_id)
     } else {
         format!(
             "{} ({})",
-            settlement_name(data, settlement_id),
-            province_name(data, &province_id)
+            data.settlement_name(settlement_id),
+            data.province_name(&province_id)
         )
     };
     events.push(
@@ -1117,8 +1098,8 @@ pub(crate) fn capture(
             EventKind::ProvinceCaptured,
             format!(
                 "{place} tombe aux mains de {} (auparavant {}).",
-                faction_name(data, new_controller),
-                faction_name(data, &previous)
+                data.faction_name(new_controller),
+                data.faction_name(&previous)
             ),
         )
         .province(&province_id)
@@ -1184,8 +1165,8 @@ pub(crate) fn resolve_raids(
                 EventKind::Raid,
                 format!(
                     "Chevauchée de {} en {} : {loot} livres de butin.",
-                    faction_name(data, &faction),
-                    province_name(data, &province_id)
+                    data.faction_name(&faction),
+                    data.province_name(&province_id)
                 ),
             )
             .province(&province_id)

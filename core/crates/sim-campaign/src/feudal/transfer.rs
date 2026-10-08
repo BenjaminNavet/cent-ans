@@ -76,10 +76,6 @@ fn fix_capital(state: &mut CampaignState, faction: &FactionId) {
     }
 }
 
-fn is_rebels(faction: &FactionId) -> bool {
-    faction.as_str() == crate::diplomacy::REBELS_FACTION
-}
-
 /// Moves `title` to `to` (see [`super::transfer_title`]).
 pub(crate) fn transfer(
     state: &mut CampaignState,
@@ -114,7 +110,7 @@ pub(crate) fn transfer(
             format!(
                 "{} passe à {}.",
                 title_name(data, title),
-                crate::diplomacy::faction_name(data, to)
+                data.faction_name(to)
             ),
         )
         .faction(to),
@@ -127,7 +123,7 @@ pub(crate) fn transfer(
     if !alive {
         return Ok(());
     }
-    if titles_of(state, &from).is_empty() && !is_rebels(&from) {
+    if titles_of(state, &from).is_empty() && !from.is_rebels() {
         absorb(state, data, &from, to, events);
     } else {
         fix_capital(state, &from);
@@ -181,8 +177,8 @@ fn absorb(
             EventKind::FactionDestroyed,
             format!(
                 "{} n'a plus de titre : ses terres sont réunies à celles de {}.",
-                crate::diplomacy::faction_name(data, from),
-                crate::diplomacy::faction_name(data, into)
+                data.faction_name(from),
+                data.faction_name(into)
             ),
         )
         .faction(from),
@@ -426,7 +422,7 @@ fn create_faction(
                 "{} reçoit {} de {} et fonde sa propre maison vassale.",
                 state.character_name(data, character),
                 title_name(data, title),
-                crate::diplomacy::faction_name(data, grantor)
+                data.faction_name(grantor)
             ),
         )
         .faction(&id),
