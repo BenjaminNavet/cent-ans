@@ -278,3 +278,15 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Fleets::deploy, struct Battle en phases nommées dans auto.rs, méthodes de Ship, Arc<NavalRules>, 27 constantes en données. Équivalence vérifiée sur 180 combats.
 - Reste : constantes de ship.rs en dur ; `pending.remove(0)` de sim-campaign/naval.rs.
 - Correctif après fusion (f7a559438) : `Derived<T>` est un newtype au Debug muet (le cache `road_index` cassait battle_step_job).
+
+## MAPKIT (fusionné d4ec81c1d)
+- Table de stratégies MODE_SPECS (map_mode_controller), JsonLookup (16 sites), MapInstancing (10 MultiMesh). Tests carte/UI verts (mf1, cb2, tb4, en, rj, cv1, rs_k, sz4…).
+- settlements_render_test bloqué 45 min sur feat/sc : comparaison avec main en cours.
+
+## FXARGS (fusionné 2a32c8ca8)
+- CmdArgs partout (44 fichiers, + `list()`), seul battle_vegetation.gd (sale sur main) lit encore la ligne de commande.
+- Includes shaders fx_flipbook / fx_blackbody / fx_noise (fire_*, life_*).
+- Écarts : `--journey=x` démarre le parcours ; `--screenshot` nu vaut capture ; dernière occurrence d'un drapeau répété l'emporte.
+
+## LOOKUPS (fusionné d59f8d795)
+- JsonLookup sur 14 sites de plus (+ `found`). Pas d'index par id (un seul site). Délégués RichTooltip gardés pour encyclopedia.gd.
