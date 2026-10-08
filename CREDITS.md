@@ -506,6 +506,14 @@ Les données dérivées de vidéos CC BY-SA portent la même licence (fichiers d
   [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Calmly_waving_grass_and_flowers.ogv),
   domaine public : balancement de l'herbe (`grass_measured`, mesure seule).
 
+## Allures du cheval (lot AS8b)
+
+Trot et galop de la cavalerie de bataille : trajectoires de sabots mesurées sur des planches
+d'**Eadweard Muybridge** (« Sallie Gardner » 1878 ; disque de zoopraxiscope, trot, 1893),
+domaine public ; seules les courbes mesurées sont versionnées
+(`tools/blender_scripts/data/horse_gaits_free.json`, détail et URL dans
+`tools/blender_scripts/data/SOURCE.md`).
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons

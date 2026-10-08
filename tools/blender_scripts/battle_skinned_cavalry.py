@@ -132,6 +132,11 @@ def cavalry_alias(name):
 
 def clip_specs():
     """(clip, horse action, rider action, rider pose, mirror, frames)."""
+    return gaits.free_rows(_clip_rows())
+
+
+def _clip_rows():
+    """Rows of `clip_specs` before the AS8b gallops are substituted."""
     return (
         [
             ("c_idle", "Idle", "Idle", poses.ride_lance_up, False, None),
