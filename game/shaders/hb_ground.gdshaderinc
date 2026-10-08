@@ -9,11 +9,17 @@
 //   x 0..11 : cultures (R couche / 255, G poids cumulé × 0,5 (1 : case vide), B tuile / 1000 m) ;
 //   x 12 : canopée (R, B ; A = taille de parcelle / 5000 m) ; x 13 : roche (R, B ; A = haies / 2) ;
 //   x 14 / 15 : sols sauvages a / b (R, B ; A = allongement / 10 / présence agricole) ;
-//   x 16 : teinte multiplicative du biome (RVB / 2).
+//   x 16 : teinte multiplicative du biome (RVB / 2) ;
+//   x 17 : R = part de la prairie du splat convertie en cultures (ME8, `open_to_farm`).
+// Lignes 1..7 : biomes ; lignes 8..15 : paysages agricoles régionaux (ME8, `hb_agri` : masque L8
+// au quart de la grille, valeur = ligne, 0 = le biome décide), cuits par `cent-ans geo agri-regions`.
 
 uniform sampler2DArray hb_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hb_biomes : filter_nearest, repeat_disable;
 uniform sampler2D hb_table : filter_nearest, repeat_disable;
+uniform sampler2D hb_agri : filter_nearest, repeat_disable;
+uniform bool has_agri = false;
+uniform float hb_agri_texel = 4.0;      // ME8 : pixels carte par texel du masque des paysages
 uniform bool has_hb = false;
 uniform float hb_strength = 0.92;       // part des matières là où elles sont pleinement visibles
 uniform float hb_fade_start = 0.14;     // empreinte (px carte / px écran) : début du fondu vers la carte
@@ -30,6 +36,45 @@ uniform float hb_season_strength = 0.8; // TB1 : part de la saison sur les mati�
 uniform float hb_season_gain = 1.0;     // TB1 : luminance des couleurs de saison des parcelles
 uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à travers la neige
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
+
+// ME8 : ligne de paysage agricole au point p (px carte), 0 sans paysage.
+int hb_agri_row(vec2 p) {
+	if (!has_agri) {
+		return 0;
+	}
+	ivec2 sz = textureSize(hb_agri, 0);
+	ivec2 q = clamp(ivec2(floor(p / hb_agri_texel)), ivec2(0), sz - 1);
+	return int(texelFetch(hb_agri, q, 0).r * 255.0 + 0.5);
+}
+
+// ME8 : part de prairie convertie en cultures, lissée entre les texels du masque (un bord de
+// paysage ne doit pas faire une marche de 4 px carte).
+float hb_agri_farm_k(vec2 p) {
+	if (!has_agri) {
+		return 0.0;
+	}
+	ivec2 sz = textureSize(hb_agri, 0);
+	vec2 g = p / hb_agri_texel - 0.5;
+	ivec2 i0 = ivec2(floor(g));
+	vec2 f = fract(g);
+	float k[4];
+	for (int n = 0; n < 4; n++) {
+		ivec2 q = clamp(i0 + ivec2(n & 1, n >> 1), ivec2(0), sz - 1);
+		int row = int(texelFetch(hb_agri, q, 0).r * 255.0 + 0.5);
+		k[n] = row > 0 ? texelFetch(hb_table, ivec2(17, row), 0).r : 0.0;
+	}
+	return mix(mix(k[0], k[1], f.x), mix(k[2], k[3], f.x), f.y);
+}
+
+// ME8 : prairie -> cultures (oliveraies et vignes de Provence au lieu d'un gazon vert).
+vec4 hb_agri_splat(vec4 s, vec2 p) {
+	if (!has_agri || !has_hb) {
+		return s;
+	}
+	float k = hb_agri_farm_k(p);
+	float moved = s.r * k;
+	return vec4(s.r - moved, s.g + moved, s.b, s.a);
+}
 
 float hb_hash(vec2 q) {
 	return fract(sin(dot(q, vec2(127.1, 311.7))) * 43758.5453);
@@ -78,6 +123,8 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	// Biome au centre de la parcelle (une parcelle = un biome, pas de coupure).
 	int b0 = int(texture(hb_biomes, p / map_sz).r * 255.0 + 0.5);
 	b0 = clamp(b0, 1, 7);
+	int ag0 = hb_agri_row(p);  // ME8
+	b0 = ag0 > 0 ? ag0 : b0;
 	vec4 prm0 = texelFetch(hb_table, ivec2(12, b0), 0);
 	vec4 prm2 = texelFetch(hb_table, ivec2(14, b0), 0);
 	float cell = max(prm0.a * 5000.0, 50.0) * hb_cell_scale / hb_meters_px;
@@ -93,6 +140,8 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	parcel = vec4(pc, hb_hash(cid + 88.8), clamp(w_bare, 0.0, 1.0));
 	int b = int(texture(hb_biomes, pc / map_sz).r * 255.0 + 0.5);
 	b = b >= 1 && b <= 7 ? b : b0;
+	int ag = hb_agri_row(pc);  // ME8 : le paysage régional prend le pas sur le biome
+	b = ag > 0 ? ag : b;
 	vec4 canopy = texelFetch(hb_table, ivec2(12, b), 0);
 	vec4 rock = texelFetch(hb_table, ivec2(13, b), 0);
 	vec4 wild_a = texelFetch(hb_table, ivec2(14, b), 0);

@@ -508,6 +508,7 @@ void fragment() {
 	// brûlis étaient décalés vers le nord d'un sixième de l'ordonnée.
 	vec4 terroir = terroir_at(p / max(map_size.x, map_size.y));  // CV1 : finage des colonies, vigne, brûlis, pâtures
 	s = terroir_splat(s, terroir);
+	s = hb_agri_splat(s, p);  // ME8 : paysages agricoles régionaux (prairie -> cultures)
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
 	float w_grass = s.r;

@@ -9,8 +9,12 @@ extends RefCounted
 
 const MIX_FILE := "art/ground_biome_mix.json"
 const BIOMES_FILE := "map/biomes.png"
-const TABLE_WIDTH := 17
-const TABLE_HEIGHT := 8
+const AGRI_FILE := "map/agri_landscapes.json"
+const AGRI_MASK_FILE := "map/agri_regions.png"
+## ME8 : lignes 1..7 = biomes, lignes 8..15 = paysages agricoles régionaux.
+const FIRST_LANDSCAPE_ROW := 8
+const TABLE_WIDTH := 18
+const TABLE_HEIGHT := 16
 const CROP_SLOTS := 12
 ## Valeurs de la table ramenées dans [0, 1] (une texture peut borner ses canaux) : couche / 255,
 ## poids cumulé × 0,5 (case vide : 1), tuile / 1000 m, taille de parcelle / 5000 m, haie / 2,
@@ -35,14 +39,73 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	if biomes == null or not mix is Dictionary:
 		push_warning("HbGround: biomes.png ou ground_biome_mix.json absent, habillage désactivé")
 		return false
-	var table := build_table(mix as Dictionary, arrays["layers"] as Dictionary)
+	var layer_ids: Dictionary = arrays["layers"]
+	var agri_doc := _read_json(data_dir.path_join(AGRI_FILE))
+	var landscapes := landscape_rows(agri_doc)
+	var merged: Dictionary = (mix as Dictionary).duplicate(true)
+	if not landscapes.is_empty():
+		var biomes_mix: Dictionary = merged["biomes"]
+		var resolved := resolve_landscapes(agri_doc, layer_ids)
+		for key in resolved:
+			biomes_mix[key] = resolved[key]
+	var table := build_table(merged, layer_ids)
 	if table == null:
 		return false
+	var agri_mask := _load_biomes(data_dir.path_join(AGRI_MASK_FILE))
+	material.set_shader_parameter("has_agri", agri_mask != null and not landscapes.is_empty())
+	if agri_mask != null:
+		material.set_shader_parameter("hb_agri", ImageTexture.create_from_image(agri_mask))
+		material.set_shader_parameter("hb_agri_texel", float(biomes.get_width()) / float(agri_mask.get_width()))
 	material.set_shader_parameter("hb_albedo", arrays["albedo"])
 	material.set_shader_parameter("hb_biomes", ImageTexture.create_from_image(biomes))
 	material.set_shader_parameter("hb_table", ImageTexture.create_from_image(table))
 	material.set_shader_parameter("has_hb", true)
 	return true
+
+
+static func _read_json(path: String) -> Dictionary:
+	var text := FileAccess.get_file_as_string(path)
+	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
+	return parsed as Dictionary if parsed is Dictionary else {}
+
+
+## Ligne de la table de chaque paysage (ordre du fichier, à partir de `FIRST_LANDSCAPE_ROW`).
+static func landscape_rows(doc: Dictionary) -> Dictionary:
+	var rows := {}
+	var row := FIRST_LANDSCAPE_ROW
+	for id in doc.get("landscapes", {}):
+		rows[str(id)] = row
+		row += 1
+	return rows
+
+
+## Paysages du fichier ME8 au format du mélange par biome (clé = ligne), matières absentes
+## de `layers` remplacées par leur repli (`material_fallbacks`) ; les poids d'une même matière
+## s'additionnent. Un paysage au-delà de la ligne 15 est ignoré.
+static func resolve_landscapes(doc: Dictionary, layers: Dictionary) -> Dictionary:
+	var result := {}
+	var fallbacks: Dictionary = doc.get("material_fallbacks", {})
+	var rows := landscape_rows(doc)
+	var landscapes: Dictionary = doc.get("landscapes", {})
+	for id in rows:
+		var row := int(rows[id])
+		if row >= TABLE_HEIGHT:
+			push_warning("HbGround: trop de paysages agricoles, %s ignoré" % id)
+			continue
+		var entry: Dictionary = (landscapes[id] as Dictionary).duplicate(true)
+		var crops := {}
+		for crop in entry["crops"]:
+			var material := str(crop)
+			if not layers.has(material):
+				material = str(fallbacks.get(material, material))
+			crops[material] = float(crops.get(material, 0.0)) + float(entry["crops"][crop])
+		entry["crops"] = crops
+		var wild: Array = []
+		for material in entry["wild"]:
+			wild.append(str(fallbacks.get(material, material)) if not layers.has(material) else material)
+		entry["wild"] = wild
+		result[str(row)] = entry
+	return result
 
 
 static func _load_biomes(path: String) -> Image:
@@ -92,6 +155,7 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		image.set_pixel(15, row, Color(float(layers[wild[1]]) / LAYER_NORM, 0.0, _tile_m(wild[1]) / TILE_NORM, float(entry["farm"])))
 		var tint: Array = entry.get("tint", [1.0, 1.0, 1.0])
 		image.set_pixel(16, row, Color(float(tint[0]) / TINT_NORM, float(tint[1]) / TINT_NORM, float(tint[2]) / TINT_NORM, 1.0))
+		image.set_pixel(17, row, Color(float(entry.get("open_to_farm", 0.0)), 0.0, 0.0, 0.0))
 	return image
 
 
