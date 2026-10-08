@@ -13,8 +13,18 @@ bibliothèques mocap, procédural/physique, keyframé.
   (`~/dev/cent-ans-mocap-src/`) ; pas d'extraits de films sous droits ; batailles navales sans 3D.
 
 ## Prochaine étape
-08/10 : joueur d'accord (« ok »). Vague AS1-AS5 lancée en parallèle, un worktree par lot
-(`../gp-as1` … `../gp-as5`, branches `feat/as1` … `feat/as5`, notes `docs/wip/as1.md` …),
-ADR réservés 0188-0192. Ensuite : relecture, fusion ff dans main, une capture de contrôle
-par lot (session principale), suppression des worktrees. AS6 (tournage) et AS7 (jugement en
-jeu) attendent le joueur.
+08/10 : AS1-AS5 FUSIONNÉS dans main (8b669767e), worktrees supprimés ; smoke + as1..as5_test
+verts ; pytest : 1 échec antérieur sans rapport (`test_relief_update`). ADR 0188 (AS1) ;
+0189-0192 libres. Planches AS1 regardées (pattes alternées au pas, chevaux du camp qui broutent :
+correct) ; `as5_shot.gd` inutilisable (scène sans lumière, flammes minuscules) ; AS2-AS4 non vus.
+
+Restes :
+- AS7 jugement en jeu (joueur) : AS2 cadence carte, AS3 trot/virage (sens du virage à
+  confirmer), AS4 positions des tas et chevauchement porteur/chargeur, AS5 flammes et bannières.
+- Lot de calage (AS8) : mesurer rythmes/amplitudes sur `docs/research/as-references-video.md`
+  et régler `data/fx/animal_motion.json`, `campaign_army_walk.json`, `battle_animation.json`
+  (`cavalry_gaits`), `siege_engines.json` (`crew.haul`), `map_fire_wind.json`.
+- Bivouacs en feu sur la carte (liste des armées à l'arrêt), porte-étendard monté au trot
+  (`battle_standards.gd`, clip `c_std_trot` déjà cuit), ombre des imposteurs d'arbres fixe,
+  `as5_shot.gd` à éclairer et cadrer.
+- AS6 tournage (joueur).
