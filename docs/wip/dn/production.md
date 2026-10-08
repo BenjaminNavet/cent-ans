@@ -10,13 +10,16 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 - campagne : 38 objets ingérés + table `dn_campaign_models.json` remplie (villes, villages, châteaux, abbaye).
 - nature, animaux et env_* de map_extra, décors de bataille : ingérés (manifeste), refusés D5 repassés avec 2 graines puis `--charter warn` (animaux/arbres naturellement chauds, s_mean 0,41-0,42 > 0,40 ; l'étalonnage d'ingestion plafonne la saturation).
 
+- architecture, mobile, economy : ingérés (multi-vues pour house/major_building/ship/cart/bridge).
+
 ## En cours
-- architecture, mobile, economy (fal en cours, 1 graine, multi-vues).
+- nature_extra, battle_extra (fal, 1 graine).
 
 ## Restant
 nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
 
 ## Ratés / retirés
+- econ_sheep_shearing_pen : refusé par le filtre de contenu fal (faux positif), non généré.
 - ship_nef (galion à 3 mâts, anachronique pour 1340) retiré.
 - animal_cattle_red etc. refusés D5 (seconde graine).
 
