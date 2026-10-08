@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "map_fauna.schema.json",
+  "title": "Faune et troupeaux de la carte de campagne (lot DN-ME2)",
+  "description": "Fichier `data/map/map_fauna.json` lu par `game/scripts/map/fauna_layer.gd` : especes (ids des animaux de `data/art/dn_catalog_map_extra.json`), reglages de rendu et zones geographiques (ellipses lon/lat) avec densites de troupeaux par region et par biome. Rendu seulement.",
+  "type": "object",
+  "required": ["version", "render", "species", "zones"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "version": {"const": 1},
+    "render": {
+      "type": "object",
+      "required": ["max_distance", "fade_from", "cell_px", "load_factor", "min_radius_px", "max_radius_px", "max_visible_instances", "max_cached_cells", "cells_per_frame", "length_k", "length_exponent", "spread_exponent", "lod_distances", "town_clearance_px", "herd_sigma_m", "water_margin_m", "gaits", "defaults"],
+      "additionalProperties": false,
+      "properties": {
+        "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-dela de laquelle plus aucun animal (unites monde)."},
+        "fade_from": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig ou commence le fondu de sortie (< max_distance)."},
+        "cell_px": {"type": "number", "exclusiveMinimum": 0, "description": "Cote (px carte) d'une cellule de MultiMesh."},
+        "load_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon du disque garni = distance du rig x ce facteur, borne par min/max."},
+        "min_radius_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_radius_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_visible_instances": {"type": "integer", "minimum": 1, "description": "Plafond d'instances affichees (amincissement par rang au-dela)."},
+        "max_cached_cells": {"type": "integer", "minimum": 1},
+        "cells_per_frame": {"type": "integer", "minimum": 1},
+        "length_k": {"type": "number", "exclusiveMinimum": 0, "description": "Longueur tenue a l'ecran : k x distance^exposant (unites monde), jamais sous la taille reelle."},
+        "length_exponent": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.5},
+        "spread_exponent": {"type": "number", "minimum": 0, "maximum": 1, "description": "L'ecart entre betes d'un troupeau et l'errance grossissent comme (grossissement de taille)^exposant."},
+        "lod_distances": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}, "description": "Distances du rig des niveaux de detail 1 et 2."},
+        "town_clearance_px": {"type": "number", "minimum": 0, "description": "Distance minimale (px carte) d'un troupeau a une colonie."},
+        "herd_sigma_m": {"type": "number", "exclusiveMinimum": 0, "description": "Etalement (ecart type, m) des betes autour du centre du troupeau."},
+        "water_margin_m": {"type": "number", "minimum": 0, "description": "Marge (m) ajoutee au rayon d'errance pour verifier qu'aucune eau n'est dans le cercle."},
+        "gaits": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["cadence", "swing", "lift", "bounce", "graze", "speed_m_s"],
+            "additionalProperties": false,
+            "properties": {
+              "cadence": {"type": "number", "exclusiveMinimum": 0, "description": "Cycles de pas par seconde."},
+              "swing": {"type": "number", "minimum": 0, "description": "Debattement des pattes (part de la longueur)."},
+              "lift": {"type": "number", "minimum": 0, "description": "Levee des pattes (part de la longueur)."},
+              "bounce": {"type": "number", "minimum": 0, "description": "Rebond du corps (part de la longueur)."},
+              "graze": {"type": "number", "minimum": 0, "description": "Baisse de la tete a l'arret (part de la hauteur)."},
+              "speed_m_s": {"type": "number", "exclusiveMinimum": 0, "description": "Vitesse moyenne de l'errance (m/s)."}
+            }
+          }
+        },
+        "defaults": {
+          "type": "object",
+          "required": ["slope_max_deg", "open_min", "forest_min", "alt_min_m", "alt_max_m"],
+          "additionalProperties": false,
+          "properties": {
+            "slope_max_deg": {"type": "number"}, "open_min": {"type": "number"}, "forest_min": {"type": "number"},
+            "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}
+          }
+        }
+      }
+    },
+    "species": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["length_m", "placeholder", "gait", "herd_size", "wander_m"],
+        "additionalProperties": false,
+        "properties": {
+          "length_m": {"type": "number", "exclusiveMinimum": 0, "description": "Longueur reelle (m), tete a croupe."},
+          "placeholder": {"type": "string", "description": "Glb de repli sous game/assets/models/ tant que le modele DN n'est pas ingere."},
+          "gait": {"type": "string"},
+          "herd_size": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer", "minimum": 1}},
+          "wander_m": {"type": "number", "minimum": 0, "description": "Rayon d'errance (m)."},
+          "slope_max_deg": {"type": "number"}, "open_min": {"type": "number", "minimum": 0, "maximum": 1},
+          "forest_min": {"type": "number", "minimum": 0, "maximum": 1},
+          "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"},
+          "near_sea_px": {"type": "integer", "minimum": 1, "description": "Le troupeau reste a cette distance (px) d'une mer."}
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "center", "radius_km", "species"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "name": {"type": "string"},
+          "note": {"type": "string"},
+          "center": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}, "description": "[longitude, latitude] WGS84."},
+          "radius_km": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}, "description": "Demi-axes [est-ouest, nord-sud] de l'ellipse (km)."},
+          "species": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["species", "per_1000km2"],
+              "additionalProperties": false,
+              "properties": {
+                "species": {"type": "string", "description": "Cle de `species`."},
+                "per_1000km2": {"type": "number", "exclusiveMinimum": 0, "description": "Troupeaux pour 1000 km2 de la zone (au moins un)."},
+                "seasons": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "spring": {"type": "number", "minimum": 0, "maximum": 1}, "summer": {"type": "number", "minimum": 0, "maximum": 1},
+                    "autumn": {"type": "number", "minimum": 0, "maximum": 1}, "winter": {"type": "number", "minimum": 0, "maximum": 1}
+                  },
+                  "description": "Part des troupeaux presente a chaque saison (transhumance : alpage l'ete, plaine l'hiver)."
+                },
+                "slope_max_deg": {"type": "number"}, "open_min": {"type": "number"}, "forest_min": {"type": "number"},
+                "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "near_sea_px": {"type": "integer", "minimum": 1},
+                "near_water": {"type": "boolean", "description": "Le troupeau reste pres d'un fleuve."}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1861 @@
+{
+ "description": "Faune et troupeaux de la carte de campagne (lot DN-ME2, `game/scripts/map/fauna_layer.gd`) : especes (ids des animaux de `data/art/dn_catalog_map_extra.json`), zones geographiques (ellipses lon/lat, EPSG:3035 via `map.json`), densites par region et biome. Rendu seulement, aucune regle de jeu. Brancher un nouveau modele = ajouter/modifier une entree `species` (le glb ingere `game/assets/models/dn/fauna/<id>_lod{0,1,2}.glb` prime sur `placeholder`).",
+ "version": 1,
+ "render": {
+  "max_distance": 110.0,
+  "fade_from": 70.0,
+  "cell_px": 96.0,
+  "load_factor": 2.6,
+  "min_radius_px": 24.0,
+  "max_radius_px": 260.0,
+  "max_visible_instances": 3000,
+  "max_cached_cells": 48,
+  "cells_per_frame": 1,
+  "length_k": 0.0105,
+  "length_exponent": 0.8,
+  "spread_exponent": 0.5,
+  "lod_distances": [
+   0.9,
+   6.0
+  ],
+  "town_clearance_px": 2.5,
+  "herd_sigma_m": 90.0,
+  "water_margin_m": 60.0,
+  "gaits": {
+   "walker": {
+    "cadence": 1.25,
+    "swing": 0.16,
+    "lift": 0.06,
+    "bounce": 0.018,
+    "graze": 0.22,
+    "speed_m_s": 0.45
+   },
+   "small": {
+    "cadence": 1.9,
+    "swing": 0.2,
+    "lift": 0.07,
+    "bounce": 0.03,
+    "graze": 0.2,
+    "speed_m_s": 0.35
+   },
+   "hopper": {
+    "cadence": 2.4,
+    "swing": 0.1,
+    "lift": 0.5,
+    "bounce": 0.35,
+    "graze": 0.15,
+    "speed_m_s": 0.6
+   },
+   "lumber": {
+    "cadence": 0.5,
+    "swing": 0.05,
+    "lift": 0.02,
+    "bounce": 0.01,
+    "graze": 0.0,
+    "speed_m_s": 0.1
+   }
+  },
+  "defaults": {
+   "slope_max_deg": 14.0,
+   "open_min": 0.0,
+   "forest_min": 0.0,
+   "alt_min_m": -50.0,
+   "alt_max_m": 2600.0
+  }
+ },
+ "species": {
+  "animal_camargue_horse": {
+   "length_m": 2.0,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    4,
+    9
+   ],
+   "wander_m": 220
+  },
+  "animal_camargue_bull": {
+   "length_m": 2.2,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    3,
+    7
+   ],
+   "wander_m": 160
+  },
+  "animal_cattle_red": {
+   "length_m": 2.3,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    5,
+    12
+   ],
+   "wander_m": 140,
+   "open_min": 0.35
+  },
+  "animal_cattle_pied": {
+   "length_m": 2.3,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    5,
+    12
+   ],
+   "wander_m": 140,
+   "open_min": 0.35
+  },
+  "animal_ox_draught": {
+   "length_m": 2.6,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    2,
+    5
+   ],
+   "wander_m": 90,
+   "open_min": 0.4
+  },
+  "animal_sheep_wool": {
+   "length_m": 1.2,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    10,
+    28
+   ],
+   "wander_m": 180,
+   "open_min": 0.3
+  },
+  "animal_sheep_merino": {
+   "length_m": 1.3,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    14,
+    34
+   ],
+   "wander_m": 220,
+   "open_min": 0.2
+  },
+  "animal_goat": {
+   "length_m": 1.1,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    6,
+    16
+   ],
+   "wander_m": 160,
+   "slope_max_deg": 28
+  },
+  "animal_pig_forest": {
+   "length_m": 1.4,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    5,
+    12
+   ],
+   "wander_m": 100,
+   "forest_min": 0.45
+  },
+  "animal_horse_draught": {
+   "length_m": 2.4,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    2,
+    5
+   ],
+   "wander_m": 110,
+   "open_min": 0.4
+  },
+  "animal_horse_wild_steppe": {
+   "length_m": 1.9,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    6,
+    16
+   ],
+   "wander_m": 320,
+   "open_min": 0.3
+  },
+  "animal_donkey": {
+   "length_m": 1.5,
+   "placeholder": "folk/horse.glb",
+   "gait": "small",
+   "herd_size": [
+    2,
+    5
+   ],
+   "wander_m": 110,
+   "open_min": 0.2
+  },
+  "animal_mule": {
+   "length_m": 2.0,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    2,
+    6
+   ],
+   "wander_m": 110
+  },
+  "animal_camel_dromedary": {
+   "length_m": 2.7,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 300,
+   "slope_max_deg": 10
+  },
+  "animal_camel_bactrian": {
+   "length_m": 2.7,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 300,
+   "slope_max_deg": 10
+  },
+  "animal_deer_red_stag": {
+   "length_m": 2.2,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    3,
+    8
+   ],
+   "wander_m": 260,
+   "forest_min": 0.25
+  },
+  "animal_deer_hind": {
+   "length_m": 1.9,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 260,
+   "forest_min": 0.2
+  },
+  "animal_roe_deer": {
+   "length_m": 1.3,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    2,
+    5
+   ],
+   "wander_m": 200,
+   "forest_min": 0.15
+  },
+  "animal_boar_wild": {
+   "length_m": 1.5,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    3,
+    8
+   ],
+   "wander_m": 200,
+   "forest_min": 0.4
+  },
+  "animal_wolf_grey": {
+   "length_m": 1.4,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    3,
+    6
+   ],
+   "wander_m": 400
+  },
+  "animal_bear_brown": {
+   "length_m": 2.0,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    1,
+    2
+   ],
+   "wander_m": 300,
+   "forest_min": 0.3
+  },
+  "animal_ibex": {
+   "length_m": 1.5,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 120,
+   "slope_max_deg": 45
+  },
+  "animal_chamois": {
+   "length_m": 1.2,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 140,
+   "slope_max_deg": 45
+  },
+  "animal_reindeer": {
+   "length_m": 2.0,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    8,
+    22
+   ],
+   "wander_m": 420
+  },
+  "animal_elk": {
+   "length_m": 2.8,
+   "placeholder": "folk/horse.glb",
+   "gait": "walker",
+   "herd_size": [
+    1,
+    3
+   ],
+   "wander_m": 260,
+   "forest_min": 0.2
+  },
+  "animal_auroch": {
+   "length_m": 2.8,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    3,
+    8
+   ],
+   "wander_m": 200
+  },
+  "animal_bison_european": {
+   "length_m": 2.8,
+   "placeholder": "folk/cow.glb",
+   "gait": "walker",
+   "herd_size": [
+    4,
+    10
+   ],
+   "wander_m": 200
+  },
+  "animal_fox_red": {
+   "length_m": 0.8,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    1,
+    2
+   ],
+   "wander_m": 300
+  },
+  "animal_hare": {
+   "length_m": 0.5,
+   "placeholder": "folk/sheep.glb",
+   "gait": "hopper",
+   "herd_size": [
+    1,
+    3
+   ],
+   "wander_m": 150,
+   "open_min": 0.5
+  },
+  "animal_beaver": {
+   "length_m": 0.9,
+   "placeholder": "folk/sheep.glb",
+   "gait": "small",
+   "herd_size": [
+    1,
+    3
+   ],
+   "wander_m": 40
+  },
+  "animal_seal_grey": {
+   "length_m": 1.9,
+   "placeholder": "folk/sheep.glb",
+   "gait": "lumber",
+   "herd_size": [
+    4,
+    14
+   ],
+   "wander_m": 25,
+   "near_sea_px": 2
+  },
+  "animal_walrus": {
+   "length_m": 3.0,
+   "placeholder": "folk/cow.glb",
+   "gait": "lumber",
+   "herd_size": [
+    3,
+    9
+   ],
+   "wander_m": 20,
+   "near_sea_px": 2
+  }
+ },
+ "zones": [
+  {
+   "id": "camargue",
+   "name": "Camargue",
+   "center": [
+    4.55,
+    43.52
+   ],
+   "radius_km": [
+    26,
+    18
+   ],
+   "note": "Delta du Rhone : chevaux blancs et taureaux semi-sauvages (manades).",
+   "species": [
+    {
+     "species": "animal_camargue_horse",
+     "per_1000km2": 5
+    },
+    {
+     "species": "animal_camargue_bull",
+     "per_1000km2": 5
+    }
+   ]
+  },
+  {
+   "id": "normandie",
+   "name": "Normandie, Pays d'Auge",
+   "center": [
+    -0.3,
+    49.0
+   ],
+   "radius_km": [
+    90,
+    55
+   ],
+   "note": "Herbages et bocage : vaches.",
+   "species": [
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 3.2
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 0.8
+    }
+   ]
+  },
+  {
+   "id": "bretagne",
+   "name": "Bretagne et Maine",
+   "center": [
+    -2.4,
+    48.1
+   ],
+   "radius_km": [
+    110,
+    50
+   ],
+   "note": "Bocage atlantique.",
+   "species": [
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 2.4
+    },
+    {
+     "species": "animal_pig_forest",
+     "per_1000km2": 0.8,
+     "seasons": {
+      "spring": 0.0,
+      "summer": 0.15,
+      "autumn": 1,
+      "winter": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "id": "poitou",
+   "name": "Marais poitevin et Vendee",
+   "center": [
+    -0.9,
+    46.4
+   ],
+   "radius_km": [
+    70,
+    40
+   ],
+   "note": "Prairies humides.",
+   "species": [
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 2.8
+    }
+   ]
+  },
+  {
+   "id": "charolais",
+   "name": "Charolais et Bourgogne",
+   "center": [
+    4.3,
+    46.8
+   ],
+   "radius_km": [
+    80,
+    60
+   ],
+   "note": "Bovins de Bourgogne.",
+   "species": [
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 2.6
+    },
+    {
+     "species": "animal_ox_draught",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "ile_de_france",
+   "name": "Ile-de-France et Beauce",
+   "center": [
+    2.2,
+    48.3
+   ],
+   "radius_km": [
+    90,
+    60
+   ],
+   "note": "Openfields : lievres, boeufs de trait, forets royales.",
+   "species": [
+    {
+     "species": "animal_hare",
+     "per_1000km2": 2.0
+    },
+    {
+     "species": "animal_ox_draught",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 1.0,
+     "forest_min": 0.2
+    }
+   ]
+  },
+  {
+   "id": "sologne",
+   "name": "Sologne et Orleanais",
+   "center": [
+    2.0,
+    47.5
+   ],
+   "radius_km": [
+    70,
+    40
+   ],
+   "note": "Forets giboyeuses.",
+   "species": [
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 2.4
+    },
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 2.0
+    },
+    {
+     "species": "animal_roe_deer",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "ardennes",
+   "name": "Ardennes et Lorraine",
+   "center": [
+    5.2,
+    49.2
+   ],
+   "radius_km": [
+    120,
+    80
+   ],
+   "note": "Grande foret : cerfs, sangliers, loups.",
+   "species": [
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 1.6
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_pig_forest",
+     "per_1000km2": 0.8,
+     "seasons": {
+      "spring": 0.0,
+      "summer": 0.15,
+      "autumn": 1,
+      "winter": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "id": "flandre",
+   "name": "Flandre et Brabant",
+   "center": [
+    3.8,
+    51.0
+   ],
+   "radius_km": [
+    90,
+    50
+   ],
+   "note": "Plat pays : vaches et boeufs de trait.",
+   "species": [
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 3.0
+    },
+    {
+     "species": "animal_ox_draught",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "angleterre_sud",
+   "name": "Angleterre du Sud",
+   "center": [
+    -1.6,
+    51.2
+   ],
+   "radius_km": [
+    130,
+    60
+   ],
+   "note": "Downs et vallees : moutons.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.2
+    },
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "midlands",
+   "name": "Midlands anglais",
+   "center": [
+    -1.4,
+    52.6
+   ],
+   "radius_km": [
+    120,
+    70
+   ],
+   "note": "Pays a laine.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.6
+    },
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.5
+    }
+   ]
+  },
+  {
+   "id": "yorkshire",
+   "name": "Yorkshire et Nord de l'Angleterre",
+   "center": [
+    -1.9,
+    54.1
+   ],
+   "radius_km": [
+    110,
+    70
+   ],
+   "note": "Dales, abbayes cisterciennes : moutons.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.0
+    }
+   ]
+  },
+  {
+   "id": "pays_de_galles",
+   "name": "Pays de Galles",
+   "center": [
+    -3.7,
+    52.4
+   ],
+   "radius_km": [
+    70,
+    60
+   ],
+   "note": "Collines a moutons.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.0
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 0.5
+    }
+   ]
+  },
+  {
+   "id": "ecosse",
+   "name": "Highlands d'Ecosse",
+   "center": [
+    -4.6,
+    57.0
+   ],
+   "radius_km": [
+    110,
+    80
+   ],
+   "note": "Landes : cerfs et moutons.",
+   "species": [
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 1.6,
+     "forest_min": 0.0,
+     "open_min": 0.0
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.2
+    }
+   ]
+  },
+  {
+   "id": "irlande",
+   "name": "Irlande",
+   "center": [
+    -8.0,
+    53.2
+   ],
+   "radius_km": [
+    140,
+    90
+   ],
+   "note": "Elevage de bovins.",
+   "species": [
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.4
+    }
+   ]
+  },
+  {
+   "id": "phoques_wash",
+   "name": "Wash et estuaires anglais",
+   "center": [
+    0.3,
+    52.9
+   ],
+   "radius_km": [
+    45,
+    30
+   ],
+   "note": "Phoques sur les bancs de vase.",
+   "species": [
+    {
+     "species": "animal_seal_grey",
+     "per_1000km2": 6
+    }
+   ]
+  },
+  {
+   "id": "phoques_wadden",
+   "name": "Mer des Wadden",
+   "center": [
+    8.2,
+    54.0
+   ],
+   "radius_km": [
+    130,
+    50
+   ],
+   "note": "Phoques gris des estrans.",
+   "species": [
+    {
+     "species": "animal_seal_grey",
+     "per_1000km2": 5
+    }
+   ]
+  },
+  {
+   "id": "phoques_ecosse",
+   "name": "Cotes d'Ecosse et Orcades",
+   "center": [
+    -3.8,
+    58.6
+   ],
+   "radius_km": [
+    140,
+    50
+   ],
+   "note": "Phoques gris.",
+   "species": [
+    {
+     "species": "animal_seal_grey",
+     "per_1000km2": 3
+    }
+   ]
+  },
+  {
+   "id": "phoques_baltique",
+   "name": "Baltique",
+   "center": [
+    19.0,
+    57.0
+   ],
+   "radius_km": [
+    220,
+    200
+   ],
+   "note": "Phoques de la Baltique.",
+   "species": [
+    {
+     "species": "animal_seal_grey",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "causses",
+   "name": "Causses et Massif central",
+   "center": [
+    3.2,
+    44.3
+   ],
+   "radius_km": [
+    90,
+    60
+   ],
+   "note": "Brebis des causses, chevres, loups.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 2.8,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.4
+    },
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "crau",
+   "name": "Crau et plaine provencale",
+   "center": [
+    4.9,
+    43.6
+   ],
+   "radius_km": [
+    35,
+    20
+   ],
+   "note": "Hivernage des troupeaux transhumants (Crau).",
+   "species": [
+    {
+     "species": "animal_sheep_merino",
+     "per_1000km2": 5.0,
+     "seasons": {
+      "spring": 0.5,
+      "summer": 0.0,
+      "autumn": 0.8,
+      "winter": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "id": "pyrenees",
+   "name": "Pyrenees",
+   "center": [
+    0.4,
+    42.7
+   ],
+   "radius_km": [
+    170,
+    35
+   ],
+   "note": "Estives d'ete : moutons, isards, ours, bouquetins.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.0,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_chamois",
+     "per_1000km2": 3.0
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.3
+    },
+    {
+     "species": "animal_ibex",
+     "per_1000km2": 1.2,
+     "slope_max_deg": 50
+    }
+   ]
+  },
+  {
+   "id": "alpes",
+   "name": "Alpes",
+   "center": [
+    7.6,
+    46.0
+   ],
+   "radius_km": [
+    190,
+    55
+   ],
+   "note": "Alpages : moutons d'ete, chamois, bouquetins.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 2.4,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.0,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_chamois",
+     "per_1000km2": 2.6
+    },
+    {
+     "species": "animal_ibex",
+     "per_1000km2": 1.4,
+     "slope_max_deg": 50
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.2
+    }
+   ]
+  },
+  {
+   "id": "jura_vosges",
+   "name": "Jura et Vosges",
+   "center": [
+    6.5,
+    47.4
+   ],
+   "radius_km": [
+    100,
+    50
+   ],
+   "note": "Hautes chaumes.",
+   "species": [
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.6,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "castille",
+   "name": "Castille et Leon",
+   "center": [
+    -4.2,
+    41.4
+   ],
+   "radius_km": [
+    190,
+    90
+   ],
+   "note": "Mesta : merinos en ete sur les hauts plateaux.",
+   "species": [
+    {
+     "species": "animal_sheep_merino",
+     "per_1000km2": 3.0,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_mule",
+     "per_1000km2": 0.6
+    }
+   ]
+  },
+  {
+   "id": "estremadure",
+   "name": "Estremadure et Manche",
+   "center": [
+    -5.8,
+    39.2
+   ],
+   "radius_km": [
+    170,
+    80
+   ],
+   "note": "Hivernage de la Mesta, porcs de glandee.",
+   "species": [
+    {
+     "species": "animal_sheep_merino",
+     "per_1000km2": 3.2,
+     "seasons": {
+      "spring": 0.5,
+      "summer": 0.0,
+      "autumn": 0.8,
+      "winter": 1.0
+     }
+    },
+    {
+     "species": "animal_pig_forest",
+     "per_1000km2": 1.4,
+     "seasons": {
+      "spring": 0.0,
+      "summer": 0.15,
+      "autumn": 1,
+      "winter": 0.5
+     }
+    }
+   ]
+  },
+  {
+   "id": "andalousie",
+   "name": "Andalousie",
+   "center": [
+    -5.0,
+    37.4
+   ],
+   "radius_km": [
+    170,
+    70
+   ],
+   "note": "Mules et anes, chevres, dromadaires de Grenade.",
+   "species": [
+    {
+     "species": "animal_donkey",
+     "per_1000km2": 1.2
+    },
+    {
+     "species": "animal_mule",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 0.3
+    }
+   ]
+  },
+  {
+   "id": "portugal",
+   "name": "Portugal",
+   "center": [
+    -8.0,
+    40.5
+   ],
+   "radius_km": [
+    70,
+    120
+   ],
+   "note": "Elevage et montagnes.",
+   "species": [
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "lombardie",
+   "name": "Plaine du Po",
+   "center": [
+    10.2,
+    45.1
+   ],
+   "radius_km": [
+    260,
+    55
+   ],
+   "note": "Boeufs de trait, vaches.",
+   "species": [
+    {
+     "species": "animal_ox_draught",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.8
+    }
+   ]
+  },
+  {
+   "id": "abruzzes",
+   "name": "Abruzzes et Apennins",
+   "center": [
+    14.0,
+    42.0
+   ],
+   "radius_km": [
+    150,
+    50
+   ],
+   "note": "Estives de la dogana : moutons d'ete, loups.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 2.5,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 0.8
+    }
+   ]
+  },
+  {
+   "id": "pouilles",
+   "name": "Pouilles (Tavoliere)",
+   "center": [
+    15.8,
+    41.4
+   ],
+   "radius_km": [
+    80,
+    50
+   ],
+   "note": "Hivernage de la dogana.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 3.6,
+     "seasons": {
+      "spring": 0.5,
+      "summer": 0.0,
+      "autumn": 0.8,
+      "winter": 1.0
+     }
+    }
+   ]
+  },
+  {
+   "id": "maremme",
+   "name": "Maremme et Latium",
+   "center": [
+    11.4,
+    42.5
+   ],
+   "radius_km": [
+    80,
+    50
+   ],
+   "note": "Plaines a bovins semi-sauvages.",
+   "species": [
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.6
+    },
+    {
+     "species": "animal_horse_draught",
+     "per_1000km2": 0.8
+    }
+   ]
+  },
+  {
+   "id": "germanie_ouest",
+   "name": "Westphalie et Basse-Saxe",
+   "center": [
+    8.4,
+    52.2
+   ],
+   "radius_km": [
+    140,
+    70
+   ],
+   "note": "Forets de chenes : porcs de glandee.",
+   "species": [
+    {
+     "species": "animal_pig_forest",
+     "per_1000km2": 1.6,
+     "seasons": {
+      "spring": 0.0,
+      "summer": 0.15,
+      "autumn": 1,
+      "winter": 0.5
+     }
+    },
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.2
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "foret_noire_boheme",
+   "name": "Foret Noire, Boheme, Thuringe",
+   "center": [
+    11.5,
+    49.5
+   ],
+   "radius_km": [
+    300,
+    100
+   ],
+   "note": "Montagnes boisees.",
+   "species": [
+    {
+     "species": "animal_deer_red_stag",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 1.6
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.4
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.2
+    }
+   ]
+  },
+  {
+   "id": "pologne",
+   "name": "Grande Pologne et Mazovie",
+   "center": [
+    19.5,
+    52.2
+   ],
+   "radius_km": [
+    170,
+    100
+   ],
+   "note": "Plaine : boeufs, chevaux, foret.",
+   "species": [
+    {
+     "species": "animal_ox_draught",
+     "per_1000km2": 1.2
+    },
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 1.2
+    }
+   ]
+  },
+  {
+   "id": "bialowieza",
+   "name": "Bialowieza et Lituanie",
+   "center": [
+    24.2,
+    52.8
+   ],
+   "radius_km": [
+    150,
+    90
+   ],
+   "note": "Aurochs, bisons, elans, loups.",
+   "species": [
+    {
+     "species": "animal_auroch",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_bison_european",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_elk",
+     "per_1000km2": 1.2
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.6
+    }
+   ]
+  },
+  {
+   "id": "carpates",
+   "name": "Carpates",
+   "center": [
+    24.0,
+    48.6
+   ],
+   "radius_km": [
+    260,
+    55
+   ],
+   "note": "Ours, loups, chamois.",
+   "species": [
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_chamois",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.2,
+     "seasons": {
+      "spring": 0.6,
+      "summer": 1,
+      "autumn": 0.5,
+      "winter": 0.0
+     }
+    }
+   ]
+  },
+  {
+   "id": "hongrie",
+   "name": "Puszta hongroise",
+   "center": [
+    20.0,
+    47.0
+   ],
+   "radius_km": [
+    200,
+    90
+   ],
+   "note": "Boeufs gris et chevaux.",
+   "species": [
+    {
+     "species": "animal_cattle_pied",
+     "per_1000km2": 1.6
+    },
+    {
+     "species": "animal_horse_draught",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 0.8
+    }
+   ]
+  },
+  {
+   "id": "balkans",
+   "name": "Balkans",
+   "center": [
+    21.0,
+    43.2
+   ],
+   "radius_km": [
+    220,
+    110
+   ],
+   "note": "Montagnes a chevres et moutons.",
+   "species": [
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.6
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.2
+    }
+   ]
+  },
+  {
+   "id": "grece",
+   "name": "Grece et Egee",
+   "center": [
+    22.0,
+    39.0
+   ],
+   "radius_km": [
+    180,
+    100
+   ],
+   "note": "Chevres, moutons.",
+   "species": [
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_donkey",
+     "per_1000km2": 0.6
+    }
+   ]
+  },
+  {
+   "id": "anatolie",
+   "name": "Anatolie",
+   "center": [
+    33.0,
+    39.0
+   ],
+   "radius_km": [
+    330,
+    130
+   ],
+   "note": "Plateaux : moutons, chevres, dromadaires.",
+   "species": [
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 0.4
+    }
+   ]
+  },
+  {
+   "id": "steppe_pontique",
+   "name": "Steppe pontique",
+   "center": [
+    35.0,
+    48.0
+   ],
+   "radius_km": [
+    520,
+    170
+   ],
+   "note": "Steppe des Coumans et de la Horde d'Or.",
+   "species": [
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_camel_bactrian",
+     "per_1000km2": 0.4
+    }
+   ]
+  },
+  {
+   "id": "volga_aral",
+   "name": "Volga, Aral, Turkestan",
+   "center": [
+    52.0,
+    45.0
+   ],
+   "radius_km": [
+    340,
+    260
+   ],
+   "note": "Chameaux de Bactriane et poneys des steppes.",
+   "species": [
+    {
+     "species": "animal_camel_bactrian",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "russie_foret",
+   "name": "Russie : Moscovie, Novgorod",
+   "center": [
+    38.0,
+    57.0
+   ],
+   "radius_km": [
+    420,
+    220
+   ],
+   "note": "Forets du nord : elans, ours, loups.",
+   "species": [
+    {
+     "species": "animal_elk",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.5
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_boar_wild",
+     "per_1000km2": 0.6
+    }
+   ]
+  },
+  {
+   "id": "scandinavie_nord",
+   "name": "Scandinavie du Nord, Laponie",
+   "center": [
+    19.0,
+    64.5
+   ],
+   "radius_km": [
+    480,
+    170
+   ],
+   "note": "Rennes, elans, ours, loups.",
+   "species": [
+    {
+     "species": "animal_reindeer",
+     "per_1000km2": 1.8
+    },
+    {
+     "species": "animal_elk",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_bear_brown",
+     "per_1000km2": 0.3
+    },
+    {
+     "species": "animal_wolf_grey",
+     "per_1000km2": 0.4
+    }
+   ]
+  },
+  {
+   "id": "scandinavie_sud",
+   "name": "Suede, Norvege, Danemark",
+   "center": [
+    11.5,
+    59.5
+   ],
+   "radius_km": [
+    300,
+    200
+   ],
+   "note": "Forets et elevage.",
+   "species": [
+    {
+     "species": "animal_elk",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_cattle_red",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_beaver",
+     "per_1000km2": 0.6,
+     "near_water": true
+    }
+   ]
+  },
+  {
+   "id": "mer_blanche",
+   "name": "Mer Blanche et Kola",
+   "center": [
+    36.0,
+    66.0
+   ],
+   "radius_km": [
+    300,
+    40
+   ],
+   "note": "Morses sur les cotes arctiques.",
+   "species": [
+    {
+     "species": "animal_walrus",
+     "per_1000km2": 3
+    },
+    {
+     "species": "animal_reindeer",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "maghreb",
+   "name": "Maghreb : Tunisie, Algerie",
+   "center": [
+    6.0,
+    35.8
+   ],
+   "radius_km": [
+    520,
+    110
+   ],
+   "note": "Dromadaires, chevres, anes.",
+   "species": [
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_donkey",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "maroc",
+   "name": "Maroc et Atlas",
+   "center": [
+    -5.5,
+    33.0
+   ],
+   "radius_km": [
+    220,
+    90
+   ],
+   "note": "Mules, chevres, dromadaires du sud.",
+   "species": [
+    {
+     "species": "animal_mule",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.4
+    },
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 0.6
+    }
+   ]
+  },
+  {
+   "id": "libye_egypte",
+   "name": "Cyrenaique, Egypte",
+   "center": [
+    27.0,
+    30.5
+   ],
+   "radius_km": [
+    500,
+    160
+   ],
+   "note": "Caravanes de dromadaires.",
+   "species": [
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_donkey",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 0.8
+    }
+   ]
+  },
+  {
+   "id": "levant",
+   "name": "Levant, Sinai, Mesopotamie",
+   "center": [
+    40.0,
+    33.5
+   ],
+   "radius_km": [
+    460,
+    200
+   ],
+   "note": "Dromadaires, moutons, chevres.",
+   "species": [
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 1.2
+    },
+    {
+     "species": "animal_sheep_wool",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 1.0
+    },
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 0.3
+    }
+   ]
+  },
+  {
+   "id": "iran",
+   "name": "Plateau iranien",
+   "center": [
+    53.0,
+    33.0
+   ],
+   "radius_km": [
+    500,
+    260
+   ],
+   "note": "Chameaux, chevres, chevaux.",
+   "species": [
+    {
+     "species": "animal_camel_dromedary",
+     "per_1000km2": 0.6
+    },
+    {
+     "species": "animal_camel_bactrian",
+     "per_1000km2": 0.3
+    },
+    {
+     "species": "animal_goat",
+     "per_1000km2": 0.8
+    },
+    {
+     "species": "animal_horse_wild_steppe",
+     "per_1000km2": 0.5
+    }
+   ]
+  }
+ ]
+}
