@@ -72,7 +72,7 @@ BA10 apply_command découpé (après BA2) ; BA11 missiles table data + fire() d�
 geom commun: BB4 + BA6 + BA13 -> un seul lot sim-battle/src/geom.rs
 ## MC map (armées, folk, contrôleurs...)
 MC2=PF-13 JsonData.load helper (28 _data_dir, 82 parse, 67 preload map_paths) -500 TRANSVERSE FONDATION (vague 1)
-MC3=PF-06 CliFlags/DevFlags autoload + suppr drapeaux morts FONDATION
+MC3=PF-06 CmdArgs/DevFlags autoload + suppr drapeaux morts FONDATION
 MC7 Hash.h01 commun (6 copies _h) + fonctions mortes folk FONDATION
 MC1 décodeur Rust heightmap obligatoire, suppr png16/8bit -300
 MC4 tutoriel féodal -> TutorialSteps ; stage_screenshot hors prod -250 ; MC5 tutorial data-driven -200
@@ -257,7 +257,7 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - ADR SC : bloc 0200-0209.
 
 ## BATTLEDEV (vague 4, fusionné)
-- CliFlags (game/scripts/util/cli_flags.gd) pour les scripts de bataille ; battle_bone_anim.gdshaderinc (skinned + drapeau) ; bt_luma dans battle_common.gdshaderinc ; --no-ga3 et --no-sr5 supprimés.
+- CliFlags (fusionné ensuite dans CmdArgs, game/scripts/util/cmd_args.gd) pour les scripts de bataille ; battle_bone_anim.gdshaderinc (skinned + drapeau) ; bt_luma dans battle_common.gdshaderinc ; --no-ga3 et --no-sr5 supprimés.
 - Gardés : RenderQuality.override_level/upscale_override (tests + bench_ep1.sh), da6/site_render/fa_on (lus par battle_vegetation.gd, fichier sale de main) → à retirer après fusion des modifs de main.
 - Non fait : SH8 (dFdx change le rendu), SH9 (flipbook dupliqué dans fire_*/life_* : piste carte).
 - Après fusion main : army_figures/map_fire_wind (code main) passés à DataFile.

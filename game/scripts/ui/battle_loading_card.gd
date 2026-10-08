@@ -158,7 +158,7 @@ func _art_size() -> Vector2:
 
 
 func _maybe_screenshot() -> void:
-	var path := CliFlags.value("--battle-loading-shot")
+	var path := CmdArgs.value("--battle-loading-shot")
 	if path != "":
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()

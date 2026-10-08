@@ -113,7 +113,7 @@ func _ready() -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	if "--no-clutter" in OS.get_cmdline_user_args():  # L5 : captures et mesures A/B
+	if CmdArgs.has("--no-clutter"):  # L5 : captures et mesures A/B
 		enabled = false
 
 

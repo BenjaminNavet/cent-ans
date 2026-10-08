@@ -21,7 +21,7 @@ static var _spec_loaded: bool = false
 
 
 static func enabled() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-ga4")
+	return not CmdArgs.has("--no-ga4")
 
 
 ## Données GA4 (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.

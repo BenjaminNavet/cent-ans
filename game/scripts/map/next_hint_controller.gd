@@ -262,16 +262,3 @@ func _open_capital_city() -> void:
 		layer.call("select", city)
 	elif capital != "":
 		map.call("_focus_capital")
-
-
-# --- Captures -----------------------------------------------------------------------------
-
-
-## `--stage=next_hint` : début de partie, conseil affiché (sans tutoriel).
-func stage_screenshot() -> void:
-	enabled = true
-	var tutorial: TutorialController = map.get("tutorial")
-	if tutorial != null and tutorial.active:
-		tutorial.postpone(false)
-	map.call("_focus_first_player_army")
-	refresh()

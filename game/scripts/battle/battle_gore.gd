@@ -51,7 +51,7 @@ static func settings() -> Dictionary:
 ## Niveau du réglage « Sang » : 0 désactivé, 1 modéré, 2 complet.
 static func blood_level() -> int:
 	# Noms (off, moderate, full) ou chiffres (0, 1, 2).
-	var forced := CliFlags.value("--blood")
+	var forced := CmdArgs.value("--blood")
 	var named := LEVEL_NAMES.find(forced)
 	if named >= 0:
 		return named

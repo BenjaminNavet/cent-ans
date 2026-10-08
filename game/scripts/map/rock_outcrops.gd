@@ -75,9 +75,9 @@ var _log := false
 
 func _ready() -> void:
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	if "--no-outcrops" in OS.get_cmdline_user_args():
+	if CmdArgs.has("--no-outcrops"):
 		enabled = false
-	_log = "--outcrops-log" in OS.get_cmdline_user_args()
+	_log = CmdArgs.has("--outcrops-log")
 
 
 ## Lit le catalogue (YAML en syntaxe de flux : lignes `#` retirées, puis JSON). {} si absent.

@@ -93,7 +93,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	settlements = settlement_layer
 	tiers = ZoomTiers.load_default()
 	enabled = false
-	if terrain == null or terrain.quadtree == null or OS.get_cmdline_user_args().has("--no-fine-geo"):
+	if terrain == null or terrain.quadtree == null or CmdArgs.has("--no-fine-geo"):
 		return false
 	store = FineGeoStore.new()
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)  # ZG7b
@@ -130,7 +130,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	rivers.apply_fine_display(river_material)
 	road_material = ShaderMaterial.new()
 	road_material.shader = ROAD_SHADER
-	if OS.get_cmdline_user_args().has("--fine-debug"):
+	if CmdArgs.has("--fine-debug"):
 		river_material.set_shader_parameter("debug_flat", true)
 		road_material.set_shader_parameter("debug_flat", true)
 	if settlements != null:

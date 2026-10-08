@@ -249,7 +249,7 @@ var horizon: BattleHorizon = null
 ## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
 ## saison, village, côte) avant la simulation : captures des variantes sans campagne dédiée.
 static func apply_site_overrides(setup: Dictionary) -> void:
-	for arg in CliFlags.args():
+	for arg in CmdArgs.args():
 		if arg.begins_with("--terrain="):
 			setup["terrain"] = arg.trim_prefix("--terrain=")
 			setup["river"] = false
@@ -291,7 +291,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	# Lot TF : colombage ou enduit/pierre selon la région de la province.
 	BuildingKit.region_style = BuildingRegions.style_for_province(province_id)
 	Ga3Kit.active = true
-	ground_key = CliFlags.value("--ground", ground_key)  # rendu seulement, comme --weather=
+	ground_key = CmdArgs.value("--ground", ground_key)  # rendu seulement, comme --weather=
 	biome = BIOMES.get(terrain_key, BIOMES["plains"])
 	_coast = terrain.get("coast", {})
 	_pools = terrain.get("pools", [])

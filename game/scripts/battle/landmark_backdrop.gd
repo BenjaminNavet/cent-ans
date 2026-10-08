@@ -21,7 +21,7 @@ var stats: Dictionary = {}
 
 ## Toile de fond pour ce siège, null si la bataille n'a pas lieu dans une ville emblématique.
 static func create(setup: Dictionary, siege: Dictionary, height_at: Callable) -> LandmarkBackdrop:
-	var forced := CliFlags.value("--landmark-backdrop")
+	var forced := CmdArgs.value("--landmark-backdrop")
 	# L3 : la ville assiégée tirée d'un plan (`siege_layout` du cœur) désigne sa toile de fond ; la
 	# province seule ne suffit plus (le Boulonnais a pour ville Boulogne, pas Calais).
 	var layout: Dictionary = setup.get("siege_layout", {}) if setup.get("siege_layout", {}) is Dictionary else {}

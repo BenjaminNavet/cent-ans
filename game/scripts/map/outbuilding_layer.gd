@@ -275,7 +275,7 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 	_root = Node3D.new()
 	_root.name = "Batches"
 	add_child(_root)
-	enabled = enabled and not config.is_empty() and not OS.get_cmdline_user_args().has("--no-tb3")
+	enabled = enabled and not config.is_empty() and not CmdArgs.has("--no-tb3")
 	visible = false
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)

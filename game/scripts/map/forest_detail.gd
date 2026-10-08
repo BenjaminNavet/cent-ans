@@ -553,5 +553,5 @@ func _flush(focus: Vector2, camera_distance: float) -> void:
 
 ## `--forest-stats` : statistiques imprimées en quittant (bancs, `map_bench.gd`).
 func _exit_tree() -> void:
-	if OS.get_cmdline_user_args().has("--forest-stats"):
+	if CmdArgs.has("--forest-stats"):
 		print("ForestDetail: %s" % JSON.stringify(stats))

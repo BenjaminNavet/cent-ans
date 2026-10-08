@@ -3,7 +3,7 @@ extends SceneTree
 ## Galerie du README : refait les six images de `docs/img/readme/` (JPEG 1600 px, qualité 86).
 ## Chaque vue tourne dans son propre processus Godot fenêtré (le rendu headless ne produit pas
 ## d'image), avec les options de capture déjà en place : bataille (`--screenshot`, `--closeup`,
-## `--historical`), carte (`--stage`, `--focus`), villes (`readme_shots.gd`), menu (`mm1_capture.gd`).
+## `--historical`), carte (`--focus`), villes (`readme_shots.gd`), menu (`mm1_capture.gd`).
 ## Usage : godot --path game --script res://tests/readme_gallery.gd -- [--out=<dossier>] [--only=<nom,nom>]
 ## `--out` relatif : relatif à la racine du dépôt (défaut `docs/img/readme`).
 
@@ -33,7 +33,7 @@ func _init() -> void:
 		["bataille", BATTLE, ["--closeup", "--closeup-distance=14", "--shot-at=170", "--no-hud", "--screenshot=%s"], "bataille.png"],
 		["bataille_poitiers", BATTLE, ["--historical=poitiers", "--screenshot=%s"], "bataille_poitiers.png"],
 		# `--focus` après `--screenshot` : la mise en scène de capture recadre sinon la caméra.
-		["campagne", MAP, ["--stage=map", "--season=summer", "--screenshot=%s", CAMPAIGN_FOCUS], "campagne.png"],
+		["campagne", MAP, ["--season=summer", "--screenshot=%s", CAMPAIGN_FOCUS], "campagne.png"],
 		["paris", "--script=res://tests/readme_shots.gd", ["--only=paris", "--out=" + out_dir], "paris.jpg"],
 		["londres", "--script=res://tests/readme_shots.gd", ["--only=londres", "--out=" + out_dir], "londres.jpg"],
 		["menu", "--script=res://tests/mm1_capture.gd", ["--scene=menu", "--wait=6", "--out=%s"], "menu.png"],

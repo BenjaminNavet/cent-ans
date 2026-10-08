@@ -75,7 +75,7 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_ids.clear()
 	# Une colonie qui a une ville 1:1 v2 est rendue par `LandmarkCityLayer`, pas ici (sauf `--no-landmarks-1to1`).
-	var v2_enabled := not "--no-landmarks-1to1" in OS.get_cmdline_user_args()
+	var v2_enabled := not CmdArgs.has("--no-landmarks-1to1")
 	for id in settlement_ids:
 		var sid := str(id)
 		if v2_enabled and not LandmarkV2Library.for_settlement(sid).is_empty():

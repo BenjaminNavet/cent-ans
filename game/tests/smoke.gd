@@ -357,7 +357,7 @@ func _run_campaign_loop() -> void:
 	await process_frame
 	if not _check(map.load_ok and map.sim != null, "campaign scene with SimFacade failed to start"):
 		return
-	print("smoke campaign: simulation %s, data %s, store %s" % ["REAL" if facade.is_real else "MOCK", paths.data_dir, "loaded" if facade.store_loaded() else "absent"])
+	print("smoke campaign: simulation REAL, data %s, store %s" % [paths.data_dir, "loaded" if facade.store_loaded() else "absent"])
 	_check(map.player_faction == "fac_france", "player faction should be fac_france, got %s" % map.player_faction)
 	_check(map.armies.army_count() > 0, "no army markers on the map")
 	_check(map.ui.faction_label.text != "" and map.ui.faction_label.text != "Cent Ans", "top bar faction label not set")
@@ -470,11 +470,7 @@ func _run_agents() -> void:
 	if not _check(ctl != null, "agents: controller missing"):
 		map.queue_free()
 		return
-	if not ctl.available():
-		print("smoke agents: mock simulation, agents inactive")
-		map.queue_free()
-		await process_frame
-		return
+	_check(ctl.available(), "agents: controller inactive with the real simulation")
 	var sim: Object = map.sim
 	# Registre (touche G) et recrutement dans la cité de la capitale.
 	var key := InputEventKey.new()
@@ -600,7 +596,7 @@ func _run_ui_layout() -> void:
 			var panel: Control = entry[2]
 			var close_button: Control = entry[3]
 			if not panel.visible:
-				continue  # simulation sans cette fonction (mock)
+				continue  # panneau non ouvert par cette touche
 			var open_centrals := 0
 			for other in ui.panels.visible_panels():
 				if ui.panels.kind_of(other) == PanelStack.Kind.CENTRAL:
@@ -683,8 +679,6 @@ func _run_minimap_fog() -> void:
 			_check(not ctl.fog_active and ctl.is_province_visible(hidden), "fog setting off should reveal %s" % hidden)
 			settings.call("set_value", "map/fog_of_war", true, false)
 			_check(ctl.fog_active, "fog setting back on")
-	else:
-		print("smoke minimap: mock simulation, fog of war inactive")
 	if _failures == 0:
 		print("smoke OK: minimap (%d dots, %d visible provinces), fog %s" % [minimap.army_dot_count(), minimap.visible_province_count(), "on" if ctl.fog_active else "off"])
 	map.queue_free()
@@ -914,9 +908,6 @@ func _run_characters() -> void:
 ## C3 : onglet « Arbre familial » du panneau Cour (Valois, ≥ 3 générations après 40 tours) et
 ## apprentissage d'une compétence depuis l'arbre visuel de la fiche. Vraie simulation seulement.
 func _check_family_tree_c3(sim: Object, faction_id: String) -> void:
-	if not sim.has_method("get_family_tree"):
-		print("smoke characters: family tree skipped (mock without get_family_tree)")
-		return
 	var failures_before := _failures
 	var ids: Array = sim.call("get_faction_characters", faction_id)
 	var rows: Array[Dictionary] = []
@@ -1130,19 +1121,6 @@ func _run_diplomacy() -> void:
 				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 3280.0)
 				_check(passage.is_empty() or passage.has("ok"), "find_path_trespass should answer")
 				break
-
-	# Panneau réel : instanciation, rafraîchissement, brouillon de traité.
-	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
-	root.add_child(panel)
-	await process_frame
-	panel.sim = sim
-	panel.player_faction = FACTION_ID
-	panel.refresh()
-	panel.select_faction("fac_england")
-	panel.stage_example()
-	await process_frame
-	_check(str(panel.get("_reasons").text) != "", "diplomacy panel should explain the verdict")
-	panel.queue_free()
 
 	# 20 tours : pas d'erreur ; offres et religion lisibles.
 	var diplomatic_events := 0

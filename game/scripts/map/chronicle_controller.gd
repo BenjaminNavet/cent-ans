@@ -171,27 +171,3 @@ func _on_option_chosen(decision_id: int, option_index: int) -> void:
 	else:
 		open_window(true)
 	refresh()
-
-
-## Mise en scène de la capture `--stage=chronicle` : joue des tours jusqu'à une décision
-## historique (au plus 60), puis ouvre la fenêtre sur elle.
-func stage_screenshot() -> void:
-	if not available():
-		return
-	for _i in 60:
-		var historical := pending().filter(func(d: Dictionary) -> bool: return d.get("historical", false))
-		if not historical.is_empty():
-			break
-		map.sim.call("end_turn")
-		# Les décisions aléatoires sont tranchées pour laisser la place à la chronique.
-		for decision in pending():
-			if not decision.get("historical", false):
-				map.sim.call("choose_event_option", int(decision["id"]), 0)
-	map.refresh_all()
-	map.ui.hide_province()
-	var date := str(map.sim.call("get_date_label"))
-	map.ui.add_events(map.sim.call("get_events"), date)
-	var decisions := pending()
-	decisions.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.get("historical", false) and not b.get("historical", false))
-	if not decisions.is_empty():
-		window.show_decision(decisions[0], decisions.size())
