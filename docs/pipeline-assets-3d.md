@@ -141,3 +141,36 @@ uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <cl
   un LOD dépasse son budget ou si S p95 > plafond. Aucune génération : l'outil ne touche pas au GPU.
 - Le contour des LOD dérive d'environ 1 % de la hauteur (mesuré sur une maison TRELLIS), sous la
   limite de 3 % de la bible.
+
+### Figurines de bataille : glb → jeu
+
+Script : `tools/blender_scripts/ga3_figures.py` (restauré après sa suppression par SC, `a600b88f2` ;
+dépendances `ga3_figure_probe.py` et les `battle_fine_*`/`battle_skinned_*` du même dossier ;
+prompts de référence dans `tools/experiments/ga3_fal_figure.py`). Chaîne : glb TRELLIS →
+nettoyage et mise à l'échelle → épaississement 12 mm, remaillage voxel 8 mm, décimation au budget LOD0 →
+UV Smart, albédo cuit Cycles (livrée vert pur et chausses bleu pur passées en niveaux de gris, alpha =
+masque de teinte) → auto-pondération sur le rig `human` ou `cavalry` → LOD1/LOD2 décimés →
+`CAM1` (`<figure>_lod{0,1,2}.mesh.bin`) + `<figure>_albedo.png` + entrée de `manifest.json`.
+
+1. **Déclarer** la figurine dans `UNITS` (en tête du script) : nom de recette, `figure` remplacée
+   (`infantry_N`, `archer_N`, `cavalry_N`, `standard_N`), `glb` et `reference` (chemins sous
+   `~/dev/cent-ans-raw/ga3/`), `top` (hauteur du casque, m), `equipment` (armes procédurales),
+   `metal_z`, `clips`, `faces` (têtes greffées, 2 variantes). Cavalier : `"mounted": True`.
+2. **Cuire** (depuis la racine du dépôt, Blender 5.x) :
+   `blender -b --factory-startup --python tools/blender_scripts/ga3_figures.py -- <recette>
+   [--raw ~/dev/cent-ans-raw/ga3] [--glb autre.glb] [--renders]`.
+   Écrit dans `game/assets/models/battle_ga3/` ; `GA3_OUT_DIR=<dossier>` redirige la sortie
+   (essai à blanc, comparaison). Planches : sous-commandes `sheet` et `board` (voir l'en-tête du script).
+3. **Vérifier** : la ligne `MESH` du journal (sommets, triangles) respecte les budgets de la bible § 6
+   (fantassin ≤ 12 000 / 1 350 / 260, monté ≤ 17 500 / 2 100 / 550) ; `uv run --project tools pytest
+   tools/tests/test_ga3_figures_manifest.py`.
+4. **Ligne manifeste** : le script ajoute `figures.<figure>` (`lods`, `tris`, `variants`, `head_y`,
+   `ga3_albedo`, `ga3_lum`, `unit`, `source`, `faces`) ; le nom de clé est celui de la figurine fine
+   remplacée (`BattleSkinned._merge_ga3`).
+5. **Lien avec l'unité** : champ `figure` de `data/unit_types/unit_<id>.json`
+   (`^(infantry|archer|cavalry)_N$`) ; sans champ, repli sur la variante 0 de la famille.
+6. `godot --headless --path game --import`, puis `godot --headless --path game --script res://tests/smoke.gd`.
+
+Reproductibilité vérifiée le 2026-10-08 : `man_at_arms` (infantry_0) recuit dans un dossier
+temporaire, 6 s sur Blender 5.2.2 : `.mesh.bin` des trois LOD, albédo et entrée de manifeste
+identiques octet pour octet à la version commitée (12 083 sommets, 11 616 triangles de maillage LOD0).

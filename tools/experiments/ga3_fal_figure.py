@@ -20,15 +20,6 @@ Stages, each cached in ``RAW_DIR/<unit>[_<attempt>]/`` (an existing output is ne
    (``--model trellis2``, 0.30 $, lot L3a comparison only: the player keeps to the cheap
    models) at 1024 on ``front.png`` (2048 texture).
 
-Free local 2D stages (ADR 0190): ``--sheet-backend local`` makes stage 1 with Z-Image Turbo
-(mflux, img2img from the SR3 sheet at ``--strength``, 3:2, white background; see
-``ga3_local.py``) and ``--cut-backend local`` makes stage 2 with ``rembg`` (``isnet-general-use``,
-weights in ``~/.rembg/models``). Only TRELLIS then stays paid; local stages add nothing to costs.json::
-
-    uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy \
-        python tools/experiments/ga3_fal_figure.py RAW_DIR --unit longbowman \
-        --sheet-backend local --cut-backend local
-
 Raw responses are kept as ``result_<stage>.json``; the estimated cost of every paid call is
 appended to ``RAW_DIR/costs.json``.
 """
@@ -38,14 +29,9 @@ import json
 import urllib.request
 from pathlib import Path
 
-import ga3_local
+import fal_client
 import numpy as np
 from PIL import Image
-
-try:
-    import fal_client
-except ImportError:  # only the paid stages need it (local 2D stages, tests)
-    fal_client = None
 
 SR3 = Path.home() / "dev/cent-ans-raw/sr3"
 # Catalogue prices (USD): nano-banana-2 edit at 2K (1.5 x 0.08), bria, trellis-2 at 1024.
@@ -432,20 +418,7 @@ def main() -> None:
         default=1,
         help="L4 face variant k >= 2: head-only edit of the unit's own sheet (VARIANTS)",
     )
-    parser.add_argument("--sheet-backend", choices=ga3_local.BACKENDS, default="fal")
-    parser.add_argument("--cut-backend", choices=ga3_local.BACKENDS, default="fal")
-    parser.add_argument(
-        "--strength",
-        type=float,
-        default=ga3_local.SHEET_STRENGTH,
-        help="local sheet: influence of the source image (img2img)",
-    )
     parser.add_argument("--resolution", choices=("1K", "2K"), default="2K")
-    parser.add_argument(
-        "--stop-before-3d",
-        action="store_true",
-        help="stop after the cut-out views (free trial of the local stages)",
-    )
     args = parser.parse_args()
     name = args.unit if args.attempt == 1 else f"{args.unit}_{args.attempt}"
     if args.variant > 1:
@@ -466,16 +439,7 @@ def main() -> None:
     (out / "prompt.txt").write_text(prompt)
     (out / "source.txt").write_text(str(source))
     sheet = out / "sheet.png"
-    if args.sheet_backend == "local":
-        ga3_local.render_local(
-            ga3_local.local_sheet_prompt(prompt),
-            sheet,
-            reference=source,
-            aspect_ratio=ga3_local.SHEET_ASPECT,
-            seed=args.seed + args.attempt - 1,
-            strength=args.strength,
-        )
-    elif not sheet.exists():
+    if not sheet.exists():
         src = fal_client.upload_file(str(source))
         res = run(
             "fal-ai/nano-banana-2/edit",
@@ -493,9 +457,7 @@ def main() -> None:
         )
         download(res["images"][0]["url"], sheet)
     cut = out / "sheet_cut.png"
-    if args.cut_backend == "local":
-        ga3_local.cut_local(sheet, cut)
-    elif not cut.exists():
+    if not cut.exists():
         url = fal_client.upload_file(str(sheet))
         res = run("fal-ai/bria/background/remove", {"image_url": url}, out, "cut")
         download(res["image"]["url"], cut)
@@ -505,9 +467,6 @@ def main() -> None:
     for index, view in enumerate(VIEW_NAMES):
         if not (out / f"{view}.png").exists():
             view_crop(cut, out / f"{view}.png", index)
-    if args.stop_before_3d:
-        print(f"Vues prêtes dans {out}, TRELLIS non lancé.")
-        return
     front = out / "front.png"
     if args.model == "multi":
         views = args.views.split(",")
