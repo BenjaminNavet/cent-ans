@@ -223,3 +223,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - PRE2 : cb0_input_equivalence_test échoue aussi sur main (12 commandes vs 14) : golden périmé, antérieur à SC.
 - UIKIT (fait, −480) : `RichTooltip.thousands` reste pour encyclopedia.gd (interdit) ; `UiBuild.spacer` non utilisé encore ; UI1 a basculé sur Money.NBSP et « − » U+2212.
 - PRE3 : po_ui_test, c5_settlements_ui_test, m5a_vision_ui_test échouent aussi sur main (antérieur à SC) ; ui1_lettrine_test passe des deux côtés.
+- NAMES (fait, −250) : reste godot-bridge `province_name` (campaign_sim.rs), `faction_label` (campaign_sim_treaty.rs), `faction_name` (campaign_sim_feudal.rs), `splitmix64` (battle_pose_lerp.rs) → GameData / util (à inclure dans GB1).
