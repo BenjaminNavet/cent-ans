@@ -7,6 +7,7 @@
 //! Une `#[func]` sans appelant est supprimée, avec les fonctions du cœur qu'elle
 //! seule utilisait.
 
+use crate::convert::vec2_f64;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -174,8 +175,8 @@ impl GameDataStore {
             "neighbors" =>&ids_of(sim_campaign::movement::land_neighbors(data, &province.id).iter()),
         };
         if let Some(geometry) = data.province_geometry.get(&province.id) {
-            dict.set("centroid", vector2(geometry.centroid));
-            dict.set("capital_px", vector2(geometry.capital_px));
+            dict.set("centroid", vec2_f64(geometry.centroid));
+            dict.set("capital_px", vec2_f64(geometry.capital_px));
         }
         dict
     }
@@ -375,10 +376,6 @@ fn date_dict(date: Option<&HistoricalDate>) -> VarDictionary {
 /// Parses `#RRGGBB`; falls back to magenta so a bad colour is visible.
 fn html_color(html: &str) -> Color {
     Color::from_html(html).unwrap_or(Color::MAGENTA)
-}
-
-fn vector2(point: [f64; 2]) -> Vector2 {
-    Vector2::new(point[0] as f32, point[1] as f32)
 }
 
 #[cfg(test)]

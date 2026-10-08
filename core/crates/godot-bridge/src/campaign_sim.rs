@@ -20,7 +20,7 @@ use sim_campaign::{
 
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
 use crate::campaign_sim_turn::TURN_PENDING_FR;
-use crate::convert::variant_to_json;
+use crate::convert::{resolve_reply, variant_to_json};
 
 /// Last successfully loaded game data and its load warnings, shared by
 /// every `CampaignSim` and `GameDataStore` (one load at start-up).
@@ -578,18 +578,18 @@ impl CampaignSim {
     #[func]
     fn submit_order(&mut self, order: VarDictionary) -> VarDictionary {
         if self.refuse_while_turn_pending("submit_order") {
-            return order_result(Err(TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let parsed = variant_to_json(&order.to_variant())
             .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
         let order = match parsed {
             Ok(order) => order,
-            Err(error) => return order_result(Err(invalid_order_message(&error))),
+            Err(error) => return resolve_reply(Err(invalid_order_message(&error))),
         };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 
     /// Resolves the turn and returns its events (synchronous: tests,
@@ -744,13 +744,6 @@ pub(crate) fn invalid_order_message(error: &str) -> String {
     "Cet ordre n'est pas reconnu par la simulation : la bibliothèque du jeu n'est sans doute \
      pas à jour. Relancez le jeu après l'avoir réinstallé."
         .to_owned()
-}
-
-pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
-    match result {
-        Ok(()) => vdict! { "ok" => true, "error" => "" },
-        Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
-    }
 }
 
 pub(crate) fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {

@@ -3,10 +3,11 @@
 //! armies of the player with a rank to spend (notification) and a staging
 //! helper for the headless tests.
 
+use crate::convert::resolve_reply;
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -95,19 +96,19 @@ impl CampaignSim {
     #[func]
     fn choose_army_tradition(&mut self, army_id: GString, tradition: GString) -> VarDictionary {
         if self.refuse_while_turn_pending("choose_army_tradition") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
-            return order_result(Err(format!("armée inconnue : {army_id}")));
+            return resolve_reply(Err(format!("armée inconnue : {army_id}")));
         };
         let order = Order::ChooseArmyTradition {
             army,
             tradition: tradition.to_string(),
         };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 
     /// Staging (UI tests): `army_id` gains `xp` army experience at once;

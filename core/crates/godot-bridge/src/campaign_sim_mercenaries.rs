@@ -2,10 +2,11 @@
 //! may hire where it stands (« Mercenaires » panel of the army sheet) and
 //! the hiring order.
 
+use crate::convert::resolve_reply;
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -74,18 +75,18 @@ impl CampaignSim {
     #[func]
     fn hire_mercenary(&mut self, army_id: GString, unit_type: GString) -> VarDictionary {
         if self.refuse_while_turn_pending("hire_mercenary") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
-            return order_result(Err(format!("armée inconnue : {army_id}")));
+            return resolve_reply(Err(format!("armée inconnue : {army_id}")));
         };
         let Ok(unit) = data_model::UnitTypeId::new(unit_type.to_string()) else {
-            return order_result(Err(format!("type d'unité inconnu : {unit_type}")));
+            return resolve_reply(Err(format!("type d'unité inconnu : {unit_type}")));
         };
         let order = Order::HireMercenary { army, unit };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 }

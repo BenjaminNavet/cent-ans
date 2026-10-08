@@ -5,7 +5,8 @@ use data_model::{EventId, FactionId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::Order;
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
+use crate::convert::resolve_reply;
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -67,16 +68,16 @@ impl CampaignSim {
     #[func]
     fn choose_event_option(&mut self, decision: i64, option: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("choose_event_option") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let order = Order::ChooseEventOption {
             decision: decision.max(0) as u32,
             option: option.max(0) as usize,
         };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 
     /// Staging (UI tests, screenshots, FK5): offers `event` to the player as

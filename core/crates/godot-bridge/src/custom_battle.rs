@@ -10,6 +10,7 @@
 //!
 //! Rules (roster, budget, cap, setup) live in `sim_battle::custom`.
 
+use crate::convert::{from_dict, to_dict};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -22,7 +23,7 @@ use sim_battle::custom::{
     CustomBattleRules, CustomData,
 };
 
-use crate::battle_sim::{from_dict, to_dict, BattleSim};
+use crate::battle_sim::BattleSim;
 
 /// Unit types and factions of a data folder.
 type Catalog = (

@@ -18,7 +18,7 @@ use sim_campaign::negotiation::{
 use sim_campaign::{CampaignState, Season};
 
 use crate::campaign_sim::{CampaignSim, Ctx};
-use crate::convert::variant_to_json;
+use crate::convert::{json_to_variant, reasons_array, variant_to_json};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -205,15 +205,6 @@ pub(crate) fn parse(
     Ok((target, articles))
 }
 
-fn reasons_array(reasons: &[(String, i32)]) -> VarArray {
-    reasons
-        .iter()
-        .map(|(text, value)| {
-            vdict! { "text" => text.as_str(), "value" => i64::from(*value) }.to_variant()
-        })
-        .collect()
-}
-
 fn verdict_dict(verdict: &TreatyEvaluation, articles: &[Article]) -> VarDictionary {
     let values: VarArray = verdict
         .articles
@@ -238,31 +229,6 @@ fn verdict_dict(verdict: &TreatyEvaluation, articles: &[Article]) -> VarDictiona
         "blocked" => verdict.blocked.as_deref().unwrap_or(""),
         "articles" => &values,
         "context" => &reasons_array(&verdict.context),
-    }
-}
-
-/// JSON value → Godot variant (objects become dictionaries).
-fn json_to_variant(value: &Value) -> Variant {
-    match value {
-        Value::Null => Variant::nil(),
-        Value::Bool(b) => b.to_variant(),
-        Value::Number(n) => n.as_i64().map_or_else(
-            || n.as_f64().unwrap_or(0.0).to_variant(),
-            |i| i.to_variant(),
-        ),
-        Value::String(s) => s.to_variant(),
-        Value::Array(list) => list
-            .iter()
-            .map(json_to_variant)
-            .collect::<VarArray>()
-            .to_variant(),
-        Value::Object(map) => {
-            let mut dict = VarDictionary::new();
-            for (key, value) in map {
-                dict.set(key.as_str(), &json_to_variant(value));
-            }
-            dict.to_variant()
-        }
     }
 }
 

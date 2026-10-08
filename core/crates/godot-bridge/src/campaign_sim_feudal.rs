@@ -3,6 +3,7 @@
 //! faction sheets, and the player's feudal orders. Every rule lives in
 //! `sim_campaign::feudal`; this module only converts to Godot values.
 
+use crate::convert::resolve_reply;
 use data_model::{FactionId, GameData, ProvinceId, TitleId, TitleRank};
 use godot::prelude::*;
 use sim_campaign::diplomacy::Proposal;
@@ -10,7 +11,7 @@ use sim_campaign::feudal::{self, Arbitration, FeudalNode, Likelihood};
 use sim_campaign::orders::Order;
 use sim_campaign::state::CampaignState;
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 use crate::GameDataStore;
 
 fn title_name(data: &GameData, id: &TitleId) -> String {
@@ -216,17 +217,17 @@ impl CampaignSim {
     /// Records a feudal order of the player (same result as `submit_order`).
     fn submit_feudal(&mut self, method: &str, order: Option<Order>) -> VarDictionary {
         if self.refuse_while_turn_pending(method) {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let Some(order) = order else {
-            return order_result(Err("ordre féodal invalide".to_owned()));
+            return resolve_reply(Err("ordre féodal invalide".to_owned()));
         };
         let result = state.submit_order(data, order).map_err(|e| e.to_string());
         self.revision += 1;
-        order_result(result)
+        resolve_reply(result)
     }
 }
 

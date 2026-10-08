@@ -14,13 +14,14 @@
 //!   the duration, the position and any divergence (rules changed since the
 //!   recording).
 
+use crate::convert::resolve_reply;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use godot::prelude::*;
 use sim_battle::{BattleReplay, ReplayAction, ReplayPlayer, ReplayRecorder, ReplayRules};
 
-use crate::battle_sim::{result_dict, BattleSim};
+use crate::battle_sim::BattleSim;
 
 /// Refusal of every order during a replay.
 pub(crate) const REPLAY_REFUSAL: &str = "rejeu : on regarde la bataille, on ne la commande pas";
@@ -208,7 +209,7 @@ impl BattleSim {
                 self.recorder = None;
                 self.begin_playback(replay)
             });
-        result_dict(result)
+        resolve_reply(result)
     }
 
     /// Plays back the battle just fought (from the recording in memory)
@@ -216,10 +217,10 @@ impl BattleSim {
     #[func]
     fn start_replay(&mut self) -> VarDictionary {
         let Some(recorder) = &self.recorder else {
-            return result_dict(Err("aucune bataille enregistrée".to_owned()));
+            return resolve_reply(Err("aucune bataille enregistrée".to_owned()));
         };
         let replay = recorder.finish("", now());
-        result_dict(self.begin_playback(replay))
+        resolve_reply(self.begin_playback(replay))
     }
 
     /// `true` while a replay is played back (orders refused).

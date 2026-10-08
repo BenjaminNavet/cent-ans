@@ -75,3 +75,80 @@ pub fn variant_to_json(variant: &Variant) -> Result<Value, String> {
         other => Err(format!("unsupported Godot type {other:?}")),
     }
 }
+
+/// Converts JSON into plain Godot values (integers stay integers).
+pub fn json_to_variant(value: &Value) -> Variant {
+    match value {
+        Value::Null => Variant::nil(),
+        Value::Bool(b) => b.to_variant(),
+        Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                i.to_variant()
+            } else if let Some(u) = n.as_u64() {
+                (u as i64).to_variant()
+            } else {
+                n.as_f64().unwrap_or(0.0).to_variant()
+            }
+        }
+        Value::String(s) => GString::from(s.as_str()).to_variant(),
+        Value::Array(items) => items
+            .iter()
+            .map(json_to_variant)
+            .collect::<VarArray>()
+            .to_variant(),
+        Value::Object(map) => {
+            let mut dict = VarDictionary::new();
+            for (key, item) in map {
+                dict.set(key.as_str(), &json_to_variant(item));
+            }
+            dict.to_variant()
+        }
+    }
+}
+
+pub fn to_dict<T: serde::Serialize>(value: &T) -> VarDictionary {
+    serde_json::to_value(value)
+        .ok()
+        .map(|json| json_to_variant(&json))
+        .and_then(|variant| variant.try_to::<VarDictionary>().ok())
+        .unwrap_or_default()
+}
+
+/// Rows `{text, value}` of an explained score (treaty and diplomacy panels).
+pub fn reasons_array(reasons: &[(String, i32)]) -> VarArray {
+    reasons
+        .iter()
+        .map(|(text, value)| {
+            vdict! { "text" => text.as_str(), "value" => i64::from(*value) }.to_variant()
+        })
+        .collect()
+}
+
+/// Standard reply `{ok, error}` of an order: the Rust result as a dictionary
+/// (`error` empty on success).
+pub fn resolve_reply(result: Result<(), String>) -> VarDictionary {
+    match result {
+        Ok(()) => vdict! { "ok" => true, "error" => "" },
+        Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
+    }
+}
+
+pub fn from_dict<T: serde::de::DeserializeOwned>(dict: &VarDictionary) -> Result<T, String> {
+    variant_to_json(&dict.to_variant())
+        .and_then(|json| serde_json::from_value::<T>(json).map_err(|e| e.to_string()))
+}
+
+/// Godot vector from a pair of coordinates.
+pub fn vec2_f32(point: [f32; 2]) -> Vector2 {
+    Vector2::new(point[0], point[1])
+}
+
+/// Godot vector from a pair of `f64` coordinates.
+pub fn vec2_f64(point: [f64; 2]) -> Vector2 {
+    Vector2::new(point[0] as f32, point[1] as f32)
+}
+
+/// Tuple of a Godot vector.
+pub fn vec2_pair(v: Vector2) -> (f32, f32) {
+    (v.x, v.y)
+}

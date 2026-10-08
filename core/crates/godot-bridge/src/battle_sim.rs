@@ -9,63 +9,12 @@
 use data_model::{Ability, UnitCategory};
 use godot::classes::RefCounted;
 use godot::prelude::*;
-use serde_json::Value;
 use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
 use crate::battle_pose_lerp::push_pose;
 use crate::battle_replay::{note, REPLAY_REFUSAL};
 use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
-use crate::convert::variant_to_json;
-
-/// Converts JSON into plain Godot values (integers stay integers).
-pub(crate) fn json_to_variant(value: &Value) -> Variant {
-    match value {
-        Value::Null => Variant::nil(),
-        Value::Bool(b) => b.to_variant(),
-        Value::Number(n) => {
-            if let Some(i) = n.as_i64() {
-                i.to_variant()
-            } else if let Some(u) = n.as_u64() {
-                (u as i64).to_variant()
-            } else {
-                n.as_f64().unwrap_or(0.0).to_variant()
-            }
-        }
-        Value::String(s) => GString::from(s.as_str()).to_variant(),
-        Value::Array(items) => items
-            .iter()
-            .map(json_to_variant)
-            .collect::<VarArray>()
-            .to_variant(),
-        Value::Object(map) => {
-            let mut dict = VarDictionary::new();
-            for (key, item) in map {
-                dict.set(key.as_str(), &json_to_variant(item));
-            }
-            dict.to_variant()
-        }
-    }
-}
-
-pub(crate) fn to_dict<T: serde::Serialize>(value: &T) -> VarDictionary {
-    serde_json::to_value(value)
-        .ok()
-        .map(|json| json_to_variant(&json))
-        .and_then(|variant| variant.try_to::<VarDictionary>().ok())
-        .unwrap_or_default()
-}
-
-pub(crate) fn from_dict<T: serde::de::DeserializeOwned>(dict: &VarDictionary) -> Result<T, String> {
-    variant_to_json(&dict.to_variant())
-        .and_then(|json| serde_json::from_value::<T>(json).map_err(|e| e.to_string()))
-}
-
-pub(crate) fn result_dict(result: Result<(), String>) -> VarDictionary {
-    match result {
-        Ok(()) => vdict! { "ok" => true, "error" => "" },
-        Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
-    }
-}
+use crate::convert::{from_dict, json_to_variant, resolve_reply, to_dict};
 
 fn parse_side(raw: &GString) -> Option<SideId> {
     SideId::parse(&raw.to_string())
@@ -560,10 +509,10 @@ impl BattleSim {
     fn issue_command(&mut self, command: VarDictionary) -> VarDictionary {
         self.touch_poses();
         if self.player.is_some() {
-            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+            return resolve_reply(Err(REPLAY_REFUSAL.to_owned()));
         }
         let Some(sim) = &mut self.sim else {
-            return result_dict(Err("aucune bataille en cours".to_owned()));
+            return resolve_reply(Err("aucune bataille en cours".to_owned()));
         };
         let result = from_dict::<Command>(&command)
             .map_err(|e| crate::campaign_sim::invalid_order_message(&e))
@@ -577,7 +526,7 @@ impl BattleSim {
                 );
                 sim.issue_command(command).map_err(|e| e.to_string())
             });
-        result_dict(result)
+        resolve_reply(result)
     }
 
     /// The leader's order bar of `side`: `[{id, kind, name, label,
@@ -820,10 +769,10 @@ impl BattleSim {
     ) -> VarDictionary {
         self.touch_poses();
         if self.player.is_some() {
-            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+            return resolve_reply(Err(REPLAY_REFUSAL.to_owned()));
         }
         let Some(sim) = &mut self.sim else {
-            return result_dict(Err("aucune bataille en cours".to_owned()));
+            return resolve_reply(Err("aucune bataille en cours".to_owned()));
         };
         let facing = facing.is_finite().then_some(facing);
         let width = (width.is_finite() && width > 0.0).then_some(width);
@@ -844,7 +793,7 @@ impl BattleSim {
                 sim.deploy_unit_width(id, x, z, facing, width)
                     .map_err(|e| sim.error_text(&e))
             });
-        result_dict(result)
+        resolve_reply(result)
     }
 
     /// Ends the deployment phase → `{ok, error}`.
@@ -852,17 +801,17 @@ impl BattleSim {
     fn start_battle(&mut self) -> VarDictionary {
         self.touch_poses();
         if self.player.is_some() {
-            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+            return resolve_reply(Err(REPLAY_REFUSAL.to_owned()));
         }
         let Some(sim) = &mut self.sim else {
-            return result_dict(Err("aucune bataille en cours".to_owned()));
+            return resolve_reply(Err("aucune bataille en cours".to_owned()));
         };
         note(
             &mut self.recorder,
             sim,
             sim_battle::ReplayAction::StartBattle,
         );
-        result_dict(sim.start_battle().map_err(|e| e.to_string()))
+        resolve_reply(sim.start_battle().map_err(|e| e.to_string()))
     }
 
     /// One dictionary per regiment (spec § 3), plus rendering helpers.
@@ -1826,18 +1775,18 @@ impl CampaignSim {
     #[func]
     fn withdraw_pending_battle(&mut self, index: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("withdraw_pending_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         match state.withdraw_pending_battle(data, index.max(0) as usize) {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 dict
             }
-            Err(error) => result_dict(Err(error.to_string())),
+            Err(error) => resolve_reply(Err(error.to_string())),
         }
     }
 
@@ -1845,10 +1794,10 @@ impl CampaignSim {
     #[func]
     fn resolve_battle(&mut self, index: i64, outcome: VarDictionary) -> VarDictionary {
         if self.refuse_while_turn_pending("resolve_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let before = state.last_battle_outcome.clone();
         let result = from_dict::<BattleOutcome>(&outcome)
@@ -1860,7 +1809,7 @@ impl CampaignSim {
             });
         match result {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 // CV3: class of the result (heroic, disaster...).
                 if state.last_battle_outcome != before {
@@ -1868,7 +1817,7 @@ impl CampaignSim {
                 }
                 dict
             }
-            Err(error) => result_dict(Err(error)),
+            Err(error) => resolve_reply(Err(error)),
         }
     }
 

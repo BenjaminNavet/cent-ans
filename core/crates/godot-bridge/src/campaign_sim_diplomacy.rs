@@ -7,8 +7,8 @@ use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
-use crate::convert::variant_to_json;
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
+use crate::convert::{reasons_array, resolve_reply, variant_to_json};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -230,16 +230,16 @@ impl CampaignSim {
     #[func]
     fn answer_offer(&mut self, offer: i64, accept: bool) -> VarDictionary {
         if self.refuse_while_turn_pending("answer_offer") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let order = Order::AnswerOffer {
             offer: offer.max(0) as u32,
             accept,
         };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 }
 
@@ -252,15 +252,6 @@ fn relation_key(relation: RelationKind) -> &'static str {
         RelationKind::Vassal => "vassal",
         RelationKind::Suzerain => "suzerain",
     }
-}
-
-fn reasons_array(reasons: &[(String, i32)]) -> VarArray {
-    reasons
-        .iter()
-        .map(|(text, value)| {
-            vdict! { "text" => text.as_str(), "value" => i64::from(*value) }.to_variant()
-        })
-        .collect()
 }
 
 fn verdict(accept: bool, score: i32, reasons: &[(String, i32)]) -> VarDictionary {

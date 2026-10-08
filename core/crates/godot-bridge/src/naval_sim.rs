@@ -1,9 +1,9 @@
 //! Naval battles on the GDExtension side: the naval methods of `CampaignSim`
 //! (a secondary `#[godot_api]` block). Naval battles are auto-resolved only.
 
+use crate::convert::{resolve_reply, to_dict};
 use godot::prelude::*;
 
-use crate::battle_sim::{result_dict, to_dict};
 use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
@@ -49,18 +49,18 @@ impl CampaignSim {
     #[func]
     fn auto_resolve_naval_battle(&mut self, index: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("auto_resolve_naval_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         match state.auto_resolve_naval_battle(data, index.max(0) as usize) {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 dict
             }
-            Err(error) => result_dict(Err(error.to_string())),
+            Err(error) => resolve_reply(Err(error.to_string())),
         }
     }
 
@@ -68,18 +68,18 @@ impl CampaignSim {
     #[func]
     fn withdraw_naval_battle(&mut self, index: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("withdraw_naval_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         match state.withdraw_naval_battle(data, index.max(0) as usize) {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 dict
             }
-            Err(error) => result_dict(Err(error.to_string())),
+            Err(error) => resolve_reply(Err(error.to_string())),
         }
     }
 

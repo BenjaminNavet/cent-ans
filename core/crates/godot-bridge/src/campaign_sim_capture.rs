@@ -1,10 +1,11 @@
 //! `CampaignSim` API of the fate of captured places (lot TW2-T1, ADR 0101),
 //! in a secondary `#[godot_api]` block.
 
+use crate::convert::resolve_reply;
 use godot::prelude::*;
 use sim_campaign::{CaptureOutcome, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim, Ctx, CtxMut};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -76,19 +77,19 @@ impl CampaignSim {
     #[func]
     fn choose_capture_outcome(&mut self, decision: i64, outcome: GString) -> VarDictionary {
         if self.refuse_while_turn_pending("choose_capture_outcome") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
         let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         let Some(outcome) = CaptureOutcome::from_id(&outcome.to_string()) else {
-            return order_result(Err(format!("sort inconnu : {outcome}")));
+            return resolve_reply(Err(format!("sort inconnu : {outcome}")));
         };
         let order = Order::ChooseCaptureOutcome {
             decision: decision.max(0) as u32,
             outcome,
         };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 
     /// Staging (UI tests): the player takes `place` (a settlement id, or a
