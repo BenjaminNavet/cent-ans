@@ -73,7 +73,14 @@ FACTION_SCENES = (
 )
 HARBOUR_SCENE = "the harbour of the capital, ships unloading on the quay"
 
-convert = partial(event_art.to_miniature_jpg, width=ART_WIDTH, height=ART_HEIGHT)
+# Z-Image paints a thin gold frame despite "no frame" (ADR 0190): cut it off.
+FRAME_INSET = 0.02
+convert = partial(
+    event_art.to_miniature_jpg,
+    width=ART_WIDTH,
+    height=ART_HEIGHT,
+    inset=FRAME_INSET,
+)
 
 
 def _year(entry: dict) -> str:

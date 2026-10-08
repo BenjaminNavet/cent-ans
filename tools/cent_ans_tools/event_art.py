@@ -91,10 +91,22 @@ def plan(
 
 
 def to_miniature_jpg(
-    image_bytes: bytes, width: int = ART_WIDTH, height: int = ART_HEIGHT
+    image_bytes: bytes,
+    width: int = ART_WIDTH,
+    height: int = ART_HEIGHT,
+    inset: float = 0.0,
 ) -> bytes:
-    """Crop to the ``width``:``height`` ratio (biased upwards) and resize, as JPEG."""
+    """Crop to the ``width``:``height`` ratio (biased upwards) and resize, as JPEG.
+
+    ``inset`` (fraction of each side) is cut first, to drop a painted frame.
+    """
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    if inset:
+        margin_x = round(image.width * inset)
+        margin_y = round(image.height * inset)
+        image = image.crop(
+            (margin_x, margin_y, image.width - margin_x, image.height - margin_y)
+        )
     source_width, source_height = image.size
     target_ratio = width / height
     if source_width / source_height > target_ratio:
