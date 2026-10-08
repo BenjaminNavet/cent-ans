@@ -163,7 +163,11 @@ void fragment() {
 	float footprint = max(length(dFdx(p)), length(dFdy(p)));
 	float far_t = smoothstep(0.6, 2.5, footprint);
 	v_far = far_t;
-	v_cloud_sun = cs_light_factor(cloud_shadow_fair(p, footprint, 1.0 - pm_weight()));  // RV-C
+	float sea_shade = cloud_shadow_fair(p, footprint, 1.0 - pm_weight());  // RV-C
+	if (sea_life_on) {  // ME1 : bords adoucis sur l'eau (3 prises décalées), ombre atténuée
+		sea_shade = (sea_shade + cloud_shadow_fair(p + vec2(9.0, 4.0), footprint, 1.0 - pm_weight()) + cloud_shadow_fair(p - vec2(5.0, 10.0), footprint, 1.0 - pm_weight())) / 3.0 * sea_cloud_shadow_gain;
+	}
+	v_cloud_sun = cs_light_factor(sea_shade);
 
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
 	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
@@ -203,9 +207,18 @@ void fragment() {
 		vec2 na = texture(water_normal, ua).rg * 2.0 - 1.0;
 		vec2 nb = texture(water_normal, ub).rg * 2.0 - 1.0;
 		float vary = 0.55 + 0.9 * value_noise(p * 0.02 + 71.0);
-		float gs = ga4_normal_strength * basin_wave_here.x * vary * (1.0 - smoothstep(0.4, 2.0, footprint) * 0.9);
+		float gs = ga4_normal_strength * basin_wave_here.x * vary * smoothstep(6.0, 30.0, ga4_scale_a / max(footprint, 1e-4));
 		vec2 nxy = (na + nb) * gs;
 		n = normalize(vec3(nxy.x, 1.0, nxy.y));
+		if (sea_life_on) {  // ME1 : clapot apériodique (bruit), prend le relais de la texture au dézoom
+			float en = 0.1;
+			vec2 nq = q * 3.1 + vec2(t * 0.35, -t * 0.2) + 40.0;
+			float sx = value_noise(nq) + value_noise(nq * 2.3 + 9.0) * 0.5;
+			float gx = value_noise(nq + vec2(en, 0.0)) + value_noise((nq + vec2(en, 0.0)) * 2.3 + 9.0) * 0.5 - sx;
+			float gz = value_noise(nq + vec2(0.0, en)) + value_noise((nq + vec2(0.0, en)) * 2.3 + 9.0) * 0.5 - sx;
+			float cs = wave_strength * 0.5 * basin_wave_here.x * (1.0 - smoothstep(0.3, 2.0, footprint));
+			n = normalize(n + vec3(-gx / en * cs, 0.0, -gz / en * cs));
+		}
 	} else {
 		float e = 0.15;
 		float hx = swell(q + vec2(e, 0.0), t) - h0;
@@ -214,29 +227,35 @@ void fragment() {
 		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	}
 	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
-	float rc_near = 1.0 - smoothstep(0.4, 2.0, footprint) * 0.9;
 	float rc_ocean = smoothstep(ocean_detail_depth.x, ocean_detail_depth.y, depth);
+	// ME1 : le détail s'efface quand une tuile tombe sous ~16 pixels d'écran (sinon trame régulière).
+	float rc_near = mix(smoothstep(5.0, 18.0, 1.0 / max(footprint * water_detail_scale, 1e-4)),
+		smoothstep(5.0, 18.0, 1.0 / max(footprint * ocean_detail_scale, 1e-4)), rc_ocean);
 	vec3 rc_sea_n = water_detail_normal_ws(p, TIME, vec2(0.0)) - vec3(0.0, 1.0, 0.0);
 	vec3 rc_ocean_n = vec3(0.0);
 	vec3 rc_ocean_col = col;
 	if (ocean_detail_strength > 0.0) {
 		vec2 ou = mat2(vec2(0.87, 0.5), vec2(-0.5, 0.87)) * p * ocean_detail_scale + (vec2(value_noise(p * 0.035), value_noise(p * 0.035 + 23.0)) - 0.5) * 2.5;
-		vec3 on = texture(ocean_detail_normal, ou + vec2(TIME * 0.004, 0.0)).xyz * 2.0 - 1.0;
-		rc_ocean_n = vec3(on.x, 0.0, -on.y) * ocean_detail_strength * (0.5 + 0.9 * value_noise(p * 0.025 + 11.0));
+		vec2 ou2 = mat2(vec2(0.5, -0.87), vec2(0.87, 0.5)) * p * ocean_detail_scale * 0.43 + vec2(0.17, 0.63) - vec2(TIME * 0.003, 0.0);
+		vec3 on = (texture(ocean_detail_normal, ou + vec2(TIME * 0.004, 0.0)).xyz + texture(ocean_detail_normal, ou2).xyz) - 1.0;  // ME1 : deux échelles croisées
+		rc_ocean_n = vec3(on.x, 0.0, -on.y) * 0.6 * ocean_detail_strength * (0.4 + 0.9 * value_noise(p * 0.025 + 11.0));
 		vec3 mean_o = max(textureLod(ocean_detail_albedo, vec2(0.5), 9.0).rgb, vec3(0.02));
 		vec3 ratio_o = clamp(texture(ocean_detail_albedo, ou).rgb / mean_o, vec3(0.5), vec3(1.6));
 		rc_ocean_col = col * mix(vec3(1.0), ratio_o, ocean_detail_strength);
 	}
-	vec3 rc_sea_col = water_detail_tint(col, p * water_detail_scale);
+	vec2 rc_tint_uv = mat2(vec2(0.92, 0.39), vec2(-0.39, 0.92)) * p * water_detail_scale
+		+ vec2(sin(p.y * 0.071 + 1.3), cos(p.x * 0.057 + 0.4)) * 0.9;  // même repère que la normale
+	vec3 rc_sea_col = water_detail_tint(col, rc_tint_uv);
 	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
-	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.25, 1.2, footprint));
+	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.06, 0.4, footprint));
 	// Retouche TB5 : relief fin des vagues lisible dans la couleur sur toutes les mers (la
 	// Méditerranée claire sortait en aplat), plus ou moins marqué selon le clapot du bassin.
-	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.25, 1.2, footprint));
+	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.1, 0.7, footprint));
 	// TB5 : longue houle du large (Atlantique), lisible dans la couleur et dans le reflet.
 	vec3 ls = long_swell(p, footprint, basin_wave_here.y);
+	ls *= 0.3 + 1.1 * value_noise(p * 0.035 + 3.0);  // ME1 : amplitude irrégulière (pas de bandes parallèles régulières)
 	col *= 1.0 + ls.z * long_swell_contrast;
 	n = normalize(n - vec3(ls.x, 0.0, ls.y) * long_swell_normal);
 	// TB1 : mer de la saison (gris acier l'hiver), assombrie sous la tempête.
@@ -248,6 +267,8 @@ void fragment() {
 	if (sea_life_on) {  // ME1 : fonds clairs, crêtes du large, saturation bornée (bible D5)
 		col = sea_shallows(col, p, depth_col, footprint);
 		col = mix(col, crest_color, sea_crests(p, depth, footprint));
+		float cur = value_noise(p * 0.011 + 31.0) * 0.65 + value_noise(p * 0.027 + 7.0) * 0.35;  // courants, reflets du ciel
+		col *= sea_gain * (0.82 + 0.4 * cur) * mix(vec3(0.92, 1.04, 1.12), vec3(1.0, 1.1, 1.0), smoothstep(0.35, 0.65, cur));
 		col = sea_limit_saturation(col);
 	}
 

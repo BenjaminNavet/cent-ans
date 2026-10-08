@@ -60,6 +60,8 @@ static func apply(material: ShaderMaterial, map_size: Vector2i) -> bool:
 	var data := spec()
 	material.set_shader_parameter("sea_life_on", true)
 	material.set_shader_parameter("sea_sat_max", float((data.get("color", {}) as Dictionary).get("saturation_max", 1.0)))
+	material.set_shader_parameter("sea_gain", float((data.get("color", {}) as Dictionary).get("brightness", 1.0)))
+	material.set_shader_parameter("sea_cloud_shadow_gain", float((data.get("color", {}) as Dictionary).get("cloud_shadow_gain", 1.0)))
 	material.set_shader_parameter("surf_min_screen_px", float((data.get("surf", {}) as Dictionary).get("min_screen_px", 0.0)))
 	var shallows: Dictionary = data.get("shallows", {})
 	material.set_shader_parameter("shallows_color", _vec3(shallows.get("color"), Vector3(0.2, 0.4, 0.38)))

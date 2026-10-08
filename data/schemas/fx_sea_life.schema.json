@@ -241,11 +241,22 @@
     "color": {
       "type": "object",
       "required": [
-        "saturation_max"
+        "saturation_max",
+        "brightness",
+        "cloud_shadow_gain"
       ],
       "additionalProperties": false,
       "properties": {
         "saturation_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "brightness": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "cloud_shadow_gain": {
           "type": "number",
           "minimum": 0,
           "maximum": 1

@@ -3,6 +3,8 @@
 // `value_noise` ; réglé par `SeaLife.apply()` depuis `data/fx/sea_life.json`.
 // `sea_life_on` = false (`--no-sea-life`, ou pas de données) : rendu inchangé.
 uniform bool sea_life_on = false;
+uniform float sea_gain = 1.0;                 // luminosité de la mer
+uniform float sea_cloud_shadow_gain = 1.0;    // part de l'ombre des cumulus gardée sur l'eau
 uniform float sea_sat_max = 1.0;              // saturation maximale de la couleur de mer (bible D5)
 uniform vec3 shallows_color = vec3(0.2, 0.4, 0.38);
 uniform float shallows_depth_m = 40.0;

@@ -2,7 +2,9 @@
   "description": "ME1 (chantier DN, mer vivante) : réglages visuels de la mer de campagne, rendu seulement, aucune règle de jeu. `shallows` : fonds clairs et caustiques près des côtes (profondeur en mètres). `crests` : lignes de crêtes qui avancent au large (profondeur en mètres). `tide` : estrans, vase découverte à marée basse dans les zones listées (polygones en pixels carte, grille de map.json ; `width_px` = largeur maximale de vase découverte ; la dernière zone qui contient un point l'emporte). `wake` : sillage des flottes en mer (unités du marqueur). Lu par game/scripts/map/sea_life.gd, game/shaders/sea_life.gdshaderinc et game/shaders/fleet_wake.gdshader. `--no-sea-life` désactive le tout (A/B).",
   "cell_px": 16,
   "color": {
-    "saturation_max": 0.4
+    "saturation_max": 0.4,
+    "brightness": 1.45,
+    "cloud_shadow_gain": 0.45
   },
   "surf": {
     "min_screen_px": 2.2
