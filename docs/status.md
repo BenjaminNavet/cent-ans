@@ -20,7 +20,7 @@ Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustra
   `docs/img/codex-window.png`) ; 19,20 $ dépensés sur 50 $ (`docs/budget.md`).
 - **Reste** : écarts d'équilibrage documentés plus bas (tableaux F4, G2, G4, G5) ; G5 : voisinage réel
   (graphe de la carte), 4 grandes factions en vie en 1400 sur 40/40 graines.
-- Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/wip/finalisation.md`.
+- Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/archive/chantiers.md`.
 - Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
 
 ## Ce qui fonctionne
@@ -135,7 +135,7 @@ Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustra
   automatique tournante sur 3 emplacements, « Continuer », rapport de saison cliquable, alertes
   persistantes, crédits. Smoke § 12 « flow ». Voir `docs/godot-map.md` § Écrans et flux. Captures :
   `docs/img/godot-start-menu.png`, `godot-loading.png`, `godot-flow-*.png`, `godot-credits.png`.
-- Règles inertes branchées (F1, détail et choix dans `docs/wip/f1-effects.md`) : effets de bâtiments
+- Règles inertes branchées (F1, détail et choix dans `docs/archive/chantiers.md`) : effets de bâtiments
   `Garrison` (la ville paie une part de l'entretien de sa garnison et la renforce), `RecruitCost`, `Supply`,
   ciblage par classe sociale et par famille d'unités ; effets de technologies `army_upkeep`,
   `army_experience` (recrues aguerries), `recruit_cost`, `movement` (trains de siège plus lents, artillerie
@@ -164,7 +164,7 @@ Dernière mise à jour : 2026-09-24 (session 5 : portraits, miniatures, illustra
   trésors dormants dépensés, licenciement anticipé, choix d'événements selon les moyens, mariages de l'IA,
   derniers bastions épargnés ; Pierre Ier de Portugal et Amédée VI de Savoie (héritiers de 1337), souverain
   vaincu tué à 1 %. Tests : `ai/tests/f4_war.rs` (7), `sim-campaign/tests/f4_succession.rs` (4).
-- Dernières règles inertes (G1, `docs/wip/g1-rules.md`) : places de recrutement par province (2, +1 dans la
+- Dernières règles inertes (G1, `docs/archive/chantiers.md`) : places de recrutement par province (2, +1 dans la
   capitale, + `recruit_slots` des bâtiments et techs ; refus « file de recrutement pleine ») ; piété des traits
   (piété effective : faveur pontificale, hérésie) et des bâtiments (+1 par an au souverain par 10 points,
   plafond 3) ; armurerie et buttes de tir équipent les unités levées dans la province (armure/tir stockés sur
@@ -319,7 +319,7 @@ possibles) ; France-Angleterre sous 55 % sur 5 graines sur 40 (au-dessus de 75 %
   `effects.by_class`).
 - G1 : la bataille 3D applique désormais les bonus des technologies de chaque camp (moral, mêlée, tir,
   armure, par catégorie d'unité) en plus de ceux des bâtiments de la province de levée dans `battle_setup`
-  (`docs/wip/g3-battle-techs.md`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
+  (`docs/archive/chantiers.md`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
   (elle paie, ou libère sur parole les simples chevaliers). Pas de faction Danemark : l'achat du Jutland
   (`evt_valdemar_iv`) reste sans cession. Le plafond de recrutement (G1) limite l'IA à 3 levées par tour
   dans sa capitale et 2 ailleurs (hors bâtiments) : trésors à resurveiller avec `century_probe`.

@@ -156,17 +156,20 @@ pub fn faction_province_tech_effects(
     faction: &FactionId,
 ) -> EffectTotals {
     let all = faction_tech_effects(state, data, faction);
-    EffectTotals {
-        tax_income: all.tax_income,
-        trade_income: all.trade_income,
-        health: all.health,
-        growth: all.growth,
-        unrest: all.unrest,
-        wealth: all.wealth,
-        production: all.production,
-        classes: all.classes,
-        ..EffectTotals::default()
+    let mut totals = EffectTotals::default();
+    totals.classes = all.classes;
+    for kind in [
+        EffectKind::TaxIncome,
+        EffectKind::TradeIncome,
+        EffectKind::Health,
+        EffectKind::Growth,
+        EffectKind::Unrest,
+        EffectKind::Wealth,
+        EffectKind::Production,
+    ] {
+        totals[kind] = all[kind];
     }
+    totals
 }
 
 /// `(defence, siegecraft)` parts of `faction`'s technology
@@ -323,8 +326,8 @@ impl CampaignState {
             let effects = crate::skills::character_effects(self, data, ruler);
             let bonus = match branch {
                 // Medicine is learned lore: civil scholarship speeds it up.
-                TechBranch::Civil | TechBranch::Medicine => effects.research_civil,
-                TechBranch::Military => effects.research_military,
+                TechBranch::Civil | TechBranch::Medicine => effects[EffectKind::ResearchCivil],
+                TechBranch::Military => effects[EffectKind::ResearchMilitary],
             };
             flat += bonus.flat;
             percent += bonus.percent;
@@ -379,10 +382,7 @@ pub fn start_research(
         .iter()
         .find(|p| !f.technologies.contains(*p))
     {
-        let name = data
-            .technologies
-            .get(missing)
-            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        let name = data.tech_name(missing);
         return Err(ResearchError::MissingPrerequisite(name));
     }
     if f.research.as_ref() == Some(technology) {
@@ -451,10 +451,7 @@ pub(crate) fn resolve_research(
         // `start_research`, which carries it over).
         f.research_progress -= effective_cost(tech, year);
         promote_queued_research(state, data, &faction_id);
-        let faction_name = data
-            .factions
-            .get(&faction_id)
-            .map_or_else(|| faction_id.to_string(), |d| d.name.display.clone());
+        let faction_name = data.faction_label(&faction_id);
         events.push(
             GameEvent::new(
                 EventKind::TechnologyResearched,
@@ -519,10 +516,7 @@ pub fn queue_research(
             && f.research.as_ref() != Some(*p)
             && !f.research_queue.contains(p)
     }) {
-        let name = data
-            .technologies
-            .get(missing)
-            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        let name = data.tech_name(missing);
         return Err(ResearchError::MissingPrerequisite(name));
     }
     if f.research_queue.len() >= data.economy_rules.research_queue_max as usize {

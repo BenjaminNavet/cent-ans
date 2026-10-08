@@ -1,8 +1,8 @@
 class_name RichTooltip
 extends RefCounted
 
-## Infobulles riches au style parchemin (F2). `make_panel(bbcode)` construit le contrôle
-## renvoyé par `_make_custom_tooltip` des classes `RichButton`, `RichPanel`, `IconChip` ;
+## Infobulles riches au style parchemin (F2). Contenu des infobulles ; `TooltipHost`
+## construit et héberge le contrôle renvoyé par `_make_custom_tooltip` ;
 ## les fonctions `unit`, `building`, `technology`, `resource`, `gauge`, `trait_tip`,
 ## `skill`, `population_class` produisent le BBCode (icône, coût, entretien, effets,
 ## prérequis…). Valeurs dynamiques (coût effectif, disponibilité, refus) : dictionnaires
@@ -125,116 +125,11 @@ static func hud_entry(id: String) -> Array:
 	return [id.trim_prefix("hud_").capitalize(), ""]
 
 
-## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
-static var last_panel: WeakRef = null
-static var last_bbcode: String = ""
-## IB1 : spec de la dernière infobulle en sections (`TooltipView.build`), {} après `make_panel`.
-static var last_spec: Dictionary = {}
-
-## IB1 (ADR 0109) : préfixe des clés d'infobulle en sections portées par `tooltip_text`
-## (« ib:<kind>:<id> », puis le BBCode de repli sur les lignes suivantes) ; le `live` de la clé
-## est rangé en métadonnée `LIVE_META` du contrôle.
-const KEY_PREFIX := "ib:"
-const LIVE_META := &"ib_live"
-## IB2 : script générique attaché par `attach_plain` aux contrôles natifs sans classe dédiée.
-const PLAIN_HOST_SCRIPT := preload("res://scripts/ui/plain_tooltip_host.gd")
-
-
-## Style parchemin commun aux infobulles et aux bulles du Codex.
-static func panel_style() -> StyleBox:
-	return HudStyle.note_box(6)
-
-
-## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
-## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués). B1 : pied
-## « T : maintenir ouverte » (la touche T verrouille l'infobulle en bulle du Codex).
-static func make_panel(bbcode: String) -> Control:
-	bbcode = fallback_of(bbcode)
-	last_spec = {}
-	var panel := PanelContainer.new()
-	if ResourceLoader.exists(THEME_PATH):
-		panel.theme = load(THEME_PATH)
-	panel.add_theme_stylebox_override("panel", panel_style())
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
-	var label := RichTextLabel.new()
-	label.bbcode_enabled = true
-	label.fit_content = true
-	label.scroll_active = false
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(WIDTH, 0)
-	label.add_theme_color_override("default_color", INK)
-	# P2c : infobulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2).
-	UiType.apply(label, UiType.CAPTION)
-	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
-	label.text = CodexText.format(bbcode, true)
-	label.name = "Text"
-	box.add_child(label)
-	var footer := Label.new()
-	footer.name = "Footer"
-	footer.text = footer_text(title_entry(label.text) != "")
-	UiType.apply(footer, UiType.CAPTION)
-	footer.add_theme_color_override("font_color", Color(MUTED))
-	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	box.add_child(footer)
-	last_panel = weakref(panel)
-	last_bbcode = label.text
-	return panel
-
-
-## Pied des infobulles riches : la fiche liée au titre se lit une fois l'infobulle verrouillée.
-static func footer_text(has_entry: bool) -> String:
-	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
-
-
-## IB1 : texte de `tooltip_text` d'une infobulle en sections — clé « ib:<kind>:<id> » sur la
-## première ligne, BBCode de repli ensuite (lu par `make_panel` et par les tests de contenu).
-static func tooltip_key(kind: String, id: String, fallback_bbcode: String) -> String:
-	return "%s%s:%s\n%s" % [KEY_PREFIX, kind, id, fallback_bbcode]
-
-
-## Clé « ib:<kind>:<id> » en tête de `text`, "" s'il n'en porte pas.
-static func key_of(text: String) -> String:
-	return text.get_slice("\n", 0) if text.begins_with(KEY_PREFIX) else ""
-
-
-## `text` sans sa clé « ib: » éventuelle (le BBCode de repli).
-static func fallback_of(text: String) -> String:
-	if not text.begins_with(KEY_PREFIX):
-		return text
-	var cut := text.find("\n")
-	return text.substr(cut + 1) if cut >= 0 else ""
-
-
-## IB1 : pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
-## `tooltip_text`, `live` en métadonnée) ; `_make_custom_tooltip` la reconstruit par `panel_for`.
-static func set_tooltip(control: Control, kind: String, id: String, live: Dictionary = {}) -> void:
-	_ensure_host(control)
-	control.set_meta(LIVE_META, live)
-	control.tooltip_text = tooltip_key(kind, id, to_bbcode(spec_for(KEY_PREFIX + kind + ":" + id, live)))
-
-
-## IB1 : contrôle d'infobulle pour `_make_custom_tooltip(for_text)` de `owner` : rendu en
-## sections (`TooltipView`, version courte) si le texte porte une clé « ib: », sinon `make_panel`.
-static func panel_for(for_text: String, owner: Object = null) -> Control:
-	var key := key_of(for_text)
-	if key == "":
-		return make_panel(for_text)
-	var live: Dictionary = {}
-	if owner != null and owner.has_meta(LIVE_META):
-		live = owner.get_meta(LIVE_META)
-	var spec := spec_for(key, live)
-	if spec.is_empty():
-		return make_panel(for_text)
-	return TooltipView.build(spec, false)
-
-
 ## IB1 : spec d'infobulle (§ 2.1 de la spec IB) de la clé « ib:<kind>:<id> » ; {} si le type
 ## n'est pas (encore) décrit en sections. `live` : mêmes dictionnaires que les fonctions BBCode.
 static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
 	var parts := key.split(":", true, 2)
-	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+	if parts.size() < 3 or parts[0] + ":" != TooltipHost.KEY_PREFIX:
 		return {}
 	var id: String = parts[2]
 	match parts[1]:
@@ -289,18 +184,9 @@ static func entity_name(id: String, name: String) -> String:
 	return CodexText.link(entry, name) if entry != "" else name
 
 
-## Infobulle native actuellement affichée (dans sa fenêtre surgissante), sinon null.
-static func visible_panel() -> Control:
-	var panel: Control = last_panel.get_ref() if last_panel != null else null
-	if panel == null or not panel.is_inside_tree() or not panel.is_visible_in_tree():
-		return null
-	var window := panel.get_window()
-	var loop := Engine.get_main_loop() as SceneTree
-	if window == null or (loop != null and window == loop.root) or not window.visible:
-		return null
-	return panel
 
 
+## Conservé pour encyclopedia.gd (hors lot) ; équivaut à `Money.digits`.
 static func thousands(value: int) -> String:
 	return Money.digits(value)
 
@@ -433,7 +319,7 @@ static func _icon_text(id: String, name: String) -> String:
 static func _live_warnings(live: Dictionary) -> Array:
 	var warnings: Array = []
 	if int(live.get("import_cost", 0)) > 0:
-		warnings.append("Dont importation : %s %s (%s manquant)" % [thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
+		warnings.append("Dont importation : %s %s (%s manquant)" % [Money.digits(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
 	if not live.is_empty() and not bool(live.get("available", true)):
 		warnings.append("Indisponible : %s" % str(live.get("reason", "conditions non remplies")))
 	for warning in live.get("warnings", []):
@@ -511,12 +397,12 @@ static func _effects_block(effects: Array, title: String = "Effets") -> String:
 ## Coût `{money, resources{res_id: n}}` → « 800 ₶ + [fer] 2 ».
 static func cost_text(cost: Variant) -> String:
 	if cost is int or cost is float:
-		return "%s %s" % [thousands(int(cost)), POUND]
+		return "%s %s" % [Money.digits(int(cost)), POUND]
 	if not (cost is Dictionary):
 		return ""
 	var parts := PackedStringArray()
 	if cost.has("money"):
-		parts.append("%s %s" % [thousands(int(cost["money"])), POUND])
+		parts.append("%s %s" % [Money.digits(int(cost["money"])), POUND])
 	var resources: Dictionary = cost.get("resources", {})
 	for res_id in resources:
 		parts.append("%s %s %d" % [icon_bbcode(str(res_id), 14), entity_link(str(res_id), GameCatalog.display_name(str(res_id))), int(resources[res_id])])
@@ -527,11 +413,6 @@ static func _description(definition: Dictionary) -> String:
 	var description: String = str(definition.get("description", ""))
 	return "[color=%s][i]%s[/i][/color]" % [MUTED, description] if description != "" else ""
 
-
-static func _unavailable(live: Dictionary) -> String:
-	if live.is_empty() or bool(live.get("available", true)):
-		return ""
-	return "[color=%s]Indisponible : %s[/color]" % [RED, str(live.get("reason", "conditions non remplies"))]
 
 
 static func _join(lines: Array) -> String:
@@ -581,25 +462,13 @@ static func plain(title: String, body: String = "", hint: String = "") -> String
 	return to_bbcode(plain_spec("", {"title": title, "body": body, "hint": hint}))
 
 
-## Attache une infobulle brute `ib:plain:<key>` à `control` : pose `tooltip_text` (clé + repli
-## BBCode) et, si `control` n'est pas déjà une classe à infobulle riche (`RichButton`, `IconChip`,
-## `RichPanel`…, reconnue à son script), lui attache le script générique `plain_tooltip_host.gd`
-## qui route `_make_custom_tooltip` vers `panel_for`. `live` : `title`/`body`/`hint` dynamiques
-## (ex. « Vitesse ×%d » selon la donnée du moment), sinon ceux de `tooltips.json`.
+## Délégués vers `TooltipHost`. Seul appelant : encyclopedia.gd (modifié hors SC) ; à retirer après sa migration.
+static func make_panel(bbcode: String) -> Control:
+	return TooltipHost.from_bbcode(bbcode)
+
+
 static func attach_plain(control: Control, key: String, live: Dictionary = {}) -> void:
-	set_tooltip(control, "plain", key, live)
-
-
-## Q8 : un contrôle sans `_make_custom_tooltip` montrerait la clé « ib: » et le BBCode bruts :
-## contrôle natif → script générique `plain_tooltip_host.gd` ; classe scriptée → erreur (la
-## méthode manque à la classe).
-static func _ensure_host(control: Control) -> void:
-	if control.has_method("_make_custom_tooltip"):
-		return
-	if control.get_script() == null:
-		control.set_script(PLAIN_HOST_SCRIPT)
-	else:
-		push_error("RichTooltip: %s (%s) lacks _make_custom_tooltip (raw tooltip)" % [control.name, control.get_script().resource_path])
+	TooltipHost.attach_plain(control, key, live)
 
 
 # --- Unités -------------------------------------------------------------------------------
@@ -668,7 +537,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 		candidates["morale"] = {"icon": "gauge_morale", "label": "Moral", "value": str(int(live.get("morale", 0)))}
 	var cost := ""
 	if live.has("cost"):
-		cost = "%s %s" % [thousands(int(live["cost"])), POUND]
+		cost = "%s %s" % [Money.digits(int(live["cost"])), POUND]
 	elif definition.has("cost"):
 		cost = cost_text(definition["cost"])
 	if cost != "":
@@ -682,7 +551,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	var footer := {} if in_army else {"cost": cost}
 	var upkeep := int(live.get("upkeep", definition.get("upkeep", -1)))
 	if upkeep >= 0:
-		footer["upkeep"] = "%s %s / saison" % [thousands(upkeep), POUND]
+		footer["upkeep"] = "%s %s / saison" % [Money.digits(upkeep), POUND]
 	if definition.has("recruit_time_turns"):
 		footer["time"] = FrText.count(int(definition["recruit_time_turns"]), "tour")
 	spec["footer"] = footer
@@ -780,13 +649,13 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 		effects.remove_at(0)
 	var footer := {}
 	if live.has("cost"):
-		footer["cost"] = "%s %s" % [thousands(int(live["cost"])), POUND]
+		footer["cost"] = "%s %s" % [Money.digits(int(live["cost"])), POUND]
 	elif definition.has("cost"):
 		footer["cost"] = cost_text(definition["cost"])
 	var turns := int(live.get("turns", definition.get("build_time_turns", 0)))
 	if turns > 0:
 		footer["time"] = FrText.count(turns, "tour")
-	footer["upkeep"] = "%s %s / saison" % [thousands(int(live.get("upkeep", definition.get("upkeep", 0)))), POUND]
+	footer["upkeep"] = "%s %s / saison" % [Money.digits(int(live.get("upkeep", definition.get("upkeep", 0)))), POUND]
 	spec["footer"] = footer
 	var units := PackedStringArray()
 	for unit_id in definition.get("enables_units", []):
@@ -906,7 +775,7 @@ static func diet(option: Dictionary) -> String:
 	var state := "régime actuel" if bool(option.get("current", false)) else ("disponible" if bool(option.get("available", false)) else "indisponible")
 	var lines: Array = [_title(id, str(option.get("name", id)), state, "resource")]
 	var cost := int(option.get("cost", 0))
-	var cost_line := "Coût : %s %s / saison" % [thousands(cost), POUND] if cost > 0 else "Coût : aucun"
+	var cost_line := "Coût : %s %s / saison" % [Money.digits(cost), POUND] if cost > 0 else "Coût : aucun"
 	var per_thousand := float(option.get("cost_per_thousand", 0))
 	if per_thousand > 0.0:
 		cost_line += " [color=%s](%s %s pour 1 000 habitants)[/color]" % [MUTED, str(snappedf(per_thousand, 0.01)).replace(".", ","), POUND]
@@ -973,7 +842,7 @@ static func resource(resource_id: String, stock: int = -1) -> String:
 static func population_class(class_id: String, data: Dictionary = {}) -> String:
 	var lines: Array = [_title("class_" + class_id, class_label(str(class_id)), "", "class")]
 	if data.has("count"):
-		lines.append("Population : %s" % thousands(int(data["count"])))
+		lines.append("Population : %s" % Money.digits(int(data["count"])))
 	var gauges := PackedStringArray()
 	for key in ["unrest", "health", "wealth", "goods_satisfaction"]:
 		if data.has(key):
@@ -1053,7 +922,7 @@ static func branch(branch_id: String, value: int = -1) -> String:
 
 
 static func _signed_pounds(value: int) -> String:
-	return "%s%s %s" % ["+" if value > 0 else "", thousands(value), POUND]
+	return "%s%s %s" % ["+" if value > 0 else "", Money.digits(value), POUND]
 
 
 ## `option` : entrée de `get_coinage().options` ; `changed_this_year` : déjà changée cette année.
@@ -1064,7 +933,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 	var recoinage := int(option.get("recoinage", 0))
 	lines.append("Seigneuriage : [color=%s]%s / saison[/color]" % [GREEN if seigniorage > 0 else MUTED, _signed_pounds(seigniorage)])
 	if recoinage > 0:
-		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, thousands(recoinage), POUND])
+		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, Money.digits(recoinage), POUND])
 	var inflation := int(option.get("inflation", 0))
 	var deflation := int(option.get("deflation", 0))
 	if inflation > 0:
@@ -1088,7 +957,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 ## `option` : entrée de `get_chivalric_orders().options`.
 static func chivalric_order(option: Dictionary) -> String:
 	var lines: Array = [_title("hud_court", str(option.get("name", option.get("id", ""))), "disponible" if bool(option.get("available", false)) else "indisponible", "hud")]
-	lines.append("Coût : %s %s · prestige requis : %d" % [thousands(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
+	lines.append("Coût : %s %s · prestige requis : %d" % [Money.digits(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
 	lines.append("Membres : %d (historiquement : %s)" % [int(option.get("members", 0)), str(option.get("historical_members", "—"))])
 	lines.append("Membres : loyauté +%d, moral des armées qu'ils mènent +%d" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0))])
 	lines.append("Souverain : prestige +%d à la fondation, +%d par an" % [int(option.get("founder_prestige", 0)), int(option.get("yearly_prestige", 0))])
@@ -1119,39 +988,24 @@ const ENTITY_KINDS := {
 	"trait_": "trait", "skill_": "skill",
 }
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
-static var _texts: Dictionary = {}
-## Vrai si les libellés viennent bien du fichier de données (tests).
-static var texts_loaded_from_data: bool = false
+const TEXTS_FALLBACK := {
+	"effects": {}, "stats": {}, "gauges": {}, "hud": {}, "categories": {},
+	"abilities": {}, "classes": {}, "branches": {}, "plain": {},
+}
+static var _texts := JsonLookup.new(TEXTS_FILE, TEXTS_FALLBACK)
 
 
 ## `data/ui/tooltips.json` (mis en cache). IB2 : repli comme `CameraFeel`/`TooltipView.style()` —
 ## le dossier de `MapPaths` peut ne pas avoir de `ui/tooltips.json` (fixtures de test), auquel cas
 ## on retombe sur `data/` à la racine du dépôt.
 static func texts() -> Dictionary:
-	if _texts.is_empty():
-		var path := TooltipView._data_dir().path_join(TEXTS_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(TEXTS_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
-		if parsed is Dictionary:
-			_texts = parsed
-			texts_loaded_from_data = true
-		else:
-			push_warning("RichTooltip : %s illisible, bulles de règle sans texte." % TEXTS_FILE)
-			_texts = {
-				"effects": {}, "stats": {}, "gauges": {}, "hud": {}, "categories": {},
-				"abilities": {}, "classes": {}, "branches": {}, "plain": {},
-			}
-			texts_loaded_from_data = false
-	return _texts
+	return _texts.data()
 
 
 ## Relit `tooltips.json` au prochain accès (tests).
 static func reload_texts() -> void:
-	_texts = {}
-	texts_loaded_from_data = false
+	_texts.reload()
 
 
 ## Entrée de règle `key` : {block, title, body (règles résolues), codex, icon} ; {} si aucune.
@@ -1213,7 +1067,7 @@ static func entity_link(id: String, label: String) -> String:
 ## l'entité (`spec_for`), sinon spec simple tirée du BBCode de l'entité. {} si inconnue.
 static func link_spec(key: String) -> Dictionary:
 	var parts := key.split(":", true, 2)
-	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+	if parts.size() < 3 or parts[0] + ":" != TooltipHost.KEY_PREFIX:
 		return {}
 	var kind: String = parts[1]
 	var id: String = parts[2]

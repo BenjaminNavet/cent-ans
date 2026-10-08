@@ -205,8 +205,8 @@ def test_cli_check_exit_code(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
     assert result.exit_code == 0, result.output
 
 
-def test_cache_in_the_legacy_frame_is_reframed_in_place(tmp_path: Path) -> None:
-    """A cache without frame.json is in the pre-R7 frame (0, 5): renamed, not rebaked."""
+def test_cache_in_the_legacy_frame_is_refused(tmp_path: Path) -> None:
+    """A cache without frame.json is in the legacy frame (0, 5): rebuild refuses it."""
     map_dir = tmp_path / "map"
     _write_manifests(map_dir)
     manifest = json.loads((map_dir / "relief_pyramid.json").read_text())
@@ -225,14 +225,6 @@ def test_cache_in_the_legacy_frame_is_reframed_in_place(tmp_path: Path) -> None:
     report = relief_cache.check(map_dir, tmp_path / "raw")
     assert report.frame_shift == (0, 5)
     assert not report.complete
-    calls: list[tuple[str, bool]] = []
-    runners = {step: (lambda *a: 0) for step in relief_cache.RUNNERS}
-    runners = {
-        step: (lambda d, f, w, log, s=step: calls.append((s, f)) or 0)
-        for step in relief_cache.RUNNERS
-    }
-    relief_cache.rebuild(map_dir, runners=runners, raw_dir=tmp_path / "raw")
-    assert (map_dir / "pyramid" / "E1" / "2_11.png").exists()
-    assert not legacy.exists()
-    assert world_frame.cache_origin(map_dir / "pyramid") == (0, 0)
-    assert relief_cache.check(map_dir, tmp_path / "raw").frame_shift is None
+    with pytest.raises(RuntimeError, match="autre cadre"):
+        relief_cache.rebuild(map_dir, raw_dir=tmp_path / "raw")
+    assert legacy.exists()

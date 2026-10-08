@@ -48,7 +48,7 @@ func setup(p_scene: Node) -> void:
 	scene = p_scene
 	name = "FormationPicker"
 	add_to_group(SiegeHealthBars.OCCLUDER_GROUP)
-	if scene.battle != null and scene.battle.has_method("formation_presets"):
+	if scene.battle != null:
 		presets = scene.battle.call("formation_presets")
 	_build()
 	visible = not presets.is_empty()
@@ -77,7 +77,7 @@ func _build() -> void:
 	header.add_theme_color_override("font_color", INK)
 	header.add_theme_color_override("font_hover_color", INK)
 	header.add_theme_color_override("font_pressed_color", INK)
-	RichTooltip.attach_plain(header, "formation_picker_toggle")
+	TooltipHost.attach_plain(header, "formation_picker_toggle")
 	header.pressed.connect(func() -> void:
 		_auto_collapse_done = true
 		toggle_collapsed())
@@ -123,7 +123,7 @@ func _build() -> void:
 	place_button.name = "PlaceButton"
 	place_button.text = "Placer en formation"
 	place_button.focus_mode = Control.FOCUS_NONE
-	RichTooltip.attach_plain(place_button, "formation_place_proposal")
+	TooltipHost.attach_plain(place_button, "formation_place_proposal")
 	place_button.pressed.connect(on_place_pressed)
 	actions.add_child(place_button)
 	cancel_button = Button.new()
@@ -252,14 +252,14 @@ func _process(_delta: float) -> void:
 ## formation reste ; `width`/`depth` : taille d'arrivée, pour les fantômes).
 func slots_for(ids: Array, point: Vector2, facing: float) -> Array:
 	var out: Array = []
-	if active_id == "" or ids.is_empty() or scene.battle == null or not scene.battle.has_method("formation_slots"):
+	if active_id == "" or ids.is_empty() or scene.battle == null:
 		return out
 	var raw: Array = scene.battle.call("formation_slots", active_id, PackedInt32Array(ids), point.x, point.y, facing)
 	for slot in raw:
 		var id := int(slot["id"])
 		var order_width := float(slot["width"])
 		var size := Vector2.ZERO
-		if order_width > 0.0 and scene.battle.has_method("formation_extent"):
+		if order_width > 0.0:
 			size = scene.battle.call("formation_extent", id, order_width)
 		else:
 			var unit := _unit(id)

@@ -62,12 +62,6 @@ pub fn natural_death_permille(state: &CampaignState, data: &GameData, id: &Chara
     }
 }
 
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
-
 /// Phase 8: roll natural deaths, then resolve successions.
 pub(crate) fn resolve_characters(
     state: &mut CampaignState,
@@ -214,7 +208,7 @@ pub(crate) fn succeed(
                     format!(
                         "{} succède à la tête de {}.",
                         state.character_name(data, &new_ruler),
-                        faction_name(data, faction)
+                        data.faction_name(faction)
                     ),
                 )
                 .faction(faction),
@@ -258,7 +252,7 @@ pub(crate) fn succeed(
                     let text = format!(
                         "{} s'empare du pouvoir en {}, faute d'héritier légitime.",
                         state.character_name(data, &ruler),
-                        faction_name(data, faction)
+                        data.faction_name(faction)
                     );
                     (ruler, text)
                 }
@@ -268,13 +262,13 @@ pub(crate) fn succeed(
                         format!(
                             "{} est élu à la tête de {}.",
                             state.character_name(data, &ruler),
-                            faction_name(data, faction)
+                            data.faction_name(faction)
                         )
                     } else {
                         format!(
                             "La lignée s'éteint : {} fonde une nouvelle maison à la tête de {}.",
                             state.character_name(data, &ruler),
-                            faction_name(data, faction)
+                            data.faction_name(faction)
                         )
                     };
                     (ruler, text)
@@ -333,7 +327,7 @@ pub(crate) fn resolve_faction_deaths(
             events.push(
                 GameEvent::new(
                     EventKind::FactionDestroyed,
-                    format!("{} disparaît de la carte.", faction_name(data, &id)),
+                    format!("{} disparaît de la carte.", data.faction_name(&id)),
                 )
                 .faction(&id),
             );

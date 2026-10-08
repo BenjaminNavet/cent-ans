@@ -1,17 +1,13 @@
 class_name NavalPreBattleDialog
 extends PreBattleDialog
 
-## Écran d'avant-bataille navale (lot NV1), même présentation qu'UB1 (`PreBattleDialog`) :
+## Écran d'avant-bataille navale, même présentation que `PreBattleDialog` :
 ## « Flotte ennemie en vue », chances estimées par le cœur (`win_chance` de
 ## `get_pending_naval_battles`, cinq résolutions automatiques), navires et équipages des deux
-## flottes, vent prévu (aperçu `NavalBattleSim` à la même graine), puis « Résolution
-## automatique » / « Retraite » (la flotte interceptée rentre au port). « Combattre » (scène 3D)
-## est masqué depuis le 25/09 à la demande du joueur (`PLAYABLE_3D`).
+## flottes, puis « Résolution automatique » / « Retraite » (la flotte interceptée rentre au port).
+## Les batailles navales ne se jouent pas : pas de bouton « Combattre ».
 
 const BANNER_SEA := "res://assets/events/evt_sluys.jpg"
-## Bataille navale jouée en 3D proposée au joueur ; désactivée (résolution automatique seule).
-const PLAYABLE_3D := false
-const COMPASS := ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"]
 
 
 func show_naval(sim: Object, p_battle: Dictionary) -> void:
@@ -44,21 +40,17 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	verdict_label.text = BattleUiKit.verdict(chance)
 	verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
 	chance_label.text = "Chances de victoire estimées : %d %% · %d navires contre %d" % [roundi(chance * 100.0), _ships_of(player_side), _ships_of(enemy_side)]
-	RichTooltip.attach_plain(balance_bar, "naval_balance_estimate")
+	TooltipHost.attach_plain(balance_bar, "naval_balance_estimate")
 	balance_bar.queue_redraw()
 	for i in 2:
 		_fill_fleet(_columns[i], player_side if i == 0 else enemy_side)
-	body_label.text = _conditions(int(battle.get("seed", 1)))
+	body_label.text = _conditions()
 	modifiers_label.text = "Les archers tirent des châteaux ; le plus haut bord domine l'abordage ; qui tient le vent choisit l'heure du combat."
 	modifiers_label.visible = true
-	fight_button.text = "Combattre"
-	fight_button.disabled = setup.is_empty()
-	# Choix du joueur (25/09) : les batailles navales se règlent par la résolution automatique ;
-	# la scène 3D reste accessible en debug (`--naval-scenario`).
-	fight_button.visible = PLAYABLE_3D
+	fight_button.visible = false
 	withdraw_button.text = "Rentrer au port" if player_side == "defender" else "Refuser le combat"
 	withdraw_button.disabled = false
-	RichTooltip.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
+	TooltipHost.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")
@@ -111,7 +103,7 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 	var fleet := BattleUiKit.label("%d navires : %s" % [ships.size(), ", ".join(parts)], UiType.size(UiType.BODY), BattleUiKit.INK, false, true)
 	fleet.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(fleet)
-	column.add_child(BattleUiKit.label("%s hommes embarqués" % BattleUiKit.thousands(soldiers), UiType.size(UiType.BODY)))
+	column.add_child(BattleUiKit.label("%s hommes embarqués" % Money.digits(soldiers), UiType.size(UiType.BODY)))
 	var units: Array = side_setup.get("units", [])
 	var composition := _composition(units)
 	if composition != "":
@@ -133,23 +125,9 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 		list.add_child(BattleUiKit.label("… et %d autres" % (ships.size() - 8), UiType.size(UiType.CAPTION), BattleUiKit.INK_FADED))
 
 
-## Saison et vent prévus (aperçu de la bataille à la même graine).
-func _conditions(seed: int) -> String:
+## Saison et pluie de la bataille.
+func _conditions() -> String:
 	var parts := PackedStringArray(["Saison : %s" % str(SEASON_FR.get(str(setup.get("season", "")), ""))])
-	if not setup.is_empty() and ClassDB.class_exists("NavalBattleSim"):
-		var preview: Object = ClassDB.instantiate("NavalBattleSim")
-		if preview.call("setup", setup, seed):
-			var wind: Dictionary = preview.call("get_wind")
-			var from := float(wind.get("to", 0.0)) + PI
-			var bearing := fposmod(rad_to_deg(atan2(cos(from), -sin(from))), 360.0)
-			var strength := float(wind.get("strength", 0.5))
-			var force := "faible" if strength < 0.3 else ("frais" if strength < 0.65 else "fort")
-			parts.append("Vent %s du %s" % [force, COMPASS[int(round(bearing / 45.0)) % 8]])
-			var gauge := str(wind.get("gauge", ""))
-			if gauge == player_side:
-				parts.append("vous avez l'avantage du vent")
-			elif gauge != "":
-				parts.append("l'ennemi a l'avantage du vent")
 	if bool(setup.get("rain", false)):
 		parts.append("pluie : cordes d'arc mouillées")
 	return "   ·   ".join(parts)

@@ -7,7 +7,6 @@ extends RefCounted
 ## `data/map/map.json`, +Z vers le sud) et repère local de `TownPlan` / `TownBuilder` (mètres, x vers +X monde,
 ## y vers +Z monde, soit [dE, -dN]). Rendu seulement.
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 ## Échelle de repli (ADR 0082, inchangée par ADR 0115) si `data/map/map.json` est illisible ; les
 ## bornes n'ont alors pas de repli (villes 1:1 mal placées, avertissement).
 const FALLBACK_METERS_PER_UNIT := 718.9765625
@@ -24,29 +23,20 @@ static func clear_cache() -> void:
 	_loaded = false
 
 
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
-
-
 static func _load() -> void:
 	_loaded = true
-	var dir_path := _data_dir().path_join("landmarks_v2")
+	var dir_path := DataFile.data_dir().path_join("landmarks_v2")
 	var dir := DirAccess.open(dir_path)
 	if dir != null:
 		for file_name in dir.get_files():
 			if not file_name.ends_with(".json"):
 				continue
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir_path.path_join(file_name)))
+			var parsed: Variant = DataFile.parse_file(dir_path.path_join(file_name))
 			if parsed is Dictionary and int((parsed as Dictionary).get("format", 0)) == 2:
 				_by_settlement[str(parsed["settlement"])] = parsed
-	var meta_path := _data_dir().path_join("map").path_join("map.json")
+	var meta_path := DataFile.data_dir().path_join("map").path_join("map.json")
 	if FileAccess.file_exists(meta_path):
-		var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+		var meta: Variant = DataFile.parse_file(meta_path)
 		if meta is Dictionary and (meta as Dictionary).has("bounds_projected"):
 			_bounds = meta["bounds_projected"]
 			_meters_per_unit = float((meta as Dictionary).get("meters_per_px", FALLBACK_METERS_PER_UNIT))

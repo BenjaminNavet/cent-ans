@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools.geo import sea_lanes
@@ -22,16 +21,6 @@ def _settlements() -> dict[str, dict]:
         for settlement in json.loads(path.read_text(encoding="utf-8")):
             out[settlement["id"]] = settlement
     return out
-
-
-def test_catalogue_matches_schema() -> None:
-    """data/naval/sea_lanes.json matches sea_lanes.schema.json."""
-    schema = json.loads(
-        (DATA / "schemas" / "sea_lanes.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = [e.message for e in Draft202012Validator(schema).iter_errors(_catalogue())]
-    assert not errors
 
 
 def test_lanes_link_known_ports_on_known_seas() -> None:

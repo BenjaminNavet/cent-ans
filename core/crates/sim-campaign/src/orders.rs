@@ -8,6 +8,7 @@
 //! A [`Place`] also accepts a province id, which stands for its city (the v1
 //! JSON field name `province` is still read as an alias).
 
+use data_model::EffectKind;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -17,9 +18,9 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::CANCEL_REFUND_PERCENT;
-use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
+use crate::negotiation::{Article, Party, Treaty};
 use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
 use crate::state::{
@@ -458,6 +459,46 @@ impl Order {
             },
         }
     }
+
+    /// The treaty a diplomatic order proposes, with its target (`None` for
+    /// any other order).
+    pub fn proposal(
+        &self,
+        state: &CampaignState,
+        proposer: &FactionId,
+    ) -> Option<(FactionId, Treaty)> {
+        let (target, treaty) = match self {
+            Order::ProposePeace {
+                target,
+                provinces,
+                tribute,
+            } => (
+                target,
+                Treaty::peace_terms(state, proposer, provinces, *tribute),
+            ),
+            Order::ProposeAlliance { target } => (target, Treaty::single(Article::Alliance)),
+            Order::ProposeTreaty { target, articles } => (target, Treaty::new(articles.clone())),
+            Order::DemandVassalage { target } => (
+                target,
+                Treaty::single(Article::Vassalage {
+                    giver: Party::Recipient,
+                }),
+            ),
+            Order::ProposeFactionMarriage {
+                target,
+                character,
+                spouse,
+            } => (
+                target,
+                Treaty::single(Article::Marriage {
+                    character: character.clone(),
+                    spouse: spouse.clone(),
+                }),
+            ),
+            _ => return None,
+        };
+        Some((target.clone(), treaty))
+    }
 }
 
 /// What an order did, for the orders whose effect the UI shows (lot M2).
@@ -792,12 +833,31 @@ impl CampaignState {
         faction: &FactionId,
         order: Order,
     ) -> Result<(), OrderError> {
+        if let Some((target, treaty)) = order.proposal(self, faction) {
+            if let Order::ProposeFactionMarriage {
+                character, spouse, ..
+            } = &order
+            {
+                self.check_owned_character(faction, character)?;
+                if self.characters.get(spouse).map(|c| &c.faction) != Some(&target) {
+                    return Err(OrderError::NotYourCharacter(target));
+                }
+            }
+            return Ok(self.propose(data, faction, &target, treaty)?);
+        }
         match order {
             Order::MoveArmy { .. }
             | Order::Attack { .. }
             | Order::Embark { .. }
             | Order::ChooseEncounterOption { .. } => {
                 unreachable!("handled by apply_order_outcome")
+            }
+            Order::ProposePeace { .. }
+            | Order::ProposeAlliance { .. }
+            | Order::ProposeTreaty { .. }
+            | Order::DemandVassalage { .. }
+            | Order::ProposeFactionMarriage { .. } => {
+                unreachable!("handled by Order::proposal")
             }
             Order::Recruit {
                 settlement,
@@ -913,22 +973,6 @@ impl CampaignState {
                 Ok(())
             }
             Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),
-            Order::ProposePeace {
-                target,
-                provinces,
-                tribute,
-            } => Ok(self.propose(
-                data,
-                faction,
-                &target,
-                Proposal::Peace { provinces, tribute },
-            )?),
-            Order::ProposeAlliance { target } => {
-                Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
-            }
-            Order::ProposeTreaty { target, articles } => {
-                Ok(self.propose(data, faction, &target, Proposal::Treaty { articles })?)
-            }
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
             Order::BreakTradeAgreement { target } => {
                 Ok(self.break_trade_agreement(data, faction, &target)?)
@@ -936,28 +980,9 @@ impl CampaignState {
             Order::SetEmbargo { target, active } => {
                 Ok(self.set_embargo(data, faction, &target, active)?)
             }
-            Order::DemandVassalage { target } => {
-                Ok(self.propose(data, faction, &target, Proposal::Vassalage)?)
-            }
             Order::ReleaseVassal { target } => Ok(self.release_vassal(data, faction, &target)?),
             Order::SendGift { target, amount } => {
                 Ok(self.send_gift(data, faction, &target, amount)?)
-            }
-            Order::ProposeFactionMarriage {
-                target,
-                character,
-                spouse,
-            } => {
-                self.check_owned_character(faction, &character)?;
-                if self.characters.get(&spouse).map(|c| &c.faction) != Some(&target) {
-                    return Err(OrderError::NotYourCharacter(target));
-                }
-                Ok(self.propose(
-                    data,
-                    faction,
-                    &target,
-                    Proposal::Marriage { character, spouse },
-                )?)
             }
             Order::AnswerOffer { offer, accept } => {
                 Ok(self.answer_offer(data, faction, offer, accept)?)
@@ -1423,10 +1448,7 @@ impl CampaignState {
         }
         if let Some(tech) = &unit_type.required_technology {
             if !faction_state.technologies.contains(tech) {
-                let name = data
-                    .technologies
-                    .get(tech)
-                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                let name = data.tech_name(tech);
                 return Some(format!("technologie requise : {name}"));
             }
         }
@@ -1488,7 +1510,9 @@ impl CampaignState {
         let capital = self.factions.get(&state.controller).is_some_and(|f| {
             f.capital == state.province && self.province_city_id(&f.capital) == Some(settlement)
         });
-        BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
+        BASE_RECRUIT_SLOTS
+            + usize::from(capital)
+            + effects[EffectKind::RecruitSlots].flat.max(0.0) as usize
     }
 
     /// Recruitment slots still free this turn in `settlement` (B7b: only the
@@ -1554,8 +1578,8 @@ impl CampaignState {
         let mut effects = self.settlement_effects(data, settlement);
         effects.merge(&research::faction_tech_effects(self, data, faction));
         let targeted = effects.unit_categories.get(unit_type.category).recruit_cost;
-        let flat = effects.recruit_cost.flat + targeted.flat;
-        let percent = (effects.recruit_cost.percent + targeted.percent).max(-75.0);
+        let flat = effects[EffectKind::RecruitCost].flat + targeted.flat;
+        let percent = (effects[EffectKind::RecruitCost].percent + targeted.percent).max(-75.0);
         let base = f64::from(unit_type.cost.money);
         // H5: prices follow the coinage.
         let prices = crate::coinage::price_factor(self, faction);

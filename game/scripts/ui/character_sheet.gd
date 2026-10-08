@@ -281,7 +281,7 @@ func _show_blockers(character: Dictionary, governable: Array, commandable: Array
 		var button: Button = pair[1]
 		var reason := action_blocker(str(pair[0]), character, pair[2]) if button.disabled else ""
 		if reason != "":
-			RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason})
+			TooltipHost.attach_plain(button, "seat_unavailable", {"body": reason})
 		if reason != "":
 			lines.append("%s : %s." % [ACTION_NAMES[pair[0]], reason])
 	_blocker_label.text = "\n".join(lines)
@@ -475,7 +475,7 @@ func _on_ransom_pressed() -> void:
 		order = {"type": "release_captive", "character": character_id}
 	var result: Dictionary = sim.call("submit_order", order)
 	if not bool(result.get("ok", false)):
-		RichTooltip.attach_plain(_ransom_button, "ransom_refused", {"body": str(result.get("error", "?"))})
+		TooltipHost.attach_plain(_ransom_button, "ransom_refused", {"body": str(result.get("error", "?"))})
 		_ransom_label.text += "\nRefusé : %s" % str(result.get("error", "?"))
 		return
 	_fill_ransom(sim.call("get_character", character_id))
@@ -485,9 +485,7 @@ func _fill_traits(traits: Array) -> void:
 	for child in traits_list.get_children():
 		child.queue_free()
 	if traits.is_empty():
-		var label := Label.new()
-		label.text = "Aucun trait."
-		traits_list.add_child(label)
+		var label := UiBuild.label("Aucun trait.", 0, null, false, 0.0, traits_list)
 		return
 	for trait_entry in traits:
 		var category: String = str(trait_entry.get("category", ""))
@@ -518,21 +516,14 @@ func _fill_family(character: Dictionary) -> void:
 	if mother_id != "":
 		family_list.add_child(_family_row("Mère", mother_id, _name_of(mother_id)))
 	if family_list.get_child_count() == 0:
-		var label := Label.new()
-		label.text = "Famille inconnue."
-		family_list.add_child(label)
+		var label := UiBuild.label("Famille inconnue.", 0, null, false, 0.0, family_list)
 
 
 func _family_row(role_text: String, id: String, label_text: String) -> Control:
 	var row := HBoxContainer.new()
-	var role_label_node := Label.new()
-	role_label_node.text = role_text
-	role_label_node.custom_minimum_size = Vector2(80, 0)
-	row.add_child(role_label_node)
-	var link := Button.new()
-	link.text = label_text
+	var role_label_node := UiBuild.label(role_text, 0, null, false, 80, row)
+	var link := UiBuild.button(label_text, func() -> void: character_requested.emit(id))
 	link.flat = true
-	link.pressed.connect(func() -> void: character_requested.emit(id))
 	row.add_child(link)
 	return row
 
@@ -542,12 +533,9 @@ func _open_picker(kind: String, title: String, entries: Array) -> void:
 	for child in picker_list.get_children():
 		child.queue_free()
 	if entries.is_empty():
-		var label := Label.new()
-		label.text = "Aucune option disponible."
-		picker_list.add_child(label)
+		var label := UiBuild.label("Aucune option disponible.", 0, null, false, 0.0, picker_list)
 	for entry in entries:
-		var button := Button.new()
-		button.text = str(entry.get("name", entry.get("id", "?")))
+		var button := UiBuild.button(str(entry.get("name", entry.get("id", "?"))))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var target_id: String = str(entry.get("id", ""))
@@ -582,8 +570,7 @@ func _build_retinue_section() -> void:
 		return
 	var header := HBoxContainer.new()
 	header.name = "RetinueHeader"
-	_retinue_header = Label.new()
-	_retinue_header.text = "Suite"
+	_retinue_header = UiBuild.label("Suite")
 	_retinue_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiType.apply(_retinue_header, UiType.BODY)
 	header.add_child(_retinue_header)

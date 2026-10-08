@@ -11,8 +11,8 @@ use sim_battle::BattleSim;
 fn losses_under(shooter: &str, seconds: f64) -> (f64, f64) {
     let data = data();
     let setup = setup(
-        units(&data, &[shooter]),
-        units(&data, &["unit_men_at_arms_foot"]),
+        units(data, &[shooter]),
+        units(data, &["unit_men_at_arms_foot"]),
         None,
     );
     let mut sim = BattleSim::new(setup, 7).unwrap();

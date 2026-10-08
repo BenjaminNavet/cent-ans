@@ -77,30 +77,7 @@ impl PopulationRules {
     }
 }
 
-impl Default for PopulationRules {
-    /// Fallback when `data/rules/population.json` is absent; kept equal to
-    /// that file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        PopulationRules {
-            tax_unrest_weight: 130.0,
-            garrison_relief_per_100_men: 1.5,
-            garrison_relief_max: 15.0,
-            garrison_relief_reference_population: 100_000,
-            garrison_relief_max_weight: 3.0,
-            goods_relief_max: 10.0,
-            occupation_unrest: 24.0,
-            foreign_religion_unrest: 10.0,
-            disorder_unrest_weight: default_disorder_weight(),
-            disorder_unrest_max: default_disorder_max(),
-            revolt_unrest_threshold: default_revolt_threshold(),
-            revolt_seasons: default_revolt_seasons(),
-            revolt_control_threshold: default_revolt_control_threshold(),
-            disorder_decay_flat: default_disorder_decay_flat(),
-            disorder_decay_percent: default_disorder_decay_percent(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(PopulationRules, "rules/population.json", default);
 
 fn default_garrison_relief_max_weight() -> f64 {
     1.0

@@ -32,14 +32,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = SIZE
 	add_theme_stylebox_override("panel", HudStyle.panel_box(12))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	var box := UiBuild.vbox(6)
 	add_child(box)
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 10)
-	box.add_child(header)
-	var title := Label.new()
-	title.text = "✠ Codex"
+	var header := UiBuild.hbox(10, box)
+	var title := UiBuild.label("✠ Codex")
 	UiType.apply(title, UiType.TITLE)
 	title.add_theme_color_override("font_color", HudStyle.RUBRIC)
 	header.add_child(title)
@@ -66,9 +62,8 @@ func _ready() -> void:
 	search.add_theme_color_override("font_color", HudStyle.INK)
 	search.text_changed.connect(_on_search)
 	header.add_child(search)
-	var close := Button.new()
-	close.text = "×"
-	RichTooltip.attach_plain(close, "close_escape")
+	var close := UiBuild.button("×")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	body = VBoxContainer.new()
@@ -144,12 +139,6 @@ func open_tab(tab: int) -> void:
 	else:
 		codex_window.open()
 
-
-func toggle_tab(tab: int) -> void:
-	if visible and tabs.current_tab == tab:
-		hide()
-	else:
-		open_tab(tab)
 
 
 func _on_tab_changed(tab: int) -> void:

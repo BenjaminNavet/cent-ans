@@ -239,13 +239,12 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.set_meta(_TOAST_META, true)
 	entry.mouse_filter = Control.MOUSE_FILTER_STOP
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	RichTooltip.attach_plain(entry, "click_to_close")
+	TooltipHost.attach_plain(entry, "click_to_close")
 	if text.length() > TOAST_TOOLTIP_CHARS:
 		# LR-09 : un avis long est tronqué à `TOAST_MAX_LINES` lignes ; l'infobulle porte le texte entier.
 		entry.tooltip_text = text + "\n\nCliquer pour fermer."
 	entry.add_theme_stylebox_override("panel", HudStyle.note_box(8))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	var row := UiBuild.hbox(8)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	entry.add_child(row)
 	if icon != "":
@@ -258,15 +257,12 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 			picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			row.add_child(picture)
-	var label := Label.new()
+	var label := UiBuild.label(text, 0, HudStyle.INK, true)
 	label.name = "Text"
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.max_lines_visible = TOAST_MAX_LINES  # NT6b : un avis très long reste dans sa zone
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_theme_color_override("font_color", HudStyle.INK)
 	UiType.apply(label, UiType.BODY)
 	row.add_child(label)
 	entry.clip_contents = true
@@ -391,16 +387,14 @@ func _build_host(host: Node) -> Dictionary:
 	host.add_child(dim)
 	host.add_child(zones[Zone.MODAL])
 	# Pile des avis : avis éphémères en haut, occupants ensuite, `at_end` en bas.
-	var stack := VBoxContainer.new()
+	var stack := UiBuild.vbox(8)
 	stack.name = "Stack"
 	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.add_theme_constant_override("separation", 8)
 	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	(zones[Zone.TOASTS] as Control).add_child(stack)
-	var toasts_box := VBoxContainer.new()
+	var toasts_box := UiBuild.vbox(4)
 	toasts_box.name = "Toasts"
 	toasts_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	toasts_box.add_theme_constant_override("separation", 4)
 	stack.add_child(toasts_box)
 	var more := Label.new()
 	more.name = "More"

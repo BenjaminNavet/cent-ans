@@ -39,7 +39,7 @@ fn lab_sim(seed: u64) -> BattleSim {
     let mut sim = BattleSim::new(
         setup(
             units(
-                &data,
+                data,
                 &[
                     "unit_men_at_arms_foot",
                     "unit_flemish_pikemen",
@@ -47,7 +47,7 @@ fn lab_sim(seed: u64) -> BattleSim {
                     "unit_knights",
                 ],
             ),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_urban_militia"]),
             None,
         ),
         seed,
@@ -314,7 +314,7 @@ fn a_queued_move_carries_its_width() {
 fn deployment_takes_a_width() {
     let data = data();
     let army = ["unit_men_at_arms_foot", "unit_longbowmen"];
-    let mut s = setup(units(&data, &army), units(&data, &army), None);
+    let mut s = setup(units(data, &army), units(data, &army), None);
     s.player_side = Some(SideId::Attacker);
     let mut sim = BattleSim::new(s, 4).unwrap();
     assert!(sim.begin_deployment());

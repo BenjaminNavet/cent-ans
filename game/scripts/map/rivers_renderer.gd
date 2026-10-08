@@ -13,7 +13,7 @@ extends MeshInstance3D
 ## - Colonies : l'eau passe *sous* les colonies (tronçons coupés dans l'emprise des maquettes, lit
 ##   effacé) ; ponts-portes aux murs (`RiverCrossings`).
 ## - Zones personnalisées (`river_styles.json` → `custom_zones`, ex. Paris pour le lot L1) : rien
-##   n'est dessiné dedans ; voir `docs/wip/v4-fleuves-forets.md`.
+##   n'est dessiné dedans ; voir `docs/archive/chantiers.md`.
 ## Repli sans `rivers_render.json` : rubans depuis `MapData.rivers` (largeur selon l'importance).
 
 const MAJOR_IMPORTANCE := 3
@@ -206,7 +206,7 @@ func _load_display() -> void:
 	display = {}
 	var path := map_data.map_dir.path_join(DISPLAY_FILE)
 	if FileAccess.file_exists(path):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var parsed: Variant = DataFile.parse_file(path)
 		if parsed is Dictionary:
 			display = parsed
 	major_min_px = float(display.get("major_min_px", major_min_px))
@@ -224,7 +224,7 @@ func _load_river_names() -> Dictionary:
 	var path := map_data.map_dir.path_join("river_names.json")
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	return parsed.get("names", {}) if parsed is Dictionary else {}
 
 
@@ -234,7 +234,7 @@ func _load_rivers() -> void:
 	var path := map_data.map_dir.path_join(RENDER_FILE)
 	var parsed: Variant = null
 	if FileAccess.file_exists(path):
-		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		parsed = DataFile.parse_file(path)
 	if parsed is Dictionary:
 		bank_px = float(parsed.get("bank_px", 1.1))
 		# GC (ADR 0158) : la maquette d'une ville emblématique est grossie (`landmark_scale`) ; le

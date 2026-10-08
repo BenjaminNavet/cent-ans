@@ -68,7 +68,7 @@ fn lab_sim(seed: u64) -> BattleSim {
     let mut sim = BattleSim::new(
         setup(
             units(
-                &data,
+                data,
                 &[
                     "unit_men_at_arms_foot",
                     "unit_longbowmen",
@@ -76,7 +76,7 @@ fn lab_sim(seed: u64) -> BattleSim {
                     "unit_crossbowmen",
                 ],
             ),
-            units(&data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
+            units(data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
             None,
         ),
         seed,
@@ -171,8 +171,8 @@ fn guard_skirmish_and_melee_exclude_each_other() {
 fn modes_can_be_set_while_deploying() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_urban_militia"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_urban_militia"]),
         None,
     );
     battle.player_side = Some(SideId::Attacker);
@@ -431,10 +431,10 @@ fn battered(data: &GameData, id: u32, breach: bool, seconds: f64) -> f64 {
 fn breach_batters_walls_harder_the_mangonel_less_so() {
     let data = data();
     let seconds = 300.0;
-    let trebuchet = battered(&data, 1, false, seconds);
-    let trebuchet_breach = battered(&data, 1, true, seconds);
-    let mangonel = battered(&data, 2, false, seconds);
-    let mangonel_breach = battered(&data, 2, true, seconds);
+    let trebuchet = battered(data, 1, false, seconds);
+    let trebuchet_breach = battered(data, 1, true, seconds);
+    let mangonel = battered(data, 2, false, seconds);
+    let mangonel_breach = battered(data, 2, true, seconds);
     assert!(trebuchet > 0.0 && mangonel > 0.0);
     let heavy = trebuchet_breach / trebuchet;
     let light = mangonel_breach / mangonel;
@@ -452,7 +452,7 @@ fn breach_batters_walls_harder_the_mangonel_less_so() {
 /// (none in range) with a garrison regiment (3) 150 m in front of it.
 fn engine_shots_at_men(breach: bool) -> Vec<sim_battle::ShotEvent> {
     let data = data();
-    let (mut sim, piece) = siege_sim(&data, breach);
+    let (mut sim, piece) = siege_sim(data, breach);
     let works = sim.siege().unwrap().clone();
     let (mx, mz) = works.pieces[piece].midpoint();
     let (nx, nz) = works.pieces[piece].outward();
@@ -471,7 +471,7 @@ fn engine_shots_at_men(breach: bool) -> Vec<sim_battle::ShotEvent> {
 #[test]
 fn breach_is_for_siege_engines_and_never_shoots_men() {
     let data = data();
-    let (mut sim, _) = siege_sim(&data, true);
+    let (mut sim, _) = siege_sim(data, true);
     // Not for the foot, nor outside a siege (see above).
     assert!(sim
         .apply_command(set_mode(vec![0], UnitMode::Breach, true), None)
@@ -642,7 +642,7 @@ fn defensive_sim(seed: u64) -> BattleSim {
         "unit_men_at_arms_foot",
         "unit_mounted_archers",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
@@ -686,86 +686,3 @@ fn the_defensive_ai_guards_its_line_and_skirmishes_its_light_shooters() {
 }
 
 // ----- reference battles (probe) -------------------------------------------
-
-fn historical_start(id: &str, seed: u64) -> BattleSim {
-    use std::path::PathBuf;
-    static DATA: std::sync::OnceLock<GameData> = std::sync::OnceLock::new();
-    let data = DATA.get_or_init(data);
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../../data/battle_maps")
-        .join(format!("{id}.json"));
-    let map =
-        sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap()).unwrap();
-    let mut setup = map
-        .battle_setup(
-            &data.unit_types,
-            data.battle_orders.values().cloned().collect(),
-            Some(data.battle_standard_rules.clone()),
-            None,
-        )
-        .unwrap();
-    // CB4: the regiments' abilities, as in the game.
-    setup.abilities = data.battle_abilities.values().cloned().collect();
-    map.start(setup, seed).unwrap()
-}
-
-/// Probe (ignored): the margins of the reference battles, as asserted by
-/// `ep7_historical` (English wins over seeds 1-20) and `eq7_cavalry`
-/// (French wins over seeds 0-15).
-/// `cargo test --release -p sim-battle --test cb2_modes -- --ignored --nocapture margins`
-#[test]
-#[ignore = "probe"]
-fn reference_margins() {
-    for id in ["crecy", "azincourt", "poitiers"] {
-        let wins = (1..21)
-            .filter(|&seed| {
-                let mut sim = historical_start(id, seed);
-                let steps = (2400.0 / DT).round() as u64;
-                for _ in 0..steps {
-                    if sim.is_finished() {
-                        break;
-                    }
-                    sim.step();
-                }
-                sim.winner() == Some(SideId::Defender)
-            })
-            .count();
-        println!("{id}: English {wins}/20");
-    }
-    let data = data();
-    let french = (0..16)
-        .filter(|&seed| {
-            let mut battle = setup(
-                units(
-                    &data,
-                    &[
-                        "unit_knights",
-                        "unit_men_at_arms_foot",
-                        "unit_men_at_arms_foot",
-                        "unit_crossbowmen",
-                        "unit_crossbowmen",
-                        "unit_knights",
-                    ],
-                ),
-                units(
-                    &data,
-                    &[
-                        "unit_men_at_arms_foot",
-                        "unit_longbowmen",
-                        "unit_longbowmen",
-                        "unit_knights",
-                    ],
-                ),
-                None,
-            );
-            battle.village = Some(false);
-            battle.abilities = data.battle_abilities.values().cloned().collect();
-            let mut sim = BattleSim::new(battle, seed).unwrap();
-            sim.set_ai(SideId::Attacker, true);
-            sim.set_ai(SideId::Defender, true);
-            run_to_end(&mut sim);
-            sim.winner() == Some(SideId::Attacker)
-        })
-        .count();
-    println!("eq7: French {french}/16");
-}

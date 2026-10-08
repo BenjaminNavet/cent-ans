@@ -63,17 +63,7 @@ static func shared() -> TreeSpecies:
 ## `data/art/tree_species.json` : dossier de données du jeu (`MapPaths.data_dir`), puis `data/`
 ## du dépôt ; "" si absent.
 static func data_path() -> String:
-	var dirs: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		dirs.append(str(paths.get("data_dir")))
-	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in dirs:
-		var path := dir.path_join(DATA_FILE)
-		if FileAccess.file_exists(path):
-			return path
-	return ""
+	return DataFile.path_of(DATA_FILE) if DataFile.exists(DATA_FILE) else ""
 
 
 ## Tests : oublie la table partagée (rechargée au prochain `shared`).
@@ -85,7 +75,7 @@ func load_file(path: String) -> bool:
 	ok = false
 	if path == "" or not FileAccess.file_exists(path):
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	return parsed is Dictionary and load_dict(parsed)
 
 

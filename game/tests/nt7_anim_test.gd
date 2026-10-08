@@ -3,7 +3,6 @@ extends SceneTree
 ## Lot NT7 : fondu entre clips successifs d'un cycle de mêlée et clips propres des rôles.
 ## Vérifie :
 ## - la durée du fondu vient des données (0,15-0,25 s) et arrive au matériau (`cycle_blend`),
-##   0 avec `--no-nt7` (banc A/B) ;
 ## - le miroir GDScript du tirage du shader (`cycle_blend_at`) : au changement de clip, le
 ##   fondu est actif (clip précédent distinct, poids strictement entre 0 et 1), le poids croît
 ##   jusqu'à 1 à la fin de la fenêtre ; aucun fondu quand le tirage redonne le même clip ;
@@ -11,7 +10,7 @@ extends SceneTree
 ##   rigs fins, dans les jeux des rôles, et choisis par état (charge, victoire, attente) ;
 ## - les servants alternent leurs gestes et le chargeur de trébuchet prend la pierre lourde ;
 ## - avec `--coarse-figures` (kit sans ces clips) : repli sur les jeux EP5 / SG3.
-## Usage : godot --headless --path game --script res://tests/nt7_anim_test.gd [-- --coarse-figures | --no-nt7]
+## Usage : godot --headless --path game --script res://tests/nt7_anim_test.gd [-- --coarse-figures]
 
 const HUMAN_NEW := ["std_charge", "std_plant", "std_victory", "drum_run", "drum_victory", "horn_run", "horn_victory", "load_heavy", "push_shoulder"]
 const CAVALRY_NEW := ["c_std_charge"]
@@ -27,19 +26,18 @@ func _check(cond: bool, what: String) -> void:
 
 func _init() -> void:
 	var fine := BattleSkinned.fine_enabled()
-	var no_nt7 := "--no-nt7" in OS.get_cmdline_user_args()
-	_check_blend(no_nt7)
+	_check_blend()
 	_check_mirror()
 	_check_roles(fine)
 	_check_crew(fine)
-	print("NT7 anim (fine=%s, no_nt7=%s): %s" % [fine, no_nt7, "OK" if ok else "FAIL"])
+	print("NT7 anim (fine=%s): %s" % [fine, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
 
 
-func _check_blend(no_nt7: bool) -> void:
+func _check_blend() -> void:
 	var data := float(BattleSkinned.animation_settings().get("cycle_blend_s", -1.0))
 	_check(data >= 0.15 and data <= 0.25, "cycle_blend_s hors de 0,15-0,25 s : %.3f" % data)
-	var expected := 0.0 if no_nt7 else data
+	var expected := data
 	_check(is_equal_approx(BattleSkinned.cycle_blend_s(), expected), "cycle_blend_s() = %.3f" % BattleSkinned.cycle_blend_s())
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER

@@ -373,10 +373,7 @@ impl CampaignState {
                 let army = self.armies.get(id)?;
                 Some(Reinforcement {
                     army: id.to_string(),
-                    faction_name: data.factions.get(&army.faction).map_or_else(
-                        || army.faction.to_string(),
-                        |f| f.short_or_display_name().to_owned(),
-                    ),
+                    faction_name: data.faction_name(&army.faction),
                     soldiers: army.total_strength(),
                     regiments: army.units.len() as u32,
                     general: army
@@ -401,7 +398,7 @@ impl CampaignState {
             return Err(BattleRequestError::CannotWithdraw(index));
         }
         let request: BattleRequest = self.pending_battles.remove(index);
-        let place = crate::siege::settlement_name(data, &request.location);
+        let place = data.settlement_name(&request.location);
         let mut event = if request.siege {
             GameEvent::new(
                 EventKind::Battle,

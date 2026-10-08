@@ -6,7 +6,7 @@
 use godot::prelude::*;
 use sim_campaign::sea_lanes::{sea_lanes, SeaLaneView};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn lane_dict(data: &data_model::GameData, lane: &SeaLaneView) -> VarDictionary {
     let settlement_name = |id: &data_model::SettlementId| {
@@ -58,7 +58,7 @@ impl CampaignSim {
     /// blockade, storm_loss_percent, trade_season_factor, trade_routes}`.
     #[func]
     fn get_sea_lanes(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         sea_lanes(state, data, &state.player_faction)
@@ -88,7 +88,7 @@ impl CampaignSim {
     /// when the army is not in a port or no voyage reaches `to_port`).
     #[func]
     fn sea_voyage(&self, army_id: GString, to_port: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let Some(army) =
@@ -113,7 +113,7 @@ impl CampaignSim {
     /// `(x, y)` (a right click on the water); "" when none.
     #[func]
     fn sea_port_near(&self, army_id: GString, x: f64, y: f64) -> GString {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return GString::new();
         };
         let Some(army) =

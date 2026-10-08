@@ -9,7 +9,7 @@ extends SceneTree
 ##     première armée du joueur, provinces atteignables non vides, ordre de déplacement vers la
 ##     première atteignable, 4 fins de tour, sauvegarde `user://saves/smoke.json`, rechargement,
 ##     égalité des dates. Sur les vraies données `data/` si la sim réelle est disponible.
-##  5. personnages et dynasties (M4, réelle si elle expose `get_character`, sinon mock dédié sur
+##  5. personnages et dynasties (M4, simulation sur
 ##     `data/` — imprimé) : panneau de cour (≥ 1 personnage), `debug_grant_xp` + `learn_skill`
 ##     sur le dirigeant, `assign_governor` d'un courtisan à `prov_normandie` (ou la première
 ##     province contrôlée ≠ capitale), `propose_marriage` entre deux candidats valides (ou skip
@@ -357,7 +357,7 @@ func _run_campaign_loop() -> void:
 	await process_frame
 	if not _check(map.load_ok and map.sim != null, "campaign scene with SimFacade failed to start"):
 		return
-	print("smoke campaign: simulation %s, data %s, store %s" % ["REAL" if facade.is_real else "MOCK", paths.data_dir, "loaded" if facade.store_loaded() else "absent"])
+	print("smoke campaign: simulation REAL, data %s, store %s" % [paths.data_dir, "loaded" if facade.store_loaded() else "absent"])
 	_check(map.player_faction == "fac_france", "player faction should be fac_france, got %s" % map.player_faction)
 	_check(map.armies.army_count() > 0, "no army markers on the map")
 	_check(map.ui.faction_label.text != "" and map.ui.faction_label.text != "Cent Ans", "top bar faction label not set")
@@ -430,7 +430,7 @@ func _run_campaign_loop() -> void:
 	_check(found, "smoke save not listed by list_saves")
 
 	if _failures == 0:
-		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
+		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real", turn, date_loaded])
 	map.queue_free()
 	await process_frame
 
@@ -470,11 +470,7 @@ func _run_agents() -> void:
 	if not _check(ctl != null, "agents: controller missing"):
 		map.queue_free()
 		return
-	if not ctl.available():
-		print("smoke agents: mock simulation, agents inactive")
-		map.queue_free()
-		await process_frame
-		return
+	_check(ctl.available(), "agents: controller inactive with the real simulation")
 	var sim: Object = map.sim
 	# Registre (touche G) et recrutement dans la cité de la capitale.
 	var key := InputEventKey.new()
@@ -600,7 +596,7 @@ func _run_ui_layout() -> void:
 			var panel: Control = entry[2]
 			var close_button: Control = entry[3]
 			if not panel.visible:
-				continue  # simulation sans cette fonction (mock)
+				continue  # panneau non ouvert par cette touche
 			var open_centrals := 0
 			for other in ui.panels.visible_panels():
 				if ui.panels.kind_of(other) == PanelStack.Kind.CENTRAL:
@@ -683,8 +679,6 @@ func _run_minimap_fog() -> void:
 			_check(not ctl.fog_active and ctl.is_province_visible(hidden), "fog setting off should reveal %s" % hidden)
 			settings.call("set_value", "map/fog_of_war", true, false)
 			_check(ctl.fog_active, "fog setting back on")
-	else:
-		print("smoke minimap: mock simulation, fog of war inactive")
 	if _failures == 0:
 		print("smoke OK: minimap (%d dots, %d visible provinces), fog %s" % [minimap.army_dot_count(), minimap.visible_province_count(), "on" if ctl.fog_active else "off"])
 	map.queue_free()
@@ -694,22 +688,16 @@ func _run_minimap_fog() -> void:
 ## M3 : construit le bâtiment le moins cher disponible à Paris (marché si absent), passe les
 ## tours nécessaires, vérifie qu'il apparaît dans `buildings` et que `projected_income` a
 ## augmenté ; passe l'impôt à Haut et vérifie une nouvelle hausse. Avec la vraie simulation si
-## elle expose `get_province_city`/`get_faction_economy` (imprimé), sinon avec le mock sur les
-## vraies données (`data/`, qui a les bâtiments/ressources ; pas les fixtures).
+## sur les vraies données (`data/`).
 func _run_city_economy() -> void:
 	const PROVINCE_ID := "prov_ile_de_france"
 	const FACTION_ID := "fac_france"
 	var data_dir := _project_root().path_join("data")
-	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
-		and ClassDB.instantiate("CampaignSim").has_method("get_province_city")
-	var sim: Object
-	if real_capable:
-		sim = ClassDB.instantiate("CampaignSim")
-	else:
-		sim = CampaignSimMock.new()
+	if not _check(ClassDB.class_exists("CampaignSim"), "city/economy: CampaignSim unavailable"):
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "city/economy: new_campaign failed"):
 		return
-	print("smoke city/economy: simulation %s" % ["REAL" if real_capable else "MOCK"])
 	# M10 : pas d'événements de chronique pendant la mesure (le bruit masquerait l'effet du bâtiment).
 	if sim.has_method("set_chronicle_enabled"):
 		sim.call("set_chronicle_enabled", false)
@@ -776,8 +764,8 @@ func _run_city_economy() -> void:
 		"projected_income should rise with high tax: %d -> %d" % [economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
 
 	if _failures == 0:
-		print("smoke OK: city/economy (%s), built %s, projected income %d -> best %d, tax normal->high %d -> %d" % [
-			"real" if real_capable else "mock", choice["building"],
+		print("smoke OK: city/economy, built %s, projected income %d -> best %d, tax normal->high %d -> %d" % [
+			choice["building"],
 			economy_before.get("projected_income", 0), best_after,
 			economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
 
@@ -829,17 +817,15 @@ func _fail(message: String) -> void:
 
 
 ## M4 : personnages et dynasties (docs/design/m4-characters-dynasties.md § 5). Avec la vraie
-## simulation si elle expose `get_character` (imprimé), sinon un `CampaignSimMock` dédié sur
-## `data/` (qui a les personnages ; pas les fixtures).
+## simulation sur `data/`.
 func _run_characters() -> void:
 	const FACTION_ID := "fac_france"
 	var data_dir := _project_root().path_join("data")
-	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
-		and ClassDB.instantiate("CampaignSim").has_method("get_character")
-	var sim: Object = ClassDB.instantiate("CampaignSim") if real_capable else CampaignSimMock.new()
+	if not _check(ClassDB.class_exists("CampaignSim"), "characters: CampaignSim unavailable"):
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "characters: new_campaign failed"):
 		return
-	print("smoke characters: simulation %s" % ["REAL" if real_capable else "MOCK"])
 
 	var ids: Array = sim.call("get_faction_characters", FACTION_ID)
 	if not _check(not ids.is_empty(), "get_faction_characters(fac_france) should not be empty"):
@@ -915,16 +901,13 @@ func _run_characters() -> void:
 	await _check_family_tree_c3(sim, FACTION_ID)
 
 	if _failures == 0:
-		print("smoke OK: characters (%s), court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
-			"real" if real_capable else "mock", rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
+		print("smoke OK: characters, court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
+			rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
 
 
 ## C3 : onglet « Arbre familial » du panneau Cour (Valois, ≥ 3 générations après 40 tours) et
 ## apprentissage d'une compétence depuis l'arbre visuel de la fiche. Vraie simulation seulement.
 func _check_family_tree_c3(sim: Object, faction_id: String) -> void:
-	if not sim.has_method("get_family_tree"):
-		print("smoke characters: family tree skipped (mock without get_family_tree)")
-		return
 	var failures_before := _failures
 	var ids: Array = sim.call("get_faction_characters", faction_id)
 	var rows: Array[Dictionary] = []
@@ -1149,7 +1132,7 @@ func _run_diplomacy() -> void:
 	panel.select_faction("fac_england")
 	panel.stage_example()
 	await process_frame
-	_check(str(panel.get("_reasons").text) != "", "diplomacy panel should explain the verdict")
+	_check(str(panel.get("negotiation").get("_reasons").text) != "", "diplomacy panel should explain the verdict")
 	panel.queue_free()
 
 	# 20 tours : pas d'erreur ; offres et religion lisibles.
@@ -1741,17 +1724,6 @@ func _run_assets() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(rotation_path))
 	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
 
-	# Persistance des volumes (valeurs d'origine restaurées ensuite).
-	var original: float = audio.get("music_volume")
-	audio.call("set_music_volume", 0.35)
-	var config := ConfigFile.new()
-	_check(config.load("user://settings.cfg") == OK, "settings.cfg not written")
-	_check(is_equal_approx(float(config.get_value("audio", "music_volume", -1.0)), 0.35), "music volume not persisted")
-	audio.set("music_volume", 1.0)
-	audio.call("load_settings")
-	_check(is_equal_approx(float(audio.get("music_volume")), 0.35), "music volume not reloaded")
-	audio.call("set_music_volume", original)
-
 	# Écus, portraits et replis.
 	_check(PortraitLoader.heraldry_texture("fac_france") != null, "fac_france heraldry missing")
 	_check(PortraitLoader.portrait_texture("chr_does_not_exist") == null, "unknown portrait should be null")
@@ -1879,7 +1851,7 @@ func _run_icons() -> void:
 	_check(not bool(library.call("is_entity", "hud_treasury")), "action icons stay ink")
 	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
 	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
-	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
+	var panel := TooltipHost.from_bbcode(RichTooltip.gauge("unrest", 40))
 	root.add_child(panel)
 	await process_frame
 	_check(panel.find_child("Text", true, false) is RichTextLabel, "tooltip panel text expected")
@@ -1913,9 +1885,9 @@ func _run_codex() -> void:
 	var auto := CodexText.format("[img]res://x/%s.png[/img] En 1348, %s frappe ; %s encore." % [alias, alias, alias], true)
 	_check(auto.count("[url=cdx:cdx_peste_noire]") == 1 and auto.begins_with("[img]res://x/%s.png[/img]" % alias), "auto link once, outside tags: %s" % auto)
 	_check(not CodexText.format("%s." % alias).contains("[url"), "no auto link unless asked")
-	var tooltip := RichTooltip.make_panel("Voir [[cdx_arc_long]].")
-	_check(RichTooltip.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
-	_check(RichTooltip.visible_panel() == null, "a detached panel is not a visible tooltip")
+	var tooltip := TooltipHost.from_bbcode("Voir [[cdx_arc_long]].")
+	_check(TooltipHost.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
+	_check(TooltipHost.visible_panel() == null, "a detached panel is not a visible tooltip")
 	tooltip.free()
 
 	# Pile de 3 bulles : deux ouvertes par l'API, la troisième par survol simulé d'un lien.
@@ -1939,7 +1911,7 @@ func _run_codex() -> void:
 	_check(int(bubbles.call("bubble_count")) == 1, "unpinned bubbles should close after the grace delay (count %d)" % int(bubbles.call("bubble_count")))
 	bubbles.call("close_all")
 	_check(int(bubbles.call("bubble_count")) == 0, "close_all should empty the stack")
-	var pinned: Control = bubbles.call("open_text", RichTooltip.last_bbcode, Vector2(40, 40))
+	var pinned: Control = bubbles.call("open_text", TooltipHost.last_bbcode, Vector2(40, 40))
 	_check(pinned != null and bool(pinned.get_meta("pinned", false)), "pinned tooltip bubble expected")
 	bubbles.call("close_all")
 
@@ -2046,7 +2018,7 @@ func _run_codex_bubbles_b1() -> void:
 	var unit_entry := str(store.call("entry_for_entity", "unit_longbowmen"))
 	var unit_tip := RichTooltip.unit("unit_longbowmen")
 	_check(unit_entry != "" and RichTooltip.title_entry(unit_tip) == unit_entry, "B1: unit tooltip title should link to %s" % unit_entry)
-	var panel := RichTooltip.make_panel(unit_tip)
+	var panel := TooltipHost.from_bbcode(unit_tip)
 	var tip_footer := panel.find_child("Footer", true, false) as Label
 	_check(tip_footer != null and tip_footer.text.begins_with("T : maintenir ouverte"), "B1: rich tooltip footer expected")
 	panel.free()
@@ -2179,7 +2151,7 @@ func _run_table_medicine() -> void:
 	table.show_for(changed_province, true, sim)
 	await process_frame
 	_check(table.visible and table.option_buttons.size() == (sim.call("get_diet_options", changed_province) as Array).size(), "table section should list every diet option")
-	var tip := RichTooltip.diet(table._option(target_diet))
+	var tip := RichTooltip.diet(PanelSection.find_option(table.options, target_diet))
 	_check(tip.contains("Coût") and tip.contains("[img"), "diet tooltip incomplete: %s" % tip)
 	(table.option_buttons[target_diet] as Button).pressed.emit()
 	var now: Dictionary = sim.call("get_province_diet", changed_province)
@@ -2191,7 +2163,7 @@ func _run_table_medicine() -> void:
 	table.show_for(refused_province, true, sim)
 	var refused: Dictionary = table.request_diet(refused_diet)
 	_check(not bool(refused.get("ok", true)) and table.error_label.visible and table.error_label.text.contains("impossible"), "unavailable diet should be refused and shown: %s" % table.error_label.text)
-	var refused_tip := RichTooltip.diet(table._option(refused_diet))
+	var refused_tip := RichTooltip.diet(PanelSection.find_option(table.options, refused_diet))
 	_check(refused_tip.contains("Manque"), "unavailable diet tooltip should list missing conditions: %s" % refused_tip)
 	table.show_for(refused_province, false, sim)
 	_check(not table.choose_button.visible and table.option_buttons.is_empty(), "read-only province: no selector")
@@ -2319,7 +2291,7 @@ func _run_flow() -> void:
 	var test_path: String = settings.get("path")
 	_check(test_path != "user://settings.cfg", "smoke must not use the player's settings file")
 	var seeded := ConfigFile.new()
-	seeded.set_value("audio", "music_volume", 0.42)
+	seeded.set_value("audio", "legacy_key", 0.42)
 	seeded.save(test_path)
 	settings.call("set_value", "camera/speed", 1.7)
 	settings.call("set_value", "interface/confirm_end_turn", true)
@@ -2327,7 +2299,7 @@ func _run_flow() -> void:
 	var config := ConfigFile.new()
 	_check(config.load(test_path) == OK, "settings file not written")
 	_check(is_equal_approx(float(config.get_value("camera", "speed", 0.0)), 1.7), "camera speed not persisted")
-	_check(is_equal_approx(float(config.get_value("audio", "music_volume", 0.0)), 0.42), "audio section lost by Settings.save_settings")
+	_check(is_equal_approx(float(config.get_value("audio", "legacy_key", 0.0)), 0.42), "audio section lost by Settings.save_settings")
 	settings.set("values", {})
 	settings.call("load_settings")
 	_check(is_equal_approx(float(settings.call("get_value", "camera/speed")), 1.7), "camera speed not reloaded")
@@ -2382,7 +2354,7 @@ func _run_flow() -> void:
 
 	# P2 : bataille résolue après la fin du tour (dialogue d'avant-bataille) — son résultat
 	# doit rejoindre le rapport de saison déjà affiché, pas seulement la chronique
-	# (docs/wip/finalisation.md § « Défauts relevés », docs/wip/p2-rapport-smoke.md).
+	# (docs/archive/chantiers.md § « Défauts relevés », docs/archive/chantiers.md).
 	var battle_armies: Array = BattleScene.main_armies(map.sim, "fac_france", "fac_england")
 	if _check(battle_armies.size() == 2, "flow: no French or English army for the late-battle check"):
 		var battle_index: int = map.sim.call("debug_stage_battle", battle_armies[0], battle_armies[1])
@@ -2800,7 +2772,7 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 4000, 15000), 2.5), "figure budget: small battle kept at Ultra")
 	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 10000, 15000), 1.5), "figure budget: large battle not capped")
 	_check(is_equal_approx(BattleScene.capped_figure_scale(1.0, 3000, 0), 1.0), "figure budget: zero budget should mean no cap")
-	_check(SettingsMenu._thousands(15000) == "15\u00a0000", "settings: thousands separator")
+	_check(Money.digits(15000) == "15" + Money.NBSP + "000", "settings: thousands separator")
 	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
 
 

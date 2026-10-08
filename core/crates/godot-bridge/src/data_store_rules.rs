@@ -20,7 +20,10 @@ impl GameDataStore {
         for (name, value) in sim_campaign::rule_constants::rule_constants(data) {
             dict.set(name, value);
         }
-        dict.set("exhausted_fatigue", sim_battle::sim::EXHAUSTED_FATIGUE);
+        dict.set(
+            "exhausted_fatigue",
+            sim_battle::MoraleRules::bundled().exhausted_fatigue,
+        );
         dict.set(
             "breach_open_threshold",
             f64::from(sim_battle::siege::BREACH_ONE_GAP),

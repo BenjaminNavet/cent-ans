@@ -10,10 +10,6 @@ use serde::{Deserialize, Serialize};
 use crate::common::UnitCategory;
 use crate::entities::settlement::SettlementKind;
 
-/// The rules file as bundled at build time: the fallback when
-/// `data/rules/replenishment.json` is absent (test fixtures).
-const BUNDLED: &str = include_str!("../../../../../data/rules/replenishment.json");
-
 /// Contents of `data/rules/replenishment.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -24,11 +20,7 @@ pub struct ReplenishmentRules {
     pub description: Option<String>,
 }
 
-impl Default for ReplenishmentRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED).expect("bundled data/rules/replenishment.json is valid")
-    }
-}
+crate::bundled_rules!(ReplenishmentRules, "rules/replenishment.json", default);
 
 /// Seasonal replenishment of a field army: percent of its missing men.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

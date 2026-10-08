@@ -574,15 +574,7 @@
                   "minimum": 0,
                   "maximum": 1
                 },
-                "rest": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  },
-                  "minItems": 3,
-                  "maxItems": 3,
-                  "description": "Place de repos (x, z, cap en degrés) quand le servant ne travaille pas : hors du souffle de la bouche."
-                }
+                "rest": { "description": "Place de repos (x, z, cap en degrés) quand le servant ne travaille pas : hors du souffle de la bouche.", "$ref": "common.schema.json#/$defs/vec3" }
               },
               "required": [
                 "x",

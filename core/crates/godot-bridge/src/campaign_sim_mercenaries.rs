@@ -5,7 +5,7 @@
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -21,7 +21,7 @@ impl CampaignSim {
     /// unknown army.
     #[func]
     fn get_mercenaries(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -73,19 +73,14 @@ impl CampaignSim {
     /// `hire_mercenary` order): `{ok, error}`.
     #[func]
     fn hire_mercenary(&mut self, army_id: GString, unit_type: GString) -> VarDictionary {
-        if self.refuse_while_turn_pending("hire_mercenary") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
-        }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
-        };
-        let Some(army) = ArmyId::parse(&army_id.to_string()) else {
-            return order_result(Err(format!("armée inconnue : {army_id}")));
-        };
-        let Ok(unit) = data_model::UnitTypeId::new(unit_type.to_string()) else {
-            return order_result(Err(format!("type d'unité inconnu : {unit_type}")));
-        };
-        let order = Order::HireMercenary { army, unit };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("hire_mercenary", || {
+            let Some(army) = ArmyId::parse(&army_id.to_string()) else {
+                return Err(format!("armée inconnue : {army_id}"));
+            };
+            let Ok(unit) = data_model::UnitTypeId::new(unit_type.to_string()) else {
+                return Err(format!("type d'unité inconnu : {unit_type}"));
+            };
+            Ok(Order::HireMercenary { army, unit })
+        })
     }
 }

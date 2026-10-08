@@ -16,9 +16,8 @@ static var _town_scale: float = -1.0
 static func town_scale() -> float:
 	if _town_scale < 0.0:
 		_town_scale = maxf(float(ArmyFigures.map_settings().get("town_scale", 1.0)), 1.0)
-		for argument in OS.get_cmdline_user_args():
-			if argument.begins_with("--town-scale="):
-				_town_scale = maxf(argument.get_slice("=", 1).to_float(), 1.0)
+		if CmdArgs.has("--town-scale"):
+			_town_scale = maxf(CmdArgs.number("--town-scale"), 1.0)
 	return _town_scale
 
 
@@ -26,9 +25,7 @@ static func town_scale() -> float:
 ## à défaut le grossissement lui-même ; `--town-range-scale=<k>` le remplace.
 static func town_range_scale() -> float:
 	var k := float(ArmyFigures.map_settings().get("town_range_scale", town_scale()))
-	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--town-range-scale="):
-			k = argument.get_slice("=", 1).to_float()
+	k = CmdArgs.number("--town-range-scale", k)
 	return maxf(k, 1.0)
 
 

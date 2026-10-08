@@ -34,7 +34,7 @@
     "template": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "id": { "$ref": "common.schema.json#/$defs/snake_id" },
         "kind": {
           "enum": ["take_province", "win_battle", "construct_building", "recruit_units", "conclude_treaty", "hold_place"],
           "description": "take_province : prendre une province voisine tenue par un ennemi en guerre ; win_battle : gagner n batailles ; construct_building : achever un bâtiment disponible ; recruit_units : recruter ou engager n unités ; conclude_treaty : paix, alliance ou vassalité nouvelle ; hold_place : garder une place frontalière menacée jusqu'à l'échéance."

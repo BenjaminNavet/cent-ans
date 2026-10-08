@@ -76,7 +76,7 @@ func _ready() -> void:
 	if ClassDB.class_exists("BattleSim"):
 		_sim = ClassDB.instantiate("BattleSim")
 		rules = _sim.call("custom_rules")
-		factions = _sim.call("custom_factions", data_dir())
+		factions = _sim.call("custom_factions", DataFile.data_dir())
 	config = _initial_config()
 	_build()
 	_sync_controls()
@@ -85,9 +85,9 @@ func _ready() -> void:
 	UiMotion.fade_in(self)
 
 
-## Dossier des données (mêmes règles que les batailles historiques).
+## Dossier `data/` (utilisé par les tests).
 static func data_dir() -> String:
-	return HistoricalBattlesMenu.data_dir()
+	return DataFile.data_dir()
 
 
 ## Dernière composition gardée dans les réglages ({} si aucune ou illisible).
@@ -161,21 +161,16 @@ func _has_faction(id: String) -> bool:
 
 
 func _build() -> void:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
+	var box := UiBuild.vbox(8)
 	add_child(box)
-	var title := Label.new()
-	title.text = "Bataille personnalisée"
+	var title := UiBuild.label("Bataille personnalisée")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Chaque camp achète ses unités sur son budget de points. Hors campagne : le résultat n'est pas conservé."
+	var hint := UiBuild.label("Chaque camp achète ses unités sur son budget de points. Hors campagne : le résultat n'est pas conservé.")
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(hint)
-	var sides := HBoxContainer.new()
-	sides.add_theme_constant_override("separation", 16)
-	box.add_child(sides)
+	var sides := UiBuild.hbox(16, box)
 	for side in SIDES:
 		sides.add_child(_build_side(side))
 	box.add_child(_build_field())
@@ -185,43 +180,35 @@ func _build() -> void:
 	UiType.apply(errors_label, UiType.CAPTION)
 	errors_label.modulate = Color(1.0, 0.72, 0.6)
 	box.add_child(errors_label)
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_END
-	row.add_theme_constant_override("separation", 8)
 	box.add_child(row)
 	hold_check = CheckBox.new()
 	hold_check.name = "HoldOpponent"
 	hold_check.text = "Adversaire : tenir sa position"
-	RichTooltip.attach_plain(hold_check, "custom_battle_hold")
+	TooltipHost.attach_plain(hold_check, "custom_battle_hold")
 	hold_check.toggled.connect(func(on: bool) -> void:
 		if not _refreshing:
 			config["hold_opponent"] = on)
 	row.add_child(hold_check)
-	var close_button := Button.new()
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	row.add_child(close_button)
-	launch_button = Button.new()
+	launch_button = UiBuild.button("Lancer la bataille")
 	launch_button.name = "LaunchButton"
-	launch_button.text = "Lancer la bataille"
 	launch_button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, launch))  # NT4 : invite au didacticiel
 	row.add_child(launch_button)
 	launch_button.grab_focus.call_deferred()
 
 
 func _build_side(side: String) -> Control:
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(6)
 	column.name = "Side_" + side
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation", 6)
-	var heading := Label.new()
-	heading.text = SIDE_TITLES[side]
+	var heading := UiBuild.label(SIDE_TITLES[side])
 	UiType.apply(heading, UiType.HEADING)
 	column.add_child(heading)
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 8)
-	column.add_child(top)
+	var top := UiBuild.hbox(8, column)
 	var faction := OptionButton.new()
 	faction.name = "Faction"
 	faction.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -231,9 +218,8 @@ func _build_side(side: String) -> Control:
 	faction.item_selected.connect(func(index: int) -> void: set_faction(side, str(factions[index]["id"])))
 	top.add_child(faction)
 	faction_options[side] = faction
-	var budget_label := Label.new()
-	budget_label.text = "Budget"
-	RichTooltip.attach_plain(budget_label, "custom_battle_budget")
+	var budget_label := UiBuild.label("Budget")
+	TooltipHost.attach_plain(budget_label, "custom_battle_budget")
 	budget_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	top.add_child(budget_label)
 	var budget := SpinBox.new()
@@ -248,7 +234,7 @@ func _build_side(side: String) -> Control:
 	tech_button.name = "Technologies"
 	tech_button.flat = false
 	tech_button.text = "Technologies"
-	RichTooltip.attach_plain(tech_button, "custom_battle_technologies")
+	TooltipHost.attach_plain(tech_button, "custom_battle_technologies")
 	var tech_popup := tech_button.get_popup()
 	tech_popup.hide_on_checkable_item_selection = false
 	tech_popup.index_pressed.connect(func(index: int) -> void: toggle_technology(side, str(tech_popup.get_item_metadata(index))))
@@ -259,16 +245,12 @@ func _build_side(side: String) -> Control:
 	UiType.apply(points, UiType.BODY)
 	column.add_child(points)
 	points_labels[side] = points
-	var lists := HBoxContainer.new()
-	lists.add_theme_constant_override("separation", 8)
-	column.add_child(lists)
+	var lists := UiBuild.hbox(8, column)
 	roster_boxes[side] = _list_column(lists, "Roster (clic : acheter)")
 	army_boxes[side] = _list_column(lists, "Armée (clic : retirer)")
-	var clear := Button.new()
+	var clear := UiBuild.button("Vider l'armée", func() -> void: clear_army(side))
 	clear.name = "Clear"
-	clear.text = "Vider l'armée"
 	clear.size_flags_horizontal = Control.SIZE_SHRINK_END
-	clear.pressed.connect(func() -> void: clear_army(side))
 	column.add_child(clear)
 	return column
 
@@ -277,8 +259,7 @@ func _list_column(parent: Control, heading_text: String) -> VBoxContainer:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
-	var heading := Label.new()
-	heading.text = heading_text
+	var heading := UiBuild.label(heading_text)
 	UiType.apply(heading, UiType.CAPTION)
 	heading.modulate = Color(1, 1, 1, 0.75)
 	column.add_child(heading)
@@ -286,9 +267,8 @@ func _list_column(parent: Control, heading_text: String) -> VBoxContainer:
 	scroll.custom_minimum_size = Vector2(0, 220)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
-	var items := VBoxContainer.new()
+	var items := UiBuild.vbox(2)
 	items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	items.add_theme_constant_override("separation", 2)
 	scroll.add_child(items)
 	return items
 
@@ -323,9 +303,8 @@ func _build_field() -> Control:
 	player_option.item_selected.connect(func(i: int) -> void: _set_key("player_side", PLAYER_SIDES[i][0]))
 	# Fin de la ligne Heure/Joueur : l'année (NT11), puis ligne du siège : case, engins,
 	# fortification, type de place.
-	var year_label := Label.new()
-	year_label.text = "Année"
-	RichTooltip.attach_plain(year_label, "custom_battle_year")
+	var year_label := UiBuild.label("Année")
+	TooltipHost.attach_plain(year_label, "custom_battle_year")
 	year_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(year_label)
 	year_spin = SpinBox.new()
@@ -338,7 +317,7 @@ func _build_field() -> Control:
 	siege_check = CheckBox.new()
 	siege_check.name = "Siege"
 	siege_check.text = "Siège : le camp 2 défend une place"
-	RichTooltip.attach_plain(siege_check, "custom_battle_siege")
+	TooltipHost.attach_plain(siege_check, "custom_battle_siege")
 	siege_check.toggled.connect(func(on: bool) -> void:
 		config["siege"] = on
 		refresh())
@@ -346,7 +325,7 @@ func _build_field() -> Control:
 	engines_button = MenuButton.new()
 	engines_button.name = "Engines"
 	engines_button.flat = false
-	RichTooltip.attach_plain(engines_button, "custom_battle_engines")
+	TooltipHost.attach_plain(engines_button, "custom_battle_engines")
 	var popup := engines_button.get_popup()
 	popup.hide_on_checkable_item_selection = false
 	popup.add_check_item("Échelles", 0)
@@ -355,9 +334,8 @@ func _build_field() -> Control:
 		popup.add_radio_check_item(_towers_label(towers), 10 + towers)
 	popup.id_pressed.connect(_on_engine_pressed)
 	grid.add_child(engines_button)
-	var fort_label := Label.new()
-	fort_label.text = "Fortification"
-	RichTooltip.attach_plain(fort_label, "custom_battle_fortification")
+	var fort_label := UiBuild.label("Fortification")
+	TooltipHost.attach_plain(fort_label, "custom_battle_fortification")
 	fort_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(fort_label)
 	fortification_spin = SpinBox.new()
@@ -377,9 +355,8 @@ func _build_field() -> Control:
 
 
 func _field_option(grid: GridContainer, text: String, tooltip_key: String) -> OptionButton:
-	var label := Label.new()
-	label.text = text
-	RichTooltip.attach_plain(label, tooltip_key)
+	var label := UiBuild.label(text)
+	TooltipHost.attach_plain(label, tooltip_key)
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(label)
 	var option := OptionButton.new()
@@ -428,7 +405,7 @@ func roster(faction: String, techs: Array = []) -> Array:
 	sorted_techs.sort()
 	var key := "%s@%d@%s" % [faction, year, ",".join(PackedStringArray(sorted_techs))]
 	if not rosters.has(key):
-		rosters[key] = _sim.call("custom_roster", data_dir(), faction, year, PackedStringArray(techs)) if _sim != null else []
+		rosters[key] = _sim.call("custom_roster", DataFile.data_dir(), faction, year, PackedStringArray(techs)) if _sim != null else []
 	return rosters[key]
 
 
@@ -442,7 +419,7 @@ func grantable_technologies(side: String) -> Array:
 	var year := int(config.get("year", rules.get("default_year", 1337)))
 	var key := "%s@%d" % [config[side]["faction"], year]
 	if not tech_catalogs.has(key):
-		tech_catalogs[key] = _sim.call("custom_technologies", data_dir(), str(config[side]["faction"]), year) if _sim != null else []
+		tech_catalogs[key] = _sim.call("custom_technologies", DataFile.data_dir(), str(config[side]["faction"]), year) if _sim != null else []
 	return tech_catalogs[key]
 
 
@@ -613,7 +590,7 @@ func battle_config() -> Dictionary:
 ## Valide la composition au cœur puis redessine les listes, les points et les erreurs.
 func refresh() -> void:
 	if _sim != null:
-		report = _sim.call("validate_custom", data_dir(), battle_config())
+		report = _sim.call("validate_custom", DataFile.data_dir(), battle_config())
 	else:
 		report = {"ok": false, "errors": ["Extension de simulation absente."]}
 	for side in SIDES:
@@ -673,7 +650,7 @@ func _fill_roster(side: String) -> void:
 		button.clip_text = true
 		button.disabled = not can_buy(side, unit_id)
 		_decorate(button, unit_id)  # VN : miniature de l'unité
-		RichTooltip.set_tooltip(button, "unit", unit_id)
+		TooltipHost.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: buy(side, unit_id))
 		items.add_child(button)
 
@@ -693,7 +670,7 @@ func _fill_army(side: String) -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
 		_decorate(button, unit_id)
-		RichTooltip.set_tooltip(button, "unit", unit_id)
+		TooltipHost.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: remove(side, index))
 		items.add_child(button)
 

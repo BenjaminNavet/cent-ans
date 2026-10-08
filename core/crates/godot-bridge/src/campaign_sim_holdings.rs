@@ -7,7 +7,7 @@ use sim_campaign::holdings::{
     self, BuildOptionRow, ConstructionRow, DangerReason, ProvinceRow, SettlementRow, SiegeRow,
 };
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn danger_reason_key(reason: DangerReason) -> &'static str {
     match reason {
@@ -112,7 +112,7 @@ impl CampaignSim {
     /// faction is unknown or no campaign is loaded.
     #[func]
     fn get_holdings_overview(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {

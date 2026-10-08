@@ -7,6 +7,7 @@
 //!
 //! Entry point: [`GameData::load`].
 
+pub mod bundled;
 pub mod common;
 pub mod cover;
 pub mod entities;
@@ -18,8 +19,11 @@ pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_grid;
 pub mod settlement_load;
+#[cfg(feature = "test-support")]
+pub mod test_support;
 pub mod title_check;
 pub mod trade_paths;
+pub mod util;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -32,9 +36,11 @@ pub use entities::agent::{
 pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
+pub use entities::ai_campaign::AiCampaign;
 pub use entities::ai_diplomacy::{
-    AiDiplomacy, JoinWarRules, MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules,
-    WarPlanningRules,
+    AiDiplomacy, AllianceWeights, ContextWeights, ExchangeWeights, JoinWarRules, MarriageWeights,
+    MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules, PeaceWeights,
+    TreatyWeights, VassalageWeights, WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy, ShareCap};
 pub use entities::ai_feudal::AiFeudal;

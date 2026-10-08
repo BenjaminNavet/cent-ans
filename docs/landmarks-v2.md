@@ -1,6 +1,6 @@
 # Villes emblématiques à l'échelle 1:1 — format `landmark` v2 (ADR 0078)
 
-Lots VH0 et VH4 (chantier VH, `docs/wip/vh-villes-historiques.md`). Ce document décrit le format
+Lots VH0 et VH4 (chantier VH, `docs/archive/chantiers.md`). Ce document décrit le format
 et le moteur pour les lots qui ajoutent des villes : **VH5 Paris, VH6 Londres, VH7 Orléans**, puis
 VH8 (Bordeaux, Avignon, Calais, Bruges). Rouen vers 1340 (`data/landmarks_v2/rouen.json`) sert
 d'exemple complet.
@@ -167,12 +167,12 @@ d'Henri III + nef romane (jusqu'en 1375, nef gothique ensuite), Westminster Hall
 tour du Joyau (1366), horloge (1367). Rues OSM avec exclusions (percées du XIXe s., reconstruction
 après 1666 : King William Street, Queen Victoria Street, Cannon Street, etc.) et rues disparues à
 la main (Candlewick Street, King Street de Westminster, Old Change, accès du pont, Snow Hill).
-Suivi : `docs/wip/vh6-londres.md`.
+Suivi : `docs/archive/chantiers.md`.
 
 ## Orléans vers 1340-1429 (VH7)
 
 `data/landmarks_v2/orleans.json`, origine sur Sainte-Croix, `extent_m` 1 850 (jusqu'à Saint-Loup).
-Suivi : `docs/wip/vh7-orleans.md` ; captures `docs/img/vh7/` (`res://tests/vh7_shots.gd`,
+Suivi : `docs/archive/chantiers.md` ; captures `docs/img/vh7/` (`res://tests/vh7_shots.gd`,
 `--year=1429` pour l'état du siège).
 
 - **Vue stratégique** : Orléans n'a pas de maquette L1/L2 ; la colonie ordinaire (maquette de ville

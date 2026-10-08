@@ -69,7 +69,7 @@ fn ai_beats_a_passive_side_on_every_relief() {
         (Terrain::Hills, 18),
         (Terrain::Mountains, 18),
     ] {
-        let (won, lost) = wins(&data, terrain, 0..16);
+        let (won, lost) = wins(data, terrain, 0..16);
         assert!(
             won >= least,
             "{}: the active AI won {won}/32 (at least {least} expected), lost {}",
@@ -106,7 +106,7 @@ fn ridge_sim(data: &GameData, attacker: &[&str], defender: &[&str], crest_z: f64
 #[test]
 fn the_relief_map_reads_crests_hollows_and_slopes() {
     let data = data();
-    let sim = ridge_sim(&data, &ARMY, &ARMY, 400.0);
+    let sim = ridge_sim(data, &ARMY, &ARMY, 400.0);
     let (field, map) = (sim.field(), sim.relief_map());
     assert!(
         map.prominence(600.0, 400.0) > 5.0,
@@ -151,7 +151,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
         "unit_crossbowmen",
     ];
     let defender = ["unit_men_at_arms_foot", "unit_longbowmen"];
-    let mut sim = ridge_sim(&data, &attacker, &defender, 525.0);
+    let mut sim = ridge_sim(data, &attacker, &defender, 525.0);
     sim.set_ai(SideId::Attacker, false);
     // L13b (ADR 0184): approach pace x0.45 while the armies are apart.
     run(&mut sim, 270.0);
@@ -159,7 +159,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let of = |kind: &str| {
         sim.units()
             .iter()
-            .find(|u| u.side == SideId::Defender && u.unit_type == kind)
+            .find(|u| u.side == SideId::Defender && &*u.unit_type == kind)
             .unwrap()
     };
     let (line, bows) = (of("unit_men_at_arms_foot"), of("unit_longbowmen"));
@@ -176,7 +176,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let crossbows = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Attacker && u.unit_type == "unit_crossbowmen");
+        .filter(|u| u.side == SideId::Attacker && &*u.unit_type == "unit_crossbowmen");
     for c in crossbows {
         assert!(
             !ReliefMap::sees(field, (c.x, c.z), (line.x, line.z)),
@@ -192,7 +192,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
 #[test]
 fn an_even_defender_keeps_its_heights() {
     let data = data();
-    let mut sim = ridge_sim(&data, &ARMY, &ARMY, 560.0);
+    let mut sim = ridge_sim(data, &ARMY, &ARMY, 560.0);
     sim.set_ai(SideId::Attacker, false);
     let start: Vec<f64> = sim.units().iter().map(|u| u.z).collect();
     run(&mut sim, 150.0);
@@ -239,7 +239,7 @@ fn survey_active_against_passive() {
             })
             .unwrap_or(0..16);
         let n = 2 * (seeds.end - seeds.start);
-        let (won, lost) = wins(&data, terrain, seeds);
+        let (won, lost) = wins(data, terrain, seeds);
         println!("{:<10} {won}/{n}  lost: {}", terrain.key(), lost.join(" "));
     }
 }
@@ -262,7 +262,7 @@ fn trace_one_battle() {
     } else {
         SideId::Defender
     };
-    let mut battle = setup(units(&data, &ARMY), units(&data, &ARMY), None);
+    let mut battle = setup(units(data, &ARMY), units(data, &ARMY), None);
     battle.terrain = terrain;
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(passive, false);

@@ -8,8 +8,8 @@ use sim_battle::{BattleSim, HoverRules, SideId};
 
 fn range_lab() -> BattleSim {
     let data = data();
-    let attacker = units(&data, &["unit_longbowmen", "unit_knights"]);
-    let defender = units(&data, &["unit_crossbowmen", "unit_urban_militia"]);
+    let attacker = units(data, &["unit_longbowmen", "unit_knights"]);
+    let defender = units(data, &["unit_crossbowmen", "unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 7).unwrap();
     lab(&mut sim);
     sim
@@ -18,7 +18,7 @@ fn range_lab() -> BattleSim {
 fn index_of(sim: &BattleSim, unit_type: &str) -> usize {
     sim.units()
         .iter()
-        .position(|u| u.unit_type == unit_type)
+        .position(|u| *u.unit_type == *unit_type)
         .unwrap_or_else(|| panic!("no {unit_type}"))
 }
 

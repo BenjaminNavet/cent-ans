@@ -12,7 +12,6 @@
 use data_model::{CrusadeRules, FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{faction_name, is_rebels};
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
 use crate::religion::{self, FaithRelation};
@@ -246,14 +245,14 @@ fn change(state: &mut CampaignState, rules: &CrusadeRules, cause: &str, delta: i
 /// Name of the vow's goal: the city of the target province.
 fn target_name(state: &CampaignState, data: &GameData, rules: &CrusadeRules) -> String {
     match state.province_city_id(&rules.target_province) {
-        Some(city) => crate::siege::settlement_name(data, city),
+        Some(city) => data.settlement_name(city),
         None => rules.target_province.to_string(),
     }
 }
 
 /// Alms `faction` receives this turn (0 unless it is the crusaders):
 /// `base + per_fervor × fervour`. Part of
-/// [`CampaignState::faction_income_effective`], so the treasury, the
+/// [`CampaignState::faction_income`], so the treasury, the
 /// projection, the budget and the AI all see them.
 pub fn alms(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
     let Some(rules) = &data.crusade_rules else {
@@ -304,7 +303,7 @@ fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<Game
     let held = state.controls_province(&rules.faction, &rules.target_province);
     let taken = state.crusade.as_ref().is_some_and(|c| c.target_taken);
     let name = target_name(state, data, rules);
-    let faction = faction_name(data, &rules.faction);
+    let faction = data.faction_name(&rules.faction);
     if held && !taken {
         let capital = state
             .factions
@@ -411,7 +410,7 @@ pub(crate) fn resolve_crusade(
     let holder = state.province_controller(&rules.target_province).cloned();
     if let Some(holder) = holder {
         if holder != rules.faction
-            && !is_rebels(&holder)
+            && !holder.is_rebels()
             && !state.is_at_war(&rules.faction, &holder)
         {
             change(
@@ -520,7 +519,7 @@ fn land_contingents(
             EventKind::Crusade,
             format!(
                 "Un contingent de volontaires débarque à {} : {}.",
-                crate::siege::settlement_name(data, &port),
+                data.settlement_name(&port),
                 count_noun(landed, "unité", "unités")
             ),
         )
@@ -625,7 +624,7 @@ fn relieve_sieges(
         .iter()
         .filter(|(_, s)| {
             rules.holy_land.contains(&s.province)
-                && !is_rebels(&s.controller)
+                && !s.controller.is_rebels()
                 && s.controller != rules.faction
                 && s.siege
                     .as_ref()
@@ -677,12 +676,12 @@ fn relieve_sieges(
     if landed == 0 {
         return;
     }
-    let name = crate::siege::settlement_name(data, &place);
+    let name = data.settlement_name(&place);
     let mut event = GameEvent::new(
         EventKind::Crusade,
         format!(
             "Appel à défendre {name} contre {} : {} de secours {} dans la place.",
-            faction_name(data, &rules.faction),
+            data.faction_name(&rules.faction),
             count_noun(landed, "unité", "unités"),
             if landed > 1 { "entrent" } else { "entre" },
         ),
@@ -726,7 +725,7 @@ fn desert(
                 EventKind::Crusade,
                 format!(
                     "Débandade : la ferveur retombe et {lost} hommes de {} rentrent chez eux.",
-                    faction_name(data, &rules.faction)
+                    data.faction_name(&rules.faction)
                 ),
             )
             .faction(&rules.faction),
@@ -758,7 +757,7 @@ pub fn on_battle(
     } else {
         return;
     };
-    let relation = if is_rebels(other) {
+    let relation = if other.is_rebels() {
         None
     } else {
         Some(religion::faith_relation(state, data, &rules.faction, other))
@@ -837,7 +836,7 @@ pub fn on_war_declared(
     let Some(rules) = active(state, data) else {
         return;
     };
-    if aggressor != &rules.faction || is_rebels(target) {
+    if aggressor != &rules.faction || target.is_rebels() {
         return;
     }
     if matches!(
@@ -945,14 +944,14 @@ pub fn preach_passage(
         EventKind::Crusade,
         format!(
             "{} prêche le passage : {} de volontaires {} à {} dans {}.",
-            crate::events::capitalize(&faction_name(data, faction)),
+            crate::events::capitalize(&data.faction_name(faction)),
             count_noun(units, "unité", "unités"),
             if units > 1 {
                 "sont attendues"
             } else {
                 "est attendue"
             },
-            crate::siege::settlement_name(data, &port),
+            data.settlement_name(&port),
             count_noun(rules.passage.delay_turns, "tour", "tours")
         ),
     )
@@ -1031,7 +1030,7 @@ pub fn crusade_view(
             .map(|p| PendingPassageView {
                 turns_left: p.arrival_turn.saturating_sub(state.turn),
                 port: p.port.clone(),
-                port_name: crate::siege::settlement_name(data, &p.port),
+                port_name: data.settlement_name(&p.port),
                 units: p.units,
             })
             .collect(),
@@ -1076,10 +1075,9 @@ mod tests {
     //! handed to an existing faction, so the tests do not depend on the
     //! values (or the faction) of `data/rules/crusade.json`.
 
-    use std::path::PathBuf;
     use std::sync::OnceLock;
 
-    use data_model::ProvinceId;
+    use data_model::test_support::{fac, game_data, prov};
 
     use super::*;
     use crate::orders::OrderError;
@@ -1090,16 +1088,8 @@ mod tests {
     const BASE: &str = "set_famagusta";
     const TARGET: &str = "prov_jerusalem";
 
-    fn fac(id: &str) -> FactionId {
-        FactionId::new(id).unwrap()
-    }
-
     fn set(id: &str) -> SettlementId {
         SettlementId::new(id).unwrap()
-    }
-
-    fn prov(id: &str) -> ProvinceId {
-        ProvinceId::new(id).unwrap()
     }
 
     fn synthetic_rules() -> CrusadeRules {
@@ -1157,8 +1147,7 @@ mod tests {
     fn data() -> &'static GameData {
         static DATA: OnceLock<GameData> = OnceLock::new();
         DATA.get_or_init(|| {
-            let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-            let mut data = GameData::load(&root).expect("game data loads").0;
+            let mut data = game_data().clone();
             data.crusade_rules = Some(synthetic_rules());
             data
         })
@@ -1606,9 +1595,9 @@ mod tests {
         let mut state = campaign();
         assert_eq!(alms(&state, data(), &fac(CRUSADERS)), 100 + 10 * 60);
         assert_eq!(alms(&state, data(), &fac(HOLDER)), 0);
-        let with = state.faction_income_effective(data(), &fac(CRUSADERS));
+        let with = state.faction_income(data(), &fac(CRUSADERS));
         set_fervor(&mut state, 10);
-        let poorer = state.faction_income_effective(data(), &fac(CRUSADERS));
+        let poorer = state.faction_income(data(), &fac(CRUSADERS));
         assert_eq!(with - poorer, 500, "alms are part of the income");
         let view = crusade_view(&state, data(), &fac(CRUSADERS)).unwrap();
         assert_eq!(view.alms, 200);

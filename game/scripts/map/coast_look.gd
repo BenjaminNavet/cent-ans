@@ -8,43 +8,24 @@ extends RefCounted
 ## Sans fichier (données de test) : rendu inchangé. Purement visuel : aucune règle de jeu.
 
 const DATA_PATH := "map/coast_types.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 ## Ordre des types dans les tableaux du shader (`coast_color`, `coast_shade`, `coast_streak`).
 const TYPES: Array[String] = ["rock", "chalk", "granite", "sand", "shingle"]
 ## Rayon (px carte) de recherche du rivage autour d'un point donné à `kind_at`.
 const SHORE_SEARCH_PX := 6
 
-static var _data: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(DATA_PATH)
 static var _texture: ImageTexture = null
 static var _texture_size: Vector2i = Vector2i.ZERO
 
 
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var path := _data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
-	return _data
+	return _lookup.data()
 
 
 ## Oublie le fichier lu (tests : autre dossier de données).
 static func reload() -> void:
-	_loaded = false
-	_data = {}
+	_lookup.reload()
 	_texture = null
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 ## Géologie de la côte au point `px` (pixels carte) : la dernière région qui le contient, sinon

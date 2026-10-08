@@ -11,9 +11,7 @@
 shader_type spatial;
 render_mode cull_disabled, diffuse_burley;
 
-uniform sampler2D bone_tex : filter_nearest, repeat_disable;
-uniform float bone_fps = 24.0;
-uniform vec4 clips[96];
+#include "res://shaders/battle_bone_anim.gdshaderinc"
 uniform ivec4 clip_set = ivec4(0);
 uniform int clip_set_size = 1;
 uniform float anim_time = 0.0;
@@ -49,36 +47,6 @@ varying float v_far;
 varying float v_state;
 varying float v_layer;
 varying float v_full;
-
-int pick(ivec4 s, int i) {
-	return i == 0 ? s.x : (i == 1 ? s.y : (i == 2 ? s.z : s.w));
-}
-
-// AN1b : jeu jusqu'à 8 clips (emplacement i : composante i % 4, octet i / 4), comme le shader
-// skinné (NT10 : `pick` seul lisait un indice faux dès 5 clips dans le jeu, NT7).
-int pick_clip(ivec4 s, int i) {
-	return (pick(s, i & 3) >> ((i >> 2) * 8)) & 255;
-}
-
-void clip_rows(int clip, float t, out int r0, out int r1, out float f) {
-	vec4 c = clips[clip];
-	float frames = max(c.y, 1.0);
-	float x = max(t, 0.0) * bone_fps;
-	float f0;
-	float f1;
-	if (c.z > 0.5) {
-		x = mod(x, frames);
-		f0 = floor(x);
-		f1 = mod(f0 + 1.0, frames);
-	} else {
-		x = min(x, frames - 1.0);
-		f0 = floor(x);
-		f1 = min(f0 + 1.0, frames - 1.0);
-	}
-	f = x - f0;
-	r0 = int(c.x + f0);
-	r1 = int(c.x + f1);
-}
 
 vec4 bone_row(int k, int r0, int r1, float f) {
 	int x = prop_bone * 3 + k;

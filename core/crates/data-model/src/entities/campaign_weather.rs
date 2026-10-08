@@ -66,35 +66,4 @@ pub struct CampaignWeatherRules {
     pub description: Option<String>,
 }
 
-impl Default for CampaignWeatherRules {
-    /// Fallback when `data/rules/campaign_weather.json` is absent.
-    fn default() -> Self {
-        let c = |clear, fog, rain, snow, storm| CampaignWeatherChances {
-            clear,
-            fog,
-            rain,
-            snow,
-            storm,
-        };
-        let temperate = SeasonalWeather {
-            spring: c(55, 10, 30, 0, 5),
-            summer: c(70, 5, 12, 0, 13),
-            autumn: c(40, 25, 32, 0, 3),
-            winter: c(35, 20, 25, 20, 0),
-        };
-        CampaignWeatherRules {
-            front_scale_deg: 3.5,
-            local_jitter: 0.25,
-            drift_deg_per_turn: [2.0, 0.3],
-            climates: ClimateWeather {
-                oceanic: temperate,
-                continental: temperate,
-                mediterranean: temperate,
-                mountain: temperate,
-                arid: temperate,
-                steppe: temperate,
-            },
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(CampaignWeatherRules, "rules/campaign_weather.json", default);

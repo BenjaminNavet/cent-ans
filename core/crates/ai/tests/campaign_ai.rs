@@ -1,23 +1,13 @@
 //! M9 strategic campaign AI tests (spec `docs/design/m9-ai.md` § 1).
-
-use std::path::PathBuf;
+use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::start;
 
 use data_model::{FactionId, GameData, ProvinceId};
 use sim_campaign::{CampaignState, Order, Place};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
+    game_data()
 }
 
 /// Applies the AI's orders for `faction` and returns (issued, refused).
@@ -34,9 +24,9 @@ fn apply(state: &mut CampaignState, data: &GameData, faction: &FactionId) -> (us
 #[test]
 fn planner_is_pure_and_deterministic() {
     let data = data();
-    let state = start(&data, "fac_england", 1);
-    let a = ai::plan_turn(&state, &data, &fac("fac_france"));
-    let b = ai::plan_turn(&state, &data, &fac("fac_france"));
+    let state = start(data, "fac_england", 1);
+    let a = ai::plan_turn(&state, data, &fac("fac_france"));
+    let b = ai::plan_turn(&state, data, &fac("fac_france"));
     assert_eq!(a, b);
     assert!(!a.is_empty());
 }
@@ -44,12 +34,12 @@ fn planner_is_pure_and_deterministic() {
 #[test]
 fn a_stronger_faction_at_war_besieges() {
     let data = data();
-    let mut state = start(&data, "fac_england", 2);
+    let mut state = start(data, "fac_england", 2);
     let france = fac("fac_france");
     let mut besieged = false;
     for _ in 0..12 {
-        apply(&mut state, &data, &france);
-        state.end_turn_with(&data, ai::plan_turn);
+        apply(&mut state, data, &france);
+        state.end_turn_with(data, ai::plan_turn);
         besieged |= state
             .settlements
             .values()
@@ -68,7 +58,7 @@ fn a_stronger_faction_at_war_besieges() {
 #[test]
 fn a_threatened_province_is_defended() {
     let data = data();
-    let mut state = start(&data, "fac_england", 3);
+    let mut state = start(data, "fac_england", 3);
     let france = fac("fac_france");
     // Move the English main army next to Picardie.
     let english = state
@@ -80,7 +70,7 @@ fn a_threatened_province_is_defended() {
     let ponthieu = ProvinceId::new("prov_ponthieu").unwrap();
     let city = state.province_city_id(&ponthieu).unwrap().clone();
     state.armies.get_mut(&english).unwrap().position = sim_campaign::ArmyPosition::Settlement(city);
-    let orders = ai::plan_turn(&state, &data, &france);
+    let orders = ai::plan_turn(&state, data, &france);
     let near = [
         "prov_picardie",
         "prov_ponthieu",
@@ -106,10 +96,10 @@ fn a_threatened_province_is_defended() {
 #[test]
 fn recruitment_respects_the_budget() {
     let data = data();
-    let mut state = start(&data, "fac_england", 4);
+    let mut state = start(data, "fac_england", 4);
     let navarre = fac("fac_navarre");
     state.factions.get_mut(&navarre).unwrap().treasury = 300;
-    let orders = ai::plan_turn(&state, &data, &navarre);
+    let orders = ai::plan_turn(&state, data, &navarre);
     assert!(
         !orders
             .iter()
@@ -121,10 +111,10 @@ fn recruitment_respects_the_budget() {
 #[test]
 fn indebted_factions_dismiss_troops() {
     let data = data();
-    let mut state = start(&data, "fac_england", 5);
+    let mut state = start(data, "fac_england", 5);
     let navarre = fac("fac_navarre");
     state.factions.get_mut(&navarre).unwrap().treasury = -5000;
-    let orders = ai::plan_turn(&state, &data, &navarre);
+    let orders = ai::plan_turn(&state, data, &navarre);
     assert!(
         orders
             .iter()
@@ -136,9 +126,9 @@ fn indebted_factions_dismiss_troops() {
 #[test]
 fn governors_and_generals_are_appointed() {
     let data = data();
-    let mut state = start(&data, "fac_england", 6);
+    let mut state = start(data, "fac_england", 6);
     let france = fac("fac_france");
-    apply(&mut state, &data, &france);
+    apply(&mut state, data, &france);
     let governors = state
         .characters
         .values()
@@ -164,15 +154,15 @@ fn governors_and_generals_are_appointed() {
 #[test]
 fn few_orders_are_refused_over_forty_turns() {
     let data = data();
-    let mut state = start(&data, "fac_england", 7);
+    let mut state = start(data, "fac_england", 7);
     let (mut issued, mut refused) = (0, 0);
     for _ in 0..40 {
         for faction in ["fac_france", "fac_castile", "fac_scotland"] {
-            let (i, r) = apply(&mut state, &data, &fac(faction));
+            let (i, r) = apply(&mut state, data, &fac(faction));
             issued += i;
             refused += r;
         }
-        state.end_turn_with(&data, ai::plan_turn);
+        state.end_turn_with(data, ai::plan_turn);
     }
     assert!(issued > 100);
     assert!(refused * 5 < issued, "{refused} refused of {issued}");
@@ -182,9 +172,9 @@ fn few_orders_are_refused_over_forty_turns() {
 fn twenty_turns_are_deterministic() {
     let data = data();
     let run = || {
-        let mut state = start(&data, "fac_england", 8);
+        let mut state = start(data, "fac_england", 8);
         for _ in 0..20 {
-            state.end_turn_with(&data, ai::plan_turn);
+            state.end_turn_with(data, ai::plan_turn);
         }
         state.save_json()
     };
@@ -194,9 +184,9 @@ fn twenty_turns_are_deterministic() {
 #[test]
 fn a_century_without_panic() {
     let data = data();
-    let mut state = start(&data, "fac_burgundy", 9);
+    let mut state = start(data, "fac_burgundy", 9);
     for _ in 0..100 {
-        state.end_turn_with(&data, ai::plan_turn);
+        state.end_turn_with(data, ai::plan_turn);
     }
     let alive = state.factions.values().filter(|f| f.alive).count();
     assert!(alive >= 8, "{alive} factions alive after 25 years");

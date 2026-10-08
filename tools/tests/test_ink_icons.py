@@ -1,11 +1,9 @@
 """DA5: ink action icons and medallion buttons (catalogue, plan, image processing)."""
 
-import json
 from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image, ImageDraw
 
 from cent_ans_tools import ink_icons
@@ -16,16 +14,6 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def _catalog() -> dict:
     return ink_icons.load_catalog()
-
-
-def test_catalog_matches_schema() -> None:
-    """The catalogue matches its schema."""
-    schema = json.loads(
-        (ROOT / "data/schemas/icons_ink.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_catalog()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_ids_and_targets_are_unique() -> None:

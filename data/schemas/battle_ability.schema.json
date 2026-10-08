@@ -33,7 +33,7 @@
       "properties": {
         "unit_types": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+          "items": { "$ref": "common.schema.json#/$defs/unit_type_id" },
           "uniqueItems": true
         },
         "abilities": { "type": "array", "items": { "$ref": "#/$defs/ability" }, "uniqueItems": true },

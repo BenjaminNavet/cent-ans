@@ -172,19 +172,18 @@ func _ready() -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
-			_log_bursts = true
-		elif arg == "--no-native-vegetation":  # PB2 : comparaisons avec le semis GDScript
-			use_native_scatter = false
-		elif arg == "--no-forest-detail":  # SZ4b : captures « avant », mesures A/B
-			use_forest_detail = false
-		elif arg == "--no-fc2":  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
-			use_impostors = false
-		elif arg == "--no-fc5":  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
-			use_near_cards = false
-		elif arg == "--no-hb4-species":  # HB4 : semis V4 sans essences par biome (A/B)
-			use_species = false
+	if CmdArgs.has("--screenshot") or CmdArgs.has("--vegetation-stats"):
+		_log_bursts = true
+	if CmdArgs.has("--no-native-vegetation"):  # PB2 : comparaisons avec le semis GDScript
+		use_native_scatter = false
+	if CmdArgs.has("--no-forest-detail"):  # SZ4b : captures « avant », mesures A/B
+		use_forest_detail = false
+	if CmdArgs.has("--no-fc2"):  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
+		use_impostors = false
+	if CmdArgs.has("--no-fc5"):  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
+		use_near_cards = false
+	if CmdArgs.has("--no-hb4-species"):  # HB4 : semis V4 sans essences par biome (A/B)
+		use_species = false
 
 
 
@@ -784,12 +783,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 ## bloquée jusqu'à 70 ms en zoomant) : on recrée le MultiMesh depuis la copie processeur du tampon
 ## (`buffers` de la tuile, tenue à jour par les recalages), boîte calculée sur le processeur.
 static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -> MultiMesh:
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = old.transform_format
-	multimesh.use_custom_data = old.use_custom_data
-	multimesh.mesh = mesh
-	multimesh.instance_count = old.instance_count
-	multimesh.buffer = buffer
+	var multimesh := MapInstancing.make(mesh, old.instance_count, old.use_custom_data, false, buffer)
 	multimesh.visible_instance_count = old.visible_instance_count
 	return multimesh
 
@@ -1088,12 +1082,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 				mmis.append(null)
 				slots.append(null)
 				continue
-			var multimesh := MultiMesh.new()
-			multimesh.transform_format = MultiMesh.TRANSFORM_3D
-			multimesh.use_custom_data = true
-			multimesh.mesh = meshes[kind]
-			multimesh.instance_count = count
-			multimesh.buffer = job.buffers[slot]
+			var multimesh := MapInstancing.make(meshes[kind], count, true, false, job.buffers[slot])
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh

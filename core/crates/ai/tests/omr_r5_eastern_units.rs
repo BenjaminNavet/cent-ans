@@ -2,13 +2,13 @@
 //! akıncı, yaya, Serbian heavy cavalry, pronoiars, druzhina, Lithuanian
 //! light cavalry, Teutonic knights, almogavars). Recruitment uses the
 //! existing culture / faction / period rules; the AI levies them through
-//! its doctrines. See `docs/wip/omr-r5.md`.
+//! its doctrines. See `docs/archive/chantiers.md`.
 
+use sim_campaign::test_support::{city, start_quiet, unit_type};
 use std::collections::BTreeMap;
-use std::path::Path;
 
 use ai::doctrine::pick_recruit;
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::GameData;
 use sim_campaign::{CampaignState, RecruitOption};
 
 const EASTERN_UNITS: [&str; 10] = [
@@ -32,43 +32,19 @@ const GATES: [&str; 4] = [
     "plus levée après",
 ];
 
-fn data() -> GameData {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("data").0
-}
+use data_model::test_support::{fac, game_data};
 
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
-
-fn start(data: &GameData) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state
-        .province_city_id(&ProvinceId::new(province).unwrap())
-        .unwrap()
-        .clone()
-}
-
-/// Recruitment refusal of `unit_type` for `faction` in the city of `province`.
+/// Recruitment refusal of `unit_id` for `faction` in the city of `province`.
 fn reason(
     state: &CampaignState,
     data: &GameData,
     faction: &str,
     province: &str,
-    unit_type: &str,
+    unit_id: &str,
 ) -> Option<String> {
     let settlement = city(state, province);
     state
-        .recruit_option(data, &fac(faction), &settlement, &unit(unit_type))
+        .recruit_option(data, &fac(faction), &settlement, &unit_type(unit_id))
         .expect("known unit")
         .reason
 }
@@ -80,9 +56,9 @@ fn gated(why: &Option<String>) -> bool {
 
 #[test]
 fn eastern_units_are_sourced_and_have_a_figure() {
-    let data = data();
+    let data = game_data();
     for id in EASTERN_UNITS {
-        let t = &data.unit_types[&unit(id)];
+        let t = &data.unit_types[&unit_type(id)];
         assert!(t.sources.len() >= 3, "{id}: at least three sources");
         assert!(t.figure.is_some(), "{id}: battle figurine");
         assert!(t.equipment.is_some() && t.description.is_some(), "{id}");
@@ -98,8 +74,8 @@ fn eastern_units_are_sourced_and_have_a_figure() {
 
 #[test]
 fn each_eastern_unit_is_levied_at_home_in_1337() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start_quiet(data, "fac_france", 7);
     let home = [
         ("unit_mamluk_cavalry", "fac_mamluks", "prov_cairo"),
         (
@@ -121,20 +97,20 @@ fn each_eastern_unit_is_levied_at_home_in_1337() {
         ("unit_almogavars", "fac_aragon", "prov_barcelona"),
     ];
     for (id, faction, province) in home {
-        let why = reason(&state, &data, faction, province, id);
+        let why = reason(&state, data, faction, province, id);
         assert!(!gated(&why), "{id} in {province} for {faction}: {why:?}");
     }
 }
 
 #[test]
 fn eastern_units_stay_in_their_region() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start_quiet(data, "fac_france", 7);
     // Culture gate: no steppe archers in Paris, no druzhina in Cairo.
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_france",
             "prov_ile_de_france",
             "unit_steppe_horse_archers"
@@ -143,7 +119,7 @@ fn eastern_units_stay_in_their_region() {
         Some("culture locale inadaptée")
     );
     assert_eq!(
-        reason(&state, &data, "fac_mamluks", "prov_cairo", "unit_druzhina").as_deref(),
+        reason(&state, data, "fac_mamluks", "prov_cairo", "unit_druzhina").as_deref(),
         Some("culture locale inadaptée")
     );
     // Faction gate: mamluks, akıncı and Teutonic brethren are institutions,
@@ -151,7 +127,7 @@ fn eastern_units_stay_in_their_region() {
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_golden_horde",
             "prov_saray",
             "unit_mamluk_cavalry"
@@ -162,7 +138,7 @@ fn eastern_units_stay_in_their_region() {
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_france",
             "prov_ile_de_france",
             "unit_akinci"
@@ -173,7 +149,7 @@ fn eastern_units_stay_in_their_region() {
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_lithuania",
             "prov_vilnius",
             "unit_teutonic_knights"
@@ -185,13 +161,13 @@ fn eastern_units_stay_in_their_region() {
 
 #[test]
 fn almogavars_and_yaya_have_a_period() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 7);
     state.year = 1401;
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_aragon",
             "prov_barcelona",
             "unit_almogavars"
@@ -201,13 +177,13 @@ fn almogavars_and_yaya_have_a_period() {
     );
     state.year = 1451;
     assert_eq!(
-        reason(&state, &data, "fac_ottoman", "prov_bursa", "unit_yaya").as_deref(),
+        reason(&state, data, "fac_ottoman", "prov_bursa", "unit_yaya").as_deref(),
         Some("plus levée après 1450")
     );
 }
 
 fn option(data: &GameData, id: &str) -> RecruitOption {
-    let t = &data.unit_types[&unit(id)];
+    let t = &data.unit_types[&unit_type(id)];
     RecruitOption {
         unit_type: t.id.clone(),
         name: t.name.display.clone(),
@@ -224,7 +200,7 @@ fn option(data: &GameData, id: &str) -> RecruitOption {
 
 #[test]
 fn eastern_doctrines_pick_their_own_troops() {
-    let data = data();
+    let data = game_data();
     let value = |o: &RecruitOption| 1000.0 / f64::from(o.cost);
     let cases = [
         ("fac_mamluks", "unit_mamluk_cavalry"),
@@ -234,12 +210,12 @@ fn eastern_doctrines_pick_their_own_troops() {
     ];
     for (faction, expected) in cases {
         let options = [
-            option(&data, "unit_urban_militia"),
-            option(&data, "unit_crossbowmen"),
-            option(&data, expected),
+            option(data, "unit_urban_militia"),
+            option(data, "unit_crossbowmen"),
+            option(data, expected),
         ];
         let refs: Vec<&RecruitOption> = options.iter().collect();
-        let pick = pick_recruit(&data, &fac(faction), &refs, &BTreeMap::new(), value).unwrap();
+        let pick = pick_recruit(data, &fac(faction), &refs, &BTreeMap::new(), value).unwrap();
         assert_eq!(pick.unit_type.as_str(), expected, "{faction}");
     }
 }

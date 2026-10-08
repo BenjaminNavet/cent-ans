@@ -68,7 +68,7 @@ func load_table() -> bool:
 	if not FileAccess.file_exists(TABLE_PATH):
 		push_warning("IconLibrary: %s missing (run cent-ans assets icons)" % TABLE_PATH)
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(TABLE_PATH))
+	var parsed: Variant = DataFile.parse_file(TABLE_PATH)
 	if not (parsed is Dictionary):
 		push_warning("IconLibrary: invalid %s" % TABLE_PATH)
 		return false
@@ -82,7 +82,7 @@ func _read_index(path: String, directory: String) -> Dictionary:
 	var result := {}
 	if not FileAccess.file_exists(path):
 		return result
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		push_warning("IconLibrary: invalid %s" % path)
 		return result
@@ -158,14 +158,6 @@ func get_icon(id: String, category: String = "") -> Texture2D:
 	return texture
 
 
-func author_of(id: String) -> String:
-	var resolved := resolve(id)
-	if entity.has(resolved):
-		return "Cent Ans (DA5b)"
-	if ink.has(resolved):
-		return "Cent Ans (DA5)"
-	return str(icons.get(resolved, {}).get("author", ""))
-
 
 ## Modulation qui change l'encre cuite (`INK_COLOR`) en `color` : composantes > 1 permises
 ## (le canevas les applique telles quelles), alpha conservé.
@@ -228,9 +220,6 @@ func clear_cache() -> void:
 
 # --- Médaillons enluminés (DA5) --------------------------------------------------------
 
-
-func has_medallion(id: String) -> bool:
-	return medallions.has(id)
 
 
 ## Texture du médaillon `id` (état normal), null si absent (l'appelant garde son repli).

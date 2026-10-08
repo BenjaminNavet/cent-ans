@@ -155,15 +155,6 @@ static func draw_balance(canvas: Control, share: float, left: Color, right: Colo
 	canvas.draw_polyline(marker + PackedVector2Array([marker[0]]), INK, 1.0)
 
 
-static func thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out
-
-
 ## Texture recadrée à la manière de « cover » (remplit `rect`, centre gardé).
 static func draw_cover(canvas: CanvasItem, texture: Texture2D, rect: Rect2, modulate: Color = Color.WHITE, focus_y: float = 0.5) -> void:
 	if texture == null:

@@ -65,7 +65,7 @@ func _ready() -> void:
 
 ## Lit la géométrie et les fiches ; `false` si l'une manque (le choix par cartes reste possible).
 func load_data(geojson_path: String = "") -> bool:
-	var path := geojson_path if geojson_path != "" else FrontEndData._data_dir().path_join("map/provinces.geojson")
+	var path := geojson_path if geojson_path != "" else DataFile.data_dir().path_join("map/provinces.geojson")
 	provinces = read_provinces(path)
 	var facade := _facade()
 	var store: Object = facade.get("store") if facade != null else null
@@ -161,7 +161,7 @@ func home_position(faction_id: String, store: Object) -> Vector2:
 	var capital := str(info.get("capital", ""))
 	if capital == "":
 		return NO_POSITION
-	var data_dir := FrontEndData._data_dir()
+	var data_dir := DataFile.data_dir()
 	var listed: Variant = _read_json(data_dir.path_join("settlements/%s.json" % capital))
 	if listed is Array:
 		var positions: Variant = _read_json(data_dir.path_join(SETTLEMENT_POSITIONS_FILE))
@@ -178,7 +178,7 @@ func home_position(faction_id: String, store: Object) -> Vector2:
 
 
 static func _read_json(path: String) -> Variant:
-	return JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	return DataFile.parse_file(path) if FileAccess.file_exists(path) else null
 
 
 # --- Filtres ---------------------------------------------------------------------------------

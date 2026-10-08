@@ -80,7 +80,7 @@ func _check_court(sim: Object, ids: Array) -> void:
 
 
 ## Onglet « Arbre familial » du panneau Cour : C1, C3 (le diagramme lui-même dessine son texte en
-## `draw_string`, hors du champ `UiType` — voir `docs/wip/p2a-court.md`).
+## `draw_string`, hors du champ `UiType` — voir `docs/archive/chantiers.md`).
 func _check_family_tree(sim: Object, ids: Array) -> void:
 	if not sim.has_method("get_family_tree"):
 		return

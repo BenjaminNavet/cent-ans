@@ -88,7 +88,7 @@ fn the_bundled_rules_parse_and_the_town_has_suburbs() {
     assert_eq!(rules.ignition_chance("unit_knights", "cavalry"), 0.0);
     assert!(rules.weather(Weather::Rain).spread < rules.weather(Weather::Clear).spread);
     let data = data();
-    let sim = siege(&data, &[], 1);
+    let sim = siege(data, &[], 1);
     let works = sim.siege().unwrap();
     let suburbs: Vec<_> = works.houses.iter().filter(|h| h.suburb).collect();
     assert_eq!(suburbs.len() as u32, rules.suburbs.count);
@@ -104,7 +104,7 @@ fn the_bundled_rules_parse_and_the_town_has_suburbs() {
 fn fire_is_deterministic() {
     let data = data();
     let run_one = |seed: u64| {
-        let mut sim = siege(&data, &["unit_trebuchet", "unit_mangonel"], seed);
+        let mut sim = siege(data, &["unit_trebuchet", "unit_mangonel"], seed);
         run(&mut sim, 240.0);
         (fire_state(&sim), sim.siege().unwrap().gate_fire.state)
     };
@@ -122,7 +122,7 @@ fn rain_slows_the_spread() {
     let spread = |weather: Weather| -> usize {
         (0..6)
             .map(|seed| {
-                let mut sim = quiet_siege(&data, seed, weather);
+                let mut sim = quiet_siege(data, seed, weather);
                 let start = town_house(&sim);
                 assert!(sim.ignite_house(start));
                 run(&mut sim, 300.0);
@@ -142,7 +142,7 @@ fn rain_slows_the_spread() {
 #[test]
 fn a_burning_house_burns_out_into_a_ruin() {
     let data = data();
-    let mut sim = quiet_siege(&data, 2, Weather::Clear);
+    let mut sim = quiet_siege(data, 2, Weather::Clear);
     let mut rules = FireRules::bundled().clone();
     rules.spread.chance_per_period = 0.0;
     sim.set_fire_rules(Some(rules.clone()));
@@ -164,7 +164,7 @@ fn a_burning_house_burns_out_into_a_ruin() {
 fn a_burnt_house_can_be_crossed() {
     let data = data();
     let cross = |burnt: bool| -> f64 {
-        let mut sim = quiet_siege(&data, 3, Weather::Clear);
+        let mut sim = quiet_siege(data, 3, Weather::Clear);
         let house = town_house(&sim);
         let (hx, hz, radius) = {
             let h = &sim.siege().unwrap().houses[house];
@@ -219,7 +219,7 @@ fn a_burnt_house_can_be_crossed() {
 #[test]
 fn regiments_near_a_fire_suffer() {
     let data = data();
-    let mut sim = quiet_siege(&data, 4, Weather::Clear);
+    let mut sim = quiet_siege(data, 4, Weather::Clear);
     let mut rules = FireRules::bundled().clone();
     rules.spread.chance_per_period = 0.0;
     sim.set_fire_rules(Some(rules));
@@ -275,7 +275,7 @@ fn the_wall_walk_is_sheltered_from_the_heat() {
     let data = data();
     let factor = FireRules::bundled().heat.wall_walk_factor;
     assert!(factor > 0.0 && factor < 1.0, "factor {factor}");
-    let mut sim = quiet_siege(&data, 4, Weather::Clear);
+    let mut sim = quiet_siege(data, 4, Weather::Clear);
     let mut rules = FireRules::bundled().clone();
     rules.spread.chance_per_period = 0.0;
     sim.set_fire_rules(Some(rules));
@@ -287,7 +287,7 @@ fn the_wall_walk_is_sheltered_from_the_heat() {
     let id = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_crossbowmen")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_crossbowmen")
         .unwrap()
         .id as usize;
     place(&mut sim, id as u32, hx, hz - radius - 8.0, 0.0);
@@ -306,7 +306,7 @@ fn the_wall_walk_is_sheltered_from_the_heat() {
 #[test]
 fn a_burning_gate_loses_its_hit_points_and_opens() {
     let data = data();
-    let mut sim = quiet_siege(&data, 6, Weather::Clear);
+    let mut sim = quiet_siege(data, 6, Weather::Clear);
     let gate = sim.siege().unwrap().gate;
     let max_hp = sim.siege().unwrap().pieces[gate].max_hp;
     assert!(sim.ignite_gate());
@@ -337,7 +337,7 @@ fn a_burning_gate_loses_its_hit_points_and_opens() {
 fn smoke_spoils_the_aim_through_it() {
     let data = data();
     let losses = |smoke: bool| -> f64 {
-        let mut sim = quiet_siege(&data, 7, Weather::Clear);
+        let mut sim = quiet_siege(data, 7, Weather::Clear);
         let mut rules = FireRules::bundled().clone();
         rules.spread.chance_per_period = 0.0;
         rules.heat.loss_per_s = 0.0;
@@ -354,13 +354,13 @@ fn smoke_spoils_the_aim_through_it() {
         let archer = sim
             .units()
             .iter()
-            .find(|u| u.side == SideId::Attacker && u.unit_type == "unit_longbowmen")
+            .find(|u| u.side == SideId::Attacker && &*u.unit_type == "unit_longbowmen")
             .unwrap()
             .id;
         let target = sim
             .units()
             .iter()
-            .find(|u| u.side == SideId::Defender && u.unit_type == "unit_urban_militia")
+            .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_urban_militia")
             .unwrap()
             .id;
         place(&mut sim, archer, hx, hz - radius - 50.0, 0.0);
@@ -394,7 +394,7 @@ fn smoke_spoils_the_aim_through_it() {
 #[test]
 fn the_burn_command_needs_a_torch_close_by() {
     let data = data();
-    let mut sim = quiet_siege(&data, 8, Weather::Clear);
+    let mut sim = quiet_siege(data, 8, Weather::Clear);
     let house = town_house(&sim);
     let (hx, hz, radius) = {
         let h = &sim.siege().unwrap().houses[house];
@@ -403,7 +403,7 @@ fn the_burn_command_needs_a_torch_close_by() {
     let id = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_urban_militia")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_urban_militia")
         .unwrap()
         .id;
     let burn = |sim: &mut BattleSim| {
@@ -444,7 +444,7 @@ fn an_ai_garrison_burns_some_of_its_suburbs() {
     let data = data();
     let burnt: usize = (0..6)
         .map(|seed| {
-            let mut sim = siege(&data, &[], seed);
+            let mut sim = siege(data, &[], seed);
             sim.set_weather(Weather::Clear);
             sim.step();
             sim.siege()

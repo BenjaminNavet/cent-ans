@@ -92,16 +92,6 @@ static func gauge_color(ratio: float) -> Color:
 	return POOR
 
 
-## Nombre avec espace fine des milliers (« 139 838 »).
-static func thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out
-
-
 ## Étiquette configurée (police, couleur, taille), sans ombre.
 static func label(text: String, size: int = FONT_BODY, color: Color = INK) -> Label:
 	var node := Label.new()

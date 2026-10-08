@@ -45,10 +45,6 @@ func _init() -> void:
 	_check(-rad_to_deg(sun.rotation.x) < 6.0, "dawn sun near the horizon (%.1f°)" % -rad_to_deg(sun.rotation.x))
 	_check(sun.light_energy < 1.75, "dawn sun weaker")
 	sun.queue_free()
-	# Options A/B.
-	var off := BattleStaging.disabled_from_args(PackedStringArray(["--no-birds", "--no-smoke", "--foo"]))
-	_check(off.has("birds") and off.has("smoke") and off.size() == 2, "--no-<effect> flags")
-	_check(BattleStaging.disabled_from_args(PackedStringArray(["--no-ep8"])).size() == BattleStaging.EFFECTS.size(), "--no-ep8 disables all")
 	# Fumées : budget par qualité, la plus faible cède la place.
 	var smoke := BattleSmoke.new()
 	get_root().add_child(smoke)

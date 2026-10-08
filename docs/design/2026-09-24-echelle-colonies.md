@@ -252,4 +252,4 @@ Trois paliers selon la distance caméra (seuils dans une ressource de réglages)
 | C6 | Rendu par paliers : icônes, maquettes, hameaux, routes, tuiles de relief, caméra | C3, C5 |
 | C7 | IA sur les colonies, équilibrage, test 50 tours, documentation (`manuel.md`, codex) | C4-C6 |
 
-Suivi de l'orchestration : `docs/wip/colonies.md`. Coût cloud prévu : 0 $.
+Suivi de l'orchestration : `docs/archive/chantiers.md`. Coût cloud prévu : 0 $.

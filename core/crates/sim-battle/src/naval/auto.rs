@@ -1,365 +1,396 @@
-//! Naval auto-resolve (lot NV1, ADR 0028), the phased logic of lot N1
-//! (ADR 0013) at sea: volleys (the fleet holding the weather gauge shoots
-//! more), fireships, rams, boarding rounds fought with the very formulas of
-//! the real-time battle ([`super::combat`]), fire, surrender, then the
-//! loser's flight. Calibrated on [`super::NavalSim`] by
-//! `tests/nv1_naval.rs`.
+//! Naval auto-resolve, in phases and without positions: volleys (the fleet
+//! holding the weather gauge shoots more), fireships, rams, boarding rounds,
+//! fire, surrender, then the loser's flight. Every coefficient lives in
+//! [`NavalRules`].
+
+use data_model::NavalRules;
 
 use super::combat::{self, climb_factor};
+use super::fleet::Fleets;
 use super::outcome::NavalOutcome;
 use super::setup::NavalSetup;
 use super::ship::{Ship, ShipStatus};
-use super::sim::{outcome_of, NavalSim};
 use crate::rng::BattleRng;
 use crate::setup::SideId;
 
-/// Seconds of shooting one auto-resolve volley stands for.
-const VOLLEY_SECONDS: f64 = 30.0;
+/// Salt mixed into the battle seed for the auto-resolve dice.
+const SEED_SALT: u64 = 0x0A07_0E5E;
 
-/// Resolves a naval battle without the real-time simulation.
+/// Resolves a naval battle: a side without ships loses by default.
 pub fn auto_resolve(setup: &NavalSetup, seed: u64) -> NavalOutcome {
-    let Ok(sim) = NavalSim::new(setup.clone(), seed) else {
-        // A side without ships: the other holds the sea unopposed.
+    let Ok(fleets) = Fleets::deploy(setup, seed) else {
         let winner = if setup.attacker.ships.is_empty() {
+            SideId::Defender
+        } else {
+            SideId::Attacker
+        };
+        return NavalOutcome::from_ships(setup, &[], Some(winner), 0.0);
+    };
+    let mut battle = Battle::new(setup, fleets, seed);
+    battle.volleys_while_closing();
+    battle.fireships();
+    battle.boarding_rounds();
+    let winner = battle.winner();
+    if let Some(winner) = winner {
+        battle.flight_of(winner.other(), winner);
+    }
+    NavalOutcome::from_ships(setup, &battle.ships, winner, battle.elapsed)
+}
+
+/// State of one auto-resolved battle.
+struct Battle<'a> {
+    rules: &'a NavalRules,
+    rain: bool,
+    ships: Vec<Ship>,
+    wind_strength: f64,
+    gauge: Option<SideId>,
+    rng: BattleRng,
+    /// Random spread of each side's blows.
+    luck: [f64; 2],
+    elapsed: f64,
+}
+
+impl<'a> Battle<'a> {
+    fn new(setup: &'a NavalSetup, fleets: Fleets, seed: u64) -> Self {
+        let rules = &setup.rules;
+        let mut rng = BattleRng::from_seed(seed ^ SEED_SALT);
+        let luck = [(); 2].map(|()| 1.0 + rng.range(-rules.auto_jitter, rules.auto_jitter));
+        Battle {
+            rules,
+            rain: setup.rain,
+            ships: fleets.ships,
+            wind_strength: fleets.wind_strength,
+            gauge: fleets.gauge,
+            rng,
+            luck,
+            elapsed: 0.0,
+        }
+    }
+
+    /// Phase 1, volleys while the fleets close: the gauge side shoots first and more.
+    fn volleys_while_closing(&mut self) {
+        let rules = self.rules;
+        let gauge = self.gauge;
+        let volleys = |side: SideId| {
+            rules.auto_volleys
+                + if gauge == Some(side) {
+                    rules.auto_gauge_volleys
+                } else {
+                    0
+                }
+        };
+        let (attacker, defender) = (volleys(SideId::Attacker), volleys(SideId::Defender));
+        let order = self.firing_order();
+        for round in 0..attacker.max(defender) {
+            for side in order {
+                if round < volleys(side) {
+                    self.volley_round(side);
+                }
+            }
+            self.burn_all(rules.auto_volley_seconds);
+            self.settle();
+            self.elapsed += rules.auto_volley_seconds;
+        }
+    }
+
+    /// The gauge side fires first.
+    fn firing_order(&self) -> [SideId; 2] {
+        match self.gauge {
+            Some(SideId::Defender) => [SideId::Defender, SideId::Attacker],
+            _ => [SideId::Attacker, SideId::Defender],
+        }
+    }
+
+    /// Phase 2, fireships drift down on the enemy.
+    fn fireships(&mut self) {
+        let rules = self.rules;
+        for side in SideId::BOTH {
+            let chance = match self.gauge {
+                Some(g) if g == side => rules.fireship_chance_gauge,
+                Some(_) => rules.fireship_chance_lee,
+                None => rules.fireship_chance_calm,
+            };
+            let fireships: Vec<usize> = self
+                .ships
+                .iter()
+                .filter(|s| s.side == side && s.fireship && s.is_afloat())
+                .map(|s| s.id as usize)
+                .collect();
+            for f in fireships {
+                if let Some(t) = strongest(&self.ships, side.other(), rules) {
+                    if self.rng.unit() < chance {
+                        let target = &mut self.ships[t];
+                        let resist = target.class.fire_resistance;
+                        target.fire = (target.fire + rules.fireship_fire * (1.0 - resist)).min(1.0);
+                        target.morale = (target.morale - rules.fireship_morale).max(0.0);
+                    }
+                }
+                let ship = &mut self.ships[f];
+                ship.status = ShipStatus::Abandoned;
+                ship.fire = 1.0;
+                ship.cast_into_sea(0.0, 0.0);
+            }
+        }
+    }
+
+    /// Phase 3, boarding rounds: rams on first contact, melee second by
+    /// second, then the shooters between the boardings.
+    fn boarding_rounds(&mut self) {
+        let rules = self.rules;
+        let order = self.firing_order();
+        for round in 0..rules.auto_rounds {
+            let pairs = pair_ships(&self.ships, rules);
+            if pairs.is_empty() {
+                break;
+            }
+            if round == 0 {
+                for &(a, b) in &pairs {
+                    ram(&mut self.ships, a, b, rules);
+                    ram(&mut self.ships, b, a, rules);
+                }
+            }
+            for _ in 0..rules.auto_round_seconds.max(1.0) as usize {
+                self.melee_second(&pairs);
+            }
+            for side in order {
+                self.volley_round(side);
+            }
+            self.settle();
+        }
+    }
+
+    /// One second of boarding melee between the paired ships, with its
+    /// fires and surrenders.
+    fn melee_second(&mut self, pairs: &[(usize, usize)]) {
+        let rules = self.rules;
+        let ships = &mut self.ships;
+        let mut losses = vec![0.0; ships.len()];
+        let mut engaged = vec![0usize; ships.len()];
+        for &(a, b) in pairs {
+            engaged[a] += 1;
+            engaged[b] += 1;
+        }
+        for &(a, b) in pairs {
+            if !ships[a].is_afloat() || !ships[b].is_afloat() {
+                continue;
+            }
+            // Nobody boards a burning ship: they shoot at it instead.
+            if ships[a].fire > rules.burnt_fire || ships[b].fire > rules.burnt_fire {
+                continue;
+            }
+            let (on_b, on_a) = combat::melee_exchange(
+                &ships[a],
+                &ships[b],
+                1.0 / engaged[a].max(1) as f64,
+                1.0 / engaged[b].max(1) as f64,
+                chain_support(ships, a, rules),
+                chain_support(ships, b, rules),
+                1.0,
+                rules,
+            );
+            losses[b] += on_b * self.luck[ships[a].side.index()];
+            losses[a] += on_a * self.luck[ships[b].side.index()];
+        }
+        for (ship, loss) in ships.iter_mut().zip(losses) {
+            if loss <= 0.0 || !ship.is_afloat() {
+                continue;
+            }
+            let before = ship.fighting_men();
+            let killed = ship.take_losses(loss, rules, rules.armor_vs_melee);
+            if before > 0.0 {
+                ship.morale = (ship.morale
+                    - killed / before * 100.0 * rules.morale_per_loss_percent)
+                    .max(0.0);
+            }
+        }
+        spread_fire(ships, pairs, rules);
+        self.burn_all(1.0);
+        capture_broken(&mut self.ships, pairs, rules);
+        self.settle();
+        self.elapsed += 1.0;
+    }
+
+    /// Phase 4, the side that still stands holds the sea (the gauge breaks a tie).
+    fn winner(&self) -> Option<SideId> {
+        let ships = &self.ships;
+        let standing = |side: SideId| {
+            ships
+                .iter()
+                .filter(|s| {
+                    s.side == side && s.is_afloat() && !s.fireship && s.fighting_men() >= 1.0
+                })
+                .map(|s| s.melee_power(self.rules))
+                .sum::<f64>()
+        };
+        let initial = |side: SideId| {
+            ships
+                .iter()
+                .filter(|s| s.side == side && !s.fireship)
+                .map(Ship::fighting_initial)
+                .sum::<f64>()
+                .max(1.0)
+        };
+        let men = |side: SideId| {
+            ships
+                .iter()
+                .filter(|s| s.side == side && s.is_afloat() && !s.fireship)
+                .map(Ship::fighting_men)
+                .sum::<f64>()
+        };
+        let (pa, pd) = (standing(SideId::Attacker), standing(SideId::Defender));
+        let ra = men(SideId::Attacker) / initial(SideId::Attacker);
+        let rd = men(SideId::Defender) / initial(SideId::Defender);
+        let margin = self.rules.auto_decisive_margin;
+        if pa <= 0.0 && pd <= 0.0 {
+            None
+        } else if pd <= 0.0 {
+            Some(SideId::Attacker)
+        } else if pa <= 0.0 {
+            Some(SideId::Defender)
+        } else if pa * ra > pd * rd * margin {
+            Some(SideId::Attacker)
+        } else if pd * rd > pa * ra * margin {
             Some(SideId::Defender)
         } else {
-            Some(SideId::Attacker)
-        };
-        return outcome_of(setup, &[], winner, 0.0, true);
-    };
-    let rules = setup.rules.clone();
-    let gauge = sim.gauge();
-    let wind = sim.wind;
-    let mut ships = sim.ships;
-    let mut rng = BattleRng::from_seed(seed ^ 0x0A07_0E5E);
-    let luck = [
-        1.0 + rng.range(-rules.auto_jitter, rules.auto_jitter),
-        1.0 + rng.range(-rules.auto_jitter, rules.auto_jitter),
-    ];
-    let mut elapsed = 0.0;
-
-    // 1. Volleys while the fleets close: the gauge side shoots first and more.
-    let volleys = |side: SideId| {
-        rules.auto_volleys
-            + if gauge == Some(side) {
-                rules.auto_gauge_volleys
-            } else {
-                0
-            }
-    };
-    let most = volleys(SideId::Attacker).max(volleys(SideId::Defender));
-    let order = match gauge {
-        Some(SideId::Defender) => [SideId::Defender, SideId::Attacker],
-        _ => [SideId::Attacker, SideId::Defender],
-    };
-    for round in 0..most {
-        for side in order {
-            if round < volleys(side) {
-                volley_round(
-                    &mut ships,
-                    side,
-                    gauge,
-                    wind,
-                    luck[side.index()],
-                    setup.rain,
-                    &rules,
-                );
-            }
-        }
-        for ship in &mut ships {
-            burn_for(ship, wind, VOLLEY_SECONDS, &rules);
-        }
-        settle(&mut ships, &rules, elapsed);
-        elapsed += VOLLEY_SECONDS;
-    }
-
-    // 2. Fireships drift down on the enemy.
-    for side in SideId::BOTH {
-        let chance = match gauge {
-            Some(g) if g == side => 0.85,
-            Some(_) => 0.35,
-            None => 0.6,
-        };
-        let fireships: Vec<usize> = ships
-            .iter()
-            .filter(|s| s.side == side && s.fireship && s.is_afloat())
-            .map(|s| s.id as usize)
-            .collect();
-        for f in fireships {
-            let target = strongest(&ships, side.other());
-            if let Some(t) = target {
-                if rng.unit() < chance {
-                    let resist = ships[t].class.fire_resistance;
-                    ships[t].fire = (ships[t].fire + rules.fireship_fire * (1.0 - resist)).min(1.0);
-                    ships[t].morale = (ships[t].morale - 15.0).max(0.0);
-                }
-            }
-            let s = &mut ships[f];
-            s.status = ShipStatus::Abandoned;
-            s.fire = 1.0;
-            for (k, crew) in s.crew.iter_mut().enumerate() {
-                s.swimmers[k] += crew.men;
-                crew.men = 0.0;
-            }
-            s.sailors = 0.0;
+            self.gauge
         }
     }
 
-    // 3. Boarding rounds.
-    for round in 0..rules.auto_rounds {
-        let pairs = pair_ships(&ships, &rules);
-        if pairs.is_empty() {
-            break;
-        }
-        if round == 0 {
-            for &(a, b) in &pairs {
-                ram(&mut ships, a, b, &rules);
-                ram(&mut ships, b, a, &rules);
-            }
-        }
-        let seconds = rules.auto_round_seconds.max(1.0) as usize;
-        for _ in 0..seconds {
-            let mut losses = vec![0.0; ships.len()];
-            let mut engaged = vec![0usize; ships.len()];
-            for &(a, b) in &pairs {
-                engaged[a] += 1;
-                engaged[b] += 1;
-            }
-            for &(a, b) in &pairs {
-                if !ships[a].is_afloat() || !ships[b].is_afloat() {
-                    continue;
-                }
-                // Nobody boards a burning ship: they shoot at it instead.
-                if ships[a].fire > 0.3 || ships[b].fire > 0.3 {
-                    continue;
-                }
-                let (on_b, on_a) = combat::melee_exchange(
-                    &ships[a],
-                    &ships[b],
-                    1.0 / engaged[a].max(1) as f64,
-                    1.0 / engaged[b].max(1) as f64,
-                    chain_support(&ships, a, &rules),
-                    chain_support(&ships, b, &rules),
-                    1.0,
-                    &rules,
-                );
-                losses[b] += on_b * luck[ships[a].side.index()];
-                losses[a] += on_a * luck[ships[b].side.index()];
-            }
-            for (i, loss) in losses.into_iter().enumerate() {
-                if loss <= 0.0 || !ships[i].is_afloat() {
-                    continue;
-                }
-                let before = ships[i].fighting_men();
-                let killed = ships[i].take_losses(loss, rules.armor_vs_melee);
-                if before > 0.0 {
-                    let m = &mut ships[i].morale;
-                    *m = (*m - killed / before * 100.0 * rules.morale_per_loss_percent).max(0.0);
-                }
-            }
-            // Fire spreads between lashed ships.
-            for &(a, b) in &pairs {
-                let (fa, fb) = (ships[a].fire, ships[b].fire);
-                if fa > 0.2 && ships[b].is_afloat() {
-                    ships[b].fire = (fb
-                        + fa * rules.fire_spread * (1.0 - ships[b].class.fire_resistance))
-                        .min(1.0);
-                }
-                if fb > 0.2 && ships[a].is_afloat() {
-                    ships[a].fire = (fa
-                        + fb * rules.fire_spread * (1.0 - ships[a].class.fire_resistance))
-                        .min(1.0);
-                }
-            }
-            for ship in &mut ships {
-                burn_for(ship, wind, 1.0, &rules);
-            }
-            capture_broken(&mut ships, &pairs, &rules);
-            settle(&mut ships, &rules, elapsed);
-            elapsed += 1.0;
-        }
-        // Shooters keep shooting between the boardings.
-        for side in order {
-            volley_round(
-                &mut ships,
-                side,
-                gauge,
-                wind,
-                luck[side.index()],
-                setup.rain,
-                &rules,
-            );
-        }
-        settle(&mut ships, &rules, elapsed);
-    }
-
-    // 4. The side that still stands holds the sea; the loser runs.
-    let standing = |ships: &[Ship], side: SideId| {
-        ships
-            .iter()
-            .filter(|s| s.side == side && s.is_afloat() && !s.fireship && s.fighting_men() >= 1.0)
-            .map(Ship::melee_power)
-            .sum::<f64>()
-    };
-    let initial = |ships: &[Ship], side: SideId| {
-        ships
-            .iter()
-            .filter(|s| s.side == side && !s.fireship)
-            .map(|s| s.fighting_initial())
-            .sum::<f64>()
-            .max(1.0)
-    };
-    let men = |ships: &[Ship], side: SideId| {
-        ships
-            .iter()
-            .filter(|s| s.side == side && s.is_afloat() && !s.fireship)
-            .map(Ship::fighting_men)
-            .sum::<f64>()
-    };
-    let (pa, pd) = (
-        standing(&ships, SideId::Attacker),
-        standing(&ships, SideId::Defender),
-    );
-    let ra = men(&ships, SideId::Attacker) / initial(&ships, SideId::Attacker);
-    let rd = men(&ships, SideId::Defender) / initial(&ships, SideId::Defender);
-    let winner = if pa <= 0.0 && pd <= 0.0 {
-        None
-    } else if pd <= 0.0 {
-        Some(SideId::Attacker)
-    } else if pa <= 0.0 {
-        Some(SideId::Defender)
-    } else if pa * ra > pd * rd * 1.1 {
-        Some(SideId::Attacker)
-    } else if pd * rd > pa * ra * 1.1 {
-        Some(SideId::Defender)
-    } else {
-        gauge
-    };
-    if let Some(winner) = winner {
-        let loser = winner.other();
-        for ship in ships
+    /// The loser's ships still afloat run for it, or strike to `winner`.
+    fn flight_of(&mut self, loser: SideId, winner: SideId) {
+        let rules = self.rules;
+        for ship in self
+            .ships
             .iter_mut()
             .filter(|s| s.side == loser && s.is_afloat())
         {
             let chance = if ship.class.oar_speed > 0.0 {
-                0.7
-            } else if gauge == Some(loser) {
-                0.5
+                rules.escape_chance_oars
+            } else if self.gauge == Some(loser) {
+                rules.escape_chance_gauge
             } else {
-                0.3
+                rules.escape_chance_other
             };
-            if ship.chain.is_none() && rng.unit() < chance {
+            if ship.chain.is_none() && self.rng.unit() < chance {
                 ship.status = ShipStatus::Escaped;
             } else {
-                for (k, crew) in ship.crew.iter_mut().enumerate() {
-                    ship.prisoners[k] += crew.men;
-                    crew.men = 0.0;
+                ship.strike(winner);
+            }
+        }
+    }
+
+    /// One volley of every shooter of `side`, each ship at the enemy ship
+    /// facing it in line (round-robin).
+    fn volley_round(&mut self, side: SideId) {
+        let rules = self.rules;
+        let alignment = match self.gauge {
+            Some(g) if g == side => rules.auto_volley_alignment,
+            Some(_) => -rules.auto_volley_alignment,
+            None => 0.0,
+        };
+        let ships = &mut self.ships;
+        let shooters: Vec<usize> = ships
+            .iter()
+            .filter(|s| s.side == side && s.is_afloat() && !s.fireship && s.ranged_power() > 0.0)
+            .map(|s| s.id as usize)
+            .collect();
+        let targets: Vec<usize> = ships
+            .iter()
+            .filter(|s| s.side != side && s.is_afloat() && !s.fireship)
+            .map(|s| s.id as usize)
+            .collect();
+        if targets.is_empty() {
+            return;
+        }
+        let luck = self.luck[side.index()];
+        for (n, &i) in shooters.iter().enumerate() {
+            let t = targets[n % targets.len()];
+            for g in 0..ships[i].crew.len() {
+                if !ships[i].crew[g].shoots() {
+                    continue;
                 }
-                ship.sailors = 0.0;
-                ship.status = ShipStatus::Captured { by: winner };
+                let distance = ships[i].crew[g].range * rules.auto_range_share;
+                let v = combat::volley(
+                    &ships[i],
+                    g,
+                    &ships[t],
+                    distance,
+                    self.wind_strength,
+                    alignment,
+                    self.rain,
+                    rules,
+                );
+                let reload = combat::reload_seconds(&ships[i].crew[g], rules);
+                let count = (rules.auto_volley_seconds / reload)
+                    .max(1.0)
+                    .min(ships[i].crew[g].ammo);
+                ships[i].crew[g].ammo -= count;
+                let before = ships[t].fighting_men();
+                let killed =
+                    ships[t].take_losses(v.hits * count * luck, rules, rules.armor_vs_ranged);
+                if before > 0.0 {
+                    let factor = combat::morale_factor(&ships[t], rules);
+                    let morale = &mut ships[t].morale;
+                    *morale = (*morale
+                        - killed / before
+                            * 100.0
+                            * rules.morale_per_loss_percent
+                            * rules.auto_volley_morale
+                            * factor)
+                        .max(0.0);
+                }
+                ships[t].fire = (ships[t].fire + v.fire * count).min(1.0);
             }
         }
     }
-    outcome_of(setup, &ships, winner, elapsed, true)
-}
 
-/// One volley of every shooter of `side`, each ship at the enemy ship
-/// facing it in line (round-robin).
-fn volley_round(
-    ships: &mut [Ship],
-    side: SideId,
-    gauge: Option<SideId>,
-    wind: combat::Wind,
-    luck: f64,
-    rain: bool,
-    rules: &data_model::NavalRules,
-) {
-    let alignment = match gauge {
-        Some(g) if g == side => 0.8,
-        Some(_) => -0.8,
-        None => 0.0,
-    };
-    let shooters: Vec<usize> = ships
-        .iter()
-        .filter(|s| s.side == side && s.is_afloat() && !s.fireship && s.ranged_power() > 0.0)
-        .map(|s| s.id as usize)
-        .collect();
-    let targets: Vec<usize> = ships
-        .iter()
-        .filter(|s| s.side != side && s.is_afloat() && !s.fireship)
-        .map(|s| s.id as usize)
-        .collect();
-    if targets.is_empty() {
-        return;
+    /// Fires burn for `seconds`, in whole-second steps at most.
+    fn burn_all(&mut self, seconds: f64) {
+        let steps = seconds.ceil().max(1.0) as usize;
+        for ship in self.ships.iter_mut().filter(|s| !s.is_out()) {
+            for _ in 0..steps {
+                combat::burn(ship, self.wind_strength, seconds / steps as f64, self.rules);
+            }
+        }
     }
-    for (n, &i) in shooters.iter().enumerate() {
-        let t = targets[n % targets.len()];
-        for g in 0..ships[i].crew.len() {
-            if !ships[i].crew[g].shoots() {
-                continue;
+
+    /// Abandons burning ships and sends holed ones to the bottom.
+    fn settle(&mut self) {
+        let rules = self.rules;
+        for ship in &mut self.ships {
+            let burning = ship.is_afloat() && ship.fire >= rules.fire_abandon;
+            let holed = !ship.is_out() && ship.hull <= 0.0;
+            if burning || holed {
+                ship.cast_into_sea(rules.drown_base, rules.drown_armor);
+                ship.status = if holed {
+                    ShipStatus::Sinking {
+                        since: self.elapsed,
+                    }
+                } else {
+                    ShipStatus::Abandoned
+                };
             }
-            let distance = ships[i].crew[g].range * 0.55;
-            let v = combat::volley(
-                &ships[i], g, &ships[t], distance, wind, alignment, rain, rules,
-            );
-            let reload = combat::reload_seconds(&ships[i].crew[g], rules);
-            let count = (VOLLEY_SECONDS / reload)
-                .max(1.0)
-                .min(ships[i].crew[g].ammo);
-            ships[i].crew[g].ammo -= count;
-            let before = ships[t].fighting_men();
-            let killed = ships[t].take_losses(v.hits * count * luck, rules.armor_vs_ranged);
-            if before > 0.0 {
-                let factor = combat::morale_factor(&ships[t], rules);
-                let m = &mut ships[t].morale;
-                *m = (*m - killed / before * 100.0 * rules.morale_per_loss_percent * 0.6 * factor)
-                    .max(0.0);
-            }
-            ships[t].fire = (ships[t].fire + v.fire * count).min(1.0);
         }
     }
 }
 
-fn burn_for(ship: &mut Ship, wind: combat::Wind, seconds: f64, rules: &data_model::NavalRules) {
-    if matches!(
-        ship.status,
-        ShipStatus::Sunk | ShipStatus::Escaped | ShipStatus::Sinking { .. }
-    ) {
-        return;
-    }
-    let steps = seconds.ceil().max(1.0) as usize;
-    for _ in 0..steps {
-        combat::burn(ship, wind, seconds / steps as f64, rules);
-    }
-}
-
-/// Abandons burning ships and sends holed ones to the bottom.
-fn settle(ships: &mut [Ship], rules: &data_model::NavalRules, elapsed: f64) {
-    for ship in ships.iter_mut() {
-        let burning = ship.is_afloat() && ship.fire >= rules.fire_abandon;
-        let holed = !matches!(
-            ship.status,
-            ShipStatus::Sunk | ShipStatus::Escaped | ShipStatus::Sinking { .. }
-        ) && ship.hull <= 0.0;
-        if burning || holed {
-            for (k, crew) in ship.crew.iter_mut().enumerate() {
-                let drown = (rules.drown_base + crew.armor / 100.0 * rules.drown_armor).min(1.0);
-                ship.drowned[k] += crew.men * drown;
-                ship.swimmers[k] += crew.men * (1.0 - drown);
-                crew.men = 0.0;
-            }
-            ship.sailors = 0.0;
-            ship.status = if holed {
-                ShipStatus::Sinking { since: elapsed }
-            } else {
-                ShipStatus::Abandoned
-            };
+/// Fire spreads between lashed ships.
+fn spread_fire(ships: &mut [Ship], pairs: &[(usize, usize)], rules: &NavalRules) {
+    for &(a, b) in pairs {
+        let (fa, fb) = (ships[a].fire, ships[b].fire);
+        if fa > rules.fire_spread_threshold && ships[b].is_afloat() {
+            ships[b].fire =
+                (fb + fa * rules.fire_spread * (1.0 - ships[b].class.fire_resistance)).min(1.0);
+        }
+        if fb > rules.fire_spread_threshold && ships[a].is_afloat() {
+            ships[a].fire =
+                (fa + fb * rules.fire_spread * (1.0 - ships[a].class.fire_resistance)).min(1.0);
         }
     }
 }
 
 /// Broken crews strike to the ship they fight.
-fn capture_broken(ships: &mut [Ship], pairs: &[(usize, usize)], rules: &data_model::NavalRules) {
+fn capture_broken(ships: &mut [Ship], pairs: &[(usize, usize)], rules: &NavalRules) {
     for &(a, b) in pairs {
         for (loser, winner) in [(a, b), (b, a)] {
             if !ships[loser].is_afloat() || !ships[winner].is_afloat() {
@@ -368,13 +399,7 @@ fn capture_broken(ships: &mut [Ship], pairs: &[(usize, usize)], rules: &data_mod
             let share = ships[loser].fighting_men() / ships[loser].fighting_initial().max(1.0);
             if ships[loser].morale < rules.surrender_morale || share < rules.surrender_crew_share {
                 let by = ships[winner].side;
-                let s = &mut ships[loser];
-                for (k, crew) in s.crew.iter_mut().enumerate() {
-                    s.prisoners[k] += crew.men;
-                    crew.men = 0.0;
-                }
-                s.sailors = 0.0;
-                s.status = ShipStatus::Captured { by };
+                ships[loser].strike(by);
             }
         }
     }
@@ -382,7 +407,7 @@ fn capture_broken(ships: &mut [Ship], pairs: &[(usize, usize)], rules: &data_mod
 
 /// Pairs every afloat ship with an enemy: the strongest meet first, the
 /// larger fleet doubles up on the enemy's weakest ships.
-fn pair_ships(ships: &[Ship], rules: &data_model::NavalRules) -> Vec<(usize, usize)> {
+fn pair_ships(ships: &[Ship], rules: &NavalRules) -> Vec<(usize, usize)> {
     let fleet = |side: SideId| {
         let mut ids: Vec<usize> = ships
             .iter()
@@ -391,8 +416,8 @@ fn pair_ships(ships: &[Ship], rules: &data_model::NavalRules) -> Vec<(usize, usi
             .collect();
         ids.sort_by(|&x, &y| {
             ships[y]
-                .melee_power()
-                .total_cmp(&ships[x].melee_power())
+                .melee_power(rules)
+                .total_cmp(&ships[x].melee_power(rules))
                 .then(x.cmp(&y))
         });
         ids
@@ -412,15 +437,13 @@ fn pair_ships(ships: &[Ship], rules: &data_model::NavalRules) -> Vec<(usize, usi
             small[n]
         } else {
             // Extra ships go for the enemy they can climb onto best.
+            let appeal = |x: usize| {
+                climb_factor(ships[x].deck_height() - ships[i].deck_height(), rules)
+                    / ships[x].melee_power(rules).max(rules.auto_min_power)
+            };
             *small
                 .iter()
-                .max_by(|&&x, &&y| {
-                    let fx = climb_factor(ships[x].deck_height() - ships[i].deck_height(), rules)
-                        / ships[x].melee_power().max(0.1);
-                    let fy = climb_factor(ships[y].deck_height() - ships[i].deck_height(), rules)
-                        / ships[y].melee_power().max(0.1);
-                    fx.total_cmp(&fy).then(y.cmp(&x))
-                })
+                .max_by(|&&x, &&y| appeal(x).total_cmp(&appeal(y)).then(y.cmp(&x)))
                 .unwrap_or(&small[0])
         };
         pairs.push((i.min(j), i.max(j)));
@@ -428,7 +451,9 @@ fn pair_ships(ships: &[Ship], rules: &data_model::NavalRules) -> Vec<(usize, usi
     pairs
 }
 
-fn chain_support(ships: &[Ship], i: usize, rules: &data_model::NavalRules) -> f64 {
+/// Reinforcements over the chains: in the auto-resolve every chained ship is
+/// engaged, so only a share of the support counts.
+fn chain_support(ships: &[Ship], i: usize, rules: &NavalRules) -> f64 {
     let Some(chain) = ships[i].chain else {
         return 0.0;
     };
@@ -439,32 +464,31 @@ fn chain_support(ships: &[Ship], i: usize, rules: &data_model::NavalRules) -> f6
         })
         .count()
         .min(2);
-    // In the auto-resolve every chained ship is engaged: half the support.
-    neighbours as f64 * rules.chain_support * 0.5
+    neighbours as f64 * rules.chain_support * rules.auto_chain_share
 }
 
 /// A galley's spur against a low hull, on first contact.
-fn ram(ships: &mut [Ship], a: usize, b: usize, rules: &data_model::NavalRules) {
+fn ram(ships: &mut [Ship], a: usize, b: usize, rules: &NavalRules) {
     if !ships[a].is_galley() || !ships[b].is_afloat() {
         return;
     }
-    let high = if ships[b].class.freeboard_m >= 2.5 {
+    let high = if ships[b].class.freeboard_m >= rules.ram_high_freeboard_m {
         rules.ram_high_factor
     } else {
         1.0
     };
     let damage = ships[a].class.ram * ships[a].class.oar_speed * (1.0 + rules.ram_speed) * high;
     ships[b].hull -= damage;
-    ships[b].morale = (ships[b].morale - 8.0).max(0.0);
+    ships[b].morale = (ships[b].morale - rules.ram_morale).max(0.0);
 }
 
-fn strongest(ships: &[Ship], side: SideId) -> Option<usize> {
+fn strongest(ships: &[Ship], side: SideId, rules: &NavalRules) -> Option<usize> {
     ships
         .iter()
         .filter(|s| s.side == side && s.is_afloat() && !s.fireship)
         .max_by(|a, b| {
-            a.melee_power()
-                .total_cmp(&b.melee_power())
+            a.melee_power(rules)
+                .total_cmp(&b.melee_power(rules))
                 .then(b.id.cmp(&a.id))
         })
         .map(|s| s.id as usize)

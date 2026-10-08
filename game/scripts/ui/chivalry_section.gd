@@ -1,7 +1,7 @@
 class_name ChivalrySection
-extends VBoxContainer
+extends PanelSection
 
-## H11 — section « Ordre de chevalerie » du panneau de faction, construite en code : ordre fondé
+## Section « Ordre de chevalerie » du panneau de faction, construite en code : ordre fondé
 ## (nom lié au Codex, membres cliquables, bonus, « brisé » après un désastre) ou options de
 ## fondation (coût, prestige requis, raison du refus, infobulle `RichTooltip.chivalric_order`).
 ## Aucune règle ici : tout vient de `CampaignSim.get_chivalric_orders` / `submit_order`
@@ -9,56 +9,38 @@ extends VBoxContainer
 
 signal order_founded(order_id: String)
 
-const ERROR_COLOR := Color(0.55, 0.20, 0.15)
-const MUTED_COLOR := Color(0.42, 0.33, 0.20)
 ## Fiches Codex des ordres historiques (repli si `entry_for_entity` ne connaît pas l'ordre).
 const ORDER_CODEX := {"ord_garter": "cdx_ordre_de_la_jarretiere", "ord_star": "cdx_ordre_de_l_etoile", "ord_golden_fleece": "cdx_toison_or", "ord_court_company": "cdx_chevalerie"}
 
 var orders: Dictionary = {}
 var found_buttons: Dictionary = {}
 var member_links: Array = []
-var last_result: Dictionary = {}
-var read_only := false
 
 var header_label: Label
 var body: VBoxContainer
-var error_label: Label
-var _sim: Object = null
 var _texts: Array = []
 
 
 func _init() -> void:
-	name = "ChivalrySection"
-	add_theme_constant_override("separation", 3)
-	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_label = Label.new()
-	header_label.text = "Ordre de chevalerie"
-	UiType.apply(header_label, UiType.BODY)  # P2a (ADR 0097) : titre de section (17 px)
+	super("ChivalrySection", 3)
+	header_label = UiBuild.label("Ordre de chevalerie")
+	UiType.apply(header_label, UiType.BODY)
 	add_child(header_label)
-	body = VBoxContainer.new()
-	body.add_theme_constant_override("separation", 3)
+	body = UiBuild.vbox(3)
 	add_child(body)
-	error_label = Label.new()
-	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	error_label.custom_minimum_size = Vector2(300, 0)
-	UiType.apply(error_label, UiType.CAPTION)
-	error_label.add_theme_color_override("font_color", ERROR_COLOR)
-	error_label.hide()
-	add_child(error_label)
+	_add_error_label(300.0)
 
 
 ## Remplit la section (ordres du joueur) ; masquée si la simulation n'expose pas l'API.
 func show_for(player_owned: bool = true, sim: Object = null) -> void:
 	read_only = not player_owned
-	_sim = sim if sim != null else _facade_sim()
+	_sim = _resolve_sim(sim)
 	if _sim == null or not _sim.has_method("get_chivalric_orders") or read_only:
 		hide()
 		return
 	orders = _sim.call("get_chivalric_orders")
 	show()
-	for child in body.get_children():
-		body.remove_child(child)
-		child.queue_free()
+	UiBuild.clear_children(body)
 	found_buttons.clear()
 	member_links.clear()
 	_texts.clear()
@@ -90,7 +72,7 @@ func _show_founded(founded: Dictionary) -> void:
 		link.text = str(member.get("name", character_id))
 		UiType.apply(link, UiType.CAPTION)
 		RansomPanel.style_link(link)
-		RichTooltip.attach_plain(link, "open_character_sheet")
+		TooltipHost.attach_plain(link, "open_character_sheet")
 		link.pressed.connect(func() -> void: _request_character(character_id))
 		flow.add_child(link)
 		member_links.append(link)
@@ -103,7 +85,7 @@ func _show_options(options: Array) -> void:
 		return
 	for option in options:
 		var id := str(option.get("id", ""))
-		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), RichTooltip.thousands(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], UiType.CAPTION))
+		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), Money.digits(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], UiType.CAPTION))
 		var button := RichButton.new()
 		button.text = "Fonder l'ordre"
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -121,12 +103,7 @@ func _show_options(options: Array) -> void:
 func request_found(order_id: String) -> Dictionary:
 	if _sim == null:
 		return {}
-	last_result = _sim.call("submit_order", {"type": "found_chivalric_order", "order": order_id})
-	var ok := bool(last_result.get("ok", false))
-	show_for(true, _sim)
-	error_label.visible = not ok
-	error_label.text = "Refusé : %s" % str(last_result.get("error", "?")) if not ok else ""
-	if ok:
+	if _submit({"type": "found_chivalric_order", "order": order_id}, func() -> void: show_for(true, _sim)):
 		order_founded.emit(order_id)
 	return last_result
 
@@ -149,13 +126,9 @@ func _option(order_id: String) -> Dictionary:
 	return {}
 
 
-## P2a (ADR 0097) : `variation`, une taille `UiType` (`UiType.CAPTION` ici, seule taille utilisée
-## par cette section) au lieu d'un nombre de pixels au hasard.
+## `variation` : une taille `UiType` (`UiType.CAPTION` ici).
 func _label(text: String, variation: String, color: Color) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(300, 0)
+	var label := UiBuild.label(text, 0, null, true, 300)
 	UiType.apply(label, variation)
 	label.add_theme_color_override("font_color", color)
 	return label
@@ -192,8 +165,3 @@ func _request_character(character_id: String) -> void:
 			node.emit_signal("character_selected", character_id)
 			return
 		node = node.get_parent()
-
-
-func _facade_sim() -> Object:
-	var facade := RansomPanel._root_node("/root/SimFacade")
-	return facade.get("sim") if facade != null else null

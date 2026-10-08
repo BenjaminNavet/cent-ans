@@ -24,7 +24,7 @@ fn crossing_setup(structure: CrossingStructure, terrain: Terrain) -> BattleSetup
     let data = data();
     let mut battle = setup(
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_men_at_arms_foot",
@@ -35,7 +35,7 @@ fn crossing_setup(structure: CrossingStructure, terrain: Terrain) -> BattleSetup
             ],
         ),
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",

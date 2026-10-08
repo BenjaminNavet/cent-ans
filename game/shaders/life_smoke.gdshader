@@ -5,6 +5,9 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, unshaded, shadows_disabled, fog_disabled;
 
+#include "res://shaders/fx_flipbook.gdshaderinc"
+#include "res://shaders/fx_noise.gdshaderinc"
+
 uniform vec2 wind = vec2(0.8, 0.35);
 uniform vec3 light_smoke : source_color = vec3(0.78, 0.76, 0.72);
 uniform vec3 dark_smoke : source_color = vec3(0.10, 0.09, 0.085);
@@ -22,28 +25,12 @@ uniform vec3 sun_tint = vec3(1.0, 0.96, 0.9);
 // LR-14 : panaches d'incendie en bouffées de la planche de fumée libre FA (WispySmoke03, CC0) au
 // lieu du bruit procédural (traits noirs droits vus de dessus). Désactivé si `use_flipbook` = faux.
 uniform bool use_flipbook = false;
-uniform sampler2D flipbook : filter_linear_mipmap, repeat_disable;
-uniform float frames_h = 8.0;
-uniform float frames_v = 8.0;
 // Hauteur / largeur du quad (corrige l'aspect des bouffées).
 uniform float aspect = 2.2;
 uniform int puffs = 6;
 
 varying vec4 v_custom;
 varying vec2 v_uv;
-
-float hash21(vec2 p) {
-	p = fract(p * vec2(123.34, 456.21));
-	p += dot(p, p + 45.32);
-	return fract(p.x * p.y);
-}
-
-float noise2(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x), mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
-}
 
 void vertex() {
 	v_custom = INSTANCE_CUSTOM;
@@ -70,11 +57,8 @@ void vertex() {
 
 vec4 puff_sample(vec2 uv, float frame) {
 	float f = clamp(frame, 0.0, frames_h * frames_v - 1.001);
-	float first = floor(f);
-	float next = min(first + 1.0, frames_h * frames_v - 1.0);
-	vec2 a = (vec2(mod(first, frames_h), floor(first / frames_h)) + uv) / vec2(frames_h, frames_v);
-	vec2 b = (vec2(mod(next, frames_h), floor(next / frames_h)) + uv) / vec2(frames_h, frames_v);
-	return mix(texture(flipbook, a), texture(flipbook, b), f - first);
+	vec3 frames = flipbook_clamped(f);
+	return flipbook_texel(frame_uv(uv, frames.x), frame_uv(uv, frames.y), frames.z);
 }
 
 vec4 flipbook_plume(float seed, float dark) {

@@ -298,7 +298,7 @@ static func read_world_size(map_dir: String) -> Vector2i:
 	var path := map_dir.path_join("map.json")
 	if not FileAccess.file_exists(path):
 		return Vector2i.ZERO
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var meta: Variant = DataFile.parse_file(path)
 	if not (meta is Dictionary):
 		return Vector2i.ZERO
 	var size_px: Variant = (meta as Dictionary).get("size_px", [])

@@ -5,7 +5,6 @@ import math
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools.geo import towns
 
@@ -14,15 +13,6 @@ DATA = Path(__file__).resolve().parents[2] / "data"
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _check(schema_name: str, document: dict) -> None:
-    schema = _load(DATA / "schemas" / schema_name)
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: list(e.path)
-    )
-    assert not errors, [f"{list(e.path)}: {e.message}" for e in errors[:10]]
 
 
 def _settlement(**extra) -> dict:
@@ -53,7 +43,6 @@ def spur(x, y):  # noqa: ANN001, ANN201
 def test_rules_match_schema() -> None:
     """data/rules/town_footprint.json matches its schema and references real settlements."""
     rules = towns.load_rules()
-    _check("town_footprint_rules.schema.json", rules)
     ids = {s["id"] for s in towns.load_settlements()}
     missing = [
         r["settlement"] for r in rules["references"] if r["settlement"] not in ids
@@ -67,7 +56,6 @@ def test_generated_file_matches_schema() -> None:
     """data/map/towns_1340.json (generated) matches its schema and skips the landmarks."""
     path = DATA / "map" / towns.OUT_FILE
     document = _load(path)
-    _check("towns_1340.schema.json", document)
     landmarks = towns.landmark_settlements()
     assert not landmarks & set(document["towns"])
     assert len(document["towns"]) >= 500

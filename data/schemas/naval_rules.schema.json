@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/naval_rules.schema.json",
   "title": "Règles navales",
-  "description": "Fichier data/naval/rules.json (lot NV1, ADR 0028) : coefficients du combat naval (tir, abordage, feu, éperon, naufrage), de l'auto-résolution par phases et des conséquences de campagne (interception, maîtrise de la mer, blocus). Le sens de chaque champ est documenté dans NavalRules (core/crates/data-model/src/entities/naval.rs).",
+  "description": "Fichier data/naval/rules.json (ADR 0028, 0192) : coefficients du combat naval (tir, abordage, feu, éperon, naufrage), de l'auto-résolution par phases et des conséquences de campagne (interception, maîtrise de la mer, blocus). Le sens de chaque champ est documenté dans NavalRules (core/crates/data-model/src/entities/naval.rs).",
   "type": "object",
   "properties": {
     "description": {
@@ -56,31 +56,35 @@
       "type": "number",
       "minimum": 0
     },
-    "wind_speed_min": {
+    "gauge_alignment": {
       "type": "number",
       "minimum": 0
     },
-    "close_hauled_deg": {
+    "wind_strength_min": {
       "type": "number",
       "minimum": 0
     },
-    "rower_stamina_s": {
+    "wind_strength_max": {
       "type": "number",
       "minimum": 0
     },
-    "drift_speed": {
+    "gauge_angle_min_deg": {
       "type": "number",
       "minimum": 0
     },
-    "grapple_gap_m": {
+    "gauge_angle_max_deg": {
       "type": "number",
       "minimum": 0
     },
-    "grapple_chance": {
+    "volley_falloff": {
       "type": "number",
       "minimum": 0
     },
-    "cut_chance": {
+    "rain_accuracy": {
+      "type": "number",
+      "minimum": 0
+    },
+    "castle_shelter": {
       "type": "number",
       "minimum": 0
     },
@@ -107,26 +111,6 @@
     "chain_support": {
       "type": "number",
       "minimum": 0
-    },
-    "boarders_per_target": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "IA (NV2) : au plus tant de navires abordent un même navire ennemi."
-    },
-    "assault_range_m": {
-      "type": "number",
-      "minimum": 0,
-      "description": "IA (NV2) : distance sous laquelle la majorité de la flotte doit se trouver pour l'abordage général."
-    },
-    "assault_softening_s": {
-      "type": "number",
-      "minimum": 0,
-      "description": "IA (NV2) : secondes de volées à cette distance avant l'abordage général."
-    },
-    "assault_odds": {
-      "type": "number",
-      "minimum": 0,
-      "description": "IA (NV2) : rapport de forces minimal pour aborder pendant l'abordage général."
     },
     "chain_morale": {
       "type": "number",
@@ -161,6 +145,18 @@
       "type": "number",
       "minimum": 0
     },
+    "fire_morale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "burnt_fire": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fire_spread_threshold": {
+      "type": "number",
+      "minimum": 0
+    },
     "fire_spread": {
       "type": "number",
       "minimum": 0
@@ -173,6 +169,22 @@
       "type": "number",
       "minimum": 0
     },
+    "fireship_morale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fireship_chance_gauge": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fireship_chance_lee": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fireship_chance_calm": {
+      "type": "number",
+      "minimum": 0
+    },
     "ram_speed": {
       "type": "number",
       "minimum": 0
@@ -181,7 +193,11 @@
       "type": "number",
       "minimum": 0
     },
-    "sink_seconds": {
+    "ram_high_freeboard_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ram_morale": {
       "type": "number",
       "minimum": 0
     },
@@ -190,14 +206,6 @@
       "minimum": 0
     },
     "drown_armor": {
-      "type": "number",
-      "minimum": 0
-    },
-    "escape_radius_m": {
-      "type": "number",
-      "minimum": 0
-    },
-    "max_duration_s": {
       "type": "number",
       "minimum": 0
     },
@@ -214,6 +222,46 @@
       "minimum": 0
     },
     "auto_round_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_volley_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_range_share": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_volley_alignment": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_volley_morale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_chain_share": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_min_power": {
+      "type": "number",
+      "minimum": 0
+    },
+    "auto_decisive_margin": {
+      "type": "number",
+      "minimum": 0
+    },
+    "escape_chance_oars": {
+      "type": "number",
+      "minimum": 0
+    },
+    "escape_chance_gauge": {
+      "type": "number",
+      "minimum": 0
+    },
+    "escape_chance_other": {
       "type": "number",
       "minimum": 0
     },
@@ -253,6 +301,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "shooter_melee_share": { "type": "number", "minimum": 0 },
+    "sailor_melee": { "type": "number", "minimum": 0 },
+    "sailor_armor": { "type": "number", "minimum": 0, "maximum": 100 },
+    "melee_morale_floor": { "type": "number", "minimum": 0, "maximum": 1 },
     "marine_archer_share": {
       "type": "number",
       "minimum": 0
@@ -271,19 +323,21 @@
     "castle_cover",
     "fire_per_missile",
     "fire_arrow_share",
-    "wind_speed_min",
-    "close_hauled_deg",
-    "rower_stamina_s",
-    "drift_speed",
-    "grapple_gap_m",
-    "grapple_chance",
-    "cut_chance",
+    "gauge_alignment",
+    "wind_strength_min",
+    "wind_strength_max",
+    "gauge_angle_min_deg",
+    "gauge_angle_max_deg",
+    "volley_falloff",
+    "rain_accuracy",
+    "castle_shelter",
     "melee_lethality",
     "armor_vs_melee",
     "climb_per_m",
     "climb_cap",
     "castle_defense",
     "chain_support",
+    "chain_morale",
     "morale_per_loss_percent",
     "surrender_morale",
     "surrender_crew_share",
@@ -291,20 +345,36 @@
     "fire_fighting",
     "fire_hull",
     "fire_crew",
+    "fire_morale",
+    "burnt_fire",
+    "fire_spread_threshold",
     "fire_spread",
     "fire_abandon",
     "fireship_fire",
+    "fireship_morale",
+    "fireship_chance_gauge",
+    "fireship_chance_lee",
+    "fireship_chance_calm",
     "ram_speed",
     "ram_high_factor",
-    "sink_seconds",
+    "ram_high_freeboard_m",
+    "ram_morale",
     "drown_base",
     "drown_armor",
-    "escape_radius_m",
-    "max_duration_s",
     "auto_volleys",
     "auto_gauge_volleys",
     "auto_rounds",
     "auto_round_seconds",
+    "auto_volley_seconds",
+    "auto_range_share",
+    "auto_volley_alignment",
+    "auto_volley_morale",
+    "auto_chain_share",
+    "auto_min_power",
+    "auto_decisive_margin",
+    "escape_chance_oars",
+    "escape_chance_gauge",
+    "escape_chance_other",
     "auto_jitter",
     "intercept_base",
     "intercept_per_control",
@@ -314,7 +384,11 @@
     "blockade_toll",
     "squadron_share",
     "squadron_max",
-    "marine_archer_share"
+    "marine_archer_share",
+    "shooter_melee_share",
+    "sailor_melee",
+    "sailor_armor",
+    "melee_morale_floor"
   ],
   "additionalProperties": false
 }

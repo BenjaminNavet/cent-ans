@@ -67,7 +67,7 @@
       "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
     },
     "raze_forbidden_kinds": { "type": "array", "items": { "$ref": "#/$defs/kind" }, "uniqueItems": true },
-    "raze_forbidden_settlements": { "type": "array", "items": { "type": "string", "pattern": "^set_[a-z0-9_]+$" }, "uniqueItems": true },
+    "raze_forbidden_settlements": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/settlement_id" }, "uniqueItems": true },
     "ai": {
       "type": "object",
       "properties": {

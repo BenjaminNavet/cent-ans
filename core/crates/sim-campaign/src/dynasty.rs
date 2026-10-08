@@ -1,6 +1,7 @@
 //! Marriages, births, deaths, succession and regency (spec § 2), plus the
 //! character queries the Godot bridge reads (spec § 3).
 
+use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{
@@ -48,12 +49,6 @@ pub const PRESTIGE_TITLE: i32 = 10;
 /// culture (spec § 1 asks for ~30 per culture; this is a tiny safety net).
 const FALLBACK_MALE_NAMES: &[&str] = &["Jean", "Guillaume", "Pierre", "Robert", "Thomas"];
 const FALLBACK_FEMALE_NAMES: &[&str] = &["Jeanne", "Marguerite", "Isabelle", "Agnès", "Blanche"];
-
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-}
 
 // =========================================================================
 // Marriage (spec § 2 `propose_marriage`)
@@ -508,35 +503,8 @@ fn spawn_head(
         id.clone(),
         CharacterState {
             name: Some(name),
-            faction: faction.clone(),
-            alive: true,
-            birth_year: state.year - age,
-            sex: Sex::Male,
-            house,
             location: capital,
-            army: None,
-            skills,
-            captive: false,
-            captor: None,
-            ransom_terms: None,
-            experience: 0,
-            skill_points: 0,
-            skills_learned: BTreeSet::new(),
-            traits: BTreeSet::new(),
-            spouse: None,
-            children: Vec::new(),
-            father: None,
-            mother: None,
-            piety: 50,
-            prestige: 0,
-            loyalty: 100,
-            title: None,
-            governor_of: None,
-            battles_fought: 0,
-            sieges_won: 0,
-            raids_led: 0,
-            death_year: None,
-            retinue: Vec::new(),
+            ..CharacterState::new(faction.clone(), state.year - age, Sex::Male, house, skills)
         },
     );
     id
@@ -585,35 +553,11 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
         id.clone(),
         CharacterState {
             name,
-            faction,
-            alive: true,
-            birth_year,
-            sex,
-            house,
             location,
-            army: None,
-            skills,
-            captive: false,
-            captor: None,
-            ransom_terms: None,
-            experience: 0,
-            skill_points: 0,
-            skills_learned: BTreeSet::new(),
             traits,
-            spouse: None,
-            children: Vec::new(),
             father: father.clone(),
             mother: mother.clone(),
-            piety: 50,
-            prestige: 0,
-            loyalty: 100,
-            title: None,
-            governor_of: None,
-            battles_fought: 0,
-            sieges_won: 0,
-            raids_led: 0,
-            death_year: None,
-            retinue: Vec::new(),
+            ..CharacterState::new(faction, birth_year, sex, house, skills)
         },
     );
     for parent in [&father, &mother].into_iter().flatten() {
@@ -754,13 +698,9 @@ pub(crate) fn resolve_births(
             continue;
         }
         let fertility_percent = skills::character_effects(state, data, &mother_id)
-            .fertility
+            [EffectKind::Fertility]
             .flat
-            .max(
-                skills::character_effects(state, data, &father_id)
-                    .fertility
-                    .flat,
-            );
+            .max(skills::character_effects(state, data, &father_id)[EffectKind::Fertility].flat);
         let permille = (f64::from(BASE_BIRTH_PERMILLE) * (1.0 + fertility_percent / 100.0))
             .round()
             .clamp(0.0, 1000.0) as u32;
@@ -806,7 +746,7 @@ pub(crate) fn resolve_births(
                 EventKind::Birth,
                 format!(
                     "Naissance de {full_name} ({}), {} de {}.",
-                    faction_name(data, &faction),
+                    data.faction_name(&faction),
                     if sex == Sex::Male { "fils" } else { "fille" },
                     state.character_name(data, &father_id)
                 ),
@@ -855,7 +795,7 @@ pub(crate) fn resolve_regencies(
             .map(|r| state.character_name(data, r))
             .unwrap_or_default();
         if minor_ruler {
-            let ruled = state.controlled_provinces(&faction_id);
+            let ruled: Vec<ProvinceId> = state.controlled_provinces(&faction_id).cloned().collect();
             for province in state
                 .provinces
                 .iter_mut()
@@ -874,12 +814,12 @@ pub(crate) fn resolve_regencies(
                         if captive_ruler {
                             format!(
                                 "{ruler_name} est captif : une régence gouverne {}.",
-                                faction_name(data, &faction_id)
+                                data.faction_name(&faction_id)
                             )
                         } else {
                             format!(
                                 "{ruler_name} est mineur : une régence gouverne {}.",
-                                faction_name(data, &faction_id)
+                                data.faction_name(&faction_id)
                             )
                         },
                     )
@@ -892,7 +832,7 @@ pub(crate) fn resolve_regencies(
                     EventKind::Regency,
                     format!(
                         "{ruler_name} gouverne de nouveau : fin de la régence en {}.",
-                        faction_name(data, &faction_id)
+                        data.faction_name(&faction_id)
                     ),
                 )
                 .faction(&faction_id),
@@ -921,18 +861,11 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| {
-            crate::buildings::effects_of(data, &s.buildings)
-                .prestige
-                .apply(0.0)
-        })
+        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Prestige].apply(0.0))
         .sum();
-    let tech = crate::research::faction_tech_effects(state, data, faction)
-        .prestige
+    let tech = crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
         .apply(0.0);
-    let own = skills::character_effects(state, data, &ruler)
-        .prestige
-        .apply(0.0);
+    let own = skills::character_effects(state, data, &ruler)[EffectKind::Prestige].apply(0.0);
     ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
         // C7: the retinue's prestige is already a yearly figure.
         + crate::retinue::yearly_prestige(state, data, &ruler)
@@ -953,11 +886,7 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| {
-            crate::buildings::effects_of(data, &s.buildings)
-                .piety
-                .apply(0.0)
-        })
+        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Piety].apply(0.0))
         .sum();
     ((buildings / PIETY_EFFECT_DIVISOR).round() as i32).clamp(0, MAX_YEARLY_BUILDING_PIETY)
 }
@@ -1337,24 +1266,20 @@ impl CampaignState {
 
 #[cfg(test)]
 mod culture_names_tests {
-    use std::path::PathBuf;
 
-    use data_model::{CharacterId, FactionId, GameData, Sex};
+    use data_model::{CharacterId, FactionId, Sex};
 
     use super::pick_name;
     use crate::rng::CampaignRng;
 
-    fn data() -> GameData {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        GameData::load(&root).expect("game data loads").0
-    }
+    use data_model::test_support::game_data;
 
     /// S2: `fac_granada` (culture `cul_andalusi`) must draw its generated
     /// characters' first names from `names_ar`, never from the Castilian
     /// `names_es` list it used to share with Castile/Navarre/the Basques.
     #[test]
     fn granada_generates_andalusi_arabic_names_not_castilian() {
-        let data = data();
+        let data = game_data();
         let names_ar = &data.names["names_ar"];
         let names_es = &data.names["names_es"];
         assert!(names_ar
@@ -1372,7 +1297,7 @@ mod culture_names_tests {
         let faction = FactionId::new("fac_granada").expect("well-formed id");
         let mut rng = CampaignRng::from_seed(1);
         for _ in 0..40 {
-            let male = pick_name(&data, &faction, Sex::Male, &mut rng);
+            let male = pick_name(data, &faction, Sex::Male, &mut rng);
             assert!(
                 names_ar.male_first_names.contains(&male),
                 "{male} was not drawn from names_ar"
@@ -1381,7 +1306,7 @@ mod culture_names_tests {
                 !names_es.male_first_names.contains(&male),
                 "{male} is a Castilian name, not Andalusi-Arabic"
             );
-            let female = pick_name(&data, &faction, Sex::Female, &mut rng);
+            let female = pick_name(data, &faction, Sex::Female, &mut rng);
             assert!(
                 names_ar.female_first_names.contains(&female),
                 "{female} was not drawn from names_ar"
@@ -1398,7 +1323,7 @@ mod culture_names_tests {
     /// `house` field for every generated descendant, see `house_members`).
     #[test]
     fn granada_ruler_house_is_not_castilian() {
-        let data = data();
+        let data = game_data();
         let yusuf = data
             .characters
             .get(&CharacterId::new("chr_yusuf_i").expect("well-formed id"))

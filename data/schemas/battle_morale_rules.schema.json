@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_morale_rules.schema.json",
+  "title": "Moral et fatigue en bataille",
+  "description": "Fichier data/rules/battle_morale.json (lot BA3) : seuils et cadences du moral et de la fatigue des régiments. Lu par sim-battle (MoraleRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "exhausted_fatigue": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Fatigue au-delà de laquelle un régiment est épuisé (perd du moral ; affiché « épuisé »)."
+    },
+    "cover": {
+      "type": "object",
+      "properties": {
+        "siege_machine": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Facteur sur le moral perdu par les pertes d'un bélier ou d'une tour de siège."
+        },
+        "on_wall": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Facteur sur le moral perdu par les pertes d'un régiment sur le rempart."
+        }
+      },
+      "required": [
+        "siege_machine",
+        "on_wall"
+      ],
+      "additionalProperties": false
+    },
+    "exhaustion_morale_per_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Moral perdu par seconde et par point de fatigue au-delà du seuil."
+    },
+    "outnumbered_melee": {
+      "type": "object",
+      "properties": {
+        "hp_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction d'effectif sous laquelle un régiment en mêlée s'ébranle."
+        },
+        "morale_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Moral perdu par seconde dans ce cas."
+        }
+      },
+      "required": [
+        "hp_fraction",
+        "morale_per_s"
+      ],
+      "additionalProperties": false
+    },
+    "general_aura": {
+      "type": "object",
+      "properties": {
+        "radius_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Rayon de l'aura du général (mètres)."
+        },
+        "base_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Moral regagné par seconde dans l'aura."
+        },
+        "per_command_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Supplément par point de commandement."
+        }
+      },
+      "required": [
+        "radius_m",
+        "base_per_s",
+        "per_command_per_s"
+      ],
+      "additionalProperties": false
+    },
+    "recovery": {
+      "type": "object",
+      "properties": {
+        "routing_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Moral regagné par seconde par un régiment en déroute hors de danger."
+        },
+        "calm_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Moral regagné par seconde hors contact, ennemi lointain."
+        },
+        "calm_enemy_distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Distance de l'ennemi au-delà de laquelle le calme rend du moral (mètres)."
+        },
+        "behind_walls_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Moral regagné par seconde par les défenseurs sur le rempart."
+        },
+        "aura_cap_margin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Au-delà du plafond de moral + cette marge, l'aura n'ajoute plus rien."
+        },
+        "resolve_hp_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction d'effectif au-dessus de laquelle un régiment en mêlée tient bon (voir melee_resolve_per_s)."
+        }
+      },
+      "required": [
+        "routing_per_s",
+        "calm_per_s",
+        "calm_enemy_distance_m",
+        "behind_walls_per_s",
+        "aura_cap_margin",
+        "resolve_hp_fraction"
+      ],
+      "additionalProperties": false
+    },
+    "rally": {
+      "type": "object",
+      "properties": {
+        "safe_distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Un ennemi plus proche empêche de se rallier (mètres)."
+        },
+        "pause_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Durée de l'état « rallié » (secondes)."
+        },
+        "min_hp_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction d'effectif minimale pour se rallier."
+        }
+      },
+      "required": [
+        "safe_distance_m",
+        "pause_s",
+        "min_hp_fraction"
+      ],
+      "additionalProperties": false
+    },
+    "fatigue_per_s": {
+      "type": "object",
+      "properties": {
+        "rest": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde au repos (négatif : récupère)."
+        },
+        "shooting": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde en tir."
+        },
+        "run": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde en course ou en retraite."
+        },
+        "march": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde en marche."
+        },
+        "charge": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde en charge."
+        },
+        "rout": {
+          "type": "number",
+          "minimum": -5,
+          "maximum": 5,
+          "description": "Fatigue par seconde en déroute."
+        },
+        "snow_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Facteur sur la fatigue gagnée sous la neige."
+        },
+        "mounted_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Facteur sur la fatigue gagnée par les montés."
+        }
+      },
+      "required": [
+        "rest",
+        "shooting",
+        "run",
+        "march",
+        "charge",
+        "rout",
+        "snow_factor",
+        "mounted_factor"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "exhausted_fatigue",
+    "cover",
+    "exhaustion_morale_per_s",
+    "outnumbered_melee",
+    "general_aura",
+    "recovery",
+    "rally",
+    "fatigue_per_s"
+  ],
+  "additionalProperties": false
+}

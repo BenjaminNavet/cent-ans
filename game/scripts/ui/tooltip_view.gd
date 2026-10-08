@@ -22,7 +22,6 @@ extends RefCounted
 
 ## Lu comme `CameraFeel` : `MapPaths` donne le dossier `data/`.
 const DATA_FILE := "ui/tooltip_style.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const FALLBACK := {
 	"width_px": 360, "max_height_screen_share": 0.7, "header_icon_px": 48, "short_max_body_lines": 8,
 	"kind_colors": {}, "headline": {}, "lower_is_better": [],
@@ -40,11 +39,11 @@ const HEADLINE_ICON_FALLBACK := {"stat_ranged": "battle_state_shoot", "stat_mele
 ## IB4 : clé de règle (`ib:rule:`) des chiffres vedettes qui ne sont ni un effet ni une stat.
 const HEADLINE_RULE_KEYS := {"strength": "strength", "morale": "morale"}
 
-static var _cache: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_FILE, FALLBACK)
 
 
 ## Contrôle d'infobulle pour `spec` ; `detailed` : version complète (bulle verrouillée). Met à
-## jour `RichTooltip.last_panel`, `last_bbcode` (BBCode complet, pour l'épinglage T) et `last_spec`.
+## jour la dernière bulle de `TooltipHost` (BBCode complet pour l'épinglage T, spec).
 static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	var style_data := style()
 	var width := float(style_data.get("width_px", 360))
@@ -52,16 +51,14 @@ static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	panel.name = "TooltipView"
 	if ResourceLoader.exists(RichTooltip.THEME_PATH):
 		panel.theme = load(RichTooltip.THEME_PATH)
-	panel.add_theme_stylebox_override("panel", RichTooltip.panel_style())
-	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 6)
+	panel.add_theme_stylebox_override("panel", TooltipHost.panel_style())
+	var outer := UiBuild.vbox(6)
 	outer.custom_minimum_size = Vector2(width, 0)
 	panel.add_child(outer)
 	outer.add_child(_header(spec, style_data))
 	var blocks := blocks_for(spec, detailed)
-	var body := VBoxContainer.new()
+	var body := UiBuild.vbox(6)
 	body.name = "Body"
-	body.add_theme_constant_override("separation", 6)
 	var lines := 0
 	var shown := PackedStringArray()
 	for entry in blocks:
@@ -94,9 +91,7 @@ static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	panel.set_meta("ib_blocks", shown)
 	panel.set_meta("ib_body_lines", lines)
 	panel.set_meta("ib_detailed", detailed)
-	RichTooltip.last_panel = weakref(panel)
-	RichTooltip.last_bbcode = CodexText.format(RichTooltip.to_bbcode(spec), true)
-	RichTooltip.last_spec = spec
+	TooltipHost.record(panel, CodexText.format(RichTooltip.to_bbcode(spec), true), spec)
 	return panel
 
 
@@ -173,22 +168,12 @@ static func blocks_for(spec: Dictionary, detailed: bool) -> Array:
 
 ## Style chargé depuis `data/ui/tooltip_style.json` (mis en cache).
 static func style() -> Dictionary:
-	if _cache.is_empty():
-		_cache = FALLBACK.duplicate(true)
-		var path := _data_dir().path_join(DATA_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
-		if parsed is Dictionary:
-			_cache.merge(parsed, true)
-		else:
-			push_warning("TooltipView : %s illisible, valeurs de repli." % DATA_FILE)
-	return _cache
+	return _lookup.data()
 
 
 ## Relit le style au prochain accès (tests).
 static func reload() -> void:
-	_cache = {}
+	_lookup.reload()
 
 
 ## Couleur de catégorie de `kind` (`kind_colors`), encre par défaut.
@@ -216,15 +201,6 @@ static func _screen_height() -> float:
 	return 900.0
 
 
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
-
-
 # --- Blocs ---------------------------------------------------------------------------------
 
 
@@ -238,9 +214,7 @@ static func _header(spec: Dictionary, style_data: Dictionary) -> Control:
 	band.set_content_margin_all(4)
 	band.content_margin_left = 6
 	header.add_theme_stylebox_override("panel", band)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	header.add_child(row)
+	var row := UiBuild.hbox(8, header)
 	var icon_px := float(style_data.get("header_icon_px", 48))
 	var library := RichTooltip.icons()
 	var icon_id := str(spec.get("icon", ""))
@@ -248,8 +222,7 @@ static func _header(spec: Dictionary, style_data: Dictionary) -> Control:
 		var rect: TextureRect = library.call("make_rect", icon_id, icon_px, str(spec.get("icon_category", "")))
 		if rect.texture != null:
 			row.add_child(rect)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 0)
+	var column := UiBuild.vbox(0)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(column)
@@ -332,21 +305,18 @@ static func _rule_caption(item: Dictionary) -> Control:
 
 ## Écussons des chiffres vedettes : icône, grand chiffre, libellé en légende.
 static func _headline(items: Array, _spec: Dictionary) -> Control:
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(12)
 	row.name = "Headline"
-	row.add_theme_constant_override("separation", 12)
 	var library := RichTooltip.icons()
 	for item in items:
-		var badge := HBoxContainer.new()
+		var badge := UiBuild.hbox(6)
 		badge.name = "Badge_%s" % str(item.get("key", ""))
-		badge.add_theme_constant_override("separation", 6)
 		badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var icon_id := str(item.get("icon", ""))
 		icon_id = headline_icon(icon_id, str(item.get("stat", "")))
 		if library != null and icon_id != "":
 			badge.add_child(library.call("make_rect", icon_id, HEADLINE_ICON_PX, ""))
-		var column := VBoxContainer.new()
-		column.add_theme_constant_override("separation", -2)
+		var column := UiBuild.vbox(-2)
 		var value := _rich("Value", UiType.TITLE)
 		value.autowrap_mode = TextServer.AUTOWRAP_OFF
 		var sign := int(item.get("sign", 0))
@@ -382,9 +352,8 @@ static func _stats(stats: Array, width: float) -> Control:
 
 ## Pied : aide de touche à gauche (Caption atténué), coût / entretien / durée à droite.
 static func _footer(spec: Dictionary, width: float) -> Control:
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(8)
 	row.name = "Footer"
-	row.add_theme_constant_override("separation", 8)
 	var hint := _label("Hint", HINT, UiType.CAPTION, Color(RichTooltip.MUTED))
 	hint.size_flags_vertical = Control.SIZE_SHRINK_END
 	row.add_child(hint)
@@ -436,9 +405,8 @@ static func _rich(name: String, variation: String) -> RichTextLabel:
 
 
 static func _label(name: String, text: String, variation: String, color: Color) -> Label:
-	var label := Label.new()
+	var label := UiBuild.label(text)
 	label.name = name
-	label.text = text
 	UiType.apply(label, variation)
 	label.add_theme_color_override("font_color", color)
 	return label

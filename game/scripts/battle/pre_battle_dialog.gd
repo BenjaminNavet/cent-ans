@@ -199,7 +199,7 @@ func _build_buttons() -> Control:
 	row.add_child(spacer)
 	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
-	RichTooltip.attach_plain(auto_button, "battle_auto_resolve")
+	TooltipHost.attach_plain(auto_button, "battle_auto_resolve")
 	auto_button.pressed.connect(func() -> void:
 		visible = false
 		auto_requested.emit(int(battle.get("index", 0))))
@@ -312,11 +312,11 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var can_withdraw := bool(forecast.get("can_withdraw", false))
 	withdraw_button.disabled = not can_withdraw
 	if siege:
-		RichTooltip.attach_plain(withdraw_button, "battle_postpone_assault")
+		TooltipHost.attach_plain(withdraw_button, "battle_postpone_assault")
 	elif can_withdraw:
-		RichTooltip.attach_plain(withdraw_button, "battle_decline")
+		TooltipHost.attach_plain(withdraw_button, "battle_decline")
 	else:
-		RichTooltip.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
+		TooltipHost.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # UB1 / U13 : bataille en vue
@@ -347,11 +347,11 @@ func _fill_balance(siege: bool) -> void:
 		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
 		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l'issue" % [
 			roundi(chance * 100.0),
-			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
-			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
+			Money.digits(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
+			Money.digits(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
 			" (assaut)" if siege else "",
 		]
-	RichTooltip.attach_plain(balance_bar, "battle_balance_estimate")
+	TooltipHost.attach_plain(balance_bar, "battle_balance_estimate")
 	balance_bar.queue_redraw()
 
 
@@ -384,7 +384,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var soldiers := 0
 	for unit in units:
 		soldiers += int(unit.get("soldiers", 0))
-	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), BattleUiKit.thousands(soldiers), units.size()]
+	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), Money.digits(soldiers), units.size()]
 	name_box.add_child(BattleUiKit.label(strength_text, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT))
 	if slot == 0:
 		header.add_child(arms)
@@ -401,7 +401,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	if not reinforcements.is_empty():
 		var parts := PackedStringArray()
 		for entry in reinforcements:
-			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), BattleUiKit.thousands(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
+			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), Money.digits(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)
@@ -479,7 +479,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, UiType.size(UiType.CAPTION), BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	RichTooltip.attach_plain(stars_label, "leader_command_level", {"body": "%d / %s" % [command, RuleValues.text("max_skill_level")]})
+	TooltipHost.attach_plain(stars_label, "leader_command_level", {"body": "%d / %s" % [command, RuleValues.text("max_skill_level")]})
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

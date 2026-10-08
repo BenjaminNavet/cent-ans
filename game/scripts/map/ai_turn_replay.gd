@@ -22,7 +22,6 @@ signal replay_started(shown: int, followed: int)
 signal replay_finished
 
 const DATA_PATH := "ui/ai_turn_replay.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const MODES: Array[String] = ["follow", "show", "hide"]
 const MODE_LABELS: Array[String] = ["Suivre", "Montrer", "Masquer"]
 const MODE_KEY := "map/ai_moves"
@@ -38,7 +37,7 @@ const HOLD_KINDS := ["battle", "siege_started", "settlement_taken", "landing"]
 
 ## Tests : rejouer même sans écran.
 static var allow_headless := false
-static var _tuning: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH, FALLBACK)
 
 var map: Node = null
 var playing := false
@@ -52,28 +51,7 @@ var _caption_label: Label = null
 
 
 static func tuning() -> Dictionary:
-	if _tuning.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_tuning = FALLBACK.duplicate()
-				_tuning.merge(parsed, true)
-		if _tuning.is_empty():
-			push_warning("AiTurnReplay: %s missing or invalid" % path)
-			_tuning = FALLBACK.duplicate()
-	return _tuning
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
+	return _lookup.data()
 
 
 ## Vitesses proposées dans les Réglages (flottants).

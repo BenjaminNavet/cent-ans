@@ -7,8 +7,8 @@
   "required": ["version", "model", "budget_cap_usd", "icon_style", "medallion_style", "icons", "medallions"],
   "additionalProperties": false,
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-    "target": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
+    "target": { "$ref": "common.schema.json#/$defs/snake_id" },
     "style": {
       "type": "object",
       "required": ["size", "reference", "prompt"],

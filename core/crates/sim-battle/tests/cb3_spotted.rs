@@ -18,7 +18,7 @@ use sim_battle::SideId;
 #[test]
 fn a_side_always_sees_its_own_regiments() {
     let data = data();
-    let mut sim = setup_two_lines(&data);
+    let mut sim = setup_two_lines(data);
     lab(&mut sim);
     let target = sim.units()[0].clone();
     assert!(sim.spotted_by(&target, SideId::Attacker));
@@ -28,7 +28,7 @@ fn a_side_always_sees_its_own_regiments() {
 #[test]
 fn a_close_enemy_in_the_open_is_spotted() {
     let data = data();
-    let mut sim = setup_two_lines(&data);
+    let mut sim = setup_two_lines(data);
     lab(&mut sim);
     place(&mut sim, 0, 600.0, 200.0, 0.0); // attacker
     place(&mut sim, 1, 600.0, 260.0, std::f64::consts::PI); // defender, 60 m away
@@ -40,7 +40,7 @@ fn a_close_enemy_in_the_open_is_spotted() {
 #[test]
 fn a_far_enemy_beyond_the_spotter_range_is_not_spotted() {
     let data = data();
-    let mut sim = setup_two_lines(&data);
+    let mut sim = setup_two_lines(data);
     lab(&mut sim);
     let reach = MissileArcRules::bundled().spotter_range_m;
     place(&mut sim, 0, 600.0, 200.0, 0.0);
@@ -59,7 +59,7 @@ fn a_far_enemy_beyond_the_spotter_range_is_not_spotted() {
 #[test]
 fn a_routing_regiment_does_not_spot() {
     let data = data();
-    let mut sim = setup_two_lines(&data);
+    let mut sim = setup_two_lines(data);
     lab(&mut sim);
     place(&mut sim, 0, 600.0, 200.0, 0.0);
     place(&mut sim, 1, 600.0, 260.0, std::f64::consts::PI);
@@ -74,8 +74,8 @@ fn a_routing_regiment_does_not_spot() {
 #[test]
 fn spotted_is_not_part_of_the_state_digest() {
     let data = data();
-    let mut a = setup_two_lines(&data);
-    let mut b = setup_two_lines(&data);
+    let mut a = setup_two_lines(data);
+    let mut b = setup_two_lines(data);
     lab(&mut a);
     lab(&mut b);
     place(&mut a, 0, 600.0, 200.0, 0.0);

@@ -285,10 +285,6 @@ static func _register(map: Dictionary, key: int, value: int) -> void:
 	map[key].append(value)
 
 
-static func _hash(text: String) -> int:
-	return absi(text.hash())
-
-
 # --- Construction ------------------------------------------------------------------
 
 
@@ -520,12 +516,7 @@ func _build_icons() -> void:
 	_marker_screen.fill(Vector2(-1.0e6, -1.0e6))
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true
-	multimesh.use_custom_data = true
-	multimesh.mesh = quad
-	multimesh.instance_count = count
+	var multimesh := MapInstancing.make(quad, count, true, true)
 	for i in count:
 		var entry: Dictionary = data.settlements[i]
 		var px: Vector2 = entry["px"]
@@ -1676,7 +1667,7 @@ func _hamlet_tile(index: int) -> Array:
 ## Graine de tirage du hameau `h` (variante, lacet, taille, incendie).
 func _hamlet_seed_of(h: int) -> int:
 	var hamlet: Dictionary = data.hamlets[h]
-	return _hash(str(hamlet["name"]) + str(hamlet["px"]))
+	return MapInstancing.hamlet_seed(hamlet)
 
 
 func _build_hamlets(index: int) -> void:
@@ -1724,10 +1715,7 @@ func _build_hamlets(index: int) -> void:
 		groups[key].append(PackedFloat32Array([px.x, px.y, yaws[p], scales[p], center, low]))
 	for key in groups:
 		var entries: Array = groups[key]
-		var multimesh := MultiMesh.new()
-		multimesh.transform_format = MultiMesh.TRANSFORM_3D
-		multimesh.mesh = meshes[key / 2]
-		multimesh.instance_count = entries.size()
+		var multimesh := MapInstancing.make(meshes[key / 2], entries.size())
 		_write_hamlet_transforms(multimesh, entries)
 		var mmi := MultiMeshInstance3D.new()
 		mmi.set_meta("hamlet_entries", entries)
@@ -2065,7 +2053,7 @@ func growth_of(id: String) -> Dictionary:
 func hamlet_burned(h: int) -> bool:
 	var hamlet: Dictionary = data.hamlets[h]
 	var px: Vector2 = hamlet["px"]
-	var seed_value := _hash(str(hamlet["name"]) + str(px))
+	var seed_value := MapInstancing.hamlet_seed(hamlet)
 	var devastation: float = _devastation.get(hamlet["province"], 0.0)
 	return devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
 

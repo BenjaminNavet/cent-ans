@@ -1,27 +1,25 @@
 //! Lot JR1 (ADR 0165): the crusader faction led by the campaign AI.
-
-use std::path::PathBuf;
+use data_model::test_support::game_data;
 
 use data_model::{FactionId, GameData};
 use sim_campaign::{CampaignState, EventKind, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
+    game_data()
 }
 
 #[test]
 fn the_planner_preaches_as_soon_as_it_can() {
     let data = data();
     let faction = data.crusade_rules.as_ref().expect("rules").faction.clone();
-    let state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 1)
+    let state = CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 1)
         .expect("1337 start");
-    let orders = ai::plan_turn(&state, &data, &faction);
+    let orders = ai::plan_turn(&state, data, &faction);
     assert!(orders.contains(&Order::PreachPassage), "{orders:?}");
     // No other faction ever does.
     let cyprus = FactionId::new("fac_cyprus").unwrap();
-    assert!(!ai::plan_turn(&state, &data, &cyprus).contains(&Order::PreachPassage));
+    assert!(!ai::plan_turn(&state, data, &cyprus).contains(&Order::PreachPassage));
 }
 
 #[test]
@@ -29,12 +27,12 @@ fn forty_turns_of_the_real_ai_keep_the_crusade_alive() {
     let data = data();
     let rules = data.crusade_rules.as_ref().expect("rules");
     let faction = rules.faction.clone();
-    let mut state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 11)
+    let mut state = CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 11)
         .expect("1337 start");
     state.interactive_battles = false;
     let mut landings = 0;
     for turn in 0..40 {
-        let events = state.end_turn_with(&data, ai::plan_turn);
+        let events = state.end_turn_with(data, ai::plan_turn);
         landings += events
             .iter()
             .filter(|e| e.kind == EventKind::Crusade && e.text_fr.contains("débarque"))
@@ -54,8 +52,8 @@ fn forty_turns_of_the_real_ai_keep_the_crusade_alive() {
                 turn + 1,
                 crusade.fervor,
                 f.treasury,
-                f.income_last_turn,
-                f.upkeep_last_turn,
+                f.last_budget.income,
+                f.last_budget.upkeep(),
                 crusade.target_taken
             );
         }
@@ -79,7 +77,7 @@ fn a_cityless_realm_never_empties_its_last_place() {
     // faction reduced to towns and castles, not only the crusade; it keeps
     // the starting garrison of each place's kind and marches the rest out.
     let data = data();
-    let mut state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 3)
+    let mut state = CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 3)
         .expect("1337 start");
     let realm = FactionId::new("fac_brittany").unwrap();
     let france = FactionId::new("fac_france").unwrap();
@@ -108,7 +106,7 @@ fn a_cityless_realm_never_empties_its_last_place() {
     }
     assert!(!kept.is_empty(), "Brittany keeps towns or castles");
     state.armies.retain(|_, a| a.faction != realm);
-    let orders = ai::plan_turn(&state, &data, &realm);
+    let orders = ai::plan_turn(&state, data, &realm);
     let musters = orders
         .iter()
         .filter(|o| matches!(o, Order::CreateArmy { .. }))

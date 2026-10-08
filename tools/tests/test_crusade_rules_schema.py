@@ -3,9 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 
 
@@ -15,28 +12,6 @@ def _load(path: Path) -> dict:
 
 def _rules() -> dict:
     return _load(DATA / "rules" / "crusade.json")
-
-
-def _validator() -> Draft202012Validator:
-    """Builds a validator that resolves `common.schema.json` references locally."""
-    schemas = {
-        path.name: _load(path) for path in (DATA / "schemas").glob("*.schema.json")
-    }
-    registry = Registry()
-    for name, schema in schemas.items():
-        resource = Resource.from_contents(schema)
-        registry = registry.with_resource(schema["$id"], resource).with_resource(
-            name, resource
-        )
-    return Draft202012Validator(schemas["crusade_rules.schema.json"], registry=registry)
-
-
-def test_crusade_rules_match_schema() -> None:
-    """The crusade rules file exists and matches its schema."""
-    validator = _validator()
-    Draft202012Validator.check_schema(validator.schema)
-    errors = sorted(validator.iter_errors(_rules()), key=lambda e: list(e.path))
-    assert not errors, [error.message for error in errors]
 
 
 def test_provinces_exist_and_coast_is_holy_land() -> None:

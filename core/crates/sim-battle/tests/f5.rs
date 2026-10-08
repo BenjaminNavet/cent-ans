@@ -13,8 +13,8 @@ fn gap(sim: &BattleSim, a: usize, b: usize) -> f64 {
 #[test]
 fn friendly_regiments_separate() {
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 1).unwrap();
     lab(&mut sim);
     // Two regiments standing half on top of each other drift apart softly.
@@ -31,8 +31,8 @@ fn friendly_regiments_separate() {
 #[test]
 fn a_charge_passes_through_friends() {
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_knights"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_knights"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 1).unwrap();
     lab(&mut sim);
     place(&mut sim, 0, 600.0, 300.0, 0.0);
@@ -64,8 +64,8 @@ fn ai_changes_formation() {
     use sim_battle::formation_ai::plan_formations;
     use sim_battle::{Formation, SideId};
     let data = data();
-    let attacker = units(&data, &["unit_knights"]);
-    let defender = units(&data, &["unit_flemish_pikemen", "unit_urban_militia"]);
+    let attacker = units(data, &["unit_knights"]);
+    let defender = units(data, &["unit_flemish_pikemen", "unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 2).unwrap();
     lab(&mut sim);
     place(&mut sim, 0, 600.0, 300.0, 0.0);
@@ -123,7 +123,7 @@ fn deployment_phase_validates_zone() {
     use sim_battle::{CommandError, SideId};
     let data = data();
     let army = ["unit_men_at_arms_foot", "unit_longbowmen", "unit_knights"];
-    let mut s = setup(units(&data, &army), units(&data, &army), None);
+    let mut s = setup(units(data, &army), units(data, &army), None);
     s.player_side = Some(SideId::Attacker);
     let mut sim = BattleSim::new(s, 4).unwrap();
     assert!(sim.begin_deployment());
@@ -172,8 +172,8 @@ fn deployment_phase_validates_zone() {
 fn siege_besiegers_deploy_outside_the_walls() {
     use sim_battle::{CommandError, SideId, SiegeSetup};
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let siege = SiegeSetup {
         fortification: 1,
         breach: 0,
@@ -201,8 +201,8 @@ fn siege_besiegers_deploy_outside_the_walls() {
 fn siege_pathing_uses_breach() {
     use sim_battle::SiegeSetup;
     let data = data();
-    let attacker = units(&data, &["unit_mounted_sergeants", "unit_men_at_arms_foot"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_mounted_sergeants", "unit_men_at_arms_foot"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
@@ -262,8 +262,8 @@ fn siege_pathing_uses_breach() {
 fn towers_shoot_and_the_garrison_sallies() {
     use sim_battle::{SideId, SiegeSetup};
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
-    let defender = units(&data, &["unit_men_at_arms_foot", "unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]);
+    let defender = units(data, &["unit_men_at_arms_foot", "unit_urban_militia"]);
     let siege = SiegeSetup {
         fortification: 1,
         breach: 0,
@@ -340,7 +340,7 @@ fn f5_is_deterministic() {
         }),
     ] {
         let run_once = || {
-            let s = setup(units(&data, &army), units(&data, &army), siege.clone());
+            let s = setup(units(data, &army), units(data, &army), siege.clone());
             let mut sim = BattleSim::new(s, 21).unwrap();
             assert!(sim.begin_deployment());
             let (x, z) = (sim.units()[0].x + 20.0, sim.units()[0].z - 10.0);

@@ -16,8 +16,7 @@ const LEVEL_NAMES := ["off", "moderate", "full"]
 ## Morceaux : 0 tête, 1 bras, 2 jambe (maillage et teinte).
 const PIECE_KINDS := {"head": 0, "arm_r": 1, "arm_l": 1, "leg_r": 2, "leg_l": 2}
 
-static var _settings: Dictionary = {}
-static var _settings_loaded: bool = false
+static var _lookup := JsonLookup.new(SETTINGS_FILE)
 
 var anim_time: float = 0.0
 var camera_pos: Vector3 = Vector3.ZERO
@@ -36,37 +35,18 @@ var _rng := RandomNumberGenerator.new()
 
 ## Lecture de `data/fx/battle_gore.json` (dossier de données du jeu, puis `data/` du dépôt).
 static func settings() -> Dictionary:
-	if _settings_loaded:
-		return _settings
-	_settings_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(SETTINGS_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_settings = parsed
-				return _settings
-	push_warning("BattleGore: %s introuvable, sang et démembrements désactivés" % SETTINGS_FILE)
-	return _settings
+	return _lookup.data()
 
 
 ## Niveau du réglage « Sang » : 0 désactivé, 1 modéré, 2 complet.
 static func blood_level() -> int:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--blood="):
-			# Noms (off, moderate, full) ou chiffres (0, 1, 2 : forme du lot BV1).
-			var value := arg.get_slice("=", 1)
-			var k := LEVEL_NAMES.find(value)
-			if k >= 0:
-				return k
-			if value.is_valid_int():
-				return clampi(int(value), 0, 2)
+	# Noms (off, moderate, full) ou chiffres (0, 1, 2).
+	var forced := CmdArgs.value("--blood")
+	var named := LEVEL_NAMES.find(forced)
+	if named >= 0:
+		return named
+	if forced.is_valid_int():
+		return clampi(int(forced), 0, 2)
 	var tree := Engine.get_main_loop() as SceneTree
 	var store: Node = tree.root.get_node_or_null("/root/Settings") if tree != null else null
 	if store != null:
@@ -79,8 +59,6 @@ static func blood_level() -> int:
 ## Intensités du niveau courant ({stains, sprays, corpse_blood, dismember}).
 static func level_settings() -> Dictionary:
 	var levels: Dictionary = settings().get("levels", {})
-	if OS.get_cmdline_user_args().has("--no-bv2"):
-		return levels.get("off", {})
 	return levels.get(LEVEL_NAMES[blood_level()], {"stains": 0.0, "sprays": 0.0, "corpse_blood": 0.0, "dismember": false})
 
 

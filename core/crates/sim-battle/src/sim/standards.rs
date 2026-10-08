@@ -114,9 +114,7 @@ impl BattleSim {
                         self.standard_taken(i, captor, &rules);
                     } else if self.units[i].able() {
                         self.units[i].standard = StandardState::Carried;
-                        let text = format!("L'étendard des {} est relevé.", self.unit_label(i));
-                        let side = self.units[i].side;
-                        self.log(text, Some(side));
+                        self.log_unit(i, |label| format!("L'étendard des {label} est relevé."));
                     } else if !self.units[i].present() {
                         self.units[i].standard = StandardState::Lost { x, z };
                     } else {
@@ -224,11 +222,11 @@ impl BattleSim {
     fn trophy_of(&self, i: usize, captor: Option<usize>) -> StandardTrophy {
         let unit = &self.units[i];
         StandardTrophy {
-            unit_type: unit.unit_type.clone(),
-            unit_name: unit.name.clone(),
+            unit_type: unit.unit_type.to_string(),
+            unit_name: unit.name.to_string(),
             faction: self.setup.side(unit.side).faction.clone(),
             general: unit.is_general,
-            captor: captor.map(|c| self.units[c].name.clone()),
+            captor: captor.map(|c| self.units[c].name.to_string()),
             time: self.elapsed,
             taken_by: unit.side.other(),
         }

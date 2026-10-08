@@ -67,4 +67,4 @@ Chaque lot a un propriétaire de fichiers exclusif pour que les agents parallèl
 
 Agents `cent-ans-dev` (Opus, effort medium) en worktree, ≤ 3 en parallèle, commits `wip:` ≤ 15 min,
 `docs/wip/<lot>.md`, rapport final. L'orchestrateur fusionne, relance les tests et met à jour
-`docs/status.md` et `docs/wip/finalisation.md`.
+`docs/status.md` et `docs/archive/chantiers.md`.

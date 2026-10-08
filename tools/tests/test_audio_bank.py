@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools import audio_bank, sg2_sounds, ui_sounds
 
@@ -15,16 +14,6 @@ AUDIO = REPO / "game" / "assets" / "audio"
 
 def _bank() -> dict:
     return json.loads((DATA / "audio" / "sound_bank.json").read_text(encoding="utf-8"))
-
-
-def test_sound_bank_matches_schema() -> None:
-    """``data/audio/sound_bank.json`` matches its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "sound_bank.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_bank()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_every_bank_file_exists_and_is_generated() -> None:

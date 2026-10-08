@@ -232,7 +232,7 @@ fn a_forced_village_has_houses_and_crofts() {
 #[test]
 fn battles_carry_the_site_and_sieges_drop_it() {
     let data = data();
-    let army = || vec![unit(&data, "unit_longbowmen"), unit(&data, "unit_knights")];
+    let army = || vec![unit(data, "unit_longbowmen"), unit(data, "unit_knights")];
     let mut s = setup(army(), army(), None);
     s.terrain = Terrain::Marsh;
     s.village = Some(true);
@@ -299,8 +299,8 @@ fn archers_behind_a_hedge_suffer_less_from_arrows() {
     let data = data();
     let volley = |with_hedge: bool| {
         let mut sim = lab_sim(
-            vec![unit(&data, "unit_longbowmen")],
-            vec![unit(&data, "unit_longbowmen")],
+            vec![unit(data, "unit_longbowmen")],
+            vec![unit(data, "unit_longbowmen")],
         );
         if with_hedge {
             sim.field_mut().obstacles.push(hedge(ObstacleKind::Hedge));
@@ -329,8 +329,8 @@ fn a_hedge_breaks_a_cavalry_charge() {
     let data = data();
     let charge = |with_hedge: bool| {
         let mut sim = lab_sim(
-            vec![unit(&data, "unit_knights")],
-            vec![unit(&data, "unit_longbowmen")],
+            vec![unit(data, "unit_knights")],
+            vec![unit(data, "unit_longbowmen")],
         );
         if with_hedge {
             sim.field_mut().obstacles.push(hedge(ObstacleKind::Hedge));
@@ -338,9 +338,7 @@ fn a_hedge_breaks_a_cavalry_charge() {
         place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
         place(&mut sim, 0, 600.0, 250.0, 0.0);
         sim.units_mut()[1].ammo = 0;
-        sim.units_mut()[1]
-            .abilities
-            .retain(|a| *a != data_model::Ability::Stakes);
+        sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
         sim.issue_command(Command::Attack {
             units: vec![0],
             target: 1,
@@ -369,8 +367,8 @@ fn a_hedge_breaks_a_cavalry_charge() {
 fn obstacles_and_pools_slow_the_march() {
     let data = data();
     let mut sim = lab_sim(
-        vec![unit(&data, "unit_knights")],
-        vec![unit(&data, "unit_longbowmen")],
+        vec![unit(data, "unit_knights")],
+        vec![unit(data, "unit_longbowmen")],
     );
     let field = sim.field_mut();
     field.obstacles.push(hedge(ObstacleKind::Hedge));

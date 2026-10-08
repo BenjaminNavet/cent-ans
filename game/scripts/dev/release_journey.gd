@@ -31,33 +31,28 @@ var _map_ab := 0.0
 ## Appelé par `StartMenu._ready` : vrai si la ligne de commande demande le parcours (le nœud
 ## est alors ajouté à la racine et survit aux changements de scène).
 static func maybe_start(tree: SceneTree) -> bool:
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--journey=battle":
-			tree.change_scene_to_file.call_deferred("res://scenes/battle/battle.tscn")
-			return true
-		if arg == "--journey":
-			if tree.root.get_node_or_null("ReleaseJourney") != null:
-				return false  # retour au menu pendant le parcours
-			var journey := ReleaseJourney.new()
-			journey.name = "ReleaseJourney"
-			tree.root.add_child.call_deferred(journey)
-			return true
-	return false
+	if CmdArgs.value("--journey") == "battle":
+		tree.change_scene_to_file.call_deferred("res://scenes/battle/battle.tscn")
+		return true
+	if not CmdArgs.has("--journey"):
+		return false
+	if tree.root.get_node_or_null("ReleaseJourney") != null:
+		return false  # retour au menu pendant le parcours
+	var journey := ReleaseJourney.new()
+	journey.name = "ReleaseJourney"
+	tree.root.add_child.call_deferred(journey)
+	return true
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--turns="):
-			_turns = int(arg.trim_prefix("--turns="))
-		elif arg.begins_with("--frames="):
-			_frames = int(arg.trim_prefix("--frames="))
-		elif arg == "--no-battle":
-			_battle = false
-		elif arg == "--uncapped":
-			_uncapped = true
-		elif arg.begins_with("--map-ab="):
-			_map_ab = float(arg.trim_prefix("--map-ab="))
+	_turns = int(CmdArgs.number("--turns", _turns))
+	_frames = int(CmdArgs.number("--frames", _frames))
+	if CmdArgs.has("--no-battle"):
+		_battle = false
+	if CmdArgs.has("--uncapped"):
+		_uncapped = true
+	_map_ab = CmdArgs.number("--map-ab", _map_ab)
 	_isolate()
 	_run.call_deferred()
 
@@ -329,9 +324,8 @@ func _measure(count: int) -> Dictionary:
 ## `--ab-configs=base,medium,hide:Sea,…` : liste des configurations (voir `_apply_config`).
 func _ab(map: Node) -> Dictionary:
 	var configs: Array = ["base", "medium", "low", "no_ssil", "no_ssao", "no_glow", "msaa_off", "no_dof", "no_shadows", "scale75"]
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--ab-configs="):
-			configs = Array(arg.trim_prefix("--ab-configs=").split(","))
+	if CmdArgs.has("--ab-configs"):
+		configs = Array(CmdArgs.list("--ab-configs"))
 	var samples: Dictionary = {}
 	var gpu: Dictionary = {}
 	var prims: Dictionary = {}
@@ -361,22 +355,21 @@ func _ab(map: Node) -> Dictionary:
 				draws[config].append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
 				last = now
 	# `--ab-shots=<dossier absolu>` : une capture par configuration (comparaisons visuelles).
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--ab-shots="):
-			var shot_dir := arg.trim_prefix("--ab-shots=")
-			DirAccess.make_dir_recursive_absolute(shot_dir)
-			for config: String in configs:
-				_apply_config(map, config)
-				_aim(map, _map_ab)
-				await _frames_passed(4)
-				await _wait_map_settled(map, 30)
-				var image := get_tree().root.get_texture().get_image()
-				image.save_png(shot_dir.path_join("d%d_%s.png" % [int(_map_ab), config.replace(":", "_")]))
+	if CmdArgs.has("--ab-shots"):
+		var shot_dir := CmdArgs.value("--ab-shots")
+		DirAccess.make_dir_recursive_absolute(shot_dir)
+		for config: String in configs:
+			_apply_config(map, config)
+			_aim(map, _map_ab)
+			await _frames_passed(4)
+			await _wait_map_settled(map, 30)
+			var image := get_tree().root.get_texture().get_image()
+			image.save_png(shot_dir.path_join("d%d_%s.png" % [int(_map_ab), config.replace(":", "_")]))
 	_apply_config(map, "base")
 	var out: Dictionary = {}
 	# `--ab-passes` : temps GPU par passe du moteur (horodatages du profileur visuel), médianes
 	# sur 30 images de la configuration de base.
-	if "--ab-passes" in OS.get_cmdline_user_args():
+	if CmdArgs.has("--ab-passes"):
 		out["passes"] = await _gpu_passes(map)
 	for config: String in configs:
 		var frame: Array = samples[config]

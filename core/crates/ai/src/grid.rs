@@ -12,6 +12,7 @@
 //!
 //! Tuning: `data/ai/grid.json` ([`data_model::AiGrid`]).
 
+use data_model::util::dist;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 use std::sync::{Arc, Mutex};
@@ -85,11 +86,139 @@ struct RoadLands {
 /// Sampling step (map pixels) of a road's straight line.
 const ROAD_SAMPLE_PX: f32 = 8.0;
 
-type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
-
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
+/// Lands of the realms at peace that the planning faction will not (or may,
+/// at a cost) cross without right of passage.
+struct PassageLands {
+    forbidden: BTreeMap<SettlementId, FactionId>,
+    crossable: BTreeSet<SettlementId>,
+    /// May the faction's AI cross each realm's lands
+    /// (`passage::ai_may_trespass`)? Asked once per realm.
+    crossing: BTreeMap<FactionId, bool>,
 }
+
+impl PassageLands {
+    fn read(state: &CampaignState, data: &GameData, faction: &FactionId) -> Self {
+        let mut lands = PassageLands {
+            forbidden: BTreeMap::new(),
+            crossable: BTreeSet::new(),
+            crossing: BTreeMap::new(),
+        };
+        // OMR R1: `trespassed_owner` depends on the province's controller
+        // alone: asked once per controller, and the verdict (owner, may
+        // cross) read once per province instead of once per settlement.
+        let mut by_controller: BTreeMap<&FactionId, Option<FactionId>> = BTreeMap::new();
+        let mut by_province: BTreeMap<&ProvinceId, (FactionId, bool)> = BTreeMap::new();
+        for province in state.provinces.keys() {
+            let Some(controller) = state.province_controller(province) else {
+                continue;
+            };
+            let owner = by_controller
+                .entry(controller)
+                .or_insert_with(|| passage::trespassed_owner(state, faction, province))
+                .clone();
+            if let Some(owner) = owner {
+                let open = lands.may_cross(state, data, faction, &owner);
+                by_province.insert(province, (owner, open));
+            }
+        }
+        for (id, settlement) in &state.settlements {
+            if &settlement.controller == faction {
+                continue;
+            }
+            let Some((owner, open)) = by_province.get(&settlement.province) else {
+                continue;
+            };
+            if *open {
+                lands.crossable.insert(id.clone());
+            } else {
+                lands.forbidden.insert(id.clone(), owner.clone());
+            }
+        }
+        lands
+    }
+
+    fn may_cross(
+        &mut self,
+        state: &CampaignState,
+        data: &GameData,
+        faction: &FactionId,
+        owner: &FactionId,
+    ) -> bool {
+        *self
+            .crossing
+            .entry(owner.clone())
+            .or_insert_with(|| passage::ai_may_trespass(state, data, faction, owner))
+    }
+}
+
+/// Settlement positions, bucketed in square cells of the avoidance radius:
+/// the settlements near a point are looked up in the 3 x 3 cells around it
+/// instead of walking all of them (AD12).
+struct PointGrid {
+    radius: f32,
+    points: Vec<(SettlementId, [f32; 2])>,
+    buckets: BTreeMap<(i32, i32), Vec<usize>>,
+}
+
+impl PointGrid {
+    fn new(data: &GameData, radius: f32) -> Self {
+        // DC3: positions read in one walk (`settlement_px` is sorted like `settlements`).
+        let points: Vec<(SettlementId, [f32; 2])> =
+            if data.settlements.keys().eq(data.settlement_px.keys()) {
+                data.settlement_px
+                    .iter()
+                    .map(|(id, p)| (id.clone(), *p))
+                    .collect()
+            } else {
+                data.settlements
+                    .keys()
+                    .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
+                    .collect()
+            };
+        let radius = radius.max(1.0);
+        let mut buckets: BTreeMap<(i32, i32), Vec<usize>> = BTreeMap::new();
+        for (i, (_, p)) in points.iter().enumerate() {
+            buckets.entry(Self::cell(radius, *p)).or_default().push(i);
+        }
+        PointGrid {
+            radius,
+            points,
+            buckets,
+        }
+    }
+
+    fn cell(radius: f32, p: [f32; 2]) -> (i32, i32) {
+        (
+            (p[0] / radius).floor() as i32,
+            (p[1] / radius).floor() as i32,
+        )
+    }
+
+    /// Settlements within the radius of `point`, in settlement order.
+    fn near(&self, point: [f32; 2]) -> Vec<SettlementId> {
+        let (cx, cy) = Self::cell(self.radius, point);
+        let mut found: Vec<usize> = Vec::new();
+        for x in cx - 1..=cx + 1 {
+            for y in cy - 1..=cy + 1 {
+                if let Some(bucket) = self.buckets.get(&(x, y)) {
+                    found.extend(
+                        bucket
+                            .iter()
+                            .copied()
+                            .filter(|i| dist(self.points[*i].1, point) <= self.radius),
+                    );
+                }
+            }
+        }
+        found.sort_unstable();
+        found
+            .into_iter()
+            .map(|i| self.points[i].0.clone())
+            .collect()
+    }
+}
+
+type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
 
 impl<'a> GridPlanner<'a> {
     pub fn new(state: &'a CampaignState, data: &'a GameData, faction: &'a FactionId) -> Self {
@@ -107,58 +236,8 @@ impl<'a> GridPlanner<'a> {
         let rules = &data.ai_grid;
         let px_per_km = sim_campaign::march::px_per_km(data);
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
-        // DC3: positions read in one walk (`settlement_px` is sorted like `settlements`).
-        let points: Vec<(SettlementId, [f32; 2])> =
-            if data.settlements.keys().eq(data.settlement_px.keys()) {
-                data.settlement_px
-                    .iter()
-                    .map(|(id, p)| (id.clone(), *p))
-                    .collect()
-            } else {
-                data.settlements
-                    .keys()
-                    .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
-                    .collect()
-            };
-        let mut crossing: BTreeMap<FactionId, bool> = BTreeMap::new();
-        let mut may_cross = |owner: &FactionId| {
-            *crossing
-                .entry(owner.clone())
-                .or_insert_with(|| passage::ai_may_trespass(state, data, faction, owner))
-        };
-        let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
-        let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
-        // OMR R1: `trespassed_owner` depends on the province's controller
-        // alone: asked once per controller, and the verdict (owner, may
-        // cross) read once per province instead of once per settlement.
-        let mut by_controller: BTreeMap<&FactionId, Option<FactionId>> = BTreeMap::new();
-        let mut by_province: BTreeMap<&ProvinceId, (FactionId, bool)> = BTreeMap::new();
-        for province in state.provinces.keys() {
-            let Some(controller) = state.province_controller(province) else {
-                continue;
-            };
-            let owner = by_controller
-                .entry(controller)
-                .or_insert_with(|| passage::trespassed_owner(state, faction, province))
-                .clone();
-            if let Some(owner) = owner {
-                let open = may_cross(&owner);
-                by_province.insert(province, (owner, open));
-            }
-        }
-        for (id, settlement) in &state.settlements {
-            if &settlement.controller == faction {
-                continue;
-            }
-            let Some((owner, open)) = by_province.get(&settlement.province) else {
-                continue;
-            };
-            if *open {
-                crossable.insert(id.clone());
-            } else {
-                forbidden.insert(id.clone(), owner.clone());
-            }
-        }
+        let mut lands = PassageLands::read(state, data, faction);
+        let points = PointGrid::new(data, avoid_px);
         let hostile: Vec<(&ArmyId, &Army)> = state
             .armies
             .iter()
@@ -176,11 +255,7 @@ impl<'a> GridPlanner<'a> {
                 power: state.army_power(data, id),
                 settlement: a.settlement().cloned(),
                 beyond_passage: false,
-                near: points
-                    .iter()
-                    .filter(|(_, p)| distance(*p, point) <= avoid_px)
-                    .map(|(s, _)| s.clone())
-                    .collect(),
+                near: points.near(point),
             };
             let owner = state
                 .army_province(data, a)
@@ -190,7 +265,8 @@ impl<'a> GridPlanner<'a> {
         let enemies: Vec<Enemy> = read
             .into_iter()
             .map(|(mut enemy, owner)| {
-                enemy.beyond_passage = owner.is_some_and(|owner| !may_cross(&owner));
+                enemy.beyond_passage =
+                    owner.is_some_and(|owner| !lands.may_cross(state, data, faction, &owner));
                 enemy
             })
             .collect();
@@ -210,9 +286,9 @@ impl<'a> GridPlanner<'a> {
             px_per_km,
             enemies,
             stops,
-            forbidden,
-            crossable,
-            may_cross: Mutex::new(crossing),
+            forbidden: lands.forbidden,
+            crossable: lands.crossable,
+            may_cross: Mutex::new(lands.crossing),
             roads: Mutex::new(BTreeMap::new()),
             tables: Mutex::new(BTreeMap::new()),
         }
@@ -470,9 +546,9 @@ impl<'a> GridPlanner<'a> {
                     .as_ref()
                     .is_none_or(|s| !state.is_hostile_settlement(self.faction, s))
             })
-            .filter(|e| engaged.iter().all(|p| distance(*p, e.point) > engage_px))
+            .filter(|e| engaged.iter().all(|p| dist(*p, e.point) > engage_px))
             .filter_map(|e| {
-                let d = distance(here, e.point);
+                let d = dist(here, e.point);
                 if d > reach_px {
                     return None;
                 }
@@ -481,7 +557,7 @@ impl<'a> GridPlanner<'a> {
                 let (mut ours, mut theirs) = (power, 0.0);
                 for (id, other) in &state.armies {
                     if id == army_id
-                        || distance(state.army_point(self.data, other), e.point) > engage_px
+                        || dist(state.army_point(self.data, other), e.point) > engage_px
                     {
                         continue;
                     }

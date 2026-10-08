@@ -84,8 +84,8 @@ pub fn open_felony_towards(
             EventKind::Vassalage,
             format!(
                 "Félonie de {} envers {} ({}) : la commise peut être prononcée.",
-                crate::diplomacy::faction_name(data, vassal),
-                crate::diplomacy::faction_name(data, liege),
+                data.faction_name(vassal),
+                data.faction_name(liege),
                 reason_text(reason)
             ),
         )
@@ -183,8 +183,8 @@ pub(super) fn declare_commise(
             EventKind::Vassalage,
             format!(
                 "{} prononce la commise contre {} : {} confisqué.",
-                crate::diplomacy::faction_name(data, liege),
-                crate::diplomacy::faction_name(data, vassal),
+                data.faction_name(liege),
+                data.faction_name(vassal),
                 names.join(", ")
             ),
         )
@@ -236,8 +236,8 @@ pub fn settle_forfeitures(
                     EventKind::Vassalage,
                     format!(
                         "La commise est exécutée : {} reprend les fiefs de {}.",
-                        crate::diplomacy::faction_name(data, liege),
-                        crate::diplomacy::faction_name(data, vassal)
+                        data.faction_name(liege),
+                        data.faction_name(vassal)
                     ),
                 )
                 .faction(liege),
@@ -248,8 +248,8 @@ pub fn settle_forfeitures(
                     EventKind::Vassalage,
                     format!(
                         "La commise prononcée par {} contre {} reste lettre morte.",
-                        crate::diplomacy::faction_name(data, liege),
-                        crate::diplomacy::faction_name(data, vassal)
+                        data.faction_name(liege),
+                        data.faction_name(vassal)
                     ),
                 )
                 .faction(vassal),

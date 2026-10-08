@@ -79,7 +79,7 @@ fn army(tier: Tier, offset: usize) -> Vec<UnitSetup> {
     let ids: Vec<&str> = (0..tier.regiments())
         .map(|i| KINDS[(i + offset) % KINDS.len()])
         .collect();
-    let mut list = units(&data, &ids);
+    let mut list = units(data, &ids);
     if tier == Tier::Epic {
         for unit in &mut list {
             unit.soldiers = 120;
@@ -136,78 +136,6 @@ pub fn play(sim: &mut BattleSim) -> (f64, Option<SideId>, String) {
         .map(|e| e.text_fr.clone())
         .unwrap_or_default();
     (sim.elapsed(), sim.winner(), last)
-}
-
-fn row(tier: Tier, terrain: Terrain, river: bool, mode: Mode, seeds: u64) -> Vec<f64> {
-    // `EP9_ONLY=large,river,IdleAttacker` keeps the matching rows only.
-    let label = format!("{} {} river={river} {mode:?}", tier.key(), terrain.key());
-    if let Ok(only) = std::env::var("EP9_ONLY") {
-        if !only.split(',').all(|token| label.contains(token)) {
-            return Vec::new();
-        }
-    }
-    let mut times = Vec::new();
-    let (mut att, mut def, mut open) = (0, 0, 0);
-    let mut ends = std::collections::BTreeMap::new();
-    for seed in 0..seeds {
-        let mut s = sim(tier, terrain, river, mode, seed);
-        let (t, w, last) = play(&mut s);
-        times.push(t);
-        *ends
-            .entry(s.end_kind().map_or("open", |e| e.key()))
-            .or_insert(0) += 1;
-        match w {
-            Some(SideId::Attacker) => att += 1,
-            Some(SideId::Defender) => def += 1,
-            None => open += 1,
-        }
-        if std::env::var("EP9_VERBOSE").is_ok() {
-            println!("  seed {seed}: {t:.0} s {w:?} « {last} »");
-        }
-    }
-    let mut sorted = times.clone();
-    sorted.sort_by(f64::total_cmp);
-    println!(
-        "{:9} {:9} river={:5} {:13} min {:4.0} med {:4.0} max {:4.0}  att {att:2} def {def:2} open {open:2} {ends:?}",
-        tier.key(),
-        terrain.key(),
-        river,
-        format!("{mode:?}"),
-        sorted[0],
-        sorted[sorted.len() / 2],
-        sorted[sorted.len() - 1],
-    );
-    times
-}
-
-/// Survey table (ignored: long). `EP9_SEEDS` (default 12), `EP9_TIERS`
-/// (`standard,large,epic`).
-#[test]
-#[ignore]
-fn survey() {
-    let seeds: u64 = std::env::var("EP9_SEEDS")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(12);
-    let tiers = std::env::var("EP9_TIERS").unwrap_or_else(|_| "standard,large,epic".into());
-    for (tier, name) in [
-        (Tier::Standard, "standard"),
-        (Tier::Large, "large"),
-        (Tier::Epic, "epic"),
-    ] {
-        if !tiers.contains(name) {
-            continue;
-        }
-        for (terrain, river) in [
-            (Terrain::Plains, false),
-            (Terrain::Hills, false),
-            (Terrain::Plains, true),
-        ] {
-            for mode in [Mode::AiVsAi, Mode::IdleAttacker, Mode::IdleDefender] {
-                row(tier, terrain, river, mode, seeds);
-            }
-        }
-    }
 }
 
 /// The Q3 battle: the demo battle of 1337 (France attacks, the player's
@@ -390,7 +318,7 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
         "unit_men_at_arms_foot",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     battle.attacker.general = Some(general("Philippe"));
     battle.defender.general = Some(general("Edouard"));
@@ -422,154 +350,4 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
         legacy_rules(&mut sim);
     }
     sim
-}
-
-/// Crécy-like battles over 12 seeds, before (legacy end) and after.
-#[test]
-#[ignore]
-fn survey_crecy() {
-    for legacy in [true, false] {
-        let (mut english, mut times) = (0, Vec::new());
-        for seed in 0..12 {
-            let mut sim = crecy(seed, legacy);
-            let (t, w, _) = play(&mut sim);
-            times.push(t.round() as i64);
-            if w == Some(SideId::Defender) {
-                english += 1;
-            }
-        }
-        println!("crecy legacy={legacy}: English {english}/12, durations {times:?}");
-    }
-}
-
-/// The reference battles of `ai.rs` (10 a side, river every other seed)
-/// and `ep1_scale.rs` (60 a side, 120 men), legacy end against EP9.
-#[test]
-#[ignore]
-fn survey_reference() {
-    let data = data();
-    for legacy in [true, false] {
-        let mut line = Vec::new();
-        for seed in 0..8u64 {
-            let ids: Vec<&str> = (0..10).map(|i| KINDS[i % KINDS.len()]).collect();
-            let mut battle = setup(units(&data, &ids), units(&data, &ids), None);
-            battle.river = seed % 2 == 0;
-            let mut sim = BattleSim::new(battle, seed).unwrap();
-            if legacy {
-                legacy_rules(&mut sim);
-            }
-            let (t, w, _) = play(&mut sim);
-            line.push(format!(
-                "{t:.0}{}",
-                if w == Some(SideId::Attacker) {
-                    "A"
-                } else {
-                    "D"
-                }
-            ));
-        }
-        println!("ai.rs legacy={legacy}: {}", line.join(" "));
-        let mut line = Vec::new();
-        for seed in [3u64, 5, 11] {
-            let ids: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
-            let mut battle = setup(units(&data, &ids), units(&data, &ids), None);
-            for unit in battle
-                .attacker
-                .units
-                .iter_mut()
-                .chain(battle.defender.units.iter_mut())
-            {
-                unit.soldiers = 120;
-                unit.max_soldiers = 120;
-            }
-            let mut sim = BattleSim::new(battle, seed).unwrap();
-            if legacy {
-                legacy_rules(&mut sim);
-            }
-            let mut melee = 0;
-            while !sim.is_finished() && sim.elapsed() < CAP {
-                sim.step();
-                melee = melee.max(
-                    sim.units()
-                        .iter()
-                        .filter(|u| u.state == sim_battle::UnitState::Melee)
-                        .count(),
-                );
-            }
-            line.push(format!(
-                "seed {seed}: {:.0} s {:?} melee {melee}",
-                sim.elapsed(),
-                sim.winner()
-            ));
-        }
-        println!("ep1 legacy={legacy}: {}", line.join(" | "));
-    }
-}
-
-/// Trace of one battle (ignored): `EP9_CASE=demo,1` or
-/// `EP9_CASE=epic,river,IdleDefender,9` (tier, `plains`/`hills`/`river`,
-/// mode, seed).
-#[test]
-#[ignore]
-fn trace() {
-    let case = std::env::var("EP9_CASE").unwrap_or_else(|_| "demo,1".into());
-    let parts: Vec<&str> = case.split(',').collect();
-    let seed: u64 = parts.last().and_then(|s| s.parse().ok()).unwrap_or(1);
-    let mut sim = if parts[0] == "demo" {
-        let setup: BattleSetup =
-            serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
-        BattleSim::new(setup, 1337 + seed).unwrap()
-    } else {
-        let tier = match parts[0] {
-            "large" => Tier::Large,
-            "epic" => Tier::Epic,
-            _ => Tier::Standard,
-        };
-        let (terrain, river) = match parts[1] {
-            "hills" => (Terrain::Hills, false),
-            "river" => (Terrain::Plains, true),
-            _ => (Terrain::Plains, false),
-        };
-        let mode = match parts[2] {
-            "IdleAttacker" => Mode::IdleAttacker,
-            "IdleDefender" => Mode::IdleDefender,
-            _ => Mode::AiVsAi,
-        };
-        sim(tier, terrain, river, mode, seed)
-    };
-    let mut next = 0.0;
-    let mut seen = 0;
-    while !sim.is_finished() && sim.elapsed() < CAP {
-        sim.step();
-        for e in &sim.events()[seen..] {
-            println!("{:6.1} {:?} {}", e.time, e.side, e.text_fr);
-        }
-        seen = sim.events().len();
-        if sim.elapsed() >= next {
-            next += 30.0;
-            let melee = sim
-                .units()
-                .iter()
-                .filter(|u| u.state == sim_battle::UnitState::Melee)
-                .count();
-            let mean_z = |side: SideId| {
-                let list: Vec<f64> = sim
-                    .units()
-                    .iter()
-                    .filter(|u| u.side == side && u.able())
-                    .map(|u| u.z)
-                    .collect();
-                list.iter().sum::<f64>() / list.len().max(1) as f64
-            };
-            println!(
-                "t {:4.0} quiet {:4.0} share att {:.2} def {:.2} melee {melee} z att {:.0} def {:.0}",
-                sim.elapsed(),
-                sim.quiet_time(),
-                sim.fighting_share(SideId::Attacker),
-                sim.fighting_share(SideId::Defender),
-                mean_z(SideId::Attacker),
-                mean_z(SideId::Defender),
-            );
-        }
-    }
 }

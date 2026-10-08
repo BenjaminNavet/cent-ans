@@ -8,28 +8,18 @@
 shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
-uniform sampler2D flipbook : filter_linear_mipmap, repeat_disable;
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
-uniform float frames_h = 8.0;
-uniform float frames_v = 8.0;
 uniform float emission = 3.2;
 uniform float opacity = 0.55;
 uniform float soft_distance = 1.5;
-uniform vec3 color_cold : source_color = vec3(0.35, 0.03, 0.0);
-uniform vec3 color_mid : source_color = vec3(1.0, 0.32, 0.04);
-uniform vec3 color_hot : source_color = vec3(1.0, 0.72, 0.28);
-uniform vec3 color_core : source_color = vec3(1.0, 0.93, 0.78);
+
+#include "res://shaders/fx_flipbook.gdshaderinc"
+#include "res://shaders/fx_blackbody.gdshaderinc"
 
 varying vec2 uv_a;
 varying vec2 uv_b;
 varying float frame_blend;
 varying float age;
-
-vec2 frame_uv(vec2 uv, float frame) {
-	float column = mod(frame, frames_h);
-	float row = floor(frame / frames_h);
-	return (vec2(column, row) + uv) / vec2(frames_h, frames_v);
-}
 
 void vertex() {
 	// Panneau face caméra conservant l'échelle de la particule (billboard de particules).
@@ -40,23 +30,15 @@ void vertex() {
 		vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
 		vec4(0.0, 0.0, 0.0, 1.0));
 	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
-	float total = frames_h * frames_v;
-	float f = fract(INSTANCE_CUSTOM.z) * total;
-	float first = floor(f);
-	frame_blend = f - first;
-	uv_a = frame_uv(UV, first);
-	uv_b = frame_uv(UV, mod(first + 1.0, total));
+	vec3 frames = flipbook_loop(INSTANCE_CUSTOM.z);
+	uv_a = frame_uv(UV, frames.x);
+	uv_b = frame_uv(UV, frames.y);
+	frame_blend = frames.z;
 	age = INSTANCE_CUSTOM.y;
 }
 
-vec3 blackbody(float heat) {
-	vec3 c = mix(color_cold, color_mid, smoothstep(0.0, 0.35, heat));
-	c = mix(c, color_hot, smoothstep(0.35, 0.7, heat));
-	return mix(c, color_core, smoothstep(0.7, 1.0, heat));
-}
-
 void fragment() {
-	vec4 texel = mix(texture(flipbook, uv_a), texture(flipbook, uv_b), frame_blend);
+	vec4 texel = flipbook_texel(uv_a, uv_b, frame_blend);
 	// La flamme se refroidit et s'amincit en vieillissant.
 	float heat = texel.r * mix(1.0, 0.55, age);
 	float coverage = texel.a * COLOR.a * smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.65, 1.0, age));

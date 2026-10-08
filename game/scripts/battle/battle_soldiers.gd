@@ -52,12 +52,10 @@ const BUDGET_FAR := 800.0
 ## EP1 : au-delà de `THIN_DISTANCE` mètres, imposteurs à demi-densité (`thin_out` du shader).
 const THIN_DISTANCE := 700.0
 ## PO4 : rangs moins tirés au cordeau. Décalage d'affichage de chaque figurine (±`LOOSE_OFFSET_M`
-## en x et z, ±`LOOSE_YAW_DEG` de lacet), stable par (régiment, rang dans le tampon), appliqué au
-## seul tampon du `MultiMesh` : l'état du cœur n'en sait rien. Régiments à moins de
-## `LOOSE_DISTANCE` m seulement (au-delà l'écart ne se voit plus). `--no-loose-ranks` : coupé.
+## en x et z, ±`LOOSE_YAW_DEG` de lacet), appliqué par le cœur (`set_loose_ranks`) au seul tampon
+## du `MultiMesh` : l'état de la simulation n'en sait rien.
 const LOOSE_OFFSET_M := 0.15
 const LOOSE_YAW_DEG := 4.0
-const LOOSE_DISTANCE := 160.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -79,27 +77,14 @@ var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'im
 ## sa taille ne dit plus l'effectif dessiné).
 var _drawn: Dictionary = {}
 ## PB3c : tampons groupés et mis en cache côté Rust entre deux pas de simulation
-## (`get_soldier_buffers`) ; `--no-pb3c` après `--` : un appel par camp et famille (mesures A/B).
-var pb3c_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3c")
+## (`get_soldier_buffers`).
 ## PB3e : un tampon inchangé depuis son dernier envoi (même version Rust, même capacité, aucune
-## figurine masquée ou poussée) n'est pas renvoyé au `MultiMesh` (`--no-pb3e` : renvoyé à
-## chaque image comme avant).
-var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
-## `--pb3e-verify` : compare chaque tampon non renvoyé au contenu du MultiMesh (banc, lent).
-var pb3e_verify: bool = OS.get_cmdline_user_args().has("--pb3e-verify")
-var pb3e_mismatches: int = 0
+## figurine masquée ou poussée) n'est pas renvoyé au `MultiMesh`.
 var _buffer_version: int = -1  # version Rust du tampon du régiment en cours (-1 : inconnue)
 var _buffer_sent: Dictionary = {}  # id d'instance du MultiMesh -> version × 2^20 + instance_count
 var _reserved_out: Dictionary = {}  # id -> [version, places, n, tampon masqué, version dérivée]
 var _derived_serial: int = 1 << 40  # versions dérivées, disjointes de celles de Rust
-var loose_ranks_enabled: bool = not OS.get_cmdline_user_args().has("--no-loose-ranks")
-var _loose_table: Dictionary = {}  # id -> PackedFloat32Array (dx, dz, cos, sin) par rang
-var _loose_out: Dictionary = {}  # id -> [version, n, tampon décalé, version dérivée]
-## RJ-b : rangs lâches appliqués par le cœur (`set_loose_ranks`, tampons groupés) : la boucle
-## GDScript par figurine ne tourne plus à chaque image quand les poses sont interpolées.
-var _core_loose: bool = false
-var _core_loose_set: bool = false
-var _core_loose_now: bool = false  # tampon en cours déjà « lâché » par le cœur
+var _core_loose_set: bool = false  # `set_loose_ranks` envoyé au cœur
 ## PB3c : derniers uniformes envoyés par matériau (instance id -> {nom: valeur}) : un paramètre
 ## inchangé n'est plus renvoyé (matériau non resali, pas d'appel au serveur de rendu).
 var _sent: Dictionary = {}
@@ -121,8 +106,7 @@ var _unit_scale: Dictionary = {}  # unit id -> figurines par soldat simulé
 var _corpse_materials: Dictionary = {}  # "side/kind/variant" -> ShaderMaterial
 var _corpse_total: int = 0
 var _dirty_corpses: Dictionary = {}
-## EP1 : budget d'animation par distance (`--no-ep1-budget` le coupe, mesures A/B).
-var budget_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep1-budget")
+## EP1 : budget d'animation par distance.
 var skipped_updates: int = 0
 var _frame_index: int = 0  # EP1 : cellules de cadavres à renvoyer au GPU
 var _tumble_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, next, material}
@@ -143,31 +127,25 @@ var victor_side: String = ""
 var _pike_units: Dictionary = {}  # unit id -> true si armes d'hast (cabrage des chevaux)
 var _frame_dt: float = 0.0
 var _audio: Script = null
-## Lot EP12 (ADR 0070) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
-## d'avant (mesures A/B).
-var ep12_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep12")
+## Lot EP12 (ADR 0070) : blessés au sol et fuyards désarmés.
 var dropped_arms: BattleDroppedArms = null
 var wounded_count: int = 0
-var last_wounded_pos: Variant = null  # capture `--ep12-shot=wounded`
+var last_wounded_pos: Variant = null
 var last_wounded_time: float = -1.0e6
 var disarmed_units: Dictionary = {}  # unit id -> instant de la débandade (armes jetées)
 var _wounded_total: int = 0
 var _recent_wounded: Array = []  # instants de chute des blessés qui bougent encore
-## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
 ## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
 var impostors: BattleImpostors = null
 var _imp_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (quadrilatères)
 ## BV3 : les pavois des génois sont plantés en rangée (`BattleVolleys`) : celui du dos disparaît.
 var hide_planted_pavise: bool = false
-var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 ## EP5 : figurines du tampon remplacées par un porte-étendard ou un musicien dédié
 ## (`BattleStandards`) : unit id -> PackedInt32Array des rangs masqués.
 var reserved: Dictionary = {}
 ## DA1 : atlas d'armoiries (Texture2DArray : une couche par écu, 128²), couche de la faction et
 ## du seigneur (maison du général) par camp, bannerets possibles par camp, croix du commun.
-## `--no-da1` après `--` : rendu d'avant DA1 (mesures A/B).
-var da1_enabled: bool = not OS.get_cmdline_user_args().has("--no-da1")
 var arms_atlas: Texture2DArray = null
 var arms_layer_ids: Array[String] = []  # couche -> "fac_x" ou id de maison
 var _side_faction_layer: Dictionary = {}
@@ -186,11 +164,10 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, sid
 	gore = BattleGore.new()
 	gore.name = "Gore"
 	add_child(gore)
-	if ep12_enabled:
-		dropped_arms = BattleDroppedArms.new()
-		dropped_arms.name = "DroppedArms"
-		add_child(dropped_arms)
-		dropped_arms.setup(_gore.get("dropped_arms", {}))
+	dropped_arms = BattleDroppedArms.new()
+	dropped_arms.name = "DroppedArms"
+	add_child(dropped_arms)
+	dropped_arms.setup(_gore.get("dropped_arms", {}))
 	if ResourceLoader.exists("res://scripts/audio/battle_audio.gd"):
 		_audio = load("res://scripts/audio/battle_audio.gd")
 	_side_colors = side_colors
@@ -251,8 +228,6 @@ func _build_arms_atlas(side_factions: Dictionary, side_houses: Dictionary) -> vo
 	for side in side_factions:
 		var house := str(side_houses.get(side, ""))
 		_side_lord_texture[side] = HouseArms.texture(house) if house != "" else null
-	if not da1_enabled:
-		return
 	var images: Array[Image] = []
 	var index_of := {}
 	var add := func(key: String, texture: Texture2D) -> int:
@@ -443,19 +418,14 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 		if str(unit.get("state", "")) == "melee":
 			_melee_time[uid] = float(_melee_time.get(uid, 0.0)) + anim_dt
 	_advance_lags(anim_dt)
-	if bv2_enabled:
-		_find_braced(units)
+	_find_braced(units)
 	if gore != null:
 		gore.update(anim_dt, _camera_pos)
-	if pb3c_enabled and battle.has_method("get_soldier_buffers"):
-		_update_batched(battle, units, selected)
-	else:
-		_update_per_kind(battle, units, selected)
+	_update_batched(battle, units, selected)
 	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
-	if bv2_enabled and battle.has_method("get_impacts"):
-		var impacts: Array = battle.call("get_impacts")
-		if not impacts.is_empty():
-			apply_impacts(impacts)
+	var impacts: Array = battle.call("get_impacts")
+	if not impacts.is_empty():
+		apply_impacts(impacts)
 	if not _dirty_corpses.is_empty():
 		_flush_corpses()
 
@@ -466,9 +436,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 	if not _core_loose_set:
 		_core_loose_set = true
-		_core_loose = loose_ranks_enabled and battle.has_method("set_loose_ranks")
-		if _core_loose:
-			battle.call("set_loose_ranks", LOOSE_OFFSET_M, LOOSE_YAW_DEG)
+		battle.call("set_loose_ranks", LOOSE_OFFSET_M, LOOSE_YAW_DEG)
 	var capacities := PackedInt32Array()
 	capacities.resize(units.size())
 	capacities.fill(-1)
@@ -483,18 +451,15 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 			var capacity := (layers[id] as MultiMeshInstance3D).multimesh.instance_count
 			capacities[i] = capacity
 			var n := int(unit.get("figures", unit["soldiers"])) if bool(unit["present"]) else 0
-			if budget_enabled and _skip_far(unit, id, n):
+			if _skip_far(unit, id, n):
 				skip[i] = 1
 				capacities[i] = -2 - capacity
 	var result: Array = battle.call("get_soldier_buffers", capacities)
 	var counts: PackedInt32Array = result[0]
 	var buffers: Array = result[1]
 	var versions := PackedInt64Array()
-	if pb3e_enabled and result.size() > 2:
+	if result.size() > 2:
 		versions = result[2]
-	if buffers.size() != units.size():
-		_update_per_kind(battle, units, selected)
-		return
 	for side in ["attacker", "defender"]:
 		for kind in KINDS:
 			for i in units.size():
@@ -515,39 +480,10 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 					continue
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
 				_buffer_version = versions[i] if i < versions.size() else -1
-				_core_loose_now = _core_loose
 				_update_unit(unit, id, kind, buffers[i], n, selected.has(id))
 	_buffer_version = -1
-	_core_loose_now = false
 
 
-## Chemin d'avant PB3c : un tampon par camp et famille, découpé en tranches par régiment.
-func _update_per_kind(battle: Object, units: Array, selected: Array) -> void:
-	for side in ["attacker", "defender"]:
-		for kind in KINDS:
-			var buffer: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
-			var total := buffer.size() / 12
-			var offset := 0
-			for unit in units:
-				if str(unit["side"]) != side or str(unit["render"]) != kind:
-					continue
-				var id := int(unit["id"])
-				if not layers.has(id):
-					continue
-				var n := int(unit.get("figures", unit["soldiers"])) if bool(unit["present"]) else 0
-				if offset + n > total:
-					if not _warned:
-						push_warning("BattleSoldiers: soldier buffer shorter than expected (%s/%s)" % [side, kind])
-						_warned = true
-					n = maxi(total - offset, 0)
-				if budget_enabled and _skip_far(unit, id, n):
-					offset += n
-					skipped_updates += 1
-					continue
-				var slice := buffer.slice(offset * 12, (offset + n) * 12)
-				offset += n
-				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
-				_update_unit(unit, id, kind, slice, n, selected.has(id))
 
 
 ## EP1 : `true` quand le régiment lointain saute cette image (budget d'animation). Jamais quand
@@ -613,20 +549,6 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	# PF1 : distances de LOD, d'ombre et d'imposteurs selon le préréglage de qualité.
 	var lod_k := RenderQuality.battle_lod_scale
-	if loose_ranks_enabled and not _core_loose_now and n > 0 and distance < LOOSE_DISTANCE * lod_k:
-		# PO4 : même tampon (même version) → même résultat, repris sans recalcul.
-		var loose: Variant = _loose_out.get(id) if version >= 0 else null
-		if loose != null and int(loose[0]) == version and int(loose[1]) == n:
-			slice = loose[2]
-			version = int(loose[3])
-		else:
-			slice = loosen(id, slice, n)
-			if version >= 0:
-				_derived_serial += 1
-				_loose_out[id] = [version, n, slice, _derived_serial]
-				version = _derived_serial
-			else:
-				_loose_out.erase(id)
 	var near := distance < LOD_DISTANCE * lod_k
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE * lod_k
 	var skinned := _skinned.has(id)
@@ -660,12 +582,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			padded.resize(mm.instance_count * 12)
 		if instance.visible and not _buffer_unchanged(mm, version):
 			mm.buffer = padded
-		elif instance.visible and pb3e_verify and mm.buffer != padded:
-			pb3e_mismatches += 1
 		if lod.visible and not _buffer_unchanged(lod_mm, version):
 			lod_mm.buffer = padded
-		elif lod.visible and pb3e_verify and lod_mm.buffer != padded:
-			pb3e_mismatches += 1
 		if imp != null:
 			if imp.multimesh.instance_count != mm.instance_count:
 				imp.multimesh.instance_count = mm.instance_count
@@ -687,7 +605,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		_param(imp_mat, imp_sent, &"anim_time", anim_time - float(_lag.get(id, 0.0)))
 		_param(imp_mat, imp_sent, &"imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
 		_param(imp_mat, imp_sent, &"highlight", 1.0 if is_selected else 0.0)
-		var thin := 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0
+		var thin := 1.0 if distance > THIN_DISTANCE and not is_selected else 0.0
 		_param(imp_mat, imp_sent, &"thin_out", thin)
 		if imp.get_child_count() > 0:
 			# NT10 : sang du régiment (celui des figurines, image précédente) et ombre éclaircie.
@@ -711,7 +629,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt
 		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
 		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
-		var cadence := _cadence(id, config) if bv2_enabled else 1.0
+		var cadence := _cadence(id, config)
 		if cadence != 1.0:
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt * (1.0 - cadence)
 	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
@@ -737,7 +655,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	track["ammo"] = ammo
 	track["state"] = state
 	_param(mat, sent, &"state_time", local - float(track["since"]))
-	if skinned and ep12_enabled and kind != "cavalry":
+	if skinned and kind != "cavalry":
 		_update_disarmed(unit, id, kind, slice, n, mat, state == "routing")
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
@@ -855,8 +773,6 @@ func _buffer_unchanged(mm: MultiMesh, version: int) -> bool:
 
 ## PB3c : uniformes déjà envoyés à `mat` (hors chemin PB3c : dictionnaire jetable, tout renvoyé).
 func _sent_of(mat: ShaderMaterial) -> Dictionary:
-	if not pb3c_enabled:
-		return {}
 	var key := mat.get_instance_id()
 	if not _sent.has(key):
 		_sent[key] = {}
@@ -903,48 +819,6 @@ func figure_count(id: int) -> int:
 
 
 ## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
-## PO4 : copie de `slice` dont les `n` premières figurines sont décalées (position et lacet) selon
-## la table stable du régiment `id` ; rendu seulement (`_previous` garde les vraies places).
-func loosen(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
-	var table: PackedFloat32Array = _loose_table.get(id, PackedFloat32Array())
-	if table.size() < n * 4:
-		var rng := RandomNumberGenerator.new()
-		var start := table.size() / 4
-		var grown := maxi(n, start * 2)
-		table.resize(grown * 4)
-		for i in range(start, grown):
-			# Graine propre à (régiment, rang) : la table ne dépend pas de l'ordre de croissance.
-			rng.seed = hash(Vector2i(id, i))
-			var yaw := deg_to_rad(rng.randf_range(-LOOSE_YAW_DEG, LOOSE_YAW_DEG))
-			table[i * 4] = rng.randf_range(-LOOSE_OFFSET_M, LOOSE_OFFSET_M)
-			table[i * 4 + 1] = rng.randf_range(-LOOSE_OFFSET_M, LOOSE_OFFSET_M)
-			table[i * 4 + 2] = cos(yaw)
-			table[i * 4 + 3] = sin(yaw)
-		_loose_table[id] = table
-	var out := slice.duplicate()
-	for i in n:
-		var o := i * 12
-		var t := i * 4
-		var c := table[t + 2]
-		var s := table[t + 3]
-		# Base × rotation autour de Y (lacet local de la figurine), ligne par ligne.
-		var a := out[o]
-		var b := out[o + 2]
-		out[o] = a * c - b * s
-		out[o + 2] = a * s + b * c
-		a = out[o + 4]
-		b = out[o + 6]
-		out[o + 4] = a * c - b * s
-		out[o + 6] = a * s + b * c
-		a = out[o + 8]
-		b = out[o + 10]
-		out[o + 8] = a * c - b * s
-		out[o + 10] = a * s + b * c
-		out[o + 3] += table[t]
-		out[o + 11] += table[t + 1]
-	return out
-
-
 func _hide_reserved(slots: PackedInt32Array, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
 	# Copie : `_previous` (même tableau) garde les vraies places (`figure_at`).
 	var out := slice.duplicate()
@@ -1024,15 +898,14 @@ func _impostor_layer(id: int, side: String, kind: String, variant: int, count: i
 	imp.material_override = impostors.make_material(key)
 	imp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(imp)
-	if BattleImpostors.nt10_enabled():
-		# NT10 : ombre en disque au sol, même MultiMesh (aucune copie du tampon), enfant de
-		# l'imposteur (visibilité commune).
-		var shadow := MultiMeshInstance3D.new()
-		shadow.name = "Shadow"
-		shadow.multimesh = mm
-		shadow.material_override = impostors.make_shadow_material(key)
-		shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		imp.add_child(shadow)
+	# NT10 : ombre en disque au sol, même MultiMesh (aucune copie du tampon), enfant de
+	# l'imposteur (visibilité commune).
+	var shadow := MultiMeshInstance3D.new()
+	shadow.name = "Shadow"
+	shadow.multimesh = mm
+	shadow.material_override = impostors.make_shadow_material(key)
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	imp.add_child(shadow)
 	_imp_layers[id] = imp
 	return imp
 
@@ -1067,7 +940,7 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var mounted := kind == "cavalry"
 	var limits: Dictionary = _gore.get("corpses", {})
 	var level := _level
-	var cause := str(unit.get("loss_cause", "other")) if bv2_enabled else "other"
+	var cause := str(unit.get("loss_cause", "other"))
 	var deaths: Dictionary = _gore.get("deaths", {})
 	var death: Dictionary = deaths.get(cause, deaths.get("other", {}))
 	var names: Array = death.get(("mounted" if mounted else "foot"), [])
@@ -1080,14 +953,14 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	# EP12 : blessés (part tirée par cause), fuyards désarmés.
 	var uid := int(unit["id"])
 	var wounded_cfg: Dictionary = _gore.get("wounded", {})
-	var wounded_share := float(wounded_cfg.get("share", {}).get(cause, 0.0)) if ep12_enabled and skinned and not mounted else 0.0
+	var wounded_share := float(wounded_cfg.get("share", {}).get(cause, 0.0)) if skinned and not mounted else 0.0
 	if wounded_share > 0.0 and BattleSkinned.wounded_config(kind, variant).is_empty():
 		wounded_share = 0.0
 	# Plafond des blessés qui bougent encore (tombés depuis moins de `animated_seconds`).
 	var window := float(wounded_cfg.get("animated_seconds", 7.0))
 	while not _recent_wounded.is_empty() and anim_time - float(_recent_wounded[0]) > window:
 		_recent_wounded.pop_front()
-	var unarmed_flag := BattleSkinned.CODE_UNARMED if ep12_enabled and disarmed_units.has(uid) else 0
+	var unarmed_flag := BattleSkinned.CODE_UNARMED if disarmed_units.has(uid) else 0
 	# Rang de tirage tiré de l'état de la simulation (effectif restant du régiment) et non d'un
 	# compteur du rendu : le rejeu (EP13) retrouve les mêmes blessés après un saut.
 	var sim_left := int(unit["soldiers"])

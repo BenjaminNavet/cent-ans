@@ -35,19 +35,15 @@ var _sim: Object = null
 func _init() -> void:
 	name = "RansomPanel"
 	custom_minimum_size = Vector2(560, 0)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	var box := UiBuild.vbox(6)
 	add_child(box)
 	var header := HBoxContainer.new()
 	box.add_child(header)
-	title_label = Label.new()
-	title_label.text = "Captifs et rançons"
-	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
+	title_label = UiBuild.label("Captifs et rançons", UiType.size(UiType.HEADING))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
-	var close_button := Button.new()
-	close_button.text = "×"
-	RichTooltip.attach_plain(close_button, "close")
+	var close_button := UiBuild.button("×")
+	TooltipHost.attach_plain(close_button, "close")
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
@@ -61,9 +57,8 @@ func _init() -> void:
 	scroll = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
-	list_box = VBoxContainer.new()
+	list_box = UiBuild.vbox(4)
 	list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list_box.add_theme_constant_override("separation", 4)
 	scroll.add_child(list_box)
 
 
@@ -122,13 +117,8 @@ func _fit_height() -> void:
 
 
 func _heading(text: String, hint: String) -> Control:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 0)
-	var label := Label.new()
-	label.text = text
-	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
-	label.add_theme_color_override("font_color", RUBRIC_COLOR)
-	box.add_child(label)
+	var box := UiBuild.vbox(0)
+	var label := UiBuild.label(text, UiType.size(UiType.BODY), RUBRIC_COLOR, false, 0.0, box)
 	var rich := RichTextLabel.new()
 	rich.bbcode_enabled = true
 	rich.fit_content = true
@@ -145,17 +135,13 @@ func _heading(text: String, hint: String) -> Control:
 
 
 func _muted(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-	label.add_theme_color_override("font_color", MUTED_COLOR)
+	var label := UiBuild.label(text, UiType.size(UiType.CAPTION), MUTED_COLOR)
 	return label
 
 
 ## Portrait (ou blason) + nom cliquable + bouton Codex si le personnage a une fiche.
 func _identity(character_id: String, name_text: String, faction_id: String, subtitle: String) -> Control:
-	var line := HBoxContainer.new()
-	line.add_theme_constant_override("separation", 8)
+	var line := UiBuild.hbox(8)
 	var frame := PanelContainer.new()
 	frame.custom_minimum_size = PORTRAIT_SIZE
 	var swatch := ColorRect.new()
@@ -164,37 +150,29 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	frame.add_child(swatch)
 	PortraitLoader.overlay_portrait(swatch, character_id, faction_id, PORTRAIT_SIZE)
 	line.add_child(frame)
-	var text_box := VBoxContainer.new()
-	text_box.add_theme_constant_override("separation", 0)
+	var text_box := UiBuild.vbox(0)
 	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(text_box)
 	var name_row := HBoxContainer.new()
 	text_box.add_child(name_row)
 	var link := LinkButton.new()
 	link.text = name_text
-	RichTooltip.attach_plain(link, "open_character_sheet")
+	TooltipHost.attach_plain(link, "open_character_sheet")
 	link.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	style_link(link)
 	link.pressed.connect(func() -> void: request_character(character_id))
 	name_row.add_child(link)
 	var codex_id := codex_entry_for(character_id)
 	if codex_id != "":
-		var codex_button := Button.new()
+		var codex_button := UiBuild.button("✠")
 		codex_button.flat = true
-		codex_button.text = "✠"
-		RichTooltip.attach_plain(codex_button, "historical_sheet_codex")
+		TooltipHost.attach_plain(codex_button, "historical_sheet_codex")
 		codex_button.pressed.connect(func() -> void:
 			var bubbles := _root_node("/root/CodexBubbles")
 			if bubbles != null:
 				bubbles.call("open_entry", codex_id))
 		name_row.add_child(codex_button)
-	var sub := Label.new()
-	sub.text = subtitle
-	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sub.custom_minimum_size = Vector2(440, 0)
-	sub.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-	sub.add_theme_color_override("font_color", MUTED_COLOR)
-	text_box.add_child(sub)
+	var sub := UiBuild.label(subtitle, UiType.size(UiType.CAPTION), MUTED_COLOR, true, 440, text_box)
 	return line
 
 
@@ -211,17 +189,14 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 	if kind == "province":
 		terms_text += " : " + _province_name(str(terms.get("province", "")))
 	subtitle += "\nTermes : " + terms_text
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 2)
+	var box := UiBuild.vbox(2)
 	box.add_child(_identity(character_id, str(captive.get("name", character_id)), str(captive.get("faction", "")), subtitle))
-	var actions := HBoxContainer.new()
-	actions.add_theme_constant_override("separation", 6)
-	box.add_child(actions)
+	var actions := UiBuild.hbox(6, box)
 	var controls := {}
 	if ours:
 		var pay := RichButton.new()
 		pay.text = "Céder %s" % _province_name(str(terms.get("province", ""))) if kind == "province" else "Payer comptant (%s)" % _pounds(ransom)
-		RichTooltip.attach_plain(pay, "ransom_pay_full", {"body": "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."})
+		TooltipHost.attach_plain(pay, "ransom_pay_full", {"body": "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."})
 		pay.pressed.connect(func() -> void: pay_ransom(character_id, 1))
 		actions.add_child(pay)
 		controls["pay"] = pay
@@ -255,7 +230,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 			if str(meta.get("kind", "")) == kind and str(meta.get("province", "")) == str(terms.get("province", "")):
 				choice.select(index)
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		RichTooltip.attach_plain(choice, "ransom_cedable_province")
+		TooltipHost.attach_plain(choice, "ransom_cedable_province")
 		actions.add_child(choice)
 		var set_terms := RichButton.new()
 		set_terms.text = "Fixer les termes"
@@ -263,7 +238,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 		actions.add_child(set_terms)
 		var parole := RichButton.new()
 		parole.text = "Libérer sur parole"
-		RichTooltip.attach_plain(parole, "ransom_parole")
+		TooltipHost.attach_plain(parole, "ransom_parole")
 		parole.pressed.connect(func() -> void: release_on_parole(character_id))
 		actions.add_child(parole)
 		controls["terms"] = choice
@@ -373,7 +348,7 @@ static func _province_name(province_id: String) -> String:
 
 
 static func _pounds(value: int) -> String:
-	return "%s %s" % [RichTooltip.thousands(value), RichTooltip.POUND]
+	return "%s %s" % [Money.digits(value), RichTooltip.POUND]
 
 
 func _facade_sim() -> Object:

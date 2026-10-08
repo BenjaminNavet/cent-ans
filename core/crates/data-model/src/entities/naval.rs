@@ -8,6 +8,7 @@
 
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 
@@ -128,24 +129,23 @@ pub struct NavalRules {
     pub fire_per_missile: f64,
     /// Share of a volley shot as fire arrows when the ship shoots fire.
     pub fire_arrow_share: f64,
-    // ----- manoeuvre --------------------------------------------------------
-    /// Wind speed factor bounds: a sail ship reaches `sail_speed × (min +
-    /// (1 - min) × wind)`.
-    pub wind_speed_min: f64,
-    /// Sail ships cannot point closer to the wind than this, degrees off
-    /// the wind's eye.
-    pub close_hauled_deg: f64,
-    /// Rowers' stamina in seconds at full stroke.
-    pub rower_stamina_s: f64,
-    /// Drift of a ship without way, metres per second at full wind.
-    pub drift_speed: f64,
-    // ----- grapples and boarding -------------------------------------------
-    /// Distance between hull sides under which grapples can be thrown.
-    pub grapple_gap_m: f64,
-    /// Chance per second that the grapples hold.
-    pub grapple_chance: f64,
-    /// Chance per second (× sailors share) that a ship cuts itself free.
-    pub cut_chance: f64,
+    /// Wind alignment between the fleets above which a side holds the weather gauge (0-1).
+    pub gauge_alignment: f64,
+    /// Weakest wind drawn for a battle (0-1).
+    pub wind_strength_min: f64,
+    /// Strongest wind drawn for a battle (0-1).
+    pub wind_strength_max: f64,
+    /// The wind blows at least this many degrees off the axis between the fleets.
+    pub gauge_angle_min_deg: f64,
+    /// The wind blows at most this many degrees off the axis between the fleets.
+    pub gauge_angle_max_deg: f64,
+    /// Share of accuracy lost by a volley at the very end of its range (grows with the square of the distance).
+    pub volley_falloff: f64,
+    /// Accuracy factor of bows in the rain.
+    pub rain_accuracy: f64,
+    /// Largest share of the target's men sheltering in its castles (they take `castle_cover` of the fire).
+    pub castle_shelter: f64,
+    // ----- boarding ---------------------------------------------------------
     /// Men killed per second and per point of fighting power / 100.
     pub melee_lethality: f64,
     /// Share of melee blows stopped by 100 points of armour.
@@ -159,26 +159,17 @@ pub struct NavalRules {
     pub castle_defense: f64,
     /// Bonus per free chained neighbour (reinforcements over the chains).
     pub chain_support: f64,
-    // ----- AI: general boarding (lot NV2) -----------------------------------
-    /// The AI shares its targets out: at most this many of its ships board
-    /// one enemy ship.
-    #[serde(default = "default_boarders_per_target")]
-    pub boarders_per_target: u32,
-    /// A fleet calls the general boarding once most of its ships are within
-    /// this distance of an enemy, metres.
-    #[serde(default = "default_assault_range_m")]
-    pub assault_range_m: f64,
-    /// Seconds of volleys at that range before the general boarding.
-    #[serde(default = "default_assault_softening_s")]
-    pub assault_softening_s: f64,
-    /// In the general boarding, a ship boards when its fighting power (after
-    /// the climb) reaches this share of its target's.
-    #[serde(default = "default_assault_odds")]
-    pub assault_odds: f64,
     /// Chained crews cannot run: their morale losses to volleys and to the
     /// loss of other ships are multiplied by this.
-    #[serde(default = "default_chain_morale")]
     pub chain_morale: f64,
+    /// Share of their melee value that shooters with arrows left fight at.
+    pub shooter_melee_share: f64,
+    /// Melee power of one sailor, as a share of a man with 100 melee.
+    pub sailor_melee: f64,
+    /// Armour of the sailors (0-100).
+    pub sailor_armor: f64,
+    /// Melee power factor of a crew at zero morale (1 at full morale).
+    pub melee_morale_floor: f64,
     // ----- morale and surrender --------------------------------------------
     pub morale_per_loss_percent: f64,
     /// Crew morale under which a ship strikes (or flees if free).
@@ -194,26 +185,38 @@ pub struct NavalRules {
     pub fire_hull: f64,
     /// Share of the crew lost per second at full fire.
     pub fire_crew: f64,
+    /// Morale lost per second aboard a ship at full fire.
+    pub fire_morale: f64,
+    /// Fire above which a ship is not boarded and an abandoned hulk is lost.
+    pub burnt_fire: f64,
+    /// Fire above which a burning ship sets its lashed neighbour alight.
+    pub fire_spread_threshold: f64,
     /// Fire that spreads per second to a grappled or touching ship, × fire.
     pub fire_spread: f64,
     /// Above this fire the crew abandons the ship.
     pub fire_abandon: f64,
     /// Fire a fireship sets on the ship it grapples.
     pub fireship_fire: f64,
+    /// Morale lost by a ship a fireship struck.
+    pub fireship_morale: f64,
+    /// Chance that a fireship of the fleet holding the weather gauge reaches its target.
+    pub fireship_chance_gauge: f64,
+    /// Chance that a fireship of the fleet downwind reaches its target.
+    pub fireship_chance_lee: f64,
+    /// Chance that a fireship reaches its target when nobody holds the gauge.
+    pub fireship_chance_calm: f64,
     // ----- ramming and sinking ---------------------------------------------
     /// Ramming speed bonus (share of top speed).
     pub ram_speed: f64,
-    /// Share of the ram's damage against a high-sided ship (freeboard ≥ 2.5 m).
+    /// Share of the ram's damage against a high-sided ship (see `ram_high_freeboard_m`).
     pub ram_high_factor: f64,
-    /// Seconds a ship takes to go under.
-    pub sink_seconds: f64,
+    /// Freeboard from which a ship counts as high-sided against a ram.
+    pub ram_high_freeboard_m: f64,
+    /// Morale lost by a ship struck by a ram.
+    pub ram_morale: f64,
     /// Share of the men of a sinking ship who drown (+ armour / 100 × `drown_armor`).
     pub drown_base: f64,
     pub drown_armor: f64,
-    /// Distance from the centre past which a fleeing ship has escaped.
-    pub escape_radius_m: f64,
-    /// Longest battle, seconds.
-    pub max_duration_s: f64,
     // ----- auto-resolve -----------------------------------------------------
     /// Volleys before the ships close.
     pub auto_volleys: u32,
@@ -223,6 +226,26 @@ pub struct NavalRules {
     pub auto_rounds: u32,
     /// Seconds of melee one boarding round stands for.
     pub auto_round_seconds: f64,
+    /// Seconds of shooting one auto-resolve volley stands for.
+    pub auto_volley_seconds: f64,
+    /// Share of its range at which a crew shoots in the auto-resolve.
+    pub auto_range_share: f64,
+    /// Wind alignment given to volleys of the gauge side (and, negated, of the other).
+    pub auto_volley_alignment: f64,
+    /// Share of the melee morale loss that volleys inflict.
+    pub auto_volley_morale: f64,
+    /// Share of the chain support that counts when every chained ship is engaged.
+    pub auto_chain_share: f64,
+    /// Melee power floor when a ship picks the enemy it can climb onto best.
+    pub auto_min_power: f64,
+    /// A side wins when its standing strength exceeds the other's by this factor; the weather gauge decides otherwise.
+    pub auto_decisive_margin: f64,
+    /// Chance that a beaten galley gets away.
+    pub escape_chance_oars: f64,
+    /// Chance that a beaten sail ship holding the gauge gets away.
+    pub escape_chance_gauge: f64,
+    /// Chance that a beaten sail ship downwind gets away.
+    pub escape_chance_other: f64,
     /// Random spread of the auto-resolve (± share).
     pub auto_jitter: f64,
     // ----- campaign ---------------------------------------------------------
@@ -247,94 +270,7 @@ pub struct NavalRules {
     pub marine_archer_share: f64,
 }
 
-fn default_boarders_per_target() -> u32 {
-    2
-}
-
-fn default_assault_range_m() -> f64 {
-    250.0
-}
-
-fn default_assault_softening_s() -> f64 {
-    30.0
-}
-
-fn default_assault_odds() -> f64 {
-    0.55
-}
-
-fn default_chain_morale() -> f64 {
-    0.3
-}
-
-impl Default for NavalRules {
-    fn default() -> Self {
-        NavalRules {
-            description: None,
-            bow_range_m: 180.0,
-            crossbow_range_m: 160.0,
-            bow_reload_s: 6.0,
-            crossbow_reload_s: 12.0,
-            ranged_lethality: 0.09,
-            armor_vs_ranged: 0.7,
-            height_per_m: 0.1,
-            height_cap: 0.5,
-            wind_gauge: 0.2,
-            castle_cover: 0.5,
-            fire_per_missile: 0.012,
-            fire_arrow_share: 0.15,
-            wind_speed_min: 0.35,
-            close_hauled_deg: 67.0,
-            rower_stamina_s: 240.0,
-            drift_speed: 0.4,
-            grapple_gap_m: 6.0,
-            grapple_chance: 0.35,
-            cut_chance: 0.1,
-            melee_lethality: 0.02,
-            armor_vs_melee: 0.6,
-            climb_per_m: 0.12,
-            climb_cap: 0.45,
-            castle_defense: 0.15,
-            chain_support: 0.12,
-            boarders_per_target: default_boarders_per_target(),
-            assault_range_m: default_assault_range_m(),
-            assault_softening_s: default_assault_softening_s(),
-            assault_odds: default_assault_odds(),
-            chain_morale: default_chain_morale(),
-            morale_per_loss_percent: 1.1,
-            surrender_morale: 18.0,
-            surrender_crew_share: 0.12,
-            fire_growth: 0.06,
-            fire_fighting: 0.01,
-            fire_hull: 1.6,
-            fire_crew: 0.01,
-            fire_spread: 0.05,
-            fire_abandon: 0.75,
-            fireship_fire: 0.45,
-            ram_speed: 0.3,
-            ram_high_factor: 0.4,
-            sink_seconds: 25.0,
-            drown_base: 0.35,
-            drown_armor: 0.5,
-            escape_radius_m: 1150.0,
-            max_duration_s: 1800.0,
-            auto_volleys: 3,
-            auto_gauge_volleys: 2,
-            auto_rounds: 4,
-            auto_round_seconds: 45.0,
-            auto_jitter: 0.1,
-            intercept_base: 0.2,
-            intercept_per_control: 0.5,
-            control_victory: 40,
-            control_decay: 10,
-            blockade_control: 60,
-            blockade_toll: 150,
-            squadron_share: 0.5,
-            squadron_max: 12,
-            marine_archer_share: 0.4,
-        }
-    }
-}
+crate::bundled_rules!(NavalRules, "naval/rules.json", default);
 
 /// Ships of one faction at the start of the campaign.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -576,7 +512,8 @@ struct SeaLaneGeometryFile {
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct NavalData {
     pub ship_classes: BTreeMap<ShipClassId, ShipClass>,
-    pub rules: NavalRules,
+    /// Shared by every naval battle setup.
+    pub rules: Arc<NavalRules>,
     pub fleets: NavalFleets,
     /// Ship names per faction and port (absent: « Nef n°1 »).
     pub ship_names: NavalShipNames,
@@ -597,7 +534,6 @@ pub mod files {
     pub const SEA_LANES: &str = "sea_lanes.json";
     /// Inside `data/map/`: routed geometry of the lanes.
     pub const SEA_LANES_PX: &str = "sea_lanes_px.json";
-    pub const SCENARIOS: &str = "scenarios";
 }
 
 impl NavalData {
@@ -615,7 +551,7 @@ impl NavalData {
         }
         let rules = dir.join(files::RULES);
         if rules.is_file() {
-            naval.rules = read_json(&rules)?;
+            naval.rules = Arc::new(read_json(&rules)?);
         }
         let fleets = dir.join(files::FLEETS);
         if fleets.is_file() {

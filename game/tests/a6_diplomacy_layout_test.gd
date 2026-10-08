@@ -55,7 +55,6 @@ func _run() -> void:
 	var panel: Control = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
 	panel.set("sim", sim)
 	panel.set("player_faction", "fac_france")
-	panel.set("province_name_of", map.province_name_of)
 	panel.set("map_data", map.map_data)
 	panel.hide()
 	var host := Control.new()
@@ -67,8 +66,9 @@ func _run() -> void:
 	panel.show()
 	for index in 6:
 		await process_frame
-	panel.set("_articles", [{"kind": "trade_agreement"}, {"kind": "gold", "giver": "proposer", "amount": 2500}])
-	panel.call("_render_draft")
+	var negotiation: Object = panel.get("negotiation")
+	negotiation.set("articles", [{"kind": "trade_agreement"}, {"kind": "gold", "giver": "proposer", "amount": 2500}])
+	negotiation.call("render_draft")
 	for index in 6:
 		await process_frame
 	var rect := Rect2(panel.global_position, panel.size)
@@ -90,7 +90,7 @@ func _run() -> void:
 			names.append("%s %s" % [control.name, button_rect])
 	_check(names.is_empty(), "buttons outside the panel %s : %s" % [rect, ", ".join(names.slice(0, 8))])
 	_check(found_trade, "no « Commerce » button in the panel")
-	var chance_label: Label = panel.get("_chance_label")
+	var chance_label: Label = negotiation.get("chance_label")
 	_check(not chance_label.text.contains("%"), "verdict label still shows a percentage: " + chance_label.text)
 	_check(chance_label.text.contains("(") and (chance_label.text.begins_with("Accepterait") or chance_label.text.begins_with("Refuserait")), "verdict label lacks signed score: " + chance_label.text)
 	sub.queue_free()

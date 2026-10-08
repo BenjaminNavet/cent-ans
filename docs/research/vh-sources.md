@@ -1,6 +1,6 @@
 # VH — Dossier de sources pour les villes historiques et le peuplement
 
-Dossier de sources pour le chantier VH (`docs/wip/vh-villes-historiques.md`), demandé le
+Dossier de sources pour le chantier VH (`docs/archive/chantiers.md`), demandé le
 2026-09-25, avant même que ZG2/ZG4 ne fixent l'API du relief (VH0). Ce dossier ne modifie aucun
 code ni aucune donnée de jeu : il sert de référence pour choisir les sources ouvertes de VH1
 (forêts), VH2 (villages), VH4 (parcellaire générique), VH5 (Paris), VH6 (Londres), VH7 (Orléans) et

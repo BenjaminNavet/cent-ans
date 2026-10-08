@@ -7,12 +7,12 @@ propres au jeu. Référence retenue par le joueur : **mélange moderne** = méca
 récents** (Three Kingdoms, Thrones of Britannia, Pharaoh, Warhammer III). Priorité **équilibrée**
 campagne / bataille.
 
-**⚠️ Coordination.** `docs/wip/tw.md` documente une session d'orchestration **parallèle** (« session 6 »)
+**⚠️ Coordination.** `docs/archive/chantiers.md` documente une session d'orchestration **parallèle** (« session 6 »)
 qui a le **même mandat** (« Rapprocher le jeu de Total War ») et prévoit d'écrire son propre plan dans
 `docs/design/2026-09-24-rapprochement-total-war.md`. Ce document-ci (`2026-09-24-analyse-total-war.md`)
 est une **analyse indépendante**, commandée séparément, qui ne touche aucun autre fichier. Les deux
 documents vont se recouper ; à réconcilier avant de lancer des agents d'implémentation, pour ne pas
-payer deux fois le même travail (le fichier `docs/wip/tw.md` liste déjà un lot « P1 » en cours qui touche
+payer deux fois le même travail (le fichier `docs/archive/chantiers.md` liste déjà un lot « P1 » en cours qui touche
 `no_quarter`, l'étain, l'IA de Normandie — aucun recoupement direct avec les lots proposés ici).
 
 Hors périmètre (autres sessions, à ne pas reproposer) : refonte « colonies » (plusieurs colonies par
@@ -23,7 +23,7 @@ Interactions signalées lot par lot ci-dessous.
 
 - Lu : `2026-09-23-cent-ans-design.md`, `2026-09-23-audit-ui-total-war.md`, `visuel-semi-realiste.md`,
   `m7-battles.md`, `m8-sieges.md`, `m9-ai.md`, `hud-campagne.md`, `battle-orders.md`,
-  `2026-09-24-echelle-colonies.md`, `docs/status.md`, `docs/roadmap.md`, `docs/wip/tw.md`, `ui-tw.md`,
+  `2026-09-24-echelle-colonies.md`, `docs/status.md`, `docs/roadmap.md`, `docs/archive/chantiers.md`, `ui-tw.md`,
   `v4b-batailles.md`.
 - Explorée l'arborescence `core/crates/{sim-campaign,sim-battle,ai}/src`, `game/scripts/{map,battle,ui}`,
   `data/schemas`.

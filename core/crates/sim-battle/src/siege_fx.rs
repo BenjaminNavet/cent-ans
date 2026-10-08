@@ -1,4 +1,4 @@
-//! Siege assault events for the renderer (SG1, `docs/wip/sg1-sieges.md`).
+//! Siege assault events for the renderer (SG1, `docs/archive/chantiers.md`).
 //!
 //! The battle journal ([`crate::BattleEvent`]) speaks French to the player;
 //! these events speak to the 3D view: which engine shot which wall piece and
@@ -103,6 +103,8 @@ pub enum SiegeFxKind {
 }
 
 /// Deterministic value in [0, 1) from two integers (no random stream used).
+/// The shot and assault jitter keep this stream (not `rng::hash01`) so that
+/// battles replay unchanged.
 pub fn hash01(a: u64, b: u64) -> f64 {
     let mut h = a
         .wrapping_mul(0x9E37_79B9_7F4A_7C15)
@@ -110,5 +112,5 @@ pub fn hash01(a: u64, b: u64) -> f64 {
     h ^= h >> 31;
     h = h.wrapping_mul(0xBF58_476D_1CE4_E5B9);
     h ^= h >> 29;
-    (h >> 11) as f64 / (1u64 << 53) as f64
+    crate::rng::unit_float(h)
 }

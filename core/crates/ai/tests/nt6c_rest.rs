@@ -1,21 +1,15 @@
 //! Lot NT6c: a weakened AI army rests to rebuild its ranks (in a friendly
 //! place or entrenched on friendly lands) when no enemy is near, and leaves
 //! once rebuilt (`stances::rest_plan`, `postures.rest` of `data/ai/grid.json`).
-
-use std::path::PathBuf;
+use data_model::test_support::{fac, game_data};
 
 use ai::stances::{self, RestPlan};
 use data_model::{FactionId, GameData};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order, Stance};
 
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+fn real_data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 fn offset(data: &GameData, point: [f32; 2], east_km: f32) -> [f32; 2] {
@@ -79,21 +73,21 @@ fn moves(orders: &[Order], army: &ArmyId) -> bool {
 #[test]
 fn a_weakened_army_in_a_friendly_place_rests() {
     let data = real_data();
-    let (mut state, army, france) = scene(&data, 40);
+    let (mut state, army, france) = scene(data, 40);
     state.season = sim_campaign::Season::Summer;
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::Rest { entrench: false }
     );
-    assert!(!moves(&ai::plan_turn(&state, &data, &france), &army));
+    assert!(!moves(&ai::plan_turn(&state, data, &france), &army));
     // Strong enough: not resting.
     set_share(&mut state, &army, 90);
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::None
     );
     // Feature off: never.
-    let (state, army, france) = scene(&data, 40);
+    let (state, army, france) = scene(data, 40);
     let mut off = data.clone();
     off.ai_grid.postures.rest.enabled = false;
     assert_eq!(
@@ -105,16 +99,16 @@ fn a_weakened_army_in_a_friendly_place_rests() {
 #[test]
 fn a_weakened_army_in_the_open_on_friendly_lands_entrenches_to_rest() {
     let data = real_data();
-    let (mut state, army, france) = scene(&data, 40);
+    let (mut state, army, france) = scene(data, 40);
     let place = state.armies[&army].settlement().cloned().unwrap();
     let at = data.settlement_point(&place).unwrap();
-    let spot = offset(&data, at, 3.0);
+    let spot = offset(data, at, 3.0);
     state.armies.get_mut(&army).unwrap().position = ArmyPosition::field(spot);
-    let allowance = state.army_grid_allowance(&data, &state.armies[&army]);
+    let allowance = state.army_grid_allowance(data, &state.armies[&army]);
     state.armies.get_mut(&army).unwrap().movement_left = allowance;
-    let plan = stances::rest_plan(&state, &data, &france, &army);
+    let plan = stances::rest_plan(&state, data, &france, &army);
     if plan == (RestPlan::Rest { entrench: true }) {
-        let orders = ai::plan_turn(&state, &data, &france);
+        let orders = ai::plan_turn(&state, data, &france);
         assert!(set_stance_orders(&orders, &army, Stance::Entrenched));
         assert!(!moves(&orders, &army));
     } else {
@@ -126,7 +120,7 @@ fn a_weakened_army_in_the_open_on_friendly_lands_entrenches_to_rest() {
 #[test]
 fn a_menace_within_reach_stops_the_rest() {
     let data = real_data();
-    let (mut state, army, france) = scene(&data, 40);
+    let (mut state, army, france) = scene(data, 40);
     let england = fac("fac_england");
     for (a, b) in [(&france, &england), (&england, &france)] {
         state
@@ -139,15 +133,15 @@ fn a_menace_within_reach_stops_the_rest() {
     let place = state.armies[&army].settlement().cloned().unwrap();
     let at = data.settlement_point(&place).unwrap();
     let enemy = main_army(&state, &england);
-    state.armies.get_mut(&enemy).unwrap().position = ArmyPosition::field(offset(&data, at, 20.0));
+    state.armies.get_mut(&enemy).unwrap().position = ArmyPosition::field(offset(data, at, 20.0));
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::None
     );
     // Far away: rests again.
-    state.armies.get_mut(&enemy).unwrap().position = ArmyPosition::field(offset(&data, at, 400.0));
+    state.armies.get_mut(&enemy).unwrap().position = ArmyPosition::field(offset(data, at, 400.0));
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::Rest { entrench: false }
     );
 }
@@ -155,24 +149,24 @@ fn a_menace_within_reach_stops_the_rest() {
 #[test]
 fn a_rebuilt_camp_is_left() {
     let data = real_data();
-    let (mut state, army, france) = scene(&data, 40);
+    let (mut state, army, france) = scene(data, 40);
     let place = state.armies[&army].settlement().cloned().unwrap();
     let at = data.settlement_point(&place).unwrap();
-    state.armies.get_mut(&army).unwrap().position = ArmyPosition::field(offset(&data, at, 3.0));
+    state.armies.get_mut(&army).unwrap().position = ArmyPosition::field(offset(data, at, 3.0));
     state.armies.get_mut(&army).unwrap().stance = Stance::Entrenched;
     // Still weak: keeps the camp.
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::Rest { entrench: true }
     );
     // Rebuilt to the exit threshold: leaves it.
     set_share(&mut state, &army, 90);
     assert!(share(&state, &army) >= 85);
     assert_eq!(
-        stances::rest_plan(&state, &data, &france, &army),
+        stances::rest_plan(&state, data, &france, &army),
         RestPlan::Leave
     );
-    let orders = ai::plan_turn(&state, &data, &france);
+    let orders = ai::plan_turn(&state, data, &france);
     assert!(
         set_stance_orders(&orders, &army, Stance::Normal) || moves(&orders, &army),
         "the rebuilt army leaves its camp: {orders:?}"

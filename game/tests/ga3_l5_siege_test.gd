@@ -7,8 +7,8 @@ extends SceneTree
 ## `Shed`, `Wheel_i`, `Beam`) ; pivot de la verge sur l'axe (6,4 m), verge de 8,5 m côté fronde
 ## et 2,2 m côté contrepoids ; la verge bascule et la pierre part au bout de la fronde ; roues sur
 ## leur centre ; réglages du bélier remplacés (roues, cordes) ; engins sans variante (mangonneau,
-## bombarde, beffroi) inchangés. Avec `--no-ga3` : modèles procéduraux d'origine partout.
-## Usage : godot --headless --path game --script res://tests/ga3_l5_siege_test.gd [-- --no-ga3]
+## bombarde, beffroi) inchangés.
+## Usage : godot --headless --path game --script res://tests/ga3_l5_siege_test.gd
 
 var failures := 0
 
@@ -49,7 +49,7 @@ func _node(root: Node, node_name: String) -> Node3D:
 	return root.find_child(node_name, true, false) as Node3D
 
 
-func _trebuchet(no_ga3: bool) -> void:
+func _trebuchet() -> void:
 	for model in ["trebuchet", "trebuchet_lod"]:
 		var node := SiegeEnginesFx.instantiate(model)
 		_check(node != null, "%s instantiates" % model)
@@ -57,11 +57,6 @@ func _trebuchet(no_ga3: bool) -> void:
 			continue
 		root.add_child(node)
 		var variant := str(node.get_meta("ga3", ""))
-		if no_ga3:
-			_check(variant == "", "%s: procedural with --no-ga3" % model)
-			_check(not _textured(_node(node, "ArmBeam") as MeshInstance3D), "%s: procedural arm" % model)
-			node.free()
-			continue
 		_check(variant == "ga3_" + model, "%s: GA3 variant (%s)" % [model, variant])
 		for part in ["Frame", "Arm", "ArmBeam", "Counterweight", "CounterweightBox", "Sling", "SlingRope", "Stone", "Winch", "Axle", "WinchFrame"]:
 			_check(_node(node, part) != null, "%s: node %s" % [model, part])
@@ -109,7 +104,7 @@ func _trebuchet(no_ga3: bool) -> void:
 		node.free()
 
 
-func _ram(no_ga3: bool) -> void:
+func _ram() -> void:
 	for model in ["ram", "ram_lod"]:
 		var node := SiegeEnginesFx.instantiate(model)
 		_check(node != null, "%s instantiates" % model)
@@ -118,11 +113,6 @@ func _ram(no_ga3: bool) -> void:
 		root.add_child(node)
 		var c := SiegeEnginesFx.kind_settings("ram", node)
 		var base: Dictionary = SiegeEnginesFx.settings()["ram"]
-		if no_ga3:
-			_check(not node.has_meta("ga3"), "%s: procedural with --no-ga3" % model)
-			_check(is_equal_approx(float(c["wheel_radius"]), float(base["wheel_radius"])), "%s: base settings" % model)
-			node.free()
-			continue
 		_check(str(node.get_meta("ga3", "")) == "ga3_" + model, "%s: GA3 variant" % model)
 		var over: Dictionary = SiegeEnginesFx.settings()["ga3"]["ram"]
 		_check(is_equal_approx(float(c["wheel_radius"]), float(over["wheel_radius"])), "%s: GA3 wheel radius" % model)
@@ -159,10 +149,9 @@ func _others() -> void:
 
 
 func _init() -> void:
-	var no_ga3 := OS.get_cmdline_user_args().has("--no-ga3")
 	await process_frame  # nœuds dans l'arbre : transformations globales valides
-	_trebuchet(no_ga3)
-	_ram(no_ga3)
+	_trebuchet()
+	_ram()
 	_others()
-	print("ga3_l5_siege_test: %s, %d failure(s)" % ["--no-ga3" if no_ga3 else "GA3", failures])
+	print("ga3_l5_siege_test: %s, %d failure(s)" % ["GA3", failures])
 	quit(0 if failures == 0 else 1)

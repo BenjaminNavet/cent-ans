@@ -49,7 +49,7 @@ gabarit du § 4 de façon mécanique.
 | C4 | Étalonnage : une heure du jour et un étalonnage par contexte, réglés dans `data/fx/atmosphere.json`, sans valeur de soleil codée en dur | test de schéma + test que chaque contexte de la tranche (carte × saison, bataille × météo × heure) résout un préréglage complet |
 | C5 | Jugement visuel | planche avant/après (8-10 vues) jugée une seule fois par le joueur à la fin de la vague 1 |
 
-Les performances ne régressent pas : le banc PB1 (`docs/wip/pb1-benchmark-perf.md`) reste dans
+Les performances ne régressent pas : le banc PB1 (`docs/archive/chantiers.md`) reste dans
 ±5 % sur la carte et en bataille.
 
 ## 4. Fondations (PO0, orchestrateur, 0 $)
@@ -102,10 +102,10 @@ capture ni d'éditeur pour les agents (règle CLAUDE.md), commits `wip:` toutes 
 - **AN1/PR1** (`docs/wip/an1-animation-vivante.md`) possèdent le shader des soldats (sommets), les
   clips, les étendards et la retexture des accessoires. PO4 n'y touche pas.
 
-- **CB-M1** (contrôles de bataille, `docs/wip/cb.md`) possède la sélection et les ordres en
+- **CB-M1** (contrôles de bataille, `docs/archive/chantiers.md`) possède la sélection et les ordres en
   bataille. Le cadre de sélection jaune et les marqueurs d'ordre sont restylés par PO4/PO5
   **après** la fusion de CB-M1, en ne touchant qu'au matériau et à la couleur.
-- **HL1/HL2** (liste des colonies, `docs/wip/colonies-liste.md`) et **CV3** (`docs/wip/cv3-campagne-vivante.md`) :
+- **HL1/HL2** (liste des colonies, `docs/archive/chantiers.md`) et **CV3** (`docs/archive/chantiers.md`) :
   leurs nouveaux panneaux rejoignent `side_panel` ou `modal` de `UiLayout` ; note ajoutée dans
   leurs wip au lancement de PO1.
 - Commits avec chemins explicites (`git commit -- <chemins>`), pas de `git stash`, cible cargo

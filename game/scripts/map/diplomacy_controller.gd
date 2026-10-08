@@ -32,7 +32,7 @@ func setup(campaign_map: Node) -> void:
 	button = Button.new()
 	button.text = "Diplomatie"
 	button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-	RichTooltip.attach_plain(button, "diplomacy_open")
+	TooltipHost.attach_plain(button, "diplomacy_open")
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
 	button.pressed.connect(toggle_panel)
@@ -62,7 +62,6 @@ func open_panel(faction_id: String = "") -> void:
 		return
 	panel.sim = map.sim
 	panel.player_faction = map.player_faction
-	panel.province_name_of = map.province_name_of
 	panel.map_data = map.map_data  # DP1 : carte des relations de l'écran
 	panel.refresh()
 	# Panneau central : ferme les panneaux latéraux qu'il recouvrirait.

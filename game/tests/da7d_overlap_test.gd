@@ -23,7 +23,7 @@ var _measure := false
 
 
 func _init() -> void:
-	_measure = OS.get_cmdline_user_args().has("--measure")
+	_measure = CmdArgs.has("--measure")
 	await process_frame
 	_test_synthetic()
 	await _test_map()

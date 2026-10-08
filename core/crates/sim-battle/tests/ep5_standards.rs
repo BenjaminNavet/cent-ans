@@ -19,8 +19,8 @@ const ARMY: [&str; 6] = [
 fn duel(rules: BattleStandardRules, seed: u64) -> BattleSim {
     let data = data();
     let mut s = setup(
-        units(&data, &["unit_men_at_arms_foot"]),
-        units(&data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
         None,
     );
     s.standards = Some(rules);
@@ -55,21 +55,15 @@ fn always_fall() -> BattleStandardRules {
 #[test]
 fn data_rules_match_the_default() {
     let data = data();
-    assert_eq!(
-        BattleStandardRules {
-            description: None,
-            ..data.battle_standard_rules.clone()
-        },
-        BattleStandardRules::default()
-    );
+    assert_eq!(data.battle_standard_rules, BattleStandardRules::default());
 }
 
 #[test]
 fn bearers_stand_in_the_front_rank_centre() {
     let data = data();
     let s = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(&data, &["unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
+        units(data, &["unit_knights"]),
         None,
     );
     let mut sim = BattleSim::new(s, 1).unwrap();
@@ -111,8 +105,8 @@ fn bearers_stand_in_the_front_rank_centre() {
 fn large_regiments_carry_two_standards() {
     let data = data();
     let s = setup(
-        units(&data, &["unit_urban_militia"]),
-        units(&data, &["unit_knights"]),
+        units(data, &["unit_urban_militia"]),
+        units(data, &["unit_knights"]),
         None,
     );
     let rules = BattleStandardRules::default();
@@ -240,7 +234,7 @@ fn standards_are_deterministic() {
     let data = data();
     let run_once = || {
         let mut sim =
-            BattleSim::new(setup(units(&data, &ARMY), units(&data, &ARMY), None), 11).unwrap();
+            BattleSim::new(setup(units(data, &ARMY), units(data, &ARMY), None), 11).unwrap();
         run_to_end(&mut sim);
         let states: Vec<StandardState> = sim.units().iter().map(|u| u.standard).collect();
         (states, sim.trophies().to_vec(), sim.outcome())
@@ -255,7 +249,7 @@ fn full_battles_see_standards_fall() {
     let (mut fallen, mut taken) = (0, 0);
     for seed in 0..6 {
         let mut sim =
-            BattleSim::new(setup(units(&data, &ARMY), units(&data, &ARMY), None), seed).unwrap();
+            BattleSim::new(setup(units(data, &ARMY), units(data, &ARMY), None), seed).unwrap();
         run_to_end(&mut sim);
         fallen += sim
             .events()

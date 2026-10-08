@@ -16,23 +16,13 @@ extends RefCounted
 
 const DATA_PATH := "fx/campaign_lighting.json"
 
-static var _data: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 
 ## Données lues une seule fois ({} et un seul avertissement si le fichier manque : les jeux de
 ## données de test n'en ont pas, la lumière de la scène reste alors telle quelle).
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var path := AtmosphereLibrary._data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
-		if _data.is_empty():
-			push_warning("CampaignLighting: %s missing or invalid" % path)
-	return _data
+	return _lookup.data()
 
 
 ## Phase du tour dans [-1, 1] : -1 = début d'après-midi, +1 = fin d'après-midi. Déterministe

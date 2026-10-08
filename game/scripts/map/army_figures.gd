@@ -36,7 +36,6 @@ const POLE_IN_HAND := Vector2(0.35, 0.55)
 const LORD_HAND := Vector3(0.4, 3.8, 0.7)
 const LORD_ADVANCE := 2.6
 const CAMPAIGN_MAP_DATA := "ui/campaign_map.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const ESCORT_ROWS_X := [-1.4, -3.0]
 const ESCORT_FILE_Z := [-1.3, 0.0, 1.3]
 ## Pied de la hampe de poupe (`campaign_fleet.py`, STERN_STAFF), repère du navire.
@@ -74,7 +73,7 @@ var _heraldry: Texture2D
 ## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
 var lord_scale: float = 1.0
 
-static var _map_settings: Dictionary = {}
+static var _map_lookup := JsonLookup.new(CAMPAIGN_MAP_DATA, {"army_figure_scale": 1.0}, "map")
 
 static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voiles teintes
 
@@ -82,39 +81,19 @@ static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voile
 ## Vrai si les figurines skinnées sont disponibles et que la comparaison `--legacy-army-markers`
 ## n'est pas demandée.
 static func enabled() -> bool:
-	if OS.get_cmdline_user_args().has("--legacy-army-markers"):
+	if CmdArgs.has("--legacy-army-markers"):
 		return false
 	return BattleSkinned.has_figure("cavalry", 0) and BattleSkinned.has_figure("infantry", 0)
 
 
 static func clear_cache() -> void:
 	_sail_meshes.clear()
-	_map_settings.clear()
+	_map_lookup.reload()
 
 
 ## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
 static func map_settings() -> Dictionary:
-	if _map_settings.is_empty():
-		var fallback := {"army_figure_scale": 1.0}
-		_map_settings = fallback.duplicate()
-		var path := _data_dir().path_join(CAMPAIGN_MAP_DATA)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(CAMPAIGN_MAP_DATA)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
-		if parsed is Dictionary and parsed.get("map") is Dictionary:
-			_map_settings.merge(parsed["map"], true)
-		else:
-			push_warning("ArmyFigures: %s missing or invalid" % path)
-	return _map_settings
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
+	return _map_lookup.data()
 
 
 ## Construit la représentation d'une armée (`army` = dictionnaire du pont).
@@ -261,7 +240,6 @@ func lord_slot() -> Vector2:
 	return LEADER_SLOT + Vector2(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
 
 
-
 static func _add_slot(slots: Dictionary, figure_kind: String, variant: int, slot: Vector2, yaw: float, size: float = 1.0) -> void:
 	var key := "%s_%d" % [figure_kind, variant]
 	if not slots.has(key):
@@ -316,7 +294,7 @@ func set_walking(value: bool) -> void:
 # --- Lot AS2 : cadence de marche et balancement de la hampe ----------------------------
 
 const WALK_DATA := "fx/campaign_army_walk.json"
-static var _walk_settings: Dictionary = {}
+static var _walk_lookup := JsonLookup.new(WALK_DATA, {"enabled": false})
 ## Vitesse au sol lissée (unités monde / s) et dernière position, mesurées sur le marqueur.
 var _ground_speed: float = 0.0
 var _last_position: Vector3 = Vector3.INF
@@ -328,20 +306,12 @@ var _bearer_bob: float = 0.0
 
 
 static func walk_settings() -> Dictionary:
-	if _walk_settings.is_empty():
-		var parsed: Variant = null
-		var path := _data_dir().path_join(WALK_DATA)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(WALK_DATA)
-		if FileAccess.file_exists(path):
-			parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-		_walk_settings = parsed if parsed is Dictionary else {"enabled": false}
-	return _walk_settings
+	return _walk_lookup.data()
 
 
 ## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).
 static func as2_enabled() -> bool:
-	return bool(walk_settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as2")
+	return bool(walk_settings().get("enabled", false)) and not CmdArgs.has("--no-as2")
 
 
 ## Facteur de cadence pour une vitesse au sol `ground_speed` (unités monde / s) d'un groupe dont

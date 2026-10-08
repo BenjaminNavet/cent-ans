@@ -18,6 +18,7 @@
 //! breaks even within a year. Undoing 30 points of inflation takes fifteen
 //! seasons of strong money.
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, SocialClass};
 use serde::{Deserialize, Serialize};
 
@@ -180,15 +181,15 @@ pub fn set_coinage(
     let text = match level {
         CoinageLevel::Strong => format!(
             "{} ordonne une monnaie forte : refonte des espèces, les prix baisseront lentement.",
-            faction_label(data, faction)
+            data.faction_label(faction)
         ),
         CoinageLevel::Sound => format!(
             "{} revient à une monnaie saine.",
-            faction_label(data, faction)
+            data.faction_label(faction)
         ),
         CoinageLevel::Debased | CoinageLevel::HeavilyDebased => format!(
             "{} mue la monnaie ({}) : le seigneuriage remplit le trésor, les prix montent.",
-            faction_label(data, faction),
+            data.faction_label(faction),
             level.label_fr().to_lowercase()
         ),
     };
@@ -196,12 +197,6 @@ pub fn set_coinage(
         .pending_events
         .push(GameEvent::new(EventKind::Coinage, text).faction(faction));
     Ok(())
-}
-
-fn faction_label(data: &GameData, faction: &FactionId) -> String {
-    data.factions
-        .get(faction)
-        .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
 }
 
 /// Cost multiplier of the faction's prices (`price_level / 100`).
@@ -228,7 +223,7 @@ pub fn seigniorage_for(
     if percent <= 0.0 {
         return 0;
     }
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 * percent / 100.0).round() as i64
 }
 
@@ -243,7 +238,7 @@ pub fn recoinage_for(
     if percent <= 0.0 {
         return 0;
     }
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 * percent / 100.0).round() as i64
 }
 
@@ -324,7 +319,7 @@ pub fn ai_choose_coinage(
     if f.coinage_changed_year == Some(state.year) {
         return Vec::new();
     }
-    let income = state.faction_income_effective(data, faction).max(1);
+    let income = state.faction_income(data, faction).max(1);
     let wanted = if f.treasury < -4 * income && f.price_level < 200 {
         CoinageLevel::HeavilyDebased
     } else if f.treasury < 0 && f.price_level < 160 {
@@ -371,11 +366,13 @@ pub fn class_effects(
     };
     let excess = f64::from(f.price_level.saturating_sub(PRICE_BASE));
     if matches!(class, SocialClass::Burghers | SocialClass::Clergy) && excess > 0.0 {
-        totals.unrest.flat += (excess / INFLATION_UNREST_DIVISOR).min(INFLATION_UNREST_MAX);
-        totals.wealth.flat -= (excess / INFLATION_WEALTH_DIVISOR).min(INFLATION_WEALTH_MAX);
+        totals[EffectKind::Unrest].flat +=
+            (excess / INFLATION_UNREST_DIVISOR).min(INFLATION_UNREST_MAX);
+        totals[EffectKind::Wealth].flat -=
+            (excess / INFLATION_WEALTH_DIVISOR).min(INFLATION_WEALTH_MAX);
     }
     if class == SocialClass::Burghers {
-        totals.unrest.flat += f.coinage.params().burgher_unrest;
+        totals[EffectKind::Unrest].flat += f.coinage.params().burgher_unrest;
     }
     totals
 }

@@ -4,7 +4,7 @@
 
 use godot::prelude::*;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -19,7 +19,7 @@ impl CampaignSim {
     /// crusader faction of `data/rules/crusade.json`.
     #[func]
     fn get_crusade(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(view) = sim_campaign::crusade::crusade_view(state, data, state.player_faction())

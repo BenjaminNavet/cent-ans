@@ -145,9 +145,9 @@ fn probe_siege_pace_per_level() {
     println!("|---|---|---|---|---|---|---|");
     for fort in 0..=5 {
         let (wall, gate) = rules.hp(fort);
-        let ram = ram_seconds(&data, fort);
+        let ram = ram_seconds(data, fort);
         let cell = |engine: &str| {
-            let (t, n) = engine_pace(&data, fort, engine);
+            let (t, n) = engine_pace(data, fort, engine);
             format!("{} ({n} tirs)", mmss(t))
         };
         println!(
@@ -166,12 +166,12 @@ fn probe_siege_pace_per_level() {
 #[test]
 fn level_three_meets_the_pace_targets() {
     let data = data();
-    let ram = ram_seconds(&data, 3);
+    let ram = ram_seconds(data, 3);
     assert!((40.0..=60.0).contains(&ram), "gate {ram:.0} s");
-    let (_, trebuchet) = engine_pace(&data, 3, "unit_trebuchet");
+    let (_, trebuchet) = engine_pace(data, 3, "unit_trebuchet");
     assert!((6..=10).contains(&trebuchet), "{trebuchet} trebuchet shots");
-    let (bombard_s, _) = engine_pace(&data, 3, "unit_bombard");
-    let (mangonel_s, _) = engine_pace(&data, 3, "unit_mangonel");
+    let (bombard_s, _) = engine_pace(data, 3, "unit_bombard");
+    let (mangonel_s, _) = engine_pace(data, 3, "unit_mangonel");
     assert!(bombard_s < mangonel_s, "{bombard_s:.0} vs {mangonel_s:.0}");
 }
 
@@ -179,15 +179,15 @@ fn level_three_meets_the_pace_targets() {
 #[test]
 fn stronger_towns_hold_longer() {
     let data = data();
-    let (ram3, ram5) = (ram_seconds(&data, 3), ram_seconds(&data, 5));
+    let (ram3, ram5) = (ram_seconds(data, 3), ram_seconds(data, 5));
     let ratio = ram5 / ram3;
     assert!((1.4..=2.1).contains(&ratio), "gate ×{ratio:.2}");
-    let (_, shots3) = engine_pace(&data, 3, "unit_trebuchet");
-    let (_, shots5) = engine_pace(&data, 5, "unit_trebuchet");
+    let (_, shots3) = engine_pace(data, 3, "unit_trebuchet");
+    let (_, shots5) = engine_pace(data, 5, "unit_trebuchet");
     let ratio = shots5 as f64 / shots3 as f64;
     assert!((1.4..=2.1).contains(&ratio), "wall ×{ratio:.2}");
-    assert!(ram_seconds(&data, 1) < 30.0);
-    let (_, shots1) = engine_pace(&data, 1, "unit_trebuchet");
+    assert!(ram_seconds(data, 1) < 30.0);
+    let (_, shots1) = engine_pace(data, 1, "unit_trebuchet");
     assert!(shots1 <= 5, "{shots1} shots at level 1");
 }
 
@@ -197,7 +197,7 @@ fn stronger_towns_hold_longer() {
 #[test]
 fn pieces_under_attack_are_flagged() {
     let data = data();
-    let mut sim = siege(&data, &["unit_trebuchet"], 3);
+    let mut sim = siege(data, &["unit_trebuchet"], 3);
     let works = sim.siege().unwrap().clone();
     assert!(works.pieces.iter().all(|p| !p.under_attack()));
     // Ram against the gate.
@@ -256,7 +256,7 @@ fn pieces_under_attack_are_flagged() {
 fn siege_engines_report_their_strength() {
     use sim_battle::SiegeEngineKind;
     let data = data();
-    let mut sim = siege(&data, &["unit_siege_tower"], 2);
+    let mut sim = siege(data, &["unit_siege_tower"], 2);
     let engines = sim.siege_engines();
     assert!(engines.iter().any(|e| e.kind == SiegeEngineKind::Ram));
     assert!(engines.iter().any(|e| e.kind == SiegeEngineKind::Tower));

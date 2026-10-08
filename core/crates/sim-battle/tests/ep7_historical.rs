@@ -25,14 +25,8 @@ fn map(id: &str) -> HistoricalMap {
     HistoricalMap::from_json(&text).expect("map parses")
 }
 
-/// The game data, loaded once for every test of this file.
-fn game_data() -> &'static data_model::GameData {
-    static DATA: std::sync::OnceLock<data_model::GameData> = std::sync::OnceLock::new();
-    DATA.get_or_init(data)
-}
-
 fn start(id: &str, seed: u64) -> (HistoricalMap, BattleSim) {
-    let data = game_data();
+    let data = data();
     let map = map(id);
     let mut setup = map
         .battle_setup(
@@ -60,114 +54,17 @@ fn crecy_loads_and_deploys() {
     }
 }
 
-/// Result of one AI-vs-AI run.
-struct Run {
-    winner: Option<SideId>,
-    end: String,
-    seconds: f64,
-    lost: [u32; 2],
-    initial: [u32; 2],
-}
-
-fn play(id: &str, seed: u64, cap: f64) -> Run {
+/// Winner of one AI-vs-AI run.
+fn play(id: &str, seed: u64, cap: f64) -> Option<SideId> {
     let (_, mut sim) = start(id, seed);
-    let initial = [
-        sim.strength(SideId::Attacker),
-        sim.strength(SideId::Defender),
-    ];
     run(&mut sim, cap);
-    let end = sim
-        .outcome()
-        .map_or("unfinished".to_owned(), |o| format!("{:?}", o.end));
-    Run {
-        winner: sim.winner(),
-        end,
-        seconds: sim.elapsed(),
-        lost: [
-            initial[0].saturating_sub(sim.strength(SideId::Attacker)),
-            initial[1].saturating_sub(sim.strength(SideId::Defender)),
-        ],
-        initial,
-    }
-}
-
-/// Plays `seeds` and returns how many the historical winner took.
-fn survey(id: &str, seeds: std::ops::Range<u64>) -> usize {
-    let winner = map(id).historical_winner;
-    let mut wins = 0;
-    for seed in seeds {
-        let started = std::time::Instant::now();
-        let r = play(id, seed, 2400.0);
-        if r.winner == Some(winner) {
-            wins += 1;
-        }
-        println!(
-            "{id} seed {seed:2}: winner {:?} ({}) at {:5.0} s, lost {}/{} vs {}/{} [{:.1} s]",
-            r.winner,
-            r.end,
-            r.seconds,
-            r.lost[0],
-            r.initial[0],
-            r.lost[1],
-            r.initial[1],
-            started.elapsed().as_secs_f64()
-        );
-    }
-    wins
-}
-
-/// Prints the course of a battle every 30 s and its journal
-/// (`EP7_MAP=crecy EP7_SEED=1`).
-#[test]
-#[ignore]
-fn trace() {
-    let id = std::env::var("EP7_MAP").unwrap_or_else(|_| "crecy".to_owned());
-    let seed = std::env::var("EP7_SEED")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(1);
-    let (_, mut sim) = start(&id, seed);
-    for _ in 0..80 {
-        run(&mut sim, 30.0);
-        let mut line = format!("t={:4.0}", sim.elapsed());
-        for side in SideId::BOTH {
-            let units: Vec<_> = sim.units().iter().filter(|u| u.side == side).collect();
-            let z = units.iter().map(|u| u.z).sum::<f64>() / units.len() as f64;
-            let count =
-                |f: &dyn Fn(&sim_battle::Unit) -> bool| units.iter().filter(|u| f(u)).count();
-            line += &format!(
-                " | {} z {:5.0} mov {} melee {} rout {} str {}",
-                side.key(),
-                z,
-                count(&|u| u.destination.is_some() || u.target.is_some()),
-                count(&|u| u.state == sim_battle::UnitState::Melee),
-                count(&|u| u.state == sim_battle::UnitState::Routing),
-                sim.strength(side)
-            );
-        }
-        println!("{line}");
-        if sim.is_finished() {
-            break;
-        }
-    }
-    for e in sim.events() {
-        println!("{:5.0} {}", e.time, e.text_fr);
-    }
-}
-
-#[test]
-#[ignore]
-fn survey_all() {
-    for &id in MAPS {
-        let wins = survey(id, 1..31);
-        println!("{id}: historical winner {wins}/30");
-    }
+    sim.winner()
 }
 
 /// English victories over seeds 1-20 of map `id`.
 fn english_wins(id: &str) -> usize {
     (1..21)
-        .filter(|&seed| play(id, seed, 2400.0).winner == Some(SideId::Defender))
+        .filter(|&seed| play(id, seed, 2400.0) == Some(SideId::Defender))
         .count()
 }
 
@@ -256,7 +153,7 @@ fn posted_regiments_hold_their_ground() {
 /// map's woods, water and decor, out of the woods and the water.
 #[test]
 fn a_campaign_battle_can_be_fought_on_the_site() {
-    let data = game_data();
+    let data = data();
     let map = map("crecy");
     assert!(map.matches_campaign("prov_ponthieu", 1346));
     assert!(!map.matches_campaign("prov_ponthieu", 1415));

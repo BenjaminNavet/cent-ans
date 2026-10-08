@@ -7,7 +7,7 @@
   "required": ["effects", "stats", "gauges", "hud", "categories", "abilities", "classes", "branches", "plain"],
   "additionalProperties": false,
   "$defs": {
-    "key": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "key": { "$ref": "common.schema.json#/$defs/snake_id" },
     "label": {"type": "string", "minLength": 1},
     "entry": {
       "type": "object",

@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
-    BuildingId, CharacterId, Effect, FactionId, GameData, PopulationClass, ProvinceId,
+    BuildingId, CharacterId, Effect, EffectKind, FactionId, GameData, PopulationClass, ProvinceId,
     ResourceCategory, Role, SettlementId, Skill, SkillBranch,
 };
 use godot::classes::RefCounted;
@@ -19,7 +19,6 @@ use sim_campaign::{
 };
 
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
-use crate::campaign_sim_turn::TURN_PENDING_FR;
 use crate::convert::variant_to_json;
 
 /// Last successfully loaded game data and its load warnings, shared by
@@ -110,14 +109,58 @@ pub(crate) fn loaded_data() -> Option<Arc<GameData>> {
     shared_data(None)
 }
 
+/// Read view of a loaded campaign: its state and the game data.
+pub(crate) struct Ctx<'a> {
+    pub(crate) state: &'a CampaignState,
+    pub(crate) data: &'a Arc<GameData>,
+}
+
+/// Mutable view of a loaded campaign (state mutable, data shared).
+pub(crate) struct CtxMut<'a> {
+    pub(crate) state: &'a mut CampaignState,
+    pub(crate) data: &'a Arc<GameData>,
+}
+
+/// Warns once per process that a method ran with no campaign loaded
+/// (getters are polled every frame: a warning per call would flood the log).
+fn warn_no_campaign() {
+    static WARNED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    if !WARNED.swap(true, std::sync::atomic::Ordering::Relaxed) {
+        godot_warn!("CampaignSim: method called before new_campaign/load_from_string");
+    }
+}
+
+impl CampaignSim {
+    /// State and data when a campaign is loaded; the single guard of every
+    /// getter (`None` after one warning otherwise).
+    pub(crate) fn ctx(&self) -> Option<Ctx<'_>> {
+        match (&self.state, &self.data) {
+            (Some(state), Some(data)) => Some(Ctx { state, data }),
+            _ => {
+                warn_no_campaign();
+                None
+            }
+        }
+    }
+
+    /// Mutable counterpart of [`CampaignSim::ctx`].
+    pub(crate) fn ctx_mut(&mut self) -> Option<CtxMut<'_>> {
+        match (&mut self.state, &self.data) {
+            (Some(state), Some(data)) => Some(CtxMut { state, data }),
+            _ => {
+                warn_no_campaign();
+                None
+            }
+        }
+    }
+}
+
 /// Godot-facing handle on a campaign simulation.
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct CampaignSim {
     pub(crate) data: Option<Arc<GameData>>,
     pub(crate) state: Option<CampaignState>,
-    /// French message of the last failed `load_from_string`.
-    pub(crate) last_load_error: String,
     /// PB3d: end of turn running on its worker thread, if any.
     pub(crate) pending_turn: Option<crate::turn_job::TurnJob>,
     /// PB3d: bumped by every call that may change the state.
@@ -133,7 +176,6 @@ impl IRefCounted for CampaignSim {
         CampaignSim {
             data: None,
             state: None,
-            last_load_error: String::new(),
             pending_turn: None,
             revision: 0,
             base,
@@ -193,14 +235,9 @@ impl CampaignSim {
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
-                self.last_load_error = String::new();
                 true
             }
             Err(error) => {
-                // Lot C4: saves older than the settlements are refused with
-                // a French message (« sauvegarde d'une version antérieure à
-                // la refonte des colonies »), kept for the UI.
-                self.last_load_error = error.to_string();
                 godot_error!("CampaignSim.load_from_string failed: {error}");
                 false
             }
@@ -231,7 +268,7 @@ impl CampaignSim {
     /// `{treasury, income, at_war_with, allies, provinces_count, armies_count, alive}`.
     #[func]
     fn get_faction_summary(&self, id: GString) -> VarDictionary {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(summary) = FactionId::new(id.to_string())
@@ -259,7 +296,7 @@ impl CampaignSim {
     /// for an unknown id.
     #[func]
     fn get_province_city(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(id) = ProvinceId::new(id.to_string()) else {
@@ -276,7 +313,7 @@ impl CampaignSim {
     /// dictionary for an unknown id.
     #[func]
     fn get_faction_economy(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(id.to_string()) else {
@@ -313,7 +350,7 @@ impl CampaignSim {
     /// garrison and siege are those of the province's city (derived).
     #[func]
     fn get_province_state(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some((province, city)) = ProvinceId::new(id.to_string())
@@ -373,7 +410,7 @@ impl CampaignSim {
     /// `{faction, general, general_name, location, units[], movement_points, supply, stance, path[]}`.
     #[func]
     fn get_army(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&id.to_string()).and_then(|id| state.army(&id)) else {
@@ -387,7 +424,7 @@ impl CampaignSim {
     /// than the army's own; see `get_reachable_settlements`).
     #[func]
     fn get_reachable(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -406,7 +443,7 @@ impl CampaignSim {
     /// `{settlement_id: cost}` for every settlement the army can reach this turn.
     #[func]
     fn get_reachable_settlements(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -425,7 +462,7 @@ impl CampaignSim {
     /// already there. The result feeds a `move_army` order as is.
     #[func]
     fn find_path(&self, army_id: GString, target: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let (Some(army), Some(target)) = (
@@ -447,7 +484,7 @@ impl CampaignSim {
     /// which draws province to province).
     #[func]
     fn find_path_provinces(&self, army_id: GString, target: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let (Some(army), Some(target)) = (
@@ -489,7 +526,7 @@ impl CampaignSim {
     /// `pool_seasons_to_next` -1 when full or never refilled).
     #[func]
     fn get_recruitable(&self, place_id: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Some(settlement) = settlement_or_city(state, &place_id.to_string()) else {
@@ -539,19 +576,11 @@ impl CampaignSim {
     /// Returns `{ok, error}`; `error` is a French message when `ok` is false.
     #[func]
     fn submit_order(&mut self, order: VarDictionary) -> VarDictionary {
-        if self.refuse_while_turn_pending("submit_order") {
-            return order_result(Err(TURN_PENDING_FR.to_owned()));
-        }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
-        };
-        let parsed = variant_to_json(&order.to_variant())
-            .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
-        let order = match parsed {
-            Ok(order) => order,
-            Err(error) => return order_result(Err(invalid_order_message(&error))),
-        };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("submit_order", || {
+            variant_to_json(&order.to_variant())
+                .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()))
+                .map_err(|error| invalid_order_message(&error))
+        })
     }
 
     /// Resolves the turn and returns its events (synchronous: tests,
@@ -564,7 +593,7 @@ impl CampaignSim {
             return events;
         }
         self.revision += 1;
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             godot_warn!("CampaignSim.end_turn called before new_campaign");
             return VarArray::new();
         };
@@ -574,7 +603,7 @@ impl CampaignSim {
     /// Character sheet (spec M4 § 3), or an empty dictionary for an unknown id.
     #[func]
     fn get_character(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(view) = CharacterId::new(id.to_string())
@@ -589,7 +618,7 @@ impl CampaignSim {
     /// Living characters of `faction`: ruler, heir, then by age.
     #[func]
     fn get_faction_characters(&self, faction: GString) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -619,7 +648,7 @@ impl CampaignSim {
     /// Skills `character` could learn now (prerequisites met, not learned).
     #[func]
     fn get_learnable(&self, character: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = CharacterId::new(character.to_string()) else {
@@ -637,7 +666,7 @@ impl CampaignSim {
     /// `[{id, name, age, faction}]` of valid spouses for `character`.
     #[func]
     fn get_marriage_candidates(&self, character: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = CharacterId::new(character.to_string()) else {
@@ -706,13 +735,6 @@ pub(crate) fn invalid_order_message(error: &str) -> String {
     "Cet ordre n'est pas reconnu par la simulation : la bibliothèque du jeu n'est sans doute \
      pas à jour. Relancez le jeu après l'avoir réinstallé."
         .to_owned()
-}
-
-pub(crate) fn order_result(result: Result<(), String>) -> VarDictionary {
-    match result {
-        Ok(()) => vdict! { "ok" => true, "error" => "" },
-        Err(error) => vdict! { "ok" => false, "error" => error.as_str() },
-    }
 }
 
 pub(crate) fn ids<'a>(iter: impl Iterator<Item = &'a (impl AsRef<str> + 'a)>) -> PackedStringArray {
@@ -1015,32 +1037,40 @@ fn effect_value_dict(value: EffectValue) -> VarDictionary {
     }
 }
 
+/// Kinds the UI reads from a province's `effects`, keyed by their snake_case name.
+const UI_EFFECT_KINDS: [(&str, EffectKind); 14] = [
+    ("tax_income", EffectKind::TaxIncome),
+    ("trade_income", EffectKind::TradeIncome),
+    ("health", EffectKind::Health),
+    ("unrest", EffectKind::Unrest),
+    ("wealth", EffectKind::Wealth),
+    ("goods_satisfaction", EffectKind::GoodsSatisfaction),
+    ("growth", EffectKind::Growth),
+    ("garrison", EffectKind::Garrison),
+    ("fortification_level", EffectKind::FortificationLevel),
+    ("recruit_cost", EffectKind::RecruitCost),
+    ("supply", EffectKind::Supply),
+    ("production", EffectKind::Production),
+    ("siege_resistance", EffectKind::SiegeResistance),
+    ("plague_resistance", EffectKind::PlagueResistance),
+];
+
 fn effect_totals_dict(effects: &EffectTotals) -> VarDictionary {
-    vdict! {
-        "tax_income" => &effect_value_dict(effects.tax_income),
-        "trade_income" => &effect_value_dict(effects.trade_income),
-        "health" => &effect_value_dict(effects.health),
-        "unrest" => &effect_value_dict(effects.unrest),
-        "wealth" => &effect_value_dict(effects.wealth),
-        "goods_satisfaction" => &effect_value_dict(effects.goods_satisfaction),
-        "growth" => &effect_value_dict(effects.growth),
-        "garrison" => &effect_value_dict(effects.garrison),
-        "fortification_level" => &effect_value_dict(effects.fortification_level),
-        "recruit_cost" => &effect_value_dict(effects.recruit_cost),
-        "supply" => &effect_value_dict(effects.supply),
-        "production" => &effect_value_dict(effects.production),
-        "siege_resistance" => &effect_value_dict(effects.siege_resistance),
-        "plague_resistance" => &effect_value_dict(effects.plague_resistance),
-        // F1: effects aimed at one social class.
-        "by_class" => &vdict! {
+    let mut dict = VarDictionary::new();
+    for (key, kind) in UI_EFFECT_KINDS {
+        dict.set(key, &effect_value_dict(effects[kind]));
+    }
+    dict.set(
+        "by_class",
+        &vdict! {
             "peasants" => &class_effects_dict(&effects.classes.peasants),
             "burghers" => &class_effects_dict(&effects.classes.burghers),
             "clergy" => &class_effects_dict(&effects.classes.clergy),
             "nobility" => &class_effects_dict(&effects.classes.nobility),
         },
-    }
+    );
+    dict
 }
-
 fn class_effects_dict(effects: &sim_campaign::buildings::ClassEffects) -> VarDictionary {
     vdict! {
         "wealth" => &effect_value_dict(effects.wealth),
@@ -1201,12 +1231,6 @@ fn role_label_fr(role: Role) -> &'static str {
     }
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 /// Current activity as shown by the court panel (its filters match on the
 /// prefixes "général", "gouverneur" and the exact "à la cour").
 fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) -> String {
@@ -1214,12 +1238,12 @@ fn activity_label(state: &CampaignState, data: &GameData, view: &CharacterView) 
         return "Captif(ve)".to_owned();
     }
     if let Some(province) = &view.governor_of {
-        return format!("gouverneur de {}", province_name(data, province));
+        return format!("gouverneur de {}", data.province_name(province));
     }
     if let Some(army) = view.army.as_ref().and_then(|a| state.army(a)) {
         let place = state
             .army_province(data, army)
-            .map_or_else(String::new, |p| province_name(data, &p));
+            .map_or_else(String::new, |p| data.province_name(&p));
 
         return format!("général de l'armée en {place}");
     }

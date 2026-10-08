@@ -5,7 +5,7 @@
 use godot::prelude::*;
 use sim_campaign::map_lens::{map_lens, ClaimStance};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn claim_key(claim: ClaimStance) -> &'static str {
     match claim {
@@ -24,7 +24,7 @@ impl CampaignSim {
     /// "contested")}`; empty for an unknown id.
     #[func]
     fn get_map_lens(&self, province_ids: PackedStringArray) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let lens = map_lens(state, data, state.player_faction());

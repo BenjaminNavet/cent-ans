@@ -7,34 +7,22 @@ extends RefCounted
 ## chaque faction vient de `CampaignSim.get_faction_stances_for` (règle dans `sim_campaign::stance`).
 ## Réglages : `data/map/stance_cues.json` (schéma `stance_cues.schema.json`).
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/stance_cues.json"
 const SELF := "self"
 const ENEMY := "enemy"
 const FRIEND := "friend"
 const OTHER := "other"
 
-static var _tuning: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(TUNING_PATH)
 
 
 ## Réglages (dictionnaire vide si le fichier manque : aucun signe, couleurs héraldiques).
 static func tuning() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(TUNING_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_tuning = parsed
-		else:
-			push_warning("StanceCues: %s missing" % path)
-	return _tuning
+	return _lookup.data()
 
 
 static func clear_cache() -> void:
-	_tuning = {}
-	_loaded = false
+	_lookup.reload()
 
 
 ## Positions du joueur envers chaque faction ({id: clé}) ; vide si la simulation ne les calcule pas.

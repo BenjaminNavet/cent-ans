@@ -1,7 +1,7 @@
 class_name CoinageSection
-extends VBoxContainer
+extends PanelSection
 
-## H11 — section « Monnaie » du panneau de faction, construite en code : monnaie actuelle,
+## Section « Monnaie » du panneau de faction, construite en code : monnaie actuelle,
 ## niveau des prix (jauge 100-400), seigneuriage et refonte (prévus et saison passée), sélecteur
 ## des quatre niveaux (infobulle riche `RichTooltip.coinage`), ordre `set_coinage` et refus en
 ## rouge, texte court aux liens du Codex. Aucune règle ici : montants, effets et refus viennent de
@@ -9,8 +9,6 @@ extends VBoxContainer
 
 signal coinage_changed(level: String)
 
-const ERROR_COLOR := Color(0.55, 0.20, 0.15)
-const MUTED_COLOR := Color(0.42, 0.33, 0.20)
 const PRICE_MIN := 100.0
 const PRICE_MAX := 400.0
 const EXPLANATION := "Les rois « muent » la monnaie : moins d'argent fin dans chaque pièce rapporte un [[cdx_mutations_monetaires|seigneuriage]] immédiat, mais les prix montent et les rentes fixes des bourgeois et du clergé fondent. [[cdx_nicole_oresme|Nicole Oresme]] plaide pour une monnaie forte, stable, comptée en [[cdx_livre_tournois|livres tournois]]."
@@ -18,8 +16,6 @@ const EXPLANATION := "Les rois « muent » la monnaie : moins d'argent fin dans 
 var coinage: Dictionary = {}
 ## Boutons du sélecteur, par niveau (`strong`, `sound`, `debased`, `heavily_debased`).
 var level_buttons: Dictionary = {}
-var last_result: Dictionary = {}
-var read_only := false
 
 var header_label: Label
 var current_label: Label
@@ -29,28 +25,21 @@ var seigniorage_label: Label
 var recoinage_label: Label
 var changed_label: Label
 var selector: GridContainer
-var error_label: Label
 var explanation_label: RichTextLabel
-var _sim: Object = null
 var _faction: String = ""
 
 
 func _init() -> void:
-	name = "CoinageSection"
-	add_theme_constant_override("separation", 3)
-	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	super("CoinageSection", 3)
 	var head := HBoxContainer.new()
 	add_child(head)
-	header_label = Label.new()
-	header_label.text = "Monnaie"
-	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	header_label = UiBuild.label("Monnaie", UiType.size(UiType.BODY))
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(header_label)
 	current_label = _small_label(14, false)
 	head.add_child(current_label)
 
-	var price_row := HBoxContainer.new()
-	price_row.add_theme_constant_override("separation", 8)
+	var price_row := UiBuild.hbox(8)
 	add_child(price_row)
 	price_label = _small_label(13, false)
 	price_label.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -81,29 +70,14 @@ func _init() -> void:
 	selector.add_theme_constant_override("v_separation", 2)
 	add_child(selector)
 
-	error_label = _small_label(12)
-	error_label.add_theme_color_override("font_color", ERROR_COLOR)
-	error_label.hide()
-	add_child(error_label)
-
-	explanation_label = RichTextLabel.new()
-	explanation_label.bbcode_enabled = true
-	explanation_label.fit_content = true
-	explanation_label.scroll_active = false
-	explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	explanation_label.custom_minimum_size = Vector2(300, 0)
-	explanation_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	explanation_label.add_theme_color_override("default_color", RichTooltip.INK)
-	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
-		explanation_label.add_theme_font_size_override(key, UiType.size(UiType.CAPTION))
+	_add_error_label(300.0)
+	explanation_label = _rich_text(UiType.size(UiType.CAPTION), 300.0, true)
 	add_child(explanation_label)
 
 
 func _ready() -> void:
 	explanation_label.text = CodexText.format("[i]%s[/i]" % EXPLANATION)
-	var bubbles := get_node_or_null("/root/CodexBubbles")
-	if bubbles != null:
-		bubbles.call("attach", explanation_label)
+	super()
 
 
 func _small_label(font_size: int, wrap := true) -> Label:
@@ -120,7 +94,7 @@ func _small_label(font_size: int, wrap := true) -> Label:
 func show_for(faction: String, player_owned: bool = true, sim: Object = null) -> void:
 	_faction = faction
 	read_only = not player_owned
-	_sim = sim if sim != null else _facade_sim()
+	_sim = _resolve_sim(sim)
 	if _sim == null or not _sim.has_method("get_coinage"):
 		hide()
 		return
@@ -147,51 +121,49 @@ func show_for(faction: String, player_owned: bool = true, sim: Object = null) ->
 	_fill_selector(changed)
 
 
+## Remplit le sélecteur ; les boutons existants sont mis à jour sur place tant que les niveaux
+## proposés ne changent pas.
 func _fill_selector(changed: bool) -> void:
-	for child in selector.get_children():
-		selector.remove_child(child)
-		child.queue_free()
-	level_buttons.clear()
 	selector.visible = not read_only
+	var options: Array = coinage.get("options", [])
 	if read_only:
+		UiBuild.clear_children(selector)
+		level_buttons.clear()
 		return
-	for option in coinage.get("options", []):
+	var levels := []
+	for option in options:
+		levels.append(str(option.get("level", "")))
+	if levels != level_buttons.keys():
+		UiBuild.clear_children(selector)
+		level_buttons.clear()
+		for level in levels:
+			var button := RichButton.new()
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size = Vector2(0, 26)
+			button.toggle_mode = true
+			button.pressed.connect(func() -> void: request_level(level))
+			selector.add_child(button)
+			level_buttons[level] = button
+	for option in options:
 		var level := str(option.get("level", ""))
-		var button := RichButton.new()
+		var button: Button = level_buttons[level]
 		var short := str(option.get("label", level)).trim_prefix("Monnaie ")
 		button.text = short.left(1).to_upper() + short.substr(1)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size = Vector2(0, 26)
-		button.toggle_mode = true
 		button.button_pressed = bool(option.get("current", false))
 		# Un niveau refusé (déjà changée cette année) reste cliquable : la simulation motive le refus.
 		button.disabled = bool(option.get("current", false))
 		button.tooltip_text = RichTooltip.coinage(option, changed)
-		button.pressed.connect(func() -> void: request_level(level))
-		selector.add_child(button)
-		level_buttons[level] = button
 
 
 ## Ordre `set_coinage` ; en cas de refus, message de la simulation affiché en rouge.
 func request_level(level: String) -> Dictionary:
 	if _sim == null or read_only:
 		return {}
-	last_result = _sim.call("submit_order", {"type": "set_coinage", "level": level})
-	var ok := bool(last_result.get("ok", false))
-	show_for(_faction, not read_only, _sim)
-	error_label.visible = not ok
-	error_label.text = "Refusé : %s" % str(last_result.get("error", "?")) if not ok else ""
-	if ok:
+	if _submit({"type": "set_coinage", "level": level}, func() -> void: show_for(_faction, not read_only, _sim)):
 		coinage_changed.emit(level)
 	return last_result
 
 
 static func _pounds(value: int, signed := false) -> String:
 	var sign := "+" if signed and value > 0 else ""
-	return "%s%s %s" % [sign, RichTooltip.thousands(value), RichTooltip.POUND]
-
-
-func _facade_sim() -> Object:
-	var loop := Engine.get_main_loop() as SceneTree
-	var facade: Node = loop.root.get_node_or_null("/root/SimFacade") if loop != null else null
-	return facade.get("sim") if facade != null else null
+	return "%s%s %s" % [sign, Money.digits(value), RichTooltip.POUND]

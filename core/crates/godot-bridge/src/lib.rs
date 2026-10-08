@@ -2,7 +2,12 @@
 //!
 //! Only plain values cross the boundary (integers, strings, packed arrays);
 //! Godot never holds a pointer into the simulation.
+//!
+//! Convention : une `#[func]` doit avoir un appelant dans `game/` (ou `tools/`).
+//! Une `#[func]` sans appelant est supprimée, avec les fonctions du cœur qu'elle
+//! seule utilisait.
 
+use crate::convert::vec2_f64;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -15,11 +20,16 @@ mod battle_pose_lerp;
 mod battle_replay;
 mod battle_sim;
 mod battle_sim_abilities;
+mod battle_sim_campaign;
 mod battle_sim_formation;
 mod battle_sim_modes;
+mod battle_sim_orders;
 mod battle_sim_poses;
 mod battle_sim_preview;
 mod battle_sim_queue;
+mod battle_sim_state;
+mod battle_sim_terrain;
+mod battle_sim_units;
 mod battle_step_job;
 mod campaign_sim;
 mod campaign_sim_agents;
@@ -72,7 +82,6 @@ mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
-pub use naval_sim::NavalBattleSim;
 pub use relief_decoder::ReliefDecoder;
 pub use relief_lod_bridge::ReliefLod;
 pub use vegetation_scatter::VegetationScatter;
@@ -91,7 +100,6 @@ unsafe impl ExtensionLibrary for CentAnsExtension {}
 pub struct GameDataStore {
     /// Shared with `CampaignSim` (one load per data folder).
     data: Option<std::sync::Arc<GameData>>,
-    warnings: Vec<String>,
     last_image_size: Vector2i,
     base: Base<RefCounted>,
 }
@@ -101,7 +109,6 @@ impl IRefCounted for GameDataStore {
     fn init(base: Base<RefCounted>) -> Self {
         GameDataStore {
             data: None,
-            warnings: Vec::new(),
             last_image_size: Vector2i::ZERO,
             base,
         }
@@ -111,21 +118,18 @@ impl IRefCounted for GameDataStore {
 #[godot_api]
 impl GameDataStore {
     /// Loads every entity folder under `data_dir`. Returns `false` (and logs the
-    /// error) if any file is invalid or a reference is dangling; warnings about
-    /// provinces still missing from the map are kept for `get_warnings`.
+    /// error) if any file is invalid or a reference is dangling.
     #[func]
     fn load(&mut self, data_dir: GString) -> bool {
         let root = PathBuf::from(data_dir.to_string());
         match campaign_sim::load_shared_data(&root) {
-            Ok((data, warnings)) => {
-                self.warnings = warnings.to_vec();
+            Ok((data, _warnings)) => {
                 self.data = Some(data);
                 true
             }
             Err(error) => {
                 godot_error!("GameDataStore.load({}) failed: {error}", root.display());
                 self.data = None;
-                self.warnings.clear();
                 false
             }
         }
@@ -135,21 +139,6 @@ impl GameDataStore {
     #[func]
     fn is_loaded(&self) -> bool {
         self.data.is_some()
-    }
-
-    /// Non-fatal problems reported by the last successful `load`.
-    #[func]
-    fn get_warnings(&self) -> PackedStringArray {
-        self.warnings.iter().map(GString::from).collect()
-    }
-
-    /// Sorted province ids.
-    #[func]
-    fn get_province_ids(&self) -> PackedStringArray {
-        self.data
-            .as_ref()
-            .map(|data| ids_of(data.provinces.keys()))
-            .unwrap_or_default()
     }
 
     /// Province summary, or an empty dictionary for an unknown id.
@@ -182,19 +171,10 @@ impl GameDataStore {
             "neighbors" =>&ids_of(sim_campaign::movement::land_neighbors(data, &province.id).iter()),
         };
         if let Some(geometry) = data.province_geometry.get(&province.id) {
-            dict.set("centroid", vector2(geometry.centroid));
-            dict.set("capital_px", vector2(geometry.capital_px));
+            dict.set("centroid", vec2_f64(geometry.centroid));
+            dict.set("capital_px", vec2_f64(geometry.capital_px));
         }
         dict
-    }
-
-    /// Sorted faction ids.
-    #[func]
-    fn get_faction_ids(&self) -> PackedStringArray {
-        self.data
-            .as_ref()
-            .map(|data| ids_of(data.factions.keys()))
-            .unwrap_or_default()
     }
 
     /// Faction summary, or an empty dictionary for an unknown id.
@@ -224,15 +204,6 @@ impl GameDataStore {
             "victory_summary" => faction.victory.as_ref().and_then(|v| v.summary.as_deref()).unwrap_or(""),
             "victory_end_year" => faction.victory.as_ref().map_or(0, |v| i64::from(v.end_year)),
         }
-    }
-
-    /// Sorted character ids.
-    #[func]
-    fn get_character_ids(&self) -> PackedStringArray {
-        self.data
-            .as_ref()
-            .map(|data| ids_of(data.characters.keys()))
-            .unwrap_or_default()
     }
 
     /// Character summary, or an empty dictionary for an unknown id.
@@ -271,48 +242,6 @@ impl GameDataStore {
         }
     }
 
-    /// Trait definition `{id, name, category, description, opposites[]}`
-    /// (spec M4 § 3), or an empty dictionary for an unknown id.
-    #[func]
-    fn get_trait(&self, id: GString) -> VarDictionary {
-        let Some(definition) = self
-            .data
-            .as_ref()
-            .and_then(|data| data.traits.get(id.to_string().as_str()))
-        else {
-            return VarDictionary::new();
-        };
-        vdict! {
-            "id" => definition.id.as_str(),
-            "name" => definition.name.display.as_str(),
-            "category" => format!("{:?}", definition.category).to_lowercase(),
-            "description" => definition.description.as_str(),
-            "opposites" => &ids_of(definition.opposites.iter()),
-        }
-    }
-
-    /// Skill definition `{id, name, branch, tier, prerequisites[], cost,
-    /// description}` (spec M4 § 3), or an empty dictionary for an unknown id.
-    #[func]
-    fn get_skill(&self, id: GString) -> VarDictionary {
-        let Some(skill) = self
-            .data
-            .as_ref()
-            .and_then(|data| data.skills.get(id.to_string().as_str()))
-        else {
-            return VarDictionary::new();
-        };
-        vdict! {
-            "id" => skill.id.as_str(),
-            "name" => skill.name.display.as_str(),
-            "branch" => format!("{:?}", skill.branch).to_lowercase(),
-            "tier" => i64::from(skill.tier),
-            "prerequisites" => &ids_of(skill.prerequisites.iter()),
-            "cost" => i64::from(skill.cost),
-            "description" => skill.description.as_str(),
-        }
-    }
-
     /// Primary heraldry colour of each province's owner, in the order of
     /// `province_ids`. Unknown provinces or factions give magenta so that a
     /// missing colour is visible on the map.
@@ -342,18 +271,6 @@ impl GameDataStore {
     #[func]
     fn load_heightmap_u16(&mut self, path: GString) -> PackedByteArray {
         self.decode_png(&path, png::ColorType::Grayscale, png::BitDepth::Sixteen)
-    }
-
-    /// Decodes an 8-bit grayscale PNG into one byte per pixel (row-major).
-    #[func]
-    fn load_mask_u8(&mut self, path: GString) -> PackedByteArray {
-        self.decode_png(&path, png::ColorType::Grayscale, png::BitDepth::Eight)
-    }
-
-    /// Decodes an 8-bit RGB PNG into three bytes per pixel (row-major, RGB).
-    #[func]
-    fn load_rgb8(&mut self, path: GString) -> PackedByteArray {
-        self.decode_png(&path, png::ColorType::Rgb, png::BitDepth::Eight)
     }
 
     /// Size in pixels of the last image decoded by `load_heightmap_u16`,
@@ -455,10 +372,6 @@ fn date_dict(date: Option<&HistoricalDate>) -> VarDictionary {
 /// Parses `#RRGGBB`; falls back to magenta so a bad colour is visible.
 fn html_color(html: &str) -> Color {
     Color::from_html(html).unwrap_or(Color::MAGENTA)
-}
-
-fn vector2(point: [f64; 2]) -> Vector2 {
-    Vector2::new(point[0] as f32, point[1] as f32)
 }
 
 #[cfg(test)]

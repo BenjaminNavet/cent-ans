@@ -11,9 +11,10 @@
 //! Without either, the battle starts at [`TimeOfDayRules::default_hour`]
 //! (midday: full visibility, so the older battles are unchanged).
 
-use std::sync::OnceLock;
-
+use data_model::util::splitmix64;
 use serde::{Deserialize, Serialize};
+
+use crate::rng::Fnv1a;
 
 /// One phase of the day.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -77,7 +78,7 @@ pub struct TimeOfDayRules {
     pub campaign_draw: Vec<PhaseWeight>,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_time_of_day.json");
+data_model::bundled_rules!(TimeOfDayRules, "rules/battle_time_of_day.json");
 
 /// `hour` brought back to `[0, 24)`.
 pub fn wrap_hour(hour: f64) -> f64 {
@@ -93,14 +94,6 @@ pub fn wrap_hour(hour: f64) -> f64 {
 }
 
 impl TimeOfDayRules {
-    /// `data/rules/battle_time_of_day.json` as compiled into the crate.
-    pub fn bundled() -> &'static TimeOfDayRules {
-        static RULES: OnceLock<TimeOfDayRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_time_of_day.json is valid")
-        })
-    }
-
     /// Hour of the day `elapsed_s` battle seconds after `start_hour`.
     pub fn hour_after(&self, start_hour: f64, elapsed_s: f64) -> f64 {
         wrap_hour(start_hour + elapsed_s.max(0.0) * self.minutes_per_battle_second / 60.0)
@@ -138,7 +131,7 @@ impl TimeOfDayRules {
         if total == 0 {
             return self.default_hour;
         }
-        let mut roll = splitmix(key) % total;
+        let mut roll = splitmix64(key) % total;
         for entry in &self.campaign_draw {
             let weight = u64::from(entry.weight);
             if roll < weight {
@@ -152,32 +145,14 @@ impl TimeOfDayRules {
     }
 }
 
-/// SplitMix64 finaliser (well spread bits from a plain hash).
-fn splitmix(mut x: u64) -> u64 {
-    x = x.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    x = (x ^ (x >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    x = (x ^ (x >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    x ^ (x >> 31)
-}
-
 /// Key of a campaign battle for [`TimeOfDayRules::campaign_hour`]: turn,
 /// index of the pending battle and province id (FNV-1a).
 pub fn campaign_battle_key(turn: u32, index: usize, province: &str) -> u64 {
-    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
-    let mut feed = |byte: u8| {
-        hash ^= u64::from(byte);
-        hash = hash.wrapping_mul(0x0100_0000_01b3);
-    };
-    for b in turn.to_le_bytes() {
-        feed(b);
-    }
-    for b in (index as u64).to_le_bytes() {
-        feed(b);
-    }
-    for b in province.bytes() {
-        feed(b);
-    }
-    hash
+    let mut hash = Fnv1a::default();
+    hash.bytes(&turn.to_le_bytes())
+        .u64(index as u64)
+        .bytes(province.as_bytes());
+    hash.finish()
 }
 
 #[cfg(test)]

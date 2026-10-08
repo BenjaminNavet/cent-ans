@@ -47,7 +47,7 @@ func _init() -> void:
 	var base_frames: int = BattleSkinned._texture_frames(BattleSkinned.FINE_DIR + str(base.get("texture", "")))
 	var trial_frames: int = BattleSkinned._texture_frames(BattleSkinned.VIDEO_TRIAL_DIR + str(trial.get("texture", "")))
 	_check(base_frames > 0 and trial_frames > 0, "en-têtes CAB1 lisibles")
-	var cmd_on := OS.get_cmdline_user_args().has("--video-trial")
+	var cmd_on := CmdArgs.has("--video-trial")
 	_check(BattleSkinned.video_trial_enabled() == cmd_on, "option lue sur la ligne de commande")
 	for forced in [0, 1]:
 		BattleSkinned.video_trial_forced = forced

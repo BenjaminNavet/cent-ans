@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
-## défaut est `maquette`, voir `gc_shots.gd`).
+## défaut est `maquette`).
 ## Captures et mesure du lot VH4 (villes emblématiques 1:1, ADR 0078) : Rouen vers 1340 en vue
 ## stratégique (maquette sous loupe), pendant le fondu, aux paliers vallée et site, puis au ras
 ## des toits ; mesure d'images par seconde au-dessus de Rouen et d'une ville ordinaire ZG6
@@ -47,15 +47,11 @@ func _init() -> void:
 	var only := ""
 	var fps := true
 	var city := "rouen"
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out_dir = arg.substr(6)
-		elif arg.begins_with("--only="):
-			only = arg.substr(7)
-		elif arg == "--no-fps":
-			fps = false
-		elif arg.begins_with("--city="):
-			city = arg.substr(7)
+	out_dir = CmdArgs.value("--out", out_dir)
+	only = CmdArgs.value("--only", only)
+	if CmdArgs.has("--no-fps"):
+		fps = false
+	city = CmdArgs.value("--city", city)
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()

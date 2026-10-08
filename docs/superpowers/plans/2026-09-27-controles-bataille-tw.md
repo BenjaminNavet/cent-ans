@@ -1,7 +1,7 @@
 # Plan d'implémentation — Contrôles de bataille façon Total War (lots CB)
 
 Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md` (validée).
-Première action après approbation : copier ce plan dans `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, créer la note d'orchestration `docs/wip/cb.md` (tableau des lots, état, prochaine étape), réserver l'ADR `docs/decisions/0095-controles-bataille-tw.md`, commit `docs:`.
+Première action après approbation : copier ce plan dans `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, créer la note d'orchestration `docs/archive/chantiers.md` (tableau des lots, état, prochaine étape), réserver l'ADR `docs/decisions/0095-controles-bataille-tw.md`, commit `docs:`.
 
 ## Contexte
 
@@ -341,7 +341,7 @@ herse. Raccourcis Alt+Maj+1…6. Le camp retranché (charrettes, palissade) est 
 | 3 | CB1 | agent `cent-ans-dev` | CB-M |
 | 4 | CB2, CB3, CB5, CB6 en parallèle (4 agents ≤ 6) | CB3 et CB5 : Sonnet ; CB2 et CB6 : `cent-ans-dev` (historien pour les préréglages CB6) | CB1 |
 | 5 | CB4 (relecture historique, puis code) | historien, puis session principale | CB2 |
-| fin | ADR 0095 finalisée, note `docs/wip/cb.md`, mémoire | session principale | — |
+| fin | ADR 0095 finalisée, note `docs/archive/chantiers.md`, mémoire | session principale | — |
 
 CB2, CB3 et CB5 modifient tous `battle_input.gd` et `battle_hud.gd`. On les fusionne (avec CB6) dans l'ordre CB3, CB5, CB6, puis CB2 : CB2 remappe les touches et réécrit l'aide en dernier.
 

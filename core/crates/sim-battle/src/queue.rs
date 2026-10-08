@@ -11,8 +11,6 @@
 //! given without `queue`, a halt, a withdrawal or a rout empties the queue.
 //! The behaviour lives in `sim/queue.rs`.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// An order waiting behind the regiment's current one.
@@ -55,14 +53,4 @@ pub struct QueueRules {
     pub max_queued_orders: u32,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_queue.json");
-
-impl QueueRules {
-    /// `data/rules/battle_queue.json` as compiled into the crate.
-    pub fn bundled() -> &'static QueueRules {
-        static RULES: OnceLock<QueueRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_queue.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(QueueRules, "rules/battle_queue.json");

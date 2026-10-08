@@ -34,22 +34,8 @@ static func clear_cache() -> void:
 	_model_names.clear()
 
 
-static func _data_dirs() -> Array[String]:
-	var dirs: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		dirs.append(str(paths.get("data_dir")))
-	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	return dirs
-
-
 static func _read_json(relative: String) -> Variant:
-	for dir in _data_dirs():
-		var path := dir.path_join(relative)
-		if FileAccess.file_exists(path):
-			return JSON.parse_string(FileAccess.get_file_as_string(path))
-	return null
+	return DataFile.read_json(relative) if DataFile.exists(relative) else null
 
 
 static func document() -> Dictionary:
@@ -72,9 +58,7 @@ static func document() -> Dictionary:
 static func style() -> String:
 	if _style == "":
 		_style = str(ArmyFigures.map_settings().get("town_style", STYLE_REAL))
-		for argument in OS.get_cmdline_user_args():
-			if argument.begins_with("--town-style="):
-				_style = argument.get_slice("=", 1)
+		_style = CmdArgs.value("--town-style", _style)
 		if _style != STYLE_MAQUETTE:
 			_style = STYLE_REAL
 		if _style == STYLE_MAQUETTE and document().is_empty():

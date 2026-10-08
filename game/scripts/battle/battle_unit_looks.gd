@@ -15,16 +15,12 @@ const COATS := {
 	"dun": Vector3(0.36, 0.26, 0.13),
 }
 
-static var _looks: Dictionary = {}
-static var _loaded := false
+static var _lookup := JsonLookup.new(FX_FILE)
 
 
 ## Variante déclarée pour `unit_type` ({} si aucune).
 static func look(unit_type: String) -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		_looks = BattleStandards.read_data(FX_FILE).get("looks", {})
-	return _looks.get(unit_type, {})
+	return _lookup.section("looks").get(unit_type, {})
 
 
 ## Étoffes d'une variante en couleurs linéaires (au plus `MAX_COLOURS`).

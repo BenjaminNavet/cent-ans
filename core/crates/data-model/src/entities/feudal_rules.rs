@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/feudal.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct FeudalRules {
     /// Share of a vassal's income paid to its direct suzerain each turn.
     pub vassal_tribute_percent: i64,
@@ -75,7 +75,7 @@ pub struct StartFelony {
 /// a vassal too far from both the muster and the theatre, or strong enough
 /// to be independent in fact, is not summoned (and commits no felony).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct HostRules {
     /// A vassal is summoned only if one of its settlements lies within this
     /// distance (km) of its suzerain's capital or of a settlement of the
@@ -86,42 +86,13 @@ pub struct HostRules {
     pub independent_power_ratio: f64,
 }
 
-impl Default for HostRules {
-    fn default() -> Self {
-        HostRules {
-            max_muster_km: 0.0,
-            independent_power_ratio: 0.0,
-        }
-    }
-}
+crate::bundled_rules!(HostRules, "rules/feudal.json", at "/host", default);
 
-impl Default for FeudalRules {
-    fn default() -> Self {
-        FeudalRules {
-            vassal_tribute_percent: 10,
-            rebellion_loyalty: 20,
-            call_to_arms_loyalty: 30,
-            rebellion_permille: 250,
-            vassalage_power_ratio: 3.0,
-            disloyal_threshold: 30,
-            felony_window_turns: 8,
-            independence_turns: 20,
-            ascension_turns: 20,
-            loyalty: LoyaltyWeights::default(),
-            forfeiture_win_war_score: 10,
-            title_loss_penalty: 30,
-            collateral_line_percent: 0,
-            arbitration: ArbitrationWeights::default(),
-            escalation: EscalationRules::default(),
-            host: HostRules::default(),
-            start_felonies: Vec::new(),
-        }
-    }
-}
+crate::bundled_rules!(FeudalRules, "rules/feudal.json", default);
 
 /// Terms of a vassal's target loyalty towards its direct suzerain (§ 4.2).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct LoyaltyWeights {
     /// Starting point before any term.
     pub base: i32,
@@ -161,34 +132,12 @@ pub struct LoyaltyWeights {
     pub rival_claimant: i32,
 }
 
-impl Default for LoyaltyWeights {
-    fn default() -> Self {
-        LoyaltyWeights {
-            base: 55,
-            power_ratio: 2.0,
-            drift_per_turn: 5,
-            homage_start: 60,
-            memory_turns: 12,
-            power_favourable: 10,
-            power_unfavourable: -10,
-            excommunicated_liege: -20,
-            embargo_squeeze: -25,
-            protection_granted: 15,
-            protection_refused: -20,
-            family_tie: 10,
-            shared_culture: 5,
-            title_granted: 10,
-            peer_forfeiture: -10,
-            liege_defeat: -5,
-            rival_claimant: -15,
-        }
-    }
-}
+crate::bundled_rules!(LoyaltyWeights, "rules/feudal.json", at "/loyalty", default);
 
 /// Scores of each claimant when a suzerain arbitrates a contested
 /// succession (spec § 4.5); the best score wins, the designated heir on a tie.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ArbitrationWeights {
     /// The claimant (or the claimant's spouse) is kin of the arbiter's
     /// ruler or belongs to the arbiter's court.
@@ -199,21 +148,13 @@ pub struct ArbitrationWeights {
     pub designated_heir: i32,
 }
 
-impl Default for ArbitrationWeights {
-    fn default() -> Self {
-        ArbitrationWeights {
-            family_tie: 20,
-            law_heir: 10,
-            designated_heir: 5,
-        }
-    }
-}
+crate::bundled_rules!(ArbitrationWeights, "rules/feudal.json", at "/arbitration", default);
 
 /// War escalation (§ 4.3): a suzerain called to protect an attacked vassal
 /// intervenes or shirks; a private war between two vassals of the same
 /// lord is arbitrated by that lord.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct EscalationRules {
     /// Prestige change of the ruler of a suzerain who shirks protection.
     pub shirk_prestige: i32,
@@ -232,24 +173,12 @@ pub struct EscalationRules {
     pub arbitration: ArbitrationRules,
 }
 
-impl Default for EscalationRules {
-    fn default() -> Self {
-        EscalationRules {
-            shirk_prestige: -20,
-            shirk_loyalty_drop: 10,
-            intervene_prestige: 5,
-            protection_memory_turns: 20,
-            answer_turns: 2,
-            score: ProtectionScore::default(),
-            arbitration: ArbitrationRules::default(),
-        }
-    }
-}
+crate::bundled_rules!(EscalationRules, "rules/feudal.json", at "/escalation", default);
 
 /// Terms of the provisional AI score of a call for protection: the
 /// suzerain intervenes when the sum reaches `intervene_at`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ProtectionScore {
     /// Feudal duty: starting point.
     pub base: i32,
@@ -274,26 +203,11 @@ pub struct ProtectionScore {
     pub certainty_margin: i32,
 }
 
-impl Default for ProtectionScore {
-    fn default() -> Self {
-        ProtectionScore {
-            base: 30,
-            power_favourable: 15,
-            power_unfavourable: -25,
-            power_ratio: 1.0,
-            attitude_divisor: 2,
-            empty_treasury: -20,
-            per_ongoing_war: -15,
-            allied_with_aggressor: -60,
-            intervene_at: 20,
-            certainty_margin: 15,
-        }
-    }
-}
+crate::bundled_rules!(ProtectionScore, "rules/feudal.json", at "/escalation/score", default);
 
 /// Private war between two direct vassals of the same lord (§ 4.3.5).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, default)]
+#[serde(deny_unknown_fields)]
 pub struct ArbitrationRules {
     /// Truce imposed with the peace.
     pub truce_turns: u32,
@@ -312,15 +226,4 @@ pub struct ArbitrationRules {
     pub defied_summons_loyalty_drop: u8,
 }
 
-impl Default for ArbitrationRules {
-    fn default() -> Self {
-        ArbitrationRules {
-            truce_turns: 8,
-            impose_peace_power_ratio: 1.5,
-            take_side_attitude_gap: 40,
-            imposed_peace_loyalty_drop: 5,
-            opposed_loyalty_drop: 20,
-            defied_summons_loyalty_drop: 15,
-        }
-    }
-}
+crate::bundled_rules!(ArbitrationRules, "rules/feudal.json", at "/escalation/arbitration", default);

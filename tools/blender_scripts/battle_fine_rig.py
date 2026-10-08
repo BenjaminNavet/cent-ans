@@ -20,7 +20,7 @@ from mathutils import Vector
 # bone -> (factor on the offset from its parent's head, extra offset in metres, world
 # axes of the bind pose, left side; the right side mirrors X). Unlisted bones follow their
 # parent. Measured on the rig at bind pose (HUMAN_SCALE 0.97) against the MakeHuman body at
-# the trunk scale of the fit (see docs/wip/fg1-corps.md, « Proportions »).
+# the trunk scale of the fit (see docs/archive/chantiers.md, « Proportions »).
 PROPORTIONS = {
     # Trunk: hips-to-neck 0.60 -> 0.63 m, so that the MakeHuman trunk is fitted at ~0.95
     # (1.70 m tall) instead of 0.90 (1.63 m, head disproportionate to the arms).

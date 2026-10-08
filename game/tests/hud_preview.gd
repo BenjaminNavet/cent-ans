@@ -39,7 +39,7 @@ func _ready() -> void:
 	letters = (load("res://scenes/ui/news_letters.tscn") as PackedScene).instantiate()
 	for node in [seal, strip, cluster, letters]:
 		add_child(node)
-	_fill_demo(OS.get_cmdline_user_args())
+	_fill_demo()
 	resized.connect(layout_hud)
 	# Le bandeau se redimensionne après `set_army` / `max_width` : replacer au prochain cycle.
 	strip.minimum_size_changed.connect(func() -> void: layout_hud.call_deferred())
@@ -124,27 +124,21 @@ func _add_placeholders() -> void:
 	_minimap.add_child(mini_label)
 
 
-func _fill_demo(args: PackedStringArray) -> void:
+func _fill_demo() -> void:
 	var unit_count := 8
 	var expand := false
 	var blocking := true
 	var selection: Array = []
 	var with_general := true
-	for arg in args:
-		if arg.begins_with("--screenshot="):
-			_screenshot_path = arg.trim_prefix("--screenshot=")
-			_countdown = SCREENSHOT_DELAY_FRAMES
-		elif arg.begins_with("--units="):
-			unit_count = clampi(int(arg.trim_prefix("--units=")), 0, 20)
-		elif arg == "--expand":
-			expand = true
-		elif arg == "--no-block":
-			blocking = false
-		elif arg == "--no-general":
-			with_general = false
-		elif arg.begins_with("--select="):
-			for part in arg.trim_prefix("--select=").split(",", false):
-				selection.append(int(part))
+	if CmdArgs.has("--screenshot"):
+		_screenshot_path = CmdArgs.value("--screenshot")
+		_countdown = SCREENSHOT_DELAY_FRAMES
+	unit_count = clampi(int(CmdArgs.number("--units", unit_count)), 0, 20)
+	expand = CmdArgs.has("--expand")
+	blocking = not CmdArgs.has("--no-block")
+	with_general = not CmdArgs.has("--no-general")
+	for part in CmdArgs.list("--select"):
+		selection.append(int(part))
 
 	var catalog := ArmyStrip.load_unit_catalog(ProjectSettings.globalize_path("res://../data"))
 	var army := demo_army(unit_count)

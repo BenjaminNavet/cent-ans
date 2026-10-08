@@ -5,11 +5,11 @@
 //! The `research { technology }` order goes through the existing
 //! `submit_order`.
 
-use data_model::{FactionId, ProvinceId, TechBranch, Technology};
+use data_model::{FactionId, TechBranch, Technology};
 use godot::prelude::*;
 use sim_campaign::research::{effective_cost, tech_progress, tech_status};
 
-use crate::campaign_sim::{effects_array, ids, CampaignSim};
+use crate::campaign_sim::{effects_array, ids, CampaignSim, Ctx};
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
 
 fn tech_branch_key(branch: TechBranch) -> &'static str {
@@ -27,7 +27,7 @@ impl CampaignSim {
     /// "researching"` and `herbs` lists codex ids (`cdx_…`).
     #[func]
     fn get_tech_tree(&self, faction: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -112,7 +112,7 @@ impl CampaignSim {
     /// gives the rate then). `turns_left` is -1 when no points are produced.
     #[func]
     fn get_research(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -144,7 +144,7 @@ impl CampaignSim {
     /// (the technologies waiting behind the current one).
     #[func]
     fn get_research_queue(&self, faction: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -171,7 +171,7 @@ impl CampaignSim {
     /// runs, their ceiling (in points) and the queue length limit.
     #[func]
     fn get_research_reserve(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -185,34 +185,10 @@ impl CampaignSim {
         }
     }
 
-    /// H4: plague resistance of `province` in percent (0-50): buildings plus
-    /// the controller's technologies.
-    #[func]
-    fn get_plague_resistance(&self, province: GString) -> f64 {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return 0.0;
-        };
-        ProvinceId::new(province.to_string()).map_or(0.0, |p| {
-            sim_campaign::medicine::plague_resistance(state, data, &p) * 100.0
-        })
-    }
-
-    /// H4: share (percent, 0-50) of battle losses `faction` recovers as
-    /// tended wounded.
-    #[func]
-    fn get_wound_recovery(&self, faction: GString) -> f64 {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return 0.0;
-        };
-        FactionId::new(faction.to_string()).map_or(0.0, |f| {
-            sim_campaign::medicine::wound_recovery(state, data, &f) * 100.0
-        })
-    }
-
     /// Research points `faction` produces per turn (shown when idle).
     #[func]
     fn get_research_points(&self, faction: GString) -> i64 {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return 0;
         };
         FactionId::new(faction.to_string())

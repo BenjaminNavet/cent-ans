@@ -1,7 +1,7 @@
 # Relecture historique — Calais vers 1340 (ville 1:1, VH8) — 28 septembre 2026
 
 Relecture indépendante de `data/landmarks_v2/calais.json` (ADR 0078, `docs/landmarks-v2.md` ;
-suivi de l'auteur : `docs/wip/rs-g-calais.md`). Méthode : faits marqués `probable` ou
+suivi de l'auteur : `docs/archive/chantiers.md`). Méthode : faits marqués `probable` ou
 `hypothetical` d'abord, puis dates clés (1337-1453) et gabarits. Source de référence : la
 synthèse du service régional de l'archéologie (SRA 2025, texte lu en entier) ; POP, Greaves
 (1918) et Wikipédia FR/EN recoupées en appoint. Faits seulement (`extracted: false`). Positions

@@ -74,8 +74,7 @@ var _more_pill: PanelContainer
 func _ready() -> void:
 	custom_minimum_size = Vector2(LETTER_WIDTH, 0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 6)
+	_box = UiBuild.vbox(6)
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.custom_minimum_size = Vector2(LETTER_WIDTH, 0)
 	add_child(_box)
@@ -250,8 +249,7 @@ class Letter:
 		box.shadow_offset = Vector2(0, 2)
 		add_theme_stylebox_override("panel", box)
 		_heraldry = PortraitLoader.heraldry_texture(str(item.get("faction_id", "")))
-		var column := VBoxContainer.new()
-		column.add_theme_constant_override("separation", 0)
+		var column := UiBuild.vbox(0)
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(column)
 		var rubric := HudStyle.label(NewsLetters.kind_label(str(item.get("kind", ""))).to_upper(), 11, HudStyle.RUBRIC)
@@ -276,7 +274,7 @@ class Letter:
 			column.add_child(body)
 		var actions_hint := "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
 		var interest := str(item.get("interest", ""))  # U5 : pourquoi cette nouvelle est retenue
-		RichTooltip.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
+		TooltipHost.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
 		mouse_entered.connect(func() -> void:
 			_hover = true
 			queue_redraw())
@@ -318,4 +316,4 @@ class Letter:
 	## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe
 	## scriptée ; Q8 : sans elle, clé et BBCode bruts).
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.panel_for(for_text, self)
+		return TooltipHost.bubble(for_text, self)

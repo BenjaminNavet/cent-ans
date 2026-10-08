@@ -7,13 +7,11 @@ use godot::classes::Image;
 use godot::prelude::*;
 use sim_campaign::vision::Vision;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 impl CampaignSim {
     fn faction_vision(&self, faction: &GString) -> Option<Vision> {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return None;
-        };
+        let Ctx { state, data } = self.ctx()?;
         let faction = FactionId::new(faction.to_string()).ok()?;
         Some(state.vision(data, &faction))
     }
@@ -36,24 +34,6 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Army ids shown to `faction`: its own and its allies', and foreign
-    /// armies whose point is seen (lot M5a).
-    #[func]
-    fn get_visible_army_ids(&self, faction: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return PackedStringArray::new();
-        };
-        let Some(vision) = self.faction_vision(&faction) else {
-            return PackedStringArray::new();
-        };
-        state
-            .armies
-            .iter()
-            .filter(|(_, army)| vision.sees_army(state, data, army))
-            .map(|(id, _)| GString::from(id.as_str()))
-            .collect()
-    }
-
     /// `true` when map pixel `point` is seen by `faction` (lot M5a).
     #[func]
     fn is_point_visible(&self, faction: GString, point: Vector2) -> bool {
@@ -71,7 +51,7 @@ impl CampaignSim {
     /// seen_share: float}`. Empty before a campaign starts.
     #[func]
     fn get_vision(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(vision) = self.faction_vision(&faction) else {

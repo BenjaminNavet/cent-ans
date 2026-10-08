@@ -53,35 +53,12 @@ fn no_site_sim(seed: u64) -> BattleSim {
         "unit_longbowmen",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     sim
-}
-
-#[test]
-#[ignore]
-fn probe() {
-    let mut sim = demo_sim();
-    let f = sim.field();
-    println!(
-        "demo: village {:?} obstacles {} coast {:?} ground {:?}",
-        f.village.as_ref().map(|v| (v.zone, v.farm)),
-        f.obstacles.len(),
-        f.coast,
-        f.ground
-    );
-    for o in &f.obstacles {
-        println!("  {o:?}");
-    }
-    println!("contact {:?}", first_contact(&mut sim, 420.0));
-    for seed in [3, 11] {
-        let mut s = no_site_sim(seed);
-        assert!(s.field().obstacles.is_empty() && s.field().village.is_none());
-        println!("no-site {seed}: {}", digest(&mut s));
-    }
 }
 
 /// The demo armies on a bocage field with a village: cover is found and
@@ -249,7 +226,7 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
         "unit_longbowmen",
         "unit_longbowmen",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     // The hedge and the village are laid for the standard 300 m line gap (ADR 0184
     // widened the field battles' gap).
@@ -350,8 +327,8 @@ fn a_village_edge_is_cover_too() {
 fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_knights"]),
-        units(&data, &["unit_longbowmen", "unit_men_at_arms_foot"]),
+        units(data, &["unit_knights"]),
+        units(data, &["unit_longbowmen", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);
@@ -363,105 +340,9 @@ fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
     place(&mut sim, 2, 1100.0, 750.0, std::f64::consts::PI);
     place(&mut sim, 0, 600.0, HEDGE_Z - 150.0, 0.0);
     // No stakes: the knights would not charge them head on anyway.
-    sim.units_mut()[1]
-        .abilities
-        .retain(|a| *a != data_model::Ability::Stakes);
+    sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
     hold_fire(&mut sim, SideId::Defender);
     sim
-}
-
-#[test]
-#[ignore]
-fn probe_shots() {
-    for terrain in [data_model::Terrain::Bocage, data_model::Terrain::Plains] {
-        let mut battle = demo_setup();
-        battle.terrain = terrain;
-        battle.river = false;
-        battle.village = Some(true);
-        let mut sim = BattleSim::new(battle, 1337).unwrap();
-        sim.set_ai(SideId::Attacker, true);
-        println!(
-            "{terrain:?}: {:?} / {}",
-            defensive_cover(sim.field(), SideId::Defender),
-            sim.field().site_label_fr()
-        );
-        println!("  contact {:?}", first_contact(&mut sim, 420.0));
-    }
-}
-
-#[test]
-#[ignore]
-fn trace_bocage() {
-    let seed: u64 = std::env::var("SEED").map_or(7, |s| s.parse().unwrap());
-    let mut battle = demo_setup();
-    battle.terrain = data_model::Terrain::Bocage;
-    battle.village = Some(true);
-    let mut sim = BattleSim::new(battle, seed).unwrap();
-    sim.set_ai(SideId::Attacker, true);
-    println!("{:?}", defensive_cover(sim.field(), SideId::Defender));
-    println!("{:?}", defensive_cover(sim.field(), SideId::Attacker));
-    for step in 0..=10 {
-        while sim.elapsed() < f64::from(step) * 20.0 {
-            sim.step();
-        }
-        println!("t={:.0}", sim.elapsed());
-        for u in sim.units() {
-            println!(
-                "  {:?} {:22} {:5.0} {:5.0} {:?} dest {:?} tgt {:?}",
-                u.side,
-                u.name,
-                u.x,
-                u.z,
-                u.state,
-                u.destination.map(|d| (d.0 as i32, d.1 as i32)),
-                u.target
-            );
-        }
-    }
-}
-
-#[test]
-#[ignore]
-fn trace_b6() {
-    let mut sim = english_on_the_defensive(5);
-    sim.field_mut()
-        .obstacles
-        .push(hedge_across(ObstacleKind::Hedge));
-    println!("{:?}", defensive_cover(sim.field(), SideId::Defender));
-    for step in 0..=8 {
-        while sim.elapsed() < f64::from(step) * 15.0 {
-            sim.step();
-        }
-        println!("t={:.0}", sim.elapsed());
-        for u in sim.units() {
-            println!(
-                "  {:?} {:22} {:5.0} {:5.0} {:?} dest {:?} cover {}",
-                u.side,
-                u.name,
-                u.x,
-                u.z,
-                u.state,
-                u.destination.map(|d| (d.0 as i32, d.1 as i32)),
-                behind_hedge(u)
-            );
-        }
-    }
-    let mut sim = knights_facing_archers(hedge_across(ObstacleKind::Hedge));
-    for step in 0..=8 {
-        while sim.elapsed() < f64::from(step) * 10.0 {
-            sim.step();
-        }
-        let u = &sim.units()[0];
-        println!(
-            "t={:.0} knights {:.0} {:.0} {:?} dest {:?} tgt {:?}",
-            sim.elapsed(),
-            u.x,
-            u.z,
-            u.state,
-            u.destination,
-            u.target
-        );
-    }
 }
 
 /// Knights sent at archers behind a hedge ride round it instead of
@@ -500,11 +381,11 @@ fn bocage_village_seed_5_engages_near_seventy_seconds() {
 fn horse_leaves_a_rout_too_far_from_the_line() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
         // A second, able defender keeps the AI engaged with the field (the
         // sole-routing-unit case makes `ai::plan` bail out early); it stays
         // out of everyone's reach.
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);
@@ -533,8 +414,8 @@ fn horse_leaves_a_rout_too_far_from_the_line() {
 fn horse_still_chases_a_rout_within_the_leash() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);

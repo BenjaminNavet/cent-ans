@@ -7,7 +7,7 @@
   "required": ["loading", "vignettes", "endings"],
   "additionalProperties": false,
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "image": {"type": "string", "pattern": "^res://assets/art/(loading|vignettes|endings)/[a-z0-9_]+\\.jpg$"},
     "quote": {
       "type": "object",

@@ -54,81 +54,89 @@ impl EffectValue {
     }
 }
 
-/// Sum of every building effect of a province, one entry per [`EffectKind`]
-/// the simulation reads (spec § 1.2): `TaxIncome`, `TradeIncome`, `Health`,
-/// `Unrest`, `Wealth`, `GoodsSatisfaction`, `Growth`, `Garrison`,
-/// `FortificationLevel`, `RecruitCost`, `Supply`. Other kinds are ignored.
-///
-/// M4 (spec § 2) extends this with the kinds carried by character traits and
-/// skills (general in battle, governor in a province): `ArmyMorale`,
-/// `ArmyExperience`, `Piety`, `Prestige`, `Loyalty`, `Movement`, plus the
-/// battle/siege/construction/court kinds `data_model::EffectKind` adds for M4
-/// (`BattleCharge`, `BattleRanged`, `BattleDefense`, `SiegeSpeed`,
-/// `ConstructionSpeed`, `Diplomacy`, `Intrigue`, `Fertility`); see
-/// `skills::character_effects`, which reuses [`EffectTotals::add_effect`] on
-/// `Trait`/`Skill` effects the same way this module uses it on buildings.
+/// Sum of every effect of a province, character or faction: one
+/// [`EffectValue`] per [`EffectKind`], read with `totals[EffectKind::Health]`
+/// (spec § 1.2, § 2). Buildings ([`effects_of`]), traits and skills
+/// (`skills::character_effects`) and technologies
+/// (`research::faction_tech_effects`) all feed it through
+/// [`EffectTotals::add_effect`].
 ///
 /// F1: an effect with a `class` only reaches that social class
 /// ([`EffectTotals::classes`], read by the population model) and an effect
 /// with a `unit_category` only that unit family
 /// ([`EffectTotals::unit_categories`]: recruitment cost, movement, recruits'
-/// experience, upkeep). The top-level fields only hold untargeted effects.
-#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+/// experience, upkeep). The per-kind table only holds untargeted effects.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(from = "EffectTotalsRepr", into = "EffectTotalsRepr")]
 pub struct EffectTotals {
-    pub tax_income: EffectValue,
-    pub trade_income: EffectValue,
-    pub health: EffectValue,
-    pub unrest: EffectValue,
-    pub wealth: EffectValue,
-    pub goods_satisfaction: EffectValue,
-    pub growth: EffectValue,
-    pub garrison: EffectValue,
-    pub fortification_level: EffectValue,
-    pub recruit_cost: EffectValue,
-    pub supply: EffectValue,
-    pub army_morale: EffectValue,
-    pub army_experience: EffectValue,
-    pub piety: EffectValue,
-    pub prestige: EffectValue,
-    pub loyalty: EffectValue,
-    pub movement: EffectValue,
-    pub battle_charge: EffectValue,
-    pub battle_ranged: EffectValue,
-    pub battle_defense: EffectValue,
-    pub siege_speed: EffectValue,
-    pub construction_speed: EffectValue,
-    pub diplomacy: EffectValue,
-    pub intrigue: EffectValue,
-    pub fertility: EffectValue,
-    // ----- F1: kinds that used to be displayed without effect -------------
-    #[serde(default)]
-    pub production: EffectValue,
-    #[serde(default)]
-    pub army_upkeep: EffectValue,
-    #[serde(default)]
-    pub siege_resistance: EffectValue,
-    #[serde(default)]
-    pub attrition_resistance: EffectValue,
-    #[serde(default)]
-    pub research_civil: EffectValue,
-    #[serde(default)]
-    pub research_military: EffectValue,
-    /// H4: `PlagueResistance`, `WoundRecovery`, `DietHealth`.
-    #[serde(default)]
-    pub plague_resistance: EffectValue,
-    #[serde(default)]
-    pub wound_recovery: EffectValue,
-    #[serde(default)]
-    pub diet_health: EffectValue,
-    /// G1: extra simultaneous recruitments per province (`RecruitSlots`).
-    #[serde(default)]
-    pub recruit_slots: EffectValue,
+    values: [EffectValue; EffectKind::COUNT],
     /// Effects restricted to one social class (`Effect::class`).
-    #[serde(default)]
     pub classes: ClassEffectTotals,
     /// Effects restricted to one unit family (`Effect::unit_category`).
-    #[serde(default)]
     pub unit_categories: CategoryEffectTotals,
+}
+
+impl Default for EffectTotals {
+    fn default() -> Self {
+        EffectTotals {
+            values: [EffectValue::default(); EffectKind::COUNT],
+            classes: ClassEffectTotals::default(),
+            unit_categories: CategoryEffectTotals::default(),
+        }
+    }
+}
+
+impl std::ops::Index<EffectKind> for EffectTotals {
+    type Output = EffectValue;
+
+    fn index(&self, kind: EffectKind) -> &EffectValue {
+        &self.values[kind.index()]
+    }
+}
+
+impl std::ops::IndexMut<EffectKind> for EffectTotals {
+    fn index_mut(&mut self, kind: EffectKind) -> &mut EffectValue {
+        &mut self.values[kind.index()]
+    }
+}
+
+/// Serialized shape of [`EffectTotals`]: the non-zero kinds only.
+#[derive(Serialize, Deserialize)]
+struct EffectTotalsRepr {
+    #[serde(default)]
+    values: Vec<(EffectKind, EffectValue)>,
+    #[serde(default)]
+    classes: ClassEffectTotals,
+    #[serde(default)]
+    unit_categories: CategoryEffectTotals,
+}
+
+impl From<EffectTotals> for EffectTotalsRepr {
+    fn from(totals: EffectTotals) -> Self {
+        EffectTotalsRepr {
+            values: EffectKind::ALL
+                .into_iter()
+                .filter(|kind| totals[*kind] != EffectValue::default())
+                .map(|kind| (kind, totals[kind]))
+                .collect(),
+            classes: totals.classes,
+            unit_categories: totals.unit_categories,
+        }
+    }
+}
+
+impl From<EffectTotalsRepr> for EffectTotals {
+    fn from(repr: EffectTotalsRepr) -> Self {
+        let mut totals = EffectTotals {
+            classes: repr.classes,
+            unit_categories: repr.unit_categories,
+            ..EffectTotals::default()
+        };
+        for (kind, value) in repr.values {
+            totals[kind] = value;
+        }
+        totals
+    }
 }
 
 /// Population effects aimed at one social class (F1).
@@ -239,48 +247,9 @@ impl EffectTotals {
     /// Merges `other`'s flat/percent totals into `self` (used to combine
     /// building effects with a governor's `character_effects`).
     pub fn merge(&mut self, other: &EffectTotals) {
-        macro_rules! merge_field {
-            ($($field:ident),* $(,)?) => {
-                $(self.$field.merge(other.$field);)*
-            };
+        for (mine, theirs) in self.values.iter_mut().zip(other.values) {
+            mine.merge(theirs);
         }
-        merge_field!(
-            tax_income,
-            trade_income,
-            health,
-            unrest,
-            wealth,
-            goods_satisfaction,
-            growth,
-            garrison,
-            fortification_level,
-            recruit_cost,
-            supply,
-            army_morale,
-            army_experience,
-            piety,
-            prestige,
-            loyalty,
-            movement,
-            battle_charge,
-            battle_ranged,
-            battle_defense,
-            siege_speed,
-            construction_speed,
-            diplomacy,
-            intrigue,
-            fertility,
-            production,
-            army_upkeep,
-            siege_resistance,
-            attrition_resistance,
-            research_civil,
-            research_military,
-            plague_resistance,
-            wound_recovery,
-            diet_health,
-            recruit_slots,
-        );
         for class in SocialClass::ALL {
             self.classes.get_mut(class).merge(other.classes.get(class));
         }
@@ -331,48 +300,9 @@ impl EffectTotals {
         self.add(effect.effect, effect.mode, effect.value);
     }
 
-    /// Adds an untargeted value to the matching slot; unmapped kinds are
-    /// ignored.
+    /// Adds an untargeted value to the slot of `kind`.
     pub(crate) fn add(&mut self, kind: EffectKind, mode: EffectMode, value: f64) {
-        let slot = match kind {
-            EffectKind::TaxIncome => &mut self.tax_income,
-            EffectKind::TradeIncome => &mut self.trade_income,
-            EffectKind::Health => &mut self.health,
-            EffectKind::Unrest => &mut self.unrest,
-            EffectKind::Wealth => &mut self.wealth,
-            EffectKind::GoodsSatisfaction => &mut self.goods_satisfaction,
-            EffectKind::Growth => &mut self.growth,
-            EffectKind::Garrison => &mut self.garrison,
-            EffectKind::FortificationLevel => &mut self.fortification_level,
-            EffectKind::RecruitCost => &mut self.recruit_cost,
-            EffectKind::Supply => &mut self.supply,
-            EffectKind::ArmyMorale => &mut self.army_morale,
-            EffectKind::ArmyExperience => &mut self.army_experience,
-            EffectKind::Piety => &mut self.piety,
-            EffectKind::Prestige => &mut self.prestige,
-            EffectKind::Loyalty => &mut self.loyalty,
-            EffectKind::Movement => &mut self.movement,
-            EffectKind::BattleCharge => &mut self.battle_charge,
-            EffectKind::BattleRanged => &mut self.battle_ranged,
-            EffectKind::BattleDefense => &mut self.battle_defense,
-            EffectKind::SiegeSpeed => &mut self.siege_speed,
-            EffectKind::ConstructionSpeed => &mut self.construction_speed,
-            EffectKind::Diplomacy => &mut self.diplomacy,
-            EffectKind::Intrigue => &mut self.intrigue,
-            EffectKind::Fertility => &mut self.fertility,
-            EffectKind::Production => &mut self.production,
-            EffectKind::ArmyUpkeep => &mut self.army_upkeep,
-            EffectKind::SiegeResistance => &mut self.siege_resistance,
-            EffectKind::AttritionResistance => &mut self.attrition_resistance,
-            EffectKind::ResearchCivil => &mut self.research_civil,
-            EffectKind::ResearchMilitary => &mut self.research_military,
-            EffectKind::PlagueResistance => &mut self.plague_resistance,
-            EffectKind::WoundRecovery => &mut self.wound_recovery,
-            EffectKind::DietHealth => &mut self.diet_health,
-            EffectKind::RecruitSlots => &mut self.recruit_slots,
-            _ => return,
-        };
-        slot.add(mode, value);
+        self[kind].add(mode, value);
     }
 }
 
@@ -648,11 +578,13 @@ impl CampaignState {
         };
         let base = u32::from(state.fortification_level);
         let effects = self.settlement_effects(data, settlement);
-        let walls = effects.fortification_level.apply(f64::from(base)).max(0.0);
+        let walls = effects[EffectKind::FortificationLevel]
+            .apply(f64::from(base))
+            .max(0.0);
         // F1: the controller's masonry techniques strengthen existing walls
         // (an open town gains nothing).
         let tech = crate::research::faction_tech_effects(self, data, &state.controller)
-            .fortification_level
+            [EffectKind::FortificationLevel]
             .flat;
         let level = if walls >= 1.0 { walls + tech } else { walls };
         level.max(0.0) as u32
@@ -682,10 +614,8 @@ impl CampaignState {
         else {
             return 0.0;
         };
-        let buildings = self
-            .settlement_effects(data, settlement)
-            .siege_resistance
-            .apply(0.0);
+        let buildings =
+            self.settlement_effects(data, settlement)[EffectKind::SiegeResistance].apply(0.0);
         let (defence, _) = crate::research::tech_siege_resistance(self, data, &controller);
         let (_, siegecraft) = crate::research::tech_siege_resistance(self, data, attacker);
         (buildings + defence + siegecraft).clamp(0.0, 80.0)
@@ -799,21 +729,18 @@ impl CampaignState {
         };
         let mut local = effects_of(data, &state.buildings);
         local.merge(&crate::edicts::edict_effects(self, data, &state.province));
-        let governor = self
-            .governor_effects(data, &state.province)
-            .construction_speed
-            .percent;
+        let governor =
+            self.governor_effects(data, &state.province)[EffectKind::ConstructionSpeed].percent;
         let ruler = self
             .factions
             .get(&state.controller)
             .and_then(|f| f.ruler.as_ref())
             .filter(|r| self.characters.get(*r).is_some_and(|c| c.alive))
             .map_or(0.0, |r| {
-                crate::skills::character_effects(self, data, r)
-                    .construction_speed
+                crate::skills::character_effects(self, data, r)[EffectKind::ConstructionSpeed]
                     .percent
             });
-        local.construction_speed.percent + governor.max(ruler)
+        local[EffectKind::ConstructionSpeed].percent + governor.max(ruler)
     }
 
     /// Turns needed to build something of `base_turns` in `settlement`
@@ -872,28 +799,19 @@ impl CampaignState {
         }
         if let Some(from) = &building.upgrades_from {
             if !state.buildings.contains(from) {
-                let name = data
-                    .buildings
-                    .get(from)
-                    .map_or_else(|| from.to_string(), |b| b.name.display.clone());
+                let name = data.building_name(from);
                 return Some(format!("nécessite {name}"));
             }
         }
         if let Some(required) = &building.required_building {
             if !data.has_building(&state.buildings, required) {
-                let name = data
-                    .buildings
-                    .get(required)
-                    .map_or_else(|| required.to_string(), |b| b.name.display.clone());
+                let name = data.building_name(required);
                 return Some(format!("bâtiment requis : {name}"));
             }
         }
         if let Some(tech) = &building.required_technology {
             if !faction.technologies.contains(tech) {
-                let name = data
-                    .technologies
-                    .get(tech)
-                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                let name = data.tech_name(tech);
                 return Some(format!("technologie requise : {name}"));
             }
         }
@@ -1113,17 +1031,11 @@ pub(crate) fn resolve_construction(
         let controller = settlement.controller.clone();
         let province = settlement.province.clone();
         if controller == player {
-            let name = data
-                .buildings
-                .get(&building)
-                .map_or_else(|| building.to_string(), |b| b.name.display.clone());
+            let name = data.building_name(&building);
             events.push(
                 GameEvent::new(
                     EventKind::BuildingCompleted,
-                    format!(
-                        "{name} achevé à {}.",
-                        crate::siege::settlement_name(data, &id)
-                    ),
+                    format!("{name} achevé à {}.", data.settlement_name(&id)),
                 )
                 .province(&province)
                 .faction(&controller),

@@ -598,8 +598,6 @@ impl SettlementState {
 pub struct FactionState {
     /// Livres tournois; may go negative.
     pub treasury: i64,
-    pub income_last_turn: i64,
-    pub upkeep_last_turn: i64,
     pub at_war_with: BTreeSet<FactionId>,
     pub allies: BTreeSet<FactionId>,
     /// Truce partner -> turn at which the truce ends.
@@ -617,18 +615,15 @@ pub struct FactionState {
     /// Number of controlled/allied provinces producing each resource (spec § 1.3).
     #[serde(default)]
     pub goods: BTreeMap<ResourceId, u32>,
-    /// Cached from the last `resolve_economy`, so [`CampaignState::faction_summary`]
-    /// (which does not take [`GameData`]) can still report them.
+    /// What the last resolved turn booked, cached so
+    /// [`CampaignState::faction_summary`] (which does not take [`GameData`])
+    /// can still report it.
     #[serde(default)]
-    pub army_upkeep_last_turn: i64,
-    #[serde(default)]
-    pub building_upkeep_last_turn: i64,
+    pub last_budget: crate::economy::TurnBudget,
     /// RS-C: seasons in a row closed in deficit (income below upkeep); the
     /// AI demolishes buildings after `economy.json` `ai_demolition`.
     #[serde(default)]
     pub deficit_seasons: u32,
-    #[serde(default)]
-    pub projected_income: i64,
     /// A regency governs for a minor ruler (M4 spec § 2); tracked so the
     /// journal reports its start and end once instead of every turn.
     #[serde(default)]
@@ -690,9 +685,6 @@ pub struct FactionState {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub research_queue: Vec<TechnologyId>,
     // ----- H3: La Table -------------------------------------------------------
-    /// Diets paid during the last resolved turn (budget line « Table »).
-    #[serde(default)]
-    pub table_upkeep_last_turn: i64,
     // ----- H5: coinage (`coinage.rs`) ---------------------------------------
     /// Silver content of the faction's coins.
     #[serde(default)]
@@ -704,12 +696,6 @@ pub struct FactionState {
     /// Year of the last `set_coinage` (one change per year).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub coinage_changed_year: Option<i32>,
-    /// Seigniorage collected during the last resolved turn.
-    #[serde(default)]
-    pub seigniorage_last_turn: i64,
-    /// Recoinage (strong money) paid during the last resolved turn.
-    #[serde(default)]
-    pub recoinage_last_turn: i64,
     // ----- H6: ransoms and chivalric orders -----------------------------------
     /// Ransoms being paid by installments (this faction owes them).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -717,10 +703,6 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
-    // ----- C5: trade (`trade.rs`) --------------------------------------------
-    /// Trade income collected during the last resolved turn.
-    #[serde(default)]
-    pub trade_income_last_turn: i64,
     // ----- UI audit A3, lot U3: budget history ------------------------------
     /// Last resolved seasons of the purse, oldest first (at most
     /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
@@ -732,6 +714,56 @@ pub struct FactionState {
         skip_serializing_if = "crate::negotiation::DiplomaticLedger::is_empty"
     )]
     pub ledger: crate::negotiation::DiplomaticLedger,
+}
+
+impl FactionState {
+    /// A living faction seated in `capital`, with the starting defaults of a
+    /// new realm: empty purse and relations, normal taxes, full vassal
+    /// loyalty, neutral papal favour, base prices. Callers override the rest
+    /// with struct update syntax.
+    pub fn new(capital: ProvinceId) -> Self {
+        FactionState {
+            treasury: 0,
+            at_war_with: BTreeSet::new(),
+            allies: BTreeSet::new(),
+            truces: BTreeMap::new(),
+            alive: true,
+            ruler: None,
+            heir: None,
+            capital,
+            technologies: BTreeSet::new(),
+            tax_rate: TaxRate::default(),
+            goods: BTreeMap::new(),
+            last_budget: crate::economy::TurnBudget::default(),
+            deficit_seasons: 0,
+            regency: false,
+            embargoes: BTreeSet::new(),
+            suzerain: None,
+            loyalty: default_faction_loyalty(),
+            claims: Vec::new(),
+            modifiers: Vec::new(),
+            war_scores: BTreeMap::new(),
+            war_started: BTreeMap::new(),
+            religion: None,
+            papal_favor: default_papal_favor(),
+            excommunicated_until: None,
+            offers: Vec::new(),
+            last_offer_turn: BTreeMap::new(),
+            last_war_declared: None,
+            research: None,
+            research_progress: 0,
+            research_points_last_turn: 0,
+            research_banked: BTreeMap::new(),
+            research_queue: Vec::new(),
+            coinage: crate::coinage::CoinageLevel::default(),
+            price_level: crate::coinage::default_price_level(),
+            coinage_changed_year: None,
+            ransom_debts: Vec::new(),
+            chivalric_order: None,
+            budget_history: Vec::new(),
+            ledger: crate::negotiation::DiplomaticLedger::default(),
+        }
+    }
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -848,10 +880,7 @@ impl CampaignState {
         }
         let owner = match &army.general {
             Some(general) => self.character_name(data, general),
-            None => data.factions.get(&army.faction).map_or_else(
-                || army.faction.to_string(),
-                |f| f.short_or_display_name().to_owned(),
-            ),
+            None => data.faction_name(&army.faction),
         };
         format!("l'ost {}", crate::events::de(&owner))
     }
@@ -862,6 +891,51 @@ impl CampaignState {
             .map(|c| c.name.display.clone())
             .or_else(|| self.characters.get(id).and_then(|c| c.name.clone()))
             .unwrap_or_else(|| id.to_string())
+    }
+}
+
+impl CharacterState {
+    /// A living, free character with no family, titles or experience; callers
+    /// override the rest with struct update syntax.
+    pub fn new(
+        faction: FactionId,
+        birth_year: i32,
+        sex: Sex,
+        house: String,
+        skills: Skills,
+    ) -> Self {
+        CharacterState {
+            name: None,
+            faction,
+            alive: true,
+            birth_year,
+            sex,
+            house,
+            location: None,
+            army: None,
+            skills,
+            captive: false,
+            captor: None,
+            ransom_terms: None,
+            experience: 0,
+            skill_points: 0,
+            skills_learned: BTreeSet::new(),
+            traits: BTreeSet::new(),
+            spouse: None,
+            children: Vec::new(),
+            father: None,
+            mother: None,
+            piety: 50,
+            prestige: 0,
+            loyalty: default_loyalty(),
+            title: None,
+            governor_of: None,
+            battles_fought: 0,
+            sieges_won: 0,
+            raids_led: 0,
+            death_year: None,
+            retinue: Vec::new(),
+        }
     }
 }
 
@@ -1153,17 +1227,17 @@ impl CampaignState {
         let faction = self.factions.get(id)?;
         Some(FactionSummary {
             treasury: faction.treasury,
-            income: faction.income_last_turn,
-            upkeep: faction.upkeep_last_turn,
+            income: faction.last_budget.income,
+            upkeep: faction.last_budget.upkeep(),
             at_war_with: faction.at_war_with.iter().cloned().collect(),
             allies: faction.allies.iter().cloned().collect(),
-            provinces_count: self.controlled_provinces(id).len(),
+            provinces_count: self.controlled_provinces(id).count(),
             armies_count: self.armies.values().filter(|a| &a.faction == id).count(),
             alive: faction.alive,
             ruler: faction.ruler.clone(),
-            projected_income: faction.projected_income,
-            army_upkeep: faction.army_upkeep_last_turn,
-            building_upkeep: faction.building_upkeep_last_turn,
+            projected_income: faction.last_budget.income,
+            army_upkeep: faction.last_budget.army_upkeep,
+            building_upkeep: faction.last_budget.building_upkeep,
             tax_rate: faction.tax_rate,
         })
     }

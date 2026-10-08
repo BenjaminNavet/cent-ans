@@ -20,14 +20,10 @@ func _init() -> void:
 
 
 func _test_presets() -> void:
-	for level: String in RenderQuality.PRESETS:
-		var p: Dictionary = RenderQuality.PRESETS[level]
-		for key: String in RenderQuality.SCENE_KEYS:
-			_check(p.has(key), "%s has %s" % [level, key])
-	var low: Dictionary = RenderQuality.PRESETS["low"]
-	var medium: Dictionary = RenderQuality.PRESETS["medium"]
-	var high: Dictionary = RenderQuality.PRESETS["high"]
-	var ultra: Dictionary = RenderQuality.PRESETS["ultra"]
+	var low: Dictionary = RenderQuality.presets()["low"]
+	var medium: Dictionary = RenderQuality.presets()["medium"]
+	var high: Dictionary = RenderQuality.presets()["high"]
+	var ultra: Dictionary = RenderQuality.presets()["ultra"]
 	# Plus le niveau est bas, moins il y a de géométrie et d'effets.
 	for key in ["veg_density", "veg_detail", "terrain_near", "battle_lod", "grass", "particles", "map_shadow_range"]:
 		_check(float(low[key]) < float(medium[key]) and float(medium[key]) <= float(high[key]) and float(high[key]) <= float(ultra[key]), "%s ordered low < medium <= high <= ultra" % key)
@@ -48,13 +44,13 @@ func _test_quadtree_quality() -> void:
 	var terrain := TerrainBuilder.new()
 	var quadtree := ReliefQuadtree.new()
 	terrain.quadtree = quadtree
-	terrain.apply_render_quality(RenderQuality.PRESETS["low"])
+	terrain.apply_render_quality(RenderQuality.presets()["low"])
 	_check(is_equal_approx(quadtree.max_vertex_px, 12.0) and quadtree.max_items == 350 and quadtree.extra_depth == 2, "low preset reaches the quadtree")
 	_check(not terrain.quality_fine, "low preset turns the fallback fine relief off")
 	for level: String in ["low", "medium", "high"]:
-		_check(int(RenderQuality.PRESETS[level]["relief_shadow_cascades"]) == 1, "%s: relief casts shadows in the first cascade only" % level)
-	_check(int(RenderQuality.PRESETS["ultra"]["relief_shadow_cascades"]) >= 2, "ultra: relief shadows further")
-	terrain.apply_render_quality(RenderQuality.PRESETS["high"])
+		_check(int(RenderQuality.presets()[level]["relief_shadow_cascades"]) == 1, "%s: relief casts shadows in the first cascade only" % level)
+	_check(int(RenderQuality.presets()["ultra"]["relief_shadow_cascades"]) >= 2, "ultra: relief shadows further")
+	terrain.apply_render_quality(RenderQuality.presets()["high"])
 	_check(is_equal_approx(quadtree.max_vertex_px, 7.5) and quadtree.max_items == 700, "high preset reaches the quadtree")
 	terrain.quadtree = null
 	quadtree.free()

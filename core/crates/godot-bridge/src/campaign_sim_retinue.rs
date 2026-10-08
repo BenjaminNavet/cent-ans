@@ -6,7 +6,7 @@ use data_model::{Companion, GameData};
 use godot::prelude::*;
 use sim_campaign::CampaignState;
 
-use crate::campaign_sim::{effects_array, CampaignSim};
+use crate::campaign_sim::{effects_array, CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -35,7 +35,7 @@ impl CampaignSim {
     /// the order `{"type": "transfer_companion", from, to, companion}`.
     #[func]
     fn get_retinue_transfer_targets(&self, character: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(from) = data_model::CharacterId::new(character.to_string()) else {

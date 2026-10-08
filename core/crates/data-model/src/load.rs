@@ -315,6 +315,9 @@ pub struct GameData {
     pub settlements: BTreeMap<SettlementId, Settlement>,
     /// Settlement ids of each province, the `city` first then file order.
     pub settlements_by_province: BTreeMap<ProvinceId, Vec<SettlementId>>,
+    /// Normalised share (0-1) of its province each settlement carries
+    /// (`Settlement::weight` over the province's total), precomputed at load.
+    pub settlement_weight_share: BTreeMap<SettlementId, f64>,
     /// `data/settlements/rules.json`, absent until written.
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
@@ -482,6 +485,7 @@ impl GameData {
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
             settlements_by_province: BTreeMap::new(),
+            settlement_weight_share: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
             ai_alignment: None,
@@ -525,193 +529,193 @@ impl GameData {
             rasters: Default::default(),
             naval: Default::default(),
         };
-        let titles_dir = root.join(folders::TITLES);
-        if titles_dir.is_dir() {
-            data.titles =
-                load_entities(&titles_dir, |t: &crate::entities::title::FeudalTitle| &t.id)?;
-        }
-        let feudal_path = root.join(folders::RULES).join(folders::FEUDAL_RULES);
-        if feudal_path.is_file() {
-            data.feudal_rules = read_json(&feudal_path)?;
-        }
-        let events_dir = root.join(folders::EVENTS);
-        if events_dir.is_dir() {
-            data.events = load_entities(&events_dir, |e: &Event| &e.id)?;
-        }
-        let orders_dir = root.join(folders::BATTLE_ORDERS);
-        if orders_dir.is_dir() {
-            data.battle_orders = load_entities(&orders_dir, |o: &BattleOrder| &o.id)?;
-        }
-        let abilities_dir = root.join(folders::BATTLE_ABILITIES);
-        if abilities_dir.is_dir() {
-            data.battle_abilities = load_entities(&abilities_dir, |a: &BattleAbility| &a.id)?;
-        }
-        let diets_dir = root.join(folders::DIETS);
-        if diets_dir.is_dir() {
-            data.diets = load_entities(&diets_dir, |d: &Diet| &d.id)?;
-        }
-        let edicts_dir = root.join(folders::EDICTS);
-        if edicts_dir.is_dir() {
-            data.edicts = load_entities(&edicts_dir, |e: &Edict| &e.id)?;
-        }
-        let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
-        if chivalric_dir.is_dir() {
-            data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
-        }
-        let landmarks_dir = root.join(folders::LANDMARKS);
-        if landmarks_dir.is_dir() {
-            data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
-        }
-        let encounters_dir = root.join(folders::ENCOUNTERS);
-        if encounters_dir.is_dir() {
-            data.encounters = load_entities(&encounters_dir, |e: &crate::Encounter| &e.id)?;
-        }
-        let encounter_rules_path = root.join(folders::RULES).join(folders::ENCOUNTER_RULES);
-        if encounter_rules_path.is_file() {
-            data.encounter_rules = read_json(&encounter_rules_path)?;
-        }
-        let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
-        if alignment_path.is_file() {
-            data.ai_alignment = Some(read_json(&alignment_path)?);
-        }
-        let diplomacy_path = root.join(folders::AI).join(folders::AI_DIPLOMACY);
-        if diplomacy_path.is_file() {
-            data.ai_diplomacy = read_json(&diplomacy_path)?;
-        }
-        let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
-        if doctrines_path.is_file() {
-            data.ai_doctrines = Some(read_json(&doctrines_path)?);
-        }
-        let feudal_ai_path = root.join(folders::AI).join(folders::AI_FEUDAL);
-        if feudal_ai_path.is_file() {
-            data.ai_feudal = read_json(&feudal_ai_path)?;
-        }
-        let grid_path = root.join(folders::AI).join(folders::AI_GRID);
-        if grid_path.is_file() {
-            data.ai_grid = read_json(&grid_path)?;
-        }
-        let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
-        if vision_path.is_file() {
-            data.vision_rules = Some(read_json(&vision_path)?);
-        }
-        let auto_resolve_path = root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES);
-        if auto_resolve_path.is_file() {
-            data.auto_resolve = read_json(&auto_resolve_path)?;
-        }
-        let population_path = root.join(folders::RULES).join(folders::POPULATION_RULES);
-        if population_path.is_file() {
-            data.population_rules = read_json(&population_path)?;
-        }
-        let economy_path = root.join(folders::RULES).join(folders::ECONOMY_RULES);
-        if economy_path.is_file() {
-            data.economy_rules = read_json(&economy_path)?;
-        }
-        let diplomacy_rules_path = root.join(folders::RULES).join(folders::DIPLOMACY_RULES);
-        if diplomacy_rules_path.is_file() {
-            data.diplomacy_rules = read_json(&diplomacy_rules_path)?;
-        }
-        let weather_path = root
-            .join(folders::RULES)
-            .join(folders::CAMPAIGN_WEATHER_RULES);
-        if weather_path.is_file() {
-            data.campaign_weather = read_json(&weather_path)?;
-        }
-        let difficulty_path = root.join(folders::RULES).join(folders::DIFFICULTY_RULES);
-        if difficulty_path.is_file() {
-            data.difficulty = read_json(&difficulty_path)?;
-        }
-        let retinue_path = root.join(folders::RETINUE);
-        if retinue_path.is_file() {
-            data.retinue = Some(read_json(&retinue_path)?);
-        }
-        let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
-        if agents_path.is_file() {
-            data.agent_rules = Some(read_json(&agents_path)?);
-        }
-        let standards_path = root
-            .join(folders::RULES)
-            .join(folders::BATTLE_STANDARD_RULES);
-        if standards_path.is_file() {
-            data.battle_standard_rules = read_json(&standards_path)?;
-        }
-        let postures_path = root.join(folders::RULES).join(folders::POSTURE_RULES);
-        if postures_path.is_file() {
-            data.posture_rules = read_json(&postures_path)?;
-        }
-        let capture_path = root.join(folders::RULES).join(folders::CAPTURE_RULES);
-        if capture_path.is_file() {
-            data.capture_rules = read_json(&capture_path)?;
-        }
-        let replenishment_path = root.join(folders::RULES).join(folders::REPLENISHMENT_RULES);
-        if replenishment_path.is_file() {
-            data.replenishment_rules = read_json(&replenishment_path)?;
-        }
-        let mercenary_path = root.join(folders::RULES).join(folders::MERCENARY_RULES);
-        if mercenary_path.is_file() {
-            data.mercenary_rules = read_json(&mercenary_path)?;
-        }
-        let crusade_path = root.join(folders::RULES).join(folders::CRUSADE_RULES);
-        if crusade_path.is_file() {
-            data.crusade_rules = Some(read_json(&crusade_path)?);
-        }
-        let starting_armies_path = root.join(folders::RULES).join(folders::STARTING_ARMIES);
-        if starting_armies_path.is_file() {
-            data.starting_armies = Some(read_json(&starting_armies_path)?);
-        }
-        let army_rules_path = root.join(folders::RULES).join(folders::ARMY_RULES);
-        if army_rules_path.is_file() {
-            data.army_rules = read_json(&army_rules_path)?;
-        }
-        let engines_path = root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES);
-        if engines_path.is_file() {
-            data.siege_engine_rules = read_json(&engines_path)?;
-        }
-        let missions_path = root.join(folders::MISSIONS);
-        if missions_path.is_file() {
-            data.mission_rules = read_json(&missions_path)?;
-        }
-        let traditions_path = root
-            .join(folders::RULES)
-            .join(folders::ARMY_TRADITION_RULES);
-        if traditions_path.is_file() {
-            data.army_tradition_rules = read_json(&traditions_path)?;
-        }
-        let outcome_path = root
-            .join(folders::RULES)
-            .join(folders::BATTLE_OUTCOME_RULES);
-        if outcome_path.is_file() {
-            data.battle_outcome_rules = read_json(&outcome_path)?;
-        }
-        let map_scenes_path = root.join(folders::RULES).join(folders::MAP_SCENE_RULES);
-        if map_scenes_path.is_file() {
-            data.map_scene_rules = read_json(&map_scenes_path)?;
-        }
-        let battle_history_path = root
-            .join(folders::RULES)
-            .join(folders::BATTLE_HISTORY_RULES);
-        if battle_history_path.is_file() {
-            data.battle_history_rules = read_json(&battle_history_path)?;
-        }
-        let crossing_rules_path = root
-            .join(folders::RULES)
-            .join(folders::RIVER_CROSSING_RULES);
-        if crossing_rules_path.is_file() {
-            data.river_crossing_rules = read_json(&crossing_rules_path)?;
-        }
+        load_entities_into(
+            &mut data.titles,
+            &root.join(folders::TITLES),
+            |t: &crate::entities::title::FeudalTitle| &t.id,
+        )?;
+        read_into(
+            &mut data.feudal_rules,
+            &root.join(folders::RULES).join(folders::FEUDAL_RULES),
+        )?;
+        load_entities_into(
+            &mut data.events,
+            &root.join(folders::EVENTS),
+            |e: &Event| &e.id,
+        )?;
+        load_entities_into(
+            &mut data.battle_orders,
+            &root.join(folders::BATTLE_ORDERS),
+            |o: &BattleOrder| &o.id,
+        )?;
+        load_entities_into(
+            &mut data.battle_abilities,
+            &root.join(folders::BATTLE_ABILITIES),
+            |a: &BattleAbility| &a.id,
+        )?;
+        load_entities_into(&mut data.diets, &root.join(folders::DIETS), |d: &Diet| {
+            &d.id
+        })?;
+        load_entities_into(
+            &mut data.edicts,
+            &root.join(folders::EDICTS),
+            |e: &Edict| &e.id,
+        )?;
+        load_entities_into(
+            &mut data.chivalric_orders,
+            &root.join(folders::CHIVALRIC_ORDERS),
+            |o: &ChivalricOrder| &o.id,
+        )?;
+        load_entities_into(
+            &mut data.landmarks,
+            &root.join(folders::LANDMARKS),
+            |l: &crate::Landmark| &l.id,
+        )?;
+        load_entities_into(
+            &mut data.encounters,
+            &root.join(folders::ENCOUNTERS),
+            |e: &crate::Encounter| &e.id,
+        )?;
+        read_into(
+            &mut data.encounter_rules,
+            &root.join(folders::RULES).join(folders::ENCOUNTER_RULES),
+        )?;
+        read_some(
+            &mut data.ai_alignment,
+            &root.join(folders::AI).join(folders::AI_ALIGNMENT),
+        )?;
+        read_into(
+            &mut data.ai_diplomacy,
+            &root.join(folders::AI).join(folders::AI_DIPLOMACY),
+        )?;
+        read_some(
+            &mut data.ai_doctrines,
+            &root.join(folders::AI).join(folders::AI_DOCTRINES),
+        )?;
+        read_into(
+            &mut data.ai_feudal,
+            &root.join(folders::AI).join(folders::AI_FEUDAL),
+        )?;
+        read_into(
+            &mut data.ai_grid,
+            &root.join(folders::AI).join(folders::AI_GRID),
+        )?;
+        read_some(
+            &mut data.vision_rules,
+            &root.join(folders::RULES).join(folders::VISION_RULES),
+        )?;
+        read_into(
+            &mut data.auto_resolve,
+            &root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES),
+        )?;
+        read_into(
+            &mut data.population_rules,
+            &root.join(folders::RULES).join(folders::POPULATION_RULES),
+        )?;
+        read_into(
+            &mut data.economy_rules,
+            &root.join(folders::RULES).join(folders::ECONOMY_RULES),
+        )?;
+        read_into(
+            &mut data.diplomacy_rules,
+            &root.join(folders::RULES).join(folders::DIPLOMACY_RULES),
+        )?;
+        read_into(
+            &mut data.campaign_weather,
+            &root
+                .join(folders::RULES)
+                .join(folders::CAMPAIGN_WEATHER_RULES),
+        )?;
+        read_into(
+            &mut data.difficulty,
+            &root.join(folders::RULES).join(folders::DIFFICULTY_RULES),
+        )?;
+        read_some(&mut data.retinue, &root.join(folders::RETINUE))?;
+        read_some(
+            &mut data.agent_rules,
+            &root.join(folders::RULES).join(folders::AGENT_RULES),
+        )?;
+        read_into(
+            &mut data.battle_standard_rules,
+            &root
+                .join(folders::RULES)
+                .join(folders::BATTLE_STANDARD_RULES),
+        )?;
+        read_into(
+            &mut data.posture_rules,
+            &root.join(folders::RULES).join(folders::POSTURE_RULES),
+        )?;
+        read_into(
+            &mut data.capture_rules,
+            &root.join(folders::RULES).join(folders::CAPTURE_RULES),
+        )?;
+        read_into(
+            &mut data.replenishment_rules,
+            &root.join(folders::RULES).join(folders::REPLENISHMENT_RULES),
+        )?;
+        read_into(
+            &mut data.mercenary_rules,
+            &root.join(folders::RULES).join(folders::MERCENARY_RULES),
+        )?;
+        read_some(
+            &mut data.crusade_rules,
+            &root.join(folders::RULES).join(folders::CRUSADE_RULES),
+        )?;
+        read_some(
+            &mut data.starting_armies,
+            &root.join(folders::RULES).join(folders::STARTING_ARMIES),
+        )?;
+        read_into(
+            &mut data.army_rules,
+            &root.join(folders::RULES).join(folders::ARMY_RULES),
+        )?;
+        read_into(
+            &mut data.siege_engine_rules,
+            &root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES),
+        )?;
+        read_into(&mut data.mission_rules, &root.join(folders::MISSIONS))?;
+        read_into(
+            &mut data.army_tradition_rules,
+            &root
+                .join(folders::RULES)
+                .join(folders::ARMY_TRADITION_RULES),
+        )?;
+        read_into(
+            &mut data.battle_outcome_rules,
+            &root
+                .join(folders::RULES)
+                .join(folders::BATTLE_OUTCOME_RULES),
+        )?;
+        read_into(
+            &mut data.map_scene_rules,
+            &root.join(folders::RULES).join(folders::MAP_SCENE_RULES),
+        )?;
+        read_into(
+            &mut data.battle_history_rules,
+            &root
+                .join(folders::RULES)
+                .join(folders::BATTLE_HISTORY_RULES),
+        )?;
+        read_into(
+            &mut data.river_crossing_rules,
+            &root
+                .join(folders::RULES)
+                .join(folders::RIVER_CROSSING_RULES),
+        )?;
         data.crossings = crate::entities::river_crossing::read_crossings(
             &root.join(folders::MAP).join(folders::CROSSINGS_PX),
         );
         data.river_names = crate::entities::river_crossing::read_river_names(
             &root.join(folders::MAP).join(folders::RIVER_NAMES),
         );
-        let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
-        if trade_path.is_file() {
-            data.trade = Some(read_json(&trade_path)?);
-        }
-        let free_movement_path = root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES);
-        if free_movement_path.is_file() {
-            data.free_movement = Some(read_json(&free_movement_path)?);
-        }
+        read_some(
+            &mut data.trade,
+            &root.join(folders::ECONOMY).join(folders::TRADE),
+        )?;
+        read_some(
+            &mut data.free_movement,
+            &root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES),
+        )?;
         data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
@@ -1236,6 +1240,39 @@ pub(crate) fn list_json_files(dir: &Path) -> Result<Vec<PathBuf>, DataError> {
     Ok(files)
 }
 
+/// Optional rules file: replaces `slot` when `path` exists, keeps it (the
+/// bundled default) otherwise.
+fn read_into<T: DeserializeOwned>(slot: &mut T, path: &Path) -> Result<(), DataError> {
+    if path.is_file() {
+        *slot = read_json(path)?;
+    }
+    Ok(())
+}
+
+/// Optional data file: `slot` becomes `Some(contents)` when `path` exists.
+fn read_some<T: DeserializeOwned>(slot: &mut Option<T>, path: &Path) -> Result<(), DataError> {
+    if path.is_file() {
+        *slot = Some(read_json(path)?);
+    }
+    Ok(())
+}
+
+/// Optional entity folder: [`load_entities`] into `slot` when `dir` exists.
+fn load_entities_into<T, K>(
+    slot: &mut BTreeMap<K, T>,
+    dir: &Path,
+    id_of: impl Fn(&T) -> &K,
+) -> Result<(), DataError>
+where
+    T: DeserializeOwned,
+    K: Ord + Clone + fmt::Display,
+{
+    if dir.is_dir() {
+        *slot = load_entities(dir, id_of)?;
+    }
+    Ok(())
+}
+
 /// Reads every `*.json` file in `dir` into a map keyed by the entity id.
 ///
 /// The file stem must equal the entity's id; ids must be unique. Sub-directories
@@ -1272,6 +1309,52 @@ where
         }
     }
     Ok(loaded)
+}
+
+/// Display names with an id fallback, shared by every crate that words
+/// messages (an unknown id is shown as is).
+impl GameData {
+    /// Display name of a province (its id when unknown).
+    pub fn province_name(&self, id: &ProvinceId) -> String {
+        self.provinces
+            .get(id)
+            .map_or_else(|| id.to_string(), |p| p.name.display.clone())
+    }
+
+    /// Short name of a faction (its id when unknown).
+    pub fn faction_name(&self, id: &FactionId) -> String {
+        self.factions
+            .get(id)
+            .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
+    }
+
+    /// Full display name of a faction (its id when unknown).
+    pub fn faction_label(&self, id: &FactionId) -> String {
+        self.factions
+            .get(id)
+            .map_or_else(|| id.to_string(), |f| f.name.display.clone())
+    }
+
+    /// Display name of a settlement (its id when unknown).
+    pub fn settlement_name(&self, id: &SettlementId) -> String {
+        self.settlements
+            .get(id)
+            .map_or_else(|| id.to_string(), |s| s.name.display.clone())
+    }
+
+    /// Display name of a technology (its id when unknown).
+    pub fn tech_name(&self, id: &TechnologyId) -> String {
+        self.technologies
+            .get(id)
+            .map_or_else(|| id.to_string(), |t| t.name.display.clone())
+    }
+
+    /// Display name of a building (its id when unknown).
+    pub fn building_name(&self, id: &BuildingId) -> String {
+        self.buildings
+            .get(id)
+            .map_or_else(|| id.to_string(), |b| b.name.display.clone())
+    }
 }
 
 #[cfg(test)]

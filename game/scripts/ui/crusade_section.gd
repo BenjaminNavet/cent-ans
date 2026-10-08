@@ -1,7 +1,7 @@
 class_name CrusadeSection
-extends VBoxContainer
+extends PanelSection
 
-## JR3 — section « Ferveur » du panneau de faction (faction croisée seulement), construite en
+## Section « Ferveur » du panneau de faction (faction croisée seulement), construite en
 ## code : jauge 0-100 avec ses seuils, aumônes, état (élan / moral / débandade), bouton « Prêcher
 ## le passage » et contingents attendus. Aucune règle ici : tout vient de
 ## `CampaignSim.get_crusade` / `submit_order` (spec JR § 4 et 5) ; les seuils dessinés sur la
@@ -14,8 +14,6 @@ const GLYPH := "✠"
 const MIN_WIDTH := 300.0
 
 var crusade: Dictionary = {}
-var last_result: Dictionary = {}
-var read_only := false
 
 var header_label: Label
 var value_label: Label
@@ -27,23 +25,18 @@ var target_label: Label
 var preach_button: Button
 var blocker_label: Label
 var pending_box: VBoxContainer
-var error_label: Label
 ## Posé par la carte de campagne : `submit(order) -> Dictionary` (son, toast, rafraîchissement,
 ## refus pendant la fin de tour) ; sans lui, l'ordre va droit à la simulation (tests, maquettes).
 var submit: Callable = Callable()
-var _sim: Object = null
 
 static var _rules_cache: Dictionary = {}
 static var _rules_dir: String = ""
 
 
 func _init() -> void:
-	name = "CrusadeSection"
-	add_theme_constant_override("separation", 3)
-	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	super("CrusadeSection", 3)
 	var head := HBoxContainer.new()
-	header_label = Label.new()
-	header_label.text = "Ferveur"
+	header_label = UiBuild.label("Ferveur")
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiType.apply(header_label, UiType.BODY)
 	head.add_child(header_label)
@@ -70,13 +63,10 @@ func _init() -> void:
 	add_child(preach_button)
 	blocker_label = _label("", Money.LOSS_COLOR)
 	add_child(blocker_label)
-	pending_box = VBoxContainer.new()
+	pending_box = UiBuild.vbox(1)
 	pending_box.name = "PendingBox"
-	pending_box.add_theme_constant_override("separation", 1)
 	add_child(pending_box)
-	error_label = _label("", Money.LOSS_COLOR)
-	error_label.hide()
-	add_child(error_label)
+	_add_error_label(MIN_WIDTH, Money.LOSS_COLOR)
 	hide()
 
 
@@ -84,7 +74,7 @@ func _init() -> void:
 ## ou si le panneau montre une autre faction que la sienne.
 func show_for(player_owned: bool = true, sim: Object = null) -> void:
 	read_only = not player_owned
-	_sim = sim if sim != null else _facade_sim()
+	_sim = _resolve_sim(sim)
 	crusade = {}
 	if _sim != null and _sim.has_method("get_crusade") and not read_only:
 		crusade = _sim.call("get_crusade")
@@ -131,9 +121,7 @@ func _show_passage() -> void:
 
 
 func _show_pending(pending: Array) -> void:
-	for child in pending_box.get_children():
-		pending_box.remove_child(child)
-		child.queue_free()
+	UiBuild.clear_children(pending_box)
 	pending_box.visible = not pending.is_empty()
 	if pending.is_empty():
 		return
@@ -146,13 +134,7 @@ func _show_pending(pending: Array) -> void:
 func request_preach() -> Dictionary:
 	if _sim == null:
 		return {}
-	var order := {"type": "preach_passage"}
-	last_result = submit.call(order) if submit.is_valid() else _sim.call("submit_order", order)
-	var ok := bool(last_result.get("ok", false))
-	show_for(true, _sim)
-	error_label.visible = not ok
-	error_label.text = "Refusé : %s" % str(last_result.get("error", "?")) if not ok else ""
-	if ok:
+	if _submit({"type": "preach_passage"}, func() -> void: show_for(true, _sim), submit):
 		passage_preached.emit()
 	return last_result
 
@@ -270,12 +252,12 @@ static func _morale_note(marks: Dictionary, key: String) -> String:
 
 
 static func _rules() -> Dictionary:
-	var dir := GameCatalog.data_dir()
+	var dir := DataFile.data_dir()
 	if dir != _rules_dir:
 		_rules_dir = dir
 		_rules_cache = {}
 		var path := dir.path_join(RULES_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.parse_file(path) if FileAccess.file_exists(path) else null
 		if parsed is Dictionary:
 			_rules_cache = parsed
 	return _rules_cache
@@ -289,11 +271,6 @@ func _label(text: String, color: Color) -> Label:
 	UiType.apply(label, UiType.CAPTION)
 	label.add_theme_color_override("font_color", color)
 	return label
-
-
-func _facade_sim() -> Object:
-	var facade := RansomPanel._root_node("/root/SimFacade")
-	return facade.get("sim") if facade != null else null
 
 
 ## Jauge 0-100 : remplissage teinté selon l'état (débandade, chancelante, résolue, élan), traits
@@ -349,4 +326,4 @@ class FervorGauge:
 			draw_polyline(diamond + PackedVector2Array([diamond[0]]), HudStyle.INK, 1.0, true)
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)

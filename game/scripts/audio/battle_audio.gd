@@ -1,39 +1,17 @@
 class_name BattleAudio
 extends Node3D
 
-## AU1 / T3 — audio de bataille spatialisé, dérivé de l'état des régiments
-## (`BattleSim.get_units()` / `get_siege()`), comme les effets visuels de B4.
-##
-## - **Pool de voix** : `max_voices` `AudioStreamPlayer3D` (banque `data/audio/sound_bank.json`).
-##   Chaque événement a une priorité, un nombre d'instances simultanées maximal et un délai de
-##   recharge ; pool plein → la voix la moins prioritaire (puis la plus ancienne) est volée si
-##   elle ne l'est pas davantage que le nouveau son. Hauteur aléatoire par événement.
-## - **Nappes** : pas un son par soldat, mais des boucles 3D (mêlée, clameur, marche, galop, feu)
-##   placées au barycentre des régiments concernés proches de la caméra, dont le volume suit le
-##   nombre de soldats engagés (pondéré par la distance) ; une nappe 2D « bataille lointaine »
-##   prend le relais quand la caméra est haute.
-## - **Distance et zoom** : atténuation 3D en distance inverse + filtre d'absorption de l'air ;
-##   au-delà de `near_distance_m`, les sons passent par le bus « BatailleLointain » dont le
-##   passe-bas et la réverbération suivent la hauteur de la caméra (`AudioBuses`).
-## - **Événements** déduits des transitions d'état : charge (cri, galop, hennissement, grondement
-##   de cavalerie qui enfle puis impact), contact (chocs de boucliers et d'épées), volée (décoche,
-##   sifflement, impacts à l'arrivée, sifflement au-dessus de la caméra si elle est proche de la
-##   trajectoire), pertes en mêlée (râles), déroute (la clameur suit le régiment en fuite), mort de
-##   général (cor, ducking de la musique), cri de guerre au premier engagement d'un camp ; siège :
-##   bélier, impacts de pierres, effondrement, cloche d'alarme, feu.
-## - Météo : pluie, vent (fort sous la neige), tonnerre occasionnel sous la pluie.
-## - **Fronts de mêlée (EP4)** : les régiments en mêlée sont groupés en fronts (paires
-##   régiment/cible), triés par distance à la caméra ; les `fronts.max_emitters` plus proches
-##   reçoivent un émetteur 3D dédié (`_front_emitter`). Sous `fronts.near_m` : chocs individuels
-##   (acier/acier, acier/bois, armure, cris d'effort, chutes, râles) tirés au hasard sans répéter
-##   le même deux fois de suite, densité et volume selon l'effectif engagé et les pertes récentes.
-##   Entre `near_m` et `mid_m` : une des `fronts.beds` (3 nappes de mêlée massives différentes,
-##   une par émetteur) remplace les chocs individuels, plus quelques chocs épars. Au-delà de
-##   `mid_m` : pas d'émetteur dédié, la nappe globale (`_update_beds`) et l'ambiance lointaine
-##   filtrée prennent le relais -- transition sans à-coup car les deux se recouvrent en volume.
-##
-## API pour les autres modules (BV1…) : `BattleAudio.play_at(événement, position)`.
-## Headless : les voix sont créées et les décisions prises (testables), rien n'est joué.
+## Audio de bataille spatialisé, dérivé de l'état des régiments (`BattleSim.get_units()` /
+## `get_siege()`). Banque `data/audio/sound_bank.json` : `max_voices` `AudioStreamPlayer3D`
+## réparties par `VoicePool` (priorité, instances max, recharge, hauteur aléatoire par événement).
+## - Nappes 3D en boucle (mêlée, clameur, marche, galop, feu) au barycentre des régiments proches,
+##   volume suivant les soldats engagés ; nappe 2D lointaine quand la caméra est haute.
+## - Au-delà de `near_distance_m`, bus « BatailleLointain » (passe-bas et réverbération selon le zoom).
+## - Événements déduits des transitions d'état (charge, contact, volée, pertes, déroute, mort de
+##   général, cri de guerre, siège) et météo (pluie, vent, tonnerre).
+## - Fronts de mêlée : régiments au contact groupés par paires ; les `fronts.max_emitters` plus
+##   proches ont un émetteur 3D (chocs individuels sous `near_m`, nappe de mêlée jusqu'à `mid_m`).
+## API : `BattleAudio.play_at(événement, position)`. Headless : décisions prises, rien joué.
 
 ## Instance courante (une seule bataille à la fois).
 static var active: BattleAudio = null
@@ -48,16 +26,9 @@ const MELEE_FULL := 420.0
 const MARCH_FULL := 500.0
 const CAVALRY_FULL := 120.0
 const BED_SMOOTHING := 2.5
-## Vitesse des traits (m/s) pour caler les impacts à l'arrivée (cf. `BattleEffects.SPEED`).
-const MISSILE_SPEED := {"arrow": 48.0, "bolt": 62.0, "ball": 110.0, "stone": 34.0, "bullet": 210.0, "javelin": 24.0}
 const DEATH_GROAN_CHANCE := 0.25
 const BELL_PERIOD := 22.0
 const BELL_UNTIL := 150.0
-## EP4 : événements de choc de proximité par front de mêlée, du plus au moins fréquent, avec leur
-## poids relatif (`NEAR_EVENT_WEIGHTS`) ; les pertes récentes font grimper le poids des deux
-## derniers (chute, râle).
-const NEAR_EVENTS := ["sword_clash", "shield_bash", "armor_hit", "effort_cry", "body_fall", "death_groan"]
-const NEAR_EVENT_WEIGHTS := [4, 3, 2, 3, 1, 1]
 ## Distance (m) autour d'un front dans laquelle les chocs individuels sont dispersés.
 const FRONT_NEAR_SPREAD := 6.0
 const FRONT_MID_SPREAD := 14.0
@@ -72,11 +43,10 @@ var history: Array = []
 ## Intensités courantes des nappes (0..1).
 var bed_levels: Dictionary = {}
 
-var _voices: Array = []  # [{player, event, priority, started}]
+var _pool := VoicePool.new(_voice_busy)
 var _last_played: Dictionary = {}  # événement → temps
-## LR-16 : cris joués à la fois par `_detect_events` (transition d'état) et par la colonne d'alertes
-## CB5 : un même cri au même endroit dans la fenêtre n'est joué qu'une fois (événement → fenêtre s).
-const DEDUP_EVENTS := {"rout_cry": 2.0, "general_death": 2.0}
+## Un cri joué à la fois par une transition d'état et par la colonne d'alertes ne sonne qu'une fois
+## dans la fenêtre `bank.battle.dedup_window_s` et ce rayon.
 const DEDUP_RADIUS_M := 40.0
 var _dedup_last: Dictionary = {}  # événement → {time, position}
 var _scheduled: Array = []  # [{time, event, position, gain}]
@@ -86,16 +56,16 @@ var _ambience_targets: Dictionary = {}  # nom → volume_db visé
 var _track: Dictionary = {}  # id → {state, ammo, soldiers, present}
 var _side_cried: Dictionary = {}
 var _siege_track: Dictionary = {}
-var wall_impacts_external := false  # SG1
+var wall_impacts_external := false  # vrai : `SiegeAssaultFx` joue les impacts de pierre
 var _weather: String = "clear"
 var _time: float = 0.0
 var _battle_time: float = 0.0
 var _next_bell: float = 4.0
 var _next_thunder: float = 20.0
 var _rng := RandomNumberGenerator.new()
-## EP4 : émetteurs par front de mêlée. clé "id1:id2" → {bed, bed_name, level, timer, last_event}.
+## Émetteurs par front de mêlée. clé "id1:id2" → {bed, bed_name, level, timer, last_event}.
 var _front_emitters: Dictionary = {}
-## EP4 : derniers effectifs connus par régiment (pertes récentes = régiment engagé dans un front).
+## Derniers effectifs connus par régiment (pertes récentes = régiment engagé dans un front).
 var _front_soldiers: Dictionary = {}
 
 
@@ -117,7 +87,7 @@ func setup(weather: String, cam: Camera3D, sound_bank: SoundBank = null) -> void
 		player.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 		player.bus = AudioBuses.BATTLE
 		add_child(player)
-		_voices.append({"player": player, "event": "", "priority": -1, "started": -1.0})
+		_pool.add(player)
 	for bed_name in bank.beds:
 		var entry: Dictionary = bank.beds[bed_name]
 		var bed := AudioStreamPlayer3D.new()
@@ -154,7 +124,7 @@ func setup(weather: String, cam: Camera3D, sound_bank: SoundBank = null) -> void
 func _exit_tree() -> void:
 	if active == self:
 		active = null
-	for voice in _voices:
+	for voice in _pool.voices:
 		(voice["player"] as AudioStreamPlayer3D).stop()
 		(voice["player"] as AudioStreamPlayer3D).stream = null
 	for bed in _beds.values():
@@ -211,7 +181,7 @@ func play_event(event_name: String, position: Vector3, gain_db: float = 0.0) -> 
 	var cooldown := float(entry["cooldown_s"])
 	if cooldown > 0.0 and _time - float(_last_played.get(event_name, -INF)) < cooldown:
 		return played
-	var voice := _claim_voice(event_name, int(entry["priority"]), int(entry["max_instances"]))
+	var voice := _pool.claim(event_name, int(entry["priority"]), int(entry["max_instances"]))
 	if voice.is_empty():
 		return played
 	var stream := bank.pick_stream(event_name)
@@ -228,10 +198,7 @@ func play_event(event_name: String, position: Vector3, gain_db: float = 0.0) -> 
 	var near_distance := float(bank.voices.get("near_distance_m", 70.0))
 	var bus := str(entry["bus"])
 	player.bus = AudioBuses.BATTLE_FAR if bus == AudioBuses.BATTLE and distance > near_distance else bus
-	voice["event"] = event_name
-	voice["priority"] = int(entry["priority"])
-	voice["started"] = _time
-	voice["length"] = stream.get_length() / maxf(player.pitch_scale, 0.01)
+	VoicePool.assign(voice, event_name, int(entry["priority"]), _time, stream.get_length() / maxf(player.pitch_scale, 0.01))
 	_last_played[event_name] = _time
 	if not silent:
 		player.play()
@@ -244,53 +211,17 @@ func play_event(event_name: String, position: Vector3, gain_db: float = 0.0) -> 
 
 ## Nombre de voix occupées (tests).
 func busy_voices() -> int:
-	var count := 0
-	for voice in _voices:
-		if _is_busy(voice):
-			count += 1
-	return count
+	return _pool.busy_count()
 
 
 func voice_count() -> int:
-	return _voices.size()
+	return _pool.voices.size()
 
 
-# --- Pool --------------------------------------------------------------------------
-
-
-func _is_busy(voice: Dictionary) -> bool:
-	if str(voice["event"]) == "":
-		return false
+func _voice_busy(voice: Dictionary) -> bool:
 	if not silent:
 		return (voice["player"] as AudioStreamPlayer3D).playing
-	return _time - float(voice["started"]) < float(voice.get("length", 0.0))
-
-
-func _claim_voice(event_name: String, priority: int, max_instances: int) -> Dictionary:
-	var same: Array = []
-	var free: Dictionary = {}
-	var victim: Dictionary = {}
-	for voice in _voices:
-		if not _is_busy(voice):
-			if free.is_empty():
-				free = voice
-			continue
-		if str(voice["event"]) == event_name:
-			same.append(voice)
-		if victim.is_empty() or int(voice["priority"]) < int(victim["priority"]) or (int(voice["priority"]) == int(victim["priority"]) and float(voice["started"]) < float(victim["started"])):
-			victim = voice
-	if same.size() >= max_instances:
-		# Limite d'instances : on remplace la plus ancienne du même événement.
-		var oldest: Dictionary = same[0]
-		for voice in same:
-			if float(voice["started"]) < float(oldest["started"]):
-				oldest = voice
-		return oldest
-	if not free.is_empty():
-		return free
-	if not victim.is_empty() and int(victim["priority"]) <= priority:
-		return victim
-	return {}
+	return _time - float(voice["started"]) < float(voice["length"])
 
 
 func _listener_position() -> Vector3:
@@ -347,7 +278,7 @@ func update_siege(siege: Dictionary, elapsed: float) -> void:
 		if _siege_track.has(key):
 			var prev: Dictionary = _siege_track[key]
 			if hp < float(prev["hp"]) - 0.001:
-				# SG1 : l'impact d'une pierre sur un pan est joué à son arrivée par `SiegeAssaultFx`.
+				# L'impact d'une pierre sur un pan est joué à son arrivée par `SiegeAssaultFx`.
 				if str(piece.get("kind", "")) == "gate":
 					play_event("ram_hit", mid)
 				elif not wall_impacts_external:
@@ -388,7 +319,7 @@ static func _forward(unit: Dictionary) -> Vector3:
 	return Vector3(sin(facing), 0.0, cos(facing))
 
 
-## Lot BV1 sans le cœur (`auto_volley`, `_no_bv1`) : mêmes deux cas particuliers que
+## Sans le cœur (`auto_volley`, `_no_bv1`) : mêmes deux cas particuliers que
 ## `sim.rs::missile_kind` (`data/unit_types/*.missile`), reconnus ici par id faute d'accès aux
 ## données ; le reste suit l'ancienne heuristique.
 static func missile_kind(unit: Dictionary) -> String:
@@ -404,13 +335,13 @@ static func missile_kind(unit: Dictionary) -> String:
 	return "arrow"
 
 
-## LR-16 : vrai si le même cri vient d'être joué près de `position` (fenêtre `DEDUP_EVENTS`) ; sinon
+## Vrai si le même cri vient d'être joué près de `position` (fenêtre `dedup_window_s`) ; sinon
 ## mémorise celui-ci.
 func _is_duplicate_cry(event_name: String, position: Vector3) -> bool:
-	if not DEDUP_EVENTS.has(event_name):
+	if not bank.battle["dedup_window_s"].has(event_name):
 		return false
 	var last: Dictionary = _dedup_last.get(event_name, {})
-	if not last.is_empty() and _time - float(last["time"]) < float(DEDUP_EVENTS[event_name]) \
+	if not last.is_empty() and _time - float(last["time"]) < float(bank.battle["dedup_window_s"][event_name]) \
 			and position.distance_to(last["position"]) <= DEDUP_RADIUS_M:
 		return true
 	_dedup_last[event_name] = {"time": _time, "position": position}
@@ -454,7 +385,7 @@ func _detect_events(units: Array, elapsed: float) -> void:
 			play_event("charge_cry", pos)
 			if mounted:
 				play_event("horse_neigh", pos)
-				# EP4 : grondement de charge qui enfle puis impact (limité par `cooldown_s`/
+				# Grondement de charge qui enfle puis impact (limité par `cooldown_s`/
 				# `max_instances` de l'événement, pas de garde par camp : plusieurs vagues sonnent).
 				play_event("cavalry_charge_impact", pos)
 		if state == "melee" and prev_state != "melee":
@@ -489,7 +420,7 @@ func _on_volley(unit: Dictionary, by_id: Dictionary) -> void:
 		return
 	var target: Dictionary = by_id[target_id]
 	var aim := _pos(target)
-	var flight := pos.distance_to(aim) / float(MISSILE_SPEED[kind])
+	var flight := pos.distance_to(aim) / float(bank.battle["missile_speed_mps"][kind])
 	if kind == "arrow" or kind == "bolt":
 		schedule("arrow_whistle", pos.lerp(aim, 0.55) + Vector3(0, 12, 0), minf(flight * 0.35, 1.5))
 		schedule("arrow_impact", aim, flight)
@@ -499,7 +430,7 @@ func _on_volley(unit: Dictionary, by_id: Dictionary) -> void:
 
 
 ## Si la trajectoire d'une volee passe pres de la camera, un sifflement supplementaire est
-## programme juste au-dessus d'elle au moment ou elle survole ce point (EP4).
+## programme juste au-dessus d'elle au moment ou elle survole ce point.
 func _maybe_flyby_over_camera(pos: Vector3, aim: Vector3, flight: float) -> void:
 	var listener := _listener_position()
 	var flat_pos := Vector3(pos.x, 0.0, pos.z)
@@ -594,7 +525,7 @@ func _drive_bed(bed_name: String, target: float, acc: Array, focus: Vector3, rea
 		bed.stop()
 
 
-# --- Fronts de melee (EP4) ----------------------------------------------------------
+# --- Fronts de mêlée ----------------------------------------------------------
 
 
 ## Regroupe les regiments en melee en fronts (paires regiment/cible), n'en garde que les
@@ -732,25 +663,28 @@ func _play_front_event(emitter: Dictionary, position: Vector3, burst: float) -> 
 
 func _pick_near_event(emitter: Dictionary, burst: float) -> String:
 	var last := str(emitter.get("last_event", ""))
-	var weights: Array = NEAR_EVENT_WEIGHTS.duplicate()
+	var near: Array = bank.battle["near_events"]
+	var weights: Array = []
+	for entry: Dictionary in near:
+		weights.append(int(entry["weight"]))
 	if burst > 0.4:
-		# Pertes recentes : plus de chutes et de rales.
-		weights[4] = int(weights[4]) + 3
-		weights[5] = int(weights[5]) + 3
+		# Pertes récentes : plus de chutes et de râles (les deux derniers de la liste).
+		weights[-2] += 3
+		weights[-1] += 3
 	var total := 0
-	for w in weights:
-		total += int(w)
+	for weight: int in weights:
+		total += weight
 	var pick := _rng.randi_range(0, maxi(total - 1, 0))
 	var acc := 0
-	var chosen := str(NEAR_EVENTS[0])
-	for i in NEAR_EVENTS.size():
-		acc += int(weights[i])
+	var chosen := 0
+	for i in near.size():
+		acc += weights[i]
 		if pick < acc:
-			chosen = str(NEAR_EVENTS[i])
+			chosen = i
 			break
-	if chosen == last and NEAR_EVENTS.size() > 1:
-		chosen = str(NEAR_EVENTS[(NEAR_EVENTS.find(chosen) + 1) % NEAR_EVENTS.size()])
-	return chosen
+	if str(near[chosen]["event"]) == last and near.size() > 1:
+		chosen = (chosen + 1) % near.size()
+	return str(near[chosen]["event"])
 
 
 func _ambience_db(layer: String, offset: float) -> float:

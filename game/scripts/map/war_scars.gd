@@ -23,7 +23,6 @@ extends Node3D
 ## Branché par `CampaignLife` (`--life-off=scars` le coupe).
 
 const DATA_PATH := "ui/war_scars.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const DEFAULT_METERS_PER_UNIT := 719.0
 ## Recalage au sol et recherche des plans de ville : au plus une fois par intervalle (s).
 const REGROUND_INTERVAL := 0.25
@@ -35,16 +34,14 @@ const FIELD_OFFSET := 0.7
 const FIGURE_UNIT := 4.3
 const ENGINES_NODE := "SiegeEngines"
 
-static var _settings: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
+
 static var _loaded := false
 
 var stats: Dictionary = {}
 ## Plan de la ville 1:1 d'une colonie : `func(id) -> {plan, anchor: Vector2, meters_per_unit}`
 ## (`{}` tant qu'elle n'est pas chargée). Sans lui, pas de portes marquées.
 var plan_provider: Callable = Callable()
-## Captures (`tb4_shot.gd`) : engins imposés par armée (`[{kind, ready, turns_left}]`), à la place
-## de ceux du pont.
-var forced_engines: Dictionary = {}
 
 var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
@@ -70,31 +67,12 @@ var _door_timer := 0.0
 
 
 static func settings() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var path := _data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_settings = parsed
-			else:
-				push_warning("WarScars: %s invalid" % path)
-	return _settings
+	return _lookup.data()
 
 
 ## Oublie le fichier lu (tests : autre dossier de données).
 static func reload() -> void:
-	_loaded = false
-	_settings = {}
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
+	_lookup.reload()
 
 
 static func _block(key: String) -> Dictionary:
@@ -612,7 +590,7 @@ func _refresh_sieges(sim: Object, new_turn: bool) -> void:
 		var attached: bool = entry != null and entry["marker"] == marker and entry["node"] != null and is_instance_valid(entry["node"])
 		if attached and not stale:
 			continue
-		var engines: Variant = forced_engines[id] if forced_engines.has(id) else (sim.call("get_assault_odds", id) as Dictionary).get("engines", [])
+		var engines: Variant = (sim.call("get_assault_odds", id) as Dictionary).get("engines", [])
 		var stages := engine_stages(engines, int(block.get("almost_ready_turns", 0)))
 		var signature := str(stages)
 		if attached and str(entry["signature"]) == signature:

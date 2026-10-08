@@ -1,5 +1,5 @@
 class_name HistoricalBattlesMenu
-extends PanelContainer
+extends ListMenu
 
 ## EP7 — « Batailles historiques » du menu principal : Crécy (1346), Poitiers (1356), Azincourt
 ## (1415), lues dans `data/battle_maps/` par le cœur (`BattleSim.list_historical`). Pour chaque
@@ -7,18 +7,11 @@ extends PanelContainer
 ## l'IA contre l'IA. La scène de bataille reçoit `--historical=<id>` et `--historical-side=` ;
 ## la fin de la bataille ramène au menu (hors campagne, rien n'est conservé). Échap ou
 ## « Fermer » : signal `closed`.
-## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
-## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
-## `UiMotion`.
 ## NT4 : le « Didacticiel de bataille » (bataille-prologue guidée, `BattlePrologue`) ouvre la liste.
 
-signal closed
 signal battle_started(id: String, side: String)
 
-const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
-
 var battles: Array = []
-var buttons: Dictionary = {}  # "<id>:<side>" -> Button (tests)
 var prologue_button: Button = null  # NT4 : « Commencer le didacticiel »
 
 
@@ -29,15 +22,12 @@ static func load_battles() -> Array:
 	var sim: Object = ClassDB.instantiate("BattleSim")
 	if not sim.has_method("list_historical"):
 		return []
-	return sim.call("list_historical", data_dir())
+	return sim.call("list_historical", DataFile.data_dir())
 
 
+## Dossier `data/` (utilisé par les tests).
 static func data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		return str(paths.get("data_dir"))
-	return ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	return DataFile.data_dir()
 
 
 ## Options de la scène de bataille pour la bataille `id` menée par `side` ("" : IA contre IA).
@@ -48,49 +38,32 @@ static func args_for(id: String, side: String) -> PackedStringArray:
 	return args
 
 
-func _ready() -> void:
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(780, 0)
+func _menu_title() -> String:
+	return "Batailles historiques"
+
+
+func _menu_hint() -> String:
+	return "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
+
+
+func _menu_width() -> float:
+	return 780.0
+
+
+func _scroll_height() -> float:
+	return 560.0
+
+
+func _load_entries() -> void:
 	battles = load_battles()
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, 560)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(scroll)
-	var box := VBoxContainer.new()
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", 8)
-	scroll.add_child(box)
-	var title := Label.new()
-	title.text = "Batailles historiques"
-	UiType.apply(title, UiType.TITLE)
-	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size = Vector2(720, 0)
-	UiType.apply(hint, UiType.CAPTION)
-	hint.modulate = Color(1, 1, 1, 0.75)
-	box.add_child(hint)
+
+
+func _build_entries(box: VBoxContainer) -> void:
 	_add_prologue(box)
 	if battles.is_empty():
-		var none := Label.new()
-		none.text = "Aucune bataille historique n'a été trouvée."
-		box.add_child(none)
+		UiBuild.label("Aucune bataille historique n'a été trouvée.", 0, null, false, 0.0, box)
 	for entry in battles:
 		_add_battle(box, entry as Dictionary)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_END
-	box.add_child(row)
-	var close_button := Button.new()
-	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
-	row.add_child(close_button)
-	if not buttons.is_empty():
-		(buttons.values()[0] as Button).grab_focus.call_deferred()
-	UiZones.put(UiZones.Zone.MODAL, self)
-	UiMotion.fade_in(self)
 
 
 ## NT4 : « Didacticiel de bataille » en tête de liste (bataille-prologue guidée), pour ne pas
@@ -101,21 +74,15 @@ func _add_prologue(box: VBoxContainer) -> void:
 		return
 	var sep := HSeparator.new()
 	box.add_child(sep)
-	var name := Label.new()
-	name.text = str(prologue.get("menu_label", "Didacticiel de bataille"))
+	var name := UiBuild.label(str(prologue.get("menu_label", "Didacticiel de bataille")))
 	UiType.apply(name, UiType.HEADING)
 	box.add_child(name)
-	var detail := Label.new()
-	detail.text = str(prologue.get("menu_detail", ""))
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.custom_minimum_size = Vector2(720, 0)
+	var detail := UiBuild.label(str(prologue.get("menu_detail", "")), 0, null, true, 720)
 	UiType.apply(detail, UiType.BODY)
 	box.add_child(detail)
-	prologue_button = Button.new()
+	prologue_button = UiBuild.button("Commencer le didacticiel", start_prologue)
 	prologue_button.name = "BattlePrologue"
-	prologue_button.text = "Commencer le didacticiel"
 	prologue_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	prologue_button.pressed.connect(start_prologue)
 	box.add_child(prologue_button)
 
 
@@ -129,39 +96,27 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 	var id := str(entry.get("id", ""))
 	var sep := HSeparator.new()
 	box.add_child(sep)
-	var name := Label.new()
-	name.text = "%s — %s" % [str(entry.get("name", id)), str(entry.get("date_fr", entry.get("date", "")))]
+	var name := UiBuild.label("%s — %s" % [str(entry.get("name", id)), str(entry.get("date_fr", entry.get("date", "")))])
 	UiType.apply(name, UiType.HEADING)
 	box.add_child(name)
-	var place := Label.new()
-	place.text = "%s (%s) · %s" % [str(entry.get("place", "")), str(entry.get("province_name", "")), str(entry.get("weather_label", ""))]
-	place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	place.custom_minimum_size = Vector2(720, 0)
+	var place := UiBuild.label("%s (%s) · %s" % [str(entry.get("place", "")), str(entry.get("province_name", "")), str(entry.get("weather_label", ""))], 0, null, true, 720)
 	UiType.apply(place, UiType.CAPTION)
 	place.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(place)
-	var summary := Label.new()
-	summary.text = str(entry.get("summary", ""))
-	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	summary.custom_minimum_size = Vector2(720, 0)
+	var summary := UiBuild.label(str(entry.get("summary", "")), 0, null, true, 720)
 	UiType.apply(summary, UiType.BODY)
 	box.add_child(summary)
-	var armies := Label.new()
-	armies.text = "%s\n%s" % [_army_line(entry, "attacker"), _army_line(entry, "defender")]
-	armies.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	armies.custom_minimum_size = Vector2(720, 0)
+	var armies := UiBuild.label("%s\n%s" % [_army_line(entry, "attacker"), _army_line(entry, "defender")], 0, null, true, 720)
 	UiType.apply(armies, UiType.CAPTION)
 	armies.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(armies)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	box.add_child(row)
+	var row := UiBuild.hbox(10, box)
 	for side in ["defender", "attacker", ""]:
 		var button := Button.new()
 		button.name = "Battle_%s_%s" % [id, side if side != "" else "watch"]
 		if side == "":
 			button.text = "Regarder"
-			RichTooltip.attach_plain(button, "historical_battle_ai_both")
+			TooltipHost.attach_plain(button, "historical_battle_ai_both")
 		else:
 			var army: Dictionary = entry.get(side, {})
 			button.text = "Mener %s" % _the_army(str(army.get("faction_name", side)))
@@ -193,22 +148,7 @@ static func _the_army(faction_name: String) -> String:
 			return "l'armée de %s" % faction_name
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
-
-
-func close() -> void:
-	closed.emit()
-	UiMotion.fade_out(self, UiMotion.DURATION, true)
-
-
 ## Lance la bataille `id`, `side` menée par le joueur ("" : IA contre IA).
 func start(id: String, side: String) -> void:
-	BattleScene.demo_args = args_for(id, side)
 	battle_started.emit(id, side)
-	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null and audio.has_method("stop_all"):
-		audio.call("stop_all")
-	SceneFader.go(BATTLE_SCENE)
+	_launch_battle(args_for(id, side))

@@ -12,7 +12,6 @@ const OPEN_SEA_PX := 45.0
 
 ## Lot FA6 : ornements réels (Atlas catalan de 1375, domaine public) découpés par
 ## `tools/cent_ans_tools/parchment_ornaments.py` ; catalogue `data/map/parchment_ornaments.json`.
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const ORNAMENTS_FILE := "map/parchment_ornaments.json"
 const ORNAMENTS_DIR := "res://assets/textures/parchment/"
 ## Shader de la mer : la rose peinte y est posée comme texture par défaut de `pm_rose_tex`
@@ -174,7 +173,7 @@ static func _clear_water(sea_at: Callable, p: Vector2, radius: float) -> bool:
 
 ## `--no-fa-parchment` après `--` : ornements dessinés par code d'avant FA6 (captures A/B).
 static func painted_enabled() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-fa-parchment")
+	return not CmdArgs.has("--no-fa-parchment")
 
 
 ## Lit le catalogue des ornements peints et pose la rose sur le shader de la mer.
@@ -184,12 +183,11 @@ func _load_ornaments() -> void:
 		sea_shader.set_default_texture_parameter(ROSE_UNIFORM, null)
 	if not painted_enabled():
 		return
-	var path := str(MAP_PATHS.default_data_dir()).path_join(ORNAMENTS_FILE)
-	if not FileAccess.file_exists(path):
+	if not DataFile.exists(ORNAMENTS_FILE):
 		return
-	var catalogue: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var catalogue: Variant = DataFile.read_json(ORNAMENTS_FILE)
 	if not catalogue is Dictionary:
-		push_warning("ParchmentDecor: unreadable %s" % path)
+		push_warning("ParchmentDecor: unreadable %s" % ORNAMENTS_FILE)
 		return
 	# `use` : par genre, `real` (découpes du catalogue) ou `drawn` (dessin par code d'origine).
 	var use: Dictionary = (catalogue as Dictionary).get("use", {})

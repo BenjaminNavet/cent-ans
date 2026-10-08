@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Test du lot RS-K (rendu réel requis : sans `--headless`, le rendu factice ne garde pas les
-## tampons) : `LifeEffects._write_transform` / `_write_custom` écrivent les tampons MultiMesh au
+## tampons) : `MapInstancing.write_transform` / `write_custom` écrivent les tampons MultiMesh au
 ## même format que `set_instance_transform` / `set_instance_custom_data` (avec et sans données
 ## d'instance). Sauté en headless.
 ## Usage : godot --path game --script res://tests/rs_k_buffer_layout_test.gd
@@ -37,10 +37,10 @@ func _run(custom: bool) -> void:
 		var xform := Transform3D(basis, Vector3(rng.randf() * 100.0, rng.randf(), rng.randf() * 100.0))
 		var color := Color(rng.randf(), rng.randf(), rng.randf(), rng.randf())
 		reference.set_instance_transform(n, xform)
-		LifeEffects._write_transform(packed, n * stride, xform)
+		MapInstancing.write_transform(packed, n * stride, xform)
 		if custom:
 			reference.set_instance_custom_data(n, color)
-			LifeEffects._write_custom(packed, n * stride + 12, color)
+			MapInstancing.write_custom(packed, n * stride + 12, color)
 	var expected := reference.buffer
 	if expected.size() != packed.size():
 		_failures += 1

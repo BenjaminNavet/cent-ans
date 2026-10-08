@@ -2,37 +2,21 @@
 //! `docs/design/2026-09-24-mouvement-libre.md` § 4 and § 7) — attacks in
 //! the bubble, avoidance of stronger armies, embarkations, determinism and
 //! the time an AI faction takes to play its turn.
+use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::main_army;
 
-use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 use data_model::{FactionId, GameData, SettlementId};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 fn at_war(state: &mut CampaignState, a: &str, b: &str) {
@@ -59,16 +43,16 @@ fn east_of(data: &GameData, settlement: &str, km: f32) -> [f32; 2] {
 #[test]
 fn the_ai_attacks_a_weaker_army_in_its_bubble() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
     let meaux = data.settlement_point(&set("set_meaux")).unwrap();
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
     let f = state.armies.get_mut(&french).unwrap();
-    f.position = ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
+    f.position = ArmyPosition::field(east_of(data, "set_meaux", 20.0));
     f.units.truncate(1);
-    let orders = ai::plan_turn(&state, &data, &fac("fac_england"));
+    let orders = ai::plan_turn(&state, data, &fac("fac_england"));
     assert!(
         orders.iter().any(|o| matches!(
             o,
@@ -78,7 +62,7 @@ fn the_ai_attacks_a_weaker_army_in_its_bubble() {
     );
     // Played at once: the battle is fought during the English turn.
     let mut events = Vec::new();
-    state.play_ai_turn(&data, &fac("fac_england"), &ai::plan_turn, &mut events);
+    state.play_ai_turn(data, &fac("fac_england"), &ai::plan_turn, &mut events);
     let fought = state
         .pending_events
         .iter()
@@ -91,7 +75,7 @@ fn the_ai_attacks_a_weaker_army_in_its_bubble() {
 #[test]
 fn the_ai_does_not_attack_a_stronger_army() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
@@ -100,8 +84,8 @@ fn the_ai_does_not_attack_a_stronger_army() {
     e.position = ArmyPosition::field(meaux);
     e.units.truncate(1);
     state.armies.get_mut(&french).unwrap().position =
-        ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
-    let orders = ai::plan_turn(&state, &data, &fac("fac_england"));
+        ArmyPosition::field(east_of(data, "set_meaux", 20.0));
+    let orders = ai::plan_turn(&state, data, &fac("fac_england"));
     assert!(
         !orders
             .iter()
@@ -113,15 +97,15 @@ fn the_ai_does_not_attack_a_stronger_army() {
 #[test]
 fn routes_avoid_the_zone_of_control_of_stronger_armies() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     // The English host camps just outside Meaux, a French town.
     state.armies.get_mut(&english).unwrap().position =
-        ArmyPosition::field(east_of(&data, "set_meaux", 2.0));
-    let power = state.army_power(&data, &english);
+        ArmyPosition::field(east_of(data, "set_meaux", 2.0));
+    let power = state.army_power(data, &english);
     let france = fac("fac_france");
-    let planner = ai::grid::GridPlanner::new(&state, &data, &france);
+    let planner = ai::grid::GridPlanner::new(&state, data, &france);
     let start = set("set_paris");
     let through_meaux = |table: &ai::grid::Table| {
         table
@@ -140,7 +124,7 @@ fn routes_avoid_the_zone_of_control_of_stronger_armies() {
 #[test]
 fn england_embarks_at_dover_for_the_continent() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     // DC3: the planning horizon (10 steps of 70 km) reaches Edinburgh, which the Scots
     // threaten in 1337: only the French war is kept, so that the host looks to France.
     for faction in state.factions.values_mut() {
@@ -150,9 +134,9 @@ fn england_embarks_at_dover_for_the_continent() {
     let english = main_army(&state, "fac_england");
     let dover = set("set_dover");
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::Settlement(dover.clone());
-    let full = state.army_grid_allowance(&data, &state.armies[&english]);
+    let full = state.army_grid_allowance(data, &state.armies[&english]);
     state.armies.get_mut(&english).unwrap().movement_left = full;
-    let orders = ai::plan_turn(&state, &data, &fac("fac_england"));
+    let orders = ai::plan_turn(&state, data, &fac("fac_england"));
     assert!(
         orders.iter().any(|o| matches!(
             o,
@@ -161,12 +145,12 @@ fn england_embarks_at_dover_for_the_continent() {
         "the English host sails from Dover: {orders:?}"
     );
     let mut events = Vec::new();
-    state.play_ai_turn(&data, &fac("fac_england"), &ai::plan_turn, &mut events);
+    state.play_ai_turn(data, &fac("fac_england"), &ai::plan_turn, &mut events);
     let army = &state.armies[&english];
     let wissant = data.settlement_point(&set("set_wissant")).unwrap();
-    let landed = state.army_point(&data, army);
+    let landed = state.army_point(data, army);
     let km = ((landed[0] - wissant[0]).hypot(landed[1] - wissant[1]))
-        / sim_campaign::march::px_per_km(&data);
+        / sim_campaign::march::px_per_km(data);
     assert!(km < 10.0, "the army landed at Wissant ({km} km away)");
 }
 
@@ -187,7 +171,7 @@ fn play(data: &GameData, seed: u64, turns: u32) -> CampaignState {
 #[test]
 fn ai_turns_are_deterministic_on_a_seed() {
     let data = data();
-    let (a, b) = (play(&data, 3, 4), play(&data, 3, 4));
+    let (a, b) = (play(data, 3, 4), play(data, 3, 4));
     assert!(a == b, "two games on the same seed differ");
     assert_eq!(a.events, b.events);
 }
@@ -219,7 +203,7 @@ fn an_ai_faction_plays_its_turn_quickly() {
         Duration::from_millis(50)
     };
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     state.interactive_battles = false;
     for turn in 0..3 {
         let factions: Vec<FactionId> = state
@@ -230,14 +214,14 @@ fn an_ai_faction_plays_its_turn_quickly() {
             .collect();
         let mut events = Vec::new();
         for faction in factions {
-            let time = best_turn_time(&state, &data, &faction);
+            let time = best_turn_time(&state, data, &faction);
             assert!(
                 time < limit,
                 "{faction} took {time:?} on turn {turn} (limit {limit:?})"
             );
-            state.play_ai_turn(&data, &faction, &ai::plan_turn, &mut events);
+            state.play_ai_turn(data, &faction, &ai::plan_turn, &mut events);
         }
-        state.resolve_end_of_turn(&data, &mut events);
+        state.resolve_end_of_turn(data, &mut events);
     }
 }
 
@@ -260,7 +244,7 @@ fn fifty_turns(data: &GameData, seed: u64) -> Game {
     state.interactive_battles = false;
     let provinces_start = majors
         .clone()
-        .map(|f| state.controlled_provinces(&f).len() as i64);
+        .map(|f| state.controlled_provinces(&f).count() as i64);
     let mut game = Game {
         treasury: [0; 2],
         provinces_delta: [0; 2],
@@ -329,7 +313,7 @@ fn fifty_turns(data: &GameData, seed: u64) -> Game {
         let f = &state.factions[major];
         game.treasury[i] = f.treasury;
         game.provinces_delta[i] =
-            state.controlled_provinces(major).len() as i64 - provinces_start[i];
+            state.controlled_provinces(major).count() as i64 - provinces_start[i];
         game.majors_alive &= f.alive;
     }
     game
@@ -341,14 +325,14 @@ const MAX_BANKRUPT_SEASONS: u32 = 2;
 const MAX_BANKRUPT_SEASONS_TOTAL: u32 = 4;
 
 /// Spec § 7: 50 turns of AI against AI on 8 seeds stay in the band measured
-/// after C7a (`docs/wip/c7a-settlements-balance.md`, `docs/wip/m3-tour-ia.md`).
+/// after C7a (`docs/archive/chantiers.md`, `docs/archive/chantiers.md`).
 /// About a minute in release; run with
 /// `cargo test --release -p ai --test m3_grid_ai -- --ignored`.
 #[test]
 #[ignore = "50 turns x 8 seeds: run in release with --ignored"]
 fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
     let data = data();
-    let games: Vec<Game> = (1..=8).map(|seed| fifty_turns(&data, seed)).collect();
+    let games: Vec<Game> = (1..=8).map(|seed| fifty_turns(data, seed)).collect();
     let n = games.len() as f64;
     let mean = |f: &dyn Fn(&Game) -> f64| games.iter().map(f).sum::<f64>() / n;
     // LR-04: every seed is printed, then every failure listed, so that one
@@ -430,7 +414,7 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
 #[test]
 fn nearby_friendly_armies_are_counted_once() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
@@ -438,35 +422,35 @@ fn nearby_friendly_armies_are_counted_once() {
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
     // A second English army next to the French one, within engagement range.
     let mut second = state.armies[&english].clone();
-    second.position = ArmyPosition::field(east_of(&data, "set_meaux", 19.0));
+    second.position = ArmyPosition::field(east_of(data, "set_meaux", 19.0));
     let second_id = ArmyId::from_index(9999);
     state.armies.insert(second_id.clone(), second);
     let f = state.armies.get_mut(&french).unwrap();
-    f.position = ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
+    f.position = ArmyPosition::field(east_of(data, "set_meaux", 20.0));
     f.units.truncate(1);
     f.units[0].strength = 100;
-    let mut ours = state.army_power(&data, &english) + state.army_power(&data, &second_id);
+    let mut ours = state.army_power(data, &english) + state.army_power(data, &second_id);
     // RC (ADR 0141): east of Meaux the Marne lies between the armies; the AI
     // weighs the crossing it would force, as the resolver does.
     if let Some(site) = sim_campaign::river_crossing::crossing_between(
-        &data,
+        data,
         meaux,
-        east_of(&data, "set_meaux", 20.0),
+        east_of(data, "set_meaux", 20.0),
     ) {
         ours *= site.effect().attacker_factor(&data.river_crossing_rules);
     }
-    let per_man = state.army_power(&data, &french) / 100.0;
+    let per_man = state.army_power(data, &french) / 100.0;
     let ratio = data.ai_grid.attack_ratio;
     let england = fac("fac_england");
     // Enemy just too strong for the true odds (but not for doubled ones).
     let too_strong = ((ours * 1.1 / ratio) / per_man).ceil() as u32;
     state.armies.get_mut(&french).unwrap().units[0].strength = too_strong;
-    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    let planner = ai::grid::GridPlanner::new(&state, data, &england);
     assert_eq!(planner.attack_order(&english), None, "odds overstated");
     // Enemy weak enough for the true odds.
     let weak = ((ours * 0.9 / ratio) / per_man).floor() as u32;
     state.armies.get_mut(&french).unwrap().units[0].strength = weak;
-    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    let planner = ai::grid::GridPlanner::new(&state, data, &england);
     assert!(
         matches!(planner.attack_order(&english), Some(Order::Attack { .. })),
         "the joint host attacks a weaker army"
@@ -478,21 +462,21 @@ fn nearby_friendly_armies_are_counted_once() {
 #[test]
 fn one_attack_per_enemy_army_and_turn() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
     state.armies.get_mut(&english).unwrap().position =
-        ArmyPosition::field(east_of(&data, "set_meaux", 60.0));
+        ArmyPosition::field(east_of(data, "set_meaux", 60.0));
     let mut second = state.armies[&english].clone();
-    second.position = ArmyPosition::field(east_of(&data, "set_meaux", 62.0));
+    second.position = ArmyPosition::field(east_of(data, "set_meaux", 62.0));
     let second_id = ArmyId::from_index(9999);
     state.armies.insert(second_id.clone(), second);
     let f = state.armies.get_mut(&french).unwrap();
-    f.position = ArmyPosition::field(east_of(&data, "set_meaux", 40.0));
+    f.position = ArmyPosition::field(east_of(data, "set_meaux", 40.0));
     f.units.truncate(1);
     let england = fac("fac_england");
-    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    let planner = ai::grid::GridPlanner::new(&state, data, &england);
     let target = |order: Option<Order>| match order {
         Some(Order::Attack { target_army, .. }) => Some(target_army),
         _ => None,

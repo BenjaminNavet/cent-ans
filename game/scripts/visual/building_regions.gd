@@ -11,38 +11,16 @@ extends RefCounted
 
 const DATA_FILE := "art/building_regions.json"
 
-static var _doc: Dictionary = {}
-static var _loaded := false
+static var _lookup := JsonLookup.new(DATA_FILE)
 static var _province_region: Dictionary = {}  # id de province → région (cache)
 
 
-static func _data_dirs() -> Array[String]:
-	var dirs: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		dirs.append(str(paths.get("data_dir")))
-	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	return dirs
-
-
 static func _read_json(relative: String) -> Variant:
-	for dir in _data_dirs():
-		var path := dir.path_join(relative)
-		if FileAccess.file_exists(path):
-			return JSON.parse_string(FileAccess.get_file_as_string(path))
-	return null
+	return DataFile.read_json(relative) if DataFile.exists(relative) else null
 
 
 static func document() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = _read_json(DATA_FILE)
-		if parsed is Dictionary:
-			_doc = parsed
-		else:
-			push_warning("BuildingRegions: %s introuvable, style régional désactivé" % DATA_FILE)
-	return _doc
+	return _lookup.data()
 
 
 ## Région (`region` du fichier de province) ; "" si inconnue.

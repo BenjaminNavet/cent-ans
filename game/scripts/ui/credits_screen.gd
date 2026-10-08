@@ -64,11 +64,8 @@ func _ready() -> void:
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.custom_minimum_size = Vector2(760, 620)
 	add_child(_panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	_panel.add_child(box)
-	var title := Label.new()
-	title.text = "Crédits"
+	var box := UiBuild.vbox(8, _panel)
+	var title := UiBuild.label("Crédits")
 	UiType.apply(title, UiType.TITLE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
@@ -87,8 +84,7 @@ func _ready() -> void:
 	scroll.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton or event is InputEventScreenDrag:
 			_auto_scroll = false)
-	var back := Button.new()
-	back.text = "Retour"
+	var back := UiBuild.button("Retour")
 	UiType.apply(back, UiType.HEADING)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.pressed.connect(close)
@@ -122,9 +118,7 @@ func close() -> void:
 ## Contenu de `CREDITS.md` (dépôt, puis jeu exporté), texte intégré à défaut.
 func load_credits() -> String:
 	var candidates: Array[String] = [ProjectSettings.globalize_path("res://").path_join("../CREDITS.md").simplify_path()]
-	var paths := get_node_or_null("/root/MapPaths")
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")).path_join("../CREDITS.md").simplify_path())
+	candidates.append(DataFile.data_dir().path_join("../CREDITS.md").simplify_path())
 	candidates.append("res://CREDITS.md")
 	for candidate in candidates:
 		if FileAccess.file_exists(candidate):

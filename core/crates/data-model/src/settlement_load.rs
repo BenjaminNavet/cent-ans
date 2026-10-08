@@ -69,6 +69,7 @@ impl GameData {
             }
         }
         self.add_fallback_cities(warnings);
+        self.compute_weight_shares();
         self.check_settlement_counts(warnings);
         self.check_settlement_rules(warnings);
 
@@ -196,6 +197,23 @@ impl GameData {
             }
             self.settlements.insert(settlement.id.clone(), settlement);
         }
+    }
+
+    /// Fills `settlement_weight_share`: each settlement's weight (at least 1)
+    /// over the sum of its province's.
+    fn compute_weight_shares(&mut self) {
+        let weight =
+            |id: &SettlementId| self.settlements.get(id).map(|s| f64::from(s.weight.max(1)));
+        let mut shares = BTreeMap::new();
+        for ids in self.settlements_by_province.values() {
+            let total: f64 = ids.iter().filter_map(weight).sum();
+            for id in ids {
+                if let Some(own) = weight(id) {
+                    shares.insert(id.clone(), own / total);
+                }
+            }
+        }
+        self.settlement_weight_share = shares;
     }
 
     /// Generates a city from `capital_city` for every province lacking one.

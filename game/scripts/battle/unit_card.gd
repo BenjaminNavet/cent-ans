@@ -395,4 +395,4 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 	if key == _tooltip_key:
 		return
 	_tooltip_key = key
-	RichTooltip.set_tooltip(self, "unit", unit_type, live)
+	TooltipHost.set_tooltip(self, "unit", unit_type, live)

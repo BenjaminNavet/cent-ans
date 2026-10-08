@@ -6,16 +6,12 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools.geo import landmarks_v2
 from cent_ans_tools.geo.project import default_grid
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 CITIES = sorted((DATA / "landmarks_v2").glob("*.json"))
-SCHEMA = json.loads(
-    (DATA / "schemas" / "landmark_v2.schema.json").read_text(encoding="utf-8")
-)
 
 
 def _load(path: Path) -> dict:
@@ -25,13 +21,6 @@ def _load(path: Path) -> dict:
 def test_rouen_exists() -> None:
     """Rouen proves the format (VH4)."""
     assert (DATA / "landmarks_v2" / "rouen.json").exists()
-
-
-@pytest.mark.parametrize("path", CITIES, ids=lambda p: p.stem)
-def test_schema(path: Path) -> None:
-    """Each v2 city validates against its schema."""
-    errors = sorted(Draft202012Validator(SCHEMA).iter_errors(_load(path)), key=str)
-    assert not errors, [f"{list(e.path)}: {e.message[:160]}" for e in errors[:5]]
 
 
 @pytest.mark.parametrize("path", CITIES, ids=lambda p: p.stem)

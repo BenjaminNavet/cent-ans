@@ -13,6 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{CharacterId, FactionId, GameData, ProvinceId, TitleId};
 use serde::{Deserialize, Serialize};
 
+use crate::negotiation::{Article, Treaty};
 use crate::state::CampaignState;
 
 mod acts;
@@ -522,10 +523,7 @@ pub fn protection_score(
     let rules = &data.feudal_rules.escalation.score;
     let mut terms: Vec<(i32, String)> = vec![(
         rules.base,
-        format!(
-            "devoir de protection envers {}",
-            faction_label(data, vassal)
-        ),
+        format!("devoir de protection envers {}", data.faction_name(vassal)),
     )];
     let ratio = state.faction_power(liege) / state.faction_power(aggressor).max(1.0);
     if ratio >= rules.power_ratio {
@@ -550,10 +548,7 @@ pub fn protection_score(
         terms.push((rules.empty_treasury, "trésor vide".to_owned()));
     }
     let wars = state.factions.get(liege).map_or(0, |f| {
-        f.at_war_with
-            .iter()
-            .filter(|e| !crate::diplomacy::is_rebels(e))
-            .count()
+        f.at_war_with.iter().filter(|e| !e.is_rebels()).count()
     });
     if wars > 0 {
         terms.push((
@@ -611,7 +606,7 @@ pub fn ai_arbitration(
                 Arbitration::TakeSide {
                     side: favoured.clone(),
                 },
-                format!("préfère {}", faction_label(data, favoured)),
+                format!("préfère {}", data.faction_name(favoured)),
             );
         }
     }
@@ -627,10 +622,6 @@ pub fn ai_arbitration(
             "trop faible pour imposer la paix".to_owned(),
         )
     }
-}
-
-fn faction_label(data: &GameData, id: &FactionId) -> String {
-    crate::diplomacy::faction_name(data, id)
 }
 
 fn capitalized(text: &str) -> String {
@@ -662,11 +653,11 @@ pub fn war_escalation_preview(
             Arbitration::ImposePeace => (Likelihood::Likely, "imposera la paix".to_owned()),
             Arbitration::TakeSide { side } if side == target => (
                 Likelihood::Likely,
-                format!("prendra le parti de {}", faction_label(data, target)),
+                format!("prendra le parti de {}", data.faction_name(target)),
             ),
             Arbitration::TakeSide { .. } => (
                 Likelihood::Unlikely,
-                format!("prendra le parti de {}", faction_label(data, attacker)),
+                format!("prendra le parti de {}", data.faction_name(attacker)),
             ),
             Arbitration::LetBe => (Likelihood::Unlikely, "laissera faire".to_owned()),
         };
@@ -712,8 +703,7 @@ pub(crate) fn escalate_war(
     attacker: &FactionId,
     target: &FactionId,
 ) {
-    use crate::diplomacy::is_rebels;
-    if is_rebels(attacker) || is_rebels(target) {
+    if attacker.is_rebels() || target.is_rebels() {
         return;
     }
     let Some(lord) = common_liege(state, data, attacker, target) else {
@@ -724,13 +714,13 @@ pub(crate) fn escalate_war(
         let text = format!(
             "Guerre privée : {} attaque {}, tous deux vos vassaux. Accepter : imposer la paix ; \
              refuser : laisser faire ; ou prendre parti.",
-            faction_label(data, attacker),
-            faction_label(data, target)
+            data.faction_name(attacker),
+            data.faction_name(target)
         );
-        let proposal = crate::diplomacy::Proposal::Arbitration {
+        let proposal = Treaty::single(Article::Arbitration {
             attacker: attacker.clone(),
             target: target.clone(),
-        };
+        });
         push_feudal_offer(state, data, target, proposal, text);
     } else {
         let (verdict, _) = (policy().arbitration)(state, data, &lord, attacker, target);
@@ -756,15 +746,15 @@ fn summon_to_peace(
     let text = format!(
         "{} vous somme de faire la paix avec {}, son vassal comme vous. Obéir : paix blanche et \
          trêve de {} tours (loyauté −{}) ; passer outre : la guerre continue (loyauté −{}).",
-        faction_label(data, lord),
-        faction_label(data, target),
+        data.faction_name(lord),
+        data.faction_name(target),
         rules.truce_turns,
         rules.imposed_peace_loyalty_drop,
         rules.defied_summons_loyalty_drop
     );
-    let proposal = crate::diplomacy::Proposal::PeaceSummons {
+    let proposal = Treaty::single(Article::PeaceSummons {
         target: target.clone(),
-    };
+    });
     push_feudal_offer(state, data, lord, proposal, text);
 }
 
@@ -789,9 +779,9 @@ fn defy_summons(
     adjust_loyalty(state, player, -i32::from(drop));
     let text = format!(
         "{} passe outre la sommation de {} et poursuit sa guerre contre {}.",
-        faction_label(data, player),
-        faction_label(data, lord),
-        faction_label(data, target)
+        data.faction_name(player),
+        data.faction_name(lord),
+        data.faction_name(target)
     );
     state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(player));
 }
@@ -817,12 +807,12 @@ pub(crate) fn call_liege(
         let text = format!(
             "{} est attaqué par {} et réclame votre protection. Accepter : entrer en guerre et \
              convoquer l'ost de vos vassaux ; refuser : vous dérober (prestige, loyauté).",
-            faction_label(data, vassal),
-            faction_label(data, aggressor)
+            data.faction_name(vassal),
+            data.faction_name(aggressor)
         );
-        let proposal = crate::diplomacy::Proposal::Protection {
+        let proposal = Treaty::single(Article::Protection {
             aggressor: aggressor.clone(),
-        };
+        });
         push_feudal_offer(state, data, vassal, proposal, text);
         return;
     }
@@ -840,7 +830,7 @@ fn push_feudal_offer(
     state: &mut CampaignState,
     data: &GameData,
     from: &FactionId,
-    proposal: crate::diplomacy::Proposal,
+    proposal: Treaty,
     text: String,
 ) {
     use crate::events::{EventKind, GameEvent};
@@ -887,9 +877,9 @@ pub(crate) fn intervene(
     );
     let text = format!(
         "{} accourt au secours de son vassal {} contre {}.",
-        faction_label(data, liege),
-        faction_label(data, vassal),
-        faction_label(data, aggressor)
+        data.faction_name(liege),
+        data.faction_name(vassal),
+        data.faction_name(aggressor)
     );
     state.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(liege));
     summon_host(state, data, liege, aggressor);
@@ -920,9 +910,9 @@ pub(crate) fn shirk(
     );
     let text = format!(
         "{} se dérobe et laisse son vassal {} seul face à {}.",
-        faction_label(data, liege),
-        faction_label(data, vassal),
-        faction_label(data, aggressor)
+        data.faction_name(liege),
+        data.faction_name(vassal),
+        data.faction_name(aggressor)
     );
     state.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(liege));
 }
@@ -948,16 +938,16 @@ pub fn summon_host(
             state.start_war(&vassal, enemy);
             let text = format!(
                 "{} répond à l'ost de son suzerain {} contre {}.",
-                faction_label(data, &vassal),
-                faction_label(data, liege),
-                faction_label(data, enemy)
+                data.faction_name(&vassal),
+                data.faction_name(liege),
+                data.faction_name(enemy)
             );
             state.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&vassal));
         } else {
             let text = format!(
                 "{} refuse l'ost de son suzerain {}.",
-                faction_label(data, &vassal),
-                faction_label(data, liege)
+                data.faction_name(&vassal),
+                data.faction_name(liege)
             );
             state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(&vassal));
             felony::on_host_refused(state, data, &vassal, liege);
@@ -1055,9 +1045,9 @@ pub(crate) fn apply_arbitration(
                 EventKind::PeaceSigned,
                 format!(
                     "{} impose la paix à ses vassaux {} et {}.",
-                    faction_label(data, lord),
-                    faction_label(data, attacker),
-                    faction_label(data, target)
+                    data.faction_name(lord),
+                    data.faction_name(attacker),
+                    data.faction_name(target)
                 ),
             )
         }
@@ -1071,9 +1061,9 @@ pub(crate) fn apply_arbitration(
                 EventKind::WarDeclared,
                 format!(
                     "{} prend le parti de {} contre {}.",
-                    faction_label(data, lord),
-                    faction_label(data, side),
-                    faction_label(data, other)
+                    data.faction_name(lord),
+                    data.faction_name(side),
+                    data.faction_name(other)
                 ),
             )
         }
@@ -1081,9 +1071,9 @@ pub(crate) fn apply_arbitration(
             EventKind::Diplomacy,
             format!(
                 "{} laisse {} et {} vider leur querelle.",
-                faction_label(data, lord),
-                faction_label(data, attacker),
-                faction_label(data, target)
+                data.faction_name(lord),
+                data.faction_name(attacker),
+                data.faction_name(target)
             ),
         ),
     };
@@ -1098,20 +1088,21 @@ pub(crate) fn refuse_feudal_call(
     player: &FactionId,
     offer: &crate::diplomacy::Offer,
 ) {
-    use crate::diplomacy::Proposal;
-    match &offer.proposal {
-        Proposal::Protection { aggressor } => {
-            if state.is_at_war(&offer.from, aggressor) {
-                shirk(state, data, player, &offer.from, aggressor);
+    for article in &offer.proposal.articles {
+        match article {
+            Article::Protection { aggressor } => {
+                if state.is_at_war(&offer.from, aggressor) {
+                    shirk(state, data, player, &offer.from, aggressor);
+                }
             }
+            Article::Arbitration { attacker, target } => {
+                apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
+            }
+            Article::PeaceSummons { target } => {
+                defy_summons(state, data, &offer.from, player, target);
+            }
+            _ => {}
         }
-        Proposal::Arbitration { attacker, target } => {
-            apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
-        }
-        Proposal::PeaceSummons { target } => {
-            defy_summons(state, data, &offer.from, player, target);
-        }
-        _ => {}
     }
 }
 
@@ -1125,7 +1116,7 @@ impl CampaignState {
         offer_id: u32,
         verdict: Arbitration,
     ) -> Result<(), crate::diplomacy::DiplomacyError> {
-        use crate::diplomacy::{DiplomacyError, Proposal};
+        use crate::diplomacy::DiplomacyError;
         let offers = &self
             .factions
             .get(faction)
@@ -1135,11 +1126,14 @@ impl CampaignState {
             .iter()
             .position(|o| o.id == offer_id)
             .ok_or(DiplomacyError::UnknownOffer)?;
-        let Proposal::Arbitration { attacker, target } = offers[index].proposal.clone() else {
+        let [Article::Arbitration { attacker, target }] =
+            offers[index].proposal.articles.as_slice()
+        else {
             return Err(DiplomacyError::Refused(
                 "cette offre n'est pas un arbitrage".to_owned(),
             ));
         };
+        let (attacker, target) = (attacker.clone(), target.clone());
         if let Arbitration::TakeSide { side } = &verdict {
             if side != &attacker && side != &target {
                 return Err(DiplomacyError::Refused(
@@ -1253,7 +1247,7 @@ fn adopt_stored_suzerains(state: &mut CampaignState, data: &GameData) {
     }
 }
 
-/// `vassal` pays homage to `liege` (`Proposal::Vassalage`, spec § 4.2):
+/// `vassal` pays homage to `liege` (`Article::Vassalage`, spec § 4.2):
 /// the effective liege of its primary title becomes `liege`'s primary
 /// title. A `liege` that stood below `vassal` is first freed, so that the
 /// hierarchy keeps no cycle. `false` when either has no primary title.
@@ -1417,7 +1411,7 @@ pub fn tribute_due(
     vassal: &FactionId,
 ) -> Option<(FactionId, i64)> {
     let liege = liege_of(state, data, vassal)?;
-    let income = state.factions.get(vassal)?.income_last_turn;
+    let income = state.factions.get(vassal)?.last_budget.income;
     let amount = (income * data.feudal_rules.vassal_tribute_percent / 100).max(0);
     Some((liege, amount))
 }

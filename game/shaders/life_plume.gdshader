@@ -10,6 +10,8 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, unshaded, shadows_disabled, fog_disabled;
 
+#include "res://shaders/fx_noise.gdshaderinc"
+
 // Direction du vent (plan de carte x, z), alignée sur le vent météo de `campaign_weather`
 // (`weather_wind`, d'ouest) ; couchage du panache (part de sa hauteur déportée au sommet).
 uniform vec2 wind_dir = vec2(0.98, 0.2);
@@ -35,19 +37,6 @@ uniform vec3 sun_tint = vec3(1.0, 0.96, 0.9);
 varying vec4 v_custom;
 varying vec2 v_uv;
 varying float v_keep;
-
-float hash21(vec2 p) {
-	p = fract(p * vec2(123.34, 456.21));
-	p += dot(p, p + 45.32);
-	return fract(p.x * p.y);
-}
-
-float noise2(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x), mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
-}
 
 void vertex() {
 	v_custom = INSTANCE_CUSTOM;

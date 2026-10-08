@@ -43,7 +43,7 @@ class IncidentSceneHit:
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)
 
 	## Disque, pas le carré englobant.
 	func _has_point(point: Vector2) -> bool:
@@ -80,7 +80,7 @@ class IncidentSeal:
 			queue_redraw())
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)
 
 	func _gui_input(event: InputEvent) -> void:
 		var click := event as InputEventMouseButton

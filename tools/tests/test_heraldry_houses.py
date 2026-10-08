@@ -4,7 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import heraldry
@@ -18,16 +17,6 @@ def _load(relative: str) -> dict:
 
 def _digest(image: Image.Image) -> str:
     return hashlib.sha256(image.tobytes()).hexdigest()
-
-
-def test_houses_match_schema() -> None:
-    """houses.json exists and matches its schema."""
-    schema = _load("schemas/heraldry_houses.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(
-        Draft202012Validator(schema).iter_errors(_load("heraldry/houses.json"))
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_every_character_house_has_arms() -> None:

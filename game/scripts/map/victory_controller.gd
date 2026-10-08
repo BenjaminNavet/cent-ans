@@ -103,7 +103,7 @@ func setup(campaign_map: Node) -> void:
 	end_box.add_theme_constant_override("separation", 10)
 	card.add_child(end_box)
 	end_title = Label.new()
-	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/wip/p2f-fonts.md).
+	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/archive/chantiers.md).
 	end_title.add_theme_font_size_override("font_size", 40)
 	end_title.add_theme_color_override("font_color", Color(0.45, 0.10, 0.06))
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -187,7 +187,7 @@ func open_panel() -> void:
 	score_label.custom_minimum_size.x = WRAP_WIDTH
 	# Audit A3 D2 : le score n'était pas expliqué.
 	score_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(score_label, "campaign_score")
+	TooltipHost.attach_plain(score_label, "campaign_score")
 	if objectives.is_empty():
 		var none := Label.new()
 		none.text = "Cette faction n'a pas d'objectifs historiques : survivre et prospérer."

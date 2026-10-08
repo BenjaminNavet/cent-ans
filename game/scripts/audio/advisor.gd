@@ -1,7 +1,7 @@
 class_name Advisor
 extends Node
 
-## VO1 — le conseiller : Jean le Bel, chanoine de Liège et chroniqueur, intervient
+## Le conseiller : Jean le Bel, chanoine de Liège et chroniqueur, intervient
 ## brièvement (voix sur le bus « Voix » + sous-titre) au premier tour d'une partie, à la première
 ## bataille, au premier assaut, au premier siège, à la première victoire ou défaite et lors des
 ## alertes importantes du tour (guerre, peste, famine, révolte, banqueroute…). Textes :
@@ -19,13 +19,9 @@ const BUS := "Voix"
 const DUCK_DB := -9.0
 const READ_CHARS_PER_SECOND := 14.0
 const MAX_QUEUE := 2
-## Q4 : une réplique qui attend la fermeture d'une fenêtre est oubliée au-delà.
+## Une réplique qui attend la fermeture d'une fenêtre est oubliée au-delà.
 const MAX_WAIT_S := 120.0
 const BLOCK_CHECK_S := 0.2
-## Q4 : largeur de la bulle et place (bord gauche, au-dessus du bas d'écran : hors des boutons
-## d'action du panneau de province, de la barre d'unités et des ordres du chef).
-const BUBBLE_WIDTH := 420.0  # PO1 : plus utilisé pour la place (zone `TOASTS`)
-const BUBBLE_BOTTOM := 0.62
 
 var silent := false
 ## Faux en capture et en test : les « premières fois » ne sont pas enregistrées.
@@ -164,7 +160,7 @@ func turn_events(events: Array, player_faction: String, turn: int) -> void:
 
 
 ## Dit `line` ({id, text}) maintenant, ou après l'intervention en cours (file de 2 au plus).
-## Q4 : tant qu'une fenêtre bloquante est ouverte (avant-bataille, fin de bataille, discours,
+## Tant qu'une fenêtre bloquante est ouverte (avant-bataille, fin de bataille, discours,
 ## rapport de saison, panneaux centraux…), la réplique attend sa fermeture (`MAX_WAIT_S` au plus).
 func say(line: Dictionary) -> void:
 	if speaking() or _blocked():
@@ -215,7 +211,7 @@ func _process(delta: float) -> void:
 	if _panel != null and _panel.visible and not speaking():
 		_panel.visible = false
 		_last_end = _time
-	# Q4 : une fenêtre bloquante s'ouvre pendant qu'il parle : le sous-titre s'efface (la voix
+	# Une fenêtre bloquante s'ouvre pendant qu'il parle : le sous-titre s'efface (la voix
 	# finit sa phrase) et ne revient pas par-dessus la fenêtre.
 	if _panel != null and _panel.visible and _is_blocked:
 		_panel.visible = false
@@ -239,7 +235,7 @@ func _show(text: String, data: Dictionary) -> void:
 
 func _build(data: Dictionary) -> void:
 	_layer = CanvasLayer.new()
-	_layer.layer = PanelStack.LAYER_ADVISOR  # Q4 : sous les modales (voir PanelStack)
+	_layer.layer = PanelStack.LAYER_ADVISOR  # sous les modales (voir PanelStack)
 	add_child(_layer)
 	_panel = PanelContainer.new()
 	_panel.name = "AdvisorPanel"
@@ -262,7 +258,7 @@ func _build(data: Dictionary) -> void:
 	_panel.offset_bottom = 0
 	_panel.offset_top = 0
 	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	# Q4 : la bulle ne capte plus la souris (le clic passe au jeu) ; seul « × » la ferme.
+	# La bulle ne capte plus la souris (le clic passe au jeu) ; seul « × » la ferme.
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_layer.add_child(_panel)
 	var box := VBoxContainer.new()
@@ -287,12 +283,12 @@ func _build(data: Dictionary) -> void:
 	_close_button.custom_minimum_size = Vector2(24, 20)
 	_close_button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_close_button.add_theme_color_override("font_color", HudStyle.RUBRIC)
-	RichTooltip.attach_plain(_close_button, "advisor_silence")
+	TooltipHost.attach_plain(_close_button, "advisor_silence")
 	_close_button.pressed.connect(dismiss)
 	head.add_child(_close_button)
 	_text_label = Label.new()
 	_text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_text_label.custom_minimum_size = Vector2(200, 0)  # PO1 : largeur de la zone `TOASTS`
+	_text_label.custom_minimum_size = Vector2(200, 0)  # largeur de la zone `TOASTS`
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("font_color", HudStyle.INK)

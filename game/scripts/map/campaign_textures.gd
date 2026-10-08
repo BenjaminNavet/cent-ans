@@ -16,34 +16,16 @@ const ALBEDO_ARRAY_PATH := TEXTURE_DIR + "terrain_albedo_array.jpg"
 const NORMAL_ARRAY_PATH := TEXTURE_DIR + "terrain_normal_array.jpg"
 const WATER_NORMAL_PATH := TEXTURE_DIR + "water_normal.png"
 
-static var _spec: Dictionary = {}
-static var _spec_loaded: bool = false
+static var _lookup := JsonLookup.new(SPEC_FILE, {}, "", "layers")
 
 
 static func enabled() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-ga4")
+	return not CmdArgs.has("--no-ga4")
 
 
 ## Données GA4 (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.
 static func spec() -> Dictionary:
-	if _spec_loaded:
-		return _spec
-	_spec_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(SPEC_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
-				_spec = parsed
-				return _spec
-	push_warning("CampaignTextures: %s introuvable, textures GA4 désactivées" % SPEC_FILE)
-	return _spec
+	return _lookup.data()
 
 
 ## Identifiants des couches dans l'ordre des données (repli : contrat du shader).

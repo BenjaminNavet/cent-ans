@@ -27,8 +27,8 @@
         "required": ["id", "poly_haven_id", "tile_size_m"],
         "additionalProperties": false,
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-          "poly_haven_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
+          "poly_haven_id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
           "role": {
             "type": "string",

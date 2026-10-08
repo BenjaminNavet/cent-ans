@@ -1,6 +1,6 @@
 """Fire and smoke flipbooks baked from free simulated sequences (lot FA2).
 
-Replaces the procedural sheets of `fire_flipbooks.py` with Unity Labs Paris sequences ("Free VFX
+Provides the fire/smoke flipbooks from Unity Labs Paris sequences ("Free VFX
 image sequences & flipbooks", CC0), keeping the encoding the shaders expect (8x8 frames):
 
 - `flame_flipbook.png`: a looping flame. RGB = heat (0 cold edge, 1 white core), A = coverage.

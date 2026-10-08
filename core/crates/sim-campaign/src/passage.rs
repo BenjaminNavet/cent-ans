@@ -20,7 +20,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{FactionId, GameData, PassageRules, ProvinceId};
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{faction_name, RelationKind, REBELS_FACTION};
+use crate::diplomacy::{RelationKind, REBELS_FACTION};
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState};
 
@@ -212,25 +212,21 @@ pub fn resolve_trespass(state: &mut CampaignState, data: &GameData, events: &mut
         }
         let where_ = provinces
             .iter()
-            .map(|p| {
-                data.provinces
-                    .get(p)
-                    .map_or_else(|| p.to_string(), |d| d.name.display.clone())
-            })
+            .map(|p| data.province_name(p))
             .collect::<Vec<_>>()
             .join(", ");
         let mut text = format!(
             "Les armées de {} campent sans droit de passage sur les terres de {} ({}) : \
              incident diplomatique ({:+}).",
-            faction_name(data, &intruder),
-            faction_name(data, &victim),
+            data.faction_name(&intruder),
+            data.faction_name(&victim),
             where_,
             -malus
         );
         if grievance && counted == rules.casus_belli_seasons {
             text.push_str(&format!(
                 " {} tient désormais un casus belli.",
-                faction_name(data, &victim)
+                data.faction_name(&victim)
             ));
         }
         let mut event = GameEvent::new(EventKind::Diplomacy, text).faction(&victim);

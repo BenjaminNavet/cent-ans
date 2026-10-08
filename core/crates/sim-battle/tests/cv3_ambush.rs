@@ -27,7 +27,7 @@ fn ambush_setup() -> BattleSetup {
     let data = data();
     let mut setup = setup(
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",
@@ -35,7 +35,7 @@ fn ambush_setup() -> BattleSetup {
                 "unit_men_at_arms_foot",
             ],
         ),
-        units(&data, &VICTIM),
+        units(data, &VICTIM),
         None,
     );
     setup.opening = BattleOpening::Ambush {
@@ -236,8 +236,8 @@ fn the_ai_ambusher_keeps_its_flanks_and_the_column_its_road() {
 fn forced_march_starts_tired_without_deployment() {
     let data = data();
     let mut setup = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
         None,
     );
     setup.defender.forced_march = true;
@@ -268,9 +268,9 @@ fn forced_march_starts_tired_without_deployment() {
 fn entrenched_setup() -> BattleSetup {
     let data = data();
     let mut setup = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",
@@ -289,7 +289,7 @@ fn an_entrenched_camp_has_its_stakes_and_palisade() {
     let archers: Vec<_> = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Defender && u.unit_type == "unit_longbowmen")
+        .filter(|u| u.side == SideId::Defender && &*u.unit_type == "unit_longbowmen")
         .collect();
     assert_eq!(archers.len(), 2);
     assert!(archers.iter().all(|u| u.stakes_planted), "stakes ready");
@@ -348,7 +348,7 @@ fn melee_losses(with_palisade: bool) -> f64 {
     let defender = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_men_at_arms_foot")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_men_at_arms_foot")
         .unwrap()
         .clone();
     let attacker = sim

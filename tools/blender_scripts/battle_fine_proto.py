@@ -6,7 +6,7 @@ Run from the repository root:
 
 Steps (after ``--``):
     fit       fit the MakeHuman body to the ``human`` rig, render the clip test sheet
-    ...       (more steps are added as the prototype grows, see docs/wip/fg0-prototype.md)
+    ...       (more steps are added as the prototype grows, see docs/archive/chantiers.md)
 
 Method (human):
 1. The CC0 MakeHuman body (``fg_base_male.blend``, made by ``fg_makehuman_base.py``) carries

@@ -1,21 +1,12 @@
 //! Lot RS-N: read-only demolition preview (`buildings::demolition_preview`)
 //! for the UI's « Raser » button, on the real data of 1337.
 
-use std::path::PathBuf;
-
-use data_model::{BuildingId, FactionId, GameData, SettlementId};
+use data_model::{BuildingId, GameData, SettlementId};
 
 use crate::buildings::demolition_preview;
 use crate::state::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
@@ -45,10 +36,10 @@ fn place_with(state: &mut CampaignState, faction: &str, buildings: &[&str]) -> S
 
 #[test]
 fn a_free_standing_building_can_be_razed() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market", "bld_apothecary"]);
-    let preview = demolition_preview(&state, &data, &place, &bld("bld_apothecary"));
+    let preview = demolition_preview(&state, data, &place, &bld("bld_apothecary"));
     assert!(preview.can_demolish);
     assert!(preview.reason.is_none());
     let apothecary = &data.buildings[&bld("bld_apothecary")];
@@ -65,10 +56,10 @@ fn a_free_standing_building_can_be_razed() {
 
 #[test]
 fn a_dependency_blocks_the_preview_but_still_gives_the_refund() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market", "bld_apothecary"]);
-    let preview = demolition_preview(&state, &data, &place, &bld("bld_market"));
+    let preview = demolition_preview(&state, data, &place, &bld("bld_market"));
     assert!(!preview.can_demolish);
     assert!(preview.reason.is_some());
     let market = &data.buildings[&bld("bld_market")];
@@ -80,8 +71,8 @@ fn a_dependency_blocks_the_preview_but_still_gives_the_refund() {
 
 #[test]
 fn a_besieged_settlement_blocks_the_preview() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market"]);
     let turn = state.turn;
     state.settlements.get_mut(&place).unwrap().siege = Some(crate::state::SiegeState {
@@ -93,21 +84,21 @@ fn a_besieged_settlement_blocks_the_preview() {
         started_turn: turn,
         engine_work: 0,
     });
-    let preview = demolition_preview(&state, &data, &place, &bld("bld_market"));
+    let preview = demolition_preview(&state, data, &place, &bld("bld_market"));
     assert!(!preview.can_demolish);
     assert_eq!(preview.reason.as_deref(), Some("la colonie est assiégée"));
 }
 
 #[test]
 fn the_preview_and_the_actual_demolition_agree_on_the_refund() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market", "bld_apothecary"]);
-    let preview = demolition_preview(&state, &data, &place, &bld("bld_apothecary"));
+    let preview = demolition_preview(&state, data, &place, &bld("bld_apothecary"));
     let treasury = state.factions[&fac("fac_france")].treasury;
     state
         .submit_order(
-            &data,
+            data,
             crate::orders::Order::Demolish {
                 settlement: place.clone().into(),
                 building: bld("bld_apothecary"),

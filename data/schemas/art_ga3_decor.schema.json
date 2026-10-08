@@ -19,7 +19,7 @@
         "required": ["id", "label", "prompt", "model", "scale_axis", "size_m", "lod0", "tex", "kit_kind", "fit", "share", "wired"],
         "additionalProperties": false,
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "label": {"type": "string"},
           "source": {"type": "string", "description": "Dossier de brutes d'une sonde réutilisée (ex. `s4`) : pas de nouvel appel fal."},
           "raw": {"type": "string", "description": "Dossier des brutes retenu, relatif à `~/dev/cent-ans-raw/ga3/` (défaut `l1/<id>`, `l1/<id>_2` pour un second essai)."},

@@ -161,7 +161,7 @@ Si un souverain perd son dernier titre de rang supérieur, ses vassaux directs d
 
 - **Registre 1337** rédigé par royaume (France ; Empire et Pays-Bas ; Îles britanniques ; Ibérie ;
   Italie), sources citées et incertitude marquée. Relecture par un agent historien (anachronismes)
-  à chaque lot, sur le modèle de `docs/wip/historien.md`.
+  à chaque lot, sur le modèle de `docs/archive/chantiers.md`.
 - **Portraits** : ≈ 170 images (≈ 110 souverains, ≈ 60 héritiers) à ≈ 0,045 $, soit ≈ 8 $, plus
   les variantes âgées des souverains de plus de 50 ans. **Plafond propre FE : 15 $**, consigné dans `docs/budget.md`.
 - **Armoiries** : générées depuis le blason par le pipeline DA1, sans coût.

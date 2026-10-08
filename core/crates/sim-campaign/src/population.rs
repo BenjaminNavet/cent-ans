@@ -1,6 +1,7 @@
 //! Per-season population dynamics: growth, health, wealth, goods
 //! satisfaction, unrest and revolt (spec § 1.1).
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, PopulationClass, ProvinceId, SocialClass};
 
 use crate::buildings::EffectTotals;
@@ -135,8 +136,8 @@ fn update_class(
         1.0
     };
     let mut growth_rate = base_growth(class) * health_factor * devastation_factor;
-    growth_rate += (effects.growth.flat + class_fx.growth.flat) / 100.0;
-    growth_rate *= 1.0 + (effects.growth.percent + class_fx.growth.percent) / 100.0;
+    growth_rate += (effects[EffectKind::Growth].flat + class_fx.growth.flat) / 100.0;
+    growth_rate *= 1.0 + (effects[EffectKind::Growth].percent + class_fx.growth.percent) / 100.0;
     let new_count = (entry.count as f64 * (1.0 + growth_rate)).max(0.0).round() as u64;
     entry.count = new_count;
 
@@ -207,8 +208,8 @@ fn health_target(
     shared: &SharedModifiers,
 ) -> f64 {
     HEALTH_NEUTRAL
-        + effects.health.flat
-        + effects.health.percent
+        + effects[EffectKind::Health].flat
+        + effects[EffectKind::Health].percent
         + class_points(effects.classes.get(class).health)
         + (goods_satisfaction - 50.0) / 4.0
         - shared.overpopulation
@@ -216,10 +217,10 @@ fn health_target(
 
 fn wealth_target(effects: &EffectTotals, class: SocialClass, shared: &SharedModifiers) -> f64 {
     base_wealth(class)
-        + effects.wealth.flat
-        + effects.wealth.percent
+        + effects[EffectKind::Wealth].flat
+        + effects[EffectKind::Wealth].percent
         + class_points(effects.classes.get(class).wealth)
-        + effects.trade_income.flat
+        + effects[EffectKind::TradeIncome].flat
         - shared.tax_burden * 30.0
         - f64::from(shared.devastation) / 2.0
 }
@@ -227,8 +228,8 @@ fn wealth_target(effects: &EffectTotals, class: SocialClass, shared: &SharedModi
 fn goods_target(effects: &EffectTotals, class: SocialClass, goods_category_count: usize) -> f64 {
     GOODS_TARGET_BASE
         + GOODS_TARGET_PER_CATEGORY * goods_category_count as f64
-        + effects.goods_satisfaction.flat
-        + effects.goods_satisfaction.percent
+        + effects[EffectKind::GoodsSatisfaction].flat
+        + effects[EffectKind::GoodsSatisfaction].percent
         + class_points(effects.classes.get(class).goods_satisfaction)
 }
 
@@ -260,13 +261,13 @@ fn unrest_target(
     unrest_target +=
         (f64::from(shared.disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
     // Building `Unrest` effects: negative values are appeasement.
-    unrest_target += effects.unrest.flat
-        + effects.unrest.percent
+    unrest_target += effects[EffectKind::Unrest].flat
+        + effects[EffectKind::Unrest].percent
         + class_points(effects.classes.get(class).unrest);
     // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
     // to its lord.
     if class == SocialClass::Nobility {
-        unrest_target -= effects.loyalty.apply(0.0);
+        unrest_target -= effects[EffectKind::Loyalty].apply(0.0);
     }
     unrest_target.clamp(0.0, 100.0)
 }
@@ -338,10 +339,10 @@ fn province_inputs(
         data,
         &controller,
     ));
-    effects.unrest.flat += state.political_unrest(id);
+    effects[EffectKind::Unrest].flat += state.political_unrest(id);
     // DF1: the player's provinces are calmer (easy) or quicker to
     // grumble (hard).
-    effects.unrest.flat += state.difficulty_unrest(data, &controller);
+    effects[EffectKind::Unrest].flat += state.difficulty_unrest(data, &controller);
     let cap = state.province_capacity(data, id);
     // H3: the province's diet, possibly aimed at one class.
     let class_effects: Vec<EffectTotals> = SocialClass::ALL
@@ -479,7 +480,7 @@ pub(crate) fn resolve_population(
         let rules = &data.population_rules;
         let weighted = weighted_unrest(&province.population);
         // EQ1: a province the rebels already hold does not rise against them.
-        if weighted > rules.revolt_unrest_threshold && !crate::diplomacy::is_rebels(&controller) {
+        if weighted > rules.revolt_unrest_threshold && !controller.is_rebels() {
             province.revolt_seasons += 1;
         } else {
             province.revolt_seasons = 0;

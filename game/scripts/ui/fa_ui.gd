@@ -27,7 +27,7 @@ static func data() -> Dictionary:
 		# Toujours le catalogue du dépôt : les jeux de données réduits des tests n'en ont pas.
 		var path := MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
 		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			var parsed: Variant = DataFile.parse_file(path)
 			if parsed is Dictionary:
 				_data = parsed
 		if _data.is_empty():

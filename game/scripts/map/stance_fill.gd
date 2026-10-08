@@ -15,7 +15,6 @@ extends Node
 ## Option du joueur : `map/stance_fill` (Réglages › Carte). Option (après `--`) :
 ## `--no-stance-fill` (A/B de perf). Purement visuel.
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/stance_fill.json"
 const SETTING_KEY := "map/stance_fill"
 
@@ -38,7 +37,7 @@ var _last_distance: float = -1.0
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = OS.get_cmdline_user_args().has("--no-stance-fill")
+	_cli_disabled = CmdArgs.has("--no-stance-fill")
 	tuning = load_tuning()
 	_set_param("sf_saturation", float(tuning.get("saturation", 0.6)))
 	_set_param("sf_flat", float(tuning.get("flat_mix", 0.0)))
@@ -54,12 +53,7 @@ func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 
 ## Réglages de `data/map/stance_fill.json` (dictionnaire vide si absent ou illisible).
 static func load_tuning() -> Dictionary:
-	var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(TUNING_PATH)
-	if not FileAccess.file_exists(path):
-		push_warning("StanceFill: %s missing" % path)
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return JsonLookup.new(TUNING_PATH).data()
 
 
 ## Couleur de lavis d'une catégorie de position (`StanceCues` : self, enemy, friend, other) :

@@ -21,13 +21,12 @@
 //! numbers come from `data/rules/battle_water.json` (schema
 //! `data/schemas/battle_water_rules.schema.json`).
 
-use std::f64::consts::TAU;
-use std::sync::OnceLock;
-
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
+use std::f64::consts::TAU;
 
 use crate::field::{Battlefield, River, Zone};
+use crate::geom::segment_distance;
 use crate::rng::BattleRng;
 use crate::scale::FieldSize;
 use crate::setup::CrossingStructure;
@@ -200,17 +199,7 @@ pub struct WaterRules {
     pub crossing: CrossingSiteRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_water.json");
-
-impl WaterRules {
-    /// `data/rules/battle_water.json` as compiled into the crate.
-    pub fn bundled() -> &'static WaterRules {
-        static RULES: OnceLock<WaterRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_water.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(WaterRules, "rules/battle_water.json");
 
 // ----- features ------------------------------------------------------------------
 
@@ -364,6 +353,42 @@ impl Road {
     }
 }
 
+/// Roads and tracks of a field in a [`SegmentGrid`]: the fast form of
+/// [`Battlefield::road_at`] for the per-step queries.
+#[derive(Debug, Clone, Default)]
+pub struct RoadIndex {
+    grid: crate::geom::SegmentGrid,
+    kinds: Vec<RoadKind>,
+}
+
+impl RoadIndex {
+    pub fn build(roads: &[Road]) -> Self {
+        let grid = crate::geom::SegmentGrid::build(
+            roads
+                .iter()
+                .enumerate()
+                .map(|(i, r)| (r.points.as_slice(), r.width * 0.5 + 1.0, i as u32)),
+        );
+        RoadIndex {
+            grid,
+            kinds: roads.iter().map(|r| r.kind).collect(),
+        }
+    }
+
+    /// The road at (x, z), if any (main roads first).
+    pub fn kind_at(&self, x: f64, z: f64) -> Option<RoadKind> {
+        let mut found = None;
+        for i in self.grid.hits(x, z) {
+            let kind = self.kinds[i as usize];
+            if kind == RoadKind::Main {
+                return Some(kind);
+            }
+            found = Some(kind);
+        }
+        found
+    }
+}
+
 /// What kind of water stands at a point.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Water {
@@ -440,17 +465,6 @@ pub fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
         .windows(2)
         .map(|w| segment_distance((x, z), w[0], w[1]))
         .fold(f64::INFINITY, f64::min)
-}
-
-fn segment_distance(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = dx * dx + dz * dz;
-    let t = if len2 < 1e-9 {
-        0.0
-    } else {
-        (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
-    };
-    (p.0 - a.0 - dx * t).hypot(p.1 - a.1 - dz * t)
 }
 
 /// Cheap reject: is (x, z) within `margin` of the bounding box of `points`?

@@ -1,11 +1,11 @@
-//! Naval war on the campaign map (lot NV1, ADR 0028).
+//! Naval war on the campaign map (ADR 0028).
 //!
 //! No fleet walks the sea: each faction keeps a pool of warships per class
 //! (`data/naval/fleets.json`) and a control of each sea (0-100). A crossing
 //! (`Embark`) may be intercepted by a faction at war that arms ships in that
-//! sea; the naval battle follows ([`sim_battle::naval`]): fought in 3D or
-//! auto-resolved when the player's army crosses (pending in
-//! [`NavalState::pending`]), auto-resolved otherwise. Its consequences:
+//! sea; the naval battle follows ([`sim_battle::naval`]), always
+//! auto-resolved (pending in [`NavalState::pending`] while the player
+//! chooses to fight or withdraw). Its consequences:
 //! losses of the embarked regiments, ships sunk and taken (they change
 //! pools), control of the sea to the victor, blockade of the enemy's ports
 //! of a sea held (treasury toll each season).
@@ -109,12 +109,6 @@ pub enum NavalRequestError {
     Stale(usize),
     #[error("résultat invalide : {0}")]
     BadOutcome(String),
-}
-
-fn faction_name(data: &GameData, id: &FactionId) -> String {
-    data.factions
-        .get(id)
-        .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
 }
 
 fn battle_season(season: Season) -> BattleSeason {
@@ -308,7 +302,7 @@ pub(crate) fn intercept(
                 EventKind::Battle,
                 format!(
                     "En mer, une escadre {} barre la route de {}.",
-                    crate::events::de(&faction_name(data, &hostile)),
+                    crate::events::de(&data.faction_name(&hostile)),
                     state.army_name(data, army)
                 ),
             )
@@ -538,9 +532,6 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
                 fireship: false,
                 chain: None,
                 fire_arrows: false,
-                position: None,
-                heading_deg: None,
-                flagship: n == 0,
             });
             n += 1;
         }
@@ -566,12 +557,11 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         .collect();
     let attacker = NavalSideSetup {
         faction: request.interceptor.to_string(),
-        faction_name: faction_name(data, &request.interceptor),
+        faction_name: data.faction_name(&request.interceptor),
         army: String::new(),
         admiral: String::new(),
         units,
         ships,
-        hold: false,
     };
     let defender = transport_side(state, data, &request.army, &request.from, request.seed);
     let player = &state.player_faction;
@@ -591,10 +581,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
         place_name: waters_name(data, request),
         season: battle_season(state.season),
         rain: state.season == Season::Autumn || state.season == Season::Winter,
-        wind_to_deg: None,
-        wind_strength: None,
         gauge: None,
-        shore: false,
         attacker,
         defender,
         player_side,
@@ -619,7 +606,6 @@ fn transport_side(
             admiral: String::new(),
             units: Vec::new(),
             ships: Vec::new(),
-            hold: false,
         };
     };
     let side = crate::battle_request::side_setup(state, data, army_id, army);
@@ -680,19 +666,15 @@ fn transport_side(
             fireship: false,
             chain: None,
             fire_arrows: false,
-            position: None,
-            heading_deg: None,
-            flagship: n == 0,
         });
     }
     NavalSideSetup {
         faction: army.faction.to_string(),
-        faction_name: faction_name(data, &army.faction),
+        faction_name: data.faction_name(&army.faction),
         army: army_id.to_string(),
         admiral: side.general.map(|g| g.name).unwrap_or_default(),
         units,
         ships,
-        hold: false,
     }
 }
 
@@ -791,9 +773,9 @@ pub(crate) fn apply_outcome(
     let army_name = state.army_name(data, &request.army);
     let text = format!(
         "Bataille navale dans {sea} : l'escadre {} contre {} ({}). {} Navires pris : {} ; coulés : {} ({} contre {}). Pertes : {} hommes contre {}.",
-        crate::events::de(&faction_name(data, &request.interceptor)),
+        crate::events::de(&data.faction_name(&request.interceptor)),
         army_name,
-        faction_name(data, &army_faction),
+        data.faction_name(&army_faction),
         match &winner {
             Some(w) if w == &request.interceptor => "La traversée est brisée.".to_owned(),
             Some(_) => "L'escadre est repoussée, la traversée continue.".to_owned(),
@@ -801,8 +783,8 @@ pub(crate) fn apply_outcome(
         },
         outcome.attacker.prizes.len() + outcome.defender.prizes.len(),
         outcome.attacker.count(ShipFate::Sunk) + outcome.defender.count(ShipFate::Sunk),
-        faction_name(data, &request.interceptor),
-        faction_name(data, &army_faction),
+        data.faction_name(&request.interceptor),
+        data.faction_name(&army_faction),
         outcome.attacker.men_lost,
         outcome.defender.men_lost,
     );
@@ -857,9 +839,9 @@ impl CampaignState {
                     sea: request.sea.clone(),
                     sea_name: data.naval.sea_name(&request.sea),
                     interceptor: request.interceptor.clone(),
-                    interceptor_name: faction_name(data, &request.interceptor),
+                    interceptor_name: data.faction_name(&request.interceptor),
                     faction: army.faction.clone(),
-                    faction_name: faction_name(data, &army.faction),
+                    faction_name: data.faction_name(&army.faction),
                     interceptor_ships: setup.attacker.ships.len() as u32,
                     transport_ships: setup.defender.ships.len() as u32,
                     interceptor_men: setup.attacker.men(),
@@ -871,7 +853,7 @@ impl CampaignState {
             .collect()
     }
 
-    /// Setup of pending naval battle `index` for the 3D battle.
+    /// Setup of pending naval battle `index` for the pre-battle dialog.
     pub fn naval_battle_setup(
         &self,
         data: &GameData,
@@ -893,7 +875,7 @@ impl CampaignState {
         self.naval.pending.get(index).map(|r| r.seed)
     }
 
-    /// Applies the result of the 3D naval battle `index`; the crossing goes
+    /// Applies the result of naval battle `index`; the crossing goes
     /// on if the army holds the sea.
     pub fn resolve_naval_battle(
         &mut self,
@@ -950,7 +932,7 @@ impl CampaignState {
         let text = format!(
             "La flotte de {} rentre au port de {} sans combattre.",
             self.army_name(data, &request.army),
-            crate::siege::settlement_name(data, &request.from)
+            data.settlement_name(&request.from)
         );
         let mut event = GameEvent::new(EventKind::Battle, text).army(&request.army);
         if let Some(army) = self.armies.get(&request.army) {

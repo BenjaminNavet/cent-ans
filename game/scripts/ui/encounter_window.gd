@@ -22,9 +22,9 @@ func _ready() -> void:
 	for node in find_children("*", "Button", true, false):
 		var button := node as Button
 		if button.text == "Plus tard":
-			RichTooltip.attach_plain(button, "decision_default_choice_turn")
+			TooltipHost.attach_plain(button, "decision_default_choice_turn")
 		elif button.text == "×":
-			RichTooltip.attach_plain(button, "close_encounter_pending")
+			TooltipHost.attach_plain(button, "close_encounter_pending")
 
 
 ## Affiche `encounter` (un élément de `get_pending_encounters`) ; `queue_size` en attente.
@@ -74,8 +74,7 @@ func option_buttons() -> Array[Button]:
 
 
 func _encounter_option_row(option: Dictionary) -> Control:
-	var row := VBoxContainer.new()
-	row.add_theme_constant_override("separation", 1)
+	var row := UiBuild.vbox(1)
 	var button := Button.new()
 	button.name = "Option_%d" % int(option.get("index", 0))
 	var text := str(option.get("label", ""))
@@ -102,11 +101,5 @@ func _encounter_option_row(option: Dictionary) -> Control:
 	if not available and reason != "":
 		lines.append("Impossible : " + reason)
 	if not lines.is_empty():
-		var summary := Label.new()
-		summary.text = "   " + " — ".join(lines)
-		summary.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-		summary.add_theme_color_override("font_color", RUBRIC if not available else FADED_INK)
-		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		summary.custom_minimum_size = Vector2(580, 0)
-		row.add_child(summary)
+		var summary := UiBuild.label("   " + " — ".join(lines), UiType.size(UiType.CAPTION), RUBRIC if not available else FADED_INK, true, 580, row)
 	return row

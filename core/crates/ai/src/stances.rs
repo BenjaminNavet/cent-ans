@@ -24,40 +24,23 @@
 //! turn and army ([`crate::alignment::campaign_roll`]), so the plan stays
 //! deterministic.
 
+use data_model::util::{dist, segment_distance};
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::posture;
 use sim_campaign::{
     ArmyId, CampaignState, Cell, MoveOrderTarget, Order, Place, Stance, StopReason,
 };
 
-/// Salts of the rolls.
-const AMBUSH_SALT: u64 = 0xA3B0;
-const DETOUR_SALT: u64 = 0xD370;
 /// Sampling step (km) of a route when looking for the lands it crosses.
 const ROUTE_SAMPLE_KM: f32 = 4.0;
 /// Ambush cells tried with a full march preview at most.
 const AMBUSH_CANDIDATES: usize = 4;
 
-fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
-    ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
-}
-
-/// Distance from `p` to the segment `a`-`b`.
-fn segment_distance(p: [f32; 2], a: [f32; 2], b: [f32; 2]) -> f32 {
-    let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
-    let len2 = dx * dx + dy * dy;
-    if len2 <= f32::EPSILON {
-        return distance(p, a);
-    }
-    let t = (((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2).clamp(0.0, 1.0);
-    distance(p, [a[0] + t * dx, a[1] + t * dy])
-}
-
 /// Distance from `p` to the polyline `route`.
 fn route_distance(p: [f32; 2], route: &[[f32; 2]]) -> f32 {
     match route {
         [] => f32::INFINITY,
-        [only] => distance(p, *only),
+        [only] => dist(p, *only),
         _ => route
             .windows(2)
             .map(|w| segment_distance(p, w[0], w[1]))
@@ -74,7 +57,7 @@ fn truncate_route(route: &[[f32; 2]], length: f32) -> Vec<[f32; 2]> {
     out.push(*first);
     let mut left = length;
     for w in route.windows(2) {
-        let d = distance(w[0], w[1]);
+        let d = dist(w[0], w[1]);
         if d >= left {
             let t = if d > 0.0 { left / d } else { 0.0 };
             out.push([
@@ -145,7 +128,7 @@ fn threatening_route(
     // Does it cross our lands? Sampled every few kilometres.
     let step = ROUTE_SAMPLE_KM * px_per_km;
     let crosses = route.windows(2).any(|w| {
-        let d = distance(w[0], w[1]);
+        let d = dist(w[0], w[1]);
         let n = (d / step).ceil().max(1.0) as usize;
         (0..=n).any(|i| {
             let t = i as f32 / n as f32;
@@ -183,7 +166,7 @@ fn threats(
         .filter(|(_, e)| state.is_at_war(faction, &e.faction) && !e.units.is_empty())
         .filter(|(_, e)| !posture::is_hidden_from(state, data, e, faction))
         .filter_map(|(id, e)| {
-            let d = distance(here, state.army_point(data, e));
+            let d = dist(here, state.army_point(data, e));
             if d > watch {
                 return None;
             }
@@ -213,7 +196,6 @@ pub fn ambush_orders(
     army_id: &ArmyId,
     aggression: i32,
 ) -> Option<Vec<Order>> {
-    let rules = &data.ai_grid.postures.ambush;
     let weight = ambush_weight(data, aggression);
     let army = state.armies.get(army_id)?;
     if weight == 0
@@ -223,90 +205,136 @@ pub fn ambush_orders(
     {
         return None;
     }
-    let power = state.army_power(data, army_id);
-    let px_per_km = sim_campaign::march::px_per_km(data);
-    let zoc = data.free_movement_rules().zoc_radius_km as f32 * px_per_km;
-    let near = rules.route_zoc_share as f32 * zoc;
-    // Stronger enemies, but not overwhelming ones.
-    let targets: Vec<([f32; 2], Vec<[f32; 2]>)> = threats(state, data, faction, army_id)
-        .into_iter()
-        .filter(|(enemy, _)| {
-            let theirs = state.army_power(data, enemy);
-            power < rules.max_power_ratio * theirs && power >= rules.min_power_ratio * theirs
-        })
-        .map(|(enemy, route)| (state.army_point(data, &state.armies[&enemy]), route))
-        .collect();
-    if targets.is_empty() || roll(state, faction, army_id, AMBUSH_SALT) >= weight {
+    let prey = AmbushPrey::new(state, data, faction, army_id)?;
+    if roll(state, faction, army_id, crate::salts::AMBUSH) >= weight {
         return None;
     }
-    let fits = |point: [f32; 2]| {
-        targets
-            .iter()
-            .any(|(at, route)| distance(point, *at) > zoc && route_distance(point, route) <= near)
-    };
-    let posture_rules = &data.posture_rules;
-    let covered = |point: [f32; 2]| {
-        data.cover_class_at(point, &posture_rules.cover)
-            .is_covered()
+    let ambush = |stance_only: bool, point: [f32; 2]| {
+        let stance = Order::SetStance {
+            army: army_id.clone(),
+            stance: Stance::Ambush,
+        };
+        if stance_only {
+            vec![stance]
+        } else {
+            vec![Order::move_to_point(army_id.clone(), point), stance]
+        }
     };
     // On the spot.
     let here = state.army_point(data, army);
     if army.settlement().is_none()
-        && fits(here)
+        && prey.fits(here)
         && posture::validate_stance_change(state, data, army_id, Stance::Ambush).is_ok()
     {
-        return Some(vec![Order::SetStance {
-            army: army_id.clone(),
-            stance: Stance::Ambush,
-        }]);
+        return Some(ambush(true, here));
     }
     // After a move leaving the movement the ambush needs.
     let base = state.army_base_grid_allowance(data, army);
-    let needed =
-        (f64::from(base) * posture_rules.ambush.min_movement_left_percent / 100.0).ceil() as u32;
+    let needed = (f64::from(base) * data.posture_rules.ambush.min_movement_left_percent / 100.0)
+        .ceil() as u32;
     let budget = army.movement_left.saturating_sub(needed.max(1));
     if budget == 0 {
         return None;
     }
     let grid = data.navgrid();
-    let own_cell = state.army_cell(data, army);
-    let mut cells: Vec<(f32, u32, Cell)> = state
-        .reachable_area(data, army_id)
-        .into_iter()
-        .filter(|(cell, cost)| *cost <= budget && *cell != own_cell)
-        .filter_map(|(cell, cost)| {
-            let point = cell.center(grid);
-            if !fits(point) || !covered(point) {
-                return None;
-            }
-            let d = targets
-                .iter()
-                .map(|(_, route)| route_distance(point, route))
-                .fold(f32::INFINITY, f32::min);
-            Some((d, cost, cell))
-        })
-        .collect();
-    cells.sort_by(|a, b| {
-        a.0.total_cmp(&b.0)
-            .then_with(|| a.1.cmp(&b.1))
-            .then_with(|| a.2.cmp(&b.2))
-    });
-    cells
+    prey.covered_cells(state, data, army_id, budget)
         .into_iter()
         .take(AMBUSH_CANDIDATES)
         .find_map(|(_, _, cell)| {
             let point = cell.center(grid);
             let (cost, stop) = state.preview_march_to_point(data, army_id, point)?;
-            (stop == StopReason::Arrived && cost <= budget).then(|| {
-                vec![
-                    Order::move_to_point(army_id.clone(), point),
-                    Order::SetStance {
-                        army: army_id.clone(),
-                        stance: Stance::Ambush,
-                    },
-                ]
-            })
+            (stop == StopReason::Arrived && cost <= budget).then(|| ambush(false, point))
         })
+}
+
+/// The stronger (but not overwhelming) enemies marching on our lands, and
+/// the geometry that decides where an ambush can lie.
+struct AmbushPrey<'a> {
+    /// Enemy position and predicted route.
+    targets: Vec<([f32; 2], Vec<[f32; 2]>)>,
+    /// Zone of control radius, in pixels.
+    zoc: f32,
+    /// A spot lies within this distance of a route.
+    near: f32,
+    data: &'a GameData,
+}
+
+impl<'a> AmbushPrey<'a> {
+    /// `None` when no enemy qualifies.
+    fn new(
+        state: &CampaignState,
+        data: &'a GameData,
+        faction: &FactionId,
+        army_id: &ArmyId,
+    ) -> Option<Self> {
+        let rules = &data.ai_grid.postures.ambush;
+        let power = state.army_power(data, army_id);
+        let zoc =
+            data.free_movement_rules().zoc_radius_km as f32 * sim_campaign::march::px_per_km(data);
+        let targets: Vec<([f32; 2], Vec<[f32; 2]>)> = threats(state, data, faction, army_id)
+            .into_iter()
+            .filter(|(enemy, _)| {
+                let theirs = state.army_power(data, enemy);
+                power < rules.max_power_ratio * theirs && power >= rules.min_power_ratio * theirs
+            })
+            .map(|(enemy, route)| (state.army_point(data, &state.armies[&enemy]), route))
+            .collect();
+        (!targets.is_empty()).then_some(Self {
+            targets,
+            zoc,
+            near: rules.route_zoc_share as f32 * zoc,
+            data,
+        })
+    }
+
+    /// Outside every zone of control yet close to an enemy route.
+    fn fits(&self, point: [f32; 2]) -> bool {
+        self.targets.iter().any(|(at, route)| {
+            dist(point, *at) > self.zoc && route_distance(point, route) <= self.near
+        })
+    }
+
+    fn covered(&self, point: [f32; 2]) -> bool {
+        self.data
+            .cover_class_at(point, &self.data.posture_rules.cover)
+            .is_covered()
+    }
+
+    /// Covered cells that fit, reachable within `budget`, closest to a
+    /// route first: (distance to the routes, cost, cell).
+    fn covered_cells(
+        &self,
+        state: &CampaignState,
+        data: &GameData,
+        army_id: &ArmyId,
+        budget: u32,
+    ) -> Vec<(f32, u32, Cell)> {
+        let grid = data.navgrid();
+        let own_cell = state.army_cell(data, &state.armies[army_id]);
+        let mut cells: Vec<(f32, u32, Cell)> = state
+            .reachable_area(data, army_id)
+            .into_iter()
+            .filter(|(cell, cost)| *cost <= budget && *cell != own_cell)
+            .filter_map(|(cell, cost)| {
+                let point = cell.center(grid);
+                if !self.fits(point) || !self.covered(point) {
+                    return None;
+                }
+                let d = self
+                    .targets
+                    .iter()
+                    .map(|(_, route)| route_distance(point, route))
+                    .fold(f32::INFINITY, f32::min);
+                Some((d, cost, cell))
+            })
+            .collect();
+        cells.sort_by(|a, b| {
+            a.0.total_cmp(&b.0)
+                .then_with(|| a.1.cmp(&b.1))
+                .then_with(|| a.2.cmp(&b.2))
+        });
+        cells
+    }
 }
 
 /// CV3-6: an army in ambush holds it while an enemy it may surprise still
@@ -330,7 +358,7 @@ pub fn keep_ambush(
         .into_iter()
         .any(|(enemy, route)| {
             let e = &state.armies[&enemy];
-            distance(here, state.army_point(data, e)) > zoc
+            dist(here, state.army_point(data, e)) > zoc
                 && route_distance(here, &route) <= zoc
                 && posture::is_hidden_from(state, data, army, &e.faction)
         })
@@ -378,7 +406,7 @@ pub fn forced_march_orders(
         .armies
         .iter()
         .filter(|(_, e)| state.is_at_war(faction, &e.faction))
-        .filter(|(_, e)| distance(state.army_point(data, e), point) <= radius)
+        .filter(|(_, e)| dist(state.army_point(data, e), point) <= radius)
         .map(|(id, _)| state.army_power(data, id))
         .sum();
     if waiting > state.army_power(data, army_id) * rules.danger_ratio {
@@ -514,7 +542,7 @@ pub fn rest_plan(
     let menaced = state.armies.values().any(|other| {
         !other.units.is_empty()
             && state.is_at_war(faction, &other.faction)
-            && distance(here, state.army_point(data, other)) <= radius
+            && dist(here, state.army_point(data, other)) <= radius
     });
     if menaced {
         return RestPlan::None;
@@ -569,20 +597,14 @@ pub fn encounter_detour(
             sim_campaign::passage::trespassed_owner(state, faction, &s.province).is_none()
                 && !state.is_hostile_territory(faction, &s.province)
         })
-        .map(|s| {
-            (
-                distance(here, s.cell.center(grid)),
-                s.id,
-                s.cell.center(grid),
-            )
-        })
+        .map(|s| (dist(here, s.cell.center(grid)), s.id, s.cell.center(grid)))
         .filter(|(d, _, _)| *d <= sight)
         .collect();
     if sites.is_empty() {
         return None;
     }
     sites.sort_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
-    let salt = DETOUR_SALT ^ u64::from(sites[0].1);
+    let salt = crate::salts::DETOUR ^ u64::from(sites[0].1);
     if roll(state, faction, army_id, salt) >= u64::from(rules.detour_permille) {
         return None;
     }

@@ -18,7 +18,6 @@ extends Node
 ## Réglages : `data/map/faction_borders.json` (schéma `faction_borders.schema.json`).
 ## Option (après `--`) : `--no-faction-borders` (A/B de perf). Purement visuel.
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/faction_borders.json"
 const PALETTE_SIZE := 256
 ## DZ : trait d'une faction sans couleur imposée (encre brun-gris).
@@ -62,7 +61,7 @@ var _focus_factions := Vector2i(-1, -1)
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = OS.get_cmdline_user_args().has("--no-faction-borders")
+	_cli_disabled = CmdArgs.has("--no-faction-borders")
 	tuning = load_tuning()
 	_apply_tuning()
 	add_to_group(RenderQuality.CLIENT_GROUP)
@@ -72,12 +71,7 @@ func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 
 ## Réglages de `data/map/faction_borders.json` (dictionnaire vide si absent ou illisible).
 static func load_tuning() -> Dictionary:
-	var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(TUNING_PATH)
-	if not FileAccess.file_exists(path):
-		push_warning("FactionBorders: %s missing" % path)
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return JsonLookup.new(TUNING_PATH).data()
 
 
 ## Matériau partagé du terrain (porte les uniformes `fr1_*`), ou null.

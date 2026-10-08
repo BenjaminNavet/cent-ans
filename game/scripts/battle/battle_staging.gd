@@ -11,9 +11,7 @@ extends Node3D
 ##   s'attarde, colonnes des maisons en feu (incendies S2 des sièges) ;
 ## - les oiseaux (`BattleBirds`) ;
 ## - le plan cinématique au premier choc (`BattleCinematic`).
-## Chaque effet a son option de mesure A/B (`--no-daytime`, `--no-cloud-shadows`,
-## `--no-staging-dust`, `--no-smoke`, `--no-birds`, `--no-cinematic`, ou `--no-ep8` pour tout) et
-## suit les niveaux de qualité PF1. Paramètres : `data/fx/battle_staging.json`.
+## Chaque effet suit les niveaux de qualité PF1. Paramètres : `data/fx/battle_staging.json`.
 ##
 ## API pour les autres lots (EP6 : camps) : `add_smoke_source(position, intensity, kind)`,
 ## `remove_smoke_source(id)` ; `auto_campfires = false` avant `setup` pour ne pas poser les feux
@@ -21,11 +19,8 @@ extends Node3D
 
 const FX_PATH := "fx/battle_staging.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
-const EFFECTS := ["daytime", "cloud-shadows", "staging-dust", "smoke", "birds", "cinematic"]
 
 var cfg: Dictionary = {}
-## Effets coupés (`--no-<effet>`) : clés de `EFFECTS`.
-var disabled: Dictionary = {}
 var auto_campfires: bool = true
 var time_of_day: BattleTimeOfDay = null
 var clouds: BattleCloudShadows = null
@@ -48,48 +43,27 @@ var _fire_sources: Dictionary = {}  # clé de maison -> id de source
 var _height_at: Callable
 
 
-## Clés coupées par la ligne de commande (`--no-ep8` : toutes).
-static func disabled_from_args(args: PackedStringArray) -> Dictionary:
-	var out := {}
-	for arg in args:
-		if arg == "--no-ep8":
-			for key in EFFECTS:
-				out[key] = true
-		elif arg.begins_with("--no-") and EFFECTS.has(arg.trim_prefix("--no-")):
-			out[arg.trim_prefix("--no-")] = true
-	return out
 
 
 static func load_config() -> Dictionary:
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(FX_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				return parsed
+	if DataFile.exists(FX_PATH):
+		var parsed: Variant = DataFile.read_json(FX_PATH)
+		if parsed is Dictionary:
+			return parsed
 	return {}
 
 
-func is_on(effect: String) -> bool:
-	return not disabled.has(effect)
 
 
 ## Branche la mise en scène sur la bataille `scene` (`BattleScene`, après `terrain.build` et
 ## `BattleAtmosphere.apply`). `terrain_data` : `get_terrain()`.
-func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3D, weather: String, terrain_data: Dictionary, p_disabled: Dictionary) -> void:
+func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3D, weather: String, terrain_data: Dictionary) -> void:
 	name = "Staging"
 	_scene = scene
 	_battle = battle
 	_env = env
 	_sun = sun
 	_weather = weather
-	disabled = p_disabled
 	cfg = load_config()
 	var terrain: Node = scene.get("terrain")
 	_horizon = terrain.get("horizon") if terrain != null else null
@@ -100,28 +74,28 @@ func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3
 	var center := Vector3(width * 0.5, 0.0, depth * 0.5)
 	center.y = height_at.call(center.x, center.z)
 	var wind := BattleStandards.wind_for(weather, int(scene.get("battle_seed")))
-	if is_on("daytime") and cfg.has("time_of_day"):
+	if cfg.has("time_of_day"):
 		time_of_day = BattleTimeOfDay.new((cfg["time_of_day"] as Dictionary).get("keyframes", []))
 		time_of_day.capture(env, sun, weather)
 		_refresh_time(true)
-	if is_on("cloud-shadows") and cfg.has("cloud_shadows"):
+	if cfg.has("cloud_shadows"):
 		clouds = BattleCloudShadows.new()
 		add_child(clouds)
 		# Le champ et ses abords (bois de l'anneau proche) : 600 m de marge de chaque côté.
 		clouds.setup(cfg["cloud_shadows"], center, Vector2(width + 1200.0, depth + 1200.0), weather, wind, int(scene.get("battle_seed")) + 3)
 		clouds.set_light_level(time_of_day.light_level if time_of_day != null else 1.0)
-	if is_on("smoke") and cfg.has("smoke"):
+	if cfg.has("smoke"):
 		smoke = BattleSmoke.new()
 		add_child(smoke)
 		smoke.setup(cfg["smoke"], wind)
 		smoke.set_light_level(time_of_day.light_level if time_of_day != null else 1.0)
 		if auto_campfires and terrain_data.get("siege") == null:
 			_place_campfires(terrain_data, height_at)
-	if is_on("birds") and cfg.has("birds"):
+	if cfg.has("birds"):
 		birds = BattleBirds.new()
 		add_child(birds)
 		birds.setup(cfg["birds"], terrain_data, height_at, int(scene.get("battle_seed")) + 17)
-	if is_on("cinematic") and cfg.has("cinematic"):
+	if cfg.has("cinematic"):
 		cinematic = BattleCinematic.new()
 		add_child(cinematic)
 		var rig: Node3D = scene.get("camera_rig")
@@ -134,7 +108,7 @@ func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3
 
 ## Poussière enrichie (B4) : réglages de `dust` passés aux effets de la bataille.
 func configure_effects(effects: BattleEffects, terrain_key: String, season: String) -> void:
-	if effects == null or not is_on("staging-dust") or not cfg.has("dust"):
+	if effects == null or not cfg.has("dust"):
 		return
 	effects.configure_staging(cfg["dust"], terrain_key, season)
 
@@ -167,7 +141,7 @@ func update(units: Array, dt: float, real_dt: float, finished: bool) -> void:
 		clouds.advance(dt)
 	if birds != null:
 		birds.update(units, dt, finished)
-	if smoke != null and _battle != null and _battle.has_method("get_siege"):
+	if smoke != null and _battle != null:
 		_fire_timer -= real_dt
 		if _fire_timer <= 0.0:
 			_fire_timer = 1.0
@@ -182,7 +156,7 @@ func time_scale() -> float:
 
 
 func _refresh_time(force: bool) -> void:
-	if _battle == null or not _battle.has_method("get_time_of_day"):
+	if _battle == null:
 		return
 	tod = _battle.call("get_time_of_day")
 	if tod.is_empty() or time_of_day == null:

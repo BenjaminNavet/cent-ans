@@ -1,12 +1,12 @@
 class_name Ga3Kit
 extends RefCounted
 
-## Lot GA3-L1 (ADR 0140) : variantes générées (image → TRELLIS, `data/art/ga3_decor.json`) des
+## Variantes générées (image → TRELLIS, `data/art/ga3_decor.json`) des
 ## modèles du kit BR1 dans le décor de bataille. `BuildingKit.Batch.add` demande ici si un modèle
 ## du kit intact (maison, église, moulin, tente, puits, charrette) est remplacé par sa variante
 ## GA3 (`share` du manifeste, tirage déterministe sur la position) ; la variante reprend l'emprise
 ## visée par le kit. Les instances GA3 sont posées par tuiles de `CELL` m, trois `MultiMesh` par
-## tuile et par modèle (LOD0/1/2 selon la distance). Désactivé par `--no-ga3` après `--`, sous la
+## tuile et par modèle (LOD0/1/2 selon la distance). Absent sous la
 ## neige (pas de variante enneigée) et hors bataille (`active` posé par `BattleTerrain.build`).
 ## Purement visuel.
 
@@ -20,7 +20,7 @@ const BUILDING_SINK := 0.35
 ## Anisotropie maximale de l'emprise (la texture cuite supporte mal un étirement fort).
 const MAX_STRETCH := 1.15
 
-## Vrai pendant une bataille (posé par `BattleTerrain.build`, `--no-ga3` le coupe).
+## Vrai pendant une bataille (posé par `BattleTerrain.build`).
 static var active := false
 static var _manifest: Dictionary = {}
 static var _loaded := false
@@ -33,17 +33,12 @@ static func clear_cache() -> void:
 	_meshes.clear()
 
 
-## Option de ligne de commande : `--no-ga3` revient au kit seul.
-static func requested() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-ga3")
-
-
 static func manifest() -> Dictionary:
 	if not _loaded:
 		_loaded = true
 		var path := DIR + "manifest.json"
 		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			var parsed: Variant = DataFile.parse_file(path)
 			if parsed is Dictionary:
 				_manifest = parsed
 	return _manifest

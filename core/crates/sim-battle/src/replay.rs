@@ -17,14 +17,13 @@
 //! [`ReplayRules::keyframe_seconds`]; a jump back restarts from the nearest
 //! earlier copy, a jump forward simulates ahead.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::command::Command;
 use crate::historical::HistoricalMap;
 use crate::outcome::BattleOutcome;
 use crate::queue::QueuedOrder;
+use crate::rng::Fnv1a;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId};
 use crate::sim::{BattleSim, DT};
@@ -49,17 +48,9 @@ pub struct ReplayRules {
     pub max_keyframes: usize,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_replay.json");
+data_model::bundled_rules!(ReplayRules, "rules/battle_replay.json");
 
 impl ReplayRules {
-    /// `data/rules/battle_replay.json` as compiled into the crate.
-    pub fn bundled() -> &'static ReplayRules {
-        static RULES: OnceLock<ReplayRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_replay.json is valid")
-        })
-    }
-
     fn period_ticks(seconds: f64) -> u64 {
         ((seconds / DT).round() as u64).max(1)
     }
@@ -380,7 +371,7 @@ impl BattleReplay {
 /// state. Stable for a given build; any rule change shows up in it sooner
 /// or later.
 pub fn state_digest(sim: &BattleSim) -> u64 {
-    let mut hash = Fnv::new();
+    let mut hash = Fnv1a::default();
     hash.u64(sim.ticks());
     hash.u64(sim.rng.clone().next_u64());
     hash.u64(u64::from(sim.is_finished()));
@@ -465,31 +456,11 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
             }
         }
     }
-    hash.0
+    hash.finish()
 }
 
 fn digest_hex(sim: &BattleSim) -> String {
     format!("{:016x}", state_digest(sim))
-}
-
-/// FNV-1a, 64 bits.
-struct Fnv(u64);
-
-impl Fnv {
-    fn new() -> Self {
-        Fnv(0xcbf2_9ce4_8422_2325)
-    }
-
-    fn bytes(&mut self, bytes: &[u8]) {
-        for byte in bytes {
-            self.0 ^= u64::from(*byte);
-            self.0 = self.0.wrapping_mul(0x0100_0000_01b3);
-        }
-    }
-
-    fn u64(&mut self, value: u64) {
-        self.bytes(&value.to_le_bytes());
-    }
 }
 
 /// Records a live battle: the bridge reports every input and calls

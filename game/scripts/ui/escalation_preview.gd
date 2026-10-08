@@ -23,9 +23,8 @@ func _init() -> void:
 	var title := HudStyle.label("Qui peut entrer en guerre", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	title.name = "Title"
 	add_child(title)
-	_rows = VBoxContainer.new()
+	_rows = UiBuild.vbox(3)
 	_rows.name = "Rows"
-	_rows.add_theme_constant_override("separation", 3)
 	add_child(_rows)
 
 
@@ -51,9 +50,8 @@ func show_for(sim: Object, attacker: String, target: String) -> void:
 
 
 func _row(step: Dictionary, index: int) -> Control:
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(6)
 	row.name = "Step%d" % index
-	row.add_theme_constant_override("separation", 6)
 	var arms := TextureRect.new()
 	arms.texture = PortraitLoader.heraldry_texture(str(step.get("faction", "")))
 	arms.custom_minimum_size = Vector2(22, 24)

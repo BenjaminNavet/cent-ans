@@ -26,9 +26,8 @@ var close_button: Button
 ## partie, ajoute l'avis à `parent` (couche UI de la carte). Renvoie l'état contrôlé (null si
 ## la pyramide est désactivée par `--no-pyramid` ou remplacée par `--pyramid-dir=`).
 static func report(parent: Node, map_dir: String, relief_root: String) -> ReliefCacheStatus:
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-pyramid" or arg.begins_with("--pyramid-dir="):
-			return null
+	if CmdArgs.has("--no-pyramid") or CmdArgs.has("--pyramid-dir"):
+		return null
 	var checked := ReliefCacheStatus.check(map_dir, relief_root)
 	if checked.needs_notice():
 		push_warning(checked.summary())
@@ -75,7 +74,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	head.add_child(title)
 	close_button = Button.new()
 	close_button.text = "Fermer"
-	RichTooltip.attach_plain(close_button, "relief_notice_hide")
+	TooltipHost.attach_plain(close_button, "relief_notice_hide")
 	close_button.pressed.connect(dismiss)
 	head.add_child(close_button)
 	var body := Label.new()
@@ -94,7 +93,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	command_field.editable = false
 	command_field.selecting_enabled = true
 	command_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	RichTooltip.attach_plain(command_field, "relief_command", {"body": "État détaillé : %s" % ReliefCacheStatus.CHECK_COMMAND})
+	TooltipHost.attach_plain(command_field, "relief_command", {"body": "État détaillé : %s" % ReliefCacheStatus.CHECK_COMMAND})
 	# ZG7c : un champ non modifiable prend la couleur « désactivée » du thème (gris sur parchemin,
 	# illisible) ; la commande est à lire et à copier : encre normale du champ.
 	command_field.ready.connect(func() -> void:
@@ -102,7 +101,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	row.add_child(command_field)
 	var copy := Button.new()
 	copy.text = "Copier"
-	RichTooltip.attach_plain(copy, "relief_copy_command")
+	TooltipHost.attach_plain(copy, "relief_copy_command")
 	copy.pressed.connect(func() -> void: DisplayServer.clipboard_set(ReliefCacheStatus.FETCH_COMMAND))
 	row.add_child(copy)
 	var fallback := Label.new()

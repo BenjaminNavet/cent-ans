@@ -121,8 +121,7 @@ static func foliage_material(species: String, winter: bool, lod_near: float, lod
 ## Rameau feuillu de `species` : sa carte de vraies feuilles, sinon le rameau dessiné commun.
 static func leaf_texture(species: String) -> Texture2D:
 	var path := SPECIES_LEAF_PATH % species
-	# `--no-fa` après `--` : rameau dessiné d'avant FA1 (captures A/B).
-	if not OS.get_cmdline_user_args().has("--no-fa") and ResourceLoader.exists(path):
+	if ResourceLoader.exists(path):
 		return load(path)
 	return LEAF_TEXTURE
 

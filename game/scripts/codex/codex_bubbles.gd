@@ -55,7 +55,6 @@ const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
 ## IB3 : réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
 const STYLE_FILE := "ui/tooltip_style.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const CHAIN_FALLBACK := {
 	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
 	"max_bubbles": MAX_BUBBLES, "breadcrumb_from_depth": 3,
@@ -67,7 +66,7 @@ const CRUMB_SEPARATOR := " › "
 ## Fond du mot-lien source d'une fille ouverte par la chaîne.
 const SOURCE_HIGHLIGHT := "#e8cf8a"
 
-static var _chain_cache: Dictionary = {}
+static var _chain := JsonLookup.new(STYLE_FILE, CHAIN_FALLBACK, "chain")
 
 ## Pile des bulles ouvertes (de la plus ancienne à la plus récente).
 var bubbles: Array[PanelContainer] = []
@@ -238,31 +237,12 @@ func explore_held() -> bool:
 
 ## IB3 : réglage `key` du bloc `chain` de `data/ui/tooltip_style.json` (repli : constantes).
 static func chain_setting(key: String) -> float:
-	if _chain_cache.is_empty():
-		_chain_cache = CHAIN_FALLBACK.duplicate()
-		var path := _data_dir().path_join(STYLE_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(STYLE_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
-		if parsed is Dictionary and (parsed as Dictionary).get("chain") is Dictionary:
-			_chain_cache.merge(parsed["chain"], true)
-		else:
-			push_warning("CodexBubbles : %s illisible, réglages de chaîne de repli." % STYLE_FILE)
-	return float(_chain_cache.get(key, CHAIN_FALLBACK.get(key, 0.0)))
+	return float(_chain.value(key, CHAIN_FALLBACK.get(key, 0.0)))
 
 
 ## Relit `tooltip_style.json` au prochain accès (tests).
 static func reload_chain_settings() -> void:
-	_chain_cache = {}
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
+	_chain.reload()
 
 
 ## Touche T : verrouille la bulle ou l'infobulle visible la plus récente. Renvoie true si
@@ -294,7 +274,7 @@ func pin_top_bubble() -> bool:
 
 ## Épingle l'infobulle riche affichée (F2) : bulle interactive au même endroit.
 func pin_native_tooltip() -> bool:
-	var panel := RichTooltip.visible_panel()
+	var panel := TooltipHost.visible_panel()
 	if panel == null:
 		return false
 	var window := panel.get_window()
@@ -302,7 +282,7 @@ func pin_native_tooltip() -> bool:
 	if not window.is_embedded():
 		at -= Vector2(get_tree().root.position)
 	window.hide()
-	var entry := RichTooltip.title_entry(RichTooltip.last_bbcode)
+	var entry := RichTooltip.title_entry(TooltipHost.last_bbcode)
 	var hovered := get_viewport().gui_get_hovered_control()
 	var view: Control = null
 	if hovered != null:
@@ -311,7 +291,7 @@ func pin_native_tooltip() -> bool:
 	if view != null:
 		open_view(view, at, entry)
 	else:
-		open_text(RichTooltip.last_bbcode, at, entry)
+		open_text(TooltipHost.last_bbcode, at, entry)
 	return true
 
 
@@ -376,7 +356,7 @@ func _tooltip_source(control: Control, local_pos: Vector2) -> Control:
 ## « ib:<kind>:<id> » (première ligne) est passée à `spec_for` : le BBCode de repli qui la suit
 ## n'est pas l'id. `source` : contrôle porteur de l'infobulle, dont la donnée `live` est reprise.
 func _detailed_view(text: String, source: Control = null) -> Control:
-	var key := RichTooltip.key_of(text)
+	var key := TooltipHost.key_of(text)
 	if key == "":
 		return null
 	var rich: Script = RichTooltip
@@ -384,8 +364,8 @@ func _detailed_view(text: String, source: Control = null) -> Control:
 	if not _script_has(rich, "spec_for") or not _script_has(view_script, "build"):
 		return null
 	var live: Dictionary = {}
-	if source != null and source.has_meta(RichTooltip.LIVE_META):
-		live = source.get_meta(RichTooltip.LIVE_META)
+	if source != null and source.has_meta(TooltipHost.LIVE_META):
+		live = source.get_meta(TooltipHost.LIVE_META)
 	var spec: Variant = rich.call("spec_for", key, live)
 	if not spec is Dictionary or (spec as Dictionary).is_empty():
 		return null
@@ -452,7 +432,7 @@ func _apply_pinned(bubble: PanelContainer, pinned: bool, chain: bool = false) ->
 	bubble.set_meta("pinned", pinned)
 	bubble.set_meta("chain_locked", pinned and chain)
 	# Épinglée : page à bande d'or (lot UI1) plutôt que simple note marginale.
-	var style: StyleBox = HudStyle.panel_box(10) if pinned else RichTooltip.panel_style()
+	var style: StyleBox = HudStyle.panel_box(10) if pinned else TooltipHost.panel_style()
 	bubble.add_theme_stylebox_override("panel", style)
 	var footer := bubble.find_child("Footer", true, false) as Label
 	if footer != null:

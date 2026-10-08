@@ -7,6 +7,7 @@
 //! The arithmetic follows the GDScript it replaces (`Vector2` in single
 //! precision, `float` in double), so the maps are the same texel for texel.
 
+use crate::convert::vec2_pair;
 use godot::classes::image::Format;
 use godot::classes::{Image, ImageTexture, RefCounted};
 use godot::prelude::*;
@@ -144,10 +145,6 @@ impl Marks {
     }
 }
 
-fn pair(v: Vector2) -> (f32, f32) {
-    (v.x, v.y)
-}
-
 #[godot_api]
 impl StampMap {
     /// `width × height` texels of `channels` bytes (1: L8, 2: RG8), all zero,
@@ -160,7 +157,7 @@ impl StampMap {
             width,
             height,
             channels,
-            origin: pair(origin),
+            origin: vec2_pair(origin),
             texel: texel.max(1e-3) as f32,
             bytes: vec![0; width * height * channels],
             dirty: true,
@@ -180,46 +177,27 @@ impl StampMap {
         add_g: i64,
         cap_r: i64,
     ) -> bool {
-        self.marks
-            .stamp_box(pair(center), facing, pair(half), add_r, add_g, cap_r)
+        self.marks.stamp_box(
+            vec2_pair(center),
+            facing,
+            vec2_pair(half),
+            add_r,
+            add_g,
+            cap_r,
+        )
     }
 
     /// Disc with a soft edge: R and G rise towards `r_value` / `g_value`.
     #[func]
     fn stamp_disc(&mut self, center: Vector2, radius: f64, r_value: i64, g_value: i64) {
         self.marks
-            .stamp_disc(pair(center), radius, r_value, g_value);
+            .stamp_disc(vec2_pair(center), radius, r_value, g_value);
     }
 
     /// Byte of `channel` at world point (x, z), 0-1 (0 outside).
     #[func]
     fn sample(&self, x: f64, z: f64, channel: i64) -> f64 {
         self.marks.sample(x, z, channel)
-    }
-
-    /// True when a stamp changed the map since the last upload.
-    #[func]
-    fn is_dirty(&self) -> bool {
-        self.marks.dirty
-    }
-
-    /// The bytes (tests, captures).
-    #[func]
-    fn get_bytes(&self) -> PackedByteArray {
-        PackedByteArray::from(self.marks.bytes.as_slice())
-    }
-
-    /// A new image of the map (creation of the texture).
-    #[func]
-    fn make_image(&self) -> Option<Gd<Image>> {
-        let m = &self.marks;
-        Image::create_from_data(
-            m.width as i32,
-            m.height as i32,
-            false,
-            m.format(),
-            &self.get_bytes(),
-        )
     }
 
     /// Sends the map to `texture` through `image` if it changed (full
@@ -230,7 +208,7 @@ impl StampMap {
             return false;
         }
         self.marks.dirty = false;
-        let bytes = self.get_bytes();
+        let bytes = PackedByteArray::from(self.marks.bytes.as_slice());
         let m = &self.marks;
         image.set_data(m.width as i32, m.height as i32, false, m.format(), &bytes);
         texture.update(&image);

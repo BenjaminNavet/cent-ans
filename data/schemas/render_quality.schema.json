@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "render_quality.schema.json",
+  "title": "Qualité du rendu",
+  "description": "Préréglages de qualité (low, medium, high, ultra, legacy) et choix de mise à l'échelle 3D du joueur. Coûts globaux du rendu et clés « scène » (relief, végétation, LOD, herbe, particules).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "upscale",
+    "presets"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "upscale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_pixels",
+        "min_scale",
+        "player_choices"
+      ],
+      "properties": {
+        "reference_pixels": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "min_scale": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 1.0
+        },
+        "player_choices": {
+          "type": "object",
+          "required": [
+            "off",
+            "quality",
+            "performance"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "off": {
+              "$ref": "#/$defs/upscale_choice"
+            },
+            "quality": {
+              "$ref": "#/$defs/upscale_choice"
+            },
+            "performance": {
+              "$ref": "#/$defs/upscale_choice"
+            }
+          }
+        }
+      }
+    },
+    "presets": {
+      "type": "object",
+      "required": [
+        "low",
+        "medium",
+        "high",
+        "ultra",
+        "legacy"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/preset"
+      }
+    }
+  },
+  "$defs": {
+    "upscale_choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "scale"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "off",
+            "metalfx_spatial",
+            "metalfx_temporal"
+          ]
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 1.0
+        }
+      }
+    },
+    "preset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "msaa",
+        "map_msaa",
+        "shadow_atlas",
+        "soft_shadows",
+        "map_soft_shadows",
+        "shadow_splits",
+        "shadow_distance",
+        "ssao",
+        "ssao_quality",
+        "ssil",
+        "ssil_quality",
+        "volumetric",
+        "sdfgi",
+        "glow",
+        "fog_grid",
+        "relief_vertex_px",
+        "relief_items",
+        "relief_extra_depth",
+        "relief_pages",
+        "relief_shadow_cascades",
+        "fine_relief",
+        "terrain_near",
+        "veg_density",
+        "veg_detail",
+        "veg_shadow_distance",
+        "map_shadow_range",
+        "map_shadow_splits",
+        "battle_lod",
+        "grass",
+        "particles",
+        "model_shadow_distance",
+        "veg_max_distance",
+        "clutter_density",
+        "upscale_mode",
+        "upscale_scale"
+      ],
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "msaa": {
+          "enum": [
+            "off",
+            "2x",
+            "4x"
+          ]
+        },
+        "map_msaa": {
+          "enum": [
+            "off",
+            "2x",
+            "4x"
+          ]
+        },
+        "shadow_atlas": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 16384
+        },
+        "soft_shadows": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "ultra"
+          ]
+        },
+        "map_soft_shadows": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "ultra"
+          ]
+        },
+        "shadow_splits": {
+          "enum": [
+            2,
+            4
+          ]
+        },
+        "shadow_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "ssao": {
+          "type": "boolean"
+        },
+        "ssao_quality": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "ultra"
+          ]
+        },
+        "ssil": {
+          "type": "boolean"
+        },
+        "ssil_quality": {
+          "enum": [
+            "low",
+            "high"
+          ]
+        },
+        "volumetric": {
+          "enum": [
+            "off",
+            "weather",
+            "always"
+          ]
+        },
+        "sdfgi": {
+          "type": "boolean"
+        },
+        "glow": {
+          "type": "boolean"
+        },
+        "fog_grid": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 8
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "relief_vertex_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "relief_items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "relief_extra_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "relief_pages": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 1024
+        },
+        "relief_shadow_cascades": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "fine_relief": {
+          "type": "boolean"
+        },
+        "terrain_near": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "veg_density": {
+          "type": "number",
+          "minimum": 0
+        },
+        "veg_detail": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "veg_shadow_distance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "map_shadow_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "map_shadow_splits": {
+          "enum": [
+            2,
+            4
+          ]
+        },
+        "battle_lod": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "grass": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "particles": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "model_shadow_distance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "veg_max_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "clutter_density": {
+          "type": "number",
+          "minimum": 0
+        },
+        "upscale_mode": {
+          "enum": [
+            "off",
+            "metalfx_spatial",
+            "metalfx_temporal"
+          ]
+        },
+        "upscale_scale": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 1.0
+        }
+      }
+    }
+  }
+}

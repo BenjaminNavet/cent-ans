@@ -37,11 +37,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
             breach: 0,
             ..Default::default()
         };
-        let battle = setup(
-            units(&data, &besiegers),
-            units(&data, &garrison),
-            Some(siege),
-        );
+        let battle = setup(units(data, &besiegers), units(data, &garrison), Some(siege));
         let mut sim = BattleSim::new(battle, seed).unwrap();
         run_to_end(&mut sim);
         wins += u32::from(sim.winner() == Some(SideId::Attacker));
@@ -54,7 +50,7 @@ fn surplus_regiments_wait_and_march_in_from_their_edge() {
     use sim_battle::MAX_ON_FIELD;
     let data = data();
     let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
-    let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
+    let battle = setup(units(data, &many), units(data, &many[..8]), None);
     // The standard field (its 40-regiment cap) whatever the head count.
     let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
     let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();
@@ -188,68 +184,4 @@ fn destinations_in_the_river_move_to_a_bank() {
         sim_battle::ai::dry_z(field, x, c - 100.0, 0.0, 1.0),
         c - 100.0
     );
-}
-
-#[test]
-#[ignore]
-fn trace_big() {
-    let data = data();
-    let kinds = [
-        "unit_men_at_arms_foot",
-        "unit_longbowmen",
-        "unit_knights",
-        "unit_urban_militia",
-        "unit_crossbowmen",
-    ];
-    let army: Vec<&str> = (0..30).map(|i| kinds[i % 5]).collect();
-    let mut battle = setup(units(&data, &army), units(&data, &army), None);
-    battle.river = false;
-    let mut sim = BattleSim::new(battle, 7).unwrap();
-    while sim.elapsed() < 1500.0 && !sim.is_finished() {
-        sim.step();
-    }
-    for u in sim.units().iter().filter(|u| u.present() || u.reserve) {
-        println!(
-            "{:?} #{} {} ({:.0},{:.0}) {:?} dest {:?} tgt {:?} res {} hp {:.0}",
-            u.side, u.id, u.name, u.x, u.z, u.state, u.destination, u.target, u.reserve, u.hp
-        );
-    }
-}
-
-#[test]
-#[ignore]
-fn trace_demo() {
-    let mut probe = demo_sim();
-    println!("contact {:?}", first_contact(&mut probe, 300.0));
-    while !probe.is_finished() {
-        probe.step();
-    }
-    println!("end {:.0} s winner {:?}", probe.elapsed(), probe.winner());
-    let mut sim = demo_sim();
-    let river = sim.field().river.clone().unwrap();
-    println!(
-        "river z0 {:.0} amp {:.0} fords {:?}",
-        river.z0, river.amplitude, river.fords
-    );
-    for step in 0..=10 {
-        while sim.elapsed() < step as f64 * 30.0 {
-            sim.step();
-        }
-        println!("t={:.0}", sim.elapsed());
-        for u in sim.units() {
-            println!(
-                "  {:?} {:24} {:6.0} {:6.0} rz {:4.0} {:?} {:?} dest {:?} tgt {:?} wet {}",
-                u.side,
-                u.name,
-                u.x,
-                u.z,
-                river.center_z(u.x),
-                u.state,
-                u.formation,
-                u.destination.map(|d| (d.0 as i32, d.1 as i32)),
-                u.target,
-                river.in_water(u.x, u.z)
-            );
-        }
-    }
 }

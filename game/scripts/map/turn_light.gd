@@ -52,7 +52,7 @@ func setup(map: Node) -> void:
 			season_banner = SeasonBanner.new()
 			(ui as Node).add_child(season_banner)
 	_season_text = season_of_label()
-	_forced = OS.get_cmdline_user_args().has("--dusk")
+	_forced = CmdArgs.has("--dusk")
 	_warm = dusk_color
 
 

@@ -117,57 +117,7 @@ impl BattleOutcomeRules {
     }
 }
 
-impl Default for BattleOutcomeRules {
-    /// Fallback when `data/rules/battle_outcome.json` is absent; kept equal to
-    /// that file (checked by `tests/real_data.rs`).
-    fn default() -> Self {
-        let class =
-            |label: &str, xp: f64, prestige: i32, morale: i8, turns: u8| OutcomeConsequence {
-                label: label.to_owned(),
-                xp_multiplier: xp,
-                prestige,
-                morale,
-                morale_turns: turns,
-            };
-        BattleOutcomeRules {
-            thresholds: OutcomeThresholds {
-                heroic_max_strength_ratio: 0.667,
-                decisive_enemy_losses_min: 0.70,
-                decisive_own_losses_max: 0.25,
-                pyrrhic_own_losses_min: 0.50,
-                honourable_inflicted_ratio_min: 1.0,
-                disaster_own_losses_min: 0.70,
-            },
-            classes: [
-                (
-                    BattleOutcomeClass::Heroic,
-                    class("Victoire héroïque", 2.0, 15, 10, 3),
-                ),
-                (
-                    BattleOutcomeClass::Decisive,
-                    class("Victoire décisive", 1.5, 10, 8, 2),
-                ),
-                (
-                    BattleOutcomeClass::Pyrrhic,
-                    class("Victoire à la Pyrrhus", 1.0, 2, -5, 2),
-                ),
-                (BattleOutcomeClass::Victory, class("Victoire", 1.0, 5, 3, 1)),
-                (
-                    BattleOutcomeClass::HonourableDefeat,
-                    class("Défaite honorable", 1.0, 0, 0, 0),
-                ),
-                (
-                    BattleOutcomeClass::Disaster,
-                    class("Désastre", 0.5, -10, -10, 3),
-                ),
-                (BattleOutcomeClass::Defeat, class("Défaite", 1.0, -3, -5, 1)),
-            ]
-            .into_iter()
-            .collect(),
-            description: None,
-        }
-    }
-}
+crate::bundled_rules!(BattleOutcomeRules, "rules/battle_outcome.json", default);
 
 #[cfg(test)]
 mod tests {

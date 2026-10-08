@@ -1,13 +1,13 @@
 class_name BattleVoices
 extends Node
 
-## VO1 — répliques des régiments en bataille : sélection, ordre de marche,
+## Répliques des régiments en bataille : sélection, ordre de marche,
 ## ordre d'attaque (2D, bus « Voix »), charge, déroute, chute du général (3D, spatialisées par
 ## `BattleAudio.play_at` sur le bus « Voix »), victoire. Langue selon l'unité et sa faction
 ## (`VoiceLines.language_for` : français, anglais, anglo-normand pour la noblesse anglaise,
 ## gascon, flamand, gallois, écossais), corpus `data/voice/barks.json`.
 ##
-## Première charge d'un camp (VX) : le cri de guerre de sa faction, repris en chœur
+## Première charge d'un camp : le cri de guerre de sa faction, repris en chœur
 ## (`speech/<voix>/<sha1>.ogg`, même fichier que la fin du discours), à la place de la réplique.
 ##
 ## Pas de rafales : une réplique à la fois (une plus prioritaire interrompt la courante),
@@ -277,7 +277,7 @@ func _too_far(position: Vector3) -> bool:
 	return audio != null and audio._listener_position().distance_to(position) > SPATIAL_MAX_DISTANCE
 
 
-## Réplique en 3D par le pool d'AU1 : l'événement `vo_<id>` est déclaré à la volée dans la
+## Réplique en 3D par le pool de `BattleAudio` : l'événement `vo_<id>` est déclaré à la volée dans la
 ## banque de la bataille (bus « Voix », une instance, priorité haute).
 func _play_spatial(relative: String, line: Dictionary, position: Vector3, unit_size: float = SPATIAL_UNIT_SIZE, max_distance: float = SPATIAL_MAX_DISTANCE) -> bool:
 	var audio := _battle_audio()

@@ -98,7 +98,7 @@ func _load_crossings() -> Array[Dictionary]:
 	var path := renderer.map_data.map_dir.path_join(CROSSINGS_FILE)
 	if not FileAccess.file_exists(path):
 		return result
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		return result
 	var raw_list: Array = parsed.get("crossings", [])

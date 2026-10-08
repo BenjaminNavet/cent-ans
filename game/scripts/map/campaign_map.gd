@@ -2,35 +2,15 @@ extends Node3D
 
 ## Scène de la carte de campagne : charge `data/map/`, assemble terrain, mer, rivières,
 ## côte, villes, armées, caméra, picking et HUD, et relie l'interface à la simulation
-## (`SimFacade.sim` : `CampaignSim` Rust ou mock). Aucune règle de jeu ici : la scène
+## (`SimFacade.sim` : `CampaignSim` Rust). Aucune règle de jeu ici : la scène
 ## affiche l'état, soumet des ordres et rafraîchit après chaque réponse.
 ##
-## Options de ligne de commande (après `--`) :
-##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte
-##                              (sélectionne la première armée du joueur + aperçu de chemin).
-##   --stage=map                avec --screenshot : carte seule (aucune sélection, aucun panneau).
-##   --stage=province           avec --screenshot : sélectionne plutôt la capitale du joueur
-##                              et ouvre le panneau de recrutement.
-##   --stage=city               capitale du joueur, panneau de province sur l'onglet Ville.
-##   --stage=faction            panneau de faction (trésor, revenus, impôts, biens).
-##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
-##   --stage=tech_civil         idem sur l'onglet Civil.
-##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
-##   --stage=loading_battle|loading_siege|loading_naval  AR1 : écran de chargement illustré.
-##   --stage=ending_victory|ending_defeat  AR1 : fin de campagne illustrée.
-##   --stage=report_vignette    AR1 : rapport de saison avec sa vignette (peste).
-##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
-##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
+## Options de ligne de commande (après `--`, lues par `CmdArgs`) :
+##   --screenshot=<chemin.png>  capture la vue après quelques frames puis quitte.
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
-##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
-##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné ;
-##   --stage=agents_registry    idem, registre des agents (G) ouvert.
-##   --stage=movement_trespass  DP2 : marche sans droit de passage (chemin rouge, avertissement).
-##   --stage=legend|legend_armies  UX1 : légende de la carte ouverte (en haut, ou aux armées).
-##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
-##                              atteignables et chemin sur le graphe (lot C5).
-##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
-##   --hide-armies               masque les marqueurs d'armée (captures des villes emblématiques, L2).
+##   --select-settlement=<id>    sélectionne une colonie ; --hide-armies masque les marqueurs d'armée.
+##   --fps-probe, --bench-map    mesures de fluidité ; --camera-min/--camera-yaw/--static-exaggeration/
+##   --rescale-settle-ms/--no-fine-terrain/--fine-step  réglages d'essai du terrain et de la caméra.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -58,7 +38,7 @@ const REPEAT_CLICK_PX := 12.0
 
 var map_data: MapData
 var load_ok: bool = false
-var sim: Object = null  # SimFacade.sim (CampaignSim ou CampaignSimMock), null si échec
+var sim: Object = null  # SimFacade.sim (CampaignSim), null si échec
 var player_faction: String = ""
 var hovered_index: int = 0
 var selected_index: int = 0
@@ -140,7 +120,6 @@ var holdings_ctl: HoldingsController = null  # liste « Colonies » (B) : revenu
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
-var _screenshot_stage: String = "army"
 
 
 func _ready() -> void:
@@ -462,7 +441,7 @@ func _setup_campaign() -> void:
 	ui.journal_player_faction = player_faction
 	ui.journal_faction_name = SimFacade.faction_short_name
 	ui.clear_log()
-	ui.add_events(sim.call("get_events"), "%s (simulation %s)" % [sim.call("get_date_label"), SimFacade.engine_label()])
+	ui.add_events(sim.call("get_events"), str(sim.call("get_date_label")))
 	refresh_all()
 	_focus_first_player_army()
 
@@ -1171,26 +1150,6 @@ func _on_research_requested(technology_id: String) -> void:
 	_submit({"type": "research", "technology": technology_id}, "Recherche lancée.")
 
 
-## Mise en scène « technologies » : première technologie militaire disponible lancée, deux
-## tours joués pour montrer la progression, panneau ouvert.
-func _stage_screenshot_tech() -> void:
-	_focus_capital()
-	ui.hide_province()
-	if not _tech_available():
-		return
-	for node in sim.call("get_tech_tree", player_faction):
-		if str(node.get("state", "")) == "available" and str(node.get("branch", "")) == "military":
-			sim.call("submit_order", {"type": "research", "technology": str(node["id"])})
-			break
-	sim.call("end_turn")
-	sim.call("end_turn")
-	ui.add_events(sim.call("get_events"), str(sim.call("get_date_label")))
-	selected_index = 0
-	ui.hide_province()
-	_on_tech_panel_requested()
-	refresh_all()
-
-
 ## Lot C5 : bascule la couche des routes commerciales (touche `map_toggle_trade` ou bouton de
 ## la barre de filtres).
 func _toggle_trade_layer() -> void:
@@ -1689,330 +1648,48 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _parse_cmdline() -> void:
-	var args := OS.get_cmdline_user_args()
-	for arg in args:
-		if arg.begins_with("--stage="):
-			_screenshot_stage = arg.trim_prefix("--stage=")
-	for arg in args:
-		if arg == "--fps-probe":
-			_fps_probe_frames = 0
-			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-			Engine.max_fps = 0
-			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
-		elif arg == "--bench-map":  # ZG2 : banc panoramique + zoom (fenêtré)
-			var bench := MapBench.new()
-			bench.camera_rig = camera_rig
-			bench.terrain = terrain
-			bench.map_data = map_data
-			add_child(bench)
-		elif arg.begins_with("--camera-min="):  # ZG2 : essais et captures seulement (ZG4 : caméra)
-			camera_rig.min_distance = float(arg.trim_prefix("--camera-min="))
-			camera_rig.close_min_distance = camera_rig.min_distance
-			camera_rig.floor_distance = 0.0
-		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
-			dynamic_exaggeration = false
-		elif arg.begins_with("--rescale-settle-ms="):  # ZG4 : mesures (délai avant recalage des calques)
-			terrain.rescale_settle_ms = int(arg.trim_prefix("--rescale-settle-ms="))
-		elif arg.begins_with("--camera-yaw="):  # ZG4 : captures (degrés, 0 = regard vers le nord)
-			camera_rig.target_yaw = deg_to_rad(float(arg.trim_prefix("--camera-yaw=")))
-			camera_rig.snap()
-		elif arg == "--no-fine-terrain":
-			terrain.fine_enabled = false
-		elif arg.begins_with("--fine-step="):
-			# Force un pas fixe (mesure, comparaison) : désactive le choix adaptatif (T2).
-			terrain.fine_step = int(arg.trim_prefix("--fine-step="))
-			terrain.fine_step_auto = false
-			terrain.fine_enabled = terrain.fine_step > 0
-		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
-			settlement_layer.select(arg.trim_prefix("--select-settlement="))
-		elif arg == "--hide-armies":  # L2 : captures des villes emblématiques
-			armies.visible = false
-	for arg in args:
-		if arg.begins_with("--screenshot="):
-			_screenshot_path = arg.trim_prefix("--screenshot=")
-			_screenshot_countdown = SCREENSHOT_DELAY_FRAMES
-			camera_rig.edge_pan_enabled = false
-			match _screenshot_stage:
-				"province":
-					_stage_screenshot_province()
-				"city":
-					_stage_screenshot_city()
-				"faction":
-					_stage_screenshot_faction()
-				"budget":  # U3 : budget et courbe du trésor après quelques saisons
-					_stage_screenshot_budget()
-				"court":
-					_stage_screenshot_court()
-				"skills":
-					_stage_screenshot_skills()
-				"codex", "codex_search":  # U11 : fenêtre commune Codex (Histoire / Règles)
-					_focus_capital()
-					var bubbles := get_node_or_null("/root/CodexBubbles")
-					if bubbles != null:
-						bubbles.call("open_entry", "cdx_charles_v")
-					if _screenshot_stage == "codex_search" and ui.codex_hub != null:
-						ui.codex_hub.search.text = "arc"
-						ui.codex_hub._on_search("arc")
-				"turn_banner":  # U5 : bandeau « Tour des autres factions »
-					_focus_capital()
-					ui.show_turn_banner()
-				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
-					_stage_screenshot_court()
-					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
-				"general_picker":  # U10 : choix du général depuis le sceau « Sans chef »
-					_stage_screenshot()
-					if selected_army != "" and hud != null:
-						hud.open_general_picker(selected_army)
-				"siege":
-					_stage_screenshot_siege()  # M8
-				"map":
-					pass  # V2 : carte seule, sans sélection ni panneau (captures du terrain)
-				"legend", "legend_armies":  # UX1 : légende de la carte ouverte (haut, ou armées)
-					minimap_ctl.set_legend_open(true)
-					if _screenshot_stage == "legend_armies":
-						get_tree().create_timer(0.5).timeout.connect(func() -> void: minimap_ctl.legend.scroll_to_section("armies"))
-				"help":
-					help.toggle()  # M10
-				"objectives":
-					_focus_capital()
-					victory.open_panel()  # M10
-				"diplomacy":
-					_focus_capital()
-					diplomacy.open_panel("fac_england")
-				"diplomacy_treaty":  # DP1 : négociation à plusieurs clauses
-					_focus_capital()
-					diplomacy.open_panel("fac_england")
-					diplomacy.panel.stage_example()
-				"diplomacy_counter":  # DP2 : un seul point bloque, contre-offre
-					_focus_capital()
-					diplomacy.open_panel("fac_aragon")
-					diplomacy.panel.stage_counter_example()
-				"diplomacy_map":
-					_focus_capital()
-					map_modes.set_mode("diplomacy")
-				"tech":
-					_stage_screenshot_tech()  # M6
-				"chronicle":  # M10
-					_focus_capital()
-					chronicle.stage_screenshot()
-				"tech_civil":
-					_stage_screenshot_tech()  # M6
-					ui.tech_panel.select_branch("civil")
-				"battle":
-					_stage_screenshot_battle()
-				"loading_battle", "loading_siege", "loading_naval":  # AR1 : écran de chargement illustré
-					BattleLoadingCard.open(get_tree(), _screenshot_stage.trim_prefix("loading_"))
-				"ending_victory", "ending_defeat":  # AR1 : fin de campagne illustrée
-					victory.show_ending(_screenshot_stage.trim_prefix("ending_"), "La guerre de Cent Ans s'achève.", 1234)
-				"report_vignette":  # AR1 : vignette du rapport de saison
-					var province := ""
-					flow.season_report.show_report(str(sim.call("get_date_label")), SeasonReport.build_groups([
-						{"kind": "plague", "text_fr": "La peste frappe la province.", "province": province, "faction": player_faction},
-						{"kind": "revolt", "text_fr": "Les vilains se soulèvent.", "province": province, "faction": player_faction}],
-						func(_e: Dictionary) -> bool: return true, Callable(), player_faction))
-				"assault":  # UB1 : écran d'avant-bataille d'un assaut
-					_stage_screenshot_assault()
-				"tooltips":  # F2
-					_stage_screenshot_tooltips()
-				"tutorial", "encyclopedia", "tutorial_toc":  # F8, UX2 (sommaire)
-					tutorial.stage_screenshot(_screenshot_stage)
-				"next_hint":  # UX2 : conseil « que faire maintenant » au premier tour
-					next_hint.stage_screenshot()
-				"settlement", "settlement_orders":  # C5
-					settlements_ctl.stage_screenshot(_screenshot_stage)
-				"trade":  # C5 : routes commerciales
-					_stage_screenshot_trade()
-				"movement", "movement_near":  # M4 : bulle et chemin (vue d'ensemble, gros plan)
-					movement_ctl.stage_screenshot(_screenshot_stage == "movement_near")
-				"movement_trespass":  # DP2 : chemin rouge sans droit de passage
-					movement_ctl.stage_trespass_screenshot()
-				"agents", "agents_registry":  # C6 agents
-					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
-				"feudal_tree", "feudal_map", "feudal_war":  # FE6 : arbre, filtre, escalade
-					feudal.stage_screenshot(_screenshot_stage)
-				_:
-					_stage_screenshot()
-		elif arg.begins_with("--focus="):
-			var parts := arg.trim_prefix("--focus=").split(",")
-			if parts.size() == 3:
-				var x := float(parts[0])
-				var y := float(parts[1])
-				camera_rig.look_at_point(Vector3(x, map_data.surface_world_at(x, y), y), float(parts[2]))
-				camera_rig.snap()
-
-
-## Mise en scène pour la capture : armée du joueur sélectionnée, aperçu de chemin vers la
-## province atteignable la plus lointaine, caméra cadrée sur l'armée.
-func _stage_screenshot() -> void:
-	var ids := player_army_ids()
-	if ids.is_empty():
-		if map_data.province_count >= 3:
-			picker.select_index(3)
-		return
-	select_army(ids[0])
-	var world := armies.world_position_of(ids[0])
-	camera_rig.look_at_point(world, maxf(map_data.size.x, map_data.size.y) * 0.09)
-	camera_rig.snap()
-	var best := ""
-	var best_cost := -1
-	for province_id in reachable:
-		if int(reachable[province_id]) > best_cost:
-			best_cost = int(reachable[province_id])
-			best = str(province_id)
-	if best != "":
-		var index := map_data.index_of_id(best)
-		hovered_index = index
-		terrain.set_highlight(index, 0)
-		_preview_path(best, province_name_of(best))
-
-
-## Mise en scène « province » : capitale du joueur sélectionnée, panneau de recrutement ouvert.
-func _stage_screenshot_province() -> void:
-	var capital: String = str(SimFacade.faction_info(player_faction).get("capital", ""))
-	var index := map_data.index_of_id(capital)
-	if index == 0:
-		var ids := player_army_ids()
-		if not ids.is_empty():
-			var first: Dictionary = sim.call("get_army", ids[0])
-			index = map_data.index_of_id(str(first.get("location_province", first.get("location", ""))))
-	if index == 0:
-		index = mini(3, map_data.province_count)
-	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
-	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
-	camera_rig.snap()
-	picker.select_index(index)
-	ui.province_panel.recruit_panel.show()
-
-
-## Remplace la simulation par le mock si la sim active n'expose pas encore `get_province_city`
-## (§ 2, en attendant `core/`) : sert uniquement aux captures `--stage=city`/`--stage=faction`.
-func _ensure_city_capable_sim() -> void:
-	if _city_available():
-		return
-	var mock := CampaignSimMock.new()
-	if not mock.new_campaign(MapPaths.data_dir, player_faction, SimFacade.pending_seed):
-		return
-	SimFacade.sim = mock
-	SimFacade.is_real = false
-	sim = mock
-	refresh_all()
-
-
-## Idem pour `get_character` (§ 3, en attendant le pont M4) : sert aux captures
-## `--stage=court`/`--stage=skills` et au smoke test.
-func _ensure_characters_capable_sim() -> void:
-	if _characters_available():
-		return
-	var mock := CampaignSimMock.new()
-	if not mock.new_campaign(MapPaths.data_dir, player_faction, SimFacade.pending_seed):
-		return
-	SimFacade.sim = mock
-	SimFacade.is_real = false
-	sim = mock
-	refresh_all()
-
-
-## Mise en scène « cour » : panneau de la cour du joueur ouvert.
-func _stage_screenshot_court() -> void:
-	_ensure_characters_capable_sim()
-	_focus_capital()
-	_on_court_panel_requested()
-
-
-## Mise en scène « compétences » : fiche du dirigeant ouverte sur l'arbre de compétences.
-func _stage_screenshot_skills() -> void:
-	_ensure_characters_capable_sim()
-	_focus_capital()
-	var info := _faction_info(player_faction)
-	var ruler: String = str(info.get("ruler", ""))
-	if ruler == "":
-		var ids: Array = sim.call("get_faction_characters", player_faction)
-		if not ids.is_empty():
-			ruler = str(ids[0])
-	if ruler != "":
-		sim.call("submit_order", {"type": "debug_grant_xp", "character": ruler, "amount": 400})
-		# Une compétence apprise pour montrer les trois états (appris/disponible/verrouillé).
-		var learnable: Array = sim.call("get_learnable", ruler)
-		if not learnable.is_empty():
-			sim.call("submit_order", {"type": "learn_skill", "character": ruler, "skill": str(learnable[0])})
-		_on_character_selected(ruler)
-
-
-func _faction_info(faction_id: String) -> Dictionary:
-	if SimFacade.store_loaded():
-		return SimFacade.store.call("get_faction", faction_id)
-	return {}
-
-
-func _focus_capital() -> void:
-	var capital: String = str(SimFacade.faction_info(player_faction).get("capital", ""))
-	var index := map_data.index_of_id(capital)
-	if index == 0:
-		index = mini(3, map_data.province_count)
-	# JR3 : une faction sans terre (les croisés à Limassol) a sa capitale chez autrui : la vue va
-	# sur son ost, qui campe dans sa colonie, sans sélectionner la province d'un autre.
-	elif sim != null and not player_army_ids().is_empty() \
-			and str((sim.call("get_province_state", capital) as Dictionary).get("owner", player_faction)) != player_faction:
-		_focus_first_player_army()
-		return
-	var centroid: Vector2 = map_data.get_province(index).get("centroid", Vector2.ZERO)
-	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
-	camera_rig.snap()
-	picker.select_index(index)
-
-
-## Lot C5 : mise en scène « commerce » — couche des routes activée, caméra sur Bruges (le plus
-## connecté des comptoirs) pour que plusieurs routes soient visibles dans le cadre.
-func _stage_screenshot_trade() -> void:
-	if not trade_mode:
-		_toggle_trade_layer()
-	var world: Vector3 = settlement_layer.world_position_of("set_bruges") if settlement_layer != null else Vector3.ZERO
-	if world != Vector3.ZERO:
-		camera_rig.look_at_point(world, maxf(map_data.size.x, map_data.size.y) * 0.12)
+	if CmdArgs.has("--fps-probe"):
+		_fps_probe_frames = 0
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		Engine.max_fps = 0
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	if CmdArgs.has("--bench-map"):
+		var bench := MapBench.new()
+		bench.camera_rig = camera_rig
+		bench.terrain = terrain
+		bench.map_data = map_data
+		add_child(bench)
+	if CmdArgs.has("--camera-min"):
+		camera_rig.min_distance = CmdArgs.number("--camera-min")
+		camera_rig.close_min_distance = camera_rig.min_distance
+		camera_rig.floor_distance = 0.0
+	if CmdArgs.has("--static-exaggeration"):
+		dynamic_exaggeration = false
+	if CmdArgs.has("--rescale-settle-ms"):
+		terrain.rescale_settle_ms = int(CmdArgs.number("--rescale-settle-ms"))
+	if CmdArgs.has("--camera-yaw"):  # degrés, 0 = regard vers le nord
+		camera_rig.target_yaw = deg_to_rad(CmdArgs.number("--camera-yaw"))
 		camera_rig.snap()
-
-
-## Mise en scène « ville » : capitale du joueur, panneau de province sur l'onglet Ville.
-func _stage_screenshot_city() -> void:
-	_ensure_city_capable_sim()
-	_focus_capital()
-	ui.province_panel.show_ville_tab()
-
-
-## F2 : panneau de recrutement de la capitale et infobulles riches figées à l'écran (une
-## unité recrutable, un bâtiment constructible), une capture ne montrant pas le survol.
-func _stage_screenshot_tooltips() -> void:
-	_stage_screenshot_province()
-	var column := VBoxContainer.new()
-	column.position = Vector2(16, 60)
-	column.add_theme_constant_override("separation", 10)
-	var recruitable: Array = sim.call("get_recruitable", str(SimFacade.faction_info(player_faction).get("capital", "")))
-	if not recruitable.is_empty():
-		column.add_child(RichTooltip.make_panel(RichTooltip.unit(str(recruitable[0].get("unit_type", "")), recruitable[0])))
-	column.add_child(RichTooltip.make_panel(RichTooltip.building("bld_castle")))
-	column.add_child(RichTooltip.make_panel(RichTooltip.gauge("unrest", 12)))
-	ui.add_child(column)
-
-
-## Mise en scène « faction » : panneau de faction ouvert sur la capitale du joueur.
-func _stage_screenshot_faction() -> void:
-	_ensure_city_capable_sim()
-	_focus_capital()
-	ui.hide_province()
-	_show_faction_panel(player_faction)
-
-
-## Mise en scène « budget » (lot U3) : six saisons jouées, puis le panneau de faction (tableau
-## du budget avec la saison passée et l'écart, courbe du trésor).
-func _stage_screenshot_budget() -> void:
-	_ensure_city_capable_sim()
-	_focus_capital()
-	ui.hide_province()
-	selected_index = 0
-	for _i in 6:
-		sim.call("end_turn")
-	refresh_all()
-	_show_faction_panel(player_faction)
+	if CmdArgs.has("--no-fine-terrain"):
+		terrain.fine_enabled = false
+	if CmdArgs.has("--fine-step"):  # pas fixe (mesure) : désactive le choix adaptatif
+		terrain.fine_step = int(CmdArgs.number("--fine-step"))
+		terrain.fine_step_auto = false
+		terrain.fine_enabled = terrain.fine_step > 0
+	if CmdArgs.has("--select-settlement") and settlement_layer != null:
+		settlement_layer.select(CmdArgs.value("--select-settlement"))
+	if CmdArgs.has("--hide-armies"):
+		armies.visible = false
+	if CmdArgs.has("--screenshot"):
+		_screenshot_path = CmdArgs.value("--screenshot")
+		_screenshot_countdown = SCREENSHOT_DELAY_FRAMES
+		camera_rig.edge_pan_enabled = false
+	var focus := CmdArgs.value("--focus").split(",")
+	if focus.size() == 3:
+		var x := float(focus[0])
+		var y := float(focus[1])
+		camera_rig.look_at_point(Vector3(x, map_data.surface_world_at(x, y), y), float(focus[2]))
+		camera_rig.snap()
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
@@ -2026,7 +1703,7 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
 	if life != null and life.folk != null:  # FK6 : contenu du réservoir au moment de la capture
 		print("CampaignMap: screenshot folk %s (waited %d frames)" % [JSON.stringify(life.folk.view_report(camera)), _screenshot_life_wait])
-	if OS.get_cmdline_user_args().has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
+	if CmdArgs.has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
 		var eye := camera.global_position
 		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 			var g := node as GeometryInstance3D
@@ -2038,47 +1715,6 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
 
-
-## Mise en scène « siège » (M8) : la première armée du joueur marche sur la province ennemie la
-## plus proche en posture de siège ; quelques tours passent jusqu'au siège, puis elle est sélectionnée.
-func _stage_screenshot_siege() -> void:
-	var ids := player_army_ids()
-	if ids.is_empty():
-		return
-	var army_id := str(ids[0])
-	# Le siège vit sur la colonie (lot C) : on attend que `get_assault_odds` le voie ; la cible
-	# n'est choisie qu'une fois, sans quoi l'armée change de route à chaque tour (audit A3 C12).
-	for _turn in 14:
-		var army: Dictionary = sim.call("get_army", army_id)
-		if army.is_empty():
-			return
-		if bool((sim.call("get_assault_odds", army_id) as Dictionary).get("available", false)):
-			break
-		if not Array(army.get("path", [])).is_empty():
-			sim.call("end_turn")
-			continue
-		var target := ""
-		var best := 1 << 30
-		for id in SimFacade.store.call("get_province_ids"):
-			var st: Dictionary = sim.call("get_province_state", id)
-			var summary: Dictionary = sim.call("get_faction_summary", player_faction)
-			if str(st.get("controller", "")) in summary.get("at_war_with", PackedStringArray()):
-				var path: PackedStringArray = sim.call("find_path", army_id, id)
-				if not path.is_empty() and path.size() < best:
-					best = path.size()
-					target = str(id)
-		if target != "":
-			sim.call("submit_order", {"type": "set_stance", "army": army_id, "stance": "siege"})
-			sim.call("submit_order", {"type": "move_army", "army": army_id, "path": Array(sim.call("find_path", army_id, target))})
-		sim.call("end_turn")
-	refresh_all()
-	select_army(army_id)
-	var army_now: Dictionary = sim.call("get_army", army_id)
-	var centroid := map_data.centroid_of_id(str(army_now.get("location_province", army_now.get("location", ""))))
-	camera_rig.look_at_point(Vector3(centroid.x, 0.0, centroid.y), 260.0)
-# --- Batailles (M7) --------------------------------------------------------------------
-# Dialogue d'avant-bataille en fin de tour, lancement de la scène 3D (la carte est mise en
-# sommeil, pas détruite : la simulation reste la même) et retour avec le résultat appliqué.
 
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const PRE_BATTLE_DIALOG := "res://scenes/battle/pre_battle_dialog.tscn"
@@ -2210,27 +1846,3 @@ func _set_world_environment_active(active: bool) -> void:
 		move_child(_parked_environment, 0)
 		_parked_environment = null
 
-
-## `--stage=assault` (UB1) : assaut français de la Guyenne mis en scène, écran ouvert.
-func _stage_screenshot_assault() -> void:
-	if not _battles_available() or not sim.has_method("debug_stage_siege"):
-		return
-	var armies := BattleScene.main_armies(sim, player_faction, "fac_england")
-	if armies.is_empty():
-		return
-	sim.call("debug_stage_siege", armies[0], "prov_guyenne")
-	refresh_all()
-	_offer_pending_battles()
-
-
-## `--stage=battle` : bataille France–Angleterre mise en scène, dialogue ouvert.
-func _stage_screenshot_battle() -> void:
-	if not _battles_available() or not sim.has_method("debug_stage_battle"):
-		return
-	var enemy := "fac_england" if player_faction != "fac_england" else "fac_france"
-	var armies := BattleScene.main_armies(sim, player_faction, enemy)
-	if armies.is_empty():
-		return
-	sim.call("debug_stage_battle", armies[0], armies[1])
-	refresh_all()
-	_offer_pending_battles()

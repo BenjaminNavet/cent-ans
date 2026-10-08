@@ -54,7 +54,7 @@ static func reload() -> void:
 
 
 static func enabled() -> bool:
-	return bool(settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as1")
+	return bool(settings().get("enabled", false)) and not CmdArgs.has("--no-as1")
 
 
 ## Réglages fusionnés d'un modèle de la carte : `defaults` < `base` < entrée du modèle ; {} si

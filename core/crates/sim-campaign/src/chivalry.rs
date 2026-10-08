@@ -206,19 +206,13 @@ fn establish(
             EventKind::Chivalry,
             format!(
                 "{} fonde {}.",
-                faction_label(data, faction),
+                data.faction_label(faction),
                 definition.name.display
             ),
         )
         .faction(faction),
     );
     fill_members(state, data, faction, events);
-}
-
-fn faction_label(data: &GameData, faction: &FactionId) -> String {
-    data.factions
-        .get(faction)
-        .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
 }
 
 /// A character who may sit in the order: alive, free, adult man of the
@@ -416,9 +410,8 @@ pub fn ai_found_order(state: &CampaignState, data: &GameData, faction: &FactionI
         .find(|o| {
             found_blocker(state, data, faction, &o.id).is_none()
                 && f.treasury - foundation_cost(state, faction, o)
-                    >= *reserve.get_or_insert_with(|| {
-                        4 * state.faction_income_effective(data, faction).max(0)
-                    })
+                    >= *reserve
+                        .get_or_insert_with(|| 4 * state.faction_income(data, faction).max(0))
         })
         .map(|o| {
             vec![Order::FoundChivalricOrder {

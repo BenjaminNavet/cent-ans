@@ -95,6 +95,128 @@
       },
       "additionalProperties": false
     },
+    "treaty_weights": {
+      "type": "object",
+      "description": "Poids, en points de traité, des raisons que pèse le destinataire d'un traité, par type d'article (core : sim-campaign negotiation/value.rs). Les valeurs absentes gardent le défaut du core, égal à ce fichier.",
+      "properties": {
+        "peace": {
+          "type": "object",
+          "description": "Paix, trêve et médiation",
+          "properties": {
+            "lassitude_seasons_per_point": {"type": "integer", "description": "lassitude seasons per point (points de traité)."},
+            "lassitude_cap": {"type": "integer", "description": "lassitude cap (points de traité)."},
+            "empty_treasury": {"type": "integer", "description": "empty treasury (points de traité)."},
+            "devastation_threshold": {"type": "integer", "description": "devastation threshold (points de traité)."},
+            "per_ravaged_province": {"type": "integer", "description": "per ravaged province (points de traité)."},
+            "ravaged_cap": {"type": "integer", "description": "ravaged cap (points de traité)."},
+            "aggression_divisor": {"type": "integer", "description": "aggression divisor (points de traité)."},
+            "victory_lure": {"type": "integer", "description": "victory lure (points de traité)."},
+            "other_front": {"type": "integer", "description": "other front (points de traité)."},
+            "claim_score_floor": {"type": "integer", "description": "claim score floor (points de traité)."},
+            "claimed_provinces": {"type": "integer", "description": "claimed provinces (points de traité)."},
+            "pretender_reluctance": {"type": "integer", "description": "pretender reluctance (points de traité)."},
+            "short_truce": {"type": "integer", "description": "short truce (points de traité)."},
+            "mediation": {"type": "integer", "description": "mediation (points de traité)."}
+          },
+          "additionalProperties": false
+        },
+        "alliance": {
+          "type": "object",
+          "description": "Alliance",
+          "properties": {
+            "military_commitment": {"type": "integer", "description": "military commitment (points de traité)."},
+            "war_on_our_allies": {"type": "integer", "description": "war on our allies (points de traité)."},
+            "common_enemy": {"type": "integer", "description": "common enemy (points de traité)."},
+            "strong_ratio": {"type": "number", "description": "strong ratio (points de traité)."},
+            "strong_ally": {"type": "integer", "description": "strong ally (points de traité)."},
+            "weak_ratio": {"type": "number", "description": "weak ratio (points de traité)."},
+            "weak_ally": {"type": "integer", "description": "weak ally (points de traité)."},
+            "common_rival": {"type": "integer", "description": "common rival (points de traité)."},
+            "friend_of_rival": {"type": "integer", "description": "friend of rival (points de traité)."}
+          },
+          "additionalProperties": false
+        },
+        "vassalage": {
+          "type": "object",
+          "description": "Vassalité",
+          "properties": {
+            "power_margin_scale": {"type": "number", "description": "power margin scale (points de traité)."},
+            "power_margin_cap": {"type": "integer", "description": "power margin cap (points de traité)."},
+            "independence_loss": {"type": "integer", "description": "independence loss (points de traité)."},
+            "defeat_score": {"type": "integer", "description": "defeat score (points de traité)."},
+            "defeat": {"type": "integer", "description": "defeat (points de traité)."},
+            "homage_gain": {"type": "integer", "description": "homage gain (points de traité)."}
+          },
+          "additionalProperties": false
+        },
+        "marriage": {
+          "type": "object",
+          "description": "Mariage",
+          "properties": {
+            "match_bonus": {"type": "integer", "description": "match bonus (points de traité)."},
+            "prestige_divisor": {"type": "integer", "description": "prestige divisor (points de traité)."},
+            "prestige_cap": {"type": "integer", "description": "prestige cap (points de traité)."}
+          },
+          "additionalProperties": false
+        },
+        "exchange": {
+          "type": "object",
+          "description": "Accès militaire, commerce, or, tribut, captifs et otages",
+          "properties": {
+            "access_given": {"type": "integer", "description": "access given (points de traité)."},
+            "access_rival": {"type": "integer", "description": "access rival (points de traité)."},
+            "access_allies": {"type": "integer", "description": "access allies (points de traité)."},
+            "access_received": {"type": "integer", "description": "access received (points de traité)."},
+            "trade_base": {"type": "integer", "description": "trade base (points de traité)."},
+            "trade_per_route": {"type": "integer", "description": "trade per route (points de traité)."},
+            "trade_routes_cap": {"type": "integer", "description": "trade routes cap (points de traité)."},
+            "trade_wealth_divisor": {"type": "integer", "description": "trade wealth divisor (points de traité)."},
+            "trade_wealth_cap": {"type": "integer", "description": "trade wealth cap (points de traité)."},
+            "trade_rival": {"type": "integer", "description": "trade rival (points de traité)."},
+            "trade_embargo": {"type": "integer", "description": "trade embargo (points de traité)."},
+            "tribute_percent": {"type": "integer", "description": "tribute percent (points de traité)."},
+            "tribute_ruinous": {"type": "integer", "description": "tribute ruinous (points de traité)."},
+            "gold_empty_treasury": {"type": "integer", "description": "gold empty treasury (points de traité)."},
+            "gold_empty_percent": {"type": "integer", "description": "gold empty percent (points de traité)."},
+            "ransom_min": {"type": "integer", "description": "ransom min (points de traité)."},
+            "ransom_max": {"type": "integer", "description": "ransom max (points de traité)."},
+            "ransom_high_rank": {"type": "integer", "description": "ransom high rank (points de traité)."},
+            "hostage_heir": {"type": "integer", "description": "hostage heir (points de traité)."},
+            "hostage_other": {"type": "integer", "description": "hostage other (points de traité)."},
+            "pledge_heir": {"type": "integer", "description": "pledge heir (points de traité)."},
+            "pledge_other": {"type": "integer", "description": "pledge other (points de traité)."},
+            "gain_percent": {"type": "integer", "description": "gain percent (points de traité)."},
+            "claimed_land": {"type": "integer", "description": "claimed land (points de traité)."},
+            "held_by_our_troops": {"type": "integer", "description": "held by our troops (points de traité)."}
+          },
+          "additionalProperties": false
+        },
+        "context": {
+          "type": "object",
+          "description": "Considérations générales, quels que soient les articles",
+          "properties": {
+            "attitude_divisor_peace": {"type": "integer", "description": "attitude divisor peace (points de traité)."},
+            "attitude_divisor": {"type": "integer", "description": "attitude divisor (points de traité)."},
+            "perjury": {"type": "integer", "description": "perjury (points de traité)."},
+            "hostage_held": {"type": "integer", "description": "hostage held (points de traité)."},
+            "marriage_tie": {"type": "integer", "description": "marriage tie (points de traité)."},
+            "standing_pact": {"type": "integer", "description": "standing pact (points de traité)."},
+            "trust_min": {"type": "integer", "description": "trust min (points de traité)."},
+            "trust_max": {"type": "integer", "description": "trust max (points de traité)."},
+            "threat_ratio": {"type": "number", "description": "threat ratio (points de traité)."},
+            "threat_scale": {"type": "number", "description": "threat scale (points de traité)."},
+            "threat_cap": {"type": "integer", "description": "threat cap (points de traité)."},
+            "weak_demander_ratio": {"type": "number", "description": "weak demander ratio (points de traité)."},
+            "weak_demander": {"type": "integer", "description": "weak demander (points de traité)."},
+            "abandoned_ally": {"type": "integer", "description": "abandoned ally (points de traité)."},
+            "abandoned_allies_max": {"type": "integer", "description": "abandoned allies max (points de traité)."},
+            "prudence": {"type": "integer", "description": "prudence (points de traité)."}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "passage": {
       "type": "object",
       "description": "Lot DP2 (ADR 0075) : droit de passage. Une armée qui finit la saison sur les terres d'une faction en paix, sans accès militaire, crée un incident (malus d'attitude croissant, casus belli pour la victime). Sans cette section (ou avec enabled faux), l'intrusion est ignorée.",

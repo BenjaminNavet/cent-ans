@@ -3,14 +3,14 @@
 use data_model::FactionId;
 use godot::prelude::*;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
     /// `[{id, title, description, done, progress}]` for `faction`.
     #[func]
     fn get_objectives(&self, faction: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -37,7 +37,7 @@ impl CampaignSim {
     /// `hold_turns` and `victory_streak` (seasons all objectives have held, F9).
     #[func]
     fn get_outcome(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match &state.outcome {

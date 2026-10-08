@@ -3,7 +3,7 @@ extends SceneTree
 ## Lot NT10 : fondu des clips de rôle, imposteurs (copies, ombre, sang), herbe hors champ.
 ## Vérifie sans rendu :
 ## - la durée du fondu des rôles vient des données (0,15-0,35 s), arrive aux matériaux
-##   (`role_blend`), vaut 0 avec `--no-nt10` ;
+##   (`role_blend`) ;
 ## - l'empaquetage de INSTANCE_CUSTOM.y (`pack_fade`) : emplacement, clip précédent et instant
 ##   du changement se relisent comme dans le shader, entier exact sous 2^24, jamais en avance ;
 ## - le suivi du clip précédent (`fade_prev`) : posé au changement, effacé après le fondu ;
@@ -13,7 +13,7 @@ extends SceneTree
 ## - imposteurs : identifiants de cuisson (livrée / habit non teint selon `livery_share`),
 ##   shader d'ombre multiplicatif ;
 ## - herbe couchée : le rectangle déborde du champ, un corps tombé hors du champ couche l'herbe.
-## Usage : godot --headless --path game --script res://tests/nt10_test.gd [-- --no-nt10]
+## Usage : godot --headless --path game --script res://tests/nt10_test.gd
 
 var ok := true
 
@@ -25,23 +25,22 @@ func _check(cond: bool, what: String) -> void:
 
 
 func _init() -> void:
-	var off := "--no-nt10" in OS.get_cmdline_user_args()
-	_check_blend(off)
+	_check_blend()
 	_check_pack()
-	_check_tracker(off)
+	_check_tracker()
 	_check_shaders()
 	_check_roles()
-	_check_crew(off)
-	_check_impostors(off)
+	_check_crew()
+	_check_impostors()
 	_check_grass()
-	print("NT10 (no_nt10=%s): %s" % [off, "OK" if ok else "FAIL"])
+	print("NT10: %s" % ("OK" if ok else "FAIL"))
 	quit(0 if ok else 1)
 
 
-func _check_blend(off: bool) -> void:
+func _check_blend() -> void:
 	var data := float(BattleSkinned.animation_settings().get("role_blend_s", -1.0))
 	_check(data >= 0.15 and data <= 0.35, "role_blend_s hors de 0,15-0,35 s : %.3f" % data)
-	var expected := 0.0 if off else data
+	var expected := data
 	_check(is_equal_approx(BattleSkinned.role_blend_s(), expected), "role_blend_s() = %.3f" % BattleSkinned.role_blend_s())
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER
@@ -70,14 +69,11 @@ func _check_pack() -> void:
 		_check(since < 0.05, "écart au changement : %.4f" % since)
 
 
-func _check_tracker(off: bool) -> void:
+func _check_tracker() -> void:
 	var state := {}
 	_check(BattleSkinned.fade_prev(state, 10, 5.0) == -1, "premier clip : pas de fondu")
 	_check(BattleSkinned.fade_prev(state, 10, 6.0) == -1, "même clip : pas de fondu")
 	var prev := BattleSkinned.fade_prev(state, 14, 7.0)
-	if off:
-		_check(prev == -1, "--no-nt10 : changement sec")
-		return
 	_check(prev == 10, "changement : clip précédent 10 (%d)" % prev)
 	_check(is_equal_approx(float(state["at"]), 7.0), "instant du changement")
 	_check(BattleSkinned.fade_prev(state, 14, 7.1) == 10, "pendant le fondu")
@@ -110,7 +106,7 @@ func _check_roles() -> void:
 			_check(int(i) >= 0 and int(i) < clips.size(), "%s : indice %d hors table" % [role, i])
 
 
-func _check_crew(off: bool) -> void:
+func _check_crew() -> void:
 	if not SiegeCrewFx.enabled():
 		print("NT10: servants absents (kit), vérification sautée")
 		return
@@ -131,18 +127,15 @@ func _check_crew(off: bool) -> void:
 	if layer != null:
 		var buf := layer.multimesh.buffer
 		var y := buf[13]
-		if off:
-			_check(y < 32.0, "--no-nt10 : servant sans fondu")
-		else:
-			var d := _decode(y)
-			var rig := BattleSkinned.rig(str(crew.cfg.get("figure_kind", "crew")), 0)
-			_check(int(d["prev"]) == BattleSkinned.clip_index(rig, "crank"), "servant : geste précédent crank (%d)" % d["prev"])
-			_check(is_equal_approx(buf[14], 1.0), "servant : début du geste précédent (%.2f)" % buf[14])
-			_check(int((layer.material_override as ShaderMaterial).get_shader_parameter("custom_fade")) == 2, "servants : custom_fade = 2")
+		var d := _decode(y)
+		var rig := BattleSkinned.rig(str(crew.cfg.get("figure_kind", "crew")), 0)
+		_check(int(d["prev"]) == BattleSkinned.clip_index(rig, "crank"), "servant : geste précédent crank (%d)" % d["prev"])
+		_check(is_equal_approx(buf[14], 1.0), "servant : début du geste précédent (%.2f)" % buf[14])
+		_check(int((layer.material_override as ShaderMaterial).get_shader_parameter("custom_fade")) == 2, "servants : custom_fade = 2")
 	crew.free()
 
 
-func _check_impostors(off: bool) -> void:
+func _check_impostors() -> void:
 	var ids := BattleImpostors.bake_ids(3, 0.7)
 	_check(ids.size() == 3, "trois identifiants")
 	var wearing := 0
@@ -158,7 +151,6 @@ func _check_impostors(off: bool) -> void:
 		var hx := BattleSkinned._hash1(float(id) * 1.37 + 0.11)
 		var hz := BattleSkinned._hash1(float(id) * 0.73 + 1.9)
 		_check(fposmod(hx * 7.31 + hz * 3.17, 1.0) < 0.95, "nobles : livrée sur toutes les copies")
-	_check(BattleImpostors.nt10_enabled() == not off, "interrupteur --no-nt10")
 
 
 func _check_grass() -> void:

@@ -6,17 +6,12 @@
 mod common;
 
 use common::*;
-use data_model::{AbilityKind, BattleAbility, GameData};
+use data_model::AbilityKind;
 use sim_battle::{BattleSim, SideId};
-
-fn game_data() -> &'static GameData {
-    static DATA: std::sync::OnceLock<GameData> = std::sync::OnceLock::new();
-    DATA.get_or_init(data)
-}
 
 #[test]
 fn the_catalogue_has_the_five_abilities_of_the_historian() {
-    let data = game_data();
+    let data = data();
     let mut kinds: Vec<AbilityKind> = data.battle_abilities.values().map(|a| a.kind).collect();
     kinds.sort_by_key(|k| format!("{k:?}"));
     assert_eq!(
@@ -96,7 +91,7 @@ fn refusal(result: Result<(), CommandError>) -> String {
 /// militia with goedendags (4) against longbowmen (5), knights (6) and
 /// militia (7), all far apart, AI off, abilities in the setup.
 fn lab_sim(seed: u64) -> BattleSim {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(
             data,
@@ -168,8 +163,8 @@ fn each_regiment_gets_the_abilities_of_its_kind() {
     // No catalogue, no ability (older replays, hand-made setups).
     let bare = BattleSim::new(
         setup(
-            units(game_data(), &["unit_crossbowmen"]),
-            units(game_data(), &["unit_longbowmen"]),
+            units(data(), &["unit_crossbowmen"]),
+            units(data(), &["unit_longbowmen"]),
             None,
         ),
         1,
@@ -539,7 +534,7 @@ fn the_rout_ends_the_ability() {
 fn record_with_abilities(seed: u64) -> (BattleSim, BattleReplay) {
     let mut setup: sim_battle::BattleSetup =
         serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
-    setup.abilities = game_data().battle_abilities.values().cloned().collect();
+    setup.abilities = data().battle_abilities.values().cloned().collect();
     let start = ReplayStart::plain(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
@@ -556,7 +551,7 @@ fn record_with_abilities(seed: u64) -> (BattleSim, BattleReplay) {
         .map(|u| u.id)
         .collect();
     let mut used = 0;
-    for ability in game_data().battle_abilities.keys() {
+    for ability in data().battle_abilities.keys() {
         let having: Vec<u32> = ours
             .iter()
             .copied()
@@ -625,7 +620,7 @@ fn a_replay_recorded_before_cb4_still_reads() {
 
 #[test]
 fn ai_crossbowmen_raise_their_pavises_under_fire() {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(data, &["unit_men_at_arms_foot", "unit_genoese_crossbowmen"]),
         units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
@@ -655,7 +650,7 @@ fn ai_crossbowmen_raise_their_pavises_under_fire() {
 
 #[test]
 fn ai_pikemen_plant_their_pikes_before_the_horse() {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(data, &["unit_knights"]),
         units(data, &["unit_flemish_pikemen", "unit_men_at_arms_foot"]),
@@ -696,120 +691,3 @@ fn ai_pikemen_plant_their_pikes_before_the_horse() {
 }
 
 // ----- reference battles --------------------------------------------------
-
-/// The ability catalogue, keeping the AI rule of the kinds in `ai_kinds`
-/// only (every kind when `None`).
-fn catalogue(ai_kinds: Option<&[AbilityKind]>) -> Vec<BattleAbility> {
-    game_data()
-        .battle_abilities
-        .values()
-        .cloned()
-        .map(|mut a| {
-            if ai_kinds.is_some_and(|kinds| !kinds.contains(&a.kind)) {
-                a.ai = None;
-            }
-            a
-        })
-        .collect()
-}
-
-fn historical(id: &str, seed: u64, abilities: Vec<BattleAbility>) -> BattleSim {
-    let data = game_data();
-    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../../data/battle_maps")
-        .join(format!("{id}.json"));
-    let map =
-        sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap()).unwrap();
-    let mut setup = map
-        .battle_setup(
-            &data.unit_types,
-            data.battle_orders.values().cloned().collect(),
-            Some(data.battle_standard_rules.clone()),
-            None,
-        )
-        .unwrap();
-    setup.abilities = abilities;
-    map.start(setup, seed).unwrap()
-}
-
-fn mixed(seed: u64, abilities: Vec<BattleAbility>) -> BattleSim {
-    let data = game_data();
-    let mut battle = setup(
-        units(
-            data,
-            &[
-                "unit_knights",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_crossbowmen",
-                "unit_crossbowmen",
-                "unit_knights",
-            ],
-        ),
-        units(
-            data,
-            &[
-                "unit_men_at_arms_foot",
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_knights",
-            ],
-        ),
-        None,
-    );
-    battle.village = Some(false);
-    battle.abilities = abilities;
-    let mut sim = BattleSim::new(battle, seed).unwrap();
-    sim.set_ai(SideId::Attacker, true);
-    sim.set_ai(SideId::Defender, true);
-    sim
-}
-
-/// English victories out of 20 on each historical map, French out of 16 in
-/// the EQ7 mixed battle (seeds of `ep7_historical` and `eq7_cavalry`).
-fn margins(ai_kinds: Option<&[AbilityKind]>) -> [usize; 4] {
-    let mut out = [0; 4];
-    for (k, id) in ["crecy", "azincourt", "poitiers"].iter().enumerate() {
-        out[k] = (1..21)
-            .filter(|&seed| {
-                let mut sim = historical(id, seed, catalogue(ai_kinds));
-                run(&mut sim, 2400.0);
-                sim.winner() == Some(SideId::Defender)
-            })
-            .count();
-    }
-    out[3] = (0..16)
-        .filter(|&seed| {
-            let mut sim = mixed(seed, catalogue(ai_kinds));
-            run_to_end(&mut sim);
-            sim.winner() == Some(SideId::Attacker)
-        })
-        .count();
-    out
-}
-
-/// Probe (ignored): the margins with the AI of each ability alone.
-/// `cargo test --release -p sim-battle --test cb4_abilities -- --ignored --nocapture probe_margins`
-#[test]
-#[ignore = "probe"]
-fn probe_margins() {
-    use AbilityKind as K;
-    let variants: [(&str, Option<&[AbilityKind]>); 7] = [
-        ("no AI", Some(&[])),
-        ("pavise", Some(&[K::Pavise])),
-        ("aimed shot", Some(&[K::AimedShot])),
-        ("banner rally", Some(&[K::BannerRally])),
-        ("close ranks", Some(&[K::CloseRanks])),
-        ("planted pikes", Some(&[K::PlantedPikes])),
-        ("all", None),
-    ];
-    // `CB4_ONLY=aimed,all`: only the variants whose name starts with one of these.
-    let only = std::env::var("CB4_ONLY").unwrap_or_default();
-    for (name, kinds) in variants {
-        if !only.is_empty() && !only.split(',').any(|o| name.starts_with(o)) {
-            continue;
-        }
-        let [c, a, p, e] = margins(kinds);
-        println!("{name}: Crécy {c}/20, Azincourt {a}/20, Poitiers {p}/20, EQ7 {e}/16");
-    }
-}

@@ -6,36 +6,15 @@ extends RefCounted
 ## départ, introduction, citations, conseils et illustrations des écrans de chargement.
 
 const DATA_PATH := "ui/front_end.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 ## Indices des citations pas encore montrées dans la session (voir `random_quote`).
 static var _quote_bag: Array = []
 static var _quote_bag_key: String = ""
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		# Jeux de données réduits (fixtures des tests) : textes d'accueil du jeu complet.
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
-		if _data.is_empty():
-			push_warning("FrontEndData: %s missing or invalid" % path)
-	return _data
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
+	return _lookup.data()
 
 
 static func backdrop() -> Dictionary:
@@ -104,12 +83,10 @@ static func loading() -> Dictionary:
 static func faction_culture(faction_id: String) -> String:
 	if faction_id == "":
 		return ""
-	var path := _data_dir().path_join("factions").path_join(faction_id + ".json")
-	if not FileAccess.file_exists(path):
-		path = MAP_PATHS_SCRIPT.project_root().path_join("data/factions").path_join(faction_id + ".json")
-	if not FileAccess.file_exists(path):
+	var rel_path := "factions/%s.json" % faction_id
+	if not DataFile.exists(rel_path):
 		return ""
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.read_json(rel_path)
 	return str((parsed as Dictionary).get("culture", "")) if parsed is Dictionary else ""
 
 

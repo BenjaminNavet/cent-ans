@@ -6,7 +6,7 @@
 use godot::prelude::*;
 use sim_campaign::{ArmyId, FactorKind};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -18,7 +18,7 @@ impl CampaignSim {
     /// the French lines ready to show. Empty for an unknown army.
     #[func]
     fn get_army_replenishment(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {

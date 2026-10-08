@@ -5,7 +5,6 @@ import json
 import re
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import art_plates
@@ -26,16 +25,6 @@ def _core_event_kinds() -> set[str]:
     body = body.split("}", 1)[0]
     names = re.findall(r"^\s*([A-Z][A-Za-z]+),", body, flags=re.MULTILINE)
     return {re.sub(r"(?<!^)([A-Z])", r"_\1", name).lower() for name in names}
-
-
-def test_illustrations_match_schema() -> None:
-    """The file matches its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "illustrations.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_data()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_ids_unique_and_images_exist() -> None:

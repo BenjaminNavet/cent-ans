@@ -223,7 +223,7 @@ func root_depth_used() -> int:
 func _setup_native() -> void:
 	_native = null
 	_wanted_order = PackedInt64Array()
-	if not use_native_select or not ClassDB.class_exists("ReliefLod") or "--no-native-quadtree" in OS.get_cmdline_user_args():
+	if not use_native_select or not ClassDB.class_exists("ReliefLod") or CmdArgs.has("--no-native-quadtree"):
 		return
 	_native = ClassDB.instantiate("ReliefLod")
 	var tiles: Array = []

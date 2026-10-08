@@ -40,7 +40,7 @@ func _check(condition: bool, message: String) -> bool:
 
 
 func _run() -> void:
-	var record := OS.get_cmdline_user_args().has("--record")
+	var record := CmdArgs.has("--record")
 	root.size = Vector2i(1440, 900)  # headless : la fenêtre par défaut est minuscule (64x64)
 	_scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	# Script de scène non compilé (classe non importée) : une erreur d'appel interromprait _run()

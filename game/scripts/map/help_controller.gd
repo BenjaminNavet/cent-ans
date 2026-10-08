@@ -55,7 +55,7 @@ func setup(campaign_map: Node) -> void:
 	var guide := Button.new()
 	guide.name = "TutorialButton"
 	guide.text = "Tutoriel pas à pas"
-	RichTooltip.attach_plain(guide, "help_resume_tutorial")
+	TooltipHost.attach_plain(guide, "help_resume_tutorial")
 	guide.pressed.connect(func() -> void:
 		panel.hide()
 		var tutorial: Node = map.get("tutorial")

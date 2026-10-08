@@ -107,10 +107,10 @@ func _cell(slot: Dictionary, player_owner: bool) -> Button:
 			button.modulate = Color(1.0, 1.0, 1.0, 0.8)
 	# Infobulle IB : le bâtiment debout (effets, entretien), sinon le premier bâtiment offert.
 	if str(slot.get("built", "")) != "":
-		RichTooltip.set_tooltip(button, "building", str(slot["built"]), {"name": str(slot.get("built_name", "")), "category": str(slot.get("category", "")), "upkeep": int(slot.get("upkeep", 0))})
+		TooltipHost.set_tooltip(button, "building", str(slot["built"]), {"name": str(slot.get("built_name", "")), "category": str(slot.get("category", "")), "upkeep": int(slot.get("upkeep", 0))})
 	elif not next.is_empty():
 		var option: Dictionary = next[0]
-		RichTooltip.set_tooltip(button, "building", str(option.get("building", shown)), option)
+		TooltipHost.set_tooltip(button, "building", str(option.get("building", shown)), option)
 	if state == "locked" and str(slot.get("locked_reason", "")) != "":
 		button.tooltip_text = "[b]Emplacement verrouillé[/b]\n%s" % str(slot["locked_reason"])
 	var can_act := player_owner and not next.is_empty() and state != "locked"

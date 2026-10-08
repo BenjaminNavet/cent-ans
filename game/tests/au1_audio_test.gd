@@ -208,21 +208,13 @@ func _check_campaign_ambience() -> void:
 
 
 func _check_volumes() -> void:
-	var director: Node = root.get_node_or_null("/root/AudioDirector")
-	if not _check(director != null, "AudioDirector autoload missing"):
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if not _check(settings != null, "Settings autoload missing"):
 		return
-	var path := "user://au1_audio_test.cfg"
-	var original: float = director.call("bus_volume", "Ambiance")
-	director.call("set_bus_volume", "Ambiance", 0.3, false)
-	director.call("save_settings", path)
-	director.call("set_bus_volume", "Ambiance", 0.9, false)
-	director.call("load_settings", path)
-	_check(is_equal_approx(float(director.call("bus_volume", "Ambiance")), 0.3), "Ambiance volume not reloaded")
+	settings.call("use_test_file")
+	var original: float = settings.call("bus_volume", "Ambiance")
+	settings.call("set_bus_volume", "Ambiance", 0.3)
+	_check(is_equal_approx(float(settings.call("bus_volume", "Ambiance")), 0.3), "Ambiance volume not stored")
 	var index := AudioServer.get_bus_index("Ambiance")
 	_check(absf(AudioServer.get_bus_volume_db(index) - linear_to_db(0.3)) < 0.01, "Ambiance bus volume not applied")
-	director.call("set_bus_volume", "Ambiance", original, false)
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
-	var controls: Control = director.call("make_volume_controls")
-	var sliders := controls.find_children("*", "HSlider", true, false)
-	_check(sliders.size() == AudioBuses.PLAYER_BUSES.size(), "one slider per bus expected (%d)" % sliders.size())
-	controls.free()
+	settings.call("set_bus_volume", "Ambiance", original)

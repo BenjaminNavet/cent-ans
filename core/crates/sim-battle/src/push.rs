@@ -22,8 +22,6 @@
 //!   dents around the point of contact. Rendering only
 //!   ([`deform_figures`]), like the squeezed ranks of a compressed regiment.
 
-use std::sync::OnceLock;
-
 use data_model::Ability;
 use serde::{Deserialize, Serialize};
 
@@ -153,17 +151,9 @@ pub struct PushShape {
     pub ground_lost: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_push.json");
+data_model::bundled_rules!(PushRules, "rules/battle_push.json");
 
 impl PushRules {
-    /// `data/rules/battle_push.json` as compiled into the crate.
-    pub fn bundled() -> &'static PushRules {
-        static RULES: OnceLock<PushRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_push.json is valid")
-        })
-    }
-
     /// False when the rules switch the push off (no recoil and no wrap):
     /// the step skips it entirely (A/B probes).
     pub fn enabled(&self) -> bool {

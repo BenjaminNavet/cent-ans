@@ -1,11 +1,11 @@
 class_name AudioBuses
 extends RefCounted
 
-## AU1 — disposition des bus audio, créée en code (idempotent) au démarrage d'`AudioDirector` :
+## Disposition des bus audio, créée en code (idempotent) au démarrage d'`AudioDirector` :
 ##
 ##   Master (limiteur dur)
 ##   ├─ Musique (amplification de ducking, compresseur côté-chaîne sur « Voix »)
-##   │   └─ BatailleMusique (B3 : passe-bas d'intensité, créé par `BattleMusicDirector`)
+##   │   └─ BatailleMusique (passe-bas d'intensité, créé par `BattleMusicDirector`)
 ##   ├─ Ambiance (compresseur doux)
 ##   ├─ Bataille (compresseur)
 ##   │   └─ BatailleLointain (passe-bas + réverbération réglés selon le zoom)

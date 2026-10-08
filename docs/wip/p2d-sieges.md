@@ -2,7 +2,7 @@
 
 Chantier PO phase 2 (`docs/wip/po.md`). Branche `feat/p2d-sieges` depuis `main` (phase 1 fusionnée :
 `UiLayout`/`UiZones`, `UiType`, `UiMotion` existent déjà). Modèle : P2c/P2g (`docs/wip/p2c-codex.md`,
-`docs/wip/p2g-layout.md`).
+`docs/archive/chantiers.md`).
 
 ## Périmètre trouvé (`grep -rln -i 'siege\|naval' game/scripts/ui game/scripts/map game/scenes`)
 

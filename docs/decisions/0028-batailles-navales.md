@@ -1,6 +1,6 @@
 # ADR 0028 — Batailles navales
 
-Date : 2026-09-25. Statut : accepté. Lot NV1. Revient sur la ligne « Naval : transport maritime
+Date : 2026-09-25. Statut : partiellement remplacé par l’ADR 0201 (le moteur temps réel, les scénarios historiques et la 3D sont supprimés ; modèle de combat, auto-résolution et conséquences de campagne restent). Lot NV1. Revient sur la ligne « Naval : transport maritime
 abstrait uniquement, pas de bataille navale » du document de conception (§ 2).
 
 ## Contexte

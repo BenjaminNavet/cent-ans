@@ -7,7 +7,7 @@
   "required": ["version", "image_size", "archetype_dir", "aged_dir", "age_bands", "cultures", "default_culture", "ranks", "faces", "cells", "fallbacks", "rank_rules", "aged_variants", "marks"],
   "additionalProperties": false,
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "sex": {"type": "string", "enum": ["male", "female"]},
     "band": {"type": "string", "enum": ["child", "young", "adult", "old"]},
     "text": {"type": "string", "minLength": 1}
@@ -44,7 +44,7 @@
         "properties": {
           "id": {"$ref": "#/$defs/id"},
           "label": {"$ref": "#/$defs/text"},
-          "factions": {"type": "array", "items": {"type": "string", "pattern": "^fac_[a-z0-9_]+$"}, "uniqueItems": true},
+          "factions": {"type": "array", "items": { "$ref": "common.schema.json#/$defs/faction_id" }, "uniqueItems": true},
           "prompt": {"$ref": "#/$defs/text"}
         }
       }

@@ -53,6 +53,7 @@ pub mod dynasty;
 pub mod economy;
 pub mod economy_balance;
 pub mod edicts;
+pub mod effects;
 pub mod encounter;
 pub mod events;
 pub mod feudal;
@@ -106,6 +107,9 @@ pub mod vision;
 pub mod voyage;
 pub mod weather;
 
+#[cfg(feature = "test-support")]
+pub mod test_support;
+
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };
@@ -128,10 +132,7 @@ pub use chronicle::{
 };
 pub use coinage::{CoinageError, CoinageLevel, CoinageParams};
 pub use crusade::{CrusadeError, CrusadeState, CrusadeView, FervorChange, PendingPassage};
-pub use diplomacy::{
-    Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
-    RelationKind,
-};
+pub use diplomacy::{Claim, DiplomacyEntry, DiplomacyError, Offer, OpinionModifier, RelationKind};
 pub use dynasty::{
     CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
     MARRIAGE_MIN_AGE,

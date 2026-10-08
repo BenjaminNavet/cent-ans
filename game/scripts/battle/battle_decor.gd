@@ -108,7 +108,7 @@ func attach_smoke(scene: Node, staging: BattleStaging, weather: String) -> void:
 ## Relie la simulation : l'état des camps (pillage) est relu une fois par seconde.
 func bind(sim: Object) -> void:
 	_sim = sim
-	set_process(sim != null and sim.has_method("get_camps") and not _camps.is_empty())
+	set_process(sim != null and not _camps.is_empty())
 
 
 func _process(delta: float) -> void:

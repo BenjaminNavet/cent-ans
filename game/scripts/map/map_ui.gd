@@ -192,11 +192,9 @@ func _apply_access_args() -> void:
 	if settings == null:
 		return
 	var keys := {"colorblind": Accessibility.KEY_COLORBLIND, "contrast": Accessibility.KEY_HIGH_CONTRAST, "motion": Accessibility.KEY_REDUCE_MOTION}
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--access="):
-			for word in arg.trim_prefix("--access=").split(","):
-				if keys.has(word):
-					settings.call("set_value", keys[word], true, false)
+	for word in CmdArgs.list("--access"):
+		if keys.has(word):
+			settings.call("set_value", keys[word], true, false)
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
@@ -362,7 +360,7 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	_set_top_text(treasury_label, "Trésor : %s" % Money.amount(treasury), Money.amount(treasury))
 	if economy.is_empty():
 		_set_top_text(income_label, "Revenu : %s" % Money.signed(income), Money.signed(income))
-		RichTooltip.attach_plain(income_label, "income_gross_last_turn")
+		TooltipHost.attach_plain(income_label, "income_gross_last_turn")
 		return
 	var net := int(economy.get("net_income", 0))
 	_set_top_text(income_label, "Solde : %s / saison" % Money.signed(net), Money.signed(net))
@@ -918,7 +916,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 	header.add_child(heading)
 	var close := Button.new()
 	close.text = "×"
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(general_picker.hide)
 	header.add_child(close)
 	var any_free := false
@@ -930,7 +928,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		if reason != "":
 			button.text += " (%s)" % reason
 			button.disabled = true
-			RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason})
+			TooltipHost.attach_plain(button, "seat_unavailable", {"body": reason})
 		else:
 			any_free = true
 			var character_id := str(candidate.get("id", ""))
@@ -1011,14 +1009,14 @@ func set_research_progress(research: Dictionary, points_per_turn: int, queue: Ar
 		research_label.text = research_bar_text("", -1, _top_compact)
 		research_bar.max_value = maxi(1, int(reserve.get("cap", 1)))
 		research_bar.value = int(reserve.get("points", 0))
-		RichTooltip.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s'accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
+		TooltipHost.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s'accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
 			points_per_turn, int(reserve.get("points", 0)), int(reserve.get("cap", 0)), queue_text]})
 		return
 	var turns := int(research.get("turns_left", -1))
 	research_label.text = research_bar_text(str(research.get("name", "")), turns, _top_compact)
 	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 	research_bar.value = int(research.get("progress", 0))
-	RichTooltip.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s%s" % [
+	TooltipHost.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s%s" % [
 		RichTooltip.entity_name(str(research.get("technology", "")), str(research.get("name", ""))),
 		int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
@@ -1217,7 +1215,7 @@ func _setup_hud() -> void:
 ## d'autres contrôleurs), dans le rectangle `TOP_BAR` ; la cloche aussi (ses pastilles d'alerte
 ## débordent vers le haut, elles ne doivent pas être coupées) : `layout_hud` la cale en bas
 ## contre le bord gauche de la minicarte (la zone `MINIMAP`, 0,18 × 0,28, ne peut porter les
-## deux : écart consigné dans `docs/wip/po1-layout.md`).
+## deux : écart consigné dans `docs/archive/chantiers.md`).
 func _setup_zones() -> void:
 	UiZones.layout().attach_host(self)
 	for control: Control in [general_seal, army_strip, army_actions]:
@@ -1593,7 +1591,7 @@ func _add_codex_button() -> void:
 		_decorate_button(button, "hud_codex")
 	button.text = "Codex"
 	UiType.apply(button, UiType.BODY)
-	RichTooltip.attach_plain(button, "codex_open_hint")
+	TooltipHost.attach_plain(button, "codex_open_hint")
 	_add_keycap(button, "codex_open")
 	_register_top_label(button, "Codex")
 

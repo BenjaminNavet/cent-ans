@@ -90,7 +90,7 @@ func _side() -> String:
 ## Relit la barre depuis la simulation (création des boutons au premier appel).
 func refresh() -> void:
 	var battle := _battle()
-	if battle == null or not battle.has_method("get_leader_orders"):
+	if battle == null:
 		visible = false
 		return
 	_orders = battle.call("get_leader_orders", _side())
@@ -114,8 +114,6 @@ func refresh() -> void:
 
 ## RS-F : l'ordre d'incendie proposé par le cœur pour la sélection (toute l'armée sans sélection).
 func _query_burn(battle: Object) -> Dictionary:
-	if not battle.has_method("get_burn_order"):
-		return {"siege": false}
 	return battle.call("get_burn_order", _side(), PackedInt32Array(_selection()))
 
 
@@ -335,6 +333,6 @@ class OrderButton extends Button:
 			lines.append("[color=#6b5a45]%s[/color]" % " · ".join(facts))
 		if not bool(order.get("available", false)):
 			lines.append("[color=#8a2a1a]Indisponible : %s[/color]" % order.get("reason", ""))
-		# BP1 : `RichTooltip.make_panel` applique les liens du Codex et enregistre l'infobulle
+		# BP1 : `TooltipHost.from_bbcode` applique les liens du Codex et enregistre l'infobulle
 		# pour la conversion en bulle épinglée (touche T, `CodexBubbles.pin_native_tooltip`).
-		return RichTooltip.make_panel("\n".join(lines))
+		return TooltipHost.from_bbcode("\n".join(lines))

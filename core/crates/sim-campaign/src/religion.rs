@@ -1,13 +1,14 @@
 //! Religion (M5 spec § 2.4): papal favour, excommunication, papal mediation,
 //! the Great Western Schism (dates from `data/religions`) and heresies.
 
+use data_model::EffectKind;
 use data_model::{BuildingCategory, FactionId, GameData, ProvinceId, ReligionId, ReligionKind};
 
 use crate::diplomacy::{
-    faction_name, DiplomacyError, Proposal, MEDIATION_COST, MEDIATION_MIN_FAVOR,
-    MEDIATION_TRUCE_TURNS, PAPACY_FACTION,
+    DiplomacyError, MEDIATION_COST, MEDIATION_MIN_FAVOR, MEDIATION_TRUCE_TURNS, PAPACY_FACTION,
 };
 use crate::events::{EventKind, GameEvent};
+use crate::negotiation::{Article, Treaty};
 use crate::state::{CampaignState, Season};
 
 /// Excommunication length (10 years).
@@ -143,7 +144,7 @@ pub(crate) fn excommunicate(state: &mut CampaignState, data: &GameData, faction:
     }
     let text = format!(
         "Le pape excommunie le souverain de {} : l'interdit frappe le royaume.",
-        faction_name(data, faction)
+        data.faction_name(faction)
     );
     state.push_order_event(GameEvent::new(EventKind::Excommunication, text).faction(faction));
 }
@@ -168,7 +169,7 @@ pub(crate) fn set_obedience(
     state.factions.get_mut(faction).expect("exists").religion = Some(religion.clone());
     let text = format!(
         "{} se range derrière {}.",
-        faction_name(data, faction),
+        data.faction_name(faction),
         religion_display(state, data, religion)
     );
     state.push_order_event(GameEvent::new(EventKind::Schism, text).faction(faction));
@@ -252,9 +253,9 @@ impl CampaignState {
             data,
             faction,
             target,
-            Proposal::Truce {
+            Treaty::single(Article::Mediation {
                 turns: MEDIATION_TRUCE_TURNS,
-            },
+            }),
         )?;
         self.factions.get_mut(faction).expect("checked").treasury -= MEDIATION_COST;
         if let Some(papacy) = FactionId::new(PAPACY_FACTION)
@@ -339,9 +340,8 @@ pub fn effective_piety(
     let Some(c) = state.characters.get(character) else {
         return 50;
     };
-    let bonus = crate::skills::character_effects(state, data, character)
-        .piety
-        .apply(0.0);
+    let bonus =
+        crate::skills::character_effects(state, data, character)[EffectKind::Piety].apply(0.0);
     (f64::from(c.piety) + bonus).round().clamp(0.0, 100.0) as u8
 }
 
@@ -450,7 +450,7 @@ impl CampaignState {
             f.offers.push(crate::diplomacy::Offer {
                 id,
                 from: from.clone(),
-                proposal: Proposal::Obedience { religion },
+                proposal: Treaty::single(Article::Obedience { religion }),
                 expires_turn,
                 text_fr: text,
             });
@@ -499,7 +499,7 @@ fn resolve_favor(state: &mut CampaignState, data: &GameData, events: &mut Vec<Ga
                     EventKind::Excommunication,
                     format!(
                         "Le pape lève l'excommunication du souverain de {}.",
-                        faction_name(data, &faction)
+                        data.faction_name(&faction)
                     ),
                 )
                 .faction(&faction),
@@ -530,10 +530,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             if p.heresy_religion.is_none() && p.heresy == 0 {
                 p.heresy = 10;
                 p.heresy_religion = Some(id.clone());
-                let province_name = data
-                    .provinces
-                    .get(province)
-                    .map_or_else(|| province.to_string(), |d| d.name.display.clone());
+                let province_name = data.province_name(province);
                 events.push(
                     GameEvent::new(
                         EventKind::Heresy,
@@ -592,10 +589,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
             ] {
                 entry.unrest = entry.unrest.saturating_add(15).min(100);
             }
-            let province_name = data
-                .provinces
-                .get(id)
-                .map_or_else(|| id.to_string(), |d| d.name.display.clone());
+            let province_name = data.province_name(id);
             events.push(
                 GameEvent::new(
                     EventKind::Heresy,

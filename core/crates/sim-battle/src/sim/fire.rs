@@ -111,14 +111,6 @@ fn add_suburbs(works: &mut SiegeWorks, rules: &FireRules) {
     }
 }
 
-/// Distance from (px, pz) to the segment `a`-`b`.
-fn segment_distance(a: (f64, f64), b: (f64, f64), px: f64, pz: f64) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = (dx * dx + dz * dz).max(1e-9);
-    let t = (((px - a.0) * dx + (pz - a.1) * dz) / len2).clamp(0.0, 1.0);
-    ((a.0 + dx * t - px).powi(2) + (a.1 + dz * t - pz).powi(2)).sqrt()
-}
-
 /// What a fire may catch.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Fuel {
@@ -449,8 +441,11 @@ impl BattleSim {
         let smoky = works.houses.iter().any(|h| {
             h.fire.burning()
                 && h.fire.intensity >= rules.smoke.min_intensity
-                && segment_distance((shooter.x, shooter.z), (target.x, target.z), h.x, h.z)
-                    < h.radius + rules.smoke.margin_m
+                && crate::geom::segment_distance(
+                    (h.x, h.z),
+                    (shooter.x, shooter.z),
+                    (target.x, target.z),
+                ) < h.radius + rules.smoke.margin_m
         });
         if smoky {
             rules.smoke.accuracy_factor

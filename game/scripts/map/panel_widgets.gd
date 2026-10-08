@@ -36,7 +36,7 @@ static func bind_army_cap(button: Button, checks: Array[CheckBox], cap: int) -> 
 		var full := selected > cap
 		button.disabled = selected == 0 or full
 		if full:
-			RichTooltip.attach_plain(button, "army_full", {"body": "%d unités cochées : une armée compte au plus %d unités. Décochez-en %d, ou formez une seconde armée ensuite." % [selected, cap, selected - cap]})
+			TooltipHost.attach_plain(button, "army_full", {"body": "%d unités cochées : une armée compte au plus %d unités. Décochez-en %d, ou formez une seconde armée ensuite." % [selected, cap, selected - cap]})
 		elif button.tooltip_text.contains("army_full"):
 			button.tooltip_text = ""
 	for check in checks:
@@ -61,12 +61,12 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			# VN : nom et effectifs passent à la ligne au lieu d'être coupés (« Milice urbaine — 12… »).
 			check.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
-			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
+			TooltipHost.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
 			checks.append(check)
 		else:
 			var chip := wrap_chip(IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit"))
-			RichTooltip.set_tooltip(chip, "unit", unit_type, unit)  # IB1
+			TooltipHost.set_tooltip(chip, "unit", unit_type, unit)  # IB1
 			list.add_child(chip)
 	return checks
 
@@ -143,7 +143,7 @@ static func _recruit_row(list: Container, row: Dictionary, on_recruit: Callable,
 	button.disabled = not available
 	var unit_type: String = str(row.get("unit_type", ""))
 	IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
-	RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
+	TooltipHost.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
 	button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 	line.add_child(button)
 	# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
@@ -176,7 +176,7 @@ static func pool_label(row: Dictionary) -> Label:
 	label.name = "PoolLabel"
 	if int(row.get("pool_available", 0)) > 0:
 		label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
-	RichTooltip.attach_plain(label, "recruit_pool", {"body": "%d au plus, se remplit à chaque saison" % int(row.get("pool_cap", 0))})
+	TooltipHost.attach_plain(label, "recruit_pool", {"body": "%d au plus, se remplit à chaque saison" % int(row.get("pool_cap", 0))})
 	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	return label
 
@@ -198,7 +198,7 @@ static func fill_buildings(list: Container, buildings: Array, demolition: Dictio
 		row.name = building_id
 		row.add_theme_constant_override("separation", 6)
 		var chip := wrap_chip(IconChip.create(building_id, text, "", ROW_ICON, 14, "building"))
-		RichTooltip.set_tooltip(chip, "building", building_id, entry)  # IB1
+		TooltipHost.set_tooltip(chip, "building", building_id, entry)  # IB1
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(chip)
 		if is_player_owner and demolition.has(building_id):
@@ -218,9 +218,9 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 	var refund := int(preview.get("refund", 0))
 	var upkeep_saved := int(preview.get("upkeep_saved", 0))
 	if can_demolish:
-		RichTooltip.attach_plain(button, "raze_building", {"body": "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]})
+		TooltipHost.attach_plain(button, "raze_building", {"body": "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]})
 	else:
-		RichTooltip.attach_plain(button, "raze_building", {"body": str(preview.get("reason", "indisponible"))})
+		TooltipHost.attach_plain(button, "raze_building", {"body": str(preview.get("reason", "indisponible"))})
 	if on_raze.is_valid():
 		button.pressed.connect(func() -> void: on_raze.call(building_id, preview))
 	return button
@@ -277,7 +277,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		var import_cost := int(row.get("import_cost", 0))
 		if import_cost > 0:
 			line.add_child(side_note(import_cost_label(import_cost)))
-		RichTooltip.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
+		TooltipHost.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
 		list.add_child(line)
 		# U12 : le motif d'indisponibilité passe sous la ligne, pleine largeur (comme le
 		# recrutement, Q8), et non plus dans une colonne rouge étroite à droite du bouton.
@@ -357,10 +357,12 @@ static func unit_label(unit: Dictionary) -> String:
 	return str(unit.get("unit_type", "?")).trim_prefix("unit_").capitalize()
 
 
-static func thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out
+## Nom d'une faction : `display_name` s'il est fourni, sinon `label_of(faction_id)`, « — » si vide.
+static func faction_label(faction_id: String, display_name: String, label_of: Callable) -> String:
+	if faction_id == "":
+		return "—"
+	if display_name != "":
+		return display_name
+	if label_of.is_valid():
+		return str(label_of.call(faction_id))
+	return faction_id

@@ -15,8 +15,6 @@
 //! `data/schemas/missile_arc_rules.schema.json`); the checks themselves run
 //! in the battle tick (`sim/indirect.rs`).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::field::Battlefield;
@@ -44,18 +42,9 @@ pub struct MissileArcRules {
     pub memory_s: f64,
 }
 
-/// The rules file, embedded at compile time.
-const BUNDLED: &str = include_str!("../../../../data/rules/missile_arc.json");
+data_model::bundled_rules!(MissileArcRules, "rules/missile_arc.json");
 
 impl MissileArcRules {
-    /// `data/rules/missile_arc.json` as compiled into the crate.
-    pub fn bundled() -> &'static MissileArcRules {
-        static RULES: OnceLock<MissileArcRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/missile_arc.json is valid")
-        })
-    }
-
     /// May this missile be lobbed over a crest?
     pub fn lobs(&self, kind: MissileKind) -> bool {
         self.indirect_missiles.iter().any(|k| k == kind.key())

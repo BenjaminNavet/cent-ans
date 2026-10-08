@@ -18,7 +18,7 @@ func _init() -> void:
 	var start := CameraFeel.get_value("battle", "marker_shrink_start_m")
 	var end := CameraFeel.get_value("battle", "marker_shrink_end_m")
 	var min_scale := CameraFeel.get_value("battle", "marker_min_scale")
-	_check(CameraFeel.loaded_from_data, "camera_feel.json loaded")
+	_check(CameraFeel.loaded_from_data(), "camera_feel.json loaded")
 	_check(end > start and min_scale < 1.0, "shrink settings are sane")
 	_check(BattleUnitMarkers.scale_for_distance(start - 10.0, start, end, min_scale) == 1.0, "full size below the threshold")
 	_check(is_equal_approx(BattleUnitMarkers.scale_for_distance(end, start, end, min_scale), min_scale), "min scale at the far end")

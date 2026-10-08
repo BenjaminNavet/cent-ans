@@ -125,13 +125,7 @@
       "minimum": 0.5,
       "maximum": 2
     },
-    "color": {
-      "description": "Couleur linéaire RVB.",
-      "type": "array",
-      "minItems": 3,
-      "maxItems": 3,
-      "items": {"type": "number", "minimum": 0, "maximum": 1}
-    },
+    "color": { "description": "Couleur linéaire RVB.", "$ref": "common.schema.json#/$defs/rgb3" },
     "type": {
       "type": "object",
       "required": ["label", "color", "shade", "streak"],

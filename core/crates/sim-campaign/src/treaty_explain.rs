@@ -11,9 +11,8 @@
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::faction_name;
 use crate::negotiation::{
-    self, chance_of, counter_proposal, evaluate_treaty, Article, Party, TreatyEvaluation,
+    chance_of, counter_proposal, evaluate_treaty, Article, Party, TreatyEvaluation,
 };
 use crate::state::CampaignState;
 
@@ -158,7 +157,7 @@ fn counter_on_article(
     articles: &[Article],
     index: usize,
 ) -> Option<(Vec<Article>, u8, String)> {
-    let label = negotiation::article_label(state, data, proposer, recipient, &articles[index]);
+    let label = articles[index].label(state, data, proposer, recipient);
     // Lower amounts first: 75 %, 50 %, 25 % of the demand.
     if articles[index].giver() == Some(Party::Recipient) {
         for percent in [75, 50, 25] {
@@ -169,8 +168,7 @@ fn counter_on_article(
             list[index] = lower.clone();
             let verdict = chance(state, data, proposer, recipient, &list);
             if verdict.blocked.is_none() && verdict.chance >= ACCEPT_CHANCE {
-                let new_label =
-                    negotiation::article_label(state, data, proposer, recipient, &lower);
+                let new_label = lower.label(state, data, proposer, recipient);
                 return Some((
                     list,
                     verdict.chance,
@@ -200,7 +198,7 @@ pub fn explain_treaty(
 ) -> TreatyExplanation {
     let verdict = chance(state, data, proposer, recipient, articles);
     let lines = explanation_lines(&verdict);
-    let name = faction_name(data, recipient);
+    let name = data.faction_name(recipient);
     let mut explanation = TreatyExplanation {
         chance: verdict.chance,
         accept: verdict.accept,
@@ -292,12 +290,12 @@ pub fn explain_treaty(
                 let added: Vec<String> = list
                     .iter()
                     .filter(|a| !articles.contains(a))
-                    .map(|a| negotiation::article_label(state, data, proposer, recipient, a))
+                    .map(|a| a.label(state, data, proposer, recipient))
                     .collect();
                 let removed: Vec<String> = articles
                     .iter()
                     .filter(|a| !list.contains(a))
-                    .map(|a| negotiation::article_label(state, data, proposer, recipient, a))
+                    .map(|a| a.label(state, data, proposer, recipient))
                     .collect();
                 let mut parts = Vec::new();
                 if !added.is_empty() {

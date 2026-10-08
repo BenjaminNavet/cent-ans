@@ -11,8 +11,8 @@ use sim_battle::{BattleSim, Command, SiegeFxKind, SiegeSetup};
 
 fn siege_with_trebuchet(seed: u64) -> (BattleSim, u32, usize) {
     let data = data();
-    let attackers = units(&data, &["unit_men_at_arms_foot", "unit_trebuchet"]);
-    let defenders = units(&data, &["unit_urban_militia", "unit_crossbowmen"]);
+    let attackers = units(data, &["unit_men_at_arms_foot", "unit_trebuchet"]);
+    let defenders = units(data, &["unit_urban_militia", "unit_crossbowmen"]);
     let setup = setup(
         attackers,
         defenders,

@@ -57,7 +57,7 @@ func _build_panel() -> void:
 	head.add_child(title)
 	var close := Button.new()
 	close.text = "✕"
-	RichTooltip.attach_plain(close, "close_list_u")
+	TooltipHost.attach_plain(close, "close_list_u")
 	close.pressed.connect(func() -> void: panel.hide())
 	head.add_child(close)
 	_scroll = ScrollContainer.new()
@@ -120,7 +120,7 @@ func _add_section(key: String, text: String, count: int) -> void:
 	header.flat = true
 	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	header.text = "%s %s (%d)" % ["▾" if _expanded[key] else "▸", text, count]
-	RichTooltip.attach_plain(header, "roster_toggle", {"title": "Replier la liste" if _expanded[key] else "Dérouler la liste"})
+	TooltipHost.attach_plain(header, "roster_toggle", {"title": "Replier la liste" if _expanded[key] else "Dérouler la liste"})
 	header.add_theme_font_size_override("font_size", HudStyle.FONT_BODY + 1)
 	header.pressed.connect(func() -> void:
 		_expanded[key] = not _expanded[key]
@@ -206,7 +206,7 @@ func army_entry(army_id: String, army: Dictionary) -> Dictionary:
 	var men := 0
 	for unit in units:
 		men += int(unit.get("strength", 0))
-	var detail := "%s · %s hommes · %s" % [FrText.count(units.size(), "unité"), HudStyle.thousands(men), _army_place(army)]
+	var detail := "%s · %s hommes · %s" % [FrText.count(units.size(), "unité"), Money.digits(men), _army_place(army)]
 	var left := int(army.get("movement_left", army.get("movement_points", 0)))
 	var allowance := maxi(1, int(army.get("movement_max", left)))
 	var ratio := clampf(float(left) / float(allowance), 0.0, 1.0)

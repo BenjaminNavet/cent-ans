@@ -1,160 +1,56 @@
 class_name RenderQuality
 extends RefCounted
 
-## Préréglages de qualité du rendu (lot V3, A1-14) : Basse, Moyenne, Haute (par défaut), Ultra.
-## Réglage `video/quality` de l'autoload `Settings` (Réglages > Affichage), ou `--quality=<niveau>`
-## en ligne de commande (mesures, captures). Règle les coûts globaux (atlas d'ombres, filtre doux,
-## qualité SSAO/SSIL, grille du brouillard volumétrique, MSAA) et, par environnement enregistré,
-## les effets : SSAO, lumière rebondie en espace écran (SSIL), SDFGI (Ultra, bataille), brouillard
-## volumétrique (lumière qui « traverse » la brume), halo, portée et cascades des ombres.
-## Lot PF1 : chaque niveau règle aussi la géométrie et les effets de scène (clés « scène » des
-## préréglages) : relief fin de la carte (présence, biais de LOD des blocs), portée et densité de
-## la végétation et de ses ombres, portée et cascades des ombres de la carte, filtre des ombres
-## douces de la carte, distances de LOD et d'imposteurs des figurines de bataille, rayon de
-## l'herbe de bataille, nombre de particules (météo, sang, fumée, poussière).
-## Les nœuds concernés s'inscrivent dans le groupe `CLIENT_GROUP` et reçoivent
-## `apply_render_quality(preset)` à chaque changement ; les particules sont réduites à leur
-## création (`SceneTree.node_added`). Purement visuel.
+## Préréglages de qualité du rendu : Basse, Moyenne, Haute (par défaut), Ultra, lus dans
+## `data/fx/render_quality.json` (clés documentées par `data/schemas/render_quality.schema.json`).
+## Niveau = réglage `video/quality` de `Settings`, ou `--quality=<niveau>` (mesures, captures).
+## Un préréglage règle les coûts globaux (ombres, SSAO/SSIL, brouillard volumétrique, MSAA,
+## mise à l'échelle 3D) et la géométrie de la scène (relief, végétation, LOD, herbe, particules).
+## Les nœuds du groupe `CLIENT_GROUP` reçoivent `apply_render_quality(preset)` à chaque
+## changement ; les particules sont réduites à leur création. Purement visuel.
 
 const LEVELS: Array[String] = ["low", "medium", "high", "ultra"]
 const LABELS: Array[String] = ["Basse", "Moyenne", "Haute", "Ultra"]
 const DEFAULT_LEVEL := "high"
-## RL1 : valeur du réglage tant que le joueur n'a rien choisi : niveau déduit du GPU détecté.
+## Valeur du réglage tant que le joueur n'a rien choisi : niveau déduit du GPU détecté.
 const AUTO := "auto"
 const GROUP := "render_quality"
-## PF1 : nœuds qui implémentent `apply_render_quality(preset: Dictionary)`.
+## Nœuds qui implémentent `apply_render_quality(preset: Dictionary)`.
 const CLIENT_GROUP := "render_quality_client"
-## Clés « scène » (PF1), communes à tous les niveaux :
-## - quadtree de relief (ZG2, pyramide en cache) : `relief_vertex_px` espacement maximal des
-##   sommets à l'écran, `relief_items` budget de nœuds, `relief_extra_depth` profondeur au-delà
-##   de l'étage de données, `relief_pages` couches de pages (VRAM, au chargement de la carte),
-##   `relief_shadow_cascades` cascades du soleil où le relief porte une ombre (au-delà, il en
-##   reçoit seulement) ;
-## - `fine_relief` : sans pyramide, relief fin `FineTerrainJob` au zoom comté (repli) ;
-## - `terrain_near` : facteur sur la distance du LOD proche du relief de la carte ;
-## - `veg_density` : part des arbres affichés ; `veg_detail` : facteur sur la portée des arbres
-##   détaillés ; `veg_shadow_distance` : zoom au-delà duquel les arbres ne portent plus d'ombre
-##   (0 : jamais d'ombre) ;
-## - `map_shadow_range`, `map_shadow_splits`, `map_soft_shadows` : ombres de la carte ;
-## - `map_msaa` (PF, ADR 0169) : MSAA sur la carte (`msaa` : en bataille) ;
-## - `battle_lod` : facteur sur les distances de LOD, d'ombre et d'imposteurs des soldats ;
-## - `grass` : facteur sur le rayon de l'herbe de bataille ; `particles` : part des particules ;
-## - `model_shadow_distance` (FC1) : zoom au-delà duquel les maquettes des colonies ne portent
-##   plus d'ombre (0 : jamais) ; `clutter_density` (FC3) : densité des touffes d'herbe et de
-##   broussailles proches de la carte (0 : aucune) ; `veg_max_distance` (L5) : zoom au-delà
-##   duquel plus aucun arbre n'est affiché sur la carte (avec imposteurs FC2 ; 700 sans eux).
-const SCENE_KEYS := ["relief_vertex_px", "relief_items", "relief_extra_depth", "relief_pages", "relief_shadow_cascades", "fine_relief", "terrain_near", "veg_density", "veg_detail",
-	"veg_shadow_distance", "map_shadow_range", "map_shadow_splits", "map_soft_shadows", "battle_lod",
-	"grass", "particles", "model_shadow_distance", "clutter_density", "veg_max_distance"]
+const DATA_PATH := "fx/render_quality.json"
 
-## Coûts par niveau. `shadow_distance` : facteur sur la portée d'ombre demandée par la scène.
-## `volumetric` : "off", "weather" (brouillard, pluie, neige seulement) ou "always".
-## PB3b (ADR 0080) : mise à l'échelle 3D du viewport racine (carte et bataille), clés globales
-## `upscale_mode` ("off", "metalfx_spatial", "metalfx_temporal") et `upscale_scale` (part de la
-## définition rendue, 0,5-1). Hors Metal (Vulkan, autres systèmes) : FSR 1 au lieu du MetalFX
-## spatial, FSR 2 au lieu du temporel. Le temporel fait aussi l'anticrénelage : MSAA et FXAA coupés.
+## Modes de mise à l'échelle 3D du viewport racine : moteur sous Metal, moteur ailleurs (FSR 1 au
+## lieu du MetalFX spatial, FSR 2 au lieu du temporel), nom court des bancs (`--upscale=`) et
+## anticrénelage intégré (le temporel remplace MSAA et FXAA). `bilinear` : référence des bancs.
 const UPSCALE_OFF := "off"
 const UPSCALE_SPATIAL := "metalfx_spatial"
 const UPSCALE_TEMPORAL := "metalfx_temporal"
-## Banc seulement : mise à l'échelle bilinéaire (référence sans MetalFX).
-const UPSCALE_BILINEAR := "bilinear"
+const UPSCALE_MODES := {
+	"off": {"metal": Viewport.SCALING_3D_MODE_BILINEAR, "other": Viewport.SCALING_3D_MODE_BILINEAR, "short": "off"},
+	"metalfx_spatial": {"metal": Viewport.SCALING_3D_MODE_METALFX_SPATIAL, "other": Viewport.SCALING_3D_MODE_FSR, "short": "metalfx_s"},
+	"metalfx_temporal": {"metal": Viewport.SCALING_3D_MODE_METALFX_TEMPORAL, "other": Viewport.SCALING_3D_MODE_FSR2, "short": "metalfx_t"},
+	"bilinear": {"metal": Viewport.SCALING_3D_MODE_BILINEAR, "other": Viewport.SCALING_3D_MODE_BILINEAR, "short": "bilinear"},
+}
 ## Réglage joueur `video/upscale` : "auto" suit le préréglage de qualité.
 const UPSCALE_CHOICES: Array[String] = ["auto", "off", "quality", "performance"]
 const UPSCALE_LABELS: Array[String] = ["Automatique", "Désactivée", "MetalFX qualité", "MetalFX performance"]
-## Mode et échelle des choix explicites du joueur (mesures : ADR 0080).
-## FPS carte (ADR 0123) : les échelles des préréglages sont réglées pour une définition de
-## référence de 1920 × 1080. Au-delà (écran Retina, 4K), le choix « Automatique » garde le même
-## nombre de pixels rendus (coût GPU du relief et des effets ≈ proportionnel aux pixels), sans
-## descendre sous `UPSCALE_MIN_SCALE`. Les choix explicites du joueur restent tels quels.
-## ADR 0191 : plancher 0,4 (plein écran HiDPI 2× de 27" : 4096 × 2304 → 1,5 M px, 40 → ≈ 30 ms).
-const UPSCALE_REFERENCE_PIXELS := 1920.0 * 1080.0
-const UPSCALE_MIN_SCALE := 0.4
-const UPSCALE_PLAYER := {
-	"off": [UPSCALE_OFF, 1.0],
-	"quality": [UPSCALE_SPATIAL, 0.75],
-	"performance": [UPSCALE_SPATIAL, 0.5],
-}
 
-const PRESETS := {
-	# Réglages d'avant le lot V3 (project.godot) : référence des mesures (`--bench-ab=`), hors menu.
-	"legacy": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "map_msaa": Viewport.MSAA_2X,
-		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
-		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
-		"glow": true, "fog_grid": [64, 32],
-		"relief_vertex_px": 4.0, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 4,
-		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
-		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
-		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
-		"model_shadow_distance": 500.0, "veg_max_distance": 700.0, "clutter_density": 0.0,
-		"upscale_mode": "off", "upscale_scale": 1.0,
-	},
-	"low": {
-		"msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 2048, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "map_msaa": Viewport.MSAA_DISABLED,
-		"shadow_splits": 2, "shadow_distance": 0.6, "ssao": false, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_LOW,
-		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
-		"glow": false, "fog_grid": [64, 32],
-		"relief_vertex_px": 12.0, "relief_items": 350, "relief_extra_depth": 2, "relief_pages": 128, "relief_shadow_cascades": 1,
-		"fine_relief": false, "terrain_near": 0.6, "veg_density": 0.5, "veg_detail": 0.6,
-		"veg_shadow_distance": 0.0, "map_shadow_range": 0.6, "map_shadow_splits": 2,
-		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.55, "grass": 0.55, "particles": 0.35,
-		# PB3b (ADR 0080) : MetalFX spatial (FSR 1 hors Metal) ; carte −16 à −27 % par image.
-		"model_shadow_distance": 0.0, "veg_max_distance": 500.0, "clutter_density": 0.0,
-		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.67,
-	},
-	"medium": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 4096, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "map_msaa": Viewport.MSAA_DISABLED,
-		"shadow_splits": 4, "shadow_distance": 0.8, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_MEDIUM,
-		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
-		"glow": true, "fog_grid": [64, 32],
-		"relief_vertex_px": 8.0, "relief_items": 500, "relief_extra_depth": 3, "relief_pages": 192, "relief_shadow_cascades": 1,
-		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
-		"veg_shadow_distance": 100.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
-		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
-		"model_shadow_distance": 150.0, "veg_max_distance": 700.0, "clutter_density": 0.5,
-		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
-	},
-	"high": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "map_msaa": Viewport.MSAA_DISABLED,
-		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_HIGH,
-		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "weather", "sdfgi": false,
-		"glow": true, "fog_grid": [64, 48],
-		# PF1 : filtre moyen sur la carte (ombres douces à contact durci, PCSS) : invisible au
-		# zoom comté, ≈ 4 ms de GPU de moins qu'en « haut ». Quadtree de relief à 6 px par sommet (ZG2 : 4,
-		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins. Q4 : 7,5 px
-		# (vue de Paris à 40 u., 1080p : 25,9 → 24,2 ms, 7,81 → 7,57 M primitives, captures identiques).
-		"relief_vertex_px": 7.5, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
-		# FPS carte (29/09) : ombres des arbres coupées au-delà de 120 (300 avant) : au zoom
-		# stratégique (d = 150), −3,3 M primitives sur 9,8 M (−34 %), forêts à peine plus claires.
-		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
-		"veg_shadow_distance": 120.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
-		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
-		# PB3b (ADR 0080) : spatial 0,75, visuellement proche du natif en 1080p ; le temporel
-		# (anticrénelage compris) efface la pluie et traîne sur les ailes des moulins : écarté.
-		"model_shadow_distance": 250.0, "veg_max_distance": 900.0, "clutter_density": 1.0,
-		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
-	},
-	# A6-L10 (P3) : Ultra à 15 i/s (Q8). Plafonné : relief à 6 px par sommet (4 avant), ombres des
-	# arbres et moulins à 200 (400), MetalFX spatial 0,85 au lieu du natif (−28 % de pixels). Primitives
-	# au zoom max de Paris : 8,4 M → 6,3 M (a6_drawcalls_probe, 1080p).
-	"ultra": {
-		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "map_msaa": Viewport.MSAA_2X,
-		"shadow_splits": 4, "shadow_distance": 1.35, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
-		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_HIGH, "volumetric": "always", "sdfgi": true,
-		"glow": true, "fog_grid": [128, 64],
-		"relief_vertex_px": 6.0, "relief_items": 900, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 2,
-		"fine_relief": true, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
-		"veg_shadow_distance": 200.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
-		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "battle_lod": 1.3, "grass": 1.2, "particles": 1.0,
-		"model_shadow_distance": 500.0, "veg_max_distance": 1100.0, "clutter_density": 1.5,
-		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.85,
-	},
+## Valeurs du fichier de données (chaînes) -> énumérations du moteur.
+const MSAA_BY_NAME := {"off": Viewport.MSAA_DISABLED, "2x": Viewport.MSAA_2X, "4x": Viewport.MSAA_4X}
+const SHADOW_QUALITY_BY_NAME := {
+	"low": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "medium": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM,
+	"high": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "ultra": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,
 }
-
+const SSAO_QUALITY_BY_NAME := {
+	"low": RenderingServer.ENV_SSAO_QUALITY_LOW, "medium": RenderingServer.ENV_SSAO_QUALITY_MEDIUM,
+	"high": RenderingServer.ENV_SSAO_QUALITY_HIGH, "ultra": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
+}
+const SSIL_QUALITY_BY_NAME := {"low": RenderingServer.ENV_SSIL_QUALITY_LOW, "high": RenderingServer.ENV_SSIL_QUALITY_HIGH}
+const INT_KEYS := ["shadow_atlas", "shadow_splits", "relief_items", "relief_extra_depth", "relief_pages", "relief_shadow_cascades", "map_shadow_splits"]
 
 ## Niveau imposé par le banc A/B (`BattleScene`, `--bench-ab=`), "" sinon.
 static var override_level: String = ""
-## PF1 : valeurs courantes lues à chaque image par le rendu des batailles (évite un
+## Valeurs courantes lues à chaque image par le rendu des batailles (évite un
 ## dictionnaire par régiment et par image).
 static var battle_lod_scale: float = 1.0
 static var particle_ratio: float = 1.0
@@ -162,20 +58,19 @@ static var particle_ratio: float = 1.0
 ## filtre des ombres douces est global au serveur de rendu.
 static var active_context: String = "battle"
 static var _particle_hook: bool = false
-## PB3b : mise à l'échelle imposée par un banc (`metalfx_s:0.75`, `metalfx_t:0.67`,
+## Mise à l'échelle imposée par un banc (`metalfx_s:0.75`, `metalfx_t:0.67`,
 ## `bilinear:0.75`, `off`), "" sinon.
 static var upscale_override: String = ""
+static var _presets: Dictionary = {}
 
 
 ## Niveau courant : `--quality=` puis réglage `video/quality`, sinon `DEFAULT_LEVEL`.
 static func current() -> String:
 	if override_level != "":
 		return override_level
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--quality="):
-			var forced := arg.trim_prefix("--quality=")
-			if PRESETS.has(forced):
-				return forced
+	var forced := CmdArgs.value("--quality")
+	if presets().has(forced):
+		return forced
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree != null and tree.root != null:
 		var settings := tree.root.get_node_or_null("Settings")
@@ -188,7 +83,7 @@ static func current() -> String:
 	return DEFAULT_LEVEL
 
 
-## RL1 : niveau conseillé pour le GPU de cette machine (réglage « Automatique », par défaut).
+## Niveau conseillé pour le GPU de cette machine (réglage « Automatique », par défaut).
 static func detected_level() -> String:
 	return level_for_adapter(RenderingServer.get_video_adapter_name())
 
@@ -216,8 +111,34 @@ static func level_for_adapter(adapter: String) -> String:
 	return "medium"
 
 
+## Tous les préréglages (`low`, `medium`, `high`, `ultra`, `legacy`), énumérations du moteur résolues.
+static func presets() -> Dictionary:
+	if _presets.is_empty():
+		for level: String in data()["presets"]:
+			_presets[level] = _resolve(data()["presets"][level])
+	return _presets
+
+
+static func data() -> Dictionary:
+	return DataFile.load_cached(DATA_PATH)
+
+
+static func _resolve(raw: Dictionary) -> Dictionary:
+	var p: Dictionary = raw.duplicate()
+	p.erase("note")
+	for key: String in INT_KEYS:
+		p[key] = int(p[key])
+	p["msaa"] = MSAA_BY_NAME[p["msaa"]]
+	p["map_msaa"] = MSAA_BY_NAME[p["map_msaa"]]
+	p["soft_shadows"] = SHADOW_QUALITY_BY_NAME[p["soft_shadows"]]
+	p["map_soft_shadows"] = SHADOW_QUALITY_BY_NAME[p["map_soft_shadows"]]
+	p["ssao_quality"] = SSAO_QUALITY_BY_NAME[p["ssao_quality"]]
+	p["ssil_quality"] = SSIL_QUALITY_BY_NAME[p["ssil_quality"]]
+	return p
+
+
 static func preset(level: String = "") -> Dictionary:
-	return PRESETS.get(level if level != "" else current(), PRESETS[DEFAULT_LEVEL])
+	return presets().get(level if level != "" else current(), presets()[DEFAULT_LEVEL])
 
 
 ## Réglages globaux du serveur de rendu et du viewport principal.
@@ -243,14 +164,13 @@ static func apply_global(viewport: Viewport = null) -> void:
 		_install_particle_hook(viewport.get_tree())
 
 
-## PB3b : mode et échelle de la mise à l'échelle 3D : banc, puis réglage du joueur, sinon préréglage.
+## Mode et échelle de la mise à l'échelle 3D : banc, puis réglage du joueur, sinon préréglage.
 ## `pixels` : pixels physiques du viewport 3D (0 : taille de la fenêtre principale).
 static func upscale(p: Dictionary = {}, pixels: float = 0.0) -> Dictionary:
 	if upscale_override != "":
 		return parse_upscale(upscale_override)
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--upscale="):  # captures et mesures : `--upscale=metalfx_t:0.75`
-			return parse_upscale(arg.trim_prefix("--upscale="))
+	if CmdArgs.has("--upscale"):  # captures et mesures : `--upscale=metalfx_t:0.75`
+		return parse_upscale(CmdArgs.value("--upscale"))
 	if p.is_empty():
 		p = preset()
 	var choice := "auto"
@@ -259,9 +179,9 @@ static func upscale(p: Dictionary = {}, pixels: float = 0.0) -> Dictionary:
 		var settings := tree.root.get_node_or_null("Settings")
 		if settings != null:
 			choice = str(settings.call("get_value", "video/upscale"))
-	if UPSCALE_PLAYER.has(choice):
-		var entry: Array = UPSCALE_PLAYER[choice]
-		return {"mode": entry[0], "scale": float(entry[1])}
+	var player_choices: Dictionary = data()["upscale"]["player_choices"]
+	if player_choices.has(choice):
+		return {"mode": str(player_choices[choice]["mode"]), "scale": float(player_choices[choice]["scale"])}
 	var up := preset_upscale(p)
 	if pixels <= 0.0:
 		var window_size := DisplayServer.window_get_size()
@@ -270,11 +190,18 @@ static func upscale(p: Dictionary = {}, pixels: float = 0.0) -> Dictionary:
 	return up
 
 
-## ADR 0123 : échelle d'un préréglage ramenée au budget de pixels de la définition de référence.
+## Les échelles des préréglages sont réglées pour une définition de référence (1920 x 1080). Au-delà
+## (Retina, 4K), « Automatique » garde le même nombre de pixels rendus, sans descendre sous
+## `min_upscale_scale` (0,4, ADR 0191). Les choix explicites du joueur restent tels quels.
 static func budget_scale(mode: String, scale: float, pixels: float) -> float:
-	if mode == UPSCALE_OFF or pixels <= UPSCALE_REFERENCE_PIXELS:
+	var reference := float(data()["upscale"]["reference_pixels"])
+	if mode == UPSCALE_OFF or pixels <= reference:
 		return scale
-	return maxf(UPSCALE_MIN_SCALE, minf(scale, scale * sqrt(UPSCALE_REFERENCE_PIXELS / pixels)))
+	return maxf(min_upscale_scale(), minf(scale, scale * sqrt(reference / pixels)))
+
+
+static func min_upscale_scale() -> float:
+	return float(data()["upscale"]["min_scale"])
 
 
 ## Mise à l'échelle prévue par un préréglage (choix « Automatique »).
@@ -296,25 +223,16 @@ static func upscale_label(up: Dictionary) -> String:
 static func parse_upscale(config: String) -> Dictionary:
 	var parts := config.split(":")
 	var mode := UPSCALE_OFF
-	match parts[0]:
-		"metalfx_s":
-			mode = UPSCALE_SPATIAL
-		"metalfx_t":
-			mode = UPSCALE_TEMPORAL
-		"bilinear", "scale":
-			mode = UPSCALE_BILINEAR
+	for mode_name: String in UPSCALE_MODES:
+		if UPSCALE_MODES[mode_name]["short"] == parts[0]:
+			mode = mode_name
 	var scale := float(parts[1]) if parts.size() > 1 else 1.0
 	return {"mode": mode, "scale": clampf(scale, 0.25, 1.0) if mode != UPSCALE_OFF else 1.0}
 
 
 ## Mode de mise à l'échelle du moteur : MetalFX sous Metal, repli FSR 1 / FSR 2 ailleurs.
 static func scaling_mode_for(mode: String, metal: bool) -> Viewport.Scaling3DMode:
-	match mode:
-		UPSCALE_SPATIAL:
-			return Viewport.SCALING_3D_MODE_METALFX_SPATIAL if metal else Viewport.SCALING_3D_MODE_FSR
-		UPSCALE_TEMPORAL:
-			return Viewport.SCALING_3D_MODE_METALFX_TEMPORAL if metal else Viewport.SCALING_3D_MODE_FSR2
-	return Viewport.SCALING_3D_MODE_BILINEAR
+	return UPSCALE_MODES[mode]["metal" if metal else "other"] as Viewport.Scaling3DMode
 
 
 static func is_metal() -> bool:
@@ -340,21 +258,21 @@ static func apply_upscale(viewport: Viewport, p: Dictionary) -> void:
 	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if temporal else fxaa as Viewport.ScreenSpaceAA
 
 
-## PF (ADR 0169) : MSAA du contexte : `map_msaa` sur la carte de campagne (shader du terrain trop
+## MSAA du contexte : `map_msaa` sur la carte de campagne (shader du terrain trop
 ## lourd pour être ombré deux fois aux bords des triangles : −11 ms à 50 % d'échelle, FXAA garde
 ## les bords lisses), `msaa` en bataille.
 static func msaa_for(p: Dictionary, context: String) -> Viewport.MSAA:
 	return (p.get("map_msaa", p["msaa"]) if context == "campaign" else p["msaa"]) as Viewport.MSAA
 
 
-## PF1 : particules réduites selon le niveau dès leur entrée dans l'arbre (`amount` d'origine
+## Particules réduites selon le niveau dès leur entrée dans l'arbre (`amount` d'origine
 ## gardé en méta : un changement de niveau le réapplique sans cumul).
 static func _install_particle_hook(tree: SceneTree) -> void:
 	if _particle_hook or tree == null:
 		return
 	_particle_hook = true
 	tree.node_added.connect(_on_node_added)
-	# ADR 0123 : le budget de pixels dépend de la taille de la fenêtre (plein écran, autre écran).
+	# Le budget de pixels dépend de la taille de la fenêtre (plein écran, autre écran).
 	tree.root.size_changed.connect(_on_root_resized)
 
 
@@ -461,7 +379,7 @@ static func _on_env_exiting(world_env: WorldEnvironment) -> void:
 
 
 ## Réapplique le niveau courant à tous les environnements enregistrés (réglage modifié) et aux
-## nœuds inscrits dans `CLIENT_GROUP` (PF1).
+## nœuds inscrits dans `CLIENT_GROUP`.
 static func reapply(tree: SceneTree) -> void:
 	apply_global(tree.root)
 	for node in tree.get_nodes_in_group(GROUP):

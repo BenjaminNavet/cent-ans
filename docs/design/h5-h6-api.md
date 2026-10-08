@@ -1,6 +1,6 @@
 # H5 « Monnaie » et H6 « Rançons et ordres de chevalerie » — règles, données et API du pont
 
-Conception : `docs/design/2026-09-23-histoire-et-savoir.md` § 5.1-5.2. Suivi : `docs/wip/h5-h6-monnaie-chevalerie.md`.
+Conception : `docs/design/2026-09-23-histoire-et-savoir.md` § 5.1-5.2. Suivi : `docs/archive/chantiers.md`.
 Règles : `core/crates/sim-campaign/src/coinage.rs`, `ransom.rs`, `chivalry.rs`. Pont :
 `core/crates/godot-bridge/src/campaign_sim_h5h6.rs` (nouveau) et `get_faction_economy`.
 

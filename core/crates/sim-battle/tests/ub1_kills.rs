@@ -15,7 +15,7 @@ const ARMY: [&str; 4] = [
 #[test]
 fn kills_match_the_enemy_losses_they_caused() {
     let data = data();
-    let mut sim = BattleSim::new(setup(units(&data, &ARMY), units(&data, &ARMY), None), 3).unwrap();
+    let mut sim = BattleSim::new(setup(units(data, &ARMY), units(data, &ARMY), None), 3).unwrap();
     run_to_end(&mut sim);
     for side in SideId::BOTH {
         let kills: f64 = sim

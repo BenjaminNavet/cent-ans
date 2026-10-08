@@ -103,12 +103,6 @@ pub struct DietOption {
     pub current: bool,
 }
 
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 fn diet_name(data: &GameData, id: &DietId) -> String {
     data.diets
         .get(id)
@@ -148,10 +142,7 @@ pub fn diet_blockers(
     }
     if let Some(tech) = &requirements.technology {
         if !faction_state.is_some_and(|f| f.technologies.contains(tech)) {
-            let name = data
-                .technologies
-                .get(tech)
-                .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+            let name = data.tech_name(tech);
             reasons.push(format!("technologie requise : {name}"));
         }
     }
@@ -167,11 +158,7 @@ pub fn diet_blockers(
         let names: Vec<String> = requirements
             .any_building
             .iter()
-            .map(|b| {
-                data.buildings
-                    .get(b)
-                    .map_or_else(|| b.to_string(), |x| x.name.display.clone())
-            })
+            .map(|b| data.building_name(b))
             .collect();
         reasons.push(format!("bâtiment requis : {}", names.join(" ou ")));
     }
@@ -239,7 +226,6 @@ impl CampaignState {
     /// controls.
     pub fn faction_table_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
         self.controlled_provinces(faction)
-            .iter()
             .map(|id| self.diet_cost(data, id, &self.province_diet(id)))
             .sum()
     }
@@ -279,7 +265,7 @@ pub fn set_diet(
         .diets
         .get(diet)
         .ok_or_else(|| DietError::UnknownDiet(diet.clone()))?;
-    let name = province_name(data, province);
+    let name = data.province_name(province);
     let Some(p) = state.provinces.get(province) else {
         return Err(DietError::NotControlled(name));
     };
@@ -363,7 +349,7 @@ pub(crate) fn resolve_requirements(
         revert_to_default(state, &id);
         let text = format!(
             "La Table : {} ne peut plus tenir le régime « {} » ({}) ; retour au {}.",
-            province_name(data, &id),
+            data.province_name(&id),
             diet_name(data, &diet_id),
             reasons.join(" ; "),
             diet_name(data, &default_diet()).to_lowercase(),
@@ -383,7 +369,7 @@ pub(crate) fn pay_table(
     available: i64,
     events: &mut Vec<GameEvent>,
 ) -> i64 {
-    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction).cloned().collect();
     let mut paid = 0;
     for id in provinces {
         let diet = state.province_diet(&id);
@@ -399,7 +385,7 @@ pub(crate) fn pay_table(
         let text = format!(
             "La Table : le trésor ne peut payer le régime « {} » de {} ({cost} livres) ; retour au {}.",
             diet_name(data, &diet),
-            province_name(data, &id),
+            data.province_name(&id),
             diet_name(data, &default_diet()).to_lowercase(),
         );
         push_player_event(state, faction, Some(&id), text, events);
@@ -504,7 +490,6 @@ pub(crate) fn resolve_lent(
     for faction in factions {
         let diets: Vec<(ProvinceId, &Diet)> = state
             .controlled_provinces(&faction)
-            .iter()
             .filter_map(|id| {
                 data.diets
                     .get(&state.province_diet(id))
@@ -551,7 +536,7 @@ pub(crate) fn resolve_lent(
             }
         }
         if !breaking.is_empty() {
-            let names: Vec<String> = breaking.iter().map(|p| province_name(data, p)).collect();
+            let names: Vec<String> = breaking.iter().map(|p| data.province_name(p)).collect();
             push_player_event(
                 state,
                 &faction,
@@ -591,7 +576,7 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
         return Vec::new();
     }
     let default = default_diet();
-    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction).cloned().collect();
     let mut orders = Vec::new();
     if f.treasury < 0 {
         for id in provinces {
@@ -604,7 +589,7 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
         }
         return orders;
     }
-    let income = f.projected_income.max(f.income_last_turn).max(0);
+    let income = f.last_budget.income.max(f.last_budget.income).max(0);
     let mut budget = state.faction_table_upkeep(data, faction);
     let ceiling =
         (income * AI_TABLE_INCOME_PERCENT / 100).min(f.treasury / AI_TABLE_RESERVE_SEASONS.max(1));

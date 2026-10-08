@@ -27,7 +27,7 @@ static func load_default() -> SettlementMarkers:
 static func load_from(path: String) -> SettlementMarkers:
 	var result := SettlementMarkers.new()
 	if FileAccess.file_exists(path):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var parsed: Variant = DataFile.parse_file(path)
 		if parsed is Dictionary:
 			result.catalog = parsed
 	return result

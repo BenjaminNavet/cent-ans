@@ -1,7 +1,7 @@
 class_name VoiceLines
 extends RefCounted
 
-## VO1 — accès aux données de voix : répliques d'unités (`data/voice/barks.json`), conseiller
+## Accès aux données de voix : répliques d'unités (`data/voice/barks.json`), conseiller
 ## (`data/voice/advisor.json`) et voix des discours (`data/voice/speech_voices.json`).
 ## Les fichiers audio, synthétisés par `tools/cent_ans_tools/voice_tts.py`, sont sous
 ## `res://assets/audio/voice/` : `barks/<id>.ogg`, `advisor/<id>.ogg`,
@@ -24,7 +24,7 @@ static func data(relative: String) -> Dictionary:
 	var path := SoundBank.data_path(relative)
 	var parsed: Variant = null
 	if FileAccess.file_exists(path):
-		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		parsed = DataFile.parse_file(path)
 	var result: Dictionary = parsed if parsed is Dictionary else {}
 	if result.is_empty():
 		push_warning("VoiceLines: %s missing or invalid" % path)
@@ -54,10 +54,6 @@ static func stream(relative: String) -> AudioStream:
 		result = load(path) as AudioStream
 	_streams[relative] = result
 	return result
-
-
-static func has_stream(relative: String) -> bool:
-	return stream(relative) != null
 
 
 # --- Répliques ---------------------------------------------------------------------

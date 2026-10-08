@@ -22,7 +22,7 @@ fn charge(
     prepare: impl Fn(&mut BattleSim),
 ) -> (BattleSim, Vec<ImpactEvent>) {
     let data = data();
-    let mut sim = arena(vec![unit(&data, "unit_knights")], vec![unit(&data, target)]);
+    let mut sim = arena(vec![unit(data, "unit_knights")], vec![unit(data, target)]);
     place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
     place(&mut sim, 0, 600.0, 250.0, 0.0);
     sim.units_mut()[1].ammo = 0;
@@ -45,9 +45,7 @@ fn charge(
 }
 
 fn no_stakes(sim: &mut BattleSim) {
-    sim.units_mut()[1]
-        .abilities
-        .retain(|a| *a != data_model::Ability::Stakes);
+    sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
 }
 
 #[test]
@@ -82,8 +80,8 @@ fn a_charge_home_knocks_men_down_and_is_reported_once() {
 fn knocked_down_men_stop_fighting_for_a_while() {
     let data = data();
     let mut sim = arena(
-        vec![unit(&data, "unit_knights")],
-        vec![unit(&data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_knights")],
+        vec![unit(data, "unit_men_at_arms_foot")],
     );
     let before = sim.units()[1].fighting_soldiers();
     sim.units_mut()[1].knocked = 10.0;
@@ -107,8 +105,8 @@ fn heavier_and_flank_charges_knock_down_more() {
     let data = data();
     let knights = BattleSim::new(
         setup(
-            vec![unit(&data, "unit_knights")],
-            vec![unit(&data, "unit_urban_militia")],
+            vec![unit(data, "unit_knights")],
+            vec![unit(data, "unit_urban_militia")],
             None,
         ),
         1,
@@ -129,8 +127,8 @@ fn heavier_and_flank_charges_knock_down_more() {
     // Men-at-arms in plate stand better than townsmen.
     let men_at_arms = BattleSim::new(
         setup(
-            vec![unit(&data, "unit_knights")],
-            vec![unit(&data, "unit_men_at_arms_foot")],
+            vec![unit(data, "unit_knights")],
+            vec![unit(data, "unit_men_at_arms_foot")],
             None,
         ),
         1,
@@ -181,8 +179,8 @@ fn stakes_impale_the_horses() {
 fn missiles_record_their_cause() {
     let data = data();
     let mut sim = arena(
-        vec![unit(&data, "unit_longbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
     );
     place(&mut sim, 0, 600.0, 250.0, 0.0);
     place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);

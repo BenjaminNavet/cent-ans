@@ -102,18 +102,10 @@ static func fx() -> Dictionary:
 ## Lit un fichier JSON de `data/` (dossier de données du jeu, puis `data/` du dépôt), comme
 ## `BattleGore.settings()`.
 static func read_data(relative: String) -> Dictionary:
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(relative)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				return parsed
+	if DataFile.exists(relative):
+		var parsed: Variant = DataFile.read_json(relative)
+		if parsed is Dictionary:
+			return parsed
 	push_warning("BattleStandards: %s introuvable" % relative)
 	return {}
 
@@ -760,7 +752,7 @@ func _place_fallen(camera_pos: Vector3, max_d: float) -> void:
 ## « Pas de quartier » : le général lève l'oriflamme (France) ou le dragon (Angleterre).
 func _poll_no_quarter(units: Array) -> void:
 	_no_quarter_poll -= 1.0 / 30.0
-	if _no_quarter_poll > 0.0 or _battle == null or not _battle.has_method("get_no_quarter"):
+	if _no_quarter_poll > 0.0 or _battle == null:
 		return
 	_no_quarter_poll = 1.0
 	for unit in units:

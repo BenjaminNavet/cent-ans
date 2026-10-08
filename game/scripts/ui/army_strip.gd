@@ -78,13 +78,11 @@ var _grid: GridContainer
 func _ready() -> void:
 	add_theme_stylebox_override("panel", HudStyle.panel_box(10))
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := UiBuild.hbox(10)
 	add_child(row)
 
-	var header := VBoxContainer.new()
+	var header := UiBuild.vbox(2)
 	header.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
-	header.add_theme_constant_override("separation", 2)
 	row.add_child(header)
 	_title_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.RUBRIC)
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -92,7 +90,7 @@ func _ready() -> void:
 	header.add_child(_title_label)
 	_count_label = HudStyle.label("", UiType.size(UiType.HEADING), HudStyle.INK)
 	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
-	RichTooltip.attach_plain(_count_label, "army_contracted_regiments")
+	TooltipHost.attach_plain(_count_label, "army_contracted_regiments")
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
 	_men_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
@@ -107,7 +105,7 @@ func _ready() -> void:
 	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
 	UiType.apply(_split_button, UiType.CAPTION)
-	RichTooltip.attach_plain(_split_button, "army_split_regiments")
+	TooltipHost.attach_plain(_split_button, "army_split_regiments")
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
 	_garrison_button = RichButton.new()
@@ -119,7 +117,7 @@ func _ready() -> void:
 	_mercenary_button.name = "MercenaryButton"
 	_mercenary_button.text = "Mercenaires"
 	UiType.apply(_mercenary_button, UiType.CAPTION)
-	RichTooltip.attach_plain(_mercenary_button, "army_mercenaries_available")
+	TooltipHost.attach_plain(_mercenary_button, "army_mercenaries_available")
 	_mercenary_button.pressed.connect(func() -> void: mercenaries_requested.emit())
 	header.add_child(_mercenary_button)
 
@@ -223,7 +221,7 @@ static func load_unit_catalog(data_dir: String) -> Dictionary:
 	for file_name in dir.get_files():
 		if not file_name.ends_with(".json"):
 			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir_path.path_join(file_name)))
+		var parsed: Variant = DataFile.parse_file(dir_path.path_join(file_name))
 		if not parsed is Dictionary:
 			continue
 		var entry: Dictionary = parsed
@@ -265,10 +263,10 @@ func _refresh() -> void:
 	_title_label.visible = _title_label.text != ""
 	_count_label.text = "%d/%d" % [units.size(), capacity]
 	_count_label.add_theme_color_override("font_color", HudStyle.RUBRIC if units.size() > capacity else HudStyle.INK)
-	_men_label.text = "%s hommes" % HudStyle.thousands(men)
+	_men_label.text = "%s hommes" % Money.digits(men)
 	var upkeep := total_upkeep()
-	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
-	RichTooltip.attach_plain(_upkeep_label, "army_upkeep_per_season", {"body": "%s (livres tournois)" % Money.amount(upkeep)})
+	_upkeep_label.text = "Entretien %s ₶" % Money.digits(upkeep)
+	TooltipHost.attach_plain(_upkeep_label, "army_upkeep_per_season", {"body": "%s (livres tournois)" % Money.amount(upkeep)})
 
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])
@@ -372,7 +370,7 @@ func tooltip_for(unit: Dictionary) -> String:
 	else:
 		lines.append("Moral : %d" % int(unit.get("morale", 0)))
 	var upkeep := unit_upkeep(unit)
-	lines.append("Entretien : %s ₶ par saison" % HudStyle.thousands(upkeep) if upkeep > 0 else "Entretien : —")
+	lines.append("Entretien : %s ₶ par saison" % Money.digits(upkeep) if upkeep > 0 else "Entretien : —")
 	return "\n".join(lines)
 
 

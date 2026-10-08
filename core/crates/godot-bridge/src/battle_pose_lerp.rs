@@ -75,7 +75,7 @@ impl LooseRanks {
     pub(crate) fn jitter(&self, unit: u32, index: usize) -> (f64, f64, f64) {
         let mut state = (u64::from(unit) << 32) ^ index as u64 ^ 0x9E37_79B9_7F4A_7C15;
         let mut unit_float = || {
-            state = splitmix64(state);
+            state = data_model::util::splitmix64(state);
             (state >> 11) as f64 / (1u64 << 53) as f64 * 2.0 - 1.0
         };
         let dx = unit_float() * self.offset_m;
@@ -83,13 +83,6 @@ impl LooseRanks {
         let dyaw = unit_float() * self.yaw_rad;
         (dx, dz, dyaw)
     }
-}
-
-fn splitmix64(state: u64) -> u64 {
-    let mut z = state.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
 }
 
 /// Appends the `MultiMesh` transform (12 floats, rotation about Y) of a pose.

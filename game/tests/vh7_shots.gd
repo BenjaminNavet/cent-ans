@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
-## défaut est `maquette`, voir `gc_shots.gd`).
+## défaut est `maquette`).
 ## Captures et mesure du lot VH7 (Orléans vers 1340-1429 à l'échelle 1:1, ADR 0078) : vue
 ## stratégique (colonie ordinaire), palier vallée, palier site, pont et Tourelles, Sainte-Croix,
 ## enceinte ; mesure d'images par seconde au-dessus d'Orléans et de Rouen à la même distance.
@@ -30,13 +30,10 @@ func _init() -> void:
 	var out_dir := "user://vh7"
 	var only := ""
 	var fps := true
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out_dir = arg.substr(6)
-		elif arg.begins_with("--only="):
-			only = arg.substr(7)
-		elif arg == "--no-fps":
-			fps = false
+	out_dir = CmdArgs.value("--out", out_dir)
+	only = CmdArgs.value("--only", only)
+	if CmdArgs.has("--no-fps"):
+		fps = false
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
@@ -53,10 +50,9 @@ func _init() -> void:
 	var settlements: SettlementLayer = map.get("settlement_layer")
 	var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
 	var suffix := ""
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--year=") and lc != null:
-			lc.set_year(int(arg.substr(7)))
-			suffix = "_" + arg.substr(7)
+	if CmdArgs.has("--year") and lc != null:
+		lc.set_year(int(CmdArgs.number("--year")))
+		suffix = "_" + CmdArgs.value("--year")
 	for shot: Array in SHOTS:
 		if only != "" and not (shot[0] as String) in only.split(","):
 			continue

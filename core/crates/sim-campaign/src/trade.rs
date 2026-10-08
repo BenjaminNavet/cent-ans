@@ -409,7 +409,7 @@ pub(crate) fn resolve_trade(
         let amount = income.get(&faction_id).copied().unwrap_or(0);
         if let Some(faction) = state.factions.get_mut(&faction_id) {
             faction.treasury += amount;
-            faction.trade_income_last_turn = amount;
+            faction.last_budget.trade_income = amount;
         }
     }
     if !player_cut.is_empty() {

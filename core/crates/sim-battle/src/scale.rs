@@ -8,8 +8,6 @@
 //! value ([`FieldSize::attacker_line_z`], [`FieldSize::line_half`]…) is then
 //! bit-for-bit the old constant, so seeds and tests are unchanged.
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 use crate::setup::BattleSetup;
@@ -167,17 +165,9 @@ pub struct BattleScaleRules {
     pub tiers: Vec<ScaleTier>,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_scale.json");
+data_model::bundled_rules!(BattleScaleRules, "rules/battle_scale.json");
 
 impl BattleScaleRules {
-    /// `data/rules/battle_scale.json` as compiled into the crate.
-    pub fn bundled() -> &'static BattleScaleRules {
-        static RULES: OnceLock<BattleScaleRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_scale.json is valid")
-        })
-    }
-
     /// The first tier covering `soldiers` (the last one beyond).
     pub fn tier_for(&self, soldiers: u32) -> &ScaleTier {
         self.tiers

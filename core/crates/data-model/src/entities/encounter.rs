@@ -186,17 +186,4 @@ pub struct EncounterRules {
     pub near_player_permille: u32,
 }
 
-impl Default for EncounterRules {
-    fn default() -> Self {
-        EncounterRules {
-            max_active: 6,
-            spawn_per_season: 2,
-            trigger_radius_km: 4.0,
-            min_site_distance_km: 60.0,
-            min_settlement_distance_km: 3.0,
-            spawn_radius_km: 25.0,
-            spawn_attempts: 24,
-            near_player_permille: 500,
-        }
-    }
-}
+crate::bundled_rules!(EncounterRules, "rules/encounters.json", default);

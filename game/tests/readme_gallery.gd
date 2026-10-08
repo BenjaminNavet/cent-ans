@@ -3,7 +3,7 @@ extends SceneTree
 ## Galerie du README : refait les six images de `docs/img/readme/` (JPEG 1600 px, qualité 86).
 ## Chaque vue tourne dans son propre processus Godot fenêtré (le rendu headless ne produit pas
 ## d'image), avec les options de capture déjà en place : bataille (`--screenshot`, `--closeup`,
-## `--historical`), carte (`--stage`, `--focus`), villes (`readme_shots.gd`), menu (`mm1_capture.gd`).
+## `--historical`), carte (`--focus`), villes (`readme_shots.gd`), menu (`mm1_capture.gd`).
 ## Usage : godot --headless --path game --script res://tests/readme_gallery.gd -- [--out=<dossier>] [--only=<nom,nom>]
 ## `--out` relatif : relatif à la racine du dépôt (défaut `docs/img/readme`).
 
@@ -12,18 +12,15 @@ const WIDTH := 1600
 const BATTLE := "res://scenes/battle/battle.tscn"
 const MAP := "res://scenes/campaign_map.tscn"
 
-## Nord de la France et Manche (px carte), distance de la vue régionale de `po3_shot.gd`.
+## Nord de la France et Manche (px carte).
 const CAMPAIGN_FOCUS := "--focus=2180,3050,491"
 
 
 func _init() -> void:
 	var out := "docs/img/readme"
 	var only := PackedStringArray()
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out = arg.trim_prefix("--out=")
-		elif arg.begins_with("--only="):
-			only = arg.trim_prefix("--only=").split(",", false)
+	out = CmdArgs.value("--out", out)
+	only = CmdArgs.list("--only")
 	var repo := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
 	var out_dir := out if out.is_absolute_path() else repo.path_join(out)
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -33,7 +30,7 @@ func _init() -> void:
 		["bataille", BATTLE, ["--closeup", "--closeup-distance=14", "--shot-at=240", "--no-hud", "--screenshot=%s"], "bataille.png"],
 		["bataille_poitiers", BATTLE, ["--historical=poitiers", "--screenshot=%s"], "bataille_poitiers.png"],
 		# `--focus` après `--screenshot` : la mise en scène de capture recadre sinon la caméra.
-		["campagne", MAP, ["--stage=map", "--season=summer", "--screenshot=%s", CAMPAIGN_FOCUS], "campagne.png"],
+		["campagne", MAP, ["--season=summer", "--screenshot=%s", CAMPAIGN_FOCUS], "campagne.png"],
 		["paris", "--script=res://tests/readme_shots.gd", ["--only=paris", "--out=" + out_dir], "paris.jpg"],
 		["londres", "--script=res://tests/readme_shots.gd", ["--only=londres", "--out=" + out_dir], "londres.jpg"],
 		["menu", "--script=res://tests/mm1_capture.gd", ["--scene=menu", "--wait=6", "--out=%s"], "menu.png"],

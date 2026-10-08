@@ -6,7 +6,7 @@
 use data_model::{Diet, FactionId, ProvinceId};
 use godot::prelude::*;
 
-use crate::campaign_sim::{effects_array, CampaignSim};
+use crate::campaign_sim::{effects_array, CampaignSim, Ctx};
 
 fn requirements_dict(diet: &Diet) -> VarDictionary {
     let requirements = &diet.requirements;
@@ -48,7 +48,7 @@ impl CampaignSim {
     /// unknown province.
     #[func]
     fn get_province_diet(&self, province: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some((id, p)) = ProvinceId::new(province.to_string())
@@ -92,7 +92,7 @@ impl CampaignSim {
     /// cost this season (winter surcharge included); `reasons` are French.
     #[func]
     fn get_diet_options(&self, province: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = ProvinceId::new(province.to_string()) else {
@@ -132,7 +132,7 @@ impl CampaignSim {
     /// diet are listed; `total` is this season's projection).
     #[func]
     fn get_table_budget(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -143,7 +143,6 @@ impl CampaignSim {
         };
         let provinces: VarArray = state
             .controlled_provinces(&faction)
-            .iter()
             .filter_map(|id| {
                 let diet = state.province_diet(id);
                 let cost = state.diet_cost(data, id, &diet);
@@ -159,7 +158,7 @@ impl CampaignSim {
             .collect();
         vdict! {
             "total" => state.faction_table_upkeep(data, &faction),
-            "last_turn" => f.table_upkeep_last_turn,
+            "last_turn" => f.last_budget.table,
             "provinces" => &provinces,
         }
     }

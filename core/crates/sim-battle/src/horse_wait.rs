@@ -2,8 +2,6 @@
 //! before riding into the range of enemy shooters who still have arrows
 //! (`data/rules/battle_horse_wait.json`).
 
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
 
 /// When the battle AI holds its horse out of the enemy shooters' reach.
@@ -20,17 +18,7 @@ pub struct HorseWaitRules {
     pub committed_m: f64,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/battle_horse_wait.json");
-
-impl HorseWaitRules {
-    /// `data/rules/battle_horse_wait.json` as compiled into the crate.
-    pub fn bundled() -> &'static HorseWaitRules {
-        static RULES: OnceLock<HorseWaitRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/battle_horse_wait.json is valid")
-        })
-    }
-}
+data_model::bundled_rules!(HorseWaitRules, "rules/battle_horse_wait.json");
 
 #[cfg(test)]
 mod tests {

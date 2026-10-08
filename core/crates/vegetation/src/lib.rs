@@ -172,6 +172,32 @@ impl ReliefFloor {
 /// request).
 pub type PageBytes = std::sync::Arc<Vec<u8>>;
 
+/// Multiplicative hash of the packed page keys (`level << 24 | row << 12 | col`): one multiply
+/// and a fold instead of SipHash, since the quadtree lookup runs once per level and instance.
+#[derive(Default, Clone, Copy)]
+pub struct PageKeyHasher(u64);
+
+impl std::hash::Hasher for PageKeyHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for &byte in bytes {
+            self.0 = (self.0.rotate_left(5) ^ u64::from(byte)).wrapping_mul(0x9e37_79b9_7f4a_7c15);
+        }
+    }
+
+    fn write_i64(&mut self, key: i64) {
+        let mixed = (key as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15);
+        self.0 = mixed ^ (mixed >> 32);
+    }
+}
+
+/// Loaded quadtree pages by key.
+pub type PageMap =
+    std::collections::HashMap<i64, PageBytes, std::hash::BuildHasherDefault<PageKeyHasher>>;
+
 /// Displayed ground under the trees (`TerrainBuilder.surface_grid`).
 pub enum Ground {
     /// Heightmap only.
@@ -184,7 +210,7 @@ pub enum Ground {
     },
     /// Quadtree snapshot: loaded pages (key → little-endian 16-bit samples).
     Pages {
-        pages: std::collections::HashMap<i64, PageBytes>,
+        pages: PageMap,
         max_level: i64,
         h_min: f64,
         h_range: f64,
@@ -281,6 +307,96 @@ impl CorridorBins {
         self.bins[j as usize * self.side_x + i as usize]
             .iter()
             .any(|&k| segment_distance(&corridors[k as usize], x, y) < corridors[k as usize][4])
+    }
+}
+
+/// Clearing discs `(x, y, radius)` binned on a regular grid over the scattered rectangle, so a
+/// candidate only tests the discs near it (a tile holds hundreds of village clearings). A disc
+/// sits in every bin its bounding box widened by `reach` touches; `reach` is the widest orchard
+/// ring queried by [`Self::ring_gap`]. Points off the grid fall back to all discs.
+struct ExclusionGrid {
+    origin: (f64, f64),
+    cell: f64,
+    side_x: usize,
+    side_y: usize,
+    reach: f64,
+    bins: Vec<Vec<u32>>,
+}
+
+impl ExclusionGrid {
+    const CELL: f64 = 8.0;
+    const MAX_SIDE: f64 = 64.0;
+    /// Absorbs the rounding of the bounding boxes.
+    const SLACK: f64 = 1e-6;
+
+    fn new(rect: (f64, f64, f64, f64), discs: &[(f64, f64, f64)], reach: f64) -> Self {
+        let cell = Self::CELL
+            .max((rect.2 - rect.0) / Self::MAX_SIDE)
+            .max((rect.3 - rect.1) / Self::MAX_SIDE);
+        let side_x = (((rect.2 - rect.0) / cell).ceil() as usize).max(1);
+        let side_y = (((rect.3 - rect.1) / cell).ceil() as usize).max(1);
+        let mut bins = vec![Vec::new(); side_x * side_y];
+        for (index, &(ex, ey, r)) in discs.iter().enumerate() {
+            let margin = r + reach + Self::SLACK;
+            let i0 = ((ex - margin - rect.0) / cell).floor().max(0.0) as usize;
+            let j0 = ((ey - margin - rect.1) / cell).floor().max(0.0) as usize;
+            let i1 =
+                (((ex + margin - rect.0) / cell).floor().max(-1.0) as i64).min(side_x as i64 - 1);
+            let j1 =
+                (((ey + margin - rect.1) / cell).floor().max(-1.0) as i64).min(side_y as i64 - 1);
+            for j in j0 as i64..=j1 {
+                for i in i0 as i64..=i1 {
+                    bins[j as usize * side_x + i as usize].push(index as u32);
+                }
+            }
+        }
+        ExclusionGrid {
+            origin: (rect.0, rect.1),
+            cell,
+            side_x,
+            side_y,
+            reach,
+            bins,
+        }
+    }
+
+    /// Discs that can matter at (x, y); `None` off the grid.
+    fn nearby(&self, x: f64, y: f64) -> Option<&[u32]> {
+        let i = ((x - self.origin.0) / self.cell).floor();
+        let j = ((y - self.origin.1) / self.cell).floor();
+        if i < 0.0 || j < 0.0 || i as usize >= self.side_x || j as usize >= self.side_y {
+            return None;
+        }
+        Some(&self.bins[j as usize * self.side_x + i as usize])
+    }
+
+    /// Whether (x, y) lies inside a disc.
+    fn contains(&self, discs: &[(f64, f64, f64)], x: f64, y: f64) -> bool {
+        let inside = |&(ex, ey, r): &(f64, f64, f64)| {
+            let (dx, dy) = (x - ex, y - ey);
+            dx * dx + dy * dy < r * r
+        };
+        match self.nearby(x, y) {
+            Some(bin) => bin.iter().any(|&k| inside(&discs[k as usize])),
+            None => discs.iter().any(inside),
+        }
+    }
+
+    /// Smallest distance from (x, y) to a disc edge (negative inside). Exact when it is under
+    /// `ring` (at most `reach`); otherwise some value of at least `ring`.
+    fn ring_gap(&self, discs: &[(f64, f64, f64)], x: f64, y: f64, ring: f64) -> f64 {
+        let gap = |&(ex, ey, r): &(f64, f64, f64)| ((x - ex).powi(2) + (y - ey).powi(2)).sqrt() - r;
+        let all = || discs.iter().map(gap).fold(f64::INFINITY, f64::min);
+        if ring > self.reach {
+            return all();
+        }
+        match self.nearby(x, y) {
+            Some(bin) => bin
+                .iter()
+                .map(|&k| gap(&discs[k as usize]))
+                .fold(f64::INFINITY, f64::min),
+            None => all(),
+        }
     }
 }
 
@@ -499,7 +615,7 @@ impl TileRequest {
     /// `ReliefQuadtree.sample_pages`: finest loaded page covering (x, y).
     fn sample_pages(
         &self,
-        pages: &std::collections::HashMap<i64, PageBytes>,
+        pages: &PageMap,
         top_level: i64,
         h_min: f64,
         h_range: f64,
@@ -554,6 +670,7 @@ struct Scatter<'a> {
     parts_side: usize,
     keep: f64,
     corridors: Option<CorridorBins>,
+    clearings: ExclusionGrid,
 }
 
 const FOREST: usize = 0;
@@ -591,11 +708,7 @@ impl<'a> Scatter<'a> {
     }
 
     fn excluded(&self, x: f64, y: f64) -> bool {
-        self.req.exclusions.iter().any(|&(ex, ey, r)| {
-            let dx = x - ex;
-            let dy = y - ey;
-            dx * dx + dy * dy < r * r
-        })
+        self.clearings.contains(&self.req.exclusions, x, y)
     }
 
     fn slot(&self, kind: usize, x: f64, y: f64) -> usize {
@@ -794,7 +907,8 @@ impl<'a> Scatter<'a> {
         let (rx0, ry0, rx1, ry1) = self.rect;
         let px = (pos.0 + jitter_x).clamp(rx0, rx1 - 0.001);
         let py = (pos.1 + jitter_y).clamp(ry0, ry1 - 0.001);
-        let ground = req.height_world_at(self.map, px, py);
+        let altitude = self.map.height_m_at(px, py);
+        let ground = req.display_height(altitude, px, py);
         if ground <= 0.0 {
             return;
         }
@@ -810,7 +924,6 @@ impl<'a> Scatter<'a> {
                 // Lot HB4: hedge trees of the local biome (role "isolated").
                 let roll = self.rng.randf();
                 let (b, conifer) = self.biome_and_conifer(table, gx, gy);
-                let altitude = self.map.height_m_at(px, py);
                 let sd = self.map.river_sd_at(px, py);
                 if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll) {
                     self.push_species(table, sp, px, ground, py, tree_yaw, 0.78);
@@ -891,11 +1004,7 @@ impl<'a> Scatter<'a> {
         if ring <= 0.0 {
             return 0.0;
         }
-        let mut best = f64::INFINITY;
-        for &(ex, ey, r) in &self.req.exclusions {
-            let d = ((x - ex).powi(2) + (y - ey).powi(2)).sqrt() - r;
-            best = best.min(d);
-        }
+        let best = self.clearings.ring_gap(&self.req.exclusions, x, y, ring);
         if best <= 0.0 {
             return 0.0;
         }
@@ -979,7 +1088,8 @@ impl<'a> Scatter<'a> {
         if self.excluded(x, y) || !self.has_point(x, y) || self.in_corridor(x, y) {
             return;
         }
-        let ground = req.height_world_at(self.map, x, y);
+        let altitude = self.map.height_m_at(x, y);
+        let ground = req.display_height(altitude, x, y);
         if ground <= 0.0 {
             return;
         }
@@ -988,7 +1098,6 @@ impl<'a> Scatter<'a> {
         } else {
             tree_roll
         };
-        let altitude = self.map.height_m_at(x, y);
         let pick = table
             .pick(role, b, altitude, sd, conifer, species_roll)
             .or_else(|| {
@@ -1114,6 +1223,15 @@ pub fn reground(buffers: &mut [Vec<f32>], req: &TileRequest, map: &MapRasters) {
     }
 }
 
+/// Widest orchard ring of the species table (px beyond a clearing), 0 without a table.
+fn orchard_reach(req: &TileRequest) -> f64 {
+    req.species.as_deref().map_or(0.0, |table| {
+        (0..species::BIOME_COUNT)
+            .map(|b| table.biome(b, B_ORCHARD_RING))
+            .fold(0.0, f64::max)
+    })
+}
+
 /// Scatters one tile (scatter, hedges, pack).
 pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
     let seed = (req.tile_index as u64)
@@ -1150,6 +1268,7 @@ pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
             .as_ref()
             .filter(|area| !area.corridors.is_empty())
             .map(|area| CorridorBins::new(rect, &area.corridors)),
+        clearings: ExclusionGrid::new(rect, &req.exclusions, orchard_reach(req)),
     };
     if req.side >= 2 {
         scatter.run();
@@ -1538,7 +1657,7 @@ mod tests {
         for _ in 0..PAGE_PX * PAGE_PX {
             page.extend_from_slice(&65535u16.to_le_bytes());
         }
-        let mut pages = std::collections::HashMap::new();
+        let mut pages = PageMap::default();
         pages.insert(0i64, std::sync::Arc::new(page));
         req.ground = Ground::Pages {
             pages,
@@ -1550,5 +1669,82 @@ mod tests {
         let buffer = result.buffers.iter().find(|b| !b.is_empty()).unwrap();
         let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt();
         assert!((buffer[7] - (5.0 - 0.08 * height)).abs() < 1e-3);
+    }
+
+    const GOLDEN_SUMS: [u64; 3] = [
+        1156438309204118281,
+        13900807228414749860,
+        17832588344718662683,
+    ];
+
+    /// FNV-1a over the packed buffers and counts: pins the exact output of a scatter.
+    fn checksum(result: &TileResult) -> u64 {
+        let mut h = 0xcbf29ce484222325u64;
+        let mut eat = |v: u64| {
+            h = (h ^ v).wrapping_mul(0x100000001b3);
+        };
+        for count in &result.counts {
+            eat(*count as u64);
+        }
+        for buffer in &result.buffers {
+            for v in buffer {
+                eat(v.to_bits() as u64);
+            }
+        }
+        h
+    }
+
+    /// Deterministic clearings: radii 0.5-6 px scattered over and around the tile.
+    fn clearings(n: usize) -> Vec<(f64, f64, f64)> {
+        let mut rng = Rng::new(99);
+        (0..n)
+            .map(|_| {
+                (
+                    rng.range(-10.0, 74.0),
+                    rng.range(-10.0, 74.0),
+                    rng.range(0.5, 6.0),
+                )
+            })
+            .collect()
+    }
+
+    #[test]
+    fn scatter_output_is_pinned_with_clearings() {
+        let map = flat_map(30000);
+        let mut v4 = request(0.6, 0.8, 0.5, 1.0);
+        v4.exclusions = clearings(40);
+        let mut species = species_request(2.0, 0.5, 0.8);
+        species.exclusions = clearings(40);
+        let mut dense = species_request(2.0, 0.7, 0.9);
+        dense.exclusions = clearings(300);
+        let sums = [&v4, &species, &dense].map(|req| checksum(&scatter_tile(req, &map)));
+        assert_eq!(sums, GOLDEN_SUMS, "{sums:?}");
+    }
+
+    #[test]
+    fn exclusion_grid_matches_brute_force() {
+        let discs = clearings(300);
+        let rect = (0.0, 0.0, 64.0, 64.0);
+        let grid = ExclusionGrid::new(rect, &discs, 5.0);
+        let mut rng = Rng::new(7);
+        for _ in 0..4000 {
+            // Includes points off the grid, which fall back to every disc.
+            let (x, y) = (rng.range(-8.0, 72.0), rng.range(-8.0, 72.0));
+            let brute = discs
+                .iter()
+                .any(|&(ex, ey, r)| (x - ex).powi(2) + (y - ey).powi(2) < r * r);
+            assert_eq!(grid.contains(&discs, x, y), brute, "({x}, {y})");
+            for ring in [0.5, 2.0, 5.0, 9.0] {
+                let exact = discs
+                    .iter()
+                    .map(|&(ex, ey, r)| ((x - ex).powi(2) + (y - ey).powi(2)).sqrt() - r)
+                    .fold(f64::INFINITY, f64::min);
+                let fast = grid.ring_gap(&discs, x, y, ring);
+                assert!(
+                    fast == exact || (fast >= ring && exact >= ring),
+                    "({x}, {y}, {ring})"
+                );
+            }
+        }
     }
 }

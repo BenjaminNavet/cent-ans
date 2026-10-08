@@ -621,13 +621,12 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 func _setup_quadtree() -> void:
 	pyramid = null
 	var manifest := pyramid_manifest_path
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-pyramid":
-			return
-		if arg.begins_with("--pyramid-dir="):
-			manifest = arg.trim_prefix("--pyramid-dir=").path_join("relief_pyramid.json")
-		if arg.begins_with("--qt-debug="):
-			material.set_shader_parameter("qt_debug", int(arg.trim_prefix("--qt-debug=")))
+	if CmdArgs.has("--no-pyramid"):
+		return
+	if CmdArgs.has("--pyramid-dir"):
+		manifest = CmdArgs.value("--pyramid-dir").path_join("relief_pyramid.json")
+	if CmdArgs.has("--qt-debug"):
+		material.set_shader_parameter("qt_debug", int(CmdArgs.number("--qt-debug")))
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()
@@ -885,7 +884,7 @@ func _setup_fine_tiles() -> void:
 	var meta_path := map_data.map_dir.path_join("map.json")
 	if not FileAccess.file_exists(meta_path):
 		return
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+	var meta: Variant = DataFile.parse_file(meta_path)
 	if not (meta is Dictionary) or not (meta as Dictionary).has("height_tiles"):
 		return
 	var tiles: Dictionary = meta["height_tiles"]

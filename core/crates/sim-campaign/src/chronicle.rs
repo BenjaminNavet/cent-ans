@@ -11,23 +11,22 @@
 //! An AI faction applies the option of highest `ai_weight` at once (ties
 //! broken by the campaign RNG); the player gets a [`Decision`] answered with
 //! the `choose_event_option` order. Every effect goes through
-//! [`apply_effect`]; an effect naming an unknown id does nothing (the loader
+//! [`crate::effects::apply_effect`]; an effect naming an unknown id does nothing (the loader
 //! already warned about it).
 
 use std::collections::BTreeSet;
 
 use data_model::{
-    CharacterId, CharacterRef, ClaimKind, Condition, Event, EventCategory, EventEffect, EventId,
-    EventPresentation, EventScope, EventSeason, FactionId, GameData, ProvinceId, ProvinceRef,
-    SceneKind, SocialClass,
+    CharacterId, Condition, Event, EventCategory, EventEffect, EventId, EventPresentation,
+    EventScope, EventSeason, FactionId, GameData, ProvinceId, SceneKind,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{faction_name, Claim, REBELS_FACTION};
+use crate::effects::{add_clamped, apply_effect, event_treasury_amount};
 use crate::events::{EventKind, GameEvent};
 use crate::population::weighted_unrest;
-use crate::state::{Army, CampaignState, Season, Unit, TURNS_PER_YEAR};
-use crate::{characters, religion, skills};
+use crate::religion;
+use crate::state::{CampaignState, Season};
 
 /// Turns a player decision stays open before the AI's option applies
 /// (ADR 0122).
@@ -168,7 +167,7 @@ pub struct DecisionView {
     pub presentation: EventPresentation,
 }
 
-fn season_of(season: Season) -> EventSeason {
+pub(crate) fn season_of(season: Season) -> EventSeason {
     match season {
         Season::Spring => EventSeason::Spring,
         Season::Summer => EventSeason::Summer,
@@ -177,22 +176,12 @@ fn season_of(season: Season) -> EventSeason {
     }
 }
 
-fn is_rebels(faction: &FactionId) -> bool {
-    faction.as_str() == REBELS_FACTION
-}
-
-fn province_name(data: &GameData, id: &ProvinceId) -> String {
-    data.provinces
-        .get(id)
-        .map_or_else(|| id.to_string(), |p| p.name.display.clone())
-}
-
 // =========================================================================
 // Conditions
 // =========================================================================
 
 impl CampaignState {
-    fn faction_alive(&self, faction: &FactionId) -> bool {
+    pub(crate) fn faction_alive(&self, faction: &FactionId) -> bool {
         self.factions.get(faction).is_some_and(|f| f.alive)
     }
 
@@ -226,7 +215,7 @@ impl CampaignState {
                     None => self
                         .factions
                         .get(&a)
-                        .is_some_and(|f| f.at_war_with.iter().any(|enemy| !is_rebels(enemy))),
+                        .is_some_and(|f| f.at_war_with.iter().any(|enemy| !enemy.is_rebels())),
                 }
             }
             Condition::Controls { faction, province } => {
@@ -271,7 +260,7 @@ impl CampaignState {
                 .is_some_and(|f| f.treasury > *amount),
             Condition::ProvincesBelow { faction, count } => {
                 scope_faction(faction).is_some_and(|f| {
-                    let controlled = self.controlled_provinces(&f).len();
+                    let controlled = self.controlled_provinces(&f).count();
                     controlled < *count as usize
                 })
             }
@@ -359,7 +348,7 @@ impl CampaignState {
                     province_name: decision
                         .province
                         .as_ref()
-                        .map(|p| province_name(data, p))
+                        .map(|p| data.province_name(p))
                         .unwrap_or_default(),
                     presentation: event.presentation(),
                 })
@@ -396,711 +385,6 @@ impl CampaignState {
         }
         Ok(())
     }
-
-    /// French one-line summary of an effect (tooltips).
-    pub fn describe_effect(
-        &self,
-        data: &GameData,
-        effect: &EventEffect,
-        ctx: &EventContext,
-    ) -> String {
-        let signed = |value: i64| {
-            if value >= 0 {
-                format!("+{value}")
-            } else {
-                value.to_string()
-            }
-        };
-        let faction_label = |explicit: &Option<FactionId>| {
-            explicit
-                .as_ref()
-                .filter(|f| Some(*f) != ctx.faction.as_ref())
-                .map(|f| format!(" ({})", faction_name(data, f)))
-                .unwrap_or_default()
-        };
-        let where_ = |target: &Option<ProvinceRef>| match (target, &ctx.province) {
-            (Some(ProvinceRef::All), _) | (None, None) => " (toutes vos provinces)".to_owned(),
-            (Some(ProvinceRef::Id(p)), _) | (None, Some(p)) => {
-                format!(" ({})", province_name(data, p))
-            }
-        };
-        let who = |character: &CharacterRef, faction: &Option<FactionId>| {
-            let faction = faction.clone().or(ctx.faction.clone());
-            match self.resolve_character(character, faction.as_ref()) {
-                Some(id) => format!(" ({})", self.character_name(data, &id)),
-                None => String::new(),
-            }
-        };
-        match effect {
-            EventEffect::Treasury { faction, amount } => {
-                // UI audit A3 E3: livres tournois with the ₶ sign and
-                // grouped digits, as everywhere else in the interface.
-                // EQ1: the amount the faction will really pay or receive.
-                let target = faction.clone().or(ctx.faction.clone());
-                let amount = event_treasury_amount(self, data, target.as_ref(), *amount);
-                format!(
-                    "Trésor {}{}",
-                    crate::economy_balance::signed_livres(amount),
-                    faction_label(faction)
-                )
-            }
-            EventEffect::Unrest { province, amount } => {
-                format!(
-                    "Mécontentement {}{}",
-                    signed(i64::from(*amount)),
-                    where_(province)
-                )
-            }
-            EventEffect::Population { province, percent } => format!(
-                "Population {} %{}",
-                signed(i64::from(*percent)),
-                where_(province)
-            ),
-            EventEffect::Health { province, amount } => {
-                format!("Santé {}{}", signed(i64::from(*amount)), where_(province))
-            }
-            EventEffect::Wealth { province, amount } => {
-                format!(
-                    "Richesse {}{}",
-                    signed(i64::from(*amount)),
-                    where_(province)
-                )
-            }
-            EventEffect::Devastation { province, amount } => {
-                format!(
-                    "Dévastation {}{}",
-                    signed(i64::from(*amount)),
-                    where_(province)
-                )
-            }
-            EventEffect::Prestige {
-                character,
-                faction,
-                amount,
-            } => format!(
-                "Prestige {}{}",
-                signed(i64::from(*amount)),
-                who(character, faction)
-            ),
-            EventEffect::Piety {
-                character,
-                faction,
-                amount,
-            } => format!(
-                "Piété {}{}",
-                signed(i64::from(*amount)),
-                who(character, faction)
-            ),
-            EventEffect::PapalFavor { faction, amount } => format!(
-                "Faveur pontificale {}{}",
-                signed(i64::from(*amount)),
-                faction_label(faction)
-            ),
-            EventEffect::Opinion {
-                faction,
-                towards,
-                amount,
-                ..
-            } => {
-                let towards = towards
-                    .as_ref()
-                    .or(ctx.faction.as_ref())
-                    .map(|f| format!(" envers {}", faction_name(data, f)))
-                    .unwrap_or_default();
-                format!(
-                    "Attitude de {}{} {}",
-                    faction_name(data, faction),
-                    towards,
-                    signed(i64::from(*amount))
-                )
-            }
-            EventEffect::DeclareWar { a, b } => format!(
-                "Guerre : {} contre {}",
-                faction_name(data, a),
-                faction_name(data, b)
-            ),
-            EventEffect::Peace { a, b } => format!(
-                "Paix entre {} et {}",
-                faction_name(data, a),
-                faction_name(data, b)
-            ),
-            EventEffect::AddTrait {
-                character,
-                faction,
-                trait_id,
-            } => {
-                let name = data
-                    .traits
-                    .get(trait_id)
-                    .map_or_else(|| trait_id.to_string(), |t| t.name.display.clone());
-                format!("Trait « {name} »{}", who(character, faction))
-            }
-            EventEffect::KillCharacter { id, faction } => {
-                format!("Mort{}", who(id, faction))
-            }
-            EventEffect::SpawnArmy {
-                faction,
-                province,
-                units,
-            } => {
-                let place = province
-                    .as_ref()
-                    .or(ctx.province.as_ref())
-                    .map(|p| format!(" en {}", province_name(data, p)))
-                    .unwrap_or_default();
-                format!(
-                    "Nouvelle armée de {} unités{}{}",
-                    units.len(),
-                    place,
-                    faction_label(faction)
-                )
-            }
-            EventEffect::Claim {
-                faction,
-                kind,
-                target,
-            } => {
-                let target_name = match kind {
-                    ClaimKind::Throne => FactionId::new(target.clone())
-                        .map(|f| format!("le trône de {}", faction_name(data, &f)))
-                        .unwrap_or_else(|_| target.clone()),
-                    ClaimKind::Province => ProvinceId::new(target.clone())
-                        .map(|p| province_name(data, &p))
-                        .unwrap_or_else(|_| target.clone()),
-                };
-                format!("Prétention sur {target_name}{}", faction_label(faction))
-            }
-            EventEffect::Loyalty { vassal, amount } => {
-                let who = vassal
-                    .as_ref()
-                    .map(|v| format!(" de {}", faction_name(data, v)))
-                    .unwrap_or_else(|| " des vassaux".to_owned());
-                format!("Loyauté{who} {}", signed(i64::from(*amount)))
-            }
-            EventEffect::PlagueWave { .. } => {
-                "La peste gagne toutes les provinces, du sud vers le nord (santé, population, \
-                 mécontentement)"
-                    .to_owned()
-            }
-            EventEffect::CaptureCharacter {
-                id,
-                faction,
-                captor,
-            } => format!(
-                "Captivité{} aux mains de {}",
-                who(id, faction),
-                faction_name(data, captor)
-            ),
-            EventEffect::ReleaseCharacter {
-                id,
-                faction,
-                ransom,
-            } => {
-                if *ransom > 0 {
-                    format!(
-                        "Libération{} contre {ransom} livres de rançon",
-                        who(id, faction)
-                    )
-                } else {
-                    format!("Libération{}", who(id, faction))
-                }
-            }
-            EventEffect::ScheduleEvent { event, delay } => {
-                let title = data
-                    .events
-                    .get(event)
-                    .map_or_else(|| event.to_string(), |e| e.title.clone());
-                format!("Suite : « {title} » dans {delay} saison(s)")
-            }
-            EventEffect::FoundChivalricOrder { order, .. } => {
-                let name = data
-                    .chivalric_orders
-                    .get(order)
-                    .map_or_else(|| order.to_string(), |o| o.name.display.clone());
-                format!("Fondation de l'ordre « {name} »")
-            }
-            EventEffect::TransferProvince {
-                province,
-                faction,
-                price,
-                payer,
-                ..
-            } => {
-                let text = match faction {
-                    Some(f) => format!(
-                        "{} passe à {}",
-                        province_name(data, province),
-                        faction_name(data, f)
-                    ),
-                    None => format!("{} rejoint le domaine", province_name(data, province)),
-                };
-                format!("{text}{}", price_label(data, *price, payer))
-            }
-            EventEffect::TransferTitle {
-                title,
-                faction,
-                price,
-                payer,
-                ..
-            } => {
-                let name = data
-                    .titles
-                    .get(title)
-                    .map_or_else(|| title.to_string(), |t| t.name.display.clone());
-                let text = match faction {
-                    Some(f) => format!("{name} passe à {}", faction_name(data, f)),
-                    None => format!("{name} rejoint le domaine"),
-                };
-                format!("{text}{}", price_label(data, *price, payer))
-            }
-            EventEffect::SetRuler { character, faction } => {
-                let realm = faction
-                    .as_ref()
-                    .or(ctx.faction.as_ref())
-                    .map(|f| format!(" de {}", faction_name(data, f)))
-                    .unwrap_or_default();
-                format!(
-                    "{} prend la tête{realm}",
-                    self.character_name(data, character)
-                )
-            }
-            EventEffect::Marry { a, b } => format!(
-                "Mariage de {} et {}",
-                self.character_name(data, a),
-                self.character_name(data, b)
-            ),
-        }
-    }
-
-    fn resolve_character(
-        &self,
-        character: &CharacterRef,
-        faction: Option<&FactionId>,
-    ) -> Option<CharacterId> {
-        let id = match character {
-            CharacterRef::Ruler => self.factions.get(faction?)?.ruler.clone()?,
-            CharacterRef::Heir => self.factions.get(faction?)?.heir.clone()?,
-            CharacterRef::Id(id) => id.clone(),
-        };
-        self.characters.get(&id).filter(|c| c.alive).map(|_| id)
-    }
-
-    /// Provinces targeted by a province effect.
-    fn effect_provinces(
-        &self,
-        target: &Option<ProvinceRef>,
-        ctx: &EventContext,
-    ) -> Vec<ProvinceId> {
-        let all = || match &ctx.faction {
-            Some(faction) => self.controlled_provinces(faction),
-            None => Vec::new(),
-        };
-        match (target, &ctx.province) {
-            (Some(ProvinceRef::All), _) | (None, None) => all(),
-            (Some(ProvinceRef::Id(p)), _) | (None, Some(p)) => {
-                if self.provinces.contains_key(p) {
-                    vec![p.clone()]
-                } else {
-                    Vec::new()
-                }
-            }
-        }
-    }
-}
-
-// =========================================================================
-// Effects
-// =========================================================================
-
-fn add_clamped(value: u8, delta: i32) -> u8 {
-    (i32::from(value) + delta).clamp(0, 100) as u8
-}
-
-fn for_each_class(
-    state: &mut CampaignState,
-    province: &ProvinceId,
-    mut apply: impl FnMut(&mut data_model::PopulationClass),
-) {
-    let Some(p) = state.provinces.get_mut(province) else {
-        return;
-    };
-    for class in SocialClass::ALL {
-        let entry = match class {
-            SocialClass::Peasants => &mut p.population.peasants,
-            SocialClass::Burghers => &mut p.population.burghers,
-            SocialClass::Clergy => &mut p.population.clergy,
-            SocialClass::Nobility => &mut p.population.nobility,
-        };
-        apply(entry);
-    }
-}
-
-/// EQ1 (`data/rules/economy.json`): the treasury effect `amount` of an
-/// event for `faction`, scaled down for a faction whose seasonal income is
-/// below the reference (never below the minimum share): event costs are
-/// written for a middling realm, and a small county must not be ruined by a
-/// fire it could not have prevented.
-pub fn event_treasury_amount(
-    state: &CampaignState,
-    data: &GameData,
-    faction: Option<&FactionId>,
-    amount: i64,
-) -> i64 {
-    let rules = &data.economy_rules;
-    let Some(f) = faction.and_then(|id| state.factions.get(id).map(|f| (id, f))) else {
-        return amount;
-    };
-    let income = if f.1.income_last_turn > 0 {
-        f.1.income_last_turn
-    } else {
-        state.faction_income_effective(data, f.0)
-    };
-    let reference = rules.event_treasury_reference_income.max(1);
-    if income >= reference {
-        return amount;
-    }
-    let scale = (income.max(0) as f64 / reference as f64)
-        .max(rules.event_treasury_min_scale)
-        .min(1.0);
-    (amount as f64 * scale).round() as i64
-}
-
-/// Applies one effect in `ctx` (the deciding faction and the event's
-/// province). Unknown ids and impossible actions are ignored.
-pub fn apply_effect(
-    state: &mut CampaignState,
-    data: &GameData,
-    effect: &EventEffect,
-    ctx: &EventContext,
-    events: &mut Vec<GameEvent>,
-) {
-    let target_faction = |explicit: &Option<FactionId>| explicit.clone().or(ctx.faction.clone());
-    match effect {
-        EventEffect::Treasury { faction, amount } => {
-            let target = target_faction(faction);
-            let amount = event_treasury_amount(state, data, target.as_ref(), *amount);
-            if let Some(f) = target.and_then(|f| state.factions.get_mut(&f)) {
-                f.treasury += amount;
-            }
-        }
-        EventEffect::Unrest { province, amount } => {
-            for id in state.effect_provinces(province, ctx) {
-                for_each_class(state, &id, |c| c.unrest = add_clamped(c.unrest, *amount));
-            }
-        }
-        EventEffect::Health { province, amount } => {
-            for id in state.effect_provinces(province, ctx) {
-                for_each_class(state, &id, |c| c.health = add_clamped(c.health, *amount));
-            }
-        }
-        EventEffect::Wealth { province, amount } => {
-            for id in state.effect_provinces(province, ctx) {
-                for_each_class(state, &id, |c| c.wealth = add_clamped(c.wealth, *amount));
-            }
-        }
-        EventEffect::Population { province, percent } => {
-            let factor = f64::from((100 + percent).max(0)) / 100.0;
-            for id in state.effect_provinces(province, ctx) {
-                for_each_class(state, &id, |c| {
-                    c.count = (c.count as f64 * factor).round() as u64;
-                });
-            }
-        }
-        EventEffect::Devastation { province, amount } => {
-            for id in state.effect_provinces(province, ctx) {
-                if let Some(p) = state.provinces.get_mut(&id) {
-                    p.devastation = add_clamped(p.devastation, *amount);
-                }
-            }
-        }
-        EventEffect::Prestige {
-            character,
-            faction,
-            amount,
-        } => {
-            let faction = target_faction(faction);
-            if let Some(id) = state.resolve_character(character, faction.as_ref()) {
-                if let Some(c) = state.characters.get_mut(&id) {
-                    c.prestige += amount;
-                }
-            }
-        }
-        EventEffect::Piety {
-            character,
-            faction,
-            amount,
-        } => {
-            let faction = target_faction(faction);
-            if let Some(id) = state.resolve_character(character, faction.as_ref()) {
-                if let Some(c) = state.characters.get_mut(&id) {
-                    c.piety = add_clamped(c.piety, *amount);
-                }
-            }
-        }
-        EventEffect::PapalFavor { faction, amount } => {
-            if let Some(f) = target_faction(faction) {
-                religion::change_favor(state, &f, *amount);
-            }
-        }
-        EventEffect::Opinion {
-            faction,
-            towards,
-            amount,
-            reason,
-            duration,
-        } => {
-            let Some(towards) = towards.clone().or(ctx.faction.clone()) else {
-                return;
-            };
-            if faction != &towards
-                && state.faction_alive(faction)
-                && state.factions.contains_key(&towards)
-            {
-                // LR-07: an event may give a capped motive too.
-                state.add_capped_modifier(
-                    data,
-                    faction,
-                    &towards,
-                    *amount,
-                    reason,
-                    duration.unwrap_or(OPINION_TURNS),
-                );
-            }
-        }
-        EventEffect::DeclareWar { a, b } => {
-            if state.faction_alive(a) && state.faction_alive(b) && !state.is_at_war(a, b) {
-                let _ = state.declare_war(data, a, b);
-            }
-        }
-        EventEffect::Peace { a, b } => {
-            if state.is_at_war(a, b) {
-                state.make_peace(data, a, b, &[], 0, PEACE_TRUCE_TURNS);
-            }
-        }
-        EventEffect::AddTrait {
-            character,
-            faction,
-            trait_id,
-        } => {
-            let faction = target_faction(faction);
-            if !data.traits.contains_key(trait_id) {
-                return;
-            }
-            if let Some(id) = state.resolve_character(character, faction.as_ref()) {
-                if skills::grant_trait(state, data, &id, trait_id) {
-                    let name = &data.traits[trait_id].name.display;
-                    let owner = state.characters[&id].faction.clone();
-                    events.push(
-                        GameEvent::new(
-                            EventKind::TraitAcquired,
-                            format!("{} devient « {name} ».", state.character_name(data, &id)),
-                        )
-                        .faction(&owner),
-                    );
-                }
-            }
-        }
-        EventEffect::KillCharacter { id, faction } => {
-            let faction = target_faction(faction);
-            if let Some(id) = state.resolve_character(id, faction.as_ref()) {
-                characters::kill(state, data, &id, events);
-            }
-        }
-        EventEffect::SpawnArmy {
-            faction,
-            province,
-            units,
-        } => {
-            let Some(faction) = target_faction(faction).filter(|f| state.faction_alive(f)) else {
-                return;
-            };
-            let location = province
-                .clone()
-                .or(ctx.province.clone())
-                .or_else(|| state.factions.get(&faction).map(|f| f.capital.clone()))
-                .filter(|p| state.provinces.contains_key(p));
-            let Some(location) = location else {
-                return;
-            };
-            let units: Vec<Unit> = units
-                .iter()
-                .filter_map(|u| data.unit_types.get(u))
-                .map(Unit::fresh)
-                .collect();
-            if units.is_empty() {
-                return;
-            }
-            let Some(city) = state.province_city_id(&location).cloned() else {
-                return;
-            };
-            let id = state.allocate_army_id();
-            let mut army = Army::new(
-                faction.clone(),
-                crate::state::ArmyPosition::Settlement(city),
-                units,
-            );
-            army.movement_left = crate::march::km_to_grid_points(
-                data,
-                f64::from(state.season_movement_points(data)),
-            );
-            state.armies.insert(id.clone(), army);
-            events.push(
-                GameEvent::new(
-                    EventKind::Chronicle,
-                    format!(
-                        "Une nouvelle armée de {} se lève en {}.",
-                        faction_name(data, &faction),
-                        province_name(data, &location)
-                    ),
-                )
-                .faction(&faction)
-                .province(&location)
-                .army(&id),
-            );
-        }
-        EventEffect::Claim {
-            faction,
-            kind,
-            target,
-        } => {
-            let Some(holder) = target_faction(faction) else {
-                return;
-            };
-            let (claim_faction, claim_province) = match kind {
-                ClaimKind::Throne => (FactionId::new(target.clone()).ok(), None),
-                ClaimKind::Province => (None, ProvinceId::new(target.clone()).ok()),
-            };
-            let known = claim_faction
-                .as_ref()
-                .is_some_and(|f| state.factions.contains_key(f))
-                || claim_province
-                    .as_ref()
-                    .is_some_and(|p| state.provinces.contains_key(p));
-            let Some(f) = state.factions.get_mut(&holder).filter(|_| known) else {
-                return;
-            };
-            let duplicate = f.claims.iter().any(|c| {
-                c.kind == *kind && c.faction == claim_faction && c.province == claim_province
-            });
-            if !duplicate {
-                f.claims.push(Claim {
-                    kind: *kind,
-                    faction: claim_faction,
-                    province: claim_province,
-                    text_fr: "prétention née de la chronique".to_owned(),
-                    expires_turn: None,
-                });
-            }
-        }
-        EventEffect::Loyalty { vassal, amount } => {
-            let vassals: Vec<FactionId> = match vassal {
-                Some(v) => vec![v.clone()],
-                None => match &ctx.faction {
-                    Some(suzerain) => state
-                        .factions
-                        .iter()
-                        .filter(|(_, f)| f.suzerain.as_ref() == Some(suzerain))
-                        .map(|(id, _)| id.clone())
-                        .collect(),
-                    None => Vec::new(),
-                },
-            };
-            for v in vassals {
-                if let Some(f) = state.factions.get_mut(&v) {
-                    f.loyalty = add_clamped(f.loyalty, *amount);
-                }
-            }
-        }
-        EventEffect::CaptureCharacter {
-            id,
-            faction,
-            captor,
-        } => {
-            let faction = target_faction(faction);
-            if let Some(id) = state.resolve_character(id, faction.as_ref()) {
-                capture_character(state, data, &id, captor, events);
-            }
-        }
-        EventEffect::ReleaseCharacter {
-            id,
-            faction,
-            ransom,
-        } => {
-            let faction = target_faction(faction);
-            if let Some(id) = state.resolve_character(id, faction.as_ref()) {
-                release_character(state, data, &id, *ransom, events);
-            }
-        }
-        EventEffect::ScheduleEvent { event, delay } => {
-            if data.events.contains_key(event) {
-                state.chronicle.scheduled.push(ScheduledEvent {
-                    event: event.clone(),
-                    turn: state.turn + (*delay).max(1),
-                    faction: ctx.faction.clone(),
-                    province: ctx.province.clone(),
-                });
-            }
-        }
-        EventEffect::Marry { a, b } => {
-            marry(state, data, a, b, events);
-        }
-        EventEffect::TransferProvince {
-            province,
-            faction,
-            from,
-            price,
-            payer,
-        } => {
-            let holder = state
-                .province_owner(province)
-                .zip(state.province_controller(province));
-            let from_ok = from
-                .as_ref()
-                .is_none_or(|f| holder.is_some_and(|(o, c)| o == f || c == f));
-            let seller = state.province_owner(province).cloned();
-            if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
-                if transfer_province(state, data, province, &faction, events) {
-                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
-                    pay_sale_price(state, data, &payer, seller.as_ref(), *price, events);
-                }
-            }
-        }
-        EventEffect::TransferTitle {
-            title,
-            faction,
-            from,
-            price,
-            payer,
-        } => {
-            let holder = crate::feudal::holder_of(state, title).cloned();
-            let from_ok = from.as_ref().is_none_or(|f| holder.as_ref() == Some(f));
-            if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
-                if transfer_title(state, data, title, &faction, events) {
-                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
-                    pay_sale_price(state, data, &payer, holder.as_ref(), *price, events);
-                }
-            }
-        }
-        EventEffect::SetRuler { character, faction } => {
-            if let Some(faction) = target_faction(faction) {
-                set_ruler(state, data, &faction, character, events);
-            }
-        }
-        EventEffect::FoundChivalricOrder { order, faction } => {
-            if let Some(faction) = target_faction(faction) {
-                crate::chivalry::found_order_by_event(state, data, &faction, order, events);
-            }
-        }
-        EventEffect::PlagueWave { from_year, to_year } => {
-            if state.chronicle.plague_wave.is_none() {
-                let years = (to_year - from_year).max(0) as u32;
-                state.chronicle.plague_wave = Some(PlagueWave {
-                    start_turn: state.turn,
-                    duration: (years * TURNS_PER_YEAR).max(1),
-                });
-            }
-        }
-    }
 }
 
 /// G1 `transfer_province`: `province` passes to `faction`, ownership and
@@ -1133,9 +417,9 @@ pub fn transfer_province(
             EventKind::ProvinceCaptured,
             format!(
                 "{} passe de {} à {}.",
-                province_name(data, province),
-                faction_name(data, &previous),
-                faction_name(data, faction)
+                data.province_name(province),
+                data.faction_name(&previous),
+                data.faction_name(faction)
             ),
         )
         .province(province)
@@ -1146,14 +430,14 @@ pub fn transfer_province(
 
 /// LR-17 ` (price N livres)` suffix of a sale, naming a payer other than
 /// the recipient.
-fn price_label(data: &GameData, price: i64, payer: &Option<FactionId>) -> String {
+pub(crate) fn price_label(data: &GameData, price: i64, payer: &Option<FactionId>) -> String {
     if price <= 0 {
         return String::new();
     }
     let amount = crate::economy_balance::signed_livres(price);
     let amount = amount.trim_start_matches('+');
     match payer {
-        Some(p) => format!(" contre {amount}, payés par {}", faction_name(data, p)),
+        Some(p) => format!(" contre {amount}, payés par {}", data.faction_name(p)),
         None => format!(" contre {amount}"),
     }
 }
@@ -1179,7 +463,7 @@ pub fn transfer_title(
 /// LR-17: `payer` pays `price` livres for a sale (even into debt); `seller`
 /// receives them if it still exists, otherwise the money leaves the map (a
 /// crown that is not playable, a seller absorbed by the sale).
-fn pay_sale_price(
+pub(crate) fn pay_sale_price(
     state: &mut CampaignState,
     data: &GameData,
     payer: &FactionId,
@@ -1203,12 +487,12 @@ fn pay_sale_price(
     let text = match receiver {
         Some(r) => format!(
             "{} verse {amount} à {}.",
-            faction_name(data, payer),
-            faction_name(data, r)
+            data.faction_name(payer),
+            data.faction_name(r)
         ),
         None => format!(
             "{} verse {amount} pour son achat.",
-            faction_name(data, payer)
+            data.faction_name(payer)
         ),
     };
     events.push(GameEvent::new(EventKind::Chronicle, text).faction(payer));
@@ -1250,7 +534,7 @@ pub fn set_ruler(
             format!(
                 "{} prend la tête de {}{deposed}.",
                 state.character_name(data, character),
-                faction_name(data, faction)
+                data.faction_name(faction)
             ),
         )
         .faction(faction),
@@ -1286,7 +570,7 @@ pub fn capture_character(
             format!(
                 "{} est retenu prisonnier par {}.",
                 state.character_name(data, id),
-                faction_name(data, captor)
+                data.faction_name(captor)
             ),
         )
         .faction(&owner),
@@ -1340,7 +624,7 @@ pub fn release_character(
 
 /// F1 `marry`: a historical marriage between two living, unmarried
 /// characters (no-op otherwise: history diverged).
-fn marry(
+pub(crate) fn marry(
     state: &mut CampaignState,
     data: &GameData,
     a: &CharacterId,
@@ -1489,7 +773,7 @@ pub fn ai_affordable_choice_among(
         .collect();
     let Some(means) = decider
         .and_then(|f| state.factions.get(f))
-        .map(|f| f.treasury.max(0) + 2 * f.income_last_turn.max(0))
+        .map(|f| f.treasury.max(0) + 2 * f.last_budget.income.max(0))
     else {
         return weighted_pick(state, event, &offered);
     };
@@ -1571,7 +855,7 @@ fn fire(
                         EventKind::Medicine,
                         format!(
                             "Une fièvre s'est déclarée à {} : les médecins l'ont circonscrite.",
-                            province_name(data, p)
+                            data.province_name(p)
                         ),
                     )
                     .province(p)
@@ -1619,7 +903,7 @@ fn fire(
     if historical {
         let who = decider
             .as_ref()
-            .map(|f| format!(" ({})", faction_name(data, f)))
+            .map(|f| format!(" ({})", data.faction_name(f)))
             .unwrap_or_default();
         let chosen = event.options.get(option).map_or("", |o| o.text.as_str());
         let mut entry = GameEvent::new(
@@ -1670,7 +954,7 @@ fn living_factions(state: &CampaignState) -> Vec<FactionId> {
     state
         .factions
         .iter()
-        .filter(|(id, f)| f.alive && !is_rebels(id))
+        .filter(|(id, f)| f.alive && !id.is_rebels())
         .map(|(id, _)| id.clone())
         .collect()
 }
@@ -1687,7 +971,7 @@ fn matching_provinces(
         .keys()
         .filter_map(|id| state.province_controller(id).map(|c| (id, c)))
         .filter(|(_, controller)| {
-            faction.is_none_or(|f| *controller == f) && !is_rebels(controller)
+            faction.is_none_or(|f| *controller == f) && !controller.is_rebels()
         })
         .filter(|(id, controller)| {
             let ctx = EventContext {
@@ -1754,7 +1038,7 @@ fn targets(
                         return Vec::new();
                     };
                     let allowed = restrict.as_ref().is_none_or(|r| r == &controller)
-                        && !is_rebels(&controller);
+                        && !controller.is_rebels();
                     let ctx = EventContext {
                         faction: Some(controller),
                         province: Some(p.clone()),
@@ -1991,11 +1275,13 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         let factor = 1.0 - f64::from(loss) / 100.0 * (1.0 - resistance);
         let health = crate::medicine::mitigated(-PLAGUE_HEALTH_LOSS, resistance);
         let unrest = -crate::medicine::mitigated(-PLAGUE_UNREST, resistance);
-        for_each_class(state, &id, |c| {
-            c.health = add_clamped(c.health, health);
-            c.unrest = add_clamped(c.unrest, unrest);
-            c.count = (c.count as f64 * factor).round() as u64;
-        });
+        if let Some(p) = state.provinces.get_mut(&id) {
+            for c in p.population.iter_mut() {
+                c.health = add_clamped(c.health, health);
+                c.unrest = add_clamped(c.unrest, unrest);
+                c.count = (c.count as f64 * factor).round() as u64;
+            }
+        }
         struck.push(id);
     }
     // FK1: every province struck shows its plague scene (visual only).
@@ -2017,7 +1303,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
                     EventKind::Medicine,
                     format!(
                         "La Grande Mortalité épargne {} : quarantaine, fumigations et apothicaires ont tenu.",
-                        province_name(data, id)
+                        data.province_name(id)
                     ),
                 )
                 .province(id)
@@ -2026,7 +1312,7 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         }
     }
     if !struck.is_empty() {
-        let names: Vec<String> = struck.iter().map(|p| province_name(data, p)).collect();
+        let names: Vec<String> = struck.iter().map(|p| data.province_name(p)).collect();
         let mut entry = GameEvent::new(
             EventKind::Plague,
             format!("La Grande Mortalité frappe : {}.", names.join(", ")),

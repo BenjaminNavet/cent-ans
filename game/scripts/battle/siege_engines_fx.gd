@@ -17,7 +17,7 @@ extends Node3D
 ## `release()` donne aux projectiles (`SiegeAssaultFx`, `BattleEffects`) le point et l'instant
 ## où la fronde ou la bouche les lâche. Rendu seulement : aucune règle ici.
 ## GA3-L5 : trébuchet et bélier peuvent être posés dans leur variante générée (`ga3_variant`,
-## mêmes nœuds animés, `--no-ga3` pour les modèles procéduraux).
+## mêmes nœuds animés).
 
 const SETTINGS_FILE := "fx/siege_engines.json"
 const SWING_CURVE_FILE := "fx/trebuchet_swing_curve.json"  # AS8d, CC BY-SA 3.0 (fichier propre)
@@ -48,30 +48,21 @@ var _camera: Variant = null  # position de la caméra à cette image (null : auc
 static func settings() -> Dictionary:
 	if not _settings.is_empty():
 		return _settings
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(SETTINGS_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_settings = parsed
-				_attach_swing_curve(dir)
-				return _settings
+	if DataFile.exists(SETTINGS_FILE):
+		var parsed: Variant = DataFile.read_json(SETTINGS_FILE)
+		if parsed is Dictionary:
+			_settings = parsed
+			_attach_swing_curve()
+			return _settings
 	return {}
 
 
 ## Courbe de bascule mesurée (fichier à part, licence propre) : posée sous `trebuchet.swing_curve`
 ## si présente ; sinon `_swing_progress` retombe sur la courbe procédurale d'origine.
-static func _attach_swing_curve(dir: String) -> void:
-	var path := dir.path_join(SWING_CURVE_FILE)
-	if not FileAccess.file_exists(path) or not _settings.get("trebuchet") is Dictionary:
+static func _attach_swing_curve() -> void:
+	if not DataFile.exists(SWING_CURVE_FILE) or not _settings.get("trebuchet") is Dictionary:
 		return
-	var curve: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var curve: Variant = DataFile.read_json(SWING_CURVE_FILE)
 	if curve is Dictionary:
 		_settings["trebuchet"]["swing_curve"] = curve
 
@@ -98,11 +89,9 @@ static func _scene(model: String) -> PackedScene:
 
 
 ## GA3-L5 (ADR 0140) : variante générée du modèle `model` (`ga3` des réglages, `_lod` suivi) ;
-## "" si aucune, absente ou coupée par `--no-ga3`. Même hiérarchie et mêmes noms de nœuds que
+## "" si aucune, absente. Même hiérarchie et mêmes noms de nœuds que
 ## le modèle procédural (`tools/blender_scripts/ga3_siege_rig.py`) : l'animation est inchangée.
 static func ga3_variant(model: String) -> String:
-	if not Ga3Kit.requested():
-		return ""
 	var base := model.trim_suffix("_lod")
 	var entry: Variant = (settings().get("ga3", {}) as Dictionary).get(base, null)
 	if not (entry is Dictionary) or str((entry as Dictionary).get("model", "")) == "":

@@ -49,11 +49,8 @@ static func body_italic() -> Font:
 
 ## Libellé stylé (police, taille, couleur, contour sombre facultatif).
 static func label(text: String, size: int, color: Color, font_value: Font = null, outline: int = 0) -> Label:
-	var result := Label.new()
-	result.text = text
+	var result := UiBuild.label(text, size, color)
 	result.add_theme_font_override("font", font_value if font_value != null else body_font())
-	result.add_theme_font_size_override("font_size", size)
-	result.add_theme_color_override("font_color", color)
 	if outline > 0:
 		result.add_theme_constant_override("outline_size", outline)
 		result.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.75))

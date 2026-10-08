@@ -1,37 +1,23 @@
 extends Node
 
-## M10 assets — autoload `AudioDirector` : musique d'ambiance et effets sonores.
-##
-## - Bus « Musique » et « Effets » (créés au démarrage s'ils manquent), volumes linéaires
-##   0..1 persistés dans `user://settings.cfg` (section `audio`).
-## - Musique selon le contexte (`campaign` — ou `campaign_<région>` selon la culture de la
-##   faction jouée : france/england/burgundy/iberia/italy, DA4 —, `war` si le joueur est en
-##   guerre, `court` quand la cour est ouverte, `menu` à l'écran-titre), fondu enchaîné entre
-##   deux lecteurs. Chaque contexte a deux listes de lecture (`data/audio/music.json`) : `primary`
-##   (musique d'époque libre de droits, tirée en priorité) et `fallback` (repli, notamment les
-##   pistes Kevin MacLeod, utilisées seulement si `primary` ne fournit aucun fichier présent),
-##   jouées en rotation mélangée (ADR 0154) : chaque morceau passe une fois avant toute
-##   répétition, la rotation survit d'une session à l'autre (`user://music_rotation.cfg`) et, en
-##   guerre, la liste `war` est complétée par celle de la région de la faction jouée ; à défaut de
-##   tout, `music/<contexte>.ogg` en boucle. `culture_regions` associe la culture de la faction jouée
-##   (`data/factions/<id>.json`, champ `culture`) à une région musicale.
-##   La bataille tire sa piste de base dans la liste `battle` (ADR 0166), pas dans `war`.
-## - Effets : clic sur tout bouton (via `SceneTree.node_added`), page tournée à l'ouverture
-##   des panneaux de la carte, cloche de fin de tour puis l'effet de l'événement le plus
-##   marquant du tour (bataille, naissance, mort, guerre, paix, religion).
+## Autoload `AudioDirector` : musique d'ambiance et effets de la campagne.
+## - Bus « Musique » et « Interface » ; volumes réglés par `Settings` (`audio/bus_*`).
+## - Musique par contexte (`campaign[_<région>]`, `war`, `court`, `menu` ; `battle` pour la
+##   bataille), fondu enchaîné entre deux lecteurs. Listes `primary` puis `fallback` dans
+##   `data/audio/music.json`, rotation mélangée persistée (`user://music_rotation.cfg`) ;
+##   `culture_regions` associe la culture de la faction jouée à une région musicale.
+## - Effets : clic de bouton, page tournée, cloche de fin de tour puis effet de l'événement le
+##   plus marquant du tour (`event_sfx` de `data/audio/sound_bank.json`).
 ## - Fichiers `res://assets/audio/{sfx,music}/<nom>.ogg|.wav` ; absent = silence, sans erreur.
 ##
 ## Accès depuis les autres scripts : `get_node_or_null("/root/AudioDirector")` (les scripts
 ## chargés par le smoke test sont compilés avant l'enregistrement des autoloads).
 
-const SETTINGS_PATH := "user://settings.cfg"
 const ROTATION_PATH := "user://music_rotation.cfg"
 const TIERS := ["primary", "fallback"]
 const MUSIC_BUS := "Musique"
-## AU1 : les effets d'interface (clic, page, cloche de tour) passent par le bus « Interface ».
+## Les effets d'interface (clic, page, cloche de tour) passent par le bus « Interface ».
 const SFX_BUS := "Interface"
-## AU1 : volumes par défaut des bus réglables (voir `AudioBuses.PLAYER_BUSES`).
-const DEFAULT_BUS_VOLUMES := {"Master": 1.0, "Musique": 0.6, "Ambiance": 0.8, "Bataille": 0.9, "Interface": 0.8, "Voix": 0.9}
 const DUCK_ATTACK := 0.25
 const DUCK_RELEASE := 1.5
 const SFX_DIR := "res://assets/audio/sfx/"
@@ -39,29 +25,7 @@ const MUSIC_DIR := "res://assets/audio/music/"
 const PLAYLISTS_PATH := "audio/music.json"
 const SFX_VOICES := 6
 const FADE_SECONDS := 1.5
-## Effet par type d'événement du journal, par priorité décroissante.
-const EVENT_SFX := [
-	["battle", "sword_clash"],
-	["siege_started", "war_horn"],
-	["war_declared", "war_horn"],
-	["province_captured", "fanfare"],
-	["peace_signed", "fanfare"],
-	["death", "choir"],
-	["succession", "choir"],
-	["excommunication", "choir"],
-	["schism", "choir"],
-	["heresy", "choir"],
-	["birth", "fanfare"],
-	["marriage", "fanfare"],
-	["building_completed", "page_turn"],
-]
-
-var music_volume: float = 0.6
-var sfx_volume: float = 0.8
-## AU1 : volume linéaire 0..1 par bus (Master, Musique, Ambiance, Bataille, Interface, Voix) ;
-## `music_volume` / `sfx_volume` restent synchronisés avec « Musique » / « Interface ».
-var bus_volumes: Dictionary = DEFAULT_BUS_VOLUMES.duplicate()
-## AU1 : ambiances de la carte de campagne (créées par `attach_campaign`).
+## Ambiances de la carte de campagne (créées par `attach_campaign`).
 var campaign_ambience: CampaignAmbience = null
 var current_context: String = ""
 ## Headless (smoke test, serveur) : flux chargés et contextes suivis, mais rien n'est joué
@@ -81,11 +45,11 @@ var _duck_tween: Tween = null
 var _duck_until: float = 0.0
 ## Listes de lecture par contexte : `{context: {"primary": [chemins res://], "fallback": [...]}}`.
 var _playlists: Dictionary = {}
-## DA4 : culture (`data/factions/<id>.json`, champ `culture`) → région musicale
+## Culture (`data/factions/<id>.json`, champ `culture`) → région musicale
 ## (`campaign_<région>`), lue dans `data/audio/music.json` (clé `culture_regions`).
 var _culture_regions: Dictionary = {}
 var _faction_cultures: Dictionary = {}  # cache faction_id -> culture id
-## Rotation mélangée (ADR 0154) : `{"<contexte>/<liste>": [morceaux restant à jouer]}`. Une liste
+## Rotation mélangée : `{"<contexte>/<liste>": [morceaux restant à jouer]}`. Une liste
 ## n'est rebattue qu'une fois épuisée ; l'état est écrit dans `rotation_path` à chaque tirage pour
 ## que deux sessions successives n'ouvrent pas sur le même morceau ("" = pas de persistance).
 var rotation_path := ROTATION_PATH
@@ -113,7 +77,6 @@ func _ready() -> void:
 		voice.bus = SFX_BUS
 		add_child(voice)
 		_sfx_players.append(voice)
-	load_settings()
 	load_playlists(SoundBank.data_path(PLAYLISTS_PATH))
 	if silent:
 		rotation_path = ""  # tests sans affichage : ne pas toucher à la rotation du joueur
@@ -139,59 +102,7 @@ func _exit_tree() -> void:
 # --- Réglages --------------------------------------------------------------------
 
 
-## Volume du joueur (linéaire 0..1) d'un bus réglable ; persisté par défaut.
-func set_bus_volume(bus_name: String, linear: float, persist: bool = true) -> void:
-	if not bus_volumes.has(bus_name):
-		return
-	var value := clampf(linear, 0.0, 1.0)
-	bus_volumes[bus_name] = value
-	if bus_name == MUSIC_BUS:
-		music_volume = value
-	elif bus_name == SFX_BUS:
-		sfx_volume = value
-	AudioBuses.set_linear_volume(bus_name, value)
-	if persist:
-		save_settings()
-
-
-func bus_volume(bus_name: String) -> float:
-	return float(bus_volumes.get(bus_name, 0.0))
-
-
-func set_music_volume(linear: float, persist: bool = true) -> void:
-	set_bus_volume(MUSIC_BUS, linear, persist)
-
-
-func set_sfx_volume(linear: float, persist: bool = true) -> void:
-	set_bus_volume(SFX_BUS, linear, persist)
-
-
-func load_settings(path: String = SETTINGS_PATH) -> void:
-	var config := ConfigFile.new()
-	if config.load(path) == OK:
-		for bus_name in bus_volumes:
-			bus_volumes[bus_name] = float(config.get_value("audio", "bus_" + str(bus_name), bus_volumes[bus_name]))
-		# Clés historiques (M10) : elles priment pour la musique et l'interface.
-		bus_volumes[MUSIC_BUS] = float(config.get_value("audio", "music_volume", music_volume))
-		bus_volumes[SFX_BUS] = float(config.get_value("audio", "sfx_volume", sfx_volume))
-	else:
-		bus_volumes[MUSIC_BUS] = music_volume
-		bus_volumes[SFX_BUS] = sfx_volume
-	for bus_name in bus_volumes:
-		set_bus_volume(bus_name, float(bus_volumes[bus_name]), false)
-
-
-func save_settings(path: String = SETTINGS_PATH) -> Error:
-	var config := ConfigFile.new()
-	config.load(path)  # conserve les autres sections éventuelles
-	config.set_value("audio", "music_volume", music_volume)
-	config.set_value("audio", "sfx_volume", sfx_volume)
-	for bus_name in bus_volumes:
-		config.set_value("audio", "bus_" + str(bus_name), bus_volumes[bus_name])
-	return config.save(path)
-
-
-# --- Ducking (AU1) -----------------------------------------------------------------
+# --- Ducking -----------------------------------------------------------------
 
 
 ## Atténue la musique de `db` (≤ 0) pendant `hold` secondes (moments forts : cri de guerre, mort
@@ -263,7 +174,7 @@ func load_playlists(path: String) -> bool:
 	_culture_regions.clear()
 	if not FileAccess.file_exists(path):
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not parsed is Dictionary:
 		push_warning("AudioDirector: %s is not a JSON object" % path)
 		return false
@@ -386,7 +297,7 @@ func culture_region(faction_id: String) -> String:
 		return ""
 	if not _faction_cultures.has(faction_id):
 		var data := SoundBank.data_path("factions/" + faction_id + ".json")
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data)) if FileAccess.file_exists(data) else null
+		var parsed: Variant = DataFile.parse_file(data) if FileAccess.file_exists(data) else null
 		_faction_cultures[faction_id] = str((parsed as Dictionary).get("culture", "")) if parsed is Dictionary else ""
 	return str(_culture_regions.get(_faction_cultures[faction_id], ""))
 
@@ -497,7 +408,7 @@ func attach_campaign(campaign: Node) -> void:
 				if not panel.has_meta("m10_audio"):
 					panel.set_meta("m10_audio", true)
 					panel.visibility_changed.connect(_on_panel_visibility.bind(panel))
-	# AU1 : ambiances de carte (enfant du directeur : il survit à la mise en veille de la carte).
+	# Ambiances de carte (enfant du directeur : il survit à la mise en veille de la carte).
 	if campaign_ambience == null:
 		campaign_ambience = CampaignAmbience.new()
 		campaign_ambience.name = "CampaignAmbience"
@@ -530,7 +441,7 @@ func player_at_war() -> bool:
 func refresh_context() -> void:
 	var faction := str(_campaign.get("player_faction")) if _campaign != null else ""
 	var peace_context := campaign_context(faction)
-	# ADR 0154 : la guerre dure presque toute la partie, sa liste s'enrichit des airs de la région.
+	# La guerre dure presque toute la partie, sa liste s'enrichit des airs de la région.
 	_war_blend = peace_context
 	_base_context = "war" if player_at_war() else peace_context
 	_update_music()
@@ -554,35 +465,7 @@ static func event_sfx(events: Array) -> String:
 	for event in events:
 		if event is Dictionary:
 			kinds[str(event.get("kind", ""))] = true
-	for pair in EVENT_SFX:
-		if kinds.has(pair[0]):
-			return pair[1]
+	for pair in DataFile.load_cached(SoundBank.BANK_PATH)["event_sfx"]["order"]:
+		if kinds.has(pair["kind"]):
+			return str(pair["clip"])
 	return ""
-
-
-# --- Interface de réglage --------------------------------------------------------
-
-
-## AU1 : un curseur par bus réglable (Général, Musique, Ambiance, Bataille, Interface, Voix),
-## 0..100 %, persisté à chaque changement.
-func make_volume_controls() -> Control:
-	var grid := GridContainer.new()
-	grid.name = "SoundControls"
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	for spec in AudioBuses.PLAYER_BUSES:
-		var bus_name: String = spec[0]
-		var label := Label.new()
-		label.text = str(spec[1])
-		grid.add_child(label)
-		var slider := HSlider.new()
-		slider.name = "%sSlider" % bus_name
-		slider.min_value = 0.0
-		slider.max_value = 1.0
-		slider.step = 0.05
-		slider.value = bus_volume(bus_name)
-		slider.custom_minimum_size = Vector2(220, 0)
-		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		slider.value_changed.connect(func(value: float) -> void: set_bus_volume(bus_name, value))
-		grid.add_child(slider)
-	return grid

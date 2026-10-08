@@ -21,8 +21,7 @@ func _init() -> void:
 	name = "MercenaryPanel"
 	add_theme_stylebox_override("panel", HudStyle.panel_box(10))
 	custom_minimum_size = Vector2(420, 0)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	var box := UiBuild.vbox(6)
 	add_child(box)
 	var header := HBoxContainer.new()
 	box.add_child(header)
@@ -30,19 +29,17 @@ func _init() -> void:
 	_title.name = "Title"
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title)
-	var close := Button.new()
+	var close := UiBuild.button("×")
 	close.name = "Close"
-	close.text = "×"
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	_status = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	_status.name = "Status"
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_status)
-	_list = VBoxContainer.new()
+	_list = UiBuild.vbox(3)
 	_list.name = "List"
-	_list.add_theme_constant_override("separation", 3)
 	box.add_child(_list)
 	var note := HudStyle.label(
 		"Engagées sur-le-champ, les compagnies coûtent cher et touchent une solde majorée ; impayées, elles désertent ou pillent la province.",

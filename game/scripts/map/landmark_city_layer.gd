@@ -64,9 +64,8 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 			terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 		if not terrain.vertical_scale_changed.is_connected(_on_vertical_scale_changed):
 			terrain.vertical_scale_changed.connect(_on_vertical_scale_changed)
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-landmarks-1to1":
-			_disabled = true
+	if CmdArgs.has("--no-landmarks-1to1"):
+		_disabled = true
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {"cities": _cities.size()}

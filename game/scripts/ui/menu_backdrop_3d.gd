@@ -74,16 +74,15 @@ func _ready() -> void:
 
 
 func _parse_args() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--menu-shot="):
-			_frozen_shot = int(arg.trim_prefix("--menu-shot="))
-		elif arg.begins_with("--menu-shot-t="):
-			_frozen_t = clampf(float(arg.trim_prefix("--menu-shot-t=")), 0.0, 1.0)
-		elif arg.begins_with("--menu-camera="):
-			var parts := arg.trim_prefix("--menu-camera=").split(",")
-			if parts.size() == 6:
-				for p in parts:
-					_forced_camera.append(float(p))
+	if CmdArgs.has("--menu-shot"):
+		_frozen_shot = int(CmdArgs.number("--menu-shot"))
+	if CmdArgs.has("--menu-shot-t"):
+		_frozen_t = clampf(CmdArgs.number("--menu-shot-t"), 0.0, 1.0)
+	if CmdArgs.has("--menu-camera"):
+		var parts := CmdArgs.value("--menu-camera").split(",")
+		if parts.size() == 6:
+			for p in parts:
+				_forced_camera.append(float(p))
 
 
 # --- Construction ------------------------------------------------------------------------------

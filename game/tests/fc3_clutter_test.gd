@@ -39,7 +39,7 @@ func _make(level: String) -> GroundClutter:
 func _test_presets() -> void:
 	var expected := {"low": 0.0, "medium": 0.5, "high": 1.0, "ultra": 1.5, "legacy": 0.0}
 	for level: String in expected:
-		_check(is_equal_approx(float(RenderQuality.PRESETS[level]["clutter_density"]), expected[level]), "%s clutter_density" % level)
+		_check(is_equal_approx(float(RenderQuality.presets()[level]["clutter_density"]), expected[level]), "%s clutter_density" % level)
 
 
 func _test_low_preset() -> void:

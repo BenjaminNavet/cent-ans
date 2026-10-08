@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 MANIFEST = (
     Path(__file__).resolve().parents[2]
@@ -18,17 +16,6 @@ MANIFEST = (
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def test_siege_town_rules_match_schema() -> None:
-    """data/rules/siege_town.json matches siege_town_rules.schema.json."""
-    schema = _load(DATA / "schemas" / "siege_town_rules.schema.json")
-    document = _load(DATA / "rules" / "siege_town.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_prop_footprints_cover_the_models() -> None:

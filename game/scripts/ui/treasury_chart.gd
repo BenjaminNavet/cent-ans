@@ -38,7 +38,7 @@ func set_history(history: Array, treasury: int, current_turn: int) -> void:
 
 
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.make_panel(for_text)
+	return TooltipHost.bubble(for_text, self)
 
 
 static func season_label(turn: int) -> String:

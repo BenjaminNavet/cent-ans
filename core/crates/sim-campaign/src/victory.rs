@@ -126,7 +126,7 @@ impl CampaignState {
 
     /// Campaign score of `faction`: land, objectives, prestige, treasury.
     pub fn campaign_score(&self, data: &GameData, faction: &FactionId) -> i64 {
-        let provinces = self.controlled_provinces(faction).len() as i64;
+        let provinces = self.controlled_provinces(faction).count() as i64;
         let objectives = self
             .objectives(data, faction)
             .iter()
@@ -153,7 +153,7 @@ pub(crate) fn resolve_victory(
         return;
     }
     let player = state.player_faction.clone();
-    let name = crate::diplomacy::faction_name(data, &player);
+    let name = data.faction_name(&player);
     // Lands as in `characters::resolve_faction_deaths`: any settlement held
     // (a castle or a town is enough, not only a province's city).
     let alive = state.factions.get(&player).is_some_and(|f| f.alive)

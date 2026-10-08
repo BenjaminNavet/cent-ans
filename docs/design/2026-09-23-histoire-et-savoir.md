@@ -1,7 +1,7 @@
 # Histoire et savoir — conception (session « historien »)
 
 Date : 2026-09-23. Auteur : session historien (Claude), à la demande de Benjamin.
-Suivi : `docs/wip/historien.md`.
+Suivi : `docs/archive/chantiers.md`.
 
 ## 0. Intention
 

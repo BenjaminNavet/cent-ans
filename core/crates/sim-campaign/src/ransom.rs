@@ -178,7 +178,7 @@ pub fn captive_rank(state: &CampaignState, character: &CharacterId) -> CaptiveRa
 /// Wealth factor of a faction: its seasonal tax income / 10 000, between
 /// 0.5 and 2 (a rich kingdom pays more for the same knight).
 pub fn wealth_factor(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 / 10_000.0).clamp(0.5, 2.0)
 }
 
@@ -192,7 +192,7 @@ pub fn ransom_amount(state: &CampaignState, data: &GameData, character: &Charact
     let prestige = 1.0 + f64::from(c.prestige.clamp(0, 200)) / 100.0;
     let raw = base * prestige * wealth_factor(state, data, &c.faction);
     // A6-L3 (ADR 0183): never more than a share of the payer's income.
-    let income = state.faction_income_effective(data, &c.faction).max(0);
+    let income = state.faction_income(data, &c.faction).max(0);
     let cap = income * data.economy_rules.ransom.income_cap_percent / 100;
     ((raw / 50.0).round() as i64 * 50).min(cap).max(50)
 }
@@ -266,10 +266,7 @@ pub fn pay_ransom(
         RansomTerms::Province { province } => {
             check_ceded_province(state, data, faction, &captor, &province)?;
             cede_province(state, faction, &captor, &province);
-            let province_name = data
-                .provinces
-                .get(&province)
-                .map_or_else(|| province.to_string(), |p| p.name.display.clone());
+            let province_name = data.province_name(&province);
             crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
             let text = format!(
                 "{name} est libéré contre la cession de la province {}.",
@@ -430,12 +427,7 @@ pub fn set_ransom_terms(
         ),
         RansomTerms::Province { province } => format!(
             "Pour libérer {name}, son geôlier exige la province {}.",
-            crate::events::de(
-                &data
-                    .provinces
-                    .get(province)
-                    .map_or_else(|| province.to_string(), |p| p.name.display.clone())
-            )
+            crate::events::de(&data.province_name(province))
         ),
         RansomTerms::Hold => format!("{name} restera captif : son geôlier refuse toute rançon."),
         RansomTerms::Parole => unreachable!("handled above"),
@@ -499,9 +491,7 @@ pub fn release_on_parole(
     let text = format!(
         "{} est libéré sur parole par {}.",
         state.character_name(data, character),
-        data.factions
-            .get(faction)
-            .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+        data.faction_label(faction)
     );
     push_news(state, &owner, faction, text);
     Ok(())
@@ -673,9 +663,9 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
                         });
                     } else if matches!(rank, CaptiveRank::Sovereign | CaptiveRank::Heir)
                         && treasury - first
-                            >= *income.get_or_insert_with(|| {
-                                state.faction_income_effective(data, faction).max(0)
-                            }) / 2
+                            >= *income
+                                .get_or_insert_with(|| state.faction_income(data, faction).max(0))
+                                / 2
                     {
                         treasury -= first;
                         orders.push(Order::PayRansom {

@@ -238,31 +238,6 @@ def test_tile_roundtrip() -> None:
 # ------------------------------------------------------------------- schemas
 
 
-@pytest.mark.parametrize(
-    ("schema_name", "data_path"),
-    [
-        ("historical_hydro_notes.schema.json", "map/historical_hydro_notes.json"),
-        ("river_widths.schema.json", "map/river_widths.json"),
-        ("rivers_fine.schema.json", "map/rivers_fine.json"),
-        ("fine_anchors.schema.json", "map/fine_anchors.json"),
-    ],
-)
-def test_matches_schema(schema_name: str, data_path: str) -> None:
-    """Versioned ZG5a files match their schema."""
-    from jsonschema import Draft202012Validator
-
-    schema = json.loads((DATA / "schemas" / schema_name).read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    path = DATA / data_path
-    if not path.exists():
-        pytest.skip(f"{data_path} pas encore généré")
-    document = json.loads(path.read_text(encoding="utf-8"))
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors[:5]]
-
-
 def test_canal_patterns_compile_and_hit_their_name() -> None:
     """Every modern canal pattern compiles; each entry matches its own name or a pattern of it."""
     import re

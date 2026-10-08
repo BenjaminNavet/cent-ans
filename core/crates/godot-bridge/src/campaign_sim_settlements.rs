@@ -5,7 +5,7 @@ use godot::prelude::*;
 
 use crate::campaign_sim::{
     buildable_array, building_category_key, buildings_array, construction_dict,
-    demolition_preview_array, ids, units_array, CampaignSim,
+    demolition_preview_array, ids, units_array, CampaignSim, Ctx,
 };
 
 #[godot_api(secondary)]
@@ -17,7 +17,7 @@ impl CampaignSim {
     /// campaign exists.
     #[func]
     fn settlements(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         data.settlements
@@ -57,7 +57,7 @@ impl CampaignSim {
     /// unknown id.
     #[func]
     fn settlement_detail(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(id) = SettlementId::new(id.to_string()) else {
@@ -147,7 +147,7 @@ impl CampaignSim {
     /// an unknown id. Recruitment options: `get_recruitable(settlement_id)`.
     #[func]
     fn settlement_buildable(&self, id: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = SettlementId::new(id.to_string()) else {
@@ -164,7 +164,7 @@ impl CampaignSim {
     /// Empty for an unknown id.
     #[func]
     fn settlement_slots(&self, id: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = SettlementId::new(id.to_string()) else {
@@ -206,7 +206,7 @@ impl CampaignSim {
     /// `can_demolish` is true. Empty for an unknown id.
     #[func]
     fn settlement_demolition_preview(&self, id: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(id) = SettlementId::new(id.to_string()) else {
@@ -223,7 +223,7 @@ impl CampaignSim {
     /// campaign exists. Drives the ruin sign of the campaign map.
     #[func]
     fn get_ruined_places(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -245,7 +245,7 @@ impl CampaignSim {
     /// Settlement ids of a province, the city first then by id (lot C4).
     #[func]
     fn province_settlements(&self, province: GString) -> PackedStringArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let Some(entry) = ProvinceId::new(province.to_string())
@@ -259,12 +259,5 @@ impl CampaignSim {
         list.into_iter()
             .map(|s| GString::from(s.as_str()))
             .collect()
-    }
-
-    /// French message of the last failed `load_from_string` (lot C4: a save
-    /// older than the settlements is refused), empty otherwise.
-    #[func]
-    fn last_load_error(&self) -> GString {
-        GString::from(self.last_load_error.as_str())
     }
 }

@@ -30,4 +30,4 @@ static func create(icon_id: String, text: String, tooltip_bbcode: String = "", i
 
 
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	return TooltipHost.bubble(for_text, self)

@@ -16,10 +16,8 @@
 //! length runs along `(cos yaw, sin yaw)` and the front (the model's +Z, the
 //! facade) faces `(-sin yaw, cos yaw)`.
 
-use std::collections::BTreeMap;
-use std::sync::OnceLock;
-
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// An oriented rectangle: centre, half sizes along its own axes and yaw.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -357,33 +355,12 @@ pub struct TownRules {
     pub places: crate::siege_layouts::PlaceRules,
 }
 
-const BUNDLED: &str = include_str!("../../../../data/rules/siege_town.json");
-
-impl TownRules {
-    /// `data/rules/siege_town.json` as compiled into the crate.
-    pub fn bundled() -> &'static TownRules {
-        static RULES: OnceLock<TownRules> = OnceLock::new();
-        RULES.get_or_init(|| {
-            serde_json::from_str(BUNDLED).expect("data/rules/siege_town.json is valid")
-        })
-    }
-}
-
-/// Deterministic draw in [0, 1) from a key and a salt (SplitMix64), for the
-/// layout of the furniture: it never touches the battle's random stream.
-pub fn hash01(key: u64, salt: u64) -> f64 {
-    let mut z = key
-        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
-        .wrapping_add(salt.wrapping_mul(0xD1B5_4A32_D192_ED03));
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^= z >> 31;
-    (z >> 11) as f64 / (1u64 << 53) as f64
-}
+data_model::bundled_rules!(TownRules, "rules/siege_town.json");
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rng::hash01;
 
     #[test]
     fn rules_load() {

@@ -9,34 +9,16 @@ extends RefCounted
 
 const DATA_PATH := "fx/atmosphere.json"
 const SKY_SHADER := preload("res://shaders/hdri_sky.gdshader")
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
 ## Repli de `battle_decor_saturation` si la saison n'en donne pas (valeur DA6).
 const DEFAULT_DECOR_SATURATION := 0.6
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 static var _lut_cache: Dictionary = {}
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
-		if _data.is_empty():
-			push_warning("AtmosphereLibrary: %s missing or invalid" % path)
-	return _data
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
+	return _lookup.data()
 
 
 static func normalize_season(season: String) -> String:

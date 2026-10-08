@@ -11,8 +11,8 @@ extends Control
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
 ## illustré 2D (`MenuBackground`).
 ##
-## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`,
-## `credits`, `faction`, `intro`, `demos`, `historical` ou `loading` ouvre l'écran correspondant avant la capture ;
+## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=faction`
+## ouvre le choix de faction avant la capture ;
 ## `--autostart[=fac_x]` démarre directement une campagne (jeu exporté).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
@@ -93,54 +93,24 @@ func _ready() -> void:
 	# RL1 : `-- --journey` (parcours de vérification du jeu exporté, `scripts/dev/release_journey.gd`).
 	if ReleaseJourney.maybe_start(get_tree()):
 		return
-	var args := OS.get_cmdline_user_args()
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
-	for arg in args:
-		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
-		if arg.begins_with("--naval-scenario="):
-			(func() -> void: SceneFader.go("res://scenes/naval/naval_battle.tscn")).call_deferred()
-			return
-		if arg.begins_with("--autostart"):
-			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
-			if faction != "":
-				faction_select.select(faction)
-			_autostart.call_deferred()
-			return
+	if CmdArgs.has("--autostart"):
+		var faction := CmdArgs.value("--autostart")
+		if faction != "":
+			faction_select.select(faction)
+		_autostart.call_deferred()
+		return
 	var staged := false
-	for arg in args:
-		if arg == "--menu-stage=settings":
-			open_settings()
-			staged = true
-		elif arg == "--menu-stage=credits":
-			open_credits()
-			staged = true
-		elif arg == "--menu-stage=faction":
-			show_faction_select(true)
-			staged = true
-		elif arg == "--menu-stage=faction_map":  # FE6 : choix de faction sur la carte, fiche au survol
-			show_faction_select(true)
-			faction_select.stage_map("fac_foix_bearn")
-			staged = true
-		elif arg == "--menu-stage=demos":
-			open_demos()
-			staged = true
-		elif arg == "--menu-stage=historical":
-			open_historical()
-			staged = true
-		elif arg == "--menu-stage=intro":
-			open_intro()
-			staged = true
-		elif arg == "--menu-stage=loading":
-			_on_start_requested.call_deferred(faction_select.selected_faction, 1337, "")
-			return
-	for arg in args:
-		if arg.begins_with("--screenshot="):
-			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
-			staged = true
+	if CmdArgs.value("--menu-stage") == "faction":
+		show_faction_select(true)
+		staged = true
+	if CmdArgs.value("--screenshot") != "":
+		_screenshot_then_quit(CmdArgs.value("--screenshot"))
+		staged = true
 	# Premier lancement (sans option de ligne de commande) : le prologue.
 	var settings := get_node_or_null("/root/Settings")
-	if not staged and args.is_empty() and not _headless() and settings != null and not bool(settings.call("get_value", "interface/intro_seen")):
+	if not staged and CmdArgs.args().is_empty() and not _headless() and settings != null and not bool(settings.call("get_value", "interface/intro_seen")):
 		settings.call("set_value", "interface/intro_seen", true)
 		open_intro()
 	else:
@@ -155,7 +125,7 @@ static func _headless() -> bool:
 
 
 func _build_backdrop() -> void:
-	var use_3d := not _headless() and not OS.get_cmdline_user_args().has("--no-menu-3d")
+	var use_3d := not _headless() and not CmdArgs.has("--no-menu-3d")
 	if use_3d:
 		var scene := MenuBackdrop3D.new()
 		scene.name = "Backdrop3D"
@@ -224,9 +194,7 @@ func _build_main_column() -> void:
 	main_column.add_theme_constant_override("margin_top", 16)
 	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	main_column.add_child(column)
+	var column := UiBuild.vbox(4, main_column)
 	_column = column
 	resized.connect(_fit_column)
 	column.add_child(IlluminatedTitle.new())
@@ -277,8 +245,7 @@ func _apply_fit_level(level: Array) -> void:
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
+	var button := UiBuild.button(text)
 	FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE))
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.custom_minimum_size = Vector2(360, 0)

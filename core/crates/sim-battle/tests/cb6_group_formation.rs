@@ -36,7 +36,7 @@ fn mixed_setup() -> BattleSetup {
         "unit_longbowmen",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     battle
 }
@@ -49,7 +49,7 @@ fn big_setup() -> BattleSetup {
     french.extend(["unit_knights"; 9]);
     french.extend(["unit_trebuchet"; 3]);
     let english = ["unit_longbowmen", "unit_men_at_arms_foot", "unit_knights"];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     battle
 }
@@ -64,7 +64,7 @@ fn shooters_setup() -> BattleSetup {
         "unit_knights",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &a), units(&data, &d), None);
+    let mut battle = setup(units(data, &a), units(data, &d), None);
     battle.village = Some(false);
     battle
 }
@@ -181,11 +181,7 @@ fn army_setup() -> BattleSetup {
         "unit_mounted_archers",
         "unit_trebuchet",
     ];
-    let mut battle = setup(
-        units(&data, &a),
-        units(&data, &["unit_urban_militia"]),
-        None,
-    );
+    let mut battle = setup(units(data, &a), units(data, &["unit_urban_militia"]), None);
     battle.village = Some(false);
     battle.attacker.general = Some(
         serde_json::from_value(serde_json::json!({
@@ -472,11 +468,7 @@ fn never_in_deep_water() {
         "unit_knights",
         "unit_trebuchet",
     ];
-    let mut battle = setup(
-        units(&data, &a),
-        units(&data, &["unit_urban_militia"]),
-        None,
-    );
+    let mut battle = setup(units(data, &a), units(data, &["unit_urban_militia"]), None);
     battle.river = true;
     let ids: Vec<u32> = (0..7).collect();
     let mut checked = 0;

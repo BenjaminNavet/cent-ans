@@ -176,9 +176,6 @@ func refresh_modal() -> void:
 	queue_redraw()
 
 
-func is_modal_blocked() -> bool:
-	return _modal
-
 
 ## Première alerte bloquante, ou `{}`.
 func blocking_alert() -> Dictionary:
@@ -324,11 +321,11 @@ func _update_tooltip() -> void:
 		return
 	var blocking := blocking_alert()
 	if _modal:
-		RichTooltip.attach_plain(_button, "end_turn_modal", {"body": "Fermez la fenêtre ouverte pour terminer la saison."})
+		TooltipHost.attach_plain(_button, "end_turn_modal", {"body": "Fermez la fenêtre ouverte pour terminer la saison."})
 	elif not blocking.is_empty():
-		RichTooltip.attach_plain(_button, "end_turn_blocked",{"body": str(blocking.get("text", ""))})
+		TooltipHost.attach_plain(_button, "end_turn_blocked",{"body": str(blocking.get("text", ""))})
 	else:
-		RichTooltip.attach_plain(_button, "end_turn_finish")
+		TooltipHost.attach_plain(_button, "end_turn_finish")
 
 
 func _on_button_pressed() -> void:
@@ -461,15 +458,7 @@ class AlertBadge:
 			accept_event()
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", HudStyle.panel_box(8))
-		var box := VBoxContainer.new()
-		panel.add_child(box)
-		var lines := for_text.split("\n")
-		for i in lines.size():
-			var color := HudStyle.RUBRIC if i == 0 else (HudStyle.INK_FADED if i == lines.size() - 1 else HudStyle.INK)
-			box.add_child(HudStyle.label(lines[i], UiType.size(UiType.CAPTION), color))
-		return panel
+		return TooltipHost.hud_lines(for_text)
 
 	func _draw() -> void:
 		var r := EndTurnCluster.BADGE_RADIUS * 0.8

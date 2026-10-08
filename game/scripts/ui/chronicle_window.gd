@@ -52,8 +52,7 @@ func _ready() -> void:
 	_content_width = content_width()
 	custom_minimum_size = Vector2(_content_width + 40.0, 0)
 	resized.connect(_center_on_screen)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 8)
+	var root := UiBuild.vbox(8)
 	add_child(root)
 
 	var header := HBoxContainer.new()
@@ -67,9 +66,8 @@ func _ready() -> void:
 	_kind_label.add_theme_color_override("font_color", RUBRIC)
 	_kind_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_kind_label)
-	var close := Button.new()
-	close.text = "×"
-	RichTooltip.attach_plain(close, "close_decision_pending")
+	var close := UiBuild.button("×")
+	TooltipHost.attach_plain(close, "close_decision_pending")
 	close.pressed.connect(_close)
 	header.add_child(close)
 	root.add_child(header)
@@ -78,8 +76,7 @@ func _ready() -> void:
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.follow_focus = true
 	root.add_child(_scroll)
-	var body := VBoxContainer.new()
-	body.add_theme_constant_override("separation", 8)
+	var body := UiBuild.vbox(8)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(body)
 
@@ -125,9 +122,8 @@ func _ready() -> void:
 
 	# Q7 : choix hors de la page défilante, toujours visibles (en vue 720 l'enluminure seule
 	# remplissait le corps borné et les choix restaient sous le pli, « Plus tard » seul visible).
-	_options_box = VBoxContainer.new()
+	_options_box = UiBuild.vbox(6)
 	_options_box.name = "Options"
-	_options_box.add_theme_constant_override("separation", 6)
 	root.add_child(_options_box)
 
 	var footer := HBoxContainer.new()
@@ -136,9 +132,8 @@ func _ready() -> void:
 	_queue_label.add_theme_color_override("font_color", FADED_INK)
 	_queue_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_queue_label)
-	var later := Button.new()
-	later.text = "Plus tard"
-	RichTooltip.attach_plain(later, "decision_default_choice")
+	var later := UiBuild.button("Plus tard")
+	TooltipHost.attach_plain(later, "decision_default_choice")
 	later.pressed.connect(_close)
 	footer.add_child(later)
 	root.add_child(footer)
@@ -208,10 +203,8 @@ func current_decision() -> int:
 
 
 func _option_row(option: Dictionary) -> Control:
-	var row := VBoxContainer.new()
-	row.add_theme_constant_override("separation", 1)
-	var button := Button.new()
-	button.text = str(option.get("text", ""))
+	var row := UiBuild.vbox(1)
+	var button := UiBuild.button(str(option.get("text", "")))
 	button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # VN : un choix long passe à la ligne
@@ -223,12 +216,11 @@ func _option_row(option: Dictionary) -> Control:
 	var reason := str(option.get("reason", ""))
 	if not option.get("allowed", true):
 		button.disabled = true
-		RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
+		TooltipHost.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
 		effects = "Impossible : %s" % reason if reason != "" else effects
 	row.add_child(button)
 	if effects != "":
-		var summary := Label.new()
-		summary.text = "   " + effects.replace("\n", " · ")
+		var summary := UiBuild.label("   " + effects.replace("\n", " · "))
 		UiType.apply(summary, UiType.CAPTION)
 		summary.add_theme_color_override("font_color", FADED_INK)
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

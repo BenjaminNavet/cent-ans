@@ -32,9 +32,6 @@ var skipped: bool = false
 var lines: Array = []
 var cry: String = ""
 var speaker: String = ""
-## Capture (`--speech-shot=<png>` / `--speech-at=<s>`) : image à cet instant du discours, puis fin.
-var shot_path: String = ""
-var shot_at: float = 6.0
 
 var _scene: Node = null
 var _t: float = 0.0
@@ -50,7 +47,6 @@ var _line_label: Label = null
 var _cry_label: Label = null
 var _band: Control = null
 var _cried: bool = false
-var _shot_done: bool = false
 ## VO1 : voix du général, début et durée de chaque phrase.
 var voice: String = ""
 var _voice_player: AudioStreamPlayer = null
@@ -216,9 +212,6 @@ func _process(delta: float) -> void:
 		return
 	_t += delta
 	_update(delta)
-	if shot_path != "" and not _shot_done and _t >= shot_at:
-		_shot_done = true
-		_take_shot()
 	if _t >= total_seconds():
 		stop()
 
@@ -346,11 +339,3 @@ func _build_subtitle() -> void:
 	_cry_label.visible = false
 	root.add_child(_cry_label)
 
-
-func _take_shot() -> void:
-	await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
-	DirAccess.make_dir_recursive_absolute(shot_path.get_base_dir())
-	var err := image.save_png(shot_path)
-	print("BattleSpeech: capture %s at %.1f s (%s), %d lines, cry %s" % [shot_path, _t, error_string(err), lines.size(), cry])
-	get_tree().quit(0 if err == OK else 1)

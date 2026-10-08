@@ -232,16 +232,8 @@
           "name": {
             "type": "string"
           },
-          "from": {
-            "type": "string",
-            "pattern": "^set_[a-z0-9_]+$",
-            "description": "Port de départ (colonie « port »)."
-          },
-          "to": {
-            "type": "string",
-            "pattern": "^set_[a-z0-9_]+$",
-            "description": "Port d'arrivée (colonie « port »)."
-          },
+          "from": { "description": "Port de départ (colonie « port »).", "$ref": "common.schema.json#/$defs/settlement_id" },
+          "to": { "description": "Port d'arrivée (colonie « port »).", "$ref": "common.schema.json#/$defs/settlement_id" },
           "sea": {
             "type": "string",
             "pattern": "^sea_[a-z0-9_]+$",

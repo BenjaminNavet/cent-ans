@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "$defs": {
     "mode": {"type": "string", "enum": ["political", "unrest", "diplomacy", "religion"]},
-    "hex_color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "hex_color": { "$ref": "common.schema.json#/$defs/color_hex" },
     "owner": {"type": "string", "enum": ["player", "other"]},
     "sample": {
       "type": "object",

@@ -2,7 +2,7 @@ class_name TutorialController
 extends Node
 
 ## F8 — tutoriel des premiers tours et encyclopédie sur la carte de campagne. Créé par
-## `campaign_map.gd`, qui n'appelle que `setup` (et `stage_screenshot` pour les captures).
+## `campaign_map.gd`, qui n'appelle que `setup`.
 ##
 ## Tutoriel : 14 étapes (`TutorialSteps`) affichées par `TutorialOverlay`. Chaque objectif est
 ## vérifié en lisant l'état de l'interface (panneaux ouverts, onglet, sélection) et de la
@@ -92,10 +92,7 @@ func _set_setting(key: String, value: Variant) -> void:
 ## Vrai en capture d'écran (`--screenshot`, `--flow-stage`…) : le guide ne s'y affiche pas,
 ## sauf mise en scène `--stage=tutorial`.
 static func capture_mode() -> bool:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--screenshot=") or arg.begins_with("--flow-stage=") or arg.begins_with("--loading-shot="):
-			return true
-	return false
+	return CmdArgs.has("--screenshot") or CmdArgs.has("--flow-stage") or CmdArgs.has("--loading-shot")
 
 
 func should_autostart() -> bool:
@@ -703,27 +700,3 @@ func _focus_for_step(step_id: String) -> void:
 			if map_data.index_of_id(capital) > 0:
 				var centroid := map_data.centroid_of_id(capital)
 				rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), extent * 0.12)
-
-
-# --- Captures ---------------------------------------------------------------------------
-
-
-## `--stage=tutorial` : armée sélectionnée avec aperçu de chemin, étape « ordre de marche ».
-## `--stage=encyclopedia` : encyclopédie ouverte sur une fiche d'unité riche en liens.
-func stage_screenshot(stage: String) -> void:
-	match stage:
-		"tutorial":
-			map.call("_stage_screenshot")
-			start(TutorialSteps.STEP_IDS.find("move_army"))
-			overlay.set_target(resolve_target("royal_army"))
-		"tutorial_toc":  # UX2 : sommaire ouvert, cible dans la barre du haut
-			map.call("_focus_capital")
-			map.get("ui").call("hide_province")
-			start(TutorialSteps.STEP_IDS.find("research"))
-			overlay.set_toc_open(true)
-			overlay.set_target(resolve_target("research"))
-		"encyclopedia":
-			map.call("_focus_capital")
-			map.get("ui").call("hide_province")
-			encyclopedia.open_window("unit_longbowmen")
-			encyclopedia.search_field.release_focus.call_deferred()

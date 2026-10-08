@@ -70,8 +70,7 @@ func show_tree(nodes: Array) -> void:
 			var ka := _barycenter(a, rows_of)
 			var kb := _barycenter(b, rows_of)
 			return ka < kb if not is_equal_approx(ka, kb) else str(a["id"]) < str(b["id"]))
-		var header := Label.new()
-		header.text = "Rang %d" % tier
+		var header := UiBuild.label("Rang %d" % tier)
 		UiType.apply(header, UiType.CAPTION)  # PO phase 2 (P2b) : plus de taille ad hoc
 		header.position = Vector2(MARGIN.x + column * COLUMN_STEP, 6)
 		header.size = Vector2(NODE_SIZE.x, 22)
@@ -148,7 +147,7 @@ func _make_button(node: Dictionary) -> Button:
 	if queue_position > 0 and state == "available":
 		second_line = "%d pts — En file (n° %d)" % [cost, queue_position]
 	button.text = "%s\n%s" % [str(node.get("name", id)), second_line]
-	RichTooltip.set_tooltip(button, "technology", id, node)  # F2 / IB1 : infobulle en sections (tooltip_for : texte brut)
+	TooltipHost.set_tooltip(button, "technology", id, node)  # F2 / IB1 : infobulle en sections (tooltip_for : texte brut)
 	var style := StyleBoxFlat.new()
 	style.bg_color = STATE_COLORS.get(state, Color(0.8, 0.8, 0.8))
 	style.set_border_width_all(2 if state != "researching" else 3)

@@ -92,7 +92,7 @@ func _node(i: int) -> MeshInstance3D:
 
 
 func _height(x: float, z: float) -> float:
-	if _battle != null and _battle.has_method("get_walk_height"):
+	if _battle != null:
 		return float(_battle.call("get_walk_height", x, z)) + LIFT
 	return LIFT
 

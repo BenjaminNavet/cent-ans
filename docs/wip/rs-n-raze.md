@@ -1,7 +1,7 @@
 # RS-N — bouton « Raser » (UI)
 
 Branche `feat/rs-n-raze`, worktree d'agent. Continue RS-C (ADR 0111,
-`docs/wip/rs-c-diplo.md`) : le cœur a déjà `Order::Demolish`, le pont accepte
+`docs/archive/chantiers.md`) : le cœur a déjà `Order::Demolish`, le pont accepte
 `{"type": "demolish", "settlement": ..., "building": ...}`, remboursement
 `economy.json` `demolition_refund_percent`, refus sous siège / hors colonie du
 joueur / dépendance (`buildings::demolition_blocker`). Aucune UI n'existait.

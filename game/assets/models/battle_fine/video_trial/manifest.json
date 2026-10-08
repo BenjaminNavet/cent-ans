@@ -232,6 +232,6 @@
  },
  "fps": 24,
  "rig": "human",
- "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md and docs/wip/nt14-video-set2.md",
+ "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/archive/chantiers.md and docs/archive/chantiers.md",
  "texture": "human.bones.bin"
 }

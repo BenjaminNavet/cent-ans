@@ -271,4 +271,4 @@ func _check_files() -> void:
 		return
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
 	for relative in manifest:
-		_check(VoiceLines.has_stream(str(relative).trim_suffix(".ogg")), "voice file loads: %s" % relative)
+		_check(VoiceLines.stream(str(relative).trim_suffix(".ogg")) != null, "voice file loads: %s" % relative)

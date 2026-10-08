@@ -179,7 +179,7 @@ def _q_leg_mid(mount):
 # single rigid transform, keeps its shape.
 
 # Anatomical joints of the CC0 horse after ``similarity`` (left side; metres, y forwards is
-# negative): read on orthographic side views with a 5 cm grid (docs/wip/fg4-cheval.md).
+# negative): read on orthographic side views with a 5 cm grid (docs/archive/chantiers.md).
 # Leg joints outside the body take their x from the mesh slice at their height.
 OGA_JOINTS = {
     "FrontUpperLeg": (None, -0.60, 1.02),  # point of the shoulder

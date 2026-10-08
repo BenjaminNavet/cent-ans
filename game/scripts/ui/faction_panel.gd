@@ -10,7 +10,6 @@ signal tax_rate_changed(faction_id: String, rate: String)
 signal closed
 
 const TAX_RATES := ["low", "normal", "high"]
-const TAX_LABELS := {"low": "Bas", "normal": "Normal", "high": "Haut"}
 const CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
@@ -147,8 +146,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 
 
 func _add_table_row() -> void:
-	var key := Label.new()
-	key.text = "Table des provinces"
+	var key := UiBuild.label("Table des provinces")
 	table_upkeep_value = RichLabel.new()
 	table_upkeep_value.text = "—"
 	table_upkeep_value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -157,8 +155,7 @@ func _add_table_row() -> void:
 
 
 func _add_trade_row() -> void:
-	var key := Label.new()
-	key.text = "Commerce"
+	var key := UiBuild.label("Commerce")
 	trade_income_value = RichLabel.new()
 	trade_income_value.text = "—"
 	trade_income_value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -168,9 +165,9 @@ func _add_trade_row() -> void:
 
 ## Revenu des routes commerciales (projection courante) ; détail des routes en infobulle.
 func _show_trade_income(economy: Dictionary) -> void:
-	trade_income_value.text = "%s ℔" % _thousands(int(economy.get("trade_income", 0)))
+	trade_income_value.text = "%s ℔" % Money.digits(int(economy.get("trade_income", 0)))
 	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt (lot C5).",
-		"Saison passée : %s ℔" % _thousands(int(economy.get("trade_income_last_turn", 0)))])
+		"Saison passée : %s ℔" % Money.digits(int(economy.get("trade_income_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
 	if sim != null and sim.has_method("get_trade_routes"):
@@ -182,8 +179,8 @@ func _show_trade_income(economy: Dictionary) -> void:
 			if bool(route.get("cut", false)):
 				lines.append("• %s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
 			else:
-				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], _thousands(int(route["total_value"]))])
-	RichTooltip.attach_plain(trade_income_value, "trade_income_detail", {"body": "\n".join(lines)})
+				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], Money.digits(int(route["total_value"]))])
+	TooltipHost.attach_plain(trade_income_value, "trade_income_detail", {"body": "\n".join(lines)})
 
 
 ## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
@@ -201,7 +198,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 			var info: Dictionary = store.call("get_province", province) if store != null else {}
 			var diet: Dictionary = sim.call("get_province_diet", province)
 			lines.append("• %s : %s — %s" % [str(info.get("display_name", province)), str(diet.get("name", row.get("diet", ""))), Money.amount(int(row.get("cost", 0)))])
-	RichTooltip.attach_plain(table_upkeep_value, "table_upkeep_detail", {"title": "La Table", "body": "\n".join(lines)})
+	TooltipHost.attach_plain(table_upkeep_value, "table_upkeep_detail", {"title": "La Table", "body": "\n".join(lines)})
 
 
 ## H11 : lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
@@ -209,8 +206,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 func _add_h11_sections() -> void:
 	var anchor: Control = trade_income_value
 	for pair in [["Seigneuriage (revenu)", "seigniorage_value"], ["Refonte (administration)", "recoinage_value"]]:
-		var key := Label.new()
-		key.text = pair[0]
+		var key := UiBuild.label(pair[0])
 		var value := RichLabel.new()
 		value.text = "—"
 		value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -222,7 +218,7 @@ func _add_h11_sections() -> void:
 	chivalry_section = ChivalrySection.new()
 	ransom_button = RichButton.new()
 	ransom_button.text = "Captifs et rançons"
-	RichTooltip.attach_plain(ransom_button, "captives_and_ransoms")
+	TooltipHost.attach_plain(ransom_button, "captives_and_ransoms")
 	ransom_button.pressed.connect(toggle_ransoms)
 	feudal_section = FeudalSection.new()
 	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, ransom_button, HSeparator.new(), feudal_section]:
@@ -233,20 +229,18 @@ func _add_h11_sections() -> void:
 ## refonte sous l'administration), puis le solde prévu et celui de la saison passée.
 func _arrange_budget() -> void:
 	var grid := income_value.get_parent()
-	var net_key := Label.new()
-	net_key.text = "Solde prévu de la saison"
-	net_key.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	var net_key := UiBuild.label("Solde prévu de la saison", UiType.size(UiType.BODY))
 	net_value = RichLabel.new()
 	net_value.text = "—"
 	net_value.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	net_value.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(net_value, "budget_total_hint", {"title": "Solde"})
+	TooltipHost.attach_plain(net_value, "budget_total_hint", {"title": "Solde"})
 	grid.add_child(net_key)
 	grid.add_child(net_value)
 	(grid.get_node("ProjectedKey") as Label).text = "Recettes prévues"
-	RichTooltip.attach_plain(projected_value, "budget_projected_income_hint")
+	TooltipHost.attach_plain(projected_value, "budget_projected_income_hint")
 	(grid.get_node("IncomeKey") as Label).text = "Solde de la saison passée"
-	RichTooltip.attach_plain(income_value, "budget_last_income_hint")
+	TooltipHost.attach_plain(income_value, "budget_last_income_hint")
 	var order: Array[Control] = []
 	for value: Control in [treasury_value, projected_value, seigniorage_value, army_upkeep_value,
 			building_upkeep_value, table_upkeep_value, administration_value, recoinage_value,
@@ -303,10 +297,7 @@ func _add_crusade_section() -> void:
 
 
 func _section_title(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
-	label.add_theme_color_override("font_color", Color(0.40, 0.22, 0.10))
+	var label := UiBuild.label(text, UiType.size(UiType.BODY), Color(0.40, 0.22, 0.10))
 	return label
 
 
@@ -365,9 +356,9 @@ func _show_h11(economy: Dictionary = {}) -> void:
 	if not economy.is_empty():
 		var seigniorage := int(economy.get("seigniorage", 0))
 		seigniorage_value.text = Money.signed(seigniorage) if seigniorage > 0 else Money.amount(seigniorage)
-		RichTooltip.attach_plain(seigniorage_value, "seigniorage_detail", {"body": "Profit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s" % Money.amount(int(economy.get("seigniorage_last_turn", 0)))})
+		TooltipHost.attach_plain(seigniorage_value, "seigniorage_detail", {"body": "Profit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s" % Money.amount(int(economy.get("seigniorage_last_turn", 0)))})
 		recoinage_value.text = _charge(int(economy.get("recoinage", 0)))
-		RichTooltip.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
+		TooltipHost.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
 	crusade_section.show_for(is_player)
@@ -418,14 +409,10 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 	for child in goods_list.get_children():
 		child.queue_free()
 	if categories.is_empty():
-		var label := Label.new()
-		label.text = "—"
-		goods_list.add_child(label)
+		var label := UiBuild.label("—", 0, null, false, 0.0, goods_list)
 		return
 	for category in categories:
-		var line := Label.new()
-		line.text = "• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize()))
-		goods_list.add_child(line)
+		var line := UiBuild.label("• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize())), 0, null, false, 0.0, goods_list)
 	# F2 : une puce (icône + nom + quantité) par ressource, infobulle riche.
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 10)
@@ -439,11 +426,3 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 static func _signed(value: int) -> String:
 	return Money.signed(value)
 
-
-static func _thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out

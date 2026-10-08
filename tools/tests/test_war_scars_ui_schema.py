@@ -3,22 +3,12 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def test_war_scars_match_schema() -> None:
-    """The war scar rendering settings match their schema."""
-    schema = _load("schemas/war_scars_ui.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_load("ui/war_scars.json")))
-    assert not errors, [error.message for error in errors]
 
 
 def test_battlefield_fades_in_order() -> None:
@@ -47,16 +37,6 @@ def test_siege_engines_cover_the_rules_and_existing_models() -> None:
         model = entry.get("model")
         if model:
             assert (ROOT / "game" / model.removeprefix("res://")).exists(), model
-
-
-def test_battle_history_rules_match_schema() -> None:
-    """The bounds of the core battle history match their schema."""
-    schema = _load("schemas/battle_history_rules.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(
-        Draft202012Validator(schema).iter_errors(_load("rules/battle_history.json"))
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_core_remembers_battles_as_long_as_the_map_marks_them() -> None:

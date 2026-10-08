@@ -8,12 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::ids::UnitTypeId;
 
-/// The army rules as bundled at build time: the fallback when
-/// `data/rules/armies.json` is absent (test fixtures).
-const BUNDLED_ARMIES: &str = include_str!("../../../../../data/rules/armies.json");
-/// The engine rules as bundled at build time.
-const BUNDLED_ENGINES: &str = include_str!("../../../../../data/rules/siege_engines.json");
-
 /// Contents of `data/rules/armies.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -25,11 +19,7 @@ pub struct ArmyRules {
     pub max_units: u32,
 }
 
-impl Default for ArmyRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED_ARMIES).expect("bundled data/rules/armies.json is valid")
-    }
-}
+crate::bundled_rules!(ArmyRules, "rules/armies.json", default);
 
 impl ArmyRules {
     /// [`ArmyRules::max_units`] as a length.
@@ -109,12 +99,7 @@ impl SiegeEngineRule {
     }
 }
 
-impl Default for SiegeEngineRules {
-    fn default() -> Self {
-        serde_json::from_str(BUNDLED_ENGINES)
-            .expect("bundled data/rules/siege_engines.json is valid")
-    }
-}
+crate::bundled_rules!(SiegeEngineRules, "rules/siege_engines.json", default);
 
 #[cfg(test)]
 mod tests {

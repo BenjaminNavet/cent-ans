@@ -12,6 +12,7 @@
 //! Battles are fought at once when an army attacks another within
 //! `engage_radius_km`; the loser falls back on the grid (§ 3.3).
 
+use data_model::EffectKind;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 
@@ -245,7 +246,7 @@ impl CampaignState {
             .as_ref()
             .map(|id| skills::character_effects(self, data, id))
             .unwrap_or_default();
-        let common = tech.movement.percent + general.movement.percent;
+        let common = tech[EffectKind::Movement].percent + general[EffectKind::Movement].percent;
         let pace = army
             .units
             .iter()
@@ -264,8 +265,8 @@ impl CampaignState {
             })
             .fold(common, f64::min);
         let steps = (base * (1.0 + pace / 100.0) + 1e-9).floor()
-            + tech.movement.flat
-            + general.movement.flat;
+            + tech[EffectKind::Movement].flat
+            + general[EffectKind::Movement].flat;
         // TW2-T5: march traditions of the army, on the points themselves (a
         // few percent of three or four steps would be floored away).
         let traditions =
@@ -352,13 +353,13 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
         supply: army.supply,
         // CV3: plus the army's morale modifiers (battle outcomes).
         // JR1: and the crusade's zeal (0 for every other faction).
-        general_morale_bonus: general_effects.army_morale.apply(0.0)
+        general_morale_bonus: general_effects[EffectKind::ArmyMorale].apply(0.0)
             + f64::from(army.morale_modifier())
             + f64::from(crate::crusade::zeal_morale(state, data, &army.faction)),
-        general_charge_percent: general_effects.battle_charge.apply(0.0),
-        general_ranged_percent: general_effects.battle_ranged.apply(0.0),
-        general_defense_percent: general_effects.battle_defense.apply(0.0),
-        general_intrigue: general_effects.intrigue.apply(0.0),
+        general_charge_percent: general_effects[EffectKind::BattleCharge].apply(0.0),
+        general_ranged_percent: general_effects[EffectKind::BattleRanged].apply(0.0),
+        general_defense_percent: general_effects[EffectKind::BattleDefense].apply(0.0),
+        general_intrigue: general_effects[EffectKind::Intrigue].apply(0.0),
     }
 }
 
@@ -736,11 +737,7 @@ pub(crate) fn apply_battle_result(
 
     let province_name =
         province.map_or_else(|| province_id.to_string(), |p| p.name.display.clone());
-    let faction_name = |id: &FactionId| -> String {
-        data.factions
-            .get(id)
-            .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
-    };
+    let faction_name = |id: &FactionId| -> String { data.faction_name(id) };
     let winner_faction = match result.winner {
         Winner::Attacker => &attacker_faction,
         Winner::Defender => &defender_faction,
@@ -836,10 +833,8 @@ pub(crate) fn apply_battle_result(
         ),
         result,
     );
-    let place = crate::march::nearest_settlement(data, battlefield).map_or_else(
-        || province_name.clone(),
-        |s| crate::siege::settlement_name(data, &s),
-    );
+    let place = crate::march::nearest_settlement(data, battlefield)
+        .map_or_else(|| province_name.clone(), |s| data.settlement_name(&s));
     let (attacker_xp, defender_xp) = crate::battle_outcome::apply(
         state,
         data,

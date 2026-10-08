@@ -42,7 +42,7 @@ fn flat_battle_with(seed: u64, attacker_kinds: &[&str], decor: bool) -> BattleSi
     let attackers: Vec<&str> = (0..60)
         .map(|i| attacker_kinds[i % attacker_kinds.len()])
         .collect();
-    let mut setup = setup(units(&data, &attackers), units(&data, &army), None);
+    let mut setup = setup(units(data, &attackers), units(data, &army), None);
     setup.village = if decor { None } else { Some(false) };
     for unit in setup
         .attacker
@@ -114,176 +114,12 @@ fn symmetric_flat_battle_is_open() {
     );
 }
 
-/// Survey (ignored): winners, ends and durations on the symmetric field.
-#[test]
-#[ignore = "survey"]
-fn survey() {
-    let decor = std::env::var("EP9B_DECOR").is_ok();
-    if decor {
-        let sim = flat_battle_with(1, &KINDS, true);
-        println!(
-            "decor: {} hamlets, {} obstacles, {} forests",
-            sim.field().decor.hamlets.len(),
-            sim.field().obstacles.len(),
-            sim.field().forests.len()
-        );
-    }
-    let (wins, results) = flat_results(decor);
-    for (seed, r) in seeds().zip(&results) {
-        println!("seed {seed}: {:?} {:?} at {:.0} s", r.0, r.1, r.2);
-    }
-    println!("attacker wins {wins}/{}", results.len());
-}
-
-/// A small battle on bare flat ground, both AIs.
-fn small_battle(attacker: &[&str], defender: &[&str], seed: u64) -> BattleSim {
-    let data = data();
-    let mut setup = setup(units(&data, attacker), units(&data, defender), None);
-    setup.village = Some(false);
-    let mut sim = BattleSim::new(setup, seed).unwrap();
-    sim.set_weather(sim_battle::Weather::Clear);
-    sim.set_ai(SideId::Attacker, true);
-    sim.set_ai(SideId::Defender, true);
-    let field = sim.field_mut();
-    field.forests.clear();
-    field.forest_parts.clear();
-    field.mud.clear();
-    field.mud_parts.clear();
-    field.pools.clear();
-    field.obstacles.clear();
-    field.river = None;
-    field.bridges.clear();
-    for h in field.heights.iter_mut() {
-        *h = 0.0;
-    }
-    sim
-}
-
-/// Probe (ignored): duel state of a few small battles over time.
-#[test]
-#[ignore = "probe"]
-fn probe_duel() {
-    let cases: [(&[&str], &[&str]); 3] = [
-        (
-            &[
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_knights",
-            ],
-            &[
-                "unit_crossbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_urban_militia",
-                "unit_urban_militia",
-                "unit_knights",
-            ],
-        ),
-        (
-            &[
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_urban_militia",
-                "unit_knights",
-            ],
-            &[
-                "unit_crossbowmen",
-                "unit_crossbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_urban_militia",
-                "unit_urban_militia",
-                "unit_knights",
-            ],
-        ),
-        (
-            &[
-                "unit_longbowmen",
-                "unit_longbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_knights",
-            ],
-            &[
-                "unit_crossbowmen",
-                "unit_men_at_arms_foot",
-                "unit_men_at_arms_foot",
-                "unit_urban_militia",
-                "unit_knights",
-            ],
-        ),
-    ];
-    let passive = std::env::var("EP9B_PASSIVE").is_ok();
-    let limited = std::env::var("EP9B_LIMITED").is_ok();
-    for (k, (att, def)) in cases.iter().enumerate() {
-        for seed in 1..4 {
-            let mut sim = small_battle(att, def, seed);
-            if passive {
-                sim.set_ai(SideId::Defender, false);
-            }
-            if limited {
-                let mut rules = sim.duel_rules().clone();
-                rules.winning_duel_max_seconds = rules.duel_limit_seconds;
-                sim.set_duel_rules(rules);
-            }
-            let window = sim.duel_rules().window_seconds;
-            let mut next = 150.0;
-            let mut first_melee = None;
-            let mut line = String::new();
-            while !sim.is_finished() && sim.elapsed() < 1800.0 {
-                sim.step();
-                if first_melee.is_none()
-                    && sim
-                        .units()
-                        .iter()
-                        .any(|u| u.state == sim_battle::UnitState::Melee)
-                {
-                    first_melee = Some(sim.elapsed());
-                }
-                if sim.elapsed() >= next && next <= 330.0 {
-                    next += 30.0;
-                    let own = sim.recent_missile_losses(SideId::Attacker, window);
-                    let enemy = sim.recent_missile_losses(SideId::Defender, window);
-                    let won = if sim.duel_rules().winning(own, enemy) {
-                        "W"
-                    } else {
-                        ""
-                    };
-                    line.push_str(&format!(
-                        " t{:.0}:{:.3}/{:.3}{won}",
-                        sim.elapsed(),
-                        own,
-                        enemy
-                    ));
-                }
-            }
-            println!(
-                "case {k} seed {seed}: {:?} {:?} at {:.0} s, first melee {:?};{line}",
-                sim.winner(),
-                sim.end_kind(),
-                sim.elapsed(),
-                first_melee.map(|t| t.round())
-            );
-        }
-    }
-}
-
 /// Mean `z` of the attacker's regiments of `kind` still present.
 fn mean_z(sim: &BattleSim, kind: &str) -> f64 {
     let zs: Vec<f64> = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Attacker && u.unit_type == kind && u.present())
+        .filter(|u| u.side == SideId::Attacker && &*u.unit_type == kind && u.present())
         .map(|u| u.z)
         .collect();
     zs.iter().sum::<f64>() / zs.len().max(1) as f64
@@ -331,48 +167,4 @@ fn a_won_duel_holds_the_line_then_the_battle_ends() {
     );
     assert!(t < 1800.0 && end.is_some(), "undecided at {t:.0} s");
     assert_ne!(end, Some(BattleEnd::Refused));
-}
-
-/// Probe (ignored): the attacker's longbows replace its crossbows (it wins
-/// the duel); where its men-at-arms stand over time.
-#[test]
-#[ignore = "probe"]
-fn probe_epic_duel() {
-    for limited in [false, true] {
-        let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER, false);
-        if limited {
-            let mut rules = sim.duel_rules().clone();
-            rules.winning_duel_max_seconds = rules.duel_limit_seconds;
-            sim.set_duel_rules(rules);
-        }
-        let window = sim.duel_rules().window_seconds;
-        let mut next = 150.0;
-        let mut line = String::new();
-        while !sim.is_finished() && sim.elapsed() < 1800.0 {
-            sim.step();
-            if sim.elapsed() >= next {
-                next += 30.0;
-                let own = sim.recent_missile_losses(SideId::Attacker, window);
-                let enemy = sim.recent_missile_losses(SideId::Defender, window);
-                let won = if sim.duel_rules().winning(own, enemy) {
-                    "W"
-                } else {
-                    ""
-                };
-                line.push_str(&format!(
-                    " t{:.0}:z{:.0},{:.3}/{:.3}{won}",
-                    sim.elapsed(),
-                    mean_z(&sim, "unit_men_at_arms_foot"),
-                    own,
-                    enemy
-                ));
-            }
-        }
-        println!(
-            "limited {limited}: {:?} {:?} at {:.0} s;{line}",
-            sim.winner(),
-            sim.end_kind(),
-            sim.elapsed()
-        );
-    }
 }
