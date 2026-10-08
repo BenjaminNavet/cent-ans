@@ -20,8 +20,9 @@ use data_model::{BattleOrder, BattleOrderKind, BattleOrderScope};
 use serde::{Deserialize, Serialize};
 
 use crate::command::CommandError;
+use crate::morale::MoraleRules;
 use crate::setup::SideId;
-use crate::sim::{of_faction, BattleSim, RALLY_PAUSE};
+use crate::sim::{of_faction, BattleSim};
 use crate::unit::{Unit, UnitState};
 
 /// Uses of one order by one side.
@@ -339,7 +340,7 @@ impl BattleSim {
                     if success {
                         let unit = &mut self.units_mut()[i];
                         unit.state = UnitState::Rallied;
-                        unit.rally_timer = RALLY_PAUSE;
+                        unit.rally_timer = MoraleRules::bundled().rally.pause_s;
                         unit.order_queue.clear();
                         unit.morale = unit.morale.max(effects.rally_morale);
                         unit.target = None;

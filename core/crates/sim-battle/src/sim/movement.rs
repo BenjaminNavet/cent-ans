@@ -251,19 +251,13 @@ impl BattleSim {
         unit.climbing = Some(piece);
         unit.climb_progress = 0.0;
         unit.state = UnitState::Climbing;
-        let text = if tower {
-            format!(
-                "Les {} s'élancent de la tour de siège sur le rempart.",
-                self.unit_label(i)
-            )
-        } else {
-            format!(
-                "Les {} dressent leurs échelles contre la muraille.",
-                self.unit_label(i)
-            )
-        };
-        let side = self.units[i].side;
-        self.log(text, Some(side));
+        self.log_unit(i, |label| {
+            if tower {
+                format!("Les {label} s'élancent de la tour de siège sur le rempart.")
+            } else {
+                format!("Les {label} dressent leurs échelles contre la muraille.")
+            }
+        });
         if !tower {
             let unit = self.units[i].id;
             self.push_fx(crate::siege_fx::SiegeFxKind::LaddersRaised { unit, piece });
@@ -311,9 +305,9 @@ impl BattleSim {
             unit.x = cx - nx * inset;
             unit.z = cz - nz * inset;
             unit.state = UnitState::Marching;
-            let text = format!("Les {} prennent pied sur le rempart !", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| {
+                format!("Les {label} prennent pied sur le rempart !")
+            });
             let unit = self.units[i].id;
             self.push_fx(crate::siege_fx::SiegeFxKind::OnWall { unit, piece });
         }
@@ -508,9 +502,7 @@ impl BattleSim {
                     self.units[i].state = UnitState::Charging;
                     if self.units[i].is_cavalry() && !self.charge_announced[i] {
                         self.charge_announced[i] = true;
-                        let text = format!("Les {} chargent !", self.unit_label(i));
-                        let side = self.units[i].side;
-                        self.log(text, Some(side));
+                        self.log_unit(i, |label| format!("Les {label} chargent !"));
                     }
                 } else if !charging {
                     self.units[i].state = UnitState::Marching;
@@ -562,9 +554,7 @@ impl BattleSim {
             if unit.has(Ability::Stakes) && !unit.stakes_planted && unit.still_time >= STAKES_DELAY
             {
                 unit.stakes_planted = true;
-                let text = format!("Les {} plantent leurs pieux.", self.unit_label(i));
-                let side = self.units[i].side;
-                self.log(text, Some(side));
+                self.log_unit(i, |label| format!("Les {label} plantent leurs pieux."));
             }
         }
     }
@@ -626,9 +616,9 @@ impl BattleSim {
             || unit.z > self.field.depth + margin
         {
             self.units[i].left_field = true;
-            let text = format!("Les {} quittent le champ de bataille.", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| {
+                format!("Les {label} quittent le champ de bataille.")
+            });
         }
     }
 }

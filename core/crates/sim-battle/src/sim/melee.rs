@@ -63,9 +63,7 @@ impl BattleSim {
             unit.charge_timer = 0.0;
             unit.loss_cause = LossCause::Stakes;
             unit.loss_by = Some(defender_id);
-            let text = format!("Les {} s'empalent sur les pieux !", self.unit_label(i));
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            self.log_unit(i, |label| format!("Les {label} s'empalent sur les pieux !"));
             self.record_impact(ImpactEvent {
                 kind: ImpactKind::Stakes,
                 unhorsed: loss.round() as u32,
@@ -87,13 +85,10 @@ impl BattleSim {
             unit.charge_timer = 0.0;
             unit.loss_cause = LossCause::Pikes;
             unit.loss_by = Some(defender_id);
-            let text = format!(
-                "La charge des {} se brise sur les piques des {} !",
-                self.unit_label(i),
-                self.unit_label(p)
-            );
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            let pikes = self.unit_label(p);
+            self.log_unit(i, |label| {
+                format!("La charge des {label} se brise sur les piques des {pikes} !")
+            });
             self.record_impact(ImpactEvent {
                 kind: ImpactKind::Pikes,
                 unhorsed: loss.round() as u32,
@@ -125,20 +120,18 @@ impl BattleSim {
         {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
-            let text = if let Some(how) = water {
-                format!("La charge des {} {how}.", self.unit_label(i))
-            } else if self.field.in_village(to.0, to.1) {
-                format!(
-                    "La charge des {} se brise dans le village.",
-                    self.unit_label(i)
-                )
-            } else if let Some(place) = decor {
-                format!("La charge des {} se brise {place}.", self.unit_label(i))
-            } else {
-                format!("La charge des {} se brise sur la haie.", self.unit_label(i))
-            };
-            let side = self.units[i].side;
-            self.log(text, Some(side));
+            let in_village = self.field.in_village(to.0, to.1);
+            self.log_unit(i, |label| {
+                if let Some(how) = water {
+                    format!("La charge des {label} {how}.")
+                } else if in_village {
+                    format!("La charge des {label} se brise dans le village.")
+                } else if let Some(place) = decor {
+                    format!("La charge des {label} se brise {place}.")
+                } else {
+                    format!("La charge des {label} se brise sur la haie.")
+                }
+            });
             self.record_impact(ImpactEvent {
                 kind: ImpactKind::Broken,
                 ..base
@@ -408,9 +401,7 @@ impl BattleSim {
         if self.units[i].is_general && self.general_alive[self.units[i].side.index()] {
             self.kill_general(self.units[i].side);
         }
-        let text = format!("Les {} sont anéantis.", self.unit_label(i));
-        let side = self.units[i].side;
-        self.log(text, Some(side));
+        self.log_unit(i, |label| format!("Les {label} sont anéantis."));
     }
 
     pub(super) fn kill_general(&mut self, side: SideId) {

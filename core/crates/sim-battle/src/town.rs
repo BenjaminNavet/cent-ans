@@ -357,21 +357,10 @@ pub struct TownRules {
 
 data_model::bundled_rules!(TownRules, "rules/siege_town.json");
 
-/// Deterministic draw in [0, 1) from a key and a salt (SplitMix64), for the
-/// layout of the furniture: it never touches the battle's random stream.
-pub fn hash01(key: u64, salt: u64) -> f64 {
-    let mut z = key
-        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
-        .wrapping_add(salt.wrapping_mul(0xD1B5_4A32_D192_ED03));
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^= z >> 31;
-    (z >> 11) as f64 / (1u64 << 53) as f64
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rng::hash01;
 
     #[test]
     fn rules_load() {

@@ -14,6 +14,8 @@
 use data_model::util::splitmix64;
 use serde::{Deserialize, Serialize};
 
+use crate::rng::Fnv1a;
+
 /// One phase of the day.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -146,21 +148,11 @@ impl TimeOfDayRules {
 /// Key of a campaign battle for [`TimeOfDayRules::campaign_hour`]: turn,
 /// index of the pending battle and province id (FNV-1a).
 pub fn campaign_battle_key(turn: u32, index: usize, province: &str) -> u64 {
-    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
-    let mut feed = |byte: u8| {
-        hash ^= u64::from(byte);
-        hash = hash.wrapping_mul(0x0100_0000_01b3);
-    };
-    for b in turn.to_le_bytes() {
-        feed(b);
-    }
-    for b in (index as u64).to_le_bytes() {
-        feed(b);
-    }
-    for b in province.bytes() {
-        feed(b);
-    }
-    hash
+    let mut hash = Fnv1a::default();
+    hash.bytes(&turn.to_le_bytes())
+        .u64(index as u64)
+        .bytes(province.as_bytes());
+    hash.finish()
 }
 
 #[cfg(test)]

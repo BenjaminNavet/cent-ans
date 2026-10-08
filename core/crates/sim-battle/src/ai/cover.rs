@@ -315,9 +315,8 @@ pub(super) fn cover_candidates(
     }
     // EP6: the edge of a hamlet, churchyard, manor or farm of the decor
     // facing the enemy (walls, hedges and houses: cover like the village).
-    let effects = &crate::decor::DecorRules::bundled().effects;
     for area in &field.decor.areas {
-        let effect = effects.of(area.kind);
+        let effect = area.effect();
         if effect.cover > VILLAGE_COVER_MAX || !effect.breaks_charge {
             continue;
         }

@@ -26,12 +26,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::fire::Blaze;
 use crate::rng::BattleRng;
+use crate::rng::{hash01, Fnv1a};
 use crate::siege::{
     place_church, yaw_facing, House, PieceKind, SiegeWorkRules, SiegeWorks, Tower, TownPlan,
     WallPiece, GATE_WIDTH, TOWN_CENTER,
 };
 use crate::siege_layout::MAX_PIECE;
-use crate::town::{hash01, Footprint, PropKind, TownRules};
+use crate::town::{Footprint, PropKind, TownRules};
 
 /// Kind of besieged place (NT1).
 #[derive(
@@ -149,9 +150,7 @@ impl PlaceRules {
 
 /// Seed of the plan of a province (FNV-1a of its id).
 pub fn place_seed(province: &str) -> u64 {
-    province.bytes().fold(0xcbf2_9ce4_8422_2325, |h, b| {
-        (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
-    })
+    Fnv1a::default().bytes(province.as_bytes()).finish()
 }
 
 /// Draw in `[lo, hi]` from the seed.

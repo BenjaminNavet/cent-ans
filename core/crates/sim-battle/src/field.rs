@@ -16,6 +16,7 @@ use crate::site::{
     self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, Village, HEDGE_COVER_REACH,
     OBSTACLE_REACH,
 };
+use crate::terrain_rules::{Scatter, TerrainRules};
 
 /// Width of the standard field (skirmishes, sieges) along x, in metres.
 /// EP1: fields are sized by [`crate::scale`]; game code reads
@@ -426,18 +427,12 @@ impl Battlefield {
         // R2: the relief detail and the shapes of woods and mud come from a
         // derived stream; the draws below are the pre-R2 ones, unchanged.
         let mut relief_stream = rng.derive(relief::RELIEF_STREAM);
-        let (hill_count, hill_height, forest_count, mud_count) = match terrain {
-            Terrain::Plains => (4, 5.0, 2, 1),
-            Terrain::Heath => (5, 7.0, 1, 1),
-            Terrain::Bocage => (5, 7.0, 7, 1),
-            Terrain::Forest => (5, 9.0, 9, 1),
-            Terrain::Hills => (7, 22.0, 3, 0),
-            Terrain::Mountains => (8, 45.0, 3, 0),
-            Terrain::Marsh => (3, 2.0, 1, 8),
-            // OM3: plains ground, open and treeless; low dunes in the desert.
-            Terrain::Steppe => (3, 4.0, 0, 0),
-            Terrain::Desert => (4, 6.0, 0, 0),
-        };
+        let Scatter {
+            hills: hill_count,
+            hill_height_m: hill_height,
+            forests: forest_count,
+            mud: mud_count,
+        } = TerrainRules::of(terrain).scatter;
         // EP1: as many hills, woods and mud per hectare on a larger field.
         let per_area = |count: usize| (count as f64 * size.area_ratio()).round() as usize;
         let (hill_count, forest_count, mud_count) = (

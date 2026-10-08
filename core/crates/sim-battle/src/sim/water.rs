@@ -274,12 +274,9 @@ impl BattleSim {
             unit.morale -= rules.morale_per_s * DT;
             if !self.drown_announced.contains(&id) {
                 self.drown_announced.push(id);
-                let text = format!(
-                    "Les {} se jettent à l'eau : des hommes se noient.",
-                    self.unit_label(i)
-                );
-                let side = self.units[i].side;
-                self.log(text, Some(side));
+                self.log_unit(i, |label| {
+                    format!("Les {label} se jettent à l'eau : des hommes se noient.")
+                });
             }
         }
     }
