@@ -159,7 +159,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let of = |kind: &str| {
         sim.units()
             .iter()
-            .find(|u| u.side == SideId::Defender && u.unit_type == kind)
+            .find(|u| u.side == SideId::Defender && &*u.unit_type == kind)
             .unwrap()
     };
     let (line, bows) = (of("unit_men_at_arms_foot"), of("unit_longbowmen"));
@@ -176,7 +176,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let crossbows = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Attacker && u.unit_type == "unit_crossbowmen");
+        .filter(|u| u.side == SideId::Attacker && &*u.unit_type == "unit_crossbowmen");
     for c in crossbows {
         assert!(
             !ReliefMap::sees(field, (c.x, c.z), (line.x, line.z)),

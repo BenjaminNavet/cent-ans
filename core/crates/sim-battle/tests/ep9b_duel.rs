@@ -119,7 +119,7 @@ fn mean_z(sim: &BattleSim, kind: &str) -> f64 {
     let zs: Vec<f64> = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Attacker && u.unit_type == kind && u.present())
+        .filter(|u| u.side == SideId::Attacker && &*u.unit_type == kind && u.present())
         .map(|u| u.z)
         .collect();
     zs.iter().sum::<f64>() / zs.len().max(1) as f64

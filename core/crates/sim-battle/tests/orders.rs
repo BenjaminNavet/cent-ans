@@ -649,7 +649,7 @@ fn ai_dismounts_on_the_defensive() {
     let knights = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_knights")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_knights")
         .unwrap();
     assert!(knights.dismounted, "the defensive AI fights on foot");
     // The strong side keeps its horses.

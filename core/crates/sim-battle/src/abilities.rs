@@ -108,7 +108,7 @@ pub struct AbilityView {
 /// Does `unit` have `ability`?
 pub fn eligible(ability: &BattleAbility, unit: &Unit) -> bool {
     let filter = &ability.eligible;
-    let granted = filter.unit_types.contains(&unit.unit_type)
+    let granted = filter.unit_types.iter().any(|t| **t == *unit.unit_type)
         || filter.abilities.iter().any(|a| unit.has(*a))
         || (filter.dismounted && unit.dismounted);
     granted

@@ -18,7 +18,7 @@ fn range_lab() -> BattleSim {
 fn index_of(sim: &BattleSim, unit_type: &str) -> usize {
     sim.units()
         .iter()
-        .position(|u| u.unit_type == unit_type)
+        .position(|u| *u.unit_type == *unit_type)
         .unwrap_or_else(|| panic!("no {unit_type}"))
 }
 

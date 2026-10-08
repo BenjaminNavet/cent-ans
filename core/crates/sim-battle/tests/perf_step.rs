@@ -65,6 +65,7 @@ fn measure(label: &str, make: fn() -> BattleSim, steps: u32) {
         sim.adopt_step(next);
     }
     let total = started.elapsed();
+    println!("  events={}", sim.events().len());
     assert_eq!(plain_digest, state_digest(&sim), "fork path diverges");
     println!(
         "{label}: steps={steps} plain={:?}/step fork+step+adopt={:?}/step fork_only={:?}/fork digest={plain_digest}",

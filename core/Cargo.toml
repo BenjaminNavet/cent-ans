@@ -30,7 +30,7 @@ debug = "line-tables-only"
 inherits = "release"
 
 [workspace.dependencies]
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive", "rc"] }
 # EP13 (ADR 0072): exact float parsing, so a replay file (and a save) reads back the very
 # numbers it wrote; hand-written data (short decimals) parses the same either way.
 serde_json = { version = "1", features = ["float_roundtrip"] }

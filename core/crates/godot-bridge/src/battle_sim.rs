@@ -889,8 +889,8 @@ impl BattleSim {
                 let mut dict = vdict! {
                     "id" => i64::from(unit.id),
                     "side" => unit.side.key(),
-                    "type" => unit.unit_type.as_str(),
-                    "name" => unit.name.as_str(),
+                    "type" => &*unit.unit_type,
+                    "name" => &*unit.name,
                     "category" => category_key(unit.category),
                     "render" => render_key(unit),
                     "soldiers" => i64::from(unit.soldiers()),

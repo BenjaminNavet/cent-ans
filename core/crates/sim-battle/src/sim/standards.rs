@@ -224,11 +224,11 @@ impl BattleSim {
     fn trophy_of(&self, i: usize, captor: Option<usize>) -> StandardTrophy {
         let unit = &self.units[i];
         StandardTrophy {
-            unit_type: unit.unit_type.clone(),
-            unit_name: unit.name.clone(),
+            unit_type: unit.unit_type.to_string(),
+            unit_name: unit.name.to_string(),
             faction: self.setup.side(unit.side).faction.clone(),
             general: unit.is_general,
-            captor: captor.map(|c| self.units[c].name.clone()),
+            captor: captor.map(|c| self.units[c].name.to_string()),
             time: self.elapsed,
             taken_by: unit.side.other(),
         }
