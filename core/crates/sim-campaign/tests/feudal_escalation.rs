@@ -1,7 +1,5 @@
 //! FE war escalation and private war (spec § 4.3), lot F2.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, TitleId};
 use sim_campaign::diplomacy::Proposal;
 use sim_campaign::feudal::{
@@ -9,15 +7,7 @@ use sim_campaign::feudal::{
 };
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn title(id: &str) -> TitleId {
     TitleId::new(id).unwrap()
@@ -25,7 +15,7 @@ fn title(id: &str) -> TitleId {
 
 /// Rules forcing every AI suzerain to intervene (`true`) or to shirk.
 fn data_with_duty(intervene: bool) -> GameData {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.feudal_rules.escalation.score.base = if intervene { 1000 } else { -1000 };
     data
 }
@@ -239,7 +229,7 @@ fn private_war_is_arbitrated_by_the_common_liege() {
         (fac("fac_brittany"), fac("fac_flanders"), fac("fac_france"));
 
     // AI lord strong enough and even-handed: it imposes peace.
-    let mut data = data();
+    let mut data = game_data().clone();
     data.feudal_rules
         .escalation
         .arbitration
@@ -317,7 +307,7 @@ fn player_private_war_gets_a_peace_summons() {
             .expect("peace summons")
             .clone()
     };
-    let mut data = data();
+    let mut data = game_data().clone();
     data.feudal_rules
         .escalation
         .arbitration

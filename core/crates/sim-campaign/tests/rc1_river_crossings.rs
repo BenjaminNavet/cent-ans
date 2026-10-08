@@ -2,23 +2,13 @@
 //! near a bridge, ford or ferry is a crossing battle (coefficients of
 //! `data/rules/river_crossings.json`, named forecast line, `setup.crossing`).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, MapCrossing};
+use data_model::{GameData, MapCrossing};
 use sim_battle::CrossingStructure;
 use sim_campaign::river_crossing::crossing_site;
 use sim_campaign::state::ArmyPosition;
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn bridge(at: [f32; 2]) -> MapCrossing {
     MapCrossing {
@@ -71,7 +61,7 @@ fn lead_armies(state: &CampaignState) -> (ArmyId, ArmyId) {
 
 #[test]
 fn opposite_banks_near_a_bridge_is_a_crossing_battle() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let (state, centre) = staged(&data, [0.0, -3.0], [0.0, 3.0]);
     let (a, d) = lead_armies(&state);
 
@@ -118,7 +108,7 @@ fn opposite_banks_near_a_bridge_is_a_crossing_battle() {
 
 #[test]
 fn same_bank_or_far_away_is_an_ordinary_battle() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let (state, centre) = staged(&data, [2.0, -3.0], [-2.0, -6.0]);
     let (a, d) = lead_armies(&state);
     data.crossings = vec![bridge(centre)];
@@ -133,7 +123,7 @@ fn same_bank_or_far_away_is_an_ordinary_battle() {
 
 #[test]
 fn anonymous_crossings_are_described_by_their_structure() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let (state, centre) = staged(&data, [0.0, -3.0], [0.0, 3.0]);
     let (a, d) = lead_armies(&state);
     let mut ford = bridge(centre);
@@ -157,7 +147,7 @@ fn anonymous_crossings_are_described_by_their_structure() {
 
 #[test]
 fn real_crossings_and_river_names_load() {
-    let data = data();
+    let data = game_data();
     assert!(data.crossings.len() > 1000, "{}", data.crossings.len());
     assert!(data
         .crossings
@@ -169,7 +159,7 @@ fn real_crossings_and_river_names_load() {
 
 #[test]
 fn road_bridges_scale_with_the_river_width() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let (state, centre) = staged(&data, [0.0, -3.0], [0.0, 3.0]);
     let (a, d) = lead_armies(&state);
     let rules = data.river_crossing_rules.clone();

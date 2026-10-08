@@ -4,8 +4,7 @@
 //! The rules run on the real game data over an all-plain synthetic grid and
 //! a synthetic cover map (forest where the tests say), so that the geometry
 //! is known.
-
-use std::path::PathBuf;
+use data_model::test_support::{fac, game_data};
 
 use data_model::{CoverMap, FactionId, GameData, MapRasters, NavGrid, SettlementId, PLAIN_COST};
 use sim_battle::{BattleOpening, SideId};
@@ -15,15 +14,6 @@ use sim_campaign::{
     ArmyId, ArmyPosition, CampaignRng, CampaignState, EventKind, MoveOrderTarget, Order,
     OrderError, Stance, StopReason,
 };
-
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
 
 fn px_per_km(data: &GameData) -> f32 {
     data.navgrid().px_per_km() as f32
@@ -61,7 +51,7 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
 /// Real data on an all-plain grid, with forest on the cells within one cell
 /// of each point of `forests`.
 fn data_with_forest(forests: &[[f32; 2]]) -> GameData {
-    let mut data = real_data();
+    let mut data = game_data().clone();
     data.set_map_rasters(MapRasters {
         navgrid: NavGrid::uniform(2048, 2048, 2, 1.438, PLAIN_COST),
         provinces: None,
@@ -169,8 +159,8 @@ fn force_chance(data: &mut GameData, chance: f64) {
 
 #[test]
 fn ambush_needs_cover_and_movement_and_spends_it() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, _) = duel(&data, east(&data, spot, 20.0), [10.0, 10.0]);
     // In the open: refused, the reason names the cover.
@@ -204,8 +194,8 @@ fn ambush_needs_cover_and_movement_and_spends_it() {
 
 #[test]
 fn moving_leaves_the_ambush() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, _) = duel(&data, spot, [10.0, 10.0]);
     set_stance(&mut state, &data, &french, Stance::Ambush);
@@ -224,8 +214,8 @@ fn moving_leaves_the_ambush() {
 
 #[test]
 fn an_ambush_is_hidden_until_an_army_or_a_spy_comes_close() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, english) = duel(&data, spot, east(&data, spot, 20.0));
     let england = fac("fac_england");
@@ -304,8 +294,8 @@ fn spy(state: &mut CampaignState, faction: &str, at: &SettlementId, index: u32) 
 
 /// French ambush in a forest `spot`; the English march west through it.
 fn ambush_setup(chance: f64, interactive: bool) -> (GameData, CampaignState, ArmyId, ArmyId) {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let mut data = data_with_forest(&[spot]);
     force_chance(&mut data, chance);
     let (mut state, french, english) = duel(&data, spot, east(&data, spot, 30.0));
@@ -461,11 +451,11 @@ fn the_ambush_chance_follows_cover_skill_scouts_and_forced_march() {
 
 #[test]
 fn the_ambusher_charges_harder_in_auto_resolve() {
-    let data = real_data();
-    let (charge, defense) = posture::auto_resolve_bonus(&data, None, true);
+    let data = game_data();
+    let (charge, defense) = posture::auto_resolve_bonus(data, None, true);
     assert_eq!(charge, data.posture_rules.ambush.auto_attack_percent);
     assert_eq!(defense, 0.0);
-    let (charge, _) = posture::auto_resolve_bonus(&data, None, false);
+    let (charge, _) = posture::auto_resolve_bonus(data, None, false);
     assert_eq!(charge, 0.0);
 }
 
@@ -473,8 +463,8 @@ fn the_ambusher_charges_harder_in_auto_resolve() {
 
 #[test]
 fn forced_march_adds_movement_and_forbids_attack_siege_and_ambush() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, english) = duel(&data, spot, east(&data, spot, 20.0));
     let base = state.army_base_grid_allowance(&data, &state.armies[&french]);
@@ -525,8 +515,8 @@ fn forced_march_adds_movement_and_forbids_attack_siege_and_ambush() {
 
 #[test]
 fn forced_march_is_decided_before_moving() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[]);
     let (mut state, french, _) = duel(&data, spot, [10.0, 10.0]);
     state
@@ -543,8 +533,8 @@ fn forced_march_is_decided_before_moving() {
 
 #[test]
 fn forced_march_costs_supply_and_ends_next_turn() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[]);
     let (mut state, french, _) = duel(&data, spot, [10.0, 10.0]);
     // A twin army standing at the same place, in normal stance.
@@ -571,8 +561,8 @@ fn forced_march_costs_supply_and_ends_next_turn() {
 
 #[test]
 fn forced_march_reaches_the_3d_battle_tired() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[]);
     let (mut state, french, english) = duel(&data, spot, east(&data, spot, 3.0));
     state.interactive_battles = true;
@@ -607,8 +597,8 @@ fn forced_march_reaches_the_3d_battle_tired() {
 
 #[test]
 fn entrenched_camp_holds_until_a_move_and_reaches_the_battle() {
-    let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[]);
     let (mut state, french, english) = duel(&data, spot, east(&data, spot, 3.0));
     set_stance(&mut state, &data, &french, Stance::Entrenched);
@@ -646,23 +636,23 @@ fn entrenched_camp_holds_until_a_move_and_reaches_the_battle() {
 
 #[test]
 fn entrenched_camp_needs_the_open_field_and_saves_supply() {
-    let data = real_data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     let french = main_army(&state, "fac_france");
-    refill(&mut state, &data, &french);
+    refill(&mut state, data, &french);
     let place = state.armies[&french].settlement().cloned();
     if place.is_some() {
-        let error = refusal(&mut state, &data, &french, Stance::Entrenched);
+        let error = refusal(&mut state, data, &french, Stance::Entrenched);
         assert!(reason(&error).contains("place"), "{error}");
     }
     let army = state.armies[&french].clone();
-    let saved = posture::entrenched_loss(&data, &army, 10);
+    let saved = posture::entrenched_loss(data, &army, 10);
     assert_eq!(saved, 10, "not entrenched: the whole loss");
     let mut camp = army;
     camp.stance = Stance::Entrenched;
     let saving = data.posture_rules.entrenched.supply_saving_percent;
     assert_eq!(
-        posture::entrenched_loss(&data, &camp, 10),
+        posture::entrenched_loss(data, &camp, 10),
         (10.0 * (1.0 - saving / 100.0)).round() as u8
     );
 }

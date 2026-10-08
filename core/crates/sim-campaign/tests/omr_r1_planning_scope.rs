@@ -2,15 +2,11 @@
 //! (faction power, neighbours), and never outlive the scope.
 
 use std::collections::BTreeSet;
-use std::path::PathBuf;
 
 use data_model::{FactionId, GameData};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn neighbours_by_walk(
     state: &CampaignState,
@@ -26,19 +22,19 @@ fn neighbours_by_walk(
 
 #[test]
 fn scope_answers_match_the_walks() {
-    let data = data();
+    let data = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
     // Outside any scope: the plain walks.
     let powers: Vec<f64> = ids.iter().map(|f| state.faction_power(f)).collect();
     let neighbours: Vec<BTreeSet<FactionId>> = ids
         .iter()
-        .map(|a| neighbours_by_walk(&state, &data, &ids, a))
+        .map(|a| neighbours_by_walk(&state, data, &ids, a))
         .collect();
     let incomes: Vec<i64> = ids
         .iter()
-        .map(|f| state.faction_income_effective(&data, f))
+        .map(|f| state.faction_income_effective(data, f))
         .collect();
     let rivals: Vec<BTreeSet<FactionId>> = ids
         .iter()
@@ -48,7 +44,7 @@ fn scope_answers_match_the_walks() {
         ids.iter().map(|f| state.controlled_provinces(f)).collect();
     let listed: Vec<BTreeSet<FactionId>> = ids
         .iter()
-        .map(|a| state.neighbour_factions(&data, a))
+        .map(|a| state.neighbour_factions(data, a))
         .collect();
     {
         let _scope = state.planning_scope();
@@ -57,16 +53,16 @@ fn scope_answers_match_the_walks() {
             assert_eq!(state.faction_power(a).to_bits(), powers[i].to_bits(), "{a}");
             assert_eq!(state.faction_power_walk(a).to_bits(), powers[i].to_bits());
             assert_eq!(
-                neighbours_by_walk(&state, &data, &ids, a),
+                neighbours_by_walk(&state, data, &ids, a),
                 neighbours[i],
                 "{a}"
             );
-            assert_eq!(state.neighbour_factions(&data, a), listed[i], "{a}");
+            assert_eq!(state.neighbour_factions(data, a), listed[i], "{a}");
             // Twice: computed, then read from the memo.
             for _ in 0..2 {
-                assert_eq!(state.faction_income_effective(&data, a), incomes[i], "{a}");
+                assert_eq!(state.faction_income_effective(data, a), incomes[i], "{a}");
             }
-            assert_eq!(state.faction_income_effective_walk(&data, a), incomes[i]);
+            assert_eq!(state.faction_income_effective_walk(data, a), incomes[i]);
             for _ in 0..2 {
                 assert_eq!(sim_campaign::diplomacy::rivals(&state, a), rivals[i], "{a}");
                 assert_eq!(state.controlled_provinces(a), controlled[i], "{a}");
@@ -76,7 +72,7 @@ fn scope_answers_match_the_walks() {
         }
         let unknown = FactionId::new("fac_nobody").unwrap();
         assert_eq!(state.faction_power(&unknown), 0.0);
-        assert!(!state.are_neighbors(&data, &unknown, &france));
+        assert!(!state.are_neighbors(data, &unknown, &france));
     }
     assert!(powers.iter().any(|p| *p > 0.0));
     assert!(incomes.iter().any(|i| *i > 0));
@@ -87,9 +83,9 @@ fn scope_answers_match_the_walks() {
 
 #[test]
 fn scope_never_serves_a_changed_state() {
-    let data = data();
+    let data = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let before = state.faction_power(&france);
     {
         let _scope = state.planning_scope();

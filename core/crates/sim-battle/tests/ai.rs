@@ -24,7 +24,7 @@ fn ai_beats_a_passive_ai_at_equal_forces() {
     let data = data();
     for seed in 0..3 {
         for passive in SideId::BOTH {
-            let mut sim = mirrored(&data, seed);
+            let mut sim = mirrored(data, seed);
             sim.set_ai(passive, false);
             run_to_end(&mut sim);
             assert_eq!(
@@ -40,8 +40,8 @@ fn ai_beats_a_passive_ai_at_equal_forces() {
 #[test]
 fn cavalry_charges_an_exposed_flank() {
     let data = data();
-    let attacker: Vec<UnitSetup> = units(&data, &["unit_men_at_arms_foot", "unit_knights"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker: Vec<UnitSetup> = units(data, &["unit_men_at_arms_foot", "unit_knights"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 3).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);
@@ -70,8 +70,8 @@ fn cavalry_charges_an_exposed_flank() {
 #[test]
 fn archers_withdraw_when_engaged() {
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]);
-    let defender = units(&data, &["unit_men_at_arms_foot"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]);
+    let defender = units(data, &["unit_men_at_arms_foot"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 5).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);
@@ -105,7 +105,7 @@ fn archers_withdraw_when_engaged() {
 fn a_weaker_side_takes_the_high_ground_and_plants_stakes() {
     let data = data();
     let attacker = units(
-        &data,
+        data,
         &[
             "unit_men_at_arms_foot",
             "unit_men_at_arms_foot",
@@ -117,7 +117,7 @@ fn a_weaker_side_takes_the_high_ground_and_plants_stakes() {
         ],
     );
     let defender = units(
-        &data,
+        data,
         &[
             "unit_men_at_arms_foot",
             "unit_longbowmen",
@@ -168,9 +168,7 @@ fn ai_battles_last_minutes_and_either_side_can_win() {
             "unit_urban_militia",
             "unit_crossbowmen",
         ];
-        (0..n)
-            .map(|i| unit(&data, kinds[i % kinds.len()]))
-            .collect()
+        (0..n).map(|i| unit(data, kinds[i % kinds.len()])).collect()
     };
     let (mut wins, mut total) = (0, 0.0);
     // EP6: the decor (hamlets, fields, vineyards) varies the fields more, 32
@@ -204,7 +202,7 @@ fn ai_battles_last_minutes_and_either_side_can_win() {
 fn ai_battles_are_deterministic() {
     let data = data();
     let play = || {
-        let mut sim = mirrored(&data, 42);
+        let mut sim = mirrored(data, 42);
         run(&mut sim, 240.0);
         sim.units()
             .iter()

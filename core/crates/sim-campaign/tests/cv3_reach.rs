@@ -7,22 +7,17 @@
 //! The rules run on the real game data on a synthetic all-plain grid, the
 //! armies standing at sea (no settlement around) so that the geometry is
 //! known.
+use data_model::test_support::{fac, game_data};
 
 use std::collections::BTreeSet;
-use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, MapRasters, NavGrid, PLAIN_COST};
+use data_model::{GameData, MapRasters, NavGrid, PLAIN_COST};
 use sim_campaign::navigation::{step_cost, Cell};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order, OrderOutcome, Stance, StopReason};
 
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
 /// The real data on an all-plain 2048² grid.
 fn plain_data() -> GameData {
-    let mut data = real_data();
+    let mut data = game_data().clone();
     let mut grid = NavGrid::uniform(2048, 2048, 2, 1.438, PLAIN_COST);
     grid.refresh_min_cost();
     data.set_map_rasters(MapRasters {
@@ -30,10 +25,6 @@ fn plain_data() -> GameData {
         provinces: None,
     });
     data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
 }
 
 fn px_per_km(data: &GameData) -> f32 {

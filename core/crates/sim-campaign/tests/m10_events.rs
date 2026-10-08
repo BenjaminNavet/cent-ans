@@ -11,22 +11,10 @@ use sim_campaign::{
     CampaignState, ChronicleError, EventKind, Order, OrderError, Season, STATE_VERSION,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn evt(id: &str) -> EventId {
     EventId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
 }
 
 fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
@@ -89,20 +77,20 @@ fn every_event_loads_and_references_known_ids() {
 
 #[test]
 fn historical_event_fires_at_its_date_for_the_player() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 1);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 1);
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Spring);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state.chronicle.fired_events.contains(&evt("evt_sluys")));
     // Summer 1340: L'Écluse.
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(state.chronicle.fired_events.contains(&evt("evt_sluys")));
     assert!(decision_for(&state, "evt_sluys").is_some());
     assert!(events
         .iter()
         .any(|e| e.kind == EventKind::Chronicle && e.text_fr.contains("l'Écluse")));
-    let views = state.decision_views(&data, &fac("fac_france"));
+    let views = state.decision_views(data, &fac("fac_france"));
     let view = views.iter().find(|v| v.event == evt("evt_sluys")).unwrap();
     assert_eq!(view.options.len(), 2);
     assert!(view.options[0]
@@ -113,31 +101,31 @@ fn historical_event_fires_at_its_date_for_the_player() {
 
 #[test]
 fn unmet_conditions_let_history_diverge() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 2);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 2);
     set_war(&mut state, "fac_england", "fac_france", false);
     set_date(&mut state, 1340, Season::Summer);
     for _ in 0..12 {
         set_war(&mut state, "fac_england", "fac_france", false);
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     // Window closed (until 1341) without the war: L'Écluse never happens.
     assert!(state.year > 1341);
     set_war(&mut state, "fac_england", "fac_france", true);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state.chronicle.fired_events.contains(&evt("evt_sluys")));
     assert!(decision_for(&state, "evt_sluys").is_none());
 }
 
 #[test]
 fn historical_event_fires_only_once() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 3);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 3);
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
     let mut sluys = 0;
     for _ in 0..6 {
-        let events = state.end_turn_with(&data, idle);
+        let events = state.end_turn_with(data, idle);
         sluys += events
             .iter()
             .filter(|e| e.text_fr.starts_with("Chronique : La bataille de l'Écluse"))
@@ -148,14 +136,14 @@ fn historical_event_fires_only_once() {
 
 #[test]
 fn random_events_are_deterministic() {
-    let data = data();
+    let data = game_data();
     let run = |seed| {
-        let mut state = start(&data, "fac_france", seed);
+        let mut state = start(data, "fac_france", seed);
         let mut journal = Vec::new();
         for _ in 0..16 {
             journal.extend(
                 state
-                    .end_turn_with(&data, idle)
+                    .end_turn_with(data, idle)
                     .into_iter()
                     .filter(|e| e.kind == EventKind::Chronicle),
             );
@@ -181,14 +169,14 @@ fn random_events_are_deterministic() {
 
 #[test]
 fn ai_applies_the_heaviest_option_at_once() {
-    let data = data();
+    let data = game_data();
     let sluys = &data.events[&evt("evt_sluys")];
-    let mut state = start(&data, "fac_england", 4);
+    let mut state = start(data, "fac_england", 4);
     assert_eq!(chronicle::ai_choice(&mut state, sluys), 1);
     // Ties are broken by the RNG, deterministically.
     let fire = &data.events[&evt("evt_incendie")];
-    let mut a = start(&data, "fac_england", 5);
-    let mut b = start(&data, "fac_england", 5);
+    let mut a = start(data, "fac_england", 5);
+    let mut b = start(data, "fac_england", 5);
     assert_eq!(
         chronicle::ai_choice(&mut a, fire),
         chronicle::ai_choice(&mut b, fire)
@@ -197,7 +185,7 @@ fn ai_applies_the_heaviest_option_at_once() {
     // England plays: France (AI) decides L'Écluse without a decision.
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(state.chronicle.fired_events.contains(&evt("evt_sluys")));
     assert!(decision_for(&state, "evt_sluys").is_none());
     assert!(events.iter().any(|e| e.kind == EventKind::Chronicle
@@ -207,16 +195,16 @@ fn ai_applies_the_heaviest_option_at_once() {
 
 #[test]
 fn player_decision_is_answered_by_order() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 6);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 6);
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let id = decision_for(&state, "evt_sluys").expect("decision");
 
     assert_eq!(
         state.submit_order(
-            &data,
+            data,
             Order::ChooseEventOption {
                 decision: 9999,
                 option: 0
@@ -226,7 +214,7 @@ fn player_decision_is_answered_by_order() {
     );
     assert_eq!(
         state.submit_order(
-            &data,
+            data,
             Order::ChooseEventOption {
                 decision: id,
                 option: 5
@@ -238,7 +226,7 @@ fn player_decision_is_answered_by_order() {
     let treasury = state.factions[&fac("fac_france")].treasury;
     state
         .submit_order(
-            &data,
+            data,
             Order::ChooseEventOption {
                 decision: id,
                 option: 0,
@@ -267,17 +255,17 @@ fn player_decision_is_answered_by_order() {
 fn unanswered_decision_expires_with_the_ai_option() {
     // ADR 0122: the option the AI would pick (« Renoncer à la mer »,
     // highest `ai_weight`), no longer the first one.
-    let data = data();
-    let mut state = start(&data, "fac_france", 7);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 7);
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let id = decision_for(&state, "evt_sluys").expect("decision");
-    let views = state.decision_views(&data, &fac("fac_france"));
+    let views = state.decision_views(data, &fac("fac_france"));
     assert_eq!(views.iter().find(|v| v.id == id).unwrap().expires_in, 2);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(decision_for(&state, "evt_sluys").is_some(), "still open");
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(decision_for(&state, "evt_sluys").is_none());
     assert!(events.iter().any(|e| e.kind == EventKind::Chronicle
         && e.text_fr.contains("Renoncer à la mer")
@@ -286,10 +274,10 @@ fn unanswered_decision_expires_with_the_ai_option() {
 
 #[test]
 fn black_death_strikes_south_first_once_per_province() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 8);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 8);
     set_date(&mut state, 1347, Season::Autumn);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state
         .chronicle
         .fired_events
@@ -297,7 +285,7 @@ fn black_death_strikes_south_first_once_per_province() {
     let id = decision_for(&state, "evt_black_death").expect("global event: the player sees it");
     state
         .submit_order(
-            &data,
+            data,
             Order::ChooseEventOption {
                 decision: id,
                 option: 0,
@@ -309,7 +297,7 @@ fn black_death_strikes_south_first_once_per_province() {
 
     // Every province is struck exactly once over the twelve steps.
     let mut struck: Vec<ProvinceId> = (0..wave.duration)
-        .flat_map(|step| plague_slice(&state, &data, step, wave.duration))
+        .flat_map(|step| plague_slice(&state, data, step, wave.duration))
         .collect();
     let total = struck.len();
     struck.sort();
@@ -318,9 +306,9 @@ fn black_death_strikes_south_first_once_per_province() {
     assert_eq!(total, state.provinces.len());
     // OM: the map now reaches Egypt and the Maghreb; Cairo (struck in the
     // autumn of 1347) is among the southernmost provinces.
-    let first = plague_slice(&state, &data, 0, wave.duration);
+    let first = plague_slice(&state, data, 0, wave.duration);
     assert!(first.contains(&prov("prov_cairo")), "{first:?}");
-    let last = plague_slice(&state, &data, wave.duration - 1, wave.duration);
+    let last = plague_slice(&state, data, wave.duration - 1, wave.duration);
     assert!(last.contains(&prov("prov_highlands")), "{last:?}");
 
     let south = prov("prov_cairo");
@@ -328,7 +316,7 @@ fn black_death_strikes_south_first_once_per_province() {
     let before_south = state.provinces[&south].population.total();
     let before_north = state.provinces[&north].population.total();
     let health_before = state.provinces[&south].population.peasants.health;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let after_south = state.provinces[&south].population.total();
     let max_kept = 1.0 - f64::from(PLAGUE_POPULATION_LOSS.0) / 100.0 + 0.01;
     assert!((after_south as f64) < before_south as f64 * max_kept);
@@ -336,18 +324,18 @@ fn black_death_strikes_south_first_once_per_province() {
     assert!(state.provinces[&north].population.total() as f64 > before_north as f64 * 0.97);
 
     for _ in 0..12 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state.chronicle.plague_wave.is_none());
 }
 
 #[test]
 fn chronicle_state_survives_save_and_old_saves_load() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 9);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 9);
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state.chronicle.pending_decisions.is_empty());
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("loads");
@@ -365,10 +353,10 @@ fn chronicle_state_survives_save_and_old_saves_load() {
 
 #[test]
 fn province_scoped_event_targets_its_province() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 10);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 10);
     set_date(&mut state, 1358, Season::Spring);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let decision = state
         .chronicle
         .pending_decisions
@@ -380,7 +368,7 @@ fn province_scoped_event_targets_its_province() {
     let devastation = state.provinces[&prov("prov_picardie")].devastation;
     state
         .submit_order(
-            &data,
+            data,
             Order::ChooseEventOption {
                 decision: decision.id,
                 option: 0,
@@ -395,12 +383,12 @@ fn province_scoped_event_targets_its_province() {
 
 #[test]
 fn sixty_turns_bring_historical_and_random_events() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 12);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 12);
     let mut historical = 0;
     let mut random = 0;
     for _ in 0..60 {
-        state.end_turn(&data);
+        state.end_turn(data);
         for decision in state.chronicle.pending_decisions.clone() {
             match data.events[&decision.event].kind {
                 EventCategory::Historical | EventCategory::Chained => historical += 1,
@@ -408,7 +396,7 @@ fn sixty_turns_bring_historical_and_random_events() {
             }
             state
                 .submit_order(
-                    &data,
+                    data,
                     Order::ChooseEventOption {
                         decision: decision.id,
                         option: 0,
@@ -424,13 +412,13 @@ fn sixty_turns_bring_historical_and_random_events() {
 
 #[test]
 fn disabled_chronicle_fires_nothing() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 13);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 13);
     state.chronicle.disabled = true;
     set_war(&mut state, "fac_england", "fac_france", true);
     set_date(&mut state, 1340, Season::Summer);
     for _ in 0..8 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state.chronicle.fired_events.is_empty());
     assert!(state.chronicle.pending_decisions.is_empty());

@@ -2,20 +2,11 @@
 //! four statuses the UI explains, the settlement count and the full-province
 //! holder.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::ProvinceId;
 use sim_campaign::possession::PossessionStatus;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 #[test]
 fn status_covers_the_five_cases() {
@@ -50,9 +41,9 @@ fn status_covers_the_five_cases() {
 
 #[test]
 fn province_possession_follows_the_city_and_counts_places() {
-    let data = data();
+    let data = game_data();
     let player = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, player.clone(), 7).expect("1337 start");
+    let mut state = CampaignState::new_1337(data, player.clone(), 7).expect("1337 start");
     let province = ProvinceId::new("prov_ile_de_france").unwrap();
     let start = state
         .province_possession(&player, &province)

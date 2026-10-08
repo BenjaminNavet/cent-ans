@@ -863,15 +863,14 @@ fn pick_general(state: &CampaignState, data: &GameData, faction: &Faction) -> Op
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use data_model::test_support::game_data;
 
     use super::*;
     use crate::difficulty::Difficulty;
 
     #[test]
     fn the_starting_garrisons_do_not_depend_on_the_difficulty() {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let data = GameData::load(&root).expect("game data loads").0;
+        let data = game_data();
         let mut raw_data = data.clone();
         raw_data
             .settlement_rules
@@ -882,7 +881,7 @@ mod tests {
         let garrisons = |level: Difficulty| {
             let mut state = CampaignState::new_1337(&raw_data, player.clone(), 1).unwrap();
             state.difficulty = level;
-            fit_starting_garrisons(&mut state, &data);
+            fit_starting_garrisons(&mut state, data);
             assert_eq!(state.difficulty, level, "the level is restored");
             state
                 .settlements
@@ -921,8 +920,7 @@ mod tests {
         // LR-15: the field armies, then the capital's garrison, go lighter
         // only for a realm that the garrisons alone could not bring within
         // the allowed deficit; the others start as under JR4b.
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let data = GameData::load(&root).expect("game data loads").0;
+        let data = game_data();
         let rule = data
             .settlement_rules
             .as_ref()
@@ -940,7 +938,7 @@ mod tests {
             r.min_capital_units = None;
         }
         let player = FactionId::new("fac_france").unwrap();
-        let state = CampaignState::new_1337(&data, player.clone(), 1).unwrap();
+        let state = CampaignState::new_1337(data, player.clone(), 1).unwrap();
         let jr4b = CampaignState::new_1337(&jr4b_data, player, 1).unwrap();
         let mut touched = Vec::new();
         for faction in state.factions.keys() {
@@ -962,7 +960,7 @@ mod tests {
             }
             touched.push(faction.clone());
             assert!(
-                over_budget(&jr4b, &data, faction, &rule),
+                over_budget(&jr4b, data, faction, &rule),
                 "{faction} was within budget under JR4b"
             );
             let armies: Vec<usize> = state
@@ -990,20 +988,19 @@ mod tests {
         // LR-15: the Marinids and Hafsids (Maghreb populations raised),
         // Serbia and Lithuania (field and capital levers) no longer start in
         // structural bankruptcy.
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let data = GameData::load(&root).expect("game data loads").0;
+        let data = game_data();
         // A6 x LR: A6-L3 asks a surplus (`max_deficit_percent` -10) that only the
         // garrisons can serve; the LR-15 fallbacks (field armies, capital
         // garrison, buildings) bring a realm to zero and no further. So the
         // invariant kept here is "no structural deficit" (net >= 0), not the
         // 10 % surplus (the Hafsids end at +4 %).
-        let state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 1)
-            .expect("start");
+        let state =
+            CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 1).expect("start");
         for realm in ["fac_marinids", "fac_hafsids", "fac_serbia", "fac_lithuania"] {
             let realm = FactionId::new(realm).unwrap();
-            let (net, receipts) = structural_balance(&state, &data, &realm);
+            let (net, receipts) = structural_balance(&state, data, &realm);
             assert!(
-                !in_deficit(&state, &data, &realm),
+                !in_deficit(&state, data, &realm),
                 "{realm}: {net} on {receipts}"
             );
         }

@@ -4,27 +4,20 @@
 //! The ambush cases run on the real data over an all-plain synthetic grid
 //! with a synthetic cover map (forest where the tests say); the forced
 //! march, entrenched camp and encounter cases on the real map.
+use data_model::test_support::{fac, game_data};
 
 use std::cell::RefCell;
-use std::path::PathBuf;
 
 use ai::stances;
-use data_model::{
-    CoverMap, FactionId, GameData, MapRasters, NavGrid, ProvinceId, SettlementId, PLAIN_COST,
-};
+use data_model::{CoverMap, GameData, MapRasters, NavGrid, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::{
     ArmyId, ArmyPosition, CampaignState, Cell, EncounterSite, MoveTarget, Order, SiegeState, Stance,
 };
 
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+fn real_data() -> &'static GameData {
     // FE5: the feudal AI decides, whatever the order of the tests.
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 fn px_per_km(data: &GameData) -> f32 {
@@ -64,7 +57,7 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
 /// Real data on an all-plain grid, with forest on the cells within one cell
 /// of each point of `forests`; the AI takes the stances.
 fn data_with_forest(forests: &[[f32; 2]]) -> GameData {
-    let mut data = real_data();
+    let mut data = real_data().clone();
     data.set_map_rasters(MapRasters {
         navgrid: NavGrid::uniform(3584, 3072, 2, 1.438, PLAIN_COST),
         provinces: None,
@@ -176,7 +169,7 @@ fn apply_all(state: &mut CampaignState, data: &GameData, faction: &str, orders: 
 #[test]
 fn a_weaker_army_in_cover_lies_in_wait_by_the_route_of_a_stronger_enemy() {
     let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, _) = ambush_duel(&data, spot, offset(&data, spot, 15.0, 0.0), true);
     let orders = stances::ambush_orders(&state, &data, &fac("fac_france"), &french, 50)
@@ -201,7 +194,7 @@ fn a_weaker_army_in_cover_lies_in_wait_by_the_route_of_a_stronger_enemy() {
 #[test]
 fn a_weaker_army_walks_to_cover_then_lies_in_wait() {
     let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (mut state, french, _) = ambush_duel(
         &data,
@@ -222,7 +215,7 @@ fn a_weaker_army_walks_to_cover_then_lies_in_wait() {
 #[test]
 fn no_ambush_without_reason() {
     let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let france = fac("fac_france");
     let english_at = offset(&data, spot, 15.0, 0.0);
@@ -279,7 +272,7 @@ fn no_ambush_without_reason() {
 #[test]
 fn the_ambush_is_left_when_the_threat_goes_or_it_is_discovered() {
     let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let france = fac("fac_france");
     let (mut state, french, english) =
@@ -319,7 +312,7 @@ fn the_ambush_is_left_when_the_threat_goes_or_it_is_discovered() {
 
 /// Real map, France and England at war; a French place besieged by England.
 fn siege_setup() -> (GameData, CampaignState, ArmyId, SettlementId, SettlementId) {
-    let mut data = real_data();
+    let mut data = real_data().clone();
     enable_ai_stances(&mut data);
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     at_war(&mut state, "fac_france", "fac_england");
@@ -476,7 +469,7 @@ fn french_province(
 
 #[test]
 fn an_outnumbered_army_on_a_threatened_border_entrenches() {
-    let mut data = real_data();
+    let mut data = real_data().clone();
     enable_ai_stances(&mut data);
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     at_war(&mut state, "fac_france", "fac_england");
@@ -565,7 +558,7 @@ fn an_outnumbered_army_on_a_threatened_border_entrenches() {
 
 #[test]
 fn an_idle_army_walks_to_a_near_encounter() {
-    let mut data = real_data();
+    let mut data = real_data().clone();
     enable_ai_stances(&mut data);
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     let france = fac("fac_france");
@@ -642,7 +635,7 @@ fn campaign_stance_orders(data: &GameData, seed: u64, turns: u32) -> Vec<(u32, S
 #[test]
 fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // Every behaviour at certainty: the most orders to check.
-    let mut data = real_data();
+    let mut data = real_data().clone();
     enable_ai_stances(&mut data);
     // RS-B (ADR 0100): seed 4 since the AI weighs its secondary places'
     // buildings (seed 7 then gave 2 watched orders, no ambush; seed 4 gave 12,
@@ -674,7 +667,7 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
 #[test]
 fn the_stance_ai_is_deterministic() {
     let probe = real_data();
-    let spot = empty_spot(&probe, 25.0);
+    let spot = empty_spot(probe, 25.0);
     let data = data_with_forest(&[spot]);
     let (state, _, _) = ambush_duel(
         &data,
@@ -694,7 +687,7 @@ fn the_stance_ai_is_deterministic() {
         }
     )));
     // Two campaign runs from the same seed take the same stances.
-    let mut real = real_data();
+    let mut real = real_data().clone();
     enable_ai_stances(&mut real);
     // Seed 2: seed 7 lost its ambush when FE added the French fiefs, seed 1
     // when SL1 added the sea lanes (the trajectory is seed-sensitive; this

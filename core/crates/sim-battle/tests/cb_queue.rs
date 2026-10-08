@@ -43,8 +43,8 @@ fn lab_sim(seed: u64) -> BattleSim {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_knights", "unit_knights"]),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_knights", "unit_knights"]),
+            units(data, &["unit_urban_militia"]),
             None,
         ),
         seed,

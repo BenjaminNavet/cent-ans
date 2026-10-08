@@ -2,20 +2,10 @@
 //! period units (`available_from` / `available_until`). See
 //! `docs/archive/chantiers.md`.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, TechnologyId, UnitTypeId};
+use data_model::{GameData, ProvinceId, SettlementId, TechnologyId, UnitTypeId};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn unit(id: &str) -> UnitTypeId {
     UnitTypeId::new(id).unwrap()
@@ -67,7 +57,7 @@ const UR1_UNITS: [&str; 14] = [
 
 #[test]
 fn ur1_units_are_sourced_and_have_a_figure() {
-    let data = data();
+    let data = game_data();
     for id in UR1_UNITS {
         let t = &data.unit_types[&unit(id)];
         assert!(t.sources.len() >= 2, "{id}: at least two sources");
@@ -81,12 +71,12 @@ fn ur1_units_are_sourced_and_have_a_figure() {
 
 #[test]
 fn ordonnance_companies_wait_for_1445_and_the_technology() {
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let paris = city(&state, "prov_ile_de_france");
     let why = reason(
         &state,
-        &data,
+        data,
         "fac_france",
         &paris,
         "unit_ordonnance_gendarmes",
@@ -101,7 +91,7 @@ fn ordonnance_companies_wait_for_1445_and_the_technology() {
         .insert(TechnologyId::new("tech_compagnies_d_ordonnance").unwrap());
     let why = reason(
         &state,
-        &data,
+        data,
         "fac_france",
         &paris,
         "unit_ordonnance_gendarmes",
@@ -112,7 +102,7 @@ fn ordonnance_companies_wait_for_1445_and_the_technology() {
     assert_eq!(
         reason(
             &state,
-            &data,
+            data,
             "fac_france",
             &paris,
             "unit_ordonnance_gendarmes"
@@ -125,8 +115,8 @@ fn ordonnance_companies_wait_for_1445_and_the_technology() {
 fn mercenary_bands_come_and_go_with_their_period() {
     // TW2-T3 (ADR 0103): companies are hired by an army from its region's
     // reserve, over the band's period; towns never levy them.
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let paris = city(&state, "prov_ile_de_france");
     let army = state
         .armies
@@ -138,7 +128,7 @@ fn mercenary_bands_come_and_go_with_their_period() {
         sim_campaign::ArmyPosition::Settlement(paris.clone());
     let offered = |state: &CampaignState| {
         state
-            .mercenary_market(&data, &army)
+            .mercenary_market(data, &army)
             .unwrap()
             .options
             .iter()
@@ -148,7 +138,7 @@ fn mercenary_bands_come_and_go_with_their_period() {
     state.year = 1360;
     assert!(offered(&state));
     assert_eq!(
-        reason(&state, &data, "fac_france", &paris, "unit_routiers").as_deref(),
+        reason(&state, data, "fac_france", &paris, "unit_routiers").as_deref(),
         Some("compagnie de mercenaires : à engager depuis une armée")
     );
     state.year = 1400;
@@ -157,20 +147,20 @@ fn mercenary_bands_come_and_go_with_their_period() {
 
 #[test]
 fn regional_units_need_their_culture() {
-    let data = data();
-    let state = start(&data, "fac_england");
+    let data = game_data();
+    let state = start(data, "fac_england");
     let wales = city(&state, "prov_gwynedd");
     let london = city(&state, "prov_middlesex");
     assert_eq!(
-        reason(&state, &data, "fac_england", &wales, "unit_welsh_spearmen"),
+        reason(&state, data, "fac_england", &wales, "unit_welsh_spearmen"),
         None
     );
     assert_eq!(
-        reason(&state, &data, "fac_england", &london, "unit_welsh_spearmen").as_deref(),
+        reason(&state, data, "fac_england", &london, "unit_welsh_spearmen").as_deref(),
         Some("culture locale inadaptée")
     );
     // The English retinues are England's own.
-    let mut france = start(&data, "fac_france");
+    let mut france = start(data, "fac_france");
     france
         .factions
         .get_mut(&fac("fac_france"))
@@ -179,18 +169,11 @@ fn regional_units_need_their_culture() {
         .insert(TechnologyId::new("tech_dismounted_tactics").unwrap());
     let paris = city(&france, "prov_ile_de_france");
     assert_eq!(
-        reason(&france, &data, "fac_france", &paris, "unit_english_retinue").as_deref(),
+        reason(&france, data, "fac_france", &paris, "unit_english_retinue").as_deref(),
         Some("réservé à d'autres factions")
     );
     assert_ne!(
-        reason(
-            &state,
-            &data,
-            "fac_england",
-            &london,
-            "unit_english_retinue"
-        )
-        .as_deref(),
+        reason(&state, data, "fac_england", &london, "unit_english_retinue").as_deref(),
         Some("réservé à d'autres factions")
     );
 }

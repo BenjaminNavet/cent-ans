@@ -1,10 +1,11 @@
 //! Lot M4: path preview split by turn (`CampaignState::plan_path`) and the
 //! march report of an attack (spec `docs/design/2026-09-24-mouvement-libre.md`
 //! § 6), on the real data with an all-plain synthetic grid.
+use data_model::test_support::fac;
 
 use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, MapRasters, NavGrid, IMPASSABLE, PLAIN_COST};
+use data_model::{GameData, MapRasters, NavGrid, IMPASSABLE, PLAIN_COST};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order, OrderOutcome, StopReason};
 
 fn data_with_grid(edit: impl FnOnce(&mut NavGrid)) -> GameData {
@@ -18,10 +19,6 @@ fn data_with_grid(edit: impl FnOnce(&mut NavGrid)) -> GameData {
         provinces: None,
     });
     data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
 }
 
 fn px_per_km(data: &GameData) -> f32 {

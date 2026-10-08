@@ -6,8 +6,7 @@
 //! pocket...) so that the geometry is known. The v5 save refusal is tested
 //! in `campaign.rs` (`save_load_round_trip`), determinism in
 //! `twenty_turns_with_ai_are_deterministic` there and below.
-
-use std::path::PathBuf;
+use data_model::test_support::{fac, game_data};
 
 use data_model::{FactionId, GameData, MapRasters, NavGrid, SettlementId, IMPASSABLE, PLAIN_COST};
 use sim_campaign::march::km_to_grid_points;
@@ -18,14 +17,9 @@ use sim_campaign::{
     StopReason,
 };
 
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
 /// The real data on an all-plain 2048² grid, edited by `edit`.
 fn data_with_grid(edit: impl FnOnce(&mut NavGrid)) -> GameData {
-    let mut data = real_data();
+    let mut data = game_data().clone();
     let mut grid = NavGrid::uniform(2048, 2048, 2, 1.438, PLAIN_COST);
     edit(&mut grid);
     grid.refresh_min_cost();
@@ -34,10 +28,6 @@ fn data_with_grid(edit: impl FnOnce(&mut NavGrid)) -> GameData {
         provinces: None,
     });
     data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
 }
 
 fn set(id: &str) -> SettlementId {
@@ -129,8 +119,8 @@ fn march(state: &mut CampaignState, data: &GameData, order: Order) -> sim_campai
 #[test]
 fn a_path_goes_round_a_river_by_the_bridge() {
     // A river two cells wide, north-south, with one bridge.
-    let probe = real_data();
-    let start = empty_spot(&probe, 25.0);
+    let probe = game_data();
+    let start = empty_spot(probe, 25.0);
     let grid_start = Cell::of_point(probe.navgrid(), start);
     let river_x = i64::from(grid_start.x) + 10;
     let bridge_y = i64::from(grid_start.y) + 40;
@@ -536,8 +526,8 @@ fn hostile_places_are_walked_around() {
 
 #[test]
 fn the_loser_falls_back_on_the_grid() {
-    let spot = empty_spot(&real_data(), 25.0);
-    let victor_at = east(&real_data(), spot, -4.0);
+    let spot = empty_spot(game_data(), 25.0);
+    let victor_at = east(game_data(), spot, -4.0);
     // No friendly place within reach; a refuge within the former 140 km
     // (two steps of 70 km since lot DC1, ADR 0082).
     let setup = |data: &mut GameData| {
@@ -607,8 +597,8 @@ fn the_loser_falls_back_on_the_grid() {
 /// no refuge left routs instead of falling back.
 #[test]
 fn a_crushed_or_cornered_loser_routs() {
-    let spot = empty_spot(&real_data(), 25.0);
-    let victor_at = east(&real_data(), spot, -4.0);
+    let spot = empty_spot(game_data(), 25.0);
+    let victor_at = east(game_data(), spot, -4.0);
     let mut data = data_with_grid(|_| {});
     let rules = &mut data.settlement_rules.as_mut().unwrap().retreat;
     rules.friendly_radius_steps = 0.0;
@@ -638,19 +628,19 @@ fn a_crushed_or_cornered_loser_routs() {
 
 #[test]
 fn free_movement_is_deterministic() {
-    let data = real_data();
+    let data = game_data();
     let run = || {
-        let mut state = CampaignState::new_1337(&data, fac("fac_france"), 77).unwrap();
+        let mut state = CampaignState::new_1337(data, fac("fac_france"), 77).unwrap();
         let french = main_army(&state, "fac_france");
         let toulouse = state
             .province_city_id(&data_model::ProvinceId::new("prov_toulousain").unwrap())
             .cloned()
             .unwrap();
         state
-            .submit_order(&data, Order::move_to(french, toulouse))
+            .submit_order(data, Order::move_to(french, toulouse))
             .unwrap();
         for _ in 0..4 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state.save_json()
     };
@@ -662,8 +652,8 @@ fn free_movement_is_deterministic() {
 /// reachable area.
 #[test]
 fn grid_searches_are_fast_enough() {
-    let data = real_data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let french = main_army(&state, "fac_france");
     let bayonne = data.settlement_point(&set("set_bayonne")).unwrap();
     let grid = data.navgrid();
@@ -672,12 +662,12 @@ fn grid_searches_are_fast_enough() {
     println!("components labelled in {:?}", start.elapsed());
     let start = std::time::Instant::now();
     let path = state
-        .find_path(&data, &french, bayonne)
+        .find_path(data, &french, bayonne)
         .expect("Paris to Bayonne");
     let path_time = start.elapsed();
 
     let start = std::time::Instant::now();
-    let area = state.reachable_area(&data, &french);
+    let area = state.reachable_area(data, &french);
     let area_time = start.elapsed();
     println!(
         "Paris-Bayonne: {} cells, cost {}, {path_time:?}; bubble: {} cells, {area_time:?}",

@@ -1,23 +1,13 @@
 //! Lot DP2 (ADR 0075): the AI's routes respect the right of passage at
 //! peace and break it at war according to its temper.
 
-use std::path::PathBuf;
-
 use ai::grid::GridPlanner;
 use data_model::{FactionId, GameData, SettlementId};
 use sim_campaign::movement::edges;
 use sim_campaign::passage::trespassed_owner;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 /// A French place with a direct road into the lands of a faction at peace
 /// with France: (French place, foreign place, owner).
@@ -54,7 +44,7 @@ fn set_aggression(data: &mut GameData, faction: &FactionId, value: u8) {
 
 #[test]
 fn routes_avoid_neutral_lands_unless_the_temper_allows_it() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     let (from, into, _owner) = border_crossing(&state, &data);

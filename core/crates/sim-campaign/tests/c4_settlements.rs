@@ -4,23 +4,10 @@
 //! See `docs/design/2026-09-24-echelle-colonies.md` § 4 and § 7 (the v4
 //! save refusal is tested in `campaign.rs`).
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, ProvinceId, SettlementEdge, SettlementId, SettlementKind};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 /// Cheapest path of `army` to `target` on the settlement graph (the
 /// skeleton of the AI's planning since lot M2).
@@ -100,14 +87,14 @@ fn staging_target(
 
 #[test]
 fn weights_split_the_province_income_between_controllers() {
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let province = prov("prov_ile_de_france");
     // The weight shares of a province add up to one.
     let total: f64 = state.provinces[&province]
         .settlements
         .iter()
-        .map(|s| sim_campaign::settlements::weight_share(&data, s))
+        .map(|s| sim_campaign::settlements::weight_share(data, s))
         .sum();
     assert!((total - 1.0).abs() < 1e-9, "shares sum to {total}");
 
@@ -115,17 +102,17 @@ fn weights_split_the_province_income_between_controllers() {
         .or_else(|| settlement_of_kind(&state, &province, SettlementKind::Village))
         .expect("Île-de-France has a secondary settlement");
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    let france_before = state.faction_income_effective(&data, &france);
-    let england_before = state.faction_income_effective(&data, &england);
+    let france_before = state.faction_income_effective(data, &france);
+    let england_before = state.faction_income_effective(data, &england);
     state.settlements.get_mut(&town).unwrap().controller = england.clone();
-    let france_after = state.faction_income_effective(&data, &france);
-    let england_after = state.faction_income_effective(&data, &england);
+    let france_after = state.faction_income_effective(data, &france);
+    let england_after = state.faction_income_effective(data, &england);
 
     let tax_rate = state.factions[&england].tax_rate;
-    let tech = sim_campaign::research::faction_province_tech_effects(&state, &data, &england);
+    let tech = sim_campaign::research::faction_province_tech_effects(&state, data, &england);
     // Embargoes (M5) cut the whole income, the town's share included.
     let share =
-        state.settlement_tax(&data, &town, tax_rate, &tech) * state.embargo_income_factor(&england);
+        state.settlement_tax(data, &town, tax_rate, &tech) * state.embargo_income_factor(&england);
     assert!(share > 0.0);
     let gain = england_after - england_before;
     assert!(
@@ -140,8 +127,8 @@ fn weights_split_the_province_income_between_controllers() {
 
 #[test]
 fn control_of_the_province_follows_its_city() {
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let province = prov("prov_normandie");
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     assert_eq!(state.province_controller(&province), Some(&france));
@@ -169,8 +156,8 @@ fn control_of_the_province_follows_its_city() {
 
 #[test]
 fn the_full_province_bonus_needs_every_settlement() {
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let province = prov("prov_ile_de_france");
     let france = fac("fac_france");
     let percent = data
@@ -180,33 +167,30 @@ fn the_full_province_bonus_needs_every_settlement() {
         .full_province_bonus
         .income_percent;
     assert!(percent > 0);
-    let full = state.full_province_income_factor(&data, &province, &france);
+    let full = state.full_province_income_factor(data, &province, &france);
     assert!((full - (1.0 + f64::from(percent) / 100.0)).abs() < 1e-9);
     let village = settlement_of_kind(&state, &province, SettlementKind::Village)
         .or_else(|| settlement_of_kind(&state, &province, SettlementKind::Town))
         .expect("a secondary settlement");
     state.settlements.get_mut(&village).unwrap().controller = fac("fac_england");
     assert_eq!(
-        state.full_province_income_factor(&data, &province, &france),
+        state.full_province_income_factor(data, &province, &france),
         1.0
     );
 }
 
 #[test]
 fn an_ungarrisoned_village_falls_on_arrival() {
-    let data = data();
-    let mut state = start(&data, "fac_england");
+    let data = game_data();
+    let mut state = start(data, "fac_england");
     let england = fac("fac_england");
-    let (village, staging) = staging_target(&state, &data, SettlementKind::Village, false);
+    let (village, staging) = staging_target(&state, data, SettlementKind::Village, false);
     let army = first_army(&state, &england);
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state
-        .submit_order(
-            &data,
-            Order::move_along(army.clone(), vec![village.clone()]),
-        )
+        .submit_order(data, Order::move_along(army.clone(), vec![village.clone()]))
         .expect("move order accepted");
-    quiet_turn(&mut state, &data);
+    quiet_turn(&mut state, data);
     assert_eq!(state.armies[&army].settlement().cloned().unwrap(), village);
     assert_eq!(
         state.settlements[&village].controller, england,
@@ -217,15 +201,15 @@ fn an_ungarrisoned_village_falls_on_arrival() {
 
 #[test]
 fn a_garrisoned_castle_is_besieged() {
-    let data = data();
-    let mut state = start(&data, "fac_england");
+    let data = game_data();
+    let mut state = start(data, "fac_england");
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    let (castle, staging) = staging_target(&state, &data, SettlementKind::Castle, true);
+    let (castle, staging) = staging_target(&state, data, SettlementKind::Castle, true);
     let army = first_army(&state, &england);
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(staging);
     state
         .submit_order(
-            &data,
+            data,
             Order::SetStance {
                 army: army.clone(),
                 stance: Stance::Siege,
@@ -233,9 +217,9 @@ fn a_garrisoned_castle_is_besieged() {
         )
         .unwrap();
     state
-        .submit_order(&data, Order::move_along(army.clone(), vec![castle.clone()]))
+        .submit_order(data, Order::move_along(army.clone(), vec![castle.clone()]))
         .expect("move order accepted");
-    quiet_turn(&mut state, &data);
+    quiet_turn(&mut state, data);
     assert_eq!(state.armies[&army].settlement().cloned().unwrap(), castle);
     let settlement = &state.settlements[&castle];
     assert_eq!(
@@ -253,7 +237,7 @@ fn a_garrisoned_castle_is_besieged() {
 
 #[test]
 fn the_loaded_graph_and_the_fallback_graph_both_route_armies() {
-    let mut data = data();
+    let mut data = game_data().clone();
     assert!(
         !data.movement_graph.fallback,
         "data/map/settlement_graph.json is used"
@@ -280,7 +264,7 @@ fn the_loaded_graph_and_the_fallback_graph_both_route_armies() {
 
 #[test]
 fn armies_prefer_the_road_on_a_fixture_graph() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let state = start(&data, "fac_france");
     let france = fac("fac_france");
     let army = first_army(&state, &france);
@@ -316,11 +300,11 @@ fn armies_prefer_the_road_on_a_fixture_graph() {
 
 #[test]
 fn settlement_campaigns_are_deterministic() {
-    let data = data();
+    let data = game_data();
     let run = || {
-        let mut state = CampaignState::new_1337(&data, fac("fac_france"), 11).unwrap();
+        let mut state = CampaignState::new_1337(data, fac("fac_france"), 11).unwrap();
         for _ in 0..6 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state.save_json()
     };

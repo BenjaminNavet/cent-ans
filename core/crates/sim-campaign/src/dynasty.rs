@@ -1331,24 +1331,20 @@ impl CampaignState {
 
 #[cfg(test)]
 mod culture_names_tests {
-    use std::path::PathBuf;
 
-    use data_model::{CharacterId, FactionId, GameData, Sex};
+    use data_model::{CharacterId, FactionId, Sex};
 
     use super::pick_name;
     use crate::rng::CampaignRng;
 
-    fn data() -> GameData {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        GameData::load(&root).expect("game data loads").0
-    }
+    use data_model::test_support::game_data;
 
     /// S2: `fac_granada` (culture `cul_andalusi`) must draw its generated
     /// characters' first names from `names_ar`, never from the Castilian
     /// `names_es` list it used to share with Castile/Navarre/the Basques.
     #[test]
     fn granada_generates_andalusi_arabic_names_not_castilian() {
-        let data = data();
+        let data = game_data();
         let names_ar = &data.names["names_ar"];
         let names_es = &data.names["names_es"];
         assert!(names_ar
@@ -1366,7 +1362,7 @@ mod culture_names_tests {
         let faction = FactionId::new("fac_granada").expect("well-formed id");
         let mut rng = CampaignRng::from_seed(1);
         for _ in 0..40 {
-            let male = pick_name(&data, &faction, Sex::Male, &mut rng);
+            let male = pick_name(data, &faction, Sex::Male, &mut rng);
             assert!(
                 names_ar.male_first_names.contains(&male),
                 "{male} was not drawn from names_ar"
@@ -1375,7 +1371,7 @@ mod culture_names_tests {
                 !names_es.male_first_names.contains(&male),
                 "{male} is a Castilian name, not Andalusi-Arabic"
             );
-            let female = pick_name(&data, &faction, Sex::Female, &mut rng);
+            let female = pick_name(data, &faction, Sex::Female, &mut rng);
             assert!(
                 names_ar.female_first_names.contains(&female),
                 "{female} was not drawn from names_ar"
@@ -1392,7 +1388,7 @@ mod culture_names_tests {
     /// `house` field for every generated descendant, see `house_members`).
     #[test]
     fn granada_ruler_house_is_not_castilian() {
-        let data = data();
+        let data = game_data();
         let yusuf = data
             .characters
             .get(&CharacterId::new("chr_yusuf_i").expect("well-formed id"))

@@ -21,7 +21,7 @@ const X: f64 = 600.0;
 fn lab_field(attackers: &[&str], defenders: &[&str]) -> BattleSim {
     let data = data();
     let mut sim = BattleSim::new(
-        setup(units(&data, attackers), units(&data, defenders), None),
+        setup(units(data, attackers), units(data, defenders), None),
         1,
     )
     .unwrap();

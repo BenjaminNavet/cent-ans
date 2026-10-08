@@ -20,8 +20,8 @@ fn lab_sim(
 fn disengaged_regiment_marches_again() {
     let data = data();
     let mut sim = lab_sim(
-        vec![unit(&data, "unit_men_at_arms_foot")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_urban_militia")],
     );
     place(&mut sim, 0, 600.0, 350.0, 0.0);
     place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
@@ -65,8 +65,8 @@ fn disengaged_regiment_marches_again() {
 fn archers_close_in_on_a_hidden_target() {
     let data = data();
     let mut sim = lab_sim(
-        vec![unit(&data, "unit_longbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
     );
     sim.field_mut().forests.clear();
     sim.field_mut().forest_parts.clear();
@@ -97,12 +97,12 @@ fn archers_fall_back_on_a_free_enemy() {
     let data = data();
     let mut sim = lab_sim(
         vec![
-            unit(&data, "unit_longbowmen"),
-            unit(&data, "unit_men_at_arms_foot"),
+            unit(data, "unit_longbowmen"),
+            unit(data, "unit_men_at_arms_foot"),
         ],
         vec![
-            unit(&data, "unit_urban_militia"),
-            unit(&data, "unit_urban_militia"),
+            unit(data, "unit_urban_militia"),
+            unit(data, "unit_urban_militia"),
         ],
     );
     sim.field_mut().forests.clear();
@@ -142,8 +142,8 @@ fn archers_fall_back_on_a_free_enemy() {
 #[test]
 fn withdrawal_from_the_town_goes_through_the_breach() {
     let data = data();
-    let attacker = common::units(&data, &["unit_men_at_arms_foot"]);
-    let defender = common::units(&data, &["unit_urban_militia"]);
+    let attacker = common::units(data, &["unit_men_at_arms_foot"]);
+    let defender = common::units(data, &["unit_urban_militia"]);
     let siege = sim_battle::SiegeSetup {
         fortification: 2,
         breach: 0,
@@ -176,10 +176,10 @@ fn withdrawal_from_the_town_goes_through_the_breach() {
 #[test]
 fn ai_pull_out_stays_on_the_field() {
     let data = data();
-    let foot = || unit(&data, "unit_men_at_arms_foot");
+    let foot = || unit(data, "unit_men_at_arms_foot");
     let mut sim = lab_sim(
         vec![foot(), foot(), foot(), foot(), foot()],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_urban_militia")],
     );
     sim.field_mut().forests.clear();
     sim.field_mut().forest_parts.clear();
@@ -231,12 +231,12 @@ fn no_blow_wasted_on_a_regiment_shot_dead_this_step() {
     let data = data();
     let mut sim = lab_sim(
         vec![
-            unit(&data, "unit_men_at_arms_foot"),
-            unit(&data, "unit_longbowmen"),
+            unit(data, "unit_men_at_arms_foot"),
+            unit(data, "unit_longbowmen"),
         ],
         vec![
-            unit(&data, "unit_urban_militia"),
-            unit(&data, "unit_urban_militia"),
+            unit(data, "unit_urban_militia"),
+            unit(data, "unit_urban_militia"),
         ],
     );
     sim.field_mut().forests.clear();
@@ -269,8 +269,8 @@ fn no_blow_wasted_on_a_regiment_shot_dead_this_step() {
 #[test]
 fn siege_pathing_cache_follows_the_walls() {
     let data = data();
-    let attacker = common::units(&data, &["unit_men_at_arms_foot"]);
-    let defender = common::units(&data, &["unit_urban_militia"]);
+    let attacker = common::units(data, &["unit_men_at_arms_foot"]);
+    let defender = common::units(data, &["unit_urban_militia"]);
     let siege = sim_battle::SiegeSetup {
         fortification: 2,
         breach: 0,
@@ -303,8 +303,8 @@ fn siege_pathing_cache_follows_the_walls() {
 fn pavised_crossbowmen_close_in_on_a_hidden_target() {
     let data = data();
     let mut battle = setup(
-        vec![unit(&data, "unit_crossbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_crossbowmen")],
+        vec![unit(data, "unit_urban_militia")],
         None,
     );
     battle.abilities = data.battle_abilities.values().cloned().collect();
@@ -345,8 +345,8 @@ fn pavised_crossbowmen_close_in_on_a_hidden_target() {
 fn pavised_crossbowmen_hold_and_shoot_a_visible_target() {
     let data = data();
     let mut battle = setup(
-        vec![unit(&data, "unit_crossbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_crossbowmen")],
+        vec![unit(data, "unit_urban_militia")],
         None,
     );
     battle.abilities = data.battle_abilities.values().cloned().collect();

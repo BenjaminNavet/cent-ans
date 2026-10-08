@@ -1,17 +1,12 @@
 //! Helpers shared by the siege and AI tests.
 #![allow(dead_code)]
 
-use std::path::PathBuf;
-
 use data_model::{GameData, Terrain, UnitTypeId};
 use sim_battle::{
     BattleSeason, BattleSetup, BattleSim, SideId, SideSetup, SiegeSetup, UnitSetup, Weather, DT,
 };
 
-pub fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+pub use data_model::test_support::game_data as data;
 
 pub fn unit(data: &GameData, id: &str) -> UnitSetup {
     let unit_type = &data.unit_types[&UnitTypeId::new(id).unwrap()];

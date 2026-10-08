@@ -4,19 +4,11 @@
 //! report, then the season turns and the player's marches resume.
 
 use std::cell::RefCell;
-use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{FactionId, SettlementId};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, MoveTarget, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -35,8 +27,8 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
 
 #[test]
 fn ai_factions_play_one_after_the_other_in_id_order() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     // Living at the start of the turn: a faction destroyed during the turn
     // has still played its own part of it.
     let expected: Vec<FactionId> = state
@@ -46,7 +38,7 @@ fn ai_factions_play_one_after_the_other_in_id_order() {
         .map(|(id, _)| id.clone())
         .collect();
     let played = RefCell::new(Vec::new());
-    state.end_turn_with(&data, |_, _, faction| {
+    state.end_turn_with(data, |_, _, faction| {
         played.borrow_mut().push(faction.clone());
         Vec::new()
     });
@@ -59,8 +51,8 @@ fn ai_factions_play_one_after_the_other_in_id_order() {
 
 #[test]
 fn an_ai_attack_on_the_player_is_auto_resolved_and_reported() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     assert!(
         state.interactive_battles,
         "3D battles are on for the player"
@@ -76,12 +68,12 @@ fn an_ai_attack_on_the_player_is_auto_resolved_and_reported() {
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
     let meaux = data.settlement_point(&set("set_meaux")).unwrap();
-    let km = sim_campaign::march::px_per_km(&data);
+    let km = sim_campaign::march::px_per_km(data);
     state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
     state.armies.get_mut(&french).unwrap().position =
         ArmyPosition::field([meaux[0] + 15.0 * km, meaux[1]]);
     let (attacker, target) = (english.clone(), french.clone());
-    let events = state.end_turn_with(&data, move |_, _, faction| {
+    let events = state.end_turn_with(data, move |_, _, faction| {
         if faction.as_str() == "fac_england" {
             vec![Order::Attack {
                 army: attacker.clone(),
@@ -110,8 +102,8 @@ fn an_ai_attack_on_the_player_is_auto_resolved_and_reported() {
 
 #[test]
 fn the_player_attacking_still_gets_his_battle() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     for (a, b) in [("fac_england", "fac_france"), ("fac_france", "fac_england")] {
         state
             .factions
@@ -123,13 +115,13 @@ fn the_player_attacking_still_gets_his_battle() {
     let english = main_army(&state, "fac_england");
     let french = main_army(&state, "fac_france");
     let meaux = data.settlement_point(&set("set_meaux")).unwrap();
-    let km = sim_campaign::march::px_per_km(&data);
+    let km = sim_campaign::march::px_per_km(data);
     state.armies.get_mut(&french).unwrap().position = ArmyPosition::field(meaux);
     state.armies.get_mut(&english).unwrap().position =
         ArmyPosition::field([meaux[0] + 15.0 * km, meaux[1]]);
     state
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: french,
                 target_army: english,
@@ -141,13 +133,13 @@ fn the_player_attacking_still_gets_his_battle() {
 
 #[test]
 fn the_player_march_resumes_after_the_new_season() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let french = main_army(&state, "fac_france");
     // Far beyond one season: Paris to Bayonne.
     let outcome = state
         .submit_order_outcome(
-            &data,
+            data,
             Order::MoveArmy {
                 army: french.clone(),
                 target: sim_campaign::MoveOrderTarget::Place(sim_campaign::Place::Settlement(set(
@@ -160,12 +152,12 @@ fn the_player_march_resumes_after_the_new_season() {
         panic!("a march");
     };
     assert!(!report.planned_path.is_empty(), "several seasons away");
-    let before = state.army_point(&data, &state.armies[&french]);
-    state.end_turn_with(&data, |_, _, _| Vec::new());
+    let before = state.army_point(data, &state.armies[&french]);
+    state.end_turn_with(data, |_, _, _| Vec::new());
     let army = &state.armies[&french];
-    assert_ne!(state.army_point(&data, army), before, "marched on");
+    assert_ne!(state.army_point(data, army), before, "marched on");
     assert!(
-        army.movement_left < state.army_grid_allowance(&data, army),
+        army.movement_left < state.army_grid_allowance(data, army),
         "with the new season's points"
     );
     assert_eq!(

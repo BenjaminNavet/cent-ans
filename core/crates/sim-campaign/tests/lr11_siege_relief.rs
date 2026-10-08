@@ -2,6 +2,7 @@
 //! relief army or a sortie) or march off. A relief army beaten before the
 //! walls leaves the siege running; besiegers put to flight by a sortie fall
 //! back like any beaten army instead of standing idle under the walls.
+use data_model::test_support::fac;
 
 use std::path::PathBuf;
 
@@ -19,10 +20,6 @@ fn plain_data() -> GameData {
         provinces: None,
     });
     data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
 }
 
 fn main_army(state: &CampaignState, faction: &str) -> ArmyId {

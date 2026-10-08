@@ -1,25 +1,11 @@
 //! MF1 (campaign map filters) integration tests: `map_lens` values on the
 //! 1337 start.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::GameData;
 use sim_campaign::map_lens::{map_lens, ClaimStance};
 use sim_campaign::{CampaignState, Season};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn start(data: &GameData, player: &str) -> CampaignState {
     CampaignState::new_1337(data, fac(player), 7).expect("1337 start")
@@ -27,9 +13,9 @@ fn start(data: &GameData, player: &str) -> CampaignState {
 
 #[test]
 fn every_province_has_values_in_range() {
-    let data = data();
-    let state = start(&data, "fac_france");
-    let lens = map_lens(&state, &data, &fac("fac_france"));
+    let data = game_data();
+    let state = start(data, "fac_france");
+    let lens = map_lens(&state, data, &fac("fac_france"));
     assert_eq!(lens.len(), state.provinces.len());
     for (id, values) in &lens {
         assert!(
@@ -45,11 +31,11 @@ fn every_province_has_values_in_range() {
 
 #[test]
 fn vassal_provinces_carry_their_lord_and_loyalty() {
-    let data = data();
-    let state = start(&data, "fac_france");
+    let data = game_data();
+    let state = start(data, "fac_france");
     let flanders = fac("fac_flanders");
     let loyalty = state.faction_state(&flanders).unwrap().loyalty;
-    let lens = map_lens(&state, &data, &fac("fac_france"));
+    let lens = map_lens(&state, data, &fac("fac_france"));
     let flemish: Vec<_> = lens
         .iter()
         .filter(|(id, _)| state.province_owner(id) == Some(&flanders))
@@ -66,15 +52,15 @@ fn vassal_provinces_carry_their_lord_and_loyalty() {
 
 #[test]
 fn claims_are_seen_from_both_sides() {
-    let data = data();
-    let state = start(&data, "fac_england");
+    let data = game_data();
+    let state = start(data, "fac_england");
     // Edward III claims the French crown, hence every French province.
-    let english = map_lens(&state, &data, &fac("fac_england"));
+    let english = map_lens(&state, data, &fac("fac_england"));
     assert!(matches!(
         english[&prov("prov_ile_de_france")].claim,
         ClaimStance::Ours | ClaimStance::Contested
     ));
-    let french = map_lens(&state, &data, &fac("fac_france"));
+    let french = map_lens(&state, data, &fac("fac_france"));
     assert_eq!(
         french[&prov("prov_ile_de_france")].claim,
         ClaimStance::AgainstUs
@@ -83,14 +69,14 @@ fn claims_are_seen_from_both_sides() {
 
 #[test]
 fn supply_recovers_at_home_and_drains_abroad_worse_in_winter() {
-    let data = data();
-    let mut state = start(&data, "fac_france");
+    let data = game_data();
+    let mut state = start(data, "fac_france");
     let france = fac("fac_france");
-    let lens = map_lens(&state, &data, &france);
+    let lens = map_lens(&state, data, &france);
     assert!(lens[&prov("prov_ile_de_france")].supply_change > 0);
     let abroad = lens[&prov("prov_kent")].supply_change;
     assert!(abroad < 0, "Kent: {abroad}");
     state.season = Season::Winter;
-    let winter = map_lens(&state, &data, &france)[&prov("prov_kent")].supply_change;
+    let winter = map_lens(&state, data, &france)[&prov("prov_kent")].supply_change;
     assert!(winter < abroad, "winter {winter} vs {abroad}");
 }

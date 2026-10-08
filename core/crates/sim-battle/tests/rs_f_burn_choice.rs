@@ -44,7 +44,7 @@ fn first_of(sim: &BattleSim, side: SideId) -> u32 {
 #[test]
 fn no_burn_order_outside_a_siege() {
     let data = data();
-    let setup = setup(units(&data, &BESIEGERS), units(&data, &GARRISON), None);
+    let setup = setup(units(data, &BESIEGERS), units(data, &GARRISON), None);
     let sim = BattleSim::new(setup, 3).unwrap();
     assert_eq!(
         sim.burn_choice(SideId::Attacker, &[]),
@@ -55,7 +55,7 @@ fn no_burn_order_outside_a_siege() {
 #[test]
 fn far_besiegers_cannot_but_the_garrison_reaches_its_suburbs() {
     let data = data();
-    let sim = quiet_siege(&data, 4);
+    let sim = quiet_siege(data, 4);
     assert_eq!(
         sim.burn_choice(SideId::Attacker, &[]),
         Err(CommandError::NothingInReach)
@@ -75,7 +75,7 @@ fn far_besiegers_cannot_but_the_garrison_reaches_its_suburbs() {
 #[test]
 fn a_besieger_next_to_a_house_gets_it_and_the_command_is_accepted() {
     let data = data();
-    let mut sim = quiet_siege(&data, 5);
+    let mut sim = quiet_siege(data, 5);
     let id = first_of(&sim, SideId::Attacker);
     let (house, hx, hz, radius) = {
         let works = sim.siege().unwrap();
@@ -104,7 +104,7 @@ fn a_besieger_next_to_a_house_gets_it_and_the_command_is_accepted() {
 fn asking_draws_nothing() {
     let data = data();
     let state = |ask: bool| {
-        let mut sim = quiet_siege(&data, 6);
+        let mut sim = quiet_siege(data, 6);
         let id = first_of(&sim, SideId::Defender);
         let suburb = (0..sim.siege().unwrap().houses.len())
             .find(|&i| sim.siege().unwrap().houses[i].suburb)
@@ -135,7 +135,7 @@ fn asking_draws_nothing() {
 #[test]
 fn nothing_left_once_everything_burns() {
     let data = data();
-    let mut sim = quiet_siege(&data, 7);
+    let mut sim = quiet_siege(data, 7);
     sim.set_weather(Weather::Clear);
     let n = sim.siege().unwrap().houses.len();
     for i in 0..n {

@@ -2,24 +2,15 @@
 //! classification, so no starting garrison is split into a leaderless army
 //! on the first turn (`prov_normandie_ouest` did).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::ProvinceId;
 use sim_campaign::Place;
 use sim_campaign::{CampaignState, GarrisonRole, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 #[test]
 fn starting_garrisons_follow_the_shared_classification() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // JR4b: the great realms short of money start with lighter garrisons
     // (`starting_budget`); the role sizes are checked without that trim.
     if let Some(rules) = data.settlement_rules.as_mut() {
@@ -53,11 +44,11 @@ fn starting_garrisons_follow_the_shared_classification() {
 
 #[test]
 fn no_leaderless_army_is_split_from_a_garrison_on_the_first_turn() {
-    let data = data();
+    let data = game_data();
     for player in ["fac_england", "fac_france"] {
-        let state = CampaignState::new_1337(&data, fac(player), 1).unwrap();
+        let state = CampaignState::new_1337(data, fac(player), 1).unwrap();
         for faction in state.factions.keys() {
-            let splits: Vec<Place> = ai::plan_turn(&state, &data, faction)
+            let splits: Vec<Place> = ai::plan_turn(&state, data, faction)
                 .into_iter()
                 .filter_map(|order| match order {
                     Order::CreateArmy { settlement, .. } => Some(settlement),

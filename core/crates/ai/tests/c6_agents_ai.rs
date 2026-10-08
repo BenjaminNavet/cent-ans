@@ -1,23 +1,21 @@
 //! Lot C6: the strategic AI recruits and employs agents with valid orders.
+use data_model::test_support::game_data;
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 
 use data_model::{FactionId, GameData};
 use sim_campaign::{CampaignState, EventKind, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
+    game_data()
 }
 
 #[test]
 fn ai_recruits_moves_and_uses_agents_with_few_refusals() {
     let data = data();
     let mut state =
-        CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 11).unwrap();
+        CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 11).unwrap();
     let mut issued = 0usize;
     let mut refused = 0usize;
     let mut refusals: BTreeMap<String, usize> = BTreeMap::new();
@@ -32,9 +30,9 @@ fn ai_recruits_moves_and_uses_agents_with_few_refusals() {
             .map(|(id, _)| id.clone())
             .collect();
         for faction in factions {
-            for order in sim_campaign::agents::plan_agents(&probe, &data, &faction) {
+            for order in sim_campaign::agents::plan_agents(&probe, data, &faction) {
                 issued += 1;
-                if let Err(e) = probe.apply_order(&data, &faction, order.clone()) {
+                if let Err(e) = probe.apply_order(data, &faction, order.clone()) {
                     refused += 1;
                     let key = match order {
                         Order::RecruitAgent { .. } => "recruit",
@@ -46,7 +44,7 @@ fn ai_recruits_moves_and_uses_agents_with_few_refusals() {
                 }
             }
         }
-        let events = state.end_turn_with(&data, ai::plan_turn);
+        let events = state.end_turn_with(data, ai::plan_turn);
         agent_events += events.iter().filter(|e| e.kind == EventKind::Agent).count();
     }
     let england = FactionId::new("fac_england").unwrap();

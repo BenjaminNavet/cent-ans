@@ -68,7 +68,7 @@ fn lab_sim(seed: u64) -> BattleSim {
     let mut sim = BattleSim::new(
         setup(
             units(
-                &data,
+                data,
                 &[
                     "unit_men_at_arms_foot",
                     "unit_longbowmen",
@@ -76,7 +76,7 @@ fn lab_sim(seed: u64) -> BattleSim {
                     "unit_crossbowmen",
                 ],
             ),
-            units(&data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
+            units(data, &["unit_urban_militia", "unit_men_at_arms_foot"]),
             None,
         ),
         seed,
@@ -171,8 +171,8 @@ fn guard_skirmish_and_melee_exclude_each_other() {
 fn modes_can_be_set_while_deploying() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_urban_militia"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_urban_militia"]),
         None,
     );
     battle.player_side = Some(SideId::Attacker);
@@ -431,10 +431,10 @@ fn battered(data: &GameData, id: u32, breach: bool, seconds: f64) -> f64 {
 fn breach_batters_walls_harder_the_mangonel_less_so() {
     let data = data();
     let seconds = 300.0;
-    let trebuchet = battered(&data, 1, false, seconds);
-    let trebuchet_breach = battered(&data, 1, true, seconds);
-    let mangonel = battered(&data, 2, false, seconds);
-    let mangonel_breach = battered(&data, 2, true, seconds);
+    let trebuchet = battered(data, 1, false, seconds);
+    let trebuchet_breach = battered(data, 1, true, seconds);
+    let mangonel = battered(data, 2, false, seconds);
+    let mangonel_breach = battered(data, 2, true, seconds);
     assert!(trebuchet > 0.0 && mangonel > 0.0);
     let heavy = trebuchet_breach / trebuchet;
     let light = mangonel_breach / mangonel;
@@ -452,7 +452,7 @@ fn breach_batters_walls_harder_the_mangonel_less_so() {
 /// (none in range) with a garrison regiment (3) 150 m in front of it.
 fn engine_shots_at_men(breach: bool) -> Vec<sim_battle::ShotEvent> {
     let data = data();
-    let (mut sim, piece) = siege_sim(&data, breach);
+    let (mut sim, piece) = siege_sim(data, breach);
     let works = sim.siege().unwrap().clone();
     let (mx, mz) = works.pieces[piece].midpoint();
     let (nx, nz) = works.pieces[piece].outward();
@@ -471,7 +471,7 @@ fn engine_shots_at_men(breach: bool) -> Vec<sim_battle::ShotEvent> {
 #[test]
 fn breach_is_for_siege_engines_and_never_shoots_men() {
     let data = data();
-    let (mut sim, _) = siege_sim(&data, true);
+    let (mut sim, _) = siege_sim(data, true);
     // Not for the foot, nor outside a siege (see above).
     assert!(sim
         .apply_command(set_mode(vec![0], UnitMode::Breach, true), None)
@@ -642,7 +642,7 @@ fn defensive_sim(seed: u64) -> BattleSim {
         "unit_men_at_arms_foot",
         "unit_mounted_archers",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);

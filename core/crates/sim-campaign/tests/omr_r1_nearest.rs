@@ -1,20 +1,14 @@
 //! OMR R1: the nearest settlement read on the settlement grid is the one the
 //! walk over every settlement finds (distance, then id), on the real map.
 
-use std::path::PathBuf;
-
 use data_model::settlement_grid::nearest_by_walk;
-use data_model::GameData;
 use sim_campaign::march::{nearest_settlement, nearest_settlement_where};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 #[test]
 fn grid_matches_the_walk() {
-    let data = data();
+    let data = game_data();
     let points: Vec<[f32; 2]> = data.settlement_px.values().copied().collect();
     assert!(points.len() > 1000);
     let (mut min, mut max) = ([f32::MAX; 2], [f32::MIN; 2]);
@@ -42,9 +36,9 @@ fn grid_matches_the_walk() {
     queries.push([-1.0e6, 3.0e5]);
     queries.push([f32::NAN, 10.0]);
     for q in &queries {
-        let walk = nearest_settlement_where(&data, *q, |_| true);
-        assert_eq!(nearest_settlement(&data, *q), walk, "{q:?}");
-        assert_eq!(nearest_by_walk(&data, *q), walk, "{q:?}");
+        let walk = nearest_settlement_where(data, *q, |_| true);
+        assert_eq!(nearest_settlement(data, *q), walk, "{q:?}");
+        assert_eq!(nearest_by_walk(data, *q), walk, "{q:?}");
     }
     assert!(queries.len() > 2000);
 }

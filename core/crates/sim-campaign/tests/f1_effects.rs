@@ -11,19 +11,7 @@ use data_model::{
 };
 use sim_campaign::{ArmyId, CampaignState, EventContext, Order, Season, SettlementState, Unit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 /// The city of a province (lot C4: buildings, garrisons and recruitment
 /// belong to settlements).
@@ -115,17 +103,17 @@ fn first_army_of(state: &CampaignState, faction: &str) -> ArmyId {
 
 #[test]
 fn class_targeted_building_effects_reach_only_their_class() {
-    let data = data();
+    let data = game_data();
     let province = prov("prov_ile_de_france");
-    let mut with = quiet_france(&data, 7);
+    let mut with = quiet_france(data, 7);
     let mut without = with.clone();
     city_mut(&mut with, &province)
         .buildings
         .push(bld("bld_guild_hall"));
     strip(&mut without, &province, &[bld("bld_guild_hall")]);
     for _ in 0..4 {
-        with.end_turn_with(&data, idle);
-        without.end_turn_with(&data, idle);
+        with.end_turn_with(data, idle);
+        without.end_turn_with(data, idle);
     }
     let a = &with.provinces[&province].population;
     let b = &without.provinces[&province].population;
@@ -141,19 +129,19 @@ fn class_targeted_building_effects_reach_only_their_class() {
 
 #[test]
 fn garrison_effect_lowers_garrison_upkeep() {
-    let data = data();
-    let mut state = quiet_france(&data, 3);
+    let data = game_data();
+    let mut state = quiet_france(data, 3);
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
     let walls = ["bld_palisade", "bld_stone_walls", "bld_castle"].map(bld);
     assert!(!city_mut(&mut state, &province).garrison.is_empty());
     strip(&mut state, &province, &walls);
-    assert_eq!(state.province_effects(&data, &province).garrison.flat, 0.0);
-    let before = state.faction_upkeep(&data, &france_id);
+    assert_eq!(state.province_effects(data, &province).garrison.flat, 0.0);
+    let before = state.faction_upkeep(data, &france_id);
     city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_palisade"));
-    let after = state.faction_upkeep(&data, &france_id);
+    let after = state.faction_upkeep(data, &france_id);
     assert!(
         after < before,
         "palisade: the town pays 10 % ({before} -> {after})"
@@ -162,8 +150,8 @@ fn garrison_effect_lowers_garrison_upkeep() {
 
 #[test]
 fn garrison_effect_reinforces_a_depleted_garrison() {
-    let data = data();
-    let mut state = quiet_france(&data, 4);
+    let data = game_data();
+    let mut state = quiet_france(data, 4);
     let province = prov("prov_ile_de_france");
     let p = city_mut(&mut state, &province);
     assert!(!p.garrison.is_empty());
@@ -172,7 +160,7 @@ fn garrison_effect_reinforces_a_depleted_garrison() {
         unit.strength = unit.max_strength / 2;
     }
     let before: u32 = p.garrison.iter().map(|u| u.strength).sum();
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let after: u32 = state
         .city_state(&province)
         .unwrap()
@@ -185,13 +173,13 @@ fn garrison_effect_reinforces_a_depleted_garrison() {
 
 #[test]
 fn recruit_cost_effects_target_their_unit_family() {
-    let data = data();
-    let mut state = quiet_france(&data, 5);
+    let data = game_data();
+    let mut state = quiet_france(data, 5);
     let france_id = fac("fac_france");
     let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
-            .recruit_option(&data, &france_id, &province, &unit(id))
+            .recruit_option(data, &france_id, &province, &unit(id))
             .unwrap()
             .cost
     };
@@ -211,7 +199,7 @@ fn recruit_cost_effects_target_their_unit_family() {
     let treasury = state.factions[&france_id].treasury;
     state
         .submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: province.clone().into(),
                 unit_type: unit("unit_knights"),
@@ -226,8 +214,8 @@ fn recruit_cost_effects_target_their_unit_family() {
 
 #[test]
 fn supply_buildings_speed_up_recovery_in_the_province() {
-    let data = data();
-    let base = quiet_france(&data, 6);
+    let data = game_data();
+    let base = quiet_france(data, 6);
     let army = first_army_of(&base, "fac_france");
     let location = base.armies[&army].settlement().cloned().unwrap();
     let run = |port: bool| {
@@ -240,7 +228,7 @@ fn supply_buildings_speed_up_recovery_in_the_province() {
             let p = state.settlements.get_mut(&location).unwrap();
             p.buildings.push(bld("bld_port"));
         }
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         state.armies[&army].supply
     };
     assert_eq!(run(true), run(false) + 10);
@@ -252,12 +240,12 @@ fn supply_buildings_speed_up_recovery_in_the_province() {
 
 #[test]
 fn army_upkeep_technology_lowers_the_bill() {
-    let data = data();
-    let mut state = quiet_france(&data, 11);
+    let data = game_data();
+    let mut state = quiet_france(data, 11);
     let france_id = fac("fac_france");
-    let before = state.faction_upkeep(&data, &france_id);
+    let before = state.faction_upkeep(data, &france_id);
     grant_tech(&mut state, "fac_france", "tech_standing_companies");
-    let after = state.faction_upkeep(&data, &france_id);
+    let after = state.faction_upkeep(data, &france_id);
     let expected = before as f64 * 0.9;
     assert!(
         (after as f64 - expected).abs() <= before as f64 * 0.01 + 5.0,
@@ -267,22 +255,22 @@ fn army_upkeep_technology_lowers_the_bill() {
 
 #[test]
 fn army_experience_technology_trains_recruits() {
-    let data = data();
-    let mut state = quiet_france(&data, 12);
+    let data = game_data();
+    let mut state = quiet_france(data, 12);
     grant_tech(&mut state, "fac_france", "tech_standing_companies");
     let province = prov("prov_ile_de_france");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 100_000;
     let garrison_before = state.city_state(&province).unwrap().garrison.len();
     state
         .submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: province.clone().into(),
                 unit_type: unit("unit_urban_militia"),
             },
         )
         .unwrap();
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let recruit = &state.city_state(&province).unwrap().garrison[garrison_before];
     assert_eq!(recruit.unit_type, unit("unit_urban_militia"));
     assert!(recruit.experience >= 2, "experience {}", recruit.experience);
@@ -290,13 +278,13 @@ fn army_experience_technology_trains_recruits() {
 
 #[test]
 fn recruit_cost_technology_targets_its_family() {
-    let data = data();
-    let mut state = quiet_france(&data, 13);
+    let data = game_data();
+    let mut state = quiet_france(data, 13);
     let france_id = fac("fac_france");
     let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
-            .recruit_option(&data, &france_id, &province, &unit(id))
+            .recruit_option(data, &france_id, &province, &unit(id))
             .unwrap()
             .cost
     };
@@ -310,40 +298,40 @@ fn recruit_cost_technology_targets_its_family() {
 
 #[test]
 fn siege_trains_slow_armies_until_field_artillery() {
-    let data = data();
-    let mut state = quiet_france(&data, 14);
+    let data = game_data();
+    let mut state = quiet_france(data, 14);
     let army_id = first_army_of(&state, "fac_france");
     let trebuchet = Unit::fresh(&data.unit_types[&unit("unit_trebuchet")]);
     let mut army = state.armies[&army_id].clone();
     army.general = None;
-    let plain = state.army_movement_allowance(&data, &army);
+    let plain = state.army_movement_allowance(data, &army);
     // Lot C4: season steps times the points of one step.
     // Lot C7a: times the season scale of `rules.json`.
     let per_step =
-        sim_campaign::movement::points_per_step(&data) * data.movement_rules().season_scale;
+        sim_campaign::movement::points_per_step(data) * data.movement_rules().season_scale;
     let steps = state.season().movement_steps();
     assert_eq!(plain, (f64::from(steps) * per_step).round() as u32);
     // A siege train marches at -20 % pace: one step less (3 -> 2).
     army.units.push(trebuchet);
     let slowed = ((f64::from(steps) * 0.8 + 1e-9).floor().max(1.0) * per_step).round() as u32;
     assert!(slowed < plain);
-    assert_eq!(state.army_movement_allowance(&data, &army), slowed);
+    assert_eq!(state.army_movement_allowance(data, &army), slowed);
     grant_tech(&mut state, "fac_france", "tech_field_artillery");
-    assert_eq!(state.army_movement_allowance(&data, &army), plain);
+    assert_eq!(state.army_movement_allowance(data, &army), plain);
 }
 
 #[test]
 fn production_buildings_raise_income() {
-    let data = data();
-    let mut state = quiet_france(&data, 15);
+    let data = game_data();
+    let mut state = quiet_france(data, 15);
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
     strip(&mut state, &province, &[bld("bld_weaving_workshop")]);
-    let before = state.faction_income_effective(&data, &france_id);
+    let before = state.faction_income_effective(data, &france_id);
     city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_weaving_workshop"));
-    let after = state.faction_income_effective(&data, &france_id);
+    let after = state.faction_income_effective(data, &france_id);
     assert!(
         after > before,
         "weaving workshop +15 % production: {before} -> {after}"
@@ -352,8 +340,8 @@ fn production_buildings_raise_income() {
 
 #[test]
 fn siege_resistance_and_masonry_harden_walled_towns() {
-    let data = data();
-    let mut state = quiet_france(&data, 16);
+    let data = game_data();
+    let mut state = quiet_france(data, 16);
     let province = city(&state, &prov("prov_ile_de_france"));
     let england = fac("fac_england");
     state
@@ -368,34 +356,34 @@ fn siege_resistance_and_masonry_harden_walled_towns() {
             .map(bld)
             .contains(b)
     });
-    let open_level = state.fortification_level(&data, &province);
-    let open_resistance = state.siege_resistance(&data, &province, &england);
+    let open_level = state.fortification_level(data, &province);
+    let open_resistance = state.siege_resistance(data, &province, &england);
     state
         .settlements
         .get_mut(&province)
         .unwrap()
         .buildings
         .push(bld("bld_stone_walls"));
-    let walled = state.fortification_level(&data, &province);
-    let walled_resistance = state.siege_resistance(&data, &province, &england);
+    let walled = state.fortification_level(data, &province);
+    let walled_resistance = state.siege_resistance(data, &province, &england);
     assert!(walled_resistance >= open_resistance + 10.0);
     // English siege engineering eats into it.
     grant_tech(&mut state, "fac_england", "tech_siege_engineering");
-    assert!(state.siege_resistance(&data, &province, &england) < walled_resistance);
+    assert!(state.siege_resistance(data, &province, &england) < walled_resistance);
     // French masonry adds a level to walled towns only.
     grant_tech(&mut state, "fac_france", "tech_masonry");
-    assert_eq!(state.fortification_level(&data, &province), walled + 1);
+    assert_eq!(state.fortification_level(data, &province), walled + 1);
     if open_level == 0 {
         let p = state.settlements.get_mut(&province).unwrap();
         p.buildings.retain(|b| b != &bld("bld_stone_walls"));
-        assert_eq!(state.fortification_level(&data, &province), 0);
+        assert_eq!(state.fortification_level(data, &province), 0);
     }
 }
 
 #[test]
 fn class_targeted_wealth_technology_enriches_peasants() {
-    let data = data();
-    let mut with = quiet_france(&data, 17);
+    let data = game_data();
+    let mut with = quiet_france(data, 17);
     with.factions
         .get_mut(&fac("fac_france"))
         .unwrap()
@@ -404,8 +392,8 @@ fn class_targeted_wealth_technology_enriches_peasants() {
     let mut without = with.clone();
     grant_tech(&mut with, "fac_france", "tech_three_field_rotation");
     for _ in 0..4 {
-        with.end_turn_with(&data, idle);
-        without.end_turn_with(&data, idle);
+        with.end_turn_with(data, idle);
+        without.end_turn_with(data, idle);
     }
     let province = prov("prov_ile_de_france");
     let a = &with.provinces[&province].population;
@@ -416,26 +404,26 @@ fn class_targeted_wealth_technology_enriches_peasants() {
 
 #[test]
 fn prestige_technology_feeds_the_ruler_every_year() {
-    let data = data();
-    let mut state = quiet_france(&data, 18);
+    let data = game_data();
+    let mut state = quiet_france(data, 18);
     let france_id = fac("fac_france");
-    let before = sim_campaign::dynasty::yearly_court_prestige(&state, &data, &france_id);
+    let before = sim_campaign::dynasty::yearly_court_prestige(&state, data, &france_id);
     grant_tech(&mut state, "fac_france", "tech_printing_press");
-    let after = sim_campaign::dynasty::yearly_court_prestige(&state, &data, &france_id);
+    let after = sim_campaign::dynasty::yearly_court_prestige(&state, data, &france_id);
     assert_eq!(after, before + 1, "printing press: +5 / 5 a year");
     // A full year: the ruler actually gains it (other sources aside).
     let ruler = state.factions[&france_id].ruler.clone().unwrap();
     let start = state.characters[&ruler].prestige;
     for _ in 0..4 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state.characters[&ruler].prestige >= start + after.min(0) + after);
 }
 
 #[test]
 fn research_surplus_carries_over_to_the_next_technology() {
-    let data = data();
-    let mut state = quiet_france(&data, 19);
+    let data = game_data();
+    let mut state = quiet_france(data, 19);
     let france_id = fac("fac_france");
     let available: Vec<TechnologyId> = data
         .technologies
@@ -450,7 +438,7 @@ fn research_surplus_carries_over_to_the_next_technology() {
     let (first, second) = (available[0].clone(), available[1].clone());
     state
         .submit_order(
-            &data,
+            data,
             Order::Research {
                 technology: first.clone(),
             },
@@ -462,15 +450,15 @@ fn research_surplus_carries_over_to_the_next_technology() {
         .get_mut(&france_id)
         .unwrap()
         .research_progress = cost - 1;
-    let points = state.research_points_per_turn(&data, &france_id);
-    state.end_turn_with(&data, idle);
+    let points = state.research_points_per_turn(data, &france_id);
+    state.end_turn_with(data, idle);
     let f = &state.factions[&france_id];
     assert!(f.technologies.contains(&first));
     assert!(f.research.is_none());
     assert_eq!(f.research_progress, points - 1);
     state
         .submit_order(
-            &data,
+            data,
             Order::Research {
                 technology: second.clone(),
             },
@@ -488,8 +476,8 @@ fn research_surplus_carries_over_to_the_next_technology() {
 
 #[test]
 fn scholar_ruler_speeds_up_civil_research_only() {
-    let data = data();
-    let mut state = quiet_france(&data, 21);
+    let data = game_data();
+    let mut state = quiet_france(data, 21);
     let france_id = fac("fac_france");
     let ruler = ruler_of(&state, "fac_france");
     for id in ["trait_scholar", "trait_cultured", "trait_prodigy"] {
@@ -516,13 +504,13 @@ fn scholar_ruler_speeds_up_civil_research_only() {
     let points = |state: &mut CampaignState, technology: &TechnologyId| {
         state
             .submit_order(
-                &data,
+                data,
                 Order::Research {
                     technology: technology.clone(),
                 },
             )
             .unwrap();
-        state.research_points_per_turn(&data, &france_id)
+        state.research_points_per_turn(data, &france_id)
     };
     let civil_plain = points(&mut state, &civil);
     let military_plain = points(&mut state, &military);
@@ -542,13 +530,13 @@ fn scholar_ruler_speeds_up_civil_research_only() {
 
 #[test]
 fn a_diplomat_ruler_improves_foreign_attitudes() {
-    let data = data();
-    let mut state = quiet_france(&data, 22);
+    let data = game_data();
+    let mut state = quiet_france(data, 22);
     let (england, france_id) = (fac("fac_england"), fac("fac_france"));
-    let before = state.attitude(&data, &england, &france_id).0;
+    let before = state.attitude(data, &england, &france_id).0;
     let ruler = ruler_of(&state, "fac_france");
     give_trait(&mut state, &ruler, "trait_diplomat");
-    let (after, reasons) = state.attitude(&data, &england, &france_id);
+    let (after, reasons) = state.attitude(data, &england, &france_id);
     assert!(after > before, "{before} -> {after}");
     assert!(reasons
         .iter()
@@ -603,8 +591,8 @@ fn intrigue_makes_captures_likelier() {
 
 #[test]
 fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
-    let data = data();
-    let mut state = quiet_france(&data, 23);
+    let data = game_data();
+    let mut state = quiet_france(data, 23);
     let (brittany, france_id) = (fac("fac_brittany"), fac("fac_france"));
     assert_eq!(
         state.factions[&brittany].suzerain.as_ref(),
@@ -612,14 +600,14 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
     );
     let duke = ruler_of(&state, "fac_brittany");
     state.characters.get_mut(&duke).unwrap().traits.clear();
-    let before = sim_campaign::diplomacy::loyalty_target(&state, &data, &brittany, &france_id);
+    let before = sim_campaign::diplomacy::loyalty_target(&state, data, &brittany, &france_id);
     give_trait(&mut state, &duke, "trait_loyal");
-    let after = sim_campaign::diplomacy::loyalty_target(&state, &data, &brittany, &france_id);
+    let after = sim_campaign::diplomacy::loyalty_target(&state, data, &brittany, &france_id);
     assert!(after > before, "loyal duke: {before} -> {after}");
 
     // A castle's `Loyalty` calms the local nobility only.
     let province = prov("prov_ile_de_france");
-    let mut with = quiet_france(&data, 24);
+    let mut with = quiet_france(data, 24);
     strip(&mut with, &province, &[bld("bld_castle")]);
     // A ravaged province: the nobility's unrest target is well above zero.
     with.provinces.get_mut(&province).unwrap().devastation = 100;
@@ -638,8 +626,8 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
         .buildings
         .push(bld("bld_castle"));
     for _ in 0..3 {
-        with.end_turn_with(&data, idle);
-        without.end_turn_with(&data, idle);
+        with.end_turn_with(data, idle);
+        without.end_turn_with(data, idle);
     }
     let a = &with.provinces[&province].population;
     let b = &without.provinces[&province].population;
@@ -653,8 +641,8 @@ fn loyal_rulers_and_castles_keep_vassals_and_nobles_loyal() {
 
 #[test]
 fn allied_armies_in_the_province_join_the_battle() {
-    let data = data();
-    let mut state = quiet_france(&data, 31);
+    let data = game_data();
+    let mut state = quiet_france(data, 31);
     let (france_id, england, brittany) =
         (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
     assert!(
@@ -669,7 +657,7 @@ fn allied_armies_in_the_province_join_the_battle() {
     let split = state.peek_next_army_id();
     state
         .submit_order(
-            &data,
+            data,
             Order::SplitArmy {
                 army: lead.clone(),
                 unit_indices: vec![units - 1],
@@ -694,7 +682,7 @@ fn allied_armies_in_the_province_join_the_battle() {
         .at_war_with
         .insert(brittany.clone());
     let breton_units = state.armies[&breton].units.len();
-    let coalition = sim_campaign::movement::battle_coalition(&state, &data, &lead, &england);
+    let coalition = sim_campaign::movement::battle_coalition(&state, data, &lead, &england);
     assert_eq!(coalition[0], lead, "the army of the encounter leads");
     let mut allies = coalition[1..].to_vec();
     allies.sort();
@@ -703,7 +691,7 @@ fn allied_armies_in_the_province_join_the_battle() {
     assert_eq!(allies, expected);
 
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
-    let setup = state.battle_setup(&data, index).unwrap();
+    let setup = state.battle_setup(data, index).unwrap();
     assert_eq!(setup.attacker.units.len(), units + breton_units);
     assert_eq!(setup.attacker.army, lead.to_string());
     assert_eq!(setup.attacker.faction, france_id.to_string());
@@ -711,7 +699,7 @@ fn allied_armies_in_the_province_join_the_battle() {
     let strength =
         |state: &CampaignState, id: &ArmyId| state.armies.get(id).map_or(0, |a| a.total_strength());
     let (split_before, breton_before) = (strength(&state, &split), strength(&state, &breton));
-    let events = state.auto_resolve_pending(&data, index).unwrap();
+    let events = state.auto_resolve_pending(data, index).unwrap();
     assert!(
         events.iter().any(|e| e.text_fr.contains("alliée")),
         "{events:?}"
@@ -729,15 +717,15 @@ fn allied_armies_in_the_province_join_the_battle() {
 #[test]
 fn a_3d_battle_result_spreads_losses_over_the_coalition() {
     use sim_battle::{BattleOutcome, SideId, SideResult};
-    let data = data();
-    let mut state = quiet_france(&data, 32);
+    let data = game_data();
+    let mut state = quiet_france(data, 32);
     let lead = first_army_of(&state, "fac_france");
     let enemy = first_army_of(&state, "fac_england");
     let units = state.armies[&lead].units.len();
     let split = state.peek_next_army_id();
     state
         .submit_order(
-            &data,
+            data,
             Order::SplitArmy {
                 army: lead.clone(),
                 unit_indices: vec![units - 1],
@@ -745,7 +733,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         )
         .unwrap();
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
-    let setup = state.battle_setup(&data, index).unwrap();
+    let setup = state.battle_setup(data, index).unwrap();
     let side = |count: usize, lost: u32| SideResult {
         losses: vec![lost; count],
         total_losses: lost * count as u32,
@@ -767,7 +755,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         duration: 60.0,
         end: Default::default(),
     };
-    assert!(state.resolve_pending_battle(&data, index, &short).is_err());
+    assert!(state.resolve_pending_battle(data, index, &short).is_err());
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
     let split_before = state.armies[&split].total_strength();
     let outcome = BattleOutcome {
@@ -777,9 +765,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         duration: 60.0,
         end: Default::default(),
     };
-    state
-        .resolve_pending_battle(&data, index, &outcome)
-        .unwrap();
+    state.resolve_pending_battle(data, index, &outcome).unwrap();
     assert_eq!(state.armies[&split].total_strength(), split_before - 7);
 }
 
@@ -802,13 +788,13 @@ fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: Even
 
 #[test]
 fn capture_and_ransom_move_the_king_and_the_money() {
-    let data = data();
-    let mut state = quiet_france(&data, 41);
+    let data = game_data();
+    let mut state = quiet_france(data, 41);
     let jean = chr("chr_jean_de_normandie");
     let (france_id, england) = (fac("fac_france"), fac("fac_england"));
     apply(
         &mut state,
-        &data,
+        data,
         "fac_france",
         EventEffect::CaptureCharacter {
             id: CharacterRef::Id(jean.clone()),
@@ -821,7 +807,7 @@ fn capture_and_ransom_move_the_king_and_the_money() {
     assert_eq!(c.captor.as_ref(), Some(&england));
     assert!(c.army.is_none());
     assert!(state.condition_holds(
-        &data,
+        data,
         &Condition::CharacterCaptive { id: jean.clone() },
         &EventContext::default()
     ));
@@ -832,7 +818,7 @@ fn capture_and_ransom_move_the_king_and_the_money() {
     );
     apply(
         &mut state,
-        &data,
+        data,
         "fac_france",
         EventEffect::ReleaseCharacter {
             id: CharacterRef::Id(jean.clone()),
@@ -850,7 +836,7 @@ fn capture_and_ransom_move_the_king_and_the_money() {
     // A second release costs nothing: he is free.
     apply(
         &mut state,
-        &data,
+        data,
         "fac_france",
         EventEffect::ReleaseCharacter {
             id: CharacterRef::Id(jean),
@@ -863,14 +849,14 @@ fn capture_and_ransom_move_the_king_and_the_money() {
 
 #[test]
 fn poitiers_captures_the_king_and_bretigny_requires_it() {
-    let data = data();
-    let mut state = quiet_france(&data, 42);
+    let data = game_data();
+    let mut state = quiet_france(data, 42);
     let france_id = fac("fac_france");
     let jean = chr("chr_jean_de_normandie");
     state.factions.get_mut(&france_id).unwrap().ruler = Some(jean.clone());
     let poitiers = &data.events[&EventId::new("evt_poitiers").unwrap()];
     for effect in &poitiers.options[1].effects {
-        apply(&mut state, &data, "fac_france", effect.clone());
+        apply(&mut state, data, "fac_france", effect.clone());
     }
     assert!(state.characters[&jean].captive);
     assert_eq!(state.chronicle.scheduled.len(), 1, "the ransom follows");
@@ -879,12 +865,12 @@ fn poitiers_captures_the_king_and_bretigny_requires_it() {
         faction: Some(france_id.clone()),
         province: None,
     };
-    assert!(state.event_conditions_hold(&data, bretigny, &ctx));
+    assert!(state.event_conditions_hold(data, bretigny, &ctx));
     // Signing the peace frees the king against the ransom.
     let england = fac("fac_england");
     let england_before = state.factions[&england].treasury;
     for effect in &bretigny.options[0].effects {
-        apply(&mut state, &data, "fac_france", effect.clone());
+        apply(&mut state, data, "fac_france", effect.clone());
     }
     assert!(!state.characters[&jean].captive);
     assert!(!state.is_at_war(&france_id, &england));
@@ -893,12 +879,12 @@ fn poitiers_captures_the_king_and_bretigny_requires_it() {
 
 #[test]
 fn a_scheduled_event_fires_k_turns_later() {
-    let data = data();
-    let mut state = france(&data, 43);
+    let data = game_data();
+    let mut state = france(data, 43);
     let jean = chr("chr_jean_de_normandie");
     apply(
         &mut state,
-        &data,
+        data,
         "fac_france",
         EventEffect::CaptureCharacter {
             id: CharacterRef::Id(jean),
@@ -909,7 +895,7 @@ fn a_scheduled_event_fires_k_turns_later() {
     let ransom = EventId::new("evt_rancon_du_roi").unwrap();
     apply(
         &mut state,
-        &data,
+        data,
         "fac_france",
         EventEffect::ScheduleEvent {
             event: ransom.clone(),
@@ -930,7 +916,7 @@ fn a_scheduled_event_fires_k_turns_later() {
     // N + 3, as the original event fired with the end of turn N.
     for _ in 0..=3 {
         assert!(!pending(&state));
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(pending(&state), "fired at N+3 as a decision for the player");
     assert!(state.chronicle.scheduled.is_empty());
@@ -939,13 +925,13 @@ fn a_scheduled_event_fires_k_turns_later() {
 
 #[test]
 fn charles_vi_is_born_to_charles_and_jeanne_and_goes_mad() {
-    let data = data();
-    let mut state = quiet_france(&data, 44);
+    let data = game_data();
+    let mut state = quiet_france(data, 44);
     // Winter 1338: Charles (Jean and Bonne's son) and Jeanne de Bourbon
     // (no modelled parents) are born.
     state.year = 1338;
     state.season = Season::Winter;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let (charles, jeanne) = (chr("chr_charles_v"), chr("chr_jeanne_de_bourbon"));
     assert!(state.characters.contains_key(&charles), "Charles V born");
     assert!(
@@ -955,13 +941,13 @@ fn charles_vi_is_born_to_charles_and_jeanne_and_goes_mad() {
     // 1350: the dauphin's wedding.
     let wedding = &data.events[&EventId::new("evt_noces_du_dauphin").unwrap()];
     for effect in &wedding.options[0].effects {
-        apply(&mut state, &data, "fac_france", effect.clone());
+        apply(&mut state, data, "fac_france", effect.clone());
     }
     assert_eq!(state.characters[&charles].spouse.as_ref(), Some(&jeanne));
     // Winter 1368: Charles VI.
     state.year = 1368;
     state.season = Season::Winter;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let charles_vi = chr("chr_charles_vi");
     let child = state.characters.get(&charles_vi).expect("Charles VI born");
     assert_eq!(child.father.as_ref(), Some(&charles));
@@ -973,11 +959,11 @@ fn charles_vi_is_born_to_charles_and_jeanne_and_goes_mad() {
         province: None,
     };
     state.year = 1392;
-    assert!(!state.event_conditions_hold(&data, madness, &ctx));
+    assert!(!state.event_conditions_hold(data, madness, &ctx));
     state.factions.get_mut(&fac("fac_france")).unwrap().ruler = Some(charles_vi.clone());
-    assert!(state.event_conditions_hold(&data, madness, &ctx));
+    assert!(state.event_conditions_hold(data, madness, &ctx));
     for effect in &madness.options[0].effects {
-        apply(&mut state, &data, "fac_france", effect.clone());
+        apply(&mut state, data, "fac_france", effect.clone());
     }
     assert!(state.characters[&charles_vi]
         .traits

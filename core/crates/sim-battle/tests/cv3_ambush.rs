@@ -27,7 +27,7 @@ fn ambush_setup() -> BattleSetup {
     let data = data();
     let mut setup = setup(
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",
@@ -35,7 +35,7 @@ fn ambush_setup() -> BattleSetup {
                 "unit_men_at_arms_foot",
             ],
         ),
-        units(&data, &VICTIM),
+        units(data, &VICTIM),
         None,
     );
     setup.opening = BattleOpening::Ambush {
@@ -236,8 +236,8 @@ fn the_ai_ambusher_keeps_its_flanks_and_the_column_its_road() {
 fn forced_march_starts_tired_without_deployment() {
     let data = data();
     let mut setup = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
         None,
     );
     setup.defender.forced_march = true;
@@ -268,9 +268,9 @@ fn forced_march_starts_tired_without_deployment() {
 fn entrenched_setup() -> BattleSetup {
     let data = data();
     let mut setup = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",

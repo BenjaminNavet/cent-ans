@@ -1,15 +1,10 @@
 //! Lot M8: a settlement queues up to `construction_queue_size` buildings,
 //! paid when queued, started one after the other, cancellable with a refund.
 
-use std::path::PathBuf;
-
 use data_model::{BuildingId, FactionId, GameData, SettlementId, SettlementKind};
 use sim_campaign::{CampaignState, Order, Place};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn france() -> FactionId {
     FactionId::new("fac_france").unwrap()
@@ -56,18 +51,18 @@ fn build(state: &mut CampaignState, data: &GameData, town: &SettlementId, b: &Bu
 
 #[test]
 fn queue_is_paid_up_front_and_limited() {
-    let data = data();
-    let (mut state, town) = setup(&data);
+    let data = game_data();
+    let (mut state, town) = setup(data);
     let size = data.economy_rules.construction_queue_size as usize;
     assert_eq!(size, 3);
-    let options = available(&state, &data, &town);
+    let options = available(&state, data, &town);
     assert!(
         options.len() > size,
         "enough distinct buildings to fill the queue"
     );
     let before = state.factions[&france()].treasury;
     for b in options.iter().take(size) {
-        build(&mut state, &data, &town, b);
+        build(&mut state, data, &town, b);
     }
     let place = &state.settlements[&town];
     assert!(place.construction.is_some());
@@ -75,7 +70,7 @@ fn queue_is_paid_up_front_and_limited() {
     assert!(state.factions[&france()].treasury < before);
     // Queue full: further orders are refused with a reason.
     let extra = state
-        .buildable(&data, &town)
+        .buildable(data, &town)
         .into_iter()
         .find(|o| {
             !place
@@ -91,15 +86,15 @@ fn queue_is_paid_up_front_and_limited() {
 
 #[test]
 fn queued_builds_start_in_turn() {
-    let data = data();
-    let (mut state, town) = setup(&data);
-    let options = available(&state, &data, &town);
+    let data = game_data();
+    let (mut state, town) = setup(data);
+    let options = available(&state, data, &town);
     let (a, b) = (options[0].clone(), options[1].clone());
-    build(&mut state, &data, &town, &a);
-    build(&mut state, &data, &town, &b);
+    build(&mut state, data, &town, &a);
+    build(&mut state, data, &town, &b);
     let mut guard = 0;
     while !state.settlements[&town].buildings.contains(&a) {
-        state.end_turn(&data);
+        state.end_turn(data);
         guard += 1;
         assert!(guard < 50, "first construction finishes");
     }
@@ -110,13 +105,13 @@ fn queued_builds_start_in_turn() {
 
 #[test]
 fn cancelling_refunds_half_and_promotes() {
-    let data = data();
-    let (mut state, town) = setup(&data);
-    let options = available(&state, &data, &town);
+    let data = game_data();
+    let (mut state, town) = setup(data);
+    let options = available(&state, data, &town);
     let (a, b) = (options[0].clone(), options[1].clone());
-    build(&mut state, &data, &town, &a);
+    build(&mut state, data, &town, &a);
     let before_b = state.factions[&france()].treasury;
-    build(&mut state, &data, &town, &b);
+    build(&mut state, data, &town, &b);
     let paid_b = state.settlements[&town].build_queue[0].paid;
     assert_eq!(
         state.factions[&france()].treasury,
@@ -124,7 +119,7 @@ fn cancelling_refunds_half_and_promotes() {
     );
     state
         .submit_order(
-            &data,
+            data,
             Order::CancelQueuedBuild {
                 settlement: Place::Settlement(town.clone()),
                 index: 0,
@@ -137,10 +132,10 @@ fn cancelling_refunds_half_and_promotes() {
         before_b - i64::from(paid_b) + i64::from(paid_b * 50 / 100)
     );
     // Queue again, then cancel the active one: the queued one starts.
-    build(&mut state, &data, &town, &b);
+    build(&mut state, data, &town, &b);
     state
         .submit_order(
-            &data,
+            data,
             Order::CancelBuild {
                 settlement: Place::Settlement(town.clone()),
             },
@@ -153,15 +148,15 @@ fn cancelling_refunds_half_and_promotes() {
 
 #[test]
 fn old_saves_load_without_a_queue() {
-    let data = data();
-    let (mut state, town) = setup(&data);
-    let options = available(&state, &data, &town);
-    build(&mut state, &data, &town, &options[0]);
+    let data = game_data();
+    let (mut state, town) = setup(data);
+    let options = available(&state, data, &town);
+    build(&mut state, data, &town, &options[0]);
     let json = state.save_json();
     assert!(!json.contains("build_queue"), "empty queue is not written");
     let loaded = CampaignState::load_json(&json).unwrap();
     assert!(loaded.settlements[&town].build_queue.is_empty());
-    build(&mut state, &data, &town, &options[1]);
+    build(&mut state, data, &town, &options[1]);
     let loaded = CampaignState::load_json(&state.save_json()).unwrap();
     assert_eq!(loaded.settlements[&town].build_queue.len(), 1);
 }
@@ -169,9 +164,9 @@ fn old_saves_load_without_a_queue() {
 #[test]
 fn recruit_lines_fall_in_u13_groups() {
     use sim_campaign::RecruitGroup;
-    let data = data();
-    let (state, town) = setup(&data);
-    let options = state.recruitable(&data, &town);
+    let data = game_data();
+    let (state, town) = setup(data);
+    let options = state.recruitable(data, &town);
     let groups: Vec<RecruitGroup> = options.iter().map(|o| o.group()).collect();
     assert!(groups.contains(&RecruitGroup::Ready));
     for option in &options {

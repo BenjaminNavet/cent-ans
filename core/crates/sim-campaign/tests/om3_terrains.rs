@@ -3,22 +3,13 @@
 //! `data/rules/*`; the provinces here are synthetic (a French province
 //! switched to steppe or desert), the geography is another lot's.
 
-use std::path::PathBuf;
-
-use data_model::{Climate, FactionId, GameData, ProvinceId, ReligionId, Terrain};
+use data_model::{Climate, FactionId, GameData, ReligionId, Terrain};
 use sim_campaign::economy::seasonal_supply_change;
 use sim_campaign::religion::{religions_relation, same_faith, FaithRelation};
 use sim_campaign::weather::chances_for;
 use sim_campaign::{CampaignState, Season};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{game_data, prov};
 
 fn rel(id: &str) -> ReligionId {
     ReligionId::new(id).unwrap()
@@ -43,7 +34,7 @@ fn enums_parse_from_the_json_keys() {
 
 #[test]
 fn rules_files_carry_the_eastern_terrains() {
-    let data = data();
+    let data = game_data();
     let desert = data.economy_rules.terrain_supply(Terrain::Desert);
     let steppe = data.economy_rules.terrain_supply(Terrain::Steppe);
     let plains = data.economy_rules.terrain_supply(Terrain::Plains);
@@ -61,7 +52,7 @@ fn rules_files_carry_the_eastern_terrains() {
 
 #[test]
 fn arid_climate_is_dry_and_steppe_snowy_in_winter() {
-    let data = data();
+    let data = game_data();
     let rules = &data.campaign_weather;
     let arid = chances_for(rules, Some(Climate::Arid), Season::Summer);
     let oceanic = chances_for(rules, Some(Climate::Oceanic), Season::Summer);
@@ -73,7 +64,7 @@ fn arid_climate_is_dry_and_steppe_snowy_in_winter() {
 
 #[test]
 fn forage_is_thin_on_the_steppe_and_the_desert_bites_in_summer() {
-    let base = data();
+    let base = game_data();
     let france = FactionId::new("fac_france").unwrap();
     let id = prov("prov_champagne");
     let change = |terrain: Terrain, friendly: bool, season: Season| {
@@ -105,25 +96,25 @@ fn forage_is_thin_on_the_steppe_and_the_desert_bites_in_summer() {
 
 #[test]
 fn orthodox_are_schismatics_not_infidels() {
-    let data = data();
+    let data = game_data();
     let (orthodox, catholic) = (rel("rel_orthodox"), rel("rel_catholic"));
     assert_eq!(
-        religions_relation(&data, &orthodox, &catholic),
+        religions_relation(data, &orthodox, &catholic),
         FaithRelation::Kindred
     );
     assert_eq!(
-        religions_relation(&data, &catholic, &orthodox),
+        religions_relation(data, &catholic, &orthodox),
         FaithRelation::Kindred
     );
     // An obedience counts as its parent church.
     assert_eq!(
-        religions_relation(&data, &rel("rel_catholic_rome"), &orthodox),
+        religions_relation(data, &rel("rel_catholic_rome"), &orthodox),
         FaithRelation::Kindred
     );
-    assert!(!same_faith(&data, &orthodox, &catholic));
+    assert!(!same_faith(data, &orthodox, &catholic));
     for other in ["rel_islam", "rel_pagan", "rel_armenian"] {
         assert_eq!(
-            religions_relation(&data, &rel(other), &catholic),
+            religions_relation(data, &rel(other), &catholic),
             FaithRelation::Different,
             "{other}"
         );

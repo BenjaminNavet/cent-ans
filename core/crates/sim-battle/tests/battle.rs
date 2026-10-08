@@ -1,18 +1,13 @@
 //! Battle simulation tests (spec `docs/design/m7-battles.md` § 1) on the real
 //! unit types of `data/unit_types`.
 
-use std::path::PathBuf;
-
 use data_model::{GameData, Terrain, UnitTypeId};
 use sim_battle::{
     BattleSeason, BattleSetup, BattleSim, Command, CommandError, Formation, GeneralSetup, SideId,
     SideSetup, UnitFate, UnitSetup, UnitState, Weather, DT,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn unit(data: &GameData, id: &str) -> UnitSetup {
     let unit_type = &data.unit_types[&UnitTypeId::new(id).unwrap()];
@@ -96,9 +91,9 @@ fn army(data: &GameData) -> Vec<UnitSetup> {
 
 #[test]
 fn same_setup_and_commands_give_the_same_battle() {
-    let data = data();
+    let data = game_data();
     let play = || {
-        let mut s = setup(army(&data), army(&data));
+        let mut s = setup(army(data), army(data));
         s.player_side = Some(SideId::Attacker);
         let mut sim = BattleSim::new(s, 1337).unwrap();
         for tick in 0..3000u32 {
@@ -146,10 +141,10 @@ fn same_setup_and_commands_give_the_same_battle() {
 
 #[test]
 fn shooting_out_of_range_has_no_effect() {
-    let data = data();
+    let data = game_data();
     let mut sim = lab(
-        vec![unit(&data, "unit_longbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
     );
     place(&mut sim, 0, 600.0, 200.0, 0.0);
     place(&mut sim, 1, 600.0, 200.0 + 300.0, std::f64::consts::PI);
@@ -165,11 +160,11 @@ fn shooting_out_of_range_has_no_effect() {
 
 #[test]
 fn rain_weakens_longbows() {
-    let data = data();
+    let data = game_data();
     let shoot = |weather: Weather| {
         let mut sim = lab(
-            vec![unit(&data, "unit_longbowmen")],
-            vec![unit(&data, "unit_urban_militia")],
+            vec![unit(data, "unit_longbowmen")],
+            vec![unit(data, "unit_urban_militia")],
         );
         sim.set_weather(weather);
         place(&mut sim, 0, 600.0, 200.0, 0.0);
@@ -232,20 +227,20 @@ fn charge_losses(data: &GameData, from_flank: bool) -> f64 {
 
 #[test]
 fn flank_charge_is_deadlier() {
-    let data = data();
-    let front = charge_losses(&data, false);
-    let flank = charge_losses(&data, true);
+    let data = game_data();
+    let front = charge_losses(data, false);
+    let flank = charge_losses(data, true);
     assert!(front > 0.0);
     assert!(flank > front * 1.3, "flank {flank} vs front {front}");
 }
 
 #[test]
 fn schiltron_stops_cavalry() {
-    let data = data();
+    let data = game_data();
     let charge = |formation: Formation| {
         let mut sim = lab(
-            vec![unit(&data, "unit_knights")],
-            vec![unit(&data, "unit_flemish_pikemen")],
+            vec![unit(data, "unit_knights")],
+            vec![unit(data, "unit_flemish_pikemen")],
         );
         place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
         place(&mut sim, 0, 600.0, 250.0, 0.0);
@@ -276,8 +271,8 @@ fn schiltron_stops_cavalry() {
     assert!(knights_losses > square_losses, "the pikes win the exchange");
     // Cavalry cannot form a schiltron, infantry cannot form a wedge.
     let mut sim = lab(
-        vec![unit(&data, "unit_knights")],
-        vec![unit(&data, "unit_flemish_pikemen")],
+        vec![unit(data, "unit_knights")],
+        vec![unit(data, "unit_flemish_pikemen")],
     );
     assert!(matches!(
         sim.issue_command(Command::Formation {
@@ -296,11 +291,11 @@ fn schiltron_stops_cavalry() {
 
 #[test]
 fn running_tires_and_rest_recovers() {
-    let data = data();
+    let data = game_data();
     let march = |run_flag: bool| {
         let mut sim = lab(
-            vec![unit(&data, "unit_men_at_arms_foot")],
-            vec![unit(&data, "unit_urban_militia")],
+            vec![unit(data, "unit_men_at_arms_foot")],
+            vec![unit(data, "unit_urban_militia")],
         );
         place(&mut sim, 1, 1100.0, 750.0, 0.0);
         place(&mut sim, 0, 100.0, 100.0, 0.0);
@@ -335,10 +330,10 @@ fn running_tires_and_rest_recovers() {
 
 #[test]
 fn rout_then_rally_far_from_the_enemy() {
-    let data = data();
+    let data = game_data();
     let mut sim = lab(
-        vec![unit(&data, "unit_men_at_arms_foot")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_urban_militia")],
     );
     place(&mut sim, 0, 600.0, 400.0, 0.0);
     place(&mut sim, 1, 600.0, 700.0, std::f64::consts::PI);
@@ -367,8 +362,8 @@ fn rout_then_rally_far_from_the_enemy() {
 
 #[test]
 fn battle_ends_with_a_winner_and_an_outcome() {
-    let data = data();
-    let mut sim = BattleSim::new(setup(army(&data), army(&data)), 3).unwrap();
+    let data = game_data();
+    let mut sim = BattleSim::new(setup(army(data), army(data)), 3).unwrap();
     let mut steps = 0;
     while !sim.is_finished() && steps < 36_000 {
         sim.step();
@@ -386,10 +381,10 @@ fn battle_ends_with_a_winner_and_an_outcome() {
 
 #[test]
 fn battle_times_out_in_favour_of_the_defender() {
-    let data = data();
+    let data = game_data();
     let mut sim = lab(
-        vec![unit(&data, "unit_urban_militia")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_urban_militia")],
+        vec![unit(data, "unit_urban_militia")],
     );
     sim.set_end_conditions(true);
     for _ in 0..36_001 {
@@ -401,13 +396,13 @@ fn battle_times_out_in_favour_of_the_defender() {
 
 #[test]
 fn general_death_shakes_the_army() {
-    let data = data();
+    let data = game_data();
     let mut s = setup(
         vec![
-            unit(&data, "unit_knights"),
-            unit(&data, "unit_men_at_arms_foot"),
+            unit(data, "unit_knights"),
+            unit(data, "unit_men_at_arms_foot"),
         ],
-        vec![unit(&data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_men_at_arms_foot")],
     );
     s.attacker.general = Some(GeneralSetup {
         character: "chr_test".to_owned(),
@@ -452,16 +447,16 @@ fn general_death_shakes_the_army() {
 
 #[test]
 fn losses_convert_back_to_campaign_units() {
-    let data = data();
-    let mut empty = unit(&data, "unit_longbowmen");
+    let data = game_data();
+    let mut empty = unit(data, "unit_longbowmen");
     empty.soldiers = 0;
     let mut sim = lab(
         vec![
-            unit(&data, "unit_men_at_arms_foot"),
+            unit(data, "unit_men_at_arms_foot"),
             empty,
-            unit(&data, "unit_knights"),
+            unit(data, "unit_knights"),
         ],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_urban_militia")],
     );
     // The empty unit is not deployed: ids 0 (men-at-arms), 1 (knights), 2 (militia).
     assert_eq!(sim.units().len(), 3);
@@ -500,8 +495,8 @@ fn losses_convert_back_to_campaign_units() {
 
 #[test]
 fn commands_are_validated() {
-    let data = data();
-    let mut s = setup(army(&data), army(&data));
+    let data = game_data();
+    let mut s = setup(army(data), army(data));
     s.player_side = Some(SideId::Attacker);
     let mut sim = BattleSim::new(s, 1).unwrap();
     assert_eq!(
@@ -557,11 +552,11 @@ fn commands_are_validated() {
 
 #[test]
 fn stakes_break_a_frontal_cavalry_charge() {
-    let data = data();
+    let data = game_data();
     let charge = |stakes: bool| {
         let mut sim = lab(
-            vec![unit(&data, "unit_knights")],
-            vec![unit(&data, "unit_longbowmen")],
+            vec![unit(data, "unit_knights")],
+            vec![unit(data, "unit_longbowmen")],
         );
         place(&mut sim, 1, 600.0, 400.0, std::f64::consts::PI);
         place(&mut sim, 0, 600.0, 250.0, 0.0);
@@ -600,8 +595,8 @@ fn stakes_break_a_frontal_cavalry_charge() {
 
 #[test]
 fn full_ai_battle_on_a_river_field_finishes() {
-    let data = data();
-    let mut s = setup(army(&data), army(&data));
+    let data = game_data();
+    let mut s = setup(army(data), army(data));
     s.river = true;
     s.terrain = Terrain::Hills;
     s.season = BattleSeason::Winter;
@@ -626,10 +621,10 @@ fn full_ai_battle_on_a_river_field_finishes() {
 
 #[test]
 fn general_retreat_reports_withdrawn_regiments() {
-    let data = data();
+    let data = game_data();
     let mut sim = lab(
-        vec![unit(&data, "unit_knights"), unit(&data, "unit_longbowmen")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_knights"), unit(data, "unit_longbowmen")],
+        vec![unit(data, "unit_urban_militia")],
     );
     sim.set_end_conditions(true);
     run(&mut sim, 1.0);
@@ -649,10 +644,10 @@ fn general_retreat_reports_withdrawn_regiments() {
 
 #[test]
 fn unit_fate_follows_losses_and_rout() {
-    let data = data();
+    let data = game_data();
     let mut sim = lab(
-        vec![unit(&data, "unit_knights")],
-        vec![unit(&data, "unit_urban_militia")],
+        vec![unit(data, "unit_knights")],
+        vec![unit(data, "unit_urban_militia")],
     );
     assert_eq!(sim.units()[0].fate(), UnitFate::Held);
     sim.units_mut()[0].state = UnitState::Routing;

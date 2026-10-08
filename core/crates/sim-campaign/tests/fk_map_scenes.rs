@@ -2,7 +2,6 @@
 //! (`docs/design/2026-09-29-carte-vivante-folk.md` § 7, ADR 0122).
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 
 use data_model::{
     EventId, EventPresentation, FactionId, GameData, ProvinceId, SceneKind, SettlementId,
@@ -12,22 +11,10 @@ use sim_campaign::map_scenes::{map_scenes, MapScene};
 use sim_campaign::state::{Construction, QueuedRecruit, SiegeState};
 use sim_campaign::{CampaignState, EventKind};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn evt(id: &str) -> EventId {
     EventId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
 }
 
 fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
@@ -73,8 +60,8 @@ fn find<'a>(
 
 #[test]
 fn map_scenes_are_deterministic() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 1337);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 1337);
     calm(&mut state);
     let turn = state.turn;
     let paris = prov("prov_ile_de_france");
@@ -134,8 +121,8 @@ fn map_scenes_are_deterministic() {
     });
 
     let rng_before = state.rng.clone();
-    let first = map_scenes(&state, &data);
-    let second = map_scenes(&state, &data);
+    let first = map_scenes(&state, data);
+    let second = map_scenes(&state, data);
     assert_eq!(first, second, "pure function of the state");
     assert_eq!(state.rng, rng_before, "no RNG read");
 
@@ -163,8 +150,8 @@ fn map_scenes_are_deterministic() {
 
 #[test]
 fn event_scenes_fade_with_age() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 3);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 3);
     calm(&mut state);
     let turn = state.turn;
     let province = prov("prov_champagne");
@@ -176,24 +163,24 @@ fn event_scenes_fade_with_age() {
     });
     let duration = data.map_scene_rules.duration(SceneKind::Plague);
     assert!(duration >= 2);
-    assert!(find(&map_scenes(&state, &data), &province, SceneKind::Plague).is_none());
+    assert!(find(&map_scenes(&state, data), &province, SceneKind::Plague).is_none());
     let mut last = f32::INFINITY;
     for age in 0..duration {
         state.turn = turn + 1 + age;
-        let scenes = map_scenes(&state, &data);
+        let scenes = map_scenes(&state, data);
         let plague = find(&scenes, &province, SceneKind::Plague).expect("still shown");
         assert!(plague.intensity < last, "age {age}: {}", plague.intensity);
         assert!(plague.intensity > 0.0);
         last = plague.intensity;
     }
     state.turn = turn + 1 + duration;
-    assert!(find(&map_scenes(&state, &data), &province, SceneKind::Plague).is_none());
+    assert!(find(&map_scenes(&state, data), &province, SceneKind::Plague).is_none());
 }
 
 #[test]
 fn chronicle_records_and_forgets_event_scenes() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 5);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 5);
     state.chronicle.disabled = true;
     let turn = state.turn;
     state.chronicle.recent_scenes.push(RecentScene {
@@ -204,10 +191,10 @@ fn chronicle_records_and_forgets_event_scenes() {
     });
     let duration = data.map_scene_rules.duration(SceneKind::Flood);
     for _ in 0..duration {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         assert_eq!(state.chronicle.recent_scenes.len(), 1);
     }
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state.chronicle.recent_scenes.is_empty(), "pruned");
 
     // Older saves without the field still load.
@@ -243,22 +230,22 @@ fn expire(state: &mut CampaignState, data: &GameData, event: &str, options: Vec<
 
 #[test]
 fn expired_decision_applies_ai_option() {
-    let data = data();
+    let data = game_data();
     // evt_sluys: option 0 « Reconstruire la flotte » (ai_weight 1, 6 000 ₶),
     // option 1 « Renoncer à la mer » (ai_weight 2).
-    let mut state = start(&data, "fac_france", 11);
-    let text = expire(&mut state, &data, "evt_sluys", vec![0, 1]);
+    let mut state = start(data, "fac_france", 11);
+    let text = expire(&mut state, data, "evt_sluys", vec![0, 1]);
     assert!(text.contains("Renoncer à la mer"), "{text}");
 
     // Restricted to the options the decision offered.
-    let mut state = start(&data, "fac_france", 11);
-    let text = expire(&mut state, &data, "evt_sluys", vec![0]);
+    let mut state = start(data, "fac_france", 11);
+    let text = expire(&mut state, data, "evt_sluys", vec![0]);
     assert!(text.contains("Reconstruire la flotte"), "{text}");
 }
 
 #[test]
 fn random_province_event_defaults_to_map() {
-    let data = data();
+    let data = game_data();
     let event = |id: &str| &data.events[&evt(id)];
     // Random, province scope: map.
     assert_eq!(event("evt_crue").presentation(), EventPresentation::Map);
@@ -276,7 +263,7 @@ fn random_province_event_defaults_to_map() {
     assert_eq!(event("evt_crue").map_scene, Some(SceneKind::Flood));
 
     // The pending decision exposes its province and presentation.
-    let mut state = start(&data, "fac_france", 2);
+    let mut state = start(data, "fac_france", 2);
     let province = prov("prov_touraine");
     state.chronicle.pending_decisions.push(Decision {
         id: 99,
@@ -287,10 +274,10 @@ fn random_province_event_defaults_to_map() {
         expires_turn: state.turn + 2,
     });
     assert_eq!(
-        state.chronicle.pending_decisions[0].presentation(&data),
+        state.chronicle.pending_decisions[0].presentation(data),
         EventPresentation::Map
     );
-    let views = state.decision_views(&data, &fac("fac_france"));
+    let views = state.decision_views(data, &fac("fac_france"));
     let view = views.iter().find(|v| v.id == 99).unwrap();
     assert_eq!(view.presentation, EventPresentation::Map);
     assert_eq!(view.province.as_ref(), Some(&province));
@@ -321,19 +308,19 @@ fn player_incident_rate_1337_1400() {
 /// Runs the 1337-1400 campaign; returns (turns, map incidents, dialogs)
 /// offered to the player.
 fn measure_incidents() -> (u32, u32, u32) {
-    let data = data();
-    let mut state = start(&data, "fac_france", 1337);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 1337);
     let player = fac("fac_france");
     let mut seen = 0u32;
     let (mut turns, mut map, mut dialog) = (0u32, 0u32, 0u32);
     while state.year < 1400 {
-        state.end_turn(&data);
+        state.end_turn(data);
         turns += 1;
         for decision in &state.chronicle.pending_decisions {
             if decision.id <= seen || decision.faction != player {
                 continue;
             }
-            match decision.presentation(&data) {
+            match decision.presentation(data) {
                 EventPresentation::Map => map += 1,
                 EventPresentation::Dialog => dialog += 1,
             }

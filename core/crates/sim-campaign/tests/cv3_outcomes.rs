@@ -2,22 +2,12 @@
 //! `docs/design/2026-09-27-campagne-vivante.md` § 3): classification
 //! thresholds, consequences (prestige, XP, morale modifiers that wear off)
 //! and the report kept for the UI.
+use data_model::test_support::{fac, game_data};
 
-use std::path::PathBuf;
-
-use data_model::{BattleOutcomeClass, BattleOutcomeRules, FactionId, GameData};
+use data_model::{BattleOutcomeClass, BattleOutcomeRules};
 use sim_campaign::battle_outcome::{classify, SideTally};
 use sim_campaign::movement::side_from_army;
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, MoraleModifier, Order};
-
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
 
 fn tally(strength: u32, losses: u32) -> SideTally {
     SideTally {
@@ -108,7 +98,7 @@ fn plain_defeat_otherwise() {
 
 #[test]
 fn every_class_has_a_label_in_the_data() {
-    let data = real_data();
+    let data = game_data();
     for class in BattleOutcomeClass::ALL {
         let consequence = data.battle_outcome_rules.consequence(class);
         assert!(!consequence.label.is_empty());
@@ -129,10 +119,10 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
 
 #[test]
 fn morale_modifiers_lift_the_battle_morale_then_wear_off() {
-    let data = real_data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     let french = main_army(&state, "fac_france");
-    let before = side_from_army(&state, &data, &state.armies[&french]).general_morale_bonus;
+    let before = side_from_army(&state, data, &state.armies[&french]).general_morale_bonus;
     state
         .armies
         .get_mut(&french)
@@ -145,11 +135,11 @@ fn morale_modifiers_lift_the_battle_morale_then_wear_off() {
                 turns: 1,
             },
         ]);
-    let after = side_from_army(&state, &data, &state.armies[&french]).general_morale_bonus;
+    let after = side_from_army(&state, data, &state.armies[&french]).general_morale_bonus;
     assert!((after - before - 5.0).abs() < 1e-9);
-    state.end_turn_with(&data, |_, _, _| Vec::new());
+    state.end_turn_with(data, |_, _, _| Vec::new());
     assert_eq!(state.armies[&french].morale_modifier(), 8, "one worn off");
-    state.end_turn_with(&data, |_, _, _| Vec::new());
+    state.end_turn_with(data, |_, _, _| Vec::new());
     assert!(
         state.armies[&french].morale_modifiers.is_empty(),
         "all gone"
@@ -158,8 +148,8 @@ fn morale_modifiers_lift_the_battle_morale_then_wear_off() {
 
 #[test]
 fn a_battle_is_classified_with_its_consequences() {
-    let data = real_data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
@@ -169,7 +159,7 @@ fn a_battle_is_classified_with_its_consequences() {
     state.armies.get_mut(&english).unwrap().position =
         ArmyPosition::field([point[0] + 4.0, point[1]]);
     for id in [&french, &english] {
-        let allowance = state.army_grid_allowance(&data, &state.armies[id]);
+        let allowance = state.army_grid_allowance(data, &state.armies[id]);
         state.armies.get_mut(id).unwrap().movement_left = allowance;
     }
     let ruler_prestige = |state: &CampaignState, faction: &str| {
@@ -182,7 +172,7 @@ fn a_battle_is_classified_with_its_consequences() {
     );
     state
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: french.clone(),
                 target_army: english.clone(),
@@ -243,8 +233,8 @@ fn a_battle_is_classified_with_its_consequences() {
 
 #[test]
 fn the_3d_battle_setup_carries_the_morale_modifiers() {
-    let data = real_data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     state.interactive_battles = true;
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
@@ -254,7 +244,7 @@ fn the_3d_battle_setup_carries_the_morale_modifiers() {
     state.armies.get_mut(&english).unwrap().position =
         ArmyPosition::field([point[0] + 4.0, point[1]]);
     for id in [&french, &english] {
-        let allowance = state.army_grid_allowance(&data, &state.armies[id]);
+        let allowance = state.army_grid_allowance(data, &state.armies[id]);
         let army = state.armies.get_mut(id).unwrap();
         army.movement_left = allowance;
         for unit in &mut army.units {
@@ -263,14 +253,14 @@ fn the_3d_battle_setup_carries_the_morale_modifiers() {
     }
     state
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: french.clone(),
                 target_army: english.clone(),
             },
         )
         .unwrap();
-    let plain = state.battle_setup(&data, 0).unwrap();
+    let plain = state.battle_setup(data, 0).unwrap();
     state
         .armies
         .get_mut(&french)
@@ -280,7 +270,7 @@ fn the_3d_battle_setup_carries_the_morale_modifiers() {
             value: 10,
             turns: 2,
         });
-    let lifted = state.battle_setup(&data, 0).unwrap();
+    let lifted = state.battle_setup(data, 0).unwrap();
     for (a, b) in plain.attacker.units.iter().zip(&lifted.attacker.units) {
         assert_eq!(b.morale, (a.morale + 10).min(100));
     }

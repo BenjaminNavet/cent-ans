@@ -8,8 +8,8 @@ use sim_battle::{BattleSim, Formation, MissileKind, ShotCover};
 fn duel() -> BattleSim {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_genoese_crossbowmen"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_genoese_crossbowmen"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 3).unwrap();
@@ -56,8 +56,8 @@ fn unread_shots_are_bounded() {
 fn figures_fill_the_simulated_rectangle() {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
-        units(&data, &["unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_longbowmen"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 1).unwrap();

@@ -1,23 +1,14 @@
 //! SL1 (ADR 0139): sea lanes — graph edges, crossings, gales, interception
 //! seas, trade cut by enemy squadrons, map view.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SeaLaneKind, SeaZoneId, SettlementId};
+use data_model::{GameData, SeaLaneKind, SeaZoneId, SettlementId};
 use sim_campaign::naval::{crossing_sea, SeaControl};
 use sim_campaign::sea_lanes::{sea_lanes, storm_loss_percent, trade_sea_legs};
 use sim_campaign::state::Season;
 use sim_campaign::trade::trade_routes;
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -57,7 +48,7 @@ fn full_movement(state: &mut CampaignState, data: &GameData, army: &ArmyId) {
 
 #[test]
 fn every_lane_is_a_sea_edge_priced_by_its_length() {
-    let data = data();
+    let data = game_data();
     assert!(data.naval.sea_lanes.lanes.len() >= 20);
     for lane in &data.naval.sea_lanes.lanes {
         let edge = data
@@ -82,13 +73,13 @@ fn every_lane_is_a_sea_edge_priced_by_its_length() {
 
 #[test]
 fn an_english_army_sails_from_southampton_to_bordeaux_in_one_season() {
-    let data = data();
-    let (mut state, army) = english_army_at(&data, "set_southampton", Season::Summer);
-    full_movement(&mut state, &data, &army);
+    let data = game_data();
+    let (mut state, army) = english_army_at(data, "set_southampton", Season::Summer);
+    full_movement(&mut state, data, &army);
     let before = state.armies[&army].total_strength();
     state
         .submit_order(
-            &data,
+            data,
             Order::Embark {
                 army: army.clone(),
                 to_port: set("set_bordeaux"),
@@ -104,19 +95,19 @@ fn an_english_army_sails_from_southampton_to_bordeaux_in_one_season() {
 
 #[test]
 fn winter_gales_cost_men_on_the_open_sea_more_than_along_the_coast() {
-    let data = data();
-    let (state, _) = english_army_at(&data, "set_southampton", Season::Winter);
-    let open = storm_loss_percent(&state, &data, &set("set_southampton"), &set("set_bordeaux"));
-    let coast = storm_loss_percent(&state, &data, &set("set_bordeaux"), &set("set_bayonne"));
+    let data = game_data();
+    let (state, _) = english_army_at(data, "set_southampton", Season::Winter);
+    let open = storm_loss_percent(&state, data, &set("set_southampton"), &set("set_bordeaux"));
+    let coast = storm_loss_percent(&state, data, &set("set_bordeaux"), &set("set_bayonne"));
     assert!(open >= 8.0, "{open}");
     assert!(coast > 0.0 && coast < open, "{coast} vs {open}");
 
-    let (mut state, army) = english_army_at(&data, "set_southampton", Season::Winter);
-    full_movement(&mut state, &data, &army);
+    let (mut state, army) = english_army_at(data, "set_southampton", Season::Winter);
+    full_movement(&mut state, data, &army);
     let before = state.armies[&army].total_strength();
     state
         .submit_order(
-            &data,
+            data,
             Order::Embark {
                 army: army.clone(),
                 to_port: set("set_bordeaux"),
@@ -137,10 +128,10 @@ fn winter_gales_cost_men_on_the_open_sea_more_than_along_the_coast() {
 
 #[test]
 fn a_lane_crossing_is_fought_on_the_lane_sea() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
     assert_eq!(
-        crossing_sea(&state, &data, &set("set_southampton"), &set("set_bordeaux")),
+        crossing_sea(&state, data, &set("set_southampton"), &set("set_bordeaux")),
         Some(biscay())
     );
     let lane = data
@@ -152,11 +143,11 @@ fn a_lane_crossing_is_fought_on_the_lane_sea() {
 
 #[test]
 fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 3).unwrap();
     state.season = Season::Summer;
     let route = |state: &CampaignState| {
-        trade_routes(state, &data)
+        trade_routes(state, data)
             .into_iter()
             .find(|r| r.id == "route_bordeaux_londres")
             .unwrap()
@@ -172,14 +163,14 @@ fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
     );
     assert!(!free.cut, "{:?}", free.cut_reason);
 
-    state.naval.ensure(&data);
-    let sea = crossing_sea(&state, &data, &free.path[0], &free.path[1])
+    state.naval.ensure(data);
+    let sea = crossing_sea(&state, data, &free.path[0], &free.path[1])
         .or_else(|| {
             free.path.windows(2).find_map(|w| {
                 data.movement_graph
                     .edge(&w[0], &w[1])
                     .filter(|e| e.sea)
-                    .and_then(|_| crossing_sea(&state, &data, &w[0], &w[1]))
+                    .and_then(|_| crossing_sea(&state, data, &w[0], &w[1]))
             })
         })
         .unwrap();
@@ -221,13 +212,13 @@ fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
 
 #[test]
 fn winter_lowers_sea_trade_only() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 3).unwrap();
     let path: Vec<SettlementId> = vec![set("set_southampton"), set("set_bordeaux")];
     state.season = Season::Summer;
     let summer = trade_sea_legs(
         &state,
-        &data,
+        data,
         &path,
         &fac("fac_england"),
         &fac("fac_england"),
@@ -235,7 +226,7 @@ fn winter_lowers_sea_trade_only() {
     state.season = Season::Winter;
     let winter = trade_sea_legs(
         &state,
-        &data,
+        data,
         &path,
         &fac("fac_england"),
         &fac("fac_england"),
@@ -245,7 +236,7 @@ fn winter_lowers_sea_trade_only() {
     let land = vec![set("set_bordeaux"), set("set_libourne")];
     let dry = trade_sea_legs(
         &state,
-        &data,
+        data,
         &land,
         &fac("fac_england"),
         &fac("fac_england"),
@@ -255,9 +246,9 @@ fn winter_lowers_sea_trade_only() {
 
 #[test]
 fn the_map_view_names_lanes_their_sea_and_trade() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 3).unwrap();
-    state.naval.ensure(&data);
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 3).unwrap();
+    state.naval.ensure(data);
     state.naval.control.insert(
         biscay(),
         SeaControl {
@@ -265,7 +256,7 @@ fn the_map_view_names_lanes_their_sea_and_trade() {
             level: 70,
         },
     );
-    let views = sea_lanes(&state, &data, &fac("fac_england"));
+    let views = sea_lanes(&state, data, &fac("fac_england"));
     assert_eq!(views.len(), data.naval.sea_lanes.lanes.len());
     let wine = views
         .iter()

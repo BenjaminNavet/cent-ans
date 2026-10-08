@@ -1,19 +1,10 @@
 //! Lot B7a: rules the interface describes — devastated land feeds armies
 //! badly, the court and bankruptcy tuning is read from `data/`.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SettlementId};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
@@ -47,9 +38,9 @@ fn supply_after_a_season(data: &GameData, settlement: &str, supply: u8, devastat
 
 #[test]
 fn a_devastated_enemy_province_starves_armies_faster() {
-    let data = data();
-    let clean = supply_after_a_season(&data, "set_boulogne", 100, 0);
-    let ravaged = supply_after_a_season(&data, "set_boulogne", 100, 100);
+    let data = game_data();
+    let clean = supply_after_a_season(data, "set_boulogne", 100, 0);
+    let ravaged = supply_after_a_season(data, "set_boulogne", 100, 100);
     assert!(clean < 100, "supply falls abroad ({clean})");
     let clean_loss = 100 - clean;
     let ravaged_loss = 100 - ravaged;
@@ -63,9 +54,9 @@ fn a_devastated_enemy_province_starves_armies_faster() {
 
 #[test]
 fn a_devastated_home_province_feeds_armies_slower() {
-    let data = data();
-    let clean = supply_after_a_season(&data, "set_cantorbery", 0, 0);
-    let ravaged = supply_after_a_season(&data, "set_cantorbery", 0, 100);
+    let data = game_data();
+    let clean = supply_after_a_season(data, "set_cantorbery", 0, 0);
+    let ravaged = supply_after_a_season(data, "set_cantorbery", 0, 100);
     assert!(clean >= 40, "full recovery at home ({clean})");
     let expected = f64::from(clean)
         * (1.0 - data.economy_rules.supply_devastation_recovery_cut_percent / 100.0);
@@ -77,7 +68,7 @@ fn a_devastated_home_province_feeds_armies_slower() {
 
 #[test]
 fn economy_tuning_comes_from_data() {
-    let data = data();
+    let data = game_data();
     let rules = &data.economy_rules;
     assert_eq!(rules.opulence_seasons, 6);
     assert_eq!(rules.opulence_percent, 20);

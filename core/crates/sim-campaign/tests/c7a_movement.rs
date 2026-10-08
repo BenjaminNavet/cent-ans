@@ -1,19 +1,14 @@
 //! Lot C7a: an army covers one or two neighbouring provinces per season
 //! (`rules.json` `movement.season_scale` and `road_cost_factor`).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{FactionId, SettlementId};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 #[test]
 fn road_edges_are_rescaled_to_the_rules_factor() {
-    let data = data();
+    let data = game_data();
     let rules = data.movement_rules();
     let raw = data
         .settlement_graph
@@ -27,9 +22,9 @@ fn road_edges_are_rescaled_to_the_rules_factor() {
 
 #[test]
 fn a_season_covers_one_or_two_provinces_from_paris() {
-    let data = data();
+    let data = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let paris = SettlementId::new("set_paris").unwrap();
     let army = state
         .armies
@@ -41,12 +36,12 @@ fn a_season_covers_one_or_two_provinces_from_paris() {
     a.position = sim_campaign::ArmyPosition::Settlement(paris.clone());
     a.general = None;
     a.units.truncate(1);
-    let allowance = state.army_movement_allowance(&data, &state.armies[&army]);
-    assert_eq!(allowance, state.season_movement_points(&data));
+    let allowance = state.army_movement_allowance(data, &state.armies[&army]);
+    assert_eq!(allowance, state.season_movement_points(data));
     // 1.5 v1 province steps at most outside winter.
     assert!(f64::from(allowance) <= 1.5 * data.movement_rules().points_per_step + 1.0);
     state.armies.get_mut(&army).unwrap().movement_left = allowance;
-    let reach = state.reachable(&data, &army);
+    let reach = state.reachable(data, &army);
     assert!(
         reach.len() < 100,
         "{} settlements in one season from Paris",

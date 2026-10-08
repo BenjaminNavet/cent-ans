@@ -10,8 +10,8 @@ use sim_battle::{BattleSim, SideId, TimeOfDayRules, Weather};
 fn range_duel(gap: f64) -> BattleSim {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 5).unwrap();

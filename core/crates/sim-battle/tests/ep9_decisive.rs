@@ -79,7 +79,7 @@ fn army(tier: Tier, offset: usize) -> Vec<UnitSetup> {
     let ids: Vec<&str> = (0..tier.regiments())
         .map(|i| KINDS[(i + offset) % KINDS.len()])
         .collect();
-    let mut list = units(&data, &ids);
+    let mut list = units(data, &ids);
     if tier == Tier::Epic {
         for unit in &mut list {
             unit.soldiers = 120;
@@ -318,7 +318,7 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
         "unit_men_at_arms_foot",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     battle.attacker.general = Some(general("Philippe"));
     battle.defender.general = Some(general("Edouard"));

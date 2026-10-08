@@ -19,7 +19,7 @@ fn lab_sim(seed: u64) -> BattleSim {
     let mut sim = BattleSim::new(
         setup(
             units(
-                &data,
+                data,
                 &[
                     "unit_men_at_arms_foot",
                     "unit_flemish_pikemen",
@@ -27,7 +27,7 @@ fn lab_sim(seed: u64) -> BattleSim {
                     "unit_knights",
                 ],
             ),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_urban_militia"]),
             None,
         ),
         seed,
@@ -198,8 +198,8 @@ fn formations_during_deployment_are_instant() {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_men_at_arms_foot"]),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_urban_militia"]),
             None,
         ),
         9,

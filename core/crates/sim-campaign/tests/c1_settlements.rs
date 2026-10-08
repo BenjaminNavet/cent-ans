@@ -2,16 +2,10 @@
 //! exactly one city, and the settlement state survives a save round trip.
 //! See `docs/design/2026-09-24-echelle-colonies.md` § 4.2 and § 8.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SettlementKind};
 use sim_campaign::{CampaignState, STATE_VERSION};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
+use data_model::test_support::game_data;
 
 fn france(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
@@ -19,12 +13,12 @@ fn france(data: &GameData) -> CampaignState {
 
 #[test]
 fn every_province_has_one_city_after_setup() {
-    let data = data();
-    let state = france(&data);
+    let data = game_data();
+    let state = france(data);
     assert!(!state.provinces.is_empty());
     for (province_id, province) in &state.provinces {
         assert_eq!(&province.settlements[0], &province.city);
-        let settlements = state.province_settlements(&data, province_id);
+        let settlements = state.province_settlements(data, province_id);
         assert!(!settlements.is_empty(), "{province_id} has no settlement");
         let cities: Vec<_> = settlements
             .iter()
@@ -57,8 +51,8 @@ fn every_province_has_one_city_after_setup() {
 
 #[test]
 fn settlements_survive_a_save_round_trip() {
-    let data = data();
-    let state = france(&data);
+    let data = game_data();
+    let state = france(data);
     assert_eq!(state.state_version, STATE_VERSION);
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("save loads");
@@ -67,8 +61,8 @@ fn settlements_survive_a_save_round_trip() {
 
 #[test]
 fn saves_without_settlements_are_refused() {
-    let data = data();
-    let state = france(&data);
+    let data = game_data();
+    let state = france(data);
     let mut value: serde_json::Value = serde_json::from_str(&state.save_json()).unwrap();
     value.as_object_mut().unwrap().remove("settlements");
     assert!(CampaignState::load_json(&value.to_string()).is_err());

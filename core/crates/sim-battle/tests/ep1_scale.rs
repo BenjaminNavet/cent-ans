@@ -24,8 +24,8 @@ fn army(count: usize) -> Vec<&'static str> {
 fn big_setup(regiments: usize) -> sim_battle::BattleSetup {
     let data = data();
     let mut battle = setup(
-        units(&data, &army(regiments)),
-        units(&data, &army(regiments)),
+        units(data, &army(regiments)),
+        units(data, &army(regiments)),
         None,
     );
     for unit in battle

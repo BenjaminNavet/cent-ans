@@ -31,11 +31,8 @@ fn flank_rout(line_morale: f64) -> (BattleSim, Vec<usize>, usize) {
     let foot = vec!["unit_men_at_arms_foot"; LINE];
     let mut attackers = foot.clone();
     attackers.push("unit_knights");
-    let mut sim = BattleSim::new(
-        setup(units(&data, &attackers), units(&data, &foot), None),
-        1,
-    )
-    .unwrap();
+    let mut sim =
+        BattleSim::new(setup(units(data, &attackers), units(data, &foot), None), 1).unwrap();
     lab(&mut sim);
     {
         let field = sim.field_mut();

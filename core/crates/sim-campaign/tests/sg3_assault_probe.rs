@@ -5,17 +5,11 @@
 //! wooden gate falls to the ram within a few minutes while stone walls hold
 //! much longer.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData};
 use sim_battle::{BattleSim, PieceKind, SideId, SiegeFxKind};
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
+use data_model::test_support::game_data;
 
 fn largest_army(state: &CampaignState, faction: &str) -> ArmyId {
     let faction = FactionId::new(faction).unwrap();
@@ -192,8 +186,8 @@ fn dump_units(sim: &BattleSim) {
 /// ram within ten minutes, a few minutes after the first blow.
 #[test]
 fn avignon_gate_falls_to_the_ram_within_minutes() {
-    let data = data();
-    let run = assault(&data, "avignon", "fac_england", 11, 600.0);
+    let data = game_data();
+    let run = assault(data, "avignon", "fac_england", 11, 600.0);
     let first = run.first_blow.expect("the ram reaches the gate");
     let fell = run.gate_at.expect("the gate falls within 600 s");
     assert!(fell - first < 300.0, "battered for {:.0} s", fell - first);
@@ -206,7 +200,7 @@ fn avignon_gate_falls_to_the_ram_within_minutes() {
 /// 6-10 trebuchet shots).
 #[test]
 fn stone_walls_hold_far_longer_than_the_gate() {
-    let data = data();
+    let data = game_data();
     let rules = sim_battle::SiegeWorkRules::bundled();
     let trebuchet = data
         .unit_types

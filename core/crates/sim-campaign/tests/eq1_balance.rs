@@ -2,20 +2,10 @@
 //! unrest, event costs scaled to income, rebels outside the economy, the
 //! English opening economy.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::ProvinceId;
 use sim_campaign::{chronicle, population, CampaignState, EventKind};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set_unrest(state: &mut CampaignState, province: &ProvinceId, value: u8) {
     let p = state.provinces.get_mut(province).unwrap();
@@ -33,8 +23,8 @@ fn set_unrest(state: &mut CampaignState, province: &ProvinceId, value: u8) {
 /// `revolt_seasons`, not every season.
 #[test]
 fn a_revolt_needs_several_seasons_again_after_each_one() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.chronicle.disabled = true;
     let province = ProvinceId::new("prov_kent").unwrap();
     let needed = data.population_rules.revolt_seasons;
@@ -45,7 +35,7 @@ fn a_revolt_needs_several_seasons_again_after_each_one() {
         // Unrest settles near 85 after the season (above the threshold,
         // below the hand-over to the rebels).
         set_unrest(&mut state, &province, 100);
-        let events = state.end_turn(&data);
+        let events = state.end_turn(data);
         revolts += events
             .iter()
             .filter(|e| e.kind == EventKind::Revolt && e.province.as_ref() == Some(&province))
@@ -61,13 +51,13 @@ fn a_revolt_needs_several_seasons_again_after_each_one() {
 /// The province's disorder gauge (captures, raids) raises class unrest.
 #[test]
 fn recent_disorder_raises_unrest() {
-    let data = data();
+    let data = game_data();
     let province = ProvinceId::new("prov_kent").unwrap();
     let run = |disorder: u8| {
-        let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+        let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
         state.chronicle.disabled = true;
         state.provinces.get_mut(&province).unwrap().unrest = disorder;
-        state.end_turn(&data);
+        state.end_turn(data);
         population::weighted_unrest(&state.provinces[&province].population)
     };
     assert!(run(60) > run(0) + 3.0);
@@ -77,15 +67,15 @@ fn recent_disorder_raises_unrest() {
 /// one pays it in full.
 #[test]
 fn event_costs_scale_with_income() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let france = fac("fac_france");
     let swiss = fac("fac_swiss");
     assert_eq!(
-        chronicle::event_treasury_amount(&state, &data, Some(&france), -2000),
+        chronicle::event_treasury_amount(&state, data, Some(&france), -2000),
         -2000
     );
-    let small = chronicle::event_treasury_amount(&state, &data, Some(&swiss), -2000);
+    let small = chronicle::event_treasury_amount(&state, data, Some(&swiss), -2000);
     let floor = (-2000.0 * data.economy_rules.event_treasury_min_scale).round() as i64;
     assert!(small > -2000 && small <= floor, "{small}");
 }
@@ -93,14 +83,14 @@ fn event_costs_scale_with_income() {
 /// The rebels hold no treasury: they never go bankrupt.
 #[test]
 fn rebels_are_outside_the_economy() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.chronicle.disabled = true;
     let rebels = fac("fac_rebels");
     let province = ProvinceId::new("prov_kent").unwrap();
     state.city_state_mut(&province).unwrap().controller = rebels.clone();
     state.factions.get_mut(&rebels).unwrap().treasury = -500;
-    let events = state.end_turn(&data);
+    let events = state.end_turn(data);
     assert!(!events
         .iter()
         .any(|e| e.kind == EventKind::Bankruptcy && e.faction.as_ref() == Some(&rebels)));
@@ -110,11 +100,11 @@ fn rebels_are_outside_the_economy() {
 /// seasonal balance at the start and a full treasury for five turns.
 #[test]
 fn england_opens_without_deficit() {
-    let data = data();
+    let data = game_data();
     let england = fac("fac_england");
-    let mut state = CampaignState::new_1337(&data, england.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, england.clone(), 1).unwrap();
     state.interactive_battles = false;
-    let e = state.faction_economy(&data, &england).unwrap();
+    let e = state.faction_economy(data, &england).unwrap();
     let net = e.projected_income + e.trade_income
         - e.army_upkeep
         - e.building_upkeep
@@ -123,7 +113,7 @@ fn england_opens_without_deficit() {
     assert!(net >= 0, "England's opening balance is {net}");
     let start = state.factions[&england].treasury;
     for _ in 0..5 {
-        let events = state.end_turn(&data);
+        let events = state.end_turn(data);
         assert!(!events
             .iter()
             .any(|e| e.kind == EventKind::Bankruptcy && e.faction.as_ref() == Some(&england)));

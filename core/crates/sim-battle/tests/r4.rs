@@ -83,8 +83,8 @@ fn arrow_losses(sim: &mut BattleSim, seconds: f64) -> f64 {
 #[test]
 fn the_reverse_slope_shelters_a_line_from_longbows() {
     let data = data();
-    let mut open = longbows_at_a_line(&data, false, true);
-    let mut sheltered = longbows_at_a_line(&data, true, true);
+    let mut open = longbows_at_a_line(data, false, true);
+    let mut sheltered = longbows_at_a_line(data, true, true);
     {
         let field = sheltered.field();
         let line = &sheltered.units()[3];
@@ -105,7 +105,7 @@ fn the_reverse_slope_shelters_a_line_from_longbows() {
 #[test]
 fn a_lobbed_volley_needs_a_friend_who_sees_the_target() {
     let data = data();
-    let mut spotted = longbows_at_a_line(&data, true, true);
+    let mut spotted = longbows_at_a_line(data, true, true);
     let killed = arrow_losses(&mut spotted, 60.0);
     let shots = spotted.take_shots();
     assert!(killed > 0.0);
@@ -113,7 +113,7 @@ fn a_lobbed_volley_needs_a_friend_who_sees_the_target() {
         shots.iter().any(|s| s.target == Some(3) && s.indirect),
         "indirect volleys at the line"
     );
-    let mut blind = longbows_at_a_line(&data, true, false);
+    let mut blind = longbows_at_a_line(data, true, false);
     assert_eq!(arrow_losses(&mut blind, 60.0), 0.0);
     assert!(blind.take_shots().iter().all(|s| s.target != Some(3)));
 }
@@ -121,7 +121,7 @@ fn a_lobbed_volley_needs_a_friend_who_sees_the_target() {
 #[test]
 fn a_target_seen_a_moment_ago_draws_a_few_scattered_volleys() {
     let data = data();
-    let mut sim = longbows_at_a_line(&data, true, false);
+    let mut sim = longbows_at_a_line(data, true, false);
     // The line stands on the crest in sight, then steps back behind it.
     place(&mut sim, 3, 600.0, CREST - 10.0, PI);
     run(&mut sim, 8.0);
@@ -147,8 +147,8 @@ fn a_target_seen_a_moment_ago_draws_a_few_scattered_volleys() {
 fn a_crest_close_in_front_of_the_target_leaves_dead_ground() {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 3).unwrap();
@@ -168,8 +168,8 @@ fn a_crest_close_in_front_of_the_target_leaves_dead_ground() {
     // right in front of it at a target on top.
     let mut sim2 = BattleSim::new(
         setup(
-            units(&data, &["unit_longbowmen"]),
-            units(&data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_longbowmen"]),
+            units(data, &["unit_men_at_arms_foot"]),
             None,
         ),
         3,
@@ -238,7 +238,7 @@ fn the_score_prefers_a_hedge_on_a_crest() {
     let data = data();
     // Hedge on the crest (x 470-730) and in the hollow behind (x 470-730).
     let sim = crest_field(
-        &data,
+        data,
         470.0,
         &[hedge_at(465.0, 470.0, 730.0), hedge_at(600.0, 470.0, 730.0)],
     );
@@ -271,7 +271,7 @@ fn the_score_prefers_a_hedge_on_a_crest() {
 #[test]
 fn a_wing_on_a_wood_or_a_river_scores_its_flank() {
     let data = data();
-    let mut sim = crest_field(&data, 470.0, &[]);
+    let mut sim = crest_field(data, 470.0, &[]);
     let front = Front {
         center: (600.0, 470.0),
         forward: -1.0,
@@ -297,7 +297,7 @@ fn english_archers_take_the_hedge_on_the_crest() {
     // French foot), the hollow 30 m behind it.
     let crest_hedge = hedge_at(500.0, 470.0, 730.0);
     let hollow_hedge = hedge_at(580.0, 480.0, 720.0);
-    let mut sim = crest_field(&data, 505.0, &[crest_hedge, hollow_hedge]);
+    let mut sim = crest_field(data, 505.0, &[crest_hedge, hollow_hedge]);
     let b6 = sim_battle::ai::defensive_cover(sim.field(), SideId::Defender).unwrap();
     assert!(b6.center.1 > 570.0, "B6 alone takes the hollow hedge");
     sim.set_ai(SideId::Attacker, false);
@@ -324,8 +324,8 @@ fn english_archers_take_the_hedge_on_the_crest() {
 fn the_attacker_strikes_the_weak_point() {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_men_at_arms_foot"]),
-        units(&data, &["unit_urban_militia", "unit_urban_militia"]),
+        units(data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_urban_militia", "unit_urban_militia"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 3).unwrap();
@@ -386,7 +386,7 @@ fn attacker_above_bows(data: &GameData) -> BattleSim {
 #[test]
 fn an_attacker_above_shooters_waits_then_attacks() {
     let data = data();
-    let mut sim = attacker_above_bows(&data);
+    let mut sim = attacker_above_bows(data);
     let foot_z = |sim: &BattleSim| {
         sim.units()
             .iter()
@@ -421,7 +421,7 @@ fn an_attacker_above_shooters_waits_then_attacks() {
 fn archers_leave_no_dead_ground_below_a_rounded_crest() {
     use sim_battle::position::{dead_ground, military_crest, DEAD_TOLERANCE};
     let data = data();
-    let mut sim = crest_field(&data, 505.0, &[]);
+    let mut sim = crest_field(data, 505.0, &[]);
     {
         // Just behind the top (where the height search lands), the ridge
         // hides the foot of its slope; the military crest does not.

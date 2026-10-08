@@ -417,15 +417,10 @@ mod tests {
     use super::*;
     use crate::state::CampaignState;
 
-    fn setup() -> (CampaignState, GameData) {
-        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("..")
-            .join("..")
-            .join("..")
-            .join("data");
-        let (data, _warnings) = GameData::load(&root).expect("data/ must load");
+    fn setup() -> (CampaignState, &'static GameData) {
+        let data = data_model::test_support::game_data();
         let faction = data_model::FactionId::new("fac_france").expect("well-formed id");
-        let state = CampaignState::new_1337(&data, faction, 1).expect("new_1337 must build");
+        let state = CampaignState::new_1337(data, faction, 1).expect("new_1337 must build");
         (state, data)
     }
 
@@ -439,10 +434,10 @@ mod tests {
             .expect("at least one province")
             .clone();
         assert_eq!(
-            state.province_edict(&data, &province).as_str(),
+            state.province_edict(data, &province).as_str(),
             DEFAULT_EDICT
         );
-        assert!(!state.edict_pending(&data, &province));
+        assert!(!state.edict_pending(data, &province));
     }
 
     #[test]
@@ -455,20 +450,20 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_peace_of_god").expect("well-formed id");
-        set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
+        set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
         // delay_turns: 1 for edict_peace_of_god -> not active on the same turn.
-        assert!(state.edict_pending(&data, &province));
+        assert!(state.edict_pending(data, &province));
         assert_eq!(
-            state.pending_edict(&data, &province),
+            state.pending_edict(data, &province),
             Some((edict.clone(), 1))
         );
         assert_eq!(
-            state.province_edict(&data, &province).as_str(),
+            state.province_edict(data, &province).as_str(),
             DEFAULT_EDICT
         );
         state.turn += 1;
-        assert!(!state.edict_pending(&data, &province));
-        assert_eq!(state.province_edict(&data, &province), edict);
+        assert!(!state.edict_pending(data, &province));
+        assert_eq!(state.province_edict(data, &province), edict);
     }
 
     #[test]
@@ -481,9 +476,9 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
-        set_edict(&mut state, &data, &faction, &province, &edict).expect("first change ok");
+        set_edict(&mut state, data, &faction, &province, &edict).expect("first change ok");
         let other = EdictId::new("edict_market_freedoms").expect("well-formed id");
-        let err = set_edict(&mut state, &data, &faction, &province, &other).unwrap_err();
+        let err = set_edict(&mut state, data, &faction, &province, &other).unwrap_err();
         assert!(matches!(err, EdictError::AlreadyChanged(_)));
     }
 
@@ -497,7 +492,7 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let unknown = EdictId::new("edict_does_not_exist").expect("well-formed id");
-        let err = set_edict(&mut state, &data, &faction, &province, &unknown).unwrap_err();
+        let err = set_edict(&mut state, data, &faction, &province, &unknown).unwrap_err();
         assert!(matches!(err, EdictError::UnknownEdict(_)));
     }
 
@@ -512,13 +507,13 @@ mod tests {
             .take(2)
             .collect();
         assert_eq!(provinces.len(), 2, "player holds two whole provinces");
-        assert_eq!(yearly_edict_piety(&state, &data, &faction), 0);
+        assert_eq!(yearly_edict_piety(&state, data, &faction), 0);
         let lent = EdictId::new("edict_strict_lent").expect("well-formed id");
         let peace = EdictId::new("edict_peace_of_god").expect("well-formed id");
-        set_edict(&mut state, &data, &faction, &provinces[0], &lent).expect("valid order");
-        set_edict(&mut state, &data, &faction, &provinces[1], &peace).expect("valid order");
+        set_edict(&mut state, data, &faction, &provinces[0], &lent).expect("valid order");
+        set_edict(&mut state, data, &faction, &provinces[1], &peace).expect("valid order");
         // Not in force before the delay.
-        assert_eq!(yearly_edict_piety(&state, &data, &faction), 0);
+        assert_eq!(yearly_edict_piety(&state, data, &faction), 0);
         state.turn += 1;
         let expected = |id: &EdictId| -> i32 {
             data.edicts[id]
@@ -531,16 +526,16 @@ mod tests {
         // Only the best province counts (no stacking across the realm).
         let best = expected(&lent).max(expected(&peace));
         assert!(best > 0, "strict Lent gives piety in data/edicts");
-        assert_eq!(yearly_edict_piety(&state, &data, &faction), best);
+        assert_eq!(yearly_edict_piety(&state, data, &faction), best);
 
         let ruler = state.factions[&faction].ruler.clone().expect("a ruler");
         state.characters.get_mut(&ruler).expect("ruler").piety = 40;
-        let buildings = crate::dynasty::yearly_building_piety(&state, &data, &faction);
+        let buildings = crate::dynasty::yearly_building_piety(&state, data, &faction);
         state.season = crate::state::Season::Summer;
-        crate::dynasty::resolve_court_prestige(&mut state, &data);
+        crate::dynasty::resolve_court_prestige(&mut state, data);
         assert_eq!(state.characters[&ruler].piety, 40, "paid in winter only");
         state.season = crate::state::Season::Winter;
-        crate::dynasty::resolve_court_prestige(&mut state, &data);
+        crate::dynasty::resolve_court_prestige(&mut state, data);
         assert_eq!(
             i32::from(state.characters[&ruler].piety),
             40 + buildings + best
@@ -557,17 +552,17 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
-        let before = edict_effects(&state, &data, &province);
-        let merged_before = state.province_effects(&data, &province);
-        set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
+        let before = edict_effects(&state, data, &province);
+        let merged_before = state.province_effects(data, &province);
+        set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
         // edict_feudal_aid has delay_turns: 0, so it is active immediately.
-        let after = edict_effects(&state, &data, &province);
+        let after = edict_effects(&state, data, &province);
         assert_eq!(before.tax_income.percent, 0.0);
         assert_eq!(after.tax_income.percent, 20.0);
         assert_eq!(after.unrest.flat, 6.0);
         // Merged into the province's full effect totals too, on top of
         // whatever the buildings/governor already contribute.
-        let merged_after = state.province_effects(&data, &province);
+        let merged_after = state.province_effects(data, &province);
         assert_eq!(
             merged_after.tax_income.percent - merged_before.tax_income.percent,
             20.0
@@ -584,8 +579,8 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
-        set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
-        assert_eq!(state.province_edict(&data, &province), edict);
+        set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
+        assert_eq!(state.province_edict(data, &province), edict);
         // Hand one settlement of the province to another faction: the
         // province is no longer wholly held.
         let other = state
@@ -604,9 +599,9 @@ mod tests {
                 s.controller = other;
             }
             let mut events = Vec::new();
-            resolve_requirements(&mut state, &data, &mut events);
+            resolve_requirements(&mut state, data, &mut events);
             assert_eq!(
-                state.province_edict(&data, &province).as_str(),
+                state.province_edict(data, &province).as_str(),
                 DEFAULT_EDICT
             );
         }
@@ -623,7 +618,7 @@ mod tests {
             .find(|p| !state.holds_whole_province(&faction, p));
         if let Some(province) = partial {
             let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
-            let err = set_edict(&mut state, &data, &faction, &province, &edict).unwrap_err();
+            let err = set_edict(&mut state, data, &faction, &province, &edict).unwrap_err();
             assert!(matches!(err, EdictError::NotWhollyControlled(_)));
         }
     }
@@ -659,7 +654,7 @@ mod tests {
             .find(|p| state.holds_whole_province(&faction, p))
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_militia_levy").expect("well-formed id");
-        set_edict(&mut state, &data, &faction, &province, &edict).expect("valid order");
+        set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
         let json = state.save_json();
         let loaded = CampaignState::load_json(&json).expect("round trip");
         assert_eq!(
@@ -679,14 +674,14 @@ mod tests {
         let (mut a, data) = setup();
         let mut b = a.clone();
         for _ in 0..8 {
-            a.end_turn(&data);
-            b.end_turn(&data);
+            a.end_turn(data);
+            b.end_turn(data);
         }
         assert_eq!(a.save_json(), b.save_json());
         for faction in a.factions.keys().cloned().collect::<Vec<_>>() {
             let mut probe = a.clone();
-            for order in ai_choose_edicts(&a, &data, &faction) {
-                probe.apply_order(&data, &faction, order).unwrap();
+            for order in ai_choose_edicts(&a, data, &faction) {
+                probe.apply_order(data, &faction, order).unwrap();
             }
         }
     }
@@ -715,7 +710,7 @@ mod tests {
             }
         }
         let chooses_aid = |state: &CampaignState| {
-            ai_choose_edicts(state, &data, &faction)
+            ai_choose_edicts(state, data, &faction)
                 .iter()
                 .any(|o| matches!(o, Order::SetEdict { edict, .. } if *edict == aid))
         };

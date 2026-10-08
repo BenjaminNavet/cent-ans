@@ -70,6 +70,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 name = "data-model"
 version = "0.1.0"
 dependencies = [
+ "data-model",
  "png",
  "serde",
  "serde_json",

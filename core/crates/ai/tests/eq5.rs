@@ -2,23 +2,13 @@
 //! lost war), and its armies do not camp in the lands of a realm at peace
 //! without right of passage.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SettlementId, SettlementKind};
 use sim_campaign::movement::edges;
 use sim_campaign::negotiation::TributeDue;
 use sim_campaign::passage::trespassed_owner;
 use sim_campaign::{ArmyId, CampaignState, Order, Place};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn main_army(state: &CampaignState, faction: &FactionId) -> ArmyId {
     state
@@ -80,14 +70,14 @@ fn deep_foreign_place(state: &CampaignState, data: &GameData, faction: &FactionI
 
 #[test]
 fn an_army_caught_deep_in_foreign_lands_marches_out() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
     at_peace(&mut state);
     let france = fac("fac_france");
     let army = main_army(&state, &france);
-    let place = deep_foreign_place(&state, &data, &france);
+    let place = deep_foreign_place(&state, data, &france);
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(place);
-    let orders = ai::plan_turn(&state, &data, &france);
+    let orders = ai::plan_turn(&state, data, &france);
     assert!(
         destination(&orders, &army).is_some(),
         "the army leaves the lands it may not stay in: {orders:?}"
@@ -96,8 +86,8 @@ fn an_army_caught_deep_in_foreign_lands_marches_out() {
 
 #[test]
 fn at_peace_an_army_in_its_own_castle_abroad_joins_the_garrison() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
     at_peace(&mut state);
     let france = fac("fac_france");
     // A castle of a foreign province, held by France.
@@ -126,7 +116,7 @@ fn at_peace_an_army_in_its_own_castle_abroad_joins_the_garrison() {
         a.units.truncate(2);
         a.position = sim_campaign::ArmyPosition::Settlement(place);
     }
-    let orders = ai::plan_turn(&state, &data, &france);
+    let orders = ai::plan_turn(&state, data, &france);
     assert!(
         orders.iter().any(|o| matches!(
             o,
@@ -138,11 +128,11 @@ fn at_peace_an_army_in_its_own_castle_abroad_joins_the_garrison() {
 
 #[test]
 fn a_tribute_the_treasury_cannot_bear_is_budgeted() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
     at_peace(&mut state);
     let france = fac("fac_france");
-    let income = state.faction_income_effective(&data, &france);
+    let income = state.faction_income_effective(data, &france);
     {
         let f = state.factions.get_mut(&france).unwrap();
         f.treasury = 0;
@@ -152,7 +142,7 @@ fn a_tribute_the_treasury_cannot_bear_is_budgeted() {
             until_turn: state.turn + 8,
         });
     }
-    let orders = ai::plan_turn(&state, &data, &france);
+    let orders = ai::plan_turn(&state, data, &france);
     assert!(
         orders
             .iter()

@@ -1,22 +1,15 @@
 //! G4 « Bourgogne et Brabant » tests: blood feud (Montereau), relative
 //! dominance, money fiefs and the Low Countries web, tuning read from
 //! `data/ai/alignment.json`.
+use data_model::test_support::{fac, game_data};
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
+use data_model::GameData;
 use sim_campaign::diplomacy::{OpinionModifier, AGGRESSION_REASON, GIFT_REASON};
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    // FE5: the feudal AI decides, whatever the order of the tests.
+fn data() -> &'static GameData {
     ai::feudal::install();
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
+    game_data()
 }
 
 /// `holder` holds a running grudge of `value` against `with`.
@@ -59,7 +52,7 @@ fn the_tuning_comes_from_data() {
 
 #[test]
 fn without_tuning_the_ai_never_changes_sides() {
-    let mut data = data();
+    let mut data = data().clone();
     let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
     grudge(
         &mut state,
@@ -80,10 +73,10 @@ fn without_tuning_the_ai_never_changes_sides() {
 fn a_blood_feud_turns_burgundy_to_the_english_pretender() {
     let data = data();
     let (france, england, burgundy) = (fac("fac_france"), fac("fac_england"), fac("fac_burgundy"));
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     // No grudge, no feud: the duke follows his king.
     assert_eq!(
-        ai::alignment::grievance_change(&state, &data, &burgundy),
+        ai::alignment::grievance_change(&state, data, &burgundy),
         None
     );
     // The reputation of an aggressor is no personal grudge.
@@ -96,7 +89,7 @@ fn a_blood_feud_turns_burgundy_to_the_english_pretender() {
     );
     assert_eq!(ai::alignment::grievance(&state, &burgundy, &france), 0);
     assert_eq!(
-        ai::alignment::grievance_change(&state, &data, &burgundy),
+        ai::alignment::grievance_change(&state, data, &burgundy),
         None
     );
     // Montereau: the murdered duke's son sides with Henry V.
@@ -109,13 +102,13 @@ fn a_blood_feud_turns_burgundy_to_the_english_pretender() {
     );
     assert_eq!(ai::alignment::grievance(&state, &burgundy, &france), -40);
     assert_eq!(
-        ai::alignment::grievance_change(&state, &data, &burgundy),
+        ai::alignment::grievance_change(&state, data, &burgundy),
         Some((france.clone(), england.clone()))
     );
     // The grudge fades after its term.
     state.turn += 21;
     assert_eq!(
-        ai::alignment::grievance_change(&state, &data, &burgundy),
+        ai::alignment::grievance_change(&state, data, &burgundy),
         None
     );
 }
@@ -124,7 +117,7 @@ fn a_blood_feud_turns_burgundy_to_the_english_pretender() {
 fn an_aggrieved_vassal_makes_peace_then_breaks_with_its_lord() {
     let data = data();
     let (france, england, burgundy) = (fac("fac_france"), fac("fac_england"), fac("fac_burgundy"));
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.factions.get_mut(&burgundy).unwrap().treasury = 50_000;
     grudge(
         &mut state,
@@ -137,10 +130,10 @@ fn an_aggrieved_vassal_makes_peace_then_breaks_with_its_lord() {
     // would sign it), never a war on the king while the English fight us.
     assert!(state.is_at_war(&burgundy, &england));
     assert_eq!(
-        ai::alignment::side_change(&state, &data, &burgundy),
+        ai::alignment::side_change(&state, data, &burgundy),
         Some((france.clone(), england.clone()))
     );
-    let orders = side_change_orders(&mut state, &data, "fac_burgundy");
+    let orders = side_change_orders(&mut state, data, "fac_burgundy");
     assert!(
         orders
             .iter()
@@ -164,7 +157,7 @@ fn an_aggrieved_vassal_makes_peace_then_breaks_with_its_lord() {
         .unwrap()
         .allies
         .insert(burgundy.clone());
-    let orders = side_change_orders(&mut state, &data, "fac_burgundy");
+    let orders = side_change_orders(&mut state, data, "fac_burgundy");
     let war = orders
         .iter()
         .position(|o| matches!(o, Order::DeclareWar { target } if *target == france));
@@ -206,19 +199,19 @@ fn dominance_is_a_share_of_the_realm() {
     let data = data();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let rules = data.ai_alignment.as_ref().unwrap();
-    let realm = ai::alignment::realm_provinces(&data, &france).len();
+    let realm = ai::alignment::realm_provinces(data, &france).len();
     let needed = (rules.defection.dominance_realm_share * realm as f64).ceil() as usize;
     // Seven provinces (a quarter of France's own lands) and no Paris: the
     // absolute rule of G2 (eight) said no.
     let count = needed.max(7);
     assert!(count < 8, "share {needed} of {realm}");
-    let state = english_provinces(&data, 1, count);
+    let state = english_provinces(data, 1, count);
     assert!(ai::alignment::dominates_realm(
-        &state, &data, &england, &france
+        &state, data, &england, &france
     ));
-    let state = english_provinces(&data, 1, 2);
+    let state = english_provinces(data, 1, 2);
     assert!(!ai::alignment::dominates_realm(
-        &state, &data, &england, &france
+        &state, data, &england, &france
     ));
 }
 
@@ -252,8 +245,8 @@ fn over_four_turns<T>(
 fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     let data = data();
     let (england, brabant, france) = (fac("fac_england"), fac("fac_brabant"), fac("fac_france"));
-    let seed = courted_seed(&data, "fac_brabant");
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), seed).unwrap();
+    let seed = courted_seed(data, "fac_brabant");
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), seed).unwrap();
     state.factions.get_mut(&england).unwrap().treasury = 100_000;
     // A lesser ally bordering Brabant fights France at England's side.
     let anchor = state
@@ -268,7 +261,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
         })
         .map(|(id, _)| id.clone())
         .find(|id| {
-            state.are_neighbors(&data, &brabant, id)
+            state.are_neighbors(data, &brabant, id)
                 && state.faction_power(id) < 0.5 * state.faction_power(&england)
                 && !state.is_at_war(id, &england)
         })
@@ -292,7 +285,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     }
     // Brabant hesitates: a pension first.
     let gifts = over_four_turns(&mut state, |s| {
-        ai::alignment::plan_money_fief(s, &data, &england)
+        ai::alignment::plan_money_fief(s, data, &england)
     });
     assert!(
         gifts
@@ -314,7 +307,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
             expires_turn,
         });
     let gifts = over_four_turns(&mut state, |s| {
-        ai::alignment::plan_money_fief(s, &data, &england)
+        ai::alignment::plan_money_fief(s, data, &england)
     });
     assert!(
         !gifts
@@ -323,7 +316,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
         "a running pension is not renewed"
     );
     let offers = over_four_turns(&mut state, |s| {
-        ai::alignment::plan_dynastic_alliance(s, &data, &england)
+        ai::alignment::plan_dynastic_alliance(s, data, &england)
     });
     assert!(
         offers
@@ -336,7 +329,7 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
 #[test]
 fn a_vassal_courts_no_prince() {
     let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state
         .factions
         .get_mut(&fac("fac_burgundy"))
@@ -344,7 +337,7 @@ fn a_vassal_courts_no_prince() {
         .treasury = 1_000_000;
     let burgundy = fac("fac_burgundy");
     let gifts = over_four_turns(&mut state, |s| {
-        ai::alignment::plan_money_fief(s, &data, &burgundy)
+        ai::alignment::plan_money_fief(s, data, &burgundy)
     });
     assert!(gifts.is_empty(), "{gifts:?}");
 }

@@ -9,14 +9,7 @@ use std::path::PathBuf;
 use data_model::{EventCategory, EventId, FactionId, GameData};
 use sim_campaign::{ai_minimal, chronicle, CampaignState, Order, Season};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 /// Runs a campaign from 1337 to the end of 1453 and returns the year each
 /// event first fired.
@@ -177,8 +170,8 @@ fn f7_events_load_with_their_kind_and_sources() {
 /// the chains reach their later steps.
 #[test]
 fn a_simulated_campaign_fires_the_new_history() {
-    let data = data();
-    let fired = simulate(&data, "fac_france", 1337);
+    let data = game_data();
+    let fired = simulate(data, "fac_france", 1337);
     let historical: Vec<&str> = F7_HISTORICAL
         .iter()
         .copied()
@@ -214,13 +207,13 @@ fn a_simulated_campaign_fires_the_new_history() {
 
 #[test]
 fn nevilles_cross_captures_david_and_berwick_frees_him() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 3).unwrap();
     let david = data_model::CharacterId::new("chr_david_ii").unwrap();
     state.year = 1346;
     state.season = Season::Autumn;
     set_war(&mut state, "fac_scotland", "fac_england");
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state
         .chronicle
         .fired_events
@@ -233,7 +226,7 @@ fn nevilles_cross_captures_david_and_berwick_frees_him() {
         .iter()
         .any(|s| s.event == evt("evt_rancon_david_ii")));
     for _ in 0..20 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state
         .chronicle
@@ -244,17 +237,17 @@ fn nevilles_cross_captures_david_and_berwick_frees_him() {
 
 #[test]
 fn montereau_leads_to_the_alliance_then_troyes() {
-    let data = data();
+    let data = game_data();
     // Seed 1 (2 before the LR merge, 7 before LR-17, 6 before the HV8 data):
     // the chain depends on the random stream, which any new random event or
     // character shifts (after LR, seeds 1 and 3-12 pass, seed 2 misses the
     // alliance within three turns).
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 1).unwrap();
     state.year = 1419;
     state.season = Season::Autumn;
     for _ in 0..3 {
         set_war(&mut state, "fac_england", "fac_france");
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     for id in [
         "evt_montereau",
@@ -276,19 +269,19 @@ fn montereau_leads_to_the_alliance_then_troyes() {
 
 #[test]
 fn nicopolis_leads_to_the_ransom_of_nevers() {
-    let data = data();
+    let data = game_data();
     // Seed 3 (5 before LR-17's new character shifted the random stream).
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 3).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 3).unwrap();
     state.year = 1396;
     state.season = Season::Autumn;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state.chronicle.fired_events.contains(&evt("evt_nicopolis")));
     assert!(!state
         .chronicle
         .fired_events
         .contains(&evt("evt_rancon_de_nevers")));
     for _ in 0..3 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state
         .chronicle
@@ -323,14 +316,14 @@ const HV10_HISTORICAL: &[(&str, i32, Season)] = &[
 /// idle AI, the player being a faction with no stake in the East).
 #[test]
 fn hv10_events_fire_on_their_date_in_a_plausible_state() {
-    let data = data();
+    let data = game_data();
     for (id, year, season) in HV10_HISTORICAL {
         let event = &data.events[&evt(id)];
         assert_eq!(event.kind, EventCategory::Historical, "{id}");
-        let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+        let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 11).unwrap();
         state.year = *year;
         state.season = *season;
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         assert!(
             state.chronicle.fired_events.contains(&evt(id)),
             "{id} did not fire in {year} {season:?}"
@@ -341,9 +334,9 @@ fn hv10_events_fire_on_their_date_in_a_plausible_state() {
 /// The conditions matter: without them an HV10 event stays silent.
 #[test]
 fn hv10_events_stay_silent_when_their_conditions_fail() {
-    let data = data();
+    let data = game_data();
     // Algeciras no longer Marinid.
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 11).unwrap();
     state.year = 1344;
     state.season = Season::Spring;
     let province = data_model::ProvinceId::new("prov_algeciras").unwrap();
@@ -351,16 +344,16 @@ fn hv10_events_stay_silent_when_their_conditions_fail() {
     let settlement = state.settlements.get_mut(&city).unwrap();
     settlement.owner = fac("fac_castile");
     settlement.controller = fac("fac_castile");
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state
         .chronicle
         .fired_events
         .contains(&evt("evt_prise_d_algesiras")));
     // Out of its window (after `until_year`).
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 11).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 11).unwrap();
     state.year = 1360;
     state.season = Season::Spring;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state
         .chronicle
         .fired_events

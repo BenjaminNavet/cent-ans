@@ -2,20 +2,12 @@
 //! and the sea of a crossing to Calais (the Channel, not the North Sea).
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::PathBuf;
 
-use data_model::{FactionId, GameData, SeaZoneId, SettlementId, ShipClassId};
+use data_model::{GameData, SeaZoneId, SettlementId, ShipClassId};
 use sim_campaign::naval::{crossing_sea, naval_setup, NavalRequest, ShipNamer};
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -31,9 +23,9 @@ fn class(id: &str) -> ShipClassId {
 
 #[test]
 fn crossings_to_calais_are_fought_in_the_channel() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
-    let crossing = |from: &str, to: &str| crossing_sea(&state, &data, &set(from), &set(to));
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
+    let crossing = |from: &str, to: &str| crossing_sea(&state, data, &set(from), &set(to));
     // London lies on the North Sea, but the fight is off Calais.
     assert_eq!(
         crossing("set_londres", "set_calais"),
@@ -94,9 +86,9 @@ fn request(data: &GameData, from: &str, to: &str, seed: u64) -> (CampaignState, 
 
 #[test]
 fn campaign_ships_bear_historical_names() {
-    let data = data();
-    let (state, request) = request(&data, "set_rye", "set_calais", 11);
-    let setup = naval_setup(&state, &data, &request);
+    let data = game_data();
+    let (state, request) = request(data, "set_rye", "set_calais", 11);
+    let setup = naval_setup(&state, data, &request);
     assert_eq!(setup.place_name, "le pas de Calais");
     assert_eq!(setup.sea_zone, "sea_channel");
     let names = &data.naval.ship_names;
@@ -131,19 +123,19 @@ fn campaign_ships_bear_historical_names() {
         assert!(side.ships.iter().all(|s| !s.name.contains("n°")));
     }
     // Same request, same names.
-    assert_eq!(naval_setup(&state, &data, &request), setup);
+    assert_eq!(naval_setup(&state, data, &request), setup);
 }
 
 #[test]
 fn names_follow_the_seed_and_run_out_gracefully() {
-    let data = data();
+    let data = game_data();
     let naples = fac("fac_naples");
     let list = data.naval.ship_names.of(&naples).unwrap();
     let cog = class("ship_galley");
     let draw = |seed: u64, count: usize| {
-        let mut namer = ShipNamer::new(&data, &naples, &[], seed);
+        let mut namer = ShipNamer::new(data, &naples, &[], seed);
         (0..count)
-            .map(|n| namer.name(&data, &cog, n))
+            .map(|n| namer.name(data, &cog, n))
             .collect::<Vec<_>>()
     };
     assert_ne!(
@@ -158,6 +150,6 @@ fn names_follow_the_seed_and_run_out_gracefully() {
     assert!(!many[total - 1].contains("n°"), "{many:?}");
     assert!(many[total].contains("n°"), "{many:?}");
     // A faction without names keeps « Galère n°1 ».
-    let mut nobody = ShipNamer::new(&data, &fac("fac_nobody"), &[], 0);
-    assert!(nobody.name(&data, &cog, 0).ends_with("n°1"));
+    let mut nobody = ShipNamer::new(data, &fac("fac_nobody"), &[], 0);
+    assert!(nobody.name(data, &cog, 0).ends_with("n°1"));
 }

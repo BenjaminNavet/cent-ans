@@ -4,10 +4,9 @@
 //! effects (movement, replenishment, shooting, siege, morale), kept name and
 //! banner, loss on dissolution, dilution of experience by reinforcements,
 //! save.
+use data_model::test_support::{fac, game_data};
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_campaign::replenish::resolve_replenishment;
 use sim_campaign::traditions::{
     add_recruits, army_tradition_effects, grant_army_xp, rank_for_xp, siege_speed_percent,
@@ -15,15 +14,6 @@ use sim_campaign::traditions::{
 use sim_campaign::{
     ArmyId, ArmyPosition, CampaignState, Order, OrderError, Season, Stance, TraditionError,
 };
-
-fn real_data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
 
 fn capital_city(state: &CampaignState, faction: &str) -> SettlementId {
     let capital = state.factions[&fac(faction)].capital.clone();
@@ -46,9 +36,9 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
 
 /// France played by the player, its main army (with its general) in Paris,
 /// spring, a full treasury.
-fn setup() -> (GameData, CampaignState, ArmyId) {
-    let data = real_data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+fn setup() -> (&'static GameData, CampaignState, ArmyId) {
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.season = Season::Spring;
     let army = main_army(&state, "fac_france");
     let paris = capital_city(&state, "fac_france");
@@ -97,14 +87,14 @@ fn veteran(
 
 #[test]
 fn ranks_follow_the_thresholds() {
-    let data = real_data();
-    let t = thresholds(&data);
+    let data = game_data();
+    let t = thresholds(data);
     assert!((3..=4).contains(&t.len()));
-    assert_eq!(rank_for_xp(&data, 0), 0);
-    assert_eq!(rank_for_xp(&data, t[0] - 1), 0);
-    assert_eq!(rank_for_xp(&data, t[0]), 1);
-    assert_eq!(rank_for_xp(&data, t[1]), 2);
-    assert_eq!(rank_for_xp(&data, u32::MAX), t.len() as u8);
+    assert_eq!(rank_for_xp(data, 0), 0);
+    assert_eq!(rank_for_xp(data, t[0] - 1), 0);
+    assert_eq!(rank_for_xp(data, t[0]), 1);
+    assert_eq!(rank_for_xp(data, t[1]), 2);
+    assert_eq!(rank_for_xp(data, u32::MAX), t.len() as u8);
 }
 
 #[test]
@@ -112,7 +102,7 @@ fn an_auto_resolved_battle_gives_experience_to_both_armies() {
     let (data, mut state, french) = setup();
     let english = main_army(&state, "fac_england");
     let index = state.debug_stage_battle(&french, &english).unwrap();
-    state.auto_resolve_pending(&data, index).unwrap();
+    state.auto_resolve_pending(data, index).unwrap();
     let fought = data.army_tradition_rules.experience.battle_fought;
     let mut survivors = 0;
     for id in [&french, &english] {
@@ -133,7 +123,7 @@ fn a_3d_battle_gives_experience_and_victory_more() {
     let (data, mut state, french) = setup();
     let english = main_army(&state, "fac_england");
     let index = state.debug_stage_battle(&french, &english).unwrap();
-    let setup = state.battle_setup(&data, index).unwrap();
+    let setup = state.battle_setup(data, index).unwrap();
     let side = |units: usize, losses: u32, routed: bool, delta: i32| {
         serde_json::json!({
             "losses": vec![losses; units],
@@ -148,9 +138,7 @@ fn a_3d_battle_gives_experience_and_victory_more() {
         "defender": side(setup.defender.units.len(), 30, true, -20),
     }))
     .unwrap();
-    state
-        .resolve_pending_battle(&data, index, &outcome)
-        .unwrap();
+    state.resolve_pending_battle(data, index, &outcome).unwrap();
     let rules = &data.army_tradition_rules.experience;
     let winner = state.armies[&french].traditions.xp;
     assert!(
@@ -174,7 +162,7 @@ fn crushing_a_mere_band_teaches_nothing() {
     band.units.truncate(1);
     band.units[0].strength = 5;
     let index = state.debug_stage_battle(&french, &english).unwrap();
-    state.auto_resolve_pending(&data, index).unwrap();
+    state.auto_resolve_pending(data, index).unwrap();
     assert_eq!(state.armies[&french].traditions.xp, 0);
 }
 
@@ -183,44 +171,44 @@ fn one_choice_per_rank_and_tiers_in_order() {
     let (data, mut state, army) = setup();
     // No rank yet.
     assert!(matches!(
-        choose(&mut state, &data, &army, "trad_march_1"),
+        choose(&mut state, data, &army, "trad_march_1"),
         Err(OrderError::Tradition(TraditionError::NoRankAvailable))
     ));
-    let first = thresholds(&data)[0];
+    let first = thresholds(data)[0];
     let mut events = Vec::new();
-    grant_army_xp(&mut state, &data, &army, first, &mut events);
+    grant_army_xp(&mut state, data, &army, first, &mut events);
     assert!(
         events.iter().any(|e| e.text_fr.contains("rang 1")),
         "the player hears of the new rank: {events:?}"
     );
-    let view = state.army_tradition_view(&data, &army).unwrap();
+    let view = state.army_tradition_view(data, &army).unwrap();
     assert_eq!((view.rank, view.pending), (1, 1));
-    assert_eq!(view.next_threshold, Some(thresholds(&data)[1]));
+    assert_eq!(view.next_threshold, Some(thresholds(data)[1]));
     let allowed: Vec<_> = view.options.iter().filter(|o| o.allowed).collect();
     assert_eq!(allowed.len(), 5, "one first tier per branch");
     assert!(allowed.iter().all(|o| o.tier == 1));
     assert!(matches!(
-        choose(&mut state, &data, &army, "trad_march_2"),
+        choose(&mut state, data, &army, "trad_march_2"),
         Err(OrderError::Tradition(TraditionError::MissingPrevious))
     ));
     assert!(matches!(
-        choose(&mut state, &data, &army, "trad_unknown"),
+        choose(&mut state, data, &army, "trad_unknown"),
         Err(OrderError::Tradition(TraditionError::UnknownTradition(_)))
     ));
-    choose(&mut state, &data, &army, "trad_march_1").unwrap();
+    choose(&mut state, data, &army, "trad_march_1").unwrap();
     assert!(matches!(
-        choose(&mut state, &data, &army, "trad_shooting_1"),
+        choose(&mut state, data, &army, "trad_shooting_1"),
         Err(OrderError::Tradition(TraditionError::NoRankAvailable))
     ));
     // Rank 2: the second march tier is open, the first one taken.
     grant_army_xp(
         &mut state,
-        &data,
+        data,
         &army,
-        thresholds(&data)[1] - first,
+        thresholds(data)[1] - first,
         &mut Vec::new(),
     );
-    let view = state.army_tradition_view(&data, &army).unwrap();
+    let view = state.army_tradition_view(data, &army).unwrap();
     let march_2 = view
         .options
         .iter()
@@ -232,14 +220,14 @@ fn one_choice_per_rank_and_tiers_in_order() {
         .iter()
         .any(|o| o.id == "trad_march_1" && o.chosen));
     assert!(matches!(
-        choose(&mut state, &data, &army, "trad_march_1"),
+        choose(&mut state, data, &army, "trad_march_1"),
         Err(OrderError::Tradition(TraditionError::AlreadyChosen))
     ));
-    choose(&mut state, &data, &army, "trad_march_2").unwrap();
+    choose(&mut state, data, &army, "trad_march_2").unwrap();
     // Another faction cannot choose for this army.
     let english = main_army(&state, "fac_england");
     let refused = state.apply_order(
-        &data,
+        data,
         &fac("fac_england"),
         Order::ChooseArmyTradition {
             army: army.clone(),
@@ -255,9 +243,9 @@ fn one_choice_per_rank_and_tiers_in_order() {
 #[test]
 fn march_tradition_lengthens_the_season_march() {
     let (data, mut state, army) = setup();
-    let before = state.army_movement_allowance(&data, &state.armies[&army]);
-    veteran(&mut state, &data, &army, &["trad_march_1"]);
-    let after = state.army_movement_allowance(&data, &state.armies[&army]);
+    let before = state.army_movement_allowance(data, &state.armies[&army]);
+    veteran(&mut state, data, &army, &["trad_march_1"]);
+    let after = state.army_movement_allowance(data, &state.armies[&army]);
     assert_eq!(
         after,
         (f64::from(before) * 1.08).round() as u32,
@@ -276,9 +264,9 @@ fn stewardship_tradition_raises_the_replenishment_rate() {
     for unit in &mut entry.units {
         unit.strength = unit.max_strength / 2;
     }
-    let before = state.army_replenishment(&data, &army).unwrap();
-    veteran(&mut state, &data, &army, &["trad_stewardship_1"]);
-    let after = state.army_replenishment(&data, &army).unwrap();
+    let before = state.army_replenishment(data, &army).unwrap();
+    veteran(&mut state, data, &army, &["trad_stewardship_1"]);
+    let after = state.army_replenishment(data, &army).unwrap();
     assert!(after.rate_bp > before.rate_bp, "{before:?} -> {after:?}");
     assert!(after
         .factors
@@ -290,19 +278,19 @@ fn stewardship_tradition_raises_the_replenishment_rate() {
 fn shooting_and_discipline_reach_both_battle_paths() {
     let (data, mut state, army) = setup();
     let english = main_army(&state, "fac_england");
-    let side_before = sim_campaign::research::army_battle_side(&state, &data, &army).unwrap();
+    let side_before = sim_campaign::research::army_battle_side(&state, data, &army).unwrap();
     let index = state.debug_stage_battle(&army, &english).unwrap();
-    let setup_before = state.battle_setup(&data, index).unwrap();
+    let setup_before = state.battle_setup(data, index).unwrap();
     veteran(
         &mut state,
-        &data,
+        data,
         &army,
         &["trad_shooting_1", "trad_discipline_1"],
     );
-    let effects = army_tradition_effects(&data, &state.armies[&army]);
+    let effects = army_tradition_effects(data, &state.armies[&army]);
     assert_eq!((effects.ranged, effects.morale), (2, 3));
-    let side_after = sim_campaign::research::army_battle_side(&state, &data, &army).unwrap();
-    let setup_after = state.battle_setup(&data, index).unwrap();
+    let side_after = sim_campaign::research::army_battle_side(&state, data, &army).unwrap();
+    let setup_after = state.battle_setup(data, index).unwrap();
     let mut ranged_seen = false;
     for (before, after) in side_before.units.iter().zip(&side_after.units) {
         assert!(after.morale >= before.morale && after.morale <= before.morale + 3);
@@ -335,9 +323,9 @@ fn shooting_and_discipline_reach_both_battle_paths() {
 #[test]
 fn assault_tradition_shortens_sieges() {
     let (data, mut state, army) = setup();
-    assert_eq!(siege_speed_percent(&data, &state.armies[&army]), 0.0);
-    veteran(&mut state, &data, &army, &["trad_assault_1"]);
-    let percent = siege_speed_percent(&data, &state.armies[&army]);
+    assert_eq!(siege_speed_percent(data, &state.armies[&army]), 0.0);
+    veteran(&mut state, data, &army, &["trad_assault_1"]);
+    let percent = siege_speed_percent(data, &state.armies[&army]);
     assert_eq!(percent, 10.0);
     assert!(
         sim_campaign::siege::supplies_drain(3, percent)
@@ -348,9 +336,9 @@ fn assault_tradition_shortens_sieges() {
 #[test]
 fn name_and_banner_stay_when_the_general_changes() {
     let (data, mut state, army) = setup();
-    let original = state.army_name(&data, &army);
+    let original = state.army_name(data, &army);
     assert!(state.armies[&army].general.is_some());
-    veteran(&mut state, &data, &army, &["trad_discipline_1"]);
+    veteran(&mut state, data, &army, &["trad_discipline_1"]);
     let banner = state.armies[&army].traditions.banner_house.clone();
     assert!(banner.is_some());
     // The general leaves (dies, is captured, is reassigned).
@@ -358,8 +346,8 @@ fn name_and_banner_stay_when_the_general_changes() {
     if let Some(c) = state.characters.get_mut(&general) {
         c.army = None;
     }
-    assert_eq!(state.army_name(&data, &army), original);
-    let view = state.army_tradition_view(&data, &army).unwrap();
+    assert_eq!(state.army_name(data, &army), original);
+    let view = state.army_tradition_view(data, &army).unwrap();
     assert_eq!(view.name, original);
     assert_eq!(view.banner_house, banner);
     assert_eq!(state.armies[&army].traditions.chosen, ["trad_discipline_1"]);
@@ -367,7 +355,7 @@ fn name_and_banner_stay_when_the_general_changes() {
     let english = main_army(&state, "fac_england");
     let mut events = Vec::new();
     state.armies.get_mut(&english).unwrap().general = None;
-    grant_army_xp(&mut state, &data, &english, 5, &mut events);
+    grant_army_xp(&mut state, data, &english, 5, &mut events);
     assert!(state.armies[&english].traditions.name.is_none());
     assert!(events.is_empty(), "no news of foreign armies");
 }
@@ -375,12 +363,12 @@ fn name_and_banner_stay_when_the_general_changes() {
 #[test]
 fn dissolution_split_and_merge_lose_the_traditions() {
     let (data, mut state, army) = setup();
-    veteran(&mut state, &data, &army, &["trad_march_1"]);
+    veteran(&mut state, data, &army, &["trad_march_1"]);
     // A detachment starts afresh.
     let count = state.armies.len();
     state
         .submit_order(
-            &data,
+            data,
             Order::SplitArmy {
                 army: army.clone(),
                 unit_indices: vec![0],
@@ -399,7 +387,7 @@ fn dissolution_split_and_merge_lose_the_traditions() {
     // Merging the veteran army into the detachment loses its traditions.
     state
         .submit_order(
-            &data,
+            data,
             Order::MergeArmies {
                 source: army.clone(),
                 target: detachment.clone(),
@@ -409,11 +397,11 @@ fn dissolution_split_and_merge_lose_the_traditions() {
     assert!(!state.armies.contains_key(&army));
     assert!(state.armies[&detachment].traditions.chosen.is_empty());
     // Disbanding every unit dissolves the army.
-    veteran(&mut state, &data, &detachment, &["trad_assault_1"]);
+    veteran(&mut state, data, &detachment, &["trad_assault_1"]);
     while state.armies.contains_key(&detachment) {
         state
             .submit_order(
-                &data,
+                data,
                 Order::DisbandUnit {
                     army: Some(detachment.clone()),
                     settlement: None,
@@ -458,9 +446,9 @@ fn reinforcements_dilute_experience_pro_rata() {
         unit.experience = 6;
         unit.experience_residue = 0;
     }
-    let preview = state.army_replenishment(&data2, &army).unwrap();
+    let preview = state.army_replenishment(data2, &army).unwrap();
     assert!(preview.men > 0);
-    resolve_replenishment(&mut state, &data2, &mut Vec::new());
+    resolve_replenishment(&mut state, data2, &mut Vec::new());
     for (unit, men) in state.armies[&army].units.iter().zip(&preview.per_unit) {
         if *men > 0 {
             let milli = u32::from(unit.experience) * 1000 + u32::from(unit.experience_residue);
@@ -476,7 +464,7 @@ fn traditions_survive_a_save() {
     let (data, mut state, army) = setup();
     veteran(
         &mut state,
-        &data,
+        data,
         &army,
         &["trad_stewardship_1", "trad_stewardship_2"],
     );

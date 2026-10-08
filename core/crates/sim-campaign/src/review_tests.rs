@@ -1,25 +1,12 @@
 //! Regression tests for the fixes of the 2026-09-26 code review
 //! (`docs/archive/chantiers.md`, section « Corrections sim-campaign »).
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 
 use crate::battle_auto::{BattleResult, SideOutcome, Winner};
 use crate::state::{ArmyId, ArmyPosition, CampaignState, Stance};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn city(state: &CampaignState, province: &str) -> SettlementId {
     state.province_city_id(&prov(province)).unwrap().clone()
@@ -61,12 +48,12 @@ fn outcome(units: usize, general_captured: bool) -> SideOutcome {
 /// Fix 1: a general taken in a failed assault is held by the defender.
 #[test]
 fn general_captured_in_assault_has_a_captor() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let army = led_army(&state, "fac_france");
     let general = state.armies[&army].general.clone().unwrap();
     let guyenne = city(&state, "prov_guyenne");
-    besiege(&mut state, &data, &army, &guyenne);
+    besiege(&mut state, data, &army, &guyenne);
     let controller = state.settlements[&guyenne].controller.clone();
     let units = state.armies[&army].units.len();
     let garrison = state.settlements[&guyenne].garrison.len();
@@ -81,7 +68,7 @@ fn general_captured_in_assault_has_a_captor() {
     let mut events = Vec::new();
     crate::siege::apply_assault_result(
         &mut state,
-        &data,
+        data,
         std::slice::from_ref(&army),
         &guyenne,
         &result,
@@ -96,11 +83,11 @@ fn general_captured_in_assault_has_a_captor() {
 /// Fix 2: a besieged garrison cannot form an army (it would lift the siege).
 #[test]
 fn besieged_garrison_cannot_create_an_army() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let army = led_army(&state, "fac_france");
     let guyenne = city(&state, "prov_guyenne");
-    besiege(&mut state, &data, &army, &guyenne);
+    besiege(&mut state, data, &army, &guyenne);
     let controller = state.settlements[&guyenne].controller.clone();
     assert!(!state.settlements[&guyenne].garrison.is_empty());
     let order = crate::orders::Order::CreateArmy {
@@ -109,7 +96,7 @@ fn besieged_garrison_cannot_create_an_army() {
         general: None,
     };
     assert_eq!(
-        state.apply_order(&data, &controller, order),
+        state.apply_order(data, &controller, order),
         Err(crate::orders::OrderError::SettlementBesieged)
     );
 }
@@ -140,8 +127,8 @@ fn ally_against(state: &mut CampaignState, a: &str, b: &str, enemy: &str) {
 /// Fix 3: an ally joining (or taking over) a siege keeps its progress.
 #[test]
 fn allied_besieger_keeps_the_siege_progress() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     ally_against(&mut state, "fac_france", "fac_burgundy", "fac_england");
     let french = led_army(&state, "fac_france");
     let scots = state
@@ -151,7 +138,7 @@ fn allied_besieger_keeps_the_siege_progress() {
         .map(|(id, _)| id.clone())
         .unwrap();
     let guyenne = city(&state, "prov_guyenne");
-    besiege(&mut state, &data, &french, &guyenne);
+    besiege(&mut state, data, &french, &guyenne);
     {
         let siege = state.settlements.get_mut(&guyenne).unwrap().siege.as_mut();
         let siege = siege.unwrap();
@@ -159,7 +146,7 @@ fn allied_besieger_keeps_the_siege_progress() {
         siege.supplies = 50;
         siege.started_turn = 0;
     }
-    besiege(&mut state, &data, &scots, &guyenne);
+    besiege(&mut state, data, &scots, &guyenne);
     let siege = state.settlements[&guyenne].siege.clone().unwrap();
     assert_eq!(siege.attacker, fac("fac_france"));
     assert_eq!(siege.breach, 40);
@@ -167,7 +154,7 @@ fn allied_besieger_keeps_the_siege_progress() {
     let kent = city(&state, "prov_kent");
     state.armies.get_mut(&french).unwrap().position = ArmyPosition::Settlement(kent);
     let mut events = Vec::new();
-    crate::siege::resolve_sieges(&mut state, &data, &mut events);
+    crate::siege::resolve_sieges(&mut state, data, &mut events);
     if let Some(siege) = state.settlements[&guyenne].siege.clone() {
         assert_eq!(siege.attacker, fac("fac_burgundy"));
         assert!(siege.breach >= 40 && siege.supplies <= 50);
@@ -180,8 +167,8 @@ fn allied_besieger_keeps_the_siege_progress() {
 /// cannot cancel it for the refund).
 #[test]
 fn capture_drops_the_construction() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let guyenne = city(&state, "prov_guyenne");
     let building = data.buildings.keys().next().unwrap().clone();
     state.settlements.get_mut(&guyenne).unwrap().construction = Some(crate::state::Construction {
@@ -191,7 +178,7 @@ fn capture_drops_the_construction() {
         drawn: Default::default(),
     });
     let mut events = Vec::new();
-    crate::siege::capture(&mut state, &data, &guyenne, &fac("fac_france"), &mut events);
+    crate::siege::capture(&mut state, data, &guyenne, &fac("fac_france"), &mut events);
     let s = &state.settlements[&guyenne];
     assert_eq!(s.controller, fac("fac_france"));
     assert!(s.construction.is_none());
@@ -201,8 +188,8 @@ fn capture_drops_the_construction() {
 /// Fix 7: a player who still holds a castle or a town is not defeated.
 #[test]
 fn holding_a_lesser_settlement_is_no_defeat() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 4).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 4).unwrap();
     let cities: Vec<SettlementId> = state
         .provinces
         .keys()
@@ -220,10 +207,10 @@ fn holding_a_lesser_settlement_is_no_defeat() {
         }
     }
     let mut events = Vec::new();
-    crate::victory::resolve_victory(&mut state, &data, &mut events);
+    crate::victory::resolve_victory(&mut state, data, &mut events);
     assert!(state.outcome.is_none());
     state.settlements.get_mut(&kept).unwrap().controller = fac("fac_england");
-    crate::victory::resolve_victory(&mut state, &data, &mut events);
+    crate::victory::resolve_victory(&mut state, data, &mut events);
     assert!(state.outcome.is_some());
 }
 
@@ -256,9 +243,9 @@ fn aragonese_hostage(state: &mut CampaignState, data: &GameData) -> data_model::
 #[test]
 fn treaty_hostage_is_held_for_his_term() {
     use crate::ransom::{self, RansomError, RansomTerms};
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
-    let hostage = aragonese_hostage(&mut state, &data);
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_aragon"), 10).unwrap();
+    let hostage = aragonese_hostage(&mut state, data);
     let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
     assert_eq!(
         state.characters[&hostage].ransom_terms,
@@ -266,15 +253,15 @@ fn treaty_hostage_is_held_for_his_term() {
     );
     state.factions.get_mut(&ar).unwrap().treasury = 1_000_000;
     assert_eq!(
-        ransom::pay_ransom(&mut state, &data, &ar, &hostage, 1),
+        ransom::pay_ransom(&mut state, data, &ar, &hostage, 1),
         Err(RansomError::Held)
     );
     assert_eq!(
-        ransom::release_on_parole(&mut state, &data, &ca, &hostage),
+        ransom::release_on_parole(&mut state, data, &ca, &hostage),
         Err(RansomError::Held)
     );
     assert_eq!(
-        ransom::set_ransom_terms(&mut state, &data, &ca, &hostage, RansomTerms::Money),
+        ransom::set_ransom_terms(&mut state, data, &ca, &hostage, RansomTerms::Money),
         Err(RansomError::Held)
     );
     assert!(state.characters[&hostage].captive);
@@ -284,7 +271,7 @@ fn treaty_hostage_is_held_for_his_term() {
 /// giver a perjurer; the giver attacking the holder does.
 #[test]
 fn hostage_betrayal_falls_on_the_aggressor_only() {
-    let data = data();
+    let data = game_data();
     let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
     let betrayed = |state: &CampaignState| {
         state.factions[&ca]
@@ -294,23 +281,23 @@ fn hostage_betrayal_falls_on_the_aggressor_only() {
     };
     let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::new();
     // The holder attacks.
-    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
-    aragonese_hostage(&mut state, &data);
-    state.declare_war(&data, &ca, &ar).unwrap();
-    state.end_turn_with(&data, idle);
+    let mut state = CampaignState::new_1337(data, fac("fac_aragon"), 10).unwrap();
+    aragonese_hostage(&mut state, data);
+    state.declare_war(data, &ca, &ar).unwrap();
+    state.end_turn_with(data, idle);
     assert!(!betrayed(&state));
     // The giver attacks.
-    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
-    aragonese_hostage(&mut state, &data);
-    state.declare_war(&data, &ar, &ca).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_aragon"), 10).unwrap();
+    aragonese_hostage(&mut state, data);
+    state.declare_war(data, &ar, &ca).unwrap();
     assert!(betrayed(&state));
 }
 
 /// Fix 12: a vanished faction pays no more tribute.
 #[test]
 fn dead_faction_pays_no_tribute() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let (payer, payee) = (fac("fac_navarre"), fac("fac_castile"));
     let turn = state.turn;
     {
@@ -327,7 +314,7 @@ fn dead_faction_pays_no_tribute() {
         state.factions[&payee].treasury,
     );
     let mut events = Vec::new();
-    crate::negotiation::resolve_negotiation(&mut state, &data, &mut events);
+    crate::negotiation::resolve_negotiation(&mut state, data, &mut events);
     assert_eq!(state.factions[&payer].treasury, before.0);
     assert_eq!(state.factions[&payee].treasury, before.1);
     assert!(state.factions[&payer].ledger.tributes.is_empty());
@@ -338,8 +325,8 @@ fn dead_faction_pays_no_tribute() {
 #[test]
 fn cross_faction_child_follows_the_father() {
     use data_model::Sex;
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     let crowned = |state: &CampaignState, id: &data_model::CharacterId| {
         state
             .factions
@@ -373,7 +360,7 @@ fn cross_faction_child_follows_the_father() {
     let before: Vec<data_model::CharacterId> = state.characters.keys().cloned().collect();
     let mut events = Vec::new();
     for _ in 0..60 {
-        crate::dynasty::resolve_births(&mut state, &data, &mut events);
+        crate::dynasty::resolve_births(&mut state, data, &mut events);
         if let Some(child) = state
             .characters
             .iter()
@@ -393,8 +380,8 @@ fn cross_faction_child_follows_the_father() {
 fn impossible_marriage_refuses_the_whole_treaty() {
     use crate::negotiation::Article;
     use data_model::Sex;
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     assert!(state.is_at_war(&fr, &en));
     let man = |state: &CampaignState, f: &FactionId| {
@@ -413,7 +400,7 @@ fn impossible_marriage_refuses_the_whole_treaty() {
             spouse: b,
         },
     ];
-    assert!(crate::negotiation::apply_treaty(&mut state, &data, &fr, &en, &articles).is_err());
+    assert!(crate::negotiation::apply_treaty(&mut state, data, &fr, &en, &articles).is_err());
     assert!(state.is_at_war(&fr, &en));
 }
 
@@ -421,9 +408,9 @@ fn impossible_marriage_refuses_the_whole_treaty() {
 #[test]
 fn a_port_on_two_enemy_seas_is_blockaded_once() {
     use crate::naval::SeaControl;
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
-    state.naval.ensure(&data);
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
+    state.naval.ensure(data);
     let (province, seas) = data
         .provinces
         .iter()
@@ -471,7 +458,7 @@ fn a_port_on_two_enemy_seas_is_blockaded_once() {
         })
         .count();
     let mut events = Vec::new();
-    crate::naval::resolve_season(&mut state, &data, &mut events);
+    crate::naval::resolve_season(&mut state, data, &mut events);
     let text = events
         .iter()
         .find(|e| e.text_fr.starts_with("Blocus") && e.faction.as_ref() == Some(&owner))
@@ -487,8 +474,8 @@ fn a_port_on_two_enemy_seas_is_blockaded_once() {
 /// (controller), not those it merely owns de jure.
 #[test]
 fn research_follows_the_controller() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     let library = data
         .buildings
@@ -503,14 +490,14 @@ fn research_follows_the_controller() {
         .map(|b| b.id.clone())
         .expect("a research building");
     let place = city(&state, "prov_guyenne");
-    let base_fr = state.research_points_per_turn(&data, &fr);
-    let base_en = state.research_points_per_turn(&data, &en);
+    let base_fr = state.research_points_per_turn(data, &fr);
+    let base_en = state.research_points_per_turn(data, &en);
     let s = state.settlements.get_mut(&place).unwrap();
     s.owner = en.clone();
     s.controller = fr.clone();
     s.buildings.push(library);
-    assert!(state.research_points_per_turn(&data, &fr) > base_fr);
-    assert!(state.research_points_per_turn(&data, &en) <= base_en);
+    assert!(state.research_points_per_turn(data, &fr) > base_fr);
+    assert!(state.research_points_per_turn(data, &en) <= base_en);
 }
 
 /// Reference for fix 18c: the per-resolution search `trade.rs` ran before
@@ -562,7 +549,7 @@ fn reference_shortest_path(
 /// per-season search found, for every route of the catalogue.
 #[test]
 fn precomputed_trade_paths_match_the_old_search() {
-    let data = data();
+    let data = game_data();
     let catalog = data.trade.as_ref().expect("trade catalogue");
     assert!(!catalog.routes.is_empty());
     let mut found = 0;
@@ -575,7 +562,7 @@ fn precomputed_trade_paths_match_the_old_search() {
             .paths
             .get(&key)
             .unwrap_or_else(|| panic!("{} is precomputed", route.id));
-        let reference = reference_shortest_path(&data, from, to);
+        let reference = reference_shortest_path(data, from, to);
         assert_eq!(cached, &reference, "{}", route.id);
         assert_eq!(data.trade_path(from, to), reference, "{}", route.id);
         found += usize::from(reference.is_some());
@@ -583,11 +570,11 @@ fn precomputed_trade_paths_match_the_old_search() {
     assert!(found > 0, "some route has a path");
 
     // The whole view is unchanged, cache or not.
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let mut uncached = data.clone();
     uncached.trade_paths = Default::default();
     assert_eq!(
-        crate::trade::trade_routes(&state, &data),
+        crate::trade::trade_routes(&state, data),
         crate::trade::trade_routes(&state, &uncached)
     );
 }
@@ -596,7 +583,7 @@ fn precomputed_trade_paths_match_the_old_search() {
 /// dispersed (as in a rout), not left on the map without a regiment.
 #[test]
 fn an_army_emptied_by_its_fallback_is_dispersed() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // As in c7a_retreat: no English place in reach of Saint-Denis, but a
     // refuge (a place no enemy holds) within the neutral radius.
     let retreat = &mut data.settlement_rules.as_mut().unwrap().retreat;
@@ -709,10 +696,10 @@ fn ceded(order: Option<crate::Order>) -> Vec<ProvinceId> {
 /// provinces it holds (ADR 0025 § 5).
 #[test]
 fn the_winner_demands_its_unheld_war_goals_first() {
-    let data = data();
+    let data = game_data();
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     // England is the player: its acceptance is not weighed, only the order.
-    let mut state = anglo_french_war(&data, "fac_england", 0);
+    let mut state = anglo_french_war(data, "fac_england", 0);
     let capital = state.factions[&en].capital.clone();
     let english: Vec<ProvinceId> = state
         .provinces
@@ -738,8 +725,8 @@ fn the_winner_demands_its_unheld_war_goals_first() {
         .ledger
         .war_goals
         .insert(en.clone(), vec![goal.clone()]);
-    set_war_score(&mut state, &data, 100);
-    let provinces = ceded(crate::negotiation::plan_peace(&state, &data, &fr));
+    set_war_score(&mut state, data, 100);
+    let provinces = ceded(crate::negotiation::plan_peace(&state, data, &fr));
     assert_eq!(provinces.first(), Some(&goal), "{provinces:?}");
     assert!(provinces.contains(&held), "{provinces:?}");
 }
@@ -748,7 +735,7 @@ fn the_winner_demands_its_unheld_war_goals_first() {
 /// (`score <= 2 * SURRENDER_WAR_SCORE`, ADR 0025 § 5 « score ≤ -50 »).
 #[test]
 fn a_crown_beaten_at_minus_fifty_sues_for_peace() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.ai_diplomacy.peace.cornered_provinces = 0;
     let fr = fac("fac_france");
     let threshold = 2 * crate::diplomacy::SURRENDER_WAR_SCORE;
@@ -768,8 +755,8 @@ fn a_crown_beaten_at_minus_fifty_sues_for_peace() {
 #[test]
 fn a_poor_herald_does_not_wait_for_a_ransom() {
     use data_model::{AgentActionKind, AgentKind};
-    let data = data();
-    let mut state = anglo_french_war(&data, "fac_scotland", -60);
+    let data = game_data();
+    let mut state = anglo_french_war(data, "fac_scotland", -60);
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     let captive = state
         .characters
@@ -779,7 +766,7 @@ fn a_poor_herald_does_not_wait_for_a_ransom() {
         })
         .map(|(id, _)| id.clone())
         .unwrap();
-    crate::chronicle::capture_character(&mut state, &data, &captive, &en, &mut Vec::new());
+    crate::chronicle::capture_character(&mut state, data, &captive, &en, &mut Vec::new());
     assert!(state.characters[&captive].captive);
     // A herald recruited at home, then standing in an English city.
     state.factions.get_mut(&fr).unwrap().treasury = 100_000;
@@ -792,7 +779,7 @@ fn a_poor_herald_does_not_wait_for_a_ransom() {
         .into_iter()
         .find_map(|id| {
             state
-                .recruit_agent(&data, &fr, &id, AgentKind::Emissary)
+                .recruit_agent(data, &fr, &id, AgentKind::Emissary)
                 .ok()
         })
         .expect("a place to recruit a herald");
@@ -808,7 +795,7 @@ fn a_poor_herald_does_not_wait_for_a_ransom() {
         agent.movement_points = 500;
     }
     let action_of = |state: &CampaignState| {
-        crate::agents::plan_agents(state, &data, &fr)
+        crate::agents::plan_agents(state, data, &fr)
             .into_iter()
             .find_map(|o| match o {
                 crate::Order::AgentAction { agent, action, .. } if agent == herald => Some(action),
@@ -828,8 +815,8 @@ fn a_poor_herald_does_not_wait_for_a_ransom() {
 fn hired_cogs_lost_at_sea_are_not_the_fleets() {
     use data_model::ShipClassId;
     use sim_battle::naval::{NavalSideResult, NavalSideSetup, ShipFate, ShipResult, ShipSetup};
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_scotland"), 1).unwrap();
     let en = fac("fac_england");
     let cog_id = ShipClassId::new("ship_cog").unwrap();
     let cog = data.naval.ship("ship_cog").expect("cog class").clone();

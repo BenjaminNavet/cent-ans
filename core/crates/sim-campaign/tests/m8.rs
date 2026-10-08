@@ -1,22 +1,9 @@
 //! M8 campaign siege warfare: supplies, breaches, assaults, sorties.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance, Unit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 /// The city of a province (lot C4: sieges target settlements).
 fn city(state: &CampaignState, province: &str) -> SettlementId {
@@ -95,10 +82,10 @@ fn ladders_ready(state: &mut CampaignState, data: &GameData, place: &SettlementI
 
 #[test]
 fn a_starved_town_capitulates() {
-    let data = data();
-    let (mut state, _) = besiege_guyenne(&data, 1, &[]);
+    let data = game_data();
+    let (mut state, _) = besiege_guyenne(data, 1, &[]);
     let guyenne = city(&state, "prov_guyenne");
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let siege = state
         .settlement_state(&guyenne)
         .unwrap()
@@ -109,7 +96,7 @@ fn a_starved_town_capitulates() {
     assert!(siege.supplies > 0 && siege.turns_left > 0);
     let mut taken = false;
     for _ in 0..12 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         if state.settlement_state(&guyenne).unwrap().controller == fac("fac_france") {
             taken = true;
             break;
@@ -124,11 +111,11 @@ fn a_starved_town_capitulates() {
 
 #[test]
 fn siege_engines_open_a_breach() {
-    let data = data();
-    let (mut state, _) = besiege_guyenne(&data, 2, &["unit_trebuchet", "unit_trebuchet"]);
+    let data = game_data();
+    let (mut state, _) = besiege_guyenne(data, 2, &["unit_trebuchet", "unit_trebuchet"]);
     let guyenne = city(&state, "prov_guyenne");
-    state.end_turn_with(&data, idle);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
+    state.end_turn_with(data, idle);
     let breach = state
         .settlement_state(&guyenne)
         .unwrap()
@@ -140,10 +127,10 @@ fn siege_engines_open_a_breach() {
 
 #[test]
 fn a_breach_makes_assaults_easier() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 3, &[]);
-    state.end_turn_with(&data, idle);
-    let (odds_walls, walls) = state.assault_odds(&data, &army).expect("besieging");
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 3, &[]);
+    state.end_turn_with(data, idle);
+    let (odds_walls, walls) = state.assault_odds(data, &army).expect("besieging");
     assert!(walls);
     let guyenne = city(&state, "prov_guyenne");
     state
@@ -154,22 +141,22 @@ fn a_breach_makes_assaults_easier() {
         .as_mut()
         .unwrap()
         .breach = 80;
-    let (odds_breach, walls) = state.assault_odds(&data, &army).unwrap();
+    let (odds_breach, walls) = state.assault_odds(data, &army).unwrap();
     assert!(!walls);
     assert!(odds_breach > odds_walls, "{odds_walls} -> {odds_breach}");
 }
 
 #[test]
 fn assault_takes_the_town_or_bloodies_the_attacker() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 4, &[]);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 4, &[]);
     state.interactive_battles = false; // auto-resolved assault (M8 § 1)
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let guyenne = city(&state, "prov_guyenne");
-    ladders_ready(&mut state, &data, &guyenne);
+    ladders_ready(&mut state, data, &guyenne);
     let before: u32 = state.armies[&army].units.iter().map(|u| u.strength).sum();
     state
-        .submit_order(&data, Order::Assault { army: army.clone() })
+        .submit_order(data, Order::Assault { army: army.clone() })
         .unwrap();
     let guyenne = city(&state, "prov_guyenne");
     let taken = state.settlement_state(&guyenne).unwrap().controller == fac("fac_france");
@@ -178,36 +165,36 @@ fn assault_takes_the_town_or_bloodies_the_attacker() {
         .get(&army)
         .map_or(0, |a| a.units.iter().map(|u| u.strength).sum());
     assert!(taken || after < before);
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.text_fr.contains("Assaut")));
 }
 
 #[test]
 fn assault_requires_a_siege() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 5).unwrap();
     let army = state
         .armies
         .iter()
         .find(|(_, a)| a.faction == fac("fac_france"))
         .map(|(id, _)| id.clone())
         .unwrap();
-    assert!(state.submit_order(&data, Order::Assault { army }).is_err());
+    assert!(state.submit_order(data, Order::Assault { army }).is_err());
 }
 
 #[test]
 fn a_strong_garrison_sallies_out() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 6, &[]);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 6, &[]);
     // Weak besiegers, huge garrison.
     state.armies.get_mut(&army).unwrap().units.truncate(1);
     let guyenne = city(&state, "prov_guyenne");
-    let knights = unit(&data, "unit_knights");
+    let knights = unit(data, "unit_knights");
     let garrison = &mut state.settlements.get_mut(&guyenne).unwrap().garrison;
     for _ in 0..8 {
         garrison.push(knights.clone());
     }
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(
         events.iter().any(|e| e.text_fr.contains("Sortie")),
         "{events:?}"
@@ -216,10 +203,10 @@ fn a_strong_garrison_sallies_out() {
 
 #[test]
 fn siege_state_survives_save() {
-    let data = data();
-    let (mut state, _) = besiege_guyenne(&data, 7, &["unit_trebuchet"]);
-    state.end_turn_with(&data, idle);
-    state.end_turn_with(&data, idle);
+    let data = game_data();
+    let (mut state, _) = besiege_guyenne(data, 7, &["unit_trebuchet"]);
+    state.end_turn_with(data, idle);
+    state.end_turn_with(data, idle);
     let loaded = CampaignState::load_json(&state.save_json()).unwrap();
     assert_eq!(loaded, state);
 }

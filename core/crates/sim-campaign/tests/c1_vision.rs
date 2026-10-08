@@ -2,21 +2,13 @@
 //! radius since lot M5a (`CampaignState::vision`, `visible_armies`).
 
 use std::collections::BTreeSet;
-use std::path::PathBuf;
 use std::time::Instant;
 
 use data_model::entities::movement::FreeMovementRules;
 use data_model::{FactionId, GameData, ProvinceId, VisionRules};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn rules(share: bool) -> VisionRules {
     VisionRules {
@@ -29,7 +21,7 @@ fn rules(share: bool) -> VisionRules {
 /// Game data with sight from the radii only (held provinces not seen whole),
 /// to test the discs in isolation.
 fn radius_only_data() -> GameData {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.vision_rules = Some(rules(true));
     data
 }
@@ -89,7 +81,7 @@ fn first_army(state: &CampaignState, faction: &FactionId) -> ArmyId {
 
 #[test]
 fn vision_rules_come_from_the_data() {
-    let data = data();
+    let data = game_data();
     let rules = data.vision_rules.as_ref().expect("data/rules/vision.json");
     assert!(rules.share_allied_vision);
     assert!(rules.own_provinces_visible);
@@ -187,10 +179,10 @@ fn the_soft_edge_width_follows_the_data() {
 
 #[test]
 fn a_faction_sees_its_provinces_but_not_everything() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
-    let vision = state.vision(&data, &france);
+    let state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
+    let vision = state.vision(data, &france);
     for province in controlled(&state, &france) {
         assert!(vision.provinces.contains(&province), "own {province} seen");
     }
@@ -278,7 +270,7 @@ fn a_held_settlement_sees_twenty_kilometres_around_it() {
 
 #[test]
 fn allies_lend_their_sight_only_when_the_rule_says_so() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let france = fac("fac_france");
     let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
     let ally = state
@@ -344,9 +336,9 @@ fn a_foreign_army_out_of_sight_is_hidden() {
 
 #[test]
 fn held_province_land_is_seen_far_from_any_source() {
-    let data = data();
+    let data = game_data();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let sources = state.vision(&radius_only_data(), &france).mask.sources;
     let raster = data.province_raster().expect("province_ids.png");
     let mut found = None;
@@ -357,9 +349,7 @@ fn held_province_land_is_seen_far_from_any_source() {
                 continue;
             };
             if state.province_controller(province) == Some(&france)
-                && sources
-                    .iter()
-                    .all(|s| dist_km(&data, s.point, point) > 40.0)
+                && sources.iter().all(|s| dist_km(data, s.point, point) > 40.0)
             {
                 found = Some((point, province.clone()));
                 break 'search;
@@ -367,8 +357,8 @@ fn held_province_land_is_seen_far_from_any_source() {
         }
     }
     let (point, province) = found.expect("French land 40 km from every French source");
-    let vision = state.vision(&data, &france);
-    assert!(vision.mask.sees_point(&data, point), "own land is seen");
+    let vision = state.vision(data, &france);
+    assert!(vision.mask.sees_point(data, point), "own land is seen");
     assert!(
         vision.mask.coverage_at(point) >= 128,
         "own land is seen in the mask"
@@ -385,9 +375,9 @@ fn held_province_land_is_seen_far_from_any_source() {
         state.settlements.get_mut(&id).unwrap().controller = england.clone();
     }
     assert_eq!(state.province_controller(&province), Some(&england));
-    let vision = state.vision(&data, &france);
+    let vision = state.vision(data, &france);
     assert!(
-        !vision.mask.sees_point(&data, point),
+        !vision.mask.sees_point(data, point),
         "enemy land is not seen"
     );
     assert!(vision.mask.coverage_at(point) < 128);
@@ -395,15 +385,15 @@ fn held_province_land_is_seen_far_from_any_source() {
 
 #[test]
 fn vision_is_cheap() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
-    let _ = state.vision(&data, &france); // rasters decoded once
-                                          // Best of 20 runs for France (the machine may be busy with other work).
+    let state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
+    let _ = state.vision(data, &france); // rasters decoded once
+                                         // Best of 20 runs for France (the machine may be busy with other work).
     let per_call = (0..20)
         .map(|_| {
             let start = Instant::now();
-            let _ = state.vision(&data, &france);
+            let _ = state.vision(data, &france);
             start.elapsed().as_secs_f64() * 1000.0
         })
         .fold(f64::INFINITY, f64::min);

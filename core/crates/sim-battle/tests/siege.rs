@@ -42,8 +42,8 @@ fn siege(data: &GameData, extra: &[&str], fortification: u32, breach: u8, seed: 
 #[test]
 fn the_town_has_a_closed_ring_with_a_gate_facing_the_attacker() {
     let data = data();
-    let low = siege(&data, &[], 1, 0, 3);
-    let high = siege(&data, &[], 3, 0, 3);
+    let low = siege(data, &[], 1, 0, 3);
+    let high = siege(data, &[], 3, 0, 3);
     let works = low.siege().expect("siege works");
     assert_eq!(
         works.pieces.len(),
@@ -86,7 +86,7 @@ fn the_town_has_a_closed_ring_with_a_gate_facing_the_attacker() {
 #[test]
 fn regiments_on_the_wall_walk_are_drawn_on_top_of_the_wall() {
     let data = data();
-    let sim = siege(&data, &[], 2, 0, 3);
+    let sim = siege(data, &[], 2, 0, 3);
     let works = sim.siege().unwrap();
     let mut checked = 0;
     for unit in sim.units().iter().filter(|u| u.on_wall) {
@@ -127,9 +127,9 @@ fn regiments_on_the_wall_walk_are_drawn_on_top_of_the_wall() {
 #[test]
 fn campaign_breach_opens_the_walls() {
     let data = data();
-    let intact = siege(&data, &[], 2, 0, 5);
-    let one = siege(&data, &[], 2, 60, 5);
-    let two = siege(&data, &[], 2, 95, 5);
+    let intact = siege(data, &[], 2, 0, 5);
+    let one = siege(data, &[], 2, 60, 5);
+    let two = siege(data, &[], 2, 95, 5);
     assert_eq!(intact.siege().unwrap().openings().len(), 0);
     assert_eq!(one.siege().unwrap().openings().len(), 1);
     assert_eq!(two.siege().unwrap().openings().len(), 2);
@@ -147,7 +147,7 @@ fn campaign_breach_opens_the_walls() {
 #[test]
 fn walls_stop_regiments_until_a_breach_opens() {
     let data = data();
-    let mut sim = siege(&data, &[], 2, 0, 11);
+    let mut sim = siege(data, &[], 2, 0, 11);
     lab(&mut sim);
     hold_fire(&mut sim, SideId::Defender);
     // The mounted sergeants (id 7) ride for the square: the wall stops them.
@@ -217,7 +217,7 @@ fn infantry_climbs_with_ladders_and_a_siege_tower_is_faster() {
         } else {
             &[]
         };
-        let mut sim = siege(&data, extra, 2, 0, 13);
+        let mut sim = siege(data, extra, 2, 0, 13);
         lab(&mut sim);
         let works = sim.siege().unwrap().clone();
         // An undefended stretch at the back of the town.
@@ -279,7 +279,7 @@ fn infantry_climbs_with_ladders_and_a_siege_tower_is_faster() {
 #[test]
 fn the_ram_breaks_the_gate() {
     let data = data();
-    let mut sim = siege(&data, &[], 1, 0, 17);
+    let mut sim = siege(data, &[], 1, 0, 17);
     lab(&mut sim);
     let ram = sim.units().iter().position(|u| u.ram).unwrap() as u32;
     let works = sim.siege().unwrap().clone();
@@ -312,7 +312,7 @@ fn the_ram_breaks_the_gate() {
 #[test]
 fn engines_batter_a_breach_and_the_wall_walk_falls() {
     let data = data();
-    let mut sim = siege(&data, &["unit_trebuchet"], 1, 0, 19);
+    let mut sim = siege(data, &["unit_trebuchet"], 1, 0, 19);
     lab(&mut sim);
     let works = sim.siege().unwrap().clone();
     let piece = works.front_walls()[0];
@@ -353,7 +353,7 @@ fn engines_batter_a_breach_and_the_wall_walk_falls() {
 #[test]
 fn holding_the_central_square_for_a_minute_takes_the_town() {
     let data = data();
-    let mut sim = siege(&data, &[], 2, 0, 23);
+    let mut sim = siege(data, &[], 2, 0, 23);
     sim.set_ai(SideId::Attacker, false);
     sim.set_ai(SideId::Defender, false);
     // Clear the square of defenders (they stay on the walls) and drop the
@@ -380,7 +380,7 @@ fn holding_the_central_square_for_a_minute_takes_the_town() {
 #[test]
 fn routing_defenders_abandon_the_walls() {
     let data = data();
-    let mut sim = siege(&data, &[], 2, 0, 29);
+    let mut sim = siege(data, &[], 2, 0, 29);
     lab(&mut sim);
     let id = sim
         .units()
@@ -414,8 +414,8 @@ fn assaults(data: &GameData, extra: &[&str], breach: u8) -> (u32, f64) {
 #[test]
 fn a_wide_breach_eases_the_assault_and_ladders_are_costly() {
     let data = data();
-    let (_, ladder_ratio) = assaults(&data, &[], 0);
-    let (_, breach_ratio) = assaults(&data, &[], 100);
+    let (_, ladder_ratio) = assaults(data, &[], 0);
+    let (_, breach_ratio) = assaults(data, &[], 100);
     // T4 (ADR 0108): through a wide breach the garrison falls back on the
     // square and makes its last stand there, so this small garrison holds
     // (breach 0/4, ladders 2/4, open point of the ADR); the breach still
@@ -430,7 +430,7 @@ fn a_wide_breach_eases_the_assault_and_ladders_are_costly() {
 fn siege_battles_are_deterministic() {
     let data = data();
     let play = || {
-        let mut sim = siege(&data, &["unit_trebuchet", "unit_siege_tower"], 2, 30, 31);
+        let mut sim = siege(data, &["unit_trebuchet", "unit_siege_tower"], 2, 30, 31);
         run(&mut sim, 200.0);
         (
             sim.units()

@@ -5,8 +5,6 @@
 //! phased resolver. These tests compare the forecast with the frequency of
 //! wins of the auto-resolver on seeds the forecast never uses.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, ProvinceId, Terrain, UnitCategory, UnitTypeId};
 use sim_campaign::battle_forecast::forecast_sides;
 use sim_campaign::rng::CampaignRng;
@@ -20,10 +18,7 @@ use sim_campaign::{
 /// (sampling noise of 200 + 400 runs is ~4 points at 50 %).
 const MARGIN: f64 = 0.12;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::{fac, game_data};
 
 fn army(data: &GameData, spec: &[(&str, usize)]) -> (Side, Vec<UnitProfile>) {
     let mut side = Side::default();
@@ -108,10 +103,10 @@ fn forecast_matches_the_auto_resolver_on_a_sample_of_compositions() {
             Season::Summer,
         ),
     ];
-    let data = data();
+    let data = game_data();
     for (index, (a, d, terrain, season)) in scenarios.iter().enumerate() {
-        let attacker = army(&data, a);
-        let defender = army(&data, d);
+        let attacker = army(data, a);
+        let defender = army(data, d);
         let conditions = FieldConditions {
             terrain: Some(*terrain),
             season: Some(*season),
@@ -153,10 +148,6 @@ fn forecast_matches_the_auto_resolver_on_a_sample_of_compositions() {
         );
         assert!(forecast.attacker_power > 0.0 && forecast.defender_power > 0.0);
     }
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
 }
 
 fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
@@ -208,20 +199,20 @@ fn at_war(state: &mut CampaignState) {
 
 #[test]
 fn campaign_forecast_matches_the_campaign_auto_resolution() {
-    let data = data();
+    let data = game_data();
     for (attacker_faction, defender_faction) in
         [("fac_france", "fac_england"), ("fac_england", "fac_france")]
     {
-        let mut state = CampaignState::new_1337(&data, fac("fac_france"), 7).expect("1337 start");
+        let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
         state.chronicle.disabled = true;
         at_war(&mut state);
         let attacker = first_army(&state, attacker_faction);
         let defender = first_army(&state, defender_faction);
         state.debug_stage_battle(&attacker, &defender).unwrap();
-        let forecast = state.battle_forecast(&data, 0).unwrap().attacker_win_chance;
+        let forecast = state.battle_forecast(data, 0).unwrap().attacker_win_chance;
         let seen = observed(
             &state,
-            &data,
+            data,
             &fac(attacker_faction),
             &fac(defender_faction),
             120,
@@ -235,22 +226,22 @@ fn campaign_forecast_matches_the_campaign_auto_resolution() {
 
 #[test]
 fn assault_forecast_matches_the_auto_assault() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 9).expect("1337 start");
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 9).expect("1337 start");
     state.chronicle.disabled = true;
     let lead = first_army(&state, "fac_france");
     let guyenne = ProvinceId::new("prov_guyenne").unwrap();
-    let index = state.debug_stage_siege(&data, &lead, &guyenne).unwrap();
+    let index = state.debug_stage_siege(data, &lead, &guyenne).unwrap();
     assert_eq!(index, 0, "the assault is the only pending battle");
-    let forecast = state.battle_forecast(&data, 0).unwrap().attacker_win_chance;
+    let forecast = state.battle_forecast(data, 0).unwrap().attacker_win_chance;
     assert_eq!(
         Some(forecast),
-        state.assault_win_chance(&data, &lead),
+        state.assault_win_chance(data, &lead),
         "the army bar shows the screen's number"
     );
     let place = state.armies[&lead].settlement().cloned().unwrap();
     let garrison = state.settlements[&place].controller.clone();
-    let seen = observed(&state, &data, &fac("fac_france"), &garrison, 120);
+    let seen = observed(&state, data, &fac("fac_france"), &garrison, 120);
     assert!(
         (forecast - seen).abs() <= MARGIN + 0.03,
         "assault: forecast {forecast:.2}, auto-assault {seen:.2}"

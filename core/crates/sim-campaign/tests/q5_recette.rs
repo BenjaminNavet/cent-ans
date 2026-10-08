@@ -2,19 +2,10 @@
 //! screen, besiegers stand down once the town is theirs, and messages name
 //! armies instead of showing their raw ids.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, ProvinceId, SettlementId};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn city(state: &CampaignState, province: &str) -> SettlementId {
     state
@@ -79,23 +70,23 @@ fn ladders_ready(state: &mut CampaignState, data: &GameData, place: &SettlementI
 
 #[test]
 fn army_bar_odds_match_the_assault_screen() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 5);
-    state.end_turn_with(&data, idle);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 5);
+    state.end_turn_with(data, idle);
     let place = state.armies[&army].settlement().unwrap().clone();
-    ladders_ready(&mut state, &data, &place);
+    ladders_ready(&mut state, data, &place);
     let bar = state
-        .assault_win_chance(&data, &army)
+        .assault_win_chance(data, &army)
         .expect("the army besieges Guyenne");
     state
-        .submit_order(&data, Order::Assault { army: army.clone() })
+        .submit_order(data, Order::Assault { army: army.clone() })
         .unwrap();
     let index = state
         .pending_battles
         .iter()
         .position(|b| b.siege && b.attacker == army)
         .expect("the assault waits for the player");
-    let screen = state.battle_forecast(&data, index).unwrap();
+    let screen = state.battle_forecast(data, index).unwrap();
     assert!(
         (screen.attacker_win_chance - bar).abs() < 1e-9,
         "bar {bar} vs screen {}",
@@ -105,12 +96,12 @@ fn army_bar_odds_match_the_assault_screen() {
 
 #[test]
 fn besiegers_stand_down_when_the_town_falls() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 1);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 1);
     let guyenne = city(&state, "prov_guyenne");
     let mut taken = false;
     for _ in 0..14 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         if state.settlement_state(&guyenne).unwrap().controller == fac("fac_france") {
             taken = true;
             break;
@@ -123,10 +114,10 @@ fn besiegers_stand_down_when_the_town_falls() {
 
 #[test]
 fn messages_name_armies_not_ids() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     for id in state.armies.keys() {
-        let name = state.army_name(&data, id);
+        let name = state.army_name(data, id);
         assert!(name.starts_with("l'ost "), "{name}");
         assert!(!name.contains("army_"), "{name}");
     }

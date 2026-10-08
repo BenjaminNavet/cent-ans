@@ -4,8 +4,6 @@
 //! cession, captive ruler), chivalric orders (foundation, members, morale,
 //! collapse, Garter and Star events), old saves and determinism.
 
-use std::path::PathBuf;
-
 use data_model::{
     CharacterId, ChivalricOrderId, EventEffect, EventId, FactionId, GameData, SocialClass,
 };
@@ -16,15 +14,7 @@ use sim_campaign::{
     RansomError, RansomTerms,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn chr(id: &str) -> CharacterId {
     CharacterId::new(id).unwrap()
@@ -57,45 +47,45 @@ fn set_coinage(
 
 #[test]
 fn coinage_defaults_and_one_change_per_year() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let f = &state.factions[&fac("fac_france")];
     assert_eq!(f.coinage, CoinageLevel::Sound);
     assert_eq!(f.price_level, PRICE_BASE);
     assert_eq!(
-        set_coinage(&mut state, &data, CoinageLevel::Sound),
+        set_coinage(&mut state, data, CoinageLevel::Sound),
         Err(OrderError::Coinage(CoinageError::Unchanged))
     );
-    set_coinage(&mut state, &data, CoinageLevel::Debased).unwrap();
+    set_coinage(&mut state, data, CoinageLevel::Debased).unwrap();
     assert!(matches!(
-        set_coinage(&mut state, &data, CoinageLevel::Sound),
+        set_coinage(&mut state, data, CoinageLevel::Sound),
         Err(OrderError::Coinage(CoinageError::AlreadyChangedThisYear(
             1337
         )))
     ));
     // The next year allows a new change.
     for _ in 0..4 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
-    set_coinage(&mut state, &data, CoinageLevel::Sound).unwrap();
+    set_coinage(&mut state, data, CoinageLevel::Sound).unwrap();
 }
 
 #[test]
 fn debasement_yields_seigniorage_and_inflation() {
-    let data = data();
-    let mut sound = france(&data, 2);
+    let data = game_data();
+    let mut sound = france(data, 2);
     let mut debased = sound.clone();
     let france_id = fac("fac_france");
-    let tax = debased.faction_income_effective(&data, &france_id);
-    let forecast = coinage::seigniorage_for(&debased, &data, &france_id, CoinageLevel::Debased);
+    let tax = debased.faction_income_effective(data, &france_id);
+    let forecast = coinage::seigniorage_for(&debased, data, &france_id, CoinageLevel::Debased);
     assert_eq!(forecast, (tax as f64 * 0.15).round() as i64);
     assert!(
-        coinage::seigniorage_for(&debased, &data, &france_id, CoinageLevel::HeavilyDebased)
+        coinage::seigniorage_for(&debased, data, &france_id, CoinageLevel::HeavilyDebased)
             > forecast
     );
-    set_coinage(&mut debased, &data, CoinageLevel::Debased).unwrap();
-    sound.end_turn_with(&data, idle);
-    debased.end_turn_with(&data, idle);
+    set_coinage(&mut debased, data, CoinageLevel::Debased).unwrap();
+    sound.end_turn_with(data, idle);
+    debased.end_turn_with(data, idle);
     let d = &debased.factions[&france_id];
     let s = &sound.factions[&france_id];
     assert!(d.seigniorage_last_turn > 0);
@@ -110,13 +100,13 @@ fn debasement_yields_seigniorage_and_inflation() {
 
 #[test]
 fn heavy_debasement_is_ruinous_in_the_long_run() {
-    let data = data();
-    let mut sound = france(&data, 3);
+    let data = game_data();
+    let mut sound = france(data, 3);
     let mut heavy = sound.clone();
-    set_coinage(&mut heavy, &data, CoinageLevel::HeavilyDebased).unwrap();
+    set_coinage(&mut heavy, data, CoinageLevel::HeavilyDebased).unwrap();
     for _ in 0..24 {
-        sound.end_turn_with(&data, idle);
-        heavy.end_turn_with(&data, idle);
+        sound.end_turn_with(data, idle);
+        heavy.end_turn_with(data, idle);
     }
     let france_id = fac("fac_france");
     let h = &heavy.factions[&france_id];
@@ -130,35 +120,35 @@ fn heavy_debasement_is_ruinous_in_the_long_run() {
 
 #[test]
 fn prices_scale_recruitment_upkeep_and_construction() {
-    let data = data();
-    let mut state = france(&data, 4);
+    let data = game_data();
+    let mut state = france(data, 4);
     let france_id = fac("fac_france");
     let capital = state.factions[&france_id].capital.clone();
     let province = state.province_city_id(&capital).unwrap().clone();
-    let unit_type = state.recruitable(&data, &province)[0].unit_type.clone();
+    let unit_type = state.recruitable(data, &province)[0].unit_type.clone();
     let recruit = |s: &CampaignState| {
-        s.recruitable(&data, &province)
+        s.recruitable(data, &province)
             .into_iter()
             .find(|o| o.unit_type == unit_type)
             .unwrap()
             .cost
     };
-    let build = |s: &CampaignState| s.buildable(&data, &province)[0].cost;
+    let build = |s: &CampaignState| s.buildable(data, &province)[0].cost;
     let (recruit_before, build_before) = (recruit(&state), build(&state));
-    let upkeep_before = state.faction_army_upkeep(&data, &france_id);
-    let buildings_before = state.faction_building_upkeep(&data, &france_id);
+    let upkeep_before = state.faction_army_upkeep(data, &france_id);
+    let buildings_before = state.faction_building_upkeep(data, &france_id);
     state.factions.get_mut(&france_id).unwrap().price_level = 200;
     assert!((i64::from(recruit(&state)) - 2 * i64::from(recruit_before)).abs() <= 1);
     assert_eq!(build(&state), 2 * build_before);
-    assert!((state.faction_army_upkeep(&data, &france_id) - 2 * upkeep_before).abs() <= 1);
-    assert!((state.faction_building_upkeep(&data, &france_id) - 2 * buildings_before).abs() <= 1);
+    assert!((state.faction_army_upkeep(data, &france_id) - 2 * upkeep_before).abs() <= 1);
+    assert!((state.faction_building_upkeep(data, &france_id) - 2 * buildings_before).abs() <= 1);
 }
 
 #[test]
 fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
-    let data = data();
+    let data = game_data();
     let france_id = fac("fac_france");
-    let mut state = france(&data, 5);
+    let mut state = france(data, 5);
     state.factions.get_mut(&france_id).unwrap().price_level = 160;
     let burghers = coinage::class_effects(&state, &france_id, SocialClass::Burghers);
     let clergy = coinage::class_effects(&state, &france_id, SocialClass::Clergy);
@@ -166,11 +156,11 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     assert_eq!(burghers.unrest.flat, 10.0);
     assert_eq!(clergy.wealth.flat, -7.5);
     assert_eq!(peasants.unrest.flat, 0.0);
-    let mut calm = france(&data, 5);
+    let mut calm = france(data, 5);
     for _ in 0..6 {
         state.factions.get_mut(&france_id).unwrap().price_level = 160;
-        state.end_turn_with(&data, idle);
-        calm.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
+        calm.end_turn_with(data, idle);
     }
     let sum = |s: &CampaignState, gauge: fn(&data_model::PopulationClass) -> u8| -> u32 {
         s.provinces
@@ -184,12 +174,12 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
 
     // Strong money: prices fall 2 points a season, recoinage is paid,
     // burghers are pleased and the ruler gains prestige.
-    let mut strong = france(&data, 6);
+    let mut strong = france(data, 6);
     strong.factions.get_mut(&france_id).unwrap().price_level = 110;
-    set_coinage(&mut strong, &data, CoinageLevel::Strong).unwrap();
+    set_coinage(&mut strong, data, CoinageLevel::Strong).unwrap();
     let ruler = strong.factions[&france_id].ruler.clone().unwrap();
     let prestige = strong.characters[&ruler].prestige;
-    strong.end_turn_with(&data, idle);
+    strong.end_turn_with(data, idle);
     let f = &strong.factions[&france_id];
     assert_eq!(f.price_level, 108);
     assert!(f.recoinage_last_turn > 0);
@@ -209,12 +199,12 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
 
 #[test]
 fn ai_coinage_policy() {
-    let data = data();
-    let mut state = france(&data, 7);
+    let data = game_data();
+    let mut state = france(data, 7);
     let england = fac("fac_england");
     state.factions.get_mut(&england).unwrap().treasury = -100;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, &data, &england),
+        coinage::ai_choose_coinage(&state, data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Debased
         }]
@@ -224,7 +214,7 @@ fn ai_coinage_policy() {
     f.coinage = CoinageLevel::Debased;
     f.price_level = 150;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, &data, &england),
+        coinage::ai_choose_coinage(&state, data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Strong
         }]
@@ -233,7 +223,7 @@ fn ai_coinage_policy() {
     f.treasury = 100;
     f.price_level = 100;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, &data, &england),
+        coinage::ai_choose_coinage(&state, data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Sound
         }]
@@ -243,7 +233,7 @@ fn ai_coinage_policy() {
         .get_mut(&england)
         .unwrap()
         .coinage_changed_year = Some(state.year());
-    assert!(coinage::ai_choose_coinage(&state, &data, &england).is_empty());
+    assert!(coinage::ai_choose_coinage(&state, data, &england).is_empty());
 }
 
 // ----- H6: ransoms ----------------------------------------------------------------
@@ -271,8 +261,8 @@ fn pay(
 
 #[test]
 fn ransom_follows_rank_prestige_and_wealth() {
-    let data = data();
-    let mut state = france(&data, 10);
+    let data = game_data();
+    let mut state = france(data, 10);
     let king = chr("chr_philippe_vi");
     let heir = chr("chr_jean_de_normandie");
     assert_eq!(
@@ -284,7 +274,7 @@ fn ransom_follows_rank_prestige_and_wealth() {
         ransom::CaptiveRank::Heir
     );
     // A6-L3: the income cap is lifted to check the formula itself.
-    let mut data = data;
+    let mut data = data.clone();
     data.economy_rules.ransom.income_cap_percent = 1_000_000;
     let king_ransom = ransom::ransom_amount(&state, &data, &king);
     let heir_ransom = ransom::ransom_amount(&state, &data, &heir);
@@ -305,27 +295,27 @@ fn ransom_follows_rank_prestige_and_wealth() {
 
 #[test]
 fn full_ransom_frees_the_captive_once() {
-    let data = data();
-    let mut state = france(&data, 11);
-    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
-    let amount = ransom::ransom_amount(&state, &data, &chr("chr_jean_de_normandie"));
+    let data = game_data();
+    let mut state = france(data, 11);
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    let amount = ransom::ransom_amount(&state, data, &chr("chr_jean_de_normandie"));
     let france_id = fac("fac_france");
     let england = fac("fac_england");
     state.factions.get_mut(&france_id).unwrap().treasury = 0;
     assert!(matches!(
-        pay(&mut state, &data, "chr_jean_de_normandie", 1),
+        pay(&mut state, data, "chr_jean_de_normandie", 1),
         Err(OrderError::Ransom(RansomError::InsufficientFunds { .. }))
     ));
     state.factions.get_mut(&france_id).unwrap().treasury = amount + 10;
     let english = state.factions[&england].treasury;
-    pay(&mut state, &data, "chr_jean_de_normandie", 1).unwrap();
+    pay(&mut state, data, "chr_jean_de_normandie", 1).unwrap();
     let heir = &state.characters[&chr("chr_jean_de_normandie")];
     assert!(!heir.captive && heir.captor.is_none() && heir.ransom_terms.is_none());
     assert_eq!(state.factions[&france_id].treasury, 10);
     assert_eq!(state.factions[&england].treasury, english + amount);
     // No double release: neither the order nor a ransom event pays again.
     assert_eq!(
-        pay(&mut state, &data, "chr_jean_de_normandie", 1),
+        pay(&mut state, data, "chr_jean_de_normandie", 1),
         Err(OrderError::Ransom(RansomError::NotCaptive))
     );
     let effect = EventEffect::ReleaseCharacter {
@@ -337,20 +327,20 @@ fn full_ransom_frees_the_captive_once() {
         faction: Some(france_id.clone()),
         province: None,
     };
-    chronicle::apply_effect(&mut state, &data, &effect, &ctx, &mut Vec::new());
+    chronicle::apply_effect(&mut state, data, &effect, &ctx, &mut Vec::new());
     assert_eq!(state.factions[&france_id].treasury, 10);
 }
 
 #[test]
 fn installments_are_paid_yearly_and_defaults_are_punished() {
-    let data = data();
-    let mut state = france(&data, 12);
+    let data = game_data();
+    let mut state = france(data, 12);
     let france_id = fac("fac_france");
     let england = fac("fac_england");
-    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
-    let amount = ransom::ransom_amount(&state, &data, &chr("chr_jean_de_normandie"));
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    let amount = ransom::ransom_amount(&state, data, &chr("chr_jean_de_normandie"));
     let (total, installment) = ransom::installment_plan(amount, 3);
-    pay(&mut state, &data, "chr_jean_de_normandie", 3).unwrap();
+    pay(&mut state, data, "chr_jean_de_normandie", 3).unwrap();
     assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
     let debt = state.factions[&france_id].ransom_debts[0].clone();
     assert_eq!(debt.remaining, total - installment);
@@ -362,7 +352,7 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     // Year one: the installment is paid (due at turn 4).
     state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
     for _ in 0..5 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     let debt = state.factions[&france_id].ransom_debts[0].clone();
     assert_eq!(debt.remaining, total - 2 * installment);
@@ -372,13 +362,13 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
     state.factions.get_mut(&france_id).unwrap().treasury = -1_000_000;
     let prestige = state.characters[&ruler].prestige;
     for _ in 0..4 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     let after = state.factions[&france_id].ransom_debts[0].clone();
     assert_eq!(after.missed, 1);
     assert!(after.remaining > debt.remaining);
     // −5 prestige (court prestige may add its yearly gain the same winter).
-    let court = sim_campaign::dynasty::yearly_court_prestige(&state, &data, &france_id);
+    let court = sim_campaign::dynasty::yearly_court_prestige(&state, data, &france_id);
     assert!(state.characters[&ruler].prestige <= prestige + court - ransom::DEFAULT_PRESTIGE);
     assert!(state
         .events()
@@ -400,16 +390,16 @@ fn installments_are_paid_yearly_and_defaults_are_punished() {
 
 #[test]
 fn captor_terms_parole_hold_and_cession() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 13).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 13).unwrap();
     state.chronicle.disabled = true;
     let france_id = fac("fac_france");
     let england = fac("fac_england");
-    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     // Only the captor sets terms.
     assert_eq!(
         state.apply_order(
-            &data,
+            data,
             &france_id,
             Order::SetRansomTerms {
                 character: chr("chr_jean_de_normandie"),
@@ -420,7 +410,7 @@ fn captor_terms_parole_hold_and_cession() {
     );
     state
         .submit_order(
-            &data,
+            data,
             Order::SetRansomTerms {
                 character: chr("chr_jean_de_normandie"),
                 terms: RansomTerms::Hold,
@@ -429,7 +419,7 @@ fn captor_terms_parole_hold_and_cession() {
         .unwrap();
     assert_eq!(
         state.apply_order(
-            &data,
+            data,
             &france_id,
             Order::PayRansom {
                 character: chr("chr_jean_de_normandie"),
@@ -439,12 +429,12 @@ fn captor_terms_parole_hold_and_cession() {
         Err(OrderError::Ransom(RansomError::Held))
     );
     // Cession of a border province.
-    let cedable = ransom::cedable_provinces(&state, &data, &france_id, &england);
+    let cedable = ransom::cedable_provinces(&state, data, &france_id, &england);
     assert!(!cedable.is_empty(), "France borders English lands");
     let province = cedable[0].clone();
     state
         .submit_order(
-            &data,
+            data,
             Order::SetRansomTerms {
                 character: chr("chr_jean_de_normandie"),
                 terms: RansomTerms::Province {
@@ -455,7 +445,7 @@ fn captor_terms_parole_hold_and_cession() {
         .unwrap();
     state
         .apply_order(
-            &data,
+            data,
             &france_id,
             Order::PayRansom {
                 character: chr("chr_jean_de_normandie"),
@@ -468,12 +458,12 @@ fn captor_terms_parole_hold_and_cession() {
     assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
 
     // Parole: prestige for the captor's ruler, goodwill from the freed side.
-    capture(&mut state, &data, "chr_david_ii", "fac_england");
+    capture(&mut state, data, "chr_david_ii", "fac_england");
     let edward = chr("chr_edward_iii");
     let prestige = state.characters[&edward].prestige;
     state
         .submit_order(
-            &data,
+            data,
             Order::ReleaseOnParole {
                 character: chr("chr_david_ii"),
             },
@@ -492,13 +482,13 @@ fn captor_terms_parole_hold_and_cession() {
 
 #[test]
 fn a_captive_king_weighs_on_his_realm() {
-    let data = data();
-    let mut state = france(&data, 14);
+    let data = game_data();
+    let mut state = france(data, 14);
     let france_id = fac("fac_france");
-    capture(&mut state, &data, "chr_philippe_vi", "fac_england");
+    capture(&mut state, data, "chr_philippe_vi", "fac_england");
     let king = chr("chr_philippe_vi");
     let prestige = state.characters[&king].prestige;
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(state.factions[&france_id].regency);
     assert!(events
         .iter()
@@ -508,22 +498,22 @@ fn a_captive_king_weighs_on_his_realm() {
         prestige - ransom::CAPTIVE_RULER_PRESTIGE
     );
     // Freed: the regency ends.
-    let amount = ransom::ransom_amount(&state, &data, &king);
+    let amount = ransom::ransom_amount(&state, data, &king);
     state.factions.get_mut(&france_id).unwrap().treasury = amount;
-    pay(&mut state, &data, "chr_philippe_vi", 1).unwrap();
-    state.end_turn_with(&data, idle);
+    pay(&mut state, data, "chr_philippe_vi", 1).unwrap();
+    state.end_turn_with(data, idle);
     assert!(!state.factions[&france_id].regency);
 }
 
 #[test]
 fn ai_pays_ransoms_and_frees_knights_at_peace() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 15).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 15).unwrap();
     state.chronicle.disabled = true;
     let france_id = fac("fac_france");
-    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
-    let orders = ransom::ai_ransom_orders(&state, &data, &france_id);
+    let orders = ransom::ai_ransom_orders(&state, data, &france_id);
     assert_eq!(
         orders,
         vec![Order::PayRansom {
@@ -532,7 +522,7 @@ fn ai_pays_ransoms_and_frees_knights_at_peace() {
         }]
     );
     for order in orders {
-        state.apply_order(&data, &france_id, order).unwrap();
+        state.apply_order(data, &france_id, order).unwrap();
     }
     assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
 }
@@ -545,22 +535,22 @@ fn found(state: &mut CampaignState, data: &GameData, order: &str) -> Result<(), 
 
 #[test]
 fn founding_an_order_checks_faction_year_prestige_and_money() {
-    let data = data();
-    let mut state = france(&data, 20);
+    let data = game_data();
+    let mut state = france(data, 20);
     let france_id = fac("fac_france");
     assert_eq!(
-        found(&mut state, &data, "ord_garter"),
+        found(&mut state, data, "ord_garter"),
         Err(OrderError::Chivalry(ChivalryError::OtherFaction))
     );
     assert_eq!(
-        found(&mut state, &data, "ord_star"),
+        found(&mut state, data, "ord_star"),
         Err(OrderError::Chivalry(ChivalryError::TooEarly(1351)))
     );
     state.year = 1352;
     let ruler = state.factions[&france_id].ruler.clone().unwrap();
     state.characters.get_mut(&ruler).unwrap().prestige = 0;
     assert!(matches!(
-        found(&mut state, &data, "ord_star"),
+        found(&mut state, data, "ord_star"),
         Err(OrderError::Chivalry(
             ChivalryError::NotEnoughPrestige { .. }
         ))
@@ -568,13 +558,13 @@ fn founding_an_order_checks_faction_year_prestige_and_money() {
     state.characters.get_mut(&ruler).unwrap().prestige = 20;
     state.factions.get_mut(&france_id).unwrap().treasury = 100;
     assert!(matches!(
-        found(&mut state, &data, "ord_star"),
+        found(&mut state, data, "ord_star"),
         Err(OrderError::Chivalry(
             ChivalryError::InsufficientFunds { .. }
         ))
     ));
     state.factions.get_mut(&france_id).unwrap().treasury = 10_000;
-    found(&mut state, &data, "ord_star").unwrap();
+    found(&mut state, data, "ord_star").unwrap();
     let star = &data.chivalric_orders[&ord("ord_star")];
     assert_eq!(
         state.factions[&france_id].treasury,
@@ -585,25 +575,25 @@ fn founding_an_order_checks_faction_year_prestige_and_money() {
         20 + star.founder_prestige
     );
     assert_eq!(
-        found(&mut state, &data, "ord_star"),
+        found(&mut state, data, "ord_star"),
         Err(OrderError::Chivalry(ChivalryError::AlreadyFounded))
     );
     // Other factions without a historical order found the generic one.
-    let options = chivalry::orders_for(&data, &fac("fac_scotland"));
+    let options = chivalry::orders_for(data, &fac("fac_scotland"));
     assert_eq!(options.len(), 1);
     assert!(options[0].faction.is_none());
 }
 
 #[test]
 fn members_are_named_and_gain_loyalty_and_morale() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 21).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 21).unwrap();
     state.chronicle.disabled = true;
     let england = fac("fac_england");
     let edward = chr("chr_edward_iii");
     state.characters.get_mut(&edward).unwrap().prestige = 20;
     state.year = 1348;
-    found(&mut state, &data, "ord_garter").unwrap();
+    found(&mut state, data, "ord_garter").unwrap();
     let order = state.factions[&england].chivalric_order.clone().unwrap();
     let garter = &data.chivalric_orders[&ord("ord_garter")];
     assert!(!order.members.is_empty());
@@ -614,11 +604,11 @@ fn members_are_named_and_gain_loyalty_and_morale() {
     );
     let member = order.members[0].clone();
     assert_eq!(
-        chivalry::member_morale(&state, &data, &member),
+        chivalry::member_morale(&state, data, &member),
         f64::from(garter.member_morale)
     );
-    assert_eq!(chivalry::member_morale(&state, &data, &edward), 0.0);
-    let effects = sim_campaign::skills::character_effects(&state, &data, &member);
+    assert_eq!(chivalry::member_morale(&state, data, &edward), 0.0);
+    let effects = sim_campaign::skills::character_effects(&state, data, &member);
     assert!(effects.army_morale.flat >= f64::from(garter.member_morale));
     // Best first: nobody outside the order has more merit than a member.
     let worst = order
@@ -641,12 +631,12 @@ fn members_are_named_and_gain_loyalty_and_morale() {
     let prestige = state.characters[&edward].prestige;
     chronicle::capture_character(
         &mut state,
-        &data,
+        data,
         &member,
         &fac("fac_france"),
         &mut Vec::new(),
     );
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let order = state.factions[&england].chivalric_order.clone().unwrap();
     assert!(!order.members.contains(&member));
     assert!(!order.collapsed || order.members.len() < 2);
@@ -655,14 +645,14 @@ fn members_are_named_and_gain_loyalty_and_morale() {
 
 #[test]
 fn an_order_losing_half_its_members_collapses() {
-    let data = data();
-    let mut state = france(&data, 22);
+    let data = game_data();
+    let mut state = france(data, 22);
     let france_id = fac("fac_france");
     state.year = 1352;
     let ruler = state.factions[&france_id].ruler.clone().unwrap();
     state.characters.get_mut(&ruler).unwrap().prestige = 30;
     state.factions.get_mut(&france_id).unwrap().treasury = 100_000;
-    found(&mut state, &data, "ord_star").unwrap();
+    found(&mut state, data, "ord_star").unwrap();
     let members = state.factions[&france_id]
         .chivalric_order
         .as_ref()
@@ -675,13 +665,13 @@ fn an_order_losing_half_its_members_collapses() {
         state.characters.get_mut(m).unwrap().alive = false;
     }
     let prestige = state.characters[&ruler].prestige;
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     let order = state.factions[&france_id].chivalric_order.clone().unwrap();
     assert!(order.collapsed);
     assert!(events.iter().any(|e| e.kind == EventKind::Chivalry));
     assert!(state.characters[&ruler].prestige <= prestige - chivalry::COLLAPSE_PRESTIGE + 4);
     let survivor = members.last().unwrap();
-    assert_eq!(chivalry::member_morale(&state, &data, survivor), 0.0);
+    assert_eq!(chivalry::member_morale(&state, data, survivor), 0.0);
 }
 
 fn choose_found_option(state: &mut CampaignState, data: &GameData, event: &str, faction: &str) {
@@ -697,15 +687,15 @@ fn choose_found_option(state: &mut CampaignState, data: &GameData, event: &str, 
 
 #[test]
 fn garter_and_star_events_found_their_orders() {
-    let data = data();
-    let mut state = france(&data, 23);
+    let data = game_data();
+    let mut state = france(data, 23);
     choose_found_option(
         &mut state,
-        &data,
+        data,
         "evt_ordre_de_la_jarretiere",
         "fac_england",
     );
-    choose_found_option(&mut state, &data, "evt_ordre_de_l_etoile", "fac_france");
+    choose_found_option(&mut state, data, "evt_ordre_de_l_etoile", "fac_france");
     let garter = state.factions[&fac("fac_england")]
         .chivalric_order
         .clone()
@@ -720,7 +710,7 @@ fn garter_and_star_events_found_their_orders() {
     // A second foundation is a no-op.
     choose_found_option(
         &mut state,
-        &data,
+        data,
         "evt_ordre_de_la_jarretiere",
         "fac_england",
     );
@@ -734,13 +724,13 @@ fn garter_and_star_events_found_their_orders() {
 
 #[test]
 fn h5_h6_state_survives_saves_and_old_saves_load() {
-    let data = data();
-    let mut state = france(&data, 30);
-    set_coinage(&mut state, &data, CoinageLevel::Debased).unwrap();
-    capture(&mut state, &data, "chr_jean_de_normandie", "fac_england");
+    let data = game_data();
+    let mut state = france(data, 30);
+    set_coinage(&mut state, data, CoinageLevel::Debased).unwrap();
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 1_000_000;
-    pay(&mut state, &data, "chr_jean_de_normandie", 3).unwrap();
-    state.end_turn_with(&data, idle);
+    pay(&mut state, data, "chr_jean_de_normandie", 3).unwrap();
+    state.end_turn_with(data, idle);
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
@@ -773,23 +763,23 @@ fn h5_h6_state_survives_saves_and_old_saves_load() {
 
 #[test]
 fn campaign_with_h5_h6_ai_is_deterministic_and_valid() {
-    let data = data();
-    let mut a = CampaignState::new_1337(&data, fac("fac_france"), 31).unwrap();
+    let data = game_data();
+    let mut a = CampaignState::new_1337(data, fac("fac_france"), 31).unwrap();
     let mut b = a.clone();
     for _ in 0..12 {
-        a.end_turn(&data);
-        b.end_turn(&data);
+        a.end_turn(data);
+        b.end_turn(data);
     }
     assert_eq!(a.save_json(), b.save_json());
     for faction in a.factions.keys().cloned().collect::<Vec<_>>() {
         let mut probe = a.clone();
-        let orders: Vec<Order> = coinage::ai_choose_coinage(&a, &data, &faction)
+        let orders: Vec<Order> = coinage::ai_choose_coinage(&a, data, &faction)
             .into_iter()
-            .chain(ransom::ai_ransom_orders(&a, &data, &faction))
-            .chain(chivalry::ai_found_order(&a, &data, &faction))
+            .chain(ransom::ai_ransom_orders(&a, data, &faction))
+            .chain(chivalry::ai_found_order(&a, data, &faction))
             .collect();
         for order in orders {
-            probe.apply_order(&data, &faction, order).unwrap();
+            probe.apply_order(data, &faction, order).unwrap();
         }
     }
 }

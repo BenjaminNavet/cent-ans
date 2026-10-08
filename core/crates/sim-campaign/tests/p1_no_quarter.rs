@@ -1,24 +1,11 @@
 //! P1: « pas de quartier » in the campaign — a victor who gave no quarter
 //! takes no noble prisoner (no ransom) and its commander loses piety.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::GameData;
 use sim_battle::{BattleOutcome, BattleSim, SideId};
 use sim_campaign::{ArmyId, CampaignState, EventKind, Order, NO_QUARTER_PIETY};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
     let faction = fac(faction);
@@ -79,12 +66,12 @@ fn french_victory(data: &GameData) -> (CampaignState, ArmyId, ArmyId, BattleOutc
 
 #[test]
 fn caught_general_is_held_for_ransom_without_the_order() {
-    let data = data();
-    let (mut state, french, english, outcome) = french_victory(&data);
+    let data = game_data();
+    let (mut state, french, english, outcome) = french_victory(data);
     let english_general = state.army(&english).unwrap().general.clone().unwrap();
     let french_general = state.army(&french).unwrap().general.clone().unwrap();
     let piety = state.character(&french_general).unwrap().piety;
-    state.resolve_pending_battle(&data, 0, &outcome).unwrap();
+    state.resolve_pending_battle(data, 0, &outcome).unwrap();
     let captive = state.character(&english_general).unwrap();
     assert!(captive.alive);
     assert!(captive.captive);
@@ -94,13 +81,13 @@ fn caught_general_is_held_for_ransom_without_the_order() {
 
 #[test]
 fn no_quarter_victors_slay_the_caught_general_and_lose_piety() {
-    let data = data();
-    let (mut state, french, english, mut outcome) = french_victory(&data);
+    let data = game_data();
+    let (mut state, french, english, mut outcome) = french_victory(data);
     outcome.attacker.no_quarter = true;
     let english_general = state.army(&english).unwrap().general.clone().unwrap();
     let french_general = state.army(&french).unwrap().general.clone().unwrap();
     let piety = state.character(&french_general).unwrap().piety;
-    let events = state.resolve_pending_battle(&data, 0, &outcome).unwrap();
+    let events = state.resolve_pending_battle(data, 0, &outcome).unwrap();
 
     let slain = state.character(&english_general).unwrap();
     assert!(!slain.alive, "no prisoner: the caught general is slain");
@@ -130,13 +117,13 @@ fn no_quarter_victors_slay_the_caught_general_and_lose_piety() {
 
 #[test]
 fn no_quarter_of_the_loser_changes_nothing() {
-    let data = data();
-    let (mut state, _french, english, mut outcome) = french_victory(&data);
+    let data = game_data();
+    let (mut state, _french, english, mut outcome) = french_victory(data);
     // The beaten English raised the dragon banner: they took no prisoner,
     // but the French victors may still ransom their general.
     outcome.defender.no_quarter = true;
     let english_general = state.army(&english).unwrap().general.clone().unwrap();
-    let events = state.resolve_pending_battle(&data, 0, &outcome).unwrap();
+    let events = state.resolve_pending_battle(data, 0, &outcome).unwrap();
     let captive = state.character(&english_general).unwrap();
     assert!(captive.alive && captive.captive);
     assert!(!events

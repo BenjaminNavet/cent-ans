@@ -1,21 +1,10 @@
 //! Lot EQ3: a peace also binds the allies and vassals who joined the war
 //! (`negotiation.truce_binds_allies`, trêve de Leulinghem 1389).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
 use sim_campaign::negotiation::{apply_treaty, Article};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 /// Puts `a` and `b` at war since `turn` (both sides' records).
 fn war(state: &mut CampaignState, a: &str, b: &str, turn: u32) {
@@ -42,9 +31,9 @@ fn set_allied(state: &mut CampaignState, a: &str, b: &str, allied: bool) {
 
 #[test]
 fn peace_binds_the_allies_who_joined_the_war() {
-    let data = data();
+    let data = game_data();
     assert!(data.ai_diplomacy.negotiation.truce_binds_allies);
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     state.turn = 20;
     war(&mut state, "fac_france", "fac_england", 10);
     // Joined France's war (Auld Alliance) and England's (Hainaut).
@@ -61,7 +50,7 @@ fn peace_binds_the_allies_who_joined_the_war() {
 
     apply_treaty(
         &mut state,
-        &data,
+        data,
         &fac("fac_england"),
         &fac("fac_france"),
         &[Article::Peace],
@@ -80,8 +69,8 @@ fn peace_binds_the_allies_who_joined_the_war() {
 
 #[test]
 fn a_great_crown_is_not_bound_by_a_lesser_ally() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     state.turn = 20;
     // England falls on Scotland; France answers the Auld Alliance.
     set_allied(&mut state, "fac_scotland", "fac_france", true);
@@ -89,7 +78,7 @@ fn a_great_crown_is_not_bound_by_a_lesser_ally() {
     war(&mut state, "fac_france", "fac_england", 10);
     apply_treaty(
         &mut state,
-        &data,
+        data,
         &fac("fac_england"),
         &fac("fac_scotland"),
         &[Article::Peace],

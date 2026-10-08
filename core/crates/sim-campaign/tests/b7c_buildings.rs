@@ -2,22 +2,12 @@
 //! upgrades never regress, `enables_units` gates recruitment, resource
 //! costs are drawn or imported, the 1337 seed does not stack a chain.
 
-use std::path::PathBuf;
-
 use data_model::{
     BuildingId, FactionId, GameData, ProvinceId, ResourceId, SettlementId, UnitTypeId,
 };
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
@@ -67,7 +57,7 @@ fn option(
 
 #[test]
 fn no_upgrade_in_the_data_loses_an_effect() {
-    let data = data();
+    let data = game_data();
     for building in data.buildings.values() {
         if let Some(base) = &building.upgrades_from {
             let lost = data_model::upgrade_regressions(&data.buildings[base], building);
@@ -85,23 +75,23 @@ fn no_upgrade_in_the_data_loses_an_effect() {
 
 #[test]
 fn an_upgrade_satisfies_the_prerequisites_of_the_building_it_replaced() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 7).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 7).unwrap();
     let rouen = city(&state, "prov_normandie");
-    allow(&mut state, &data, &france, &rouen, "bld_apothecary");
+    allow(&mut state, data, &france, &rouen, "bld_apothecary");
     state.settlements.get_mut(&rouen).unwrap().buildings = vec![bld("bld_guild_hall")];
-    let apothecary = option(&state, &data, &rouen, "bld_apothecary");
+    let apothecary = option(&state, data, &rouen, "bld_apothecary");
     assert!(apothecary.available, "{:?}", apothecary.reason);
     // The market it replaced cannot be built again.
-    let market = option(&state, &data, &rouen, "bld_market");
+    let market = option(&state, data, &rouen, "bld_market");
     assert!(!market.available);
 }
 
 #[test]
 fn the_1337_seed_keeps_only_the_highest_level_of_a_chain() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 7).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     let paris = city(&state, "prov_ile_de_france");
     let buildings = &state.settlement_state(&paris).unwrap().buildings;
     for replaced in [
@@ -125,9 +115,9 @@ fn the_1337_seed_keeps_only_the_highest_level_of_a_chain() {
 
 #[test]
 fn enables_units_gates_recruitment() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 7).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 7).unwrap();
     let paris = city(&state, "prov_ile_de_france");
     let mangonel = UnitTypeId::new("unit_mangonel").unwrap();
     state
@@ -137,7 +127,7 @@ fn enables_units_gates_recruitment() {
         .buildings
         .retain(|b| b.as_str() != "bld_siege_workshop");
     let blocked = state
-        .recruit_option(&data, &france, &paris, &mangonel)
+        .recruit_option(data, &france, &paris, &mangonel)
         .unwrap();
     assert!(
         blocked
@@ -154,7 +144,7 @@ fn enables_units_gates_recruitment() {
         .buildings
         .push(bld("bld_siege_workshop"));
     let open = state
-        .recruit_option(&data, &france, &paris, &mangonel)
+        .recruit_option(data, &france, &paris, &mangonel)
         .unwrap();
     assert!(
         !open
@@ -167,7 +157,7 @@ fn enables_units_gates_recruitment() {
     // Units no building lists stay free of any building requirement.
     let militia = UnitTypeId::new("unit_urban_militia").unwrap();
     let free = state
-        .recruit_option(&data, &france, &paris, &militia)
+        .recruit_option(data, &france, &paris, &militia)
         .unwrap();
     assert!(!free
         .reason
@@ -177,11 +167,11 @@ fn enables_units_gates_recruitment() {
 
 #[test]
 fn stone_is_drawn_from_the_quarries_then_imported() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 7).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 7).unwrap();
     let supply = state
-        .free_supply(&data, &france)
+        .free_supply(data, &france)
         .get(&stone())
         .copied()
         .unwrap_or(0);
@@ -189,15 +179,15 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
 
     // A first castle draws its 3 stone from the French quarries.
     let angers = city(&state, "prov_anjou");
-    allow(&mut state, &data, &france, &angers, "bld_castle");
-    let castle = option(&state, &data, &angers, "bld_castle");
+    allow(&mut state, data, &france, &angers, "bld_castle");
+    let castle = option(&state, data, &angers, "bld_castle");
     assert!(castle.available, "{:?}", castle.reason);
     assert_eq!(castle.import_cost, 0);
     assert!(castle.imported.is_empty());
     let before = state.factions[&france].treasury;
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: angers.clone().into(),
                 building: bld("bld_castle"),
@@ -218,19 +208,19 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
     );
     let left = supply - 3;
     assert_eq!(
-        state.free_supply(&data, &france).get(&stone()).copied(),
+        state.free_supply(data, &france).get(&stone()).copied(),
         Some(left)
     );
 
     // While it lasts, a second castle imports what the quarries lack.
     let rouen = city(&state, "prov_normandie");
-    allow(&mut state, &data, &france, &rouen, "bld_castle");
+    allow(&mut state, data, &france, &rouen, "bld_castle");
     {
         let rouen_state = state.settlements.get_mut(&rouen).unwrap();
         rouen_state.buildings.retain(|b| b.as_str() != "bld_castle");
         rouen_state.buildings.push(bld("bld_stone_walls"));
     }
-    let second = option(&state, &data, &rouen, "bld_castle");
+    let second = option(&state, data, &rouen, "bld_castle");
     let missing = 3 - left.min(3);
     assert_eq!(second.imported.get(&stone()).copied().unwrap_or(0), missing);
     let price = i64::from(data.resources[&stone()].base_price)
@@ -245,7 +235,7 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
     let treasury = state.factions[&france].treasury;
     state
         .submit_order(
-            &data,
+            data,
             Order::CancelBuild {
                 settlement: angers.clone().into(),
             },
@@ -256,14 +246,14 @@ fn stone_is_drawn_from_the_quarries_then_imported() {
         treasury + i64::from(construction.paid / 2)
     );
     assert_eq!(
-        state.free_supply(&data, &france).get(&stone()).copied(),
+        state.free_supply(data, &france).get(&stone()).copied(),
         Some(supply)
     );
 }
 
 #[test]
 fn normandy_quarries_caen_stone() {
-    let data = data();
+    let data = game_data();
     let province = &data.provinces[&ProvinceId::new("prov_normandie_ouest").unwrap()];
     assert!(province.resources.contains(&stone()));
 }
