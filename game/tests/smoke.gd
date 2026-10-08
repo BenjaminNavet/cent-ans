@@ -430,7 +430,7 @@ func _run_campaign_loop() -> void:
 	_check(found, "smoke save not listed by list_saves")
 
 	if _failures == 0:
-		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
+		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real", turn, date_loaded])
 	map.queue_free()
 	await process_frame
 
@@ -700,16 +700,11 @@ func _run_city_economy() -> void:
 	const PROVINCE_ID := "prov_ile_de_france"
 	const FACTION_ID := "fac_france"
 	var data_dir := _project_root().path_join("data")
-	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
-		and ClassDB.instantiate("CampaignSim").has_method("get_province_city")
-	var sim: Object
-	if real_capable:
-		sim = ClassDB.instantiate("CampaignSim")
-	else:
-		sim = CampaignSimMock.new()
+	if not _check(ClassDB.class_exists("CampaignSim"), "city/economy: CampaignSim unavailable"):
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "city/economy: new_campaign failed"):
 		return
-	print("smoke city/economy: simulation %s" % ["REAL" if real_capable else "MOCK"])
 	# M10 : pas d'événements de chronique pendant la mesure (le bruit masquerait l'effet du bâtiment).
 	if sim.has_method("set_chronicle_enabled"):
 		sim.call("set_chronicle_enabled", false)
@@ -776,8 +771,8 @@ func _run_city_economy() -> void:
 		"projected_income should rise with high tax: %d -> %d" % [economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
 
 	if _failures == 0:
-		print("smoke OK: city/economy (%s), built %s, projected income %d -> best %d, tax normal->high %d -> %d" % [
-			"real" if real_capable else "mock", choice["building"],
+		print("smoke OK: city/economy, built %s, projected income %d -> best %d, tax normal->high %d -> %d" % [
+			choice["building"],
 			economy_before.get("projected_income", 0), best_after,
 			economy_normal.get("projected_income", 0), economy_high_tax.get("projected_income", 0)])
 
@@ -829,17 +824,15 @@ func _fail(message: String) -> void:
 
 
 ## M4 : personnages et dynasties (docs/design/m4-characters-dynasties.md § 5). Avec la vraie
-## simulation si elle expose `get_character` (imprimé), sinon un `CampaignSimMock` dédié sur
-## `data/` (qui a les personnages ; pas les fixtures).
+## simulation sur `data/`.
 func _run_characters() -> void:
 	const FACTION_ID := "fac_france"
 	var data_dir := _project_root().path_join("data")
-	var real_capable: bool = ClassDB.class_exists("CampaignSim") \
-		and ClassDB.instantiate("CampaignSim").has_method("get_character")
-	var sim: Object = ClassDB.instantiate("CampaignSim") if real_capable else CampaignSimMock.new()
+	if not _check(ClassDB.class_exists("CampaignSim"), "characters: CampaignSim unavailable"):
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
 	if not _check(sim.call("new_campaign", data_dir, FACTION_ID, 1337), "characters: new_campaign failed"):
 		return
-	print("smoke characters: simulation %s" % ["REAL" if real_capable else "MOCK"])
 
 	var ids: Array = sim.call("get_faction_characters", FACTION_ID)
 	if not _check(not ids.is_empty(), "get_faction_characters(fac_france) should not be empty"):
@@ -915,8 +908,8 @@ func _run_characters() -> void:
 	await _check_family_tree_c3(sim, FACTION_ID)
 
 	if _failures == 0:
-		print("smoke OK: characters (%s), court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
-			"real" if real_capable else "mock", rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
+		print("smoke OK: characters, court %d, learn_skill %s, governor %s->%s, marriage %s, birth/death seen" % [
+			rows.size(), tier1_command, courtier, target_province, "yes" if married else "skipped"])
 
 
 ## C3 : onglet « Arbre familial » du panneau Cour (Valois, ≥ 3 générations après 40 tours) et

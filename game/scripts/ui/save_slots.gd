@@ -70,7 +70,6 @@ static func write_meta(save_name: String) -> bool:
 		"turn": int(sim.call("get_turn")),
 		"difficulty": str(facade.call("current_difficulty")) if facade.has_method("current_difficulty") else "normal",
 		"timestamp": Time.get_datetime_string_from_system(),
-		"engine": "real" if facade.get("is_real") else "mock",
 		"path": facade.call("save_path", save_name),
 	}
 	var file := FileAccess.open(meta_path(save_name), FileAccess.WRITE)
@@ -156,7 +155,7 @@ static func list() -> Array[Dictionary]:
 				"turn": int(wrapper.get("turn", 0)),
 				"difficulty": str(wrapper.get("difficulty", "normal")),
 				"timestamp": str(wrapper.get("timestamp", "")),
-				"engine": str(wrapper.get("engine", "mock")),
+				"engine": str(wrapper.get("engine", "real")),
 			}
 		entry["path"] = path
 		entry["name"] = save_name
@@ -167,9 +166,9 @@ static func list() -> Array[Dictionary]:
 	return result
 
 
-## Sauvegarde chargeable par ce moteur (une partie « réelle » exige la GDExtension).
+## Sauvegarde chargeable : exige la GDExtension ; les anciennes sauvegardes « mock » sont refusées.
 static func loadable(entry: Dictionary) -> bool:
-	return str(entry.get("engine", "mock")) != "real" or ClassDB.class_exists("CampaignSim")
+	return str(entry.get("engine", "real")) != "mock" and ClassDB.class_exists("CampaignSim")
 
 
 ## Sauvegarde la plus récente chargeable (« Continuer »), vide s'il n'y en a pas.
