@@ -1,0 +1,1887 @@
+[
+ {
+  "id": "animal_camargue_horse",
+  "kind": "decor",
+  "prompt": "small stocky white-grey Camargue horse with a thick mane and short strong legs in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "herds:camargue_horse (camargue, delta Rhone)"
+ },
+ {
+  "id": "animal_camargue_bull",
+  "kind": "decor",
+  "prompt": "small black Camargue fighting bull with lyre-shaped horns in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.2,
+   "yaw_fix": 0
+  },
+  "target": "herds:camargue_bull"
+ },
+ {
+  "id": "animal_cattle_red",
+  "kind": "decor",
+  "prompt": "medieval landrace red-brown cow, rangy, with horns in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.3,
+   "yaw_fix": 0
+  },
+  "target": "herds:cattle (atlantique, continental)"
+ },
+ {
+  "id": "animal_cattle_pied",
+  "kind": "decor",
+  "prompt": "medieval landrace black and white pied cow, rangy, short horns in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.3,
+   "yaw_fix": 0
+  },
+  "target": "herds:cattle"
+ },
+ {
+  "id": "animal_ox_draught",
+  "kind": "decor",
+  "prompt": "large muscular draught ox with a wooden yoke on its neck in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.6,
+   "yaw_fix": 0
+  },
+  "target": "herds:ox (champs ouverts)"
+ },
+ {
+  "id": "animal_sheep_wool",
+  "kind": "decor",
+  "prompt": "medieval landrace woolly sheep with a heavy fleece in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "herds:sheep (transhumance, prairies)"
+ },
+ {
+  "id": "animal_sheep_merino",
+  "kind": "decor",
+  "prompt": "early Merino-type sheep with fine dense fleece and curled horns on the ram in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.3,
+   "yaw_fix": 0
+  },
+  "target": "herds:sheep (castille, mesta)"
+ },
+ {
+  "id": "animal_goat",
+  "kind": "decor",
+  "prompt": "medieval landrace goat with backward curved horns and a short beard in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.1,
+   "yaw_fix": 0
+  },
+  "target": "herds:goat (montagne, maquis)"
+ },
+ {
+  "id": "animal_pig_forest",
+  "kind": "decor",
+  "prompt": "rangy long-snouted medieval forest pig with coarse dark bristles, lean and hairy in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.4,
+   "yaw_fix": 0
+  },
+  "target": "herds:pig (glandee, forets)"
+ },
+ {
+  "id": "animal_horse_draught",
+  "kind": "decor",
+  "prompt": "heavy medieval draught horse, broad chest, feathered hooves, no harness in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.4,
+   "yaw_fix": 0
+  },
+  "target": "herds:horse (plaines)"
+ },
+ {
+  "id": "animal_horse_wild_steppe",
+  "kind": "decor",
+  "prompt": "small hardy steppe pony with a shaggy coat and dun colour, Przewalski-like in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.9,
+   "yaw_fix": 0
+  },
+  "target": "herds:horse_steppe (steppe, Ukraine)"
+ },
+ {
+  "id": "animal_donkey",
+  "kind": "decor",
+  "prompt": "small grey donkey with long ears in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "herds:donkey (mediterranee)"
+ },
+ {
+  "id": "animal_mule",
+  "kind": "decor",
+  "prompt": "medieval pack mule, bay coat, long ears, no pack in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "herds:mule (cols, mediterranee)"
+ },
+ {
+  "id": "animal_camel_dromedary",
+  "kind": "decor",
+  "prompt": "single-humped dromedary camel standing, no saddle in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.7,
+   "yaw_fix": 0
+  },
+  "target": "herds:camel (andalousie, levant, afrique du nord)"
+ },
+ {
+  "id": "animal_camel_bactrian",
+  "kind": "decor",
+  "prompt": "double-humped Bactrian camel with a shaggy winter coat in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.7,
+   "yaw_fix": 0
+  },
+  "target": "herds:camel_bactrian (steppe, Volga)"
+ },
+ {
+  "id": "animal_deer_red_stag",
+  "kind": "decor",
+  "prompt": "red deer stag with large antlers in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.2,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:red_deer (forets)"
+ },
+ {
+  "id": "animal_deer_hind",
+  "kind": "decor",
+  "prompt": "red deer hind without antlers in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.9,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:red_deer"
+ },
+ {
+  "id": "animal_roe_deer",
+  "kind": "decor",
+  "prompt": "small roe deer with short antlers in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.3,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:roe_deer (bocage, lisieres)"
+ },
+ {
+  "id": "animal_boar_wild",
+  "kind": "decor",
+  "prompt": "wild boar with dark bristly coat and short tusks in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:boar (forets)"
+ },
+ {
+  "id": "animal_wolf_grey",
+  "kind": "decor",
+  "prompt": "grey wolf with thick fur, head level in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.4,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:wolf (forets, montagnes, nord)"
+ },
+ {
+  "id": "animal_bear_brown",
+  "kind": "decor",
+  "prompt": "brown bear with heavy shoulders, walking pose in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:bear (Pyrenees, Alpes, nord)"
+ },
+ {
+  "id": "animal_ibex",
+  "kind": "decor",
+  "prompt": "alpine ibex with long ridged curved horns in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:ibex (Alpes, Pyrenees)"
+ },
+ {
+  "id": "animal_chamois",
+  "kind": "decor",
+  "prompt": "chamois with short hooked horns and a two-tone winter coat in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:chamois (Alpes)"
+ },
+ {
+  "id": "animal_reindeer",
+  "kind": "decor",
+  "prompt": "reindeer with branching antlers and a thick pale neck mane in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:reindeer (Laponie, nord)"
+ },
+ {
+  "id": "animal_elk",
+  "kind": "decor",
+  "prompt": "European elk (moose) with palmate antlers and a long muzzle in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.8,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:elk (Baltique, Russie)"
+ },
+ {
+  "id": "animal_auroch",
+  "kind": "decor",
+  "prompt": "aurochs wild ox, black coat with a pale dorsal stripe, huge forward-curved horns in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.8,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:auroch (Pologne, Lituanie)"
+ },
+ {
+  "id": "animal_bison_european",
+  "kind": "decor",
+  "prompt": "European bison with a heavy shaggy forequarter and a low head in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.8,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:bison (Bialowieza, Pologne)"
+ },
+ {
+  "id": "animal_fox_red",
+  "kind": "decor",
+  "prompt": "red fox with a bushy tail in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:fox (partout)"
+ },
+ {
+  "id": "animal_hare",
+  "kind": "decor",
+  "prompt": "brown hare sitting upright with ears up in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.5,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:hare (open-fields)"
+ },
+ {
+  "id": "animal_beaver",
+  "kind": "decor",
+  "prompt": "European beaver on all fours with a flat tail in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.9,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:beaver (rivieres du nord)"
+ },
+ {
+  "id": "animal_seal_grey",
+  "kind": "decor",
+  "prompt": "grey seal lying on its belly with raised head in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.9,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:seal (estrans, Manche, Baltique)"
+ },
+ {
+  "id": "animal_walrus",
+  "kind": "decor",
+  "prompt": "walrus lying with long tusks in a natural standing pose, strict three-quarter side view, whole animal visible, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "wildlife:walrus (banquise, Mer Blanche)"
+ },
+ {
+  "id": "bird_goose_grey",
+  "kind": "decor",
+  "prompt": "greylag goose standing, wings folded, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "flocks:goose_ground (marais, champs)"
+ },
+ {
+  "id": "bird_goose_flying",
+  "kind": "decor",
+  "prompt": "greylag goose in flight, wings raised, seen from the side, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.6,
+   "yaw_fix": 0
+  },
+  "target": "flocks:goose_v (vols en V, migration)"
+ },
+ {
+  "id": "bird_crane_common",
+  "kind": "decor",
+  "prompt": "common crane standing on long legs, grey plumage, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "flocks:crane (marais, Baltique)"
+ },
+ {
+  "id": "bird_stork_white",
+  "kind": "decor",
+  "prompt": "white stork standing with black flight feathers and red bill, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "flocks:stork (toits, clochers)"
+ },
+ {
+  "id": "bird_stork_nest",
+  "kind": "decor",
+  "prompt": "large stick stork nest on a thatched roof ridge with a stork, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "props:stork_nest (Alsace, Pologne)"
+ },
+ {
+  "id": "bird_flamingo",
+  "kind": "decor",
+  "prompt": "greater flamingo standing on one leg, pale pink plumage, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "flocks:flamingo (Camargue, etangs mediterraneens)"
+ },
+ {
+  "id": "bird_gull_flying",
+  "kind": "decor",
+  "prompt": "herring gull in flight, wings spread, seen from the side, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.6,
+   "yaw_fix": 0
+  },
+  "target": "flocks:gull (cotes, ports)"
+ },
+ {
+  "id": "bird_gull_standing",
+  "kind": "decor",
+  "prompt": "herring gull standing on the ground, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.6,
+   "yaw_fix": 0
+  },
+  "target": "flocks:gull_ground (estrans, ports)"
+ },
+ {
+  "id": "bird_cormorant",
+  "kind": "decor",
+  "prompt": "cormorant perched with wings half open drying, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "flocks:cormorant (rochers, rivieres)"
+ },
+ {
+  "id": "bird_heron_grey",
+  "kind": "decor",
+  "prompt": "grey heron standing in a hunched posture, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "flocks:heron (marais, rivieres)"
+ },
+ {
+  "id": "bird_swan_mute",
+  "kind": "decor",
+  "prompt": "mute swan floating on water, white plumage, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "flocks:swan (etangs, rivieres)"
+ },
+ {
+  "id": "bird_duck_mallard",
+  "kind": "decor",
+  "prompt": "mallard drake swimming, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.55,
+   "yaw_fix": 0
+  },
+  "target": "flocks:duck (marais, etangs)"
+ },
+ {
+  "id": "bird_starling_flying",
+  "kind": "decor",
+  "prompt": "common starling in flight, small dark bird, seen from the side, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 0.25,
+   "yaw_fix": 0
+  },
+  "target": "flocks:starling_murmuration (automne, champs)"
+ },
+ {
+  "id": "bird_raven_flying",
+  "kind": "decor",
+  "prompt": "raven in flight, large black bird, wings spread, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "flocks:raven (champs de bataille, gibets)"
+ },
+ {
+  "id": "bird_vulture_griffon",
+  "kind": "decor",
+  "prompt": "griffon vulture soaring, wings spread flat, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "flocks:vulture (Pyrenees, Espagne)"
+ },
+ {
+  "id": "bird_eagle_golden",
+  "kind": "decor",
+  "prompt": "golden eagle soaring, wings spread, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 2.1,
+   "yaw_fix": 0
+  },
+  "target": "flocks:eagle (Alpes, Pyrenees)"
+ },
+ {
+  "id": "bird_pelican",
+  "kind": "decor",
+  "prompt": "dalmatian pelican standing with a large bill pouch, strict three-quarter side view, plain uniform medium grey background, whole bird visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "animal",
+   "target_width_m": 1.6,
+   "yaw_fix": 0
+  },
+  "target": "flocks:pelican (delta Danube)"
+ },
+ {
+  "id": "sea_dolphin_leaping",
+  "kind": "decor",
+  "prompt": "common dolphin leaping out of the water in an arc, seen from the side, no water, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "prop",
+   "target_width_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "seafauna:dolphin (Mediterranee, Atlantique)"
+ },
+ {
+  "id": "sea_whale_back",
+  "kind": "decor",
+  "prompt": "whale back and dorsal fin surfacing, only the visible part, seen from the side, dark grey skin, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "prop",
+   "target_width_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "seafauna:whale (Atlantique, Mer du Nord)"
+ },
+ {
+  "id": "sea_fish_school_leap",
+  "kind": "decor",
+  "prompt": "salmon leaping upward out of a river, seen from the side, no water, plain uniform medium grey background",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "prop",
+   "target_width_m": 0.5,
+   "yaw_fix": 0
+  },
+  "target": "seafauna:salmon (torrents du nord, Loire)"
+ },
+ {
+  "id": "env_haystack_pile_open",
+  "kind": "decor",
+  "prompt": "tall conical medieval hay rick around a central pole, thatched top",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.5,
+   "class": "prop"
+  },
+  "target": "fields:haystack_field"
+ },
+ {
+  "id": "env_cross_wayside_stone",
+  "kind": "decor",
+  "prompt": "medieval stone wayside cross on a stepped base, weathered",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.0,
+   "class": "prop"
+  },
+  "target": "roadside:cross_stone"
+ },
+ {
+  "id": "env_calvary_breton",
+  "kind": "decor",
+  "prompt": "Breton stone calvary with carved crucifixion group on a granite plinth",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 5.0,
+   "class": "prop"
+  },
+  "target": "roadside:calvary (Bretagne)"
+ },
+ {
+  "id": "env_gibbet",
+  "kind": "decor",
+  "prompt": "medieval timber gibbet with a crossbeam and a chain, bare wood",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 5.0,
+   "class": "prop"
+  },
+  "target": "roadside:gibbet (carrefours, sorties de villes)"
+ },
+ {
+  "id": "env_gibbet_stone",
+  "kind": "decor",
+  "prompt": "masonry gibbet with several stone pillars joined by beams, as at Montfaucon",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "major_building"
+  },
+  "target": "roadside:gibbet_montfaucon (Paris)"
+ },
+ {
+  "id": "env_toll_bar",
+  "kind": "decor",
+  "prompt": "medieval roadside toll with a wooden barrier pole and a small timber hut",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "house"
+  },
+  "target": "roadside:toll"
+ },
+ {
+  "id": "env_milestone",
+  "kind": "decor",
+  "prompt": "rough square stone milestone with a rounded top",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 1.4,
+   "class": "prop"
+  },
+  "target": "roadside:milestone"
+ },
+ {
+  "id": "env_wayside_shrine",
+  "kind": "decor",
+  "prompt": "small roofed stone wayside shrine with a niche, Mediterranean",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 2.5,
+   "class": "prop"
+  },
+  "target": "roadside:shrine (Provence, Italie)"
+ },
+ {
+  "id": "env_hospice_alpine",
+  "kind": "decor",
+  "prompt": "stone mountain hospice with a thick-walled low hall and a small bell turret",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 22.0,
+   "class": "house"
+  },
+  "target": "pass:hospice (cols alpins)"
+ },
+ {
+  "id": "env_mine_headframe",
+  "kind": "decor",
+  "prompt": "medieval mine head with a timber windlass over a shaft and spoil heaps",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10.0,
+   "class": "house"
+  },
+  "target": "industry:mine_head (Harz, Boheme, Cornouailles)"
+ },
+ {
+  "id": "env_quarry_face",
+  "kind": "decor",
+  "prompt": "medieval stone quarry cut with stacked blocks, a wooden crane and a ramp",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24.0,
+   "class": "house"
+  },
+  "target": "industry:quarry (Caen, Paris)"
+ },
+ {
+  "id": "env_charcoal_kiln",
+  "kind": "decor",
+  "prompt": "earth-covered charcoal burner's mound with smoke and a lean-to hut",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "house"
+  },
+  "target": "industry:charcoal_kiln (forets)"
+ },
+ {
+  "id": "env_glassworks",
+  "kind": "decor",
+  "prompt": "forest glassworks with a conical furnace hut and a woodpile",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16.0,
+   "class": "house"
+  },
+  "target": "industry:glassworks (Weald, Lorraine, Boheme)"
+ },
+ {
+  "id": "env_forge_water",
+  "kind": "decor",
+  "prompt": "water-powered ironworks forge with a wheel and a tilt hammer shed",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14.0,
+   "class": "house"
+  },
+  "target": "industry:forge (Ardennes, Styrie)"
+ },
+ {
+  "id": "env_tidal_mill",
+  "kind": "decor",
+  "prompt": "medieval tidal mill on a dam with a small pond and a timber mill house",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14.0,
+   "class": "house"
+  },
+  "target": "industry:tidal_mill (Bretagne, Angleterre)"
+ },
+ {
+  "id": "env_fishing_weir",
+  "kind": "decor",
+  "prompt": "wooden fishing weir of stakes and wicker traps in shallow water, seen from above",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 14.0,
+   "class": "prop"
+  },
+  "target": "coast:fishing_weir (bordigues, Languedoc)"
+ },
+ {
+  "id": "env_fish_trap_stakes",
+  "kind": "decor",
+  "prompt": "tidal fish trap, V-shaped line of tall stakes with nets",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.0,
+   "class": "prop"
+  },
+  "target": "coast:stake_weir (estrans)"
+ },
+ {
+  "id": "env_drying_racks_fish",
+  "kind": "decor",
+  "prompt": "wooden racks with split cod and stockfish drying in rows",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "house"
+  },
+  "target": "coast:fish_racks (Norvege, Islande, Baltique)"
+ },
+ {
+  "id": "env_lighthouse_medieval",
+  "kind": "decor",
+  "prompt": "medieval stone lighthouse tower with a brazier platform at the top",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "major_building"
+  },
+  "target": "coast:lighthouse (Genes, Cordouan, Gironde)"
+ },
+ {
+  "id": "env_signal_tower",
+  "kind": "decor",
+  "prompt": "square stone coastal watch tower with a beacon basket on the roof",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "major_building"
+  },
+  "target": "coast:signal_tower (guet, cotes de Manche et Mediterranee)"
+ },
+ {
+  "id": "env_beacon_hill",
+  "kind": "decor",
+  "prompt": "hilltop signal beacon, a stacked timber pyre on a stone ring with a small hut",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 6.0,
+   "class": "prop"
+  },
+  "target": "coast:beacon (collines)"
+ },
+ {
+  "id": "env_ferry_raft",
+  "kind": "decor",
+  "prompt": "rope ferry, a flat wooden barge on a cable with a hut at each bank, no water",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10.0,
+   "class": "cart"
+  },
+  "target": "river:ferry (bacs)"
+ },
+ {
+  "id": "env_barge_river",
+  "kind": "decor",
+  "prompt": "flat-bottomed medieval river barge with a single mast and a cargo of barrels",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18.0,
+   "class": "ship"
+  },
+  "target": "river:barge (Seine, Loire, Rhin)"
+ },
+ {
+  "id": "env_barge_tow_horses",
+  "kind": "decor",
+  "prompt": "towing path scene, two horses on a rope pulling a barge, side view",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24.0,
+   "class": "ship"
+  },
+  "target": "river:barge_towed"
+ },
+ {
+  "id": "env_boat_fishing_small",
+  "kind": "decor",
+  "prompt": "small clinker fishing boat with a single square sail and nets",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9.0,
+   "class": "ship"
+  },
+  "target": "coast:fishing_boat (Manche, Atlantique)"
+ },
+ {
+  "id": "env_boat_dugout_reeds",
+  "kind": "decor",
+  "prompt": "dugout canoe and reed punt moored among reeds",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5.0,
+   "class": "ship"
+  },
+  "target": "marsh:punt (marais, Pripet, Fens)"
+ },
+ {
+  "id": "env_boat_lateen",
+  "kind": "decor",
+  "prompt": "small Mediterranean lateen-rigged fishing boat with a triangular sail",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10.0,
+   "class": "ship"
+  },
+  "target": "coast:lateen (Mediterranee)"
+ },
+ {
+  "id": "env_boat_longship_viking",
+  "kind": "decor",
+  "prompt": "late Norse clinker trading ship with a square sail, high prow, no figurehead",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20.0,
+   "class": "ship"
+  },
+  "target": "coast:norse_knarr (Norvege, Islande)"
+ },
+ {
+  "id": "env_dhow",
+  "kind": "decor",
+  "prompt": "Arab dhow with a single lateen sail and a raised stern",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18.0,
+   "class": "ship"
+  },
+  "target": "coast:dhow (Levant, Egypte, Maghreb)"
+ },
+ {
+  "id": "env_shipyard_slip",
+  "kind": "decor",
+  "prompt": "medieval shipyard slip with a half-built cog hull on timber stocks, scaffolding and plank stacks",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 26.0,
+   "class": "ship"
+  },
+  "target": "port:shipyard (Venise, Bruges, Lubeck, Genes)"
+ },
+ {
+  "id": "env_shipwreck_hull",
+  "kind": "decor",
+  "prompt": "beached wrecked ship hull with exposed ribs listing on its side",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18.0,
+   "class": "ship"
+  },
+  "target": "coast:wreck (cotes dangereuses)"
+ },
+ {
+  "id": "env_hermitage_cliff",
+  "kind": "decor",
+  "prompt": "small hermit chapel and cell built into a rock face with a tiny terrace",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "house"
+  },
+  "target": "religious:hermitage (Provence, Cappadoce, Meteora)"
+ },
+ {
+  "id": "env_monastery_cliff",
+  "kind": "decor",
+  "prompt": "fortified monastery perched on a rocky peak with thick walls",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 40.0,
+   "class": "major_building"
+  },
+  "target": "religious:cliff_monastery (Mont Athos, Meteora, Montserrat)"
+ },
+ {
+  "id": "env_pilgrim_hostel",
+  "kind": "decor",
+  "prompt": "pilgrim hostel, a long low stone building with a scallop shell sign and a bell",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24.0,
+   "class": "house"
+  },
+  "target": "religious:pilgrim_hostel (Compostelle)"
+ },
+ {
+  "id": "env_chapel_pilgrim",
+  "kind": "decor",
+  "prompt": "small pilgrimage chapel with a bell gable and a stone cross",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9.0,
+   "class": "house"
+  },
+  "target": "religious:wayside_chapel"
+ },
+ {
+  "id": "env_megalith_dolmen",
+  "kind": "decor",
+  "prompt": "Neolithic dolmen, huge capstone on standing stones, weathered",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6.0,
+   "class": "rock"
+  },
+  "target": "landmarks:dolmen (Bretagne, Irlande)"
+ },
+ {
+  "id": "env_megalith_menhir_row",
+  "kind": "decor",
+  "prompt": "row of tall standing stones in a line, lichen covered",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20.0,
+   "class": "rock"
+  },
+  "target": "landmarks:menhir_row (Carnac)"
+ },
+ {
+  "id": "env_stone_circle",
+  "kind": "decor",
+  "prompt": "stone circle of standing stones with lintels, Stonehenge-like",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30.0,
+   "class": "rock"
+  },
+  "target": "landmarks:stone_circle (Wiltshire)"
+ },
+ {
+  "id": "env_roman_aqueduct",
+  "kind": "decor",
+  "prompt": "Roman stone aqueduct with several tiers of arches, partly ruined",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 50.0,
+   "class": "major_building"
+  },
+  "target": "landmarks:aqueduct (Pont du Gard, Segovie, Tarragone)"
+ },
+ {
+  "id": "env_roman_arena_ruin",
+  "kind": "decor",
+  "prompt": "ruined Roman amphitheatre with partial arcades, overgrown",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 60.0,
+   "class": "major_building"
+  },
+  "target": "landmarks:arena (Nimes, Arles, Verone)"
+ },
+ {
+  "id": "env_roman_temple_ruin",
+  "kind": "decor",
+  "prompt": "ruined Roman temple with broken columns and a pediment fragment",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16.0,
+   "class": "major_building"
+  },
+  "target": "landmarks:temple (Nimes, Rome)"
+ },
+ {
+  "id": "env_roman_arch_triumph",
+  "kind": "decor",
+  "prompt": "Roman triumphal arch, weathered stone",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14.0,
+   "class": "major_building"
+  },
+  "target": "landmarks:arch (Orange, Rimini)"
+ },
+ {
+  "id": "env_ruin_village_abandoned",
+  "kind": "decor",
+  "prompt": "abandoned medieval village with roofless stone walls and collapsed roofs",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30.0,
+   "class": "house"
+  },
+  "target": "ruins:deserted_village (Angleterre, Languedoc, Lorraine)"
+ },
+ {
+  "id": "env_ruin_burnt_hamlet",
+  "kind": "decor",
+  "prompt": "burnt hamlet, blackened wall stumps and charred beams",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18.0,
+   "class": "house"
+  },
+  "target": "war:burnt_hamlet"
+ },
+ {
+  "id": "env_plague_pit",
+  "kind": "decor",
+  "prompt": "open plague burial pit with a low earth mound, a wooden cross, and lime stains",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 8.0,
+   "class": "prop"
+  },
+  "target": "plague:pit (fosses, cimetieres de peste)"
+ },
+ {
+  "id": "env_plague_isolation_hut",
+  "kind": "decor",
+  "prompt": "timber lazaretto hut outside walls with a yellow cloth on a pole",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "house"
+  },
+  "target": "plague:lazaretto"
+ },
+ {
+  "id": "env_battlefield_stakes_graves",
+  "kind": "decor",
+  "prompt": "old battlefield with fresh earth mounds, a few broken stakes and a wooden memorial cross",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 12.0,
+   "class": "prop"
+  },
+  "target": "war:battlefield_scar (Crecy, Poitiers, Azincourt)"
+ },
+ {
+  "id": "env_battlefield_bones_arms",
+  "kind": "decor",
+  "prompt": "scatter of rusty arrow shafts, broken lances and a half-buried helmet on bare ground",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 6.0,
+   "class": "prop"
+  },
+  "target": "war:battlefield_debris"
+ },
+ {
+  "id": "env_pilgrim_group_staff",
+  "kind": "decor",
+  "prompt": "a small group of three 14th-century pilgrims walking with staffs and wide hats, muted cloaks",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 1.7,
+   "class": "prop"
+  },
+  "target": "folk:pilgrims (routes de Compostelle)"
+ },
+ {
+  "id": "env_shepherd_hut_wheeled",
+  "kind": "decor",
+  "prompt": "small wheeled shepherd's hut with a curved roof and a sheepdog",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4.0,
+   "class": "cart"
+  },
+  "target": "pastoral:shepherd_hut"
+ },
+ {
+  "id": "env_sheepfold_stone",
+  "kind": "decor",
+  "prompt": "stone sheepfold enclosure with a low dry-stone wall and a hut",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16.0,
+   "class": "house"
+  },
+  "target": "pastoral:sheepfold (Causses, Highlands, Pyrenees)"
+ },
+ {
+  "id": "env_bergerie_cabane",
+  "kind": "decor",
+  "prompt": "high-pasture stone shepherd's cabin with a turf roof",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "house"
+  },
+  "target": "pastoral:cabane (alpages)"
+ },
+ {
+  "id": "env_yurt_steppe",
+  "kind": "decor",
+  "prompt": "Mongol felt yurt with a round roof and a wooden door, tied with ropes",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 7.0,
+   "class": "house"
+  },
+  "target": "steppe:yurt (Horde d'Or, Crimee)"
+ },
+ {
+  "id": "env_steppe_camp_carts",
+  "kind": "decor",
+  "prompt": "nomad camp, a high two-wheeled cart with a felt cabin",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 7.0,
+   "class": "cart"
+  },
+  "target": "steppe:kibitka_cart"
+ },
+ {
+  "id": "env_cart_ox_peasant",
+  "kind": "decor",
+  "prompt": "two-wheeled peasant cart with a yoke for oxen, loaded with sacks",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4.5,
+   "class": "cart"
+  },
+  "target": "roads:peasant_cart"
+ },
+ {
+  "id": "env_cart_pack_train_mules",
+  "kind": "decor",
+  "prompt": "pack-train mule loaded with panniers, side view, with a rope lead",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.1,
+   "class": "animal"
+  },
+  "target": "roads:pack_mule"
+ },
+ {
+  "id": "env_market_fair_tents",
+  "kind": "decor",
+  "prompt": "medieval fair, several striped canvas market stalls with barrels and crates, seen at a slight angle",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 22.0,
+   "class": "house"
+  },
+  "target": "fair:stalls (foires de Champagne, Lyon, Francfort)"
+ },
+ {
+  "id": "env_merchant_caravan_camels",
+  "kind": "decor",
+  "prompt": "caravan of three loaded camels roped together, side view",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "animal"
+  },
+  "target": "caravan:camels (Levant, Maghreb)"
+ },
+ {
+  "id": "env_windmill_tower_med",
+  "kind": "decor",
+  "prompt": "stone tower windmill with a conical cap and four sails, Mediterranean",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9.0,
+   "class": "house"
+  },
+  "target": "industry:tower_mill (Mediterranee, Majorque)"
+ },
+ {
+  "id": "env_windmill_dutch_polder",
+  "kind": "decor",
+  "prompt": "small wooden drainage windmill on a low base with four sails",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10.0,
+   "class": "house"
+  },
+  "target": "industry:polder_mill (Flandre, Zeeland)"
+ },
+ {
+  "id": "env_water_wheel_noria",
+  "kind": "decor",
+  "prompt": "wooden noria raising water wheel on a stone pier, Spanish style",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9.0,
+   "class": "house"
+  },
+  "target": "industry:noria (Andalousie, Valence)"
+ },
+ {
+  "id": "env_dovecote_round",
+  "kind": "decor",
+  "prompt": "round stone dovecote tower with a conical roof and a lantern",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 7.0,
+   "class": "house"
+  },
+  "target": "manor:dovecote (colombier)"
+ },
+ {
+  "id": "env_tithe_barn",
+  "kind": "decor",
+  "prompt": "huge medieval stone tithe barn with a steep tiled roof and buttresses",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 45.0,
+   "class": "major_building"
+  },
+  "target": "manor:tithe_barn (abbayes, Cotswolds, Brie)"
+ },
+ {
+  "id": "env_orchard_press_cider",
+  "kind": "decor",
+  "prompt": "cider press house with a big timber screw press and barrels",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10.0,
+   "class": "house"
+  },
+  "target": "farm:cider_press (Normandie, Kent)"
+ },
+ {
+  "id": "env_wine_press_cellar",
+  "kind": "decor",
+  "prompt": "stone wine press house with a timber screw press, barrels and a vine pergola",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "house"
+  },
+  "target": "farm:wine_press (Bourgogne, Rhin)"
+ },
+ {
+  "id": "env_hop_poles",
+  "kind": "decor",
+  "prompt": "hop yard with tall poles and climbing bines in rows",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 5.0,
+   "class": "prop"
+  },
+  "target": "fields:hops (Flandre, Boheme)"
+ },
+ {
+  "id": "env_orchard_blossom",
+  "kind": "decor",
+  "prompt": "small field orchard of blossoming fruit trees in a row",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 5.0,
+   "class": "tree"
+  },
+  "target": "fields:orchard_blossom (printemps)"
+ },
+ {
+  "id": "env_bocage_hedge_bank",
+  "kind": "decor",
+  "prompt": "earthen bank topped with a dense hedge of hawthorn and oak pollards",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.0,
+   "class": "prop"
+  },
+  "target": "fields:bocage_hedge (Normandie, Bretagne, Devon)"
+ },
+ {
+  "id": "env_peat_cut",
+  "kind": "decor",
+  "prompt": "peat cutting with stacked drying peat bricks in a bog and a spade",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.0,
+   "class": "prop"
+  },
+  "target": "marsh:peat_cut (Frise, Irlande, Fens)"
+ },
+ {
+  "id": "env_reed_bed_mass",
+  "kind": "decor",
+  "prompt": "dense stand of tall common reed with brown plumes",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.0,
+   "class": "prop"
+  },
+  "target": "marsh:reed_bed (marais, deltas, etangs)"
+ },
+ {
+  "id": "env_reed_cutter_thatched_hut",
+  "kind": "decor",
+  "prompt": "reed-thatched low hut of a marsh-dweller on stilts",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "house"
+  },
+  "target": "marsh:marsh_hut (Camargue, Fens, Pripet)"
+ },
+ {
+  "id": "env_cattail_clump",
+  "kind": "decor",
+  "prompt": "clump of bulrush and yellow iris at a water edge",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 1.5,
+   "class": "prop"
+  },
+  "target": "marsh:bulrush"
+ },
+ {
+  "id": "env_fallen_log_driftwood",
+  "kind": "decor",
+  "prompt": "bleached driftwood trunk with roots, stranded",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5.0,
+   "class": "rock"
+  },
+  "target": "coast:driftwood (plages, estuaires)"
+ },
+ {
+  "id": "env_waterfall_rock_step",
+  "kind": "decor",
+  "prompt": "rocky stepped ledge for a small waterfall, wet dark rock with moss, no water",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "rock"
+  },
+  "target": "water:waterfall_ledge (torrents)"
+ },
+ {
+  "id": "env_gorge_boulders_torrent",
+  "kind": "decor",
+  "prompt": "jumble of rounded river boulders in a mountain stream bed, no water",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "rock"
+  },
+  "target": "water:torrent_bed (Alpes, Pyrenees, Highlands)"
+ },
+ {
+  "id": "env_ford_stepping_stones",
+  "kind": "decor",
+  "prompt": "river ford with flat stepping stones and cart-wheel ruts on both banks, no water",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "rock"
+  },
+  "target": "water:ford (gues)"
+ },
+ {
+  "id": "env_glacier_ice_tongue",
+  "kind": "decor",
+  "prompt": "glacier tongue snout with blue-white crevassed ice and moraine debris",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30.0,
+   "class": "rock"
+  },
+  "target": "relief:glacier (Alpes, Norvege, Islande)"
+ },
+ {
+  "id": "env_iceberg_floe",
+  "kind": "decor",
+  "prompt": "drifting ice floe with a jagged blue-white top, seen from slightly above",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14.0,
+   "class": "rock"
+  },
+  "target": "sea:ice_floe (banquise, Mer Blanche, Groenland)"
+ },
+ {
+  "id": "env_cliff_chalk_coast",
+  "kind": "decor",
+  "prompt": "white chalk cliff face with flint bands and a grassy top",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30.0,
+   "class": "rock"
+  },
+  "target": "coast:chalk_cliff (Douvres, Etretat)"
+ },
+ {
+  "id": "env_cliff_sea_arch",
+  "kind": "decor",
+  "prompt": "natural sea arch in a limestone cliff, weathered",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16.0,
+   "class": "rock"
+  },
+  "target": "coast:sea_arch (Etretat, Cornouailles)"
+ },
+ {
+  "id": "env_reef_rocks_awash",
+  "kind": "decor",
+  "prompt": "low dark rocky reef with kelp and barnacle crust, tidal flat",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12.0,
+   "class": "rock"
+  },
+  "target": "coast:reef (Bretagne, Cornouailles)"
+ },
+ {
+  "id": "env_cave_mouth_limestone",
+  "kind": "decor",
+  "prompt": "limestone cave mouth in a rock face with a dark opening and ferns",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9.0,
+   "class": "rock"
+  },
+  "target": "relief:cave (Causses, Dordogne)"
+ },
+ {
+  "id": "env_rock_pinnacle_karst",
+  "kind": "decor",
+  "prompt": "tall limestone karst pinnacle cluster, weathered",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20.0,
+   "class": "rock"
+  },
+  "target": "relief:karst (Causses, Dalmatie)"
+ },
+ {
+  "id": "env_volcanic_cone_ash",
+  "kind": "decor",
+  "prompt": "small volcanic cone with dark scoria and ash, sparse vegetation",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 40.0,
+   "class": "rock"
+  },
+  "target": "relief:volcano (Auvergne, Etna, Islande)"
+ },
+ {
+  "id": "env_hotspring_steam_pool",
+  "kind": "decor",
+  "prompt": "travertine hot spring pool with white mineral rim and steam, no water texture needed",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8.0,
+   "class": "rock"
+  },
+  "target": "relief:hot_spring (Islande, Bath, Italie)"
+ },
+ {
+  "id": "env_palm_oasis",
+  "kind": "decor",
+  "prompt": "small oasis with date palms around a pool, seen at a slight angle",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 10.0,
+   "class": "tree"
+  },
+  "target": "south:oasis (Maghreb, Andalousie)"
+ },
+ {
+  "id": "env_cactus_agave",
+  "kind": "decor",
+  "prompt": "agave and prickly pear cactus clump, Mediterranean coast",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 2.0,
+   "class": "tree"
+  },
+  "target": "south:agave (Sicile, Andalousie)"
+ },
+ {
+  "id": "env_snow_conifer",
+  "kind": "decor",
+  "prompt": "spruce tree heavily laden with snow",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 15.0,
+   "class": "tree"
+  },
+  "target": "winter:snow_spruce (saisons, nord, montagnes)"
+ },
+ {
+  "id": "env_autumn_oak_gold",
+  "kind": "decor",
+  "prompt": "mature oak tree in full autumn colour, ochre and rust foliage, muted",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 20.0,
+   "class": "tree"
+  },
+  "target": "autumn:oak_gold (saisons)"
+ },
+ {
+  "id": "env_autumn_beech_copper",
+  "kind": "decor",
+  "prompt": "beech tree in copper autumn foliage, muted",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 22.0,
+   "class": "tree"
+  },
+  "target": "autumn:beech_copper (saisons)"
+ },
+ {
+  "id": "env_autumn_larch_gold",
+  "kind": "decor",
+  "prompt": "larch tree in golden autumn needles",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 20.0,
+   "class": "tree"
+  },
+  "target": "autumn:larch_gold (saisons, Alpes)"
+ },
+ {
+  "id": "env_hay_meadow_flowers",
+  "kind": "decor",
+  "prompt": "tall flowering hay meadow tuft with daisies and grass seed heads",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 0.8,
+   "class": "prop"
+  },
+  "target": "meadow:flowers (prairies, printemps)"
+ },
+ {
+  "id": "env_harvest_sheaves",
+  "kind": "decor",
+  "prompt": "stooks of wheat sheaves standing in a field row, golden",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 1.2,
+   "class": "prop"
+  },
+  "target": "fields:sheaves (ete)"
+ }
+]

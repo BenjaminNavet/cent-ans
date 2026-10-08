@@ -111,6 +111,19 @@
       "scale_axis": "length",
       "roughness": 0.95,
       "strip_base": false
+    },
+    "animal": {
+      "label": "Animal (troupeau, faune, oiseau)",
+      "category": "fauna",
+      "lod_tris": [
+        4000,
+        1200,
+        300
+      ],
+      "tex": 512,
+      "scale_axis": "length",
+      "roughness": 0.9,
+      "strip_base": true
     }
   },
   "island_min": 0.01
