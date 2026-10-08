@@ -112,7 +112,7 @@ func _cell(slot: Dictionary, player_owner: bool) -> Button:
 		var option: Dictionary = next[0]
 		TooltipHost.set_tooltip(button, "building", str(option.get("building", shown)), option)
 	if state == "locked" and str(slot.get("locked_reason", "")) != "":
-		button.tooltip_text = "[b]Emplacement verrouillé[/b]\n%s" % str(slot["locked_reason"])
+		TooltipHost.attach_plain(button, "slot_locked", {"body": str(slot["locked_reason"])})
 	var can_act := player_owner and not next.is_empty() and state != "locked"
 	button.disabled = not can_act
 	if can_act:
