@@ -261,3 +261,14 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Gardés : RenderQuality.override_level/upscale_override (tests + bench_ep1.sh), da6/site_render/fa_on (lus par battle_vegetation.gd, fichier sale de main) → à retirer après fusion des modifs de main.
 - Non fait : SH8 (dFdx change le rendu), SH9 (flipbook dupliqué dans fire_*/life_* : piste carte).
 - Après fusion main : army_figures/map_fire_wind (code main) passés à DataFile.
+
+## FLHOOKS (fusionné c91bfd683)
+- `--stage=`/captures de mise en scène, CampaignSimMock et ses replis supprimés (77 fichiers, −1250 lignes nettes).
+- CmdArgs (`game/scripts/util/cmd_args.gd`) : seul accès à la ligne de commande (has/value/number/args) ; CliFlags fusionné dedans. Reste ~25 scripts qui relisent `OS.get_cmdline_user_args()` à convertir.
+
+## UIKIT2 (fusionné eed9b7b48)
+- TooltipHost : hôte unique des bulles (~25 `_make_custom_tooltip`) ; RichTooltip ne garde que le contenu. Délégués `make_panel`/`attach_plain` à retirer quand campaign_map/encyclopedia (sales sur main) migrent.
+- diplomacy_panel 1390 → 278 lignes : 8 sous-vues DiplomacyView (game/scripts/ui/diplomacy/).
+- Textes du tutoriel en données (data/tutorial/steps.json + schéma).
+- ProvinceSection (patron de méthode) : choix, classes, colonies ; province_panel 590 → 453.
+- Échecs antérieurs : ib_plain_test (littéraux tooltip_text), c5_settlements_ui_test.
