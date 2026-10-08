@@ -144,6 +144,22 @@ uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <cl
 - Lacet SF3D : `--yaw 180` tourne bien le maillage (vérifié sur les sommets) ; le sens « avant »
   des glb `sf3d/out/norm/` (déjà normalisés) semble déjà être −Z : vérifier à l'œil avant d'appliquer 180.
 
+### Arbre glb -> imposteur de campagne (lot DN nature)
+La chaîne glb -> atlas d'imposteurs avait disparu avec le nettoyage SC (`ga3_vegetation_l2.py`,
+a600b88f2) ; restaurée, et complétée d'une entrée glb. Pour une essence `<id>` :
+```
+uv run --project tools cent-ans dn-ingest <brut.glb> --id tree_<id> --class tree --height <m>
+uv run --project tools python tools/blender_scripts/ga3_vegetation_l2.py sheet <id> game/assets/models/dn/vegetation/tree_<id>_lod0.glb
+# ajouter l'essence à data/art/tree_species.yaml (une rangée d'atlas par entrée, dans l'ordre)
+uv run --project tools python tools/blender_scripts/ga3_vegetation_l2.py atlas
+```
+`sheet` rend 8 vues (Blender, albédo plat, 25 deg, `dn_tree_views.py`) en une planche
+`~/dev/cent-ans-raw/ga3/l2/<id>_sheet_cut.png`, que `atlas` lit : réécrit `ga3_impostors_{albedo,
+normal}.png` et compile `tree_species.json`. Le semis (MultiMesh d'imposteurs, rôles, biomes) est
+piloté par ce json (`ga3_vegetation.gd`) ; `fal` (ancien chemin image -> planche) reste disponible.
+Eau : `uv run --project tools python -m cent_ans_tools.water_procedural` régénère les textures de
+`game/assets/textures/water/`.
+
 ### Figurines de bataille : glb → jeu
 
 Script : `tools/blender_scripts/ga3_figures.py` (restauré après sa suppression par SC, `a600b88f2` ;

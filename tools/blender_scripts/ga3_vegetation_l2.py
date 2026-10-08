@@ -20,6 +20,10 @@ Steps (raw files in ``~/dev/cent-ans-raw/ga3/l2/``, run from the repository root
   the thin blades survive the 0.5 cut).
 * ``rocks``: ``ga3_cleanup.py`` (Blender) on the three TRELLIS rocks, 120 / 60 / 18 triangles,
   1 m long, 256 px albedo.
+* ``sheet <species> <glb>`` (lot DN nature): glb -> impostor input. Renders the 8 views of an
+  ingested tree glb (``cent-ans dn-ingest ... --class tree``, ``tools/blender_scripts/
+  dn_tree_views.py``, flat albedo, 25 degrees) and composes ``<species>_sheet_cut.png`` (4 x 2,
+  transparent) in ``RAW``, exactly what ``atlas`` reads: no fal call, no turnaround sheet.
 * ``species`` (lot HB4, ADR 0143): compiles ``data/art/tree_species.yaml`` into
   ``data/art/tree_species.json`` (the game does not read YAML). ``atlas`` does it too.
 
@@ -599,6 +603,35 @@ def impostor_atlases(
     return albedo, normal
 
 
+def sheet_step(name: str, glb: str) -> None:
+    """Lot DN nature: 8 Blender views of ``glb`` -> ``RAW/<name>_sheet_cut.png`` (4 x 2 grid)."""
+    from PIL import Image
+
+    views_dir = RAW / f"{name}_views"
+    subprocess.run(
+        [
+            "blender",
+            "-b",
+            "--factory-startup",
+            "--python",
+            str(REPO / "tools/blender_scripts/dn_tree_views.py"),
+            "--",
+            glb,
+            str(views_dir),
+            "768",
+        ],
+        check=True,
+    )
+    first = Image.open(views_dir / "view_0.png")
+    width, height = first.size
+    sheet = Image.new("RGBA", (SHEET_COLS * width, SHEET_ROWS * height), (0, 0, 0, 0))
+    for view in range(VIEWS):
+        panel = Image.open(views_dir / f"view_{view}.png").convert("RGBA")
+        sheet.paste(panel, ((view % SHEET_COLS) * width, (view // SHEET_COLS) * height))
+    sheet.save(RAW / f"{name}_sheet_cut.png")
+    print(f"OK sheet {name}")
+
+
 def board_step() -> None:
     """Local contact sheet of the atlas (one row per species, labelled), for visual review."""
     from PIL import Image, ImageDraw
@@ -784,5 +817,9 @@ if __name__ == "__main__":
         species_step()
     elif step == "board":
         board_step()
+    elif step == "sheet" and len(sys.argv) == 4:
+        sheet_step(sys.argv[2], sys.argv[3])
     else:
-        sys.exit("usage: ga3_vegetation_l2.py fal|atlas|rocks|species|board")
+        sys.exit(
+            "usage: ga3_vegetation_l2.py fal|atlas|rocks|species|board|sheet <species> <glb>"
+        )

@@ -1,0 +1,639 @@
+[
+ {
+  "id": "tree_oak_pedunculate",
+  "kind": "decor",
+  "prompt": "mature pedunculate oak (Quercus robur), short thick gnarled trunk, broad irregular domed crown of dense foliage with visible leaf clumps and a few sky gaps, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 20,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_pedunculate (atlantique, continental)"
+ },
+ {
+  "id": "tree_oak_holm",
+  "kind": "decor",
+  "prompt": "mature holm oak (Quercus ilex), evergreen, rounded dense dark grey-green crown, rough dark fissured bark, often multi-stemmed, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 14,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_holm (méditerranéen)"
+ },
+ {
+  "id": "tree_oak_cork",
+  "kind": "decor",
+  "prompt": "mature cork oak (Quercus suber), thick deeply furrowed pale grey cork bark, spreading open crown of evergreen leathery leaves, stripped russet patch on the lower trunk, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 13,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_cork (méditerranéen ouest)"
+ },
+ {
+  "id": "tree_beech",
+  "kind": "decor",
+  "prompt": "mature European beech (Fagus sylvatica), smooth silver-grey straight trunk, tall dense oval crown of fresh foliage, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 28,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:beech (atlantique, continental, montagnard)"
+ },
+ {
+  "id": "tree_chestnut",
+  "kind": "decor",
+  "prompt": "mature sweet chestnut (Castanea sativa), massive twisted trunk with spiralling deep bark furrows, broad crown of long toothed leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:chestnut (atlantique, méditerranéen, montagnard)"
+ },
+ {
+  "id": "tree_hornbeam",
+  "kind": "decor",
+  "prompt": "mature common hornbeam (Carpinus betulus), fluted grey trunk with sinewy ridges, dense oval crown of small pleated leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 17,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:hornbeam (continental, atlantique)"
+ },
+ {
+  "id": "tree_ash",
+  "kind": "decor",
+  "prompt": "mature European ash (Fraxinus excelsior), straight grey furrowed trunk, open airy crown of pinnate compound leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 24,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:ash (atlantique, continental, ripisylve)"
+ },
+ {
+  "id": "tree_birch",
+  "kind": "decor",
+  "prompt": "mature silver birch (Betula pendula), slender white bark trunk with dark fissures, light drooping twigs and small triangular leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 16,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:birch (boréal, steppe, landes)"
+ },
+ {
+  "id": "tree_alder",
+  "kind": "decor",
+  "prompt": "mature black alder (Alnus glutinosa), dark rough bark, narrow rounded crown of dark round leaves, growing on a riverbank, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 18,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:alder (zones humides, ripisylve)"
+ },
+ {
+  "id": "tree_willow",
+  "kind": "decor",
+  "prompt": "mature white willow (Salix alba), thick leaning trunk with deep fissures, long drooping silvery-green branches, riverside, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 15,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:willow (zones humides, ripisylve)"
+ },
+ {
+  "id": "tree_poplar",
+  "kind": "decor",
+  "prompt": "mature black poplar (Populus nigra), tall straight trunk with burred bark, broad open crown of heart-shaped leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 26,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:poplar (ripisylve, continental)"
+ },
+ {
+  "id": "tree_linden",
+  "kind": "decor",
+  "prompt": "mature small-leaved linden (Tilia cordata), straight trunk, dense wide heart-shaped crown, village green tree, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:linden (continental, villages)"
+ },
+ {
+  "id": "tree_elm",
+  "kind": "decor",
+  "prompt": "mature wych elm (Ulmus glabra), thick trunk dividing into a wide vase-shaped crown of rough serrated leaves, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 25,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:elm (atlantique, continental)"
+ },
+ {
+  "id": "tree_pine_scots",
+  "kind": "decor",
+  "prompt": "mature Scots pine (Pinus sylvestris), tall straight trunk with orange-brown flaking bark in the upper part, flat irregular crown of blue-green needle tufts, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 24,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_scots (boréal, montagnard, continental)"
+ },
+ {
+  "id": "tree_pine_stone",
+  "kind": "decor",
+  "prompt": "mature stone pine (Pinus pinea), umbrella-shaped dense flat crown on a long reddish trunk, Mediterranean, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 18,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_stone (méditerranéen)"
+ },
+ {
+  "id": "tree_pine_aleppo",
+  "kind": "decor",
+  "prompt": "mature Aleppo pine (Pinus halepensis), twisted trunk, open irregular crown of light green needles, Mediterranean hillside, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 13,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_aleppo (méditerranéen, semi-aride)"
+ },
+ {
+  "id": "tree_pine_maritime",
+  "kind": "decor",
+  "prompt": "mature maritime pine (Pinus pinaster), tall bare reddish trunk with deep fissures and a rounded tuft crown of long needles, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_maritime (atlantique sud, méditerranéen)"
+ },
+ {
+  "id": "tree_fir_silver",
+  "kind": "decor",
+  "prompt": "mature silver fir (Abies alba), straight conical evergreen, dense dark green layered branches down to near the ground, narrow pointed top, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 32,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:fir_silver (montagnard)"
+ },
+ {
+  "id": "tree_spruce",
+  "kind": "decor",
+  "prompt": "mature Norway spruce (Picea abies), narrow conical evergreen, drooping dark green branches in regular whorls, pointed top, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 30,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:spruce (boréal, montagnard)"
+ },
+ {
+  "id": "tree_larch",
+  "kind": "decor",
+  "prompt": "mature European larch (Larix decidua), straight trunk, open conical crown of soft light green needle tufts, drooping twigs, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 28,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:larch (montagnard alpin)"
+ },
+ {
+  "id": "tree_cypress",
+  "kind": "decor",
+  "prompt": "mature Mediterranean cypress (Cupressus sempervirens), very narrow dense dark green column shape, fluted trunk hidden, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 20,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:cypress (méditerranéen)"
+ },
+ {
+  "id": "tree_olive",
+  "kind": "decor",
+  "prompt": "mature old olive tree (Olea europaea), short gnarled hollow twisted trunk, silvery-grey-green lanceolate leaves in a spreading crown, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 8,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:olive (méditerranéen, semi-aride)"
+ },
+ {
+  "id": "tree_palm_date",
+  "kind": "decor",
+  "prompt": "mature date palm (Phoenix dactylifera), tall ringed slender trunk crowned by a tuft of long feathery fronds and hanging date clusters, oasis, mature summer foliage in muted desaturated grey-green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 14,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:palm_date (désert, oasis, semi-aride)"
+ },
+ {
+  "id": "tree_juniper",
+  "kind": "decor",
+  "prompt": "mature common juniper (Juniperus communis), dense upright dark green conifer with prickly needles and blue-grey berries, dry hillside, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:juniper (steppe, montagnard, méditerranéen)"
+ },
+ {
+  "id": "tree_yew",
+  "kind": "decor",
+  "prompt": "mature English yew (Taxus baccata), massive fluted ancient trunk, dense dark flattened evergreen crown, churchyard, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 10,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:yew (atlantique, cimetières)"
+ },
+ {
+  "id": "tree_orchard_apple",
+  "kind": "decor",
+  "prompt": "mature old apple orchard tree (Malus domestica), short trunk, low spreading gnarled crown pruned to an open goblet shape, small green apples, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:orchard_apple (atlantique, continental, vergers)"
+ },
+ {
+  "id": "tree_orchard_cherry",
+  "kind": "decor",
+  "prompt": "mature cherry orchard tree (Prunus avium), smooth reddish bark with horizontal lenticels, rounded crown of glossy leaves with red cherries, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 9,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:orchard_cherry (continental, vergers)"
+ },
+ {
+  "id": "tree_pollard",
+  "kind": "decor",
+  "prompt": "mature pollarded willow or hornbeam head tree, thick short trunk cut at 2 metres with a knuckled head sprouting dense straight shoots, hedgerow tree, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pollard (bocage, ripisylve)"
+ },
+ {
+  "id": "tree_dead",
+  "kind": "decor",
+  "prompt": "mature dead standing oak snag, grey bare bark-stripped trunk, a few broken dead limbs, no leaves, lichen, muted desaturated grey-brown weathered wood colours, no leaves, single object only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 12,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:dead (tous biomes)"
+ },
+ {
+  "id": "tree_stump",
+  "kind": "decor",
+  "prompt": "mature large cut oak stump with exposed pale wood top, roots flaring, moss on one side, a few axe marks, muted desaturated grey-brown weathered wood colours, no leaves, single object only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:stump (tous biomes, forêts exploitées)"
+ },
+ {
+  "id": "shrub_hawthorn",
+  "kind": "decor",
+  "prompt": "hawthorn bush (Crataegus monogyna), dense thorny tangled twigs, small lobed leaves, a few white flowers, hedgerow, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 3,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):hawthorn (atlantique, bocage)"
+ },
+ {
+  "id": "shrub_blackthorn",
+  "kind": "decor",
+  "prompt": "blackthorn thicket (Prunus spinosa), dense dark thorny branches, small oval leaves, blue-black sloes, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):blackthorn (atlantique, continental)"
+ },
+ {
+  "id": "shrub_bramble",
+  "kind": "decor",
+  "prompt": "bramble thicket (Rubus fruticosus), arching thorny canes tangled into a mound, toothed leaves, a few black berries, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):bramble (atlantique, continental)"
+ },
+ {
+  "id": "shrub_broom",
+  "kind": "decor",
+  "prompt": "common broom (Cytisus scoparius), many slender green upright stems, small leaves, few yellow flowers, heathland, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.8,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):broom (landes, atlantique, montagnard)"
+ },
+ {
+  "id": "shrub_box",
+  "kind": "decor",
+  "prompt": "common box (Buxus sempervirens), dense rounded evergreen shrub of small glossy dark leaves, clipped natural dome, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 2,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):box (calcaire, continental, méditerranéen)"
+ },
+ {
+  "id": "shrub_mastic",
+  "kind": "decor",
+  "prompt": "mastic lentisk shrub (Pistacia lentiscus), dense rounded evergreen maquis shrub of dark pinnate leaves, red twigs, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):mastic (méditerranéen)"
+ },
+ {
+  "id": "shrub_maquis",
+  "kind": "decor",
+  "prompt": "mixed Mediterranean maquis clump, rock rose, rosemary and kermes oak scrub, low dense grey-green mound, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):maquis (méditerranéen, semi-aride)"
+ },
+ {
+  "id": "shrub_heather",
+  "kind": "decor",
+  "prompt": "heather mound (Calluna vulgaris), low dense carpet of tiny leaves and purple-pink flower spikes, moorland, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 0.6,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):heather (landes, boréal, montagnard)"
+ },
+ {
+  "id": "shrub_hazel",
+  "kind": "decor",
+  "prompt": "hazel coppice (Corylus avellana), many straight stems from a stool, broad rounded serrated leaves, hedgerow, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 4,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):hazel (atlantique, continental)"
+ },
+ {
+  "id": "shrub_gorse",
+  "kind": "decor",
+  "prompt": "gorse bush (Ulex europaeus), dense spiny dark green mound, a few yellow flowers, coastal heath, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):gorse (littoral, landes)"
+ },
+ {
+  "id": "shrub_tamarisk",
+  "kind": "decor",
+  "prompt": "tamarisk shrub (Tamarix gallica), feathery grey-green foliage on slender arching branches, coast and dry riverbed, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single bush only, base on the ground line visible",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 3,
+   "yaw_fix": 0
+  },
+  "target": "shrubs (hedges, maquis, scrub):tamarisk (littoral, semi-aride, ripisylve)"
+ },
+ {
+  "id": "rock_limestone_boulder",
+  "kind": "decor",
+  "prompt": "pale grey limestone boulder with horizontal weathering ledges and cracks, lichen patches, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 1.6,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):limestone_boulder (calcaire, continental)"
+ },
+ {
+  "id": "rock_granite_boulder",
+  "kind": "decor",
+  "prompt": "rounded grey granite boulder with pink-grey speckled surface and moss, Brittany or Massif Central, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 1.8,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):granite_boulder (granitique, montagnard, bretagne)"
+ },
+ {
+  "id": "rock_sandstone_outcrop",
+  "kind": "decor",
+  "prompt": "ochre sandstone outcrop block with layered bedding and rounded edges, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.2,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):sandstone_outcrop (grès, vosges, semi-aride)"
+ },
+ {
+  "id": "rock_schist_slab",
+  "kind": "decor",
+  "prompt": "dark grey-brown schist slab outcrop with thin splintering foliation leaning at an angle, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):schist_slab (ardennes, massif armoricain)"
+ },
+ {
+  "id": "rock_scree_pile",
+  "kind": "decor",
+  "prompt": "pile of angular broken grey scree stones heaped in a low mound, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):scree_pile (montagnard, alpin)"
+ },
+ {
+  "id": "rock_mossy_erratic",
+  "kind": "decor",
+  "prompt": "large moss-covered erratic boulder with ferns at the foot, dark green moss on the north side, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.2,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):mossy_erratic (atlantique, boréal)"
+ },
+ {
+  "id": "rock_cliff_face_limestone",
+  "kind": "decor",
+  "prompt": "vertical limestone cliff face segment with vertical fissures, ledges and small shrubs, modular wall piece, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 8.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):cliff_face_limestone (falaises, gorges, littoral)"
+ },
+ {
+  "id": "rock_sea_stack",
+  "kind": "decor",
+  "prompt": "weathered coastal rock sea stack with wet dark base and pale guano streaks on top, natural muted grey-brown stone colours, no vegetation other than lichen and moss, single rock only",
+  "seeds": 3,
+  "backend3d": "both",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 6.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks (battle + campaign relief):sea_stack (littoral)"
+ }
+]

@@ -1,0 +1,91 @@
+{
+ "description": "Cartes d'herbes, fleurs, roseaux et sous-bois (lot DN nature) : kind `texture`, À TRAITER HORS dn_batch.py (qui ne connaît que decor|figure). Chaîne prévue : Z-Image Turbo local (verrou GPU) → rembg → atlas de cases comme data/art/battle_grass.json / game/assets/textures/vegetation/ga3 ; ou atlas ambientCG CC0 (Foliage/LeafSet) quand une planche convient.",
+ "cards": [
+  {
+   "id": "card_grass_tuft_green",
+   "kind": "texture",
+   "prompt": "dense tuft of green meadow grass blades, side view, cut-out RGBA card",
+   "target": "battle_grass.json atlas (existing FA7 via ambientCG Foliage001/006)",
+   "biomes": "atlantique, continental",
+   "note": "Déjà couvert par FA7 ; ajouter si besoin une case dry_steppe."
+  },
+  {
+   "id": "card_grass_tuft_dry",
+   "kind": "texture",
+   "prompt": "tuft of dry golden steppe grass with feathery seed heads, cut-out card",
+   "biomes": "steppe, méditerranéen, semi-aride"
+  },
+  {
+   "id": "card_grass_esparto",
+   "kind": "texture",
+   "prompt": "stipa / esparto grass tussock with long thin curved leaves, cut-out card",
+   "biomes": "semi-aride, désert"
+  },
+  {
+   "id": "card_reed_phragmites",
+   "kind": "texture",
+   "prompt": "common reed stand (Phragmites australis), tall stems with plumes, cut-out card 2 m",
+   "biomes": "zones humides, rivières, littoral"
+  },
+  {
+   "id": "card_reed_cattail",
+   "kind": "texture",
+   "prompt": "bulrush / cattail clump with brown cylindrical heads, cut-out card",
+   "biomes": "zones humides"
+  },
+  {
+   "id": "card_sedge_marsh",
+   "kind": "texture",
+   "prompt": "marsh sedge and rush tussock, drooping dark green leaves, cut-out card",
+   "biomes": "zones humides, tourbières, boréal"
+  },
+  {
+   "id": "card_fern_bracken",
+   "kind": "texture",
+   "prompt": "bracken fern cluster, broad triangular fronds, cut-out card",
+   "biomes": "atlantique, montagnard, sous-bois"
+  },
+  {
+   "id": "card_flowers_meadow",
+   "kind": "texture",
+   "prompt": "meadow flowers: oxeye daisy, buttercup, red clover, poppy, muted colours, cut-out card",
+   "biomes": "atlantique, continental"
+  },
+  {
+   "id": "card_flowers_alpine",
+   "kind": "texture",
+   "prompt": "alpine meadow cushion plants with small gentian and edelweiss, cut-out card",
+   "biomes": "montagnard"
+  },
+  {
+   "id": "card_lavender_thyme",
+   "kind": "texture",
+   "prompt": "lavender and thyme low aromatic scrub with violet flower spikes, cut-out card",
+   "biomes": "méditerranéen"
+  },
+  {
+   "id": "card_nettle_weeds",
+   "kind": "texture",
+   "prompt": "nettle, dock and thistle weed patch around ruins and farms, cut-out card",
+   "biomes": "villages, ruines"
+  },
+  {
+   "id": "card_beach_marram",
+   "kind": "texture",
+   "prompt": "marram grass tuft on sand dune, stiff blue-green blades, cut-out card",
+   "biomes": "littoral"
+  },
+  {
+   "id": "card_moss_boreal",
+   "kind": "texture",
+   "prompt": "boreal ground cover of reindeer lichen, bilberry and moss, cut-out card",
+   "biomes": "boréal, taïga"
+  },
+  {
+   "id": "card_oasis_undergrowth",
+   "kind": "texture",
+   "prompt": "oasis undergrowth: low date-palm shoots, oleander and reeds, cut-out card",
+   "biomes": "désert, oasis"
+  }
+ ]
+}
