@@ -13,7 +13,8 @@ extends Node3D
 ##   --season=spring|summer|autumn|winter   force la saison affichée (captures) ;
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
 ##   --no-life                               désactive la couche (mesures A/B) ;
-##   --life-off=terrain,smoke,mills,ambient,scars  désactive une partie (mesures de coût).
+##   --life-off=terrain,smoke,mills,ambient,scars,fauna  désactive une partie (mesures de coût) ;
+##   --no-fauna                              pas de troupeaux ni de faune (lot DN-ME2, A/B).
 ## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
 ## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
 ##   --no-folk                                        désactive les figurines (mesures A/B) ;
@@ -28,6 +29,7 @@ var levels: Dictionary = {}
 var effects: LifeEffects = null
 var ambient: LifeAmbient = null
 ## FK3 : réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
+var fauna: FaunaLayer = null
 var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
@@ -97,9 +99,27 @@ func setup(map: Node) -> void:
 	add_child(ambient)
 	ambient.setup(_map_data, _terrain, _settlements.data if _settlements != null else null)
 	stats.merge(ambient.stats, true)
+	_setup_fauna()
 	_setup_folk()
 	_setup_incidents()
 	_setup_scars()
+
+
+## DN-ME2 : troupeaux et faune sauvage (rendu seul, `--no-fauna` ou `--life-off=fauna`).
+func _setup_fauna() -> void:
+	if _off.has("fauna") or CmdArgs.has("--no-fauna"):
+		return
+	var towns := PackedVector2Array()
+	if _settlements != null and _settlements.data != null:
+		for entry in _settlements.data.settlements:
+			towns.append(entry["px"])
+		for hamlet in _settlements.data.hamlets:
+			towns.append(hamlet["px"])
+	fauna = FaunaLayer.new()
+	fauna.name = "Fauna"
+	add_child(fauna)
+	fauna.setup(_map_data, _map.get("camera_rig") as Node3D if _map != null else null, towns, _tiers)
+	stats["fauna"] = fauna.stats
 
 
 ## TB4 : fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.
@@ -247,6 +267,8 @@ func refresh(sim: Object) -> void:
 	if turn_key == _turn_key:
 		return
 	_turn_key = turn_key
+	if fauna != null:
+		fauna.set_turn(int(sim.call("get_turn")) if sim.has_method("get_turn") else 0)
 	_read_provinces(sim)
 	if not forced_devastation.is_empty() and _settlements != null:
 		_settlements.override_devastation(forced_devastation)

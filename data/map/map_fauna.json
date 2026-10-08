@@ -424,11 +424,11 @@
    "species": [
     {
      "species": "animal_camargue_horse",
-     "per_1000km2": 5
+     "per_1000km2": 9
     },
     {
      "species": "animal_camargue_bull",
-     "per_1000km2": 5
+     "per_1000km2": 8
     }
    ]
   },
