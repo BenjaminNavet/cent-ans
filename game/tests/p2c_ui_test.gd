@@ -103,7 +103,7 @@ func _check_bubbles_and_tooltip() -> void:
 		_collect(bubble)
 	bubbles.call("close_all")
 	await process_frame
-	var panel: Control = RichTooltip.make_panel("[b]%s[/b]\nTexte d'infobulle riche." % "Test")
+	var panel: Control = TooltipHost.from_bbcode("[b]%s[/b]\nTexte d'infobulle riche." % "Test")
 	root.add_child(panel)
 	await process_frame
 	_collect(panel)

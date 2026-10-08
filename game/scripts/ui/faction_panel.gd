@@ -180,7 +180,7 @@ func _show_trade_income(economy: Dictionary) -> void:
 				lines.append("• %s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
 			else:
 				lines.append("• %s ↔ %s : %s ℔" % [route["from_hub_name"], route["to_hub_name"], Money.digits(int(route["total_value"]))])
-	RichTooltip.attach_plain(trade_income_value, "trade_income_detail", {"body": "\n".join(lines)})
+	TooltipHost.attach_plain(trade_income_value, "trade_income_detail", {"body": "\n".join(lines)})
 
 
 ## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
@@ -198,7 +198,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 			var info: Dictionary = store.call("get_province", province) if store != null else {}
 			var diet: Dictionary = sim.call("get_province_diet", province)
 			lines.append("• %s : %s — %s" % [str(info.get("display_name", province)), str(diet.get("name", row.get("diet", ""))), Money.amount(int(row.get("cost", 0)))])
-	RichTooltip.attach_plain(table_upkeep_value, "table_upkeep_detail", {"title": "La Table", "body": "\n".join(lines)})
+	TooltipHost.attach_plain(table_upkeep_value, "table_upkeep_detail", {"title": "La Table", "body": "\n".join(lines)})
 
 
 ## H11 : lignes Seigneuriage / Refonte après la Table ; Monnaie, Ordre et bouton des rançons
@@ -218,7 +218,7 @@ func _add_h11_sections() -> void:
 	chivalry_section = ChivalrySection.new()
 	ransom_button = RichButton.new()
 	ransom_button.text = "Captifs et rançons"
-	RichTooltip.attach_plain(ransom_button, "captives_and_ransoms")
+	TooltipHost.attach_plain(ransom_button, "captives_and_ransoms")
 	ransom_button.pressed.connect(toggle_ransoms)
 	feudal_section = FeudalSection.new()
 	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, ransom_button, HSeparator.new(), feudal_section]:
@@ -234,13 +234,13 @@ func _arrange_budget() -> void:
 	net_value.text = "—"
 	net_value.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	net_value.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(net_value, "budget_total_hint", {"title": "Solde"})
+	TooltipHost.attach_plain(net_value, "budget_total_hint", {"title": "Solde"})
 	grid.add_child(net_key)
 	grid.add_child(net_value)
 	(grid.get_node("ProjectedKey") as Label).text = "Recettes prévues"
-	RichTooltip.attach_plain(projected_value, "budget_projected_income_hint")
+	TooltipHost.attach_plain(projected_value, "budget_projected_income_hint")
 	(grid.get_node("IncomeKey") as Label).text = "Solde de la saison passée"
-	RichTooltip.attach_plain(income_value, "budget_last_income_hint")
+	TooltipHost.attach_plain(income_value, "budget_last_income_hint")
 	var order: Array[Control] = []
 	for value: Control in [treasury_value, projected_value, seigniorage_value, army_upkeep_value,
 			building_upkeep_value, table_upkeep_value, administration_value, recoinage_value,
@@ -356,9 +356,9 @@ func _show_h11(economy: Dictionary = {}) -> void:
 	if not economy.is_empty():
 		var seigniorage := int(economy.get("seigniorage", 0))
 		seigniorage_value.text = Money.signed(seigniorage) if seigniorage > 0 else Money.amount(seigniorage)
-		RichTooltip.attach_plain(seigniorage_value, "seigniorage_detail", {"body": "Profit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s" % Money.amount(int(economy.get("seigniorage_last_turn", 0)))})
+		TooltipHost.attach_plain(seigniorage_value, "seigniorage_detail", {"body": "Profit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s" % Money.amount(int(economy.get("seigniorage_last_turn", 0)))})
 		recoinage_value.text = _charge(int(economy.get("recoinage", 0)))
-		RichTooltip.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
+		TooltipHost.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
 	crusade_section.show_for(is_player)

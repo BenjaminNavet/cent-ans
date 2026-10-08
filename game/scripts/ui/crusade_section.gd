@@ -326,4 +326,4 @@ class FervorGauge:
 			draw_polyline(diamond + PackedVector2Array([diamond[0]]), HudStyle.INK, 1.0, true)
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)

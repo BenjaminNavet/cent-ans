@@ -281,7 +281,7 @@ func _show_blockers(character: Dictionary, governable: Array, commandable: Array
 		var button: Button = pair[1]
 		var reason := action_blocker(str(pair[0]), character, pair[2]) if button.disabled else ""
 		if reason != "":
-			RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason})
+			TooltipHost.attach_plain(button, "seat_unavailable", {"body": reason})
 		if reason != "":
 			lines.append("%s : %s." % [ACTION_NAMES[pair[0]], reason])
 	_blocker_label.text = "\n".join(lines)
@@ -475,7 +475,7 @@ func _on_ransom_pressed() -> void:
 		order = {"type": "release_captive", "character": character_id}
 	var result: Dictionary = sim.call("submit_order", order)
 	if not bool(result.get("ok", false)):
-		RichTooltip.attach_plain(_ransom_button, "ransom_refused", {"body": str(result.get("error", "?"))})
+		TooltipHost.attach_plain(_ransom_button, "ransom_refused", {"body": str(result.get("error", "?"))})
 		_ransom_label.text += "\nRefusé : %s" % str(result.get("error", "?"))
 		return
 	_fill_ransom(sim.call("get_character", character_id))

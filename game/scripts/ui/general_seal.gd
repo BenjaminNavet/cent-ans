@@ -135,7 +135,7 @@ func _refresh() -> void:
 	_skills_label.visible = has_general
 	_skills_label.text = "Cdt %d · Gouv %d · Cour %d" % [
 		int(skills.get("command", 0)), int(skills.get("governance", 0)), int(skills.get("court", 0))]
-	RichTooltip.attach_plain(_skills_label, "general_skills_overview")
+	TooltipHost.attach_plain(_skills_label, "general_skills_overview")
 	_skills_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	for child in _status_row.get_children():
 		child.queue_free()

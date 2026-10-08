@@ -6,4 +6,4 @@ extends Label
 
 
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.make_panel(for_text)
+	return TooltipHost.bubble(for_text, self)

@@ -43,7 +43,7 @@ func _init() -> void:
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
 	var close_button := UiBuild.button("×")
-	RichTooltip.attach_plain(close_button, "close")
+	TooltipHost.attach_plain(close_button, "close")
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
@@ -157,7 +157,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	text_box.add_child(name_row)
 	var link := LinkButton.new()
 	link.text = name_text
-	RichTooltip.attach_plain(link, "open_character_sheet")
+	TooltipHost.attach_plain(link, "open_character_sheet")
 	link.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	style_link(link)
 	link.pressed.connect(func() -> void: request_character(character_id))
@@ -166,7 +166,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	if codex_id != "":
 		var codex_button := UiBuild.button("✠")
 		codex_button.flat = true
-		RichTooltip.attach_plain(codex_button, "historical_sheet_codex")
+		TooltipHost.attach_plain(codex_button, "historical_sheet_codex")
 		codex_button.pressed.connect(func() -> void:
 			var bubbles := _root_node("/root/CodexBubbles")
 			if bubbles != null:
@@ -196,7 +196,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 	if ours:
 		var pay := RichButton.new()
 		pay.text = "Céder %s" % _province_name(str(terms.get("province", ""))) if kind == "province" else "Payer comptant (%s)" % _pounds(ransom)
-		RichTooltip.attach_plain(pay, "ransom_pay_full", {"body": "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."})
+		TooltipHost.attach_plain(pay, "ransom_pay_full", {"body": "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."})
 		pay.pressed.connect(func() -> void: pay_ransom(character_id, 1))
 		actions.add_child(pay)
 		controls["pay"] = pay
@@ -230,7 +230,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 			if str(meta.get("kind", "")) == kind and str(meta.get("province", "")) == str(terms.get("province", "")):
 				choice.select(index)
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		RichTooltip.attach_plain(choice, "ransom_cedable_province")
+		TooltipHost.attach_plain(choice, "ransom_cedable_province")
 		actions.add_child(choice)
 		var set_terms := RichButton.new()
 		set_terms.text = "Fixer les termes"
@@ -238,7 +238,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 		actions.add_child(set_terms)
 		var parole := RichButton.new()
 		parole.text = "Libérer sur parole"
-		RichTooltip.attach_plain(parole, "ransom_parole")
+		TooltipHost.attach_plain(parole, "ransom_parole")
 		parole.pressed.connect(func() -> void: release_on_parole(character_id))
 		actions.add_child(parole)
 		controls["terms"] = choice

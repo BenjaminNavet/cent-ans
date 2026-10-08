@@ -71,7 +71,7 @@ func _init() -> void:
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_overlay.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	RichTooltip.attach_plain(_overlay, "minimap_click_camera")
+	TooltipHost.attach_plain(_overlay, "minimap_click_camera")
 	_overlay.clip_contents = true
 	_overlay.draw.connect(_draw_overlay)
 	_overlay.gui_input.connect(_on_overlay_input)
@@ -98,7 +98,7 @@ func _init() -> void:
 	legend_button = Button.new()
 	legend_button.name = "LegendButton"
 	legend_button.text = "Légende"
-	RichTooltip.attach_plain(legend_button, "map_legend_open")
+	TooltipHost.attach_plain(legend_button, "map_legend_open")
 	legend_button.toggle_mode = true
 	legend_button.focus_mode = Control.FOCUS_NONE
 	legend_button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)

@@ -96,7 +96,7 @@ func _ready() -> void:
 	toc_button.focus_mode = Control.FOCUS_NONE
 	toc_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	toc_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	RichTooltip.attach_plain(toc_button, "tutorial_toc")
+	TooltipHost.attach_plain(toc_button, "tutorial_toc")
 	toc_button.toggled.connect(func(on: bool) -> void: set_toc_open(on))
 	header.add_child(toc_button)
 	toc_box = UiBuild.vbox(0)
@@ -120,12 +120,12 @@ func _ready() -> void:
 	var buttons := UiBuild.hbox(8, box)
 	skip_all_button = UiBuild.button("Passer le tutoriel")
 	skip_all_button.name = "SkipAllButton"
-	RichTooltip.attach_plain(skip_all_button, "tutorial_skip_all")
+	TooltipHost.attach_plain(skip_all_button, "tutorial_skip_all")
 	skip_all_button.pressed.connect(func() -> void: skip_all_pressed.emit())
 	buttons.add_child(skip_all_button)
 	later_button = UiBuild.button("Plus tard")
 	later_button.name = "LaterButton"
-	RichTooltip.attach_plain(later_button, "tutorial_later")
+	TooltipHost.attach_plain(later_button, "tutorial_later")
 	later_button.pressed.connect(func() -> void: later_pressed.emit())
 	buttons.add_child(later_button)
 	var spacer := Control.new()
@@ -262,7 +262,7 @@ func _rebuild_toc() -> void:
 			row.add_theme_color_override("font_color", Color(0.55, 0.12, 0.08))
 		elif index < current_index:
 			row.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
-		RichTooltip.attach_plain(row, "tutorial_go_to_step")
+		TooltipHost.attach_plain(row, "tutorial_go_to_step")
 		row.pressed.connect(func() -> void: step_chosen.emit(index))
 		toc_box.add_child(row)
 

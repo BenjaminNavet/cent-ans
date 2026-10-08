@@ -480,7 +480,7 @@ func _fill_possession(detail: String) -> void:
 	owner_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	owner_value.add_theme_color_override("font_color", PossessionText.ink(str(possession.get("cue", "")), RichTooltip.INK))
 	owner_value.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(owner_value, "province_possession", {"body": "%s\n%s\n%s" % [possession_help(), held_text(), detail]})
+	TooltipHost.attach_plain(owner_value, "province_possession", {"body": "%s\n%s\n%s" % [possession_help(), held_text(), detail]})
 
 
 ## RJ-c : phrase d'aide (la cité donne le contrôle, le traité la possession) et rappel de la
@@ -541,7 +541,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	if not siege.is_empty():
 		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	button.text = text
-	RichTooltip.attach_plain(button, "colony_focus_open")
+	TooltipHost.attach_plain(button, "colony_focus_open")
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
 	return button
 
@@ -585,6 +585,6 @@ func _fill_breadcrumb() -> void:
 		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		var holder := str(link.get("holder", ""))
 		var holder_name := str(link.get("holder_name", ""))
-		RichTooltip.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
+		TooltipHost.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
 		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
 		breadcrumb.add_child(crumb)

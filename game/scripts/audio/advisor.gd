@@ -283,7 +283,7 @@ func _build(data: Dictionary) -> void:
 	_close_button.custom_minimum_size = Vector2(24, 20)
 	_close_button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_close_button.add_theme_color_override("font_color", HudStyle.RUBRIC)
-	RichTooltip.attach_plain(_close_button, "advisor_silence")
+	TooltipHost.attach_plain(_close_button, "advisor_silence")
 	_close_button.pressed.connect(dismiss)
 	head.add_child(_close_button)
 	_text_label = Label.new()

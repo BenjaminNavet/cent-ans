@@ -99,7 +99,7 @@ func setup(campaign_map: Node) -> void:
 	button = Button.new()
 	button.name = "MapFiltersButton"
 	button.text = "Filtres ▾"
-	RichTooltip.attach_plain(button, "map_mode_filters")
+	TooltipHost.attach_plain(button, "map_mode_filters")
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(toggle_menu)
 	_decorate_ink(button, "map_filters", 14)  # DA5
@@ -160,7 +160,7 @@ func _build_menu() -> void:
 	_trade_check.name = "TradeLayer"
 	var trade_key := ShortcutSheet.first_key("map_toggle_trade")
 	_trade_check.text = "Routes commerciales   (%s)" % trade_key if trade_key != "" else "Routes commerciales"
-	RichTooltip.attach_plain(_trade_check, "map_mode_trade_overlay")
+	TooltipHost.attach_plain(_trade_check, "map_mode_trade_overlay")
 	_trade_check.focus_mode = Control.FOCUS_NONE
 	_trade_check.toggled.connect(func(_on: bool) -> void: map.call("_toggle_trade_layer"))
 	box.add_child(_trade_check)
@@ -169,7 +169,7 @@ func _build_menu() -> void:
 	_signs_check = CheckBox.new()
 	_signs_check.name = "SignsLayer"
 	_signs_check.text = "Signes : chantiers, incidents, rencontres"
-	RichTooltip.attach_plain(_signs_check, "map_mode_signs_overlay")
+	TooltipHost.attach_plain(_signs_check, "map_mode_signs_overlay")
 	_signs_check.focus_mode = Control.FOCUS_NONE
 	_signs_check.toggled.connect(func(on: bool) -> void: MapReadability.signs_layer_on = on)
 	box.add_child(_signs_check)

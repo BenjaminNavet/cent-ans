@@ -1,8 +1,8 @@
 class_name RichTooltip
 extends RefCounted
 
-## Infobulles riches au style parchemin (F2). `make_panel(bbcode)` construit le contrôle
-## renvoyé par `_make_custom_tooltip` des classes `RichButton`, `RichPanel`, `IconChip` ;
+## Infobulles riches au style parchemin (F2). Contenu des infobulles ; `TooltipHost`
+## construit et héberge le contrôle renvoyé par `_make_custom_tooltip` ;
 ## les fonctions `unit`, `building`, `technology`, `resource`, `gauge`, `trait_tip`,
 ## `skill`, `population_class` produisent le BBCode (icône, coût, entretien, effets,
 ## prérequis…). Valeurs dynamiques (coût effectif, disponibilité, refus) : dictionnaires
@@ -125,113 +125,11 @@ static func hud_entry(id: String) -> Array:
 	return [id.trim_prefix("hud_").capitalize(), ""]
 
 
-## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
-static var last_panel: WeakRef = null
-static var last_bbcode: String = ""
-## IB1 : spec de la dernière infobulle en sections (`TooltipView.build`), {} après `make_panel`.
-static var last_spec: Dictionary = {}
-
-## IB1 (ADR 0109) : préfixe des clés d'infobulle en sections portées par `tooltip_text`
-## (« ib:<kind>:<id> », puis le BBCode de repli sur les lignes suivantes) ; le `live` de la clé
-## est rangé en métadonnée `LIVE_META` du contrôle.
-const KEY_PREFIX := "ib:"
-const LIVE_META := &"ib_live"
-## IB2 : script générique attaché par `attach_plain` aux contrôles natifs sans classe dédiée.
-const PLAIN_HOST_SCRIPT := preload("res://scripts/ui/plain_tooltip_host.gd")
-
-
-## Style parchemin commun aux infobulles et aux bulles du Codex.
-static func panel_style() -> StyleBox:
-	return HudStyle.note_box(6)
-
-
-## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
-## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués). B1 : pied
-## « T : maintenir ouverte » (la touche T verrouille l'infobulle en bulle du Codex).
-static func make_panel(bbcode: String) -> Control:
-	bbcode = fallback_of(bbcode)
-	last_spec = {}
-	var panel := PanelContainer.new()
-	if ResourceLoader.exists(THEME_PATH):
-		panel.theme = load(THEME_PATH)
-	panel.add_theme_stylebox_override("panel", panel_style())
-	var box := UiBuild.vbox(4, panel)
-	var label := RichTextLabel.new()
-	label.bbcode_enabled = true
-	label.fit_content = true
-	label.scroll_active = false
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(WIDTH, 0)
-	label.add_theme_color_override("default_color", INK)
-	# P2c : infobulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2).
-	UiType.apply(label, UiType.CAPTION)
-	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
-	label.text = CodexText.format(bbcode, true)
-	label.name = "Text"
-	box.add_child(label)
-	var footer := UiBuild.label(footer_text(title_entry(label.text) != ""))
-	footer.name = "Footer"
-	UiType.apply(footer, UiType.CAPTION)
-	footer.add_theme_color_override("font_color", Color(MUTED))
-	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	box.add_child(footer)
-	last_panel = weakref(panel)
-	last_bbcode = label.text
-	return panel
-
-
-## Pied des infobulles riches : la fiche liée au titre se lit une fois l'infobulle verrouillée.
-static func footer_text(has_entry: bool) -> String:
-	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
-
-
-## IB1 : texte de `tooltip_text` d'une infobulle en sections — clé « ib:<kind>:<id> » sur la
-## première ligne, BBCode de repli ensuite (lu par `make_panel` et par les tests de contenu).
-static func tooltip_key(kind: String, id: String, fallback_bbcode: String) -> String:
-	return "%s%s:%s\n%s" % [KEY_PREFIX, kind, id, fallback_bbcode]
-
-
-## Clé « ib:<kind>:<id> » en tête de `text`, "" s'il n'en porte pas.
-static func key_of(text: String) -> String:
-	return text.get_slice("\n", 0) if text.begins_with(KEY_PREFIX) else ""
-
-
-## `text` sans sa clé « ib: » éventuelle (le BBCode de repli).
-static func fallback_of(text: String) -> String:
-	if not text.begins_with(KEY_PREFIX):
-		return text
-	var cut := text.find("\n")
-	return text.substr(cut + 1) if cut >= 0 else ""
-
-
-## IB1 : pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
-## `tooltip_text`, `live` en métadonnée) ; `_make_custom_tooltip` la reconstruit par `panel_for`.
-static func set_tooltip(control: Control, kind: String, id: String, live: Dictionary = {}) -> void:
-	_ensure_host(control)
-	control.set_meta(LIVE_META, live)
-	control.tooltip_text = tooltip_key(kind, id, to_bbcode(spec_for(KEY_PREFIX + kind + ":" + id, live)))
-
-
-## IB1 : contrôle d'infobulle pour `_make_custom_tooltip(for_text)` de `owner` : rendu en
-## sections (`TooltipView`, version courte) si le texte porte une clé « ib: », sinon `make_panel`.
-static func panel_for(for_text: String, owner: Object = null) -> Control:
-	var key := key_of(for_text)
-	if key == "":
-		return make_panel(for_text)
-	var live: Dictionary = {}
-	if owner != null and owner.has_meta(LIVE_META):
-		live = owner.get_meta(LIVE_META)
-	var spec := spec_for(key, live)
-	if spec.is_empty():
-		return make_panel(for_text)
-	return TooltipView.build(spec, false)
-
-
 ## IB1 : spec d'infobulle (§ 2.1 de la spec IB) de la clé « ib:<kind>:<id> » ; {} si le type
 ## n'est pas (encore) décrit en sections. `live` : mêmes dictionnaires que les fonctions BBCode.
 static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
 	var parts := key.split(":", true, 2)
-	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+	if parts.size() < 3 or parts[0] + ":" != TooltipHost.KEY_PREFIX:
 		return {}
 	var id: String = parts[2]
 	match parts[1]:
@@ -286,16 +184,6 @@ static func entity_name(id: String, name: String) -> String:
 	return CodexText.link(entry, name) if entry != "" else name
 
 
-## Infobulle native actuellement affichée (dans sa fenêtre surgissante), sinon null.
-static func visible_panel() -> Control:
-	var panel: Control = last_panel.get_ref() if last_panel != null else null
-	if panel == null or not panel.is_inside_tree() or not panel.is_visible_in_tree():
-		return null
-	var window := panel.get_window()
-	var loop := Engine.get_main_loop() as SceneTree
-	if window == null or (loop != null and window == loop.root) or not window.visible:
-		return null
-	return panel
 
 
 ## Conservé pour encyclopedia.gd (hors lot) ; équivaut à `Money.digits`.
@@ -574,25 +462,13 @@ static func plain(title: String, body: String = "", hint: String = "") -> String
 	return to_bbcode(plain_spec("", {"title": title, "body": body, "hint": hint}))
 
 
-## Attache une infobulle brute `ib:plain:<key>` à `control` : pose `tooltip_text` (clé + repli
-## BBCode) et, si `control` n'est pas déjà une classe à infobulle riche (`RichButton`, `IconChip`,
-## `RichPanel`…, reconnue à son script), lui attache le script générique `plain_tooltip_host.gd`
-## qui route `_make_custom_tooltip` vers `panel_for`. `live` : `title`/`body`/`hint` dynamiques
-## (ex. « Vitesse ×%d » selon la donnée du moment), sinon ceux de `tooltips.json`.
+## Passerelles pour les fichiers gelés (campaign_map.gd, encyclopedia.gd) ; à retirer après leur migration.
+static func make_panel(bbcode: String) -> Control:
+	return TooltipHost.from_bbcode(bbcode)
+
+
 static func attach_plain(control: Control, key: String, live: Dictionary = {}) -> void:
-	set_tooltip(control, "plain", key, live)
-
-
-## Q8 : un contrôle sans `_make_custom_tooltip` montrerait la clé « ib: » et le BBCode bruts :
-## contrôle natif → script générique `plain_tooltip_host.gd` ; classe scriptée → erreur (la
-## méthode manque à la classe).
-static func _ensure_host(control: Control) -> void:
-	if control.has_method("_make_custom_tooltip"):
-		return
-	if control.get_script() == null:
-		control.set_script(PLAIN_HOST_SCRIPT)
-	else:
-		push_error("RichTooltip: %s (%s) lacks _make_custom_tooltip (raw tooltip)" % [control.name, control.get_script().resource_path])
+	TooltipHost.attach_plain(control, key, live)
 
 
 # --- Unités -------------------------------------------------------------------------------
@@ -1202,7 +1078,7 @@ static func entity_link(id: String, label: String) -> String:
 ## l'entité (`spec_for`), sinon spec simple tirée du BBCode de l'entité. {} si inconnue.
 static func link_spec(key: String) -> Dictionary:
 	var parts := key.split(":", true, 2)
-	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+	if parts.size() < 3 or parts[0] + ":" != TooltipHost.KEY_PREFIX:
 		return {}
 	var kind: String = parts[1]
 	var id: String = parts[2]

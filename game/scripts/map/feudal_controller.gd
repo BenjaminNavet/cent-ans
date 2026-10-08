@@ -129,7 +129,7 @@ func _build_panel() -> void:
 	titles.add_child(_title)
 	var close := Button.new()
 	close.text = "×"
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(panel.hide)
 	header.add_child(close)
 	_position_box = _section("Position")

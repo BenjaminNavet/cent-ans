@@ -63,7 +63,7 @@ func _ready() -> void:
 	search.text_changed.connect(_on_search)
 	header.add_child(search)
 	var close := UiBuild.button("×")
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	body = VBoxContainer.new()

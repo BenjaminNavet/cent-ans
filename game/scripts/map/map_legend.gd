@@ -64,7 +64,7 @@ func _init() -> void:
 	var close := Button.new()
 	close.name = "Close"
 	close.text = "×"
-	RichTooltip.attach_plain(close, "close_legend")
+	TooltipHost.attach_plain(close, "close_legend")
 	close.focus_mode = Control.FOCUS_NONE
 	close.pressed.connect(close_legend)
 	header.add_child(close)

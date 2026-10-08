@@ -186,7 +186,7 @@ func _build() -> void:
 	hold_check = CheckBox.new()
 	hold_check.name = "HoldOpponent"
 	hold_check.text = "Adversaire : tenir sa position"
-	RichTooltip.attach_plain(hold_check, "custom_battle_hold")
+	TooltipHost.attach_plain(hold_check, "custom_battle_hold")
 	hold_check.toggled.connect(func(on: bool) -> void:
 		if not _refreshing:
 			config["hold_opponent"] = on)
@@ -219,7 +219,7 @@ func _build_side(side: String) -> Control:
 	top.add_child(faction)
 	faction_options[side] = faction
 	var budget_label := UiBuild.label("Budget")
-	RichTooltip.attach_plain(budget_label, "custom_battle_budget")
+	TooltipHost.attach_plain(budget_label, "custom_battle_budget")
 	budget_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	top.add_child(budget_label)
 	var budget := SpinBox.new()
@@ -234,7 +234,7 @@ func _build_side(side: String) -> Control:
 	tech_button.name = "Technologies"
 	tech_button.flat = false
 	tech_button.text = "Technologies"
-	RichTooltip.attach_plain(tech_button, "custom_battle_technologies")
+	TooltipHost.attach_plain(tech_button, "custom_battle_technologies")
 	var tech_popup := tech_button.get_popup()
 	tech_popup.hide_on_checkable_item_selection = false
 	tech_popup.index_pressed.connect(func(index: int) -> void: toggle_technology(side, str(tech_popup.get_item_metadata(index))))
@@ -304,7 +304,7 @@ func _build_field() -> Control:
 	# Fin de la ligne Heure/Joueur : l'année (NT11), puis ligne du siège : case, engins,
 	# fortification, type de place.
 	var year_label := UiBuild.label("Année")
-	RichTooltip.attach_plain(year_label, "custom_battle_year")
+	TooltipHost.attach_plain(year_label, "custom_battle_year")
 	year_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(year_label)
 	year_spin = SpinBox.new()
@@ -317,7 +317,7 @@ func _build_field() -> Control:
 	siege_check = CheckBox.new()
 	siege_check.name = "Siege"
 	siege_check.text = "Siège : le camp 2 défend une place"
-	RichTooltip.attach_plain(siege_check, "custom_battle_siege")
+	TooltipHost.attach_plain(siege_check, "custom_battle_siege")
 	siege_check.toggled.connect(func(on: bool) -> void:
 		config["siege"] = on
 		refresh())
@@ -325,7 +325,7 @@ func _build_field() -> Control:
 	engines_button = MenuButton.new()
 	engines_button.name = "Engines"
 	engines_button.flat = false
-	RichTooltip.attach_plain(engines_button, "custom_battle_engines")
+	TooltipHost.attach_plain(engines_button, "custom_battle_engines")
 	var popup := engines_button.get_popup()
 	popup.hide_on_checkable_item_selection = false
 	popup.add_check_item("Échelles", 0)
@@ -335,7 +335,7 @@ func _build_field() -> Control:
 	popup.id_pressed.connect(_on_engine_pressed)
 	grid.add_child(engines_button)
 	var fort_label := UiBuild.label("Fortification")
-	RichTooltip.attach_plain(fort_label, "custom_battle_fortification")
+	TooltipHost.attach_plain(fort_label, "custom_battle_fortification")
 	fort_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(fort_label)
 	fortification_spin = SpinBox.new()
@@ -356,7 +356,7 @@ func _build_field() -> Control:
 
 func _field_option(grid: GridContainer, text: String, tooltip_key: String) -> OptionButton:
 	var label := UiBuild.label(text)
-	RichTooltip.attach_plain(label, tooltip_key)
+	TooltipHost.attach_plain(label, tooltip_key)
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	grid.add_child(label)
 	var option := OptionButton.new()
@@ -650,7 +650,7 @@ func _fill_roster(side: String) -> void:
 		button.clip_text = true
 		button.disabled = not can_buy(side, unit_id)
 		_decorate(button, unit_id)  # VN : miniature de l'unité
-		RichTooltip.set_tooltip(button, "unit", unit_id)
+		TooltipHost.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: buy(side, unit_id))
 		items.add_child(button)
 
@@ -670,7 +670,7 @@ func _fill_army(side: String) -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
 		_decorate(button, unit_id)
-		RichTooltip.set_tooltip(button, "unit", unit_id)
+		TooltipHost.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: remove(side, index))
 		items.add_child(button)
 

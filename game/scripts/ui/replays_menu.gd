@@ -120,7 +120,7 @@ func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
 		button.pressed.connect(start.bind(path))
 	else:
 		button.disabled = true
-		RichTooltip.attach_plain(button, "replay_wrong_format", {"body": "Enregistré par une autre version du jeu (format %d) : ce rejeu ne peut plus être revu." % int(entry.get("format", 0))})
+		TooltipHost.attach_plain(button, "replay_wrong_format", {"body": "Enregistré par une autre version du jeu (format %d) : ce rejeu ne peut plus être revu." % int(entry.get("format", 0))})
 	line.add_child(button)
 	buttons[path] = button
 

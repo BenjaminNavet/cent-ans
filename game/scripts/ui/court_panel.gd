@@ -232,7 +232,7 @@ func _make_row(row: Dictionary) -> Control:
 	var character_id: String = str(row.get("id", ""))
 	var frame := CourtRow.new()
 	frame.name = "CourtRow_%s" % character_id.validate_node_name()
-	RichTooltip.attach_plain(frame, "open_named_sheet", {"title": "Ouvrir la fiche de %s" % str(row.get("name", "?"))})
+	TooltipHost.attach_plain(frame, "open_named_sheet", {"title": "Ouvrir la fiche de %s" % str(row.get("name", "?"))})
 	frame.activated.connect(func() -> void: character_selected.emit(character_id))
 	var line := UiBuild.hbox(10)
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -331,7 +331,7 @@ class CourtRow:
 
 	## Q8 : infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.panel_for(for_text, self)
+		return TooltipHost.bubble(for_text, self)
 
 
 static func _initials(name: String) -> String:

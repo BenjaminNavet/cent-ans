@@ -85,9 +85,9 @@ func _check_kinds() -> void:
 				_check(not blocks.has("Stats") and not blocks.has("Flavour") and not blocks.has("Detail"), "%s: short version should not show %s" % [case[0], blocks])
 			_check_sizes(panel, str(case[0]))
 			_check_on_screen(panel, "%s (%s)" % [case[0], "complète" if detailed else "courte"])
-			_check(RichTooltip.last_panel != null and RichTooltip.last_panel.get_ref() == panel, "%s: last_panel should be the view" % case[0])
-			_check(RichTooltip.last_bbcode.contains(str(spec.get("title", ""))) or RichTooltip.last_bbcode.contains("[url="), "%s: last_bbcode should carry the title" % case[0])
-			_check(RichTooltip.last_spec == spec, "%s: last_spec expected" % case[0])
+			_check(TooltipHost.last_panel != null and TooltipHost.last_panel.get_ref() == panel, "%s: last_panel should be the view" % case[0])
+			_check(TooltipHost.last_bbcode.contains(str(spec.get("title", ""))) or TooltipHost.last_bbcode.contains("[url="), "%s: last_bbcode should carry the title" % case[0])
+			_check(TooltipHost.last_spec == spec, "%s: last_spec expected" % case[0])
 			panel.free()
 	# Prérequis ✓ (version complète) / ✗ ; avertissement ⚠ ; un effet par ligne ; avant → après.
 	var spec := RichTooltip.building_spec(building_id, {"available": true, "before_after": {}})
@@ -127,7 +127,7 @@ func _check_short_units(limit: int) -> void:
 ## ignore la clé ; `spec_for` sert les bulles verrouillées (IB3/IB4).
 func _check_keys() -> void:
 	var button := RichButton.new()
-	RichTooltip.set_tooltip(button, "unit", "unit_longbowmen", {"cost": 420, "upkeep": 40, "available": true})
+	TooltipHost.set_tooltip(button, "unit", "unit_longbowmen", {"cost": 420, "upkeep": 40, "available": true})
 	_check(button.tooltip_text.begins_with("ib:unit:unit_longbowmen\n") and button.tooltip_text.contains("Coût"), "tooltip_text should carry the key and the BBCode fallback")
 	var view: Control = button._make_custom_tooltip(button.tooltip_text)
 	_check(view != null and view.name == "TooltipView", "RichButton should build a TooltipView from an ib: key")
@@ -137,8 +137,8 @@ func _check_keys() -> void:
 	var plain: Control = button._make_custom_tooltip("[b]Texte[/b] simple")
 	_check(plain.name != "TooltipView", "plain BBCode keeps make_panel")
 	plain.free()
-	var fallback := RichTooltip.make_panel(button.tooltip_text)
-	_check(not RichTooltip.last_bbcode.contains("ib:unit"), "make_panel should drop the key line")
+	var fallback := TooltipHost.from_bbcode(button.tooltip_text)
+	_check(not TooltipHost.last_bbcode.contains("ib:unit"), "make_panel should drop the key line")
 	fallback.free()
 	button.free()
 	for key in ["ib:unit:unit_longbowmen", "ib:building:" + _building_with_effects(), "ib:technology:" + _technology_with_effects()]:

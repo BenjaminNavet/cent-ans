@@ -75,7 +75,7 @@ func _refresh_tooltip() -> void:
 			lines.append("Sort : %s" % fate)
 		if hero:
 			lines.append("Héros de la bataille")
-	RichTooltip.attach_plain(self, "roster_card_detail", {"title": name_text + (" (général)" if general else ""), "body": "\n".join(lines)})
+	TooltipHost.attach_plain(self, "roster_card_detail", {"title": name_text + (" (général)" if general else ""), "body": "\n".join(lines)})
 
 
 func _draw() -> void:
@@ -167,4 +167,4 @@ func _draw_laurel(center: Vector2) -> void:
 
 ## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	return TooltipHost.bubble(for_text, self)

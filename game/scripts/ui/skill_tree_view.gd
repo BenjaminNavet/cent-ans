@@ -217,7 +217,7 @@ class SkillNode:
 		return node
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)
 
 	func _gui_input(event: InputEvent) -> void:
 		if event is InputEventMouseButton:

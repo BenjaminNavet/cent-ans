@@ -47,7 +47,7 @@ func setup(campaign_map: Node) -> void:
 	button.name = "TraditionsButton"
 	button.text = "Traditions"
 	UiType.apply(button, UiType.CAPTION)
-	RichTooltip.attach_plain(button, "army_traditions")
+	TooltipHost.attach_plain(button, "army_traditions")
 	button.visible = false
 	button.pressed.connect(func() -> void: open_for(_selected))
 	var strip: Node = map.ui.get("army_strip")
@@ -154,7 +154,7 @@ func _fill(info: Dictionary) -> void:
 	titles.add_child(heading)
 	var close := Button.new()
 	close.text = "×"
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(panel.hide)
 	header.add_child(close)
 
@@ -216,7 +216,7 @@ func _option_row(option: Dictionary) -> Control:
 		var reason := str(option.get("reason", ""))
 		if reason != "":
 			body = "%s\nImpossible : %s." % [tip, reason]
-	RichTooltip.attach_plain(choice, "tradition_choice", {"title": str(option.get("name", "")), "body": body})
+	TooltipHost.attach_plain(choice, "tradition_choice", {"title": str(option.get("name", "")), "body": body})
 	return choice
 
 

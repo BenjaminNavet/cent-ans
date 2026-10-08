@@ -31,7 +31,7 @@ func _init() -> void:
 	header.add_child(_title)
 	var close := UiBuild.button("×")
 	close.name = "Close"
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	_status = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)

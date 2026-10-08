@@ -232,7 +232,7 @@ func _build_header() -> Control:
 		trade_view_requested.emit())
 	header.add_child(trade)
 	var close := UiBuild.button("×")
-	RichTooltip.attach_plain(close, "close_escape")
+	TooltipHost.attach_plain(close, "close_escape")
 	close.custom_minimum_size = Vector2(36, 36)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void:
@@ -279,7 +279,7 @@ func _build_map_column() -> Control:
 	_map_view_toggle.text = "Vue de la faction choisie"
 	_map_view_toggle.button_pressed = _map_their_view
 	_map_view_toggle.focus_mode = Control.FOCUS_NONE
-	RichTooltip.attach_plain(_map_view_toggle, "diplomacy_map_view")
+	TooltipHost.attach_plain(_map_view_toggle, "diplomacy_map_view")
 	_map_view_toggle.toggled.connect(func(on: bool) -> void:
 		_map_their_view = on
 		_render_map())
@@ -401,7 +401,7 @@ func _build_negotiation() -> Control:
 	_counter_box.add_child(_counter_label)
 	var adopt := UiBuild.button("Reprendre leur contre-offre")
 	adopt.name = "AdoptCounter"
-	RichTooltip.attach_plain(adopt, "treaty_adopt_counter")
+	TooltipHost.attach_plain(adopt, "treaty_adopt_counter")
 	adopt.focus_mode = Control.FOCUS_NONE
 	adopt.pressed.connect(_adopt_counter)
 	_counter_box.add_child(adopt)
@@ -414,7 +414,7 @@ func _build_negotiation() -> Control:
 		bubbles.call("attach", _reasons)
 	var buttons := UiBuild.hbox(6)
 	var counter := UiBuild.button("Que faudrait-il ?")
-	RichTooltip.attach_plain(counter, "treaty_ask_counter")
+	TooltipHost.attach_plain(counter, "treaty_ask_counter")
 	counter.pressed.connect(_ask_counter)
 	buttons.add_child(counter)
 	var clear := UiBuild.button("Effacer")
@@ -567,7 +567,7 @@ func _render_offers() -> void:
 			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
 				var side_id := str(call.get(side[0], ""))
 				var take := UiBuild.button("Soutenir %s" % str(call.get(side[1], side_id)))
-				RichTooltip.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
+				TooltipHost.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
 		var no := UiBuild.button({"protection": "Se dérober", "arbitration": "Laisser faire", "summons": "Passer outre"}.get(kind, "Refuser"), func() -> void: offer_answered.emit(offer_id, false), row)
@@ -609,7 +609,7 @@ func _faction_row(entry: Dictionary) -> Control:
 	var reasons := PackedStringArray(["Attitude envers nous : %+d" % attitude])
 	for reason in entry.get("attitude_reasons", []):
 		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
-	RichTooltip.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
+	TooltipHost.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
 	var line := UiBuild.hbox(8)
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line.offset_left = 6
@@ -925,17 +925,17 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
 	if str(value.get("blocked", "")) != "":
 		tips.append("Impossible : %s" % value["blocked"])
-	RichTooltip.attach_plain(label, "treaty_clause_detail", {"body": "\n".join(tips)})
+	TooltipHost.attach_plain(label, "treaty_clause_detail", {"body": "\n".join(tips)})
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.add_child(label)
 	if not value.is_empty():
 		var points := int(value.get("value", 0))
 		var points_label := _label("%+d" % points, UiType.BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
-		RichTooltip.attach_plain(points_label, "treaty_clause_value_for_them")
+		TooltipHost.attach_plain(points_label, "treaty_clause_value_for_them")
 		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(points_label)
 	var remove := UiBuild.button("×")
-	RichTooltip.attach_plain(remove, "treaty_clause_remove")
+	TooltipHost.attach_plain(remove, "treaty_clause_remove")
 	remove.focus_mode = Control.FOCUS_NONE
 	remove.pressed.connect(func() -> void:
 		_articles.remove_at(index)

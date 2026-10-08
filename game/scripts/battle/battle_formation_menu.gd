@@ -44,7 +44,7 @@ func setup(formations: Array, reform: Dictionary) -> void:
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.text = str(entry["name"])
 		row.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-		RichTooltip.set_tooltip(row, "formation", key, tooltip_live(entry, reform_rules))
+		TooltipHost.set_tooltip(row, "formation", key, tooltip_live(entry, reform_rules))
 		row.draw.connect(_draw_row.bind(row, key))
 		row.pressed.connect(func() -> void: chosen.emit(key))
 		column.add_child(row)

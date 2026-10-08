@@ -67,7 +67,7 @@ func _ready() -> void:
 	_kind_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_kind_label)
 	var close := UiBuild.button("×")
-	RichTooltip.attach_plain(close, "close_decision_pending")
+	TooltipHost.attach_plain(close, "close_decision_pending")
 	close.pressed.connect(_close)
 	header.add_child(close)
 	root.add_child(header)
@@ -133,7 +133,7 @@ func _ready() -> void:
 	_queue_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_queue_label)
 	var later := UiBuild.button("Plus tard")
-	RichTooltip.attach_plain(later, "decision_default_choice")
+	TooltipHost.attach_plain(later, "decision_default_choice")
 	later.pressed.connect(_close)
 	footer.add_child(later)
 	root.add_child(footer)
@@ -216,7 +216,7 @@ func _option_row(option: Dictionary) -> Control:
 	var reason := str(option.get("reason", ""))
 	if not option.get("allowed", true):
 		button.disabled = true
-		RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
+		TooltipHost.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
 		effects = "Impossible : %s" % reason if reason != "" else effects
 	row.add_child(button)
 	if effects != "":
