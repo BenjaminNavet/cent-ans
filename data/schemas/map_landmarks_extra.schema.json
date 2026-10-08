@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "map_landmarks_extra.schema.json",
+  "title": "Décor ponctuel hors les villes de la carte de campagne (lots DN ME6/ME7/ME9)",
+  "description": "`data/map/map_landmarks_extra.json` : types de décor (croix, gibets, phares, mines, mégalithes, ruines, pèlerins, foires…), règles de placement par données et sites historiques réels. Lu par `DecorPlanner` (placement) et `DecorLayer` (rendu). Rendu seulement : aucune règle de jeu.",
+  "type": "object",
+  "required": ["version", "seed", "render", "types", "rules", "sites"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "version": {"const": 1},
+    "seed": {"type": "integer"},
+    "render": {
+      "type": "object",
+      "required": ["view_range_units", "fade_from_units", "load_factor", "load_min_units", "load_max_units", "max_instances", "lod_distances", "shadow_range_units", "cell_px", "screen"],
+      "additionalProperties": false,
+      "properties": {
+        "view_range_units": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-delà de laquelle rien n'est affiché (toujours bien sous le palier parchemin)."},
+        "fade_from_units": {"type": "number", "exclusiveMinimum": 0},
+        "load_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon du voisinage chargé = facteur x distance du rig."},
+        "load_min_units": {"type": "number", "exclusiveMinimum": 0},
+        "load_max_units": {"type": "number", "exclusiveMinimum": 0},
+        "max_instances": {"type": "integer", "minimum": 1, "description": "Plafond d'instances affichées (les plus proches du point visé d'abord)."},
+        "lod_distances": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}, "description": "Distances du rig des passages LOD0 -> LOD1 -> LOD2."},
+        "shadow_range_units": {"type": "number", "minimum": 0},
+        "cell_px": {"type": "number", "exclusiveMinimum": 0, "description": "Côté (px carte) des cases de la grille spatiale."},
+        "screen": {
+          "type": "object",
+          "required": ["real_below", "full_from", "max_factor", "fov_deg"],
+          "additionalProperties": false,
+          "properties": {
+            "real_below": {"type": "number"},
+            "full_from": {"type": "number"},
+            "max_factor": {"type": "number", "minimum": 1},
+            "fov_deg": {"type": "number"}
+          }
+        }
+      }
+    },
+    "types": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/type"}
+    },
+    "rules": {"type": "array", "items": {"$ref": "#/$defs/rule"}},
+    "sites": {"type": "array", "items": {"$ref": "#/$defs/site"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+    "type": {
+      "type": "object",
+      "required": ["label", "model", "shape", "color", "size_m", "fraction", "max_distance", "category"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string"},
+        "model": {"type": "string", "pattern": "^(env|rock|bird|animal)_[a-z0-9_]+$", "description": "Id du catalogue DN (`data/art/dn_catalog_map_extra.json`) ; brancher un nouveau modèle = changer cette ligne."},
+        "shape": {"enum": ["pillar", "hut", "tower", "cone", "slab", "ring", "arch"], "description": "Volume de repli tant que le glb du catalogue est absent du manifeste."},
+        "color": {"$ref": "#/$defs/rgb"},
+        "size_m": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}, "description": "Largeur et hauteur réelles (m)."},
+        "fraction": {"type": "number", "exclusiveMinimum": 0, "description": "Largeur tenue à l'écran, part de la hauteur d'écran."},
+        "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Portée (distance du rig)."},
+        "category": {"enum": ["road", "coast", "industry", "religion", "ancient", "ruin", "folk"]},
+        "smoke": {"type": "boolean", "description": "Source de fumée (lue par la couche de vie)."}
+      }
+    },
+    "filters": {
+      "type": "object",
+      "properties": {
+        "provinces": {"type": "array", "items": {"type": "string"}, "description": "Provinces autorisées."},
+        "terrains": {"type": "array", "items": {"enum": ["plains", "hills", "mountains", "forest", "steppe", "heath", "marsh", "desert", "bocage"]}},
+        "climates": {"type": "array", "items": {"enum": ["continental", "oceanic", "mediterranean", "mountain", "arid", "steppe"]}},
+        "provinces_resource": {"type": "array", "items": {"type": "string"}, "description": "La province produit une de ces ressources."},
+        "min_height_m": {"type": "number"},
+        "max_height_m": {"type": "number"},
+        "min_settlement_px": {"type": "number", "minimum": 0, "description": "Distance minimale à une colonie (px carte)."},
+        "near_river_px": {"type": "number", "exclusiveMinimum": 0, "description": "Distance maximale à un fleuve (px carte)."},
+        "from_year": {"type": "integer"},
+        "to_year": {"type": "integer"},
+        "seasons": {"type": "array", "items": {"enum": ["spring", "summer", "autumn", "winter"]}}
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id", "mode", "types", "seed"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "mode": {"enum": ["road", "gate", "crossing", "coast", "province", "route"]},
+        "types": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "number", "exclusiveMinimum": 0}, "description": "Type -> poids du tirage."},
+        "seed": {"type": "integer"},
+        "chance": {"type": "number", "minimum": 0, "maximum": 1},
+        "spacing_px": {"type": "number", "exclusiveMinimum": 0},
+        "lateral_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}},
+        "kinds": {"type": "array", "items": {"type": "string"}, "description": "gate : genres de colonie."},
+        "distance_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}},
+        "crossing_types": {"type": "array", "items": {"enum": ["bridge", "ford", "road"]}},
+        "offset_px": {"type": "number", "minimum": 0},
+        "inland_px": {"type": "number", "minimum": 0, "description": "coast : recul dans les terres."},
+        "settlement_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}, "description": "coast : distance à la colonie la plus proche, min et max."},
+        "settlement_kinds": {"type": "array", "items": {"type": "string"}},
+        "resources_any": {"type": "array", "items": {"type": "string"}},
+        "resources_all": {"type": "array", "items": {"type": "string"}},
+        "per_province": {"type": "number", "minimum": 0},
+        "per_area_px": {"type": "number", "minimum": 0, "description": "province : instances en plus par pixel de surface."},
+        "waypoints": {"type": "array", "minItems": 2, "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}, "description": "route : lon/lat des étapes."},
+        "nodes": {"type": "array", "minItems": 2, "items": {"type": "string"}, "description": "route : colonies cuites (`decor_bake.py`)."}
+      },
+      "allOf": [{"$ref": "#/$defs/filters"}],
+      "unevaluatedProperties": false
+    },
+    "site": {
+      "type": "object",
+      "required": ["id", "name", "type"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "lonlat": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "near": {"type": "string", "description": "Colonie de rattachement (avec `offset_px`)."},
+        "offset_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "coastal": {"type": "boolean", "description": "Le site reste sur la côte lors du recalage sur la terre."},
+        "yaw_deg": {"type": "number"},
+        "note": {"type": "string"},
+        "from_year": {"type": "integer"},
+        "to_year": {"type": "integer"},
+        "seasons": {"type": "array", "items": {"enum": ["spring", "summer", "autumn", "winter"]}}
+      },
+      "oneOf": [{"required": ["lonlat", "px"]}, {"required": ["near", "offset_px"]}],
+      "additionalProperties": false
+    }
+  }
+}
