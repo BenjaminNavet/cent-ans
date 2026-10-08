@@ -109,21 +109,13 @@ func _build() -> void:
 		map.dim = 0.6
 		_root_control.add_child(map)
 
-	var margin := MarginContainer.new()
+	var margin := UiBuild.margin(left, top, right, bottom)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 64)
-	margin.add_theme_constant_override("margin_right", 64)
-	margin.add_theme_constant_override("margin_top", 48)
-	margin.add_theme_constant_override("margin_bottom", 40)
 	_root_control.add_child(margin)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 18)
-	margin.add_child(column)
+	var column := UiBuild.vbox(18, margin)
 
 	# En-tête : écu, nom de la faction, sous-titre.
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 16)
-	column.add_child(header)
+	var header := UiBuild.hbox(16, column)
 	var shield_texture := PortraitLoader.heraldry_texture(faction_id)
 	if shield_texture != null:
 		var shield := TextureRect.new()
@@ -132,16 +124,13 @@ func _build() -> void:
 		shield.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		header.add_child(shield)
-	var titles := VBoxContainer.new()
-	titles.add_theme_constant_override("separation", -4)
-	header.add_child(titles)
+	var titles := UiBuild.vbox(-4, header)
 	var name := str(facade.call("faction_info", faction_id).get("name", "Cent Ans")) if facade != null and faction_id != "" else "Cent Ans"
 	titles.add_child(FrontEndStyle.label(name, UiType.size(UiType.TITLE), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6))
 	titles.add_child(FrontEndStyle.label(subtitle, UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.title_italic(), 4))
 
 	# Corps : miniature encadrée à gauche, citation et conseil à droite.
-	var body := HBoxContainer.new()
-	body.add_theme_constant_override("separation", 44)
+	var body := UiBuild.hbox(44)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(body)
 	var frame := PanelContainer.new()
@@ -162,10 +151,9 @@ func _build() -> void:
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	frame.add_child(art)
 
-	var side := VBoxContainer.new()
+	var side := UiBuild.vbox(14)
 	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	side.alignment = BoxContainer.ALIGNMENT_CENTER
-	side.add_theme_constant_override("separation", 14)
 	body.add_child(side)
 	if not quote.is_empty():
 		var mark := FrontEndStyle.label("«", 64, Color(FrontEndStyle.GOLD, 0.8), FrontEndStyle.title_font())

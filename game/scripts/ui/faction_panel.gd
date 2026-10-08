@@ -10,7 +10,6 @@ signal tax_rate_changed(faction_id: String, rate: String)
 signal closed
 
 const TAX_RATES := ["low", "normal", "high"]
-const TAX_LABELS := {"low": "Bas", "normal": "Normal", "high": "Haut"}
 const CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
@@ -147,8 +146,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 
 
 func _add_table_row() -> void:
-	var key := Label.new()
-	key.text = "Table des provinces"
+	var key := UiBuild.label("Table des provinces")
 	table_upkeep_value = RichLabel.new()
 	table_upkeep_value.text = "—"
 	table_upkeep_value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -157,8 +155,7 @@ func _add_table_row() -> void:
 
 
 func _add_trade_row() -> void:
-	var key := Label.new()
-	key.text = "Commerce"
+	var key := UiBuild.label("Commerce")
 	trade_income_value = RichLabel.new()
 	trade_income_value.text = "—"
 	trade_income_value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -209,8 +206,7 @@ func _show_table_upkeep(economy: Dictionary) -> void:
 func _add_h11_sections() -> void:
 	var anchor: Control = trade_income_value
 	for pair in [["Seigneuriage (revenu)", "seigniorage_value"], ["Refonte (administration)", "recoinage_value"]]:
-		var key := Label.new()
-		key.text = pair[0]
+		var key := UiBuild.label(pair[0])
 		var value := RichLabel.new()
 		value.text = "—"
 		value.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -233,9 +229,7 @@ func _add_h11_sections() -> void:
 ## refonte sous l'administration), puis le solde prévu et celui de la saison passée.
 func _arrange_budget() -> void:
 	var grid := income_value.get_parent()
-	var net_key := Label.new()
-	net_key.text = "Solde prévu de la saison"
-	net_key.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	var net_key := UiBuild.label("Solde prévu de la saison", UiType.size(UiType.BODY))
 	net_value = RichLabel.new()
 	net_value.text = "—"
 	net_value.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
@@ -303,10 +297,7 @@ func _add_crusade_section() -> void:
 
 
 func _section_title(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
-	label.add_theme_color_override("font_color", Color(0.40, 0.22, 0.10))
+	var label := UiBuild.label(text, UiType.size(UiType.BODY), Color(0.40, 0.22, 0.10))
 	return label
 
 
@@ -418,14 +409,10 @@ func _fill_goods(goods: Dictionary, categories: Array) -> void:
 	for child in goods_list.get_children():
 		child.queue_free()
 	if categories.is_empty():
-		var label := Label.new()
-		label.text = "—"
-		goods_list.add_child(label)
+		var label := UiBuild.label("—", 0, null, false, 0.0, goods_list)
 		return
 	for category in categories:
-		var line := Label.new()
-		line.text = "• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize()))
-		goods_list.add_child(line)
+		var line := UiBuild.label("• %s" % str(CATEGORY_LABELS.get(category, str(category).capitalize())), 0, null, false, 0.0, goods_list)
 	# F2 : une puce (icône + nom + quantité) par ressource, infobulle riche.
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 10)

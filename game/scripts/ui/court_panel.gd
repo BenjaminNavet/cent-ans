@@ -125,8 +125,7 @@ func _build_tree_tab() -> void:
 	tree_box.name = "TreeBox"
 	tree_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tree_box.visible = false
-	var toolbar := HBoxContainer.new()
-	toolbar.add_theme_constant_override("separation", 6)
+	var toolbar := UiBuild.hbox(6)
 	_tree_hint = Label.new()
 	_tree_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiType.apply(_tree_hint, UiType.CAPTION)
@@ -135,11 +134,9 @@ func _build_tree_tab() -> void:
 	for spec in [["Recentrer sur le souverain", "⌂", func() -> void: recenter_tree("")],
 			["Dézoomer", "−", func() -> void: family_tree.set_zoom(family_tree.zoom / 1.2)],
 			["Zoomer", "+", func() -> void: family_tree.set_zoom(family_tree.zoom * 1.2)]]:
-		var button := Button.new()
-		button.text = spec[1]
+		var button := UiBuild.button(spec[1], spec[2])
 		button.tooltip_text = spec[0]
 		button.custom_minimum_size = Vector2(30, 0)
-		button.pressed.connect(spec[2])
 		toolbar.add_child(button)
 	tree_box.add_child(toolbar)
 	family_tree = FamilyTreeView.new()
@@ -237,8 +234,7 @@ func _make_row(row: Dictionary) -> Control:
 	frame.name = "CourtRow_%s" % character_id.validate_node_name()
 	RichTooltip.attach_plain(frame, "open_named_sheet", {"title": "Ouvrir la fiche de %s" % str(row.get("name", "?"))})
 	frame.activated.connect(func() -> void: character_selected.emit(character_id))
-	var line := HBoxContainer.new()
-	line.add_theme_constant_override("separation", 10)
+	var line := UiBuild.hbox(10)
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(line)
 
@@ -248,11 +244,9 @@ func _make_row(row: Dictionary) -> Control:
 	swatch.color = SimFacade.faction_color(str(row.get("faction", "")))
 	swatch.custom_minimum_size = Vector2(36, 36)
 	portrait.add_child(swatch)
-	var initials := Label.new()
-	initials.text = _initials(str(row.get("name", "?")))
+	var initials := UiBuild.label(_initials(str(row.get("name", "?"))), 0, Color(1, 1, 1))
 	initials.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	initials.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	initials.add_theme_color_override("font_color", Color(1, 1, 1))
 	UiType.apply(initials, UiType.CAPTION)
 	initials.set_anchors_preset(Control.PRESET_FULL_RECT)
 	swatch.add_child(initials)
@@ -261,16 +255,14 @@ func _make_row(row: Dictionary) -> Control:
 	PortraitLoader.overlay_portrait(swatch, str(row.get("id", "")), str(row.get("faction", "")), Vector2(64, 64), row)
 	line.add_child(portrait)
 
-	var name_box := VBoxContainer.new()
+	var name_box := UiBuild.vbox(0)
 	name_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_box.add_theme_constant_override("separation", 0)
 	var name_label := Label.new()
 	var epithet: String = str(row.get("epithet", ""))
 	name_label.text = "%s%s" % [str(row.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
 	UiType.apply(name_label, UiType.BODY)
 	name_box.add_child(name_label)
-	var sub_label := Label.new()
-	sub_label.text = "%s ans — %s — %s" % [int(row.get("age", 0)), str(row.get("title", "")), str(row.get("role", ""))]
+	var sub_label := UiBuild.label("%s ans — %s — %s" % [int(row.get("age", 0)), str(row.get("title", "")), str(row.get("role", ""))])
 	UiType.apply(sub_label, UiType.CAPTION)
 	# C7 : une ligne trop longue n'élargit plus le panneau (la fiche se range à sa droite).
 	sub_label.clip_text = true
@@ -294,8 +286,7 @@ func _make_row(row: Dictionary) -> Control:
 	line.add_child(role_chip)
 	line.move_child(role_chip, 1)
 
-	var chevron := Label.new()
-	chevron.text = "›"
+	var chevron := UiBuild.label("›")
 	UiType.apply(chevron, UiType.HEADING)
 	chevron.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	line.add_child(chevron)

@@ -65,8 +65,7 @@ func _ready() -> void:
 	margin.add_theme_constant_override("margin_left", 18)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_plate.add_child(margin)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 1)
+	var box := UiBuild.vbox(1)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(box)
 	_name_label = HudStyle.label("", HudStyle.FONT_TITLE)
@@ -79,8 +78,7 @@ func _ready() -> void:
 	box.add_child(_title_label)
 	_skills_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK_SOFT)
 	box.add_child(_skills_label)
-	_status_row = HBoxContainer.new()
-	_status_row.add_theme_constant_override("separation", 10)
+	_status_row = UiBuild.hbox(10)
 	_status_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(_status_row)
 	stance_bar = StanceBar.new()
@@ -185,8 +183,7 @@ static func replenishment_color(replenishment: Dictionary) -> Color:
 
 
 func _add_status(glyph: String, text: String, tip: String, color: Color = HudStyle.INK) -> HBoxContainer:
-	var item := HBoxContainer.new()
-	item.add_theme_constant_override("separation", 3)
+	var item := UiBuild.hbox(3)
 	item.mouse_filter = Control.MOUSE_FILTER_PASS  # infobulle, clic transmis au sceau
 	var icon := GlyphIcon.new()
 	icon.glyph = glyph

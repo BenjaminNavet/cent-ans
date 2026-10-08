@@ -31,12 +31,10 @@ func _init() -> void:
 	name = "ChivalrySection"
 	add_theme_constant_override("separation", 3)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_label = Label.new()
-	header_label.text = "Ordre de chevalerie"
+	header_label = UiBuild.label("Ordre de chevalerie")
 	UiType.apply(header_label, UiType.BODY)  # P2a (ADR 0097) : titre de section (17 px)
 	add_child(header_label)
-	body = VBoxContainer.new()
-	body.add_theme_constant_override("separation", 3)
+	body = UiBuild.vbox(3)
 	add_child(body)
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -152,10 +150,7 @@ func _option(order_id: String) -> Dictionary:
 ## P2a (ADR 0097) : `variation`, une taille `UiType` (`UiType.CAPTION` ici, seule taille utilisée
 ## par cette section) au lieu d'un nombre de pixels au hasard.
 func _label(text: String, variation: String, color: Color) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(300, 0)
+	var label := UiBuild.label(text, 0, null, true, 300)
 	UiType.apply(label, variation)
 	label.add_theme_color_override("font_color", color)
 	return label

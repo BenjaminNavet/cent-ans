@@ -220,9 +220,7 @@ func _build_main_column() -> void:
 	main_column.add_theme_constant_override("margin_top", 16)
 	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	main_column.add_child(column)
+	var column := UiBuild.vbox(4, main_column)
 	_column = column
 	resized.connect(_fit_column)
 	column.add_child(IlluminatedTitle.new())
@@ -273,8 +271,7 @@ func _apply_fit_level(level: Array) -> void:
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
+	var button := UiBuild.button(text)
 	FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE))
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.custom_minimum_size = Vector2(360, 0)

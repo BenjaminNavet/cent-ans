@@ -88,36 +88,25 @@ func _ready() -> void:
 	scroll.custom_minimum_size = Vector2(760, 520)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
-	var box := VBoxContainer.new()
+	var box := UiBuild.vbox(8)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", 8)
 	scroll.add_child(box)
-	var title := Label.new()
-	title.text = "Rejeux"
+	var title := UiBuild.label("Rejeux")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas."
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size = Vector2(720, 0)
+	var hint := UiBuild.label("Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas.", 0, null, true, 720)
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	box.add_child(hint)
 	if replays.is_empty():
-		empty_label = Label.new()
-		empty_label.text = "Aucun rejeu pour l'instant : chaque bataille livrée est enregistrée à sa fin."
-		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		empty_label.custom_minimum_size = Vector2(720, 0)
-		box.add_child(empty_label)
+		empty_label = UiBuild.label("Aucun rejeu pour l'instant : chaque bataille livrée est enregistrée à sa fin.", 0, null, true, 720, box)
 	for entry in replays:
 		_add_replay(box, entry as Dictionary)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(row)
-	var close_button := Button.new()
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	row.add_child(close_button)
 	if not buttons.is_empty():
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
@@ -130,26 +119,19 @@ func _ready() -> void:
 func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
 	var path := str(entry.get("path", ""))
 	box.add_child(HSeparator.new())
-	var line := HBoxContainer.new()
-	line.add_theme_constant_override("separation", 12)
-	box.add_child(line)
+	var line := UiBuild.hbox(12, box)
 	var texts := VBoxContainer.new()
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(texts)
-	var name := Label.new()
-	name.text = str(entry.get("title", "")) if str(entry.get("title", "")) != "" else "Bataille"
+	var name := UiBuild.label(str(entry.get("title", "")) if str(entry.get("title", "")) != "" else "Bataille")
 	UiType.apply(name, UiType.HEADING)
 	texts.add_child(name)
-	var detail := Label.new()
-	detail.text = summary(entry)
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.custom_minimum_size = Vector2(560, 0)
+	var detail := UiBuild.label(summary(entry), 0, null, true, 560)
 	UiType.apply(detail, UiType.CAPTION)
 	detail.modulate = Color(1, 1, 1, 0.8)
 	texts.add_child(detail)
-	var button := Button.new()
+	var button := UiBuild.button("Revoir")
 	button.name = "Replay_%d" % buttons.size()
-	button.text = "Revoir"
 	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if bool(entry.get("readable", true)):
 		button.pressed.connect(start.bind(path))

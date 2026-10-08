@@ -122,16 +122,3 @@ func keeps(event: Dictionary) -> bool:
 		return GREAT_POWER_KINDS.has(str(event.get("kind", "")))
 	return level != Interest.NONE
 
-
-## Libellé court de la raison (infobulle des lettres).
-static func interest_label(level: Interest) -> String:
-	match level:
-		Interest.PLAYER:
-			return "Votre royaume"
-		Interest.CLOSE:
-			return "Allié, ennemi ou vassal"
-		Interest.NEIGHBOR:
-			return "Voisin"
-		Interest.GREAT_POWER:
-			return "Grande puissance"
-	return "Nouvelle lointaine"

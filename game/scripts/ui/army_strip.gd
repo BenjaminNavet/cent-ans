@@ -78,13 +78,11 @@ var _grid: GridContainer
 func _ready() -> void:
 	add_theme_stylebox_override("panel", HudStyle.panel_box(10))
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := UiBuild.hbox(10)
 	add_child(row)
 
-	var header := VBoxContainer.new()
+	var header := UiBuild.vbox(2)
 	header.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
-	header.add_theme_constant_override("separation", 2)
 	row.add_child(header)
 	_title_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.RUBRIC)
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

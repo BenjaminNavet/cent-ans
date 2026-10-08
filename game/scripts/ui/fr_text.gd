@@ -19,13 +19,6 @@ static func count(value: int, singular: String, plural: String = "") -> String:
 	return "%d %s" % [value, singular]
 
 
-## Date et heure en français depuis un horodatage Unix (heure locale) :
-## « 24 sept. 2026, 23 h 19 ».
-static func datetime(unix_time: int) -> String:
-	var bias := int(Time.get_time_zone_from_system().get("bias", 0)) * 60
-	var parts := Time.get_datetime_dict_from_unix_time(unix_time + bias)
-	return from_dict(parts)
-
 
 ## Même format depuis un dictionnaire `{year, month, day, hour, minute}`, ou une chaîne ISO
 ## (« 2026-09-24T23:19:05 » ou « 2026-09-24 23:19:05 »).

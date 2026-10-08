@@ -74,8 +74,7 @@ var _more_pill: PanelContainer
 func _ready() -> void:
 	custom_minimum_size = Vector2(LETTER_WIDTH, 0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 6)
+	_box = UiBuild.vbox(6)
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.custom_minimum_size = Vector2(LETTER_WIDTH, 0)
 	add_child(_box)
@@ -250,8 +249,7 @@ class Letter:
 		box.shadow_offset = Vector2(0, 2)
 		add_theme_stylebox_override("panel", box)
 		_heraldry = PortraitLoader.heraldry_texture(str(item.get("faction_id", "")))
-		var column := VBoxContainer.new()
-		column.add_theme_constant_override("separation", 0)
+		var column := UiBuild.vbox(0)
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(column)
 		var rubric := HudStyle.label(NewsLetters.kind_label(str(item.get("kind", ""))).to_upper(), 11, HudStyle.RUBRIC)

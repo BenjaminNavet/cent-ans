@@ -85,8 +85,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	position = Vector2(20, 60)
 	custom_minimum_size = Vector2(560, 0)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
+	var box := UiBuild.vbox(6)
 	add_child(box)
 	var header := HBoxContainer.new()
 	box.add_child(header)
@@ -94,8 +93,7 @@ func _ready() -> void:
 	UiType.apply(title_label, UiType.HEADING)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
-	var close_button := Button.new()
-	close_button.text = "×"
+	var close_button := UiBuild.button("×")
 	RichTooltip.attach_plain(close_button, "close_escape")
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
@@ -119,25 +117,19 @@ func _ready() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
-	list_box = VBoxContainer.new()
+	list_box = UiBuild.vbox(3)
 	list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list_box.add_theme_constant_override("separation", 3)
 	scroll.add_child(list_box)
-	var footer := HBoxContainer.new()
+	var footer := UiBuild.hbox(8)
 	footer.alignment = BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation", 8)
 	box.add_child(footer)
-	var disable := Button.new()
-	disable.text = "Ne plus afficher"
+	var disable := UiBuild.button("Ne plus afficher")
 	RichTooltip.attach_plain(disable, "season_report_disable")
 	disable.pressed.connect(func() -> void:
 		disable_requested.emit()
 		close())
 	footer.add_child(disable)
-	var ok := Button.new()
-	ok.text = "Continuer"
-	ok.pressed.connect(close)
-	footer.add_child(ok)
+	var ok := UiBuild.button("Continuer", close, footer)
 	hide()
 
 
@@ -353,8 +345,7 @@ func _render() -> void:
 	title_label.text = "Rapport de saison — %s" % _title
 	_update_vignette()
 	for group in groups:
-		var heading := Label.new()
-		heading.text = "%s  %s" % [group["glyph"], group["title"]]
+		var heading := UiBuild.label("%s  %s" % [group["glyph"], group["title"]])
 		UiType.apply(heading, UiType.HEADING)
 		heading.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		list_box.add_child(heading)
@@ -411,18 +402,13 @@ static func action_label(event: Dictionary) -> String:
 
 func _entry_row(event: Dictionary) -> Control:
 	var tone := str(event.get("_tone", ""))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	var mark := Label.new()
-	mark.text = "▼" if tone == TONE_LOSS else ("▲" if tone == TONE_GAIN else "•")
+	var row := UiBuild.hbox(6)
+	var mark := UiBuild.label("▼" if tone == TONE_LOSS else ("▲" if tone == TONE_GAIN else "•"))
 	UiType.apply(mark, UiType.CAPTION)
 	mark.custom_minimum_size = Vector2(16, 0)
 	row.add_child(mark)
-	var label := Label.new()
-	label.text = str(event.get("text_fr", ""))
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var label := UiBuild.label(str(event.get("text_fr", "")), 0, null, true, 380)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(380, 0)
 	UiType.apply(label, UiType.BODY)
 	var ink := HudStyle.RUBRIC if tone == TONE_LOSS else (Money.GAIN_COLOR if tone == TONE_GAIN else HudStyle.INK)
 	label.add_theme_color_override("font_color", ink)
@@ -430,8 +416,7 @@ func _entry_row(event: Dictionary) -> Control:
 	row.add_child(label)
 	var action := action_label(event)
 	if action != "":
-		var button := Button.new()
-		button.text = action
+		var button := UiBuild.button(action)
 		RichTooltip.attach_plain(button, "season_event_action", {"title": "Aller voir" if action.begins_with("Voir") else "Ouvrir : %s" % action.to_lower()})
 		UiType.apply(button, UiType.CAPTION)
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER

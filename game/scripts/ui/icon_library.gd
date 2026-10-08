@@ -158,14 +158,6 @@ func get_icon(id: String, category: String = "") -> Texture2D:
 	return texture
 
 
-func author_of(id: String) -> String:
-	var resolved := resolve(id)
-	if entity.has(resolved):
-		return "Cent Ans (DA5b)"
-	if ink.has(resolved):
-		return "Cent Ans (DA5)"
-	return str(icons.get(resolved, {}).get("author", ""))
-
 
 ## Modulation qui change l'encre cuite (`INK_COLOR`) en `color` : composantes > 1 permises
 ## (le canevas les applique telles quelles), alpha conservé.
@@ -228,9 +220,6 @@ func clear_cache() -> void:
 
 # --- Médaillons enluminés (DA5) --------------------------------------------------------
 
-
-func has_medallion(id: String) -> bool:
-	return medallions.has(id)
 
 
 ## Texture du médaillon `id` (état normal), null si absent (l'appelant garde son repli).

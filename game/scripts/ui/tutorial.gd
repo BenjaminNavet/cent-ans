@@ -33,8 +33,6 @@ const TOC_MIN_HEIGHT := 90.0
 const HALO_COLOR := Color(0.93, 0.73, 0.26)
 const HALO_SHADOW := Color(0.18, 0.10, 0.03, 0.55)
 const MUTED := "#6b5a40"
-## Q2 : hauteur laissée au journal replié (bas gauche) ; gardée pour compatibilité.
-const JOURNAL_CLEARANCE := 110.0
 
 var panel: PanelContainer
 var title_label: Label
@@ -80,12 +78,8 @@ func _ready() -> void:
 	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
 	panel.add_theme_stylebox_override("panel", HudStyle.panel_box(16))
 	add_child(panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 8)
-	box.add_child(header)
+	var box := UiBuild.vbox(8, panel)
+	var header := UiBuild.hbox(8, box)
 	title_label = Label.new()
 	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -96,9 +90,8 @@ func _ready() -> void:
 	progress_label.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
 	progress_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(progress_label)
-	toc_button = Button.new()
+	toc_button = UiBuild.button("☰ Étapes")
 	toc_button.name = "TocButton"
-	toc_button.text = "☰ Étapes"
 	toc_button.toggle_mode = true
 	toc_button.focus_mode = Control.FOCUS_NONE
 	toc_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
@@ -106,9 +99,8 @@ func _ready() -> void:
 	RichTooltip.attach_plain(toc_button, "tutorial_toc")
 	toc_button.toggled.connect(func(on: bool) -> void: set_toc_open(on))
 	header.add_child(toc_button)
-	toc_box = VBoxContainer.new()
+	toc_box = UiBuild.vbox(0)
 	toc_box.name = "Toc"
-	toc_box.add_theme_constant_override("separation", 0)
 	toc_scroll = ScrollContainer.new()
 	toc_scroll.name = "TocScroll"
 	toc_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -125,33 +117,25 @@ func _ready() -> void:
 		bubbles.call("attach", text_label)
 	objective_label = _rich(15)
 	box.add_child(objective_label)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 8)
-	box.add_child(buttons)
-	skip_all_button = Button.new()
+	var buttons := UiBuild.hbox(8, box)
+	skip_all_button = UiBuild.button("Passer le tutoriel")
 	skip_all_button.name = "SkipAllButton"
-	skip_all_button.text = "Passer le tutoriel"
 	RichTooltip.attach_plain(skip_all_button, "tutorial_skip_all")
 	skip_all_button.pressed.connect(func() -> void: skip_all_pressed.emit())
 	buttons.add_child(skip_all_button)
-	later_button = Button.new()
+	later_button = UiBuild.button("Plus tard")
 	later_button.name = "LaterButton"
-	later_button.text = "Plus tard"
 	RichTooltip.attach_plain(later_button, "tutorial_later")
 	later_button.pressed.connect(func() -> void: later_pressed.emit())
 	buttons.add_child(later_button)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buttons.add_child(spacer)
-	skip_step_button = Button.new()
+	skip_step_button = UiBuild.button("Passer l'étape", func() -> void: skip_step_pressed.emit())
 	skip_step_button.name = "SkipStepButton"
-	skip_step_button.text = "Passer l'étape"
-	skip_step_button.pressed.connect(func() -> void: skip_step_pressed.emit())
 	buttons.add_child(skip_step_button)
-	continue_button = Button.new()
+	continue_button = UiBuild.button("Continuer", func() -> void: continue_pressed.emit())
 	continue_button.name = "ContinueButton"
-	continue_button.text = "Continuer"
-	continue_button.pressed.connect(func() -> void: continue_pressed.emit())
 	buttons.add_child(continue_button)
 	for button: Button in [skip_all_button, later_button, skip_step_button]:
 		button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))

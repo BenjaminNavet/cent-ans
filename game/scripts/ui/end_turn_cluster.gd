@@ -176,9 +176,6 @@ func refresh_modal() -> void:
 	queue_redraw()
 
 
-func is_modal_blocked() -> bool:
-	return _modal
-
 
 ## Première alerte bloquante, ou `{}`.
 func blocking_alert() -> Dictionary:

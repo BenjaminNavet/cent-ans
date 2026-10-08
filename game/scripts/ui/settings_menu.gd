@@ -35,17 +35,13 @@ func _ready() -> void:
 
 ## Contenu de la fenêtre (onglets, boutons) ; reconstruit sur place par `_on_reset`.
 func _build() -> void:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
+	var box := UiBuild.vbox(10)
 	add_child(box)
-	var title := Label.new()
-	title.text = "Réglages"
+	var title := UiBuild.label("Réglages")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	if settings == null:
-		var missing := Label.new()
-		missing.text = "Réglages indisponibles (autoload Settings absent)."
-		box.add_child(missing)
+		var missing := UiBuild.label("Réglages indisponibles (autoload Settings absent).", 0, null, false, 0.0, box)
 	else:
 		var tabs := TabContainer.new()
 		tabs.name = "Tabs"
@@ -61,18 +57,12 @@ func _build() -> void:
 		var start_tab := tabs.get_node_or_null(initial_tab) if initial_tab != "" else null
 		if start_tab != null:
 			tabs.current_tab = start_tab.get_index()
-	var buttons := HBoxContainer.new()
+	var buttons := UiBuild.hbox(10)
 	buttons.alignment = BoxContainer.ALIGNMENT_END
-	buttons.add_theme_constant_override("separation", 10)
 	box.add_child(buttons)
-	var reset := Button.new()
-	reset.text = "Valeurs par défaut"
-	reset.pressed.connect(_on_reset)
-	buttons.add_child(reset)
-	var close_button := Button.new()
+	var reset := UiBuild.button("Valeurs par défaut", _on_reset, buttons)
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	buttons.add_child(close_button)
 
 
@@ -102,8 +92,7 @@ func _tab(tabs: TabContainer, label: String) -> GridContainer:
 
 
 func _label(grid: GridContainer, text: String, tooltip: String = "") -> void:
-	var label := Label.new()
-	label.text = text
+	var label := UiBuild.label(text)
 	label.tooltip_text = tooltip
 	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -264,11 +253,9 @@ func _build_controls(grid: GridContainer) -> void:
 	_key_notice.visible = false
 	column.add_child(_key_notice)
 	column.add_child(scroll)
-	var restore := Button.new()
+	var restore := UiBuild.button("Rétablir par défaut", _on_restore_keys)
 	restore.name = "RestoreKeys"
-	restore.text = "Rétablir par défaut"
 	restore.tooltip_text = "Remet toutes les touches de la carte à leur valeur d'origine."
-	restore.pressed.connect(_on_restore_keys)
 	column.add_child(restore)
 	grid.add_child(column)
 	_fill_shortcuts(sheet)
@@ -283,28 +270,21 @@ func _fill_shortcuts(sheet: GridContainer) -> void:
 		sheet.remove_child(child)
 		child.queue_free()
 	for section in KeyBindings.sections():
-		var title := Label.new()
-		title.text = str(section["title"])
-		title.add_theme_color_override("font_color", HudStyle.RUBRIC)
-		sheet.add_child(title)
+		var title := UiBuild.label(str(section["title"]), 0, HudStyle.RUBRIC, false, 0.0, sheet)
 		sheet.add_child(Control.new())
 		sheet.add_child(Control.new())
 		for row in section["actions"]:
 			var action: String = row[0]
-			var what := Label.new()
-			what.text = str(row[1])
+			var what := UiBuild.label(str(row[1]))
 			UiType.apply(what, UiType.CAPTION)
 			what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			sheet.add_child(what)
-			var keys := Label.new()
-			keys.text = ShortcutSheet.action_keys(action)
+			var keys := UiBuild.label(ShortcutSheet.action_keys(action))
 			UiType.apply(keys, UiType.CAPTION)
 			keys.custom_minimum_size = Vector2(90, 0)
 			sheet.add_child(keys)
-			var change := Button.new()
+			var change := UiBuild.button("Changer", _begin_capture.bind(action))
 			change.name = "Change_" + action
-			change.text = "Changer"
-			change.pressed.connect(_begin_capture.bind(action))
 			sheet.add_child(change)
 			_key_buttons[action] = change
 

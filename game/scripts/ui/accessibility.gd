@@ -14,15 +14,6 @@ const RELATION_SYMBOLS := {
 	"self": "♔", "war": "⚔", "truce": "⌛", "peace": "·", "alliance": "⚭", "vassal": "⚜",
 	"suzerain": "⚜", "enemy": "⚔", "ally": "⚭", "neutral": "·",
 }
-const RELATION_NAMES := {
-	"self": "Votre royaume", "war": "Guerre", "truce": "Trêve", "peace": "Paix", "alliance": "Alliance",
-	"vassal": "Vassal", "suzerain": "Suzerain",
-}
-## Motif de hachure par relation pour la carte diplomatique : 0 aucun, 1 diagonales, 2 croisillons,
-## 3 points, 4 horizontales, 5 verticales.
-const RELATION_PATTERNS := {
-	"self": 0, "war": 2, "truce": 3, "peace": 0, "alliance": 1, "vassal": 4, "suzerain": 5,
-}
 
 
 static func _settings() -> Node:
@@ -111,10 +102,3 @@ static func level_symbol(ratio: float) -> String:
 		return "■"
 	return "▼"
 
-
-## Texte d'une attitude signée, avec symbole en mode daltonien (« ▲ +35 »).
-static func signed_with_symbol(value: int) -> String:
-	var text := ("+%d" % value) if value > 0 else str(value)
-	if not colorblind():
-		return text
-	return "%s %s" % ["▲" if value > 0 else ("▼" if value < 0 else "■"), text]

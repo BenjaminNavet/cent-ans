@@ -155,9 +155,7 @@ static func make_panel(bbcode: String) -> Control:
 	if ResourceLoader.exists(THEME_PATH):
 		panel.theme = load(THEME_PATH)
 	panel.add_theme_stylebox_override("panel", panel_style())
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
+	var box := UiBuild.vbox(4, panel)
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -171,9 +169,8 @@ static func make_panel(bbcode: String) -> Control:
 	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
 	box.add_child(label)
-	var footer := Label.new()
+	var footer := UiBuild.label(footer_text(title_entry(label.text) != ""))
 	footer.name = "Footer"
-	footer.text = footer_text(title_entry(label.text) != "")
 	UiType.apply(footer, UiType.CAPTION)
 	footer.add_theme_color_override("font_color", Color(MUTED))
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -528,11 +525,6 @@ static func _description(definition: Dictionary) -> String:
 	var description: String = str(definition.get("description", ""))
 	return "[color=%s][i]%s[/i][/color]" % [MUTED, description] if description != "" else ""
 
-
-static func _unavailable(live: Dictionary) -> String:
-	if live.is_empty() or bool(live.get("available", true)):
-		return ""
-	return "[color=%s]Indisponible : %s[/color]" % [RED, str(live.get("reason", "conditions non remplies"))]
 
 
 static func _join(lines: Array) -> String:

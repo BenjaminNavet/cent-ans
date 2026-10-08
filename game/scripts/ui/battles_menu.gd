@@ -23,26 +23,20 @@ func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(480, 0)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
+	var box := UiBuild.vbox(8)
 	add_child(box)
-	var title := Label.new()
-	title.text = "Batailles"
+	var title := UiBuild.label("Batailles")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	for entry: Array in ENTRIES:
 		var mode := str(entry[0])
-		var button := Button.new()
+		var button := UiBuild.button(str(entry[1]), func() -> void: chosen.emit(mode))
 		button.name = "Battles_" + mode
-		button.text = str(entry[1])
 		button.custom_minimum_size = Vector2(0, 40)
-		button.pressed.connect(func() -> void: chosen.emit(mode))
 		box.add_child(button)
 		buttons[mode] = button
-	var close_button := Button.new()
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	box.add_child(close_button)
 	(buttons["custom"] as Button).grab_focus.call_deferred()
 	UiZones.put(UiZones.Zone.MODAL, self)

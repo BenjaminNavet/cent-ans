@@ -29,7 +29,6 @@ const PREMIUM_NAME := "Surprime des mercenaires"
 const PREMIUM_HINT := "Ce que les compagnies coûtent au-delà de la solde ordinaire ; prélevé sur le trésor en fin de tour, en plus du solde. Impayée, une compagnie déserte ou pille."
 const HEADER_COLOR := Color(0.40, 0.28, 0.14)
 const FONT_SIZE := 15
-const COLUMN_WIDTHS := [0, 96, 108, 96]
 
 var _grid: GridContainer
 ## Valeurs affichées (clé → `{projected, last, delta}` en texte), lues par les tests.
