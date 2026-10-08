@@ -107,6 +107,9 @@ pub struct AiDiplomacy {
     /// Lot DP2: right of passage, trespass incidents, diplomatic map.
     #[serde(default)]
     pub passage: PassageRules,
+    /// Weights of the reasons a recipient weighs in a treaty.
+    #[serde(default)]
+    pub treaty_weights: TreatyWeights,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -235,3 +238,149 @@ pub struct PassageRules {
 }
 
 crate::bundled_rules!(PassageRules, "ai/diplomacy.json", at "/passage", default);
+
+/// Weights (in treaty points) of the reasons a recipient weighs in a treaty,
+/// grouped by article kind (`negotiation::value` in `sim-campaign`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TreatyWeights {
+    pub peace: PeaceWeights,
+    pub alliance: AllianceWeights,
+    pub vassalage: VassalageWeights,
+    pub marriage: MarriageWeights,
+    pub exchange: ExchangeWeights,
+    pub context: ContextWeights,
+}
+
+crate::bundled_rules!(TreatyWeights, "ai/diplomacy.json", at "/treaty_weights", default);
+
+/// Peace, truce and papal mediation.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PeaceWeights {
+    /// Seasons of war per point of lassitude (until `lassitude_cap`).
+    pub lassitude_seasons_per_point: u32,
+    pub lassitude_cap: u32,
+    /// Points when the treasury is empty.
+    pub empty_treasury: i32,
+    /// Devastation above which an owned province counts as ravaged.
+    pub devastation_threshold: u8,
+    pub per_ravaged_province: i32,
+    pub ravaged_cap: i32,
+    /// Aggression points (above 50) per point of reluctance.
+    pub aggression_divisor: i32,
+    /// Flat reluctance: the lure of victory.
+    pub victory_lure: i32,
+    /// A stronger enemy on another front calls for peace.
+    pub other_front: i32,
+    /// War score above which the claims of the pretender weigh.
+    pub claim_score_floor: i32,
+    pub claimed_provinces: i32,
+    /// A pretender to the other's throne does not give up its claim lightly.
+    pub pretender_reluctance: i32,
+    /// A short truce commits to nothing.
+    pub short_truce: i32,
+    /// Points of a truce mediated by the pope or a herald.
+    pub mediation: i32,
+}
+
+/// Alliance.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AllianceWeights {
+    pub military_commitment: i32,
+    pub war_on_our_allies: i32,
+    pub common_enemy: i32,
+    /// Proposer power over ours above which it is a strong ally.
+    pub strong_ratio: f64,
+    pub strong_ally: i32,
+    /// Proposer power over ours below which it is a weak ally.
+    pub weak_ratio: f64,
+    pub weak_ally: i32,
+    pub common_rival: i32,
+    pub friend_of_rival: i32,
+}
+
+/// Vassalage.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VassalageWeights {
+    /// Points per unit of power ratio beyond `vassalage_power_ratio`.
+    pub power_margin_scale: f64,
+    pub power_margin_cap: i32,
+    pub independence_loss: i32,
+    /// War score of the recipient below which defeat softens it.
+    pub defeat_score: i32,
+    pub defeat: i32,
+    /// Points for the lord when the proposer offers its homage.
+    pub homage_gain: i32,
+}
+
+/// Marriage.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MarriageWeights {
+    pub match_bonus: i32,
+    /// Prestige difference per point of value, clamped to `prestige_cap`.
+    pub prestige_divisor: i32,
+    pub prestige_cap: i32,
+}
+
+/// Access, trade, money, captives and hostages.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ExchangeWeights {
+    pub access_given: i32,
+    pub access_rival: i32,
+    pub access_allies: i32,
+    pub access_received: i32,
+    pub trade_base: i32,
+    pub trade_per_route: i32,
+    pub trade_routes_cap: i32,
+    /// Partner income per point of wealth, capped at `trade_wealth_cap`.
+    pub trade_wealth_divisor: i64,
+    pub trade_wealth_cap: i32,
+    pub trade_rival: i32,
+    pub trade_embargo: i32,
+    /// Share (percent) of the total tribute that counts.
+    pub tribute_percent: i64,
+    pub tribute_ruinous: i32,
+    pub gold_empty_treasury: i32,
+    /// Percent of the gold value when the treasury is empty.
+    pub gold_empty_percent: i32,
+    pub ransom_min: i32,
+    pub ransom_max: i32,
+    pub ransom_high_rank: i32,
+    pub hostage_heir: i32,
+    pub hostage_other: i32,
+    pub pledge_heir: i32,
+    pub pledge_other: i32,
+    /// Share (percent) of the cost that a gain is worth.
+    pub gain_percent: i32,
+    pub claimed_land: i32,
+    pub held_by_our_troops: i32,
+}
+
+/// General considerations, whatever the articles.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContextWeights {
+    /// Attitude points per point of value (a peace is judged on the war).
+    pub attitude_divisor_peace: i32,
+    pub attitude_divisor: i32,
+    pub perjury: i32,
+    pub hostage_held: i32,
+    pub marriage_tie: i32,
+    pub standing_pact: i32,
+    pub trust_min: i32,
+    pub trust_max: i32,
+    /// Proposer power over ours above which it threatens a neighbour.
+    pub threat_ratio: f64,
+    pub threat_scale: f64,
+    pub threat_cap: i32,
+    pub weak_demander_ratio: f64,
+    pub weak_demander: i32,
+    pub abandoned_ally: i32,
+    pub abandoned_allies_max: i32,
+    pub prudence: i32,
+}

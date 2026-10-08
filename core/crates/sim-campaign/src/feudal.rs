@@ -13,6 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{CharacterId, FactionId, GameData, ProvinceId, TitleId};
 use serde::{Deserialize, Serialize};
 
+use crate::negotiation::{Article, Treaty};
 use crate::state::CampaignState;
 
 mod acts;
@@ -716,10 +717,10 @@ pub(crate) fn escalate_war(
             data.faction_name(attacker),
             data.faction_name(target)
         );
-        let proposal = crate::diplomacy::Proposal::Arbitration {
+        let proposal = Treaty::single(Article::Arbitration {
             attacker: attacker.clone(),
             target: target.clone(),
-        };
+        });
         push_feudal_offer(state, data, target, proposal, text);
     } else {
         let (verdict, _) = (policy().arbitration)(state, data, &lord, attacker, target);
@@ -751,9 +752,9 @@ fn summon_to_peace(
         rules.imposed_peace_loyalty_drop,
         rules.defied_summons_loyalty_drop
     );
-    let proposal = crate::diplomacy::Proposal::PeaceSummons {
+    let proposal = Treaty::single(Article::PeaceSummons {
         target: target.clone(),
-    };
+    });
     push_feudal_offer(state, data, lord, proposal, text);
 }
 
@@ -809,9 +810,9 @@ pub(crate) fn call_liege(
             data.faction_name(vassal),
             data.faction_name(aggressor)
         );
-        let proposal = crate::diplomacy::Proposal::Protection {
+        let proposal = Treaty::single(Article::Protection {
             aggressor: aggressor.clone(),
-        };
+        });
         push_feudal_offer(state, data, vassal, proposal, text);
         return;
     }
@@ -829,7 +830,7 @@ fn push_feudal_offer(
     state: &mut CampaignState,
     data: &GameData,
     from: &FactionId,
-    proposal: crate::diplomacy::Proposal,
+    proposal: Treaty,
     text: String,
 ) {
     use crate::events::{EventKind, GameEvent};
@@ -1087,20 +1088,21 @@ pub(crate) fn refuse_feudal_call(
     player: &FactionId,
     offer: &crate::diplomacy::Offer,
 ) {
-    use crate::diplomacy::Proposal;
-    match &offer.proposal {
-        Proposal::Protection { aggressor } => {
-            if state.is_at_war(&offer.from, aggressor) {
-                shirk(state, data, player, &offer.from, aggressor);
+    for article in &offer.proposal.articles {
+        match article {
+            Article::Protection { aggressor } => {
+                if state.is_at_war(&offer.from, aggressor) {
+                    shirk(state, data, player, &offer.from, aggressor);
+                }
             }
+            Article::Arbitration { attacker, target } => {
+                apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
+            }
+            Article::PeaceSummons { target } => {
+                defy_summons(state, data, &offer.from, player, target);
+            }
+            _ => {}
         }
-        Proposal::Arbitration { attacker, target } => {
-            apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
-        }
-        Proposal::PeaceSummons { target } => {
-            defy_summons(state, data, &offer.from, player, target);
-        }
-        _ => {}
     }
 }
 
@@ -1114,7 +1116,7 @@ impl CampaignState {
         offer_id: u32,
         verdict: Arbitration,
     ) -> Result<(), crate::diplomacy::DiplomacyError> {
-        use crate::diplomacy::{DiplomacyError, Proposal};
+        use crate::diplomacy::DiplomacyError;
         let offers = &self
             .factions
             .get(faction)
@@ -1124,11 +1126,14 @@ impl CampaignState {
             .iter()
             .position(|o| o.id == offer_id)
             .ok_or(DiplomacyError::UnknownOffer)?;
-        let Proposal::Arbitration { attacker, target } = offers[index].proposal.clone() else {
+        let [Article::Arbitration { attacker, target }] =
+            offers[index].proposal.articles.as_slice()
+        else {
             return Err(DiplomacyError::Refused(
                 "cette offre n'est pas un arbitrage".to_owned(),
             ));
         };
+        let (attacker, target) = (attacker.clone(), target.clone());
         if let Arbitration::TakeSide { side } = &verdict {
             if side != &attacker && side != &target {
                 return Err(DiplomacyError::Refused(
@@ -1242,7 +1247,7 @@ fn adopt_stored_suzerains(state: &mut CampaignState, data: &GameData) {
     }
 }
 
-/// `vassal` pays homage to `liege` (`Proposal::Vassalage`, spec § 4.2):
+/// `vassal` pays homage to `liege` (`Article::Vassalage`, spec § 4.2):
 /// the effective liege of its primary title becomes `liege`'s primary
 /// title. A `liege` that stood below `vassal` is first freed, so that the
 /// hierarchy keeps no cycle. `false` when either has no primary title.

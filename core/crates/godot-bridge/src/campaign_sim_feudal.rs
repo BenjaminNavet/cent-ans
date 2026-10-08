@@ -5,8 +5,8 @@
 
 use data_model::{FactionId, GameData, ProvinceId, TitleId, TitleRank};
 use godot::prelude::*;
-use sim_campaign::diplomacy::Proposal;
 use sim_campaign::feudal::{self, Arbitration, FeudalNode, Likelihood};
+use sim_campaign::negotiation::Article;
 use sim_campaign::orders::Order;
 use sim_campaign::state::CampaignState;
 
@@ -422,14 +422,14 @@ impl CampaignSim {
             .offers
             .iter()
             .filter_map(|offer| {
-                let (kind, aggressor, attacker, target) = match &offer.proposal {
-                    Proposal::Protection { aggressor } => {
+                let (kind, aggressor, attacker, target) = match offer.proposal.articles.as_slice() {
+                    [Article::Protection { aggressor }] => {
                         ("protection", Some(aggressor), None, None)
                     }
-                    Proposal::Arbitration { attacker, target } => {
+                    [Article::Arbitration { attacker, target }] => {
                         ("arbitration", None, Some(attacker), Some(target))
                     }
-                    Proposal::PeaceSummons { target } => ("summons", None, None, Some(target)),
+                    [Article::PeaceSummons { target }] => ("summons", None, None, Some(target)),
                     _ => return None,
                 };
                 let expires_in = offer

@@ -33,12 +33,12 @@ fn play(data: &GameData, player: FactionId, seed: u64) {
     // Burgundy's deadline is 1477: 560 seasons; stop at the outcome or 600.
     for _ in 0..600 {
         for offer in state.factions[&player].offers.clone() {
-            let accept = sim_campaign::diplomacy::evaluate(
+            let accept = sim_campaign::negotiation::evaluate_treaty(
                 &state,
                 data,
                 &offer.from,
                 &player,
-                &offer.proposal,
+                &offer.proposal.articles,
             )
             .accept;
             let _ = state.submit_order(

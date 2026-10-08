@@ -1480,15 +1480,15 @@ fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId,
         .filter(|(_, id, faction)| {
             faction == ctx.faction
                 || faction == &state.player_faction
-                || sim_campaign::diplomacy::evaluate(
+                || sim_campaign::negotiation::evaluate_treaty(
                     state,
                     data,
                     ctx.faction,
                     faction,
-                    &sim_campaign::diplomacy::Proposal::Marriage {
+                    &[sim_campaign::negotiation::Article::Marriage {
                         character: single.clone(),
                         spouse: id.clone(),
-                    },
+                    }],
                 )
                 .accept
         })

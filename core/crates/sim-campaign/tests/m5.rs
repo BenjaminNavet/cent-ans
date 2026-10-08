@@ -2,10 +2,22 @@
 //! `docs/design/m5-diplomacy-religion.md` § 2.5.
 
 use data_model::{FactionId, GameData, ReligionId};
-use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
+use sim_campaign::diplomacy::RelationKind;
+use sim_campaign::negotiation::{evaluate_treaty, Article, Party, Treaty, TreatyEvaluation};
 use sim_campaign::{CampaignState, EventKind, Order, OrderError, Season, SettlementState};
 
 use data_model::test_support::{fac, game_data, prov};
+
+/// Verdict of `recipient` on `treaty` proposed by `proposer`.
+fn evaluate(
+    state: &CampaignState,
+    data: &GameData,
+    proposer: &FactionId,
+    recipient: &FactionId,
+    treaty: &Treaty,
+) -> TreatyEvaluation {
+    evaluate_treaty(state, data, proposer, recipient, &treaty.articles)
+}
 
 /// Mutable state of the city of a province (lot C4: it carries control).
 fn city_mut<'a>(state: &'a mut CampaignState, province: &str) -> &'a mut SettlementState {
@@ -123,15 +135,14 @@ fn allied_factions_cannot_declare_war_on_each_other() {
 fn peace_depends_on_war_score() {
     let data = game_data();
     let mut state = start(data, "fac_france", 6);
-    let white = Proposal::Peace {
-        provinces: Vec::new(),
-        tribute: 0,
-    };
+    let white = Treaty::single(Article::Peace);
     // Even war: England has no reason to accept a peace that cedes Guyenne.
-    let greedy = Proposal::Peace {
-        provinces: vec![prov("prov_guyenne"), prov("prov_gascogne")],
-        tribute: 0,
-    };
+    let greedy = Treaty::peace_terms(
+        &state,
+        &fac("fac_france"),
+        &[prov("prov_guyenne"), prov("prov_gascogne")],
+        0,
+    );
     let verdict = evaluate(
         &state,
         data,
@@ -171,7 +182,10 @@ fn peace_depends_on_war_score() {
         &white,
     );
     assert!(verdict.accept, "{verdict:?}");
-    assert!(verdict.reasons.iter().any(|(t, _)| t == "Score de guerre"));
+    assert!(verdict
+        .detailed_reasons()
+        .iter()
+        .any(|(t, _)| t == "Score de guerre"));
 }
 
 #[test]
@@ -254,9 +268,12 @@ fn alliance_needs_a_good_attitude() {
         data,
         &fac("fac_england"),
         &fac("fac_portugal"),
-        &Proposal::Alliance,
+        &Treaty::single(Article::Alliance),
     );
-    assert!(verdict.reasons.iter().any(|(t, _)| t == "Attitude"));
+    assert!(verdict
+        .detailed_reasons()
+        .iter()
+        .any(|(t, _)| t == "Attitude"));
 }
 
 #[test]
@@ -328,10 +345,12 @@ fn release_vassal_and_demand_vassalage() {
         data,
         &fac("fac_france"),
         &fac("fac_navarre"),
-        &Proposal::Vassalage,
+        &Treaty::single(Article::Vassalage {
+            giver: Party::Recipient,
+        }),
     );
     assert!(verdict
-        .reasons
+        .detailed_reasons()
         .iter()
         .any(|(t, _)| t == "Perte d'indépendance"));
 }
@@ -347,10 +366,7 @@ fn ai_proposals_to_the_player_become_offers() {
             data,
             &fac("fac_england"),
             &fac("fac_france"),
-            Proposal::Peace {
-                provinces: Vec::new(),
-                tribute: 0,
-            },
+            Treaty::single(Article::Peace),
         )
         .unwrap();
     let offers = state
@@ -376,7 +392,7 @@ fn ai_proposals_to_the_player_become_offers() {
             data,
             &fac("fac_castile"),
             &fac("fac_france"),
-            Proposal::Alliance,
+            Treaty::single(Article::Alliance),
         )
         .ok();
     for _ in 0..4 {
@@ -479,7 +495,7 @@ fn great_schism_1378_and_council_of_constance() {
         .unwrap()
         .offers
         .iter()
-        .find(|o| matches!(o.proposal, Proposal::Obedience { .. }))
+        .find(|o| o.proposal.is_obedience())
         .cloned();
     assert!(offer.is_some());
     // 1417: the Church is reunited.

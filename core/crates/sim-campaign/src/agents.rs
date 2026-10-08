@@ -19,9 +19,10 @@ use data_model::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{Proposal, PAPACY_FACTION, REBELS_FACTION};
+use crate::diplomacy::{PAPACY_FACTION, REBELS_FACTION};
 use crate::events::{EventKind, GameEvent};
 use crate::movement;
+use crate::negotiation::{Article, Treaty};
 use crate::orders::Order;
 use crate::rng::CampaignRng;
 use crate::state::CampaignState;
@@ -1267,9 +1268,9 @@ impl CampaignState {
                     data,
                     faction,
                     &target,
-                    Proposal::Truce {
+                    Treaty::single(Article::Mediation {
                         turns: effects.truce_turns,
-                    },
+                    }),
                 );
                 let enemy = data.faction_name(&target);
                 match result {

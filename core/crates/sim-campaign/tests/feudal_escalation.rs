@@ -1,10 +1,10 @@
 //! FE war escalation and private war (spec § 4.3), lot F2.
 
 use data_model::{FactionId, GameData, TitleId};
-use sim_campaign::diplomacy::Proposal;
 use sim_campaign::feudal::{
     self, Arbitration, Likelihood, PROTECTION_GRANTED_REASON, PROTECTION_REFUSED_REASON,
 };
+use sim_campaign::negotiation::Article;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
@@ -185,7 +185,7 @@ fn cascade_stops_at_a_shirking_liege() {
         .offers
         .iter()
         .find(
-            |o| matches!(&o.proposal, Proposal::Protection { aggressor } if aggressor == &brabant),
+            |o| matches!(o.proposal.articles.as_slice(), [Article::Protection { aggressor }] if aggressor == &brabant),
         )
         .expect("call for protection")
         .clone();
@@ -270,7 +270,12 @@ fn private_war_is_arbitrated_by_the_common_liege() {
     let offer = state.factions[&france]
         .offers
         .iter()
-        .find(|o| matches!(o.proposal, Proposal::Arbitration { .. }))
+        .find(|o| {
+            matches!(
+                o.proposal.articles.as_slice(),
+                [Article::Arbitration { .. }]
+            )
+        })
         .expect("arbitration offer")
         .clone();
     let loyalty_before = state.factions[&brittany].loyalty;
@@ -303,7 +308,12 @@ fn player_private_war_gets_a_peace_summons() {
         state.factions[&fac("fac_ryazan")]
             .offers
             .iter()
-            .find(|o| matches!(o.proposal, Proposal::PeaceSummons { .. }))
+            .find(|o| {
+                matches!(
+                    o.proposal.articles.as_slice(),
+                    [Article::PeaceSummons { .. }]
+                )
+            })
             .expect("peace summons")
             .clone()
     };

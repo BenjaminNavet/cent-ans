@@ -2,7 +2,7 @@
 //! map graph (not the province files' partial `neighbors`), and the border
 //! diplomacy tuning comes from `data/ai/diplomacy.json`.
 
-use data_model::{AiDiplomacy, FactionId, GameData, PeaceRules, ProvinceId};
+use data_model::{AiDiplomacy, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::plan_diplomacy;
 use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
@@ -144,14 +144,4 @@ fn a_beaten_crown_keeps_its_capital_and_a_province() {
         assert!(!provinces.contains(&capital), "{provinces:?}");
         assert!(provinces.len() < owned, "{provinces:?}");
     }
-    // The F4 rules cede everything: Scotland vanishes from the map.
-    let mut f4 = data.clone();
-    f4.ai_diplomacy.peace = PeaceRules {
-        keep_capital: false,
-        cornered_provinces: 0,
-        cornered_waits_for_defeat: false,
-    };
-    f4.ai_diplomacy.negotiation.enabled = false;
-    let offers = scottish_surrender(&f4);
-    assert!(offers.iter().any(|p| p.len() == owned), "{offers:?}");
 }

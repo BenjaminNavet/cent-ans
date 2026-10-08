@@ -72,5 +72,92 @@
     "ai_violate_attitude": -40,
     "ai_violate_power_ratio": 2.0,
     "tension_attitude": -20
+  },
+  "treaty_weights": {
+    "peace": {
+      "lassitude_seasons_per_point": 2,
+      "lassitude_cap": 20,
+      "empty_treasury": 15,
+      "devastation_threshold": 30,
+      "per_ravaged_province": 3,
+      "ravaged_cap": 20,
+      "aggression_divisor": 5,
+      "victory_lure": 5,
+      "other_front": 15,
+      "claim_score_floor": -30,
+      "claimed_provinces": 5,
+      "pretender_reluctance": 10,
+      "short_truce": 4,
+      "mediation": 30
+    },
+    "alliance": {
+      "military_commitment": -15,
+      "war_on_our_allies": -60,
+      "common_enemy": 25,
+      "strong_ratio": 1.0,
+      "strong_ally": 10,
+      "weak_ratio": 0.3,
+      "weak_ally": -10,
+      "common_rival": 15,
+      "friend_of_rival": -40
+    },
+    "vassalage": {
+      "power_margin_scale": 10.0,
+      "power_margin_cap": 40,
+      "independence_loss": -40,
+      "defeat_score": -30,
+      "defeat": 30,
+      "homage_gain": 25
+    },
+    "marriage": {
+      "match_bonus": 10,
+      "prestige_divisor": 10,
+      "prestige_cap": 20
+    },
+    "exchange": {
+      "access_given": -10,
+      "access_rival": -20,
+      "access_allies": 8,
+      "access_received": 6,
+      "trade_base": 6,
+      "trade_per_route": 4,
+      "trade_routes_cap": 12,
+      "trade_wealth_divisor": 1500,
+      "trade_wealth_cap": 10,
+      "trade_rival": -12,
+      "trade_embargo": -15,
+      "tribute_percent": 80,
+      "tribute_ruinous": -15,
+      "gold_empty_treasury": 5,
+      "gold_empty_percent": 150,
+      "ransom_min": 3,
+      "ransom_max": 40,
+      "ransom_high_rank": 10,
+      "hostage_heir": 30,
+      "hostage_other": 12,
+      "pledge_heir": 20,
+      "pledge_other": 10,
+      "gain_percent": 75,
+      "claimed_land": -5,
+      "held_by_our_troops": 5
+    },
+    "context": {
+      "attitude_divisor_peace": 5,
+      "attitude_divisor": 3,
+      "perjury": -15,
+      "hostage_held": 10,
+      "marriage_tie": 5,
+      "standing_pact": 5,
+      "trust_min": -30,
+      "trust_max": 20,
+      "threat_ratio": 1.5,
+      "threat_scale": 5.0,
+      "threat_cap": 15,
+      "weak_demander_ratio": 0.5,
+      "weak_demander": -8,
+      "abandoned_ally": -6,
+      "abandoned_allies_max": 3,
+      "prudence": -3
+    }
   }
 }
