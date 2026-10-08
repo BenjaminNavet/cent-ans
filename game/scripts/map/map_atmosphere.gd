@@ -3,7 +3,7 @@ extends Node3D
 
 ## Lot ME5 (chantier DN, carte) : atmosphère de la carte de campagne, rendu seulement. Réglages
 ## dans `data/fx/map_atmosphere.json` (schéma `fx_map_atmosphere.schema.json`) :
-## - cartes de cumulus éclairées par le soleil de la carte (même direction que les ombres RV-C) ;
+## - champ de cumulus du ciel lu dans le même bruit que les ombres RV-C (nuage et ombre se correspondent) ;
 ## - cirrus de haute couche ; rideaux de pluie lointains sur les provinces en pluie ou orage du
 ##   cœur ; bancs de brouillard du matin sur les fleuves (levés comme la brume TB6) ;
 ## - aurore boréale au bord nord (hiver, soirée dorée).
@@ -152,7 +152,7 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	_set_family(_cumulus, band_fade(distance, pair(cards.get("distance_in"), Vector2(260, 520)), pair(cards.get("distance_out"), Vector2(1000, 1250))) * clear)
 	if _cumulus != null:
 		var material := _cumulus.material_override as ShaderMaterial
-		material.set_shader_parameter("keep", lerpf(1.0, float(cards.get("cover_wet", 0.35)), 1.0 if wet_focus else _wet_sky * 0.5))
+		material.set_shader_parameter("wet", 1.0 if wet_focus else _wet_sky * 0.5)
 
 	var cirrus_rule: Dictionary = tuning.get("cirrus", {})
 	_set_family(_cirrus, band_fade(distance, pair(cirrus_rule.get("distance_in"), Vector2(420, 800)), pair(cirrus_rule.get("distance_out"), Vector2(1000, 1250))) * clear)
@@ -229,27 +229,30 @@ func _instance_node(name_text: String, mesh: Mesh, shader: Shader, count: int) -
 
 func _build_cumulus() -> void:
 	var rule: Dictionary = tuning.get("cumulus_cards", {})
-	var count := int(rule.get("count", 0))
-	if not bool(rule.get("enabled", true)) or count <= 0:
+	if not bool(rule.get("enabled", true)):
 		return
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(rule.get("seed", 1))
-	var heights := pair(rule.get("height"), Vector2(33, 41))
-	var sizes := pair(rule.get("size"), Vector2(70, 130))
-	var squash := float(rule.get("squash", 0.55))
-	_cumulus = _instance_node("CumulusCards", QuadMesh.new(), CUMULUS_SHADER, count)
-	var map_size := Vector2(_map_data.size)
-	for index in count:
-		var width := rng.randf_range(sizes.x, sizes.y)
-		var transform := Transform3D(Basis.from_scale(Vector3(width, width * squash, 1.0)),
-				Vector3(rng.randf() * map_size.x, rng.randf_range(heights.x, heights.y), rng.randf() * map_size.y))
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(_map_data.size)
+	_cumulus = _instance_node("CumulusField", plane, CUMULUS_SHADER, 3)
+	# Plan bas à l'altitude de l'ombre de cumulus (`cloud_height - 2`, `_apply_cumulus_tuning`).
+	var base := float(rule.get("base_height", 34.0))
+	var step := float(rule.get("layer_height", 1.6))
+	for index in 3:
+		var transform := Transform3D(Basis.IDENTITY, Vector3(_map_data.size.x * 0.5, base + step * index, _map_data.size.y * 0.5))
 		_cumulus.multimesh.set_instance_transform(index, transform)
-		_cumulus.multimesh.set_instance_custom_data(index, Color(rng.randf(), 0.0, 0.0, 0.0))
+		_cumulus.multimesh.set_instance_custom_data(index, Color(index * 0.5, 0.0, 0.0, 0.0))
 	var material := _cumulus.material_override as ShaderMaterial
-	material.set_shader_parameter("opacity", float(rule.get("opacity", 0.55)))
-	material.set_shader_parameter("drift_share", float(rule.get("drift_share", 1.0)))
+	for key: String in ["opacity", "soft", "fray", "fray_scale", "layer_step", "gain"]:
+		if rule.has(key):
+			material.set_shader_parameter(key, float(rule[key]))
+	material.set_shader_parameter("bank_band", pair(rule.get("bank_band"), Vector2(0.42, 0.62)))
 	material.set_shader_parameter("lit_color", color3(rule.get("lit_color"), Vector3(1.0, 0.97, 0.92)))
 	material.set_shader_parameter("shade_color", color3(rule.get("shade_color"), Vector3(0.56, 0.62, 0.72)))
+
+
+## Matériau du champ de cumulus du ciel (reçoit les réglages `cloud_shadow_*` comme le sol).
+func cumulus_material() -> ShaderMaterial:
+	return _cumulus.material_override as ShaderMaterial if _cumulus != null else null
 
 
 func _build_cirrus() -> void:

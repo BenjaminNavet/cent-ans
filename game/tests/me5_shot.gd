@@ -63,6 +63,9 @@ func _init() -> void:
 		for child in view.atmosphere.get_children():
 			states.append("%s=%s" % [child.name, child.visible])
 		var aurora := view.atmosphere.get_node_or_null("Aurora") as MeshInstance3D
+		if aurora_debug(view):
+			var cam := root.get_viewport().get_camera_3d()
+			print("me5_dbg cam=", cam.global_position, " far=", cam.far, " fade=", (view.atmosphere.get_node("Aurora") as MeshInstance3D).material_override.get_shader_parameter("atm_fade"), " pos=", (view.atmosphere.get_node("Aurora") as Node3D).global_position)
 		print("me5_shot: ", parts[0], " ", states, " map=", map_data.size, " aurora_strength=",
 				(aurora.material_override as ShaderMaterial).get_shader_parameter("strength") if aurora != null else -1)
 	if thumbs.size() > 1:  # planche 2 colonnes, pour une seule lecture d'image
@@ -73,3 +76,7 @@ func _init() -> void:
 	map.queue_free()
 	await process_frame
 	quit(0)
+
+
+func aurora_debug(view: CampaignWeatherView) -> bool:
+	return view.atmosphere.get_node_or_null("Aurora") != null

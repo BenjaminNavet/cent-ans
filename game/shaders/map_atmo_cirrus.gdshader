@@ -27,10 +27,11 @@ void fragment() {
 	vec2 p = (world_pos.xz - atm_wind * TIME * drift_share) * scale;
 	float u = dot(p, wind_dir);
 	float v = dot(p, side);
-	v += (atm_fbm(vec2(u * 0.7, v * 0.7) + 3.1) - 0.5) * 1.6;  // gauchissement : courbes lentes
-	float mass = smoothstep(0.42, 0.78, atm_fbm(vec2(u / stretch, v) * 1.1));
-	float fibres = atm_noise(vec2(u / (stretch * 2.2), v * 9.0)) * 0.6 + atm_noise(vec2(u / (stretch * 1.1), v * 20.0)) * 0.4;
-	float density = mass * smoothstep(0.3, 0.85, fibres);
+	v += (atm_fbm(vec2(u * 0.7, v * 0.7) + 3.1) - 0.5) * 0.45;  // gauchissement léger
+	float mass = smoothstep(0.52, 0.8, atm_fbm(vec2(u / stretch, v) * 1.1));
+	mass *= smoothstep(0.45, 0.7, atm_fbm(vec2(u * 0.35, v * 0.5) + 11.0));  // plages discontinues
+	float fibres = atm_noise(vec2(u / (stretch * 2.2), v * 22.0)) * 0.6 + atm_noise(vec2(u / (stretch * 1.1), v * 48.0)) * 0.4;
+	float density = mass * smoothstep(0.45, 0.85, fibres);
 	if (density <= 0.002) {
 		discard;
 	}

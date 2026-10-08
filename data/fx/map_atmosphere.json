@@ -11,18 +11,14 @@
   },
   "cumulus_cards": {
     "enabled": true,
-    "count": 150,
-    "seed": 5171,
-    "height": [
-      33.0,
-      41.0
-    ],
-    "size": [
-      110.0,
-      220.0
-    ],
-    "squash": 0.55,
-    "opacity": 0.7,
+    "base_height": 34.0,
+    "layer_height": 1.6,
+    "opacity": 0.62,
+    "soft": 0.16,
+    "fray": 0.1,
+    "fray_scale": 0.28,
+    "layer_step": 0.075,
+    "gain": 5.0,
     "distance_in": [
       260.0,
       520.0
@@ -37,27 +33,30 @@
       0.92
     ],
     "shade_color": [
+      0.5,
       0.56,
-      0.62,
-      0.72
+      0.67
     ],
-    "cover_wet": 0.35,
-    "drift_share": 1.0
+    "description": "Champ lu dans le même bruit que les ombres de cumulus RV-C (bloc clouds de campaign_map.json : cumulus_scale, cover, drift) ; trois plans empilés.",
+    "bank_band": [
+      0.42,
+      0.62
+    ]
   },
   "cirrus": {
     "enabled": true,
     "height": 96.0,
-    "opacity": 0.38,
+    "opacity": 0.09,
     "distance_in": [
-      420.0,
-      800.0
+      350.0,
+      600.0
     ],
     "distance_out": [
-      1000.0,
-      1250.0
+      750.0,
+      1050.0
     ],
-    "scale": 0.0024,
-    "stretch": 5.0,
+    "scale": 0.0045,
+    "stretch": 7.0,
     "drift_share": 0.35,
     "color": [
       0.96,
@@ -134,14 +133,14 @@
     "enabled": true,
     "north_margin_px": 0.0,
     "height": [
-      30.0,
-      150.0
+      0.0,
+      260.0
     ],
     "width_share": 0.8,
     "opacity": 0.9,
     "distance_in": [
-      450.0,
-      900.0
+      350.0,
+      700.0
     ],
     "distance_out": [
       2200.0,

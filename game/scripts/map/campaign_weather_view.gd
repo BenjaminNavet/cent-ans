@@ -218,6 +218,7 @@ func _cloud_shadow_materials() -> Array[ShaderMaterial]:
 	var sea := _map.get("sea") as MeshInstance3D if _map != null else null
 	var vegetation := _map.get_node_or_null("Vegetation") if _map != null else null
 	for material: Variant in [_terrain.material if _terrain != null else null,
+			atmosphere.cumulus_material() if atmosphere != null else null,  # ME5
 			sea.material_override if sea != null else null,
 			vegetation.get("_impostor_material") if vegetation != null else null]:
 		if material is ShaderMaterial:

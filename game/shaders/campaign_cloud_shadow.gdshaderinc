@@ -71,8 +71,9 @@ float cs_footprint_fade(float area_px) {
 	return smoothstep(cloud_shadow_fade_px.y, cloud_shadow_fade_px.x, cell_px);
 }
 
-// Densité [0, 1] des cumulus au point src du plan de nuées ; `wet` = ciel chargé (0-1).
-float cs_cumulus(vec2 src, float wet, float footprint) {
+// Champ brut des cumulus au point src du plan de nuées (`wet` = ciel chargé, 0-1) : valeur du bruit,
+// seuil et largeur du bord (ME5 : les cartes de cumulus du ciel lisent le même champ).
+float cs_cumulus_field(vec2 src, float wet, float footprint, out float threshold, out float edge) {
 	vec2 drift = TIME * cloud_shadow_wind * cloud_shadow_drift;
 	vec2 q = (src - drift) * cloud_shadow_scale;
 	// Domaine déformé : contours de cumulus bourgeonnants plutôt que taches rondes.
@@ -86,8 +87,16 @@ float cs_cumulus(vec2 src, float wet, float footprint) {
 	float cover = mix(cloud_shadow_cover.x, cloud_shadow_cover.y, smoothstep(0.3, 0.7, region));
 	cover = mix(cover, cloud_shadow_cover_wet, wet);
 	// cs_fbm vaut ≈ 0,5 ± 0,2 : seuil tel qu'environ `cover` du ciel soit au-dessus.
-	float threshold = mix(0.74, 0.36, cover);
-	float edge = cloud_shadow_edge + footprint * cloud_shadow_scale * 0.25;
+	threshold = mix(0.74, 0.36, cover);
+	edge = cloud_shadow_edge + footprint * cloud_shadow_scale * 0.25;
+	return c;
+}
+
+// Densité [0, 1] des cumulus au point src du plan de nuées ; `wet` = ciel chargé (0-1).
+float cs_cumulus(vec2 src, float wet, float footprint) {
+	float threshold;
+	float edge;
+	float c = cs_cumulus_field(src, wet, footprint, threshold, edge);
 	return smoothstep(threshold, threshold + edge, c);
 }
 

@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_add, depth_draw_never, cull_disabled, unshaded, shadows_disabled;
+render_mode blend_add, depth_draw_never, cull_disabled, unshaded, shadows_disabled, fog_disabled;
 
 // Lot ME5 : aurore boréale, rideau vertical le long du bord nord de la carte (hiver, soirée).
 // Rais verticaux qui ondulent, pied vif et net, sommet qui s'éteint, vert -> bleu -> violet.
@@ -28,11 +28,11 @@ void fragment() {
 	float y = quad_uv.y - foot;
 	float rays = atm_noise(vec2(quad_uv.x * 70.0 + wave * 12.0, t * 2.0));
 	rays = mix(0.35, 1.0, smoothstep(0.2, 0.9, rays));
-	float band = smoothstep(0.0, 0.05, y) * pow(clamp(1.0 - y * 1.25, 0.0, 1.0), 1.6);
-	float patches = smoothstep(0.25, 0.7, atm_fbm(vec2(quad_uv.x * 3.0 - t * 4.0, 1.7)));
+	float band = smoothstep(0.0, 0.05, y) * pow(clamp(1.0 - y * 0.95, 0.0, 1.0), 1.1);
+	float patches = smoothstep(0.15, 0.5, atm_fbm(vec2(quad_uv.x * 3.0 - t * 4.0, 1.7)));
 	float k = band * rays * patches * smoothstep(0.0, 0.12, quad_uv.x) * smoothstep(0.0, 0.12, 1.0 - quad_uv.x);
 	vec3 col = mix(color_low, color_mid, smoothstep(0.1, 0.5, y));
 	col = mix(col, color_high, smoothstep(0.45, 0.9, y));
-	ALBEDO = col * k * strength * atm_fade;
+	ALBEDO = col * k * strength * atm_fade * 22.0;
 	ALPHA = 1.0;
 }

@@ -63,8 +63,8 @@ func _check_build() -> void:
 	map.add_child(atmosphere)
 	atmosphere.setup(map, null)
 	_check(atmosphere.enabled, "atmosphère active")
-	var cumulus := atmosphere.get_node_or_null("CumulusCards") as MultiMeshInstance3D
-	_check(cumulus != null and cumulus.multimesh.instance_count == int(MapAtmosphere.data()["cumulus_cards"]["count"]), "cartes de cumulus en un MultiMesh")
+	var cumulus := atmosphere.get_node_or_null("CumulusField") as MultiMeshInstance3D
+	_check(cumulus != null and cumulus.multimesh.instance_count == 3 and atmosphere.cumulus_material() != null, "champ de cumulus en trois plans")
 	_check(atmosphere.get_node_or_null("Cirrus") != null, "cirrus")
 	_check(atmosphere.get_node_or_null("Aurora") != null, "aurore")
 	var fog := atmosphere.get_node_or_null("RiverFog") as MultiMeshInstance3D
