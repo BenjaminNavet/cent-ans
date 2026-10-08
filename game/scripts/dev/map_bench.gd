@@ -17,6 +17,7 @@ extends Node
 ## SZ6 : `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
 ## VT-I : `--bench-pan-only` s'arrête après le panoramique (mesure à une seule distance) ; le rapport
 ## donne aussi `startup_total_ms` (chargement de la carte) et `town_far` (statistiques du lointain).
+## FL : `--bench-hover` simule le curseur au centre de la vue (survol des armées et colonies).
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
@@ -128,6 +129,8 @@ func _ready() -> void:
 		elif arg.begins_with("--bench-ab="):
 			_ab_configs = arg.trim_prefix("--bench-ab=").split(";")
 	PerfProbe.enabled = OS.get_cmdline_user_args().has("--bench-probe")
+	if OS.get_cmdline_user_args().has("--bench-hover"):  # FL : survol avec le curseur au centre
+		get_parent().set("bench_mouse", get_viewport().get_visible_rect().size * 0.5)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	camera_rig.edge_pan_enabled = false

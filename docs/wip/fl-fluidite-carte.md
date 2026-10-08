@@ -25,6 +25,15 @@ Reprend `docs/wip/arbres-clignotants.md` et `docs/wip/fps-carte.md` (PF, ADR 016
   recalages d'arbres une image après (≤ 22 % de la hauteur) — à revoir si le joueur en voit encore.
 - [ ] FL2 appels de dessin et primitives.
 - [ ] FL3 images p50/p99 de la carte (shader du terrain, pics de scripts).
+  - Base FL0 prise à froid (cache) : peu fiable. Nouvelle base à chaud avec curseur simulé au
+    centre (`--bench-hover`) : d 150 p50 18,9 / p99 41 ms ; d 30 p50 19,8 / p99 41 ms ;
+    `misc/object_hover` 3,4 / 2,4 ms en moyenne (`map.misc` découpé en 5 sondes).
+  - FL3a en cours : `SettlementCells` (grille 256 u, sphère par case) ; dé-encombrement limité aux
+    cases du champ élargi (+ colonies encore affichées) ; survol limité aux cases proches du rayon.
+    Tests : sa_pick OK, smoke OK. **Préexistants, sans lien avec FL** (identiques avec le fichier
+    d'origine) : tb2_declutter « minor place … should lose its shield at distance 400 » (11-14
+    lieux, règle `_shield_until` TB2) ; settlements_render_test se bloque au chargement (fil
+    principal sur une variable de condition du moteur, 0 % CPU).
 
 ## FL1 — diagnostic (lecture du code)
 Style généralisé (HC1) + imposteurs GA3 actifs par défaut (`Ga3Vegetation.near_impostors()`) :
@@ -40,4 +49,5 @@ Session SC (`../gp-sc`, `feat/sc`, simplification de tout le code, 20 agents) d�
 elle peut toucher les fichiers FL. Bancs FL : uniquement `--bench-ab` en processus (charge).
 
 ## Prochaine étape
-Décomposer `map.misc` (campaign_map.gd:1548) et `settle/declutter` ; A/B du coût d'ombres FL1.
+Tests de FL3a (sa_pick, tb2_declutter, settlements_render, smoke) puis banc `--bench-hover` d 150/30 ;
+ensuite pics `life/reground`, `lod/level_emits`, temps non attribué ; A/B ombres FL1 ; FL2.
