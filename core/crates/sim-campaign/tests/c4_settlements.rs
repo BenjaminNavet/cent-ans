@@ -102,11 +102,11 @@ fn weights_split_the_province_income_between_controllers() {
         .or_else(|| settlement_of_kind(&state, &province, SettlementKind::Village))
         .expect("Île-de-France has a secondary settlement");
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    let france_before = state.faction_income_effective(data, &france);
-    let england_before = state.faction_income_effective(data, &england);
+    let france_before = state.faction_income(data, &france);
+    let england_before = state.faction_income(data, &england);
     state.settlements.get_mut(&town).unwrap().controller = england.clone();
-    let france_after = state.faction_income_effective(data, &france);
-    let england_after = state.faction_income_effective(data, &england);
+    let france_after = state.faction_income(data, &france);
+    let england_after = state.faction_income(data, &england);
 
     let tax_rate = state.factions[&england].tax_rate;
     let tech = sim_campaign::research::faction_province_tech_effects(&state, data, &england);

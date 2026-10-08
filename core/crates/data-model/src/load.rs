@@ -315,6 +315,9 @@ pub struct GameData {
     pub settlements: BTreeMap<SettlementId, Settlement>,
     /// Settlement ids of each province, the `city` first then file order.
     pub settlements_by_province: BTreeMap<ProvinceId, Vec<SettlementId>>,
+    /// Normalised share (0-1) of its province each settlement carries
+    /// (`Settlement::weight` over the province's total), precomputed at load.
+    pub settlement_weight_share: BTreeMap<SettlementId, f64>,
     /// `data/settlements/rules.json`, absent until written.
     pub settlement_rules: Option<SettlementRules>,
     /// Edges of `data/map/settlement_graph.json`, empty until `tools/geo` writes it.
@@ -482,6 +485,7 @@ impl GameData {
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
             settlements_by_province: BTreeMap::new(),
+            settlement_weight_share: BTreeMap::new(),
             settlement_rules: None,
             settlement_graph: Vec::new(),
             ai_alignment: None,

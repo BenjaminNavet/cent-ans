@@ -3,6 +3,7 @@
 //! diet, Lent, diet effects, plague resistance, wound recovery, AI diets,
 //! old saves and determinism. See `docs/design/2026-09-23-histoire-et-savoir.md`.
 
+use data_model::EffectKind;
 use data_model::{BuildingId, DietId, FactionId, GameData, ProvinceId, TechnologyId};
 use sim_battle::{BattleOutcome, SideId, SideResult};
 use sim_campaign::table::{self, DEFAULT_DIET, LENT_FISH_PIETY, LENT_PIETY_PENALTY};
@@ -192,15 +193,12 @@ fn the_table_is_paid_in_the_economy() {
     assert_eq!(economy.table_upkeep, expected);
     reference.end_turn_with(data, idle);
     state.end_turn_with(data, idle);
-    let paid = state.factions[&fac("fac_france")].table_upkeep_last_turn;
+    let paid = state.factions[&fac("fac_france")].last_budget.table;
     assert_eq!(paid, expected);
+    assert_eq!(reference.factions[&fac("fac_france")].last_budget.table, 0);
     assert_eq!(
-        reference.factions[&fac("fac_france")].table_upkeep_last_turn,
-        0
-    );
-    assert_eq!(
-        state.factions[&fac("fac_france")].upkeep_last_turn,
-        reference.factions[&fac("fac_france")].upkeep_last_turn + paid
+        state.factions[&fac("fac_france")].last_budget.upkeep(),
+        reference.factions[&fac("fac_france")].last_budget.upkeep() + paid
     );
 }
 
@@ -215,7 +213,7 @@ fn an_empty_treasury_brings_back_the_default_diet() {
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
     );
-    assert_eq!(state.factions[&fac("fac_france")].table_upkeep_last_turn, 0);
+    assert_eq!(state.factions[&fac("fac_france")].last_budget.table, 0);
     assert!(events
         .iter()
         .any(|e| e.kind == EventKind::Table && e.text_fr.contains("le trésor ne peut payer")));
@@ -310,12 +308,12 @@ fn diets_feed_the_population_and_the_regimen_boosts_them() {
     let normandie = prov("prov_normandie");
     let class = data_model::SocialClass::Peasants;
     let plain = table::diet_class_effects(&pulses, data, &normandie, class);
-    assert_eq!(plain.health.flat, 3.0);
+    assert_eq!(plain[EffectKind::Health].flat, 3.0);
     // Pulses only target the peasants' health.
     let nobles =
         table::diet_class_effects(&pulses, data, &normandie, data_model::SocialClass::Nobility);
-    assert_eq!(nobles.health.flat, 0.0);
-    assert_eq!(nobles.growth.percent, 5.0);
+    assert_eq!(nobles[EffectKind::Health].flat, 0.0);
+    assert_eq!(nobles[EffectKind::Growth].percent, 5.0);
     pulses
         .factions
         .get_mut(&fac("fac_france"))
@@ -323,7 +321,7 @@ fn diets_feed_the_population_and_the_regimen_boosts_them() {
         .technologies
         .insert(tech("tech_regimen_sanitatis"));
     let boosted = table::diet_class_effects(&pulses, data, &normandie, class);
-    assert!((boosted.health.flat - 3.75).abs() < 1e-9);
+    assert!((boosted[EffectKind::Health].flat - 3.75).abs() < 1e-9);
 
     for _ in 0..4 {
         reference.end_turn_with(data, idle);
@@ -618,16 +616,13 @@ fn diets_survive_saves_and_old_saves_load() {
     );
     assert_eq!(loaded, state);
 
-    // A save written before H3 has neither `diet` nor `table_upkeep_last_turn`.
+    // A save written before H3 has neither `diet` nor `last_budget`.
     let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
     for province in value["provinces"].as_object_mut().unwrap().values_mut() {
         province.as_object_mut().unwrap().remove("diet");
     }
     for faction in value["factions"].as_object_mut().unwrap().values_mut() {
-        faction
-            .as_object_mut()
-            .unwrap()
-            .remove("table_upkeep_last_turn");
+        faction.as_object_mut().unwrap().remove("last_budget");
     }
     let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
     assert_eq!(

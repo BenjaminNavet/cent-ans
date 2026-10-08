@@ -70,8 +70,8 @@ fn data_defines_four_levels_and_normal_is_neutral() {
 fn income_follows_the_level() {
     let data = game_data();
     let [easy, normal, hard] = levels(data);
-    let ai = |s: &CampaignState| s.faction_income_effective(data, &fac("fac_england"));
-    let player = |s: &CampaignState| s.faction_income_effective(data, &fac("fac_france"));
+    let ai = |s: &CampaignState| s.faction_income(data, &fac("fac_england"));
+    let player = |s: &CampaignState| s.faction_income(data, &fac("fac_france"));
     assert!(ai(&easy) < ai(&normal) && ai(&normal) < ai(&hard));
     assert!(player(&easy) > player(&normal));
     assert_eq!(player(&hard), player(&normal));
@@ -85,7 +85,7 @@ fn ai_upkeep_and_recruitment_are_cheaper_when_hard() {
     let [easy, normal, hard] = levels(data);
     let england = fac("fac_england");
     let france = fac("fac_france");
-    let upkeep = |s: &CampaignState, f: &FactionId| s.faction_army_upkeep(data, f);
+    let upkeep = |s: &CampaignState, f: &FactionId| s.faction_upkeep(data, f);
     assert!(upkeep(&hard, &england) < upkeep(&normal, &england));
     assert_eq!(upkeep(&easy, &england), upkeep(&normal, &england));
     assert_eq!(upkeep(&hard, &france), upkeep(&normal, &france));

@@ -11,15 +11,12 @@
 //! and truces from `Faction::relations`; vassal/overlord ties count as
 //! alliances.
 
-use std::collections::BTreeSet;
-
 use data_model::{
     BuildingId, CharacterId, CharacterStatus, Faction, FactionId, GameData, HistoricalDate,
     ProvinceId, RelationStatus, UnitTypeId,
 };
 
 use crate::diplomacy::{Claim, FOREVER};
-use crate::economy::TaxRate;
 use crate::frontier::GarrisonRole;
 use crate::orders::status_allows_command;
 use crate::save::CampaignError;
@@ -89,7 +86,7 @@ fn structural_balance(state: &CampaignState, data: &GameData, faction: &FactionI
         return (0, 0);
     };
     let rules = &data.economy_rules;
-    let income = state.faction_income_effective(data, faction);
+    let income = state.faction_income(data, faction);
     let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
     let opulence =
         (treasury - rules.opulence_seasons * income.max(0)).max(0) * rules.opulence_percent / 100;
@@ -122,7 +119,7 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
     state.difficulty = crate::difficulty::Difficulty::Normal;
     let factions: Vec<FactionId> = state.factions.keys().cloned().collect();
     for faction in factions {
-        if state.controlled_provinces(&faction).len() < rule.min_provinces
+        if state.controlled_provinces(&faction).count() < rule.min_provinces
             || crate::crusade::starting_army(state, data, &faction).is_some()
         {
             continue;
@@ -398,378 +395,321 @@ impl CampaignState {
         // frontiers classified by `CampaignState::is_frontier`, like the AI
         // does; lot C4: control is derived from the cities, so the
         // settlements must exist first).
-        for (id, province) in &data.provinces {
-            let Some(city) = data.province_city(id) else {
-                return Err(CampaignError::MissingData(format!("city of {id}")));
-            };
-            state.provinces.insert(
-                id.clone(),
-                ProvinceState {
-                    city: city.id.clone(),
-                    settlements: data
-                        .settlements_by_province
-                        .get(id)
-                        .cloned()
-                        .unwrap_or_else(|| vec![city.id.clone()]),
-                    unrest: province.population.classes.peasants.unrest / 4,
-                    devastation: 0,
-                    population: province.population.classes.clone(),
-                    revolt_seasons: 0,
-                    heresy: 0,
-                    heresy_religion: None,
-                    diet: None,
-                    edict: None,
-                },
-            );
-        }
+        init_provinces(&mut state, data)?;
         init_settlements(&mut state, data)?;
-        let mut city_garrisons = std::collections::BTreeMap::new();
-        for (id, province) in &data.provinces {
-            let owner = &province.owner;
-            let role = if data.factions.get(owner).is_some_and(|f| &f.capital == id) {
-                GarrisonRole::Capital
-            } else if state.is_frontier(data, owner, id) {
-                GarrisonRole::Frontier
-            } else {
-                GarrisonRole::Interior
-            };
-            let garrison = units_from(data, &garrison_composition(data, role))?;
-            city_garrisons.insert(id.clone(), garrison);
-        }
-        for (id, garrison) in city_garrisons {
-            if let Some(city) = state.city_state_mut(&id) {
-                city.garrison = garrison;
-            }
-        }
+        init_city_garrisons(&mut state, data)?;
 
-        // Factions and diplomacy.
-        for (id, faction) in &data.factions {
-            let faction_state = FactionState {
-                treasury: faction.treasury.map_or(DEFAULT_TREASURY, |t| t as i64),
-                income_last_turn: 0,
-                upkeep_last_turn: 0,
-                at_war_with: BTreeSet::new(),
-                allies: BTreeSet::new(),
-                truces: Default::default(),
-                alive: true,
-                ruler: faction.ruler.clone(),
-                heir: faction.heir.clone(),
-                capital: faction.capital.clone(),
-                technologies: faction.starting_technologies.iter().cloned().collect(),
-                tax_rate: TaxRate::Normal,
-                goods: Default::default(),
-                army_upkeep_last_turn: 0,
-                building_upkeep_last_turn: 0,
-                deficit_seasons: 0,
-                projected_income: 0,
-                table_upkeep_last_turn: 0,
-                coinage: Default::default(),
-                price_level: crate::coinage::PRICE_BASE,
-                coinage_changed_year: None,
-                seigniorage_last_turn: 0,
-                recoinage_last_turn: 0,
-                ransom_debts: Vec::new(),
-                chivalric_order: None,
-                trade_income_last_turn: 0,
-                budget_history: Vec::new(),
-                ledger: Default::default(),
-                regency: false,
-                embargoes: BTreeSet::new(),
-                // Lot FE: a view of the title holdings (ADR 0098).
-                suzerain: crate::feudal::liege_of(&state, data, id),
-                loyalty: 100,
-                claims: faction
-                    .claims
-                    .iter()
-                    .map(|claim| Claim {
-                        kind: claim.kind,
-                        faction: claim.faction.clone(),
-                        province: claim.province.clone(),
-                        text_fr: claim
-                            .note
-                            .clone()
-                            .unwrap_or_else(|| "prétention historique".to_owned()),
-                        expires_turn: None,
-                    })
-                    .collect(),
-                modifiers: Vec::new(),
-                war_scores: Default::default(),
-                war_started: Default::default(),
-                religion: Some(faction.religion.clone()),
-                papal_favor: 50,
-                excommunicated_until: None,
-                offers: Vec::new(),
-                last_offer_turn: Default::default(),
-                last_war_declared: None,
-                research: None,
-                research_progress: 0,
-                research_points_last_turn: 0,
-                research_banked: Default::default(),
-                research_queue: Vec::new(),
-            };
-            state.factions.insert(id.clone(), faction_state);
-        }
-        for (id, faction) in &data.factions {
-            for relation in &faction.relations {
-                let other = &relation.faction;
-                if !state.factions.contains_key(other) {
-                    continue;
-                }
-                match relation.status {
-                    RelationStatus::War => {
-                        state
-                            .factions
-                            .get_mut(id)
-                            .expect("exists")
-                            .at_war_with
-                            .insert(other.clone());
-                        state
-                            .factions
-                            .get_mut(other)
-                            .expect("exists")
-                            .at_war_with
-                            .insert(id.clone());
-                    }
-                    RelationStatus::Alliance
-                    | RelationStatus::Vassal
-                    | RelationStatus::Overlord => {
-                        state
-                            .factions
-                            .get_mut(id)
-                            .expect("exists")
-                            .allies
-                            .insert(other.clone());
-                        state
-                            .factions
-                            .get_mut(other)
-                            .expect("exists")
-                            .allies
-                            .insert(id.clone());
-                    }
-                    RelationStatus::Truce => {
-                        let until = INITIAL_TRUCE_TURNS;
-                        state
-                            .factions
-                            .get_mut(id)
-                            .expect("exists")
-                            .truces
-                            .insert(other.clone(), until);
-                        state
-                            .factions
-                            .get_mut(other)
-                            .expect("exists")
-                            .truces
-                            .insert(id.clone(), until);
-                    }
-                    RelationStatus::Embargo => {
-                        state
-                            .factions
-                            .get_mut(id)
-                            .expect("exists")
-                            .embargoes
-                            .insert(other.clone());
-                    }
-                    RelationStatus::MarriageTie => {
-                        state.add_modifier(id, other, 15, "Alliance matrimoniale", FOREVER);
-                    }
-                    RelationStatus::Peace => {}
-                }
-            }
-        }
-        for faction in state.factions.values_mut() {
-            let enemies: Vec<FactionId> = faction.at_war_with.iter().cloned().collect();
-            for enemy in enemies {
-                faction.war_started.insert(enemy.clone(), 0);
-                faction.war_scores.insert(enemy, 0);
-            }
-        }
-        // A faction never fights its allies at the start.
-        let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
-        for id in &ids {
-            let allies = state.factions[id].allies.clone();
-            state
-                .factions
-                .get_mut(id)
-                .expect("exists")
-                .at_war_with
-                .retain(|f| !allies.contains(f));
-        }
+        init_factions(&mut state, data);
+        init_relations(&mut state, data);
+        init_wars(&mut state);
 
-        // Characters. Historical characters not yet born in 1337 stay out of
-        // the state: `dynasty::resolve_births` spawns them at their real
-        // date if their parents are alive and married (spec M4 § 2).
-        for (id, character) in &data.characters {
-            if character.status == Some(CharacterStatus::Unborn) {
-                continue;
-            }
-            let location = character
-                .starting_location
-                .clone()
-                .filter(|p| state.provinces.contains_key(p))
-                .or_else(|| {
-                    data.factions
-                        .get(&character.faction)
-                        .map(|f| f.capital.clone())
-                });
-            let family = character.family.as_ref();
-            state.characters.insert(
-                id.clone(),
-                CharacterState {
-                    name: None,
-                    faction: character.faction.clone(),
-                    alive: !character.death.as_ref().is_some_and(dead_before_start),
-                    birth_year: character.birth.year().unwrap_or(1300),
-                    sex: character.sex,
-                    house: character.house.clone(),
-                    location,
-                    army: None,
-                    skills: character.skills,
-                    captive: character.status == Some(CharacterStatus::Captive),
-                    captor: None,
-                    ransom_terms: None,
-                    experience: 0,
-                    skill_points: 0,
-                    skills_learned: BTreeSet::new(),
-                    traits: character
-                        .traits
-                        .iter()
-                        .filter(|t| data.traits.contains_key(*t))
-                        .cloned()
-                        .collect(),
-                    spouse: None,
-                    children: Vec::new(),
-                    father: family.and_then(|f| f.father.clone()),
-                    mother: family.and_then(|f| f.mother.clone()),
-                    piety: character.piety.unwrap_or(50).min(100),
-                    prestige: 0,
-                    loyalty: 100,
-                    title: character
-                        .titles
-                        .iter()
-                        .find(|t| t.to.is_none())
-                        .or_else(|| character.titles.first())
-                        .map(|t| t.title.clone()),
-                    governor_of: None,
-                    battles_fought: 0,
-                    sieges_won: 0,
-                    raids_led: 0,
-                    death_year: character
-                        .death
-                        .as_ref()
-                        .filter(|d| dead_before_start(d))
-                        .and_then(|d| d.year()),
-                    retinue: Vec::new(),
-                },
-            );
-        }
+        init_characters(&mut state, data);
         link_families(&mut state, data);
-        // Republics whose data names no ruler (Florence, the Confederates)
-        // start with an elected head, like a realm whose dynasty died out.
-        let rulerless: Vec<FactionId> = state
-            .factions
-            .iter()
-            .filter(|(id, f)| id.as_str() != REBELS_FACTION && f.ruler.is_none())
-            .map(|(id, _)| id.clone())
-            .collect();
-        for id in rulerless {
-            let ruler = crate::dynasty::spawn_ruler(&mut state, data, &id);
-            state.factions.get_mut(&id).expect("exists").ruler = Some(ruler);
-        }
-        // Factions whose data names no heir get the one their succession law
-        // designates (spec M4 § 1: "héritier calculable").
-        let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
-        for id in ids {
-            let faction_state = &state.factions[&id];
-            let heir_alive = faction_state
-                .heir
-                .as_ref()
-                .is_some_and(|h| state.characters.get(h).is_some_and(|c| c.alive));
-            if heir_alive {
-                continue;
-            }
-            let heir = faction_state
-                .ruler
-                .clone()
-                .and_then(|ruler| crate::dynasty::pick_heir_by_law(&state, data, &id, &ruler));
-            state.factions.get_mut(&id).expect("exists").heir = heir;
-        }
+        init_rulers_and_heirs(&mut state, data);
 
-        // Main armies (the virtual rebels faction owns no province and never
-        // fields troops of its own; it only ever inherits a garrison already
-        // weakened by the revolt that hands it a province, spec § 1.1).
-        for (id, faction) in &data.factions {
-            if id.as_str() == REBELS_FACTION {
-                continue;
-            }
-            // JR1: a faction the crusade rules base in a settlement starts
-            // there with the army they list (it holds no city).
-            let (station, units) = match crate::crusade::starting_army(&state, data, id) {
-                Some(start) => start,
-                None => {
-                    // LR-15: its seat (never another realm's city), else,
-                    // when it holds no place at all, its capital's city.
-                    let Some(station) = state
-                        .faction_seat(id)
-                        .or_else(|| state.province_city_id(&faction.capital).cloned())
-                    else {
-                        return Err(CampaignError::MissingData(format!(
-                            "capital {} of {id}",
-                            faction.capital
-                        )));
-                    };
-                    (
-                        station,
-                        units_from(data, &main_army_composition(data, faction))?,
-                    )
-                }
-            };
-            let army_id = state.allocate_army_id();
-            state.armies.insert(
-                army_id.clone(),
-                Army::new(
-                    id.clone(),
-                    crate::state::ArmyPosition::Settlement(station),
-                    units,
-                ),
-            );
-            if let Some(general) = pick_general(&state, data, faction) {
-                state.attach_general(&army_id, &general);
-            }
-            let allowance = state.army_grid_allowance(data, &state.armies[&army_id]);
-            state
-                .armies
-                .get_mut(&army_id)
-                .expect("just created")
-                .movement_left = allowance;
-        }
+        init_main_armies(&mut state, data)?;
         crate::economy::resolve_goods(&mut state, data);
         // JR4b: the great realms start with garrisons they can pay.
         fit_starting_garrisons(&mut state, data);
         // JR1: the crusade opens when its rules and its faction exist.
         crate::crusade::init_crusade(&mut state, data);
-        // Vassal loyalty starts at its equilibrium (M5).
-        let vassals: Vec<(FactionId, FactionId)> = state
-            .factions
-            .iter()
-            .filter_map(|(id, f)| f.suzerain.clone().map(|s| (id.clone(), s)))
-            .collect();
-        for (vassal, suzerain) in vassals {
-            let loyalty = crate::diplomacy::loyalty_target(&state, data, &vassal, &suzerain);
-            state.factions.get_mut(&vassal).expect("exists").loyalty = loyalty;
-        }
-        // ADR 0114: no alliance between a suzerain and its direct vassal.
-        crate::feudal::drop_feudal_alliances(&mut state, data);
-        // F8: the felony cases of 1337 (Robert of Artois harboured by Edward III).
-        for case in &data.feudal_rules.start_felonies {
-            crate::feudal::open_felony_towards(
-                &mut state,
-                data,
-                &case.vassal,
-                &case.liege,
-                case.reason,
-            );
-        }
+        init_feudal_ties(&mut state, data);
         Ok(state)
+    }
+}
+
+fn init_provinces(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
+    for (id, province) in &data.provinces {
+        let Some(city) = data.province_city(id) else {
+            return Err(CampaignError::MissingData(format!("city of {id}")));
+        };
+        state.provinces.insert(
+            id.clone(),
+            ProvinceState {
+                city: city.id.clone(),
+                settlements: data
+                    .settlements_by_province
+                    .get(id)
+                    .cloned()
+                    .unwrap_or_else(|| vec![city.id.clone()]),
+                unrest: province.population.classes.peasants.unrest / 4,
+                devastation: 0,
+                population: province.population.classes.clone(),
+                revolt_seasons: 0,
+                heresy: 0,
+                heresy_religion: None,
+                diet: None,
+                edict: None,
+            },
+        );
+    }
+    Ok(())
+}
+
+/// The city of every province holds the garrison of its role (capital,
+/// frontier, interior).
+fn init_city_garrisons(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
+    for (id, province) in &data.provinces {
+        let owner = &province.owner;
+        let role = if data.factions.get(owner).is_some_and(|f| &f.capital == id) {
+            GarrisonRole::Capital
+        } else if state.is_frontier(data, owner, id) {
+            GarrisonRole::Frontier
+        } else {
+            GarrisonRole::Interior
+        };
+        let garrison = units_from(data, &garrison_composition(data, role))?;
+        if let Some(city) = state.city_state_mut(id) {
+            city.garrison = garrison;
+        }
+    }
+    Ok(())
+}
+
+fn init_factions(state: &mut CampaignState, data: &GameData) {
+    for (id, faction) in &data.factions {
+        let faction_state = FactionState {
+            treasury: faction.treasury.map_or(DEFAULT_TREASURY, |t| t as i64),
+            ruler: faction.ruler.clone(),
+            heir: faction.heir.clone(),
+            technologies: faction.starting_technologies.iter().cloned().collect(),
+            // Lot FE: a view of the title holdings (ADR 0098).
+            suzerain: crate::feudal::liege_of(state, data, id),
+            claims: faction
+                .claims
+                .iter()
+                .map(|claim| Claim {
+                    kind: claim.kind,
+                    faction: claim.faction.clone(),
+                    province: claim.province.clone(),
+                    text_fr: claim
+                        .note
+                        .clone()
+                        .unwrap_or_else(|| "prétention historique".to_owned()),
+                    expires_turn: None,
+                })
+                .collect(),
+            religion: Some(faction.religion.clone()),
+            ..FactionState::new(faction.capital.clone())
+        };
+        state.factions.insert(id.clone(), faction_state);
+    }
+}
+
+/// Applies `edge(a_state, b)` and `edge(b_state, a)`: a symmetric link
+/// between two factions of the state.
+fn link(
+    state: &mut CampaignState,
+    a: &FactionId,
+    b: &FactionId,
+    edge: impl Fn(&mut FactionState, &FactionId),
+) {
+    for (from, to) in [(a, b), (b, a)] {
+        edge(state.factions.get_mut(from).expect("exists"), to);
+    }
+}
+
+/// Wars, alliances, truces, embargoes and marriage ties of
+/// `Faction::relations` (vassal and overlord ties count as alliances).
+fn init_relations(state: &mut CampaignState, data: &GameData) {
+    for (id, faction) in &data.factions {
+        for relation in &faction.relations {
+            let other = &relation.faction;
+            if !state.factions.contains_key(other) {
+                continue;
+            }
+            match relation.status {
+                RelationStatus::War => link(state, id, other, |f, to| {
+                    f.at_war_with.insert(to.clone());
+                }),
+                RelationStatus::Alliance | RelationStatus::Vassal | RelationStatus::Overlord => {
+                    link(state, id, other, |f, to| {
+                        f.allies.insert(to.clone());
+                    });
+                }
+                RelationStatus::Truce => link(state, id, other, |f, to| {
+                    f.truces.insert(to.clone(), INITIAL_TRUCE_TURNS);
+                }),
+                RelationStatus::Embargo => {
+                    let own = state.factions.get_mut(id).expect("exists");
+                    own.embargoes.insert(other.clone());
+                }
+                RelationStatus::MarriageTie => {
+                    state.add_modifier(id, other, 15, "Alliance matrimoniale", FOREVER);
+                }
+                RelationStatus::Peace => {}
+            }
+        }
+    }
+}
+
+/// Opens the war clock of every starting war, then drops the wars between
+/// allies: a faction never fights its allies at the start.
+fn init_wars(state: &mut CampaignState) {
+    for faction in state.factions.values_mut() {
+        for enemy in faction.at_war_with.clone() {
+            faction.war_started.insert(enemy.clone(), 0);
+            faction.war_scores.insert(enemy, 0);
+        }
+        let allies = faction.allies.clone();
+        faction.at_war_with.retain(|f| !allies.contains(f));
+    }
+}
+
+/// Characters. Historical characters not yet born in 1337 stay out of the
+/// state: `dynasty::resolve_births` spawns them at their real date if their
+/// parents are alive and married (spec M4 § 2).
+fn init_characters(state: &mut CampaignState, data: &GameData) {
+    for (id, character) in &data.characters {
+        if character.status == Some(CharacterStatus::Unborn) {
+            continue;
+        }
+        let location = character
+            .starting_location
+            .clone()
+            .filter(|p| state.provinces.contains_key(p))
+            .or_else(|| {
+                data.factions
+                    .get(&character.faction)
+                    .map(|f| f.capital.clone())
+            });
+        let family = character.family.as_ref();
+        let died_before_start = character.death.as_ref().filter(|d| dead_before_start(d));
+        state.characters.insert(
+            id.clone(),
+            CharacterState {
+                alive: died_before_start.is_none(),
+                location,
+                captive: character.status == Some(CharacterStatus::Captive),
+                traits: character
+                    .traits
+                    .iter()
+                    .filter(|t| data.traits.contains_key(*t))
+                    .cloned()
+                    .collect(),
+                father: family.and_then(|f| f.father.clone()),
+                mother: family.and_then(|f| f.mother.clone()),
+                piety: character.piety.unwrap_or(50).min(100),
+                title: character
+                    .titles
+                    .iter()
+                    .find(|t| t.to.is_none())
+                    .or_else(|| character.titles.first())
+                    .map(|t| t.title.clone()),
+                death_year: died_before_start.and_then(|d| d.year()),
+                ..CharacterState::new(
+                    character.faction.clone(),
+                    character.birth.year().unwrap_or(1300),
+                    character.sex,
+                    character.house.clone(),
+                    character.skills,
+                )
+            },
+        );
+    }
+}
+
+/// Republics whose data names no ruler (Florence, the Confederates) start
+/// with an elected head, like a realm whose dynasty died out; factions whose
+/// data names no heir get the one their succession law designates (spec M4
+/// § 1: "héritier calculable").
+fn init_rulers_and_heirs(state: &mut CampaignState, data: &GameData) {
+    let rulerless: Vec<FactionId> = state
+        .factions
+        .iter()
+        .filter(|(id, f)| id.as_str() != REBELS_FACTION && f.ruler.is_none())
+        .map(|(id, _)| id.clone())
+        .collect();
+    for id in rulerless {
+        let ruler = crate::dynasty::spawn_ruler(state, data, &id);
+        state.factions.get_mut(&id).expect("exists").ruler = Some(ruler);
+    }
+    let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for id in ids {
+        let faction_state = &state.factions[&id];
+        let heir_alive = faction_state
+            .heir
+            .as_ref()
+            .is_some_and(|h| state.characters.get(h).is_some_and(|c| c.alive));
+        if heir_alive {
+            continue;
+        }
+        let heir = faction_state
+            .ruler
+            .clone()
+            .and_then(|ruler| crate::dynasty::pick_heir_by_law(state, data, &id, &ruler));
+        state.factions.get_mut(&id).expect("exists").heir = heir;
+    }
+}
+
+/// Main armies (the virtual rebels faction owns no province and never
+/// fields troops of its own; it only ever inherits a garrison already
+/// weakened by the revolt that hands it a province, spec § 1.1).
+fn init_main_armies(state: &mut CampaignState, data: &GameData) -> Result<(), CampaignError> {
+    for (id, faction) in &data.factions {
+        if id.as_str() == REBELS_FACTION {
+            continue;
+        }
+        // JR1: a faction the crusade rules base in a settlement starts
+        // there with the army they list (it holds no city).
+        let (station, units) = match crate::crusade::starting_army(state, data, id) {
+            Some(start) => start,
+            None => {
+                // LR-15: its seat (never another realm's city), else,
+                // when it holds no place at all, its capital's city.
+                let Some(station) = state
+                    .faction_seat(id)
+                    .or_else(|| state.province_city_id(&faction.capital).cloned())
+                else {
+                    return Err(CampaignError::MissingData(format!(
+                        "capital {} of {id}",
+                        faction.capital
+                    )));
+                };
+                (
+                    station,
+                    units_from(data, &main_army_composition(data, faction))?,
+                )
+            }
+        };
+        let army_id = state.allocate_army_id();
+        state.armies.insert(
+            army_id.clone(),
+            Army::new(
+                id.clone(),
+                crate::state::ArmyPosition::Settlement(station),
+                units,
+            ),
+        );
+        if let Some(general) = pick_general(state, data, faction) {
+            state.attach_general(&army_id, &general);
+        }
+        let allowance = state.army_grid_allowance(data, &state.armies[&army_id]);
+        state
+            .armies
+            .get_mut(&army_id)
+            .expect("just created")
+            .movement_left = allowance;
+    }
+    Ok(())
+}
+
+/// Vassal loyalty starts at its equilibrium (M5); no alliance between a
+/// suzerain and its direct vassal (ADR 0114); the felony cases of 1337
+/// (Robert of Artois harboured by Edward III, F8).
+fn init_feudal_ties(state: &mut CampaignState, data: &GameData) {
+    let vassals: Vec<(FactionId, FactionId)> = state
+        .factions
+        .iter()
+        .filter_map(|(id, f)| f.suzerain.clone().map(|s| (id.clone(), s)))
+        .collect();
+    for (vassal, suzerain) in vassals {
+        let loyalty = crate::diplomacy::loyalty_target(state, data, &vassal, &suzerain);
+        state.factions.get_mut(&vassal).expect("exists").loyalty = loyalty;
+    }
+    crate::feudal::drop_feudal_alliances(state, data);
+    for case in &data.feudal_rules.start_felonies {
+        crate::feudal::open_felony_towards(state, data, &case.vassal, &case.liege, case.reason);
     }
 }
 

@@ -339,7 +339,7 @@ fn side_dict(
         "name" => data.faction_name(side).as_str(),
         "ruler" => ruler_name(state, data, side).as_str(),
         "treasury" => f.treasury,
-        "income" => f.income_last_turn,
+        "income" => f.last_budget.income,
         "weariness" => i64::from(f.ledger.weariness),
         "provinces" => &provinces,
         "settlements" => &settlements,

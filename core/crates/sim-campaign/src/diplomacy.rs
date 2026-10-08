@@ -6,6 +6,7 @@
 //! and the UI (which shows the verdict and its reasons before sending).
 //! Proposals to the player become [`Offer`]s answered with `answer_offer`.
 
+use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{CharacterId, ClaimKind, FactionId, GameData, ProvinceId};
@@ -525,7 +526,7 @@ impl CampaignState {
         // F1: a charming (or haughty) ruler on the other side.
         add(
             "Diplomatie de son souverain",
-            self.ruler_effect_points(data, b, |e| e.diplomacy.apply(0.0) * 2.0),
+            self.ruler_effect_points(data, b, |e| e[EffectKind::Diplomacy].apply(0.0) * 2.0),
         );
         match self.relation(a, b) {
             RelationKind::War => add(AT_WAR_REASON, -50),
@@ -2146,7 +2147,7 @@ pub fn loyalty_target(
     }
     target += crate::feudal::remembered_loyalty(state, data, vassal, suzerain);
     // F1 `Loyalty`: a loyal vassal ruler, a generous or kind overlord.
-    let loyalty = |e: &crate::buildings::EffectTotals| e.loyalty.apply(0.0);
+    let loyalty = |e: &crate::buildings::EffectTotals| e[EffectKind::Loyalty].apply(0.0);
     target += state.ruler_effect_points(data, vassal, loyalty)
         + state.ruler_effect_points(data, suzerain, loyalty);
     // Embargoed by an enemy of the suzerain: the vassal's trade suffers
@@ -2355,9 +2356,9 @@ pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
     !me.regency
         && ruler_free
         && me.treasury > 0
-        && me.treasury >= 2 * me.upkeep_last_turn.max(0)
-        && (me.income_last_turn >= me.upkeep_last_turn
-            || me.treasury >= 8 * me.upkeep_last_turn.max(0))
+        && me.treasury >= 2 * me.last_budget.upkeep().max(0)
+        && (me.last_budget.income >= me.last_budget.upkeep()
+            || me.treasury >= 8 * me.last_budget.upkeep().max(0))
 }
 
 /// Power of the enemies `faction` already fights (rebels excluded).

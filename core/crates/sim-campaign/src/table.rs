@@ -226,7 +226,6 @@ impl CampaignState {
     /// controls.
     pub fn faction_table_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
         self.controlled_provinces(faction)
-            .iter()
             .map(|id| self.diet_cost(data, id, &self.province_diet(id)))
             .sum()
     }
@@ -370,7 +369,7 @@ pub(crate) fn pay_table(
     available: i64,
     events: &mut Vec<GameEvent>,
 ) -> i64 {
-    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction).cloned().collect();
     let mut paid = 0;
     for id in provinces {
         let diet = state.province_diet(&id);
@@ -491,7 +490,6 @@ pub(crate) fn resolve_lent(
     for faction in factions {
         let diets: Vec<(ProvinceId, &Diet)> = state
             .controlled_provinces(&faction)
-            .iter()
             .filter_map(|id| {
                 data.diets
                     .get(&state.province_diet(id))
@@ -578,7 +576,7 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
         return Vec::new();
     }
     let default = default_diet();
-    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction);
+    let provinces: Vec<ProvinceId> = state.controlled_provinces(faction).cloned().collect();
     let mut orders = Vec::new();
     if f.treasury < 0 {
         for id in provinces {
@@ -591,7 +589,7 @@ pub fn ai_choose_diets(state: &CampaignState, data: &GameData, faction: &Faction
         }
         return orders;
     }
-    let income = f.projected_income.max(f.income_last_turn).max(0);
+    let income = f.last_budget.income.max(f.last_budget.income).max(0);
     let mut budget = state.faction_table_upkeep(data, faction);
     let ceiling =
         (income * AI_TABLE_INCOME_PERCENT / 100).min(f.treasury / AI_TABLE_RESERVE_SEASONS.max(1));

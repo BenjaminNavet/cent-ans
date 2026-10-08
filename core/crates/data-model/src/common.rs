@@ -148,6 +148,58 @@ pub enum EffectKind {
     DietHealth,
 }
 
+impl EffectKind {
+    /// Every kind, in declaration order (`ALL[kind.index()] == kind`).
+    pub const ALL: [EffectKind; 39] = [
+        EffectKind::Wealth,
+        EffectKind::Health,
+        EffectKind::Unrest,
+        EffectKind::GoodsSatisfaction,
+        EffectKind::Growth,
+        EffectKind::TaxIncome,
+        EffectKind::TradeIncome,
+        EffectKind::Production,
+        EffectKind::ResearchCivil,
+        EffectKind::ResearchMilitary,
+        EffectKind::RecruitSlots,
+        EffectKind::RecruitCost,
+        EffectKind::ArmyUpkeep,
+        EffectKind::ArmyExperience,
+        EffectKind::ArmyMorale,
+        EffectKind::ArmyArmor,
+        EffectKind::ArmyRanged,
+        EffectKind::ArmyMelee,
+        EffectKind::Garrison,
+        EffectKind::FortificationLevel,
+        EffectKind::SiegeResistance,
+        EffectKind::Piety,
+        EffectKind::Prestige,
+        EffectKind::Supply,
+        EffectKind::Movement,
+        EffectKind::AttritionResistance,
+        EffectKind::Loyalty,
+        EffectKind::SiegeSpeed,
+        EffectKind::ConstructionSpeed,
+        EffectKind::Diplomacy,
+        EffectKind::Intrigue,
+        EffectKind::Fertility,
+        EffectKind::BattleCharge,
+        EffectKind::BattleRanged,
+        EffectKind::BattleDefense,
+        EffectKind::ResearchPoints,
+        EffectKind::PlagueResistance,
+        EffectKind::WoundRecovery,
+        EffectKind::DietHealth,
+    ];
+    /// Number of kinds: the length of any per-kind table.
+    pub const COUNT: usize = Self::ALL.len();
+
+    /// Position of the kind in [`EffectKind::ALL`], for per-kind tables.
+    pub const fn index(self) -> usize {
+        self as usize
+    }
+}
+
 /// How an effect value combines with the base value.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -183,3 +235,16 @@ pub struct Cost {
 
 /// Titles of Wikipedia pages or book references backing an entity.
 pub type Sources = Vec<String>;
+
+#[cfg(test)]
+mod effect_kind_tests {
+    use super::EffectKind;
+
+    #[test]
+    fn all_is_in_declaration_order() {
+        for (position, kind) in EffectKind::ALL.iter().enumerate() {
+            assert_eq!(kind.index(), position);
+        }
+        assert_eq!(EffectKind::DietHealth.index() + 1, EffectKind::COUNT);
+    }
+}

@@ -307,14 +307,14 @@ fn technologies_raise_income() {
     let data = game_data();
     let mut state = france(data, 7);
     let france_id = fac("fac_france");
-    let before = state.faction_income_effective(data, &france_id);
+    let before = state.faction_income(data, &france_id);
     state
         .factions
         .get_mut(&france_id)
         .unwrap()
         .technologies
         .insert(tech("tech_royal_taxation"));
-    let after = state.faction_income_effective(data, &france_id);
+    let after = state.faction_income(data, &france_id);
     assert!(after > before, "{after} <= {before}");
 }
 

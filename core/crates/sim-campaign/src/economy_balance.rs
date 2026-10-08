@@ -175,7 +175,10 @@ impl CampaignState {
     /// every upkeep, the Table included); `None` for an unknown faction.
     pub fn faction_net_last_turn(&self, id: &FactionId) -> Option<i64> {
         let faction = self.factions.get(id)?;
-        Some(faction.income_last_turn + faction.trade_income_last_turn - faction.upkeep_last_turn)
+        Some(
+            faction.last_budget.income + faction.last_budget.trade_income
+                - faction.last_budget.upkeep(),
+        )
     }
 
     /// Treasury of every faction, taken at the start of a turn so that
@@ -197,17 +200,17 @@ impl CampaignState {
             if !faction.alive {
                 continue;
             }
-            let table = faction.table_upkeep_last_turn;
-            let armies = faction.army_upkeep_last_turn;
-            let buildings = faction.building_upkeep_last_turn;
+            let table = faction.last_budget.table;
+            let armies = faction.last_budget.army_upkeep;
+            let buildings = faction.last_budget.building_upkeep;
             let mut record = BudgetRecord {
                 turn,
                 treasury: faction.treasury,
                 // C5: trade routes are credited after the taxes, apart.
-                receipts: faction.income_last_turn + faction.trade_income_last_turn,
+                receipts: faction.last_budget.income + faction.last_budget.trade_income,
                 armies,
                 buildings,
-                administration: faction.upkeep_last_turn - armies - buildings - table,
+                administration: faction.last_budget.upkeep() - armies - buildings - table,
                 table,
                 other: 0,
             };

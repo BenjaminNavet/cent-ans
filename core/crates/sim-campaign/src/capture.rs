@@ -25,7 +25,7 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 
 use crate::diplomacy::REBELS_FACTION;
-use crate::economy::province_income;
+use crate::economy::province_base_income;
 use crate::economy_balance::signed_livres;
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState};
@@ -270,7 +270,7 @@ pub fn preview(
     let share = place_share(rules, place.kind);
     let (income, heads) = state.provinces.get(&place.province).map_or((0.0, 0), |p| {
         (
-            province_income(&data.economy_rules, p),
+            province_base_income(data, p),
             p.population.iter().map(|(_, c)| c.count).sum::<u64>(),
         )
     });

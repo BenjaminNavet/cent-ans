@@ -1,6 +1,7 @@
 //! Marriages, births, deaths, succession and regency (spec § 2), plus the
 //! character queries the Godot bridge reads (spec § 3).
 
+use data_model::EffectKind;
 use std::collections::BTreeSet;
 
 use data_model::{
@@ -502,35 +503,8 @@ fn spawn_head(
         id.clone(),
         CharacterState {
             name: Some(name),
-            faction: faction.clone(),
-            alive: true,
-            birth_year: state.year - age,
-            sex: Sex::Male,
-            house,
             location: capital,
-            army: None,
-            skills,
-            captive: false,
-            captor: None,
-            ransom_terms: None,
-            experience: 0,
-            skill_points: 0,
-            skills_learned: BTreeSet::new(),
-            traits: BTreeSet::new(),
-            spouse: None,
-            children: Vec::new(),
-            father: None,
-            mother: None,
-            piety: 50,
-            prestige: 0,
-            loyalty: 100,
-            title: None,
-            governor_of: None,
-            battles_fought: 0,
-            sieges_won: 0,
-            raids_led: 0,
-            death_year: None,
-            retinue: Vec::new(),
+            ..CharacterState::new(faction.clone(), state.year - age, Sex::Male, house, skills)
         },
     );
     id
@@ -579,35 +553,11 @@ fn spawn_child(state: &mut CampaignState, data: &GameData, child: NewChild) -> C
         id.clone(),
         CharacterState {
             name,
-            faction,
-            alive: true,
-            birth_year,
-            sex,
-            house,
             location,
-            army: None,
-            skills,
-            captive: false,
-            captor: None,
-            ransom_terms: None,
-            experience: 0,
-            skill_points: 0,
-            skills_learned: BTreeSet::new(),
             traits,
-            spouse: None,
-            children: Vec::new(),
             father: father.clone(),
             mother: mother.clone(),
-            piety: 50,
-            prestige: 0,
-            loyalty: 100,
-            title: None,
-            governor_of: None,
-            battles_fought: 0,
-            sieges_won: 0,
-            raids_led: 0,
-            death_year: None,
-            retinue: Vec::new(),
+            ..CharacterState::new(faction, birth_year, sex, house, skills)
         },
     );
     for parent in [&father, &mother].into_iter().flatten() {
@@ -748,13 +698,9 @@ pub(crate) fn resolve_births(
             continue;
         }
         let fertility_percent = skills::character_effects(state, data, &mother_id)
-            .fertility
+            [EffectKind::Fertility]
             .flat
-            .max(
-                skills::character_effects(state, data, &father_id)
-                    .fertility
-                    .flat,
-            );
+            .max(skills::character_effects(state, data, &father_id)[EffectKind::Fertility].flat);
         let permille = (f64::from(BASE_BIRTH_PERMILLE) * (1.0 + fertility_percent / 100.0))
             .round()
             .clamp(0.0, 1000.0) as u32;
@@ -849,7 +795,7 @@ pub(crate) fn resolve_regencies(
             .map(|r| state.character_name(data, r))
             .unwrap_or_default();
         if minor_ruler {
-            let ruled = state.controlled_provinces(&faction_id);
+            let ruled: Vec<ProvinceId> = state.controlled_provinces(&faction_id).cloned().collect();
             for province in state
                 .provinces
                 .iter_mut()
@@ -915,18 +861,11 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| {
-            crate::buildings::effects_of(data, &s.buildings)
-                .prestige
-                .apply(0.0)
-        })
+        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Prestige].apply(0.0))
         .sum();
-    let tech = crate::research::faction_tech_effects(state, data, faction)
-        .prestige
+    let tech = crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
         .apply(0.0);
-    let own = skills::character_effects(state, data, &ruler)
-        .prestige
-        .apply(0.0);
+    let own = skills::character_effects(state, data, &ruler)[EffectKind::Prestige].apply(0.0);
     ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
         // C7: the retinue's prestige is already a yearly figure.
         + crate::retinue::yearly_prestige(state, data, &ruler)
@@ -947,11 +886,7 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
         .settlements
         .values()
         .filter(|s| &s.controller == faction)
-        .map(|s| {
-            crate::buildings::effects_of(data, &s.buildings)
-                .piety
-                .apply(0.0)
-        })
+        .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Piety].apply(0.0))
         .sum();
     ((buildings / PIETY_EFFECT_DIVISOR).round() as i32).clamp(0, MAX_YEARLY_BUILDING_PIETY)
 }

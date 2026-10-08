@@ -105,10 +105,10 @@ fn tax_efficiency_is_read_from_the_data() {
     let state = start(&data);
     let paris = ProvinceId::new("prov_ile_de_france").unwrap();
     let province = state.provinces.get(&paris).expect("Île-de-France");
-    let income = sim_campaign::economy::province_income(&data.economy_rules, province);
+    let income = sim_campaign::economy::province_base_income(&data, province);
     assert!(income > 0.0);
     data.economy_rules.tax_efficiency *= 2.0;
-    let doubled = sim_campaign::economy::province_income(&data.economy_rules, province);
+    let doubled = sim_campaign::economy::province_base_income(&data, province);
     assert!((doubled - 2.0 * income).abs() < 1e-6);
 }
 

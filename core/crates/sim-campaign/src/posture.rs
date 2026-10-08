@@ -17,6 +17,7 @@
 //! - **Entrenched**: taken before moving, outside a settlement; stays until
 //!   a move order; less supply lost, `BattleDefense` in auto-resolve.
 
+use data_model::EffectKind;
 use data_model::{CoverClass, FactionId, GameData, PostureRules};
 use sim_battle::{BattleOpening, SideId};
 
@@ -252,9 +253,8 @@ pub fn ambush_skill(state: &CampaignState, data: &GameData, army: &Army) -> f64 
         return 0.0;
     };
     let command = f64::from(state.characters[general].skills.command);
-    let intrigue = crate::skills::character_effects(state, data, general)
-        .intrigue
-        .apply(0.0);
+    let intrigue =
+        crate::skills::character_effects(state, data, general)[EffectKind::Intrigue].apply(0.0);
     command.max(intrigue)
 }
 

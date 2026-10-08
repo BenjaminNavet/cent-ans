@@ -143,7 +143,6 @@ impl CampaignSim {
         };
         let provinces: VarArray = state
             .controlled_provinces(&faction)
-            .iter()
             .filter_map(|id| {
                 let diet = state.province_diet(id);
                 let cost = state.diet_cost(data, id, &diet);
@@ -159,7 +158,7 @@ impl CampaignSim {
             .collect();
         vdict! {
             "total" => state.faction_table_upkeep(data, &faction),
-            "last_turn" => f.table_upkeep_last_turn,
+            "last_turn" => f.last_budget.table,
             "provinces" => &provinces,
         }
     }

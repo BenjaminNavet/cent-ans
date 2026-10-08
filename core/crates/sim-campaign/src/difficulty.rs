@@ -7,7 +7,7 @@
 //! a normal campaign plays bit for bit as before the lot.
 //!
 //! Levers (who they touch):
-//! - income of the AI factions / of the player ([`CampaignState::faction_income_effective`]);
+//! - income of the AI factions / of the player ([`CampaignState::faction_income`]);
 //! - upkeep of the AI armies and garrisons ([`CampaignState::faction_upkeep`]);
 //! - recruitment cost of the AI ([`CampaignState::recruit_cost`]);
 //! - unrest in the player's provinces (`population::resolve_population`);

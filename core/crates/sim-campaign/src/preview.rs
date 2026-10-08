@@ -11,7 +11,7 @@
 //! - `tax_income`, `trade_income`, `production`: seasonal income in livres —
 //!   of the province for a building ([`CampaignState::province_gross_income`]),
 //!   of the faction for a technology
-//!   ([`CampaignState::faction_income_effective`]);
+//!   ([`CampaignState::faction_income`]);
 //! - `health`, `wealth`, `goods_satisfaction`, `unrest`: the value the gauge
 //!   tends towards ([`crate::population::equilibrium`]), averaged over the
 //!   population (the province's for a building, the faction's provinces' for
@@ -187,7 +187,7 @@ fn read_stat(
             Some(state.province_gross_income(data, province, faction, tax_rate, &tech) as f64)
         }
         (K::TaxIncome | K::TradeIncome | K::Production, Context::Faction(_)) => {
-            Some(state.faction_income_effective(data, faction) as f64)
+            Some(state.faction_income(data, faction) as f64)
         }
         (K::ResearchPoints, _) => Some(f64::from(state.research_points_per_turn(data, faction))),
         (K::FortificationLevel, Context::Settlement { settlement, .. }) => {

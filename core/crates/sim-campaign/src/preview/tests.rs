@@ -187,14 +187,8 @@ fn technology_preview_matches_the_acquired_technology() {
         .unwrap()
         .technologies
         .insert(tech.clone());
-    assert_eq!(
-        income[0],
-        state.faction_income_effective(data, &france()) as f64
-    );
-    assert_eq!(
-        income[1],
-        learned.faction_income_effective(data, &france()) as f64
-    );
+    assert_eq!(income[0], state.faction_income(data, &france()) as f64);
+    assert_eq!(income[1], learned.faction_income(data, &france()) as f64);
     assert!(income[1] > income[0], "{income:?}");
 
     let hospital = TechnologyId::new("tech_hospital_reform").unwrap();

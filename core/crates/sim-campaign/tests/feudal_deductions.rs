@@ -163,7 +163,7 @@ fn tribute_goes_to_the_direct_liege_only() {
     let data = game_data();
     let mut state = with_rear_vassal(data);
     let navarre = fac("fac_navarre");
-    state.factions.get_mut(&navarre).unwrap().income_last_turn = 1000;
+    state.factions.get_mut(&navarre).unwrap().last_budget.income = 1000;
     let expected = 1000 * data.feudal_rules.vassal_tribute_percent / 100;
     assert_eq!(
         feudal::tribute_due(&state, data, &navarre),

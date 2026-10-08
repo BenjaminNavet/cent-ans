@@ -156,17 +156,20 @@ pub fn faction_province_tech_effects(
     faction: &FactionId,
 ) -> EffectTotals {
     let all = faction_tech_effects(state, data, faction);
-    EffectTotals {
-        tax_income: all.tax_income,
-        trade_income: all.trade_income,
-        health: all.health,
-        growth: all.growth,
-        unrest: all.unrest,
-        wealth: all.wealth,
-        production: all.production,
-        classes: all.classes,
-        ..EffectTotals::default()
+    let mut totals = EffectTotals::default();
+    totals.classes = all.classes;
+    for kind in [
+        EffectKind::TaxIncome,
+        EffectKind::TradeIncome,
+        EffectKind::Health,
+        EffectKind::Growth,
+        EffectKind::Unrest,
+        EffectKind::Wealth,
+        EffectKind::Production,
+    ] {
+        totals[kind] = all[kind];
     }
+    totals
 }
 
 /// `(defence, siegecraft)` parts of `faction`'s technology
@@ -323,8 +326,8 @@ impl CampaignState {
             let effects = crate::skills::character_effects(self, data, ruler);
             let bonus = match branch {
                 // Medicine is learned lore: civil scholarship speeds it up.
-                TechBranch::Civil | TechBranch::Medicine => effects.research_civil,
-                TechBranch::Military => effects.research_military,
+                TechBranch::Civil | TechBranch::Medicine => effects[EffectKind::ResearchCivil],
+                TechBranch::Military => effects[EffectKind::ResearchMilitary],
             };
             flat += bonus.flat;
             percent += bonus.percent;

@@ -341,57 +341,18 @@ fn create_faction(
         .get(title)
         .and_then(|t| t.de_jure_provinces.first().cloned())
         .unwrap_or_else(|| template.capital.clone());
-    // ADR 0114: the feudal tie stands for an alliance.
-    let allies = BTreeSet::new();
     let faction = FactionState {
-        treasury: 0,
-        income_last_turn: 0,
-        upkeep_last_turn: 0,
-        at_war_with: BTreeSet::new(),
-        allies,
-        truces: Default::default(),
-        alive: true,
         ruler: Some(character.clone()),
-        heir: None,
-        capital,
         technologies: template.technologies.clone(),
         tax_rate: template.tax_rate,
-        goods: Default::default(),
-        army_upkeep_last_turn: 0,
-        building_upkeep_last_turn: 0,
-        deficit_seasons: 0,
-        projected_income: 0,
-        regency: false,
-        embargoes: BTreeSet::new(),
         suzerain: Some(grantor.clone()),
         loyalty: (data.feudal_rules.loyalty.base + data.feudal_rules.loyalty.title_granted)
             .clamp(0, 100) as u8,
-        claims: Vec::new(),
-        modifiers: Vec::new(),
-        war_scores: Default::default(),
-        war_started: Default::default(),
         religion: template.religion.clone(),
         papal_favor: template.papal_favor,
-        excommunicated_until: None,
-        offers: Vec::new(),
-        last_offer_turn: Default::default(),
-        last_war_declared: None,
-        research: None,
-        research_progress: 0,
-        research_points_last_turn: 0,
-        research_banked: Default::default(),
-        research_queue: Vec::new(),
-        table_upkeep_last_turn: 0,
         coinage: template.coinage,
         price_level: template.price_level,
-        coinage_changed_year: None,
-        seigniorage_last_turn: 0,
-        recoinage_last_turn: 0,
-        ransom_debts: Vec::new(),
-        chivalric_order: None,
-        trade_income_last_turn: 0,
-        budget_history: Vec::new(),
-        ledger: Default::default(),
+        ..FactionState::new(capital)
     };
     state.factions.insert(id.clone(), faction);
     state.detach_general(character);

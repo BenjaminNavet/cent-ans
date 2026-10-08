@@ -64,7 +64,7 @@ fn secondary_places_weigh_half_on_their_province() {
     });
     let full = unrest_of(&state, data, &province, |_| 1.0);
     let effects = state.province_building_effects(data, &province);
-    let got = effects.unrest.flat + effects.unrest.percent;
+    let got = effects[EffectKind::Unrest].flat + effects[EffectKind::Unrest].percent;
     assert!(
         (got - weighed).abs() < 1e-9,
         "{province}: {got} vs {weighed}"

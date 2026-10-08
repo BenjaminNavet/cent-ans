@@ -8,6 +8,7 @@
 //! A [`Place`] also accepts a province id, which stands for its city (the v1
 //! JSON field name `province` is still read as an alias).
 
+use data_model::EffectKind;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -1485,7 +1486,9 @@ impl CampaignState {
         let capital = self.factions.get(&state.controller).is_some_and(|f| {
             f.capital == state.province && self.province_city_id(&f.capital) == Some(settlement)
         });
-        BASE_RECRUIT_SLOTS + usize::from(capital) + effects.recruit_slots.flat.max(0.0) as usize
+        BASE_RECRUIT_SLOTS
+            + usize::from(capital)
+            + effects[EffectKind::RecruitSlots].flat.max(0.0) as usize
     }
 
     /// Recruitment slots still free this turn in `settlement` (B7b: only the
@@ -1551,8 +1554,8 @@ impl CampaignState {
         let mut effects = self.settlement_effects(data, settlement);
         effects.merge(&research::faction_tech_effects(self, data, faction));
         let targeted = effects.unit_categories.get(unit_type.category).recruit_cost;
-        let flat = effects.recruit_cost.flat + targeted.flat;
-        let percent = (effects.recruit_cost.percent + targeted.percent).max(-75.0);
+        let flat = effects[EffectKind::RecruitCost].flat + targeted.flat;
+        let percent = (effects[EffectKind::RecruitCost].percent + targeted.percent).max(-75.0);
         let base = f64::from(unit_type.cost.money);
         // H5: prices follow the coinage.
         let prices = crate::coinage::price_factor(self, faction);

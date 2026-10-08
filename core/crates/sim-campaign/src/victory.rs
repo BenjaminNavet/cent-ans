@@ -126,7 +126,7 @@ impl CampaignState {
 
     /// Campaign score of `faction`: land, objectives, prestige, treasury.
     pub fn campaign_score(&self, data: &GameData, faction: &FactionId) -> i64 {
-        let provinces = self.controlled_provinces(faction).len() as i64;
+        let provinces = self.controlled_provinces(faction).count() as i64;
         let objectives = self
             .objectives(data, faction)
             .iter()

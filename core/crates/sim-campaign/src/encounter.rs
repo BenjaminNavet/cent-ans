@@ -23,8 +23,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::battle_auto::Winner;
 use crate::chronicle::season_of;
-use crate::chronicle::{apply_effect, EventContext};
+use crate::chronicle::EventContext;
 use crate::diplomacy::REBELS_FACTION;
+use crate::effects::apply_effect;
 use crate::events::{EventKind, GameEvent};
 use crate::march::px_per_km;
 use crate::navigation::Cell;

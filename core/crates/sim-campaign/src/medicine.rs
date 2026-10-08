@@ -17,6 +17,7 @@
 //!   tended wounded ([`recovered_wounded`], applied by
 //!   `movement::apply_outcome`).
 
+use data_model::EffectKind;
 use data_model::{FactionId, GameData, ProvinceId};
 
 use crate::state::CampaignState;
@@ -43,17 +44,17 @@ pub fn plague_resistance(state: &CampaignState, data: &GameData, province: &Prov
     let Some(controller) = state.province_controller(province) else {
         return 0.0;
     };
-    let buildings = state
-        .province_building_effects(data, province)
-        .plague_resistance;
-    let techs = crate::research::faction_tech_effects(state, data, controller).plague_resistance;
+    let buildings = state.province_building_effects(data, province)[EffectKind::PlagueResistance];
+    let techs = crate::research::faction_tech_effects(state, data, controller)
+        [EffectKind::PlagueResistance];
     let total = buildings.flat + buildings.percent + techs.flat + techs.percent;
     total.clamp(0.0, MAX_PLAGUE_RESISTANCE) / 100.0
 }
 
 /// Wound recovery of `faction` as a fraction (0 to 0.5).
 pub fn wound_recovery(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
-    let value = crate::research::faction_tech_effects(state, data, faction).wound_recovery;
+    let value =
+        crate::research::faction_tech_effects(state, data, faction)[EffectKind::WoundRecovery];
     (value.flat + value.percent).clamp(0.0, MAX_WOUND_RECOVERY) / 100.0
 }
 
@@ -68,10 +69,10 @@ pub fn army_wound_recovery(
     let Some(army) = state.armies.get(army) else {
         return 0.0;
     };
-    let mut value =
-        crate::research::faction_tech_effects(state, data, &army.faction).wound_recovery;
+    let mut value = crate::research::faction_tech_effects(state, data, &army.faction)
+        [EffectKind::WoundRecovery];
     if let Some(general) = &army.general {
-        let own = crate::skills::character_effects(state, data, general).wound_recovery;
+        let own = crate::skills::character_effects(state, data, general)[EffectKind::WoundRecovery];
         value.flat += own.flat;
         value.percent += own.percent;
     }

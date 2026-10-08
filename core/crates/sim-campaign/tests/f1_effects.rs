@@ -3,6 +3,7 @@
 //! battles, and the new chronicle effects (capture, ransom, delayed events).
 //! See `docs/design/v2-finalisation.md` (lot F1).
 
+use data_model::EffectKind;
 use std::path::PathBuf;
 
 use data_model::{
@@ -136,7 +137,10 @@ fn garrison_effect_lowers_garrison_upkeep() {
     let walls = ["bld_palisade", "bld_stone_walls", "bld_castle"].map(bld);
     assert!(!city_mut(&mut state, &province).garrison.is_empty());
     strip(&mut state, &province, &walls);
-    assert_eq!(state.province_effects(data, &province).garrison.flat, 0.0);
+    assert_eq!(
+        state.province_effects(data, &province)[EffectKind::Garrison].flat,
+        0.0
+    );
     let before = state.faction_upkeep(data, &france_id);
     city_mut(&mut state, &province)
         .buildings
@@ -327,11 +331,11 @@ fn production_buildings_raise_income() {
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
     strip(&mut state, &province, &[bld("bld_weaving_workshop")]);
-    let before = state.faction_income_effective(data, &france_id);
+    let before = state.faction_income(data, &france_id);
     city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_weaving_workshop"));
-    let after = state.faction_income_effective(data, &france_id);
+    let after = state.faction_income(data, &france_id);
     assert!(
         after > before,
         "weaving workshop +15 % production: {before} -> {after}"
@@ -783,7 +787,7 @@ fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: Even
         province: None,
     };
     let mut events = Vec::new();
-    sim_campaign::chronicle::apply_effect(state, data, &effect, &ctx, &mut events);
+    sim_campaign::effects::apply_effect(state, data, &effect, &ctx, &mut events);
 }
 
 #[test]

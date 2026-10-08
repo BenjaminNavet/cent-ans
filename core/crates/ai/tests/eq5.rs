@@ -132,7 +132,7 @@ fn a_tribute_the_treasury_cannot_bear_is_budgeted() {
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 1).unwrap();
     at_peace(&mut state);
     let france = fac("fac_france");
-    let income = state.faction_income_effective(data, &france);
+    let income = state.faction_income(data, &france);
     {
         let f = state.factions.get_mut(&france).unwrap();
         f.treasury = 0;

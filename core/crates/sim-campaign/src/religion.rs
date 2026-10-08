@@ -1,6 +1,7 @@
 //! Religion (M5 spec § 2.4): papal favour, excommunication, papal mediation,
 //! the Great Western Schism (dates from `data/religions`) and heresies.
 
+use data_model::EffectKind;
 use data_model::{BuildingCategory, FactionId, GameData, ProvinceId, ReligionId, ReligionKind};
 
 use crate::diplomacy::{
@@ -339,9 +340,8 @@ pub fn effective_piety(
     let Some(c) = state.characters.get(character) else {
         return 50;
     };
-    let bonus = crate::skills::character_effects(state, data, character)
-        .piety
-        .apply(0.0);
+    let bonus =
+        crate::skills::character_effects(state, data, character)[EffectKind::Piety].apply(0.0);
     (f64::from(c.piety) + bonus).round().clamp(0.0, 100.0) as u8
 }
 

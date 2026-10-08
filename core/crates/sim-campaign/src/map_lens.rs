@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{FactionId, GameData, ProvinceId};
 
 use crate::diplomacy::claimed_provinces;
-use crate::economy::{province_income, seasonal_supply_change};
+use crate::economy::{province_base_income, seasonal_supply_change};
 use crate::population::weighted_unrest;
 use crate::state::CampaignState;
 
@@ -74,7 +74,7 @@ pub fn map_lens(
             };
             let friendly = state.is_friendly_territory(viewer, id);
             let lens = ProvinceLens {
-                income: province_income(&data.economy_rules, province),
+                income: province_base_income(data, province),
                 population: province.population.total(),
                 unrest: weighted_unrest(&province.population),
                 vassal_loyalty: vassal.map(|f| f.loyalty),
