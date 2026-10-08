@@ -5,10 +5,10 @@ from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import openrouter, ui_illumination, ui_ornaments
+from cent_ans_tools.codex import schema_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 PIECE = {"size": [60, 40], "margins": [10, 8, 10, 8], "content": [4, 4, 4, 4]}
@@ -187,13 +187,6 @@ def test_contact_sheet_small(tmp_path: Path) -> None:
 
 def test_ui_ornaments_match_schema() -> None:
     """``data/art/ui_ornaments.yaml`` matches its schema."""
-    schema = json.loads(
-        (ROOT / "data" / "schemas" / "ui_ornaments.schema.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(
-        Draft202012Validator(schema).iter_errors(ui_ornaments.load_ornaments())
-    )
+    validator = schema_validator(ROOT / "data", "ui_ornaments.schema.json")
+    errors = list(validator.iter_errors(ui_ornaments.load_ornaments()))
     assert not errors, [e.message for e in errors]

@@ -4,12 +4,10 @@ import json
 from pathlib import Path
 
 import yaml
-from jsonschema import Draft202012Validator
+
+from cent_ans_tools.codex import schema_validator
 
 REPO = Path(__file__).resolve().parents[2]
-SCHEMA = json.loads(
-    (REPO / "data/schemas/art_tree_species.schema.json").read_text(encoding="utf-8")
-)
 CATALOGUE = yaml.safe_load(
     (REPO / "data/art/tree_species.yaml").read_text(encoding="utf-8")
 )
@@ -18,7 +16,7 @@ COMPILED = json.loads((REPO / "data/art/tree_species.json").read_text(encoding="
 
 def test_catalogue_and_table_match_schema() -> None:
     """The YAML source and its JSON compilation both validate."""
-    validator = Draft202012Validator(SCHEMA)
+    validator = schema_validator(REPO / "data", "art_tree_species.schema.json")
     assert not list(validator.iter_errors(CATALOGUE))
     assert not list(validator.iter_errors(COMPILED))
 

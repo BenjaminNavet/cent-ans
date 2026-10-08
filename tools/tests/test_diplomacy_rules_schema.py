@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from cent_ans_tools.codex import schema_validator
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -14,9 +14,8 @@ def _load(path: Path) -> dict:
 
 def test_unknown_motive_is_rejected() -> None:
     """A cap on a motive the simulation does not know is a schema error."""
-    schema = _load(DATA / "schemas" / "diplomacy_rules.schema.json")
-    rules = {"opinion_caps": {"flattery": 10}}
-    assert list(Draft202012Validator(schema).iter_errors(rules))
+    validator = schema_validator(DATA, "diplomacy_rules.schema.json")
+    assert list(validator.iter_errors({"opinion_caps": {"flattery": 10}}))
 
 
 def test_marriage_and_herald_are_capped() -> None:

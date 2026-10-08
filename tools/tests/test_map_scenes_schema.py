@@ -6,7 +6,8 @@ import re
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
+
+from cent_ans_tools.codex import schema_validator
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -17,15 +18,7 @@ def _load(path: Path) -> dict:
 
 def _event_validator() -> Draft202012Validator:
     """Event schema validator resolving `common.schema.json` locally."""
-    registry = Registry()
-    for path in (DATA / "schemas").glob("*.schema.json"):
-        schema = _load(path)
-        resource = Resource.from_contents(schema)
-        registry = registry.with_resource(schema["$id"], resource).with_resource(
-            path.name, resource
-        )
-    schema = _load(DATA / "schemas" / "event.schema.json")
-    return Draft202012Validator(schema, registry=registry)
+    return schema_validator(DATA, "event.schema.json")
 
 
 def _rules_validator() -> Draft202012Validator:

@@ -9,9 +9,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from jsonschema import Draft202012Validator
 from PIL import Image
 
+from cent_ans_tools.codex import schema_validator
 from cent_ans_tools.geo import block_compress, colormap
 
 MPP = 718.9765625
@@ -48,10 +48,11 @@ def _distance(image: np.ndarray, color: str) -> np.ndarray:
 
 def test_repository_style_matches_schema() -> None:
     """``colormap_style.yaml`` validates against ``colormap_style.schema.json``."""
-    schema = json.loads(colormap.SCHEMA_PATH.read_text(encoding="utf-8"))
+    validator = schema_validator(
+        colormap.SCHEMA_PATH.parents[1], colormap.SCHEMA_PATH.name
+    )
     document = yaml.safe_load(colormap.STYLE_PATH.read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(document))
+    errors = list(validator.iter_errors(document))
     assert not errors, [error.message for error in errors]
 
 

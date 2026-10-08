@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from jsonschema import Draft202012Validator
+from conftest import assert_matches_schema
 from PIL import Image
 
 from cent_ans_tools import ground_materials as gm
@@ -124,10 +124,7 @@ def test_pack_writes_arrays_imports_and_manifest(tmp_path: Path) -> None:
     assert f"slices/horizontal={columns}" in imported
     assert f"slices/vertical={rows}" in imported
     manifest = json.loads(manifest_path.read_text())
-    schema = json.loads(
-        (ROOT / "data" / "schemas" / "ground_materials_pack.schema.json").read_text()
-    )
-    Draft202012Validator(schema).validate(manifest)
+    assert_matches_schema(manifest_path, "ground_materials_pack.schema.json")
     assert [m["layer"] for m in manifest["layers"]] == list(range(count))
 
 

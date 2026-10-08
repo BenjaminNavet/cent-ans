@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
+from conftest import assert_matches_schema
 from PIL import Image
 
 from cent_ans_tools import vfx_flipbooks
@@ -20,14 +20,7 @@ def _settings() -> dict:
 
 def test_fire_flipbooks_match_schema() -> None:
     """The flipbook settings match their schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "fx_fire_flipbooks.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_settings()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
+    assert_matches_schema("fx/fire_flipbooks.json", "fx_fire_flipbooks.schema.json")
 
 
 def test_sheets_are_eight_by_eight() -> None:
