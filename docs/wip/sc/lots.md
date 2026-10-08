@@ -306,3 +306,6 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Tests d'intégration sim-campaign : 106 binaires → 8 thèmes (`tests/<thème>/main.rs`), 800 tests, aucune assertion modifiée.
 - Restes : helpers à signature particulière non migrés (feudal_ai, jr_crusade, p1_no_quarter…) ; RT5 sur les autres crates.
 - Reste : ~10 tests tools (ground_materials, colormap, biomes…) construisent encore un `Draft202012Validator(schema)` nu → `assert_matches_schema` (casse dès qu'un schéma référence common.schema.json, cf. fa_ui_assets corrigé 34ccfc87e).
+
+## RT5 (fusionné 08/10)
+- Tests d'intégration sim-battle 58 → 6 binaires (ai_tactics, controls, combat, siege, terrain, determinism), ai 26 → 4 (economy, strategy, movement, replay) ; 513 tests inchangés. `common::data()` partagé dans ai/tests/common.
