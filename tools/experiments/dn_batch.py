@@ -160,7 +160,12 @@ def timed(entry_id: str, step: str, **extra):
 
 
 def full_prompt(entry: dict) -> str:
-    """Decor: charter prefix + object + suffix from ``ga3_decor.json``; figure: white-sheet suffix."""
+    """Decor: charter prefix + object + suffix from ``ga3_decor.json``; figure: white-sheet suffix.
+
+    ``image`` entries (illustrations) carry their whole prompt.
+    """
+    if entry["kind"] == "image":
+        return entry["prompt"]
     if entry["kind"] == "decor":
         style = json.loads(DECOR_STYLE.read_text())
         suffix = style["style_suffix"]
@@ -210,6 +215,14 @@ FAL_IMAGE_ENDPOINT = "fal-ai/z-image/turbo"
 FAL_IMAGE_COST_USD = 0.005
 
 
+def image_size(entry: dict) -> dict:
+    """fal ``image_size``: the ingest size of an ``image`` entry (multiple of 16), else 1024 square."""
+    if entry["kind"] == "image":
+        width, height = entry["ingest"]["size"]
+        return {"width": -(-width // 16) * 16, "height": -(-height // 16) * 16}
+    return {"width": SIZE, "height": SIZE}
+
+
 def fal_image(entry: dict, seed: int, target: Path) -> None:
     """One Z-Image Turbo call on fal (same prompt, seed, 1024 square), PNG at ``target``."""
     import fal_client
@@ -223,7 +236,7 @@ def fal_image(entry: dict, seed: int, target: Path) -> None:
                 FAL_IMAGE_ENDPOINT,
                 arguments={
                     "prompt": full_prompt(entry),
-                    "image_size": {"width": SIZE, "height": SIZE},
+                    "image_size": image_size(entry),
                     "seed": seed,
                     "enable_prompt_expansion": False,
                     "output_format": "png",
@@ -245,7 +258,7 @@ def fal_image(entry: dict, seed: int, target: Path) -> None:
         {
             "seed": seed, "endpoint": FAL_IMAGE_ENDPOINT, "file": f"img/s{seed}.png",
             "arguments": {
-                "image_size": f"{SIZE}x{SIZE}", "seed": seed, "enable_prompt_expansion": False,
+                "image_size": image_size(entry), "seed": seed, "enable_prompt_expansion": False,
                 "output_format": "png",
             },
             "usd": FAL_IMAGE_COST_USD,
@@ -258,6 +271,53 @@ def fal_image(entry: dict, seed: int, target: Path) -> None:
             "endpoint": FAL_IMAGE_ENDPOINT, "seed": seed, "usd": FAL_IMAGE_COST_USD,
         },
     )  # fmt: skip
+
+
+def image_output_path(entry: dict) -> Path:
+    """Repo path of an ``image`` entry (``ingest.out`` is ``res://...`` relative to ``game/``)."""
+    out = entry["ingest"]["out"]
+    return REPO / "game" / out.removeprefix("res://")
+
+
+def finalise_image(entry: dict, source: Path) -> Path:
+    """Fit ``source`` to ``ingest.size`` (cover + centre crop), write it as PNG or JPG per extension."""
+    from PIL import Image
+
+    width, height = entry["ingest"]["size"]
+    image = Image.open(source).convert("RGB")
+    scale = max(width / image.width, height / image.height)
+    resized = image.resize(
+        (max(width, round(image.width * scale)), max(height, round(image.height * scale))),
+        Image.LANCZOS,
+    )
+    left, top = (resized.width - width) // 2, (resized.height - height) // 2
+    fitted = resized.crop((left, top, left + width, top + height))
+    target = image_output_path(entry)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.suffix.lower() in (".jpg", ".jpeg"):
+        fitted.save(target, quality=90)
+    else:
+        fitted.save(target)
+    return target
+
+
+def run_image_entries(entries: list[dict], workers: int) -> None:
+    """``image`` entries: one fal image at the ingest size, no cut-out, no 3D."""
+    jobs = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for entry in entries:
+            out_dir = DN / entry["id"]
+            (out_dir / "img").mkdir(parents=True, exist_ok=True)
+            gen_base(entry)
+            seed = seed_list(entry)[0]
+            target = out_dir / "img" / f"s{seed}.png"
+            jobs.append((entry, target, pool.submit(fal_image, entry, seed, target)))
+        for entry, target, job in jobs:
+            job.result()
+            if target.exists():
+                finalise_image(entry, target)
+            else:
+                print(f"[{entry['id']}] image missing (cap or failure)", flush=True)
 
 
 def prefetch_images(entries: list[dict], workers: int) -> None:
@@ -822,6 +882,12 @@ def main() -> None:
             "warning: FAL_KEY not set, fal calls will fail (logged in failures.jsonl)"
         )
     DN.mkdir(parents=True, exist_ok=True)
+    image_entries = [e for e in entries if e["kind"] == "image"]
+    if image_entries:
+        entries = [e for e in entries if e["kind"] != "image"]
+        run_image_entries(image_entries, args.image_workers)
+        if not entries:
+            return
     if args.image_backend == "fal":
         prefetch_images(entries, args.image_workers)
     futures: list[Future] = []
