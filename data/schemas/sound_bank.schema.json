@@ -4,7 +4,7 @@
   "title": "Banque sonore (AU1)",
   "description": "Événements sonores ponctuels, nappes 3D et ambiances 2D. Chemins relatifs à game/assets/audio/, sans extension.",
   "type": "object",
-  "required": ["voices", "events", "beds", "ambience"],
+  "required": ["voices", "battle", "event_sfx", "events", "beds", "ambience"],
   "additionalProperties": false,
   "properties": {
     "voices": {
@@ -29,6 +29,43 @@
         "engaged_full": {"type": "number", "exclusiveMinimum": 0},
         "event_period_s": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2},
         "beds": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+      }
+    },
+    "battle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["missile_speed_mps", "near_events", "dedup_window_s"],
+      "properties": {
+        "description": {"type": "string"},
+        "missile_speed_mps": {"type": "object", "additionalProperties": {"type": "number", "exclusiveMinimum": 0}, "minProperties": 1},
+        "near_events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event", "weight"],
+            "properties": {"event": {"type": "string"}, "weight": {"type": "integer", "minimum": 1}}
+          }
+        },
+        "dedup_window_s": {"type": "object", "additionalProperties": {"type": "number", "exclusiveMinimum": 0}}
+      }
+    },
+    "event_sfx": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order"],
+      "properties": {
+        "description": {"type": "string"},
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "clip"],
+            "properties": {"kind": {"type": "string"}, "clip": {"type": "string"}}
+          }
+        }
       }
     },
     "events": {

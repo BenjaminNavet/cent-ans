@@ -1,7 +1,7 @@
 class_name UiSounds
 extends Node
 
-## UB1 / U13 — sons d'interface distincts, joués en 2D sur le bus « Interface » d'AU1 depuis la
+## Sons d'interface distincts, joués en 2D sur le bus « Interface » depuis la
 ## banque `data/audio/sound_bank.json` (événements `ui_*`, fichiers `assets/audio/ui/`) :
 ## ordre donné, ordre refusé, alerte, lettre reçue, recrutement, construction, sélection
 ## d'armée, clic sur une carte d'unité. Respecte priorité, recharge et limite d'instances de la
@@ -23,9 +23,8 @@ const EVENTS := {
 var bank: SoundBank = null
 var silent := false
 var played: Array[String] = []  # derniers événements joués (tests), 16 au plus
-var _players: Array[AudioStreamPlayer] = []
+var _pool := VoicePool.new(func(voice: Dictionary) -> bool: return (voice["player"] as AudioStreamPlayer).playing)
 var _last_time: Dictionary = {}  # événement → instant (s) de la dernière lecture
-var _next := 0
 
 
 static func instance() -> UiSounds:
@@ -64,11 +63,12 @@ func _ready() -> void:
 		player.name = "Voice%d" % index
 		player.bus = BUS if AudioServer.get_bus_index(BUS) >= 0 else "Master"
 		add_child(player)
-		_players.append(player)
+		_pool.add(player)
 
 
 func _exit_tree() -> void:
-	for player in _players:
+	for voice in _pool.voices:
+		var player := voice["player"] as AudioStreamPlayer
 		player.stop()
 		player.stream = null
 
@@ -89,33 +89,14 @@ func play_event(event_name: String) -> bool:
 	var stream := bank.pick_stream(event_name)
 	if stream == null:
 		return false
-	var player := _pick_player(int(entry.get("priority", 3)), event_name, int(entry.get("max_instances", 2)))
-	if player == null:
+	var priority := int(entry.get("priority", 3))
+	var voice := _pool.claim(event_name, priority, int(entry.get("max_instances", 2)))
+	if voice.is_empty():
 		return false
+	var player := voice["player"] as AudioStreamPlayer
 	player.stream = stream
 	player.volume_db = float(entry.get("volume_db", 0.0))
 	player.pitch_scale = bank.random_pitch(event_name)
-	player.set_meta("event", event_name)
-	player.set_meta("priority", int(entry.get("priority", 3)))
+	VoicePool.assign(voice, event_name, priority, now)
 	player.play()
 	return true
-
-
-## Voix libre ; sinon la plus ancienne du même événement au-delà de sa limite ; sinon une voix de
-## priorité inférieure ou égale.
-func _pick_player(priority: int, event_name: String, max_instances: int) -> AudioStreamPlayer:
-	var same: Array[AudioStreamPlayer] = []
-	for player in _players:
-		if player.playing and str(player.get_meta("event", "")) == event_name:
-			same.append(player)
-	if same.size() >= max_instances:
-		return same[0]
-	for player in _players:
-		if not player.playing:
-			return player
-	for i in _players.size():
-		var player := _players[(_next + i) % _players.size()]
-		if int(player.get_meta("priority", 0)) <= priority:
-			_next = (_next + i + 1) % _players.size()
-			return player
-	return null

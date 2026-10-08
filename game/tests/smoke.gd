@@ -1741,17 +1741,6 @@ func _run_assets() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(rotation_path))
 	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
 
-	# Persistance des volumes (valeurs d'origine restaurées ensuite).
-	var original: float = audio.get("music_volume")
-	audio.call("set_music_volume", 0.35)
-	var config := ConfigFile.new()
-	_check(config.load("user://settings.cfg") == OK, "settings.cfg not written")
-	_check(is_equal_approx(float(config.get_value("audio", "music_volume", -1.0)), 0.35), "music volume not persisted")
-	audio.set("music_volume", 1.0)
-	audio.call("load_settings")
-	_check(is_equal_approx(float(audio.get("music_volume")), 0.35), "music volume not reloaded")
-	audio.call("set_music_volume", original)
-
 	# Écus, portraits et replis.
 	_check(PortraitLoader.heraldry_texture("fac_france") != null, "fac_france heraldry missing")
 	_check(PortraitLoader.portrait_texture("chr_does_not_exist") == null, "unknown portrait should be null")
@@ -2319,7 +2308,7 @@ func _run_flow() -> void:
 	var test_path: String = settings.get("path")
 	_check(test_path != "user://settings.cfg", "smoke must not use the player's settings file")
 	var seeded := ConfigFile.new()
-	seeded.set_value("audio", "music_volume", 0.42)
+	seeded.set_value("audio", "legacy_key", 0.42)
 	seeded.save(test_path)
 	settings.call("set_value", "camera/speed", 1.7)
 	settings.call("set_value", "interface/confirm_end_turn", true)
@@ -2327,7 +2316,7 @@ func _run_flow() -> void:
 	var config := ConfigFile.new()
 	_check(config.load(test_path) == OK, "settings file not written")
 	_check(is_equal_approx(float(config.get_value("camera", "speed", 0.0)), 1.7), "camera speed not persisted")
-	_check(is_equal_approx(float(config.get_value("audio", "music_volume", 0.0)), 0.42), "audio section lost by Settings.save_settings")
+	_check(is_equal_approx(float(config.get_value("audio", "legacy_key", 0.0)), 0.42), "audio section lost by Settings.save_settings")
 	settings.set("values", {})
 	settings.call("load_settings")
 	_check(is_equal_approx(float(settings.call("get_value", "camera/speed")), 1.7), "camera speed not reloaded")

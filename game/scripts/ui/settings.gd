@@ -1,12 +1,11 @@
 extends Node
 
-## F3 — autoload `Settings` : réglages du joueur persistés dans `user://settings.cfg`
-## (même fichier que les volumes d'`AudioDirector`, section `audio`, conservée telle quelle).
+## Autoload `Settings` : unique propriétaire de `user://settings.cfg` (réglages du joueur).
 ##
 ## Clés « section/nom » ; `get_value` / `set_value` (persisté, signal `changed`). Les réglages
 ## d'affichage sont appliqués ici (fenêtre, vsync, échelle d'interface, taille du texte) ; ceux de la carte
 ## (caméra, sauvegarde auto, batailles, rapport de saison) sont lus par `FlowController`.
-## Volumes : délégués à `AudioDirector` (`music_volume` / `sfx_volume`).
+## Volumes (`audio/bus_<bus>`) : appliqués aux bus par `AudioBuses`.
 ##
 ## Accès depuis un script à `class_name` : `get_node_or_null("/root/Settings")` (le smoke test
 ## compile certains scripts avant l'enregistrement des autoloads).
@@ -24,7 +23,7 @@ const DEFAULTS := {
 	# RL1 : "auto" (défaut) suit le GPU détecté ; un choix enregistré par le joueur est gardé.
 	"video/quality": "auto",
 	# PB3b (ADR 0080) : mise à l'échelle 3D : "auto" suit le préréglage de qualité, "off",
-	# "quality", "performance" (voir `RenderQuality.UPSCALE_PLAYER`).
+	# "quality", "performance" (voir `data/fx/render_quality.json`).
 	"video/upscale": "auto",
 	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
@@ -39,6 +38,12 @@ const DEFAULTS := {
 	# Lot NT6d : touches réaffectées (action → liste de touches, voir `KeyBindings`).
 	"input/bindings": {},
 	# Lot U12 : accessibilité.
+	"audio/bus_Master": 1.0,
+	"audio/bus_Musique": 0.6,
+	"audio/bus_Ambiance": 0.8,
+	"audio/bus_Bataille": 0.9,
+	"audio/bus_Interface": 0.8,
+	"audio/bus_Voix": 0.9,
 	"access/colorblind": false,
 	"access/reduce_motion": false,
 	"access/high_contrast": false,
@@ -132,6 +137,7 @@ func _ready() -> void:
 	load_settings()
 	KeyBindings.apply_saved(get_value(KeyBindings.SETTING_KEY))
 	apply_display()
+	apply_audio()
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().node_added.connect(_on_node_added)
 	RenderQuality.apply_global(get_tree().root)
@@ -185,6 +191,8 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 			RenderQuality.reapply(get_tree())
 	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
 		apply_display()
+	elif key.begins_with("audio/bus_"):
+		_apply_bus(key)
 	elif key == "access/high_contrast":
 		Accessibility.apply_contrast(load(PARCHMENT_THEME) as Theme, bool(get_value(key)))
 	if persist:
@@ -236,6 +244,7 @@ func reset_to_defaults() -> void:
 	KeyBindings.reset()
 	apply_display()
 	RenderQuality.reapply(get_tree())
+	apply_audio()
 	save_settings()
 	for key in DEFAULTS:
 		changed.emit(key)
@@ -345,42 +354,23 @@ func _scale_control_text(control: Control, factor: float) -> void:
 		control.set_meta("text_base_sizes", bases)
 
 
-# --- Volumes (AudioDirector) --------------------------------------------------------
+# --- Volumes ---------------------------------------------------------------------------
 
 
-func _audio() -> Node:
-	return get_node_or_null("/root/AudioDirector")
-
-
-func music_volume() -> float:
-	var audio := _audio()
-	return float(audio.get("music_volume")) if audio != null else 0.0
-
-
-func sfx_volume() -> float:
-	var audio := _audio()
-	return float(audio.get("sfx_volume")) if audio != null else 0.0
-
-
-func set_music_volume(linear: float) -> void:
-	var audio := _audio()
-	if audio != null:
-		audio.call("set_music_volume", linear, path == SETTINGS_PATH)
-
-
-func set_sfx_volume(linear: float) -> void:
-	var audio := _audio()
-	if audio != null:
-		audio.call("set_sfx_volume", linear, path == SETTINGS_PATH)
-
-
-## AU1 : volume d'un bus réglable (`AudioBuses.PLAYER_BUSES`).
+## Volume (linéaire 0..1) d'un bus réglable (`AudioBuses.PLAYER_BUSES`).
 func bus_volume(bus_name: String) -> float:
-	var audio := _audio()
-	return float(audio.call("bus_volume", bus_name)) if audio != null else 0.0
+	return float(get_value("audio/bus_" + bus_name))
 
 
 func set_bus_volume(bus_name: String, linear: float) -> void:
-	var audio := _audio()
-	if audio != null:
-		audio.call("set_bus_volume", bus_name, linear, path == SETTINGS_PATH)
+	set_value("audio/bus_" + bus_name, clampf(linear, 0.0, 1.0), path == SETTINGS_PATH)
+
+
+## Applique tous les volumes enregistrés aux bus.
+func apply_audio() -> void:
+	for spec in AudioBuses.PLAYER_BUSES:
+		_apply_bus("audio/bus_" + str(spec[0]))
+
+
+func _apply_bus(key: String) -> void:
+	AudioBuses.set_linear_volume(key.trim_prefix("audio/bus_"), float(get_value(key)))

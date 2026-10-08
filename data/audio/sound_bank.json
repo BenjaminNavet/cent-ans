@@ -1,5 +1,36 @@
 {
   "voices": {"max_voices": 28, "near_distance_m": 70},
+  "battle": {
+    "description": "Réglages de la bataille : vitesse des traits (m/s) pour caler les impacts, chocs de proximité par front (poids relatifs), fenêtre (s) de déduplication des cris.",
+    "missile_speed_mps": {"arrow": 48, "bolt": 62, "ball": 110, "stone": 34, "bullet": 210, "javelin": 24},
+    "near_events": [
+      {"event": "sword_clash", "weight": 4},
+      {"event": "shield_bash", "weight": 3},
+      {"event": "armor_hit", "weight": 2},
+      {"event": "effort_cry", "weight": 3},
+      {"event": "body_fall", "weight": 1},
+      {"event": "death_groan", "weight": 1}
+    ],
+    "dedup_window_s": {"rout_cry": 2.0, "general_death": 2.0}
+  },
+  "event_sfx": {
+    "description": "Effet de la campagne par type d'événement du journal, par priorité décroissante (le premier type présent gagne).",
+    "order": [
+      {"kind": "battle", "clip": "sword_clash"},
+      {"kind": "siege_started", "clip": "war_horn"},
+      {"kind": "war_declared", "clip": "war_horn"},
+      {"kind": "province_captured", "clip": "fanfare"},
+      {"kind": "peace_signed", "clip": "fanfare"},
+      {"kind": "death", "clip": "choir"},
+      {"kind": "succession", "clip": "choir"},
+      {"kind": "excommunication", "clip": "choir"},
+      {"kind": "schism", "clip": "choir"},
+      {"kind": "heresy", "clip": "choir"},
+      {"kind": "birth", "clip": "fanfare"},
+      {"kind": "marriage", "clip": "fanfare"},
+      {"kind": "building_completed", "clip": "page_turn"}
+    ]
+  },
   "fronts": {
     "description": "EP4 : émetteurs 3D par front de mêlée (paires de régiments au contact), les plus proches de la caméra",
     "max_emitters": 6,
