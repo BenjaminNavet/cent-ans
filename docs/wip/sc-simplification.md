@@ -44,3 +44,6 @@ map.misc), déclutter des villes (settlement), `outbuilding_layer.gd`, life regr
 est annoncé à FL avant de commencer. Base FL : d30 p50 31 ms, d150 p50 46 ms (map.misc 8-12 ms).
 - Vague 3 : effects + rulesdata fusionnés (10-08) ; treaty en cours (ADR 0202 réservé). ADR SC renumérotés 0200 (parapluie) et 0201 (naval 3D) ; bloc 0200-0209 réservé SC (main a pris 0186-0192).
 - Vague 4 (patterns/perf) lancée : movperf (sim-battle resolve_movement + geom), battlerules (moral/fatigue, tables terrain → data, decor_gen, rng ; ADR 0205 si besoin), naval (NV2/BB2/BB3/BB13 ; ADR 0203 si besoin), aiturn (ArmyTurn, constantes IA → data, PlanCache ; ADR 0204 si besoin), uikit2 (TooltipHost, diplomacy sous-vues, tutoriel → data).
+
+## Fusion intermédiaire (décision du propriétaire, 08/10)
+Dès que le point de contrôle est vert (relance propre cargo test + tests carte/UI) et que les lots aiturn, fxargs, lookups, rustperf, testkit sont fusionnés : fusionner feat/sc dans main SANS push (fichiers sales de main préservés, patch scratchpad/main-dirty.patch), puis les vagues suivantes repartent de main. Push seulement à la fin du chantier.
