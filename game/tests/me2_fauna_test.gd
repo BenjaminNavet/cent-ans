@@ -74,6 +74,8 @@ func _test_map() -> void:
 	var herds_all := 0
 	var bad_sea := 0
 	var in_river := 0
+	var in_lake := 0
+	var in_marsh := 0
 	var side := 96
 	var ranks_ok := true
 	var profiles := {}
@@ -85,12 +87,16 @@ func _test_map() -> void:
 				totals[herd["species"]] = int(totals.get(herd["species"], 0)) + 1
 				bad_sea += 0 if _ring_land(data, at) or str(herd["species"]) in ["animal_seal_grey", "animal_walrus"] else 1
 				in_river += 1 if data.river_sd_at(at.x, at.y) < 0.3 else 0
+				in_lake += 1 if fauna.in_lake(at) else 0
+				in_marsh += 1 if fauna.wetness_at(at).r > 0.81 else 0
 				ranks_ok = ranks_ok and float(herd["rank"]) >= 0.0 and float(herd["rank"]) < 1.0
 				profiles[int(herd["profile"])] = true
 	print("me2: %d herds on the map in %d ms; %s" % [herds_all, Time.get_ticks_msec() - t0, totals])
 	_check(herds_all > 300, "enough herds (%d)" % herds_all)
 	_check(bad_sea == 0, "no herd on water (%d)" % bad_sea)
 	_check(in_river == 0, "no herd in a river bed (%d)" % in_river)
+	_check(in_lake == 0, "no herd on a lake (%d)" % in_lake)
+	_check(in_marsh == 0, "no herd deep in a marsh (%d)" % in_marsh)
 	_check(ranks_ok, "herd ranks in [0, 1)")
 	_check(profiles.size() >= 3, "season profiles for transhumance (%d)" % profiles.size())
 	# Régions : Camargue, nord, sud.

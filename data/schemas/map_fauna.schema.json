@@ -49,11 +49,12 @@
         },
         "defaults": {
           "type": "object",
-          "required": ["slope_max_deg", "open_min", "forest_min", "alt_min_m", "alt_max_m"],
+          "required": ["slope_max_deg", "open_min", "forest_min", "alt_min_m", "alt_max_m", "marsh_max"],
           "additionalProperties": false,
           "properties": {
             "slope_max_deg": {"type": "number"}, "open_min": {"type": "number"}, "forest_min": {"type": "number"},
-            "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}
+            "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"},
+            "marsh_max": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part maximale de marais (canal R de wetlands.png) du site."}
           }
         }
       }
@@ -74,7 +75,7 @@
           "wander_m": {"type": "number", "minimum": 0, "description": "Rayon d'errance (m)."},
           "slope_max_deg": {"type": "number"}, "open_min": {"type": "number", "minimum": 0, "maximum": 1},
           "forest_min": {"type": "number", "minimum": 0, "maximum": 1},
-          "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"},
+          "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "marsh_max": {"type": "number", "minimum": 0, "maximum": 1},
           "near_sea_px": {"type": "integer", "minimum": 1, "description": "Le troupeau reste a cette distance (px) d'une mer."}
         }
       }
@@ -112,7 +113,7 @@
                   "description": "Part des troupeaux presente a chaque saison (transhumance : alpage l'ete, plaine l'hiver)."
                 },
                 "slope_max_deg": {"type": "number"}, "open_min": {"type": "number"}, "forest_min": {"type": "number"},
-                "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "near_sea_px": {"type": "integer", "minimum": 1},
+                "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "marsh_max": {"type": "number", "minimum": 0, "maximum": 1}, "near_sea_px": {"type": "integer", "minimum": 1},
                 "near_water": {"type": "boolean", "description": "Le troupeau reste pres d'un fleuve."}
               }
             }

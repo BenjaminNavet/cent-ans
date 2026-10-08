@@ -115,10 +115,15 @@ func _setup_fauna() -> void:
 			towns.append(entry["px"])
 		for hamlet in _settlements.data.hamlets:
 			towns.append(hamlet["px"])
+	var lake_polygons: Array = []
+	var lakes: Variant = _map.get("lakes") if _map != null else null
+	if lakes is LakesRenderer:
+		for lake: Dictionary in (lakes as LakesRenderer).lakes:
+			lake_polygons.append(lake["polygon"])
 	fauna = FaunaLayer.new()
 	fauna.name = "Fauna"
 	add_child(fauna)
-	fauna.setup(_map_data, _map.get("camera_rig") as Node3D if _map != null else null, towns, _tiers)
+	fauna.setup(_map_data, _map.get("camera_rig") as Node3D if _map != null else null, towns, lake_polygons)
 	stats["fauna"] = fauna.stats
 
 

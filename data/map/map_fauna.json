@@ -11,12 +11,12 @@
   "max_visible_instances": 3000,
   "max_cached_cells": 48,
   "cells_per_frame": 1,
-  "length_k": 0.0105,
-  "length_exponent": 0.8,
+  "length_k": 0.02,
+  "length_exponent": 0.85,
   "spread_exponent": 0.5,
   "lod_distances": [
-   0.9,
-   6.0
+   35.0,
+   80.0
   ],
   "town_clearance_px": 2.5,
   "herd_sigma_m": 90.0,
@@ -56,6 +56,7 @@
    }
   },
   "defaults": {
+   "marsh_max": 0.5,
    "slope_max_deg": 14.0,
    "open_min": 0.0,
    "forest_min": 0.0,
@@ -72,7 +73,8 @@
     4,
     9
    ],
-   "wander_m": 220
+   "wander_m": 220,
+   "marsh_max": 0.8
   },
   "animal_camargue_bull": {
    "length_m": 2.2,
@@ -82,7 +84,8 @@
     3,
     7
    ],
-   "wander_m": 160
+   "wander_m": 160,
+   "marsh_max": 0.8
   },
   "animal_cattle_red": {
    "length_m": 2.3,
@@ -332,7 +335,8 @@
     3
    ],
    "wander_m": 260,
-   "forest_min": 0.2
+   "forest_min": 0.2,
+   "marsh_max": 0.7
   },
   "animal_auroch": {
    "length_m": 2.8,
@@ -342,7 +346,8 @@
     3,
     8
    ],
-   "wander_m": 200
+   "wander_m": 200,
+   "marsh_max": 0.7
   },
   "animal_bison_european": {
    "length_m": 2.8,
@@ -383,7 +388,8 @@
     1,
     3
    ],
-   "wander_m": 40
+   "wander_m": 40,
+   "marsh_max": 0.9
   },
   "animal_seal_grey": {
    "length_m": 1.9,

@@ -26,6 +26,9 @@ const FLOATS_PER_INSTANCE := 16
 const MAX_PROFILES := 24
 const SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
 const MAX_LODS := 3
+const LAKE_GRID := 16.0
+const WETLANDS_FILE := "wetlands.png"
+const WETLANDS_SHRINK := 4
 
 var config: Dictionary = {}
 var enabled := true
@@ -45,7 +48,12 @@ var _town_grid: Dictionary = {}  # Vector2i → PackedVector2Array
 var _frame := 0
 var _lod := -1
 var _turn_phase := 0.0
-var _tiers: ZoomTiers
+## Eau affichée hors du masque de terre : lacs (polygones, index par case de `LAKE_GRID` px) et
+## zones humides (`wetlands.png` réduite au quart, lue hors du fil principal).
+var _lakes: Array = []  # {rect: Rect2, polygon: PackedVector2Array}
+var _lake_grid: Dictionary = {}  # Vector2i → PackedInt32Array
+var _wet: Image
+var _wet_task := -1
 
 
 ## Dossier `data/` -> configuration (vide si le fichier manque).
@@ -60,20 +68,27 @@ func _ready() -> void:
 
 
 ## Branche la couche sur la carte. `towns` : positions (px carte) des colonies à éviter.
-func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = PackedVector2Array(), tiers: ZoomTiers = null) -> void:
+func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = PackedVector2Array(), lake_polygons: Array = []) -> void:
 	clear()
+	_wait_wet()
 	_map_data = map_data
 	_mpp = map_data.meters_per_px if map_data != null else 719.0
 	_rig = rig
-	_tiers = tiers
 	config = load_config()
 	_species.clear()
 	_zones.clear()
 	_profiles.clear()
 	_profile_index.clear()
 	_town_grid.clear()
+	_lakes.clear()
+	_lake_grid.clear()
+	_wet = null
 	if config.is_empty() or map_data == null:
 		return
+	_index_lakes(lake_polygons)
+	if FileAccess.file_exists(map_data.map_dir.path_join(WETLANDS_FILE)):
+		var path := map_data.map_dir.path_join(WETLANDS_FILE)
+		_wet_task = WorkerThreadPool.add_task(func() -> void: _wet = _load_wetlands(path), false, "FaunaWetlands")
 	for town in towns:
 		var key := Vector2i(floori(town.x / 8.0), floori(town.y / 8.0))
 		var list: PackedVector2Array = _town_grid.get(key, PackedVector2Array())
@@ -93,6 +108,62 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 			"radius": Vector2(float(radius_km[0]), float(radius_km[1])) * 1000.0 / _mpp,
 			"species": items,
 		})
+
+
+## Zones humides réduites (R marais, G étangs, B prés humides), lues hors du fil principal.
+static func _load_wetlands(path: String) -> Image:
+	var image := Image.load_from_file(path)
+	if image == null:
+		return null
+	image.resize(maxi(image.get_width() / WETLANDS_SHRINK, 1), maxi(image.get_height() / WETLANDS_SHRINK, 1), Image.INTERPOLATE_BILINEAR)
+	return image
+
+
+func _wait_wet() -> void:
+	if _wet_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_wet_task)
+		_wet_task = -1
+
+
+func _exit_tree() -> void:
+	_wait_wet()
+
+
+func _index_lakes(polygons: Array) -> void:
+	for polygon: PackedVector2Array in polygons:
+		if polygon.size() < 3:
+			continue
+		var low := polygon[0]
+		var high := polygon[0]
+		for point in polygon:
+			low = Vector2(minf(low.x, point.x), minf(low.y, point.y))
+			high = Vector2(maxf(high.x, point.x), maxf(high.y, point.y))
+		var index := _lakes.size()
+		_lakes.append({"rect": Rect2(low, high - low), "polygon": polygon})
+		for gy in range(floori(low.y / LAKE_GRID), floori(high.y / LAKE_GRID) + 1):
+			for gx in range(floori(low.x / LAKE_GRID), floori(high.x / LAKE_GRID) + 1):
+				var key := Vector2i(gx, gy)
+				var list: PackedInt32Array = _lake_grid.get(key, PackedInt32Array())
+				list.append(index)
+				_lake_grid[key] = list
+
+
+## Le point (px carte) est-il sur un lac affiché ?
+func in_lake(p: Vector2) -> bool:
+	var list: PackedInt32Array = _lake_grid.get(Vector2i(floori(p.x / LAKE_GRID), floori(p.y / LAKE_GRID)), PackedInt32Array())
+	for index in list:
+		var lake: Dictionary = _lakes[index]
+		if (lake["rect"] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, lake["polygon"]):
+			return true
+	return false
+
+
+## Zones humides (R, G, B de 0 à 1) au point ; noir sans le fichier.
+func wetness_at(p: Vector2) -> Color:
+	_wait_wet()
+	if _wet == null:
+		return Color(0, 0, 0, 0)
+	return _wet.get_pixel(clampi(int(p.x * _wet.get_width() / _map_data.size.x), 0, _wet.get_width() - 1), clampi(int(p.y * _wet.get_height() / _map_data.size.y), 0, _wet.get_height() - 1))
 
 
 func clear() -> void:
@@ -270,6 +341,11 @@ func site_ok(p: Vector2, species: Dictionary, item: Dictionary) -> bool:
 		return false
 	if item.get("near_water", false) and river > 2.0:
 		return false
+	if in_lake(p):
+		return false
+	var wet := wetness_at(p)
+	if wet.r > _filter(species, item, "marsh_max") or wet.g > 0.4:
+		return false
 	var open_min := _filter(species, item, "open_min")
 	var forest_min := _filter(species, item, "forest_min")
 	if (open_min > 0.0 or forest_min > 0.0) and map.splat_image != null:
@@ -278,17 +354,18 @@ func site_ok(p: Vector2, species: Dictionary, item: Dictionary) -> bool:
 			return false
 	var shore := int(item.get("near_sea_px", species.get("near_sea_px", 0)))
 	if shore > 0:
-		var wet := false
+		var touches_sea := false
 		for k in 8:
 			var a := TAU * k / 8.0
 			if not map.is_land_px(int(p.x + cos(a) * shore), int(p.y + sin(a) * shore)):
-				wet = true
-		return wet
+				touches_sea = true
+		return touches_sea
 	# Cercle d'errance (et marge d'eau) entièrement sur la terre ; au moins 1 px (résolution du masque).
 	var ring := maxf(1.0, (float(species["wander_m"]) + 3.0 * _render("herd_sigma_m", 90.0) + _render("water_margin_m", 60.0)) / _mpp)
 	for k in 8:
 		var a := TAU * k / 8.0
-		if not map.is_land_px(int(p.x + cos(a) * ring), int(p.y + sin(a) * ring)):
+		var q := p + Vector2(cos(a), sin(a)) * ring
+		if not map.is_land_px(int(q.x), int(q.y)) or in_lake(q):
 			return false
 	return true
 

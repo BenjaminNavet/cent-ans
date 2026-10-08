@@ -16,7 +16,12 @@ def test_map_fauna_matches_schema() -> None:
 def test_map_fauna_references_resolve() -> None:
     """Species ids exist in the map-extra catalogue, zone species and gaits exist."""
     doc = json.loads((DATA / "map" / "map_fauna.json").read_text(encoding="utf-8"))
-    catalog = {e["id"] for e in json.loads((DATA / "art" / "dn_catalog_map_extra.json").read_text(encoding="utf-8"))}
+    catalog = {
+        e["id"]
+        for e in json.loads(
+            (DATA / "art" / "dn_catalog_map_extra.json").read_text(encoding="utf-8")
+        )
+    }
     assert set(doc["species"]) <= catalog
     for entry in doc["species"].values():
         assert entry["gait"] in doc["render"]["gaits"]
