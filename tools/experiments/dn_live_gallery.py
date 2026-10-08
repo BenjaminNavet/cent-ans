@@ -17,9 +17,19 @@ from pathlib import Path
 MODEL_VIEWER = "https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"
 
 
+OUTPUT_MARKERS = ("prompt.txt", "img", "cut", "3d")
+CATALOG_GLOB = "data/art/dn_catalog_*.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
 def object_dirs(root: Path) -> list[Path]:
-    """Return per-object folders (those holding a prompt.txt), most recently modified first."""
-    folders = [folder for folder in root.iterdir() if (folder / "prompt.txt").exists()]
+    """Return per-object folders (any generation output), most recently modified first."""
+    folders = [
+        folder
+        for folder in root.iterdir()
+        if folder.is_dir()
+        and any((folder / marker).exists() for marker in OUTPUT_MARKERS)
+    ]
     return sorted(folders, key=latest_mtime, reverse=True)
 
 
@@ -27,6 +37,22 @@ def latest_mtime(folder: Path) -> float:
     """Return the newest modification time of any file under the folder."""
     times = [path.stat().st_mtime for path in folder.rglob("*") if path.is_file()]
     return max(times, default=folder.stat().st_mtime)
+
+
+def catalog_prompts() -> dict[str, str]:
+    """Return the prompt of every catalogue entry by id (fallback when prompt.txt is absent)."""
+    prompts: dict[str, str] = {}
+    for catalog_path in REPO_ROOT.glob(CATALOG_GLOB):
+        try:
+            entries = json.loads(catalog_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(entries, dict):
+            entries = next((v for v in entries.values() if isinstance(v, list)), [])
+        for entry in entries:
+            if isinstance(entry, dict) and "id" in entry:
+                prompts[entry["id"]] = entry.get("prompt", "")
+    return prompts
 
 
 def charter_status(root: Path) -> dict[str, str]:
@@ -43,7 +69,9 @@ def charter_status(root: Path) -> dict[str, str]:
     return statuses
 
 
-def object_card(root: Path, folder: Path, statuses: dict[str, str]) -> str:
+def object_card(
+    root: Path, folder: Path, statuses: dict[str, str], prompts: dict[str, str]
+) -> str:
     """Render one object: prompt, image attempts, chosen seed, 3D sheet and viewers."""
     object_id = folder.name
     rel = folder.relative_to(root).as_posix()
@@ -82,18 +110,50 @@ def object_card(root: Path, folder: Path, statuses: dict[str, str]) -> str:
             else ("images" if images else "en attente")
         )
     )
-    prompt = html.escape((folder / "prompt.txt").read_text()[:400])
+    prompt_path = folder / "prompt.txt"
+    prompt_text = (
+        prompt_path.read_text() if prompt_path.exists() else prompts.get(object_id, "")
+    )
+    prompt = html.escape(prompt_text)
+    generation_path = folder / "generation.json"
+    generation = (
+        json.loads(generation_path.read_text()) if generation_path.exists() else {}
+    )
+    origin = html.escape(
+        " · ".join(
+            str(generation[key])
+            for key in ("catalogue", "target", "region")
+            if generation.get(key)
+        )
+    )
+    links = " ".join(
+        f'<a href="/{rel}/{name}">{name}</a>'
+        for name in ("prompt.txt", "generation.json")
+        if (folder / name).exists()
+    )
+    view_images = (
+        sorted((folder / "views").glob("*.png")) if (folder / "views").exists() else []
+    )
+    views = "".join(
+        f'<figure><a href="/{rel}/views/{image.name}"><img loading="lazy" src="/{rel}/views/{image.name}"></a>'
+        f"<figcaption>vue {image.stem}</figcaption></figure>"
+        for image in view_images
+    )
+    search_text = html.escape(f"{object_id} {origin} {prompt_text}".lower(), quote=True)
     return (
-        f'<section><h2>{object_id} <span class="tag">{stage}</span>'
+        f'<section id="{object_id}" data-search="{search_text}"><h2><a href="#{object_id}">{object_id}</a> <span class="tag">{stage}</span>'
         f"{f'<span class=tag>{status}</span>' if status else ''}</h2>"
-        f'<p class="prompt">{prompt}</p><div class="row">{thumbs}</div>{sheet}<div class="row">{viewers}</div></section>'
+        f'<p class="origin">{origin} {links}</p><p class="prompt">{prompt}</p>'
+        f'<div class="row">{thumbs}{views}</div>{sheet}<div class="row">{viewers}</div></section>'
     )
 
 
 def render_index(root: Path) -> str:
     """Build the whole gallery page."""
     statuses = charter_status(root)
-    cards = "".join(object_card(root, folder, statuses) for folder in object_dirs(root))
+    prompts = catalog_prompts()
+    folders = object_dirs(root)
+    cards = "".join(object_card(root, folder, statuses, prompts) for folder in folders)
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Galerie DN</title>
 <script type="module" src="{MODEL_VIEWER}"></script>
@@ -102,17 +162,27 @@ body{{background:#1d1b18;color:#e8e1d3;font:14px system-ui;margin:0;padding:16px
 h1{{font-weight:600}} h2{{margin:0 0 4px;font-size:18px}}
 section{{border-top:1px solid #444;padding:12px 0}}
 .tag{{font-size:11px;background:#3a352d;border-radius:4px;padding:2px 6px;margin-left:8px}}
-.prompt{{color:#a99f8c;font-size:12px;max-width:900px}}
+.prompt{{color:#a99f8c;font-size:12px;max-width:900px;user-select:all}}
+.origin{{font-size:12px;margin:2px 0}} a{{color:#c9a227}}
+#q{{width:min(600px,100%);padding:6px 8px;font-size:14px;background:#2b2823;color:#e8e1d3;border:1px solid #555;border-radius:4px}}
 .row{{display:flex;flex-wrap:wrap;gap:8px}}
 figure{{margin:0;text-align:center;font-size:11px;color:#a99f8c}}
 figure img{{width:200px;height:200px;object-fit:contain;background:#fff;border-radius:4px}}
 figure.chosen img{{outline:3px solid #c9a227}}
 img.sheet{{max-width:100%;margin:8px 0;border-radius:4px}}
 model-viewer{{width:320px;height:320px;background:#2b2823;border-radius:4px}}
-</style></head><body><h1>Galerie DN — production de la nuit</h1>
-<p>Objet le plus récent en haut. Cadre doré = essai retenu. La page se recharge seule quand un fichier change.</p>
+</style></head><body><h1>Galerie DN — production de la nuit ({len(folders)} objets)</h1>
+<p>Objet le plus récent en haut. Cadre doré = essai retenu. La page se recharge seule quand un fichier change.
+Chaque objet : catalogue, cible en jeu, prompt complet (clic = sélection), fiche <code>generation.json</code>.</p>
+<input id="q" placeholder="Rechercher (id, catalogue, mot du prompt)…"> <span id="n"></span>
 {cards}
 <script>
+const q=document.getElementById('q'),n=document.getElementById('n');
+function filt(){{const t=q.value.toLowerCase().trim();let k=0;
+document.querySelectorAll('section').forEach(e=>{{const on=!t||e.dataset.search.includes(t);e.style.display=on?'':'none';k+=on;}});
+n.textContent=k+' affichés';try{{sessionStorage.setItem('q',q.value)}}catch(e){{}}}}
+try{{q.value=sessionStorage.getItem('q')||''}}catch(e){{}}
+q.addEventListener('input',filt);filt();
 let stamp=null;
 setInterval(async()=>{{try{{const r=await fetch('/__stamp');const s=await r.text();
 if(stamp!==null&&s!==stamp)location.reload();stamp=s;}}catch(e){{}}}},20000);
