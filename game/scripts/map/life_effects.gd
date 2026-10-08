@@ -14,6 +14,9 @@ const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
 ## RV-F : panaches régionaux (vue moyenne, caméra haute), taille fixée à l'écran.
 const PLUME_SHADER := preload("res://shaders/life_plume.gdshader")
+## AS5 : flammes de la carte (planche FA2), mêmes foyers que les fumées d'incendie.
+const FLAME_SHADER := preload("res://shaders/life_flame.gdshader")
+const FLAME_FLIPBOOK := "res://assets/textures/fx/flame_flipbook.png"
 ## RV-F : un panache régional par colonie de ces types (les autres : un sur deux) ; un hameau sur
 ## `PLUME_HAMLET_ONE_IN` ; incendie régional au-dessus des hameaux brûlés, un sur
 ## `PLUME_HAMLET_FIRE_ONE_IN`.
@@ -68,6 +71,12 @@ var _chimneys: MultiMeshInstance3D
 var _fires: MultiMeshInstance3D
 var _chimney_material: ShaderMaterial
 var _fire_material: ShaderMaterial
+## AS5 : flammes (MultiMesh sur `_fire_points`), lumières vacillantes proches de la caméra.
+var _flames: MultiMeshInstance3D
+var _flame_material: ShaderMaterial
+var _flame_cfg: Dictionary = {}
+var _flame_lights: Array[OmniLight3D] = []
+var _light_timer := 0.0
 ## RV-F : panaches régionaux (même format de points que les cheminées).
 var _plumes: MultiMeshInstance3D
 var _plume_material: ShaderMaterial
@@ -128,6 +137,7 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 		_fire_material.set_shader_parameter("aspect", FIRE_SIZE.y / FIRE_SIZE.x)
 	_chimneys = _make_instance("Chimneys", _chimney_material)
 	_fires = _make_instance("Fires", _fire_material)
+	_setup_flames()
 	_plume_material = ShaderMaterial.new()
 	_plume_material.shader = PLUME_SHADER
 	_plume_material.render_priority = 1
@@ -233,6 +243,7 @@ func rebuild(province_states: Dictionary) -> void:
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * TownMaquetteData.prop("chimney_ratio", MapPropScale.shared().chimney_scale()), 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
+	_fill_flames()
 	_fill_plumes()
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
@@ -481,6 +492,7 @@ func _apply_ruins(province_states: Dictionary) -> void:
 				# Village en ruine : fumée d'incendie au-dessus.
 				_fire_points.append(_settlement_point(i, Vector2.ZERO, 0.3, float(i % 97) / 97.0))
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
+	_fill_flames()
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
@@ -613,7 +625,7 @@ func _reground_pass(changed: Dictionary) -> void:
 			point[4] = _pose_y(pose)
 		if not mills.is_empty():
 			_write_windmills(mills)
-	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"], [_plumes, _plume_points, "plumes"]]:
+	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"], [_flames, _fire_points, "fires"], [_plumes, _plume_points, "plumes"]]:
 		var mmi: MultiMeshInstance3D = triple[0]
 		var points: Array = triple[1]
 		if mmi.multimesh == null:
@@ -769,6 +781,8 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	if not is_equal_approx(fire, _fire_scale):
 		_fire_scale = fire
 		_fire_material.set_shader_parameter("prop_scale", fire)
+		if _flame_material != null:
+			_flame_material.set_shader_parameter("prop_scale", fire)
 	_camera_distance = camera_distance
 
 
@@ -805,6 +819,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
 	_fires.visible = fire_alpha > 0.02
 	_fire_material.set_shader_parameter("fade", fire_alpha)
+	_update_flames(fire_alpha, camera_distance)
 	_update_plumes(camera_distance, tiers, medium)
 	# VT2 : moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
 	var mill_range := TownMaquetteData.prop("windmill_range", -1.0)  # GC : portée des moulins grossis
@@ -822,3 +837,92 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 		var tp := Time.get_ticks_usec()
 		_reground_step()  # RS-K2 : tranches suivantes
 		PerfProbe.lap("life/reground", tp)
+
+
+## AS5 : matériau et instances des flammes ; sans données (`map_fire_wind.json`), sans planche
+## importée ou avec `--no-as5`, aucune flamme (les fumées restent).
+func _setup_flames() -> void:
+	_flame_cfg = MapFireWind.section("fire")
+	if _flame_cfg.is_empty() or not ResourceLoader.exists(FLAME_FLIPBOOK):
+		_flame_cfg = {}
+		return
+	_flame_material = ShaderMaterial.new()
+	_flame_material.shader = FLAME_SHADER
+	_flame_material.render_priority = 2
+	_flame_material.set_shader_parameter("flipbook", load(FLAME_FLIPBOOK))
+	var frames: Array = _flame_cfg["frames"]
+	_flame_material.set_shader_parameter("frames_h", float(frames[0]))
+	_flame_material.set_shader_parameter("frames_v", float(frames[1]))
+	for key in ["loops_per_s", "emission", "opacity", "lean"]:
+		_flame_material.set_shader_parameter(key, float(_flame_cfg[key]))
+	for key in ["color_cold", "color_mid", "color_hot", "color_core"]:
+		_flame_material.set_shader_parameter(key, MapFireWind.color(_flame_cfg[key]))
+	_flames = _make_instance("Flames", _flame_material)
+	var light: Dictionary = _flame_cfg["light"]
+	if bool(light["enabled"]):
+		for k in int(light["max_lights"]):
+			var omni := OmniLight3D.new()
+			omni.name = "FlameLight%d" % k
+			omni.light_color = MapFireWind.color(light["color"])
+			omni.omni_range = float(light["range"])
+			omni.shadow_enabled = false
+			omni.light_energy = 0.0
+			omni.visible = false
+			add_child(omni)
+			_flame_lights.append(omni)
+
+
+func _fill_flames() -> void:
+	if _flames == null:
+		return
+	var size: Array = _flame_cfg["flame_size"]
+	_fill(_flames, _fire_points, Vector2(float(size[0]), float(size[1])), 1.0)
+
+
+func _update_flames(fire_alpha: float, camera_distance: float) -> void:
+	if _flames == null:
+		return
+	_flames.visible = fire_alpha > 0.02 and not _fire_points.is_empty()
+	_flame_material.set_shader_parameter("fade", fire_alpha)
+	_update_flame_lights(camera_distance)
+
+
+## Lumières vacillantes sur les foyers les plus proches de la caméra, au palier proche seulement.
+func _update_flame_lights(camera_distance: float) -> void:
+	if _flame_lights.is_empty():
+		return
+	var light: Dictionary = _flame_cfg["light"]
+	var flicker := 1.0 - float(light["flicker_amount"]) * (0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.001 * float(light["flicker_speed"])))
+	var active := _flames.visible and camera_distance < float(light["max_camera_distance"])
+	_light_timer -= get_process_delta_time()
+	if _light_timer <= 0.0:
+		_light_timer = float(light["update_period_s"])
+		_assign_flame_lights(active)
+	for omni in _flame_lights:
+		if omni.visible:
+			omni.light_energy = float(light["energy"]) * flicker
+
+
+func _assign_flame_lights(active: bool) -> void:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var ranked: Array = []
+	if active and camera != null:
+		var eye := camera.global_position
+		for n in _fire_points.size():
+			ranked.append([eye.distance_squared_to(_origin(_fire_points[n])), n])
+		ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var height := float((_flame_cfg["light"] as Dictionary)["height"]) * maxf(_fire_scale, 0.0)
+	for k in _flame_lights.size():
+		var omni := _flame_lights[k]
+		omni.visible = k < ranked.size()
+		if omni.visible:
+			omni.position = _origin(_fire_points[int(ranked[k][1])]) + Vector3(0.0, height, 0.0)
+
+
+## Nombre de lumières de flamme allumées (test).
+func flame_lights_on() -> int:
+	var count := 0
+	for omni in _flame_lights:
+		if omni.visible:
+			count += 1
+	return count
