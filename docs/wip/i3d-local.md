@@ -100,3 +100,8 @@ multi (fal)** ; les planches SR3 viennent de NB2 via OpenRouter (`google/gemini-
 - **Enjeu (joueur, 08/10)** : si Qwen est bon, le procédé standard des assets 3D devient
   Qwen-Image-Edit (image vérifiée selon la charte) → TRELLIS gratuit (Space HF) en premier → SF3D
   local en second. Pour les modèles gratuits seulement, on garde la meilleure de plusieurs images (graines), puis le meilleur de plusieurs modèles 3D par image (meilleur-de-N). Il sera adopté après l'essai et l'avis du joueur.
+- **Arrêté le 08/10 (trop long : 33 min par image, RAM partagée)** après la correction de pose de
+  l'archer (`~/dev/cent-ans-raw/sf3d/qwen/out/cmp_archer_1337.jpg` : bras écartés, paumes vides,
+  reste identique, léger fantôme des anciens bras). Le joueur veut les bras plus haut (« Christ de
+  Rio »). Procédé adopté : `docs/pipeline-assets-3d.md`, ADR 0210. Quota ZeroGPU épuisé le 08/10
+  (chaque appel réserve 120 s).

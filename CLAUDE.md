@@ -19,6 +19,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Build GDExtension : `core/build.sh` (build cargo + copie de la dylib/.so/.dll dans `game/bin/` si elle a changé)
 - Lancer le jeu : `tools/launch.sh` (recompile et réimporte ce qui a changé, ADR 0117) ou `godot --path game`
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
+- Assets 3D générés (image → 3D, gratuit d'abord) : `docs/pipeline-assets-3d.md`
 - Animations (mocap vidéo, Muybridge, mesures sur vidéos libres, shaders) : `docs/animation.md`
 
 ## Règles de robustesse pour les agents (quota Claude Code)

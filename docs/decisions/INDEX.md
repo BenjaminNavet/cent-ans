@@ -179,3 +179,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
+| 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
