@@ -315,7 +315,7 @@ pub const UNIT_CATEGORIES: [UnitCategory; 4] = [
 ];
 
 /// Sums the effects of every completed building of `buildings` (data-only:
-/// no [`CampaignState`] needed, so `orders.rs` and the population/economy
+/// no [`CampaignState`] needed, so `orders` and the population/economy
 /// modules can call it on any building list).
 pub fn effects_of(data: &GameData, buildings: &[BuildingId]) -> EffectTotals {
     let mut totals = EffectTotals::default();
