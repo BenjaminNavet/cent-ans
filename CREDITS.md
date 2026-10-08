@@ -486,6 +486,18 @@ deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne
   licence : fichier `KayKit-CC0-License.txt` du pack (« License: (Creative Commons Zero, CC0) »).
   Clips d'essai seulement (`slash`, `overhead`, `pike_level`, `pike_thrust`).
 
+## Animations tirées de vidéos libres (`game/assets/models/battle_fine/vf/`, lot AS8a, ADR 0189)
+
+Clips `vf_thrust`, `vf_guard`, `vf_strike` : poses humaines extraites (MediaPipe) d'une vidéo
+de Wikimedia Commons, reciblées sur le squelette fin et cuites en matrices d'os. Seuls ces
+dérivés sont versionnés ; la vidéo reste hors dépôt. Adaptation d'une œuvre CC BY-SA : le
+fichier dérivé (`human.bones.bin`, `manifest.json`) est lui-même sous **CC BY-SA 3.0** (fichier
+de données seul ; le reste du jeu n'est pas concerné). Clips non lus par défaut.
+
+- **« RoscheiderhofSpaetmittelter2018.webm »**, Helge Klaus Rieder (User:HelgeRieder), Roscheider
+  Hof, 2018 — https://commons.wikimedia.org/wiki/File:RoscheiderhofSpaetmittelter2018.webm —
+  CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0). Segments 33-50 s.
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons

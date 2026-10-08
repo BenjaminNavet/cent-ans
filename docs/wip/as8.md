@@ -15,3 +15,41 @@ avec un `LICENSE.txt` par vidéo (auteur, URL Commons, licence vérifiée sur la
 
 ## Prochaine étape
 Fusion des 4 branches, crédits dans `CREDITS.md`, AS7 (jugement en jeu) étendu aux clips AS8.
+
+## AS8a — humains (branche feat/as8a, 08/10)
+
+État : clips cuits, mesurés, NON promus. Sources vérifiées par l'API Commons (extmetadata) ;
+`LICENSE.txt` par vidéo dans `~/dev/cent-ans-mocap-src/video/free/humans/<nom>/`.
+
+| Vidéo | Licence | Verdict |
+|---|---|---|
+| RoscheiderhofSpaetmittelter2018.webm (Helge Klaus Rieder, 4 min 18, 1080p) | CC BY-SA 3.0 | utilisée : combat d'un homme en brigandine noire à l'écu (33-50 s, caméra à la main) |
+| Jousting reenactment Eggenburg.webm (Ekrem Canli, 114 s, 500 Mo) | CC BY-SA 4.0 | inexploitable : cavaliers minuscules et montés, caméra qui bouge ; téléchargement interrompu à 211 Mo (fichier incomplet, à supprimer) |
+| Canon firing mvi 3662.ogv (Rama, 17 s, 640x480) | CC BY-SA 2.0 fr | inexploitable : servant caché derrière la roue, petit, puis fumée ; pas de pose extraite |
+
+Le film Roscheiderhof contient aussi un canon (170-215 s) mais les servants y font ~60 px :
+non tentés. Aucune marche en armure dans les trois vidéos (pas de `vf_march`) ; pas de
+chargement de canon exploitable (pas de `vf_gun_load`).
+
+Pipeline : `ffmpeg` (33-50 s, 25 i/s) → `extract_pose.py` (409/425 images détectées) →
+`tools/video_mocap/camera_shift.py` (nouveau : translation du fond par flux LK, retranchée des
+repères image pour les contacts de pieds, fichier `<video>_cam.npz` lu par `Clip`) →
+`nt13_video_trial.py` (`CLIPS_AS8A`, `-- bake-vf`, `-- measure` ajoute les `vf_` à la ligne du
+rôle). Bake : `game/assets/models/battle_fine/vf/` (SOURCE.md, CREDITS.md).
+
+Clips : `vf_thrust` (i. 104-150), `vf_guard` (148-172, bouclé), `vf_strike` (358-392 ; rôle
+`overhead`). Lacet fixé à la main (le lacet auto donnait -32° / 138° : visage et épée peu fiables).
+
+Mesures (`-- measure`, avec camera_shift ; glissement m / tremblement / accél.) :
+| rôle | actuel (défaut) | vf_ |
+|---|---|---|
+| thrust | NT14 : 0 / 1,63 / 18,5 | vf_thrust : 0,433 / 1,62 / 11,9 |
+| guard | NT14 : 0 / 0,03 / 0,06 | vf_guard : 0,360 / 0,38 / 4,95 |
+| overhead | NT14 : 0 / 1,41 / 15,6 | vf_strike : 0,473 / 1,66 / 12,7 |
+Sans camera_shift : glissement 0,35 / 0,37 / 0,49. Cause : MediaPipe suit mal talons et orteils
+(armure, jambes 50-80 % visibles) → 8-23 images d'appui seulement, un pied jamais posé sur la
+garde ; tremblement de pied 3-4°. Aucun clip n'est meilleur : rien de promu, `melee/` inchangé,
+option de jeu non créée (aucune option `data/fx` existante pour ces clips).
+
+Prochaine étape possible : un tournage du joueur (caméra fixe, plein pied) ; ou suivi des pieds
+par un second modèle. Test : `game/tests/as8a_test.gd`.

@@ -1,0 +1,157 @@
+{
+ "bones": [
+  "Root",
+  "Body",
+  "Hips",
+  "Abdomen",
+  "Torso",
+  "Chest",
+  "Neck",
+  "Head",
+  "Shoulder.L",
+  "UpperArm.L",
+  "LowerArm.L",
+  "Wrist.L",
+  "Shoulder.R",
+  "UpperArm.R",
+  "LowerArm.R",
+  "Wrist.R",
+  "UpperLeg.L",
+  "LowerLeg.L",
+  "Foot.L",
+  "UpperLeg.R",
+  "LowerLeg.R",
+  "Foot.R",
+  "Prop",
+  "Nock",
+  "Arrow"
+ ],
+ "clip_sources": {
+  "vf_guard": {
+   "grip": "right_hand",
+   "note": "guard with buckler",
+   "quality": {
+    "contact_frames": [
+     19,
+     0
+    ],
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.36,
+    "jitter_deg_per_frame2": 4.95,
+    "tremor_deg": 0.38,
+    "tremor_worst": [
+     [
+      "Foot.L",
+      1.7
+     ],
+     [
+      "UpperArm.R",
+      0.87
+     ],
+     [
+      "LowerArm.R",
+      0.86
+     ]
+    ],
+    "wrist_r_bend_max_deg": 65.7,
+    "wrist_r_max_deg_per_frame": 9.1
+   },
+   "set": "as8a",
+   "shield": "keyframed",
+   "solve_s": 0.0,
+   "source": "Roscheiderhof Spaetmittelter 2018 (Helge Klaus Rieder, CC BY-SA 3.0) vf_fight frames 148-172 @25fps, x1.0 speed",
+   "yaw_deg": 20.0
+  },
+  "vf_strike": {
+   "grip": "right_hand",
+   "note": "sword raised, step and cut",
+   "quality": {
+    "contact_frames": [
+     23,
+     0
+    ],
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.473,
+    "jitter_deg_per_frame2": 12.65,
+    "tremor_deg": 1.66,
+    "tremor_worst": [
+     [
+      "Foot.R",
+      4.29
+     ],
+     [
+      "LowerArm.R",
+      3.42
+     ],
+     [
+      "UpperArm.R",
+      2.82
+     ]
+    ],
+    "wrist_r_bend_max_deg": 99.1,
+    "wrist_r_max_deg_per_frame": 27.5
+   },
+   "set": "as8a",
+   "shield": "keyframed",
+   "solve_s": 0.0,
+   "source": "Roscheiderhof Spaetmittelter 2018 (Helge Klaus Rieder, CC BY-SA 3.0) vf_fight frames 358-392 @25fps, x1.0 speed",
+   "yaw_deg": 80.0
+  },
+  "vf_thrust": {
+   "grip": "right_hand",
+   "note": "lunge, sword thrust",
+   "quality": {
+    "contact_frames": [
+     9,
+     14
+    ],
+    "foot_below_rest_m": -0.0,
+    "foot_slide_m": 0.433,
+    "jitter_deg_per_frame2": 11.93,
+    "tremor_deg": 1.62,
+    "tremor_worst": [
+     [
+      "LowerArm.R",
+      3.39
+     ],
+     [
+      "Foot.L",
+      3.3
+     ],
+     [
+      "UpperArm.R",
+      3.15
+     ]
+    ],
+    "wrist_r_bend_max_deg": 98.7,
+    "wrist_r_max_deg_per_frame": 38.5
+   },
+   "set": "as8a",
+   "shield": "keyframed",
+   "solve_s": 0.1,
+   "source": "Roscheiderhof Spaetmittelter 2018 (Helge Klaus Rieder, CC BY-SA 3.0) vf_fight frames 104-150 @25fps, x1.0 speed",
+   "yaw_deg": 90.0
+  }
+ },
+ "clips": {
+  "vf_guard": {
+   "frames": 24,
+   "loop": true,
+   "start": 45
+  },
+  "vf_strike": {
+   "frames": 33,
+   "loop": false,
+   "start": 69
+  },
+  "vf_thrust": {
+   "frames": 45,
+   "loop": false,
+   "start": 0
+  }
+ },
+ "fps": 24,
+ "rig": "human",
+ "source": "tools/blender_scripts/nt13_video_trial.py (bake-vf) - free Wikimedia Commons video (CC BY-SA 3.0), MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/as8.md and ADR 0189",
+ "texture": "human.bones.bin"
+}
