@@ -20,6 +20,15 @@
    "full_from": 14.0,
    "max_factor": 220.0,
    "fov_deg": 55.0
+  },
+  "maquette": {
+   "size_distance": 50.0,
+   "distance_scale": 3.0,
+   "view_range_units": 220.0,
+   "fade_from_units": 180.0,
+   "load_factor": 1.8,
+   "load_min_units": 30.0,
+   "load_max_units": 260.0
   }
  },
  "types": {
@@ -1009,7 +1018,7 @@
     0.9,
     1.8
    ],
-   "chance": 0.45,
+   "chance": 0.25,
    "seed": 17
   },
   {

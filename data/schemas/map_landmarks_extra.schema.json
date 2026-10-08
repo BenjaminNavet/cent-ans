@@ -12,7 +12,7 @@
     "seed": {"type": "integer"},
     "render": {
       "type": "object",
-      "required": ["view_range_units", "fade_from_units", "load_factor", "load_min_units", "load_max_units", "max_instances", "lod_distances", "shadow_range_units", "cell_px", "screen"],
+      "required": ["view_range_units", "fade_from_units", "load_factor", "load_min_units", "load_max_units", "max_instances", "lod_distances", "shadow_range_units", "cell_px", "screen", "maquette"],
       "additionalProperties": false,
       "properties": {
         "view_range_units": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-delà de laquelle rien n'est affiché (toujours bien sous le palier parchemin)."},
@@ -24,6 +24,21 @@
         "lod_distances": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}, "description": "Distances du rig des passages LOD0 -> LOD1 -> LOD2."},
         "shadow_range_units": {"type": "number", "minimum": 0},
         "cell_px": {"type": "number", "exclusiveMinimum": 0, "description": "Côté (px carte) des cases de la grille spatiale."},
+        "maquette": {
+          "type": "object",
+          "required": ["size_distance", "distance_scale", "view_range_units", "fade_from_units", "load_factor", "load_min_units", "load_max_units"],
+          "additionalProperties": false,
+          "description": "Style `maquette` de la carte généralisée (ADR 0158) : taille monde constante, celle qu'aurait un objet à `size_distance` ; portées des types et distances LOD multipliées par `distance_scale`.",
+          "properties": {
+            "size_distance": {"type": "number", "exclusiveMinimum": 0},
+            "distance_scale": {"type": "number", "exclusiveMinimum": 0},
+            "view_range_units": {"type": "number", "exclusiveMinimum": 0},
+            "fade_from_units": {"type": "number", "exclusiveMinimum": 0},
+            "load_factor": {"type": "number", "exclusiveMinimum": 0},
+            "load_min_units": {"type": "number", "exclusiveMinimum": 0},
+            "load_max_units": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
         "screen": {
           "type": "object",
           "required": ["real_below", "full_from", "max_factor", "fov_deg"],
