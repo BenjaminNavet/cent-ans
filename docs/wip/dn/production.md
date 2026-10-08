@@ -12,6 +12,8 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 
 - architecture, mobile, economy : ingérés (multi-vues pour house/major_building/ship/cart/bridge).
 
+- illus : 308 images générées (1 graine, fal Z-Image, recadrées à `ingest.size`), provenance dans `data/art/dn_illus_generation.json`.
+
 ## En cours
 - nature_extra, battle_extra (fal, 1 graine).
 

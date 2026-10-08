@@ -290,3 +290,6 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-08 | fal.ai | paquet architecture + mobile + economy : images Z-Image fal (`fal-ai/z-image/turbo`), 109 appels | 0.55 $ | 0.55 $ | 17.37 $ |
 | 2026-10-08 | fal.ai | paquet architecture + mobile + economy : vues dos/côté `fal-ai/flux-2/edit`, 69 appels | 1.66 $ | 1.66 $ | 19.02 $ |
 | 2026-10-08 | fal.ai | paquet architecture + mobile + economy : 3D `fal-ai/trellis` / `trellis/multi`, 171 appels | 3.42 $ | 3.42 $ | 22.44 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : images Z-Image fal (`fal-ai/z-image/turbo`), 403 appels | 2.02 $ | 2.02 $ | 24.46 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : vues dos/côté `fal-ai/flux-2/edit`, 10 appels | 0.24 $ | 0.24 $ | 24.70 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : 3D `fal-ai/trellis` / `trellis/multi`, 23 appels | 0.46 $ | 0.46 $ | 25.16 $ |
