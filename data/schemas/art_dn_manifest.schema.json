@@ -34,6 +34,7 @@
           "raw": {"type": "string", "description": "Glb brut d'origine (hors dépôt)."},
           "cost_usd": {"type": "number", "minimum": 0},
           "yaw_deg": {"type": "number"},
+          "generation": {"type": "object", "description": "Provenance complète : prompt exact, graine, endpoints et vues (copié de <id>/generation.json)."},
           "grade": {"type": "object", "description": "Étalonnage appliqué à l'albédo et statistiques avant/après."}
         }
       }

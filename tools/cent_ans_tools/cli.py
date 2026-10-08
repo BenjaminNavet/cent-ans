@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import typer
@@ -125,6 +126,9 @@ def dn_ingest_command(
     source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
     model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
     cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
+    generation: Path | None = typer.Option(  # noqa: B008
+        None, exists=True, dir_okay=False, help="JSON de provenance (manifeste)"
+    ),
     out_dir: Path | None = typer.Option(  # noqa: B008
         None, help="Racine de sortie (défaut game/assets/models/dn)"
     ),
@@ -162,6 +166,7 @@ def dn_ingest_command(
         source_image=source_image,
         model_3d=model_3d,
         cost_usd=cost_usd,
+        generation=json.loads(generation.read_text()) if generation else None,
     )
     dn_ingest.update_manifest(entry, manifest)
     console.print(

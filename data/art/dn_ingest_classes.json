@@ -124,6 +124,19 @@
       "scale_axis": "length",
       "roughness": 0.9,
       "strip_base": true
+    },
+    "bridge": {
+      "label": "Pont",
+      "category": "buildings",
+      "lod_tris": [
+        8000,
+        2500,
+        600
+      ],
+      "tex": 1024,
+      "scale_axis": "length",
+      "roughness": 0.9,
+      "strip_base": true
     }
   },
   "island_min": 0.01

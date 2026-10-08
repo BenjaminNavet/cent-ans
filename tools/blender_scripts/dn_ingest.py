@@ -241,8 +241,8 @@ def grade_and_resize(obj: "bpy.types.Object", spec: dict) -> dict | None:
     return report
 
 
-def decimate(obj: "bpy.types.Object", target: int) -> int:
-    """Collapse-decimate to roughly ``target`` triangles (two passes), return the count."""
+def collapse_passes(obj: "bpy.types.Object", target: int) -> int:
+    """Up to 8 collapse passes toward ``target`` triangles; return the count."""
     for _ in range(8):
         current = len(obj.data.polygons)
         if current <= target * 1.02:
@@ -254,6 +254,28 @@ def decimate(obj: "bpy.types.Object", target: int) -> int:
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_apply(modifier=modifier.name)
     return len(obj.data.polygons)
+
+
+def decimate(obj: "bpy.types.Object", target: int) -> int:
+    """Collapse-decimate to roughly ``target`` triangles, return the count.
+
+    Collapse stalls on meshes with many UV islands (seams block it); the fallback welds
+    vertices at a growing distance (texture seams blur, harmless at low LOD) and retries.
+    """
+    count = collapse_passes(obj, target)
+    low, high = bounds(obj)
+    diagonal = max(high[i] - low[i] for i in range(3))
+    for fraction in (0.002, 0.006, 0.015, 0.04, 0.08, 0.15, 0.25):
+        if count <= target * 1.04:
+            break
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=diagonal * fraction)
+        bm.to_mesh(obj.data)
+        bm.free()
+        obj.data.update()
+        count = collapse_passes(obj, target)
+    return count
 
 
 def regrind(obj: "bpy.types.Object") -> dict:

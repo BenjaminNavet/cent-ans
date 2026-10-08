@@ -115,6 +115,7 @@ def manifest_entry(
     source_image: str | None = None,
     model_3d: str | None = None,
     cost_usd: float | None = None,
+    generation: dict | None = None,
 ) -> dict:
     """Build the manifest entry for a finished ingest."""
     out_dir = Path(job["out_dir"])
@@ -140,6 +141,7 @@ def manifest_entry(
         ("source_image", source_image),
         ("model_3d", model_3d),
         ("cost_usd", cost_usd),
+        ("generation", generation),
     ):
         if value is not None:
             entry[key] = value

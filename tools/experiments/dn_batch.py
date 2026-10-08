@@ -103,6 +103,38 @@ def append_jsonl(path: Path, record: dict) -> None:
         handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+CATALOG_NAME = ""
+
+
+def gen_event(entry_id: str, section: str, record: dict) -> None:
+    """Append ``record`` to ``<id>/generation.json[section]`` (provenance, merged not replaced)."""
+    path = DN / entry_id / "generation.json"
+    record = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), **record}
+    with _append_lock:
+        data = json.loads(path.read_text()) if path.exists() else {"id": entry_id}
+        data.pop("reconstructed", None)
+        data.setdefault(section, []).append(record)
+        path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
+
+
+def gen_base(entry: dict) -> None:
+    """Static provenance fields and ``prompt.txt`` (fal path writes them like the local one)."""
+    out_dir = DN / entry["id"]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "prompt.txt").write_text(full_prompt(entry))
+    path = out_dir / "generation.json"
+    with _append_lock:
+        data = json.loads(path.read_text()) if path.exists() else {}
+        data.update(
+            {
+                "id": entry["id"], "catalogue": CATALOG_NAME, "target": entry.get("target"),
+                "region": entry.get("region"), "catalogue_prompt": entry["prompt"],
+                "full_prompt": full_prompt(entry), "ingest": entry.get("ingest"),
+            }
+        )  # fmt: skip
+        path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
+
+
 @contextlib.contextmanager
 def timed(entry_id: str, step: str, **extra):
     """Record the wall-clock time of a step in ``dn/timings.jsonl``."""
@@ -197,6 +229,17 @@ def fal_image(entry: dict, seed: int, target: Path) -> None:
             {"id": entry["id"], "step": "zimage-fal", "error": str(error)[:400]},
         )
         return
+    gen_event(
+        entry["id"], "images",
+        {
+            "seed": seed, "endpoint": FAL_IMAGE_ENDPOINT, "file": f"img/s{seed}.png",
+            "arguments": {
+                "image_size": f"{SIZE}x{SIZE}", "seed": seed, "enable_prompt_expansion": False,
+                "output_format": "png",
+            },
+            "usd": FAL_IMAGE_COST_USD,
+        },
+    )  # fmt: skip
     append_jsonl(
         DN / "fal_spend.jsonl",
         {
@@ -468,6 +511,14 @@ def fal_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
             },
         )
         urllib.request.urlretrieve(result["model_mesh"]["url"], target)  # noqa: S310
+    gen_event(
+        entry_id, "calls_3d",
+        {
+            "seed": seed, "endpoint": FAL_ENDPOINT, "mode": "single-view",
+            "views": [str(cut.relative_to(DN / entry_id))], "file": f"3d/{target.name}",
+            "usd": FAL_COST_USD,
+        },
+    )  # fmt: skip
     append_jsonl(
         DN / "fal_spend.jsonl",
         {
@@ -508,10 +559,112 @@ def hf_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
         print(f"[{entry_id}] HF failed (skipped): {note.strip()[-120:]}", flush=True)
 
 
-def fal_job(entry_id: str, cut: Path, target: Path, seed: int) -> None:
+MULTI_VIEW_CLASSES = {
+    "house", "major_building", "bridge", "ship", "cart", "siege_engine", "figure",
+    "figure_mounted",
+}  # fmt: skip
+SIDE_VIEW_CLASSES = {"cart", "siege_engine", "bridge"}
+VIEW_PROMPTS = {
+    "back": "Show exactly the same object from behind, seen from the back three-quarter "
+    "opposite to the original view, same materials, same proportions, same lighting, "
+    "same plain mid-grey background, whole object visible and centred, no ground.",
+    "side": "Show exactly the same object from its left side, seen straight from the side at "
+    "eye level, same materials, same proportions, same lighting, same plain mid-grey "
+    "background, whole object visible and centred, no ground.",
+}
+FAL_EDIT_ENDPOINT = "fal-ai/flux-2/edit"
+FAL_EDIT_COST_USD = 0.024
+FAL_MULTI_ENDPOINT = "fal-ai/trellis/multi"
+_rembg_lock = threading.Lock()
+
+
+def is_multi_view(entry: dict) -> bool:
+    """Oriented objects need several views (single-view TRELLIS leaves a black back)."""
+    return entry.get("ingest", {}).get("class") in MULTI_VIEW_CLASSES
+
+
+def log_spend(entry_id: str, endpoint: str, seed: int, usd: float, category: str) -> None:
+    """One line of ``fal_spend.jsonl``."""
+    append_jsonl(
+        DN / "fal_spend.jsonl",
+        {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "id": entry_id, "category": category,
+            "endpoint": endpoint, "seed": seed, "usd": usd,
+        },
+    )  # fmt: skip
+
+
+def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
+    """Back (and side) views by flux-2/edit, rembg, then ``fal-ai/trellis/multi``."""
+    import fal_client
+    from PIL import Image
+
+    entry_id = entry["id"]
+    views = out_dir / "views"
+    views.mkdir(exist_ok=True)
+    names = ["back"] + (["side"] if entry["ingest"]["class"] in SIDE_VIEW_CLASSES else [])
+    cuts = [out_dir / "cut" / f"s{seed}.png"]
+    source_url = None
+    for name in names:
+        raw, framed = views / f"{name}_s{seed}.png", views / f"{name}_cut_s{seed}.png"
+        if not raw.exists():
+            source_url = source_url or fal_client.upload_file(
+                str(out_dir / "img" / f"s{seed}.png")
+            )
+            with timed(entry_id, f"edit-{name}", seed=seed):
+                result = fal_client.subscribe(
+                    FAL_EDIT_ENDPOINT,
+                    arguments={
+                        "prompt": VIEW_PROMPTS[name], "image_urls": [source_url],
+                        "image_size": {"width": SIZE, "height": SIZE}, "seed": seed,
+                        "output_format": "png",
+                    },
+                )  # fmt: skip
+                urllib.request.urlretrieve(result["images"][0]["url"], raw)  # noqa: S310
+            log_spend(entry_id, FAL_EDIT_ENDPOINT, seed, FAL_EDIT_COST_USD, "view")
+            gen_event(
+                entry_id, "views",
+                {
+                    "seed": seed, "view": name, "endpoint": FAL_EDIT_ENDPOINT,
+                    "prompt": VIEW_PROMPTS[name], "source": f"img/s{seed}.png",
+                    "file": f"views/{name}_s{seed}.png", "usd": FAL_EDIT_COST_USD,
+                },
+            )  # fmt: skip
+        if not framed.exists():
+            with _rembg_lock:
+                frame_square(rembg_cut(Image.open(raw).convert("RGB"))).save(framed)
+        cuts.append(framed)
+    with timed(entry_id, "trellis-multi", seed=seed):
+        urls = [fal_client.upload_file(str(path)) for path in cuts]
+        result = fal_client.subscribe(
+            FAL_MULTI_ENDPOINT,
+            arguments={
+                "image_urls": urls, "multiimage_algo": "stochastic", "seed": seed,
+                "texture_size": 1024, "mesh_simplify": 0.95,
+            },
+        )  # fmt: skip
+        mesh = result.get("model_mesh") or result.get("model_glb")
+        urllib.request.urlretrieve(mesh["url"], target)  # noqa: S310
+    log_spend(entry_id, FAL_MULTI_ENDPOINT, seed, FAL_COST_USD, "3d")
+    gen_event(
+        entry_id, "calls_3d",
+        {
+            "seed": seed, "endpoint": FAL_MULTI_ENDPOINT, "mode": "multi-view",
+            "views": [str(path.relative_to(out_dir)) for path in cuts],
+            "file": f"3d/fal__s{seed}.glb", "usd": FAL_COST_USD,
+        },
+    )  # fmt: skip
+
+
+def fal_job(
+    entry_id: str, cut: Path, target: Path, seed: int, entry: dict | None = None
+) -> None:
     """Wrapper that logs a fal failure (balance, network) instead of killing the batch."""
     try:
-        fal_trellis(entry_id, cut, target, seed)
+        if entry is not None and is_multi_view(entry):
+            fal_multi(entry, cut.parent.parent, seed, target)
+        else:
+            fal_trellis(entry_id, cut, target, seed)
     except Exception as error:  # noqa: BLE001
         append_jsonl(
             DN / "failures.jsonl",
@@ -572,6 +725,7 @@ def process(
         (out_dir / "kind_figure").touch()
     until = STAGES.index(args.until)
     if args.image_backend == "fal":
+        gen_base(entry)
         if not any((out_dir / "img").glob("s*.png")):
             print(f"[{entry['id']}] no fal image, skipped", flush=True)
             return
@@ -591,7 +745,7 @@ def process(
     if "fal" in wanted and not (out_dir / "3d" / f"fal__s{seed}.glb").exists():
         futures.append(
             executor.submit(
-                fal_job, entry["id"], cut, out_dir / "3d" / f"fal__s{seed}.glb", seed
+                fal_job, entry["id"], cut, out_dir / "3d" / f"fal__s{seed}.glb", seed, entry
             )
         )
     if "hf" in wanted and not (out_dir / "3d" / f"hf__s{seed}.glb").exists():
@@ -638,6 +792,8 @@ def main() -> None:
         args.charter_s_p95,
         args.charter_s_mean,
     )
+    global CATALOG_NAME
+    CATALOG_NAME = Path(args.catalog).name
     entries = json.loads(Path(args.catalog).read_text())
     if args.only:
         entries = [e for e in entries if e["id"] in args.only.split(",")]
