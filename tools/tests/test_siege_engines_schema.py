@@ -78,8 +78,7 @@ def test_ga3_variants_have_their_models() -> None:
 
 
 def test_trebuchet_swing_curve_matches_schema() -> None:
-    """The measured swing curve (own file, own licence) matches its schema."""
+    """The measured swing curve keeps its own file and licence (schema: test_schemas.py)."""
     curve = _load("fx/trebuchet_swing_curve.json")
-    _check("fx_trebuchet_swing_curve.schema.json", curve)
     assert "swing_curve" not in _load("fx/siege_engines.json")["trebuchet"]
     assert "CC BY-SA" in curve["licence"]
