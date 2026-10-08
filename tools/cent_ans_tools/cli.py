@@ -103,9 +103,13 @@ def blender_smoke() -> None:
 
 @app.command("dn-ingest")
 def dn_ingest_command(
-    raw: Path = typer.Argument(..., exists=True, dir_okay=False, help="Glb brut TRELLIS/SF3D"),
+    raw: Path = typer.Argument(
+        ..., exists=True, dir_okay=False, help="Glb brut TRELLIS/SF3D"
+    ),  # noqa: B008
     asset_id: str = typer.Option(..., "--id", help="Identifiant snake_case anglais"),
-    asset_class: str = typer.Option(..., "--class", help="Classe (data/art/dn_ingest_classes.json)"),
+    asset_class: str = typer.Option(
+        ..., "--class", help="Classe (data/art/dn_ingest_classes.json)"
+    ),
     length: float | None = typer.Option(None, help="Longueur cible (m)"),
     width: float | None = typer.Option(None, help="Largeur cible (m)"),
     height: float | None = typer.Option(None, help="Hauteur cible (m)"),
@@ -113,20 +117,36 @@ def dn_ingest_command(
     lods: int = typer.Option(3, help="Nombre de LOD (1 à 3)"),
     tex: int | None = typer.Option(None, help="Taille de texture (défaut : classe)"),
     gamma: float = typer.Option(1.0, help="Gamma d'albédo avant plafonnement"),
-    no_grade: bool = typer.Option(False, "--no-grade", help="Pas d'étalonnage de l'albédo"),
+    no_grade: bool = typer.Option(
+        False, "--no-grade", help="Pas d'étalonnage de l'albédo"
+    ),
     source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
     model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
     cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
-    out_dir: Path | None = typer.Option(None, help="Racine de sortie (défaut game/assets/models/dn)"),
-    manifest: Path = typer.Option(dn_ingest.MANIFEST_PATH, help="Manifeste à mettre à jour"),
+    out_dir: Path | None = typer.Option(
+        None, help="Racine de sortie (défaut game/assets/models/dn)"
+    ),  # noqa: B008
+    manifest: Path = typer.Option(
+        dn_ingest.MANIFEST_PATH, help="Manifeste à mettre à jour"
+    ),  # noqa: B008
 ) -> None:
     """Transforme un glb brut en asset de jeu (échelle, pivot, LOD, albédo) et l'inscrit au manifeste."""
     classes = dn_ingest.load_classes()
     try:
         job = dn_ingest.build_job(
-            asset_id=asset_id, asset_class=asset_class, raw=raw.resolve(), classes=classes,
-            out_dir=out_dir, length=length, width=width, height=height, yaw_deg=yaw,
-            lods=lods, tex=tex, grade=not no_grade, gamma=gamma,
+            asset_id=asset_id,
+            asset_class=asset_class,
+            raw=raw.resolve(),
+            classes=classes,
+            out_dir=out_dir,
+            length=length,
+            width=width,
+            height=height,
+            yaw_deg=yaw,
+            lods=lods,
+            tex=tex,
+            grade=not no_grade,
+            gamma=gamma,
         )
         result = dn_ingest.run_ingest(job, classes)
     except (dn_ingest.IngestError, blender.BlenderError) as error:
@@ -134,10 +154,17 @@ def dn_ingest_command(
         raise typer.Exit(code=1) from error
     problems = dn_ingest.check_result(job, result, classes)
     entry = dn_ingest.manifest_entry(
-        job, result, asset_class, source_image=source_image, model_3d=model_3d, cost_usd=cost_usd
+        job,
+        result,
+        asset_class,
+        source_image=source_image,
+        model_3d=model_3d,
+        cost_usd=cost_usd,
     )
     dn_ingest.update_manifest(entry, manifest)
-    console.print(f"{asset_id} : {result['triangles']} triangles, {result['dimensions_m']} m")
+    console.print(
+        f"{asset_id} : {result['triangles']} triangles, {result['dimensions_m']} m"
+    )
     for problem in problems:
         console.print(f"[yellow]{problem}[/yellow]")
     if problems:
