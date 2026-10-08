@@ -63,7 +63,7 @@ static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	var p := model_params(model)
 	if p.is_empty() or not enabled():
 		material.set_shader_parameter("am_on", 0.0)
-		material.set_shader_parameter("am_cart", Vector4(0.0, 0.65, 0.03, 1.26))
+		material.set_shader_parameter("am_cart", Vector4(0.0, 0.65, 1.0, 1.26))
 		return
 	var has_beast := float(p.get("half_m", 0.0)) > 0.0
 	material.set_shader_parameter("am_on", 1.0 if has_beast else 0.0)
@@ -76,7 +76,34 @@ static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	material.set_shader_parameter("am_breath", Vector4(float(p["breath_m"]), float(p["breath_hz"]), float(p["chew_hz"]), float(p["chew_rad"])))
 	# Le cahot suit la foulée de la bête attelée ; sans bête, la période des données.
 	var period := float(p["stride_m"]) if has_beast else float(p["jolt_period_m"])
-	material.set_shader_parameter("am_cart", Vector4(float(p.get("wheel_radius_m", 0.0)), float(p.get("wheel_x_min_m", 0.65)), float(p["jolt_amp_m"]), period))
+	material.set_shader_parameter("am_cart", Vector4(float(p.get("wheel_radius_m", 0.0)), float(p.get("wheel_x_min_m", 0.65)), 1.0, period))
+	# Lot AS8c : courbes de pas, cahot et roulis mesurés (data/fx/animal_motion_measured.json).
+	material.set_shader_parameter("am_extra", Vector4(float(p["graze_ramp_s"]), float(p["roll_rad"]), 0.0, 0.0))
+	material.set_shader_parameter("am_swing", _lut(p["swing_lut"]))
+	material.set_shader_parameter("am_lift", _lut(p["lift_lut"]))
+	var amps := Vector3.ZERO
+	var ratios := Vector3.ONE
+	var lines: Array = p["jolt_lines"]
+	for k in mini(lines.size(), 3):
+		amps[k] = float(lines[k]["amp_m"])
+		ratios[k] = float(lines[k]["stride_ratio"])
+	material.set_shader_parameter("am_jolt_amp", amps)
+	material.set_shader_parameter("am_jolt_ratio", ratios)
+
+
+## Valeur d'une table de pas (16 échantillons bouclés) à la phase `u` en cycles : même
+## interpolation que `am_swing_at` du shader (utilisée par les tests).
+static func lut_at(table: Array, u: float) -> float:
+	var x := fposmod(u, 1.0) * float(table.size())
+	var i := int(floor(x))
+	return lerpf(float(table[i % table.size()]), float(table[(i + 1) % table.size()]), x - float(i))
+
+
+static func _lut(values: Array) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	for v in values:
+		out.append(float(v))
+	return out
 
 
 ## Matériau d'un cheval de camp pour une surface du modèle du kit (couleur et rugosité de
@@ -93,7 +120,7 @@ static func camp_horse_material(source: Material, hair: bool) -> ShaderMaterial:
 	material.set_shader_parameter("ch_on", 1.0 if enabled() else 0.0)
 	material.set_shader_parameter("ch_head", Vector4(_f(s, "head_pivot_x_m"), _f(s, "head_pivot_y_m"), _f(s, "head_start_x_m"), _f(s, "head_end_x_m")))
 	material.set_shader_parameter("ch_head2", Vector4(_f(s, "head_lift_rad"), _f(s, "head_cycle_s"), _f(s, "head_up_share"), _f(s, "head_nod_rad")))
-	material.set_shader_parameter("ch_head3", Vector4(_f(s, "head_nod_hz"), _f(s, "chew_hz"), _f(s, "chew_rad"), 0.0))
+	material.set_shader_parameter("ch_head3", Vector4(_f(s, "head_nod_hz"), _f(s, "chew_hz"), _f(s, "chew_rad"), _f(s, "head_ramp_s")))
 	material.set_shader_parameter("ch_tail", Vector4(_f(s, "tail_start_x_m"), _f(s, "tail_end_x_m"), _f(s, "tail_top_y_m"), maxf(_f(s, "tail_len_m"), 0.05)))
 	material.set_shader_parameter("ch_tail2", Vector4(_f(s, "tail_swing_m"), _f(s, "tail_hz"), maxf(_f(s, "tail_swish_period_s"), 1.0), 0.0))
 	material.set_shader_parameter("ch_shift", Vector4(maxf(_f(s, "shift_period_s"), 1.0), _f(s, "shift_lift_m"), _f(s, "shift_back_m"), _f(s, "shift_sway_m")))

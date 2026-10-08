@@ -16,8 +16,10 @@ uniform float ch_on = 1.0;
 uniform vec4 ch_head = vec4(-0.75, 1.3, -0.75, -1.15);
 // (tête relevée, durée du cycle, part du cycle tête haute, hochement)
 uniform vec4 ch_head2 = vec4(0.4, 15.0, 0.22, 0.04);
-// (fréquence du hochement, fréquence de mâchonnement, amplitude de mâchonnement)
-uniform vec4 ch_head3 = vec4(0.7, 2.2, 0.025, 0.0);
+// (fréquence du hochement, fréquence de mâchonnement, amplitude de mâchonnement, durée de la
+// montée et de la descente de la tête en secondes ; 0 = 5 % du cycle). Lot AS8c : mâchonnement et
+// durée mesurés sur les vidéos de Rama (chevaux au foin).
+uniform vec4 ch_head3 = vec4(0.7, 1.11, 0.034, 1.0);
 // (début x, fin x, attache y, longueur)
 uniform vec4 ch_tail = vec4(0.6, 0.9, 1.45, 0.75);
 // (battement, fréquence, période des chasses-mouches)
@@ -58,7 +60,8 @@ void vertex() {
 		hw = hw * hw * (3.0 - 2.0 * hw);
 		if (hw > 0.0) {
 			float u = fract(t / ch_head2.y);
-			float up = smoothstep(0.0, 0.05, u) * (1.0 - smoothstep(ch_head2.z - 0.05, ch_head2.z, u));
+			float ramp = ch_head3.w > 0.0 ? clamp(ch_head3.w / ch_head2.y, 0.01, 0.2) : 0.05;
+			float up = smoothstep(0.0, ramp, u) * (1.0 - smoothstep(ch_head2.z - ramp, ch_head2.z, u));
 			float angle = -ch_head2.x * up;
 			angle += sin(t * TAU * ch_head3.y) * ch_head3.z * (1.0 - up);
 			angle += sin(t * TAU * ch_head3.x) * ch_head2.w;
