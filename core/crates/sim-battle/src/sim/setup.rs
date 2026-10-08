@@ -201,6 +201,7 @@ impl BattleSim {
             standard_rout_seen: vec![false; count],
             trophies: Vec::new(),
             crossings: Default::default(),
+            road_index: Default::default(),
             drown_announced: Vec::new(),
             camp_states: Default::default(),
             decor_grid: Default::default(),

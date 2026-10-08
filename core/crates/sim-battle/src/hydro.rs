@@ -353,6 +353,42 @@ impl Road {
     }
 }
 
+/// Roads and tracks of a field in a [`SegmentGrid`]: the fast form of
+/// [`Battlefield::road_at`] for the per-step queries.
+#[derive(Debug, Clone, Default)]
+pub struct RoadIndex {
+    grid: crate::geom::SegmentGrid,
+    kinds: Vec<RoadKind>,
+}
+
+impl RoadIndex {
+    pub fn build(roads: &[Road]) -> Self {
+        let grid = crate::geom::SegmentGrid::build(
+            roads
+                .iter()
+                .enumerate()
+                .map(|(i, r)| (r.points.as_slice(), r.width * 0.5 + 1.0, i as u32)),
+        );
+        RoadIndex {
+            grid,
+            kinds: roads.iter().map(|r| r.kind).collect(),
+        }
+    }
+
+    /// The road at (x, z), if any (main roads first).
+    pub fn kind_at(&self, x: f64, z: f64) -> Option<RoadKind> {
+        let mut found = None;
+        for i in self.grid.hits(x, z) {
+            let kind = self.kinds[i as usize];
+            if kind == RoadKind::Main {
+                return Some(kind);
+            }
+            found = Some(kind);
+        }
+        found
+    }
+}
+
 /// What kind of water stands at a point.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Water {
