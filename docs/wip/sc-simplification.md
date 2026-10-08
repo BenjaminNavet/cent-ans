@@ -65,3 +65,21 @@ battlepower (CB6/CB11, ADR 0208 si l'équilibrage bouge), keyenum (BB11/AD14/GB7
 gdtests (GT3/GT4 TestCase + run_all), gdshared (MC7 Hash, MC9 ConfirmDialog, MC8 army_markers).
 Suivants candidats : BB14/BB5 siege_layouts, BA6/BA11 constantes bataille en data, CC6 save, CC13 missions,
 PF-02 relief_quadtree → Rust, UI4 encyclopédie data, GB5 trait BattleSim ; docs (UI10, MC15, CA10, CC15, GB7 doc) en dernier.
+
+## PAUSE (08/10 soir) — point de reprise
+État : vagues 1-6 + gdshared (vague 7) dans main, NON poussé. Push à la fin du chantier seulement.
+Lire aussi : docs/wip/sc/lots.md (notes par lot), inventaire des restes ci-dessus (« Vague 7 »).
+
+Lots de la vague 7 interrompus, chacun commité en `wip` sur sa branche, worktree conservé :
+| lot | worktree / branche | état | à faire |
+|---|---|---|---|
+| orders | ../gp-sc-orders, sc/orders | orders.rs → orders/ + RecruitContext, commité, non vérifié | fmt, clippy -p sim-campaign -p ai, cargo test idem, puis fusion |
+| movement | ../gp-sc-movement, sc/movement | Dijkstra générique data_model::pathfinding (5 sites), movement/ en 6 fichiers, constantes landing/raid/siege en data/rules ; build OK, 3 erreurs clippy corrigées | fmt, clippy, cargo test -p sim-campaign -p ai -p data-model (vérifier omr_r1_agent_paths = départages Dijkstra), pytest -k schema ; supprimer wrappers terrain_cost/sea_neighbors ; fusionner own_army_checked avec orders::own_army après orders |
+| battlepower | ../gp-sc-battlepower, sc/battlepower | puissance d'unité commune battle_auto/forecast, non vérifié | clippy, tests sim-campaign/sim-battle/ai ; ADR 0208 si l'équilibrage bouge |
+| keyenum | ../gp-sc-keyenum, sc/keyenum | macro key_enum! + migration (data-model, godot-bridge), clippy propre | cargo test --workspace, puis fusion |
+| gdtests | ../gp-sc-gdtests, sc/gdtests | game/tests/lib/test_case.gd + tools/run_godot_tests.sh, AUCUN test migré | migrer les *_test.gd (sortie 0/1 identique), comparer échecs avant/après |
+Ordre de fusion conseillé : keyenum, orders, movement (dépend d'orders pour own_army), battlepower, gdtests. Conflits probables orders/movement/keyenum dans sim-campaign.
+Règle machine : 3 lots Rust en parallèle au plus (5 → charge 200, agents rendus avant leurs tests).
+Préexistant à corriger : at1_attack_order_test (siège commencé au lieu d'assaut, pending 0 → 0).
+Constats pour le joueur : bouton « scinder l'armée » toujours caché (hud split_supported lit supports_order absent du pont) ; OutbuildingLayer._finish_warm peut bloquer si une vue est demandée dans la frame du setup ; test_relief_update (bake 5≠6) vient d'une autre session.
+Vagues suivantes (≈ 5) : restes dans « Vague 7 » ci-dessus ; docs en dernier ; à la fin : push origin main, mémoire project-hyw-sc.
