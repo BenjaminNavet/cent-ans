@@ -287,7 +287,7 @@ fn the_wall_walk_is_sheltered_from_the_heat() {
     let id = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_crossbowmen")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_crossbowmen")
         .unwrap()
         .id as usize;
     place(&mut sim, id as u32, hx, hz - radius - 8.0, 0.0);
@@ -354,13 +354,13 @@ fn smoke_spoils_the_aim_through_it() {
         let archer = sim
             .units()
             .iter()
-            .find(|u| u.side == SideId::Attacker && u.unit_type == "unit_longbowmen")
+            .find(|u| u.side == SideId::Attacker && &*u.unit_type == "unit_longbowmen")
             .unwrap()
             .id;
         let target = sim
             .units()
             .iter()
-            .find(|u| u.side == SideId::Defender && u.unit_type == "unit_urban_militia")
+            .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_urban_militia")
             .unwrap()
             .id;
         place(&mut sim, archer, hx, hz - radius - 50.0, 0.0);
@@ -403,7 +403,7 @@ fn the_burn_command_needs_a_torch_close_by() {
     let id = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_urban_militia")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_urban_militia")
         .unwrap()
         .id;
     let burn = |sim: &mut BattleSim| {

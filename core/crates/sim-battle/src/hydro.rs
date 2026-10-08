@@ -28,6 +28,7 @@ use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
 use crate::field::{Battlefield, River, Zone};
+use crate::geom::segment_distance;
 use crate::rng::BattleRng;
 use crate::scale::FieldSize;
 use crate::setup::CrossingStructure;
@@ -440,17 +441,6 @@ pub fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
         .windows(2)
         .map(|w| segment_distance((x, z), w[0], w[1]))
         .fold(f64::INFINITY, f64::min)
-}
-
-fn segment_distance(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = dx * dx + dz * dz;
-    let t = if len2 < 1e-9 {
-        0.0
-    } else {
-        (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
-    };
-    (p.0 - a.0 - dx * t).hypot(p.1 - a.1 - dz * t)
 }
 
 /// Cheap reject: is (x, z) within `margin` of the bounding box of `points`?

@@ -45,9 +45,7 @@ fn charge(
 }
 
 fn no_stakes(sim: &mut BattleSim) {
-    sim.units_mut()[1]
-        .abilities
-        .retain(|a| *a != data_model::Ability::Stakes);
+    sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
 }
 
 #[test]

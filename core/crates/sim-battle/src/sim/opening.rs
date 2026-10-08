@@ -500,11 +500,13 @@ impl BattleSim {
             if self.field.water_at(mid.0, mid.1) == Some(false) {
                 continue;
             }
-            self.field.obstacles.push(Obstacle {
-                a,
-                b,
-                kind: ObstacleKind::Palisade,
-            });
+            std::sync::Arc::make_mut(&mut self.field)
+                .obstacles
+                .push(Obstacle {
+                    a,
+                    b,
+                    kind: ObstacleKind::Palisade,
+                });
         }
     }
 

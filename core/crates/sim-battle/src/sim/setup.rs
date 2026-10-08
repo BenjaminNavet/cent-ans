@@ -156,10 +156,10 @@ impl BattleSim {
         ];
         let count = units.len();
         let standard_rng = rng.derive(standards::STANDARD_SALT);
-        let standard_rules = std::sync::Arc::new(setup.standards.clone().unwrap_or_default());
+        let standard_rules = Arc::new(setup.standards.clone().unwrap_or_default());
         let mut sim = BattleSim {
-            setup,
-            field,
+            setup: Arc::new(setup),
+            field: Arc::new(field),
             weather,
             units,
             rng,

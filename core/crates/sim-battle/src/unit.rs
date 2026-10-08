@@ -114,12 +114,12 @@ pub struct Unit {
     pub side: SideId,
     /// Index in the side's [`crate::SideSetup::units`].
     pub setup_index: usize,
-    pub unit_type: String,
-    pub name: String,
+    pub unit_type: std::sync::Arc<str>,
+    pub name: std::sync::Arc<str>,
     pub category: UnitCategory,
     pub mounted: bool,
     pub stats: UnitStats,
-    pub abilities: Vec<Ability>,
+    pub abilities: std::sync::Arc<[Ability]>,
     /// Missile loosed by a shooting unit (lot UR2: data-driven, see
     /// `BattleSim::missile_kind`).
     #[serde(default)]
@@ -301,12 +301,12 @@ impl Unit {
             id,
             side,
             setup_index,
-            unit_type: setup.unit_type.clone(),
-            name: setup.name.clone(),
+            unit_type: setup.unit_type.as_str().into(),
+            name: setup.name.as_str().into(),
             category: setup.category,
             mounted: setup.mounted,
             stats: setup.stats.clone(),
-            abilities: setup.abilities.clone(),
+            abilities: setup.abilities.as_slice().into(),
             missile: setup.missile,
             experience: setup.experience,
             initial_soldiers: setup.soldiers,
@@ -400,6 +400,16 @@ impl Unit {
     /// Living soldiers.
     pub fn soldiers(&self) -> u32 {
         self.hp.max(0.0).ceil() as u32
+    }
+
+    /// Strips `ability` from the regiment (laboratory set-ups).
+    pub fn remove_ability(&mut self, ability: Ability) {
+        self.abilities = self
+            .abilities
+            .iter()
+            .copied()
+            .filter(|a| *a != ability)
+            .collect();
     }
 
     pub fn has(&self, ability: Ability) -> bool {

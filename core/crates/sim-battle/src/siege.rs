@@ -190,10 +190,7 @@ impl WallPiece {
     }
 
     pub fn closest_point(&self, x: f64, z: f64) -> (f64, f64) {
-        let (dx, dz) = (self.b.0 - self.a.0, self.b.1 - self.a.1);
-        let len2 = (dx * dx + dz * dz).max(1e-9);
-        let t = (((x - self.a.0) * dx + (z - self.a.1) * dz) / len2).clamp(0.0, 1.0);
-        (self.a.0 + dx * t, self.a.1 + dz * t)
+        crate::geom::closest_on_segment(self.a, self.b, (x, z))
     }
 
     /// Signed distance along the outward normal (positive outside).
@@ -205,7 +202,7 @@ impl WallPiece {
 
     /// `true` when segment `p`-`q` crosses the piece's centre line.
     pub fn crossed_by(&self, p: (f64, f64), q: (f64, f64)) -> bool {
-        segments_intersect(p, q, self.a, self.b)
+        crate::geom::segments_intersect(p, q, self.a, self.b)
     }
 }
 
@@ -496,7 +493,7 @@ impl TownPlan<'_> {
         if fp
             .corners()
             .iter()
-            .any(|&(x, z)| !point_in_ring(self.ring, x, z))
+            .any(|&(x, z)| !crate::geom::point_in_polygon(self.ring, (x, z)))
         {
             return false;
         }
@@ -536,22 +533,6 @@ impl TownPlan<'_> {
 pub(crate) fn overlaps(a: &Footprint, b: &Footprint, gap: f64) -> bool {
     (a.x - b.x).hypot(a.z - b.z) < a.bounding_radius() + b.bounding_radius() + gap
         && a.distance_to(b) < gap
-}
-
-/// Point-in-polygon test on a ring of vertices.
-pub(crate) fn point_in_ring(vertices: &[(f64, f64)], x: f64, z: f64) -> bool {
-    let n = vertices.len();
-    let mut inside = false;
-    let mut j = n - 1;
-    for i in 0..n {
-        let (xi, zi) = vertices[i];
-        let (xj, zj) = vertices[j];
-        if (zi > z) != (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi {
-            inside = !inside;
-        }
-        j = i;
-    }
-    inside
 }
 
 /// Yaw of a block whose row 0 faces `(fx, fz)` (unit vector).
@@ -717,20 +698,6 @@ pub struct SiegeWorks {
     /// landmark (whose streets are in `landmark`).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub streets: Vec<Vec<(f64, f64)>>,
-}
-
-fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
-    (a.0 - o.0) * (b.1 - o.1) - (a.1 - o.1) * (b.0 - o.0)
-}
-
-/// Proper intersection of segments `p1-p2` and `q1-q2`.
-pub fn segments_intersect(p1: (f64, f64), p2: (f64, f64), q1: (f64, f64), q2: (f64, f64)) -> bool {
-    let d1 = cross(q1, q2, p1);
-    let d2 = cross(q1, q2, p2);
-    let d3 = cross(p1, p2, q1);
-    let d4 = cross(p1, p2, q2);
-    ((d1 > 0.0 && d2 < 0.0) || (d1 < 0.0 && d2 > 0.0))
-        && ((d3 > 0.0 && d4 < 0.0) || (d3 < 0.0 && d4 > 0.0))
 }
 
 impl SiegeWorks {
@@ -943,7 +910,7 @@ impl SiegeWorks {
 
     /// Point-in-polygon test (inside the ring).
     pub fn inside(&self, x: f64, z: f64) -> bool {
-        point_in_ring(&self.vertices, x, z)
+        crate::geom::point_in_polygon(&self.vertices, (x, z))
     }
 
     pub fn in_square(&self, x: f64, z: f64) -> bool {

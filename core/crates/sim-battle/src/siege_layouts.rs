@@ -495,7 +495,7 @@ fn open_church(houses: &mut Vec<House>, plan: &TownPlan, rules: &TownRules) {
 /// Streets cut to the part inside the ring (props and rendering), the main
 /// street keeping its start before the gate.
 fn clip_streets(streets: &[Vec<(f64, f64)>], ring: &[(f64, f64)]) -> Vec<Vec<(f64, f64)>> {
-    let inside = |p: (f64, f64)| crate::siege::point_in_ring(ring, p.0, p.1);
+    let inside = |p: (f64, f64)| crate::geom::point_in_polygon(ring, p);
     streets
         .iter()
         .enumerate()

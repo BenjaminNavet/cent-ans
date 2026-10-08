@@ -20,6 +20,7 @@ use std::f64::consts::PI;
 use serde::{Deserialize, Serialize};
 
 use crate::fire::Blaze;
+use crate::geom;
 use crate::rng::BattleRng;
 use crate::siege::{
     place_church, House, PieceKind, SiegeWorkRules, SiegeWorks, Tower, TownPlan, WallPiece,
@@ -117,23 +118,13 @@ fn dist(a: (f64, f64), b: (f64, f64)) -> f64 {
     ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt()
 }
 
-fn segment_distance(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = (dx * dx + dz * dz).max(1e-12);
-    let t = (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0);
-    dist(p, (a.0 + dx * t, a.1 + dz * t))
-}
-
 /// Closest point of the closed polygon `ring` to `p`.
 fn snap_to_ring(ring: &[(f64, f64)], p: (f64, f64)) -> (f64, f64) {
     let n = ring.len();
     let mut best = (f64::INFINITY, ring[0]);
     for i in 0..n {
         let (a, b) = (ring[i], ring[(i + 1) % n]);
-        let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-        let len2 = (dx * dx + dz * dz).max(1e-12);
-        let t = (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0);
-        let q = (a.0 + dx * t, a.1 + dz * t);
+        let q = geom::closest_on_segment(a, b, p);
         let d = dist(p, q);
         if d < best.0 {
             best = (d, q);
@@ -175,21 +166,6 @@ fn centroid(ring: &[(f64, f64)]) -> (f64, f64) {
     (cx / (6.0 * area), cy / (6.0 * area))
 }
 
-fn point_in_polygon(ring: &[(f64, f64)], p: (f64, f64)) -> bool {
-    let n = ring.len();
-    let mut inside = false;
-    let mut j = n - 1;
-    for i in 0..n {
-        let (xi, zi) = ring[i];
-        let (xj, zj) = ring[j];
-        if (zi > p.1) != (zj > p.1) && p.0 < (xj - xi) * (p.1 - zi) / (zj - zi) + xi {
-            inside = !inside;
-        }
-        j = i;
-    }
-    inside
-}
-
 /// Removes, one at a time, the vertex that deviates least from the chord of
 /// its neighbours while that deviation stays under `tolerance` (closed ring,
 /// at least 5 vertices kept). Deterministic: ties go to the lowest index.
@@ -198,7 +174,7 @@ fn simplify(ring: &mut Vec<(f64, f64)>, tolerance: f64) {
         let n = ring.len();
         let (mut best, mut best_d) = (0, f64::INFINITY);
         for i in 0..n {
-            let d = segment_distance(ring[(i + n - 1) % n], ring[(i + 1) % n], ring[i]);
+            let d = geom::distance_to_segment(ring[(i + n - 1) % n], ring[(i + 1) % n], ring[i]);
             if d < best_d {
                 best = i;
                 best_d = d;
@@ -369,7 +345,7 @@ impl SiegeWorks {
         let edge = (0..n)
             .min_by(|&i, &j| {
                 let d = |k: usize| {
-                    segment_distance(layout.ring[k], layout.ring[(k + 1) % n], gate_plan)
+                    geom::distance_to_segment(layout.ring[k], layout.ring[(k + 1) % n], gate_plan)
                 };
                 d(i).total_cmp(&d(j)).then(i.cmp(&j))
             })
@@ -413,7 +389,7 @@ impl SiegeWorks {
         if signed_area(&ring) > 0.0 {
             ring.reverse();
         }
-        if !point_in_polygon(&ring, TOWN_CENTER) {
+        if !geom::point_in_polygon(&ring, TOWN_CENTER) {
             return None;
         }
         // Pieces of at most MAX_PIECE metres.
@@ -549,7 +525,7 @@ impl SiegeWorks {
             Some((a, b)) => (0..pieces.len())
                 .filter(|&i| {
                     let (mx, mz) = pieces[i].midpoint();
-                    segment_distance(a, b, (mx, mz)) < 2.0
+                    geom::distance_to_segment(a, b, (mx, mz)) < 2.0
                 })
                 .collect(),
             None => Vec::new(),

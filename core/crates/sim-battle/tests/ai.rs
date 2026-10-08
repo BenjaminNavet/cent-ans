@@ -139,13 +139,13 @@ fn a_weaker_side_takes_the_high_ground_and_plants_stakes() {
     let longbows: Vec<_> = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Defender && u.unit_type == "unit_longbowmen")
+        .filter(|u| u.side == SideId::Defender && &*u.unit_type == "unit_longbowmen")
         .collect();
     assert!(longbows.iter().all(|u| u.stakes_planted), "stakes planted");
     let line = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_men_at_arms_foot")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_men_at_arms_foot")
         .unwrap();
     assert!(
         sim.field().height(line.x, line.z) >= start[line.id as usize] - 0.5,

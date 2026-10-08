@@ -302,10 +302,8 @@ impl Valley {
         let mut best = (f64::MAX, 0.0);
         for (i, pair) in self.points.windows(2).enumerate() {
             let (a, b) = (pair[0], pair[1]);
-            let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-            let len2 = (dx * dx + dz * dz).max(1e-9);
-            let t = (((x - a.0) * dx + (z - a.1) * dz) / len2).clamp(0.0, 1.0);
-            let (px, pz) = (a.0 + dx * t, a.1 + dz * t);
+            let t = crate::geom::segment_param(a, b, (x, z));
+            let (px, pz) = (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t);
             let d2 = (x - px).powi(2) + (z - pz).powi(2);
             if d2 < best.0 {
                 best = (d2, (i as f64 + t) / segments);

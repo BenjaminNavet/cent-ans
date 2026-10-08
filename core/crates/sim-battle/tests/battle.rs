@@ -563,9 +563,7 @@ fn stakes_break_a_frontal_cavalry_charge() {
         sim.units_mut()[1].ammo = 0;
         if !stakes {
             // Same archers without their stakes.
-            sim.units_mut()[1]
-                .abilities
-                .retain(|a| *a != data_model::Ability::Stakes);
+            sim.units_mut()[1].remove_ability(data_model::Ability::Stakes);
         }
         if stakes {
             run(&mut sim, 16.0);

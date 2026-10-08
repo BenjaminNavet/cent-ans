@@ -17,6 +17,7 @@ mod melee;
 mod modes;
 mod morale;
 mod movement;
+mod neighbours;
 mod obstacles;
 mod opening;
 mod pathing;
@@ -42,6 +43,8 @@ pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
 pub use siege_assault::{Ladder, SiegeEngineKind, SiegeEngineView};
 pub use width::{MoveShape, AUTO_GROUP_TAG};
+
+use std::sync::{Arc, OnceLock};
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -107,11 +110,16 @@ impl std::fmt::Display for SetupError {
 
 impl std::error::Error for SetupError {}
 
+/// Data derived from the field, computed once and shared by the forks of a
+/// step (reset to a fresh cell by [`BattleSim::field_mut`]).
+type Derived<T> = Arc<OnceLock<T>>;
+
 /// A battle in progress.
 #[derive(Debug, Clone)]
 pub struct BattleSim {
-    setup: BattleSetup,
-    field: Battlefield,
+    /// Immutable during a battle: shared by the forks of [`BattleSim::fork_for_step`].
+    setup: Arc<BattleSetup>,
+    field: Arc<Battlefield>,
     weather: Weather,
     units: Vec<Unit>,
     pub(crate) rng: BattleRng,
@@ -161,10 +169,10 @@ pub struct BattleSim {
     obstacle_cache: std::cell::RefCell<pathing::ObstacleCache>,
     /// Tactical reading of the relief for the AI (R2b; derived data, read
     /// once per battle, reset by [`BattleSim::field_mut`]).
-    relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
+    relief_map: Derived<crate::relief_ai::ReliefMap>,
     /// BR3: props of the battle village (derived data, reset by
     /// [`BattleSim::field_mut`]).
-    village_props: std::cell::OnceCell<Vec<crate::town::Prop>>,
+    village_props: Derived<Vec<crate::town::Prop>>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
@@ -181,14 +189,14 @@ pub struct BattleSim {
     standard_rout_seen: Vec<bool>,
     trophies: Vec<crate::outcome::StandardTrophy>,
     /// EP3: crossings of the river (derived data, reset by `field_mut`).
-    crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
+    crossings: Derived<Vec<crate::hydro::Crossing>>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
     /// EP6: looting of each side's camp.
     camp_states: [camp::CampState; 2],
     /// EP6: solid footprints of the decor by cell (derived data, reset by
     /// `field_mut`).
-    decor_grid: std::cell::OnceCell<obstacles::DecorGrid>,
+    decor_grid: Derived<obstacles::DecorGrid>,
     /// EP8: hour of the day when the battle began (the day moves on with
     /// `elapsed`) and the phase last announced in the journal.
     start_hour: f64,
@@ -358,7 +366,7 @@ impl BattleSim {
         self.crossings = Default::default();
         self.village_props = Default::default();
         self.decor_grid = Default::default();
-        &mut self.field
+        Arc::make_mut(&mut self.field)
     }
 
     /// Tactical reading of the relief (R2b), computed on first use.
@@ -499,7 +507,7 @@ impl BattleSim {
             };
         }
         if unit.category == UnitCategory::Siege {
-            if unit.unit_type == "unit_bombard" {
+            if &*unit.unit_type == "unit_bombard" {
                 MissileKind::Ball
             } else {
                 MissileKind::Stone

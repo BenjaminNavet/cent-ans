@@ -393,7 +393,7 @@ fn hover_siege() -> BattleSim {
 fn id_of(sim: &BattleSim, unit_type: &str) -> u32 {
     sim.units()
         .iter()
-        .find(|u| u.unit_type == unit_type)
+        .find(|u| *u.unit_type == *unit_type)
         .unwrap_or_else(|| panic!("no {unit_type}"))
         .id
 }

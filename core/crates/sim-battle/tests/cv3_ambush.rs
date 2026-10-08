@@ -289,7 +289,7 @@ fn an_entrenched_camp_has_its_stakes_and_palisade() {
     let archers: Vec<_> = sim
         .units()
         .iter()
-        .filter(|u| u.side == SideId::Defender && u.unit_type == "unit_longbowmen")
+        .filter(|u| u.side == SideId::Defender && &*u.unit_type == "unit_longbowmen")
         .collect();
     assert_eq!(archers.len(), 2);
     assert!(archers.iter().all(|u| u.stakes_planted), "stakes ready");
@@ -348,7 +348,7 @@ fn melee_losses(with_palisade: bool) -> f64 {
     let defender = sim
         .units()
         .iter()
-        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_men_at_arms_foot")
+        .find(|u| u.side == SideId::Defender && &*u.unit_type == "unit_men_at_arms_foot")
         .unwrap()
         .clone();
     let attacker = sim
