@@ -1,7 +1,8 @@
 extends SceneTree
 
 ## Test headless du lot DN camp-bati (D1) : glb générés des lieux de la carte de campagne.
-##  1. table vide (livrée par défaut) : aucun glb généré, comportement inchangé ;
+##  0. table livrée (production DN) : non vide, chaque entrée pointe un glb du manifeste ;
+##  1. table vide (forcée en mémoire) : aucun glb généré, comportement des maquettes inchangé ;
 ##  2. table fournie en mémoire (bouche-trous GA3 `props_ga/ga3_house_lod1`, `ga3_church_lod1`) :
 ##     un glb par lieu du kit concerné, une bannière procédurale par glb, mêmes emplacements ;
 ##  3. bascule par distance : glb opaque et maquette cachée sous `near_distance`, fondu croisé
@@ -41,9 +42,16 @@ func _build(world: Node3D, terrain: TerrainBuilder, data: SettlementData) -> Set
 
 
 func _run() -> void:
-	# Données livrées : table vide.
+	# 0. Données livrées : table remplie par la production DN.
 	_check(not DnCampaignModels.document().is_empty(), "dn_campaign_models.json missing")
-	_check(DnCampaignModels.is_empty(), "shipped table must be empty (current behaviour unchanged)")
+	_check(not DnCampaignModels.is_empty(), "shipped table holds the generated models")
+	var shipped: Dictionary = DnCampaignModels.document().get("table", {})
+	for kind in shipped:
+		for family in shipped[kind]:
+			for entry in shipped[kind][family]:
+				var lod0 := "res://assets/models/%s_lod0.glb" % entry["path"]
+				_check(ResourceLoader.exists(lod0), "shipped entry %s/%s points to a missing glb: %s" % [kind, family, lod0])
+	DnCampaignModels.set_document({"table": {}})
 	_check(DnCampaignModels.entry_for("city", "west", 0).is_empty(), "no entry in an empty table")
 	DnCampaignModels.set_document({"defaults": {"near_distance": 400.0, "fade_margin": 60.0}, "table": {
 		"village": {"west": [{"path": "props_ga/ga3_house_lod1"}], "*": [{"path": "props_ga/ga3_church_lod1", "banner": false}]},
@@ -53,7 +61,7 @@ func _run() -> void:
 	_check(DnCampaignModels.entry_for("village", "west", 3)["path"] == "props_ga/ga3_house_lod1", "exact family entry")
 	_check(DnCampaignModels.entry_for("village", "med", 0)["path"] == "props_ga/ga3_church_lod1", "wildcard entry")
 	_check(DnCampaignModels.entry_for("abbey", "west", 0).is_empty(), "no entry for an unlisted kind")
-	DnCampaignModels.clear_cache()  # revient au fichier livré (table vide)
+	DnCampaignModels.set_document({"table": {}})  # cas 1 : table vide
 
 	var data_dir := MAP_PATHS.default_data_dir()
 	var map_dir := data_dir.path_join("map")
