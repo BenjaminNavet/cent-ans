@@ -82,3 +82,13 @@ def test_batch_with_local_model_writes_without_budget_row(
     assert budget_file.read_text(encoding="utf-8") == before
     image = Image.open(io.BytesIO(job.out_path.read_bytes()))
     assert image.size == (entry_art.ART_WIDTH, entry_art.ART_HEIGHT)
+
+
+def test_strength_overrides_reference_strength(fake_mflux):
+    """``strength`` replaces the default img2img strength; omitted keeps it."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(buffer, "PNG")
+    local_art.render_image("p", reference=buffer.getvalue(), strength=0.7)
+    local_art.render_image("p", reference=buffer.getvalue())
+    values = [c[c.index("--image-strength") + 1] for c in fake_mflux]
+    assert values == ["0.7", str(local_art.REFERENCE_STRENGTH)]

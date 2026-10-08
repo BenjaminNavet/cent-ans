@@ -65,8 +65,13 @@ def command_for(
     output: Path,
     size: tuple[int, int] = (WIDTH, HEIGHT),
     seed: int | None = None,
+    strength: float | None = None,
 ) -> list[str]:
-    """The mflux command line for one job (seed from its id unless given)."""
+    """The mflux command line for one job (seed from its id unless given).
+
+    ``strength`` is the img2img strength when the job has a reference (default
+    :data:`REFERENCE_STRENGTH`).
+    """
     command = [
         MFLUX_COMMAND,
         "--model", str(model_path()),
@@ -81,7 +86,8 @@ def command_for(
     if job.reference is not None:
         command += [
             "--image-path", str(job.reference),
-            "--image-strength", str(REFERENCE_STRENGTH),
+            "--image-strength",
+            str(REFERENCE_STRENGTH if strength is None else strength),
         ]  # fmt: skip
     return command
 
@@ -96,11 +102,13 @@ def render_image(
     aspect_ratio: str | None = None,
     reference: bytes | None = None,
     seed: int | None = None,
+    strength: float | None = None,
     runner: Runner | None = None,
 ) -> bytes:
     """One PNG image for ``prompt``; ``reference`` (PNG/JPEG) is the img2img start.
 
     Without ``seed`` the seed is derived from the prompt, so a rerun is identical.
+    ``strength`` overrides :data:`REFERENCE_STRENGTH` (img2img, with ``reference``).
     """
     with tempfile.TemporaryDirectory(prefix="cent_ans_mflux_") as work_dir:
         work = Path(work_dir)
@@ -122,6 +130,7 @@ def render_image(
                 output,
                 size_for(aspect_ratio),
                 zlib.crc32(prompt.encode("utf-8")) if seed is None else seed,
+                strength,
             )
         )
         return output.read_bytes()

@@ -13,6 +13,14 @@ Each stage is cached in ``OUT_DIR`` (an existing output is never paid for twice)
 3. ``trellis.glb`` (``fal-ai/trellis``, 0.02 $) and/or ``trellis-2.glb``
    (``fal-ai/trellis-2`` at 1024, 0.30 $, PBR textures).
 
+Free local 2D stages (ADR 0190): ``--image-backend local`` replaces flux-2 and flux-2/edit by
+Z-Image Turbo (mflux; the edit views are img2img from ``src.png``), ``--cut-backend local``
+replaces bria by ``rembg``; only TRELLIS stays paid::
+
+    uv run --with rembg --with onnxruntime --with fal-client --with pillow \
+        python tools/experiments/ga3_fal_decor.py RAW_DIR --catalog data/art/ga3_decor.json \
+        --only well --image-backend local --cut-backend local
+
 Every raw fal response is kept as ``result_<stage>.json``.
 
 Catalogue mode (lot GA3-L1, ``data/art/ga3_decor.json``) runs the same stages for every object
@@ -34,7 +42,16 @@ import json
 import urllib.request
 from pathlib import Path
 
-import fal_client
+import ga3_local
+
+try:
+    import fal_client
+except ImportError:  # only the paid stages need it (local 2D stages, tests)
+    fal_client = None
+
+# Backends of the 2D stages (ADR 0190): "fal" (paid, default) or "local" (mflux / rembg).
+IMAGE_BACKEND = "fal"
+CUT_BACKEND = "fal"
 
 # Catalogue prices (USD) used for the cost log: flux-2 1 Mpx, edit (1 Mpx in + out), bria,
 # trellis, trellis-2 at 1024, trellis/multi.
@@ -88,7 +105,9 @@ def first_url(result: dict, keys: tuple[str, ...]) -> str:
 def image_stage(out_dir: Path, prompt: str, seed: int) -> Path:
     """``src.png`` (flux-2) then ``cut.png`` (bria), cached."""
     source = out_dir / "src.png"
-    if not source.exists():
+    if IMAGE_BACKEND == "local":
+        ga3_local.render_local(prompt, source, aspect_ratio="1:1", seed=seed)
+    elif not source.exists():
         result = run(
             "fal-ai/flux-2",
             {
@@ -108,6 +127,8 @@ def image_stage(out_dir: Path, prompt: str, seed: int) -> Path:
 def cut_out(out_dir: Path, source: Path, name: str, stage: str) -> Path:
     """Background removal of ``source`` into ``out_dir/name``, cached."""
     cut = out_dir / name
+    if CUT_BACKEND == "local":
+        return ga3_local.cut_local(source, cut)
     if not cut.exists():
         result = run(
             "fal-ai/bria/background/remove",
@@ -126,7 +147,16 @@ def views_stage(out_dir: Path, seed: int) -> list[Path]:
     cuts = [out_dir / "cut.png"]
     for view, prompt in VIEW_PROMPTS.items():
         image = out_dir / f"view_{view}.png"
-        if not image.exists():
+        if IMAGE_BACKEND == "local":
+            ga3_local.render_local(
+                prompt,
+                image,
+                reference=out_dir / "src.png",
+                aspect_ratio="1:1",
+                seed=seed,
+                strength=ga3_local.VIEW_STRENGTH,
+            )
+        elif not image.exists():
             source_url = source_url or fal_client.upload_file(str(out_dir / "src.png"))
             result = run(
                 "fal-ai/flux-2/edit",
@@ -210,7 +240,11 @@ def main() -> None:
     parser.add_argument("--catalog", default="")
     parser.add_argument("--only", default="")
     parser.add_argument("--attempt", type=int, default=1)
+    parser.add_argument("--image-backend", choices=ga3_local.BACKENDS, default="fal")
+    parser.add_argument("--cut-backend", choices=ga3_local.BACKENDS, default="fal")
     args = parser.parse_args()
+    global IMAGE_BACKEND, CUT_BACKEND
+    IMAGE_BACKEND, CUT_BACKEND = args.image_backend, args.cut_backend
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     try:
