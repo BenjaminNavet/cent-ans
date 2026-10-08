@@ -196,6 +196,7 @@ func _build() -> void:
 	row.add_child(close_button)
 	launch_button = UiBuild.button("Lancer la bataille")
 	launch_button.name = "LaunchButton"
+	launch_button.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 	launch_button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, launch))  # NT4 : invite au didacticiel
 	row.add_child(launch_button)
 	launch_button.grab_focus.call_deferred()

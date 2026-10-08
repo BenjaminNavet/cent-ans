@@ -62,6 +62,7 @@ func _init(yes_label := "Confirmer", no_label := "Renoncer", width := 440) -> vo
 	yes_button = Button.new()
 	yes_button.name = "Confirm"
 	yes_button.text = yes_label
+	yes_button.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 	yes_button.pressed.connect(_on_confirm)
 	button_row.add_child(yes_button)
 	hide()

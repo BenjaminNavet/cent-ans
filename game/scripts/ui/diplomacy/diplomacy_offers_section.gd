@@ -37,6 +37,7 @@ func _render() -> void:
 		var offer_id := int(offer["id"])
 		var kind := str(offer.get("kind", ""))
 		var yes := UiBuild.button({"protection": "Intervenir", "arbitration": "Imposer la paix", "peace_summons": "Obéir"}.get(kind, "Accepter"), func() -> void: offer_answered.emit(offer_id, true), row)
+		yes.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 		if kind == "arbitration" and feudal.has(offer_id):
 			var call: Dictionary = feudal[offer_id]
 			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:

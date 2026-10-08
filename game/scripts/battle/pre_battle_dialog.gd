@@ -207,14 +207,7 @@ func _build_buttons() -> Control:
 	fight_button = _button("Combattre", UiType.size(UiType.HEADING))
 	fight_button.name = "Fight"
 	fight_button.custom_minimum_size = Vector2(230, 48)
-	var style := BattleUiKit.parchment_box(8, Color(0.55, 0.11, 0.08), Color(0.36, 0.06, 0.04), 2)
-	style.shadow_size = 4
-	fight_button.add_theme_stylebox_override("normal", style)
-	var hover := style.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.68, 0.18, 0.12)
-	fight_button.add_theme_stylebox_override("hover", hover)
-	fight_button.add_theme_color_override("font_color", Color(0.99, 0.94, 0.82))
-	fight_button.add_theme_color_override("font_hover_color", Color(1, 1, 0.92))
+	fight_button.theme_type_variation = &"PrimaryButton"  # DN ui-kit : bouton principal enluminé
 	fight_button.pressed.connect(func() -> void:
 		visible = false
 		fight_requested.emit(int(battle.get("index", 0)), int(battle.get("seed", 1))))

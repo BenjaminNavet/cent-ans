@@ -1068,3 +1068,72 @@ def build(output_dir: Path = OUTPUT_DIR, seed: int = 1337) -> list[Path]:
         json.dumps(sidecar, indent=2) + "\n", encoding="utf-8"
     )
     return written
+
+
+def contact_sheet(out_path: Path, source_dir: Path = OUTPUT_DIR) -> Path:
+    """Compose a review board of the DN ui-kit widgets (buttons, tabs, gauge, rules) on a dark ground."""
+    names = [
+        ["button_normal", "button_hover", "button_pressed", "button_disabled"],
+        [f"button_primary_{s}" for s in ("normal", "hover", "pressed", "disabled")],
+        [
+            "tab_ornate_selected",
+            "tab_ornate_unselected",
+            "tab_selected",
+            "tab_unselected",
+        ],
+        ["progress_frame", "progress_fill", "separator_h", "slider_track"],
+        ["slider_grabber", "slider_grabber_hover", "inset_ornate", "initial_frame"],
+    ]
+    kit = json.loads((source_dir / SIDECAR_NAME).read_text(encoding="utf-8"))
+    cell_w, cell_h, pad = 220, 90, 16
+    sheet = Image.new(
+        "RGBA",
+        (len(names[0]) * (cell_w + pad) + pad, len(names) * (cell_h + pad) + pad),
+        (36, 30, 24, 255),
+    )
+    for row, line in enumerate(names):
+        for col, name in enumerate(line):
+            with Image.open(source_dir / f"{name}.png") as image:
+                tex = image.convert("RGBA")
+            margins = kit[name]["margins"]
+            if not any(margins):
+                target = tex  # plain icon
+            else:
+                target = _nine_slice(
+                    tex, margins, (cell_w, cell_h if margins[1] else tex.height)
+                )
+            x = pad + col * (cell_w + pad) + (cell_w - target.width) // 2
+            y = pad + row * (cell_h + pad) + (cell_h - target.height) // 2
+            sheet.alpha_composite(target, (x, y))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out_path)
+    return out_path
+
+
+def _nine_slice(
+    tex: Image.Image, margins: list[int], size: tuple[int, int]
+) -> Image.Image:
+    """Stretch ``tex`` to ``size`` with 9-slice margins (left, top, right, bottom)."""
+    left, top, right, bottom = margins
+    width, height = size
+    out = Image.new("RGBA", size, (0, 0, 0, 0))
+    xs_src = [0, left, tex.width - right, tex.width]
+    ys_src = [0, top, tex.height - bottom, tex.height]
+    xs_dst = [0, left, width - right, width]
+    ys_dst = [0, top, height - bottom, height]
+    for i in range(3):
+        for j in range(3):
+            src = (xs_src[i], ys_src[j], xs_src[i + 1], ys_src[j + 1])
+            dst = (xs_dst[i], ys_dst[j], xs_dst[i + 1], ys_dst[j + 1])
+            if (
+                src[2] <= src[0]
+                or src[3] <= src[1]
+                or dst[2] <= dst[0]
+                or dst[3] <= dst[1]
+            ):
+                continue
+            piece = tex.crop(src).resize(
+                (dst[2] - dst[0], dst[3] - dst[1]), Image.Resampling.NEAREST
+            )
+            out.alpha_composite(piece, (dst[0], dst[1]))
+    return out

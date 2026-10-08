@@ -122,6 +122,7 @@ func _build() -> void:
 	buttons.add_child(clear)
 	var send := UiBuild.button("Proposer le traité")
 	send.name = "SendTreaty"
+	send.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# FA5 : sceau de cire réel sur le bouton qui engage la parole du prince.
 	send.icon = FaUi.seal("treaty")
