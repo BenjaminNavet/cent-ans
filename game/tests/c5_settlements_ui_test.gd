@@ -82,7 +82,8 @@ func _run() -> void:
 	var province_panel: Control = map.ui.province_panel
 	_check(province_panel.visible and not panel.visible, "province panel should replace the settlement panel")
 	var expected: PackedStringArray = sim.call("province_settlements", province_id)
-	var rows: Array = province_panel.settlements_list.get_children()
+	# Un libellé d'aide (« PossessionHelp », RJ-c) précède les lignes : on ne compte que les boutons.
+	var rows: Array = province_panel.settlements_list.get_children().filter(func(child: Node) -> bool: return child is Button)
 	_check(rows.size() == expected.size(), "Colonies tab: %d rows, expected %d" % [rows.size(), expected.size()])
 	var row: Node = province_panel.settlements_list.get_node_or_null(NodePath(town))
 	if _check(row is Button, "Colonies tab: no row for %s" % town):
@@ -108,7 +109,12 @@ func _run() -> void:
 		var built: Dictionary = sim.call("settlement_detail", town)
 		_check(built.has("construction"), "build order should start a construction in the town")
 		_check(panel.construction_box.visible, "panel should show the construction")
-		_check(_first_enabled_button(panel.buildable_list) == null, "one construction at a time")
+		# La file de construction (cœur) remplace « une seule construction » : un second ordre s'y met.
+		var queued_button := _first_enabled_button(panel.buildable_list)
+		if queued_button != null:
+			queued_button.emit_signal("pressed")
+			var queued: Dictionary = sim.call("settlement_detail", town)
+			_check((queued.get("build_queue", []) as Array).size() == 1, "a second build order should join the construction queue")
 
 	# 4. Armée du joueur : sélection. Lot M4 : la bulle du mouvement libre remplace les
 	# anneaux C5 et l'aperçu sur le graphe des colonies.

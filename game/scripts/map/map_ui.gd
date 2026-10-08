@@ -246,7 +246,7 @@ func _decorate_top_bar() -> void:
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		UiType.apply(menu_button, UiType.CAPTION)
 	# U4 : le menu a aussi son infobulle (nom, contenu, raccourci).
-	menu_button.tooltip_text = "Menu\nSauvegarder, charger, retour au menu principal, quitter.\nRaccourci : Échap"
+	TooltipHost.attach_plain(menu_button, "menu_button")
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
@@ -285,7 +285,8 @@ func set_crusade(view: Dictionary) -> void:
 		var failing := int(view.get("desertion_percent", 0)) > 0 or morale < 0
 		fervor_label.add_theme_color_override("font_color",
 			Money.LOSS_COLOR if failing else (Money.GAIN_COLOR if morale > 0 else Money.INK_COLOR))
-		fervor_label.tooltip_text = "%s\n\n[color=%s](Clic : panneau de faction)[/color]" % [CrusadeSection.tooltip(view), RichTooltip.MUTED]
+		var fervor_lines := CrusadeSection.tooltip(view).split("\n")
+		TooltipHost.attach_plain(fervor_label, "crusade_fervor", {"title": "Ferveur : %d / 100" % fervor, "body": "\n".join(fervor_lines.slice(1)).strip_edges()})
 	if fervor_label.visible != shown:
 		fervor_label.visible = shown
 		queue_fit_top_bar()

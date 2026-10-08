@@ -15,7 +15,7 @@ extends SceneTree
 ## Usage :
 ##   godot --headless --path game --script res://tests/cb0_input_equivalence_test.gd
 ##   godot --headless --path game --script res://tests/cb0_input_equivalence_test.gd -- --record
-##       (régénère le golden sur le code courant ; à n'utiliser qu'avant l'extraction CB0)
+##       (régénère le golden ; à refaire si la démo de bataille ou la mise en page change)
 
 const GOLDEN_PATH := "res://tests/data/cb0_orders_golden.json"
 
@@ -109,7 +109,7 @@ func _play_sequence() -> void:
 	# Vue plongeante sur tout le champ (les deux camps sont visibles) plutôt que sur le seul
 	# camp du joueur : la cible ennemie (étape 7) doit être à l'écran.
 	var field_center: Vector2 = _scene.terrain.field_center()
-	_scene.camera_rig.look_at_point(Vector3(field_center.x, 0.0, field_center.y), 750.0, 0.0)
+	_scene.camera_rig.look_at_point(Vector3(field_center.x, 0.0, field_center.y + 40.0), 750.0, 0.0)  # décalée vers l'ennemi : hors barre de HUD
 	for _i in 3:
 		await process_frame
 
@@ -226,7 +226,14 @@ func _drag_right(a: Vector2, b: Vector2) -> void:
 	_mouse_button(b, MOUSE_BUTTON_RIGHT, false, false)
 
 
+## `push_input` attend des coordonnées fenêtre : le facteur d'échelle de contenu (UI 720p) les
+## ramène aux coordonnées de la vue (`get_visible_rect`) dans lesquelles le test raisonne.
+func _to_window(pos: Vector2) -> Vector2:
+	return pos * Vector2(root.size) / _scene.get_viewport().get_visible_rect().size
+
+
 func _mouse_button(pos: Vector2, button: int, pressed: bool, shift: bool) -> void:
+	pos = _to_window(pos)
 	var event := InputEventMouseButton.new()
 	event.button_index = button
 	event.pressed = pressed
@@ -237,6 +244,7 @@ func _mouse_button(pos: Vector2, button: int, pressed: bool, shift: bool) -> voi
 
 
 func _mouse_motion(pos: Vector2) -> void:
+	pos = _to_window(pos)
 	var event := InputEventMouseMotion.new()
 	event.position = pos
 	event.global_position = pos

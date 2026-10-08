@@ -255,7 +255,7 @@ func _build_controls(grid: GridContainer) -> void:
 	column.add_child(scroll)
 	var restore := UiBuild.button("Rétablir par défaut", _on_restore_keys)
 	restore.name = "RestoreKeys"
-	restore.tooltip_text = "Remet toutes les touches de la carte à leur valeur d'origine."
+	TooltipHost.attach_plain(restore, "restore_keys")
 	column.add_child(restore)
 	grid.add_child(column)
 	_fill_shortcuts(sheet)

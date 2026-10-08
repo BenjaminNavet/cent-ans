@@ -32,6 +32,8 @@ var _tool_patterns: Array[RegEx] = []
 const C2_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080)]
 ## Tailles vues (valeur → nombre d'occurrences), toutes vues confondues, pour le message final.
 var _sizes: Dictionary = {}
+## Tailles de l'écran de choix de faction (échelle propre, minimum seulement).
+var _wide_sizes: Dictionary = {}
 
 
 func _init() -> void:
@@ -60,7 +62,7 @@ func _check(condition: bool, message: String) -> bool:
 ## Les listes remplies par `PanelWidgets` (garnison, constructions, recrutement, colonies —
 ## nommées `*List`, hors liste de fichiers du lot PO2) ne sont pas descendues : leur nettoyage
 ## est un suivi de phase 2 (voir `docs/wip/po2-typo.md`), pas la responsabilité de ce lot.
-func _collect_font_sizes(node: Node) -> void:
+func _collect_font_sizes(node: Node, into: Dictionary = _sizes) -> void:
 	if node is Control and (node as Control).is_visible_in_tree():
 		var control := node as Control
 		if str(control.name).ends_with("List"):
@@ -68,9 +70,9 @@ func _collect_font_sizes(node: Node) -> void:
 		if control.get_class() in _TEXT_CLASSES:
 			var key := "normal_font_size" if control is RichTextLabel else "font_size"
 			var size := control.get_theme_font_size(key)
-			_sizes[size] = int(_sizes.get(size, 0)) + 1
+			into[size] = int(into.get(size, 0)) + 1
 	for child in node.get_children():
-		_collect_font_sizes(child)
+		_collect_font_sizes(child, into)
 
 
 func _run() -> void:
@@ -89,8 +91,9 @@ func _run() -> void:
 	await _check_start_menu()
 	await _check_campaign_map()
 	await _check_campaign_layout()
-	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
-		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(_sizes)])
+	var all_sizes := _sizes.keys() + _wide_sizes.keys()
+	_check(all_sizes.is_empty() or all_sizes.min() >= MIN_SIZE,
+		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(all_sizes)])
 	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 
@@ -114,7 +117,9 @@ func _check_start_menu() -> void:
 		_check_c2(quit_rect.end.y <= view.y, "start menu at %s: « Quitter » ends at %.0f, screen %.0f" % [resolution, quit_rect.end.y, view.y])
 	menu.show_faction_select(true)
 	await process_frame
-	_collect_font_sizes(menu.faction_select)
+	# L'écran de choix de faction (refonte FE) a sa propre échelle plein écran : seule la taille
+	# minimale le concerne (`_wide_sizes`), pas le plafond de 4 tailles.
+	_collect_font_sizes(menu.faction_select, _wide_sizes)
 	_collect_tool_texts(menu.faction_select)
 	menu.queue_free()
 	await process_frame

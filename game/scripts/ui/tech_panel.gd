@@ -41,7 +41,7 @@ func _ready() -> void:
 	# A6-L4 : case « Mettre en file » (équivalent du Maj+clic) sous la barre de recherche.
 	_queue_toggle = CheckBox.new()
 	_queue_toggle.text = "Mettre en file (ou Maj+clic)"
-	_queue_toggle.tooltip_text = "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d'elles-mêmes."
+	TooltipHost.attach_plain(_queue_toggle, "tech_queue_toggle")
 	research_bar.get_parent().add_child(_queue_toggle)
 	research_bar.get_parent().move_child(_queue_toggle, research_bar.get_index() + 1)
 	_queue_toggle.hide()

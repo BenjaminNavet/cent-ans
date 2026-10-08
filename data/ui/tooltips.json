@@ -650,6 +650,12 @@
     "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"},
     "feudal_title_crumb": {"title": "Titre"},
     "feudal_tree_open": {"title": "Suzerains, vassaux, loyautés et actions féodales"},
-    "feudal_take_side": {"title": "Arbitrage féodal"}
+    "feudal_take_side": {"title": "Arbitrage féodal"},
+    "trade_routes_toggle": {"title": "Routes commerciales", "body": "Affiche les routes commerciales sur la carte.", "hint": "V"},
+    "restore_keys": {"title": "Rétablir par défaut", "body": "Remet toutes les touches de la carte à leur valeur d'origine."},
+    "tech_queue_toggle": {"title": "Mettre en file", "body": "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d'elles-mêmes."},
+    "menu_button": {"title": "Menu", "body": "Sauvegarder, charger, retour au menu principal, quitter.", "hint": "Échap"},
+    "crusade_fervor": {"title": "Ferveur", "hint": "Clic : panneau de faction"},
+    "slot_locked": {"title": "Emplacement verrouillé"}
   }
 }

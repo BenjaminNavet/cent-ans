@@ -131,7 +131,7 @@ func _build_header() -> Control:
 	header.add_child(donate)
 	var trade := UiBuild.button("Commerce")
 	trade.name = "TradeButton"
-	trade.tooltip_text = "Affiche les routes commerciales sur la carte (touche V)."
+	TooltipHost.attach_plain(trade, "trade_routes_toggle")
 	trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	trade.pressed.connect(func() -> void:
 		trade_view_requested.emit())
