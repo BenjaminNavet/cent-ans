@@ -1364,16 +1364,26 @@ def assets_portrait_archetypes(
 
 
 def _run_art_batch(
-    jobs, model, envelope, dry_run, noun, subject, convert, budget_session=None
+    jobs,
+    model,
+    envelope,
+    dry_run,
+    noun,
+    subject,
+    convert,
+    budget_session=None,
+    aspect_ratio=None,
 ) -> None:
     """Dry-run listing or paid batch for an image job list (event art, illustrations).
 
     ``budget_session`` names the `docs/budget.md` heading that funds this batch, when it is
     not necessarily the last table in the file (see `portraits.generate`).
+    ``aspect_ratio`` sizes the free local model's output (``--model local/z-image-turbo``,
+    ADR 0190); paid models keep their own default.
     """
     from decimal import Decimal
 
-    from cent_ans_tools import portraits
+    from cent_ans_tools import local_art, portraits
 
     if dry_run:
         for job in jobs:
@@ -1399,6 +1409,11 @@ def _run_art_batch(
         convert=convert,
         on_progress=lambda job, spent: console.print(
             f"{job.character_id} ({spent:.4f} $)"
+        ),
+        image_config=(
+            {"aspect_ratio": aspect_ratio}
+            if aspect_ratio and model == local_art.MODEL_ID
+            else None
         ),
     )
     console.print(
@@ -1466,30 +1481,15 @@ def assets_illustrations(
         if category
         else entry_art.CATEGORIES
     )
-    jobs = entry_art.plan(categories=categories, limit=limit)
-    if local:
-        typer.echo(f"{len(jobs)} illustration(s) à générer localement")
-        if dry_run:
-            return
-        written, failed = local_art.generate(
-            jobs,
-            entry_art.convert,
-            on_progress=lambda job: typer.echo(f"  {job.out_path.name}"),
-        )
-        typer.echo(f"{len(written)} écrite(s), {len(failed)} échec(s)")
-        for job, reason in failed:
-            typer.echo(f"  échec {job.character_id} : {reason}", err=True)
-        if failed:
-            raise typer.Exit(1)
-        return
     _run_art_batch(
-        jobs,
-        model or portraits.DEFAULT_MODEL,
+        entry_art.plan(categories=categories, limit=limit),
+        local_art.MODEL_ID if local else model or portraits.DEFAULT_MODEL,
         envelope,
         dry_run,
         "illustration(s)",
         "Illustrations de l'encyclopédie",
         entry_art.convert,
+        aspect_ratio="16:9",
     )
 
 

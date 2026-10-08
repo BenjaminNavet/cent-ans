@@ -10,8 +10,11 @@ le Mac de développement (M4 Pro, 48 Go) montre qu'un modèle ouvert donne un st
 
 ## Décision
 - Backend local `tools/cent_ans_tools/local_art.py` : appelle `mflux-generate-z-image-turbo`
-  (MLX) sur les mêmes `PortraitJob` que les lots payants ; option `--local` de
-  `cent-ans assets illustrations`.
+  (MLX). Il est branché comme un modèle, `local/z-image-turbo`, dans
+  `openrouter.request_image` : tout pipeline d'images 2D qui accepte un modèle passe en
+  local sans autre changement (coût 0, aucune ligne de budget). Le format vient de
+  `image_config.aspect_ratio` ; la première image de référence sert de départ img2img.
+  Option `--local` des commandes `cent-ans assets …`.
 - Modèle : **Z-Image Turbo** (Tongyi-MAI, licence Apache 2.0, usage commercial libre), copie
   quantifiée 8 bits hors dépôt (`~/models/mflux/z-image-turbo-q8`, 10 Go, chemin modifiable par
   `CENT_ANS_MFLUX_MODEL`). Installation : `uv tool install mflux` puis

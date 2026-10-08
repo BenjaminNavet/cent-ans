@@ -1,10 +1,9 @@
 """Free local image generation with mflux (Z-Image Turbo on Apple Silicon, ADR 0190).
 
-Same jobs as the paid OpenRouter batches (:class:`PortraitJob`), generated on this
-machine by the ``mflux-generate-z-image-turbo`` command: no cost, no budget entry.
+Any pipeline that calls :func:`cent_ans_tools.openrouter.request_image` with the model
+:data:`MODEL_ID` gets its image from :func:`render_image` (no cost, no budget entry).
 The model is the 8-bit copy saved by ``mflux-save --model z-image-turbo --quantize 8``
-(path from ``CENT_ANS_MFLUX_MODEL``). Jobs with a reference image use it as the
-image-to-image start.
+(path from ``CENT_ANS_MFLUX_MODEL``). A reference image is the image-to-image start.
 """
 
 from __future__ import annotations
@@ -18,12 +17,25 @@ from pathlib import Path
 
 from cent_ans_tools.portraits import PortraitJob
 
+MODEL_ID = "local/z-image-turbo"
 MFLUX_COMMAND = "mflux-generate-z-image-turbo"
 DEFAULT_MODEL_PATH = Path.home() / "models" / "mflux" / "z-image-turbo-q8"
 STEPS = 9
 WIDTH = 1024
 HEIGHT = 576
 REFERENCE_STRENGTH = 0.4
+# Output sizes (multiples of 16, about one megapixel) per OpenRouter ``aspect_ratio``.
+ASPECT_SIZES = {
+    "1:1": (1024, 1024),
+    "16:9": (1024, 576),
+    "9:16": (576, 1024),
+    "4:3": (1024, 768),
+    "3:4": (768, 1024),
+    "3:2": (1152, 768),
+    "2:3": (768, 1152),
+    "21:9": (1344, 576),
+    "4:1": (1536, 384),
+}
 
 Runner = Callable[[list[str]], None]
 
@@ -38,17 +50,32 @@ def seed_for(job: PortraitJob) -> int:
     return zlib.crc32(job.character_id.encode("utf-8"))
 
 
-def command_for(job: PortraitJob, prompt_file: Path, output: Path) -> list[str]:
-    """The mflux command line for one job."""
+def size_for(aspect_ratio: str | None) -> tuple[int, int]:
+    """Output size for an OpenRouter-style ``aspect_ratio`` (default 16:9)."""
+    if aspect_ratio is None:
+        return WIDTH, HEIGHT
+    if aspect_ratio not in ASPECT_SIZES:
+        raise ValueError(f"Format non géré en local : {aspect_ratio}")
+    return ASPECT_SIZES[aspect_ratio]
+
+
+def command_for(
+    job: PortraitJob,
+    prompt_file: Path,
+    output: Path,
+    size: tuple[int, int] = (WIDTH, HEIGHT),
+    seed: int | None = None,
+) -> list[str]:
+    """The mflux command line for one job (seed from its id unless given)."""
     command = [
         MFLUX_COMMAND,
         "--model", str(model_path()),
         "--base-model", "z-image-turbo",
         "--prompt-file", str(prompt_file),
         "--steps", str(STEPS),
-        "--seed", str(seed_for(job)),
-        "--width", str(WIDTH),
-        "--height", str(HEIGHT),
+        "--seed", str(seed_for(job) if seed is None else seed),
+        "--width", str(size[0]),
+        "--height", str(size[1]),
         "--output", str(output),
     ]  # fmt: skip
     if job.reference is not None:
@@ -63,29 +90,38 @@ def _run(command: list[str]) -> None:
     subprocess.run(command, check=True, capture_output=True)
 
 
-def generate(
-    jobs: list[PortraitJob],
-    convert: Callable[[bytes], bytes],
+def render_image(
+    prompt: str,
     *,
-    runner: Runner = _run,
-    on_progress: Callable[[PortraitJob], None] | None = None,
-) -> tuple[list[Path], list[tuple[PortraitJob, str]]]:
-    """Generate each job locally; returns (written files, failed jobs with reason)."""
-    written: list[Path] = []
-    failed: list[tuple[PortraitJob, str]] = []
+    aspect_ratio: str | None = None,
+    reference: bytes | None = None,
+    seed: int | None = None,
+    runner: Runner | None = None,
+) -> bytes:
+    """One PNG image for ``prompt``; ``reference`` (PNG/JPEG) is the img2img start.
+
+    Without ``seed`` the seed is derived from the prompt, so a rerun is identical.
+    """
     with tempfile.TemporaryDirectory(prefix="cent_ans_mflux_") as work_dir:
-        for job in jobs:
-            prompt_file = Path(work_dir) / f"{job.character_id}.txt"
-            raw_image = Path(work_dir) / f"{job.character_id}.png"
-            prompt_file.write_text(job.prompt, encoding="utf-8")
-            try:
-                runner(command_for(job, prompt_file, raw_image))
-                job.out_path.parent.mkdir(parents=True, exist_ok=True)
-                job.out_path.write_bytes(convert(raw_image.read_bytes()))
-            except (subprocess.CalledProcessError, OSError) as error:
-                failed.append((job, str(error)))
-                continue
-            written.append(job.out_path)
-            if on_progress is not None:
-                on_progress(job)
-    return written, failed
+        work = Path(work_dir)
+        reference_path = None
+        if reference is not None:
+            suffix = ".jpg" if reference[:2] == b"\xff\xd8" else ".png"
+            reference_path = work / f"reference{suffix}"
+            reference_path.write_bytes(reference)
+        job = PortraitJob(
+            "image", prompt, work / "unused.jpg", reference=reference_path
+        )
+        prompt_file = work / "prompt.txt"
+        prompt_file.write_text(prompt, encoding="utf-8")
+        output = work / "image.png"
+        (runner or _run)(
+            command_for(
+                job,
+                prompt_file,
+                output,
+                size_for(aspect_ratio),
+                zlib.crc32(prompt.encode("utf-8")) if seed is None else seed,
+            )
+        )
+        return output.read_bytes()
