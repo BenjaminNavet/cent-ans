@@ -205,15 +205,7 @@ pub struct Obstacle {
 impl Obstacle {
     /// Distance from (x, z) to the segment.
     pub fn distance(&self, x: f64, z: f64) -> f64 {
-        let (ax, az) = self.a;
-        let (dx, dz) = (self.b.0 - ax, self.b.1 - az);
-        let len2 = dx * dx + dz * dz;
-        let t = if len2 > 0.0 {
-            (((x - ax) * dx + (z - az) * dz) / len2).clamp(0.0, 1.0)
-        } else {
-            0.0
-        };
-        ((x - ax - dx * t).powi(2) + (z - az - dz * t).powi(2)).sqrt()
+        crate::geom::segment_distance((x, z), self.a, self.b)
     }
 
     /// `true` when the segment from `p` to `q` crosses the obstacle.

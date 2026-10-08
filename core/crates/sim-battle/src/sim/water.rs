@@ -209,7 +209,10 @@ impl BattleSim {
         if let Some(b) = self.field.bridge_at(unit.x, unit.z) {
             k *= (b.width / unit.extent().0.max(1.0)).clamp(m.bridge_min_squeeze, 1.0);
         }
-        if self.field.road_at(unit.x, unit.z).is_some() {
+        let roads = self
+            .road_index
+            .get_or_init(|| crate::hydro::RoadIndex::build(&self.field.roads));
+        if roads.kind_at(unit.x, unit.z).is_some() {
             k *= if unit.formation.def().road_march {
                 m.road_column
             } else {

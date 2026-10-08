@@ -179,6 +179,8 @@ pub struct BattleSim {
     trophies: Vec<crate::outcome::StandardTrophy>,
     /// EP3: crossings of the river (derived data, reset by `field_mut`).
     crossings: Derived<Vec<crate::hydro::Crossing>>,
+    /// Roads of the field by cell (derived data, reset by `field_mut`).
+    road_index: Derived<crate::hydro::RoadIndex>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
     /// EP6: looting of each side's camp.
@@ -353,6 +355,7 @@ impl BattleSim {
     pub fn field_mut(&mut self) -> &mut Battlefield {
         self.relief_map = Default::default();
         self.crossings = Default::default();
+        self.road_index = Default::default();
         self.village_props = Default::default();
         self.decor_grid = Default::default();
         Arc::make_mut(&mut self.field)
