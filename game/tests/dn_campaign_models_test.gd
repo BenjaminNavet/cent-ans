@@ -6,7 +6,8 @@ extends SceneTree
 ##     un glb par lieu du kit concerné, une bannière procédurale par glb, mêmes emplacements ;
 ##  3. bascule par distance : glb opaque et maquette cachée sous `near_distance`, fondu croisé
 ##     au-dessus, maquette seule au-delà de `near + marge` ; modèle absent = maquette seule.
-## Usage : godot --headless --path game --script res://tests/dn_campaign_models_test.gd
+## Usage : godot --headless --path game --script res://tests/dn_campaign_models_test.gd -- --no-tb3
+## (`--no-tb3` : sans la couche de bâtiments hors murs, dont le fil de préchauffe bloque les scripts de test isolés).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
@@ -30,18 +31,13 @@ func _check(condition: bool, message: String) -> bool:
 	return condition
 
 
-func _build(world_parent: Node, map_data: MapData, data: SettlementData) -> Array:
-	var world := Node3D.new()
-	world_parent.add_child(world)
-	var terrain := TerrainBuilder.new()
-	world.add_child(terrain)
-	terrain.build(map_data)
+func _build(world: Node3D, terrain: TerrainBuilder, data: SettlementData) -> SettlementLayer:
 	var layer := SettlementLayer.new()
 	world.add_child(layer)
-	layer.setup(map_data, terrain, data, ZoomTiers.load_default())
+	layer.setup(terrain.map_data, terrain, data, ZoomTiers.load_default())
 	layer.update_view(85.0)
 	layer.flush()
-	return [world, layer]
+	return layer
 
 
 func _run() -> void:
@@ -67,24 +63,33 @@ func _run() -> void:
 	var data := SettlementData.load_from(data_dir, map_dir)
 
 	# 1. Table vide.
-	var built := _build(root, map_data, data)
-	var base: TownMaquetteLayer = (built[1] as SettlementLayer).maquettes
+	var world := Node3D.new()
+	root.add_child(world)
+	var terrain := TerrainBuilder.new()
+	world.add_child(terrain)
+	terrain.build(map_data)
+	var camera := Camera3D.new()
+	world.add_child(camera)
+	var focus_px: Vector2 = data.settlements[data.index_by_id["set_amiens"]]["px"]
+	var focus := Vector3(focus_px.x, map_data.surface_world_at(focus_px.x, focus_px.y), focus_px.y)
+	camera.look_at_from_position(focus + Vector3(0.0, 60.0, 60.0), focus, Vector3.UP)
+	camera.current = true
+	var base_layer := _build(world, terrain, data)
+	var base: TownMaquetteLayer = base_layer.maquettes
 	if not _check(base != null, "no TownMaquetteLayer"):
 		return
 	var base_instances := base.instance_count()
 	var base_meshes := int(base.stats.get("multimeshes", 0))
 	_check(int(base.stats.get("dn_places", -1)) == 0 and base.dn_instance_count() == 0 and base.dn_banner_count() == 0, "empty table: no generated model (%s)" % base.stats)
-	(built[0] as Node).queue_free()
-	await process_frame
+	base_layer.free()
 
 	# 2. Table fournie.
 	DnCampaignModels.set_document({"defaults": {"near_distance": 400.0, "fade_margin": 60.0}, "table": {
-		"village": {"*": [{"path": "props_ga/ga3_house_lod1"}]},
+		"village": {"*": [{"path": "props_ga/ga3_house_lod1", "near_distance": 150.0}]},
 		"town": {"*": [{"path": "props_ga/ga3_church_lod1", "near_distance": 200.0}]},
 		"castle": {"*": [{"path": "props_ga/does_not_exist"}]},
 	}})
-	built = _build(root, map_data, data)
-	var layer: SettlementLayer = built[1]
+	var layer := _build(world, terrain, data)
 	var maquettes := layer.maquettes
 	_check(maquettes.instance_count() == base_instances, "every place keeps its maquette instance (%d vs %d)" % [maquettes.instance_count(), base_instances])
 	var dn_places := int(maquettes.stats.get("dn_places", 0))
@@ -122,14 +127,15 @@ func _run() -> void:
 	# 3. Bascule par distance.
 	layer.update_view(85.0)
 	_check(is_equal_approx(maquettes.dn_alpha_of(village), 1.0) and not maquettes.maquette_visible(village), "near: generated model opaque, maquette hidden")
-	layer.update_view(430.0)
+	layer.update_view(190.0)
 	_check(maquettes.dn_alpha_of(village) > 0.0 and maquettes.dn_alpha_of(village) < 1.0 and maquettes.maquette_visible(village), "crossfade: both drawn")
-	layer.update_view(700.0)
-	_check(is_equal_approx(maquettes.dn_alpha_of(village), 0.0) and maquettes.maquette_visible(village), "far: maquette only")
 	layer.update_view(300.0)
-	_check(is_equal_approx(maquettes.dn_alpha_of(town), 0.0) or maquettes.dn_alpha_of(town) < 1.0, "town switches at its own near_distance (200)")
+	_check(is_equal_approx(maquettes.dn_alpha_of(village), 0.0) and maquettes.maquette_visible(village), "far: maquette only")
+	_check(is_equal_approx(maquettes.dn_alpha_of(town), 0.0), "town (near_distance 200) is back on its maquette at 300")
+	layer.update_view(230.0)
+	_check(maquettes.dn_alpha_of(town) > 0.0 and maquettes.dn_alpha_of(town) < 1.0, "town crossfades at its own near_distance")
 	_check(maquettes.maquette_visible(castle), "a place without generated model stays on its maquette")
 	# Bannière : la couleur du contrôleur passe aussi à la bannière procédurale.
 	maquettes.refresh(null, func(_f: String) -> Color: return Color(0.2, 0.3, 0.9))
 	_check(maquettes.banner_color(village).is_equal_approx(Color(0.2, 0.3, 0.9)), "controller colour applied")
-	(built[0] as Node).queue_free()
+	layer.free()
