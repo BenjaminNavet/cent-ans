@@ -95,7 +95,7 @@
     "kind": "decor",
     "prompt": "14th-century walled medina with flat roofs, a minaret, a horseshoe-arch gate and ramparts, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -108,7 +108,7 @@
     "kind": "decor",
     "prompt": "14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -121,7 +121,7 @@
     "kind": "decor",
     "prompt": "14th-century fortified town with a log kremlin, timber towers, log houses and an onion-domed church, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -134,7 +134,7 @@
     "kind": "decor",
     "prompt": "14th-century encampment town of felt yurts around a timber-stockaded khan's hall, earth rampart, Golden Horde steppe settlement (felt yurts, a low earth rampart with a timber stockade, horse pens), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -147,7 +147,7 @@
     "kind": "decor",
     "prompt": "14th-century large walled seaport city with a cathedral and campanile, tall tower houses, terracotta roofs, harbour wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 3.6,
@@ -160,7 +160,7 @@
     "kind": "decor",
     "prompt": "14th-century large walled city with a great mosque and tall minaret, a citadel, flat roofs and massive gates, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 3.6,
@@ -173,7 +173,7 @@
     "kind": "decor",
     "prompt": "14th-century hilltop stone castle with a square keep, swallow-tail crenellations, curtain wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 1.9,
@@ -186,7 +186,7 @@
     "kind": "decor",
     "prompt": "14th-century stone qasr fortress with square towers, a bent gate and a flat-roofed keep, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 1.9,
@@ -199,7 +199,7 @@
     "kind": "decor",
     "prompt": "14th-century hillside village of stone houses with terracotta roofs and a small campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -212,7 +212,7 @@
     "kind": "decor",
     "prompt": "14th-century village of mud-brick flat-roofed houses around a small mosque with a short minaret and a well, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -225,7 +225,7 @@
     "kind": "decor",
     "prompt": "14th-century village of log cabins with plank roofs, a small timber church with an onion dome, a wooden fence, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 2.0,
@@ -238,7 +238,7 @@
     "kind": "decor",
     "prompt": "14th-century French gothic cathedral, grey limestone, twin west towers, flying buttresses, slate roof, rose window, semi-realistic",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 45,
@@ -277,7 +277,7 @@
     "kind": "decor",
     "prompt": "14th-century Mediterranean war galley, long low hull with a ram, one lateen mast with furled sail, oars shipped, no crew, no flag",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 36,
@@ -316,7 +316,7 @@
     "kind": "decor",
     "prompt": "14th-century stone bridge with three round arches and pointed cutwaters, weathered limestone, a small gate tower at one end",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 40,
@@ -329,7 +329,7 @@
     "kind": "decor",
     "prompt": "medieval wooden trestle bridge on timber piles, plank deck with side rails, weathered oak",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 30,
@@ -342,7 +342,7 @@
     "kind": "decor",
     "prompt": "medieval fortified bridge with crenellated stone gate towers at both ends and a portcullis, weathered limestone",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 36,
@@ -355,7 +355,7 @@
     "kind": "decor",
     "prompt": "medieval wooden post mill windmill with lattice sails, weathered oak planks, tail pole and access ladder",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 12,
@@ -368,7 +368,7 @@
     "kind": "decor",
     "prompt": "medieval stone and timber watermill with a wooden undershot wheel and a thatched roof",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 10,
@@ -381,7 +381,7 @@
     "kind": "decor",
     "prompt": "medieval harbour corner with a stone quay, a wooden treadwheel crane, two timber warehouses and moored small rowing boats",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 30,
@@ -394,7 +394,7 @@
     "kind": "decor",
     "prompt": "14th-century French farmstead with a long timber-framed barn, thatched roofs and a low courtyard wall",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 24,
@@ -407,7 +407,7 @@
     "kind": "decor",
     "prompt": "covered wooden merchant cart with two spoked wheels, canvas hood, shafts empty, no animal, weathered oak",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 4,
@@ -420,7 +420,7 @@
     "kind": "decor",
     "prompt": "heavy four-wheel medieval wagon with a canvas cover and spoked wheels, shafts empty, no animal",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 6,
@@ -433,7 +433,7 @@
     "kind": "decor",
     "prompt": "medieval stone well with a wooden windlass, a small tiled roof and a bucket on a rope",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 3,
@@ -446,7 +446,7 @@
     "kind": "decor",
     "prompt": "round medieval haystack with a conical thatch cap, tied with ropes",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 4,
@@ -459,7 +459,7 @@
     "kind": "decor",
     "prompt": "stone church construction worksite with timber scaffolding, a wooden treadwheel crane and stacked ashlar blocks",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 14,
@@ -472,7 +472,7 @@
     "kind": "decor",
     "prompt": "ruined burnt medieval castle with a collapsed tower, broken curtain wall and charred beams",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 24,
@@ -485,7 +485,7 @@
     "kind": "decor",
     "prompt": "medieval square stone watchtower with a wooden hoarding and a beacon platform",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 14,
@@ -498,7 +498,7 @@
     "kind": "decor",
     "prompt": "small stone romanesque chapel with a bellcote and a slate roof",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 9,
@@ -511,7 +511,7 @@
     "kind": "decor",
     "prompt": "small stone vineyard hut with a slate roof beside a few staked vine rows",
     "seeds": 3,
-    "backend3d": "sf3d",
+    "backend3d": "both",
     "ingest": {
       "yaw_fix": 0,
       "target_width_m": 8,
