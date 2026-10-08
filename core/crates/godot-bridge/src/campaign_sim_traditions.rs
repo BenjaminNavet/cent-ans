@@ -3,7 +3,6 @@
 //! armies of the player with a rank to spend (notification) and a staging
 //! helper for the headless tests.
 
-use crate::convert::resolve_reply;
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
@@ -95,20 +94,15 @@ impl CampaignSim {
     /// `{ok, error}` (French reason when refused).
     #[func]
     fn choose_army_tradition(&mut self, army_id: GString, tradition: GString) -> VarDictionary {
-        if self.refuse_while_turn_pending("choose_army_tradition") {
-            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
-        }
-        let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return resolve_reply(Err("aucune campagne en cours".to_owned()));
-        };
-        let Some(army) = ArmyId::parse(&army_id.to_string()) else {
-            return resolve_reply(Err(format!("armée inconnue : {army_id}")));
-        };
-        let order = Order::ChooseArmyTradition {
-            army,
-            tradition: tradition.to_string(),
-        };
-        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("choose_army_tradition", || {
+            let Some(army) = ArmyId::parse(&army_id.to_string()) else {
+                return Err(format!("armée inconnue : {army_id}"));
+            };
+            Ok(Order::ChooseArmyTradition {
+                army,
+                tradition: tradition.to_string(),
+            })
+        })
     }
 
     /// Staging (UI tests): `army_id` gains `xp` army experience at once;

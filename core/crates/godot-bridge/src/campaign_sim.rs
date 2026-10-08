@@ -19,8 +19,7 @@ use sim_campaign::{
 };
 
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
-use crate::campaign_sim_turn::TURN_PENDING_FR;
-use crate::convert::{resolve_reply, variant_to_json};
+use crate::convert::variant_to_json;
 
 /// Last successfully loaded game data and its load warnings, shared by
 /// every `CampaignSim` and `GameDataStore` (one load at start-up).
@@ -577,19 +576,11 @@ impl CampaignSim {
     /// Returns `{ok, error}`; `error` is a French message when `ok` is false.
     #[func]
     fn submit_order(&mut self, order: VarDictionary) -> VarDictionary {
-        if self.refuse_while_turn_pending("submit_order") {
-            return resolve_reply(Err(TURN_PENDING_FR.to_owned()));
-        }
-        let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return resolve_reply(Err("aucune campagne en cours".to_owned()));
-        };
-        let parsed = variant_to_json(&order.to_variant())
-            .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
-        let order = match parsed {
-            Ok(order) => order,
-            Err(error) => return resolve_reply(Err(invalid_order_message(&error))),
-        };
-        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("submit_order", || {
+            variant_to_json(&order.to_variant())
+                .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()))
+                .map_err(|error| invalid_order_message(&error))
+        })
     }
 
     /// Resolves the turn and returns its events (synchronous: tests,

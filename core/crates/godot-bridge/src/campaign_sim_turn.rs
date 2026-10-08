@@ -10,8 +10,10 @@
 use std::sync::Arc;
 
 use godot::prelude::*;
+use sim_campaign::Order;
 
-use crate::campaign_sim::{events_array, CampaignSim, Ctx};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
+use crate::convert::resolve_reply;
 use crate::turn_job::TurnJob;
 
 /// French message of an order refused during the end of turn.
@@ -29,6 +31,25 @@ impl CampaignSim {
         }
         self.revision += 1;
         false
+    }
+
+    /// Common path of the order entry points: refused while the end of turn
+    /// runs, needs a loaded campaign, `build` turns the arguments into an
+    /// order (or a French refusal), then the order is submitted. Reply `{ok, error}`.
+    pub(crate) fn run_order(
+        &mut self,
+        method: &str,
+        build: impl FnOnce() -> Result<Order, String>,
+    ) -> VarDictionary {
+        if self.refuse_while_turn_pending(method) {
+            return resolve_reply(Err(TURN_PENDING_FR.to_owned()));
+        }
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
+        };
+        resolve_reply(
+            build().and_then(|order| state.submit_order(data, order).map_err(|e| e.to_string())),
+        )
     }
 
     /// Drops a running end of turn (new campaign, load): its worker ends on

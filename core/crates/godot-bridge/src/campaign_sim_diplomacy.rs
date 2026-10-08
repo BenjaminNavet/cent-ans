@@ -7,8 +7,8 @@ use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
 
-use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
-use crate::convert::{reasons_array, resolve_reply, variant_to_json};
+use crate::campaign_sim::{CampaignSim, Ctx};
+use crate::convert::{reasons_array, variant_to_json};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -229,17 +229,12 @@ impl CampaignSim {
     /// Answers an offer (same result shape as `submit_order`).
     #[func]
     fn answer_offer(&mut self, offer: i64, accept: bool) -> VarDictionary {
-        if self.refuse_while_turn_pending("answer_offer") {
-            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
-        }
-        let Some(CtxMut { state, data }) = self.ctx_mut() else {
-            return resolve_reply(Err("aucune campagne en cours".to_owned()));
-        };
-        let order = Order::AnswerOffer {
-            offer: offer.max(0) as u32,
-            accept,
-        };
-        resolve_reply(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("answer_offer", || {
+            Ok(Order::AnswerOffer {
+                offer: offer.max(0) as u32,
+                accept,
+            })
+        })
     }
 }
 
