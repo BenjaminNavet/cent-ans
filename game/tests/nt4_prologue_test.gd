@@ -137,7 +137,12 @@ func _check_battle() -> void:
 	_pass(prologue, "select")
 	# Marche.
 	scene.call("issue", {"type": "move", "units": [int(own["infantry"])], "x": _unit(battle, own["infantry"])["x"] + 40.0, "z": _unit(battle, own["infantry"])["z"]})
-	_run(scene, battle, 25.0)
+	# Cadence de campagne : marche d'approche à 45 % de la vitesse (data/rules/battle_pace.json).
+	for _i in 240:
+		if prologue.check_now():
+			break
+		_run(scene, battle, 0.5)
+	print("nt4: move seen at %.0f s" % float(battle.call("get_elapsed")))
 	_pass(prologue, "move")
 	# Front (glisser) ou formation.
 	scene.call("issue", {"type": "formation", "units": [int(own["infantry"])], "kind": "column"})
@@ -147,24 +152,29 @@ func _check_battle() -> void:
 	var target := _nearest_enemy(battle, _unit(battle, own["cavalry"]))
 	scene.call("issue", {"type": "attack", "units": [int(own["cavalry"])], "target": target, "run": true})
 	var charged := false
-	for _i in 120:
+	for _i in 480:
 		_run(scene, battle, 0.5)
 		if prologue.check_now():
 			charged = true
 			break
 	_check(charged, "cavalry charge seen")
+	print("nt4: charge seen at %.0f s" % float(battle.call("get_elapsed")))
 	_advance(prologue, "charge")
-	# Tir d'archers : on les approche de l'ennemi.
-	var archers := _unit(battle, own["ranged"])
-	var foe := _unit(battle, _nearest_enemy(battle, archers))
-	scene.call("issue", {"type": "move", "units": [int(own["ranged"])], "x": float(foe["x"]), "z": lerpf(float(archers["z"]), float(foe["z"]), 0.6), "run": true})
+	# Tir d'archers : on les approche d'un ennemi encore en place (la charge a pu en mettre en
+	# déroute) et on réévalue la cible toutes les 10 s.
 	var fired := false
-	for _i in 240:
+	for _i in 480:
+		if _i % 20 == 0:
+			var archers := _unit(battle, own["ranged"])
+			var foe := _unit(battle, _nearest_enemy(battle, archers, true))
+			if not foe.is_empty():
+				scene.call("issue", {"type": "move", "units": [int(own["ranged"])], "x": float(foe["x"]), "z": lerpf(float(archers["z"]), float(foe["z"]), 0.6), "run": true})
 		_run(scene, battle, 0.5)
 		if prologue.check_now():
 			fired = true
 			break
 	_check(fired, "archers shooting seen")
+	print("nt4: fire seen at %.0f s, finished %s" % [float(battle.call("get_elapsed")), battle.call("is_finished")])
 	_advance(prologue, "fire")
 	var enemy_moved := _max_shift(enemy_start, _positions(battle, "attacker"))
 	print("nt4: passive enemy max shift %.1f m" % enemy_moved)
@@ -173,10 +183,9 @@ func _check_battle() -> void:
 			var from: Vector2 = enemy_start.get(int(unit["id"]), Vector2.ZERO)
 			var shift := from.distance_to(Vector2(float(unit["x"]), float(unit["z"])))
 			print("nt4:   enemy %d %s shift %.1f m" % [int(unit["id"]), str(unit.get("state", "?")), shift])
-			# NT11 (camp tenu) : seule la déroute sous la pression déplace l'ennemi ; la poussée d'une
-			# mêlée peut le décaler de quelques mètres.
-			if str(unit.get("state", "")) != "routing":
-				_check(shift < 8.0, "held enemy %d stayed in place (%.1f m)" % [int(unit["id"]), shift])
+			# NT11 (camp tenu) : l'ennemi n'avance pas vers le joueur (au sud, z croissant). Il peut
+			# reculer : déroute, ou poussée d'une mêlée prolongée (cadence de campagne).
+			_check(float(unit["z"]) - from.y < 8.0, "held enemy %d did not advance (%.1f m)" % [int(unit["id"]), float(unit["z"]) - from.y])
 	# Pause.
 	scene.set("paused", false)
 	_check(not prologue.check_now(), "not paused yet")
@@ -303,11 +312,13 @@ func _own(battle: Object, side: String) -> Dictionary:
 	return out
 
 
-func _nearest_enemy(battle: Object, unit: Dictionary) -> int:
+func _nearest_enemy(battle: Object, unit: Dictionary, standing_only: bool = false) -> int:
 	var best := -1
 	var best_d := INF
 	for other in battle.call("get_units"):
 		if str(other["side"]) == str(unit["side"]) or not bool(other["present"]):
+			continue
+		if standing_only and str(other["state"]) == "routing":
 			continue
 		var d := Vector2(float(other["x"]), float(other["z"])).distance_to(Vector2(float(unit["x"]), float(unit["z"])))
 		if d < best_d:
