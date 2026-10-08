@@ -62,5 +62,15 @@ func _init() -> void:
 		if not known.has(str(variant["model_id"])):
 			print("ME8: modèle saisonnier inconnu %s" % variant["model_id"])
 			ok = false
+	var variants := AgriSeasons.load_variants(data_dir)
+	if AgriSeasons.model_for(variants, {}, "oak", "autumn") != "":
+		print("ME8: modèle non ingéré rendu")
+		ok = false
+	if AgriSeasons.model_for(variants, {"env_autumn_oak_gold": {}}, "oak", "autumn") != "env_autumn_oak_gold":
+		print("ME8: modèle ingéré non rendu")
+		ok = false
+	if AgriSeasons.model_for(variants, {"env_autumn_oak_gold": {}}, "oak", "winter") != "":
+		print("ME8: mauvaise saison")
+		ok = false
 	print("ME8: %d paysages, %d régions, test %s" % [rows.size(), (doc["regions"] as Array).size(), "OK" if ok else "ÉCHEC"])
 	quit(0 if ok else 1)
