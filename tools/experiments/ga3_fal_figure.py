@@ -441,6 +441,11 @@ def main() -> None:
         help="local sheet: influence of the source image (img2img)",
     )
     parser.add_argument("--resolution", choices=("1K", "2K"), default="2K")
+    parser.add_argument(
+        "--stop-before-3d",
+        action="store_true",
+        help="stop after the cut-out views (free trial of the local stages)",
+    )
     args = parser.parse_args()
     name = args.unit if args.attempt == 1 else f"{args.unit}_{args.attempt}"
     if args.variant > 1:
@@ -500,6 +505,9 @@ def main() -> None:
     for index, view in enumerate(VIEW_NAMES):
         if not (out / f"{view}.png").exists():
             view_crop(cut, out / f"{view}.png", index)
+    if args.stop_before_3d:
+        print(f"Vues prêtes dans {out}, TRELLIS non lancé.")
+        return
     front = out / "front.png"
     if args.model == "multi":
         views = args.views.split(",")
