@@ -114,6 +114,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "lakes.schema.json": ("map/lakes.json",),
     "landmark.schema.json": ("landmarks/*.json",),
     "landmark_v2.schema.json": ("landmarks_v2/*.json",),
+    "map_birds.schema.json": ("map/map_birds.json",),
     "map_legend.schema.json": ("ui/map_legend.json",),
     "map_parchment_ornaments.schema.json": ("map/parchment_ornaments.json",),
     "map_scenes_rules.schema.json": ("rules/map_scenes.json",),

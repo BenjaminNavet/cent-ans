@@ -2,17 +2,11 @@ class_name LifeAmbient
 extends Node3D
 
 ## Lot CV1 : vie ambiante de la carte (rendu seulement) :
-## - vols d'oiseaux autour du point visé par la caméra (réserve de vols recentrés quand la vue se
-##   déplace ; orbite et battement d'ailes dans `life_birds.gdshader`) ;
+## - oiseaux (lot ME3 : `MapBirdFlocks`, espèces/habitats/saisons dans `data/map/map_birds.json`) ;
 ## - bateaux sur les grands fleuves (va-et-vient le long du tracé) et navires sur la Manche et
 ##   les côtes (lignes entre ports voisins dont le trajet reste en mer).
 ## Palier près (oiseaux) et près/moyen (bateaux) ; un `MultiMesh` par famille.
 
-const BIRDS_SHADER := preload("res://shaders/life_birds.gdshader")
-const FLOCKS := 3
-const BIRDS_PER_FLOCK := 9
-## Rayon (px carte) autour du point visé où vivent les vols.
-const FLOCK_AREA := 70.0
 ## Importance minimale (Strahler) d'un fleuve navigable et longueur par bateau (px carte).
 const RIVER_MIN_IMPORTANCE := 5
 const RIVER_PX_PER_BOAT := 260.0
@@ -30,11 +24,9 @@ var stats: Dictionary = {}
 
 var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
-var _birds: MultiMeshInstance3D
+var _birds: MapBirdFlocks
 var _boats: MultiMeshInstance3D
 var _ships: MultiMeshInstance3D
-var _flock_centers: Array[Vector2] = []
-var _flock_timer := 0.0
 ## Trajets : {points: PackedVector2Array, length: float, cumulative: PackedFloat32Array,
 ## offset: float, speed: float}.
 var _river_routes: Array = []
@@ -47,79 +39,15 @@ func setup(map_data: MapData, terrain: TerrainBuilder, settlements: SettlementDa
 	_map_data = map_data
 	_terrain = terrain
 	_rng.seed = 1337
-	_build_birds()
+	_birds = MapBirdFlocks.new()
+	_birds.name = "Birds"
+	add_child(_birds)
+	_birds.setup(map_data, terrain, settlements)
 	_river_routes = _build_river_routes()
 	_sea_routes = _build_sea_routes(settlements)
 	_boats = _route_instance("RiverBoats", _river_routes.size(), RIVER_BOAT_SCALE)
 	_ships = _route_instance("SeaShips", _sea_routes.size(), SEA_SHIP_SCALE)
-	stats = {"birds": FLOCKS * BIRDS_PER_FLOCK, "river_boats": _river_routes.size(), "sea_ships": _sea_routes.size()}
-
-
-# --- Oiseaux -------------------------------------------------------------------------
-
-
-static func _bird_mesh() -> ArrayMesh:
-	# V aplati : deux ailes en triangles, corps au centre (bec vers -Z).
-	var vertices := PackedVector3Array([
-		Vector3(0, 0, -0.25), Vector3(-1.0, 0.08, 0.15), Vector3(0, 0, 0.2),
-		Vector3(0, 0, -0.25), Vector3(0, 0, 0.2), Vector3(1.0, 0.08, 0.15),
-	])
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
-
-
-func _build_birds() -> void:
-	var material := ShaderMaterial.new()
-	material.shader = BIRDS_SHADER
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_custom_data = true
-	multimesh.mesh = _bird_mesh()
-	multimesh.instance_count = FLOCKS * BIRDS_PER_FLOCK
-	_birds = MultiMeshInstance3D.new()
-	_birds.name = "Birds"
-	_birds.multimesh = multimesh
-	_birds.material_override = material
-	_birds.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_birds.extra_cull_margin = _world_margin()
-	add_child(_birds)
-	_flock_centers.resize(FLOCKS)
-	_flock_centers.fill(Vector2(-1e6, -1e6))
-
-
-func _place_flock(f: int, center: Vector2) -> void:
-	_flock_centers[f] = center
-	var ground := _terrain.surface_height_at(center.x, center.y) if _terrain != null else 0.0
-	var base_height := 5.0 + _rng.randf() * 6.0
-	var direction := 1.0 if _rng.randf() < 0.5 else -1.0
-	var radius := 4.0 + _rng.randf() * 8.0
-	for b in BIRDS_PER_FLOCK:
-		var n := f * BIRDS_PER_FLOCK + b
-		var jitter := Vector3(_rng.randf_range(-1.2, 1.2), 0.0, _rng.randf_range(-1.2, 1.2))
-		var origin := Vector3(center.x, ground + base_height, center.y) + jitter
-		_birds.multimesh.set_instance_transform(n, Transform3D(Basis.from_scale(Vector3.ONE * 0.5), origin))
-		# Même vitesse dans un vol, phases proches : ils volent ensemble.
-		_birds.multimesh.set_instance_custom_data(n, Color(radius + _rng.randf() * 0.8, direction * (0.22 + 0.04 * float(f % 3)), 0.1 * f + 0.012 * b, _rng.randf() * 0.8))
-
-
-func _update_birds(focus: Vector2, visible_birds: bool) -> void:
-	_birds.visible = visible_birds
-	if not visible_birds:
-		return
-	_flock_timer -= get_process_delta_time()
-	if _flock_timer > 0.0:
-		return
-	_flock_timer = 1.5
-	for f in FLOCKS:
-		if _flock_centers[f].distance_to(focus) > FLOCK_AREA * 1.3:
-			var angle := _rng.randf() * TAU
-			var place := focus + Vector2(cos(angle), sin(angle)) * FLOCK_AREA * sqrt(_rng.randf())
-			if _map_data == null or _map_data.is_land_px(int(place.x), int(place.y)):
-				_place_flock(f, place)
+	stats = {"birds": int(_birds.stats.get("total", 0)), "river_boats": _river_routes.size(), "sea_ships": _sea_routes.size()}
 
 
 # --- Bateaux -------------------------------------------------------------------------
@@ -240,9 +168,9 @@ func _update_routes(mmi: MultiMeshInstance3D, routes: Array, focus: Vector2, rad
 
 
 ## DV : `normal_weight` = poids de la vue normale (1 − `ZoomTiers.strategic_weight`).
-func update_view(focus: Vector2, near_weight: float, normal_weight: float) -> void:
+func update_view(focus: Vector2, near_weight: float, normal_weight: float, season_weights: Vector4 = Vector4(0, 1, 0, 0)) -> void:
 	_time += get_process_delta_time()
-	_update_birds(focus, near_weight > 0.35)
+	_birds.update_view(focus, near_weight > 0.35, season_weights)
 	var show_boats := near_weight > 0.35 or normal_weight > 0.5
 	_boats.visible = show_boats
 	_ships.visible = show_boats

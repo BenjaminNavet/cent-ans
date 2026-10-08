@@ -467,7 +467,7 @@ func update_view(camera_distance: float) -> void:
 		var keep := 1.0 - _tiers.site_weight(_camera_distance)
 		# DV : bateaux et navires sur toute la vue normale (poids 1 − `strategic_weight`).
 		var normal := 1.0 - _tiers.strategic_weight(_camera_distance)
-		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, normal * keep)
+		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, normal * keep, seasons.weights)
 	tp = PerfProbe.lap("life/ambient", tp)
 	if folk != null and _tiers != null:
 		var folk_rig := _map.get("camera_rig") as Node3D if _map != null else null

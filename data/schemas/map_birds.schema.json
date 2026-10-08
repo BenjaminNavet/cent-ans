@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_birds.schema.json",
+  "title": "Oiseaux de la carte de campagne",
+  "description": "Fichier data/map/map_birds.json (lot ME3) : espèces, comportements, habitats et saisons des vols d'oiseaux de la carte (rendu seulement).",
+  "type": "object",
+  "required": ["flock_area", "retarget_seconds", "species"],
+  "$defs": {
+    "range": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+    "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+    "biome": { "enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"] }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "flock_area": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon (px carte) autour du point visé où vivent les vols." },
+    "retarget_seconds": { "type": "number", "exclusiveMinimum": 0 },
+    "species": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "behavior", "flocks", "per_flock", "scale", "color", "height", "seasons", "habitat"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z_]+$" },
+          "label": { "type": "string" },
+          "behavior": { "enum": ["orbit", "transit", "perch", "wade"], "description": "orbit : tourne autour d'un point ; transit : vol en V qui traverse ; perch : posé (toit) ; wade : patauge et dérive lentement." },
+          "flocks": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "per_flock": { "type": "integer", "minimum": 1, "maximum": 80 },
+          "scale": { "type": "number", "exclusiveMinimum": 0 },
+          "color": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+          "height": { "$ref": "#/$defs/range", "description": "Hauteur au-dessus du sol (unités du monde)." },
+          "radius": { "$ref": "#/$defs/range", "description": "Rayon d'orbite (orbit, wade)." },
+          "speed": { "$ref": "#/$defs/range", "description": "Vitesse angulaire rad/s (orbit, wade) ou unités/s (transit)." },
+          "jitter": { "type": "number", "minimum": 0, "description": "Dispersion horizontale des oiseaux d'un vol." },
+          "height_jitter": { "type": "number", "minimum": 0 },
+          "radius_spread": { "type": "number", "minimum": 0, "description": "Écart de rayon d'orbite entre oiseaux d'un vol (défaut 0,8)." },
+          "phase_spread": { "type": "number", "minimum": 0, "maximum": 1, "description": "Dispersion des phases d'orbite (défaut 0,1 : vol groupé ; 1 : nuée)." },
+          "flap_rate": { "type": "number", "minimum": 0 },
+          "flap_amount": { "type": "number", "minimum": 0, "maximum": 2 },
+          "wing_fold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "model": { "type": "string", "description": "Nom ModelLibrary du glb (vide : silhouette en V)." },
+          "seasons": {
+            "type": "object",
+            "required": ["spring", "summer", "autumn", "winter"],
+            "additionalProperties": false,
+            "properties": {
+              "spring": { "$ref": "#/$defs/weight" }, "summer": { "$ref": "#/$defs/weight" },
+              "autumn": { "$ref": "#/$defs/weight" }, "winter": { "$ref": "#/$defs/weight" }
+            }
+          },
+          "habitat": {
+            "type": "object",
+            "required": ["surface"],
+            "additionalProperties": false,
+            "properties": {
+              "surface": { "enum": ["land", "sea", "any"] },
+              "biomes": { "type": "array", "items": { "$ref": "#/$defs/biome" } },
+              "coast_max_px": { "type": "number", "minimum": 0, "description": "Distance maximale à la côte (px)." },
+              "min_height_m": { "type": "number" },
+              "max_height_m": { "type": "number" },
+              "wetland_ids": { "type": "array", "items": { "type": "string" }, "description": "Zones de data/map/wetland_sites_px.json." },
+              "towns": { "type": "array", "items": { "type": "string" }, "description": "Colonies où l'espèce se pose (perch)." },
+              "town_radius": { "type": "number", "minimum": 0 },
+              "span": { "type": "number", "exclusiveMinimum": 0, "description": "Demi-longueur du couloir de transit (px)." },
+              "v_spacing": { "type": "number", "exclusiveMinimum": 0 },
+              "v_angle_deg": { "type": "number", "minimum": 0, "maximum": 80 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
