@@ -23,14 +23,6 @@ const TERRAIN_LABELS := {
 	"heath": "Lande", "bocage": "Bocage", "steppe": "Steppe", "desert": "Désert",
 }
 const STANCE_LABELS := {"normal": "Normale", "raid": "Chevauchée", "siege": "Siège"}
-const CLASS_LABELS := {"peasants": "Paysans", "burghers": "Bourgeois", "clergy": "Clergé", "nobility": "Noblesse"}
-## Jauge → (nom court, vrai si une valeur haute est mauvaise : mécontentement).
-const GAUGE_SPECS := [
-	["unrest", "Mécont.", true],
-	["health", "Santé", false],
-	["wealth", "Richesse", false],
-	["goods_satisfaction", "Biens", false],
-]
 const RESOURCE_CATEGORY_LABELS := {
 	"food": "Nourriture", "luxury": "Luxe", "raw_material": "Matières premières",
 	"manufactured": "Manufacturé", "textile": "Textile", "metal": "Métal",
@@ -58,7 +50,6 @@ const ROW_ICON := 20.0
 @onready var close_button: Button = %CloseButton
 @onready var tabs: TabContainer = %Tabs
 @onready var resources_list: HFlowContainer = %ResourcesList
-@onready var classes_list: VBoxContainer = %ClassesList
 @onready var buildings_list: VBoxContainer = %BuildingsList
 @onready var construction_box: VBoxContainer = %ConstructionBox
 @onready var construction_label: Label = %ConstructionLabel
@@ -71,17 +62,18 @@ var province_id: String = ""
 var _garrison_checks: Array[CheckBox] = []
 ## H9 : section « La Table » (onglet Ville, sous les classes), construite en code.
 var table_section: TableSection
+## Classes de population de l'onglet Ville (remplace le conteneur `ClassesList` de la scène).
+var classes_list: ClassesSection
 var edict_section: EdictSection  # lot C4
 ## Lot C5 : onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
 ## renvoie les lignes `[{id, name, kind, controller, owner, garrison_units, garrison_strength,
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
-var settlements_list: VBoxContainer
+var settlements_list: SettlementsSection
 var settlement_rows_provider: Callable = Callable()
 ## RJ-c (ADR 0175) : `possession_provider(province_id)` renvoie la possession décrite
 ## (`PossessionText.describe` de `province_possession`) ; {} : lignes propriétaire d'origine.
 var possession_provider: Callable = Callable()
 var possession: Dictionary = {}
-var _label_of: Callable = Callable()
 ## FE6 : fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
 var breadcrumb: HFlowContainer
 
@@ -111,6 +103,12 @@ func _ready() -> void:
 	tabs.set_tab_icon(0, IconLibrary.get_icon("hud_army"))
 	if tabs.get_tab_count() > 1:
 		tabs.set_tab_icon(1, IconLibrary.get_icon("cat_class"))
+	var classes_slot: Node = %ClassesList
+	classes_list = ClassesSection.new()
+	classes_slot.replace_by(classes_list)
+	classes_slot.queue_free()
+	classes_list.name = "ClassesList"
+	classes_list.add_theme_constant_override("separation", 3)
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
 	edict_section = EdictSection.new()  # lot C4
@@ -203,9 +201,9 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	province_id = str(province.get("id", ""))
 	name_label.text = str(province.get("display_name", province.get("name", "?")))
 	var owner: String = str(state.get("owner", province.get("owner", "")))
-	var owner_label := _faction_label(owner, province.get("owner_display_name", ""), label_of)
+	var owner_label := PanelWidgets.faction_label(owner, province.get("owner_display_name", ""), label_of)
 	var controller: String = str(state.get("controller", owner))
-	var controller_label := _faction_label(controller, "", label_of) if controller != owner else "—"
+	var controller_label := PanelWidgets.faction_label(controller, "", label_of) if controller != owner else "—"
 	controller_value.text = controller_label
 	var capital: String = str(province.get("capital", province.get("capital_name", "")))
 	capital_value.text = capital if capital != "" else "—"
@@ -241,7 +239,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	if siege.is_empty():
 		siege_value.text = "Aucun"
 	else:
-		siege_value.text = "%s, %s" % [_faction_label(str(siege.get("attacker", "")), "", label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
+		siege_value.text = "%s, %s" % [PanelWidgets.faction_label(str(siege.get("attacker", "")), "", label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	if siege_key != null:
 		siege_key.visible = not siege.is_empty()
 		siege_value.visible = not siege.is_empty()
@@ -257,8 +255,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	_fill_city(city, is_player_owner)
 	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
 	edict_section.show_for(province_id, is_player_owner and not state.is_empty())  # lot C4
-	_label_of = label_of
-	_fill_settlements()  # C5
+	_fill_settlements(label_of, is_player_owner)  # C5
 	_fill_breadcrumb()  # FE6
 	show()
 	queue_fit_height()
@@ -268,7 +265,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 ## ressources. `city` vide (simulation sans `get_province_city`) → onglet quasi vide.
 func _fill_city(city: Dictionary, is_player_owner: bool) -> void:
 	_fill_resources(city.get("resources", []))
-	_fill_classes(city.get("classes", {}))
+	classes_list.show_for(province_id, is_player_owner, null, {"classes": city.get("classes", {})})
 	var buildings: Array = city.get("buildings", [])
 	_fill_buildings(buildings)
 	_fill_construction(city.get("construction", {}), is_player_owner, (city.get("build_queue", []) as Array).size())
@@ -289,89 +286,6 @@ func _fill_resources(resources: Array) -> void:
 	for res in resources:
 		var res_id := str(res)
 		resources_list.add_child(IconChip.create(res_id, GameCatalog.display_name(res_id), RichTooltip.resource(res_id), ROW_ICON, 13))
-
-
-func _fill_classes(classes: Dictionary) -> void:
-	for child in classes_list.get_children():
-		child.queue_free()
-	if classes.is_empty():
-		var label := Label.new()
-		label.text = "Données de ville indisponibles."
-		classes_list.add_child(label)
-		return
-	for class_id in ["peasants", "burghers", "clergy", "nobility"]:
-		if not classes.has(class_id):
-			continue
-		classes_list.add_child(_make_class_row(class_id, classes[class_id]))
-
-
-func _make_class_row(class_id: String, data: Dictionary) -> Control:
-	# Q6 : ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
-	# ligne fixe de 420 px élargissait le panneau hors de l'écran en vue 1280×720.
-	var row := HFlowContainer.new()
-	row.add_theme_constant_override("h_separation", 8)
-	var name_chip := IconChip.create("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), RichTooltip.population_class(class_id, data), ROW_ICON, 14)
-	name_chip.custom_minimum_size = Vector2(104, 0)
-	row.add_child(name_chip)
-	var count_label := Label.new()
-	count_label.text = Money.digits(int(data.get("count", 0)))
-	count_label.custom_minimum_size = Vector2(62, 0)
-	row.add_child(count_label)
-	for spec in GAUGE_SPECS:
-		var key: String = spec[0]
-		var invert: bool = spec[2]
-		var value := float(data.get(key, 0))
-		row.add_child(_make_gauge(value, invert, spec[1], key))
-	return row
-
-
-## Petite jauge colorée (fond gris, remplissage vert → rouge selon `invert`), icône et
-## infobulle d'explication (F2).
-func _make_gauge(value: float, invert: bool, label_text: String, key: String = "") -> Control:
-	var holder := RichPanel.new()
-	holder.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-	holder.mouse_filter = Control.MOUSE_FILTER_STOP
-	holder.tooltip_text = RichTooltip.gauge(key, value) if key != "" else label_text
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 0)
-	box.custom_minimum_size = Vector2(46, 0)
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	holder.add_child(box)
-	var caption := HBoxContainer.new()
-	caption.alignment = BoxContainer.ALIGNMENT_CENTER
-	caption.add_theme_constant_override("separation", 2)
-	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if key != "":
-		caption.add_child(IconLibrary.make_rect("gauge_" + key, 12.0))
-	var caption_label := Label.new()
-	caption_label.text = label_text
-	UiType.apply(caption_label, UiType.CAPTION)
-	caption.add_child(caption_label)
-	box.add_child(caption)
-	var track := ColorRect.new()
-	track.color = Color(0.55, 0.50, 0.40)
-	track.custom_minimum_size = Vector2(44, 10)
-	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var fill := ColorRect.new()
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var ratio := clampf(value / 100.0, 0.0, 1.0)
-	fill.color = _gauge_color(ratio, invert)
-	fill.size = Vector2(44.0 * ratio, 10.0)
-	fill.position = Vector2.ZERO
-	track.add_child(fill)
-	box.add_child(track)
-	var value_label := Label.new()
-	value_label.text = "%d" % int(round(value))
-	UiType.apply(value_label, UiType.CAPTION)
-	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(value_label)
-	return holder
-
-
-static func _gauge_color(ratio01: float, invert: bool) -> Color:
-	var good := Color(0.28, 0.55, 0.22)
-	var bad := Color(0.70, 0.16, 0.12)
-	return good.lerp(bad, ratio01) if invert else bad.lerp(good, ratio01)
 
 
 func _fill_buildings(buildings: Array) -> void:
@@ -454,10 +368,8 @@ func _build_settlements_tab() -> void:
 	scroll.name = "Colonies"
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	tabs.add_child(scroll)
-	settlements_list = VBoxContainer.new()
-	settlements_list.name = "SettlementsList"
-	settlements_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	settlements_list.add_theme_constant_override("separation", 4)
+	settlements_list = SettlementsSection.new()
+	settlements_list.settlement_requested.connect(settlement_requested.emit)
 	scroll.add_child(settlements_list)
 	tabs.set_tab_icon(tabs.get_tab_count() - 1, IconLibrary.get_icon("cat_building"))
 
@@ -480,7 +392,7 @@ func _fill_possession(detail: String) -> void:
 	owner_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	owner_value.add_theme_color_override("font_color", PossessionText.ink(str(possession.get("cue", "")), RichTooltip.INK))
 	owner_value.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(owner_value, "province_possession", {"body": "%s\n%s\n%s" % [possession_help(), held_text(), detail]})
+	TooltipHost.attach_plain(owner_value, "province_possession", {"body": "%s\n%s\n%s" % [possession_help(), held_text(), detail]})
 
 
 ## RJ-c : phrase d'aide (la cité donne le contrôle, le traité la possession) et rappel de la
@@ -501,64 +413,15 @@ func show_settlements_tab() -> void:
 	tabs.current_tab = tabs.get_tab_count() - 1
 
 
-func _fill_settlements() -> void:
-	PanelWidgets.clear(settlements_list)
+func _fill_settlements(label_of: Callable, is_player_owner: bool) -> void:
 	var rows: Array = settlement_rows_provider.call(province_id) if settlement_rows_provider.is_valid() else []
-	if rows.is_empty():
-		PanelWidgets.placeholder(settlements_list, "Colonies indisponibles.")
-		return
-	if not possession.is_empty():  # RJ-c : la cité donne le contrôle, le traité la possession
-		var help := Label.new()
-		help.name = "PossessionHelp"
-		help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		help.text = "%s\n%s" % [possession_help(), held_text()]
-		help.add_theme_color_override("font_color", Color(RichTooltip.MUTED))
-		UiType.apply(help, UiType.CAPTION)
-		settlements_list.add_child(help)
-	for row in rows:
-		settlements_list.add_child(_make_settlement_row(row))
-
-
-func _make_settlement_row(row: Dictionary) -> Control:
-	var settlement_id := str(row.get("id", ""))
-	var button := RichButton.new()
-	button.name = settlement_id
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6 : zone `SIDE_PANEL` étroite
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var kind := str(row.get("kind", ""))
-	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)
-	var text := "%s — %s, %s" % [str(row.get("name", settlement_id)), str(SettlementPanel.KIND_LABELS.get(kind, kind)), controller]
-	# RJ-c : « occupée par … » (statut du cœur, `province_possession`).
-	var owner_label := _faction_label(str(row.get("owner", "")), "", _label_of)
-	var mention := PossessionText.occupied_mention(str(row.get("possession_status", "")), owner_label, controller)
-	if mention != "":
-		text += " — " + mention
-	if bool(row.get("is_city", false)):
-		text += " (cité : donne la province)"
-	text += "\n    garnison : %s, %s hommes" % [FrText.count(int(row.get("garrison_units", 0)), "unité"), Money.digits(int(row.get("garrison_strength", 0)))]
-	var siege: Dictionary = row.get("siege", {}) if row.get("siege") is Dictionary else {}
-	if not siege.is_empty():
-		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
-	button.text = text
-	RichTooltip.attach_plain(button, "colony_focus_open")
-	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
-	return button
+	var help := "%s\n%s" % [possession_help(), held_text()] if not possession.is_empty() else ""
+	settlements_list.show_for(province_id, is_player_owner, null, {"rows": rows, "label_of": label_of, "help": help})
 
 
 ## Nom d'unité : `name` si la simulation le fournit, sinon l'id rendu lisible.
 static func unit_label(unit: Dictionary) -> String:
 	return PanelWidgets.unit_label(unit)
-
-
-static func _faction_label(faction_id: String, display_name: String, label_of: Callable) -> String:
-	if faction_id == "":
-		return "—"
-	if display_name != "":
-		return display_name
-	if label_of.is_valid():
-		return str(label_of.call(faction_id))
-	return faction_id
 
 
 ## FE6 : titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur
@@ -585,6 +448,6 @@ func _fill_breadcrumb() -> void:
 		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		var holder := str(link.get("holder", ""))
 		var holder_name := str(link.get("holder_name", ""))
-		RichTooltip.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
+		TooltipHost.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
 		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
 		breadcrumb.add_child(crumb)

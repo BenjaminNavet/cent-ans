@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Chantier IB (ADR 0109), lot IB2 : infobulles brutes migrées (spec § 2.4).
-## - `RichTooltip.attach_plain(control, key)` pose une clé `ib:plain:<key>` qui rend en sections
+## - `TooltipHost.attach_plain(control, key)` pose une clé `ib:plain:<key>` qui rend en sections
 ##   (titre + corps), pas un simple texte natif ;
 ## - un contrôle natif sans script dédié reçoit `plain_tooltip_host.gd` (`_make_custom_tooltip`) ;
 ## - aucun `tooltip_text = "…"` littéral ne reste dans `game/scripts` hors la liste d'exceptions
@@ -60,7 +60,7 @@ func _check_plain_entry() -> void:
 ## Un `RichButton` (déjà scripté) garde son script ; `attach_plain` ne fait que poser la clé.
 func _check_attach_on_rich_button() -> void:
 	var button := RichButton.new()
-	RichTooltip.attach_plain(button, "ib2_smoke_test", {"title": "Fermer", "hint": "Échap"})
+	TooltipHost.attach_plain(button, "ib2_smoke_test", {"title": "Fermer", "hint": "Échap"})
 	_check(button.tooltip_text.begins_with("ib:plain:ib2_smoke_test"), "RichButton tooltip_text carries the ib:plain: key")
 	var panel := button._make_custom_tooltip(button.tooltip_text)
 	_check(panel is Control, "RichButton still renders a sectioned tooltip")
@@ -71,7 +71,7 @@ func _check_attach_on_rich_button() -> void:
 func _check_attach_on_native_control() -> void:
 	var button := Button.new()
 	_check(button.get_script() == null, "plain native control starts without a script")
-	RichTooltip.attach_plain(button, "ib2_smoke_test", {"title": "Fermer"})
+	TooltipHost.attach_plain(button, "ib2_smoke_test", {"title": "Fermer"})
 	_check(button.get_script() != null, "attach_plain scripts a native control")
 	var panel: Object = button.call("_make_custom_tooltip", button.tooltip_text)
 	_check(panel is Control, "native control renders a sectioned tooltip once hosted")

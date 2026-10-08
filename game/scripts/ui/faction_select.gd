@@ -547,7 +547,7 @@ func _character(character_id: String) -> Dictionary:
 func _difficulty_row(level: int) -> Control:
 	var row := UiBuild.hbox(6)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(row, "faction_challenge_indicative")
+	TooltipHost.attach_plain(row, "faction_challenge_indicative")
 	row.add_child(FrontEndStyle.label("Défi :", CAPTION_PX, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
 	var pips := UiBuild.hbox(4)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -619,7 +619,7 @@ func _build_difficulty_selector() -> Control:
 	bar.add_theme_stylebox_override("panel", FrontEndStyle.night_panel(0.72))
 	var column := UiBuild.vbox(6, bar)
 	var heading := FrontEndStyle.label("Difficulté de la campagne", HEADING_PX, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
-	RichTooltip.attach_plain(heading, "difficulty_fixed_effects")
+	TooltipHost.attach_plain(heading, "difficulty_fixed_effects")
 	heading.mouse_filter = Control.MOUSE_FILTER_PASS
 	column.add_child(heading)
 	var row := HFlowContainer.new()
@@ -705,7 +705,7 @@ func _build_actions() -> Control:
 	seed_row.visible = false
 	_advanced_box = seed_row
 	var seed_label := FrontEndStyle.label("Graine aléatoire", BODY_PX, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
-	RichTooltip.attach_plain(seed_label, "seed_same_draw")
+	TooltipHost.attach_plain(seed_label, "seed_same_draw")
 	seed_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	seed_row.add_child(seed_label)
 	seed_edit = LineEdit.new()

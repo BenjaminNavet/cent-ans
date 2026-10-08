@@ -30,7 +30,7 @@ func setup(campaign_map: Node) -> void:
 	engines_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	engines_label.custom_minimum_size = Vector2(320, 0)
 	engines_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	RichTooltip.attach_plain(engines_label, "siege_engines")
+	TooltipHost.attach_plain(engines_label, "siege_engines")
 	box.add_child(engines_label)
 	assault_button = Button.new()
 	assault_button.name = "AssaultButton"
@@ -72,7 +72,7 @@ func _update(is_player: bool) -> void:
 	assault_button.disabled = blocker != ""
 	if blocker != "":
 		assault_button.text = "Donner l'assaut (aucun engin prêt)"
-		RichTooltip.attach_plain(assault_button, "assault_blocked", {"body": "Assaut impossible : %s." % blocker})
+		TooltipHost.attach_plain(assault_button, "assault_blocked", {"body": "Assaut impossible : %s." % blocker})
 	else:
 		assault_button.text = "Donner l'assaut (chances ≈ %d %%)" % int(odds["odds"])
 		assault_button.tooltip_text = ""

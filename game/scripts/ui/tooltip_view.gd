@@ -43,7 +43,7 @@ static var _cache: Dictionary = {}
 
 
 ## Contrôle d'infobulle pour `spec` ; `detailed` : version complète (bulle verrouillée). Met à
-## jour `RichTooltip.last_panel`, `last_bbcode` (BBCode complet, pour l'épinglage T) et `last_spec`.
+## jour la dernière bulle de `TooltipHost` (BBCode complet pour l'épinglage T, spec).
 static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	var style_data := style()
 	var width := float(style_data.get("width_px", 360))
@@ -51,7 +51,7 @@ static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	panel.name = "TooltipView"
 	if ResourceLoader.exists(RichTooltip.THEME_PATH):
 		panel.theme = load(RichTooltip.THEME_PATH)
-	panel.add_theme_stylebox_override("panel", RichTooltip.panel_style())
+	panel.add_theme_stylebox_override("panel", TooltipHost.panel_style())
 	var outer := UiBuild.vbox(6)
 	outer.custom_minimum_size = Vector2(width, 0)
 	panel.add_child(outer)
@@ -91,9 +91,7 @@ static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	panel.set_meta("ib_blocks", shown)
 	panel.set_meta("ib_body_lines", lines)
 	panel.set_meta("ib_detailed", detailed)
-	RichTooltip.last_panel = weakref(panel)
-	RichTooltip.last_bbcode = CodexText.format(RichTooltip.to_bbcode(spec), true)
-	RichTooltip.last_spec = spec
+	TooltipHost.record(panel, CodexText.format(RichTooltip.to_bbcode(spec), true), spec)
 	return panel
 
 

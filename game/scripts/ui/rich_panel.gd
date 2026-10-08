@@ -5,4 +5,4 @@ extends PanelContainer
 
 
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	return TooltipHost.bubble(for_text, self)

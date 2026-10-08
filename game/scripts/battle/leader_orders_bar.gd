@@ -333,6 +333,6 @@ class OrderButton extends Button:
 			lines.append("[color=#6b5a45]%s[/color]" % " · ".join(facts))
 		if not bool(order.get("available", false)):
 			lines.append("[color=#8a2a1a]Indisponible : %s[/color]" % order.get("reason", ""))
-		# BP1 : `RichTooltip.make_panel` applique les liens du Codex et enregistre l'infobulle
+		# BP1 : `TooltipHost.from_bbcode` applique les liens du Codex et enregistre l'infobulle
 		# pour la conversion en bulle épinglée (touche T, `CodexBubbles.pin_native_tooltip`).
-		return RichTooltip.make_panel("\n".join(lines))
+		return TooltipHost.from_bbcode("\n".join(lines))

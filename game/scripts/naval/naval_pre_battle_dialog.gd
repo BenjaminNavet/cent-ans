@@ -40,7 +40,7 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	verdict_label.text = BattleUiKit.verdict(chance)
 	verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
 	chance_label.text = "Chances de victoire estimées : %d %% · %d navires contre %d" % [roundi(chance * 100.0), _ships_of(player_side), _ships_of(enemy_side)]
-	RichTooltip.attach_plain(balance_bar, "naval_balance_estimate")
+	TooltipHost.attach_plain(balance_bar, "naval_balance_estimate")
 	balance_bar.queue_redraw()
 	for i in 2:
 		_fill_fleet(_columns[i], player_side if i == 0 else enemy_side)
@@ -50,7 +50,7 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	fight_button.visible = false
 	withdraw_button.text = "Rentrer au port" if player_side == "defender" else "Refuser le combat"
 	withdraw_button.disabled = false
-	RichTooltip.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
+	TooltipHost.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")

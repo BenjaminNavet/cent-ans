@@ -112,7 +112,7 @@ func _check_pure() -> void:
 	_check(not bool(menu.get("wedge", {}).get("able", true)), "no rider: wedge greyed")
 	for entry in catalog:
 		if str(entry["key"]) == "square":
-			var spec := RichTooltip.spec_for(RichTooltip.tooltip_key("formation", "square", ""), BattleFormationMenu.tooltip_live(entry, core.call("formation_reform_rules")))
+			var spec := RichTooltip.spec_for(TooltipHost.tooltip_key("formation", "square", ""), BattleFormationMenu.tooltip_live(entry, core.call("formation_reform_rules")))
 			_check(str(spec.get("title", "")) == "Schiltron" and (spec.get("effects", []) as Array).size() >= 4, "schiltron tooltip: name, history and effects (%s)" % [spec.get("effects")])
 	if core is Node:
 		(core as Node).free()

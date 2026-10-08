@@ -228,7 +228,7 @@ func _row(entry: Dictionary) -> Control:
 	var text: String = str(LABELS.get(kind, kind))
 	text += count_label(int(entry["count"]))
 	row.text = "   " + text
-	RichTooltip.attach_plain(row, "click_camera_focus")
+	TooltipHost.attach_plain(row, "click_camera_focus")
 	var glyph := Control.new()
 	glyph.custom_minimum_size = Vector2(22, 22)
 	glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE

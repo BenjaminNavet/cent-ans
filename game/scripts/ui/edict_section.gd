@@ -27,7 +27,7 @@ func _refresh_extra(state: Dictionary, _current: Dictionary) -> void:
 	pending_label.visible = pending and is_player_owner
 	if pending:
 		pending_label.text = "« %s » entre en vigueur dans %d tour(s) ; l'édit actuel s'applique en attendant." % [str(state.get("pending_name", "")), int(state.get("turns_left", 0))]
-	RichTooltip.attach_plain(choose_button, "choose_edict")
+	TooltipHost.attach_plain(choose_button, "choose_edict")
 
 
 func _option_text(option: Dictionary) -> String:

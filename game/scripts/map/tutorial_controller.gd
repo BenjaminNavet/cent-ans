@@ -2,7 +2,7 @@ class_name TutorialController
 extends Node
 
 ## F8 — tutoriel des premiers tours et encyclopédie sur la carte de campagne. Créé par
-## `campaign_map.gd`, qui n'appelle que `setup` (et `stage_screenshot` pour les captures).
+## `campaign_map.gd`, qui n'appelle que `setup`.
 ##
 ## Tutoriel : 14 étapes (`TutorialSteps`) affichées par `TutorialOverlay`. Chaque objectif est
 ## vérifié en lisant l'état de l'interface (panneaux ouverts, onglet, sélection) et de la

@@ -94,7 +94,7 @@ func _ready() -> void:
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
 	var close_button := UiBuild.button("×")
-	RichTooltip.attach_plain(close_button, "close_escape")
+	TooltipHost.attach_plain(close_button, "close_escape")
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
@@ -124,7 +124,7 @@ func _ready() -> void:
 	footer.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(footer)
 	var disable := UiBuild.button("Ne plus afficher")
-	RichTooltip.attach_plain(disable, "season_report_disable")
+	TooltipHost.attach_plain(disable, "season_report_disable")
 	disable.pressed.connect(func() -> void:
 		disable_requested.emit()
 		close())
@@ -417,7 +417,7 @@ func _entry_row(event: Dictionary) -> Control:
 	var action := action_label(event)
 	if action != "":
 		var button := UiBuild.button(action)
-		RichTooltip.attach_plain(button, "season_event_action", {"title": "Aller voir" if action.begins_with("Voir") else "Ouvrir : %s" % action.to_lower()})
+		TooltipHost.attach_plain(button, "season_event_action", {"title": "Aller voir" if action.begins_with("Voir") else "Ouvrir : %s" % action.to_lower()})
 		UiType.apply(button, UiType.CAPTION)
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		button.pressed.connect(func() -> void: entry_selected.emit(event))

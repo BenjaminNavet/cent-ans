@@ -239,7 +239,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.set_meta(_TOAST_META, true)
 	entry.mouse_filter = Control.MOUSE_FILTER_STOP
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	RichTooltip.attach_plain(entry, "click_to_close")
+	TooltipHost.attach_plain(entry, "click_to_close")
 	if text.length() > TOAST_TOOLTIP_CHARS:
 		# LR-09 : un avis long est tronqué à `TOAST_MAX_LINES` lignes ; l'infobulle porte le texte entier.
 		entry.tooltip_text = text + "\n\nCliquer pour fermer."

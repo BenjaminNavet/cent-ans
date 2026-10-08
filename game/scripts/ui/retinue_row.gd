@@ -103,7 +103,7 @@ func _empty_slot() -> Control:
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
 	slot.add_theme_stylebox_override("panel", style)
-	RichTooltip.attach_plain(slot, "retinue_slot_free")
+	TooltipHost.attach_plain(slot, "retinue_slot_free")
 	return slot
 
 
@@ -141,4 +141,4 @@ class _Vignette:
 	extends PanelContainer
 
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.make_panel(for_text)
+		return TooltipHost.bubble(for_text, self)

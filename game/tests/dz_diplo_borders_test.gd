@@ -102,13 +102,13 @@ func _run() -> void:
 	_check(_same(_palette_color(borders, "fac_france"), heraldic_france), "France heraldic colour should be back")
 
 	# 4. Panneau de diplomatie : la carte suit la faction choisie.
-	var panel_script: Script = load("res://scripts/ui/diplomacy_panel.gd")
+	var panel_script: Script = load("res://scripts/ui/diplomacy/diplomacy_map_view.gd")
 	var panel: Node = panel_script.new()
 	panel.set("sim", sim)
 	panel.set("player_faction", "fac_france")
-	panel.set("_selected", "fac_england")
+	panel.set("faction_id", "fac_england")
 	_check(str(panel.call("map_viewer")) == "fac_england", "panel map should show the selected faction's view")
-	panel.set("_map_their_view", false)
+	panel.set("their_view", false)
 	_check(str(panel.call("map_viewer")) == "", "toggle off: panel map shows our relations")
 	panel.free()
 	map.queue_free()

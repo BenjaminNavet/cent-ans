@@ -1,5 +1,5 @@
 class_name ProvinceChoiceSection
-extends PanelSection
+extends ProvinceSection
 
 ## Base des sections « choisir une option pour la province » du panneau de province (La Table,
 ## Édit régional) : titre, option actuelle (icône, nom), description aux mots du Codex, bouton
@@ -10,8 +10,6 @@ extends PanelSection
 
 const ROW_ICON := 20.0
 
-var province_id: String = ""
-var is_player_owner: bool = false
 ## Options proposées (dernier appel d'options de la simulation).
 var options: Array = []
 var option_buttons: Dictionary = {}
@@ -52,22 +50,18 @@ func _init(section_name: String, title: String, change_text: String, state_call:
 	_add_error_label()
 
 
-## Remplit la section pour `province` ; `sim` : `SimFacade.sim` si null. Section masquée si la
-## simulation n'expose pas l'API (mock) ou si la province est inconnue.
-func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
-	province_id = province
-	is_player_owner = player_owned
-	_sim = _resolve_sim(sim)
+## Section masquée si la simulation n'expose pas l'API (mock) ou si la province est inconnue.
+func _render(_data: Dictionary) -> void:
 	error_label.hide()
-	if _sim == null or not _sim.has_method(_state_call) or province == "":
+	if _sim == null or not _sim.has_method(_state_call) or province_id == "":
 		hide()
 		return
-	var state: Dictionary = _sim.call(_state_call, province)
+	var state: Dictionary = _sim.call(_state_call, province_id)
 	if state.is_empty():
 		hide()
 		return
 	show()
-	options = _sim.call(_options_call, province) if _sim.has_method(_options_call) else []
+	options = _sim.call(_options_call, province_id) if _sim.has_method(_options_call) else []
 	var option_id := str(state.get(_state_key, ""))
 	var current := find_option(options, option_id)
 	current_chip.label.text = str(state.get("name", option_id))
@@ -77,9 +71,9 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 	current_chip.tooltip_text = _option_tooltip(current) if not current.is_empty() else ""
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
 	description_label.visible = description_label.text != ""
-	choose_button.visible = player_owned
+	choose_button.visible = is_player_owner
 	_refresh_extra(state, current)
-	if not player_owned:
+	if not is_player_owner:
 		options_box.hide()
 	_fill_options()
 

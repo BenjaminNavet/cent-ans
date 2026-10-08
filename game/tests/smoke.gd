@@ -1122,6 +1122,19 @@ func _run_diplomacy() -> void:
 				_check(passage.is_empty() or passage.has("ok"), "find_path_trespass should answer")
 				break
 
+	# Panneau réel : instanciation, rafraîchissement, brouillon de traité.
+	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
+	root.add_child(panel)
+	await process_frame
+	panel.sim = sim
+	panel.player_faction = FACTION_ID
+	panel.refresh()
+	panel.select_faction("fac_england")
+	panel.stage_example()
+	await process_frame
+	_check(str(panel.get("negotiation").get("_reasons").text) != "", "diplomacy panel should explain the verdict")
+	panel.queue_free()
+
 	# 20 tours : pas d'erreur ; offres et religion lisibles.
 	var diplomatic_events := 0
 	for _i in 20:
@@ -1838,7 +1851,7 @@ func _run_icons() -> void:
 	_check(not bool(library.call("is_entity", "hud_treasury")), "action icons stay ink")
 	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
 	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
-	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))
+	var panel := TooltipHost.from_bbcode(RichTooltip.gauge("unrest", 40))
 	root.add_child(panel)
 	await process_frame
 	_check(panel.find_child("Text", true, false) is RichTextLabel, "tooltip panel text expected")
@@ -1872,9 +1885,9 @@ func _run_codex() -> void:
 	var auto := CodexText.format("[img]res://x/%s.png[/img] En 1348, %s frappe ; %s encore." % [alias, alias, alias], true)
 	_check(auto.count("[url=cdx:cdx_peste_noire]") == 1 and auto.begins_with("[img]res://x/%s.png[/img]" % alias), "auto link once, outside tags: %s" % auto)
 	_check(not CodexText.format("%s." % alias).contains("[url"), "no auto link unless asked")
-	var tooltip := RichTooltip.make_panel("Voir [[cdx_arc_long]].")
-	_check(RichTooltip.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
-	_check(RichTooltip.visible_panel() == null, "a detached panel is not a visible tooltip")
+	var tooltip := TooltipHost.from_bbcode("Voir [[cdx_arc_long]].")
+	_check(TooltipHost.last_bbcode.contains("[url=cdx:cdx_arc_long]"), "rich tooltips should go through CodexText")
+	_check(TooltipHost.visible_panel() == null, "a detached panel is not a visible tooltip")
 	tooltip.free()
 
 	# Pile de 3 bulles : deux ouvertes par l'API, la troisième par survol simulé d'un lien.
@@ -1898,7 +1911,7 @@ func _run_codex() -> void:
 	_check(int(bubbles.call("bubble_count")) == 1, "unpinned bubbles should close after the grace delay (count %d)" % int(bubbles.call("bubble_count")))
 	bubbles.call("close_all")
 	_check(int(bubbles.call("bubble_count")) == 0, "close_all should empty the stack")
-	var pinned: Control = bubbles.call("open_text", RichTooltip.last_bbcode, Vector2(40, 40))
+	var pinned: Control = bubbles.call("open_text", TooltipHost.last_bbcode, Vector2(40, 40))
 	_check(pinned != null and bool(pinned.get_meta("pinned", false)), "pinned tooltip bubble expected")
 	bubbles.call("close_all")
 
@@ -2005,7 +2018,7 @@ func _run_codex_bubbles_b1() -> void:
 	var unit_entry := str(store.call("entry_for_entity", "unit_longbowmen"))
 	var unit_tip := RichTooltip.unit("unit_longbowmen")
 	_check(unit_entry != "" and RichTooltip.title_entry(unit_tip) == unit_entry, "B1: unit tooltip title should link to %s" % unit_entry)
-	var panel := RichTooltip.make_panel(unit_tip)
+	var panel := TooltipHost.from_bbcode(unit_tip)
 	var tip_footer := panel.find_child("Footer", true, false) as Label
 	_check(tip_footer != null and tip_footer.text.begins_with("T : maintenir ouverte"), "B1: rich tooltip footer expected")
 	panel.free()

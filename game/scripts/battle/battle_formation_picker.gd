@@ -77,7 +77,7 @@ func _build() -> void:
 	header.add_theme_color_override("font_color", INK)
 	header.add_theme_color_override("font_hover_color", INK)
 	header.add_theme_color_override("font_pressed_color", INK)
-	RichTooltip.attach_plain(header, "formation_picker_toggle")
+	TooltipHost.attach_plain(header, "formation_picker_toggle")
 	header.pressed.connect(func() -> void:
 		_auto_collapse_done = true
 		toggle_collapsed())
@@ -123,7 +123,7 @@ func _build() -> void:
 	place_button.name = "PlaceButton"
 	place_button.text = "Placer en formation"
 	place_button.focus_mode = Control.FOCUS_NONE
-	RichTooltip.attach_plain(place_button, "formation_place_proposal")
+	TooltipHost.attach_plain(place_button, "formation_place_proposal")
 	place_button.pressed.connect(on_place_pressed)
 	actions.add_child(place_button)
 	cancel_button = Button.new()

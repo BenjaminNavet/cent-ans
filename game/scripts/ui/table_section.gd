@@ -50,7 +50,7 @@ func _refresh_extra(state: Dictionary, _current: Dictionary) -> void:
 	if lent:
 		lent_text.text = CodexText.format(RuleValues.format(LENT_TEXT))
 	choose_button.disabled = _changed_this_turn
-	RichTooltip.attach_plain(choose_button, "choose_diet", {"body": "Un seul changement par province et par tour." if _changed_this_turn else "Choisir la table de la province (effet à la fin du tour)."})
+	TooltipHost.attach_plain(choose_button, "choose_diet", {"body": "Un seul changement par province et par tour." if _changed_this_turn else "Choisir la table de la province (effet à la fin du tour)."})
 
 
 func _option_text(option: Dictionary) -> String:

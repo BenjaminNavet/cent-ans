@@ -98,14 +98,14 @@ func _section_row(title: String) -> void:
 ## plus du solde ci-dessus ; ligne à part, hors du total.
 func _premium_row(premium: int, last: int) -> void:
 	var name_label := _cell("   " + PREMIUM_NAME, false, FONT_SIZE)
-	RichTooltip.attach_plain(name_label, "budget_line_hint", {"title": PREMIUM_NAME, "body": PREMIUM_HINT})
+	TooltipHost.attach_plain(name_label, "budget_line_hint", {"title": PREMIUM_NAME, "body": PREMIUM_HINT})
 	_grid.add_child(name_label)
 	var projected_label := _cell(Money.signed(-premium), true, FONT_SIZE)
 	projected_label.add_theme_color_override("font_color", Money.LOSS_COLOR if premium > 0 else Money.INK_COLOR)
-	RichTooltip.attach_plain(projected_label, "budget_projected_hint")
+	TooltipHost.attach_plain(projected_label, "budget_projected_hint")
 	_grid.add_child(projected_label)
 	var last_label := _cell(Money.signed(-last), true, FONT_SIZE - 1)
-	RichTooltip.attach_plain(last_label, "budget_last_hint", {"body": "Surprime réellement prélevée à la dernière fin de tour."})
+	TooltipHost.attach_plain(last_label, "budget_last_hint", {"body": "Surprime réellement prélevée à la dernière fin de tour."})
 	_grid.add_child(last_label)
 	_grid.add_child(Control.new())
 	cells["mercenary_premium"] = {"projected": projected_label.text, "last": last_label.text, "delta": "—"}
@@ -125,13 +125,13 @@ func _line_row(line: Dictionary, has_past: bool, is_total: bool = false) -> void
 	var name_label := _cell(name, false, FONT_SIZE + (1 if is_total else 0))
 	if not is_total:
 		name_label.text = "   " + name
-	RichTooltip.attach_plain(name_label, "budget_line_hint", {"title": name, "body": "Recettes moins toutes les charges : le « Solde » de la barre du haut, ajouté au trésor en fin de tour." if is_total else str(RUBRIC_HINTS.get(key, ""))})
+	TooltipHost.attach_plain(name_label, "budget_line_hint", {"title": name, "body": "Recettes moins toutes les charges : le « Solde » de la barre du haut, ajouté au trésor en fin de tour." if is_total else str(RUBRIC_HINTS.get(key, ""))})
 	_grid.add_child(name_label)
 	var projected_text := "—" if key == "other" else Money.signed(projected)
 	var projected_label := _cell(projected_text, true, FONT_SIZE + (1 if is_total else 0))
 	if key != "other":
 		projected_label.add_theme_color_override("font_color", Money.color_of(projected) if is_total else (Money.LOSS_COLOR if projected < 0 else Money.GAIN_COLOR if projected > 0 else Money.INK_COLOR))
-	RichTooltip.attach_plain(projected_label, "budget_projected_hint")
+	TooltipHost.attach_plain(projected_label, "budget_projected_hint")
 	_grid.add_child(projected_label)
 	var last_text := "—"
 	var delta_text := "—"
@@ -140,12 +140,12 @@ func _line_row(line: Dictionary, has_past: bool, is_total: bool = false) -> void
 	if has_past and line.has("delta") and key != "other":
 		delta_text = Money.delta(int(line["delta"]))
 	var last_label := _cell(last_text, true, FONT_SIZE - 1)
-	RichTooltip.attach_plain(last_label, "budget_last_hint", {"body": "Ce qui a réellement été porté au trésor à la dernière fin de tour." if has_past else "Premier tour : pas encore de saison passée."})
+	TooltipHost.attach_plain(last_label, "budget_last_hint", {"body": "Ce qui a réellement été porté au trésor à la dernière fin de tour." if has_past else "Premier tour : pas encore de saison passée."})
 	_grid.add_child(last_label)
 	var delta_label := _cell(delta_text, true, FONT_SIZE - 2)
 	if has_past and line.has("delta") and key != "other":
 		delta_label.add_theme_color_override("font_color", Money.color_of(int(line["delta"])))
-		RichTooltip.attach_plain(delta_label, "budget_delta_hint")
+		TooltipHost.attach_plain(delta_label, "budget_delta_hint")
 	_grid.add_child(delta_label)
 	if is_total:
 		for label: Label in [name_label, projected_label]:

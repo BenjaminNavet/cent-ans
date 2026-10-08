@@ -281,7 +281,7 @@ func pin_top_bubble() -> bool:
 
 ## Épingle l'infobulle riche affichée (F2) : bulle interactive au même endroit.
 func pin_native_tooltip() -> bool:
-	var panel := RichTooltip.visible_panel()
+	var panel := TooltipHost.visible_panel()
 	if panel == null:
 		return false
 	var window := panel.get_window()
@@ -289,7 +289,7 @@ func pin_native_tooltip() -> bool:
 	if not window.is_embedded():
 		at -= Vector2(get_tree().root.position)
 	window.hide()
-	var entry := RichTooltip.title_entry(RichTooltip.last_bbcode)
+	var entry := RichTooltip.title_entry(TooltipHost.last_bbcode)
 	var hovered := get_viewport().gui_get_hovered_control()
 	var view: Control = null
 	if hovered != null:
@@ -298,7 +298,7 @@ func pin_native_tooltip() -> bool:
 	if view != null:
 		open_view(view, at, entry)
 	else:
-		open_text(RichTooltip.last_bbcode, at, entry)
+		open_text(TooltipHost.last_bbcode, at, entry)
 	return true
 
 
@@ -363,7 +363,7 @@ func _tooltip_source(control: Control, local_pos: Vector2) -> Control:
 ## « ib:<kind>:<id> » (première ligne) est passée à `spec_for` : le BBCode de repli qui la suit
 ## n'est pas l'id. `source` : contrôle porteur de l'infobulle, dont la donnée `live` est reprise.
 func _detailed_view(text: String, source: Control = null) -> Control:
-	var key := RichTooltip.key_of(text)
+	var key := TooltipHost.key_of(text)
 	if key == "":
 		return null
 	var rich: Script = RichTooltip
@@ -371,8 +371,8 @@ func _detailed_view(text: String, source: Control = null) -> Control:
 	if not _script_has(rich, "spec_for") or not _script_has(view_script, "build"):
 		return null
 	var live: Dictionary = {}
-	if source != null and source.has_meta(RichTooltip.LIVE_META):
-		live = source.get_meta(RichTooltip.LIVE_META)
+	if source != null and source.has_meta(TooltipHost.LIVE_META):
+		live = source.get_meta(TooltipHost.LIVE_META)
 	var spec: Variant = rich.call("spec_for", key, live)
 	if not spec is Dictionary or (spec as Dictionary).is_empty():
 		return null
@@ -439,7 +439,7 @@ func _apply_pinned(bubble: PanelContainer, pinned: bool, chain: bool = false) ->
 	bubble.set_meta("pinned", pinned)
 	bubble.set_meta("chain_locked", pinned and chain)
 	# Épinglée : page à bande d'or (lot UI1) plutôt que simple note marginale.
-	var style: StyleBox = HudStyle.panel_box(10) if pinned else RichTooltip.panel_style()
+	var style: StyleBox = HudStyle.panel_box(10) if pinned else TooltipHost.panel_style()
 	bubble.add_theme_stylebox_override("panel", style)
 	var footer := bubble.find_child("Footer", true, false) as Label
 	if footer != null:

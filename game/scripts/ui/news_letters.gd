@@ -274,7 +274,7 @@ class Letter:
 			column.add_child(body)
 		var actions_hint := "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
 		var interest := str(item.get("interest", ""))  # U5 : pourquoi cette nouvelle est retenue
-		RichTooltip.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
+		TooltipHost.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
 		mouse_entered.connect(func() -> void:
 			_hover = true
 			queue_redraw())
@@ -316,4 +316,4 @@ class Letter:
 	## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe
 	## scriptée ; Q8 : sans elle, clé et BBCode bruts).
 	func _make_custom_tooltip(for_text: String) -> Object:
-		return RichTooltip.panel_for(for_text, self)
+		return TooltipHost.bubble(for_text, self)

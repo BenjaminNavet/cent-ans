@@ -7,7 +7,7 @@ extends Node
 ## l'affiche dans `NextHintCard`. Un clic exécute ou ouvre l'action. Masqué pendant le
 ## tutoriel, sous les panneaux et fenêtres, et quand le réglage `interface/next_hint` est
 ## décoché ; la croix masque le conseil courant jusqu'à la saison suivante.
-## Créé par `campaign_map.gd` (`setup`, `stage_screenshot`). Aucune règle de jeu.
+## Créé par `campaign_map.gd` (`setup`). Aucune règle de jeu.
 ## RS-E : `refresh()` est appelé par `campaign_map.gd` sur les événements qui changent son état
 ## (fin de tour et tout ordre via `refresh_all`, sélection et désélection d'armée ou de province) ;
 ## `_process` ne sert plus que de minuterie de secours, lente, pour les cas non couverts.

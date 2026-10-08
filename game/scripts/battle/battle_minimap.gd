@@ -25,7 +25,7 @@ func _init() -> void:
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true  # bois et boues débordant du champ
-	RichTooltip.attach_plain(self, "battle_minimap_click_camera")
+	TooltipHost.attach_plain(self, "battle_minimap_click_camera")
 	set_process(false)  # CB5 : seulement pendant un repère pulsé
 
 
@@ -199,4 +199,4 @@ func _gui_input(event: InputEvent) -> void:
 
 ## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	return TooltipHost.bubble(for_text, self)

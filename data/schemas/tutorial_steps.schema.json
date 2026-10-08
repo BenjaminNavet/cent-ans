@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tutorial_steps.schema.json",
+  "title": "Textes du tutoriel des premiers tours",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "description",
+    "step_ids",
+    "steps",
+    "advice",
+    "generic_advice",
+    "army_names"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "step_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z_]+$"
+      }
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "advice": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/advice_map"
+      }
+    },
+    "generic_advice": {
+      "$ref": "#/$defs/advice_map"
+    },
+    "army_names": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "advice_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "text",
+        "objective",
+        "target"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string"
+        },
+        "manual": {
+          "type": "boolean"
+        },
+        "modal_ok": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

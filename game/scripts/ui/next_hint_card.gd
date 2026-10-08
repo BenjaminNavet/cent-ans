@@ -48,7 +48,7 @@ func _ready() -> void:
 	close_button.focus_mode = Control.FOCUS_NONE
 	close_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	close_button.add_theme_color_override("font_color", HudStyle.INK_SOFT)
-	RichTooltip.attach_plain(close_button, "hint_card_hide")
+	TooltipHost.attach_plain(close_button, "hint_card_hide")
 	close_button.pressed.connect(func() -> void: dismissed.emit(hint))
 	header.add_child(close_button)
 	text_label = Label.new()
@@ -74,7 +74,7 @@ func set_hint(new_hint: Dictionary) -> void:
 		return
 	title_label.text = str(hint.get("title", ""))
 	text_label.text = str(hint.get("text", ""))
-	RichTooltip.attach_plain(self, "hint_card_act")
+	TooltipHost.attach_plain(self, "hint_card_act")
 	size = Vector2.ZERO
 	reset_size()
 
@@ -94,4 +94,4 @@ func _set_hover(hovered: bool) -> void:
 
 ## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
 func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	return TooltipHost.bubble(for_text, self)

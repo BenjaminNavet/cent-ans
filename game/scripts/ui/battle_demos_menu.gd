@@ -78,7 +78,7 @@ func _build_entries(box: VBoxContainer) -> void:
 	# Heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
 	var hour_row := UiBuild.hbox(8, box)
 	var hour_label := UiBuild.label("Heure de la bataille", 0, null, false, 0.0, hour_row)
-	RichTooltip.attach_plain(hour_label, "battle_demo_hour")
+	TooltipHost.attach_plain(hour_label, "battle_demo_hour")
 	hour_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	hour_option = OptionButton.new()
 	hour_option.name = "HourOption"
