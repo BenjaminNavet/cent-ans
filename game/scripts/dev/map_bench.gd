@@ -160,7 +160,10 @@ func _apply_bench_sets() -> void:
 		elif item.begins_with("prop:"):
 			# FL : `prop:settlement_layer.use_cells=false` : propriété d'un nœud de la carte.
 			var kv := item.trim_prefix("prop:").split("=")
-			var target := get_parent().get(kv[0].get_slice(".", 0)) as Node  # membre de la carte
+			var head := kv[0].get_slice(".", 0)
+			var target := get_parent().get(head) as Node  # membre de la carte, sinon nœud enfant (Sun)
+			if target == null:
+				target = get_parent().get_node_or_null(head)
 			var prop := kv[0].get_slice(".", 1)
 			if target != null:
 				if not _ab_defaults.is_empty() and not (_ab_defaults["props"] as Dictionary).has(kv[0]):

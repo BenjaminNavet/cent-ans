@@ -23,7 +23,11 @@ Reprend `docs/wip/arbres-clignotants.md` et `docs/wip/fps-carte.md` (PF, ADR 016
   (124 ms > 8, charge 231 : SC). Coût des ombres en plus à rig < 64 : à mesurer en A/B (FL3).
   Restes possibles du clignotement : changements de niveau du relief (64 en 150 images) et
   recalages d'arbres une image après (≤ 22 % de la hauteur) — à revoir si le joueur en voit encore.
-- [ ] FL2 appels de dessin et primitives.
+- [x] FL2 appels de dessin : mesurés, pas un goulot. `a6_drawcalls_probe` d 60 : 873 appels dont
+  **451 dus aux ombres du soleil** (chaque objet porteur d'ombre redessiné par cascade). A/B plein
+  écran 4 → 2 cascades (`prop:Sun.directional_shadow_mode=1`) : −0,4 ms seulement (d 60 et 150) ;
+  l'image est limitée par les pixels (shader du terrain), pas par les appels. Rien changé.
+  (Sonde : ne pas lancer l'ablation complète, elle descend tuile par tuile, > 10 min.)
 - [ ] FL3 images p50/p99 de la carte (shader du terrain, pics de scripts).
   - Base FL0 prise à froid (cache) : peu fiable. Nouvelle base à chaud avec curseur simulé au
     centre (`--bench-hover`) : d 150 p50 18,9 / p99 41 ms ; d 30 p50 19,8 / p99 41 ms ;
@@ -72,5 +76,5 @@ elle peut toucher les fichiers FL. Bancs FL : uniquement `--bench-ab` en process
   `life/reground` ≤ 10 ms (déjà découpé, RS-K2).
 
 ## Prochaine étape
-FL2 appels de dessin : `a6_drawcalls_probe` (ablation par couche, d 150/60) en cours ; s'attaquer aux
-une ou deux couches dominantes. Puis fusion dans main (worktree dédié, --ff-only), mémoire FL.
+Fusion dans main ; mémoire FL. Restes possibles : coût pixel du terrain (seul levier réel restant,
+≈ moitié de l'image) ; essai joueur en plein écran.
