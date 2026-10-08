@@ -90,7 +90,7 @@ static func camp_horse_material(source: Material, hair: bool) -> ShaderMaterial:
 		material.set_shader_parameter("rough", base.roughness)
 	material.set_shader_parameter("ch_hair", 1.0 if hair else 0.0)
 	var s: Dictionary = settings().get("camp_horse", {})
-	material.set_shader_parameter("ch_on", 1.0)
+	material.set_shader_parameter("ch_on", 1.0 if enabled() else 0.0)
 	material.set_shader_parameter("ch_head", Vector4(_f(s, "head_pivot_x_m"), _f(s, "head_pivot_y_m"), _f(s, "head_start_x_m"), _f(s, "head_end_x_m")))
 	material.set_shader_parameter("ch_head2", Vector4(_f(s, "head_lift_rad"), _f(s, "head_cycle_s"), _f(s, "head_up_share"), _f(s, "head_nod_rad")))
 	material.set_shader_parameter("ch_head3", Vector4(_f(s, "head_nod_hz"), _f(s, "chew_hz"), _f(s, "chew_rad"), 0.0))

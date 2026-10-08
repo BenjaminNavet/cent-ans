@@ -117,5 +117,24 @@ func _init() -> void:
 	var made := AnimalMotion.build_camp_horses(parent, {"horse_0": [Transform3D.IDENTITY, Transform3D(Basis(), Vector3(5, 0, 0))]}, 100.0)
 	_check(made.size() == 1 and made[0].multimesh.instance_count == 2, "build_camp_horses")
 	_check(is_equal_approx(made[0].visibility_range_end, 100.0), "portée des chevaux")
+	# Décor de bataille : les chevaux d'une ligne sont des MultiMesh animés (ou le lot du kit sous
+	# --no-as1).
+	var terrain := BattleTerrain.new()
+	root.add_child(terrain)
+	var decor := BattleDecor.new()
+	root.add_child(decor)
+	var camp := {"side": "a", "area": {"x": 0.0, "z": 0.0}, "items": [{"kind": "horse_line", "x": 0.0, "z": 0.0, "yaw": 0.0, "length": 12.0, "count": 6}]}
+	decor.build(terrain, {"profile": "as1", "camps": [camp]}, "clear")
+	_check(decor.horse_count == 6, "décor : %d chevaux posés au lieu de 6" % decor.horse_count)
+	var animated := 0
+	var plain := 0
+	for node in decor.find_children("Kit_horse_*", "MultiMeshInstance3D", true, false):
+		var mmi := node as MultiMeshInstance3D
+		var shaded := mmi.multimesh.mesh.surface_get_material(0) is ShaderMaterial
+		if shaded:
+			animated += mmi.multimesh.instance_count
+		else:
+			plain += mmi.multimesh.instance_count
+	_check(animated == (0 if off else 6) and plain == (6 if off else 0), "décor : %d animés, %d fixes" % [animated, plain])
 	print("AS1 ", "OK" if ok else "FAILED")
 	quit(0 if ok else 1)

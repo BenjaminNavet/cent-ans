@@ -8,7 +8,7 @@
       "swing_m": 0.2,
       "lift_m": 0.07,
       "bob_m": 0.012,
-      "graze_rad": 0.8,
+      "graze_rad": 1.0,
       "graze_share": 0.7,
       "graze_cycle_s": 12.0,
       "nod_rad": 0.05,
@@ -28,7 +28,7 @@
       "ox": {"half_m": 0.8, "belly_m": 0.77, "withers_m": 1.4, "neck_start_m": 0.64, "neck_len_m": 0.4, "neck_pivot_m": 1.19, "stride_m": 1.5, "swing_m": 0.22},
       "cow": {"half_m": 0.775, "belly_m": 0.715, "withers_m": 1.3, "neck_start_m": 0.62, "neck_len_m": 0.4, "neck_pivot_m": 1.1, "stride_m": 1.4, "swing_m": 0.2},
       "horse": {"half_m": 0.725, "belly_m": 0.8, "withers_m": 1.45, "neck_start_m": 0.58, "neck_len_m": 0.42, "neck_pivot_m": 1.22, "stride_m": 1.7, "swing_m": 0.24, "lift_m": 0.09, "graze_share": 0.35, "tail_swing_m": 0.1},
-      "sheep": {"half_m": 0.44, "belly_m": 0.35, "withers_m": 0.72, "neck_start_m": 0.3, "neck_len_m": 0.15, "neck_pivot_m": 0.58, "tail_len_m": 0.07, "stride_m": 0.8, "swing_m": 0.09, "lift_m": 0.035, "bob_m": 0.008, "graze_cycle_s": 8.0, "graze_share": 0.8, "chew_rad": 0.05, "tail_swing_m": 0.04, "shift_m": 0.006, "breath_m": 0.006},
+      "sheep": {"half_m": 0.44, "belly_m": 0.35, "withers_m": 0.72, "neck_start_m": 0.3, "neck_len_m": 0.15, "neck_pivot_m": 0.58, "tail_len_m": 0.07, "stride_m": 0.8, "swing_m": 0.09, "lift_m": 0.035, "bob_m": 0.008, "graze_cycle_s": 8.0, "graze_rad": 1.15, "graze_share": 0.8, "chew_rad": 0.05, "tail_swing_m": 0.04, "shift_m": 0.006, "breath_m": 0.006},
       "stone_cart": {"base": "ox", "anchor_m": 3.0, "wheel_radius_m": 0.55, "wheel_x_min_m": 0.65},
       "merchant_cart": {"base": "horse", "anchor_m": 3.0, "wheel_radius_m": 0.62, "wheel_x_min_m": 0.67},
       "dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.5, "wheel_x_min_m": 0.61}
