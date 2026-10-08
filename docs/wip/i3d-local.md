@@ -99,4 +99,4 @@ multi (fal)** ; les planches SR3 viennent de NB2 via OpenRouter (`google/gemini-
   multi et SF3D.
 - **Enjeu (joueur, 08/10)** : si Qwen est bon, le procédé standard des assets 3D devient
   Qwen-Image-Edit (image vérifiée selon la charte) → TRELLIS gratuit (Space HF) en premier → SF3D
-  local en second. Il sera adopté après l'essai et l'avis du joueur.
+  local en second. Pour les modèles gratuits seulement, on garde la meilleure de plusieurs images (graines), puis le meilleur de plusieurs modèles 3D par image (meilleur-de-N). Il sera adopté après l'essai et l'avis du joueur.
