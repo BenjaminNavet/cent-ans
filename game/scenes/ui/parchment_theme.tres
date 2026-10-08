@@ -22,6 +22,20 @@
 [ext_resource type="Texture2D" path="res://assets/ui/illumination/button_disabled.png" id="ui_button_disabled"]
 [ext_resource type="FontFile" path="res://assets/third_party/fonts/im_fell_english/IMFeENrm28P.ttf" id="6_im_fell"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/button_primary_normal.png" id="ui_bp_n"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/button_primary_hover.png" id="ui_bp_h"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/button_primary_pressed.png" id="ui_bp_p"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/button_primary_disabled.png" id="ui_bp_d"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/tab_ornate_selected.png" id="ui_to_s"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/tab_ornate_unselected.png" id="ui_to_u"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/progress_frame.png" id="ui_pr_frame"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/progress_fill.png" id="ui_pr_fill"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/slider_grabber.png" id="ui_sg"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/slider_grabber_hover.png" id="ui_sg_h"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/separator_h.png" id="ui_sep_h"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/inset_ornate.png" id="ui_inset_o"]
+[ext_resource type="Texture2D" path="res://assets/ui/illumination/initial_frame.png" id="ui_init"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
 draw_center = false
 border_width_left = 2
@@ -312,6 +326,149 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
+[sub_resource type="StyleBoxTexture" id="SBT_primary_n"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("ui_bp_n")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_primary_h"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("ui_bp_h")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_primary_p"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("ui_bp_p")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_primary_d"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("ui_bp_d")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_tab_ornate_selected"]
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 5.0
+texture = ExtResource("ui_to_s")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_tab_ornate_unselected"]
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 5.0
+texture = ExtResource("ui_to_u")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_progress_frame"]
+content_margin_left = 3.0
+content_margin_top = 4.0
+content_margin_right = 3.0
+content_margin_bottom = 4.0
+texture = ExtResource("ui_pr_frame")
+texture_margin_left = 6
+texture_margin_top = 0
+texture_margin_right = 6
+texture_margin_bottom = 0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 0
+
+[sub_resource type="StyleBoxTexture" id="SBT_progress_fill_gules"]
+content_margin_left = 0.0
+content_margin_top = 3.0
+content_margin_right = 0.0
+content_margin_bottom = 3.0
+texture = ExtResource("ui_pr_fill")
+texture_margin_left = 5
+texture_margin_top = 0
+texture_margin_right = 5
+texture_margin_bottom = 0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 0
+
+[sub_resource type="StyleBoxTexture" id="SBT_separator_fleuron"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+texture = ExtResource("ui_sep_h")
+texture_margin_left = 18
+texture_margin_top = 0
+texture_margin_right = 18
+texture_margin_bottom = 0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 0
+
+[sub_resource type="StyleBoxTexture" id="SBT_inset_ornate"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+texture = ExtResource("ui_inset_o")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxTexture" id="SBT_initial_frame"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+texture = ExtResource("ui_init")
+texture_margin_left = 10
+texture_margin_top = 10
+texture_margin_right = 10
+texture_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
 [resource]
 default_font = SubResource("FontVariation_body")
 default_font_size = 17
@@ -328,6 +485,9 @@ Button/styles/pressed = SubResource("SBT_button_pressed")
 CheckBox/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 HSlider/styles/grabber_area = SubResource("SBT_slider_fill")
 HSlider/styles/grabber_area_highlight = SubResource("SBT_slider_fill_hover")
+HSlider/icons/grabber = ExtResource("ui_sg")
+HSlider/icons/grabber_highlight = ExtResource("ui_sg_h")
+HSlider/icons/grabber_disabled = ExtResource("ui_sg")
 HSlider/styles/slider = SubResource("SBT_slider_track")
 ItemList/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 ItemList/styles/panel = SubResource("SBT_inset")
@@ -351,8 +511,8 @@ RichTextLabel/fonts/normal_font = SubResource("FontVariation_body")
 TabContainer/colors/font_selected_color = Color(0.15, 0.09, 0.04, 1)
 TabContainer/colors/font_unselected_color = Color(0.40, 0.32, 0.22, 1)
 TabContainer/styles/panel = SubResource("SBT_inset")
-TabContainer/styles/tab_selected = SubResource("SBT_tab_selected")
-TabContainer/styles/tab_unselected = SubResource("SBT_tab_unselected")
+TabContainer/styles/tab_selected = SubResource("SBT_tab_ornate_selected")
+TabContainer/styles/tab_unselected = SubResource("SBT_tab_ornate_unselected")
 TabContainer/styles/tabbar_background = SubResource("SBE_empty")
 TooltipLabel/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 TooltipPanel/styles/panel = SubResource("SBT_tooltip")
@@ -372,7 +532,7 @@ PopupMenu/colors/font_separator_color = Color(0.40, 0.32, 0.22, 1)
 PopupMenu/styles/hover = SubResource("SBF_popup_hover")
 PopupMenu/styles/panel = SubResource("SBT_tooltip")
 PopupPanel/styles/panel = SubResource("SBT_tooltip")
-ProgressBar/styles/background = SubResource("SBT_slider_track")
+ProgressBar/styles/background = SubResource("SBT_progress_frame")
 ProgressBar/styles/fill = SubResource("SBT_progress_fill")
 ProgressBar/colors/font_color = Color(0.22, 0.14, 0.07, 1)
 VScrollBar/styles/grabber = SubResource("SBT_scroll_grabber")
@@ -381,9 +541,9 @@ VScrollBar/styles/grabber_pressed = SubResource("SBT_scroll_grabber")
 HScrollBar/styles/grabber = SubResource("SBT_scroll_grabber_h")
 HScrollBar/styles/grabber_highlight = SubResource("SBT_scroll_grabber_h")
 HScrollBar/styles/grabber_pressed = SubResource("SBT_scroll_grabber_h")
-TabBar/styles/tab_selected = SubResource("SBT_tab_selected")
-TabBar/styles/tab_unselected = SubResource("SBT_tab_unselected")
-TabBar/styles/tab_hovered = SubResource("SBT_tab_selected")
+TabBar/styles/tab_selected = SubResource("SBT_tab_ornate_selected")
+TabBar/styles/tab_unselected = SubResource("SBT_tab_ornate_unselected")
+TabBar/styles/tab_hovered = SubResource("SBT_tab_ornate_selected")
 TabBar/colors/font_selected_color = Color(0.15, 0.09, 0.04, 1)
 TabBar/colors/font_unselected_color = Color(0.40, 0.32, 0.22, 1)
 Title/base_type = &"Label"
@@ -406,3 +566,25 @@ Spacing/constants/space_xs = 4
 Spacing/constants/space_s = 8
 Spacing/constants/space_m = 16
 Spacing/constants/space_l = 24
+PrimaryButton/base_type = &"Button"
+PrimaryButton/colors/font_color = Color(0.97, 0.93, 0.80, 1)
+PrimaryButton/colors/font_hover_color = Color(1, 0.97, 0.88, 1)
+PrimaryButton/colors/font_pressed_color = Color(0.90, 0.84, 0.66, 1)
+PrimaryButton/colors/font_hover_pressed_color = Color(0.90, 0.84, 0.66, 1)
+PrimaryButton/colors/font_focus_color = Color(1, 0.97, 0.88, 1)
+PrimaryButton/colors/font_disabled_color = Color(0.82, 0.82, 0.86, 0.8)
+PrimaryButton/styles/normal = SubResource("SBT_primary_n")
+PrimaryButton/styles/hover = SubResource("SBT_primary_h")
+PrimaryButton/styles/pressed = SubResource("SBT_primary_p")
+PrimaryButton/styles/hover_pressed = SubResource("SBT_primary_p")
+PrimaryButton/styles/disabled = SubResource("SBT_primary_d")
+OrnateProgress/base_type = &"ProgressBar"
+OrnateProgress/styles/background = SubResource("SBT_progress_frame")
+OrnateProgress/styles/fill = SubResource("SBT_progress_fill_gules")
+FleuronSeparator/base_type = &"HSeparator"
+FleuronSeparator/constants/separation = 12
+FleuronSeparator/styles/separator = SubResource("SBT_separator_fleuron")
+InsetFrame/base_type = &"PanelContainer"
+InsetFrame/styles/panel = SubResource("SBT_inset_ornate")
+InitialFrame/base_type = &"PanelContainer"
+InitialFrame/styles/panel = SubResource("SBT_initial_frame")

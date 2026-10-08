@@ -773,6 +773,238 @@ def slider_track(rng: np.random.Generator) -> tuple[Canvas, Piece]:
     return canvas, piece
 
 
+# --------------------------------------------------------------------------------------
+# DN ui-kit: primary button, ornate tabs, progress, slider grabber, separators, frames
+# --------------------------------------------------------------------------------------
+
+AZURE_DEEP = np.array([0.075, 0.140, 0.390])
+AZURE_GREY = np.array([0.420, 0.450, 0.560])
+
+
+def _solid(canvas: Canvas, color: np.ndarray, rng: np.random.Generator) -> None:
+    """Cover the whole canvas with a hand-laid pigment field."""
+    width, height = canvas.size
+    full = Mask(width, height)
+    full.rect(0, 0, width, height)
+    canvas.paint(full, canvas.flat(color, rng, 0.06))
+
+
+def button_primary(rng: np.random.Generator, state: str) -> tuple[Canvas, Piece]:
+    """Strong action button: azure field, gold band, white-lead filet, vermilion lozenges."""
+    margin, period = 10, 64
+    size = 2 * margin + period
+    field = {
+        "normal": AZURE,
+        "hover": AZURE_LIGHT,
+        "pressed": AZURE_DEEP,
+        "disabled": AZURE_GREY,
+    }[state]
+    canvas = Canvas.empty(size, size, margin, period)
+    _solid(canvas, field, rng)
+    if state == "pressed":
+        yy, xx = np.mgrid[0:size, 0:size]
+        canvas.shade(0.25 * np.clip(1.0 - np.minimum(yy, xx) / 8.0, 0.0, 1.0) ** 2)
+    else:
+        canvas.shade(edge_vignette(size, size, 8.0, 0.20))
+    outer = Mask(size, size)
+    outer.frame(0, 1.3)
+    inked(canvas, outer, 0.5 if state == "disabled" else 0.95)
+    band = Mask(size, size)
+    band.frame(1.8, 2.6 if state in ("hover", "pressed") else 2.0)
+    name = f"button_primary_{state}"
+    if state == "disabled":
+        canvas.paint(band, canvas.metal(rng, VELLUM_DARK * 0.8, VELLUM * 0.9), 0.7)
+        return canvas, Piece(name, (margin,) * 4, (14, 6, 14, 6))
+    gilded(canvas, band, rng, 0.0)
+    filet = Mask(size, size)
+    filet.frame(5.2, 0.9)
+    canvas.paint(filet, WHITE_LEAD, 0.85 if state != "pressed" else 0.55)
+    for cx in (4.0, size - 4.0):
+        for cy in (4.0, size - 4.0):
+            dot = Mask(size, size)
+            lozenge(dot, (cx, cy), 3.4, 3.4)
+            gilded(canvas, dot, rng, 0.3)
+            pip = Mask(size, size)
+            lozenge(pip, (cx, cy), 1.7, 1.7)
+            canvas.paint(pip, canvas.flat(GULES, rng))
+    return canvas, Piece(name, (margin,) * 4, (14, 6, 14, 6))
+
+
+def tab_ornate(rng: np.random.Generator, selected: bool) -> tuple[Canvas, Piece]:
+    """Gilded book-tab: active = bright vellum, gold head, gules tongue, azure hairline."""
+    margin, period = 10, 64
+    size = 2 * margin + period
+    base = VELLUM if selected else VELLUM_DARK * 0.93
+    canvas = Canvas.vellum(size, size, margin, period, rng, base)
+    canvas.shade(edge_vignette(size, size, 7.0, 0.10 if selected else 0.26))
+    side = Mask(size, size)
+    side.rect(0, 0, size, 1.2)
+    side.rect(0, 0, 1.2, size)
+    side.rect(size - 1.2, 0, size, size)
+    inked(canvas, side, 0.9 if selected else 0.7)
+    head = Mask(size, size)
+    head.rect(1.2, 1.2, size - 1.2, 5.0 if selected else 3.0)
+    gilded(canvas, head, rng, 0.0)
+    if selected:
+        tongue = Mask(size, size)
+        tongue.rect(1.2, 5.0, size - 1.2, 7.0)
+        canvas.paint(tongue, canvas.flat(GULES, rng))
+        hair = Mask(size, size)
+        hair.rect(3.4, 8.6, size - 3.4, 9.4)
+        canvas.paint(hair, canvas.flat(AZURE, rng), 0.8)
+        for cx in (3.4, size - 3.4):
+            dot = Mask(size, size)
+            lozenge(dot, (cx, 3.1), 1.9, 1.9)
+            canvas.paint(dot, canvas.flat(AZURE, rng))
+    name = "tab_ornate_selected" if selected else "tab_ornate_unselected"
+    return canvas, Piece(name, (margin,) * 4, (14, 8, 14, 5))
+
+
+def progress_frame(rng: np.random.Generator) -> tuple[Canvas, Piece]:
+    """Gauge trough: ink-ruled vellum groove bordered by a gold hairline (horizontal 9-slice)."""
+    margin, period, thick = 6, 32, 16
+    width, height = 2 * margin + period, thick
+    canvas = Canvas.vellum(width, height, margin, period, rng, VELLUM_DARK * 0.93, 0.6)
+    yy = np.mgrid[0:height, 0:width][0]
+    canvas.shade(0.16 * np.clip(1.0 - yy / 5.0, 0.0, 1.0))  # inner shadow on top
+    ink = Mask(width, height)
+    ink.rect(0, 0, width, 1.2)
+    ink.rect(0, height - 1.2, width, height)
+    ink.rect(0, 0, 1.2, height)
+    ink.rect(width - 1.2, 0, width, height)
+    inked(canvas, ink, 0.9)
+    gold = Mask(width, height)
+    gold.rect(1.2, 1.2, width - 1.2, 2.4)
+    gold.rect(1.2, height - 2.4, width - 1.2, height - 1.2)
+    gilded(canvas, gold, rng, 0.0)
+    return canvas, Piece("progress_frame", (margin, 0, margin, 0), (3, 4, 3, 4))
+
+
+def progress_fill(rng: np.random.Generator) -> tuple[Canvas, Piece]:
+    """Gauge fill: vermilion pigment capped by a gold highlight and white-lead dots."""
+    margin, period, thick = 5, 32, 10
+    width, height = 2 * margin + period, thick
+    canvas = Canvas.empty(width, height, margin, period)
+    shape = Mask(width, height)
+    shape.rect(0, 0.5, width, height - 0.5)
+    canvas.paint(shape, canvas.flat(GULES, rng))
+    sheen = Mask(width, height)
+    sheen.rect(0, 1.0, width, 2.6)
+    canvas.paint(sheen, canvas.metal(rng, GOLD_DARK, GOLD_LIGHT, 0.4), 0.9)
+    dots = Mask(width, height)
+    for i in range(period // 8):
+        dots.disc(margin + 4 + i * 8, height * 0.68, 0.7)
+    canvas.paint(dots, WHITE_LEAD, 0.8)
+    edge = Mask(width, height)
+    edge.rect(0, 0, width, 0.7)
+    edge.rect(0, height - 0.7, width, height)
+    inked(canvas, edge, 0.6)
+    return canvas, Piece("progress_fill", (margin, 0, margin, 0), (0, 3, 0, 3))
+
+
+def slider_grabber(
+    rng: np.random.Generator, hover: bool = False
+) -> tuple[Canvas, Piece]:
+    """Slider handle: a wax cabochon rimmed with gold (plain icon, not a 9-slice)."""
+    size = 22
+    canvas = Canvas.empty(size, size, 0, size)
+    centre = size / 2.0
+    rim = Mask(size, size)
+    rim.disc(centre, centre, 10.0)
+    gilded(canvas, rim, rng, 0.8)
+    wax = Mask(size, size)
+    wax.disc(centre, centre, 7.4)
+    wax_color = np.clip(GULES * (1.18 if hover else 1.0), 0.0, 1.0)
+    canvas.paint(wax, canvas.flat(wax_color, rng, 0.04))
+    yy, xx = np.mgrid[0:size, 0:size]
+    light = np.exp(-(((xx - centre + 2.4) ** 2 + (yy - centre + 2.4) ** 2) / 9.0))
+    canvas.paint(light * wax.array(), WHITE_LEAD, 0.5)
+    ring = Mask(size, size)
+    ring.disc(centre, centre, 7.4)
+    ring.disc(centre, centre, 6.4, 0)
+    inked(canvas, ring, 0.35)
+    name = "slider_grabber_hover" if hover else "slider_grabber"
+    return canvas, Piece(name, (0, 0, 0, 0), (0, 0, 0, 0), tile=False)
+
+
+def separator_h(rng: np.random.Generator) -> tuple[Canvas, Piece]:
+    """Section rule: gold hairline ending in quatrefoil-and-lozenge fleurons."""
+    margin, period, height = 18, 32, 12
+    width = 2 * margin + period
+    canvas = Canvas.empty(width, height, margin, period)
+    centre = height / 2.0
+    line = Mask(width, height)
+    line.rect(0, centre - 0.7, width, centre + 0.7)
+    gilded(canvas, line, rng, 0.0)
+    hair = Mask(width, height)
+    hair.rect(0, centre + 2.0, width, centre + 2.6)
+    canvas.paint(hair, canvas.flat(GULES, rng), 0.6)
+    for cx in (7.0, width - 7.0):
+        flower = Mask(width, height)
+        quatrefoil(flower, (cx, centre), 8.0)
+        gilded(canvas, flower, rng, 0.5)
+        pip = Mask(width, height)
+        lozenge(pip, (cx, centre), 1.6, 1.6)
+        canvas.paint(pip, canvas.flat(AZURE, rng))
+        tip = Mask(width, height)
+        lozenge(tip, (cx + (8.5 if cx < margin else -8.5), centre), 2.2, 2.2)
+        canvas.paint(tip, canvas.flat(GULES, rng))
+    return canvas, Piece("separator_h", (margin, 0, margin, 0), (0, 0, 0, 0))
+
+
+def inset_ornate(rng: np.random.Generator) -> tuple[Canvas, Piece]:
+    """Framed reading field: pale vellum, ink rule, gold band, vermilion filet, lozenges."""
+    margin, period = 10, 96
+    size = 2 * margin + period
+    canvas = Canvas.vellum(
+        size, size, margin, period, rng, np.array([0.975, 0.945, 0.860]), 0.5
+    )
+    yy, xx = np.mgrid[0:size, 0:size]
+    canvas.shade(0.10 * np.clip(1.0 - np.minimum(yy, xx) / 7.0, 0, 1))
+    outer = Mask(size, size)
+    outer.frame(0, 1.1)
+    inked(canvas, outer, 0.85)
+    band = Mask(size, size)
+    band.frame(2.2, 1.4)
+    gilded(canvas, band, rng, 0.0)
+    filet = Mask(size, size)
+    filet.frame(4.6, 0.8)
+    canvas.paint(filet, GULES, 0.8)
+    for cx in (3.3, size - 3.3):
+        for cy in (3.3, size - 3.3):
+            dot = Mask(size, size)
+            lozenge(dot, (cx, cy), 3.0, 3.0)
+            canvas.paint(dot, canvas.flat(AZURE, rng))
+    return canvas, Piece("inset_ornate", (margin,) * 4, (12, 8, 12, 8))
+
+
+def initial_frame(rng: np.random.Generator) -> tuple[Canvas, Piece]:
+    """Frame for a drop cap: azure field, gold border, vermilion corner pips.
+
+    The letter itself is set in the theme font over this field (none is drawn here).
+    """
+    margin, period = 10, 24
+    size = 2 * margin + period
+    canvas = Canvas.empty(size, size, margin, period)
+    _solid(canvas, AZURE, rng)
+    canvas.shade(edge_vignette(size, size, 6.0, 0.18))
+    outer = Mask(size, size)
+    outer.frame(0, 1.2)
+    inked(canvas, outer)
+    band = Mask(size, size)
+    band.frame(1.4, 2.6)
+    gilded(canvas, band, rng, 0.0)
+    dots = Mask(size, size)
+    dots.frame(5.6, 0.7)
+    canvas.paint(dots, WHITE_LEAD, 0.8)
+    for cx in (margin * 0.5 + 1.0, size - margin * 0.5 - 1.0):
+        for cy in (margin * 0.5 + 1.0, size - margin * 0.5 - 1.0):
+            pip = Mask(size, size)
+            lozenge(pip, (cx, cy), 2.4, 2.4)
+            canvas.paint(pip, canvas.flat(GULES, rng))
+    return canvas, Piece("initial_frame", (margin,) * 4, (8, 6, 8, 6))
+
+
 def build(output_dir: Path = OUTPUT_DIR, seed: int = 1337) -> list[Path]:
     """Render the whole kit into ``output_dir`` and write the ``kit.json`` sidecar."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -792,6 +1024,23 @@ def build(output_dir: Path = OUTPUT_DIR, seed: int = 1337) -> list[Path]:
     makers += [
         lambda rng, s=state: button(rng, s)
         for state in ("normal", "hover", "pressed", "disabled")
+    ]
+    # DN ui-kit pieces are appended last: per-piece seeds depend on the index, so the
+    # historical textures above stay byte-identical.
+    makers += [
+        lambda rng, s=state: button_primary(rng, s)
+        for state in ("normal", "hover", "pressed", "disabled")
+    ]
+    makers += [
+        lambda rng: tab_ornate(rng, True),
+        lambda rng: tab_ornate(rng, False),
+        progress_frame,
+        progress_fill,
+        lambda rng: slider_grabber(rng, False),
+        lambda rng: slider_grabber(rng, True),
+        separator_h,
+        inset_ornate,
+        initial_frame,
     ]
     written: list[Path] = []
     sidecar: dict[str, dict] = {}
