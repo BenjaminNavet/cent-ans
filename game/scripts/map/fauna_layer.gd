@@ -49,11 +49,10 @@ var _frame := 0
 var _lod := -1
 var _turn_phase := 0.0
 ## Eau affichée hors du masque de terre : lacs (polygones, index par case de `LAKE_GRID` px) et
-## zones humides (`wetlands.png` réduite au quart, lue hors du fil principal).
+## zones humides (`wetlands.png` réduite au quart).
 var _lakes: Array = []  # {rect: Rect2, polygon: PackedVector2Array}
 var _lake_grid: Dictionary = {}  # Vector2i → PackedInt32Array
 var _wet: Image
-var _wet_task := -1
 
 
 ## Dossier `data/` -> configuration (vide si le fichier manque).
@@ -70,7 +69,6 @@ func _ready() -> void:
 ## Branche la couche sur la carte. `towns` : positions (px carte) des colonies à éviter.
 func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = PackedVector2Array(), lake_polygons: Array = []) -> void:
 	clear()
-	_wait_wet()
 	_map_data = map_data
 	_mpp = map_data.meters_per_px if map_data != null else 719.0
 	_rig = rig
@@ -87,8 +85,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 		return
 	_index_lakes(lake_polygons)
 	if FileAccess.file_exists(map_data.map_dir.path_join(WETLANDS_FILE)):
-		var path := map_data.map_dir.path_join(WETLANDS_FILE)
-		_wet_task = WorkerThreadPool.add_task(func() -> void: _wet = _load_wetlands(path), false, "FaunaWetlands")
+		_wet = _load_wetlands(map_data.map_dir.path_join(WETLANDS_FILE))
 	for town in towns:
 		var key := Vector2i(floori(town.x / 8.0), floori(town.y / 8.0))
 		var list: PackedVector2Array = _town_grid.get(key, PackedVector2Array())
@@ -110,23 +107,13 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 		})
 
 
-## Zones humides réduites (R marais, G étangs, B prés humides), lues hors du fil principal.
+## Zones humides réduites (R marais, G étangs, B prés humides).
 static func _load_wetlands(path: String) -> Image:
 	var image := Image.load_from_file(path)
 	if image == null:
 		return null
 	image.resize(maxi(image.get_width() / WETLANDS_SHRINK, 1), maxi(image.get_height() / WETLANDS_SHRINK, 1), Image.INTERPOLATE_BILINEAR)
 	return image
-
-
-func _wait_wet() -> void:
-	if _wet_task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_wet_task)
-		_wet_task = -1
-
-
-func _exit_tree() -> void:
-	_wait_wet()
 
 
 func _index_lakes(polygons: Array) -> void:
@@ -160,7 +147,6 @@ func in_lake(p: Vector2) -> bool:
 
 ## Zones humides (R, G, B de 0 à 1) au point ; noir sans le fichier.
 func wetness_at(p: Vector2) -> Color:
-	_wait_wet()
 	if _wet == null:
 		return Color(0, 0, 0, 0)
 	return _wet.get_pixel(clampi(int(p.x * _wet.get_width() / _map_data.size.x), 0, _wet.get_width() - 1), clampi(int(p.y * _wet.get_height() / _map_data.size.y), 0, _wet.get_height() - 1))

@@ -15,5 +15,5 @@ Etat (08/10) : couche, shader, donnees, schema et tests faits ; a fusionner par 
 - Altitude : heightmap 719 m/px (pas le relief fin) ; les betes peuvent flotter ou s'enfoncer de quelques metres au tout pres sur le relief fin. Une relecture par `quadtree.surface_snapshot` comme `GroundClutter` regle cela si besoin.
 - Pas de mesure de temps de frame fiable (machine a charge 50-100 pendant la nuit) ; estimation : <= 25 appels, <= 3000 instances (LOD <= 1200 tri), vertex shader seul.
 - Zone Camargue modeste (une dizaine de troupeaux : masque de terre a 719 m/px et marge d'eau d'un pixel) ; densites des grandes zones (chevres, dromadaires) a rabaisser apres revue visuelle.
-- Erreurs RID intermittentes "Initializing already initialized RID / m is null" vues 2 fois sur 7 en headless sous forte charge (non reproduites sur 3 executions consecutives ni sur hb5) : a surveiller.
+- Incident (corrige) : la lecture de `wetlands.png` dans un `WorkerThreadPool` a produit 3 fois sur 10 des erreurs RID en headless (jusqu'a 675 000 lignes `Initializing already initialized RID` ; garde-fou a 20 000). Lecture rendue synchrone (~0,4 s au chargement) : 18 executions consecutives sans erreur, y compris en parallele. Ne pas reintroduire de thread autour d'`Image`/ressources ici.
 - Les moutons/vaches des scenes FK (`folk/`) restent separes (scenes seulement).
