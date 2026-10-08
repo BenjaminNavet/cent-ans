@@ -8,14 +8,14 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
     BuildingId, CharacterId, Effect, EffectKind, FactionId, GameData, PopulationClass, ProvinceId,
-    ResourceCategory, Role, SettlementId, Skill, SkillBranch,
+    Role, SettlementId, Skill,
 };
 use godot::classes::RefCounted;
 use godot::prelude::*;
 use sim_campaign::buildings::demolition_preview;
 use sim_campaign::{
     Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, DemolitionPreview,
-    EffectTotals, EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
+    EffectTotals, EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, Unit,
 };
 
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
@@ -288,7 +288,7 @@ impl CampaignSim {
             "projected_income" => summary.projected_income,
             "army_upkeep" => summary.army_upkeep,
             "building_upkeep" => summary.building_upkeep,
-            "tax_rate" => tax_rate_key(summary.tax_rate),
+            "tax_rate" => summary.tax_rate.key(),
         }
     }
 
@@ -638,7 +638,7 @@ impl CampaignSim {
             return VarArray::new();
         };
         let mut skills: Vec<&Skill> = data.skills.values().collect();
-        skills.sort_by_key(|s| (branch_key(s.branch), s.tier, s.id.clone()));
+        skills.sort_by_key(|s| (s.branch.key(), s.tier, s.id.clone()));
         skills
             .into_iter()
             .map(|skill| skill_dict(skill).to_variant())
@@ -850,34 +850,6 @@ fn stance_key(stance: sim_campaign::Stance) -> &'static str {
     stance.key()
 }
 
-fn tax_rate_key(rate: TaxRate) -> &'static str {
-    match rate {
-        TaxRate::Low => "low",
-        TaxRate::Normal => "normal",
-        TaxRate::High => "high",
-    }
-}
-
-fn resource_category_key(category: ResourceCategory) -> &'static str {
-    match category {
-        ResourceCategory::Food => "food",
-        ResourceCategory::RawMaterial => "raw_material",
-        ResourceCategory::Manufactured => "manufactured",
-        ResourceCategory::Luxury => "luxury",
-    }
-}
-
-pub(crate) fn building_category_key(category: data_model::BuildingCategory) -> &'static str {
-    match category {
-        data_model::BuildingCategory::Production => "production",
-        data_model::BuildingCategory::Commerce => "commerce",
-        data_model::BuildingCategory::Military => "military",
-        data_model::BuildingCategory::Religious => "religious",
-        data_model::BuildingCategory::Sanitary => "sanitary",
-        data_model::BuildingCategory::Fortification => "fortification",
-    }
-}
-
 fn population_class_dict(entry: &PopulationClass) -> VarDictionary {
     vdict! {
         "count" => entry.count as i64,
@@ -909,7 +881,7 @@ fn building_summary_dict(data: &GameData, id: &BuildingId) -> VarDictionary {
     vdict! {
         "id" => id.as_str(),
         "name" => building.name.display.as_str(),
-        "category" => building_category_key(building.category),
+        "category" => building.category.key(),
         "upkeep" => i64::from(building.upkeep.unwrap_or(0)),
     }
 }
@@ -988,7 +960,7 @@ fn build_option_dict(
     let category = data
         .buildings
         .get(&option.building)
-        .map_or("", |b| building_category_key(b.category));
+        .map_or("", |b| b.category.key());
     let mut imported = VarDictionary::new();
     for (resource, amount) in &option.imported {
         imported.set(resource.as_str(), i64::from(*amount));
@@ -1110,7 +1082,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
     let goods_categories: PackedStringArray = economy
         .goods_categories
         .iter()
-        .map(|category| GString::from(resource_category_key(*category)))
+        .map(|category| GString::from(category.key()))
         .collect();
     vdict! {
         "treasury" => economy.treasury,
@@ -1128,7 +1100,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "recoinage" => economy.recoinage,
         "seigniorage_last_turn" => economy.seigniorage_last_turn,
         "recoinage_last_turn" => economy.recoinage_last_turn,
-        "tax_rate" => tax_rate_key(economy.tax_rate),
+        "tax_rate" => economy.tax_rate.key(),
         "goods" => &goods,
         "goods_categories" => &goods_categories,
         "trade_income" => economy.trade_income,
@@ -1207,14 +1179,6 @@ pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {
         .collect()
 }
 
-fn branch_key(branch: SkillBranch) -> &'static str {
-    match branch {
-        SkillBranch::Command => "command",
-        SkillBranch::Governance => "governance",
-        SkillBranch::Court => "court",
-    }
-}
-
 fn role_label_fr(role: Role) -> &'static str {
     match role {
         Role::Ruler => "Souverain(e)",
@@ -1283,7 +1247,7 @@ fn skill_dict(skill: &Skill) -> VarDictionary {
     vdict! {
         "id" => skill.id.as_str(),
         "name" => skill.name.display.as_str(),
-        "branch" => branch_key(skill.branch),
+        "branch" => skill.branch.key(),
         "tier" => i64::from(skill.tier),
         "prerequisites" => &ids(skill.prerequisites.iter()),
         "cost" => i64::from(skill.cost),

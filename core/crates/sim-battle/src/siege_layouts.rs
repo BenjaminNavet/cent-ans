@@ -35,11 +35,11 @@ use crate::siege::{
 use crate::siege_layout::MAX_PIECE;
 use crate::town::{Footprint, PropKind, TownRules};
 
+key_enum! {
 /// Kind of besieged place (NT1).
 #[derive(
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
-key_enum! {
 #[serde(rename_all = "snake_case")]
 pub enum PlaceKind {
     /// Ring town (the generic plan of BR3).

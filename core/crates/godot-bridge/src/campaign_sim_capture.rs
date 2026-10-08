@@ -33,7 +33,7 @@ impl CampaignSim {
                         let effects = &option.effects;
                         vdict! {
                             "index" => index as i64,
-                            "outcome" => option.outcome.id(),
+                            "outcome" => option.outcome.key(),
                             "text" => option.label.as_str(),
                             "effects_text" => option.effects_text.as_str(),
                             "allowed" => option.allowed,
@@ -76,7 +76,7 @@ impl CampaignSim {
     #[func]
     fn choose_capture_outcome(&mut self, decision: i64, outcome: GString) -> VarDictionary {
         self.run_order("choose_capture_outcome", || {
-            let Some(outcome) = CaptureOutcome::from_id(&outcome.to_string()) else {
+            let Some(outcome) = CaptureOutcome::from_key(&outcome.to_string()) else {
                 return Err(format!("sort inconnu : {outcome}"));
             };
             Ok(Order::ChooseCaptureOutcome {

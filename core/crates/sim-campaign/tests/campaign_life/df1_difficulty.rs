@@ -47,7 +47,7 @@ fn data_defines_four_levels_and_normal_is_neutral() {
         .collect();
     assert_eq!(ids, ["easy", "normal", "hard", "very_hard"]);
     for id in ids {
-        assert!(Difficulty::from_id(id).is_some(), "{id}");
+        assert!(Difficulty::from_key(id).is_some(), "{id}");
     }
     assert!(data.difficulty.modifiers("normal").is_neutral());
     assert_eq!(data.difficulty.default, "normal");

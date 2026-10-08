@@ -14,6 +14,7 @@
 //! the whole province) plus its own ([`CampaignState::settlement_tax`]).
 //! Garrisons, recruits and building upkeep are counted per settlement.
 
+use data_model::key_enum;
 use data_model::EffectKind;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -27,16 +28,18 @@ use crate::buildings::{effects_of, goods_map, province_building_upkeep, EffectTo
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState, ProvinceState, Season, SettlementState, Unit};
 
+key_enum! {
 /// Tax bracket a faction can pick (spec § 1.4): `×0.7 / ×1.0 / ×1.4` on the
 /// tax base, also used as the unrest multiplier of § 1.1 (values in
 /// `economy.json` `tax_rates`, RS-B).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TaxRate {
-    Low,
+    Low => "low",
     #[default]
-    Normal,
-    High,
+    Normal => "normal",
+    High => "high",
+}
 }
 
 impl TaxRate {
@@ -1001,5 +1004,16 @@ pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
         if bonus != 0 && whole.contains(id) {
             province.unrest = (i32::from(province.unrest) + bonus).clamp(0, 100) as u8;
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TaxRate>();
     }
 }

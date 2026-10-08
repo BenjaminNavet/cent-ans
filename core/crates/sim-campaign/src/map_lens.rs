@@ -3,6 +3,7 @@
 //! one pass so the claims of every faction are gathered once, not per
 //! province. The rendering (colours, legend) lives in Godot.
 
+use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{FactionId, GameData, ProvinceId};
@@ -12,17 +13,19 @@ use crate::economy::{province_base_income, seasonal_supply_change};
 use crate::population::weighted_unrest;
 use crate::state::CampaignState;
 
+key_enum! {
 /// Who claims a province, from the viewer's side.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ClaimStance {
     /// No claim involves the viewer.
-    None,
+    None => "",
     /// The viewer claims a province it does not own.
-    Ours,
+    Ours => "ours",
     /// Another faction claims a province the viewer owns.
-    AgainstUs,
+    AgainstUs => "against_us",
     /// The viewer and a third faction both claim a province neither owns.
-    Contested,
+    Contested => "contested",
+}
 }
 
 /// Map filter values of one province.

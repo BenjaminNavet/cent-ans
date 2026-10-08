@@ -4,7 +4,7 @@
 //! `get_recruitable` (`pool_*` keys).
 
 use godot::prelude::*;
-use sim_campaign::{ArmyId, FactorKind};
+use sim_campaign::ArmyId;
 
 use crate::campaign_sim::{CampaignSim, Ctx};
 
@@ -34,11 +34,7 @@ impl CampaignSim {
             preview.percent()
         )];
         for factor in &preview.factors {
-            let kind = match factor.kind {
-                FactorKind::Base => "base",
-                FactorKind::Multiplier => "multiplier",
-                FactorKind::Bonus => "bonus",
-            };
+            let kind = factor.kind.key();
             let text = factor.text_fr();
             lines.push(format!("· {text}"));
             factors.push(

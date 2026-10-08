@@ -3,7 +3,6 @@
 
 use data_model::{FactionId, GameData, ProvinceId};
 use godot::prelude::*;
-use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::negotiation::{evaluate_treaty, Article};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
@@ -43,7 +42,7 @@ impl CampaignSim {
                     "id" => entry.faction.as_str(),
                     "name" => static_faction.map_or(entry.faction.as_str(), |f| f.short_or_display_name()),
                     "color" => static_faction.map_or("#888888", |f| f.heraldry.primary_color.as_str()),
-                    "status" => relation_key(entry.relation),
+                    "status" => entry.relation.key(),
                     "attitude" => i64::from(entry.attitude),
                     "attitude_reasons" => &reasons_array(&entry.attitude_reasons),
                     "truce_turns_left" => i64::from(entry.truce_turns_left),
@@ -203,7 +202,7 @@ impl CampaignSim {
                         if controller == player {
                             "self"
                         } else {
-                            relation_key(state.relation(&player, &controller))
+                            state.relation(&player, &controller).key()
                         }
                     });
                 GString::from(key)
@@ -220,17 +219,6 @@ impl CampaignSim {
                 accept,
             })
         })
-    }
-}
-
-fn relation_key(relation: RelationKind) -> &'static str {
-    match relation {
-        RelationKind::War => "war",
-        RelationKind::Truce => "truce",
-        RelationKind::Peace => "peace",
-        RelationKind::Alliance => "alliance",
-        RelationKind::Vassal => "vassal",
-        RelationKind::Suzerain => "suzerain",
     }
 }
 

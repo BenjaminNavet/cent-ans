@@ -68,14 +68,16 @@ pub enum SocialClass {
 }
 }
 
+key_enum! {
 /// Battle unit family, shared by unit types and effects.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnitCategory {
-    Infantry,
-    Ranged,
-    Cavalry,
-    Siege,
+    Infantry => "infantry",
+    Ranged => "ranged",
+    Cavalry => "cavalry",
+    Siege => "siege",
+}
 }
 
 /// Closed list of modifiers an effect may target.
@@ -239,6 +241,7 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
+        assert_keys_match_serde::<UnitCategory>();
         assert_keys_match_serde::<SocialClass>();
     }
 }

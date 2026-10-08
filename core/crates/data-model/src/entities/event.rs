@@ -5,6 +5,7 @@
 //! three options, each with typed effects and an AI weight. The rules that
 //! evaluate conditions and apply effects live in `sim-campaign::chronicle`.
 
+use crate::key_enum;
 use std::fmt;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -546,71 +547,34 @@ pub struct Event {
     pub presentation: Option<EventPresentation>,
 }
 
+key_enum! {
 /// FK1: kind of scene staged on the close campaign view (closed list,
 /// mirrored by the `map_scene` enum of `event.schema.json`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SceneKind {
-    Plague,
-    Famine,
-    Revolt,
-    Devastation,
-    Siege,
-    Construction,
-    Fair,
-    Celebration,
-    Flood,
-    Muster,
+    Plague => "plague",
+    Famine => "famine",
+    Revolt => "revolt",
+    Devastation => "devastation",
+    Siege => "siege",
+    Construction => "construction",
+    Fair => "fair",
+    Celebration => "celebration",
+    Flood => "flood",
+    Muster => "muster",
+}
 }
 
-impl SceneKind {
-    /// Every kind, in declaration order.
-    pub const ALL: [SceneKind; 10] = [
-        SceneKind::Plague,
-        SceneKind::Famine,
-        SceneKind::Revolt,
-        SceneKind::Devastation,
-        SceneKind::Siege,
-        SceneKind::Construction,
-        SceneKind::Fair,
-        SceneKind::Celebration,
-        SceneKind::Flood,
-        SceneKind::Muster,
-    ];
-
-    /// Snake-case name, as in the data files.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            SceneKind::Plague => "plague",
-            SceneKind::Famine => "famine",
-            SceneKind::Revolt => "revolt",
-            SceneKind::Devastation => "devastation",
-            SceneKind::Siege => "siege",
-            SceneKind::Construction => "construction",
-            SceneKind::Fair => "fair",
-            SceneKind::Celebration => "celebration",
-            SceneKind::Flood => "flood",
-            SceneKind::Muster => "muster",
-        }
-    }
-}
-
+key_enum! {
 /// FK1: an incident posed on the map (a marker over its province) or a
 /// dialog window at the start of the turn.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EventPresentation {
-    Map,
-    Dialog,
+    Map => "map",
+    Dialog => "dialog",
 }
-
-impl EventPresentation {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            EventPresentation::Map => "map",
-            EventPresentation::Dialog => "dialog",
-        }
-    }
 }
 
 impl Event {
@@ -623,5 +587,17 @@ impl Event {
                 (EventCategory::Random, EventScope::Province { .. }) => EventPresentation::Map,
                 _ => EventPresentation::Dialog,
             })
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<SceneKind>();
+        assert_keys_match_serde::<EventPresentation>();
     }
 }

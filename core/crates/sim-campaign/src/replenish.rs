@@ -50,16 +50,18 @@ impl Territory {
     }
 }
 
+key_enum! {
 /// How a factor acts on the rate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FactorKind {
     /// Base rate, percent of the missing men.
-    Base,
+    Base => "base",
     /// Multiplier, percent.
-    Multiplier,
+    Multiplier => "multiplier",
     /// Bonus or malus, percent of the rate.
-    Bonus,
+    Bonus => "bonus",
+}
 }
 
 /// One line of the replenishment tooltip.
@@ -433,6 +435,7 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
+        assert_keys_match_serde::<FactorKind>();
         assert_keys_match_serde::<Territory>();
     }
 }

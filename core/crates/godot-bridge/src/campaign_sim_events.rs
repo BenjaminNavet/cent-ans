@@ -44,7 +44,7 @@ impl CampaignSim {
                     "expires_in" => i64::from(view.expires_in),
                     "province" => view.province.as_ref().map_or("", |p| p.as_str()),
                     "province_name" => view.province_name.as_str(),
-                    "presentation" => view.presentation.as_str(),
+                    "presentation" => view.presentation.key(),
                 }
                 .to_variant()
             })
@@ -131,7 +131,7 @@ impl CampaignSim {
                 GString::from(
                     relevance
                         .classify(faction.as_ref(), province.as_ref(), public)
-                        .as_str(),
+                        .key(),
                 )
             })
             .collect()

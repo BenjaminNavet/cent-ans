@@ -8,6 +8,7 @@
 //! and sight, except for defenders on the wall walk and attackers climbing
 //! with ladders or from a siege tower.
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::fire::Blaze;
@@ -100,12 +101,14 @@ impl SiegeWorkRules {
     }
 }
 
+key_enum! {
 /// What a piece of the ring is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PieceKind {
-    Wall,
-    Gate,
+    Wall => "wall",
+    Gate => "gate",
+}
 }
 
 /// A straight stretch of wall (or the gate), from `a` to `b`.
@@ -1041,5 +1044,16 @@ impl SiegeWorks {
         } else {
             0.0
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<PieceKind>();
     }
 }

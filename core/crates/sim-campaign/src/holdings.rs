@@ -6,18 +6,21 @@
 //! `settlement_detail` in `godot-bridge/src/campaign_sim_settlements.rs`
 //! (`settlement_tax`, `buildable`, `garrison_cap`) so both stay in sync.
 
+use data_model::key_enum;
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, SettlementKind};
 
 use crate::population;
 use crate::state::CampaignState;
 
+key_enum! {
 /// Why a settlement is [`SettlementRow::endangered`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 pub enum DangerReason {
-    Siege,
-    Occupied,
-    RevoltCountdown,
-    UnrestAboveThreshold,
+    Siege => "siege",
+    Occupied => "occupied",
+    RevoltCountdown => "revolt_countdown",
+    UnrestAboveThreshold => "unrest",
+}
 }
 
 /// One buildable or promotable option offered by a settlement.
@@ -302,5 +305,16 @@ fn settlement_row(
         siege,
         endangered,
         danger_reasons,
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<DangerReason>();
     }
 }

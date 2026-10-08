@@ -33,15 +33,6 @@ pub(crate) fn add_formation_fields(unit: &Unit, dict: &mut VarDictionary) {
     dict.set("reform_from", unit.reform.map_or("", |r| r.from.key()));
 }
 
-fn category_key(category: data_model::UnitCategory) -> &'static str {
-    match category {
-        data_model::UnitCategory::Infantry => "infantry",
-        data_model::UnitCategory::Ranged => "ranged",
-        data_model::UnitCategory::Cavalry => "cavalry",
-        data_model::UnitCategory::Siege => "siege",
-    }
-}
-
 #[godot_api(secondary)]
 impl BattleSim {
     /// The presets, in the data order: `{id, name_fr, description_fr,
@@ -74,7 +65,7 @@ impl BattleSim {
             let categories: PackedStringArray = f
                 .categories
                 .iter()
-                .map(|&c| GString::from(category_key(c)))
+                .map(|&c| GString::from(c.key()))
                 .collect();
             let modifiers = vdict! {
                 "speed" => m.speed,

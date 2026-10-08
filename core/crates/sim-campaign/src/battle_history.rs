@@ -13,33 +13,25 @@
 //! record is dropped once `max_age_turns` old, and at most `max_records` are
 //! kept. Saved with the state; absent from older saves (empty by default).
 
+use data_model::key_enum;
 use data_model::{BattleHistoryRules, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
 
 use crate::battle_auto::{BattleResult, Winner};
 use crate::state::CampaignState;
 
+key_enum! {
 /// What kind of land battle was fought.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BattleKind {
     /// Two hosts in the open.
-    Field,
+    Field => "field",
     /// A settlement stormed by its besiegers.
-    Assault,
+    Assault => "assault",
     /// A garrison falling on its besiegers.
-    Sortie,
+    Sortie => "sortie",
 }
-
-impl BattleKind {
-    /// `snake_case` key ("field"), as saved and as given to the UI.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            BattleKind::Field => "field",
-            BattleKind::Assault => "assault",
-            BattleKind::Sortie => "sortie",
-        }
-    }
 }
 
 /// One side of a recorded battle.
@@ -165,4 +157,15 @@ pub(crate) fn record(
 pub(crate) fn on_new_turn(state: &mut CampaignState, data: &GameData) {
     let turn = state.turn;
     state.battle_history.purge(&data.battle_history_rules, turn);
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<BattleKind>();
+    }
 }

@@ -7,7 +7,7 @@
 //! however often the interface asks.
 
 use godot::prelude::*;
-use sim_battle::{Advantage, Compare, CompareSide, PreviewError, PreviewLeg, SideId};
+use sim_battle::{Compare, CompareSide, PreviewError, PreviewLeg, SideId};
 
 use crate::battle_sim::BattleSim;
 
@@ -18,14 +18,6 @@ pub(crate) fn reason_fr(error: PreviewError) -> &'static str {
         PreviewError::OutsideField => "Hors du champ de bataille",
         PreviewError::OutsideZone => "Hors de la zone de déploiement",
         PreviewError::Unreachable => "Aucun chemin jusque-là",
-    }
-}
-
-fn advantage_key(a: Advantage) -> &'static str {
-    match a {
-        Advantage::Even => "even",
-        Advantage::Ours => "ours",
-        Advantage::Theirs => "theirs",
     }
 }
 
@@ -48,7 +40,7 @@ fn compare_dict(compare: &Compare) -> VarDictionary {
     let mut advantages = VarDictionary::new();
     let mut lines = VarArray::new();
     for (line, advantage) in &compare.advantages {
-        advantages.set(line.as_str(), advantage_key(*advantage));
+        advantages.set(line.as_str(), advantage.key());
         lines.push(&line.to_variant());
     }
     let mut dict = VarDictionary::new();

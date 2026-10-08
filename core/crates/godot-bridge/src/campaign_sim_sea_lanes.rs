@@ -33,10 +33,7 @@ fn lane_dict(data: &data_model::GameData, lane: &SeaLaneView) -> VarDictionary {
         "to_name" => settlement_name(&lane.to).as_str(),
         "sea" => lane.sea.as_str(),
         "sea_name" => lane.sea_name.as_str(),
-        "kind" => match lane.kind {
-            data_model::SeaLaneKind::Coastal => "coastal",
-            data_model::SeaLaneKind::OpenSea => "open_sea",
-        },
+        "kind" => lane.kind.key(),
         "kind_name" => lane.kind_name.as_str(),
         "length_km" => lane.length_km,
         "control_faction" => lane.control_faction.as_ref().map_or("", |f| f.as_str()),

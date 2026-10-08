@@ -33,14 +33,6 @@ fn rank_label(rank: Option<TitleRank>) -> &'static str {
     }
 }
 
-fn likelihood_key(likelihood: Likelihood) -> &'static str {
-    match likelihood {
-        Likelihood::Likely => "likely",
-        Likelihood::Uncertain => "uncertain",
-        Likelihood::Unlikely => "unlikely",
-    }
-}
-
 fn likelihood_label(likelihood: Likelihood) -> &'static str {
     match likelihood {
         Likelihood::Likely => "probable",
@@ -367,7 +359,7 @@ impl CampaignSim {
                 vdict! {
                     "faction" => step.faction.as_str(),
                     "name" => data.faction_name(&step.faction).as_str(),
-                    "likelihood" => likelihood_key(step.likelihood),
+                    "likelihood" => step.likelihood.key(),
                     "likelihood_label" => likelihood_label(step.likelihood),
                     "reason" => step.reason.as_str(),
                 }

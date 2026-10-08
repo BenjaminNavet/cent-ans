@@ -18,47 +18,28 @@
 //!   (`battle_request`) and in the auto-resolver (`movement::auto_fight`,
 //!   sieges, forecast).
 
+use data_model::key_enum;
 use data_model::{DifficultyModifiers, FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
 use crate::battle_auto::Side;
 use crate::state::{ArmyId, CampaignState};
 
+key_enum! {
 /// Difficulty level of a campaign. Saves without the field load as
 /// [`Difficulty::Normal`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Difficulty {
-    Easy,
+    Easy => "easy",
     #[default]
-    Normal,
-    Hard,
-    VeryHard,
+    Normal => "normal",
+    Hard => "hard",
+    VeryHard => "very_hard",
+}
 }
 
-impl Difficulty {
-    pub const ALL: [Difficulty; 4] = [
-        Difficulty::Easy,
-        Difficulty::Normal,
-        Difficulty::Hard,
-        Difficulty::VeryHard,
-    ];
-
-    /// Id used in `data/rules/difficulty.json` and by the bridge.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Difficulty::Easy => "easy",
-            Difficulty::Normal => "normal",
-            Difficulty::Hard => "hard",
-            Difficulty::VeryHard => "very_hard",
-        }
-    }
-
-    /// Parses an id of `data/rules/difficulty.json`.
-    pub fn from_id(id: &str) -> Option<Difficulty> {
-        Difficulty::ALL.into_iter().find(|d| d.as_str() == id)
-    }
-}
+impl Difficulty {}
 
 /// `value × percent / 100`, exactly `value` at 100 %.
 pub fn scale_i64(value: i64, percent: u32) -> i64 {
@@ -87,7 +68,7 @@ impl CampaignState {
 
     /// Modifiers of the campaign's level (neutral when the data lacks it).
     pub fn difficulty_modifiers(&self, data: &GameData) -> DifficultyModifiers {
-        data.difficulty.modifiers(self.difficulty.as_str())
+        data.difficulty.modifiers(self.difficulty.key())
     }
 
     fn is_ai(&self, faction: &FactionId) -> bool {
@@ -241,4 +222,15 @@ pub fn effect_summary(m: &DifficultyModifiers) -> Vec<String> {
         lines.push("Aucun modificateur.".to_owned());
     }
     lines
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Difficulty>();
+    }
 }

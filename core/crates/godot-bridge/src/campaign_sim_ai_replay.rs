@@ -21,7 +21,7 @@ fn move_dict(record: &AiMoveRecord) -> VarDictionary {
         "army" => record.army.as_str(),
         "faction" => record.faction.as_str(),
         "path" => &path,
-        "kind" => record.kind.as_str(),
+        "kind" => record.kind.key(),
         "settlement" => text(record.settlement.as_ref().map(|s| s.as_str())),
         "target_army" => text(record.target_army.as_ref().map(|a| a.as_str())),
         "target_faction" => text(record.target_faction.as_ref().map(|f| f.as_str())),

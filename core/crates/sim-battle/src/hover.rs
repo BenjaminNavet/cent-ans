@@ -61,15 +61,17 @@ pub struct CompareSide {
     pub bonus_vs: f64,
 }
 
+key_enum! {
 /// A line of the comparison where one side has a net advantage.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Advantage {
-    Even,
+    Even => "even",
     /// The selected regiment.
-    Ours,
+    Ours => "ours",
     /// The enemy under the cursor.
-    Theirs,
+    Theirs => "theirs",
+}
 }
 
 /// Face-to-face figures of the selected regiment and the hovered enemy,
@@ -388,6 +390,7 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
+        assert_keys_match_serde::<Advantage>();
         assert_keys_match_serde::<HoverKind>();
     }
 }

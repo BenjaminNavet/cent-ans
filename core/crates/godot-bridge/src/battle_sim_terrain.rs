@@ -191,7 +191,7 @@ impl BattleSim {
             "mud" => &zones(&[field.mud.as_slice(), &field.mud_parts].concat()),
             // B5: campaign site.
             "terrain" => field.terrain.key(),
-            "season" => season_key(field.season),
+            "season" => field.season.key(),
             "ground" => field.ground.key(),
             "ground_label" => field.ground.label_fr(),
             // B6: the site in one compact line (pre-battle dialog, HUD).
@@ -212,10 +212,7 @@ impl BattleSim {
                 .collect::<VarArray>(),
         };
         if let Some(coast) = &field.coast {
-            let flank = match coast.flank {
-                sim_battle::Flank::West => "west",
-                sim_battle::Flank::East => "east",
-            };
+            let flank = coast.flank.key();
             dict.set(
                 "coast",
                 &vdict! { "flank" => flank, "shore_x" => coast.shore_x, "beach" => coast.beach },
@@ -361,10 +358,7 @@ impl BattleSim {
             .map(|(index, piece)| {
                 vdict! {
                     "index" => index as i64,
-                    "kind" => match piece.kind {
-                        sim_battle::PieceKind::Wall => "wall",
-                        sim_battle::PieceKind::Gate => "gate",
-                    },
+                    "kind" => piece.kind.key(),
                     "a" => v2(piece.a),
                     "b" => v2(piece.b),
                     "hp" => piece.hp,
@@ -651,15 +645,5 @@ impl BattleSim {
                 )
             })
             .collect()
-    }
-}
-
-/// `snake_case` key of a battle season (`get_terrain`).
-fn season_key(season: sim_battle::BattleSeason) -> &'static str {
-    match season {
-        sim_battle::BattleSeason::Spring => "spring",
-        sim_battle::BattleSeason::Summer => "summer",
-        sim_battle::BattleSeason::Autumn => "autumn",
-        sim_battle::BattleSeason::Winter => "winter",
     }
 }

@@ -12,6 +12,7 @@
 //!
 //! Records are rebuilt at each `end_turn` and never saved.
 
+use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementId};
@@ -22,36 +23,27 @@ use crate::orders::{Order, OrderOutcome};
 use crate::state::{ArmyId, CampaignState};
 use crate::vision::VisionMask;
 
+key_enum! {
 /// What an AI army move ended in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AiMoveKind {
     /// A plain march (stopped in the field, out of points or at a zone of control).
-    March,
+    March => "march",
     /// The army entered a friendly or neutral settlement.
-    Stationed,
+    Stationed => "stationed",
     /// The army laid siege to a settlement.
-    SiegeStarted,
+    SiegeStarted => "siege_started",
     /// The army took a settlement without a fight.
-    SettlementTaken,
+    SettlementTaken => "settlement_taken",
     /// The army attacked another army (the battle is auto-resolved).
-    Battle,
+    Battle => "battle",
     /// The army crossed the sea and landed in a port.
-    Landing,
+    Landing => "landing",
+}
 }
 
 impl AiMoveKind {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            AiMoveKind::March => "march",
-            AiMoveKind::Stationed => "stationed",
-            AiMoveKind::SiegeStarted => "siege_started",
-            AiMoveKind::SettlementTaken => "settlement_taken",
-            AiMoveKind::Battle => "battle",
-            AiMoveKind::Landing => "landing",
-        }
-    }
-
     fn from_stop(stop: &StopReason) -> (Self, Option<SettlementId>, Option<ArmyId>) {
         match stop {
             StopReason::Stationed { settlement } => {
@@ -437,4 +429,15 @@ fn notability(
         dx * dx + dy * dy <= radius_px * radius_px
     });
     near.then_some(AiMoveNotability::NearPlayer)
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<AiMoveKind>();
+    }
 }

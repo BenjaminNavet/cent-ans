@@ -3,18 +3,9 @@
 //! supply, claims), seen from the player. Read only.
 
 use godot::prelude::*;
-use sim_campaign::map_lens::{map_lens, ClaimStance};
+use sim_campaign::map_lens::map_lens;
 
 use crate::campaign_sim::{CampaignSim, Ctx};
-
-fn claim_key(claim: ClaimStance) -> &'static str {
-    match claim {
-        ClaimStance::None => "",
-        ClaimStance::Ours => "ours",
-        ClaimStance::AgainstUs => "against_us",
-        ClaimStance::Contested => "contested",
-    }
-}
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -45,7 +36,7 @@ impl CampaignSim {
                     "vassal_loyalty" => values.vassal_loyalty.map_or(-1, i64::from),
                     "suzerain" => values.suzerain.as_ref().map_or("", |f| f.as_str()),
                     "supply_change" => i64::from(values.supply_change),
-                    "claim" => claim_key(values.claim),
+                    "claim" => values.claim.key(),
                 }
                 .to_variant()
             })

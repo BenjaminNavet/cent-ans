@@ -25,15 +25,6 @@ fn render_key(unit: &Unit) -> &'static str {
     }
 }
 
-fn category_key(category: UnitCategory) -> &'static str {
-    match category {
-        UnitCategory::Infantry => "infantry",
-        UnitCategory::Ranged => "ranged",
-        UnitCategory::Cavalry => "cavalry",
-        UnitCategory::Siege => "siege",
-    }
-}
-
 fn state_label_fr(state: UnitState) -> &'static str {
     match state {
         UnitState::Idle => "au repos",
@@ -77,7 +68,7 @@ impl BattleSim {
                     "side" => unit.side.key(),
                     "type" => &*unit.unit_type,
                     "name" => &*unit.name,
-                    "category" => category_key(unit.category),
+                    "category" => unit.category.key(),
                     "render" => render_key(unit),
                     "soldiers" => i64::from(unit.soldiers()),
                     "figures" => i64::from(unit.figure_count(self.figure_scale)),

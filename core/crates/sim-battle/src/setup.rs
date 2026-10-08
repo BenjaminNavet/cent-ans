@@ -44,15 +44,17 @@ impl SideId {
     }
 }
 
+key_enum! {
 /// Season of the campaign turn (drives the weather draw).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BattleSeason {
     #[default]
-    Spring,
-    Summer,
-    Autumn,
-    Winter,
+    Spring => "spring",
+    Summer => "summer",
+    Autumn => "autumn",
+    Winter => "winter",
+}
 }
 
 impl BattleSeason {
@@ -379,6 +381,7 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
+        assert_keys_match_serde::<BattleSeason>();
         assert_keys_match_serde::<SideId>();
     }
 }

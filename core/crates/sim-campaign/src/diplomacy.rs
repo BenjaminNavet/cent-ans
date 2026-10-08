@@ -6,6 +6,7 @@
 //! and the UI (which shows the verdict and its reasons before sending).
 //! Proposals to the player become [`Offer`]s answered with `answer_offer`.
 
+use data_model::key_enum;
 use data_model::EffectKind;
 use std::collections::BTreeSet;
 
@@ -108,18 +109,20 @@ pub struct Offer {
     pub text_fr: String,
 }
 
+key_enum! {
 /// Relation of a faction with another, as shown by the UI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum RelationKind {
-    War,
-    Truce,
-    Peace,
-    Alliance,
+    War => "war",
+    Truce => "truce",
+    Peace => "peace",
+    Alliance => "alliance",
     /// The other faction is our vassal.
-    Vassal,
+    Vassal => "vassal",
     /// The other faction is our suzerain.
-    Suzerain,
+    Suzerain => "suzerain",
+}
 }
 
 /// Why a diplomatic order was refused.
@@ -2258,5 +2261,16 @@ impl PlanCache<'_> {
         }
         let total: i32 = reasons.iter().map(|(_, v)| v).sum();
         (total.clamp(-100, 100), reasons)
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<RelationKind>();
     }
 }

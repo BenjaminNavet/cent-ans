@@ -64,12 +64,14 @@ impl Ground {
     }
 }
 
+key_enum! {
 /// Side of the field.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Flank {
-    West,
-    East,
+    West => "west",
+    East => "east",
+}
 }
 
 /// Sea along one flank (coastal provinces): the waterline lies just outside
@@ -808,6 +810,7 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
+        assert_keys_match_serde::<Flank>();
         assert_keys_match_serde::<Ground>();
         assert_keys_match_serde::<ObstacleKind>();
         assert_keys_match_serde::<HouseKind>();

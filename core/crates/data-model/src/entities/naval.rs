@@ -6,6 +6,7 @@
 //! No rule lives here: `sim-battle::naval` fights the battles and
 //! `sim-campaign::naval` applies them to the campaign.
 
+use crate::key_enum;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -348,15 +349,17 @@ impl NavalShipNames {
     }
 }
 
+key_enum! {
 /// Coastal navigation or open sea (lot SL1, ADR 0139).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SeaLaneKind {
     /// Cabotage along the coast: short legs, sheltered.
-    Coastal,
+    Coastal => "coastal",
     /// Open sea: long legs out of sight of land, exposed to gales but
     /// harder for a squadron to find.
-    OpenSea,
+    OpenSea => "open_sea",
+}
 }
 
 /// One value per season (keys of the campaign seasons).
@@ -598,5 +601,16 @@ impl NavalData {
     /// The starting fleet of `faction`, if any.
     pub fn fleet_of(&self, faction: &FactionId) -> Option<&FactionFleet> {
         self.fleets.fleets.iter().find(|f| &f.faction == faction)
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<SeaLaneKind>();
     }
 }

@@ -17,7 +17,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("set_difficulty") {
             return false;
         }
-        let Some(level) = Difficulty::from_id(&id.to_string()) else {
+        let Some(level) = Difficulty::from_key(&id.to_string()) else {
             godot_error!("CampaignSim.set_difficulty: unknown level {id}");
             return false;
         };
@@ -33,7 +33,7 @@ impl CampaignSim {
             .state
             .as_ref()
             .map_or(Difficulty::Normal, |state| state.difficulty());
-        GString::from(level.as_str())
+        GString::from(level.key())
     }
 
     /// The four levels, easiest first: `[{id, label, description, effects:

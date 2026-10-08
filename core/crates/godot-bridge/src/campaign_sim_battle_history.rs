@@ -31,7 +31,7 @@ impl CampaignSim {
                     "age" => i64::from(record.age(turn)),
                     "province" => record.province.as_str(),
                     "position" => Vector2::new(record.position[0], record.position[1]),
-                    "kind" => record.kind.as_str(),
+                    "kind" => record.kind.key(),
                     "attacker" => record.attacker.faction.as_str(),
                     "defender" => record.defender.faction.as_str(),
                     "winner" => record.winner().as_str(),

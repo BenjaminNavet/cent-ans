@@ -5,17 +5,9 @@
 //! `break_trade_agreement` (`Order` derives `Deserialize`).
 
 use godot::prelude::*;
-use sim_campaign::trade::{trade_routes, TradeMode, TradeRouteView};
+use sim_campaign::trade::{trade_routes, TradeRouteView};
 
 use crate::campaign_sim::{CampaignSim, Ctx};
-
-fn mode_key(mode: TradeMode) -> &'static str {
-    match mode {
-        TradeMode::Land => "land",
-        TradeMode::Sea => "sea",
-        TradeMode::Mixed => "mixed",
-    }
-}
 
 fn route_dict(data: &data_model::GameData, route: &TradeRouteView) -> VarDictionary {
     let goods: PackedStringArray = route
@@ -45,7 +37,7 @@ fn route_dict(data: &data_model::GameData, route: &TradeRouteView) -> VarDiction
         "from_faction" => route.from_faction.as_ref().map_or("", |f| f.as_str()),
         "to_faction" => route.to_faction.as_ref().map_or("", |f| f.as_str()),
         "goods" => &goods,
-        "mode" => mode_key(route.mode),
+        "mode" => route.mode.key(),
         "path" => &path,
         "agreement" => route.agreement,
         "security" => route.security,

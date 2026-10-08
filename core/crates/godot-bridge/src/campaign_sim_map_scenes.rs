@@ -28,7 +28,7 @@ impl CampaignSim {
                 vdict! {
                     "province" => scene.province.as_str(),
                     "settlement" => scene.settlement.as_ref().map_or("", |s| s.as_str()),
-                    "kind" => scene.kind.as_str(),
+                    "kind" => scene.kind.key(),
                     "since_turn" => i64::from(scene.since_turn),
                     "intensity" => f64::from(scene.intensity),
                 }

@@ -16,6 +16,7 @@
 //! construction for `ruin_turns` turns). Razing is refused on province cities
 //! and on the emblematic places listed in the data.
 
+use data_model::key_enum;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -30,46 +31,26 @@ use crate::economy_balance::signed_livres;
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState};
 
+key_enum! {
 /// The four fates of a captured place, in the order of the UI (the first is
 /// the default).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CaptureOutcome {
     /// « Occuper »: the place changes hands (capture unrest only).
-    Occupy,
+    Occupy => "occupy",
     /// « Mettre à rançon » (appatis): moderate gold, more unrest.
-    Ransom,
+    Ransom => "ransom",
     /// « Piller »: much gold, people and buildings lost, piety and
     /// reputation lost, the troops gain experience.
-    Sack,
+    Sack => "sack",
     /// « Raser »: little gold, the place loses a level or becomes a ruin,
     /// heavy diplomatic malus.
-    Raze,
+    Raze => "raze",
+}
 }
 
 impl CaptureOutcome {
-    pub const ALL: [CaptureOutcome; 4] = [
-        CaptureOutcome::Occupy,
-        CaptureOutcome::Ransom,
-        CaptureOutcome::Sack,
-        CaptureOutcome::Raze,
-    ];
-
-    /// Snake-case id (`occupy`, `ransom`, `sack`, `raze`).
-    pub fn id(self) -> &'static str {
-        match self {
-            CaptureOutcome::Occupy => "occupy",
-            CaptureOutcome::Ransom => "ransom",
-            CaptureOutcome::Sack => "sack",
-            CaptureOutcome::Raze => "raze",
-        }
-    }
-
-    /// Parses [`CaptureOutcome::id`].
-    pub fn from_id(id: &str) -> Option<CaptureOutcome> {
-        CaptureOutcome::ALL.into_iter().find(|o| o.id() == id)
-    }
-
     /// French label of the choice.
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -781,4 +762,15 @@ pub fn occupation_reminder(is_city: bool, province_name: &str, owner_name: Optio
          elle ne devient vôtre que par cession dans un traité, et vous la rendrez à la paix \
          si elle n'est pas cédée."
     )
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CaptureOutcome>();
+    }
 }

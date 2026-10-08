@@ -8,7 +8,7 @@ use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn weather_dict(w: &ProvinceWeather) -> VarDictionary {
     vdict! {
-        "kind" => w.kind.as_str(),
+        "kind" => w.kind.key(),
         "intensity" => w.intensity,
         "label" => w.kind.label_fr(),
     }

@@ -5,6 +5,7 @@
 //! province bordering their lands. Everything else is "world" news: kept in
 //! the folded « Monde » tab of the journal, never pushed as a letter.
 
+use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{FactionId, GameData, ProvinceId};
@@ -12,30 +13,22 @@ use data_model::{FactionId, GameData, ProvinceId};
 use crate::movement::land_neighbors;
 use crate::state::CampaignState;
 
+key_enum! {
 /// How much an entry concerns the player, weakest first.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Relevance {
     /// Unrelated to the player: « Monde » tab only.
-    Far,
+    Far => "far",
     /// A bordering faction or province.
-    Neighbor,
+    Neighbor => "neighbor",
     /// Ally, vassal, suzerain or enemy at war.
-    Related,
+    Related => "related",
     /// The player's own faction or provinces.
-    Player,
+    Player => "player",
+}
 }
 
 impl Relevance {
-    /// Stable key used by the bridge.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Relevance::Far => "far",
-            Relevance::Neighbor => "neighbor",
-            Relevance::Related => "related",
-            Relevance::Player => "player",
-        }
-    }
-
     /// Whether the entry belongs to the player's own journal (not « Monde »).
     pub fn concerns_player(self) -> bool {
         self != Relevance::Far

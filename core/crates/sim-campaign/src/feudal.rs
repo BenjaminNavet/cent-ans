@@ -8,6 +8,7 @@
 //! F0 provides the state and the deductions; escalation (F2), felony,
 //! forfeiture, transfers and objectives (F3) are filled by later lots.
 
+use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{CharacterId, FactionId, GameData, ProvinceId, TitleId};
@@ -196,13 +197,15 @@ pub enum FeudalError {
     PrimaryTitle(TitleId),
 }
 
+key_enum! {
 /// Estimated answer of a suzerain called to war (§ 4.3, F2).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Likelihood {
-    Likely,
-    Uncertain,
-    Unlikely,
+    Likely => "likely",
+    Uncertain => "uncertain",
+    Unlikely => "unlikely",
+}
 }
 
 /// One link of the escalation chain shown before a declaration of war.
@@ -1414,4 +1417,15 @@ pub fn tribute_due(
     let income = state.factions.get(vassal)?.last_budget.income;
     let amount = (income * data.feudal_rules.vassal_tribute_percent / 100).max(0);
     Some((liege, amount))
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Likelihood>();
+    }
 }

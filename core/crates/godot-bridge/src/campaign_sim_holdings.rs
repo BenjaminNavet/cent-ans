@@ -4,19 +4,10 @@
 use data_model::FactionId;
 use godot::prelude::*;
 use sim_campaign::holdings::{
-    self, BuildOptionRow, ConstructionRow, DangerReason, ProvinceRow, SettlementRow, SiegeRow,
+    self, BuildOptionRow, ConstructionRow, ProvinceRow, SettlementRow, SiegeRow,
 };
 
 use crate::campaign_sim::{CampaignSim, Ctx};
-
-fn danger_reason_key(reason: DangerReason) -> &'static str {
-    match reason {
-        DangerReason::Siege => "siege",
-        DangerReason::Occupied => "occupied",
-        DangerReason::RevoltCountdown => "revolt_countdown",
-        DangerReason::UnrestAboveThreshold => "unrest",
-    }
-}
 
 fn build_option_row_dict(option: &BuildOptionRow) -> VarDictionary {
     vdict! {
@@ -51,7 +42,7 @@ fn settlement_row_dict(row: &SettlementRow) -> VarDictionary {
     let danger_reasons: PackedStringArray = row
         .danger_reasons
         .iter()
-        .map(|r| GString::from(danger_reason_key(*r)))
+        .map(|r| GString::from(r.key()))
         .collect();
     let mut dict = vdict! {
         "id" => row.id.as_str(),

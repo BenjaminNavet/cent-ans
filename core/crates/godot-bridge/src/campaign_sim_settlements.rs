@@ -4,8 +4,8 @@ use data_model::{ProvinceId, SettlementId};
 use godot::prelude::*;
 
 use crate::campaign_sim::{
-    buildable_array, building_category_key, buildings_array, construction_dict,
-    demolition_preview_array, ids, units_array, CampaignSim, Ctx,
+    buildable_array, buildings_array, construction_dict, demolition_preview_array, ids,
+    units_array, CampaignSim, Ctx,
 };
 
 #[godot_api(secondary)]
@@ -188,7 +188,7 @@ impl CampaignSim {
                     "built_name" => building.map_or("", |b| b.name.display.as_str()),
                     "level" => i64::from(slot.level),
                     "max_level" => i64::from(slot.max_level),
-                    "category" => building.map_or("", |b| building_category_key(b.category)),
+                    "category" => building.map_or("", |b| b.category.key()),
                     "upkeep" => building.map_or(0, |b| i64::from(b.upkeep.unwrap_or(0))),
                     "state" => slot_state,
                     "locked_reason" => slot.locked_reason.as_deref().unwrap_or(""),

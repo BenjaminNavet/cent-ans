@@ -64,15 +64,6 @@ impl FireSystem {
     }
 }
 
-fn category_key(category: UnitCategory) -> &'static str {
-    match category {
-        UnitCategory::Infantry => "infantry",
-        UnitCategory::Ranged => "ranged",
-        UnitCategory::Cavalry => "cavalry",
-        UnitCategory::Siege => "siege",
-    }
-}
-
 /// Suburb houses outside the side walls (east and west), off the axis of
 /// the assault (spec § 2.2): shared round-robin between the two sides,
 /// `spacing_m` apart along each wall.
@@ -375,7 +366,7 @@ impl BattleSim {
         let unit = &self.units[shooter];
         self.siege.is_some()
             && unit.side == SideId::Attacker
-            && rules.ignition_chance(&unit.unit_type, category_key(unit.category)) > 0.0
+            && rules.ignition_chance(&unit.unit_type, unit.category.key()) > 0.0
     }
 
     pub(super) fn incendiary_volley(&mut self, shooter: usize, aim: (f64, f64)) {
@@ -386,7 +377,7 @@ impl BattleSim {
         if unit.side != SideId::Attacker {
             return;
         }
-        let chance = rules.ignition_chance(&unit.unit_type, category_key(unit.category))
+        let chance = rules.ignition_chance(&unit.unit_type, unit.category.key())
             * rules.weather(self.weather).ignition;
         if chance <= 0.0 {
             return;

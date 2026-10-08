@@ -28,6 +28,7 @@
 //! full. `resolve_trade` credits the treasuries and reports newly-cut routes
 //! that touch the player.
 
+use data_model::key_enum;
 use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, ResourceId, SettlementId, TradeRouteDef};
@@ -48,13 +49,15 @@ pub const DECLINING_FACTOR: f64 = 0.6;
 /// Coinage factor floor: even a heavily debased currency keeps some trade.
 pub const COINAGE_FACTOR_MIN: f64 = 0.4;
 
+key_enum! {
 /// Whether a route's path is entirely by land, entirely by sea, or both.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TradeMode {
-    Land,
-    Sea,
-    Mixed,
+    Land => "land",
+    Sea => "sea",
+    Mixed => "mixed",
+}
 }
 
 /// One trade route, resolved against the current state (query, no mutation);
@@ -415,5 +418,16 @@ pub(crate) fn resolve_trade(
     if !player_cut.is_empty() {
         let text = format!("Routes commerciales coupées : {}.", player_cut.join(", "));
         events.push(GameEvent::new(EventKind::Trade, text).faction(&player));
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TradeMode>();
     }
 }

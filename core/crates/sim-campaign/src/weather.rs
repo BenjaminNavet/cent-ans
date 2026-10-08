@@ -14,6 +14,7 @@
 //!
 //! Purely visual for now: no rule reads it (ADR 0027).
 
+use data_model::key_enum;
 use data_model::util::splitmix64;
 use std::collections::BTreeMap;
 
@@ -23,39 +24,22 @@ use data_model::{
 
 use crate::state::{CampaignState, Season};
 
+key_enum! {
 /// Weather over a province for the current turn, from the driest to the
 /// wettest.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum MapWeather {
-    Clear,
+    Clear => "clear",
     /// Morning fog (lifts during the day; lingers in valleys).
-    Fog,
-    Rain,
-    Snow,
+    Fog => "fog",
+    Rain => "rain",
+    Snow => "snow",
     /// Thunderstorm (summer mostly).
-    Storm,
+    Storm => "storm",
+}
 }
 
 impl MapWeather {
-    pub const ALL: [MapWeather; 5] = [
-        MapWeather::Clear,
-        MapWeather::Fog,
-        MapWeather::Rain,
-        MapWeather::Snow,
-        MapWeather::Storm,
-    ];
-
-    /// Identifier shared with the bridge and the data files.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            MapWeather::Clear => "clear",
-            MapWeather::Fog => "fog",
-            MapWeather::Rain => "rain",
-            MapWeather::Snow => "snow",
-            MapWeather::Storm => "storm",
-        }
-    }
-
     /// French label for the interface.
     pub fn label_fr(self) -> &'static str {
         match self {

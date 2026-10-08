@@ -1,20 +1,23 @@
 //! Building: a province improvement (`building.schema.json`).
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Cost, Effect, LocalizedName, Sources};
 use crate::entities::settlement::SettlementKind;
 use crate::ids::{BuildingId, ResourceId, TechnologyId, UnitTypeId};
 
+key_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BuildingCategory {
-    Production,
-    Commerce,
-    Military,
-    Religious,
-    Sanitary,
-    Fortification,
+    Production => "production",
+    Commerce => "commerce",
+    Military => "military",
+    Religious => "religious",
+    Sanitary => "sanitary",
+    Fortification => "fortification",
+}
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -147,5 +150,16 @@ impl crate::load::GameData {
             kept.push(id.clone());
         }
         kept
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<BuildingCategory>();
     }
 }
