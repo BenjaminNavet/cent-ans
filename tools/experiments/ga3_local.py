@@ -5,7 +5,7 @@ Shared by ``ga3_fal_figure.py`` and ``ga3_fal_decor.py`` (``--sheet-backend loca
 
 * sheet / image: :func:`cent_ans_tools.local_art.render_image` (Z-Image Turbo, mflux), the
   source image being the img2img start;
-* background removal: ``rembg`` (MIT; weights downloaded once into ``~/.u2net``, outside the
+* background removal: ``rembg`` (MIT; weights downloaded once into ``~/.rembg/models``, outside the
   repository).
 
 Run a chain with the local 2D stages (only TRELLIS stays paid)::

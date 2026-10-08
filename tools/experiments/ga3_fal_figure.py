@@ -23,7 +23,7 @@ Stages, each cached in ``RAW_DIR/<unit>[_<attempt>]/`` (an existing output is ne
 Free local 2D stages (ADR 0190): ``--sheet-backend local`` makes stage 1 with Z-Image Turbo
 (mflux, img2img from the SR3 sheet at ``--strength``, 3:2, white background; see
 ``ga3_local.py``) and ``--cut-backend local`` makes stage 2 with ``rembg`` (``isnet-general-use``,
-weights in ``~/.u2net``). Only TRELLIS then stays paid; local stages add nothing to costs.json::
+weights in ``~/.rembg/models``). Only TRELLIS then stays paid; local stages add nothing to costs.json::
 
     uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy \
         python tools/experiments/ga3_fal_figure.py RAW_DIR --unit longbowman \
