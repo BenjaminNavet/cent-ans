@@ -67,6 +67,22 @@ const CLAIM_COLORS := {
 const MODE_TINT_NEAR := 0.62
 const MODE_TINT_FAR := 0.8
 const MODE_SATURATION := 0.9
+## Table des modes : chaque mode déclare comment il se teint, se décrit au survol et se légende.
+## Clés (noms de méthodes) : `available` (défaut `_lens_available`), `colors` (défaut `_lens_colors`,
+## qui appelle `cell_color(row, rank)` ; `rank` : clé du `get_map_lens` classée en percentiles),
+## `hover` (défaut `_lens_hover`, qui appelle `cell_hover(row)`), `legend_fn`.
+const MODE_SPECS := {
+	"diplomacy": {"available": &"_has_relations", "colors": &"_relation_colors", "hover": &"_relation_hover", "legend_fn": &"_relation_legend"},
+	"religion": {"available": &"_has_religion", "colors": &"_religion_colors", "hover": &"_religion_hover", "legend_fn": &"_religion_legend"},
+	"feudal": {"available": &"_has_feudal", "colors": &"_feudal_colors", "hover": &"_feudal_hover", "legend_fn": &"_feudal_legend"},
+	"unrest": {"cell_color": &"_unrest_color", "cell_hover": &"_unrest_hover", "legend_fn": &"_unrest_legend"},
+	"wealth": {"rank": "income", "cell_color": &"_wealth_color", "cell_hover": &"_wealth_hover", "legend_fn": &"_wealth_legend"},
+	"population": {"rank": "population", "cell_color": &"_population_color", "cell_hover": &"_population_hover", "legend_fn": &"_population_legend"},
+	"loyalty": {"cell_color": &"_loyalty_color", "cell_hover": &"_loyalty_hover", "legend_fn": &"_loyalty_legend"},
+	"supply": {"cell_color": &"_supply_color", "cell_hover": &"_supply_hover", "legend_fn": &"_supply_legend"},
+	"claims": {"cell_color": &"_claims_color", "cell_hover": &"_claims_hover", "legend_fn": &"_claims_legend"},
+}
+
 const MARKER_FONT := "res://assets/third_party/fonts/noto/NotoSansSymbols2-Subset.ttf"
 const MARKER_FONT_MAIN := "res://assets/third_party/fonts/noto/NotoSansSymbols-Subset.ttf"
 const MARKED_RELATIONS := ["war", "alliance", "vassal", "suzerain", "truce"]
@@ -260,15 +276,23 @@ func _available(target: String) -> bool:
 		return true
 	if map == null or map.sim == null:
 		return false
-	match target:
-		"diplomacy":
-			return map.sim.has_method("get_province_relations")
-		"religion":
-			return map.sim.has_method("get_province_religion")
-		"feudal":
-			return FeudalMapLens.available(map.sim)
-		_:
-			return map.sim.has_method("get_map_lens")
+	return bool(call(MODE_SPECS[target].get("available", &"_lens_available")))
+
+
+func _has_relations() -> bool:
+	return map.sim.has_method("get_province_relations")
+
+
+func _has_religion() -> bool:
+	return map.sim.has_method("get_province_religion")
+
+
+func _has_feudal() -> bool:
+	return FeudalMapLens.available(map.sim)
+
+
+func _lens_available() -> bool:
+	return map.sim.has_method("get_map_lens")
 
 
 ## Après `refresh_all` (couleurs politiques déjà posées) : repeint dans le mode courant.
@@ -276,16 +300,7 @@ func refresh() -> void:
 	if mode == POLITICAL or not _available(mode):
 		return
 	var ids := _province_ids()
-	var colors := PackedColorArray()
-	match mode:
-		"diplomacy":
-			colors = _relation_colors(ids)
-		"religion":
-			colors = _religion_colors(ids)
-		"feudal":
-			colors = _feudal_colors(ids)
-		_:
-			colors = _lens_colors(ids)
+	var colors: PackedColorArray = call(MODE_SPECS[mode].get("colors", &"_lens_colors"), ids)
 	map.terrain.set_province_colors(colors)
 	if map.get("minimap_ctl") != null:
 		map.minimap_ctl.set_province_colors(colors)
@@ -470,16 +485,16 @@ func _lens_colors(ids: PackedStringArray) -> PackedColorArray:
 	for index in mini(ids.size(), rows.size()):
 		if not (rows[index] as Dictionary).is_empty():
 			_lens[ids[index]] = rows[index]
-	var ranks := {}
-	if mode == "wealth" or mode == "population":
-		ranks = _percentiles("income" if mode == "wealth" else "population")
+	var spec: Dictionary = MODE_SPECS[mode]
+	var ranks := _percentiles(str(spec["rank"])) if spec.has("rank") else {}
+	var cell_color: StringName = spec["cell_color"]
 	var colors := PackedColorArray()
 	for id in ids:
 		var row: Dictionary = _lens.get(id, {})
 		if row.is_empty():
 			colors.append(Color(0, 0, 0, 0))
 			continue
-		colors.append(_lens_color(row, float(ranks.get(id, 0.0))))
+		colors.append(call(cell_color, row, float(ranks.get(id, 0.0))))
 	return colors
 
 
@@ -495,76 +510,103 @@ func _percentiles(key: String) -> Dictionary:
 	return ranks
 
 
-## `rank` : rang de la province (richesse, population), ignoré pour les autres modes.
-func _lens_color(row: Dictionary, rank: float) -> Color:
-	match mode:
-		"unrest":
-			return GOOD.lerp(BAD, clampf(float(row.get("unrest", 0.0)) / 100.0, 0.0, 1.0))
-		"wealth":
-			return WEALTH_LOW.lerp(WEALTH_HIGH, rank)
-		"population":
-			return POPULATION_LOW.lerp(POPULATION_HIGH, rank)
-		"loyalty":
-			var loyalty := int(row.get("vassal_loyalty", -1))
-			if loyalty < 0:
-				return NEUTRAL
-			var ratio := clampf(loyalty / 100.0, 0.0, 1.0)
-			return LOYALTY_LOW.lerp(LOYALTY_MID, ratio * 2.0) if ratio < 0.5 else LOYALTY_MID.lerp(LOYALTY_HIGH, ratio * 2.0 - 1.0)
-		"supply":
-			var change := int(row.get("supply_change", 0))
-			if change >= 0:
-				return SUPPLY_GAIN
-			# SV4 : rouge sombre à la perte d'hiver hors de nos terres (`supply_loss_winter`, cœur).
-			var worst := RuleValues.value("supply_loss_winter", 0.0)
-			return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / worst, 0.0, 1.0) if worst > 0.0 else 1.0)
-		"claims":
-			return CLAIM_COLORS.get(str(row.get("claim", "")), NEUTRAL)
-	return Color(0, 0, 0, 0)
+# Une paire couleur / survol / légende par mode ; `rank` : rang de la province (richesse, population).
+
+func _unrest_color(row: Dictionary, _rank: float) -> Color:
+	return GOOD.lerp(BAD, clampf(float(row.get("unrest", 0.0)) / 100.0, 0.0, 1.0))
+
+
+func _wealth_color(_row: Dictionary, rank: float) -> Color:
+	return WEALTH_LOW.lerp(WEALTH_HIGH, rank)
+
+
+func _population_color(_row: Dictionary, rank: float) -> Color:
+	return POPULATION_LOW.lerp(POPULATION_HIGH, rank)
+
+
+func _loyalty_color(row: Dictionary, _rank: float) -> Color:
+	var loyalty := int(row.get("vassal_loyalty", -1))
+	if loyalty < 0:
+		return NEUTRAL
+	var ratio := clampf(loyalty / 100.0, 0.0, 1.0)
+	return LOYALTY_LOW.lerp(LOYALTY_MID, ratio * 2.0) if ratio < 0.5 else LOYALTY_MID.lerp(LOYALTY_HIGH, ratio * 2.0 - 1.0)
+
+
+func _supply_color(row: Dictionary, _rank: float) -> Color:
+	var change := int(row.get("supply_change", 0))
+	if change >= 0:
+		return SUPPLY_GAIN
+	# Rouge sombre à la perte d'hiver hors de nos terres (`supply_loss_winter`, cœur).
+	var worst := RuleValues.value("supply_loss_winter", 0.0)
+	return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / worst, 0.0, 1.0) if worst > 0.0 else 1.0)
+
+
+func _claims_color(row: Dictionary, _rank: float) -> Color:
+	return CLAIM_COLORS.get(str(row.get("claim", "")), NEUTRAL)
 
 
 ## Texte ajouté au nom de la province survolée dans le mode courant ("" en mode politique).
 func hover_text(province_id: String) -> String:
-	match mode:
-		"diplomacy":
-			if focus_faction != "":  # DZ
-				return _focus_hover_text(str(_relations.get(province_id, "")))
-			return {"self": "vos terres", "war": "en guerre", "truce": "trêve", "peace": "neutre",
-				"alliance": "allié", "vassal": "vassal", "suzerain": "suzerain",
-				# DP2 : positions diplomatiques
-				"ally": "allié", "agreement": "en paix, avec un accord", "neutral": "neutre",
-				"tension": "tensions (hostilité, embargo ou intrusion)"}.get(str(_relations.get(province_id, "")), "")
-		"religion":
-			var info: Dictionary = _religions.get(province_id, {})
-			if info.is_empty():
-				return ""
-			var text := str(info.get("religion_name", ""))
-			if int(info.get("heresy", 0)) > 0:
-				text += ", hérésie %d %%" % int(info.get("heresy", 0))
-			return text
-		"feudal":
-			return feudal_lens.hover_text(province_id)
-	var row: Dictionary = _lens.get(province_id, {})
-	if row.is_empty():
+	if mode == POLITICAL:
 		return ""
-	match mode:
-		"unrest":
-			return "mécontentement %d %%" % roundi(float(row.get("unrest", 0.0)))
-		"wealth":
-			return "%d livres par saison (impôt de base)" % roundi(float(row.get("income", 0.0)))
-		"population":
-			return "%s habitants" % Money.digits(int(row.get("population", 0)))
-		"loyalty":
-			var loyalty := int(row.get("vassal_loyalty", -1))
-			if loyalty < 0:
-				return "pas un vassal"
-			return "loyauté %d envers %s" % [loyalty, SimFacade.faction_short_name(str(row.get("suzerain", "")))]
-		"supply":
-			var change := int(row.get("supply_change", 0))
-			return "ravitaillement +%d par saison" % change if change >= 0 else "attrition : ravitaillement %d par saison" % change
-		"claims":
-			return {"ours": "vous la revendiquez", "against_us": "revendiquée contre vous",
-				"contested": "revendiquée par vous et par un autre"}.get(str(row.get("claim", "")), "")
-	return ""
+	return str(call(MODE_SPECS[mode].get("hover", &"_lens_hover"), province_id))
+
+
+func _relation_hover(province_id: String) -> String:
+	if focus_faction != "":  # DZ
+		return _focus_hover_text(str(_relations.get(province_id, "")))
+	return {"self": "vos terres", "war": "en guerre", "truce": "trêve", "peace": "neutre",
+		"alliance": "allié", "vassal": "vassal", "suzerain": "suzerain",
+		"ally": "allié", "agreement": "en paix, avec un accord", "neutral": "neutre",
+		"tension": "tensions (hostilité, embargo ou intrusion)"}.get(str(_relations.get(province_id, "")), "")
+
+
+func _religion_hover(province_id: String) -> String:
+	var info: Dictionary = _religions.get(province_id, {})
+	if info.is_empty():
+		return ""
+	var text := str(info.get("religion_name", ""))
+	if int(info.get("heresy", 0)) > 0:
+		text += ", hérésie %d %%" % int(info.get("heresy", 0))
+	return text
+
+
+func _feudal_hover(province_id: String) -> String:
+	return feudal_lens.hover_text(province_id)
+
+
+func _lens_hover(province_id: String) -> String:
+	var row: Dictionary = _lens.get(province_id, {})
+	return "" if row.is_empty() else str(call(MODE_SPECS[mode]["cell_hover"], row))
+
+
+func _unrest_hover(row: Dictionary) -> String:
+	return "mécontentement %d %%" % roundi(float(row.get("unrest", 0.0)))
+
+
+func _wealth_hover(row: Dictionary) -> String:
+	return "%d livres par saison (impôt de base)" % roundi(float(row.get("income", 0.0)))
+
+
+func _population_hover(row: Dictionary) -> String:
+	return "%s habitants" % Money.digits(int(row.get("population", 0)))
+
+
+func _loyalty_hover(row: Dictionary) -> String:
+	var loyalty := int(row.get("vassal_loyalty", -1))
+	if loyalty < 0:
+		return "pas un vassal"
+	return "loyauté %d envers %s" % [loyalty, SimFacade.faction_short_name(str(row.get("suzerain", "")))]
+
+
+func _supply_hover(row: Dictionary) -> String:
+	var change := int(row.get("supply_change", 0))
+	return "ravitaillement +%d par saison" % change if change >= 0 else "attrition : ravitaillement %d par saison" % change
+
+
+func _claims_hover(row: Dictionary) -> String:
+	return {"ours": "vous la revendiquez", "against_us": "revendiquée contre vous",
+		"contested": "revendiquée par vous et par un autre"}.get(str(row.get("claim", "")), "")
 
 
 ## DZ : valeur de survol vue de la faction observée.
@@ -599,34 +641,54 @@ func _set_tint_boost(on: bool) -> void:
 ## Entrées de légende du mode : [[couleur ou relation, libellé]] (catégories) ou
 ## {"from": Color, "to": Color, "low": texte, "high": texte} (rampe).
 func _legend_entries() -> Variant:
-	match mode:
-		"diplomacy":
-			if map != null and DiplomaticStances.available(map.sim):  # DP2
-				var stance_entries: Array = []
-				for key in DiplomaticStances.ORDER:
-					var label: String = DiplomaticStances.LABELS[key]
-					if key == "self" and focus_faction != "":  # DZ
-						label = SimFacade.faction_short_name(focus_faction)
-					stance_entries.append([key, label])
-				return stance_entries
-			return [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
-		"religion":
-			return [[RELIGION_AVIGNON, "Obédience d'Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_ORTHODOX, "Orthodoxie"], [RELIGION_ARMENIAN, "Église arménienne"], [RELIGION_ISLAM, "Islam"], [RELIGION_PAGAN, "Paganisme"], [RELIGION_OTHER, "Autre foi"]]
-		"unrest":
-			return {"from": GOOD, "to": BAD, "low": "Calme", "high": "Révolte proche"}
-		"wealth":
-			return {"from": WEALTH_LOW, "to": WEALTH_HIGH, "low": "Les plus pauvres", "high": "Les plus riches"}
-		"population":
-			return {"from": POPULATION_LOW, "to": POPULATION_HIGH, "low": "Les moins peuplées", "high": "Les plus peuplées"}
-		"loyalty":
-			return [[LOYALTY_HIGH, "Vassal fidèle"], [LOYALTY_MID, "Hésitant"], [LOYALTY_LOW, "Prêt à se révolter"], [NEUTRAL, "Pas un vassal"]]
-		"supply":
-			return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d'hiver"]]
-		"claims":
-			return [[CLAIM_COLORS["ours"], "Nos revendications"], [CLAIM_COLORS["against_us"], "Revendiquées contre nous"], [CLAIM_COLORS["contested"], "Disputées"], [NEUTRAL, "Aucune"]]
-		"feudal":
-			return FeudalMapLens.legend_entries()
+	var spec: Dictionary = MODE_SPECS.get(mode, {})
+	if spec.has("legend_fn"):
+		return call(spec["legend_fn"])
 	return []
+
+
+func _relation_legend() -> Array:
+	if map != null and DiplomaticStances.available(map.sim):  # DP2
+		var stance_entries: Array = []
+		for key in DiplomaticStances.ORDER:
+			var label: String = DiplomaticStances.LABELS[key]
+			if key == "self" and focus_faction != "":  # DZ
+				label = SimFacade.faction_short_name(focus_faction)
+			stance_entries.append([key, label])
+		return stance_entries
+	return [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
+
+
+func _religion_legend() -> Array:
+	return [[RELIGION_AVIGNON, "Obédience d'Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_ORTHODOX, "Orthodoxie"], [RELIGION_ARMENIAN, "Église arménienne"], [RELIGION_ISLAM, "Islam"], [RELIGION_PAGAN, "Paganisme"], [RELIGION_OTHER, "Autre foi"]]
+
+
+func _feudal_legend() -> Variant:
+	return FeudalMapLens.legend_entries()
+
+
+func _unrest_legend() -> Dictionary:
+	return {"from": GOOD, "to": BAD, "low": "Calme", "high": "Révolte proche"}
+
+
+func _wealth_legend() -> Dictionary:
+	return {"from": WEALTH_LOW, "to": WEALTH_HIGH, "low": "Les plus pauvres", "high": "Les plus riches"}
+
+
+func _population_legend() -> Dictionary:
+	return {"from": POPULATION_LOW, "to": POPULATION_HIGH, "low": "Les moins peuplées", "high": "Les plus peuplées"}
+
+
+func _loyalty_legend() -> Array:
+	return [[LOYALTY_HIGH, "Vassal fidèle"], [LOYALTY_MID, "Hésitant"], [LOYALTY_LOW, "Prêt à se révolter"], [NEUTRAL, "Pas un vassal"]]
+
+
+func _supply_legend() -> Array:
+	return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d'hiver"]]
+
+
+func _claims_legend() -> Array:
+	return [[CLAIM_COLORS["ours"], "Nos revendications"], [CLAIM_COLORS["against_us"], "Revendiquées contre nous"], [CLAIM_COLORS["contested"], "Disputées"], [NEUTRAL, "Aucune"]]
 
 
 func _mode_title() -> String:

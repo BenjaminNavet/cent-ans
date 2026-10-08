@@ -34,7 +34,8 @@ const FIELD_OFFSET := 0.7
 const FIGURE_UNIT := 4.3
 const ENGINES_NODE := "SiegeEngines"
 
-static var _settings: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
+
 static var _loaded := false
 
 var stats: Dictionary = {}
@@ -66,21 +67,12 @@ var _door_timer := 0.0
 
 
 static func settings() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		if DataFile.exists(DATA_PATH):
-			var parsed: Variant = DataFile.read_json(DATA_PATH)
-			if parsed is Dictionary:
-				_settings = parsed
-			else:
-				push_warning("WarScars: %s invalid" % DATA_PATH)
-	return _settings
+	return _lookup.data()
 
 
 ## Oublie le fichier lu (tests : autre dossier de données).
 static func reload() -> void:
-	_loaded = false
-	_settings = {}
+	_lookup.reload()
 
 
 static func _block(key: String) -> Dictionary:

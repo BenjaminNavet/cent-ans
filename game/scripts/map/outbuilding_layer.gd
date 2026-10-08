@@ -728,7 +728,7 @@ func _instances_of(i: int) -> Array:
 		if _maquette:
 			# Autour d'une maquette GC, le site réel n'a pas de sens : seule compte la direction,
 			# le secteur de la famille (tiré de l'identifiant de la colonie).
-			var seed_value := absi(str(_data.settlements[i]["id"]).hash())
+			var seed_value := MapInstancing.text_seed(str(_data.settlements[i]["id"]))
 			var angle := float(seed_value % 3600) / 3600.0 * TAU + float(int(model["slot"])) * TAU / float(_family_order.size() + 1)
 			anchor = {"px": center + Vector2(cos(angle), sin(angle)) * (_built_radius(i) + 0.1), "yaw": 0.0}
 		else:
@@ -943,7 +943,7 @@ func _find_anchor(i: int, slot: int, site: String, radius_m: float) -> Dictionar
 	var reach := radius_m / _mpu
 	var ring_min := built + float(render.get("ring_min_m", 90.0)) / _mpu + reach
 	var ring_max := maxf(built + float(render.get("ring_max_m", 650.0)) / _mpu, ring_min + reach)
-	var seed_value := absi(str(_data.settlements[i]["id"]).hash())
+	var seed_value := MapInstancing.text_seed(str(_data.settlements[i]["id"]))
 	var theta0 := float(seed_value % 3600) / 3600.0 * TAU
 	if site == "shore" or site == "coast":
 		var shore := _shore_anchor(i, center, ring_min - reach, built + float(render.get("shore_reach_m", 2500.0)) / _mpu, theta0)
@@ -1602,10 +1602,7 @@ func _write_batches() -> void:
 		if mmi == null:
 			mmi = MultiMeshInstance3D.new()
 			mmi.name = key.replace(":", "_")
-			mmi.multimesh = MultiMesh.new()
-			mmi.multimesh.transform_format = MultiMesh.TRANSFORM_3D
-			mmi.multimesh.use_custom_data = true
-			mmi.multimesh.mesh = mesh
+			mmi.multimesh = MapInstancing.make(mesh, 0, true)
 			mmi.material_override = _drape_material() if key.begins_with("out:") else TownBuilder.material(0, not key.begins_with("kit:"), 0.0, _mpu)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if _shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mmi.transparency = 1.0 - _fade

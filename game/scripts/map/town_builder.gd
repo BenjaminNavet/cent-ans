@@ -434,18 +434,7 @@ static func pack_instances(xforms: Array, bases: Array, tints: Array) -> Diction
 	for i in xforms.size():
 		var t: Transform3D = xforms[i]
 		var o := i * 16
-		buf[o] = t.basis.x.x
-		buf[o + 1] = t.basis.y.x
-		buf[o + 2] = t.basis.z.x
-		buf[o + 3] = t.origin.x
-		buf[o + 4] = t.basis.x.y
-		buf[o + 5] = t.basis.y.y
-		buf[o + 6] = t.basis.z.y
-		buf[o + 7] = t.origin.y
-		buf[o + 8] = t.basis.x.z
-		buf[o + 9] = t.basis.y.z
-		buf[o + 10] = t.basis.z.z
-		buf[o + 11] = t.origin.z
+		MapInstancing.write_transform(buf, o, t)
 		buf[o + 12] = float(bases[i])
 		buf[o + 13] = float(tints[i]) if i < tints.size() else 0.5
 		lo = minf(lo, float(bases[i]))

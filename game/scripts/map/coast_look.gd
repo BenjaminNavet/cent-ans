@@ -13,25 +13,18 @@ const TYPES: Array[String] = ["rock", "chalk", "granite", "sand", "shingle"]
 ## Rayon (px carte) de recherche du rivage autour d'un point donné à `kind_at`.
 const SHORE_SEARCH_PX := 6
 
-static var _data: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(DATA_PATH)
 static var _texture: ImageTexture = null
 static var _texture_size: Vector2i = Vector2i.ZERO
 
 
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-	return _data
+	return _lookup.data()
 
 
 ## Oublie le fichier lu (tests : autre dossier de données).
 static func reload() -> void:
-	_loaded = false
-	_data = {}
+	_lookup.reload()
 	_texture = null
 
 

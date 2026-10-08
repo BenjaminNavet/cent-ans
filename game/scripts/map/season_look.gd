@@ -11,23 +11,16 @@ const DATA_PATH := "ui/campaign_seasons.json"
 ## y / z début et fin du fondu vers le sud (px carte).
 const ROOF_SNOW_PARAM := &"campaign_roof_snow"
 
-static var _data: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-	return _data
+	return _lookup.data()
 
 
 ## Oublie le fichier lu (tests : autre dossier de données).
 static func reload() -> void:
-	_loaded = false
-	_data = {}
+	_lookup.reload()
 
 
 static func _season_block(season: String, key: String) -> Dictionary:

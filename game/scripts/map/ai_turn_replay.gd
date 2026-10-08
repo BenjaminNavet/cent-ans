@@ -37,7 +37,7 @@ const HOLD_KINDS := ["battle", "siege_started", "settlement_taken", "landing"]
 
 ## Tests : rejouer même sans écran.
 static var allow_headless := false
-static var _tuning: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH, FALLBACK)
 
 var map: Node = null
 var playing := false
@@ -51,15 +51,7 @@ var _caption_label: Label = null
 
 
 static func tuning() -> Dictionary:
-	if _tuning.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_tuning = FALLBACK.duplicate()
-			_tuning.merge(parsed, true)
-		if _tuning.is_empty():
-			push_warning("AiTurnReplay: %s missing or invalid" % DATA_PATH)
-			_tuning = FALLBACK.duplicate()
-	return _tuning
+	return _lookup.data()
 
 
 ## Vitesses proposées dans les Réglages (flottants).

@@ -119,7 +119,7 @@ func _run() -> void:
 	modes.set_mode("unrest")
 	var row: Dictionary = modes._lens.get(PARIS, {})
 	var unrest := float(row.get("unrest", 0.0))
-	var color: Color = modes._lens_color(row, 0.0)
+	var color: Color = modes._unrest_color(row, 0.0)
 	_check(unrest >= 0.0 and unrest <= 100.0, "unrest out of range: %s" % unrest)
 	if unrest < 90.0:
 		_check(not color.is_equal_approx((modes.get_script().BAD as Color)), "Paris unrest %.1f should not be full red" % unrest)

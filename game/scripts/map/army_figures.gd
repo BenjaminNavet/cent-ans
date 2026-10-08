@@ -73,7 +73,7 @@ var _heraldry: Texture2D
 ## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
 var lord_scale: float = 1.0
 
-static var _map_settings: Dictionary = {}
+static var _map_lookup := JsonLookup.new(CAMPAIGN_MAP_DATA, {"army_figure_scale": 1.0}, "map")
 
 static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voiles teintes
 
@@ -88,20 +88,12 @@ static func enabled() -> bool:
 
 static func clear_cache() -> void:
 	_sail_meshes.clear()
-	_map_settings.clear()
+	_map_lookup.reload()
 
 
 ## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
 static func map_settings() -> Dictionary:
-	if _map_settings.is_empty():
-		var fallback := {"army_figure_scale": 1.0}
-		_map_settings = fallback.duplicate()
-		var parsed: Variant = DataFile.read_json(CAMPAIGN_MAP_DATA) if DataFile.exists(CAMPAIGN_MAP_DATA) else null
-		if parsed is Dictionary and parsed.get("map") is Dictionary:
-			_map_settings.merge(parsed["map"], true)
-		else:
-			push_warning("ArmyFigures: %s missing or invalid" % CAMPAIGN_MAP_DATA)
-	return _map_settings
+	return _map_lookup.data()
 
 
 ## Construit la représentation d'une armée (`army` = dictionnaire du pont).
@@ -302,7 +294,7 @@ func set_walking(value: bool) -> void:
 # --- Lot AS2 : cadence de marche et balancement de la hampe ----------------------------
 
 const WALK_DATA := "fx/campaign_army_walk.json"
-static var _walk_settings: Dictionary = {}
+static var _walk_lookup := JsonLookup.new(WALK_DATA, {"enabled": false})
 ## Vitesse au sol lissée (unités monde / s) et dernière position, mesurées sur le marqueur.
 var _ground_speed: float = 0.0
 var _last_position: Vector3 = Vector3.INF
@@ -314,15 +306,7 @@ var _bearer_bob: float = 0.0
 
 
 static func walk_settings() -> Dictionary:
-	if _walk_settings.is_empty():
-		var parsed: Variant = null
-		var path := _data_dir().path_join(WALK_DATA)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(WALK_DATA)
-		if FileAccess.file_exists(path):
-			parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-		_walk_settings = parsed if parsed is Dictionary else {"enabled": false}
-	return _walk_settings
+	return _walk_lookup.data()
 
 
 ## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).

@@ -10,21 +10,12 @@ extends RefCounted
 const SPEC_FILE := "fx/water_detail.json"
 const TEXTURE_DIR := "res://assets/textures/water/"
 
-static var _spec: Dictionary = {}
-static var _spec_loaded: bool = false
+static var _lookup := JsonLookup.new(SPEC_FILE, {}, "materials")
 
 
 ## Données RC5 (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.
 static func spec() -> Dictionary:
-	if _spec_loaded:
-		return _spec
-	_spec_loaded = true
-	if DataFile.exists(SPEC_FILE):
-		var parsed: Variant = DataFile.read_json(SPEC_FILE)
-		if parsed is Dictionary and (parsed as Dictionary).get("materials") is Dictionary:
-			_spec = (parsed as Dictionary).get("materials")
-			return _spec
-	return _spec
+	return _lookup.data()
 
 
 ## Applique la matière `id` à `material` (uniformes `<prefix>_normal`, `_albedo`, `_scale`,
