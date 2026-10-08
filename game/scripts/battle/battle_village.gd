@@ -356,7 +356,7 @@ func _build_palisades(obstacles: Array) -> void:
 
 ## Lot GA3-L1 : palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
 ## de la simulation reçoit un nombre entier de segments étirés en longueur (±25 %), posés sur le
-## sol. Faux (procédural gardé) sans variante, sous la neige ou avec `--no-ga3`.
+## sol. Faux (procédural gardé) sans variante, ou sous la neige.
 func _ga3_palisades(obstacles: Array) -> bool:
 	if not Ga3Kit.active or _snowy:
 		return false

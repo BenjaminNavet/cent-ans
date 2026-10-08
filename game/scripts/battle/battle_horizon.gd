@@ -82,9 +82,7 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 	centre = field_size * 0.5
 	_terrain_key = terrain_key
 	_season = season
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--horizon-province="):
-			province = arg.trim_prefix("--horizon-province=")
+	province = CliFlags.value("--horizon-province", province)
 	_cfg = data()
 	if _cfg.is_empty() or province == "":
 		return false
@@ -161,9 +159,9 @@ func _load_tile(path: String) -> bool:
 
 ## Premier panorama dont la règle s'applique (`rules` de `horizon.json`).
 func _choose_panorama(entry: Dictionary) -> String:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--panorama="):
-			return arg.trim_prefix("--panorama=")
+	var forced := CliFlags.value("--panorama")
+	if forced != "":
+		return forced
 	var skyline_max := float(entry.get("skyline_max_deg", 0.0))
 	for rule in _cfg.get("rules", []):
 		var r: Dictionary = rule

@@ -98,3 +98,8 @@ vec3 bt_field_info_soft(vec2 p) {
 float bt_decor_edge_soft(float z, vec2 p) {
 	return clamp(z + (bt_value_noise(p * 0.3 + 3.7) - 0.5) * 0.35, 0.0, 1.0);
 }
+
+// Luminance perceptuelle commune (poids des palettes de bataille : sol, herbe, soldats).
+float bt_luma(vec3 c) {
+	return dot(c, vec3(0.3, 0.59, 0.11));
+}

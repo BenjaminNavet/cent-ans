@@ -28,7 +28,7 @@ static func set_override(values: Dictionary) -> void:
 
 
 static func enabled() -> bool:
-	if "--no-as3" in OS.get_cmdline_user_args():
+	if CliFlags.has("--no-as3"):
 		return false
 	var cfg := settings()
 	return not cfg.is_empty() and bool(cfg.get("enabled", true))

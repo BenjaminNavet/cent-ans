@@ -4,8 +4,8 @@ extends SceneTree
 ## chaque variante branchée du manifeste `assets/models/props_ga/manifest.json` : les trois LOD
 ## chargent, triangles sous le plafond du catalogue (LOD1 < LOD0, LOD2 < LOD1), pied à y = 0 ;
 ## puis l'option : un lot du kit (`BuildingKit.Batch`) remplace une part des maisons par la
-## variante GA3 (poignées, masquage, tuiles LOD), rien sous la neige ni avec `--no-ga3`.
-## Usage : godot --headless --path game --script res://tests/ga3_l1_decor_test.gd [-- --no-ga3]
+## variante GA3 (poignées, masquage, tuiles LOD), rien sous la neige.
+## Usage : godot --headless --path game --script res://tests/ga3_l1_decor_test.gd
 
 
 
@@ -33,7 +33,6 @@ func _stats(root: Node) -> Dictionary:
 
 func _init() -> void:
 	var ok := true
-	var no_ga3 := OS.get_cmdline_user_args().has("--no-ga3")
 	var caps: Dictionary = {}
 	for entry in _catalog().get("objects", []):
 		caps["ga3_" + str(entry["id"])] = int(entry["lod0"])
@@ -81,7 +80,7 @@ func _init() -> void:
 		ok = false
 
 	# Option : 200 chaumières du kit sur une grille, variante GA3 pour une part d'entre elles.
-	Ga3Kit.active = Ga3Kit.requested()
+	Ga3Kit.active = true
 	var kit_model := ""
 	for m in BuildingKit.models_of("cottage"):
 		kit_model = m
@@ -96,11 +95,11 @@ func _init() -> void:
 			handles.append(batch.add(kit_model, xform))
 		batch.build(root)
 		var ga3 := batch.ga3_count()
-		print("ga3_l1: variante '%s', %d / %d chaumières GA3 (--no-ga3 %s)" % [variant, ga3, batch.count(), no_ga3])
+		print("ga3_l1: variante '%s', %d / %d chaumières GA3" % [variant, ga3, batch.count()])
 		if batch.count() != 200:
 			push_error("ga3_l1: %d instances au lieu de 200" % batch.count())
 			ok = false
-		var expected_some: bool = not no_ga3 and variant == "" and not Ga3Kit.variants_of("cottage").is_empty()
+		var expected_some: bool = variant == "" and not Ga3Kit.variants_of("cottage").is_empty()
 		if expected_some and (ga3 < 40 or ga3 > 160):
 			push_error("ga3_l1: part GA3 %d hors de [40, 160] (share 0,5)" % ga3)
 			ok = false
@@ -125,7 +124,7 @@ func _init() -> void:
 			push_error("ga3_l1: portées LOD incohérentes sur %s" % mmi.name)
 			ok = false
 	print("ga3_l1: %d nœuds MultiMesh GA3 (tuiles × LOD)" % lod_nodes)
-	if not no_ga3 and lod_nodes > 0 and lod_nodes % 3 != 0:
+	if lod_nodes > 0 and lod_nodes % 3 != 0:
 		push_error("ga3_l1: tuiles sans leurs trois LOD")
 		ok = false
 	root.free()

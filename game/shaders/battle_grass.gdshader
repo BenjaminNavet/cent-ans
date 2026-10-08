@@ -307,7 +307,7 @@ void fragment() {
 	vec4 tex = texture(grass_texture, uv);
 	// La carte ne donne que la découpe et les nuances claires/sombres des brins ; la couleur
 	// vient du sol (v_tint) pour que l'herbe prolonge la texture du terrain.
-	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / tex_lum;
+	float l = bt_luma(tex.rgb) / tex_lum;
 	// VN1 : au-delà de ~30 m, contraste des brins et pied sombre atténués : vue de haut, les
 	// touffes lointaines faisaient un moucheté sombre (« détritus ») sur le sol plus clair.
 	float far_k = smoothstep(22.0, 70.0, length(VERTEX));
@@ -318,7 +318,7 @@ void fragment() {
 		// FA7 : la carte est neutre en moyenne ; elle porte les écarts de clarté et de teinte des
 		// brins (brin vert, épi paille, feuille jaunie), appliqués à la couleur du sol.
 		vec3 rel = tex.rgb / tex_lum;
-		float rl = max(dot(rel, vec3(0.3, 0.59, 0.11)), 0.001);
+		float rl = max(bt_luma(rel), 0.001);
 		float lum = clamp(mix(1.0, rl, fa_contrast), fa_luma_clamp.x, fa_luma_clamp.y);
 		lum = mix(lum, fa_far_luma, far_k * 0.65);
 		ALBEDO = v_tint * lum * mix(vec3(1.0), rel / rl, fa_hue_mix) * v_shade;
@@ -332,7 +332,7 @@ void fragment() {
 		float top = 1.0 - UV.y;
 		ALBEDO *= mix(mix(v_foot, 1.0, far_k * 0.6), 1.0, smoothstep(0.0, fa_foot_height, top));
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
-		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, min(decor_saturation * 1.25, 1.0));
+		ALBEDO = mix(vec3(bt_luma(ALBEDO)), ALBEDO, min(decor_saturation * 1.25, 1.0));
 	} else {
 		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
 		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
@@ -341,7 +341,7 @@ void fragment() {
 		ALBEDO = mix(ALBEDO, ALBEDO * vec3(1.08, 1.04, 0.9), top * top * 0.5);
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
 		// VN1 : brins un peu moins désaturés que le sol (la prairie restait olive terne).
-		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, min(decor_saturation * 1.25, 1.0));
+		ALBEDO = mix(vec3(bt_luma(ALBEDO)), ALBEDO, min(decor_saturation * 1.25, 1.0));
 	}
 	// Alpha-to-coverage : bord des brins lissé par le MSAA (bord à 0,4 comme l'ancienne coupe),
 	// sinon la coupe franche scintille dès que la caméra bouge.

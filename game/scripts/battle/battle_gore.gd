@@ -50,15 +50,13 @@ static func settings() -> Dictionary:
 
 ## Niveau du réglage « Sang » : 0 désactivé, 1 modéré, 2 complet.
 static func blood_level() -> int:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--blood="):
-			# Noms (off, moderate, full) ou chiffres (0, 1, 2 : forme du lot BV1).
-			var value := arg.get_slice("=", 1)
-			var k := LEVEL_NAMES.find(value)
-			if k >= 0:
-				return k
-			if value.is_valid_int():
-				return clampi(int(value), 0, 2)
+	# Noms (off, moderate, full) ou chiffres (0, 1, 2).
+	var forced := CliFlags.value("--blood")
+	var named := LEVEL_NAMES.find(forced)
+	if named >= 0:
+		return named
+	if forced.is_valid_int():
+		return clampi(int(forced), 0, 2)
 	var tree := Engine.get_main_loop() as SceneTree
 	var store: Node = tree.root.get_node_or_null("/root/Settings") if tree != null else null
 	if store != null:
