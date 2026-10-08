@@ -114,11 +114,37 @@ def object_card(
     prompt_text = (
         prompt_path.read_text() if prompt_path.exists() else prompts.get(object_id, "")
     )
-    prompt = html.escape(prompt_text[:400])
+    prompt = html.escape(prompt_text)
+    generation_path = folder / "generation.json"
+    generation = (
+        json.loads(generation_path.read_text()) if generation_path.exists() else {}
+    )
+    origin = html.escape(
+        " · ".join(
+            str(generation[key])
+            for key in ("catalogue", "target", "region")
+            if generation.get(key)
+        )
+    )
+    links = " ".join(
+        f'<a href="/{rel}/{name}">{name}</a>'
+        for name in ("prompt.txt", "generation.json")
+        if (folder / name).exists()
+    )
+    view_images = (
+        sorted((folder / "views").glob("*.png")) if (folder / "views").exists() else []
+    )
+    views = "".join(
+        f'<figure><a href="/{rel}/views/{image.name}"><img loading="lazy" src="/{rel}/views/{image.name}"></a>'
+        f"<figcaption>vue {image.stem}</figcaption></figure>"
+        for image in view_images
+    )
+    search_text = html.escape(f"{object_id} {origin} {prompt_text}".lower(), quote=True)
     return (
-        f'<section><h2>{object_id} <span class="tag">{stage}</span>'
+        f'<section id="{object_id}" data-search="{search_text}"><h2><a href="#{object_id}">{object_id}</a> <span class="tag">{stage}</span>'
         f"{f'<span class=tag>{status}</span>' if status else ''}</h2>"
-        f'<p class="prompt">{prompt}</p><div class="row">{thumbs}</div>{sheet}<div class="row">{viewers}</div></section>'
+        f'<p class="origin">{origin} {links}</p><p class="prompt">{prompt}</p>'
+        f'<div class="row">{thumbs}{views}</div>{sheet}<div class="row">{viewers}</div></section>'
     )
 
 
@@ -136,7 +162,9 @@ body{{background:#1d1b18;color:#e8e1d3;font:14px system-ui;margin:0;padding:16px
 h1{{font-weight:600}} h2{{margin:0 0 4px;font-size:18px}}
 section{{border-top:1px solid #444;padding:12px 0}}
 .tag{{font-size:11px;background:#3a352d;border-radius:4px;padding:2px 6px;margin-left:8px}}
-.prompt{{color:#a99f8c;font-size:12px;max-width:900px}}
+.prompt{{color:#a99f8c;font-size:12px;max-width:900px;user-select:all}}
+.origin{{font-size:12px;margin:2px 0}} a{{color:#c9a227}}
+#q{{width:min(600px,100%);padding:6px 8px;font-size:14px;background:#2b2823;color:#e8e1d3;border:1px solid #555;border-radius:4px}}
 .row{{display:flex;flex-wrap:wrap;gap:8px}}
 figure{{margin:0;text-align:center;font-size:11px;color:#a99f8c}}
 figure img{{width:200px;height:200px;object-fit:contain;background:#fff;border-radius:4px}}
@@ -144,9 +172,17 @@ figure.chosen img{{outline:3px solid #c9a227}}
 img.sheet{{max-width:100%;margin:8px 0;border-radius:4px}}
 model-viewer{{width:320px;height:320px;background:#2b2823;border-radius:4px}}
 </style></head><body><h1>Galerie DN — production de la nuit ({len(folders)} objets)</h1>
-<p>Objet le plus récent en haut. Cadre doré = essai retenu. La page se recharge seule quand un fichier change.</p>
+<p>Objet le plus récent en haut. Cadre doré = essai retenu. La page se recharge seule quand un fichier change.
+Chaque objet : catalogue, cible en jeu, prompt complet (clic = sélection), fiche <code>generation.json</code>.</p>
+<input id="q" placeholder="Rechercher (id, catalogue, mot du prompt)…"> <span id="n"></span>
 {cards}
 <script>
+const q=document.getElementById('q'),n=document.getElementById('n');
+function filt(){{const t=q.value.toLowerCase().trim();let k=0;
+document.querySelectorAll('section').forEach(e=>{{const on=!t||e.dataset.search.includes(t);e.style.display=on?'':'none';k+=on;}});
+n.textContent=k+' affichés';try{{sessionStorage.setItem('q',q.value)}}catch(e){{}}}}
+try{{q.value=sessionStorage.getItem('q')||''}}catch(e){{}}
+q.addEventListener('input',filt);filt();
 let stamp=null;
 setInterval(async()=>{{try{{const r=await fetch('/__stamp');const s=await r.text();
 if(stamp!==null&&s!==stamp)location.reload();stamp=s;}}catch(e){{}}}},20000);
