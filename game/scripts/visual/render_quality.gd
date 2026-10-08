@@ -66,8 +66,9 @@ const UPSCALE_LABELS: Array[String] = ["Automatique", "Désactivée", "MetalFX q
 ## référence de 1920 × 1080. Au-delà (écran Retina, 4K), le choix « Automatique » garde le même
 ## nombre de pixels rendus (coût GPU du relief et des effets ≈ proportionnel aux pixels), sans
 ## descendre sous `UPSCALE_MIN_SCALE`. Les choix explicites du joueur restent tels quels.
+## ADR 0191 : plancher 0,4 (plein écran HiDPI 2× de 27" : 4096 × 2304 → 1,5 M px, 40 → ≈ 30 ms).
 const UPSCALE_REFERENCE_PIXELS := 1920.0 * 1080.0
-const UPSCALE_MIN_SCALE := 0.5
+const UPSCALE_MIN_SCALE := 0.4
 const UPSCALE_PLAYER := {
 	"off": [UPSCALE_OFF, 1.0],
 	"quality": [UPSCALE_SPATIAL, 0.75],
