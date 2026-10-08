@@ -29,7 +29,7 @@ pub(super) fn context_reasons(deal: &Deal) -> ReasonList {
 fn attitude(deal: &Deal, ends_war: bool, reasons: &mut ReasonList) {
     let weights = &deal.weights().context;
     let (attitude, _) = deal
-        .state
+        .cache
         .attitude(deal.data, deal.recipient, deal.proposer);
     let divisor = if ends_war {
         weights.attitude_divisor_peace
@@ -81,8 +81,8 @@ fn threat(deal: &Deal, reasons: &mut ReasonList) {
     if !gives {
         return;
     }
-    let ratio = state.faction_power(proposer) / state.faction_power(recipient).max(1.0);
-    if ratio > weights.threat_ratio && state.are_neighbors(data, recipient, proposer) {
+    let ratio = deal.cache.faction_power(proposer) / deal.cache.faction_power(recipient).max(1.0);
+    if ratio > weights.threat_ratio && deal.cache.are_neighbors(data, recipient, proposer) {
         reasons.push(
             "Menace de sa puissance",
             ((ratio - 1.0) * weights.threat_scale)

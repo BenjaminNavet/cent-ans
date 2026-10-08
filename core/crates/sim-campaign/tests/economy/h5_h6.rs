@@ -9,6 +9,7 @@ use data_model::{CharacterId, ChivalricOrderId, EventEffect, EventId, GameData, 
 use sim_campaign::chronicle::{self, EventContext};
 use sim_campaign::coinage::{self, CoinageLevel, PRICE_BASE};
 use sim_campaign::effects;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::test_support::{idle, start_quiet};
 use sim_campaign::{
     chivalry, ransom, CampaignState, ChivalryError, CoinageError, EventKind, Order, OrderError,
@@ -192,7 +193,7 @@ fn ai_coinage_policy() {
     let england = fac("fac_england");
     state.factions.get_mut(&england).unwrap().treasury = -100;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, data, &england),
+        coinage::ai_choose_coinage(&PlanCache::new(&state), data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Debased
         }]
@@ -202,7 +203,7 @@ fn ai_coinage_policy() {
     f.coinage = CoinageLevel::Debased;
     f.price_level = 150;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, data, &england),
+        coinage::ai_choose_coinage(&PlanCache::new(&state), data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Strong
         }]
@@ -211,7 +212,7 @@ fn ai_coinage_policy() {
     f.treasury = 100;
     f.price_level = 100;
     assert_eq!(
-        coinage::ai_choose_coinage(&state, data, &england),
+        coinage::ai_choose_coinage(&PlanCache::new(&state), data, &england),
         vec![Order::SetCoinage {
             level: CoinageLevel::Sound
         }]
@@ -221,7 +222,7 @@ fn ai_coinage_policy() {
         .get_mut(&england)
         .unwrap()
         .coinage_changed_year = Some(state.year());
-    assert!(coinage::ai_choose_coinage(&state, data, &england).is_empty());
+    assert!(coinage::ai_choose_coinage(&PlanCache::new(&state), data, &england).is_empty());
 }
 
 // ----- H6: ransoms ----------------------------------------------------------------
@@ -501,7 +502,7 @@ fn ai_pays_ransoms_and_frees_knights_at_peace() {
     let france_id = fac("fac_france");
     capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     state.factions.get_mut(&france_id).unwrap().treasury = 1_000_000;
-    let orders = ransom::ai_ransom_orders(&state, data, &france_id);
+    let orders = ransom::ai_ransom_orders(&PlanCache::new(&state), data, &france_id);
     assert_eq!(
         orders,
         vec![Order::PayRansom {
@@ -760,10 +761,18 @@ fn campaign_with_h5_h6_ai_is_deterministic_and_valid() {
     assert_eq!(a.save_json(), b.save_json());
     for faction in a.factions.keys().cloned().collect::<Vec<_>>() {
         let mut probe = a.clone();
-        let orders: Vec<Order> = coinage::ai_choose_coinage(&a, data, &faction)
+        let orders: Vec<Order> = coinage::ai_choose_coinage(&PlanCache::new(&a), data, &faction)
             .into_iter()
-            .chain(ransom::ai_ransom_orders(&a, data, &faction))
-            .chain(chivalry::ai_found_order(&a, data, &faction))
+            .chain(ransom::ai_ransom_orders(
+                &PlanCache::new(&a),
+                data,
+                &faction,
+            ))
+            .chain(chivalry::ai_found_order(
+                &PlanCache::new(&a),
+                data,
+                &faction,
+            ))
             .collect();
         for order in orders {
             probe.apply_order(data, &faction, order).unwrap();

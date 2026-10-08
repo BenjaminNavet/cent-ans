@@ -27,12 +27,12 @@ fn the_demesne_is_paid_while_the_seat_is_held() {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let luna = fac("fac_luna");
     assert_eq!(state.faction_domain_income(data, &luna), amount);
-    let before = state.faction_income_uncached(data, &luna);
+    let before = state.faction_income(data, &luna);
     // The seat falls: no demesne any more.
     let seat = state.faction_capital_city(&luna).cloned().expect("seat");
     state.settlements.get_mut(&seat).unwrap().controller = fac("fac_aragon");
     assert_eq!(state.faction_domain_income(data, &luna), 0);
-    assert!(state.faction_income_uncached(data, &luna) < before);
+    assert!(state.faction_income(data, &luna) < before);
     // Rule absent: nothing.
     let mut without = data.clone();
     without.economy_rules.domain_income = 0;

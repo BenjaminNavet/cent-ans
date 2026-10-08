@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::diplomacy::{RelationKind, REBELS_FACTION};
 use crate::events::{EventKind, GameEvent};
+use crate::plan_cache::PlanCache;
 use crate::state::{ArmyId, CampaignState};
 
 /// Reason of the opinion modifier a trespass leaves with the victim.
@@ -291,11 +292,12 @@ pub fn trespass_along(
 /// passage? Never at peace; at war, when its temper is aggressive, when it
 /// hates the owner, or when the owner is much weaker and not liked.
 pub fn ai_may_trespass(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     owner: &FactionId,
 ) -> bool {
+    let state = cache.state();
     let rules = rules(data);
     if !rules.enabled {
         return true;
@@ -316,10 +318,10 @@ pub fn ai_may_trespass(
     if aggression >= rules.ai_violate_aggression {
         return true;
     }
-    let (attitude, _) = state.attitude(data, faction, owner);
+    let (attitude, _) = cache.attitude(data, faction, owner);
     if attitude <= rules.ai_violate_attitude {
         return true;
     }
-    let ratio = state.faction_power(faction) / state.faction_power(owner).max(1.0);
+    let ratio = cache.faction_power(faction) / cache.faction_power(owner).max(1.0);
     ratio >= rules.ai_violate_power_ratio && attitude < 0
 }

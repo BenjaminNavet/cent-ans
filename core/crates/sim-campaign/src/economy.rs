@@ -480,18 +480,6 @@ impl CampaignState {
     /// and buildings (spec § 1.4): what `resolve_economy` applies to the
     /// treasury.
     pub fn faction_income(&self, data: &GameData, faction: &FactionId) -> i64 {
-        // OMR R1: asked several times per plan (economy, coinage, agents,
-        // subsidies): a memo while a planning scope is open.
-        if let Some(derived) = self.derived() {
-            return derived.income(data, faction, || {
-                self.faction_income_uncached(data, faction)
-            });
-        }
-        self.faction_income_uncached(data, faction)
-    }
-
-    /// [`Self::faction_income`] computed afresh.
-    pub fn faction_income_uncached(&self, data: &GameData, faction: &FactionId) -> i64 {
         let tax_rate = self
             .factions
             .get(faction)

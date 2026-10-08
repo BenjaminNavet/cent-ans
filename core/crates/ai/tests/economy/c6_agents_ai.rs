@@ -1,4 +1,5 @@
 //! Lot C6: the strategic AI recruits and employs agents with valid orders.
+use sim_campaign::plan_cache::PlanCache;
 
 use std::collections::BTreeMap;
 
@@ -26,7 +27,8 @@ fn ai_recruits_moves_and_uses_agents_with_few_refusals() {
             .map(|(id, _)| id.clone())
             .collect();
         for faction in factions {
-            for order in sim_campaign::agents::plan_agents(&probe, data, &faction) {
+            for order in sim_campaign::agents::plan_agents(&PlanCache::new(&probe), data, &faction)
+            {
                 issued += 1;
                 if let Err(e) = probe.apply_order(data, &faction, order.clone()) {
                     refused += 1;

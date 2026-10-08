@@ -24,6 +24,7 @@ use crate::events::{EventKind, GameEvent};
 use crate::movement;
 use crate::negotiation::{Article, Treaty};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::rng::CampaignRng;
 use crate::state::CampaignState;
 
@@ -802,8 +803,9 @@ pub fn agent_dijkstra(
     AgentTable::search(data, start, budget, cap, None).into_reaches()
 }
 
-/// [`agent_dijkstra`] as it was before OMR R1 (settlement ids in maps): the
-/// reference of the equality tests.
+/// [`agent_dijkstra`] with settlement ids in maps: the reference of the
+/// equality tests.
+#[cfg(feature = "test-support")]
 pub fn agent_dijkstra_by_ids(
     data: &GameData,
     start: &SettlementId,
@@ -1655,7 +1657,8 @@ pub(crate) fn start_season(state: &mut CampaignState, data: &GameData) {
 // ----- AI -----------------------------------------------------------------------
 
 /// Agent orders of an AI faction (called by `ai::plan_turn`): see the design § 10.
-pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn plan_agents(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let Some(f) = state.factions.get(faction) else {
         return Vec::new();
     };
@@ -1665,7 +1668,7 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
     // F8: a playable faction too poor for a network of agents (their
     // upkeep) behaves like a minor power.
     let playable = data.factions.get(faction).is_some_and(|d| d.playable)
-        && state.faction_income(data, faction) >= rules(data).ai_network_min_income;
+        && cache.faction_income(data, faction) >= rules(data).ai_network_min_income;
     let mut orders = Vec::new();
     // Recruitment: one agent of each missing kind, one per season.
     if playable || f.treasury > 2 * AI_RECRUIT_RESERVE {
@@ -1720,7 +1723,7 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
         }
         let plan = match agent.kind {
             AgentKind::Spy => ai_spy(state, data, faction, id, agent),
-            AgentKind::Emissary => ai_emissary(state, data, faction, id, agent),
+            AgentKind::Emissary => ai_emissary(cache, data, faction, id, agent),
             AgentKind::Preacher => ai_preacher(state, data, faction, id, agent),
         };
         orders.extend(plan);
@@ -1845,12 +1848,13 @@ fn ai_spy(
 }
 
 fn ai_emissary(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     id: &AgentId,
     agent: &Agent,
 ) -> Vec<Order> {
+    let state = cache.state();
     let odds = |action| state.agent_action_odds(data, id, action, None, None).ok();
     // 1. Buy back a captive: only one held for money that the treasury can
     // pay for (else steps 2 and 3, rather than waiting at his captor's).
@@ -1943,7 +1947,7 @@ fn ai_emissary(
             None,
         );
     }
-    let neighbours = state.neighbour_factions(data, faction);
+    let neighbours = cache.neighbour_factions(data, faction);
     let neighbour = state
         .factions
         .iter()
@@ -1960,7 +1964,7 @@ fn ai_emissary(
                         && m.expires_turn > state.turn
                 })
         })
-        .map(|(other, _)| (state.attitude(data, other, faction).0, other.clone()))
+        .map(|(other, _)| (cache.attitude(data, other, faction).0, other.clone()))
         // Only courts that need winning over (C6 balance: no opinion inflation).
         .filter(|(attitude, _)| *attitude < AI_PARLEY_ATTITUDE)
         .min()

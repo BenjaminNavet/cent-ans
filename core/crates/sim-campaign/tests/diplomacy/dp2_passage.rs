@@ -7,6 +7,7 @@ use sim_campaign::passage::{
     ai_may_trespass, has_grievance, penalty, resolve_trespass, trespass_along, trespassed_owner,
     TRESPASS_REASON,
 };
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::stance::{diplomatic_stance, Stance};
 use sim_campaign::test_support::start;
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
@@ -258,7 +259,12 @@ fn disabled_rules_ignore_trespass() {
     season(&mut state, &data);
     assert!(state.factions[&victim].ledger.trespassers.is_empty());
     assert!(trespass_along(&state, &data, &fr, &[point, point], &[1]).is_empty());
-    assert!(ai_may_trespass(&state, &data, &fr, &victim));
+    assert!(ai_may_trespass(
+        &PlanCache::new(&state),
+        &data,
+        &fr,
+        &victim
+    ));
 }
 
 #[test]
@@ -315,7 +321,12 @@ fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
     for f in state.factions.values_mut() {
         f.at_war_with.clear();
     }
-    assert!(!ai_may_trespass(&state, &data, &fr, &victim));
+    assert!(!ai_may_trespass(
+        &PlanCache::new(&state),
+        &data,
+        &fr,
+        &victim
+    ));
     // At war with England.
     let en = fac("fac_england");
     state
@@ -338,7 +349,12 @@ fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
         .as_mut()
         .unwrap();
     personality.aggression = Some(95);
-    assert!(ai_may_trespass(&state, &data, &fr, &victim));
+    assert!(ai_may_trespass(
+        &PlanCache::new(&state),
+        &data,
+        &fr,
+        &victim
+    ));
     let personality = data
         .factions
         .get_mut(&fr)
@@ -349,10 +365,20 @@ fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
     personality.aggression = Some(10);
     data.ai_diplomacy.passage.ai_violate_power_ratio = 1000.0;
     data.ai_diplomacy.passage.ai_violate_attitude = -1000;
-    assert!(!ai_may_trespass(&state, &data, &fr, &victim));
+    assert!(!ai_may_trespass(
+        &PlanCache::new(&state),
+        &data,
+        &fr,
+        &victim
+    ));
     // Hatred overrides a peaceful temper.
     data.ai_diplomacy.passage.ai_violate_attitude = 1000;
-    assert!(ai_may_trespass(&state, &data, &fr, &victim));
+    assert!(ai_may_trespass(
+        &PlanCache::new(&state),
+        &data,
+        &fr,
+        &victim
+    ));
 }
 
 #[test]

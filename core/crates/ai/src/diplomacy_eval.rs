@@ -12,8 +12,9 @@
 //! other side would likely sign (the player receives it as an offer).
 
 use data_model::{FactionId, GameData};
-use sim_campaign::diplomacy::{rivals, PAPACY_FACTION, REBELS_FACTION};
-use sim_campaign::negotiation::{evaluate_treaty, friendly, Article, Party};
+use sim_campaign::diplomacy::{PAPACY_FACTION, REBELS_FACTION};
+use sim_campaign::negotiation::{evaluate_treaty_with, friendly, Article, Party};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 /// Seasons between two treaty plans of one faction.
@@ -37,38 +38,41 @@ fn negotiable(state: &CampaignState, id: &FactionId) -> bool {
 }
 
 /// Treaties `faction` sends this turn (at most one).
-pub fn plan_treaties(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn plan_treaties(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let rules = &data.ai_diplomacy.negotiation;
     if !rules.enabled || !negotiable(state, faction) {
         return Vec::new();
     }
     let phase = (state.turn + slot(faction)) % PLAN_PERIOD;
     let order = match phase {
-        0 => plan_trade(state, data, faction),
-        3 => plan_access(state, data, faction).or_else(|| plan_passage(state, data, faction)),
-        _ => plan_passage(state, data, faction),
+        0 => plan_trade(cache, data, faction),
+        3 => plan_access(cache, data, faction).or_else(|| plan_passage(cache, data, faction)),
+        _ => plan_passage(cache, data, faction),
     };
     order.into_iter().collect()
 }
 
 fn would_sign(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     from: &FactionId,
     to: &FactionId,
     articles: &[Article],
 ) -> bool {
+    let state = cache.state();
     to == &state.player_faction
-        || evaluate_treaty(state, data, from, to, articles).chance
+        || evaluate_treaty_with(cache, data, from, to, articles).chance
             >= data.ai_diplomacy.negotiation.ai_min_chance
 }
 
 /// A trade agreement with the friendliest partner that is not a rival.
-fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+fn plan_trade(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let me = state.factions.get(faction)?;
-    let my_rivals = rivals(state, faction);
+    let my_rivals = cache.rivals(faction);
     let treaty = [Article::TradeAgreement];
-    let neighbours = state.neighbour_factions(data, faction);
+    let neighbours = cache.neighbour_factions(data, faction);
     state
         .factions
         .keys()
@@ -77,7 +81,7 @@ fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
         .filter(|id| !me.ledger.trade_agreements.contains(*id))
         .filter(|id| !me.embargoes.contains(*id))
         .filter(|id| neighbours.contains(*id) || state.is_allied(faction, id))
-        .map(|id| (id.clone(), state.attitude(data, faction, id).0))
+        .map(|id| (id.clone(), cache.attitude(data, faction, id).0))
         .filter(|(id, attitude)| {
             let needed = if id == &state.player_faction {
                 PLAYER_TRADE_MIN_ATTITUDE
@@ -86,7 +90,7 @@ fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
             };
             *attitude >= needed
         })
-        .filter(|(id, _)| would_sign(state, data, faction, id, &treaty))
+        .filter(|(id, _)| would_sign(cache, data, faction, id, &treaty))
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)))
         .map(|(target, _)| Order::ProposeTreaty {
             target,
@@ -96,7 +100,8 @@ fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
 
 /// Mutual military access with a friendly neighbour of one of our enemies
 /// (allies already supply each other's armies).
-fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+fn plan_access(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let me = state.factions.get(faction)?;
     let enemies: Vec<&FactionId> = me
         .at_war_with
@@ -106,7 +111,7 @@ fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> O
     if enemies.is_empty() {
         return None;
     }
-    let my_rivals = rivals(state, faction);
+    let my_rivals = cache.rivals(faction);
     let mut candidates: Vec<&FactionId> = state
         .factions
         .keys()
@@ -114,7 +119,7 @@ fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> O
         .filter(|id| !state.is_allied(faction, id) && friendly(state, faction, id))
         .filter(|id| !my_rivals.contains(*id))
         .filter(|id| !state.factions[*id].ledger.military_access.contains(faction))
-        .filter(|id| enemies.iter().any(|e| state.are_neighbors(data, id, e)))
+        .filter(|id| enemies.iter().any(|e| cache.are_neighbors(data, id, e)))
         .collect();
     candidates.sort();
     candidates.into_iter().find_map(|id| {
@@ -126,7 +131,7 @@ fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> O
                 giver: Party::Proposer,
             });
         }
-        would_sign(state, data, faction, id, &treaty).then(|| Order::ProposeTreaty {
+        would_sign(cache, data, faction, id, &treaty).then(|| Order::ProposeTreaty {
             target: id.clone(),
             articles: treaty,
         })
@@ -137,7 +142,8 @@ fn plan_access(state: &CampaignState, data: &GameData, faction: &FactionId) -> O
 /// passage: ask it for military access (ours in exchange when it has none),
 /// rather than let the incidents pile up. AI realms only (the player is not
 /// pestered every season), the largest trespassing force first.
-fn plan_passage(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+fn plan_passage(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let me = state.factions.get(faction)?;
     let mut owners: std::collections::BTreeMap<FactionId, usize> = Default::default();
     for army in state.armies.values().filter(|a| &a.faction == faction) {
@@ -162,7 +168,7 @@ fn plan_passage(state: &CampaignState, data: &GameData, faction: &FactionId) -> 
                 giver: Party::Proposer,
             });
         }
-        would_sign(state, data, faction, &id, &treaty).then_some(Order::ProposeTreaty {
+        would_sign(cache, data, faction, &id, &treaty).then_some(Order::ProposeTreaty {
             target: id,
             articles: treaty,
         })

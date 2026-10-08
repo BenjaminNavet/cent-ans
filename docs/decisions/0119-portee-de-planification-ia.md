@@ -1,5 +1,7 @@
 # ADR 0119 — Portée de planification de l'IA (index partagés en lecture seule)
 
+Statut : remplacé par l'ADR 0205 (le registre global devient un objet `PlanCache` explicite).
+
 ## Contexte
 Sur la carte Oural–Méditerranée (443 provinces, 177 factions, ≈ 3 900 colonies), la
 planification IA d'un tour de jeu coûtait ≈ 1 s contre 0,23 s sur l'ancienne carte (OM I1).

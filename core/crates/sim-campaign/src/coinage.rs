@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 use crate::buildings::EffectTotals;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::state::CampaignState;
 
 /// Price level of a sound currency (per cent of the 1337 prices).
@@ -308,18 +309,15 @@ pub(crate) fn resolve_coinage(state: &mut CampaignState, events: &mut Vec<GameEv
 /// in debt, debase (heavily when deep in debt); once out of debt, return
 /// to sound money; with a comfortable surplus and high prices, strike
 /// strong money until prices are back near 100. Deterministic.
-pub fn ai_choose_coinage(
-    state: &CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-) -> Vec<Order> {
+pub fn ai_choose_coinage(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
         return Vec::new();
     };
     if f.coinage_changed_year == Some(state.year) {
         return Vec::new();
     }
-    let income = state.faction_income(data, faction).max(1);
+    let income = cache.faction_income(data, faction).max(1);
     let wanted = if f.treasury < -4 * income && f.price_level < 200 {
         CoinageLevel::HeavilyDebased
     } else if f.treasury < 0 && f.price_level < 160 {

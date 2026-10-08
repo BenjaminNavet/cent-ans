@@ -4,6 +4,7 @@
 
 use data_model::{AgentKind, SettlementKind};
 use sim_campaign::economy::{garrison_share, garrison_upkeep_percent};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, Order};
 
@@ -87,14 +88,14 @@ fn a_realm_in_debt_dismisses_its_costliest_agent() {
         .recruit_agent(data, &france, &paris, AgentKind::Emissary)
         .expect("a herald");
     let dismissals = |state: &CampaignState| {
-        sim_campaign::agents::plan_agents(state, data, &france)
+        sim_campaign::agents::plan_agents(&PlanCache::new(state), data, &france)
             .into_iter()
             .filter(|o| matches!(o, Order::DismissAgent { .. }))
             .count()
     };
     assert_eq!(dismissals(&state), 0, "a solvent realm keeps its agents");
     state.factions.get_mut(&france).unwrap().treasury = -100;
-    let orders = sim_campaign::agents::plan_agents(&state, data, &france);
+    let orders = sim_campaign::agents::plan_agents(&PlanCache::new(&state), data, &france);
     let dismissed: Vec<_> = orders
         .iter()
         .filter_map(|o| match o {

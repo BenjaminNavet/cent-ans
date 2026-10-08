@@ -3,6 +3,7 @@
 //! the bubble, avoidance of stronger armies, embarkations, determinism and
 //! the time an AI faction takes to play its turn.
 use data_model::test_support::fac;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::test_support::main_army;
 
 use std::time::{Duration, Instant};
@@ -102,7 +103,8 @@ fn routes_avoid_the_zone_of_control_of_stronger_armies() {
         ArmyPosition::field(east_of(data, "set_meaux", 2.0));
     let power = state.army_power(data, &english);
     let france = fac("fac_france");
-    let planner = ai::grid::GridPlanner::new(&state, data, &france);
+    let cache = PlanCache::new(&state);
+    let planner = ai::grid::GridPlanner::new(&cache, data, &france);
     let start = set("set_paris");
     let through_meaux = |table: &ai::grid::Table| {
         table
@@ -442,12 +444,14 @@ fn nearby_friendly_armies_are_counted_once() {
     // Enemy just too strong for the true odds (but not for doubled ones).
     let too_strong = ((ours * 1.1 / ratio) / per_man).ceil() as u32;
     state.armies.get_mut(&french).unwrap().units[0].strength = too_strong;
-    let planner = ai::grid::GridPlanner::new(&state, data, &england);
+    let cache = PlanCache::new(&state);
+    let planner = ai::grid::GridPlanner::new(&cache, data, &england);
     assert_eq!(planner.attack_order(&english), None, "odds overstated");
     // Enemy weak enough for the true odds.
     let weak = ((ours * 0.9 / ratio) / per_man).floor() as u32;
     state.armies.get_mut(&french).unwrap().units[0].strength = weak;
-    let planner = ai::grid::GridPlanner::new(&state, data, &england);
+    let cache = PlanCache::new(&state);
+    let planner = ai::grid::GridPlanner::new(&cache, data, &england);
     assert!(
         matches!(planner.attack_order(&english), Some(Order::Attack { .. })),
         "the joint host attacks a weaker army"
@@ -473,7 +477,8 @@ fn one_attack_per_enemy_army_and_turn() {
     f.position = ArmyPosition::field(east_of(data, "set_meaux", 40.0));
     f.units.truncate(1);
     let england = fac("fac_england");
-    let planner = ai::grid::GridPlanner::new(&state, data, &england);
+    let cache = PlanCache::new(&state);
+    let planner = ai::grid::GridPlanner::new(&cache, data, &england);
     let target = |order: Option<Order>| match order {
         Some(Order::Attack { target_army, .. }) => Some(target_army),
         _ => None,

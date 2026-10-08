@@ -13,6 +13,7 @@ use sim_campaign::diplomacy::{
     MARRIAGE_REASON,
 };
 use sim_campaign::negotiation::plan_peace;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 /// An uncapped goodwill (LR-07: herald embassies are capped when read).
@@ -74,7 +75,7 @@ fn campaign(data: &GameData, level: Difficulty) -> CampaignState {
 }
 
 fn declares(state: &CampaignState, data: &GameData) -> Option<FactionId> {
-    plan_diplomacy(state, data, &fac("fac_england"))
+    plan_diplomacy(&PlanCache::new(state), data, &fac("fac_england"))
         .into_iter()
         .find_map(|order| match order {
             Order::DeclareWar { target } => Some(target),
@@ -182,14 +183,17 @@ fn a_cornered_crown_fights_before_it_sues() {
     let france = fac("fac_france");
     let fresh = fresh_war(&data, 0);
     assert!(is_cornered(&fresh, &data, &france));
-    assert_eq!(plan_peace(&fresh, &data, &france), None);
+    assert_eq!(plan_peace(&PlanCache::new(&fresh), &data, &france), None);
     let beaten = fresh_war(&data, -60);
-    let beaten_offer = plan_peace(&beaten, &data, &france);
+    let beaten_offer = plan_peace(&PlanCache::new(&beaten), &data, &france);
     // Before EQ6 it sued the very season war was declared.
     data.ai_diplomacy.peace.cornered_waits_for_defeat = false;
-    assert!(plan_peace(&fresh, &data, &france).is_some());
+    assert!(plan_peace(&PlanCache::new(&fresh), &data, &france).is_some());
     // Once beaten, it treats as before.
-    assert_eq!(plan_peace(&beaten, &data, &france), beaten_offer);
+    assert_eq!(
+        plan_peace(&PlanCache::new(&beaten), &data, &france),
+        beaten_offer
+    );
 }
 
 #[test]

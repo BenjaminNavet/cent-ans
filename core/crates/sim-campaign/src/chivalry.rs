@@ -20,6 +20,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::state::CampaignState;
 
 /// Ruler prestige lost when the order collapses.
@@ -396,7 +397,8 @@ pub(crate) fn resolve_chivalry(
 
 /// AI: founds the first available order as soon as it can while keeping
 /// four seasons of income in the treasury. Deterministic.
-pub fn ai_found_order(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn ai_found_order(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
         return Vec::new();
     };
@@ -411,7 +413,7 @@ pub fn ai_found_order(state: &CampaignState, data: &GameData, faction: &FactionI
             found_blocker(state, data, faction, &o.id).is_none()
                 && f.treasury - foundation_cost(state, faction, o)
                     >= *reserve
-                        .get_or_insert_with(|| 4 * state.faction_income(data, faction).max(0))
+                        .get_or_insert_with(|| 4 * cache.faction_income(data, faction).max(0))
         })
         .map(|o| {
             vec![Order::FoundChivalricOrder {

@@ -2,6 +2,7 @@
 
 use data_model::GameData;
 use sim_campaign::feudal::{self, FelonyReason, PROTECTION_REFUSED_REASON};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
@@ -81,7 +82,7 @@ fn a_county_declares_no_hopeless_war() {
             technology: data_model::TechnologyId::new("tech_aqua_vitae").unwrap(),
         },
     ];
-    ai::feudal::filter_suicidal_wars(&state, data, &foix, &mut orders);
+    ai::feudal::filter_suicidal_wars(&PlanCache::new(&state), data, &foix, &mut orders);
     assert!(
         !orders.iter().any(|o| matches!(o, Order::DeclareWar { .. })),
         "{orders:?}"
@@ -91,7 +92,12 @@ fn a_county_declares_no_hopeless_war() {
     let mut orders = vec![Order::DeclareWar {
         target: fac("fac_foix_bearn"),
     }];
-    ai::feudal::filter_suicidal_wars(&state, data, &fac("fac_castile"), &mut orders);
+    ai::feudal::filter_suicidal_wars(
+        &PlanCache::new(&state),
+        data,
+        &fac("fac_castile"),
+        &mut orders,
+    );
     assert_eq!(orders.len(), 1);
 }
 
@@ -102,9 +108,12 @@ fn forfeiture_is_declared_on_felony_when_the_odds_allow() {
     let (france, blois) = (fac("fac_france"), fac("fac_blois"));
     // F8: the case of 1337 against England is left aside.
     state.feudal.felonies.clear();
-    assert_eq!(ai::feudal::plan_commise(&state, data, &france), None);
+    assert_eq!(
+        ai::feudal::plan_commise(&PlanCache::new(&state), data, &france),
+        None
+    );
     feudal::open_felony(&mut state, data, &blois, FelonyReason::RefusedHost).expect("case");
-    let order = ai::feudal::plan_commise(&state, data, &france);
+    let order = ai::feudal::plan_commise(&PlanCache::new(&state), data, &france);
     assert_eq!(
         order,
         Some(Order::DeclareCommise {
@@ -135,7 +144,10 @@ fn a_mighty_felon_is_spared() {
         let id = sim_campaign::state::ArmyId::from_index(9000 + n);
         state.armies.insert(id, copy);
     }
-    assert_eq!(ai::feudal::plan_commise(&state, data, &brittany), None);
+    assert_eq!(
+        ai::feudal::plan_commise(&PlanCache::new(&state), data, &brittany),
+        None
+    );
 }
 
 #[test]
@@ -196,7 +208,7 @@ fn a_disloyal_vassal_strong_enough_revolts() {
     let turn = (0..40)
         .find(|t| {
             state.turn = *t;
-            ai::feudal::plan_revolt(&state, data, &penthievre).is_some()
+            ai::feudal::plan_revolt(&PlanCache::new(&state), data, &penthievre).is_some()
         })
         .expect("revolts within 40 turns");
     state.turn = turn;
@@ -212,6 +224,6 @@ fn a_disloyal_vassal_strong_enough_revolts() {
     set_loyalty(&mut state, "fac_blois", 90);
     assert!((0..40).all(|t| {
         state.turn = t;
-        ai::feudal::plan_revolt(&state, data, &fac("fac_blois")).is_none()
+        ai::feudal::plan_revolt(&PlanCache::new(&state), data, &fac("fac_blois")).is_none()
     }));
 }
