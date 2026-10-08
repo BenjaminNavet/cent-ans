@@ -2800,7 +2800,7 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 4000, 15000), 2.5), "figure budget: small battle kept at Ultra")
 	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 10000, 15000), 1.5), "figure budget: large battle not capped")
 	_check(is_equal_approx(BattleScene.capped_figure_scale(1.0, 3000, 0), 1.0), "figure budget: zero budget should mean no cap")
-	_check(Money.digits(15000) == "15\u00a0000", "settings: thousands separator")
+	_check(Money.digits(15000) == "15" + Money.NBSP + "000", "settings: thousands separator")
 	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
 
 
