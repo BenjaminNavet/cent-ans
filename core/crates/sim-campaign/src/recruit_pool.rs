@@ -56,7 +56,7 @@ impl PoolView {
 
 impl CampaignState {
     /// `true` when `settlement` is the city of its controller's capital.
-    fn is_capital_city(&self, settlement: &SettlementId) -> bool {
+    pub(crate) fn is_capital_city(&self, settlement: &SettlementId) -> bool {
         let Some(state) = self.settlements.get(settlement) else {
             return false;
         };
@@ -67,7 +67,7 @@ impl CampaignState {
 
     /// `recruit_slots` points of the settlement's own buildings, governor
     /// and edict (muster field, stables, armoury...).
-    fn pool_slot_points(&self, data: &GameData, settlement: &SettlementId) -> u32 {
+    pub(crate) fn pool_slot_points(&self, data: &GameData, settlement: &SettlementId) -> u32 {
         self.settlement_effects(data, settlement)[EffectKind::RecruitSlots]
             .flat
             .max(0.0) as u32
@@ -80,6 +80,10 @@ impl CampaignState {
         settlement: &SettlementId,
         _unit_type: &UnitTypeId,
     ) -> u32 {
+        self.pool_cap_with(data, settlement, self.pool_slot_points(data, settlement))
+    }
+
+    fn pool_cap_with(&self, data: &GameData, settlement: &SettlementId, slot_points: u32) -> u32 {
         let Some(state) = self.settlements.get(settlement) else {
             return 0;
         };
@@ -88,7 +92,7 @@ impl CampaignState {
         if self.is_capital_city(settlement) {
             cap += rules.capital_cap_bonus;
         }
-        cap + rules.recruit_slot_cap_bonus * self.pool_slot_points(data, settlement)
+        cap + rules.recruit_slot_cap_bonus * slot_points
     }
 
     /// Thousandths of a unit of `unit_type` `settlement` gains each season.
@@ -98,13 +102,28 @@ impl CampaignState {
         settlement: &SettlementId,
         unit_type: &UnitTypeId,
     ) -> u32 {
+        self.pool_rate_with(
+            data,
+            settlement,
+            unit_type,
+            self.pool_slot_points(data, settlement),
+        )
+    }
+
+    fn pool_rate_with(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        unit_type: &UnitTypeId,
+        slot_points: u32,
+    ) -> u32 {
         let Some(state) = self.settlements.get(settlement) else {
             return 0;
         };
         let rules = &data.replenishment_rules.recruit_pool;
         let mut rate = rules.base_rate_milli.get(state.kind)
             + rules.fortification_rate_milli_per_level * u32::from(state.fortification_level)
-            + rules.recruit_slot_rate_milli * self.pool_slot_points(data, settlement);
+            + rules.recruit_slot_rate_milli * slot_points;
         if self.is_capital_city(settlement) {
             rate += rules.capital_rate_milli;
         }
@@ -122,14 +141,28 @@ impl CampaignState {
         settlement: &SettlementId,
         unit_type: &UnitTypeId,
     ) -> PoolView {
-        let cap = self.recruit_pool_cap(data, settlement, unit_type);
+        let slot_points = self.pool_slot_points(data, settlement);
+        self.recruit_pool_with(data, settlement, unit_type, slot_points)
+    }
+
+    /// [`CampaignState::recruit_pool`] with the settlement's
+    /// [`CampaignState::pool_slot_points`] already computed (they cost a
+    /// full effects pass, the same for every unit type).
+    pub(crate) fn recruit_pool_with(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        unit_type: &UnitTypeId,
+        slot_points: u32,
+    ) -> PoolView {
+        let cap = self.pool_cap_with(data, settlement, slot_points);
         let full = cap * MILLI;
         let milli = self
             .settlements
             .get(settlement)
             .and_then(|s| s.recruit_pool.get(unit_type).copied())
             .map_or(full, |m| m.min(full));
-        let rate_milli = self.recruit_pool_rate_milli(data, settlement, unit_type);
+        let rate_milli = self.pool_rate_with(data, settlement, unit_type, slot_points);
         let seasons_to_next = if milli >= full || rate_milli == 0 {
             None
         } else {
@@ -173,6 +206,7 @@ pub fn resolve_recruit_pools(state: &mut CampaignState, data: &GameData) {
         .filter(|(_, s)| !s.recruit_pool.is_empty())
         .map(|(id, s)| {
             let besieged = s.siege.is_some();
+            let slot_points = state.pool_slot_points(data, id);
             let changes = s
                 .recruit_pool
                 .keys()
@@ -180,7 +214,7 @@ pub fn resolve_recruit_pools(state: &mut CampaignState, data: &GameData) {
                     if !data.unit_types.contains_key(unit_type) {
                         return (unit_type.clone(), None);
                     }
-                    let view = state.recruit_pool(data, id, unit_type);
+                    let view = state.recruit_pool_with(data, id, unit_type, slot_points);
                     let rate = if besieged { 0 } else { view.rate_milli };
                     let next = view.milli + rate;
                     let full = view.cap * MILLI;

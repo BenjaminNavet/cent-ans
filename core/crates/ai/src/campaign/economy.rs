@@ -290,8 +290,13 @@ impl<'c, 'a> Recruiting<'c, 'a> {
     ) {
         let ctx = self.ctx;
         let (state, data) = (ctx.state, ctx.data);
+        let Some(recruit_context) =
+            sim_campaign::RecruitContext::new(state, data, ctx.faction, site)
+        else {
+            return;
+        };
         // G1: no more than the settlement's free recruitment slots.
-        let mut free_slots = state.recruit_slots_free(data, site);
+        let mut free_slots = recruit_context.slots_free();
         // TW2-T2: no more of a unit type than the settlement's reserve.
         let mut drawn: BTreeMap<UnitTypeId, u32> = BTreeMap::new();
         while self.recruits < self.max_recruits && free_slots > 0 {
@@ -302,7 +307,7 @@ impl<'c, 'a> Recruiting<'c, 'a> {
                     self.target_upkeep
                 }
             };
-            let repriced = reprice_recruits(state, data, ctx.faction, site, options, &self.supply);
+            let repriced = recruit_context.reprice(options, &self.supply);
             let fitting: Vec<&sim_campaign::RecruitOption> = repriced
                 .iter()
                 .filter(|o| {
@@ -822,22 +827,10 @@ pub fn reprice_recruits(
     options: &[sim_campaign::RecruitOption],
     supply: &BTreeMap<data_model::ResourceId, u32>,
 ) -> Vec<sim_campaign::RecruitOption> {
-    options
-        .iter()
-        .map(|option| {
-            let mut option = option.clone();
-            if !option.resources.is_empty() {
-                if let Some(price) =
-                    state.recruit_price(data, faction, settlement, &option.unit_type, supply)
-                {
-                    option.cost = price.cost;
-                    option.import_cost = price.import_cost;
-                    option.imported = price.draw.imported;
-                }
-            }
-            option
-        })
-        .collect()
+    sim_campaign::RecruitContext::new(state, data, faction, settlement).map_or_else(
+        || options.to_vec(),
+        |context| context.reprice(options, supply),
+    )
 }
 
 /// SV2: removes `needed` from the running `supply` (what is lacking is
