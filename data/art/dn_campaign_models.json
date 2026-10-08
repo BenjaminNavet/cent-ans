@@ -1,0 +1,9 @@
+{
+  "description": "Lot DN camp-bati (D1, ADR 0211) : glb générés semi-réalistes des lieux de la carte de campagne, affichés aux zooms proche et moyen à la place des maquettes stylisées (`town_maquette_layer.gd`), qui restent l'état généralisé du lointain. Table vide = comportement actuel inchangé. Branchement d'un nouveau modèle = une entrée dans table[type][famille] (ou famille `*`, repli) : { \"path\": \"dn/<categorie>/<nom>\" } suffit ; la largeur native est mesurée sur le maillage si `native_width` manque. Les modèles sont mono-surface texturés (albédo baké) ; la couleur du contrôleur ne teinte qu'une bannière procédurale posée au-dessus.",
+  "defaults": {
+    "near_distance": 300.0,
+    "fade_margin": 60.0,
+    "banner_pole_ratio": 0.12
+  },
+  "table": {}
+}

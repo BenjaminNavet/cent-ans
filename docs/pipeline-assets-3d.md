@@ -192,3 +192,50 @@ masque de teinte) → auto-pondération sur le rig `human` ou `cavalry` → LOD1
 Reproductibilité vérifiée le 2026-10-08 : `man_at_arms` (infantry_0) recuit dans un dossier
 temporaire, 6 s sur Blender 5.2.2 : `.mesh.bin` des trois LOD, albédo et entrée de manifeste
 identiques octet pour octet à la version commitée (12 083 sommets, 11 616 triangles de maillage LOD0).
+
+## 7. Lot de nuit (`tools/experiments/dn_batch.py`)
+
+Outil de lot non interactif et reprenable (banc DN du 08/10). Entrée : un catalogue JSON, liste de
+`{"id", "kind": "decor"|"figure", "prompt", "seeds": N, "backend3d": "fal"|"sf3d"|"hf"|"both", "region"?}`
+(`data/art/dn_catalog_*.json`). Sorties hors dépôt : `~/dev/cent-ans-raw/dn/<id>/` (`img/`, `cut_raw/`,
+`cut/`, `contact.png`, `scores.json`, `chosen.json`, `3d/<fal|sf3d|hf>__s<graine>.glb`, `sheet.png`).
+
+```sh
+source <(grep '^export FAL_KEY' ~/.zshrc)
+uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy \
+  python tools/experiments/dn_batch.py CATALOGUE.json --select-best [--until select] \
+  [--only id,id] [--charter strict|warn|off] [--fal-workers 4]
+```
+
+- Étapes `image` (Z-Image Turbo) → `cut` (rembg, cadrage 90 % de 1024²) → `select` → `3d` → `sheet`
+  (Blender headless) → `gallery` (`build.py` relie les glb `dn/` dans `galerie-3d/2-decor|1-figurines`).
+  Une étape dont la sortie existe est sautée : relancer la même commande reprend.
+- `--until select` s'arrête à la planche contact `dn/<id>/contact.png` (et `dn/_contact.png`, toutes les
+  entrées) : l'orchestrateur choisit à l'œil en écrivant `dn/<id>/chosen.json` = `{"seed": N}`, puis relance
+  sans `--until`. Sans `chosen.json` : `--select-best` (heuristique : alpha non coupé au bord, centré,
+  bien rempli, plein) sinon la première graine.
+- Prompt : décor = `style_prefix` + objet + `style_suffix` de `ga3_decor.json`; le champ `region` remplace le
+  segment initial « Rural medieval France circa 1340, humble, » (cathédrales, navires, familles non
+  françaises). Figure = prompt du catalogue tel quel (bible § 14.8), ici en texte seul, sans Qwen.
+- Contrôle de charte D5 (bible § 14.2) à l'étape `select` : S moyenne ≤ 0,35, percentile 95 de S ≤ 0,40,
+  V moyenne 0,25-0,60 sur le détouré hors vert/bleu purs. `strict` (défaut) : l'image refusée ne part pas en 3D
+  (`dn/charter.jsonl`, mention HORS-CHARTE sur la planche); `warn` : signalée seulement.
+  **Piège** : le p95 de S en HSV vaut 0,83-0,86 sur le bois/pierre chauds réalistes (moulin, chariot, 6 images
+  pourtant correctes à l'œil), donc `strict` rejette tout objet en bois. Seuil à revoir (bible) ou lancer en
+  `warn` et juger sur la planche; `--charter-s-p95 0.9` convient aux essais du banc.
+- Verrou GPU global `~/dev/cent-ans-raw/dn/gpu.lock` (flock, attente bloquante) autour de mflux et de SF3D.
+  Envelopper toute autre commande locale : `tools/gpu_lock.sh <commande...>`
+  (ex. `tools/gpu_lock.sh uv run --project tools cent-ans assets ... --local`). fal n'est pas verrouillé.
+- Dépenses fal : `dn/fal_spend.jsonl` (id, endpoint, graine, 0,02 $) à reporter dans `docs/budget.md`;
+  durées : `dn/timings.jsonl`; erreurs (solde fal, quota HF, Blender) : `dn/failures.jsonl`, jamais fatales.
+- Temps mesurés (M4 Pro 48 Go) : Z-Image 1024² 103-119 s/image; rembg 0,5 s (30 s au premier appel, modèle);
+  TRELLIS fal 52-88 s par appel (envoi + génération + export, en parallèle); SF3D 28-29 s/vue (hors
+  chargement ≈ +10 s); planche Blender 3,5 s. Pour 3 graines + fal + SF3D : ≈ 6 min par objet, dont 5,5 de GPU local.
+- Pièges : attendre le verrou peut durer plusieurs minutes si un autre agent génère (observé : 4 et 15 min);
+  TRELLIS HF : quota ZeroGPU épuisé le 08/10 (`exceeded your free ZeroGPU quota`, retour dans ~19 h), l'étape
+  `hf` est optionnelle et son échec est journalisé; sorties SF3D tournées de 180° (la planche corrige);
+  la planche coupe un objet plus large que 1,8 m (roue du moulin fal).
+- Qualité sur les 2 objets (planches `dn/watermill/sheet.png`, `dn/ox_cart/sheet.png`) : TRELLIS fal nettement
+  meilleur (tour de pierre et ardoise nettes, roue à aubes lisible, chariot propre aux 4 roues, couleurs
+  sombres et sobres); SF3D : formes correctes mais texture floue, trop claire et saturée, roue du moulin
+  déchiquetée, chariot bruité. SF3D reste un repli.
