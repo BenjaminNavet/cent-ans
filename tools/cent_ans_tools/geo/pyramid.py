@@ -554,8 +554,7 @@ def require_world_frame(map_dir: Path, step: str) -> None:
     ``fine_anchors.json``, ``towns_1340.json`` and the draped roads read world
     positions (settlements, hamlets, roads) and write world units while sampling
     the cache in its frame. Until the pyramid is recooked in the world frame
-    (``root_origin_tiles`` = ``[0, 0]``), those files are migrated (+1280 y,
-    ``tools/cent_ans_tools/geo/migrate_om2.py``) instead of regenerated.
+    (``root_origin_tiles`` = ``[0, 0]``), those files must be regenerated.
 
     Raises:
         RuntimeError: ``root_origin_tiles`` is not ``(0, 0)``.

@@ -696,47 +696,6 @@ def geo_relief_all(
     console.print("[green]Cache de relief complet.[/green]")
 
 
-@geo_app.command("relief-reframe")
-def geo_relief_reframe(
-    src: str = typer.Option(
-        "",
-        "--src",
-        help="Cache à recadrer (défaut : data/map/pyramid, recadré sur place)",
-    ),
-    manifests: bool = typer.Option(
-        False,
-        "--manifests",
-        help="Décale aussi les manifestes versionnés (une seule fois, dans le dépôt)",
-    ),
-) -> None:
-    """Recadre le cache de relief dans le cadre du manifeste (ADR 0121), sans recuire.
-
-    Tuiles renommées (liens durs depuis --src), fleuves et routes fins décalés.
-    """
-    from pathlib import Path
-
-    from cent_ans_tools.geo import pyramid, world_frame
-
-    dst = pyramid.MAP_DIR / pyramid.PYRAMID_DIR_NAME
-    source = Path(src) if src else dst
-    old = world_frame.cache_origin(source) or world_frame.LEGACY_ORIGIN
-    new = world_frame.manifest_origin(pyramid.MAP_DIR)
-    if manifests:
-        new = (0, 0)
-    shift = (old[0] - new[0], old[1] - new[1])
-    if shift == (0, 0):
-        console.print("Cache déjà dans le cadre du manifeste : rien à faire.")
-        return
-    counts = world_frame.reframe_cache(source, dst, shift, log=console.print)
-    world_frame.write_frame(dst, new)
-    if manifests:
-        world_frame.shift_manifests(pyramid.MAP_DIR, shift, dst)
-    console.print(
-        f"{counts['relief']} tuiles de relief, {counts['cafv']} tuiles fines "
-        f"recadrées (décalage {list(shift)})"
-    )
-
-
 @geo_app.command("relief-pack")
 def geo_relief_pack(
     out: str = typer.Option(

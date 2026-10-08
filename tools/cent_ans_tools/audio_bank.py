@@ -4,7 +4,7 @@ Reproducible pipeline, run with::
 
     uv run --project tools --with soundfile python -m cent_ans_tools.audio_bank
 
-1. **Sources** (``SOURCES``): Freesound sounds chosen with ``freesound_search`` among
+1. **Sources** (``SOURCES``): Freesound sounds chosen by hand among
    the "Creative Commons 0" results. Each sound page is fetched and its licence is
    checked again, page by page (``verify_licence``): the page must link the CC0 deed
    and no other Creative Commons licence, otherwise the build stops. The public
