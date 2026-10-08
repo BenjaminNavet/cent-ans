@@ -6,7 +6,7 @@
 use godot::prelude::*;
 use sim_campaign::map_scenes;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -19,7 +19,7 @@ impl CampaignSim {
     /// campaign starts.
     #[func]
     fn get_map_scenes(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         map_scenes::map_scenes(state, data)

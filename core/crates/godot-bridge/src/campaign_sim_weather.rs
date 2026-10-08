@@ -4,7 +4,7 @@
 use godot::prelude::*;
 use sim_campaign::weather::{self, ProvinceWeather};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn weather_dict(w: &ProvinceWeather) -> VarDictionary {
     vdict! {
@@ -21,7 +21,7 @@ impl CampaignSim {
     /// before a campaign starts. Deterministic (seed, date, province).
     #[func]
     fn get_campaign_weather(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let mut out = VarDictionary::new();
@@ -35,7 +35,7 @@ impl CampaignSim {
     /// when unknown.
     #[func]
     fn get_province_weather(&self, province: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let wanted = province.to_string();

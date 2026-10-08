@@ -7,7 +7,7 @@ use data_model::SettlementId;
 use godot::prelude::*;
 use sim_campaign::agents::{self, Agent, AgentId, AgentReport};
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn report_dict(report: &AgentReport) -> VarDictionary {
     vdict! {
@@ -24,7 +24,7 @@ fn report_dict(report: &AgentReport) -> VarDictionary {
 
 impl CampaignSim {
     fn agent_dict(&self, id: &AgentId, agent: &Agent) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let rules = agents::rules(data);
@@ -65,7 +65,7 @@ impl CampaignSim {
     /// `preacher`; the UI hides foreign agents standing out of sight.
     #[func]
     fn get_agents(&self) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -79,7 +79,7 @@ impl CampaignSim {
     /// One agent (see `get_agents`), empty for an unknown id.
     #[func]
     fn get_agent(&self, id: GString) -> VarDictionary {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(id) = AgentId::parse(&id.to_string()) else {
@@ -94,7 +94,7 @@ impl CampaignSim {
     /// `{settlement_id: cost}` the agent can reach this season.
     #[func]
     fn get_agent_reachable(&self, id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(id) = AgentId::parse(&id.to_string()) else {
@@ -111,7 +111,7 @@ impl CampaignSim {
     /// available, reason, chance, cost, death_risk, description}]`.
     #[func]
     fn get_agent_actions(&self, id: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Some(id) = AgentId::parse(&id.to_string()) else {
@@ -148,7 +148,7 @@ impl CampaignSim {
     /// cost, upkeep, count, max, available, reason}]`.
     #[func]
     fn get_agent_recruit_options(&self, settlement: GString) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         let Ok(settlement) = SettlementId::new(settlement.to_string()) else {

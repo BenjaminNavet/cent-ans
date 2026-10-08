@@ -5,7 +5,7 @@ use data_model::{EventId, FactionId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::Order;
 
-use crate::campaign_sim::{order_result, CampaignSim};
+use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -15,7 +15,7 @@ impl CampaignSim {
     /// `presentation` (FK1) is `map` (incident posed on the map) or `dialog`.
     #[func]
     fn get_pending_decisions(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -66,17 +66,12 @@ impl CampaignSim {
     /// Answers a pending decision (same as the `choose_event_option` order).
     #[func]
     fn choose_event_option(&mut self, decision: i64, option: i64) -> VarDictionary {
-        if self.refuse_while_turn_pending("choose_event_option") {
-            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
-        }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
-            return order_result(Err("aucune campagne en cours".to_owned()));
-        };
-        let order = Order::ChooseEventOption {
-            decision: decision.max(0) as u32,
-            option: option.max(0) as usize,
-        };
-        order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+        self.run_order("choose_event_option", || {
+            Ok(Order::ChooseEventOption {
+                decision: decision.max(0) as u32,
+                option: option.max(0) as usize,
+            })
+        })
     }
 
     /// Staging (UI tests, screenshots, FK5): offers `event` to the player as
@@ -87,7 +82,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_offer_decision") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let Ok(event) = EventId::new(event.to_string()) else {
@@ -111,7 +106,7 @@ impl CampaignSim {
     /// the turn journal dictionaries (`faction`, `province`, `public`).
     #[func]
     fn classify_news(&self, events: VarArray) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return events
                 .iter_shared()
                 .map(|_| GString::from("player"))

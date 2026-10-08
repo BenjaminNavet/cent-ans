@@ -4,7 +4,7 @@
 use godot::prelude::*;
 use sim_campaign::AiMoveRecord;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn text(value: Option<&str>) -> &str {
     value.unwrap_or("")
@@ -57,7 +57,7 @@ impl CampaignSim {
     /// siege|battle, priority: 0-4}]`. Empty when the record is off.
     #[func]
     fn get_ai_turn_moves(&self) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         state

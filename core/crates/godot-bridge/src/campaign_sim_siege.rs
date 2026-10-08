@@ -3,7 +3,7 @@
 use godot::prelude::*;
 use sim_campaign::ArmyId;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -11,7 +11,7 @@ impl CampaignSim {
     /// the next turn's journal): `[{kind, text_fr, province, faction}]`.
     #[func]
     fn get_pending_events(&self) -> VarArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -40,7 +40,7 @@ impl CampaignSim {
     /// is refused (French, empty when it may be given).
     #[func]
     fn get_assault_odds(&self, army: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return vdict! { "available" => false };
         };
         let Some(id) = ArmyId::parse(&army.to_string()) else {

@@ -7,6 +7,7 @@
 //! Une `#[func]` sans appelant est supprimée, avec les fonctions du cœur qu'elle
 //! seule utilisait.
 
+use crate::convert::vec2_f64;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -19,11 +20,16 @@ mod battle_pose_lerp;
 mod battle_replay;
 mod battle_sim;
 mod battle_sim_abilities;
+mod battle_sim_campaign;
 mod battle_sim_formation;
 mod battle_sim_modes;
+mod battle_sim_orders;
 mod battle_sim_poses;
 mod battle_sim_preview;
 mod battle_sim_queue;
+mod battle_sim_state;
+mod battle_sim_terrain;
+mod battle_sim_units;
 mod battle_step_job;
 mod campaign_sim;
 mod campaign_sim_agents;
@@ -174,8 +180,8 @@ impl GameDataStore {
             "neighbors" =>&ids_of(sim_campaign::movement::land_neighbors(data, &province.id).iter()),
         };
         if let Some(geometry) = data.province_geometry.get(&province.id) {
-            dict.set("centroid", vector2(geometry.centroid));
-            dict.set("capital_px", vector2(geometry.capital_px));
+            dict.set("centroid", vec2_f64(geometry.centroid));
+            dict.set("capital_px", vec2_f64(geometry.capital_px));
         }
         dict
     }
@@ -375,10 +381,6 @@ fn date_dict(date: Option<&HistoricalDate>) -> VarDictionary {
 /// Parses `#RRGGBB`; falls back to magenta so a bad colour is visible.
 fn html_color(html: &str) -> Color {
     Color::from_html(html).unwrap_or(Color::MAGENTA)
-}
-
-fn vector2(point: [f64; 2]) -> Vector2 {
-    Vector2::new(point[0] as f32, point[1] as f32)
 }
 
 #[cfg(test)]

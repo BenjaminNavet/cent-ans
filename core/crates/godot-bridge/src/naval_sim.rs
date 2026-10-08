@@ -1,10 +1,10 @@
 //! Naval battles on the GDExtension side: the naval methods of `CampaignSim`
 //! (a secondary `#[godot_api]` block). Naval battles are auto-resolved only.
 
+use crate::convert::{resolve_reply, to_dict};
 use godot::prelude::*;
 
-use crate::battle_sim::{result_dict, to_dict};
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -14,7 +14,7 @@ impl CampaignSim {
     /// army_men, win_chance, player_side, seed}]`.
     #[func]
     fn get_pending_naval_battles(&self) -> VarArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarArray::new();
         };
         state
@@ -33,7 +33,7 @@ impl CampaignSim {
     /// Setup of pending naval battle `index` for the pre-battle dialog.
     #[func]
     fn get_naval_battle_setup(&self, index: i64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         match state.naval_battle_setup(data, index.max(0) as usize) {
@@ -49,18 +49,18 @@ impl CampaignSim {
     #[func]
     fn auto_resolve_naval_battle(&mut self, index: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("auto_resolve_naval_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         match state.auto_resolve_naval_battle(data, index.max(0) as usize) {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 dict
             }
-            Err(error) => result_dict(Err(error.to_string())),
+            Err(error) => resolve_reply(Err(error.to_string())),
         }
     }
 
@@ -68,18 +68,18 @@ impl CampaignSim {
     #[func]
     fn withdraw_naval_battle(&mut self, index: i64) -> VarDictionary {
         if self.refuse_while_turn_pending("withdraw_naval_battle") {
-            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+            return resolve_reply(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
-            return result_dict(Err("aucune campagne en cours".to_owned()));
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
+            return resolve_reply(Err("aucune campagne en cours".to_owned()));
         };
         match state.withdraw_naval_battle(data, index.max(0) as usize) {
             Ok(events) => {
-                let mut dict = result_dict(Ok(()));
+                let mut dict = resolve_reply(Ok(()));
                 dict.set("events", &events_array(&events));
                 dict
             }
-            Err(error) => result_dict(Err(error.to_string())),
+            Err(error) => resolve_reply(Err(error.to_string())),
         }
     }
 
@@ -87,7 +87,7 @@ impl CampaignSim {
     /// level, name}}, blockaded: [settlement]}`.
     #[func]
     fn get_naval_state(&self) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let mut naval = state.naval.clone();
@@ -115,7 +115,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_stage_naval") {
             return -1;
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return -1;
         };
         let (Some(army), Ok(to), Ok(by)) = (

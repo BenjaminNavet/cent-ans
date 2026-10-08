@@ -8,7 +8,7 @@ use data_model::{CharacterId, GameData};
 use godot::prelude::*;
 use sim_campaign::CampaignState;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 /// Hard cap on the number of nodes returned (the UI lays out every node).
 const MAX_NODES: usize = 120;
@@ -28,7 +28,7 @@ impl CampaignSim {
     /// an unknown id or before a campaign starts.
     #[func]
     fn get_family_tree(&self, character: GString, up: i64, down: i64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(root) = CharacterId::new(character.to_string()) else {

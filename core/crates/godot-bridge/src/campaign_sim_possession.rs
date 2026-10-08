@@ -6,7 +6,7 @@
 use data_model::{FactionId, ProvinceId, SettlementId};
 use godot::prelude::*;
 
-use crate::campaign_sim::CampaignSim;
+use crate::campaign_sim::{CampaignSim, Ctx};
 
 impl CampaignSim {
     /// `viewer`, or the player's faction when it is empty or malformed.
@@ -36,7 +36,7 @@ impl CampaignSim {
     /// owner at their peace unless ceded. Empty for an unknown id.
     #[func]
     fn province_possession(&self, id: GString, viewer: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(viewer) = self.possession_viewer(&viewer) else {
@@ -97,7 +97,7 @@ impl CampaignSim {
     /// the city of its province). Empty for an unknown id.
     #[func]
     fn settlement_possession(&self, id: GString, viewer: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(viewer) = self.possession_viewer(&viewer) else {

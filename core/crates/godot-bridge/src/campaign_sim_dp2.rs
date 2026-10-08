@@ -11,10 +11,8 @@ use sim_campaign::stance::diplomatic_stance;
 use sim_campaign::treaty_explain::explain_treaty;
 use sim_campaign::ArmyId;
 
-use crate::campaign_sim::CampaignSim;
-use crate::campaign_sim_treaty::{
-    articles_array, error_dict, faction_label, parse, province_label,
-};
+use crate::campaign_sim::{CampaignSim, Ctx};
+use crate::campaign_sim_treaty::{articles_array, error_dict, parse};
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -25,7 +23,7 @@ impl CampaignSim {
     /// incident). `warning` is "" when the march is lawful.
     #[func]
     fn find_path_trespass(&self, army_id: GString, x: f64, y: f64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return vdict! { "ok" => false };
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -44,9 +42,9 @@ impl CampaignSim {
             .map(|c| {
                 vdict! {
                     "province" => c.province.as_str(),
-                    "province_name" => province_label(data, &c.province).as_str(),
+                    "province_name" => data.province_name(&c.province).as_str(),
                     "owner" => c.owner.as_str(),
-                    "owner_name" => faction_label(data, &c.owner).as_str(),
+                    "owner_name" => data.faction_name(&c.owner).as_str(),
                     "halt" => c.halt,
                 }
                 .to_variant()
@@ -57,7 +55,7 @@ impl CampaignSim {
         } else {
             let mut owners: Vec<String> = Vec::new();
             for c in &crossings {
-                let name = faction_label(data, &c.owner);
+                let name = data.faction_name(&c.owner);
                 if !owners.contains(&name) {
                     owners.push(name);
                 }
@@ -88,7 +86,7 @@ impl CampaignSim {
     /// province is unknown or held by rebels.
     #[func]
     fn get_province_stances(&self, province_ids: PackedStringArray) -> PackedStringArray {
-        let Some(state) = &self.state else {
+        let Some(Ctx { state, .. }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let player = GString::from(state.player_faction().as_str());
@@ -104,7 +102,7 @@ impl CampaignSim {
         viewer: GString,
         province_ids: PackedStringArray,
     ) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return PackedStringArray::new();
         };
         let Some(viewer) = FactionId::new(viewer.to_string())
@@ -138,7 +136,7 @@ impl CampaignSim {
     /// always "war". Empty when `viewer` is unknown.
     #[func]
     fn get_faction_stances_for(&self, viewer: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(viewer) = FactionId::new(viewer.to_string())
@@ -166,7 +164,7 @@ impl CampaignSim {
     /// `get_province_stances`) with its French label: `{key, label}`.
     #[func]
     fn get_faction_stance(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(faction) = FactionId::new(faction.to_string()) else {
@@ -185,7 +183,7 @@ impl CampaignSim {
     /// `grievance`: the victim holds a casus belli).
     #[func]
     fn get_trespass(&self, faction: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Ok(other) = FactionId::new(faction.to_string()) else {
@@ -201,7 +199,7 @@ impl CampaignSim {
                 .map(|t| {
                     t.provinces
                         .iter()
-                        .map(|p| GString::from(province_label(data, p).as_str()))
+                        .map(|p| GString::from(data.province_name(p).as_str()))
                         .collect()
                 })
                 .unwrap_or_default();
@@ -228,7 +226,7 @@ impl CampaignSim {
     /// general consideration.
     #[func]
     fn explain_treaty(&self, target: GString, articles: VarArray) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return error_dict("aucune campagne en cours");
         };
         let (target, articles) = match parse(state, &target, &articles) {

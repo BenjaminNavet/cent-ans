@@ -3,6 +3,7 @@
 //! "bubble" as a mask image, the turn-by-turn path preview, and the move,
 //! attack and embark orders with the march they caused.
 
+use crate::convert::vec2_f32;
 use data_model::SettlementId;
 use godot::classes::image::Format;
 use godot::classes::Image;
@@ -11,7 +12,7 @@ use serde_json::Value;
 use sim_campaign::navigation::Cell;
 use sim_campaign::{ArmyId, CampaignState, MoveReport, Order, OrderOutcome};
 
-use crate::campaign_sim::{events_array, CampaignSim};
+use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 /// Empty cells kept around the bubble in the mask (smooth contour).
 const MASK_MARGIN: u32 = 2;
@@ -27,7 +28,7 @@ impl CampaignSim {
     #[func]
     fn get_stance_options(&self, army_id: GString) -> VarDictionary {
         let mut dict = VarDictionary::new();
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return dict;
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -60,7 +61,7 @@ impl CampaignSim {
     /// when the army is unknown.
     #[func]
     fn get_reachable_area(&self, army_id: GString) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return VarDictionary::new();
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -157,7 +158,7 @@ impl CampaignSim {
     /// `{ok: false}` when unreachable.
     #[func]
     fn find_path_points(&self, army_id: GString, x: f64, y: f64) -> VarDictionary {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(Ctx { state, data }) = self.ctx() else {
             return vdict! { "ok" => false };
         };
         let Some(army) = ArmyId::parse(&army_id.to_string()) else {
@@ -185,7 +186,7 @@ impl CampaignSim {
     }
 
     /// Order `move_army` to map pixel `(x, y)`, executed at once; returns the
-    /// march report (see `submit_order_report`).
+    /// march report.
     #[func]
     fn move_army_to(&mut self, army_id: GString, x: f64, y: f64) -> VarDictionary {
         let order = serde_json::json!({
@@ -236,7 +237,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("debug_place_army") {
             return false;
         }
-        let Some(state) = &mut self.state else {
+        let Some(CtxMut { state, .. }) = self.ctx_mut() else {
             return false;
         };
         let Some(army) =
@@ -255,7 +256,7 @@ impl CampaignSim {
         if self.refuse_while_turn_pending("run_order_json") {
             return failure(crate::campaign_sim_turn::TURN_PENDING_FR);
         }
-        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+        let Some(CtxMut { state, data }) = self.ctx_mut() else {
             return failure("aucune campagne en cours");
         };
         let order = match serde_json::from_value::<Order>(json) {
@@ -364,10 +365,6 @@ fn failure(error: &str) -> VarDictionary {
     }
 }
 
-fn to_vec2(point: [f32; 2]) -> Vector2 {
-    Vector2::new(point[0], point[1])
-}
-
 /// Current position fields of `army` (after the order).
 fn position_fields(
     dict: &mut VarDictionary,
@@ -380,7 +377,7 @@ fn position_fields(
     let Some(entry) = entry else {
         return;
     };
-    dict.set("position", to_vec2(state.army_point(data, entry)));
+    dict.set("position", vec2_f32(state.army_point(data, entry)));
     dict.set(
         "settlement",
         entry.settlement().map_or("", SettlementId::as_str),
@@ -396,10 +393,10 @@ fn report_dict(
 ) -> VarDictionary {
     let mut walked = PackedVector2Array::new();
     if let Some(start) = start {
-        walked.push(to_vec2(start));
+        walked.push(vec2_f32(start));
     }
     for point in &report.walked {
-        let point = to_vec2(*point);
+        let point = vec2_f32(*point);
         if walked.as_slice().last() != Some(&point) {
             walked.push(point);
         }
@@ -408,7 +405,7 @@ fn report_dict(
     let planned: PackedVector2Array = report
         .planned_path
         .iter()
-        .map(|cell| to_vec2(cell.center(grid)))
+        .map(|cell| vec2_f32(cell.center(grid)))
         .collect();
     let stop = serde_json::to_value(&report.stop).unwrap_or(Value::Null);
     let field = |key: &str| {
@@ -442,8 +439,8 @@ fn done_dict(
     if let (Some(start), Some(entry)) = (start, army.and_then(|id| state.army(id))) {
         let end = state.army_point(data, entry);
         if end != start {
-            walked.push(to_vec2(start));
-            walked.push(to_vec2(end));
+            walked.push(vec2_f32(start));
+            walked.push(vec2_f32(end));
         }
     }
     let mut dict = vdict! {
