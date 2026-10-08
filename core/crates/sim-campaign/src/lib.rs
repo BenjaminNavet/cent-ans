@@ -128,10 +128,7 @@ pub use chronicle::{
 };
 pub use coinage::{CoinageError, CoinageLevel, CoinageParams};
 pub use crusade::{CrusadeError, CrusadeState, CrusadeView, FervorChange, PendingPassage};
-pub use diplomacy::{
-    Claim, DiplomacyEntry, DiplomacyError, Evaluation, Offer, OpinionModifier, Proposal,
-    RelationKind,
-};
+pub use diplomacy::{Claim, DiplomacyEntry, DiplomacyError, Offer, OpinionModifier, RelationKind};
 pub use dynasty::{
     CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
     MARRIAGE_MIN_AGE,

@@ -3,7 +3,8 @@
 
 use data_model::{FactionId, GameData, ProvinceId};
 use godot::prelude::*;
-use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
+use sim_campaign::diplomacy::RelationKind;
+use sim_campaign::negotiation::{evaluate_treaty, Article};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
 
@@ -86,31 +87,21 @@ impl CampaignSim {
             }
         };
         let player = state.player_faction().clone();
-        let (target, proposal) = match order {
-            Order::ProposePeace {
-                target,
-                provinces,
-                tribute,
-            } => (target, Proposal::Peace { provinces, tribute }),
-            Order::ProposeAlliance { target } => (target, Proposal::Alliance),
-            Order::DemandVassalage { target } => (target, Proposal::Vassalage),
-            Order::ProposeFactionMarriage {
-                target,
-                character,
-                spouse,
-            } => (target, Proposal::Marriage { character, spouse }),
+        let (target, articles) = match order {
+            Order::DeclareWar { target } => return war_verdict(state, data, &player, &target),
             Order::RequestPapalMediation { target } => (
                 target,
-                Proposal::Truce {
+                vec![Article::Mediation {
                     turns: sim_campaign::diplomacy::MEDIATION_TRUCE_TURNS,
-                },
+                }],
             ),
-            Order::DeclareWar { target } => return war_verdict(state, data, &player, &target),
-            Order::ProposeTreaty { target, articles } => (target, Proposal::Treaty { articles }),
-            _ => return verdict(true, 0, &[]),
+            other => match other.proposal(state, &player) {
+                Some((target, treaty)) => (target, treaty.articles),
+                None => return verdict(true, 0, &[]),
+            },
         };
-        let evaluation = evaluate(state, data, &player, &target, &proposal);
-        verdict(evaluation.accept, evaluation.score, &evaluation.reasons)
+        let evaluation = evaluate_treaty(state, data, &player, &target, &articles);
+        verdict(evaluation.accept, evaluation.score, &evaluation.reasons())
     }
 
     /// Offers waiting for the player's answer.
@@ -126,15 +117,12 @@ impl CampaignSim {
             .offers
             .iter()
             .map(|offer| {
-                let kind = serde_json::to_value(&offer.proposal)
-                    .ok()
-                    .and_then(|v| v.get("kind").and_then(|k| k.as_str().map(str::to_owned)))
-                    .unwrap_or_default();
+                let kind = offer.proposal.kind();
                 vdict! {
                     "id" => i64::from(offer.id),
                     "from" => offer.from.as_str(),
                     "from_name" => data.factions.get(&offer.from).map_or(offer.from.as_str(), |f| f.short_or_display_name()),
-                    "kind" => kind.as_str(),
+                    "kind" => kind,
                     "text" => offer.text_fr.as_str(),
                     "expires_in" => i64::from(offer.expires_turn.saturating_sub(state.turn()).saturating_sub(1)),
                 }
@@ -157,10 +145,7 @@ impl CampaignSim {
             return VarDictionary::new();
         };
         let religion = faction_religion(state, data, &faction);
-        let pending = f
-            .offers
-            .iter()
-            .any(|o| matches!(o.proposal, Proposal::Obedience { .. }));
+        let pending = f.offers.iter().any(|o| o.proposal.is_obedience());
         vdict! {
             "religion" => religion.as_ref().map_or("", |r| r.as_str()),
             "religion_name" => religion.as_ref().map_or(String::new(), |r| religion_display(state, data, r)).as_str(),

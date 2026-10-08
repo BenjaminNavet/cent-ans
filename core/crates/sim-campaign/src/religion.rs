@@ -4,10 +4,10 @@
 use data_model::{BuildingCategory, FactionId, GameData, ProvinceId, ReligionId, ReligionKind};
 
 use crate::diplomacy::{
-    DiplomacyError, Proposal, MEDIATION_COST, MEDIATION_MIN_FAVOR, MEDIATION_TRUCE_TURNS,
-    PAPACY_FACTION,
+    DiplomacyError, MEDIATION_COST, MEDIATION_MIN_FAVOR, MEDIATION_TRUCE_TURNS, PAPACY_FACTION,
 };
 use crate::events::{EventKind, GameEvent};
+use crate::negotiation::{Article, Treaty};
 use crate::state::{CampaignState, Season};
 
 /// Excommunication length (10 years).
@@ -252,9 +252,9 @@ impl CampaignState {
             data,
             faction,
             target,
-            Proposal::Truce {
+            Treaty::single(Article::Mediation {
                 turns: MEDIATION_TRUCE_TURNS,
-            },
+            }),
         )?;
         self.factions.get_mut(faction).expect("checked").treasury -= MEDIATION_COST;
         if let Some(papacy) = FactionId::new(PAPACY_FACTION)
@@ -450,7 +450,7 @@ impl CampaignState {
             f.offers.push(crate::diplomacy::Offer {
                 id,
                 from: from.clone(),
-                proposal: Proposal::Obedience { religion },
+                proposal: Treaty::single(Article::Obedience { religion }),
                 expires_turn,
                 text_fr: text,
             });

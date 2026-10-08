@@ -36,8 +36,9 @@ pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
 pub use entities::ai_diplomacy::{
-    AiDiplomacy, JoinWarRules, MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules,
-    WarPlanningRules,
+    AiDiplomacy, AllianceWeights, ContextWeights, ExchangeWeights, JoinWarRules, MarriageWeights,
+    MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules, PeaceWeights,
+    TreatyWeights, VassalageWeights, WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy, ShareCap};
 pub use entities::ai_feudal::AiFeudal;

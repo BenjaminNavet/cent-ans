@@ -9,9 +9,10 @@ use std::collections::BTreeMap;
 
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
-    claim_stakes, evaluate, rivals, war_ready, Proposal, RelationKind, AGGRESSION_REASON,
-    AT_WAR_REASON, DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
+    claim_stakes, rivals, war_ready, RelationKind, AGGRESSION_REASON, AT_WAR_REASON,
+    DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
 };
+use sim_campaign::negotiation::{evaluate_treaty, Article};
 use sim_campaign::{CampaignState, Order};
 
 /// Salt of the wool revolt roll.
@@ -278,13 +279,9 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
     let Some((patron, invader)) = side_change(state, data, faction) else {
         return Vec::new();
     };
-    let white = Proposal::Peace {
-        provinces: Vec::new(),
-        tribute: 0,
-    };
     if state.is_at_war(faction, &invader) {
         let accepted = invader != state.player_faction
-            && evaluate(state, data, faction, &invader, &white).accept;
+            && evaluate_treaty(state, data, faction, &invader, &[Article::Peace]).accept;
         return if accepted {
             vec![Order::ProposePeace {
                 target: invader,
@@ -446,7 +443,7 @@ pub fn plan_dynastic_alliance(
             let margin = if in_law { 0 } else { rules.dynastic.margin };
             *towards_us > towards_enemy + margin && *towards_us >= rules.dynastic.min_attitude
         })
-        .filter(|(id, _, _)| evaluate(state, data, faction, id, &Proposal::Alliance).accept)
+        .filter(|(id, _, _)| evaluate_treaty(state, data, faction, id, &[Article::Alliance]).accept)
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(a.0)))
         .map(|(target, _, _)| Order::ProposeAlliance {
             target: target.clone(),

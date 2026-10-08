@@ -17,9 +17,9 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::CANCEL_REFUND_PERCENT;
-use crate::diplomacy::Proposal;
 use crate::dynasty::{self, GovernorError, MarriageError};
 use crate::economy::TaxRate;
+use crate::negotiation::{Article, Party, Treaty};
 use crate::research::{self, ResearchError};
 use crate::skills::{self, LearnSkillError};
 use crate::state::{
@@ -458,6 +458,46 @@ impl Order {
             },
         }
     }
+
+    /// The treaty a diplomatic order proposes, with its target (`None` for
+    /// any other order).
+    pub fn proposal(
+        &self,
+        state: &CampaignState,
+        proposer: &FactionId,
+    ) -> Option<(FactionId, Treaty)> {
+        let (target, treaty) = match self {
+            Order::ProposePeace {
+                target,
+                provinces,
+                tribute,
+            } => (
+                target,
+                Treaty::peace_terms(state, proposer, provinces, *tribute),
+            ),
+            Order::ProposeAlliance { target } => (target, Treaty::single(Article::Alliance)),
+            Order::ProposeTreaty { target, articles } => (target, Treaty::new(articles.clone())),
+            Order::DemandVassalage { target } => (
+                target,
+                Treaty::single(Article::Vassalage {
+                    giver: Party::Recipient,
+                }),
+            ),
+            Order::ProposeFactionMarriage {
+                target,
+                character,
+                spouse,
+            } => (
+                target,
+                Treaty::single(Article::Marriage {
+                    character: character.clone(),
+                    spouse: spouse.clone(),
+                }),
+            ),
+            _ => return None,
+        };
+        Some((target.clone(), treaty))
+    }
 }
 
 /// What an order did, for the orders whose effect the UI shows (lot M2).
@@ -792,12 +832,31 @@ impl CampaignState {
         faction: &FactionId,
         order: Order,
     ) -> Result<(), OrderError> {
+        if let Some((target, treaty)) = order.proposal(self, faction) {
+            if let Order::ProposeFactionMarriage {
+                character, spouse, ..
+            } = &order
+            {
+                self.check_owned_character(faction, character)?;
+                if self.characters.get(spouse).map(|c| &c.faction) != Some(&target) {
+                    return Err(OrderError::NotYourCharacter(target));
+                }
+            }
+            return Ok(self.propose(data, faction, &target, treaty)?);
+        }
         match order {
             Order::MoveArmy { .. }
             | Order::Attack { .. }
             | Order::Embark { .. }
             | Order::ChooseEncounterOption { .. } => {
                 unreachable!("handled by apply_order_outcome")
+            }
+            Order::ProposePeace { .. }
+            | Order::ProposeAlliance { .. }
+            | Order::ProposeTreaty { .. }
+            | Order::DemandVassalage { .. }
+            | Order::ProposeFactionMarriage { .. } => {
+                unreachable!("handled by Order::proposal")
             }
             Order::Recruit {
                 settlement,
@@ -913,22 +972,6 @@ impl CampaignState {
                 Ok(())
             }
             Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),
-            Order::ProposePeace {
-                target,
-                provinces,
-                tribute,
-            } => Ok(self.propose(
-                data,
-                faction,
-                &target,
-                Proposal::Peace { provinces, tribute },
-            )?),
-            Order::ProposeAlliance { target } => {
-                Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
-            }
-            Order::ProposeTreaty { target, articles } => {
-                Ok(self.propose(data, faction, &target, Proposal::Treaty { articles })?)
-            }
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
             Order::BreakTradeAgreement { target } => {
                 Ok(self.break_trade_agreement(data, faction, &target)?)
@@ -936,28 +979,9 @@ impl CampaignState {
             Order::SetEmbargo { target, active } => {
                 Ok(self.set_embargo(data, faction, &target, active)?)
             }
-            Order::DemandVassalage { target } => {
-                Ok(self.propose(data, faction, &target, Proposal::Vassalage)?)
-            }
             Order::ReleaseVassal { target } => Ok(self.release_vassal(data, faction, &target)?),
             Order::SendGift { target, amount } => {
                 Ok(self.send_gift(data, faction, &target, amount)?)
-            }
-            Order::ProposeFactionMarriage {
-                target,
-                character,
-                spouse,
-            } => {
-                self.check_owned_character(faction, &character)?;
-                if self.characters.get(&spouse).map(|c| &c.faction) != Some(&target) {
-                    return Err(OrderError::NotYourCharacter(target));
-                }
-                Ok(self.propose(
-                    data,
-                    faction,
-                    &target,
-                    Proposal::Marriage { character, spouse },
-                )?)
             }
             Order::AnswerOffer { offer, accept } => {
                 Ok(self.answer_offer(data, faction, offer, accept)?)

@@ -25,11 +25,20 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{
     CharacterId, FactionId, GameData, NegotiationRules, ProvinceId, SettlementId, SettlementKind,
-    TitleId,
+    TitleId, TreatyWeights,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::diplomacy::{self, DiplomacyError, Proposal, RelationKind};
+mod apply;
+mod check;
+mod context;
+mod label;
+mod reasons;
+mod value;
+
+pub use reasons::ReasonList;
+
+use crate::diplomacy::{self, DiplomacyError, RelationKind};
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
 use crate::state::CampaignState;
@@ -78,6 +87,11 @@ pub enum Article {
     Peace,
     /// Ends the war with a short truce.
     Truce {
+        turns: u32,
+    },
+    /// White peace of `turns` seasons obtained through the pope's or a
+    /// herald's mediation: the recipient owes it a good turn.
+    Mediation {
         turns: u32,
     },
     Alliance,
@@ -134,6 +148,31 @@ pub enum Article {
         giver: Party,
         title: TitleId,
     },
+    /// Great Schism: the recipient switches to `religion`. Not a bargain:
+    /// created by the core, answered by the player.
+    Obedience {
+        religion: data_model::ReligionId,
+    },
+    /// FE (§ 4.3): the proposer, a direct vassal of the recipient, is
+    /// attacked by `aggressor` and calls for protection. Accept: intervene;
+    /// refuse or let expire: shirk. Only sent to the player.
+    Protection {
+        aggressor: FactionId,
+    },
+    /// FE (§ 4.3.5): private war of `attacker` against `target`, both direct
+    /// vassals of the recipient. Accept: impose peace; refuse or let expire:
+    /// let be; `arbitrate` also takes a side. Only sent to the player.
+    Arbitration {
+        attacker: FactionId,
+        target: FactionId,
+    },
+    /// ADR 0146: the proposer, lord of both the player and `target`, summons
+    /// the player to end the private war it declared on `target`. Accept:
+    /// imposed peace; refuse or let expire: the war goes on, at a cost in
+    /// loyalty. Only sent to the player.
+    PeaceSummons {
+        target: FactionId,
+    },
 }
 
 impl Article {
@@ -155,7 +194,22 @@ impl Article {
 
     /// Ends a war between the parties.
     pub fn ends_war(&self) -> bool {
-        matches!(self, Article::Peace | Article::Truce { .. })
+        matches!(
+            self,
+            Article::Peace | Article::Truce { .. } | Article::Mediation { .. }
+        )
+    }
+
+    /// A lord's order created by the core (feudal call, obedience), which
+    /// no faction proposes and which carries no treaty bookkeeping.
+    pub fn is_imposed(&self) -> bool {
+        matches!(
+            self,
+            Article::Obedience { .. }
+                | Article::Protection { .. }
+                | Article::Arbitration { .. }
+                | Article::PeaceSummons { .. }
+        )
     }
 
     /// Key of the article kind (`serde` tag).
@@ -163,6 +217,7 @@ impl Article {
         match self {
             Article::Peace => "peace",
             Article::Truce { .. } => "truce",
+            Article::Mediation { .. } => "mediation",
             Article::Alliance => "alliance",
             Article::MilitaryAccess { .. } => "military_access",
             Article::TradeAgreement => "trade_agreement",
@@ -175,6 +230,93 @@ impl Article {
             Article::ReleaseCaptive { .. } => "release_captive",
             Article::Hostage { .. } => "hostage",
             Article::DemandTitle { .. } => "demand_title",
+            Article::Obedience { .. } => "obedience",
+            Article::Protection { .. } => "protection",
+            Article::Arbitration { .. } => "arbitration",
+            Article::PeaceSummons { .. } => "peace_summons",
+        }
+    }
+}
+
+/// A treaty: what one faction proposes to another, made of articles. A
+/// simple alliance or a lord's call is a treaty of one article.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Treaty {
+    pub articles: Vec<Article>,
+}
+
+impl Treaty {
+    pub fn new(articles: Vec<Article>) -> Self {
+        Self { articles }
+    }
+
+    pub fn single(article: Article) -> Self {
+        Self::new(vec![article])
+    }
+
+    /// Peace ending the war, with the `provinces` that change hands (each
+    /// passes from its owner to the other party) and a `tribute` paid once:
+    /// by the recipient to the proposer if positive, the reverse if negative.
+    pub fn peace_terms(
+        state: &CampaignState,
+        proposer: &FactionId,
+        provinces: &[ProvinceId],
+        tribute: i64,
+    ) -> Self {
+        let mut articles = vec![Article::Peace];
+        for province in provinces {
+            let giver = if state.province_owner(province) == Some(proposer) {
+                Party::Proposer
+            } else {
+                Party::Recipient
+            };
+            articles.push(Article::CedeProvince {
+                giver,
+                province: province.clone(),
+            });
+        }
+        if tribute != 0 {
+            articles.push(Article::Gold {
+                giver: if tribute > 0 {
+                    Party::Recipient
+                } else {
+                    Party::Proposer
+                },
+                amount: tribute.abs(),
+            });
+        }
+        Self::new(articles)
+    }
+
+    /// Orders of a lord (feudal call, obedience) are answered, not bargained.
+    pub fn is_imposed(&self) -> bool {
+        self.articles.iter().any(Article::is_imposed)
+    }
+
+    /// Feudal calls are created by the core, never proposed by a faction.
+    pub fn is_feudal_call(&self) -> bool {
+        self.articles.iter().any(|a| {
+            matches!(
+                a,
+                Article::Protection { .. }
+                    | Article::Arbitration { .. }
+                    | Article::PeaceSummons { .. }
+            )
+        })
+    }
+
+    pub fn is_obedience(&self) -> bool {
+        self.articles
+            .iter()
+            .any(|a| matches!(a, Article::Obedience { .. }))
+    }
+
+    /// Key of the treaty for the UI: that of its article when it has one.
+    pub fn kind(&self) -> &'static str {
+        match self.articles.as_slice() {
+            [only] => only.key(),
+            _ => "treaty",
         }
     }
 }
@@ -255,7 +397,7 @@ impl DiplomaticLedger {
 pub struct ArticleValue {
     pub label: String,
     pub value: i32,
-    pub reasons: Vec<(String, i32)>,
+    pub reasons: ReasonList,
     /// Why the article cannot be accepted at all.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blocked: Option<String>,
@@ -271,20 +413,20 @@ pub struct TreatyEvaluation {
     pub score: i32,
     pub articles: Vec<ArticleValue>,
     /// General considerations (attitude, trust, threat, honour, weariness).
-    pub context: Vec<(String, i32)>,
+    pub context: ReasonList,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blocked: Option<String>,
 }
 
 impl TreatyEvaluation {
     /// Flat list of reasons (context first), for [`diplomacy::Evaluation`].
-    pub fn reasons(&self) -> Vec<(String, i32)> {
+    pub fn reasons(&self) -> ReasonList {
         let mut reasons = self.context.clone();
         for article in &self.articles {
-            reasons.push((article.label.clone(), article.value));
+            reasons.push(article.label.clone(), article.value);
         }
         if let Some(blocked) = &self.blocked {
-            reasons.push((blocked.clone(), -100));
+            reasons.push(blocked.clone(), -100);
         }
         reasons
     }
@@ -412,8 +554,76 @@ pub fn goal_war_score(state: &CampaignState, data: &GameData, a: &FactionId, b: 
 }
 
 // =========================================================================
-// Validation
+// Validation and evaluation (the treaty is the sum of its articles)
 // =========================================================================
+
+/// The world and the two parties a treaty is judged or checked in.
+struct Deal<'a> {
+    pub state: &'a CampaignState,
+    pub data: &'a GameData,
+    pub proposer: &'a FactionId,
+    pub recipient: &'a FactionId,
+    pub articles: &'a [Article],
+}
+
+impl<'a> Deal<'a> {
+    fn new(
+        state: &'a CampaignState,
+        data: &'a GameData,
+        proposer: &'a FactionId,
+        recipient: &'a FactionId,
+        articles: &'a [Article],
+    ) -> Self {
+        Self {
+            state,
+            data,
+            proposer,
+            recipient,
+            articles,
+        }
+    }
+
+    pub fn rules(&self) -> &'a NegotiationRules {
+        rules(self.data)
+    }
+
+    pub fn weights(&self) -> &'a TreatyWeights {
+        &self.data.ai_diplomacy.treaty_weights
+    }
+
+    /// Faction giving `article` (`None`: mutual).
+    pub fn giver(&self, article: &Article) -> Option<&'a FactionId> {
+        article
+            .giver()
+            .map(|g| party_id(g, self.proposer, self.recipient))
+    }
+
+    /// Faction receiving `article` (`None`: mutual).
+    pub fn taker(&self, article: &Article) -> Option<&'a FactionId> {
+        article
+            .giver()
+            .map(|g| party_id(g.other(), self.proposer, self.recipient))
+    }
+
+    /// Articles of the treaty of the same kind and from the same giver as
+    /// `article` (itself included).
+    pub fn count_from_same_giver(
+        &self,
+        article: &Article,
+        same_kind: fn(&Article) -> bool,
+    ) -> usize {
+        self.articles
+            .iter()
+            .filter(|a| same_kind(a) && a.giver() == article.giver())
+            .count()
+    }
+
+    /// Treaty points of a sum of livres, capped.
+    pub fn gold_points(&self, amount: i64) -> i32 {
+        let rules = self.rules();
+        ((amount / rules.livres_per_point.max(1)) as i32).min(rules.max_gold_points)
+    }
+}
 
 /// Checks that every article can be executed (ownership, funds, war).
 pub fn check_treaty(
@@ -426,181 +636,15 @@ pub fn check_treaty(
     if articles.is_empty() {
         return Err(DiplomacyError::Refused("traité vide".to_owned()));
     }
-    let at_war = state.is_at_war(proposer, recipient);
-    let ends_war = articles.iter().any(Article::ends_war);
-    for (i, article) in articles.iter().enumerate() {
-        if articles[..i].contains(article) {
+    let deal = Deal::new(state, data, proposer, recipient, articles);
+    for (index, article) in articles.iter().enumerate() {
+        if articles[..index].contains(article) {
             return Err(DiplomacyError::Refused("article en double".to_owned()));
         }
-        let giver = article.giver().map(|g| party_id(g, proposer, recipient));
-        let taker = article
-            .giver()
-            .map(|g| party_id(g.other(), proposer, recipient));
-        match article {
-            Article::Peace | Article::Truce { .. } => {
-                if !at_war {
-                    return Err(DiplomacyError::NotAtWar);
-                }
-            }
-            Article::Alliance => {
-                if state.is_allied(proposer, recipient) {
-                    return Err(DiplomacyError::AlreadyAllied);
-                }
-                if crate::feudal::direct_tie(state, data, proposer, recipient) {
-                    return Err(DiplomacyError::Refused(
-                        crate::diplomacy::FEUDAL_TIE_ALLIANCE.to_owned(),
-                    ));
-                }
-                if at_war && !ends_war {
-                    return Err(DiplomacyError::AlreadyAtWar);
-                }
-            }
-            Article::MilitaryAccess { .. } | Article::TradeAgreement => {
-                if at_war && !ends_war {
-                    return Err(DiplomacyError::AlreadyAtWar);
-                }
-                let (g, t) = match article {
-                    Article::MilitaryAccess { .. } => (giver.expect("giver"), taker.expect("t")),
-                    _ => (proposer, recipient),
-                };
-                let ledger = &state.factions[g].ledger;
-                let already = match article {
-                    Article::MilitaryAccess { .. } => ledger.military_access.contains(t),
-                    _ => ledger.trade_agreements.contains(t),
-                };
-                if already {
-                    return Err(DiplomacyError::Refused("accord déjà en vigueur".to_owned()));
-                }
-            }
-            Article::Marriage { character, spouse } => {
-                if at_war && !ends_war {
-                    return Err(DiplomacyError::AlreadyAtWar);
-                }
-                let own = |c: &CharacterId, f: &FactionId| {
-                    state
-                        .characters
-                        .get(c)
-                        .is_some_and(|c| c.alive && &c.faction == f)
-                };
-                if !own(character, proposer) || !own(spouse, recipient) {
-                    return Err(DiplomacyError::Refused("époux invalides".to_owned()));
-                }
-                // Checked here so that the treaty never applies by halves.
-                crate::dynasty::check_marriage(state, character, spouse)
-                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
-                let wed_twice = articles[..i].iter().any(|other| {
-                    matches!(other, Article::Marriage { character: c, spouse: s }
-                        if [c, s].iter().any(|x| *x == character || *x == spouse))
-                });
-                if wed_twice {
-                    return Err(DiplomacyError::Refused(
-                        "un même époux dans deux mariages".to_owned(),
-                    ));
-                }
-            }
-            Article::Tribute {
-                per_season,
-                seasons,
-                ..
-            } => {
-                if *per_season <= 0 || *seasons == 0 || *seasons > MAX_TRIBUTE_SEASONS {
-                    return Err(DiplomacyError::InvalidAmount);
-                }
-            }
-            Article::Gold { amount, .. } => {
-                if *amount <= 0 {
-                    return Err(DiplomacyError::InvalidAmount);
-                }
-                if state.factions[giver.expect("giver")].treasury < *amount {
-                    return Err(DiplomacyError::InsufficientFunds);
-                }
-            }
-            Article::CedeProvince { province, .. } => {
-                if state.province_owner(province) != giver {
-                    return Err(DiplomacyError::InvalidProvince(province.clone()));
-                }
-                let owned = state.owned_provinces(giver.expect("giver")).len();
-                let ceded = articles
-                    .iter()
-                    .filter(|a| {
-                        matches!(a, Article::CedeProvince { .. }) && a.giver() == article.giver()
-                    })
-                    .count();
-                if ceded >= owned {
-                    return Err(DiplomacyError::Refused(
-                        "on ne cède pas sa dernière province".to_owned(),
-                    ));
-                }
-            }
-            Article::DemandTitle { title, .. } => {
-                let giver = giver.expect("giver");
-                if crate::feudal::holder_of(state, title) != Some(giver) {
-                    return Err(DiplomacyError::Refused(format!(
-                        "{} ne détient pas ce titre",
-                        data.faction_name(giver)
-                    )));
-                }
-                let held = crate::feudal::titles_of(state, giver).len();
-                let demanded = articles
-                    .iter()
-                    .filter(|a| {
-                        matches!(a, Article::DemandTitle { .. }) && a.giver() == article.giver()
-                    })
-                    .count();
-                if demanded >= held {
-                    return Err(DiplomacyError::Refused(
-                        "on ne cède pas son dernier titre".to_owned(),
-                    ));
-                }
-            }
-            Article::CedeSettlement { settlement, .. } => {
-                let Some(s) = state.settlements.get(settlement) else {
-                    return Err(DiplomacyError::Refused("place inconnue".to_owned()));
-                };
-                if Some(&s.owner) != giver || s.kind == SettlementKind::City {
-                    return Err(DiplomacyError::Refused(format!(
-                        "{} ne peut pas être cédée seule",
-                        data.settlement_name(settlement)
-                    )));
-                }
-            }
-            Article::Vassalage { .. } => {
-                let (vassal, lord) = (giver.expect("giver"), taker.expect("taker"));
-                if state.factions[vassal].suzerain.is_some()
-                    || state.factions[lord].suzerain.as_ref() == Some(vassal)
-                {
-                    return Err(DiplomacyError::Refused(
-                        "déjà lié par la vassalité".to_owned(),
-                    ));
-                }
-            }
-            Article::ReleaseCaptive { character, .. } => {
-                let ok = state.characters.get(character).is_some_and(|c| {
-                    c.alive && c.captive && c.captor.as_ref() == giver && Some(&c.faction) == taker
-                });
-                if !ok {
-                    return Err(DiplomacyError::Refused("captif invalide".to_owned()));
-                }
-            }
-            Article::Hostage { character, .. } => {
-                let g = giver.expect("giver");
-                let f = &state.factions[g];
-                let ok =
-                    state.characters.get(character).is_some_and(|c| {
-                        c.alive && !c.captive && &c.faction == g && c.army.is_none()
-                    }) && f.ruler.as_ref() != Some(character);
-                if !ok {
-                    return Err(DiplomacyError::Refused("otage invalide".to_owned()));
-                }
-            }
-        }
+        article.check(&deal, index)?;
     }
     Ok(())
 }
-
-// =========================================================================
-// Evaluation
-// =========================================================================
 
 /// How `recipient` values `articles` offered by `proposer`. Pure.
 pub fn evaluate_treaty(
@@ -610,22 +654,14 @@ pub fn evaluate_treaty(
     recipient: &FactionId,
     articles: &[Article],
 ) -> TreatyEvaluation {
-    let mut values: Vec<ArticleValue> = articles
-        .iter()
-        .map(|a| article_value(state, data, proposer, recipient, a))
-        .collect();
-    let context = context_reasons(state, data, proposer, recipient, articles);
-    let mut blocked = check_treaty(state, data, proposer, recipient, articles)
+    let deal = Deal::new(state, data, proposer, recipient, articles);
+    let values: Vec<ArticleValue> = articles.iter().map(|a| a.value(&deal)).collect();
+    let context = context::context_reasons(&deal);
+    let blocked = check_treaty(state, data, proposer, recipient, articles)
         .err()
-        .map(|e| e.to_string());
-    if blocked.is_none() {
-        blocked = values.iter().find_map(|v| v.blocked.clone());
-    }
-    for v in &mut values {
-        v.value = v.reasons.iter().map(|(_, x)| x).sum();
-    }
-    let score: i32 =
-        values.iter().map(|v| v.value).sum::<i32>() + context.iter().map(|(_, v)| v).sum::<i32>();
+        .map(|e| e.to_string())
+        .or_else(|| values.iter().find_map(|v| v.blocked.clone()));
+    let score = values.iter().map(|v| v.value).sum::<i32>() + context.total();
     let chance = if blocked.is_some() {
         0
     } else {
@@ -639,162 +675,6 @@ pub fn evaluate_treaty(
         context,
         blocked,
     }
-}
-
-/// General considerations of `recipient` about a treaty with `proposer`.
-fn context_reasons(
-    state: &CampaignState,
-    data: &GameData,
-    proposer: &FactionId,
-    recipient: &FactionId,
-    articles: &[Article],
-) -> Vec<(String, i32)> {
-    let rules = rules(data);
-    let mut reasons: Vec<(String, i32)> = Vec::new();
-    let (attitude, _) = state.attitude(data, recipient, proposer);
-    // A peace is judged on the war, not on the hatred the war feeds.
-    let divisor = if articles.iter().any(Article::ends_war) {
-        5
-    } else {
-        3
-    };
-    reasons.push(("Attitude".to_owned(), attitude / divisor));
-    // Trust: the proposer's word (perjuries, hostages, marriages, treaties).
-    let rec = &state.factions[recipient];
-    let perjuries = rec
-        .modifiers
-        .iter()
-        .filter(|m| {
-            &m.with == proposer
-                && m.expires_turn > state.turn
-                && (m.reason_fr == diplomacy::PERJURY_REASON
-                    || m.reason_fr == HOSTAGE_BETRAYAL_REASON)
-        })
-        .count() as i32;
-    let hostages = rec
-        .ledger
-        .hostages
-        .iter()
-        .filter(|h| &h.from == proposer)
-        .count() as i32;
-    let standing = i32::from(rec.ledger.trade_agreements.contains(proposer))
-        + i32::from(state.is_allied(recipient, proposer));
-    let trust = (-15 * perjuries
-        + 10 * hostages
-        + 5 * i32::from(state.marriage_tie(recipient, proposer))
-        + 5 * standing)
-        .clamp(-30, 20);
-    reasons.push(("Confiance".to_owned(), trust));
-    // Threat: a much stronger neighbour obtains concessions more easily.
-    let gives = articles.iter().any(|a| {
-        a.giver() == Some(Party::Recipient)
-            || (a.ends_war() && state.war_score(data, recipient, proposer) < 0)
-    });
-    if gives {
-        let ratio = state.faction_power(proposer) / state.faction_power(recipient).max(1.0);
-        if ratio > 1.5 && state.are_neighbors(data, recipient, proposer) {
-            reasons.push((
-                "Menace de sa puissance".to_owned(),
-                ((ratio - 1.0) * 5.0).round().min(15.0) as i32,
-            ));
-        } else if ratio < 0.5 {
-            reasons.push(("Faiblesse du demandeur".to_owned(), -8));
-        }
-    }
-    let ends_war = articles.iter().any(Article::ends_war);
-    if ends_war {
-        // Honour: a separate peace abandons the allies still fighting.
-        let abandoned = rec
-            .allies
-            .iter()
-            .filter(|a| state.is_at_war(a, proposer))
-            .count() as i32;
-        if abandoned > 0 {
-            reasons.push((
-                "Honneur : ne pas abandonner nos alliés".to_owned(),
-                -6 * abandoned.min(3),
-            ));
-        }
-        if rules.enabled {
-            reasons.push((
-                "Fatigue de guerre".to_owned(),
-                (rec.ledger.weariness / rules.weariness_peace_divisor.max(1)) as i32,
-            ));
-            // EQ6: a war nobody wins outright ends in a truce, the winner
-            // weary of it too.
-            if rules.long_war_years > 0 {
-                let years = rec
-                    .war_started
-                    .get(proposer)
-                    .map_or(0, |started| state.turn.saturating_sub(*started) / 4);
-                let beyond = years.saturating_sub(rules.long_war_years) as i32;
-                reasons.push((
-                    "Guerre interminable".to_owned(),
-                    (beyond * rules.long_war_points_per_year).min(rules.long_war_max_points),
-                ));
-            }
-            // LR-11: a war against a realm down to its last bastions, which
-            // the other side never besieges without a claim (F4), has nothing
-            // left to fight for once the campaign seasons are over.
-            let lasted = rec
-                .war_started
-                .get(proposer)
-                .is_some_and(|started| state.turn >= started + rules.min_war_turns);
-            if rules.bastion_war_points > 0
-                && lasted
-                && bastion_stalemate(state, data, recipient, proposer)
-            {
-                reasons.push((
-                    "Guerre sans enjeu : derniers bastions".to_owned(),
-                    rules.bastion_war_points,
-                ));
-            }
-            // A pretender does not give up a crown for nothing.
-            let gains_land = articles.iter().any(|a| {
-                matches!(
-                    a,
-                    Article::CedeProvince {
-                        giver: Party::Proposer,
-                        ..
-                    }
-                )
-            });
-            if diplomacy::claim_stakes(state, recipient, proposer).throne
-                && !gains_land
-                && state.war_score(data, recipient, proposer) > -40
-            {
-                reasons.push((
-                    "Prétention à la couronne".to_owned(),
-                    -rules.pretender_reluctance,
-                ));
-            }
-            // War goals: a belligerent not beaten keeps fighting for them.
-            if let Some(goals) = rec.ledger.war_goals.get(proposer) {
-                let obtained = articles.iter().any(|a| match a {
-                    Article::CedeProvince {
-                        giver: Party::Proposer,
-                        province,
-                    } => goals.contains(province),
-                    _ => false,
-                });
-                let held = goals.iter().any(|p| state.controls_province(recipient, p));
-                if !goals.is_empty()
-                    && !obtained
-                    && state.war_score(data, recipient, proposer) > -30
-                {
-                    let value = if held {
-                        rules.unmet_goals_reluctance
-                    } else {
-                        rules.unmet_goals_reluctance / 2
-                    };
-                    reasons.push(("Buts de guerre non atteints".to_owned(), -value));
-                }
-            }
-        }
-    }
-    reasons.push(("Prudence".to_owned(), -3));
-    reasons.retain(|(_, v)| *v != 0);
-    reasons
 }
 
 /// A realm down to this many provinces is not besieged there by an enemy
@@ -827,376 +707,6 @@ pub fn bastion_stalemate(
         && state.war_score(data, a, b).abs() < rules(data).demand_score
 }
 
-/// Value of one article for `recipient`.
-fn article_value(
-    state: &CampaignState,
-    data: &GameData,
-    proposer: &FactionId,
-    recipient: &FactionId,
-    article: &Article,
-) -> ArticleValue {
-    let rules = rules(data);
-    let mut reasons: Vec<(String, i32)> = Vec::new();
-    let mut blocked: Option<String> = None;
-    let gives = article.giver() == Some(Party::Recipient);
-    let sign = if gives { -1 } else { 1 };
-    let lpp = rules.livres_per_point.max(1);
-    let gold_points = |amount: i64| -> i32 { ((amount / lpp) as i32).min(rules.max_gold_points) };
-    let label = article_label(state, data, proposer, recipient, article);
-    // Reasons of the legacy evaluation of a proposal, without attitude
-    // (counted once in the context) nor the turn-based lassitude (replaced
-    // by the war weariness when DP1 rules are on).
-    let legacy = |proposal: &Proposal| -> (Vec<(String, i32)>, bool) {
-        let eval = diplomacy::evaluate(state, data, proposer, recipient, proposal);
-        let hard = eval.reasons.iter().any(|(_, v)| *v <= -100);
-        let reasons = eval
-            .reasons
-            .into_iter()
-            .filter(|(t, v)| {
-                t != "Attitude" && *v > -100 && !(rules.enabled && t == "Lassitude de la guerre")
-            })
-            .collect();
-        (reasons, hard)
-    };
-    match article {
-        Article::Peace | Article::Truce { .. } => {
-            let (mut r, _) = legacy(&Proposal::Peace {
-                provinces: Vec::new(),
-                tribute: 0,
-            });
-            if let Article::Truce { turns } = article {
-                if *turns < diplomacy::TRUCE_TURNS {
-                    r.push(("Trêve courte, sans engagement".to_owned(), 4));
-                }
-            }
-            reasons.extend(r);
-            // JR4: the vow of an AI-led crusade allows no peace with the
-            // master of its goal.
-            if crate::crusade::ai_vow_forbids_peace(state, data, recipient, proposer) {
-                blocked = Some("le vœu de croisade interdit la paix".to_owned());
-            }
-        }
-        Article::Alliance => {
-            let (r, hard) = legacy(&Proposal::Alliance);
-            reasons.extend(r);
-            if hard && !state.is_at_war(proposer, recipient) {
-                blocked = Some("alliance impossible".to_owned());
-            }
-        }
-        Article::Marriage { character, spouse } => {
-            let (r, hard) = legacy(&Proposal::Marriage {
-                character: character.clone(),
-                spouse: spouse.clone(),
-            });
-            reasons.extend(r);
-            if hard {
-                blocked = Some("mariage impossible".to_owned());
-            }
-        }
-        Article::Vassalage { giver } => {
-            if *giver == Party::Recipient {
-                let (r, hard) = legacy(&Proposal::Vassalage);
-                reasons.extend(r);
-                if hard {
-                    blocked = Some("vassalité refusée : pas assez puissant".to_owned());
-                }
-            } else {
-                reasons.push(("Hommage d'un nouveau vassal".to_owned(), 25));
-                let income = state.factions[proposer].income_last_turn.max(0);
-                reasons.push((
-                    "Tribut du vassal".to_owned(),
-                    gold_points(income * data.feudal_rules.vassal_tribute_percent / 100 * 20),
-                ));
-            }
-        }
-        Article::MilitaryAccess { giver } => {
-            if *giver == Party::Recipient {
-                reasons.push(("Passage d'armées étrangères".to_owned(), -10));
-                if diplomacy::rivals(state, recipient).contains(proposer) {
-                    reasons.push(("Armées d'un rival".to_owned(), -20));
-                }
-                if state.is_allied(recipient, proposer) {
-                    reasons.push(("Entre alliés".to_owned(), 8));
-                }
-            } else {
-                reasons.push(("Libre passage de nos armées".to_owned(), 6));
-            }
-        }
-        Article::TradeAgreement => {
-            reasons.push(("Commerce".to_owned(), 6));
-            // C5: the agreement raises the routes linking our marketplaces.
-            let routes = crate::trade::common_routes(state, data, proposer, recipient) as i32;
-            if routes > 0 {
-                reasons.push((
-                    "Routes commerciales communes".to_owned(),
-                    (4 * routes).min(12),
-                ));
-            }
-            let partner = state.factions[proposer].income_last_turn.max(0);
-            reasons.push((
-                "Richesse du partenaire".to_owned(),
-                ((partner / 1500) as i32).min(10),
-            ));
-            if diplomacy::rivals(state, recipient).contains(proposer) {
-                reasons.push(("Enrichir un rival".to_owned(), -12));
-            }
-            let embargo = state.factions[proposer].embargoes.contains(recipient)
-                || state.factions[recipient].embargoes.contains(proposer);
-            if embargo {
-                reasons.push(("Embargo en cours".to_owned(), -15));
-            }
-        }
-        Article::Tribute {
-            per_season,
-            seasons,
-            ..
-        } => {
-            let total = per_season.saturating_mul(i64::from(*seasons));
-            let points = gold_points(total * 4 / 5);
-            reasons.push((
-                if gives {
-                    "Tribut à verser".to_owned()
-                } else {
-                    "Tribut reçu".to_owned()
-                },
-                sign * points,
-            ));
-            if gives && *per_season * 2 > state.factions[recipient].income_last_turn.max(1) {
-                reasons.push(("Tribut ruineux".to_owned(), -15));
-            }
-        }
-        Article::Gold { amount, .. } => {
-            let mut points = gold_points(*amount);
-            if !gives && state.factions[recipient].treasury < 0 {
-                points = points * 3 / 2;
-                reasons.push(("Trésor vide".to_owned(), 5));
-            }
-            reasons.push((
-                if gives {
-                    "Or à verser".to_owned()
-                } else {
-                    "Or reçu".to_owned()
-                },
-                sign * points,
-            ));
-        }
-        Article::CedeProvince { province, .. } => {
-            let taker = if gives { proposer } else { recipient };
-            let giver_id = if gives { recipient } else { proposer };
-            let capital = state.factions[giver_id].capital == *province;
-            let mut cost = if capital {
-                rules.capital_cost
-            } else {
-                rules.province_cost
-            };
-            if gives {
-                if data.ai_diplomacy.peace.keep_capital && capital {
-                    blocked = Some(format!(
-                        "{} ne cédera jamais sa capitale",
-                        data.faction_name(recipient)
-                    ));
-                }
-                let occupied = state.controls_province(taker, province);
-                if occupied {
-                    cost = cost * rules.occupied_cost_percent / 100;
-                }
-                reasons.push((
-                    if occupied {
-                        "Province déjà occupée par l'ennemi".to_owned()
-                    } else {
-                        "Perte d'une province".to_owned()
-                    },
-                    -cost,
-                ));
-                let claimed = state.factions[recipient].claims.iter().any(|c| {
-                    c.province.as_ref() == Some(province)
-                        && c.kind == data_model::ClaimKind::Province
-                });
-                if claimed {
-                    reasons.push(("Terre revendiquée de longue date".to_owned(), -5));
-                }
-            } else {
-                reasons.push((
-                    "Gain d'une province".to_owned(),
-                    rules.province_cost * 3 / 4,
-                ));
-                let wanted = is_war_goal(state, recipient, proposer, province)
-                    || diplomacy::claimed_provinces(state, recipient).contains(province);
-                if wanted {
-                    reasons.push(("Terre convoitée".to_owned(), rules.war_goal_bonus));
-                }
-                if state.controls_province(recipient, province) {
-                    reasons.push(("Déjà tenue par nos troupes".to_owned(), 5));
-                }
-            }
-        }
-        Article::DemandTitle { title, .. } => {
-            // The title's own provinces held by the giver, plus its rank.
-            let giver_id = if gives { recipient } else { proposer };
-            let capital = &state.factions[giver_id].capital;
-            let provinces: i32 = data
-                .titles
-                .get(title)
-                .map(|t| {
-                    t.de_jure_provinces
-                        .iter()
-                        .filter(|p| state.province_owner(p) == Some(giver_id))
-                        .map(|p| {
-                            if p == capital {
-                                rules.capital_cost
-                            } else {
-                                rules.province_cost
-                            }
-                        })
-                        .sum()
-                })
-                .unwrap_or(0);
-            let value = provinces + data.feudal_rules.title_loss_penalty;
-            if gives {
-                reasons.push(("Perte d'un titre".to_owned(), -value));
-            } else {
-                reasons.push(("Gain d'un titre".to_owned(), value * 3 / 4));
-            }
-        }
-        Article::CedeSettlement { settlement, .. } => {
-            let taker = if gives { proposer } else { recipient };
-            let occupied = state
-                .settlements
-                .get(settlement)
-                .is_some_and(|s| &s.controller == taker);
-            let mut cost = rules.settlement_cost;
-            if occupied {
-                cost = cost * rules.occupied_cost_percent / 100;
-            }
-            reasons.push((
-                if gives {
-                    "Perte d'une place".to_owned()
-                } else {
-                    "Gain d'une place".to_owned()
-                },
-                sign * cost.max(1),
-            ));
-        }
-        Article::ReleaseCaptive { character, .. } => {
-            let ransom = crate::ransom::ransom_amount(state, data, character);
-            let high = state
-                .factions
-                .values()
-                .any(|f| f.ruler.as_ref() == Some(character) || f.heir.as_ref() == Some(character));
-            let mut points = ((ransom / lpp) as i32).clamp(3, 40);
-            if high {
-                points += 10;
-            }
-            reasons.push((
-                if gives {
-                    "Libérer un captif sans rançon".to_owned()
-                } else {
-                    "Retour d'un des nôtres".to_owned()
-                },
-                sign * points,
-            ));
-        }
-        Article::Hostage { character, .. } => {
-            let heir = state
-                .factions
-                .values()
-                .any(|f| f.heir.as_ref() == Some(character));
-            if gives {
-                reasons.push(("Livrer un otage".to_owned(), if heir { -30 } else { -12 }));
-            } else {
-                reasons.push((
-                    "Otage en gage de parole".to_owned(),
-                    if heir { 20 } else { 10 },
-                ));
-            }
-        }
-    }
-    reasons.retain(|(_, v)| *v != 0);
-    let value = reasons.iter().map(|(_, v)| v).sum();
-    ArticleValue {
-        label,
-        value,
-        reasons,
-        blocked,
-    }
-}
-
-/// French label of an article from the proposer's point of view.
-pub fn article_label(
-    state: &CampaignState,
-    data: &GameData,
-    proposer: &FactionId,
-    recipient: &FactionId,
-    article: &Article,
-) -> String {
-    let who = |p: &Party| data.faction_name(party_id(*p, proposer, recipient));
-    let to = |p: &Party| data.faction_name(party_id(p.other(), proposer, recipient));
-    match article {
-        Article::Peace => format!(
-            "Paix (trêve de {} ans)",
-            (if rules(data).enabled {
-                rules(data).peace_truce_turns
-            } else {
-                diplomacy::TRUCE_TURNS
-            } / 4)
-                .max(1)
-        ),
-        Article::Truce { turns } => format!("Trêve de {} an(s)", (turns / 4).max(1)),
-        Article::Alliance => "Alliance défensive et offensive".to_owned(),
-        Article::MilitaryAccess { giver } => {
-            format!("Accès militaire : {} ouvre ses terres", who(giver))
-        }
-        Article::TradeAgreement => "Accord commercial".to_owned(),
-        Article::Marriage { character, spouse } => format!(
-            "Mariage de {} et de {}",
-            state.character_name(data, character),
-            state.character_name(data, spouse)
-        ),
-        Article::Tribute {
-            giver,
-            per_season,
-            seasons,
-        } => format!(
-            "Tribut : {} verse {per_season} livres par saison pendant {seasons} saisons",
-            who(giver)
-        ),
-        Article::Gold { giver, amount } => format!("{} verse {amount} livres", who(giver)),
-        Article::CedeProvince { giver, province } => format!(
-            "{} cède {} à {}",
-            who(giver),
-            data.province_name(province),
-            to(giver)
-        ),
-        Article::CedeSettlement { giver, settlement } => format!(
-            "{} cède la place de {} à {}",
-            who(giver),
-            data.settlement_name(settlement),
-            to(giver)
-        ),
-        Article::Vassalage { giver } => {
-            format!("{} devient vassal de {}", who(giver), to(giver))
-        }
-        Article::ReleaseCaptive { giver, character } => format!(
-            "{} libère {}",
-            who(giver),
-            state.character_name(data, character)
-        ),
-        Article::Hostage { giver, character } => format!(
-            "{} livre {} en otage",
-            who(giver),
-            state.character_name(data, character)
-        ),
-        Article::DemandTitle { giver, title } => format!(
-            "{} remet le titre {} à {}",
-            who(giver),
-            data.titles
-                .get(title)
-                .map_or_else(|| title.to_string(), |t| t.name.display.clone()),
-            to(giver)
-        ),
-    }
-}
-
 /// Summary of a treaty (journal, offers).
 pub fn treaty_text(
     state: &CampaignState,
@@ -1207,7 +717,7 @@ pub fn treaty_text(
 ) -> String {
     let list: Vec<String> = articles
         .iter()
-        .map(|a| article_label(state, data, proposer, recipient, a))
+        .map(|a| a.label(state, data, proposer, recipient))
         .collect();
     format!(
         "Traité entre {} et {} : {}.",
@@ -1380,19 +890,12 @@ pub fn propose_treaty(
     };
     if !accepted {
         record(state, data, proposer, recipient, &articles, false);
-        let mut reasons = verdict.reasons();
-        reasons.sort_by_key(|(_, v)| *v);
-        let top: Vec<String> = reasons
-            .iter()
-            .take(3)
-            .map(|(t, v)| format!("{t} ({v:+})"))
-            .collect();
         return Err(DiplomacyError::Refused(format!(
             "{} refuse (score {:+}, il en fallait {:+}) : {}",
             data.faction_name(recipient),
             verdict.score,
             ACCEPT_SCORE,
-            top.join(", ")
+            verdict.reasons().heaviest_objections(3)
         )));
     }
     apply_treaty(state, data, proposer, recipient, &articles)?;
@@ -1431,7 +934,8 @@ fn record(
     }
 }
 
-/// Executes a signed treaty (peace first, then transfers).
+/// Executes a signed treaty (peace first, then transfers). Orders of a lord
+/// (feudal call, obedience) are executed without treaty bookkeeping.
 pub fn apply_treaty(
     state: &mut CampaignState,
     data: &GameData,
@@ -1439,175 +943,27 @@ pub fn apply_treaty(
     recipient: &FactionId,
     articles: &[Article],
 ) -> Result<(), DiplomacyError> {
-    check_treaty(state, data, proposer, recipient, articles)?;
-    record(state, data, proposer, recipient, articles, true);
+    let imposed = articles.iter().any(Article::is_imposed);
+    if !imposed {
+        check_treaty(state, data, proposer, recipient, articles)?;
+        record(state, data, proposer, recipient, articles, true);
+    }
     let text = treaty_text(state, data, proposer, recipient, articles);
     let mut ordered: Vec<&Article> = articles.iter().collect();
     ordered.sort_by_key(|a| !a.ends_war());
+    let parties = apply::Parties {
+        proposer,
+        recipient,
+    };
     for article in ordered {
-        let giver = article
-            .giver()
-            .map(|g| party_id(g, proposer, recipient).clone());
-        let taker = article
-            .giver()
-            .map(|g| party_id(g.other(), proposer, recipient).clone());
-        match article {
-            Article::Peace => {
-                let truce = if rules(data).enabled {
-                    rules(data).peace_truce_turns
-                } else {
-                    diplomacy::TRUCE_TURNS
-                };
-                state.make_peace(data, proposer, recipient, &[], 0, truce.max(1));
-            }
-            Article::Truce { turns } => {
-                state.make_peace(data, proposer, recipient, &[], 0, (*turns).max(1));
-            }
-            Article::Alliance => {
-                if !state.is_allied(proposer, recipient) {
-                    state.apply_proposal(data, proposer, recipient, &Proposal::Alliance)?;
-                }
-            }
-            Article::Marriage { character, spouse } => {
-                state.apply_proposal(
-                    data,
-                    proposer,
-                    recipient,
-                    &Proposal::Marriage {
-                        character: character.clone(),
-                        spouse: spouse.clone(),
-                    },
-                )?;
-            }
-            Article::Vassalage { .. } => {
-                let (vassal, lord) = (giver.expect("giver"), taker.expect("taker"));
-                state.apply_proposal(data, &lord, &vassal, &Proposal::Vassalage)?;
-            }
-            Article::MilitaryAccess { .. } => {
-                let (g, t) = (giver.expect("giver"), taker.expect("taker"));
-                state
-                    .factions
-                    .get_mut(&g)
-                    .expect("checked")
-                    .ledger
-                    .military_access
-                    .insert(t);
-            }
-            Article::TradeAgreement => {
-                for (a, b) in [(proposer, recipient), (recipient, proposer)] {
-                    state
-                        .factions
-                        .get_mut(a)
-                        .expect("checked")
-                        .ledger
-                        .trade_agreements
-                        .insert(b.clone());
-                }
-            }
-            Article::Tribute {
-                per_season,
-                seasons,
-                ..
-            } => {
-                let until_turn = state.turn + seasons;
-                state
-                    .factions
-                    .get_mut(&giver.expect("giver"))
-                    .expect("checked")
-                    .ledger
-                    .tributes
-                    .push(TributeDue {
-                        to: taker.expect("taker"),
-                        per_season: *per_season,
-                        until_turn,
-                    });
-            }
-            Article::Gold { amount, .. } => {
-                state
-                    .factions
-                    .get_mut(&giver.expect("giver"))
-                    .expect("checked")
-                    .treasury -= amount;
-                state
-                    .factions
-                    .get_mut(&taker.expect("taker"))
-                    .expect("checked")
-                    .treasury += amount;
-            }
-            Article::CedeProvince { province, .. } => {
-                cede_province(state, province, &giver.expect("giver"), &taker.expect("t"));
-            }
-            Article::DemandTitle { title, .. } => {
-                crate::feudal::conquer_title(state, data, &taker.expect("taker"), title)
-                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
-            }
-            Article::CedeSettlement { settlement, .. } => {
-                let to = taker.expect("taker");
-                // As `cede_province`: the giver's garrison, recruits and
-                // building site do not pass to the taker.
-                if let Some(s) = state.settlements.get_mut(settlement) {
-                    s.owner = to.clone();
-                    s.hand_over(&to);
-                    s.garrison.clear();
-                }
-            }
-            Article::ReleaseCaptive { character, .. } => {
-                crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
-            }
-            Article::Hostage { character, .. } => {
-                let holder = taker.expect("taker");
-                if let Some(c) = state.characters.get_mut(character) {
-                    c.captive = true;
-                    c.captor = Some(holder.clone());
-                    c.governor_of = None;
-                    // ADR 0025 § 6: held for the whole term, not for sale.
-                    c.ransom_terms = Some(crate::ransom::RansomTerms::Hold);
-                }
-                let until_turn = state.turn + HOSTAGE_TURNS;
-                state
-                    .factions
-                    .get_mut(&holder)
-                    .expect("checked")
-                    .ledger
-                    .hostages
-                    .push(HostagePledge {
-                        character: character.clone(),
-                        from: giver.expect("giver"),
-                        until_turn,
-                    });
-            }
-        }
+        article.apply(state, data, &parties)?;
     }
-    state.add_capped_modifier(data, recipient, proposer, 5, TREATY_REASON, 20);
-    state.add_capped_modifier(data, proposer, recipient, 5, TREATY_REASON, 20);
-    state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(proposer));
+    if !imposed {
+        state.add_capped_modifier(data, recipient, proposer, 5, TREATY_REASON, 20);
+        state.add_capped_modifier(data, proposer, recipient, 5, TREATY_REASON, 20);
+        state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(proposer));
+    }
     Ok(())
-}
-
-/// A province passes by treaty from `from` to `to` (every settlement `from`
-/// holds there); `from` keeps a claim on it.
-fn cede_province(
-    state: &mut CampaignState,
-    province: &ProvinceId,
-    from: &FactionId,
-    to: &FactionId,
-) {
-    state.cede_province(province, Some(from), to);
-    for character in state.characters.values_mut() {
-        if character.governor_of.as_ref() == Some(province) {
-            character.governor_of = None;
-        }
-    }
-    let turn = state.turn;
-    if let Some(f) = state.factions.get_mut(from) {
-        f.claims.push(diplomacy::Claim {
-            kind: data_model::ClaimKind::Province,
-            faction: None,
-            province: Some(province.clone()),
-            text_fr: "province perdue par traité".to_owned(),
-            expires_turn: Some(turn + 80),
-        });
-    }
 }
 
 // =========================================================================
