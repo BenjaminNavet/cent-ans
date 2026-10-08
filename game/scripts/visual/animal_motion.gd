@@ -11,46 +11,31 @@ extends RefCounted
 
 const FX_PATH := "fx/animal_motion.json"
 const CAMP_FX_PATH := "fx/camp_horse_motion.json"  # AS8c : valeurs tirées de vidéos CC BY-SA, fichier propre
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const CAMP_SHADER := preload("res://shaders/camp_horse.gdshader")
 
+static var _motion := JsonLookup.new(FX_PATH)
+static var _camp_motion := JsonLookup.new(CAMP_FX_PATH)
 static var _settings: Dictionary = {}
-static var _loaded := false
 static var _camp_meshes: Dictionary = {}
 
 
+## Réglages fusionnés (mouvement + chevaux de camp), construits une fois.
 static func settings() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var path := _data_dir().path_join(FX_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_settings = parsed
-		_merge_camp_horse_motion()
+	if _settings.is_empty():
+		_settings = _motion.data().duplicate(true)
+		_merge_camp_horse_motion(_camp_motion.data())
 	return _settings
 
 
 ## Ajoute les réglages des chevaux de camp et le mâchonnement du cheval de la campagne, lus dans
 ## leur fichier à part (`camp_horse_motion.json`, licence propre).
-static func _merge_camp_horse_motion() -> void:
-	var path := _data_dir().path_join(CAMP_FX_PATH)
-	if not FileAccess.file_exists(path):
+static func _merge_camp_horse_motion(camp: Dictionary) -> void:
+	if camp.is_empty():
 		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not parsed is Dictionary:
-		return
-	_settings["camp_horse"] = parsed.get("camp_horse", {})
+	_settings["camp_horse"] = camp.get("camp_horse", {})
 	var models: Variant = (_settings.get("campaign", {}) as Dictionary).get("models", null)
 	if models is Dictionary and (models as Dictionary).get("horse") is Dictionary:
-		(models["horse"] as Dictionary).merge(parsed.get("campaign_horse", {}), true)
-
-
-## Recharge les données (tests).
-static func reload() -> void:
-	_loaded = false
-	_settings = {}
-	_camp_meshes.clear()
+		(models["horse"] as Dictionary).merge(camp.get("campaign_horse", {}), true)
 
 
 static func enabled() -> bool:
@@ -190,11 +175,3 @@ static func camp_horse_mesh(model_name: String) -> Mesh:
 static func _f(d: Dictionary, key: String) -> float:
 	return float(d.get(key, 0.0))
 
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()

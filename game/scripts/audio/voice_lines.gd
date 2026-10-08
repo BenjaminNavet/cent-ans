@@ -14,34 +14,22 @@ const SPEECH_FILE := "voice/speech_voices.json"
 const VOICE_ROOT := "res://assets/audio/voice/"
 const SPEECH_HASH_LEN := 12
 
-static var _cache: Dictionary = {}  # fichier de données → Dictionary
+static var _barks := JsonLookup.new(BARKS_FILE)
+static var _advisor := JsonLookup.new(ADVISOR_FILE)
+static var _speech := JsonLookup.new(SPEECH_FILE)
 static var _streams: Dictionary = {}  # chemin → AudioStream ou null
 
 
-static func data(relative: String) -> Dictionary:
-	if _cache.has(relative):
-		return _cache[relative]
-	var path := SoundBank.data_path(relative)
-	var parsed: Variant = null
-	if FileAccess.file_exists(path):
-		parsed = DataFile.parse_file(path)
-	var result: Dictionary = parsed if parsed is Dictionary else {}
-	if result.is_empty():
-		push_warning("VoiceLines: %s missing or invalid" % path)
-	_cache[relative] = result
-	return result
-
-
 static func barks() -> Dictionary:
-	return data(BARKS_FILE)
+	return _barks.data()
 
 
 static func advisor() -> Dictionary:
-	return data(ADVISOR_FILE)
+	return _advisor.data()
 
 
 static func speech_casting() -> Dictionary:
-	return data(SPEECH_FILE)
+	return _speech.data()
 
 
 ## Flux `res://assets/audio/voice/<relative>.ogg`, ou null s'il n'a pas (encore) été généré.
@@ -115,8 +103,8 @@ static func speech_voice(faction: String, general_id: String) -> String:
 
 ## VX : cri de guerre de `faction` (`order_war_cry.json`, sinon le cri par défaut des discours).
 static func war_cry(faction: String) -> String:
-	var cries: Dictionary = data("battle_orders/order_war_cry.json").get("labels_by_faction", {})
-	return str(cries.get(faction, data("speeches/battle_speeches.json").get("default_cry", "")))
+	var cries: Dictionary = BattleSpeech.war_cries.section("labels_by_faction")
+	return str(cries.get(faction, BattleSpeech.speeches.value("default_cry", "")))
 
 
 static func speech_path(voice: String, text: String) -> String:

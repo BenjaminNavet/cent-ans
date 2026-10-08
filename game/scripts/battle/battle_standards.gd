@@ -50,8 +50,8 @@ const FLAG_CARRIED := 0.0
 const FLAG_CAPTURED := 2.0
 const FLAG_GROUND := 3.0
 
-static var _settings: Dictionary = {}
-static var _fx_cache: Dictionary = {}
+static var _settings_lookup := JsonLookup.new(SETTINGS_FILE)
+static var _fx_lookup := JsonLookup.new(FX_FILE)
 
 var wind_dir: Vector2 = Vector2(1, 0)
 var wind_strength: float = 0.5
@@ -87,27 +87,12 @@ var _anim_time: float = 0.0
 
 
 static func settings() -> Dictionary:
-	if _settings.is_empty():
-		_settings = read_data(SETTINGS_FILE)
-	return _settings
+	return _settings_lookup.data()
 
 
 ## Réglages de rendu des étendards d'EP5 (`data/fx/battle_standards.json`).
 static func fx() -> Dictionary:
-	if _fx_cache.is_empty():
-		_fx_cache = read_data(FX_FILE)
-	return _fx_cache
-
-
-## Lit un fichier JSON de `data/` (dossier de données du jeu, puis `data/` du dépôt), comme
-## `BattleGore.settings()`.
-static func read_data(relative: String) -> Dictionary:
-	if DataFile.exists(relative):
-		var parsed: Variant = DataFile.read_json(relative)
-		if parsed is Dictionary:
-			return parsed
-	push_warning("BattleStandards: %s introuvable" % relative)
-	return {}
+	return _fx_lookup.data()
 
 
 ## Vent de la bataille : direction déterministe (graine), force selon la météo.

@@ -21,7 +21,7 @@ func _init() -> void:
 	for clip in CLIPS_SECONDS:
 		var seconds := BattleSkinned.clip_seconds("cavalry", 0, clip)
 		_check(absf(seconds - float(CLIPS_SECONDS[clip])) < 0.05, "%s dure %.3f s (attendu %.3f)" % [clip, seconds, CLIPS_SECONDS[clip]])
-	var cadence: Dictionary = BattleStandards.read_data("fx/battle_gore.json").get("cadence", {})
+	var cadence: Dictionary = BattleGore.settings().get("cadence", {})
 	for clip in MEASURED_CADENCE:
 		_check(absf(float(cadence.get(clip, 0.0)) - float(MEASURED_CADENCE[clip])) < 0.01, "cadence de %s" % clip)
 	# Table de courbes versionnée (outil Blender) : trot et galop, quatre membres, 48 pas.

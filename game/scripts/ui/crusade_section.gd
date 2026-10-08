@@ -29,8 +29,7 @@ var pending_box: VBoxContainer
 ## refus pendant la fin de tour) ; sans lui, l'ordre va droit à la simulation (tests, maquettes).
 var submit: Callable = Callable()
 
-static var _rules_cache: Dictionary = {}
-static var _rules_dir: String = ""
+static var _rules_lookup := JsonLookup.new(RULES_FILE)
 
 
 func _init() -> void:
@@ -252,15 +251,7 @@ static func _morale_note(marks: Dictionary, key: String) -> String:
 
 
 static func _rules() -> Dictionary:
-	var dir := DataFile.data_dir()
-	if dir != _rules_dir:
-		_rules_dir = dir
-		_rules_cache = {}
-		var path := dir.path_join(RULES_FILE)
-		var parsed: Variant = DataFile.parse_file(path) if FileAccess.file_exists(path) else null
-		if parsed is Dictionary:
-			_rules_cache = parsed
-	return _rules_cache
+	return _rules_lookup.data()
 
 
 func _label(text: String, color: Color) -> Label:

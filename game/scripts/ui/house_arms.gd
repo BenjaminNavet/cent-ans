@@ -9,10 +9,10 @@ extends RefCounted
 const DATA_FILE := "heraldry/houses.json"
 const DIR := "res://assets/heraldry/houses/"
 
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(DATA_FILE)
+static var _indexed: bool = false
 static var _by_key: Dictionary = {}  # nom exact ou id → entrée
 static var _houses: Array = []  # entrées triées par id
-static var _badges: Dictionary = {}
 static var _character_house: Dictionary = {}  # id de personnage → maison (fichiers de données)
 
 
@@ -21,26 +21,20 @@ static func data_path(relative: String) -> String:
 	return DataFile.path_of(relative) if DataFile.exists(relative) else ""
 
 
-static func _ensure_loaded() -> void:
-	if _loaded:
+static func _ensure_indexed() -> void:
+	if _indexed:
 		return
-	_loaded = true
-	var path := data_path(DATA_FILE)
-	var parsed: Variant = DataFile.parse_file(path) if path != "" else null
-	if not parsed is Dictionary:
-		push_warning("HouseArms: %s introuvable, armes de faction seulement" % DATA_FILE)
-		return
-	for house in (parsed as Dictionary).get("houses", []):
+	_indexed = true
+	for house: Dictionary in _lookup.value("houses", []):
 		_by_key[str(house["name"])] = house
 		_by_key[str(house["id"])] = house
 		_houses.append(house)
 	_houses.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a["id"]) < str(b["id"]))
-	_badges = (parsed as Dictionary).get("badges", {})
 
 
 ## Entrée de la maison `house` (nom affiché, ex. « Plantagenêt », ou id), vide si inconnue.
 static func entry(house: String) -> Dictionary:
-	_ensure_loaded()
+	_ensure_indexed()
 	return _by_key.get(house, {})
 
 
@@ -90,7 +84,7 @@ static func house_of(character_id: String, sim: Object = null) -> String:
 
 ## Ids des maisons dont des bannerets servent dans les armées de `faction` (hors `exclude`).
 static func vassals(faction: String, exclude: String = "") -> Array[String]:
-	_ensure_loaded()
+	_ensure_indexed()
 	var out: Array[String] = []
 	var skip := id_of(exclude) if exclude != "" else ""
 	for house in _houses:
@@ -101,8 +95,8 @@ static func vassals(faction: String, exclude: String = "") -> Array[String]:
 
 ## Croix de livrée du commun de `faction` : {cross: Color, patch: Color ou null}, vide sinon.
 static func badge(faction: String) -> Dictionary:
-	_ensure_loaded()
-	var data: Dictionary = _badges.get(faction, {})
+	_ensure_indexed()
+	var data: Dictionary = _lookup.section("badges").get(faction, {})
 	if data.is_empty():
 		return {}
 	var out := {"cross": tincture(str(data["cross"]))}
