@@ -12,7 +12,6 @@ extends RefCounted
 ## les marques sont lus dans les dictionnaires de la façade (`get_character`, `get_family_tree`).
 
 const DATA_PATH := "portraits/archetypes.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const ASSETS_ROOT := "res://assets/"
 const BAND_ORDER := ["child", "young", "adult", "old"]
 const START_YEAR := 1337
@@ -32,13 +31,9 @@ static var _roles: Dictionary = {}  # id → rôle de données (personnages hist
 
 static func config() -> Dictionary:
 	if _config.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_config = parsed
+		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
+		if parsed is Dictionary:
+			_config = parsed
 		for culture in _config.get("cultures", []):
 			for faction in (culture as Dictionary).get("factions", []):
 				_faction_culture[str(faction)] = str(culture["id"])
@@ -48,15 +43,6 @@ static func config() -> Dictionary:
 				_aged[id] = []
 			(_aged[id] as Array).append(str(variant["band"]))
 	return _config
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 ## Oublie les caches (nouvelle partie, tests).

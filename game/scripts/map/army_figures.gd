@@ -36,7 +36,6 @@ const POLE_IN_HAND := Vector2(0.35, 0.55)
 const LORD_HAND := Vector3(0.4, 3.8, 0.7)
 const LORD_ADVANCE := 2.6
 const CAMPAIGN_MAP_DATA := "ui/campaign_map.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const ESCORT_ROWS_X := [-1.4, -3.0]
 const ESCORT_FILE_Z := [-1.3, 0.0, 1.3]
 ## Pied de la hampe de poupe (`campaign_fleet.py`, STERN_STAFF), repère du navire.
@@ -97,24 +96,12 @@ static func map_settings() -> Dictionary:
 	if _map_settings.is_empty():
 		var fallback := {"army_figure_scale": 1.0}
 		_map_settings = fallback.duplicate()
-		var path := _data_dir().path_join(CAMPAIGN_MAP_DATA)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(CAMPAIGN_MAP_DATA)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(CAMPAIGN_MAP_DATA) if DataFile.exists(CAMPAIGN_MAP_DATA) else null
 		if parsed is Dictionary and parsed.get("map") is Dictionary:
 			_map_settings.merge(parsed["map"], true)
 		else:
-			push_warning("ArmyFigures: %s missing or invalid" % path)
+			push_warning("ArmyFigures: %s missing or invalid" % CAMPAIGN_MAP_DATA)
 	return _map_settings
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
 
 
 ## Construit la représentation d'une armée (`army` = dictionnaire du pont).
@@ -258,7 +245,6 @@ func is_lord() -> bool:
 ## Lot CV3-5 : place du général agrandi (avancé pour que sa monture ne couvre pas l'escorte).
 func lord_slot() -> Vector2:
 	return LEADER_SLOT + Vector2(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
-
 
 
 static func _add_slot(slots: Dictionary, figure_kind: String, variant: int, slot: Vector2, yaw: float, size: float = 1.0) -> void:

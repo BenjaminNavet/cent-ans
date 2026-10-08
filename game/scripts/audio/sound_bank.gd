@@ -44,19 +44,7 @@ static func load_default() -> SoundBank:
 ## `data/` du dépôt à défaut (jeux de données réduits des tests, qui n'ont que la carte), comme
 ## `BattleStandards.read_data` et `FrontEndData.data`.
 static func data_path(relative: String) -> String:
-	var path := _data_dir().path_join(relative)
-	if FileAccess.file_exists(path):
-		return path
-	var fallback := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path().path_join(relative)
-	return fallback if FileAccess.file_exists(fallback) else path
-
-
-static func _data_dir() -> String:
-	var loop := Engine.get_main_loop() as SceneTree
-	var paths: Node = loop.root.get_node_or_null("/root/MapPaths") if loop != null else null
-	if paths != null:
-		return str(paths.get("data_dir"))
-	return ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	return DataFile.path_of(relative)
 
 
 func load_file(path: String) -> bool:
@@ -64,7 +52,7 @@ func load_file(path: String) -> bool:
 	if not FileAccess.file_exists(path):
 		push_warning("SoundBank: %s missing, audio bank empty" % path)
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not parsed is Dictionary:
 		push_warning("SoundBank: %s is not a JSON object" % path)
 		return false

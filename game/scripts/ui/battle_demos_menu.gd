@@ -30,39 +30,23 @@ var hour_keys: Array[String] = [""]
 
 ## Démos déclarées (`[]` si le fichier manque).
 static func load_demos() -> Array:
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(DEMOS_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				return (parsed as Dictionary).get("demos", [])
+	if DataFile.exists(DEMOS_FILE):
+		var parsed: Variant = DataFile.read_json(DEMOS_FILE)
+		if parsed is Dictionary:
+			return (parsed as Dictionary).get("demos", [])
 	return []
 
 
 ## EP8 : phases sélectionnables `[{key, label}]` (`[]` si le fichier manque).
 static func load_day_phases() -> Array:
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	var dirs: Array[String] = []
-	if paths != null:
-		dirs.append(str(paths.get("data_dir")))
-	dirs.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in dirs:
-		var path := dir.path_join(TIME_OF_DAY_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				var out: Array = []
-				for phase in (parsed as Dictionary).get("phases", []):
-					if bool((phase as Dictionary).get("selectable", true)):
-						out.append({"key": str(phase["key"]), "label": str(phase["label"])})
-				return out
+	if DataFile.exists(TIME_OF_DAY_FILE):
+		var parsed: Variant = DataFile.read_json(TIME_OF_DAY_FILE)
+		if parsed is Dictionary:
+			var out: Array = []
+			for phase in (parsed as Dictionary).get("phases", []):
+				if bool((phase as Dictionary).get("selectable", true)):
+					out.append({"key": str(phase["key"]), "label": str(phase["label"])})
+			return out
 	return []
 
 

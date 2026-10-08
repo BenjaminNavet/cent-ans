@@ -26,7 +26,7 @@ static func manifest() -> Dictionary:
 		_loaded = true
 		var path := DIR + "manifest.json"
 		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			var parsed: Variant = DataFile.parse_file(path)
 			if parsed is Dictionary:
 				_manifest = parsed
 	return _manifest

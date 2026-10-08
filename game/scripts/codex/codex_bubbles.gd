@@ -55,7 +55,6 @@ const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
 ## IB3 : réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
 const STYLE_FILE := "ui/tooltip_style.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const CHAIN_FALLBACK := {
 	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
 	"max_bubbles": MAX_BUBBLES, "breadcrumb_from_depth": 3,
@@ -240,10 +239,7 @@ func explore_held() -> bool:
 static func chain_setting(key: String) -> float:
 	if _chain_cache.is_empty():
 		_chain_cache = CHAIN_FALLBACK.duplicate()
-		var path := _data_dir().path_join(STYLE_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(STYLE_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(STYLE_FILE) if DataFile.exists(STYLE_FILE) else null
 		if parsed is Dictionary and (parsed as Dictionary).get("chain") is Dictionary:
 			_chain_cache.merge(parsed["chain"], true)
 		else:
@@ -254,15 +250,6 @@ static func chain_setting(key: String) -> float:
 ## Relit `tooltip_style.json` au prochain accès (tests).
 static func reload_chain_settings() -> void:
 	_chain_cache = {}
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.project_root().path_join("data")
 
 
 ## Touche T : verrouille la bulle ou l'infobulle visible la plus récente. Renvoie true si

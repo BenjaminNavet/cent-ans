@@ -15,7 +15,6 @@ extends Node
 ## Option du joueur : `map/stance_fill` (Réglages › Carte). Option (après `--`) :
 ## `--no-stance-fill` (A/B de perf). Purement visuel.
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/stance_fill.json"
 const SETTING_KEY := "map/stance_fill"
 
@@ -54,11 +53,10 @@ func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 
 ## Réglages de `data/map/stance_fill.json` (dictionnaire vide si absent ou illisible).
 static func load_tuning() -> Dictionary:
-	var path := MAP_PATHS_SCRIPT.default_data_dir().path_join(TUNING_PATH)
-	if not FileAccess.file_exists(path):
-		push_warning("StanceFill: %s missing" % path)
+	if not DataFile.exists(TUNING_PATH):
+		push_warning("StanceFill: %s missing" % TUNING_PATH)
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.read_json(TUNING_PATH)
 	return parsed if parsed is Dictionary else {}
 
 

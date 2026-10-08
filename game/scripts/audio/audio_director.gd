@@ -263,7 +263,7 @@ func load_playlists(path: String) -> bool:
 	_culture_regions.clear()
 	if not FileAccess.file_exists(path):
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not parsed is Dictionary:
 		push_warning("AudioDirector: %s is not a JSON object" % path)
 		return false
@@ -386,7 +386,7 @@ func culture_region(faction_id: String) -> String:
 		return ""
 	if not _faction_cultures.has(faction_id):
 		var data := SoundBank.data_path("factions/" + faction_id + ".json")
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data)) if FileAccess.file_exists(data) else null
+		var parsed: Variant = DataFile.parse_file(data) if FileAccess.file_exists(data) else null
 		_faction_cultures[faction_id] = str((parsed as Dictionary).get("culture", "")) if parsed is Dictionary else ""
 	return str(_culture_regions.get(_faction_cultures[faction_id], ""))
 

@@ -159,7 +159,7 @@ static func prop_mesh(role: String) -> ArrayMesh:
 ## Entrée `models.<nom>` du manifeste FK2 ({} si absent).
 static func model_entry(model: String) -> Dictionary:
 	if _manifest.is_empty():
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROP_MANIFEST)) if FileAccess.file_exists(PROP_MANIFEST) else null
+		var parsed: Variant = DataFile.parse_file(PROP_MANIFEST) if FileAccess.file_exists(PROP_MANIFEST) else null
 		_manifest = parsed if parsed is Dictionary else {"models": {}}
 	var entry: Variant = (_manifest.get("models", {}) as Dictionary).get(model)
 	return entry if entry is Dictionary else {}

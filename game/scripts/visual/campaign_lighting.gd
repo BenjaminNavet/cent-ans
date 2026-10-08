@@ -25,13 +25,11 @@ static var _loaded: bool = false
 static func data() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		var path := AtmosphereLibrary._data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
+		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
+		if parsed is Dictionary:
+			_data = parsed
 		if _data.is_empty():
-			push_warning("CampaignLighting: %s missing or invalid" % path)
+			push_warning("CampaignLighting: %s missing or invalid" % DATA_PATH)
 	return _data
 
 

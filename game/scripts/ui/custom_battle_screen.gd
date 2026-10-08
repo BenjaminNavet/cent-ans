@@ -76,7 +76,7 @@ func _ready() -> void:
 	if ClassDB.class_exists("BattleSim"):
 		_sim = ClassDB.instantiate("BattleSim")
 		rules = _sim.call("custom_rules")
-		factions = _sim.call("custom_factions", data_dir())
+		factions = _sim.call("custom_factions", DataFile.data_dir())
 	config = _initial_config()
 	_build()
 	_sync_controls()
@@ -85,9 +85,9 @@ func _ready() -> void:
 	UiMotion.fade_in(self)
 
 
-## Dossier des données (mêmes règles que les batailles historiques).
+## Dossier `data/` (utilisé par les tests).
 static func data_dir() -> String:
-	return HistoricalBattlesMenu.data_dir()
+	return DataFile.data_dir()
 
 
 ## Dernière composition gardée dans les réglages ({} si aucune ou illisible).
@@ -428,7 +428,7 @@ func roster(faction: String, techs: Array = []) -> Array:
 	sorted_techs.sort()
 	var key := "%s@%d@%s" % [faction, year, ",".join(PackedStringArray(sorted_techs))]
 	if not rosters.has(key):
-		rosters[key] = _sim.call("custom_roster", data_dir(), faction, year, PackedStringArray(techs)) if _sim != null else []
+		rosters[key] = _sim.call("custom_roster", DataFile.data_dir(), faction, year, PackedStringArray(techs)) if _sim != null else []
 	return rosters[key]
 
 
@@ -442,7 +442,7 @@ func grantable_technologies(side: String) -> Array:
 	var year := int(config.get("year", rules.get("default_year", 1337)))
 	var key := "%s@%d" % [config[side]["faction"], year]
 	if not tech_catalogs.has(key):
-		tech_catalogs[key] = _sim.call("custom_technologies", data_dir(), str(config[side]["faction"]), year) if _sim != null else []
+		tech_catalogs[key] = _sim.call("custom_technologies", DataFile.data_dir(), str(config[side]["faction"]), year) if _sim != null else []
 	return tech_catalogs[key]
 
 
@@ -613,7 +613,7 @@ func battle_config() -> Dictionary:
 ## Valide la composition au cœur puis redessine les listes, les points et les erreurs.
 func refresh() -> void:
 	if _sim != null:
-		report = _sim.call("validate_custom", data_dir(), battle_config())
+		report = _sim.call("validate_custom", DataFile.data_dir(), battle_config())
 	else:
 		report = {"ok": false, "errors": ["Extension de simulation absente."]}
 	for side in SIDES:

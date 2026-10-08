@@ -260,10 +260,10 @@ static func tab_of(entry_id: String) -> int:
 ## C7 : compagnons de `data/retinue.json`, `id → définition`.
 static func retinue_definitions() -> Dictionary:
 	var result: Dictionary = {}
-	var path := GameCatalog.data_dir().path_join("retinue.json")
+	var path := DataFile.data_dir().path_join("retinue.json")
 	if not FileAccess.file_exists(path):
 		return result
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if parsed is Dictionary:
 		for companion in parsed.get("companions", []):
 			if companion is Dictionary and companion.has("id"):
@@ -1070,8 +1070,8 @@ static var _agent_cache: Dictionary = {}
 static func agent_definitions() -> Dictionary:
 	if not _agent_cache.is_empty():
 		return _agent_cache
-	var path := GameCatalog.data_dir().path_join("rules/agents.json")
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	var path := DataFile.data_dir().path_join("rules/agents.json")
+	var parsed: Variant = DataFile.parse_file(path) if FileAccess.file_exists(path) else null
 	if not parsed is Dictionary:
 		return {}
 	var types: Dictionary = parsed.get("types", {})

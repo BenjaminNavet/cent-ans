@@ -64,17 +64,15 @@ func reload(directory: String = "") -> void:
 		for file_name in dir.get_files():
 			if not file_name.begins_with("cdx_") or not file_name.ends_with(".json"):
 				continue
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(codex_dir.path_join(file_name)))
+			var parsed: Variant = DataFile.parse_file(codex_dir.path_join(file_name))
 			if parsed is Dictionary and parsed.has("id"):
 				_add(parsed)
 	loaded.emit()
 
 
 func _default_dir() -> String:
-	var paths: Node = get_node_or_null("/root/MapPaths")
-	var data_dir: String = str(paths.get("data_dir")) if paths != null else ""
-	var candidate := data_dir.path_join("codex")
-	if data_dir != "" and _has_entries(candidate):
+	var candidate := DataFile.data_dir().path_join("codex")
+	if _has_entries(candidate):
 		return candidate
 	return ProjectSettings.globalize_path("res://").path_join("../data/codex").simplify_path()
 

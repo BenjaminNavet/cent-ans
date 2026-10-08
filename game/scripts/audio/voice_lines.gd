@@ -24,7 +24,7 @@ static func data(relative: String) -> Dictionary:
 	var path := SoundBank.data_path(relative)
 	var parsed: Variant = null
 	if FileAccess.file_exists(path):
-		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		parsed = DataFile.parse_file(path)
 	var result: Dictionary = parsed if parsed is Dictionary else {}
 	if result.is_empty():
 		push_warning("VoiceLines: %s missing or invalid" % path)

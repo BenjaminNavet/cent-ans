@@ -105,7 +105,7 @@ func lake_named(lake_name: String) -> Dictionary:
 func _load_lakes(path: String) -> void:
 	if not FileAccess.file_exists(path):
 		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not parsed is Dictionary:
 		push_warning("LakesRenderer: %s illisible" % path)
 		return

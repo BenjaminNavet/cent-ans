@@ -16,7 +16,6 @@ extends Node3D
 
 const DATA_PATH := "fx/horizon.json"
 const PANORAMA_META := "res://assets/horizon/panoramas/panoramas.json"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const LAND_SHADER := preload("res://shaders/battle_horizon_land.gdshader")
 const PANORAMA_SHADER := preload("res://shaders/battle_panorama.gdshader")
 const SMOKE_SHADER := preload("res://shaders/battle_horizon_smoke.gdshader")
@@ -67,23 +66,12 @@ var _season: String = "summer"
 
 static func data() -> Dictionary:
 	if _data.is_empty():
-		var path := _data_dir().path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_data = parsed
+		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
+		if parsed is Dictionary:
+			_data = parsed
 		if _data.is_empty():
-			push_warning("BattleHorizon: %s missing or invalid" % path)
+			push_warning("BattleHorizon: %s missing or invalid" % DATA_PATH)
 	return _data
-
-
-static func _data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	if tree != null and tree.root != null:
-		var map_paths := tree.root.get_node_or_null("MapPaths")
-		if map_paths != null:
-			return str(map_paths.get("data_dir"))
-	return MAP_PATHS_SCRIPT.default_data_dir()
 
 
 static func disabled_by_flag() -> bool:
@@ -112,7 +100,7 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 	var index_path := str(relief.get("index", ""))
 	if not FileAccess.file_exists(index_path):
 		return false
-	var index: Variant = JSON.parse_string(FileAccess.get_file_as_string(index_path))
+	var index: Variant = DataFile.parse_file(index_path)
 	if not (index is Dictionary):
 		return false
 	var tiles: Dictionary = (index as Dictionary).get("provinces", {})
@@ -500,7 +488,7 @@ func _build_panorama(weather: String) -> void:
 static func _panorama_meta(id: String) -> Dictionary:
 	if not FileAccess.file_exists(PANORAMA_META):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PANORAMA_META))
+	var parsed: Variant = DataFile.parse_file(PANORAMA_META)
 	if not (parsed is Dictionary):
 		return {}
 	return ((parsed as Dictionary).get("panoramas", {}) as Dictionary).get(id, {})

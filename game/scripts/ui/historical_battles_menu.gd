@@ -29,15 +29,12 @@ static func load_battles() -> Array:
 	var sim: Object = ClassDB.instantiate("BattleSim")
 	if not sim.has_method("list_historical"):
 		return []
-	return sim.call("list_historical", data_dir())
+	return sim.call("list_historical", DataFile.data_dir())
 
 
+## Dossier `data/` (utilisé par les tests).
 static func data_dir() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		return str(paths.get("data_dir"))
-	return ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	return DataFile.data_dir()
 
 
 ## Options de la scène de bataille pour la bataille `id` menée par `side` ("" : IA contre IA).

@@ -19,19 +19,11 @@ static func manifest() -> Dictionary:
 	if _manifest_loaded:
 		return _manifest
 	_manifest_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(MANIFEST_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
-				_manifest = parsed
-				return _manifest
+	if DataFile.exists(MANIFEST_FILE):
+		var parsed: Variant = DataFile.read_json(MANIFEST_FILE)
+		if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
+			_manifest = parsed
+			return _manifest
 	push_warning("GroundMaterials: %s introuvable" % MANIFEST_FILE)
 	return _manifest
 

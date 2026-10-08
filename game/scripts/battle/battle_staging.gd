@@ -61,18 +61,10 @@ static func disabled_from_args(args: PackedStringArray) -> Dictionary:
 
 
 static func load_config() -> Dictionary:
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(FX_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				return parsed
+	if DataFile.exists(FX_PATH):
+		var parsed: Variant = DataFile.read_json(FX_PATH)
+		if parsed is Dictionary:
+			return parsed
 	return {}
 
 

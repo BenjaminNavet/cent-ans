@@ -17,17 +17,9 @@ static var _cache: Dictionary = {}  # dossier → {id → définition}
 static var _data_dir: String = ""
 
 
-static func data_dir() -> String:
-	var loop := Engine.get_main_loop() as SceneTree
-	var paths: Node = loop.root.get_node_or_null("/root/MapPaths") if loop != null else null
-	if paths != null:
-		return str(paths.get("data_dir"))
-	return ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
-
-
 ## Définitions d'un dossier de `data/` (rechargées si `MapPaths.data_dir` a changé).
 static func definitions(directory: String) -> Dictionary:
-	var current := data_dir()
+	var current := DataFile.data_dir()
 	if current != _data_dir:
 		_cache.clear()
 		_data_dir = current
@@ -40,7 +32,7 @@ static func definitions(directory: String) -> Dictionary:
 		for file_name in dir.get_files():
 			if not file_name.ends_with(".json"):
 				continue
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path.path_join(file_name)))
+			var parsed: Variant = DataFile.parse_file(path.path_join(file_name))
 			if parsed is Dictionary and parsed.has("id"):
 				result[str(parsed["id"])] = parsed
 	_cache[directory] = result

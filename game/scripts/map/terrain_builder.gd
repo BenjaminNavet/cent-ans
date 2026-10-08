@@ -885,7 +885,7 @@ func _setup_fine_tiles() -> void:
 	var meta_path := map_data.map_dir.path_join("map.json")
 	if not FileAccess.file_exists(meta_path):
 		return
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+	var meta: Variant = DataFile.parse_file(meta_path)
 	if not (meta is Dictionary) or not (meta as Dictionary).has("height_tiles"):
 		return
 	var tiles: Dictionary = meta["height_tiles"]

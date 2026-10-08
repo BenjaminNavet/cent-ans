@@ -53,7 +53,7 @@ func _load_geometry() -> void:
 	var path := map_data.map_dir.path_join(LANES_FILE)
 	if not FileAccess.file_exists(path):
 		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		push_warning("SeaLaneLayer : %s illisible" % path)
 		return

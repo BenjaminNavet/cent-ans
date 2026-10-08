@@ -39,19 +39,11 @@ static func settings() -> Dictionary:
 	if _settings_loaded:
 		return _settings
 	_settings_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(SETTINGS_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary:
-				_settings = parsed
-				return _settings
+	if DataFile.exists(SETTINGS_FILE):
+		var parsed: Variant = DataFile.read_json(SETTINGS_FILE)
+		if parsed is Dictionary:
+			_settings = parsed
+			return _settings
 	push_warning("BattleGore: %s introuvable, sang et démembrements désactivés" % SETTINGS_FILE)
 	return _settings
 

@@ -30,7 +30,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	texture = PortraitLoader.load_texture(ART_PATH)
 	if FileAccess.file_exists(SIDECAR_PATH):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SIDECAR_PATH))
+		var parsed: Variant = DataFile.parse_file(SIDECAR_PATH)
 		if parsed is Dictionary:
 			_sidecar = parsed
 	resized.connect(func() -> void:

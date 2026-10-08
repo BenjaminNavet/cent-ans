@@ -135,7 +135,7 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 	if not FileAccess.file_exists(path):
 		load_error = "manifest missing: %s" % path
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		load_error = "invalid manifest: %s" % path
 		return false
@@ -233,7 +233,7 @@ func _load_e0() -> void:
 	var meta_path := map_dir.path_join("map.json")
 	if not FileAccess.file_exists(meta_path):
 		return
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+	var meta: Variant = DataFile.parse_file(meta_path)
 	if not (meta is Dictionary):
 		return
 	var world: Variant = (meta as Dictionary).get("size_px", [])

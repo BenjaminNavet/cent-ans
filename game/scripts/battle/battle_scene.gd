@@ -366,9 +366,7 @@ func _stage_standalone() -> bool:
 		sim = sim_facade.sim
 	else:
 		sim = ClassDB.instantiate("CampaignSim")
-		var paths := get_node_or_null("/root/MapPaths")
-		var data_dir: String = paths.data_dir if paths != null else ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
-		if not sim.call("new_campaign", data_dir, "fac_france", 1337):
+		if not sim.call("new_campaign", DataFile.data_dir(), "fac_france", 1337):
 			return false
 	var armies := main_armies(sim, "fac_france", "fac_england")
 	if armies.is_empty():
@@ -443,9 +441,7 @@ func begin_historical() -> bool:
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.has_method("setup_historical"):
 		return false
-	var paths := get_node_or_null("/root/MapPaths")
-	var data_dir: String = paths.data_dir if paths != null else ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
-	if not battle.call("setup_historical", data_dir, _historical, _historical_side, battle_seed):
+	if not battle.call("setup_historical", DataFile.data_dir(), _historical, _historical_side, battle_seed):
 		return false
 	setup = battle.call("get_setup")
 	padded = true  # hors campagne : pas de résultat à rapporter
@@ -470,7 +466,7 @@ func begin_custom(config: Dictionary) -> bool:
 		return false
 	# Un champ différent à chaque bataille, sauf graine imposée (`seed` : tests, captures).
 	battle_seed = int(config.get("seed", randi() % 1000000))
-	if not battle.call("setup_custom", CustomBattleScreen.data_dir(), config, battle_seed):
+	if not battle.call("setup_custom", DataFile.data_dir(), config, battle_seed):
 		return false
 	setup = battle.call("get_setup")
 	padded = true  # hors campagne : pas de résultat à rapporter

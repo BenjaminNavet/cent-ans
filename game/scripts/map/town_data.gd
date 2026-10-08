@@ -20,7 +20,7 @@ static func load_from(map_dir: String) -> TownData:
 	var path := map_dir.path_join("towns_1340.json")
 	if not FileAccess.file_exists(path):
 		return result
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var parsed: Variant = DataFile.parse_file(path)
 	if not (parsed is Dictionary):
 		return result
 	result.towns = parsed.get("towns", {})

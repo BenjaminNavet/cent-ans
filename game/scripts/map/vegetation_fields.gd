@@ -147,7 +147,7 @@ static func _province_landuse(data: MapData) -> Dictionary:
 		var path := provinces_dir.path_join(str(province.get("id", "")) + ".json")
 		if not FileAccess.file_exists(path):
 			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var parsed: Variant = DataFile.parse_file(path)
 		if not (parsed is Dictionary):
 			continue
 		result[index] = landuse_of(parsed)

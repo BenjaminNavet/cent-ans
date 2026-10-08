@@ -223,7 +223,7 @@ static func load_unit_catalog(data_dir: String) -> Dictionary:
 	for file_name in dir.get_files():
 		if not file_name.ends_with(".json"):
 			continue
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir_path.path_join(file_name)))
+		var parsed: Variant = DataFile.parse_file(dir_path.path_join(file_name))
 		if not parsed is Dictionary:
 			continue
 		var entry: Dictionary = parsed

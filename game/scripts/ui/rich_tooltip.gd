@@ -1119,7 +1119,6 @@ const ENTITY_KINDS := {
 	"trait_": "trait", "skill_": "skill",
 }
 
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
 static var _texts: Dictionary = {}
 ## Vrai si les libellés viennent bien du fichier de données (tests).
@@ -1131,10 +1130,7 @@ static var texts_loaded_from_data: bool = false
 ## on retombe sur `data/` à la racine du dépôt.
 static func texts() -> Dictionary:
 	if _texts.is_empty():
-		var path := TooltipView._data_dir().path_join(TEXTS_FILE)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(TEXTS_FILE)
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		var parsed: Variant = DataFile.read_json(TEXTS_FILE) if DataFile.exists(TEXTS_FILE) else null
 		if parsed is Dictionary:
 			_texts = parsed
 			texts_loaded_from_data = true

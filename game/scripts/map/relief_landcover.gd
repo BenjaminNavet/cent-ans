@@ -167,13 +167,13 @@ static func load_gpu_copy(map_dir: String, entry: Variant) -> Image:
 
 
 static func _map_meta(map_dir: String) -> Dictionary:
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	var meta: Variant = DataFile.parse_file(map_dir.path_join("map.json"))
 	return meta if meta is Dictionary else {}
 
 
 ## Bandes horizontales de `map.json.relief_shade.bands` empilées de haut en bas ; null sans bandes.
 static func _load_bands(map_dir: String, format: int) -> Image:
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	var meta: Variant = DataFile.parse_file(map_dir.path_join("map.json"))
 	if not (meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary):
 		return null
 	var bands: Variant = meta["relief_shade"].get("bands")
@@ -199,7 +199,7 @@ static func _load_bands(map_dir: String, format: int) -> Image:
 
 
 static func _detail_scale_of(map_dir: String) -> float:
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	var meta: Variant = DataFile.parse_file(map_dir.path_join("map.json"))
 	if meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary:
 		return float(meta["relief_shade"].get("detail_scale_m", 1.5))
 	return 1.5

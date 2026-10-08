@@ -19,19 +19,11 @@ static func spec() -> Dictionary:
 	if _spec_loaded:
 		return _spec
 	_spec_loaded = true
-	var candidates: Array[String] = []
-	var tree := Engine.get_main_loop() as SceneTree
-	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
-	if paths != null:
-		candidates.append(str(paths.get("data_dir")))
-	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
-	for dir in candidates:
-		var path := dir.path_join(SPEC_FILE)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if parsed is Dictionary and (parsed as Dictionary).get("materials") is Dictionary:
-				_spec = (parsed as Dictionary).get("materials")
-				return _spec
+	if DataFile.exists(SPEC_FILE):
+		var parsed: Variant = DataFile.read_json(SPEC_FILE)
+		if parsed is Dictionary and (parsed as Dictionary).get("materials") is Dictionary:
+			_spec = (parsed as Dictionary).get("materials")
+			return _spec
 	return _spec
 
 
