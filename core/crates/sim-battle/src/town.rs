@@ -16,6 +16,7 @@
 //! length runs along `(cos yaw, sin yaw)` and the front (the model's +Z, the
 //! facade) faces `(-sin yaw, cos yaw)`.
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -191,27 +192,17 @@ impl Footprint {
     }
 }
 
+key_enum! {
 /// Kind of a piece of street furniture (kit model kind).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PropKind {
-    Stall,
-    Cart,
-    Barrels,
-    Woodpile,
-    Well,
+    Stall => "stall",
+    Cart => "cart",
+    Barrels => "barrels",
+    Woodpile => "woodpile",
+    Well => "well",
 }
-
-impl PropKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            PropKind::Stall => "stall",
-            PropKind::Cart => "cart",
-            PropKind::Barrels => "barrels",
-            PropKind::Woodpile => "woodpile",
-            PropKind::Well => "well",
-        }
-    }
 }
 
 /// A piece of street furniture: a solid obstacle for the figures (and, on
@@ -394,5 +385,16 @@ mod tests {
     fn hash_is_uniform_enough() {
         let mean = (0..1000).map(|k| hash01(k, 7)).sum::<f64>() / 1000.0;
         assert!((mean - 0.5).abs() < 0.05);
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<PropKind>();
     }
 }

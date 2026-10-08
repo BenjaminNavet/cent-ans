@@ -1,41 +1,27 @@
 //! Province: a region of the campaign map (`province.schema.json`).
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Percent, SocialClass, Sources};
 use crate::ids::{BuildingId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId};
 
+key_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Terrain {
-    Plains,
-    Hills,
-    Mountains,
-    Forest,
-    Marsh,
-    Heath,
-    Bocage,
+    Plains => "plains",
+    Hills => "hills",
+    Mountains => "mountains",
+    Forest => "forest",
+    Marsh => "marsh",
+    Heath => "heath",
+    Bocage => "bocage",
     /// Dry open grassland (Pontic steppe): moves like plains, thin forage, cavalry country.
-    Steppe,
+    Steppe => "steppe",
     /// Arid land (Sahara fringe, Syrian desert): slow, very thin forage, summer attrition.
-    Desert,
+    Desert => "desert",
 }
-
-impl Terrain {
-    /// The `snake_case` key used in JSON files.
-    pub fn key(self) -> &'static str {
-        match self {
-            Terrain::Plains => "plains",
-            Terrain::Hills => "hills",
-            Terrain::Mountains => "mountains",
-            Terrain::Forest => "forest",
-            Terrain::Marsh => "marsh",
-            Terrain::Heath => "heath",
-            Terrain::Bocage => "bocage",
-            Terrain::Steppe => "steppe",
-            Terrain::Desert => "desert",
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -189,5 +175,16 @@ impl Province {
     /// Whether the province has at least one usable port.
     pub fn has_port(&self) -> bool {
         !self.ports.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Terrain>();
     }
 }

@@ -31,6 +31,7 @@
 //! street hamlets), and every size is read from the field ([`FieldSize`]),
 //! never assumed to be 1200 × 800.
 
+use data_model::key_enum;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -303,41 +304,29 @@ impl DecorRules {
 
 // ----- features ----------------------------------------------------------------------
 
+key_enum! {
 /// Kind of a decor area (its effect on the regiments).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AreaKind {
     /// Houses, crofts and lanes of a hamlet.
-    Hamlet,
+    Hamlet => "hamlet",
     /// Walled churchyard round the parish church.
-    Church,
+    Church => "church",
     /// Manor house or tower house with its yard (and moat).
-    Manor,
+    Manor => "manor",
     /// Lone farm round its yard.
-    Farmstead,
-    Orchard,
-    Vineyard,
-    Ploughland,
-    Meadow,
+    Farmstead => "farmstead",
+    Orchard => "orchard",
+    Vineyard => "vineyard",
+    Ploughland => "ploughland",
+    Meadow => "meadow",
     /// An army's camp.
-    Camp,
+    Camp => "camp",
+}
 }
 
 impl AreaKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            AreaKind::Hamlet => "hamlet",
-            AreaKind::Church => "church",
-            AreaKind::Manor => "manor",
-            AreaKind::Farmstead => "farmstead",
-            AreaKind::Orchard => "orchard",
-            AreaKind::Vineyard => "vineyard",
-            AreaKind::Ploughland => "ploughland",
-            AreaKind::Meadow => "meadow",
-            AreaKind::Camp => "camp",
-        }
-    }
-
     pub fn label_fr(self) -> &'static str {
         match self {
             AreaKind::Hamlet => "hameau",
@@ -368,28 +357,19 @@ impl AreaKind {
     }
 }
 
+key_enum! {
 /// State of a field of ploughland.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FieldState {
     /// Bare furrows.
-    Ploughed,
+    Ploughed => "ploughed",
     /// Young green corn.
-    Sown,
+    Sown => "sown",
     /// Ripe standing corn.
-    Crop,
-    Stubble,
+    Crop => "crop",
+    Stubble => "stubble",
 }
-
-impl FieldState {
-    pub fn key(self) -> &'static str {
-        match self {
-            FieldState::Ploughed => "ploughed",
-            FieldState::Sown => "sown",
-            FieldState::Crop => "crop",
-            FieldState::Stubble => "stubble",
-        }
-    }
 }
 
 /// A decor area: an oriented rectangle (same convention as
@@ -422,26 +402,18 @@ impl Area {
     }
 }
 
+key_enum! {
 /// Plan of a hamlet.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HamletLayout {
     /// Houses lining both sides of a road (street village, bastide).
-    Street,
+    Street => "street",
     /// Houses round a green and the parish church.
-    Green,
+    Green => "green",
     /// A lone farm: farmhouse, barn and byre round a yard.
-    Farmstead,
+    Farmstead => "farmstead",
 }
-
-impl HamletLayout {
-    pub fn key(self) -> &'static str {
-        match self {
-            HamletLayout::Street => "street",
-            HamletLayout::Green => "green",
-            HamletLayout::Farmstead => "farmstead",
-        }
-    }
 }
 
 /// A hamlet or a farmstead: its plan and its buildings (indices in
@@ -456,39 +428,26 @@ pub struct Hamlet {
     pub buildings: Vec<usize>,
 }
 
+key_enum! {
 /// Kind of a decor prop.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DecorPropKind {
-    Haystack,
-    Cart,
-    Tent,
-    Pavilion,
-    Wagon,
-    Campfire,
+    Haystack => "haystack",
+    Cart => "cart",
+    Tent => "tent",
+    Pavilion => "pavilion",
+    Wagon => "wagon",
+    Campfire => "campfire",
     /// A line of horses tethered to a rope between two posts (`length`).
-    HorseLine,
-    Graves,
-    Well,
-    Woodpile,
+    HorseLine => "horse_line",
+    Graves => "graves",
+    Well => "well",
+    Woodpile => "woodpile",
+}
 }
 
 impl DecorPropKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            DecorPropKind::Haystack => "haystack",
-            DecorPropKind::Cart => "cart",
-            DecorPropKind::Tent => "tent",
-            DecorPropKind::Pavilion => "pavilion",
-            DecorPropKind::Wagon => "wagon",
-            DecorPropKind::Campfire => "campfire",
-            DecorPropKind::HorseLine => "horse_line",
-            DecorPropKind::Graves => "graves",
-            DecorPropKind::Well => "well",
-            DecorPropKind::Woodpile => "woodpile",
-        }
-    }
-
     /// Figures walk round it (not through it).
     pub fn solid(self) -> bool {
         !matches!(
@@ -1046,5 +1005,19 @@ impl Battlefield {
             }
         }
         out
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<AreaKind>();
+        assert_keys_match_serde::<FieldState>();
+        assert_keys_match_serde::<HamletLayout>();
+        assert_keys_match_serde::<DecorPropKind>();
     }
 }

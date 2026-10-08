@@ -16,6 +16,7 @@
 //! Everything is deterministic: no random draw, the counts follow from the
 //! regiments' statistics, formation and the angle of the attack.
 
+use data_model::key_enum;
 use data_model::{Ability, UnitCategory};
 use serde::{Deserialize, Serialize};
 
@@ -30,75 +31,48 @@ pub const KNOCKED_PER_RIDER: f64 = 1.5;
 /// Riders lost (share of the charging regiment) on a wall of levelled pikes.
 pub const PIKE_STOP_LOSS: f64 = 0.08;
 
+key_enum! {
 /// What happened when a charge reached its target.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ImpactKind {
     /// The charge went home: men knocked down or thrown back.
-    Shock,
+    Shock => "shock",
     /// Levelled pikes stopped the horses: riders unhorsed, no knock-down.
-    Pikes,
+    Pikes => "pikes",
     /// The horses impaled themselves on the archers' stakes.
-    Stakes,
+    Stakes => "stakes",
     /// A hedge, a ditch or village lanes broke the charge before contact.
-    Broken,
+    Broken => "broken",
+}
 }
 
-impl ImpactKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            ImpactKind::Shock => "shock",
-            ImpactKind::Pikes => "pikes",
-            ImpactKind::Stakes => "stakes",
-            ImpactKind::Broken => "broken",
-        }
-    }
-}
-
+key_enum! {
 /// Cause of a regiment's latest casualties (chooses the death drawn).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LossCause {
     #[default]
-    Other,
-    Arrow,
-    Bolt,
+    Other => "other",
+    Arrow => "arrow",
+    Bolt => "bolt",
     /// Bombard ball.
-    Ball,
+    Ball => "ball",
     /// Trebuchet or mangonel stone.
-    Stone,
+    Stone => "stone",
     /// Handheld firearm bullet (couleuvriniers, lot UR2).
-    Bullet,
+    Bullet => "bullet",
     /// Thrown javelin (jinetes, lot UR2).
-    Javelin,
-    Melee,
+    Javelin => "javelin",
+    Melee => "melee",
     /// Melee while the attacker's charge impact lasts.
-    Charge,
-    Stakes,
-    Pikes,
-    Fire,
+    Charge => "charge",
+    Stakes => "stakes",
+    Pikes => "pikes",
+    Fire => "fire",
     /// EP3: swept away in deep water.
-    Drowned,
+    Drowned => "drowned",
 }
-
-impl LossCause {
-    pub fn key(self) -> &'static str {
-        match self {
-            LossCause::Other => "other",
-            LossCause::Arrow => "arrow",
-            LossCause::Bolt => "bolt",
-            LossCause::Ball => "ball",
-            LossCause::Stone => "stone",
-            LossCause::Bullet => "bullet",
-            LossCause::Javelin => "javelin",
-            LossCause::Melee => "melee",
-            LossCause::Charge => "charge",
-            LossCause::Stakes => "stakes",
-            LossCause::Pikes => "pikes",
-            LossCause::Fire => "fire",
-            LossCause::Drowned => "drowned",
-        }
-    }
 }
 
 /// One charge impact, as resolved by the simulation.
@@ -192,5 +166,17 @@ pub fn shock_morale(angle: u8) -> f64 {
         8.0
     } else {
         15.0
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<ImpactKind>();
+        assert_keys_match_serde::<LossCause>();
     }
 }

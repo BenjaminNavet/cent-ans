@@ -5,6 +5,7 @@
 //! tick (`sim/fire.rs`); this module only holds plain data and the pure
 //! burning law of one blaze, so that the bridge and the tests share it.
 
+use data_model::key_enum;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
@@ -13,25 +14,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::field::Weather;
 
+key_enum! {
 /// Where a house (or the gate) stands in its fire.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FireState {
     #[default]
-    Intact,
-    Burning,
+    Intact => "intact",
+    Burning => "burning",
     /// Burnt out: a ruin that no longer blocks movement.
-    Burnt,
+    Burnt => "burnt",
 }
-
-impl FireState {
-    pub fn key(self) -> &'static str {
-        match self {
-            FireState::Intact => "intact",
-            FireState::Burning => "burning",
-            FireState::Burnt => "burnt",
-        }
-    }
 }
 
 /// The fire of one house or of the gate.
@@ -271,5 +264,16 @@ impl FireRules {
             .or_else(|| self.ignition.by_category.get(category))
             .copied()
             .unwrap_or(0.0)
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<FireState>();
     }
 }

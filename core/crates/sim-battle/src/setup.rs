@@ -3,15 +3,18 @@
 //! The setup is plain serde data so that it crosses the GDExtension boundary
 //! as a `Dictionary` (via JSON) and can be stored in tests as fixtures.
 
+use data_model::key_enum;
 use data_model::{Ability, BattleOrder, Missile, Terrain, UnitCategory, UnitStats, UnitType};
 use serde::{Deserialize, Serialize};
 
+key_enum! {
 /// One of the two sides of a battle.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SideId {
-    Attacker,
-    Defender,
+    Attacker => "attacker",
+    Defender => "defender",
+}
 }
 
 impl SideId {
@@ -28,13 +31,6 @@ impl SideId {
         match self {
             SideId::Attacker => 0,
             SideId::Defender => 1,
-        }
-    }
-
-    pub fn key(self) -> &'static str {
-        match self {
-            SideId::Attacker => "attacker",
-            SideId::Defender => "defender",
         }
     }
 
@@ -373,5 +369,16 @@ impl BattleSetup {
             SideId::Attacker => &self.attacker,
             SideId::Defender => &self.defender,
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<SideId>();
     }
 }

@@ -3,6 +3,7 @@
 //! the campaign site (coast, marsh pools, village, hedges, ground of the
 //! season: lot B5, [`crate::site`]).
 
+use data_model::key_enum;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
@@ -101,29 +102,22 @@ impl River {
     }
 }
 
+key_enum! {
 /// Weather of the battle (spec § 1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Weather {
-    Clear,
+    Clear => "clear",
     /// Longbows and crossbows shoot 40 % worse; mud is heavier.
-    Rain,
+    Rain => "rain",
     /// Ranges are 30 % shorter.
-    Fog,
+    Fog => "fog",
     /// Slower and more tiring marches.
-    Snow,
+    Snow => "snow",
+}
 }
 
 impl Weather {
-    pub fn key(self) -> &'static str {
-        match self {
-            Weather::Clear => "clear",
-            Weather::Rain => "rain",
-            Weather::Fog => "fog",
-            Weather::Snow => "snow",
-        }
-    }
-
     pub fn label_fr(self) -> &'static str {
         match self {
             Weather::Clear => "Temps clair",
@@ -811,5 +805,16 @@ impl Battlefield {
             let z = from.1 + (to.1 - from.1) * t;
             self.height(x, z) > h0 + (h1 - h0) * t + 1.0
         })
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Weather>();
     }
 }

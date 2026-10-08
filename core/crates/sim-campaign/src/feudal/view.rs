@@ -3,6 +3,7 @@
 //! breadcrumb and the feudal map filter. Everything is deduced from the
 //! title holdings; nothing here changes the state.
 
+use data_model::key_enum;
 use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, ProvinceId, TitleId, TitleRank};
@@ -14,31 +15,23 @@ use super::{
 };
 use crate::state::CampaignState;
 
+key_enum! {
 /// Badge of a vassal in the feudal tree (§ 6: loyal, discontent, felon,
 /// in revolt).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VassalStatus {
-    Loyal,
+    Loyal => "loyal",
     /// Loyalty below `feudal.json:disloyal_threshold`: may refuse the host,
     /// revolt or pay homage elsewhere (§ 4.2).
-    Discontent,
+    Discontent => "discontent",
     /// Under an open felony case: its suzerain may declare forfeiture.
-    Felon,
+    Felon => "felon",
     /// At war with its own suzerain (forfeiture war, revolt under way).
-    InRevolt,
+    InRevolt => "in_revolt",
+}
 }
 
 impl VassalStatus {
-    /// Snake-case key for the interface.
-    pub fn key(self) -> &'static str {
-        match self {
-            VassalStatus::Loyal => "loyal",
-            VassalStatus::Discontent => "discontent",
-            VassalStatus::Felon => "felon",
-            VassalStatus::InRevolt => "in_revolt",
-        }
-    }
-
     /// French label.
     pub fn label_fr(self) -> &'static str {
         match self {

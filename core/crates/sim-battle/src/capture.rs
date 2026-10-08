@@ -14,6 +14,7 @@
 //! (`data/schemas/siege_capture_rules.schema.json`). The step itself is in
 //! `sim/capture.rs`.
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 
 /// Rules of one capture point.
@@ -106,48 +107,31 @@ impl CaptureRules {
     }
 }
 
+key_enum! {
 /// Which point.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CapturePointKind {
-    Square,
-    Gate,
+    Square => "square",
+    Gate => "gate",
+}
 }
 
-impl CapturePointKind {
-    /// Stable key for the Godot bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            CapturePointKind::Square => "square",
-            CapturePointKind::Gate => "gate",
-        }
-    }
-}
-
+key_enum! {
 /// Who has the upper hand on a point this step.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PointStatus {
     /// Nobody from the attacker on it: the defender holds it.
     #[default]
-    Held,
+    Held => "held",
     /// Both sides on it, the attacker not superior enough.
-    Contested,
+    Contested => "contested",
     /// The attacker is superior: the progress grows.
-    Capturing,
+    Capturing => "capturing",
     /// Taken by the attacker (the gate for good; the square: the town falls).
-    Taken,
+    Taken => "taken",
 }
-
-impl PointStatus {
-    pub fn key(self) -> &'static str {
-        match self {
-            PointStatus::Held => "held",
-            PointStatus::Contested => "contested",
-            PointStatus::Capturing => "capturing",
-            PointStatus::Taken => "taken",
-        }
-    }
 }
 
 /// One capture point during the battle.
@@ -282,5 +266,17 @@ mod tests {
         assert!(p.progress < before - 0.1 * r.square.retake_per_s + 1e-9);
         p.advance(0.0, 0.0, &r.square, r.superiority, 0.1);
         assert_eq!(p.status, PointStatus::Held);
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CapturePointKind>();
+        assert_keys_match_serde::<PointStatus>();
     }
 }

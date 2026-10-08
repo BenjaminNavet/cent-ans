@@ -9,6 +9,7 @@
 //! campaign seed and the turn, and never draws from [`CampaignState::rng`]
 //! (the rest of the simulation is left untouched).
 
+use data_model::key_enum;
 use std::collections::BTreeSet;
 
 use data_model::{
@@ -68,23 +69,15 @@ pub struct Mission {
     pub baseline: Vec<String>,
 }
 
+key_enum! {
 /// What happened to a mission, for a toast.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum NoticeKind {
-    Offered,
-    Succeeded,
-    Failed,
+    Offered => "offered",
+    Succeeded => "succeeded",
+    Failed => "failed",
 }
-
-impl NoticeKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            NoticeKind::Offered => "offered",
-            NoticeKind::Succeeded => "succeeded",
-            NoticeKind::Failed => "failed",
-        }
-    }
 }
 
 /// A toast for the interface.
@@ -716,5 +709,16 @@ impl CampaignState {
     /// Notices (offered, succeeded, failed) of the last resolution.
     pub fn mission_notices(&self) -> &[MissionNotice] {
         &self.missions.notices
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<NoticeKind>();
     }
 }

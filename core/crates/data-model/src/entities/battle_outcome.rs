@@ -3,48 +3,28 @@
 //! (`data/rules/battle_outcome.json`). Spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 3.
 
+use crate::key_enum;
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+key_enum! {
 /// Class of a battle result for one side, tested in declaration order
 /// within victories then within defeats.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BattleOutcomeClass {
-    Heroic,
-    Decisive,
-    Pyrrhic,
-    Victory,
-    HonourableDefeat,
-    Disaster,
-    Defeat,
+    Heroic => "heroic",
+    Decisive => "decisive",
+    Pyrrhic => "pyrrhic",
+    Victory => "victory",
+    HonourableDefeat => "honourable_defeat",
+    Disaster => "disaster",
+    Defeat => "defeat",
+}
 }
 
 impl BattleOutcomeClass {
-    pub const ALL: [BattleOutcomeClass; 7] = [
-        BattleOutcomeClass::Heroic,
-        BattleOutcomeClass::Decisive,
-        BattleOutcomeClass::Pyrrhic,
-        BattleOutcomeClass::Victory,
-        BattleOutcomeClass::HonourableDefeat,
-        BattleOutcomeClass::Disaster,
-        BattleOutcomeClass::Defeat,
-    ];
-
-    /// The `snake_case` key used in JSON files and by the bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            BattleOutcomeClass::Heroic => "heroic",
-            BattleOutcomeClass::Decisive => "decisive",
-            BattleOutcomeClass::Pyrrhic => "pyrrhic",
-            BattleOutcomeClass::Victory => "victory",
-            BattleOutcomeClass::HonourableDefeat => "honourable_defeat",
-            BattleOutcomeClass::Disaster => "disaster",
-            BattleOutcomeClass::Defeat => "defeat",
-        }
-    }
-
     pub fn is_victory(self) -> bool {
         matches!(
             self,
@@ -132,5 +112,16 @@ mod tests {
         for class in BattleOutcomeClass::ALL {
             assert!(rules.classes.contains_key(&class), "{class:?}");
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<BattleOutcomeClass>();
     }
 }

@@ -19,6 +19,7 @@
 //! traditions raise the rate.
 //! Garrisons keep their own reinforcement (`economy`, `garrison` effect).
 
+use data_model::key_enum;
 use data_model::EffectKind;
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
@@ -26,26 +27,19 @@ use serde::{Deserialize, Serialize};
 use crate::events::{EventKind, GameEvent};
 use crate::state::{ArmyId, CampaignState, Season, Stance};
 
+key_enum! {
 /// Territory an army stands on, for its replenishment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Territory {
-    Own,
-    Ally,
-    Neutral,
-    Hostile,
+    Own => "own",
+    Ally => "ally",
+    Neutral => "neutral",
+    Hostile => "hostile",
+}
 }
 
 impl Territory {
-    pub fn key(self) -> &'static str {
-        match self {
-            Territory::Own => "own",
-            Territory::Ally => "ally",
-            Territory::Neutral => "neutral",
-            Territory::Hostile => "hostile",
-        }
-    }
-
     pub fn label_fr(self) -> &'static str {
         match self {
             Territory::Own => "Terres propres",
@@ -429,5 +423,16 @@ fn apply_plan(
     }
     if let Some(faction) = state.factions.get_mut(faction) {
         faction.treasury -= i64::from(plan.cost);
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Territory>();
     }
 }

@@ -17,6 +17,7 @@
 //! from the battle's random stream: a province always gets the same plan.
 //! The side of the attacked gate always faces the attacker (−z).
 
+use data_model::key_enum;
 use data_model::util::dist_xz;
 use std::collections::BTreeMap;
 use std::f64::consts::{PI, TAU};
@@ -38,30 +39,20 @@ use crate::town::{Footprint, PropKind, TownRules};
 #[derive(
     Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
 )]
+key_enum! {
 #[serde(rename_all = "snake_case")]
 pub enum PlaceKind {
     /// Ring town (the generic plan of BR3).
     #[default]
-    City,
+    City => "city",
     /// Fortified borough: main street, market square, rows of houses.
-    Borough,
+    Borough => "borough",
     /// Castle: tight enceinte, keep, bailey, few buildings.
-    Castle,
+    Castle => "castle",
+}
 }
 
 impl PlaceKind {
-    /// Every kind.
-    pub const ALL: [PlaceKind; 3] = [PlaceKind::City, PlaceKind::Borough, PlaceKind::Castle];
-
-    /// The `snake_case` key used in JSON files and by the bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            PlaceKind::City => "city",
-            PlaceKind::Borough => "borough",
-            PlaceKind::Castle => "castle",
-        }
-    }
-
     /// The default kind (serde `skip_serializing_if`).
     pub fn is_city(&self) -> bool {
         *self == PlaceKind::City

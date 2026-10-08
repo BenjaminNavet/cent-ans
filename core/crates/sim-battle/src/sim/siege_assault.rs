@@ -11,6 +11,7 @@ use crate::siege_fx::{
     RAM_PERIOD,
 };
 use crate::unit::{Unit, UnitState};
+use data_model::key_enum;
 
 /// One ladder of a climbing regiment: foot on the ground and top against
 /// the crenels, both on the (x, z) plane, and their heights.
@@ -22,20 +23,13 @@ pub struct Ladder {
     pub top_y: f64,
 }
 
+key_enum! {
 /// SB: what a siege engine of the attacker is, for its health bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SiegeEngineKind {
-    Ram,
-    Tower,
+    Ram => "ram",
+    Tower => "tower",
 }
-
-impl SiegeEngineKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            SiegeEngineKind::Ram => "ram",
-            SiegeEngineKind::Tower => "tower",
-        }
-    }
 }
 
 /// SB: a ram or siege tower and its strength (`hp` = crew left).

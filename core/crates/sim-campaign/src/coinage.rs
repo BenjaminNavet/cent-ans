@@ -18,6 +18,7 @@
 //! breaks even within a year. Undoing 30 points of inflation takes fifteen
 //! seasons of strong money.
 
+use data_model::key_enum;
 use data_model::EffectKind;
 use data_model::{FactionId, GameData, SocialClass};
 use serde::{Deserialize, Serialize};
@@ -42,19 +43,21 @@ pub const INFLATION_WEALTH_DIVISOR: f64 = 8.0;
 /// Ceiling of the inflation wealth loss.
 pub const INFLATION_WEALTH_MAX: f64 = 20.0;
 
+key_enum! {
 /// How much silver the faction's coins hold.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CoinageLevel {
     /// Monnaie forte (Charles V, the franc of 1360).
-    Strong,
+    Strong => "strong",
     /// Monnaie saine (default).
     #[default]
-    Sound,
+    Sound => "sound",
     /// Monnaie affaiblie.
-    Debased,
+    Debased => "debased",
     /// Monnaie fortement affaiblie (Philippe VI and Jean II at war).
-    HeavilyDebased,
+    HeavilyDebased => "heavily_debased",
+}
 }
 
 /// Seasonal rule of one coinage level.
@@ -75,24 +78,6 @@ pub struct CoinageParams {
 }
 
 impl CoinageLevel {
-    /// Every level, from the strongest to the weakest.
-    pub const ALL: [CoinageLevel; 4] = [
-        CoinageLevel::Strong,
-        CoinageLevel::Sound,
-        CoinageLevel::Debased,
-        CoinageLevel::HeavilyDebased,
-    ];
-
-    /// The `snake_case` key used by orders and the bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            CoinageLevel::Strong => "strong",
-            CoinageLevel::Sound => "sound",
-            CoinageLevel::Debased => "debased",
-            CoinageLevel::HeavilyDebased => "heavily_debased",
-        }
-    }
-
     /// French label for the UI.
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -101,11 +86,6 @@ impl CoinageLevel {
             CoinageLevel::Debased => "Monnaie affaiblie",
             CoinageLevel::HeavilyDebased => "Monnaie fortement affaiblie",
         }
-    }
-
-    /// Parses a [`CoinageLevel::key`].
-    pub fn from_key(key: &str) -> Option<Self> {
-        Self::ALL.into_iter().find(|level| level.key() == key)
     }
 
     /// The seasonal rule of this level (see the module documentation).
@@ -373,4 +353,15 @@ pub fn class_effects(
         totals[EffectKind::Unrest].flat += f.coinage.params().burgher_unrest;
     }
     totals
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CoinageLevel>();
+    }
 }

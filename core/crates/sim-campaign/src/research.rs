@@ -24,6 +24,7 @@
 //! and every `unlocks.units`/`unlocks.buildings` entry of the data carries
 //! that same `required_technology` (checked by `tests/m6.rs`).
 
+use data_model::key_enum;
 use data_model::{
     EffectKind, EffectMode, FactionId, GameData, TechBranch, Technology, TechnologyId, UnitCategory,
 };
@@ -54,29 +55,20 @@ pub enum ResearchError {
     QueueFull,
 }
 
+key_enum! {
 /// State of a technology for one faction (`get_tech_tree`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TechStatus {
     /// Acquired.
-    Known,
+    Known => "known",
     /// Prerequisites acquired, can be researched.
-    Available,
+    Available => "available",
     /// A prerequisite is missing.
-    Locked,
+    Locked => "locked",
     /// Currently being researched.
-    Researching,
+    Researching => "researching",
 }
-
-impl TechStatus {
-    pub fn key(self) -> &'static str {
-        match self {
-            TechStatus::Known => "known",
-            TechStatus::Available => "available",
-            TechStatus::Locked => "locked",
-            TechStatus::Researching => "researching",
-        }
-    }
 }
 
 /// Current research of a faction (`get_research`).
@@ -605,4 +597,15 @@ pub fn ai_choose_research(
             )
         })
         .map(|t| t.id.clone())
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TechStatus>();
+    }
 }

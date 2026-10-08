@@ -20,41 +20,28 @@
 //! (`data/schemas/battle_alerts_rules.schema.json`), loaded the way
 //! [`crate::rout::RoutRules`] loads `battle_rout.json`.
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::setup::SideId;
 
+key_enum! {
 /// What happened. Mirrors, without replacing, the journal's free text.
 /// "General down" covers both killed and captured (spec: a general's wound
 /// has no model yet, ADR 0095 point 3).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AlertKind {
-    Rout,
-    GeneralDown,
-    Flanked,
-    Reinforcements,
-    AmmoOut,
-    WallBreached,
-    GateDestroyed,
+    Rout => "rout",
+    GeneralDown => "general_down",
+    Flanked => "flanked",
+    Reinforcements => "reinforcements",
+    AmmoOut => "ammo_out",
+    WallBreached => "wall_breached",
+    GateDestroyed => "gate_destroyed",
     /// T4 (ADR 0108): the attacker is taking the market square.
-    SquareThreatened,
+    SquareThreatened => "square_threatened",
 }
-
-impl AlertKind {
-    /// Stable key used by the Godot bridge and `data/rules/battle_alerts.json`.
-    pub fn key(self) -> &'static str {
-        match self {
-            AlertKind::Rout => "rout",
-            AlertKind::GeneralDown => "general_down",
-            AlertKind::Flanked => "flanked",
-            AlertKind::Reinforcements => "reinforcements",
-            AlertKind::AmmoOut => "ammo_out",
-            AlertKind::WallBreached => "wall_breached",
-            AlertKind::GateDestroyed => "gate_destroyed",
-            AlertKind::SquareThreatened => "square_threatened",
-        }
-    }
 }
 
 /// One typed battle alert (CB5). Read-only output: see the module doc.
@@ -129,5 +116,16 @@ mod tests {
         ] {
             assert!(!kind.key().is_empty());
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<AlertKind>();
     }
 }

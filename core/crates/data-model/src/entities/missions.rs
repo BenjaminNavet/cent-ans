@@ -1,6 +1,7 @@
 //! Short-term campaign missions (lot NT3, ADR 0127), mirroring
 //! `data/schemas/missions.schema.json` (`data/missions.json`).
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/missions.json`.
@@ -22,36 +23,24 @@ pub struct MissionRules {
 
 crate::bundled_rules!(MissionRules, "missions.json", default);
 
+key_enum! {
 /// What a mission asks for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MissionKind {
     /// Take a neighbouring province held by a faction at war with the player.
-    TakeProvince,
+    TakeProvince => "take_province",
     /// Win `count` battles.
-    WinBattle,
+    WinBattle => "win_battle",
     /// Complete a given building in a given place.
-    ConstructBuilding,
+    ConstructBuilding => "construct_building",
     /// Recruit or hire `count` units.
-    RecruitUnits,
+    RecruitUnits => "recruit_units",
     /// Sign a new peace, alliance or vassalage.
-    ConcludeTreaty,
+    ConcludeTreaty => "conclude_treaty",
     /// Keep a threatened border place until the deadline.
-    HoldPlace,
+    HoldPlace => "hold_place",
 }
-
-impl MissionKind {
-    /// Stable `snake_case` key, as in the data file.
-    pub fn key(self) -> &'static str {
-        match self {
-            MissionKind::TakeProvince => "take_province",
-            MissionKind::WinBattle => "win_battle",
-            MissionKind::ConstructBuilding => "construct_building",
-            MissionKind::RecruitUnits => "recruit_units",
-            MissionKind::ConcludeTreaty => "conclude_treaty",
-            MissionKind::HoldPlace => "hold_place",
-        }
-    }
 }
 
 /// One mission template.
@@ -122,5 +111,16 @@ mod tests {
         for t in &rules.templates {
             assert!((3..=12).contains(&t.duration), "{}", t.id);
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<MissionKind>();
     }
 }

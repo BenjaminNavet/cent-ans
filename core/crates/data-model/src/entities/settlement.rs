@@ -2,6 +2,7 @@
 //! plus the tuning file `data/settlements/rules.json` and the movement graph
 //! `data/map/settlement_graph.json`. See `docs/design/2026-09-24-echelle-colonies.md`.
 
+use crate::key_enum;
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
@@ -10,42 +11,22 @@ use crate::common::{LocalizedName, Sources};
 use crate::entities::province::Province;
 use crate::ids::{BuildingId, FactionId, ProvinceId, SeaZoneId, SettlementId, UnitTypeId};
 
+key_enum! {
 /// Type of settlement; fixes allowed buildings and the siege model.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SettlementKind {
     /// Capital city of the province (exactly one per province).
-    City,
+    City => "city",
     /// Walled town or bastide.
-    Town,
+    Town => "town",
     /// Castle or fortress.
-    Castle,
+    Castle => "castle",
     /// Abbey, fortified priory or commandery.
-    Abbey,
+    Abbey => "abbey",
     /// Unfortified borough or village.
-    Village,
+    Village => "village",
 }
-
-impl SettlementKind {
-    /// Every kind, in schema order.
-    pub const ALL: [SettlementKind; 5] = [
-        SettlementKind::City,
-        SettlementKind::Town,
-        SettlementKind::Castle,
-        SettlementKind::Abbey,
-        SettlementKind::Village,
-    ];
-
-    /// The `snake_case` key used in JSON files.
-    pub fn key(self) -> &'static str {
-        match self {
-            SettlementKind::City => "city",
-            SettlementKind::Town => "town",
-            SettlementKind::Castle => "castle",
-            SettlementKind::Abbey => "abbey",
-            SettlementKind::Village => "village",
-        }
-    }
 }
 
 /// Static data of one settlement (one entry of `data/settlements/<province>.json`).
@@ -368,5 +349,16 @@ mod tests {
             let json = serde_json::to_string(&kind).unwrap();
             assert_eq!(json, format!("\"{}\"", kind.key()));
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<SettlementKind>();
     }
 }

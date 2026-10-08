@@ -14,6 +14,7 @@
 //! the ransom events (`evt_rancon_david_ii`...): a freed character is no
 //! longer captive, so a second release (order or event) is a no-op.
 
+use data_model::key_enum;
 use data_model::{CharacterId, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
 
@@ -49,14 +50,16 @@ pub const PAROLE_OPINION: i32 = 20;
 /// Ruler prestige lost every season the ruler himself is a captive.
 pub const CAPTIVE_RULER_PRESTIGE: i32 = 1;
 
+key_enum! {
 /// Rank of a captive, which sets the base of his ransom.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CaptiveRank {
-    Sovereign,
-    Heir,
-    GreatNoble,
-    Knight,
+    Sovereign => "sovereign",
+    Heir => "heir",
+    GreatNoble => "great_noble",
+    Knight => "knight",
+}
 }
 
 impl CaptiveRank {
@@ -66,15 +69,6 @@ impl CaptiveRank {
             CaptiveRank::Heir => RANSOM_HEIR,
             CaptiveRank::GreatNoble => RANSOM_GREAT_NOBLE,
             CaptiveRank::Knight => RANSOM_KNIGHT,
-        }
-    }
-
-    pub fn key(self) -> &'static str {
-        match self {
-            CaptiveRank::Sovereign => "sovereign",
-            CaptiveRank::Heir => "heir",
-            CaptiveRank::GreatNoble => "great_noble",
-            CaptiveRank::Knight => "knight",
         }
     }
 
@@ -705,4 +699,15 @@ pub fn ai_ransom_orders(cache: &PlanCache, data: &GameData, faction: &FactionId)
         }
     }
     orders
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CaptiveRank>();
+    }
 }

@@ -6,6 +6,7 @@
 //! without consuming it ([`BattleRng::derive`]): battles drawn before B5 keep
 //! their hills, forests, river and every later random draw.
 
+use data_model::key_enum;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
@@ -15,27 +16,21 @@ use crate::scale::FieldSize;
 use crate::setup::BattleSeason;
 use crate::terrain_rules::TerrainRules;
 
+key_enum! {
 /// State of the ground at the time of the battle (season and weather).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Ground {
     #[default]
-    Dry,
+    Dry => "dry",
     /// Soaked ground: extra mud zones.
-    Muddy,
+    Muddy => "muddy",
     /// Snow on the ground: slower marches even when no snow falls.
-    Snowy,
+    Snowy => "snowy",
+}
 }
 
 impl Ground {
-    pub fn key(self) -> &'static str {
-        match self {
-            Ground::Dry => "dry",
-            Ground::Muddy => "muddy",
-            Ground::Snowy => "snowy",
-        }
-    }
-
     pub fn label_fr(self) -> &'static str {
         match self {
             Ground::Dry => "Sol sec",
@@ -121,33 +116,26 @@ impl Coast {
     pub const SAND_FACTOR: f64 = 0.85;
 }
 
+key_enum! {
 /// Kind of a linear obstacle.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ObstacleKind {
     /// Hedgerow on a bank: cover against missiles, breaks charges, slows
     /// horses badly (the English archers' favourite position).
-    Hedge,
+    Hedge => "hedge",
     /// Wattle fence of a croft or a pen: slows horses.
-    Fence,
+    Fence => "fence",
     /// Drainage ditch: slows everyone, breaks charges.
-    Ditch,
+    Ditch => "ditch",
     /// CV3-2: low palisade of an entrenched camp: slows everyone badly,
     /// breaks charges, covers against missiles and shelters the defenders
     /// behind it in melee (`data/rules/battle_opening.json`).
-    Palisade,
+    Palisade => "palisade",
+}
 }
 
 impl ObstacleKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            ObstacleKind::Hedge => "hedge",
-            ObstacleKind::Fence => "fence",
-            ObstacleKind::Ditch => "ditch",
-            ObstacleKind::Palisade => "palisade",
-        }
-    }
-
     /// Speed multiplier while crossing.
     pub fn crossing_factor(self, mounted: bool) -> f64 {
         match (self, mounted) {
@@ -222,41 +210,28 @@ impl Obstacle {
     }
 }
 
+key_enum! {
 /// Kind of a village building (rendering).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HouseKind {
     /// Cottage of cob or wattle and daub under thatch.
-    Cottage,
+    Cottage => "cottage",
     /// Timber-framed house (colombage).
-    Timbered,
+    Timbered => "timbered",
     /// Barn or byre.
-    Barn,
+    Barn => "barn",
     /// Small stone church.
-    Church,
+    Church => "church",
     /// EP6: stone house (Midi, mountains).
-    Stone,
+    Stone => "stone",
     /// EP6: post mill.
-    Windmill,
+    Windmill => "windmill",
     /// EP6: water mill (wheel on the front, towards the water).
-    Watermill,
+    Watermill => "watermill",
     /// EP6: manor or tower house.
-    Manor,
+    Manor => "manor",
 }
-
-impl HouseKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            HouseKind::Cottage => "cottage",
-            HouseKind::Timbered => "timbered",
-            HouseKind::Barn => "barn",
-            HouseKind::Church => "church",
-            HouseKind::Stone => "stone",
-            HouseKind::Windmill => "windmill",
-            HouseKind::Watermill => "watermill",
-            HouseKind::Manor => "manor",
-        }
-    }
 }
 
 /// A building footprint: centre, size along its own axes, yaw (radians,
@@ -824,4 +799,17 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
 
 fn near(zone: Zone, x: f64, z: f64, margin: f64) -> bool {
     (x - zone.x).powi(2) + (z - zone.z).powi(2) < (zone.radius + margin).powi(2)
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Ground>();
+        assert_keys_match_serde::<ObstacleKind>();
+        assert_keys_match_serde::<HouseKind>();
+    }
 }

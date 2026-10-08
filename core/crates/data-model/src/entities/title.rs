@@ -6,32 +6,24 @@
 //! Suzerains, vassals and province allegiances are deduced from who holds
 //! which title (`sim_campaign::feudal`), never stored.
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Sources};
 use crate::entities::faction::Heraldry;
 use crate::ids::{FactionId, ProvinceId, TitleId};
 
+key_enum! {
 /// Rank of a title; at most three levels. The Empire is a `Kingdom`.
 ///
 /// The derived order runs from lowest to highest: `County < Duchy < Kingdom`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TitleRank {
-    County,
-    Duchy,
-    Kingdom,
+    County => "county",
+    Duchy => "duchy",
+    Kingdom => "kingdom",
 }
-
-impl TitleRank {
-    /// Snake-case key, as written in the data.
-    pub fn key(self) -> &'static str {
-        match self {
-            TitleRank::County => "county",
-            TitleRank::Duchy => "duchy",
-            TitleRank::Kingdom => "kingdom",
-        }
-    }
 }
 
 /// Holder of a title in spring 1337.
@@ -126,5 +118,16 @@ mod tests {
             title.objectives[0].condition,
             TitleObjectiveCondition::BeIndependent
         );
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TitleRank>();
     }
 }

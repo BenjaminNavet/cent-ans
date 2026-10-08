@@ -21,6 +21,7 @@
 //! numbers come from `data/rules/battle_water.json` (schema
 //! `data/schemas/battle_water_rules.schema.json`).
 
+use data_model::key_enum;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 use std::f64::consts::TAU;
@@ -203,23 +204,16 @@ data_model::bundled_rules!(WaterRules, "rules/battle_water.json");
 
 // ----- features ------------------------------------------------------------------
 
+key_enum! {
 /// Kind of a stretch of river bank.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BankKind {
     /// Steep, high bank: slow to climb, breaks a charge.
-    Steep,
+    Steep => "steep",
     /// Reeds and mire along the water.
-    Marsh,
+    Marsh => "marsh",
 }
-
-impl BankKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            BankKind::Steep => "steep",
-            BankKind::Marsh => "marsh",
-        }
-    }
 }
 
 /// A stretch of the main river's bank, from `x0` to `x1`, on the north
@@ -232,21 +226,14 @@ pub struct Bank {
     pub kind: BankKind,
 }
 
+key_enum! {
 /// A shallow watercourse (tributary or brook).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StreamKind {
-    Tributary,
-    Brook,
+    Tributary => "tributary",
+    Brook => "brook",
 }
-
-impl StreamKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            StreamKind::Tributary => "tributary",
-            StreamKind::Brook => "brook",
-        }
-    }
 }
 
 /// A tributary or a brook: a polyline of centre points, shallow water.
@@ -321,21 +308,14 @@ impl Bridge {
     }
 }
 
+key_enum! {
 /// Main road (through a bridge, the village) or farm track (through a ford).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum RoadKind {
-    Main,
-    Track,
+    Main => "main",
+    Track => "track",
 }
-
-impl RoadKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            RoadKind::Main => "main",
-            RoadKind::Track => "track",
-        }
-    }
 }
 
 /// A road: centre line and width.
@@ -1430,5 +1410,18 @@ impl Battlefield {
             }
         }
         best.map(|(spot, _)| spot)
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<BankKind>();
+        assert_keys_match_serde::<StreamKind>();
+        assert_keys_match_serde::<RoadKind>();
     }
 }

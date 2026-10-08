@@ -13,6 +13,7 @@
 //! it comes from the province terrain. Without rasters, the class falls back
 //! on the terrain of the province (`Forest`, `Bocage`, `Marsh`).
 
+use crate::key_enum;
 use std::collections::HashMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -24,26 +25,19 @@ use crate::entities::posture::CoverRules;
 use crate::entities::province::Terrain;
 use crate::load::GameData;
 
+key_enum! {
 /// Cover class of a cell.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CoverClass {
-    Open,
-    Forest,
-    Bocage,
-    Marsh,
+    Open => "open",
+    Forest => "forest",
+    Bocage => "bocage",
+    Marsh => "marsh",
+}
 }
 
 impl CoverClass {
-    pub fn key(self) -> &'static str {
-        match self {
-            CoverClass::Open => "open",
-            CoverClass::Forest => "forest",
-            CoverClass::Bocage => "bocage",
-            CoverClass::Marsh => "marsh",
-        }
-    }
-
     /// French label ("forêt").
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -344,5 +338,16 @@ mod tests {
         assert_eq!(CoverClass::of_terrain(Terrain::Forest), CoverClass::Forest);
         assert_eq!(CoverClass::of_terrain(Terrain::Plains), CoverClass::Open);
         assert!(!CoverClass::Open.is_covered());
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CoverClass>();
     }
 }

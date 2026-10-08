@@ -1,5 +1,6 @@
 //! Shared value types mirroring `data/schemas/common.schema.json`.
 
+use crate::key_enum;
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
@@ -55,34 +56,16 @@ pub struct UncertainInteger {
 /// Integer gauge from 0 to 100.
 pub type Percent = u8;
 
+key_enum! {
 /// The four social classes of the population model.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SocialClass {
-    Peasants,
-    Burghers,
-    Clergy,
-    Nobility,
+    Peasants => "peasants",
+    Burghers => "burghers",
+    Clergy => "clergy",
+    Nobility => "nobility",
 }
-
-impl SocialClass {
-    /// All classes, in schema order.
-    pub const ALL: [SocialClass; 4] = [
-        SocialClass::Peasants,
-        SocialClass::Burghers,
-        SocialClass::Clergy,
-        SocialClass::Nobility,
-    ];
-
-    /// The `snake_case` key used in JSON files.
-    pub fn key(self) -> &'static str {
-        match self {
-            SocialClass::Peasants => "peasants",
-            SocialClass::Burghers => "burghers",
-            SocialClass::Clergy => "clergy",
-            SocialClass::Nobility => "nobility",
-        }
-    }
 }
 
 /// Battle unit family, shared by unit types and effects.
@@ -246,5 +229,16 @@ mod effect_kind_tests {
             assert_eq!(kind.index(), position);
         }
         assert_eq!(EffectKind::DietHealth.index() + 1, EffectKind::COUNT);
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<SocialClass>();
     }
 }

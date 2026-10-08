@@ -2,107 +2,58 @@
 //! `data/schemas/agent_rules.schema.json` (`data/rules/agents.json`).
 //! See `docs/design/2026-09-24-agents.md`.
 
+use crate::key_enum;
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
 use crate::entities::settlement::SettlementKind;
 
+key_enum! {
 /// Type of agent.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AgentKind {
     /// Espion: sees, reports, sabotages, stirs up revolts.
-    Spy,
+    Spy => "spy",
     /// Héraut: embassies, truces, bribes, ransoms.
-    Emissary,
+    Emissary => "emissary",
     /// Prédicateur: preaching against heresy, denouncing schismatics, the Curia.
-    Preacher,
+    Preacher => "preacher",
+}
 }
 
-impl AgentKind {
-    pub const ALL: [AgentKind; 3] = [AgentKind::Spy, AgentKind::Emissary, AgentKind::Preacher];
-
-    /// Stable snake_case key (the serde name).
-    pub fn key(self) -> &'static str {
-        match self {
-            AgentKind::Spy => "spy",
-            AgentKind::Emissary => "emissary",
-            AgentKind::Preacher => "preacher",
-        }
-    }
-
-    /// Parses a snake_case key.
-    pub fn from_key(key: &str) -> Option<AgentKind> {
-        AgentKind::ALL.into_iter().find(|k| k.key() == key)
-    }
-}
-
+key_enum! {
 /// An action an agent can attempt (one per season).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AgentActionKind {
     /// Spy: detailed report on a settlement and sight of its province.
-    Scout,
+    Scout => "scout",
     /// Spy: opens a breach in a besieged town, or delays works.
-    Sabotage,
+    Sabotage => "sabotage",
     /// Spy: stirs up the province's unrest.
-    Incite,
+    Incite => "incite",
     /// Spy: unmasks foreign agents in the province.
-    Counter,
+    Counter => "counter",
     /// Herald: improves the opinion of the settlement's master.
-    Parley,
+    Parley => "parley",
     /// Herald: carries a truce proposal to an enemy.
-    Truce,
+    Truce => "truce",
     /// Herald: buys the garrison of an enemy settlement.
-    Bribe,
+    Bribe => "bribe",
     /// Herald: buys back one of our captives at a discount.
-    Ransom,
+    Ransom => "ransom",
     /// Preacher: fights heresy and unrest in a friendly province.
-    Preach,
+    Preach => "preach",
     /// Preacher: preaches against an enemy, excommunicated or schismatic prince.
-    Denounce,
+    Denounce => "denounce",
     /// Preacher: pleads at the papal court (papal favour).
-    Curia,
+    Curia => "curia",
+}
 }
 
 impl AgentActionKind {
-    pub const ALL: [AgentActionKind; 11] = [
-        AgentActionKind::Scout,
-        AgentActionKind::Sabotage,
-        AgentActionKind::Incite,
-        AgentActionKind::Counter,
-        AgentActionKind::Parley,
-        AgentActionKind::Truce,
-        AgentActionKind::Bribe,
-        AgentActionKind::Ransom,
-        AgentActionKind::Preach,
-        AgentActionKind::Denounce,
-        AgentActionKind::Curia,
-    ];
-
-    /// Stable snake_case key (the serde name).
-    pub fn key(self) -> &'static str {
-        match self {
-            AgentActionKind::Scout => "scout",
-            AgentActionKind::Sabotage => "sabotage",
-            AgentActionKind::Incite => "incite",
-            AgentActionKind::Counter => "counter",
-            AgentActionKind::Parley => "parley",
-            AgentActionKind::Truce => "truce",
-            AgentActionKind::Bribe => "bribe",
-            AgentActionKind::Ransom => "ransom",
-            AgentActionKind::Preach => "preach",
-            AgentActionKind::Denounce => "denounce",
-            AgentActionKind::Curia => "curia",
-        }
-    }
-
-    /// Parses a snake_case key.
-    pub fn from_key(key: &str) -> Option<AgentActionKind> {
-        AgentActionKind::ALL.into_iter().find(|k| k.key() == key)
-    }
-
     /// The agent type able to attempt this action.
     pub fn agent(self) -> AgentKind {
         match self {
@@ -313,5 +264,17 @@ mod tests {
         let json = serde_json::to_string(&rules).unwrap();
         let back: AgentRules = serde_json::from_str(&json).unwrap();
         assert_eq!(back, rules);
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<AgentKind>();
+        assert_keys_match_serde::<AgentActionKind>();
     }
 }

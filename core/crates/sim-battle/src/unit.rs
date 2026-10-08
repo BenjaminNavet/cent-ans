@@ -1,5 +1,6 @@
 //! Battle regiments: state, formation geometry and soldier positions.
 
+use data_model::key_enum;
 use std::collections::VecDeque;
 
 use data_model::{Ability, Missile, UnitCategory, UnitStats};
@@ -13,63 +14,40 @@ use crate::setup::{SideId, UnitSetup};
 pub use crate::formations::{Formation, Reform};
 use crate::formations::{FormationRules, FormationShape};
 
+key_enum! {
 /// What a regiment is doing (spec § 1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnitState {
-    Idle,
-    Marching,
-    Charging,
-    Melee,
-    Shooting,
-    Routing,
+    Idle => "idle",
+    Marching => "marching",
+    Charging => "charging",
+    Melee => "melee",
+    Shooting => "shooting",
+    Routing => "routing",
     /// Just rallied; back to `Idle` after a few seconds.
-    Rallied,
+    Rallied => "rallied",
     /// Scaling a town wall (ladders or siege tower bridge).
-    Climbing,
+    Climbing => "climbing",
+}
 }
 
-impl UnitState {
-    pub fn key(self) -> &'static str {
-        match self {
-            UnitState::Idle => "idle",
-            UnitState::Marching => "marching",
-            UnitState::Charging => "charging",
-            UnitState::Melee => "melee",
-            UnitState::Shooting => "shooting",
-            UnitState::Routing => "routing",
-            UnitState::Rallied => "rallied",
-            UnitState::Climbing => "climbing",
-        }
-    }
-}
-
+key_enum! {
 /// What became of a regiment, as shown on the end-of-battle screen (Q2).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnitFate {
     /// No soldier left.
-    Destroyed,
+    Destroyed => "destroyed",
     /// Fleeing, on the field or already off it.
-    Routed,
+    Routed => "routed",
     /// Ordered off the field (retreat or general retreat), in good order.
-    Withdrawn,
+    Withdrawn => "withdrawn",
     /// Never committed (reinforcement waiting off the field).
-    Reserve,
+    Reserve => "reserve",
     /// Still standing on the field.
-    Held,
+    Held => "held",
 }
-
-impl UnitFate {
-    pub fn key(self) -> &'static str {
-        match self {
-            UnitFate::Destroyed => "destroyed",
-            UnitFate::Routed => "routed",
-            UnitFate::Withdrawn => "withdrawn",
-            UnitFate::Reserve => "reserve",
-            UnitFate::Held => "held",
-        }
-    }
 }
 
 /// The regiment's standard (lot EP5, ADR 0034).
@@ -982,5 +960,17 @@ impl Unit {
     /// (larger when routing or in melee).
     pub fn soldier_positions(&self) -> Vec<(f64, f64, f64)> {
         self.figure_positions(1.0)
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<UnitState>();
+        assert_keys_match_serde::<UnitFate>();
     }
 }

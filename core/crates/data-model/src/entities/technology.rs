@@ -1,35 +1,20 @@
 //! Technology: a node of the military or civil tree (`technology.schema.json`).
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Effect, HistoricalDate, LocalizedName, Sources};
 use crate::ids::{BuildingId, TechnologyId, UnitTypeId};
 
+key_enum! {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TechBranch {
-    Military,
-    Civil,
+    Military => "military",
+    Civil => "civil",
     /// H4: medicine and herbalism.
-    Medicine,
+    Medicine => "medicine",
 }
-
-impl TechBranch {
-    /// Every branch, in display order.
-    pub const ALL: [TechBranch; 3] = [
-        TechBranch::Military,
-        TechBranch::Civil,
-        TechBranch::Medicine,
-    ];
-
-    /// The `snake_case` key used in JSON files and by the bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            TechBranch::Military => "military",
-            TechBranch::Civil => "civil",
-            TechBranch::Medicine => "medicine",
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -66,4 +51,15 @@ pub struct Technology {
     /// technology brings into the Herbarium.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub herbs: Vec<String>,
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TechBranch>();
+    }
 }

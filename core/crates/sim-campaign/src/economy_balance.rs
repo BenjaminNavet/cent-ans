@@ -7,6 +7,7 @@
 //! purse (last [`BUDGET_HISTORY_SEASONS`] seasons) for the treasury curve.
 //! Nothing here changes the economy: it only records and reports it.
 
+use data_model::key_enum;
 use std::collections::BTreeMap;
 
 use data_model::FactionId;
@@ -50,39 +51,20 @@ impl BudgetRecord {
     }
 }
 
+key_enum! {
 /// Rubric of the budget table, in display order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BudgetLineKind {
-    Receipts,
-    Armies,
-    Buildings,
-    Table,
-    Administration,
-    Other,
+    Receipts => "receipts",
+    Armies => "armies",
+    Buildings => "buildings",
+    Table => "table",
+    Administration => "administration",
+    Other => "other",
+}
 }
 
 impl BudgetLineKind {
-    pub const ALL: [BudgetLineKind; 6] = [
-        BudgetLineKind::Receipts,
-        BudgetLineKind::Armies,
-        BudgetLineKind::Buildings,
-        BudgetLineKind::Table,
-        BudgetLineKind::Administration,
-        BudgetLineKind::Other,
-    ];
-
-    /// Stable key for the bridge (the interface owns the French labels).
-    pub fn key(self) -> &'static str {
-        match self {
-            BudgetLineKind::Receipts => "receipts",
-            BudgetLineKind::Armies => "armies",
-            BudgetLineKind::Buildings => "buildings",
-            BudgetLineKind::Table => "table",
-            BudgetLineKind::Administration => "administration",
-            BudgetLineKind::Other => "other",
-        }
-    }
-
     /// Receipts are positive, charges negative, `Other` either.
     pub fn is_charge(self) -> bool {
         !matches!(self, BudgetLineKind::Receipts | BudgetLineKind::Other)

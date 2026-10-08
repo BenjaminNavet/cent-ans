@@ -17,6 +17,7 @@
 //! shooters 45 m behind the foot (or on the line without foot), the horse
 //! on the wings, alternately right and left, the engines behind.
 
+use data_model::key_enum;
 use data_model::UnitCategory;
 use serde::{Deserialize, Serialize};
 
@@ -43,7 +44,6 @@ impl Role {
         Role::Siege,
         Role::General,
     ];
-
     fn index(self) -> usize {
         self as usize
     }
@@ -61,23 +61,15 @@ impl Role {
     }
 }
 
+key_enum! {
 /// Posture of a preset (the picker sorts them under these headings).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Stance {
-    Attack,
-    Defense,
-    March,
+    Attack => "attack",
+    Defense => "defense",
+    March => "march",
 }
-
-impl Stance {
-    pub fn key(self) -> &'static str {
-        match self {
-            Stance::Attack => "attack",
-            Stance::Defense => "defense",
-            Stance::March => "march",
-        }
-    }
 }
 
 /// Row of a role (descriptive; `depth_m` places it).
@@ -818,5 +810,16 @@ mod tests {
         let sizes: Vec<usize> = chunks.iter().map(Vec::len).collect();
         assert_eq!(sizes, vec![2, 2, 1]);
         assert_eq!(chunks.concat(), (0..5).collect::<Vec<_>>());
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Stance>();
     }
 }

@@ -2,46 +2,36 @@
 //! the « Diplomatie » map mode and minimap (green ally, blue agreement,
 //! yellow neutral, orange tension, red war, grey vassal). Pure.
 
+use data_model::key_enum;
 use data_model::{FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
 use crate::diplomacy::RelationKind;
 use crate::state::CampaignState;
 
+key_enum! {
 /// How `viewer` stands with another faction, as the map shows it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Stance {
     /// The viewer itself.
-    Own,
+    Own => "self",
     /// Alliance.
-    Ally,
+    Ally => "ally",
     /// At peace with a standing agreement: trade, military access (either
     /// way) or a marriage between the houses.
-    Agreement,
+    Agreement => "agreement",
     /// At peace (or truce), nothing particular.
-    Neutral,
+    Neutral => "neutral",
     /// At peace, but hostile: bad attitude, embargo, trespass or grievance.
-    Tension,
-    War,
+    Tension => "tension",
+    War => "war",
     /// Vassal or suzerain.
-    Vassal,
+    Vassal => "vassal",
+}
 }
 
 impl Stance {
-    /// Key used by the bridge and the UI.
-    pub fn key(self) -> &'static str {
-        match self {
-            Stance::Own => "self",
-            Stance::Ally => "ally",
-            Stance::Agreement => "agreement",
-            Stance::Neutral => "neutral",
-            Stance::Tension => "tension",
-            Stance::War => "war",
-            Stance::Vassal => "vassal",
-        }
-    }
-
     /// French label (map legend, tooltips).
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -110,5 +100,16 @@ pub fn diplomatic_stance(
         Stance::Agreement
     } else {
         Stance::Neutral
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Stance>();
     }
 }

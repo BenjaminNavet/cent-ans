@@ -4,57 +4,40 @@
 //! population effects and seasonal rules (Lent, winter). The rules that read
 //! these fields live in `sim-campaign::table`.
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Effect, LocalizedName, Sources};
 use crate::entities::province::Terrain;
 use crate::ids::{BuildingId, DietId, ResourceId, TechnologyId};
 
+key_enum! {
 /// What a diet does during Lent (spring turn).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LentRule {
     /// Unaffected by Lent.
     #[default]
-    None,
+    None => "none",
     /// Meat on lean days: piety and clergy penalty.
-    Meat,
+    Meat => "meat",
     /// Lean fish: piety bonus.
-    Fish,
+    Fish => "fish",
     /// Eggs and dairy, forbidden during Lent: same penalty as meat.
-    Dairy,
+    Dairy => "dairy",
+}
 }
 
-impl LentRule {
-    /// The `snake_case` key used in JSON files.
-    pub fn key(self) -> &'static str {
-        match self {
-            LentRule::None => "none",
-            LentRule::Meat => "meat",
-            LentRule::Fish => "fish",
-            LentRule::Dairy => "dairy",
-        }
-    }
-}
-
+key_enum! {
 /// What a diet does in winter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum WinterRule {
     #[default]
-    None,
+    None => "none",
     /// Fresh produce: costs more in winter.
-    Fresh,
+    Fresh => "fresh",
 }
-
-impl WinterRule {
-    /// The `snake_case` key used in JSON files.
-    pub fn key(self) -> &'static str {
-        match self {
-            WinterRule::None => "none",
-            WinterRule::Fresh => "fresh",
-        }
-    }
 }
 
 /// Conditions a province (and its controller) must meet to adopt a diet.
@@ -101,4 +84,16 @@ pub struct Diet {
     pub winter_rule: WinterRule,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<LentRule>();
+        assert_keys_match_serde::<WinterRule>();
+    }
 }

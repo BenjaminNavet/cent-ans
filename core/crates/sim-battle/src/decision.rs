@@ -19,6 +19,7 @@
 //!
 //! Siege battles keep their own end (the square held, the garrison beaten).
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 
 /// Campaign morale after a refused battle.
@@ -62,36 +63,25 @@ pub struct DecisionRules {
 
 data_model::bundled_rules!(DecisionRules, "rules/battle_decision.json");
 
+key_enum! {
 /// How a battle ended (result screen, campaign chronicle).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BattleEnd {
     /// Every regiment of the loser fled, fell or left the field.
     #[default]
-    Rout,
+    Rout => "rout",
     /// The loser's army broke (below its break share).
-    Broken,
+    Broken => "broken",
     /// Nobody engaged: the attacker gave up, the defender keeps the field.
-    Refused,
+    Refused => "refused",
     /// The fight died down: the side that suffered less keeps the field.
-    Lull,
+    Lull => "lull",
     /// Nightfall (the hour limit).
-    Nightfall,
+    Nightfall => "nightfall",
     /// Siege: the attacker holds the central square.
-    SquareHeld,
+    SquareHeld => "square_held",
 }
-
-impl BattleEnd {
-    pub fn key(self) -> &'static str {
-        match self {
-            BattleEnd::Rout => "rout",
-            BattleEnd::Broken => "broken",
-            BattleEnd::Refused => "refused",
-            BattleEnd::Lull => "lull",
-            BattleEnd::Nightfall => "nightfall",
-            BattleEnd::SquareHeld => "square_held",
-        }
-    }
 }
 
 /// Engagement clock of a field battle (derived from the state each step).
@@ -116,4 +106,15 @@ pub(crate) struct EngagementClock {
     /// sampled every AI period (oldest first), for the attacker's archery
     /// duel (`duel.rs`).
     pub missile_log: std::collections::VecDeque<(f64, [f64; 2])>,
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<BattleEnd>();
+    }
 }

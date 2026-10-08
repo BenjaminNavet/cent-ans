@@ -10,6 +10,7 @@
 //! GDScript. Read-only and cheap (no path search): called as the mouse
 //! moves. Numbers from `data/rules/battle_hover.json` ([`HoverRules`]).
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::hydro::Water;
@@ -18,39 +19,26 @@ use crate::siege::PieceKind;
 use crate::sim::{horse_against_foot, pikes_against_horse, BattleSim};
 use crate::unit::{Unit, UnitState};
 
+key_enum! {
 /// What a right click under the cursor would do.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HoverKind {
     /// Walk there.
-    Move,
+    Move => "move",
     /// Close with the enemy (crossed swords).
-    Melee,
+    Melee => "melee",
     /// Shoot at the enemy.
-    Ranged,
+    Ranged => "ranged",
     /// A shooter's target out of range or out of sight.
-    RangedBlocked,
+    RangedBlocked => "ranged_blocked",
     /// Batter, ram or scale the wall, tower or gate.
-    Siege,
+    Siege => "siege",
     /// Impassable ground, off the field or outside the deployment zone.
-    Forbidden,
+    Forbidden => "forbidden",
     /// A friend, or nothing selected.
-    None,
+    None => "none",
 }
-
-impl HoverKind {
-    /// Key of the context for the interface (`move`, `ranged_blocked`...).
-    pub fn key(self) -> &'static str {
-        match self {
-            HoverKind::Move => "move",
-            HoverKind::Melee => "melee",
-            HoverKind::Ranged => "ranged",
-            HoverKind::RangedBlocked => "ranged_blocked",
-            HoverKind::Siege => "siege",
-            HoverKind::Forbidden => "forbidden",
-            HoverKind::None => "none",
-        }
-    }
 }
 
 /// One regiment's figures in the comparison (same format on both sides).
@@ -390,5 +378,16 @@ impl BattleSim {
             fatigue: unit.fatigue,
             bonus_vs: 100.0 * horse_against_foot(unit, other) * pikes_against_horse(unit, other),
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<HoverKind>();
     }
 }

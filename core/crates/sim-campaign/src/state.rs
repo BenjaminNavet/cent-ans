@@ -5,6 +5,7 @@
 //! `BTreeMap`/`BTreeSet` so that iteration order, and therefore the simulation,
 //! is deterministic.
 
+use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
@@ -66,7 +67,6 @@ impl Season {
         Season::Autumn,
         Season::Winter,
     ];
-
     /// The season following this one (winter wraps to spring).
     pub fn next(self) -> Season {
         match self {
@@ -143,49 +143,30 @@ impl AsRef<str> for ArmyId {
     }
 }
 
+key_enum! {
 /// How an army behaves where it stands.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Stance {
     /// March and fight; do not besiege.
     #[default]
-    Normal,
+    Normal => "normal",
     /// Chevauchée: devastate enemy provinces for loot.
-    Raid,
+    Raid => "raid",
     /// Besiege the enemy settlement the army stands on.
-    Siege,
+    Siege => "siege",
     /// CV3: hidden in cover, springs on an enemy march entering its zone of
     /// control (`crate::posture`).
-    Ambush,
+    Ambush => "ambush",
     /// CV3: extra movement this turn, tired troops; back to `Normal` at the
     /// start of the next turn.
-    ForcedMarch,
+    ForcedMarch => "forced_march",
     /// CV3: fortified camp: better defence, less supply used.
-    Entrenched,
+    Entrenched => "entrenched",
+}
 }
 
 impl Stance {
-    pub const ALL: [Stance; 6] = [
-        Stance::Normal,
-        Stance::Raid,
-        Stance::Siege,
-        Stance::Ambush,
-        Stance::ForcedMarch,
-        Stance::Entrenched,
-    ];
-
-    /// The `snake_case` key used in saves, orders and by the bridge.
-    pub fn key(self) -> &'static str {
-        match self {
-            Stance::Normal => "normal",
-            Stance::Raid => "raid",
-            Stance::Siege => "siege",
-            Stance::Ambush => "ambush",
-            Stance::ForcedMarch => "forced_march",
-            Stance::Entrenched => "entrenched",
-        }
-    }
-
     /// French label ("Embuscade").
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -1460,4 +1441,15 @@ pub fn unit_power(data: &GameData, units: &[Unit]) -> f64 {
             f64::from(unit.strength) * attack / 100.0
         })
         .sum()
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<Stance>();
+    }
 }

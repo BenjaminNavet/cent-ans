@@ -4,6 +4,7 @@
 //! The rules that read it (acquisition, inheritance, transfer, effects)
 //! live in `sim-campaign::retinue`.
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{Effect, LocalizedName, Sources};
@@ -28,30 +29,18 @@ impl Retinue {
     }
 }
 
+key_enum! {
 /// Family of a companion (colour of its vignette).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CompanionCategory {
-    Military,
-    Court,
-    Faith,
-    Learning,
-    Commerce,
-    Intrigue,
+    Military => "military",
+    Court => "court",
+    Faith => "faith",
+    Learning => "learning",
+    Commerce => "commerce",
+    Intrigue => "intrigue",
 }
-
-impl CompanionCategory {
-    /// Stable key for the UI.
-    pub fn key(self) -> &'static str {
-        match self {
-            CompanionCategory::Military => "military",
-            CompanionCategory::Court => "court",
-            CompanionCategory::Faith => "faith",
-            CompanionCategory::Learning => "learning",
-            CompanionCategory::Commerce => "commerce",
-            CompanionCategory::Intrigue => "intrigue",
-        }
-    }
 }
 
 /// One kind of companion.
@@ -77,37 +66,25 @@ pub struct Companion {
     pub sources: Sources,
 }
 
+key_enum! {
 /// Occasion on which a companion may join.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AcquisitionTrigger {
     /// The general of the winning side of a battle.
-    BattleWon,
+    BattleWon => "battle_won",
     /// Any general of a battle, won or lost.
-    BattleFought,
+    BattleFought => "battle_fought",
     /// The besieging general of a siege won.
-    SiegeWon,
+    SiegeWon => "siege_won",
     /// The general of a chevauchée.
-    RaidLed,
+    RaidLed => "raid_led",
     /// A season spent by the general's army in a friendly settlement whose
     /// province has `building`.
-    SeasonInSettlement,
+    SeasonInSettlement => "season_in_settlement",
     /// The ruler of a faction receiving a ransom.
-    RansomReceived,
+    RansomReceived => "ransom_received",
 }
-
-impl AcquisitionTrigger {
-    /// Stable key (also salt of the deterministic roll).
-    pub fn key(self) -> &'static str {
-        match self {
-            AcquisitionTrigger::BattleWon => "battle_won",
-            AcquisitionTrigger::BattleFought => "battle_fought",
-            AcquisitionTrigger::SiegeWon => "siege_won",
-            AcquisitionTrigger::RaidLed => "raid_led",
-            AcquisitionTrigger::SeasonInSettlement => "season_in_settlement",
-            AcquisitionTrigger::RansomReceived => "ransom_received",
-        }
-    }
 }
 
 /// One acquisition rule: on `trigger`, joins with `chance_permille`.
@@ -138,4 +115,16 @@ pub struct CompanionConditions {
     /// None of them.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub excludes_traits: Vec<TraitId>,
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<CompanionCategory>();
+        assert_keys_match_serde::<AcquisitionTrigger>();
+    }
 }

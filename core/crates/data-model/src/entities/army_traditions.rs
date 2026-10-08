@@ -3,6 +3,7 @@
 //! (`data/rules/army_traditions.json`). Spec
 //! `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T5.
 
+use crate::key_enum;
 use serde::{Deserialize, Serialize};
 
 /// Contents of `data/rules/army_traditions.json`.
@@ -50,35 +51,17 @@ pub struct ArmyExperienceRules {
     pub rank_thresholds: Vec<u32>,
 }
 
+key_enum! {
 /// The five branches of the spec.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TraditionBranch {
-    March,
-    Stewardship,
-    Shooting,
-    Assault,
-    Discipline,
+    March => "march",
+    Stewardship => "stewardship",
+    Shooting => "shooting",
+    Assault => "assault",
+    Discipline => "discipline",
 }
-
-impl TraditionBranch {
-    pub const ALL: [TraditionBranch; 5] = [
-        TraditionBranch::March,
-        TraditionBranch::Stewardship,
-        TraditionBranch::Shooting,
-        TraditionBranch::Assault,
-        TraditionBranch::Discipline,
-    ];
-
-    pub fn key(self) -> &'static str {
-        match self {
-            TraditionBranch::March => "march",
-            TraditionBranch::Stewardship => "stewardship",
-            TraditionBranch::Shooting => "shooting",
-            TraditionBranch::Assault => "assault",
-            TraditionBranch::Discipline => "discipline",
-        }
-    }
 }
 
 /// A branch as the UI shows it.
@@ -215,5 +198,16 @@ mod tests {
                 .iter()
                 .any(|t| t.branch == branch && t.tier == 1));
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use crate::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<TraditionBranch>();
     }
 }

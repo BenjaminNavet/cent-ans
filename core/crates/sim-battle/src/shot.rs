@@ -8,6 +8,7 @@
 //! arrows stuck in pavises and stakes, and the blood of the hits, without
 //! guessing it from the ammunition counters.
 
+use data_model::key_enum;
 use serde::Serialize;
 
 /// Seconds between two shots of a siege engine (SG2: the renderer winds the
@@ -18,58 +19,38 @@ pub const PAVISE_RELOAD: f64 = 9.0;
 /// Seconds between two volleys of other shooters.
 pub const VOLLEY_RELOAD: f64 = 6.0;
 
+key_enum! {
 /// Kind of missile a volley throws.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MissileKind {
-    Arrow,
-    Bolt,
+    Arrow => "arrow",
+    Bolt => "bolt",
     /// Bombard stone or iron ball.
-    Ball,
+    Ball => "ball",
     /// Trebuchet or mangonel stone.
-    Stone,
+    Stone => "stone",
     /// Handheld firearm bullet (couleuvriniers, lot UR2): drawn with
     /// ignition smoke at the shooter.
-    Bullet,
+    Bullet => "bullet",
     /// Thrown javelin (jinetes, lot UR2): no arc drop like a bow shot.
-    Javelin,
+    Javelin => "javelin",
+}
 }
 
-impl MissileKind {
-    pub fn key(self) -> &'static str {
-        match self {
-            MissileKind::Arrow => "arrow",
-            MissileKind::Bolt => "bolt",
-            MissileKind::Ball => "ball",
-            MissileKind::Stone => "stone",
-            MissileKind::Bullet => "bullet",
-            MissileKind::Javelin => "javelin",
-        }
-    }
-}
-
+key_enum! {
 /// What the missiles strike besides men and earth.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ShotCover {
-    None,
+    None => "none",
     /// The target stands behind pavises (Genoese crossbowmen, pavise order).
-    Pavise,
+    Pavise => "pavise",
     /// The target stands behind planted stakes (English archers).
-    Stakes,
+    Stakes => "stakes",
     /// The target stands on a wall (merlons).
-    Wall,
+    Wall => "wall",
 }
-
-impl ShotCover {
-    pub fn key(self) -> &'static str {
-        match self {
-            ShotCover::None => "none",
-            ShotCover::Pavise => "pavise",
-            ShotCover::Stakes => "stakes",
-            ShotCover::Wall => "wall",
-        }
-    }
 }
 
 /// One volley, as resolved by the simulation.
@@ -101,3 +82,15 @@ pub struct ShotEvent {
 /// Shots kept for the renderer between two reads; older ones are dropped
 /// (a headless simulation nobody reads must not grow without bound).
 pub const MAX_PENDING_SHOTS: usize = 1024;
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<MissileKind>();
+        assert_keys_match_serde::<ShotCover>();
+    }
+}

@@ -19,40 +19,24 @@
 //! `sim/modes.rs`. The display states of the regiment (charging, under
 //! fire, engaged, wavering) are computed here too ([`UnitStatus`]).
 
+use data_model::key_enum;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+key_enum! {
 /// A persistent mode of a regiment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnitMode {
-    Run,
-    Guard,
-    Skirmish,
-    Melee,
-    Breach,
+    Run => "run",
+    Guard => "guard",
+    Skirmish => "skirmish",
+    Melee => "melee",
+    Breach => "breach",
+}
 }
 
 impl UnitMode {
-    pub const ALL: [UnitMode; 5] = [
-        UnitMode::Run,
-        UnitMode::Guard,
-        UnitMode::Skirmish,
-        UnitMode::Melee,
-        UnitMode::Breach,
-    ];
-
-    /// Key of the mode (JSON and bridge).
-    pub fn key(self) -> &'static str {
-        match self {
-            UnitMode::Run => "run",
-            UnitMode::Guard => "guard",
-            UnitMode::Skirmish => "skirmish",
-            UnitMode::Melee => "melee",
-            UnitMode::Breach => "breach",
-        }
-    }
-
     /// French name of the mode (messages).
     pub fn label_fr(self) -> &'static str {
         match self {
@@ -169,5 +153,16 @@ mod tests {
             let json = serde_json::to_string(&mode).unwrap();
             assert_eq!(json, format!("\"{}\"", mode.key()));
         }
+    }
+}
+
+#[cfg(test)]
+mod key_enum_tests {
+    use super::*;
+    use data_model::key_enum::assert_keys_match_serde;
+
+    #[test]
+    fn keys_match_serde_names() {
+        assert_keys_match_serde::<UnitMode>();
     }
 }
