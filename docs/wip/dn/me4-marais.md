@@ -1,5 +1,7 @@
 # DN-ME4 : eaux douces et marais (branche dn/me4-marais)
 
-État : données + générateur faits (`data/map/map_freshwater.json`, `cent-ans geo freshwater-sites` -> `freshwater_px.json`, schéma `map_freshwater.schema.json`).
-Prochaine étape : `FreshwaterLayer` (roselières/mares MultiMesh, salins, torrents, cascades, gués), shader sol (gley/sansouïre Camargue, glaciers), test headless.
-Références visuelles demandées : Camargue (sol détrempé gris-vert, sansouïres, lagunes turquoise-gris, salins rosés), Alpes (névés, glaciers, torrents).
+État : livré (sauf points ouverts). Fichiers : `data/map/map_freshwater.json` (+ schéma), `cent-ans geo freshwater-sites` -> `data/map/freshwater_px.json`, `game/scripts/map/freshwater_layer.gd` (câblé dans `campaign_map.gd`, `--no-freshwater`), shaders `freshwater_{reeds,pool,surface}.gdshader`, `freshwater_ground.gdshaderinc` (glaciers/névés, inclus par terrain), marais gley/sansouïre/lagune dans `relief_landcover.gdshaderinc`, test `game/tests/dn_freshwater_test.gd`, vue réglable `game/tests/dn_me4_shot.gd` (--x --z --distance).
+- Roselières/mares : deux niveaux de blocs (patch grossi, près réel), un MultiMesh par bloc et famille, semis déterministe sur les ellipses de `wetlands.json` ; lagunes (liste `lagoon_ids`) : roselière sur les rives, eau au centre.
+- Salins (18, rose/gris), torrents (1400 tronçons de pente >= 5 % : ruban d'écume animé), cascades (16 historiques) et gués (3) : substituts procéduraux ; glb par `dn_manifest.json` (clés `models` de la config : waterfall, ford, ...), une ligne de données.
+- Glaciers/névés : altitude > 2600 m, toutes saisons (uniform `fw_glacier`, poussé depuis `glacier` de la config).
+Points ouverts : carte de roseaux générée (`card_texture`, absente : lame procédurale) ; cabane de roselière/barques (`reed_hut`, glb à venir) ; banquise non faite ; réglage visuel des Alpes (glaciers non vérifié en capture) ; lagunes peintes du terrain encore pâles (reflet de ciel HC2) ; pas de recalage des mares sur surface fine hors `surface_rect_changed`.

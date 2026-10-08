@@ -15,17 +15,19 @@
     "scale_near_distance": 3.0,
     "scale_far_distance": 60.0,
     "far_scale": 36.0,
+    "model_magnify": 6.0,
+    "pool_far_scale": 2.0,
     "seed": 4417
   },
   "reeds": {
     "card_texture": "res://assets/textures/vegetation/dn/card_reed_phragmites.png",
     "card_cards": ["card_reed_phragmites", "card_reed_cattail", "card_sedge_marsh"],
-    "clump_width_m": 7.0,
-    "clump_height_m": 2.6,
+    "clump_width_m": 10.0,
+    "clump_height_m": 6.0,
     "kinds": {
-      "marsh": {"cover": 0.8, "pool_share": 0.12, "tint": [0.62, 0.58, 0.34]},
-      "ponds": {"cover": 0.45, "pool_share": 0.2, "tint": [0.5, 0.56, 0.34]},
-      "wet_meadow": {"cover": 0.25, "pool_share": 0.04, "tint": [0.42, 0.5, 0.3]}
+      "marsh": {"cover": 0.8, "pool_share": 0.12, "tint": [0.52, 0.46, 0.17]},
+      "ponds": {"cover": 0.45, "pool_share": 0.2, "tint": [0.36, 0.44, 0.16]},
+      "wet_meadow": {"cover": 0.25, "pool_share": 0.04, "tint": [0.30, 0.42, 0.16]}
     },
     "lagoon_ids": ["camargue", "delta_ebre", "delta_po", "lagune_venise", "valli_comacchio", "etangs_languedoc", "delta_danube", "albufera", "marismas_guadalquivir", "menzaleh"],
     "pool_diameter_m": 60.0

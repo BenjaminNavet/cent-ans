@@ -356,6 +356,11 @@ func _setup_settlements() -> void:
 	for road: Dictionary in settlement_data.roads:
 		road_lines.append(road["points"])
 	outcrops.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions(), road_lines)
+	# DN-ME4 : eaux douces (roselières, mares, salins, torrents, cascades, gués).
+	var freshwater := FreshwaterLayer.new()
+	freshwater.name = "FreshwaterLayer"
+	add_child(freshwater)
+	freshwater.setup(map_data, terrain, settlement_layer.vegetation_exclusions())
 	life = CampaignLife.new()  # CV1
 	life.name = "CampaignLife"
 	add_child(life)

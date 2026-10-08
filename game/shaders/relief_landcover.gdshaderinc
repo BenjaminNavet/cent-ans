@@ -25,6 +25,15 @@ uniform bool has_wetlands = false;
 uniform vec3 rl_reed_color = vec3(0.19, 0.22, 0.085);
 uniform vec3 rl_wet_meadow = vec3(0.06, 0.12, 0.05);
 uniform vec3 rl_marsh_water = vec3(0.07, 0.14, 0.16);
+// DN-ME4 : sol détrempé gris-vert (gley) sous tout marais, sansouïres (croûte saline pâle) des marais
+// méditerranéens (v de carte > `rl_sansouire_v`), lagunes peu profondes turquoise-gris.
+uniform vec3 rl_gley_color = vec3(0.095, 0.12, 0.085);
+uniform float rl_gley_amount = 0.5;
+uniform vec3 rl_sansouire_color = vec3(0.30, 0.27, 0.20);
+uniform float rl_sansouire_v = 0.60;
+uniform float rl_sansouire_amount = 0.55;
+uniform vec3 rl_lagoon_water = vec3(0.07, 0.24, 0.25);
+uniform float rl_lagoon_amount = 0.85;
 uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pixels carte ≈ 2 km), palier 0
 // HC2 (ADR 0161 §3) : étangs et mares généralisés. Au dézoom, les cellules d'étangs doublent par
 // paliers d'empreinte (comme les octaves de canopée du terrain) : une zone d'étangs montre toujours
@@ -188,6 +197,14 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float viewport_h, float land_f
 	// Marais : roselières (teinte paille, bandes) et mares d'eau libre en taches. HC2 : les mares
 	// grossissent par paliers au dézoom (au moins `rl_pool_min_px`), la roselière domine.
 	float pool = 0.0;
+	// DN-ME4 : le sol de tout marais et pré humide est détrempé, gris-vert.
+	float soggy = clamp(wl.r * 1.2 + wl.b * 0.5, 0.0, 1.0);
+	col = mix(col, rl_gley_color * (0.8 + 0.5 * moss), soggy * rl_gley_amount);
+	float south = smoothstep(rl_sansouire_v - 0.03, rl_sansouire_v + 0.03, uv.y);
+	if (south > 0.0 && wl.r > 0.02) {
+		float crust = smoothstep(0.42, 0.62, value_noise(p * 0.9) * 0.65 + value_noise(p * 4.1) * 0.35);
+		col = mix(col, rl_sansouire_color * (0.85 + 0.3 * moss), crust * south * smoothstep(0.02, 0.3, wl.r) * rl_sansouire_amount);
+	}
 	if (wl.r > 0.01) {
 		float reeds = value_noise(p * vec2(5.0, 1.7)) * 0.6 + value_noise(p * 13.0) * 0.4;
 		col = mix(col, rl_reed_color * (0.75 + 0.5 * reeds), smoothstep(0.0, 0.5, wl.r) * 0.85);
@@ -227,6 +244,8 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float viewport_h, float land_f
 	float before = lake;
 	lake = max(lake, water);
 	vec3 pool_col = mix(rl_marsh_water, lake_color, rl_pool_lake_tint);
+	// DN-ME4 : lagunes méditerranéennes : eau peu profonde turquoise-grise.
+	pool_col = mix(pool_col, rl_lagoon_water, south * rl_lagoon_amount);
 	vec3 pond_col = mix(lake_color, lake_shallow_color, pond_shallow);
 	vec3 wet_col = mix(pool_col, pond_col, pond >= pool ? 1.0 : 0.0);
 	water_col = mix(water_col, wet_col, clamp(water - before, 0.0, 1.0));

@@ -91,7 +91,9 @@ def build(map_dir: Path = MAP_DIR) -> dict:
             "density": area.get("density", 0.5),
             "lagoon": area["id"] in lagoons,
         }
-        entry.update(_ellipse_px(grid, e["center"], e["radii_km"], e.get("angle_deg", 0.0)))
+        entry.update(
+            _ellipse_px(grid, e["center"], e["radii_km"], e.get("angle_deg", 0.0))
+        )
         wetlands.append(entry)
     salt_pans = []
     for pan in config["salt_pans"]:
@@ -134,4 +136,3 @@ def build(map_dir: Path = MAP_DIR) -> dict:
         encoding="utf-8",
     )
     return result
-
