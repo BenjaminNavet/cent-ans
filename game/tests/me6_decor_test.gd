@@ -151,6 +151,12 @@ func _check_layer(map_data: MapData, data: SettlementData, config: Dictionary) -
 	decor.flush(focus)
 	_check(decor.instance_count() > 15 and decor.node_count() <= TYPES_MAX_NODES, "medium zoom: %d instances, %d nodes" % [decor.instance_count(), decor.node_count()])
 	print("me6_decor_test: medium view, %d instances, %d nodes, %.1f ms" % [decor.instance_count(), decor.node_count(), decor.stats["build_ms"]])
+	# Pire cas de charge : zoom large au-dessus de l'île de France (routes, villes, foires denses).
+	var paris := Vector2(2096.5, 3100.0)
+	decor.update_view(80.0)
+	decor.flush(paris)
+	_check(decor.node_count() <= TYPES_MAX_NODES and decor.instance_count() <= int(config["render"]["max_instances"]), "wide zoom over Paris: %d instances, %d nodes" % [decor.instance_count(), decor.node_count()])
+	print("me6_decor_test: wide view (rig 80), %d instances, %d nodes, %.1f ms" % [decor.instance_count(), decor.node_count(), decor.stats["build_ms"]])
 	decor.update_view(12.0)
 	decor.flush(focus)
 	# Hauteurs : posées sur la surface affichée.
@@ -189,6 +195,14 @@ func _check_layer(map_data: MapData, data: SettlementData, config: Dictionary) -
 	_check(decor.model_source("wayside_cross") == "glb", "manifest entry must switch the type to its glb")
 	_check(decor.model_source("milestone") == "procedural", "other types keep their fallback")
 	decor.set_manifest({})
+	# 3d ter. Fumée des forges et charbonnières : un panache par instance `smoke` du voisinage.
+	var forge := _first_of_type(decor, "charcoal_kiln")
+	if _check(not forge.is_empty(), "no charcoal kiln planned"):
+		decor.flush(forge["px"])
+		_check(decor.smoke_count() >= 1, "charcoal kilns must smoke")
+		_check(not decor.smoke_sources(forge["px"], 5.0).is_empty(), "smoke sources exposed")
+	decor.flush(focus)
+	_check(decor.smoke_count() == 0 or decor.smoke_count() < decor.instance_count(), "smoke only for smoking types")
 	# 3e. Repli procédural : volumes non vides, pied à y = 0.
 	for shape in ["pillar", "hut", "tower", "cone", "slab", "ring", "arch"]:
 		var mesh := DecorLayer.procedural_mesh(shape, [10.0, 8.0], Color.WHITE)
@@ -207,3 +221,10 @@ func _shown_site(decor: DecorLayer, site_id: String) -> bool:
 		if instance.get("site", "") == site_id:
 			return true
 	return false
+
+
+func _first_of_type(decor: DecorLayer, type: String) -> Dictionary:
+	for instance: Dictionary in decor.sites():
+		if instance["type"] == type:
+			return instance
+	return {}

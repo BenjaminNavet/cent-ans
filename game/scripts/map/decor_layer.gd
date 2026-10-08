@@ -16,9 +16,12 @@ extends Node3D
 ## - Modèle d'un type : `model` = id du catalogue DN (`data/art/dn_manifest.json`, fichiers
 ##   `_lod0/1/2.glb`). Tant que le modèle manque, volume procédural (`shape`, `color`, `size_m`).
 ##   Brancher un nouveau modèle = rien à faire (le manifeste suffit) ou changer `model`.
+## - Fumée : les types `smoke` (forges, charbonnières, verreries) portent un panache (shader
+##   `life_smoke`, un MultiMesh pour toute la couche).
 ## - Vue parchemin : rien n'est affiché au-delà de `view_range_units` (bien sous le palier 1200).
 ## - `--no-me6` coupe la couche (A/B).
 
+const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const MANIFEST_FILE := "art/dn_manifest.json"
 const MODEL_ROOT := "res://assets/models/"
 const CELL_SEARCH_LIMIT := 4096
@@ -64,6 +67,8 @@ var _fog_in := 0
 var _fade := 1.0
 var _reground_in := -1
 var _shadows := true
+var _smoke: MultiMeshInstance3D = null
+var _smoke_material: ShaderMaterial = null
 
 
 func setup(layer: Node, map: MapData, terrain: TerrainBuilder, data: SettlementData, meters_per_unit: float = 719.0) -> void:
@@ -406,6 +411,8 @@ func update_view(rig_distance: float) -> void:
 		_fade = opacity
 		for mmi: MultiMeshInstance3D in _batches.values():
 			mmi.transparency = 1.0 - _fade
+		if _smoke_material != null:
+			_smoke_material.set_shader_parameter("fade", 0.55 * _fade)
 
 
 ## Point du sol visé par la caméra (unités carte) ; position de la caméra en repli.
@@ -517,9 +524,52 @@ func rebuild(focus: Vector2) -> void:
 			var basis := Basis(Vector3.UP, float(instance["yaw"])).scaled(Vector3(scale, scale, scale))
 			multimesh.set_instance_transform(n, Transform3D(basis, Vector3(px.x, y, px.y)))
 		total += indices.size()
+	_write_smoke(size_distance)
 	stats["instances"] = total
 	stats["nodes"] = _batches.size()
 	stats["build_ms"] = float(Time.get_ticks_usec() - t0) / 1000.0
+
+
+## Panaches des types `smoke` du voisinage : un quad par instance, hauteur et largeur en mètres du
+## type (grossis comme lui), levé au sommet du volume.
+func _write_smoke(size_distance: float) -> void:
+	var points: Array = []
+	for i: int in _shown:
+		var instance: Dictionary = _sites[i]
+		if bool((config["types"][instance["type"]] as Dictionary).get("smoke", false)):
+			points.append(instance)
+	if _smoke == null:
+		_smoke_material = ShaderMaterial.new()
+		_smoke_material.shader = SMOKE_SHADER
+		_smoke_material.set_shader_parameter("fade", 0.55)
+		_smoke_material.render_priority = 1
+		_smoke = MultiMeshInstance3D.new()
+		_smoke.name = "Smoke"
+		_smoke.material_override = _smoke_material
+		_smoke.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_smoke.extra_cull_margin = 16.0
+		_root.add_child(_smoke)
+	_smoke.visible = not points.is_empty()
+	if points.is_empty():
+		return
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE
+	quad.center_offset = Vector3(0.0, 0.5, 0.0)
+	var multimesh := MapInstancing.make(quad, points.size(), true)
+	var buffer := PackedFloat32Array()
+	buffer.resize(points.size() * 16)
+	for n in points.size():
+		var instance: Dictionary = points[n]
+		var spec: Dictionary = config["types"][instance["type"]]
+		var scale := factor_of(spec, size_distance) / _mpu
+		var size_m: Array = spec["size_m"]
+		var px: Vector2 = instance["px"]
+		var seed_value := fposmod(px.x * 0.137 + px.y * 0.071, 1.0)
+		var basis := Basis(Vector3(float(size_m[0]) * 0.4 * scale, 0.0, 0.0), Vector3(0.0, float(size_m[1]) * 1.8 * scale, 0.0), Vector3(0.0, float(size_m[1]) * scale, 1.0))
+		MapInstancing.write_transform(buffer, n * 16, Transform3D(basis, Vector3(px.x, _ground_y(px), px.y)))
+		MapInstancing.write_custom(buffer, n * 16 + 12, Color(seed_value, 0.35, 0.8, fposmod(seed_value * 13.0, 1.0)))
+	multimesh.buffer = buffer
+	_smoke.multimesh = multimesh
 
 
 func _ground_y(px: Vector2) -> float:
@@ -543,9 +593,14 @@ func instance_count() -> int:
 	return int(stats.get("instances", 0))
 
 
-## Nombre de nœuds de rendu (un appel de dessin par nœud et par passe).
+## Nombre de nœuds de rendu (un appel de dessin par nœud et par passe), panache non compté.
 func node_count() -> int:
 	return _batches.size()
+
+
+## Nombre de panaches affichés.
+func smoke_count() -> int:
+	return _smoke.multimesh.instance_count if _smoke != null and _smoke.visible and _smoke.multimesh != null else 0
 
 
 ## Positions (px carte) des sources de fumée proches de `center` (forges, charbonnières, verreries),

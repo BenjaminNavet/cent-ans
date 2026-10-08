@@ -2206,3 +2206,31 @@ Captures `docs/img/sz2b/avant_*` / `apres_*` (Rouen, Orléans, Tours, Londres, B
 site). Laissés : maillages E0 des morceaux (vue parchemin, repli sans pyramide), tuiles fines d'avant
 la pyramide et grille du fond ZG8 dans l'ancienne convention (≤ 0,5 pixel de 719 m, invisible).
 
+
+## Décor ponctuel hors les villes (lots DN ME6 / ME7 / ME9)
+
+Rendu seulement. Données : `data/map/map_landmarks_extra.json` (schéma `map_landmarks_extra.schema.json`) ;
+plan de production des glb : `docs/wip/dn/carte-extra.md` ; note d'état : `docs/wip/dn/me6-decor.md`.
+
+- **Ce qui existait** : `OutbuildingLayer` (TB3, bâtiments liés aux colonies et à leurs bâtiments construits),
+  `RuinMarkers` (icône d'une colonie rasée), scènes `folk/` (FK, vie en mouvement) : aucun ne pose de décor
+  ponctuel en pleine campagne. La nouvelle couche en reprend le mécanisme (MultiMesh, taille tenue à l'écran,
+  style `maquette`, brouillard de guerre) sans le toucher.
+- **Placement** (`DecorPlanner`, calculé hors du fil principal au `setup`, déterministe) : règles `rules` par
+  mode `road` (le long des routes du graphe de colonies), `gate` (portes des villes : gibets), `crossing`
+  (ponts : péages), `coast` (phares, tours à signaux, pêcheries, chantiers, épaves, moulins à marée),
+  `province` (selon ressources, terrain, climat, surface : mines, carrières, charbonnières, forges, bergeries,
+  campements de steppe), `route` (plus court chemin entre colonies : pèlerins de Compostelle, Via Podiensis,
+  Francigena, caravanes). `sites` : 86 lieux réels (Carnac, Stonehenge, Pont du Gard, arènes de Nîmes,
+  Montfaucon, Crécy…), longitude/latitude cuits en pixels par `tools/cent_ans_tools/decor_bake.py`, recalés sur
+  la terre (7 px au plus) ; `from_year`/`to_year` (peste après 1348, champs de bataille après leur date) et
+  `seasons` (foires d'été et d'automne) filtrés à l'affichage.
+- **Rendu** (`DecorLayer`, enfant `Decor` de `SettlementLayer`) : un `MultiMesh` par type pour le voisinage de
+  la caméra (au plus un nœud par type, 8 à 11 en zoom moyen), reconstruit au déplacement (30 % du rayon), à
+  4 % de variation de distance, ou si l'année, la saison ou le brouillard changent. Portée propre à chaque type
+  (`max_distance`, x3 en style maquette), rien au-delà de `view_range_units` (très en dessous de la vue
+  parchemin). Fumée (forges, charbonnières, verreries) : un `MultiMesh` de panaches `life_smoke`.
+- **Brancher un modèle** : `type.model` est l'id du catalogue DN (`data/art/dn_catalog_map_extra.json`) ; dès que
+  `cent-ans dn-ingest` l'inscrit dans `data/art/dn_manifest.json`, ses `_lod0/1/2.glb` remplacent le volume
+  procédural de repli (`shape`, `color`, `size_m`). Ajouter un type, une règle ou un site = une entrée de données.
+- Test : `godot --headless --path game --script res://tests/me6_decor_test.gd` ; `--no-me6` coupe la couche (A/B).
