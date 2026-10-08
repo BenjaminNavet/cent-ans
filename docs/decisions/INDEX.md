@@ -31,7 +31,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0025 | [Négociation à plusieurs clauses, buts de guerre et fatigue de guerre (lot DP1)](0025-negociation-et-buts-de-guerre.md) | accepté |
 | 0026 | [Sièges dans le plan des villes emblématiques](0026-sieges-dans-le-plan-des-villes-emblematiques.md) | accepté |
 | 0027 | [Météo de la carte de campagne : tirée au cœur, déterministe, visuelle pour l'instant](0027-meteo-de-campagne.md) | n/d |
-| 0028 | [Batailles navales](0028-batailles-navales.md) | accepté |
+| 0028 | [Batailles navales](0028-batailles-navales.md) | partiellement remplacé par l’ADR 0201 |
 | 0029 | [Révoltes à délai, troubles de province et coûts d'événements proportionnels](0029-revoltes-et-couts-d-evenements.md) | accepté |
 | 0031 | [Dossier utilisateur propre au jeu exporté](0031-dossier-utilisateur-du-jeu-exporte.md) | n/d |
 | 0032 | [Horizon des batailles : relief réel lointain et panoramas peints](0032-horizon-de-bataille.md) | accepté |
