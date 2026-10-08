@@ -46,3 +46,14 @@
   --sheet-backend local --cut-backend local` (ajouter `--model multi` par défaut ; pour juger la
   planche seule, interrompre avant TRELLIS ou ouvrir `sheet.png`/`sheet_cut.png`). Risque : la force
   0.45 peut ne pas suffire à imposer la A-pose 3 vues ; ajuster `--strength` (0.3-0.6) et `--attempt`.
+
+## Stable Fast 3D local (10-08, essai)
+- Installé dans `~/models/stable-fast-3d` (venv 3.11, torch 2.6 ; compiler avec
+  `CFLAGS=CXXFLAGS=-Wno-invalid-specialization` ; lancer avec `PYTORCH_ENABLE_MPS_FALLBACK=1`,
+  `HF_TOKEN`). Licence Stability Community (gratuite < 1 M$ de revenu ; sorties à nous).
+- Archer L3 (front.png A-pose) : 32 s, 12 862 triangles, 141 parties (TRELLIS : 15 260, 242).
+  Forme et A-pose fidèles, carquois et dague présents ; texture plus claire/délavée que la
+  référence, visage flou ; dos deviné (une seule vue en entrée). Modèle tourné de 180° (yaw).
+  Comparaison : `ga3_compare_render.py --panel …/sf3d/out/0/mesh.glb "SF3D" --yaw 180`.
+- Pistes : corriger la teinte (gamma/saturation de l'albédo), essayer `--remesh_option triangle`,
+  câbler un `--model sf3d` dans `ga3_fal_figure.py` si le joueur valide.
