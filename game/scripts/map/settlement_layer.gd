@@ -115,6 +115,8 @@ var _priority_order: PackedInt32Array = PackedInt32Array()
 ## FL3 : grille des ancres (`_marker_world`) : dé-encombrement et survol limités aux colonies du
 ## champ (marques `_view_mark`) ou proches du curseur (`_pick_mark`).
 var _cells := SettlementCells.new()
+## Banc FL (`--bench-set=prop:settlement_layer.use_cells=false`) : sans la grille, comme avant.
+var use_cells := true
 var _view_mark: PackedByteArray = PackedByteArray()
 var _pick_mark: PackedByteArray = PackedByteArray()
 var _max_text_px := -1.0
@@ -1142,7 +1144,7 @@ func _declutter_begin() -> bool:
 	var reach_px := _max_label_text_px() * _dc_scale + LABEL_GAP_PX + LABEL_FOOTPRINT_MAX_PX + _max_marker_px * icon_size_scale + _dc_label_margin + _dc_marker_margin + _shield_gap
 	_cells.mark_in_view(camera, screen.size.y, spill_px + 2.0 * reach_px, _marker_world, _view_mark)
 	for i in _priority_order:
-		if (_view_mark[i] == 1 or _labels[i].visible or _marker_screen[i].x > -1.0e5) and not _dc_pins.has(i):
+		if (not use_cells or _view_mark[i] == 1 or _labels[i].visible or _marker_screen[i].x > -1.0e5) and not _dc_pins.has(i):
 			_dc_sequence.append(i)
 	_dc_pos = 0
 	PerfProbe.lap("settle/declutter/prep", tp)
@@ -1765,7 +1767,7 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var reach_px := _max_label_text_px() * scale + LABEL_GAP_PX + LABEL_FOOTPRINT_MAX_PX + _max_marker_px * icon_size_scale + PICK_MIN_PX
 	_cells.mark_near_ray(camera, get_viewport().get_visible_rect().size.y, screen_position, 2.0 * reach_px, _marker_world, _pick_mark)
 	for i in data.settlements.size():
-		if _pick_mark[i] == 0:
+		if use_cells and _pick_mark[i] == 0:
 			continue
 		var score := INF
 		# GC2 : une maquette hors de portée (type masqué à cette hauteur) ne se clique pas.

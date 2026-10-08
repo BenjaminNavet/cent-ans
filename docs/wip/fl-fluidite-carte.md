@@ -48,6 +48,21 @@ apparaît ou disparaît d'une image à l'autre. C'était la piste 1 de `arbres-c
 Session SC (`../gp-sc`, `feat/sc`, simplification de tout le code, 20 agents) démarrée le 08/10 :
 elle peut toucher les fichiers FL. Bancs FL : uniquement `--bench-ab` en processus (charge).
 
+## FL3 — mesures du 08/10 (fenêtre en arrière-plan, `tools/godot_bg.sh`, A/B en processus)
+- La sonde `--bench-probe` gonfle les images (≈ 29 ms contre 14 sans) : p50/p99 sans sonde.
+- **Bimodalité des bancs = taille de fenêtre** : `settings.cfg` du joueur a `fullscreen=true` ; le
+  banc s'ouvre tantôt en 1440×900 (échelle 0,75 → 0,73 M px : **16-20 ms**), tantôt plein écran sur
+  le Dell HiDPI 2× (4096×2304, budget ADR 0123 au plancher 0,5 → 2,36 M px : **38-43 ms**).
+  Le joueur joue en plein écran : c'est son cas réel.
+- Grille FL3a : sans effet sur la médiane (14,1 / 14,0 ms), coupe le survol (3,4 → 0,7 ms) et ses pics.
+- Pixel-bound : échelle 0,25 → 17 ms ; 0,42 → 30 ; 0,35 → 25 (contre 38-40). Ombres du soleil −1,2 à −3.
+- Terrain = moitié de l'image (hide:Terrain 15,9 → 8,1 en fenêtre). Aucun effet ne domine :
+  météo −2 à −6,5 ms, vie −2 à −2,8, brouillard −1 ; reliefs, côtes, biomes, satellite ≈ 0.
+- Météo : 205/443 provinces actives (84 % avec voisines) en automne 1337 : un saut « loin de
+  toute météo » n'aide pas (essayé, annulé). Piste : cuire la météo en texture carte basse
+  résolution à chaque tour (frange comprise) → 1 lecture au lieu de 2 fbm + 3 lectures.
+- Bancs : `--bench-set/--bench-ab=prop:nœud.propriété=valeur` (ex. `prop:settlement_layer.use_cells=false`).
+
 ## Prochaine étape
-Tests de FL3a (sa_pick, tb2_declutter, settlements_render, smoke) puis banc `--bench-hover` d 150/30 ;
-ensuite pics `life/reground`, `lod/level_emits`, temps non attribué ; A/B ombres FL1 ; FL2.
+Choix du joueur : plancher d'échelle en plein écran HiDPI (0,5 → 0,35 : −37 %, plus flou) ;
+puis cuisson de la météo ; pics `life/reground`, `lod/level_emits` ; FL2 appels de dessin.
