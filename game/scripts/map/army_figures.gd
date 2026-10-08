@@ -81,7 +81,7 @@ static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voile
 ## Vrai si les figurines skinnées sont disponibles et que la comparaison `--legacy-army-markers`
 ## n'est pas demandée.
 static func enabled() -> bool:
-	if OS.get_cmdline_user_args().has("--legacy-army-markers"):
+	if CmdArgs.has("--legacy-army-markers"):
 		return false
 	return BattleSkinned.has_figure("cavalry", 0) and BattleSkinned.has_figure("infantry", 0)
 
@@ -311,7 +311,7 @@ static func walk_settings() -> Dictionary:
 
 ## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).
 static func as2_enabled() -> bool:
-	return bool(walk_settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as2")
+	return bool(walk_settings().get("enabled", false)) and not CmdArgs.has("--no-as2")
 
 
 ## Facteur de cadence pour une vitesse au sol `ground_speed` (unités monde / s) d'un groupe dont
