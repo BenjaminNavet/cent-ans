@@ -116,7 +116,9 @@ def render_image(
     if strength is None and os.environ.get("CENT_ANS_LOCAL_STRENGTH"):
         strength = float(os.environ["CENT_ANS_LOCAL_STRENGTH"])
     if seed is None and os.environ.get("CENT_ANS_LOCAL_SEED_SALT"):
-        seed = zlib.crc32((prompt + os.environ["CENT_ANS_LOCAL_SEED_SALT"]).encode("utf-8"))
+        seed = zlib.crc32(
+            (prompt + os.environ["CENT_ANS_LOCAL_SEED_SALT"]).encode("utf-8")
+        )
     with tempfile.TemporaryDirectory(prefix="cent_ans_mflux_") as work_dir:
         work = Path(work_dir)
         reference_path = None
