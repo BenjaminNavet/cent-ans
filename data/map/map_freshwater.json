@@ -1,0 +1,100 @@
+{
+  "description": "Eaux douces et zones humides de la carte de campagne (lot DN-ME4) : réglages de rendu, familles de roselières, salins, cascades et gués historiques, torrents, glaciers. Entrée de `cent-ans geo freshwater-sites` (sortie : freshwater_px.json) et de FreshwaterLayer. Rendu seulement.",
+  "render": {
+    "fade_start": 950.0,
+    "fade_end": 1200.0,
+    "patch_max_distance": 120.0,
+    "near_max_distance": 4.0,
+    "patch_block_units": 16.0,
+    "patch_spacing_units": 0.8,
+    "near_block_units": 2.0,
+    "near_spacing_units": 0.07,
+    "max_blocks_per_frame": 2,
+    "max_cached_blocks": 220,
+    "max_instances": 60000,
+    "scale_near_distance": 3.0,
+    "scale_far_distance": 60.0,
+    "far_scale": 36.0,
+    "model_magnify": 6.0,
+    "pool_far_scale": 2.0,
+    "seed": 4417
+  },
+  "reeds": {
+    "card_texture": "res://assets/textures/vegetation/dn/card_reed_phragmites.png",
+    "card_cards": ["card_reed_phragmites", "card_reed_cattail", "card_sedge_marsh"],
+    "clump_width_m": 10.0,
+    "clump_height_m": 6.0,
+    "kinds": {
+      "marsh": {"cover": 0.8, "pool_share": 0.12, "tint": [0.52, 0.46, 0.17]},
+      "ponds": {"cover": 0.45, "pool_share": 0.2, "tint": [0.36, 0.44, 0.16]},
+      "wet_meadow": {"cover": 0.25, "pool_share": 0.04, "tint": [0.30, 0.42, 0.16]}
+    },
+    "lagoon_ids": ["camargue", "delta_ebre", "delta_po", "lagune_venise", "valli_comacchio", "etangs_languedoc", "delta_danube", "albufera", "marismas_guadalquivir", "menzaleh"],
+    "pool_diameter_m": 60.0
+  },
+  "models": {
+    "waterfall": "env_waterfall_rock_step",
+    "ford": "env_ford_stepping_stones",
+    "torrent_bed": "env_gorge_boulders_torrent",
+    "reed_mass": "env_reed_bed_mass",
+    "reed_hut": "env_reed_cutter_thatched_hut",
+    "placeholder": "res://assets/models/rocks/hb/alpine_spire_lod0.glb"
+  },
+  "torrent": {
+    "min_slope": 0.05,
+    "min_points": 2,
+    "foam_width_units": 0.18,
+    "max_runs": 1400,
+    "bed_boulder_spacing_units": 1.2
+  },
+  "salt_pans": [
+    {"id": "guerande", "name": "Marais salants de Guérande", "center": [-2.45, 47.30], "size_km": [9, 6], "angle_deg": 20, "tint": "rose"},
+    {"id": "bourgneuf", "name": "Baie de Bourgneuf", "center": [-2.02, 47.00], "size_km": [7, 4], "angle_deg": 0, "tint": "grey"},
+    {"id": "re_brouage", "name": "Salines de Ré et Brouage", "center": [-1.2, 46.0], "size_km": [10, 5], "angle_deg": 10, "tint": "grey"},
+    {"id": "aigues_mortes", "name": "Salins d'Aigues-Mortes", "center": [4.18, 43.54], "size_km": [10, 5], "angle_deg": 0, "tint": "rose"},
+    {"id": "giraud", "name": "Salin-de-Giraud", "center": [4.74, 43.40], "size_km": [8, 5], "angle_deg": 0, "tint": "rose"},
+    {"id": "peccais", "name": "Peccais", "center": [4.14, 43.50], "size_km": [5, 3], "angle_deg": 0, "tint": "rose"},
+    {"id": "hyeres", "name": "Salins d'Hyères", "center": [6.15, 43.05], "size_km": [5, 3], "angle_deg": 0, "tint": "rose"},
+    {"id": "cervia", "name": "Salines de Cervia", "center": [12.35, 44.26], "size_km": [7, 4], "angle_deg": 0, "tint": "rose"},
+    {"id": "chioggia", "name": "Salines de Chioggia", "center": [12.28, 45.2], "size_km": [6, 3], "angle_deg": 0, "tint": "grey"},
+    {"id": "secovlje", "name": "Sečovlje", "center": [13.6, 45.49], "size_km": [4, 3], "angle_deg": 0, "tint": "grey"},
+    {"id": "trapani", "name": "Salines de Trapani", "center": [12.5, 37.99], "size_km": [10, 4], "angle_deg": 20, "tint": "rose"},
+    {"id": "cagliari", "name": "Salines de Cagliari", "center": [9.1, 39.2], "size_km": [9, 4], "angle_deg": 0, "tint": "rose"},
+    {"id": "ibiza", "name": "Salines d'Ibiza", "center": [1.4, 38.84], "size_km": [5, 3], "angle_deg": 0, "tint": "rose"},
+    {"id": "ebre", "name": "Salines du delta de l'Èbre", "center": [0.65, 40.6], "size_km": [6, 3], "angle_deg": 0, "tint": "grey"},
+    {"id": "cadix", "name": "Salines de la baie de Cadix", "center": [-6.2, 36.45], "size_km": [10, 5], "angle_deg": 0, "tint": "grey"},
+    {"id": "cabo_gata", "name": "Salines du cap de Gata", "center": [-2.2, 36.78], "size_km": [5, 3], "angle_deg": 0, "tint": "rose"},
+    {"id": "setubal", "name": "Salines de Setúbal et du Tage", "center": [-8.85, 38.5], "size_km": [8, 4], "angle_deg": 0, "tint": "grey"},
+    {"id": "aveiro", "name": "Salines d'Aveiro", "center": [-8.65, 40.64], "size_km": [6, 3], "angle_deg": 0, "tint": "grey"}
+  ],
+  "waterfalls": [
+    {"id": "rhine_falls", "name": "Chutes du Rhin", "lonlat": [8.615, 47.678], "height_m": 23},
+    {"id": "gavarnie", "name": "Cirque de Gavarnie", "lonlat": [-0.01, 42.69], "height_m": 420},
+    {"id": "giessbach", "name": "Giessbach", "lonlat": [8.02, 46.73], "height_m": 300},
+    {"id": "staubbach", "name": "Staubbach", "lonlat": [7.9, 46.59], "height_m": 297},
+    {"id": "reichenbach", "name": "Chutes de Reichenbach", "lonlat": [8.18, 46.71], "height_m": 250},
+    {"id": "pissevache", "name": "Pissevache", "lonlat": [7.03, 46.14], "height_m": 65},
+    {"id": "krimml", "name": "Chutes de Krimml", "lonlat": [12.18, 47.2], "height_m": 380},
+    {"id": "gimel", "name": "Cascades de Gimel", "lonlat": [1.9, 45.3], "height_m": 140},
+    {"id": "voringsfossen", "name": "Vøringsfossen", "lonlat": [7.25, 60.43], "height_m": 180},
+    {"id": "high_force", "name": "High Force", "lonlat": [-2.22, 54.65], "height_m": 21},
+    {"id": "aysgarth", "name": "Aysgarth Falls", "lonlat": [-1.99, 54.31], "height_m": 20},
+    {"id": "clyde_falls", "name": "Falls of Clyde", "lonlat": [-3.78, 55.67], "height_m": 26},
+    {"id": "imatra", "name": "Rapides d'Imatra", "lonlat": [28.77, 61.17], "height_m": 18},
+    {"id": "narva_falls", "name": "Chutes de Narva", "lonlat": [28.2, 59.38], "height_m": 6},
+    {"id": "skogafoss", "name": "Skógafoss", "lonlat": [-19.51, 63.53], "height_m": 60},
+    {"id": "gullfoss", "name": "Gullfoss", "lonlat": [-20.12, 64.33], "height_m": 32}
+  ],
+  "fords": [
+    {"id": "blanchetaque", "name": "Gué de Blanchetaque (Somme)", "lonlat": [1.628, 50.114], "width_m": 1500},
+    {"id": "gois", "name": "Passage du Gois", "lonlat": [-2.14, 46.9], "width_m": 4000},
+    {"id": "morecambe", "name": "Traversée des sables de Morecambe", "lonlat": [-2.85, 54.17], "width_m": 8000}
+  ],
+  "glacier": {
+    "line_m": 2600.0,
+    "full_m": 3100.0,
+    "max_slope": 0.62,
+    "ice_color": [0.70, 0.80, 0.88],
+    "crevasse_color": [0.38, 0.5, 0.62]
+  }
+}

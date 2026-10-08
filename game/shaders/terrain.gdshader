@@ -397,6 +397,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 }
 
 #include "res://shaders/relief_landcover.gdshaderinc"
+#include "res://shaders/freshwater_ground.gdshaderinc"  // DN-ME4 : névés et glaciers
 // Lot CV1 : saisons, terroirs, dévastation, ombres de nuages (fonctions séparées).
 #include "res://shaders/campaign_life.gdshaderinc"
 // Lot CM2 : vue stratégique parchemin (fondu au zoom maximal) et météo de campagne.
@@ -715,6 +716,7 @@ void fragment() {
 		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
 		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
+	fw_glacier_apply(p, hc, slope, footprint, macro, land_f, col);  // DN-ME4 : névés et glaciers
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
 	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part

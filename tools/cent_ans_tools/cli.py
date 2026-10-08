@@ -512,6 +512,19 @@ def _report_landcover() -> None:
     )
 
 
+@geo_app.command("freshwater-sites")
+def geo_freshwater_sites() -> None:
+    """Génère freshwater_px.json (zones humides, salins, cascades, gués, torrents ; lot DN-ME4)."""
+    from cent_ans_tools.geo import freshwater
+
+    result = freshwater.build()
+    console.print(
+        f"{len(result['wetlands'])} zones humides, {len(result['salt_pans'])} salins, "
+        f"{len(result['waterfalls'])} cascades, {len(result['fords'])} gués, "
+        f"{len(result['torrents'])} tronçons de torrent"
+    )
+
+
 @geo_app.command("rivers-render")
 def geo_rivers_render(
     fine_min_order: int = typer.Option(
