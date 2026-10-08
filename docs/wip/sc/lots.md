@@ -309,3 +309,9 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 
 ## RT5 (fusionné 08/10)
 - Tests d'intégration sim-battle 58 → 6 binaires (ai_tactics, controls, combat, siege, terrain, determinism), ai 26 → 4 (economy, strategy, movement, replay) ; 513 tests inchangés. `common::data()` partagé dans ai/tests/common.
+
+## LOOKUPS2 (fusionné 08/10)
+- JsonLookup sur 9 sites de plus (fa_ui, animal_motion, siege_engines_fx, house_arms, battle_standards, battle_speech, battle_skinned, voice_lines, crusade_section) ; 17 tests Python sur assert_matches_schema/schema_validator. pytest 3 166 verts (seul échec bake préexistant).
+- Les .uid de game/tests sont maintenant suivis : supprimer les copies non suivies locales avant fusion/ff dans main.
+- Régression SC trouvée après fusion : flhooks avait supprimé `campaign_map._focus_capital` encore appelé (next_hint_controller, jr_crusade_test) → corrigé c3215a194 / 5203821d2.
+- Balayage des `call("nom")` sans définition : seuls restes antérieurs, gardés par has_method (morts) : `close_all_dialogs` (release_journey, pb1_turns), `open_faction_select` (q8), `supports_order` (hud_controller : le bouton scinder se croit toujours indisponible ? à vérifier).
