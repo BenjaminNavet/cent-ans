@@ -1,4 +1,4 @@
-# 0192 — Suppression de la bataille navale 3D
+# 0201 — Suppression de la bataille navale 3D
 
 ## Contexte
 Le bouton « Combattre » de l'écran d'avant-bataille navale est masqué depuis le 25/09 (`PLAYABLE_3D := false`) :

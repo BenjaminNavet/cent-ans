@@ -31,7 +31,7 @@ def main() -> None:
         "# Index des décisions d'architecture",
         "",
         "Généré par `tools/adr_index.py` (ne pas éditer à la main). « bis » : numéro attribué deux fois, fichiers non renommés.",
-        "Prochain numéro libre : 0193.",
+        "Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).",
         "",
         "| N° | Titre | Statut |",
         "|---|---|---|",

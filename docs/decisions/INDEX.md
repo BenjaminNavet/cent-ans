@@ -1,7 +1,7 @@
 # Index des décisions d'architecture
 
 Généré par `tools/adr_index.py` (ne pas éditer à la main). « bis » : numéro attribué deux fois, fichiers non renommés.
-Prochain numéro libre : 0193.
+Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 
 | N° | Titre | Statut |
 |---|---|---|
@@ -168,5 +168,5 @@ Prochain numéro libre : 0193.
 | 0183 | [Économie à l'échelle (lot A6-L3)](0183-economie-a-l-echelle.md) | n/d |
 | 0184 | [Durée des batailles : mesure, cadence en données, et limite des leviers de combat](0184-duree-des-batailles.md) | appliqué par le lot A6-L13b** |
 | 0185 | [Barre des emplacements de colonie](0185-barre-des-emplacements.md) | n/d |
-| 0191 | [Chantier SC : une seule voie de code](0191-chantier-simplification.md) | n/d |
-| 0192 | [Suppression de la bataille navale 3D](0192-suppression-bataille-navale-3d.md) | n/d |
+| 0200 | [Chantier SC : une seule voie de code](0200-chantier-simplification.md) | n/d |
+| 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |

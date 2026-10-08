@@ -30,8 +30,8 @@ Le propriétaire précise : le chantier n'est pas que de la suppression ; il fau
 
 ## État
 - [x] Vague 0 audit (18/20 zones ; MS et DT en cours) → `docs/wip/sc/lots.md` (catalogue des lots par zone)
-- [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0192), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
-- Vague 1 fusionnée dans feat/sc : docs, probes, deadfuncs, naval (ADR 0192), tlschemas, gtshots, jsondata (DataFile). En cours : simsplit, names, mock, tldel.
+- [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0201), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
+- Vague 1 fusionnée dans feat/sc : docs, probes, deadfuncs, naval (ADR 0201), tlschemas, gtshots, jsondata (DataFile). En cours : simsplit, names, mock, tldel.
 - [ ] Vague 2 (lancée 10-08, 6 lots car disque ≈ 35 Go) : battledev, hooks, uikit, audio, testsupport, schemadefs.
 - Veto joueur 10-08 : garder l'issue bataille des rencontres (CB2) et les 4 issues de prise + ruines (CB3).
 - Réserve : main a des modifs non commitées sur landmarks_v2/towns_1340 (sauvegarde scratchpad main-dirty.patch) → MA1/MA2 (suppression style real / landmarks v2) en attente de vérif.
@@ -42,5 +42,5 @@ Gel jusqu'à la fusion de FL : `game/scripts/map/vegetation.gd`, `campaign_map.g
 map.misc), déclutter des villes (settlement), `outbuilding_layer.gd`, life reground,
 `terrain.gdshader` + includes, `dev/map_bench.gd`. Tout portage Rust d'un point chaud de la carte
 est annoncé à FL avant de commencer. Base FL : d30 p50 31 ms, d150 p50 46 ms (map.misc 8-12 ms).
-- Vague 3 : effects + rulesdata fusionnés (10-08) ; treaty en cours (ADR 0193 réservé). ADR SC renumérotés 0191/0192 (main a pris 0186-0190).
-- Vague 4 (patterns/perf) lancée : movperf (sim-battle resolve_movement + geom), battlerules (moral/fatigue, tables terrain → data, decor_gen, rng ; ADR 0195 si besoin), naval (NV2/BB2/BB3/BB13 ; ADR 0194 si besoin), aiturn (ArmyTurn, constantes IA → data, PlanCache ; ADR 0196 si besoin), uikit2 (TooltipHost, diplomacy sous-vues, tutoriel → data).
+- Vague 3 : effects + rulesdata fusionnés (10-08) ; treaty en cours (ADR 0202 réservé). ADR SC renumérotés 0200 (parapluie) et 0201 (naval 3D) ; bloc 0200-0209 réservé SC (main a pris 0186-0192).
+- Vague 4 (patterns/perf) lancée : movperf (sim-battle resolve_movement + geom), battlerules (moral/fatigue, tables terrain → data, decor_gen, rng ; ADR 0205 si besoin), naval (NV2/BB2/BB3/BB13 ; ADR 0203 si besoin), aiturn (ArmyTurn, constantes IA → data, PlanCache ; ADR 0204 si besoin), uikit2 (TooltipHost, diplomacy sous-vues, tutoriel → data).
