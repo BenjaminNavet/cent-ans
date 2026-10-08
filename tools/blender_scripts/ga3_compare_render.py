@@ -9,7 +9,8 @@ Blender headless::
 
 Each ``--panel`` is a glb plus a label; ``--yaw`` (degrees) turns that model so it faces the
 camera, ``--frame`` picks an animation frame (``rest`` = armature rest pose, default: no
-animation change), ``--unmetal`` undoes the Meshy rigged glb material bugs. Two rows: three-quarter front and three-quarter back. Each model is scaled
+animation change), ``--unmetal`` undoes the Meshy rigged glb material bugs; ``--fit-width W`` (global) also caps the
+horizontal extent so a horse or a building fits the panel. Two rows: three-quarter front and three-quarter back. Each model is scaled
 to 1.80 m, feet on the ground. The mesh statistics (triangles, textures and the material
 inputs they feed, mesh objects and loose parts, bones) are written to ``--stats``.
 """
@@ -24,11 +25,13 @@ import numpy as np
 
 PANEL_W, PANEL_H = 320, 480
 HEIGHT = 1.80
+FIT_WIDTH = None  # --fit-width W: also cap the horizontal extent (horses, decor)
 ROW_YAWS = (-25.0, 155.0)
 
 
 def parse_args(argv):
     """Return (out, stats, reference, panels) from the argv after ``--``."""
+    global FIT_WIDTH
     argv = argv[argv.index("--") + 1 :] if "--" in argv else []
     out, stats, reference, panels = None, None, None, []
     i = 0
@@ -40,6 +43,8 @@ def parse_args(argv):
             stats, i = argv[i + 1], i + 2
         elif arg == "--ref":
             reference, i = (argv[i + 1].split(":"), argv[i + 2]), i + 3
+        elif arg == "--fit-width":
+            FIT_WIDTH, i = float(argv[i + 1]), i + 2
         elif arg == "--panel":
             panels.append(
                 {
@@ -152,6 +157,8 @@ def normalise(root, meshes):
     points = world_points(meshes)
     low, high = points.min(axis=0), points.max(axis=0)
     scale = HEIGHT / max(high[2] - low[2], 1e-6)
+    if FIT_WIDTH:
+        scale = min(scale, FIT_WIDTH / max(np.max(high[:2] - low[:2]), 1e-6))
     root.scale = (scale, scale, scale)
     bpy.context.view_layer.update()
     points = world_points(meshes)

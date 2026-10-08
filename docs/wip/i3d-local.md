@@ -48,3 +48,36 @@ détaillés. TripoSR : à abandonner.
 ## Verdict mis à jour
 TRELLIS gagne partout et devient **gratuit** par le Space HF (dans la limite du quota ZeroGPU
 quotidien). SF3D/TripoSR locaux : replis hors ligne seulement.
+
+## Essai 3 (08/10) : 3 vues Z-Image conformes à la charte, TRELLIS multi contre SF3D par vue
+- Images : Z-Image Turbo local (mflux, ADR 0190), une planche de 3 vues par objet, seed 1337,
+  prompts `~/dev/cent-ans-raw/sf3d/mv/*.txt`. Charte : figurines selon la convention GA3
+  (bible §6 : bras écartés, mains vides, livrée verte et chausses bleues pures = canaux de
+  recoloration ; cavalier : jupon et caparaçon unis sans blason, acier non peint) ; ville selon
+  `style_prefix/suffix` de `data/art/ga3_decor.json` (tons de terre, fond gris). ≈ 6 min par planche.
+  - Archer : vraie face / profil / dos. Cavalier : Z-Image donne ¾ avant, profil, ¾ avant (pas de
+    vraie face ni de dos). Ville : trois ¾ avant presque identiques. Z-Image tient mal les angles
+    de vue multiples pour un objet non humain.
+- Découpe : `sf3d/split_views.py` (rembg isnet, colonnes séparées par l'alpha, carré 1024, objet
+  ≈ 90 % du cadre). Le cavalier s'est chevauché : coupe au creux d'alpha, plus grande composante.
+- **Résolutions d'entrée vérifiées dans le code** : TRELLIS `preprocess_image` réduit à ≤ 1024,
+  recadre la boîte alpha × 1,2 puis 518 × 518 (chaque vue en multi) ; SF3D : rembg,
+  `resize_foreground` 0,85 puis 512 × 512 (`cond_image_size`). Un carré 1024 détouré, objet plein
+  cadre, convient aux deux.
+- **Piège Space HF** : l'API appelle `generate_and_extract_glb` avec `preprocess_image=False` et le
+  mode multi dépend de l'onglet. Script `sf3d/trellis_hf_multi.py` : `/start_session`,
+  `/lambda_1` (onglet multi), `/preprocess_images`, puis génération (stochastic). 22-36 s, 0 $.
+- SF3D : `run.py` sur les 9 vues d'un coup, ≈ 1 min/vue, 11-16 k tri.
+- Planches `out/sheets/mv_archer.jpg`, `mv_cav.jpg`, `mv_town.jpg` (`ga3_compare_render.py`,
+  nouvelle option `--fit-width` pour cheval et décor).
+  - Archer : TRELLIS 3 vues cohérent tout autour (texture sombre, défaut connu) ; SF3D face net,
+    couleurs vives, dos inventé correct ; SF3D profil : **texture entièrement noire** (cuisson ratée
+    sur une silhouette fine) ; SF3D dos : forme bonne, visage inventé.
+  - Cavalier : TRELLIS lisible mais cavalier fin et sombre ; SF3D face très bon de face (meilleur
+    rendu des couleurs), flou et miroité ailleurs ; profil et dos déformés.
+  - Ville : SF3D face la plus fidèle (enceinte, tours, église) ; TRELLIS multi réorganise la ville
+    (vues trop semblables, pas d'information nouvelle) ; SF3D profil et dos plus mous.
+- Verdict : SF3D marche bien **depuis une vue de face ou ¾ avant**, mal depuis un profil ou un dos.
+  TRELLIS multi n'apporte que si les vues sont vraiment différentes (archer) ; avec des vues
+  quasi identiques (ville) il fait moins bien que SF3D en vue unique. Choix inchangé : TRELLIS d'abord,
+  SF3D en repli, toujours nourri d'une vue ¾ avant.
