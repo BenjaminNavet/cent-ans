@@ -217,3 +217,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - SCH lecteurs Python sans registre $ref (geo/colormap.py, geo/biomes.py, ground_materials.py…) → passer par codex.schema_validator puis factoriser 12 schémas restants
 
 - SIMSPLIT (fait) : `ai/plan_field.rs` reste à 897 lignes, découpage plus fin possible.
+- AUDIO (fait) : `AudioDirector.play_sfx` reste en round-robin, hors VoicePool (MS5a partiel).
