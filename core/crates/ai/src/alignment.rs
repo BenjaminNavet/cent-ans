@@ -7,20 +7,16 @@
 
 use std::collections::BTreeMap;
 
+use crate::salts;
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
-    claim_stakes, rivals, war_ready, RelationKind, AGGRESSION_REASON, AT_WAR_REASON,
-    DESERTION_WAR_SCORE, GIFT_REASON, PERJURY_REASON,
+    claim_stakes, war_ready, RelationKind, AGGRESSION_REASON, AT_WAR_REASON, DESERTION_WAR_SCORE,
+    GIFT_REASON, PERJURY_REASON,
 };
-use sim_campaign::negotiation::{evaluate_treaty, Article};
+use sim_campaign::negotiation::{evaluate_treaty_with, Article};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
-/// Salt of the wool revolt roll.
-const WOOL_SALT: u64 = 1;
-/// Salt of the defection rolls (one per decade from this one).
-const DEFECTION_SALT: u64 = 2;
-/// Salt of the dynastic alliance and money fief roll.
-const DYNASTIC_SALT: u64 = 7;
 /// Turns per decade (one defection roll each).
 const DECADE_TURNS: u32 = 40;
 
@@ -155,12 +151,12 @@ pub fn grievance(state: &CampaignState, faction: &FactionId, patron: &FactionId)
 /// Attitude of `faction` towards `other`, leaving out the war between
 /// them (a side change starts with a white peace).
 fn attitude_beyond_war(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     other: &FactionId,
 ) -> i32 {
-    let (_, reasons) = state.attitude(data, faction, other);
+    let (_, reasons) = cache.attitude(data, faction, other);
     let total: i32 = reasons
         .iter()
         .filter(|(label, _)| label != AT_WAR_REASON)
@@ -174,10 +170,11 @@ fn attitude_beyond_war(
 /// it already fights) and the enemy or pretender of that patron it would
 /// side with (attitude of `grievance.min_attitude`, their war aside).
 pub fn grievance_change(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
 ) -> Option<(FactionId, FactionId)> {
+    let state = cache.state();
     let rules = &data.ai_alignment.as_ref()?.grievance;
     let me = state.factions.get(faction)?;
     let patrons = me
@@ -208,7 +205,7 @@ pub fn grievance_change(
                     pretender || fights
                 }
             })
-            .map(|e| (attitude_beyond_war(state, data, faction, e), e))
+            .map(|e| (attitude_beyond_war(cache, data, faction, e), e))
             .filter(|(towards, _)| *towards >= rules.min_attitude)
             .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(a.1)));
         if let Some((_, invader)) = best {
@@ -223,10 +220,11 @@ pub fn grievance_change(
 /// ally of a crown whose realm the enemy dominates (Troyes), or a prince
 /// with a grievance against its patron (Montereau).
 pub fn side_change(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
 ) -> Option<(FactionId, FactionId)> {
+    let state = cache.state();
     let rules = data.ai_alignment.as_ref()?;
     let me = state.factions.get(faction)?;
     let alive = |f: &FactionId| state.factions.get(f).is_some_and(|s| s.alive);
@@ -234,7 +232,7 @@ pub fn side_change(
         .suzerain
         .clone()
         .filter(|_| me.loyalty < rules.wool_revolt.loyalty)
-        .filter(|_| campaign_roll(state, faction, WOOL_SALT) < rules.history_permille)
+        .filter(|_| campaign_roll(state, faction, salts::WOOL) < rules.history_permille)
     {
         let embargoer = state
             .factions
@@ -245,12 +243,12 @@ pub fn side_change(
         }
     }
     // A blood feud needs no roll: the chronicle already hesitated.
-    if let Some(change) = grievance_change(state, data, faction) {
+    if let Some(change) = grievance_change(cache, data, faction) {
         return Some(change);
     }
     // One roll per decade: the fall of a crown is not written.
     let decade = u64::from(state.turn / DECADE_TURNS);
-    if campaign_roll(state, faction, DEFECTION_SALT + decade) >= rules.history_permille {
+    if campaign_roll(state, faction, salts::DEFECTION + decade) >= rules.history_permille {
         return None;
     }
     let patrons: Vec<FactionId> = match &me.suzerain {
@@ -272,16 +270,17 @@ pub fn side_change(
 /// Orders of `faction` changing sides this turn (G2): white peace with the
 /// new patron first, then independence war (vassal) or broken alliance,
 /// and an alliance offer to the new patron.
-pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn plan_side_change(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     if faction == &state.player_faction || !(state.turn + slot(faction)).is_multiple_of(4) {
         return Vec::new();
     }
-    let Some((patron, invader)) = side_change(state, data, faction) else {
+    let Some((patron, invader)) = side_change(cache, data, faction) else {
         return Vec::new();
     };
     if state.is_at_war(faction, &invader) {
         let accepted = invader != state.player_faction
-            && evaluate_treaty(state, data, faction, &invader, &[Article::Peace]).accept;
+            && evaluate_treaty_with(cache, data, faction, &invader, &[Article::Peace]).accept;
         return if accepted {
             vec![Order::ProposePeace {
                 target: invader,
@@ -309,7 +308,7 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
     if !state.is_allied(faction, &invader) {
         // The new camp takes no friend of its rivals: the old alliances
         // against it go first (Burgundy leaves the Scots to the dauphin).
-        let theirs = rivals(state, &invader);
+        let theirs = cache.rivals(&invader);
         orders.extend(
             me.allies
                 .iter()
@@ -327,11 +326,12 @@ pub fn plan_side_change(state: &CampaignState, data: &GameData, faction: &Factio
 /// its allies, whose campaign roll lets history court them: each
 /// with its attitude towards us and its best one towards our enemies.
 fn courted_princes<'a>(
-    state: &'a CampaignState,
+    cache: &PlanCache<'a>,
     data: &GameData,
     rules: &AiAlignment,
     faction: &FactionId,
 ) -> Vec<(&'a FactionId, i32, i32)> {
+    let state = cache.state();
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
@@ -365,7 +365,7 @@ fn courted_princes<'a>(
     }
     // A great crown is no pensioner.
     let lesser = |id: &FactionId| {
-        state.faction_power(id) <= rules.dynastic.max_power_ratio * state.faction_power(faction)
+        cache.faction_power(id) <= rules.dynastic.max_power_ratio * cache.faction_power(faction)
     };
     state
         .factions
@@ -403,15 +403,15 @@ fn courted_princes<'a>(
             me.allies.iter().any(|a| {
                 lesser(a)
                     && enemies.iter().any(|e| state.is_at_war(a, e))
-                    && state.are_neighbors(data, id, a)
+                    && cache.are_neighbors(data, id, a)
             })
         })
-        .filter(|(id, _)| campaign_roll(state, id, DYNASTIC_SALT) < rules.history_permille)
+        .filter(|(id, _)| campaign_roll(state, id, salts::DYNASTIC) < rules.history_permille)
         .filter_map(|(id, _)| {
-            let towards_us = state.attitude(data, id, faction).0;
+            let towards_us = cache.attitude(data, id, faction).0;
             let towards_enemy = enemies
                 .iter()
-                .map(|e| state.attitude(data, id, e).0)
+                .map(|e| cache.attitude(data, id, e).0)
                 .max()?;
             Some((id, towards_us, towards_enemy))
         })
@@ -422,28 +422,31 @@ fn courted_princes<'a>(
 /// by `dynastic.margin` (G2: Edward III's in-laws of Hainaut, Brabant), in
 /// about half the campaigns for each prince.
 pub fn plan_dynastic_alliance(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
 ) -> Option<Order> {
+    let state = cache.state();
     let rules = data.ai_alignment.as_ref()?;
     let me = state.factions.get(faction)?;
     // Off the turns of `plan_diplomacy`'s alliances ((turn + slot) % 4 == 1).
     if faction == &state.player_faction || (state.turn + slot(faction)) % 4 != 3 {
         return None;
     }
-    courted_princes(state, data, rules, faction)
+    courted_princes(cache, data, rules, faction)
         .into_iter()
         .filter(|(id, towards_us, towards_enemy)| {
             // In-laws of our allies need less (Hainaut draws Brabant).
             let in_law = me
                 .allies
                 .iter()
-                .any(|a| state.attitude(data, id, a).0 >= rules.dynastic.in_law_attitude);
+                .any(|a| cache.attitude(data, id, a).0 >= rules.dynastic.in_law_attitude);
             let margin = if in_law { 0 } else { rules.dynastic.margin };
             *towards_us > towards_enemy + margin && *towards_us >= rules.dynastic.min_attitude
         })
-        .filter(|(id, _, _)| evaluate_treaty(state, data, faction, id, &[Article::Alliance]).accept)
+        .filter(|(id, _, _)| {
+            evaluate_treaty_with(cache, data, faction, id, &[Article::Alliance]).accept
+        })
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(a.0)))
         .map(|(target, _, _)| Order::ProposeAlliance {
             target: target.clone(),
@@ -454,11 +457,8 @@ pub fn plan_dynastic_alliance(
 /// not yet prefer it to its enemy by `dynastic.margin`; the gift's goodwill
 /// tips the balance before the next alliance offer (Edward III's pensions
 /// to Brabant and Hainaut, 1337). A pension still running is not renewed.
-pub fn plan_money_fief(
-    state: &CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-) -> Option<Order> {
+pub fn plan_money_fief(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let rules = data.ai_alignment.as_ref()?;
     let me = state.factions.get(faction)?;
     // The turn before the offers of `plan_dynastic_alliance`.
@@ -469,7 +469,7 @@ pub fn plan_money_fief(
     if me.treasury < fief.amount * fief.treasury_multiple {
         return None;
     }
-    courted_princes(state, data, rules, faction)
+    courted_princes(cache, data, rules, faction)
         .into_iter()
         .filter(|(_, towards_us, towards_enemy)| {
             *towards_us >= fief.min_attitude && *towards_us <= towards_enemy + rules.dynastic.margin
@@ -498,16 +498,17 @@ fn pensioned(state: &CampaignState, prince: &FactionId, donor: &FactionId) -> bo
 /// returns to Ghent once Flanders turns on France); the attitude case is
 /// left to `plan_diplomacy`.
 pub fn lift_embargoes_on_cobelligerents(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
 ) -> Vec<Order> {
+    let state = cache.state();
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
     me.embargoes
         .iter()
-        .filter(|t| !state.is_at_war(faction, t) && state.attitude(data, faction, t).0 <= 10)
+        .filter(|t| !state.is_at_war(faction, t) && cache.attitude(data, faction, t).0 <= 10)
         .filter(|t| {
             state.factions.get(*t).is_some_and(|f| {
                 f.at_war_with

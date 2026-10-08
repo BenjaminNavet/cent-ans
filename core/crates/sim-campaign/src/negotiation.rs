@@ -47,6 +47,7 @@ pub use reasons::ReasonList;
 use crate::diplomacy::{self, DiplomacyError, RelationKind};
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::state::CampaignState;
 
 /// Seasons a hostage stays with the other party.
@@ -576,6 +577,7 @@ pub fn goal_war_score(state: &CampaignState, data: &GameData, a: &FactionId, b: 
 /// The world and the two parties a treaty is judged or checked in.
 struct Deal<'a> {
     pub state: &'a CampaignState,
+    pub cache: &'a PlanCache<'a>,
     pub data: &'a GameData,
     pub proposer: &'a FactionId,
     pub recipient: &'a FactionId,
@@ -584,14 +586,15 @@ struct Deal<'a> {
 
 impl<'a> Deal<'a> {
     fn new(
-        state: &'a CampaignState,
+        cache: &'a PlanCache<'a>,
         data: &'a GameData,
         proposer: &'a FactionId,
         recipient: &'a FactionId,
         articles: &'a [Article],
     ) -> Self {
         Self {
-            state,
+            state: cache.state(),
+            cache,
             data,
             proposer,
             recipient,
@@ -652,7 +655,8 @@ pub fn check_treaty(
     if articles.is_empty() {
         return Err(DiplomacyError::Refused("traité vide".to_owned()));
     }
-    let deal = Deal::new(state, data, proposer, recipient, articles);
+    let cache = PlanCache::new(state);
+    let deal = Deal::new(&cache, data, proposer, recipient, articles);
     for (index, article) in articles.iter().enumerate() {
         if articles[..index].contains(article) {
             return Err(DiplomacyError::Refused("article en double".to_owned()));
@@ -670,7 +674,19 @@ pub fn evaluate_treaty(
     recipient: &FactionId,
     articles: &[Article],
 ) -> TreatyEvaluation {
-    let deal = Deal::new(state, data, proposer, recipient, articles);
+    evaluate_treaty_with(&PlanCache::new(state), data, proposer, recipient, articles)
+}
+
+/// [`evaluate_treaty`] reading the state through the planner's `cache`.
+pub fn evaluate_treaty_with(
+    cache: &PlanCache,
+    data: &GameData,
+    proposer: &FactionId,
+    recipient: &FactionId,
+    articles: &[Article],
+) -> TreatyEvaluation {
+    let state = cache.state();
+    let deal = Deal::new(cache, data, proposer, recipient, articles);
     let values: Vec<ArticleValue> = articles.iter().map(|a| a.value(&deal)).collect();
     let context = context::context_reasons(&deal);
     let blocked = check_treaty(state, data, proposer, recipient, articles)
@@ -1243,7 +1259,8 @@ pub fn has_military_access(
 /// the winner demands the provinces it holds (war goals first) as long as
 /// the loser would still likely sign; a weary or beaten side buys peace
 /// with what the enemy already holds, gold and tribute.
-pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+pub fn plan_peace(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let rules = rules(data);
     let me = state.factions.get(faction)?;
     let min_chance = rules.ai_min_chance;
@@ -1252,7 +1269,7 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
     enemies.sort_by(|a, b| {
         state
             .faction_power(b)
-            .total_cmp(&state.faction_power(a))
+            .total_cmp(&cache.faction_power(a))
             .then_with(|| a.cmp(b))
     });
     let cornered = diplomacy::is_cornered(state, data, faction);
@@ -1277,11 +1294,12 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
             continue;
         }
         let chance = |articles: &[Article]| -> u8 {
-            evaluate_treaty(state, data, faction, enemy, articles).chance
+            evaluate_treaty_with(cache, data, faction, enemy, articles).chance
         };
         // Would we sign a white peace ourselves (enemy's view of us)?
         let white = vec![Article::Peace];
-        let we_accept_white = evaluate_treaty(state, data, enemy, faction, &white).chance >= 50;
+        let we_accept_white =
+            evaluate_treaty_with(cache, data, enemy, faction, &white).chance >= 50;
         if score >= rules.demand_score {
             // Winner: demand what we hold of theirs, war goals first.
             let goals = me.ledger.war_goals.get(enemy).cloned().unwrap_or_default();

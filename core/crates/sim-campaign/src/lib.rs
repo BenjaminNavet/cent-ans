@@ -73,7 +73,7 @@ pub mod news_relevance;
 pub mod orders;
 pub mod passage;
 pub mod path_plan;
-pub mod planning_scope;
+pub mod plan_cache;
 pub mod population;
 pub mod possession;
 pub mod posture;

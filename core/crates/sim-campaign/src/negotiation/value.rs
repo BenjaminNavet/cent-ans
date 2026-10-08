@@ -129,7 +129,7 @@ fn peace_factors(deal: &Deal, reasons: &mut ReasonList) {
         f.at_war_with.iter().any(|e| {
             e != proposer
                 && !e.is_rebels()
-                && state.faction_power(e) > state.faction_power(proposer)
+                && deal.cache.faction_power(e) > deal.cache.faction_power(proposer)
         })
     });
     reasons.push_if(
@@ -206,7 +206,7 @@ fn alliance_factors(deal: &Deal, reasons: &mut ReasonList) {
             .any(|e| !e.is_rebels() && state.is_at_war(recipient, e))
     });
     reasons.push_if(common_enemy, "Ennemi commun", weights.common_enemy);
-    let ratio = state.faction_power(proposer) / state.faction_power(recipient).max(1.0);
+    let ratio = deal.cache.faction_power(proposer) / deal.cache.faction_power(recipient).max(1.0);
     if ratio > weights.strong_ratio {
         reasons.push("Allié puissant", weights.strong_ally);
     } else if ratio < weights.weak_ratio {
@@ -214,8 +214,8 @@ fn alliance_factors(deal: &Deal, reasons: &mut ReasonList) {
     }
     // Shared rivals, counterweight against a menacing neighbour, and no
     // alliance with a rival's friend.
-    let proposer_rivals = diplomacy::rivals(state, proposer);
-    let recipient_rivals = diplomacy::rivals(state, recipient);
+    let proposer_rivals = deal.cache.rivals(proposer);
+    let recipient_rivals = deal.cache.rivals(recipient);
     reasons.push_if(
         !proposer_rivals.is_disjoint(&recipient_rivals),
         "Rival commun",
@@ -223,8 +223,9 @@ fn alliance_factors(deal: &Deal, reasons: &mut ReasonList) {
     );
     let menace = &data.ai_diplomacy.menacing_neighbour;
     let menaced = proposer_rivals.iter().any(|r| {
-        state.faction_power(r) > menace.power_ratio * state.faction_power(recipient).max(1.0)
-            && state.are_neighbors(data, recipient, r)
+        deal.cache.faction_power(r)
+            > menace.power_ratio * deal.cache.faction_power(recipient).max(1.0)
+            && deal.cache.are_neighbors(data, recipient, r)
     });
     reasons.push_if(
         menaced,
@@ -257,7 +258,7 @@ fn vassalage_factors(deal: &Deal, giver: Party, reasons: &mut ReasonList) -> Opt
         );
         return None;
     }
-    let ratio = state.faction_power(proposer) / state.faction_power(recipient).max(1.0);
+    let ratio = deal.cache.faction_power(proposer) / deal.cache.faction_power(recipient).max(1.0);
     let required = data.feudal_rules.vassalage_power_ratio;
     let mut blocked = None;
     if ratio < required {
@@ -303,7 +304,7 @@ fn access_factors(deal: &Deal, giver: Party, reasons: &mut ReasonList) {
     }
     reasons.push("Passage d'armées étrangères", weights.access_given);
     reasons.push_if(
-        diplomacy::rivals(state, recipient).contains(proposer),
+        deal.cache.rivals(recipient).contains(proposer),
         "Armées d'un rival",
         weights.access_rival,
     );
@@ -331,7 +332,7 @@ fn trade_factors(deal: &Deal, reasons: &mut ReasonList) {
         ((partner / weights.trade_wealth_divisor) as i32).min(weights.trade_wealth_cap),
     );
     reasons.push_if(
-        diplomacy::rivals(state, recipient).contains(proposer),
+        deal.cache.rivals(recipient).contains(proposer),
         "Enrichir un rival",
         weights.trade_rival,
     );

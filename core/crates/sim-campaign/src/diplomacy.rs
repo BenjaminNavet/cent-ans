@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::events::{EventKind, GameEvent};
 use crate::negotiation::{Article, Treaty};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::religion;
 use crate::state::CampaignState;
 
@@ -174,15 +175,6 @@ pub const FEUDAL_TIE_ALLIANCE: &str = "le lien féodal tient déjà lieu d'allia
 impl CampaignState {
     /// Military weight of a faction: field armies count fully, garrisons half.
     pub fn faction_power(&self, faction: &FactionId) -> f64 {
-        // OMR R1: the planning scope's index (same sums).
-        if let Some(derived) = self.derived() {
-            return derived.faction_power(faction);
-        }
-        self.faction_power_walk(faction)
-    }
-
-    /// [`Self::faction_power`] walking the armies and settlements.
-    pub fn faction_power_walk(&self, faction: &FactionId) -> f64 {
         let armies: u32 = self
             .armies
             .values()
@@ -246,12 +238,6 @@ impl CampaignState {
         // OM I1: called for most pairs of factions each turn (O(F² × P)); read
         // each province's city directly instead of looking the province up
         // again, and compare the controller before walking the neighbours.
-        // OMR R1: the planning scope's neighbour index when one is open.
-        if let Some(derived) = self.derived() {
-            if let Some(index) = derived.neighbours(self, data) {
-                return index.get(a).is_some_and(|set| set.contains(b));
-            }
-        }
         self.provinces.iter().any(|(id, province)| {
             self.settlements
                 .get(&province.city)
@@ -266,11 +252,6 @@ impl CampaignState {
     /// pass over the provinces (OM I1: loops over all factions call this
     /// once instead of `are_neighbors` for each pair). May contain `a`.
     pub fn neighbour_factions(&self, data: &GameData, a: &FactionId) -> BTreeSet<FactionId> {
-        if let Some(derived) = self.derived() {
-            if let Some(index) = derived.neighbours(self, data) {
-                return index.get(a).cloned().unwrap_or_default();
-            }
-        }
         let mut out = BTreeSet::new();
         for (id, province) in &self.provinces {
             if self
@@ -432,113 +413,7 @@ impl CampaignState {
         a: &FactionId,
         b: &FactionId,
     ) -> (i32, Vec<(String, i32)>) {
-        let mut reasons: Vec<(String, i32)> = Vec::new();
-        let mut add = |text: &str, value: i32| {
-            if value != 0 {
-                reasons.push((text.to_owned(), value));
-            }
-        };
-        let Some(fa) = self.factions.get(a) else {
-            return (0, reasons);
-        };
-        let personality = data
-            .factions
-            .get(a)
-            .and_then(|f| f.ai_personality.as_ref())
-            .and_then(|p| p.diplomacy)
-            .map_or(0, |d| (i32::from(d) - 50) / 2);
-        add("Tempérament diplomatique", personality);
-        // F1: a charming (or haughty) ruler on the other side.
-        add(
-            "Diplomatie de son souverain",
-            self.ruler_effect_points(data, b, |e| e[EffectKind::Diplomacy].apply(0.0) * 2.0),
-        );
-        match self.relation(a, b) {
-            RelationKind::War => add(AT_WAR_REASON, -50),
-            RelationKind::Truce => add("Trêve récente", -10),
-            RelationKind::Alliance => add("Alliés", 30),
-            RelationKind::Suzerain => add(
-                "Loyauté envers le suzerain",
-                (i32::from(fa.loyalty) - 50) / 2,
-            ),
-            RelationKind::Vassal => add("Notre vassal", 10),
-            RelationKind::Peace => {}
-        }
-        if self.marriage_tie(a, b) {
-            add(MARRIAGE_TIE_REASON, 15);
-        }
-        if let (Some(ha), Some(hb)) = (self.ruler_house(a), self.ruler_house(b)) {
-            if ha == hb {
-                add(SAME_HOUSE_REASON, 20);
-            }
-        }
-        match religion::faith_relation(self, data, a, b) {
-            religion::FaithRelation::Same => add("Même foi", 10),
-            religion::FaithRelation::RivalObedience => add("Obédience rivale", -20),
-            religion::FaithRelation::Kindred => add("Schismatiques", -25),
-            religion::FaithRelation::Different => add("Religion différente", -40),
-        }
-        if religion::is_excommunicated(self, b) && religion::is_catholic(self, data, a) {
-            add("Excommunié", -30);
-        }
-        let common_enemy = fa
-            .at_war_with
-            .iter()
-            .any(|e| !e.is_rebels() && self.is_at_war(b, e));
-        if common_enemy {
-            add("Ennemi commun", 20);
-        }
-        // DF1: the AI's stance towards the player follows the difficulty.
-        add(DIFFICULTY_REASON, self.difficulty_attitude(data, a, b));
-        let menace = &data.ai_diplomacy.menacing_neighbour;
-        if !self.is_allied(a, b)
-            && self.faction_power(b) > menace.power_ratio * self.faction_power(a).max(1.0)
-            && self.are_neighbors(data, a, b)
-        {
-            add("Voisin menaçant", menace.attitude);
-        }
-        if let Some(fb) = self.factions.get(b) {
-            let claims_on_us = fb.claims.iter().any(|c| match c.kind {
-                ClaimKind::Throne => c.faction.as_ref() == Some(a),
-                ClaimKind::Province => c
-                    .province
-                    .as_ref()
-                    .is_some_and(|p| self.province_owner(p) == Some(a)),
-            });
-            if claims_on_us {
-                add("Prétentions sur nos terres", -25);
-            }
-            if fb.embargoes.contains(a) {
-                add("Embargo contre nous", -20);
-            }
-        }
-        // LR-07: a capped motive (`opinion_caps`) also weighs at most its
-        // cap when read, whatever path wrote its modifiers (events, saves
-        // from before RS-C): one line per capped motive.
-        let mut capped: Vec<(&str, i32, i32)> = Vec::new();
-        for modifier in fa
-            .modifiers
-            .iter()
-            .filter(|m| &m.with == b && m.expires_turn > self.turn)
-        {
-            let cap = opinion_motive(&modifier.reason_fr)
-                .and_then(|m| data.diplomacy_rules.opinion_cap(m));
-            match cap {
-                Some(cap) => match capped
-                    .iter_mut()
-                    .find(|(reason, _, _)| *reason == modifier.reason_fr)
-                {
-                    Some(entry) => entry.1 += modifier.value,
-                    None => capped.push((&modifier.reason_fr, modifier.value, cap)),
-                },
-                None => add(&modifier.reason_fr, modifier.value),
-            }
-        }
-        for (reason, sum, cap) in capped {
-            add(reason, sum.clamp(-cap.abs(), cap.abs()));
-        }
-        let total: i32 = reasons.iter().map(|(_, v)| v).sum();
-        (total.clamp(-100, 100), reasons)
+        PlanCache::new(self).attitude(data, a, b)
     }
 
     /// Part of the attitude of `a` towards `b` owed to kinship: marriage
@@ -1749,16 +1624,6 @@ pub fn claimed_provinces(state: &CampaignState, faction: &FactionId) -> BTreeSet
 /// Factions `faction` quarrels with: current enemies, the targets of its
 /// claims and the factions claiming its lands.
 pub fn rivals(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId> {
-    // OMR R1: asked for most factions by each alliance plan: a memo while a
-    // planning scope is open.
-    if let Some(derived) = state.derived() {
-        return derived.rivals(faction, || rivals_walk(state, faction));
-    }
-    rivals_walk(state, faction)
-}
-
-/// [`rivals`] computed afresh.
-pub fn rivals_walk(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId> {
     let Some(me) = state.factions.get(faction) else {
         return BTreeSet::new();
     };
@@ -1797,18 +1662,19 @@ pub fn war_ready(state: &CampaignState, faction: &FactionId) -> bool {
 /// Power of the enemies `faction` already fights (rebels excluded).
 /// Only fronts that press on us count: bordering enemies and enemies
 /// holding our provinces (a distant war of religion does not tie armies).
-fn enemy_power(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
+fn enemy_power(cache: &PlanCache, data: &GameData, faction: &FactionId) -> f64 {
+    let state = cache.state();
     state.factions.get(faction).map_or(0.0, |f| {
         f.at_war_with
             .iter()
             .filter(|e| !e.is_rebels())
             .filter(|e| {
-                state.are_neighbors(data, faction, e)
+                cache.are_neighbors(data, faction, e)
                     || state.provinces.keys().any(|id| {
                         state.province_owner(id) == Some(faction) && state.controls_province(e, id)
                     })
             })
-            .map(|e| state.faction_power(e))
+            .map(|e| cache.faction_power(e))
             .sum()
     })
 }
@@ -1873,7 +1739,8 @@ pub fn answers_call_to_arms(
 }
 
 /// Diplomatic orders of an AI faction for this turn (spec § 2.3, F4).
-pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let mut orders = Vec::new();
     if faction.is_rebels() {
         return orders;
@@ -1898,10 +1765,10 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     // cede what the enemy holds rather than lose everything (F4).
     let treaties = data.ai_diplomacy.negotiation.enabled;
     if treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
-        orders.extend(crate::negotiation::plan_peace(state, data, faction));
+        orders.extend(crate::negotiation::plan_peace(cache, data, faction));
     }
 
-    plan_alliances(state, data, faction, slot, &mut orders);
+    plan_alliances(cache, data, faction, slot, &mut orders);
 
     let rested = me
         .last_war_declared
@@ -1917,24 +1784,24 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     let main_first = data.ai_diplomacy.war.main_claim_first;
     let mut declared = false;
     if able && (rested || main_first) && (turn + slot).is_multiple_of(2) {
-        if let Some(target) = war_target(state, data, faction, aggression, rested) {
+        if let Some(target) = war_target(cache, data, faction, aggression, rested) {
             orders.push(Order::DeclareWar { target });
             declared = true;
         }
     }
     if ready && !declared && (turn + slot) % 2 == 1 {
-        if let Some(target) = ally_war_to_join(state, data, faction) {
+        if let Some(target) = ally_war_to_join(cache, data, faction) {
             orders.push(Order::DeclareWar { target });
             declared = true;
         }
     }
     if ready && !declared {
-        orders.extend(desert_losing_suzerain(state, data, faction, slot));
+        orders.extend(desert_losing_suzerain(cache, data, faction, slot));
     }
 
     // Lift pointless embargoes, drop hated allies.
     for target in &me.embargoes {
-        if !state.is_at_war(faction, target) && state.attitude(data, faction, target).0 > 10 {
+        if !state.is_at_war(faction, target) && cache.attitude(data, faction, target).0 > 10 {
             orders.push(Order::SetEmbargo {
                 target: target.clone(),
                 active: false,
@@ -1945,7 +1812,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         .allies
         .iter()
         .filter(|a| state.relation(faction, a) == RelationKind::Alliance)
-        .filter(|a| state.attitude(data, faction, a).0 < -30)
+        .filter(|a| cache.attitude(data, faction, a).0 < -30)
         .cloned()
         .collect();
     for target in hated {
@@ -2011,19 +1878,20 @@ pub fn main_claim(state: &CampaignState, faction: &FactionId) -> Option<FactionI
 /// When `faction` is not `rested` (it declared another war lately), only
 /// its main claim is considered (EQ6, `war.main_claim_first`).
 fn war_target(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     aggression: i32,
     rested: bool,
 ) -> Option<FactionId> {
-    let my_power = state.coalition_power(faction);
+    let state = cache.state();
+    let my_power = cache.coalition_power(faction);
     let rules = &data.ai_diplomacy.war;
     // Never a new front while the current wars weigh (DP1: a pretender
     // to a throne tolerates a heavier border war, as Edward III kept
     // fighting the Scots while claiming France).
-    let pressing = enemy_power(state, data, faction);
-    let own = state.faction_power(faction);
+    let pressing = enemy_power(cache, data, faction);
+    let own = cache.faction_power(faction);
     let pretender = data.ai_diplomacy.negotiation.enabled
         && state.factions[faction]
             .claims
@@ -2071,7 +1939,7 @@ fn war_target(
             } else {
                 state.difficulty_war_ratio_factor(data, id)
             };
-            let attitude = state.attitude(data, faction, id).0
+            let attitude = cache.attitude(data, faction, id).0
                 - if neutral {
                     state.difficulty_attitude(data, faction, id)
                 } else {
@@ -2090,8 +1958,8 @@ fn war_target(
                 0.0
             };
             if stakes.any() && aggression >= PRETENDER_AGGRESSION {
-                let ratio = my_power / state.faction_power(id).max(1.0);
-                let supported = has_allies || state.are_neighbors(data, faction, id);
+                let ratio = my_power / cache.faction_power(id).max(1.0);
+                let supported = has_allies || cache.are_neighbors(data, faction, id);
                 let needed = demand
                     * if supported {
                         rules.pretender_ratio
@@ -2105,9 +1973,9 @@ fn war_target(
             }
             if aggression >= OPPORTUNIST_AGGRESSION
                 && state.casus_belli(data, faction, id).is_some()
-                && state.attitude(data, faction, id).0 < 0
+                && cache.attitude(data, faction, id).0 < 0
             {
-                let ratio = my_power / state.coalition_power(id).max(1.0);
+                let ratio = my_power / cache.coalition_power(id).max(1.0);
                 return (ratio >= OPPORTUNIST_RATIO * demand).then(|| (id.clone(), ratio));
             }
             None
@@ -2118,25 +1986,22 @@ fn war_target(
 
 /// An ally's war `faction` joins (co-belligerence, F4): the Low Countries
 /// follow Edward III into France, Scotland falls on the English border.
-fn ally_war_to_join(
-    state: &CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-) -> Option<FactionId> {
+fn ally_war_to_join(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<FactionId> {
+    let state = cache.state();
     let me = state.factions.get(faction)?;
     let front_share = data.ai_diplomacy.war.front_share;
     let rules = &data.ai_diplomacy.join_war;
-    if enemy_power(state, data, faction) > front_share * state.faction_power(faction) {
+    if enemy_power(cache, data, faction) > front_share * cache.faction_power(faction) {
         return None;
     }
-    let my_power = state.faction_power(faction);
+    let my_power = cache.faction_power(faction);
     for ally in &me.allies {
         let Some(ally_state) = state.factions.get(ally) else {
             continue;
         };
         if !ally_state.alive
-            || state.attitude(data, faction, ally).0 <= rules.min_attitude
-            || state.faction_power(ally) < rules.min_ally_power_ratio * my_power
+            || cache.attitude(data, faction, ally).0 <= rules.min_attitude
+            || cache.faction_power(ally) < rules.min_ally_power_ratio * my_power
         {
             continue;
         }
@@ -2154,10 +2019,10 @@ fn ally_war_to_join(
             // quarrel of our ally's does not spread along every border.
             let claim_war =
                 claim_stakes(state, ally, enemy).any() || claim_stakes(state, enemy, ally).any();
-            let border = state.are_neighbors(data, faction, enemy)
+            let border = cache.are_neighbors(data, faction, enemy)
                 && (claim_war || !rules.border_only_claim_wars);
             let reachable = border || claim_stakes(state, faction, enemy).any();
-            let ratio = state.coalition_power(faction) / state.coalition_power(enemy).max(1.0);
+            let ratio = cache.coalition_power(faction) / cache.coalition_power(enemy).max(1.0);
             if reachable && ratio >= rules.ratio {
                 return Some(enemy.clone());
             }
@@ -2170,16 +2035,17 @@ fn ally_war_to_join(
 /// it more than they like it (the counterweight of distant England for the
 /// Low Countries, of France for Scotland).
 fn plan_alliances(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     slot: u32,
     orders: &mut Vec<Order>,
 ) {
+    let state = cache.state();
     if (state.turn + slot) % 4 != 1 || alliance_count(state, faction) >= MAX_ALLIANCES {
         return;
     }
-    let my_rivals = rivals(state, faction);
+    let my_rivals = cache.rivals(faction);
     if my_rivals.is_empty() {
         return;
     }
@@ -2197,19 +2063,19 @@ fn plan_alliances(
                 && f.allies.iter().all(|a| !my_rivals.contains(a))
         })
         .filter(|(id, _)| {
-            let theirs = rivals(state, id);
+            let theirs = cache.rivals(id);
             !theirs.is_disjoint(&my_rivals)
                 || my_rivals.iter().any(|r| {
-                    let towards_rival = state.attitude(data, id, r).0;
-                    towards_rival < 0 && state.attitude(data, id, faction).0 > towards_rival + 10
+                    let towards_rival = cache.attitude(data, id, r).0;
+                    towards_rival < 0 && cache.attitude(data, id, faction).0 > towards_rival + 10
                 })
         })
-        .map(|(id, _)| (id.clone(), state.attitude(data, id, faction).0))
-        .filter(|(id, _)| state.attitude(data, faction, id).0 > 0)
+        .map(|(id, _)| (id.clone(), cache.attitude(data, id, faction).0))
+        .filter(|(id, _)| cache.attitude(data, faction, id).0 > 0)
         .filter(|(id, _)| {
             id == &state.player_faction
-                || crate::negotiation::evaluate_treaty(
-                    state,
+                || crate::negotiation::evaluate_treaty_with(
+                    cache,
                     data,
                     faction,
                     id,
@@ -2226,11 +2092,12 @@ fn plan_alliances(
 /// An opportunistic vassal (Burgundy) deserts a suzerain that is losing to
 /// a stronger coalition: white peace with the winner, then independence.
 fn desert_losing_suzerain(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     slot: u32,
 ) -> Vec<Order> {
+    let state = cache.state();
     let me = &state.factions[faction];
     let Some(lord) = me.suzerain.clone() else {
         return Vec::new();
@@ -2244,8 +2111,8 @@ fn desert_losing_suzerain(
         .filter(|e| !e.is_rebels() && *e != faction)
         .find(|e| {
             state.war_score(data, &lord, e) <= DESERTION_WAR_SCORE
-                && state.coalition_power(e) > state.coalition_power(&lord)
-                && state.attitude(data, faction, e).0 > -40
+                && cache.coalition_power(e) > cache.coalition_power(&lord)
+                && cache.attitude(data, faction, e).0 > -40
         })
         .cloned();
     let Some(winner) = winner else {
@@ -2273,4 +2140,123 @@ fn desert_losing_suzerain(
     }
     orders.push(Order::DeclareWar { target: lord });
     orders
+}
+
+impl PlanCache<'_> {
+    /// Attitude of `a` towards `b` (-100..100) with its reasons.
+    pub fn attitude(
+        &self,
+        data: &GameData,
+        a: &FactionId,
+        b: &FactionId,
+    ) -> (i32, Vec<(String, i32)>) {
+        let state = self.state();
+        let mut reasons: Vec<(String, i32)> = Vec::new();
+        let mut add = |text: &str, value: i32| {
+            if value != 0 {
+                reasons.push((text.to_owned(), value));
+            }
+        };
+        let Some(fa) = state.factions.get(a) else {
+            return (0, reasons);
+        };
+        let personality = data
+            .factions
+            .get(a)
+            .and_then(|f| f.ai_personality.as_ref())
+            .and_then(|p| p.diplomacy)
+            .map_or(0, |d| (i32::from(d) - 50) / 2);
+        add("Tempérament diplomatique", personality);
+        // F1: a charming (or haughty) ruler on the other side.
+        add(
+            "Diplomatie de son souverain",
+            state.ruler_effect_points(data, b, |e| e[EffectKind::Diplomacy].apply(0.0) * 2.0),
+        );
+        match state.relation(a, b) {
+            RelationKind::War => add(AT_WAR_REASON, -50),
+            RelationKind::Truce => add("Trêve récente", -10),
+            RelationKind::Alliance => add("Alliés", 30),
+            RelationKind::Suzerain => add(
+                "Loyauté envers le suzerain",
+                (i32::from(fa.loyalty) - 50) / 2,
+            ),
+            RelationKind::Vassal => add("Notre vassal", 10),
+            RelationKind::Peace => {}
+        }
+        if state.marriage_tie(a, b) {
+            add(MARRIAGE_TIE_REASON, 15);
+        }
+        if let (Some(ha), Some(hb)) = (state.ruler_house(a), state.ruler_house(b)) {
+            if ha == hb {
+                add(SAME_HOUSE_REASON, 20);
+            }
+        }
+        match religion::faith_relation(state, data, a, b) {
+            religion::FaithRelation::Same => add("Même foi", 10),
+            religion::FaithRelation::RivalObedience => add("Obédience rivale", -20),
+            religion::FaithRelation::Kindred => add("Schismatiques", -25),
+            religion::FaithRelation::Different => add("Religion différente", -40),
+        }
+        if religion::is_excommunicated(state, b) && religion::is_catholic(state, data, a) {
+            add("Excommunié", -30);
+        }
+        let common_enemy = fa
+            .at_war_with
+            .iter()
+            .any(|e| !e.is_rebels() && state.is_at_war(b, e));
+        if common_enemy {
+            add("Ennemi commun", 20);
+        }
+        // DF1: the AI's stance towards the player follows the difficulty.
+        add(DIFFICULTY_REASON, state.difficulty_attitude(data, a, b));
+        let menace = &data.ai_diplomacy.menacing_neighbour;
+        if !state.is_allied(a, b)
+            && self.faction_power(b) > menace.power_ratio * self.faction_power(a).max(1.0)
+            && self.are_neighbors(data, a, b)
+        {
+            add("Voisin menaçant", menace.attitude);
+        }
+        if let Some(fb) = state.factions.get(b) {
+            let claims_on_us = fb.claims.iter().any(|c| match c.kind {
+                ClaimKind::Throne => c.faction.as_ref() == Some(a),
+                ClaimKind::Province => c
+                    .province
+                    .as_ref()
+                    .is_some_and(|p| state.province_owner(p) == Some(a)),
+            });
+            if claims_on_us {
+                add("Prétentions sur nos terres", -25);
+            }
+            if fb.embargoes.contains(a) {
+                add("Embargo contre nous", -20);
+            }
+        }
+        // LR-07: a capped motive (`opinion_caps`) also weighs at most its
+        // cap when read, whatever path wrote its modifiers (events, saves
+        // from before RS-C): one line per capped motive.
+        let mut capped: Vec<(&str, i32, i32)> = Vec::new();
+        for modifier in fa
+            .modifiers
+            .iter()
+            .filter(|m| &m.with == b && m.expires_turn > state.turn)
+        {
+            let cap = opinion_motive(&modifier.reason_fr)
+                .and_then(|m| data.diplomacy_rules.opinion_cap(m));
+            match cap {
+                Some(cap) => match capped
+                    .iter_mut()
+                    .find(|(reason, _, _)| *reason == modifier.reason_fr)
+                {
+                    Some(entry) => entry.1 += modifier.value,
+                    None => capped.push((&modifier.reason_fr, modifier.value, cap)),
+                },
+                None => add(&modifier.reason_fr, modifier.value),
+            }
+        }
+        for (reason, sum, cap) in capped {
+            add(reason, sum.clamp(-cap.abs(), cap.abs()));
+        }
+        let total: i32 = reasons.iter().map(|(_, v)| v).sum();
+        (total.clamp(-100, 100), reasons)
+    }
 }

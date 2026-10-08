@@ -13,4 +13,3 @@ mod mf1_map_lens;
 mod om3_terrains;
 mod omr_r1_agent_paths;
 mod omr_r1_nearest;
-mod omr_r1_planning_scope;

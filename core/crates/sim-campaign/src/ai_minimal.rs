@@ -23,6 +23,7 @@ use data_model::{FactionId, GameData, SettlementId};
 
 use crate::movement::{dijkstra, edges, points_per_step};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::state::{ArmyId, CampaignState, Stance};
 
 /// Maximum path cost the AI considers for an offensive, in province steps
@@ -95,15 +96,16 @@ fn plan_realm(
     faction: &FactionId,
     orders: &mut Vec<Order>,
 ) {
-    orders.extend(crate::diplomacy::plan_diplomacy(state, data, faction));
+    let cache = PlanCache::new(state);
+    orders.extend(crate::diplomacy::plan_diplomacy(&cache, data, faction));
     if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
         orders.push(Order::Research { technology });
     }
     orders.extend(crate::table::ai_choose_diets(state, data, faction));
     orders.extend(crate::edicts::ai_choose_edicts(state, data, faction));
-    orders.extend(crate::coinage::ai_choose_coinage(state, data, faction));
-    orders.extend(crate::ransom::ai_ransom_orders(state, data, faction));
-    orders.extend(crate::chivalry::ai_found_order(state, data, faction));
+    orders.extend(crate::coinage::ai_choose_coinage(&cache, data, faction));
+    orders.extend(crate::ransom::ai_ransom_orders(&cache, data, faction));
+    orders.extend(crate::chivalry::ai_found_order(&cache, data, faction));
     orders.extend(crate::crusade::ai_preach(state, data, faction));
 }
 

@@ -20,6 +20,7 @@ use std::sync::{Arc, Mutex};
 use data_model::{AiGrid, FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
 use sim_campaign::passage;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{Army, ArmyId, CampaignState, Order};
 
 use crate::parallel::Mode;
@@ -45,6 +46,7 @@ struct Enemy {
 /// pass through, and the cached route tables.
 pub struct GridPlanner<'a> {
     state: &'a CampaignState,
+    cache: &'a PlanCache<'a>,
     data: &'a GameData,
     faction: &'a FactionId,
     rules: &'a AiGrid,
@@ -97,7 +99,8 @@ struct PassageLands {
 }
 
 impl PassageLands {
-    fn read(state: &CampaignState, data: &GameData, faction: &FactionId) -> Self {
+    fn read(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Self {
+        let state = cache.state();
         let mut lands = PassageLands {
             forbidden: BTreeMap::new(),
             crossable: BTreeSet::new(),
@@ -117,7 +120,7 @@ impl PassageLands {
                 .or_insert_with(|| passage::trespassed_owner(state, faction, province))
                 .clone();
             if let Some(owner) = owner {
-                let open = lands.may_cross(state, data, faction, &owner);
+                let open = lands.may_cross(cache, data, faction, &owner);
                 by_province.insert(province, (owner, open));
             }
         }
@@ -139,7 +142,7 @@ impl PassageLands {
 
     fn may_cross(
         &mut self,
-        state: &CampaignState,
+        cache: &PlanCache,
         data: &GameData,
         faction: &FactionId,
         owner: &FactionId,
@@ -147,7 +150,7 @@ impl PassageLands {
         *self
             .crossing
             .entry(owner.clone())
-            .or_insert_with(|| passage::ai_may_trespass(state, data, faction, owner))
+            .or_insert_with(|| passage::ai_may_trespass(cache, data, faction, owner))
     }
 }
 
@@ -221,22 +224,23 @@ impl PointGrid {
 type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
 
 impl<'a> GridPlanner<'a> {
-    pub fn new(state: &'a CampaignState, data: &'a GameData, faction: &'a FactionId) -> Self {
-        Self::with_mode(Mode::Sequential, state, data, faction)
+    pub fn new(cache: &'a PlanCache<'a>, data: &'a GameData, faction: &'a FactionId) -> Self {
+        Self::with_mode(Mode::Sequential, cache, data, faction)
     }
 
     /// [`GridPlanner::new`], the lands and enemy armies read on the
     /// planner's pool in [`Mode::Parallel`] (PB3f, same planner).
     pub fn with_mode(
         mode: Mode,
-        state: &'a CampaignState,
+        cache: &'a PlanCache<'a>,
         data: &'a GameData,
         faction: &'a FactionId,
     ) -> Self {
+        let state = cache.state();
         let rules = &data.ai_grid;
         let px_per_km = sim_campaign::march::px_per_km(data);
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
-        let mut lands = PassageLands::read(state, data, faction);
+        let mut lands = PassageLands::read(cache, data, faction);
         let points = PointGrid::new(data, avoid_px);
         let hostile: Vec<(&ArmyId, &Army)> = state
             .armies
@@ -266,7 +270,7 @@ impl<'a> GridPlanner<'a> {
             .into_iter()
             .map(|(mut enemy, owner)| {
                 enemy.beyond_passage =
-                    owner.is_some_and(|owner| !lands.may_cross(state, data, faction, &owner));
+                    owner.is_some_and(|owner| !lands.may_cross(cache, data, faction, &owner));
                 enemy
             })
             .collect();
@@ -280,6 +284,7 @@ impl<'a> GridPlanner<'a> {
         stops.extend(enemies.iter().filter_map(|e| e.settlement.clone()));
         GridPlanner {
             state,
+            cache,
             data,
             faction,
             rules,
@@ -305,7 +310,7 @@ impl<'a> GridPlanner<'a> {
             .get(owner)
             .copied();
         known.unwrap_or_else(|| {
-            let open = passage::ai_may_trespass(self.state, self.data, self.faction, owner);
+            let open = passage::ai_may_trespass(self.cache, self.data, self.faction, owner);
             self.may_cross
                 .lock()
                 .expect("planner cache")

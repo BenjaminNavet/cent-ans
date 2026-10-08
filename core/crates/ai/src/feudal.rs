@@ -20,7 +20,8 @@ use data_model::{AiFeudal, FactionId, GameData, TitleId, TitleRank};
 use sim_campaign::feudal::{
     self as fe, direct_vassals, liege_of, primary_rank, Arbitration, FeudalPolicy, Likelihood,
 };
-use sim_campaign::negotiation::{check_treaty, evaluate_treaty, Article, Party};
+use sim_campaign::negotiation::{check_treaty, evaluate_treaty_with, Article, Party};
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 use crate::alignment::campaign_roll;
@@ -80,13 +81,14 @@ fn wars(state: &CampaignState, faction: &FactionId) -> usize {
 
 /// Power of `faction`, of its living allies and of its direct vassals
 /// (ADR 0114), `except` left out.
-fn coalition_power(state: &CampaignState, faction: &FactionId, except: &[&FactionId]) -> f64 {
-    let own = state.faction_power(faction);
+fn coalition_power(cache: &PlanCache, faction: &FactionId, except: &[&FactionId]) -> f64 {
+    let state = cache.state();
+    let own = cache.faction_power(faction);
     let members: f64 = state
         .coalition_members(faction)
         .iter()
         .filter(|a| !except.contains(a))
-        .map(|a| state.faction_power(a))
+        .map(|a| cache.faction_power(a))
         .sum();
     own + members
 }
@@ -108,6 +110,7 @@ pub fn protection_score(
     vassal: &FactionId,
     aggressor: &FactionId,
 ) -> (i32, String) {
+    let cache = PlanCache::new(state);
     let w = &weights(data).protection;
     let mut terms: Vec<(i32, String)> = vec![(
         w.base,
@@ -125,10 +128,10 @@ pub fn protection_score(
                 .get(*v)
                 .is_some_and(|f| f.loyalty >= host_pivot)
         })
-        .map(|v| state.faction_power(v))
+        .map(|v| cache.faction_power(v))
         .sum();
-    let ours = state.faction_power(liege) + state.faction_power(vassal) + host;
-    let theirs = coalition_power(state, aggressor, &[liege, vassal]).max(1.0);
+    let ours = cache.faction_power(liege) + cache.faction_power(vassal) + host;
+    let theirs = coalition_power(&cache, aggressor, &[liege, vassal]).max(1.0);
     let doublings = (ours.max(1.0) / theirs)
         .log2()
         .clamp(-w.max_power_doublings, w.max_power_doublings);
@@ -141,7 +144,7 @@ pub fn protection_score(
             "plus faible que l'agresseur".to_owned()
         },
     ));
-    let attitude = state.attitude(data, liege, vassal).0 / w.attitude_divisor.max(1);
+    let attitude = cache.attitude(data, liege, vassal).0 / w.attitude_divisor.max(1);
     terms.push((
         attitude,
         if attitude >= 0 {
@@ -255,20 +258,21 @@ pub fn host_score(
     liege: &FactionId,
     enemy: &FactionId,
 ) -> i32 {
+    let cache = PlanCache::new(state);
     let w = &weights(data).host;
     let loyalty = state
         .factions
         .get(vassal)
         .map_or(0, |f| i32::from(f.loyalty));
     let mut score = (loyalty - i32::from(w.loyalty_pivot)) * w.loyalty_weight;
-    let liege_power = state.faction_power(liege).max(1.0);
-    if liege_power >= w.fear_power_ratio * state.faction_power(vassal).max(1.0) {
+    let liege_power = cache.faction_power(liege).max(1.0);
+    if liege_power >= w.fear_power_ratio * cache.faction_power(vassal).max(1.0) {
         score += w.fear_bonus;
     }
-    if coalition_power(state, enemy, &[liege, vassal]) >= w.lost_cause_power_ratio * liege_power {
+    if coalition_power(&cache, enemy, &[liege, vassal]) >= w.lost_cause_power_ratio * liege_power {
         score += w.lost_cause;
     }
-    score -= state.attitude(data, vassal, enemy).0 / w.enemy_attitude_divisor.max(1);
+    score -= cache.attitude(data, vassal, enemy).0 / w.enemy_attitude_divisor.max(1);
     if state.is_allied(vassal, enemy) {
         score += w.allied_with_enemy;
     }
@@ -292,7 +296,8 @@ fn answers_host(
 
 /// Feudal orders of `faction` this turn: at most one forfeiture, then a
 /// revolt or a homage, then a grant.
-pub fn plan_feudal(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn plan_feudal(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let mut orders = Vec::new();
     if !alive(state, faction) || !state.feudal.primary.contains_key(faction) {
         return orders;
@@ -304,9 +309,9 @@ pub fn plan_feudal(state: &CampaignState, data: &GameData, faction: &FactionId) 
             return orders;
         }
     }
-    orders.extend(plan_commise(state, data, faction));
+    orders.extend(plan_commise(cache, data, faction));
     if let Some(order) =
-        plan_revolt(state, data, faction).or_else(|| plan_homage(state, data, faction))
+        plan_revolt(cache, data, faction).or_else(|| plan_homage(cache, data, faction))
     {
         orders.push(order);
     }
@@ -320,7 +325,8 @@ fn idle(state: &CampaignState, faction: &FactionId) -> bool {
 }
 
 /// Forfeiture against a felon under an open case, when the odds allow it.
-pub fn plan_commise(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+pub fn plan_commise(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let w = &weights(data).commise;
     let me = state.factions.get(faction)?;
     let cases: Vec<&FactionId> = state
@@ -342,7 +348,7 @@ pub fn plan_commise(state: &CampaignState, data: &GameData, faction: &FactionId)
             let other_wars = wars(state, faction) - usize::from(state.is_at_war(faction, v));
             other_wars <= w.max_wars
         })
-        .find(|v| commise_power_ratio(state, faction, v) >= needed)
+        .find(|v| commise_power_ratio(cache, faction, v) >= needed)
         .map(|v| Order::DeclareCommise { vassal: v.clone() })
 }
 
@@ -350,7 +356,8 @@ pub fn plan_commise(state: &CampaignState, data: &GameData, faction: &FactionId)
 /// (itself, its allies and its direct vassals) against the felon's, each
 /// without the other. Before F8 the suzerain counted alone against the
 /// felon's whole coalition.
-pub fn commise_power_ratio(state: &CampaignState, liege: &FactionId, felon: &FactionId) -> f64 {
+pub fn commise_power_ratio(cache: &PlanCache, liege: &FactionId, felon: &FactionId) -> f64 {
+    let state = cache.state();
     // A side: the faction, its allies and its direct vassals, not its own
     // suzerain (who does not punish a rear vassal's felony for it).
     let side = |faction: &FactionId, other: &FactionId| -> f64 {
@@ -362,9 +369,9 @@ pub fn commise_power_ratio(state: &CampaignState, liege: &FactionId, felon: &Fac
             .coalition_members(faction)
             .iter()
             .filter(|m| *m != other && Some(*m) != own_liege)
-            .map(|m| state.faction_power(m))
+            .map(|m| cache.faction_power(m))
             .sum();
-        state.faction_power(faction) + members
+        cache.faction_power(faction) + members
     };
     side(liege, felon) / side(felon, liege).max(1.0)
 }
@@ -379,7 +386,8 @@ fn roll(state: &CampaignState, faction: &FactionId, kind: u64) -> u64 {
 
 /// A disloyal AI vassal revolts when it and its allies weigh enough
 /// against its suzerain.
-pub fn plan_revolt(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+pub fn plan_revolt(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let w = &weights(data).revolt;
     let me = state.factions.get(faction)?;
     if me.loyalty >= data.feudal_rules.rebellion_loyalty || faction == &state.player_faction {
@@ -389,8 +397,8 @@ pub fn plan_revolt(state: &CampaignState, data: &GameData, faction: &FactionId) 
     if state.is_at_war(faction, &liege) {
         return None;
     }
-    let ours = coalition_power(state, faction, &[&liege]);
-    if ours < w.min_power_ratio * state.faction_power(&liege).max(1.0) {
+    let ours = coalition_power(cache, faction, &[&liege]);
+    if ours < w.min_power_ratio * cache.faction_power(&liege).max(1.0) {
         return None;
     }
     let chance = i64::from(w.chance_permille)
@@ -401,7 +409,8 @@ pub fn plan_revolt(state: &CampaignState, data: &GameData, faction: &FactionId) 
 /// Homage to another lord: a disloyal vassal leaving a weak or faithless
 /// suzerain, or a sovereign county at war with a far stronger neighbour
 /// seeking a protector (« survival first »).
-pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<Order> {
+pub fn plan_homage(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
     let w = &weights(data).allegiance;
     let me = state.factions.get(faction)?;
     let own_rank = primary_rank(state, data, faction)?;
@@ -411,12 +420,12 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
         Some(_) => return None,
         None => {
             let ratio = strategy(data, own_rank)?.seek_protection_power_ratio;
-            let ours = coalition_power(state, faction, &[]).max(1.0);
+            let ours = coalition_power(cache, faction, &[]).max(1.0);
             let threats: Vec<&FactionId> = me
                 .at_war_with
                 .iter()
                 .filter(|e| !e.is_rebels())
-                .filter(|e| coalition_power(state, e, &[faction]) >= ratio * ours)
+                .filter(|e| coalition_power(cache, e, &[faction]) >= ratio * ours)
                 .collect();
             if threats.is_empty() {
                 return None;
@@ -429,8 +438,8 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
     }
     let floor = liege
         .as_ref()
-        .map_or(0.0, |l| w.min_power_ratio * state.faction_power(l));
-    let neighbours = state.neighbour_factions(data, faction);
+        .map_or(0.0, |l| w.min_power_ratio * cache.faction_power(l));
+    let neighbours = cache.neighbour_factions(data, faction);
     state
         .factions
         .iter()
@@ -449,9 +458,9 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
                 .all(|t| !f.allies.contains(*t) && *t != *id)
         })
         .filter(|(id, _)| !fe::liege_chain(state, data, id).contains(faction))
-        .filter(|(id, _)| state.attitude(data, faction, id).0 >= w.min_attitude)
+        .filter(|(id, _)| cache.attitude(data, faction, id).0 >= w.min_attitude)
         .filter(|(id, _)| neighbours.contains(*id))
-        .map(|(id, _)| (id, state.faction_power(id)))
+        .map(|(id, _)| (id, cache.faction_power(id)))
         .filter(|(_, power)| *power >= floor)
         .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(a.0)))
         .map(|(id, _)| Order::SwitchAllegiance { lord: id.clone() })
@@ -508,18 +517,19 @@ fn strategy(data: &GameData, rank: TitleRank) -> Option<&data_model::RankStrateg
 /// target, its allies and the suzerains likely or maybe coming to its
 /// help (the escalation preview of the core).
 pub fn war_opposition(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     attacker: &FactionId,
     target: &FactionId,
 ) -> f64 {
-    let mut total = coalition_power(state, target, &[attacker]);
+    let state = cache.state();
+    let mut total = coalition_power(cache, target, &[attacker]);
     for step in fe::war_escalation_preview(state, data, attacker, target) {
         if step.likelihood != Likelihood::Unlikely
             && &step.faction != attacker
             && !state.is_allied(target, &step.faction)
         {
-            total += state.faction_power(&step.faction);
+            total += cache.faction_power(&step.faction);
         }
     }
     total
@@ -529,11 +539,12 @@ pub fn war_opposition(
 /// faction's rank forbids: our side must outweigh the opposition by
 /// `min_war_power_ratio`.
 pub fn filter_suicidal_wars(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     orders: &mut Vec<Order>,
 ) {
+    let state = cache.state();
     let Some(rank) = primary_rank(state, data, faction) else {
         return;
     };
@@ -543,10 +554,10 @@ pub fn filter_suicidal_wars(
     if !orders.iter().any(|o| matches!(o, Order::DeclareWar { .. })) {
         return;
     }
-    let ours = coalition_power(state, faction, &[]);
+    let ours = coalition_power(cache, faction, &[]);
     orders.retain(|order| match order {
         Order::DeclareWar { target } => {
-            ours >= strategy.min_war_power_ratio * war_opposition(state, data, faction, target)
+            ours >= strategy.min_war_power_ratio * war_opposition(cache, data, faction, target)
         }
         _ => true,
     });
@@ -556,11 +567,12 @@ pub fn filter_suicidal_wars(
 /// provinces it mostly controls (§ 4.6), as long as the treaty stays valid
 /// and likely to be signed.
 pub fn demand_titles(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     orders: &mut [Order],
 ) {
+    let state = cache.state();
     let w = &weights(data).demand_title;
     if !w.enabled {
         return;
@@ -602,7 +614,7 @@ pub fn demand_titles(
             });
             let ok = check_treaty(state, data, faction, target, articles).is_ok()
                 && (target == &state.player_faction
-                    || evaluate_treaty(state, data, faction, target, articles).chance
+                    || evaluate_treaty_with(cache, data, faction, target, articles).chance
                         >= min_chance);
             if !ok {
                 articles.pop();

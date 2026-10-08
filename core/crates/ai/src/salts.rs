@@ -8,3 +8,9 @@ pub(crate) const AMBUSH: u64 = 0xA3B0;
 pub(crate) const DETOUR: u64 = 0xD370;
 /// Per-turn feudal rolls: revolt, homage (`feudal`).
 pub(crate) const FEUDAL: u64 = 0xFE05;
+/// The wool revolt roll (`alignment`).
+pub(crate) const WOOL: u64 = 1;
+/// The defection rolls, one per decade from this one (`alignment`).
+pub(crate) const DEFECTION: u64 = 2;
+/// The dynastic alliance and money fief roll (`alignment`).
+pub(crate) const DYNASTIC: u64 = 7;

@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::plan_cache::PlanCache;
 use crate::state::CampaignState;
 
 /// Base ransom of a ruler (livres tournois).
@@ -178,21 +179,31 @@ pub fn captive_rank(state: &CampaignState, character: &CharacterId) -> CaptiveRa
 /// Wealth factor of a faction: its seasonal tax income / 10 000, between
 /// 0.5 and 2 (a rich kingdom pays more for the same knight).
 pub fn wealth_factor(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
-    let income = state.faction_income(data, faction).max(0);
-    (income as f64 / 10_000.0).clamp(0.5, 2.0)
+    wealth_of(state.faction_income(data, faction))
+}
+
+fn wealth_of(income: i64) -> f64 {
+    (income.max(0) as f64 / 10_000.0).clamp(0.5, 2.0)
 }
 
 /// Ransom of `character`: `base(rank) × (1 + prestige/100) × wealth`,
 /// prestige clamped to 0-200, rounded to 50 livres.
 pub fn ransom_amount(state: &CampaignState, data: &GameData, character: &CharacterId) -> i64 {
+    ransom_amount_with(&PlanCache::new(state), data, character)
+}
+
+/// [`ransom_amount`] reading the payer's income through the planner's cache.
+pub fn ransom_amount_with(cache: &PlanCache, data: &GameData, character: &CharacterId) -> i64 {
+    let state = cache.state();
     let Some(c) = state.characters.get(character) else {
         return 0;
     };
     let base = captive_rank(state, character).base_ransom() as f64;
     let prestige = 1.0 + f64::from(c.prestige.clamp(0, 200)) / 100.0;
-    let raw = base * prestige * wealth_factor(state, data, &c.faction);
+    let income = cache.faction_income(data, &c.faction);
+    let raw = base * prestige * wealth_of(income);
     // A6-L3 (ADR 0183): never more than a share of the payer's income.
-    let income = state.faction_income(data, &c.faction).max(0);
+    let income = income.max(0);
     let cap = income * data.economy_rules.ransom.income_cap_percent / 100;
     ((raw / 50.0).round() as i64 * 50).min(cap).max(50)
 }
@@ -634,7 +645,8 @@ pub fn ransom_debt_total(state: &CampaignState, faction: &FactionId) -> i64 {
 /// treasury, by four installments for a ruler or heir when the first one
 /// leaves half a season of income; cedes a province only for its ruler.
 /// Captor: frees plain knights on parole once at peace with their faction.
-pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+pub fn ai_ransom_orders(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    let state = cache.state();
     let mut orders = Vec::new();
     let Some(f) = state.factions.get(faction).filter(|f| f.alive) else {
         return orders;
@@ -653,7 +665,7 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
             let rank = captive_rank(state, id);
             match c.ransom_terms.clone().unwrap_or_default() {
                 RansomTerms::Money => {
-                    let amount = ransom_amount(state, data, id);
+                    let amount = ransom_amount_with(cache, data, id);
                     let (_, first) = installment_plan(amount, 4);
                     if treasury >= 2 * amount {
                         treasury -= amount;
@@ -664,7 +676,7 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
                     } else if matches!(rank, CaptiveRank::Sovereign | CaptiveRank::Heir)
                         && treasury - first
                             >= *income
-                                .get_or_insert_with(|| state.faction_income(data, faction).max(0))
+                                .get_or_insert_with(|| cache.faction_income(data, faction).max(0))
                                 / 2
                     {
                         treasury -= first;

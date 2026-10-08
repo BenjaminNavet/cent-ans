@@ -2,7 +2,8 @@
 //! pays the debts of an indebted one (French gold for the Scots).
 
 use data_model::{FactionId, GameData};
-use sim_campaign::diplomacy::rivals;
+
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
 /// Seasons of the ally's deficit the subsidy covers ahead.
@@ -26,18 +27,19 @@ pub fn subsidy_need(state: &CampaignState, ally: &FactionId) -> i64 {
 /// Subsidies `faction` pays this turn out of `spare` (money beyond its own
 /// reserve): allies sharing one of our rivals, neediest first, each gift capped by what is left.
 pub fn plan_subsidies(
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     spare: i64,
 ) -> Vec<Order> {
-    let wealth = |f: &FactionId| state.faction_income(data, f).max(0);
+    let state = cache.state();
+    let wealth = |f: &FactionId| cache.faction_income(data, f).max(0);
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
     // Our enemies and pretenders (or the realms we claim): the Scots and the
     // French share England, in war as in truce.
-    let my_rivals = rivals(state, faction);
+    let my_rivals = cache.rivals(faction);
     // DC3: the incomes (a walk over every place) are weighed last, on the few
     // needy allies left, and ours only once.
     let mut my_wealth = None;
@@ -45,7 +47,7 @@ pub fn plan_subsidies(
         .allies
         .iter()
         .filter(|a| state.factions.get(*a).is_some_and(|f| f.alive))
-        .filter(|a| !rivals(state, a).is_disjoint(&my_rivals))
+        .filter(|a| !cache.rivals(a).is_disjoint(&my_rivals))
         .map(|a| (subsidy_need(state, a), a.clone()))
         .filter(|(need, _)| *need >= SUBSIDY_MIN)
         .filter(|(_, a)| {

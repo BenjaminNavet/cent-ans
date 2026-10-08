@@ -224,7 +224,7 @@ fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId,
             let attitude = if own {
                 0
             } else {
-                state.attitude(data, ctx.faction, &c.faction).0
+                ctx.cache.attitude(data, ctx.faction, &c.faction).0
             };
             if !own && (attitude < 0 || state.is_at_war(ctx.faction, &c.faction)) {
                 return None;
@@ -241,8 +241,8 @@ fn marriage_partner(ctx: &Context, single: &CharacterId) -> Option<(CharacterId,
         .filter(|(_, id, faction)| {
             faction == ctx.faction
                 || faction == &state.player_faction
-                || sim_campaign::negotiation::evaluate_treaty(
-                    state,
+                || sim_campaign::negotiation::evaluate_treaty_with(
+                    ctx.cache,
                     data,
                     ctx.faction,
                     faction,

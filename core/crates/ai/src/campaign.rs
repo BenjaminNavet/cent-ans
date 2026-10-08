@@ -18,6 +18,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use data_model::{AiCampaign, FactionId, GameData, ProvinceId, SettlementId, SettlementKind};
 use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::edges;
+use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{ArmyId, CampaignState, Order, TaxRate};
 
 use crate::parallel::Mode;
@@ -35,6 +36,8 @@ pub const LAST_BASTIONS: usize = sim_campaign::negotiation::LAST_BASTIONS;
 /// Everything the planner derives once per faction and turn.
 struct Context<'a> {
     state: &'a CampaignState,
+    /// Memoised faction power, borders, income and rivals of `state`.
+    cache: &'a PlanCache<'a>,
     data: &'a GameData,
     faction: &'a FactionId,
     enemies: BTreeSet<FactionId>,
@@ -65,11 +68,12 @@ impl<'a> Context<'a> {
     /// in [`Mode::Parallel`].
     fn new(
         mode: Mode,
-        state: &'a CampaignState,
+        cache: &'a PlanCache<'a>,
         data: &'a GameData,
         faction: &'a FactionId,
         upkeep: (i64, i64),
     ) -> Option<Self> {
+        let state = cache.state();
         let me = state.factions.get(faction)?;
         let aggression = data
             .factions
@@ -78,7 +82,7 @@ impl<'a> Context<'a> {
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
         let (grid, (anchors, gross_income)) = mode.join(
-            || crate::grid::GridPlanner::with_mode(mode, state, data, faction),
+            || crate::grid::GridPlanner::with_mode(mode, cache, data, faction),
             || {
                 let armies: Vec<(&ArmyId, &sim_campaign::Army)> = state.armies.iter().collect();
                 let anchors: BTreeMap<ArmyId, SettlementId> = mode
@@ -88,7 +92,7 @@ impl<'a> Context<'a> {
                     .into_iter()
                     .flatten()
                     .collect();
-                (anchors, state.faction_income(data, faction))
+                (anchors, cache.faction_income(data, faction))
             },
         );
         // Net of court and administration (M10 balance) and of the tribute
@@ -109,6 +113,7 @@ impl<'a> Context<'a> {
             rules: AiCampaign::bundled(),
             hostile_power: hostile_power_by_province(state, data, faction),
             state,
+            cache,
             data,
             faction,
             enemies: me.at_war_with.clone(),
@@ -336,36 +341,37 @@ fn gift_amount(order: &Order) -> i64 {
 /// out of the treasury left by the money fief (`upkeep`: army, buildings).
 fn state_plans(
     mode: Mode,
-    state: &CampaignState,
+    cache: &PlanCache,
     data: &GameData,
     faction: &FactionId,
     upkeep: (i64, i64),
 ) -> StatePlans {
+    let state = cache.state();
     let ((diplomacy, (money_fief, embargoes, subsidies)), ((research, diets, edicts), rest)) = mode
         .join(
             || {
                 mode.join(
                     || {
                         let mut orders =
-                            sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+                            sim_campaign::diplomacy::plan_diplomacy(cache, data, faction);
                         // FE5: « survival first » for the counties, titles
                         // demanded at the peace, feudal acts.
-                        crate::feudal::filter_suicidal_wars(state, data, faction, &mut orders);
-                        crate::feudal::demand_titles(state, data, faction, &mut orders);
-                        orders.extend(crate::feudal::plan_feudal(state, data, faction));
+                        crate::feudal::filter_suicidal_wars(cache, data, faction, &mut orders);
+                        crate::feudal::demand_titles(cache, data, faction, &mut orders);
+                        orders.extend(crate::feudal::plan_feudal(cache, data, faction));
                         // DP1: trade agreements and military access (ADR 0025).
-                        orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
+                        orders.extend(crate::diplomacy_eval::plan_treaties(cache, data, faction));
                         // G2: historical side changes (Artevelde, Troyes).
-                        orders.extend(crate::alignment::plan_side_change(state, data, faction));
+                        orders.extend(crate::alignment::plan_side_change(cache, data, faction));
                         orders.extend(crate::alignment::plan_dynastic_alliance(
-                            state, data, faction,
+                            cache, data, faction,
                         ));
                         orders
                     },
                     || {
-                        let money_fief = crate::alignment::plan_money_fief(state, data, faction);
+                        let money_fief = crate::alignment::plan_money_fief(cache, data, faction);
                         let embargoes = crate::alignment::lift_embargoes_on_cobelligerents(
-                            state, data, faction,
+                            cache, data, faction,
                         );
                         // G2: subsidies first, out of what the donor would
                         // otherwise hoard.
@@ -373,7 +379,7 @@ fn state_plans(
                             - money_fief.as_ref().map_or(0, gift_amount);
                         let spare = (treasury - upkeep.0 - upkeep.1).max(0)
                             / crate::support::SUBSIDY_SPARE_DIVISOR;
-                        let subsidies = crate::support::plan_subsidies(state, data, faction, spare);
+                        let subsidies = crate::support::plan_subsidies(cache, data, faction, spare);
                         (money_fief, embargoes, subsidies)
                     },
                 )
@@ -390,20 +396,20 @@ fn state_plans(
                     },
                     || {
                         (
-                            sim_campaign::coinage::ai_choose_coinage(state, data, faction),
-                            sim_campaign::ransom::ai_ransom_orders(state, data, faction),
+                            sim_campaign::coinage::ai_choose_coinage(cache, data, faction),
+                            sim_campaign::ransom::ai_ransom_orders(cache, data, faction),
                             {
                                 // JR1: the crusader faction preaches the
                                 // passage as soon as it can.
                                 let mut orders =
-                                    sim_campaign::chivalry::ai_found_order(state, data, faction);
+                                    sim_campaign::chivalry::ai_found_order(cache, data, faction);
                                 orders
                                     .extend(sim_campaign::crusade::ai_preach(state, data, faction));
                                 orders
                             },
                             // C6: spies, heralds and preachers (recruitment
                             // keeps a reserve).
-                            sim_campaign::agents::plan_agents(state, data, faction),
+                            sim_campaign::agents::plan_agents(cache, data, faction),
                         )
                     },
                 )
@@ -473,9 +479,9 @@ fn plan_turn_in(
 ) -> Vec<Order> {
     // FE5: the core asks the feudal decisions of this crate from now on.
     crate::feudal::install();
-    // OMR R1: the state is read-only for the whole plan; repeated questions
-    // (faction power, neighbours) are answered from indexes built once.
-    let _scope = state.planning_scope();
+    // The state is read-only for the whole plan: repeated questions
+    // (faction power, neighbours, income, rivals) are answered once.
+    let cache = PlanCache::new(state);
     if faction.is_rebels() || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
@@ -484,8 +490,8 @@ fn plan_turn_in(
         state.faction_building_upkeep(data, faction),
     );
     let (ctx, plans) = mode.join(
-        || Context::new(mode, state, data, faction, upkeep),
-        || state_plans(mode, state, data, faction, upkeep),
+        || Context::new(mode, &cache, data, faction, upkeep),
+        || state_plans(mode, &cache, data, faction, upkeep),
     );
     let Some(mut ctx) = ctx else {
         return Vec::new();
