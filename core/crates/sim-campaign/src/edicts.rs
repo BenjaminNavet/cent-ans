@@ -449,8 +449,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_peace_of_god").expect("well-formed id");
         set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
@@ -475,8 +475,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
         set_edict(&mut state, data, &faction, &province, &edict).expect("first change ok");
@@ -491,8 +491,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let unknown = EdictId::new("edict_does_not_exist").expect("well-formed id");
         let err = set_edict(&mut state, data, &faction, &province, &unknown).unwrap_err();
@@ -505,9 +505,9 @@ mod tests {
         let faction = state.player_faction.clone();
         let provinces: Vec<ProvinceId> = state
             .controlled_provinces(&faction)
-            .cloned()
             .filter(|p| state.holds_whole_province(&faction, p))
             .take(2)
+            .cloned()
             .collect();
         assert_eq!(provinces.len(), 2, "player holds two whole provinces");
         assert_eq!(yearly_edict_piety(&state, data, &faction), 0);
@@ -551,8 +551,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
         let before = edict_effects(&state, data, &province);
@@ -579,8 +579,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
         set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
@@ -618,8 +618,8 @@ mod tests {
         // Find a province the faction controls but does not wholly hold, if any.
         let partial = state
             .controlled_provinces(&faction)
-            .cloned()
-            .find(|p| !state.holds_whole_province(&faction, p));
+            .find(|p| !state.holds_whole_province(&faction, p))
+            .cloned();
         if let Some(province) = partial {
             let edict = EdictId::new("edict_feudal_aid").expect("well-formed id");
             let err = set_edict(&mut state, data, &faction, &province, &edict).unwrap_err();
@@ -654,8 +654,8 @@ mod tests {
         let faction = state.player_faction.clone();
         let province = state
             .controlled_provinces(&faction)
-            .cloned()
             .find(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .expect("player holds at least one whole province");
         let edict = EdictId::new("edict_militia_levy").expect("well-formed id");
         set_edict(&mut state, data, &faction, &province, &edict).expect("valid order");
@@ -699,8 +699,8 @@ mod tests {
         let aid = EdictId::new("edict_feudal_aid").expect("well-formed id");
         let calm: Vec<ProvinceId> = state
             .controlled_provinces(&faction)
-            .cloned()
             .filter(|p| state.holds_whole_province(&faction, p))
+            .cloned()
             .collect();
         for id in &calm {
             let p = state.provinces.get_mut(id).expect("province");
