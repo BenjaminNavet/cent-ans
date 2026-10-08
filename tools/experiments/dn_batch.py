@@ -164,6 +164,63 @@ def stage_image(entry: dict, out_dir: Path) -> None:
             subprocess.run(command, check=True, capture_output=True)
 
 
+FAL_IMAGE_ENDPOINT = "fal-ai/z-image/turbo"
+FAL_IMAGE_COST_USD = 0.005
+
+
+def fal_image(entry: dict, seed: int, target: Path) -> None:
+    """One Z-Image Turbo call on fal (same prompt, seed, 1024 square), PNG at ``target``."""
+    import fal_client
+
+    if target.exists():
+        return
+    try:
+        with timed(entry["id"], "zimage-fal", seed=seed):
+            result = fal_client.subscribe(
+                FAL_IMAGE_ENDPOINT,
+                arguments={
+                    "prompt": full_prompt(entry),
+                    "image_size": {"width": SIZE, "height": SIZE},
+                    "seed": seed,
+                    "enable_prompt_expansion": False,
+                    "output_format": "png",
+                    "enable_safety_checker": False,
+                    "num_images": 1,
+                },
+            )
+            partial = target.with_suffix(".part")
+            urllib.request.urlretrieve(result["images"][0]["url"], partial)  # noqa: S310
+            partial.rename(target)
+    except Exception as error:  # noqa: BLE001
+        append_jsonl(
+            DN / "failures.jsonl",
+            {"id": entry["id"], "step": "zimage-fal", "error": str(error)[:400]},
+        )
+        return
+    append_jsonl(
+        DN / "fal_spend.jsonl",
+        {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "id": entry["id"], "category": "image",
+            "endpoint": FAL_IMAGE_ENDPOINT, "seed": seed, "usd": FAL_IMAGE_COST_USD,
+        },
+    )  # fmt: skip
+
+
+def prefetch_images(entries: list[dict], workers: int) -> None:
+    """Generate every missing image on fal in parallel, without the GPU lock."""
+    jobs = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for entry in entries:
+            out_dir = DN / entry["id"]
+            (out_dir / "img").mkdir(parents=True, exist_ok=True)
+            for seed in seed_list(entry):
+                target = out_dir / "img" / f"s{seed}.png"
+                if not target.exists():
+                    jobs.append(pool.submit(fal_image, entry, seed, target))
+        for job in jobs:
+            job.result()
+
+
 def seed_list(entry: dict) -> list[int]:
     """Deterministic seeds 1337, 1338, ... (``seeds`` of the catalogue = how many)."""
     return [1337 + index for index in range(int(entry.get("seeds", 1)))]
@@ -210,7 +267,7 @@ def stage_cut(entry: dict, out_dir: Path) -> None:
             out_dir / "cut_raw" / f"s{seed}.png",
             out_dir / "cut" / f"s{seed}.png",
         )
-        if framed.exists():
+        if framed.exists() or not (out_dir / "img" / f"s{seed}.png").exists():
             continue
         with timed(entry["id"], "rembg", seed=seed):
             cut = rembg_cut(Image.open(out_dir / "img" / f"s{seed}.png").convert("RGB"))
@@ -311,7 +368,7 @@ def stage_select(entry: dict, out_dir: Path, select_best: bool) -> int | None:
     """Contact sheet + scores; returns the chosen seed (chosen.json > best > first)."""
     from PIL import Image, ImageDraw
 
-    seeds = seed_list(entry)
+    seeds = [s for s in seed_list(entry) if (out_dir / "cut_raw" / f"s{s}.png").exists()]
     scores_path = out_dir / "scores.json"
     if scores_path.exists():
         scores = json.loads(scores_path.read_text())
@@ -514,7 +571,12 @@ def process(
     if entry["kind"] == "figure":
         (out_dir / "kind_figure").touch()
     until = STAGES.index(args.until)
-    stage_image(entry, out_dir)
+    if args.image_backend == "fal":
+        if not any((out_dir / "img").glob("s*.png")):
+            print(f"[{entry['id']}] no fal image, skipped", flush=True)
+            return
+    else:
+        stage_image(entry, out_dir)
     if until < 1:
         return
     stage_cut(entry, out_dir)
@@ -567,6 +629,8 @@ def main() -> None:
     parser.add_argument("--fal-workers", type=int, default=4)
     parser.add_argument("--backend3d", default="", help="override every entry (fal|sf3d|hf|both)")
     parser.add_argument("--seeds", type=int, default=0, help="override seeds per entry")
+    parser.add_argument("--image-backend", choices=("local", "fal"), default="local")
+    parser.add_argument("--image-workers", type=int, default=6)
     parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
     args = parser.parse_args()
     CHARTER_MODE, MAX_SAT_P95, MAX_SAT_MEAN = (
@@ -589,6 +653,8 @@ def main() -> None:
             "warning: FAL_KEY not set, fal calls will fail (logged in failures.jsonl)"
         )
     DN.mkdir(parents=True, exist_ok=True)
+    if args.image_backend == "fal":
+        prefetch_images(entries, args.image_workers)
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=args.fal_workers) as executor:
         for entry in entries:
