@@ -1,0 +1,379 @@
+[
+  {
+    "id": "mangonel",
+    "kind": "decor",
+    "prompt": "14th-century timber torsion mangonel with a wooden frame, sling arm, twisted rope skeins and a few stone shot",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "siege_engine"
+    },
+    "target": "siege:mangonel"
+  },
+  {
+    "id": "bombard",
+    "kind": "decor",
+    "prompt": "large forged iron bombard of the 14th century on a heavy oak timber bed with iron hoops, a raised wooden mantlet and stone balls beside it",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "siege_engine"
+    },
+    "target": "siege:bombard"
+  },
+  {
+    "id": "siege_tower",
+    "kind": "decor",
+    "prompt": "four-storey timber siege tower on solid wheels clad in wet raw hides, drawbridge raised, weathered oak",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 12,
+      "class": "siege_engine"
+    },
+    "target": "siege:siege_tower"
+  },
+  {
+    "id": "scaling_ladder",
+    "kind": "decor",
+    "prompt": "long rough wooden scaling ladder with iron hooks at the top, weathered oak, lying flat",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "siege_engine"
+    },
+    "target": "siege:ladder"
+  },
+  {
+    "id": "mantlet",
+    "kind": "decor",
+    "prompt": "large wooden mantlet screen on a stand, thick planks with iron bands and a small sighting slot",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 2,
+      "class": "siege_engine"
+    },
+    "target": "siege:mantlet"
+  },
+  {
+    "id": "curtain_wall_segment",
+    "kind": "decor",
+    "prompt": "14th-century limestone curtain wall segment with a crenellated parapet, wall-walk and ashlar blocks, straight with flat tileable ends",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "major_building"
+    },
+    "target": "battle_siege:wall"
+  },
+  {
+    "id": "round_tower",
+    "kind": "decor",
+    "prompt": "14th-century round limestone defence tower with machicolations, arrow slits and a conical slate roof",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 14,
+      "class": "major_building"
+    },
+    "target": "battle_siege:tower"
+  },
+  {
+    "id": "town_gate",
+    "kind": "decor",
+    "prompt": "stone gatehouse with a raised portcullis, double oak doors with iron straps, a lowered drawbridge and two flanking towers",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 12,
+      "class": "major_building"
+    },
+    "target": "battle_siege:gate"
+  },
+  {
+    "id": "wall_breach_rubble",
+    "kind": "decor",
+    "prompt": "wide heap of fallen limestone blocks and mortar rubble from a breached wall, broken timbers",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 5,
+      "class": "prop"
+    },
+    "target": "battle_siege:breach"
+  },
+  {
+    "id": "hoarding",
+    "kind": "decor",
+    "prompt": "timber hoarding gallery projecting from a stone parapet, with arrow slits and a plank roof",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "major_building"
+    },
+    "target": "battle_siege:hoarding"
+  },
+  {
+    "id": "townhouse_siege",
+    "kind": "decor",
+    "prompt": "narrow 14th-century timber-framed town house, two storeys, jettied upper floor, slate roof",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "house"
+    },
+    "target": "battle_siege:townhouse"
+  },
+  {
+    "id": "bridge_stone_arch",
+    "kind": "decor",
+    "prompt": "medieval two-arch stone bridge with cutwaters, weathered limestone, a flat roadway",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 14,
+      "class": "bridge"
+    },
+    "target": "battle_siege:bridge"
+  },
+  {
+    "id": "field_rocks",
+    "kind": "decor",
+    "prompt": "weathered limestone boulder group with moss patches",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2,
+      "class": "prop"
+    },
+    "target": "vegetation:rock_battle"
+  },
+  {
+    "id": "bush_hawthorn",
+    "kind": "decor",
+    "prompt": "dense leafless hawthorn bush in winter, thorny branches",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.5,
+      "class": "prop"
+    },
+    "target": "vegetation:bush"
+  },
+  {
+    "id": "hedge_bocage",
+    "kind": "decor",
+    "prompt": "bocage hawthorn hedge segment with a few saplings, on a low earth bank",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "prop"
+    },
+    "target": "vegetation:hedge"
+  },
+  {
+    "id": "wattle_fence",
+    "kind": "decor",
+    "prompt": "woven hazel wattle fence section with oak posts",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2,
+      "class": "prop"
+    },
+    "target": "battle_kit:fence"
+  },
+  {
+    "id": "stake_cluster",
+    "kind": "decor",
+    "prompt": "bundle of sharpened oak stakes planted at an angle, archers' defence",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1.5,
+      "class": "prop"
+    },
+    "target": "battle_kit:stakes"
+  },
+  {
+    "id": "war_pavilion",
+    "kind": "decor",
+    "prompt": "large 14th-century lord's canvas pavilion with a central pole and guy ropes, undyed canvas with red-and-white stripes",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "prop"
+    },
+    "target": "battle_kit:pavilion"
+  },
+  {
+    "id": "field_tent",
+    "kind": "decor",
+    "prompt": "small A-frame soldier tent of undyed canvas with guy ropes",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3,
+      "class": "prop"
+    },
+    "target": "battle_kit:tent"
+  },
+  {
+    "id": "baggage_wagon",
+    "kind": "decor",
+    "prompt": "heavy four-wheel medieval baggage wagon with a canvas cover and spoked wheels, shafts empty",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "prop"
+    },
+    "target": "battle_kit:wagon"
+  },
+  {
+    "id": "campfire_cauldron",
+    "kind": "decor",
+    "prompt": "stone-ring campfire with an iron tripod and cooking pot, split logs",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1,
+      "class": "prop"
+    },
+    "target": "battle_kit:campfire"
+  },
+  {
+    "id": "pavise_stack",
+    "kind": "decor",
+    "prompt": "stack of wooden pavises, barrels and sacks of camp stores",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2,
+      "class": "prop"
+    },
+    "target": "battle_kit:stores"
+  },
+  {
+    "id": "wayside_cross",
+    "kind": "decor",
+    "prompt": "weathered stone wayside cross beside a few leaning gravestones",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 1.5,
+      "class": "prop"
+    },
+    "target": "battle_kit:cross"
+  },
+  {
+    "id": "archer_3_jack",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a French or Scots archer in a padded jack and kettle hat, short bow absent, arms raised nearly horizontal.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure",
+      "target_height_m": 1.75,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:archer_3"
+  },
+  {
+    "id": "archer_5_handgunner",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a hand-gunner in an open sallet and a quilted coat with a leather bandolier, no gun in hand.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure",
+      "target_height_m": 1.75,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:archer_5"
+  },
+  {
+    "id": "cavalry_4_routier",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a lightly armoured mounted man-at-arms in a brigandine and open helm on a courser, hands off the reins.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure_mounted",
+      "target_height_m": 3.0,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:cavalry_4"
+  },
+  {
+    "id": "cavalry_5_jinete",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a light javelin rider in a leather jerkin and felt cap on a small horse, hands off the reins.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure_mounted",
+      "target_height_m": 3.0,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:cavalry_5"
+  },
+  {
+    "id": "standard_0_bearer",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a foot standard bearer in a green tabard and mail coif, both arms raised wide, hands open and empty.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure",
+      "target_height_m": 1.75,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:standard_0"
+  },
+  {
+    "id": "cavalry_1_druzhina",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Rus' mounted noble in lamellar and mail with a pointed helm and a green kaftan, hands off the reins.",
+    "seeds": 2,
+    "backend3d": "sf3d",
+    "ingest": {
+      "class": "figure_mounted",
+      "target_height_m": 3.0,
+      "yaw_fix": 0
+    },
+    "target": "battle_ga3:cavalry_1"
+  }
+]

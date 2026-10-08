@@ -1,0 +1,167 @@
+[
+  {
+    "cmd": "event-art --local",
+    "ids": [
+      "evt_mort_d_ivan_kalita",
+      "evt_mort_de_gediminas",
+      "evt_mort_d_andronic_iii",
+      "evt_couronnement_de_dusan",
+      "evt_chute_de_tlemcen",
+      "evt_siege_de_caffa",
+      "evt_prise_d_algesiras",
+      "evt_seisme_de_gallipoli",
+      "evt_feu_de_grange",
+      "evt_marchand_detrousse",
+      "evt_pont_effondre",
+      "evt_algirdas_grand_duc",
+      "evt_bataille_de_la_streva",
+      "evt_bateliers_en_greve",
+      "evt_charbonniers_en_conflit",
+      "evt_desastre_de_kairouan",
+      "evt_dusan_prend_serres",
+      "evt_election_d_osel_wiek",
+      "evt_faux_monnayeur",
+      "evt_jongleurs_de_passage",
+      "evt_loup_dans_la_bergerie",
+      "evt_mariage_de_notables",
+      "evt_moines_quetes",
+      "evt_mort_d_an_nasir",
+      "evt_mort_d_ozbeg",
+      "evt_moulin_banal_conteste",
+      "evt_nuit_de_la_saint_georges",
+      "evt_paix_de_kalisz",
+      "evt_pelerins_malades",
+      "evt_reliques_miraculeuses",
+      "evt_rixe_de_foire",
+      "evt_sainte_ligue_a_smyrne",
+      "evt_source_guerisseuse",
+      "evt_tzympe",
+      "evt_vente_de_l_estonie",
+      "evt_zakonik"
+    ],
+    "note": "36 événements sans image, par priorité (historiques puis génériques, puis le reste). Pas de --only : l'outil ne génère que les miniatures absentes (idempotent), dans l'ordre alphabétique des ids, borné par --limit. Lancer sans --limit (36 x ~1 min) ; l'ordre de priorité ci-contre est indicatif. 16:9 vers game/assets/events/."
+  },
+  {
+    "cmd": "ink-icons --local --kind icon --group religion",
+    "ids": [
+      "rel_catholic",
+      "rel_orthodox",
+      "rel_sunni",
+      "rel_shia",
+      "rel_lollard",
+      "rel_hussite",
+      "rel_pagan",
+      "rel_armenian",
+      "rel_jewish"
+    ],
+    "note": "9 religions sans icône propre (IconLibrary retombe sur cat_*). Ids exacts à relire dans data/religions (non vérifiés ici). Ajouter d'abord 9 entrées au catalogue data/ui/icons_ink.json (champs id, label, group, subject, targets) puis cibler avec --group et/ou --only <id> répétable. Variante : entity_icons.json (source = illustration existante, non adapté)."
+  },
+  {
+    "cmd": "ink-icons --local --kind icon --group order",
+    "ids": [
+      "ord_garter",
+      "ord_golden_fleece",
+      "ord_star",
+      "ord_court_company"
+    ],
+    "note": "4 ordres de chevalerie : jarretière, toison d'or, étoile, compagnie de la cour. Ids à confirmer dans data/. Entrées à ajouter à icons_ink.json comme ci-dessus ; --only <id> répétable."
+  },
+  {
+    "cmd": "ink-icons --local --kind icon --group edict",
+    "ids": [
+      "edict_peace_of_god",
+      "edict_strict_lent",
+      "edict_levy",
+      "edict_market_franchise",
+      "edict_feudal_aid",
+      "edict_none"
+    ],
+    "note": "6 édits : paix de Dieu, carême strict, levée de milice, franchises de marché, aide féodale, aucun. Ids à confirmer dans data/."
+  },
+  {
+    "cmd": "ink-icons --local --kind medallion",
+    "ids": [
+      "stances",
+      "treasury",
+      "supply",
+      "alerts",
+      "siege"
+    ],
+    "note": "5 médaillons de HUD manquants (même format que agents.png). Entrées à ajouter dans icons_ink.json (treasury existe déjà en icône hud, pas en médaillon). --only <id> répétable."
+  },
+  {
+    "cmd": "ink-icons --local --kind icon --group glyph",
+    "ids": [
+      "glyph_cross",
+      "glyph_check",
+      "glyph_star",
+      "glyph_arrow",
+      "glyph_swords",
+      "glyph_crown",
+      "season_report_lands",
+      "season_report_armies",
+      "season_report_works",
+      "season_report_world",
+      "season_report_table"
+    ],
+    "note": "Remplaçants à l'encre des glyphes Unicode (codex_hub, tutorial, accessibility, encounter_window, season_report). Entrées à créer dans icons_ink.json."
+  },
+  {
+    "cmd": "ink-icons --local (curseurs : entrée `cursors` de icons_ink.json) ; sinon dessin procédural",
+    "ids": [
+      "arrow",
+      "hand",
+      "move",
+      "attack",
+      "siege",
+      "embark",
+      "forbidden"
+    ],
+    "note": "Curseurs de campagne 32 px vers ui/cursors_campaign/. Le catalogue `cursors` actuel ne contient que les 6 curseurs de bataille (id, icon, fill, barred) : ajouter les 7 entrées ; un futur campaign_cursor.gd est nécessaire pour les lire. Rendu IA incertain à 32 px : procédural acceptable."
+  },
+  {
+    "cmd": "ui-ornaments --local --only <id> [--sheet planche.png] [--install]",
+    "ids": [
+      "initial_dragon",
+      "fleuron_divider",
+      "drollery_hare",
+      "drollery_musician",
+      "corner_rinceau"
+    ],
+    "note": "Ornements déjà définis dans data/ui_ornaments.yaml (section decor) : data/art/ui_ornaments.yaml. Ajouter ensuite les pièces absentes (button_primary, tab_selected/unselected, inset, frame_modal, frame_portrait, frame_icon_slot, scroll_bar, ribbon_banner, parchment_tile) à la section pieces, 3 variantes par pièce, relecture humaine avant --install (9-patch)."
+  },
+  {
+    "cmd": "art-plates --local",
+    "ids": [
+      "ld_azincourt",
+      "ld_cocherel",
+      "ld_castillon",
+      "ld_formigny",
+      "ld_cassel",
+      "ld_rosebecque",
+      "ld_nicopolis",
+      "ld_tannenberg",
+      "ld_orient",
+      "ld_baltique",
+      "ld_mediterranee",
+      "end_campaign_defeat_exile",
+      "end_campaign_defeat_ruin",
+      "end_battle_draw",
+      "end_battle_retreat",
+      "vg_crusade",
+      "vg_heresy",
+      "vg_tournament",
+      "vg_embassy",
+      "vg_harvest",
+      "vg_shipwreck",
+      "vg_truce",
+      "vg_coronation"
+    ],
+    "note": "Pas de --only : ajouter d'abord les entrées à data/ui/illustrations.json (loading/endings/vignettes, sans `source.commons`) ; l'outil ne génère que les manquantes ; --limit pour borner. Priorité : endings puis loading. 16:9 (vignettes 21:9)."
+  },
+  {
+    "cmd": "codex-art --local --category lieu,bataille",
+    "ids": [],
+    "note": "Optionnel, hors nuit courte : 28 lieux et 16 batailles du Codex sans image (~1 min chacune). Pas de ciblage par id (filtre --category et --limit seulement)."
+  }
+]

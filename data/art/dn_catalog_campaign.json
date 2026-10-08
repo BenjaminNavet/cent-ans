@@ -1,0 +1,522 @@
+[
+  {
+    "id": "army_lord_mounted",
+    "kind": "figure",
+    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a mounted French lord of 1350-1400 in a mail hauberk with a quilted green jupon, bascinet with open visor, blue hose, a horse in a plain green cloth caparison, arms stretched out horizontally.",
+    "seeds": 2,
+    "backend3d": "both",
+    "ingest": {
+      "class": "figure_mounted",
+      "target_height_m": 3.0,
+      "yaw_fix": 0
+    },
+    "target": "army_figures:lord (cavalry_*)"
+  },
+  {
+    "id": "town_west",
+    "kind": "decor",
+    "prompt": "14th-century walled market town with a stone curtain wall, towers, dense timber and slate roofs and a central church spire, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/west"
+  },
+  {
+    "id": "city_west",
+    "kind": "decor",
+    "prompt": "14th-century large walled city with a double ring of crenellated walls, dense roofs, a gothic cathedral with twin towers and a river gate, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.6,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/west"
+  },
+  {
+    "id": "castle_west",
+    "kind": "decor",
+    "prompt": "14th-century stone castle on a mound with round corner towers under conical slate roofs, a square keep, curtain wall and gatehouse, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1.9,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/west"
+  },
+  {
+    "id": "village_west",
+    "kind": "decor",
+    "prompt": "14th-century village of thatched wattle-and-daub peasant houses, a small stone church, timber barns and fenced gardens, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/west"
+  },
+  {
+    "id": "abbey_west",
+    "kind": "decor",
+    "prompt": "14th-century Benedictine abbey with cloister, long gothic nave, bell tower and enclosure wall in grey limestone and slate, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.2,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/west"
+  },
+  {
+    "id": "town_med",
+    "kind": "decor",
+    "prompt": "14th-century walled hill town with terracotta roofs, tower houses, stone walls and a campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/med"
+  },
+  {
+    "id": "town_isl",
+    "kind": "decor",
+    "prompt": "14th-century walled medina with flat roofs, a minaret, a horseshoe-arch gate and ramparts, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/isl"
+  },
+  {
+    "id": "town_byz",
+    "kind": "decor",
+    "prompt": "14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/byz"
+  },
+  {
+    "id": "town_rus",
+    "kind": "decor",
+    "prompt": "14th-century fortified town with a log kremlin, timber towers, log houses and an onion-domed church, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/rus"
+  },
+  {
+    "id": "town_steppe",
+    "kind": "decor",
+    "prompt": "14th-century encampment town of felt yurts around a timber-stockaded khan's hall, earth rampart, Golden Horde steppe settlement (felt yurts, a low earth rampart with a timber stockade, horse pens), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/steppe"
+  },
+  {
+    "id": "city_med",
+    "kind": "decor",
+    "prompt": "14th-century large walled seaport city with a cathedral and campanile, tall tower houses, terracotta roofs, harbour wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.6,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/med"
+  },
+  {
+    "id": "city_isl",
+    "kind": "decor",
+    "prompt": "14th-century large walled city with a great mosque and tall minaret, a citadel, flat roofs and massive gates, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 3.6,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/isl"
+  },
+  {
+    "id": "castle_med",
+    "kind": "decor",
+    "prompt": "14th-century hilltop stone castle with a square keep, swallow-tail crenellations, curtain wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1.9,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/med"
+  },
+  {
+    "id": "castle_isl",
+    "kind": "decor",
+    "prompt": "14th-century stone qasr fortress with square towers, a bent gate and a flat-roofed keep, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 1.9,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/isl"
+  },
+  {
+    "id": "village_med",
+    "kind": "decor",
+    "prompt": "14th-century hillside village of stone houses with terracotta roofs and a small campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/med"
+  },
+  {
+    "id": "village_isl",
+    "kind": "decor",
+    "prompt": "14th-century village of mud-brick flat-roofed houses around a small mosque with a short minaret and a well, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/isl"
+  },
+  {
+    "id": "village_rus",
+    "kind": "decor",
+    "prompt": "14th-century village of log cabins with plank roofs, a small timber church with an onion dome, a wooden fence, Rus' architecture (log houses, a wooden kremlin palisade with log towers, an onion-domed timber church), stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/rus"
+  },
+  {
+    "id": "cathedral_west",
+    "kind": "decor",
+    "prompt": "14th-century French gothic cathedral, grey limestone, twin west towers, flying buttresses, slate roof, rose window, semi-realistic",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 45,
+      "class": "major_building"
+    },
+    "target": "landmarks:cathedral / town_maquettes:city monument"
+  },
+  {
+    "id": "ship_cog",
+    "kind": "decor",
+    "prompt": "14th-century Hanseatic cog sailing ship, clinker oak hull, single square sail furled to a plain undyed canvas, high stern castle, no flag, no crew",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 24,
+      "class": "ship"
+    },
+    "target": "fleet:cog"
+  },
+  {
+    "id": "ship_nef",
+    "kind": "decor",
+    "prompt": "15th-century two-masted nef sailing ship, forecastle and high sterncastle, red-ochre painted hull, plain undyed furled sails, no flag, no crew",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 30,
+      "class": "ship"
+    },
+    "target": "fleet:nef"
+  },
+  {
+    "id": "ship_galley",
+    "kind": "decor",
+    "prompt": "14th-century Mediterranean war galley, long low hull with a ram, one lateen mast with furled sail, oars shipped, no crew, no flag",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 36,
+      "class": "ship"
+    },
+    "target": "fleet:galley"
+  },
+  {
+    "id": "siege_camp",
+    "kind": "decor",
+    "prompt": "medieval siege camp with canvas tents, a wooden palisade, a siege ladder, stacked stone shot and a small trebuchet, muddy ground",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 60,
+      "class": "prop"
+    },
+    "target": "siege_camp.glb"
+  },
+  {
+    "id": "bivouac",
+    "kind": "decor",
+    "prompt": "small medieval army bivouac with three undyed canvas tents, a campfire ring and stacked spears, no people",
+    "seeds": 3,
+    "backend3d": "both",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 30,
+      "class": "prop"
+    },
+    "target": "fleet:bivouac"
+  },
+  {
+    "id": "bridge_stone",
+    "kind": "decor",
+    "prompt": "14th-century stone bridge with three round arches and pointed cutwaters, weathered limestone, a small gate tower at one end",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 40,
+      "class": "bridge"
+    },
+    "target": "bridge_meshes:stone"
+  },
+  {
+    "id": "bridge_wood",
+    "kind": "decor",
+    "prompt": "medieval wooden trestle bridge on timber piles, plank deck with side rails, weathered oak",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 30,
+      "class": "bridge"
+    },
+    "target": "bridge_meshes:wood"
+  },
+  {
+    "id": "bridge_gate",
+    "kind": "decor",
+    "prompt": "medieval fortified bridge with crenellated stone gate towers at both ends and a portcullis, weathered limestone",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 36,
+      "class": "bridge"
+    },
+    "target": "bridge_meshes:gate"
+  },
+  {
+    "id": "windmill_post",
+    "kind": "decor",
+    "prompt": "medieval wooden post mill windmill with lattice sails, weathered oak planks, tail pole and access ladder",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 12,
+      "class": "prop"
+    },
+    "target": "outbuildings:windmill"
+  },
+  {
+    "id": "watermill",
+    "kind": "decor",
+    "prompt": "medieval stone and timber watermill with a wooden undershot wheel and a thatched roof",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 10,
+      "class": "prop"
+    },
+    "target": "outbuildings:watermill"
+  },
+  {
+    "id": "port_quay",
+    "kind": "decor",
+    "prompt": "medieval harbour corner with a stone quay, a wooden treadwheel crane, two timber warehouses and moored small rowing boats",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 30,
+      "class": "prop"
+    },
+    "target": "outbuildings:port"
+  },
+  {
+    "id": "farmstead",
+    "kind": "decor",
+    "prompt": "14th-century French farmstead with a long timber-framed barn, thatched roofs and a low courtyard wall",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 24,
+      "class": "prop"
+    },
+    "target": "outbuildings:farm"
+  },
+  {
+    "id": "cart_merchant",
+    "kind": "decor",
+    "prompt": "covered wooden merchant cart with two spoked wheels, canvas hood, shafts empty, no animal, weathered oak",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 4,
+      "class": "prop"
+    },
+    "target": "folk:cart"
+  },
+  {
+    "id": "wagon_four_wheel",
+    "kind": "decor",
+    "prompt": "heavy four-wheel medieval wagon with a canvas cover and spoked wheels, shafts empty, no animal",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6,
+      "class": "prop"
+    },
+    "target": "folk:wagon"
+  },
+  {
+    "id": "well_stone",
+    "kind": "decor",
+    "prompt": "medieval stone well with a wooden windlass, a small tiled roof and a bucket on a rope",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 3,
+      "class": "prop"
+    },
+    "target": "folk:well"
+  },
+  {
+    "id": "haystack",
+    "kind": "decor",
+    "prompt": "round medieval haystack with a conical thatch cap, tied with ropes",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 4,
+      "class": "prop"
+    },
+    "target": "folk:haystack"
+  },
+  {
+    "id": "worksite_scaffold",
+    "kind": "decor",
+    "prompt": "stone church construction worksite with timber scaffolding, a wooden treadwheel crane and stacked ashlar blocks",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 14,
+      "class": "prop"
+    },
+    "target": "outbuildings:worksite_1"
+  },
+  {
+    "id": "ruin_castle",
+    "kind": "decor",
+    "prompt": "ruined burnt medieval castle with a collapsed tower, broken curtain wall and charred beams",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 24,
+      "class": "prop"
+    },
+    "target": "ruin_markers:castle"
+  },
+  {
+    "id": "watchtower",
+    "kind": "decor",
+    "prompt": "medieval square stone watchtower with a wooden hoarding and a beacon platform",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 14,
+      "class": "prop"
+    },
+    "target": "outbuildings:watchtower"
+  },
+  {
+    "id": "chapel_romanesque",
+    "kind": "decor",
+    "prompt": "small stone romanesque chapel with a bellcote and a slate roof",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 9,
+      "class": "prop"
+    },
+    "target": "outbuildings:chapel"
+  },
+  {
+    "id": "vineyard_hut",
+    "kind": "decor",
+    "prompt": "small stone vineyard hut with a slate roof beside a few staked vine rows",
+    "seeds": 3,
+    "backend3d": "sf3d",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8,
+      "class": "prop"
+    },
+    "target": "outbuildings:vineyard"
+  }
+]
