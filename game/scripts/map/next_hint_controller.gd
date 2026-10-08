@@ -261,4 +261,7 @@ func _open_capital_city() -> void:
 		_look_at(layer.call("world_position_of", city))
 		layer.call("select", city)
 	elif capital != "":
-		map.call("_focus_capital")
+		var map_data: MapData = map.get("map_data")
+		var centroid := map_data.centroid_of_id(capital)
+		if centroid.x >= 0.0:
+			_look_at(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y))
