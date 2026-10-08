@@ -218,3 +218,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 
 - SIMSPLIT (fait) : `ai/plan_field.rs` reste à 897 lignes, découpage plus fin possible.
 - AUDIO (fait) : `AudioDirector.play_sfx` reste en round-robin, hors VoicePool (MS5a partiel).
+- HOOKS (fait) : après levée du gel FL, retirer le tronc `--screenshot=`/`--stage=` de campaign_map.gd et tous les `stage_screenshot()`/`stage_example` avec vn_ui_720_b/c_test et smoke.gd:1150.
