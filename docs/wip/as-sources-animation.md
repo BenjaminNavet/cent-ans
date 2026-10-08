@@ -1,4 +1,4 @@
-# AN — stratégie d'animation (tout le jeu)
+# AS — sources d'animation (tout le jeu)
 
 Chantier de réflexion ouvert le 08/10 à la demande du joueur : pour chaque famille animée
 (humains, chevaux, engins, navires, campagne : armées, chariots, scènes de vie, eau, végétation,
@@ -14,5 +14,5 @@ bibliothèques mocap, procédural/physique, keyframé.
   droits ; batailles navales sans 3D.
 
 ## Prochaine étape
-Synthèse : tableau famille → méthode actuelle → meilleure source → lots proposés, puis
+Prédécesseurs : AN1 (`an1-animation-vivante.md`), NT12-14. Synthèse : tableau famille → méthode actuelle → meilleure source → lots proposés, puis
 document de conception `docs/design/` et ADR.
