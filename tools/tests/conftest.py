@@ -5,6 +5,7 @@ from functools import cache
 from pathlib import Path
 
 import pytest
+from PIL import Image
 
 from cent_ans_tools.codex import schema_validator
 
@@ -89,6 +90,26 @@ def da_then_po_budget_file(budget_file: Path) -> Path:
     return target
 
 
+def _fake_run(command: list[str]) -> None:
+    output = Path(command[command.index("--output") + 1])
+    width = int(command[command.index("--width") + 1])
+    height = int(command[command.index("--height") + 1])
+    Image.new("RGB", (width, height), "navy").save(output)
+
+
+@pytest.fixture
+def fake_mflux(monkeypatch):
+    """Replace the mflux subprocess by a fake that records its command lines."""
+    commands: list[list[str]] = []
+
+    def run(command: list[str]) -> None:
+        commands.append(command)
+        _fake_run(command)
+
+    from cent_ans_tools import local_art
+
+    monkeypatch.setattr(local_art, "_run", run)
+    return commands
 @cache
 def _checked_validator(schema_name: str):
     """One validator (and metaschema check) per schema: the sibling registry is costly to build."""

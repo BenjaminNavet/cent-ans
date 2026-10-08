@@ -107,6 +107,10 @@ def estimate_price(
     model: str, client: httpx.Client | None = None, image_size: str | None = None
 ) -> Decimal:
     """Estimated USD price for one image with ``model`` (rounded up to the cent)."""
+    from cent_ans_tools import local_art
+
+    if model == local_art.MODEL_ID:
+        return Decimal("0")
     for candidate in list_image_models(client):
         if candidate.id == model:
             price = candidate.estimated_price_per_image(image_size)
@@ -154,7 +158,20 @@ def request_image(
     are optional reference pictures (PNG or JPEG bytes) sent with the prompt, e.g.
     the existing portrait of a character to age (lot DA2). ``image_config`` (Gemini:
     ``aspect_ratio``, ``image_size``) and ``seed`` are sent only when given.
+
+    The model ``local/z-image-turbo`` renders on this machine instead (ADR 0190): free,
+    first reference image as the img2img start, ``aspect_ratio`` honoured.
     """
+    from cent_ans_tools import local_art
+
+    if model == local_art.MODEL_ID:
+        image = local_art.render_image(
+            prompt,
+            aspect_ratio=(image_config or {}).get("aspect_ratio"),
+            reference=images[0] if images else None,
+            seed=seed,
+        )
+        return image, Decimal("0")
     content: str | list[dict[str, Any]] = prompt
     if images:
         content = [{"type": "text", "text": prompt}]

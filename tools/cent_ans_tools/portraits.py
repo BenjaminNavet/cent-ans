@@ -46,6 +46,7 @@ KNOWN_PRICES = {
     "openai/gpt-5-image-mini": Decimal("0.0455"),
     "google/gemini-2.5-flash-image": Decimal("0.0390"),
     "google/gemini-3.1-flash-lite-image": Decimal("0.0389"),
+    "local/z-image-turbo": Decimal("0"),  # free, on this machine (ADR 0190)
 }
 PORTRAIT_SIZE = 256
 # Output token cap per call (image ~1 056-1 290 tokens + reasoning); bounds the reservation.
@@ -210,6 +211,8 @@ def to_portrait_png(image_bytes: bytes, size: int = PORTRAIT_SIZE) -> bytes:
 
 def price_per_image(model: str, client: httpx.Client | None = None) -> Decimal:
     """Unrounded estimated USD price of one image with ``model``."""
+    if model in KNOWN_PRICES and KNOWN_PRICES[model] == 0:
+        return Decimal("0")
     for candidate in openrouter.list_image_models(client):
         if candidate.id == model:
             price = candidate.estimated_price_per_image()
@@ -238,6 +241,7 @@ def generate(
     subject: str | None = None,
     on_progress: Callable[[PortraitJob, Decimal], None] | None = None,
     convert: Callable[[bytes], bytes] = to_portrait_png,
+    image_config: dict[str, str] | None = None,
 ) -> BatchResult:
     """Paid batch: generate each job, guarded by the envelope and the global cap.
 
@@ -248,6 +252,7 @@ def generate(
     ledger row goes to the last table in the file, as before. A caller whose
     envelope is not always the last section (several pipelines share one, and a
     later, unrelated section can be appended after it) must pass it explicitly.
+    ``image_config`` (e.g. ``{"aspect_ratio": "16:9"}``) goes to every request.
     """
     unit = max(price_per_image(model, client), KNOWN_PRICES.get(model, Decimal("0")))
     written: list[Path] = []
@@ -265,11 +270,9 @@ def generate(
                 raise BudgetExceeded(
                     "Le plafond global de docs/budget.md serait dépassé"
                 )
-            extra = (
-                {"images": [job.reference.read_bytes()]}
-                if job.reference is not None
-                else {}
-            )
+            extra: dict = {"image_config": image_config} if image_config else {}
+            if job.reference is not None:
+                extra["images"] = [job.reference.read_bytes()]
             image = None
             for _attempt in range(MAX_ATTEMPTS):
                 estimated += unit

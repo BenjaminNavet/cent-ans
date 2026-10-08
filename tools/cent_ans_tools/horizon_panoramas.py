@@ -27,7 +27,7 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-from cent_ans_tools import budget, openrouter
+from cent_ans_tools import budget, local_art, openrouter
 
 REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_PATH = REPO_DIR / "data" / "fx" / "horizon.json"
@@ -37,6 +37,8 @@ DEFAULT_MODEL = "openai/gpt-5-image-mini"
 #: Pre-call estimate per image (ledger rows of 2026-09-24: 0,045-0,05 $).
 ESTIMATE_PER_IMAGE = Decimal("0.05")
 LOT_CAP = Decimal("3.00")
+# Aspect ratio of a locally generated painting (very wide, sky then crest).
+LOCAL_ASPECT = "21:9"
 SKYLINE_SAMPLES = 512
 OUT_WIDTH = 2048
 FEATHER_PX = 2.5
@@ -188,11 +190,18 @@ def generate(
     dry_run: bool = False,
     data: dict | None = None,
     raw_dir: Path = RAW_DIR,
+    budget_path: Path | str = budget.DEFAULT_BUDGET_PATH,
 ) -> list[tuple[str, Decimal]]:
-    """Paid: one painting per id (skips ids already in ``raw_dir``); returns costs."""
+    """Paid: one painting per id (skips ids already in ``raw_dir``); returns costs.
+
+    With the free local model (:data:`local_art.MODEL_ID`, ADR 0190) nothing is estimated,
+    checked or recorded in the ledger; the painting is 21:9.
+    """
     data = data or load_data()
+    local = model == local_art.MODEL_ID
+    per_image = Decimal("0") if local else ESTIMATE_PER_IMAGE
     todo = [i for i in ids if not (raw_dir / f"{i}.jpg").exists()]
-    estimate = ESTIMATE_PER_IMAGE * len(todo)
+    estimate = per_image * len(todo)
     if estimate > LOT_CAP:
         raise budget.BudgetExceeded(f"{estimate} $ > plafond du lot {LOT_CAP} $")
     if dry_run:
@@ -202,19 +211,22 @@ def generate(
     raw_dir.mkdir(parents=True, exist_ok=True)
     costs = []
     for panorama_id in todo:
-        if not budget.check(ESTIMATE_PER_IMAGE):
+        if not local and not budget.check(ESTIMATE_PER_IMAGE, budget_path):
             raise budget.BudgetExceeded("plafond de la session atteint")
+        extra = {"image_config": {"aspect_ratio": LOCAL_ASPECT}} if local else {}
         image, actual = openrouter.request_image(
-            model, prompt_for(data, panorama_id), max_tokens=4000
+            model, prompt_for(data, panorama_id), max_tokens=4000, **extra
         )
         cost = budget.to_money(actual) if actual is not None else ESTIMATE_PER_IMAGE
-        budget.add_entry(
-            date.today().isoformat(),
-            openrouter.SERVICE_NAME,
-            f"EP2 : panorama d'horizon « {panorama_id} » (1 × {model})",
-            ESTIMATE_PER_IMAGE,
-            cost,
-        )
+        if not local:
+            budget.add_entry(
+                date.today().isoformat(),
+                openrouter.SERVICE_NAME,
+                f"EP2 : panorama d'horizon « {panorama_id} » (1 × {model})",
+                ESTIMATE_PER_IMAGE,
+                cost,
+                path=budget_path,
+            )
         Image.open(io.BytesIO(image)).convert("RGB").save(
             raw_dir / f"{panorama_id}.jpg", "JPEG", quality=92
         )

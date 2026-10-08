@@ -1,52 +1,73 @@
 """Tests of the free local mflux backend (no model run: fake runner)."""
 
 import io
-import subprocess
-from pathlib import Path
+from decimal import Decimal
 
+import pytest
 from PIL import Image
 
-from cent_ans_tools import entry_art, local_art
+from cent_ans_tools import entry_art, local_art, openrouter, portraits
 from cent_ans_tools.portraits import PortraitJob
 
 
-def _fake_runner(command: list[str]) -> None:
-    output = Path(command[command.index("--output") + 1])
-    Image.new("RGB", (local_art.WIDTH, local_art.HEIGHT), "navy").save(output)
+def test_render_image_honours_aspect_and_stable_seed(fake_mflux):
+    """The aspect ratio sets the size; the same prompt gives the same seed."""
+    image = local_art.render_image("a realm", aspect_ratio="3:4")
+    assert Image.open(io.BytesIO(image)).size == (768, 1024)
+    local_art.render_image("a realm", aspect_ratio="3:4")
+    seeds = [c[c.index("--seed") + 1] for c in fake_mflux]
+    assert seeds[0] == seeds[1]
 
 
-def test_generate_writes_converted_miniature(tmp_path):
-    """The raw mflux image is cropped and saved as the miniature."""
+def test_render_image_passes_reference(fake_mflux):
+    """A reference image becomes the img2img start."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(buffer, "PNG")
+    local_art.render_image("p", reference=buffer.getvalue())
+    assert "--image-path" in fake_mflux[0]
+
+
+def test_unknown_aspect_is_refused():
+    """An aspect ratio without a local size fails loudly."""
+    with pytest.raises(ValueError):
+        local_art.size_for("5:1")
+
+
+def test_openrouter_routes_local_model_for_free(fake_mflux):
+    """``request_image`` with the local model renders here, at no cost."""
+    image, cost = openrouter.request_image(
+        local_art.MODEL_ID, "p", image_config={"aspect_ratio": "1:1"}
+    )
+    assert cost == Decimal("0")
+    assert Image.open(io.BytesIO(image)).size == (1024, 1024)
+    assert openrouter.estimate_price(local_art.MODEL_ID) == Decimal("0")
+
+
+def test_batch_with_local_model_writes_without_budget_row(
+    fake_mflux, tmp_path, budget_file
+):
+    """A shared batch on the local model writes miniatures and no ledger row."""
+    before = budget_file.read_text(encoding="utf-8")
     job = PortraitJob("fac_test", "A realm", tmp_path / "fac_test.jpg")
-    written, failed = local_art.generate([job], entry_art.convert, runner=_fake_runner)
-    assert written == [job.out_path]
-    assert failed == []
+    result = portraits.generate(
+        [job],
+        local_art.MODEL_ID,
+        budget_path=budget_file,
+        convert=entry_art.convert,
+        image_config={"aspect_ratio": "16:9"},
+    )
+    assert result.written == [job.out_path]
+    assert result.actual == Decimal("0")
+    assert budget_file.read_text(encoding="utf-8") == before
     image = Image.open(io.BytesIO(job.out_path.read_bytes()))
     assert image.size == (entry_art.ART_WIDTH, entry_art.ART_HEIGHT)
 
 
-def test_failed_job_is_reported_and_batch_continues(tmp_path):
-    """A failing job is reported without stopping the batch."""
-    jobs = [
-        PortraitJob("fac_bad", "A", tmp_path / "fac_bad.jpg"),
-        PortraitJob("fac_good", "B", tmp_path / "fac_good.jpg"),
-    ]
-
-    def runner(command: list[str]) -> None:
-        if "fac_bad" in command[command.index("--output") + 1]:
-            raise subprocess.CalledProcessError(1, command)
-        _fake_runner(command)
-
-    written, failed = local_art.generate(jobs, entry_art.convert, runner=runner)
-    assert written == [jobs[1].out_path]
-    assert [job.character_id for job, _ in failed] == ["fac_bad"]
-
-
-def test_command_uses_stable_seed_and_reference(tmp_path):
-    """The seed is stable and the reference image is passed."""
-    reference = tmp_path / "ref.png"
-    job = PortraitJob("fac_x", "p", tmp_path / "x.jpg", reference=reference)
-    command = local_art.command_for(job, tmp_path / "p.txt", tmp_path / "o.png")
-    assert command[command.index("--seed") + 1] == str(local_art.seed_for(job))
-    assert local_art.seed_for(job) == local_art.seed_for(job)
-    assert command[command.index("--image-path") + 1] == str(reference)
+def test_strength_overrides_reference_strength(fake_mflux):
+    """``strength`` replaces the default img2img strength; omitted keeps it."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(buffer, "PNG")
+    local_art.render_image("p", reference=buffer.getvalue(), strength=0.7)
+    local_art.render_image("p", reference=buffer.getvalue())
+    values = [c[c.index("--image-strength") + 1] for c in fake_mflux]
+    assert values == ["0.7", str(local_art.REFERENCE_STRENGTH)]

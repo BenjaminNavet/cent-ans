@@ -165,3 +165,16 @@ def test_faction_prompt_uses_capital_province_scenery(tmp_path: Path) -> None:
             0
         ].prompt
     )
+
+
+def test_miniature_inset_drops_painted_frame() -> None:
+    """``inset`` cuts a border painted around the image before the ratio crop."""
+    image = Image.new("RGB", (1000, 562), "gold")
+    image.paste(Image.new("RGB", (970, 532), "navy"), (15, 15))
+    buffer = io.BytesIO()
+    image.save(buffer, "PNG")
+    out = Image.open(
+        io.BytesIO(event_art.to_miniature_jpg(buffer.getvalue(), inset=0.03))
+    )
+    red, green, blue = out.convert("RGB").getpixel((0, 0))
+    assert blue > red and blue > green

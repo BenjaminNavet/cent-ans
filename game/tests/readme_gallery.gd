@@ -4,7 +4,7 @@ extends SceneTree
 ## Chaque vue tourne dans son propre processus Godot fenêtré (le rendu headless ne produit pas
 ## d'image), avec les options de capture déjà en place : bataille (`--screenshot`, `--closeup`,
 ## `--historical`), carte (`--focus`), villes (`readme_shots.gd`), menu (`mm1_capture.gd`).
-## Usage : godot --path game --script res://tests/readme_gallery.gd -- [--out=<dossier>] [--only=<nom,nom>]
+## Usage : godot --headless --path game --script res://tests/readme_gallery.gd -- [--out=<dossier>] [--only=<nom,nom>]
 ## `--out` relatif : relatif à la racine du dépôt (défaut `docs/img/readme`).
 
 const RESOLUTION := "1600x900"
@@ -26,8 +26,8 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	# [nom, scène ou script, options après `--` (`%s` = fichier écrit par le processus), fichier écrit].
 	var views := [
-		# Mêlée engagée depuis une demi-minute (premier choc vers 142 s), sans interface.
-		["bataille", BATTLE, ["--closeup", "--closeup-distance=14", "--shot-at=170", "--no-hud", "--screenshot=%s"], "bataille.png"],
+		# Mêlée engagée (le premier choc vient désormais après 170 s), sans interface.
+		["bataille", BATTLE, ["--closeup", "--closeup-distance=14", "--shot-at=240", "--no-hud", "--screenshot=%s"], "bataille.png"],
 		["bataille_poitiers", BATTLE, ["--historical=poitiers", "--screenshot=%s"], "bataille_poitiers.png"],
 		# `--focus` après `--screenshot` : la mise en scène de capture recadre sinon la caméra.
 		["campagne", MAP, ["--season=summer", "--screenshot=%s", CAMPAIGN_FOCUS], "campagne.png"],
@@ -56,7 +56,7 @@ func _init() -> void:
 		var before := FileAccess.get_modified_time(written)
 		var started := Time.get_ticks_msec()
 		var output := []
-		var code := OS.execute(OS.get_executable_path(), args, output, true)
+		var code := _run_godot(repo, args, output)
 		var ok := code == 0 and FileAccess.get_modified_time(written) > before and _to_jpg(written)
 		if ok:
 			print("README_SHOT %s OK (%.1f s)" % [name, (Time.get_ticks_msec() - started) / 1000.0])
@@ -65,6 +65,15 @@ func _init() -> void:
 			print("README_SHOT %s FAIL (code %d)\n%s" % [name, code, "".join(output).right(1500)])
 	print("README_SHOT done, %d failed" % failed)
 	quit(0 if failed == 0 else 1)
+
+
+## Lance un processus Godot de capture. Sous macOS, passe par `tools/godot_bg.sh` (`open -g`) pour ne
+## pas prendre le focus ; ce lanceur ne transmet pas le code de sortie : le fichier écrit fait foi.
+func _run_godot(repo: String, args: PackedStringArray, output: Array) -> int:
+	if OS.get_name() == "macOS":
+		OS.execute(repo.path_join("tools/godot_bg.sh"), args, output, true)
+		return 0
+	return OS.execute(OS.get_executable_path(), args, output, true)
 
 
 ## Ramène l'image à `WIDTH` px de large et l'écrit en JPEG (le PNG intermédiaire est supprimé).

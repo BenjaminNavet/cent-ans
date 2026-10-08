@@ -21,7 +21,7 @@ import numpy as np
 import yaml
 from PIL import Image, ImageDraw, ImageFont
 
-from cent_ans_tools import openrouter
+from cent_ans_tools import local_art, openrouter
 
 ROOT = Path(__file__).resolve().parents[2]
 ORNAMENTS_PATH = ROOT / "data" / "art" / "ui_ornaments.yaml"
@@ -130,8 +130,13 @@ def generate(
     dry_run: bool = False,
     model: str | None = None,
 ) -> list[Path]:
-    """Paid calls (budget-guarded); raw images already in ``raw_dir`` are reused."""
+    """Paid calls (budget-guarded); raw images already in ``raw_dir`` are reused.
+
+    With the free local model (ADR 0190) only the aspect ratio is sent (``image_size`` is
+    a Gemini tier) and the first non-empty reference is the img2img start.
+    """
     model = model or load_ornaments()["model"]
+    local = model == local_art.MODEL_ID
     if not dry_run:
         raw_dir.mkdir(parents=True, exist_ok=True)
     paths: list[Path] = []
@@ -153,8 +158,12 @@ def generate(
             request.prompt,
             path,
             subject=f"NB1 : {request.piece_id} v{request.variant} ({model})",
-            images=list(request.references),
-            image_config=request.image_config,
+            images=[ref for ref in request.references if ref or not local],
+            image_config=(
+                {"aspect_ratio": request.image_config["aspect_ratio"]}
+                if local
+                else request.image_config
+            ),
             seed=request.seed,
             cap=NB_CAP,
         )
