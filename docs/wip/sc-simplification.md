@@ -30,8 +30,8 @@ Le propriétaire précise : le chantier n'est pas que de la suppression ; il fau
 
 ## État
 - [x] Vague 0 audit (18/20 zones ; MS et DT en cours) → `docs/wip/sc/lots.md` (catalogue des lots par zone)
-- [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0187), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
-- Vague 1 fusionnée dans feat/sc : docs, probes, deadfuncs, naval (ADR 0187), tlschemas, gtshots, jsondata (DataFile). En cours : simsplit, names, mock, tldel.
+- [ ] Vague 1 (lancée 10-08) : worktrees `../gp-sc-<lot>`, branches `sc/<lot>` : probes, naval (ADR 0192), simsplit, names, deadfuncs, gtshots, docs, mock, jsondata, tldel, tlschemas
+- Vague 1 fusionnée dans feat/sc : docs, probes, deadfuncs, naval (ADR 0192), tlschemas, gtshots, jsondata (DataFile). En cours : simsplit, names, mock, tldel.
 - [ ] Vague 2 (lancée 10-08, 6 lots car disque ≈ 35 Go) : battledev, hooks, uikit, audio, testsupport, schemadefs.
 - Veto joueur 10-08 : garder l'issue bataille des rencontres (CB2) et les 4 issues de prise + ruines (CB3).
 - Réserve : main a des modifs non commitées sur landmarks_v2/towns_1340 (sauvegarde scratchpad main-dirty.patch) → MA1/MA2 (suppression style real / landmarks v2) en attente de vérif.
