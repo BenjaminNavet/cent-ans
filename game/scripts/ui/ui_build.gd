@@ -72,3 +72,10 @@ static func spacer(parent: Node = null) -> Control:
 static func _attach(node: Node, parent: Node) -> void:
 	if parent != null:
 		parent.add_child(node)
+
+
+## Retire et libère tous les enfants de `node` (reconstruction d'une liste).
+static func clear_children(node: Node) -> void:
+	for child in node.get_children():
+		node.remove_child(child)
+		child.queue_free()

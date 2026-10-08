@@ -1,5 +1,5 @@
 class_name HistoricalBattlesMenu
-extends PanelContainer
+extends ListMenu
 
 ## EP7 — « Batailles historiques » du menu principal : Crécy (1346), Poitiers (1356), Azincourt
 ## (1415), lues dans `data/battle_maps/` par le cœur (`BattleSim.list_historical`). Pour chaque
@@ -7,18 +7,11 @@ extends PanelContainer
 ## l'IA contre l'IA. La scène de bataille reçoit `--historical=<id>` et `--historical-side=` ;
 ## la fin de la bataille ramène au menu (hors campagne, rien n'est conservé). Échap ou
 ## « Fermer » : signal `closed`.
-## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
-## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
-## `UiMotion`.
 ## NT4 : le « Didacticiel de bataille » (bataille-prologue guidée, `BattlePrologue`) ouvre la liste.
 
-signal closed
 signal battle_started(id: String, side: String)
 
-const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
-
 var battles: Array = []
-var buttons: Dictionary = {}  # "<id>:<side>" -> Button (tests)
 var prologue_button: Button = null  # NT4 : « Commencer le didacticiel »
 
 
@@ -45,40 +38,32 @@ static func args_for(id: String, side: String) -> PackedStringArray:
 	return args
 
 
-func _ready() -> void:
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(780, 0)
+func _menu_title() -> String:
+	return "Batailles historiques"
+
+
+func _menu_hint() -> String:
+	return "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
+
+
+func _menu_width() -> float:
+	return 780.0
+
+
+func _scroll_height() -> float:
+	return 560.0
+
+
+func _load_entries() -> void:
 	battles = load_battles()
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, 560)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(scroll)
-	var box := UiBuild.vbox(8)
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(box)
-	var title := UiBuild.label("Batailles historiques")
-	UiType.apply(title, UiType.TITLE)
-	box.add_child(title)
-	var hint := UiBuild.label("Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé.", 0, null, true, 720)
-	UiType.apply(hint, UiType.CAPTION)
-	hint.modulate = Color(1, 1, 1, 0.75)
-	box.add_child(hint)
+
+
+func _build_entries(box: VBoxContainer) -> void:
 	_add_prologue(box)
 	if battles.is_empty():
-		var none := UiBuild.label("Aucune bataille historique n'a été trouvée.", 0, null, false, 0.0, box)
+		UiBuild.label("Aucune bataille historique n'a été trouvée.", 0, null, false, 0.0, box)
 	for entry in battles:
 		_add_battle(box, entry as Dictionary)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_END
-	box.add_child(row)
-	var close_button := UiBuild.button("Fermer", close)
-	close_button.name = "CloseButton"
-	row.add_child(close_button)
-	if not buttons.is_empty():
-		(buttons.values()[0] as Button).grab_focus.call_deferred()
-	UiZones.put(UiZones.Zone.MODAL, self)
-	UiMotion.fade_in(self)
 
 
 ## NT4 : « Didacticiel de bataille » en tête de liste (bataille-prologue guidée), pour ne pas
@@ -163,22 +148,7 @@ static func _the_army(faction_name: String) -> String:
 			return "l'armée de %s" % faction_name
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
-
-
-func close() -> void:
-	closed.emit()
-	UiMotion.fade_out(self, UiMotion.DURATION, true)
-
-
 ## Lance la bataille `id`, `side` menée par le joueur ("" : IA contre IA).
 func start(id: String, side: String) -> void:
-	BattleScene.demo_args = args_for(id, side)
 	battle_started.emit(id, side)
-	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null and audio.has_method("stop_all"):
-		audio.call("stop_all")
-	SceneFader.go(BATTLE_SCENE)
+	_launch_battle(args_for(id, side))
