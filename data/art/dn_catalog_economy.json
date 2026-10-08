@@ -1,0 +1,1346 @@
+[
+ {
+  "id": "econ_saltpan_atlantic",
+  "kind": "decor",
+  "prompt": "Atlantic salt marsh works with rectangular clay evaporation pans separated by low earth banks, a small thatched salt-raker hut, heaps of grey salt and wooden rakes",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "outbuildings:saltworks (res_salt, Guerande, baie de Bourgneuf, Marennes)",
+  "region": "Medieval Brittany Atlantic coast circa 1340, wet,"
+ },
+ {
+  "id": "econ_saltpan_hanseatic",
+  "kind": "decor",
+  "prompt": "Baltic boiling-salt works: a long timber shed with a smoking chimney, lead boiling pans, stacked firewood and salt barrels",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "house"
+  },
+  "target": "outbuildings:saltworks (Luneburg, Kolberg, Oldesloe)",
+  "region": "Medieval Hanseatic north German circa 1340, smoky,"
+ },
+ {
+  "id": "econ_saltmine_alpine",
+  "kind": "decor",
+  "prompt": "Alpine rock-salt mine entrance with a timber gallery portal, a small winch house, brine pipes of hollow logs and salt crates",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:saltworks (Hallein, Wieliczka, Bad Reichenhall)",
+  "region": "Medieval Central European mountain circa 1340, rugged,"
+ },
+ {
+  "id": "econ_saltpan_mediterranean",
+  "kind": "decor",
+  "prompt": "Mediterranean solar salt pans with flat shallow basins, white salt cones, a small windmill pump and a stone store hut",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "outbuildings:saltworks (Peccais, Ibiza, Trapani, Cervia)",
+  "region": "Medieval Mediterranean coast circa 1340, sun-bleached,"
+ },
+ {
+  "id": "econ_bloomery_furnace",
+  "kind": "decor",
+  "prompt": "Medieval clay bloomery iron furnace with a short stack, leather bellows, charcoal heaps and a pile of raw iron blooms beside a timber lean-to",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "outbuildings:mine (res_iron, Weald, Dean, Berry, Nivernais)",
+  "region": "Medieval northwestern Europe circa 1340, sooty,"
+ },
+ {
+  "id": "econ_forge_catalan",
+  "kind": "decor",
+  "prompt": "Catalan forge with a stone hearth, water-driven trip hammer in a timber shed, a leat and stacked iron bars",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "outbuildings:mine (res_iron, Pyrenees, Catalogne, Foix)",
+  "region": "Medieval Pyrenean valley circa 1340, rugged,"
+ },
+ {
+  "id": "econ_ironmine_styrian",
+  "kind": "decor",
+  "prompt": "Alpine iron ore mine with a stone and timber adit portal, ore carts on wooden rails, spoil heap and a small hoist hut",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:mine (res_iron, Styrie, Erzberg, Siegerland, Suede)",
+  "region": "Medieval Alpine circa 1340, grim,"
+ },
+ {
+  "id": "econ_tin_streamworks_cornwall",
+  "kind": "decor",
+  "prompt": "Cornish tin streamworks with timber stamping mill beside a stream, a water wheel, wooden buddles and heaps of dark ore",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "outbuildings:mine (res_tin, Cornouailles, Dartmoor)",
+  "region": "Medieval Cornwall circa 1340, windswept,"
+ },
+ {
+  "id": "econ_quarry_crane_stone",
+  "kind": "decor",
+  "prompt": "Open stone quarry cut face with a wooden treadwheel crane, stacked dressed limestone blocks and a sledge with rollers",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:mine (res_stone, Caen, Tuffeau, Portland, Istrie)",
+  "region": "Medieval northern France circa 1340, pale,"
+ },
+ {
+  "id": "econ_sheep_shearing_pen",
+  "kind": "decor",
+  "prompt": "Wool shearing station: a wooden hurdle pen, a low thatched shed, bales of raw wool in sacks and a wool-weighing beam scale",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (res_wool, Cotswolds, Yorkshire, Castille, Mesta)",
+  "region": "Medieval English Cotswolds circa 1340, pastoral,"
+ },
+ {
+  "id": "econ_wool_staple_house",
+  "kind": "decor",
+  "prompt": "Stone wool staple warehouse with a loading hoist door, stacked wool sacks and a hand cart at the doorway",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:market (hub_calais, hub_londres, hub_bruges)",
+  "region": "Medieval Flemish and English trading town circa 1340, prosperous,"
+ },
+ {
+  "id": "econ_fulling_mill_cloth",
+  "kind": "decor",
+  "prompt": "Fulling mill with a water wheel driving timber stocks, tenter frames with stretched cloth drying beside a shed",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (res_cloth, Flandre, Brabant, Norwich, Florence)",
+  "region": "Medieval Flemish cloth town circa 1340, busy,"
+ },
+ {
+  "id": "econ_dyers_vats_workshop",
+  "kind": "decor",
+  "prompt": "Dyers workshop with a row of wooden vats stained blue and red, cloth hanging on long poles to dry under an open timber roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:market (res_cloth, faubourg des drapiers)",
+  "region": "Medieval northern Italian or Flemish town circa 1340, colourful but muted,"
+ },
+ {
+  "id": "econ_vine_press_gascon",
+  "kind": "decor",
+  "prompt": "Large timber lever wine press (pressoir a long fut) in an open stone-pillared shed, wooden vats and stacked casks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "outbuildings:vineyard (res_wine, Bordeaux, Bourgogne, Rhin)",
+  "region": "Medieval Gascony and Burgundy circa 1340, rustic,"
+ },
+ {
+  "id": "econ_vine_terrace_rhine",
+  "kind": "decor",
+  "prompt": "Vineyard on narrow dry-stone terraces with wooden stakes and a tiny stone watch hut with slate roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "house"
+  },
+  "target": "outbuildings:vineyard slope (Rhin, Moselle, Wachau)",
+  "region": "Medieval Rhine valley circa 1340, steep,"
+ },
+ {
+  "id": "econ_wine_cellar_chai",
+  "kind": "decor",
+  "prompt": "Long low stone wine storehouse (chai) with a tiled roof, a loading door, barrels stacked outside and a hoist beam",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "house"
+  },
+  "target": "outbuildings:vineyard / port Bordeaux, La Rochelle (res_wine)",
+  "region": "Medieval Bordeaux circa 1340, stone,"
+ },
+ {
+  "id": "econ_vine_pergola_med",
+  "kind": "decor",
+  "prompt": "Mediterranean vineyard with vines trained on pergolas over a small stone farmhouse hut, amphorae and wicker baskets",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:vineyard (Italie, Catalogne, Chypre, Crimee)",
+  "region": "Medieval Mediterranean circa 1340, sunny,"
+ },
+ {
+  "id": "econ_sawmill_waterdriven",
+  "kind": "decor",
+  "prompt": "Water-driven sawmill: a timber shed over a mill race, a reciprocating frame saw, a log carriage and stacked planks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (res_wood, Vosges, Alpes, Baltique, Norvege)",
+  "region": "Medieval Alpine or Scandinavian forest circa 1340, rustic,"
+ },
+ {
+  "id": "econ_timber_yard_logs",
+  "kind": "decor",
+  "prompt": "Timber yard with piled oak logs on skids, a pit-saw trestle with two sawyers' frame, stacked squared beams and bundles of faggots",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (res_wood, forets royales, Baltique)",
+  "region": "Medieval northern forest edge circa 1340, rough,"
+ },
+ {
+  "id": "econ_log_float_raft",
+  "kind": "decor",
+  "prompt": "Raft of tied logs for river floating moored at a bank with a pole and a small wooden landing stage",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "nouveau : worksite riviere (res_wood, flottage Loire, Vistule, Neman)",
+  "region": "Medieval river forest circa 1340, rough,"
+ },
+ {
+  "id": "econ_pitch_tar_kiln",
+  "kind": "decor",
+  "prompt": "Pine tar and pitch kiln: an earth-covered conical mound with a clay drain pipe and a barrel collecting black tar, stacked split pine roots",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "prop"
+  },
+  "target": "outbuildings:farm (res_wood, Suede, Finlande, Landes)",
+  "region": "Medieval Nordic pine forest circa 1340, dark,"
+ },
+ {
+  "id": "econ_cod_drying_station",
+  "kind": "decor",
+  "prompt": "Stockfish drying station: tall pole frames with rows of split cod, a rorbu timber fisher hut on stilts and a salting trough",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:port (res_fish, Lofoten, Bergen, Islande)",
+  "region": "Medieval Norwegian arctic coast circa 1340, windswept,"
+ },
+ {
+  "id": "econ_herring_curing_house",
+  "kind": "decor",
+  "prompt": "Herring curing house with a long low timber shed, rows of barrels, smoking racks and a gutting table with baskets",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:port (res_fish, Scanie, Yarmouth, Zeeland)",
+  "region": "Medieval Baltic and North Sea coast circa 1340, damp,"
+ },
+ {
+  "id": "econ_fish_pond_monastic",
+  "kind": "decor",
+  "prompt": "Monastic stew pond: a stocked square fishpond with an earth dam, a sluice gate and a small monk's fishing hut with nets",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:abbey / farm (res_fish, Dombes, Boheme, Silesie)",
+  "region": "Medieval central European circa 1340, calm,"
+ },
+ {
+  "id": "econ_tuna_trap_almadraba",
+  "kind": "decor",
+  "prompt": "Tuna fishery of Mediterranean coast: a shore shed, heaps of cork floats, big hemp nets spread to dry and a pair of moored boats",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "house"
+  },
+  "target": "outbuildings:port (res_fish, Andalousie, Sicile, Maghreb)",
+  "region": "Medieval Andalusian coast circa 1340, sunny,"
+ },
+ {
+  "id": "econ_caviar_sturgeon_fishery",
+  "kind": "decor",
+  "prompt": "Volga-Don sturgeon fishery: a timber pier with wooden fish tanks, hanging split sturgeon on poles and a salting shed",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "nouveau : worksite fleuve (Astrakhan, Don, Dniepr, Caffa)",
+  "region": "Medieval Black Sea and steppe river circa 1340, rough,"
+ },
+ {
+  "id": "econ_amber_workshop",
+  "kind": "decor",
+  "prompt": "Amber gatherer and craftsman workshop: a small timber hut by a dune with long-handled nets on the wall, trays of raw amber chunks and a bench with a polishing wheel",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "nouveau : worksite cote (ambre, Samland, Prusse, Chevaliers Teutoniques)",
+  "region": "Medieval Baltic Prussian coast circa 1340, windswept,"
+ },
+ {
+  "id": "econ_fur_trapper_cabin",
+  "kind": "decor",
+  "prompt": "Fur trapper cabin: a log hut with a turf roof, stretched pelts on drying hoops, a pole rack with furs and traps on the wall",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "nouveau : worksite foret (fourrures, Novgorod, Perm, Pskov, Finlande)",
+  "region": "Medieval Russian taiga circa 1340, harsh,"
+ },
+ {
+  "id": "econ_fur_market_stall_rus",
+  "kind": "decor",
+  "prompt": "Open air timber furrier stall with hanging bundles of sable, squirrel and ermine pelts, a counting board and a small brazier",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "folk:stall / market (Novgorod, Moscou, Sarai, Bruges hanse)",
+  "region": "Medieval Rus' trading town circa 1340, wintry,"
+ },
+ {
+  "id": "econ_silk_house_mulberry",
+  "kind": "decor",
+  "prompt": "Silk farm with mulberry trees, a long stone and timber silkworm shed with wicker trays and a reeling shed with a spinning frame",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "nouveau : worksite (soie, Grenade, Lucques, Bursa, Calabre)",
+  "region": "Medieval Mediterranean circa 1340, warm,"
+ },
+ {
+  "id": "econ_spice_warehouse_levant",
+  "kind": "decor",
+  "prompt": "Levantine caravanserai-type spice warehouse with sacks of pepper, a weighing scale, stacked chests and a camel kneeling at the door",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "outbuildings:market (epices, Alexandrie, Acre, Trebizonde, Venise)",
+  "region": "Medieval Levant circa 1340, dusty,"
+ },
+ {
+  "id": "econ_stud_farm_haras",
+  "kind": "decor",
+  "prompt": "Horse stud farm with a timber paddock fence, a long stone stable range with arched doors and a covered training ring",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 22,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (chevaux, Andalousie, Normandie, Hongrie, Mamelouks)",
+  "region": "Medieval Andalusian and Norman circa 1340, stately,"
+ },
+ {
+  "id": "econ_horse_corral_steppe",
+  "kind": "decor",
+  "prompt": "Steppe horse corral: a round rope and stake enclosure with a felt tent beside it, horse picket lines and saddle stands",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "nouveau : worksite steppe (chevaux, Horde d'Or, Hongrie, Cumans)",
+  "region": "Medieval Golden Horde steppe circa 1340, nomadic,"
+ },
+ {
+  "id": "econ_alum_mine_phocaea",
+  "kind": "decor",
+  "prompt": "Alum mine and works: yellowish pale rock pits, stone roasting kilns, large lead boiling cauldrons and sacks of white alum",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "nouveau : worksite colline (alun, Phocee, Tolfa, Asie Mineure)",
+  "region": "Medieval Aegean Anatolian circa 1340, pale,"
+ },
+ {
+  "id": "econ_glass_pitch_ashworks",
+  "kind": "decor",
+  "prompt": "Potash ash-burning pit works with a pile of logs, a lye barrel and a conical sooty kiln",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "prop"
+  },
+  "target": "outbuildings:farm (forets, Baltique, Boheme)",
+  "region": "Medieval forest circa 1340, sooty,"
+ },
+ {
+  "id": "econ_hemp_retting_pond",
+  "kind": "decor",
+  "prompt": "Flax and hemp retting: a pond with bundles of stalks weighed with stones, a breaking frame and sheaves drying in stooks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (cordages, lin, Flandre, Baltique)",
+  "region": "Medieval Flanders lowlands circa 1340, damp,"
+ },
+ {
+  "id": "econ_tannery_riverside",
+  "kind": "decor",
+  "prompt": "Tannery on a river bank: timber sheds with tanning pits, hides stretched on frames and bark piles",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "folk:worksite / faubourg des tanneurs",
+  "region": "Medieval town river edge circa 1340, grimy,"
+ },
+ {
+  "id": "econ_granary_stone_raised",
+  "kind": "decor",
+  "prompt": "Raised stone granary on staddle pillars with a tiled roof and external stairs to a door, sacks of wheat below",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (res_wheat, greniers de ville, Sicile, Pologne)",
+  "region": "Medieval central Europe circa 1340, solid,"
+ },
+ {
+  "id": "econ_wheat_stacks_rick",
+  "kind": "decor",
+  "prompt": "Group of thatched wheat ricks on stone bases with a ladder and a flail threshing floor",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "prop"
+  },
+  "target": "outbuildings:farm level 3 (res_wheat)",
+  "region": "Medieval northern France circa 1340, golden but muted,"
+ },
+ {
+  "id": "econ_market_hall_timber",
+  "kind": "decor",
+  "prompt": "Timber covered market hall (halle) with a high shingled roof on massive oak posts, open sides, stacked sacks and barrels",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24,
+   "class": "major_building"
+  },
+  "target": "outbuildings:market 3 / villes 1:1 place (landmarks_v2 kind market)",
+  "region": "Medieval France and England circa 1340, framed,"
+ },
+ {
+  "id": "econ_market_hall_stone_flemish",
+  "kind": "decor",
+  "prompt": "Stone cloth hall with a massive belfry tower, pointed arcade ground floor and stepped gables",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 50,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 Bruges (landmarks_v2 bruges halles), outbuildings:market",
+  "region": "Medieval Flanders circa 1340, brick and stone,"
+ },
+ {
+  "id": "econ_market_hall_italian",
+  "kind": "decor",
+  "prompt": "Italian loggia market with open round arches, a vaulted roof, a stone counter table and a weighing house beside",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 / outbuildings:market (Italie, Avignon)",
+  "region": "Medieval Italian town circa 1340, brick,"
+ },
+ {
+  "id": "econ_market_stalls_cluster",
+  "kind": "decor",
+  "prompt": "Cluster of simple wooden market stalls with cloth awnings, crates of vegetables, baskets, a hanging scale and a barrel",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "prop"
+  },
+  "target": "folk:market scene (landmarks_v2 market/square)",
+  "region": "Medieval town square circa 1340, lively,"
+ },
+ {
+  "id": "econ_market_cross_covered",
+  "kind": "decor",
+  "prompt": "Market cross: an octagonal stone shelter with a central pillar and a conical roof, steps and a pillory ring beside",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "prop"
+  },
+  "target": "villes 1:1 place (England, Normandie)",
+  "region": "Medieval English market town circa 1340, stone,"
+ },
+ {
+  "id": "econ_bazaar_covered_street",
+  "kind": "decor",
+  "prompt": "Covered bazaar street segment with vaulted brick roof, wooden shutters, hanging lanterns and carpet displays",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "nouveau : villes maghreb/levant/byzantines (town_isl, town_byz markets)",
+  "region": "Medieval Islamic Mediterranean city circa 1340, warm stone,"
+ },
+ {
+  "id": "econ_steppe_market_tents",
+  "kind": "decor",
+  "prompt": "Steppe trading post with felt tents, hanging hides, stacked saddles and sheepskin bales around a wooden counter",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "nouveau : town_steppe marche (Sarai, Caffa)",
+  "region": "Medieval Golden Horde circa 1340, nomadic,"
+ },
+ {
+  "id": "econ_weigh_house_crane",
+  "kind": "decor",
+  "prompt": "Public weigh house of timber and stone with a large beam balance, a hoist crane over the door and weights on the wall",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "villes 1:1 / ports (Londres tron, Bruges, Hanse)",
+  "region": "Medieval northern trading town circa 1340, solid,"
+ },
+ {
+  "id": "econ_bridge_stone_pointed_gothic",
+  "kind": "decor",
+  "prompt": "Gothic stone bridge of many pointed arches with triangular cutwaters and a mid-span chapel and houses on the piers",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 60,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:stone (grands fleuves, Pont de Londres, Pont-Notre-Dame)",
+  "region": "Medieval northern France and England circa 1340, crowded,"
+ },
+ {
+  "id": "econ_bridge_stone_roman_round",
+  "kind": "decor",
+  "prompt": "Old Roman-style stone bridge with high round arches and a flat deck with low parapets, weathered and patched",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 45,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:stone (Sud, Espagne, Italie, Languedoc)",
+  "region": "Medieval southern Europe circa 1340, ancient,"
+ },
+ {
+  "id": "econ_bridge_stone_fortified_avignon",
+  "kind": "decor",
+  "prompt": "Long fortified stone bridge with round arches, a defensive tower mid-span, a small chapel and a toll gate at the end",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 60,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:gate (Avignon, Cahors Valentre, Orthez, Prague)",
+  "region": "Medieval Rhone valley circa 1340, fortified,"
+ },
+ {
+  "id": "econ_bridge_timber_trestle",
+  "kind": "decor",
+  "prompt": "Plain timber trestle bridge with wooden piers, a plank deck and low rails, mossy and rough",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 25,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:wood (Europe du Nord, Pologne, Rus')",
+  "region": "Medieval eastern Europe circa 1340, rough,"
+ },
+ {
+  "id": "econ_bridge_timber_covered",
+  "kind": "decor",
+  "prompt": "Covered timber bridge with a shingled roof, stone abutments and side shutters",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:wood (Alpes, Suisse, Rhin superieur)",
+  "region": "Medieval Alpine valley circa 1340, shingled,"
+ },
+ {
+  "id": "econ_bridge_pontoon_boats",
+  "kind": "decor",
+  "prompt": "Pontoon boat bridge of moored flat barges with planks across, a rope tether and a toll hut at one end",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 35,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:boats (Danube, Dniepr, Euphrate)",
+  "region": "Medieval great river circa 1340, improvised,"
+ },
+ {
+  "id": "econ_bridge_draw_town",
+  "kind": "decor",
+  "prompt": "Stone bridge with a timber drawbridge span and portcullis gatehouse tower at the town end",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:gate / villes 1:1 (Calais, Rouen)",
+  "region": "Medieval fortified town circa 1340, sturdy,"
+ },
+ {
+  "id": "econ_bridge_arched_andalusi",
+  "kind": "decor",
+  "prompt": "Single high horseshoe-arched stone bridge with a humped deck and a small watchtower",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 35,
+   "class": "major_building"
+  },
+  "target": "bridge_meshes:stone (Grenade, Cordoue, Maghreb)",
+  "region": "Medieval Andalusian circa 1340, golden stone,"
+ },
+ {
+  "id": "econ_bridge_footbridge_plank",
+  "kind": "decor",
+  "prompt": "Simple footbridge made of two logs hewn flat with a rope handrail",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "prop"
+  },
+  "target": "bridge_meshes:ford / petits ruisseaux (fine_geo crossings)",
+  "region": "Medieval village stream circa 1340, rustic,"
+ },
+ {
+  "id": "econ_town_gate_twin_towers",
+  "kind": "decor",
+  "prompt": "Fortified town gate with two round towers, a pointed archway, a portcullis, crenellations and machicolations",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 landmarks_v2 kind gate (116 portes)",
+  "region": "Medieval northern France circa 1340, imposing,"
+ },
+ {
+  "id": "econ_town_gate_brick_hanse",
+  "kind": "decor",
+  "prompt": "Brick gate tower with stepped gables, a pointed arch and a small side postern, copper-green roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 gate (Hanse, Bruges, Prusse)",
+  "region": "Medieval Hanseatic brick city circa 1340, red brick,"
+ },
+ {
+  "id": "econ_town_gate_mediterranean",
+  "kind": "decor",
+  "prompt": "Square sandstone gate tower with a single round archway, battlements and a machicolated parapet",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 gate (Avignon, Italie, Provence)",
+  "region": "Medieval Provence circa 1340, limestone,"
+ },
+ {
+  "id": "econ_town_gate_horseshoe_bab",
+  "kind": "decor",
+  "prompt": "Bent-entrance gate with horseshoe arch in banded stone and flanking square towers",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "major_building"
+  },
+  "target": "nouveau : villes Andalus/Maghreb/Levant (town_isl)",
+  "region": "Medieval Islamic city circa 1340, sandstone,"
+ },
+ {
+  "id": "econ_town_gate_timber_rus",
+  "kind": "decor",
+  "prompt": "Timber city gate with a log tower, a shingled hip roof and heavy plank doors set in an earthen rampart",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "major_building"
+  },
+  "target": "nouveau : town_rus portes (Novgorod, Pskov, Moscou)",
+  "region": "Medieval Rus' timber kremlin circa 1340, log,"
+ },
+ {
+  "id": "econ_water_gate_riverside",
+  "kind": "decor",
+  "prompt": "Water gate: an arched opening in a town wall over a canal with a portcullis and a boat landing, flanked by a small tower",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 landmarks_v2 kind water_gate (14)",
+  "region": "Medieval river town circa 1340, wet,"
+ },
+ {
+  "id": "econ_postern_small",
+  "kind": "decor",
+  "prompt": "Small postern door in a stone wall with a pointed arch, iron-studded wood door and a lantern bracket",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 4,
+   "class": "prop"
+  },
+  "target": "villes 1:1 landmarks_v2 kind postern (12)",
+  "region": "Medieval town wall circa 1340, quiet,"
+ },
+ {
+  "id": "econ_fountain_town_basin",
+  "kind": "decor",
+  "prompt": "Town fountain with an octagonal stone basin, a central pillar topped by a Gothic finial and spouts",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 4,
+   "class": "prop"
+  },
+  "target": "villes 1:1 place (Rouen Fontaines, Paris, Orleans)",
+  "region": "Medieval French town circa 1340, stone,"
+ },
+ {
+  "id": "econ_well_covered_bruges",
+  "kind": "decor",
+  "prompt": "Roofed brick public well with a pulley and a wooden bucket under a small gable roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 3.5,
+   "class": "prop"
+  },
+  "target": "folk:well variantes regionales (well_stone existe : Nord)",
+  "region": "Medieval Flanders circa 1340, red brick,"
+ },
+ {
+  "id": "econ_cistern_arab_courtyard",
+  "kind": "decor",
+  "prompt": "Stone cistern head with a carved rim, a small domed cover and a water jar beside",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 2,
+   "class": "prop"
+  },
+  "target": "nouveau : villes Andalus/Byzance/Levant",
+  "region": "Medieval Mediterranean circa 1340, pale stone,"
+ },
+ {
+  "id": "econ_well_sweep_shaduf",
+  "kind": "decor",
+  "prompt": "Well with a pole sweep lever, a counterweight stone and a bucket on a forked post",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 4,
+   "class": "prop"
+  },
+  "target": "folk:well variante Europe de l'Est, Rus', steppe",
+  "region": "Medieval eastern Europe circa 1340, timber,"
+ },
+ {
+  "id": "econ_wash_house_lavoir",
+  "kind": "decor",
+  "prompt": "Public wash house: an open stone basin with sloping washing slabs under a tiled lean-to roof on posts, with wooden paddles",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "villes 1:1 / villages (lavoirs, FK life)",
+  "region": "Medieval French village circa 1340, damp,"
+ },
+ {
+  "id": "econ_pillory_post_stone",
+  "kind": "decor",
+  "prompt": "Stone pillory on a stepped base with a column topped by a wheel, iron collar and chains",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 4,
+   "class": "prop"
+  },
+  "target": "villes 1:1 place / marches (fermes banales)",
+  "region": "Medieval market town circa 1340, grim,"
+ },
+ {
+  "id": "econ_gallows_stone_pillars",
+  "kind": "decor",
+  "prompt": "Stone gallows with three square pillars joined by wooden crossbeams on a hilltop mound, a few chains",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 7,
+   "class": "prop"
+  },
+  "target": "roadside / hors les murs (Montfaucon Paris); env_gibbet existe : bois seul",
+  "region": "Medieval Paris Montfaucon circa 1340, grim,"
+ },
+ {
+  "id": "econ_pillory_wheel_post",
+  "kind": "decor",
+  "prompt": "Execution wheel mounted on a tall wooden pole with a rope ladder",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 5,
+   "class": "prop"
+  },
+  "target": "scenes FK justice, entrees de ville (HRE, Pologne)",
+  "region": "Medieval central Europe circa 1340, grim,"
+ },
+ {
+  "id": "econ_pigeonnier_square_tower",
+  "kind": "decor",
+  "prompt": "Square stone dovecote tower on legs with a rat guard band and a tiled lantern roof with flight holes",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 8,
+   "class": "prop"
+  },
+  "target": "manor:dovecote (Midi, Gascogne, Quercy; env_dovecote_round existe : rond)",
+  "region": "Medieval southwestern France circa 1340, sandy stone,"
+ },
+ {
+  "id": "econ_dovecote_timber_poland",
+  "kind": "decor",
+  "prompt": "Timber dovecote on a single post with small round nesting boxes and a shingle roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_height_m": 4,
+   "class": "prop"
+  },
+  "target": "manor:dovecote Europe de l'Est, Angleterre",
+  "region": "Medieval English and Polish farm circa 1340, rustic,"
+ },
+ {
+  "id": "econ_barn_timber_thatch",
+  "kind": "decor",
+  "prompt": "Large timber-framed thatched barn with wide doors and a gabled porch",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 30,
+   "class": "house"
+  },
+  "target": "outbuildings:farm 2-3 (env_tithe_barn est la version pierre)",
+  "region": "Medieval England and Normandy circa 1340, framed,"
+ },
+ {
+  "id": "econ_mill_windmill_horse_gin",
+  "kind": "decor",
+  "prompt": "Horse-driven mill house with a round stone building, a central vertical shaft and a horse walking a circular track",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (villes 1:1, ports, chateaux)",
+  "region": "Medieval Mediterranean circa 1340, round,"
+ },
+ {
+  "id": "econ_mill_floating_boat",
+  "kind": "decor",
+  "prompt": "Floating ship mill: a moored boat with a paddle wheel between two hulls, a small mill house and a gangplank to the shore",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (Pont, Danube, Seine, Loire, Italie Po)",
+  "region": "Medieval great river circa 1340, wooden,"
+ },
+ {
+  "id": "econ_mill_windmill_post_italian",
+  "kind": "decor",
+  "prompt": "Small stone tower windmill with a conical thatched cap and four lattice sails (Mediterranean type)",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (Provence, Catalogne, Grece; windmill_post est le moulin sur pivot)",
+  "region": "Medieval Mediterranean circa 1340, white,"
+ },
+ {
+  "id": "econ_mill_water_undershot",
+  "kind": "decor",
+  "prompt": "Timber undershot water mill with a large wheel in a mill race, a plank building and stacked flour sacks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "outbuildings:mill 1-2 (watermill campagne existe : version pierre)",
+  "region": "Medieval northern Europe circa 1340, rustic,"
+ },
+ {
+  "id": "econ_mill_horizontal_wheel",
+  "kind": "decor",
+  "prompt": "Horizontal-wheel watermill: a low stone hut over a stream channel with a timber chute and a thatched roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "house"
+  },
+  "target": "outbuildings:mill (Scandinavie, Balkans, Iles, Pyrenees)",
+  "region": "Medieval upland Nordic circa 1340, small,"
+ },
+ {
+  "id": "econ_terrace_wall_dry_stone",
+  "kind": "decor",
+  "prompt": "Section of dry-stone terrace walls on a steep slope with a flight of steps and a small tree",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "prop"
+  },
+  "target": "outbuildings:vineyard slope / hamlets (Midi, Cevennes, Rhin, Ligurie, Maghreb)",
+  "region": "Medieval Mediterranean hillside circa 1340, stone,"
+ },
+ {
+  "id": "econ_terrace_olive_grove",
+  "kind": "decor",
+  "prompt": "Terraced olive grove with ancient twisted olives and a stone wall and rock steps",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "prop"
+  },
+  "target": "nouveau : biome mediterraneen (huile)",
+  "region": "Medieval Mediterranean circa 1340, silver,"
+ },
+ {
+  "id": "econ_port_treadwheel_crane",
+  "kind": "decor",
+  "prompt": "Large wooden treadwheel harbour crane on a stone quay with a swivel jib, a rope hoist and crates",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "outbuildings:port 2-3 / villes 1:1 (Bruges, Londres, Danzig Krantor)",
+  "region": "Medieval Hanseatic port circa 1340, timber,"
+ },
+ {
+  "id": "econ_port_warehouse_stone",
+  "kind": "decor",
+  "prompt": "Stone port warehouse with arched doors, a hoist beam, stacked barrels and bales at the door",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 20,
+   "class": "house"
+  },
+  "target": "outbuildings:port (res_wine, res_wool, Hanse Kontor)",
+  "region": "Medieval northern European harbour circa 1340, solid,"
+ },
+ {
+  "id": "econ_port_fondaco_venetian",
+  "kind": "decor",
+  "prompt": "Venetian-style fondaco warehouse on a quay with a ground-floor arcade, upper loggia and a water gate",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 24,
+   "class": "house"
+  },
+  "target": "outbuildings:port (Venise, Genes, Pise, Caffa)",
+  "region": "Medieval Italian maritime republic circa 1340, brick,"
+ },
+ {
+  "id": "econ_port_quay_timber_pier",
+  "kind": "decor",
+  "prompt": "Wooden pier on piles with bollards, rope coils, barrels and a small shed, no boats",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "house"
+  },
+  "target": "outbuildings:port 1 / villages cotiers (landmark port_quay existe : grand quai)",
+  "region": "Medieval coastal village circa 1340, weathered,"
+ },
+ {
+  "id": "econ_port_sea_wall_chain_tower",
+  "kind": "decor",
+  "prompt": "Harbour chain tower: a round stone tower at the harbour mouth with a chain winch and a beacon brazier",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "major_building"
+  },
+  "target": "villes 1:1 Calais / ports (Aigues-Mortes, Marseille, La Rochelle)",
+  "region": "Medieval fortified port circa 1340, stone,"
+ },
+ {
+  "id": "econ_port_beach_landing_boats",
+  "kind": "decor",
+  "prompt": "Beach landing: three clinker boats pulled up on stakes with nets drying and a keg stack",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "house"
+  },
+  "target": "outbuildings:port 1 / grau (Atlantique, Baltique)",
+  "region": "Medieval coastal beach circa 1340, humble,"
+ },
+ {
+  "id": "econ_port_customs_house",
+  "kind": "decor",
+  "prompt": "Port customs house with stone ground floor, timber upper storey, a counter window and barrels sealed with lead",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "outbuildings:port / villes 1:1 Londres, Calais (douane)",
+  "region": "Medieval English port circa 1340, tarred,"
+ },
+ {
+  "id": "econ_port_arsenal_galley_shed",
+  "kind": "decor",
+  "prompt": "Long arched shipyard shed for galleys, open at the water end, with ribs and planks stacked",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 36,
+   "class": "major_building"
+  },
+  "target": "outbuildings:port 3 (Venise, Genes, Barcelone, Marseille)",
+  "region": "Medieval Mediterranean arsenal circa 1340, brick,"
+ },
+ {
+  "id": "econ_port_lime_kiln",
+  "kind": "decor",
+  "prompt": "Stone lime kiln: a squat round stone furnace with a firing arch, heaps of burned lime and a cart",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "prop"
+  },
+  "target": "outbuildings:farm / faubourgs (chaux, constructions)",
+  "region": "Medieval coastal circa 1340, white dust,"
+ },
+ {
+  "id": "econ_storehouse_hanse_kontor",
+  "kind": "decor",
+  "prompt": "Tall timber and brick Hanseatic storehouse with a gabled hoist door, stacked barrels and a pulley beam",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "villes 1:1 Bruges / ports hanse (Kontor)",
+  "region": "Medieval Hanseatic circa 1340, brick,"
+ },
+ {
+  "id": "econ_shop_stall_butcher_row",
+  "kind": "decor",
+  "prompt": "Row of three narrow shop fronts with folding counter shutters, wares hanging from hooks, awnings",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "villes 1:1 rues commercantes (landmarks_v2 market)",
+  "region": "Medieval medieval town circa 1340, narrow,"
+ },
+ {
+  "id": "econ_toll_house_bridge",
+  "kind": "decor",
+  "prompt": "Small toll house at a bridge end, stone with a timber upper storey, a barrier arm and a chain",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "house"
+  },
+  "target": "bridge_meshes:gate (peages) + env_toll_bar existe : barriere seule",
+  "region": "Medieval river crossing circa 1340, small,"
+ },
+ {
+  "id": "econ_charcoal_stack_burners",
+  "kind": "decor",
+  "prompt": "Stacked charcoal burners camp: a covered mound and two turf huts, split logs and sacks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "prop"
+  },
+  "target": "outbuildings:mine / forges (env_charcoal_kiln existe : meule seule)",
+  "region": "Medieval forest circa 1340, black,"
+ },
+ {
+  "id": "econ_beehive_apiary_skeps",
+  "kind": "decor",
+  "prompt": "Row of straw skep beehives in wall niches of a low stone bee-bole wall",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "prop"
+  },
+  "target": "outbuildings:abbey / farm (cire, miel)",
+  "region": "Medieval England and Germany circa 1340, straw,"
+ },
+ {
+  "id": "econ_hop_drying_oast",
+  "kind": "decor",
+  "prompt": "Round brick oast-like drying house with a conical roof and a vent cowl for hops and malt",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "house"
+  },
+  "target": "outbuildings:farm (brasserie, Boheme, Flandre, Kent)",
+  "region": "Medieval Bohemia and Kent circa 1340, brick,"
+ }
+]

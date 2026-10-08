@@ -1794,9 +1794,9 @@
   "target": "south:oasis (Maghreb, Andalousie)"
  },
  {
-  "id": "env_cactus_agave",
+  "id": "env_dwarf_palm_chamaerops",
   "kind": "decor",
-  "prompt": "agave and prickly pear cactus clump, Mediterranean coast",
+  "prompt": "European dwarf fan palm clump (Chamaerops humilis), several stems with stiff fan-shaped fronds, Mediterranean coast",
   "seeds": 3,
   "backend3d": "both",
   "ingest": {
@@ -1804,7 +1804,7 @@
    "target_height_m": 2.0,
    "class": "tree"
   },
-  "target": "south:agave (Sicile, Andalousie)"
+  "target": "south:chamaerops (Sicile, Andalousie)"
  },
  {
   "id": "env_snow_conifer",

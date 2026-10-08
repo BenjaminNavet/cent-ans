@@ -1,0 +1,1262 @@
+[
+  {
+    "id": "town_isl_andalus",
+    "kind": "decor",
+    "prompt": "14th-century Nasrid Granada-style hill town with whitewashed flat-roofed houses, red-tiled eaves, a small mosque with a square brick minaret, horseshoe-arched gate in a tapia rammed-earth wall, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Nasrid al-Andalus circa 1340, whitewashed,"
+  },
+  {
+    "id": "city_isl_andalus",
+    "kind": "decor",
+    "prompt": "14th-century Nasrid city climbing a hill, a red rammed-earth Alhambra-like palace-fortress with square towers above whitewashed terraced houses, cypresses, a congregational mosque with a brick minaret, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Nasrid al-Andalus circa 1340, refined,"
+  },
+  {
+    "id": "castle_isl_andalus",
+    "kind": "decor",
+    "prompt": "14th-century Nasrid alcazaba fortress on a rock spur, crenellated tapia walls with square towers, a horseshoe-arched gatehouse, a small walled court, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Nasrid al-Andalus circa 1340, austere,"
+  },
+  {
+    "id": "village_isl_andalus",
+    "kind": "decor",
+    "prompt": "14th-century Alpujarras mountain village of flat-roofed stacked stone and clay houses with chimney pots on terraces, a small whitewashed mosque, irrigation channels and fig trees, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Nasrid al-Andalus circa 1340, humble,"
+  },
+  {
+    "id": "abbey_isl_maghreb",
+    "kind": "decor",
+    "prompt": "14th-century Maghrebi ribat-zawiya complex, a square white-plastered fortified court with a green-tiled dome over a saint's tomb, a plain minaret and a small madrasa, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/isl (sous-famille isl : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Maghreb Islamic circa 1340, monastic,"
+  },
+  {
+    "id": "city_isl_mamluk",
+    "kind": "decor",
+    "prompt": "14th-century Mamluk Cairo-style city, striped ablaq masonry mosque-madrasa with a tall carved stone minaret and domes, dense flat-roofed buildings with wind-catcher malqaf, a citadel on a ridge, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Mamluk Egypt circa 1340, monumental,"
+  },
+  {
+    "id": "town_isl_mamluk",
+    "kind": "decor",
+    "prompt": "14th-century Mamluk Syrian-Egyptian market town with sandstone and ablaq houses, mashrabiya wooden windows, a caravanserai khan with a stone portal, a minaret and a domed tomb, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Mamluk Levant circa 1340, dense,"
+  },
+  {
+    "id": "castle_isl_mamluk",
+    "kind": "decor",
+    "prompt": "14th-century Mamluk citadel with massive rounded and square towers of ashlar limestone, machicolated walls, a monumental gate with a bent entrance and a domed hall, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Mamluk Syria circa 1340, imposing,"
+  },
+  {
+    "id": "village_isl_mamluk",
+    "kind": "decor",
+    "prompt": "14th-century Nile delta village of mud-brick houses with domed roofs and pigeon towers, date palms, a small mosque with a short minaret, a shaduf well, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Mamluk Egypt circa 1340, humble,"
+  },
+  {
+    "id": "town_isl_anatolia",
+    "kind": "decor",
+    "prompt": "14th-century Anatolian Turkish beylik town on a hillside, stone and timber houses with wooden upper floors and low pitched roofs, a Seljuk-style mosque with a fluted turquoise-tile minaret, a stone portal madrasa, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/isl_anatolia (sous-famille isl_anatolia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Anatolian Turkish beylik circa 1340, hardy,"
+  },
+  {
+    "id": "castle_isl_anatolia",
+    "kind": "decor",
+    "prompt": "14th-century Seljuk-Ottoman frontier fortress on a rocky hill, basalt walls with round towers, a gatehouse and a small mosque inside, a few wooden houses beneath, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/isl_anatolia (sous-famille isl_anatolia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Anatolia circa 1340, austere,"
+  },
+  {
+    "id": "village_isl_anatolia",
+    "kind": "decor",
+    "prompt": "14th-century Anatolian plateau village of flat-roofed stone and mud-brick houses with timber balconies, stacked haystacks, a small mosque, a plane tree and a stone fountain, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/isl_anatolia (sous-famille isl_anatolia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Anatolia circa 1340, humble,"
+  },
+  {
+    "id": "abbey_isl_anatolia",
+    "kind": "decor",
+    "prompt": "14th-century Seljuk caravanserai-madrasa complex, a rectangular walled court of cut stone with an ornate carved portal, a central domed mescit and surrounding cells, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/isl_anatolia (sous-famille isl_anatolia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Anatolia circa 1340, monastic,"
+  },
+  {
+    "id": "city_byz",
+    "kind": "decor",
+    "prompt": "14th-century Byzantine city, brick-and-stone banded walls with square towers, domed churches with cross-in-square plan, red tiled roofs, a cistern and a harbour wall, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Byzantine Constantinople-Thessalonica circa 1340, ancient,"
+  },
+  {
+    "id": "castle_byz",
+    "kind": "decor",
+    "prompt": "14th-century Byzantine Balkan fortress on a hill, banded brick and stone walls with towers, a domed chapel inside and a keep tower, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Byzantine Balkans circa 1340, austere,"
+  },
+  {
+    "id": "village_byz",
+    "kind": "decor",
+    "prompt": "14th-century Balkan village of stone and timber houses with low tiled roofs, a small domed church with an apse, a stone well, terraced fields, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Byzantine Balkans circa 1340, humble,"
+  },
+  {
+    "id": "abbey_byz",
+    "kind": "decor",
+    "prompt": "14th-century Athonite Orthodox monastery, fortified quadrangle of stone with timber balconies, a central domed katholikon with a separate bell tower, red tile roofs, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Byzantine Athos circa 1340, monastic,"
+  },
+  {
+    "id": "town_byz_serbia",
+    "kind": "decor",
+    "prompt": "14th-century Serbian medieval trading town beside a fortress, timber and stone houses with steep shingle roofs, a Raška-style church with five domes in alternating stone and brick, a mining town gate, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/byz_serbia (sous-famille byz_serbia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Serbian Empire circa 1340, solid,"
+  },
+  {
+    "id": "abbey_byz_serbia",
+    "kind": "decor",
+    "prompt": "14th-century Serbian Orthodox monastery, a Raška-school stone church with a central dome and a narthex, frescoed façade, a walled court with a stone refectory, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/byz_serbia (sous-famille byz_serbia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Serbian Empire circa 1340, monastic,"
+  },
+  {
+    "id": "castle_byz_serbia",
+    "kind": "decor",
+    "prompt": "14th-century Serbian mountain fortress with a tall donjon tower and a polygonal curtain of rough stone with a small chapel, on a rock above a river, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/byz_serbia (sous-famille byz_serbia : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Serbian Empire circa 1340, imposing,"
+  },
+  {
+    "id": "city_rus",
+    "kind": "decor",
+    "prompt": "14th-century Rus' great city, a stone kremlin with white-limestone walls and towers, several white stone churches with golden helmet domes beside timber houses with plank roofs, wooden market quarter, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/rus (sous-famille rus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Rus' Novgorod-Pskov circa 1340, prosperous,"
+  },
+  {
+    "id": "castle_rus",
+    "kind": "decor",
+    "prompt": "14th-century Rus' kremlin fortress, a timber palisade of squared logs on an earth rampart with gate towers with tent roofs, a small wooden church with onion dome, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/rus (sous-famille rus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Rus' circa 1340, rugged,"
+  },
+  {
+    "id": "abbey_rus",
+    "kind": "decor",
+    "prompt": "14th-century Rus' Orthodox monastery, white stone cathedral with a single helmet dome, wooden refectory and cells inside a log palisade with a gate church, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/rus (sous-famille rus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Rus' circa 1340, monastic,"
+  },
+  {
+    "id": "village_byz_wallachia",
+    "kind": "decor",
+    "prompt": "14th-century Wallachian-Moldavian village of wattle-and-daub huts with steep thatched roofs and carved wooden gateways, a small wooden church with a tall shingled tower, plum orchards, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Wallachia-Moldavia circa 1340, humble,"
+  },
+  {
+    "id": "town_nord",
+    "kind": "decor",
+    "prompt": "14th-century Scandinavian port town of tarred timber stave and log houses with turf and shingle roofs, a stone church, wooden quays and boathouses, a fjord harbour, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Scandinavia circa 1340, weathered,"
+  },
+  {
+    "id": "city_nord",
+    "kind": "decor",
+    "prompt": "14th-century Scandinavian trading city (Bergen-Visby style) with a long row of gabled timber warehouses on the quay, a stone cathedral, a ring wall of limestone with towers and a stone tower house, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Scandinavia circa 1340, prosperous,"
+  },
+  {
+    "id": "castle_nord",
+    "kind": "decor",
+    "prompt": "14th-century Scandinavian royal fortress of rough stone and brick with a round donjon and a timber hall, on a rocky islet by the sea, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Scandinavia circa 1340, austere,"
+  },
+  {
+    "id": "village_nord",
+    "kind": "decor",
+    "prompt": "14th-century Norwegian farm cluster of turf-roofed log houses, stilted storehouses (stabbur), a boathouse and a small wooden stave church, fish racks, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Scandinavia circa 1340, humble,"
+  },
+  {
+    "id": "abbey_nord",
+    "kind": "decor",
+    "prompt": "14th-century Scandinavian Cistercian-Benedictine abbey of plain granite and brick with a low aisled church, a cloister and timber outbuildings in a windswept field, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Scandinavia circa 1340, monastic,"
+  },
+  {
+    "id": "church_stave",
+    "kind": "decor",
+    "prompt": "medieval Norwegian stave church, tiered steep shingled roofs with carved dragon-head gables, tarred pine, a separate low bell tower",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 18.0,
+      "class": "major_building"
+    },
+    "target": "outbuildings/regional chapel (variante nord de abbey_1..3) et paysage rural Norvège",
+    "region": "Norway circa 1340, tarred,"
+  },
+  {
+    "id": "castle_balt",
+    "kind": "decor",
+    "prompt": "14th-century Teutonic Order brick castle, a square konventshaus of red brick with corner turrets and a tall gate tower, stepped gables, moat and a bridge, on a flat plain, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Teutonic Prussia-Livonia circa 1340, imposing,"
+  },
+  {
+    "id": "town_balt",
+    "kind": "decor",
+    "prompt": "14th-century Baltic Hanseatic town of red brick gothic gabled houses with stepped gables, a brick hall church with a tall steeple, a brick wall with a gate tower, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Baltic Prussia circa 1340, orderly,"
+  },
+  {
+    "id": "city_balt",
+    "kind": "decor",
+    "prompt": "14th-century Baltic Hanseatic seaport (Danzig-Riga) with brick gothic stepped gable merchant houses on a quay, a huge brick hall church, a crane house on the water, brick walls and gate towers, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Baltic Hansa circa 1340, prosperous,"
+  },
+  {
+    "id": "abbey_balt",
+    "kind": "decor",
+    "prompt": "14th-century Baltic brick monastery of the Cistercians, a brick basilica with stepped gables, a rectangular cloister and a brick refectory, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Baltic circa 1340, monastic,"
+  },
+  {
+    "id": "village_balt",
+    "kind": "decor",
+    "prompt": "14th-century Baltic village of thatched log farmhouses with reed roofs, a brick-and-fieldstone church with a squat tower, a wooden fence, wells and a windmill, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Baltic Livonia-Prussia circa 1340, humble,"
+  },
+  {
+    "id": "village_balt_pagan",
+    "kind": "decor",
+    "prompt": "14th-century Lithuanian forest hill-fort village on a mound, a timber palisade with log towers, thatched log houses inside, a sacred oak grove with a carved wooden idol, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Pagan Lithuania circa 1340, wild,"
+  },
+  {
+    "id": "town_hansa",
+    "kind": "decor",
+    "prompt": "14th-century North German town of half-timbered brick-filled houses with high gables facing the street, red tiled roofs, a Rathaus with stepped gable and a brick church spire, town wall of brick, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/west_hansa (sous-famille west_hansa : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Holy Roman Empire north Germany circa 1340, prosperous,"
+  },
+  {
+    "id": "city_hansa",
+    "kind": "decor",
+    "prompt": "14th-century Hanseatic free city (Lübeck style) with twin-spired brick cathedral, merchant gabled warehouses along a canal, a double-towered brick town gate (Holstentor) and brick walls, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/west_hansa (sous-famille west_hansa : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Hanse Lübeck circa 1340, prosperous,"
+  },
+  {
+    "id": "town_empire_south",
+    "kind": "decor",
+    "prompt": "14th-century South German-Alpine town with plastered houses under steep tiled roofs, painted façades, a stone tower gate, an onion-less Gothic church spire, wooden balconies, a mountain backdrop, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/west_alp (sous-famille west_alp : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Holy Roman Empire south Germany circa 1340, tidy,"
+  },
+  {
+    "id": "village_empire",
+    "kind": "decor",
+    "prompt": "14th-century German village of timber-framed farmhouses with huge steep thatched roofs, a stone church with a saddleback tower, a linden tree and a well, a fenced churchyard, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/west_alp (sous-famille west_alp : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Holy Roman Empire circa 1340, humble,"
+  },
+  {
+    "id": "castle_empire_rhine",
+    "kind": "decor",
+    "prompt": "14th-century Rhine valley hillside castle, a tall round bergfried tower in a polygonal curtain of rough stone with a half-timbered palas, above terraced vineyards, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/west_alp (sous-famille west_alp : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Rhineland circa 1340, imposing,"
+  },
+  {
+    "id": "hall_house_lowgerman",
+    "kind": "decor",
+    "prompt": "Low German hall house (Hallenhaus), a huge half-timbered thatched farmhouse with a high hipped reed roof and big barn doors, brick infill",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 14.0,
+      "class": "house"
+    },
+    "target": "outbuildings/farm regional (Empire nord, Pays-Bas)",
+    "region": "Northern Germany circa 1340, humble,"
+  },
+  {
+    "id": "rathaus_gothic_brick",
+    "kind": "decor",
+    "prompt": "medieval north German brick Rathaus town hall, a long gabled hall with arcaded ground floor and a stepped gable with blind tracery",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 28.0,
+      "class": "major_building"
+    },
+    "target": "outbuildings/market regional (Hanse, Flandre)",
+    "region": "Hanse circa 1340, civic,"
+  },
+  {
+    "id": "town_ital_towers",
+    "kind": "decor",
+    "prompt": "14th-century Tuscan hill town (San Gimignano) with dozens of tall square tower-houses in honey stone, terracotta roofs, a stone communal palace and a campanile, city walls on a hilltop, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Tuscany circa 1340, tall,"
+  },
+  {
+    "id": "city_ital_maritime",
+    "kind": "decor",
+    "prompt": "14th-century Genoa-Venice maritime republic city with tall palazzi on the quay, striped marble church with a campanile, galleys at an arsenal, lanterna lighthouse, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/med_sea (sous-famille med_sea : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Italian maritime republic circa 1340, prosperous,"
+  },
+  {
+    "id": "city_ital_commune",
+    "kind": "decor",
+    "prompt": "14th-century Lombard-Tuscan commune city (Florence style) with a crenellated Palazzo della Signoria-like tower, a marble cathedral with a dome-less nave and a tall campanile, terracotta roofs, river bridge with houses, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Italian commune circa 1340, prosperous,"
+  },
+  {
+    "id": "castle_ital_rocca",
+    "kind": "decor",
+    "prompt": "14th-century Italian rocca fortress on a hill with a square keep, Ghibelline swallowtail merlons, thick stone walls and a corner tower, terracotta roofs, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Italy circa 1340, imposing,"
+  },
+  {
+    "id": "village_ital",
+    "kind": "decor",
+    "prompt": "14th-century Apennine hill village of stone houses with terracotta roofs clustered around a small Romanesque church with a campanile, olive terraces, cypress trees, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Italy circa 1340, humble,"
+  },
+  {
+    "id": "abbey_ital",
+    "kind": "decor",
+    "prompt": "14th-century Italian Benedictine abbey with a Romanesque basilica of banded stone, a square campanile, an arcaded cloister and terracotta roofs on a hillside, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/med (sous-famille med : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Italy circa 1340, monastic,"
+  },
+  {
+    "id": "campanile_romanesque",
+    "kind": "decor",
+    "prompt": "freestanding medieval Italian campanile, a tall square brick-and-stone bell tower with arched mullioned windows rising in tiers and a pyramidal cap",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 30.0,
+      "class": "major_building"
+    },
+    "target": "Landmarks Italie / maquettes city_med",
+    "region": "Italy circa 1340, tall,"
+  },
+  {
+    "id": "palazzo_communal",
+    "kind": "decor",
+    "prompt": "medieval Italian communal palace, a stone block with Guelph crenellations, mullioned windows and a high square tower, arcaded ground floor",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 32.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/med (centre de ville)",
+    "region": "Italian commune circa 1340, civic,"
+  },
+  {
+    "id": "town_iber",
+    "kind": "decor",
+    "prompt": "14th-century Castilian walled town on a plateau with ochre adobe and stone houses under low terracotta roofs, a Romanesque-Gothic church with a bell wall, an old mudéjar brick tower, an arched gate, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Castile circa 1340, sun-baked,"
+  },
+  {
+    "id": "castle_iber",
+    "kind": "decor",
+    "prompt": "14th-century Castilian castle on a rocky peak with a tall square keep, round corner turrets, crenellated stone walls of ochre limestone and a barbican, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Castile-Aragon circa 1340, imposing,"
+  },
+  {
+    "id": "village_iber",
+    "kind": "decor",
+    "prompt": "14th-century Spanish upland village of ochre stone houses with low terracotta roofs, a church with a bell wall, a stone threshing floor and a windmill on a hill, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Iberia circa 1340, humble,"
+  },
+  {
+    "id": "village_iber_galicia",
+    "kind": "decor",
+    "prompt": "14th-century Galician granite village with stilted stone granaries (hórreos), slate-roofed round-ended thatched houses, a stone cross and a small church, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Galicia circa 1340, humble,"
+  },
+  {
+    "id": "abbey_iber",
+    "kind": "decor",
+    "prompt": "14th-century Iberian Cistercian monastery in golden stone with a rib-vaulted church, a cloister, and a defensive tower, in dry hills, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Castile Aragon circa 1340, monastic,"
+  },
+  {
+    "id": "city_iber_mudejar",
+    "kind": "decor",
+    "prompt": "14th-century Mudéjar Toledo-Seville style city with horseshoe-arched brick towers, a Gothic cathedral built over a mosque, whitewashed houses, an Alcázar fortress and a bridge on a river bend, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Castile circa 1340, layered,"
+  },
+  {
+    "id": "town_hungpol",
+    "kind": "decor",
+    "prompt": "14th-century Central European market town around a rectangular square with a Rathaus and a brick Gothic church with a tall pointed spire, plastered burgher houses with arcades, timber thatch outskirts, a brick wall, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Poland-Hungary circa 1340, orderly,"
+  },
+  {
+    "id": "city_hungpol",
+    "kind": "decor",
+    "prompt": "14th-century Kraków-Buda style royal city with a hilltop castle of brick and stone, a huge brick Gothic church with two uneven towers, a cloth hall in the market square, gate barbican, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Poland-Hungary circa 1340, prosperous,"
+  },
+  {
+    "id": "castle_hungpol",
+    "kind": "decor",
+    "prompt": "14th-century Carpathian stone castle with a round tower and a steep shingle roof, a rectangular court of brick and stone, built by Casimir the Great, on a limestone crag, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Poland-Hungary circa 1340, imposing,"
+  },
+  {
+    "id": "village_hungpol",
+    "kind": "decor",
+    "prompt": "14th-century Polish-Hungarian village of log and wattle houses with steep thatched roofs along a single street, a small wooden church with a shingled spire, and a manor with a stockade, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Poland Hungary circa 1340, humble,"
+  },
+  {
+    "id": "village_carpathian",
+    "kind": "decor",
+    "prompt": "14th-century Carpathian highland village of log houses with high steep shingle roofs, a carved wooden gate, a wooden church with a tall tower, sheep pens, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Carpathians circa 1340, rugged,"
+  },
+  {
+    "id": "church_wood_polish",
+    "kind": "decor",
+    "prompt": "medieval Polish-Carpathian wooden church of horizontal logs with a shingled tiered roof and a slender tower, log gallery",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 14.0,
+      "class": "major_building"
+    },
+    "target": "outbuildings/chapel régional (Pologne, Hongrie, Slovaquie)",
+    "region": "Poland Carpathians circa 1340, weathered,"
+  },
+  {
+    "id": "city_steppe",
+    "kind": "decor",
+    "prompt": "14th-century Golden Horde capital Sarai, a large tent city with a khan's palace of brick with glazed tile domes, caravanserais, a mosque with a short minaret, yurts and carts all around, no walls, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:city/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Golden Horde Sarai circa 1340, prosperous,"
+  },
+  {
+    "id": "castle_steppe",
+    "kind": "decor",
+    "prompt": "14th-century Steppe earth fortress with a high rammed-earth rampart and wooden palisade, a brick gatehouse and a few felt yurts inside, horse pens, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:castle/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Golden Horde circa 1340, austere,"
+  },
+  {
+    "id": "village_steppe",
+    "kind": "decor",
+    "prompt": "14th-century Kipchak winter camp of a dozen felt yurts around carts and animal pens, a small stack of felt and horse herders, a wooden pole banner, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Golden Horde steppe circa 1340, humble,"
+  },
+  {
+    "id": "abbey_steppe",
+    "kind": "decor",
+    "prompt": "14th-century Steppe sacred place, a domed brick mausoleum (turbe) beside a Sufi lodge, with felt tents and a few horses tied around, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Golden Horde Volga circa 1340, shrine,"
+  },
+  {
+    "id": "town_volga_bulgar",
+    "kind": "decor",
+    "prompt": "14th-century Volga Bulgar river town of timber houses on a bluff, a brick mosque with a short minaret, wooden palisade, river wharves with boats, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Volga Bulgaria circa 1340, trading,"
+  },
+  {
+    "id": "town_circassian",
+    "kind": "decor",
+    "prompt": "14th-century Circassian highland fortified settlement of stone towers and wattle houses, a stone watchtower on a hill, timber stockade, lanes between low stone walls, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Caucasus circa 1340, rugged,"
+  },
+  {
+    "id": "village_ural",
+    "kind": "decor",
+    "prompt": "14th-century Ural forest village of squared log huts with bark roofs, a conical wooden shrine on stilts, fish racks and reindeer sleds in snow, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/rus_ural (sous-famille rus_ural : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Urals Komi-Perm circa 1340, humble,"
+  },
+  {
+    "id": "town_ural",
+    "kind": "decor",
+    "prompt": "14th-century Fur-trading town of the Perm region, log houses and storehouses behind a palisade, a wooden chapel and sled warehouses on a river bank in the taiga, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:town/rus_ural (sous-famille rus_ural : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Urals Great Perm circa 1340, trading,"
+  },
+  {
+    "id": "abbey_ural_shrine",
+    "kind": "decor",
+    "prompt": "14th-century Finno-Ugric sacred grove with carved wooden idols on a platform, a log shrine house with birch bark roof and sacrificial poles among old pines, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:abbey/rus_ural (sous-famille rus_ural : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Urals pagan circa 1340, sacred,"
+  },
+  {
+    "id": "village_bashkir",
+    "kind": "decor",
+    "prompt": "14th-century Bashkir summer pasture camp of yurts and wooden hives on poles (bortnik) beside a birch forest, with horse picket lines, stylised miniature maquette, whole settlement on a small plain base",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 2.0,
+      "class": "major_building"
+    },
+    "target": "town_maquettes:village/steppe (sous-famille steppe : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+    "region": "Southern Urals circa 1340, humble,"
+  },
+  {
+    "id": "kurgan_mound",
+    "kind": "decor",
+    "prompt": "steppe kurgan burial mound, a large earthen mound with a ring of stones, tall grass and a few stone balbal figures on top",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 8.0,
+      "class": "prop"
+    },
+    "target": "nouveau : couche paysage tombes de steppe (data/map, crimee/horde)",
+    "region": "Pontic steppe circa 1340, ancient,"
+  },
+  {
+    "id": "balbal_stones",
+    "kind": "decor",
+    "prompt": "a row of weathered stone balbal anthropomorphic grave markers standing in the steppe, rough carved faces and hands",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 3.0,
+      "class": "prop"
+    },
+    "target": "nouveau : couche paysage tombes de steppe",
+    "region": "Eurasian steppe circa 1340, weathered,"
+  },
+  {
+    "id": "yurt_khan_pavilion",
+    "kind": "decor",
+    "prompt": "the great white felt yurt pavilion of a Mongol khan, richly embroidered, with a gilded roof crown, flanking banners and silk door hangings",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 12.0,
+      "class": "house"
+    },
+    "target": "army_figures / steppe camps : camp de seigneur de la Horde",
+    "region": "Golden Horde circa 1340, lordly,"
+  },
+  {
+    "id": "horde_camp_carts",
+    "kind": "decor",
+    "prompt": "a Mongol nomad camp wagon, a huge felt yurt on a wooden cart pulled by oxen",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_height_m": 6.0,
+      "class": "prop"
+    },
+    "target": "nouveau : colonne de chariots de la Horde sur la carte",
+    "region": "Golden Horde circa 1340, rugged,"
+  },
+  {
+    "id": "caravanserai_stone",
+    "kind": "decor",
+    "prompt": "stone caravanserai with a monumental portal, a rectangular court with arcades, corner towers and a domed mescit in the middle",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 40.0,
+      "class": "major_building"
+    },
+    "target": "outbuildings/market régional (isl, steppe)",
+    "region": "Anatolian Silk Road circa 1340, sturdy,"
+  },
+  {
+    "id": "house_andalus_courtyard",
+    "kind": "decor",
+    "prompt": "Nasrid Andalusian townhouse, whitewashed two storeys with a tiled roof and a small tower mirador, a carved wooden window and a horseshoe door",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 10.0,
+      "class": "house"
+    },
+    "target": "TownBuilder/OutbuildingLayer variante isl",
+    "region": "Nasrid Granada circa 1340, whitewashed,"
+  },
+  {
+    "id": "house_mud_brick_flat",
+    "kind": "decor",
+    "prompt": "Egyptian mud-brick house with a flat roof, ladders and a domed pigeon tower, palm-beam lintels",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8.0,
+      "class": "house"
+    },
+    "target": "Hameaux isl_mamluk (village)",
+    "region": "Mamluk Egypt circa 1340, humble,"
+  },
+  {
+    "id": "house_maghreb_dar",
+    "kind": "decor",
+    "prompt": "Maghrebi dar townhouse of whitewashed rammed earth with a flat roof, a carved cedar door and a small cube minaret nearby",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9.0,
+      "class": "house"
+    },
+    "target": "Hameaux isl (Maghreb)",
+    "region": "Maghreb circa 1340, whitewashed,"
+  },
+  {
+    "id": "house_anatolia_timber",
+    "kind": "decor",
+    "prompt": "Anatolian Turkish two-storey stone-and-timber house with a projecting wooden upper floor and a low hip roof of tiles",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9.0,
+      "class": "house"
+    },
+    "target": "Hameaux isl_anatolia",
+    "region": "Anatolia circa 1340, humble,"
+  },
+  {
+    "id": "house_slavic_log",
+    "kind": "decor",
+    "prompt": "Rus' log house, a rectangular izba of horizontal logs, a steep plank roof with a carved ridge beam and a small porch",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 8.0,
+      "class": "house"
+    },
+    "target": "Hameaux rus",
+    "region": "Rus' circa 1340, humble,"
+  },
+  {
+    "id": "house_balkan_tile",
+    "kind": "decor",
+    "prompt": "Balkan stone house with a first floor of timber, a low terracotta tile roof and a small porch",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9.0,
+      "class": "house"
+    },
+    "target": "Hameaux byz",
+    "region": "Byzantine Balkans circa 1340, humble,"
+  },
+  {
+    "id": "house_scand_turf",
+    "kind": "decor",
+    "prompt": "Scandinavian longhouse of tarred logs with a grass turf roof and a wooden chimney vent",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 12.0,
+      "class": "house"
+    },
+    "target": "Hameaux nord",
+    "region": "Scandinavia circa 1340, weathered,"
+  },
+  {
+    "id": "house_brick_gable",
+    "kind": "decor",
+    "prompt": "north European merchant brick house with a stepped gable, narrow, three storeys, a loading crane beam",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 7.0,
+      "class": "house"
+    },
+    "target": "Hameaux balt/hansa",
+    "region": "Baltic Hansa circa 1340, narrow,"
+  },
+  {
+    "id": "house_ital_tower",
+    "kind": "decor",
+    "prompt": "medieval Italian tower-house, a narrow stone tower three to five storeys tall with a wooden loggia and crenellations",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 6.0,
+      "class": "house"
+    },
+    "target": "Hameaux med_towers",
+    "region": "Tuscany circa 1340, tall,"
+  },
+  {
+    "id": "house_iber_adobe",
+    "kind": "decor",
+    "prompt": "Castilian adobe and stone farmhouse with a low terracotta roof, a courtyard wall and a bread oven",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 10.0,
+      "class": "house"
+    },
+    "target": "Hameaux med_iber",
+    "region": "Castile circa 1340, sun-baked,"
+  },
+  {
+    "id": "house_pol_log",
+    "kind": "decor",
+    "prompt": "Polish village house of squared logs with a steep hipped thatch roof and a small porch",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 9.0,
+      "class": "house"
+    },
+    "target": "Hameaux west_east",
+    "region": "Poland circa 1340, humble,"
+  },
+  {
+    "id": "house_alpine_chalet",
+    "kind": "decor",
+    "prompt": "Alpine chalet of dark timber with a wide low shingled roof weighted with stones, a stone ground floor and balcony",
+    "seeds": 1,
+    "backend3d": "fal",
+    "ingest": {
+      "yaw_fix": 0,
+      "target_width_m": 10.0,
+      "class": "house"
+    },
+    "target": "Hameaux west_alp",
+    "region": "Alps circa 1340, rustic,"
+  }
+]
