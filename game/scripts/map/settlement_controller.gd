@@ -6,7 +6,7 @@ extends Node
 ## - panneau de colonie (`SettlementPanel`) ouvert par `SettlementLayer.settlement_selected`
 ##   ou par l'onglet « Colonies » du panneau de province (qui centre aussi la caméra) ;
 ##   ordres `recruit` / `create_army` / `build` / `cancel_build` / `demolish` (RS-N, bouton
-##   « Raser », confirmé par `RazeConfirmationDialog`) adressés à la colonie ;
+##   « Raser », confirmé par `ConfirmPanel`) adressés à la colonie ;
 ## - clic droit sur une colonie avec une armée sélectionnée : ordre `move_army` le long de
 ##   `find_path(armée, colonie)` ;
 ## - colonies atteignables ce tour (`get_reachable_settlements`) : anneaux au sol ;
@@ -28,7 +28,7 @@ var _last_distance := -1.0
 ## RS-N : confirmation avant l'ordre `demolish` ; ordre en attente de sa réponse
 ## ({settlement, building}).
 var slot_bar: SettlementSlotBar = null
-var raze_dialog: RazeConfirmationDialog = null
+var raze_dialog: ConfirmPanel = null
 var _pending_raze: Dictionary = {}
 
 
@@ -53,7 +53,7 @@ func setup(campaign_map: Node) -> void:
 	panel.cancel_queued_build_requested.connect(_on_cancel_queued_build)
 	panel.raze_requested.connect(_on_raze_requested)
 	panel.province_requested.connect(_on_province_requested)
-	raze_dialog = RazeConfirmationDialog.new()
+	raze_dialog = ConfirmPanel.new("Raser")
 	raze_dialog.confirmed.connect(_on_raze_confirmed)
 	raze_dialog.cancelled.connect(func() -> void: _pending_raze = {})
 	UiZones.put(UiZones.Zone.MODAL, raze_dialog)
@@ -249,7 +249,10 @@ func _on_raze_requested(settlement_id: String, building_id: String, preview: Dic
 	if not bool(preview.get("can_demolish", false)):
 		return
 	_pending_raze = {"settlement": settlement_id, "building": building_id}
-	raze_dialog.ask(str(preview.get("name", building_id)), preview)
+	var building_name := str(preview.get("name", building_id))
+	var refund := Money.amount(int(preview.get("refund", 0)))
+	var upkeep_saved := Money.amount(int(preview.get("upkeep_saved", 0)))
+	raze_dialog.open("Raser %s ?" % building_name, "Le bâtiment est détruit sans retour possible. Rembourse %s ; économise %s d'entretien par saison." % [refund, upkeep_saved])
 
 
 func _on_raze_confirmed() -> void:

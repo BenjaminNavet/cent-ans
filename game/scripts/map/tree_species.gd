@@ -197,12 +197,12 @@ func pick(role: int, biome: int, altitude_m: float, river_sd: float, conifer_sha
 
 
 ## Tirage « par peuplement » (cellules de `stand_px`) : même valeur pour tous les arbres d'une
-## cellule (`VegetationFields.hash01`, identique au Rust).
+## cellule (`Hash.lcg01`, identique au Rust).
 func stand_roll(x: float, y: float) -> float:
 	var side := maxf(d("stand_px", 3.0), 0.1)
 	var ix := floori(x / side)
 	var iy := floori(y / side)
-	return VegetationFields.hash01(ix * 7919 + iy * 104729 + 17)
+	return Hash.lcg01(ix * 7919 + iy * 104729 + 17)
 
 
 ## Parcelle de verger : tirage haché de la parcelle (cellules de `orchard_parcel_px`).
@@ -210,4 +210,4 @@ func parcel_roll(x: float, y: float) -> float:
 	var side := maxf(d("orchard_parcel_px", 2.2), 0.1)
 	var ix := floori(x / side)
 	var iy := floori(y / side)
-	return VegetationFields.hash01(ix * 15731 + iy * 789221 + 3)
+	return Hash.lcg01(ix * 15731 + iy * 789221 + 3)

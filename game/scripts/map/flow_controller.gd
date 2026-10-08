@@ -28,9 +28,7 @@ var last_autosave: String = ""
 var _last_saved_turn: int = 0
 var _pause_snapshot: Image = null
 var _end_turn_confirmed := false
-var _confirm_panel: PanelContainer = null
-var _confirm_label: Label = null
-var _confirm_yes: Button = null
+var _confirm_panel: ConfirmPanel = null
 var _settings_menu: SettingsMenu = null
 
 
@@ -202,7 +200,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _settings_menu != null and is_instance_valid(_settings_menu):
 		return  # la fenêtre de réglages se ferme elle-même
-	if _confirm_panel != null and _confirm_panel.visible:
+	if _confirm_panel != null and is_instance_valid(_confirm_panel) and _confirm_panel.visible:
 		_confirm_panel.hide()
 	elif season_report != null and season_report.visible:
 		season_report.close()
@@ -277,33 +275,6 @@ func before_end_turn() -> bool:
 
 
 func _show_end_turn_confirm() -> void:
-	if _confirm_panel == null:
-		_confirm_panel = PanelContainer.new()
-		PanelStack.set_tier(_confirm_panel, PanelStack.Tier.MODAL, true)  # Q4
-		_confirm_panel.theme = load("res://scenes/ui/parchment_theme.tres")
-		_confirm_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
-		_confirm_panel.offset_left = -220
-		_confirm_panel.offset_right = 220
-		_confirm_panel.offset_top = 90
-		var box := VBoxContainer.new()
-		_confirm_panel.add_child(box)
-		_confirm_label = Label.new()
-		_confirm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_confirm_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(_confirm_label)
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		row.add_theme_constant_override("separation", 12)
-		box.add_child(row)
-		var no := Button.new()
-		no.text = "Pas encore"
-		no.pressed.connect(func() -> void: _confirm_panel.hide())
-		row.add_child(no)
-		_confirm_yes = Button.new()
-		_confirm_yes.text = "Terminer le tour"
-		_confirm_yes.pressed.connect(confirm_end_turn)
-		row.add_child(_confirm_yes)
-		map.get("ui").add_child(_confirm_panel)
 	var armies_idle := 0
 	var sim: Object = map.get("sim")
 	for army_id in map.call("player_army_ids"):
@@ -313,13 +284,13 @@ func _show_end_turn_confirm() -> void:
 	var question := "Terminer le tour (%s) ?" % sim.call("get_date_label")
 	if armies_idle > 0:
 		question += "\n%d armée%s sans ordre de marche." % [armies_idle, "s" if armies_idle > 1 else ""]
-	_confirm_label.text = question
-	_confirm_panel.show()
-	_confirm_yes.grab_focus()
+	if _confirm_panel != null and is_instance_valid(_confirm_panel):
+		_confirm_panel.queue_free()
+	_confirm_panel = ConfirmDialog.ask(map.get("ui"), "", question, confirm_end_turn, "Terminer le tour", "Pas encore")
 
 
 func confirm_end_turn() -> void:
-	if _confirm_panel != null:
+	if _confirm_panel != null and is_instance_valid(_confirm_panel):
 		_confirm_panel.hide()
 	_end_turn_confirmed = true
 	map.get("ui").call("request_end_turn")  # U5 : avec le bandeau des autres factions

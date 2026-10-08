@@ -91,10 +91,6 @@ static func _count_for(range_value: Variant, intensity: float) -> int:
 	return maxi(roundi(lerpf(float(range_value[0]), float(range_value[1]), clampf(intensity, 0.0, 1.0))), 0)
 
 
-static func _h(a: int, b: int) -> float:
-	return float(absi(hash(Vector2i(a, b))) % 10007) / 10007.0
-
-
 # --- Branchement -----------------------------------------------------------------------
 
 
@@ -209,7 +205,7 @@ func _build_plague(id: String, site: Dictionary, intensity: float, block: Dictio
 		# Deux rangs en quinconce, groupés au bord de la colonie (mètres avant grossissement).
 		var pit := _add_prop(root, "Pit_%d" % k, WarScarMeshes.plague_pit())
 		pit.set_meta("offset", Vector2(10.0 + 7.5 * float(k % 2), (float(k) - float(pits - 1) * 0.5) * 8.5))
-		pit.set_meta("turn", (_h(seed_value, 40 + k) - 0.5) * 0.5)
+		pit.set_meta("turn", (Hash.vec01(seed_value, 40 + k) - 0.5) * 0.5)
 	if bool(block.get("cart", false)) and pits > 0:
 		var cart := _add_prop(root, "DeadCart", FolkModels.prop_mesh("dead_cart"))
 		cart.set_meta("cart", float(pits))
@@ -322,10 +318,10 @@ func _try_doors(id: String) -> bool:
 	var order: Array = []
 	for i in xs.size():
 		if search <= 0.0 or Vector2(xs[i], ys[i]).length() <= search:
-			order.append([_h(seed_value, 1000 + i), i])
+			order.append([Hash.vec01(seed_value, 1000 + i), i])
 	if order.is_empty():
 		for i in xs.size():
-			order.append([_h(seed_value, 1000 + i), i])
+			order.append([Hash.vec01(seed_value, 1000 + i), i])
 	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var root: Node3D = entry["node"]
 	var unit := 1.0 / meters_per_unit
@@ -381,7 +377,7 @@ func _read_history(history: Variant) -> void:
 		if existing != null:
 			_drop_field(province)
 		# Même décalage à chaque lecture (rechargement compris) : la marque ne bouge pas.
-		var at := source + Vector2.from_angle(_h(hash(str(province) + str(turn)), 7) * TAU) * FIELD_OFFSET
+		var at := source + Vector2.from_angle(Hash.vec01(hash(str(province) + str(turn)), 7) * TAU) * FIELD_OFFSET
 		_fields[province] = {"at": at, "province": province, "turn": turn, "texts": {}, "node": null, "stage": "", "seed": absi(str(province).hash()),
 			"history": true, "source": source}
 
@@ -431,7 +427,7 @@ func _battle_position(sim: Object, army: String, province: String) -> Vector2:
 		at = _map_data.centroid_of_id(province)
 	if at.x < 0.0:
 		return at
-	var angle := _h(hash(army + province), 7) * TAU
+	var angle := Hash.vec01(hash(army + province), 7) * TAU
 	return at + Vector2.from_angle(angle) * FIELD_OFFSET
 
 
@@ -484,17 +480,17 @@ func _build_field(key: String, field: Dictionary, block: Dictionary, crows: bool
 	mound.name = "Mound"
 	mound.mesh = WarScarMeshes.mound(radius * 0.4, radius * 0.17)
 	mound.set_meta("local", Vector3.ZERO)
-	mound.set_meta("yaw", _h(seed_value, 1) * TAU)
+	mound.set_meta("yaw", Hash.vec01(seed_value, 1) * TAU)
 	root.add_child(mound)
 	if debris:
 		for k in int(block.get("debris", 0)):
-			var angle := _h(seed_value, 10 + k) * TAU
-			var reach := radius * (0.5 + 0.5 * sqrt(_h(seed_value, 60 + k)))
+			var angle := Hash.vec01(seed_value, 10 + k) * TAU
+			var reach := radius * (0.5 + 0.5 * sqrt(Hash.vec01(seed_value, 60 + k)))
 			var piece := MeshInstance3D.new()
 			piece.name = "Debris_%d" % k
-			piece.mesh = WarScarMeshes.debris(int(_h(seed_value, 110 + k) * 5.0), FIGURE_UNIT)
+			piece.mesh = WarScarMeshes.debris(int(Hash.vec01(seed_value, 110 + k) * 5.0), FIGURE_UNIT)
 			piece.set_meta("local", Vector3(cos(angle) * reach, 0.0, sin(angle) * reach))
-			piece.set_meta("yaw", _h(seed_value, 160 + k) * TAU)
+			piece.set_meta("yaw", Hash.vec01(seed_value, 160 + k) * TAU)
 			root.add_child(piece)
 	if crows:
 		for k in int(block.get("crows", 0)):
@@ -503,8 +499,8 @@ func _build_field(key: String, field: Dictionary, block: Dictionary, crows: bool
 			crow.mesh = WarScarMeshes.crow(FIGURE_UNIT * 0.55)
 			crow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			# Orbite : rayon, hauteur, vitesse angulaire (sens tiré), phase.
-			crow.set_meta("orbit", Vector4(radius * (0.35 + 0.5 * _h(seed_value, 210 + k)), radius * (0.55 + 0.5 * _h(seed_value, 260 + k)),
-				(0.35 + 0.3 * _h(seed_value, 310 + k)) * (1.0 if _h(seed_value, 360 + k) < 0.5 else -1.0), _h(seed_value, 410 + k) * TAU))
+			crow.set_meta("orbit", Vector4(radius * (0.35 + 0.5 * Hash.vec01(seed_value, 210 + k)), radius * (0.55 + 0.5 * Hash.vec01(seed_value, 260 + k)),
+				(0.35 + 0.3 * Hash.vec01(seed_value, 310 + k)) * (1.0 if Hash.vec01(seed_value, 360 + k) < 0.5 else -1.0), Hash.vec01(seed_value, 410 + k) * TAU))
 			root.add_child(crow)
 	return root
 

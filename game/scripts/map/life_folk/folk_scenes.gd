@@ -179,10 +179,6 @@ func _warn(key: String, message: String) -> void:
 		push_warning(message)
 
 
-static func _h(a: int, b: int) -> float:
-	return VegetationFields.hash01(a * 73856093 ^ b * 19349663)
-
-
 ## Rayon réel (unités monde) de la colonie (VT : villes 1:1, plus de maquette grossie).
 func _model_radius(index: int) -> float:
 	if _layer == null:
@@ -209,7 +205,7 @@ func _footprint(index: int) -> float:
 
 ## Direction (carte) du côté de la colonie où se tient la scène (stable par colonie et type).
 static func _side(scene: Dictionary) -> Vector2:
-	var angle := _h(int(scene["seed"]), 1) * TAU
+	var angle := Hash.h01(int(scene["seed"]), 1) * TAU
 	return Vector2(cos(angle), sin(angle))
 
 
@@ -353,13 +349,13 @@ func _plague(f: Dictionary, n: int) -> void:
 	var seed_value: int = f["seed"]
 	var from := _at(f, 0.0, -12.0)
 	var to := _at(f, 0.0, 12.0)
-	var phase := _h(seed_value, 2)
+	var phase := Hash.h01(seed_value, 2)
 	if _pool.add("dead_cart", "", from, to, phase):
 		for slot_name in ["porter_l", "porter_r"]:
 			var slot := FolkModels.slot("dead_cart", slot_name, Vector2(0.25 if slot_name == "porter_r" else -0.25, 1.95))
 			_pool.add("porter", "procession", from, to, phase, slot.x, -slot.y)
-	_procession(_at(f, 9.0, 14.0), _at(f, 9.0, -14.0), _h(seed_value, 3), maxi(n - 3, 1), ["pilgrim", "monk"], 0)
-	_pool.add_static("pyre", "", _at(f, 5.0, 7.0), _h(seed_value, 4) * TAU)
+	_procession(_at(f, 9.0, 14.0), _at(f, 9.0, -14.0), Hash.h01(seed_value, 3), maxi(n - 3, 1), ["pilgrim", "monk"], 0)
+	_pool.add_static("pyre", "", _at(f, 5.0, 7.0), Hash.h01(seed_value, 4) * TAU)
 
 
 ## Disette : file de gens devant l'église (vers la colonie), immobiles.
@@ -368,8 +364,8 @@ func _famine(f: Dictionary, n: int) -> void:
 	var face := -(f["out"] as Vector2)
 	var roles := ["peasant", "peasant_b", "pilgrim", "porter"]
 	for k in n:
-		var at := _at(f, -2.0 + 0.9 * k, (_h(seed_value, 10 + k) - 0.5) * 0.6)
-		if not _pool.add_static(roles[k % roles.size()], "idle", at, _yaw(face) + (_h(seed_value, 40 + k) - 0.5) * 0.5):
+		var at := _at(f, -2.0 + 0.9 * k, (Hash.h01(seed_value, 10 + k) - 0.5) * 0.6)
+		if not _pool.add_static(roles[k % roles.size()], "idle", at, _yaw(face) + (Hash.h01(seed_value, 40 + k) - 0.5) * 0.5):
 			return
 
 
@@ -381,16 +377,16 @@ func _revolt(f: Dictionary, n: int) -> void:
 	var spread := sqrt(float(n)) * 0.9
 	var pacing := n / 5
 	for k in n:
-		var angle := _h(seed_value, 10 + k) * TAU
-		var r := spread * sqrt(_h(seed_value, 40 + k))
+		var angle := Hash.h01(seed_value, 10 + k) * TAU
+		var r := spread * sqrt(Hash.h01(seed_value, 40 + k))
 		var at := _at(f, cos(angle) * r, sin(angle) * r)
 		if k < pacing:
 			var dir := (f["along"] as Vector2) * (1.0 if k % 2 == 0 else -1.0)
-			if not _pool.add("rioter", "walk", at, at + dir * _m(4.0), _h(seed_value, 70 + k)):
+			if not _pool.add("rioter", "walk", at, at + dir * _m(4.0), Hash.h01(seed_value, 70 + k)):
 				return
 			continue
 		var face := (center - at).normalized()
-		if not _pool.add_static("rioter", "idle", at, _yaw(face) + (_h(seed_value, 90 + k) - 0.5) * 0.7):
+		if not _pool.add_static("rioter", "idle", at, _yaw(face) + (Hash.h01(seed_value, 90 + k) - 0.5) * 0.7):
 			return
 
 
@@ -403,7 +399,7 @@ func _devastation(f: Dictionary, n: int) -> void:
 	var placed := 0
 	var inner := (f["anchor"] as Vector2).distance_to(center) - _m(EDGE_M) * 0.5
 	for g in groups:
-		var angle := _h(seed_value, 5) * TAU + (float(g) + _h(seed_value, 10 + g) * 0.5) * TAU / float(groups)
+		var angle := Hash.h01(seed_value, 5) * TAU + (float(g) + Hash.h01(seed_value, 10 + g) * 0.5) * TAU / float(groups)
 		var dir := Vector2(cos(angle), sin(angle))
 		var from := center + dir * inner
 		# LR-18 : trajet courbe (route voisine, sinon arc qui s'écarte de l'eau), un tronçon par groupe.
@@ -414,8 +410,8 @@ func _devastation(f: Dictionary, n: int) -> void:
 		var piece := g % (path.size() - 1)
 		var a := path[piece]
 		var b := path[piece + 1]
-		var phase := _h(seed_value, 30 + g)
-		var size := 2 + int(_h(seed_value, 50 + g) * 2.0)
+		var phase := Hash.h01(seed_value, 30 + g)
+		var size := 2 + int(Hash.h01(seed_value, 50 + g) * 2.0)
 		for k in size:
 			if placed >= n:
 				return
@@ -437,7 +433,7 @@ func _escape_path(index: int, from: Vector2, dir: Vector2, salt: int) -> PackedV
 	var bend := _m(18.0)
 	var pos := mid + side * bend
 	var neg := mid - side * bend
-	var sign_value := 1.0 if _h(salt, 1) < 0.5 else -1.0
+	var sign_value := 1.0 if Hash.h01(salt, 1) < 0.5 else -1.0
 	var rivers: Array = _river_cache.get(index, [])
 	if not rivers.is_empty():
 		var near_pos := INF
@@ -519,16 +515,16 @@ func _siege(f: Dictionary, n: int) -> void:
 	for c in carts:
 		var from := _at(f, 40.0, -6.0 + 12.0 * c)
 		var to := _at(f, 8.0, -3.0 + 6.0 * c)
-		var phase := _h(seed_value, 2 + c)
+		var phase := Hash.h01(seed_value, 2 + c)
 		if _pool.add("peasant_cart", "roll", from, to, phase):
 			var carter := FolkModels.slot("peasant_cart", "carter", Vector2(0.75, 3.3))
 			_pool.add("peasant", "walk", from, to, phase, carter.x, -carter.y)
 	for k in maxi(n - carts, 0):
-		var angle := _h(seed_value, 10 + k) * PI - PI * 0.5
-		var r := 14.0 + 18.0 * _h(seed_value, 40 + k)
+		var angle := Hash.h01(seed_value, 10 + k) * PI - PI * 0.5
+		var r := 14.0 + 18.0 * Hash.h01(seed_value, 40 + k)
 		var at := _at(f, cos(angle) * r, sin(angle) * r * 1.5)
-		var dir := Vector2.from_angle(_h(seed_value, 70 + k) * TAU)
-		if not _pool.add("porter", "harvest", at, at + dir * _m(6.0), _h(seed_value, 90 + k)):
+		var dir := Vector2.from_angle(Hash.h01(seed_value, 70 + k) * TAU)
+		if not _pool.add("porter", "harvest", at, at + dir * _m(6.0), Hash.h01(seed_value, 90 + k)):
 			return
 
 
@@ -548,7 +544,7 @@ func _construction(f: Dictionary, n: int) -> void:
 	var masons := mini(n - 1, 10)
 	for k in masons:
 		var forward := k % 2 == 0
-		if not _pool.add("porter", "walk", pile if forward else ladder, ladder if forward else pile, float(k) / float(maxi(masons, 1)) + _h(seed_value, 10 + k) * 0.1, 0.4 * float(k % 3)):
+		if not _pool.add("porter", "walk", pile if forward else ladder, ladder if forward else pile, float(k) / float(maxi(masons, 1)) + Hash.h01(seed_value, 10 + k) * 0.1, 0.4 * float(k % 3)):
 			return
 
 
@@ -579,13 +575,13 @@ func _fair(f: Dictionary, n: int) -> void:
 	var k := 0
 	while placed < n:
 		var forward := k % 2 == 0
-		if not _pool.add("peasant" if k % 3 else "porter", "walk", lane_from if forward else lane_to, lane_to if forward else lane_from, _h(seed_value, 10 + k), (_h(seed_value, 40 + k) - 0.5) * 2.0):
+		if not _pool.add("peasant" if k % 3 else "porter", "walk", lane_from if forward else lane_to, lane_to if forward else lane_from, Hash.h01(seed_value, 10 + k), (Hash.h01(seed_value, 40 + k) - 0.5) * 2.0):
 			break
 		placed += 1
 		k += 1
 	for b in 4:
-		_pool.add_static("sheep", "", _at(f, (_h(seed_value, 60 + b) - 0.5) * 3.0, half + 6.0 + _h(seed_value, 70 + b) * 3.0), _h(seed_value, 80 + b) * TAU)
-	_pool.add_static("cow", "", _at(f, 2.0, half + 8.0), _h(seed_value, 90) * TAU)
+		_pool.add_static("sheep", "", _at(f, (Hash.h01(seed_value, 60 + b) - 0.5) * 3.0, half + 6.0 + Hash.h01(seed_value, 70 + b) * 3.0), Hash.h01(seed_value, 80 + b) * TAU)
+	_pool.add_static("cow", "", _at(f, 2.0, half + 8.0), Hash.h01(seed_value, 90) * TAU)
 	for end in [-1.0, 1.0]:
 		_pool.add_static("procession_banner", "", _at(f, 0.0, end * (half + 2.0)), _yaw(f["along"]))
 
@@ -594,7 +590,7 @@ func _fair(f: Dictionary, n: int) -> void:
 ## de la colonie.
 func _celebration(f: Dictionary, n: int) -> void:
 	var seed_value: int = f["seed"]
-	_procession(_at(f, 2.0, -18.0), _at(f, 2.0, 18.0), _h(seed_value, 2), maxi(n - 3, 1), ["peasant", "peasant_b", "monk", "merchant"], 2)
+	_procession(_at(f, 2.0, -18.0), _at(f, 2.0, 18.0), Hash.h01(seed_value, 2), maxi(n - 3, 1), ["peasant", "peasant_b", "monk", "merchant"], 2)
 
 
 ## Crue : nappes d'eau boueuse le long du fleuve voisin (sinon devant la colonie) et habitants
@@ -607,14 +603,14 @@ func _flood(f: Dictionary, n: int) -> void:
 	if points.is_empty():
 		_pool.warn_once("scenes:flood_river", "FolkScenes: no river near a flooded settlement, water laid in front of it")
 		for k in 2:
-			points.append(_at(f, 8.0 + 10.0 * k, (_h(seed_value, 5 + k) - 0.5) * 12.0))
+			points.append(_at(f, 8.0 + 10.0 * k, (Hash.h01(seed_value, 5 + k) - 0.5) * 12.0))
 	for k in points.size():
-		_pool.add_static("flood_water", "", points[k], _h(seed_value, 20 + k) * TAU)
+		_pool.add_static("flood_water", "", points[k], Hash.h01(seed_value, 20 + k) * TAU)
 	var face := -(f["out"] as Vector2)
 	for k in n:
 		var at := _at(f, -4.0 + 1.5 * float(k % 4), -3.0 + 1.5 * float(k / 4))
 		var role := "porter" if k % 3 == 0 else "peasant"
-		if not _pool.add_static(role, "idle", at, _yaw(face) + (_h(seed_value, 40 + k) - 0.5) * 1.2):
+		if not _pool.add_static(role, "idle", at, _yaw(face) + (Hash.h01(seed_value, 40 + k) - 0.5) * 1.2):
 			return
 
 
@@ -681,4 +677,4 @@ func _muster(f: Dictionary, n: int) -> void:
 		if not _pool.add_static("recruit", "drill", at, _yaw(-face)):
 			return
 	var front_from := _at(f, 4.0, -float(columns) * 0.7)
-	_pool.add("guard", "guard_walk", front_from, front_from + along * _m(float(columns) * 1.4), _h(seed_value, 3))
+	_pool.add("guard", "guard_walk", front_from, front_from + along * _m(float(columns) * 1.4), Hash.h01(seed_value, 3))

@@ -14,7 +14,7 @@ extends RefCounted
 ## - Pâtures (canal A) : troupeaux (moutons ou vaches) et un berger.
 ## - Forêts (canal B de `splat`, couverture forestière) en hiver : bûcherons.
 ## - Pèlerins : petits groupes marchant vers les cités (niveau 3 de `SettlementGrowth`).
-## Tirages déterministes par lieu (`VegetationFields.hash01`) : un nouveau placement retrouve les
+## Tirages déterministes par lieu (`Hash.h01`) : un nouveau placement retrouve les
 ## mêmes gens au même endroit.
 
 ## Taille des cases de l'index spatial des tronçons de route (unités monde).
@@ -136,10 +136,6 @@ func _setting(key: String, fallback: float) -> float:
 	return float(_pool.settings.get(key, fallback)) if _pool != null else fallback
 
 
-static func _h(a: int, b: int, c: int = 0) -> float:
-	return VegetationFields.hash01(a * 73856093 ^ b * 19349663 ^ c * 83492791)
-
-
 ## Tronçons de route dont le milieu est dans le disque, plus proches d'abord (indices). FK6 :
 ## tri natif de clés entières (distance² quantifiée << 20 | indice) au lieu d'un `sort_custom`
 ## sur des milliers de paires (≈ 10 ms près de Paris) ; résultat gardé pour le placement en cours.
@@ -215,7 +211,7 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 			var pa := a.lerp(b, float(piece) / pieces)
 			var pb := a.lerp(b, float(piece + 1) / pieces)
 			var expected := pa.distance_to(pb) * density
-			var n := int(expected) + (1 if _h(index, piece, 1) < fposmod(expected, 1.0) else 0)
+			var n := int(expected) + (1 if Hash.h01(index, piece, 1) < fposmod(expected, 1.0) else 0)
 			for k in n:
 				if placed >= budget:
 					break
@@ -225,13 +221,13 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 
 ## Un voyageur (ou un petit groupe) sur un trajet ; renvoie le nombre de figurines posées.
 func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
-	var forward := _h(seed_id, k, 2) < 0.5
+	var forward := Hash.h01(seed_id, k, 2) < 0.5
 	var from := a if forward else b
 	var to := b if forward else a
-	var phase := _h(seed_id, k, 3)
+	var phase := Hash.h01(seed_id, k, 3)
 	# Chacun tient sa droite.
-	var side := 0.5 + 0.3 * _h(seed_id, k, 4)
-	var kind := _h(seed_id, k, 5)
+	var side := 0.5 + 0.3 * Hash.h01(seed_id, k, 4)
+	var kind := Hash.h01(seed_id, k, 5)
 	if kind < 0.15:
 		return 1 if _pool.add("rider", "ride", from, to, phase, side) else 0
 	if kind < 0.27:
@@ -241,7 +237,7 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
 			var carter := FolkModels.slot("peasant_cart", "carter", Vector2(1.1, 0.8))
 			count += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
 		return count
-	var pick := _h(seed_id, k, 6)
+	var pick := Hash.h01(seed_id, k, 6)
 	# Porteurs (sac à l'épaule : leur marche est `carry`) parmi les piétons.
 	var role := "porter" if pick < 0.25 else ("peasant" if pick < 0.7 else "peasant_b")
 	return 1 if _pool.add(role, "walk", from, to, phase, side) else 0
@@ -269,7 +265,7 @@ func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable
 	var quant := 1000000.0 / maxf(r2, 1e-6)
 	for j in range(j0, j1 + 1):
 		for i in range(i0, i1 + 1):
-			var p := Vector2((i + _h(i, j, salt)) * step, (j + _h(i, j, salt + 1)) * step)
+			var p := Vector2((i + Hash.h01(i, j, salt)) * step, (j + Hash.h01(i, j, salt + 1)) * step)
 			var d2 := p.distance_squared_to(focus)
 			if d2 > r2:
 				continue
@@ -309,10 +305,10 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 		var plan: Array = entry[4]
 		var activity: String = plan[0]
 		var group: int = plan[1]
-		var yaw := _h(i, j, 22) * TAU
+		var yaw := Hash.h01(i, j, 22) * TAU
 		var dir := Vector2(sin(yaw), cos(yaw))
 		if activity == "plough":
-			placed += _plough_team(p, dir, _h(i, j, 23))
+			placed += _plough_team(p, dir, Hash.h01(i, j, 23))
 			continue
 		for k in group:
 			if placed >= budget:
@@ -321,11 +317,11 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 			var offset := Vector2(cos(yaw + k * 2.1), sin(yaw + k * 2.1)) * (2.5 * k) * _pool.current_scale()
 			if activity == "harvest":
 				# Porteurs (vendange, gerbes) : allers et venues courtes.
-				if _pool.add("porter", "harvest", p + offset, p + offset + dir.rotated(k * 0.7) * FURROW, _h(i, j, 30 + k)):
+				if _pool.add("porter", "harvest", p + offset, p + offset + dir.rotated(k * 0.7) * FURROW, Hash.h01(i, j, 30 + k)):
 					placed += 1
 				continue
 			var role := "reaper" if activity == "scythe" else ("peasant" if (i + j + k) % 3 != 0 else "peasant_b")
-			if _pool.add_static(role, activity, p + offset, yaw + (_h(i, j, 30 + k) - 0.5) * 0.8):
+			if _pool.add_static(role, activity, p + offset, yaw + (Hash.h01(i, j, 30 + k) - 0.5) * 0.8):
 				placed += 1
 	return placed
 
@@ -360,15 +356,15 @@ func _field_plan(p: Vector2, i: int, j: int, probability: float) -> Variant:
 		"summer":
 			activity = "scythe"
 			chance = fields * probability
-			group = 2 + int(_h(i, j, 21) * 2.0)
+			group = 2 + int(Hash.h01(i, j, 21) * 2.0)
 		"autumn":
 			activity = "harvest"
 			if mask.g > 0.25:
 				chance = mask.g * probability * 1.4
-				group = 2 + int(_h(i, j, 21) * 3.0)
+				group = 2 + int(Hash.h01(i, j, 21) * 3.0)
 			else:
 				chance = fields * probability * 0.4
-	var roll := _h(i, j, 20)
+	var roll := Hash.h01(i, j, 20)
 	if roll >= chance * 1.5:
 		return null  # rejet avant la lecture (coûteuse) de la province
 	if roll >= chance * clampf(_people_factor(p), 0.3, 1.5):
@@ -386,21 +382,21 @@ func _pastures(focus: Vector2, radius: float, budget: int) -> int:
 	var pick := func(p: Vector2, i: int, j: int) -> Variant:
 		var mask := terroir.sample(p)
 		var pasture := mask.a * (1.0 - mask.b)
-		return null if pasture < 0.3 or _h(i, j, 42) >= pasture * probability else true
+		return null if pasture < 0.3 or Hash.h01(i, j, 42) >= pasture * probability else true
 	for entry in _grid(focus, radius, PASTURE_STEP, 41, pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
-		var cows := _h(i, j, 43) < 0.35
-		var beasts := (2 + int(_h(i, j, 44) * 3.0)) if cows else (4 + int(_h(i, j, 44) * 4.0))
+		var cows := Hash.h01(i, j, 43) < 0.35
+		var beasts := (2 + int(Hash.h01(i, j, 44) * 3.0)) if cows else (4 + int(Hash.h01(i, j, 44) * 4.0))
 		var spread := (4.0 if cows else 3.0) * _pool.current_scale()
 		for k in beasts:
-			var angle := _h(i, j, 50 + k) * TAU
-			var at := p + Vector2(cos(angle), sin(angle)) * spread * sqrt(_h(i, j, 60 + k)) * 2.0
-			_pool.add_static("cow" if cows else "sheep", "", at, _h(i, j, 70 + k) * TAU)
-		if _pool.add_static("peasant_b", "herd", p + Vector2(spread * 3.0, 0.0), _h(i, j, 45) * TAU):
+			var angle := Hash.h01(i, j, 50 + k) * TAU
+			var at := p + Vector2(cos(angle), sin(angle)) * spread * sqrt(Hash.h01(i, j, 60 + k)) * 2.0
+			_pool.add_static("cow" if cows else "sheep", "", at, Hash.h01(i, j, 70 + k) * TAU)
+		if _pool.add_static("peasant_b", "herd", p + Vector2(spread * 3.0, 0.0), Hash.h01(i, j, 45) * TAU):
 			placed += 1
 	return placed
 
@@ -418,11 +414,11 @@ func _woodcutters(focus: Vector2, radius: float, budget: int) -> int:
 	var probability := _setting("woodcutter_probability", WOODCUTTER_PROBABILITY)
 	var placed := 0
 	var pick := func(p: Vector2, i: int, j: int) -> Variant:
-		if _h(i, j, 82) >= probability * 2.5:
+		if Hash.h01(i, j, 82) >= probability * 2.5:
 			return null
 		var x := clampi(int(p.x * sx), 0, splat.get_width() - 1)
 		var y := clampi(int(p.y * sy), 0, splat.get_height() - 1)
-		if splat.get_pixel(x, y).b < FOREST_COVER or _h(i, j, 82) >= probability * _people_factor(p):
+		if splat.get_pixel(x, y).b < FOREST_COVER or Hash.h01(i, j, 82) >= probability * _people_factor(p):
 			return null
 		return true
 	for entry in _grid(focus, radius, FOREST_STEP, 81, pick):
@@ -432,7 +428,7 @@ func _woodcutters(focus: Vector2, radius: float, budget: int) -> int:
 		var i: int = entry[2]
 		var j: int = entry[3]
 		for k in 2:
-			if placed < budget and _pool.add_static("peasant", "chop", p + Vector2(k * 1.2, k * 0.6) * _pool.current_scale(), _h(i, j, 83 + k) * TAU):
+			if placed < budget and _pool.add_static("peasant", "chop", p + Vector2(k * 1.2, k * 0.6) * _pool.current_scale(), Hash.h01(i, j, 83 + k) * TAU):
 				placed += 1
 	return placed
 
@@ -460,14 +456,14 @@ func _pilgrims(focus: Vector2, radius: float, budget: int) -> int:
 			if d < best:
 				best = d
 				target = city
-		if best > PILGRIM_RANGE or best < 1.5 or _h(index, 0, 90) >= probability:
+		if best > PILGRIM_RANGE or best < 1.5 or Hash.h01(index, 0, 90) >= probability:
 			continue
 		# Vers la cité : départ au bout le plus éloigné.
 		var from := a if a.distance_to(target) > b.distance_to(target) else b
 		var to := b if from == a else a
 		if from.distance_to(to) > PIECE:
 			from = to + (from - to).normalized() * PIECE
-		var phase := _h(index, 0, 91)
+		var phase := Hash.h01(index, 0, 91)
 		for k in 3:
 			if placed < budget and _pool.add("pilgrim", "walk", from, to, phase, 0.5 + 0.5 * (k % 2), 1.3 * k):
 				placed += 1

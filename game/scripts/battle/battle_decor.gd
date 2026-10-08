@@ -99,7 +99,7 @@ func attach_smoke(scene: Node, staging: BattleStaging, weather: String) -> void:
 		var n := mini(count, fires.size())
 		for i in n:
 			var fire: Vector3 = fires[int((i + 0.5) * fires.size() / float(n))]
-			var id := int(scene.call("add_smoke_source", fire + Vector3(0, 0.6, 0), 0.6 + 0.4 * BuildingKit.hash01(i, 73), "campfire"))
+			var id := int(scene.call("add_smoke_source", fire + Vector3(0, 0.6, 0), 0.6 + 0.4 * Hash.vec24(i, 73), "campfire"))
 			if id >= 0:
 				smoke_sources += 1
 	print("BattleDecor: %d camp fire smoke sources" % smoke_sources)
@@ -442,7 +442,7 @@ func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, post
 		var p := a.lerp(b, t) + front * side * 1.5
 		# Le modèle a le nez vers -X : il regarde la corde (vers -side * front).
 		var nose := -front * side
-		var ang := atan2(-nose.y, -nose.x) + BuildingKit.hash01(i, int(c.x)) * 0.5 - 0.25
+		var ang := atan2(-nose.y, -nose.x) + Hash.vec24(i, int(c.x)) * 0.5 - 0.25
 		var xform := Transform3D(Basis(Vector3.UP, -ang), Vector3(p.x, _terrain.height_at(p.x, p.y) - 0.02, p.y))
 		var model: String = models[(i + int(c.x)) % models.size()]
 		if moves == null:
@@ -504,7 +504,7 @@ func _build_fires(root: Node3D, fires: Array[Vector3]) -> void:
 	mm.instance_count = fires.size()
 	for i in fires.size():
 		mm.set_instance_transform(i, Transform3D(Basis(), fires[i] + Vector3(0, 0.25, 0)))
-		mm.set_instance_custom_data(i, Color(BuildingKit.hash01(i, 71), 0, 0, 0))
+		mm.set_instance_custom_data(i, Color(Hash.vec24(i, 71), 0, 0, 0))
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = "Fires"
 	mmi.multimesh = mm

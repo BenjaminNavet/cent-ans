@@ -364,7 +364,7 @@ func _build_houses() -> void:
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
 		if i != church_index and not bool(site["keep"]):
-			var h := 4.0 + 3.0 * BuildingKit.hash01(i, 11)
+			var h := 4.0 + 3.0 * Hash.vec24(i, 11)
 			_house(houses_root, site["p"], float(site["length"]) * 0.95, float(site["depth"]) * 0.95, h, -float(site["yaw"]))
 	BattleSiegeBatcher.batch_and_replace(houses_root)
 	if church_index < 0:
