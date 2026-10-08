@@ -73,7 +73,7 @@ var _heraldry: Texture2D
 ## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
 var lord_scale: float = 1.0
 
-static var _map_settings: Dictionary = {}
+static var _map_lookup := JsonLookup.new(CAMPAIGN_MAP_DATA, {"army_figure_scale": 1.0}, "map")
 
 static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voiles teintes
 
@@ -81,27 +81,19 @@ static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voile
 ## Vrai si les figurines skinnées sont disponibles et que la comparaison `--legacy-army-markers`
 ## n'est pas demandée.
 static func enabled() -> bool:
-	if CmdArgs.has("--legacy-army-markers"):
+	if OS.get_cmdline_user_args().has("--legacy-army-markers"):
 		return false
 	return BattleSkinned.has_figure("cavalry", 0) and BattleSkinned.has_figure("infantry", 0)
 
 
 static func clear_cache() -> void:
 	_sail_meshes.clear()
-	_map_settings.clear()
+	_map_lookup.reload()
 
 
 ## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
 static func map_settings() -> Dictionary:
-	if _map_settings.is_empty():
-		var fallback := {"army_figure_scale": 1.0}
-		_map_settings = fallback.duplicate()
-		var parsed: Variant = DataFile.read_json(CAMPAIGN_MAP_DATA) if DataFile.exists(CAMPAIGN_MAP_DATA) else null
-		if parsed is Dictionary and parsed.get("map") is Dictionary:
-			_map_settings.merge(parsed["map"], true)
-		else:
-			push_warning("ArmyFigures: %s missing or invalid" % CAMPAIGN_MAP_DATA)
-	return _map_settings
+	return _map_lookup.data()
 
 
 ## Construit la représentation d'une armée (`army` = dictionnaire du pont).
@@ -302,7 +294,7 @@ func set_walking(value: bool) -> void:
 # --- Lot AS2 : cadence de marche et balancement de la hampe ----------------------------
 
 const WALK_DATA := "fx/campaign_army_walk.json"
-static var _walk_settings: Dictionary = {}
+static var _walk_lookup := JsonLookup.new(WALK_DATA, {"enabled": false})
 ## Vitesse au sol lissée (unités monde / s) et dernière position, mesurées sur le marqueur.
 var _ground_speed: float = 0.0
 var _last_position: Vector3 = Vector3.INF
@@ -314,15 +306,12 @@ var _bearer_bob: float = 0.0
 
 
 static func walk_settings() -> Dictionary:
-	if _walk_settings.is_empty():
-		var parsed: Variant = DataFile.read_json(WALK_DATA) if DataFile.exists(WALK_DATA) else null
-		_walk_settings = parsed if parsed is Dictionary else {"enabled": false}
-	return _walk_settings
+	return _walk_lookup.data()
 
 
 ## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).
 static func as2_enabled() -> bool:
-	return bool(walk_settings().get("enabled", false)) and not CmdArgs.has("--no-as2")
+	return bool(walk_settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as2")
 
 
 ## Facteur de cadence pour une vitesse au sol `ground_speed` (unités monde / s) d'un groupe dont

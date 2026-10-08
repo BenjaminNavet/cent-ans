@@ -199,7 +199,7 @@ func rebuild(province_states: Dictionary) -> void:
 		var entry: Dictionary = data.settlements[i]
 		var kind := str(entry["kind"])
 		var px: Vector2 = entry["px"]
-		var seed_value := absi(str(entry["id"]).hash())
+		var seed_value := MapInstancing.text_seed(str(entry["id"]))
 		var state: Dictionary = province_states.get(str(entry["province"]), {})
 		# VT-G : rayon et hauteur réels (1 u ≈ 719 m) ; cheminées dans l'emprise bâtie, en tête de toit.
 		var radius := _footprint_radius(i) * CHIMNEY_RADIUS_RATIO
@@ -225,7 +225,7 @@ func rebuild(province_states: Dictionary) -> void:
 	for h in data.hamlets.size():
 		var hamlet: Dictionary = data.hamlets[h]
 		var hpx: Vector2 = hamlet["px"]
-		var hseed := absi((str(hamlet["name"]) + str(hpx)).hash())
+		var hseed := MapInstancing.hamlet_seed(hamlet)
 		hpx = _layer.hamlet_px(h)  # SZ4b : pose de rendu du hameau (ancrage fin ZG5b)
 		var devastation := float(province_states.get(str(hamlet["province"]), {}).get("devastation", 0.0))
 		if _layer.hamlet_burned(h):
@@ -289,7 +289,7 @@ func _build_windmills(province_states: Dictionary) -> void:
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
 		var count := int(WINDMILLS.get(str(entry["kind"]), 0))
-		var seed_value := absi((str(entry["id"]) + "mill").hash())
+		var seed_value := MapInstancing.text_seed(str(entry["id"]) + "mill")
 		if seed_value % int(WINDMILL_ONE_IN.get(str(entry["kind"]), 1)) != 0:
 			count = 0
 		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
@@ -303,15 +303,8 @@ func _build_windmills(province_states: Dictionary) -> void:
 	var sails_mesh := _first_mesh("settlements/windmill_sails")
 	if body_mesh == null or sails_mesh == null:
 		return
-	var bodies := MultiMesh.new()
-	bodies.transform_format = MultiMesh.TRANSFORM_3D
-	bodies.mesh = body_mesh
-	bodies.instance_count = _windmill_points.size()
-	var sails := MultiMesh.new()
-	sails.transform_format = MultiMesh.TRANSFORM_3D
-	sails.use_custom_data = true
-	sails.mesh = sails_mesh
-	sails.instance_count = _windmill_points.size()
+	var bodies := MapInstancing.make(body_mesh, _windmill_points.size())
+	var sails := MapInstancing.make(sails_mesh, _windmill_points.size(), true)
 	var body_buffer := PackedFloat32Array()
 	body_buffer.resize(_windmill_points.size() * 12)
 	var sail_buffer := PackedFloat32Array()
@@ -319,38 +312,15 @@ func _build_windmills(province_states: Dictionary) -> void:
 	for n in _windmill_points.size():
 		var point: Array = _windmill_points[n]
 		var xforms := _windmill_transforms(point)
-		_write_transform(body_buffer, n * 12, xforms[0])
-		_write_transform(sail_buffer, n * 16, xforms[1])
-		_write_custom(sail_buffer, n * 16 + 12, Color(float(point[2]), 0.9 if bool(point[3]) else 0.0, 0.0, 0.0))
+		MapInstancing.write_transform(body_buffer, n * 12, xforms[0])
+		MapInstancing.write_transform(sail_buffer, n * 16, xforms[1])
+		MapInstancing.write_custom(sail_buffer, n * 16 + 12, Color(float(point[2]), 0.9 if bool(point[3]) else 0.0, 0.0, 0.0))
 	bodies.buffer = body_buffer
 	sails.buffer = sail_buffer
 	_windmill_bodies.multimesh = bodies
 	_windmill_sails.multimesh = sails
 	_cpu_buffers[_windmill_bodies] = body_buffer
 	_cpu_buffers[_windmill_sails] = sail_buffer
-
-
-## RS-K : transformation au format du tampon MultiMesh (3 lignes de base + origine).
-static func _write_transform(buffer: PackedFloat32Array, o: int, t: Transform3D) -> void:
-	buffer[o] = t.basis.x.x
-	buffer[o + 1] = t.basis.y.x
-	buffer[o + 2] = t.basis.z.x
-	buffer[o + 3] = t.origin.x
-	buffer[o + 4] = t.basis.x.y
-	buffer[o + 5] = t.basis.y.y
-	buffer[o + 6] = t.basis.z.y
-	buffer[o + 7] = t.origin.y
-	buffer[o + 8] = t.basis.x.z
-	buffer[o + 9] = t.basis.y.z
-	buffer[o + 10] = t.basis.z.z
-	buffer[o + 11] = t.origin.z
-
-
-static func _write_custom(buffer: PackedFloat32Array, o: int, c: Color) -> void:
-	buffer[o] = c.r
-	buffer[o + 1] = c.g
-	buffer[o + 2] = c.b
-	buffer[o + 3] = c.a
 
 
 ## RS-K : moulins `indices` réécrits dans les copies processeur, puis envoyés en un bloc.
@@ -365,8 +335,8 @@ func _write_windmills(indices: Array) -> void:
 		return
 	for n: int in indices:
 		var xforms := _windmill_transforms(_windmill_points[n])
-		_write_transform(body_buffer, n * 12, xforms[0])
-		_write_transform(sail_buffer, n * 16, xforms[1])
+		MapInstancing.write_transform(body_buffer, n * 12, xforms[0])
+		MapInstancing.write_transform(sail_buffer, n * 16, xforms[1])
 	_windmill_bodies.multimesh.buffer = body_buffer
 	_windmill_sails.multimesh.buffer = sail_buffer
 	_cpu_buffers[_windmill_bodies] = body_buffer
@@ -500,11 +470,7 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	quad.center_offset = Vector3(0.0, 0.5, 0.0)
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_custom_data = true
-	multimesh.mesh = quad
-	multimesh.instance_count = points.size()
+	var multimesh := MapInstancing.make(quad, points.size(), true)
 	var buffer := PackedFloat32Array()
 	buffer.resize(points.size() * 16)
 	for n in points.size():
@@ -514,8 +480,8 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader,
 		# `prop_scale` : 1 pour les cheminées, VT2).
 		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
-		_write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
-		_write_custom(buffer, n * 16 + 12, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
+		MapInstancing.write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
+		MapInstancing.write_custom(buffer, n * 16 + 12, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
 	multimesh.buffer = buffer
 	mmi.multimesh = multimesh
 	_cpu_buffers[mmi] = buffer
@@ -729,11 +695,7 @@ func _fill_plumes() -> void:
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	quad.center_offset = Vector3(0.0, 0.5, 0.0)
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_custom_data = true
-	multimesh.mesh = quad
-	multimesh.instance_count = _plume_points.size()
+	var multimesh := MapInstancing.make(quad, _plume_points.size(), true)
 	var buffer := PackedFloat32Array()
 	buffer.resize(_plume_points.size() * 16)
 	for n in _plume_points.size():
@@ -741,9 +703,9 @@ func _fill_plumes() -> void:
 		var seed_value: float = point[2]
 		# Taille portée par le shader (part de l'écran) ; base unitaire, levée en colonne z.
 		var basis := Basis(Vector3.RIGHT, Vector3.UP, Vector3(0.0, float(point[1]), 1.0))
-		_write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
+		MapInstancing.write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
 		var rank := fposmod(seed_value * 31.7 + float(n % 13) * 0.071, 1.0)
-		_write_custom(buffer, n * 16 + 12, Color(seed_value, _plume_dark[n], rank, fposmod(seed_value * 13.0, 1.0)))
+		MapInstancing.write_custom(buffer, n * 16 + 12, Color(seed_value, _plume_dark[n], rank, fposmod(seed_value * 13.0, 1.0)))
 	multimesh.buffer = buffer
 	_plumes.multimesh = multimesh
 	_cpu_buffers[_plumes] = buffer

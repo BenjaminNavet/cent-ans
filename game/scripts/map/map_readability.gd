@@ -9,23 +9,14 @@ extends RefCounted
 
 const FILE := "ui/campaign_map.json"
 
-static var _catalog: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(FILE)
 ## Couche « Signes » de la barre de filtres (chantiers, incidents, rencontres), éteinte par défaut.
 static var signs_layer_on: bool = false
 
 
 ## Bloc `name` du fichier (dictionnaire vide si absent : chaque appelant garde ses replis).
 static func section(name: String) -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = DataFile.read_json(FILE) if DataFile.exists(FILE) else null
-		if parsed is Dictionary:
-			_catalog = parsed
-		else:
-			push_warning("MapReadability: %s missing or invalid" % FILE)
-	var block: Variant = _catalog.get(name, {})
-	return block if block is Dictionary else {}
+	return _lookup.section(name)
 
 
 ## TB6 : massifs forestiers de la carte de couleur éclaircis (uniformes `sg_dark_*` du matériau du
@@ -47,8 +38,7 @@ static func number(name: String, key: String, fallback: float) -> float:
 
 
 static func clear_cache() -> void:
-	_catalog = {}
-	_loaded = false
+	_lookup.reload()
 	signs_layer_on = false
 
 

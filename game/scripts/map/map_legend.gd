@@ -15,7 +15,7 @@ const MODES := ["political", "unrest", "diplomacy", "religion"]
 ## Interligne resserré des petits textes (les polices de secours du thème l'élargissent).
 const SMALL_LINE_SPACING := -9
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 var mode: String = "political"
 ## {player_color, player_faction, factions: [[id, Color, nom]]} (voir `LegendSample`).
@@ -28,13 +28,7 @@ var _scroll: ScrollContainer
 
 ## Contenu de `data/ui/map_legend.json` (mis en cache), {} si absent.
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("MapLegend: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 ## Sections affichées dans le mode de carte `map_mode` (sections sans `modes` : toujours).

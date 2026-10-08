@@ -13,18 +13,12 @@ const SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
 ## Repli de `battle_decor_saturation` si la saison n'en donne pas (valeur DA6).
 const DEFAULT_DECOR_SATURATION := 0.6
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 static var _lut_cache: Dictionary = {}
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("AtmosphereLibrary: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 static func normalize_season(season: String) -> String:

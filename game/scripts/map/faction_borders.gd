@@ -71,11 +71,7 @@ func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 
 ## Réglages de `data/map/faction_borders.json` (dictionnaire vide si absent ou illisible).
 static func load_tuning() -> Dictionary:
-	if not DataFile.exists(TUNING_PATH):
-		push_warning("FactionBorders: %s missing" % TUNING_PATH)
-		return {}
-	var parsed: Variant = DataFile.read_json(TUNING_PATH)
-	return parsed if parsed is Dictionary else {}
+	return JsonLookup.new(TUNING_PATH).data()
 
 
 ## Matériau partagé du terrain (porte les uniformes `fr1_*`), ou null.

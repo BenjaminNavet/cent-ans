@@ -13,26 +13,16 @@ const ENEMY := "enemy"
 const FRIEND := "friend"
 const OTHER := "other"
 
-static var _tuning: Dictionary = {}
-static var _loaded: bool = false
+static var _lookup := JsonLookup.new(TUNING_PATH)
 
 
 ## Réglages (dictionnaire vide si le fichier manque : aucun signe, couleurs héraldiques).
 static func tuning() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		if DataFile.exists(TUNING_PATH):
-			var parsed: Variant = DataFile.read_json(TUNING_PATH)
-			if parsed is Dictionary:
-				_tuning = parsed
-		else:
-			push_warning("StanceCues: %s missing" % TUNING_PATH)
-	return _tuning
+	return _lookup.data()
 
 
 static func clear_cache() -> void:
-	_tuning = {}
-	_loaded = false
+	_lookup.reload()
 
 
 ## Positions du joueur envers chaque faction ({id: clé}) ; vide si la simulation ne les calcule pas.

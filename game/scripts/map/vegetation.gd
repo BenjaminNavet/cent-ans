@@ -784,12 +784,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 ## bloquée jusqu'à 70 ms en zoomant) : on recrée le MultiMesh depuis la copie processeur du tampon
 ## (`buffers` de la tuile, tenue à jour par les recalages), boîte calculée sur le processeur.
 static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -> MultiMesh:
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = old.transform_format
-	multimesh.use_custom_data = old.use_custom_data
-	multimesh.mesh = mesh
-	multimesh.instance_count = old.instance_count
-	multimesh.buffer = buffer
+	var multimesh := MapInstancing.make(mesh, old.instance_count, old.use_custom_data, false, buffer)
 	multimesh.visible_instance_count = old.visible_instance_count
 	return multimesh
 
@@ -1088,12 +1083,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 				mmis.append(null)
 				slots.append(null)
 				continue
-			var multimesh := MultiMesh.new()
-			multimesh.transform_format = MultiMesh.TRANSFORM_3D
-			multimesh.use_custom_data = true
-			multimesh.mesh = meshes[kind]
-			multimesh.instance_count = count
-			multimesh.buffer = job.buffers[slot]
+			var multimesh := MapInstancing.make(meshes[kind], count, true, false, job.buffers[slot])
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh
