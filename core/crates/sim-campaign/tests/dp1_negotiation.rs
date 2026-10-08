@@ -513,19 +513,6 @@ fn ledger_survives_a_save() {
     assert!(negotiation::has_military_access(&back, &ca, &ar));
 }
 
-/// `cargo test -p sim-campaign --test dp1_negotiation print -- --ignored --nocapture`
-#[test]
-#[ignore]
-fn print_the_1337_white_peace() {
-    let data = data();
-    let state = start(&data, "fac_france", 2);
-    let (fr, en) = (fac("fac_france"), fac("fac_england"));
-    println!(
-        "{:#?}",
-        evaluate_treaty(&state, &data, &fr, &en, &[Article::Peace])
-    );
-}
-
 #[test]
 fn treaty_orders_parse_from_json() {
     let json = serde_json::json!({

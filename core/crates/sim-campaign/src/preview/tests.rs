@@ -270,21 +270,3 @@ fn requirements_state() {
         .any(|b| data.has_building(&state.settlements[&with].buildings, &b.id));
     assert_eq!(enabling.met, present);
 }
-
-#[test]
-#[ignore = "timing probe: cargo test -p sim-campaign preview -- --ignored --nocapture"]
-fn preview_cost() {
-    let data = data();
-    let state = campaign(&data);
-    let place = place_without(&state, &data, &BuildingId::new("bld_hotel_dieu").unwrap());
-    let start = std::time::Instant::now();
-    for building in data.buildings.keys() {
-        let _ = state.building_before_after(&data, &place, building);
-    }
-    println!("buildings: {:?}", start.elapsed());
-    let start = std::time::Instant::now();
-    for tech in data.technologies.keys() {
-        let _ = state.technology_before_after(&data, &france(), tech);
-    }
-    println!("technologies: {:?}", start.elapsed());
-}

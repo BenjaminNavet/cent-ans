@@ -11,14 +11,6 @@ use data_model::{FactionId, GameData};
 use sim_battle::{BattleSim, PieceKind, SideId, SiegeFxKind};
 use sim_campaign::{ArmyId, CampaignState};
 
-const TOWNS: [(&str, &str); 5] = [
-    ("paris", "fac_england"),
-    ("avignon", "fac_england"),
-    ("bruges", "fac_france"),
-    ("calais", "fac_england"),
-    ("rouen", "fac_england"),
-];
-
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let (data, _warnings) = GameData::load(&root).expect("game data loads");
@@ -192,76 +184,6 @@ fn dump_units(sim: &BattleSim) {
             u.destination.map(|(x, z)| (x.round(), z.round())),
             u.target,
             u.withdrawing
-        );
-    }
-}
-
-fn fmt(v: Option<f64>) -> String {
-    v.map_or("—".to_owned(), |t| format!("{t:.0}"))
-}
-
-fn median(mut v: Vec<f64>) -> Option<f64> {
-    if v.is_empty() {
-        return None;
-    }
-    v.sort_by(f64::total_cmp);
-    Some(v[v.len() / 2])
-}
-
-#[test]
-#[ignore = "probe: prints the assault durations of the landmark towns"]
-fn probe_landmark_assaults() {
-    let data = data();
-    let seeds: u64 = std::env::var("SEEDS")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(10);
-    let limit: f64 = std::env::var("LIMIT_S")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(1800.0);
-    println!("| Ville | Hommes (ass./garn.) | PV porte | PV mur | 1er coup (s) | porte tombée | porte (médiane s) | brèche (médiane s) | victoires assaillant | nuls | retraites | durée médiane (s) |");
-    println!("|---|---|---|---|---|---|---|---|---|---|---|---|");
-    for (landmark, attacker) in TOWNS {
-        let runs: Vec<Assault> = (0..seeds)
-            .map(|k| assault(&data, landmark, attacker, 11 + k, limit))
-            .collect();
-        for (k, r) in runs.iter().enumerate() {
-            eprintln!(
-                "{landmark} seed {}: men {}/{} blow {} gate {} (left {:.0} %) breach {} blows {} end {:.0} won {} withdrew {} lost {:.0} %/{:.0} %",
-                11 + k as u64,
-                r.men.0,
-                r.men.1,
-                fmt(r.first_blow),
-                fmt(r.gate_at),
-                r.gate_left * 100.0,
-                fmt(r.breach_at),
-                r.blows,
-                r.ended,
-                r.attacker_won,
-                r.withdrew,
-                r.lost.0 * 100.0,
-                r.lost.1 * 100.0
-            );
-        }
-        let gates: Vec<f64> = runs.iter().filter_map(|r| r.gate_at).collect();
-        let breaches: Vec<f64> = runs.iter().filter_map(|r| r.breach_at).collect();
-        println!(
-            "| {landmark} | {}/{} | {:.0} | {:.0} | {} | {}/{} | {} | {} | {}/{} | {} | {} | {} |",
-            runs[0].men.0,
-            runs[0].men.1,
-            runs[0].gate_hp,
-            runs[0].wall_hp,
-            fmt(median(runs.iter().filter_map(|r| r.first_blow).collect())),
-            gates.len(),
-            runs.len(),
-            fmt(median(gates)),
-            fmt(median(breaches)),
-            runs.iter().filter(|r| r.attacker_won).count(),
-            runs.len(),
-            runs.iter().filter(|r| r.ended >= limit - 1.0).count(),
-            runs.iter().filter(|r| r.withdrew).count(),
-            fmt(median(runs.iter().map(|r| r.ended).collect())),
         );
     }
 }
