@@ -152,8 +152,8 @@ pub fn melee_exchange(
     } else {
         1.0
     };
-    let power_a = a.melee_power() * share_a * (1.0 + support_a) * castle_a;
-    let power_b = b.melee_power() * share_b * (1.0 + support_b) * castle_b;
+    let power_a = a.melee_power(rules) * share_a * (1.0 + support_a) * castle_a;
+    let power_b = b.melee_power(rules) * share_b * (1.0 + support_b) * castle_b;
     // Each side fights partly on its own deck, partly on the other's: the
     // climb counts for the attack on the higher deck.
     let factor_a = climb_factor(climb_a, rules);

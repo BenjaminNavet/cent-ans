@@ -1,6 +1,6 @@
 //! A ship in a naval battle: hull, fire, crew groups.
 
-use data_model::{Ability, Propulsion, ShipClass, UnitCategory};
+use data_model::{Ability, NavalRules, Propulsion, ShipClass, UnitCategory};
 use serde::Serialize;
 
 use crate::setup::{SideId, UnitSetup};
@@ -200,28 +200,24 @@ impl Ship {
         self.class.ram > 0.0 && self.class.propulsion == Propulsion::Oars
     }
 
-    /// Average armour of the men aboard (sailors count as 10).
-    pub fn average_armor(&self) -> f64 {
-        let men = self.fighting_men();
-        if men <= 0.0 {
-            return 0.0;
-        }
-        (self.crew.iter().map(|c| c.men * c.armor).sum::<f64>() + self.sailors * 10.0) / men
-    }
-
     /// Melee power: men × melee / 100 × morale factor (shooters with arrows
-    /// left fight at half strength, sailors at a third).
-    pub fn melee_power(&self) -> f64 {
-        let morale = 0.5 + self.morale / 200.0;
+    /// left fight at `shooter_melee_share`, sailors at `sailor_melee`).
+    pub fn melee_power(&self, rules: &NavalRules) -> f64 {
+        let floor = rules.melee_morale_floor;
+        let morale = floor + (1.0 - floor) * self.morale / 100.0;
         let soldiers: f64 = self
             .crew
             .iter()
             .map(|c| {
-                let share = if c.shoots() { 0.5 } else { 1.0 };
+                let share = if c.shoots() {
+                    rules.shooter_melee_share
+                } else {
+                    1.0
+                };
                 c.men * c.melee / 100.0 * share
             })
             .sum();
-        (soldiers + self.sailors * 0.5 * 0.25) * morale
+        (soldiers + self.sailors * rules.sailor_melee) * morale
     }
 
     /// Shooting power: shooters × ranged / 100.
@@ -236,7 +232,7 @@ impl Ship {
     /// Kills `amount` men spread over the soldiers and sailors in
     /// proportion to their numbers, the armour of each group stopping
     /// `armor_share` per 100 points. Returns the men killed.
-    pub fn take_losses(&mut self, amount: f64, armor_share: f64) -> f64 {
+    pub fn take_losses(&mut self, amount: f64, rules: &NavalRules, armor_share: f64) -> f64 {
         let men = self.fighting_men();
         if men <= 0.0 || amount <= 0.0 {
             return 0.0;
@@ -249,7 +245,8 @@ impl Ship {
             killed += loss;
         }
         let share = self.sailors / men;
-        let loss = (amount * share * (1.0 - 0.1 * armor_share)).min(self.sailors);
+        let loss =
+            (amount * share * (1.0 - rules.sailor_armor / 100.0 * armor_share)).min(self.sailors);
         self.sailors -= loss;
         killed + loss
     }

@@ -301,6 +301,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "shooter_melee_share": { "type": "number", "minimum": 0 },
+    "sailor_melee": { "type": "number", "minimum": 0 },
+    "sailor_armor": { "type": "number", "minimum": 0, "maximum": 100 },
+    "melee_morale_floor": { "type": "number", "minimum": 0, "maximum": 1 },
     "marine_archer_share": {
       "type": "number",
       "minimum": 0
@@ -380,7 +384,11 @@
     "blockade_toll",
     "squadron_share",
     "squadron_max",
-    "marine_archer_share"
+    "marine_archer_share",
+    "shooter_melee_share",
+    "sailor_melee",
+    "sailor_armor",
+    "melee_morale_floor"
   ],
   "additionalProperties": false
 }

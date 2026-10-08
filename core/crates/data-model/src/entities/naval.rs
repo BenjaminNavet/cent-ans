@@ -162,6 +162,14 @@ pub struct NavalRules {
     /// Chained crews cannot run: their morale losses to volleys and to the
     /// loss of other ships are multiplied by this.
     pub chain_morale: f64,
+    /// Share of their melee value that shooters with arrows left fight at.
+    pub shooter_melee_share: f64,
+    /// Melee power of one sailor, as a share of a man with 100 melee.
+    pub sailor_melee: f64,
+    /// Armour of the sailors (0-100).
+    pub sailor_armor: f64,
+    /// Melee power factor of a crew at zero morale (1 at full morale).
+    pub melee_morale_floor: f64,
     // ----- morale and surrender --------------------------------------------
     pub morale_per_loss_percent: f64,
     /// Crew morale under which a ship strikes (or flees if free).
