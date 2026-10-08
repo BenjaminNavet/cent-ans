@@ -53,3 +53,7 @@ Dès que le point de contrôle est vert (relance propre cargo test + tests carte
 - Vérifs : cargo test workspace 103 résultats / 0 échec, fmt/clippy propres ; pytest 3 162 verts (seul échec `test_manifest_bake_versions_follow_the_code`, antérieur, corrigé dans les fichiers sales d'une autre session) ; import 0 erreur ; smoke, ep13, fe_ui, cv1, q6, ib_layout, mf1 verts.
 - Conflits : outils GA3 gardés (utilisés par la session i3d), conftest union, readme_gallery.
 - Suite : vagues suivantes depuis `main`, intégrées via feat/sc.
+
+### Vague 6 (lancée 08/10 depuis main 632ce7e0e)
+- plancache (CC10 PlanCache explicite + CA8 + sels alignment, ADR 0205), rt5 (tests sim-battle/ai en binaires thématiques), fixtests (8 tests Godot en échec), lookups2 (JsonLookup restants + validateurs nus Python).
+- Ensuite : lots doc en dernier (UI10, MC15, CA10, CC15, GB7), puis push.
