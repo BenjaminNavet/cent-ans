@@ -1,26 +1,13 @@
 //! NT5 (ADR 0128): N6 army unit cap (`data/rules/armies.json`) and N7
 //! siege engines built on the spot (`data/rules/siege_engines.json`).
 
-use std::path::PathBuf;
-
-use data_model::{BuiltEngineKind, FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::{BuiltEngineKind, FactionId, GameData, SettlementId, UnitTypeId};
 use sim_battle::{BattleSim, SideId};
 use sim_campaign::{
     siege::AssaultError, siege_engines, ArmyId, CampaignState, Order, OrderError, Stance, Unit,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn units(data: &GameData, unit_type: &str, n: usize) -> Vec<Unit> {
     let t = &data.unit_types[&UnitTypeId::new(unit_type).unwrap()];
@@ -80,21 +67,21 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
 
 #[test]
 fn the_cap_is_data() {
-    let data = data();
+    let data = game_data();
     assert_eq!(data.army_rules.max_units, 40);
 }
 
 #[test]
 fn a_41st_unit_cannot_form_an_army() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     let paris = state
         .province_city_id(&prov("prov_ile_de_france"))
         .unwrap()
         .clone();
-    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 45);
+    state.settlements.get_mut(&paris).unwrap().garrison = units(data, "unit_crossbowmen", 45);
     let refused = state.submit_order(
-        &data,
+        data,
         Order::CreateArmy {
             settlement: paris.clone().into(),
             units_from_garrison: (0..41).collect(),
@@ -109,7 +96,7 @@ fn a_41st_unit_cannot_form_an_army() {
     let before = state.armies.len();
     state
         .submit_order(
-            &data,
+            data,
             Order::CreateArmy {
                 settlement: paris.into(),
                 units_from_garrison: (0..40).collect(),
@@ -122,18 +109,18 @@ fn a_41st_unit_cannot_form_an_army() {
 
 #[test]
 fn a_merge_stays_within_the_cap() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     let target = french_army(&state);
     let place = state.armies[&target].settlement().unwrap().clone();
-    state.armies.get_mut(&target).unwrap().units = units(&data, "unit_crossbowmen", 35);
+    state.armies.get_mut(&target).unwrap().units = units(data, "unit_crossbowmen", 35);
     let mut source_army = state.armies[&target].clone();
     source_army.general = None;
-    source_army.units = units(&data, "unit_crossbowmen", 6);
+    source_army.units = units(data, "unit_crossbowmen", 6);
     let source = ArmyId::from_index(9_999);
     state.armies.insert(source.clone(), source_army);
     let refused = state.submit_order(
-        &data,
+        data,
         Order::MergeArmies {
             source: source.clone(),
             target: target.clone(),
@@ -144,7 +131,7 @@ fn a_merge_stays_within_the_cap() {
     state.armies.get_mut(&source).unwrap().units.truncate(5);
     state
         .submit_order(
-            &data,
+            data,
             Order::MergeArmies {
                 source: source.clone(),
                 target: target.clone(),
@@ -158,31 +145,31 @@ fn a_merge_stays_within_the_cap() {
 
 #[test]
 fn a_full_army_hires_no_company() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     let army = french_army(&state);
-    state.armies.get_mut(&army).unwrap().units = units(&data, "unit_crossbowmen", 40);
-    let market = state.mercenary_market(&data, &army).unwrap();
+    state.armies.get_mut(&army).unwrap().units = units(data, "unit_crossbowmen", 40);
+    let market = state.mercenary_market(data, &army).unwrap();
     let blocked = market.blocked.expect("a full army hires nobody");
     assert!(blocked.contains("armée complète"), "{blocked}");
     assert!(market.options.iter().all(|o| !o.available));
-    assert_eq!(sim_campaign::orders::army_room(&state, &data, &army), 0);
+    assert_eq!(sim_campaign::orders::army_room(&state, data, &army), 0);
 }
 
 // ----- N7 -------------------------------------------------------------------
 
 #[test]
 fn engines_take_turns_by_army_size() {
-    let data = data();
+    let data = game_data();
     // 2 000 men: 20 points a turn; 400 men: the floor.
-    let big = siege_engines::work_per_turn(&data, 2_000, 0.0);
-    let small = siege_engines::work_per_turn(&data, 400, 0.0);
+    let big = siege_engines::work_per_turn(data, 2_000, 0.0);
+    let small = siege_engines::work_per_turn(data, 400, 0.0);
     assert_eq!(big, 20);
     assert_eq!(small, data.siege_engine_rules.min_work_per_turn);
     // A siege-speed general hastens the work.
-    assert!(siege_engines::work_per_turn(&data, 2_000, 50.0) > big);
+    assert!(siege_engines::work_per_turn(data, 2_000, 50.0) > big);
     let tower_turns = |rate: u32| {
-        siege_engines::statuses(&data, 0, rate, 0)
+        siege_engines::statuses(data, 0, rate, 0)
             .into_iter()
             .find(|s| s.kind == BuiltEngineKind::Tower)
             .unwrap()
@@ -192,10 +179,10 @@ fn engines_take_turns_by_army_size() {
     assert!(tower_turns(small) > tower_turns(big));
     // In list order: ladders first.
     let ladders = data.siege_engine_rules.engines[0].work;
-    let first = siege_engines::statuses(&data, ladders, 1, 0);
+    let first = siege_engines::statuses(data, ladders, 1, 0);
     assert!(first[0].ready && !first[1].ready && !first[2].ready);
     assert_eq!(
-        siege_engines::ready_kinds(&data, 1_000, 0),
+        siege_engines::ready_kinds(data, 1_000, 0),
         vec![
             BuiltEngineKind::Ladders,
             BuiltEngineKind::Ram,
@@ -206,15 +193,15 @@ fn engines_take_turns_by_army_size() {
 
 #[test]
 fn engines_are_built_during_the_siege() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 4);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 4);
     let city = guyenne(&state);
-    let engines = state.siege_engines(&data, &city);
+    let engines = state.siege_engines(data, &city);
     assert_eq!(engines.len(), data.siege_engine_rules.engines.len());
     assert!(engines.iter().all(|e| !e.ready && e.turns_left >= 1));
-    let rate = state.engine_rate(&data, &city);
+    let rate = state.engine_rate(data, &city);
     assert!(rate >= data.siege_engine_rules.min_work_per_turn);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let siege = state
         .settlement_state(&city)
         .unwrap()
@@ -222,13 +209,13 @@ fn engines_are_built_during_the_siege() {
         .clone()
         .unwrap();
     assert_eq!(siege.engine_work, rate);
-    let engines = state.siege_engines(&data, &city);
+    let engines = state.siege_engines(data, &city);
     // A6-L2: against walls of level 5 the ladders take several turns.
     assert_eq!(
         engines[0].ready,
         rate >= data.siege_engine_rules.engines[0].cost(
             data.siege_engine_rules.scaling_min_wall_level,
-            state.fortification_level(&data, &city)
+            state.fortification_level(data, &city)
         ),
         "ladders after one turn: {engines:?}"
     );
@@ -239,13 +226,13 @@ fn engines_are_built_during_the_siege() {
 
 #[test]
 fn an_assault_waits_for_an_engine() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 4);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 4);
     let city = guyenne(&state);
-    assert!(state.fortification_level(&data, &city) > 0);
-    let blocker = state.assault_blocker(&data, &army).expect("no engine yet");
+    assert!(state.fortification_level(data, &city) > 0);
+    let blocker = state.assault_blocker(data, &army).expect("no engine yet");
     assert!(blocker.contains("aucun engin prêt"), "{blocker}");
-    let refused = state.submit_order(&data, Order::Assault { army: army.clone() });
+    let refused = state.submit_order(data, Order::Assault { army: army.clone() });
     assert!(matches!(
         refused,
         Err(OrderError::Assault(AssaultError::NoEngine(_)))
@@ -260,7 +247,7 @@ fn an_assault_waits_for_an_engine() {
         .as_mut()
         .unwrap()
         .breach = 60;
-    assert_eq!(state.assault_blocker(&data, &army), None);
+    assert_eq!(state.assault_blocker(data, &army), None);
     state
         .settlements
         .get_mut(&city)
@@ -271,11 +258,11 @@ fn an_assault_waits_for_an_engine() {
         .breach = 0;
     // A6-L2: one turn of work is not enough for ladders against these
     // walls; with the work done, the assault is given.
-    state.end_turn_with(&data, idle);
-    assert!(state.assault_blocker(&data, &army).is_some());
+    state.end_turn_with(data, idle);
+    assert!(state.assault_blocker(data, &army).is_some());
     let ladders = data.siege_engine_rules.engines[0].cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &city),
+        state.fortification_level(data, &city),
     );
     state
         .settlements
@@ -285,22 +272,22 @@ fn an_assault_waits_for_an_engine() {
         .as_mut()
         .unwrap()
         .engine_work = ladders;
-    assert_eq!(state.assault_blocker(&data, &army), None);
+    assert_eq!(state.assault_blocker(data, &army), None);
     state
-        .submit_order(&data, Order::Assault { army: army.clone() })
+        .submit_order(data, Order::Assault { army: army.clone() })
         .unwrap();
     assert_eq!(state.pending_battles.len(), 1);
 }
 
 #[test]
 fn built_engines_reach_the_siege_battle() {
-    let data = data();
-    let (mut state, army) = besiege_guyenne(&data, 6);
+    let data = game_data();
+    let (mut state, army) = besiege_guyenne(data, 6);
     let city = guyenne(&state);
     // Ladders only.
     let ladders = data.siege_engine_rules.engines[0].cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &city),
+        state.fortification_level(data, &city),
     );
     state
         .settlements
@@ -311,9 +298,9 @@ fn built_engines_reach_the_siege_battle() {
         .unwrap()
         .engine_work = ladders;
     state
-        .submit_order(&data, Order::Assault { army: army.clone() })
+        .submit_order(data, Order::Assault { army: army.clone() })
         .unwrap();
-    let setup = state.battle_setup(&data, 0).unwrap();
+    let setup = state.battle_setup(data, 0).unwrap();
     let engines = setup.siege.as_ref().unwrap().engines.clone().unwrap();
     assert!(engines.ladders && !engines.ram && engines.towers.is_empty());
     let sim = BattleSim::new(setup.clone(), 1).unwrap();
@@ -328,7 +315,7 @@ fn built_engines_reach_the_siege_battle() {
         .as_mut()
         .unwrap()
         .engine_work = 1_000;
-    let setup = state.battle_setup(&data, 0).unwrap();
+    let setup = state.battle_setup(data, 0).unwrap();
     let engines = setup.siege.as_ref().unwrap().engines.clone().unwrap();
     assert!(engines.ladders && engines.ram && engines.towers.len() == 1);
     let sim = BattleSim::new(setup.clone(), 1).unwrap();
@@ -340,7 +327,7 @@ fn built_engines_reach_the_siege_battle() {
     assert!(attackers.iter().any(|u| u.ram));
     assert!(attackers.iter().any(|u| u.siege_tower() && u.synthetic));
     assert_eq!(
-        state.assault_odds(&data, &army).map(|(_, walls)| walls),
+        state.assault_odds(data, &army).map(|(_, walls)| walls),
         Some(false)
     );
 }
@@ -349,7 +336,7 @@ fn built_engines_reach_the_siege_battle() {
 /// assailant's odds behind standing walls; the bonus is data.
 #[test]
 fn a_ready_ram_helps_the_auto_resolved_assault() {
-    let data = data();
+    let data = game_data();
     let ram = data
         .siege_engine_rules
         .engines
@@ -357,11 +344,11 @@ fn a_ready_ram_helps_the_auto_resolved_assault() {
         .find(|e| e.kind == BuiltEngineKind::Ram)
         .unwrap();
     assert!(ram.auto_assault_bonus_percent > 0);
-    let (mut state, army) = besiege_guyenne(&data, 6);
+    let (mut state, army) = besiege_guyenne(data, 6);
     let city = guyenne(&state);
     let ladders = data.siege_engine_rules.engines[0].cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &city),
+        state.fortification_level(data, &city),
     );
     let set_work = |state: &mut CampaignState, work: u32| {
         state
@@ -374,14 +361,14 @@ fn a_ready_ram_helps_the_auto_resolved_assault() {
             .engine_work = work;
     };
     set_work(&mut state, ladders);
-    let (without, walls) = state.assault_odds(&data, &army).unwrap();
+    let (without, walls) = state.assault_odds(data, &army).unwrap();
     assert!(walls);
     let ram_cost = ram.cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &city),
+        state.fortification_level(data, &city),
     );
     set_work(&mut state, ladders + ram_cost);
-    let (with, walls) = state.assault_odds(&data, &army).unwrap();
+    let (with, walls) = state.assault_odds(data, &army).unwrap();
     assert!(walls, "the ram does not bring the walls down");
     assert!(with > without, "{with} > {without}");
 }
@@ -390,8 +377,8 @@ fn a_ready_ram_helps_the_auto_resolved_assault() {
 /// marches) builds its engines at that turn's end, as the ETA promised.
 #[test]
 fn engines_are_built_from_the_turn_the_siege_begins() {
-    let data = data();
-    let (mut state, _army) = besiege_guyenne(&data, 4);
+    let data = game_data();
+    let (mut state, _army) = besiege_guyenne(data, 4);
     let city = guyenne(&state);
     let turn = state.turn;
     {
@@ -412,8 +399,8 @@ fn engines_are_built_from_the_turn_the_siege_begins() {
         .clone()
         .unwrap()
         .supplies;
-    let rate = state.engine_rate(&data, &city);
-    state.end_turn_with(&data, idle);
+    let rate = state.engine_rate(data, &city);
+    state.end_turn_with(data, idle);
     let siege = state
         .settlement_state(&city)
         .unwrap()
@@ -424,7 +411,7 @@ fn engines_are_built_from_the_turn_the_siege_begins() {
     assert_eq!(siege.supplies, supplies, "supplies still wait a turn (M2)");
     let cost = data.siege_engine_rules.engines[0].cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &city),
+        state.fortification_level(data, &city),
     );
-    assert_eq!(state.siege_engines(&data, &city)[0].ready, rate >= cost);
+    assert_eq!(state.siege_engines(data, &city)[0].ready, rate >= cost);
 }

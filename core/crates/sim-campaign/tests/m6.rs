@@ -3,8 +3,6 @@
 //! battles and income, anachronism surcharge, save format and determinism.
 //! See `docs/design/m6-technologies.md` § 2.
 
-use std::path::PathBuf;
-
 use data_model::{EffectKind, FactionId, GameData, ProvinceId, TechnologyId, UnitTypeId};
 use sim_campaign::battle_auto::{effective_armor, side_power};
 use sim_campaign::research::{self, effective_cost, BASE_RESEARCH_POINTS};
@@ -12,15 +10,7 @@ use sim_campaign::{
     CampaignState, EventKind, Order, OrderError, ResearchError, TechStatus, STATE_VERSION,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn tech(id: &str) -> TechnologyId {
     TechnologyId::new(id).unwrap()
@@ -46,8 +36,8 @@ fn research(state: &mut CampaignState, data: &GameData, id: &str) -> Result<(), 
 
 #[test]
 fn research_points_are_base_plus_buildings_plus_half_governance() {
-    let data = data();
-    let state = france(&data, 1);
+    let data = game_data();
+    let state = france(data, 1);
     let france_id = fac("fac_france");
     // DC6b: a secondary place's libraries weigh its kind's `research_percent`.
     let buildings: f64 = state
@@ -55,8 +45,7 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
         .values()
         .filter(|s| s.controller == france_id)
         .map(|s| {
-            let weight =
-                f64::from(sim_campaign::buildings::research_percent(&data, s.kind)) / 100.0;
+            let weight = f64::from(sim_campaign::buildings::research_percent(data, s.kind)) / 100.0;
             s.buildings
                 .iter()
                 .filter_map(|b| data.buildings.get(b))
@@ -79,14 +68,14 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     let expected =
         f64::from(BASE_RESEARCH_POINTS) + buildings + techs + f64::from(governance.div_ceil(2));
     assert_eq!(
-        state.research_points_per_turn(&data, &france_id),
+        state.research_points_per_turn(data, &france_id),
         expected.round() as u32
     );
-    assert!(state.research_points_per_turn(&data, &france_id) > BASE_RESEARCH_POINTS);
+    assert!(state.research_points_per_turn(data, &france_id) > BASE_RESEARCH_POINTS);
 
     // A new research building in a city raises the rate by its full value.
     let mut state = state;
-    let before = state.research_points_per_turn(&data, &france_id);
+    let before = state.research_points_per_turn(data, &france_id);
     let settlement = state
         .settlements
         .iter()
@@ -105,30 +94,27 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
         .unwrap()
         .buildings
         .push(data_model::BuildingId::new("bld_scriptorium").unwrap());
-    assert_eq!(
-        state.research_points_per_turn(&data, &france_id),
-        before + 1
-    );
+    assert_eq!(state.research_points_per_turn(data, &france_id), before + 1);
 }
 
 #[test]
 fn research_order_is_refused_for_missing_prerequisite_known_or_unknown_tech() {
-    let data = data();
-    let mut state = france(&data, 2);
+    let data = game_data();
+    let mut state = france(data, 2);
     assert!(matches!(
-        research(&mut state, &data, "tech_bombards"),
+        research(&mut state, data, "tech_bombards"),
         Err(OrderError::Research(ResearchError::MissingPrerequisite(_)))
     ));
     assert!(matches!(
-        research(&mut state, &data, "tech_masonry"),
+        research(&mut state, data, "tech_masonry"),
         Err(OrderError::Research(ResearchError::AlreadyKnown))
     ));
     assert!(matches!(
-        research(&mut state, &data, "tech_does_not_exist"),
+        research(&mut state, data, "tech_does_not_exist"),
         Err(OrderError::Research(ResearchError::UnknownTechnology(_)))
     ));
     assert!(state.factions[&fac("fac_france")].research.is_none());
-    research(&mut state, &data, "tech_gunpowder").expect("gunpowder is available");
+    research(&mut state, data, "tech_gunpowder").expect("gunpowder is available");
     assert_eq!(
         state.factions[&fac("fac_france")].research,
         Some(tech("tech_gunpowder"))
@@ -149,16 +135,16 @@ fn research_order_is_refused_for_missing_prerequisite_known_or_unknown_tech() {
 
 #[test]
 fn research_completes_with_an_event_and_clears_the_slot() {
-    let data = data();
-    let mut state = france(&data, 3);
+    let data = game_data();
+    let mut state = france(data, 3);
     let france_id = fac("fac_france");
-    research(&mut state, &data, "tech_longbow_drill").unwrap();
-    let info = state.research_info(&data, &france_id).expect("researching");
+    research(&mut state, data, "tech_longbow_drill").unwrap();
+    let info = state.research_info(data, &france_id).expect("researching");
     assert_eq!(info.cost, 120);
     let expected_turns = info.turns_left;
     let mut completed_at = None;
     for turn in 1..=40 {
-        let events = state.end_turn_with(&data, idle);
+        let events = state.end_turn_with(data, idle);
         if events.iter().any(|e| {
             e.kind == EventKind::TechnologyResearched && e.faction.as_ref() == Some(&france_id)
         }) {
@@ -190,16 +176,16 @@ fn research_completes_with_an_event_and_clears_the_slot() {
 
 #[test]
 fn switching_research_banks_and_restores_progress() {
-    let data = data();
-    let mut state = france(&data, 4);
+    let data = game_data();
+    let mut state = france(data, 4);
     let france_id = fac("fac_france");
-    research(&mut state, &data, "tech_gunpowder").unwrap();
-    state.end_turn_with(&data, idle);
-    state.end_turn_with(&data, idle);
+    research(&mut state, data, "tech_gunpowder").unwrap();
+    state.end_turn_with(data, idle);
+    state.end_turn_with(data, idle);
     let progress = state.factions[&france_id].research_progress;
     assert!(progress > 0);
 
-    research(&mut state, &data, "tech_pavise").unwrap();
+    research(&mut state, data, "tech_pavise").unwrap();
     let faction = &state.factions[&france_id];
     assert_eq!(faction.research, Some(tech("tech_pavise")));
     assert_eq!(faction.research_progress, 0);
@@ -209,7 +195,7 @@ fn switching_research_banks_and_restores_progress() {
         progress
     );
 
-    research(&mut state, &data, "tech_gunpowder").unwrap();
+    research(&mut state, data, "tech_gunpowder").unwrap();
     let faction = &state.factions[&france_id];
     assert_eq!(faction.research_progress, progress);
     assert!(!faction
@@ -221,7 +207,7 @@ fn switching_research_banks_and_restores_progress() {
 
 #[test]
 fn technology_unlocks_units_and_the_data_is_consistent() {
-    let data = data();
+    let data = game_data();
     // Every unit/building a technology unlocks requires that technology.
     for t in data.technologies.values() {
         for unit in &t.unlocks.units {
@@ -242,12 +228,12 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
         }
     }
 
-    let mut state = france(&data, 5);
+    let mut state = france(data, 5);
     let france_id = fac("fac_france");
     let longbow = UnitTypeId::new("unit_longbowmen").unwrap();
     let capital: ProvinceId = state.factions[&france_id].capital.clone();
     let option = state
-        .recruitable_in_province(&data, &capital)
+        .recruitable_in_province(data, &capital)
         .into_iter()
         .find(|o| o.unit_type == longbow)
         .expect("longbowmen listed");
@@ -261,7 +247,7 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
         .technologies
         .insert(tech("tech_longbow_drill"));
     let option = state
-        .recruitable_in_province(&data, &capital)
+        .recruitable_in_province(data, &capital)
         .into_iter()
         .find(|o| o.unit_type == longbow)
         .unwrap();
@@ -277,8 +263,8 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
 
 #[test]
 fn technologies_strengthen_armies_in_battle() {
-    let data = data();
-    let mut state = france(&data, 6);
+    let data = game_data();
+    let mut state = france(data, 6);
     let france_id = fac("fac_france");
     let army = state
         .armies
@@ -292,7 +278,7 @@ fn technologies_strengthen_armies_in_battle() {
         .unwrap()
         .technologies
         .clear();
-    let without = research::army_battle_side(&state, &data, &army).unwrap();
+    let without = research::army_battle_side(&state, data, &army).unwrap();
     for id in [
         "tech_coat_of_plates",
         "tech_crossbow_windlass",
@@ -306,11 +292,11 @@ fn technologies_strengthen_armies_in_battle() {
             .technologies
             .insert(tech(id));
     }
-    let with = research::army_battle_side(&state, &data, &army).unwrap();
+    let with = research::army_battle_side(&state, data, &army).unwrap();
     assert!(effective_armor(&with) > effective_armor(&without));
     assert!(side_power(&with, 30.0, 1.0) > side_power(&without, 30.0, 1.0));
     let bonus =
-        research::tech_unit_bonus(&state, &data, &france_id, data_model::UnitCategory::Cavalry);
+        research::tech_unit_bonus(&state, data, &france_id, data_model::UnitCategory::Cavalry);
     assert_eq!(bonus.armor, 5.0);
     assert_eq!(bonus.melee, 5.0);
     assert_eq!(bonus.morale, 5.0);
@@ -318,23 +304,23 @@ fn technologies_strengthen_armies_in_battle() {
 
 #[test]
 fn technologies_raise_income() {
-    let data = data();
-    let mut state = france(&data, 7);
+    let data = game_data();
+    let mut state = france(data, 7);
     let france_id = fac("fac_france");
-    let before = state.faction_income_effective(&data, &france_id);
+    let before = state.faction_income_effective(data, &france_id);
     state
         .factions
         .get_mut(&france_id)
         .unwrap()
         .technologies
         .insert(tech("tech_royal_taxation"));
-    let after = state.faction_income_effective(&data, &france_id);
+    let after = state.faction_income_effective(data, &france_id);
     assert!(after > before, "{after} <= {before}");
 }
 
 #[test]
 fn anachronistic_technologies_cost_more() {
-    let data = data();
+    let data = game_data();
     let field_artillery = &data.technologies["tech_field_artillery"];
     assert_eq!(effective_cost(field_artillery, 1337), 1125);
     assert_eq!(effective_cost(field_artillery, 1430), 900);
@@ -347,12 +333,12 @@ fn anachronistic_technologies_cost_more() {
 
 #[test]
 fn research_state_survives_a_save_round_trip() {
-    let data = data();
-    let mut state = france(&data, 8);
-    research(&mut state, &data, "tech_gunpowder").unwrap();
-    state.end_turn_with(&data, idle);
-    research(&mut state, &data, "tech_pavise").unwrap();
-    state.end_turn_with(&data, idle);
+    let data = game_data();
+    let mut state = france(data, 8);
+    research(&mut state, data, "tech_gunpowder").unwrap();
+    state.end_turn_with(data, idle);
+    research(&mut state, data, "tech_pavise").unwrap();
+    state.end_turn_with(data, idle);
     let json = state.save_json();
     assert!(json.contains(&format!("\"state_version\":{STATE_VERSION}")));
     assert_eq!(STATE_VERSION, 8);
@@ -368,11 +354,11 @@ fn research_state_survives_a_save_round_trip() {
 
 #[test]
 fn ai_research_is_deterministic_and_alternates_branches() {
-    let data = data();
+    let data = game_data();
     let run = || {
-        let mut state = france(&data, 42);
+        let mut state = france(data, 42);
         for _ in 0..30 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state
     };
@@ -395,14 +381,14 @@ fn ai_research_is_deterministic_and_alternates_branches() {
     );
     // Somebody completed a technology in 30 turns, and the AI picks the
     // cheapest available tech of the branch it has fewer of.
-    let started = france(&data, 42);
+    let started = france(data, 42);
     let learned = a
         .factions
         .iter()
         .any(|(id, f)| f.technologies.len() > started.factions[id].technologies.len());
     assert!(learned);
     let england = fac("fac_england");
-    let choice = research::ai_choose_research(&started, &data, &england).unwrap();
+    let choice = research::ai_choose_research(&started, data, &england).unwrap();
     let chosen = &data.technologies[&choice];
     let known = &started.factions[&england].technologies;
     // H4: three branches; the one with the fewest acquired techs wins

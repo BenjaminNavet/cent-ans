@@ -1,23 +1,9 @@
 //! FE deductions (spec § 3.3), obligations and loyalty (§ 4.1-4.2): deductions (F0), suzerain view, maxim, tribute and loyalty (F1).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::GameData;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start")
@@ -27,30 +13,30 @@ use sim_campaign::feudal;
 
 #[test]
 fn guyenne_owes_allegiance_to_england_then_france() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start(data);
     assert_eq!(
-        feudal::province_lieges(&state, &data, &prov("prov_guyenne")),
+        feudal::province_lieges(&state, data, &prov("prov_guyenne")),
         vec![fac("fac_england"), fac("fac_france")]
     );
-    assert_eq!(feudal::liege_of(&state, &data, &fac("fac_england")), None);
-    assert!(feudal::title_vassals(&state, &data, &fac("fac_france")).contains(&fac("fac_england")));
+    assert_eq!(feudal::liege_of(&state, data, &fac("fac_england")), None);
+    assert!(feudal::title_vassals(&state, data, &fac("fac_france")).contains(&fac("fac_england")));
 }
 
 #[test]
 fn deduced_liege_matches_the_1337_suzerains() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start(data);
     for (id, faction) in &data.factions {
         if let Some(suzerain) = &faction.suzerain {
             assert_eq!(
-                feudal::liege_of(&state, &data, id).as_ref(),
+                feudal::liege_of(&state, data, id).as_ref(),
                 Some(suzerain),
                 "{id}"
             );
         }
     }
-    let vassals = feudal::direct_vassals(&state, &data, &fac("fac_france"));
+    let vassals = feudal::direct_vassals(&state, data, &fac("fac_france"));
     for v in ["fac_brittany", "fac_burgundy", "fac_flanders"] {
         assert!(vassals.contains(&fac(v)), "{v}");
     }
@@ -71,12 +57,12 @@ fn with_rear_vassal(data: &GameData) -> CampaignState {
 
 #[test]
 fn state_suzerain_is_a_view_of_the_titles() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     for id in state.factions.keys() {
         assert_eq!(
             state.factions[id].suzerain,
-            feudal::liege_of(&state, &data, id),
+            feudal::liege_of(&state, data, id),
             "{id}"
         );
     }
@@ -92,7 +78,7 @@ fn state_suzerain_is_a_view_of_the_titles() {
     let scotland = fac("fac_scotland");
     assert!(feudal::pay_homage(
         &mut state,
-        &data,
+        data,
         &scotland,
         &fac("fac_france")
     ));
@@ -103,51 +89,51 @@ fn state_suzerain_is_a_view_of_the_titles() {
     // Survives a save.
     let loaded = CampaignState::load_json(&state.save_json()).expect("round trip");
     assert_eq!(
-        feudal::liege_of(&loaded, &data, &scotland),
+        feudal::liege_of(&loaded, data, &scotland),
         Some(fac("fac_france"))
     );
     // Release: sovereign again.
     state
-        .release_vassal(&data, &fac("fac_france"), &fac("fac_brittany"))
+        .release_vassal(data, &fac("fac_france"), &fac("fac_brittany"))
         .expect("release");
-    assert_eq!(feudal::liege_of(&state, &data, &fac("fac_brittany")), None);
+    assert_eq!(feudal::liege_of(&state, data, &fac("fac_brittany")), None);
     assert_eq!(state.factions[&fac("fac_brittany")].suzerain, None);
     // A pre-F1 save: its stored suzerain is adopted as an override.
-    let mut legacy = start(&data);
+    let mut legacy = start(data);
     legacy.feudal.derived = false;
     legacy.factions.get_mut(&scotland).unwrap().suzerain = Some(fac("fac_france"));
-    feudal::sync_suzerains(&mut legacy, &data);
+    feudal::sync_suzerains(&mut legacy, data);
     assert!(legacy.feudal.derived);
     assert_eq!(
-        feudal::liege_of(&legacy, &data, &scotland),
+        feudal::liege_of(&legacy, data, &scotland),
         Some(fac("fac_france"))
     );
     // No cycle: a liege paying homage to its own vassal is freed first.
-    let mut cycle = start(&data);
+    let mut cycle = start(data);
     assert!(feudal::pay_homage(
         &mut cycle,
-        &data,
+        data,
         &fac("fac_france"),
         &fac("fac_brittany")
     ));
-    assert_eq!(feudal::liege_of(&cycle, &data, &fac("fac_brittany")), None);
+    assert_eq!(feudal::liege_of(&cycle, data, &fac("fac_brittany")), None);
     assert_eq!(
-        feudal::liege_of(&cycle, &data, &fac("fac_france")),
+        feudal::liege_of(&cycle, data, &fac("fac_france")),
         Some(fac("fac_brittany"))
     );
 }
 
 #[test]
 fn king_does_not_levy_his_dukes_counts() {
-    let data = data();
-    let mut state = with_rear_vassal(&data);
+    let data = game_data();
+    let mut state = with_rear_vassal(data);
     let (france, burgundy, navarre) = (fac("fac_france"), fac("fac_burgundy"), fac("fac_navarre"));
     assert_eq!(
-        feudal::liege_chain(&state, &data, &navarre),
+        feudal::liege_chain(&state, data, &navarre),
         vec![burgundy.clone(), france.clone()]
     );
-    assert!(!feudal::direct_vassals(&state, &data, &france).contains(&navarre));
-    let tree = feudal::feudal_tree(&state, &data, &france);
+    assert!(!feudal::direct_vassals(&state, data, &france).contains(&navarre));
+    let tree = feudal::feudal_tree(&state, data, &france);
     let burgundy_node = tree
         .vassals
         .iter()
@@ -167,33 +153,30 @@ fn king_does_not_levy_his_dukes_counts() {
         .unwrap()
         .allies
         .remove(&navarre);
-    state.declare_war(&data, &france, &target).expect("war");
+    state.declare_war(data, &france, &target).expect("war");
     assert!(state.is_at_war(&burgundy, &target));
     assert!(!state.is_at_war(&navarre, &target));
 }
 
 #[test]
 fn tribute_goes_to_the_direct_liege_only() {
-    let data = data();
-    let mut state = with_rear_vassal(&data);
+    let data = game_data();
+    let mut state = with_rear_vassal(data);
     let navarre = fac("fac_navarre");
     state.factions.get_mut(&navarre).unwrap().income_last_turn = 1000;
     let expected = 1000 * data.feudal_rules.vassal_tribute_percent / 100;
     assert_eq!(
-        feudal::tribute_due(&state, &data, &navarre),
+        feudal::tribute_due(&state, data, &navarre),
         Some((fac("fac_burgundy"), expected))
     );
     // Sovereigns owe nothing.
-    assert_eq!(feudal::tribute_due(&state, &data, &fac("fac_france")), None);
-    assert_eq!(
-        feudal::tribute_due(&state, &data, &fac("fac_england")),
-        None
-    );
+    assert_eq!(feudal::tribute_due(&state, data, &fac("fac_france")), None);
+    assert_eq!(feudal::tribute_due(&state, data, &fac("fac_england")), None);
 }
 
 #[test]
 fn loyalty_thresholds_come_from_the_rules() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let mut state = start(&data);
     let (france, burgundy, brittany) =
         (fac("fac_france"), fac("fac_burgundy"), fac("fac_brittany"));
@@ -248,8 +231,8 @@ fn loyalty_thresholds_come_from_the_rules() {
 
 #[test]
 fn title_holdings_survive_a_save_and_older_saves_are_refused() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start(data);
     assert!(!state.feudal.holders.is_empty());
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("round trip");

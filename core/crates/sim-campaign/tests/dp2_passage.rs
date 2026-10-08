@@ -1,8 +1,6 @@
 //! Lot DP2 (ADR 0075): right of passage and trespass incidents, the AI's
 //! respect of it, the path warning and the diplomatic stance of the map.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::passage::{
@@ -12,15 +10,7 @@ use sim_campaign::passage::{
 use sim_campaign::stance::{diplomatic_stance, Stance};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn start(data: &GameData, seed: u64) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
@@ -93,7 +83,7 @@ fn season(state: &mut CampaignState, data: &GameData) -> Vec<sim_campaign::GameE
 
 #[test]
 fn penalty_grows_with_the_seasons_and_is_capped() {
-    let data = data();
+    let data = game_data();
     let rules = &data.ai_diplomacy.passage;
     assert!(
         rules.enabled,
@@ -110,10 +100,10 @@ fn penalty_grows_with_the_seasons_and_is_capped() {
 
 #[test]
 fn trespass_creates_a_growing_incident_then_a_casus_belli() {
-    let data = data();
-    let mut state = start(&data, 1);
+    let data = game_data();
+    let mut state = start(data, 1);
     let fr = fac("fac_france");
-    let (victim, province, point) = neutral_victim(&state, &data);
+    let (victim, province, point) = neutral_victim(&state, data);
     assert_eq!(
         trespassed_owner(&state, &fr, &province),
         Some(victim.clone())
@@ -121,12 +111,12 @@ fn trespass_creates_a_growing_incident_then_a_casus_belli() {
     let army = french_army(&state);
     place(&mut state, &army, point);
     assert_eq!(
-        state.army_province(&data, &state.armies[&army]),
+        state.army_province(data, &state.armies[&army]),
         Some(province.clone())
     );
-    let attitude_before = state.attitude(&data, &victim, &fr).0;
+    let attitude_before = state.attitude(data, &victim, &fr).0;
 
-    let events = season(&mut state, &data);
+    let events = season(&mut state, data);
     let rules = data.ai_diplomacy.passage.clone();
     assert_eq!(trespass_malus(&state, &victim, &fr), -rules.base_penalty);
     assert!(
@@ -135,10 +125,10 @@ fn trespass_creates_a_growing_incident_then_a_casus_belli() {
             .any(|e| e.text_fr.contains("sans droit de passage")),
         "{events:?}"
     );
-    assert!(state.attitude(&data, &victim, &fr).0 < attitude_before);
+    assert!(state.attitude(data, &victim, &fr).0 < attitude_before);
     assert!(!has_grievance(&state, &victim, &fr));
 
-    season(&mut state, &data);
+    season(&mut state, data);
     // One modifier, replaced and grown, not stacked.
     assert_eq!(
         trespass_malus(&state, &victim, &fr),
@@ -146,7 +136,7 @@ fn trespass_creates_a_growing_incident_then_a_casus_belli() {
     );
     assert!(has_grievance(&state, &victim, &fr));
     assert_eq!(
-        state.casus_belli(&data, &victim, &fr).as_deref(),
+        state.casus_belli(data, &victim, &fr).as_deref(),
         Some("violation de nos frontières")
     );
     let record = &state.factions[&victim].ledger.trespassers[&fr];
@@ -156,20 +146,20 @@ fn trespass_creates_a_growing_incident_then_a_casus_belli() {
 
 #[test]
 fn leaving_resets_the_count_and_the_incident_is_forgotten() {
-    let data = data();
-    let mut state = start(&data, 2);
+    let data = game_data();
+    let mut state = start(data, 2);
     let fr = fac("fac_france");
-    let (victim, _, point) = neutral_victim(&state, &data);
+    let (victim, _, point) = neutral_victim(&state, data);
     let army = french_army(&state);
     let home = state.armies[&army].position.clone();
     place(&mut state, &army, point);
-    season(&mut state, &data);
+    season(&mut state, data);
     state.armies.get_mut(&army).unwrap().position = home;
-    season(&mut state, &data);
+    season(&mut state, data);
     assert_eq!(state.factions[&victim].ledger.trespassers[&fr].seasons, 0);
     let memory = data.ai_diplomacy.passage.memory_turns;
     for _ in 0..=memory {
-        season(&mut state, &data);
+        season(&mut state, data);
     }
     assert!(!state.factions[&victim].ledger.trespassers.contains_key(&fr));
     assert_eq!(
@@ -187,10 +177,10 @@ fn leaving_resets_the_count_and_the_incident_is_forgotten() {
 
 #[test]
 fn military_access_or_alliance_make_the_passage_lawful() {
-    let data = data();
-    let mut state = start(&data, 3);
+    let data = game_data();
+    let mut state = start(data, 3);
     let fr = fac("fac_france");
-    let (victim, province, point) = neutral_victim(&state, &data);
+    let (victim, province, point) = neutral_victim(&state, data);
     state
         .factions
         .get_mut(&victim)
@@ -201,7 +191,7 @@ fn military_access_or_alliance_make_the_passage_lawful() {
     assert_eq!(trespassed_owner(&state, &fr, &province), None);
     let army = french_army(&state);
     place(&mut state, &army, point);
-    season(&mut state, &data);
+    season(&mut state, data);
     assert_eq!(trespass_malus(&state, &victim, &fr), 0);
     assert!(!state.factions[&victim].ledger.trespassers.contains_key(&fr));
 
@@ -228,10 +218,10 @@ fn military_access_or_alliance_make_the_passage_lawful() {
 
 #[test]
 fn a_truce_leaves_time_to_withdraw() {
-    let data = data();
-    let mut state = start(&data, 4);
+    let data = game_data();
+    let mut state = start(data, 4);
     let fr = fac("fac_france");
-    let (victim, _, point) = neutral_victim(&state, &data);
+    let (victim, _, point) = neutral_victim(&state, data);
     let until = state.turn + 20;
     state
         .factions
@@ -249,10 +239,10 @@ fn a_truce_leaves_time_to_withdraw() {
     place(&mut state, &army, point);
     let grace = data.ai_diplomacy.passage.truce_grace_seasons;
     for _ in 0..grace {
-        season(&mut state, &data);
+        season(&mut state, data);
         assert_eq!(trespass_malus(&state, &victim, &fr), 0);
     }
-    season(&mut state, &data);
+    season(&mut state, data);
     assert_eq!(
         trespass_malus(&state, &victim, &fr),
         -data.ai_diplomacy.passage.base_penalty
@@ -261,7 +251,7 @@ fn a_truce_leaves_time_to_withdraw() {
 
 #[test]
 fn disabled_rules_ignore_trespass() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.ai_diplomacy.passage.enabled = false;
     let mut state = start(&data, 5);
     let fr = fac("fac_france");
@@ -276,14 +266,14 @@ fn disabled_rules_ignore_trespass() {
 
 #[test]
 fn the_end_of_turn_records_trespass_deterministically() {
-    let data = data();
+    let data = game_data();
     let run = || {
-        let mut state = start(&data, 6);
-        let (_, _, point) = neutral_victim(&state, &data);
+        let mut state = start(data, 6);
+        let (_, _, point) = neutral_victim(&state, data);
         let army = french_army(&state);
         place(&mut state, &army, point);
         let idle = |_: &CampaignState, _: &GameData, _: &FactionId| -> Vec<Order> { Vec::new() };
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         serde_json::to_string(&state).unwrap()
     };
     let first = run();
@@ -301,13 +291,13 @@ fn the_end_of_turn_records_trespass_deterministically() {
 
 #[test]
 fn the_path_preview_names_the_lands_crossed_and_the_halts() {
-    let data = data();
-    let state = start(&data, 7);
+    let data = game_data();
+    let state = start(data, 7);
     let fr = fac("fac_france");
-    let (victim, province, point) = neutral_victim(&state, &data);
+    let (victim, province, point) = neutral_victim(&state, data);
     let army = french_army(&state);
-    let from = state.army_point(&data, &state.armies[&army]);
-    let crossings = trespass_along(&state, &data, &fr, &[from, point], &[1]);
+    let from = state.army_point(data, &state.armies[&army]);
+    let crossings = trespass_along(&state, data, &fr, &[from, point], &[1]);
     let found = crossings
         .iter()
         .find(|t| t.province == province)
@@ -315,12 +305,12 @@ fn the_path_preview_names_the_lands_crossed_and_the_halts() {
     assert_eq!(found.owner, victim);
     assert!(found.halt, "the season ends there");
     // Our own lands only: nothing.
-    assert!(trespass_along(&state, &data, &fr, &[from, from], &[1]).is_empty());
+    assert!(trespass_along(&state, data, &fr, &[from, from], &[1]).is_empty());
 }
 
 #[test]
 fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let mut state = start(&data, 8);
     let fr = fac("fac_france");
     let (victim, _, _) = neutral_victim(&state, &data);
@@ -370,13 +360,13 @@ fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
 
 #[test]
 fn the_diplomatic_map_stance() {
-    let data = data();
-    let mut state = start(&data, 9);
+    let data = game_data();
+    let mut state = start(data, 9);
     let fr = fac("fac_france");
     let en = fac("fac_england");
-    assert_eq!(diplomatic_stance(&state, &data, &fr, &fr), Stance::Own);
-    let (victim, _, point) = neutral_victim(&state, &data);
-    let before = diplomatic_stance(&state, &data, &fr, &victim);
+    assert_eq!(diplomatic_stance(&state, data, &fr, &fr), Stance::Own);
+    let (victim, _, point) = neutral_victim(&state, data);
+    let before = diplomatic_stance(&state, data, &fr, &victim);
     assert!(
         matches!(
             before,
@@ -396,16 +386,16 @@ fn the_diplomatic_map_stance() {
     }
     if before != Stance::Tension {
         assert_eq!(
-            diplomatic_stance(&state, &data, &fr, &victim),
+            diplomatic_stance(&state, data, &fr, &victim),
             Stance::Agreement
         );
     }
     // Our army camping on their lands: tension.
     let army = french_army(&state);
     place(&mut state, &army, point);
-    season(&mut state, &data);
+    season(&mut state, data);
     assert_eq!(
-        diplomatic_stance(&state, &data, &fr, &victim),
+        diplomatic_stance(&state, data, &fr, &victim),
         Stance::Tension
     );
     // War.
@@ -421,7 +411,7 @@ fn the_diplomatic_map_stance() {
         .unwrap()
         .at_war_with
         .insert(fr.clone());
-    assert_eq!(diplomatic_stance(&state, &data, &fr, &en), Stance::War);
+    assert_eq!(diplomatic_stance(&state, data, &fr, &en), Stance::War);
     assert_eq!(Stance::War.key(), "war");
     assert_eq!(Stance::Agreement.label_fr(), "Accord");
 }

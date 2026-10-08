@@ -1076,10 +1076,9 @@ mod tests {
     //! handed to an existing faction, so the tests do not depend on the
     //! values (or the faction) of `data/rules/crusade.json`.
 
-    use std::path::PathBuf;
     use std::sync::OnceLock;
 
-    use data_model::ProvinceId;
+    use data_model::test_support::{fac, game_data, prov};
 
     use super::*;
     use crate::orders::OrderError;
@@ -1090,16 +1089,8 @@ mod tests {
     const BASE: &str = "set_famagusta";
     const TARGET: &str = "prov_jerusalem";
 
-    fn fac(id: &str) -> FactionId {
-        FactionId::new(id).unwrap()
-    }
-
     fn set(id: &str) -> SettlementId {
         SettlementId::new(id).unwrap()
-    }
-
-    fn prov(id: &str) -> ProvinceId {
-        ProvinceId::new(id).unwrap()
     }
 
     fn synthetic_rules() -> CrusadeRules {
@@ -1157,8 +1148,7 @@ mod tests {
     fn data() -> &'static GameData {
         static DATA: OnceLock<GameData> = OnceLock::new();
         DATA.get_or_init(|| {
-            let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-            let mut data = GameData::load(&root).expect("game data loads").0;
+            let mut data = game_data().clone();
             data.crusade_rules = Some(synthetic_rules());
             data
         })

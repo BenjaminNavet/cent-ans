@@ -3,25 +3,12 @@
 //! marks of the map, bounded by `data/rules/battle_history.json`, saved
 //! with the game and absent from older saves.
 
-use std::path::PathBuf;
-
-use data_model::{BattleHistoryRules, FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::{BattleHistoryRules, FactionId, GameData, SettlementId, UnitTypeId};
 use sim_battle::{BattleSim, SideId};
 use sim_campaign::battle_history::{BattleHistory, BattleKind, BattleRecord, BattleSideRecord};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order, Stance, Unit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn saint_denis() -> SettlementId {
     SettlementId::new("set_saint_denis").unwrap()
@@ -96,7 +83,7 @@ fn rules(max_age_turns: u32, max_records: u32) -> BattleHistoryRules {
 
 #[test]
 fn rules_are_read_from_data_and_match_their_default() {
-    let mut from_file = data().battle_history_rules;
+    let mut from_file = game_data().battle_history_rules.clone();
     assert!(
         from_file.description.is_some(),
         "battle_history.json not read"
@@ -108,12 +95,12 @@ fn rules_are_read_from_data_and_match_their_default() {
 
 #[test]
 fn an_auto_resolved_field_battle_is_recorded() {
-    let data = data();
-    let (mut state, french, english) = pending_battle(&data, 3);
+    let data = game_data();
+    let (mut state, french, english) = pending_battle(data, 3);
     assert!(state.battle_history.is_empty(), "nothing fought yet");
     let strength = |state: &CampaignState, id: &ArmyId| state.army(id).unwrap().total_strength();
     let (french_before, english_before) = (strength(&state, &french), strength(&state, &english));
-    let events = state.auto_resolve_pending(&data, 0).unwrap();
+    let events = state.auto_resolve_pending(data, 0).unwrap();
 
     let records = state.battle_history.records();
     assert_eq!(records.len(), 1);
@@ -152,9 +139,9 @@ fn an_auto_resolved_field_battle_is_recorded() {
 
 #[test]
 fn a_battle_fought_in_3d_is_recorded() {
-    let data = data();
-    let (mut state, _, _) = pending_battle(&data, 3);
-    let setup = state.battle_setup(&data, 0).unwrap();
+    let data = game_data();
+    let (mut state, _, _) = pending_battle(data, 3);
+    let setup = state.battle_setup(data, 0).unwrap();
     let mut battle = BattleSim::new(setup, 11).unwrap();
     battle.set_ai(SideId::Attacker, true);
     let mut steps = 0;
@@ -163,7 +150,7 @@ fn a_battle_fought_in_3d_is_recorded() {
         steps += 1;
     }
     let outcome = battle.outcome().expect("battle finished");
-    state.resolve_pending_battle(&data, 0, &outcome).unwrap();
+    state.resolve_pending_battle(data, 0, &outcome).unwrap();
 
     let records = state.battle_history.records();
     assert_eq!(records.len(), 1);
@@ -225,13 +212,13 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId, Settle
 
 #[test]
 fn an_assault_is_recorded() {
-    let data = data();
-    let (mut state, army, guyenne) = besiege_guyenne(&data, 4);
+    let data = game_data();
+    let (mut state, army, guyenne) = besiege_guyenne(data, 4);
     state.interactive_battles = false;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let ladders = data.siege_engine_rules.engines[0].cost(
         data.siege_engine_rules.scaling_min_wall_level,
-        state.fortification_level(&data, &guyenne),
+        state.fortification_level(data, &guyenne),
     );
     if let Some(siege) = state
         .settlements
@@ -241,9 +228,9 @@ fn an_assault_is_recorded() {
         siege.engine_work = siege.engine_work.max(ladders);
     }
     let before = state.battle_history.len();
-    let camp = state.army_point(&data, &state.armies[&army]);
+    let camp = state.army_point(data, &state.armies[&army]);
     state
-        .submit_order(&data, Order::Assault { army: army.clone() })
+        .submit_order(data, Order::Assault { army: army.clone() })
         .unwrap();
     let records = state.battle_history.records();
     assert_eq!(records.len(), before + 1);
@@ -258,15 +245,15 @@ fn an_assault_is_recorded() {
 
 #[test]
 fn a_garrison_sortie_is_recorded() {
-    let data = data();
-    let (mut state, army, guyenne) = besiege_guyenne(&data, 6);
+    let data = game_data();
+    let (mut state, army, guyenne) = besiege_guyenne(data, 6);
     state.armies.get_mut(&army).unwrap().units.truncate(1);
-    let knights = unit(&data, "unit_knights");
+    let knights = unit(data, "unit_knights");
     let garrison = &mut state.settlements.get_mut(&guyenne).unwrap().garrison;
     for _ in 0..8 {
         garrison.push(knights.clone());
     }
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.text_fr.contains("Sortie")));
     let record = state
         .battle_history
@@ -308,7 +295,7 @@ fn the_history_drops_old_battles_and_keeps_the_newest() {
 
 #[test]
 fn old_battles_are_purged_as_turns_pass() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.battle_history_rules.max_age_turns = 2;
     let mut state = after_a_battle(&data);
     let fought = state.turn();
@@ -335,8 +322,8 @@ fn old_battles_are_purged_as_turns_pass() {
 
 #[test]
 fn the_history_survives_a_save_round_trip() {
-    let data = data();
-    let state = after_a_battle(&data);
+    let data = game_data();
+    let state = after_a_battle(data);
     let json = state.save_json();
     assert!(json.contains("\"battle_history\""));
     let loaded = CampaignState::load_json(&json).unwrap();
@@ -353,8 +340,8 @@ fn the_history_survives_a_save_round_trip() {
 
 #[test]
 fn a_save_without_the_field_loads_with_an_empty_history() {
-    let data = data();
-    let state = after_a_battle(&data);
+    let data = game_data();
+    let state = after_a_battle(data);
     // An older save: the same game, written before the history existed.
     let mut value: serde_json::Value = serde_json::from_str(&state.save_json()).unwrap();
     assert!(value
@@ -369,10 +356,10 @@ fn a_save_without_the_field_loads_with_an_empty_history() {
     assert_eq!(loaded, expected, "nothing else changes");
     // A game without battles writes no key at all: its save is the one an
     // older build would have written.
-    let fresh = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let fresh = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     assert!(!fresh.save_json().contains("battle_history"));
     // The loaded game goes on.
     loaded.interactive_battles = false;
-    loaded.end_turn_with(&data, idle);
+    loaded.end_turn_with(data, idle);
     assert_eq!(loaded.turn(), state.turn() + 1);
 }

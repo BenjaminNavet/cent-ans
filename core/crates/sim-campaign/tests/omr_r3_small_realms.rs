@@ -2,20 +2,11 @@
 //! the capital city's garrison — is paid by the domain, and a realm in debt
 //! dismisses its agents.
 
-use std::path::PathBuf;
-
-use data_model::{AgentKind, FactionId, GameData, SettlementKind};
+use data_model::{AgentKind, GameData, SettlementKind};
 use sim_campaign::economy::{garrison_share, garrison_upkeep_percent};
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_papacy"), 1).expect("setup")
@@ -23,7 +14,7 @@ fn start(data: &GameData) -> CampaignState {
 
 #[test]
 fn the_data_sets_a_one_unit_guard_paid_by_the_domain() {
-    let data = data();
+    let data = game_data();
     let guard = data
         .settlement_rules
         .as_ref()
@@ -35,26 +26,26 @@ fn the_data_sets_a_one_unit_guard_paid_by_the_domain() {
 
 #[test]
 fn only_the_cheapest_units_of_the_capital_form_the_guard() {
-    let data = data();
-    let percent = garrison_upkeep_percent(&data, SettlementKind::City);
+    let data = game_data();
+    let percent = garrison_upkeep_percent(data, SettlementKind::City);
     let costs = [100, 40, 60];
     // Elsewhere every unit pays the city's share.
     assert_eq!(
-        garrison_share(&data, SettlementKind::City, false, costs),
+        garrison_share(data, SettlementKind::City, false, costs),
         200 * percent / 100
     );
     // In the capital the cheapest (40) is free.
     assert_eq!(
-        garrison_share(&data, SettlementKind::City, true, costs),
+        garrison_share(data, SettlementKind::City, true, costs),
         160 * percent / 100
     );
-    assert_eq!(garrison_share(&data, SettlementKind::City, true, []), 0);
+    assert_eq!(garrison_share(data, SettlementKind::City, true, []), 0);
 }
 
 #[test]
 fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let perm = fac("fac_perm");
     let capital = state
         .faction_capital_city(&perm)
@@ -70,7 +61,7 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
     let city = state.settlements.get_mut(&capital).unwrap();
     city.garrison.truncate(1);
     assert_eq!(city.garrison.len(), 1);
-    assert_eq!(state.faction_army_upkeep(&data, &perm), 0);
+    assert_eq!(state.faction_army_upkeep(data, &perm), 0);
     // A second unit pays its share.
     let unit = state.settlements[&capital].garrison[0].clone();
     state
@@ -79,7 +70,7 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
         .unwrap()
         .garrison
         .push(unit);
-    assert!(state.faction_army_upkeep(&data, &perm) > 0);
+    assert!(state.faction_army_upkeep(data, &perm) > 0);
     // Lost, the capital city is no longer the guard's home.
     state.settlements.get_mut(&capital).unwrap().controller = fac("fac_golden_horde");
     assert!(state.faction_capital_city(&perm).is_none());
@@ -87,26 +78,26 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
 
 #[test]
 fn a_realm_in_debt_dismisses_its_costliest_agent() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     let paris = state.faction_capital_city(&france).cloned().expect("Paris");
     state.factions.get_mut(&france).unwrap().treasury = 50_000;
     state
-        .recruit_agent(&data, &france, &paris, AgentKind::Spy)
+        .recruit_agent(data, &france, &paris, AgentKind::Spy)
         .expect("a spy");
     state
-        .recruit_agent(&data, &france, &paris, AgentKind::Emissary)
+        .recruit_agent(data, &france, &paris, AgentKind::Emissary)
         .expect("a herald");
     let dismissals = |state: &CampaignState| {
-        sim_campaign::agents::plan_agents(state, &data, &france)
+        sim_campaign::agents::plan_agents(state, data, &france)
             .into_iter()
             .filter(|o| matches!(o, Order::DismissAgent { .. }))
             .count()
     };
     assert_eq!(dismissals(&state), 0, "a solvent realm keeps its agents");
     state.factions.get_mut(&france).unwrap().treasury = -100;
-    let orders = sim_campaign::agents::plan_agents(&state, &data, &france);
+    let orders = sim_campaign::agents::plan_agents(&state, data, &france);
     let dismissed: Vec<_> = orders
         .iter()
         .filter_map(|o| match o {
@@ -118,7 +109,7 @@ fn a_realm_in_debt_dismisses_its_costliest_agent() {
     let costliest = state
         .agents_of(&france)
         .into_iter()
-        .max_by_key(|(_, a)| sim_campaign::agents::rules(&data).types[&a.kind].upkeep)
+        .max_by_key(|(_, a)| sim_campaign::agents::rules(data).types[&a.kind].upkeep)
         .map(|(id, _)| id.clone())
         .unwrap();
     assert_eq!(dismissed[0], costliest);

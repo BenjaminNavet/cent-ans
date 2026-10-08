@@ -6,8 +6,6 @@
 //! pretender back (`war.claim_war_ignores_kinship`), and a realm too weary
 //! to declare a war stays out of its allies' wars (`join_war.weary_stay_out`).
 
-use std::path::PathBuf;
-
 use data_model::{ClaimKind, FactionId, GameData};
 use sim_campaign::difficulty::Difficulty;
 use sim_campaign::diplomacy::{
@@ -20,15 +18,7 @@ use sim_campaign::{CampaignState, Order};
 /// An uncapped goodwill (LR-07: herald embassies are capped when read).
 const GOODWILL_REASON: &str = "Bonne volonté";
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 /// Data with both EQ6 switches set to `on`.
 fn switches(data: &GameData, on: bool) -> GameData {
@@ -91,8 +81,8 @@ fn declares(state: &CampaignState, data: &GameData) -> Option<FactionId> {
 
 #[test]
 fn main_claim_is_the_largest_claimed_crown() {
-    let data = data();
-    let state = campaign(&data, Difficulty::Normal);
+    let data = game_data();
+    let state = campaign(data, Difficulty::Normal);
     assert_eq!(
         main_claim(&state, &fac("fac_england")),
         Some(fac("fac_france"))
@@ -102,8 +92,8 @@ fn main_claim_is_the_largest_claimed_crown() {
 
 #[test]
 fn france_outranks_a_small_claimed_crown_and_ignores_the_rest() {
-    let base = data();
-    let data = switches(&base, true);
+    let base = game_data();
+    let data = switches(base, true);
     let mut state = campaign(&data, Difficulty::Normal);
     assert_eq!(declares(&state, &data), Some(fac("fac_france")));
     // A war declared elsewhere two turns ago does not hold France back...
@@ -115,15 +105,15 @@ fn france_outranks_a_small_claimed_crown_and_ignores_the_rest() {
         .last_war_declared = Some(turn - 2);
     assert_eq!(declares(&state, &data), Some(fac("fac_france")));
     // ... whereas before EQ6 every war waited the rest.
-    let old = switches(&base, false);
+    let old = switches(base, false);
     assert_eq!(declares(&state, &old), None);
 }
 
 #[test]
 fn easy_level_goodwill_does_not_stop_the_claim_war() {
-    let base = data();
-    let data = switches(&base, true);
-    let old = switches(&base, false);
+    let base = game_data();
+    let data = switches(base, true);
+    let old = switches(base, false);
     let mut state = campaign(&data, Difficulty::Easy);
     let england = fac("fac_england");
     let france = fac("fac_france");
@@ -182,7 +172,7 @@ fn fresh_war(data: &GameData, score: i32) -> CampaignState {
 
 #[test]
 fn a_cornered_crown_fights_before_it_sues() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // Every crown counts as cornered.
     data.ai_diplomacy.peace.cornered_provinces = 1000;
     data.ai_diplomacy.peace.cornered_waits_for_defeat = true;
@@ -201,8 +191,8 @@ fn a_cornered_crown_fights_before_it_sues() {
 
 #[test]
 fn marriages_do_not_stop_the_claim_war() {
-    let base = data();
-    let mut data = switches(&base, true);
+    let base = game_data();
+    let mut data = switches(base, true);
     data.ai_diplomacy.war.claim_war_ignores_kinship = true;
     // Marriages uncapped (LR-07 reads them at most at the cap): a large goodwill.
     data.diplomacy_rules.opinion_caps.clear();
@@ -234,7 +224,7 @@ fn marriages_do_not_stop_the_claim_war() {
 
 #[test]
 fn an_exhausted_realm_stays_out_of_its_allys_war() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.ai_diplomacy.join_war.weary_stay_out = true;
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 11).expect("1337 start");
     state.chronicle.disabled = true;

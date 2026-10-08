@@ -1,26 +1,12 @@
 //! FE title transfers, forfeiture, inheritance, conquest, objectives (spec § 4.4-4.8), lot F3.
 
-use std::path::PathBuf;
-
-use data_model::{CharacterId, FactionId, GameData, ProvinceId, SuccessionLaw, TitleId};
+use data_model::{CharacterId, FactionId, GameData, SuccessionLaw, TitleId};
 use sim_campaign::feudal::{self, FelonyReason, FeudalError, Grantee, TitleDemandOutcome};
 use sim_campaign::negotiation::{apply_treaty, Article, Party};
 use sim_campaign::victory::OutcomeKind;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn tit(id: &str) -> TitleId {
     TitleId::new(id).unwrap()
@@ -60,23 +46,23 @@ fn kill(s: &mut CampaignState, data: &GameData, id: &str) {
 
 #[test]
 fn guyenne_forfeiture() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     // England is no direct vassal of France, but holds Guyenne of it.
-    assert_eq!(feudal::liege_of(&s, &data, &england), None);
+    assert_eq!(feudal::liege_of(&s, data, &england), None);
     // F8: the case of 1337 (Robert of Artois harboured) is open at the start.
     assert!(s.feudal.felonies.iter().any(|c| c.vassal == england
         && c.liege == france
         && c.reason == FelonyReason::HarbouredFelon));
     s.feudal.felonies.clear();
     assert_eq!(
-        feudal::declare_commise(&mut s, &data, &france, &england),
+        feudal::declare_commise(&mut s, data, &france, &england),
         Err(FeudalError::NoFelonyCase(england.clone()))
     );
     let case = feudal::open_felony_towards(
         &mut s,
-        &data,
+        data,
         &england,
         &france,
         FelonyReason::AlliedWithEnemy,
@@ -88,14 +74,14 @@ fn guyenne_forfeiture() {
     );
     // Not a vassal of England: no case the other way round.
     assert!(
-        feudal::open_felony_towards(&mut s, &data, &france, &england, FelonyReason::Revolt)
+        feudal::open_felony_towards(&mut s, data, &france, &england, FelonyReason::Revolt)
             .is_none()
     );
-    feudal::declare_commise(&mut s, &data, &france, &england).expect("forfeiture declared");
+    feudal::declare_commise(&mut s, data, &france, &england).expect("forfeiture declared");
     assert!(s.is_at_war(&france, &england));
     assert!(feudal::has_forfeiture(&s, &france, &england));
     assert_eq!(
-        s.casus_belli(&data, &france, &england).as_deref(),
+        s.casus_belli(data, &france, &england).as_deref(),
         Some("commise")
     );
     assert!(s.feudal.felonies.is_empty(), "the case is used up");
@@ -106,7 +92,7 @@ fn guyenne_forfeiture() {
         .unwrap()
         .war_scores
         .insert(england.clone(), 60);
-    apply_treaty(&mut s, &data, &france, &england, &[Article::Peace]).expect("peace");
+    apply_treaty(&mut s, data, &france, &england, &[Article::Peace]).expect("peace");
     for title in ["tit_guyenne", "tit_ponthieu"] {
         assert_eq!(holder(&s, title), Some(france.clone()), "{title}");
     }
@@ -119,42 +105,42 @@ fn guyenne_forfeiture() {
 
 #[test]
 fn lost_forfeiture_war_keeps_the_fief() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
-    feudal::open_felony_towards(&mut s, &data, &england, &france, FelonyReason::RefusedHost)
+    feudal::open_felony_towards(&mut s, data, &england, &france, FelonyReason::RefusedHost)
         .unwrap();
-    feudal::declare_commise(&mut s, &data, &france, &england).unwrap();
+    feudal::declare_commise(&mut s, data, &france, &england).unwrap();
     s.factions
         .get_mut(&france)
         .unwrap()
         .war_scores
         .insert(england.clone(), -30);
-    apply_treaty(&mut s, &data, &france, &england, &[Article::Peace]).unwrap();
+    apply_treaty(&mut s, data, &france, &england, &[Article::Peace]).unwrap();
     assert_eq!(holder(&s, "tit_guyenne"), Some(england));
     assert!(s.feudal.forfeitures.is_empty());
 }
 
 #[test]
 fn brittany_1341_two_claimants() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let (france, england, brittany) = (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
     let (jeanne, montfort, blois) = (
         chr("chr_jeanne_de_penthievre"),
         chr("chr_jean_de_montfort"),
         chr("chr_charles_de_blois"),
     );
-    assert_eq!(feudal::liege_of(&s, &data, &brittany), Some(france.clone()));
+    assert_eq!(feudal::liege_of(&s, data, &brittany), Some(france.clone()));
     assert_eq!(s.factions[&brittany].heir.as_ref(), Some(&jeanne));
     // Jeanne de Penthièvre married Charles de Blois, nephew of Philip VI.
     s.characters.get_mut(&jeanne).unwrap().spouse = Some(blois.clone());
     s.characters.get_mut(&blois).unwrap().spouse = Some(jeanne.clone());
     if !s.is_at_war(&england, &france) {
-        s.declare_war(&data, &england, &france).unwrap();
+        s.declare_war(data, &england, &france).unwrap();
     }
 
-    kill(&mut s, &data, "chr_jean_iii_de_bretagne");
+    kill(&mut s, data, "chr_jean_iii_de_bretagne");
 
     assert_eq!(s.factions[&brittany].ruler.as_ref(), Some(&jeanne));
     let dispute = s.feudal.disputes.last().expect("contested succession");
@@ -176,7 +162,7 @@ fn brittany_1341_two_claimants() {
 
 #[test]
 fn burgundy_1361_duchy_and_county_split() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // The duchy follows proximity in the male line (John II), the counties
     // the eldest heir (Marguerite): per-title laws.
     data.titles
@@ -231,8 +217,8 @@ fn burgundy_1361_duchy_and_county_split() {
 
 #[test]
 fn personal_union() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let (castile, navarre) = (fac("fac_castile"), fac("fac_navarre"));
     let house = "Évreux (test)";
     last_of_line(&mut s, "chr_jeanne_ii_de_navarre", house);
@@ -240,7 +226,7 @@ fn personal_union() {
         Some(chr("chr_jeanne_ii_de_navarre"));
     let armies_before = s.armies.values().filter(|a| a.faction == navarre).count();
 
-    kill(&mut s, &data, "chr_jeanne_ii_de_navarre");
+    kill(&mut s, data, "chr_jeanne_ii_de_navarre");
 
     assert_eq!(holder(&s, "tit_navarre"), Some(castile.clone()));
     assert_eq!(holder(&s, "tit_angoumois"), Some(castile.clone()));
@@ -253,12 +239,12 @@ fn personal_union() {
     );
     assert!(armies_before == 0 || s.armies.values().any(|a| a.faction == castile));
     // Castile now holds Angoumois of France: a title vassal of the crown.
-    assert!(feudal::title_vassals(&s, &data, &fac("fac_france")).contains(&castile));
+    assert!(feudal::title_vassals(&s, data, &fac("fac_france")).contains(&castile));
 }
 
 #[test]
 fn escheat_without_heir() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // LR-05: no cadet branch takes the duchy over.
     data.feudal_rules.collateral_line_percent = 0;
     let mut s = start(&data);
@@ -281,12 +267,12 @@ fn escheat_without_heir() {
 
 #[test]
 fn vacant_title_frees_its_vassals() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let brittany = fac("fac_brittany");
-    assert!(feudal::liege_of(&s, &data, &brittany).is_some());
-    feudal::vacate_title(&mut s, &data, &tit("tit_france"));
-    assert_eq!(feudal::liege_of(&s, &data, &brittany), None);
+    assert!(feudal::liege_of(&s, data, &brittany).is_some());
+    feudal::vacate_title(&mut s, data, &tit("tit_france"));
+    assert_eq!(feudal::liege_of(&s, data, &brittany), None);
     assert_eq!(holder(&s, "tit_france"), None);
     // France still holds its Norman duchies, now its primary title.
     let primary = &s.feudal.primary[&fac("fac_france")];
@@ -295,7 +281,7 @@ fn vacant_title_frees_its_vassals() {
 
 #[test]
 fn victory_by_independence() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.feudal_rules.independence_turns = 2;
     let brittany = fac("fac_brittany");
     let mut s = CampaignState::new_1337(&data, brittany.clone(), 7).expect("start");
@@ -320,11 +306,11 @@ fn victory_by_independence() {
 
 #[test]
 fn conquered_title_is_usurped_or_granted() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let (france, england, brittany) = (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
     if !s.is_at_war(&england, &france) {
-        s.declare_war(&data, &england, &france).unwrap();
+        s.declare_war(data, &england, &france).unwrap();
     }
     // A duchy is below England's crown: granted to England's strongest
     // direct vassal if any, else kept.
@@ -335,16 +321,16 @@ fn conquered_title_is_usurped_or_granted() {
             title: tit("tit_normandie"),
         },
     ];
-    apply_treaty(&mut s, &data, &england, &france, &articles).expect("treaty");
+    apply_treaty(&mut s, data, &england, &france, &articles).expect("treaty");
     let normandy = holder(&s, "tit_normandie").unwrap();
-    let english_vassals = feudal::direct_vassals(&s, &data, &england);
+    let english_vassals = feudal::direct_vassals(&s, data, &england);
     assert!(
         normandy == england || english_vassals.contains(&normandy),
         "{normandy:?} not in {english_vassals:?}"
     );
     assert_eq!(s.province_owner(&prov("prov_normandie")), Some(&normandy));
     // A crown is usurped by a duke.
-    let outcome = feudal::conquer_title(&mut s, &data, &brittany, &tit("tit_france")).unwrap();
+    let outcome = feudal::conquer_title(&mut s, data, &brittany, &tit("tit_france")).unwrap();
     assert_eq!(outcome, TitleDemandOutcome::Usurped);
     assert_eq!(holder(&s, "tit_france"), Some(brittany.clone()));
     assert_eq!(s.feudal.primary[&brittany], tit("tit_france"));
@@ -365,21 +351,21 @@ fn conquered_title_is_usurped_or_granted() {
             title: tit("tit_angoumois"),
         },
     ];
-    assert!(sim_campaign::negotiation::check_treaty(&s, &data, &england, &navarre, &all).is_err());
-    let partial = sim_campaign::negotiation::check_treaty(&s, &data, &england, &navarre, &all[2..]);
+    assert!(sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all).is_err());
+    let partial = sim_campaign::negotiation::check_treaty(&s, data, &england, &navarre, &all[2..]);
     assert!(partial.is_ok(), "{partial:?}");
 }
 
 #[test]
 fn grant_to_a_courtier_founds_a_vassal_faction() {
-    let data = data();
-    let mut s = start(&data);
+    let data = game_data();
+    let mut s = start(data);
     let france = fac("fac_france");
     let blois = chr("chr_godefroy_d_harcourt");
     assert_eq!(
         feudal::grant_title(
             &mut s,
-            &data,
+            data,
             &france,
             &tit("tit_france"),
             Grantee::Character(blois.clone())
@@ -388,7 +374,7 @@ fn grant_to_a_courtier_founds_a_vassal_faction() {
     );
     let new = feudal::grant_title(
         &mut s,
-        &data,
+        data,
         &france,
         &tit("tit_normandie"),
         Grantee::Character(blois.clone()),
@@ -398,14 +384,14 @@ fn grant_to_a_courtier_founds_a_vassal_faction() {
     assert_eq!(s.factions[&new].ruler.as_ref(), Some(&blois));
     assert_eq!(s.characters[&blois].faction, new);
     assert_eq!(s.feudal.primary[&new], tit("tit_normandie"));
-    assert_eq!(feudal::liege_of(&s, &data, &new), Some(france.clone()));
+    assert_eq!(feudal::liege_of(&s, data, &new), Some(france.clone()));
     assert_eq!(s.province_owner(&prov("prov_normandie")), Some(&new));
-    assert!(feudal::direct_vassals(&s, &data, &france).contains(&new));
+    assert!(feudal::direct_vassals(&s, data, &france).contains(&new));
 }
 
 #[test]
 fn objectives_are_evaluated() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let brittany = fac("fac_brittany");
     data.titles
         .get_mut(&tit("tit_brittany"))
@@ -433,13 +419,13 @@ fn objectives_are_evaluated() {
 /// one objective of every primary title must still be to achieve.
 #[test]
 fn no_objective_victory_at_start() {
-    let data = data();
-    let s = start(&data);
+    let data = game_data();
+    let s = start(data);
     let mut already_won: Vec<String> = s
         .feudal
         .primary
         .keys()
-        .filter(|f| feudal::generic_victory(&s, &data, f).is_some())
+        .filter(|f| feudal::generic_victory(&s, data, f).is_some())
         .map(|f| f.to_string())
         .collect();
     already_won.sort();

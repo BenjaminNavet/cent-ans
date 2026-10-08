@@ -14,4 +14,5 @@ rand_chacha = { workspace = true, features = ["serde1"] }
 thiserror.workspace = true
 
 [dev-dependencies]
+data-model = { path = "../data-model", features = ["test-support"] }
 serde_json.workspace = true

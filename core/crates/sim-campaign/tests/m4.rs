@@ -2,25 +2,11 @@
 //! traits, generals and governors, marriages, births, succession, regency,
 //! and the version-3 save format. See `docs/design/m4-characters-dynasties.md` § 2.
 
-use std::path::PathBuf;
-
-use data_model::{CharacterId, FactionId, GameData, ProvinceId, SkillBranch, SkillId, TraitId};
+use data_model::{CharacterId, FactionId, GameData, SkillBranch, SkillId, TraitId};
 use sim_campaign::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
 use sim_campaign::{CampaignRng, CampaignState, EventKind, Order, OrderError};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn chr(id: &str) -> CharacterId {
     CharacterId::new(id).unwrap()
@@ -64,12 +50,12 @@ fn unit(strength: u32) -> BattleUnit {
 
 #[test]
 fn experience_converts_into_skill_points() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let philippe = chr("chr_philippe_vi");
     state
         .submit_order(
-            &data,
+            data,
             Order::DebugGrantXp {
                 character: philippe.clone(),
                 amount: 250,
@@ -86,13 +72,13 @@ fn experience_converts_into_skill_points() {
 
 #[test]
 fn learn_skill_checks_points_and_prerequisites() {
-    let data = data();
-    let mut state = france(&data, 2);
+    let data = game_data();
+    let mut state = france(data, 2);
     let philippe = chr("chr_philippe_vi");
-    let (first, second) = tier1_and_successor(&data, SkillBranch::Command);
+    let (first, second) = tier1_and_successor(data, SkillBranch::Command);
 
     let no_points = state.submit_order(
-        &data,
+        data,
         Order::LearnSkill {
             character: philippe.clone(),
             skill: first.clone(),
@@ -102,7 +88,7 @@ fn learn_skill_checks_points_and_prerequisites() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::DebugGrantXp {
                 character: philippe.clone(),
                 amount: 1000,
@@ -110,7 +96,7 @@ fn learn_skill_checks_points_and_prerequisites() {
         )
         .unwrap();
     let missing_prereq = state.submit_order(
-        &data,
+        data,
         Order::LearnSkill {
             character: philippe.clone(),
             skill: second.clone(),
@@ -126,7 +112,7 @@ fn learn_skill_checks_points_and_prerequisites() {
     let command_before = state.character(&philippe).unwrap().skills.command;
     state
         .submit_order(
-            &data,
+            data,
             Order::LearnSkill {
                 character: philippe.clone(),
                 skill: first.clone(),
@@ -135,7 +121,7 @@ fn learn_skill_checks_points_and_prerequisites() {
         .unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::LearnSkill {
                 character: philippe.clone(),
                 skill: second.clone(),
@@ -146,7 +132,7 @@ fn learn_skill_checks_points_and_prerequisites() {
     assert!(c.skills_learned.contains(&first) && c.skills_learned.contains(&second));
     assert_eq!(c.skills.command, (command_before + 2).min(10));
     let again = state.submit_order(
-        &data,
+        data,
         Order::LearnSkill {
             character: philippe.clone(),
             skill: first,
@@ -159,8 +145,8 @@ fn learn_skill_checks_points_and_prerequisites() {
 
 #[test]
 fn veteran_trait_after_five_battles() {
-    let data = data();
-    let mut state = france(&data, 3);
+    let data = game_data();
+    let mut state = france(data, 3);
     let general = chr("chr_raoul_de_brienne");
     let veteran = TraitId::new("trait_veteran").unwrap();
     let mut events = Vec::new();
@@ -168,7 +154,7 @@ fn veteran_trait_after_five_battles() {
         assert!(!state.character(&general).unwrap().traits.contains(&veteran));
         sim_campaign::dynasty::on_battle_resolved(
             &mut state,
-            &data,
+            data,
             &general,
             true,
             1.0,
@@ -187,7 +173,7 @@ fn veteran_trait_after_five_battles() {
 
 #[test]
 fn opposite_traits_exclude_each_other() {
-    let data = data();
+    let data = game_data();
     let with_opposite = data
         .traits
         .values()
@@ -196,12 +182,12 @@ fn opposite_traits_exclude_each_other() {
     let mut traits = std::collections::BTreeSet::new();
     traits.insert(with_opposite.opposites[0].clone());
     assert!(!sim_campaign::skills::can_acquire(
-        &data,
+        data,
         &traits,
         &with_opposite.id
     ));
     assert!(sim_campaign::skills::can_acquire(
-        &data,
+        data,
         &Default::default(),
         &with_opposite.id
     ));
@@ -244,10 +230,10 @@ fn a_skilled_general_wins_more_often() {
 
 #[test]
 fn a_governor_with_justice_lowers_unrest_effects() {
-    let data = data();
-    let mut state = france(&data, 4);
+    let data = game_data();
+    let mut state = france(data, 4);
     let rouen = prov("prov_normandie");
-    let before = state.province_effects(&data, &rouen).unrest;
+    let before = state.province_effects(data, &rouen).unrest;
     let governor = chr("chr_raoul_de_brienne");
     // Grant a governance skill that reduces unrest.
     let skill = data
@@ -262,7 +248,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
         .expect("a tier-1 skill lowering unrest");
     state
         .submit_order(
-            &data,
+            data,
             Order::DebugGrantXp {
                 character: governor.clone(),
                 amount: 100 * skill.cost,
@@ -271,7 +257,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
         .unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::LearnSkill {
                 character: governor.clone(),
                 skill: skill.id.clone(),
@@ -280,7 +266,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
         .unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::AssignGovernor {
                 province: rouen.clone(),
                 character: governor.clone(),
@@ -288,28 +274,28 @@ fn a_governor_with_justice_lowers_unrest_effects() {
         )
         .unwrap();
     assert_eq!(state.province_governor(&rouen), Some(&governor));
-    let after = state.province_effects(&data, &rouen).unrest;
+    let after = state.province_effects(data, &rouen).unrest;
     assert!(
         after.flat + after.percent < before.flat + before.percent,
         "governor effect: {before:?} -> {after:?}"
     );
 
     // Governance XP accrues each turn.
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let c = state.character(&governor).unwrap();
     assert!(c.experience > 0 || c.skill_points > 0);
 }
 
 #[test]
 fn governor_and_general_are_exclusive_and_adults_only() {
-    let data = data();
-    let mut state = france(&data, 5);
+    let data = game_data();
+    let mut state = france(data, 5);
     let rouen = prov("prov_normandie");
     // The ruler commands the royal army at start.
     let philippe = chr("chr_philippe_vi");
     assert!(state.character(&philippe).unwrap().army.is_some());
     let refused = state.submit_order(
-        &data,
+        data,
         Order::AssignGovernor {
             province: rouen.clone(),
             character: philippe,
@@ -320,7 +306,7 @@ fn governor_and_general_are_exclusive_and_adults_only() {
     // A foreign character cannot govern a French province.
     let edward = chr("chr_edouard_iii");
     let foreign = state.submit_order(
-        &data,
+        data,
         Order::AssignGovernor {
             province: rouen.clone(),
             character: edward,
@@ -336,7 +322,7 @@ fn governor_and_general_are_exclusive_and_adults_only() {
         .map(|(id, _)| id.clone());
     if let Some(child) = child {
         let minor = state.submit_order(
-            &data,
+            data,
             Order::AssignGovernor {
                 province: rouen,
                 character: child,
@@ -350,8 +336,8 @@ fn governor_and_general_are_exclusive_and_adults_only() {
 
 #[test]
 fn marriage_valid_and_refused_cases() {
-    let data = data();
-    let mut state = france(&data, 6);
+    let data = game_data();
+    let mut state = france(data, 6);
     let philippe = chr("chr_philippe_vi");
     let jeanne = chr("chr_jeanne_de_bourgogne");
     let jean = chr("chr_jean_de_normandie");
@@ -362,7 +348,7 @@ fn marriage_valid_and_refused_cases() {
         Some(jeanne.clone())
     );
     let married = state.submit_order(
-        &data,
+        data,
         Order::ProposeMarriage {
             character: philippe.clone(),
             spouse: jeanne.clone(),
@@ -376,14 +362,14 @@ fn marriage_valid_and_refused_cases() {
     ));
 
     // Same sex.
-    let same_sex = sim_campaign::dynasty::propose_marriage(&mut state, &data, &philippe, &jean);
+    let same_sex = sim_campaign::dynasty::propose_marriage(&mut state, data, &philippe, &jean);
     assert_eq!(same_sex, Err(sim_campaign::MarriageError::SameSex));
 
     // Parent / child: widow Jeanne's husband first so only kinship blocks.
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &philippe, &mut events);
+    sim_campaign::characters::kill(&mut state, data, &philippe, &mut events);
     assert_eq!(state.character(&jeanne).unwrap().spouse, None, "widowed");
-    let related = sim_campaign::dynasty::propose_marriage(&mut state, &data, &jean, &jeanne);
+    let related = sim_campaign::dynasty::propose_marriage(&mut state, data, &jean, &jeanne);
     assert!(related.is_err(), "mother and son (or already married son)");
 
     // A valid marriage between candidates offered by the engine.
@@ -392,13 +378,13 @@ fn marriage_valid_and_refused_cases() {
         .keys()
         .find_map(|id| {
             state
-                .marriage_candidates(&data, id)
+                .marriage_candidates(data, id)
                 .first()
                 .map(|spouse| (id.clone(), spouse.clone()))
         })
         .expect("some valid couple in 1337");
     let prestige_before = state.character(&a).unwrap().prestige;
-    sim_campaign::dynasty::propose_marriage(&mut state, &data, &a, &b).unwrap();
+    sim_campaign::dynasty::propose_marriage(&mut state, data, &a, &b).unwrap();
     assert_eq!(state.character(&a).unwrap().spouse, Some(b.clone()));
     assert_eq!(state.character(&b).unwrap().spouse, Some(a.clone()));
     assert!(state.character(&a).unwrap().prestige > prestige_before);
@@ -406,8 +392,8 @@ fn marriage_valid_and_refused_cases() {
 
 #[test]
 fn too_young_to_marry() {
-    let data = data();
-    let mut state = france(&data, 7);
+    let data = game_data();
+    let mut state = france(data, 7);
     let child = state
         .characters
         .iter()
@@ -420,7 +406,7 @@ fn too_young_to_marry() {
         .find(|(_, c)| c.alive && c.spouse.is_none() && c.age(1337) >= 20 && c.sex != child.1)
         .map(|(id, _)| id.clone())
         .expect("an unmarried adult of the other sex");
-    let result = sim_campaign::dynasty::propose_marriage(&mut state, &data, &child.0, &adult);
+    let result = sim_campaign::dynasty::propose_marriage(&mut state, data, &child.0, &adult);
     assert_eq!(result, Err(sim_campaign::MarriageError::TooYoung));
 }
 
@@ -428,12 +414,12 @@ fn too_young_to_marry() {
 
 #[test]
 fn births_are_deterministic() {
-    let data = data();
+    let data = game_data();
     let run = |seed| {
-        let mut state = france(&data, seed);
+        let mut state = france(data, seed);
         let mut births = Vec::new();
         for _ in 0..16 {
-            for event in state.end_turn_with(&data, idle) {
+            for event in state.end_turn_with(data, idle) {
                 if event.kind == EventKind::Birth {
                     births.push(event.text_fr);
                 }
@@ -448,15 +434,15 @@ fn births_are_deterministic() {
 
 #[test]
 fn charles_v_is_born_when_jean_and_bonne_are_married() {
-    let data = data();
+    let data = game_data();
     let charles = chr("chr_charles_v");
-    let mut state = france(&data, 8);
+    let mut state = france(data, 8);
     assert!(state.character(&charles).is_none(), "unborn in 1337");
     let jean = chr("chr_jean_de_normandie");
     let bonne = chr("chr_bonne_de_luxembourg");
     assert_eq!(state.character(&jean).unwrap().spouse, Some(bonne.clone()));
     for _ in 0..8 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     let born = state.character(&charles).expect("Charles V born by 1339");
     assert_eq!(born.birth_year, 1338);
@@ -465,11 +451,11 @@ fn charles_v_is_born_when_jean_and_bonne_are_married() {
     assert!(state.character(&jean).unwrap().children.contains(&charles));
 
     // Without the marriage, history diverges: he is never born.
-    let mut state = france(&data, 8);
+    let mut state = france(data, 8);
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &jean, &mut events);
+    sim_campaign::characters::kill(&mut state, data, &jean, &mut events);
     for _ in 0..8 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state.character(&charles).is_none());
 }
@@ -478,10 +464,10 @@ fn charles_v_is_born_when_jean_and_bonne_are_married() {
 
 #[test]
 fn salic_succession_from_philippe_to_jean() {
-    let data = data();
-    let mut state = france(&data, 9);
+    let data = game_data();
+    let mut state = france(data, 9);
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &chr("chr_philippe_vi"), &mut events);
+    sim_campaign::characters::kill(&mut state, data, &chr("chr_philippe_vi"), &mut events);
     let france_state = state.faction_state(&fac("fac_france")).unwrap();
     assert_eq!(france_state.ruler, Some(chr("chr_jean_de_normandie")));
     assert!(france_state.heir.is_some(), "a new heir is designated");
@@ -494,19 +480,19 @@ fn salic_succession_from_philippe_to_jean() {
 
 #[test]
 fn a_minor_ruler_opens_a_regency() {
-    let data = data();
+    let data = game_data();
     // Seed 12 (HV8 data): seeds 10 and 11 give Jean a random elder son
     // (born 1337), who rightly inherits before Charles V.
-    let mut state = france(&data, 12);
+    let mut state = france(data, 12);
     // Let Charles V be born, then kill every adult Valois ahead of him.
     for _ in 0..8 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     let charles = chr("chr_charles_v");
     assert!(state.character(&charles).is_some());
     let mut events = Vec::new();
     for id in ["chr_philippe_vi", "chr_jean_de_normandie"] {
-        sim_campaign::characters::kill(&mut state, &data, &chr(id), &mut events);
+        sim_campaign::characters::kill(&mut state, data, &chr(id), &mut events);
     }
     let ruler = state
         .faction_state(&fac("fac_france"))
@@ -517,13 +503,13 @@ fn a_minor_ruler_opens_a_regency() {
     assert_eq!(ruler, charles, "the eldest son of Jean inherits");
     let paris = prov("prov_ile_de_france");
     let unrest_before = state.province_state(&paris).unwrap().unrest;
-    let turn_events = state.end_turn_with(&data, idle);
+    let turn_events = state.end_turn_with(data, idle);
     assert!(turn_events.iter().any(|e| e.kind == EventKind::Regency));
     assert!(state.faction_state(&fac("fac_france")).unwrap().regency);
     // The regency penalty is applied (the population model may also move
     // unrest, so only check the flag stays set and no event is repeated).
     let _ = unrest_before;
-    let next = state.end_turn_with(&data, idle);
+    let next = state.end_turn_with(data, idle);
     assert!(
         !next.iter().any(|e| e.kind == EventKind::Regency),
         "reported once"
@@ -534,12 +520,12 @@ fn a_minor_ruler_opens_a_regency() {
 
 #[test]
 fn save_round_trip_keeps_m4_fields() {
-    let data = data();
-    let mut state = france(&data, 11);
+    let data = game_data();
+    let mut state = france(data, 11);
     let raoul = chr("chr_raoul_de_brienne");
     state
         .submit_order(
-            &data,
+            data,
             Order::DebugGrantXp {
                 character: raoul.clone(),
                 amount: 150,
@@ -548,7 +534,7 @@ fn save_round_trip_keeps_m4_fields() {
         .unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::AssignGovernor {
                 province: prov("prov_normandie"),
                 character: raoul.clone(),
@@ -556,7 +542,7 @@ fn save_round_trip_keeps_m4_fields() {
         )
         .unwrap();
     for _ in 0..4 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     let json = state.save_json();
     assert!(json.contains(&format!(
@@ -572,11 +558,11 @@ fn save_round_trip_keeps_m4_fields() {
 
 #[test]
 fn twenty_turns_are_deterministic_with_dynasties() {
-    let data = data();
+    let data = game_data();
     let run = || {
-        let mut state = france(&data, 12);
+        let mut state = france(data, 12);
         for _ in 0..20 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state.save_json()
     };
@@ -585,14 +571,12 @@ fn twenty_turns_are_deterministic_with_dynasties() {
 
 #[test]
 fn view_lists_ruler_first_and_family() {
-    let data = data();
-    let state = france(&data, 13);
+    let data = game_data();
+    let state = france(data, 13);
     let ids = state.faction_characters(&fac("fac_france"));
     assert_eq!(ids.first(), Some(&chr("chr_philippe_vi")));
     assert_eq!(ids.get(1), Some(&chr("chr_jean_de_normandie")));
-    let view = state
-        .character_view(&data, &chr("chr_philippe_vi"))
-        .unwrap();
+    let view = state.character_view(data, &chr("chr_philippe_vi")).unwrap();
     assert_eq!(view.spouse, Some(chr("chr_jeanne_de_bourgogne")));
     assert!(view
         .children

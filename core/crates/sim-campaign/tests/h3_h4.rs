@@ -3,8 +3,6 @@
 //! diet, Lent, diet effects, plague resistance, wound recovery, AI diets,
 //! old saves and determinism. See `docs/design/2026-09-23-histoire-et-savoir.md`.
 
-use std::path::PathBuf;
-
 use data_model::{BuildingId, DietId, FactionId, GameData, ProvinceId, TechnologyId};
 use sim_battle::{BattleOutcome, SideId, SideResult};
 use sim_campaign::table::{self, DEFAULT_DIET, LENT_FISH_PIETY, LENT_PIETY_PENALTY};
@@ -12,19 +10,7 @@ use sim_campaign::{
     medicine, ArmyId, CampaignState, DietError, EventKind, Order, OrderError, Season,
 };
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 /// Mutable state of the city of a province (lot C4).
 fn city_mut<'a>(
@@ -76,14 +62,14 @@ fn ruler_piety(state: &CampaignState, faction: &str) -> u8 {
 
 #[test]
 fn set_diet_is_validated() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
     );
 
-    let unknown = set_diet(&mut state, &data, "prov_normandie", "diet_ambrosia");
+    let unknown = set_diet(&mut state, data, "prov_normandie", "diet_ambrosia");
     assert!(matches!(
         unknown,
         Err(OrderError::Diet(DietError::UnknownDiet(_)))
@@ -95,7 +81,7 @@ fn set_diet_is_validated() {
         .find(|(id, _)| !state.controls_province(&fac("fac_france"), id))
         .map(|(id, _)| id.to_string())
         .unwrap();
-    let error = set_diet(&mut state, &data, &foreign, "diet_pulses").unwrap_err();
+    let error = set_diet(&mut state, data, &foreign, "diet_pulses").unwrap_err();
     assert!(error.to_string().contains("n'est pas contrôlée"), "{error}");
 
     // Dairy needs grazing land: heath and forest (sheep and swine country) refuse it.
@@ -111,7 +97,7 @@ fn set_diet_is_validated() {
         })
         .map(|(id, _)| id.to_string());
     if let Some(province) = grazing_less {
-        let error = set_diet(&mut state, &data, &province, "diet_dairy").unwrap_err();
+        let error = set_diet(&mut state, data, &province, "diet_dairy").unwrap_err();
         assert!(error.to_string().contains("terrain requis"), "{error}");
     }
 
@@ -128,7 +114,7 @@ fn set_diet_is_validated() {
             .buildings
             .retain(|b| b.as_str() != "bld_market" && b.as_str() != "bld_fair");
     }
-    let error = set_diet(&mut state, &data, "prov_touraine", "diet_spiced_table").unwrap_err();
+    let error = set_diet(&mut state, data, "prov_touraine", "diet_spiced_table").unwrap_err();
     assert!(
         error
             .to_string()
@@ -137,18 +123,18 @@ fn set_diet_is_validated() {
     );
 
     // Pulses need the three-field rotation, which France knows.
-    set_diet(&mut state, &data, "prov_normandie", "diet_pulses").unwrap();
+    set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     assert_eq!(
         state.province_diet(&prov("prov_normandie")),
         diet("diet_pulses")
     );
-    let again = set_diet(&mut state, &data, "prov_normandie", "diet_lenten_fish");
+    let again = set_diet(&mut state, data, "prov_normandie", "diet_lenten_fish");
     assert!(matches!(
         again,
         Err(OrderError::Diet(DietError::AlreadyChanged(_)))
     ));
-    state.end_turn_with(&data, idle);
-    set_diet(&mut state, &data, "prov_normandie", "diet_lenten_fish").unwrap();
+    state.end_turn_with(data, idle);
+    set_diet(&mut state, data, "prov_normandie", "diet_lenten_fish").unwrap();
 
     // Without the technology, the refusal names it.
     state
@@ -157,7 +143,7 @@ fn set_diet_is_validated() {
         .unwrap()
         .technologies
         .remove(&tech("tech_three_field_rotation"));
-    let error = set_diet(&mut state, &data, "prov_ile_de_france", "diet_pulses").unwrap_err();
+    let error = set_diet(&mut state, data, "prov_ile_de_france", "diet_pulses").unwrap_err();
     assert!(
         error
             .to_string()
@@ -168,44 +154,44 @@ fn set_diet_is_validated() {
 
 #[test]
 fn diet_cost_scales_with_population_and_winter() {
-    let data = data();
-    let mut state = france(&data, 2);
+    let data = game_data();
+    let mut state = france(data, 2);
     let normandie = prov("prov_normandie");
     let population = state.provinces[&normandie].population.total() as f64;
     let dairy = &data.diets[&diet("diet_dairy")];
     let expected = (population / 1000.0 * dairy.cost_per_thousand).round() as i64;
     assert_eq!(
-        state.diet_cost(&data, &normandie, &diet("diet_dairy")),
+        state.diet_cost(data, &normandie, &diet("diet_dairy")),
         expected
     );
-    assert_eq!(state.diet_cost(&data, &normandie, &diet(DEFAULT_DIET)), 0);
+    assert_eq!(state.diet_cost(data, &normandie, &diet(DEFAULT_DIET)), 0);
     state.season = Season::Winter;
     let winter = (population / 1000.0 * dairy.cost_per_thousand * 1.5).round() as i64;
     assert_eq!(
-        state.diet_cost(&data, &normandie, &diet("diet_dairy")),
+        state.diet_cost(data, &normandie, &diet("diet_dairy")),
         winter
     );
     // Salted meat keeps: no winter surcharge.
     let meat = &data.diets[&diet("diet_meat_salting")];
     assert_eq!(
-        state.diet_cost(&data, &normandie, &diet("diet_meat_salting")),
+        state.diet_cost(data, &normandie, &diet("diet_meat_salting")),
         (population / 1000.0 * meat.cost_per_thousand).round() as i64
     );
 }
 
 #[test]
 fn the_table_is_paid_in_the_economy() {
-    let data = data();
-    let mut reference = france(&data, 3);
-    let mut state = france(&data, 3);
-    set_diet(&mut state, &data, "prov_normandie", "diet_meat_salting").unwrap();
-    set_diet(&mut state, &data, "prov_ile_de_france", "diet_wine_bread").unwrap();
-    let expected = state.faction_table_upkeep(&data, &fac("fac_france"));
+    let data = game_data();
+    let mut reference = france(data, 3);
+    let mut state = france(data, 3);
+    set_diet(&mut state, data, "prov_normandie", "diet_meat_salting").unwrap();
+    set_diet(&mut state, data, "prov_ile_de_france", "diet_wine_bread").unwrap();
+    let expected = state.faction_table_upkeep(data, &fac("fac_france"));
     assert!(expected > 0);
-    let economy = state.faction_economy(&data, &fac("fac_france")).unwrap();
+    let economy = state.faction_economy(data, &fac("fac_france")).unwrap();
     assert_eq!(economy.table_upkeep, expected);
-    reference.end_turn_with(&data, idle);
-    state.end_turn_with(&data, idle);
+    reference.end_turn_with(data, idle);
+    state.end_turn_with(data, idle);
     let paid = state.factions[&fac("fac_france")].table_upkeep_last_turn;
     assert_eq!(paid, expected);
     assert_eq!(
@@ -220,11 +206,11 @@ fn the_table_is_paid_in_the_economy() {
 
 #[test]
 fn an_empty_treasury_brings_back_the_default_diet() {
-    let data = data();
-    let mut state = france(&data, 4);
-    set_diet(&mut state, &data, "prov_normandie", "diet_meat_salting").unwrap();
+    let data = game_data();
+    let mut state = france(data, 4);
+    set_diet(&mut state, data, "prov_normandie", "diet_meat_salting").unwrap();
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = -1_000_000;
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
@@ -237,16 +223,16 @@ fn an_empty_treasury_brings_back_the_default_diet() {
 
 #[test]
 fn lost_requirements_bring_back_the_default_diet() {
-    let data = data();
-    let mut state = france(&data, 5);
-    set_diet(&mut state, &data, "prov_normandie", "diet_pulses").unwrap();
+    let data = game_data();
+    let mut state = france(data, 5);
+    set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     state
         .factions
         .get_mut(&fac("fac_france"))
         .unwrap()
         .technologies
         .remove(&tech("tech_three_field_rotation"));
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
@@ -258,9 +244,9 @@ fn lost_requirements_bring_back_the_default_diet() {
 
 #[test]
 fn a_new_controller_does_not_inherit_the_diet() {
-    let data = data();
-    let mut state = france(&data, 6);
-    set_diet(&mut state, &data, "prov_normandie", "diet_pulses").unwrap();
+    let data = game_data();
+    let mut state = france(data, 6);
+    set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     city_mut(&mut state, &prov("prov_normandie")).controller = fac("fac_england");
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
@@ -270,17 +256,17 @@ fn a_new_controller_does_not_inherit_the_diet() {
 
 #[test]
 fn lent_punishes_meat_and_rewards_fish() {
-    let data = data();
-    let mut reference = france(&data, 7);
+    let data = game_data();
+    let mut reference = france(data, 7);
     assert!(reference.is_lent());
     let mut meat = reference.clone();
     let mut fish = reference.clone();
-    set_diet(&mut meat, &data, "prov_carcassonne", "diet_meat_salting").unwrap();
-    set_diet(&mut fish, &data, "prov_normandie", "diet_lenten_fish").unwrap();
+    set_diet(&mut meat, data, "prov_carcassonne", "diet_meat_salting").unwrap();
+    set_diet(&mut fish, data, "prov_normandie", "diet_lenten_fish").unwrap();
     let before = ruler_piety(&reference, "fac_france");
-    reference.end_turn_with(&data, idle);
-    let meat_events = meat.end_turn_with(&data, idle);
-    fish.end_turn_with(&data, idle);
+    reference.end_turn_with(data, idle);
+    let meat_events = meat.end_turn_with(data, idle);
+    fish.end_turn_with(data, idle);
     let base = i32::from(ruler_piety(&reference, "fac_france"));
     assert_eq!(
         i32::from(ruler_piety(&meat, "fac_france")),
@@ -304,8 +290,8 @@ fn lent_punishes_meat_and_rewards_fish() {
     assert!(!meat.is_lent());
     let piety = ruler_piety(&meat, "fac_france");
     let mut summer_reference = reference.clone();
-    summer_reference.end_turn_with(&data, idle);
-    meat.end_turn_with(&data, idle);
+    summer_reference.end_turn_with(data, idle);
+    meat.end_turn_with(data, idle);
     let drift = i32::from(ruler_piety(&summer_reference, "fac_france"))
         - i32::from(ruler_piety(&reference, "fac_france"));
     assert_eq!(
@@ -316,22 +302,18 @@ fn lent_punishes_meat_and_rewards_fish() {
 
 #[test]
 fn diets_feed_the_population_and_the_regimen_boosts_them() {
-    let data = data();
-    let mut reference = france(&data, 8);
+    let data = game_data();
+    let mut reference = france(data, 8);
     reference.season = Season::Summer;
     let mut pulses = reference.clone();
-    set_diet(&mut pulses, &data, "prov_normandie", "diet_pulses").unwrap();
+    set_diet(&mut pulses, data, "prov_normandie", "diet_pulses").unwrap();
     let normandie = prov("prov_normandie");
     let class = data_model::SocialClass::Peasants;
-    let plain = table::diet_class_effects(&pulses, &data, &normandie, class);
+    let plain = table::diet_class_effects(&pulses, data, &normandie, class);
     assert_eq!(plain.health.flat, 3.0);
     // Pulses only target the peasants' health.
-    let nobles = table::diet_class_effects(
-        &pulses,
-        &data,
-        &normandie,
-        data_model::SocialClass::Nobility,
-    );
+    let nobles =
+        table::diet_class_effects(&pulses, data, &normandie, data_model::SocialClass::Nobility);
     assert_eq!(nobles.health.flat, 0.0);
     assert_eq!(nobles.growth.percent, 5.0);
     pulses
@@ -340,12 +322,12 @@ fn diets_feed_the_population_and_the_regimen_boosts_them() {
         .unwrap()
         .technologies
         .insert(tech("tech_regimen_sanitatis"));
-    let boosted = table::diet_class_effects(&pulses, &data, &normandie, class);
+    let boosted = table::diet_class_effects(&pulses, data, &normandie, class);
     assert!((boosted.health.flat - 3.75).abs() < 1e-9);
 
     for _ in 0..4 {
-        reference.end_turn_with(&data, idle);
-        pulses.end_turn_with(&data, idle);
+        reference.end_turn_with(data, idle);
+        pulses.end_turn_with(data, idle);
     }
     assert!(
         pulses.provinces[&normandie].population.peasants.health
@@ -355,12 +337,12 @@ fn diets_feed_the_population_and_the_regimen_boosts_them() {
 
 #[test]
 fn salted_meat_raises_the_morale_of_levies() {
-    let data = data();
-    let mut state = france(&data, 9);
-    set_diet(&mut state, &data, "prov_carcassonne", "diet_meat_salting").unwrap();
+    let data = game_data();
+    let mut state = france(data, 9);
+    set_diet(&mut state, data, "prov_carcassonne", "diet_meat_salting").unwrap();
     let carcassonne = prov("prov_carcassonne");
     let (option, base_morale) = state
-        .recruitable_in_province(&data, &carcassonne)
+        .recruitable_in_province(data, &carcassonne)
         .into_iter()
         .filter(|o| o.available)
         .map(|o| {
@@ -371,14 +353,14 @@ fn salted_meat_raises_the_morale_of_levies() {
         .expect("a recruitable unit");
     state
         .submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: carcassonne.clone().into(),
                 unit_type: option.unit_type.clone(),
             },
         )
         .unwrap();
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     let recruit = state
         .city_state(&carcassonne)
         .unwrap()
@@ -418,29 +400,29 @@ fn give_medicine(state: &mut CampaignState, province: &ProvinceId) {
 
 #[test]
 fn plague_resistance_softens_the_local_plague() {
-    let data = data();
+    let data = game_data();
     let normandie = prov("prov_normandie");
-    let mut reference = france(&data, 10);
+    let mut reference = france(data, 10);
     assert_eq!(
-        medicine::plague_resistance(&reference, &data, &normandie),
+        medicine::plague_resistance(&reference, data, &normandie),
         0.0
     );
     let mut resistant = reference.clone();
     give_medicine(&mut resistant, &normandie);
     // 15 + 10 + 10 (techs) + 10 (apothecary) = 45 %.
-    assert!((medicine::plague_resistance(&resistant, &data, &normandie) - 0.45).abs() < 1e-9);
+    assert!((medicine::plague_resistance(&resistant, data, &normandie) - 0.45).abs() < 1e-9);
     // Capped at 50 %.
     let mut capped = resistant.clone();
     city_mut(&mut capped, &normandie)
         .buildings
         .extend(["bld_apothecary", "bld_apothecary"].map(|b| BuildingId::new(b).unwrap()));
-    assert_eq!(medicine::plague_resistance(&capped, &data, &normandie), 0.5);
+    assert_eq!(medicine::plague_resistance(&capped, data, &normandie), 0.5);
 
     make_plague(&mut reference, &normandie);
     make_plague(&mut resistant, &normandie);
     let before = reference.provinces[&normandie].population.total() as f64;
-    let reference_events = reference.end_turn_with(&data, idle);
-    let events = resistant.end_turn_with(&data, idle);
+    let reference_events = reference.end_turn_with(data, idle);
+    let events = resistant.end_turn_with(data, idle);
     assert!(reference_events
         .iter()
         .any(|e| e.kind == EventKind::Plague && e.province.as_ref() == Some(&normandie)));
@@ -462,8 +444,8 @@ fn plague_resistance_softens_the_local_plague() {
 
 #[test]
 fn plague_resistance_softens_the_black_death() {
-    let data = data();
-    let mut reference = france(&data, 11);
+    let data = game_data();
+    let mut reference = france(data, 11);
     reference.chronicle.plague_wave = Some(sim_campaign::PlagueWave {
         start_turn: reference.turn,
         duration: 1,
@@ -485,8 +467,8 @@ fn plague_resistance_softens_the_black_death() {
             .sum()
     };
     let before = total(&reference);
-    reference.end_turn_with(&data, idle);
-    resistant.end_turn_with(&data, idle);
+    reference.end_turn_with(data, idle);
+    resistant.end_turn_with(data, idle);
     let lost_reference = before - total(&reference);
     let lost_resistant = before - total(&resistant);
     assert!(lost_reference > before / 10);
@@ -552,8 +534,8 @@ fn fight(state: &mut CampaignState, data: &GameData) -> (ArmyId, ArmyId) {
 
 #[test]
 fn wound_recovery_returns_part_of_the_losses() {
-    let data = data();
-    let base = france(&data, 12);
+    let data = game_data();
+    let base = france(data, 12);
     let mut plain = base.clone();
     let mut tended = base.clone();
     {
@@ -566,9 +548,9 @@ fn wound_recovery_returns_part_of_the_losses() {
             france.technologies.insert(tech(id));
         }
     }
-    assert!((medicine::wound_recovery(&tended, &data, &fac("fac_france")) - 0.35).abs() < 1e-9);
+    assert!((medicine::wound_recovery(&tended, data, &fac("fac_france")) - 0.35).abs() < 1e-9);
     assert_eq!(
-        medicine::wound_recovery(&tended, &data, &fac("fac_england")),
+        medicine::wound_recovery(&tended, data, &fac("fac_england")),
         0.0
     );
     let attacker = first_army(&base, "fac_france");
@@ -577,8 +559,8 @@ fn wound_recovery_returns_part_of_the_losses() {
         .iter()
         .map(|u| u.strength)
         .collect();
-    let (a, d) = fight(&mut plain, &data);
-    fight(&mut tended, &data);
+    let (a, d) = fight(&mut plain, data);
+    fight(&mut tended, data);
     let plain_units: Vec<u32> = plain.armies[&a].units.iter().map(|u| u.strength).collect();
     let tended_units: Vec<u32> = tended.armies[&a].units.iter().map(|u| u.strength).collect();
     assert_eq!(plain_units.len(), tended_units.len());
@@ -600,19 +582,19 @@ fn wound_recovery_returns_part_of_the_losses() {
 
 #[test]
 fn ai_diets_are_valid_and_deterministic() {
-    let data = data();
-    let mut a = CampaignState::new_1337(&data, fac("fac_france"), 13).unwrap();
+    let data = game_data();
+    let mut a = CampaignState::new_1337(data, fac("fac_france"), 13).unwrap();
     let mut b = a.clone();
     for _ in 0..8 {
-        a.end_turn(&data);
-        b.end_turn(&data);
+        a.end_turn(data);
+        b.end_turn(data);
     }
     assert_eq!(a.save_json(), b.save_json());
     // Every order the AI proposes is accepted.
     for faction in a.factions.keys().cloned().collect::<Vec<_>>() {
         let mut probe = a.clone();
-        for order in table::ai_choose_diets(&a, &data, &faction) {
-            probe.apply_order(&data, &faction, order).unwrap();
+        for order in table::ai_choose_diets(&a, data, &faction) {
+            probe.apply_order(data, &faction, order).unwrap();
         }
     }
     // Some AI realm has adopted a diet other than the default.
@@ -624,10 +606,10 @@ fn ai_diets_are_valid_and_deterministic() {
 
 #[test]
 fn diets_survive_saves_and_old_saves_load() {
-    let data = data();
-    let mut state = france(&data, 14);
-    set_diet(&mut state, &data, "prov_normandie", "diet_pulses").unwrap();
-    state.end_turn_with(&data, idle);
+    let data = game_data();
+    let mut state = france(data, 14);
+    set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
+    state.end_turn_with(data, idle);
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(
@@ -656,10 +638,10 @@ fn diets_survive_saves_and_old_saves_load() {
 
 #[test]
 fn medicine_branch_alternates_in_ai_research() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 15).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 15).unwrap();
     for _ in 0..40 {
-        state.end_turn(&data);
+        state.end_turn(data);
     }
     let medicine_known = state.factions.values().any(|f| {
         f.technologies.iter().any(|t| {

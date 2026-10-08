@@ -2,8 +2,6 @@
 //! single blocking point and its counter-offer, and the trade agreement
 //! with a rival (low value, on purpose).
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData};
 use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::negotiation::{evaluate_treaty, Article, Party};
@@ -11,15 +9,7 @@ use sim_campaign::religion::faction_religion;
 use sim_campaign::treaty_explain::{explain_treaty, ACCEPT_CHANCE};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), 1).expect("1337 start")
@@ -46,9 +36,9 @@ fn neutral(state: &CampaignState, data: &GameData) -> FactionId {
 
 #[test]
 fn every_weighted_reason_is_a_line_objections_first() {
-    let data = data();
-    let state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
+    let data = game_data();
+    let state = start(data);
+    let (fr, other) = (fac("fac_france"), neutral(&state, data));
     let treaty = vec![
         Article::TradeAgreement,
         Article::Gold {
@@ -56,8 +46,8 @@ fn every_weighted_reason_is_a_line_objections_first() {
             amount: 1000,
         },
     ];
-    let verdict = evaluate_treaty(&state, &data, &fr, &other, &treaty);
-    let explanation = explain_treaty(&state, &data, &fr, &other, &treaty);
+    let verdict = evaluate_treaty(&state, data, &fr, &other, &treaty);
+    let explanation = explain_treaty(&state, data, &fr, &other, &treaty);
     assert_eq!(explanation.chance, verdict.chance);
     // Every reason, with its weight: the lines add up to the score.
     let total: i32 = explanation.lines.iter().map(|l| l.value).sum();
@@ -94,9 +84,9 @@ fn every_weighted_reason_is_a_line_objections_first() {
 
 #[test]
 fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
-    let data = data();
-    let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
+    let data = game_data();
+    let mut state = start(data);
+    let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&other).unwrap().treasury = 50_000;
     // A generous offer spoiled by one greedy demand.
     let treaty = vec![
@@ -110,7 +100,7 @@ fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
         },
     ];
     state.factions.get_mut(&fr).unwrap().treasury = 50_000;
-    let explanation = explain_treaty(&state, &data, &fr, &other, &treaty);
+    let explanation = explain_treaty(&state, data, &fr, &other, &treaty);
     assert!(!explanation.accept, "{explanation:#?}");
     let blocker = explanation.blocker.as_ref().expect("one point blocks");
     assert_eq!(blocker.article, Some(1));
@@ -123,7 +113,7 @@ fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
     let counter = explanation.counter.as_ref().expect("a counter-offer");
     assert!(explanation.counter_chance >= ACCEPT_CHANCE);
     assert_eq!(
-        evaluate_treaty(&state, &data, &fr, &other, counter).chance,
+        evaluate_treaty(&state, data, &fr, &other, counter).chance,
         explanation.counter_chance
     );
     // The demand is lowered (or dropped), the offer kept.
@@ -141,9 +131,9 @@ fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
 
 #[test]
 fn a_general_consideration_can_be_the_single_blocking_point() {
-    let data = data();
-    let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
+    let data = game_data();
+    let mut state = start(data);
+    let (fr, other) = (fac("fac_france"), neutral(&state, data));
     // They loathe us: a gift alone does not suffice.
     let turn = state.turn;
     state.factions.get_mut(&other).unwrap().modifiers.push(
@@ -159,7 +149,7 @@ fn a_general_consideration_can_be_the_single_blocking_point() {
         giver: Party::Proposer,
         amount: 3000,
     }];
-    let explanation = explain_treaty(&state, &data, &fr, &other, &treaty);
+    let explanation = explain_treaty(&state, data, &fr, &other, &treaty);
     assert!(!explanation.accept, "{explanation:#?}");
     let blocker = explanation.blocker.as_ref().expect("the attitude blocks");
     assert_eq!(blocker.article, None);
@@ -168,9 +158,9 @@ fn a_general_consideration_can_be_the_single_blocking_point() {
 
 #[test]
 fn several_objections_give_no_single_point() {
-    let data = data();
-    let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
+    let data = game_data();
+    let mut state = start(data);
+    let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&other).unwrap().treasury = 100_000;
     let turn = state.turn;
     state.factions.get_mut(&other).unwrap().modifiers.push(
@@ -190,7 +180,7 @@ fn several_objections_give_no_single_point() {
             giver: Party::Recipient,
         },
     ];
-    let explanation = explain_treaty(&state, &data, &fr, &other, &treaty);
+    let explanation = explain_treaty(&state, data, &fr, &other, &treaty);
     assert!(!explanation.accept);
     assert!(explanation.blocker.is_none(), "{explanation:#?}");
     assert!(explanation.counter.is_none());
@@ -203,15 +193,15 @@ fn several_objections_give_no_single_point() {
 
 #[test]
 fn an_acceptable_treaty_says_why() {
-    let data = data();
-    let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
+    let data = game_data();
+    let mut state = start(data);
+    let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&fr).unwrap().treasury = 50_000;
     let treaty = vec![Article::Gold {
         giver: Party::Proposer,
         amount: 10_000,
     }];
-    let explanation = explain_treaty(&state, &data, &fr, &other, &treaty);
+    let explanation = explain_treaty(&state, data, &fr, &other, &treaty);
     assert!(explanation.accept, "{explanation:#?}");
     assert!(explanation.blocker.is_none());
     assert!(explanation.summary.contains("accepterait"));
@@ -222,11 +212,11 @@ fn an_acceptable_treaty_says_why() {
 /// agreement stays possible once the attitude is good or with a sweetener.
 #[test]
 fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start(data);
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     assert!(sim_campaign::diplomacy::rivals(&state, &en).contains(&fr));
-    let explanation = explain_treaty(&state, &data, &fr, &en, &[Article::TradeAgreement]);
+    let explanation = explain_treaty(&state, data, &fr, &en, &[Article::TradeAgreement]);
     let rival = explanation
         .lines
         .iter()
@@ -235,9 +225,9 @@ fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {
     assert_eq!(rival.value, -12);
     // Between two factions that are not rivals, the same article is worth
     // at least the rival malus more.
-    let other = neutral(&state, &data);
-    let with_rival = evaluate_treaty(&state, &data, &fr, &en, &[Article::TradeAgreement]);
-    let plain = evaluate_treaty(&state, &data, &fr, &other, &[Article::TradeAgreement]);
+    let other = neutral(&state, data);
+    let with_rival = evaluate_treaty(&state, data, &fr, &en, &[Article::TradeAgreement]);
+    let plain = evaluate_treaty(&state, data, &fr, &other, &[Article::TradeAgreement]);
     let rival_article = with_rival.articles[0].value;
     let plain_article = plain.articles[0].value;
     let common_routes = |v: &sim_campaign::negotiation::TreatyEvaluation| {

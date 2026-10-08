@@ -3,20 +3,11 @@
 //! settlement within reach, else a fallback away from the victor with
 //! stragglers lost, else a rout (heavy losses, rally far away or dispersal).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_campaign::movement::{retreat_target, Retreat};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -55,7 +46,7 @@ fn distance_km(data: &GameData, a: [f32; 2], b: [f32; 2]) -> f64 {
 
 #[test]
 fn rules_are_read_from_data() {
-    let data = data();
+    let data = game_data();
     let rules = data.retreat_rules();
     assert!(rules.friendly_radius_steps > 0.0);
     assert!(rules.rout_loss_percent > rules.neutral_loss_percent);
@@ -64,13 +55,13 @@ fn rules_are_read_from_data() {
 
 #[test]
 fn a_french_army_falls_back_on_a_french_place() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     let french = main_army(&state, "fac_france");
     state.armies.get_mut(&french).unwrap().position =
         ArmyPosition::Settlement(set("set_saint_denis"));
     let battlefield = data.settlement_point(&set("set_saint_denis")).unwrap();
-    match retreat_target(&state, &data, &french, battlefield) {
+    match retreat_target(&state, data, &french, battlefield) {
         Some(Retreat::Friendly(target)) => {
             assert_ne!(target, set("set_saint_denis"));
             assert!(state.is_friendly_settlement(&fac("fac_france"), &target));
@@ -81,7 +72,7 @@ fn a_french_army_falls_back_on_a_french_place() {
 
 #[test]
 fn an_english_army_cut_off_near_paris_falls_back_away_from_the_victor() {
-    let mut data = data();
+    let mut data = game_data().clone();
     // Abbeville (English Ponthieu) lies ~150 km from Saint-Denis: shrink
     // the friendly radius so that no English place is in reach. Lot DC1
     // (ADR 0082) halved the step to 70 km: the neutral radius is widened
@@ -108,23 +99,23 @@ fn an_english_army_cut_off_near_paris_falls_back_away_from_the_victor() {
 
 #[test]
 fn an_allied_or_own_place_next_door_is_the_refuge() {
-    let data = data();
-    let (mut state, english) = english_at_saint_denis(&data);
+    let data = game_data();
+    let (mut state, english) = english_at_saint_denis(data);
     let start = data.settlement_point(&set("set_saint_denis")).unwrap();
-    let neighbour = sim_campaign::march::nearest_settlement_where(&data, start, |id| {
+    let neighbour = sim_campaign::march::nearest_settlement_where(data, start, |id| {
         id != &set("set_saint_denis") && id != &set("set_paris")
     })
     .unwrap();
     state.settlements.get_mut(&neighbour).unwrap().controller = fac("fac_england");
     assert_eq!(
-        retreat_target(&state, &data, &english, paris(&data)),
+        retreat_target(&state, data, &english, paris(data)),
         Some(Retreat::Friendly(neighbour))
     );
 }
 
 #[test]
 fn a_distant_friendly_place_is_a_rally_point_after_a_rout() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let rules = data.settlement_rules.as_mut().unwrap();
     rules.retreat.friendly_radius_steps = 0.0;
     // A fallback beyond the sea in every direction tried: none is found.
@@ -156,9 +147,9 @@ fn a_distant_friendly_place_is_a_rally_point_after_a_rout() {
 /// deterministic.
 #[test]
 fn the_loser_never_stays_on_the_battlefield() {
-    let data = data();
+    let data = game_data();
     let run = |boost: u32| {
-        let (mut state, english) = english_at_saint_denis(&data);
+        let (mut state, english) = english_at_saint_denis(data);
         let french = main_army(&state, "fac_france");
         // Give France the upper hand so that England loses.
         for _ in 0..boost {
@@ -167,7 +158,7 @@ fn the_loser_never_stays_on_the_battlefield() {
         }
         state
             .submit_order(
-                &data,
+                data,
                 Order::Attack {
                     army: french.clone(),
                     target_army: english.clone(),
@@ -193,8 +184,8 @@ fn the_loser_never_stays_on_the_battlefield() {
 
 #[test]
 fn a_routed_army_takes_heavy_losses_or_disperses() {
-    let data = data();
-    let (mut state, english) = english_at_saint_denis(&data);
+    let data = game_data();
+    let (mut state, english) = english_at_saint_denis(data);
     let french = main_army(&state, "fac_france");
     for _ in 0..3 {
         let extra = state.armies[&french].units.clone();
@@ -203,7 +194,7 @@ fn a_routed_army_takes_heavy_losses_or_disperses() {
     let before = state.armies[&english].total_strength();
     state
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: french.clone(),
                 target_army: english.clone(),

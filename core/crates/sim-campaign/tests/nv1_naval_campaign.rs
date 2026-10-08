@@ -1,22 +1,13 @@
 //! NV1: naval war on the campaign map — interception of crossings, pending
 //! naval battles, ships taken and sunk, control of the sea, blockade.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SeaZoneId, SettlementId};
 use sim_battle::naval::{NavalSim, ShipFate};
 use sim_battle::SideId;
 use sim_campaign::naval::SeaControl;
 use sim_campaign::{ArmyId, CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn channel() -> SeaZoneId {
     SeaZoneId::new("sea_channel").unwrap()
@@ -83,12 +74,12 @@ fn intercepted(data: &GameData) -> (CampaignState, ArmyId, SettlementId, Settlem
 
 #[test]
 fn an_intercepted_player_crossing_waits_in_port() {
-    let data = data();
-    let (state, army, from, _) = intercepted(&data);
+    let data = game_data();
+    let (state, army, from, _) = intercepted(data);
     let a = state.army(&army).unwrap();
     assert!(a.is_at(&from), "the army waits in port");
     assert_eq!(a.movement_left, 0);
-    let views = state.pending_naval_views(&data);
+    let views = state.pending_naval_views(data);
     assert_eq!(views.len(), 1);
     let view = &views[0];
     assert_eq!(view.interceptor, fac("fac_france"));
@@ -97,7 +88,7 @@ fn an_intercepted_player_crossing_waits_in_port() {
     assert!(view.interceptor_ships > 0 && view.transport_ships > 0);
     assert_eq!(view.army_men, a.total_strength());
     // The setup plays in the real-time battle.
-    let setup = state.naval_battle_setup(&data, 0).unwrap();
+    let setup = state.naval_battle_setup(data, 0).unwrap();
     assert_eq!(setup.defender.units.len(), a.units.len());
     assert_eq!(setup.defender.men(), a.total_strength());
     let mut sim = NavalSim::new(setup, 1).unwrap();
@@ -108,10 +99,10 @@ fn an_intercepted_player_crossing_waits_in_port() {
 
 #[test]
 fn withdrawing_keeps_the_army_home() {
-    let data = data();
-    let (mut state, army, from, _) = intercepted(&data);
+    let data = game_data();
+    let (mut state, army, from, _) = intercepted(data);
     let before = state.army(&army).unwrap().total_strength();
-    state.withdraw_naval_battle(&data, 0).unwrap();
+    state.withdraw_naval_battle(data, 0).unwrap();
     assert!(state.naval.pending.is_empty());
     let a = state.army(&army).unwrap();
     assert!(a.is_at(&from));
@@ -120,16 +111,16 @@ fn withdrawing_keeps_the_army_home() {
 
 #[test]
 fn a_naval_battle_moves_ships_losses_and_the_sea() {
-    let data = data();
-    let (mut state, army, from, to) = intercepted(&data);
+    let data = game_data();
+    let (mut state, army, from, to) = intercepted(data);
     let before_men = state.army(&army).unwrap().total_strength();
-    let setup = state.naval_battle_setup(&data, 0).unwrap();
+    let setup = state.naval_battle_setup(data, 0).unwrap();
     let english_before = state.naval.ships_of(&fac("fac_england"));
     let french_before = state.naval.ships_of(&fac("fac_france"));
     let mut sim = NavalSim::new(setup, state.naval_battle_seed(0).unwrap()).unwrap();
     sim.set_ai(SideId::Defender, true);
     let outcome = sim.run_to_end();
-    state.resolve_naval_battle(&data, 0, &outcome).unwrap();
+    state.resolve_naval_battle(data, 0, &outcome).unwrap();
     assert!(state.naval.pending.is_empty());
     let lost: u32 = outcome.defender.unit_losses.iter().sum();
     match state.army(&army) {
@@ -163,9 +154,9 @@ fn a_naval_battle_moves_ships_losses_and_the_sea() {
 
 #[test]
 fn auto_resolve_of_a_pending_naval_battle() {
-    let data = data();
-    let (mut state, _, _, _) = intercepted(&data);
-    let events = state.auto_resolve_naval_battle(&data, 0).unwrap();
+    let data = game_data();
+    let (mut state, _, _, _) = intercepted(data);
+    let events = state.auto_resolve_naval_battle(data, 0).unwrap();
     assert!(events
         .iter()
         .any(|e| e.text_fr.contains("Bataille navale dans la Manche")));
@@ -174,14 +165,14 @@ fn auto_resolve_of_a_pending_naval_battle() {
 
 #[test]
 fn ai_crossings_are_fought_at_once() {
-    let data = data();
+    let data = game_data();
     let mut fought = false;
     for seed in 1..40 {
-        let (mut state, army, _, to) = crossing(&data, seed);
+        let (mut state, army, _, to) = crossing(data, seed);
         state.interactive_battles = false;
         state
             .submit_order(
-                &data,
+                data,
                 Order::Embark {
                     army: army.clone(),
                     to_port: to.clone(),
@@ -203,8 +194,8 @@ fn ai_crossings_are_fought_at_once() {
 
 #[test]
 fn a_held_sea_blockades_enemy_ports_and_fades() {
-    let data = data();
-    let (mut state, _, _, _) = crossing(&data, 3);
+    let data = game_data();
+    let (mut state, _, _, _) = crossing(data, 3);
     let treasury = state.factions[&fac("fac_england")].treasury;
     let mut events = Vec::new();
     state
@@ -214,7 +205,7 @@ fn a_held_sea_blockades_enemy_ports_and_fades() {
         .unwrap()
         .clear();
     let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::new();
-    events.extend(state.end_turn_with(&data, idle));
+    events.extend(state.end_turn_with(data, idle));
     assert!(
         !state.naval.blockaded.is_empty(),
         "English Channel ports blockaded"
@@ -228,8 +219,8 @@ fn a_held_sea_blockades_enemy_ports_and_fades() {
 
 #[test]
 fn older_saves_without_naval_state_load() {
-    let data = data();
-    let (state, _, _, _) = crossing(&data, 1);
+    let data = game_data();
+    let (state, _, _, _) = crossing(data, 1);
     let mut json = serde_json::to_value(&state).unwrap();
     json.as_object_mut().unwrap().remove("naval");
     let back: CampaignState = serde_json::from_value(json).unwrap();

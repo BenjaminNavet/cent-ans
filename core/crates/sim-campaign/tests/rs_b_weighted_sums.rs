@@ -3,15 +3,10 @@
 //! each place's kind `province_effect_percent`, like the province-wide building
 //! effects of lot DC3.
 
-use std::path::PathBuf;
-
 use data_model::{BuildingId, FactionId, GameData, ProvinceId, SettlementKind};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
@@ -36,7 +31,7 @@ fn province_with_secondary_garrison(state: &CampaignState) -> ProvinceId {
 
 #[test]
 fn secondary_garrisons_weigh_half_in_public_order() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let state = start(&data);
     let province = province_with_secondary_garrison(&state);
     let controller = state.province_controller(&province).cloned().unwrap();
@@ -88,14 +83,14 @@ fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f6
 
 #[test]
 fn a_village_apothecary_resists_plague_less_than_a_city_one() {
-    let data = data();
-    let (before, after) = resistance_with_apothecary(&data, SettlementKind::City);
+    let data = game_data();
+    let (before, after) = resistance_with_apothecary(data, SettlementKind::City);
     let city_gain = after - before;
-    let (before, after) = resistance_with_apothecary(&data, SettlementKind::Village);
+    let (before, after) = resistance_with_apothecary(data, SettlementKind::Village);
     let village_gain = after - before;
     assert!(city_gain > 0.0);
     let weight = f64::from(sim_campaign::buildings::province_effect_percent(
-        &data,
+        data,
         SettlementKind::Village,
     )) / 100.0;
     assert!(
@@ -106,7 +101,7 @@ fn a_village_apothecary_resists_plague_less_than_a_city_one() {
 
 #[test]
 fn tax_efficiency_is_read_from_the_data() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let state = start(&data);
     let paris = ProvinceId::new("prov_ile_de_france").unwrap();
     let province = state.provinces.get(&paris).expect("Île-de-France");
@@ -120,7 +115,7 @@ fn tax_efficiency_is_read_from_the_data() {
 #[test]
 fn tax_brackets_come_from_the_data() {
     use sim_campaign::economy::TaxRate;
-    let data = data();
+    let data = game_data();
     let rules = &data.economy_rules;
     assert!(TaxRate::Low.multiplier(rules) < TaxRate::Normal.multiplier(rules));
     assert!(TaxRate::Normal.multiplier(rules) < TaxRate::High.multiplier(rules));

@@ -3,24 +3,10 @@
 //! `docs/design/2026-09-24-analyse-total-war.md` § 2.1 « Bâtiments en
 //! chaînes/arbres ».
 
-use std::path::PathBuf;
-
-use data_model::{BuildingId, FactionId, GameData, ProvinceId, SettlementId};
+use data_model::{BuildingId, FactionId, GameData, SettlementId};
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
@@ -63,8 +49,8 @@ fn finish_construction(state: &mut CampaignState, data: &GameData, settlement: &
 
 #[test]
 fn market_chain_upgrades_replace_the_previous_level() {
-    let data = data();
-    let mut state = france(&data, 401);
+    let data = game_data();
+    let mut state = france(data, 401);
     let agen = city(&state, "prov_agenais");
     // prov_agenais's city starts with `bld_market` but no `bld_guild_hall`
     // or `bld_fair` (data/settlements/prov_agenais.json).
@@ -76,14 +62,14 @@ fn market_chain_upgrades_replace_the_previous_level() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: agen.clone().into(),
                 building: bld("bld_guild_hall"),
             },
         )
         .unwrap();
-    finish_construction(&mut state, &data, &agen);
+    finish_construction(&mut state, data, &agen);
     let buildings = &state.settlement_state(&agen).unwrap().buildings;
     assert!(buildings.contains(&bld("bld_guild_hall")));
     assert!(
@@ -95,14 +81,14 @@ fn market_chain_upgrades_replace_the_previous_level() {
     // directly): the chain is linear, market -> guild hall -> fair.
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: agen.clone().into(),
                 building: bld("bld_fair"),
             },
         )
         .unwrap();
-    finish_construction(&mut state, &data, &agen);
+    finish_construction(&mut state, data, &agen);
     let buildings = &state.settlement_state(&agen).unwrap().buildings;
     assert!(buildings.contains(&bld("bld_fair")));
     assert!(!buildings.contains(&bld("bld_guild_hall")));
@@ -111,10 +97,10 @@ fn market_chain_upgrades_replace_the_previous_level() {
 
 #[test]
 fn fair_is_blocked_without_the_guild_hall() {
-    let data = data();
-    let state = france(&data, 402);
+    let data = game_data();
+    let state = france(data, 402);
     let agen = city(&state, "prov_agenais");
-    let options = state.buildable(&data, &agen);
+    let options = state.buildable(data, &agen);
     let fair = options
         .iter()
         .find(|o| o.building == bld("bld_fair"))
@@ -125,8 +111,8 @@ fn fair_is_blocked_without_the_guild_hall() {
 
 #[test]
 fn religious_chain_branches_after_the_collegiate_church() {
-    let data = data();
-    let mut state = france(&data, 403);
+    let data = game_data();
+    let mut state = france(data, 403);
     let agen = city(&state, "prov_agenais");
     assert!(state
         .settlement_state(&agen)
@@ -135,7 +121,7 @@ fn religious_chain_branches_after_the_collegiate_church() {
         .contains(&bld("bld_parish_church")));
 
     // Abbey/cathedral are blocked before the collegiate church exists.
-    let options = state.buildable(&data, &agen);
+    let options = state.buildable(data, &agen);
     let abbey = options
         .iter()
         .find(|o| o.building == bld("bld_abbey"))
@@ -144,14 +130,14 @@ fn religious_chain_branches_after_the_collegiate_church() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: agen.clone().into(),
                 building: bld("bld_collegiate_church"),
             },
         )
         .unwrap();
-    finish_construction(&mut state, &data, &agen);
+    finish_construction(&mut state, data, &agen);
     assert!(state
         .settlement_state(&agen)
         .unwrap()
@@ -167,21 +153,21 @@ fn religious_chain_branches_after_the_collegiate_church() {
     // replaces the collegiate church.
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: agen.clone().into(),
                 building: bld("bld_abbey"),
             },
         )
         .unwrap();
-    finish_construction(&mut state, &data, &agen);
+    finish_construction(&mut state, data, &agen);
     let buildings = &state.settlement_state(&agen).unwrap().buildings;
     assert!(buildings.contains(&bld("bld_abbey")));
     assert!(!buildings.contains(&bld("bld_collegiate_church")));
 
     // The other branch (cathedral) is no longer available: the chain does
     // not allow building both from a single collegiate church.
-    let options = state.buildable(&data, &agen);
+    let options = state.buildable(data, &agen);
     let cathedral = options
         .iter()
         .find(|o| o.building == bld("bld_cathedral"))
@@ -191,8 +177,8 @@ fn religious_chain_branches_after_the_collegiate_church() {
 
 #[test]
 fn water_mill_upgrades_from_the_windmill() {
-    let data = data();
-    let mut state = france(&data, 404);
+    let data = game_data();
+    let mut state = france(data, 404);
     let agen = city(&state, "prov_agenais");
     assert!(state
         .settlement_state(&agen)
@@ -202,14 +188,14 @@ fn water_mill_upgrades_from_the_windmill() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: agen.clone().into(),
                 building: bld("bld_water_mill"),
             },
         )
         .unwrap();
-    finish_construction(&mut state, &data, &agen);
+    finish_construction(&mut state, data, &agen);
     let buildings = &state.settlement_state(&agen).unwrap().buildings;
     assert!(buildings.contains(&bld("bld_water_mill")));
     assert!(
@@ -222,8 +208,8 @@ fn water_mill_upgrades_from_the_windmill() {
 fn fortification_chain_still_upgrades_through_four_tiers() {
     // Pre-existing chain (palisade -> stone walls -> castle -> artillery
     // bastion); C4 only adds new chains, this one must keep working.
-    let data = data();
-    let mut state = france(&data, 405);
+    let data = game_data();
+    let mut state = france(data, 405);
     let paris = city(&state, "prov_ile_de_france");
     // Paris starts with `bld_stone_walls` and `bld_castle` (already
     // upgraded past the palisade).
@@ -237,7 +223,7 @@ fn fortification_chain_still_upgrades_through_four_tiers() {
         .unwrap()
         .technologies
         .insert(data_model::TechnologyId::new("tech_artillery_fortification").unwrap());
-    let artillery_bastion = state.buildable(&data, &paris);
+    let artillery_bastion = state.buildable(data, &paris);
     let option = artillery_bastion
         .iter()
         .find(|o| o.building == bld("bld_artillery_bastion"))
@@ -253,8 +239,8 @@ fn fortification_chain_still_upgrades_through_four_tiers() {
 /// keeps working; only future construction is gated by the new chain.
 #[test]
 fn pre_c4_stacked_chain_data_still_loads_and_computes_effects() {
-    let data = data();
-    let mut state = france(&data, 406);
+    let data = game_data();
+    let mut state = france(data, 406);
     // A save from before the chain restructuring (and before EQ2 cleaned
     // the seed data) lists both `bld_abbey` and `bld_cathedral` (and
     // `bld_market`/`bld_guild_hall`/`bld_fair`) together in Paris.
@@ -269,9 +255,9 @@ fn pre_c4_stacked_chain_data_still_loads_and_computes_effects() {
     assert!(buildings.contains(&bld("bld_abbey")));
     assert!(buildings.contains(&bld("bld_cathedral")));
     // No panic computing effects on the "stacked" list.
-    let _ = state.settlement_effects(&data, &paris);
+    let _ = state.settlement_effects(data, &paris);
     let _ = state.province_effects(
-        &data,
+        data,
         &data_model::ProvinceId::new("prov_ile_de_france").unwrap(),
     );
 }

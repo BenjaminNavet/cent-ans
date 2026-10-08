@@ -1,20 +1,10 @@
 //! EP5 (ADR 0034): standards taken in battle reach the campaign chronicle,
 //! and the ruler leading his army is flagged for the royal banner.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
 use sim_battle::{BattleOutcome, SideId, SideResult, StandardTrophy};
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
     state
@@ -63,8 +53,8 @@ fn side(state: &CampaignState, army: &ArmyId, won: bool) -> SideResult {
 
 #[test]
 fn trophies_are_told_in_the_chronicle() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.chronicle.disabled = true;
     let (attacker, defender, index) = stage(&mut state);
     let mut won = side(&state, &attacker, true);
@@ -89,9 +79,7 @@ fn trophies_are_told_in_the_chronicle() {
         duration: 300.0,
         end: Default::default(),
     };
-    let events = state
-        .resolve_pending_battle(&data, index, &outcome)
-        .unwrap();
+    let events = state.resolve_pending_battle(data, index, &outcome).unwrap();
     let line = events
         .iter()
         .find(|e| e.text_fr.contains("étendards"))
@@ -102,8 +90,8 @@ fn trophies_are_told_in_the_chronicle() {
 
 #[test]
 fn no_trophy_no_line() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.chronicle.disabled = true;
     let (attacker, defender, index) = stage(&mut state);
     let outcome = BattleOutcome {
@@ -113,8 +101,6 @@ fn no_trophy_no_line() {
         duration: 300.0,
         end: Default::default(),
     };
-    let events = state
-        .resolve_pending_battle(&data, index, &outcome)
-        .unwrap();
+    let events = state.resolve_pending_battle(data, index, &outcome).unwrap();
     assert!(events.iter().all(|e| !e.text_fr.contains("étendard")));
 }

@@ -2,28 +2,24 @@
 //! regional fronts, chances of `data/rules/campaign_weather.json`.
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 
-use data_model::{Climate, FactionId, GameData, ProvinceId};
+use data_model::{Climate, FactionId, ProvinceId};
 use sim_campaign::state::Season;
 use sim_campaign::weather::{compute_weather, weather_map, MapWeather};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 #[test]
 fn rules_file_is_loaded() {
-    let data = data();
+    let data = game_data();
     assert!((data.campaign_weather.front_scale_deg - 3.5).abs() < 1e-9);
     assert_eq!(data.campaign_weather.climates.mountain.winter.snow, 50);
 }
 
 #[test]
 fn weather_is_deterministic_and_changes_with_the_turn() {
-    let data = data();
+    let data = game_data();
     let a = compute_weather(
         &data.campaign_weather,
         &data.provinces,
@@ -70,7 +66,7 @@ fn weather_is_deterministic_and_changes_with_the_turn() {
 
 #[test]
 fn chances_hold_over_many_turns() {
-    let data = data();
+    let data = game_data();
     let mut counts: BTreeMap<MapWeather, u32> = BTreeMap::new();
     let mut total = 0u32;
     for turn in 0..60u32 {
@@ -120,7 +116,7 @@ fn chances_hold_over_many_turns() {
 
 #[test]
 fn neighbours_share_the_sky_more_often_than_distant_provinces() {
-    let data = data();
+    let data = game_data();
     let ids: Vec<&ProvinceId> = data.provinces.keys().collect();
     let (mut near_same, mut near_total, mut far_same, mut far_total) = (0u32, 0u32, 0u32, 0u32);
     for turn in 0..40u32 {
@@ -156,10 +152,10 @@ fn neighbours_share_the_sky_more_often_than_distant_provinces() {
 
 #[test]
 fn weather_map_reads_the_state_date_and_seed() {
-    let data = data();
+    let data = game_data();
     let france = FactionId::new("fac_france").unwrap();
-    let state = CampaignState::new_1337(&data, france, 11).unwrap();
-    let map = weather_map(&data, &state);
+    let state = CampaignState::new_1337(data, france, 11).unwrap();
+    let map = weather_map(data, &state);
     let direct = compute_weather(
         &data.campaign_weather,
         &data.provinces,
@@ -170,6 +166,6 @@ fn weather_map_reads_the_state_date_and_seed() {
     assert_eq!(map, direct);
     // The weather lives outside the state: reading it does not touch the RNG.
     let before = state.rng.clone();
-    let _ = weather_map(&data, &state);
+    let _ = weather_map(data, &state);
     assert_eq!(before, state.rng);
 }

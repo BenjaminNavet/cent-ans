@@ -3,21 +3,12 @@
 //! side of his own fleet, and `win_chance` must be the player's share of the
 //! auto-resolves — whichever side (interceptor or convoy) he is on.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_battle::naval::{auto_resolve, NavalSim};
 use sim_battle::SideId;
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
     state
@@ -41,15 +32,15 @@ fn share(state: &CampaignState, data: &GameData, side: SideId) -> f64 {
 
 #[test]
 fn french_convoy_intercepted_by_england_is_the_players_side() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 7).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     let army = main_army(&state, "fac_france");
     let port = SettlementId::new("set_portsmouth").unwrap();
     let index = state
-        .debug_stage_naval(&data, &army, &port, &fac("fac_england"))
+        .debug_stage_naval(data, &army, &port, &fac("fac_england"))
         .expect("staged");
     assert_eq!(index, 0);
-    let view = &state.pending_naval_views(&data)[0];
+    let view = &state.pending_naval_views(data)[0];
     assert_eq!(view.faction, fac("fac_france"));
     assert_eq!(view.interceptor, fac("fac_england"));
     assert_eq!(
@@ -57,12 +48,12 @@ fn french_convoy_intercepted_by_england_is_the_players_side() {
         SideId::Defender,
         "the French convoy is the defender"
     );
-    let setup = state.naval_battle_setup(&data, 0).unwrap();
+    let setup = state.naval_battle_setup(data, 0).unwrap();
     assert_eq!(setup.defender.faction, "fac_france");
     assert_eq!(setup.player_side, Some(SideId::Defender));
-    assert_eq!(view.win_chance, share(&state, &data, SideId::Defender));
+    assert_eq!(view.win_chance, share(&state, data, SideId::Defender));
     // Complementary: the view never reports the interceptor's chances.
-    let english = share(&state, &data, SideId::Attacker);
+    let english = share(&state, data, SideId::Attacker);
     assert!(view.win_chance + english <= 1.0 + 1e-9);
     // The auto-resolve applied by « Résolution automatique » agrees with a sure forecast.
     let outcome = auto_resolve(&setup, state.naval.pending[0].seed);
@@ -75,17 +66,17 @@ fn french_convoy_intercepted_by_england_is_the_players_side() {
 
 #[test]
 fn french_squadron_intercepting_an_english_convoy_is_the_attacker() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 11).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 11).unwrap();
     let army = main_army(&state, "fac_england");
     let port = SettlementId::new("set_calais").unwrap();
     state
-        .debug_stage_naval(&data, &army, &port, &fac("fac_france"))
+        .debug_stage_naval(data, &army, &port, &fac("fac_france"))
         .expect("staged");
-    let view = &state.pending_naval_views(&data)[0];
+    let view = &state.pending_naval_views(data)[0];
     assert_eq!(view.interceptor, fac("fac_france"));
     assert_eq!(view.player_side, SideId::Attacker);
-    assert_eq!(view.win_chance, share(&state, &data, SideId::Attacker));
+    assert_eq!(view.win_chance, share(&state, data, SideId::Attacker));
 }
 
 /// Diagnostic: the forecast of the Q3 matchup and the real-time battle with
@@ -93,15 +84,15 @@ fn french_squadron_intercepting_an_english_convoy_is_the_attacker() {
 /// contradict each other wildly).
 #[test]
 fn forecast_matches_the_real_time_battle_under_ai() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 7).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     let army = main_army(&state, "fac_france");
     let port = SettlementId::new("set_portsmouth").unwrap();
     state
-        .debug_stage_naval(&data, &army, &port, &fac("fac_england"))
+        .debug_stage_naval(data, &army, &port, &fac("fac_england"))
         .unwrap();
-    let view = state.pending_naval_views(&data)[0].clone();
-    let setup = state.naval_battle_setup(&data, 0).unwrap();
+    let view = state.pending_naval_views(data)[0].clone();
+    let setup = state.naval_battle_setup(data, 0).unwrap();
     let mut wins = 0;
     for seed in 1..=5u64 {
         let mut sim = NavalSim::new(setup.clone(), seed).unwrap();

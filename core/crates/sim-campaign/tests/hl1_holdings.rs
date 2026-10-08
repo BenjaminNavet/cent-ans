@@ -1,16 +1,11 @@
 //! Lot HL1 (settlements quick-access list, touche B): `holdings_overview`.
 //! See `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 1.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SettlementId, SettlementKind};
 use sim_campaign::holdings::{holdings_overview, DangerReason, SettlementRow};
 use sim_campaign::{CampaignState, Order, Place};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
@@ -50,8 +45,8 @@ fn set_treasury(state: &mut CampaignState, amount: i64) {
 
 #[test]
 fn idle_settlement_with_enough_treasury_can_upgrade() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     set_treasury(&mut state, 10_000_000);
 
     // Find a settlement with at least one upgrade among its build options
@@ -65,7 +60,7 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
         .map(|(id, _)| id.clone())
         .find(|id| {
             let live = &state.settlements[id];
-            state.buildable(&data, id).iter().any(|option| {
+            state.buildable(data, id).iter().any(|option| {
                 option.available
                     && data
                         .buildings
@@ -76,7 +71,7 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
         })
         .expect("at least one French settlement has an upgrade available");
 
-    let overview = holdings_overview(&state, &data, &france());
+    let overview = holdings_overview(&state, data, &france());
     let r = row(&overview.provinces, &settlement);
     assert!(r.idle, "no construction under way: the settlement is idle");
     assert!(r.upgrade_available, "an upgrade is affordable");
@@ -93,12 +88,12 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
 
 #[test]
 fn idle_settlement_without_enough_treasury_has_no_options() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     set_treasury(&mut state, 0);
 
     let village = french_settlement(&state, SettlementKind::Village);
-    let overview = holdings_overview(&state, &data, &france());
+    let overview = holdings_overview(&state, data, &france());
     let r = row(&overview.provinces, &village);
     assert!(r.idle);
     assert!(
@@ -110,18 +105,18 @@ fn idle_settlement_without_enough_treasury_has_no_options() {
 
 #[test]
 fn settlement_under_construction_is_not_idle() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     set_treasury(&mut state, 10_000_000);
     let town = french_settlement(&state, SettlementKind::Town);
     let build = state
-        .buildable(&data, &town)
+        .buildable(data, &town)
         .into_iter()
         .find(|option| option.available)
         .expect("a town can build at least one building");
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: Place::Settlement(town.clone()),
                 building: build.building.clone(),
@@ -129,7 +124,7 @@ fn settlement_under_construction_is_not_idle() {
         )
         .expect("build in the town");
 
-    let overview = holdings_overview(&state, &data, &france());
+    let overview = holdings_overview(&state, data, &france());
     let r = row(&overview.provinces, &town);
     assert!(!r.idle, "a construction is under way");
     let construction = r.construction.as_ref().expect("construction is filled");
@@ -142,8 +137,8 @@ fn settlement_under_construction_is_not_idle() {
 
 #[test]
 fn besieged_settlement_has_no_income_and_is_endangered() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let town = french_settlement(&state, SettlementKind::Town);
     state.settlements.get_mut(&town).unwrap().siege = Some(sim_campaign::SiegeState {
         attacker: FactionId::new("fac_england").unwrap(),
@@ -155,7 +150,7 @@ fn besieged_settlement_has_no_income_and_is_endangered() {
         engine_work: 0,
     });
 
-    let overview = holdings_overview(&state, &data, &france());
+    let overview = holdings_overview(&state, data, &france());
     let r = row(&overview.provinces, &town);
     assert_eq!(r.income, 0);
     assert!(r.endangered);
@@ -165,13 +160,13 @@ fn besieged_settlement_has_no_income_and_is_endangered() {
 
 #[test]
 fn occupied_settlement_is_listed_and_excluded_from_slots_total() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let town = french_settlement(&state, SettlementKind::Town);
     let england = FactionId::new("fac_england").unwrap();
     state.settlements.get_mut(&town).unwrap().controller = england;
 
-    let overview = holdings_overview(&state, &data, &france());
+    let overview = holdings_overview(&state, data, &france());
     let r = row(&overview.provinces, &town);
     assert!(r.occupied);
     assert!(r.danger_reasons.contains(&DangerReason::Occupied));
@@ -193,9 +188,9 @@ fn occupied_settlement_is_listed_and_excluded_from_slots_total() {
 
 #[test]
 fn province_income_is_the_sum_of_its_settlements() {
-    let data = data();
-    let state = start(&data);
-    let overview = holdings_overview(&state, &data, &france());
+    let data = game_data();
+    let state = start(data);
+    let overview = holdings_overview(&state, data, &france());
     assert!(!overview.provinces.is_empty());
     for province in &overview.provinces {
         let sum: i64 = province.settlements.iter().map(|s| s.income).sum();
@@ -207,10 +202,10 @@ fn province_income_is_the_sum_of_its_settlements() {
 
 #[test]
 fn unknown_faction_has_an_empty_overview() {
-    let data = data();
-    let state = start(&data);
+    let data = game_data();
+    let state = start(data);
     let unknown = FactionId::new("fac_does_not_exist").unwrap();
-    let overview = holdings_overview(&state, &data, &unknown);
+    let overview = holdings_overview(&state, data, &unknown);
     assert!(overview.provinces.is_empty());
     assert_eq!(overview.treasury, 0);
 }

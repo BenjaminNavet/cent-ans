@@ -1,23 +1,9 @@
 //! Integration tests of the campaign model on the real `data/` directory.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
 use sim_campaign::{ArmyId, CampaignState, EventKind, Order, OrderError, Stance, Unit, START_YEAR};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -54,8 +40,8 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 
 #[test]
 fn new_1337_matches_game_data() {
-    let data = data();
-    let state = france(&data, 1);
+    let data = game_data();
+    let state = france(data, 1);
     // FE registry lots keep adding factions and provinces: every one in the
     // data enters the campaign (fac_rebels included), and the map is not shrunk.
     assert_eq!(
@@ -119,8 +105,8 @@ fn new_1337_matches_game_data() {
 
 #[test]
 fn new_1337_rejects_unknown_faction() {
-    let data = data();
-    let err = CampaignState::new_1337(&data, fac("fac_atlantis"), 1).unwrap_err();
+    let data = game_data();
+    let err = CampaignState::new_1337(data, fac("fac_atlantis"), 1).unwrap_err();
     assert!(matches!(
         err,
         sim_campaign::CampaignError::UnknownFaction(_)
@@ -129,15 +115,15 @@ fn new_1337_rejects_unknown_faction() {
 
 #[test]
 fn invalid_orders_are_rejected_without_side_effects() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let before = state.save_json();
     let own = main_army(&state, "fac_france");
     let foreign = main_army(&state, "fac_england");
 
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::MoveArmy {
                 army: foreign,
                 target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_kent").into()])
@@ -147,7 +133,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::MoveArmy {
                 army: own.clone(),
                 target: sim_campaign::MoveOrderTarget::Path(vec![])
@@ -158,14 +144,14 @@ fn invalid_orders_are_rejected_without_side_effects() {
     // Lot M2: over the sea, only port-to-port crossings (`embark`).
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::move_along(own.clone(), vec![set("set_cantorbery")])
         ),
         Err(OrderError::NoPath)
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::MoveArmy {
                 army: ArmyId::parse("army_9999").unwrap(),
                 target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_kent").into()])
@@ -175,7 +161,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: prov("prov_kent").into(),
                 unit_type: unit("unit_urban_militia")
@@ -185,7 +171,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: set("set_paris").into(),
                 unit_type: unit("unit_longbowmen")
@@ -195,7 +181,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::CreateArmy {
                 settlement: prov("prov_ile_de_france").into(),
                 units_from_garrison: vec![9],
@@ -206,7 +192,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::SplitArmy {
                 army: own.clone(),
                 unit_indices: (0..8).collect()
@@ -216,7 +202,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
     ));
     assert!(matches!(
         state.submit_order(
-            &data,
+            data,
             Order::AssignGeneral {
                 army: own,
                 character: data_model::CharacterId::new("chr_edward_iii").unwrap()
@@ -233,12 +219,12 @@ fn invalid_orders_are_rejected_without_side_effects() {
 
 #[test]
 fn valid_orders_apply_immediately() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let paris = set("set_paris");
     let treasury_before = state.faction_state(&fac("fac_france")).unwrap().treasury;
 
-    let options = state.recruitable(&data, &paris);
+    let options = state.recruitable(data, &paris);
     let militia = options
         .iter()
         .find(|o| o.unit_type == unit("unit_urban_militia"))
@@ -265,7 +251,7 @@ fn valid_orders_apply_immediately() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::Recruit {
                 settlement: paris.clone().into(),
                 unit_type: unit("unit_urban_militia"),
@@ -281,14 +267,14 @@ fn valid_orders_apply_immediately() {
         4,
         "recruit lands next turn"
     );
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert_eq!(state.settlement_state(&paris).unwrap().garrison.len(), 5);
 
     // Form an army from the garrison, split it, merge it back, change stance.
     let commander = data_model::CharacterId::new("chr_raoul_de_brienne").unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::CreateArmy {
                 settlement: paris.clone().into(),
                 units_from_garrison: vec![0, 1, 4],
@@ -303,7 +289,7 @@ fn valid_orders_apply_immediately() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::SplitArmy {
                 army: new_army.clone(),
                 unit_indices: vec![2],
@@ -317,7 +303,7 @@ fn valid_orders_apply_immediately() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::MergeArmies {
                 source: detached.clone(),
                 target: new_army.clone(),
@@ -329,7 +315,7 @@ fn valid_orders_apply_immediately() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::SetStance {
                 army: new_army.clone(),
                 stance: Stance::Raid,
@@ -340,7 +326,7 @@ fn valid_orders_apply_immediately() {
 
     state
         .submit_order(
-            &data,
+            data,
             Order::DisbandUnit {
                 army: Some(new_army.clone()),
                 settlement: None,
@@ -425,26 +411,26 @@ fn orders_round_trip_through_snake_case_json() {
 
 #[test]
 fn movement_spans_turns_and_reachable_is_bounded() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_left;
     // Lot C7a: 3 steps of 70 km (lot DC1, ADR 0082) times the season scale
     // (0.5) in spring, converted to grid costs (lot M2: 10 per plain cell of
     // ~1.44 km).
-    assert_eq!(state.season_movement_points(&data), 105);
+    assert_eq!(state.season_movement_points(data), 105);
     assert_eq!(
         allowance,
-        sim_campaign::march::km_to_grid_points(&data, 105.0)
+        sim_campaign::march::km_to_grid_points(data, 105.0)
     );
     assert!((700..=760).contains(&allowance), "{allowance}");
-    let reachable = state.reachable(&data, &army);
+    let reachable = state.reachable(data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable
         .values()
         .all(|&cost| cost >= 1 && cost <= allowance));
     assert!(!reachable.contains_key(&set("set_paris")));
-    let provinces = state.reachable_provinces(&data, &army);
+    let provinces = state.reachable_provinces(data, &army);
     assert!(provinces.contains_key(&prov("prov_normandie")));
     assert!(!provinces.contains_key(&prov("prov_ile_de_france")));
 
@@ -452,12 +438,12 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let toulouse = city(&state, "prov_toulousain");
     let point = data.settlement_point(&toulouse).unwrap();
     let path = state
-        .find_path(&data, &army, point)
+        .find_path(data, &army, point)
         .expect("path to Toulouse");
     assert!(path.cost > 2 * allowance, "cost {}", path.cost);
     assert_eq!(path.waypoints.last(), path.cells.last());
     let outcome = state
-        .submit_order_outcome(&data, Order::move_to(army.clone(), toulouse.clone()))
+        .submit_order_outcome(data, Order::move_to(army.clone(), toulouse.clone()))
         .unwrap();
     let sim_campaign::OrderOutcome::Moved(report) = outcome else {
         panic!("a march report");
@@ -477,7 +463,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
             !state.army(&army).unwrap().planned_path.is_empty(),
             "leftover path continues next turn"
         );
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
     }
     assert!(state.army(&army).unwrap().is_at(&toulouse));
     assert!(state.army(&army).unwrap().planned_path.is_empty());
@@ -492,12 +478,12 @@ fn movement_spans_turns_and_reachable_is_bounded() {
 
 #[test]
 fn v1_province_paths_head_for_the_city() {
-    let data = data();
-    let mut state = france(&data, 1);
+    let data = game_data();
+    let mut state = france(data, 1);
     let army = main_army(&state, "fac_france");
     state
         .submit_order(
-            &data,
+            data,
             Order::MoveArmy {
                 army: army.clone(),
                 target: sim_campaign::MoveOrderTarget::Path(vec![prov("prov_normandie").into()]),
@@ -516,8 +502,8 @@ fn v1_province_paths_head_for_the_city() {
 
 #[test]
 fn sea_crossings_go_port_to_port_and_take_the_turn() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 2).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 2).unwrap();
     let sea_edges: Vec<_> = data
         .movement_graph
         .adjacency
@@ -548,14 +534,14 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
     state.armies.get_mut(&army).unwrap().position =
         sim_campaign::ArmyPosition::field(data.settlement_point(&from).unwrap());
     assert!(matches!(
-        state.submit_order(&data, embark(&army, &to)),
+        state.submit_order(data, embark(&army, &to)),
         Err(OrderError::NotInPort)
     ));
     state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(from);
     // Not a full turn of movement left: refused.
     state.armies.get_mut(&army).unwrap().movement_left -= 1;
     assert!(matches!(
-        state.submit_order(&data, embark(&army, &to)),
+        state.submit_order(data, embark(&army, &to)),
         Err(OrderError::EmbarkNeedsFullTurn)
     ));
     state.armies.get_mut(&army).unwrap().movement_left += 1;
@@ -563,7 +549,7 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
     // Lot NV1: no French warship to intercept this crossing.
     state.naval.initialised = true;
     state.naval.fleets.clear();
-    state.submit_order(&data, embark(&army, &to)).unwrap();
+    state.submit_order(data, embark(&army, &to)).unwrap();
     let landed = state.army(&army).unwrap();
     assert!(landed.is_at(&to), "landed in {to}: {:?}", landed.position);
     assert_eq!(landed.movement_left, 0, "the crossing takes the turn");
@@ -575,8 +561,8 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
 
 #[test]
 fn attacking_an_enemy_army_triggers_a_battle() {
-    let data = data();
-    let mut state = france(&data, 3);
+    let data = game_data();
+    let mut state = france(data, 3);
     // Auto-resolved battle (interactive battles are covered by tests/m7.rs).
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
@@ -588,7 +574,7 @@ fn attacking_an_enemy_army_triggers_a_battle() {
     let strength_before: u32 = state.army(&french).unwrap().total_strength();
     state
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: french.clone(),
                 target_army: english.clone(),
@@ -611,12 +597,12 @@ fn attacking_an_enemy_army_triggers_a_battle() {
         "both armies stop after a battle"
     );
     // Out of reach: refused, nothing happens.
-    let mut far = france(&data, 3);
+    let mut far = france(data, 3);
     far.interactive_battles = false;
     let before = far.save_json();
     let err = far
         .submit_order(
-            &data,
+            data,
             Order::Attack {
                 army: main_army(&far, "fac_france"),
                 target_army: main_army(&far, "fac_england"),
@@ -631,16 +617,16 @@ fn attacking_an_enemy_army_triggers_a_battle() {
 }
 #[test]
 fn siege_captures_after_fortification_dependent_duration() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 4).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 4).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = set("set_boulogne");
-    let fortification = state.fortification_level(&data, &boulogne);
+    let fortification = state.fortification_level(data, &boulogne);
     state.armies.get_mut(&english).unwrap().position =
         sim_campaign::ArmyPosition::Settlement(boulogne.clone());
     state
         .submit_order(
-            &data,
+            data,
             Order::SetStance {
                 army: english.clone(),
                 stance: Stance::Siege,
@@ -648,7 +634,7 @@ fn siege_captures_after_fortification_dependent_duration() {
         )
         .unwrap();
 
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::SiegeStarted));
     let siege = state
         .settlement_state(&boulogne)
@@ -661,7 +647,7 @@ fn siege_captures_after_fortification_dependent_duration() {
 
     let mut captured_turn = None;
     for turn in 1..=(2 + fortification + 1) {
-        let events = state.end_turn_with(&data, idle);
+        let events = state.end_turn_with(data, idle);
         if events.iter().any(|e| e.kind == EventKind::ProvinceCaptured) {
             captured_turn = Some(turn);
             break;
@@ -690,8 +676,8 @@ fn siege_captures_after_fortification_dependent_duration() {
 
 #[test]
 fn empty_garrison_is_captured_instantly() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 5).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 5).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = set("set_boulogne");
     state
@@ -704,14 +690,14 @@ fn empty_garrison_is_captured_instantly() {
         sim_campaign::ArmyPosition::Settlement(boulogne.clone());
     state
         .submit_order(
-            &data,
+            data,
             Order::SetStance {
                 army: english.clone(),
                 stance: Stance::Siege,
             },
         )
         .unwrap();
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::ProvinceCaptured));
     assert_eq!(
         state.settlement_state(&boulogne).unwrap().controller,
@@ -721,22 +707,22 @@ fn empty_garrison_is_captured_instantly() {
 
 #[test]
 fn raid_devastates_and_loots() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 6).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 6).unwrap();
     let english = main_army(&state, "fac_england");
     let boulogne = prov("prov_boulonnais");
     state.armies.get_mut(&english).unwrap().position =
         sim_campaign::ArmyPosition::Settlement(city(&state, "prov_boulonnais"));
     state
         .submit_order(
-            &data,
+            data,
             Order::SetStance {
                 army: english.clone(),
                 stance: Stance::Raid,
             },
         )
         .unwrap();
-    let events = state.end_turn_with(&data, idle);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Raid));
     let province = state.province_state(&boulogne).unwrap();
     assert!(
@@ -748,13 +734,13 @@ fn raid_devastates_and_loots() {
 
 #[test]
 fn france_income_is_positive_and_in_target_range() {
-    let data = data();
-    let mut state = france(&data, 7);
+    let data = game_data();
+    let mut state = france(data, 7);
     let france_id = fac("fac_france");
-    let income = state.faction_income(&data, &france_id);
-    let upkeep = state.faction_upkeep(&data, &france_id);
+    let income = state.faction_income(data, &france_id);
+    let upkeep = state.faction_upkeep(data, &france_id);
     let army = main_army(&state, "fac_france");
-    let army_upkeep = sim_campaign::economy::units_upkeep(&data, &state.army(&army).unwrap().units);
+    let army_upkeep = sim_campaign::economy::units_upkeep(data, &state.army(&army).unwrap().units);
     println!("France income {income}, upkeep {upkeep}, main army upkeep {army_upkeep}");
     assert!(
         (20_000..=30_000).contains(&income),
@@ -766,7 +752,7 @@ fn france_income_is_positive_and_in_target_range() {
 
     // The actually-collected income (spec § 1.4: tax rate + building
     // effects) stays in the same target range with the default Normal rate.
-    let effective_income = state.faction_income_effective(&data, &france_id);
+    let effective_income = state.faction_income_effective(data, &france_id);
     println!("France effective income (Normal tax) {effective_income}");
     assert!(
         (20_000..=30_000).contains(&effective_income),
@@ -774,10 +760,10 @@ fn france_income_is_positive_and_in_target_range() {
     );
 
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
-    let effective_upkeep = state.faction_army_upkeep(&data, &france_id)
-        + state.faction_building_upkeep(&data, &france_id)
-        + state.faction_administration_upkeep(&data, &france_id);
-    let events = state.end_turn_with(&data, idle);
+    let effective_upkeep = state.faction_army_upkeep(data, &france_id)
+        + state.faction_building_upkeep(data, &france_id)
+        + state.faction_administration_upkeep(data, &france_id);
+    let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();
     assert_eq!(summary.income, effective_income);
@@ -803,15 +789,15 @@ fn france_income_is_positive_and_in_target_range() {
 
 #[test]
 fn attrition_abroad_and_recovery_at_home() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_england"), 8).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 8).unwrap();
     let english = main_army(&state, "fac_england");
     state.armies.get_mut(&english).unwrap().position =
         sim_campaign::ArmyPosition::Settlement(set("set_boulogne"));
     let strength_before = state.army(&english).unwrap().total_strength();
     let mut supplies = Vec::new();
     for _ in 0..7 {
-        state.end_turn_with(&data, idle);
+        state.end_turn_with(data, idle);
         supplies.push(state.army(&english).unwrap().supply);
     }
     assert!(supplies[0] < 100);
@@ -823,16 +809,16 @@ fn attrition_abroad_and_recovery_at_home() {
 
     state.armies.get_mut(&english).unwrap().position =
         sim_campaign::ArmyPosition::Settlement(set("set_cantorbery"));
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state.army(&english).unwrap().supply >= 40);
 }
 
 #[test]
 fn save_load_round_trip() {
-    let data = data();
-    let mut state = france(&data, 9);
+    let data = game_data();
+    let mut state = france(data, 9);
     for _ in 0..3 {
-        state.end_turn(&data);
+        state.end_turn(data);
     }
     let json = state.save_json();
     assert!(json.contains(&format!(
@@ -848,8 +834,8 @@ fn save_load_round_trip() {
     // A loaded game continues exactly like the original.
     let mut a = state.clone();
     let mut b = loaded;
-    a.end_turn(&data);
-    b.end_turn(&data);
+    a.end_turn(data);
+    b.end_turn(data);
     assert_eq!(a.save_json(), b.save_json());
 
     let err = CampaignState::load_json(&json.replace(
@@ -896,13 +882,13 @@ fn save_load_round_trip() {
 
 #[test]
 fn twenty_turns_with_ai_are_deterministic() {
-    let data = data();
+    let data = game_data();
     let run = |seed: u64| {
-        let mut state = france(&data, seed);
+        let mut state = france(data, seed);
         let army = main_army(&state, "fac_france");
         state
             .submit_order(
-                &data,
+                data,
                 Order::MoveArmy {
                     army,
                     target: sim_campaign::MoveOrderTarget::Path(
@@ -912,7 +898,7 @@ fn twenty_turns_with_ai_are_deterministic() {
             )
             .unwrap();
         for _ in 0..20 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state.save_json()
     };
@@ -922,13 +908,13 @@ fn twenty_turns_with_ai_are_deterministic() {
 
 #[test]
 fn forty_turns_all_ai_change_the_map() {
-    let data = data();
-    let mut state = france(&data, 21);
+    let data = game_data();
+    let mut state = france(data, 21);
     let mut changed = 0;
     let mut battles = 0;
     let mut captures = 0;
     for _ in 0..40 {
-        let events = state.end_turn(&data);
+        let events = state.end_turn(data);
         battles += events
             .iter()
             .filter(|e| e.kind == EventKind::Battle)
@@ -963,7 +949,7 @@ fn forty_turns_all_ai_change_the_map() {
 
 #[test]
 fn unit_fresh_uses_data_stats() {
-    let data = data();
+    let data = game_data();
     let knights = Unit::fresh(&data.unit_types[&unit("unit_knights")]);
     assert_eq!(knights.strength, 60);
     assert_eq!(knights.morale, 80);
@@ -971,12 +957,12 @@ fn unit_fresh_uses_data_stats() {
 
 #[test]
 fn succession_follows_heir_then_house_then_none() {
-    let data = data();
-    let mut state = france(&data, 10);
+    let data = game_data();
+    let mut state = france(data, 10);
     let philippe = data_model::CharacterId::new("chr_philippe_vi").unwrap();
     let jean = data_model::CharacterId::new("chr_jean_de_normandie").unwrap();
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &philippe, &mut events);
+    sim_campaign::characters::kill(&mut state, data, &philippe, &mut events);
     assert!(events.iter().any(|e| e.kind == EventKind::Death));
     assert!(events.iter().any(|e| e.kind == EventKind::Succession));
     let france_state = state.faction_state(&fac("fac_france")).unwrap();
@@ -991,7 +977,7 @@ fn succession_follows_heir_then_house_then_none() {
 
     // Jean dies too: the eldest living Valois male takes over.
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &jean, &mut events);
+    sim_campaign::characters::kill(&mut state, data, &jean, &mut events);
     let ruler = state
         .faction_state(&fac("fac_france"))
         .unwrap()
@@ -1005,7 +991,7 @@ fn succession_follows_heir_then_house_then_none() {
     let jeanne = data_model::CharacterId::new("chr_jeanne_ii_de_navarre").unwrap();
     let charles = data_model::CharacterId::new("chr_charles_ii_de_navarre").unwrap();
     let mut events = Vec::new();
-    sim_campaign::characters::kill(&mut state, &data, &jeanne, &mut events);
+    sim_campaign::characters::kill(&mut state, data, &jeanne, &mut events);
     assert_eq!(
         state.faction_state(&fac("fac_navarre")).unwrap().ruler,
         Some(charles)
@@ -1022,7 +1008,7 @@ fn succession_follows_heir_then_house_then_none() {
             .clone()
             .unwrap();
         let mut events = Vec::new();
-        sim_campaign::characters::kill(&mut state, &data, &ruler, &mut events);
+        sim_campaign::characters::kill(&mut state, data, &ruler, &mut events);
         if events.iter().any(|e| {
             e.kind == EventKind::Succession
                 && (e.text_fr.contains("nouvelle maison") || e.text_fr.contains("s'empare"))

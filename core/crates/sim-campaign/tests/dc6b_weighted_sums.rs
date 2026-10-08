@@ -2,15 +2,10 @@
 //! kind's `research_percent`, their religious buildings against heresy their kind's
 //! `province_effect_percent` (like the province-wide effects of lot DC3).
 
-use std::path::PathBuf;
-
 use data_model::{BuildingId, FactionId, GameData, SettlementKind};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
@@ -45,18 +40,18 @@ fn research_with_scriptoriums(data: &GameData, kind: SettlementKind) -> (u32, u3
 
 #[test]
 fn an_abbey_library_counts_less_than_a_city_one() {
-    let data = data();
-    let weight = sim_campaign::buildings::research_percent(&data, SettlementKind::Abbey);
+    let data = game_data();
+    let weight = sim_campaign::buildings::research_percent(data, SettlementKind::Abbey);
     assert!(weight < 100, "abbeys weigh less than cities");
-    let (before, after) = research_with_scriptoriums(&data, SettlementKind::Abbey);
+    let (before, after) = research_with_scriptoriums(data, SettlementKind::Abbey);
     assert_eq!(after, before + weight / 10, "ten abbey scriptoriums");
-    let (before, after) = research_with_scriptoriums(&data, SettlementKind::City);
+    let (before, after) = research_with_scriptoriums(data, SettlementKind::City);
     assert_eq!(after, before + 10, "ten city scriptoriums weigh ten points");
 }
 
 #[test]
 fn full_weights_count_every_library() {
-    let mut data = data();
+    let mut data = game_data().clone();
     if let Some(rules) = data.settlement_rules.as_mut() {
         rules.research_percent.clear();
     }
@@ -89,7 +84,7 @@ fn religious_of(
 
 #[test]
 fn secondary_churches_weigh_half_against_heresy() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let state = start(&data);
     let oxford = data_model::ProvinceId::new("prov_oxford").unwrap();
     let weighed = sim_campaign::religion::weighted_religious_buildings(&state, &data, &oxford);

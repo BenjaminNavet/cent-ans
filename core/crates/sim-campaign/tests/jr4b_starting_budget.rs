@@ -1,19 +1,10 @@
 //! Lot JR4b: the great realms start with garrisons they can pay
 //! (`data/settlements/rules.json` § `starting_budget`).
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 /// Seasonal balance without the idle hoard's share of the court, and the
 /// receipts.
@@ -33,13 +24,13 @@ fn structural(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i
 
 #[test]
 fn the_great_realms_start_within_their_means_and_the_others_untouched() {
-    let data = data();
+    let data = game_data();
     let rule = data
         .settlement_rules
         .as_ref()
         .and_then(|r| r.starting_budget.clone())
         .expect("starting_budget rule");
-    let fitted = CampaignState::new_1337(&data, fac("fac_france"), 1).expect("start");
+    let fitted = CampaignState::new_1337(data, fac("fac_france"), 1).expect("start");
     let mut raw_data = data.clone();
     raw_data
         .settlement_rules
@@ -50,7 +41,7 @@ fn the_great_realms_start_within_their_means_and_the_others_untouched() {
 
     // The Mamluks were 21 % short; now within the allowed share.
     let mamluks = fac("fac_mamluks");
-    let (net, receipts) = structural(&fitted, &data, &mamluks);
+    let (net, receipts) = structural(&fitted, data, &mamluks);
     // A6-L3: the rule now asks for a surplus (negative max_deficit_percent);
     // the garrisons alone reach it only for some realms, none stays in deficit.
     assert!(net >= 0, "net {net} on {receipts}");

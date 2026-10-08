@@ -1,20 +1,10 @@
 //! EP9 (ADR 0056): a refused battle reaches the campaign as a withdrawal of
 //! the attacker, without losses, told in the chronicle.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
 use sim_battle::{BattleEnd, BattleOutcome, SideId, SideResult};
 use sim_campaign::{ArmyId, CampaignState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
     state
@@ -43,8 +33,8 @@ fn untouched(state: &CampaignState, army: &ArmyId, morale_delta: i32, won: bool)
 
 #[test]
 fn a_refused_battle_is_told_and_costs_no_soldier() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     state.chronicle.disabled = true;
     for (a, b) in [("fac_france", "fac_england"), ("fac_england", "fac_france")] {
         state
@@ -65,9 +55,7 @@ fn a_refused_battle_is_told_and_costs_no_soldier() {
         duration: 300.0,
         end: BattleEnd::Refused,
     };
-    let events = state
-        .resolve_pending_battle(&data, index, &outcome)
-        .unwrap();
+    let events = state.resolve_pending_battle(data, index, &outcome).unwrap();
     let line = events
         .iter()
         .find(|e| e.text_fr.contains("Bataille refusée"))

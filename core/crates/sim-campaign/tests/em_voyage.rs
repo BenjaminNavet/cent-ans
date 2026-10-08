@@ -1,21 +1,12 @@
 //! EM (ADR 0167): voyages of several legs from a port, landing at any port
 //! reached this season, click on the water.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_campaign::orders::OrderError;
 use sim_campaign::voyage::{port_near, sea_voyage, sea_voyages};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
@@ -45,10 +36,10 @@ fn english_army_at(data: &GameData, port: &str) -> (CampaignState, ArmyId) {
 
 #[test]
 fn a_port_reaches_ports_beyond_its_direct_lanes() {
-    let data = data();
-    let (state, _) = english_army_at(&data, "set_southampton");
+    let data = game_data();
+    let (state, _) = english_army_at(data, "set_southampton");
     let england = fac("fac_england");
-    let voyages = sea_voyages(&state, &data, &england, &set("set_southampton"));
+    let voyages = sea_voyages(&state, data, &england, &set("set_southampton"));
     let max_legs = data.free_movement_rules().max_voyage_legs as usize;
     assert!(max_legs > 1, "data allows multi-leg voyages");
     assert!(voyages
@@ -71,16 +62,16 @@ fn a_port_reaches_ports_beyond_its_direct_lanes() {
 
 #[test]
 fn an_army_sails_through_ports_of_call_in_one_season() {
-    let data = data();
-    let (mut state, army) = english_army_at(&data, "set_southampton");
+    let data = game_data();
+    let (mut state, army) = english_army_at(data, "set_southampton");
     let england = fac("fac_england");
-    let (target, voyage) = sea_voyages(&state, &data, &england, &set("set_southampton"))
+    let (target, voyage) = sea_voyages(&state, data, &england, &set("set_southampton"))
         .into_iter()
         .find(|(port, v)| v.len() >= 2 && !state.is_hostile_settlement(&england, port))
         .expect("a friendly or neutral port two legs away");
     state
         .submit_order(
-            &data,
+            data,
             Order::Embark {
                 army: army.clone(),
                 to_port: target.clone(),
@@ -94,12 +85,12 @@ fn an_army_sails_through_ports_of_call_in_one_season() {
 
 #[test]
 fn embarking_needs_the_whole_season() {
-    let data = data();
-    let (mut state, army) = english_army_at(&data, "set_southampton");
+    let data = game_data();
+    let (mut state, army) = english_army_at(data, "set_southampton");
     state.armies.get_mut(&army).unwrap().movement_left = 1;
     let err = state
         .submit_order(
-            &data,
+            data,
             Order::Embark {
                 army: army.clone(),
                 to_port: set("set_bordeaux"),
@@ -111,12 +102,12 @@ fn embarking_needs_the_whole_season() {
 
 #[test]
 fn an_inland_town_has_no_sea_route() {
-    let data = data();
-    let (mut state, army) = english_army_at(&data, "set_southampton");
+    let data = game_data();
+    let (mut state, army) = english_army_at(data, "set_southampton");
     let england = fac("fac_england");
     assert!(sea_voyage(
         &state,
-        &data,
+        data,
         &england,
         &set("set_southampton"),
         &set("set_paris")
@@ -124,7 +115,7 @@ fn an_inland_town_has_no_sea_route() {
     .is_none());
     let err = state
         .submit_order(
-            &data,
+            data,
             Order::Embark {
                 army,
                 to_port: set("set_paris"),
@@ -136,13 +127,13 @@ fn an_inland_town_has_no_sea_route() {
 
 #[test]
 fn a_click_on_the_water_picks_the_nearest_reachable_port() {
-    let data = data();
-    let (state, _) = english_army_at(&data, "set_southampton");
+    let data = game_data();
+    let (state, _) = english_army_at(data, "set_southampton");
     let england = fac("fac_england");
     let bordeaux = data.settlement_point(&set("set_bordeaux")).unwrap();
     let near = port_near(
         &state,
-        &data,
+        data,
         &england,
         &set("set_southampton"),
         [bordeaux[0] - 3.0, bordeaux[1] + 2.0],

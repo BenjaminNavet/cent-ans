@@ -1,25 +1,11 @@
 //! M5 (diplomacy & religion) integration tests. See
 //! `docs/design/m5-diplomacy-religion.md` § 2.5.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId, ReligionId};
+use data_model::{FactionId, GameData, ReligionId};
 use sim_campaign::diplomacy::{evaluate, Proposal, RelationKind};
 use sim_campaign::{CampaignState, EventKind, Order, OrderError, Season, SettlementState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 /// Mutable state of the city of a province (lot C4: it carries control).
 fn city_mut<'a>(state: &'a mut CampaignState, province: &str) -> &'a mut SettlementState {
@@ -44,12 +30,12 @@ fn events_of(state: &mut CampaignState, data: &GameData) -> Vec<sim_campaign::Ga
 
 #[test]
 fn attitude_has_reasons() {
-    let data = data();
-    let state = start(&data, "fac_france", 1);
-    let (value, reasons) = state.attitude(&data, &fac("fac_england"), &fac("fac_france"));
+    let data = game_data();
+    let state = start(data, "fac_france", 1);
+    let (value, reasons) = state.attitude(data, &fac("fac_england"), &fac("fac_france"));
     assert!(value < 0, "England hates France in 1337: {value}");
     assert!(reasons.iter().any(|(t, _)| t == "En guerre"));
-    let (ally, reasons) = state.attitude(&data, &fac("fac_scotland"), &fac("fac_france"));
+    let (ally, reasons) = state.attitude(data, &fac("fac_scotland"), &fac("fac_france"));
     assert!(ally > 0, "the Auld Alliance: {ally}");
     assert!(reasons.iter().any(|(t, _)| t == "Alliés"));
     assert!(reasons.iter().any(|(t, _)| t == "Ennemi commun"));
@@ -57,14 +43,14 @@ fn attitude_has_reasons() {
 
 #[test]
 fn claims_give_casus_belli() {
-    let data = data();
-    let state = start(&data, "fac_france", 2);
-    let cb = state.casus_belli(&data, &fac("fac_england"), &fac("fac_france"));
+    let data = game_data();
+    let state = start(data, "fac_france", 2);
+    let cb = state.casus_belli(data, &fac("fac_england"), &fac("fac_france"));
     assert!(cb.unwrap().contains("trône"));
-    let cb = state.casus_belli(&data, &fac("fac_france"), &fac("fac_england"));
+    let cb = state.casus_belli(data, &fac("fac_france"), &fac("fac_england"));
     assert!(cb.unwrap().contains("prétention"));
     assert!(state
-        .casus_belli(&data, &fac("fac_aragon"), &fac("fac_navarre"))
+        .casus_belli(data, &fac("fac_aragon"), &fac("fac_navarre"))
         .is_none());
 }
 
@@ -72,14 +58,14 @@ fn claims_give_casus_belli() {
 
 #[test]
 fn war_without_casus_belli_costs_reputation() {
-    let data = data();
-    let mut state = start(&data, "fac_aragon", 3);
+    let data = game_data();
+    let mut state = start(data, "fac_aragon", 3);
     let before = state
-        .attitude(&data, &fac("fac_castile"), &fac("fac_aragon"))
+        .attitude(data, &fac("fac_castile"), &fac("fac_aragon"))
         .0;
     state
         .submit_order(
-            &data,
+            data,
             Order::DeclareWar {
                 target: fac("fac_navarre"),
             },
@@ -87,22 +73,22 @@ fn war_without_casus_belli_costs_reputation() {
         .unwrap();
     assert!(state.is_at_war(&fac("fac_aragon"), &fac("fac_navarre")));
     let after = state
-        .attitude(&data, &fac("fac_castile"), &fac("fac_aragon"))
+        .attitude(data, &fac("fac_castile"), &fac("fac_aragon"))
         .0;
     assert!(after < before, "{before} -> {after}");
-    let events = events_of(&mut state, &data);
+    let events = events_of(&mut state, data);
     assert!(events.iter().any(|e| e.kind == EventKind::WarDeclared));
 }
 
 #[test]
 fn allies_are_called_to_arms() {
-    let data = data();
-    let mut state = start(&data, "fac_england", 4);
+    let data = game_data();
+    let mut state = start(data, "fac_england", 4);
     // England attacks Castile, France's ally: France, already at war with
     // England, stays at war; Castile's other ties decide for themselves.
     state
         .submit_order(
-            &data,
+            data,
             Order::DeclareWar {
                 target: fac("fac_castile"),
             },
@@ -122,10 +108,10 @@ fn allies_are_called_to_arms() {
 
 #[test]
 fn allied_factions_cannot_declare_war_on_each_other() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 5);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 5);
     let result = state.submit_order(
-        &data,
+        data,
         Order::DeclareWar {
             target: fac("fac_scotland"),
         },
@@ -135,8 +121,8 @@ fn allied_factions_cannot_declare_war_on_each_other() {
 
 #[test]
 fn peace_depends_on_war_score() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 6);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 6);
     let white = Proposal::Peace {
         provinces: Vec::new(),
         tribute: 0,
@@ -148,7 +134,7 @@ fn peace_depends_on_war_score() {
     };
     let verdict = evaluate(
         &state,
-        &data,
+        data,
         &fac("fac_france"),
         &fac("fac_england"),
         &greedy,
@@ -179,7 +165,7 @@ fn peace_depends_on_war_score() {
     }
     let verdict = evaluate(
         &state,
-        &data,
+        data,
         &fac("fac_france"),
         &fac("fac_england"),
         &white,
@@ -190,8 +176,8 @@ fn peace_depends_on_war_score() {
 
 #[test]
 fn peace_cedes_provinces_and_starts_a_truce() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 7);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 7);
     city_mut(&mut state, "prov_guyenne").controller = fac("fac_france");
     state
         .factions
@@ -207,7 +193,7 @@ fn peace_cedes_provinces_and_starts_a_truce() {
         .insert(fac("fac_france"), -100);
     state
         .submit_order(
-            &data,
+            data,
             Order::ProposePeace {
                 target: fac("fac_england"),
                 provinces: vec![prov("prov_guyenne")],
@@ -233,18 +219,18 @@ fn peace_cedes_provinces_and_starts_a_truce() {
         .any(|c| c.province == Some(prov("prov_guyenne"))));
     // Breaking the truce is perjury.
     let before = state
-        .attitude(&data, &fac("fac_castile"), &fac("fac_france"))
+        .attitude(data, &fac("fac_castile"), &fac("fac_france"))
         .0;
     state
         .submit_order(
-            &data,
+            data,
             Order::DeclareWar {
                 target: fac("fac_england"),
             },
         )
         .unwrap();
     let after = state
-        .attitude(&data, &fac("fac_castile"), &fac("fac_france"))
+        .attitude(data, &fac("fac_castile"), &fac("fac_france"))
         .0;
     assert!(after <= before - 30, "{before} -> {after}");
 }
@@ -253,10 +239,10 @@ fn peace_cedes_provinces_and_starts_a_truce() {
 
 #[test]
 fn alliance_needs_a_good_attitude() {
-    let data = data();
-    let mut state = start(&data, "fac_england", 8);
+    let data = game_data();
+    let mut state = start(data, "fac_england", 8);
     let refused = state.submit_order(
-        &data,
+        data,
         Order::ProposeAlliance {
             target: fac("fac_scotland"),
         },
@@ -265,7 +251,7 @@ fn alliance_needs_a_good_attitude() {
     // Portugal (at war with Castile, France's ally) is a natural partner.
     let verdict = evaluate(
         &state,
-        &data,
+        data,
         &fac("fac_england"),
         &fac("fac_portugal"),
         &Proposal::Alliance,
@@ -275,10 +261,10 @@ fn alliance_needs_a_good_attitude() {
 
 #[test]
 fn embargo_cuts_income() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 9);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 9);
     let flanders = fac("fac_flanders");
-    let before = state.faction_income_effective(&data, &flanders);
+    let before = state.faction_income_effective(data, &flanders);
     // Remove England's embargo, then compare.
     state
         .factions
@@ -286,7 +272,7 @@ fn embargo_cuts_income() {
         .unwrap()
         .embargoes
         .remove(&flanders);
-    let without = state.faction_income_effective(&data, &flanders);
+    let without = state.faction_income_effective(data, &flanders);
     assert!(
         without > before,
         "embargo costs Flanders: {before} vs {without}"
@@ -295,8 +281,8 @@ fn embargo_cuts_income() {
 
 #[test]
 fn vassals_pay_tribute_and_can_rebel() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 10);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 10);
     let flanders = fac("fac_flanders");
     assert_eq!(
         state.faction_state(&flanders).unwrap().suzerain,
@@ -309,7 +295,7 @@ fn vassals_pay_tribute_and_can_rebel() {
     let mut rebelled = false;
     for _ in 0..40 {
         state.factions.get_mut(&flanders).unwrap().loyalty = 0;
-        let events = events_of(&mut state, &data);
+        let events = events_of(&mut state, data);
         if events.iter().any(|e| e.kind == EventKind::VassalRebellion) {
             rebelled = true;
             break;
@@ -322,11 +308,11 @@ fn vassals_pay_tribute_and_can_rebel() {
 
 #[test]
 fn release_vassal_and_demand_vassalage() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 11);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 11);
     state
         .submit_order(
-            &data,
+            data,
             Order::ReleaseVassal {
                 target: fac("fac_brittany"),
             },
@@ -339,7 +325,7 @@ fn release_vassal_and_demand_vassalage() {
     // France is far stronger than Navarre but Navarre refuses without cause.
     let verdict = evaluate(
         &state,
-        &data,
+        data,
         &fac("fac_france"),
         &fac("fac_navarre"),
         &Proposal::Vassalage,
@@ -354,11 +340,11 @@ fn release_vassal_and_demand_vassalage() {
 
 #[test]
 fn ai_proposals_to_the_player_become_offers() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 12);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 12);
     state
         .propose(
-            &data,
+            data,
             &fac("fac_england"),
             &fac("fac_france"),
             Proposal::Peace {
@@ -376,7 +362,7 @@ fn ai_proposals_to_the_player_become_offers() {
     assert!(offers[0].text_fr.contains("paix"));
     state
         .submit_order(
-            &data,
+            data,
             Order::AnswerOffer {
                 offer: offers[0].id,
                 accept: true,
@@ -387,14 +373,14 @@ fn ai_proposals_to_the_player_become_offers() {
     // Offers expire.
     state
         .propose(
-            &data,
+            data,
             &fac("fac_castile"),
             &fac("fac_france"),
             Proposal::Alliance,
         )
         .ok();
     for _ in 0..4 {
-        events_of(&mut state, &data);
+        events_of(&mut state, data);
     }
     assert!(state
         .faction_state(&fac("fac_france"))
@@ -407,18 +393,18 @@ fn ai_proposals_to_the_player_become_offers() {
 
 #[test]
 fn papal_mediation_and_donations() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 13);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 13);
     let favor = state.faction_state(&fac("fac_france")).unwrap().papal_favor;
     state
-        .submit_order(&data, Order::DonateToChurch { amount: 2000 })
+        .submit_order(data, Order::DonateToChurch { amount: 2000 })
         .unwrap();
     assert!(state.faction_state(&fac("fac_france")).unwrap().papal_favor >= favor + 10);
     let treasury = state.faction_state(&fac("fac_france")).unwrap().treasury;
     // Scotland is at war with England; Scotland asks the pope to mediate
     // would be the AI's call; here France asks for a truce with England.
     let result = state.submit_order(
-        &data,
+        data,
         Order::RequestPapalMediation {
             target: fac("fac_england"),
         },
@@ -443,8 +429,8 @@ fn papal_mediation_and_donations() {
 
 #[test]
 fn excommunication_after_aggression_with_no_favor() {
-    let data = data();
-    let mut state = start(&data, "fac_aragon", 14);
+    let data = game_data();
+    let mut state = start(data, "fac_aragon", 14);
     state
         .factions
         .get_mut(&fac("fac_aragon"))
@@ -452,7 +438,7 @@ fn excommunication_after_aggression_with_no_favor() {
         .papal_favor = 5;
     state
         .submit_order(
-            &data,
+            data,
             Order::DeclareWar {
                 target: fac("fac_navarre"),
             },
@@ -462,17 +448,17 @@ fn excommunication_after_aggression_with_no_favor() {
         &state,
         &fac("fac_aragon")
     ));
-    let (value, reasons) = state.attitude(&data, &fac("fac_castile"), &fac("fac_aragon"));
+    let (value, reasons) = state.attitude(data, &fac("fac_castile"), &fac("fac_aragon"));
     assert!(reasons.iter().any(|(t, _)| t == "Excommunié"), "{value}");
 }
 
 #[test]
 fn great_schism_1378_and_council_of_constance() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 15);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 15);
     state.year = 1378;
     state.season = Season::Autumn;
-    let events = events_of(&mut state, &data);
+    let events = events_of(&mut state, data);
     assert!(state.schism);
     assert!(events.iter().any(|e| e.kind == EventKind::Schism));
     let rome = ReligionId::new("rel_catholic_rome").unwrap();
@@ -485,7 +471,7 @@ fn great_schism_1378_and_council_of_constance() {
         state.faction_state(&fac("fac_france")).unwrap().religion,
         Some(avignon.clone())
     );
-    let (_, reasons) = state.attitude(&data, &fac("fac_england"), &fac("fac_france"));
+    let (_, reasons) = state.attitude(data, &fac("fac_england"), &fac("fac_france"));
     assert!(reasons.iter().any(|(t, _)| t == "Obédience rivale"));
     // The player is asked to choose.
     let offer = state
@@ -499,7 +485,7 @@ fn great_schism_1378_and_council_of_constance() {
     // 1417: the Church is reunited.
     state.year = 1417;
     state.season = Season::Autumn;
-    events_of(&mut state, &data);
+    events_of(&mut state, data);
     assert!(!state.schism);
     assert_eq!(
         state.faction_state(&fac("fac_england")).unwrap().religion,
@@ -509,11 +495,11 @@ fn great_schism_1378_and_council_of_constance() {
 
 #[test]
 fn lollards_appear_and_spread_with_unrest() {
-    let data = data();
-    let mut state = start(&data, "fac_england", 16);
+    let data = game_data();
+    let mut state = start(data, "fac_england", 16);
     state.year = 1381;
     let oxford = prov("prov_oxford");
-    events_of(&mut state, &data);
+    events_of(&mut state, data);
     let p = state.province_state(&oxford).unwrap();
     assert!(p.heresy > 0, "Lollards in Oxford");
     assert_eq!(
@@ -526,7 +512,7 @@ fn lollards_appear_and_spread_with_unrest() {
         let p = state.provinces.get_mut(&oxford).unwrap();
         p.population.clergy.unrest = 100;
         p.population.clergy.goods_satisfaction = 0;
-        events_of(&mut state, &data);
+        events_of(&mut state, data);
     }
     assert!(state.province_state(&oxford).unwrap().heresy > before);
     assert!(state.political_unrest(&oxford) > 0.0);
@@ -536,11 +522,11 @@ fn lollards_appear_and_spread_with_unrest() {
 
 #[test]
 fn save_round_trip_keeps_diplomacy() {
-    let data = data();
-    let mut state = start(&data, "fac_france", 17);
+    let data = game_data();
+    let mut state = start(data, "fac_france", 17);
     state
         .submit_order(
-            &data,
+            data,
             Order::SetEmbargo {
                 target: fac("fac_england"),
                 active: true,
@@ -548,7 +534,7 @@ fn save_round_trip_keeps_diplomacy() {
         )
         .unwrap();
     for _ in 0..4 {
-        state.end_turn(&data);
+        state.end_turn(data);
     }
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
@@ -562,11 +548,11 @@ fn save_round_trip_keeps_diplomacy() {
 
 #[test]
 fn forty_turns_are_deterministic_with_diplomacy() {
-    let data = data();
+    let data = game_data();
     let run = || {
-        let mut state = start(&data, "fac_france", 18);
+        let mut state = start(data, "fac_france", 18);
         for _ in 0..40 {
-            state.end_turn(&data);
+            state.end_turn(data);
         }
         state.save_json()
     };

@@ -4,19 +4,10 @@
 //! Algirdas grand duke (1345) and the Ösel-Wiek election (1338). See
 //! `docs/wip/lr-17.md`.
 
-use std::path::PathBuf;
-
 use data_model::{CharacterId, CharacterRef, EventEffect, EventId, FactionId, GameData, TitleId};
 use sim_campaign::{CampaignState, EventContext, Order, Season};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn chr(id: &str) -> CharacterId {
     CharacterId::new(id).unwrap()
@@ -49,8 +40,8 @@ fn treasury(state: &CampaignState, faction: &str) -> i64 {
 
 #[test]
 fn a_province_sale_pays_the_former_owner() {
-    let data = data();
-    let mut state = start(&data, 1);
+    let data = game_data();
+    let mut state = start(data, 1);
     state.chronicle.disabled = true;
     let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
     let (france, empire) = (
@@ -64,26 +55,26 @@ fn a_province_sale_pays_the_former_owner() {
         price: 5000,
         payer: None,
     };
-    apply(&mut state, &data, "fac_france", sale.clone());
+    apply(&mut state, data, "fac_france", sale.clone());
     assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_france")));
     assert_eq!(treasury(&state, "fac_france"), france - 5000);
     assert_eq!(treasury(&state, "fac_empire"), empire + 5000);
     // Already sold: nothing changes hands, nothing is paid again.
-    apply(&mut state, &data, "fac_france", sale);
+    apply(&mut state, data, "fac_france", sale);
     assert_eq!(treasury(&state, "fac_france"), france - 5000);
 }
 
 #[test]
 fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
-    let data = data();
-    let mut state = start(&data, 2);
+    let data = game_data();
+    let mut state = start(data, 2);
     state.chronicle.disabled = true;
     let reval = data_model::ProvinceId::new("prov_harrien_wierland").unwrap();
     let teutonic = treasury(&state, "fac_teutonic");
     // A plain province transfer refuses the capital of the seller.
     apply(
         &mut state,
-        &data,
+        data,
         "fac_livonian_order",
         EventEffect::TransferProvince {
             province: reval.clone(),
@@ -104,7 +95,7 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
         price: 6000,
         payer: Some(fac("fac_teutonic")),
     };
-    apply(&mut state, &data, "fac_danish_estonia", sale.clone());
+    apply(&mut state, data, "fac_danish_estonia", sale.clone());
     assert_eq!(
         state.province_owner(&reval),
         Some(&fac("fac_livonian_order"))
@@ -118,20 +109,20 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
         Some(fac("fac_teutonic"))
     );
     // `from` no longer holds it: a second sale is ignored.
-    apply(&mut state, &data, "fac_danish_estonia", sale);
+    apply(&mut state, data, "fac_danish_estonia", sale);
     assert_eq!(treasury(&state, "fac_teutonic"), teutonic - 6000);
 }
 
 #[test]
 fn set_ruler_deposes_without_killing() {
-    let data = data();
-    let mut state = start(&data, 3);
+    let data = game_data();
+    let mut state = start(data, 3);
     state.chronicle.disabled = true;
     let lithuania = fac("fac_lithuania");
     // A rival of another faction cannot take the throne.
     apply(
         &mut state,
-        &data,
+        data,
         "fac_lithuania",
         EventEffect::SetRuler {
             character: chr("chr_jakob_ii_d_osel_wiek"),
@@ -141,7 +132,7 @@ fn set_ruler_deposes_without_killing() {
     assert_eq!(state.factions[&lithuania].ruler, Some(chr("chr_gediminas")));
     apply(
         &mut state,
-        &data,
+        data,
         "fac_lithuania",
         EventEffect::SetRuler {
             character: chr("chr_algirdas"),
@@ -155,11 +146,11 @@ fn set_ruler_deposes_without_killing() {
 
 #[test]
 fn danish_estonia_is_sold_to_the_order_in_1346() {
-    let data = data();
-    let mut state = start(&data, 4);
+    let data = game_data();
+    let mut state = start(data, 4);
     state.year = 1346;
     state.season = Season::Summer;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state
         .chronicle
         .fired_events
@@ -174,12 +165,12 @@ fn danish_estonia_is_sold_to_the_order_in_1346() {
 
 #[test]
 fn algirdas_takes_vilnius_in_1345() {
-    let data = data();
-    let mut state = start(&data, 5);
+    let data = game_data();
+    let mut state = start(data, 5);
     // Gediminas died in 1341: Jaunutis rules.
     apply(
         &mut state,
-        &data,
+        data,
         "fac_lithuania",
         EventEffect::KillCharacter {
             id: CharacterRef::Id(chr("chr_gediminas")),
@@ -190,7 +181,7 @@ fn algirdas_takes_vilnius_in_1345() {
     assert_eq!(state.factions[&lithuania].ruler, Some(chr("chr_jaunutis")));
     state.year = 1345;
     state.season = Season::Spring;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state
         .chronicle
         .fired_events
@@ -201,8 +192,8 @@ fn algirdas_takes_vilnius_in_1345() {
 
 #[test]
 fn the_osel_wiek_chapter_elects_hermann_in_1338() {
-    let data = data();
-    let mut state = start(&data, 6);
+    let data = game_data();
+    let mut state = start(data, 6);
     let osel = fac("fac_osel_wiek");
     assert_eq!(
         state.factions[&osel].ruler,
@@ -210,7 +201,7 @@ fn the_osel_wiek_chapter_elects_hermann_in_1338() {
     );
     state.year = 1338;
     state.season = Season::Spring;
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(state
         .chronicle
         .fired_events

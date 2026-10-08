@@ -3,19 +3,10 @@
 //! unit beside its buildings (FE8 open point: Irish kingdoms, the Isles,
 //! Luna, Urbino); the common demesne revenue lets it.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, SettlementKind};
+use data_model::SettlementKind;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 const POOR_COUNTIES: [&str; 8] = [
     "fac_connacht",
@@ -30,18 +21,18 @@ const POOR_COUNTIES: [&str; 8] = [
 
 #[test]
 fn the_demesne_is_paid_while_the_seat_is_held() {
-    let data = data();
+    let data = game_data();
     let amount = data.economy_rules.domain_income;
     assert!(amount > 0, "domain_income is set in economy.json");
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let luna = fac("fac_luna");
-    assert_eq!(state.faction_domain_income(&data, &luna), amount);
-    let before = state.faction_income_effective_walk(&data, &luna);
+    assert_eq!(state.faction_domain_income(data, &luna), amount);
+    let before = state.faction_income_effective_walk(data, &luna);
     // The seat falls: no demesne any more.
     let seat = state.faction_capital_city(&luna).cloned().expect("seat");
     state.settlements.get_mut(&seat).unwrap().controller = fac("fac_aragon");
-    assert_eq!(state.faction_domain_income(&data, &luna), 0);
-    assert!(state.faction_income_effective_walk(&data, &luna) < before);
+    assert_eq!(state.faction_domain_income(data, &luna), 0);
+    assert!(state.faction_income_effective_walk(data, &luna) < before);
     // Rule absent: nothing.
     let mut without = data.clone();
     without.economy_rules.domain_income = 0;
@@ -54,8 +45,8 @@ fn the_demesne_is_paid_while_the_seat_is_held() {
 /// guard (ADR 0117).
 #[test]
 fn a_poor_county_can_pay_one_garrison_unit() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let militia = data
         .unit_types
         .values()
@@ -63,11 +54,11 @@ fn a_poor_county_can_pay_one_garrison_unit() {
         .expect("urban militia");
     let unit = i64::from(militia.upkeep)
         * data.economy_rules.upkeep_months_per_season
-        * sim_campaign::economy::garrison_upkeep_percent(&data, SettlementKind::City)
+        * sim_campaign::economy::garrison_upkeep_percent(data, SettlementKind::City)
         / 100;
     for id in POOR_COUNTIES.map(fac) {
-        let economy = state.faction_economy(&data, &id).expect("economy");
-        let income = state.faction_income_effective(&data, &id);
+        let economy = state.faction_economy(data, &id).expect("economy");
+        let income = state.faction_income_effective(data, &id);
         let provinces = state.controlled_provinces(&id).len();
         let court =
             (income as f64 * data.economy_rules.administration_rate(provinces)).round() as i64;

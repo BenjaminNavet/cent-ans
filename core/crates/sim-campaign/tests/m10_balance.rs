@@ -1,19 +1,10 @@
 //! M10 balance rules: disbanding a whole army, opulent courts, vanished
 //! factions leave no war behind.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData};
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
@@ -21,9 +12,9 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 
 #[test]
 fn dismissing_the_last_unit_disbands_the_army() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let (army_id, size, general) = state
         .armies
         .iter()
@@ -33,7 +24,7 @@ fn dismissing_the_last_unit_disbands_the_army() {
     for _ in 0..size {
         state
             .submit_order(
-                &data,
+                data,
                 Order::DisbandUnit {
                     army: Some(army_id.clone()),
                     settlement: None,
@@ -50,14 +41,14 @@ fn dismissing_the_last_unit_disbands_the_army() {
 
 #[test]
 fn a_hoarded_treasury_feeds_the_court() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
-    let base = state.faction_administration_upkeep(&data, &france);
-    let income = state.faction_income_effective(&data, &france);
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
+    let base = state.faction_administration_upkeep(data, &france);
+    let income = state.faction_income_effective(data, &france);
     state.factions.get_mut(&france).unwrap().treasury =
         data.economy_rules.opulence_seasons * income + 1_000_000;
-    let rich = state.faction_administration_upkeep(&data, &france);
+    let rich = state.faction_administration_upkeep(data, &france);
     assert_eq!(
         rich - base,
         1_000_000 * data.economy_rules.opulence_percent / 100
@@ -66,13 +57,13 @@ fn a_hoarded_treasury_feeds_the_court() {
 
 #[test]
 fn a_vanished_faction_leaves_no_war_or_alliance() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
     let navarre = fac("fac_navarre");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+    let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::DeclareWar {
                 target: navarre.clone(),
             },
@@ -87,7 +78,7 @@ fn a_vanished_faction_leaves_no_war_or_alliance() {
         }
     }
     state.armies.retain(|_, a| a.faction != navarre);
-    state.end_turn_with(&data, idle);
+    state.end_turn_with(data, idle);
     assert!(!state.factions[&navarre].alive);
     for faction in state.factions.values() {
         assert!(!faction.at_war_with.contains(&navarre));
@@ -98,7 +89,7 @@ fn a_vanished_faction_leaves_no_war_or_alliance() {
 #[test]
 fn landing_on_a_hostile_shore_costs_men_and_movement() {
     use sim_campaign::movement::{edge_cost, edges, is_sea_crossing};
-    let mut data = data();
+    let mut data = game_data().clone();
     // Landing cost only: no interception at sea, whatever the RNG stream.
     data.naval.rules.intercept_base = 0.0;
     data.naval.rules.intercept_per_control = 0.0;

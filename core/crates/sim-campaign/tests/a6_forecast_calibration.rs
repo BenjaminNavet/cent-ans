@@ -4,21 +4,11 @@
 //! forecast is compared with the frequency of attacker victories over 200
 //! auto-resolutions on fresh seeds.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
 use sim_campaign::{ArmyId, CampaignRng, CampaignState};
 
 const SEEDS: u64 = 200;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn armies_of(state: &CampaignState, faction: &str) -> Vec<ArmyId> {
     state
@@ -47,8 +37,8 @@ fn attacker_won(before: &CampaignState, after: &CampaignState, army: &ArmyId) ->
 
 #[test]
 fn forecast_matches_auto_resolution_frequency() {
-    let data = data();
-    let mut base = CampaignState::new_1337(&data, fac("fac_france"), 7).expect("1337 start");
+    let data = game_data();
+    let mut base = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
     base.chronicle.disabled = true;
     let factions = [
         "fac_france",
@@ -102,12 +92,12 @@ fn forecast_matches_auto_resolution_frequency() {
     assert!(cases.len() >= 20, "{} cases", cases.len());
     let mut total_gap = 0.0;
     for (state, attacker, name) in &cases {
-        let forecast = state.battle_forecast(&data, 0).expect("forecast");
+        let forecast = state.battle_forecast(data, 0).expect("forecast");
         let wins = (0..SEEDS)
             .filter(|seed| {
                 let mut trial = state.clone();
                 trial.rng = CampaignRng::from_seed(9_000 + seed);
-                trial.auto_resolve_pending(&data, 0).unwrap();
+                trial.auto_resolve_pending(data, 0).unwrap();
                 attacker_won(state, &trial, attacker)
             })
             .count();
@@ -133,8 +123,8 @@ fn forecast_matches_auto_resolution_frequency() {
 /// Forecast attacker win chance with the defender's regiments scaled by
 /// `1 / ratio` (same regiments when `mirror`, else another 1337 army).
 fn chance_at_ratio(ratio: f64, mirror: bool) -> f64 {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 7).expect("1337 start");
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
     state.chronicle.disabled = true;
     let (a, b) = (fac("fac_france"), fac("fac_england"));
     state
@@ -163,7 +153,7 @@ fn chance_at_ratio(ratio: f64, mirror: bool) -> f64 {
         .debug_stage_battle(&attacker, &defender)
         .expect("stage");
     let chance = state
-        .battle_forecast(&data, 0)
+        .battle_forecast(data, 0)
         .expect("forecast")
         .attacker_win_chance;
     eprintln!("ratio {ratio} mirror={mirror}: {:.1} %", chance * 100.0);

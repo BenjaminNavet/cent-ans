@@ -3,15 +3,10 @@
 //! the units' `recruit_time_turns`. The edicts' piety is tested in
 //! `edicts.rs`. See `docs/archive/chantiers.md`.
 
-use std::path::PathBuf;
-
 use data_model::{FactionId, GameData, SettlementId, SkillId, TraitId, UnitTypeId};
 use sim_campaign::{CampaignState, Order, Place, QueuedRecruit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
@@ -75,14 +70,14 @@ fn option_turns(state: &CampaignState, data: &GameData, city: &SettlementId, id:
 
 #[test]
 fn builder_ruler_shortens_constructions() {
-    let data = data();
-    let mut state = start(&data);
-    clear_builders(&mut state, &data);
+    let data = game_data();
+    let mut state = start(data);
+    clear_builders(&mut state, data);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let city = capital_city(&state);
-    let (building, base) = longest_build(&state, &data, &city);
+    let (building, base) = longest_build(&state, data, &city);
     assert!(base >= 4, "a long build exists ({building}: {base})");
-    assert_eq!(option_turns(&state, &data, &city, &building), base);
+    assert_eq!(option_turns(&state, data, &city, &building), base);
 
     let ruler = state.factions[&france()].ruler.clone().expect("ruler");
     let builder = TraitId::new("trait_builder").unwrap();
@@ -101,14 +96,14 @@ fn builder_ruler_shortens_constructions() {
         .insert(builder);
     let expected = ((f64::from(base) * 100.0 / (100.0 + percent)).round() as u32).max(1);
     assert!(expected < base);
-    assert_eq!(state.construction_speed_percent(&data, &city), percent);
-    assert_eq!(option_turns(&state, &data, &city, &building), expected);
+    assert_eq!(state.construction_speed_percent(data, &city), percent);
+    assert_eq!(option_turns(&state, data, &city, &building), expected);
 
     // The construction started takes the shortened time.
     let building_id = data_model::BuildingId::new(&building).unwrap();
     state
         .submit_order(
-            &data,
+            data,
             Order::Build {
                 settlement: Place::Settlement(city.clone()),
                 building: building_id,
@@ -127,9 +122,9 @@ fn builder_ruler_shortens_constructions() {
 
 #[test]
 fn governor_and_ruler_do_not_stack_but_skills_do() {
-    let data = data();
-    let mut state = start(&data);
-    clear_builders(&mut state, &data);
+    let data = game_data();
+    let mut state = start(data);
+    clear_builders(&mut state, data);
     let city = capital_city(&state);
     let province = state.settlements[&city].province.clone();
     let ruler = state.factions[&france()].ruler.clone().expect("ruler");
@@ -138,7 +133,7 @@ fn governor_and_ruler_do_not_stack_but_skills_do() {
     let r = state.characters.get_mut(&ruler).unwrap();
     r.skills_learned.insert(skill("skill_batisseur"));
     r.skills_learned.insert(skill("skill_urbaniste"));
-    let ruler_percent = state.construction_speed_percent(&data, &city);
+    let ruler_percent = state.construction_speed_percent(data, &city);
     let sum: f64 = ["skill_batisseur", "skill_urbaniste"]
         .iter()
         .flat_map(|s| data.skills[&skill(s)].effects.iter())
@@ -162,15 +157,12 @@ fn governor_and_ruler_do_not_stack_but_skills_do() {
     let g = state.characters.get_mut(&governor).unwrap();
     g.governor_of = Some(province.clone());
     g.traits.insert(TraitId::new("trait_builder").unwrap());
-    assert_eq!(
-        state.construction_speed_percent(&data, &city),
-        ruler_percent
-    );
+    assert_eq!(state.construction_speed_percent(data, &city), ruler_percent);
 }
 
 #[test]
 fn slow_recruits_train_for_their_recruit_time() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let mut state = start(&data);
     let city = capital_city(&state);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
@@ -219,7 +211,7 @@ fn slow_recruits_train_for_their_recruit_time() {
 
 #[test]
 fn one_turn_recruits_join_at_the_end_of_the_turn() {
-    let mut data = data();
+    let mut data = game_data().clone();
     let mut state = start(&data);
     let city = capital_city(&state);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;

@@ -2,23 +2,10 @@
 //! assault without breach is a poor bet (`data/rules/siege_engines.json`,
 //! `data/rules/auto_resolve.json`).
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
 use sim_campaign::{siege_engines, ArmyId, CampaignState, Order, Stance, Unit};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
-
-fn prov(id: &str) -> ProvinceId {
-    ProvinceId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data, prov};
 
 fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
     Vec::new()
@@ -78,25 +65,25 @@ fn set_breach(state: &mut CampaignState, city: &SettlementId, breach: u8) {
 
 #[test]
 fn engines_are_not_ready_on_the_first_turn_against_level_5_walls() {
-    let data = data();
-    let (state, army, city) = siege(&data, 5);
-    assert!(state.fortification_level(&data, &city) >= 5);
-    let engines = state.siege_engines(&data, &city);
+    let data = game_data();
+    let (state, army, city) = siege(data, 5);
+    assert!(state.fortification_level(data, &city) >= 5);
+    let engines = state.siege_engines(data, &city);
     assert!(
         engines.iter().all(|e| !e.ready && e.turns_left >= 1),
         "{engines:?}"
     );
     // The assault is refused: walls stand, nothing ready.
-    assert!(state.assault_blocker(&data, &army).is_some());
+    assert!(state.assault_blocker(data, &army).is_some());
 }
 
 #[test]
 fn engines_cost_more_against_higher_walls() {
-    let data = data();
+    let data = game_data();
     // 2 000 men: 20 points a turn.
     let rate = 20;
     let turns =
-        |walls: u32, index: usize| siege_engines::statuses(&data, 0, rate, walls)[index].turns_left;
+        |walls: u32, index: usize| siege_engines::statuses(data, 0, rate, walls)[index].turns_left;
     // Ladders: a season more against level 3+, one against a palisade.
     assert!(turns(5, 0) >= 2 && turns(3, 0) >= 2);
     assert_eq!(turns(1, 0), 1);
@@ -108,11 +95,11 @@ fn engines_cost_more_against_higher_walls() {
 
 #[test]
 fn assault_chance_grows_with_the_breach() {
-    let data = data();
-    let (mut state, army, city) = siege(&data, 5);
+    let data = game_data();
+    let (mut state, army, city) = siege(data, 5);
     let mut chance = |breach: u8| {
         set_breach(&mut state, &city, breach);
-        state.assault_win_chance(&data, &army).unwrap()
+        state.assault_win_chance(data, &army).unwrap()
     };
     let none = chance(0);
     let some = chance(25);
@@ -126,10 +113,10 @@ fn assault_chance_grows_with_the_breach() {
 
 #[test]
 fn intact_level_5_walls_keep_a_3_to_1_assault_under_half() {
-    let data = data();
+    let data = game_data();
     // Base level 2 plus the city's buildings: walls of level 5.
-    let (mut state, army, city) = siege(&data, 2);
-    assert_eq!(state.fortification_level(&data, &city), 5);
+    let (mut state, army, city) = siege(data, 2);
+    assert_eq!(state.fortification_level(data, &city), 5);
     let t = &data.unit_types[&UnitTypeId::new("unit_men_at_arms_foot").unwrap()];
     let guyenne = prov("prov_guyenne");
     // Power ratio of an army of `n` against the garrison, walls breached
@@ -137,7 +124,7 @@ fn intact_level_5_walls_keep_a_3_to_1_assault_under_half() {
     let forecast = |state: &mut CampaignState, n: usize, breach: u8| {
         state.armies.get_mut(&army).unwrap().units = (0..n).map(|_| Unit::fresh(t)).collect();
         state.pending_battles.clear();
-        let index = state.debug_stage_siege(&data, &army, &guyenne).unwrap();
+        let index = state.debug_stage_siege(data, &army, &guyenne).unwrap();
         let siege = state
             .settlements
             .get_mut(&city)
@@ -147,7 +134,7 @@ fn intact_level_5_walls_keep_a_3_to_1_assault_under_half() {
             .unwrap();
         siege.engine_work = 0;
         siege.breach = breach;
-        let f = state.battle_forecast(&data, index).unwrap();
+        let f = state.battle_forecast(data, index).unwrap();
         (f.attacker_power / f.defender_power, f.attacker_win_chance)
     };
     let n = (1..80)
@@ -160,5 +147,5 @@ fn intact_level_5_walls_keep_a_3_to_1_assault_under_half() {
     assert!(open_chance > intact_chance);
     // The quick estimate of the army bar agrees.
     set_breach(&mut state, &city, 0);
-    assert!(state.assault_win_chance(&data, &army).unwrap() <= 0.5);
+    assert!(state.assault_win_chance(data, &army).unwrap() <= 0.5);
 }

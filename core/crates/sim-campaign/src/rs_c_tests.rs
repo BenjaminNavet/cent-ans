@@ -1,9 +1,7 @@
 //! Lot RS-C: opinion caps per motive (`data/rules/diplomacy.json`) and the
 //! demolition order, on the real data of 1337.
 
-use std::path::PathBuf;
-
-use data_model::{BuildingId, FactionId, GameData, OpinionMotive, SettlementId};
+use data_model::{BuildingId, GameData, OpinionMotive, SettlementId};
 
 use crate::agents::PARLEY_REASON;
 use crate::diplomacy::{opinion_motive, GIFT_REASON, MARRIAGE_REASON};
@@ -11,14 +9,7 @@ use crate::negotiation::TREATY_REASON;
 use crate::orders::{Order, OrderError};
 use crate::state::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
@@ -55,22 +46,22 @@ fn every_capped_motive_maps_to_a_reason() {
 
 #[test]
 fn marriages_stack_up_to_the_cap_then_only_renew() {
-    let data = data();
+    let data = game_data();
     let cap = data
         .diplomacy_rules
         .opinion_cap(OpinionMotive::Marriage)
         .expect("marriage is capped");
-    let mut state = campaign(&data);
+    let mut state = campaign(data);
     let (england, france) = (fac("fac_england"), fac("fac_france"));
     for _ in 0..10 {
-        state.add_capped_modifier(&data, &england, &france, 15, MARRIAGE_REASON, 80);
+        state.add_capped_modifier(data, &england, &france, 15, MARRIAGE_REASON, 80);
     }
     let (total, count) = running(&state, "fac_england", "fac_france", MARRIAGE_REASON);
     assert_eq!(total, cap);
     assert!(count <= (cap as usize).div_ceil(15));
     // Later marriages renew the goodwill already won.
     state.turn += 70;
-    state.add_capped_modifier(&data, &england, &france, 15, MARRIAGE_REASON, 80);
+    state.add_capped_modifier(data, &england, &france, 15, MARRIAGE_REASON, 80);
     let (total, _) = running(&state, "fac_england", "fac_france", MARRIAGE_REASON);
     assert_eq!(total, cap);
     state.turn += 20;
@@ -80,15 +71,15 @@ fn marriages_stack_up_to_the_cap_then_only_renew() {
 
 #[test]
 fn heralds_do_not_stack_beyond_their_cap() {
-    let data = data();
+    let data = game_data();
     let cap = data
         .diplomacy_rules
         .opinion_cap(OpinionMotive::HeraldEmbassy)
         .expect("herald embassies are capped");
-    let mut state = campaign(&data);
+    let mut state = campaign(data);
     let (castile, france) = (fac("fac_castile"), fac("fac_france"));
     for _ in 0..6 {
-        state.add_capped_modifier(&data, &castile, &france, 12, PARLEY_REASON, 12);
+        state.add_capped_modifier(data, &castile, &france, 12, PARLEY_REASON, 12);
     }
     assert_eq!(
         running(&state, "fac_castile", "fac_france", PARLEY_REASON).0,
@@ -98,7 +89,7 @@ fn heralds_do_not_stack_beyond_their_cap() {
 
 #[test]
 fn uncapped_motives_still_stack() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.diplomacy_rules.opinion_caps.clear();
     let mut state = campaign(&data);
     let (england, france) = (fac("fac_england"), fac("fac_france"));
@@ -113,7 +104,7 @@ fn uncapped_motives_still_stack() {
 
 #[test]
 fn a_negative_motive_is_capped_from_below() {
-    let mut data = data();
+    let mut data = game_data().clone();
     data.diplomacy_rules
         .opinion_caps
         .insert(OpinionMotive::Gift, 10);
@@ -145,14 +136,14 @@ fn place_with(state: &mut CampaignState, faction: &str, buildings: &[&str]) -> S
 
 #[test]
 fn demolition_razes_the_building_and_refunds_its_share() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market", "bld_apothecary"]);
     let treasury = state.factions[&fac("fac_france")].treasury;
     let apothecary = &data.buildings[&bld("bld_apothecary")];
     state
         .submit_order(
-            &data,
+            data,
             Order::Demolish {
                 settlement: place.clone().into(),
                 building: bld("bld_apothecary"),
@@ -172,11 +163,11 @@ fn demolition_razes_the_building_and_refunds_its_share() {
 
 #[test]
 fn demolition_is_refused_when_another_building_depends_on_it() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_france", &["bld_market", "bld_apothecary"]);
     let refused = state.submit_order(
-        &data,
+        data,
         Order::Demolish {
             settlement: place.clone().into(),
             building: bld("bld_market"),
@@ -186,7 +177,7 @@ fn demolition_is_refused_when_another_building_depends_on_it() {
     assert_eq!(state.settlements[&place].buildings.len(), 2);
     // A building that is not there cannot be razed.
     let absent = state.submit_order(
-        &data,
+        data,
         Order::Demolish {
             settlement: place.clone().into(),
             building: bld("bld_fair"),
@@ -197,11 +188,11 @@ fn demolition_is_refused_when_another_building_depends_on_it() {
 
 #[test]
 fn demolition_needs_ones_own_settlement() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let place = place_with(&mut state, "fac_england", &["bld_market"]);
     let refused = state.submit_order(
-        &data,
+        data,
         Order::Demolish {
             settlement: place.into(),
             building: bld("bld_market"),
@@ -221,8 +212,8 @@ fn the_order_reads_from_the_bridge_json() {
 
 #[test]
 fn deficit_seasons_count_the_seasons_in_the_red() {
-    let data = data();
-    let mut state = campaign(&data);
+    let data = game_data();
+    let mut state = campaign(data);
     let france = fac("fac_france");
     // An absurd upkeep: every building of the realm is an apothecary.
     let ids: Vec<SettlementId> = state
@@ -235,8 +226,8 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
         state.settlements.get_mut(id).unwrap().buildings = vec![bld("bld_apothecary"); 40];
     }
     let mut events = Vec::new();
-    crate::economy::resolve_economy(&mut state, &data, &mut events);
-    crate::economy::resolve_economy(&mut state, &data, &mut events);
+    crate::economy::resolve_economy(&mut state, data, &mut events);
+    crate::economy::resolve_economy(&mut state, data, &mut events);
     assert_eq!(state.factions[&france].deficit_seasons, 2);
     // Nothing left to pay: no building, no troops.
     for id in &ids {
@@ -245,7 +236,7 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
         place.garrison.clear();
     }
     state.armies.retain(|_, a| a.faction != france);
-    crate::economy::resolve_economy(&mut state, &data, &mut events);
+    crate::economy::resolve_economy(&mut state, data, &mut events);
     assert_eq!(state.factions[&france].deficit_seasons, 0);
 }
 
@@ -253,12 +244,12 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
 /// a direct push) weigh at most the cap in the attitude, on one line.
 #[test]
 fn the_attitude_reads_a_capped_motive_at_most_at_its_cap() {
-    let data = data();
+    let data = game_data();
     let cap = data
         .diplomacy_rules
         .opinion_cap(OpinionMotive::Marriage)
         .expect("marriage is capped");
-    let mut state = campaign(&data);
+    let mut state = campaign(data);
     let (england, france) = (fac("fac_england"), fac("fac_france"));
     let turn = state.turn;
     for _ in 0..10 {
@@ -271,7 +262,7 @@ fn the_attitude_reads_a_capped_motive_at_most_at_its_cap() {
             },
         );
     }
-    let (_, reasons) = state.attitude(&data, &england, &france);
+    let (_, reasons) = state.attitude(data, &england, &france);
     let marriage: Vec<i32> = reasons
         .iter()
         .filter(|(reason, _)| reason == MARRIAGE_REASON)
@@ -293,12 +284,12 @@ fn the_attitude_reads_a_capped_motive_at_most_at_its_cap() {
 /// LR-07: an event's opinion effect with a capped motive is capped too.
 #[test]
 fn an_event_opinion_of_a_capped_motive_is_capped() {
-    let data = data();
+    let data = game_data();
     let cap = data
         .diplomacy_rules
         .opinion_cap(OpinionMotive::Marriage)
         .expect("marriage is capped");
-    let mut state = campaign(&data);
+    let mut state = campaign(data);
     let (england, france) = (fac("fac_england"), fac("fac_france"));
     let effect = data_model::EventEffect::Opinion {
         faction: england.clone(),
@@ -310,7 +301,7 @@ fn an_event_opinion_of_a_capped_motive_is_capped() {
     let ctx = crate::chronicle::EventContext::default();
     let mut events = Vec::new();
     for _ in 0..4 {
-        crate::chronicle::apply_effect(&mut state, &data, &effect, &ctx, &mut events);
+        crate::chronicle::apply_effect(&mut state, data, &effect, &ctx, &mut events);
     }
     assert_eq!(
         running(&state, "fac_england", "fac_france", MARRIAGE_REASON).0,

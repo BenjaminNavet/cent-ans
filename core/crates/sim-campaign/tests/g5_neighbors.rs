@@ -2,21 +2,12 @@
 //! map graph (not the province files' partial `neighbors`), and the border
 //! diplomacy tuning comes from `data/ai/diplomacy.json`.
 
-use std::path::PathBuf;
-
 use data_model::{AiDiplomacy, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::plan_diplomacy;
 use sim_campaign::movement::land_neighbors;
 use sim_campaign::{CampaignState, Order};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn state(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), 1).expect("1337 state")
@@ -24,19 +15,19 @@ fn state(data: &GameData) -> CampaignState {
 
 #[test]
 fn neighbours_come_from_the_map_graph() {
-    let data = data();
-    let state = state(&data);
+    let data = game_data();
+    let state = state(data);
     // No Scottish province file lists neighbours: the map graph does.
     let (scotland, england) = (fac("fac_scotland"), fac("fac_england"));
-    assert!(state.are_neighbors(&data, &scotland, &england));
-    assert!(state.are_neighbors(&data, &england, &scotland));
-    assert!(!state.are_neighbors(&data, &scotland, &fac("fac_naples")));
-    assert!(state.are_neighbors(&data, &fac("fac_france"), &fac("fac_burgundy")));
+    assert!(state.are_neighbors(data, &scotland, &england));
+    assert!(state.are_neighbors(data, &england, &scotland));
+    assert!(!state.are_neighbors(data, &scotland, &fac("fac_naples")));
+    assert!(state.are_neighbors(data, &fac("fac_france"), &fac("fac_burgundy")));
 }
 
 #[test]
 fn most_provinces_have_map_neighbours() {
-    let data = data();
+    let data = game_data();
     let with_files = data
         .provinces
         .values()
@@ -45,7 +36,7 @@ fn most_provinces_have_map_neighbours() {
     let with_map = data
         .provinces
         .keys()
-        .filter(|id| !land_neighbors(&data, id).is_empty())
+        .filter(|id| !land_neighbors(data, id).is_empty())
         .count();
     assert!(
         with_map > 5 * with_files.max(1),
@@ -55,8 +46,8 @@ fn most_provinces_have_map_neighbours() {
 
 #[test]
 fn being_neighbours_is_symmetric() {
-    let data = data();
-    let state = state(&data);
+    let data = game_data();
+    let state = state(data);
     let alive: Vec<&FactionId> = state
         .factions
         .iter()
@@ -66,8 +57,8 @@ fn being_neighbours_is_symmetric() {
     for a in &alive {
         for b in &alive {
             assert_eq!(
-                state.are_neighbors(&data, a, b),
-                state.are_neighbors(&data, b, a),
+                state.are_neighbors(data, a, b),
+                state.are_neighbors(data, b, a),
                 "{a} / {b}"
             );
         }
@@ -76,7 +67,7 @@ fn being_neighbours_is_symmetric() {
 
 #[test]
 fn the_tuning_comes_from_data() {
-    let data = data();
+    let data = game_data();
     assert_ne!(data.ai_diplomacy, AiDiplomacy::default());
     assert!(data.ai_diplomacy.peace.keep_capital);
     assert!(data.ai_diplomacy.join_war.min_ally_power_ratio > 0.0);
@@ -139,22 +130,22 @@ fn scottish_surrender(data: &GameData) -> Vec<Vec<ProvinceId>> {
 
 #[test]
 fn a_beaten_crown_keeps_its_capital_and_a_province() {
-    let data = data();
-    let capital = state(&data).factions[&fac("fac_scotland")].capital.clone();
-    let start = state(&data);
+    let data = game_data();
+    let capital = state(data).factions[&fac("fac_scotland")].capital.clone();
+    let start = state(data);
     let owned = start
         .provinces
         .keys()
         .filter(|id| start.province_owner(id) == Some(&fac("fac_scotland")))
         .count();
-    let offers = scottish_surrender(&data);
+    let offers = scottish_surrender(data);
     assert!(!offers.is_empty(), "Scotland sues for peace");
     for provinces in &offers {
         assert!(!provinces.contains(&capital), "{provinces:?}");
         assert!(provinces.len() < owned, "{provinces:?}");
     }
     // The F4 rules cede everything: Scotland vanishes from the map.
-    let mut f4 = data;
+    let mut f4 = data.clone();
     f4.ai_diplomacy = AiDiplomacy::default();
     let offers = scottish_surrender(&f4);
     assert!(offers.iter().any(|p| p.len() == owned), "{offers:?}");

@@ -2,20 +2,10 @@
 //! down in a few seasons, starting settlements hold one step per building
 //! chain, and a later step of a chain satisfies what requires an earlier one.
 
-use std::path::PathBuf;
-
-use data_model::{BuildingId, FactionId, GameData, ProvinceId, SettlementId};
+use data_model::{BuildingId, ProvinceId, SettlementId};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn bld(id: &str) -> BuildingId {
     BuildingId::new(id).unwrap()
@@ -25,14 +15,14 @@ fn bld(id: &str) -> BuildingId {
 /// eight seasons (it stayed at 100 for years at 2 points a season).
 #[test]
 fn a_pacified_province_calms_down_in_a_few_seasons() {
-    let data = data();
-    let mut state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.chronicle.disabled = true;
     let province = ProvinceId::new("prov_kent").unwrap();
     state.provinces.get_mut(&province).unwrap().unrest = 100;
     let mut seasons = 0;
     while state.provinces[&province].unrest >= 40 {
-        state.end_turn(&data);
+        state.end_turn(data);
         seasons += 1;
         assert!(
             seasons <= 8,
@@ -48,8 +38,8 @@ fn a_pacified_province_calms_down_in_a_few_seasons() {
 /// play.
 #[test]
 fn starting_settlements_hold_reachable_building_tiers() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_papacy"), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let mut problems = Vec::new();
     for (id, settlement) in &state.settlements {
         let list = &settlement.buildings;
@@ -92,7 +82,7 @@ fn starting_settlements_hold_reachable_building_tiers() {
 /// pikemen are raised at the guild hall), a cathedral as the parish church.
 #[test]
 fn a_later_step_satisfies_an_earlier_requirement() {
-    let data = data();
+    let data = game_data();
     assert!(data.building_satisfies(&bld("bld_fair"), &bld("bld_guild_hall")));
     assert!(data.building_satisfies(&bld("bld_fair"), &bld("bld_market")));
     assert!(data.building_satisfies(&bld("bld_cathedral"), &bld("bld_parish_church")));

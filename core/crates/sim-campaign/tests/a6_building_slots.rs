@@ -1,22 +1,17 @@
 //! Lot A6-L15 (ADR 0185): the slot grid derived from the building chains.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
+use data_model::FactionId;
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
+use data_model::test_support::game_data;
 
 #[test]
 fn city_slots_cover_every_chain_once() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 1).unwrap();
+    let data = game_data();
+    let state = CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 1).unwrap();
     let province = state.provinces.keys().next().unwrap().clone();
     let city = state.province_city_id(&province).unwrap().clone();
-    let slots = state.building_slots(&data, &city);
+    let slots = state.building_slots(data, &city);
     assert!(
         slots.len() >= 10,
         "a city has many slots, got {}",

@@ -2,29 +2,18 @@
 //! (12 seasons kept, treasury chained season to season, the unexplained
 //! part isolated in `other`), signed budget lines and old saves.
 
-use std::path::PathBuf;
-
-use data_model::{FactionId, GameData};
 use sim_campaign::economy_balance::{BudgetLineKind, BUDGET_HISTORY_SEASONS};
 use sim_campaign::CampaignState;
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    let (data, _warnings) = GameData::load(&root).expect("game data loads");
-    data
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 #[test]
 fn history_is_empty_before_the_first_turn() {
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 7).expect("1337 start");
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
     assert!(state.budget_history(&fac("fac_france")).is_empty());
     let economy = state
-        .faction_economy(&data, &fac("fac_france"))
+        .faction_economy(data, &fac("fac_france"))
         .expect("economy");
     let lines = economy.budget_lines(state.last_budget(&fac("fac_france")));
     assert_eq!(lines.len(), BudgetLineKind::ALL.len());
@@ -42,12 +31,12 @@ fn history_is_empty_before_the_first_turn() {
 
 #[test]
 fn history_chains_the_treasury_and_keeps_twelve_seasons() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 11).expect("1337 start");
+    let mut state = CampaignState::new_1337(data, france.clone(), 11).expect("1337 start");
     let start = state.faction_state(&france).unwrap().treasury;
     for _ in 0..(BUDGET_HISTORY_SEASONS + 3) {
-        state.end_turn(&data);
+        state.end_turn(data);
     }
     let history = state.budget_history(&france);
     assert_eq!(history.len(), BUDGET_HISTORY_SEASONS);
@@ -69,7 +58,7 @@ fn history_chains_the_treasury_and_keeps_twelve_seasons() {
     assert_eq!(Some(last.net()), state.faction_net_last_turn(&france));
     assert_ne!(start, last.treasury);
     // Lines now carry the season just resolved and its delta.
-    let economy = state.faction_economy(&data, &france).unwrap();
+    let economy = state.faction_economy(data, &france).unwrap();
     let lines = economy.budget_lines(Some(last));
     let receipts = &lines[0];
     assert_eq!(receipts.last, Some(last.receipts));
@@ -83,10 +72,10 @@ fn history_chains_the_treasury_and_keeps_twelve_seasons() {
 
 #[test]
 fn old_saves_without_history_load() {
-    let data = data();
+    let data = game_data();
     let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(&data, france.clone(), 5).expect("1337 start");
-    state.end_turn(&data);
+    let mut state = CampaignState::new_1337(data, france.clone(), 5).expect("1337 start");
+    state.end_turn(data);
     let mut json = serde_json::to_value(&state).expect("serialize");
     for faction in json["factions"].as_object_mut().unwrap().values_mut() {
         faction.as_object_mut().unwrap().remove("budget_history");

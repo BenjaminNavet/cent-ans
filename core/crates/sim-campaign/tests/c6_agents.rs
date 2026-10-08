@@ -1,7 +1,5 @@
 //! Lot C6: campaign agents (spies, heralds, preachers) — `agents.rs`.
 
-use std::path::PathBuf;
-
 use data_model::{
     AgentActionKind, AgentKind, AgentRules, BuildingCategory, CharacterId, FactionId, GameData,
     SettlementId, SettlementKind,
@@ -9,14 +7,7 @@ use data_model::{
 use sim_campaign::agents::{self, AgentId};
 use sim_campaign::{CampaignState, Order, OrderError, SiegeState};
 
-fn data() -> GameData {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-    GameData::load(&root).expect("game data loads").0
-}
-
-fn fac(id: &str) -> FactionId {
-    FactionId::new(id).unwrap()
-}
+use data_model::test_support::{fac, game_data};
 
 fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start")
@@ -170,7 +161,7 @@ fn act(
 
 #[test]
 fn rules_file_matches_the_design_defaults() {
-    let data = data();
+    let data = game_data();
     let loaded = data.agent_rules.as_ref().expect("data/rules/agents.json");
     let defaults = AgentRules::default();
     for kind in AgentKind::ALL {
@@ -192,15 +183,15 @@ fn rules_file_matches_the_design_defaults() {
 
 #[test]
 fn recruitment_pays_checks_places_and_caps() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
     let before = state.factions[&france].treasury;
     state
         .submit_order(
-            &data,
+            data,
             Order::RecruitAgent {
                 settlement: paris.clone().into(),
                 kind: AgentKind::Spy,
@@ -218,11 +209,11 @@ fn recruitment_pays_checks_places_and_caps() {
     // Cap: three spies.
     for _ in 0..2 {
         state
-            .recruit_agent(&data, &france, &paris, AgentKind::Spy)
+            .recruit_agent(data, &france, &paris, AgentKind::Spy)
             .unwrap();
     }
     let err = state
-        .recruit_agent(&data, &france, &paris, AgentKind::Spy)
+        .recruit_agent(data, &france, &paris, AgentKind::Spy)
         .unwrap_err();
     assert!(err.to_string().contains("plafond"), "{err}");
     // A herald needs a city; a village is refused.
@@ -233,7 +224,7 @@ fn recruitment_pays_checks_places_and_caps() {
         .map(|(id, _)| id.clone())
         .expect("a French village");
     assert!(state
-        .recruit_agent(&data, &france, &village, AgentKind::Emissary)
+        .recruit_agent(data, &france, &village, AgentKind::Emissary)
         .is_err());
     // Not in someone else's settlement.
     let english = state
@@ -243,25 +234,25 @@ fn recruitment_pays_checks_places_and_caps() {
         .map(|(id, _)| id.clone())
         .unwrap();
     assert!(state
-        .recruit_agent(&data, &france, &english, AgentKind::Spy)
+        .recruit_agent(data, &france, &english, AgentKind::Spy)
         .is_err());
     // Options of the panel.
-    let options = state.agent_recruit_options(&data, &france, &paris);
+    let options = state.agent_recruit_options(data, &france, &paris);
     assert_eq!(options.len(), 3);
     let spy = options.iter().find(|o| o.kind == AgentKind::Spy).unwrap();
     assert!(!spy.available);
     assert_eq!(spy.count, 3);
     // Dismissal.
     state
-        .submit_order(&data, Order::DismissAgent { agent: id.clone() })
+        .submit_order(data, Order::DismissAgent { agent: id.clone() })
         .unwrap();
     assert!(state.agent(&id).is_none());
 }
 
 #[test]
 fn preacher_needs_a_religious_building_or_an_abbey() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
     let religious = |s: &sim_campaign::SettlementState| {
@@ -279,7 +270,7 @@ fn preacher_needs_a_religious_building_or_an_abbey() {
         .map(|(id, _)| id.clone());
     if let Some(without) = without {
         let err = state
-            .recruit_agent(&data, &france, &without, AgentKind::Preacher)
+            .recruit_agent(data, &france, &without, AgentKind::Preacher)
             .unwrap_err();
         assert!(err.to_string().contains("religieux"), "{err}");
     }
@@ -290,13 +281,13 @@ fn preacher_needs_a_religious_building_or_an_abbey() {
         .map(|(id, _)| id.clone())
         .expect("a French abbey or church");
     state
-        .recruit_agent(&data, &france, &with, AgentKind::Preacher)
+        .recruit_agent(data, &france, &with, AgentKind::Preacher)
         .expect("preacher recruited");
 }
 
 #[test]
 fn agents_walk_the_settlement_graph_through_enemy_land() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -350,7 +341,7 @@ fn agents_walk_the_settlement_graph_through_enemy_land() {
 
 #[test]
 fn scouting_reports_and_keeps_the_province_in_sight() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -384,11 +375,11 @@ fn scouting_reports_and_keeps_the_province_in_sight() {
 
 #[test]
 fn spies_see_around_them() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     // The farthest settlement from France: somewhere nobody French sees.
-    let before = state.visible_provinces(&data, &france);
+    let before = state.visible_provinces(data, &france);
     let hidden = state
         .settlements
         .iter()
@@ -396,17 +387,17 @@ fn spies_see_around_them() {
         .map(|(id, _)| id.clone())
         .expect("a hidden settlement");
     let province = state.settlement_province(&hidden).unwrap().clone();
-    place(&mut state, &data, &france, AgentKind::Spy, &hidden);
-    let after = state.visible_provinces(&data, &france);
+    place(&mut state, data, &france, AgentKind::Spy, &hidden);
+    let after = state.visible_provinces(data, &france);
     assert!(after.contains(&province));
-    for neighbour in sim_campaign::movement::land_neighbors(&data, &province) {
+    for neighbour in sim_campaign::movement::land_neighbors(data, &province) {
         assert!(after.contains(neighbour), "spy range 1 reaches {neighbour}");
     }
 }
 
 #[test]
 fn sabotage_opens_a_breach_or_delays_works() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -468,7 +459,7 @@ fn sabotage_opens_a_breach_or_delays_works() {
 
 #[test]
 fn inciting_raises_unrest() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -485,7 +476,7 @@ fn inciting_raises_unrest() {
 
 #[test]
 fn counter_espionage_unmasks_foreign_spies_actively_and_passively() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -517,24 +508,24 @@ fn counter_espionage_unmasks_foreign_spies_actively_and_passively() {
 
 #[test]
 fn counter_spies_lower_the_odds() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let paris = paris(&state);
-    let intruder = place(&mut state, &data, &england, AgentKind::Spy, &paris);
+    let intruder = place(&mut state, data, &england, AgentKind::Spy, &paris);
     let (alone, _) = state
-        .agent_action_odds(&data, &intruder, AgentActionKind::Scout, None, None)
+        .agent_action_odds(data, &intruder, AgentActionKind::Scout, None, None)
         .unwrap();
-    place(&mut state, &data, &france, AgentKind::Spy, &paris);
+    place(&mut state, data, &france, AgentKind::Spy, &paris);
     let (watched, _) = state
-        .agent_action_odds(&data, &intruder, AgentActionKind::Scout, None, None)
+        .agent_action_odds(data, &intruder, AgentActionKind::Scout, None, None)
         .unwrap();
     assert_eq!(alone - watched, 8, "5 + 3 per seal of the French spy");
 }
 
 #[test]
 fn herald_parley_truce_bribe() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -589,7 +580,7 @@ fn herald_parley_truce_bribe() {
 
 #[test]
 fn herald_buys_back_a_captive_at_a_discount() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -624,7 +615,7 @@ fn herald_buys_back_a_captive_at_a_discount() {
 
 #[test]
 fn preacher_preach_denounce_curia() {
-    let mut data = data();
+    let mut data = game_data().clone();
     sure(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -687,7 +678,7 @@ fn preacher_preach_denounce_curia() {
 
 #[test]
 fn failure_can_cost_the_agent_and_experience_raises_the_seal() {
-    let mut data = data();
+    let mut data = game_data().clone();
     doomed(&mut data);
     let mut state = start(&data);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
@@ -706,16 +697,16 @@ fn failure_can_cost_the_agent_and_experience_raises_the_seal() {
 
 #[test]
 fn rolls_are_deterministic_and_leave_the_main_stream_alone() {
-    let data = data();
+    let data = game_data();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let run = || {
-        let mut state = start(&data);
-        let (_, enemy) = border(&state, &data, &france, &england);
+        let mut state = start(data);
+        let (_, enemy) = border(&state, data, &france, &england);
         let rng_before = state.rng.clone();
         let mut outcomes = Vec::new();
         for _ in 0..6 {
-            let spy = place(&mut state, &data, &france, AgentKind::Spy, &enemy);
-            let report = act(&mut state, &data, &spy, AgentActionKind::Scout, None);
+            let spy = place(&mut state, data, &france, AgentKind::Spy, &enemy);
+            let report = act(&mut state, data, &spy, AgentActionKind::Scout, None);
             outcomes.push((report.success, report.lost, report.chance));
             state.agents.agents.remove(&spy);
         }
@@ -729,13 +720,13 @@ fn rolls_are_deterministic_and_leave_the_main_stream_alone() {
 
 #[test]
 fn saves_without_agents_still_load() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
     state
-        .recruit_agent(&data, &france, &paris, AgentKind::Spy)
+        .recruit_agent(data, &france, &paris, AgentKind::Spy)
         .unwrap();
     // Round trip with agents.
     let json = state.save_json();
@@ -751,15 +742,15 @@ fn saves_without_agents_still_load() {
 
 #[test]
 fn upkeep_is_paid_each_season_and_points_come_back() {
-    let data = data();
-    let mut state = start(&data);
+    let data = game_data();
+    let mut state = start(data);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
     let id = state
-        .recruit_agent(&data, &france, &paris, AgentKind::Spy)
+        .recruit_agent(data, &france, &paris, AgentKind::Spy)
         .unwrap();
-    state.end_turn(&data);
+    state.end_turn(data);
     assert!(
         state
             .agents
@@ -772,11 +763,11 @@ fn upkeep_is_paid_each_season_and_points_come_back() {
     let agent = state.agent(&id).unwrap();
     assert_eq!(
         agent.movement_points,
-        state.agent_movement_allowance(&data, AgentKind::Spy)
+        state.agent_movement_allowance(data, AgentKind::Spy)
     );
     assert!(!agent.acted);
     // The action bar lists the four spy actions.
-    let bar = state.agent_actions(&data, &id);
+    let bar = state.agent_actions(data, &id);
     assert_eq!(bar.len(), 4);
     assert!(bar.iter().all(|o| o.available || o.reason.is_some()));
 }
