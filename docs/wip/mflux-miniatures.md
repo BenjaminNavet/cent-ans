@@ -20,7 +20,7 @@
 
 ## Ensuite
 - Incrustation des vrais blasons (données `heraldry`).
-- Essais réels de A et B (GPU libre) ; pour B, ajouter d'abord un arrêt avant TRELLIS (essai gratuit).
+- Essais réels de A (textures, portrait, ornements) GPU libre ; B : planche locale validée, TRELLIS à lancer.
 
 ## Lot B : chaîne GA3 locale (10-08, code fait, aucun essai réel mflux)
 - `tools/experiments/ga3_local.py` (commun) : `local_sheet_prompt` (prompt nano-banana -> description
@@ -32,6 +32,10 @@
   `--cut-backend` (flux-2 et flux-2/edit -> Z-Image ; vues latérales en img2img à 0.55 depuis `src.png`).
 - `local_art.render_image/command_for` : paramètre `strength` optionnel (rétrocompatible).
 - Reste payant : TRELLIS seul (0,02 $). Aucun coût local dans costs.json.
+- Essai réel 10-08 (`--stop-before-3d`, 0 $) : archer longbowman, planche 3 vues (face, profil
+  3/4, dos) cohérentes, réalistes (gambison, chapeau de fer, arc long), détourage rembg propre,
+  3 vues découpées. Bras le long du corps plutôt qu'en A-pose stricte ; arc tenu derrière en vue
+  de dos. Prochaine étape : TRELLIS multi (0,02 $) sur ces vues et comparaison avec l'archer L3.
 - Essai réel à lancer GPU libre (une unité) :
   `uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy python
   tools/experiments/ga3_fal_figure.py ~/dev/cent-ans-raw/ga3/local --unit longbowman
