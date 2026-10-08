@@ -75,6 +75,10 @@ uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 // courant ; force 0 (défaut, texture absente) = rendu procédural seul.
 #include "res://shaders/water_detail.gdshaderinc"
 uniform float water_detail_flow = 0.05;
+// Lot DN nature : turbidité (0 = eau claire, 1 = limon plein), couleur du limon ; réglée par
+// WaterDetail.turbidity() d'après data/fx/water_detail.json. 0 = rendu d'avant.
+uniform float turbidity = 0.0;
+uniform vec3 silt_color : source_color = vec3(0.34, 0.31, 0.22);
 
 varying float v_alpha;
 varying float v_side;
@@ -200,8 +204,13 @@ void fragment() {
 	// RC5 : coordonnées du courant (abscisse aval, travers) : la texture suit le lit.
 	vec2 rc_uv = vec2(v_flow.x, v_flow.y) * water_detail_scale;
 	col = water_detail_tint(col, rc_uv);
+	// DN : le limon couvre le fond (plus dense en eau profonde, jamais total) et grisonne au courant.
+	col = mix(col, silt_color * (0.9 + 0.2 * n2), turbidity * mix(0.55, 1.0, deep));
+	// DN : stries d'écume le long de la berge, étirées dans le sens du courant (texture de détail).
+	float streak = water_detail_foam(rc_uv * vec2(0.6, 1.4) + vec2(-TIME * water_detail_flow * 1.5, 0.0));
 	// Écume légère au contact des berges et sur les remous du gué.
 	float bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * (1.0 - v_carved) * 0.25;
+	bank_foam += smoothstep(0.6, 1.0, edge) * streak * 0.35 * (1.0 - v_carved * 0.5);
 	float contact = v_carved * (1.0 - smoothstep(0.0, 0.006, thickness)) * 0.5;
 	float foam = clamp(bank_foam + contact + riffle, 0.0, 1.0);
 	col = mix(col, foam_color, foam * 0.7);

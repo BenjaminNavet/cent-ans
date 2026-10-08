@@ -529,6 +529,7 @@ func _water_material(min_px: float) -> ShaderMaterial:
 	var detail_id := "river_large" if min_px == major_min_px else "river_small"
 	WaterDetail.apply(material, detail_id)
 	material.set_shader_parameter("water_detail_flow", WaterDetail.flow_speed(detail_id))
+	material.set_shader_parameter("turbidity", WaterDetail.turbidity(detail_id))
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("river_bank_px", bank_px)
 	if terrain != null and terrain.river_bed_texture() != null:

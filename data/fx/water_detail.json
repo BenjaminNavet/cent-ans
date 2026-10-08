@@ -17,13 +17,15 @@
       "description": "Grand fleuve (Loire, Seine) : rides douces et filets de courant, eau limoneuse brun-vert.",
       "strength": 0.5,
       "scale": 4.0,
-      "flow_speed": 0.05
+      "flow_speed": 0.05,
+      "turbidity": 0.35
     },
     "river_small": {
       "description": "Petite rivière claire sur galets et herbes : plus clair, rides fines.",
       "strength": 0.45,
       "scale": 6.0,
-      "flow_speed": 0.08
+      "flow_speed": 0.08,
+      "turbidity": 0.1
     }
   }
 }

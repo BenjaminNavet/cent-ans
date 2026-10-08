@@ -36,3 +36,12 @@ vec3 water_detail_tint(vec3 base, vec2 uv) {
 	vec3 ratio = texture(water_detail_albedo, uv).rgb / mean_color;
 	return base * mix(vec3(1.0), clamp(ratio, vec3(0.5), vec3(1.6)), water_detail_strength);
 }
+
+// Lot DN nature : masque d'écume (canal alpha de l'albédo, stries étirées dans le sens du courant),
+// 0 quand le détail est éteint. `uv` en coordonnées de tuile.
+float water_detail_foam(vec2 uv) {
+	if (water_detail_strength <= 0.0) {
+		return 0.0;
+	}
+	return texture(water_detail_albedo, uv).a;
+}

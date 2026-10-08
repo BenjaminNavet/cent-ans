@@ -45,3 +45,9 @@ static func apply(material: ShaderMaterial, id: String, prefix: String = "water_
 static func flow_speed(id: String) -> float:
 	var entry: Variant = spec().get(id)
 	return float((entry as Dictionary).get("flow_speed", 0.0)) if entry is Dictionary else 0.0
+
+
+## Turbidité (0 clair, 1 limoneux) de la matière `id` : uniforme `turbidity` des shaders de fleuve.
+static func turbidity(id: String) -> float:
+	var entry: Variant = spec().get(id)
+	return float((entry as Dictionary).get("turbidity", 0.0)) if entry is Dictionary else 0.0

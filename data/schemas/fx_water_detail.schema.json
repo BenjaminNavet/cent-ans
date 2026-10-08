@@ -20,7 +20,8 @@
           "description": {"type": "string", "minLength": 1},
           "strength": {"type": "number", "minimum": 0, "maximum": 1},
           "scale": {"type": "number", "exclusiveMinimum": 0},
-          "flow_speed": {"type": "number", "minimum": 0}
+          "flow_speed": {"type": "number", "minimum": 0},
+          "turbidity": {"type": "number", "minimum": 0, "maximum": 1}
         }
       }
     }
