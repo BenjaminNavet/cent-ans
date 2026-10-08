@@ -1,0 +1,1332 @@
+[
+ {
+  "id": "fort_merlon_crenel_run",
+  "kind": "decor",
+  "prompt": "stone wall-walk section with square crenellated merlons and embrasures, weathered limestone",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece : remplace les boîtes de créneaux procédurales",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_merlon_swallowtail",
+  "kind": "decor",
+  "prompt": "Ghibelline swallowtail merlons on a short stone parapet section, weathered brick and stone",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece : variante italienne des créneaux",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_hoarding_timber_run",
+  "kind": "decor",
+  "prompt": "projecting timber hoarding gallery with trapdoors and wooden roof, attached to short stone wall stub",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece : hourds en bois sur muraille assiégée",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_machicolation_stone",
+  "kind": "decor",
+  "prompt": "stone machicolation corbelled parapet with open drop holes under battlements, short wall section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_tower : mâchicoulis des tours",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_postern_gate",
+  "kind": "decor",
+  "prompt": "small stone postern door with iron-studded oak door in a thick wall stub, arched lintel",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece kind gate : poterne de sortie",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_barbican_gatehouse",
+  "kind": "decor",
+  "prompt": "stone barbican gatehouse with twin round turrets, arrow slits and a narrow passage, battlemented",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9,
+   "class": "major_building"
+  },
+  "target": "battle_siege.gd _build_piece kind gate : barbacane devant la porte",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_drawbridge_raised",
+  "kind": "decor",
+  "prompt": "timber drawbridge raised against a gatehouse arch with chains and counterweight beams",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece kind gate : pont-levis relevé",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_drawbridge_lowered",
+  "kind": "decor",
+  "prompt": "timber drawbridge lowered flat with chains and iron-banded planks, fixed pivot beam",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece kind gate : pont-levis abaissé (assaut)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_portcullis_gate",
+  "kind": "decor",
+  "prompt": "iron-shod wooden portcullis grille half lowered in a stone arch frame",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "house"
+  },
+  "target": "battle_siege.gd _build_piece kind gate : herse",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_palisade_straight",
+  "kind": "decor",
+  "prompt": "straight sharpened timber palisade section with lashed cross rails, muddy base",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "nouveau : battle_fieldworks (palissades de camp et de village)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_palisade_gate",
+  "kind": "decor",
+  "prompt": "palisade gate with two plank leaves and a small watch platform, sharpened logs",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "house"
+  },
+  "target": "nouveau : battle_fieldworks (porte de palissade)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_palisade_corner_tower",
+  "kind": "decor",
+  "prompt": "palisade corner with small square wooden watchtower on stilts and ladder",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "house"
+  },
+  "target": "nouveau : battle_fieldworks (angle de palissade)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_ditch_stakes",
+  "kind": "decor",
+  "prompt": "dug earth ditch segment with sharpened wooden stakes pointing up, raw soil",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_fieldworks (fossé défensif)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_earth_rampart_fascine",
+  "kind": "decor",
+  "prompt": "earth rampart bank faced with bundled brushwood fascines and wicker gabions",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_fieldworks (rempart de terre)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_cheval_de_frise",
+  "kind": "decor",
+  "prompt": "hedgehog barrier of crossed sharpened timbers lashed together, short log row",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_fieldworks (chevaux de frise anti-cavalerie)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_pavise_wall_planted",
+  "kind": "decor",
+  "prompt": "row of three tall painted wooden pavises planted in the ground with props behind",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_soldiers.gd : arbalétriers derrière pavois ; complète pavise_stack",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_mantlet_mobile",
+  "kind": "decor",
+  "prompt": "large mobile wooden mantlet on small wheels with loophole and hide covering",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : mantelet roulant d'approche (complète mantlet fixe)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_stone_curtain_ruined",
+  "kind": "decor",
+  "prompt": "stone curtain wall section partially collapsed with exposed rubble core and fallen blocks",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "house"
+  },
+  "target": "battle_siege.gd : brèche (remplace wall_breach_rubble pour les murs déjà ruinés)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_castle_keep_square",
+  "kind": "decor",
+  "prompt": "square stone donjon keep with corner turrets, battlements and few windows, 14th century",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 16,
+   "class": "major_building"
+  },
+  "target": "battle_siege.gd _build_keep : donjon (aujourd'hui boîtes procédurales)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_shell_keep_motte",
+  "kind": "decor",
+  "prompt": "wooden palisaded motte with timber keep on a steep earth mound, rural castle",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "major_building"
+  },
+  "target": "battle_siege.gd _build_keep : château à motte",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "fort_fortified_church",
+  "kind": "decor",
+  "prompt": "village church with crenellated tower, buttresses, arrow slits and thick walls",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 18,
+   "class": "major_building"
+  },
+  "target": "battle_siege.gd : église fortifiée (Guyenne, Thiérache)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_cart_overturned",
+  "kind": "decor",
+  "prompt": "overturned two-wheeled wooden cart with broken axle and spilled sacks, weathered",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "cart"
+  },
+  "target": "battle_aftermath.gd : débris après combat",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_wagon_burnt",
+  "kind": "decor",
+  "prompt": "burnt-out four-wheel baggage wagon, charred timber ribs and iron-rimmed wheels",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "cart"
+  },
+  "target": "battle_aftermath.gd : chariot incendié",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_horse_carcass",
+  "kind": "decor",
+  "prompt": "dead horse lying on its side with saddle and trappings, no blood gore, realistic",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.6,
+   "class": "animal"
+  },
+  "target": "battle_gore.gd / battle_aftermath.gd : cadavre de cheval",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_horse_barded_down",
+  "kind": "decor",
+  "prompt": "fallen barded warhorse with caparison and chamfron lying on the side, no gore",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.8,
+   "class": "animal"
+  },
+  "target": "battle_aftermath.gd : destrier bardé tombé",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_broken_lances",
+  "kind": "decor",
+  "prompt": "bundle of broken lances and splintered shafts lying crossed, painted bands",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_dropped_arms.gd : lances brisées (absentes des KINDS)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_broken_swords_shield",
+  "kind": "decor",
+  "prompt": "broken sword blades and a cracked heater shield lying together, rusted",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.2,
+   "class": "prop"
+  },
+  "target": "battle_dropped_arms.gd : armes brisées",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_arrows_planted",
+  "kind": "decor",
+  "prompt": "cluster of arrows planted in ground at an angle, grey goose fletching",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.2,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_dropped_arms (volées plantées)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_crater_cannonball",
+  "kind": "decor",
+  "prompt": "small earth crater with splashed soil and a half-buried round stone cannonball",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "rock"
+  },
+  "target": "battle_siege.gd : impact de bombarde",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_siege_ladder_broken",
+  "kind": "decor",
+  "prompt": "broken siege ladder lying in two pieces with snapped rungs",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "battle_siege.gd : échelle détruite",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_ram_wreck",
+  "kind": "decor",
+  "prompt": "wrecked battering ram, split roof frame and fallen iron-capped log",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : bélier détruit",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_tower_wreck",
+  "kind": "decor",
+  "prompt": "collapsed siege tower wreck, burnt beams and hide scraps",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : tour de siège incendiée",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "debris_shot_pile_stone",
+  "kind": "decor",
+  "prompt": "pile of round stone shot of several sizes",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.2,
+   "class": "prop"
+  },
+  "target": "battle_siege.gd : munitions au sol des mangonneaux",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "terrain_hedge_stretch_temperate",
+  "kind": "decor",
+  "prompt": "long dense hedgerow with hawthorn and hazel on a low earth bank, straight section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "tree"
+  },
+  "target": "battle_decor.gd _build_props : haies (bocage, Normandie)",
+  "region": "Medieval northern French countryside circa 1340,"
+ },
+ {
+  "id": "terrain_dry_stone_wall_limestone",
+  "kind": "decor",
+  "prompt": "dry stone wall of grey limestone blocks, moss on top, straight section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "rock"
+  },
+  "target": "battle_decor.gd : murets (Quercy, Causses)",
+  "region": "Medieval southern French limestone countryside circa 1340,"
+ },
+ {
+  "id": "terrain_dry_stone_wall_slate",
+  "kind": "decor",
+  "prompt": "dry stone wall of dark slate slabs laid flat, straight section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "rock"
+  },
+  "target": "battle_decor.gd : murets (Pays de Galles, Cornouailles)",
+  "region": "Medieval Welsh upland countryside circa 1340,"
+ },
+ {
+  "id": "terrain_split_rail_fence",
+  "kind": "decor",
+  "prompt": "split rail wooden fence of weathered chestnut, straight section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : clôtures (Angleterre)",
+  "region": "Medieval English countryside circa 1340,"
+ },
+ {
+  "id": "terrain_wicker_fence_long",
+  "kind": "decor",
+  "prompt": "woven wattle fence with hazel rods, long straight section",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : clôtures de parcs à bétail",
+  "region": "Medieval European farm countryside circa 1340,"
+ },
+ {
+  "id": "terrain_village_well_stone",
+  "kind": "decor",
+  "prompt": "round stone village well with wooden roof, rope and bucket",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_props : puits",
+  "region": "Medieval French village circa 1340,"
+ },
+ {
+  "id": "terrain_wayside_cross_calvary",
+  "kind": "decor",
+  "prompt": "stone calvary cross on stepped plinth, lichen, Breton style",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_props : croix de chemin (Bretagne)",
+  "region": "Medieval Breton countryside circa 1340,"
+ },
+ {
+  "id": "terrain_wayside_cross_wood",
+  "kind": "decor",
+  "prompt": "tall plain wooden wayside cross with small roof, weathered",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : croix de bois (Flandre, Empire)",
+  "region": "Medieval Flemish countryside circa 1340,"
+ },
+ {
+  "id": "terrain_beehive_skeps_stand",
+  "kind": "decor",
+  "prompt": "wooden stand with several straw skep beehives under thatched roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : ruchers",
+  "region": "Medieval European farm circa 1340,"
+ },
+ {
+  "id": "terrain_haystack_round",
+  "kind": "decor",
+  "prompt": "round thatched hayrick with pole on rural field, golden straw",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : meules (complète haystack campagne)",
+  "region": "Medieval European farm circa 1340,"
+ },
+ {
+  "id": "terrain_wheat_sheaves_stooks",
+  "kind": "decor",
+  "prompt": "field stooks of bound wheat sheaves standing in a row of five",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : gerbes (champs moissonnés)",
+  "region": "Medieval European farm circa 1340,"
+ },
+ {
+  "id": "terrain_barrels_stack_cooper",
+  "kind": "decor",
+  "prompt": "stack of oak barrels and a cooper cart, iron hoops",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : tonneaux (Bordelais, Bourgogne)",
+  "region": "Medieval French wine village circa 1340,"
+ },
+ {
+  "id": "terrain_vat_wine_press",
+  "kind": "decor",
+  "prompt": "large oak wine press with screw beam and wooden vat",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd : cuves (vignes)",
+  "region": "Medieval French vineyard circa 1340,"
+ },
+ {
+  "id": "terrain_haywain_wagon",
+  "kind": "decor",
+  "prompt": "wooden hay wagon piled with hay, shafts down, no animals",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4.5,
+   "class": "cart"
+  },
+  "target": "battle_decor.gd : charrois de foin",
+  "region": "Medieval European farm circa 1340,"
+ },
+ {
+  "id": "terrain_olive_terrace_wall",
+  "kind": "decor",
+  "prompt": "stepped olive terrace wall with dry stone retaining face and one olive stump",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "rock"
+  },
+  "target": "battle_decor.gd : Midi, Aragon, Italie",
+  "region": "Medieval Mediterranean hillside circa 1340,"
+ },
+ {
+  "id": "terrain_reed_hut_marsh",
+  "kind": "decor",
+  "prompt": "small thatched reed hut on piles at marsh edge",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : marais",
+  "region": "Medieval Flemish marsh circa 1340,"
+ },
+ {
+  "id": "terrain_stone_cairn_boundary",
+  "kind": "decor",
+  "prompt": "boundary cairn of piled stones with one tall standing marker stone",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.8,
+   "class": "rock"
+  },
+  "target": "battle_decor.gd : landes, montagnes",
+  "region": "Medieval European upland circa 1340,"
+ },
+ {
+  "id": "farm_norman_timber_courtyard",
+  "kind": "decor",
+  "prompt": "Norman half-timbered farmstead with thatched roof, barn and courtyard wall, one building group",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_buildings : fermes (Normandie)",
+  "region": "Medieval Norman village circa 1340,"
+ },
+ {
+  "id": "farm_flemish_brick_barn",
+  "kind": "decor",
+  "prompt": "Flemish brick farmhouse with stepped gable and attached barn, tiled roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : fermes (Flandre)",
+  "region": "Medieval Flemish village circa 1340,"
+ },
+ {
+  "id": "farm_english_stone_manor",
+  "kind": "decor",
+  "prompt": "English fortified stone manor farm with slate roof and gatehouse, small courtyard",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 14,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : manoirs (Angleterre)",
+  "region": "Medieval English village circa 1340,"
+ },
+ {
+  "id": "farm_southern_stone_mas",
+  "kind": "decor",
+  "prompt": "southern French stone mas farmhouse with low terracotta roof and arched barn door",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : mas (Languedoc)",
+  "region": "Medieval Languedoc village circa 1340,"
+ },
+ {
+  "id": "farm_iberian_adobe_cortijo",
+  "kind": "decor",
+  "prompt": "Castilian adobe farmhouse with flat clay-tile roof and small courtyard arch",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 12,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : cortijo (Castille, Andalousie)",
+  "region": "Medieval Castilian village circa 1340,"
+ },
+ {
+  "id": "farm_german_fachwerk",
+  "kind": "decor",
+  "prompt": "German timber-frame Fachwerk farmhouse with steep thatched roof and stable end",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 13,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : fermes (Empire)",
+  "region": "Medieval Rhineland village circa 1340,"
+ },
+ {
+  "id": "farm_alpine_chalet_stone",
+  "kind": "decor",
+  "prompt": "Alpine stone-base chalet with wooden upper floor and heavy stone slab roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : chalets (Alpes, Savoie)",
+  "region": "Medieval Savoyard village circa 1340,"
+ },
+ {
+  "id": "farm_scots_blackhouse",
+  "kind": "decor",
+  "prompt": "Scottish stone blackhouse with rounded corners, thick turf and thatch roof",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : maisons (Écosse, Irlande)",
+  "region": "Medieval Scottish highland circa 1340,"
+ },
+ {
+  "id": "farm_polish_log_cabin",
+  "kind": "decor",
+  "prompt": "Polish log cabin farmstead with shingle roof, notched logs and small barn",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 11,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : fermes (Pologne, Rus')",
+  "region": "Medieval Polish village circa 1340,"
+ },
+ {
+  "id": "farm_baltic_longhouse",
+  "kind": "decor",
+  "prompt": "Baltic timber longhouse with turf roof and wooden storehouse on stilts",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 13,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : fermes (Livonie, Prusse)",
+  "region": "Medieval Livonian village circa 1340,"
+ },
+ {
+  "id": "farm_ottoman_stone_house",
+  "kind": "decor",
+  "prompt": "Anatolian stone farmhouse with flat roof, courtyard wall and outside oven",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 11,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : fermes (Anatolie, Balkans)",
+  "region": "Medieval Anatolian village circa 1340,"
+ },
+ {
+  "id": "village_mill_watermill_small",
+  "kind": "decor",
+  "prompt": "small timber watermill with overshot wheel and stone base",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : moulins de champ de bataille",
+  "region": "Medieval European village circa 1340,"
+ },
+ {
+  "id": "village_windmill_post_field",
+  "kind": "decor",
+  "prompt": "timber post windmill with sails, ladder and trestle, field-side",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "battle_decor.gd : moulins à vent (Flandre, Angleterre)",
+  "region": "Medieval Flemish village circa 1340,"
+ },
+ {
+  "id": "camp_lord_pavilion_round",
+  "kind": "decor",
+  "prompt": "large round lord's pavilion with peaked top, striped cloth, pennant and guy ropes",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : tente de seigneur (complète war_pavilion)",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_lord_pavilion_english",
+  "kind": "decor",
+  "prompt": "long English royal marquee with scalloped valance and heraldic pennons, plain cloth",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 9,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : pavillon anglais",
+  "region": "Medieval English army camp circa 1340,"
+ },
+ {
+  "id": "camp_soldier_tent_ridge",
+  "kind": "decor",
+  "prompt": "small ridge tent of patched canvas with guy ropes, soldier bivouac",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : tente de soldats",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_soldier_tent_round",
+  "kind": "decor",
+  "prompt": "small round conical canvas tent with central pole, worn",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : tentes rondes",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_tent_yurt_steppe",
+  "kind": "decor",
+  "prompt": "felt yurt with wooden door and smoke ring, plain felt",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : camp tatar, Horde d'Or",
+  "region": "Medieval steppe army camp circa 1340,"
+ },
+ {
+  "id": "camp_tent_saracen_awning",
+  "kind": "decor",
+  "prompt": "Moorish army tent with pointed roof, patterned cloth, open front awning",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : camp mauresque (Grenade, Maroc)",
+  "region": "Medieval Marinid army camp circa 1340,"
+ },
+ {
+  "id": "camp_tent_ottoman_pavilion",
+  "kind": "decor",
+  "prompt": "Ottoman beylik tent with domed top and finial, red and cream cloth, worn",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 7,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : camp ottoman, Anatolie",
+  "region": "Medieval Ottoman army camp circa 1340,"
+ },
+ {
+  "id": "camp_field_kitchen_cauldrons",
+  "kind": "decor",
+  "prompt": "army field kitchen with two big cauldrons on tripods, firewood and long table",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_camp : cuisines (complète campfire_cauldron)",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_field_forge_anvil",
+  "kind": "decor",
+  "prompt": "field forge with bellows, anvil on stump, tongs and horseshoes, canvas awning",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_camp : forge de campagne",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_fletcher_workshop",
+  "kind": "decor",
+  "prompt": "fletcher's bench with arrow bundles, bow staves and feathers under a canvas awning",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_camp : atelier de flèches",
+  "region": "Medieval English army camp circa 1340,"
+ },
+ {
+  "id": "camp_baggage_wagon_covered",
+  "kind": "decor",
+  "prompt": "covered baggage wagon with canvas hoops, four wheels, no animals",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "cart"
+  },
+  "target": "battle_decor.gd _build_camp : charrois (variante bâchée)",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_surgeon_tent_cots",
+  "kind": "decor",
+  "prompt": "field surgeon tent with open front, cots and basins, plain cloth",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : tente des blessés",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_chapel_tent_altar",
+  "kind": "decor",
+  "prompt": "field chapel tent with small portable altar, cross and candles",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4.5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : chapelle de camp (croisés, Rois)",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_campfire_logs_seats",
+  "kind": "decor",
+  "prompt": "campfire ring with log seats and cooking spit, ash",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "prop"
+  },
+  "target": "battle_decor.gd _build_fires : foyers (complète campfire_cauldron)",
+  "region": "Medieval European army camp circa 1340,"
+ },
+ {
+  "id": "camp_pitched_tent_pilgrim",
+  "kind": "decor",
+  "prompt": "white canvas tent with plain undecorated cloth, crusader style, rope pegs",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "house"
+  },
+  "target": "battle_decor.gd _build_camp : camp des croisés (fac_crusaders)",
+  "region": "Medieval crusader army camp circa 1340,"
+ },
+ {
+  "id": "siege_trebuchet_counterweight",
+  "kind": "decor",
+  "prompt": "large timber counterweight trebuchet with sling, box counterweight and windlass, 14th century",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 10,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd _model_machine : trébuchet (complète mangonel)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_ram_roofed",
+  "kind": "decor",
+  "prompt": "covered battering ram with hide-covered pitched roof, iron-capped log hung on chains, wheels",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 7,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd _make_ram : bélier (aujourd'hui procédural)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_tower_belfry_hides",
+  "kind": "decor",
+  "prompt": "tall four-storey siege belfry on wheels with hide covering and drop bridge",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 8,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd _make_tower : beffroi (remplace procédural)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_springald_bolt",
+  "kind": "decor",
+  "prompt": "large timber springald with twin arms and bolt trough on wheeled mount",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : springale (artillerie à torsion défensive)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_ballista_crossbow_great",
+  "kind": "decor",
+  "prompt": "great windlass crossbow on a stand with ratchet and bolts, 14th century",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : arbalète à tour",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_ribauldequin_organ",
+  "kind": "decor",
+  "prompt": "ribauldequin with a row of small gun barrels on a two-wheeled cart, 1430s",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 2.5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : ribaudequin (1340-1400)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_cannon_early_1340",
+  "kind": "decor",
+  "prompt": "very early vase-shaped iron gun lying on a timber trestle bed, small, 1340s",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : canon primitif 1340 (pot-de-fer)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_bombard_hooped_1380",
+  "kind": "decor",
+  "prompt": "big hooped iron bombard barrel on a timber sled with wedges, 1380s",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : bombarde 1380 (complète bombard)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_bombard_great_1450",
+  "kind": "decor",
+  "prompt": "huge cast bronze bombard with breech chamber on timber cradle, 1440s, tompion",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : grande bombarde 1450 (Mons Meg)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_gun_bronze_wheeled_1450",
+  "kind": "decor",
+  "prompt": "bronze field cannon on a two-wheel carriage with limber, 1440s Bureau brothers style",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3.5,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : canon de campagne 1450",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_handgonne_pair",
+  "kind": "decor",
+  "prompt": "two hand gonnes iron barrels on wooden tillers, 1340s, on a rest",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.2,
+   "class": "prop"
+  },
+  "target": "battle_soldiers.gd : couleuvrine à main",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_gun_battery_mantlet",
+  "kind": "decor",
+  "prompt": "gun emplacement with timber shutters, gabions, gun and shot pile",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "siege_engine"
+  },
+  "target": "battle_siege.gd : batterie de siège",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_ammo_stone_pile",
+  "kind": "decor",
+  "prompt": "pile of dressed round stone cannonballs of varied sizes next to a wooden mallet",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 1.5,
+   "class": "prop"
+  },
+  "target": "battle_siege.gd : munitions de bombarde",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_powder_barrels_cart",
+  "kind": "decor",
+  "prompt": "two-wheel cart carrying powder barrels and bags, covered with tarpaulin",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 3,
+   "class": "cart"
+  },
+  "target": "battle_siege.gd : poudre",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_ladder_array",
+  "kind": "decor",
+  "prompt": "three long wooden scaling ladders leaning together with iron hooks at top",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 5,
+   "class": "prop"
+  },
+  "target": "battle_siege.gd _make_ladder_group : échelles d'assaut",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_trench_sap_cover",
+  "kind": "decor",
+  "prompt": "covered sapper trench with timber roof frame and earth bank, siege approach",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 6,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_siege (tranchées de sape)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ },
+ {
+  "id": "siege_mine_entrance",
+  "kind": "decor",
+  "prompt": "mine tunnel entrance with timber props and spoil heap and barrow",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "yaw_fix": 0,
+   "target_width_m": 4,
+   "class": "prop"
+  },
+  "target": "nouveau : battle_siege (mines)",
+  "region": "Medieval European battlefield circa 1340-1450, weathered,"
+ }
+]
