@@ -315,3 +315,7 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Les .uid de game/tests sont maintenant suivis : supprimer les copies non suivies locales avant fusion/ff dans main.
 - Régression SC trouvée après fusion : flhooks avait supprimé `campaign_map._focus_capital` encore appelé (next_hint_controller, jr_crusade_test) → corrigé c3215a194 / 5203821d2.
 - Balayage des `call("nom")` sans définition : seuls restes antérieurs, gardés par has_method (morts) : `close_all_dialogs` (release_journey, pb1_turns), `open_faction_select` (q8), `supports_order` (hud_controller) : **le bouton « Séparer » est toujours masqué alors que core gère `split_army`** (antérieur à SC, à signaler au joueur : activer = changement visible).
+
+## FIXTESTS (fusionné 08/10)
+- 8 tests Godot verts : cb0 (échelle d'UI dans push_input + golden régénéré), po_ui (tailles de l'écran de faction à part), c5 (file de construction), m5a (brouillard = grille de vision), nt4 (cadence battle_pace), ib_plain (6 bulles littérales → TooltipHost.attach_plain + tooltips.json), da7d (plafond 30 ms), settlements_render (40 frames avant update_view).
+- Risque ouvert : `OutbuildingLayer._finish_warm` attend une tâche de fond qui a besoin du fil principal → blocage si une vue est demandée dans la même frame que `setup` (non constaté en jeu).
