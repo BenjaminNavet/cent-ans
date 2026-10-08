@@ -17,5 +17,14 @@ et la classe `NavalBattleSim` du pont ne servaient plus qu'au scénario de debug
 
 ## Conséquences
 - Plus de bataille navale jouable ; la rétablir demanderait de reprendre l'historique git (commit précédant ce lot).
-- Le moteur naval temps réel de `sim-battle` (`NavalSim`, commandes, scénarios historiques `data/naval/scenarios`)
-  et `resolve_naval_battle` de `sim-campaign` n'ont plus d'appelant côté jeu ; leur retrait est un lot à part.
+- Le moteur naval temps réel de `sim-battle` est retiré à son tour (lot SC « naval ») : `NavalSim`, l'IA, les
+  commandes, les scénarios historiques `data/naval/scenarios` et leur schéma, l'événement `NavalEvent`, les
+  champs de placement et de vent de `NavalSetup` (position, cap, vaisseau amiral, rivage, vent imposé).
+  Restent : `ship`, `combat` (formules de tir, d'abordage et de feu), `fleet` (déploiement, vent et avantage du
+  vent tirés de la graine), `auto` (résolution par phases), `outcome` et `setup`.
+- L'auto-résolution est découpée en phases nommées (`Battle::volleys_while_closing`, `fireships`,
+  `boarding_rounds`, `winner`, `flight_of`) ; ses constantes numériques sont dans `data/naval/rules.json`
+  (`NavalRules`) et les règles de manœuvre temps réel (vent, grappins, assaut général, durée) en ont disparu.
+  Résultats identiques à l'ancien code (vérifié sur 180 combats).
+- `NavalSetup.rules` et `NavalData.rules` sont des `Arc<NavalRules>` : une bataille ne copie plus les règles.
+- `resolve_naval_battle` de `sim-campaign` reste : il applique le résultat de l'auto-résolution.

@@ -1,7 +1,9 @@
-//! Naval battle setup (lot NV1): plain serde data built by the campaign
-//! (`sim-campaign::naval`) or read from a scenario (`data/naval/scenarios/`).
+//! Naval battle setup: plain serde data built by the campaign
+//! (`sim-campaign::naval`).
 
 use data_model::{NavalRules, ShipClass};
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
 use crate::setup::{BattleSeason, SideId, UnitSetup};
@@ -25,22 +27,13 @@ pub struct ShipSetup {
     /// alight and leave in the boat.
     #[serde(default)]
     pub fireship: bool,
-    /// Chained ships of the same group are lashed together in line: they
-    /// cannot move, but send men across the chains (l'Écluse, 1340).
+    /// Chained ships of the same group are lashed together in line: their
+    /// crews cannot run (l'Écluse, 1340).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chain: Option<u32>,
     /// Shoots fire arrows (Castilians at La Rochelle, 1372).
     #[serde(default)]
     pub fire_arrows: bool,
-    /// Starting position (metres, sea centred on 0); formation otherwise.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub position: Option<[f64; 2]>,
-    /// Starting heading, degrees (0 = +x, 90 = +z); facing the enemy otherwise.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub heading_deg: Option<f64>,
-    /// The admiral's ship: its loss shakes the whole fleet.
-    #[serde(default)]
-    pub flagship: bool,
 }
 
 impl ShipSetup {
@@ -62,9 +55,6 @@ pub struct NavalSideSetup {
     /// Embarked regiments (campaign units): losses come back per unit.
     pub units: Vec<UnitSetup>,
     pub ships: Vec<ShipSetup>,
-    /// The fleet waits at anchor and never leaves its line (AI only).
-    #[serde(default)]
-    pub hold: bool,
 }
 
 impl NavalSideSetup {
@@ -87,27 +77,16 @@ pub struct NavalSetup {
     /// Rain slackens the bowstrings.
     #[serde(default)]
     pub rain: bool,
-    /// Direction the wind blows towards, degrees (0 = +x); from the weather
-    /// gauge otherwise.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub wind_to_deg: Option<f64>,
-    /// Wind strength 0-1; drawn from the seed otherwise.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub wind_strength: Option<f64>,
-    /// Side holding the weather gauge (upwind) when no wind is given; the
-    /// seed decides otherwise.
+    /// Side holding the weather gauge (upwind); the seed decides otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gauge: Option<SideId>,
-    /// Shore behind the defender (estuary): drawn by the renderer; no rule.
-    #[serde(default)]
-    pub shore: bool,
     pub attacker: NavalSideSetup,
     pub defender: NavalSideSetup,
-    /// Side commanded by the player; the other (both when `None`) is AI.
+    /// Side commanded by the player (for the UI).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub player_side: Option<SideId>,
     #[serde(default)]
-    pub rules: NavalRules,
+    pub rules: Arc<NavalRules>,
 }
 
 impl NavalSetup {

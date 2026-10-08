@@ -2,7 +2,7 @@
 //! naval battles, ships taken and sunk, control of the sea, blockade.
 
 use data_model::{FactionId, GameData, SeaZoneId, SettlementId};
-use sim_battle::naval::{NavalSim, ShipFate};
+use sim_battle::naval::{auto_resolve, ShipFate};
 use sim_battle::SideId;
 use sim_campaign::naval::SeaControl;
 use sim_campaign::{ArmyId, CampaignState, Order};
@@ -87,14 +87,9 @@ fn an_intercepted_player_crossing_waits_in_port() {
     assert_eq!(view.sea_name, "la Manche");
     assert!(view.interceptor_ships > 0 && view.transport_ships > 0);
     assert_eq!(view.army_men, a.total_strength());
-    // The setup plays in the real-time battle.
     let setup = state.naval_battle_setup(data, 0).unwrap();
     assert_eq!(setup.defender.units.len(), a.units.len());
     assert_eq!(setup.defender.men(), a.total_strength());
-    let mut sim = NavalSim::new(setup, 1).unwrap();
-    sim.set_ai(SideId::Defender, true);
-    sim.advance(10.0);
-    assert!(!sim.ships.is_empty());
 }
 
 #[test]
@@ -117,9 +112,7 @@ fn a_naval_battle_moves_ships_losses_and_the_sea() {
     let setup = state.naval_battle_setup(data, 0).unwrap();
     let english_before = state.naval.ships_of(&fac("fac_england"));
     let french_before = state.naval.ships_of(&fac("fac_france"));
-    let mut sim = NavalSim::new(setup, state.naval_battle_seed(0).unwrap()).unwrap();
-    sim.set_ai(SideId::Defender, true);
-    let outcome = sim.run_to_end();
+    let outcome = auto_resolve(&setup, state.naval_battle_seed(0).unwrap());
     state.resolve_naval_battle(data, 0, &outcome).unwrap();
     assert!(state.naval.pending.is_empty());
     let lost: u32 = outcome.defender.unit_losses.iter().sum();

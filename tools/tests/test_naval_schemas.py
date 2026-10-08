@@ -26,20 +26,3 @@ def test_fleets_match_schema_and_reference_known_ships() -> None:
     for fleet in fleets["fleets"]:
         assert fleet["faction"] in factions
         assert set(fleet["ships"]) <= ships
-
-
-@pytest.mark.parametrize(
-    "path", sorted((NAVAL / "scenarios").glob("*.json")), ids=lambda p: p.stem
-)
-def test_scenarios_match_schema(path: Path) -> None:
-    """Scenarios match their schema and reference known ships and units."""
-    scenario = json.loads(path.read_text(encoding="utf-8"))
-    assert scenario["id"] == path.stem
-    ships = {p.stem for p in (NAVAL / "ships").glob("*.json")}
-    units = {p.stem for p in (DATA / "unit_types").glob("*.json")}
-    for side in ("attacker", "defender"):
-        fleet = scenario[side]
-        assert {u["unit_type"] for u in fleet["units"]} <= units
-        for ship in fleet["ships"]:
-            assert ship["class"] in ships
-            assert all(c["unit"] < len(fleet["units"]) for c in ship["crew"])

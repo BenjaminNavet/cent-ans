@@ -4,7 +4,7 @@
 //! auto-resolves — whichever side (interceptor or convoy) he is on.
 
 use data_model::{GameData, SettlementId};
-use sim_battle::naval::{auto_resolve, NavalSim};
+use sim_battle::naval::auto_resolve;
 use sim_battle::SideId;
 use sim_campaign::{ArmyId, CampaignState};
 
@@ -77,33 +77,4 @@ fn french_squadron_intercepting_an_english_convoy_is_the_attacker() {
     assert_eq!(view.interceptor, fac("fac_france"));
     assert_eq!(view.player_side, SideId::Attacker);
     assert_eq!(view.win_chance, share(&state, data, SideId::Attacker));
-}
-
-/// Diagnostic: the forecast of the Q3 matchup and the real-time battle with
-/// both fleets under AI (the 3D fight is disabled, but the numbers must not
-/// contradict each other wildly).
-#[test]
-fn forecast_matches_the_real_time_battle_under_ai() {
-    let data = game_data();
-    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
-    let army = main_army(&state, "fac_france");
-    let port = SettlementId::new("set_portsmouth").unwrap();
-    state
-        .debug_stage_naval(data, &army, &port, &fac("fac_england"))
-        .unwrap();
-    let view = state.pending_naval_views(data)[0].clone();
-    let setup = state.naval_battle_setup(data, 0).unwrap();
-    let mut wins = 0;
-    for seed in 1..=5u64 {
-        let mut sim = NavalSim::new(setup.clone(), seed).unwrap();
-        sim.set_ai(SideId::Attacker, true);
-        sim.set_ai(SideId::Defender, true);
-        if sim.run_to_end().winner == Some(SideId::Defender) {
-            wins += 1;
-        }
-    }
-    eprintln!(
-        "Q4 naval forecast {:.0} %, real-time (both AI) {wins}/5 for the French convoy",
-        view.win_chance * 100.0
-    );
 }
