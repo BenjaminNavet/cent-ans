@@ -23,11 +23,12 @@ Aucun modèle ne « connaît » la charte : elle passe par le **prompt** et, pou
 image hors charte ne part pas en 3D.
 
 Références (liens rassemblés hors dépôt dans `~/dev/cent-ans-raw/charte/`) :
-- Bible DA `docs/design/2026-09-25-bible-da.md` : § 3.1 teintes héraldiques, § 3.3 tons de terre
-  (saturation ≤ 35 %), § 6 réalisme peint, canal de livrée, budgets de triangles.
+- Bible DA `docs/design/2026-09-25-bible-da.md` : § 3.1 teintes héraldiques, § 3.3 palette (S ≤ 0,40
+  hors livrées, contrôlée à l'étape image), § 6 réalisme peint, **§ 14 assets générés** (acceptation
+  image et glb, budgets triangles, repère, nommage, prompt figurines, ADR 0211).
 - Matières : `data/art/materials.yaml` (étoffes, mailles, plates, cuir, bois des figurines),
   `data/art/building_materials.json` (bâti, fer), `ground_materials.yaml`, `water_materials.yaml`.
-- Décor : `style_prefix` / `style_suffix` de `data/art/ga3_decor.json`.
+- Décor : `style_prefix` / `style_suffix` de `data/art/ga3_decor.json` (révisés, ADR 0211) ; prompt figurines : bible § 14.8.
 - Image de référence d'une figurine : un rendu réaliste validé (planche SR3, figurines GA3
   `docs/img/ga3/`). **Jamais l'image d'ancrage** `data/art/style/anchor.jpg` : elle ne sert qu'au
   registre 2D (bible § 13).

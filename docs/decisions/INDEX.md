@@ -180,3 +180,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
 | 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
+| 0211 | [Charte semi-réaliste révisée (trois états, figurines générées, palette contrôlée)](0211-charte-semi-realiste.md) | accepté |
