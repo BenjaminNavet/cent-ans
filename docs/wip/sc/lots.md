@@ -228,3 +228,13 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - BRIDGE (fait) : Ctx/CtxMut, run_order, convert.rs, battle_sim éclaté en 6 fichiers ; GB3 déjà vide. Avertissement « pas de campagne » émis une fois par processus.
 - PRE4 : nt4_prologue_test échoue aussi sur main (step move / charge / tir non vus, sensible à la charge machine) ; sur feat/sc : « held enemy stayed in place ». À revoir machine calme.
 - BATTLEPERF (fait) : fork 25,5→7,7 µs ; reste chaud : resolve_movement (Road::on_road, Battlefield::height, ranks_files_in) ; Obstacle::distance, decor_gen::arc_at, town::distance_to_segment, hydro::segments_cross hors geom (arrondis).
+
+## EFFECTS (vague 3, fusionné)
+- EffectKind indexé (EffectTotals = tableau), effects.rs (ProvinceStat/CharacterStat), FactionState::new/CharacterState::new, setup_1337 en étapes, TurnBudget::compute (9 champs → last_budget), settlement_weight_share précalculé, controlled_provinces paresseux. Fin de tour 4359 → 3972 ms (médiane).
+- Mécanique inchangée ; turn_digest change (forme de save). Ancienne save : compteurs de budget à 0 pour la saison en cours.
+
+## RULESDATA (vague 3, fusionné)
+- Macro `bundled_rules!` + `data_model::bundled` : 30/43 impl Default recopiant le JSON supprimés ; helpers read_into/read_some/load_entities_into dans load.rs.
+- Défauts Rust divergents du JSON (météo, AgentRules, FeudalRules, FreeMovement, AiDiplomacy, AiGrid, settlements/rules) : le JSON gagne partout ; jeu réel inchangé (chargeait déjà le JSON).
+- Plus de `#[serde(default)]` de conteneur sur FeudalRules et sous-structures, AiDiplomacy, NegotiationRules, AiFeudal subs, AgentEffects (interblocage OnceLock) : JSON complets requis.
+- Non vérifié : FileTable, SpacingFactors vs JSON.
