@@ -8,7 +8,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from cent_ans_tools import blender, budget, openrouter
+from cent_ans_tools import blender, budget, dn_ingest, openrouter
 
 app = typer.Typer(help="Outils du projet Cent Ans.", no_args_is_help=True)
 budget_app = typer.Typer(
@@ -99,6 +99,49 @@ def blender_smoke() -> None:
         console.print("[red]FAIL[/red] : le script Blender n'a pas imprimé OK")
         raise typer.Exit(code=1)
     console.print("[green]OK[/green] : cube exporté en glTF")
+
+
+@app.command("dn-ingest")
+def dn_ingest_command(
+    raw: Path = typer.Argument(..., exists=True, dir_okay=False, help="Glb brut TRELLIS/SF3D"),
+    asset_id: str = typer.Option(..., "--id", help="Identifiant snake_case anglais"),
+    asset_class: str = typer.Option(..., "--class", help="Classe (data/art/dn_ingest_classes.json)"),
+    length: float | None = typer.Option(None, help="Longueur cible (m)"),
+    width: float | None = typer.Option(None, help="Largeur cible (m)"),
+    height: float | None = typer.Option(None, help="Hauteur cible (m)"),
+    yaw: float = typer.Option(0.0, help="Lacet de correction en degrés (SF3D : 180)"),
+    lods: int = typer.Option(3, help="Nombre de LOD (1 à 3)"),
+    tex: int | None = typer.Option(None, help="Taille de texture (défaut : classe)"),
+    gamma: float = typer.Option(1.0, help="Gamma d'albédo avant plafonnement"),
+    no_grade: bool = typer.Option(False, "--no-grade", help="Pas d'étalonnage de l'albédo"),
+    source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
+    model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
+    cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
+    out_dir: Path | None = typer.Option(None, help="Racine de sortie (défaut game/assets/models/dn)"),
+    manifest: Path = typer.Option(dn_ingest.MANIFEST_PATH, help="Manifeste à mettre à jour"),
+) -> None:
+    """Transforme un glb brut en asset de jeu (échelle, pivot, LOD, albédo) et l'inscrit au manifeste."""
+    classes = dn_ingest.load_classes()
+    try:
+        job = dn_ingest.build_job(
+            asset_id=asset_id, asset_class=asset_class, raw=raw.resolve(), classes=classes,
+            out_dir=out_dir, length=length, width=width, height=height, yaw_deg=yaw,
+            lods=lods, tex=tex, grade=not no_grade, gamma=gamma,
+        )
+        result = dn_ingest.run_ingest(job, classes)
+    except (dn_ingest.IngestError, blender.BlenderError) as error:
+        console.print(f"[red]{error}[/red]")
+        raise typer.Exit(code=1) from error
+    problems = dn_ingest.check_result(job, result, classes)
+    entry = dn_ingest.manifest_entry(
+        job, result, asset_class, source_image=source_image, model_3d=model_3d, cost_usd=cost_usd
+    )
+    dn_ingest.update_manifest(entry, manifest)
+    console.print(f"{asset_id} : {result['triangles']} triangles, {result['dimensions_m']} m")
+    for problem in problems:
+        console.print(f"[yellow]{problem}[/yellow]")
+    if problems:
+        raise typer.Exit(code=2)
 
 
 @geo_app.command("build")

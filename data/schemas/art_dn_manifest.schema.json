@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_dn_manifest.schema.json",
+  "title": "Manifeste des assets 3D ingérés (lot DN ingest)",
+  "description": "Écrit par `tools/cent_ans_tools/dn_ingest.py` (`cent-ans dn-ingest`), une entrée par asset.",
+  "type": "object",
+  "required": ["assets"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "assets": {
+      "type": "object",
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "class", "files", "dimensions_m", "triangles", "tex"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "class": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "files": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "Chemins relatifs à game/assets/models/, un par LOD."},
+          "dimensions_m": {
+            "type": "object",
+            "required": ["length", "width", "height"],
+            "additionalProperties": false,
+            "properties": {
+              "length": {"type": "number"}, "width": {"type": "number"}, "height": {"type": "number"}
+            }
+          },
+          "triangles": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}},
+          "tex": {"type": "integer"},
+          "source_image": {"type": "string"},
+          "model_3d": {"type": "string"},
+          "raw": {"type": "string", "description": "Glb brut d'origine (hors dépôt)."},
+          "cost_usd": {"type": "number", "minimum": 0},
+          "yaw_deg": {"type": "number"},
+          "grade": {"type": "object", "description": "Étalonnage appliqué à l'albédo et statistiques avant/après."}
+        }
+      }
+    }
+  }
+}

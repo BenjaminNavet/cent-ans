@@ -120,3 +120,24 @@ TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul app
   `~/dev/cent-ans-raw/galerie-3d/` (`<objet>__<modèle image>__<modèle 3D>.glb`, régénérer avec
   `python3 -I build.py`).
 - Dans le jeu : budgets de triangles et LOD de la bible § 6, procédure d'asset § 11.
+
+### Ingestion d'un glb brut : `cent-ans dn-ingest` (lot DN)
+Un seul outil transforme un glb brut TRELLIS/SF3D en asset de jeu (bible § 14.4-14.6) :
+```
+uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <classe> \
+    (--length|--width|--height <m>) [--yaw 180] [--lods 3] [--tex 1024] [--gamma 1.0] [--no-grade] \
+    [--source-image ...] [--model-3d trellis-fal] [--cost-usd 0.02]
+```
+- Classes et budgets lus dans `data/art/dn_ingest_classes.json` (prop, house, major_building,
+  siege_engine, cart, ship, tree, rock : triangles par LOD, texture, axe d'échelle, dossier). Le
+  plafond de saturation (S 0,40) et la fenêtre d'albédo moyen (0,18-0,35) y sont aussi.
+- Étapes (`tools/blender_scripts/dn_ingest.py`, Blender headless) : fusion des maillages, lacet
+  `--yaw` (SF3D sort tourné de 180°), échelle uniforme à la taille cible, pivot au sol au centre,
+  +Y haut, texture réduite à la taille de la classe, étalonnage de l'albédo
+  (`dn_grade.py` : plafond de S, fenêtre de luminance), décimation quadrique LOD0/1/2.
+- Sorties : `game/assets/models/dn/<categorie>/<id>_lod{0,1,2}.glb` (un glb par LOD, texture JPEG
+  embarquée) et entrée dans `data/art/dn_manifest.json` (classe, chemins, dimensions, triangles par
+  LOD, texture, brut, image source, modèle 3D, coût, statistiques d'étalonnage). Code de sortie 2 si
+  un LOD dépasse son budget ou si S p95 > plafond. Aucune génération : l'outil ne touche pas au GPU.
+- Le contour des LOD dérive d'environ 1 % de la hauteur (mesuré sur une maison TRELLIS), sous la
+  limite de 3 % de la bible.

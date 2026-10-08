@@ -1,0 +1,20 @@
+{
+  "description": "Classes d'asset du lot DN `ingest` : budgets de triangles par LOD, texture, axe de mise à l'échelle et dossier de sortie (bible § 14.4-14.6). Lu par `tools/cent_ans_tools/dn_ingest.py` et `tools/blender_scripts/dn_ingest.py` ; ne rien coder en dur ailleurs.",
+  "grade": {
+    "saturation_cap": 0.40,
+    "mean_saturation_cap": 0.35,
+    "albedo_mean_min": 0.18,
+    "albedo_mean_max": 0.35
+  },
+  "lod_ratio_tolerance": 0.05,
+  "classes": {
+    "prop": {"label": "Accessoire (tonneau, caisse, étal)", "category": "props", "lod_tris": [1500, 500, 150], "tex": 512, "scale_axis": "height"},
+    "house": {"label": "Maison, grange, moulin, puits", "category": "buildings", "lod_tris": [8000, 2500, 600], "tex": 1024, "scale_axis": "length"},
+    "major_building": {"label": "Bâtiment majeur (église, halle, tour)", "category": "buildings", "lod_tris": [15000, 4000, 1000], "tex": 2048, "scale_axis": "length"},
+    "siege_engine": {"label": "Machine de siège", "category": "siege", "lod_tris": [12000, 3500, 800], "tex": 1024, "scale_axis": "length"},
+    "cart": {"label": "Charrette", "category": "props", "lod_tris": [12000, 3500, 800], "tex": 1024, "scale_axis": "length"},
+    "ship": {"label": "Bateau", "category": "ships", "lod_tris": [12000, 3500, 800], "tex": 1024, "scale_axis": "length"},
+    "tree": {"label": "Arbre ou arbuste de bataille", "category": "vegetation", "lod_tris": [6000, 1200, 300], "tex": 1024, "scale_axis": "height"},
+    "rock": {"label": "Rocher (hors bible : aligné sur l'accessoire large)", "category": "rocks", "lod_tris": [3000, 1000, 300], "tex": 1024, "scale_axis": "length"}
+  }
+}

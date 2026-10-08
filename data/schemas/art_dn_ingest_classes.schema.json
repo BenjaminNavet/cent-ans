@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_dn_ingest_classes.schema.json",
+  "title": "Classes d'ingestion d'assets 3D (lot DN ingest)",
+  "type": "object",
+  "required": ["grade", "lod_ratio_tolerance", "classes"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "grade": {
+      "type": "object",
+      "required": ["saturation_cap", "mean_saturation_cap", "albedo_mean_min", "albedo_mean_max"],
+      "additionalProperties": false,
+      "properties": {
+        "saturation_cap": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "mean_saturation_cap": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "albedo_mean_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "albedo_mean_max": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "lod_ratio_tolerance": {"type": "number", "minimum": 0, "maximum": 0.5, "description": "Écart relatif toléré entre triangles visés et obtenus par LOD."},
+    "classes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "category", "lod_tris", "tex", "scale_axis"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {"type": "string"},
+          "category": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "lod_tris": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 50}},
+          "tex": {"type": "integer", "enum": [256, 512, 1024, 2048]},
+          "scale_axis": {"enum": ["length", "width", "height"]}
+        }
+      }
+    }
+  }
+}
