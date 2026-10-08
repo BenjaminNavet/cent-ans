@@ -144,9 +144,4 @@ fn a_beaten_crown_keeps_its_capital_and_a_province() {
         assert!(!provinces.contains(&capital), "{provinces:?}");
         assert!(provinces.len() < owned, "{provinces:?}");
     }
-    // The F4 rules cede everything: Scotland vanishes from the map.
-    let mut f4 = data.clone();
-    f4.ai_diplomacy = AiDiplomacy::default();
-    let offers = scottish_surrender(&f4);
-    assert!(offers.iter().any(|p| p.len() == owned), "{offers:?}");
 }

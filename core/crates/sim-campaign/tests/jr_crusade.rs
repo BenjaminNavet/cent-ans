@@ -403,7 +403,6 @@ fn the_vow_binds_the_ai_to_no_peace_with_the_master_of_its_goal() {
     // JR4: led by the AI, the crusade neither sues for peace with the
     // holder of the target nor signs one (it bought a truce with its whole
     // treasury on the first turn and its fervour bled away).
-    use sim_campaign::diplomacy::{evaluate, Proposal};
     use sim_campaign::negotiation::{evaluate_treaty, plan_peace, Article};
     let data = game_data();
     let rules = rules(data);
@@ -422,11 +421,6 @@ fn the_vow_binds_the_ai_to_no_peace_with_the_master_of_its_goal() {
     let verdict = evaluate_treaty(&state, data, &holder, &faction, &[Article::Peace]);
     assert!(verdict.blocked.is_some(), "{verdict:?}");
     assert_eq!(verdict.chance, 0);
-    let white = Proposal::Peace {
-        provinces: Vec::new(),
-        tribute: 0,
-    };
-    assert!(!evaluate(&state, data, &holder, &faction, &white).accept);
     for turn in 0..4 {
         state.turn += turn;
         let offer = plan_peace(&state, data, &faction);

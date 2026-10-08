@@ -370,15 +370,13 @@ fn the_player_receives_ai_treaties_as_offers() {
             data,
             &en,
             &fr,
-            sim_campaign::diplomacy::Proposal::Treaty {
-                articles: vec![
-                    Article::Peace,
-                    Article::Gold {
-                        giver: Party::Proposer,
-                        amount: 100,
-                    },
-                ],
-            },
+            sim_campaign::negotiation::Treaty::new(vec![
+                Article::Peace,
+                Article::Gold {
+                    giver: Party::Proposer,
+                    amount: 100,
+                },
+            ]),
         )
         .unwrap();
     let offer = state.factions[&fr].offers.last().cloned().expect("offer");

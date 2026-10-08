@@ -1,5 +1,11 @@
 //! Lot DP1 (ADR 0025): diplomatic negotiation.
 //!
+//! Every diplomatic proposal is a [`Treaty`] of [`Article`]s (ADR 0202): an
+//! alliance, a feudal call or a ten-article peace alike. Each article checks
+//! itself (`check`), values itself for the recipient (`value`), executes
+//! itself (`apply`) and words itself (`label`); the treaty is their sum plus
+//! the general considerations of `context`.
+//!
 //! - **Treaties** with several articles (peace, truce, alliance, military
 //!   access, trade agreement, marriage, tribute, gold, cession of a province
 //!   or of a settlement, vassalage, release of a captive, hostage), each given
@@ -419,6 +425,16 @@ pub struct TreatyEvaluation {
 }
 
 impl TreatyEvaluation {
+    /// Every reason weighed, article by article, after the general
+    /// considerations.
+    pub fn detailed_reasons(&self) -> ReasonList {
+        let mut reasons = self.context.clone();
+        for article in &self.articles {
+            reasons.extend(article.reasons.clone());
+        }
+        reasons
+    }
+
     /// Flat list of reasons (context first), for [`diplomacy::Evaluation`].
     pub fn reasons(&self) -> ReasonList {
         let mut reasons = self.context.clone();
