@@ -30,6 +30,17 @@
         "barred": {"type": "boolean", "description": "Barre rouge en diagonale (cercle barré si pas d'icône)."}
       }
     },
+    "campaign_cursor": {
+      "type": "object",
+      "required": ["id", "fill", "barred"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "enum": ["hand", "move", "attack", "siege", "embark", "forbidden"], "description": "Contexte de curseur de la carte de campagne, nom du fichier `game/assets/ui/cursors_campaign/<id>.png`."},
+        "icon": {"$ref": "#/$defs/id"},
+        "fill": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
+        "barred": {"type": "boolean"}
+      }
+    },
     "entry": {
       "type": "object",
       "required": ["id", "label", "subject", "targets"],
@@ -37,7 +48,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/id"},
         "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
-        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action", "trait", "cb"]},
+        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action", "trait", "cb", "religion", "order", "edict", "glyph"]},
         "subject": {"type": "string", "minLength": 3, "description": "Sujet en anglais, ajouté à la fin du prompt de style."},
         "source": {"type": "string", "description": "Image déjà validée réutilisée telle quelle (aucune génération)."},
         "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}}
@@ -53,6 +64,7 @@
     "medallion_style": {"$ref": "#/$defs/style"},
     "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}},
     "cursors": {"type": "array", "description": "Lot CB : curseurs de bataille 32 px, point chaud au centre, dérivés gratuitement des icônes à l'encre.", "items": {"$ref": "#/$defs/cursor"}},
+    "cursors_campaign": {"type": "array", "description": "Lot DN ui-prod : curseurs de la carte de campagne 32 px (même dérivation que `cursors`).", "items": {"$ref": "#/$defs/campaign_cursor"}},
     "medallions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
   }
 }
