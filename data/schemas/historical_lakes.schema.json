@@ -27,7 +27,7 @@
           {"required": ["axis", "width_m"], "not": {"required": ["polygon"]}}
         ],
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "name": {"type": "string", "minLength": 1},
           "status": {"enum": ["drained", "existing"], "description": "drained : asséché depuis 1340 ; existing : existe encore."},
           "drained": {"type": "string", "description": "Années de l'assèchement."},

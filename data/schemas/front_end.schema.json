@@ -18,14 +18,7 @@
       "type": "string",
       "pattern": "^res://.+\\.(jpg|png|glb)$"
     },
-    "vec3": {
-      "type": "array",
-      "items": {
-        "type": "number"
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
+    "vec3": { "$ref": "common.schema.json#/$defs/vec3" },
     "vec2": {
       "type": "array",
       "items": {

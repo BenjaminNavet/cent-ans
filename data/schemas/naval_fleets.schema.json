@@ -13,10 +13,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "faction": {
-            "type": "string",
-            "pattern": "^fac_[a-z0-9_]+$"
-          },
+          "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
           "ships": {
             "type": "object",
             "propertyNames": {
@@ -88,14 +85,8 @@
       "type": "object",
       "description": "Types d'unités embarqués quand la flotte sort sans armée.",
       "properties": {
-        "archers": {
-          "type": "string",
-          "pattern": "^unit_[a-z0-9_]+$"
-        },
-        "soldiers": {
-          "type": "string",
-          "pattern": "^unit_[a-z0-9_]+$"
-        }
+        "archers": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+        "soldiers": { "$ref": "common.schema.json#/$defs/unit_type_id" }
       },
       "required": [
         "archers",

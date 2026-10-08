@@ -7,7 +7,7 @@
   "required": ["categories", "border", "army", "town"],
   "additionalProperties": false,
   "$defs": {
-    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "color": { "$ref": "common.schema.json#/$defs/color_hex" },
     "unit": {"type": "number", "minimum": 0, "maximum": 1},
     "category": {"enum": ["self", "enemy", "friend", "other"]},
     "plate": {

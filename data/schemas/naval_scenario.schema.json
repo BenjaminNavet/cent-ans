@@ -8,7 +8,7 @@
     "fleet": {
       "type": "object",
       "properties": {
-        "faction": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+        "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
         "faction_name": { "type": "string" },
         "admiral": { "type": "string" },
         "hold": { "type": "boolean", "description": "La flotte reste à l'ancre (IA)." },
@@ -33,7 +33,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+              "unit_type": { "$ref": "common.schema.json#/$defs/unit_type_id" },
               "name": { "type": "string" },
               "morale": { "type": "integer", "minimum": 0, "maximum": 100 },
               "experience": { "type": "integer", "minimum": 0, "maximum": 10 }

@@ -106,21 +106,14 @@
           "maximum": 1,
           "description": "Facteur de luminosité du sol hors de vue (1 = inchangé)."
         },
-        "veil_color": {
-          "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$",
-          "description": "Ton parchemin du voile."
-        },
+        "veil_color": { "description": "Ton parchemin du voile.", "$ref": "common.schema.json#/$defs/color_hex" },
         "veil_strength": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
           "description": "Lavis uni par-dessus le sol (0 = aucun)."
         },
-        "mist_color": {
-          "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
-        },
+        "mist_color": { "$ref": "common.schema.json#/$defs/color_hex" },
         "mist_max": {
           "type": "number",
           "minimum": 0,
@@ -223,20 +216,14 @@
           "minimum": 0,
           "maximum": 12
         },
-        "color": {
-          "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
-        },
+        "color": { "$ref": "common.schema.json#/$defs/color_hex" },
         "alpha": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
           "description": "Opacité de l'encre : discrète, sous celle des noms de ville."
         },
-        "halo_color": {
-          "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
-        },
+        "halo_color": { "$ref": "common.schema.json#/$defs/color_hex" },
         "halo_alpha": {
           "type": "number",
           "minimum": 0,
@@ -546,10 +533,7 @@
           "maximum": 1,
           "description": "Part de la nappe gardée de près."
         },
-        "color": {
-          "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
-        }
+        "color": { "$ref": "common.schema.json#/$defs/color_hex" }
       }
     },
     "forest_masses": {

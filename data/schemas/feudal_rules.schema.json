@@ -109,8 +109,8 @@
       "items": {
         "type": "object",
         "properties": {
-          "vassal": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Faction félonne (tient un titre du suzerain)." },
-          "liege": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Suzerain qui peut prononcer la commise." },
+          "vassal": { "description": "Faction félonne (tient un titre du suzerain).", "$ref": "common.schema.json#/$defs/faction_id" },
+          "liege": { "description": "Suzerain qui peut prononcer la commise.", "$ref": "common.schema.json#/$defs/faction_id" },
           "reason": { "enum": ["refused_host", "allied_with_enemy", "revolt", "harboured_felon"], "description": "Motif du cas." }
         },
         "required": ["vassal", "liege", "reason"],

@@ -130,7 +130,7 @@
       "propertyNames": {"enum": ["political", "diplomacy", "religion", "unrest", "wealth", "population", "loyalty", "supply", "claims"]},
       "additionalProperties": {"$ref": "#/$defs/mode"}
     },
-    "neutral_color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "neutral_color": { "$ref": "common.schema.json#/$defs/color_hex" },
     "terrain_realm_band_alpha": {"$ref": "#/$defs/unit", "description": "Liseré sombre intérieur du shader de terrain, remplacé par le halo (0 = supprimé)."},
     "emission": {"$ref": "#/$defs/unit", "description": "Part émissive de la couleur du trait et du halo en vue 3D (lisible à l'ombre du relief)."},
     "quality": {

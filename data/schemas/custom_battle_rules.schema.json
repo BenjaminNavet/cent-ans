@@ -102,11 +102,7 @@
       "maximum": 6,
       "description": "Beffrois au plus (hors budget et hors plafond d'unités)."
     },
-    "siege_tower_unit_type": {
-      "type": "string",
-      "pattern": "^unit_[a-z0-9_]+$",
-      "description": "Type d'unité d'un beffroi (statistiques du régiment-engin)."
-    }
+    "siege_tower_unit_type": { "description": "Type d'unité d'un beffroi (statistiques du régiment-engin).", "$ref": "common.schema.json#/$defs/unit_type_id" }
   },
   "required": [
     "default_budget",

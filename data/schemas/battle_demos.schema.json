@@ -22,7 +22,7 @@
           "province": {"type": "string", "pattern": "^prov_[a-z0-9_]+$"},
           "landmark": {"type": "string", "pattern": "^[a-z0-9_]+$"},
           "attacker": {"enum": ["fac_france", "fac_england"]},
-          "engines": {"type": "array", "items": {"type": "string", "pattern": "^unit_[a-z0-9_]+$"}}
+          "engines": {"type": "array", "items": { "$ref": "common.schema.json#/$defs/unit_type_id" }}
         },
         "allOf": [
           {"if": {"properties": {"kind": {"const": "field"}}}, "then": {"not": {"anyOf": [{"required": ["province"]}, {"required": ["landmark"]}]}}},

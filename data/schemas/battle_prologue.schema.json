@@ -65,9 +65,9 @@
       "additionalProperties": false,
       "required": ["faction", "budget", "units"],
       "properties": {
-        "faction": {"type": "string", "pattern": "^fac_[a-z0-9_]+$"},
+        "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
         "budget": {"type": "integer", "minimum": 0},
-        "units": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^unit_[a-z0-9_]+$"}}
+        "units": {"type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/unit_type_id" }}
       }
     },
     "condition": {

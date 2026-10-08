@@ -5,7 +5,7 @@
   "description": "Fichier data/fx/campaign_lighting.json (lot RV-B) lu par game/scripts/visual/campaign_lighting.gd et appliqué par CampaignAtmosphere. Le soleil de base par saison vit dans fx/atmosphere.json. Aucune règle de jeu.",
   "type": "object",
   "$defs": {
-    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "pair": {
       "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2,
       "description": "[vue basse inclinée, vue de dessus], interpolé selon le tangage de la caméra."

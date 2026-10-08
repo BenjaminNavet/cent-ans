@@ -34,7 +34,7 @@
     }
   },
   "$defs": {
-    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 0, "maximum": 255}},
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb255" },
     "asset": {"type": "string", "pattern": "^[A-Za-z]+[0-9]{3}$", "description": "Identifiant ambientCG."},
     "axis": {"enum": ["vertical", "horizontal"], "description": "Sens du grand axe des feuilles dans l'atlas."},
     "leaf_px": {"type": "integer", "minimum": 8, "maximum": 400, "description": "Longueur moyenne d'une feuille sur la carte (px)."},

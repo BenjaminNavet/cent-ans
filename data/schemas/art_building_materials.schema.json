@@ -19,7 +19,7 @@
           "normal": {"type": "string", "description": "Chemin relatif à `assets/textures/`, sans extension."},
           "roughness_map": {"type": "string", "description": "Chemin relatif à `assets/textures/`, sans extension ; absent = rugosité scalaire (`roughness`)."},
           "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
-          "tint": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "tint": { "$ref": "common.schema.json#/$defs/vec3" },
           "roughness": {"type": "number", "minimum": 0, "maximum": 1},
           "roof": {"type": "boolean", "default": false},
           "poly_haven_id": {"type": "string", "description": "Identifiant Poly Haven (source directe) ou vide si dérivé/procédural (cf. README.md)."},
@@ -35,7 +35,7 @@
         "additionalProperties": false,
         "properties": {
           "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
-          "color": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "color": { "$ref": "common.schema.json#/$defs/vec3" },
           "roughness": {"type": "number", "minimum": 0, "maximum": 1}
         }
       }

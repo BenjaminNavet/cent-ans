@@ -153,7 +153,7 @@
     }
   },
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "box": {
       "type": "array",
       "description": "Rectangle de découpe dans la photographie d'origine : x0, y0, x1, y1 (px).",
@@ -164,7 +164,7 @@
     "size": {"type": "integer", "minimum": 16, "maximum": 512, "description": "Plus grand côté du fichier produit (px), avant ombre."},
     "rotate": {"type": "integer", "enum": [0, 90, 180, 270], "description": "Quarts de tour, sens trigonométrique."},
     "unit": {"type": "number", "minimum": 0, "maximum": 1},
-    "colour": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}, "minItems": 3, "maxItems": 3},
+    "colour": { "$ref": "common.schema.json#/$defs/rgb255" },
     "matte": {
       "type": "object",
       "description": "Détourage : distance de couleur au support (parchemin, fond de musée).",

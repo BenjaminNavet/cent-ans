@@ -8,24 +8,13 @@
     "format": {
       "const": 2
     },
-    "id": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*$"
-    },
+    "id": { "$ref": "common.schema.json#/$defs/snake_id" },
     "name": {
       "type": "string",
       "minLength": 1
     },
-    "settlement": {
-      "type": "string",
-      "pattern": "^set_[a-z0-9_]+$",
-      "description": "Colonie représentée."
-    },
-    "landmark": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*$",
-      "description": "Maquette L1/L2 (data/landmarks/<id>.json) affichée en vue stratégique. Absente : la colonie garde en vue stratégique la maquette de colonie ordinaire, et la ville 1:1 remplace sa ville ZG6 (Orléans, VH7)."
-    },
+    "settlement": { "description": "Colonie représentée.", "$ref": "common.schema.json#/$defs/settlement_id" },
+    "landmark": { "description": "Maquette L1/L2 (data/landmarks/<id>.json) affichée en vue stratégique. Absente : la colonie garde en vue stratégique la maquette de colonie ordinaire, et la ville 1:1 remplace sa ville ZG6 (Orléans, VH7).", "$ref": "common.schema.json#/$defs/snake_id" },
     "period": {
       "type": "string",
       "description": "État représenté, en français."
@@ -720,10 +709,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$"
-          },
+          "id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "name": {
             "type": "string"
           },
@@ -949,15 +935,7 @@
       "minItems": 2,
       "maxItems": 2
     },
-    "point_width": {
-      "type": "array",
-      "items": {
-        "type": "number"
-      },
-      "minItems": 3,
-      "maxItems": 3,
-      "description": "[dE, dN, largeur m]"
-    },
+    "point_width": { "description": "[dE, dN, largeur m]", "$ref": "common.schema.json#/$defs/vec3" },
     "range": {
       "type": "array",
       "items": {

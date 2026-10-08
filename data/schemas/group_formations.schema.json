@@ -91,7 +91,7 @@
     "preset": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "id": { "$ref": "common.schema.json#/$defs/snake_id" },
         "name_fr": { "type": "string", "minLength": 1 },
         "description_fr": { "type": "string", "minLength": 1 },
         "stance": { "type": "string", "enum": ["attack", "defense", "march"] },
