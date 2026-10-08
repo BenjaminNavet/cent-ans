@@ -1,13 +1,12 @@
 """Validates data/ui/fa_ui_assets.json and the cutting of the FA5 interface ornaments."""
 
-import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import fa_ui_assets
+from cent_ans_tools.codex import schema_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -142,10 +141,8 @@ def test_catalogue_without_initials_or_spray_is_valid(tmp_path: Path) -> None:
     catalogue["initials"] = []
     catalogue["ornaments"] = []
     catalogue["display"]["title_spray"] = ""
-    schema = json.loads(
-        (DATA / "schemas" / "ui_fa_assets.schema.json").read_text(encoding="utf-8")
-    )
-    assert not list(Draft202012Validator(schema).iter_errors(catalogue))
+    validator = schema_validator(DATA, "ui_fa_assets.schema.json")
+    assert not list(validator.iter_errors(catalogue))
     text = fa_ui_assets.sources_markdown(catalogue)
     assert "initials/" not in text and "ornaments/" not in text
     assert "seals/" in text
@@ -175,10 +172,8 @@ def test_initial_and_ornament_entries_still_validate() -> None:
         }
     ]
     catalogue["display"]["title_spray"] = "spray_example"
-    schema = json.loads(
-        (DATA / "schemas" / "ui_fa_assets.schema.json").read_text(encoding="utf-8")
-    )
-    assert not list(Draft202012Validator(schema).iter_errors(catalogue))
+    validator = schema_validator(DATA, "ui_fa_assets.schema.json")
+    assert not list(validator.iter_errors(catalogue))
     region = np.full((64, 64, 3), 0.5, dtype=np.float32)
     assert fa_ui_assets.cut_initial(region, catalogue["initials"][0]).shape == (
         64,
