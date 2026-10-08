@@ -30,6 +30,7 @@ def main(trot_path, gallop_path, out_path):
             legs[leg] = {
                 "u": rounded(curves["u"]),
                 "d": rounded(curves["d"]),
+                "h": rounded(curves["h"]),
                 "upper": rounded(d["joints"][leg]["upper"], 3),
                 "lower": rounded(d["joints"][leg]["lower"], 3),
             }
@@ -38,6 +39,7 @@ def main(trot_path, gallop_path, out_path):
             "frames_measured": d["frames"],
             "period_frames": d["period_frames"],
             "samples": d["samples"],
+            "planted_tol": d["planted_tol"],
             "duty": {k: round(v["duty"], 2) for k, v in d["stance"].items()},
             "legs": legs,
             "rise": rounded(d["rise"]),

@@ -78,6 +78,7 @@ def normalise(gait):
         "u": u,
         "d": d,
         "height": height,
+        "h": height,
         "planted": height < gait.get("planted_tol", PLANTED),
         "rise": rise,
         "pitch": pitch,
@@ -148,7 +149,7 @@ def fit(keypoints, gait_name, harmonics, samples, refine):
     design = _design(grid, harmonics)
     curves = {}
     rms = {}
-    for name in ("u", "d"):
+    for name in ("u", "d", "h"):
         for j, leg in enumerate(LEGS):
             coef, r = fourier_fit(phase, norm[name][:, j], harmonics)
             curves.setdefault(leg, {})[name] = (design @ coef).tolist()
@@ -157,7 +158,7 @@ def fit(keypoints, gait_name, harmonics, samples, refine):
         # Trot and walk: the second leg of a pair is the first one half a stride later.
         half = samples // 2
         for a, b in (("F1", "F2"), ("H1", "H2")):
-            for name in ("u", "d"):
+            for name in ("u", "d", "h"):
                 ca = np.array(curves[a][name])
                 cb = np.array(curves[b][name])
                 mean_a = (ca + np.roll(cb, half)) / 2.0  # b(phi) = a(phi + 0.5)
@@ -200,6 +201,7 @@ def fit(keypoints, gait_name, harmonics, samples, refine):
         "samples": samples,
         "harmonics": harmonics,
         "leg_length_px": norm["length_px"],
+        "planted_tol": gait.get("planted_tol", PLANTED),
         "legs": {leg: curves[leg] for leg in LEGS},
         "joints": joints,
         "rise": curves["rise"],
@@ -227,20 +229,18 @@ def track(frames_dir, keypoints, gait_name, seeds):
         i = start
         while i != stop:
             nxt, st, _err = cv2.calcOpticalFlowPyrLK(grays[i], grays[i + step], cur, None, **lk)
-            cur = np.where(st == 1, nxt, cur)
+            cur = np.where(st.reshape(-1, 1, 1) == 1, nxt, cur)
             i += step
             out[i] = cur.reshape(-1, 2).copy()
         return out
 
     seeds = sorted(seeds)
     errors = []
-    for a, b in zip(seeds, seeds[1:] + [seeds[0] + n], strict=True):
-        fwd = run(a, min(b, n - 1), 1) if b < n else run(a, n - 1, 1)
-        bwd = run(b % n, a if b < n else 0, -1) if b < n else {}
-        for i in range(a + 1, min(b, n)):
-            if i in seeds:
-                continue
-            w = (i - a) / (b - a)
+    for a, b in zip(seeds, [*seeds[1:], None], strict=True):
+        fwd = run(a, (b if b is not None else n - 1), 1)
+        bwd = run(b, a, -1) if b is not None else {}
+        for i in range(a + 1, b if b is not None else n):
+            w = (i - a) / (b - a) if b is not None else 0.0
             est = fwd[i] if i not in bwd else (1 - w) * fwd[i] + w * bwd[i]
             errors.append(np.linalg.norm(est - pts[i], axis=1))
     err = np.array(errors)

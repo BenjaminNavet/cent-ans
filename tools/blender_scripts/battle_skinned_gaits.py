@@ -26,7 +26,9 @@ head towards the inside (left turn = counter-clockwise seen from above). The rid
 World space is Blender's: Z up, the horse faces -Y, its left side is at +X.
 """
 
+import json
 import math
+import os
 
 import battle_skinned as bs
 import battle_skinned_poses as poses
@@ -203,6 +205,13 @@ def trot_pose(harm, phase):
 
 
 def horse_trot(harm, t, frames=TROT_FRAMES):
+    """Horse trotting: measured legs (lot AS8b), or the keyframed trot with AS8B_LEGACY=1."""
+    if free_enabled():
+        return horse_trot_free(harm, t, frames)
+    return horse_trot_keyed(harm, t, frames)
+
+
+def horse_trot_keyed(harm, t, frames=TROT_FRAMES):
     """Horse trotting: the legs by diagonal pairs, two suspensions, nodding head."""
     entry = _Entry(harm)
     phase = trot_phase(t, frames)
@@ -222,6 +231,251 @@ def horse_trot(harm, t, frames=TROT_FRAMES):
     poses.rotate_about(harm, "Neck1", poses.X_AXIS, nod)
     poses.rotate_about(harm, "Tail1", poses.X_AXIS, TROT_TAIL)
     poses._horse_feet(harm, before)
+
+
+# --- Gaits measured on free films (lot AS8b) -------------------------------------------------
+#
+# The legs are driven by hoof trajectories measured on Muybridge's plates (public domain):
+# `tools/video_mocap/track_quadruped.py` -> `data/horse_gaits_free.json` (see data/SOURCE.md).
+# Each hoof is placed relative to the root of its leg (leg lengths forward `u`, below `d`) and
+# the leg is bent to reach it (sagittal CCD); the body rises and pitches as measured. The
+# spine, neck and tail still come from the Quaternius actions (Walk for the trot, Gallop).
+
+FREE_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data", "horse_gaits_free.json"
+)
+FREE_LEG = {
+    "trot": {"FL": "F1", "BR": "H1", "FR": "F2", "BL": "H2"},
+    "gallop": {"FL": "F1", "FR": "F2", "BL": "H1", "BR": "H2"},
+}
+# Share of the measured stride amplitude kept (the drawn trot is an extended racing trot).
+FREE_REACH = {"trot": 1.0, "gallop": 1.0}
+FREE_DUTY = {"trot": 0.36}  # planted share of the stride of every leg (diagonal pairs)
+FREE_LIFT = {"trot": 0.5, "gallop": 0.8}  # share of the measured hoof height (drawn high knees)
+FREE_CROUCH = {"trot": 0.14, "gallop": 0.14}  # m, body lowered so the legs can reach the stride
+FREE_RISE = {"trot": 1.0, "gallop": 0.6}  # share of the measured rise of the body
+FREE_PITCH = {"trot": 1.0, "gallop": 0.6}
+GALLOP_FRAMES = 15  # the clip keeps its length (cadence data)
+_FREE = {}
+
+
+def free_enabled():
+    """True unless AS8B_LEGACY=1 asks for the AS3 keyframed gaits (A/B comparison)."""
+    return os.environ.get("AS8B_LEGACY") != "1"
+
+
+def free_gaits():
+    """Measured gait table (cached)."""
+    if not _FREE:
+        with open(FREE_PATH) as f:
+            _FREE.update(json.load(f)["gaits"])
+        for name, table in _FREE.items():
+            table["name"] = name
+    return _FREE
+
+
+def _with_stance(table, gait_duty=None):
+    """Hoof curves with a flat, uniform stance (cached on the table).
+
+    The low-harmonic fit rounds the stance off. Where the fitted hoof height is under the
+    planted tolerance the hoof is put on the ground (height 0) and its `u` is replaced by a
+    straight line between the touchdown and lift-off values: the planted hoof then travels
+    backwards at one constant speed.
+    """
+    if "eff" in table:
+        return table["eff"]
+    gait_duty = FREE_DUTY.get(table["name"])
+    tol = table["planted_tol"]
+    eff = {}
+    for name, curve in table["legs"].items():
+        n = len(curve["u"])
+        u = list(curve["u"])
+        leg_tol = tol
+        if gait_duty:  # diagonal pairs share their stance: every leg gets the same duty
+            leg_tol = sorted(curve["h"])[min(int(gait_duty * n), n - 1)]
+        top = max(max(curve["h"]) - leg_tol, 1e-6)
+        # Square root: the hoof leaves the ground briskly instead of skimming it.
+        h = [top * math.sqrt(max(v - leg_tol, 0.0) / top) for v in curve["h"]]
+        planted = [v <= 0.0 for v in h]
+        if all(planted) or not any(planted):
+            eff[name] = {"u": u, "h": h}
+            continue
+        start = next(i for i in range(n) if planted[i] and not planted[i - 1])
+        i = start
+        while i < start + n:
+            if not planted[i % n]:
+                i += 1
+                continue
+            end = i
+            while planted[(end + 1) % n] and end + 1 < start + n:
+                end += 1
+            first, last = curve["u"][i % n], curve["u"][end % n]
+            for k in range(end - i + 1):
+                u[(i + k) % n] = first + (last - first) * k / max(end - i, 1)
+            i = end + 1
+        eff[name] = {"u": u, "h": h}
+    table["eff"] = eff
+    return eff
+
+
+SHOULDER = {
+    "FL": "FrontShoulder.L",
+    "FR": "FrontShoulder.R",
+    "BL": "BackShoulder.L",
+    "BR": "BackShoulder.R",
+}
+JOINT_KICK = 1.0  # rad
+SHOULDER_SHARE = 0.6  # share of the needed angle the shoulder / hip blade takes
+
+
+def _plant_with_shoulder(harm, leg, before, target, iterations=24):
+    """`poses._plant` with the shoulder (or hip) blade in the chain: a longer lever arm."""
+    chain = (SHOULDER[leg], *poses.HORSE_LEGS[leg][0])
+    # Start with the joint flexed the right way (foreleg: hoof back; hind leg: hoof forward) so
+    # that the solver does not settle on a hyperextended leg.
+    kick = JOINT_KICK if leg[0] == "F" else -JOINT_KICK
+    poses.rotate_about(harm, chain[-1], poses.X_AXIS, kick)
+    for _ in range(iterations):
+        for bone in reversed(chain):
+            end = poses._hoof_at(harm, leg, before).to_translation()
+            pivot = poses.pos(harm, bone)
+            a = end - pivot
+            b = target - pivot
+            angle = math.atan2(b.z, b.y) - math.atan2(a.z, a.y)
+            angle = (angle + math.pi) % (2.0 * math.pi) - math.pi
+            if bone == SHOULDER[leg]:
+                angle *= SHOULDER_SHARE
+            poses.rotate_about(harm, bone, poses.X_AXIS, max(-0.3, min(0.3, angle)), pivot)
+
+
+def stride_gain(gait, rest):
+    """Share of the measured stride the rig's legs can reach (the same for the four legs).
+
+    The measured stride is scaled by one factor so that every planted hoof still travels at
+    the same speed (the speed of the ground under the horse); the factor is the largest one
+    at which the shortest leg, with the body lowered by the crouch, reaches the stride.
+    """
+    key = "gain_" + gait
+    if key not in rest:
+        table = free_gaits()[gait]
+        gain = FREE_REACH[gait]
+        for leg, name in FREE_LEG[gait].items():
+            curve = _with_stance(table)[name]
+            mean_u = sum(curve["u"]) / len(curve["u"])
+            half = max(abs(v - mean_u) for v in curve["u"]) * rest["unit"]
+            dz = rest[leg][0] - rest[leg][1] - FREE_CROUCH[gait]
+            allowed = math.sqrt(max(rest[leg + "_reach"] ** 2 - dz * dz, 0.0))
+            gain = min(gain, 0.92 * allowed / max(half, 1e-6))
+        rest[key] = gain
+    return rest[key]
+
+
+def _periodic(values, phase):
+    """Linear interpolation of a looping table at `phase` (0-1)."""
+    n = len(values)
+    x = (phase % 1.0) * n
+    i = int(math.floor(x))
+    w = x - i
+    return values[i % n] * (1.0 - w) + values[(i + 1) % n] * w
+
+
+def touchdown_phase(gait):
+    """Phase of the table at which the near-fore touches down (maximum reach of F1)."""
+    u = free_gaits()[gait]["legs"]["F1"]["u"]
+    return max(range(len(u)), key=u.__getitem__) / len(u)
+
+
+def apply_free_legs(harm, gait, phase, before, rest):
+    """Body motion then hooves of the measured `gait` at table phase `phase`.
+
+    `rest` = standing geometry from `_rest_geometry`.
+    """
+    table = free_gaits()[gait]
+    unit = rest["unit"]
+    lift = _periodic(table["rise"], phase) * FREE_RISE[gait] * unit - FREE_CROUCH[gait]
+    hip = (poses.pos(harm, "BackLeg.L") + poses.pos(harm, "BackLeg.R")) / 2
+    mean_pitch = sum(table["pitch"]) / len(table["pitch"])
+    pitch = _periodic(table["pitch"], phase) - mean_pitch
+    poses.rotate_about(harm, "Body", poses.X_AXIS, -FREE_PITCH[gait] * pitch, hip)
+    poses.translate(harm, "Body", Vector((0.0, 0.0, lift)))
+    for leg, name in FREE_LEG[gait].items():
+        chain, _hoof = poses.HORSE_LEGS[leg]
+        curve = _with_stance(table)[name]
+        mean_u = sum(curve["u"]) / len(curve["u"])
+        u = (_periodic(curve["u"], phase) - mean_u) * stride_gain(gait, rest)
+        height = _periodic(curve["h"], phase) * FREE_LIFT[gait]
+        root = poses.pos(harm, chain[0])
+        _root_height, hoof_height = rest[leg]
+        dz = root.z - (hoof_height + height * unit)  # root above the hoof
+        reach = rest[leg + "_reach"]
+        dy = u * unit
+        if dz * dz + dy * dy > reach * reach:  # keep the hoof height, shorten the stride
+            dy = math.copysign(math.sqrt(max(reach * reach - dz * dz, 0.0)), dy)
+        target = Vector(
+            (
+                rest[leg + "_x"],
+                root.y + rest[leg + "_dy"] - dy,  # the horse faces -Y
+                root.z - dz,
+            )
+        )
+        _plant_with_shoulder(harm, leg, before, target)
+        if os.environ.get("AS8B_DEBUG"):
+            got = poses._hoof_at(harm, leg, before).to_translation()
+            print("PLANT", gait, leg, round(phase % 1, 2), "want", tuple(round(v, 2) for v in target), "got", tuple(round(v, 2) for v in got))
+    poses._horse_feet(harm, before)
+
+
+def _rest_geometry(harm):
+    """Standing geometry of the legs (cached on the armature)."""
+    key = (harm.as_pointer(), "free_rest")
+    if key not in _CACHE:
+        entry = _Entry(harm)
+        for pb in harm.pose.bones:
+            pb.matrix_basis.identity()
+        bpy.context.view_layer.update()
+        legs = poses.HORSE_LEGS
+        rest = {"unit": sum(poses.pos(harm, c[0]).z for c, _h in legs.values()) / 4.0}
+        for leg, (chain, hoof) in legs.items():
+            rest[leg] = (poses.pos(harm, chain[0]).z, poses.pos(harm, hoof).z)
+            rest[leg + "_x"] = poses.pos(harm, hoof).x
+            rest[leg + "_dy"] = poses.pos(harm, hoof).y - poses.pos(harm, chain[0]).y
+            heads = [poses.pos(harm, b) for b in (SHOULDER[leg], *chain)] + [
+                poses.pos(harm, hoof)
+            ]
+            length = sum((b - a).length for a, b in zip(heads, heads[1:], strict=False))
+            rest[leg + "_reach"] = 0.97 * length
+        entry.restore()
+        _CACHE[key] = rest
+    return _CACHE[key]
+
+
+def horse_trot_free(harm, t, frames=TROT_FRAMES):
+    """Trot from the measured table: walk spine, legs placed on the measured hoof paths."""
+    rest = _rest_geometry(harm)
+    entry = _Entry(harm)
+    phase = trot_phase(t, frames)
+    pose = dict(_at(harm, WALK, phase * _frames(WALK)[1]))
+    entry.restore()
+    _commit(harm, pose)
+    before = poses._horse_capture(harm)
+    apply_free_legs(harm, "trot", phase + touchdown_phase("trot"), before, rest)
+    poses.rotate_about(harm, "Tail1", poses.X_AXIS, TROT_TAIL)
+
+
+def gallop_free(count=GALLOP_FRAMES, frames=GALLOP_FRAMES):
+    """Horse override: the measured gallop (a stride lasts `frames` of the clip's `count`)."""
+
+    def override(harm, t):
+        rest = _rest_geometry(harm)
+        entry = _Entry(harm)
+        phase = (t * (count - 1) / frames) % 1.0
+        pose = _at(harm, GALLOP, phase * _frames(GALLOP)[1])
+        entry.restore()
+        _commit(harm, pose)
+        before = poses._horse_capture(harm)
+        apply_free_legs(harm, "gallop", phase + touchdown_phase("gallop"), before, rest)
+
+    return override
 
 
 # --- Turns ----------------------------------------------------------------------------------
@@ -360,6 +614,24 @@ def clip_specs():
                 )
             )
     return rows
+
+
+FREE_GALLOP_ROWS = {"c_gallop": 15, "c_charge": 15, "c_std_gallop": 15, "c_std_charge": 30}
+
+
+def free_rows(rows):
+    """Rows of `battle_skinned_cavalry.clip_specs` with the gallops of the measured table."""
+    if not free_enabled():
+        return rows
+    out = []
+    for row in rows:
+        clip, horse_act, rider_act, pose, mirror, frames = row
+        if clip in FREE_GALLOP_ROWS:
+            count = FREE_GALLOP_ROWS[clip]
+            pose = with_horse(pose, gallop_free(count), frames)
+            row = (clip, horse_act, rider_act, pose, mirror, frames)
+        out.append(row)
+    return out
 
 
 def loop_names():
