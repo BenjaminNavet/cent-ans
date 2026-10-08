@@ -162,7 +162,7 @@
   "trait_wrathful": 5.0,
   "rel_catholic": 5.15,
   "rel_catholic_rome": 5.0,
-  "rel_orthodox": 5.7,
+  "rel_orthodox": 5.0,
   "rel_islam": 5.0,
   "rel_judaism": 8.06,
   "rel_lollard": 5.5,
@@ -189,7 +189,7 @@
   "glyph_flag": 5.0,
   "glyph_hammer": 4.95,
   "glyph_letter": 5.0,
-  "glyph_hand": 5.85,
+  "glyph_hand": 5.52,
   "glyph_ship": 5.39
  },
  "icons": {

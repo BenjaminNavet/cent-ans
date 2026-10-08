@@ -57,7 +57,12 @@ def _place(event: dict, provinces: dict[str, dict]) -> str | None:
 
 def build_prompt(event: dict, provinces: dict[str, dict]) -> str:
     """Miniature prompt built from the event data only (no hard-coded scenes)."""
-    lines = [f"Illustrated chronicle scene: « {event['title']} »."]
+    lines = [
+        "Paint a wordless illuminated chronicle miniature of the episode described below. "
+        "The notes are background only: never write, copy, title or letter any of their "
+        "words in the picture."
+    ]
+    lines.append(f"Episode: {event['title']}.")
     year = str((event.get("historical_date") or {}).get("value", ""))[:4]
     place = _place(event, provinces)
     if year or place:
@@ -68,8 +73,9 @@ def build_prompt(event: dict, provinces: dict[str, dict]) -> str:
         )
     elif event.get("kind") == "random":
         lines.append("Setting: a typical scene of 14th-century France or England.")
-    lines.append(f"What happens (French chronicle text): {event['text']}")
+    lines.append(f"What happens (background notes, not to be written): {event['text']}")
     lines.append(STYLE)
+    lines.append("The image contains no writing of any kind: no title, banner or caption.")
     return "\n".join(lines)
 
 
