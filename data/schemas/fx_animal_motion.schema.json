@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_animal_motion.schema.json",
+  "title": "Mouvement procédural des bêtes (lot AS1)",
+  "description": "Réglages des shaders de sommets `folk_prop.gdshader` (bêtes et attelages de la carte) et `camp_horse.gdshader` (chevaux au piquet des camps de bataille). Mètres du modèle, radians, secondes.",
+  "type": "object",
+  "required": ["enabled", "campaign", "camp_horse"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "enabled": {"type": "boolean"},
+    "campaign": {
+      "type": "object",
+      "required": ["defaults", "models"],
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {"$ref": "#/$defs/campaign_params"},
+        "models": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/campaign_params"}
+        }
+      }
+    },
+    "camp_horse": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {"^[a-z_]+$": {"type": "number"}}
+    }
+  },
+  "$defs": {
+    "campaign_params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": {"type": "string", "description": "Modèle dont on hérite les réglages."},
+        "anchor_m": {"type": "number", "description": "Centre de la bête sur l'axe d'avance (m ; 0 pour une bête seule, 3 pour l'attelage d'une charrette)."},
+        "half_m": {"type": "number", "minimum": 0, "description": "Demi-longueur du corps ; 0 : pas de bête (charrette seule)."},
+        "belly_m": {"type": "number", "minimum": 0, "description": "Hauteur du ventre = haut des pattes."},
+        "withers_m": {"type": "number", "minimum": 0},
+        "neck_start_m": {"type": "number", "description": "Avance (depuis le centre) où le cou quitte le corps."},
+        "neck_len_m": {"type": "number", "exclusiveMinimum": 0},
+        "neck_pivot_m": {"type": "number", "description": "Hauteur du pivot du cou."},
+        "stride_m": {"type": "number", "exclusiveMinimum": 0, "description": "Distance parcourue par cycle de pas ; fixe la cadence à une vitesse donnée."},
+        "swing_m": {"type": "number", "minimum": 0, "description": "Débattement avant-arrière du sabot."},
+        "lift_m": {"type": "number", "minimum": 0},
+        "bob_m": {"type": "number", "minimum": 0},
+        "graze_rad": {"type": "number", "minimum": 0, "maximum": 1.5},
+        "graze_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "graze_cycle_s": {"type": "number", "exclusiveMinimum": 0},
+        "nod_rad": {"type": "number", "minimum": 0},
+        "chew_hz": {"type": "number", "minimum": 0},
+        "chew_rad": {"type": "number", "minimum": 0},
+        "tail_len_m": {"type": "number", "exclusiveMinimum": 0},
+        "tail_swing_m": {"type": "number", "minimum": 0},
+        "tail_hz": {"type": "number", "minimum": 0},
+        "tail_walk_gain": {"type": "number", "minimum": 0},
+        "shift_m": {"type": "number", "minimum": 0},
+        "breath_m": {"type": "number", "minimum": 0},
+        "breath_hz": {"type": "number", "minimum": 0},
+        "jolt_amp_m": {"type": "number", "minimum": 0},
+        "jolt_period_m": {"type": "number", "exclusiveMinimum": 0},
+        "wheel_radius_m": {"type": "number", "minimum": 0, "description": "Rayon des roues (0 : pas de roue animée)."},
+        "wheel_x_min_m": {"type": "number", "minimum": 0, "description": "Écart latéral minimal d'un sommet de roue."}
+      }
+    }
+  }
+}

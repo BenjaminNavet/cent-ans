@@ -3,12 +3,12 @@
 Branche `feat/as1` (worktree `../gp-as1`). Doctrine : `docs/design/2026-10-08-sources-animation.md` § 2-3, ADR 0187 ; décision du lot : ADR 0188.
 
 ## État
-- Squelette : API `AnimalMotion` (game/scripts/visual/animal_motion.gd), données `data/fx/animal_motion.json` + schéma, shaders vides.
+- Fait : données `data/fx/animal_motion.json` + schéma + test Python ; `animal_motion.gdshaderinc` (pas 4 temps, tête, queue, souffle, roues, cahot) inclus par `folk_prop.gdshader` ; `camp_horse.gdshader` branché dans `battle_decor.gd` (`_horse_line`) ; `AnimalMotion` ; test `game/tests/as1_test.gd` OK.
+- A/B : `--no-as1` (ou `enabled:false`).
 
 ## Prochaine étape
-1. Shader de sommets `animal_motion.gdshaderinc` (pas, tête, queue, souffle) inclus par `folk_prop.gdshader`.
-2. Shader `camp_horse.gdshader` + branchement dans `battle_decor.gd` (`_horse_line`).
-3. Test `game/tests/as1_test.gd`, planche `as1_shot.gd`, smoke.
+1. Planche `game/tests/as1_shot.gd` (GPU) et comparaison d'images numérique.
+2. Smoke, fusion de main, rapport.
 
 ## Points ouverts
 - (aucun)
