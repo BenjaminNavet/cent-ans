@@ -35,7 +35,7 @@ Pipeline : `ffmpeg` (33-50 s, 25 i/s) → `extract_pose.py` (409/425 images dét
 `tools/video_mocap/camera_shift.py` (nouveau : translation du fond par flux LK, retranchée des
 repères image pour les contacts de pieds, fichier `<video>_cam.npz` lu par `Clip`) →
 `nt13_video_trial.py` (`CLIPS_AS8A`, `-- bake-vf`, `-- measure` ajoute les `vf_` à la ligne du
-rôle). Bake : les clips `vf_` ne sont PLUS versionnés (inutilisés, moins bons, dérivés CC BY-SA) : on les recuit hors dépôt avec `nt13_video_trial.py -- bake-vf` (vidéos locales), le dossier `battle_fine/vf/` est ignoré du dépôt.
+rôle). Bake : les clips `vf_` ne sont PLUS versionnés (inutilisés, moins bons, dérivés CC BY-SA) : on les recuit hors dépôt avec `nt13_video_trial.py -- bake-vf` (vidéos locales).
 
 Clips : `vf_thrust` (i. 104-150), `vf_guard` (148-172, bouclé), `vf_strike` (358-392 ; rôle
 `overhead`). Lacet fixé à la main (le lacet auto donnait -32° / 138° : visage et épée peu fiables).
