@@ -26,6 +26,8 @@ const WOOD_TINTS := {
 	"TimberDark": Color(0.45, 0.35, 0.26),
 }
 
+static var _lookup := JsonLookup.new(SETTINGS_FILE)
+static var _swing_lookup := JsonLookup.new(SWING_CURVE_FILE)
 static var _settings: Dictionary = {}
 static var _scenes: Dictionary = {}  # modèle -> PackedScene (null : absent)
 static var _materials: Dictionary = {}
@@ -44,27 +46,16 @@ var crew: SiegeCrewFx  # SG3 : servants (null : figurines skinnées absentes)
 var _camera: Variant = null  # position de la caméra à cette image (null : aucune)
 
 
-## Réglages (`data/fx/siege_engines.json`), lus une fois ; `{}` si introuvables.
+## Réglages (`data/fx/siege_engines.json`), lus une fois, avec la courbe de bascule mesurée
+## (fichier à part, licence propre) posée sous `trebuchet.swing_curve` si présente ; sans elle
+## `_swing_progress` retombe sur la courbe procédurale d'origine. `{}` si introuvables.
 static func settings() -> Dictionary:
-	if not _settings.is_empty():
-		return _settings
-	if DataFile.exists(SETTINGS_FILE):
-		var parsed: Variant = DataFile.read_json(SETTINGS_FILE)
-		if parsed is Dictionary:
-			_settings = parsed
-			_attach_swing_curve()
-			return _settings
-	return {}
-
-
-## Courbe de bascule mesurée (fichier à part, licence propre) : posée sous `trebuchet.swing_curve`
-## si présente ; sinon `_swing_progress` retombe sur la courbe procédurale d'origine.
-static func _attach_swing_curve() -> void:
-	if not DataFile.exists(SWING_CURVE_FILE) or not _settings.get("trebuchet") is Dictionary:
-		return
-	var curve: Variant = DataFile.read_json(SWING_CURVE_FILE)
-	if curve is Dictionary:
-		_settings["trebuchet"]["swing_curve"] = curve
+	if _settings.is_empty():
+		_settings = _lookup.data().duplicate(true)
+		var curve := _swing_lookup.data()
+		if _settings.get("trebuchet") is Dictionary and not curve.is_empty():
+			_settings["trebuchet"]["swing_curve"] = curve
+	return _settings
 
 
 ## Modèle d'engin d'un type d'unité (`""` : pas de modèle animé).

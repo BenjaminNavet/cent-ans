@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from conftest import assert_matches_schema
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -15,12 +15,7 @@ def _load(relative: str) -> dict:
 
 def test_animal_motion_matches_schema() -> None:
     """The motion file matches its schema."""
-    schema = _load("schemas/fx_animal_motion.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(
-        Draft202012Validator(schema).iter_errors(_load("fx/animal_motion.json"))
-    )
-    assert not errors, [error.message for error in errors]
+    assert_matches_schema("fx/animal_motion.json", "fx_animal_motion.schema.json")
 
 
 def test_gait_curves_come_from_the_measurement() -> None:
@@ -41,10 +36,9 @@ def test_gait_curves_come_from_the_measurement() -> None:
 def test_camp_horse_motion_matches_schema_and_measurement() -> None:
     """The CC BY-SA camp horse file matches its schema and its own measured block."""
     document = _load("fx/camp_horse_motion.json")
-    schema = _load("schemas/fx_camp_horse_motion.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(document))
-    assert not errors, [error.message for error in errors]
+    assert_matches_schema(
+        "fx/camp_horse_motion.json", "fx_camp_horse_motion.schema.json"
+    )
     assert "CC BY-SA" in document["licence"]
     camp, rest = document["camp_horse"], document["horse_rest"]
     assert abs(camp["chew_hz"] - rest["chew_peaks_hz"][0][0]) < 0.05

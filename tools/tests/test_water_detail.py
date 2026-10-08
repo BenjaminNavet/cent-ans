@@ -7,11 +7,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from jsonschema import Draft202012Validator
 from PIL import Image
 from typer.testing import CliRunner
 
 from cent_ans_tools import budget, cli, material_gen, openrouter
+from cent_ans_tools.codex import schema_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 WATER_YAML = ROOT / "data" / "art" / "water_materials.yaml"
@@ -20,11 +20,7 @@ RC_SECTION = "Fleuves et rivières RC"
 
 
 def _validate(schema_name: str, document: object) -> None:
-    schema = json.loads(
-        (ROOT / "data" / "schemas" / schema_name).read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(document))
+    errors = list(schema_validator(ROOT / "data", schema_name).iter_errors(document))
     assert not errors, [error.message for error in errors]
 
 

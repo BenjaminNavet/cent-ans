@@ -26,6 +26,9 @@ const CRY_DISTANCE := 95.0
 ## U22 : décalage (px) du bandeau sous le haut de l'écran, sous la barre de rapport de forces.
 const SUBTITLE_TOP := 76.0
 
+static var speeches := JsonLookup.new(DATA_FILE)
+static var war_cries := JsonLookup.new(WAR_CRY_FILE)
+
 var active: bool = false
 ## Vrai si le joueur a passé le discours (le discours adverse n'est alors pas joué).
 var skipped: bool = false
@@ -58,7 +61,7 @@ var _cry_stream: AudioStream = null
 
 ## Discours de `side` : {lines: [phrases], cry, speaker}. `ratio` = nos hommes / les leurs.
 static func compose(setup: Dictionary, side: String, ratio: float, terrain_key: String, weather_key: String, seed_value: int) -> Dictionary:
-	var data := BattleStandards.read_data(DATA_FILE)
+	var data := speeches.data()
 	if data.is_empty():
 		return {}
 	var side_setup: Dictionary = setup.get(side, {})
@@ -86,7 +89,7 @@ static func compose(setup: Dictionary, side: String, ratio: float, terrain_key: 
 	if not weather_lines.is_empty():
 		out.append(pick.call(weather_lines, "weather"))
 	out.append(pick.call(by_key.call("closings", faction), "close"))
-	var cries: Dictionary = BattleStandards.read_data(WAR_CRY_FILE).get("labels_by_faction", {})
+	var cries: Dictionary = war_cries.section("labels_by_faction")
 	var result_lines: Array = []
 	for line in out:
 		if str(line) != "":

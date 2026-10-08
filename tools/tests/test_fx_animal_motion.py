@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from conftest import assert_matches_schema
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -14,14 +14,7 @@ def _settings() -> dict:
 
 def test_animal_motion_matches_schema() -> None:
     """The animal motion settings match their schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "fx_animal_motion.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_settings()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
+    assert_matches_schema("fx/animal_motion.json", "fx_animal_motion.schema.json")
 
 
 def test_cart_bases_exist() -> None:

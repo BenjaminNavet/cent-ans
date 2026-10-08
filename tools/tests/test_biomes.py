@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from jsonschema import Draft202012Validator
 
+from cent_ans_tools.codex import schema_validator
 from cent_ans_tools.geo import biomes, colormap
 
 MPP = 718.9765625
@@ -65,10 +65,9 @@ def _grid(value: float, rows: int = 40, cols: int = 40) -> np.ndarray:
 
 def test_legend_matches_schema() -> None:
     """``biomes.yaml`` validates against ``biomes.schema.json``."""
-    schema = json.loads(biomes.SCHEMA_PATH.read_text(encoding="utf-8"))
+    validator = schema_validator(biomes.SCHEMA_PATH.parents[1], biomes.SCHEMA_PATH.name)
     document = yaml.safe_load(biomes.LEGEND_PATH.read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(document))
+    errors = list(validator.iter_errors(document))
     assert not errors, [error.message for error in errors]
 
 

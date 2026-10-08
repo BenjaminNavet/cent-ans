@@ -37,7 +37,7 @@ func _init() -> void:
 	_check(absf(BattleSkinned.clip_seconds("cavalry", 0, "c_fall") - 4.5) < 0.05, "c_fall = 4,5 s")
 	_check(BattleSkinned.death_index("cavalry", 0, "c_fall") >= 0, "c_fall dans le jeu des morts")
 	# États d'allure de chaque figurine de cavalerie : clips présents dans le rig, jeu non vide.
-	var cadence: Dictionary = BattleStandards.read_data("fx/battle_gore.json").get("cadence", {})
+	var cadence: Dictionary = BattleGore.settings().get("cadence", {})
 	for variant in 7:
 		var clips: Dictionary = BattleSkinned.rig("cavalry", variant).get("clips", {})
 		for state in GAIT_STATES:

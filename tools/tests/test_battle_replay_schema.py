@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from cent_ans_tools.codex import schema_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -19,11 +19,8 @@ SAMPLE = (
 
 
 def _errors(schema_name: str, document: dict) -> list[str]:
-    schema = json.loads((DATA / "schemas" / schema_name).read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
-    )
+    validator = schema_validator(DATA, schema_name)
+    errors = sorted(validator.iter_errors(document), key=lambda e: e.path)
     return [error.message for error in errors]
 
 

@@ -52,14 +52,12 @@ const FA_DEFAULT := 1
 const FA_ALL := 2
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
-static var _animation: Dictionary = {}
+static var _animation := JsonLookup.new(ANIMATION_FILE)
 
 
 ## NT7 : réglages d'animation (fondu de cycle, clips de rôle), lus une fois.
 static func animation_settings() -> Dictionary:
-	if _animation.is_empty():
-		_animation = BattleStandards.read_data(ANIMATION_FILE)
-	return _animation
+	return _animation.data()
 
 
 ## NT7 : durée (s) du fondu entre deux clips d'un cycle de mêlée.

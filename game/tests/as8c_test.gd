@@ -20,13 +20,13 @@ func _check(cond: bool, what: String) -> void:
 
 
 func _measured() -> Dictionary:
-	var path := AnimalMotion.MAP_PATHS_SCRIPT.default_data_dir().path_join("fx/animal_motion_measured.json")
+	var path := DataFile.path_of("fx/animal_motion_measured.json")
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return parsed if parsed is Dictionary else {}
 
 
 func _camp_file() -> Dictionary:
-	var path := AnimalMotion.MAP_PATHS_SCRIPT.default_data_dir().path_join("fx/camp_horse_motion.json")
+	var path := DataFile.path_of("fx/camp_horse_motion.json")
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return parsed if parsed is Dictionary else {}
 

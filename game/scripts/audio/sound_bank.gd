@@ -44,7 +44,7 @@ static func load_default() -> SoundBank:
 
 ## Chemin d'un fichier audio de `data/` : dossier de données du jeu (`MapPaths.data_dir`), puis
 ## `data/` du dépôt à défaut (jeux de données réduits des tests, qui n'ont que la carte), comme
-## `BattleStandards.read_data` et `FrontEndData.data`.
+## `JsonLookup` et `FrontEndData.data`.
 static func data_path(relative: String) -> String:
 	return DataFile.path_of(relative)
 

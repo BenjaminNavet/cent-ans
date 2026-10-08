@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 
 import yaml
-from jsonschema import Draft202012Validator
+
+from cent_ans_tools.codex import schema_validator
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 MODELS = Path(__file__).resolve().parents[2] / "game/assets/models/rocks/hb"
@@ -18,13 +19,8 @@ def _document() -> dict:
 
 def test_rock_outcrops_match_schema() -> None:
     """``data/art/rock_outcrops.yaml`` matches ``art_rock_outcrops.schema.json``."""
-    schema = json.loads(
-        (DATA / "schemas" / "art_rock_outcrops.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_document()), key=lambda e: e.path
-    )
+    validator = schema_validator(DATA, "art_rock_outcrops.schema.json")
+    errors = sorted(validator.iter_errors(_document()), key=lambda e: e.path)
     assert not errors, [error.message for error in errors]
 
 

@@ -1,15 +1,14 @@
 """GA: tileable material pipeline and data/art/materials.yaml."""
 
-import json
 from pathlib import Path
 
 import numpy as np
 import pytest
 import yaml
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import material_gen
+from cent_ans_tools.codex import schema_validator
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "data" / "schemas" / "materials.schema.json"
@@ -165,10 +164,9 @@ def test_generate_reuses_existing_raw(tmp_path):
 
 def test_materials_yaml_matches_schema():
     """data/art/materials.yaml validates against materials.schema.json."""
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
+    validator = schema_validator(SCHEMA_PATH.parents[1], SCHEMA_PATH.name)
     document = material_gen.load_materials()
-    errors = list(Draft202012Validator(schema).iter_errors(document))
+    errors = list(validator.iter_errors(document))
     assert not errors, [error.message for error in errors]
     ids = [entry["id"] for entry in document["materials"]]
     assert len(ids) == len(set(ids))

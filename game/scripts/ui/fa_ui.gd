@@ -10,29 +10,17 @@ extends RefCounted
 
 const DATA_PATH := "ui/fa_ui_assets.json"
 const ASSET_DIR := "res://assets/ui/fa/"
-const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
 ## Écart entre un titre et le rinceau qui le suit.
 const SPRAY_GAP := 12.0
 
 static var enabled := true
-static var _data: Dictionary = {}
-static var _loaded := false
+static var _lookup := JsonLookup.new(DATA_PATH)
 static var _textures: Dictionary = {}
 
 
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		# Toujours le catalogue du dépôt : les jeux de données réduits des tests n'en ont pas.
-		var path := MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
-		if FileAccess.file_exists(path):
-			var parsed: Variant = DataFile.parse_file(path)
-			if parsed is Dictionary:
-				_data = parsed
-		if _data.is_empty():
-			push_warning("FaUi: %s missing or invalid" % path)
-	return _data
+	return _lookup.data()
 
 
 ## Texture `game/assets/ui/fa/<kind>/<id>.png`, ou null (absente, ou FA désactivé).

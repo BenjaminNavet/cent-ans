@@ -11,11 +11,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from jsonschema import Draft202012Validator
 from PIL import Image
 from scipy import ndimage
 from shapely.geometry import LineString
 
+from cent_ans_tools.codex import schema_validator
 from cent_ans_tools.geo import navgrid
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -206,9 +206,7 @@ def test_forest_and_marsh_are_never_walls() -> None:
 
 
 def _validate(schema_name: str, document: dict) -> list[str]:
-    schema = json.loads((DATA / "schemas" / schema_name).read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    validator = Draft202012Validator(schema)
+    validator = schema_validator(DATA, schema_name)
     return [error.message for error in validator.iter_errors(document)]
 
 
