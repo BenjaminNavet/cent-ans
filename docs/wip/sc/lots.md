@@ -323,3 +323,8 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 ## PLANCACHE (fusionné 08/10, ADR 0205)
 - `sim_campaign::plan_cache::PlanCache<'a>` (emprunt de l'état, mémo paresseux, Sync) remplace le registre global `planning_scope` (ADR 0119 remplacé). Planificateurs IA prennent `&PlanCache` ; variantes `evaluate_treaty_with`, `ransom_amount_with`. Perf identique (3,76 ms/tour de faction), gain structurel.
 - CA8 : `agent_dijkstra_by_ids` sous feature test-support. Sels alignment → `ai/src/salts.rs`.
+
+## GDSHARED (vague 7, fusionné 94c8f14e1)
+Hash (lcg01/h01/vec01/vec24, bit à bit identiques, 11 sites) ; ConfirmPanel (instance) + ConfirmDialog.ask (façade) : raser, guerre, fin de tour, retraite/quitter bataille. Non migrés : menu pause (3 boutons), AcceptDialog rejeu. army_markers 656 l : non découpé.
+À voir par le joueur : titre déclaration de guerre en style Heading, confirmation de fin de tour centrée sans titre, panneaux HUD de bataille habillés à la main (theme=null).
+Préexistant sur feat/sc : at1_attack_order_test échoue (siège commencé, assaut attendu : pending 0 → 0).
