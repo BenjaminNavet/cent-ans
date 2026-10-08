@@ -35,7 +35,7 @@ Pipeline : `ffmpeg` (33-50 s, 25 i/s) → `extract_pose.py` (409/425 images dét
 `tools/video_mocap/camera_shift.py` (nouveau : translation du fond par flux LK, retranchée des
 repères image pour les contacts de pieds, fichier `<video>_cam.npz` lu par `Clip`) →
 `nt13_video_trial.py` (`CLIPS_AS8A`, `-- bake-vf`, `-- measure` ajoute les `vf_` à la ligne du
-rôle). Bake : `game/assets/models/battle_fine/vf/` (SOURCE.md, CREDITS.md).
+rôle). Bake : les clips `vf_` ne sont PLUS versionnés (inutilisés, moins bons, dérivés CC BY-SA) : on les recuit hors dépôt avec `nt13_video_trial.py -- bake-vf` (vidéos locales), le dossier `battle_fine/vf/` est ignoré du dépôt.
 
 Clips : `vf_thrust` (i. 104-150), `vf_guard` (148-172, bouclé), `vf_strike` (358-392 ; rôle
 `overhead`). Lacet fixé à la main (le lacet auto donnait -32° / 138° : visage et épée peu fiables).
@@ -52,4 +52,4 @@ garde ; tremblement de pied 3-4°. Aucun clip n'est meilleur : rien de promu, `m
 option de jeu non créée (aucune option `data/fx` existante pour ces clips).
 
 Prochaine étape possible : un tournage du joueur (caméra fixe, plein pied) ; ou suivi des pieds
-par un second modèle. Test : `game/tests/as8a_test.gd`.
+par un second modèle. (`as8a_test.gd` supprimé avec les clips.)
