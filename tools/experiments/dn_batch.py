@@ -565,6 +565,9 @@ def main() -> None:
     parser.add_argument("--charter-s-p95", type=float, default=MAX_SAT_P95)
     parser.add_argument("--charter-s-mean", type=float, default=MAX_SAT_MEAN)
     parser.add_argument("--fal-workers", type=int, default=4)
+    parser.add_argument("--backend3d", default="", help="override every entry (fal|sf3d|hf|both)")
+    parser.add_argument("--seeds", type=int, default=0, help="override seeds per entry")
+    parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
     args = parser.parse_args()
     CHARTER_MODE, MAX_SAT_P95, MAX_SAT_MEAN = (
         args.charter,
@@ -574,6 +577,13 @@ def main() -> None:
     entries = json.loads(Path(args.catalog).read_text())
     if args.only:
         entries = [e for e in entries if e["id"] in args.only.split(",")]
+    if args.kind:
+        entries = [e for e in entries if e["kind"] == args.kind]
+    for entry in entries:
+        if args.backend3d:
+            entry["backend3d"] = args.backend3d
+        if args.seeds:
+            entry["seeds"] = args.seeds
     if "FAL_KEY" not in os.environ and any("fal" in backends(e) for e in entries):
         print(
             "warning: FAL_KEY not set, fal calls will fail (logged in failures.jsonl)"
