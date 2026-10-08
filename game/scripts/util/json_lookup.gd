@@ -14,6 +14,9 @@ var defaults: Dictionary
 var block: String
 var required_key: String
 
+## Vrai si le fichier a été lu et jugé valide (faux : `defaults` seul).
+var found := false
+
 var _data: Dictionary = {}
 var _loaded := false
 
@@ -47,6 +50,7 @@ func value(key: String, fallback: Variant = null) -> Variant:
 ## Oublie le contenu lu : relu au prochain accès (tests, autre dossier de données).
 func reload() -> void:
 	_loaded = false
+	found = false
 	_data = {}
 
 
@@ -60,4 +64,5 @@ func _read() -> Dictionary:
 		push_warning("JsonLookup: %s missing or invalid" % rel_path)
 		return result
 	result.merge(content, true)
+	found = true
 	return result

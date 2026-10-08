@@ -17,17 +17,11 @@ const DATA_PATH := "ui/next_hints.json"
 ## Conditions servies par une alerte de la cloche du même type (`kind`).
 const ALERT_KINDS := ["chronicle_decision", "siege", "enemy_army", "debt", "research_idle"]
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("NextHint: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 ## Conseil à afficher pour `state` : `{id, title, text, action, alert?, army_id?}`, ou `{}`.

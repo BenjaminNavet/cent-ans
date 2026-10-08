@@ -16,8 +16,7 @@ const LEVEL_NAMES := ["off", "moderate", "full"]
 ## Morceaux : 0 tête, 1 bras, 2 jambe (maillage et teinte).
 const PIECE_KINDS := {"head": 0, "arm_r": 1, "arm_l": 1, "leg_r": 2, "leg_l": 2}
 
-static var _settings: Dictionary = {}
-static var _settings_loaded: bool = false
+static var _lookup := JsonLookup.new(SETTINGS_FILE)
 
 var anim_time: float = 0.0
 var camera_pos: Vector3 = Vector3.ZERO
@@ -36,16 +35,7 @@ var _rng := RandomNumberGenerator.new()
 
 ## Lecture de `data/fx/battle_gore.json` (dossier de données du jeu, puis `data/` du dépôt).
 static func settings() -> Dictionary:
-	if _settings_loaded:
-		return _settings
-	_settings_loaded = true
-	if DataFile.exists(SETTINGS_FILE):
-		var parsed: Variant = DataFile.read_json(SETTINGS_FILE)
-		if parsed is Dictionary:
-			_settings = parsed
-			return _settings
-	push_warning("BattleGore: %s introuvable, sang et démembrements désactivés" % SETTINGS_FILE)
-	return _settings
+	return _lookup.data()
 
 
 ## Niveau du réglage « Sang » : 0 désactivé, 1 modéré, 2 complet.

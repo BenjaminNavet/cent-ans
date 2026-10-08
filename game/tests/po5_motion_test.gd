@@ -40,7 +40,7 @@ func _test_camera_feel() -> void:
 	if not _check(parsed is Dictionary, "camera_feel.json unreadable at %s" % path):
 		return
 	var glide := CameraFeel.get_value("campaign", "focus_glide_s")
-	_check(CameraFeel.loaded_from_data, "camera feel should come from data/, not the fallback")
+	_check(CameraFeel.loaded_from_data(), "camera feel should come from data/, not the fallback")
 	_check(is_equal_approx(glide, float(parsed["campaign"]["focus_glide_s"])), "campaign glide %f should match the data file" % glide)
 	_check(is_equal_approx(CameraFeel.get_value("battle", "zoom_damping"), float(parsed["battle"]["zoom_damping"])), "battle zoom damping should match the data file")
 	_check(glide > 0.0, "campaign focus glide should be a real glide")

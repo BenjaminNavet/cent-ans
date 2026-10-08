@@ -462,7 +462,7 @@ static func plain(title: String, body: String = "", hint: String = "") -> String
 	return to_bbcode(plain_spec("", {"title": title, "body": body, "hint": hint}))
 
 
-## Passerelles pour les fichiers gelés (campaign_map.gd, encyclopedia.gd) ; à retirer après leur migration.
+## Délégués vers `TooltipHost`. Seul appelant : encyclopedia.gd (modifié hors SC) ; à retirer après sa migration.
 static func make_panel(bbcode: String) -> Control:
 	return TooltipHost.from_bbcode(bbcode)
 
@@ -989,34 +989,23 @@ const ENTITY_KINDS := {
 }
 
 
-static var _texts: Dictionary = {}
-## Vrai si les libellés viennent bien du fichier de données (tests).
-static var texts_loaded_from_data: bool = false
+const TEXTS_FALLBACK := {
+	"effects": {}, "stats": {}, "gauges": {}, "hud": {}, "categories": {},
+	"abilities": {}, "classes": {}, "branches": {}, "plain": {},
+}
+static var _texts := JsonLookup.new(TEXTS_FILE, TEXTS_FALLBACK)
 
 
 ## `data/ui/tooltips.json` (mis en cache). IB2 : repli comme `CameraFeel`/`TooltipView.style()` —
 ## le dossier de `MapPaths` peut ne pas avoir de `ui/tooltips.json` (fixtures de test), auquel cas
 ## on retombe sur `data/` à la racine du dépôt.
 static func texts() -> Dictionary:
-	if _texts.is_empty():
-		var parsed: Variant = DataFile.read_json(TEXTS_FILE) if DataFile.exists(TEXTS_FILE) else null
-		if parsed is Dictionary:
-			_texts = parsed
-			texts_loaded_from_data = true
-		else:
-			push_warning("RichTooltip : %s illisible, bulles de règle sans texte." % TEXTS_FILE)
-			_texts = {
-				"effects": {}, "stats": {}, "gauges": {}, "hud": {}, "categories": {},
-				"abilities": {}, "classes": {}, "branches": {}, "plain": {},
-			}
-			texts_loaded_from_data = false
-	return _texts
+	return _texts.data()
 
 
 ## Relit `tooltips.json` au prochain accès (tests).
 static func reload_texts() -> void:
-	_texts = {}
-	texts_loaded_from_data = false
+	_texts.reload()
 
 
 ## Entrée de règle `key` : {block, title, body (règles résolues), codex, icon} ; {} si aucune.

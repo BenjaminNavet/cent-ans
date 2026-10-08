@@ -66,7 +66,7 @@ const CRUMB_SEPARATOR := " › "
 ## Fond du mot-lien source d'une fille ouverte par la chaîne.
 const SOURCE_HIGHLIGHT := "#e8cf8a"
 
-static var _chain_cache: Dictionary = {}
+static var _chain := JsonLookup.new(STYLE_FILE, CHAIN_FALLBACK, "chain")
 
 ## Pile des bulles ouvertes (de la plus ancienne à la plus récente).
 var bubbles: Array[PanelContainer] = []
@@ -237,19 +237,12 @@ func explore_held() -> bool:
 
 ## IB3 : réglage `key` du bloc `chain` de `data/ui/tooltip_style.json` (repli : constantes).
 static func chain_setting(key: String) -> float:
-	if _chain_cache.is_empty():
-		_chain_cache = CHAIN_FALLBACK.duplicate()
-		var parsed: Variant = DataFile.read_json(STYLE_FILE) if DataFile.exists(STYLE_FILE) else null
-		if parsed is Dictionary and (parsed as Dictionary).get("chain") is Dictionary:
-			_chain_cache.merge(parsed["chain"], true)
-		else:
-			push_warning("CodexBubbles : %s illisible, réglages de chaîne de repli." % STYLE_FILE)
-	return float(_chain_cache.get(key, CHAIN_FALLBACK.get(key, 0.0)))
+	return float(_chain.value(key, CHAIN_FALLBACK.get(key, 0.0)))
 
 
 ## Relit `tooltip_style.json` au prochain accès (tests).
 static func reload_chain_settings() -> void:
-	_chain_cache = {}
+	_chain.reload()
 
 
 ## Touche T : verrouille la bulle ou l'infobulle visible la plus récente. Renvoie true si

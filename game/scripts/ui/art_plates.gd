@@ -9,17 +9,11 @@ extends RefCounted
 
 const DATA_PATH := "ui/illustrations.json"
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("ArtPlates: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 ## Durée d'affichage minimale d'un écran de chargement (secondes).

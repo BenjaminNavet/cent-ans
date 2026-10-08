@@ -22,7 +22,7 @@ const SEA_SHADER := preload("res://shaders/battle_sea.gdshader")
 const SEA_CLASS := 255
 const FOREST_MAX := 200.0
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 ## Relief réel chargé et actif (sinon repli sur le seul relief généré).
 var active: bool = false
@@ -64,13 +64,7 @@ var _season: String = "summer"
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("BattleHorizon: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 ## Charge la tuile de `p_province` et aligne sa côte sur le flanc côtier du champ (`flank` :
