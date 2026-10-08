@@ -1,9 +1,14 @@
-"""Shared fixtures: a pristine budget file (header of docs/budget.md, empty table)."""
+"""Shared fixtures and helpers: a pristine budget file, JSON-schema assertion."""
 
+import json
+from functools import cache
 from pathlib import Path
 
 import pytest
 
+from cent_ans_tools.codex import schema_validator
+
+DATA = Path(__file__).resolve().parents[2] / "data"
 REPO_BUDGET = Path(__file__).resolve().parents[2] / "docs" / "budget.md"
 EMPTY_TABLE = (
     "| Date | Service | Objet | Coût estimé | Coût réel | Cumul |\n"
@@ -82,3 +87,20 @@ def da_then_po_budget_file(budget_file: Path) -> Path:
         encoding="utf-8",
     )
     return target
+
+
+@cache
+def _checked_validator(schema_name: str):
+    """One validator (and metaschema check) per schema: the sibling registry is costly to build."""
+    validator = schema_validator(DATA, schema_name)
+    validator.check_schema(validator.schema)
+    return validator
+
+
+def assert_matches_schema(data_path: Path | str, schema_name: str) -> None:
+    """Asserts a JSON file (absolute, or relative to `data/`) is valid against `data/schemas/<schema_name>`."""
+    path = data_path if isinstance(data_path, Path) else DATA / data_path
+    validator = _checked_validator(schema_name)
+    document = json.loads(path.read_text(encoding="utf-8"))
+    errors = sorted(validator.iter_errors(document), key=lambda error: list(error.path))
+    assert not errors, [f"{list(e.path)}: {e.message}" for e in errors[:5]]
