@@ -10,6 +10,9 @@ extends Node3D
 ## `--no-map-weather` (A/B).
 
 const CLOUD_SHADER := preload("res://shaders/campaign_clouds.gdshader")
+const FIELD_BAKE_SHADER := preload("res://shaders/weather_field_bake.gdshader")
+## FL3 (ADR 0192) : pixels carte par texel du champ météo cuit (frange de 30 px fondue au filtrage).
+const FIELD_DOWNSAMPLE := 4
 ## PF1 : shader de particules maison (voir l'en-tête du shader : fuite à la fermeture avec
 ## `ParticleProcessMaterial`).
 const PRECIPITATION_SHADER := preload("res://shaders/campaign_precipitation.gdshader")
@@ -343,9 +346,48 @@ func _upload_mask() -> void:
 			continue
 		material.set_shader_parameter("weather_mask", _mask)
 		material.set_shader_parameter("weather_enabled", any)
+	_bake_field(any)
 
 
 var _mask_any := false
+## FL3 (ADR 0192) : banc `--bench-set=prop:weather_view.use_field=false` : frange recalculée à chaque pixel.
+var use_field := true:
+	set(value):
+		use_field = value
+		_bake_field(_mask_any)
+var _field_viewport: SubViewport = null
+var _field_material: ShaderMaterial = null
+
+
+## Cuit la météo par point de carte (frange comprise) dans une texture basse résolution, une
+## fois par tour : le sol et les nuées la lisent au lieu de recalculer la frange à chaque pixel.
+func _bake_field(any: bool) -> void:
+	var province_ids: Variant = _terrain.material.get_shader_parameter("province_ids") if _terrain != null and _terrain.material != null else null
+	var on := use_field and any and province_ids != null
+	if on and _field_viewport == null:
+		_field_material = ShaderMaterial.new()
+		_field_material.shader = FIELD_BAKE_SHADER
+		_field_material.set_shader_parameter("map_size", Vector2(_map_data.size))
+		_field_material.set_shader_parameter("weather_enabled", true)
+		_field_viewport = SubViewport.new()
+		_field_viewport.name = "WeatherField"
+		_field_viewport.size = Vector2i(_map_data.size) / FIELD_DOWNSAMPLE
+		_field_viewport.transparent_bg = true
+		_field_viewport.disable_3d = true
+		_field_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		var quad := ColorRect.new()
+		quad.size = Vector2(_field_viewport.size)
+		quad.material = _field_material
+		_field_viewport.add_child(quad)
+		add_child(_field_viewport)
+	if on:
+		_field_material.set_shader_parameter("province_ids", province_ids)
+		_field_material.set_shader_parameter("weather_mask", _mask)
+		_field_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
+		if material != null:
+			material.set_shader_parameter("weather_field", _field_viewport.get_texture() if on else null)
+			material.set_shader_parameter("weather_field_on", on)
 
 
 ## Masque météo du tour (un texel par province : R pluie, G neige, B brouillard, A orage).

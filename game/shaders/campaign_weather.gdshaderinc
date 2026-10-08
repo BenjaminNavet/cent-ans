@@ -12,6 +12,10 @@ uniform vec2 weather_wind = vec2(3.0, 0.6);
 uniform float weather_fog_morning = 1.0;
 // Frange irrégulière des zones météo (px carte) : pas de bord de province net.
 uniform float weather_edge_px = 30.0;
+// FL3 (ADR 0192) : `wx_sample` cuit une fois par tour dans une texture carte basse résolution
+// (CampaignWeatherView, weather_field_bake.gdshader) ; lue ici au lieu de 2 fbm + 3 × 2 lectures.
+uniform sampler2D weather_field : filter_linear, repeat_disable, hint_default_black;
+uniform bool weather_field_on = false;
 // Lot ZG4b : de près (paliers vallée / site, empreinte d'un pixel < `weather_mist_near_footprint`
 // unité), la nappe de brouillard matinal peinte sur le sol ne garde que `weather_mist_near` : sinon
 // elle recouvre le sol d'un gris-beige uniforme qui efface textures et parcellaire (Londres, recette
@@ -88,6 +92,9 @@ float wx_fbm(vec2 p) {
 vec4 wx_sample(vec2 p) {
 	if (!weather_enabled) {
 		return vec4(0.0);
+	}
+	if (weather_field_on) {
+		return texture(weather_field, p / map_size);
 	}
 	// Trois lectures déformées moyennées : frange large et fondue entre deux provinces.
 	vec2 warp = (vec2(wx_fbm(p * 0.011), wx_fbm(p * 0.011 + 7.3)) - 0.5) * weather_edge_px * 2.0;
