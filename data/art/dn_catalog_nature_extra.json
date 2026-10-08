@@ -1,0 +1,1206 @@
+[
+ {
+  "id": "tree_spruce_siberian",
+  "kind": "decor",
+  "prompt": "Siberian spruce (Picea obovata), tall very narrow dense spire-shaped conifer, short drooping dark blue-green branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species.yaml: nouvelle essence boréale (Oural, Perm, Novgorod) ; battle trees:spruce_siberian",
+  "region": "Urals and northern Russia 1340"
+ },
+ {
+  "id": "tree_fir_siberian",
+  "kind": "decor",
+  "prompt": "Siberian fir (Abies sibirica), slender conical dark green conifer with smooth grey bark and upturned branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 20,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:fir_siberian (taïga, Oural)",
+  "region": "Urals taiga"
+ },
+ {
+  "id": "tree_pine_siberian",
+  "kind": "decor",
+  "prompt": "Siberian stone pine (Pinus sibirica), broad rounded crown of long soft blue-green needle tufts, thick rough trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_siberian (taïga, Oural)",
+  "region": "Urals taiga"
+ },
+ {
+  "id": "tree_larch_siberian",
+  "kind": "decor",
+  "prompt": "Siberian larch (Larix sibirica), tall open conical deciduous conifer with soft pale green needle clusters and thin drooping branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 24,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:larch_siberian (Oural, Perm, Nord russe)",
+  "region": "Urals taiga"
+ },
+ {
+  "id": "tree_aspen",
+  "kind": "decor",
+  "prompt": "European aspen (Populus tremula), slender smooth pale green-grey trunk, rounded crown of small round leaves, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 18,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:aspen (boréal, steppe boisée, clairières)"
+ },
+ {
+  "id": "tree_rowan",
+  "kind": "decor",
+  "prompt": "rowan mountain ash (Sorbus aucuparia), small tree with pinnate leaves and clusters of red berries, smooth grey bark, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 9,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:rowan (boréal, montagnard, landes)"
+ },
+ {
+  "id": "tree_pine_bog_stunted",
+  "kind": "decor",
+  "prompt": "stunted bog Scots pine, short twisted trunk with a thin flat crown of sparse needles, grey lichen on branches, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 6,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_bog (tourbières, taïga claire, Laponie)",
+  "region": "Lapland and northern bogs"
+ },
+ {
+  "id": "shrub_birch_dwarf",
+  "kind": "decor",
+  "prompt": "dwarf birch (Betula nana) low tangled mound with tiny round leaves and reddish twigs, tundra shrub, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 0.6,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:birch_dwarf (toundra, Laponie, Islande)",
+  "region": "Lapland and Iceland tundra"
+ },
+ {
+  "id": "tree_pine_arolla",
+  "kind": "decor",
+  "prompt": "Swiss stone pine arolla (Pinus cembra), dense columnar crown of stiff blue-green needle tufts, gnarled trunk, subalpine, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 16,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_arolla (Alpes, Carpates)",
+  "region": "Alps and Carpathians"
+ },
+ {
+  "id": "shrub_pine_mugo",
+  "kind": "decor",
+  "prompt": "mountain pine krummholz (Pinus mugo), low spreading prostrate dark green mound with curved stems, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:mugo (étage subalpin Alpes, Carpates)",
+  "region": "Alps and Carpathians"
+ },
+ {
+  "id": "tree_spruce_subalpine_flagged",
+  "kind": "decor",
+  "prompt": "wind-flagged subalpine Norway spruce, narrow crown with branches swept to one side, lower trunk bare, tree line specimen, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 12,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:spruce_flagged (limite des arbres)",
+  "region": "Alps and Carpathians tree line"
+ },
+ {
+  "id": "tree_maple_sycamore",
+  "kind": "decor",
+  "prompt": "sycamore maple (Acer pseudoplatanus), broad rounded crown, large five-lobed leaves, grey flaking bark, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 22,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:maple (déjà dans tree_species.yaml, sans modèle)",
+  "region": "Alps, Carpathians, mountain valleys"
+ },
+ {
+  "id": "shrub_caragana",
+  "kind": "decor",
+  "prompt": "steppe pea shrub (Caragana frutex), dense upright grey-green bush with small yellow flowers, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.4,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:caragana (steppe, Ukraine, Volga)",
+  "region": "Pontic steppe"
+ },
+ {
+  "id": "shrub_wormwood",
+  "kind": "decor",
+  "prompt": "wormwood sagebrush (Artemisia) clump, silvery-grey feathery foliage, woody base, steppe plant, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 0.7,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:wormwood (steppe, semi-aride)",
+  "region": "Pontic steppe"
+ },
+ {
+  "id": "shrub_steppe_cherry",
+  "kind": "decor",
+  "prompt": "dwarf steppe cherry (Prunus fruticosa) thicket with white blossom, many thin stems, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:steppe_cherry (steppe boisée)",
+  "region": "Pontic steppe"
+ },
+ {
+  "id": "tree_oak_pubescent",
+  "kind": "decor",
+  "prompt": "downy oak (Quercus pubescens), low wide gnarled tree with dense lobed leaves, forest-steppe specimen, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 10,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_pubescent (steppe boisée, Hongrie, Balkans)",
+  "region": "Forest-steppe, Hungary and Ukraine"
+ },
+ {
+  "id": "tree_pear_wild_lone",
+  "kind": "decor",
+  "prompt": "lone wild pear tree (Pyrus pyraster) with thorny branches and small fruits standing alone on open grassland, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 8,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pear_wild (arbre isolé de steppe, kourganes)",
+  "region": "Steppe"
+ },
+ {
+  "id": "tree_carob",
+  "kind": "decor",
+  "prompt": "carob tree (Ceratonia siliqua), broad dense dome of dark glossy leathery leaves, dark seed pods hanging, thick gnarled trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 9,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:carob (méditerranée, Andalousie, Sicile)",
+  "region": "Andalusia, Sicily, Catalonia 1340"
+ },
+ {
+  "id": "tree_arbutus",
+  "kind": "decor",
+  "prompt": "strawberry tree (Arbutus unedo), multi-stemmed with red peeling bark, glossy dark leaves, red round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 6,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:arbutus (déjà dans tree_species.yaml, sans modèle)",
+  "region": "Mediterranean maquis"
+ },
+ {
+  "id": "tree_oak_kermes",
+  "kind": "decor",
+  "prompt": "kermes oak (Quercus coccifera) dense shrubby evergreen with spiny holly-like leaves, rounded bush-tree, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 4,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:kermes_oak (déjà dans tree_species.yaml, sans modèle)",
+  "region": "Mediterranean garrigue"
+ },
+ {
+  "id": "tree_pine_black",
+  "kind": "decor",
+  "prompt": "black pine (Pinus nigra), dark flat-topped umbrella crown, rugged dark grey trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 18,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:black_pine (déjà dans tree_species.yaml, sans modèle)",
+  "region": "Balkans, Pyrenees, Apennines"
+ },
+ {
+  "id": "shrub_cistus",
+  "kind": "decor",
+  "prompt": "rock rose (Cistus) bush covered in large white crinkled flowers, grey-green sticky leaves, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:cistus (garrigue)",
+  "region": "Mediterranean garrigue"
+ },
+ {
+  "id": "shrub_rosemary_lavender",
+  "kind": "decor",
+  "prompt": "garrigue clump of rosemary and lavender with blue-violet flower spikes, low grey-green mound, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:garrigue_herbs (garrigue, Provence)",
+  "region": "Provence and Languedoc"
+ },
+ {
+  "id": "shrub_oleander",
+  "kind": "decor",
+  "prompt": "oleander (Nerium oleander) bush with pink flowers and narrow dark leaves, dry riverbed shrub, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:oleander (oueds, ripisylve méditerranéenne)",
+  "region": "Mediterranean dry riverbeds"
+ },
+ {
+  "id": "tree_fig",
+  "kind": "decor",
+  "prompt": "common fig tree (Ficus carica), wide spreading smooth grey branches, large lobed leaves, low crooked trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 6,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:fig (jardins, terrasses, méditerranée)",
+  "region": "Mediterranean villages"
+ },
+ {
+  "id": "tree_pomegranate",
+  "kind": "decor",
+  "prompt": "pomegranate tree (Punica granatum), small many-stemmed tree with narrow glossy leaves and red round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 4,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pomegranate (Andalousie, Levant)",
+  "region": "Andalusia and Levant gardens"
+ },
+ {
+  "id": "tree_almond",
+  "kind": "decor",
+  "prompt": "almond tree in bloom (Prunus dulcis), spreading crown with pale pink-white blossom, rough dark bark, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 6,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:almond (vergers, Andalousie, Majorque, Provence)",
+  "region": "Andalusia, Majorca, Provence orchards"
+ },
+ {
+  "id": "tree_orange_bitter",
+  "kind": "decor",
+  "prompt": "bitter orange tree (Citrus aurantium), compact round crown of dark glossy leaves with bright orange fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:orange_bitter (Séville, Valence, patios)",
+  "region": "Seville and Valencia gardens"
+ },
+ {
+  "id": "tree_plane_oriental",
+  "kind": "decor",
+  "prompt": "oriental plane (Platanus orientalis), huge wide crown, mottled flaking grey and cream bark, deeply lobed leaves, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 25,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:plane (places de village, Grèce, Italie, Balkans)",
+  "region": "Greece, Italy, Balkans village squares"
+ },
+ {
+  "id": "tree_palm_dwarf",
+  "kind": "decor",
+  "prompt": "European fan palm (Chamaerops humilis), clump of multiple short trunks with stiff fan-shaped fronds, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 3,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:palm_dwarf (Andalousie, Sicile, Maghreb)",
+  "region": "Andalusia, Sicily, Maghreb coasts"
+ },
+ {
+  "id": "tree_palm_doum",
+  "kind": "decor",
+  "prompt": "doum palm (Hyphaene thebaica), forked branching trunk with fan-shaped fronds at each tip, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 9,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:palm_doum (Haute-Égypte, désert)",
+  "region": "Egypt and Nubia"
+ },
+ {
+  "id": "tree_acacia_umbrella",
+  "kind": "decor",
+  "prompt": "flat-topped umbrella acacia (Vachellia tortilis), thin thorny layered canopy, rough dark trunk, desert fringe, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 7,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:acacia_umbrella (désert, Sahara, Égypte)",
+  "region": "Sahara fringe and Egypt"
+ },
+ {
+  "id": "tree_argan",
+  "kind": "decor",
+  "prompt": "argan tree (Argania spinosa), gnarled twisted trunk with a low wide thorny crown of small leaves and round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 7,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:argan (Maroc atlantique)",
+  "region": "Southwest Morocco"
+ },
+ {
+  "id": "tree_cedar_lebanon",
+  "kind": "decor",
+  "prompt": "cedar of Lebanon (Cedrus libani), massive layered flat horizontal branches with dark green needle plates, thick trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 25,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:cedar_lebanon (Liban, Taurus, Chypre)",
+  "region": "Lebanon mountains and Taurus"
+ },
+ {
+  "id": "tree_cedar_atlas",
+  "kind": "decor",
+  "prompt": "Atlas cedar (Cedrus atlantica), blue-green needle tufts, conical crown becoming broad with age, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 24,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:cedar_atlas (Atlas, Rif, Maghreb)",
+  "region": "Atlas and Rif mountains"
+ },
+ {
+  "id": "tree_sycamore_fig",
+  "kind": "decor",
+  "prompt": "sycamore fig (Ficus sycomorus), huge spreading crown with dense round leaves, thick buttressed trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 15,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:sycamore_fig (Égypte, Levant, villages)",
+  "region": "Egypt and Levant"
+ },
+ {
+  "id": "tree_oak_valonia",
+  "kind": "decor",
+  "prompt": "Valonia oak (Quercus ithaburensis), broad open-grown crown, large acorns with fringed cups, rugged bark, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 14,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_valonia (Anatolie, Levant, Grèce)",
+  "region": "Anatolia and Levant"
+ },
+ {
+  "id": "tree_pine_brutia",
+  "kind": "decor",
+  "prompt": "Turkish pine (Pinus brutia), irregular open crown with bright green long needles, orange-brown flaking bark, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 15,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:pine_brutia (Anatolie, Chypre, Égée)",
+  "region": "Anatolia, Cyprus, Aegean"
+ },
+ {
+  "id": "shrub_euphorbia_desert",
+  "kind": "decor",
+  "prompt": "cactus-like leafless succulent euphorbia, dense grey-green mound of fleshy upright stems, Moroccan semi-desert, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.2,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:euphorbia (désert, Maghreb)",
+  "region": "Morocco and Maghreb semi-desert"
+ },
+ {
+  "id": "shrub_saltbush",
+  "kind": "decor",
+  "prompt": "saltbush (Atriplex halimus) silver-grey rounded shrub with small fleshy leaves, arid steppe, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.3,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:saltbush (semi-aride, désert, Anatolie centrale)",
+  "region": "Arid steppe and Anatolian plateau"
+ },
+ {
+  "id": "shrub_desert_dead_thorn",
+  "kind": "decor",
+  "prompt": "dead dry thorn bush skeleton, grey tangled bare branches, desert scrub, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:desert_dead (désert, hamada)",
+  "region": "Desert and hamada"
+ },
+ {
+  "id": "shrub_tamarisk_dune_mound",
+  "kind": "decor",
+  "prompt": "sand dune mound anchored by a tamarisk bush, small hummock of pale sand with feathery grey-green foliage, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:nebkha (désert, côtes sableuses)",
+  "region": "Sahara and desert coasts"
+ },
+ {
+  "id": "shrub_osier_coppice",
+  "kind": "decor",
+  "prompt": "basket willow osier (Salix viminalis) coppice stool with many long straight yellow-green withies, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:osier (ripisylve, vannerie, Somme, Fens)",
+  "region": "Rivers and marshes"
+ },
+ {
+  "id": "tree_poplar_black_riparian",
+  "kind": "decor",
+  "prompt": "black poplar (Populus nigra), broad irregular crown, heavy burred trunk, river bank tree, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 25,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:poplar_black (ripisylve, Loire, Rhin, Danube)",
+  "region": "Large river valleys"
+ },
+ {
+  "id": "shrub_riparian_thicket",
+  "kind": "decor",
+  "prompt": "riverside thicket of alder, willow and ash saplings entangled with brambles, dense low green mass, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:riparian_thicket (ripisylve dense, marais)",
+  "region": "River banks"
+ },
+ {
+  "id": "shrub_hazel_coppice_stool",
+  "kind": "decor",
+  "prompt": "hazel coppice stool with many straight cut poles radiating from one base, spring leaves, muted desaturated natural colours, single bush only, base on the ground line visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5.0,
+   "yaw_fix": 0
+  },
+  "target": "shrubs:coppice_stool (taillis, forêts exploitées)",
+  "region": "Managed woods"
+ },
+ {
+  "id": "tree_oak_veteran_hollow",
+  "kind": "decor",
+  "prompt": "ancient veteran oak, enormous hollow trunk with a split opening, few huge limbs, sparse crown, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 14,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:oak_veteran (arbres remarquables, forêts royales)",
+  "region": "Royal forests, Sherwood, Tronçais"
+ },
+ {
+  "id": "tree_dead_conifer_snag",
+  "kind": "decor",
+  "prompt": "dead standing spruce snag, bare grey trunk with broken stubs of branches, no needles, lichen, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 16,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:dead_conifer (taïga, montagne, forêts brûlées)"
+ },
+ {
+  "id": "tree_burnt_charred",
+  "kind": "decor",
+  "prompt": "charred burnt tree trunk after fire, black cracked bark, a few snapped blackened limbs, ash at base, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 9,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:burnt (campagnes dévastées, chevauchées)"
+ },
+ {
+  "id": "tree_lightning_split",
+  "kind": "decor",
+  "prompt": "oak split by lightning, vertical scar stripping bark, half the crown dead and bare, half alive, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 14,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:split (événements, orages)"
+ },
+ {
+  "id": "env_fallen_log_forest_mossy",
+  "kind": "decor",
+  "prompt": "fallen rotting tree trunk lying on the ground covered in thick moss and bracket fungi, broken branch stubs, muted natural colours, single log only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "forest floor:log (sous-bois, forêts, toutes biomes)"
+ },
+ {
+  "id": "env_root_plate_windthrow",
+  "kind": "decor",
+  "prompt": "uprooted windthrown tree with a tall upended root plate full of earth and stones, trunk lying behind, muted natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 3.5,
+   "yaw_fix": 0
+  },
+  "target": "forest floor:windthrow (forêts, montagne)"
+ },
+ {
+  "id": "tree_stump_conifer_resin",
+  "kind": "decor",
+  "prompt": "freshly cut conifer stump with orange resinous rings and cut chips of wood at the base, muted natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.7,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:stump (forêts boréales, charbonniers)"
+ },
+ {
+  "id": "tree_stump_charred",
+  "kind": "decor",
+  "prompt": "burnt charred tree stump, black cracked wood with ash around base, muted natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.7,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:stump_burnt (villages incendiés)"
+ },
+ {
+  "id": "crop_wheat_ripe",
+  "kind": "decor",
+  "prompt": "dense patch of ripe golden wheat with bearded ears, summer, uneven medieval variety taller than modern wheat, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.1,
+   "yaw_fix": 0
+  },
+  "target": "fields: tile blé (champs ouverts, mois d'été)"
+ },
+ {
+  "id": "crop_barley_ripe",
+  "kind": "decor",
+  "prompt": "patch of ripe barley with long drooping bearded ears, pale golden, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.9,
+   "yaw_fix": 0
+  },
+  "target": "fields: orge (Espagne, Castille, Angleterre)"
+ },
+ {
+  "id": "crop_rye_tall",
+  "kind": "decor",
+  "prompt": "patch of tall rye with slender grey-gold ears, taller than a man's waist, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "fields: seigle (Pologne, Allemagne, Massif central)",
+  "region": "Poland and Germany 1340"
+ },
+ {
+  "id": "crop_oats",
+  "kind": "decor",
+  "prompt": "patch of oats with loose drooping panicles, green-gold, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: avoine (Écosse, Angleterre, Flandre)",
+  "region": "Scotland and England 1340"
+ },
+ {
+  "id": "crop_millet_steppe",
+  "kind": "decor",
+  "prompt": "patch of ripe millet with dense nodding seed heads, golden-brown, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.4,
+   "yaw_fix": 0
+  },
+  "target": "fields: millet (Ukraine, Bulgarie, Hongrie)",
+  "region": "Ukraine and Hungary"
+ },
+ {
+  "id": "crop_flax_blooming",
+  "kind": "decor",
+  "prompt": "patch of flax in pale blue bloom, thin upright stems, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.9,
+   "yaw_fix": 0
+  },
+  "target": "fields: lin (Flandre, Normandie, Artois)",
+  "region": "Flanders and Normandy"
+ },
+ {
+  "id": "crop_hemp_tall",
+  "kind": "decor",
+  "prompt": "dense stand of tall hemp plants, palmate leaves, dark green, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 2.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: chanvre (cordages, Bretagne, Anjou, Pologne)",
+  "region": "Brittany and Poland"
+ },
+ {
+  "id": "crop_woad_yellow",
+  "kind": "decor",
+  "prompt": "patch of woad (Isatis tinctoria) in yellow flower, blue-green leaves, dye plant, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: pastel (Toulousain, Thuringe, Picardie)",
+  "region": "Toulouse region and Thuringia"
+ },
+ {
+  "id": "crop_bean_field",
+  "kind": "decor",
+  "prompt": "patch of broad bean plants with pods, grey-green leaves, white-black flowers, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.9,
+   "yaw_fix": 0
+  },
+  "target": "fields: fèves, pois (jachère, assolement triennal)"
+ },
+ {
+  "id": "crop_turnip_cabbage_garden",
+  "kind": "decor",
+  "prompt": "medieval village kitchen garden bed with cabbages, leeks and turnips in neat rows, low wattle fence, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.8,
+   "yaw_fix": 0
+  },
+  "target": "fields: jardin de village (potager, anneau des villages)"
+ },
+ {
+  "id": "crop_vine_stakes_row",
+  "kind": "decor",
+  "prompt": "short segment of vineyard with low pruned grape vines each tied to a wooden stake, green leaves and dark grape bunches, bare earth",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 1.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: vignoble (Bourgogne, Rhin, Bordelais)"
+ },
+ {
+  "id": "crop_vine_tree_trained_italy",
+  "kind": "decor",
+  "prompt": "grapevine trained high on a live pollarded maple tree with festoons of vine, Italian vite maritata, leaves and grape bunches",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 5.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: vigne en hautain (Toscane, Émilie, Campanie)",
+  "region": "Tuscany and Emilia"
+ },
+ {
+  "id": "tree_mulberry_silk",
+  "kind": "decor",
+  "prompt": "white mulberry tree (Morus alba) pollarded for silkworm leaves, rounded crown of bright light green heart-shaped leaves, short thick trunk, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "tree",
+   "target_height_m": 6,
+   "yaw_fix": 0
+  },
+  "target": "tree_species/battle trees:mulberry (soie, Grenade, Sicile, Lucques)",
+  "region": "Granada, Sicily, Lucca silk country"
+ },
+ {
+  "id": "crop_rice_paddy",
+  "kind": "decor",
+  "prompt": "patch of green rice plants standing in shallow water, flooded paddy section with earthen bank, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 0.9,
+   "yaw_fix": 0
+  },
+  "target": "fields: riz (Valence, Albufera, Andalousie)",
+  "region": "Valencia and Andalusia"
+ },
+ {
+  "id": "crop_sugarcane_stand",
+  "kind": "decor",
+  "prompt": "dense stand of tall sugar cane with green leaf blades and jointed purple-green stalks, single compact clump cut cleanly, base on the ground line visible, muted desaturated natural colours",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "prop",
+   "target_height_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "fields: canne à sucre (Motril, Grenade, Sicile, Chypre, Levant)",
+  "region": "Granada coast, Sicily, Cyprus, Levant"
+ },
+ {
+  "id": "rock_granite_tor_breton",
+  "kind": "decor",
+  "prompt": "coastal Breton granite chaos of huge rounded stacked blocks with pink-grey speckled surface, weathered by sea, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 5.0,
+   "yaw_fix": 0
+  },
+  "target": "rock_outcrops.yaml:granite_chaos variante côte de granit rose (Bretagne) ; battle rocks",
+  "region": "Brittany coast"
+ },
+ {
+  "id": "rock_granite_tor_moor",
+  "kind": "decor",
+  "prompt": "moorland granite tor, stack of horizontally split slabs on a low knoll, grey with lichen, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 4.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:granite_tor (Dartmoor, Cornouailles, Highlands)",
+  "region": "Dartmoor and Cornwall"
+ },
+ {
+  "id": "rock_karst_lapiaz",
+  "kind": "decor",
+  "prompt": "limestone pavement lapiaz with deep dissolved grooves and clints, pale grey, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:lapiaz (Causses, Dalmatie, Jura, Burren)",
+  "region": "Causses, Dalmatia, Jura"
+ },
+ {
+  "id": "rock_red_sandstone_slab",
+  "kind": "decor",
+  "prompt": "slab of red-brown sandstone with cross-bedding layers, Vosges Buntsandstein type, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:red_sandstone_slab (Vosges, Forêt-Noire, Galles)",
+  "region": "Vosges and Black Forest"
+ },
+ {
+  "id": "rock_basalt_columns",
+  "kind": "decor",
+  "prompt": "outcrop of hexagonal basalt columns with dark grey surfaces, some columns broken, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 4.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:basalt_columns (Auvergne, Écosse, Irlande du Nord, Islande)",
+  "region": "Auvergne, Scotland, Iceland"
+ },
+ {
+  "id": "rock_basalt_lava_boulder",
+  "kind": "decor",
+  "prompt": "rough dark porous basalt lava boulder with reddish scoria patches, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 1.5,
+   "yaw_fix": 0
+  },
+  "target": "rocks:basalt_boulder (Auvergne, Eifel, Islande, Etna)",
+  "region": "Auvergne and Eifel"
+ },
+ {
+  "id": "rock_moraine_boulder_field",
+  "kind": "decor",
+  "prompt": "cluster of rounded glacial boulders of mixed grey granite and gneiss resting on gravel, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 4.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:moraine (Alpes, Scandinavie, Écosse, Tatras)",
+  "region": "Alps, Scandinavia, Highlands"
+ },
+ {
+  "id": "rock_roche_moutonnee",
+  "kind": "decor",
+  "prompt": "glacier-polished rounded bedrock hump with parallel scratches and a steep plucked side, grey, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 5.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:roche_moutonnee (Alpes, Norvège, Écosse)",
+  "region": "Alps and Norway"
+ },
+ {
+  "id": "rock_cliff_red_sandstone",
+  "kind": "decor",
+  "prompt": "tall red sandstone sea cliff face with horizontal strata and ledges, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 8.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:cliff_red_sandstone (Devon, Écosse, Provence : Esterel)",
+  "region": "Devon and Esterel coast"
+ },
+ {
+  "id": "rock_cliff_basalt",
+  "kind": "decor",
+  "prompt": "dark basalt cliff face of stacked columns with weathered ledges, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 8.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:cliff_basalt (Islande, Hébrides, Auvergne)",
+  "region": "Iceland and Hebrides"
+ },
+ {
+  "id": "rock_travertine_terraces",
+  "kind": "decor",
+  "prompt": "white travertine terraces with shallow stepped basins and calcite rims, mineral deposit, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 5.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:travertine (Anatolie : Hiérapolis, Italie, Hongrie)",
+  "region": "Anatolia and Italy hot springs"
+ },
+ {
+  "id": "rock_gypsum_badland",
+  "kind": "decor",
+  "prompt": "eroded gypsum and marl badland hillock with sharp furrows, pale grey-cream, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 4.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:badlands (Aragon, Murcie, Anatolie centrale, Almería)",
+  "region": "Aragon, Murcia, Anatolia"
+ },
+ {
+  "id": "rock_tuff_fairy_chimneys",
+  "kind": "decor",
+  "prompt": "group of soft volcanic tuff fairy-chimney cones with cap rocks, pale buff, Cappadocia, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 8.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:fairy_chimneys (Cappadoce, ermitages rupestres, env_hermitage_cliff)",
+  "region": "Cappadocia"
+ },
+ {
+  "id": "rock_flint_nodules_chalk",
+  "kind": "decor",
+  "prompt": "chalk outcrop with embedded black flint nodules and white weathered face, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "rocks:chalk_flint (Champagne, Kent, Normandie, Picardie)",
+  "region": "Champagne, Kent, Normandy"
+ },
+ {
+  "id": "rock_sarsen_stone",
+  "kind": "decor",
+  "prompt": "large grey sarsen sandstone block, rough pitted, half buried, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 2.5,
+   "yaw_fix": 0
+  },
+  "target": "rocks:sarsen (Wiltshire, plaine de Salisbury)",
+  "region": "Wiltshire"
+ },
+ {
+  "id": "rock_serpentine_green",
+  "kind": "decor",
+  "prompt": "dark green serpentinite outcrop with polished veins and rusty weathering, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:serpentine (Corse, Ligurie, Balkans, Oural)",
+  "region": "Corsica, Liguria, Urals"
+ },
+ {
+  "id": "rock_salt_flat_crust",
+  "kind": "decor",
+  "prompt": "cracked white salt crust plates on dry lake bed with a few mounds, pale, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 4.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:salt_crust (salines, chotts, Camargue, Anatolie)",
+  "region": "Camargue and chotts"
+ },
+ {
+  "id": "rock_hamada_desert",
+  "kind": "decor",
+  "prompt": "stony desert hamada boulders, dark varnished angular rocks over pale gravel, sun-baked, natural muted stone colours, no vegetation other than lichen, single rock formation only",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "rock",
+   "target_width_m": 3.0,
+   "yaw_fix": 0
+  },
+  "target": "rocks:hamada (désert, Maghreb, Égypte)",
+  "region": "Maghreb and Egypt"
+ }
+]
