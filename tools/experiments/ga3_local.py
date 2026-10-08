@@ -44,7 +44,8 @@ def local_sheet_prompt(fal_prompt: str) -> str:
     return (
         "Photographic character reference sheet of one man, shown three times side by side "
         "on a plain pure white background: front view, left side view, back view. "
-        + body
+        "Strict A-pose in every view: arms straight and held 30 degrees away from the body, "
+        "hands open and empty, nothing held, no bow, no weapon in hand. " + body
     ).strip()
 
 
