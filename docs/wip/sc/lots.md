@@ -281,7 +281,7 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 
 ## MAPKIT (fusionné d4ec81c1d)
 - Table de stratégies MODE_SPECS (map_mode_controller), JsonLookup (16 sites), MapInstancing (10 MultiMesh). Tests carte/UI verts (mf1, cb2, tb4, en, rj, cv1, rs_k, sz4…).
-- settlements_render_test bloqué 45 min sur feat/sc : comparaison avec main en cours.
+- settlements_render_test se bloque aussi sur main (même point, après TownMaquetteLayer) : antérieur à SC, à traiter avec les tests en échec connus.
 
 ## FXARGS (fusionné 2a32c8ca8)
 - CmdArgs partout (44 fichiers, + `list()`), seul battle_vegetation.gd (sale sur main) lit encore la ligne de commande.
