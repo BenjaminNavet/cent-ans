@@ -39,7 +39,7 @@ const HEADLINE_ICON_FALLBACK := {"stat_ranged": "battle_state_shoot", "stat_mele
 ## IB4 : clé de règle (`ib:rule:`) des chiffres vedettes qui ne sont ni un effet ni une stat.
 const HEADLINE_RULE_KEYS := {"strength": "strength", "morale": "morale"}
 
-static var _cache: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_FILE, FALLBACK)
 
 
 ## Contrôle d'infobulle pour `spec` ; `detailed` : version complète (bulle verrouillée). Met à
@@ -168,19 +168,12 @@ static func blocks_for(spec: Dictionary, detailed: bool) -> Array:
 
 ## Style chargé depuis `data/ui/tooltip_style.json` (mis en cache).
 static func style() -> Dictionary:
-	if _cache.is_empty():
-		_cache = FALLBACK.duplicate(true)
-		var parsed: Variant = DataFile.read_json(DATA_FILE) if DataFile.exists(DATA_FILE) else null
-		if parsed is Dictionary:
-			_cache.merge(parsed, true)
-		else:
-			push_warning("TooltipView : %s illisible, valeurs de repli." % DATA_FILE)
-	return _cache
+	return _lookup.data()
 
 
 ## Relit le style au prochain accès (tests).
 static func reload() -> void:
-	_cache = {}
+	_lookup.reload()
 
 
 ## Couleur de catégorie de `kind` (`kind_colors`), encre par défaut.

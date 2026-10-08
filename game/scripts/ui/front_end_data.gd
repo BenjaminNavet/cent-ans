@@ -7,20 +7,14 @@ extends RefCounted
 
 const DATA_PATH := "ui/front_end.json"
 
-static var _data: Dictionary = {}
+static var _lookup := JsonLookup.new(DATA_PATH)
 ## Indices des citations pas encore montrées dans la session (voir `random_quote`).
 static var _quote_bag: Array = []
 static var _quote_bag_key: String = ""
 
 
 static func data() -> Dictionary:
-	if _data.is_empty():
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-		if _data.is_empty():
-			push_warning("FrontEndData: %s missing or invalid" % DATA_PATH)
-	return _data
+	return _lookup.data()
 
 
 static func backdrop() -> Dictionary:

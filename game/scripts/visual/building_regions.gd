@@ -11,8 +11,7 @@ extends RefCounted
 
 const DATA_FILE := "art/building_regions.json"
 
-static var _doc: Dictionary = {}
-static var _loaded := false
+static var _lookup := JsonLookup.new(DATA_FILE)
 static var _province_region: Dictionary = {}  # id de province → région (cache)
 
 
@@ -21,14 +20,7 @@ static func _read_json(relative: String) -> Variant:
 
 
 static func document() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = _read_json(DATA_FILE)
-		if parsed is Dictionary:
-			_doc = parsed
-		else:
-			push_warning("BuildingRegions: %s introuvable, style régional désactivé" % DATA_FILE)
-	return _doc
+	return _lookup.data()
 
 
 ## Région (`region` du fichier de province) ; "" si inconnue.

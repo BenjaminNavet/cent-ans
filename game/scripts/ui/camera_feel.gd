@@ -19,9 +19,7 @@ const FALLBACK := {
 	"reduce_motion": {},
 }
 
-static var _cache: Dictionary = {}
-## Vrai si les valeurs viennent du fichier de données (tests).
-static var loaded_from_data: bool = false
+static var _lookup := JsonLookup.new(DATA_FILE, FALLBACK)
 
 
 ## Valeur `key` du bloc `block` (`"campaign"` ou `"battle"`), selon « Réduire les animations ».
@@ -35,24 +33,19 @@ static func get_value(block: String, key: String) -> float:
 	return float(values.get(key, (FALLBACK.get(block, {}) as Dictionary).get(key, 0.0)))
 
 
-## Réglages complets (lus une fois).
+## Réglages complets (lus une fois) : repli complété par le fichier.
 static func settings() -> Dictionary:
-	if _cache.is_empty():
-		_cache = FALLBACK.duplicate(true)
-		var parsed: Variant = DataFile.read_json(DATA_FILE) if DataFile.exists(DATA_FILE) else null
-		if parsed is Dictionary:
-			for block: String in ["campaign", "battle", "reduce_motion"]:
-				if (parsed as Dictionary).get(block) is Dictionary:
-					(_cache[block] as Dictionary).merge(parsed[block], true)
-			loaded_from_data = true
-		else:
-			push_warning("CameraFeel : %s illisible, valeurs de repli." % DATA_FILE)
-	return _cache
+	return _lookup.data()
+
+
+## Vrai si les valeurs viennent du fichier de données (tests).
+static func loaded_from_data() -> bool:
+	settings()
+	return _lookup.found
 
 
 ## Relit le fichier au prochain accès (tests).
 static func reload() -> void:
-	_cache = {}
-	loaded_from_data = false
+	_lookup.reload()
 
 

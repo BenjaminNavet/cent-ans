@@ -8,17 +8,11 @@ extends RefCounted
 
 const DATA_PATH := "fx/map_fire_wind.json"
 
-static var _data: Dictionary = {}
-static var _loaded := false
+static var _lookup := JsonLookup.new(DATA_PATH)
 
 
 static func data() -> Dictionary:
-	if not _loaded:
-		_loaded = true
-		var parsed: Variant = DataFile.read_json(DATA_PATH) if DataFile.exists(DATA_PATH) else null
-		if parsed is Dictionary:
-			_data = parsed
-	return _data
+	return _lookup.data()
 
 
 static func enabled() -> bool:

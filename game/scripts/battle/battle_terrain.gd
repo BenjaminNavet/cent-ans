@@ -122,21 +122,11 @@ static func ground_role_index(role: String) -> int:
 ## A6-L14 : échelles de bruit et variation macro du sol (`data/fx/battle_ground.json`, schéma
 ## `fx_battle_ground.schema.json`) ; sans fichier, les uniforms gardent les anciennes constantes.
 const GROUND_NOISE_FILE := "fx/battle_ground.json"
-static var _ground_noise: Dictionary = {}
-static var _ground_noise_loaded: bool = false
+static var _ground_noise := JsonLookup.new(GROUND_NOISE_FILE)
 
 
 static func ground_noise() -> Dictionary:
-	if _ground_noise_loaded:
-		return _ground_noise
-	_ground_noise_loaded = true
-	if DataFile.exists(GROUND_NOISE_FILE):
-		var parsed: Variant = DataFile.read_json(GROUND_NOISE_FILE)
-		if parsed is Dictionary:
-			_ground_noise = parsed
-			return _ground_noise
-	push_warning("BattleTerrain: %s introuvable, échelles de sol historiques" % GROUND_NOISE_FILE)
-	return _ground_noise
+	return _ground_noise.data()
 
 
 func _apply_ground_noise() -> void:
