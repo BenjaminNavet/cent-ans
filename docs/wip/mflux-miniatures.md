@@ -2,8 +2,9 @@
 
 ## État
 - Modèle `local/z-image-turbo` routé dans `openrouter.request_image` (tests `tools/tests/test_local_art.py`).
-- `cent-ans assets illustrations --local` : lot des 148 miniatures de factions en cours (nouveau
-  prompt : paysage de la province capitale, scène variée). Blasons inventés, cadre doré fin.
+- 148 miniatures de factions générées en local et commitées (fe9af28f7) : paysage de la province
+  capitale, scène variée. Cadre doré fin rogné par `entry_art.FRAME_INSET` (2 %, e717af6e4).
+  Contrôle visuel d'un échantillon de 12 : correct. Défaut restant : blasons inventés.
 
 ## Lots en cours (10-08)
 - A (mech) : FAIT (10-08). `--local` (mflux gratuit, aucun appel réseau ni ligne de budget) sur
@@ -18,9 +19,8 @@
   locale (Z-Image img2img) + détourage local (rembg) ; seul TRELLIS reste payant (0,02 $).
 
 ## Ensuite
-- Rogner le cadre doré des miniatures de factions, contrôle visuel d'un échantillon, commit.
 - Incrustation des vrais blasons (données `heraldry`).
-- Essais réels de A et B quand le lot de factions est fini (GPU libre).
+- Essais réels de A et B (GPU libre) ; pour B, ajouter d'abord un arrêt avant TRELLIS (essai gratuit).
 
 ## Lot B : chaîne GA3 locale (10-08, code fait, aucun essai réel mflux)
 - `tools/experiments/ga3_local.py` (commun) : `local_sheet_prompt` (prompt nano-banana -> description
