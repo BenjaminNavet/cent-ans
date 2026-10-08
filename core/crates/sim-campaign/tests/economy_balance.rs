@@ -1,14 +1,11 @@
 //! Net balance (UI audit A3, E1): the projected « solde » shown before the
 //! turn is the one booked by the economy phase.
 
-use data_model::{FactionId, GameData};
-use sim_campaign::{CampaignState, Order};
+use data_model::FactionId;
+use sim_campaign::test_support::idle;
+use sim_campaign::CampaignState;
 
 use data_model::test_support::game_data;
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 #[test]
 fn projected_net_income_is_the_booked_balance() {

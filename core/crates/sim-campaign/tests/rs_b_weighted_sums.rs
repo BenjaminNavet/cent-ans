@@ -4,13 +4,10 @@
 //! effects of lot DC3.
 
 use data_model::{BuildingId, FactionId, GameData, ProvinceId, SettlementKind};
+use sim_campaign::test_support::start;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::game_data;
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
 
 /// A province whose controller holds a garrisoned secondary place.
 fn province_with_secondary_garrison(state: &CampaignState) -> ProvinceId {
@@ -32,7 +29,7 @@ fn province_with_secondary_garrison(state: &CampaignState) -> ProvinceId {
 #[test]
 fn secondary_garrisons_weigh_half_in_public_order() {
     let mut data = game_data().clone();
-    let state = start(&data);
+    let state = start(&data, "fac_france", 7);
     let province = province_with_secondary_garrison(&state);
     let controller = state.province_controller(&province).cloned().unwrap();
     let expected: u32 = state
@@ -57,7 +54,7 @@ fn secondary_garrisons_weigh_half_in_public_order() {
 /// Plague resistance of the capital's province after an apothecary is added to a
 /// place of `kind` there.
 fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f64) {
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let apothecary = BuildingId::new("bld_apothecary").unwrap();
     let france = FactionId::new("fac_france").unwrap();
     let (place, province) = state
@@ -102,7 +99,7 @@ fn a_village_apothecary_resists_plague_less_than_a_city_one() {
 #[test]
 fn tax_efficiency_is_read_from_the_data() {
     let mut data = game_data().clone();
-    let state = start(&data);
+    let state = start(&data, "fac_france", 7);
     let paris = ProvinceId::new("prov_ile_de_france").unwrap();
     let province = state.provinces.get(&paris).expect("Île-de-France");
     let income = sim_campaign::economy::province_base_income(&data, province);

@@ -1,14 +1,11 @@
 //! M10 campaign objectives and outcome.
 
-use data_model::{FactionId, GameData, ProvinceId};
+use data_model::ProvinceId;
+use sim_campaign::test_support::idle;
 use sim_campaign::victory::OutcomeKind;
-use sim_campaign::{CampaignState, EventKind, Order};
+use sim_campaign::{CampaignState, EventKind};
 
 use data_model::test_support::{fac, game_data};
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 #[test]
 fn every_playable_faction_has_objectives() {

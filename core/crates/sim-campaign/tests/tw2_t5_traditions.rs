@@ -5,8 +5,9 @@
 //! banner, loss on dissolution, dilution of experience by reinforcements,
 //! save.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::{capital_city, main_army};
 
-use data_model::{GameData, SettlementId};
+use data_model::GameData;
 use sim_campaign::replenish::resolve_replenishment;
 use sim_campaign::traditions::{
     add_recruits, army_tradition_effects, grant_army_xp, rank_for_xp, siege_speed_percent,
@@ -14,25 +15,6 @@ use sim_campaign::traditions::{
 use sim_campaign::{
     ArmyId, ArmyPosition, CampaignState, Order, OrderError, Season, Stance, TraditionError,
 };
-
-fn capital_city(state: &CampaignState, faction: &str) -> SettlementId {
-    let capital = state.factions[&fac(faction)].capital.clone();
-    state
-        .province_city_id(&capital)
-        .cloned()
-        .expect("capital city")
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
 
 /// France played by the player, its main army (with its general) in Paris,
 /// spring, a full treasury.

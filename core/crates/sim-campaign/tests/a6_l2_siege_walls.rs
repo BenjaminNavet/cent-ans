@@ -2,14 +2,11 @@
 //! assault without breach is a poor bet (`data/rules/siege_engines.json`,
 //! `data/rules/auto_resolve.json`).
 
-use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
-use sim_campaign::{siege_engines, ArmyId, CampaignState, Order, Stance, Unit};
+use data_model::{GameData, SettlementId, UnitTypeId};
+use sim_campaign::test_support::idle;
+use sim_campaign::{siege_engines, ArmyId, CampaignState, Stance, Unit};
 
 use data_model::test_support::{fac, game_data, prov};
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 /// France besieging English Guyenne, walls raised to `walls`, siege begun.
 fn siege(data: &GameData, walls: u8) -> (CampaignState, ArmyId, SettlementId) {

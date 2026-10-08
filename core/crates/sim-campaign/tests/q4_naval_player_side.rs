@@ -6,19 +6,10 @@
 use data_model::{GameData, SettlementId};
 use sim_battle::naval::auto_resolve;
 use sim_battle::SideId;
-use sim_campaign::{ArmyId, CampaignState};
+use sim_campaign::test_support::main_army;
+use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies()
-        .iter()
-        .filter(|(_, a)| a.faction == fac(faction))
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .unwrap()
-}
 
 /// Share of the five forecast auto-resolves won by `side` (same seeds as the view).
 fn share(state: &CampaignState, data: &GameData, side: SideId) -> f64 {

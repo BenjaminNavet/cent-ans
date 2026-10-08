@@ -4,6 +4,7 @@
 use data_model::EffectKind;
 use data_model::{AcquisitionTrigger, BuildingId, CharacterId, CompanionId, GameData};
 use sim_campaign::state::ArmyId;
+use sim_campaign::test_support::start_quiet;
 use sim_campaign::{characters, retinue, skills, CampaignState, Order, OrderError};
 
 use data_model::test_support::{fac, game_data};
@@ -16,15 +17,9 @@ fn ret(id: &str) -> CompanionId {
     CompanionId::new(id).unwrap()
 }
 
-fn start(data: &GameData, faction: &str, seed: u64) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac(faction), seed).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
-}
-
 /// Companions `id` gains over `turns` victories, one roll per turn.
 fn victories(data: &GameData, seed: u64, id: &str, turns: u32) -> Vec<CompanionId> {
-    let mut state = start(data, "fac_england", seed);
+    let mut state = start_quiet(data, "fac_england", seed);
     let id = chr(id);
     let mut events = Vec::new();
     for turn in 0..turns {
@@ -78,7 +73,7 @@ fn acquisition_is_deterministic_per_seed_and_capped() {
 #[test]
 fn acquisition_does_not_touch_the_main_random_stream() {
     let data = game_data();
-    let mut state = start(data, "fac_england", 3);
+    let mut state = start_quiet(data, "fac_england", 3);
     let before = state.rng.clone();
     let mut events = Vec::new();
     for turn in 0..20 {
@@ -99,7 +94,7 @@ fn acquisition_does_not_touch_the_main_random_stream() {
 fn faction_conditions_and_buildings_are_honoured() {
     let data = game_data();
     // The vintenar only serves England.
-    let mut state = start(data, "fac_france", 11);
+    let mut state = start_quiet(data, "fac_france", 11);
     let philippe = chr("chr_philippe_vi");
     assert!(!retinue::can_gain(
         &state,
@@ -150,7 +145,7 @@ fn faction_conditions_and_buildings_are_honoured() {
 #[test]
 fn companions_add_their_effects() {
     let data = game_data();
-    let mut state = start(data, "fac_england", 1);
+    let mut state = start_quiet(data, "fac_england", 1);
     let edward = chr("chr_edward_iii");
     let before = skills::character_effects(&state, data, &edward);
     state
@@ -172,7 +167,7 @@ fn companions_add_their_effects() {
 #[test]
 fn the_heir_gathers_the_inheritable_companions() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 5);
+    let mut state = start_quiet(data, "fac_france", 5);
     let philippe = chr("chr_philippe_vi");
     let jean = chr("chr_jean_de_normandie");
     state
@@ -193,7 +188,7 @@ fn the_heir_gathers_the_inheritable_companions() {
 #[test]
 fn a_childless_general_loses_his_retinue() {
     let data = game_data();
-    let mut state = start(data, "fac_england", 5);
+    let mut state = start_quiet(data, "fac_england", 5);
     let mauny = chr("chr_gautier_de_mauny");
     state
         .characters
@@ -213,7 +208,7 @@ fn a_childless_general_loses_his_retinue() {
 #[test]
 fn death_year_of_characters_already_dead_in_1337() {
     let data = game_data();
-    let state = start(data, "fac_france", 1);
+    let state = start_quiet(data, "fac_france", 1);
     for (id, c) in &state.characters {
         if c.alive {
             assert_eq!(c.death_year, None, "{id}");
@@ -231,7 +226,7 @@ fn place_general(state: &mut CampaignState, army: &ArmyId, general: &CharacterId
 #[test]
 fn companions_move_between_generals_standing_together() {
     let data = game_data();
-    let mut state = start(data, "fac_england", 2);
+    let mut state = start_quiet(data, "fac_england", 2);
     let england = fac("fac_england");
     let first = state
         .armies
@@ -289,7 +284,7 @@ fn companions_move_between_generals_standing_together() {
 #[test]
 fn old_saves_without_the_new_fields_still_load() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 9);
+    let mut state = start_quiet(data, "fac_france", 9);
     state
         .characters
         .get_mut(&chr("chr_philippe_vi"))
@@ -325,7 +320,7 @@ fn old_saves_without_the_new_fields_still_load() {
 #[test]
 fn the_ai_gains_companions_during_a_campaign() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 21);
+    let mut state = start_quiet(data, "fac_france", 21);
     for _ in 0..16 {
         state.end_turn(data);
     }

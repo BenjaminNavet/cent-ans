@@ -3,6 +3,7 @@
 //! walls leaves the siege running; besiegers put to flight by a sortie fall
 //! back like any beaten army instead of standing idle under the walls.
 use data_model::test_support::fac;
+use sim_campaign::test_support::{idle, main_army};
 
 use std::path::PathBuf;
 
@@ -20,21 +21,6 @@ fn plain_data() -> GameData {
         provinces: None,
     });
     data
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 /// A map point `km` kilometres east of `point`.

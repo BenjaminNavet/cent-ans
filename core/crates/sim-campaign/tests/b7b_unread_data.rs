@@ -4,17 +4,10 @@
 //! `edicts.rs`. See `docs/archive/chantiers.md`.
 
 use data_model::{FactionId, GameData, SettlementId, SkillId, TraitId, UnitTypeId};
+use sim_campaign::test_support::{idle, start};
 use sim_campaign::{CampaignState, Order, Place, QueuedRecruit};
 
 use data_model::test_support::game_data;
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 fn france() -> FactionId {
     FactionId::new("fac_france").unwrap()
@@ -71,7 +64,7 @@ fn option_turns(state: &CampaignState, data: &GameData, city: &SettlementId, id:
 #[test]
 fn builder_ruler_shortens_constructions() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     clear_builders(&mut state, data);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let city = capital_city(&state);
@@ -123,7 +116,7 @@ fn builder_ruler_shortens_constructions() {
 #[test]
 fn governor_and_ruler_do_not_stack_but_skills_do() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     clear_builders(&mut state, data);
     let city = capital_city(&state);
     let province = state.settlements[&city].province.clone();
@@ -163,7 +156,7 @@ fn governor_and_ruler_do_not_stack_but_skills_do() {
 #[test]
 fn slow_recruits_train_for_their_recruit_time() {
     let mut data = game_data().clone();
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let city = capital_city(&state);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let option = state
@@ -212,7 +205,7 @@ fn slow_recruits_train_for_their_recruit_time() {
 #[test]
 fn one_turn_recruits_join_at_the_end_of_the_turn() {
     let mut data = game_data().clone();
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let city = capital_city(&state);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let unit = state

@@ -3,9 +3,10 @@
 //! choice, player decisions and the `choose_event_option` order, expiry, the
 //! Black Death wave and the save format. See `docs/design/m10-events.md` § 2.
 
+use sim_campaign::test_support::{idle, start};
 use std::path::PathBuf;
 
-use data_model::{EventCategory, EventId, FactionId, GameData, ProvinceId};
+use data_model::{EventCategory, EventId, GameData, ProvinceId};
 use sim_campaign::chronicle::{self, plague_slice, PLAGUE_POPULATION_LOSS};
 use sim_campaign::{
     CampaignState, ChronicleError, EventKind, Order, OrderError, Season, STATE_VERSION,
@@ -15,15 +16,6 @@ use data_model::test_support::{fac, game_data, prov};
 
 fn evt(id: &str) -> EventId {
     EventId::new(id).unwrap()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<sim_campaign::Order> {
-    Vec::new()
 }
 
 fn set_date(state: &mut CampaignState, year: i32, season: Season) {

@@ -2,13 +2,10 @@
 //! useful after a prolonged deficit (`economy.json` `ai_demolition`).
 
 use data_model::{BuildingId, GameData, SettlementKind};
+use sim_campaign::test_support::bld;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
 
 /// The Swiss with a university (and its collegiate church) and a cathedral
 /// in every city and town: far more upkeep than their income bears.

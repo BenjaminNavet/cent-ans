@@ -2,25 +2,11 @@
 //! piety, levy armour/ranged bonuses, `transfer_province`, player ransoms and
 //! allies joining siege assaults. See `docs/archive/chantiers.md`.
 
-use data_model::{
-    BuildingId, CharacterId, EventEffect, FactionId, GameData, SettlementId, UnitTypeId,
-};
+use data_model::{CharacterId, EventEffect, GameData};
+use sim_campaign::test_support::{bld, city, idle, unit_type};
 use sim_campaign::{CampaignState, Order, OrderError};
 
 use data_model::test_support::{fac, game_data, prov};
-
-/// The city of a province (lot C4: recruitment and buildings are per settlement).
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
-}
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
 
 /// France at spring 1337 without chronicle events (no random noise).
 fn quiet_france(data: &GameData, seed: u64) -> CampaignState {
@@ -58,7 +44,7 @@ fn recruit_slots_cap_the_province_queue() {
             data,
             Order::Recruit {
                 settlement: province.clone().into(),
-                unit_type: unit("unit_urban_militia"),
+                unit_type: unit_type("unit_urban_militia"),
             },
         )
     };
@@ -82,10 +68,6 @@ fn recruit_slots_cap_the_province_queue() {
 }
 
 // 2. Piety -----------------------------------------------------------------
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 #[test]
 fn trait_piety_raises_the_effective_piety_and_papal_favour() {
@@ -167,7 +149,7 @@ fn armoury_and_butts_equip_the_units_levied_there() {
     for u in ["unit_urban_militia", "unit_crossbowmen"] {
         let order = Order::Recruit {
             settlement: province.clone().into(),
-            unit_type: unit(u),
+            unit_type: unit_type(u),
         };
         state.submit_order(data, order).unwrap();
     }
@@ -175,10 +157,10 @@ fn armoury_and_butts_equip_the_units_levied_there() {
     let garrison = &state.settlements[&province].garrison;
     let militia = garrison
         .iter()
-        .find(|u| u.unit_type == unit("unit_urban_militia"));
+        .find(|u| u.unit_type == unit_type("unit_urban_militia"));
     let crossbows = garrison
         .iter()
-        .find(|u| u.unit_type == unit("unit_crossbowmen"));
+        .find(|u| u.unit_type == unit_type("unit_crossbowmen"));
     let (militia, crossbows) = (militia.unwrap(), crossbows.unwrap());
     assert_eq!((militia.levy_armor, militia.levy_ranged), (3, 0));
     assert_eq!((crossbows.levy_armor, crossbows.levy_ranged), (3, 3));

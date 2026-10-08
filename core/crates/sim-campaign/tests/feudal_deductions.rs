@@ -1,20 +1,17 @@
 //! FE deductions (spec § 3.3), obligations and loyalty (§ 4.1-4.2): deductions (F0), suzerain view, maxim, tribute and loyalty (F1).
 
 use data_model::GameData;
+use sim_campaign::test_support::start;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data, prov};
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start")
-}
 
 use sim_campaign::feudal;
 
 #[test]
 fn guyenne_owes_allegiance_to_england_then_france() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     assert_eq!(
         feudal::province_lieges(&state, data, &prov("prov_guyenne")),
         vec![fac("fac_england"), fac("fac_france")]
@@ -26,7 +23,7 @@ fn guyenne_owes_allegiance_to_england_then_france() {
 #[test]
 fn deduced_liege_matches_the_1337_suzerains() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     for (id, faction) in &data.factions {
         if let Some(suzerain) = &faction.suzerain {
             assert_eq!(
@@ -45,7 +42,7 @@ fn deduced_liege_matches_the_1337_suzerains() {
 /// Navarre pays homage to Burgundy: a count (Angoumois' holder) below a
 /// duke below the king.
 fn with_rear_vassal(data: &GameData) -> CampaignState {
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     assert!(feudal::pay_homage(
         &mut state,
         data,
@@ -58,7 +55,7 @@ fn with_rear_vassal(data: &GameData) -> CampaignState {
 #[test]
 fn state_suzerain_is_a_view_of_the_titles() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     for id in state.factions.keys() {
         assert_eq!(
             state.factions[id].suzerain,
@@ -99,7 +96,7 @@ fn state_suzerain_is_a_view_of_the_titles() {
     assert_eq!(feudal::liege_of(&state, data, &fac("fac_brittany")), None);
     assert_eq!(state.factions[&fac("fac_brittany")].suzerain, None);
     // A pre-F1 save: its stored suzerain is adopted as an override.
-    let mut legacy = start(data);
+    let mut legacy = start(data, "fac_france", 7);
     legacy.feudal.derived = false;
     legacy.factions.get_mut(&scotland).unwrap().suzerain = Some(fac("fac_france"));
     feudal::sync_suzerains(&mut legacy, data);
@@ -109,7 +106,7 @@ fn state_suzerain_is_a_view_of_the_titles() {
         Some(fac("fac_france"))
     );
     // No cycle: a liege paying homage to its own vassal is freed first.
-    let mut cycle = start(data);
+    let mut cycle = start(data, "fac_france", 7);
     assert!(feudal::pay_homage(
         &mut cycle,
         data,
@@ -177,7 +174,7 @@ fn tribute_goes_to_the_direct_liege_only() {
 #[test]
 fn loyalty_thresholds_come_from_the_rules() {
     let mut data = game_data().clone();
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, burgundy, brittany) =
         (fac("fac_france"), fac("fac_burgundy"), fac("fac_brittany"));
     let target = |state: &CampaignState, data: &GameData| {
@@ -222,7 +219,7 @@ fn loyalty_thresholds_come_from_the_rules() {
     let holstein = fac("fac_holstein");
     let threshold = data.feudal_rules.call_to_arms_loyalty;
     for (loyalty, follows) in [(threshold - 1, false), (threshold, true)] {
-        let mut war = start(&data);
+        let mut war = start(&data, "fac_france", 7);
         war.factions.get_mut(&burgundy).unwrap().loyalty = loyalty;
         war.declare_war(&data, &france, &holstein).expect("war");
         assert_eq!(war.is_at_war(&burgundy, &holstein), follows, "{loyalty}");
@@ -232,7 +229,7 @@ fn loyalty_thresholds_come_from_the_rules() {
 #[test]
 fn title_holdings_survive_a_save_and_older_saves_are_refused() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     assert!(!state.feudal.holders.is_empty());
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("round trip");

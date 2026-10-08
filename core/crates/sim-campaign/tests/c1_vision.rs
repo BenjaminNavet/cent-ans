@@ -1,6 +1,7 @@
 //! Fog of war: lot C1 (`CampaignState::visible_provinces`), per-cell sight
 //! radius since lot M5a (`CampaignState::vision`, `visible_armies`).
 
+use sim_campaign::march::px_per_km;
 use std::collections::BTreeSet;
 use std::time::Instant;
 
@@ -24,10 +25,6 @@ fn radius_only_data() -> GameData {
     let mut data = game_data().clone();
     data.vision_rules = Some(rules(true));
     data
-}
-
-fn px_per_km(data: &GameData) -> f32 {
-    data.navgrid().px_per_km() as f32
 }
 
 /// `point` moved `km` kilometres east.

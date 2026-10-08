@@ -1,6 +1,7 @@
 //! A6-L4: idle research reserve (capped) and research queue.
 
 use data_model::{FactionId, GameData, TechnologyId};
+use sim_campaign::test_support::idle;
 use sim_campaign::{CampaignState, Order, OrderError, ResearchError};
 
 use data_model::test_support::game_data;
@@ -11,10 +12,6 @@ fn fac() -> FactionId {
 
 fn tech(id: &str) -> TechnologyId {
     TechnologyId::new(id).unwrap()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn state(data: &GameData) -> CampaignState {

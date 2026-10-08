@@ -5,12 +5,11 @@
 //! collapse, Garter and Star events), old saves and determinism.
 
 use data_model::EffectKind;
-use data_model::{
-    CharacterId, ChivalricOrderId, EventEffect, EventId, FactionId, GameData, SocialClass,
-};
+use data_model::{CharacterId, ChivalricOrderId, EventEffect, EventId, GameData, SocialClass};
 use sim_campaign::chronicle::{self, EventContext};
 use sim_campaign::coinage::{self, CoinageLevel, PRICE_BASE};
 use sim_campaign::effects;
+use sim_campaign::test_support::{idle, start_quiet};
 use sim_campaign::{
     chivalry, ransom, CampaignState, ChivalryError, CoinageError, EventKind, Order, OrderError,
     RansomError, RansomTerms,
@@ -26,17 +25,6 @@ fn ord(id: &str) -> ChivalricOrderId {
     ChivalricOrderId::new(id).unwrap()
 }
 
-/// France 1337 with the chronicle off (no random noise).
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
 fn set_coinage(
     state: &mut CampaignState,
     data: &GameData,
@@ -50,7 +38,7 @@ fn set_coinage(
 #[test]
 fn coinage_defaults_and_one_change_per_year() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start_quiet(data, "fac_france", 1);
     let f = &state.factions[&fac("fac_france")];
     assert_eq!(f.coinage, CoinageLevel::Sound);
     assert_eq!(f.price_level, PRICE_BASE);
@@ -75,7 +63,7 @@ fn coinage_defaults_and_one_change_per_year() {
 #[test]
 fn debasement_yields_seigniorage_and_inflation() {
     let data = game_data();
-    let mut sound = france(data, 2);
+    let mut sound = start_quiet(data, "fac_france", 2);
     let mut debased = sound.clone();
     let france_id = fac("fac_france");
     let tax = debased.faction_income(data, &france_id);
@@ -103,7 +91,7 @@ fn debasement_yields_seigniorage_and_inflation() {
 #[test]
 fn heavy_debasement_is_ruinous_in_the_long_run() {
     let data = game_data();
-    let mut sound = france(data, 3);
+    let mut sound = start_quiet(data, "fac_france", 3);
     let mut heavy = sound.clone();
     set_coinage(&mut heavy, data, CoinageLevel::HeavilyDebased).unwrap();
     for _ in 0..24 {
@@ -123,7 +111,7 @@ fn heavy_debasement_is_ruinous_in_the_long_run() {
 #[test]
 fn prices_scale_recruitment_upkeep_and_construction() {
     let data = game_data();
-    let mut state = france(data, 4);
+    let mut state = start_quiet(data, "fac_france", 4);
     let france_id = fac("fac_france");
     let capital = state.factions[&france_id].capital.clone();
     let province = state.province_city_id(&capital).unwrap().clone();
@@ -150,7 +138,7 @@ fn prices_scale_recruitment_upkeep_and_construction() {
 fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     let data = game_data();
     let france_id = fac("fac_france");
-    let mut state = france(data, 5);
+    let mut state = start_quiet(data, "fac_france", 5);
     state.factions.get_mut(&france_id).unwrap().price_level = 160;
     let burghers = coinage::class_effects(&state, &france_id, SocialClass::Burghers);
     let clergy = coinage::class_effects(&state, &france_id, SocialClass::Clergy);
@@ -158,7 +146,7 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     assert_eq!(burghers[EffectKind::Unrest].flat, 10.0);
     assert_eq!(clergy[EffectKind::Wealth].flat, -7.5);
     assert_eq!(peasants[EffectKind::Unrest].flat, 0.0);
-    let mut calm = france(data, 5);
+    let mut calm = start_quiet(data, "fac_france", 5);
     for _ in 0..6 {
         state.factions.get_mut(&france_id).unwrap().price_level = 160;
         state.end_turn_with(data, idle);
@@ -176,7 +164,7 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
 
     // Strong money: prices fall 2 points a season, recoinage is paid,
     // burghers are pleased and the ruler gains prestige.
-    let mut strong = france(data, 6);
+    let mut strong = start_quiet(data, "fac_france", 6);
     strong.factions.get_mut(&france_id).unwrap().price_level = 110;
     set_coinage(&mut strong, data, CoinageLevel::Strong).unwrap();
     let ruler = strong.factions[&france_id].ruler.clone().unwrap();
@@ -200,7 +188,7 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
 #[test]
 fn ai_coinage_policy() {
     let data = game_data();
-    let mut state = france(data, 7);
+    let mut state = start_quiet(data, "fac_france", 7);
     let england = fac("fac_england");
     state.factions.get_mut(&england).unwrap().treasury = -100;
     assert_eq!(
@@ -262,7 +250,7 @@ fn pay(
 #[test]
 fn ransom_follows_rank_prestige_and_wealth() {
     let data = game_data();
-    let mut state = france(data, 10);
+    let mut state = start_quiet(data, "fac_france", 10);
     let king = chr("chr_philippe_vi");
     let heir = chr("chr_jean_de_normandie");
     assert_eq!(
@@ -296,7 +284,7 @@ fn ransom_follows_rank_prestige_and_wealth() {
 #[test]
 fn full_ransom_frees_the_captive_once() {
     let data = game_data();
-    let mut state = france(data, 11);
+    let mut state = start_quiet(data, "fac_france", 11);
     capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     let amount = ransom::ransom_amount(&state, data, &chr("chr_jean_de_normandie"));
     let france_id = fac("fac_france");
@@ -334,7 +322,7 @@ fn full_ransom_frees_the_captive_once() {
 #[test]
 fn installments_are_paid_yearly_and_defaults_are_punished() {
     let data = game_data();
-    let mut state = france(data, 12);
+    let mut state = start_quiet(data, "fac_france", 12);
     let france_id = fac("fac_france");
     let england = fac("fac_england");
     capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
@@ -483,7 +471,7 @@ fn captor_terms_parole_hold_and_cession() {
 #[test]
 fn a_captive_king_weighs_on_his_realm() {
     let data = game_data();
-    let mut state = france(data, 14);
+    let mut state = start_quiet(data, "fac_france", 14);
     let france_id = fac("fac_france");
     capture(&mut state, data, "chr_philippe_vi", "fac_england");
     let king = chr("chr_philippe_vi");
@@ -536,7 +524,7 @@ fn found(state: &mut CampaignState, data: &GameData, order: &str) -> Result<(), 
 #[test]
 fn founding_an_order_checks_faction_year_prestige_and_money() {
     let data = game_data();
-    let mut state = france(data, 20);
+    let mut state = start_quiet(data, "fac_france", 20);
     let france_id = fac("fac_france");
     assert_eq!(
         found(&mut state, data, "ord_garter"),
@@ -646,7 +634,7 @@ fn members_are_named_and_gain_loyalty_and_morale() {
 #[test]
 fn an_order_losing_half_its_members_collapses() {
     let data = game_data();
-    let mut state = france(data, 22);
+    let mut state = start_quiet(data, "fac_france", 22);
     let france_id = fac("fac_france");
     state.year = 1352;
     let ruler = state.factions[&france_id].ruler.clone().unwrap();
@@ -688,7 +676,7 @@ fn choose_found_option(state: &mut CampaignState, data: &GameData, event: &str, 
 #[test]
 fn garter_and_star_events_found_their_orders() {
     let data = game_data();
-    let mut state = france(data, 23);
+    let mut state = start_quiet(data, "fac_france", 23);
     choose_found_option(
         &mut state,
         data,
@@ -725,7 +713,7 @@ fn garter_and_star_events_found_their_orders() {
 #[test]
 fn h5_h6_state_survives_saves_and_old_saves_load() {
     let data = game_data();
-    let mut state = france(data, 30);
+    let mut state = start_quiet(data, "fac_france", 30);
     set_coinage(&mut state, data, CoinageLevel::Debased).unwrap();
     capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 1_000_000;

@@ -1,6 +1,7 @@
 //! Lot TW2-T2 (ADR 0102): seasonal replenishment of field armies and
 //! recruitment pools (spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T2).
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::{capital_city, main_army};
 
 use data_model::{GameData, SettlementId, SettlementKind, UnitTypeId};
 use sim_campaign::replenish::{resolve_replenishment, Territory};
@@ -8,25 +9,6 @@ use sim_campaign::{
     recruit_pool::resolve_recruit_pools, ArmyId, ArmyPosition, CampaignState, Order, OrderError,
     Season, Stance,
 };
-
-fn capital_city(state: &CampaignState, faction: &str) -> SettlementId {
-    let capital = state.factions[&fac(faction)].capital.clone();
-    state
-        .province_city_id(&capital)
-        .cloned()
-        .expect("capital city")
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
 
 /// France played by the player, its main army in Paris with every unit at
 /// half strength, a full treasury, spring.

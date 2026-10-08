@@ -3,28 +3,15 @@
 //! See `docs/design/m3-cities-economy.md` § 1.6.
 
 use data_model::EffectKind;
-use data_model::{FactionId, GameData, ProvinceId, SettlementId};
+use data_model::{FactionId, ProvinceId};
 use sim_campaign::population::weighted_unrest;
+use sim_campaign::test_support::{city, idle, start};
 use sim_campaign::{CampaignState, EventKind, Order, Season, TaxRate};
 
 use data_model::test_support::{fac, game_data, prov};
 
-/// The city of a province (lot C4: buildings stand in settlements).
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
-}
-
 fn building(id: &str) -> data_model::BuildingId {
     data_model::BuildingId::new(id).unwrap()
-}
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn set_all_unrest(state: &mut CampaignState, province: &ProvinceId, value: u8) {
@@ -48,7 +35,7 @@ fn set_all_health(state: &mut CampaignState, province: &ProvinceId, value: u8) {
 #[test]
 fn growth_is_positive_when_health_is_high() {
     let data = game_data();
-    let mut state = france(data, 101);
+    let mut state = start(data, "fac_france", 101);
     let paris = prov("prov_ile_de_france");
     set_all_health(&mut state, &paris, 90);
     let before = state
@@ -70,7 +57,7 @@ fn growth_is_positive_when_health_is_high() {
 #[test]
 fn growth_is_negative_when_health_is_low() {
     let data = game_data();
-    let mut state = france(data, 102);
+    let mut state = start(data, "fac_france", 102);
     let paris = prov("prov_ile_de_france");
     set_all_health(&mut state, &paris, 5);
     let before = state
@@ -92,7 +79,7 @@ fn growth_is_negative_when_health_is_low() {
 #[test]
 fn low_health_triggers_a_plague() {
     let data = game_data();
-    let mut state = france(data, 103);
+    let mut state = start(data, "fac_france", 103);
     let paris = prov("prov_ile_de_france");
     set_all_health(&mut state, &paris, 5);
     let before = state
@@ -115,7 +102,7 @@ fn low_health_triggers_a_plague() {
 #[test]
 fn devastated_province_starves_in_winter() {
     let data = game_data();
-    let mut state = france(data, 104);
+    let mut state = start(data, "fac_france", 104);
     let paris = prov("prov_ile_de_france");
     for _ in 0..3 {
         state.end_turn_with(data, idle);
@@ -232,7 +219,7 @@ fn more_goods_categories_raise_satisfaction() {
 #[test]
 fn buildable_reports_the_missing_prerequisite() {
     let data = game_data();
-    let mut state = france(data, 108);
+    let mut state = start(data, "fac_france", 108);
     let paris = city(&state, "prov_ile_de_france");
     state.settlements.get_mut(&paris).unwrap().buildings.clear();
     let options = state.buildable(data, &paris);
@@ -264,7 +251,7 @@ fn buildable_reports_the_missing_prerequisite() {
 #[test]
 fn build_order_charges_cost_and_completes_after_its_duration() {
     let data = game_data();
-    let mut state = france(data, 109);
+    let mut state = start(data, "fac_france", 109);
     let paris = city(&state, "prov_ile_de_france");
     let france_id = fac("fac_france");
     let armoury = building("bld_armoury"); // upgrades_from bld_muster_field, already present
@@ -323,7 +310,7 @@ fn build_order_charges_cost_and_completes_after_its_duration() {
 #[test]
 fn completed_building_effects_apply_to_the_province() {
     let data = game_data();
-    let mut state = france(data, 110);
+    let mut state = start(data, "fac_france", 110);
     let province = prov("prov_agenais");
     // bld_guild_hall requires bld_market (already present) and adds +5
     // wealth / -5 unrest, both targeted at burghers (F1: class targeting).
@@ -375,7 +362,7 @@ fn completed_building_effects_apply_to_the_province() {
 #[test]
 fn cancel_build_refunds_half_the_cost() {
     let data = game_data();
-    let mut state = france(data, 111);
+    let mut state = start(data, "fac_france", 111);
     let paris = city(&state, "prov_ile_de_france");
     let france_id = fac("fac_france");
     let armoury = building("bld_armoury");
@@ -417,8 +404,8 @@ fn cancel_build_refunds_half_the_cost() {
 fn high_tax_raises_income_and_unrest_over_normal() {
     let data = game_data();
     let france_id = fac("fac_france");
-    let mut normal = france(data, 112);
-    let mut high = france(data, 112);
+    let mut normal = start(data, "fac_france", 112);
+    let mut high = start(data, "fac_france", 112);
     high.submit_order(
         data,
         Order::SetTaxRate {
@@ -451,8 +438,8 @@ fn high_tax_raises_income_and_unrest_over_normal() {
 fn low_tax_lowers_income_versus_normal() {
     let data = game_data();
     let france_id = fac("fac_france");
-    let mut normal = france(data, 113);
-    let mut low = france(data, 113);
+    let mut normal = start(data, "fac_france", 113);
+    let mut low = start(data, "fac_france", 113);
     low.submit_order(data, Order::SetTaxRate { rate: TaxRate::Low })
         .unwrap();
     normal.end_turn_with(data, idle);
@@ -480,7 +467,7 @@ fn average_unrest(state: &CampaignState, faction: &FactionId) -> f64 {
 #[test]
 fn save_json_round_trips_the_new_m3_fields() {
     let data = game_data();
-    let mut state = france(data, 114);
+    let mut state = start(data, "fac_france", 114);
     let paris = city(&state, "prov_ile_de_france");
     state
         .submit_order(
@@ -517,7 +504,7 @@ fn save_json_round_trips_the_new_m3_fields() {
 #[test]
 fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
     let data = game_data();
-    let state = france(data, 115);
+    let state = start(data, "fac_france", 115);
     let json = state.save_json().replace(
         &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
         "\"state_version\":1",

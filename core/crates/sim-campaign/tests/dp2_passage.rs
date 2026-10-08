@@ -8,13 +8,10 @@ use sim_campaign::passage::{
     TRESPASS_REASON,
 };
 use sim_campaign::stance::{diplomatic_stance, Stance};
+use sim_campaign::test_support::start;
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
-
-fn start(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
 
 /// A faction at plain peace with France (no truce, no grievance of any
 /// kind), and one of its provinces whose city point lies in it.
@@ -101,7 +98,7 @@ fn penalty_grows_with_the_seasons_and_is_capped() {
 #[test]
 fn trespass_creates_a_growing_incident_then_a_casus_belli() {
     let data = game_data();
-    let mut state = start(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let fr = fac("fac_france");
     let (victim, province, point) = neutral_victim(&state, data);
     assert_eq!(
@@ -147,7 +144,7 @@ fn trespass_creates_a_growing_incident_then_a_casus_belli() {
 #[test]
 fn leaving_resets_the_count_and_the_incident_is_forgotten() {
     let data = game_data();
-    let mut state = start(data, 2);
+    let mut state = start(data, "fac_france", 2);
     let fr = fac("fac_france");
     let (victim, _, point) = neutral_victim(&state, data);
     let army = french_army(&state);
@@ -178,7 +175,7 @@ fn leaving_resets_the_count_and_the_incident_is_forgotten() {
 #[test]
 fn military_access_or_alliance_make_the_passage_lawful() {
     let data = game_data();
-    let mut state = start(data, 3);
+    let mut state = start(data, "fac_france", 3);
     let fr = fac("fac_france");
     let (victim, province, point) = neutral_victim(&state, data);
     state
@@ -219,7 +216,7 @@ fn military_access_or_alliance_make_the_passage_lawful() {
 #[test]
 fn a_truce_leaves_time_to_withdraw() {
     let data = game_data();
-    let mut state = start(data, 4);
+    let mut state = start(data, "fac_france", 4);
     let fr = fac("fac_france");
     let (victim, _, point) = neutral_victim(&state, data);
     let until = state.turn + 20;
@@ -253,7 +250,7 @@ fn a_truce_leaves_time_to_withdraw() {
 fn disabled_rules_ignore_trespass() {
     let mut data = game_data().clone();
     data.ai_diplomacy.passage.enabled = false;
-    let mut state = start(&data, 5);
+    let mut state = start(&data, "fac_france", 5);
     let fr = fac("fac_france");
     let (victim, _, point) = neutral_victim(&state, &data);
     let army = french_army(&state);
@@ -268,7 +265,7 @@ fn disabled_rules_ignore_trespass() {
 fn the_end_of_turn_records_trespass_deterministically() {
     let data = game_data();
     let run = || {
-        let mut state = start(data, 6);
+        let mut state = start(data, "fac_france", 6);
         let (_, _, point) = neutral_victim(&state, data);
         let army = french_army(&state);
         place(&mut state, &army, point);
@@ -292,7 +289,7 @@ fn the_end_of_turn_records_trespass_deterministically() {
 #[test]
 fn the_path_preview_names_the_lands_crossed_and_the_halts() {
     let data = game_data();
-    let state = start(data, 7);
+    let state = start(data, "fac_france", 7);
     let fr = fac("fac_france");
     let (victim, province, point) = neutral_victim(&state, data);
     let army = french_army(&state);
@@ -311,7 +308,7 @@ fn the_path_preview_names_the_lands_crossed_and_the_halts() {
 #[test]
 fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
     let mut data = game_data().clone();
-    let mut state = start(&data, 8);
+    let mut state = start(&data, "fac_france", 8);
     let fr = fac("fac_france");
     let (victim, _, _) = neutral_victim(&state, &data);
     // No war: never.
@@ -361,7 +358,7 @@ fn the_ai_respects_the_passage_at_peace_and_breaks_it_by_temper_at_war() {
 #[test]
 fn the_diplomatic_map_stance() {
     let data = game_data();
-    let mut state = start(data, 9);
+    let mut state = start(data, "fac_france", 9);
     let fr = fac("fac_france");
     let en = fac("fac_england");
     assert_eq!(diplomatic_stance(&state, data, &fr, &fr), Stance::Own);

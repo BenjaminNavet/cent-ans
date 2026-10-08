@@ -1,14 +1,10 @@
 //! M10 balance rules: disbanding a whole army, opulent courts, vanished
 //! factions leave no war behind.
 
-use data_model::{FactionId, GameData};
+use sim_campaign::test_support::idle;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 #[test]
 fn dismissing_the_last_unit_disbands_the_army() {

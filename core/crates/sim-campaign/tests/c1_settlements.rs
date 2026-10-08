@@ -2,19 +2,16 @@
 //! exactly one city, and the settlement state survives a save round trip.
 //! See `docs/design/2026-09-24-echelle-colonies.md` § 4.2 and § 8.
 
-use data_model::{FactionId, GameData, SettlementKind};
+use data_model::SettlementKind;
+use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, STATE_VERSION};
 
 use data_model::test_support::game_data;
 
-fn france(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
-
 #[test]
 fn every_province_has_one_city_after_setup() {
     let data = game_data();
-    let state = france(data);
+    let state = start(data, "fac_france", 7);
     assert!(!state.provinces.is_empty());
     for (province_id, province) in &state.provinces {
         assert_eq!(&province.settlements[0], &province.city);
@@ -52,7 +49,7 @@ fn every_province_has_one_city_after_setup() {
 #[test]
 fn settlements_survive_a_save_round_trip() {
     let data = game_data();
-    let state = france(data);
+    let state = start(data, "fac_france", 7);
     assert_eq!(state.state_version, STATE_VERSION);
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("save loads");
@@ -62,7 +59,7 @@ fn settlements_survive_a_save_round_trip() {
 #[test]
 fn saves_without_settlements_are_refused() {
     let data = game_data();
-    let state = france(data);
+    let state = start(data, "fac_france", 7);
     let mut value: serde_json::Value = serde_json::from_str(&state.save_json()).unwrap();
     value.as_object_mut().unwrap().remove("settlements");
     assert!(CampaignState::load_json(&value.to_string()).is_err());

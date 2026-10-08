@@ -2,18 +2,10 @@
 //! the attacker, without losses, told in the chronicle.
 
 use sim_battle::{BattleEnd, BattleOutcome, SideId, SideResult};
+use sim_campaign::test_support::first_army;
 use sim_campaign::{ArmyId, CampaignState};
 
 use data_model::test_support::{fac, game_data};
-
-fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies
-        .iter()
-        .find(|(_, a)| a.faction == fac(faction))
-        .map(|(id, _)| id.clone())
-        .unwrap()
-}
 
 fn untouched(state: &CampaignState, army: &ArmyId, morale_delta: i32, won: bool) -> SideResult {
     SideResult {

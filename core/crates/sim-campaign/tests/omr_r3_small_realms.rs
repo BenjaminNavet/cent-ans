@@ -2,15 +2,12 @@
 //! the capital city's garrison — is paid by the domain, and a realm in debt
 //! dismisses its agents.
 
-use data_model::{AgentKind, GameData, SettlementKind};
+use data_model::{AgentKind, SettlementKind};
 use sim_campaign::economy::{garrison_share, garrison_upkeep_percent};
+use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_papacy"), 1).expect("setup")
-}
 
 #[test]
 fn the_data_sets_a_one_unit_guard_paid_by_the_domain() {
@@ -45,7 +42,7 @@ fn only_the_cheapest_units_of_the_capital_form_the_guard() {
 #[test]
 fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_papacy", 1);
     let perm = fac("fac_perm");
     let capital = state
         .faction_capital_city(&perm)
@@ -79,7 +76,7 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
 #[test]
 fn a_realm_in_debt_dismisses_its_costliest_agent() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_papacy", 1);
     let france = fac("fac_france");
     let paris = state.faction_capital_city(&france).cloned().expect("Paris");
     state.factions.get_mut(&france).unwrap().treasury = 50_000;

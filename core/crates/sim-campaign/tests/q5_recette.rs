@@ -2,21 +2,11 @@
 //! screen, besiegers stand down once the town is theirs, and messages name
 //! armies instead of showing their raw ids.
 
-use data_model::{FactionId, GameData, ProvinceId, SettlementId};
+use data_model::{GameData, ProvinceId, SettlementId};
+use sim_campaign::test_support::{city, idle};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
 use data_model::test_support::{fac, game_data};
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state
-        .province_city_id(&ProvinceId::new(province).unwrap())
-        .unwrap()
-        .clone()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 /// France's first army before the city of English Guyenne, in siege stance
 /// (the English field armies are sent to Kent).

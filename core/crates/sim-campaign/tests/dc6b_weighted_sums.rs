@@ -3,17 +3,14 @@
 //! `province_effect_percent` (like the province-wide effects of lot DC3).
 
 use data_model::{BuildingId, FactionId, GameData, SettlementKind};
+use sim_campaign::test_support::start;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::game_data;
 
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
-
 /// Research of France after adding ten scriptoriums (1 point each) to places of `kind`.
 fn research_with_scriptoriums(data: &GameData, kind: SettlementKind) -> (u32, u32) {
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = FactionId::new("fac_france").unwrap();
     let scriptorium = BuildingId::new("bld_scriptorium").unwrap();
     let before = state.research_points_per_turn(data, &france);
@@ -85,7 +82,7 @@ fn religious_of(
 #[test]
 fn secondary_churches_weigh_half_against_heresy() {
     let mut data = game_data().clone();
-    let state = start(&data);
+    let state = start(&data, "fac_france", 7);
     let oxford = data_model::ProvinceId::new("prov_oxford").unwrap();
     let weighed = sim_campaign::religion::weighted_religious_buildings(&state, &data, &oxford);
     let half = |k: SettlementKind| if k == SettlementKind::City { 1.0 } else { 0.5 };

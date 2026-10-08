@@ -13,6 +13,11 @@ rand.workspace = true
 rand_chacha = { workspace = true, features = ["serde1"] }
 thiserror.workspace = true
 
+[features]
+# Fixtures partagées par les tests de sim-campaign et de ai (`sim_campaign::test_support`).
+test-support = []
+
 [dev-dependencies]
+sim-campaign = { path = ".", features = ["test-support"] }
 data-model = { path = "../data-model", features = ["test-support"] }
 serde_json.workspace = true

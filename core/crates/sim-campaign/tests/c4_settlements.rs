@@ -5,6 +5,7 @@
 //! save refusal is tested in `campaign.rs`).
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementEdge, SettlementId, SettlementKind};
+use sim_campaign::test_support::start;
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -21,10 +22,6 @@ fn graph_path(
     let from = entry.settlement()?;
     let table = sim_campaign::movement::dijkstra(state, data, &entry.faction, from, None, None);
     sim_campaign::movement::path_to(&table, target)
-}
-
-fn start(data: &GameData, player: &str) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), 7).expect("1337 start")
 }
 
 /// First non-city settlement of `province` of the given kind.
@@ -88,7 +85,7 @@ fn staging_target(
 #[test]
 fn weights_split_the_province_income_between_controllers() {
     let data = game_data();
-    let mut state = start(data, "fac_france");
+    let mut state = start(data, "fac_france", 7);
     let province = prov("prov_ile_de_france");
     // The weight shares of a province add up to one.
     let total: f64 = state.provinces[&province]
@@ -128,7 +125,7 @@ fn weights_split_the_province_income_between_controllers() {
 #[test]
 fn control_of_the_province_follows_its_city() {
     let data = game_data();
-    let mut state = start(data, "fac_france");
+    let mut state = start(data, "fac_france", 7);
     let province = prov("prov_normandie");
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     assert_eq!(state.province_controller(&province), Some(&france));
@@ -157,7 +154,7 @@ fn control_of_the_province_follows_its_city() {
 #[test]
 fn the_full_province_bonus_needs_every_settlement() {
     let data = game_data();
-    let mut state = start(data, "fac_france");
+    let mut state = start(data, "fac_france", 7);
     let province = prov("prov_ile_de_france");
     let france = fac("fac_france");
     let percent = data
@@ -182,7 +179,7 @@ fn the_full_province_bonus_needs_every_settlement() {
 #[test]
 fn an_ungarrisoned_village_falls_on_arrival() {
     let data = game_data();
-    let mut state = start(data, "fac_england");
+    let mut state = start(data, "fac_england", 7);
     let england = fac("fac_england");
     let (village, staging) = staging_target(&state, data, SettlementKind::Village, false);
     let army = first_army(&state, &england);
@@ -202,7 +199,7 @@ fn an_ungarrisoned_village_falls_on_arrival() {
 #[test]
 fn a_garrisoned_castle_is_besieged() {
     let data = game_data();
-    let mut state = start(data, "fac_england");
+    let mut state = start(data, "fac_england", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (castle, staging) = staging_target(&state, data, SettlementKind::Castle, true);
     let army = first_army(&state, &england);
@@ -242,7 +239,7 @@ fn the_loaded_graph_and_the_fallback_graph_both_route_armies() {
         !data.movement_graph.fallback,
         "data/map/settlement_graph.json is used"
     );
-    let state = start(&data, "fac_france");
+    let state = start(&data, "fac_france", 7);
     let france = fac("fac_france");
     let army = first_army(&state, &france);
     let target = state.provinces[&prov("prov_normandie")].city.clone();
@@ -265,7 +262,7 @@ fn the_loaded_graph_and_the_fallback_graph_both_route_armies() {
 #[test]
 fn armies_prefer_the_road_on_a_fixture_graph() {
     let mut data = game_data().clone();
-    let state = start(&data, "fac_france");
+    let state = start(&data, "fac_france", 7);
     let france = fac("fac_france");
     let army = first_army(&state, &france);
     let a = state.armies[&army].settlement().cloned().unwrap();

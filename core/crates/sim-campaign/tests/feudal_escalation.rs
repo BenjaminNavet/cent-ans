@@ -5,6 +5,7 @@ use sim_campaign::feudal::{
     self, Arbitration, Likelihood, PROTECTION_GRANTED_REASON, PROTECTION_REFUSED_REASON,
 };
 use sim_campaign::negotiation::Article;
+use sim_campaign::test_support::start;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
@@ -18,10 +19,6 @@ fn data_with_duty(intervene: bool) -> GameData {
     let mut data = game_data().clone();
     data.feudal_rules.escalation.score.base = if intervene { 1000 } else { -1000 };
     data
-}
-
-fn start(data: &GameData, player: &str) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), 7).expect("1337 start")
 }
 
 /// 1337 has no count under a duke under a king: Flanders is given the
@@ -72,7 +69,7 @@ fn has_modifier(state: &CampaignState, holder: &str, with: &str, reason: &str) -
 #[test]
 fn count_duke_king_chain() {
     let data = data_with_duty(true);
-    let mut state = start(&data, "fac_castile");
+    let mut state = start(&data, "fac_castile", 7);
     count_duke_king(&mut state, &data);
     let (flanders, burgundy, france, brabant) = (
         fac("fac_flanders"),
@@ -126,7 +123,7 @@ fn count_duke_king_chain() {
 #[test]
 fn liege_shirks_protection() {
     let data = data_with_duty(false);
-    let mut state = start(&data, "fac_castile");
+    let mut state = start(&data, "fac_castile", 7);
     count_duke_king(&mut state, &data);
     let (flanders, burgundy, brabant) =
         (fac("fac_flanders"), fac("fac_burgundy"), fac("fac_brabant"));
@@ -166,7 +163,7 @@ fn cascade_stops_at_a_shirking_liege() {
 
     // The duke shirks: the king is never called.
     let data = data_with_duty(false);
-    let mut state = start(&data, "fac_france");
+    let mut state = start(&data, "fac_france", 7);
     count_duke_king(&mut state, &data);
     let prestige_before = prestige(&state, "fac_france");
     state.declare_war(&data, &brabant, &flanders).unwrap();
@@ -176,7 +173,7 @@ fn cascade_stops_at_a_shirking_liege() {
 
     // The duke intervenes: the king (the player) is called by an offer.
     let data = data_with_duty(true);
-    let mut state = start(&data, "fac_france");
+    let mut state = start(&data, "fac_france", 7);
     count_duke_king(&mut state, &data);
     state.declare_war(&data, &brabant, &flanders).unwrap();
     assert!(state.is_at_war(&burgundy, &brabant));
@@ -238,7 +235,7 @@ fn private_war_is_arbitrated_by_the_common_liege() {
         .escalation
         .arbitration
         .impose_peace_power_ratio = 0.0;
-    let mut state = start(&data, "fac_castile");
+    let mut state = start(&data, "fac_castile", 7);
     assert_eq!(
         feudal::common_liege(&state, &data, &brittany, &flanders),
         Some(france.clone())
@@ -258,13 +255,13 @@ fn private_war_is_arbitrated_by_the_common_liege() {
         .escalation
         .arbitration
         .impose_peace_power_ratio = 1.0e9;
-    let mut state = start(&data, "fac_castile");
+    let mut state = start(&data, "fac_castile", 7);
     state.declare_war(&data, &brittany, &flanders).unwrap();
     assert!(state.is_at_war(&brittany, &flanders));
     assert!(!state.is_at_war(&france, &brittany));
 
     // The player as lord gets an arbitration offer and takes a side.
-    let mut state = start(&data, "fac_france");
+    let mut state = start(&data, "fac_france", 7);
     state.declare_war(&data, &brittany, &flanders).unwrap();
     assert!(state.is_at_war(&brittany, &flanders));
     let offer = state.factions[&france]
@@ -328,7 +325,7 @@ fn player_private_war_gets_a_peace_summons() {
         .impose_peace_power_ratio = 0.0;
 
     // Defied: the war goes on, loyalty drops.
-    let mut state = start(&data, "fac_ryazan");
+    let mut state = start(&data, "fac_ryazan", 7);
     let lord = feudal::common_liege(&state, &data, &ryazan, &moscow).expect("common liege");
     state.declare_war(&data, &ryazan, &moscow).unwrap();
     assert!(state.is_at_war(&ryazan, &moscow), "war kept until answered");
@@ -340,7 +337,7 @@ fn player_private_war_gets_a_peace_summons() {
     assert!(state.factions[&ryazan].loyalty < loyalty_before || loyalty_before == 0);
 
     // Obeyed: imposed peace and truce.
-    let mut state = start(&data, "fac_ryazan");
+    let mut state = start(&data, "fac_ryazan", 7);
     state.declare_war(&data, &ryazan, &moscow).unwrap();
     let offer = summons(&state);
     state.answer_offer(&data, &ryazan, offer.id, true).unwrap();

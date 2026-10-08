@@ -2,23 +2,11 @@
 //! upgrades never regress, `enables_units` gates recruitment, resource
 //! costs are drawn or imported, the 1337 seed does not stack a chain.
 
-use data_model::{
-    BuildingId, FactionId, GameData, ProvinceId, ResourceId, SettlementId, UnitTypeId,
-};
+use data_model::{FactionId, GameData, ProvinceId, ResourceId, SettlementId, UnitTypeId};
+use sim_campaign::test_support::{bld, city};
 use sim_campaign::{CampaignState, Order};
 
 use data_model::test_support::{fac, game_data};
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state
-        .province_city_id(&ProvinceId::new(province).unwrap())
-        .unwrap()
-        .clone()
-}
 
 fn stone() -> ResourceId {
     ResourceId::new("res_stone").unwrap()

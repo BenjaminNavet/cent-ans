@@ -5,23 +5,13 @@
 
 use data_model::{GameData, SettlementId};
 use sim_campaign::movement::{retreat_target, Retreat};
+use sim_campaign::test_support::main_army;
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order};
 
 use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// The English main army teleported to Saint-Denis, next to Paris.

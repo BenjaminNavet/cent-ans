@@ -3,23 +3,13 @@
 //! `GarrisonUnits` order it relies on.
 
 use data_model::SettlementId;
+use sim_campaign::test_support::main_army;
 use sim_campaign::{ArmyId, CampaignState, Order, OrderError, Place, SiegeState};
 
 use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// Destination of the last move order of `army` (lot M3: one order per

@@ -1,7 +1,8 @@
 //! NT5 (ADR 0128): the campaign AI respects the army unit cap (N6) and
 //! storms a walled place only once an engine is built (N7).
 
-use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::{GameData, UnitTypeId};
+use sim_campaign::test_support::{city, idle};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance, Unit};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -9,14 +10,6 @@ use data_model::test_support::{fac, game_data, prov};
 fn units(data: &GameData, unit_type: &str, n: usize) -> Vec<Unit> {
     let t = &data.unit_types[&UnitTypeId::new(unit_type).unwrap()];
     (0..n).map(|_| Unit::fresh(t)).collect()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
 }
 
 fn french_armies(state: &CampaignState) -> Vec<ArmyId> {

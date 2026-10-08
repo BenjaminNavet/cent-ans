@@ -1,8 +1,9 @@
 //! M7 integration: player battles wait for the 3D battle (spec
 //! `docs/design/m7-battles.md` § 2).
 
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_battle::{BattleSim, SideId};
+use sim_campaign::test_support::{idle, main_army};
 use sim_campaign::{ArmyId, BattleRequestError, CampaignState, EventKind, Order};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -10,21 +11,6 @@ use data_model::test_support::{fac, game_data, prov};
 /// Lot C4: the battlefield, Saint-Denis next to Paris (the French start).
 fn battlefield() -> SettlementId {
     SettlementId::new("set_saint_denis").unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies()
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 /// France attacks an English army teleported to Saint-Denis (lot M2: the

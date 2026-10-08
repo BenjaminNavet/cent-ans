@@ -2,10 +2,10 @@
 //! acceptance chance, counter-proposals, war goals, war score and war
 //! weariness.
 
-use data_model::{FactionId, GameData};
 use sim_campaign::negotiation::{
     self, answer_roll, counter_proposal, evaluate_treaty, Article, Party, HOSTAGE_TURNS,
 };
+use sim_campaign::test_support::{idle, start};
 use sim_campaign::{CampaignState, Order, SettlementState};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -13,14 +13,6 @@ use data_model::test_support::{fac, game_data, prov};
 fn city_mut<'a>(state: &'a mut CampaignState, province: &str) -> &'a mut SettlementState {
     let id = state.province_city_id(&prov(province)).unwrap().clone();
     state.settlements.get_mut(&id).unwrap()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn set_battle_score(state: &mut CampaignState, winner: &str, loser: &str, score: i32) {

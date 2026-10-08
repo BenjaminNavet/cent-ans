@@ -3,30 +3,16 @@
 //! marks of the map, bounded by `data/rules/battle_history.json`, saved
 //! with the game and absent from older saves.
 
-use data_model::{BattleHistoryRules, FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::{BattleHistoryRules, GameData, SettlementId, UnitTypeId};
 use sim_battle::{BattleSim, SideId};
 use sim_campaign::battle_history::{BattleHistory, BattleKind, BattleRecord, BattleSideRecord};
+use sim_campaign::test_support::{idle, main_army};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order, Stance, Unit};
 
 use data_model::test_support::{fac, game_data, prov};
 
 fn saint_denis() -> SettlementId {
     SettlementId::new("set_saint_denis").unwrap()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies()
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// France attacks an English army teleported to Saint-Denis: the battle

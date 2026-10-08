@@ -6,14 +6,11 @@ use data_model::{FactionId, GameData};
 use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::negotiation::{evaluate_treaty, Article, Party};
 use sim_campaign::religion::faction_religion;
+use sim_campaign::test_support::start;
 use sim_campaign::treaty_explain::{explain_treaty, ACCEPT_CHANCE};
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), 1).expect("1337 start")
-}
 
 /// A faction at plain peace with France and of its faith, first by id (OM:
 /// the first peaceful faction by id is now a distant power of another faith,
@@ -37,7 +34,7 @@ fn neutral(state: &CampaignState, data: &GameData) -> FactionId {
 #[test]
 fn every_weighted_reason_is_a_line_objections_first() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 1);
     let (fr, other) = (fac("fac_france"), neutral(&state, data));
     let treaty = vec![
         Article::TradeAgreement,
@@ -85,7 +82,7 @@ fn every_weighted_reason_is_a_line_objections_first() {
 #[test]
 fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 1);
     let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&other).unwrap().treasury = 50_000;
     // A generous offer spoiled by one greedy demand.
@@ -132,7 +129,7 @@ fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
 #[test]
 fn a_general_consideration_can_be_the_single_blocking_point() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 1);
     let (fr, other) = (fac("fac_france"), neutral(&state, data));
     // They loathe us: a gift alone does not suffice.
     let turn = state.turn;
@@ -159,7 +156,7 @@ fn a_general_consideration_can_be_the_single_blocking_point() {
 #[test]
 fn several_objections_give_no_single_point() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 1);
     let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&other).unwrap().treasury = 100_000;
     let turn = state.turn;
@@ -194,7 +191,7 @@ fn several_objections_give_no_single_point() {
 #[test]
 fn an_acceptable_treaty_says_why() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 1);
     let (fr, other) = (fac("fac_france"), neutral(&state, data));
     state.factions.get_mut(&fr).unwrap().treasury = 50_000;
     let treaty = vec![Article::Gold {
@@ -213,7 +210,7 @@ fn an_acceptable_treaty_says_why() {
 #[test]
 fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 1);
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     assert!(sim_campaign::diplomacy::rivals(&state, &en).contains(&fr));
     let explanation = explain_treaty(&state, data, &fr, &en, &[Article::TradeAgreement]);

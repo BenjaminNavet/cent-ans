@@ -4,11 +4,12 @@
 //! See `docs/design/v2-finalisation.md` (lot F1).
 
 use data_model::EffectKind;
+use sim_campaign::test_support::{bld, idle, start, unit_type};
 use std::path::PathBuf;
 
 use data_model::{
-    BuildingId, CharacterId, CharacterRef, Condition, EventEffect, EventId, FactionId, GameData,
-    ProvinceId, SettlementId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, CharacterRef, Condition, EventEffect, EventId, GameData, ProvinceId,
+    SettlementId, TechnologyId, TraitId,
 };
 use sim_campaign::{ArmyId, CampaignState, EventContext, Order, Season, SettlementState, Unit};
 
@@ -34,14 +35,6 @@ fn strip(state: &mut CampaignState, province: &ProvinceId, buildings: &[Building
     {
         settlement.buildings.retain(|b| !buildings.contains(b));
     }
-}
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
 }
 
 fn tech(id: &str) -> TechnologyId {
@@ -73,20 +66,11 @@ fn give_trait(state: &mut CampaignState, character: &CharacterId, id: &str) {
         .insert(TraitId::new(id).unwrap());
 }
 
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
 /// France at spring 1337 without chronicle events (no random noise).
 fn quiet_france(data: &GameData, seed: u64) -> CampaignState {
-    let mut state = france(data, seed);
+    let mut state = start(data, "fac_france", seed);
     state.chronicle.disabled = true;
     state
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn first_army_of(state: &CampaignState, faction: &str) -> ArmyId {
@@ -183,7 +167,7 @@ fn recruit_cost_effects_target_their_unit_family() {
     let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
-            .recruit_option(data, &france_id, &province, &unit(id))
+            .recruit_option(data, &france_id, &province, &unit_type(id))
             .unwrap()
             .cost
     };
@@ -196,7 +180,7 @@ fn recruit_cost_effects_target_their_unit_family() {
         .buildings
         .push(bld("bld_stables"));
     // −10 % of the base price (percent effects add up).
-    let base = data.unit_types[&unit("unit_knights")].cost.money;
+    let base = data.unit_types[&unit_type("unit_knights")].cost.money;
     assert_eq!(cost(&state, "unit_knights"), knights - base / 10);
     assert_eq!(cost(&state, "unit_urban_militia"), militia);
     // The treasury pays the discounted price.
@@ -206,7 +190,7 @@ fn recruit_cost_effects_target_their_unit_family() {
             data,
             Order::Recruit {
                 settlement: province.clone().into(),
-                unit_type: unit("unit_knights"),
+                unit_type: unit_type("unit_knights"),
             },
         )
         .unwrap();
@@ -270,13 +254,13 @@ fn army_experience_technology_trains_recruits() {
             data,
             Order::Recruit {
                 settlement: province.clone().into(),
-                unit_type: unit("unit_urban_militia"),
+                unit_type: unit_type("unit_urban_militia"),
             },
         )
         .unwrap();
     state.end_turn_with(data, idle);
     let recruit = &state.city_state(&province).unwrap().garrison[garrison_before];
-    assert_eq!(recruit.unit_type, unit("unit_urban_militia"));
+    assert_eq!(recruit.unit_type, unit_type("unit_urban_militia"));
     assert!(recruit.experience >= 2, "experience {}", recruit.experience);
 }
 
@@ -288,14 +272,14 @@ fn recruit_cost_technology_targets_its_family() {
     let province = city(&state, &prov("prov_ile_de_france"));
     let cost = |state: &CampaignState, id: &str| {
         state
-            .recruit_option(data, &france_id, &province, &unit(id))
+            .recruit_option(data, &france_id, &province, &unit_type(id))
             .unwrap()
             .cost
     };
     let crossbow = cost(&state, "unit_crossbowmen");
     let knights = cost(&state, "unit_knights");
     grant_tech(&mut state, "fac_france", "tech_francs_archers");
-    let base = data.unit_types[&unit("unit_crossbowmen")].cost.money;
+    let base = data.unit_types[&unit_type("unit_crossbowmen")].cost.money;
     assert_eq!(cost(&state, "unit_crossbowmen"), crossbow - base / 10);
     assert_eq!(cost(&state, "unit_knights"), knights);
 }
@@ -305,7 +289,7 @@ fn siege_trains_slow_armies_until_field_artillery() {
     let data = game_data();
     let mut state = quiet_france(data, 14);
     let army_id = first_army_of(&state, "fac_france");
-    let trebuchet = Unit::fresh(&data.unit_types[&unit("unit_trebuchet")]);
+    let trebuchet = Unit::fresh(&data.unit_types[&unit_type("unit_trebuchet")]);
     let mut army = state.armies[&army_id].clone();
     army.general = None;
     let plain = state.army_movement_allowance(data, &army);
@@ -884,7 +868,7 @@ fn poitiers_captures_the_king_and_bretigny_requires_it() {
 #[test]
 fn a_scheduled_event_fires_k_turns_later() {
     let data = game_data();
-    let mut state = france(data, 43);
+    let mut state = start(data, "fac_france", 43);
     let jean = chr("chr_jean_de_normandie");
     apply(
         &mut state,

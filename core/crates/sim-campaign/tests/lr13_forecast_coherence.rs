@@ -9,9 +9,10 @@ use data_model::{FactionId, GameData, ProvinceId, Terrain, UnitCategory, UnitTyp
 use sim_campaign::battle_forecast::forecast_sides;
 use sim_campaign::rng::CampaignRng;
 use sim_campaign::state::Season;
+use sim_campaign::test_support::first_army;
 use sim_campaign::{
-    resolve_with_crossings, ArmyId, BattleContext, BattleUnit, CampaignState, FieldConditions,
-    Side, UnitProfile, Winner,
+    resolve_with_crossings, BattleContext, BattleUnit, CampaignState, FieldConditions, Side,
+    UnitProfile, Winner,
 };
 
 /// Largest gap allowed between the forecast and the observed frequency
@@ -148,15 +149,6 @@ fn forecast_matches_the_auto_resolver_on_a_sample_of_compositions() {
         );
         assert!(forecast.attacker_power > 0.0 && forecast.defender_power > 0.0);
     }
-}
-
-fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies
-        .iter()
-        .find(|(_, a)| a.faction == fac(faction))
-        .map(|(id, _)| id.clone())
-        .unwrap()
 }
 
 /// Share of `attacker`'s wins against `defender` in pending battle 0, over

@@ -1,11 +1,10 @@
 //! Lot FK1: map scenes, event presentation, expiry by the AI's option
 //! (`docs/design/2026-09-29-carte-vivante-folk.md` § 7, ADR 0122).
 
+use sim_campaign::test_support::{idle, start};
 use std::collections::BTreeMap;
 
-use data_model::{
-    EventId, EventPresentation, FactionId, GameData, ProvinceId, SceneKind, SettlementId,
-};
+use data_model::{EventId, EventPresentation, GameData, ProvinceId, SceneKind, SettlementId};
 use sim_campaign::chronicle::{Decision, RecentScene};
 use sim_campaign::map_scenes::{map_scenes, MapScene};
 use sim_campaign::state::{Construction, QueuedRecruit, SiegeState};
@@ -15,14 +14,6 @@ use data_model::test_support::{fac, game_data, prov};
 
 fn evt(id: &str) -> EventId {
     EventId::new(id).unwrap()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<sim_campaign::Order> {
-    Vec::new()
 }
 
 /// A calm world: no unrest, devastation, sickness, siege, work or recruit

@@ -2,18 +2,10 @@
 //! and the ruler leading his army is flagged for the royal banner.
 
 use sim_battle::{BattleOutcome, SideId, SideResult, StandardTrophy};
+use sim_campaign::test_support::first_army;
 use sim_campaign::{ArmyId, CampaignState};
 
 use data_model::test_support::{fac, game_data};
-
-fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies
-        .iter()
-        .find(|(_, a)| a.faction == fac(faction))
-        .map(|(id, _)| id.clone())
-        .unwrap()
-}
 
 fn stage(state: &mut CampaignState) -> (ArmyId, ArmyId, usize) {
     for (a, b) in [("fac_france", "fac_england"), ("fac_england", "fac_france")] {

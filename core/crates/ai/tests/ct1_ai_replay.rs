@@ -2,26 +2,16 @@
 //! 0073) — deterministic, harmless to the game, and telling which moves
 //! concern the player.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::main_army;
 
 use data_model::{GameData, SettlementId};
 use sim_campaign::{
-    AiMoveKind, AiMoveNotability, AiMoveRecord, ArmyId, ArmyPosition, CampaignState, Order,
+    AiMoveKind, AiMoveNotability, AiMoveRecord, ArmyPosition, CampaignState, Order,
 };
 
 fn data() -> &'static GameData {
     ai::feudal::install();
     game_data()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// Plays `turns` turns with the strategic AI, the record on or off; returns

@@ -2,21 +2,11 @@
 //! period units (`available_from` / `available_until`). See
 //! `docs/archive/chantiers.md`.
 
-use data_model::{GameData, ProvinceId, SettlementId, TechnologyId, UnitTypeId};
+use data_model::{GameData, SettlementId, TechnologyId};
+use sim_campaign::test_support::{city, unit_type};
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state
-        .province_city_id(&ProvinceId::new(province).unwrap())
-        .unwrap()
-        .clone()
-}
 
 fn start(data: &GameData, faction: &str) -> CampaignState {
     let mut state = CampaignState::new_1337(data, fac(faction), 7).expect("1337 start");
@@ -30,10 +20,10 @@ fn reason(
     data: &GameData,
     faction: &str,
     settlement: &SettlementId,
-    unit_type: &str,
+    unit_id: &str,
 ) -> Option<String> {
     state
-        .recruit_option(data, &fac(faction), settlement, &unit(unit_type))
+        .recruit_option(data, &fac(faction), settlement, &unit_type(unit_id))
         .expect("known unit")
         .reason
 }
@@ -59,7 +49,7 @@ const UR1_UNITS: [&str; 14] = [
 fn ur1_units_are_sourced_and_have_a_figure() {
     let data = game_data();
     for id in UR1_UNITS {
-        let t = &data.unit_types[&unit(id)];
+        let t = &data.unit_types[&unit_type(id)];
         assert!(t.sources.len() >= 2, "{id}: at least two sources");
         assert!(t.figure.is_some(), "{id}: battle figurine");
         assert!(t.equipment.is_some() && t.description.is_some(), "{id}");

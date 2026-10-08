@@ -1,14 +1,11 @@
 //! Lot NT3 (ADR 0127): short-term campaign missions of the player's faction
 //! (spec `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md`, NT3).
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::start;
 
 use data_model::{FactionId, GameData, MissionKind, MissionReward, SettlementId};
 use sim_campaign::missions::{resolve_missions, treaty_tokens, Mission, NoticeKind};
 use sim_campaign::{CampaignState, Order, Place};
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).unwrap()
-}
 
 fn capital_city(state: &CampaignState) -> SettlementId {
     let capital = state.factions[&state.player_faction].capital.clone();
@@ -57,7 +54,7 @@ fn with_mission(mut state: CampaignState, m: Mission) -> CampaignState {
 #[test]
 fn the_player_gets_missions_and_the_ai_none() {
     let data = game_data();
-    let mut state = france(data, 11);
+    let mut state = start(data, "fac_france", 11);
     assert!(state.missions.active.is_empty(), "no mission before turn 1");
     state.end_turn(data);
     assert_eq!(state.missions.faction.as_ref(), Some(&fac("fac_france")));
@@ -93,7 +90,7 @@ fn the_player_gets_missions_and_the_ai_none() {
 fn offers_are_deterministic_by_seed() {
     let data = game_data();
     let run = |seed| {
-        let mut state = france(data, seed);
+        let mut state = start(data, "fac_france", seed);
         for _ in 0..4 {
             state.end_turn(data);
         }
@@ -105,7 +102,7 @@ fn offers_are_deterministic_by_seed() {
 #[test]
 fn the_generator_follows_the_situation() {
     let data = game_data();
-    let mut state = france(data, 3);
+    let mut state = start(data, "fac_france", 3);
     let player = state.player_faction.clone();
     // At war with a neighbour: a province it holds on the border can be the
     // target.
@@ -161,7 +158,7 @@ fn the_generator_follows_the_situation() {
 #[test]
 fn recruiting_counts_and_success_pays_the_reward() {
     let data = game_data();
-    let state = france(data, 7);
+    let state = start(data, "fac_france", 7);
     let m = mission(&state, MissionKind::RecruitUnits, state.turn + 4);
     let mut state = with_mission(state, m);
     state
@@ -211,7 +208,7 @@ fn recruiting_counts_and_success_pays_the_reward() {
 #[test]
 fn a_won_battle_counts_through_the_counter() {
     let data = game_data();
-    let state = france(data, 7);
+    let state = start(data, "fac_france", 7);
     let mut m = mission(&state, MissionKind::WinBattle, state.turn + 6);
     m.count = 1;
     m.progress = 1;
@@ -224,7 +221,7 @@ fn a_won_battle_counts_through_the_counter() {
 #[test]
 fn the_deadline_fails_the_mission_with_a_small_loss() {
     let data = game_data();
-    let state = france(data, 7);
+    let state = start(data, "fac_france", 7);
     let m = mission(&state, MissionKind::WinBattle, state.turn);
     let mut state = with_mission(state, m);
     let player = state.player_faction.clone();
@@ -247,7 +244,7 @@ fn the_deadline_fails_the_mission_with_a_small_loss() {
 #[test]
 fn a_held_place_succeeds_at_the_deadline_and_fails_when_lost() {
     let data = game_data();
-    let base = france(data, 7);
+    let base = start(data, "fac_france", 7);
     let capital = base.factions[&base.player_faction].capital.clone();
     let mut m = mission(&base, MissionKind::HoldPlace, base.turn + 1);
     m.province = Some(capital.clone());
@@ -278,7 +275,7 @@ fn a_held_place_succeeds_at_the_deadline_and_fails_when_lost() {
 #[test]
 fn a_new_treaty_fulfils_the_treaty_mission() {
     let data = game_data();
-    let state = france(data, 7);
+    let state = start(data, "fac_france", 7);
     let m = mission(&state, MissionKind::ConcludeTreaty, state.turn + 8);
     let mut state = with_mission(state, m);
     let player = state.player_faction.clone();
@@ -305,7 +302,7 @@ fn a_new_treaty_fulfils_the_treaty_mission() {
 #[test]
 fn missions_survive_save_and_load_and_old_saves_load_empty() {
     let data = game_data();
-    let mut state = france(data, 21);
+    let mut state = start(data, "fac_france", 21);
     state.end_turn(data);
     state.end_turn(data);
     assert!(!state.missions.active.is_empty());

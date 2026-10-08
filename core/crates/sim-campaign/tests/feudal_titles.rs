@@ -3,6 +3,7 @@
 use data_model::{CharacterId, FactionId, GameData, SuccessionLaw, TitleId};
 use sim_campaign::feudal::{self, FelonyReason, FeudalError, Grantee, TitleDemandOutcome};
 use sim_campaign::negotiation::{apply_treaty, Article, Party};
+use sim_campaign::test_support::start;
 use sim_campaign::victory::OutcomeKind;
 use sim_campaign::CampaignState;
 
@@ -14,10 +15,6 @@ fn tit(id: &str) -> TitleId {
 
 fn chr(id: &str) -> CharacterId {
     CharacterId::new(id).unwrap()
-}
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start")
 }
 
 fn holder(s: &CampaignState, title: &str) -> Option<FactionId> {
@@ -47,7 +44,7 @@ fn kill(s: &mut CampaignState, data: &GameData, id: &str) {
 #[test]
 fn guyenne_forfeiture() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     // England is no direct vassal of France, but holds Guyenne of it.
     assert_eq!(feudal::liege_of(&s, data, &england), None);
@@ -106,7 +103,7 @@ fn guyenne_forfeiture() {
 #[test]
 fn lost_forfeiture_war_keeps_the_fief() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     feudal::open_felony_towards(&mut s, data, &england, &france, FelonyReason::RefusedHost)
         .unwrap();
@@ -124,7 +121,7 @@ fn lost_forfeiture_war_keeps_the_fief() {
 #[test]
 fn brittany_1341_two_claimants() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let (france, england, brittany) = (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
     let (jeanne, montfort, blois) = (
         chr("chr_jeanne_de_penthievre"),
@@ -173,7 +170,7 @@ fn burgundy_1361_duchy_and_county_split() {
         data.titles.get_mut(&tit(county)).unwrap().succession_law =
             Some(SuccessionLaw::CognaticPrimogeniture);
     }
-    let mut s = start(&data);
+    let mut s = start(&data, "fac_france", 7);
     let (france, flanders, burgundy) =
         (fac("fac_france"), fac("fac_flanders"), fac("fac_burgundy"));
     let house = "Bourgogne (test)";
@@ -218,7 +215,7 @@ fn burgundy_1361_duchy_and_county_split() {
 #[test]
 fn personal_union() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let (castile, navarre) = (fac("fac_castile"), fac("fac_navarre"));
     let house = "Évreux (test)";
     last_of_line(&mut s, "chr_jeanne_ii_de_navarre", house);
@@ -247,7 +244,7 @@ fn escheat_without_heir() {
     let mut data = game_data().clone();
     // LR-05: no cadet branch takes the duchy over.
     data.feudal_rules.collateral_line_percent = 0;
-    let mut s = start(&data);
+    let mut s = start(&data, "fac_france", 7);
     let (france, brittany) = (fac("fac_france"), fac("fac_brittany"));
     last_of_line(&mut s, "chr_jean_iii_de_bretagne", "Dreux (test)");
     // Jeanne de Penthièvre, designated heir, rules her own county (F4a):
@@ -268,7 +265,7 @@ fn escheat_without_heir() {
 #[test]
 fn vacant_title_frees_its_vassals() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let brittany = fac("fac_brittany");
     assert!(feudal::liege_of(&s, data, &brittany).is_some());
     feudal::vacate_title(&mut s, data, &tit("tit_france"));
@@ -307,7 +304,7 @@ fn victory_by_independence() {
 #[test]
 fn conquered_title_is_usurped_or_granted() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let (france, england, brittany) = (fac("fac_france"), fac("fac_england"), fac("fac_brittany"));
     if !s.is_at_war(&england, &france) {
         s.declare_war(data, &england, &france).unwrap();
@@ -359,7 +356,7 @@ fn conquered_title_is_usurped_or_granted() {
 #[test]
 fn grant_to_a_courtier_founds_a_vassal_faction() {
     let data = game_data();
-    let mut s = start(data);
+    let mut s = start(data, "fac_france", 7);
     let france = fac("fac_france");
     let blois = chr("chr_godefroy_d_harcourt");
     assert_eq!(
@@ -402,7 +399,7 @@ fn objectives_are_evaluated() {
         description: "Ne relever de personne.".to_owned(),
         condition: data_model::TitleObjectiveCondition::BeIndependent,
     }];
-    let mut s = start(&data);
+    let mut s = start(&data, "fac_france", 7);
     let progress = feudal::evaluate_objectives(&s, &data);
     let mine: Vec<_> = progress.iter().filter(|p| p.faction == brittany).collect();
     assert_eq!(mine.len(), 1);
@@ -420,7 +417,7 @@ fn objectives_are_evaluated() {
 #[test]
 fn no_objective_victory_at_start() {
     let data = game_data();
-    let s = start(data);
+    let s = start(data, "fac_france", 7);
     let mut already_won: Vec<String> = s
         .feudal
         .primary

@@ -1,7 +1,8 @@
 //! M8 § 2: interactive assaults become pending siege battles (3D or auto).
 
-use data_model::{FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
 use sim_battle::{BattleSim, SideId};
+use sim_campaign::test_support::idle;
 use sim_campaign::{ArmyId, CampaignState, Order, Stance};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -12,10 +13,6 @@ fn guyenne(state: &CampaignState) -> SettlementId {
         .province_city_id(&prov("prov_guyenne"))
         .unwrap()
         .clone()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 /// France's main army besieging English Guyenne (siege started).

@@ -1,14 +1,11 @@
 //! Lot B7a: rules the interface describes — devastated land feeds armies
 //! badly, the court and bankruptcy tuning is read from `data/`.
 
-use data_model::{FactionId, GameData, SettlementId};
-use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order};
+use data_model::{GameData, SettlementId};
+use sim_campaign::test_support::idle;
+use sim_campaign::{ArmyId, ArmyPosition, CampaignState};
 
 use data_model::test_support::{fac, game_data};
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 fn english_army(state: &CampaignState) -> ArmyId {
     state

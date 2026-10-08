@@ -1,18 +1,10 @@
 //! M8 campaign siege warfare: supplies, breaches, assaults, sorties.
 
-use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::{GameData, SettlementId, UnitTypeId};
+use sim_campaign::test_support::{city, idle};
 use sim_campaign::{ArmyId, CampaignState, Order, Stance, Unit};
 
 use data_model::test_support::{fac, game_data, prov};
-
-/// The city of a province (lot C4: sieges target settlements).
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 fn unit(data: &GameData, id: &str) -> Unit {
     let t = &data.unit_types[&UnitTypeId::new(id).unwrap()];

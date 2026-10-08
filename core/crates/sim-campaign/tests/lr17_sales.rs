@@ -4,8 +4,9 @@
 //! Algirdas grand duke (1345) and the Ösel-Wiek election (1338). See
 //! `docs/wip/lr-17.md`.
 
-use data_model::{CharacterId, CharacterRef, EventEffect, EventId, FactionId, GameData, TitleId};
-use sim_campaign::{CampaignState, EventContext, Order, Season};
+use data_model::{CharacterId, CharacterRef, EventEffect, EventId, GameData, TitleId};
+use sim_campaign::test_support::{idle, start};
+use sim_campaign::{CampaignState, EventContext, Season};
 
 use data_model::test_support::{fac, game_data};
 
@@ -17,21 +18,12 @@ fn evt(id: &str) -> EventId {
     EventId::new(id).unwrap()
 }
 
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
 fn apply(state: &mut CampaignState, data: &GameData, faction: &str, effect: EventEffect) {
     let ctx = EventContext {
         faction: Some(fac(faction)),
         province: None,
     };
     sim_campaign::effects::apply_effect(state, data, &effect, &ctx, &mut Vec::new());
-}
-
-/// England plays (none of the Baltic realms), chronicle on.
-fn start(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_england"), seed).expect("1337 start")
 }
 
 fn treasury(state: &CampaignState, faction: &str) -> i64 {
@@ -41,7 +33,7 @@ fn treasury(state: &CampaignState, faction: &str) -> i64 {
 #[test]
 fn a_province_sale_pays_the_former_owner() {
     let data = game_data();
-    let mut state = start(data, 1);
+    let mut state = start(data, "fac_england", 1);
     state.chronicle.disabled = true;
     let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
     let (france, empire) = (
@@ -67,7 +59,7 @@ fn a_province_sale_pays_the_former_owner() {
 #[test]
 fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
     let data = game_data();
-    let mut state = start(data, 2);
+    let mut state = start(data, "fac_england", 2);
     state.chronicle.disabled = true;
     let reval = data_model::ProvinceId::new("prov_harrien_wierland").unwrap();
     let teutonic = treasury(&state, "fac_teutonic");
@@ -116,7 +108,7 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
 #[test]
 fn set_ruler_deposes_without_killing() {
     let data = game_data();
-    let mut state = start(data, 3);
+    let mut state = start(data, "fac_england", 3);
     state.chronicle.disabled = true;
     let lithuania = fac("fac_lithuania");
     // A rival of another faction cannot take the throne.
@@ -147,7 +139,7 @@ fn set_ruler_deposes_without_killing() {
 #[test]
 fn danish_estonia_is_sold_to_the_order_in_1346() {
     let data = game_data();
-    let mut state = start(data, 4);
+    let mut state = start(data, "fac_england", 4);
     state.year = 1346;
     state.season = Season::Summer;
     state.end_turn_with(data, idle);
@@ -166,7 +158,7 @@ fn danish_estonia_is_sold_to_the_order_in_1346() {
 #[test]
 fn algirdas_takes_vilnius_in_1345() {
     let data = game_data();
-    let mut state = start(data, 5);
+    let mut state = start(data, "fac_england", 5);
     // Gediminas died in 1341: Jaunutis rules.
     apply(
         &mut state,
@@ -193,7 +185,7 @@ fn algirdas_takes_vilnius_in_1345() {
 #[test]
 fn the_osel_wiek_chapter_elects_hermann_in_1338() {
     let data = game_data();
-    let mut state = start(data, 6);
+    let mut state = start(data, "fac_england", 6);
     let osel = fac("fac_osel_wiek");
     assert_eq!(
         state.factions[&osel].ruler,

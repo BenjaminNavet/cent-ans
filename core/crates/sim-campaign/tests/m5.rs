@@ -4,6 +4,7 @@
 use data_model::{FactionId, GameData, ReligionId};
 use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::negotiation::{evaluate_treaty, Article, Party, Treaty, TreatyEvaluation};
+use sim_campaign::test_support::{idle, start};
 use sim_campaign::{CampaignState, EventKind, Order, OrderError, Season, SettlementState};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -23,15 +24,6 @@ fn evaluate(
 fn city_mut<'a>(state: &'a mut CampaignState, province: &str) -> &'a mut SettlementState {
     let id = state.province_city_id(&prov(province)).unwrap().clone();
     state.settlements.get_mut(&id).unwrap()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn events_of(state: &mut CampaignState, data: &GameData) -> Vec<sim_campaign::GameEvent> {

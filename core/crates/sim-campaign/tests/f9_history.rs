@@ -1,14 +1,11 @@
 //! F9: historical rulers are spared natural death before their recorded
 //! death year (minus a grace), so 1337's realms keep their kings.
 
-use data_model::{CharacterId, FactionId, GameData};
-use sim_campaign::{CampaignState, Order};
+use data_model::{CharacterId, FactionId};
+use sim_campaign::test_support::idle;
+use sim_campaign::CampaignState;
 
 use data_model::test_support::game_data;
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
 
 #[test]
 fn philippe_vi_outlives_the_1340s_in_peace() {

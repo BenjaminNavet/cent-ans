@@ -1,22 +1,11 @@
 //! Lot TW2-T3 (ADR 0103): mercenary companies hired by an army from its
 //! region's reserve (spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T3).
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::{capital_city, unit_type};
 
-use data_model::{GameData, SettlementId, SettlementKind, UnitTypeId};
+use data_model::{GameData, SettlementKind};
 use sim_campaign::mercenaries::{is_mercenary, resolve_mercenaries};
 use sim_campaign::{ArmyId, ArmyPosition, CampaignState, Order, OrderError, Season, Stance, Unit};
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
-
-fn capital_city(state: &CampaignState, faction: &str) -> SettlementId {
-    let capital = state.factions[&fac(faction)].capital.clone();
-    state
-        .province_city_id(&capital)
-        .cloned()
-        .expect("capital city")
-}
 
 fn armies_of(state: &CampaignState, faction: &str) -> Vec<ArmyId> {
     let faction = fac(faction);
@@ -38,7 +27,7 @@ fn hire(
         data,
         Order::HireMercenary {
             army: army.clone(),
-            unit: unit(id),
+            unit: unit_type(id),
         },
     )
 }
@@ -106,7 +95,7 @@ fn an_army_hires_a_company_of_its_region_at_once() {
         .options
         .iter()
         .all(|o| o.unit_type.as_str() != "unit_routiers"));
-    let base = data.unit_types[&unit("unit_genoese_crossbowmen")].clone();
+    let base = data.unit_types[&unit_type("unit_genoese_crossbowmen")].clone();
     let rules = &data.mercenary_rules;
     assert_eq!(
         genoese.cost,
@@ -246,7 +235,12 @@ fn towns_no_longer_levy_companies() {
     let (data, state, _) = setup(1362);
     let paris = capital_city(&state, "fac_france");
     let option = state
-        .recruit_option(data, &fac("fac_france"), &paris, &unit("unit_routiers"))
+        .recruit_option(
+            data,
+            &fac("fac_france"),
+            &paris,
+            &unit_type("unit_routiers"),
+        )
         .unwrap();
     assert!(!option.available);
     assert_eq!(
@@ -262,7 +256,7 @@ fn companies_cost_a_premium_and_unpaid_ones_desert_or_pillage() {
     for _ in 0..2 {
         hire(&mut state, data, &army, "unit_routiers").unwrap();
     }
-    let routier = &data.unit_types[&unit("unit_routiers")];
+    let routier = &data.unit_types[&unit_type("unit_routiers")];
     let premium = state.mercenary_premium(data, &fac("fac_france"));
     let extra = i64::from(data.mercenary_rules.upkeep_percent - 100);
     let mercs = mercenaries_in(&state, data, &army) as i64;

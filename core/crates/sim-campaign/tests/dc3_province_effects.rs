@@ -2,15 +2,12 @@
 //! kind's `province_effect_percent` in the province-wide effects (order, health,
 //! goods, supply, growth room), the city's in full.
 
-use data_model::{EffectKind, FactionId, GameData, ProvinceId, SettlementKind};
+use data_model::{EffectKind, GameData, ProvinceId, SettlementKind};
 use sim_campaign::buildings::province_effect_percent;
+use sim_campaign::test_support::start;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::game_data;
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
 
 /// Unrest effect of the buildings of `province`, each place weighed by `weight`.
 fn unrest_of(
@@ -38,7 +35,7 @@ fn unrest_of(
 #[test]
 fn secondary_places_weigh_half_on_their_province() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     assert_eq!(province_effect_percent(data, SettlementKind::City), 100);
     for kind in [
         SettlementKind::Town,
@@ -78,7 +75,7 @@ fn secondary_places_weigh_half_on_their_province() {
 #[test]
 fn full_weights_keep_the_growth_room_of_before() {
     let mut data = game_data().clone();
-    let state = start(&data);
+    let state = start(&data, "fac_france", 7);
     let province = ProvinceId::new("prov_anjou").unwrap();
     let weighed = state.province_capacity(&data, &province);
     if let Some(rules) = data.settlement_rules.as_mut() {

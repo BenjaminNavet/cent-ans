@@ -3,26 +3,16 @@
 //! battles against the player are auto-resolved with a notice in the season
 //! report, then the season turns and the player's marches resume.
 
+use sim_campaign::test_support::main_army;
 use std::cell::RefCell;
 
 use data_model::{FactionId, SettlementId};
-use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, MoveTarget, Order};
+use sim_campaign::{ArmyPosition, CampaignState, EventKind, MoveTarget, Order};
 
 use data_model::test_support::{fac, game_data};
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 #[test]

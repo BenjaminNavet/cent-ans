@@ -3,10 +3,11 @@
 //! built-in AI for every faction, the player's decisions taken by the AI
 //! weights). See `docs/design/m10-events.md` § F7b.
 
+use sim_campaign::test_support::idle;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use data_model::{EventCategory, EventId, FactionId, GameData};
+use data_model::{EventCategory, EventId, GameData};
 use sim_campaign::{ai_minimal, chronicle, CampaignState, Order, Season};
 
 use data_model::test_support::{fac, game_data};
@@ -358,11 +359,6 @@ fn hv10_events_stay_silent_when_their_conditions_fail() {
         .chronicle
         .fired_events
         .contains(&evt("evt_chute_de_tlemcen")));
-}
-
-/// A planner that does nothing: only the chronicle moves the world.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 #[test]

@@ -4,14 +4,11 @@
 //! settlement other than the province's city.
 //! See `docs/design/2026-09-24-echelle-colonies.md` § 4.3 and § 6.
 
-use data_model::{FactionId, GameData, SettlementId, SettlementKind};
+use data_model::{FactionId, SettlementId, SettlementKind};
+use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, Order, Place};
 
 use data_model::test_support::game_data;
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
 
 /// First settlement of `kind` owned and controlled by France, by id.
 fn french_settlement(state: &CampaignState, kind: SettlementKind) -> SettlementId {
@@ -27,7 +24,7 @@ fn french_settlement(state: &CampaignState, kind: SettlementKind) -> SettlementI
 #[test]
 fn build_options_follow_the_settlement_kind() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     let village = french_settlement(&state, SettlementKind::Village);
     let options = state.buildable(data, &village);
     assert!(!options.is_empty(), "a village can build something");
@@ -51,7 +48,7 @@ fn build_options_follow_the_settlement_kind() {
 #[test]
 fn recruit_and_build_orders_address_a_non_city_settlement() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let town = french_settlement(&state, SettlementKind::Town);
     let province = state.settlements[&town].province.clone();
     let city = state.provinces[&province].city.clone();

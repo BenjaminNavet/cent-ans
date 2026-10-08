@@ -3,9 +3,10 @@
 //! battles and income, anachronism surcharge, save format and determinism.
 //! See `docs/design/m6-technologies.md` § 2.
 
-use data_model::{EffectKind, FactionId, GameData, ProvinceId, TechnologyId, UnitTypeId};
+use data_model::{EffectKind, GameData, ProvinceId, TechnologyId, UnitTypeId};
 use sim_campaign::battle_auto::{effective_armor, side_power};
 use sim_campaign::research::{self, effective_cost, BASE_RESEARCH_POINTS};
+use sim_campaign::test_support::{idle, start};
 use sim_campaign::{
     CampaignState, EventKind, Order, OrderError, ResearchError, TechStatus, STATE_VERSION,
 };
@@ -14,15 +15,6 @@ use data_model::test_support::{fac, game_data};
 
 fn tech(id: &str) -> TechnologyId {
     TechnologyId::new(id).unwrap()
-}
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn research(state: &mut CampaignState, data: &GameData, id: &str) -> Result<(), OrderError> {
@@ -37,7 +29,7 @@ fn research(state: &mut CampaignState, data: &GameData, id: &str) -> Result<(), 
 #[test]
 fn research_points_are_base_plus_buildings_plus_half_governance() {
     let data = game_data();
-    let state = france(data, 1);
+    let state = start(data, "fac_france", 1);
     let france_id = fac("fac_france");
     // DC6b: a secondary place's libraries weigh its kind's `research_percent`.
     let buildings: f64 = state
@@ -100,7 +92,7 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
 #[test]
 fn research_order_is_refused_for_missing_prerequisite_known_or_unknown_tech() {
     let data = game_data();
-    let mut state = france(data, 2);
+    let mut state = start(data, "fac_france", 2);
     assert!(matches!(
         research(&mut state, data, "tech_bombards"),
         Err(OrderError::Research(ResearchError::MissingPrerequisite(_)))
@@ -136,7 +128,7 @@ fn research_order_is_refused_for_missing_prerequisite_known_or_unknown_tech() {
 #[test]
 fn research_completes_with_an_event_and_clears_the_slot() {
     let data = game_data();
-    let mut state = france(data, 3);
+    let mut state = start(data, "fac_france", 3);
     let france_id = fac("fac_france");
     research(&mut state, data, "tech_longbow_drill").unwrap();
     let info = state.research_info(data, &france_id).expect("researching");
@@ -177,7 +169,7 @@ fn research_completes_with_an_event_and_clears_the_slot() {
 #[test]
 fn switching_research_banks_and_restores_progress() {
     let data = game_data();
-    let mut state = france(data, 4);
+    let mut state = start(data, "fac_france", 4);
     let france_id = fac("fac_france");
     research(&mut state, data, "tech_gunpowder").unwrap();
     state.end_turn_with(data, idle);
@@ -228,7 +220,7 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
         }
     }
 
-    let mut state = france(data, 5);
+    let mut state = start(data, "fac_france", 5);
     let france_id = fac("fac_france");
     let longbow = UnitTypeId::new("unit_longbowmen").unwrap();
     let capital: ProvinceId = state.factions[&france_id].capital.clone();
@@ -264,7 +256,7 @@ fn technology_unlocks_units_and_the_data_is_consistent() {
 #[test]
 fn technologies_strengthen_armies_in_battle() {
     let data = game_data();
-    let mut state = france(data, 6);
+    let mut state = start(data, "fac_france", 6);
     let france_id = fac("fac_france");
     let army = state
         .armies
@@ -305,7 +297,7 @@ fn technologies_strengthen_armies_in_battle() {
 #[test]
 fn technologies_raise_income() {
     let data = game_data();
-    let mut state = france(data, 7);
+    let mut state = start(data, "fac_france", 7);
     let france_id = fac("fac_france");
     let before = state.faction_income(data, &france_id);
     state
@@ -334,7 +326,7 @@ fn anachronistic_technologies_cost_more() {
 #[test]
 fn research_state_survives_a_save_round_trip() {
     let data = game_data();
-    let mut state = france(data, 8);
+    let mut state = start(data, "fac_france", 8);
     research(&mut state, data, "tech_gunpowder").unwrap();
     state.end_turn_with(data, idle);
     research(&mut state, data, "tech_pavise").unwrap();
@@ -356,7 +348,7 @@ fn research_state_survives_a_save_round_trip() {
 fn ai_research_is_deterministic_and_alternates_branches() {
     let data = game_data();
     let run = || {
-        let mut state = france(data, 42);
+        let mut state = start(data, "fac_france", 42);
         for _ in 0..30 {
             state.end_turn(data);
         }
@@ -381,7 +373,7 @@ fn ai_research_is_deterministic_and_alternates_branches() {
     );
     // Somebody completed a technology in 30 turns, and the AI picks the
     // cheapest available tech of the branch it has fewer of.
-    let started = france(data, 42);
+    let started = start(data, "fac_france", 42);
     let learned = a
         .factions
         .iter()

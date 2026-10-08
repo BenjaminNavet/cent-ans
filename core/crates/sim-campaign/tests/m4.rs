@@ -3,23 +3,15 @@
 //! and the version-3 save format. See `docs/design/m4-characters-dynasties.md` § 2.
 
 use data_model::EffectKind;
-use data_model::{CharacterId, FactionId, GameData, SkillBranch, SkillId, TraitId};
+use data_model::{CharacterId, GameData, SkillBranch, SkillId, TraitId};
 use sim_campaign::battle_auto::{resolve_auto, BattleContext, BattleUnit, Side, Winner};
+use sim_campaign::test_support::{idle, start};
 use sim_campaign::{CampaignRng, CampaignState, EventKind, Order, OrderError};
 
 use data_model::test_support::{fac, game_data, prov};
 
 fn chr(id: &str) -> CharacterId {
     CharacterId::new(id).unwrap()
-}
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
-/// A planner that does nothing: only the orders the test submits apply.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 /// A tier-1 skill of `branch` with no prerequisite, and one of its tier-2
@@ -52,7 +44,7 @@ fn unit(strength: u32) -> BattleUnit {
 #[test]
 fn experience_converts_into_skill_points() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let philippe = chr("chr_philippe_vi");
     state
         .submit_order(
@@ -74,7 +66,7 @@ fn experience_converts_into_skill_points() {
 #[test]
 fn learn_skill_checks_points_and_prerequisites() {
     let data = game_data();
-    let mut state = france(data, 2);
+    let mut state = start(data, "fac_france", 2);
     let philippe = chr("chr_philippe_vi");
     let (first, second) = tier1_and_successor(data, SkillBranch::Command);
 
@@ -147,7 +139,7 @@ fn learn_skill_checks_points_and_prerequisites() {
 #[test]
 fn veteran_trait_after_five_battles() {
     let data = game_data();
-    let mut state = france(data, 3);
+    let mut state = start(data, "fac_france", 3);
     let general = chr("chr_raoul_de_brienne");
     let veteran = TraitId::new("trait_veteran").unwrap();
     let mut events = Vec::new();
@@ -232,7 +224,7 @@ fn a_skilled_general_wins_more_often() {
 #[test]
 fn a_governor_with_justice_lowers_unrest_effects() {
     let data = game_data();
-    let mut state = france(data, 4);
+    let mut state = start(data, "fac_france", 4);
     let rouen = prov("prov_normandie");
     let before = state.province_effects(data, &rouen)[EffectKind::Unrest];
     let governor = chr("chr_raoul_de_brienne");
@@ -290,7 +282,7 @@ fn a_governor_with_justice_lowers_unrest_effects() {
 #[test]
 fn governor_and_general_are_exclusive_and_adults_only() {
     let data = game_data();
-    let mut state = france(data, 5);
+    let mut state = start(data, "fac_france", 5);
     let rouen = prov("prov_normandie");
     // The ruler commands the royal army at start.
     let philippe = chr("chr_philippe_vi");
@@ -338,7 +330,7 @@ fn governor_and_general_are_exclusive_and_adults_only() {
 #[test]
 fn marriage_valid_and_refused_cases() {
     let data = game_data();
-    let mut state = france(data, 6);
+    let mut state = start(data, "fac_france", 6);
     let philippe = chr("chr_philippe_vi");
     let jeanne = chr("chr_jeanne_de_bourgogne");
     let jean = chr("chr_jean_de_normandie");
@@ -394,7 +386,7 @@ fn marriage_valid_and_refused_cases() {
 #[test]
 fn too_young_to_marry() {
     let data = game_data();
-    let mut state = france(data, 7);
+    let mut state = start(data, "fac_france", 7);
     let child = state
         .characters
         .iter()
@@ -417,7 +409,7 @@ fn too_young_to_marry() {
 fn births_are_deterministic() {
     let data = game_data();
     let run = |seed| {
-        let mut state = france(data, seed);
+        let mut state = start(data, "fac_france", seed);
         let mut births = Vec::new();
         for _ in 0..16 {
             for event in state.end_turn_with(data, idle) {
@@ -437,7 +429,7 @@ fn births_are_deterministic() {
 fn charles_v_is_born_when_jean_and_bonne_are_married() {
     let data = game_data();
     let charles = chr("chr_charles_v");
-    let mut state = france(data, 8);
+    let mut state = start(data, "fac_france", 8);
     assert!(state.character(&charles).is_none(), "unborn in 1337");
     let jean = chr("chr_jean_de_normandie");
     let bonne = chr("chr_bonne_de_luxembourg");
@@ -452,7 +444,7 @@ fn charles_v_is_born_when_jean_and_bonne_are_married() {
     assert!(state.character(&jean).unwrap().children.contains(&charles));
 
     // Without the marriage, history diverges: he is never born.
-    let mut state = france(data, 8);
+    let mut state = start(data, "fac_france", 8);
     let mut events = Vec::new();
     sim_campaign::characters::kill(&mut state, data, &jean, &mut events);
     for _ in 0..8 {
@@ -466,7 +458,7 @@ fn charles_v_is_born_when_jean_and_bonne_are_married() {
 #[test]
 fn salic_succession_from_philippe_to_jean() {
     let data = game_data();
-    let mut state = france(data, 9);
+    let mut state = start(data, "fac_france", 9);
     let mut events = Vec::new();
     sim_campaign::characters::kill(&mut state, data, &chr("chr_philippe_vi"), &mut events);
     let france_state = state.faction_state(&fac("fac_france")).unwrap();
@@ -484,7 +476,7 @@ fn a_minor_ruler_opens_a_regency() {
     let data = game_data();
     // Seed 12 (HV8 data): seeds 10 and 11 give Jean a random elder son
     // (born 1337), who rightly inherits before Charles V.
-    let mut state = france(data, 12);
+    let mut state = start(data, "fac_france", 12);
     // Let Charles V be born, then kill every adult Valois ahead of him.
     for _ in 0..8 {
         state.end_turn_with(data, idle);
@@ -522,7 +514,7 @@ fn a_minor_ruler_opens_a_regency() {
 #[test]
 fn save_round_trip_keeps_m4_fields() {
     let data = game_data();
-    let mut state = france(data, 11);
+    let mut state = start(data, "fac_france", 11);
     let raoul = chr("chr_raoul_de_brienne");
     state
         .submit_order(
@@ -561,7 +553,7 @@ fn save_round_trip_keeps_m4_fields() {
 fn twenty_turns_are_deterministic_with_dynasties() {
     let data = game_data();
     let run = || {
-        let mut state = france(data, 12);
+        let mut state = start(data, "fac_france", 12);
         for _ in 0..20 {
             state.end_turn(data);
         }
@@ -573,7 +565,7 @@ fn twenty_turns_are_deterministic_with_dynasties() {
 #[test]
 fn view_lists_ruler_first_and_family() {
     let data = game_data();
-    let state = france(data, 13);
+    let state = start(data, "fac_france", 13);
     let ids = state.faction_characters(&fac("fac_france"));
     assert_eq!(ids.first(), Some(&chr("chr_philippe_vi")));
     assert_eq!(ids.get(1), Some(&chr("chr_jean_de_normandie")));

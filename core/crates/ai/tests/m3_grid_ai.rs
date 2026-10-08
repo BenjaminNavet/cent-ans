@@ -3,6 +3,7 @@
 //! the bubble, avoidance of stronger armies, embarkations, determinism and
 //! the time an AI faction takes to play its turn.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::main_army;
 
 use std::time::{Duration, Instant};
 
@@ -16,17 +17,6 @@ fn data() -> &'static GameData {
 
 fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 fn at_war(state: &mut CampaignState, a: &str, b: &str) {

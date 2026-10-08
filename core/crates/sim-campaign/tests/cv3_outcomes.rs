@@ -3,11 +3,12 @@
 //! thresholds, consequences (prestige, XP, morale modifiers that wear off)
 //! and the report kept for the UI.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::main_army;
 
 use data_model::{BattleOutcomeClass, BattleOutcomeRules};
 use sim_campaign::battle_outcome::{classify, SideTally};
 use sim_campaign::movement::side_from_army;
-use sim_campaign::{ArmyId, ArmyPosition, CampaignState, MoraleModifier, Order};
+use sim_campaign::{ArmyPosition, CampaignState, MoraleModifier, Order};
 
 fn tally(strength: u32, losses: u32) -> SideTally {
     SideTally {
@@ -104,17 +105,6 @@ fn every_class_has_a_label_in_the_data() {
         assert!(!consequence.label.is_empty());
         assert_ne!(consequence.label, class.key(), "{class:?} has a real label");
     }
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 #[test]

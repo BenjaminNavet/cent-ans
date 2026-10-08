@@ -1,14 +1,11 @@
 //! Lot FK5a: staging of map incidents for the UI tests
 //! (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.4, ADR 0122).
 
-use data_model::{EventId, EventPresentation, FactionId, GameData, ProvinceId};
+use data_model::{EventId, EventPresentation, FactionId, ProvinceId};
+use sim_campaign::test_support::idle;
 use sim_campaign::{CampaignState, EventKind};
 
 use data_model::test_support::game_data;
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<sim_campaign::Order> {
-    Vec::new()
-}
 
 #[test]
 fn offered_decision_is_a_map_incident_that_expires_with_a_journal_entry() {

@@ -5,6 +5,8 @@
 //! a synthetic cover map (forest where the tests say), so that the geometry
 //! is known.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::march::px_per_km;
+use sim_campaign::test_support::main_army;
 
 use data_model::{CoverMap, FactionId, GameData, MapRasters, NavGrid, SettlementId, PLAIN_COST};
 use sim_battle::{BattleOpening, SideId};
@@ -14,10 +16,6 @@ use sim_campaign::{
     ArmyId, ArmyPosition, CampaignRng, CampaignState, EventKind, MoveOrderTarget, Order,
     OrderError, Stance, StopReason,
 };
-
-fn px_per_km(data: &GameData) -> f32 {
-    data.navgrid().px_per_km() as f32
-}
 
 fn east(data: &GameData, point: [f32; 2], km: f32) -> [f32; 2] {
     [point[0] + km * px_per_km(data), point[1]]
@@ -70,17 +68,6 @@ fn data_with_forest(forests: &[[f32; 2]]) -> GameData {
     }
     data.set_cover_map(Some(cover));
     data
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 fn refill(state: &mut CampaignState, data: &GameData, id: &ArmyId) {

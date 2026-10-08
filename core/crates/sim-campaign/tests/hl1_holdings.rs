@@ -1,15 +1,12 @@
 //! Lot HL1 (settlements quick-access list, touche B): `holdings_overview`.
 //! See `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 1.
 
-use data_model::{FactionId, GameData, SettlementId, SettlementKind};
+use data_model::{FactionId, SettlementId, SettlementKind};
 use sim_campaign::holdings::{holdings_overview, DangerReason, SettlementRow};
+use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, Order, Place};
 
 use data_model::test_support::game_data;
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, FactionId::new("fac_france").unwrap(), 7).expect("1337 start")
-}
 
 fn france() -> FactionId {
     FactionId::new("fac_france").unwrap()
@@ -46,7 +43,7 @@ fn set_treasury(state: &mut CampaignState, amount: i64) {
 #[test]
 fn idle_settlement_with_enough_treasury_can_upgrade() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     set_treasury(&mut state, 10_000_000);
 
     // Find a settlement with at least one upgrade among its build options
@@ -89,7 +86,7 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
 #[test]
 fn idle_settlement_without_enough_treasury_has_no_options() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     set_treasury(&mut state, 0);
 
     let village = french_settlement(&state, SettlementKind::Village);
@@ -106,7 +103,7 @@ fn idle_settlement_without_enough_treasury_has_no_options() {
 #[test]
 fn settlement_under_construction_is_not_idle() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     set_treasury(&mut state, 10_000_000);
     let town = french_settlement(&state, SettlementKind::Town);
     let build = state
@@ -138,7 +135,7 @@ fn settlement_under_construction_is_not_idle() {
 #[test]
 fn besieged_settlement_has_no_income_and_is_endangered() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let town = french_settlement(&state, SettlementKind::Town);
     state.settlements.get_mut(&town).unwrap().siege = Some(sim_campaign::SiegeState {
         attacker: FactionId::new("fac_england").unwrap(),
@@ -161,7 +158,7 @@ fn besieged_settlement_has_no_income_and_is_endangered() {
 #[test]
 fn occupied_settlement_is_listed_and_excluded_from_slots_total() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let town = french_settlement(&state, SettlementKind::Town);
     let england = FactionId::new("fac_england").unwrap();
     state.settlements.get_mut(&town).unwrap().controller = england;
@@ -189,7 +186,7 @@ fn occupied_settlement_is_listed_and_excluded_from_slots_total() {
 #[test]
 fn province_income_is_the_sum_of_its_settlements() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     let overview = holdings_overview(&state, data, &france());
     assert!(!overview.provinces.is_empty());
     for province in &overview.provinces {
@@ -203,7 +200,7 @@ fn province_income_is_the_sum_of_its_settlements() {
 #[test]
 fn unknown_faction_has_an_empty_overview() {
     let data = game_data();
-    let state = start(data);
+    let state = start(data, "fac_france", 7);
     let unknown = FactionId::new("fac_does_not_exist").unwrap();
     let overview = holdings_overview(&state, data, &unknown);
     assert!(overview.provinces.is_empty());

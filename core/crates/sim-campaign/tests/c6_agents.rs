@@ -5,13 +5,10 @@ use data_model::{
     SettlementId, SettlementKind,
 };
 use sim_campaign::agents::{self, AgentId};
+use sim_campaign::test_support::start;
 use sim_campaign::{CampaignState, Order, OrderError, SiegeState};
 
 use data_model::test_support::{fac, game_data};
-
-fn start(data: &GameData) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start")
-}
 
 /// Rules where every action succeeds and nobody dies.
 fn sure(data: &mut GameData) {
@@ -184,7 +181,7 @@ fn rules_file_matches_the_design_defaults() {
 #[test]
 fn recruitment_pays_checks_places_and_caps() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
@@ -252,7 +249,7 @@ fn recruitment_pays_checks_places_and_caps() {
 #[test]
 fn preacher_needs_a_religious_building_or_an_abbey() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
     let religious = |s: &sim_campaign::SettlementState| {
@@ -289,7 +286,7 @@ fn preacher_needs_a_religious_building_or_an_abbey() {
 fn agents_walk_the_settlement_graph_through_enemy_land() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     war(&mut state, &france, &england);
     let (home, enemy) = border(&state, &data, &france, &england);
@@ -343,7 +340,7 @@ fn agents_walk_the_settlement_graph_through_enemy_land() {
 fn scouting_reports_and_keeps_the_province_in_sight() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (home, enemy) = border(&state, &data, &france, &england);
     let id = place(&mut state, &data, &france, AgentKind::Spy, &home);
@@ -376,7 +373,7 @@ fn scouting_reports_and_keeps_the_province_in_sight() {
 #[test]
 fn spies_see_around_them() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     // The farthest settlement from France: somewhere nobody French sees.
     let before = state.visible_provinces(data, &france);
@@ -399,7 +396,7 @@ fn spies_see_around_them() {
 fn sabotage_opens_a_breach_or_delays_works() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (home, enemy) = border(&state, &data, &france, &england);
     // At peace: refused.
@@ -461,7 +458,7 @@ fn sabotage_opens_a_breach_or_delays_works() {
 fn inciting_raises_unrest() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     war(&mut state, &france, &england);
     let (_, enemy) = border(&state, &data, &france, &england);
@@ -478,7 +475,7 @@ fn inciting_raises_unrest() {
 fn counter_espionage_unmasks_foreign_spies_actively_and_passively() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     war(&mut state, &france, &england);
     let paris = paris(&state);
@@ -509,7 +506,7 @@ fn counter_espionage_unmasks_foreign_spies_actively_and_passively() {
 #[test]
 fn counter_spies_lower_the_odds() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let paris = paris(&state);
     let intruder = place(&mut state, data, &england, AgentKind::Spy, &paris);
@@ -527,7 +524,7 @@ fn counter_spies_lower_the_odds() {
 fn herald_parley_truce_bribe() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (home, enemy) = border(&state, &data, &france, &england);
     peace(&mut state, &france, &england);
@@ -582,7 +579,7 @@ fn herald_parley_truce_bribe() {
 fn herald_buys_back_a_captive_at_a_discount() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let captive: CharacterId = state
         .characters
@@ -617,7 +614,7 @@ fn herald_buys_back_a_captive_at_a_discount() {
 fn preacher_preach_denounce_curia() {
     let mut data = game_data().clone();
     sure(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let paris = paris(&state);
     let province = state.settlement_province(&paris).unwrap().clone();
@@ -680,7 +677,7 @@ fn preacher_preach_denounce_curia() {
 fn failure_can_cost_the_agent_and_experience_raises_the_seal() {
     let mut data = game_data().clone();
     doomed(&mut data);
-    let mut state = start(&data);
+    let mut state = start(&data, "fac_france", 7);
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let (_, enemy) = border(&state, &data, &france, &england);
     let spy = place(&mut state, &data, &france, AgentKind::Spy, &enemy);
@@ -700,7 +697,7 @@ fn rolls_are_deterministic_and_leave_the_main_stream_alone() {
     let data = game_data();
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let run = || {
-        let mut state = start(data);
+        let mut state = start(data, "fac_france", 7);
         let (_, enemy) = border(&state, data, &france, &england);
         let rng_before = state.rng.clone();
         let mut outcomes = Vec::new();
@@ -721,7 +718,7 @@ fn rolls_are_deterministic_and_leave_the_main_stream_alone() {
 #[test]
 fn saves_without_agents_still_load() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;
@@ -743,7 +740,7 @@ fn saves_without_agents_still_load() {
 #[test]
 fn upkeep_is_paid_each_season_and_points_come_back() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     let paris = paris(&state);
     state.factions.get_mut(&france).unwrap().treasury = 5_000;

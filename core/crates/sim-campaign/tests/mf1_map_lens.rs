@@ -1,20 +1,16 @@
 //! MF1 (campaign map filters) integration tests: `map_lens` values on the
 //! 1337 start.
 
-use data_model::GameData;
 use sim_campaign::map_lens::{map_lens, ClaimStance};
-use sim_campaign::{CampaignState, Season};
+use sim_campaign::test_support::start;
+use sim_campaign::Season;
 
 use data_model::test_support::{fac, game_data, prov};
-
-fn start(data: &GameData, player: &str) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), 7).expect("1337 start")
-}
 
 #[test]
 fn every_province_has_values_in_range() {
     let data = game_data();
-    let state = start(data, "fac_france");
+    let state = start(data, "fac_france", 7);
     let lens = map_lens(&state, data, &fac("fac_france"));
     assert_eq!(lens.len(), state.provinces.len());
     for (id, values) in &lens {
@@ -32,7 +28,7 @@ fn every_province_has_values_in_range() {
 #[test]
 fn vassal_provinces_carry_their_lord_and_loyalty() {
     let data = game_data();
-    let state = start(data, "fac_france");
+    let state = start(data, "fac_france", 7);
     let flanders = fac("fac_flanders");
     let loyalty = state.faction_state(&flanders).unwrap().loyalty;
     let lens = map_lens(&state, data, &fac("fac_france"));
@@ -53,7 +49,7 @@ fn vassal_provinces_carry_their_lord_and_loyalty() {
 #[test]
 fn claims_are_seen_from_both_sides() {
     let data = game_data();
-    let state = start(data, "fac_england");
+    let state = start(data, "fac_england", 7);
     // Edward III claims the French crown, hence every French province.
     let english = map_lens(&state, data, &fac("fac_england"));
     assert!(matches!(
@@ -70,7 +66,7 @@ fn claims_are_seen_from_both_sides() {
 #[test]
 fn supply_recovers_at_home_and_drains_abroad_worse_in_winter() {
     let data = game_data();
-    let mut state = start(data, "fac_france");
+    let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
     let lens = map_lens(&state, data, &france);
     assert!(lens[&prov("prov_ile_de_france")].supply_change > 0);

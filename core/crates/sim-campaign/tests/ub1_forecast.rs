@@ -3,18 +3,10 @@
 
 use data_model::{GameData, ProvinceId};
 use sim_campaign::battle_forecast::WITHDRAW_MORALE_LOSS;
+use sim_campaign::test_support::first_army;
 use sim_campaign::{ArmyId, CampaignState};
 
 use data_model::test_support::{fac, game_data};
-
-fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies
-        .iter()
-        .find(|(_, a)| a.faction == fac(faction))
-        .map(|(id, _)| id.clone())
-        .unwrap()
-}
 
 fn at_war(state: &mut CampaignState) {
     for (a, b) in [("fac_france", "fac_england"), ("fac_england", "fac_france")] {

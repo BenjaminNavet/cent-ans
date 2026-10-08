@@ -2,14 +2,11 @@
 //! down in a few seasons, starting settlements hold one step per building
 //! chain, and a later step of a chain satisfies what requires an earlier one.
 
-use data_model::{BuildingId, ProvinceId, SettlementId};
+use data_model::{ProvinceId, SettlementId};
+use sim_campaign::test_support::bld;
 use sim_campaign::CampaignState;
 
 use data_model::test_support::{fac, game_data};
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
 
 /// A province at 100 disorder left in peace falls back under 40 within
 /// eight seasons (it stayed at 100 for years at 2 points a season).

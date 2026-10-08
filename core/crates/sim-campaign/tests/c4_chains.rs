@@ -3,26 +3,11 @@
 //! `docs/design/2026-09-24-analyse-total-war.md` § 2.1 « Bâtiments en
 //! chaînes/arbres ».
 
-use data_model::{BuildingId, FactionId, GameData, SettlementId};
+use data_model::{GameData, SettlementId};
+use sim_campaign::test_support::{bld, city, idle, start};
 use sim_campaign::{CampaignState, Order};
 
-use data_model::test_support::{fac, game_data, prov};
-
-fn bld(id: &str) -> BuildingId {
-    BuildingId::new(id).unwrap()
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
-}
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
+use data_model::test_support::{fac, game_data};
 
 /// Runs the current construction of `settlement` to completion.
 fn finish_construction(state: &mut CampaignState, data: &GameData, settlement: &SettlementId) {
@@ -50,7 +35,7 @@ fn finish_construction(state: &mut CampaignState, data: &GameData, settlement: &
 #[test]
 fn market_chain_upgrades_replace_the_previous_level() {
     let data = game_data();
-    let mut state = france(data, 401);
+    let mut state = start(data, "fac_france", 401);
     let agen = city(&state, "prov_agenais");
     // prov_agenais's city starts with `bld_market` but no `bld_guild_hall`
     // or `bld_fair` (data/settlements/prov_agenais.json).
@@ -98,7 +83,7 @@ fn market_chain_upgrades_replace_the_previous_level() {
 #[test]
 fn fair_is_blocked_without_the_guild_hall() {
     let data = game_data();
-    let state = france(data, 402);
+    let state = start(data, "fac_france", 402);
     let agen = city(&state, "prov_agenais");
     let options = state.buildable(data, &agen);
     let fair = options
@@ -112,7 +97,7 @@ fn fair_is_blocked_without_the_guild_hall() {
 #[test]
 fn religious_chain_branches_after_the_collegiate_church() {
     let data = game_data();
-    let mut state = france(data, 403);
+    let mut state = start(data, "fac_france", 403);
     let agen = city(&state, "prov_agenais");
     assert!(state
         .settlement_state(&agen)
@@ -178,7 +163,7 @@ fn religious_chain_branches_after_the_collegiate_church() {
 #[test]
 fn water_mill_upgrades_from_the_windmill() {
     let data = game_data();
-    let mut state = france(data, 404);
+    let mut state = start(data, "fac_france", 404);
     let agen = city(&state, "prov_agenais");
     assert!(state
         .settlement_state(&agen)
@@ -209,7 +194,7 @@ fn fortification_chain_still_upgrades_through_four_tiers() {
     // Pre-existing chain (palisade -> stone walls -> castle -> artillery
     // bastion); C4 only adds new chains, this one must keep working.
     let data = game_data();
-    let mut state = france(data, 405);
+    let mut state = start(data, "fac_france", 405);
     let paris = city(&state, "prov_ile_de_france");
     // Paris starts with `bld_stone_walls` and `bld_castle` (already
     // upgraded past the palisade).
@@ -240,7 +225,7 @@ fn fortification_chain_still_upgrades_through_four_tiers() {
 #[test]
 fn pre_c4_stacked_chain_data_still_loads_and_computes_effects() {
     let data = game_data();
-    let mut state = france(data, 406);
+    let mut state = start(data, "fac_france", 406);
     // A save from before the chain restructuring (and before EQ2 cleaned
     // the seed data) lists both `bld_abbey` and `bld_cathedral` (and
     // `bld_market`/`bld_guild_hall`/`bld_fair`) together in Paris.

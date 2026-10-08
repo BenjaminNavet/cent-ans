@@ -1,6 +1,7 @@
 //! Integration tests of the campaign model on the real `data/` directory.
 
-use data_model::{FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::SettlementId;
+use sim_campaign::test_support::{city, idle, main_army, start, unit_type};
 use sim_campaign::{ArmyId, CampaignState, EventKind, Order, OrderError, Stance, Unit, START_YEAR};
 
 use data_model::test_support::{fac, game_data, prov};
@@ -9,39 +10,10 @@ fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
 }
 
-/// The city of a province.
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state.province_city_id(&prov(province)).unwrap().clone()
-}
-
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
-
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start")
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies()
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
-
-/// A planner that does nothing: the world stands still except for the player.
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
 #[test]
 fn new_1337_matches_game_data() {
     let data = game_data();
-    let state = france(data, 1);
+    let state = start(data, "fac_france", 1);
     // FE registry lots keep adding factions and provinces: every one in the
     // data enters the campaign (fac_rebels included), and the map is not shrunk.
     assert_eq!(
@@ -116,7 +88,7 @@ fn new_1337_rejects_unknown_faction() {
 #[test]
 fn invalid_orders_are_rejected_without_side_effects() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let before = state.save_json();
     let own = main_army(&state, "fac_france");
     let foreign = main_army(&state, "fac_england");
@@ -164,7 +136,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
             data,
             Order::Recruit {
                 settlement: prov("prov_kent").into(),
-                unit_type: unit("unit_urban_militia")
+                unit_type: unit_type("unit_urban_militia")
             }
         ),
         Err(OrderError::RecruitUnavailable(_))
@@ -174,7 +146,7 @@ fn invalid_orders_are_rejected_without_side_effects() {
             data,
             Order::Recruit {
                 settlement: set("set_paris").into(),
-                unit_type: unit("unit_longbowmen")
+                unit_type: unit_type("unit_longbowmen")
             }
         ),
         Err(OrderError::RecruitUnavailable(_))
@@ -220,26 +192,26 @@ fn invalid_orders_are_rejected_without_side_effects() {
 #[test]
 fn valid_orders_apply_immediately() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let paris = set("set_paris");
     let treasury_before = state.faction_state(&fac("fac_france")).unwrap().treasury;
 
     let options = state.recruitable(data, &paris);
     let militia = options
         .iter()
-        .find(|o| o.unit_type == unit("unit_urban_militia"))
+        .find(|o| o.unit_type == unit_type("unit_urban_militia"))
         .unwrap();
     assert!(militia.available, "{:?}", militia.reason);
     assert_eq!(militia.cost, 300);
     let longbow = options
         .iter()
-        .find(|o| o.unit_type == unit("unit_longbowmen"))
+        .find(|o| o.unit_type == unit_type("unit_longbowmen"))
         .unwrap();
     assert!(!longbow.available);
     assert!(longbow.reason.as_deref().unwrap().contains("technologie"));
     let genoese = options
         .iter()
-        .find(|o| o.unit_type == unit("unit_genoese_crossbowmen"))
+        .find(|o| o.unit_type == unit_type("unit_genoese_crossbowmen"))
         .unwrap();
     // TW2-T3 (ADR 0103): Genoese companies are hired by an army from the
     // regional reserve, never levied in a town.
@@ -254,7 +226,7 @@ fn valid_orders_apply_immediately() {
             data,
             Order::Recruit {
                 settlement: paris.clone().into(),
-                unit_type: unit("unit_urban_militia"),
+                unit_type: unit_type("unit_urban_militia"),
             },
         )
         .unwrap();
@@ -412,7 +384,7 @@ fn orders_round_trip_through_snake_case_json() {
 #[test]
 fn movement_spans_turns_and_reachable_is_bounded() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_left;
     // Lot C7a: 3 steps of 70 km (lot DC1, ADR 0082) times the season scale
@@ -479,7 +451,7 @@ fn movement_spans_turns_and_reachable_is_bounded() {
 #[test]
 fn v1_province_paths_head_for_the_city() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start(data, "fac_france", 1);
     let army = main_army(&state, "fac_france");
     state
         .submit_order(
@@ -562,7 +534,7 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
 #[test]
 fn attacking_an_enemy_army_triggers_a_battle() {
     let data = game_data();
-    let mut state = france(data, 3);
+    let mut state = start(data, "fac_france", 3);
     // Auto-resolved battle (interactive battles are covered by tests/m7.rs).
     state.interactive_battles = false;
     let french = main_army(&state, "fac_france");
@@ -597,7 +569,7 @@ fn attacking_an_enemy_army_triggers_a_battle() {
         "both armies stop after a battle"
     );
     // Out of reach: refused, nothing happens.
-    let mut far = france(data, 3);
+    let mut far = start(data, "fac_france", 3);
     far.interactive_battles = false;
     let before = far.save_json();
     let err = far
@@ -735,7 +707,7 @@ fn raid_devastates_and_loots() {
 #[test]
 fn france_income_is_positive_and_in_target_range() {
     let data = game_data();
-    let mut state = france(data, 7);
+    let mut state = start(data, "fac_france", 7);
     let france_id = fac("fac_france");
     let income = state.faction_income(data, &france_id);
     let upkeep = state.faction_upkeep(data, &france_id);
@@ -816,7 +788,7 @@ fn attrition_abroad_and_recovery_at_home() {
 #[test]
 fn save_load_round_trip() {
     let data = game_data();
-    let mut state = france(data, 9);
+    let mut state = start(data, "fac_france", 9);
     for _ in 0..3 {
         state.end_turn(data);
     }
@@ -884,7 +856,7 @@ fn save_load_round_trip() {
 fn twenty_turns_with_ai_are_deterministic() {
     let data = game_data();
     let run = |seed: u64| {
-        let mut state = france(data, seed);
+        let mut state = start(data, "fac_france", seed);
         let army = main_army(&state, "fac_france");
         state
             .submit_order(
@@ -909,7 +881,7 @@ fn twenty_turns_with_ai_are_deterministic() {
 #[test]
 fn forty_turns_all_ai_change_the_map() {
     let data = game_data();
-    let mut state = france(data, 21);
+    let mut state = start(data, "fac_france", 21);
     let mut changed = 0;
     let mut battles = 0;
     let mut captures = 0;
@@ -953,7 +925,7 @@ fn forty_turns_all_ai_change_the_map() {
 #[test]
 fn unit_fresh_uses_data_stats() {
     let data = game_data();
-    let knights = Unit::fresh(&data.unit_types[&unit("unit_knights")]);
+    let knights = Unit::fresh(&data.unit_types[&unit_type("unit_knights")]);
     assert_eq!(knights.strength, 60);
     assert_eq!(knights.morale, 80);
 }
@@ -961,7 +933,7 @@ fn unit_fresh_uses_data_stats() {
 #[test]
 fn succession_follows_heir_then_house_then_none() {
     let data = game_data();
-    let mut state = france(data, 10);
+    let mut state = start(data, "fac_france", 10);
     let philippe = data_model::CharacterId::new("chr_philippe_vi").unwrap();
     let jean = data_model::CharacterId::new("chr_jean_de_normandie").unwrap();
     let mut events = Vec::new();

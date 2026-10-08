@@ -1,6 +1,7 @@
 //! Lot CV3-3: map encounters (spawn, expiry, trigger, choices, battle and
 //! join outcomes, vision, old saves, data references).
 
+use sim_campaign::test_support::start_quiet;
 use std::collections::BTreeSet;
 
 use data_model::{
@@ -15,12 +16,6 @@ use data_model::test_support::{fac, game_data};
 
 fn enc(id: &str) -> EncounterId {
     EncounterId::new(id).unwrap()
-}
-
-fn start(data: &GameData, faction: &str, seed: u64) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac(faction), seed).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
 }
 
 fn army_of(state: &CampaignState, faction: &str) -> ArmyId {
@@ -118,7 +113,7 @@ fn spawn_seasons(state: &mut CampaignState, data: &GameData, seasons: u32) {
 fn sites_spawn_within_the_rules() {
     let data = game_data();
     let rules = &data.encounter_rules;
-    let mut state = start(data, "fac_france", 11);
+    let mut state = start_quiet(data, "fac_france", 11);
     spawn_seasons(&mut state, data, 12);
     let sites = &state.encounters.sites;
     assert!(!sites.is_empty(), "sites appear");
@@ -155,13 +150,13 @@ fn spawn_respects_max_active_and_per_season() {
     let mut data = game_data().clone();
     data.encounter_rules.max_active = 3;
     data.encounter_rules.spawn_per_season = 5;
-    let mut state = start(&data, "fac_france", 3);
+    let mut state = start_quiet(&data, "fac_france", 3);
     spawn_seasons(&mut state, &data, 1);
     assert!(state.encounters.sites.len() <= 3);
     spawn_seasons(&mut state, &data, 4);
     assert!(state.encounters.sites.len() <= 3);
     data.encounter_rules.spawn_per_season = 0;
-    let mut empty = start(&data, "fac_france", 3);
+    let mut empty = start_quiet(&data, "fac_france", 3);
     spawn_seasons(&mut empty, &data, 4);
     assert!(empty.encounters.sites.is_empty());
 }
@@ -169,7 +164,7 @@ fn spawn_respects_max_active_and_per_season() {
 #[test]
 fn sites_expire() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 5);
+    let mut state = start_quiet(data, "fac_france", 5);
     spawn_seasons(&mut state, data, 1);
     let first: Vec<(u32, u32)> = state
         .encounters
@@ -192,14 +187,14 @@ fn sites_expire() {
 #[test]
 fn spawning_is_deterministic_and_leaves_the_main_stream_alone() {
     let data = game_data();
-    let mut a = start(data, "fac_france", 42);
-    let mut b = start(data, "fac_france", 42);
+    let mut a = start_quiet(data, "fac_france", 42);
+    let mut b = start_quiet(data, "fac_france", 42);
     let rng_before = a.rng.clone();
     spawn_seasons(&mut a, data, 8);
     spawn_seasons(&mut b, data, 8);
     assert_eq!(a.encounters, b.encounters);
     assert_eq!(a.rng, rng_before, "the campaign stream is untouched");
-    let mut c = start(data, "fac_france", 43);
+    let mut c = start_quiet(data, "fac_france", 43);
     spawn_seasons(&mut c, data, 8);
     assert_ne!(a.encounters.sites, c.encounters.sites);
 }
@@ -207,7 +202,7 @@ fn spawning_is_deterministic_and_leaves_the_main_stream_alone() {
 #[test]
 fn a_player_march_ending_near_a_site_waits_for_a_choice() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 7);
+    let mut state = start_quiet(data, "fac_france", 7);
     let (army, site) = meet(&mut state, data, "enc_marchands_lombards");
     assert_eq!(state.encounters.pending.len(), 1);
     let pending = &state.encounters.pending[0];
@@ -259,7 +254,7 @@ fn a_player_march_ending_near_a_site_waits_for_a_choice() {
 #[test]
 fn an_option_whose_conditions_fail_is_refused() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 8);
+    let mut state = start_quiet(data, "fac_france", 8);
     let (army, site) = meet(&mut state, data, "enc_marchands_lombards");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 0;
     let views = state.pending_encounter_views(data, &fac("fac_france"));
@@ -299,7 +294,7 @@ fn an_option_whose_conditions_fail_is_refused() {
 #[test]
 fn an_unanswered_encounter_takes_its_default_option_at_the_end_of_the_turn() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 9);
+    let mut state = start_quiet(data, "fac_france", 9);
     let (_army, site) = meet(&mut state, data, "enc_peage_pont");
     assert_eq!(state.encounters.pending.len(), 1);
     state.end_turn(data);
@@ -311,7 +306,7 @@ fn an_unanswered_encounter_takes_its_default_option_at_the_end_of_the_turn() {
 #[test]
 fn an_ai_march_ending_near_a_site_chooses_at_once() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 10);
+    let mut state = start_quiet(data, "fac_france", 10);
     let army = army_of(&state, "fac_england");
     let target = nearby_target(&state, data, &army);
     let site = put_site(&mut state, data, "enc_moines_hospitaliers", target);
@@ -337,7 +332,7 @@ fn choose(state: &mut CampaignState, data: &GameData, army: &ArmyId, site: u32, 
 #[test]
 fn a_battle_outcome_raises_a_troop_and_applies_on_win() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 12);
+    let mut state = start_quiet(data, "fac_france", 12);
     state.year = 1360;
     let (army, site) = meet(&mut state, data, "enc_grandes_compagnies");
     state.armies.get_mut(&army).unwrap().units = fresh(data, "unit_knights", 14);
@@ -370,7 +365,7 @@ fn a_battle_outcome_raises_a_troop_and_applies_on_win() {
 #[test]
 fn a_lost_encounter_battle_applies_on_loss() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 13);
+    let mut state = start_quiet(data, "fac_france", 13);
     state.interactive_battles = false;
     let (army, site) = meet(&mut state, data, "enc_grandes_compagnies");
     let mut weak = fresh(data, "unit_urban_militia", 1);
@@ -393,7 +388,7 @@ fn a_lost_encounter_battle_applies_on_loss() {
 fn a_join_outcome_respects_the_army_size_limit() {
     let data = game_data();
     let max = data.army_rules.cap();
-    let mut state = start(data, "fac_france", 14);
+    let mut state = start_quiet(data, "fac_france", 14);
     let (army, site) = meet(&mut state, data, "enc_deserteurs_gallois");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 5_000;
     state.armies.get_mut(&army).unwrap().units = fresh(data, "unit_crossbowmen", max - 1);
@@ -405,7 +400,7 @@ fn a_join_outcome_respects_the_army_size_limit() {
     );
 
     // A full army cannot take a join option.
-    let mut full = start(data, "fac_france", 15);
+    let mut full = start_quiet(data, "fac_france", 15);
     let (army, site) = meet(&mut full, data, "enc_deserteurs_gallois");
     full.factions.get_mut(&fac("fac_france")).unwrap().treasury = 5_000;
     full.armies.get_mut(&army).unwrap().units = fresh(data, "unit_crossbowmen", max);
@@ -422,7 +417,7 @@ fn a_join_outcome_respects_the_army_size_limit() {
 #[test]
 fn sites_are_seen_only_inside_the_vision() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 16);
+    let mut state = start_quiet(data, "fac_france", 16);
     let army = army_of(&state, "fac_france");
     let near = nearby_target(&state, data, &army);
     let near_id = put_site(&mut state, data, "enc_peage_pont", near);
@@ -442,7 +437,7 @@ fn sites_are_seen_only_inside_the_vision() {
 #[test]
 fn a_campaign_runs_with_encounters_and_leaves_no_troop_behind() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 21);
+    let mut state = start_quiet(data, "fac_france", 21);
     state.interactive_battles = false;
     let mut met = 0;
     for _ in 0..12 {
@@ -469,7 +464,7 @@ fn a_campaign_runs_with_encounters_and_leaves_no_troop_behind() {
 #[test]
 fn old_saves_without_encounters_still_load() {
     let data = game_data();
-    let mut state = start(data, "fac_france", 17);
+    let mut state = start_quiet(data, "fac_france", 17);
     let _ = meet(&mut state, data, "enc_peage_pont");
     spawn_seasons(&mut state, data, 1);
     let saved = state.save_json();
@@ -592,7 +587,7 @@ fn every_encounter_references_existing_data() {
 fn a_staged_site_is_seen_and_met_like_a_spawned_one() {
     // CV3-4: `debug_put_encounter_site` (UI tests and screenshots).
     let data = game_data();
-    let mut state = start(data, "fac_france", 7);
+    let mut state = start_quiet(data, "fac_france", 7);
     let army = army_of(&state, "fac_france");
     let target = nearby_target(&state, data, &army);
     assert!(state

@@ -2,6 +2,8 @@
 //! march report of an attack (spec `docs/design/2026-09-24-mouvement-libre.md`
 //! § 6), on the real data with an all-plain synthetic grid.
 use data_model::test_support::fac;
+use sim_campaign::march::px_per_km;
+use sim_campaign::test_support::main_army;
 
 use std::path::PathBuf;
 
@@ -19,10 +21,6 @@ fn data_with_grid(edit: impl FnOnce(&mut NavGrid)) -> GameData {
         provinces: None,
     });
     data
-}
-
-fn px_per_km(data: &GameData) -> f32 {
-    data.navgrid().px_per_km() as f32
 }
 
 fn distance_km(data: &GameData, a: [f32; 2], b: [f32; 2]) -> f32 {
@@ -48,17 +46,6 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
         }
     }
     panic!("no empty spot");
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// France and England at war, only their main armies kept, in the field.

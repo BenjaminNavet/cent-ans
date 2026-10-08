@@ -4,9 +4,10 @@
 //! old saves and determinism. See `docs/design/2026-09-23-histoire-et-savoir.md`.
 
 use data_model::EffectKind;
-use data_model::{BuildingId, DietId, FactionId, GameData, ProvinceId, TechnologyId};
+use data_model::{BuildingId, DietId, GameData, ProvinceId, TechnologyId};
 use sim_battle::{BattleOutcome, SideId, SideResult};
 use sim_campaign::table::{self, DEFAULT_DIET, LENT_FISH_PIETY, LENT_PIETY_PENALTY};
+use sim_campaign::test_support::{first_army, idle, start_quiet};
 use sim_campaign::{
     medicine, ArmyId, CampaignState, DietError, EventKind, Order, OrderError, Season,
 };
@@ -28,17 +29,6 @@ fn diet(id: &str) -> DietId {
 
 fn tech(id: &str) -> TechnologyId {
     TechnologyId::new(id).unwrap()
-}
-
-/// France 1337 with the chronicle off (no random noise).
-fn france(data: &GameData, seed: u64) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac("fac_france"), seed).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn set_diet(
@@ -64,7 +54,7 @@ fn ruler_piety(state: &CampaignState, faction: &str) -> u8 {
 #[test]
 fn set_diet_is_validated() {
     let data = game_data();
-    let mut state = france(data, 1);
+    let mut state = start_quiet(data, "fac_france", 1);
     assert_eq!(
         state.province_diet(&prov("prov_normandie")).as_str(),
         DEFAULT_DIET
@@ -156,7 +146,7 @@ fn set_diet_is_validated() {
 #[test]
 fn diet_cost_scales_with_population_and_winter() {
     let data = game_data();
-    let mut state = france(data, 2);
+    let mut state = start_quiet(data, "fac_france", 2);
     let normandie = prov("prov_normandie");
     let population = state.provinces[&normandie].population.total() as f64;
     let dairy = &data.diets[&diet("diet_dairy")];
@@ -183,8 +173,8 @@ fn diet_cost_scales_with_population_and_winter() {
 #[test]
 fn the_table_is_paid_in_the_economy() {
     let data = game_data();
-    let mut reference = france(data, 3);
-    let mut state = france(data, 3);
+    let mut reference = start_quiet(data, "fac_france", 3);
+    let mut state = start_quiet(data, "fac_france", 3);
     set_diet(&mut state, data, "prov_normandie", "diet_meat_salting").unwrap();
     set_diet(&mut state, data, "prov_ile_de_france", "diet_wine_bread").unwrap();
     let expected = state.faction_table_upkeep(data, &fac("fac_france"));
@@ -205,7 +195,7 @@ fn the_table_is_paid_in_the_economy() {
 #[test]
 fn an_empty_treasury_brings_back_the_default_diet() {
     let data = game_data();
-    let mut state = france(data, 4);
+    let mut state = start_quiet(data, "fac_france", 4);
     set_diet(&mut state, data, "prov_normandie", "diet_meat_salting").unwrap();
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = -1_000_000;
     let events = state.end_turn_with(data, idle);
@@ -222,7 +212,7 @@ fn an_empty_treasury_brings_back_the_default_diet() {
 #[test]
 fn lost_requirements_bring_back_the_default_diet() {
     let data = game_data();
-    let mut state = france(data, 5);
+    let mut state = start_quiet(data, "fac_france", 5);
     set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     state
         .factions
@@ -243,7 +233,7 @@ fn lost_requirements_bring_back_the_default_diet() {
 #[test]
 fn a_new_controller_does_not_inherit_the_diet() {
     let data = game_data();
-    let mut state = france(data, 6);
+    let mut state = start_quiet(data, "fac_france", 6);
     set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     city_mut(&mut state, &prov("prov_normandie")).controller = fac("fac_england");
     assert_eq!(
@@ -255,7 +245,7 @@ fn a_new_controller_does_not_inherit_the_diet() {
 #[test]
 fn lent_punishes_meat_and_rewards_fish() {
     let data = game_data();
-    let mut reference = france(data, 7);
+    let mut reference = start_quiet(data, "fac_france", 7);
     assert!(reference.is_lent());
     let mut meat = reference.clone();
     let mut fish = reference.clone();
@@ -301,7 +291,7 @@ fn lent_punishes_meat_and_rewards_fish() {
 #[test]
 fn diets_feed_the_population_and_the_regimen_boosts_them() {
     let data = game_data();
-    let mut reference = france(data, 8);
+    let mut reference = start_quiet(data, "fac_france", 8);
     reference.season = Season::Summer;
     let mut pulses = reference.clone();
     set_diet(&mut pulses, data, "prov_normandie", "diet_pulses").unwrap();
@@ -336,7 +326,7 @@ fn diets_feed_the_population_and_the_regimen_boosts_them() {
 #[test]
 fn salted_meat_raises_the_morale_of_levies() {
     let data = game_data();
-    let mut state = france(data, 9);
+    let mut state = start_quiet(data, "fac_france", 9);
     set_diet(&mut state, data, "prov_carcassonne", "diet_meat_salting").unwrap();
     let carcassonne = prov("prov_carcassonne");
     let (option, base_morale) = state
@@ -400,7 +390,7 @@ fn give_medicine(state: &mut CampaignState, province: &ProvinceId) {
 fn plague_resistance_softens_the_local_plague() {
     let data = game_data();
     let normandie = prov("prov_normandie");
-    let mut reference = france(data, 10);
+    let mut reference = start_quiet(data, "fac_france", 10);
     assert_eq!(
         medicine::plague_resistance(&reference, data, &normandie),
         0.0
@@ -443,7 +433,7 @@ fn plague_resistance_softens_the_local_plague() {
 #[test]
 fn plague_resistance_softens_the_black_death() {
     let data = game_data();
-    let mut reference = france(data, 11);
+    let mut reference = start_quiet(data, "fac_france", 11);
     reference.chronicle.plague_wave = Some(sim_campaign::PlagueWave {
         start_turn: reference.turn,
         duration: 1,
@@ -474,15 +464,6 @@ fn plague_resistance_softens_the_black_death() {
         lost_resistant * 10 < lost_reference * 7,
         "{lost_resistant} vs {lost_reference}"
     );
-}
-
-fn first_army(state: &CampaignState, faction: &str) -> ArmyId {
-    state
-        .armies
-        .iter()
-        .find(|(_, a)| a.faction == fac(faction))
-        .map(|(id, _)| id.clone())
-        .unwrap()
 }
 
 /// Stages France (attacker) against England and applies an outcome where
@@ -533,7 +514,7 @@ fn fight(state: &mut CampaignState, data: &GameData) -> (ArmyId, ArmyId) {
 #[test]
 fn wound_recovery_returns_part_of_the_losses() {
     let data = game_data();
-    let base = france(data, 12);
+    let base = start_quiet(data, "fac_france", 12);
     let mut plain = base.clone();
     let mut tended = base.clone();
     {
@@ -605,7 +586,7 @@ fn ai_diets_are_valid_and_deterministic() {
 #[test]
 fn diets_survive_saves_and_old_saves_load() {
     let data = game_data();
-    let mut state = france(data, 14);
+    let mut state = start_quiet(data, "fac_france", 14);
     set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
     state.end_turn_with(data, idle);
     let json = state.save_json();

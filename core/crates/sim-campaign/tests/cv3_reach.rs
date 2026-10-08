@@ -8,6 +8,8 @@
 //! armies standing at sea (no settlement around) so that the geometry is
 //! known.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::march::px_per_km;
+use sim_campaign::test_support::main_army;
 
 use std::collections::BTreeSet;
 
@@ -25,21 +27,6 @@ fn plain_data() -> GameData {
         provinces: None,
     });
     data
-}
-
-fn px_per_km(data: &GameData) -> f32 {
-    data.navgrid().px_per_km() as f32
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 /// A point with no settlement within `radius_km` (deterministic scan, open

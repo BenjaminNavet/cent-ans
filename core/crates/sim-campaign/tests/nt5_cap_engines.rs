@@ -1,8 +1,9 @@
 //! NT5 (ADR 0128): N6 army unit cap (`data/rules/armies.json`) and N7
 //! siege engines built on the spot (`data/rules/siege_engines.json`).
 
-use data_model::{BuiltEngineKind, FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::{BuiltEngineKind, GameData, SettlementId, UnitTypeId};
 use sim_battle::{BattleSim, SideId};
+use sim_campaign::test_support::idle;
 use sim_campaign::{
     siege::AssaultError, siege_engines, ArmyId, CampaignState, Order, OrderError, Stance, Unit,
 };
@@ -19,10 +20,6 @@ fn guyenne(state: &CampaignState) -> SettlementId {
         .province_city_id(&prov("prov_guyenne"))
         .unwrap()
         .clone()
-}
-
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
 }
 
 fn french_army(state: &CampaignState) -> ArmyId {
