@@ -2,33 +2,12 @@
 
 import io
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
 from PIL import Image
 
 from cent_ans_tools import entry_art, local_art, openrouter, portraits
 from cent_ans_tools.portraits import PortraitJob
-
-
-def _fake_run(command: list[str]) -> None:
-    output = Path(command[command.index("--output") + 1])
-    width = int(command[command.index("--width") + 1])
-    height = int(command[command.index("--height") + 1])
-    Image.new("RGB", (width, height), "navy").save(output)
-
-
-@pytest.fixture
-def fake_mflux(monkeypatch):
-    """Replace the mflux subprocess by a fake that records its command lines."""
-    commands: list[list[str]] = []
-
-    def run(command: list[str]) -> None:
-        commands.append(command)
-        _fake_run(command)
-
-    monkeypatch.setattr(local_art, "_run", run)
-    return commands
 
 
 def test_render_image_honours_aspect_and_stable_seed(fake_mflux):
