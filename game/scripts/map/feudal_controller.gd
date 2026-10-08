@@ -514,10 +514,7 @@ func _setup_tutorial() -> void:
 ## Captures et vues de flux (mêmes arguments que `TutorialController.capture_mode`) : le guide ne
 ## démarre pas et ne note rien.
 static func capture_mode() -> bool:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--screenshot=") or arg.begins_with("--flow-stage=") or arg.begins_with("--loading-shot="):
-			return true
-	return false
+	return CmdArgs.has("--screenshot") or CmdArgs.has("--flow-stage") or CmdArgs.has("--loading-shot")
 
 
 func _setting(key: String, fallback: Variant) -> Variant:

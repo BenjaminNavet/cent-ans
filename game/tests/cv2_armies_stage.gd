@@ -33,23 +33,16 @@ static func _units(spec: Array) -> Array:
 	return units
 
 
-static func _arg(args: PackedStringArray, key: String, fallback: String) -> String:
-	for arg in args:
-		if arg.begins_with(key + "="):
-			return arg.substr(key.length() + 1)
-	return fallback
-
-
 func _init() -> void:
 	await process_frame
-	var args := OS.get_cmdline_user_args()
+	var args := CmdArgs.args()
 	var prefix := args[0] if args.size() > 0 and not args[0].begins_with("--") else "user://cv2"
 	var zooms := PackedFloat32Array()
-	for part in _arg(args, "--zooms", "60,160,320,800").split(","):
+	for part in CmdArgs.value("--zooms", "60,160,320,800").split(","):
 		zooms.append(float(part))
-	var focus_parts := _arg(args, "--focus", "1985,3185").split(",")
+	var focus_parts := CmdArgs.value("--focus", "1985,3185").split(",")
 	var focus := Vector2(float(focus_parts[0]), float(focus_parts[1]))
-	var fps_mode := args.has("--fps")
+	var fps_mode := CmdArgs.has("--fps")
 	# Position des armées mises en scène (indépendante du point visé).
 	var base := Vector2(1985, 3185)
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
@@ -60,7 +53,7 @@ func _init() -> void:
 	var data: MapData = map.map_data
 	var rig: CampaignCamera = map.camera_rig
 	map.ui.visible = false
-	if fps_mode and args.has("--crowd"):
+	if fps_mode and CmdArgs.has("--crowd"):
 		var crowd := FakeSim.new()
 		var factions := ["fac_france", "fac_england", "fac_brittany", "fac_burgundy"]
 		var types := [["unit_knights", 60], ["unit_men_at_arms_foot", 80], ["unit_longbowmen", 100], ["unit_crossbowmen", 100], ["unit_urban_militia", 120]]
@@ -101,7 +94,7 @@ func _init() -> void:
 		rig.look_at_point(Vector3(focus.x, data.surface_world_at(focus.x, focus.y), focus.y), distance)
 		rig.snap()
 		for i in (240 if fps_mode else 90):
-			if args.has("--walk") and not fps_mode:
+			if CmdArgs.has("--walk") and not fps_mode:
 				var t := float(i % 90) / 90.0
 				armies.place_marker("army_en_march", start.lerp(goal, t * 0.5), goal - start)
 			await process_frame
@@ -119,7 +112,7 @@ func _init() -> void:
 				primitives += Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
 			var seconds := (Time.get_ticks_usec() - t0) / 1000000.0
 			print("cv2 fps: distance %d, %d markers, %.1f fps, gpu %.2f ms, cpu %.2f ms, %.0f k prims, process %.2f ms%s" % [int(distance), armies.army_count(), 300.0 / seconds,
-				gpu_ms / 300.0, cpu_ms / 300.0, primitives / 300000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, " (legacy)" if args.has("--legacy-army-markers") else ""])
+				gpu_ms / 300.0, cpu_ms / 300.0, primitives / 300000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, " (legacy)" if CmdArgs.has("--legacy-army-markers") else ""])
 			continue
 		var image := root.get_texture().get_image()
 		var out_path := "%s_%d.png" % [prefix, int(distance)]

@@ -32,7 +32,7 @@ func _camp_file() -> Dictionary:
 
 
 func _init() -> void:
-	var off := OS.get_cmdline_user_args().has("--no-as1")
+	var off := CmdArgs.has("--no-as1")
 	var measured := _measured()
 	_check(not measured.is_empty(), "données mesurées absentes")
 	var defaults: Dictionary = AnimalMotion.settings().get("campaign", {}).get("defaults", {})

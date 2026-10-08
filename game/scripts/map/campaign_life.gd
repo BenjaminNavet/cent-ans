@@ -197,26 +197,22 @@ func _setup_incidents() -> void:
 
 
 func _parse_cmdline() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg == "--no-life":
-			enabled = false
-		elif arg.begins_with("--life-off="):
-			for part in arg.trim_prefix("--life-off=").split(",", false):
-				_off[part] = true
-		elif arg == "--no-folk":
-			folk_enabled = false
-		elif arg.begins_with("--folk-off="):
-			for part in arg.trim_prefix("--folk-off=").split(",", false):
-				folk_off[part] = true
-		elif arg.begins_with("--scene="):
-			forced_scenes.append_array(FolkScenes.parse_forced(arg.trim_prefix("--scene=")))
-		elif arg.begins_with("--season="):
-			forced_season = arg.trim_prefix("--season=")
-		elif arg.begins_with("--devastate="):
-			for pair in arg.trim_prefix("--devastate=").split(",", false):
-				var parts := pair.split(":")
-				if parts.size() == 2:
-					forced_devastation[parts[0]] = float(parts[1])
+	if CmdArgs.has("--no-life"):
+		enabled = false
+	for part in CmdArgs.list("--life-off"):
+		_off[part] = true
+	if CmdArgs.has("--no-folk"):
+		folk_enabled = false
+	for part in CmdArgs.list("--folk-off"):
+		folk_off[part] = true
+	if CmdArgs.has("--scene"):
+		forced_scenes.append_array(FolkScenes.parse_forced(CmdArgs.value("--scene")))
+	if CmdArgs.has("--season"):
+		forced_season = CmdArgs.value("--season")
+	for pair in CmdArgs.list("--devastate"):
+		var parts := pair.split(":")
+		if parts.size() == 2:
+			forced_devastation[parts[0]] = float(parts[1])
 
 
 ## TB1 : mer de la saison (teinte, écume) et neige des toits des villes 1:1 quand les poids

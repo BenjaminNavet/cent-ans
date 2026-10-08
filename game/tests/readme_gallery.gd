@@ -19,11 +19,8 @@ const CAMPAIGN_FOCUS := "--focus=2180,3050,491"
 func _init() -> void:
 	var out := "docs/img/readme"
 	var only := PackedStringArray()
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out = arg.trim_prefix("--out=")
-		elif arg.begins_with("--only="):
-			only = arg.trim_prefix("--only=").split(",", false)
+	out = CmdArgs.value("--out", out)
+	only = CmdArgs.list("--only")
 	var repo := ProjectSettings.globalize_path("res://").path_join("..").simplify_path()
 	var out_dir := out if out.is_absolute_path() else repo.path_join(out)
 	DirAccess.make_dir_recursive_absolute(out_dir)

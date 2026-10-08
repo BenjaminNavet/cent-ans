@@ -26,7 +26,7 @@ static func _units(spec: Array) -> Array:
 
 func _init() -> void:
 	await process_frame
-	var args := OS.get_cmdline_user_args()
+	var args := CmdArgs.args()
 	var out_path := args[0] if args.size() > 0 else "user://v3_markers.png"
 	var focus := Vector3(2000, 3180, 230)
 	if args.size() > 1:

@@ -42,3 +42,8 @@ static func number(key: String, fallback: float = 0.0) -> float:
 static func args() -> PackedStringArray:
 	_table()
 	return _raw
+
+
+## Valeurs de `--clé=a,b,c` découpées sur `separator` (sans éléments vides), vide si absente.
+static func list(key: String, separator: String = ",") -> PackedStringArray:
+	return value(key).split(separator, false)

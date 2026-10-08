@@ -21,12 +21,8 @@ func _save(name: String) -> void:
 
 
 func _run() -> void:
-	var args := OS.get_cmdline_user_args()
-	var fog := not args.has("--no-fog")
-	var turns := 3
-	for arg in args:
-		if arg.begins_with("--turns="):
-			turns = int(arg.get_slice("=", 1))
+	var fog := not CmdArgs.has("--no-fog")
+	var turns := int(CmdArgs.number("--turns", 3))
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	settings.call("use_test_file")
 	settings.call("set_value", "game/autosave_interval", 0, false)

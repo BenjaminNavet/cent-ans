@@ -26,15 +26,10 @@ func _init() -> void:
 	var only := ""
 	var keep_ui := false
 	var width := 1600
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out_dir = arg.substr(6)
-		elif arg.begins_with("--only="):
-			only = arg.substr(7)
-		elif arg == "--ui":
-			keep_ui = true
-		elif arg.begins_with("--width="):
-			width = int(arg.substr(8))
+	out_dir = CmdArgs.value("--out", out_dir)
+	only = CmdArgs.value("--only", only)
+	keep_ui = CmdArgs.has("--ui")
+	width = int(CmdArgs.number("--width", width))
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()

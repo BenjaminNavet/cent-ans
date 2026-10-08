@@ -29,18 +29,14 @@ var _voice_bus := -1
 
 
 func _init() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out_dir = arg.trim_prefix("--out=")
-		elif arg.begins_with("--faction="):
-			faction = arg.trim_prefix("--faction=")
-		elif arg.begins_with("--turns="):
-			turns = int(arg.trim_prefix("--turns="))
-		elif arg.begins_with("--res="):
-			var parts := arg.trim_prefix("--res=").split("x")
-			resolution = Vector2i(int(parts[0]), int(parts[1]))
-		elif arg.begins_with("--phases="):
-			phases = Array(arg.trim_prefix("--phases=").split(","))
+	out_dir = CmdArgs.value("--out", out_dir)
+	faction = CmdArgs.value("--faction", faction)
+	turns = int(CmdArgs.number("--turns", turns))
+	if CmdArgs.has("--res"):
+		var parts := CmdArgs.value("--res").split("x")
+		resolution = Vector2i(int(parts[0]), int(parts[1]))
+	if CmdArgs.has("--phases"):
+		phases = Array(CmdArgs.list("--phases"))
 	if out_dir == "":
 		out_dir = OS.get_user_data_dir().path_join("q3")
 	DirAccess.make_dir_recursive_absolute(out_dir)

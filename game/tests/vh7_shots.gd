@@ -30,13 +30,10 @@ func _init() -> void:
 	var out_dir := "user://vh7"
 	var only := ""
 	var fps := true
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			out_dir = arg.substr(6)
-		elif arg.begins_with("--only="):
-			only = arg.substr(7)
-		elif arg == "--no-fps":
-			fps = false
+	out_dir = CmdArgs.value("--out", out_dir)
+	only = CmdArgs.value("--only", only)
+	if CmdArgs.has("--no-fps"):
+		fps = false
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
@@ -53,10 +50,9 @@ func _init() -> void:
 	var settlements: SettlementLayer = map.get("settlement_layer")
 	var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
 	var suffix := ""
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--year=") and lc != null:
-			lc.set_year(int(arg.substr(7)))
-			suffix = "_" + arg.substr(7)
+	if CmdArgs.has("--year") and lc != null:
+		lc.set_year(int(CmdArgs.number("--year")))
+		suffix = "_" + CmdArgs.value("--year")
 	for shot: Array in SHOTS:
 		if only != "" and not (shot[0] as String) in only.split(","):
 			continue

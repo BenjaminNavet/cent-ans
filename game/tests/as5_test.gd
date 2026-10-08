@@ -26,7 +26,7 @@ func _check(condition: bool, message: String) -> bool:
 
 
 func _run() -> void:
-	var off := OS.get_cmdline_user_args().has("--no-as5")
+	var off := CmdArgs.has("--no-as5")
 	_check(MapFireWind.enabled() == not off, "enabled() follows --no-as5")
 	var effects := LifeEffects.new()
 	root.add_child(effects)

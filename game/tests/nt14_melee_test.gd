@@ -26,7 +26,7 @@ func _json(path: String) -> Dictionary:
 
 
 func _init() -> void:
-	var cmd_keyframed := OS.get_cmdline_user_args().has("--keyframed-melee")
+	var cmd_keyframed := CmdArgs.has("--keyframed-melee")
 	if not BattleSkinned.fine_enabled():
 		_check(not BattleSkinned.melee_default_enabled(), "défaut inactif sur le kit grossier")
 		print("NT14 melee (coarse): %s" % ("OK" if ok else "FAIL"))

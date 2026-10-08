@@ -12,13 +12,9 @@ var _every := 30.0
 func _init() -> void:
 	var dump := ""
 	var until := 600.0
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--every="):
-			_every = float(arg.trim_prefix("--every="))
-		elif arg.begins_with("--until="):
-			until = float(arg.trim_prefix("--until="))
-		elif arg.begins_with("--dump="):
-			dump = arg.trim_prefix("--dump=")
+	_every = CmdArgs.number("--every", _every)
+	until = CmdArgs.number("--until", until)
+	dump = CmdArgs.value("--dump", dump)
 	var sim: Object = ClassDB.instantiate("CampaignSim")
 	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
 	if not sim.call("new_campaign", data_dir, "fac_france", 1337):

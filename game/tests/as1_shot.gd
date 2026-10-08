@@ -14,9 +14,7 @@ var _out := ""
 
 
 func _init() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--out="):
-			_out = arg.trim_prefix("--out=")
+	_out = CmdArgs.value("--out", _out)
 	_run()
 
 

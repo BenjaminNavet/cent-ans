@@ -107,27 +107,21 @@ func _ready() -> void:
 	_starter.process_physics_priority = -1000000
 	get_tree().root.add_child.call_deferred(_starter)
 	process_priority = 1000000
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--bench-distance="):
-			pan_distance = float(arg.trim_prefix("--bench-distance="))
-		elif arg.begins_with("--bench-seconds="):
-			pan_seconds = float(arg.trim_prefix("--bench-seconds="))
-		elif arg == "--bench-descent-only":
-			_descent_only = true
-		elif arg == "--bench-pan-only":
-			_pan_only = true
-		elif arg == "--bench-towns":
-			_descent_sites = TOWN_DESCENT_SITES
-			_descent_hold = TOWN_DESCENT_HOLD
+	pan_distance = CmdArgs.number("--bench-distance", pan_distance)
+	pan_seconds = CmdArgs.number("--bench-seconds", pan_seconds)
+	_descent_only = _descent_only or CmdArgs.has("--bench-descent-only")
+	_pan_only = _pan_only or CmdArgs.has("--bench-pan-only")
+	if CmdArgs.has("--bench-towns"):
+		_descent_sites = TOWN_DESCENT_SITES
+		_descent_hold = TOWN_DESCENT_HOLD
 	if CmdArgs.has("--bench-listeners"):
 		_wrap_listeners.call_deferred()
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--bench-hide="):  # PF : coût d'une couche dans le scénario du banc
-			_hide_layers.call_deferred(arg.trim_prefix("--bench-hide=").split(","))
-		elif arg.begins_with("--bench-set="):
-			_bench_sets = arg.trim_prefix("--bench-set=").split(",")
-		elif arg.begins_with("--bench-ab="):
-			_ab_configs = arg.trim_prefix("--bench-ab=").split(";")
+	if CmdArgs.has("--bench-hide"):  # PF : coût d'une couche dans le scénario du banc
+		_hide_layers.call_deferred(CmdArgs.list("--bench-hide"))
+	if CmdArgs.has("--bench-set"):
+		_bench_sets = CmdArgs.list("--bench-set")
+	if CmdArgs.has("--bench-ab"):
+		_ab_configs = CmdArgs.list("--bench-ab", ";")
 	PerfProbe.enabled = CmdArgs.has("--bench-probe")
 	if CmdArgs.has("--bench-hover"):  # FL : survol avec le curseur au centre
 		get_parent().set("bench_mouse", get_viewport().get_visible_rect().size * 0.5)

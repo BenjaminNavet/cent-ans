@@ -34,11 +34,9 @@ func _run() -> void:
 	RenderingServer.viewport_set_measure_render_time(_viewport_rid, true)
 	var rounds := 3
 	var configs: Array = ["base", "no_parcels", "no_relief", "no_towns"]
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--rounds="):
-			rounds = int(arg.trim_prefix("--rounds="))
-		elif arg.begins_with("--configs="):
-			configs = Array(arg.trim_prefix("--configs=").split(","))
+	rounds = int(CmdArgs.number("--rounds", rounds))
+	if CmdArgs.has("--configs"):
+		configs = Array(CmdArgs.list("--configs"))
 	await process_frame
 	_map = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(_map)
