@@ -9,6 +9,19 @@
   "properties": {
     "description": {"type": "string"},
     "enabled": {"type": "boolean"},
+    "source": {
+      "type": "object",
+      "description": "Provenance des valeurs mesurées sur vidéos libres (lot AS8c, ADR 0189).",
+      "required": ["measured_file", "tool", "videos", "license_note"],
+      "properties": {
+        "measured_file": {"type": "string"},
+        "tool": {"type": "string"},
+        "videos": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "license_note": {"type": "string"},
+        "measured_keys": {"type": "string"},
+        "assumed_keys": {"type": "string"}
+      }
+    },
     "campaign": {
       "type": "object",
       "required": ["defaults", "models"],
@@ -30,6 +43,7 @@
     }
   },
   "$defs": {
+    "lut16": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"type": "number", "minimum": -2, "maximum": 2}},
     "campaign_params": {
       "type": "object",
       "additionalProperties": false,
@@ -59,8 +73,26 @@
         "shift_m": {"type": "number", "minimum": 0},
         "breath_m": {"type": "number", "minimum": 0},
         "breath_hz": {"type": "number", "minimum": 0},
-        "jolt_amp_m": {"type": "number", "minimum": 0},
-        "jolt_period_m": {"type": "number", "exclusiveMinimum": 0},
+        "graze_ramp_s": {"type": "number", "exclusiveMinimum": 0, "description": "Durée de la descente (ou de la remontée) de la tête, mesurée (AS8c)."},
+        "swing_lut": {"$ref": "#/$defs/lut16", "description": "Courbe de pas mesurée : déplacement avant-arrière du sabot sur un cycle (16 échantillons, amplitude 1, positif vers l'avant, phase 0 = mi-balancé montant). Multipliée par swing_m."},
+        "lift_lut": {"$ref": "#/$defs/lut16", "description": "Courbe de levée du sabot mesurée sur le même cycle (16 échantillons de 0 à 1). Multipliée par lift_m."},
+        "roll_rad": {"type": "number", "minimum": 0, "description": "Roulis de la caisse des charrettes (amplitude, rad), mesuré."},
+        "jolt_lines": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "Cahot de la caisse : raies mesurées du spectre (au plus 3), période = stride_ratio x foulée de la bête attelée.",
+          "items": {
+            "type": "object",
+            "required": ["amp_m", "stride_ratio"],
+            "additionalProperties": false,
+            "properties": {
+              "amp_m": {"type": "number", "minimum": 0},
+              "stride_ratio": {"type": "number", "exclusiveMinimum": 0}
+            }
+          }
+        },
+        "jolt_period_m": {"type": "number", "exclusiveMinimum": 0, "description": "Foulée de référence du cahot d'une charrette sans bête."},
         "wheel_radius_m": {"type": "number", "minimum": 0, "description": "Rayon des roues (0 : pas de roue animée)."},
         "wheel_x_min_m": {"type": "number", "minimum": 0, "description": "Écart latéral minimal d'un sommet de roue."}
       }

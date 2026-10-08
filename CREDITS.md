@@ -517,6 +517,18 @@ deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne
   reproductible `tools/cent_ans_tools/voice_tts.py` (liste des fichiers, voix et coût dans
   `game/assets/audio/voice/manifest.json`), dépenses consignées dans `docs/budget.md`.
 
+## Mouvement des bêtes et charrettes (lot AS8c)
+
+Courbes de pas, mâchonnement, cahot et roulis mesurés sur des vidéos libres de Wikimedia Commons
+(`data/fx/animal_motion_measured.json`, détail dans `data/fx/animal_motion_SOURCE.md`) :
+
+- « Passage d'un troupeau de montbéliardes à Boissia (Jura) en juillet 2018 » — Benoît Prieur, CC0.
+- « Sheeps near Elbe river » — Tvabutzku1234, CC0.
+- « Two Horse Drawn Covered Wagons » — Thomas Farley, CC0.
+- « Horse standing MVI 7491 », « Horse chewing MVI 7493 », « Horse eating MVI 7496 » — Rama,
+  [CC BY-SA 2.0 fr](https://creativecommons.org/licenses/by-sa/2.0/fr/) ; les fichiers de données
+  `animal_motion.json` et `animal_motion_measured.json` qui en dérivent portent la même licence.
+
 ## Polices
 
 - Interface parchemin : polices serif du système (Georgia, Palatino, Times New Roman), non

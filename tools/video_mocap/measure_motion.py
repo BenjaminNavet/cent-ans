@@ -28,6 +28,7 @@ in pixels at ``start_s``) so the result is unit-free (fractions of body length).
 import argparse
 import json
 import sys
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -40,12 +41,14 @@ LK = {
 
 
 def read_frame(cap, t):
+    """Read frame."""
     cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000.0)
     ok, frame = cap.read()
     return frame if ok else None
 
 
 def cmd_sheet(args):
+    """Cmd sheet."""
     cap = cv2.VideoCapture(args.video)
     tiles = []
     for i in range(args.n):
@@ -114,7 +117,8 @@ def cmd_sheet(args):
 
 
 def cmd_track(args):
-    spec = json.load(open(args.points))
+    """Cmd track."""
+    spec = json.loads(Path(args.points).read_text())
     cap = cv2.VideoCapture(args.video)
     fps = cap.get(cv2.CAP_PROP_FPS)
     cap.set(cv2.CAP_PROP_POS_MSEC, spec["start_s"] * 1000.0)
@@ -231,7 +235,7 @@ def cmd_period(args):
     appearance tracker, the band is cut at its centre, and the mean absolute difference between
     frames ``lag`` apart is computed; the first deep minimum is the cycle period.
     """
-    spec = json.load(open(args.points))
+    spec = json.loads(Path(args.points).read_text())
     cap = cv2.VideoCapture(args.video)
     fps = cap.get(cv2.CAP_PROP_FPS)
     cap.set(cv2.CAP_PROP_POS_MSEC, spec["start_s"] * 1000.0)
@@ -262,18 +266,39 @@ def cmd_period(args):
     stack -= stack.mean(axis=(1, 2), keepdims=True)
     n = len(stack)
     max_lag = min(n // 2, int(spec.get("max_lag_s", 2.5) * fps))
-    curve = np.array([np.mean(np.abs(stack[: n - lag] - stack[lag:])) for lag in range(1, max_lag)])
+    curve = np.array(
+        [np.mean(np.abs(stack[: n - lag] - stack[lag:])) for lag in range(1, max_lag)]
+    )
     curve /= curve.max() + 1e-9
     lags = np.arange(1, max_lag) / fps
-    mins = [k for k in range(1, len(curve) - 1) if curve[k] < curve[k - 1] and curve[k] <= curve[k + 1] and lags[k] > spec.get("min_period_s", 0.4)]
-    result = {"frames": n, "fps": fps, "minima": [(round(float(lags[k]), 3), round(float(curve[k]), 3)) for k in mins[:4]]}
+    mins = [
+        k
+        for k in range(1, len(curve) - 1)
+        if curve[k] < curve[k - 1]
+        and curve[k] <= curve[k + 1]
+        and lags[k] > spec.get("min_period_s", 0.4)
+    ]
+    result = {
+        "frames": n,
+        "fps": fps,
+        "minima": [
+            (round(float(lags[k]), 3), round(float(curve[k]), 3)) for k in mins[:4]
+        ],
+    }
     if mins:
         result["period_s"] = round(float(lags[mins[0]]), 3)
         result["hz"] = round(1.0 / lags[mins[0]], 3)
     print(json.dumps(result))
     if args.json:
         with open(args.json, "w") as handle:
-            json.dump({**result, "curve": [round(float(v), 4) for v in curve], "centres": [(round(a, 1), round(b, 1)) for a, b in centres]}, handle)
+            json.dump(
+                {
+                    **result,
+                    "curve": [round(float(v), 4) for v in curve],
+                    "centres": [(round(a, 1), round(b, 1)) for a, b in centres],
+                },
+                handle,
+            )
 
 
 def detrend(signal, fps, seconds=1.5):
@@ -337,6 +362,7 @@ def fold_profile(signal, fps, f0, phase0, bins=16):
 
 
 def describe(signal, fps, f0, label, phase0=0.0):
+    """Describe."""
     harm, resid = fit_harmonics(signal, fps, f0)
     lo, hi = np.percentile(signal, [5, 95])
     return {
@@ -355,8 +381,9 @@ def describe(signal, fps, f0, label, phase0=0.0):
 
 
 def cmd_analyse(args):
+    """Cmd analyse."""
     d = np.load(args.npz)
-    spec = json.load(open(args.points))
+    spec = json.loads(Path(args.points).read_text())
     names = [str(n) for n in d["names"]]
     traj = d["traj"].astype(float)
     fps = float(d["fps"])
@@ -421,16 +448,19 @@ def cmd_analyse(args):
     if grounds and ref is not None:
         # Speed of the reference relative to ground texture points (median of the slopes).
         times = np.arange(len(traj)) / fps
-        slopes = [np.polyfit(times, x_of(ref) - x_of(names.index(g)), 1)[0] for g in grounds]
+        slopes = [
+            np.polyfit(times, x_of(ref) - x_of(names.index(g)), 1)[0] for g in grounds
+        ]
         slope = float(np.median(slopes))
         out["speed_body_per_s"] = round(slope, 4)
         out["stride_body"] = round(abs(slope) / f0, 4) if f0 else None
     print(json.dumps(out, indent=1))
     if args.json:
-        json.dump(out, open(args.json, "w"), indent=1)
+        Path(args.json).write_text(json.dumps(out, indent=1))
 
 
 def main():
+    """Main."""
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
