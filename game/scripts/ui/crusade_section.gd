@@ -42,8 +42,7 @@ func _init() -> void:
 	add_theme_constant_override("separation", 3)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var head := HBoxContainer.new()
-	header_label = Label.new()
-	header_label.text = "Ferveur"
+	header_label = UiBuild.label("Ferveur")
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiType.apply(header_label, UiType.BODY)
 	head.add_child(header_label)
@@ -70,9 +69,8 @@ func _init() -> void:
 	add_child(preach_button)
 	blocker_label = _label("", Money.LOSS_COLOR)
 	add_child(blocker_label)
-	pending_box = VBoxContainer.new()
+	pending_box = UiBuild.vbox(1)
 	pending_box.name = "PendingBox"
-	pending_box.add_theme_constant_override("separation", 1)
 	add_child(pending_box)
 	error_label = _label("", Money.LOSS_COLOR)
 	error_label.hide()

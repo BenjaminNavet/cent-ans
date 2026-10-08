@@ -338,9 +338,9 @@ func _balance_row(sides: Dictionary, player_side: String, enemy_side: String, to
 		grid.add_child(_label(text, 13, MUTED))
 	for side in [player_side, enemy_side]:
 		grid.add_child(_label(str(sides[side]["name"]), 16, INK, true))
-		grid.add_child(_label(BattleUiKit.thousands(int(totals[side]["engaged"])), 16))
-		grid.add_child(_label("%s (%d %%)" % [BattleUiKit.thousands(int(totals[side]["losses"])), int(round(float(totals[side]["ratio"]) * 100.0))], 16, RED))
-		grid.add_child(_label(BattleUiKit.thousands(int(totals[side]["engaged"]) - int(totals[side]["losses"])), 16, GREEN))
+		grid.add_child(_label(Money.digits(int(totals[side]["engaged"])), 16))
+		grid.add_child(_label("%s (%d %%)" % [Money.digits(int(totals[side]["losses"])), int(round(float(totals[side]["ratio"]) * 100.0))], 16, RED))
+		grid.add_child(_label(Money.digits(int(totals[side]["engaged"]) - int(totals[side]["losses"])), 16, GREEN))
 	return grid
 
 
@@ -456,9 +456,9 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 	var captive_lines: Array = []
 	var in_campaign := not aftermath.is_empty()
 	for captive in aftermath.get("captives", []):
-		captive_lines.append("%s%s — rançon %s ₶" % [str(captive["name"]), " (%s)" % captive["rank"] if str(captive.get("rank", "")) != "" else "", BattleUiKit.thousands(int(captive["ransom"]))])
+		captive_lines.append("%s%s — rançon %s ₶" % [str(captive["name"]), " (%s)" % captive["rank"] if str(captive.get("rank", "")) != "" else "", Money.digits(int(captive["ransom"]))])
 	for captive in aftermath.get("lost", []):
-		captive_lines.append("Des nôtres pris : %s — rançon exigée %s ₶" % [str(captive["name"]), BattleUiKit.thousands(int(captive["ransom"]))])
+		captive_lines.append("Des nôtres pris : %s — rançon exigée %s ₶" % [str(captive["name"]), Money.digits(int(captive["ransom"]))])
 	if captive_lines.is_empty():
 		var enemy_result: Dictionary = outcome.get(enemy_side, {})
 		if bool((outcome.get(outcome.get("winner", ""), {}) as Dictionary).get("no_quarter", false)):
@@ -490,7 +490,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 	var loot_lines: Array = []
 	var total := int(aftermath.get("ransom_total", 0))
 	if total > 0:
-		loot_lines.append("%s ₶ de rançons à percevoir." % BattleUiKit.thousands(total))
+		loot_lines.append("%s ₶ de rançons à percevoir." % Money.digits(total))
 	else:
 		loot_lines.append("Aucun butin : pas de rançon à percevoir.")
 	var trophies: Array = (outcome.get(player_side, {}) as Dictionary).get("standards_taken", [])

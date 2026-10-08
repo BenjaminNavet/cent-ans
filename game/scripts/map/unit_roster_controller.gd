@@ -206,7 +206,7 @@ func army_entry(army_id: String, army: Dictionary) -> Dictionary:
 	var men := 0
 	for unit in units:
 		men += int(unit.get("strength", 0))
-	var detail := "%s · %s hommes · %s" % [FrText.count(units.size(), "unité"), HudStyle.thousands(men), _army_place(army)]
+	var detail := "%s · %s hommes · %s" % [FrText.count(units.size(), "unité"), Money.digits(men), _army_place(army)]
 	var left := int(army.get("movement_left", army.get("movement_points", 0)))
 	var allowance := maxi(1, int(army.get("movement_max", left)))
 	var ratio := clampf(float(left) / float(allowance), 0.0, 1.0)

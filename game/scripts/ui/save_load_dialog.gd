@@ -114,8 +114,7 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	var row := PanelContainer.new()
 	row.add_theme_stylebox_override("panel", _row_style)
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 12)
+	var hbox := UiBuild.hbox(12)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(hbox)
 	var icon := TextureRect.new()
@@ -140,8 +139,7 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	if not usable:
 		lines.append(["Simulation réelle requise", UiType.CAPTION, Color(0.55, 0.12, 0.10)])
 	for spec in lines:
-		var label := Label.new()
-		label.text = spec[0]
+		var label := UiBuild.label(spec[0])
 		UiType.apply(label, spec[1])
 		label.add_theme_color_override("font_color", spec[2])
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE

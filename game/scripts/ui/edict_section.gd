@@ -36,13 +36,10 @@ func _init() -> void:
 	name = "EdictSection"
 	add_theme_constant_override("separation", 4)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_label = Label.new()
-	header_label.text = "Édit régional"
-	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	header_label = UiBuild.label("Édit régional", UiType.size(UiType.BODY))
 	add_child(header_label)
 
-	var current_row := HBoxContainer.new()
-	current_row.add_theme_constant_override("separation", 8)
+	var current_row := UiBuild.hbox(8)
 	add_child(current_row)
 	current_chip = IconChip.create("cat_building", "—", "", ROW_ICON, 14, "building")
 	current_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -63,8 +60,7 @@ func _init() -> void:
 	choose_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	choose_button.pressed.connect(func() -> void: options_box.visible = not options_box.visible)
 	add_child(choose_button)
-	options_box = VBoxContainer.new()
-	options_box.add_theme_constant_override("separation", 2)
+	options_box = UiBuild.vbox(2)
 	options_box.hide()
 	add_child(options_box)
 
@@ -141,8 +137,7 @@ func _fill_options() -> void:
 		return
 	for option in options:
 		var id := str(option.get("id", ""))
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 6)
+		var line := UiBuild.hbox(6)
 		var button := RichButton.new()
 		button.text = str(option.get("name", id))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -163,11 +158,7 @@ func _fill_options() -> void:
 		button.pressed.connect(func() -> void: request_edict(id))
 		line.add_child(button)
 		if not available and not current:
-			var marker := Label.new()
-			marker.text = str(option.get("reason", "indisponible"))
-			marker.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-			marker.add_theme_color_override("font_color", ERROR_COLOR)
-			line.add_child(marker)
+			var marker := UiBuild.label(str(option.get("reason", "indisponible")), UiType.size(UiType.CAPTION), ERROR_COLOR, false, 0.0, line)
 		options_box.add_child(line)
 		option_buttons[id] = button
 

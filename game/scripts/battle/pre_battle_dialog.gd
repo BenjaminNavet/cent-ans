@@ -347,8 +347,8 @@ func _fill_balance(siege: bool) -> void:
 		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
 		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l'issue" % [
 			roundi(chance * 100.0),
-			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
-			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
+			Money.digits(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
+			Money.digits(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
 			" (assaut)" if siege else "",
 		]
 	RichTooltip.attach_plain(balance_bar, "battle_balance_estimate")
@@ -384,7 +384,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var soldiers := 0
 	for unit in units:
 		soldiers += int(unit.get("soldiers", 0))
-	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), BattleUiKit.thousands(soldiers), units.size()]
+	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), Money.digits(soldiers), units.size()]
 	name_box.add_child(BattleUiKit.label(strength_text, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT))
 	if slot == 0:
 		header.add_child(arms)
@@ -401,7 +401,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	if not reinforcements.is_empty():
 		var parts := PackedStringArray()
 		for entry in reinforcements:
-			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), BattleUiKit.thousands(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
+			var text := "%s (%s h., %d rég.)" % [str(entry.get("faction_name", "")), Money.digits(int(entry.get("soldiers", 0))), int(entry.get("regiments", 0))]
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)

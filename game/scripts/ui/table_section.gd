@@ -39,9 +39,7 @@ func _init() -> void:
 	name = "TableSection"
 	add_theme_constant_override("separation", 4)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_label = Label.new()
-	header_label.text = "La Table"
-	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	header_label = UiBuild.label("La Table", UiType.size(UiType.BODY))
 	add_child(header_label)
 
 	lent_banner = PanelContainer.new()
@@ -56,8 +54,7 @@ func _init() -> void:
 	lent_banner.hide()
 	add_child(lent_banner)
 
-	var current_row := HBoxContainer.new()
-	current_row.add_theme_constant_override("separation", 8)
+	var current_row := UiBuild.hbox(8)
 	add_child(current_row)
 	current_chip = IconChip.create("cat_resource", "—", "", ROW_ICON, 14, "resource")
 	current_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -66,10 +63,7 @@ func _init() -> void:
 	cost_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	current_row.add_child(cost_label)
 
-	changed_label = Label.new()
-	changed_label.text = "Régime déjà changé ce tour-ci (effet à la fin du tour)."
-	changed_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-	changed_label.add_theme_color_override("font_color", MUTED_COLOR)
+	changed_label = UiBuild.label("Régime déjà changé ce tour-ci (effet à la fin du tour).", UiType.size(UiType.CAPTION), MUTED_COLOR)
 	changed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6
 	changed_label.hide()
 	add_child(changed_label)
@@ -82,8 +76,7 @@ func _init() -> void:
 	choose_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	choose_button.pressed.connect(func() -> void: options_box.visible = not options_box.visible)
 	add_child(choose_button)
-	options_box = VBoxContainer.new()
-	options_box.add_theme_constant_override("separation", 2)
+	options_box = UiBuild.vbox(2)
 	options_box.hide()
 	add_child(options_box)
 
@@ -140,7 +133,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 		current_chip.icon_rect.texture = library.call("get_icon", diet_id, "resource")
 	current_chip.tooltip_text = RichTooltip.diet(current) if not current.is_empty() else ""
 	var cost := int(diet.get("cost", 0))
-	cost_label.text = "%s %s / saison" % [RichTooltip.thousands(cost), RichTooltip.POUND] if cost > 0 else "gratuit"
+	cost_label.text = "%s %s / saison" % [Money.digits(cost), RichTooltip.POUND] if cost > 0 else "gratuit"
 	var changed := bool(diet.get("changed_this_turn", false))
 	changed_label.visible = changed and player_owned
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
@@ -166,11 +159,10 @@ func _fill_options(changed: bool) -> void:
 		return
 	for option in options:
 		var id := str(option.get("id", ""))
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 6)
+		var line := UiBuild.hbox(6)
 		var button := RichButton.new()
 		var cost := int(option.get("cost", 0))
-		button.text = "%s — %s" % [str(option.get("name", id)), "%s %s" % [RichTooltip.thousands(cost), RichTooltip.POUND] if cost > 0 else "gratuit"]
+		button.text = "%s — %s" % [str(option.get("name", id)), "%s %s" % [Money.digits(cost), RichTooltip.POUND] if cost > 0 else "gratuit"]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -189,11 +181,7 @@ func _fill_options(changed: bool) -> void:
 		button.pressed.connect(func() -> void: request_diet(id))
 		line.add_child(button)
 		if not available and not current:
-			var marker := Label.new()
-			marker.text = "indisponible"
-			marker.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-			marker.add_theme_color_override("font_color", ERROR_COLOR)
-			line.add_child(marker)
+			var marker := UiBuild.label("indisponible", UiType.size(UiType.CAPTION), ERROR_COLOR, false, 0.0, line)
 		options_box.add_child(line)
 		option_buttons[id] = button
 

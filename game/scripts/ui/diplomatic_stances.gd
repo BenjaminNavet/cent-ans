@@ -85,8 +85,7 @@ static func legend(variation: String = UiType.CAPTION, swatch: float = 14.0, wra
 	flow.add_theme_constant_override("separation", 12)
 	flow.add_theme_constant_override("v_separation", 2)
 	for key in ORDER:
-		var chip := HBoxContainer.new()
-		chip.add_theme_constant_override("separation", 4)
+		var chip := UiBuild.hbox(4)
 		chip.tooltip_text = TOOLTIPS[key]
 		chip.mouse_filter = Control.MOUSE_FILTER_PASS
 		var rect := ColorRect.new()

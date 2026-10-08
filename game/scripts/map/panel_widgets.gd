@@ -356,11 +356,3 @@ static func unit_label(unit: Dictionary) -> String:
 		return name
 	return str(unit.get("unit_type", "?")).trim_prefix("unit_").capitalize()
 
-
-static func thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out

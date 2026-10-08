@@ -32,9 +32,8 @@ func _init() -> void:
 	RichTooltip.attach_plain(tree_button, "feudal_tree_open")
 	tree_button.pressed.connect(func() -> void: tree_requested.emit(faction_id))
 	header.add_child(tree_button)
-	_body = VBoxContainer.new()
+	_body = UiBuild.vbox(3)
 	_body.name = "Body"
-	_body.add_theme_constant_override("separation", 3)
 	add_child(_body)
 
 

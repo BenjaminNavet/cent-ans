@@ -52,15 +52,13 @@ static func build(spec: Dictionary, detailed: bool = false) -> Control:
 	if ResourceLoader.exists(RichTooltip.THEME_PATH):
 		panel.theme = load(RichTooltip.THEME_PATH)
 	panel.add_theme_stylebox_override("panel", RichTooltip.panel_style())
-	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 6)
+	var outer := UiBuild.vbox(6)
 	outer.custom_minimum_size = Vector2(width, 0)
 	panel.add_child(outer)
 	outer.add_child(_header(spec, style_data))
 	var blocks := blocks_for(spec, detailed)
-	var body := VBoxContainer.new()
+	var body := UiBuild.vbox(6)
 	body.name = "Body"
-	body.add_theme_constant_override("separation", 6)
 	var lines := 0
 	var shown := PackedStringArray()
 	for entry in blocks:
@@ -225,9 +223,7 @@ static func _header(spec: Dictionary, style_data: Dictionary) -> Control:
 	band.set_content_margin_all(4)
 	band.content_margin_left = 6
 	header.add_theme_stylebox_override("panel", band)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	header.add_child(row)
+	var row := UiBuild.hbox(8, header)
 	var icon_px := float(style_data.get("header_icon_px", 48))
 	var library := RichTooltip.icons()
 	var icon_id := str(spec.get("icon", ""))
@@ -235,8 +231,7 @@ static func _header(spec: Dictionary, style_data: Dictionary) -> Control:
 		var rect: TextureRect = library.call("make_rect", icon_id, icon_px, str(spec.get("icon_category", "")))
 		if rect.texture != null:
 			row.add_child(rect)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 0)
+	var column := UiBuild.vbox(0)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(column)
@@ -319,21 +314,18 @@ static func _rule_caption(item: Dictionary) -> Control:
 
 ## Écussons des chiffres vedettes : icône, grand chiffre, libellé en légende.
 static func _headline(items: Array, _spec: Dictionary) -> Control:
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(12)
 	row.name = "Headline"
-	row.add_theme_constant_override("separation", 12)
 	var library := RichTooltip.icons()
 	for item in items:
-		var badge := HBoxContainer.new()
+		var badge := UiBuild.hbox(6)
 		badge.name = "Badge_%s" % str(item.get("key", ""))
-		badge.add_theme_constant_override("separation", 6)
 		badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var icon_id := str(item.get("icon", ""))
 		icon_id = headline_icon(icon_id, str(item.get("stat", "")))
 		if library != null and icon_id != "":
 			badge.add_child(library.call("make_rect", icon_id, HEADLINE_ICON_PX, ""))
-		var column := VBoxContainer.new()
-		column.add_theme_constant_override("separation", -2)
+		var column := UiBuild.vbox(-2)
 		var value := _rich("Value", UiType.TITLE)
 		value.autowrap_mode = TextServer.AUTOWRAP_OFF
 		var sign := int(item.get("sign", 0))
@@ -369,9 +361,8 @@ static func _stats(stats: Array, width: float) -> Control:
 
 ## Pied : aide de touche à gauche (Caption atténué), coût / entretien / durée à droite.
 static func _footer(spec: Dictionary, width: float) -> Control:
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(8)
 	row.name = "Footer"
-	row.add_theme_constant_override("separation", 8)
 	var hint := _label("Hint", HINT, UiType.CAPTION, Color(RichTooltip.MUTED))
 	hint.size_flags_vertical = Control.SIZE_SHRINK_END
 	row.add_child(hint)
@@ -423,9 +414,8 @@ static func _rich(name: String, variation: String) -> RichTextLabel:
 
 
 static func _label(name: String, text: String, variation: String, color: Color) -> Label:
-	var label := Label.new()
+	var label := UiBuild.label(text)
 	label.name = name
-	label.text = text
 	UiType.apply(label, variation)
 	label.add_theme_color_override("font_color", color)
 	return label

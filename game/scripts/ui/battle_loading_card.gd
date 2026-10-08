@@ -102,9 +102,8 @@ func _build() -> void:
 	margin.add_theme_constant_override("margin_top", 36)
 	margin.add_theme_constant_override("margin_bottom", 32)
 	_root_control.add_child(margin)
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(14)
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation", 14)
 	margin.add_child(column)
 
 	var kicker := {"battle": "Bataille rangée", "siege": "Siège", "naval": "Bataille sur mer", "campaign": "Campagne"}

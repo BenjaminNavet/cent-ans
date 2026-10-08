@@ -155,9 +155,7 @@ static func make_panel(bbcode: String) -> Control:
 	if ResourceLoader.exists(THEME_PATH):
 		panel.theme = load(THEME_PATH)
 	panel.add_theme_stylebox_override("panel", panel_style())
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
+	var box := UiBuild.vbox(4, panel)
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -171,9 +169,8 @@ static func make_panel(bbcode: String) -> Control:
 	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
 	box.add_child(label)
-	var footer := Label.new()
+	var footer := UiBuild.label(footer_text(title_entry(label.text) != ""))
 	footer.name = "Footer"
-	footer.text = footer_text(title_entry(label.text) != "")
 	UiType.apply(footer, UiType.CAPTION)
 	footer.add_theme_color_override("font_color", Color(MUTED))
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -301,6 +298,7 @@ static func visible_panel() -> Control:
 	return panel
 
 
+## Conservé pour encyclopedia.gd (hors lot) ; équivaut à `Money.digits`.
 static func thousands(value: int) -> String:
 	return Money.digits(value)
 
@@ -433,7 +431,7 @@ static func _icon_text(id: String, name: String) -> String:
 static func _live_warnings(live: Dictionary) -> Array:
 	var warnings: Array = []
 	if int(live.get("import_cost", 0)) > 0:
-		warnings.append("Dont importation : %s %s (%s manquant)" % [thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
+		warnings.append("Dont importation : %s %s (%s manquant)" % [Money.digits(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
 	if not live.is_empty() and not bool(live.get("available", true)):
 		warnings.append("Indisponible : %s" % str(live.get("reason", "conditions non remplies")))
 	for warning in live.get("warnings", []):
@@ -511,12 +509,12 @@ static func _effects_block(effects: Array, title: String = "Effets") -> String:
 ## Coût `{money, resources{res_id: n}}` → « 800 ₶ + [fer] 2 ».
 static func cost_text(cost: Variant) -> String:
 	if cost is int or cost is float:
-		return "%s %s" % [thousands(int(cost)), POUND]
+		return "%s %s" % [Money.digits(int(cost)), POUND]
 	if not (cost is Dictionary):
 		return ""
 	var parts := PackedStringArray()
 	if cost.has("money"):
-		parts.append("%s %s" % [thousands(int(cost["money"])), POUND])
+		parts.append("%s %s" % [Money.digits(int(cost["money"])), POUND])
 	var resources: Dictionary = cost.get("resources", {})
 	for res_id in resources:
 		parts.append("%s %s %d" % [icon_bbcode(str(res_id), 14), entity_link(str(res_id), GameCatalog.display_name(str(res_id))), int(resources[res_id])])
@@ -527,11 +525,6 @@ static func _description(definition: Dictionary) -> String:
 	var description: String = str(definition.get("description", ""))
 	return "[color=%s][i]%s[/i][/color]" % [MUTED, description] if description != "" else ""
 
-
-static func _unavailable(live: Dictionary) -> String:
-	if live.is_empty() or bool(live.get("available", true)):
-		return ""
-	return "[color=%s]Indisponible : %s[/color]" % [RED, str(live.get("reason", "conditions non remplies"))]
 
 
 static func _join(lines: Array) -> String:
@@ -668,7 +661,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 		candidates["morale"] = {"icon": "gauge_morale", "label": "Moral", "value": str(int(live.get("morale", 0)))}
 	var cost := ""
 	if live.has("cost"):
-		cost = "%s %s" % [thousands(int(live["cost"])), POUND]
+		cost = "%s %s" % [Money.digits(int(live["cost"])), POUND]
 	elif definition.has("cost"):
 		cost = cost_text(definition["cost"])
 	if cost != "":
@@ -682,7 +675,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	var footer := {} if in_army else {"cost": cost}
 	var upkeep := int(live.get("upkeep", definition.get("upkeep", -1)))
 	if upkeep >= 0:
-		footer["upkeep"] = "%s %s / saison" % [thousands(upkeep), POUND]
+		footer["upkeep"] = "%s %s / saison" % [Money.digits(upkeep), POUND]
 	if definition.has("recruit_time_turns"):
 		footer["time"] = FrText.count(int(definition["recruit_time_turns"]), "tour")
 	spec["footer"] = footer
@@ -780,13 +773,13 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 		effects.remove_at(0)
 	var footer := {}
 	if live.has("cost"):
-		footer["cost"] = "%s %s" % [thousands(int(live["cost"])), POUND]
+		footer["cost"] = "%s %s" % [Money.digits(int(live["cost"])), POUND]
 	elif definition.has("cost"):
 		footer["cost"] = cost_text(definition["cost"])
 	var turns := int(live.get("turns", definition.get("build_time_turns", 0)))
 	if turns > 0:
 		footer["time"] = FrText.count(turns, "tour")
-	footer["upkeep"] = "%s %s / saison" % [thousands(int(live.get("upkeep", definition.get("upkeep", 0)))), POUND]
+	footer["upkeep"] = "%s %s / saison" % [Money.digits(int(live.get("upkeep", definition.get("upkeep", 0)))), POUND]
 	spec["footer"] = footer
 	var units := PackedStringArray()
 	for unit_id in definition.get("enables_units", []):
@@ -906,7 +899,7 @@ static func diet(option: Dictionary) -> String:
 	var state := "régime actuel" if bool(option.get("current", false)) else ("disponible" if bool(option.get("available", false)) else "indisponible")
 	var lines: Array = [_title(id, str(option.get("name", id)), state, "resource")]
 	var cost := int(option.get("cost", 0))
-	var cost_line := "Coût : %s %s / saison" % [thousands(cost), POUND] if cost > 0 else "Coût : aucun"
+	var cost_line := "Coût : %s %s / saison" % [Money.digits(cost), POUND] if cost > 0 else "Coût : aucun"
 	var per_thousand := float(option.get("cost_per_thousand", 0))
 	if per_thousand > 0.0:
 		cost_line += " [color=%s](%s %s pour 1 000 habitants)[/color]" % [MUTED, str(snappedf(per_thousand, 0.01)).replace(".", ","), POUND]
@@ -973,7 +966,7 @@ static func resource(resource_id: String, stock: int = -1) -> String:
 static func population_class(class_id: String, data: Dictionary = {}) -> String:
 	var lines: Array = [_title("class_" + class_id, class_label(str(class_id)), "", "class")]
 	if data.has("count"):
-		lines.append("Population : %s" % thousands(int(data["count"])))
+		lines.append("Population : %s" % Money.digits(int(data["count"])))
 	var gauges := PackedStringArray()
 	for key in ["unrest", "health", "wealth", "goods_satisfaction"]:
 		if data.has(key):
@@ -1053,7 +1046,7 @@ static func branch(branch_id: String, value: int = -1) -> String:
 
 
 static func _signed_pounds(value: int) -> String:
-	return "%s%s %s" % ["+" if value > 0 else "", thousands(value), POUND]
+	return "%s%s %s" % ["+" if value > 0 else "", Money.digits(value), POUND]
 
 
 ## `option` : entrée de `get_coinage().options` ; `changed_this_year` : déjà changée cette année.
@@ -1064,7 +1057,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 	var recoinage := int(option.get("recoinage", 0))
 	lines.append("Seigneuriage : [color=%s]%s / saison[/color]" % [GREEN if seigniorage > 0 else MUTED, _signed_pounds(seigniorage)])
 	if recoinage > 0:
-		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, thousands(recoinage), POUND])
+		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, Money.digits(recoinage), POUND])
 	var inflation := int(option.get("inflation", 0))
 	var deflation := int(option.get("deflation", 0))
 	if inflation > 0:
@@ -1088,7 +1081,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 ## `option` : entrée de `get_chivalric_orders().options`.
 static func chivalric_order(option: Dictionary) -> String:
 	var lines: Array = [_title("hud_court", str(option.get("name", option.get("id", ""))), "disponible" if bool(option.get("available", false)) else "indisponible", "hud")]
-	lines.append("Coût : %s %s · prestige requis : %d" % [thousands(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
+	lines.append("Coût : %s %s · prestige requis : %d" % [Money.digits(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
 	lines.append("Membres : %d (historiquement : %s)" % [int(option.get("members", 0)), str(option.get("historical_members", "—"))])
 	lines.append("Membres : loyauté +%d, moral des armées qu'ils mènent +%d" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0))])
 	lines.append("Souverain : prestige +%d à la fondation, +%d par an" % [int(option.get("founder_prestige", 0)), int(option.get("yearly_prestige", 0))])

@@ -41,16 +41,13 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var head := HBoxContainer.new()
 	add_child(head)
-	header_label = Label.new()
-	header_label.text = "Monnaie"
-	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	header_label = UiBuild.label("Monnaie", UiType.size(UiType.BODY))
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(header_label)
 	current_label = _small_label(14, false)
 	head.add_child(current_label)
 
-	var price_row := HBoxContainer.new()
-	price_row.add_theme_constant_override("separation", 8)
+	var price_row := UiBuild.hbox(8)
 	add_child(price_row)
 	price_label = _small_label(13, false)
 	price_label.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -188,7 +185,7 @@ func request_level(level: String) -> Dictionary:
 
 static func _pounds(value: int, signed := false) -> String:
 	var sign := "+" if signed and value > 0 else ""
-	return "%s%s %s" % [sign, RichTooltip.thousands(value), RichTooltip.POUND]
+	return "%s%s %s" % [sign, Money.digits(value), RichTooltip.POUND]
 
 
 func _facade_sim() -> Object:

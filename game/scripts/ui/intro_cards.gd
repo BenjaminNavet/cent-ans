@@ -95,24 +95,21 @@ func _build() -> void:
 	_text.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_content.add_child(_text)
 
-	var footer := HBoxContainer.new()
+	var footer := UiBuild.hbox(16)
 	footer.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	footer.offset_top = -64
 	footer.offset_bottom = -20
 	footer.offset_left = 40
 	footer.offset_right = -40
-	footer.add_theme_constant_override("separation", 16)
 	add_child(footer)
 	_counter = FrontEndStyle.label("", 16, Color(0.7, 0.64, 0.52), FrontEndStyle.body_italic())
 	_counter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_counter)
-	var next_button := Button.new()
-	next_button.text = "Suivant"
+	var next_button := UiBuild.button("Suivant")
 	FrontEndStyle.style_action_button(next_button, false, 18)
 	next_button.pressed.connect(next)
 	footer.add_child(next_button)
-	var skip := Button.new()
-	skip.text = "Passer l'introduction"
+	var skip := UiBuild.button("Passer l'introduction")
 	FrontEndStyle.style_action_button(skip, false, 18)
 	skip.pressed.connect(close)
 	footer.add_child(skip)

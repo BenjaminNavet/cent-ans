@@ -46,22 +46,16 @@ func _ready() -> void:
 	name = "BattlePrologueInvite"
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
+	var box := UiBuild.vbox(12)
 	add_child(box)
-	var title := Label.new()
-	title.text = "Jouer le didacticiel de bataille ?"
+	var title := UiBuild.label("Jouer le didacticiel de bataille ?")
 	UiType.apply(title, UiType.HEADING)
 	box.add_child(title)
-	var text := Label.new()
-	text.text = "Une courte escarmouche guidée de 1337 apprend à mener une bataille : caméra, ordres, formation, charge, tir et pause tactique. On la retrouve dans « Batailles historiques »."
-	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.custom_minimum_size = Vector2(520, 0)
+	var text := UiBuild.label("Une courte escarmouche guidée de 1337 apprend à mener une bataille : caméra, ordres, formation, charge, tir et pause tactique. On la retrouve dans « Batailles historiques ».", 0, null, true, 520)
 	UiType.apply(text, UiType.BODY)
 	box.add_child(text)
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(10)
 	row.alignment = BoxContainer.ALIGNMENT_END
-	row.add_theme_constant_override("separation", 10)
 	box.add_child(row)
 	never_button = _button(row, "NeverButton", "Ne plus demander", "never")
 	no_button = _button(row, "NoButton", "Non", "no")
@@ -72,10 +66,8 @@ func _ready() -> void:
 
 
 func _button(row: HBoxContainer, node_name: String, text: String, choice: String) -> Button:
-	var button := Button.new()
+	var button := UiBuild.button(text, choose.bind(choice))
 	button.name = node_name
-	button.text = text
-	button.pressed.connect(choose.bind(choice))
 	row.add_child(button)
 	return button
 

@@ -55,7 +55,6 @@ const TRIBUTE_STEPS := [100, 250, 500, 1000]
 const TRIBUTE_SEASONS := 8
 const TRUCE_TURNS := 8
 const TAB_NEGOTIATION := 0
-const TAB_WAR := 1
 const TAB_HISTORY := 2
 const FILTERS := ["Toutes", "En guerre", "Alliés et vassaux", "En paix"]
 
@@ -120,16 +119,14 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	visibility_changed.connect(_fit_to_viewport)
 	get_viewport().size_changed.connect(_fit_to_viewport)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 6)
+	var root := UiBuild.vbox(6)
 	add_child(root)
 	root.add_child(_build_header())
 	_offers_box = VBoxContainer.new()
 	root.add_child(_offers_box)
 	root.add_child(_rule())
-	var body := HBoxContainer.new()
+	var body := UiBuild.hbox(14)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 14)
 	root.add_child(body)
 	# Q6 : un contenu qui grandit après l'ajustement (avis reçus, fiche) faisait déborder le
 	# panneau sous l'écran, la carte gardant sa taille : on la réduit de l'excédent.
@@ -208,10 +205,8 @@ static func _label(text: String, variation: String, color: Color = HudStyle.INK)
 
 
 func _build_header() -> Control:
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 12)
-	var titles := VBoxContainer.new()
-	titles.add_theme_constant_override("separation", 0)
+	var header := UiBuild.hbox(12)
+	var titles := UiBuild.vbox(0)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# CV3-0 (#10) : lettrine du kit partagé (UI1, `Lettrine.attach`) au lieu de l'ancien
 	# `DropCap` local, qui figeait le titre affiché à "iplomatie" (le "D" retiré à la main pour
@@ -223,23 +218,20 @@ func _build_header() -> Control:
 	_religion_label = _label("", UiType.BODY, HudStyle.INK_SOFT)
 	titles.add_child(_religion_label)
 	header.add_child(titles)
-	var donate := Button.new()
-	donate.text = "Don à l'Église (%s)" % Money.amount(DONATION_AMOUNT)
+	var donate := UiBuild.button("Don à l'Église (%s)" % Money.amount(DONATION_AMOUNT))
 	donate.tooltip_text = RuleValues.format("Augmente la faveur pontificale (+1 par {rule.donation_livres_per_favor} livres).")
 	donate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	donate.pressed.connect(func() -> void:
 		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
 	header.add_child(donate)
-	var trade := Button.new()
+	var trade := UiBuild.button("Commerce")
 	trade.name = "TradeButton"
-	trade.text = "Commerce"
 	trade.tooltip_text = "Affiche les routes commerciales sur la carte (touche V)."
 	trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	trade.pressed.connect(func() -> void:
 		trade_view_requested.emit())
 	header.add_child(trade)
-	var close := Button.new()
-	close.text = "×"
+	var close := UiBuild.button("×")
 	RichTooltip.attach_plain(close, "close_escape")
 	close.custom_minimum_size = Vector2(36, 36)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -251,9 +243,8 @@ func _build_header() -> Control:
 
 
 func _build_faction_column() -> Control:
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(6)
 	column.custom_minimum_size = Vector2(FACTION_COLUMN_MIN_WIDTH, 0)
-	column.add_theme_constant_override("separation", 6)
 	column.add_child(_section("Les puissances"))
 	var filter := OptionButton.new()
 	for label in FILTERS:
@@ -266,18 +257,16 @@ func _build_faction_column() -> Control:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_list = VBoxContainer.new()
+	_list = UiBuild.vbox(3)
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_list.add_theme_constant_override("separation", 3)
 	scroll.add_child(_list)
 	column.add_child(scroll)
 	return column
 
 
 func _build_map_column() -> Control:
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(6)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation", 6)
 	column.add_child(_section("Carte des relations"))
 	var view_row := HBoxContainer.new()  # DZ
 	view_row.add_theme_constant_override("separation", 8)
@@ -313,8 +302,7 @@ func _legend() -> Control:
 	flow.add_theme_constant_override("h_separation", 12)
 	for entry in [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["friendly", "Bien disposés"], ["hostile", "Hostiles"]]:
 		var key: String = entry[0]
-		var chip := HBoxContainer.new()
-		chip.add_theme_constant_override("separation", 4)
+		var chip := UiBuild.hbox(4)
 		var swatch := ColorRect.new()
 		swatch.custom_minimum_size = Vector2(14, 14)
 		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -327,20 +315,14 @@ func _legend() -> Control:
 
 
 func _build_detail_column() -> Control:
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(6)
 	column.custom_minimum_size = Vector2(DETAIL_COLUMN_MIN_WIDTH, 0)
-	column.add_theme_constant_override("separation", 6)
-	_head = VBoxContainer.new()
-	_head.add_theme_constant_override("separation", 2)
-	column.add_child(_head)
-	var tabs := HBoxContainer.new()
-	tabs.add_theme_constant_override("separation", 4)
+	_head = UiBuild.vbox(2, column)
+	var tabs := UiBuild.hbox(4)
 	for index in 3:
-		var button := Button.new()
-		button.text = ["Négociation", "Guerre", "Traités"][index]
+		var button := UiBuild.button(["Négociation", "Guerre", "Traités"][index], func() -> void: _show_tab(index))
 		button.toggle_mode = true
 		button.focus_mode = Control.FOCUS_NONE
-		button.pressed.connect(func() -> void: _show_tab(index))
 		tabs.add_child(button)
 		_tab_buttons.append(button)
 	column.add_child(tabs)
@@ -350,11 +332,9 @@ func _build_detail_column() -> Control:
 	column.add_child(stack)
 	var negotiation := _scroll_page(_build_negotiation())
 	column.add_child(_treaty_buttons)
-	var war := VBoxContainer.new()
-	war.add_theme_constant_override("separation", 6)
+	var war := UiBuild.vbox(6)
 	_war_page = war
-	var history := VBoxContainer.new()
-	history.add_theme_constant_override("separation", 6)
+	var history := UiBuild.vbox(6)
 	_history_page = history
 	for page in [negotiation, _scroll_page(war), _scroll_page(history)]:
 		page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -373,8 +353,7 @@ func _scroll_page(content: Control) -> ScrollContainer:
 
 
 func _build_negotiation() -> Control:
-	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", 6)
+	var page := UiBuild.vbox(6)
 	var clause_row := HBoxContainer.new()
 	clause_row.add_child(_label("Clauses communes", UiType.HEADING, HudStyle.INK))
 	var spacer := Control.new()
@@ -386,9 +365,7 @@ func _build_negotiation() -> Control:
 	_clauses = HFlowContainer.new()
 	_clauses.add_theme_constant_override("h_separation", 6)
 	page.add_child(_clauses)
-	var columns := HBoxContainer.new()
-	columns.add_theme_constant_override("separation", 10)
-	page.add_child(columns)
+	var columns := UiBuild.hbox(10, page)
 	var offer := _article_column("Vous offrez")
 	_offer_menu = offer[1]
 	_offer_list = offer[2]
@@ -398,8 +375,7 @@ func _build_negotiation() -> Control:
 	_demand_list = demand[2]
 	columns.add_child(demand[0])
 	page.add_child(_rule())
-	var chance_row := HBoxContainer.new()
-	chance_row.add_theme_constant_override("separation", 8)
+	var chance_row := UiBuild.hbox(8)
 	_chance_label = _label("", UiType.HEADING, HudStyle.INK)
 	_chance_label.custom_minimum_size = Vector2(150, 0)
 	_chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -417,16 +393,14 @@ func _build_negotiation() -> Control:
 	_reasons.bbcode_enabled = true
 	_reasons.fit_content = true
 	_reasons.scroll_active = false
-	_counter_box = HBoxContainer.new()
+	_counter_box = UiBuild.hbox(8)
 	_counter_box.name = "CounterOffer"
-	_counter_box.add_theme_constant_override("separation", 8)
 	_counter_label = _label("", UiType.BODY, HudStyle.INK)
 	_counter_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_counter_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_counter_box.add_child(_counter_label)
-	var adopt := Button.new()
+	var adopt := UiBuild.button("Reprendre leur contre-offre")
 	adopt.name = "AdoptCounter"
-	adopt.text = "Reprendre leur contre-offre"
 	RichTooltip.attach_plain(adopt, "treaty_adopt_counter")
 	adopt.focus_mode = Control.FOCUS_NONE
 	adopt.pressed.connect(_adopt_counter)
@@ -438,22 +412,18 @@ func _build_negotiation() -> Control:
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _reasons)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 6)
-	var counter := Button.new()
-	counter.text = "Que faudrait-il ?"
+	var buttons := UiBuild.hbox(6)
+	var counter := UiBuild.button("Que faudrait-il ?")
 	RichTooltip.attach_plain(counter, "treaty_ask_counter")
 	counter.pressed.connect(_ask_counter)
 	buttons.add_child(counter)
-	var clear := Button.new()
-	clear.text = "Effacer"
+	var clear := UiBuild.button("Effacer")
 	clear.pressed.connect(func() -> void:
 		_articles = []
 		_render_draft())
 	buttons.add_child(clear)
-	var send := Button.new()
+	var send := UiBuild.button("Proposer le traité")
 	send.name = "SendTreaty"
-	send.text = "Proposer le traité"
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# FA5 : sceau de cire réel sur le bouton qui engage la parole du prince.
 	send.icon = FaUi.seal("treaty")
@@ -483,9 +453,7 @@ func _article_column(title: String) -> Array:
 	var box := PanelContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_stylebox_override("panel", HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD, 1))
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	box.add_child(column)
+	var column := UiBuild.vbox(4, box)
 	var row := HBoxContainer.new()
 	var label := _label(title, UiType.HEADING, HudStyle.RUBRIC)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -496,9 +464,8 @@ func _article_column(title: String) -> Array:
 	var menu := _add_menu("+ Ajouter")
 	row.add_child(menu)
 	column.add_child(row)
-	var list := VBoxContainer.new()
+	var list := UiBuild.vbox(3)
 	list.custom_minimum_size = Vector2(0, 90)
-	list.add_theme_constant_override("separation", 3)
 	column.add_child(list)
 	return [box, menu, list]
 
@@ -581,8 +548,7 @@ func _render_offers() -> void:
 		for call in sim.call("get_feudal_offers"):
 			feudal[int(call.get("id", -1))] = call
 	for offer in offers:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 6)
+		var row := UiBuild.hbox(6)
 		var heraldry := TextureRect.new()
 		heraldry.texture = PortraitLoader.heraldry_texture(str(offer.get("from", "")))
 		heraldry.custom_minimum_size = Vector2(26, 26)
@@ -595,23 +561,16 @@ func _render_offers() -> void:
 		row.add_child(text)
 		var offer_id := int(offer["id"])
 		var kind := str(offer.get("kind", ""))
-		var yes := Button.new()
-		yes.text = {"protection": "Intervenir", "arbitration": "Imposer la paix", "summons": "Obéir"}.get(kind, "Accepter")
-		yes.pressed.connect(func() -> void: offer_answered.emit(offer_id, true))
-		row.add_child(yes)
+		var yes := UiBuild.button({"protection": "Intervenir", "arbitration": "Imposer la paix", "summons": "Obéir"}.get(kind, "Accepter"), func() -> void: offer_answered.emit(offer_id, true), row)
 		if kind == "arbitration" and feudal.has(offer_id):
 			var call: Dictionary = feudal[offer_id]
 			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
 				var side_id := str(call.get(side[0], ""))
-				var take := Button.new()
-				take.text = "Soutenir %s" % str(call.get(side[1], side_id))
+				var take := UiBuild.button("Soutenir %s" % str(call.get(side[1], side_id)))
 				RichTooltip.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
-		var no := Button.new()
-		no.text = {"protection": "Se dérober", "arbitration": "Laisser faire", "summons": "Passer outre"}.get(kind, "Refuser")
-		no.pressed.connect(func() -> void: offer_answered.emit(offer_id, false))
-		row.add_child(no)
+		var no := UiBuild.button({"protection": "Se dérober", "arbitration": "Laisser faire", "summons": "Passer outre"}.get(kind, "Refuser"), func() -> void: offer_answered.emit(offer_id, false), row)
 		_offers_box.add_child(row)
 
 
@@ -651,17 +610,15 @@ func _faction_row(entry: Dictionary) -> Control:
 	for reason in entry.get("attitude_reasons", []):
 		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
 	RichTooltip.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
-	var line := HBoxContainer.new()
+	var line := UiBuild.hbox(8)
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line.offset_left = 6
 	line.offset_right = -6
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_theme_constant_override("separation", 8)
 	line.add_child(_heraldry(id, 36, str(entry.get("color", "#888888"))))
-	var names := VBoxContainer.new()
+	var names := UiBuild.vbox(-2)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	names.alignment = BoxContainer.ALIGNMENT_CENTER
-	names.add_theme_constant_override("separation", -2)
 	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var name_label := _label(str(entry["name"]), UiType.BODY, HudStyle.INK)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -673,10 +630,9 @@ func _faction_row(entry: Dictionary) -> Control:
 		ruler_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		names.add_child(ruler_label)
 	line.add_child(names)
-	var right := VBoxContainer.new()
+	var right := UiBuild.vbox(0)
 	right.alignment = BoxContainer.ALIGNMENT_CENTER
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	right.add_theme_constant_override("separation", 0)
 	var symbol := Accessibility.relation_symbol(status) if Accessibility.colorblind() else ""
 	var status_label := _label(("%s %s" % [symbol, STATUS_LABELS.get(status, status)]).strip_edges(), UiType.CAPTION, STATUS_COLORS.get(status, HudStyle.INK))
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -885,11 +841,9 @@ func _render_detail() -> void:
 	if entry.is_empty():
 		return
 	var status := str(entry["status"])
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 10)
+	var top := UiBuild.hbox(10)
 	top.add_child(_heraldry(_selected, 64, str(entry.get("color", "#888888"))))
-	var names := VBoxContainer.new()
-	names.add_theme_constant_override("separation", 0)
+	var names := UiBuild.vbox(0)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	names.add_child(_label(str(entry["name"]), UiType.HEADING, HudStyle.INK))
 	var ruler := str(entry.get("ruler", ""))
@@ -900,7 +854,7 @@ func _render_detail() -> void:
 	_head.add_child(top)
 	var facts := PackedStringArray()
 	facts.append("Religion : %s" % entry.get("religion_name", "?"))
-	facts.append("Puissance : %s" % HudStyle.thousands(int(entry.get("power", 0))))
+	facts.append("Puissance : %s" % Money.digits(int(entry.get("power", 0))))
 	if int(entry.get("truce_turns_left", 0)) > 0:
 		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
 	if bool(entry.get("trade_agreement", false)):
@@ -955,8 +909,7 @@ func _render_draft() -> void:
 
 
 func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
+	var row := UiBuild.hbox(4)
 	var label_text := str(value.get("label", _fallback_label(article)))
 	var label := _label(label_text, UiType.BODY, HudStyle.INK)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -981,8 +934,7 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 		RichTooltip.attach_plain(points_label, "treaty_clause_value_for_them")
 		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(points_label)
-	var remove := Button.new()
-	remove.text = "×"
+	var remove := UiBuild.button("×")
 	RichTooltip.attach_plain(remove, "treaty_clause_remove")
 	remove.focus_mode = Control.FOCUS_NONE
 	remove.pressed.connect(func() -> void:
@@ -1295,11 +1247,9 @@ func _render_trade_routes(parent: Control, id: String) -> void:
 
 
 func _add_action(label: String, order: Dictionary, success_text: String, unilateral: bool) -> void:
-	var button := Button.new()
-	button.text = label
+	var button := UiBuild.button(label, func() -> void: order_requested.emit(order, success_text))
 	button.focus_mode = Control.FOCUS_NONE
 	button.mouse_entered.connect(func() -> void: _show_consequences(order, unilateral))
-	button.pressed.connect(func() -> void: order_requested.emit(order, success_text))
 	_actions.add_child(button)
 
 
@@ -1380,8 +1330,7 @@ func _render_history() -> void:
 		var head_label := _label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC)
 		var wax := FaUi.seal_rect("treaty", float(TREATY_SEAL_SIZE)) if accepted else null
 		if wax != null:  # FA5 : un traité signé porte son sceau
-			var head_row := HBoxContainer.new()
-			head_row.add_theme_constant_override("separation", 6)
+			var head_row := UiBuild.hbox(6)
 			head_row.add_child(wax)
 			head_row.add_child(head_label)
 			_history_page.add_child(head_row)

@@ -103,7 +103,7 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 	var fleet := BattleUiKit.label("%d navires : %s" % [ships.size(), ", ".join(parts)], UiType.size(UiType.BODY), BattleUiKit.INK, false, true)
 	fleet.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(fleet)
-	column.add_child(BattleUiKit.label("%s hommes embarqués" % BattleUiKit.thousands(soldiers), UiType.size(UiType.BODY)))
+	column.add_child(BattleUiKit.label("%s hommes embarqués" % Money.digits(soldiers), UiType.size(UiType.BODY)))
 	var units: Array = side_setup.get("units", [])
 	var composition := _composition(units)
 	if composition != "":

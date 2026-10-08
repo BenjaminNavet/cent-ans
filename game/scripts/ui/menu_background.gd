@@ -38,9 +38,6 @@ func _ready() -> void:
 		layout_changed.emit())
 
 
-func has_art() -> bool:
-	return texture != null
-
 
 func _process(delta: float) -> void:
 	if animated and texture != null:

@@ -157,14 +157,10 @@ func _build() -> void:
 	margin.add_theme_constant_override("margin_top", 26)
 	margin.add_theme_constant_override("margin_bottom", 22)
 	add_child(margin)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 14)
-	margin.add_child(column)
+	var column := UiBuild.vbox(14, margin)
 
 	# En-tête : titre et date de départ.
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 24)
-	column.add_child(header)
+	var header := UiBuild.hbox(24, column)
 	var heading := FrontEndStyle.label("Choisissez votre couronne", TITLE_PX, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 8)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
@@ -172,10 +168,9 @@ func _build() -> void:
 
 	# A6-L11 (U2) : à gauche les onglets (cartes, défis, carte), à droite la fiche et la difficulté,
 	# pour occuper toute la largeur au lieu d'empiler trois étages centrés.
-	var body_row := HBoxContainer.new()
+	var body_row := UiBuild.hbox(18)
 	body_row.name = "ScreenBody"
 	body_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body_row.add_theme_constant_override("separation", 18)
 	column.add_child(body_row)
 	start_tabs = TabContainer.new()
 	start_tabs.name = "StartTabs"
@@ -183,10 +178,9 @@ func _build() -> void:
 	start_tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	start_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body_row.add_child(start_tabs)
-	var cards := HBoxContainer.new()
+	var cards := UiBuild.hbox(14)
 	cards.name = "Départs recommandés"
 	cards.alignment = BoxContainer.ALIGNMENT_CENTER
-	cards.add_theme_constant_override("separation", 14)
 	start_tabs.add_child(cards)
 	for faction_id in FrontEndData.recommended():
 		cards.add_child(_build_card(FrontEndData.faction(faction_id)))
@@ -200,10 +194,9 @@ func _build() -> void:
 	_map_page = _build_map_tab()
 	start_tabs.add_child(_map_page)
 
-	var side := VBoxContainer.new()
+	var side := UiBuild.vbox(10)
 	side.name = "SideColumn"
 	side.custom_minimum_size = Vector2(SIDE_WIDTH, 0)
-	side.add_theme_constant_override("separation", 10)
 	body_row.add_child(side)
 	var detail := _build_detail()
 	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -218,9 +211,8 @@ func _build_special_tab() -> Control:
 	var entry := FrontEndData.special_starts()
 	if entry.is_empty():
 		return null
-	var page := VBoxContainer.new()
+	var page := UiBuild.vbox(8)
 	page.name = str(entry["title"])
-	page.add_theme_constant_override("separation", 8)
 	var text := str(entry.get("text", ""))
 	if text != "":
 		var caption := FrontEndStyle.label(text, BODY_PX, Color(0.97, 0.92, 0.80))
@@ -228,10 +220,9 @@ func _build_special_tab() -> Control:
 		caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		caption.custom_minimum_size = Vector2(320, 0)  # A6-L11 : évite un repli à une colonne de mots
 		page.add_child(caption)
-	var cards := HBoxContainer.new()
+	var cards := UiBuild.hbox(14)
 	cards.name = "SpecialCards"
 	cards.alignment = BoxContainer.ALIGNMENT_CENTER
-	cards.add_theme_constant_override("separation", 14)
 	page.add_child(cards)
 	for faction_id in entry["factions"]:
 		cards.add_child(_build_card(FrontEndData.faction(str(faction_id))))
@@ -246,12 +237,9 @@ func map_tab_index() -> int:
 ## FE6 : onglet « Toutes les factions » : filtres (royaume, rang), carte cliquable de 1337 à ses
 ## proportions et, à côté, la liste des factions filtrées groupées par royaume.
 func _build_map_tab() -> Control:
-	var page := VBoxContainer.new()
+	var page := UiBuild.vbox(6)
 	page.name = "Toutes les factions"
-	page.add_theme_constant_override("separation", 6)
-	var filters := HBoxContainer.new()
-	filters.add_theme_constant_override("separation", 10)
-	page.add_child(filters)
+	var filters := UiBuild.hbox(10, page)
 	map_picker = FactionMapPicker.new()
 	map_picker.faction_chosen.connect(select)
 	filters.add_child(FrontEndStyle.label("Royaume", BODY_PX, FrontEndStyle.INK))
@@ -270,10 +258,9 @@ func _build_map_tab() -> Control:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	filters.add_child(hint)
-	var body := HBoxContainer.new()
+	var body := UiBuild.hbox(10)
 	body.name = "MapBody"
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 10)
 	page.add_child(body)
 	map_picker.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(map_picker)
@@ -282,10 +269,9 @@ func _build_map_tab() -> Control:
 	list_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	body.add_child(list_scroll)
-	_faction_list = VBoxContainer.new()
+	_faction_list = UiBuild.vbox(4)
 	_faction_list.name = "FactionList"
 	_faction_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_faction_list.add_theme_constant_override("separation", 4)
 	list_scroll.add_child(_faction_list)
 	# La carte prend la largeur de ses proportions à la hauteur disponible ; la liste, le reste.
 	body.resized.connect(func() -> void: _fit_map_width(body))
@@ -345,14 +331,12 @@ func _rebuild_faction_list() -> void:
 		flow.add_theme_constant_override("v_separation", 4)
 		_faction_list.add_child(flow)
 		for id in groups[kingdom_name]:
-			var button := Button.new()
+			var button := UiBuild.button(str((map_picker.sheets[id] as Dictionary).get("name", id)), func() -> void: select(id))
 			button.name = "Faction_%s" % id
-			button.text = str((map_picker.sheets[id] as Dictionary).get("name", id))
 			button.toggle_mode = true
 			button.button_pressed = id == selected_faction
 			button.focus_mode = Control.FOCUS_NONE
 			button.add_theme_font_size_override("font_size", CAPTION_PX)
-			button.pressed.connect(func() -> void: select(id))
 			button.mouse_entered.connect(func() -> void: map_picker.highlight(id))
 			button.mouse_exited.connect(func() -> void: map_picker.highlight(""))
 			flow.add_child(button)
@@ -367,8 +351,7 @@ func _apply_map_filters() -> void:
 
 
 func _build_start_dates() -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := UiBuild.hbox(10)
 	row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var group := ButtonGroup.new()
 	var first := true
@@ -407,8 +390,7 @@ func _build_card(entry: Dictionary) -> Control:
 	chosen.shadow_size = 18
 	panel.add_theme_stylebox_override("panel", normal)
 	_card_styles[faction_id] = [normal, chosen]
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 0)
+	var box := UiBuild.vbox(0)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(box)
 
@@ -464,12 +446,10 @@ func _build_card(entry: Dictionary) -> Control:
 	for side in ["left", "right", "top", "bottom"]:
 		body.add_theme_constant_override("margin_" + side, 12)
 	box.add_child(body)
-	var text_box := VBoxContainer.new()
-	text_box.add_theme_constant_override("separation", 4)
+	var text_box := UiBuild.vbox(4)
 	text_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(text_box)
-	var title_row := HBoxContainer.new()
-	title_row.add_theme_constant_override("separation", 10)
+	var title_row := UiBuild.hbox(10)
 	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text_box.add_child(title_row)
 	if shield_texture != null:
@@ -480,8 +460,7 @@ func _build_card(entry: Dictionary) -> Control:
 		shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		shield.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		title_row.add_child(shield)
-	var names := VBoxContainer.new()
-	names.add_theme_constant_override("separation", -2)
+	var names := UiBuild.vbox(-2)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title_row.add_child(names)
@@ -512,8 +491,7 @@ func _build_card(entry: Dictionary) -> Control:
 
 
 func _ruler_row(ruler_id: String) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	var row := UiBuild.hbox(10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ruler_id == "":
 		return row
@@ -567,13 +545,11 @@ func _character(character_id: String) -> Dictionary:
 ## Défi propre à la faction (indicatif : situation historique de départ), à ne pas confondre avec
 ## le niveau de difficulté de la campagne choisi sous la fiche.
 func _difficulty_row(level: int) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
+	var row := UiBuild.hbox(6)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	RichTooltip.attach_plain(row, "faction_challenge_indicative")
 	row.add_child(FrontEndStyle.label("Défi :", CAPTION_PX, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
-	var pips := HBoxContainer.new()
-	pips.add_theme_constant_override("separation", 4)
+	var pips := UiBuild.hbox(4)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for i in 4:
 		var pip := ColorRect.new()
@@ -600,9 +576,8 @@ func _build_detail() -> Control:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size = Vector2(0, 160)
 	panel.add_child(scroll)
-	var left := VBoxContainer.new()
+	var left := UiBuild.vbox(8)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.add_theme_constant_override("separation", 8)
 	scroll.add_child(left)
 	_detail_title = FrontEndStyle.label("", TITLE_PX, FrontEndStyle.INK, FrontEndStyle.title_font())
 	left.add_child(_detail_title)
@@ -627,14 +602,11 @@ func _build_detail() -> Control:
 
 
 func _list_column(parent: Control, heading: String, color: Color) -> VBoxContainer:
-	var column := VBoxContainer.new()
+	var column := UiBuild.vbox(6)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation", 6)
 	parent.add_child(column)
 	column.add_child(FrontEndStyle.label(heading, HEADING_PX, color, FrontEndStyle.title_font()))
-	var items := VBoxContainer.new()
-	items.add_theme_constant_override("separation", 6)
-	column.add_child(items)
+	var items := UiBuild.vbox(6, column)
 	items.set_meta("color", color)
 	return items
 
@@ -645,9 +617,7 @@ func _list_column(parent: Control, heading: String, color: Color) -> VBoxContain
 func _build_difficulty_selector() -> Control:
 	var bar := PanelContainer.new()
 	bar.add_theme_stylebox_override("panel", FrontEndStyle.night_panel(0.72))
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 6)
-	bar.add_child(column)
+	var column := UiBuild.vbox(6, bar)
 	var heading := FrontEndStyle.label("Difficulté de la campagne", HEADING_PX, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
 	RichTooltip.attach_plain(heading, "difficulty_fixed_effects")
 	heading.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -721,22 +691,17 @@ func difficulty_count() -> int:
 func _build_actions() -> Control:
 	var bar := PanelContainer.new()
 	bar.add_theme_stylebox_override("panel", FrontEndStyle.night_panel(0.72))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	bar.add_child(row)
-	back_button = Button.new()
-	back_button.text = "Retour"
+	var row := UiBuild.hbox(16, bar)
+	back_button = UiBuild.button("Retour")
 	FrontEndStyle.style_action_button(back_button, false, HEADING_PX)
 	back_button.pressed.connect(func() -> void: back_requested.emit())
 	row.add_child(back_button)
 
-	var advanced := Button.new()
-	advanced.text = "Options avancées"
+	var advanced := UiBuild.button("Options avancées")
 	advanced.toggle_mode = true
 	FrontEndStyle.style_action_button(advanced, false, HEADING_PX)
 	row.add_child(advanced)
-	var seed_row := HBoxContainer.new()
-	seed_row.add_theme_constant_override("separation", 8)
+	var seed_row := UiBuild.hbox(8)
 	seed_row.visible = false
 	_advanced_box = seed_row
 	var seed_label := FrontEndStyle.label("Graine aléatoire", BODY_PX, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
@@ -754,8 +719,7 @@ func _build_actions() -> Control:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	start_button = Button.new()
-	start_button.text = "Commencer"
+	start_button = UiBuild.button("Commencer")
 	FrontEndStyle.style_action_button(start_button, true, TITLE_PX)
 	start_button.pressed.connect(_on_start)
 	row.add_child(start_button)
@@ -803,8 +767,7 @@ func _fill_list(items: VBoxContainer, lines: Array, bullet: String) -> void:
 		child.queue_free()
 	var color: Color = items.get_meta("color", FrontEndStyle.INK)
 	for line in lines:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
+		var row := UiBuild.hbox(8)
 		var mark := FrontEndStyle.label(bullet, BODY_PX, color)
 		mark.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		row.add_child(mark)

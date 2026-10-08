@@ -54,35 +54,26 @@ func _ready() -> void:
 	scroll.custom_minimum_size = Vector2(760, 560)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
-	var box := VBoxContainer.new()
+	var box := UiBuild.vbox(8)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation", 8)
 	scroll.add_child(box)
-	var title := Label.new()
-	title.text = "Batailles historiques"
+	var title := UiBuild.label("Batailles historiques")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size = Vector2(720, 0)
+	var hint := UiBuild.label("Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé.", 0, null, true, 720)
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	box.add_child(hint)
 	_add_prologue(box)
 	if battles.is_empty():
-		var none := Label.new()
-		none.text = "Aucune bataille historique n'a été trouvée."
-		box.add_child(none)
+		var none := UiBuild.label("Aucune bataille historique n'a été trouvée.", 0, null, false, 0.0, box)
 	for entry in battles:
 		_add_battle(box, entry as Dictionary)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(row)
-	var close_button := Button.new()
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	row.add_child(close_button)
 	if not buttons.is_empty():
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
@@ -98,21 +89,15 @@ func _add_prologue(box: VBoxContainer) -> void:
 		return
 	var sep := HSeparator.new()
 	box.add_child(sep)
-	var name := Label.new()
-	name.text = str(prologue.get("menu_label", "Didacticiel de bataille"))
+	var name := UiBuild.label(str(prologue.get("menu_label", "Didacticiel de bataille")))
 	UiType.apply(name, UiType.HEADING)
 	box.add_child(name)
-	var detail := Label.new()
-	detail.text = str(prologue.get("menu_detail", ""))
-	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail.custom_minimum_size = Vector2(720, 0)
+	var detail := UiBuild.label(str(prologue.get("menu_detail", "")), 0, null, true, 720)
 	UiType.apply(detail, UiType.BODY)
 	box.add_child(detail)
-	prologue_button = Button.new()
+	prologue_button = UiBuild.button("Commencer le didacticiel", start_prologue)
 	prologue_button.name = "BattlePrologue"
-	prologue_button.text = "Commencer le didacticiel"
 	prologue_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	prologue_button.pressed.connect(start_prologue)
 	box.add_child(prologue_button)
 
 
@@ -126,33 +111,21 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 	var id := str(entry.get("id", ""))
 	var sep := HSeparator.new()
 	box.add_child(sep)
-	var name := Label.new()
-	name.text = "%s — %s" % [str(entry.get("name", id)), str(entry.get("date_fr", entry.get("date", "")))]
+	var name := UiBuild.label("%s — %s" % [str(entry.get("name", id)), str(entry.get("date_fr", entry.get("date", "")))])
 	UiType.apply(name, UiType.HEADING)
 	box.add_child(name)
-	var place := Label.new()
-	place.text = "%s (%s) · %s" % [str(entry.get("place", "")), str(entry.get("province_name", "")), str(entry.get("weather_label", ""))]
-	place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	place.custom_minimum_size = Vector2(720, 0)
+	var place := UiBuild.label("%s (%s) · %s" % [str(entry.get("place", "")), str(entry.get("province_name", "")), str(entry.get("weather_label", ""))], 0, null, true, 720)
 	UiType.apply(place, UiType.CAPTION)
 	place.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(place)
-	var summary := Label.new()
-	summary.text = str(entry.get("summary", ""))
-	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	summary.custom_minimum_size = Vector2(720, 0)
+	var summary := UiBuild.label(str(entry.get("summary", "")), 0, null, true, 720)
 	UiType.apply(summary, UiType.BODY)
 	box.add_child(summary)
-	var armies := Label.new()
-	armies.text = "%s\n%s" % [_army_line(entry, "attacker"), _army_line(entry, "defender")]
-	armies.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	armies.custom_minimum_size = Vector2(720, 0)
+	var armies := UiBuild.label("%s\n%s" % [_army_line(entry, "attacker"), _army_line(entry, "defender")], 0, null, true, 720)
 	UiType.apply(armies, UiType.CAPTION)
 	armies.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(armies)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	box.add_child(row)
+	var row := UiBuild.hbox(10, box)
 	for side in ["defender", "attacker", ""]:
 		var button := Button.new()
 		button.name = "Battle_%s_%s" % [id, side if side != "" else "watch"]

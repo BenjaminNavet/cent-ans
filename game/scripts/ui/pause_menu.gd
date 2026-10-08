@@ -47,11 +47,8 @@ func _ready() -> void:
 	_menu_panel.theme = parchment
 	_menu_panel.custom_minimum_size = Vector2(240, 0)
 	add_child(_menu_panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 3)
-	_menu_panel.add_child(box)
-	var title := Label.new()
-	title.text = "Pause"
+	var box := UiBuild.vbox(3, _menu_panel)
+	var title := UiBuild.label("Pause")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UiType.apply(title, UiType.HEADING)
 	box.add_child(title)
@@ -72,8 +69,7 @@ func _ready() -> void:
 		["main_menu", "Menu principal", func() -> void: _request_exit("main_menu")],
 		["quit", "Quitter le jeu", func() -> void: _request_exit("quit")],
 	]:
-		var button := Button.new()
-		button.text = spec[1]
+		var button := UiBuild.button(spec[1])
 		# Menu compact (retour joueur 10-03 : fenêtre trop grande) : corps de texte, boutons serrés.
 		UiType.apply(button, UiType.BODY)
 		button.pressed.connect(spec[2])
@@ -123,15 +119,12 @@ func _build_confirm(parchment: Theme) -> void:
 	add_child(_confirm_panel)
 	_confirm_panel.process_mode = Node.PROCESS_MODE_ALWAYS  # Q8 : voir `_menu_panel`
 	UiZones.put(UiZones.Zone.MODAL, _confirm_panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
-	_confirm_panel.add_child(box)
+	var box := UiBuild.vbox(10, _confirm_panel)
 	_confirm_label = Label.new()
 	_confirm_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_confirm_label)
-	var row := HBoxContainer.new()
+	var row := UiBuild.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_END
-	row.add_theme_constant_override("separation", 8)
 	box.add_child(row)
 	for spec in [
 		["Annuler", _cancel_exit],
@@ -140,10 +133,7 @@ func _build_confirm(parchment: Theme) -> void:
 			open_save()],
 		["Quitter sans sauvegarder", _confirm_exit],
 	]:
-		var button := Button.new()
-		button.text = spec[0]
-		button.pressed.connect(spec[1])
-		row.add_child(button)
+		var button := UiBuild.button(spec[0], spec[1], row)
 		buttons["confirm_%d" % row.get_child_count()] = button
 
 
@@ -231,6 +221,3 @@ func _confirm_exit() -> void:
 	elif kind == "quit":
 		quit_requested.emit()
 
-
-func confirm_visible() -> bool:
-	return _confirm_panel.visible

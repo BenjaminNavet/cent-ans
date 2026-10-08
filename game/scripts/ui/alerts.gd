@@ -63,8 +63,8 @@ static func collect(map: Node, last_events: Array) -> Array:
 		result.append({
 			"id": "army:" + str(army_id), "kind": "enemy_army", "severity": "danger",
 			"army_id": str(army_id), "province_id": location,
-			"text": "Armée ennemie %s (%s)" % [where, _thousands(strength)],
-			"tooltip": "Armée de %s, %s hommes." % [_faction_name(faction), _thousands(strength)],
+			"text": "Armée ennemie %s (%s)" % [where, Money.digits(strength)],
+			"tooltip": "Armée de %s, %s hommes." % [_faction_name(faction), Money.digits(strength)],
 		})
 	if int(summary.get("treasury", 0)) < 0:
 		result.append({
@@ -190,12 +190,3 @@ static func _faction_name(faction_id: String) -> String:
 	var facade: Node = tree.root.get_node_or_null("/root/SimFacade") if tree != null else null
 	return str(facade.call("faction_short_name", faction_id)) if facade != null else faction_id
 
-
-static func _thousands(value: int) -> String:
-	var digits := str(absi(value))
-	var groups := PackedStringArray()
-	while digits.length() > 3:
-		groups.insert(0, digits.substr(digits.length() - 3))
-		digits = digits.substr(0, digits.length() - 3)
-	groups.insert(0, digits)
-	return ("-" if value < 0 else "") + " ".join(groups)

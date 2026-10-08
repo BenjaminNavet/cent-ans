@@ -227,7 +227,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	owner_value.tooltip_text = detail
 	_fill_possession(detail)  # RJ-c, après la ligne compacte de LR-09 qu'il remplace
 	var population := int(state.get("population_total", province.get("population_total", 0)))
-	population_value.text = _thousands(population) if population > 0 else "—"
+	population_value.text = Money.digits(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
 	# EQ1: the revolt countdown, as soon as unrest is above the threshold.
 	var revolt_seasons := int(state.get("revolt_seasons", 0))
@@ -314,7 +314,7 @@ func _make_class_row(class_id: String, data: Dictionary) -> Control:
 	name_chip.custom_minimum_size = Vector2(104, 0)
 	row.add_child(name_chip)
 	var count_label := Label.new()
-	count_label.text = _thousands(int(data.get("count", 0)))
+	count_label.text = Money.digits(int(data.get("count", 0)))
 	count_label.custom_minimum_size = Vector2(62, 0)
 	row.add_child(count_label)
 	for spec in GAUGE_SPECS:
@@ -536,7 +536,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 		text += " — " + mention
 	if bool(row.get("is_city", false)):
 		text += " (cité : donne la province)"
-	text += "\n    garnison : %s, %s hommes" % [FrText.count(int(row.get("garrison_units", 0)), "unité"), _thousands(int(row.get("garrison_strength", 0)))]
+	text += "\n    garnison : %s, %s hommes" % [FrText.count(int(row.get("garrison_units", 0)), "unité"), Money.digits(int(row.get("garrison_strength", 0)))]
 	var siege: Dictionary = row.get("siege", {}) if row.get("siege") is Dictionary else {}
 	if not siege.is_empty():
 		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
@@ -559,15 +559,6 @@ static func _faction_label(faction_id: String, display_name: String, label_of: C
 	if label_of.is_valid():
 		return str(label_of.call(faction_id))
 	return faction_id
-
-
-static func _thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out
 
 
 ## FE6 : titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur

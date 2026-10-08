@@ -74,23 +74,19 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(680, 0)
 	demos = load_demos()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
+	var box := UiBuild.vbox(8)
 	add_child(box)
-	var title := Label.new()
-	title.text = "Batailles de démonstration"
+	var title := UiBuild.label("Batailles de démonstration")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
-	var hint := Label.new()
-	hint.text = "Hors campagne : le résultat n'est pas conservé."
+	var hint := UiBuild.label("Hors campagne : le résultat n'est pas conservé.")
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(hint)
 	# EP8 : heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
 	var hour_row := HBoxContainer.new()
 	box.add_child(hour_row)
-	var hour_label := Label.new()
-	hour_label.text = "Heure de la bataille"
+	var hour_label := UiBuild.label("Heure de la bataille")
 	RichTooltip.attach_plain(hour_label, "battle_demo_hour")
 	hour_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	hour_row.add_child(hour_label)
@@ -105,17 +101,12 @@ func _ready() -> void:
 	hour_row.add_child(hour_option)
 	for demo in demos:
 		var entry := demo as Dictionary
-		var button := Button.new()
+		var button := UiBuild.button(str(entry["label"]), start.bind(str(entry["id"])))
 		button.name = "Demo_" + str(entry["id"])
-		button.text = str(entry["label"])
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = str(entry.get("detail", ""))
-		button.pressed.connect(start.bind(str(entry["id"])))
 		box.add_child(button)
-		var detail := Label.new()
-		detail.text = str(entry.get("detail", ""))
-		detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		detail.custom_minimum_size = Vector2(640, 0)
+		var detail := UiBuild.label(str(entry.get("detail", "")), 0, null, true, 640)
 		UiType.apply(detail, UiType.CAPTION)
 		detail.modulate = Color(1, 1, 1, 0.75)
 		box.add_child(detail)
@@ -123,10 +114,8 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(row)
-	var close_button := Button.new()
+	var close_button := UiBuild.button("Fermer", close)
 	close_button.name = "CloseButton"
-	close_button.text = "Fermer"
-	close_button.pressed.connect(close)
 	row.add_child(close_button)
 	if not buttons.is_empty():
 		(buttons.values()[0] as Button).grab_focus.call_deferred()

@@ -70,8 +70,7 @@ func show_tree(nodes: Array) -> void:
 			var ka := _barycenter(a, rows_of)
 			var kb := _barycenter(b, rows_of)
 			return ka < kb if not is_equal_approx(ka, kb) else str(a["id"]) < str(b["id"]))
-		var header := Label.new()
-		header.text = "Rang %d" % tier
+		var header := UiBuild.label("Rang %d" % tier)
 		UiType.apply(header, UiType.CAPTION)  # PO phase 2 (P2b) : plus de taille ad hoc
 		header.position = Vector2(MARGIN.x + column * COLUMN_STEP, 6)
 		header.size = Vector2(NODE_SIZE.x, 22)

@@ -11,7 +11,6 @@ extends RefCounted
 ## N'utilise aucun autoload par son nom (le smoke `--script` est compilé avant leur
 ## enregistrement) : `data/` est résolu via `/root/MapPaths` à l'exécution.
 
-const DIRECTORIES := ["unit_types", "buildings", "resources", "technologies", "traits", "skills"]
 
 static var _cache: Dictionary = {}  # dossier → {id → définition}
 static var _data_dir: String = ""
