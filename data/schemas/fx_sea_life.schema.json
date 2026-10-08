@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_sea_life.schema.json",
+  "title": "Mer vivante de la carte de campagne (ME1)",
+  "description": "Fonds clairs, crêtes, estrans (marées) et sillages, lus par `game/scripts/map/sea_life.gd`.",
+  "type": "object",
+  "required": [
+    "description",
+    "cell_px",
+    "color",
+    "surf",
+    "shallows",
+    "crests",
+    "tide",
+    "wake"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "xy": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cell_px": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "shallows": {
+      "type": "object",
+      "required": [
+        "color",
+        "depth_m",
+        "amount",
+        "caustic",
+        "caustic_scale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "depth_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "caustic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "caustic_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "crests": {
+      "type": "object",
+      "required": [
+        "color",
+        "amount",
+        "depth_m",
+        "frequency",
+        "speed",
+        "direction"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "depth_m": {
+          "$ref": "#/$defs/xy"
+        },
+        "frequency": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "direction": {
+          "$ref": "#/$defs/xy"
+        }
+      }
+    },
+    "tide": {
+      "type": "object",
+      "required": [
+        "period_s",
+        "max_px",
+        "high_cover",
+        "mud_color",
+        "wet_color",
+        "mud_alpha",
+        "zones"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "period_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "high_cover": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "mud_color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "wet_color": {
+          "$ref": "#/$defs/rgb"
+        },
+        "mud_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "width_px",
+              "polygon_px"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "width_px": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "polygon_px": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "$ref": "#/$defs/xy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "wake": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "length",
+        "width_start",
+        "width_end",
+        "stern_x",
+        "y",
+        "alpha_moving",
+        "alpha_idle",
+        "speed",
+        "color"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "length": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "width_start": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "width_end": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "stern_x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "alpha_moving": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "alpha_idle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "color": {
+          "$ref": "#/$defs/rgb"
+        }
+      }
+    },
+    "color": {
+      "type": "object",
+      "required": [
+        "saturation_max"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "saturation_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "surf": {
+      "type": "object",
+      "required": [
+        "min_screen_px"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min_screen_px": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

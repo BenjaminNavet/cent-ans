@@ -118,6 +118,7 @@ float value_noise(vec2 p) {
 
 #include "res://shaders/sea_basins.gdshaderinc"  // TB5 : mers par bassin
 #include "res://shaders/coast_common.gdshaderinc"  // TB5 : géologie de la côte, ressac
+#include "res://shaders/sea_life.gdshaderinc"  // ME1 : mer vivante
 
 // TB1 : force de la tempête [0, 1] au point p (px carte) : province lue ici et à `storm_reach_px`
 // autour (frange déformée par le bruit : pas de bord de province net sur l'eau).
@@ -193,11 +194,16 @@ void fragment() {
 	if (ga4_on > 0.5) {
 		// GA4 : deux couches de normale défilant en sens différents (la seconde tournée), mêlées
 		// en « whiteout » ; les mipmaps lissent le lointain, estompe plus tardive que la houle.
-		vec2 ua = (p + TIME * ga4_velocity_a) / ga4_scale_a;
-		vec2 ub = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * (p + TIME * ga4_velocity_b) / ga4_scale_b;
+		// ME1 : rotation oblique, gauchissement basse fréquence et modulation lente de la force :
+		// plus de damier visible au large.
+		vec2 warp_a = (vec2(value_noise(p * 0.045), value_noise(p * 0.045 + 17.0)) - 0.5) * 3.0;
+		vec2 warp_b = (vec2(value_noise(p * 0.03 + 5.0), value_noise(p * 0.03 + 41.0)) - 0.5) * 3.0;
+		vec2 ua = mat2(vec2(0.94, 0.34), vec2(-0.34, 0.94)) * (p + TIME * ga4_velocity_a) / ga4_scale_a + warp_a;
+		vec2 ub = mat2(vec2(0.64, 0.77), vec2(-0.77, 0.64)) * (p + TIME * ga4_velocity_b) / ga4_scale_b + warp_b;
 		vec2 na = texture(water_normal, ua).rg * 2.0 - 1.0;
 		vec2 nb = texture(water_normal, ub).rg * 2.0 - 1.0;
-		float gs = ga4_normal_strength * basin_wave_here.x * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
+		float vary = 0.55 + 0.9 * value_noise(p * 0.02 + 71.0);
+		float gs = ga4_normal_strength * basin_wave_here.x * vary * (1.0 - smoothstep(0.4, 2.0, footprint) * 0.9);
 		vec2 nxy = (na + nb) * gs;
 		n = normalize(vec3(nxy.x, 1.0, nxy.y));
 	} else {
@@ -208,15 +214,15 @@ void fragment() {
 		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	}
 	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
-	float rc_near = 1.0 - smoothstep(0.6, 2.5, footprint) * 0.8;
+	float rc_near = 1.0 - smoothstep(0.4, 2.0, footprint) * 0.9;
 	float rc_ocean = smoothstep(ocean_detail_depth.x, ocean_detail_depth.y, depth);
 	vec3 rc_sea_n = water_detail_normal_ws(p, TIME, vec2(0.0)) - vec3(0.0, 1.0, 0.0);
 	vec3 rc_ocean_n = vec3(0.0);
 	vec3 rc_ocean_col = col;
 	if (ocean_detail_strength > 0.0) {
-		vec2 ou = p * ocean_detail_scale;
+		vec2 ou = mat2(vec2(0.87, 0.5), vec2(-0.5, 0.87)) * p * ocean_detail_scale + (vec2(value_noise(p * 0.035), value_noise(p * 0.035 + 23.0)) - 0.5) * 2.5;
 		vec3 on = texture(ocean_detail_normal, ou + vec2(TIME * 0.004, 0.0)).xyz * 2.0 - 1.0;
-		rc_ocean_n = vec3(on.x, 0.0, -on.y) * ocean_detail_strength;
+		rc_ocean_n = vec3(on.x, 0.0, -on.y) * ocean_detail_strength * (0.5 + 0.9 * value_noise(p * 0.025 + 11.0));
 		vec3 mean_o = max(textureLod(ocean_detail_albedo, vec2(0.5), 9.0).rgb, vec3(0.02));
 		vec3 ratio_o = clamp(texture(ocean_detail_albedo, ou).rgb / mean_o, vec3(0.5), vec3(1.6));
 		rc_ocean_col = col * mix(vec3(1.0), ratio_o, ocean_detail_strength);
@@ -239,11 +245,17 @@ void fragment() {
 	vec3 basin_tint_seen = mix(sqrt(basin_tint_here), basin_tint_here, smoothstep(0.0, 40.0, depth_col));
 	col = mix(col * basin_tint_seen, season_grey, clamp(season_grey_amount * basin_water_here.y, 0.0, 1.0)) * season_tint;  // TB5 : bassin
 	col *= 1.0 - storm_darken * storm;
+	if (sea_life_on) {  // ME1 : fonds clairs, crêtes du large, saturation bornée (bible D5)
+		col = sea_shallows(col, p, depth_col, footprint);
+		col = mix(col, crest_color, sea_crests(p, depth, footprint));
+		col = sea_limit_saturation(col);
+	}
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.
 	float coast = has_coast_dist && inside ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : -50.0;
 	float off = max(-coast, 0.0);
 	float foam_w = foam_px * (1.0 + storm_foam_width * storm);  // TB1 : bande plus large par tempête
+	foam_w = max(foam_w, footprint * surf_min_screen_px);  // ME1 : liseré lisible au dézoom
 	float band = 1.0 - smoothstep(0.0, foam_w, off);
 	float lines = smoothstep(0.55, 0.95, sin(off * 5.5 + TIME * 1.6 + value_noise(p * 0.8) * 4.0) * 0.5 + 0.5);
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
@@ -255,6 +267,9 @@ void fragment() {
 		float cliff_f = coast_enabled && has_heightmap ? coast_cliff_factor(height_m(coast_probe_uv(uv, coast, coast_to_land(uv)))) : 0.0;
 		foam = max(foam * (1.0 - 0.45 * swash_amount), coast_swash(p, coast, cliff_f, footprint).x);
 	}
+	if (sea_life_on && surf_min_screen_px > 0.0) {  // ME1 : pulsation lente du ressac, plus vive sur le large
+		foam *= 0.8 + 0.2 * sin(TIME * 1.3 + value_noise(p * 0.15) * 9.0);
+	}
 	foam = clamp(foam * season_foam * basin_wave_here.z * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1, TB5
 	// TB1, TB5 : moutons au large (tempête, bassin houleux) : crêtes rares et irrégulières de
 	// près, simple voile de teinte au dézoom (`sea_whitecaps`).
@@ -262,6 +277,16 @@ void fragment() {
 	foam = max(foam, caps.x);
 	col = mix(col, foam_color, min(foam * 0.55, 0.9) + caps.y);
 	alpha = mix(alpha, 0.9, foam * 0.5);
+	float tide_wet = 0.0;
+	if (sea_life_on && has_coast_dist && inside) {  // ME1 : estrans, vase découverte à marée basse
+		vec2 flat_tide = sea_tide_flat(uv, p, off);
+		float mud_var = 0.8 + 0.4 * value_noise(p * 2.3 + 5.0);
+		vec3 mud = mix(tide_mud_color, tide_wet_color, flat_tide.y * 0.8) * mud_var;
+		col = mix(col, mud, flat_tide.x);
+		alpha = mix(alpha, tide_mud_alpha, flat_tide.x);
+		foam *= 1.0 - flat_tide.x;
+		tide_wet = flat_tide.x;
+	}
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
 	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.
 	alpha *= 1.0 - smoothstep(-0.2, 0.6, coast);
@@ -294,7 +319,7 @@ void fragment() {
 	ALBEDO = col;
 	EMISSION = pm_emit;  // CM2
 	ALPHA = alpha;
-	ROUGHNESS = mix(mix(roughness_near, roughness_far, far_t), 0.8, foam);
+	ROUGHNESS = mix(mix(mix(roughness_near, roughness_far, far_t), 0.8, foam), 0.12, tide_wet);
 	SPECULAR = specular_amount * (1.0 - foam);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }

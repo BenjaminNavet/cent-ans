@@ -34,7 +34,7 @@
       "id": "atlantic",
       "label": "Atlantique : bleu profond, longue houle, moutons au large",
       "look": {
-        "tint": [1.35, 1.57, 1.9],
+        "tint": [0.95, 1.1, 1.22],
         "clarity": 1.0,
         "swell": 1.6,
         "long_swell": 1.0,

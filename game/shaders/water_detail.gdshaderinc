@@ -18,9 +18,13 @@ vec3 water_detail_normal_ws(vec2 world_xz, float time, vec2 flow) {
 	if (water_detail_strength <= 0.0) {
 		return vec3(0.0, 1.0, 0.0);
 	}
-	vec2 uv = world_xz * water_detail_scale;
+	// ME1 : couche 1 tournée et gauchie par une ondulation lente, couche 2 tournée autrement
+	// (plus de damier au large) ; ondulation = sinus, sans dépendance au bruit de l'hôte.
+	vec2 warp = vec2(sin(world_xz.y * 0.071 + 1.3), cos(world_xz.x * 0.057 + 0.4)) * 0.9;
+	vec2 uv = mat2(vec2(0.92, 0.39), vec2(-0.39, 0.92)) * world_xz * water_detail_scale + warp;
 	vec3 n1 = texture(water_detail_normal, uv + flow * time).xyz * 2.0 - 1.0;
-	vec3 n2 = texture(water_detail_normal, uv.yx * 0.37 + vec2(0.31, 0.57) - flow * time * 0.6).xyz * 2.0 - 1.0;
+	vec2 uv2 = mat2(vec2(0.6, -0.8), vec2(0.8, 0.6)) * world_xz * water_detail_scale * 0.37 + vec2(0.31, 0.57) - warp * 0.5;
+	vec3 n2 = texture(water_detail_normal, uv2 - flow * time * 0.6).xyz * 2.0 - 1.0;
 	// Espace tangent (x, y, z=haut) -> monde (x, haut, z) ; le vert OpenGL pointe vers -Z monde.
 	vec3 n = vec3(n1.x + n2.x, 0.0, -(n1.y + n2.y)) * 0.5 * water_detail_strength;
 	return normalize(vec3(n.x, 1.0, n.z));
