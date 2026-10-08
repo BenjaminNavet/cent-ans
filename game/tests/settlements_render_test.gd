@@ -101,6 +101,11 @@ func _run() -> void:
 	world.add_child(layer)
 	layer.setup(map_data, terrain, data, tiers)
 	layer.settlement_selected.connect(func(id: String) -> void: _selected = id)
+	# Laisse tourner des images : la couche des bâtiments hors les murs charge ses maillages sur un
+	# fil de travail qui a besoin du fil principal ; `update_view` l'attend sans rendre la main
+	# (blocage définitif si la première vue suit `setup` dans la même image).
+	for _i in 40:
+		await process_frame
 	layer.update_view(55.0)
 	layer.flush()
 	roads.update_view(0.0, 1.0)
