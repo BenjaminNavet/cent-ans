@@ -15,11 +15,10 @@ mod path;
 mod retreat;
 mod sea;
 
-pub use allowance::*;
 pub use battle::*;
 pub use path::*;
 pub use retreat::*;
-pub use sea::*;
+pub(crate) use sea::land_on_hostile_shore;
 
 use std::cmp::Reverse;
 

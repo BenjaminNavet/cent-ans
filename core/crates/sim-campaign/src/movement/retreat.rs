@@ -1,6 +1,5 @@
 //! The retreat of the beaten and the aftermath of a battle.
 
-use std::collections::BTreeMap;
 
 use super::{move_general, points_per_step};
 use crate::events::{EventKind, GameEvent};
