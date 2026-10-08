@@ -486,6 +486,14 @@ deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne
   licence : fichier `KayKit-CC0-License.txt` du pack (« License: (Creative Commons Zero, CC0) »).
   Clips d'essai seulement (`slash`, `overhead`, `pike_level`, `pike_thrust`).
 
+## Allures du cheval (lot AS8b)
+
+Trot et galop de la cavalerie de bataille : trajectoires de sabots mesurées sur des planches
+d'**Eadweard Muybridge** (« Sallie Gardner » 1878 ; disque de zoopraxiscope, trot, 1893),
+domaine public ; seules les courbes mesurées sont versionnées
+(`tools/blender_scripts/data/horse_gaits_free.json`, détail et URL dans
+`tools/blender_scripts/data/SOURCE.md`).
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons

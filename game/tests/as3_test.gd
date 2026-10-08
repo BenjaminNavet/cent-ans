@@ -78,7 +78,7 @@ func _init() -> void:
 	# Les réglages livrés respectent la bande trot entre pas et galop.
 	BattleCavalryGaits.set_override({})
 	var cfg := BattleCavalryGaits.settings()
-	_check(float(cfg["trot_min_speed"]) > float(cadence["c_walk"]) and float(cfg["gallop_min_speed"]) < float(cadence["c_gallop"]), "seuils entre c_walk et c_gallop")
+	_check(float(cfg["trot_min_speed"]) > float(cadence["c_walk"]) and float(cfg["gallop_min_speed"]) < 1.8 * float(cadence["c_gallop"]), "seuils entre c_walk et c_gallop (cadence jusqu'à ×1,8, AS8b)")
 	_check(float(cfg["trot_min_speed"]) < float(cfg["gallop_min_speed"]), "trot_min < gallop_min")
 	print("AS3 cavalry gaits (fine=%s): %s" % [BattleSkinned.fine_enabled(), "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
