@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot TB6 : lumière et atmosphère de la carte de campagne. Vérifie les paramètres appliqués par
 ## saison et par météo (ombres de nuages bornées, lumière dorée, brume du matin) et que la brume
-## épargne la province sélectionnée. Les chiffres de rendu viennent de `tb6_shot.gd`.
+## épargne la province sélectionnée.
 ## Usage : godot --headless --path game --script res://tests/tb6_light_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")

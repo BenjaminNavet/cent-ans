@@ -96,7 +96,7 @@ func _to_jpg(png: String) -> bool:
 	return err == OK
 
 
-## Vue 7 : fenêtre de rencontre sur la carte (même mise en scène que `cv3_4_ui_shot.gd`).
+## Vue 7 : fenêtre de rencontre sur la carte.
 func _encounter() -> void:
 	var png := ""
 	for arg in OS.get_cmdline_user_args():

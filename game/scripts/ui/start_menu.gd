@@ -11,8 +11,8 @@ extends Control
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
 ## illustré 2D (`MenuBackground`).
 ##
-## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`,
-## `credits`, `faction`, `intro`, `demos`, `historical` ou `loading` ouvre l'écran correspondant avant la capture ;
+## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=faction`
+## ouvre le choix de faction avant la capture ;
 ## `--autostart[=fac_x]` démarre directement une campagne (jeu exporté).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
@@ -105,31 +105,9 @@ func _ready() -> void:
 			return
 	var staged := false
 	for arg in args:
-		if arg == "--menu-stage=settings":
-			open_settings()
-			staged = true
-		elif arg == "--menu-stage=credits":
-			open_credits()
-			staged = true
-		elif arg == "--menu-stage=faction":
+		if arg == "--menu-stage=faction":
 			show_faction_select(true)
 			staged = true
-		elif arg == "--menu-stage=faction_map":  # FE6 : choix de faction sur la carte, fiche au survol
-			show_faction_select(true)
-			faction_select.stage_map("fac_foix_bearn")
-			staged = true
-		elif arg == "--menu-stage=demos":
-			open_demos()
-			staged = true
-		elif arg == "--menu-stage=historical":
-			open_historical()
-			staged = true
-		elif arg == "--menu-stage=intro":
-			open_intro()
-			staged = true
-		elif arg == "--menu-stage=loading":
-			_on_start_requested.call_deferred(faction_select.selected_faction, 1337, "")
-			return
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_then_quit(arg.trim_prefix("--screenshot="))

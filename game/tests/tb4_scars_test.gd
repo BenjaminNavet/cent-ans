@@ -3,8 +3,7 @@ extends SceneTree
 ## Lot TB4 (campagne façon Thrones of Britannia) : conséquences visibles de la guerre et des
 ## fléaux.
 ##  1. brûlis posé par-dessus la carte de couleur (SS2) et les matières (HB3), masque de terroir
-##     échantillonné à son échelle (carte non carrée) ; les chiffres de rendu viennent de
-##     `ss_shot.gd --stats --devastate=` ;
+##     échantillonné à son échelle (carte non carrée) ;
 ##  2. peste : fosses, portes marquées, charrette des morts selon l'intensité, au palier proche,
 ##     sans pictogramme ; retirées quand la peste cesse ;
 ##  3. champ de bataille : tertre, corbeaux, débris à l'endroit de la bataille, corbeaux puis

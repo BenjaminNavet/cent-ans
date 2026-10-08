@@ -41,9 +41,6 @@ var stats: Dictionary = {}
 ## Plan de la ville 1:1 d'une colonie : `func(id) -> {plan, anchor: Vector2, meters_per_unit}`
 ## (`{}` tant qu'elle n'est pas chargée). Sans lui, pas de portes marquées.
 var plan_provider: Callable = Callable()
-## Captures (`tb4_shot.gd`) : engins imposés par armée (`[{kind, ready, turns_left}]`), à la place
-## de ceux du pont.
-var forced_engines: Dictionary = {}
 
 var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
@@ -601,7 +598,7 @@ func _refresh_sieges(sim: Object, new_turn: bool) -> void:
 		var attached: bool = entry != null and entry["marker"] == marker and entry["node"] != null and is_instance_valid(entry["node"])
 		if attached and not stale:
 			continue
-		var engines: Variant = forced_engines[id] if forced_engines.has(id) else (sim.call("get_assault_odds", id) as Dictionary).get("engines", [])
+		var engines: Variant = (sim.call("get_assault_odds", id) as Dictionary).get("engines", [])
 		var stages := engine_stages(engines, int(block.get("almost_ready_turns", 0)))
 		var signature := str(stages)
 		if attached and str(entry["signature"]) == signature:

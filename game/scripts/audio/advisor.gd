@@ -24,8 +24,6 @@ const MAX_WAIT_S := 120.0
 const BLOCK_CHECK_S := 0.2
 ## Q4 : largeur de la bulle et place (bord gauche, au-dessus du bas d'écran : hors des boutons
 ## d'action du panneau de province, de la barre d'unités et des ordres du chef).
-const BUBBLE_WIDTH := 420.0  # PO1 : plus utilisé pour la place (zone `TOASTS`)
-const BUBBLE_BOTTOM := 0.62
 
 var silent := false
 ## Faux en capture et en test : les « premières fois » ne sont pas enregistrées.

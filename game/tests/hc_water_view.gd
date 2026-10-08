@@ -1,6 +1,6 @@
 extends RefCounted
 
-## Lot HC2 (ADR 0161 §3) : outils communs à `hc_water_test.gd` et `hc_water_shots.gd` — carte de
+## Lot HC2 (ADR 0161 §3) : outils communs à `hc_water_test.gd` — carte de
 ## campagne instanciée, caméra posée sur une vue, et mesure de la part d'eau intérieure d'une image
 ## sans la lire : les couleurs d'eau (lacs, étangs, mares, nappe des lacs) passent en magenta le
 ## temps d'une image, on compte les pixels magenta, puis les couleurs d'origine sont rétablies.
