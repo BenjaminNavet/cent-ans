@@ -11,7 +11,7 @@ Branche `feat/as8c` (partie de `main` d83187ee5, main fusionné pour `tools/godo
 - Shaders `animal_motion.gdshaderinc` (tables, cahot en raies, roulis, descente de tête mesurée) et `camp_horse.gdshader`.
 - Tests : `as1_test`, `as2_test`, `as8c_test`, smoke, pytest `test_animal_motion_schema.py`; sonde de compilation
   `as8c_shader_probe.gd` (via `tools/godot_bg.sh`) sans erreur de shader.
-- Attribution : `data/fx/animal_motion_SOURCE.md`, `CREDITS.md` (fichiers de données CC BY-SA 2.0 fr : Rama).
+- Attribution : `data/fx/animal_motion_SOURCE.md`, `CREDITS.md` (seul `camp_horse_motion.json` est CC BY-SA 2.0 fr : Rama).
 
 ## Points ouverts
 - Suivi du sabot instable : la courbe de pas vient du centre de la jambe arrière (cadence 0,71 Hz, sinusoïde nette).

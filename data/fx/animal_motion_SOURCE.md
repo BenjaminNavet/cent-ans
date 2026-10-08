@@ -1,6 +1,6 @@
 # Provenance — mouvement des bêtes et charrettes (lot AS8c, ADR 0189)
 
-Fichiers : `animal_motion.json` (réglages), `animal_motion_measured.json` (mesures brutes et dérivées).
+Fichiers : `animal_motion.json` (réglages), `animal_motion_measured.json` (mesures brutes et dérivées, vidéos CC0), `camp_horse_motion.json` (chevaux de camp : réglages et mesures, vidéos Rama CC BY-SA).
 Les vidéos ne sont pas dans le dépôt (`~/dev/cent-ans-mocap-src/video/free/animals/`, un
 `LICENSE.txt` par fichier, licence relue sur la page Commons par l'API le 08/10/2026). Seules les
 mesures (nombres) sont versionnées ; elles sont reproductibles par
@@ -18,11 +18,15 @@ des images extraites ; `tools/video_mocap/measure_motion.py`).
 la boue, aucun cycle de pas mesurable.
 
 ## Licence des fichiers de données
-Les courbes de `animal_motion.json` et `animal_motion_measured.json` dérivent en partie de vidéos
-**CC BY-SA 2.0 fr** (Rama) : ces deux fichiers de données sont donc diffusés sous
-**CC BY-SA 2.0 fr**, avec attribution à Rama, « Horse standing / chewing / eating MVI 7491 / 7493 /
-7496 », Wikimedia Commons ; le reste du jeu n'est pas concerné (ADR 0189). Les autres sources sont
-CC0 (aucune obligation, mention par courtoisie).
+`animal_motion.json` et `animal_motion_measured.json` ne dérivent que de vidéos **CC0** : aucune
+obligation (mention par courtoisie).
+
+Les valeurs tirées des vidéos **CC BY-SA 2.0 fr** (Rama) sont isolées dans
+**`camp_horse_motion.json`** (réglages des chevaux de camp, mâchonnement du cheval de la campagne,
+mesures `horse_rest` et clips `horse_*`), seul fichier de données diffusé sous **CC BY-SA 2.0 fr**,
+avec attribution à Rama, « Horse standing / chewing / eating MVI 7491 / 7493 / 7496 », Wikimedia
+Commons ; le reste du jeu n'est pas concerné (ADR 0189). `animal_motion.gd` le lit en plus de
+`animal_motion.json` ; `as8c_measure.py` y écrit `horse_rest` et les clips Rama.
 
 ## Hypothèses (pas des mesures)
 Échelles : garrot des bovins 1,4 m, rayon de roue de la charrette 0,6 m (208 px/m). Rapport de marche

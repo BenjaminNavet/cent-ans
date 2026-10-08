@@ -25,6 +25,12 @@ func _measured() -> Dictionary:
 	return parsed if parsed is Dictionary else {}
 
 
+func _camp_file() -> Dictionary:
+	var path := AnimalMotion.MAP_PATHS_SCRIPT.default_data_dir().path_join("fx/camp_horse_motion.json")
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return parsed if parsed is Dictionary else {}
+
+
 func _init() -> void:
 	var off := OS.get_cmdline_user_args().has("--no-as1")
 	var measured := _measured()
@@ -88,9 +94,11 @@ func _init() -> void:
 	var camp_settings: Dictionary = AnimalMotion.settings()["camp_horse"]
 	_check(is_equal_approx(head3.w, float(camp_settings["head_ramp_s"])), "camp : durée de descente de la tête")
 	_check(is_equal_approx(head3.y, float(camp_settings["chew_hz"])), "camp : mâchonnement")
-	if measured.has("horse_rest"):
-		_check(absf(float(camp_settings["head_lift_rad"]) - float(measured["horse_rest"]["head_lift_rad"])) < 0.01, "camp : tête relevée mesurée")
-		_check(absf(float(camp_settings["tail_hz"]) - float(measured["horse_rest"]["tail_hz"])) < 0.01, "camp : fréquence de queue mesurée")
+	var rest: Dictionary = _camp_file().get("horse_rest", {})
+	_check(not measured.has("horse_rest"), "mesures Rama hors de animal_motion_measured.json")
+	if not rest.is_empty():
+		_check(absf(float(camp_settings["head_lift_rad"]) - float(rest["head_lift_rad"])) < 0.01, "camp : tête relevée mesurée")
+		_check(absf(float(camp_settings["tail_hz"]) - float(rest["tail_hz"])) < 0.01, "camp : fréquence de queue mesurée")
 	# Le shader lit bien les tables et les raies (et non plus le sinus unique de l'AS1).
 	var inc := FileAccess.get_file_as_string(SHADER_INC)
 	_check(inc.contains("am_swing_at(leg_u)") and inc.contains("am_lift_at(leg_u)"), "shader : tables de pas non lues")

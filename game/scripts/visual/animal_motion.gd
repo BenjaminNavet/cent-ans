@@ -10,6 +10,7 @@ extends RefCounted
 ## `enabled` ou par `--no-as1` après `--` (banc A/B).
 
 const FX_PATH := "fx/animal_motion.json"
+const CAMP_FX_PATH := "fx/camp_horse_motion.json"  # AS8c : valeurs tirées de vidéos CC BY-SA, fichier propre
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const CAMP_SHADER := preload("res://shaders/camp_horse.gdshader")
 
@@ -26,7 +27,23 @@ static func settings() -> Dictionary:
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 			if parsed is Dictionary:
 				_settings = parsed
+		_merge_camp_horse_motion()
 	return _settings
+
+
+## Ajoute les réglages des chevaux de camp et le mâchonnement du cheval de la campagne, lus dans
+## leur fichier à part (`camp_horse_motion.json`, licence propre).
+static func _merge_camp_horse_motion() -> void:
+	var path := _data_dir().path_join(CAMP_FX_PATH)
+	if not FileAccess.file_exists(path):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not parsed is Dictionary:
+		return
+	_settings["camp_horse"] = parsed.get("camp_horse", {})
+	var models: Variant = (_settings.get("campaign", {}) as Dictionary).get("models", null)
+	if models is Dictionary and (models as Dictionary).get("horse") is Dictionary:
+		(models["horse"] as Dictionary).merge(parsed.get("campaign_horse", {}), true)
 
 
 ## Recharge les données (tests).

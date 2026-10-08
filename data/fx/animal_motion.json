@@ -3,16 +3,16 @@
   "enabled": true,
   "source": {
     "measured_file": "fx/animal_motion_measured.json",
+    "camp_horse_file": "fx/camp_horse_motion.json",
     "tool": "tools/video_mocap/as8c_measure.py",
     "videos": [
       "Passage d'un troupeau de montbéliardes à Boissia (Jura) en juillet 2018.webm (CC0)",
       "Sheeps near Elbe river.webm (CC0)",
-      "Two Horse Drawn Covered Wagons.webm (CC0)",
-      "Horse standing MVI 7491 / Horse chewing MVI 7493 / Horse eating MVI 7496, Rama (CC BY-SA 2.0 fr)"
+      "Two Horse Drawn Covered Wagons.webm (CC0)"
     ],
-    "license_note": "Les courbes de ce fichier dérivent en partie de vidéos CC BY-SA 2.0 fr (Rama) : ce fichier de données seul est sous la même licence ; le reste du jeu n'est pas concerné (ADR 0189).",
-    "measured_keys": "stride_m (bovins : 0,614 garrot ; chevaux de trait : 1,76 m), swing_lut, lift_lut, nod_rad, graze_rad, graze_ramp_s, chew_hz, chew_rad, jolt_lines, roll_rad ; camp_horse : head_lift_rad, head_ramp_s, chew_hz, chew_rad, tail_swing_m, tail_hz, breath_m (borne haute)",
-    "assumed_keys": "swing_m (rapport de marche 0,6 admis), lift_m, bob_m, shift_m, tail_*, breath_* de la campagne, graze_cycle_s, graze_share, shift_period_s et tail_swish_period_s des chevaux de camp, stride_m des moutons (non mesurés ou non mesurables sur ces vidéos)"
+    "license_note": "Toutes les vidéos sources de ce fichier sont CC0. Les valeurs tirées des vidéos CC BY-SA 2.0 fr de Rama (chevaux de camp, mâchonnement du cheval de la campagne) vivent à part dans `fx/camp_horse_motion.json`, seul fichier de données sous cette licence.",
+    "measured_keys": "stride_m (bovins : 0,614 garrot ; chevaux de trait : 1,76 m), swing_lut, lift_lut, nod_rad, graze_rad, graze_ramp_s, jolt_lines, roll_rad",
+    "assumed_keys": "swing_m (rapport de marche 0,6 admis), lift_m, bob_m, shift_m, tail_*, breath_* de la campagne, graze_cycle_s, graze_share, stride_m des moutons (non mesurés ou non mesurables sur ces vidéos)"
   },
   "campaign": {
     "defaults": {
@@ -48,39 +48,11 @@
     "models": {
       "ox": {"half_m": 0.8, "belly_m": 0.77, "withers_m": 1.4, "neck_start_m": 0.64, "neck_len_m": 0.4, "neck_pivot_m": 1.19, "stride_m": 0.86, "swing_m": 0.26},
       "cow": {"half_m": 0.775, "belly_m": 0.715, "withers_m": 1.3, "neck_start_m": 0.62, "neck_len_m": 0.4, "neck_pivot_m": 1.1, "stride_m": 0.8, "swing_m": 0.24},
-      "horse": {"half_m": 0.725, "belly_m": 0.8, "withers_m": 1.45, "neck_start_m": 0.58, "neck_len_m": 0.42, "neck_pivot_m": 1.22, "stride_m": 1.76, "swing_m": 0.26, "lift_m": 0.09, "graze_share": 0.35, "tail_swing_m": 0.1, "chew_hz": 1.11, "chew_rad": 0.034},
+      "horse": {"half_m": 0.725, "belly_m": 0.8, "withers_m": 1.45, "neck_start_m": 0.58, "neck_len_m": 0.42, "neck_pivot_m": 1.22, "stride_m": 1.76, "swing_m": 0.26, "lift_m": 0.09, "graze_share": 0.35, "tail_swing_m": 0.1},
       "sheep": {"half_m": 0.44, "belly_m": 0.35, "withers_m": 0.72, "neck_start_m": 0.3, "neck_len_m": 0.15, "neck_pivot_m": 0.58, "tail_len_m": 0.07, "stride_m": 0.8, "swing_m": 0.09, "lift_m": 0.035, "bob_m": 0.008, "graze_cycle_s": 8.0, "graze_rad": 0.75, "graze_share": 0.8, "chew_hz": 1.05, "chew_rad": 0.045, "tail_swing_m": 0.04, "shift_m": 0.006, "breath_m": 0.006},
       "stone_cart": {"base": "ox", "anchor_m": 3.0, "wheel_radius_m": 0.55, "wheel_x_min_m": 0.65},
       "merchant_cart": {"base": "horse", "anchor_m": 3.0, "wheel_radius_m": 0.62, "wheel_x_min_m": 0.67},
       "dead_cart": {"half_m": 0.0, "wheel_radius_m": 0.5, "wheel_x_min_m": 0.61}
     }
-  },
-  "camp_horse": {
-    "head_pivot_x_m": -0.75,
-    "head_pivot_y_m": 1.35,
-    "head_start_x_m": -0.75,
-    "head_end_x_m": -1.15,
-    "head_lift_rad": 0.549,
-    "head_ramp_s": 1.0,
-    "head_cycle_s": 15.0,
-    "head_up_share": 0.22,
-    "head_nod_rad": 0.04,
-    "head_nod_hz": 0.7,
-    "chew_hz": 1.11,
-    "chew_rad": 0.034,
-    "tail_start_x_m": 0.6,
-    "tail_end_x_m": 0.9,
-    "tail_top_y_m": 1.45,
-    "tail_len_m": 0.75,
-    "tail_swing_m": 0.042,
-    "tail_hz": 0.322,
-    "tail_swish_period_s": 20.0,
-    "shift_period_s": 22.0,
-    "shift_lift_m": 0.045,
-    "shift_back_m": 0.04,
-    "shift_sway_m": 0.018,
-    "breath_m": 0.004,
-    "breath_side": 0.04,
-    "breath_hz": 0.3
   }
 }

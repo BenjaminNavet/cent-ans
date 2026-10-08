@@ -6,7 +6,9 @@
 
 Runs ``measure_motion.py`` on a fixed list of clips (point positions picked by eye on contact
 sheets, see ``CLIPS``) and writes the numbers that feed ``data/fx/animal_motion.json`` to
-``data/fx/animal_motion_measured.json``. Videos stay outside the repository::
+``data/fx/animal_motion_measured.json`` (CC0 videos) and ``data/fx/camp_horse_motion.json``
+(``horse_rest`` and the Rama clips: CC BY-SA 2.0 fr, kept in their own file). Videos stay outside
+the repository::
 
     uv run tools/video_mocap/as8c_measure.py [--src ~/dev/cent-ans-mocap-src/video/free/animals] [--out data/fx/animal_motion_measured.json]
 
@@ -581,11 +583,30 @@ def main():
     parser.add_argument(
         "--out", default=str(HERE.parent.parent / "data/fx/animal_motion_measured.json")
     )
+    parser.add_argument(
+        "--camp-out", default=str(HERE.parent.parent / "data/fx/camp_horse_motion.json")
+    )
     args = parser.parse_args()
     result = derive(Path(args.src))
+    # The Rama videos are CC BY-SA 2.0 fr: their numbers go to their own data file, so that
+    # animal_motion*.json stay CC0-derived (ADR 0189).
+    rest = result.pop("horse_rest")
+    rest.pop("source", None)
+    rama_clips = {
+        name: result["clips"].pop(name)
+        for name in ("horse_stand", "horse_chew", "horse_eat")
+    }
     Path(args.out).write_text(
         json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    camp_path = Path(args.camp_out)
+    camp = json.loads(camp_path.read_text(encoding="utf-8"))
+    camp["horse_rest"] = rest
+    camp["clips"] = rama_clips
+    camp_path.write_text(
+        json.dumps(camp, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    result["horse_rest"] = rest
     json.dump(result, sys.stdout, indent=1, ensure_ascii=False)
 
 

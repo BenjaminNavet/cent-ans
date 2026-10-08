@@ -36,21 +36,6 @@
    "start_s": 41.0,
    "end_s": 58.0
   },
-  "horse_stand": {
-   "video": "rama7491/rama7491.ogv",
-   "start_s": 0.1,
-   "end_s": 7.0
-  },
-  "horse_chew": {
-   "video": "rama7493/rama7493.ogv",
-   "start_s": 0.3,
-   "end_s": 6.4
-  },
-  "horse_eat": {
-   "video": "rama7496/rama7496.ogv",
-   "start_s": 10.0,
-   "end_s": 18.0
-  },
   "wagon_box": {
    "video": "wagons/wagons.webm",
    "start_s": 6.5,
@@ -167,33 +152,6 @@
     1.8
    ]
   ]
- },
- "horse_rest": {
-  "source": "rama7491/7493/7496 (CC BY-SA 2.0 fr)",
-  "chew_peaks_hz": [
-   [
-    1.113,
-    3.6
-   ],
-   [
-    0.938,
-    2.1
-   ],
-   [
-    2.373,
-    1.7
-   ]
-  ],
-  "chew_amp_rad": 0.034,
-  "head_up_deg": 1.5,
-  "head_down_deg": 32.9,
-  "head_lift_rad": 0.549,
-  "head_lowering_s": 1.03,
-  "tail_swing_half_rad": 0.0558,
-  "tail_hz": 0.322,
-  "stand_hoof_motion_half_body": 0.0012,
-  "stand_barrel_half_body": 0.0006,
-  "note": "Aucun report de poids ni souffle resolu en 7 s (< 0,5 px) : bornes superieures seulement."
  },
  "wagon": {
   "source": "wagons (CC0)",

@@ -1,4 +1,4 @@
-"""Validates data/fx/animal_motion.json (lots AS1, AS8c) and its link to the measured values."""
+"""Validates data/fx/animal_motion.json and camp_horse_motion.json (lots AS1, AS8c)."""
 
 import json
 from pathlib import Path
@@ -35,9 +35,21 @@ def test_gait_curves_come_from_the_measurement() -> None:
     for setting, line in zip(defaults["jolt_lines"], lines, strict=True):
         assert abs(setting["amp_m"] - line["amp_m"]) < 1e-4
         assert abs(setting["stride_ratio"] * stride - line["spatial_period_m"]) < 0.02
-    camp = motion["camp_horse"]
-    assert abs(camp["chew_hz"] - measured["horse_rest"]["chew_peaks_hz"][0][0]) < 0.05
-    assert abs(camp["head_lift_rad"] - measured["horse_rest"]["head_lift_rad"]) < 0.01
+    assert "horse_rest" not in measured and "camp_horse" not in motion
+
+
+def test_camp_horse_motion_matches_schema_and_measurement() -> None:
+    """The CC BY-SA camp horse file matches its schema and its own measured block."""
+    document = _load("fx/camp_horse_motion.json")
+    schema = _load("schemas/fx_camp_horse_motion.schema.json")
+    Draft202012Validator.check_schema(schema)
+    errors = list(Draft202012Validator(schema).iter_errors(document))
+    assert not errors, [error.message for error in errors]
+    assert "CC BY-SA" in document["licence"]
+    camp, rest = document["camp_horse"], document["horse_rest"]
+    assert abs(camp["chew_hz"] - rest["chew_peaks_hz"][0][0]) < 0.05
+    assert abs(camp["head_lift_rad"] - rest["head_lift_rad"]) < 0.01
+    assert abs(document["campaign_horse"]["chew_hz"] - camp["chew_hz"]) < 1e-9
 
 
 def test_lut_phase_origin() -> None:

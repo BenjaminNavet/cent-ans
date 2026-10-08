@@ -551,14 +551,15 @@ domaine public ; seules les courbes mesurées sont versionnées
 ## Mouvement des bêtes et charrettes (lot AS8c)
 
 Courbes de pas, mâchonnement, cahot et roulis mesurés sur des vidéos libres de Wikimedia Commons
-(`data/fx/animal_motion_measured.json`, détail dans `data/fx/animal_motion_SOURCE.md`) :
+(`data/fx/animal_motion_measured.json` et `camp_horse_motion.json`, détail dans `data/fx/animal_motion_SOURCE.md`) :
 
 - « Passage d'un troupeau de montbéliardes à Boissia (Jura) en juillet 2018 » — Benoît Prieur, CC0.
 - « Sheeps near Elbe river » — Tvabutzku1234, CC0.
 - « Two Horse Drawn Covered Wagons » — Thomas Farley, CC0.
 - « Horse standing MVI 7491 », « Horse chewing MVI 7493 », « Horse eating MVI 7496 » — Rama,
-  [CC BY-SA 2.0 fr](https://creativecommons.org/licenses/by-sa/2.0/fr/) ; les fichiers de données
-  `animal_motion.json` et `animal_motion_measured.json` qui en dérivent portent la même licence.
+  [CC BY-SA 2.0 fr](https://creativecommons.org/licenses/by-sa/2.0/fr/) ; seul le fichier de
+  données `data/fx/camp_horse_motion.json`, qui en dérive, porte la même licence
+  (`animal_motion.json` et `animal_motion_measured.json` ne dérivent que de vidéos CC0).
 
 ## Polices
 

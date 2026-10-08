@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "fx_animal_motion.schema.json",
   "title": "Mouvement procédural des bêtes (lot AS1)",
-  "description": "Réglages des shaders de sommets `folk_prop.gdshader` (bêtes et attelages de la carte) et `camp_horse.gdshader` (chevaux au piquet des camps de bataille). Mètres du modèle, radians, secondes.",
+  "description": "Réglages des shaders de sommets `folk_prop.gdshader` (bêtes et attelages de la carte) (les réglages du shader `camp_horse.gdshader`, chevaux au piquet des camps de bataille, sont dans `camp_horse_motion.json`). Mètres du modèle, radians, secondes.",
   "type": "object",
-  "required": ["enabled", "campaign", "camp_horse"],
+  "required": ["enabled", "campaign"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
@@ -15,6 +15,7 @@
       "required": ["measured_file", "tool", "videos", "license_note"],
       "properties": {
         "measured_file": {"type": "string"},
+        "camp_horse_file": {"type": "string"},
         "tool": {"type": "string"},
         "videos": {"type": "array", "items": {"type": "string"}, "minItems": 1},
         "license_note": {"type": "string"},
@@ -34,12 +35,6 @@
           "additionalProperties": {"$ref": "#/$defs/campaign_params"}
         }
       }
-    },
-    "camp_horse": {
-      "type": "object",
-      "additionalProperties": false,
-      "minProperties": 1,
-      "patternProperties": {"^[a-z_]+$": {"type": "number"}}
     }
   },
   "$defs": {
