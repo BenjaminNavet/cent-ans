@@ -1,7 +1,7 @@
 # Plan : liste des colonies (touche B)
 
 Spec : `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` (validée le 2026-09-27).
-Suivi : `docs/wip/colonies-liste.md`.
+Suivi : `docs/archive/chantiers.md`.
 
 Deux lots séquentiels, chacun sur sa branche et dans son worktree, avec une cible cargo privée (voir les mémoires sur le dossier `target` partagé). L2 dépend du pont livré par L1. Les deux lots sont mécaniques une fois la spec lue, donc ils peuvent tourner sur Sonnet (`cent-ans-dev`).
 
@@ -42,7 +42,7 @@ Deux lots séquentiels, chacun sur sa branche et dans son worktree, avec une cib
    - les infobulles de danger traduisent les clés : siège → « Assiégée », occupied → « Occupée », revolt_countdown → « Révolte dans N saisons », unrest → « Agitation au-dessus du seuil de révolte ».
 4. **Tests** : activer `holdings_test.gd` (cas de la spec § 2), puis lancer `holdings_test`, `unit_roster_test` et `smoke.gd`.
 5. **Capture** : `game/tests/holdings_shot.gd` écrit `docs/img/holdings.png`. La session principale fait une seule lecture pour juger la lisibilité ; les sous-agents ne font pas de capture.
-6. **Documentation, puis commit `HL2: ...`** : section « Liste des colonies (B) » dans `docs/manuel.md`, mise à jour de `docs/wip/colonies-liste.md`. Fusion en fast-forward.
+6. **Documentation, puis commit `HL2: ...`** : section « Liste des colonies (B) » dans `docs/manuel.md`, mise à jour de `docs/archive/chantiers.md`. Fusion en fast-forward.
 
 ## Critères de fin
 

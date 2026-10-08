@@ -139,7 +139,7 @@ Godot : `smoke.gd` passe ; test existant du thème (s'il charge les textures) in
 
 ## 8. Organisation
 
-- Branche `feat/nb`, worktree `../game_project-nb` ; note `docs/wip/nb.md`.
+- Branche `feat/nb`, worktree `../game_project-nb` ; note `docs/archive/chantiers.md`.
 - NB-S (squelette) : API vide, schéma, YAML vide typé, tests `skip`, section budget → commit.
 - Ordre : NB-S → client OpenRouter → NB-DA (jugement) → NB0 (jugement) → NB1 chaîne →
   NB1 génération → jugement → fusion `--ff-only` dans `main`.

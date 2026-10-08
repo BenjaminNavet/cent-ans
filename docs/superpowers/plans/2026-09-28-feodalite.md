@@ -1,7 +1,7 @@
 # Plan : FE — féodalité et petites factions jouables
 
 Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md` (validée le 2026-09-28).
-Suivi : `docs/wip/fe.md` (orchestration) et `docs/wip/fe<N>-<objet>.md` (un par lot).
+Suivi : `docs/archive/chantiers.md` (orchestration) et `docs/wip/fe<N>-<objet>.md` (un par lot).
 ADR : **0098** (titres au-dessus des factions). Budget : section « FE » de `docs/budget.md`, plafond propre 15 $ (portraits F7 seulement).
 
 Organisation :
@@ -36,7 +36,7 @@ Points d'ancrage existants (à réutiliser, pas à dupliquer) :
    - API publique vide : `liege_of(faction)`, `province_lieges(province)`, `direct_vassals(faction)`, `feudal_tree(faction)`, `war_escalation_preview(attacker, target)`, `open_felony`, `declare_commise`, `transfer_title`, `evaluate_objectives` ;
    - `sim-campaign/tests/feudal_*.rs` désactivés (`#[ignore]`).
 7. **Sauvegarde** : version de format incrémentée ; message « sauvegarde d'une version antérieure » côté pont.
-8. `docs/wip/fe.md`, section FE de `docs/budget.md` (0 $). Tous les tests existants passent (le comportement est inchangé à données migrées). Commit `FE0: titles skeleton, migration, ADR 0098`. Puis `git branch feat/fe main`.
+8. `docs/archive/chantiers.md`, section FE de `docs/budget.md` (0 $). Tous les tests existants passent (le comportement est inchangé à données migrées). Commit `FE0: titles skeleton, migration, ADR 0098`. Puis `git branch feat/fe main`.
 
 ## Vague 1 (4 agents)
 
@@ -63,7 +63,7 @@ Points d'ancrage existants (à réutiliser, pas à dupliquer) :
 ### F4a — Registre France (`feat/fe4a-france`, `cent-ans-mech`)
 - Subdiviser les provinces françaises pour les fiefs manquants (Alençon, Évreux, Albret, Charolais, Penthièvre, Bourbon, Blois, Foix-Béarn, Armagnac, Valois…). Nouvelles graines dans `data/provinces/`, `cent-ans geo provinces`, réaffectation des colonies.
 - Titres, factions, souverains et héritiers (personnages), objectifs historiques, sources.
-- Relecture historienne (agent dédié, rapport dans `docs/wip/fe4a-france.md`).
+- Relecture historienne (agent dédié, rapport dans `docs/archive/chantiers.md`).
 - Tests : pytest invariants ; `cargo test` (chargement des données).
 
 ## Vague 2 (5 agents, après fusion de la vague 1)

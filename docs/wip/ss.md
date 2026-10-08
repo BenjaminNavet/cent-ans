@@ -3,7 +3,7 @@
 Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0142. Autonomie totale (joueur 30/09).
 
 ## État : fusionné dans main, en attente du jugement du joueur
-- [x] SS1 `cent-ans geo colormap` : BC1 14336×12288 + mipmaps, 4 parts (~46 Mo), cuisson ~2 min 20 ; style `data/map/colormap_style.yaml` ; aperçu `data/map/colormap_preview.jpg` ; note `docs/wip/ss1-colormap.md`.
+- [x] SS1 `cent-ans geo colormap` : BC1 14336×12288 + mipmaps, 4 parts (~46 Mo), cuisson ~2 min 20 ; style `data/map/colormap_style.yaml` ; aperçu `data/map/colormap_preview.jpg` ; note `docs/archive/chantiers.md`.
 - [x] SS2 shader : `satellite_ground.gdshaderinc` (crochet après `fp_parcels`), chargement `ReliefLandcover.load_colormap`, repli sans carte ; routes principales en terre (`road_renderer.gd`), estompées de loin avec la carte ; relief moins exagéré de près (`shading_relief_near` 1,3).
 - [x] **Cause principale du « relief IGN » trouvée** : le brouillard matinal météo (`weather_ground`) peignait le sol en gris clair jusqu'à 80 % dans les basses terres (tout le bassin parisien). Plafonné à `weather_mist_max` 0,15 et teinté par le sol. Mesure (Paris, distance 90, été) : sol rendu 125/112/91 (beige gris) → 108/95/71 ; avant la météo 94/81/55.
 - [x] SS3 lacs : `cent-ans geo lakes` → `data/map/lakes.json` (762 nappes, 67 nommées), `lakes_renderer.gd`, mode `sheet` de `river_water.gdshader`.

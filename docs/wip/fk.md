@@ -12,7 +12,7 @@ Coût cloud : 0 $.
 
 ## Intégration
 Worktree `../game_project-fk`, branche `integration/fk` : FK2 + FK3 fusionnés (25273ae81). Rebranchement des modèles FK2 dans `FolkModels` en cours (figurines `villager_*`, accessoires face +X). FK1 (feat/fk1-core) : taux d'incidents mesuré 0,147/tour (sous la cible 0,25-0,5 ; FK5 ajoute 15 événements).
-FK3 : clés de `map_scenes.json` lues par le rendu à aligner avec le schéma FK1 (voir docs/wip/fk3-folk.md).
+FK3 : clés de `map_scenes.json` lues par le rendu à aligner avec le schéma FK1 (voir docs/archive/chantiers.md).
 
 ## Points ouverts vague 2
 - FK4 : fumées de scène (feux LifeEffects) visibles jusqu'au palier moyen ; crue = plaque opaque, pas de gens sur les toits ; fuyards en ligne droite ; orientation étals/échafaudage à vérifier.

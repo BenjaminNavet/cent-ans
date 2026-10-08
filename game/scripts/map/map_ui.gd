@@ -1217,7 +1217,7 @@ func _setup_hud() -> void:
 ## d'autres contrôleurs), dans le rectangle `TOP_BAR` ; la cloche aussi (ses pastilles d'alerte
 ## débordent vers le haut, elles ne doivent pas être coupées) : `layout_hud` la cale en bas
 ## contre le bord gauche de la minicarte (la zone `MINIMAP`, 0,18 × 0,28, ne peut porter les
-## deux : écart consigné dans `docs/wip/po1-layout.md`).
+## deux : écart consigné dans `docs/archive/chantiers.md`).
 func _setup_zones() -> void:
 	UiZones.layout().attach_host(self)
 	for control: Control in [general_seal, army_strip, army_actions]:

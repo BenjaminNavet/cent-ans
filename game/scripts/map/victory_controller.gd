@@ -103,7 +103,7 @@ func setup(campaign_map: Node) -> void:
 	end_box.add_theme_constant_override("separation", 10)
 	card.add_child(end_box)
 	end_title = Label.new()
-	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/wip/p2f-fonts.md).
+	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/archive/chantiers.md).
 	end_title.add_theme_font_size_override("font_size", 40)
 	end_title.add_theme_color_override("font_color", Color(0.45, 0.10, 0.06))
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

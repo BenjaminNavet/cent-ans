@@ -165,7 +165,7 @@ CLIPS_NT14 = [
         **NT14,
     ),
 ]
-# Baked into ``video_trial/``: per gesture the better of NT13 and NT14 (docs/wip/nt14-video-set2.md).
+# Baked into ``video_trial/``: per gesture the better of NT13 and NT14 (docs/archive/chantiers.md).
 CLIPS = [CLIPS_NT13[2]] + CLIPS_NT14
 
 SHIELD_ARM = nt12.SHIELD_ARM
@@ -898,8 +898,8 @@ def bake():
         [(s["name"], "video", s) for s in CLIPS],
         OUT_DIR,
         "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, "
-        "MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md "
-        "and docs/wip/nt14-video-set2.md",
+        "MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/archive/chantiers.md "
+        "and docs/archive/chantiers.md",
     )
 
 
@@ -921,7 +921,7 @@ def bake_melee():
         MELEE_DIR,
         "tools/blender_scripts/nt13_video_trial.py (bake-melee) - default melee clips chosen "
         "per gesture among keyframed / CMU (NT12) / player videos (NT13, NT14), see "
-        "docs/wip/nt14-video-set2.md and ADR 0129",
+        "docs/archive/chantiers.md and ADR 0129",
     )
 
 

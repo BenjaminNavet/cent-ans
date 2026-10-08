@@ -1,7 +1,7 @@
 # Relecture historique — Bruges vers 1340 (ville 1:1, VH8 / RS-G) — 28 septembre 2026
 
 Relecture indépendante de `data/landmarks_v2/bruges.json` (ADR 0078, `docs/landmarks-v2.md` ;
-suivi d'auteur `docs/wip/rs-g-bruges.md`) : faits marqués `probable` ou `hypothetical` d'abord,
+suivi d'auteur `docs/archive/chantiers.md`) : faits marqués `probable` ou `hypothetical` d'abord,
 puis dates clés (1337-1453) et gabarits. Sources relues en texte intégral : notices de l'Inventaris
 Onroerend Erfgoed (CC BY 4.0), fiches du *Beheerplan Vesten* de la ville de Bruges (2024),
 Wikipédia NL en appoint. Faits seulement, rien d'extrait (`extracted: false`). Positions vérifiées en

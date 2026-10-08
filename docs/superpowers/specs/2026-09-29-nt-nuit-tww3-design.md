@@ -50,7 +50,7 @@ guerre civile/prétendants (L, à spécifier avec le joueur), batailles navales 
 - Une partie donne des missions qui se résolvent (réussite/échec) avec récompense visible.
 - Le recrutement refuse la 21e unité ; un siège de campagne peut finir par un assaut après
   construction d'engins, sans casser l'équilibre EQ6.
-- Tous les tests verts dans main au matin, note `docs/wip/nt.md` à jour.
+- Tous les tests verts dans main au matin, note `docs/archive/chantiers.md` à jour.
 
 ## Pour le joueur (à trancher au réveil)
 

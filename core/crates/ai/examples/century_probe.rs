@@ -8,11 +8,11 @@
 //! France-England wars and peaces; `DIFFICULTY=hard` (any DF1 level id)
 //! plays at that level instead of normal.
 //!
-//! EQ4 adds the combined balance table (`docs/wip/eq4-equilibre-combine.md`):
+//! EQ4 adds the combined balance table (`docs/archive/chantiers.md`):
 //! revolts, sieges and their outcome, territorial snowball in 1437 and 1453,
 //! factions eliminated and the use of the right of passage (DP2).
 //!
-//! EQ5 diagnostics (`docs/wip/eq5-ia-banqueroutes-intrusions.md`):
+//! EQ5 diagnostics (`docs/archive/chantiers.md`):
 //! `ECON_TRACE=fac_swiss` prints that faction's budget, economic orders,
 //! events and unexplained treasury moves every turn; `TRESPASS_TRACE=1`
 //! lists the armies standing on foreign lands without right of passage;

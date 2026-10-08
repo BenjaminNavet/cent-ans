@@ -45,7 +45,7 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   OpenGameArt (CC0) sur le rig `cavalry`. LOD0 12,3 k (pied) / 16,4 k (monté). Planche
   `docs/img/fg/planche_fg0.png` sur la branche. Défauts connus : galop (jarrets tordus), bras
   comprimés (humérus courts du rig), camail sombre. Mémoire : un atlas 2048 par recette ×25 = trop
-  (270 Mo) → textures de détail partagées + atlas 1024 par famille. Détails : `docs/wip/fg0-prototype.md`.
+  (270 Mo) → textures de détail partagées + atlas 1024 par famille. Détails : `docs/archive/chantiers.md`.
 - 26/09 : joueur : « oui pour les deux » (style validé, bras allongés) puis « ne valide plus par
   moi, vas-y » → l'orchestrateur enchaîne FG1-FG5 sans nouvelle validation. FG0 fusionné
   (8dfc13d1). Vague 1 : FG1 et FG4 en parallèle. Partage : FG1 possède les longueurs d'os
@@ -78,7 +78,7 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
     LOD2 sans texture, 15,7 Mo BC7. Camail noir corrigé (faces inversées depuis FG0), barbes OK.
     Reste : captures `fg3_*.png`, smoke + captures DA1 (`da1_arms_shot.gd`) et EP12
     (`ep12_shot.gd`) avec/sans drapeau, banc `--units=50`, réglages martelage/bois, ADR (~0088),
-    `battle_fine/SOURCE.md`. Détails et commandes : `docs/wip/fg3-matieres.md` sur la branche.
+    `battle_fine/SOURCE.md`. Détails et commandes : `docs/archive/chantiers.md` sur la branche.
   - **Reprise** : ouvrir le worktree FG3 (ou relancer un agent dessus), finir les vérifs, fusionner
     main dans la branche puis ff-only dans main ; ensuite FG5 (perf : LOD0 relayé plus tôt,
     LOD1 plus léger ; bascule du rendu fin par défaut ; ADR relevant le plafond de triangles de la
@@ -88,7 +88,7 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   `FG3_BAKED` (ADR 0088). Réglages en capture : plates sans « papier froissé » (AO et normale
   de forme adoucies), martelage léger, mailles plus sombres. Bogue trouvé et corrigé : drapeaux
   portés (EP5) invisibles sous FG3. Banc `--units=50` : FG3 ≈ +2,5 ms médiane (≈ 9 %, bruit
-  ±20 %). Captures `docs/img/fg/fg3_*.png`. Détails : `docs/wip/fg3-matieres.md`.
+  ±20 %). Captures `docs/img/fg/fg3_*.png`. Détails : `docs/archive/chantiers.md`.
 - 26/09 : FG5 fait (branche `feat/fg5-perf`, ADR 0089). Le banc standard ne voit aucune figurine
   en LOD0/LOD1 (LOD2 + imposteurs) ; banc rapproché ajouté (`--benchmark --closeup`) : fines
   +94 %, parce que le LOD0 se choisissait par régiment. Désormais **LOD0 par soldat** (< 12 m ×
@@ -96,4 +96,4 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   1 885-2 055 monté, LOD2 235-252 / 446-534 (recuisson). Rendu fin **par défaut** ;
   `--coarse-figures` pour l'ancien, `--no-fg3` gardé. Banc Ultra (4 passes, durée moyenne) :
   standard 16,58 → 17,04 ms (+2,8 %, contre +8,3 % avant), rapproché 15,15 → 18,09 ms (+19 %,
-  contre +94 %). Bible § 6 relevée. Captures `docs/img/fg/fg5_*.png`. Détails : `docs/wip/fg5-perf.md`.
+  contre +94 %). Bible § 6 relevée. Captures `docs/img/fg/fg5_*.png`. Détails : `docs/archive/chantiers.md`.

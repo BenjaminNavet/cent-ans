@@ -13,7 +13,7 @@ extends MeshInstance3D
 ## - Colonies : l'eau passe *sous* les colonies (tronçons coupés dans l'emprise des maquettes, lit
 ##   effacé) ; ponts-portes aux murs (`RiverCrossings`).
 ## - Zones personnalisées (`river_styles.json` → `custom_zones`, ex. Paris pour le lot L1) : rien
-##   n'est dessiné dedans ; voir `docs/wip/v4-fleuves-forets.md`.
+##   n'est dessiné dedans ; voir `docs/archive/chantiers.md`.
 ## Repli sans `rivers_render.json` : rubans depuis `MapData.rivers` (largeur selon l'importance).
 
 const MAJOR_IMPORTANCE := 3

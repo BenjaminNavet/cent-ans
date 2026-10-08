@@ -1,7 +1,7 @@
 # SZ7 — hébergement du relief fin « Cent Ans relief » (ADR 0077)
 
 Branche `worktree-agent-ab262042c73ec57c4` (worktree d'agent), partie de `main`. Lot SZ7 du
-chantier `docs/wip/sz-suites-zoom.md`, suite de ZG7b (`docs/wip/zg7b-export-cache.md`).
+chantier `docs/archive/chantiers.md`, suite de ZG7b (`docs/wip/zg7b-export-cache.md`).
 
 ## Mandat
 Outillage seulement : **aucune publication réseau** (ni `gh repo create`, ni `gh release`) —

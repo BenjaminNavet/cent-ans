@@ -45,7 +45,7 @@ gardée. C1, C2, C3, C5, C6 et C8 restent nécessaires et ont été revérifiés
    `integration/tw` (6ebe9658, 7d754085) mais `integration/tw` n'a pas été avancé dans main
    (seul B8b l'a été, 95057829). Aucun édit ni route commerciale en jeu : impossible à recetter.
    Reproduire : `git merge-base --is-ancestor integration/tw main` → faux. Lot suspect :
-   orchestration TW (`docs/wip/tw.md`). Fusion à faire par l'orchestrateur (conflits attendus
+   orchestration TW (`docs/archive/chantiers.md`). Fusion à faire par l'orchestrateur (conflits attendus
    `economy.rs` / `movement.rs` après M2-M4).
 2. **Figurines d'armée CV2 géantes au zoom rapproché** : à distance 10 sur Paris, l'ost
    anglais (bannière, cavaliers, piquiers) fait la taille de la ville entière et la recouvre

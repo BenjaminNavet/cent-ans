@@ -25,10 +25,10 @@ Coller ce prompt :
 
 | Chantier | Fichier | Ce qui compte pour PO |
 |---|---|---|
-| CB (contrôles de bataille) | `docs/wip/cb.md` | CB-M1 fusionné ? Si non, PO4 étape 6 (style du marqueur de sélection) et la partie bataille de la caméra de PO5 attendent. |
+| CB (contrôles de bataille) | `docs/archive/chantiers.md` | CB-M1 fusionné ? Si non, PO4 étape 6 (style du marqueur de sélection) et la partie bataille de la caméra de PO5 attendent. |
 | AN1 / PR1 | `docs/wip/an1-animation-vivante.md` | Possèdent le shader des soldats (sommets), les clips, les étendards et les accessoires. PO4 n'y touche pas. |
-| HL (liste des colonies) | `docs/wip/colonies-liste.md` | Le panneau HL2 rejoint `UiLayout.SIDE_PANEL` (note à poser en PO0 étape 4). |
-| CV3 | `docs/wip/cv3-campagne-vivante.md` | La fenêtre de rencontre, l'avis de résultat et le badge de posture sont migrés par PO1. Vérifier qu'aucun lot CV3 ne les modifie en même temps. |
+| HL (liste des colonies) | `docs/archive/chantiers.md` | Le panneau HL2 rejoint `UiLayout.SIDE_PANEL` (note à poser en PO0 étape 4). |
+| CV3 | `docs/archive/chantiers.md` | La fenêtre de rencontre, l'avis de résultat et le badge de posture sont migrés par PO1. Vérifier qu'aucun lot CV3 ne les modifie en même temps. |
 
 4. Nombre d'agents actifs sur le dépôt : 6 au plus au total (règle CLAUDE.md). Si d'autres sessions en font déjà tourner, lancer la vague 1 en deux fois : d'abord PO2, PO3 et PO4, puis PO1 et PO5.
 
@@ -101,8 +101,8 @@ Spécifique à chaque lot :
 | PO2 | Sonnet | « Ne remplace les tailles de police que dans les scripts de la tranche listés. Compte les occurrences restantes et note-les dans ton wip. Sons CC0 seulement, avec `SOURCE.md` et `CREDITS.md`. » |
 | PO1 | session | « `UiLayout` ne doit jamais dépendre de la taille minimale des enfants (boucles de mise en page vues en UI1). Ne touche ni à la sélection ni aux ordres en bataille (propriété de CB). Si `UiMotion` (PO2) est absent, replie-toi sur `hide()`. » |
 | PO3 | session | « Saturation ≤ 35 % à vérifier avec l'outil DA7b. Dé-encombrement DA7d inchangé. Banc PB1 carte ≤ +5 %. Pas de nouvel asset. » |
-| PO4 | session | « Interdits : shader des soldats et clips (AN1), accessoires (PR1), sélection et ordres (CB). Le décalage des rangs est un décalage de rendu, sans aucun effet sur l'état du core. L'étape 6 n'est faite que si `docs/wip/cb.md` indique CB-M1 fusionné ; sinon, la noter comme reportée. Banc PB1 bataille ≤ +5 %. » |
-| PO5 | session | « Lis `docs/wip/cb.md` : si CB-M1 n'est pas fusionné et modifie `battle_camera.gd`, ne fais que la caméra de campagne. Paramètres de caméra dans `data/ui/camera_feel.json` avec un schéma, jamais en dur. » |
+| PO4 | session | « Interdits : shader des soldats et clips (AN1), accessoires (PR1), sélection et ordres (CB). Le décalage des rangs est un décalage de rendu, sans aucun effet sur l'état du core. L'étape 6 n'est faite que si `docs/archive/chantiers.md` indique CB-M1 fusionné ; sinon, la noter comme reportée. Banc PB1 bataille ≤ +5 %. » |
+| PO5 | session | « Lis `docs/archive/chantiers.md` : si CB-M1 n'est pas fusionné et modifie `battle_camera.gd`, ne fais que la caméra de campagne. Paramètres de caméra dans `data/ui/camera_feel.json` avec un schéma, jamais en dur. » |
 
 ## Inventaire des défauts (PO0, planche `docs/img/po/avant/`, 1280×720)
 

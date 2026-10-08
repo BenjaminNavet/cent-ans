@@ -8,4 +8,4 @@
 
 ## Prochaine étape
 - Dériver l'attente de cadrage de `fe_ui_test` de l'emprise des provinces jouables.
-- Vérifier `smoke`, `q6_diplomacy_test`, `vn_ui_720_test`, `ub1_ui_test`, puis mettre à jour `docs/wip/vn.md`.
+- Vérifier `smoke`, `q6_diplomacy_test`, `vn_ui_720_test`, `ub1_ui_test`, puis mettre à jour `docs/archive/chantiers.md`.

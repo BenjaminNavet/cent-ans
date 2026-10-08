@@ -1,7 +1,7 @@
 # FA3 — animations de combat CC0 reciblées sur les figurines fines
 
 Branche `feat/fa-anim` (worktree `../gp-fa-anim`, issue de `feat/fa`). Chantier : `docs/wip/fa.md`.
-Prédécesseurs : NT12 (`docs/wip/nt12-mocap.md`), NT13/NT14 (`docs/wip/nt13-video-mocap.md`).
+Prédécesseurs : NT12 (`docs/archive/chantiers.md`), NT13/NT14 (`docs/archive/chantiers.md`).
 
 ## État : TERMINÉ (10-02) ; défauts décidés par la session principale
 Trois modes (`BattleSkinned.fa_anim_mode`) : sans option, les clips marqués `default: true` dans

@@ -1,5 +1,5 @@
 //! Campaign AI quality probe: how *well* the AI plays (not balance), AI
-//! against AI from 1337 (`docs/wip/ia-quality-probe.md`).
+//! against AI from 1337 (`docs/archive/chantiers.md`).
 //!
 //! France is answered by the AI like in `settlements_probe`; every other
 //! faction plays through `end_turn_with(data, planner)`, where the planner

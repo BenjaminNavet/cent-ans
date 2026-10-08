@@ -1,7 +1,7 @@
 # Plan — rapprochement Total War (session 6)
 
 Source : `docs/design/2026-09-24-analyse-total-war.md` (tableau comparatif, lots T1-T10) complété par un examen des captures (`docs/img/visuel/v4b_*.png`, `hud-campaign.png`, `godot-battle-f5.png`).
-Suivi : `docs/wip/tw.md`. Hors périmètre : colonies (C2c-C7), portraits.
+Suivi : `docs/archive/chantiers.md`. Hors périmètre : colonies (C2c-C7), portraits.
 
 ## Constat complémentaire (visuel)
 

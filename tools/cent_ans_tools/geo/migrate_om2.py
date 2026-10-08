@@ -14,7 +14,7 @@ sub-commands) is simply rebuilt; this module shifts the rest:
 
 Data in lon/lat or ``origin_3035`` does not move. The game test and dev
 scripts that aim at map points (``game/tests/*_shot.gd``...) were shifted by
-hand in the same lot (list in ``docs/wip/om-om2.md``).
+hand in the same lot (list in ``docs/archive/chantiers.md``).
 
 Run once: ``uv run --project tools python -m cent_ans_tools.geo.migrate_om2``.
 Running it twice shifts twice: :func:`already_migrated` refuses a second run

@@ -1,6 +1,6 @@
 # Backlog Total War — idées du joueur + compléments de l'orchestrateur (nuit du 24-25/09)
 
-Liste vivante. Chaque idée devient un lot dans `docs/wip/nuit.md` une fois planifiée. (J) = demandé par le joueur.
+Liste vivante. Chaque idée devient un lot dans `docs/archive/chantiers.md` une fois planifiée. (J) = demandé par le joueur.
 
 ## Bataille — « champ de bataille vivant »
 
@@ -50,4 +50,4 @@ Liste vivante. Chaque idée devient un lot dans `docs/wip/nuit.md` une fois plan
   - les enceintes de Philippe Auguste, puis de Charles V (rive droite, Bastille à partir de 1370) ;
   - les halles, les quais, Montmartre au nord.
   Sources : plans historiques du domaine public (plan de Bâle, restitutions), Wikimedia.
-- (J) **Ensuite (lot L2, fait)** : Londres (la Tour, Old St Paul's, London Bridge, Westminster), Avignon (palais des Papes, pont Saint-Bénézet, remparts datés), Calais (port fortifié, Rysbank, Étape), Rouen (cathédrale, Saint-Ouen, château, Gros-Horloge), Bordeaux (Saint-André, Pey-Berland, Ombrière, Grosse Cloche, port de la Lune), Bruges (beffroi et halles, canaux, Notre-Dame). Gabarits paramétrés dans `landmark_monuments.py` ; suivi `docs/wip/l2-villes.md`. Reste : toiles de fond de siège pour ces villes.
+- (J) **Ensuite (lot L2, fait)** : Londres (la Tour, Old St Paul's, London Bridge, Westminster), Avignon (palais des Papes, pont Saint-Bénézet, remparts datés), Calais (port fortifié, Rysbank, Étape), Rouen (cathédrale, Saint-Ouen, château, Gros-Horloge), Bordeaux (Saint-André, Pey-Berland, Ombrière, Grosse Cloche, port de la Lune), Bruges (beffroi et halles, canaux, Notre-Dame). Gabarits paramétrés dans `landmark_monuments.py` ; suivi `docs/archive/chantiers.md`. Reste : toiles de fond de siège pour ces villes.

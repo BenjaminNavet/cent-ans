@@ -1,7 +1,7 @@
 # CB5 — Alertes de bataille typées (état)
 
 Branche : `feat/cb5-alerts` (depuis `main` @ be631979, qui contient `cad1ca05` — CB0 + CB-M1
-seulement ; CB-M2/CB-M3/CB-M4/CB1 ne sont **pas** encore dans `main`, malgré `docs/wip/cb.md`).
+seulement ; CB-M2/CB-M3/CB-M4/CB1 ne sont **pas** encore dans `main`, malgré `docs/archive/chantiers.md`).
 Cible cargo privée : `core/target-cb5`.
 
 ## État
@@ -55,7 +55,7 @@ tous OK (exit 0, aucune `SCRIPT ERROR`).
 
 `cb1_drag_formation_test`, `cb_m2_path_hover_test`, `cb_m3_queue_test`,
 `cb_m4_range_compare_test` : **absents de cette branche** (CB-M2/CB-M3/CB-M4/CB1 pas encore
-fusionnés dans `main`, malgré `docs/wip/cb.md`) — impossible à exécuter ici, pas une régression
+fusionnés dans `main`, malgré `docs/archive/chantiers.md`) — impossible à exécuter ici, pas une régression
 de CB5. Le panneau de comparaison au survol (CB-M4) n'a donc pas pu être vérifié contre le
 chevauchement de la colonne d'alertes ; à refaire une fois CB-M4 fusionné (le probe script laisse
 une note explicite à cet effet).
@@ -65,5 +65,5 @@ Touches ajoutées : aucune (pas de remappage, CB2 s'en charge). Fichiers `battle
 construction, un branchement de signal, une ligne dans la boucle HUD) pour limiter les conflits
 avec CB2/CB3/CB6 qui travaillent en parallèle sur ces mêmes fichiers.
 
-Je n'ai pas mis à jour `docs/wip/cb.md` (fichier d'orchestration partagé, modifié par les autres
+Je n'ai pas mis à jour `docs/archive/chantiers.md` (fichier d'orchestration partagé, modifié par les autres
 lots en parallèle) : à faire par la session d'orchestration lors de la fusion.

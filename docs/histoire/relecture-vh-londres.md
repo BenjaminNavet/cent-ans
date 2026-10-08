@@ -1,7 +1,7 @@
 # Relecture historique — Londres vers 1340 (VH6)
 
 Relecture du 2026-09-26 de `data/landmarks_v2/london.json` (restitution 1:1, ADR 0078), sur la liste
-« Faits à faire relire » de `docs/wip/vh6-londres.md` puis sur tous les éléments `probable` /
+« Faits à faire relire » de `docs/archive/chantiers.md` puis sur tous les éléments `probable` /
 `hypothetical`. Règle suivie : faits seulement ; rien n'est extrait des sources non commerciales
 (MoEML, Historic Towns Atlas) ; les positions viennent des monuments classés de Historic England
 (NHLE, Open Government Licence v3, service ArcGIS ouvert) et d'OpenStreetMap (ODbL), converties

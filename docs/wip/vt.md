@@ -17,10 +17,10 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
 - [x] Plan, ADR 0138, cette note.
 - [ ] Vague 1
 - [x] G : consommateurs `model_*` recâblés (effets, rivières, foule, CV1), `MapPropScale` sans `settlement_*`, hameaux 1:1, `ModelLibrary.settlement_model` et `zoom_tiers.model_shadow_distance` retirés.
-- [x] D : maquettes, SZ4b, DC4/DC6c, ombres retirés de `settlement_layer.gd` ; étiquettes, clic et anneau sur l'emprise réelle (`docs/wip/vt-d.md`).
+- [x] D : maquettes, SZ4b, DC4/DC6c, ombres retirés de `settlement_layer.gd` ; étiquettes, clic et anneau sur l'emprise réelle (`docs/archive/chantiers.md`).
   - [x] H : tests retirés (dc4, dc6c), adaptés (fc1, sz4b) ; résultats dans le rapport VT-H.
   - [x] C : `town_far.gdshader`, `roofscape.gdshaderinc`, `TownFarMask`, `tf_far_shader_test` (1e928affa).
-- [x] B : `TownFarBuilder` (F1 294 tri/ville, max 706 ; F2 50,5 ; v2 max 3 613 ; 1,4 s un fil), `tf_far_mesh_test` (`docs/wip/vt-b-far-builder.md`).
+- [x] B : `TownFarBuilder` (F1 294 tri/ville, max 706 ; F2 50,5 ; v2 max 3 613 ; 1,4 s un fil), `tf_far_mesh_test` (`docs/archive/chantiers.md`).
 - [x] E : `TownFarLayer` (`town_far_layer.gd`), créé dans `SettlementLayer._setup_towns`, mis à jour
   après les calques 1:1 dans `SettlementLayer.update_view` (`settle/townfar`, `townfar/build|mask|view`).
   2 141 villes ; F1 757 tuiles (128 u), 638 k tri ; F2 122 tuiles (512 u), 118 k tri ; 1,23 M sommets,

@@ -1,5 +1,5 @@
 //! Regression tests for the fixes of the 2026-09-26 code review
-//! (`docs/wip/revue-code.md`, section « Corrections sim-campaign »).
+//! (`docs/archive/chantiers.md`, section « Corrections sim-campaign »).
 
 use std::path::PathBuf;
 

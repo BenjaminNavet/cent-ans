@@ -71,7 +71,7 @@ lots) et tient les critères de guerre plus juste : v9 retenu.
 ### Points ouverts
 
 - **Révoltes `balance_probe` sous la bande 4-10** : 3,6 déjà après la fusion de main, sans
-  règle EQ6 (dette connue du lot DC, `docs/wip/dc-densite.md` : 3,2 contre 5,7 avant DC) ;
+  règle EQ6 (dette connue du lot DC, `docs/archive/chantiers.md` : 3,2 contre 5,7 avant DC) ;
   2,7 avec v9. La règle de fatigue retire des guerres d'appoint, donc des provinces occupées
   (la moitié des révoltes éclatent en province occupée). Relever les révoltes relève de l'ordre
   public (lot DC/EQ1 : pondérer la garnison qui apaise), hors du périmètre d'EQ6.

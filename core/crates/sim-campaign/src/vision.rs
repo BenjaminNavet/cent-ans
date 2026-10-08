@@ -23,7 +23,7 @@
 //! point is not seen. Nothing in the simulation depends on it: vision is
 //! recomputed on demand and never saved. **The AI does not use it** (it
 //! reads the whole state, as before lot M5a: the AI "cheats" by design in
-//! v1, see `docs/wip/m5a-vision.md`).
+//! v1, see `docs/archive/chantiers.md`).
 
 use std::collections::{BTreeMap, BTreeSet};
 

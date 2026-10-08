@@ -1,7 +1,7 @@
 # Relecture historique — Avignon vers 1340 (ville 1:1, VH8) — 28 septembre 2026
 
 Relecture indépendante de `data/landmarks_v2/avignon.json` (ADR 0078, `docs/landmarks-v2.md` ;
-suivi de l'auteur : `docs/wip/rs-g-avignon.md`). Méthode : faits marqués `probable` ou
+suivi de l'auteur : `docs/archive/chantiers.md`). Méthode : faits marqués `probable` ou
 `hypothetical` d'abord, puis dates clés (1337-1453) et gabarits. Sources sérieuses (Inventaire
 général PACA, POP, étude universitaire de J.-M. Poisson, notice d'Archeodunum, Centre des
 monuments nationaux), Wikipédia en appoint quand elle cite ses sources. Faits seulement : rien

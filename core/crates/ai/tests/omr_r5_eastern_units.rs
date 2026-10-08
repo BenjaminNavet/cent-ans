@@ -2,7 +2,7 @@
 //! akıncı, yaya, Serbian heavy cavalry, pronoiars, druzhina, Lithuanian
 //! light cavalry, Teutonic knights, almogavars). Recruitment uses the
 //! existing culture / faction / period rules; the AI levies them through
-//! its doctrines. See `docs/wip/omr-r5.md`.
+//! its doctrines. See `docs/archive/chantiers.md`.
 
 use std::collections::BTreeMap;
 use std::path::Path;
