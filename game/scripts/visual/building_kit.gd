@@ -111,7 +111,7 @@ static func prop_model(kind: String, index: int) -> String:
 	var models := models_of(kind)
 	if models.is_empty():
 		return ""
-	return models[int(hash01(index, 29) * models.size()) % models.size()]
+	return models[int(Hash.vec24(index, 29) * models.size()) % models.size()]
 
 
 ## Transformation d'une pièce de mobilier du cœur `{x, z, yaw}` (lacet du cœur : longueur
@@ -120,12 +120,6 @@ static func prop_model(kind: String, index: int) -> String:
 static func prop_transform(prop: Dictionary, y: float) -> Transform3D:
 	var basis := Basis(Vector3.UP, -float(prop["yaw"]))
 	return Transform3D(basis, Vector3(float(prop["x"]), y, float(prop["z"])))
-
-
-## Tirage déterministe dans [0, 1) à partir d'un entier et d'un sel (variété du rendu seulement).
-static func hash01(key: int, salt: int) -> float:
-	var h := hash(Vector2i(key, salt))
-	return float(h & 0xFFFFFF) / float(0x1000000)
 
 
 ## Maillage importé du modèle (premier `MeshInstance3D` du GLB), matériaux non remplacés.

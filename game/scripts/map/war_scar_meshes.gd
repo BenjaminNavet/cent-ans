@@ -103,7 +103,7 @@ static func dome(st: SurfaceTool, center: Vector3, radius: float, height: float,
 		var row := PackedVector3Array()
 		for s in segments:
 			var a := TAU * s / segments
-			var wobble := 1.0 + 0.16 * (_h(seed_value, r * 31 + s) - 0.5) * (1.0 if r > 0 else 0.0)
+			var wobble := 1.0 + 0.16 * (Hash.vec01(seed_value, r * 31 + s) - 0.5) * (1.0 if r > 0 else 0.0)
 			var rr := radius * sin(t * PI * 0.5) * wobble
 			row.append(center + Vector3(cos(a) * rr, height * cos(t * PI * 0.5), sin(a) * rr))
 		rows.append(row)
@@ -112,7 +112,7 @@ static func dome(st: SurfaceTool, center: Vector3, radius: float, height: float,
 		var bottom: PackedVector3Array = rows[r + 1]
 		for s in segments:
 			var s2 := (s + 1) % segments
-			var shade := 0.85 + 0.3 * _h(seed_value, 500 + r * 17 + s)
+			var shade := 0.85 + 0.3 * Hash.vec01(seed_value, 500 + r * 17 + s)
 			var quad := [top[s], top[s2], bottom[s2], bottom[s]]
 			var normal := ((quad[2] as Vector3) - (quad[0] as Vector3)).cross((quad[1] as Vector3) - (quad[0] as Vector3)).normalized()
 			if normal.y < 0.0:
@@ -121,10 +121,6 @@ static func dome(st: SurfaceTool, center: Vector3, radius: float, height: float,
 			st.set_color(Color(color.r * shade, color.g * shade, color.b * shade))
 			for k in [0, 1, 2, 0, 2, 3]:
 				st.add_vertex(quad[k])
-
-
-static func _h(a: int, b: int) -> float:
-	return float(absi(hash(Vector2i(a, b))) % 10007) / 10007.0
 
 
 # --- Peste (mètres) --------------------------------------------------------------------
@@ -142,8 +138,8 @@ static func plague_pit() -> ArrayMesh:
 	box(st, Vector3(-1.1, 0.46, 0.0), Vector3(2.9, 0.16, 1.7), EARTH_DARK.lightened(0.06))
 	box(st, Vector3(1.9, 0.22, 0.0), Vector3(2.2, 0.06, 2.3), Color(0.05, 0.04, 0.035))
 	for k in 3:
-		var skew := Basis(Vector3.UP, 0.25 * (_h(21, k) - 0.5))
-		box(st, Vector3(1.25 + 0.65 * k, 0.36, 0.25 * (_h(22, k) - 0.5)), Vector3(0.5, 0.26, 1.75), SHROUD, skew)
+		var skew := Basis(Vector3.UP, 0.25 * (Hash.vec01(21, k) - 0.5))
+		box(st, Vector3(1.25 + 0.65 * k, 0.36, 0.25 * (Hash.vec01(22, k) - 0.5)), Vector3(0.5, 0.26, 1.75), SHROUD, skew)
 	box(st, Vector3(2.75, 0.27, -0.75), Vector3(0.6, 0.04, 0.6), LIME)
 	cross(st, Vector3(-3.5, 0.0, 0.0), 3.2, WOOD_FRESH, PI * 0.5)
 	_cache["plague_pit"] = _commit(st)
@@ -198,8 +194,8 @@ static func debris(variant: int, unit: float) -> ArrayMesh:
 			box(st, Vector3(0.5, 0.06, 0.3) * unit, Vector3(0.3, 0.42, 0.05) * unit, SHIELD_COLORS[2], Basis(Vector3.RIGHT, -1.45))
 		2:
 			for k in 4:
-				var foot := Vector3(0.3 * (k - 1.5), 0.0, 0.2 * _h(31, k)) * unit
-				beam(st, foot, foot + Vector3(0.12 * (_h(32, k) - 0.5), 0.62, 0.2 * (_h(33, k) - 0.5)) * unit, 0.025 * unit, WOOD_FRESH)
+				var foot := Vector3(0.3 * (k - 1.5), 0.0, 0.2 * Hash.vec01(31, k)) * unit
+				beam(st, foot, foot + Vector3(0.12 * (Hash.vec01(32, k) - 0.5), 0.62, 0.2 * (Hash.vec01(33, k) - 0.5)) * unit, 0.025 * unit, WOOD_FRESH)
 		3:
 			beam(st, Vector3.ZERO, Vector3(-0.35, 1.5, 0.0) * unit, 0.05 * unit, WOOD)
 			box(st, Vector3(-0.12, 1.2, 0.0) * unit, Vector3(0.5, 0.36, 0.02) * unit, SHIELD_COLORS[1], Basis(Vector3.BACK, 0.23))

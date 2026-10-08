@@ -162,10 +162,6 @@ func routes_with_pieces() -> PackedStringArray:
 	return PackedStringArray(seen.keys())
 
 
-static func _h(a: int, b: int, c: int = 0) -> float:
-	return VegetationFields.hash01(a * 73856093 ^ b * 19349663 ^ c * 83492791)
-
-
 func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 	_pool = pool
 	if off or _piece_a.is_empty():
@@ -195,7 +191,7 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		var a := _piece_a[index]
 		var b := _piece_b[index]
 		var expected := a.distance_to(b) / 10.0 * _piece_rate[index]
-		var n := int(expected) + (1 if _h(index, 0, 1) < fposmod(expected, 1.0) else 0)
+		var n := int(expected) + (1 if Hash.h01(index, 0, 1) < fposmod(expected, 1.0) else 0)
 		for k in n:
 			if figures >= budget:
 				break
@@ -211,10 +207,10 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 ## trouve pas de place).
 func _caravan(index: int, k: int, a: Vector2, b: Vector2, value: float) -> int:
 	# Deux sens, phases décalées ; chacun tient sa droite.
-	var forward := (k % 2 == 0) == (_h(index, k, 2) < 0.5)
+	var forward := (k % 2 == 0) == (Hash.h01(index, k, 2) < 0.5)
 	var from := a if forward else b
 	var to := b if forward else a
-	var phase := _h(index, k, 3)
+	var phase := Hash.h01(index, k, 3)
 	var side := 0.9
 	if not _pool.add("merchant_cart", "roll", from, to, phase, side):
 		return 0

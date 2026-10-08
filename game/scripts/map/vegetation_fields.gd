@@ -8,7 +8,7 @@ extends RefCounted
 ##   la limite entre régions devient un chemin de terre.
 ## - Trame : grille biaisée (u, v) = ((x + k y) / fu, (y − k x) / fv) d'un repère déformé
 ##   (`warp`) ; les rangées (v) sont décalées d'une colonne à l'autre (jonctions en T, pas de
-##   quadrillage) ; chaque bord d'enclos est planté de haie selon un tirage (`hash01`).
+##   quadrillage) ; chaque bord d'enclos est planté de haie selon un tirage (`Hash.lcg01`).
 ## - Le shader inverse la déformation par point fixe : mêmes constantes, même hachage entier
 ##   (bits de poids faible identiques en 64 bits GDScript et en `uint` GLSL). Toute modification
 ##   ici doit être reportée dans `terrain.gdshader` et dans le semis natif
@@ -23,13 +23,6 @@ extends RefCounted
 const LAYOUTS: Array = [[0.35, 5.0, 4.2, 0.0], [-0.8, 4.6, 3.8, 2.1]]
 const LANDUSE_SIZE := 128
 const LANDUSE_SAMPLES := 192
-
-
-## Tirage déterministe [0, 1[ d'un entier (identique au `hash01i` du shader).
-static func hash01(n: int) -> float:
-	var h := (n * 1103515245 + 12345) & 0x7fffffff
-	h = (h ^ (h >> 13)) * 1274126177 & 0x7fffffff
-	return float(h % 100000) / 100000.0
 
 
 ## Fonction de région (lente) : > 0 → trame 1, sinon trame 0.
@@ -69,17 +62,17 @@ static func to_uv(layout: int, x0: float, y0: float) -> Vector2:
 
 ## Décalage de rangée de la colonne `column` (jonctions en T).
 static func row_offset(layout: int, column: int) -> float:
-	return hash01(column * 5023 + 17 + layout * 101)
+	return Hash.lcg01(column * 5023 + 17 + layout * 101)
 
 
 ## Tirage d'un bord à u constant (`line`), segment `segment` = floor(v).
 static func roll_u_edge(layout: int, line: int, segment: int) -> float:
-	return hash01(line * 7919 + segment * 104729 + layout * 7 + 1)
+	return Hash.lcg01(line * 7919 + segment * 104729 + layout * 7 + 1)
 
 
 ## Tirage d'un bord de rangée (`row` dans le repère décalé de la colonne `column`).
 static func roll_v_edge(layout: int, row: int, column: int) -> float:
-	return hash01(row * 7919 + column * 104729 + layout * 7 + 31)
+	return Hash.lcg01(row * 7919 + column * 104729 + layout * 7 + 31)
 
 
 ## Probabilité qu'un bord d'enclos porte une haie (même formule dans le shader).

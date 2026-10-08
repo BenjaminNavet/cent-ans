@@ -67,8 +67,8 @@ static func variant_for(kit_model: String, xform: Transform3D) -> String:
 	if candidates.is_empty():
 		return ""
 	var key := int(xform.origin.x * 7.0) * 92821 + int(xform.origin.z * 7.0)
-	var pick: String = candidates[int(BuildingKit.hash01(key, 41) * candidates.size()) % candidates.size()]
-	if BuildingKit.hash01(key, 83) >= float(manifest()[pick].get("share", 0.0)):
+	var pick: String = candidates[int(Hash.vec24(key, 41) * candidates.size()) % candidates.size()]
+	if Hash.vec24(key, 83) >= float(manifest()[pick].get("share", 0.0)):
 		return ""
 	return pick
 

@@ -5,7 +5,7 @@ extends SceneTree
 ##  1. panneau d'une colonie française avec un bâtiment dépendant d'un autre (marché → maison
 ##     des métiers) : le marché montre un bouton « Raser » désactivé, avec la raison du cœur en
 ##     tooltip ; la maison des métiers (sans dépendant) montre un bouton actif ;
-##  2. clic sur le bouton actif → confirmation (`RazeConfirmationDialog`) ; renoncer laisse le
+##  2. clic sur le bouton actif → confirmation (`ConfirmPanel`) ; renoncer laisse le
 ##     bâtiment en place ; confirmer envoie l'ordre `demolish`, le bâtiment disparaît de la
 ##     colonie et le remboursement est versé.
 ## Usage : godot --headless --path game --script res://tests/rs_n_raze_test.gd
