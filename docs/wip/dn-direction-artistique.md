@@ -16,4 +16,7 @@ Priorité quand le temps machine manque : **campagne > bataille > UI**. 20 agent
 - V3+ production (file sérielle) et intégration (worktrees `dn/*`), fusion ff-only.
 
 ## État
-- [ ] V1 audit
+- [x] V1 audit : docs/wip/dn/audit-{campagne,bataille,ui}.md, revision-bible.md
+- Arbitrages DA (D1-D5) : maquettes = état généralisé lointain, glb générés proche/moyen ; figurines générées via cuisson GA3 en bataille, statiques ailleurs ; budgets acceptés, 2048² bâtiments majeurs ; parchemin = enluminure ; S ≤ 0,40 contrôlé à l'image. ADR 0211 (en cours).
+- V2 en cours : bible+ADR, banc procédé (dn_batch.py + verrou GPU ~/dev/cent-ans-raw/dn/gpu.lock), branches dn/ingest, dn/camp-bati, dn/fig-bake, dn/ui-codex, dn/ui-kit.
+- Suite : catalogue de production (campagne d'abord : bâtiments par famille, navires, camp, ponts, folk ; puis siège/figurines ; UI : 36 événements, codex, icônes religions/ordres/édits, curseurs campagne, ornements).
