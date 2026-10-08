@@ -215,3 +215,5 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - PRE échec préexistant (avant SC) : `tools/tests/test_relief_update.py::test_manifest_bake_versions_follow_the_code` (tier3 attendu 5, trouvé 6) — à corriger (manifeste ou code).
 - TLR descriptions de schémas art_ga3_decor / art_rock_outcrops et commentaire siege_engines_fx.gd:89 citent des outils supprimés (tldel).
 - SCH lecteurs Python sans registre $ref (geo/colormap.py, geo/biomes.py, ground_materials.py…) → passer par codex.schema_validator puis factoriser 12 schémas restants
+
+- SIMSPLIT (fait) : `ai/plan_field.rs` reste à 897 lignes, découpage plus fin possible.
