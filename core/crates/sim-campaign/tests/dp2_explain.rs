@@ -254,25 +254,3 @@ fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {
         "{with_rival:#?} {plain:#?}"
     );
 }
-
-/// Display only: `cargo test -p sim-campaign --test dp2_explain -- --ignored --nocapture`.
-#[test]
-#[ignore]
-fn show_trade_agreement_explanations() {
-    let data = data();
-    let state = start(&data);
-    let fr = fac("fac_france");
-    for target in ["fac_england", "fac_flanders", "fac_castile", "fac_empire"] {
-        let target = fac(target);
-        let e = explain_treaty(&state, &data, &fr, &target, &[Article::TradeAgreement]);
-        println!("== {target} : {} % — {}", e.chance, e.summary);
-        for line in &e.lines {
-            println!("   {:+4}  {}", line.value, line.text);
-        }
-        let e = explain_treaty(&state, &data, &target, &fr, &[Article::TradeAgreement]);
-        println!(
-            "   (proposé par {target} à la France) {} % — {}",
-            e.chance, e.summary
-        );
-    }
-}

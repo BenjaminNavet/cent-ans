@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## SG4 : captures d'un assaut d'Avignon par l'IA (armée anglaise, trébuchet et bombarde ajoutés,
-## comme la sonde `sg3_assault_probe` avec ENGINES=1) : le bélier à la porte et son équipage relevé,
+## comme l'ancienne sonde `sg3_assault_probe` avec ENGINES=1) : le bélier à la porte et son équipage relevé,
 ## les échelles dressées sur plusieurs pans à la fois, l'infanterie qui entre par la porte enfoncée.
 ## Usage (avec affichage) :
 ##   godot --path game --resolution 1600x900 --script res://tests/sg4_assault_shot.gd -- \

@@ -592,35 +592,6 @@ fn precomputed_trade_paths_match_the_old_search() {
     );
 }
 
-/// Fix 18c, timing: `cargo test -p sim-campaign --release --lib --
-/// --ignored trade_paths_timing --nocapture`.
-#[test]
-#[ignore = "timing probe"]
-fn trade_paths_timing() {
-    const RUNS: u32 = 200;
-    let data = data();
-    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
-    let mut uncached = data.clone();
-    uncached.trade_paths = Default::default();
-    let time = |d: &GameData| {
-        let start = std::time::Instant::now();
-        for _ in 0..RUNS {
-            std::hint::black_box(crate::trade::trade_routes(&state, d));
-        }
-        start.elapsed() / RUNS
-    };
-    let before = time(&uncached);
-    let after = time(&data);
-    let mut rebuilt = data.clone();
-    let start = std::time::Instant::now();
-    rebuilt.build_trade_paths();
-    let build = start.elapsed();
-    println!(
-        "trade_routes: {before:?} per call before, {after:?} after; \
-         build_trade_paths once: {build:?}"
-    );
-}
-
 /// Fix 4: an army emptied by the stragglers of an orderly fallback is
 /// dispersed (as in a rout), not left on the map without a regiment.
 #[test]

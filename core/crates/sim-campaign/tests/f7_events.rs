@@ -373,35 +373,6 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 }
 
 #[test]
-#[ignore = "exploration: cargo test --release -- --ignored --nocapture"]
-fn print_campaign_chronicle() {
-    let data = data();
-    for (player, seed) in [
-        ("fac_france", 1337),
-        ("fac_england", 7),
-        ("fac_burgundy", 42),
-    ] {
-        let fired = simulate(&data, player, seed);
-        let mut by_year: Vec<(i32, &EventId)> = fired.iter().map(|(e, y)| (*y, e)).collect();
-        by_year.sort();
-        for (year, event) in by_year {
-            println!("{year} {event}");
-        }
-        let missing: Vec<&EventId> = data
-            .events
-            .iter()
-            .filter(|(id, e)| e.kind != EventCategory::Random && !fired.contains_key(*id))
-            .map(|(id, _)| id)
-            .collect();
-        let new_fired = F7_HISTORICAL
-            .iter()
-            .filter(|id| fired.contains_key(&evt(id)))
-            .count();
-        println!("{player}/{seed}: {new_fired} new historical fired; not fired: {missing:?}");
-    }
-}
-
-#[test]
 fn an_event_reserved_to_another_faction_costs_no_roll() {
     use data_model::EventScope;
     let venice = fac("fac_venice");
