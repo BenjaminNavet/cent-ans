@@ -109,7 +109,7 @@ func _build() -> void:
 		map.dim = 0.6
 		_root_control.add_child(map)
 
-	var margin := UiBuild.margin(left, top, right, bottom)
+	var margin := UiBuild.margin(64, 48, 64, 40)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root_control.add_child(margin)
 	var column := UiBuild.vbox(18, margin)
