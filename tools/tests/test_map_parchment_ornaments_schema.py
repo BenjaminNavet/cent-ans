@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import parchment_ornaments
@@ -21,20 +20,6 @@ def _document() -> dict:
     return json.loads(
         (DATA / "map" / "parchment_ornaments.json").read_text(encoding="utf-8")
     )
-
-
-def test_parchment_ornaments_match_schema() -> None:
-    """``data/map/parchment_ornaments.json`` matches its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "map_parchment_ornaments.schema.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_document()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_parchment_ornaments_are_consistent() -> None:

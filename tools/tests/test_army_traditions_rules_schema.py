@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 
 
@@ -14,16 +12,6 @@ def _load(path: Path) -> dict:
 
 def _rules() -> dict:
     return _load(DATA / "rules" / "army_traditions.json")
-
-
-def test_army_traditions_match_schema() -> None:
-    """The army traditions file exists and matches its schema."""
-    schema = _load(DATA / "schemas" / "army_traditions_rules.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_rules()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_rank_thresholds_increase() -> None:

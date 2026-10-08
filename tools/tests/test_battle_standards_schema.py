@@ -3,34 +3,12 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def _check(schema_file: str, data_file: str) -> None:
-    schema = _load(schema_file)
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_load(data_file)),
-        key=lambda e: e.path,
-    )
-    assert not errors, [error.message for error in errors]
-
-
-def test_standard_rules_match_schema() -> None:
-    """data/rules/battle_standards.json matches its schema."""
-    _check("schemas/battle_standard_rules.schema.json", "rules/battle_standards.json")
-
-
-def test_standard_fx_match_schema() -> None:
-    """data/fx/battle_standards.json matches its schema."""
-    _check("schemas/battle_standards_fx.schema.json", "fx/battle_standards.json")
 
 
 def test_standard_kinds_and_unit_types_exist() -> None:

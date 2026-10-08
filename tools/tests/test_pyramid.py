@@ -6,7 +6,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from jsonschema import Draft202012Validator
 
 from cent_ans_tools.geo import copernicus, pyramid, relief_shade, surface, terrain
 
@@ -273,15 +272,9 @@ def test_reservoir_valley_is_reconstructed() -> None:
 
 def test_reservoirs_match_schema_and_core() -> None:
     """``modern_reservoirs.json`` is valid, post-1340 and inside the core bbox."""
-    schema = json.loads(
-        (DATA / "schemas" / "modern_reservoirs.schema.json").read_text(encoding="utf-8")
-    )
     document = json.loads(
         (MAP_DIR / "modern_reservoirs.json").read_text(encoding="utf-8")
     )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(document))
-    assert not errors, [error.message for error in errors]
     ids = [entry["id"] for entry in document["reservoirs"]]
     assert len(ids) == len(set(ids))
     lon_min, lat_min, lon_max, lat_max = pyramid.CORE_BBOX

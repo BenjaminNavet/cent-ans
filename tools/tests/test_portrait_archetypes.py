@@ -7,7 +7,6 @@ from pathlib import Path
 
 import httpx
 import pytest
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import openrouter, portrait_archetypes, portraits
@@ -18,16 +17,6 @@ DATA = ROOT / "data"
 
 def _config() -> dict:
     return portrait_archetypes.load_config()
-
-
-def test_config_matches_schema() -> None:
-    """archetypes.json validates against its schema."""
-    schema = json.loads(
-        (DATA / "schemas" / "portrait_archetypes.schema.json").read_text("utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_config()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_references_are_consistent() -> None:

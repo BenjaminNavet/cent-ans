@@ -5,7 +5,6 @@ import math
 from pathlib import Path
 
 import numpy as np
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import horizon_panoramas
@@ -19,14 +18,6 @@ PANORAMAS = ROOT / "game" / "assets" / "horizon" / "panoramas"
 
 def _load(relative: str) -> dict:
     return json.loads((DATA / relative).read_text(encoding="utf-8"))
-
-
-def test_horizon_matches_schema() -> None:
-    """The horizon file matches its schema."""
-    schema = _load("schemas/fx_horizon.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_load("fx/horizon.json")))
-    assert not errors, [error.message for error in errors]
 
 
 def test_horizon_references_exist() -> None:

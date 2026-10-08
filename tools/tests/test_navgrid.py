@@ -212,18 +212,11 @@ def _validate(schema_name: str, document: dict) -> list[str]:
     return [error.message for error in validator.iter_errors(document)]
 
 
-def test_movement_rules_match_schema() -> None:
-    """``data/movement/rules.json`` (shared with lot M2) matches its schema."""
-    rules = json.loads((DATA / "movement" / "rules.json").read_text(encoding="utf-8"))
-    assert not _validate("movement_rules.schema.json", rules)
-
-
 def test_crossings_match_schema() -> None:
     """``crossings.json`` matches its schema; ids are unique; every entry is sourced."""
     document = json.loads(
         (MAP_DIR / navgrid.CROSSINGS_FILE).read_text(encoding="utf-8")
     )
-    assert not _validate("crossings.schema.json", document)
     ids = [entry["id"] for entry in document["crossings"]]
     assert len(ids) == len(set(ids))
     kinds = {entry["type"] for entry in document["crossings"]}

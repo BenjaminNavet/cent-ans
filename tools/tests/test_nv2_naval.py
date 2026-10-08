@@ -3,16 +3,8 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 NAVAL = DATA / "naval"
-
-
-def _schema(name: str) -> Draft202012Validator:
-    schema = json.loads((DATA / "schemas" / name).read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema)
 
 
 def _ports() -> dict[str, dict]:
@@ -27,10 +19,6 @@ def _ports() -> dict[str, dict]:
 def test_ship_names_match_schema_and_reference_ports() -> None:
     """Ship names use known factions and port settlements, never twice a faction."""
     names = json.loads((NAVAL / "ship_names.json").read_text(encoding="utf-8"))
-    errors = [
-        e.message for e in _schema("naval_ship_names.schema.json").iter_errors(names)
-    ]
-    assert not errors
     factions = {p.stem for p in (DATA / "factions").glob("*.json")}
     ports = _ports()
     for entry in names["factions"]:

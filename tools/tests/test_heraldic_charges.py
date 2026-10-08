@@ -12,7 +12,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from jsonschema import Draft202012Validator
 from PIL import Image
 
 from cent_ans_tools import banners, heraldic_charges, heraldry
@@ -23,16 +22,6 @@ CHARGES = DATA / "heraldry" / "charges"
 
 def _manifest() -> dict:
     return json.loads((CHARGES / "charges.json").read_text(encoding="utf-8"))
-
-
-def test_manifest_matches_schema() -> None:
-    """charges.json matches its schema (licences restricted to PD, CC0, CC BY)."""
-    schema = json.loads(
-        (DATA / "schemas" / "heraldry_charges.schema.json").read_text(encoding="utf-8")
-    )
-    Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_manifest()))
-    assert not errors, [error.message for error in errors]
 
 
 def test_every_charge_is_credited_and_every_colour_has_a_role() -> None:

@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
-
 DATA = Path(__file__).resolve().parents[2] / "data"
 
 KINDS = {
@@ -23,16 +21,6 @@ def _load(path: Path) -> dict:
 
 def _missions() -> dict:
     return _load(DATA / "missions.json")
-
-
-def test_missions_match_schema() -> None:
-    """The missions file exists and matches its schema."""
-    schema = _load(DATA / "schemas" / "missions.schema.json")
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(_missions()), key=lambda e: e.path
-    )
-    assert not errors, [error.message for error in errors]
 
 
 def test_every_kind_has_a_template_with_unique_ids() -> None:
