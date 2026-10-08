@@ -281,3 +281,6 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 |---|---|---|---|---|---|
 | 2026-10-08 | fal.ai | banc `dn_batch.py` : test de solde (cavalier I3D) + moulin + chariot, 3 × `fal-ai/trellis` | 0,06 $ | 0,06 $ | 0,06 $ |
 | 2026-10-08 | fal.ai | comparatif cavalier `fal-ai/trellis` (1024) vs `fal-ai/trellis-2` (1024, 100 k faces), `cent-ans-raw/cmp-trellis/cav/` | 0,32 $ | 0,32 $ | 0,38 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : images Z-Image fal (`fal-ai/z-image/turbo`), 285 appels | 1.43 $ | 1.43 $ | 1.81 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : vues dos/côté `fal-ai/flux-2/edit`, 68 appels | 1.63 $ | 1.63 $ | 3.44 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : 3D `fal-ai/trellis` / `trellis/multi`, 190 appels | 3.80 $ | 3.80 $ | 7.24 $ |

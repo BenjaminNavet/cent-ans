@@ -5,5 +5,101 @@
     "fade_margin": 60.0,
     "banner_pole_ratio": 0.12
   },
-  "table": {}
+  "table": {
+    "city": {
+      "west": [
+        {
+          "path": "dn/buildings/city_west"
+        }
+      ],
+      "med": [
+        {
+          "path": "dn/buildings/city_med"
+        }
+      ],
+      "isl": [
+        {
+          "path": "dn/buildings/city_isl"
+        }
+      ]
+    },
+    "castle": {
+      "west": [
+        {
+          "path": "dn/buildings/castle_west"
+        }
+      ],
+      "med": [
+        {
+          "path": "dn/buildings/castle_med"
+        }
+      ],
+      "isl": [
+        {
+          "path": "dn/buildings/castle_isl"
+        }
+      ]
+    },
+    "village": {
+      "west": [
+        {
+          "path": "dn/buildings/village_west"
+        }
+      ],
+      "med": [
+        {
+          "path": "dn/buildings/village_med"
+        }
+      ],
+      "isl": [
+        {
+          "path": "dn/buildings/village_isl"
+        }
+      ],
+      "rus": [
+        {
+          "path": "dn/buildings/village_rus"
+        }
+      ]
+    },
+    "abbey": {
+      "west": [
+        {
+          "path": "dn/buildings/abbey_west"
+        }
+      ]
+    },
+    "town": {
+      "med": [
+        {
+          "path": "dn/buildings/town_med"
+        }
+      ],
+      "isl": [
+        {
+          "path": "dn/buildings/town_isl"
+        }
+      ],
+      "byz": [
+        {
+          "path": "dn/buildings/town_byz"
+        }
+      ],
+      "rus": [
+        {
+          "path": "dn/buildings/town_rus"
+        }
+      ],
+      "steppe": [
+        {
+          "path": "dn/buildings/town_steppe"
+        }
+      ],
+      "west": [
+        {
+          "path": "dn/buildings/town_west"
+        }
+      ]
+    }
+  }
 }
