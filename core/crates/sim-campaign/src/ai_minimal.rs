@@ -46,110 +46,185 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if !faction_state.alive {
         return Vec::new();
     }
-    // Diplomacy first (M5): peace, alliances, wars change what the armies do.
-    let mut orders = crate::diplomacy::plan_diplomacy(state, data, faction);
-    // LR-15: the seat, never another realm's city (cityless faction).
-    let capital_city = state.faction_seat(faction);
-
-    // Research (M6): pick the cheapest available technology when idle.
-    if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
-        orders.push(Order::Research { technology });
-    }
-    // The table (H3).
-    orders.extend(crate::table::ai_choose_diets(state, data, faction));
-    // Regional edicts (lot C4).
-    orders.extend(crate::edicts::ai_choose_edicts(state, data, faction));
-    // Coinage (H5).
-    orders.extend(crate::coinage::ai_choose_coinage(state, data, faction));
-    // Ransoms (H6).
-    orders.extend(crate::ransom::ai_ransom_orders(state, data, faction));
-    // Chivalric order (H6).
-    orders.extend(crate::chivalry::ai_found_order(state, data, faction));
-    // The crusade's passage (JR1).
-    orders.extend(crate::crusade::ai_preach(state, data, faction));
-
+    let mut orders = Vec::new();
+    plan_realm(state, data, faction, &mut orders);
     // In debt and still losing money: dismiss the most expensive field unit.
     if faction_state.treasury < 0
         && faction_state.last_budget.income < faction_state.last_budget.upkeep()
     {
-        if let Some(order) = disband_most_expensive(state, data, faction) {
-            orders.push(order);
-        }
+        orders.extend(disband_most_expensive(state, data, faction));
     }
-
-    // Recruit the cheapest affordable unit in the capital's city.
-    if let Some(city) = capital_city.as_ref().filter(|city| {
-        state
-            .settlements
-            .get(*city)
-            .is_some_and(|s| &s.owner == faction && &s.controller == faction)
-    }) {
-        let cheapest = state
-            .recruitable(data, city)
-            .into_iter()
-            .filter(|o| o.available && i64::from(o.cost) < faction_state.treasury)
-            .min_by_key(|o| (o.cost, o.unit_type.clone()));
-        if let Some(option) = cheapest {
-            orders.push(Order::Recruit {
-                settlement: city.into(),
-                unit_type: option.unit_type,
-            });
-        }
+    // LR-15: the seat, never another realm's city (cityless faction).
+    let capital_city = state.faction_seat(faction);
+    if let Some(city) = capital_city.as_ref() {
+        orders.extend(recruit_cheapest(state, data, faction, city));
     }
-
     let own_armies: Vec<ArmyId> = state
         .armies
         .iter()
         .filter(|(_, a)| &a.faction == faction)
         .map(|(id, _)| id.clone())
         .collect();
-
-    // Surplus capital garrison joins the army standing in the capital.
-    if let Some((city, garrison_len)) = capital_city.as_ref().and_then(|city| {
-        state
-            .settlements
-            .get(city)
-            .filter(|s| &s.controller == faction)
-            .map(|s| (city, s.garrison.len()))
-    }) {
-        if garrison_len > CAPITAL_GARRISON_KEEP {
-            if let Some(target) = own_armies.iter().find(|id| state.armies[*id].is_at(city)) {
-                orders.push(Order::CreateArmy {
-                    settlement: city.into(),
-                    units_from_garrison: (CAPITAL_GARRISON_KEEP..garrison_len).collect(),
-                    general: None,
-                });
-                orders.push(Order::MergeArmies {
-                    source: state.peek_next_army_id(),
-                    target: target.clone(),
-                });
-            }
-        }
+    if let Some(city) = capital_city.as_ref() {
+        orders.extend(fold_capital_garrison(state, faction, city, &own_armies));
     }
-
     // Lot M2: where every army stands on the settlement graph.
-    let anchors: BTreeMap<ArmyId, SettlementId> = state
-        .armies
-        .iter()
-        .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
-        .collect();
+    let turn = ArmyPlanner {
+        state,
+        data,
+        faction,
+        anchors: state
+            .armies
+            .iter()
+            .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
+            .collect(),
+    };
     for army_id in own_armies {
-        let army = &state.armies[&army_id];
+        turn.plan_army(&army_id, &mut orders);
+    }
+    orders
+}
+
+/// Diplomacy (M5: peace, alliances and wars change what the armies do),
+/// research (M6: the cheapest available technology when idle), then the
+/// table (H3), regional edicts (C4), coinage (H5), ransoms (H6), the
+/// chivalric order (H6) and the crusade's passage (JR1).
+fn plan_realm(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    orders: &mut Vec<Order>,
+) {
+    orders.extend(crate::diplomacy::plan_diplomacy(state, data, faction));
+    if let Some(technology) = crate::research::ai_choose_research(state, data, faction) {
+        orders.push(Order::Research { technology });
+    }
+    orders.extend(crate::table::ai_choose_diets(state, data, faction));
+    orders.extend(crate::edicts::ai_choose_edicts(state, data, faction));
+    orders.extend(crate::coinage::ai_choose_coinage(state, data, faction));
+    orders.extend(crate::ransom::ai_ransom_orders(state, data, faction));
+    orders.extend(crate::chivalry::ai_found_order(state, data, faction));
+    orders.extend(crate::crusade::ai_preach(state, data, faction));
+}
+
+/// Recruits the cheapest affordable unit in the capital's city, when the
+/// faction holds it.
+fn recruit_cheapest(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    city: &SettlementId,
+) -> Option<Order> {
+    state
+        .settlements
+        .get(city)
+        .filter(|s| &s.owner == faction && &s.controller == faction)?;
+    let treasury = state.factions[faction].treasury;
+    let cheapest = state
+        .recruitable(data, city)
+        .into_iter()
+        .filter(|o| o.available && i64::from(o.cost) < treasury)
+        .min_by_key(|o| (o.cost, o.unit_type.clone()))?;
+    Some(Order::Recruit {
+        settlement: city.into(),
+        unit_type: cheapest.unit_type,
+    })
+}
+
+/// The surplus of the capital's garrison joins the army standing there.
+fn fold_capital_garrison(
+    state: &CampaignState,
+    faction: &FactionId,
+    city: &SettlementId,
+    own_armies: &[ArmyId],
+) -> Vec<Order> {
+    let Some(garrison_len) = state
+        .settlements
+        .get(city)
+        .filter(|s| &s.controller == faction)
+        .map(|s| s.garrison.len())
+        .filter(|len| *len > CAPITAL_GARRISON_KEEP)
+    else {
+        return Vec::new();
+    };
+    let Some(target) = own_armies.iter().find(|id| state.armies[*id].is_at(city)) else {
+        return Vec::new();
+    };
+    vec![
+        Order::CreateArmy {
+            settlement: city.into(),
+            units_from_garrison: (CAPITAL_GARRISON_KEEP..garrison_len).collect(),
+            general: None,
+        },
+        Order::MergeArmies {
+            source: state.peek_next_army_id(),
+            target: target.clone(),
+        },
+    ]
+}
+
+/// What the per-army planning reads.
+struct ArmyPlanner<'a> {
+    state: &'a CampaignState,
+    data: &'a GameData,
+    faction: &'a FactionId,
+    /// Where every army stands on the settlement graph.
+    anchors: BTreeMap<ArmyId, SettlementId>,
+}
+
+impl ArmyPlanner<'_> {
+    /// Orders of one idle army: attack, keep a siege, defend or go home.
+    fn plan_army(&self, army_id: &ArmyId, orders: &mut Vec<Order>) {
+        let (state, data, faction) = (self.state, self.data, self.faction);
+        let army = &state.armies[army_id];
         if !army.planned_path.is_empty() {
-            continue;
+            return;
         }
-        let Some(anchor) = anchors.get(&army_id).cloned() else {
-            continue;
+        let Some(anchor) = self.anchors.get(army_id) else {
+            return;
         };
-        let power = state.army_power(data, &army_id);
+        let power = state.army_power(data, army_id);
         let step = points_per_step(data);
         let range = (f64::from(OFFENSIVE_RANGE) * step).round() as u32;
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(state, data, faction, &anchor, Some(range), Some(cap));
+        let table = dijkstra(state, data, faction, anchor, Some(range), Some(cap));
 
-        // Offensive: the best weakly defended hostile settlement, cities
-        // first, then the others by weight and fortification.
-        let target = table
+        if let Some(target) = self.offensive_target(&table, power, step) {
+            if !army.is_at(&target) {
+                orders.push(Order::SetStance {
+                    army: army_id.clone(),
+                    stance: Stance::Siege,
+                });
+                orders.push(Order::move_to(army_id.clone(), target));
+            } else if army.stance != Stance::Siege {
+                orders.push(Order::SetStance {
+                    army: army_id.clone(),
+                    stance: Stance::Siege,
+                });
+            }
+            return;
+        }
+        // Keep an ongoing siege.
+        if army
+            .settlement()
+            .and_then(|s| state.settlements.get(s))
+            .is_some_and(|s| s.siege.as_ref().is_some_and(|s| &s.attacker == faction))
+        {
+            return;
+        }
+        self.defend_or_go_home(army_id, &table, orders);
+    }
+
+    /// Offensive: the best weakly defended hostile settlement, cities
+    /// first, then the others by weight and fortification.
+    fn offensive_target(
+        &self,
+        table: &BTreeMap<SettlementId, crate::movement::Reach>,
+        power: f64,
+        step: f64,
+    ) -> Option<SettlementId> {
+        let (state, data, faction) = (self.state, self.data, self.faction);
+        table
             .iter()
             .filter(|(id, _)| state.is_hostile_settlement(faction, id))
             .filter(|(id, _)| {
@@ -167,39 +242,24 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                 (score, id)
             })
             .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
-            .map(|(_, id)| id.clone());
-        if let Some(target) = target {
-            if army.is_at(&target) {
-                if army.stance != Stance::Siege {
-                    orders.push(Order::SetStance {
-                        army: army_id.clone(),
-                        stance: Stance::Siege,
-                    });
-                }
-                continue;
-            }
-            orders.push(Order::SetStance {
-                army: army_id.clone(),
-                stance: Stance::Siege,
-            });
-            orders.push(Order::move_to(army_id.clone(), target));
-            continue;
-        }
+            .map(|(_, id)| id.clone())
+    }
 
-        // Keep an ongoing siege.
-        if army
-            .settlement()
-            .and_then(|s| state.settlements.get(s))
-            .is_some_and(|s| s.siege.as_ref().is_some_and(|s| &s.attacker == faction))
-        {
-            continue;
-        }
-
-        // Defence: the most threatened friendly settlement within reach.
+    /// Defence: the most threatened friendly settlement within reach; else
+    /// (lot C7a, lot M2: an army in the field too) an idle army outside
+    /// friendly and hostile places goes home; else it drops its stance.
+    fn defend_or_go_home(
+        &self,
+        army_id: &ArmyId,
+        table: &BTreeMap<SettlementId, crate::movement::Reach>,
+        orders: &mut Vec<Order>,
+    ) {
+        let (state, faction) = (self.state, self.faction);
+        let army = &state.armies[army_id];
         let threatened = table
             .iter()
             .filter(|(id, _)| state.is_friendly_settlement(faction, id))
-            .filter(|(id, _)| threat_at(state, data, &anchors, faction, id) > 0.0)
+            .filter(|(id, _)| self.threat_at(id) > 0.0)
             .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
             .map(|(id, _)| id.clone());
         let place = army.settlement();
@@ -213,8 +273,6 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
                 }
                 orders.push(Order::move_to(army_id.clone(), target));
             }
-            // Lot C7a: an idle army outside friendly places goes home (lot
-            // M2: an army in the field too).
             _ if place.is_none_or(|p| {
                 !state.is_friendly_settlement(faction, p)
                     && !state.is_hostile_settlement(faction, p)
@@ -247,7 +305,21 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
             }
         }
     }
-    orders
+
+    /// Strength of hostile armies anchored on or one edge away from
+    /// `settlement` (lot M2: an army in the field is anchored on the
+    /// nearest settlement).
+    fn threat_at(&self, settlement: &SettlementId) -> f64 {
+        let mut places = vec![settlement.clone()];
+        places.extend(edges(self.data, settlement).into_iter().map(|(n, _)| n));
+        self.anchors
+            .iter()
+            .filter(|(_, anchor)| places.contains(anchor))
+            .filter_map(|(id, _)| self.state.armies.get(id))
+            .filter(|a| self.state.is_at_war(self.faction, &a.faction))
+            .map(|a| f64::from(a.total_strength()))
+            .sum()
+    }
 }
 
 /// Dismisses the costliest unit of the largest army (never its last unit), or a
@@ -313,25 +385,4 @@ pub fn target_score(
         - if is_city { CITY_PREFERENCE_STEPS } else { 0.0 }
         - 2.0 * weight
         + 0.5 * fortification
-}
-
-/// Strength of hostile armies anchored on or one edge away from
-/// `settlement` (lot M2: an army in the field is anchored on the nearest
-/// settlement).
-fn threat_at(
-    state: &CampaignState,
-    data: &GameData,
-    anchors: &BTreeMap<ArmyId, SettlementId>,
-    faction: &FactionId,
-    settlement: &SettlementId,
-) -> f64 {
-    let mut places = vec![settlement.clone()];
-    places.extend(edges(data, settlement).into_iter().map(|(n, _)| n));
-    anchors
-        .iter()
-        .filter(|(_, anchor)| places.contains(anchor))
-        .filter_map(|(id, _)| state.armies.get(id))
-        .filter(|a| state.is_at_war(faction, &a.faction))
-        .map(|a| f64::from(a.total_strength()))
-        .sum()
 }

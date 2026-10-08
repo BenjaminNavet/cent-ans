@@ -9,6 +9,7 @@ from conftest import DATA, assert_matches_schema
 SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "agent_rules.schema.json": ("rules/agents.json",),
     "ai_alignment.schema.json": ("ai/alignment.json",),
+    "ai_campaign.schema.json": ("ai/campaign.json",),
     "ai_diplomacy.schema.json": ("ai/diplomacy.json",),
     "ai_doctrine.schema.json": ("ai/doctrines.json",),
     "ai_feudal.schema.json": ("ai/feudal.json",),
