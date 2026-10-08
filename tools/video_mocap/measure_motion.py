@@ -223,6 +223,59 @@ def cmd_overlay(args):
     cv2.imwrite(args.out, np.vstack(rows))
 
 
+def cmd_period(args):
+    """Period of a repeating motion from the self-similarity of a body-stabilised image band.
+
+    ``POINTS.json``: ``start_s``, ``end_s``, ``box`` [x, y, w, h] around the animal at ``start_s``,
+    ``band`` [y0, y1] fractions of the box height (legs: [0.55, 1.0]). The box is followed by an
+    appearance tracker, the band is cut at its centre, and the mean absolute difference between
+    frames ``lag`` apart is computed; the first deep minimum is the cycle period.
+    """
+    spec = json.load(open(args.points))
+    cap = cv2.VideoCapture(args.video)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    cap.set(cv2.CAP_PROP_POS_MSEC, spec["start_s"] * 1000.0)
+    ok, frame = cap.read()
+    x, y, w, h = spec["box"]
+    tracker = cv2.TrackerMIL_create()
+    tracker.init(frame, (x, y, w, h))
+    b0, b1 = spec.get("band", [0.55, 1.0])
+    bands = []
+    centres = []
+    while (len(bands) / fps) < spec["end_s"] - spec["start_s"]:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        found, rect = tracker.update(frame)
+        if found:
+            rx, ry, rw, rh = (int(v) for v in rect)
+        ya, yb = ry + int(rh * b0), ry + int(rh * b1)
+        cx = int(spec.get("anchor_x", 0.5) * rw) + rx
+        half = int(w * spec.get("half_width", 0.5))
+        patch = gray[max(ya, 0) : yb, max(cx - half, 0) : cx + half]
+        if patch.size == 0:
+            break
+        bands.append(cv2.resize(patch, (64, 24)).astype(np.float32))
+        centres.append((rx + rw / 2, ry + rh / 2))
+        ok, frame = cap.read()
+        if not ok:
+            break
+    stack = np.array(bands)
+    stack -= stack.mean(axis=(1, 2), keepdims=True)
+    n = len(stack)
+    max_lag = min(n // 2, int(spec.get("max_lag_s", 2.5) * fps))
+    curve = np.array([np.mean(np.abs(stack[: n - lag] - stack[lag:])) for lag in range(1, max_lag)])
+    curve /= curve.max() + 1e-9
+    lags = np.arange(1, max_lag) / fps
+    mins = [k for k in range(1, len(curve) - 1) if curve[k] < curve[k - 1] and curve[k] <= curve[k + 1] and lags[k] > spec.get("min_period_s", 0.4)]
+    result = {"frames": n, "fps": fps, "minima": [(round(float(lags[k]), 3), round(float(curve[k]), 3)) for k in mins[:4]]}
+    if mins:
+        result["period_s"] = round(float(lags[mins[0]]), 3)
+        result["hz"] = round(1.0 / lags[mins[0]], 3)
+    print(json.dumps(result))
+    if args.json:
+        with open(args.json, "w") as handle:
+            json.dump({**result, "curve": [round(float(v), 4) for v in curve], "centres": [(round(a, 1), round(b, 1)) for a, b in centres]}, handle)
+
+
 def detrend(signal, fps, seconds=1.5):
     """Remove the slow drift (camera pan, slope) with a moving average of ``seconds``."""
     win = max(3, int(seconds * fps))
@@ -362,12 +415,16 @@ def cmd_analyse(args):
             round(float(v), 3) for v in np.percentile(ang, [2, 98])
         )
         out["angles"][key] = info
-    if spec.get("ground") and ref is not None:
-        gi = names.index(spec["ground"])
-        rel = x_of(ref) - x_of(gi)
-        slope = np.polyfit(np.arange(len(rel)) / fps, rel, 1)[0]
-        out["speed_body_per_s"] = round(float(slope), 4)
-        out["stride_body"] = round(float(abs(slope) / f0), 4) if f0 else None
+    grounds = spec.get("ground") or []
+    if isinstance(grounds, str):
+        grounds = [grounds]
+    if grounds and ref is not None:
+        # Speed of the reference relative to ground texture points (median of the slopes).
+        times = np.arange(len(traj)) / fps
+        slopes = [np.polyfit(times, x_of(ref) - x_of(names.index(g)), 1)[0] for g in grounds]
+        slope = float(np.median(slopes))
+        out["speed_body_per_s"] = round(slope, 4)
+        out["stride_body"] = round(abs(slope) / f0, 4) if f0 else None
     print(json.dumps(out, indent=1))
     if args.json:
         json.dump(out, open(args.json, "w"), indent=1)
@@ -396,6 +453,11 @@ def main():
     t.add_argument("points")
     t.add_argument("out")
     t.set_defaults(fn=cmd_track)
+    p = sub.add_parser("period")
+    p.add_argument("video")
+    p.add_argument("points")
+    p.add_argument("--json")
+    p.set_defaults(fn=cmd_period)
     o = sub.add_parser("overlay")
     o.add_argument("video")
     o.add_argument("npz")
