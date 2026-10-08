@@ -256,6 +256,7 @@ func _model_index(model_name: String) -> int:
 				if material_name == "Banner":
 					if original is BaseMaterial3D:
 						banner = (original as BaseMaterial3D).albedo_color
+					_note_banner_size(mesh, surface)
 					mesh.surface_set_material(surface, _banner_material())
 					continue
 				var shared := BuildingMaterials.material(material_name, "far")
@@ -270,6 +271,7 @@ func _model_index(model_name: String) -> int:
 
 
 var _banner: ShaderMaterial
+var _banner_size := 0.0
 var _kit: ShaderMaterial
 
 
@@ -297,7 +299,26 @@ func _banner_material() -> ShaderMaterial:
 	if _banner == null:
 		_banner = ShaderMaterial.new()
 		_banner.shader = BANNER_SHADER
+		# AS5 : onde de vent (data/fx/map_fire_wind.json) ; amplitude nulle si éteinte.
+		var wind := MapFireWind.section("maquette_banner")
+		_banner.set_shader_parameter("amplitude", float(wind.get("amplitude", 0.0)))
+		for key in ["wave_speed", "wave_length", "gust_gain", "calm"]:
+			if wind.has(key):
+				_banner.set_shader_parameter(key, float(wind[key]))
 	return _banner
+
+
+## AS5 : plus grande dimension d'une toile de bannière des modèles préparés (mètres du modèle),
+## base de l'amplitude de l'onde de vent.
+func _note_banner_size(mesh: Mesh, surface: int) -> void:
+	var vertices: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+	if not vertices is PackedVector3Array or (vertices as PackedVector3Array).is_empty():
+		return
+	var box := AABB((vertices as PackedVector3Array)[0], Vector3.ZERO)
+	for v: Vector3 in vertices:
+		box = box.expand(v)
+	_banner_size = maxf(_banner_size, box.get_longest_axis_size())
+	_banner_material().set_shader_parameter("banner_size", _banner_size)
 
 
 ## Altitude de pose (m) du lieu `i` : le sol au centre, abaissé à la moyenne de l'emprise si elle

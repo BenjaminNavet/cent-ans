@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_map_fire_wind.schema.json",
+  "title": "Flammes de carte et vent des maquettes (lot AS5)",
+  "description": "Fichier data/fx/map_fire_wind.json : paramètres visuels de game/scripts/map/map_fire_wind.gd. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "positive": { "type": "number", "exclusiveMinimum": 0 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "fire": {
+      "type": "object",
+      "properties": {
+        "flame_size": { "type": "array", "items": { "$ref": "#/$defs/positive" }, "minItems": 2, "maxItems": 2, "description": "Largeur, hauteur d'une flamme (unités monde à l'échelle de la carte)." },
+        "frames": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "minItems": 2, "maxItems": 2, "description": "Colonnes, lignes de la planche." },
+        "loops_per_s": { "$ref": "#/$defs/positive" },
+        "emission": { "type": "number", "minimum": 0 },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "lean": { "type": "number", "minimum": 0, "maximum": 1, "description": "Inclinaison de la flamme sous la rafale (part de sa hauteur)." },
+        "color_cold": { "$ref": "#/$defs/rgb" },
+        "color_mid": { "$ref": "#/$defs/rgb" },
+        "color_hot": { "$ref": "#/$defs/rgb" },
+        "color_core": { "$ref": "#/$defs/rgb" },
+        "light": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_lights": { "type": "integer", "minimum": 0, "maximum": 16 },
+            "max_camera_distance": { "$ref": "#/$defs/positive" },
+            "update_period_s": { "$ref": "#/$defs/positive" },
+            "color": { "$ref": "#/$defs/rgb" },
+            "energy": { "type": "number", "minimum": 0 },
+            "range": { "$ref": "#/$defs/positive" },
+            "height": { "type": "number", "minimum": 0 },
+            "flicker_speed": { "type": "number", "minimum": 0 },
+            "flicker_amount": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["enabled", "max_lights", "max_camera_distance", "update_period_s", "color", "energy", "range", "height", "flicker_speed", "flicker_amount"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["flame_size", "frames", "loops_per_s", "emission", "opacity", "lean", "color_cold", "color_mid", "color_hot", "color_core", "light"],
+      "additionalProperties": false
+    },
+    "maquette_banner": {
+      "type": "object",
+      "properties": {
+        "amplitude": { "type": "number", "minimum": 0, "description": "Ondulation (part de la taille de la bannière)." },
+        "wave_speed": { "type": "number", "minimum": 0 },
+        "wave_length": { "$ref": "#/$defs/positive" },
+        "gust_gain": { "type": "number", "minimum": 0 },
+        "calm": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'amplitude hors rafale." }
+      },
+      "required": ["amplitude", "wave_speed", "wave_length", "gust_gain", "calm"],
+      "additionalProperties": false
+    },
+    "battle_tree_impostor": {
+      "type": "object",
+      "properties": {
+        "sway": { "type": "number", "minimum": 0, "description": "Déplacement de la cime (part de la hauteur de la cellule)." },
+        "frequency": { "type": "number", "minimum": 0 },
+        "second_harmonic": { "type": "number", "minimum": 0 },
+        "flutter": { "type": "number", "minimum": 0 }
+      },
+      "required": ["sway", "frequency", "second_harmonic", "flutter"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["enabled", "fire", "maquette_banner", "battle_tree_impostor"],
+  "additionalProperties": false
+}
