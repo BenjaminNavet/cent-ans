@@ -100,8 +100,35 @@ impl std::fmt::Display for SetupError {
 impl std::error::Error for SetupError {}
 
 /// Data derived from the field, computed once and shared by the forks of a
-/// step (reset to a fresh cell by [`BattleSim::field_mut`]).
-type Derived<T> = Arc<OnceLock<T>>;
+/// step (reset to a fresh cell by [`BattleSim::field_mut`]). A cache, not
+/// state: its `Debug` prints nothing, so a lazily filled cell never makes two
+/// identical battles compare different.
+struct Derived<T>(Arc<OnceLock<T>>);
+
+impl<T> Default for Derived<T> {
+    fn default() -> Self {
+        Self(Arc::default())
+    }
+}
+
+impl<T> Clone for Derived<T> {
+    fn clone(&self) -> Self {
+        Self(Arc::clone(&self.0))
+    }
+}
+
+impl<T> std::ops::Deref for Derived<T> {
+    type Target = OnceLock<T>;
+    fn deref(&self) -> &OnceLock<T> {
+        &self.0
+    }
+}
+
+impl<T> std::fmt::Debug for Derived<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Derived")
+    }
+}
 
 /// A battle in progress.
 #[derive(Debug, Clone)]
