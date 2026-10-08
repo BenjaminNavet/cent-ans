@@ -301,6 +301,7 @@ static func visible_panel() -> Control:
 	return panel
 
 
+## Conservé pour encyclopedia.gd (hors lot) ; équivaut à `Money.digits`.
 static func thousands(value: int) -> String:
 	return Money.digits(value)
 
