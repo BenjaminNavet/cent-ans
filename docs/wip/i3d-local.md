@@ -13,12 +13,18 @@ But : trouver une alternative gratuite à TRELLIS fal (0,02 $/objet). Tout est h
   - Planche `out/sheets/d_all.jpg` (TRELLIS à gauche, TripoSR à droite, `ga3_sheet.py`) :
     maison correcte de face mais floue/molle ; chariot : une roue manque, brancards OK ;
     chêne : boules molles, tronc à peine visible. Nettement en dessous de TRELLIS.
-- **Stable Fast 3D** (licence Stability communautaire, gratuite < 1 M$) : installé (venv `.venv`,
-  libomp brew, extensions texture_baker/uv_unwrapper compilées, MPS OK) mais **modèle gated** :
-  attend `hf auth login` + licence acceptée par le joueur sur huggingface.co/stabilityai/stable-fast-3d.
+- **Stable Fast 3D** (licence Stability communautaire, gratuite < 1 M$) : marche (venv `.venv`, MPS).
+  - Accès HF accepté + `hf auth login` (08/10). Poids ≈ 4 Go dans le cache HF.
+  - Piège : texture_baker/uv_unwrapper liés au libomp de brew + celui de torch → OMP #15 puis
+    segfault. Corrigé par `install_name_tool -change` vers `<torch>/lib/libomp.dylib` (chemin absolu)
+    + `codesign -f -s -`. À refaire après toute réinstallation.
+  - ≈ 70 s/objet (chargement compris), 26-72 k triangles, vrai glb texturé, Y vers le haut.
+  - Planche `out/sheets/compare_3.jpg` + `cart_close.jpg` (TRELLIS / TripoSR / SF3D) :
+    maison : bonne silhouette mais pans de bois perdus, texture paille uniforme, pas de soubassement ;
+    chariot : **le meilleur des gratuits** (2 roues, brancards, ridelles), un peu bruité ;
+    chêne : masse vert clair délavée, tronc invisible. Toujours sous TRELLIS en détail et en couleur.
 
-## Prochaine étape
-Une fois le jeton HF présent (`~/.cache/huggingface/token`) : lancer SF3D sur les 3 mêmes images
-(`ga3/s4/cut.png`, `ga3/l1/cart/cut.png`, `ga3/s5/oak_tree_cut.png`) avec
-`PYTORCH_ENABLE_MPS_FALLBACK=1 python run.py IMG --device mps --output-dir ../out/sf3d/<n>`,
-normaliser (même script trimesh que TripoSR), ajouter une colonne à la planche.
+## Verdict
+TRELLIS fal reste le meilleur rapport qualité/prix (0,02 $). SF3D local = repli gratuit honnête pour
+les objets simples vus de loin (chariots, caisses, rochers) ; inutilisable pour arbres et bâtiments
+détaillés. TripoSR : à abandonner.
