@@ -2,13 +2,14 @@
 
 use std::path::PathBuf;
 
+use data_model::test_support::{data_dir, game_data};
 use data_model::{GameData, SocialClass};
 
 /// Lot M2: the navigation grid (or its land-mask fallback) and the province
 /// raster decode, and the settlements stand on passable cells.
 #[test]
 fn real_rasters_load() {
-    let (data, _) = GameData::load(&data_root()).expect("data/ must load");
+    let data = game_data();
     let start = std::time::Instant::now();
     let grid = data.navgrid();
     println!("rasters decoded in {:?} ({grid:?})", start.elapsed());
@@ -36,14 +37,14 @@ fn real_rasters_load() {
 }
 
 fn data_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data")
+    data_dir()
 }
 
 /// Lot N1: `data/rules/auto_resolve.json` is read and the built-in fallback
 /// mirrors it.
 #[test]
 fn auto_resolve_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.auto_resolve.clone();
     assert!(
         from_file.description.is_some(),
@@ -56,7 +57,7 @@ fn auto_resolve_rules_match_their_default() {
 /// Lot E2: `data/rules/population.json` is read and mirrored by the default.
 #[test]
 fn population_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.population_rules.clone();
     assert!(from_file.description.is_some(), "population.json not read");
     from_file.description = None;
@@ -66,7 +67,7 @@ fn population_rules_match_their_default() {
 /// Lot EP5: `data/rules/battle_standards.json` is read and mirrored by the default.
 #[test]
 fn battle_standard_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.battle_standard_rules.clone();
     assert!(
         from_file.description.is_some(),
@@ -79,7 +80,7 @@ fn battle_standard_rules_match_their_default() {
 /// Lot DF1: `data/rules/difficulty.json` is read and mirrored by the default.
 #[test]
 fn difficulty_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.difficulty.clone();
     assert!(from_file.description.is_some(), "difficulty.json not read");
     from_file.description = None;
@@ -88,7 +89,7 @@ fn difficulty_rules_match_their_default() {
 
 #[test]
 fn economy_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.economy_rules.clone();
     assert!(from_file.description.is_some(), "economy.json not read");
     from_file.description = None;
@@ -97,7 +98,7 @@ fn economy_rules_match_their_default() {
 
 #[test]
 fn diplomacy_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.diplomacy_rules.clone();
     assert!(from_file.description.is_some(), "diplomacy.json not read");
     from_file.description = None;
@@ -290,7 +291,7 @@ fn real_data_loads_without_errors() {
 /// Lot C1: every province has settlements, exactly one city first in its list.
 #[test]
 fn every_province_has_exactly_one_city() {
-    let (data, _) = GameData::load(&data_root()).expect("data/ must load");
+    let data = game_data();
     assert!(data.settlement_rules.is_some(), "settlements/rules.json");
     for id in data.provinces.keys() {
         let settlements = data.province_settlements(id);
@@ -319,7 +320,7 @@ fn every_province_has_exactly_one_city() {
 /// Lot CV3-1: `data/rules/postures.json` is read and mirrored by the default.
 #[test]
 fn posture_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.posture_rules.clone();
     assert!(from_file.description.is_some(), "postures.json not read");
     from_file.description = None;
@@ -329,7 +330,7 @@ fn posture_rules_match_their_default() {
 /// Lot CV3-1: `data/rules/battle_outcome.json` is read and mirrored by the default.
 #[test]
 fn battle_outcome_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.battle_outcome_rules.clone();
     assert!(
         from_file.description.is_some(),
@@ -343,7 +344,7 @@ fn battle_outcome_rules_match_their_default() {
 /// and times every scene kind.
 #[test]
 fn map_scene_rules_match_their_default() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let mut from_file = data.map_scene_rules.clone();
     assert!(from_file.description.is_some(), "map_scenes.json not read");
     from_file.description = None;
@@ -357,7 +358,7 @@ fn map_scene_rules_match_their_default() {
 /// forests and wetlands somewhere.
 #[test]
 fn cover_map_reads_the_rasters() {
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let data = game_data();
     let map = data.cover_map().expect("cover rasters");
     assert_eq!(map.width, data.navgrid().width);
     assert!(map.forest.iter().any(|v| *v > 200), "no forest cell");

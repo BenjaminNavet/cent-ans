@@ -9,3 +9,10 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 png = "0.17"
+
+[features]
+# Helpers de test partagés (`data_model::test_support`), activés en dev-dependency.
+test-support = []
+
+[dev-dependencies]
+data-model = { path = ".", features = ["test-support"] }

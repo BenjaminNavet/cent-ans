@@ -18,6 +18,8 @@ pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_grid;
 pub mod settlement_load;
+#[cfg(feature = "test-support")]
+pub mod test_support;
 pub mod title_check;
 pub mod trade_paths;
 
