@@ -19,6 +19,12 @@ extends Node3D
 ##   par morceau recalé puis par tranches) ;
 ## - les villes emblématiques (`data/landmarks/`) gardent leur `LandmarkModel`, grossi de
 ##   `landmark_scale`.
+## - lot DN camp-bati (D1) : si `data/art/dn_campaign_models.json` donne un glb généré pour le type
+##   et la famille d'un lieu, ce glb (mono-surface texturé, éclairage standard) remplace la maquette
+##   sous `near_distance` (fondu croisé sur `fade_margin`) ; la maquette stylisée garde le lointain.
+##   Un MultiMesh par (modèle généré, tuile) ; la couleur du contrôleur ne teinte qu'une bannière
+##   procédurale (hampe + toile, `maquette_banner.gdshader`) posée au sommet. Table vide : rien
+##   ne change.
 ## Style par défaut (`map.town_style`), `--town-style=real` rend les villes 1:1. Purement visuel.
 
 const BANNER_SHADER := preload("res://shaders/maquette_banner.gdshader")
@@ -47,6 +53,8 @@ var _model_of: PackedInt32Array = PackedInt32Array()  # index dans `_model_list`
 var _tile_of: PackedInt32Array = PackedInt32Array()  # index dans `_tiles`, -1 sinon
 var _slot: PackedInt32Array = PackedInt32Array()  # instance dans le MultiMesh de la tuile
 var _ground_m: PackedFloat64Array = PackedFloat64Array()  # altitude de pose (m), NAN : à lire
+var _dn_scale: PackedFloat32Array = PackedFloat32Array()  # échelle du glb généré (0 : lieu sans glb généré)
+var _dn_model_of: PackedInt32Array = PackedInt32Array()  # index dans `_dn_list`, -1 sinon
 var _color: PackedColorArray = PackedColorArray()
 var _family: PackedStringArray = PackedStringArray()
 ## Modèles préparés : nom → index ; liste de {mesh, local: Transform3D, top, banner: Color}.
@@ -54,7 +62,19 @@ var _models: Dictionary = {}
 var _model_list: Array[Dictionary] = []
 ## Tuiles : `MultiMeshInstance3D` par (modèle, tuile), et par type pour le fondu de portée.
 var _tiles: Array[MultiMeshInstance3D] = []
-var _tiles_by_kind: Array = []
+## Parallèles à `_tiles` (null : tuile sans glb généré) : glb généré, bannière, entrée de `_dn_list`.
+var _dn_tiles: Array[MultiMeshInstance3D] = []
+var _dn_banners: Array[MultiMeshInstance3D] = []
+var _dn_tile_model: PackedInt32Array = PackedInt32Array()
+var _tile_kind: PackedInt32Array = PackedInt32Array()  # type de lieu de chaque tuile
+## Glb générés préparés : nom → index ; liste de {mesh, local, top, width, entry}.
+var _dn_models: Dictionary = {}
+var _dn_list: Array[Dictionary] = []
+var _dn_banner_mesh: ArrayMesh
+var _dn_banner_material: ShaderMaterial
+var _dn_alpha: PackedFloat32Array = PackedFloat32Array()  # par tuile : part de glb généré (0 à 1)
+var _tiles_by_kind: Array = []  # toutes les tuiles du type (ombres)
+var _fade_by_kind: Array = []  # tuiles du type sans glb généré (fondu de portée)
 var _kind_alpha: PackedFloat32Array = PackedFloat32Array()
 var _kind_shadows: PackedByteArray = PackedByteArray()  # 1 : les tuiles du type portent une ombre
 var _kind_shadow_range: PackedFloat32Array = PackedFloat32Array()  # `shadow_range` du type (INF : sans limite)
@@ -94,10 +114,15 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	_ground_m.resize(count)
 	_ground_m.fill(NAN)
 	_color.resize(count)
+	_dn_scale.resize(count)
+	_dn_model_of.resize(count)
+	_dn_model_of.fill(-1)
 	_family.resize(count)
 	_tiles_by_kind.clear()
+	_fade_by_kind.clear()
 	for k in TownMaquetteData.KINDS.size():
 		_tiles_by_kind.append([])
+		_fade_by_kind.append([])
 	_kind_alpha.resize(TownMaquetteData.KINDS.size())
 	_kind_alpha.fill(1.0)
 	_kind_shadows.resize(TownMaquetteData.KINDS.size())
@@ -174,14 +199,19 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		_radius[i] *= _factor[i]
 		_top[i] = float(_model_list[m]["top"]) * _model_scale[i]
 		_color[i] = _model_list[m]["banner"]
-		var key := Vector3i(m, int(floor(centers[i].x / tile)), int(floor(centers[i].y / tile)))
+		# Glb généré (D1) : le groupe porte l'index du glb (w), -1 sans.
+		var dn := _dn_for(i, kind)
+		if dn >= 0:
+			_dn_model_of[i] = dn
+			_dn_scale[i] = _dn_scale_of(dn, kind, i)
+		var key := Vector4i(m, int(floor(centers[i].x / tile)), int(floor(centers[i].y / tile)), dn)
 		if not groups.has(key):
 			groups[key] = PackedInt32Array()
 		groups[key].append(i)
 	# 3. Un MultiMesh par (modèle, tuile).
 	var instances := 0
 	var margin := TownMaquetteData.fade_margin()
-	for key: Vector3i in groups:
+	for key: Vector4i in groups:
 		var members: PackedInt32Array = groups[key]
 		var model: Dictionary = _model_list[key.x]
 		var multimesh := MultiMesh.new()
@@ -200,20 +230,32 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		add_child(mmi)
 		var t := _tiles.size()
 		_tiles.append(mmi)
+		_tile_kind.append(kind_index)
 		(_tiles_by_kind[kind_index] as Array).append(mmi)
+		if key.w < 0:
+			(_fade_by_kind[kind_index] as Array).append(mmi)
+			_dn_tiles.append(null)
+			_dn_banners.append(null)
+			_dn_tile_model.append(-1)
+			_dn_alpha.append(0.0)
+		else:
+			_add_dn_tiles(key.w, mmi, members.size(), kind_index)
 		for s in members.size():
 			var i := members[s]
 			_tile_of[i] = t
 			_slot[i] = s
 			_place(i)
 			multimesh.set_instance_custom_data(s, _color[i].srgb_to_linear())
+			var banner_mmi := _dn_banners[t]
+			if banner_mmi != null:
+				banner_mmi.multimesh.set_instance_custom_data(s, _color[i].srgb_to_linear())
 		instances += members.size()
 	_pose_scale = MapData.vertical_scale()
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {
 		"places": count, "landmarks": _landmarks.size(), "instances": instances, "multimeshes": _tiles.size(),
-		"models": _model_list.size(), "reduced": reduced, "absorbed": absorbed, "family_fallbacks": fallbacks,
+		"models": _model_list.size(), "dn_models": _dn_list.size(), "dn_places": _dn_places(), "reduced": reduced, "absorbed": absorbed, "family_fallbacks": fallbacks,
 		"setup_ms": Time.get_ticks_msec() - t0, "prepare_ms": t1 - t0,
 	}
 	print("TownMaquetteLayer: %s" % JSON.stringify(stats))
@@ -347,6 +389,12 @@ func _place(i: int) -> void:
 	var y := maxf(MapData.display_height(_pose_m(i), px.x, px.y), 0.0)
 	var mmi := _tiles[t]
 	mmi.multimesh.set_instance_transform(_slot[i], Transform3D(Basis.IDENTITY, -mmi.position) * _world_transform(i, px, y))
+	if _dn_model_of[i] >= 0 and _dn_tiles[t] != null:
+		var offset := Transform3D(Basis.IDENTITY, -mmi.position)
+		_dn_tiles[t].multimesh.set_instance_transform(_slot[i], offset * dn_world_transform(i, px, y))
+		var banner_mmi := _dn_banners[t]
+		if banner_mmi != null:
+			banner_mmi.multimesh.set_instance_transform(_slot[i], offset * _dn_banner_transform(i, px, y))
 
 
 ## Transformation monde du maillage du lieu `i` posé en (`px`, `y`) : lacet, échelle, repère du
@@ -387,6 +435,8 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		if color != _color[i]:
 			_color[i] = color
 			_tiles[t].multimesh.set_instance_custom_data(_slot[i], color.srgb_to_linear())
+			if _dn_banners[t] != null:
+				_dn_banners[t].multimesh.set_instance_custom_data(_slot[i], color.srgb_to_linear())
 
 
 ## Couleur de bannière affichée pour le lieu `i` (tests).
@@ -412,14 +462,15 @@ func reposition_all() -> void:
 func update_view(camera_distance: float) -> void:
 	# Fondu de portée par type, sur la distance du rig.
 	var margin := maxf(TownMaquetteData.fade_margin(), 0.001)
-	for k in _tiles_by_kind.size():
+	for k in _fade_by_kind.size():
 		var limit := TownMaquetteData.visibility(TownMaquetteData.KINDS[k])
 		var alpha := clampf((limit - camera_distance) / margin, 0.0, 1.0)
 		if alpha != _kind_alpha[k]:
 			_kind_alpha[k] = alpha
-			for mmi: MultiMeshInstance3D in _tiles_by_kind[k]:
+			for mmi: MultiMeshInstance3D in _fade_by_kind[k]:
 				mmi.visible = alpha > 0.0
 				mmi.transparency = 1.0 - alpha
+	_update_dn_view(camera_distance)
 	# Ombres portées, par type : jusqu'à `model_shadow_distance` (FC1) et, pour les petits lieux,
 	# jusqu'à leur `shadow_range` (une passe d'ombre en moins par tuile au-delà).
 	for k in _tiles_by_kind.size():
@@ -567,3 +618,220 @@ func instance_transform(i: int) -> Transform3D:
 	if i < 0 or i >= _tile_of.size() or _tile_of[i] < 0:
 		return Transform3D.IDENTITY
 	return _world_transform(i, _layer.model_px(i), pose_height(i))
+
+
+# --- Glb générés (DN camp-bati, D1) ---------------------------------------------------
+
+
+## Index du glb généré du lieu `i` (type `kind`), -1 si la table n'en donne pas ou si le fichier
+## manque (la maquette reste alors seule).
+func _dn_for(i: int, kind: String) -> int:
+	if DnCampaignModels.is_empty():
+		return -1
+	var variant_index := absi(str(_layer.data.settlements[i]["id"]).hash())
+	var entry := DnCampaignModels.entry_for(kind, _family[i], variant_index)
+	if entry.is_empty():
+		return -1
+	return _dn_index(entry)
+
+
+## Glb généré préparé (premier maillage, repère local, largeur native mesurée si absente) ; -1 s'il
+## n'est pas importé. Le matériau importé (albédo baké, éclairage standard) est gardé tel quel.
+func _dn_index(entry: Dictionary) -> int:
+	var path := str(entry.get("path", ""))
+	if _dn_models.has(path):
+		return _dn_models[path]
+	var index := -1
+	var scene := ModelLibrary.get_scene(path)
+	var root: Node3D = null
+	if scene != null:
+		root = scene.instantiate() as Node3D
+	if root != null:
+		var found := root.find_children("*", "MeshInstance3D", true, false)
+		if root is MeshInstance3D:
+			found.push_front(root)
+		if not found.is_empty():
+			var mesh_instance := found[0] as MeshInstance3D
+			var local := Transform3D.IDENTITY
+			var node: Node3D = mesh_instance
+			while node != null and node != root:
+				local = node.transform * local
+				node = node.get_parent() as Node3D
+			var mesh := mesh_instance.mesh.duplicate() as Mesh
+			var box := local * mesh.get_aabb()
+			var width := float(entry.get("native_width", maxf(box.size.x, box.size.z)))
+			index = _dn_list.size()
+			_dn_list.append({"path": path, "mesh": mesh, "local": local, "top": maxf(box.end.y, 0.0), "width": maxf(width, 0.001), "entry": entry})
+		root.free()
+	_dn_models[path] = index
+	return index
+
+
+## Échelle du glb généré `dn` pour le lieu `i` : même largeur monde que la maquette du type.
+func _dn_scale_of(dn: int, kind: String, i: int) -> float:
+	var info: Dictionary = _dn_list[dn]
+	var entry: Dictionary = info["entry"]
+	return TownMaquetteData.width(kind) * _gain[i] * _factor[i] * float(entry.get("scale", 1.0)) / float(info["width"])
+
+
+func dn_world_transform(i: int, px: Vector2, y: float) -> Transform3D:
+	var basis := Basis(Vector3.UP, _yaw[i]).scaled(Vector3.ONE * _dn_scale[i])
+	var local: Transform3D = _dn_list[_dn_model_of[i]]["local"]
+	return Transform3D(basis, Vector3(px.x, y, px.y)) * local
+
+
+## Bannière procédurale au sommet du glb généré : hauteur de hampe = part de la hauteur du modèle.
+func _dn_banner_transform(i: int, px: Vector2, y: float) -> Transform3D:
+	var info: Dictionary = _dn_list[_dn_model_of[i]]
+	var top: float = float(info["top"]) * _dn_scale[i]
+	var k := maxf(top * DnCampaignModels.banner_pole_ratio(), 0.001)
+	var basis := Basis(Vector3.UP, _yaw[i]).scaled(Vector3.ONE * k)
+	return Transform3D(basis, Vector3(px.x, y + top, px.y))
+
+
+## Crée le MultiMesh du glb `dn` (et sa bannière) en parallèle de la tuile de maquette `mmi`
+## (mêmes emplacements) ; la tuile de maquette se fond avec lui (`_update_dn_view`).
+func _add_dn_tiles(dn: int, mmi: MultiMeshInstance3D, member_count: int, kind_index: int) -> void:
+	var info: Dictionary = _dn_list[dn]
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.mesh = info["mesh"]
+	multimesh.instance_count = member_count
+	var dn_mmi := MultiMeshInstance3D.new()
+	dn_mmi.name = "dn_%s" % mmi.name
+	dn_mmi.position = mmi.position
+	dn_mmi.multimesh = multimesh
+	var near := DnCampaignModels.near_distance(info["entry"])
+	dn_mmi.visibility_range_end = near + DnCampaignModels.fade_margin() + TownMaquetteData.tile_size() * 0.7072
+	dn_mmi.visible = false
+	add_child(dn_mmi)
+	(_tiles_by_kind[kind_index] as Array).append(dn_mmi)
+	var banner_mmi: MultiMeshInstance3D = null
+	if bool((info["entry"] as Dictionary).get("banner", true)):
+		var banner_mm := MultiMesh.new()
+		banner_mm.transform_format = MultiMesh.TRANSFORM_3D
+		banner_mm.use_custom_data = true
+		banner_mm.mesh = _banner_mesh()
+		banner_mm.instance_count = member_count
+		banner_mmi = MultiMeshInstance3D.new()
+		banner_mmi.name = "dn_banner_%s" % mmi.name
+		banner_mmi.position = mmi.position
+		banner_mmi.multimesh = banner_mm
+		banner_mmi.material_override = _dn_banner_mat()
+		banner_mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		banner_mmi.visibility_range_end = dn_mmi.visibility_range_end
+		banner_mmi.visible = false
+		add_child(banner_mmi)
+	_dn_tiles.append(dn_mmi)
+	_dn_banners.append(banner_mmi)
+	_dn_tile_model.append(dn)
+	_dn_alpha.append(0.0)
+
+
+## Bannière unitaire : hampe (hauteur 1) et toile 0,55 × 0,38 sur une grille 6 × 3 (onde de vent).
+func _banner_mesh() -> ArrayMesh:
+	if _dn_banner_mesh != null:
+		return _dn_banner_mesh
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var pole := 0.02
+	var corners := [Vector3(-pole, 0, -pole), Vector3(pole, 0, -pole), Vector3(pole, 0, pole), Vector3(-pole, 0, pole)]
+	for c in 4:
+		var a: Vector3 = corners[c]
+		var b: Vector3 = corners[(c + 1) % 4]
+		var up := Vector3(0, 1.0, 0)
+		for v: Vector3 in [a, b, b + up, a, b + up, a + up]:
+			st.set_normal((a + b).normalized())
+			st.add_vertex(v)
+	var cols := 6
+	var rows := 3
+	var width := 0.55
+	var height := 0.38
+	for r in rows:
+		for c in cols:
+			var x0 := width * c / cols
+			var x1 := width * (c + 1) / cols
+			var y0 := 1.0 - height * r / rows
+			var y1 := 1.0 - height * (r + 1) / rows
+			for v: Vector3 in [Vector3(x0, y0, 0), Vector3(x1, y0, 0), Vector3(x1, y1, 0), Vector3(x0, y0, 0), Vector3(x1, y1, 0), Vector3(x0, y1, 0)]:
+				st.set_normal(Vector3(0, 0, 1))
+				st.add_vertex(v)
+	_dn_banner_mesh = st.commit()
+	return _dn_banner_mesh
+
+
+func _dn_banner_mat() -> ShaderMaterial:
+	if _dn_banner_material == null:
+		_dn_banner_material = _banner_material().duplicate() as ShaderMaterial
+		_dn_banner_material.set_shader_parameter("banner_size", 0.55)
+	return _dn_banner_material
+
+
+## Fondu croisé maquette / glb généré par tuile : le glb apparaît sous `near + marge` (opacité
+## pleine à `near`), la maquette de la tuile reste dessous jusqu'à ce que le glb soit opaque,
+## puis disparaît ; au-delà de la portée du type, rien.
+func _update_dn_view(camera_distance: float) -> void:
+	if _dn_list.is_empty():
+		return
+	var margin := maxf(DnCampaignModels.fade_margin(), 0.001)
+	var fade := maxf(TownMaquetteData.fade_margin(), 0.001)
+	for t in _tiles.size():
+		var dn_mmi := _dn_tiles[t]
+		if dn_mmi == null:
+			continue
+		var info: Dictionary = _dn_list[_dn_tile_model[t]]
+		var near := DnCampaignModels.near_distance(info["entry"])
+		var limit := TownMaquetteData.visibility(TownMaquetteData.KINDS[_tile_kind[t]])
+		var dn_alpha := clampf((near + margin - camera_distance) / margin, 0.0, 1.0) if camera_distance < limit else 0.0
+		if dn_alpha != _dn_alpha[t]:
+			_dn_alpha[t] = dn_alpha
+			dn_mmi.visible = dn_alpha > 0.0
+			dn_mmi.transparency = 1.0 - dn_alpha
+			if _dn_banners[t] != null:
+				_dn_banners[t].visible = dn_alpha > 0.0
+				_dn_banners[t].transparency = 1.0 - dn_alpha
+		var gen := _tiles[t]
+		var gen_alpha := clampf((limit - camera_distance) / fade, 0.0, 1.0)
+		gen.visible = dn_alpha < 1.0 and gen_alpha > 0.0
+		gen.transparency = 1.0 - gen_alpha
+
+
+## Nombre de lieux affichés par un glb généré.
+func _dn_places() -> int:
+	var total := 0
+	for dn in _dn_model_of:
+		if dn >= 0:
+			total += 1
+	return total
+
+
+## Accès tests : glb généré du lieu `i` (-1 sans), part de glb généré de sa tuile (0 à 1),
+## visibilité de la maquette de sa tuile.
+func dn_model_of(i: int) -> int:
+	return _dn_model_of[i] if i >= 0 and i < _dn_model_of.size() else -1
+
+
+func dn_alpha_of(i: int) -> float:
+	if i < 0 or i >= _tile_of.size() or _tile_of[i] < 0:
+		return 0.0
+	return _dn_alpha[_tile_of[i]]
+
+
+func maquette_visible(i: int) -> bool:
+	return i >= 0 and i < _tile_of.size() and _tile_of[i] >= 0 and _tiles[_tile_of[i]].visible
+
+
+func dn_instance_count() -> int:
+	var total := 0
+	for mmi in _dn_tiles:
+		if mmi != null:
+			total += mmi.multimesh.instance_count
+	return total
+
+
+func dn_banner_count() -> int:
+	var total := 0
+	for mmi in _dn_banners:
+		if mmi != null:
+			total += mmi.multimesh.instance_count
+	return total
