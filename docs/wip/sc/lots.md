@@ -210,3 +210,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - DT7 codex : bundle généré au lieu de 477 fichiers lus au démarrage.
 - DT8 schémas town_footprint, forced_sea_edges ; brancher les 4 schémas orphelins.
 - RL1 relief-lod ReliefSelector::clear_pages/clear_slots sans appelant ; wound_recovery / visible_armies seulement testés (deadfuncs)
+- NV2 moteur naval temps réel sim-battle (`naval/{sim,ship,scenario,setup,outcome}.rs`), `data/naval/scenarios` + schéma : vérifier d'abord si `auto.rs` / `auto_resolve_naval_battle` en dépend (la résolution auto doit rester) ; mettre à jour ADR 0028 (statut remplacé par 0187).
