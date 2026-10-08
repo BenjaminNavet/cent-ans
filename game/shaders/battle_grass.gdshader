@@ -37,8 +37,7 @@ uniform float flatten_on = 0.0;
 uniform vec3 grass_blood_color : source_color = vec3(0.2, 0.02, 0.02);
 // DA6 : lisières douces (touffes mêlées au bord des parcelles), touffes en volume (cartes cintrées,
 // normales arrondies portées par le maillage, normale de carte dans COLOR), cartes vues par la
-// tranche amincies, pied assombri. `--no-da6` : 0 (ancien rendu).
-uniform float da6_on = 0.0;
+// tranche amincies, pied assombri.
 uniform float decor_saturation = 0.6; // DA6 : même désaturation que le sol
 uniform float tex_lum = 0.14; // luminance moyenne (linéaire) de la carte, ramenée à ~0,6
 // FA7 : atlas de touffes faites de vrais brins (`grass_tufts.png`, `data/art/battle_grass.json`).
@@ -101,14 +100,12 @@ void vertex() {
 	// PO4 : touffes groupées (DA6) : plaques à ~25 m avec des trouées franches, et dans les
 	// plaques des bouquets de ~2 m plus ou moins serrés, au lieu de taches régulières.
 	float clump = 0.5;
-	if (da6_on > 0.5) {
-		float patches = bt_value_noise(wp * 0.04 + 5.3) * 0.7 + bt_value_noise(wp * 0.11 + 1.9) * 0.3;
-		clump = bt_value_noise(wp * 0.55 + 7.1);
-		density = smoothstep(0.08, 0.38, patches) * mix(0.62, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
-		if (fa_on > 0.5) {
-			// FA7 : nappe continue, les vides deviennent de l'herbe rase (tirage des cases).
-			density = mix(fa_patch_fill, 1.0, smoothstep(0.08, 0.38, patches)) * mix(fa_gap_fill, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
-		}
+	float patches = bt_value_noise(wp * 0.04 + 5.3) * 0.7 + bt_value_noise(wp * 0.11 + 1.9) * 0.3;
+	clump = bt_value_noise(wp * 0.55 + 7.1);
+	density = smoothstep(0.08, 0.38, patches) * mix(0.62, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
+	if (fa_on > 0.5) {
+		// FA7 : nappe continue, les vides deviennent de l'herbe rase (tirage des cases).
+		density = mix(fa_patch_fill, 1.0, smoothstep(0.08, 0.38, patches)) * mix(fa_gap_fill, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
 	}
 	// VN : dans les parcelles de blé et de chaume du décor, tiges serrées partout (sinon ils ne poussaient que dans
 	// les plaques d'herbe : blé en ovales, Crécy, Poitiers).
@@ -144,8 +141,7 @@ void vertex() {
 		density *= mix(1.0, 0.45, smoothstep(0.3, 0.8, sa.r)); // sous-bois : clairsemé
 		vec2 calm_d = max(calm_rect.xy - wp, wp - calm_rect.zw);
 		float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
-		bool soft = da6_on > 0.5;
-		vec3 field = soft ? bt_field_info_soft(wp) : bt_field_info(wp);
+		vec3 field = bt_field_info_soft(wp);
 		float height_mul = 1.0;
 		int fa_kind = 0; // 1 : blé, 2 : chaume, 3 : semis
 		// Couleur de base : celle du sol dessous (couches herbe et prairie, très floues), pour que
@@ -158,17 +154,17 @@ void vertex() {
 		float patch2 = texture(macro_noise, wp * 0.0047 + vec2(0.27, 0.83)).r;
 		float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
 		float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
-		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.9, 0.85, 0.6) : vec3(1.35, 1.12, 0.62)), dry * 0.85);
+		v_tint = mix(v_tint, v_tint * vec3(0.9, 0.85, 0.6), dry * 0.85);
 		// VN1 : prairie grasse plus verte mais pas plus sombre que le sol (touffes « détritus »).
-		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.86, 1.0, 0.8) : vec3(0.7, 0.86, 0.66)), lush * 0.8);
+		v_tint = mix(v_tint, v_tint * vec3(0.86, 1.0, 0.8), lush * 0.8);
 		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
 		if (decor_on > 0.5) {
-			vec2 duv = soft ? (wp + bt_edge_warp(wp) - splat_rect.xy) / splat_rect.zw : suv;
+			vec2 duv = (wp + bt_edge_warp(wp) - splat_rect.xy) / splat_rect.zw;
 			vec4 df = texture(decor_fields, duv);
 			if (df.a > 0.5) {
 				field = bt_decor_field(df, wp);
-				in_field = soft ? bt_decor_edge_soft(field.z, wp) : field.z;
+				in_field = bt_decor_edge_soft(field.z, wp);
 				if (field.x == 4.0) {
 					// Semis : herbe courte et claire en rangs.
 					density *= 0.55;
@@ -183,27 +179,25 @@ void vertex() {
 					// Chaume : tiges courtes et blondes.
 					height_mul *= fa ? fa_field_height.z : 0.5;
 					fa_kind = in_field > 0.5 ? 2 : 0;
-					v_tint = mix(v_tint, soft ? vec3(0.6, 0.5, 0.3) : vec3(1.2, 1.02, 0.62), in_field * 0.8);
+					v_tint = mix(v_tint, vec3(0.6, 0.5, 0.3), in_field * 0.8);
 					field.x = 0.0;
 				}
 			}
 		}
-		if (soft) {
-			// Chaque touffe bascule à son propre seuil : au bord, les touffes des deux côtés se
-			// mêlent sur quelques mètres au lieu d'un fondu uniforme (ou d'une ligne).
-			float r_edge = bt_hash21(cell + 71.3) * 0.8 + 0.1;
-			in_field = mix(in_field, smoothstep(r_edge - 0.18, r_edge + 0.18, in_field), 0.8);
-		}
+		// Chaque touffe bascule à son propre seuil : au bord, les touffes des deux côtés se
+		// mêlent sur quelques mètres au lieu d'un fondu uniforme (ou d'une ligne).
+		float r_edge = bt_hash21(cell + 71.3) * 0.8 + 0.1;
+		in_field = mix(in_field, smoothstep(r_edge - 0.18, r_edge + 0.18, in_field), 0.8);
 		if (field.x == 1.0) {
 			density *= 1.0 - in_field;
 		} else if (field.x == 2.0) {
 			height_mul = mix(1.0, fa ? fa_field_height.x : 2.1, in_field);
 			fa_kind = in_field > 0.5 ? 1 : 0;
-			v_tint = mix(v_tint, soft ? vec3(0.4, 0.33, 0.17) : vec3(0.5, 0.36, 0.11), in_field);
+			v_tint = mix(v_tint, vec3(0.4, 0.33, 0.17), in_field);
 		} else if (field.x == 3.0) {
 			height_mul = mix(1.0, fa ? fa_field_height.y : 1.4, in_field);
 			// DA6 : jachère herbeuse (vert passé, fleurs rares) et non plus crème vif.
-			v_tint = soft ? mix(v_tint, v_tint * vec3(1.02, 1.0, 0.82), in_field) : mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
+			v_tint = mix(v_tint, v_tint * vec3(1.02, 1.0, 0.82), in_field);
 		}
 		height_mul *= 1.0 - snow * 0.5;
 		// BV3 : herbe couchée par les troupes et sous les corps, sang sur les brins.
@@ -225,16 +219,14 @@ void vertex() {
 		}
 		float keep = step(r3, density);
 		float s = (0.6 + 0.8 * rnd.x) * blade_scale * fade * keep;
-		if (soft) {
-			// Hauteur : variation propre à la touffe et par plaques (~6 m).
-			float h_var = mix(0.7, 1.3, bt_value_noise(wp * 0.17 + 2.3)) * mix(0.85, 1.15, r3);
-			// PO4 : chaque bouquet a sa hauteur et sa teinte (vert frais au cœur des bouquets
-			// serrés, brins plus secs et plus courts aux bords clairsemés).
-			h_var *= mix(0.8, 1.2, clump);
-			vec3 t_var = mix(vec3(1.07, 1.03, 0.86), vec3(0.93, 1.0, 0.92), clump) * mix(0.94, 1.06, bt_hash21(floor(wp * 0.55) + 13.7));
-			height_mul *= fa ? mix(1.0, h_var, fa_height_var) : h_var;
-			v_tint *= fa ? mix(vec3(1.0), t_var, fa_tint_var) : t_var;
-		}
+		// Hauteur : variation propre à la touffe et par plaques (~6 m).
+		float h_var = mix(0.7, 1.3, bt_value_noise(wp * 0.17 + 2.3)) * mix(0.85, 1.15, r3);
+		// PO4 : chaque bouquet a sa hauteur et sa teinte (vert frais au cœur des bouquets
+		// serrés, brins plus secs et plus courts aux bords clairsemés).
+		h_var *= mix(0.8, 1.2, clump);
+		vec3 t_var = mix(vec3(1.07, 1.03, 0.86), vec3(0.93, 1.0, 0.92), clump) * mix(0.94, 1.06, bt_hash21(floor(wp * 0.55) + 13.7));
+		height_mul *= fa ? mix(1.0, h_var, fa_height_var) : h_var;
+		v_tint *= fa ? mix(vec3(1.0), t_var, fa_tint_var) : t_var;
 		float h_units = 1.0; // hauteur de la carte en unités de l'ancienne touffe (0,44 m)
 		if (fa) {
 			// FA7 : case de l'atlas propre à chaque carte de la touffe (UV2.x = rang de la carte),
@@ -282,23 +274,21 @@ void vertex() {
 		vec3 world = vec3(wp.x, terrain_h(wp) - 0.05, wp.y) + v;
 		VERTEX = world - origin;
 		NORMAL = normalize(vec3(0.0, 1.0, 0.0) + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
-		if (soft) {
-			// Normale arrondie du maillage tournée avec la touffe ; carte vue par la tranche
-			// (vue rasante) : amincie par le seuil d'alpha dans `fragment`.
-			vec3 n = mesh_normal;
-			n.xz = rot * n.xz;
-			v_normal = normalize(n + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
-			if (fa) {
-				v_normal = normalize(mix(v_normal, vec3(0.0, 1.0, 0.0), fa_up_normal));
-			}
-			vec3 card = COLOR.rgb * 2.0 - 1.0;
-			card.xz = rot * card.xz;
-			vec3 to_cam = CAMERA_POSITION_WORLD - vec3(wp.x, 0.0, wp.y);
-			to_cam.y = CAMERA_POSITION_WORLD.y - terrain_h(wp);
-			vec3 vdir = normalize(to_cam);
-			float face_h = abs(dot(normalize(card.xz + 1e-4), normalize(vdir.xz + 1e-4)));
-			v_facing = max(face_h, abs(vdir.y) * 1.3);
+		// Normale arrondie du maillage tournée avec la touffe ; carte vue par la tranche
+		// (vue rasante) : amincie par le seuil d'alpha dans `fragment`.
+		vec3 n = mesh_normal;
+		n.xz = rot * n.xz;
+		v_normal = normalize(n + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
+		if (fa) {
+			v_normal = normalize(mix(v_normal, vec3(0.0, 1.0, 0.0), fa_up_normal));
 		}
+		vec3 card = COLOR.rgb * 2.0 - 1.0;
+		card.xz = rot * card.xz;
+		vec3 to_cam = CAMERA_POSITION_WORLD - vec3(wp.x, 0.0, wp.y);
+		to_cam.y = CAMERA_POSITION_WORLD.y - terrain_h(wp);
+		vec3 vdir = normalize(to_cam);
+		float face_h = abs(dot(normalize(card.xz + 1e-4), normalize(vdir.xz + 1e-4)));
+		v_facing = max(face_h, abs(vdir.y) * 1.3);
 		v_shade = mix(0.85, 1.12, rnd.x) * mix(0.9, 1.05, gust);
 		vec3 r_tint = mix(vec3(0.95, 1.0, 0.9), vec3(1.08, 1.03, 0.9), r3);
 		if (fa) {
@@ -311,7 +301,7 @@ void vertex() {
 
 void fragment() {
 	// Normale « verticale » pour toutes les faces (pas d'assombrissement des faces arrière).
-	NORMAL = normalize((VIEW_MATRIX * vec4(da6_on > 0.5 ? v_normal : vec3(0.0, 1.0, 0.0), 0.0)).xyz);
+	NORMAL = normalize((VIEW_MATRIX * vec4(v_normal, 0.0)).xyz);
 	bool fa = fa_on > 0.5;
 	vec2 uv = fa ? (v_cell + fa_pad + clamp(UV, 0.0, 1.0) * (1.0 - 2.0 * fa_pad)) / fa_grid : UV;
 	vec4 tex = texture(grass_texture, uv);
@@ -320,7 +310,7 @@ void fragment() {
 	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / tex_lum;
 	// VN1 : au-delà de ~30 m, contraste des brins et pied sombre atténués : vue de haut, les
 	// touffes lointaines faisaient un moucheté sombre (« détritus ») sur le sol plus clair.
-	float far_k = smoothstep(22.0, 70.0, length(VERTEX)) * da6_on;
+	float far_k = smoothstep(22.0, 70.0, length(VERTEX));
 	l = mix(l, 1.05, far_k * 0.65);
 	vec3 hue = tex.rgb / max(dot(tex.rgb, vec3(0.333)), 0.001) * 0.333;
 	ALBEDO = v_tint * clamp(l, 0.45, 1.5) * mix(vec3(1.0), hue * 3.0, 0.2) * v_shade;
@@ -343,7 +333,7 @@ void fragment() {
 		ALBEDO *= mix(mix(v_foot, 1.0, far_k * 0.6), 1.0, smoothstep(0.0, fa_foot_height, top));
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
 		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, min(decor_saturation * 1.25, 1.0));
-	} else if (da6_on > 0.5) {
+	} else {
 		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
 		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
 		float top = 1.0 - UV.y;

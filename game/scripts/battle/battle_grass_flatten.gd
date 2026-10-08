@@ -32,9 +32,8 @@ var _bytes := PackedByteArray()
 var _w: int = 0
 var _h: int = 0
 var _timer: float = 0.0
-var _dirty: bool = false
 var _last: Dictionary = {}  # id -> position (x, z) au dernier passage
-## PB3e : empreintes tamponnées en Rust (`StampMap`) ; `--no-pb3e` : boucles GDScript d'avant.
+## PB3e : empreintes tamponnées en Rust (`StampMap`).
 var _map: RefCounted = null
 
 
@@ -50,10 +49,8 @@ func setup(field: Vector2 = Vector2(1200.0, 800.0)) -> void:
 	_w = int(RECT.size.x / TEXEL)
 	_h = int(RECT.size.y / TEXEL)
 	_bytes.resize(_w * _h * 2)
-	_map = null
-	if ClassDB.class_exists(&"StampMap") and not OS.get_cmdline_user_args().has("--no-pb3e"):
-		_map = ClassDB.instantiate(&"StampMap")
-		_map.call("setup", _w, _h, 2, RECT.position, TEXEL)
+	_map = ClassDB.instantiate(&"StampMap")
+	_map.call("setup", _w, _h, 2, RECT.position, TEXEL)
 	_image = Image.create_from_data(_w, _h, false, Image.FORMAT_RG8, _bytes)
 	texture = ImageTexture.create_from_image(_image)
 	enabled = true
@@ -107,92 +104,30 @@ func on_corpse(pos: Vector3, kind: String, blood: float) -> void:
 	_stamp_disc(Vector2(pos.x, pos.z), radius, 255, 0)
 	if blood > 0.0:
 		_stamp_disc(Vector2(pos.x, pos.z), radius * 0.9, 0, int(200.0 * blood))
-	_dirty = true
 
 
 ## Envoie la carte au GPU si elle a changé.
 func flush() -> void:
-	if _map != null:
-		_map.call("upload", _image, texture)
-		return
-	if not _dirty:
-		return
-	_dirty = false
-	_image.set_data(_w, _h, false, Image.FORMAT_RG8, _bytes)
-	texture.update(_image)
+	_map.call("upload", _image, texture)
 
 
 ## Herbe couchée (0-1) en un point (tests, captures).
 func flatten_at(x: float, z: float) -> float:
-	if _map != null:
-		return float(_map.call("sample", x, z, 0))
-	var i := _index(x, z)
-	return 0.0 if i < 0 else float(_bytes[i]) / 255.0
+	return float(_map.call("sample", x, z, 0))
 
 
 ## Sang sur l'herbe (0-1) en un point.
 func blood_at(x: float, z: float) -> float:
-	if _map != null:
-		return float(_map.call("sample", x, z, 1))
-	var i := _index(x, z)
-	return 0.0 if i < 0 else float(_bytes[i + 1]) / 255.0
+	return float(_map.call("sample", x, z, 1))
 
-
-func _index(x: float, z: float) -> int:
-	if not enabled:
-		return -1
-	var ix := int(floor((x - RECT.position.x) / TEXEL))
-	var iz := int(floor((z - RECT.position.y) / TEXEL))
-	if ix < 0 or iz < 0 or ix >= _w or iz >= _h:
-		return -1
-	return (iz * _w + ix) * 2
 
 
 ## Rectangle orienté (`half` demi-côtés, x le long du front) : ajoute `add_r` / `add_g`,
 ## R plafonné à `cap_r`.
 func _stamp_box(center: Vector2, facing: float, half: Vector2, add_r: int, add_g: int, cap_r: int) -> void:
-	if _map != null:
-		_map.call("stamp_box", center, facing, half, add_r, add_g, cap_r)
-		return
-	var axis_x := Vector2(cos(facing), -sin(facing))
-	var axis_z := Vector2(sin(facing), cos(facing))
-	var reach := half.length()
-	var c := (center - RECT.position) / TEXEL
-	var r := reach / TEXEL
-	var z0 := maxi(int(c.y - r), 0)
-	var z1 := mini(int(c.y + r) + 1, _h)
-	var x0 := maxi(int(c.x - r), 0)
-	var x1 := mini(int(c.x + r) + 1, _w)
-	for iz in range(z0, z1):
-		for ix in range(x0, x1):
-			var d := RECT.position + (Vector2(ix, iz) + Vector2(0.5, 0.5)) * TEXEL - center
-			if absf(d.dot(axis_x)) > half.x or absf(d.dot(axis_z)) > half.y:
-				continue
-			var i := (iz * _w + ix) * 2
-			var old := int(_bytes[i])
-			if old < cap_r:
-				_bytes[i] = mini(old + add_r, cap_r)
-				_dirty = true
-			if add_g > 0:
-				_bytes[i + 1] = mini(int(_bytes[i + 1]) + add_g, 255)
-				_dirty = true
+	_map.call("stamp_box", center, facing, half, add_r, add_g, cap_r)
 
 
 ## Disque à bord adouci : R et G montent vers `r_value` / `g_value` (jamais ne baissent).
 func _stamp_disc(center: Vector2, radius: float, r_value: int, g_value: int) -> void:
-	if _map != null:
-		_map.call("stamp_disc", center, radius, r_value, g_value)
-		return
-	var c := (center - RECT.position) / TEXEL
-	var rr := radius / TEXEL + 1.0
-	for iz in range(maxi(int(c.y - rr), 0), mini(int(c.y + rr) + 1, _h)):
-		for ix in range(maxi(int(c.x - rr), 0), mini(int(c.x + rr) + 1, _w)):
-			var d := (Vector2(ix, iz) + Vector2(0.5, 0.5) - c).length() * TEXEL
-			var k := 1.0 - smoothstep(radius * 0.8, radius + TEXEL * 0.5, d)
-			if k <= 0.0:
-				continue
-			var i := (iz * _w + ix) * 2
-			if r_value > 0:
-				_bytes[i] = maxi(int(_bytes[i]), int(r_value * k))
-			if g_value > 0:
-				_bytes[i + 1] = mini(int(_bytes[i + 1]) + int(g_value * k), 255)
+	_map.call("stamp_disc", center, radius, r_value, g_value)

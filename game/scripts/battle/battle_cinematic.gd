@@ -8,7 +8,7 @@ extends Node
 ## (`slowmo_scale`, réglage « Ralenti du plan »). Échap, Espace ou un clic passent le plan ; la
 ## caméra rend ensuite la main exactement où le joueur l'avait laissée. Rien n'est imposé :
 ## réglage « Plan cinématique au premier choc » (`battle/cinematic`), jamais en banc d'essai,
-## en capture ou quand l'IA joue les deux camps, et `--no-cinematic` le coupe.
+## en capture ou quand l'IA joue les deux camps.
 ## Paramètres : `data/fx/battle_staging.json` (`cinematic`).
 
 signal started(focus: Vector3)

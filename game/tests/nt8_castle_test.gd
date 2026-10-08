@@ -26,7 +26,7 @@ func _init() -> void:
 	if index < 0:
 		quit(1)
 		return
-	BattleScene.demo_args = PackedStringArray(["--no-speech"])
+	BattleScene.demo_args = PackedStringArray([])
 	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	scene.configure(sim, index, 7)
 	root.add_child(scene)

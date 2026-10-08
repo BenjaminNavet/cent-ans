@@ -3,11 +3,11 @@ extends SceneTree
 ## Lot FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`, posés par-dessus le
 ## défaut NT14. Trois modes : sans option, seuls les clips marqués `default` dans le manifeste
 ## (champ de la table `data/fx/fa3_anim_sources.json`) sont substitués ; `-- --fa-anim` : tous ;
-## `-- --no-fa-anim` : aucun (manifeste du jeu d'avant FA3). Mêmes noms (donc mêmes indices de
+## kit grossier : aucun (manifeste du jeu d'avant FA3). Mêmes noms (donc mêmes indices de
 ## clip), images placées après celles du rig et de la couche NT14, texture d'os concaténée ; un
 ## clip non couvert (`thrust`) garde sa couche. Chaque clip substitué est joué : ses lignes de
 ## texture existent, sont finies et diffèrent du clip remplacé.
-## Usage : godot --headless --path game --script res://tests/fa3_anim_test.gd [-- --fa-anim | --no-fa-anim]
+## Usage : godot --headless --path game --script res://tests/fa3_anim_test.gd [-- --fa-anim]
 
 const RIG := "fine_human"
 const MELEE := ["guard", "slash", "overhead", "parry", "hit", "death"]
@@ -41,7 +41,7 @@ func _row(image: Image, row: int) -> PackedFloat32Array:
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
-	var cmd_mode := BattleSkinned.FA_NONE if args.has("--no-fa-anim") else BattleSkinned.FA_ALL if args.has("--fa-anim") else BattleSkinned.FA_DEFAULT
+	var cmd_mode := BattleSkinned.FA_ALL if args.has("--fa-anim") else BattleSkinned.FA_DEFAULT
 	if not BattleSkinned.fine_enabled():
 		_check(BattleSkinned.fa_anim_mode() == BattleSkinned.FA_NONE, "couche inactive sur le kit grossier")
 		print("FA3 anim (coarse): %s" % ("OK" if ok else "FAIL"))
@@ -162,7 +162,7 @@ func _check_rig(base: Dictionary, melee: Dictionary, fa: Dictionary, base_frames
 		else:
 			_check(kept == base_clips.get(c, {}), "%s : clip du rig hors couche" % c)
 	if covered.is_empty():
-		# `--no-fa-anim` : une seule couche (NT14), aucune image FA3.
+		# Aucun clip FA3 : une seule couche (NT14), aucune image FA3.
 		_check(layers.size() == 1 and str(layers[0]).begins_with(BattleSkinned.MELEE_DIR), "sans FA3 : couche NT14 seule")
 		_check(tex.get_height() == base_frames + melee_frames, "sans FA3 : texture rig + NT14 (%d)" % tex.get_height())
 		return

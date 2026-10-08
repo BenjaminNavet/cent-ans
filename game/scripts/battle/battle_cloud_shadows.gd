@@ -10,7 +10,7 @@ extends Node3D
 ## saut visible). La texture est calculée une fois (aucune lecture GPU, aucun rendu hors écran).
 ## Intensité et couverture selon la météo (`data/fx/battle_staging.json`, `cloud_shadows`),
 ## atténuées quand la lumière baisse (aube, crépuscule, nuit : `set_light_level`). Coupé au
-## niveau de qualité Basse (PF1) et par `--no-cloud-shadows`.
+## niveau de qualité Basse (PF1).
 
 const DECAL_HEIGHT := 900.0
 

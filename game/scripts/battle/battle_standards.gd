@@ -752,7 +752,7 @@ func _place_fallen(camera_pos: Vector3, max_d: float) -> void:
 ## « Pas de quartier » : le général lève l'oriflamme (France) ou le dragon (Angleterre).
 func _poll_no_quarter(units: Array) -> void:
 	_no_quarter_poll -= 1.0 / 30.0
-	if _no_quarter_poll > 0.0 or _battle == null or not _battle.has_method("get_no_quarter"):
+	if _no_quarter_poll > 0.0 or _battle == null:
 		return
 	_no_quarter_poll = 1.0
 	for unit in units:

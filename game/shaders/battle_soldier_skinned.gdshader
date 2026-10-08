@@ -215,7 +215,7 @@ const float FG3_TILE_SIZE[8] = float[](0.1, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 
 // GA1_TILE_SIZE). `fine_detail` reçoit alors `fine_detail_ga1.png` (RG normale, B relief,
 // A rugosité absolue) et `fine_detail_albedo` un albédo de détail centré en luminance 0,5 qui
 // multiplie (x2) la couleur de sommet : livrée et armoiries restent pilotées par les données.
-// `--no-ga1` : tuiles FG3 d'origine (ga1_detail = false).
+// Sans les tableaux GA1 : tuiles FG3 d'origine (ga1_detail = false).
 uniform sampler2DArray fine_detail_albedo : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool ga1_detail = false;
 const int GA1_TILE_WOOL = 0;
@@ -249,7 +249,7 @@ varying vec2 v_atlas;
 varying flat int v_src;
 #endif
 #if defined(FG3_BAKED) || defined(GA3_TEX)
-// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
+// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned ; hauteur de
 // repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
 // GA3-L4 : aussi pour les figurines générées (variante GA3_TEX, sans atlas).
 uniform float weathering = 0.85;

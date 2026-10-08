@@ -2,10 +2,10 @@ extends SceneTree
 
 ## Lot SR2 : usure des figurines fines cuites (GA3-L4 : et des figurines générées, `GA3_TEX`). Vérifie que la variante `FG3_BAKED` se compile
 ## (liste d'uniformes lue par le compilateur de shaders) et expose `weathering` (défaut 0,85),
-## que BattleSkinned le pose à 0,6 (0 avec `--no-sr2`), la hauteur de boue des cavaliers, et
+## que BattleSkinned le pose à 0,85, la hauteur de boue des cavaliers, et
 ## qu'avec `--coarse-figures` le shader par défaut reste inchangé (sans uniforme SR2).
 ## Usage : godot --headless --path game --script res://tests/sr2_weathering_test.gd
-##         [-- --no-sr2 | --coarse-figures]
+##         [-- --coarse-figures]
 
 
 ## Défaut d'un uniforme float : présent dans la liste compilée (le rendu factice compile tout le
@@ -50,8 +50,7 @@ func _check(kind: String, variant: int, expected: float, generated: bool) -> boo
 
 func _init() -> void:
 	var ok := true
-	var args := OS.get_cmdline_user_args()
-	var expected := 0.0 if args.has("--no-sr2") else 0.85
+	var expected := 0.85
 	# Shader par défaut : aucune ligne SR2 compilée (rendu des figurines grossières inchangé).
 	if BattleSkinned.SHADER.get_shader_uniform_list().is_empty():
 		print("SR2 : le shader par défaut ne compile pas")
