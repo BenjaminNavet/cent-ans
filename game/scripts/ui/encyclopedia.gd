@@ -335,6 +335,9 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 		"factions":
 			return library.call("get_icon", "hud_diplomacy")
 		"religions":
+			# DN ui-prod : icône propre à la religion (`rel_*`), sinon l'église paroissiale.
+			if library.call("has_icon", entry_id):
+				return library.call("get_icon", entry_id)
 			return library.call("get_icon", "bld_parish_church")
 		"mechanics", "agents":
 			return library.call("get_icon", str(definition.get("icon", "")))

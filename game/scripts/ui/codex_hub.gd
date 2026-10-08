@@ -35,10 +35,11 @@ func _ready() -> void:
 	var box := UiBuild.vbox(6)
 	add_child(box)
 	var header := UiBuild.hbox(10, box)
-	var title := UiBuild.label("✠ Codex")
+	var title_parts := GlyphIcon.heading_row("glyph_cross", "✠", "Codex", 26)
+	var title: Label = title_parts["label"]
 	UiType.apply(title, UiType.TITLE)
 	title.add_theme_color_override("font_color", HudStyle.RUBRIC)
-	header.add_child(title)
+	header.add_child(title_parts["node"])
 	tabs = TabBar.new()
 	tabs.name = "HubTabs"
 	tabs.add_tab("Histoire")

@@ -165,6 +165,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	var codex_id := codex_entry_for(character_id)
 	if codex_id != "":
 		var codex_button := UiBuild.button("✠")
+		GlyphIcon.apply_button(codex_button, "glyph_cross", "✠")
 		codex_button.flat = true
 		TooltipHost.attach_plain(codex_button, "historical_sheet_codex")
 		codex_button.pressed.connect(func() -> void:
