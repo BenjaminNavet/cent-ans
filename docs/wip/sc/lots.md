@@ -295,3 +295,13 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - vegetation : ExclusionGrid (clairières/vergers, 2 sites), PageKeyHasher pour Ground::Pages, hauteur calculée une fois ; checksum figé sur l'ancien code (3 scénarios). MB12 côté Rust sans objet (le semis est en GDScript).
 - Morts : relief-lod clear_pages/clear_slots ; bridge get_interactive_battles, get_naval_state, get_province_ids, StampMap::is_dirty/get_bytes.
 - Naval : 4 constantes de ship.rs dans NavalRules. `pending` reste un Vec (liste indexée sérialisée).
+
+## AITURN (fusionné 08/10)
+- IA de campagne découpée en étapes army/economy/characters (`ai/src/campaign/`), `ArmyPlanner` (ai_minimal), `AmbushPrey`, `PassageLands`/`PointGrid`, module `salts`, index `hostile_power` par tour (bit-identique), 47 constantes → `data/ai/campaign.json` (`bundled_rules!`).
+- Conflit treaty résolu : `characters.rs` appelle `negotiation::evaluate_treaty` + `Article::Marriage`.
+- Restes : CC10 (`PlanCache` pour faction_power/are_neighbors/rivals/faction_income, ~99 sites, treaty désormais fusionné → lot possible) ; sels d'`alignment.rs` à déplacer dans `salts.rs`.
+
+## TESTKIT (fusionné 08/10)
+- `sim_campaign::test_support` (feature `test-support`) : start/start_quiet/idle/main_army/first_army/city/capital_city/bld/unit_type ; ~170 helpers locaux supprimés (sim-campaign + ai).
+- Tests d'intégration sim-campaign : 106 binaires → 8 thèmes (`tests/<thème>/main.rs`), 800 tests, aucune assertion modifiée.
+- Restes : helpers à signature particulière non migrés (feudal_ai, jr_crusade, p1_no_quarter…) ; RT5 sur les autres crates.
