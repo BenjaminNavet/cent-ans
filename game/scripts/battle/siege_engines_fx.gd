@@ -17,7 +17,7 @@ extends Node3D
 ## `release()` donne aux projectiles (`SiegeAssaultFx`, `BattleEffects`) le point et l'instant
 ## où la fronde ou la bouche les lâche. Rendu seulement : aucune règle ici.
 ## GA3-L5 : trébuchet et bélier peuvent être posés dans leur variante générée (`ga3_variant`,
-## mêmes nœuds animés, `--no-ga3` pour les modèles procéduraux).
+## mêmes nœuds animés).
 
 const SETTINGS_FILE := "fx/siege_engines.json"
 const SWING_CURVE_FILE := "fx/trebuchet_swing_curve.json"  # AS8d, CC BY-SA 3.0 (fichier propre)
@@ -89,11 +89,9 @@ static func _scene(model: String) -> PackedScene:
 
 
 ## GA3-L5 (ADR 0140) : variante générée du modèle `model` (`ga3` des réglages, `_lod` suivi) ;
-## "" si aucune, absente ou coupée par `--no-ga3`. Même hiérarchie et mêmes noms de nœuds que
+## "" si aucune, absente. Même hiérarchie et mêmes noms de nœuds que
 ## le modèle procédural (`tools/blender_scripts/ga3_siege_rig.py`) : l'animation est inchangée.
 static func ga3_variant(model: String) -> String:
-	if not Ga3Kit.requested():
-		return ""
 	var base := model.trim_suffix("_lod")
 	var entry: Variant = (settings().get("ga3", {}) as Dictionary).get(base, null)
 	if not (entry is Dictionary) or str((entry as Dictionary).get("model", "")) == "":

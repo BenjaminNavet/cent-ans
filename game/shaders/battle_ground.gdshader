@@ -340,7 +340,7 @@ void fragment() {
 		vec2 duv = mat2(vec2(0.6, -0.8), vec2(0.8, 0.6)) * p / (layer_size(dom) * 0.27) + vec2(0.19, 0.83);
 		vec3 dcol = texture(albedo_array, vec3(duv, dom)).rgb;
 		vec3 dref = textureLod(albedo_array, vec3(duv, dom), 9.0).rgb;
-		float dl = dot(dcol, vec3(0.3, 0.59, 0.11)) / max(dot(dref, vec3(0.3, 0.59, 0.11)), 0.02);
+		float dl = bt_luma(dcol) / max(bt_luma(dref), 0.02);
 		albedo *= mix(1.0, clamp(dl, 0.55, 1.5), near_k * 0.5);
 		vec3 dn = texture(normal_array, vec3(duv, dom)).rgb;
 		vec3 n_near = nrm * 2.0 - 1.0;
@@ -354,8 +354,8 @@ void fragment() {
 	if (nd_k > 0.01) {
 		vec2 nuv = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / near_detail_size + vec2(0.37, 0.11);
 		vec3 ncol = texture(near_detail_albedo, nuv).rgb;
-		float nref = dot(textureLod(near_detail_albedo, nuv, 10.0).rgb, vec3(0.3, 0.59, 0.11));
-		float nl = dot(ncol, vec3(0.3, 0.59, 0.11)) / max(nref, 0.02);
+		float nref = bt_luma(textureLod(near_detail_albedo, nuv, 10.0).rgb);
+		float nl = bt_luma(ncol) / max(nref, 0.02);
 		albedo *= mix(1.0, clamp(nl, 0.45, 1.6), nd_k * near_detail_strength);
 		vec3 nn = texture(near_detail_normal, nuv).rgb;
 		vec3 n_nd = nrm * 2.0 - 1.0;
@@ -422,7 +422,7 @@ void fragment() {
 		+ texture(macro_noise, p / 200.0 + vec2(0.83, 0.19)).r * 0.1;
 	albedo *= ga_macro_variation(ga2_h, 0.5, 1.0, 0.0);  // GA4 : fonction partagée
 	// DA6 (bible § 3.3) : décor sourd, saturation ramenée vers la luminance.
-	albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, decor_saturation);
+	albedo = mix(vec3(bt_luma(albedo)), albedo, decor_saturation);
 	ALBEDO = albedo;
 	// Lot R2 : relief de détail sous la grille de 10 m (normales, rendu seulement), plus marqué sur
 	// les sols caillouteux, effacé au loin (anti-crénelage) et sous la neige.

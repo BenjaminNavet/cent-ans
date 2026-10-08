@@ -158,13 +158,12 @@ func _art_size() -> Vector2:
 
 
 func _maybe_screenshot() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--battle-loading-shot="):
-			var path := arg.trim_prefix("--battle-loading-shot=")
-			await RenderingServer.frame_post_draw
-			var image := get_viewport().get_texture().get_image()
-			DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-			var err := image.save_png(path)
-			print("BattleLoadingCard: screenshot %s (%s)" % [path, error_string(err)])
-			get_tree().quit(0 if err == OK else 1)
-			await get_tree().process_frame
+	var path := CliFlags.value("--battle-loading-shot")
+	if path != "":
+		await RenderingServer.frame_post_draw
+		var image := get_viewport().get_texture().get_image()
+		DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+		var err := image.save_png(path)
+		print("BattleLoadingCard: screenshot %s (%s)" % [path, error_string(err)])
+		get_tree().quit(0 if err == OK else 1)
+		await get_tree().process_frame
