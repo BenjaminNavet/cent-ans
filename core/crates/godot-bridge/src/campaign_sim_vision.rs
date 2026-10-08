@@ -36,24 +36,6 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Army ids shown to `faction`: its own and its allies', and foreign
-    /// armies whose point is seen (lot M5a).
-    #[func]
-    fn get_visible_army_ids(&self, faction: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return PackedStringArray::new();
-        };
-        let Some(vision) = self.faction_vision(&faction) else {
-            return PackedStringArray::new();
-        };
-        state
-            .armies
-            .iter()
-            .filter(|(_, army)| vision.sees_army(state, data, army))
-            .map(|(id, _)| GString::from(id.as_str()))
-            .collect()
-    }
-
     /// `true` when map pixel `point` is seen by `faction` (lot M5a).
     #[func]
     fn is_point_visible(&self, faction: GString, point: Vector2) -> bool {

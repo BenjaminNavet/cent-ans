@@ -12,7 +12,6 @@ use sim_campaign::navigation::Cell;
 use sim_campaign::{ArmyId, CampaignState, MoveReport, Order, OrderOutcome};
 
 use crate::campaign_sim::{events_array, CampaignSim};
-use crate::convert::variant_to_json;
 
 /// Empty cells kept around the bubble in the mask (smooth contour).
 const MASK_MARGIN: u32 = 2;
@@ -248,22 +247,6 @@ impl CampaignSim {
         army.position = sim_campaign::ArmyPosition::field([x as f32, y as f32]);
         army.clear_plan();
         true
-    }
-
-    /// Like `submit_order`, with what the order did: `{ok, error, army,
-    /// walked, cost, stop, stop_settlement, stop_army, planned_path,
-    /// position, settlement, events}`. `walked` is the polyline walked in
-    /// map pixels, start included (animation); `stop` the reason the march
-    /// stopped (`arrived`, `stationed`, `siege_started`, `settlement_taken`,
-    /// `out_of_movement`, `enemy_zone_of_control`, `enemy_settlement`,
-    /// `blocked`, `engaged`, or "" for an order without a march); `events`
-    /// the events the order raised (battles, sieges, captures).
-    #[func]
-    fn submit_order_report(&mut self, order: VarDictionary) -> VarDictionary {
-        match variant_to_json(&order.to_variant()) {
-            Ok(json) => self.run_order_json(json),
-            Err(error) => failure(&format!("ordre invalide : {error}")),
-        }
     }
 }
 

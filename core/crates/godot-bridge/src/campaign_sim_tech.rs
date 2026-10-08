@@ -5,7 +5,7 @@
 //! The `research { technology }` order goes through the existing
 //! `submit_order`.
 
-use data_model::{FactionId, ProvinceId, TechBranch, Technology};
+use data_model::{FactionId, TechBranch, Technology};
 use godot::prelude::*;
 use sim_campaign::research::{effective_cost, tech_progress, tech_status};
 
@@ -183,30 +183,6 @@ impl CampaignSim {
             "cap" => i64::from(cap),
             "max_queue" => i64::from(data.economy_rules.research_queue_max),
         }
-    }
-
-    /// H4: plague resistance of `province` in percent (0-50): buildings plus
-    /// the controller's technologies.
-    #[func]
-    fn get_plague_resistance(&self, province: GString) -> f64 {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return 0.0;
-        };
-        ProvinceId::new(province.to_string()).map_or(0.0, |p| {
-            sim_campaign::medicine::plague_resistance(state, data, &p) * 100.0
-        })
-    }
-
-    /// H4: share (percent, 0-50) of battle losses `faction` recovers as
-    /// tended wounded.
-    #[func]
-    fn get_wound_recovery(&self, faction: GString) -> f64 {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return 0.0;
-        };
-        FactionId::new(faction.to_string()).map_or(0.0, |f| {
-            sim_campaign::medicine::wound_recovery(state, data, &f) * 100.0
-        })
     }
 
     /// Research points `faction` produces per turn (shown when idle).

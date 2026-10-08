@@ -92,12 +92,6 @@ impl ReliefLod {
     }
 
     #[func]
-    fn clear_pages(&mut self) {
-        self.selector.clear_pages();
-        self.bytes.clear();
-    }
-
-    #[func]
     fn page_count(&self) -> i64 {
         self.selector.page_count() as i64
     }
@@ -106,11 +100,6 @@ impl ReliefLod {
     #[func]
     fn oldest_page(&self, limit: i64) -> i64 {
         self.selector.oldest_page(limit)
-    }
-
-    #[func]
-    fn clear_slots(&mut self) {
-        self.selector.clear_slots();
     }
 
     /// One frame. `view`: [k, vertical_scale, up, down, now, shadow_cast_distance, frame];

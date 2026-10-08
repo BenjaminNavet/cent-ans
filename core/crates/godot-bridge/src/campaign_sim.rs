@@ -116,8 +116,6 @@ pub(crate) fn loaded_data() -> Option<Arc<GameData>> {
 pub struct CampaignSim {
     pub(crate) data: Option<Arc<GameData>>,
     pub(crate) state: Option<CampaignState>,
-    /// French message of the last failed `load_from_string`.
-    pub(crate) last_load_error: String,
     /// PB3d: end of turn running on its worker thread, if any.
     pub(crate) pending_turn: Option<crate::turn_job::TurnJob>,
     /// PB3d: bumped by every call that may change the state.
@@ -133,7 +131,6 @@ impl IRefCounted for CampaignSim {
         CampaignSim {
             data: None,
             state: None,
-            last_load_error: String::new(),
             pending_turn: None,
             revision: 0,
             base,
@@ -193,14 +190,9 @@ impl CampaignSim {
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
-                self.last_load_error = String::new();
                 true
             }
             Err(error) => {
-                // Lot C4: saves older than the settlements are refused with
-                // a French message (« sauvegarde d'une version antérieure à
-                // la refonte des colonies »), kept for the UI.
-                self.last_load_error = error.to_string();
                 godot_error!("CampaignSim.load_from_string failed: {error}");
                 false
             }
