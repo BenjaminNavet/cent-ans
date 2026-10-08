@@ -272,3 +272,9 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - Textes du tutoriel en données (data/tutorial/steps.json + schéma).
 - ProvinceSection (patron de méthode) : choix, classes, colonies ; province_panel 590 → 453.
 - Échecs antérieurs : ib_plain_test (littéraux tooltip_text), c5_settlements_ui_test.
+
+## NAVAL (fusionné f61efaa22)
+- Moteur naval temps réel retiré (NavalSim, IA, scénarios, 14 règles) : 27 fichiers, +950/−3929. ADR 0201 complété.
+- Fleets::deploy, struct Battle en phases nommées dans auto.rs, méthodes de Ship, Arc<NavalRules>, 27 constantes en données. Équivalence vérifiée sur 180 combats.
+- Reste : constantes de ship.rs en dur ; `pending.remove(0)` de sim-campaign/naval.rs.
+- Correctif après fusion (f7a559438) : `Derived<T>` est un newtype au Debug muet (le cache `road_index` cassait battle_step_job).
