@@ -1,0 +1,41 @@
+{
+  "description": "Lot AS5 (ADR 0187, doctrine docs/design/2026-10-08-sources-animation.md) : restes statiques passés en shader. Rendu seulement, aucune règle de jeu. `fire` : flammes de la carte de campagne (flipbook FA2 `flame_flipbook.png`, 8x8 images) sur les foyers d'incendie existants (sièges, hameaux brûlés, villages en ruine, bûchers). `maquette_banner` : onde de vent des bannières des maquettes de villes (rafales partagées `campaign_wind.gdshaderinc`). `battle_tree_impostor` : balancement des imposteurs d'arbres de bataille (même phase que `battle_tree_foliage.gdshader`). Éteint par `enabled` ou par l'argument `--no-as5` (banc A/B).",
+  "enabled": true,
+  "fire": {
+    "flame_size": [3.0, 4.6],
+    "frames": [8, 8],
+    "loops_per_s": 0.55,
+    "emission": 2.6,
+    "opacity": 0.85,
+    "lean": 0.22,
+    "color_cold": [0.35, 0.03, 0.0],
+    "color_mid": [1.0, 0.32, 0.04],
+    "color_hot": [1.0, 0.72, 0.28],
+    "color_core": [1.0, 0.93, 0.78],
+    "light": {
+      "enabled": true,
+      "max_lights": 4,
+      "max_camera_distance": 260.0,
+      "update_period_s": 0.4,
+      "color": [1.0, 0.52, 0.18],
+      "energy": 2.2,
+      "range": 9.0,
+      "height": 1.6,
+      "flicker_speed": 9.0,
+      "flicker_amount": 0.35
+    }
+  },
+  "maquette_banner": {
+    "amplitude": 0.16,
+    "wave_speed": 5.0,
+    "wave_length": 0.9,
+    "gust_gain": 0.9,
+    "calm": 0.45
+  },
+  "battle_tree_impostor": {
+    "sway": 0.018,
+    "frequency": 1.15,
+    "second_harmonic": 0.25,
+    "flutter": 0.004
+  }
+}
