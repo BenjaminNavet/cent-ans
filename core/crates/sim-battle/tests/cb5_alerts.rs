@@ -28,8 +28,8 @@ fn rout_alert_fires_once_when_a_unit_breaks() {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_men_at_arms_foot"]),
-            units(&data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
             None,
         ),
         1,
@@ -62,8 +62,8 @@ fn rout_alert_fires_once_when_a_unit_breaks() {
 fn general_down_alert_fires_when_the_general_dies() {
     let data = data();
     let mut s = setup(
-        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
-        units(&data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot"]),
         None,
     );
     s.attacker.general = Some(general(0));
@@ -96,8 +96,8 @@ fn general_down_alert_fires_when_the_general_dies() {
 #[test]
 fn flanked_alert_fires_once_on_the_rising_edge() {
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_knights"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_knights"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let mut sim = BattleSim::new(setup(attacker, defender, None), 3).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);
@@ -137,7 +137,7 @@ fn flanked_alert_fires_once_on_the_rising_edge() {
 fn reinforcements_alert_fires_when_a_reserve_marches_in() {
     let data = data();
     let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
-    let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
+    let battle = setup(units(data, &many), units(data, &many[..8]), None);
     // The standard field (its 40-regiment cap) whatever the head count.
     let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
     let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();
@@ -160,8 +160,8 @@ fn reinforcements_alert_fires_when_a_reserve_marches_in() {
 fn ammo_out_alert_fires_when_a_shooter_runs_dry() {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_longbowmen"]),
-        units(&data, &["unit_genoese_crossbowmen"]),
+        units(data, &["unit_longbowmen"]),
+        units(data, &["unit_genoese_crossbowmen"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 3).unwrap();
@@ -208,10 +208,10 @@ const GARRISON: [&str; 5] = [
 #[test]
 fn gate_destroyed_alert_fires_once_when_the_gate_breaks() {
     let data = data();
-    let mut garrison = units(&data, &GARRISON);
-    garrison.extend(units(&data, &GARRISON));
+    let mut garrison = units(data, &GARRISON);
+    garrison.extend(units(data, &GARRISON));
     let battle_setup = setup(
-        units(&data, &BESIEGERS),
+        units(data, &BESIEGERS),
         garrison,
         Some(SiegeSetup {
             fortification: 1,
@@ -266,8 +266,8 @@ fn taking_alerts_does_not_affect_the_state_digest() {
     let data = data();
     let build = || {
         let mut s = setup(
-            units(&data, &["unit_men_at_arms_foot"]),
-            units(&data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
             None,
         );
         s.attacker.general = Some(general(0));
@@ -298,8 +298,8 @@ fn taking_alerts_does_not_affect_the_state_digest() {
 fn replay_commands_are_unaffected_by_new_alert_fields() {
     let data = data();
     let battle = setup(
-        units(&data, &["unit_men_at_arms_foot"]),
-        units(&data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot"]),
         None,
     );
     let mut sim = BattleSim::new(battle, 9).unwrap();

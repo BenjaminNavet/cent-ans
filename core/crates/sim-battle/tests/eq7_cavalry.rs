@@ -23,7 +23,7 @@ fn small_mixed_battle(seed: u64) -> BattleSim {
         "unit_longbowmen",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     // CB4: the regiments' abilities, as in the game.
     battle.abilities = data.battle_abilities.values().cloned().collect();

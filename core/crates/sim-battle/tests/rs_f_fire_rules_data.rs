@@ -44,16 +44,16 @@ fn fire_rules_come_from_the_data_folder_once_installed() {
 
     let data = data();
     let bundled = FireRules::bundled().suburbs.count as usize;
-    assert_eq!(suburbs(&data), bundled, "bundled rules before any install");
+    assert_eq!(suburbs(data), bundled, "bundled rules before any install");
 
     // A tuned file changes the next battles, without recompiling.
     let mut tuned = loaded.clone();
     tuned.suburbs.count = 2;
     FireRules::install(Some(tuned.clone()));
     assert_eq!(*FireRules::current(), tuned);
-    assert_eq!(suburbs(&data), 2);
+    assert_eq!(suburbs(data), 2);
 
     FireRules::install(None);
     assert_eq!(*FireRules::current(), *FireRules::bundled());
-    assert_eq!(suburbs(&data), bundled);
+    assert_eq!(suburbs(data), bundled);
 }

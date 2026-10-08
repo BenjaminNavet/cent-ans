@@ -25,14 +25,8 @@ fn map(id: &str) -> HistoricalMap {
     HistoricalMap::from_json(&text).expect("map parses")
 }
 
-/// The game data, loaded once for every test of this file.
-fn game_data() -> &'static data_model::GameData {
-    static DATA: std::sync::OnceLock<data_model::GameData> = std::sync::OnceLock::new();
-    DATA.get_or_init(data)
-}
-
 fn start(id: &str, seed: u64) -> (HistoricalMap, BattleSim) {
-    let data = game_data();
+    let data = data();
     let map = map(id);
     let mut setup = map
         .battle_setup(
@@ -159,7 +153,7 @@ fn posted_regiments_hold_their_ground() {
 /// map's woods, water and decor, out of the woods and the water.
 #[test]
 fn a_campaign_battle_can_be_fought_on_the_site() {
-    let data = game_data();
+    let data = data();
     let map = map("crecy");
     assert!(map.matches_campaign("prov_ponthieu", 1346));
     assert!(!map.matches_campaign("prov_ponthieu", 1415));

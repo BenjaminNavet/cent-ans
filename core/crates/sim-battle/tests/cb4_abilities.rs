@@ -6,17 +6,12 @@
 mod common;
 
 use common::*;
-use data_model::{AbilityKind, GameData};
+use data_model::AbilityKind;
 use sim_battle::{BattleSim, SideId};
-
-fn game_data() -> &'static GameData {
-    static DATA: std::sync::OnceLock<GameData> = std::sync::OnceLock::new();
-    DATA.get_or_init(data)
-}
 
 #[test]
 fn the_catalogue_has_the_five_abilities_of_the_historian() {
-    let data = game_data();
+    let data = data();
     let mut kinds: Vec<AbilityKind> = data.battle_abilities.values().map(|a| a.kind).collect();
     kinds.sort_by_key(|k| format!("{k:?}"));
     assert_eq!(
@@ -96,7 +91,7 @@ fn refusal(result: Result<(), CommandError>) -> String {
 /// militia with goedendags (4) against longbowmen (5), knights (6) and
 /// militia (7), all far apart, AI off, abilities in the setup.
 fn lab_sim(seed: u64) -> BattleSim {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(
             data,
@@ -168,8 +163,8 @@ fn each_regiment_gets_the_abilities_of_its_kind() {
     // No catalogue, no ability (older replays, hand-made setups).
     let bare = BattleSim::new(
         setup(
-            units(game_data(), &["unit_crossbowmen"]),
-            units(game_data(), &["unit_longbowmen"]),
+            units(data(), &["unit_crossbowmen"]),
+            units(data(), &["unit_longbowmen"]),
             None,
         ),
         1,
@@ -539,7 +534,7 @@ fn the_rout_ends_the_ability() {
 fn record_with_abilities(seed: u64) -> (BattleSim, BattleReplay) {
     let mut setup: sim_battle::BattleSetup =
         serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
-    setup.abilities = game_data().battle_abilities.values().cloned().collect();
+    setup.abilities = data().battle_abilities.values().cloned().collect();
     let start = ReplayStart::plain(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
@@ -556,7 +551,7 @@ fn record_with_abilities(seed: u64) -> (BattleSim, BattleReplay) {
         .map(|u| u.id)
         .collect();
     let mut used = 0;
-    for ability in game_data().battle_abilities.keys() {
+    for ability in data().battle_abilities.keys() {
         let having: Vec<u32> = ours
             .iter()
             .copied()
@@ -625,7 +620,7 @@ fn a_replay_recorded_before_cb4_still_reads() {
 
 #[test]
 fn ai_crossbowmen_raise_their_pavises_under_fire() {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(data, &["unit_men_at_arms_foot", "unit_genoese_crossbowmen"]),
         units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
@@ -655,7 +650,7 @@ fn ai_crossbowmen_raise_their_pavises_under_fire() {
 
 #[test]
 fn ai_pikemen_plant_their_pikes_before_the_horse() {
-    let data = game_data();
+    let data = data();
     let mut battle = setup(
         units(data, &["unit_knights"]),
         units(data, &["unit_flemish_pikemen", "unit_men_at_arms_foot"]),

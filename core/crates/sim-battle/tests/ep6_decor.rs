@@ -438,8 +438,8 @@ fn decor_areas_give_cover_slow_and_defend() {
     let losses = |in_manor: bool| {
         let data = data();
         let mut battle = setup(
-            units(&data, &["unit_men_at_arms_foot"]),
-            units(&data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_men_at_arms_foot"]),
             None,
         );
         battle.village = Some(false);
@@ -477,8 +477,8 @@ fn decor_areas_give_cover_slow_and_defend() {
 fn raid(guarded: bool) -> BattleSim {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
-        units(&data, &["unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_knights"]),
         None,
     );
     battle.village = Some(false);
@@ -579,8 +579,8 @@ fn hand_placed_decor_plan_is_applied() {
     .expect("the example plan parses");
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot"]),
-        units(&data, &["unit_longbowmen"]),
+        units(data, &["unit_men_at_arms_foot"]),
+        units(data, &["unit_longbowmen"]),
         None,
     );
     battle.province = "prov_ponthieu".to_owned();

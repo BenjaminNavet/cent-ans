@@ -58,12 +58,7 @@ fn garrison_to_the_back(sim: &mut BattleSim) {
 #[test]
 fn the_points_are_the_square_and_the_inside_of_the_gate() {
     let data = data();
-    let sim = siege(
-        &data,
-        &["unit_men_at_arms_foot"],
-        &["unit_urban_militia"],
-        1,
-    );
+    let sim = siege(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"], 1);
     let works = sim.siege().unwrap();
     let rules = CaptureRules::bundled();
     let square = point(&sim, CapturePointKind::Square);
@@ -80,7 +75,7 @@ fn the_points_are_the_square_and_the_inside_of_the_gate() {
 fn holding_the_square_takes_the_town_and_warns_the_garrison() {
     let data = data();
     let mut sim = siege(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_men_at_arms_foot"],
         &["unit_urban_militia"],
         2,
@@ -115,7 +110,7 @@ fn holding_the_square_takes_the_town_and_warns_the_garrison() {
 fn a_stronger_garrison_on_the_square_stops_the_capture() {
     let data = data();
     let mut sim = siege(
-        &data,
+        data,
         &["unit_men_at_arms_foot"],
         &["unit_urban_militia", "unit_urban_militia"],
         3,
@@ -143,7 +138,7 @@ fn a_stronger_garrison_on_the_square_stops_the_capture() {
 fn taking_the_gate_opens_it() {
     let data = data();
     let mut sim = siege(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_men_at_arms_foot"],
         &["unit_urban_militia"],
         4,
@@ -170,12 +165,7 @@ fn taking_the_gate_opens_it() {
 fn the_last_stand_steadies_the_garrison_once_the_town_is_open() {
     let data = data();
     let fight = |breach: bool| {
-        let mut sim = siege(
-            &data,
-            &["unit_men_at_arms_foot"],
-            &["unit_urban_militia"],
-            5,
-        );
+        let mut sim = siege(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"], 5);
         let (cx, cz) = sim.siege().unwrap().center;
         let attacker = ids(&sim, SideId::Attacker)[0];
         let defender = ids(&sim, SideId::Defender)[0];
@@ -210,7 +200,7 @@ fn the_last_stand_steadies_the_garrison_once_the_town_is_open() {
 fn the_garrison_falls_back_on_the_square_at_the_first_breach() {
     let data = data();
     let mut sim = siege(
-        &data,
+        data,
         &["unit_men_at_arms_foot"],
         &["unit_urban_militia", "unit_welsh_spearmen"],
         6,

@@ -64,7 +64,7 @@ fn clear_the_gate(sim: &mut BattleSim) {
 fn the_ram_strikes_the_gate_in_rhythm() {
     let data = data();
     // SB (ADR 0107): level 5, so that the gate outlasts 30 s of blows.
-    let mut sim = siege(&data, &[], 5, 17);
+    let mut sim = siege(data, &[], 5, 17);
     lab(&mut sim);
     hold_fire(&mut sim, SideId::Defender);
     clear_the_gate(&mut sim);
@@ -112,7 +112,7 @@ fn the_ram_strikes_the_gate_in_rhythm() {
 fn an_engine_shot_strikes_a_point_on_its_wall() {
     let data = data();
     // SB (ADR 0107): level 5, so that the piece outlasts a minute of shots.
-    let mut sim = siege(&data, &["unit_trebuchet"], 5, 19);
+    let mut sim = siege(data, &["unit_trebuchet"], 5, 19);
     lab(&mut sim);
     let works = sim.siege().unwrap().clone();
     let piece = works.front_walls()[0];
@@ -161,7 +161,7 @@ fn an_engine_shot_strikes_a_point_on_its_wall() {
 #[test]
 fn ladders_are_raised_then_the_wall_walk_is_gained() {
     let data = data();
-    let mut sim = siege(&data, &[], 2, 13);
+    let mut sim = siege(data, &[], 2, 13);
     lab(&mut sim);
     clear_the_gate(&mut sim);
     let works = sim.siege().unwrap().clone();
@@ -247,7 +247,7 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
 #[test]
 fn a_siege_tower_docks_and_lowers_its_bridge() {
     let data = data();
-    let mut sim = siege(&data, &["unit_siege_tower"], 2, 13);
+    let mut sim = siege(data, &["unit_siege_tower"], 2, 13);
     lab(&mut sim);
     hold_fire(&mut sim, SideId::Defender);
     let tower = sim.units().iter().position(|u| u.siege_tower()).unwrap() as u32;
@@ -286,7 +286,7 @@ fn a_siege_tower_docks_and_lowers_its_bridge() {
 fn boiling_oil_scalds_the_attackers_at_the_gate_only_when_guarded() {
     let data = data();
     let oil_losses = |guarded: bool| -> (usize, u32, u32) {
-        let mut sim = siege(&data, &[], 2, 41);
+        let mut sim = siege(data, &[], 2, 41);
         lab(&mut sim);
         hold_fire(&mut sim, SideId::Defender);
         clear_the_gate(&mut sim);
@@ -334,10 +334,10 @@ fn boiling_oil_scalds_the_attackers_at_the_gate_only_when_guarded() {
 #[test]
 fn the_gate_gives_way_and_the_garrison_falls_back_to_the_square() {
     let data = data();
-    let mut garrison = units(&data, &GARRISON);
-    garrison.extend(units(&data, &GARRISON));
+    let mut garrison = units(data, &GARRISON);
+    garrison.extend(units(data, &GARRISON));
     let setup = setup(
-        units(&data, &BESIEGERS),
+        units(data, &BESIEGERS),
         garrison,
         Some(SiegeSetup {
             fortification: 1,
@@ -393,7 +393,7 @@ fn the_gate_gives_way_and_the_garrison_falls_back_to_the_square() {
 fn tower_volleys_are_reported_and_the_events_are_deterministic() {
     let data = data();
     let play = || {
-        let mut sim = siege(&data, &["unit_trebuchet", "unit_siege_tower"], 2, 47);
+        let mut sim = siege(data, &["unit_trebuchet", "unit_siege_tower"], 2, 47);
         run(&mut sim, 600.0);
         sim.siege_fx().to_vec()
     };
@@ -410,7 +410,7 @@ fn tower_volleys_are_reported_and_the_events_are_deterministic() {
         .iter()
         .any(|f| matches!(f.kind, SiegeFxKind::RamStrike { .. })));
     // take_new_siege_fx hands each event over once.
-    let mut sim = siege(&data, &[], 2, 47);
+    let mut sim = siege(data, &[], 2, 47);
     run(&mut sim, 120.0);
     let first = sim.take_new_siege_fx();
     assert_eq!(first.len(), sim.siege_fx().len());
@@ -424,7 +424,7 @@ fn tower_volleys_are_reported_and_the_events_are_deterministic() {
 #[test]
 fn an_attacker_over_the_wall_makes_for_the_square() {
     let data = data();
-    let mut sim = siege(&data, &[], 2, 11);
+    let mut sim = siege(data, &[], 2, 11);
     if sim.is_deploying() {
         sim.start_battle().expect("start");
     }

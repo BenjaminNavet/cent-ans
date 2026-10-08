@@ -14,7 +14,7 @@ use sim_battle::naval::{
 use sim_battle::{BattleSeason, SideId, UnitSetup};
 
 fn root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data")
+    data_model::test_support::data_dir()
 }
 
 struct Data {

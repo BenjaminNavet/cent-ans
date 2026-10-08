@@ -19,7 +19,7 @@ const ARMY: [&str; 6] = [
 
 fn mirrored(seed: u64) -> BattleSim {
     let data = data();
-    BattleSim::new(setup(units(&data, &ARMY), units(&data, &ARMY), None), seed).unwrap()
+    BattleSim::new(setup(units(data, &ARMY), units(data, &ARMY), None), seed).unwrap()
 }
 
 fn positions(sim: &BattleSim, side: SideId) -> Vec<(u32, f64, f64)> {
@@ -81,8 +81,8 @@ fn held_skirmishers_do_not_step_back() {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_urban_militia"]),
-            units(&data, &["unit_crossbowmen"]),
+            units(data, &["unit_urban_militia"]),
+            units(data, &["unit_crossbowmen"]),
             None,
         ),
         6,

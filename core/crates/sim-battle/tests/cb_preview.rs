@@ -95,8 +95,8 @@ fn off_path(p: P, from: P, path: &[P]) -> f64 {
 fn river_lab(seed: u64) -> BattleSim {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
-        units(&data, &["unit_urban_militia"]),
+        units(data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(data, &["unit_urban_militia"]),
         None,
     );
     battle.river = true;
@@ -153,8 +153,8 @@ fn straight_line_preview_is_the_order() {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_knights"]),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_knights"]),
+            units(data, &["unit_urban_militia"]),
             None,
         ),
         3,
@@ -252,8 +252,8 @@ fn deep_water_without_crossing_is_unreachable_for_horse() {
 
 fn siege_lab(seed: u64) -> BattleSim {
     let data = data();
-    let attacker = units(&data, &["unit_mounted_sergeants", "unit_men_at_arms_foot"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_mounted_sergeants", "unit_men_at_arms_foot"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
@@ -371,7 +371,7 @@ fn previews_leave_the_battle_untouched() {
 fn hover_siege() -> BattleSim {
     let data = data();
     let attacker = units(
-        &data,
+        data,
         &[
             "unit_longbowmen",
             "unit_men_at_arms_foot",
@@ -379,7 +379,7 @@ fn hover_siege() -> BattleSim {
             "unit_trebuchet",
         ],
     );
-    let defender = units(&data, &["unit_urban_militia", "unit_crossbowmen"]);
+    let defender = units(data, &["unit_urban_militia", "unit_crossbowmen"]);
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
@@ -498,8 +498,8 @@ fn hover_context_follows_the_table() {
 fn hover_context_in_deployment_and_deep_water() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
-        units(&data, &["unit_urban_militia"]),
+        units(data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(data, &["unit_urban_militia"]),
         None,
     );
     battle.river = true;
@@ -538,8 +538,8 @@ fn comparison_figures_and_net_advantages() {
     let data = data();
     let mut sim = BattleSim::new(
         setup(
-            units(&data, &["unit_flemish_pikemen"]),
-            units(&data, &["unit_knights"]),
+            units(data, &["unit_flemish_pikemen"]),
+            units(data, &["unit_knights"]),
             None,
         ),
         2,

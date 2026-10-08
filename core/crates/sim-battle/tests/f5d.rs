@@ -37,11 +37,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
             breach: 0,
             ..Default::default()
         };
-        let battle = setup(
-            units(&data, &besiegers),
-            units(&data, &garrison),
-            Some(siege),
-        );
+        let battle = setup(units(data, &besiegers), units(data, &garrison), Some(siege));
         let mut sim = BattleSim::new(battle, seed).unwrap();
         run_to_end(&mut sim);
         wins += u32::from(sim.winner() == Some(SideId::Attacker));
@@ -54,7 +50,7 @@ fn surplus_regiments_wait_and_march_in_from_their_edge() {
     use sim_battle::MAX_ON_FIELD;
     let data = data();
     let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
-    let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
+    let battle = setup(units(data, &many), units(data, &many[..8]), None);
     // The standard field (its 40-regiment cap) whatever the head count.
     let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
     let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();

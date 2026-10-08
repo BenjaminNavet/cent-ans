@@ -141,7 +141,7 @@ fn leader_order_command_serialises() {
 fn war_cry_lifts_morale_around_the_general_then_fades_and_recharges() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &[
             "unit_men_at_arms_foot",
             "unit_urban_militia",
@@ -182,7 +182,7 @@ fn war_cry_lifts_morale_around_the_general_then_fades_and_recharges() {
 #[test]
 fn orders_need_a_commanding_general_and_a_known_id() {
     let data = data();
-    let mut s = order_setup(&data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
+    let mut s = order_setup(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
     s.attacker.general = None;
     let mut sim = lab_sim(s, 3);
     let why = reason(order(&mut sim, SideId::Attacker, "order_war_cry", vec![]));
@@ -206,7 +206,7 @@ fn orders_need_a_commanding_general_and_a_known_id() {
         "cet ordre ne concerne pas votre armée"
     );
     // The routed general no longer commands.
-    let s = order_setup(&data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
+    let s = order_setup(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
     let mut sim = lab_sim(s, 3);
     sim.units_mut()[0].state = UnitState::Routing;
     let why = reason(order(&mut sim, SideId::Attacker, "order_war_cry", vec![]));
@@ -217,7 +217,7 @@ fn orders_need_a_commanding_general_and_a_known_id() {
 fn no_quarter_emboldens_the_whole_army_once_and_is_reported() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_urban_militia"],
         &["unit_urban_militia"],
     );
@@ -255,7 +255,7 @@ fn no_quarter_emboldens_the_whole_army_once_and_is_reported() {
 fn dismount_turns_knights_into_heavy_foot_for_good() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_knights", "unit_knights"],
         &["unit_urban_militia"],
     );
@@ -301,7 +301,7 @@ fn dismount_turns_knights_into_heavy_foot_for_good() {
 fn siege_assault_dismount_uses_the_order_wording() {
     let data = data();
     let mut s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_knights"],
         &["unit_urban_militia"],
     );
@@ -346,8 +346,8 @@ fn crossbow_losses(data: &GameData, raise: bool) -> f64 {
 #[test]
 fn pavises_cut_missile_casualties_until_the_next_move() {
     let data = data();
-    let open = crossbow_losses(&data, false);
-    let covered = crossbow_losses(&data, true);
+    let open = crossbow_losses(data, false);
+    let covered = crossbow_losses(data, true);
     assert!(open > 0.0);
     assert!(
         covered < open * 0.7,
@@ -355,7 +355,7 @@ fn pavises_cut_missile_casualties_until_the_next_move() {
     );
     // Raised pavises: the regiment stands still; a move order lifts them.
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_genoese_crossbowmen"],
         &["unit_urban_militia"],
     );
@@ -392,7 +392,7 @@ fn rally_depends_on_the_chance_and_is_logged() {
     let data = data();
     let run_rally = |chance: f64| {
         let mut s = order_setup(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_urban_militia",
@@ -433,7 +433,7 @@ fn rally_depends_on_the_chance_and_is_logged() {
         "n'entendent pas l'appel de Le connétable"
     ));
     // Nobody fleeing near the general: refused.
-    let s = order_setup(&data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
+    let s = order_setup(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);
     let mut sim = lab_sim(s, 11);
     let why = reason(order(&mut sim, SideId::Attacker, "order_rally", vec![]));
     assert_eq!(why, "aucun régiment en déroute près du chef");
@@ -446,7 +446,7 @@ fn rally_chance_grows_with_command() {
         let mut count = 0;
         for seed in 0..40 {
             let mut s = order_setup(
-                &data,
+                data,
                 &["unit_men_at_arms_foot", "unit_urban_militia"],
                 &["unit_urban_militia"],
             );
@@ -487,7 +487,7 @@ fn orders_are_deterministic() {
     let data = data();
     let play = || {
         let s = order_setup(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_knights",
@@ -521,7 +521,7 @@ fn orders_are_deterministic() {
 fn leader_orders_view_lists_availability() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_knights"],
         &["unit_urban_militia"],
     );
@@ -565,7 +565,7 @@ fn ai_lab(setup: BattleSetup, side: SideId, seed: u64) -> BattleSim {
 fn ai_cries_on_engagement() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_urban_militia"],
         &["unit_men_at_arms_foot"],
     );
@@ -587,7 +587,7 @@ fn ai_cries_on_engagement() {
 fn ai_rallies_fleeing_regiments() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_urban_militia"],
         &["unit_men_at_arms_foot"],
     );
@@ -606,7 +606,7 @@ fn ai_rallies_fleeing_regiments() {
 fn ai_raises_pavises_under_fire() {
     let data = data();
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_genoese_crossbowmen"],
         &["unit_men_at_arms_foot", "unit_longbowmen"],
     );
@@ -634,7 +634,7 @@ fn ai_dismounts_on_the_defensive() {
     let data = data();
     // A weak English host with knights waits for a much stronger French one.
     let s = order_setup(
-        &data,
+        data,
         &[
             "unit_men_at_arms_foot",
             "unit_men_at_arms_foot",
@@ -655,7 +655,7 @@ fn ai_dismounts_on_the_defensive() {
     // The strong side keeps its horses.
     let mut sim = ai_lab(
         order_setup(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_men_at_arms_foot",
@@ -676,7 +676,7 @@ fn ai_gives_no_quarter_only_outnumbered_against_its_hereditary_enemy() {
     let data = data();
     let weak_french = |defender_faction: &str| {
         let mut s = order_setup(
-            &data,
+            data,
             &["unit_men_at_arms_foot", "unit_urban_militia"],
             &[
                 "unit_men_at_arms_foot",
@@ -707,7 +707,7 @@ fn ai_gives_no_quarter_only_outnumbered_against_its_hereditary_enemy() {
     assert!(!against_navarre.no_quarter(SideId::Attacker));
     // An army at least as strong never gives it.
     let s = order_setup(
-        &data,
+        data,
         &["unit_men_at_arms_foot", "unit_men_at_arms_foot"],
         &["unit_urban_militia"],
     );
@@ -730,7 +730,7 @@ fn ai_battle_with_orders_is_deterministic_and_uses_them() {
         "unit_urban_militia",
     ];
     let play = || {
-        let s = order_setup(&data, &army, &army);
+        let s = order_setup(data, &army, &army);
         let mut sim = BattleSim::new(s, 17).unwrap();
         run_to_end(&mut sim);
         (fingerprint(&sim), sim.events().to_vec())

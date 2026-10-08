@@ -30,9 +30,9 @@ fn towns(data: &GameData) -> Vec<Option<String>> {
 #[test]
 fn every_opening_reaches_the_square() {
     let data = data();
-    for town in towns(&data) {
+    for town in towns(data) {
         for seed in [1, 2, 3] {
-            let mut sim = siege(&data, town.as_deref(), seed);
+            let mut sim = siege(data, town.as_deref(), seed);
             let count = sim.siege().unwrap().pieces.len();
             for p in 0..count {
                 sim.siege_mut().unwrap().pieces[p].hp = 0.0;
@@ -55,8 +55,8 @@ fn every_opening_reaches_the_square() {
 #[test]
 fn the_towns_are_dense() {
     let data = data();
-    for town in towns(&data) {
-        let sim = siege(&data, town.as_deref(), 1);
+    for town in towns(data) {
+        let sim = siege(data, town.as_deref(), 1);
         let works = sim.siege().unwrap();
         let blocks = works.houses.iter().filter(|h| !h.suburb).count();
         println!("{town:?}: {blocks} blocks, {} props", works.props.len());
@@ -74,9 +74,9 @@ fn the_towns_are_dense() {
 fn props_are_deterministic_and_stand_against_their_houses() {
     let data = data();
     let clearance = TownRules::bundled().block.clearance_m;
-    for town in towns(&data) {
-        let a = siege(&data, town.as_deref(), 4);
-        let b = siege(&data, town.as_deref(), 4);
+    for town in towns(data) {
+        let a = siege(data, town.as_deref(), 4);
+        let b = siege(data, town.as_deref(), 4);
         let works = a.siege().unwrap();
         assert_eq!(works.props, b.siege().unwrap().props, "{town:?}");
         assert!(
@@ -121,7 +121,7 @@ fn props_are_deterministic_and_stand_against_their_houses() {
 #[test]
 fn the_market_leaves_the_streets_open() {
     let data = data();
-    let sim = siege(&data, None, 2);
+    let sim = siege(data, None, 2);
     let works = sim.siege().unwrap();
     let passage = TownRules::bundled().props.market.passage_m;
     for prop in works.props.iter().filter(|p| p.house.is_none()) {
@@ -140,7 +140,7 @@ fn the_market_leaves_the_streets_open() {
 #[test]
 fn burnt_houses_lose_their_props() {
     let data = data();
-    let mut sim = siege(&data, None, 3);
+    let mut sim = siege(data, None, 3);
     let works = sim.siege().unwrap();
     let house = works.props.iter().find_map(|p| p.house).unwrap();
     let before = works.standing_props().count();
@@ -178,7 +178,7 @@ fn assert_figures_clear(sim: &BattleSim, what: &str) {
 fn no_figure_stands_in_a_house_or_a_prop_during_a_siege() {
     let data = data();
     for town in [None, Some("paris")] {
-        let mut sim = siege(&data, town, 6);
+        let mut sim = siege(data, town, 6);
         lab(&mut sim);
         let works = sim.siege().unwrap().clone();
         // Every regiment dropped on a block, then on a prop of the market.
@@ -201,7 +201,7 @@ fn no_figure_stands_in_a_house_or_a_prop_during_a_siege() {
         }
         assert_figures_clear(&sim, "market");
         // And while the battle runs.
-        let mut sim = siege(&data, town, 6);
+        let mut sim = siege(data, town, 6);
         sim.set_ai(SideId::Attacker, true);
         sim.set_ai(SideId::Defender, true);
         if sim.is_deploying() {
@@ -218,8 +218,8 @@ fn no_figure_stands_in_a_house_or_a_prop_during_a_siege() {
 fn no_figure_stands_in_a_village_house() {
     let data = data();
     let mut s = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(&data, &["unit_urban_militia", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
+        units(data, &["unit_urban_militia", "unit_knights"]),
         None,
     );
     s.village = Some(true);
@@ -229,7 +229,7 @@ fn no_figure_stands_in_a_village_house() {
     assert!(!sim.village_props().is_empty(), "props before the houses");
     assert_eq!(
         sim.village_props(),
-        BattleSim::new(sim_setup_village(&data), 5)
+        BattleSim::new(sim_setup_village(data), 5)
             .unwrap()
             .village_props()
     );
@@ -257,8 +257,8 @@ fn sim_setup_village(data: &GameData) -> sim_battle::BattleSetup {
 fn dump_town_plans() {
     let data = data();
     let dir = std::env::var("BR3_SVG_DIR").unwrap_or_else(|_| ".".into());
-    for town in towns(&data) {
-        let sim = siege(&data, town.as_deref(), 1);
+    for town in towns(data) {
+        let sim = siege(data, town.as_deref(), 1);
         let works = sim.siege().unwrap();
         let (cx, cz) = works.center;
         let mut svg = String::from(

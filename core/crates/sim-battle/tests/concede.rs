@@ -7,8 +7,8 @@ use sim_battle::{BattleSim, Command, SideId};
 
 fn battle(player: SideId) -> BattleSim {
     let data = data();
-    let attacker = units(&data, &["unit_men_at_arms_foot", "unit_urban_militia"]);
-    let defender = units(&data, &["unit_urban_militia"]);
+    let attacker = units(data, &["unit_men_at_arms_foot", "unit_urban_militia"]);
+    let defender = units(data, &["unit_urban_militia"]);
     let mut setup = setup(attacker, defender, None);
     setup.player_side = Some(player);
     BattleSim::new(setup, 1).unwrap()

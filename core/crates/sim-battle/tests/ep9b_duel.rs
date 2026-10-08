@@ -42,7 +42,7 @@ fn flat_battle_with(seed: u64, attacker_kinds: &[&str], decor: bool) -> BattleSi
     let attackers: Vec<&str> = (0..60)
         .map(|i| attacker_kinds[i % attacker_kinds.len()])
         .collect();
-    let mut setup = setup(units(&data, &attackers), units(&data, &army), None);
+    let mut setup = setup(units(data, &attackers), units(data, &army), None);
     setup.village = if decor { None } else { Some(false) };
     for unit in setup
         .attacker

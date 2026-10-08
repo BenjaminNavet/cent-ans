@@ -189,8 +189,8 @@ fn waterside_spot_is_dry_and_faces_the_water() {
 fn river_lab(seed: u64) -> BattleSim {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
-        units(&data, &["unit_urban_militia"]),
+        units(data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(data, &["unit_urban_militia"]),
         None,
     );
     battle.river = true;
@@ -353,8 +353,8 @@ fn marching_in_column_on_the_road_is_faster() {
     let mut timings = Vec::new();
     for on_road in [true, false] {
         let mut battle = setup(
-            units(&data, &["unit_men_at_arms_foot"]),
-            units(&data, &["unit_urban_militia"]),
+            units(data, &["unit_men_at_arms_foot"]),
+            units(data, &["unit_urban_militia"]),
             None,
         );
         battle.river = false;
@@ -398,7 +398,7 @@ fn the_side_holding_the_bridgehead_strikes_harder() {
     let data = data();
     let army = || {
         units(
-            &data,
+            data,
             &["unit_men_at_arms_foot", "unit_longbowmen", "unit_knights"],
         )
     };
@@ -470,7 +470,7 @@ fn river_battle(seed: u64) -> BattleSim {
     let data = data();
     let mut battle = setup(
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_men_at_arms_foot",
@@ -481,7 +481,7 @@ fn river_battle(seed: u64) -> BattleSim {
             ],
         ),
         units(
-            &data,
+            data,
             &[
                 "unit_men_at_arms_foot",
                 "unit_longbowmen",
@@ -593,7 +593,7 @@ fn automatic_deployment_stays_in_the_zone_on_rivers() {
     for tier in ["skirmish", "large", "epic"] {
         for seed in 0..12 {
             let army: Vec<&str> = (0..12).map(|i| kinds[i % kinds.len()]).collect();
-            let mut battle = setup(units(&data, &army), units(&data, &army), None);
+            let mut battle = setup(units(data, &army), units(data, &army), None);
             battle.river = true;
             battle.player_side = Some(SideId::Attacker);
             let scale = sim_battle::BattleScale::named(tier).unwrap();

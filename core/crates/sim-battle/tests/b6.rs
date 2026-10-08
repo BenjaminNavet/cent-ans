@@ -53,7 +53,7 @@ fn no_site_sim(seed: u64) -> BattleSim {
         "unit_longbowmen",
         "unit_knights",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
@@ -226,7 +226,7 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
         "unit_longbowmen",
         "unit_longbowmen",
     ];
-    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    let mut battle = setup(units(data, &french), units(data, &english), None);
     battle.village = Some(false);
     // The hedge and the village are laid for the standard 300 m line gap (ADR 0184
     // widened the field battles' gap).
@@ -327,8 +327,8 @@ fn a_village_edge_is_cover_too() {
 fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_knights"]),
-        units(&data, &["unit_longbowmen", "unit_men_at_arms_foot"]),
+        units(data, &["unit_knights"]),
+        units(data, &["unit_longbowmen", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);
@@ -383,11 +383,11 @@ fn bocage_village_seed_5_engages_near_seventy_seconds() {
 fn horse_leaves_a_rout_too_far_from_the_line() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
         // A second, able defender keeps the AI engaged with the field (the
         // sole-routing-unit case makes `ai::plan` bail out early); it stays
         // out of everyone's reach.
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);
@@ -416,8 +416,8 @@ fn horse_leaves_a_rout_too_far_from_the_line() {
 fn horse_still_chases_a_rout_within_the_leash() {
     let data = data();
     let mut battle = setup(
-        units(&data, &["unit_men_at_arms_foot", "unit_knights"]),
-        units(&data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
+        units(data, &["unit_men_at_arms_foot", "unit_knights"]),
+        units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
     battle.village = Some(false);
