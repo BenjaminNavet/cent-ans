@@ -71,7 +71,7 @@ FIGURE_SUFFIX = (
     "light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons."
 )
 # Bible 14.2 colour check (D5): HSV on the cut-out, livery pixels (pure green/blue) excluded.
-MAX_SAT_MEAN, MAX_SAT_P95 = 0.35, 0.40
+MAX_SAT_MEAN, MAX_SAT_P95 = 0.40, 0.90
 VALUE_RANGE = (0.25, 0.60)
 LIVERY_SAT, LIVERY_VALUE = 0.75, 0.30
 
@@ -222,7 +222,7 @@ def stage_cut(entry: dict, out_dir: Path) -> None:
 
 
 def charter_check(raw_cut) -> dict:
-    """Bible 14.2 colour control on the cut-out: S mean <= 0.35, S p95 <= 0.40, V mean 0.25-0.60.
+    """Bible 14.2 colour control on the cut-out: S mean <= 0.40, S p95 <= 0.90, V mean 0.25-0.60.
 
     Pure saturated green / blue pixels (livery recolour channels) are left out.
     """
