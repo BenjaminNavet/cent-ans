@@ -319,3 +319,7 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 ## FIXTESTS (fusionné 08/10)
 - 8 tests Godot verts : cb0 (échelle d'UI dans push_input + golden régénéré), po_ui (tailles de l'écran de faction à part), c5 (file de construction), m5a (brouillard = grille de vision), nt4 (cadence battle_pace), ib_plain (6 bulles littérales → TooltipHost.attach_plain + tooltips.json), da7d (plafond 30 ms), settlements_render (40 frames avant update_view).
 - Risque ouvert : `OutbuildingLayer._finish_warm` attend une tâche de fond qui a besoin du fil principal → blocage si une vue est demandée dans la même frame que `setup` (non constaté en jeu).
+
+## PLANCACHE (fusionné 08/10, ADR 0205)
+- `sim_campaign::plan_cache::PlanCache<'a>` (emprunt de l'état, mémo paresseux, Sync) remplace le registre global `planning_scope` (ADR 0119 remplacé). Planificateurs IA prennent `&PlanCache` ; variantes `evaluate_treaty_with`, `ransom_amount_with`. Perf identique (3,76 ms/tour de faction), gain structurel.
+- CA8 : `agent_dijkstra_by_ids` sous feature test-support. Sels alignment → `ai/src/salts.rs`.
