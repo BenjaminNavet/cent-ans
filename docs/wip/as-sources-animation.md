@@ -13,4 +13,8 @@ bibliothèques mocap, procédural/physique, keyframé.
   (`~/dev/cent-ans-mocap-src/`) ; pas d'extraits de films sous droits ; batailles navales sans 3D.
 
 ## Prochaine étape
-Accord du joueur sur les lots AS1-AS7 (document de conception § 3), puis enchaîner AS1, AS2, AS5.
+08/10 : joueur d'accord (« ok »). Vague AS1-AS5 lancée en parallèle, un worktree par lot
+(`../gp-as1` … `../gp-as5`, branches `feat/as1` … `feat/as5`, notes `docs/wip/as1.md` …),
+ADR réservés 0188-0192. Ensuite : relecture, fusion ff dans main, une capture de contrôle
+par lot (session principale), suppression des worktrees. AS6 (tournage) et AS7 (jugement en
+jeu) attendent le joueur.
