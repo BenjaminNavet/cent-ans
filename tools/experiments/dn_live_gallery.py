@@ -17,9 +17,19 @@ from pathlib import Path
 MODEL_VIEWER = "https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"
 
 
+OUTPUT_MARKERS = ("prompt.txt", "img", "cut", "3d")
+CATALOG_GLOB = "data/art/dn_catalog_*.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
 def object_dirs(root: Path) -> list[Path]:
-    """Return per-object folders (those holding a prompt.txt), most recently modified first."""
-    folders = [folder for folder in root.iterdir() if (folder / "prompt.txt").exists()]
+    """Return per-object folders (any generation output), most recently modified first."""
+    folders = [
+        folder
+        for folder in root.iterdir()
+        if folder.is_dir()
+        and any((folder / marker).exists() for marker in OUTPUT_MARKERS)
+    ]
     return sorted(folders, key=latest_mtime, reverse=True)
 
 
@@ -27,6 +37,22 @@ def latest_mtime(folder: Path) -> float:
     """Return the newest modification time of any file under the folder."""
     times = [path.stat().st_mtime for path in folder.rglob("*") if path.is_file()]
     return max(times, default=folder.stat().st_mtime)
+
+
+def catalog_prompts() -> dict[str, str]:
+    """Return the prompt of every catalogue entry by id (fallback when prompt.txt is absent)."""
+    prompts: dict[str, str] = {}
+    for catalog_path in REPO_ROOT.glob(CATALOG_GLOB):
+        try:
+            entries = json.loads(catalog_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(entries, dict):
+            entries = next((v for v in entries.values() if isinstance(v, list)), [])
+        for entry in entries:
+            if isinstance(entry, dict) and "id" in entry:
+                prompts[entry["id"]] = entry.get("prompt", "")
+    return prompts
 
 
 def charter_status(root: Path) -> dict[str, str]:
@@ -43,7 +69,9 @@ def charter_status(root: Path) -> dict[str, str]:
     return statuses
 
 
-def object_card(root: Path, folder: Path, statuses: dict[str, str]) -> str:
+def object_card(
+    root: Path, folder: Path, statuses: dict[str, str], prompts: dict[str, str]
+) -> str:
     """Render one object: prompt, image attempts, chosen seed, 3D sheet and viewers."""
     object_id = folder.name
     rel = folder.relative_to(root).as_posix()
@@ -82,7 +110,11 @@ def object_card(root: Path, folder: Path, statuses: dict[str, str]) -> str:
             else ("images" if images else "en attente")
         )
     )
-    prompt = html.escape((folder / "prompt.txt").read_text()[:400])
+    prompt_path = folder / "prompt.txt"
+    prompt_text = (
+        prompt_path.read_text() if prompt_path.exists() else prompts.get(object_id, "")
+    )
+    prompt = html.escape(prompt_text[:400])
     return (
         f'<section><h2>{object_id} <span class="tag">{stage}</span>'
         f"{f'<span class=tag>{status}</span>' if status else ''}</h2>"
@@ -93,7 +125,9 @@ def object_card(root: Path, folder: Path, statuses: dict[str, str]) -> str:
 def render_index(root: Path) -> str:
     """Build the whole gallery page."""
     statuses = charter_status(root)
-    cards = "".join(object_card(root, folder, statuses) for folder in object_dirs(root))
+    prompts = catalog_prompts()
+    folders = object_dirs(root)
+    cards = "".join(object_card(root, folder, statuses, prompts) for folder in folders)
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Galerie DN</title>
 <script type="module" src="{MODEL_VIEWER}"></script>
@@ -109,7 +143,7 @@ figure img{{width:200px;height:200px;object-fit:contain;background:#fff;border-r
 figure.chosen img{{outline:3px solid #c9a227}}
 img.sheet{{max-width:100%;margin:8px 0;border-radius:4px}}
 model-viewer{{width:320px;height:320px;background:#2b2823;border-radius:4px}}
-</style></head><body><h1>Galerie DN — production de la nuit</h1>
+</style></head><body><h1>Galerie DN — production de la nuit ({len(folders)} objets)</h1>
 <p>Objet le plus récent en haut. Cadre doré = essai retenu. La page se recharge seule quand un fichier change.</p>
 {cards}
 <script>
