@@ -13,6 +13,9 @@ avec un `LICENSE.txt` par vidéo (auteur, URL Commons, licence vérifiée sur la
 | AS8c | bêtes et charrettes de campagne | montbéliardes (CC0), Ploughing, wagons (CC0), moutons, Rama | cadences/amplitudes/phases → `animal_motion.json`, charrettes | FAIT sur `feat/as8c` (mesures dans `animal_motion_measured.json`, courbes de pas en table, cahot en 3 raies, roulis ; Ploughing inutilisable ; `as8c_test` vert ; restent : jugement en jeu AS7, foulée des moutons, rapport de marche et levée non mesurés) |
 | AS8d | engins, feu, herbe, drapeaux | Warwick trébuchet, Canon firing, Fire 01-10 (CC0), herbe (DP), drapeau | courbes → `siege_engines.json`, `map_fire_wind.json` ; flipbook flammes depuis CC0 | lancé |
 
+## État
+FUSIONNÉ dans main le 08/10 (branche as8-merge, a-d). Licences : clips `vf_` retirés ; courbe du trébuchet dans `data/fx/trebuchet_swing_curve.json` (CC BY-SA 3.0) ; valeurs Rama dans `data/fx/camp_horse_motion.json` (CC BY-SA 2.0 fr).
+
 ## Prochaine étape
 Fusion des 4 branches, crédits dans `CREDITS.md`, AS7 (jugement en jeu) étendu aux clips AS8.
 
