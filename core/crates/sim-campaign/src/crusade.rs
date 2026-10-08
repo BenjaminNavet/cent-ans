@@ -252,7 +252,7 @@ fn target_name(state: &CampaignState, data: &GameData, rules: &CrusadeRules) -> 
 
 /// Alms `faction` receives this turn (0 unless it is the crusaders):
 /// `base + per_fervor × fervour`. Part of
-/// [`CampaignState::faction_income_effective`], so the treasury, the
+/// [`CampaignState::faction_income`], so the treasury, the
 /// projection, the budget and the AI all see them.
 pub fn alms(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
     let Some(rules) = &data.crusade_rules else {
@@ -1595,9 +1595,9 @@ mod tests {
         let mut state = campaign();
         assert_eq!(alms(&state, data(), &fac(CRUSADERS)), 100 + 10 * 60);
         assert_eq!(alms(&state, data(), &fac(HOLDER)), 0);
-        let with = state.faction_income_effective(data(), &fac(CRUSADERS));
+        let with = state.faction_income(data(), &fac(CRUSADERS));
         set_fervor(&mut state, 10);
-        let poorer = state.faction_income_effective(data(), &fac(CRUSADERS));
+        let poorer = state.faction_income(data(), &fac(CRUSADERS));
         assert_eq!(with - poorer, 500, "alms are part of the income");
         let view = crusade_view(&state, data(), &fac(CRUSADERS)).unwrap();
         assert_eq!(view.alms, 200);

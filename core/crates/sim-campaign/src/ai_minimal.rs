@@ -69,7 +69,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     orders.extend(crate::crusade::ai_preach(state, data, faction));
 
     // In debt and still losing money: dismiss the most expensive field unit.
-    if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn
+    if faction_state.treasury < 0
+        && faction_state.last_budget.income < faction_state.last_budget.upkeep()
     {
         if let Some(order) = disband_most_expensive(state, data, faction) {
             orders.push(order);

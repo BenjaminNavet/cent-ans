@@ -55,8 +55,11 @@ fn campaign(data: &GameData, level: Difficulty) -> CampaignState {
     };
     let me = state.factions.get_mut(&england).unwrap();
     me.treasury = 100_000;
-    me.upkeep_last_turn = 1_000;
-    me.income_last_turn = 5_000;
+    me.last_budget = sim_campaign::economy::TurnBudget {
+        income: 5_000,
+        administration: 1_000,
+        ..Default::default()
+    };
     me.ledger.weariness = 0;
     me.regency = false;
     me.last_war_declared = None;

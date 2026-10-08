@@ -178,7 +178,7 @@ pub fn captive_rank(state: &CampaignState, character: &CharacterId) -> CaptiveRa
 /// Wealth factor of a faction: its seasonal tax income / 10 000, between
 /// 0.5 and 2 (a rich kingdom pays more for the same knight).
 pub fn wealth_factor(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 / 10_000.0).clamp(0.5, 2.0)
 }
 
@@ -192,7 +192,7 @@ pub fn ransom_amount(state: &CampaignState, data: &GameData, character: &Charact
     let prestige = 1.0 + f64::from(c.prestige.clamp(0, 200)) / 100.0;
     let raw = base * prestige * wealth_factor(state, data, &c.faction);
     // A6-L3 (ADR 0183): never more than a share of the payer's income.
-    let income = state.faction_income_effective(data, &c.faction).max(0);
+    let income = state.faction_income(data, &c.faction).max(0);
     let cap = income * data.economy_rules.ransom.income_cap_percent / 100;
     ((raw / 50.0).round() as i64 * 50).min(cap).max(50)
 }
@@ -663,9 +663,9 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
                         });
                     } else if matches!(rank, CaptiveRank::Sovereign | CaptiveRank::Heir)
                         && treasury - first
-                            >= *income.get_or_insert_with(|| {
-                                state.faction_income_effective(data, faction).max(0)
-                            }) / 2
+                            >= *income
+                                .get_or_insert_with(|| state.faction_income(data, faction).max(0))
+                                / 2
                     {
                         treasury -= first;
                         orders.push(Order::PayRansom {

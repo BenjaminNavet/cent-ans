@@ -410,9 +410,8 @@ pub fn ai_found_order(state: &CampaignState, data: &GameData, faction: &FactionI
         .find(|o| {
             found_blocker(state, data, faction, &o.id).is_none()
                 && f.treasury - foundation_cost(state, faction, o)
-                    >= *reserve.get_or_insert_with(|| {
-                        4 * state.faction_income_effective(data, faction).max(0)
-                    })
+                    >= *reserve
+                        .get_or_insert_with(|| 4 * state.faction_income(data, faction).max(0))
         })
         .map(|o| {
             vec![Order::FoundChivalricOrder {

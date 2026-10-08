@@ -331,11 +331,11 @@ fn production_buildings_raise_income() {
     let france_id = fac("fac_france");
     let province = prov("prov_ile_de_france");
     strip(&mut state, &province, &[bld("bld_weaving_workshop")]);
-    let before = state.faction_income_effective(data, &france_id);
+    let before = state.faction_income(data, &france_id);
     city_mut(&mut state, &province)
         .buildings
         .push(bld("bld_weaving_workshop"));
-    let after = state.faction_income_effective(data, &france_id);
+    let after = state.faction_income(data, &france_id);
     assert!(
         after > before,
         "weaving workshop +15 % production: {before} -> {after}"

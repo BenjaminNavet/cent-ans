@@ -1406,7 +1406,7 @@ pub fn tribute_due(
     vassal: &FactionId,
 ) -> Option<(FactionId, i64)> {
     let liege = liege_of(state, data, vassal)?;
-    let income = state.factions.get(vassal)?.income_last_turn;
+    let income = state.factions.get(vassal)?.last_budget.income;
     let amount = (income * data.feudal_rules.vassal_tribute_percent / 100).max(0);
     Some((liege, amount))
 }

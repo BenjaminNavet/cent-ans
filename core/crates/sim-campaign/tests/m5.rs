@@ -264,7 +264,7 @@ fn embargo_cuts_income() {
     let data = game_data();
     let mut state = start(data, "fac_france", 9);
     let flanders = fac("fac_flanders");
-    let before = state.faction_income_effective(data, &flanders);
+    let before = state.faction_income(data, &flanders);
     // Remove England's embargo, then compare.
     state
         .factions
@@ -272,7 +272,7 @@ fn embargo_cuts_income() {
         .unwrap()
         .embargoes
         .remove(&flanders);
-    let without = state.faction_income_effective(data, &flanders);
+    let without = state.faction_income(data, &flanders);
     assert!(
         without > before,
         "embargo costs Flanders: {before} vs {without}"

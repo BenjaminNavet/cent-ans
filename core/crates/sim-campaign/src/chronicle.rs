@@ -260,7 +260,7 @@ impl CampaignState {
                 .is_some_and(|f| f.treasury > *amount),
             Condition::ProvincesBelow { faction, count } => {
                 scope_faction(faction).is_some_and(|f| {
-                    let controlled = self.controlled_provinces(&f).len();
+                    let controlled = self.controlled_provinces(&f).count();
                     controlled < *count as usize
                 })
             }
@@ -773,7 +773,7 @@ pub fn ai_affordable_choice_among(
         .collect();
     let Some(means) = decider
         .and_then(|f| state.factions.get(f))
-        .map(|f| f.treasury.max(0) + 2 * f.income_last_turn.max(0))
+        .map(|f| f.treasury.max(0) + 2 * f.last_budget.income.max(0))
     else {
         return weighted_pick(state, event, &offered);
     };

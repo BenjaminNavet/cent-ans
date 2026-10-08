@@ -131,7 +131,7 @@ fn preaching_lands_a_contingent_on_time() {
     assert!(view.pending.is_empty());
     // The alms are part of the season's income.
     assert!(view.alms_last_turn > 0);
-    assert!(state.factions[&faction].income_last_turn >= view.alms_last_turn);
+    assert!(state.factions[&faction].last_budget.income >= view.alms_last_turn);
 }
 
 #[test]

@@ -154,7 +154,7 @@ fn end_turn_credits_trade_income_into_the_treasury() {
     // first turn's AI moves.
     state.end_turn(data);
     let after = &state.factions[&fac("fac_flanders")];
-    assert!(after.trade_income_last_turn > 0);
+    assert!(after.last_budget.trade_income > 0);
 }
 
 #[test]
@@ -183,11 +183,11 @@ fn trade_state_survives_saves_and_old_saves_load() {
     let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
     for faction in value["factions"].as_object_mut().unwrap().values_mut() {
         let f = faction.as_object_mut().unwrap();
-        f.remove("trade_income_last_turn");
+        f.remove("last_budget");
     }
     let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
     let f = &old.factions[&fac("fac_flanders")];
-    assert_eq!(f.trade_income_last_turn, 0);
+    assert_eq!(f.last_budget.trade_income, 0);
     assert!(old.has_trade_agreement(&fac("fac_flanders"), &fac("fac_england")));
 }
 

@@ -752,7 +752,7 @@ fn france_income_is_positive_and_in_target_range() {
 
     // The actually-collected income (spec § 1.4: tax rate + building
     // effects) stays in the same target range with the default Normal rate.
-    let effective_income = state.faction_income_effective(data, &france_id);
+    let effective_income = state.faction_income(data, &france_id);
     println!("France effective income (Normal tax) {effective_income}");
     assert!(
         (20_000..=30_000).contains(&effective_income),
@@ -760,7 +760,7 @@ fn france_income_is_positive_and_in_target_range() {
     );
 
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
-    let effective_upkeep = state.faction_army_upkeep(data, &france_id)
+    let effective_upkeep = state.faction_upkeep(data, &france_id)
         + state.faction_building_upkeep(data, &france_id)
         + state.faction_administration_upkeep(data, &france_id);
     let events = state.end_turn_with(data, idle);
@@ -772,12 +772,12 @@ fn france_income_is_positive_and_in_target_range() {
         .factions
         .values()
         .filter(|f| f.suzerain.as_ref() == Some(&france_id))
-        .map(|f| f.income_last_turn * data.feudal_rules.vassal_tribute_percent / 100)
+        .map(|f| f.last_budget.income * data.feudal_rules.vassal_tribute_percent / 100)
         .sum();
     assert!(tribute > 0, "Burgundy, Brittany and Flanders pay tribute");
     // C5: trade routes touching a French hub (Troyes, Provins) settle after
     // the tax income, in their own treasury line.
-    let trade_income = state.factions[&france_id].trade_income_last_turn;
+    let trade_income = state.factions[&france_id].last_budget.trade_income;
     assert_eq!(
         summary.treasury,
         treasury_before + effective_income - effective_upkeep + tribute + trade_income
@@ -936,7 +936,10 @@ fn forty_turns_all_ai_change_the_map() {
     for (id, faction) in &state.factions {
         println!(
             "  {id}: treasury {} income {} upkeep {} alive {}",
-            faction.treasury, faction.income_last_turn, faction.upkeep_last_turn, faction.alive
+            faction.treasury,
+            faction.last_budget.income,
+            faction.last_budget.upkeep(),
+            faction.alive
         );
     }
     assert_eq!(state.date_label(), "Printemps 1347");

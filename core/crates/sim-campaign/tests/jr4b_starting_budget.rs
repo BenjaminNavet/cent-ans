@@ -11,7 +11,7 @@ use data_model::test_support::{fac, game_data};
 fn structural(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i64, i64) {
     let e = state.faction_economy(data, faction).expect("economy");
     let rules = &data.economy_rules;
-    let income = state.faction_income_effective(data, faction);
+    let income = state.faction_income(data, faction);
     let opulence = (state.factions[faction].treasury - rules.opulence_seasons * income.max(0))
         .max(0)
         * rules.opulence_percent
@@ -70,7 +70,7 @@ fn the_great_realms_start_within_their_means_and_the_others_untouched() {
         }
         // Sound or small realms keep their garrisons.
         let faction = &place.controller;
-        let small = raw.controlled_provinces(faction).len() < rule.min_provinces;
+        let small = raw.controlled_provinces(faction).count() < rule.min_provinces;
         let (net, receipts) = structural(&raw, &raw_data, faction);
         if small || net * 100 >= -rule.max_deficit_percent * receipts {
             assert_eq!(now.garrison, place.garrison, "{id} of {faction}");

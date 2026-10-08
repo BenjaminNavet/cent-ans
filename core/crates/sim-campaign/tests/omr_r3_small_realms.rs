@@ -61,7 +61,7 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
     let city = state.settlements.get_mut(&capital).unwrap();
     city.garrison.truncate(1);
     assert_eq!(city.garrison.len(), 1);
-    assert_eq!(state.faction_army_upkeep(data, &perm), 0);
+    assert_eq!(state.faction_upkeep(data, &perm), 0);
     // A second unit pays its share.
     let unit = state.settlements[&capital].garrison[0].clone();
     state
@@ -70,7 +70,7 @@ fn a_county_keeping_one_unit_at_home_pays_no_garrison() {
         .unwrap()
         .garrison
         .push(unit);
-    assert!(state.faction_army_upkeep(data, &perm) > 0);
+    assert!(state.faction_upkeep(data, &perm) > 0);
     // Lost, the capital city is no longer the guard's home.
     state.settlements.get_mut(&capital).unwrap().controller = fac("fac_golden_horde");
     assert!(state.faction_capital_city(&perm).is_none());

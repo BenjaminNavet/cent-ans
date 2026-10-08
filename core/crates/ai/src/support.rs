@@ -18,7 +18,7 @@ pub const SUBSIDY_MIN: i64 = 100;
 /// What `ally` needs to stay solvent for a couple of seasons (0: nothing).
 pub fn subsidy_need(state: &CampaignState, ally: &FactionId) -> i64 {
     state.factions.get(ally).map_or(0, |f| {
-        let deficit = (f.upkeep_last_turn - f.income_last_turn).max(0);
+        let deficit = (f.last_budget.upkeep() - f.last_budget.income).max(0);
         (SUBSIDY_DEFICIT_SEASONS * deficit - f.treasury).max(0)
     })
 }
@@ -31,7 +31,7 @@ pub fn plan_subsidies(
     faction: &FactionId,
     spare: i64,
 ) -> Vec<Order> {
-    let wealth = |f: &FactionId| state.faction_income_effective(data, f).max(0);
+    let wealth = |f: &FactionId| state.faction_income(data, f).max(0);
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };

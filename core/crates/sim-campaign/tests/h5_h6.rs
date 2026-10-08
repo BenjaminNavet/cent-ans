@@ -78,7 +78,7 @@ fn debasement_yields_seigniorage_and_inflation() {
     let mut sound = france(data, 2);
     let mut debased = sound.clone();
     let france_id = fac("fac_france");
-    let tax = debased.faction_income_effective(data, &france_id);
+    let tax = debased.faction_income(data, &france_id);
     let forecast = coinage::seigniorage_for(&debased, data, &france_id, CoinageLevel::Debased);
     assert_eq!(forecast, (tax as f64 * 0.15).round() as i64);
     assert!(
@@ -90,8 +90,8 @@ fn debasement_yields_seigniorage_and_inflation() {
     debased.end_turn_with(data, idle);
     let d = &debased.factions[&france_id];
     let s = &sound.factions[&france_id];
-    assert!(d.seigniorage_last_turn > 0);
-    assert_eq!(s.seigniorage_last_turn, 0);
+    assert!(d.last_budget.seigniorage > 0);
+    assert_eq!(s.last_budget.seigniorage, 0);
     // Short term: more money.
     assert!(d.treasury > s.treasury, "{} vs {}", d.treasury, s.treasury);
     assert_eq!(d.price_level, PRICE_BASE + 3);
@@ -114,9 +114,9 @@ fn heavy_debasement_is_ruinous_in_the_long_run() {
     let h = &heavy.factions[&france_id];
     assert!(h.price_level >= 250, "price level {}", h.price_level);
     // The upkeep outruns the seigniorage.
-    let h_net = h.income_last_turn - h.upkeep_last_turn;
+    let h_net = h.last_budget.income - h.last_budget.upkeep();
     let s = &sound.factions[&france_id];
-    let s_net = s.income_last_turn - s.upkeep_last_turn;
+    let s_net = s.last_budget.income - s.last_budget.upkeep();
     assert!(h_net < s_net, "{h_net} vs {s_net}");
 }
 
@@ -137,12 +137,12 @@ fn prices_scale_recruitment_upkeep_and_construction() {
     };
     let build = |s: &CampaignState| s.buildable(data, &province)[0].cost;
     let (recruit_before, build_before) = (recruit(&state), build(&state));
-    let upkeep_before = state.faction_army_upkeep(data, &france_id);
+    let upkeep_before = state.faction_upkeep(data, &france_id);
     let buildings_before = state.faction_building_upkeep(data, &france_id);
     state.factions.get_mut(&france_id).unwrap().price_level = 200;
     assert!((i64::from(recruit(&state)) - 2 * i64::from(recruit_before)).abs() <= 1);
     assert_eq!(build(&state), 2 * build_before);
-    assert!((state.faction_army_upkeep(data, &france_id) - 2 * upkeep_before).abs() <= 1);
+    assert!((state.faction_upkeep(data, &france_id) - 2 * upkeep_before).abs() <= 1);
     assert!((state.faction_building_upkeep(data, &france_id) - 2 * buildings_before).abs() <= 1);
 }
 
@@ -184,7 +184,7 @@ fn inflation_angers_burghers_and_clergy_and_strong_money_deflates() {
     strong.end_turn_with(data, idle);
     let f = &strong.factions[&france_id];
     assert_eq!(f.price_level, 108);
-    assert!(f.recoinage_last_turn > 0);
+    assert!(f.last_budget.recoinage > 0);
     assert!(strong.characters[&ruler].prestige > prestige);
     assert_eq!(
         coinage::class_effects(&strong, &france_id, SocialClass::Burghers)[EffectKind::Unrest].flat,
@@ -743,8 +743,7 @@ fn h5_h6_state_survives_saves_and_old_saves_load() {
             "coinage",
             "price_level",
             "coinage_changed_year",
-            "seigniorage_last_turn",
-            "recoinage_last_turn",
+            "last_budget",
             "ransom_debts",
             "chivalric_order",
         ] {

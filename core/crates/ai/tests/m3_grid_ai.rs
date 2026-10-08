@@ -254,7 +254,7 @@ fn fifty_turns(data: &GameData, seed: u64) -> Game {
     state.interactive_battles = false;
     let provinces_start = majors
         .clone()
-        .map(|f| state.controlled_provinces(&f).len() as i64);
+        .map(|f| state.controlled_provinces(&f).count() as i64);
     let mut game = Game {
         treasury: [0; 2],
         provinces_delta: [0; 2],
@@ -323,7 +323,7 @@ fn fifty_turns(data: &GameData, seed: u64) -> Game {
         let f = &state.factions[major];
         game.treasury[i] = f.treasury;
         game.provinces_delta[i] =
-            state.controlled_provinces(major).len() as i64 - provinces_start[i];
+            state.controlled_provinces(major).count() as i64 - provinces_start[i];
         game.majors_alive &= f.alive;
     }
     game

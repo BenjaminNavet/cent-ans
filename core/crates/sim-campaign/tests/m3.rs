@@ -432,8 +432,8 @@ fn high_tax_raises_income_and_unrest_over_normal() {
         high.end_turn_with(data, idle);
     }
 
-    let income_normal = normal.faction_state(&france_id).unwrap().income_last_turn;
-    let income_high = high.faction_state(&france_id).unwrap().income_last_turn;
+    let income_normal = normal.faction_state(&france_id).unwrap().last_budget.income;
+    let income_high = high.faction_state(&france_id).unwrap().last_budget.income;
     assert!(
         income_high as f64 > income_normal as f64 * 1.25,
         "normal={income_normal} high={income_high}"
@@ -457,8 +457,8 @@ fn low_tax_lowers_income_versus_normal() {
         .unwrap();
     normal.end_turn_with(data, idle);
     low.end_turn_with(data, idle);
-    let income_normal = normal.faction_state(&france_id).unwrap().income_last_turn;
-    let income_low = low.faction_state(&france_id).unwrap().income_last_turn;
+    let income_normal = normal.faction_state(&france_id).unwrap().last_budget.income;
+    let income_low = low.faction_state(&france_id).unwrap().last_budget.income;
     assert!(
         income_low < income_normal,
         "normal={income_normal} low={income_low}"

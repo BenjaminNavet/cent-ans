@@ -15,7 +15,7 @@
 //! Garrisons, recruits and building upkeep are counted per settlement.
 
 use data_model::EffectKind;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{
     BuildingId, EconomyRules, FactionId, GameData, ProvinceId, ResourceCategory, ResourceId,
@@ -107,6 +107,59 @@ pub struct FactionEconomy {
     pub trade_income_last_turn: i64,
 }
 
+/// The purse of one faction for one season, in livres: what
+/// [`TurnBudget::compute`] projects for the coming season and what
+/// `FactionState::last_budget` books once it is resolved.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct TurnBudget {
+    /// Taxes, domain and crusade alms, plus `seigniorage`; trade apart.
+    pub income: i64,
+    /// H5: part of `income` minted from the coinage.
+    pub seigniorage: i64,
+    /// H5: recoinage of strong money, part of `administration`.
+    pub recoinage: i64,
+    pub army_upkeep: i64,
+    pub building_upkeep: i64,
+    /// Court and administration, `recoinage` included.
+    pub administration: i64,
+    /// H3: the diets (« Table »).
+    pub table: i64,
+    /// C5: trade routes, credited after the taxes.
+    pub trade_income: i64,
+}
+
+impl TurnBudget {
+    /// The budget of `faction` for the coming season, as `resolve_economy`
+    /// will book it. `table` and `trade_income` are left at zero: the Table
+    /// is paid only when the purse can (`table::pay_table`) and trade is
+    /// credited by `trade::resolve_trade`.
+    pub fn compute(state: &CampaignState, data: &GameData, faction: &FactionId) -> Self {
+        let seigniorage = crate::coinage::seigniorage(state, data, faction);
+        let recoinage = crate::coinage::recoinage(state, data, faction);
+        let tax_income = state.faction_income(data, faction);
+        TurnBudget {
+            income: tax_income + seigniorage,
+            seigniorage,
+            recoinage,
+            army_upkeep: state.faction_upkeep(data, faction),
+            building_upkeep: state.faction_building_upkeep(data, faction),
+            administration: state.administration_upkeep_for(data, faction, tax_income) + recoinage,
+            table: 0,
+            trade_income: 0,
+        }
+    }
+
+    /// Everything the faction pays.
+    pub fn upkeep(&self) -> i64 {
+        self.army_upkeep + self.building_upkeep + self.administration + self.table
+    }
+
+    /// Taxes plus trade.
+    pub fn receipts(&self) -> i64 {
+        self.income + self.trade_income
+    }
+}
+
 /// Livres per head and per season, by social class (`economy.json` `tax_per_head`).
 pub fn tax_per_head(rules: &EconomyRules, class: SocialClass) -> f64 {
     rules.tax_per_head.of(class)
@@ -116,40 +169,10 @@ pub fn tax_per_head(rules: &EconomyRules, class: SocialClass) -> f64 {
 // scale, upkeep months and garrison shares are in `data/rules/economy.json`
 // (`EconomyRules`).
 
-/// Seasonal tax income of a province (livres).
-pub fn province_income(rules: &EconomyRules, province: &ProvinceState) -> f64 {
-    let base: f64 = province
-        .population
-        .iter()
-        .map(|(class, entry)| {
-            entry.count as f64 * tax_per_head(rules, class) * f64::from(entry.wealth) / 50.0
-        })
-        .sum();
-    base * (1.0 - f64::from(province.devastation) / 100.0) * rules.tax_efficiency
-}
-
-/// Seasonal tax income of a province including the tax bracket and building
-/// `TaxIncome`/`TradeIncome` effects (spec § 1.4); used to actually collect
-/// income (`resolve_economy`), unlike the legacy [`province_income`] which
-/// [`CampaignState::faction_income`] keeps using.
-pub fn province_income_effective(
-    data: &GameData,
-    province: &ProvinceState,
-    buildings: &[BuildingId],
-    tax_rate: TaxRate,
-) -> f64 {
-    province_income_with(
-        data,
-        province,
-        buildings,
-        tax_rate,
-        &EffectTotals::default(),
-    )
-}
-
-/// [`province_income_effective`] with `extra` effects (the controller's
-/// technologies, M6) merged on top of the buildings'.
-pub fn province_income_with(
+/// Seasonal tax income of a province (livres) under `tax_rate`, including the
+/// `TaxIncome`/`TradeIncome`/`Production` effects of its `buildings` and of
+/// `extra` (governor, controller's technologies, spec § 1.4).
+pub fn province_income(
     data: &GameData,
     province: &ProvinceState,
     buildings: &[BuildingId],
@@ -185,6 +208,18 @@ pub fn province_income_with(
         + effects[EffectKind::TradeIncome].flat;
     ((base + trade) * (1.0 - f64::from(province.devastation) / 100.0) * rules.tax_efficiency)
         .max(0.0)
+}
+
+/// [`province_income`] at the normal rate with no building or other effect:
+/// the bare wealth of the province (raid loot, capture ransoms, map lens).
+pub fn province_base_income(data: &GameData, province: &ProvinceState) -> f64 {
+    province_income(
+        data,
+        province,
+        &[],
+        TaxRate::Normal,
+        &EffectTotals::default(),
+    )
 }
 
 /// Share of a garrison's upkeep paid by its controller, in per cent (lot C4:
@@ -322,7 +357,7 @@ impl CampaignState {
         if settlement != &province.city {
             buildings.extend(state.buildings.iter().cloned());
         }
-        province_income_with(data, province, &buildings, tax_rate, extra)
+        province_income(data, province, &buildings, tax_rate, extra)
             * crate::settlements::weight_share(data, settlement)
     }
 
@@ -342,24 +377,6 @@ impl CampaignState {
         } else {
             1.0
         }
-    }
-
-    /// Income the faction would collect this turn (legacy formula without
-    /// buildings: its share of each province, unbesieged settlements).
-    pub fn faction_income(&self, data: &GameData, faction: &FactionId) -> i64 {
-        self.provinces
-            .iter()
-            .map(|(id, p)| {
-                let share = self.province_tax_share(data, id, faction);
-                if share <= 0.0 {
-                    return 0;
-                }
-                (province_income(&data.economy_rules, p)
-                    * share
-                    * self.full_province_income_factor(data, id, faction))
-                .round() as i64
-            })
-            .sum()
     }
 
     /// Upkeep of every army and garrison of the faction: fortified towns pay
@@ -435,11 +452,6 @@ impl CampaignState {
         })
     }
 
-    /// Upkeep of the army (field armies + garrisons), without buildings.
-    pub fn faction_army_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
-        self.faction_upkeep(data, faction)
-    }
-
     /// Upkeep of every completed building of the faction's settlements (spec § 1.2).
     ///
     /// F4: a besieged settlement pays nothing (it pays no taxes either) and a
@@ -465,21 +477,21 @@ impl CampaignState {
     }
 
     /// Income the faction would collect this turn under its current tax rate
-    /// and buildings (spec § 1.4); unlike [`CampaignState::faction_income`]
-    /// this is what `resolve_economy` actually applies to the treasury.
-    pub fn faction_income_effective(&self, data: &GameData, faction: &FactionId) -> i64 {
+    /// and buildings (spec § 1.4): what `resolve_economy` applies to the
+    /// treasury.
+    pub fn faction_income(&self, data: &GameData, faction: &FactionId) -> i64 {
         // OMR R1: asked several times per plan (economy, coinage, agents,
         // subsidies): a memo while a planning scope is open.
         if let Some(derived) = self.derived() {
             return derived.income(data, faction, || {
-                self.faction_income_effective_walk(data, faction)
+                self.faction_income_uncached(data, faction)
             });
         }
-        self.faction_income_effective_walk(data, faction)
+        self.faction_income_uncached(data, faction)
     }
 
-    /// [`Self::faction_income_effective`] computed afresh.
-    pub fn faction_income_effective_walk(&self, data: &GameData, faction: &FactionId) -> i64 {
+    /// [`Self::faction_income`] computed afresh.
+    pub fn faction_income_uncached(&self, data: &GameData, faction: &FactionId) -> i64 {
         let tax_rate = self
             .factions
             .get(faction)
@@ -527,7 +539,7 @@ impl CampaignState {
 
     /// Seasonal tax `faction` collects in `province` before embargoes and
     /// difficulty (the per-province part of
-    /// [`CampaignState::faction_income_effective`]; `tech` is the faction's
+    /// [`CampaignState::faction_income`]; `tech` is the faction's
     /// `faction_province_tech_effects`). IB5: read by the tooltip previews.
     pub fn province_gross_income(
         &self,
@@ -559,12 +571,12 @@ impl CampaignState {
     /// above some seasons of income (M10 balance, F4; B7a:
     /// `data/rules/economy.json`, 20 % above six seasons).
     pub fn faction_administration_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
-        let income = self.faction_income_effective(data, faction);
+        let income = self.faction_income(data, faction);
         self.administration_upkeep_for(data, faction, income)
     }
 
     /// [`Self::faction_administration_upkeep`] for an `income` already
-    /// computed (`faction_income_effective`, without seigniorage).
+    /// computed (`faction_income`, without seigniorage).
     pub fn administration_upkeep_for(
         &self,
         data: &GameData,
@@ -572,7 +584,7 @@ impl CampaignState {
         income: i64,
     ) -> i64 {
         let rules = &data.economy_rules;
-        let provinces = self.controlled_provinces(faction).len();
+        let provinces = self.controlled_provinces(faction).count();
         let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
         // An idle hoard feeds court luxury, patronage and embezzlement.
         let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
@@ -585,12 +597,8 @@ impl CampaignState {
     /// Full economic snapshot for the bridge (spec § 2).
     pub fn faction_economy(&self, data: &GameData, id: &FactionId) -> Option<FactionEconomy> {
         let faction = self.factions.get(id)?;
-        let seigniorage = crate::coinage::seigniorage(self, data, id);
-        let recoinage = crate::coinage::recoinage(self, data, id);
-        let base_income = self.faction_income_effective(data, id);
-        let income = base_income + seigniorage;
-        let army_upkeep = self.faction_army_upkeep(data, id);
-        let building_upkeep = self.faction_building_upkeep(data, id);
+        let projected = TurnBudget::compute(self, data, id);
+        let last = &faction.last_budget;
         let mut goods_categories: Vec<ResourceCategory> = Vec::new();
         for resource_id in faction.goods.keys() {
             if let Some(resource) = data.resources.get(resource_id) {
@@ -601,25 +609,24 @@ impl CampaignState {
         }
         Some(FactionEconomy {
             treasury: faction.treasury,
-            income: faction.income_last_turn,
-            projected_income: income,
-            army_upkeep,
-            building_upkeep,
-            administration_upkeep: self.administration_upkeep_for(data, id, base_income)
-                + recoinage,
+            income: last.income,
+            projected_income: projected.income,
+            army_upkeep: projected.army_upkeep,
+            building_upkeep: projected.building_upkeep,
+            administration_upkeep: projected.administration,
             table_upkeep: self.faction_table_upkeep(data, id),
-            table_upkeep_last_turn: faction.table_upkeep_last_turn,
+            table_upkeep_last_turn: last.table,
             coinage: faction.coinage,
             price_level: faction.price_level,
-            seigniorage,
-            recoinage,
-            seigniorage_last_turn: faction.seigniorage_last_turn,
-            recoinage_last_turn: faction.recoinage_last_turn,
+            seigniorage: projected.seigniorage,
+            recoinage: projected.recoinage,
+            seigniorage_last_turn: last.seigniorage,
+            recoinage_last_turn: last.recoinage,
             tax_rate: faction.tax_rate,
             goods: faction.goods.clone(),
             goods_categories,
             trade_income: crate::trade::faction_trade_income(self, data, id),
-            trade_income_last_turn: faction.trade_income_last_turn,
+            trade_income_last_turn: last.trade_income,
         })
     }
 }
@@ -638,35 +645,23 @@ pub(crate) fn resolve_economy(
             continue;
         }
         // H5: seigniorage is income, the recoinage of strong money upkeep.
-        let seigniorage = crate::coinage::seigniorage(state, data, &faction_id);
-        let recoinage = crate::coinage::recoinage(state, data, &faction_id);
-        let base_income = state.faction_income_effective(data, &faction_id);
-        let income = base_income + seigniorage;
-        let army_upkeep = state.faction_army_upkeep(data, &faction_id);
-        let building_upkeep = state.faction_building_upkeep(data, &faction_id);
-        let administration =
-            state.administration_upkeep_for(data, &faction_id, base_income) + recoinage;
-        let available = state.factions[&faction_id].treasury + income
-            - (army_upkeep + building_upkeep + administration);
+        let mut budget = TurnBudget::compute(state, data, &faction_id);
+        let available = state.factions[&faction_id].treasury + budget.income
+            - (budget.army_upkeep + budget.building_upkeep + budget.administration);
         // H3: the diets of the provinces (« Table »), those the purse cannot
         // cover fall back to the default.
-        let table = crate::table::pay_table(state, data, &faction_id, available, events);
-        let upkeep = army_upkeep + building_upkeep + administration + table;
+        budget.table = crate::table::pay_table(state, data, &faction_id, available, events);
+        let (income, upkeep) = (budget.income, budget.upkeep());
         let faction = state.factions.get_mut(&faction_id).expect("exists");
-        faction.table_upkeep_last_turn = table;
-        faction.seigniorage_last_turn = seigniorage;
-        faction.recoinage_last_turn = recoinage;
         faction.treasury += income - upkeep;
         faction.deficit_seasons = if income < upkeep {
             faction.deficit_seasons.saturating_add(1)
         } else {
             0
         };
-        faction.income_last_turn = income;
-        faction.upkeep_last_turn = upkeep;
-        faction.army_upkeep_last_turn = army_upkeep;
-        faction.building_upkeep_last_turn = building_upkeep;
-        faction.projected_income = income;
+        // Trade is credited after the taxes (`trade::resolve_trade`).
+        budget.trade_income = faction.last_budget.trade_income;
+        faction.last_budget = budget;
         let treasury = faction.treasury;
         if faction_id == state.player_faction {
             events.push(
@@ -994,7 +989,7 @@ pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
         .settlement_rules
         .as_ref()
         .map_or(0, |r| r.full_province_bonus.unrest_per_season);
-    let whole: Vec<ProvinceId> = state
+    let whole: BTreeSet<ProvinceId> = state
         .provinces
         .keys()
         .filter(|id| {

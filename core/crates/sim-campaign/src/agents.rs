@@ -1666,7 +1666,7 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
     // F8: a playable faction too poor for a network of agents (their
     // upkeep) behaves like a minor power.
     let playable = data.factions.get(faction).is_some_and(|d| d.playable)
-        && state.faction_income_effective(data, faction) >= rules(data).ai_network_min_income;
+        && state.faction_income(data, faction) >= rules(data).ai_network_min_income;
     let mut orders = Vec::new();
     // Recruitment: one agent of each missing kind, one per season.
     if playable || f.treasury > 2 * AI_RECRUIT_RESERVE {
@@ -1734,7 +1734,6 @@ fn heresy_or_schism(state: &CampaignState, faction: &FactionId) -> bool {
     state.schism
         || state
             .controlled_provinces(faction)
-            .iter()
             .any(|p| state.provinces.get(p).is_some_and(|p| p.heresy > 0))
 }
 
@@ -2010,8 +2009,7 @@ fn ai_preacher(
     // The most heretical friendly province.
     let target = state
         .controlled_provinces(faction)
-        .into_iter()
-        .filter_map(|p| state.provinces.get(&p).map(|s| (p.clone(), s.heresy)))
+        .filter_map(|p| state.provinces.get(p).map(|s| (p.clone(), s.heresy)))
         .filter(|(_, heresy)| *heresy > 0)
         .max_by_key(|(_, heresy)| *heresy)
         .and_then(|(p, _)| state.province_city_id(&p).cloned());

@@ -31,13 +31,11 @@ pub(crate) struct Derived {
     /// [`CampaignState::neighbour_factions`] of every faction, built on the
     /// first question with the data it was asked with (`data` address).
     neighbours: OnceLock<(usize, BTreeMap<FactionId, BTreeSet<FactionId>>)>,
-    /// [`CampaignState::faction_income_effective`] of the factions asked
+    /// [`CampaignState::faction_income`] of the factions asked
     /// so far, with the data address they were computed with.
     income: Mutex<BTreeMap<(usize, FactionId), i64>>,
     /// [`crate::diplomacy::rivals`] of the factions asked so far.
     rivals: Mutex<BTreeMap<FactionId, BTreeSet<FactionId>>>,
-    /// [`CampaignState::controlled_provinces`] of the factions asked so far.
-    controlled: Mutex<BTreeMap<FactionId, Vec<data_model::ProvinceId>>>,
 }
 
 /// `map[key]`, computed by `compute` (outside the lock) when missing.
@@ -73,7 +71,6 @@ impl Derived {
             neighbours: OnceLock::new(),
             income: Mutex::new(BTreeMap::new()),
             rivals: Mutex::new(BTreeMap::new()),
-            controlled: Mutex::new(BTreeMap::new()),
         }
     }
 
@@ -100,15 +97,6 @@ impl Derived {
         compute: impl FnOnce() -> BTreeSet<FactionId>,
     ) -> BTreeSet<FactionId> {
         memo(&self.rivals, faction.clone(), compute)
-    }
-
-    /// Provinces `faction` controls (a memo of `compute`).
-    pub(crate) fn controlled_provinces(
-        &self,
-        faction: &FactionId,
-        compute: impl FnOnce() -> Vec<data_model::ProvinceId>,
-    ) -> Vec<data_model::ProvinceId> {
-        memo(&self.controlled, faction.clone(), compute)
     }
 
     /// Neighbours of every faction, or `None` when the index was built with

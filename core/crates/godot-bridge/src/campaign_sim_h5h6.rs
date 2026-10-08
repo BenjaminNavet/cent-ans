@@ -107,8 +107,8 @@ impl CampaignSim {
             "changed_this_year" => f.coinage_changed_year == Some(state.year()),
             "seigniorage" => coinage::seigniorage(state, data, &id),
             "recoinage" => coinage::recoinage(state, data, &id),
-            "seigniorage_last_turn" => f.seigniorage_last_turn,
-            "recoinage_last_turn" => f.recoinage_last_turn,
+            "seigniorage_last_turn" => f.last_budget.seigniorage,
+            "recoinage_last_turn" => f.last_budget.recoinage,
             "options" => &options,
         }
     }

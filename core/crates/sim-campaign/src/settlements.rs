@@ -11,25 +11,13 @@ use data_model::{BuildingId, FactionId, GameData, ProvinceId, SettlementId, Sett
 use crate::state::{CampaignState, SettlementState};
 
 /// Normalised share (0-1) of its province that `settlement` carries
-/// (`Settlement::weight` divided by the sum of the province's weights).
+/// (`Settlement::weight` divided by the sum of the province's weights,
+/// precomputed at load); 0 for an unknown settlement.
 pub fn weight_share(data: &GameData, settlement: &SettlementId) -> f64 {
-    let Some(entry) = data.settlements.get(settlement) else {
-        return 0.0;
-    };
-    let total: f64 = data
-        .settlements_by_province
-        .get(&entry.province)
-        .map(|ids| {
-            ids.iter()
-                .filter_map(|id| data.settlements.get(id))
-                .map(|s| f64::from(s.weight.max(1)))
-                .sum()
-        })
-        .unwrap_or(0.0);
-    if total <= 0.0 {
-        return 1.0;
-    }
-    f64::from(entry.weight.max(1)) / total
+    data.settlement_weight_share
+        .get(settlement)
+        .copied()
+        .unwrap_or(0.0)
 }
 
 impl CampaignState {
@@ -115,22 +103,13 @@ impl CampaignState {
     }
 
     /// Ids of the provinces whose city `faction` controls, in id order.
-    pub fn controlled_provinces(&self, faction: &FactionId) -> Vec<ProvinceId> {
-        // OMR R1: a memo while a planning scope is open.
-        if let Some(derived) = self.derived() {
-            return derived
-                .controlled_provinces(faction, || self.controlled_provinces_walk(faction));
-        }
-        self.controlled_provinces_walk(faction)
-    }
-
-    /// [`Self::controlled_provinces`] computed afresh.
-    pub fn controlled_provinces_walk(&self, faction: &FactionId) -> Vec<ProvinceId> {
+    pub fn controlled_provinces<'a>(
+        &'a self,
+        faction: &'a FactionId,
+    ) -> impl Iterator<Item = &'a ProvinceId> + 'a {
         self.provinces
             .keys()
-            .filter(|id| self.controls_province(faction, id))
-            .cloned()
-            .collect()
+            .filter(move |id| self.controls_province(faction, id))
     }
 
     /// Ids of the provinces whose city `faction` owns, in id order.

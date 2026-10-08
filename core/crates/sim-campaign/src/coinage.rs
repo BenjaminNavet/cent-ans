@@ -223,7 +223,7 @@ pub fn seigniorage_for(
     if percent <= 0.0 {
         return 0;
     }
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 * percent / 100.0).round() as i64
 }
 
@@ -238,7 +238,7 @@ pub fn recoinage_for(
     if percent <= 0.0 {
         return 0;
     }
-    let income = state.faction_income_effective(data, faction).max(0);
+    let income = state.faction_income(data, faction).max(0);
     (income as f64 * percent / 100.0).round() as i64
 }
 
@@ -319,7 +319,7 @@ pub fn ai_choose_coinage(
     if f.coinage_changed_year == Some(state.year) {
         return Vec::new();
     }
-    let income = state.faction_income_effective(data, faction).max(1);
+    let income = state.faction_income(data, faction).max(1);
     let wanted = if f.treasury < -4 * income && f.price_level < 200 {
         CoinageLevel::HeavilyDebased
     } else if f.treasury < 0 && f.price_level < 160 {

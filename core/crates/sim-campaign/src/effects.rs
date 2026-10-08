@@ -295,7 +295,7 @@ impl CampaignState {
         ctx: &EventContext,
     ) -> Vec<ProvinceId> {
         let all = || match &ctx.faction {
-            Some(faction) => self.controlled_provinces(faction),
+            Some(faction) => self.controlled_provinces(faction).cloned().collect(),
             None => Vec::new(),
         };
         match (target, &ctx.province) {
@@ -436,10 +436,10 @@ pub fn event_treasury_amount(
     let Some(f) = faction.and_then(|id| state.factions.get(id).map(|f| (id, f))) else {
         return amount;
     };
-    let income = if f.1.income_last_turn > 0 {
-        f.1.income_last_turn
+    let income = if f.1.last_budget.income > 0 {
+        f.1.last_budget.income
     } else {
-        state.faction_income_effective(data, f.0)
+        state.faction_income(data, f.0)
     };
     let reference = rules.event_treasury_reference_income.max(1);
     if income >= reference {

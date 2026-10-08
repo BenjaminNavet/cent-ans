@@ -52,8 +52,8 @@ fn forty_turns_of_the_real_ai_keep_the_crusade_alive() {
                 turn + 1,
                 crusade.fervor,
                 f.treasury,
-                f.income_last_turn,
-                f.upkeep_last_turn,
+                f.last_budget.income,
+                f.last_budget.upkeep(),
                 crusade.target_taken
             );
         }

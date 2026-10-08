@@ -902,7 +902,7 @@ fn article_value(
                 }
             } else {
                 reasons.push(("Hommage d'un nouveau vassal".to_owned(), 25));
-                let income = state.factions[proposer].income_last_turn.max(0);
+                let income = state.factions[proposer].last_budget.income.max(0);
                 reasons.push((
                     "Tribut du vassal".to_owned(),
                     gold_points(income * data.feudal_rules.vassal_tribute_percent / 100 * 20),
@@ -932,7 +932,7 @@ fn article_value(
                     (4 * routes).min(12),
                 ));
             }
-            let partner = state.factions[proposer].income_last_turn.max(0);
+            let partner = state.factions[proposer].last_budget.income.max(0);
             reasons.push((
                 "Richesse du partenaire".to_owned(),
                 ((partner / 1500) as i32).min(10),
@@ -961,7 +961,7 @@ fn article_value(
                 },
                 sign * points,
             ));
-            if gives && *per_season * 2 > state.factions[recipient].income_last_turn.max(1) {
+            if gives && *per_season * 2 > state.factions[recipient].last_budget.income.max(1) {
                 reasons.push(("Tribut ruineux".to_owned(), -15));
             }
         }
@@ -1342,7 +1342,7 @@ pub fn counter_proposal(
             let total = i64::from(gap.max(1)) * lpp * 5 / 4;
             let seasons = COUNTER_TRIBUTE_SEASONS;
             let per_season = ((total / i64::from(seasons)) / 50 + 1) * 50;
-            let affordable = me.income_last_turn.max(0) / 3;
+            let affordable = me.last_budget.income.max(0) / 3;
             if per_season <= affordable {
                 current.push(Article::Tribute {
                     giver: Party::Proposer,
@@ -1846,7 +1846,7 @@ pub fn pretender_ready(state: &CampaignState, data: &GameData, faction: &Faction
         && !me.regency
         && ruler_free
         && me.treasury > 0
-        && me.treasury >= me.upkeep_last_turn.max(0)
+        && me.treasury >= me.last_budget.upkeep().max(0)
 }
 
 /// Does `owner` let `army_faction`'s armies cross its lands?

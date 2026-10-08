@@ -162,7 +162,7 @@ impl<'a> Context<'a> {
                     .into_iter()
                     .flatten()
                     .collect();
-                (anchors, state.faction_income_effective(data, faction))
+                (anchors, state.faction_income(data, faction))
             },
         );
         // Net of court and administration (M10 balance) and of the tribute
@@ -255,7 +255,7 @@ impl<'a> Context<'a> {
     /// a market in a village no longer counts as one in the city).
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
-            sim_campaign::economy::province_income_with(
+            sim_campaign::economy::province_income(
                 self.data,
                 p,
                 &[],
@@ -492,7 +492,7 @@ fn plan_turn_in(
         return Vec::new();
     }
     let upkeep = (
-        state.faction_army_upkeep(data, faction),
+        state.faction_upkeep(data, faction),
         state.faction_building_upkeep(data, faction),
     );
     let (ctx, plans) = mode.join(

@@ -27,12 +27,12 @@ fn the_demesne_is_paid_while_the_seat_is_held() {
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     let luna = fac("fac_luna");
     assert_eq!(state.faction_domain_income(data, &luna), amount);
-    let before = state.faction_income_effective_walk(data, &luna);
+    let before = state.faction_income_uncached(data, &luna);
     // The seat falls: no demesne any more.
     let seat = state.faction_capital_city(&luna).cloned().expect("seat");
     state.settlements.get_mut(&seat).unwrap().controller = fac("fac_aragon");
     assert_eq!(state.faction_domain_income(data, &luna), 0);
-    assert!(state.faction_income_effective_walk(data, &luna) < before);
+    assert!(state.faction_income_uncached(data, &luna) < before);
     // Rule absent: nothing.
     let mut without = data.clone();
     without.economy_rules.domain_income = 0;
@@ -58,8 +58,8 @@ fn a_poor_county_can_pay_one_garrison_unit() {
         / 100;
     for id in POOR_COUNTIES.map(fac) {
         let economy = state.faction_economy(data, &id).expect("economy");
-        let income = state.faction_income_effective(data, &id);
-        let provinces = state.controlled_provinces(&id).len();
+        let income = state.faction_income(data, &id);
+        let provinces = state.controlled_provinces(&id).count();
         let court =
             (income as f64 * data.economy_rules.administration_rate(provinces)).round() as i64;
         let receipts = economy.projected_income + economy.trade_income;
