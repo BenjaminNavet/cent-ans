@@ -9,7 +9,7 @@ extends SceneTree
 ##     première armée du joueur, provinces atteignables non vides, ordre de déplacement vers la
 ##     première atteignable, 4 fins de tour, sauvegarde `user://saves/smoke.json`, rechargement,
 ##     égalité des dates. Sur les vraies données `data/` si la sim réelle est disponible.
-##  5. personnages et dynasties (M4, réelle si elle expose `get_character`, sinon mock dédié sur
+##  5. personnages et dynasties (M4, simulation sur
 ##     `data/` — imprimé) : panneau de cour (≥ 1 personnage), `debug_grant_xp` + `learn_skill`
 ##     sur le dirigeant, `assign_governor` d'un courtisan à `prov_normandie` (ou la première
 ##     province contrôlée ≠ capitale), `propose_marriage` entre deux candidats valides (ou skip
@@ -694,8 +694,7 @@ func _run_minimap_fog() -> void:
 ## M3 : construit le bâtiment le moins cher disponible à Paris (marché si absent), passe les
 ## tours nécessaires, vérifie qu'il apparaît dans `buildings` et que `projected_income` a
 ## augmenté ; passe l'impôt à Haut et vérifie une nouvelle hausse. Avec la vraie simulation si
-## elle expose `get_province_city`/`get_faction_economy` (imprimé), sinon avec le mock sur les
-## vraies données (`data/`, qui a les bâtiments/ressources ; pas les fixtures).
+## sur les vraies données (`data/`).
 func _run_city_economy() -> void:
 	const PROVINCE_ID := "prov_ile_de_france"
 	const FACTION_ID := "fac_france"
