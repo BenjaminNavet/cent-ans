@@ -107,6 +107,9 @@ pub mod vision;
 pub mod voyage;
 pub mod weather;
 
+#[cfg(feature = "test-support")]
+pub mod test_support;
+
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };

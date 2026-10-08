@@ -4,10 +4,11 @@
 //! existing culture / faction / period rules; the AI levies them through
 //! its doctrines. See `docs/archive/chantiers.md`.
 
+use sim_campaign::test_support::{city, start_quiet, unit_type};
 use std::collections::BTreeMap;
 
 use ai::doctrine::pick_recruit;
-use data_model::{GameData, ProvinceId, SettlementId, UnitTypeId};
+use data_model::GameData;
 use sim_campaign::{CampaignState, RecruitOption};
 
 const EASTERN_UNITS: [&str; 10] = [
@@ -33,34 +34,17 @@ const GATES: [&str; 4] = [
 
 use data_model::test_support::{fac, game_data};
 
-fn unit(id: &str) -> UnitTypeId {
-    UnitTypeId::new(id).unwrap()
-}
-
-fn start(data: &GameData) -> CampaignState {
-    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).expect("1337 start");
-    state.chronicle.disabled = true;
-    state
-}
-
-fn city(state: &CampaignState, province: &str) -> SettlementId {
-    state
-        .province_city_id(&ProvinceId::new(province).unwrap())
-        .unwrap()
-        .clone()
-}
-
-/// Recruitment refusal of `unit_type` for `faction` in the city of `province`.
+/// Recruitment refusal of `unit_id` for `faction` in the city of `province`.
 fn reason(
     state: &CampaignState,
     data: &GameData,
     faction: &str,
     province: &str,
-    unit_type: &str,
+    unit_id: &str,
 ) -> Option<String> {
     let settlement = city(state, province);
     state
-        .recruit_option(data, &fac(faction), &settlement, &unit(unit_type))
+        .recruit_option(data, &fac(faction), &settlement, &unit_type(unit_id))
         .expect("known unit")
         .reason
 }
@@ -74,7 +58,7 @@ fn gated(why: &Option<String>) -> bool {
 fn eastern_units_are_sourced_and_have_a_figure() {
     let data = game_data();
     for id in EASTERN_UNITS {
-        let t = &data.unit_types[&unit(id)];
+        let t = &data.unit_types[&unit_type(id)];
         assert!(t.sources.len() >= 3, "{id}: at least three sources");
         assert!(t.figure.is_some(), "{id}: battle figurine");
         assert!(t.equipment.is_some() && t.description.is_some(), "{id}");
@@ -91,7 +75,7 @@ fn eastern_units_are_sourced_and_have_a_figure() {
 #[test]
 fn each_eastern_unit_is_levied_at_home_in_1337() {
     let data = game_data();
-    let state = start(data);
+    let state = start_quiet(data, "fac_france", 7);
     let home = [
         ("unit_mamluk_cavalry", "fac_mamluks", "prov_cairo"),
         (
@@ -121,7 +105,7 @@ fn each_eastern_unit_is_levied_at_home_in_1337() {
 #[test]
 fn eastern_units_stay_in_their_region() {
     let data = game_data();
-    let state = start(data);
+    let state = start_quiet(data, "fac_france", 7);
     // Culture gate: no steppe archers in Paris, no druzhina in Cairo.
     assert_eq!(
         reason(
@@ -178,7 +162,7 @@ fn eastern_units_stay_in_their_region() {
 #[test]
 fn almogavars_and_yaya_have_a_period() {
     let data = game_data();
-    let mut state = start(data);
+    let mut state = start_quiet(data, "fac_france", 7);
     state.year = 1401;
     assert_eq!(
         reason(
@@ -199,7 +183,7 @@ fn almogavars_and_yaya_have_a_period() {
 }
 
 fn option(data: &GameData, id: &str) -> RecruitOption {
-    let t = &data.unit_types[&unit(id)];
+    let t = &data.unit_types[&unit_type(id)];
     RecruitOption {
         unit_type: t.id.clone(),
         name: t.name.display.clone(),

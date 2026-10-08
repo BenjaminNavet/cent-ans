@@ -3,22 +3,12 @@
 //! its situation (a depleted army: stewardship), through the campaign
 //! planner.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::main_army;
 
 use ai::traditions::{doctrine_ranged_share, pick_tradition, plan_traditions};
 use data_model::{GameData, TraditionBranch};
 use sim_campaign::traditions::grant_army_xp;
-use sim_campaign::{ArmyId, CampaignState, Order};
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
-}
+use sim_campaign::{CampaignState, Order};
 
 fn branch_of(data: &GameData, tradition: &str) -> TraditionBranch {
     data.army_tradition_rules

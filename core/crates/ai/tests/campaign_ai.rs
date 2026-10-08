@@ -1,5 +1,6 @@
 //! M9 strategic campaign AI tests (spec `docs/design/m9-ai.md` § 1).
 use data_model::test_support::{fac, game_data};
+use sim_campaign::test_support::start;
 
 use data_model::{FactionId, GameData, ProvinceId};
 use sim_campaign::{CampaignState, Order, Place};
@@ -7,10 +8,6 @@ use sim_campaign::{CampaignState, Order, Place};
 fn data() -> &'static GameData {
     ai::feudal::install();
     game_data()
-}
-
-fn start(data: &GameData, player: &str, seed: u64) -> CampaignState {
-    CampaignState::new_1337(data, fac(player), seed).expect("1337 start")
 }
 
 /// Applies the AI's orders for `faction` and returns (issued, refused).

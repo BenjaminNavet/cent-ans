@@ -5,6 +5,8 @@
 //! with a synthetic cover map (forest where the tests say); the forced
 //! march, entrenched camp and encounter cases on the real map.
 use data_model::test_support::{fac, game_data};
+use sim_campaign::march::px_per_km;
+use sim_campaign::test_support::main_army;
 
 use std::cell::RefCell;
 
@@ -18,10 +20,6 @@ fn real_data() -> &'static GameData {
     // FE5: the feudal AI decides, whatever the order of the tests.
     ai::feudal::install();
     game_data()
-}
-
-fn px_per_km(data: &GameData) -> f32 {
-    sim_campaign::march::px_per_km(data)
 }
 
 fn offset(data: &GameData, point: [f32; 2], east_km: f32, south_km: f32) -> [f32; 2] {
@@ -87,17 +85,6 @@ fn enable_ai_stances(data: &mut GameData) {
     postures.forced_march.enabled = true;
     postures.entrenched.enabled = true;
     data.ai_grid.encounters.detour_permille = 1000;
-}
-
-fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
-    let faction = fac(faction);
-    state
-        .armies
-        .iter()
-        .filter(|(_, a)| a.faction == faction)
-        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
-        .map(|(id, _)| id.clone())
-        .expect("faction has an army")
 }
 
 fn refill(state: &mut CampaignState, data: &GameData, id: &ArmyId) {
