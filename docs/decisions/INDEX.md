@@ -168,6 +168,13 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0183 | [Économie à l'échelle (lot A6-L3)](0183-economie-a-l-echelle.md) | n/d |
 | 0184 | [Durée des batailles : mesure, cadence en données, et limite des leviers de combat](0184-duree-des-batailles.md) | appliqué par le lot A6-L13b** |
 | 0185 | [Barre des emplacements de colonie](0185-barre-des-emplacements.md) | n/d |
+| 0186 | [La CI suit la version de Godot installée](0186-ci-suit-godot-installe.md) | n/d |
+| 0187 | [Sources d'animation par famille](0187-sources-animation.md) | n/d |
+| 0188 | [Bêtes animées en shader de sommets, masques par position](0188-betes-animees-shader.md) | n/d |
+| 0189 | [Animations tirées de vidéos libres](0189-animations-tirees-de-videos-libres.md) | n/d |
+| 0190 | [Génération d'images locale et gratuite (mflux, Z-Image Turbo)](0190-generation-images-locale-mflux.md) | n/d |
+| 0191 | [Plancher d'échelle 3D à 0,4 en plein écran HiDPI](0191-plancher-echelle-plein-ecran-hidpi.md) | acceptée |
+| 0192 | [Météo de campagne cuite une fois par tour](0192-meteo-cuite-par-tour.md) | acceptée |
 | 0200 | [Chantier SC : une seule voie de code](0200-chantier-simplification.md) | n/d |
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
