@@ -47,3 +47,9 @@ est annoncé à FL avant de commencer. Base FL : d30 p50 31 ms, d150 p50 46 ms (
 
 ## Fusion intermédiaire (décision du propriétaire, 08/10)
 Dès que le point de contrôle est vert (relance propre cargo test + tests carte/UI) et que les lots aiturn, fxargs, lookups, rustperf, testkit sont fusionnés : fusionner feat/sc dans main SANS push (fichiers sales de main préservés, patch scratchpad/main-dirty.patch), puis les vagues suivantes repartent de main. Push seulement à la fin du chantier.
+
+### Point de contrôle fait (08/10)
+- `main` avancé en fast-forward sur 1e0d006b8 (feat/sc + main), **non poussé**. Fichiers sales de main préservés (patch 3 voies, désindexés).
+- Vérifs : cargo test workspace 103 résultats / 0 échec, fmt/clippy propres ; pytest 3 162 verts (seul échec `test_manifest_bake_versions_follow_the_code`, antérieur, corrigé dans les fichiers sales d'une autre session) ; import 0 erreur ; smoke, ep13, fe_ui, cv1, q6, ib_layout, mf1 verts.
+- Conflits : outils GA3 gardés (utilisés par la session i3d), conftest union, readme_gallery.
+- Suite : vagues suivantes depuis `main`, intégrées via feat/sc.
