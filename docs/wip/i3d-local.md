@@ -28,3 +28,23 @@ But : trouver une alternative gratuite à TRELLIS fal (0,02 $/objet). Tout est h
 TRELLIS fal reste le meilleur rapport qualité/prix (0,02 $). SF3D local = repli gratuit honnête pour
 les objets simples vus de loin (chariots, caisses, rochers) ; inutilisable pour arbres et bâtiments
 détaillés. TripoSR : à abandonner.
+
+## Essai 2 (08/10) : archer, cavalier, ville
+- Sources : archer `ga3/l3/longbowman/front.png` ; cavalier = vue ¾ recadrée de `sr3/knight_mounted.png`
+  détourée en local (rembg) ; ville = image locale Z-Image Turbo (prompt `sf3d/in/town/prompt.txt`,
+  ville close ronde, église, maquette) détourée en local. Coût 0 $.
+- fal.ai toujours vide (403, ADR 0152). **TRELLIS gratuit via le Space HF
+  `trellis-community/TRELLIS`** (gradio_client, login HF du joueur, quota ZeroGPU) : ≈ 26 s/objet,
+  glb texturé 1024, 7-24 k tri. Script : `~/dev/cent-ans-raw/sf3d/trellis_hf.py` (copie du scratchpad).
+- Planches `out/sheets/units.jpg` (archer + cavalier, ¾ face/dos) et `town.jpg`.
+  - Archer : TRELLIS le plus fidèle (couleurs sombres) ; SF3D net mais vert fluo, casque clair ;
+    TripoSR étonnamment proche de TRELLIS, un peu plus mou.
+  - Cavalier : TRELLIS lisible (cheval, housse, cavalier) ; SF3D housse aux armes la plus lisible de
+    face mais dos flou/miroité, cavalier fondu ; TripoSR cheval correct, cavalier brouillé.
+  - Ville : TRELLIS garde tours, enceinte, église ; TripoSR enceinte + toits, sombre et bruité ;
+    SF3D socle penché, tours perdues.
+- Orientation : SF3D sort tourné de 180° (yaw 180), TripoSR couché + 90° (rx −90 puis yaw 90).
+
+## Verdict mis à jour
+TRELLIS gagne partout et devient **gratuit** par le Space HF (dans la limite du quota ZeroGPU
+quotidien). SF3D/TripoSR locaux : replis hors ligne seulement.
