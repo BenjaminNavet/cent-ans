@@ -13,10 +13,10 @@
 //! Tuning: `data/ai/grid.json` ([`data_model::AiGrid`]).
 
 use data_model::util::dist;
-use std::cmp::Reverse;
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
 
+use data_model::pathfinding::{self, Visit};
 use data_model::{AiGrid, FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
 use sim_campaign::passage;
@@ -450,55 +450,39 @@ impl<'a> GridPlanner<'a> {
             .and_then(|p| passage::trespassed_owner(self.state, self.faction, p));
         let way_out = way_out.as_ref();
         let mut best: Table = BTreeMap::new();
-        let mut heap = BinaryHeap::new();
-        best.insert(
+        pathfinding::dijkstra(
+            &mut best,
             start.clone(),
-            Reach {
-                cost: 0,
-                previous: None,
+            Some(budget),
+            |current| {
+                if current != start && (self.stops.contains(current) || blocked.contains(current)) {
+                    Visit::Skip
+                } else {
+                    Visit::Expand
+                }
+            },
+            |current, out| {
+                for (next, edge) in edges(self.data, current) {
+                    if !homeward
+                        && self
+                            .forbidden
+                            .get(&next)
+                            .is_some_and(|owner| Some(owner) != way_out)
+                    {
+                        continue;
+                    }
+                    let road = self.road_lands(current, &next);
+                    if !homeward && road.closed.iter().any(|owner| Some(owner) != way_out) {
+                        continue;
+                    }
+                    let mut step = edge.min(cap.max(1));
+                    if self.crossable.contains(&next) || road.open {
+                        step = (f64::from(step) * self.rules.trespass_route_factor).round() as u32;
+                    }
+                    out.push((next, step));
+                }
             },
         );
-        heap.push(Reverse((0u32, start.clone())));
-        while let Some(Reverse((cost, current))) = heap.pop() {
-            if best.get(&current).is_some_and(|r| r.cost < cost) {
-                continue;
-            }
-            if &current != start && (self.stops.contains(&current) || blocked.contains(&current)) {
-                continue;
-            }
-            for (next, edge) in edges(self.data, &current) {
-                if !homeward
-                    && self
-                        .forbidden
-                        .get(&next)
-                        .is_some_and(|owner| Some(owner) != way_out)
-                {
-                    continue;
-                }
-                let road = self.road_lands(&current, &next);
-                if !homeward && road.closed.iter().any(|owner| Some(owner) != way_out) {
-                    continue;
-                }
-                let mut step = edge.min(cap.max(1));
-                if self.crossable.contains(&next) || road.open {
-                    step = (f64::from(step) * self.rules.trespass_route_factor).round() as u32;
-                }
-                let total = cost + step;
-                if total > budget {
-                    continue;
-                }
-                if best.get(&next).is_none_or(|r| total < r.cost) {
-                    best.insert(
-                        next.clone(),
-                        Reach {
-                            cost: total,
-                            previous: Some(current.clone()),
-                        },
-                    );
-                    heap.push(Reverse((total, next)));
-                }
-            }
-        }
         let table = Arc::new(best);
         self.tables
             .lock()

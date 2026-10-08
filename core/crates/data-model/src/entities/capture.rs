@@ -14,6 +14,8 @@ use crate::ids::{FactionId, SettlementId};
 #[serde(deny_unknown_fields)]
 pub struct CaptureRules {
     pub occupy: OccupyRules,
+    pub raid: RaidRules,
+    pub siege: SiegeRules,
     pub ransom: OutcomeRules,
     pub sack: OutcomeRules,
     pub raze: RazeRules,
@@ -37,6 +39,26 @@ pub struct OccupyRules {
     pub unrest_city: u8,
     /// Unrest added when another place of the province is taken.
     pub unrest_place: u8,
+}
+
+/// A chevauchée: what one turn of raiding does to a province.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RaidRules {
+    /// Devastation added per turn.
+    pub devastation: u8,
+    /// Unrest added per turn.
+    pub unrest: u8,
+    /// Share of the province's seasonal tax base taken as loot.
+    pub loot_share: f64,
+}
+
+/// Campaign siege duration.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SiegeRules {
+    /// Base duration in turns, added to the fortification level.
+    pub base_turns: u32,
 }
 
 /// Extra effects of ransom and sack, on top of the occupation.

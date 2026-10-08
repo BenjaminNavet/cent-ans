@@ -145,11 +145,11 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
     values.insert("zoc_radius_km", data.free_movement_rules().zoc_radius_km);
     values.insert(
         "landing_loss_percent",
-        f64::from(movement::LANDING_LOSS_PERCENT),
+        f64::from(data.army_rules.landing.loss_percent),
     );
     values.insert(
         "landing_loss_winter_percent",
-        f64::from(movement::LANDING_WINTER_FACTOR * movement::LANDING_LOSS_PERCENT),
+        f64::from(data.army_rules.landing.winter_factor * data.army_rules.landing.loss_percent),
     );
 
     // Characters and agents.

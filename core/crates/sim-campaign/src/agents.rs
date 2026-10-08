@@ -9,8 +9,9 @@
 //! so a game without agents keeps exactly the same draws.
 
 use data_model::util::splitmix64;
-use std::cmp::Reverse;
-use std::collections::{BTreeMap, BinaryHeap};
+use std::collections::BTreeMap;
+
+use data_model::pathfinding::{self, Labels, Visit};
 use std::fmt;
 
 use data_model::{
@@ -769,42 +770,43 @@ pub fn agent_dijkstra_by_ids(
     budget: Option<u32>,
     cap: u32,
 ) -> BTreeMap<SettlementId, movement::Reach> {
-    let mut best: BTreeMap<SettlementId, movement::Reach> = BTreeMap::new();
-    let mut heap = BinaryHeap::new();
-    best.insert(
+    let mut best = BTreeMap::new();
+    pathfinding::dijkstra(
+        &mut best,
         start.clone(),
-        movement::Reach {
-            cost: 0,
-            previous: None,
+        budget,
+        |_| Visit::Expand,
+        |current, out| {
+            out.extend(
+                movement::edges(data, current)
+                    .into_iter()
+                    .map(|(next, edge)| (next, edge.min(cap.max(1)))),
+            );
         },
     );
-    heap.push(Reverse((0u32, start.clone())));
-    while let Some(Reverse((cost, current))) = heap.pop() {
-        if best.get(&current).is_some_and(|r| r.cost < cost) {
-            continue;
-        }
-        for (next, edge) in movement::edges(data, &current) {
-            let total = cost + edge.min(cap.max(1));
-            if budget.is_some_and(|b| total > b) {
-                continue;
-            }
-            if best.get(&next).is_none_or(|r| total < r.cost) {
-                best.insert(
-                    next.clone(),
-                    movement::Reach {
-                        cost: total,
-                        previous: Some(current.clone()),
-                    },
-                );
-                heap.push(Reverse((total, next)));
-            }
-        }
-    }
     best
 }
 
 /// No settlement (unreached, or the start's previous).
 const NONE: u32 = u32::MAX;
+
+/// Search labels over dense settlement indices.
+struct DenseLabels {
+    cost: Vec<u32>,
+    previous: Vec<u32>,
+}
+
+impl Labels<u32> for DenseLabels {
+    fn cost(&self, node: &u32) -> Option<u32> {
+        let cost = self.cost[*node as usize];
+        (cost != NONE).then_some(cost)
+    }
+
+    fn set(&mut self, node: &u32, cost: u32, previous: Option<&u32>) {
+        self.cost[*node as usize] = cost;
+        self.previous[*node as usize] = previous.copied().unwrap_or(NONE);
+    }
+}
 
 /// OMR R1: [`agent_dijkstra`] over the graph's dense indices
 /// ([`data_model::movement_graph::GraphIndex`]; index order = id order, so
@@ -844,31 +846,32 @@ impl<'a> AgentTable<'a> {
         let n = index.ids.len();
         table.cost = vec![NONE; n];
         table.previous = vec![NONE; n];
-        table.cost[origin as usize] = 0;
-        let mut heap = BinaryHeap::new();
-        heap.push(Reverse((0u32, origin)));
         let step_cap = cap.max(1);
-        while let Some(Reverse((cost, current))) = heap.pop() {
-            if table.cost[current as usize] < cost {
-                continue;
-            }
-            if until == Some(current) {
-                break;
-            }
-            for &(next, edge_cost) in &index.edges[current as usize] {
-                let edge = (edge_cost.round() as u32).max(1);
-                let total = cost + edge.min(step_cap);
-                if budget.is_some_and(|b| total > b) {
-                    continue;
+        let mut labels = DenseLabels {
+            cost: std::mem::take(&mut table.cost),
+            previous: std::mem::take(&mut table.previous),
+        };
+        pathfinding::dijkstra(
+            &mut labels,
+            origin,
+            budget,
+            |&current| {
+                if until == Some(current) {
+                    Visit::Stop
+                } else {
+                    Visit::Expand
                 }
-                let known = table.cost[next as usize];
-                if known == NONE || total < known {
-                    table.cost[next as usize] = total;
-                    table.previous[next as usize] = current;
-                    heap.push(Reverse((total, next)));
-                }
-            }
-        }
+            },
+            |&current, out| {
+                out.extend(
+                    index.edges[current as usize]
+                        .iter()
+                        .map(|&(next, edge)| (next, (edge.round() as u32).max(1).min(step_cap))),
+                );
+            },
+        );
+        table.cost = labels.cost;
+        table.previous = labels.previous;
         table
     }
 

@@ -17,20 +17,6 @@ use crate::events::{EventKind, GameEvent};
 use crate::skills;
 use crate::state::{ArmyId, CampaignState, SiegeState, Stance};
 
-/// Base siege duration in turns, added to the fortification level.
-pub const SIEGE_BASE_TURNS: u32 = 2;
-/// Devastation added by one turn of chevauchée.
-pub const RAID_DEVASTATION: u8 = 30;
-/// Unrest added to a province by a chevauchée.
-pub const RAID_UNREST: u8 = 10;
-/// Share of the province's seasonal tax base taken as loot.
-pub const RAID_LOOT_SHARE: f64 = 0.5;
-/// Unrest added to a province when its city changes hands (half for
-/// another settlement).
-/// TW2-T1: the value now read is `occupy.unrest_city` of
-/// `data/rules/capture.json`; kept for reference.
-pub const CAPTURE_UNREST: u8 = 20;
-
 /// Armies on `settlement` besieging its controller, sorted by id: armies in
 /// `Siege` stance, or any hostile army when the settlement is a village.
 pub(crate) fn besiegers(
@@ -162,7 +148,7 @@ pub(crate) fn resolve_sieges(
         let breach_gain = (f64::from(breach_per_turn(state, data, &besiegers, fortification))
             * (1.0 - resistance / 100.0))
             .round() as u8;
-        let drain = supplies_drain(fortification, siege_speed_percent);
+        let drain = supplies_drain(data, fortification, siege_speed_percent);
         let turn = state.turn;
         let settlement = state.settlements.get_mut(&settlement_id).expect("exists");
         match &mut settlement.siege {
@@ -266,7 +252,7 @@ pub(crate) fn begin_siege(
     let province_id = province_of(state, settlement_id);
     let fortification = state.fortification_level(data, settlement_id);
     let siege_speed_percent = siege_speed_percent(state, data, army);
-    let drain = supplies_drain(fortification, siege_speed_percent);
+    let drain = supplies_drain(data, fortification, siege_speed_percent);
     let devastation = state
         .provinces
         .get(&province_id)
@@ -322,10 +308,11 @@ pub(crate) fn siege_speed_percent(state: &CampaignState, data: &GameData, army: 
     }) + crate::traditions::siege_speed_percent(data, a)
 }
 
-/// Food lost per turn of siege: a town lasts `SIEGE_BASE_TURNS +
-/// fortification` turns, shortened by the besieging general's `SiegeSpeed`.
-pub fn supplies_drain(fortification: u32, siege_speed_percent: f64) -> u8 {
-    let base_duration = f64::from(SIEGE_BASE_TURNS + fortification);
+/// Food lost per turn of siege: a town lasts `siege.base_turns +
+/// fortification` turns (`capture.json`), shortened by the besieging
+/// general's `SiegeSpeed`.
+pub fn supplies_drain(data: &GameData, fortification: u32, siege_speed_percent: f64) -> u8 {
+    let base_duration = f64::from(data.capture_rules.siege.base_turns + fortification);
     let duration = (base_duration * (1.0 - siege_speed_percent / 100.0)).max(1.0);
     (100.0 / duration).ceil().min(100.0) as u8
 }
@@ -1078,7 +1065,7 @@ pub(crate) fn capture(
             army.stance = Stance::Normal;
         }
     }
-    // TW2-T1: the occupation's unrest comes from `data/rules/capture.json`.
+    // The occupation's unrest comes from `data/rules/capture.json`.
     let unrest = crate::capture::occupation_unrest(state, data, settlement_id);
     if let Some(province) = state.provinces.get_mut(&province_id) {
         province.unrest = province.unrest.saturating_add(unrest).min(100);
@@ -1138,12 +1125,13 @@ pub(crate) fn resolve_raids(
         }
         let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
-        let loot = (province_base_income(data, province) * RAID_LOOT_SHARE).round() as i64;
+        let raid = &data.capture_rules.raid;
+        let loot = (province_base_income(data, province) * raid.loot_share).round() as i64;
         province.devastation = province
             .devastation
-            .saturating_add(RAID_DEVASTATION)
+            .saturating_add(raid.devastation)
             .min(100);
-        province.unrest = province.unrest.saturating_add(RAID_UNREST).min(100);
+        province.unrest = province.unrest.saturating_add(raid.unrest).min(100);
         if let Some(faction_state) = state.factions.get_mut(&faction) {
             faction_state.treasury += loot;
         }

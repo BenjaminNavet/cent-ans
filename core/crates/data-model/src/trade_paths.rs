@@ -8,8 +8,9 @@
 //! [`GameData::trade_path`], which falls back to a fresh search for a pair
 //! of settlements the cache does not know (a catalogue edited after load).
 
-use std::cmp::Reverse;
-use std::collections::{BTreeMap, BinaryHeap};
+use std::collections::BTreeMap;
+
+use crate::pathfinding::{dijkstra, path_to, Label, Visit};
 
 use crate::ids::SettlementId;
 use crate::load::GameData;
@@ -41,36 +42,30 @@ pub fn shortest_path(
     if from == to {
         return Some((0, vec![from.clone()]));
     }
-    let mut dist: BTreeMap<SettlementId, u32> = BTreeMap::new();
-    let mut prev: BTreeMap<SettlementId, SettlementId> = BTreeMap::new();
-    let mut heap = BinaryHeap::new();
-    dist.insert(from.clone(), 0);
-    heap.push(Reverse((0u32, from.clone())));
-    while let Some(Reverse((cost, current))) = heap.pop() {
-        if &current == to {
-            break;
-        }
-        if cost > *dist.get(&current).unwrap_or(&u32::MAX) {
-            continue;
-        }
-        for edge in graph.edges(&current) {
-            let next_cost = cost + edge_cost(edge.cost);
-            if next_cost < dist.get(&edge.to).copied().unwrap_or(u32::MAX) {
-                dist.insert(edge.to.clone(), next_cost);
-                prev.insert(edge.to.clone(), current.clone());
-                heap.push(Reverse((next_cost, edge.to.clone())));
+    let mut labels: BTreeMap<SettlementId, Label<SettlementId>> = BTreeMap::new();
+    dijkstra(
+        &mut labels,
+        from.clone(),
+        None,
+        |node| {
+            if node == to {
+                Visit::Stop
+            } else {
+                Visit::Expand
             }
-        }
-    }
-    let cost = *dist.get(to)?;
-    let mut path = vec![to.clone()];
-    let mut current = to.clone();
-    while &current != from {
-        let previous = prev.get(&current)?;
-        path.push(previous.clone());
-        current = previous.clone();
-    }
-    path.reverse();
+        },
+        |node, out| {
+            out.extend(
+                graph
+                    .edges(node)
+                    .iter()
+                    .map(|edge| (edge.to.clone(), edge_cost(edge.cost))),
+            );
+        },
+    );
+    let cost = labels.get(to)?.cost;
+    let mut path = vec![from.clone()];
+    path.extend(path_to(&labels, to)?);
     Some((cost, path))
 }
 

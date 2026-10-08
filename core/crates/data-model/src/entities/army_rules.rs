@@ -17,6 +17,22 @@ pub struct ArmyRules {
     /// Regiments an army may hold at most (formation, merge, mercenaries,
     /// encounter joins).
     pub max_units: u32,
+    /// Landing on a hostile shore.
+    pub landing: LandingRules,
+    /// Pace change (percent) of an army dragging siege engines.
+    pub siege_train_pace_percent: f64,
+}
+
+/// Cost of landing in hostile territory.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LandingRules {
+    /// Strength lost by each unit, percent.
+    pub loss_percent: u32,
+    /// Multiplier of the loss in winter.
+    pub winter_factor: u32,
+    /// Morale lost by each unit.
+    pub morale_loss: u8,
 }
 
 crate::bundled_rules!(ArmyRules, "rules/armies.json", default);

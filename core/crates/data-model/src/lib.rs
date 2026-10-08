@@ -19,6 +19,7 @@ pub mod map;
 pub mod map_geo;
 pub mod movement_graph;
 pub mod navgrid;
+pub mod pathfinding;
 pub mod settlement_grid;
 pub mod settlement_load;
 #[cfg(feature = "test-support")]

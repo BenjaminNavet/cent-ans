@@ -1,8 +1,16 @@
 {
-  "description": "Sort de la ville prise (lot TW2-T1, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T1) : occuper, mettre à rançon (appatis), piller, raser. L'or se calcule sur l'assiette fiscale saisonnière de la province × gold_income_share × part de la place (place_share, la cité vaut 1) ; population en pour cent, dévastation et troubles en points (0-100), expérience des unités sur l'échelle 0-10, opinions en points et en tours. Raser est interdit aux cités de province et aux lieux emblématiques ; une place ramenée au niveau 0 devient une ruine pendant ruin_turns tours (ni recrutement ni chantier). L'IA additionne des scores (doctrine de faction, trésor bas, culture étrangère, reconquête de sa terre, place intenable) et prend le plus haut, sans tirage.",
+  "description": "Sort de la ville prise (lot TW2-T1, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T1) : occuper, mettre à rançon (appatis), piller, raser, chevauchée (raid) et durée de base du siège. L'or se calcule sur l'assiette fiscale saisonnière de la province × gold_income_share × part de la place (place_share, la cité vaut 1) ; population en pour cent, dévastation et troubles en points (0-100), expérience des unités sur l'échelle 0-10, opinions en points et en tours. Raser est interdit aux cités de province et aux lieux emblématiques ; une place ramenée au niveau 0 devient une ruine pendant ruin_turns tours (ni recrutement ni chantier). L'IA additionne des scores (doctrine de faction, trésor bas, culture étrangère, reconquête de sa terre, place intenable) et prend le plus haut, sans tirage.",
   "occupy": {
     "unrest_city": 20,
     "unrest_place": 10
+  },
+  "raid": {
+    "devastation": 30,
+    "unrest": 10,
+    "loot_share": 0.5
+  },
+  "siege": {
+    "base_turns": 2
   },
   "ransom": {
     "gold_income_share": 1.5,

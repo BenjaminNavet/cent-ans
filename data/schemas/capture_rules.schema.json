@@ -49,6 +49,25 @@
       "required": ["unrest_city", "unrest_place"],
       "additionalProperties": false
     },
+    "raid": {
+      "type": "object",
+      "description": "Chevauchée d'une armée dans une province, par tour.",
+      "properties": {
+        "devastation": { "$ref": "#/$defs/points", "description": "Dévastation ajoutée." },
+        "unrest": { "$ref": "#/$defs/points", "description": "Troubles ajoutés." },
+        "loot_share": { "type": "number", "minimum": 0, "maximum": 5, "description": "Part de l'assiette fiscale saisonnière de la province prise en butin." }
+      },
+      "required": ["devastation", "unrest", "loot_share"],
+      "additionalProperties": false
+    },
+    "siege": {
+      "type": "object",
+      "properties": {
+        "base_turns": { "type": "integer", "minimum": 0, "maximum": 20, "description": "Durée de base d'un siège en tours, ajoutée au niveau de fortification." }
+      },
+      "required": ["base_turns"],
+      "additionalProperties": false
+    },
     "ransom": { "$ref": "#/$defs/outcome" },
     "sack": { "$ref": "#/$defs/outcome" },
     "raze": {
@@ -87,6 +106,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["occupy", "ransom", "sack", "raze", "place_share", "raze_forbidden_kinds", "raze_forbidden_settlements", "ai"],
+  "required": ["occupy", "raid", "siege", "ransom", "sack", "raze", "place_share", "raze_forbidden_kinds", "raze_forbidden_settlements", "ai"],
   "additionalProperties": false
 }

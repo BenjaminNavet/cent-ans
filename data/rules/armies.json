@@ -1,4 +1,10 @@
 {
-  "description": "Lot NT5 (N6, ADR 0128) : plafond d'unités par armée de campagne, comme en bataille (40 régiments, doublé le 2026-09-30). Il borne la formation d'une armée depuis une garnison, la fusion de deux armées, l'engagement de mercenaires et les ralliements des rencontres (issue join). Une armée déjà au-delà (partie ancienne) le garde mais ne reçoit plus d'unité.",
-  "max_units": 40
+  "description": "Lot NT5 (N6, ADR 0128) : plafond d'unités par armée de campagne, comme en bataille (40 régiments, doublé le 2026-09-30). Il borne la formation d'une armée depuis une garnison, la fusion de deux armées, l'engagement de mercenaires et les ralliements des rencontres (issue join). Une armée déjà au-delà (partie ancienne) le garde mais ne reçoit plus d'unité. Y figurent aussi le débarquement en terre hostile (pertes en pour cent, doublées en hiver, moral perdu) et l'allure des armées traînant un équipage de siège (en pour cent).",
+  "max_units": 40,
+  "landing": {
+    "loss_percent": 5,
+    "winter_factor": 2,
+    "morale_loss": 10
+  },
+  "siege_train_pace_percent": -20.0
 }

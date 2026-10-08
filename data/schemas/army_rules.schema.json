@@ -2,12 +2,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/army_rules.schema.json",
   "title": "Règles des armées de campagne",
-  "description": "Fichier data/rules/armies.json (lot NT5, N6) : plafond d'unités par armée.",
+  "description": "Fichier data/rules/armies.json (lot NT5, N6) : plafond d'unités par armée, débarquement en terre hostile, allure avec un équipage de siège.",
   "type": "object",
   "properties": {
     "description": { "type": "string" },
     "max_units": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Régiments par armée au plus (formation, fusion, mercenaires, rencontres)." }
+    "landing": {
+      "type": "object",
+      "description": "Débarquement en terre hostile : l'armée est épuisée pour le tour et paie en hommes et en moral.",
+      "properties": {
+        "loss_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Force perdue par régiment, en pour cent." },
+        "winter_factor": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Multiplicateur des pertes en hiver." },
+        "morale_loss": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu par chaque régiment." }
+      },
+      "required": ["loss_percent", "winter_factor", "morale_loss"],
+      "additionalProperties": false
+    },
+    "siege_train_pace_percent": { "type": "number", "minimum": -100, "maximum": 0, "description": "Variation d'allure (pour cent) d'une armée qui traîne des engins de siège." }
   },
-  "required": ["max_units"],
+  "required": ["max_units", "landing", "siege_train_pace_percent"],
   "additionalProperties": false
 }

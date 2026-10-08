@@ -310,8 +310,8 @@ fn assault_tradition_shortens_sieges() {
     let percent = siege_speed_percent(data, &state.armies[&army]);
     assert_eq!(percent, 10.0);
     assert!(
-        sim_campaign::siege::supplies_drain(3, percent)
-            > sim_campaign::siege::supplies_drain(3, 0.0)
+        sim_campaign::siege::supplies_drain(data, 3, percent)
+            > sim_campaign::siege::supplies_drain(data, 3, 0.0)
     );
 }
 
