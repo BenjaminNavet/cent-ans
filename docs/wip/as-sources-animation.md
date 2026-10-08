@@ -5,14 +5,12 @@ Chantier de réflexion ouvert le 08/10 à la demande du joueur : pour chaque fam
 UI…), choisir la meilleure source gratuite et compatible usage commercial : vidéo → mouvement,
 bibliothèques mocap, procédural/physique, keyframé.
 
-## État
-- En cours : inventaire de l'existant (agent Explore) ; recherche des sources gratuites et de
-  leurs licences (agent de recherche) ; essai RTMW sur les vidéos NT14 (lot RT,
-  `docs/wip/rt-rtmw.md`, branche en worktree).
-- Contraintes déjà décidées : rien qui dépende de SMPL/AMASS/HumanML3D (non commercial) ;
-  vidéos personnelles hors dépôt (`~/dev/cent-ans-mocap-src/`) ; pas d'extraits de films sous
-  droits ; batailles navales sans 3D.
+## État (08/10)
+- FAIT : inventaire (`docs/research/as-inventaire-animations.md`), sources et licences
+  (`docs/research/as-sources-gratuites.md`), essai RTMW non retenu (`docs/wip/rt-rtmw.md`),
+  doctrine `docs/design/2026-10-08-sources-animation.md`, ADR 0187.
+- Contraintes : rien qui dépende de SMPL/AMASS/HumanML3D/H36M ; vidéos personnelles hors dépôt
+  (`~/dev/cent-ans-mocap-src/`) ; pas d'extraits de films sous droits ; batailles navales sans 3D.
 
 ## Prochaine étape
-Prédécesseurs : AN1 (`an1-animation-vivante.md`), NT12-14. Synthèse : tableau famille → méthode actuelle → meilleure source → lots proposés, puis
-document de conception `docs/design/` et ADR.
+Accord du joueur sur les lots AS1-AS7 (document de conception § 3), puis enchaîner AS1, AS2, AS5.
