@@ -2160,7 +2160,7 @@ func _run_table_medicine() -> void:
 	table.show_for(changed_province, true, sim)
 	await process_frame
 	_check(table.visible and table.option_buttons.size() == (sim.call("get_diet_options", changed_province) as Array).size(), "table section should list every diet option")
-	var tip := RichTooltip.diet(table._option(target_diet))
+	var tip := RichTooltip.diet(PanelSection.find_option(table.options, target_diet))
 	_check(tip.contains("Coût") and tip.contains("[img"), "diet tooltip incomplete: %s" % tip)
 	(table.option_buttons[target_diet] as Button).pressed.emit()
 	var now: Dictionary = sim.call("get_province_diet", changed_province)
@@ -2172,7 +2172,7 @@ func _run_table_medicine() -> void:
 	table.show_for(refused_province, true, sim)
 	var refused: Dictionary = table.request_diet(refused_diet)
 	_check(not bool(refused.get("ok", true)) and table.error_label.visible and table.error_label.text.contains("impossible"), "unavailable diet should be refused and shown: %s" % table.error_label.text)
-	var refused_tip := RichTooltip.diet(table._option(refused_diet))
+	var refused_tip := RichTooltip.diet(PanelSection.find_option(table.options, refused_diet))
 	_check(refused_tip.contains("Manque"), "unavailable diet tooltip should list missing conditions: %s" % refused_tip)
 	table.show_for(refused_province, false, sim)
 	_check(not table.choose_button.visible and table.option_buttons.is_empty(), "read-only province: no selector")

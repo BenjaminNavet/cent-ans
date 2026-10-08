@@ -1,7 +1,7 @@
 class_name FeudalSection
-extends VBoxContainer
+extends PanelSection
 
-## Lot FE6 (spec FE § 4.1, § 4.8, § 6) : section « Féodalité » du panneau de faction — rang et
+## Section « Féodalité » du panneau de faction — rang et
 ## suzerain, obligations (tribut, ost, vassaux à protéger, cas de félonie) et objectifs (titres
 ## historiques et voies génériques de victoire). Lit `CampaignSim.get_feudal_sheet` et
 ## `get_feudal_obligations` ; « Arbre féodal… » ouvre le panneau de l'arbre.
@@ -19,10 +19,8 @@ var tree_button: Button
 
 
 func _init() -> void:
-	name = "FeudalSection"
-	add_theme_constant_override("separation", 4)
-	var header := HBoxContainer.new()
-	add_child(header)
+	super("FeudalSection", 4, false)
+	var header := UiBuild.hbox(0, self)
 	var title := HudStyle.label("Féodalité", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
@@ -49,9 +47,7 @@ func refresh(sim: Object, id: String) -> void:
 		return
 	sheet = sim.call("get_feudal_sheet", id)
 	obligations = sim.call("get_feudal_obligations", id)
-	for child in _body.get_children():
-		_body.remove_child(child)
-		child.queue_free()
+	UiBuild.clear_children(_body)
 	if sheet.is_empty():
 		_line("Cette faction ne tient aucun titre.", HudStyle.INK_FADED, "NoTitle")
 		return

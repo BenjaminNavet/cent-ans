@@ -1,21 +1,15 @@
 class_name BattleDemosMenu
-extends PanelContainer
+extends ListMenu
 
 ## SG2 — « Batailles de démonstration » du menu principal : liste `data/ui/battle_demos.json`
 ## (bataille rangée, assauts de Guyenne, de Paris, d'Avignon et de Bruges dans le plan de la
 ## ville). Un clic lance la scène de bataille autonome avec les options de la démo
 ## (`BattleScene.demo_args`) ; la fin de la bataille ramène au menu. Échap ou « Fermer » :
 ## signal `closed`.
-## Lot P2e (ADR 0097, bible DA § 12.1) : la fenêtre rejoint la zone `MODAL` de `UiLayout`
-## (voile assombri et blocage des entrées fournis par la zone, plus de veil ni de
-## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
-## `UiMotion`.
 
-signal closed
 signal demo_started(id: String)
 
 const DEMOS_FILE := "ui/battle_demos.json"
-const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 ## EP8 : phases proposées pour l'heure de la bataille (règles du cœur, libellés des données).
 const TIME_OF_DAY_FILE := "rules/battle_time_of_day.json"
 
@@ -23,7 +17,6 @@ const TIME_OF_DAY_FILE := "rules/battle_time_of_day.json"
 static var chosen_hour: String = ""
 
 var demos: Array = []
-var buttons: Dictionary = {}  # id -> Button (tests)
 var hour_option: OptionButton = null
 var hour_keys: Array[String] = [""]
 
@@ -69,27 +62,24 @@ static func args_for(demo: Dictionary) -> PackedStringArray:
 	return args
 
 
-func _ready() -> void:
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(680, 0)
+func _menu_title() -> String:
+	return "Batailles de démonstration"
+
+
+func _menu_hint() -> String:
+	return "Hors campagne : le résultat n'est pas conservé."
+
+
+func _load_entries() -> void:
 	demos = load_demos()
-	var box := UiBuild.vbox(8)
-	add_child(box)
-	var title := UiBuild.label("Batailles de démonstration")
-	UiType.apply(title, UiType.TITLE)
-	box.add_child(title)
-	var hint := UiBuild.label("Hors campagne : le résultat n'est pas conservé.")
-	UiType.apply(hint, UiType.CAPTION)
-	hint.modulate = Color(1, 1, 1, 0.7)
-	box.add_child(hint)
-	# EP8 : heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
-	var hour_row := HBoxContainer.new()
-	box.add_child(hour_row)
-	var hour_label := UiBuild.label("Heure de la bataille")
+
+
+func _build_entries(box: VBoxContainer) -> void:
+	# Heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
+	var hour_row := UiBuild.hbox(8, box)
+	var hour_label := UiBuild.label("Heure de la bataille", 0, null, false, 0.0, hour_row)
 	RichTooltip.attach_plain(hour_label, "battle_demo_hour")
 	hour_label.mouse_filter = Control.MOUSE_FILTER_STOP
-	hour_row.add_child(hour_label)
 	hour_option = OptionButton.new()
 	hour_option.name = "HourOption"
 	hour_option.add_item("Au hasard (comme en campagne)", 0)
@@ -101,47 +91,20 @@ func _ready() -> void:
 	hour_row.add_child(hour_option)
 	for demo in demos:
 		var entry := demo as Dictionary
-		var button := UiBuild.button(str(entry["label"]), start.bind(str(entry["id"])))
+		var button := UiBuild.button(str(entry["label"]), start.bind(str(entry["id"])), box)
 		button.name = "Demo_" + str(entry["id"])
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text = str(entry.get("detail", ""))
-		box.add_child(button)
-		var detail := UiBuild.label(str(entry.get("detail", "")), 0, null, true, 640)
+		var detail := UiBuild.label(str(entry.get("detail", "")), 0, null, true, 640, box)
 		UiType.apply(detail, UiType.CAPTION)
 		detail.modulate = Color(1, 1, 1, 0.75)
-		box.add_child(detail)
 		buttons[str(entry["id"])] = button
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_END
-	box.add_child(row)
-	var close_button := UiBuild.button("Fermer", close)
-	close_button.name = "CloseButton"
-	row.add_child(close_button)
-	if not buttons.is_empty():
-		(buttons.values()[0] as Button).grab_focus.call_deferred()
-	UiZones.put(UiZones.Zone.MODAL, self)
-	UiMotion.fade_in(self)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
-
-
-func close() -> void:
-	closed.emit()
-	UiMotion.fade_out(self, UiMotion.DURATION, true)
 
 
 ## Lance la démo `id` : options transmises à la scène de bataille, puis changement de scène.
 func start(id: String) -> void:
 	for demo in demos:
 		if str((demo as Dictionary)["id"]) == id:
-			BattleScene.demo_args = args_for(demo)
 			demo_started.emit(id)
-			var audio := get_node_or_null("/root/AudioDirector")
-			if audio != null and audio.has_method("stop_all"):
-				audio.call("stop_all")
-			SceneFader.go(BATTLE_SCENE)
+			_launch_battle(args_for(demo))
 			return

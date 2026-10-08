@@ -1,25 +1,18 @@
 class_name ReplaysMenu
-extends PanelContainer
+extends ListMenu
 
 ## EP13 — « Rejeux » du menu principal : les dernières batailles livrées, enregistrées à leur fin
 ## par le cœur (`BattleSim.save_replay`, dossier utilisateur `user://replays`, les N dernières
 ## gardées selon `data/rules/battle_replay.json`). Pour chacune : titre, armées, vainqueur, durée,
 ## date ; « Revoir » lance la scène de bataille en rejeu (`--replay=<fichier>`). Un rejeu d'un
 ## autre format de fichier est montré mais ne peut être revu. Échap ou « Fermer » : `closed`.
-## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
-## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
-## `UiMotion`.
 
-signal closed
 signal replay_started(path: String)
-
-const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 
 ## Dossier des rejeux (les tests en imposent un autre).
 static var dir_override: String = ""
 
 var replays: Array = []
-var buttons: Dictionary = {}  # chemin -> Button (tests)
 var empty_label: Label = null
 
 
@@ -79,41 +72,31 @@ static func args_for(path: String) -> PackedStringArray:
 	return PackedStringArray(["--replay=" + path])
 
 
-func _ready() -> void:
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(780, 0)
+func _menu_title() -> String:
+	return "Rejeux"
+
+
+func _menu_hint() -> String:
+	return "Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas."
+
+
+func _menu_width() -> float:
+	return 780.0
+
+
+func _scroll_height() -> float:
+	return 520.0
+
+
+func _load_entries() -> void:
 	replays = load_replays()
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, 520)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(scroll)
-	var box := UiBuild.vbox(8)
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(box)
-	var title := UiBuild.label("Rejeux")
-	UiType.apply(title, UiType.TITLE)
-	box.add_child(title)
-	var hint := UiBuild.label("Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas.", 0, null, true, 720)
-	UiType.apply(hint, UiType.CAPTION)
-	hint.modulate = Color(1, 1, 1, 0.75)
-	box.add_child(hint)
+
+
+func _build_entries(box: VBoxContainer) -> void:
 	if replays.is_empty():
 		empty_label = UiBuild.label("Aucun rejeu pour l'instant : chaque bataille livrée est enregistrée à sa fin.", 0, null, true, 720, box)
 	for entry in replays:
 		_add_replay(box, entry as Dictionary)
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_END
-	box.add_child(row)
-	var close_button := UiBuild.button("Fermer", close)
-	close_button.name = "CloseButton"
-	row.add_child(close_button)
-	if not buttons.is_empty():
-		(buttons.values()[0] as Button).grab_focus.call_deferred()
-	else:
-		close_button.grab_focus.call_deferred()
-	UiZones.put(UiZones.Zone.MODAL, self)
-	UiMotion.fade_in(self)
 
 
 func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
@@ -142,22 +125,7 @@ func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
 	buttons[path] = button
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
-
-
-func close() -> void:
-	closed.emit()
-	UiMotion.fade_out(self, UiMotion.DURATION, true)
-
-
 ## Lance la scène de bataille en rejeu du fichier `path`.
 func start(path: String) -> void:
-	BattleScene.demo_args = args_for(path)
 	replay_started.emit(path)
-	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null and audio.has_method("stop_all"):
-		audio.call("stop_all")
-	SceneFader.go(BATTLE_SCENE)
+	_launch_battle(args_for(path))
