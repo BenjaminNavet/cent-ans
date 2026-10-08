@@ -1,0 +1,170 @@
+{
+  "description": "Lot ME5 (chantier DN, carte) : atmosphère de la carte de campagne, rendu seulement. `cumulus_cards` : cartes de cumulus éclairées par le soleil de la carte (même direction que les ombres de nuages RV-C), en vue moyenne et lointaine. `cirrus` : voile de haute couche. `rain_curtains` : rideaux de pluie lointains sur les provinces dont le cœur donne pluie ou orage. `river_fog` : bancs de brouillard du matin sur les fleuves, qui se lèvent comme la brume du matin (TB6). `aurora` : rideau d'aurore au bord nord, hiver et soirée. Tout est éteint par `enabled` ou `--no-me5` (banc A/B), absent en vue parchemin (< 1200) et sur la province sélectionnée. Les valeurs de distance sont des distances caméra.",
+  "enabled": true,
+  "wind": [
+    3.0,
+    0.6
+  ],
+  "focus_clear": {
+    "radius_per_distance": 0.28,
+    "feather_per_distance": 0.22
+  },
+  "cumulus_cards": {
+    "enabled": true,
+    "count": 150,
+    "seed": 5171,
+    "height": [
+      33.0,
+      41.0
+    ],
+    "size": [
+      110.0,
+      220.0
+    ],
+    "squash": 0.55,
+    "opacity": 0.7,
+    "distance_in": [
+      260.0,
+      520.0
+    ],
+    "distance_out": [
+      1000.0,
+      1250.0
+    ],
+    "lit_color": [
+      1.0,
+      0.97,
+      0.92
+    ],
+    "shade_color": [
+      0.56,
+      0.62,
+      0.72
+    ],
+    "cover_wet": 0.35,
+    "drift_share": 1.0
+  },
+  "cirrus": {
+    "enabled": true,
+    "height": 96.0,
+    "opacity": 0.38,
+    "distance_in": [
+      420.0,
+      800.0
+    ],
+    "distance_out": [
+      1000.0,
+      1250.0
+    ],
+    "scale": 0.0024,
+    "stretch": 5.0,
+    "drift_share": 0.35,
+    "color": [
+      0.96,
+      0.97,
+      1.0
+    ]
+  },
+  "rain_curtains": {
+    "enabled": true,
+    "max_curtains": 160,
+    "per_province": 2,
+    "height_top": 34.0,
+    "width": [
+      34.0,
+      64.0
+    ],
+    "opacity": 0.5,
+    "distance": [
+      190.0,
+      330.0
+    ],
+    "distance_out": [
+      1000.0,
+      1250.0
+    ],
+    "slant": 0.18,
+    "speed": 1.6,
+    "color": [
+      0.62,
+      0.67,
+      0.76
+    ],
+    "storm_color": [
+      0.34,
+      0.36,
+      0.43
+    ],
+    "seed": 77
+  },
+  "river_fog": {
+    "enabled": true,
+    "min_importance": 3,
+    "step_px": 38.0,
+    "max_banks": 220,
+    "size": [
+      20.0,
+      34.0
+    ],
+    "lift": 1.4,
+    "opacity": 0.45,
+    "distance": [
+      120.0,
+      260.0
+    ],
+    "distance_out": [
+      700.0,
+      950.0
+    ],
+    "season_share": [
+      0.35,
+      0.1,
+      0.8,
+      1.0
+    ],
+    "lifted_share": 0.1,
+    "color": [
+      0.86,
+      0.87,
+      0.86
+    ],
+    "seed": 31
+  },
+  "aurora": {
+    "enabled": true,
+    "north_margin_px": 0.0,
+    "height": [
+      30.0,
+      150.0
+    ],
+    "width_share": 0.8,
+    "opacity": 0.45,
+    "distance_in": [
+      450.0,
+      900.0
+    ],
+    "distance_out": [
+      2200.0,
+      3200.0
+    ],
+    "night_floor": 0.35,
+    "colors": [
+      [
+        0.2,
+        0.95,
+        0.55
+      ],
+      [
+        0.35,
+        0.55,
+        1.0
+      ],
+      [
+        0.75,
+        0.3,
+        0.9
+      ]
+    ],
+    "speed": 0.05
+  }
+}

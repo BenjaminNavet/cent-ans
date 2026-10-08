@@ -86,6 +86,8 @@ var _sun_energy: float = 1.0
 var _next_flash: float = 2.0
 var _particle_scale: float = -1.0
 var _focus_kind: String = "clear"
+## ME5 : atmosphère (cartes de cumulus, cirrus, rideaux de pluie, brouillard de fleuve, aurore).
+var atmosphere: MapAtmosphere = null
 
 
 func setup(map: Node) -> void:
@@ -103,6 +105,10 @@ func setup(map: Node) -> void:
 	_rain = _make_particles(false)
 	_snow = _make_particles(true)
 	_sun = map.get_node_or_null("Sun") as DirectionalLight3D
+	atmosphere = MapAtmosphere.new()  # ME5
+	atmosphere.name = "Atmosphere"
+	add_child(atmosphere)
+	atmosphere.setup(map, self)
 
 
 ## Relit la météo du tour (une fois par tour, au chargement).
@@ -120,6 +126,13 @@ func refresh(sim: Object) -> void:
 	if weather.hash() != previous:
 		_fog_clock = 0.0  # nouveau tour : le brouillard du matin se reforme
 	_upload_mask()
+	if atmosphere != null:
+		atmosphere.refresh(weather)  # ME5
+
+
+## ME5 : brume du matin (1 au début du tour, 0 une fois levée), même courbe que le sol.
+func morning_mist() -> float:
+	return 1.0 - smoothstep(fog_lift_seconds * 0.15, fog_lift_seconds, _fog_clock)
 
 
 ## Météo (`kind`) au point de carte `px` ; `clear` hors des provinces ou sans campagne.
@@ -155,6 +168,8 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	_update_cumulus_medium(distance)  # A6-C9
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)
+	if atmosphere != null:
+		atmosphere.update_view(focus, distance, parchment)  # ME5
 
 
 # --- TB2 : nuées sobres -----------------------------------------------------------------
