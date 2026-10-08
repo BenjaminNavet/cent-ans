@@ -19,8 +19,7 @@ extends Node3D
 ## dans `BattleVillage`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
 ## bocage|steppe|desert>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
 ## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
-## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
-## (comparaisons de performance A/B).
+## (réécrivent la mise en place avant la simulation, captures).
 ##
 ## Lot EP3 (eau et chemins) : rivière de largeur variable (`river.widths`), berges escarpées ou
 ## marécageuses, affluent et ruisseaux (rubans d'eau étroits), gués caillouteux (galets et pierres
@@ -203,6 +202,7 @@ var season_key: String = "summer"
 var ground_key: String = "dry"
 var woodland: float = 0.5
 var biome: Dictionary = BIOMES["plains"]
+## Toujours vrai : `BattleVegetation` le lit encore.
 var site_render: bool = true
 var village_view: BattleVillage
 ## EP6 : décor du champ (hameaux, moulins, église, manoir, vignes, camps) et parcelles peintes au
@@ -211,29 +211,19 @@ var village_view: BattleVillage
 var decor_view: BattleDecor
 var decor_fields: ImageTexture
 var decor_on := false
-## EP6 : `--no-ep6-decor` coupe le rendu du décor (banc A/B ; les règles du cœur restent).
-var decor_render := true
 ## DA6 (bible DA § 6) : végétation de bataille — lisières douces des cultures, touffes d'herbe en
 ## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
-## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
+## Toujours vrai : `BattleVegetation` le lit encore.
 var da6 := true
 ## GA2 : couches supplémentaires du sol (prairie fleurie, herbe piétinée, chaume, labour frais)
-## et macro-variation de teinte/luminance (50–200 m). `--no-ga2` coupe la macro-variation
-## (comparaisons A/B ; les couches restent en place, sans coût de rendu notable si non utilisées).
-var ga2 := true
+## et macro-variation de teinte/luminance (50–200 m).
 var tree_view: BattleTrees = null
-## DA6 : banc A/B dans un seul processus (`--bench-ab=da6,no-da6`) : les deux végétations sont
-## construites, `set_da6_view` bascule de l'une à l'autre.
-var da6_ab := false
-var _old_trees: Node3D = null
-var _old_vegetation: BattleVegetation = null
-var _tree_parent: Node = null
 
 
 ## DA6 (bible § 3.3) : part de saturation gardée par le sol et l'herbe ; la saison déplace la teinte,
 ## pas la saturation. DA7b : valeur par saison dans `data/fx/atmosphere.json` (`battle_seasons`).
 func decor_saturation() -> float:
-	return AtmosphereLibrary.battle_decor_saturation(season_key if site_render else "summer")
+	return AtmosphereLibrary.battle_decor_saturation(season_key)
 var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] (arbres écartés)
 var _coast: Dictionary = {}
 var _pools: Array = []
@@ -244,7 +234,7 @@ const TRAMPLE_STEP := 0.5
 var trample_image: Image = null
 var _trample_texture: ImageTexture
 var _trample_bytes := PackedByteArray()
-## PB3e : empreintes tamponnées en Rust (`StampMap`) ; `--no-pb3e` : boucles GDScript d'avant.
+## PB3e : empreintes tamponnées en Rust (`StampMap`).
 var _trample_map: RefCounted = null
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
@@ -298,23 +288,16 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	season_key = str(terrain.get("season", "summer"))
 	ground_key = str(terrain.get("ground", "dry"))
 	woodland = float(terrain.get("woodland", 0.5))
-	site_render = not OS.get_cmdline_user_args().has("--no-site")
-	# Lot TF : colombage ou enduit/pierre selon la région de la province (`--no-tf` : choix d'avant).
-	BuildingKit.region_style = {} if OS.get_cmdline_user_args().has("--no-tf") else BuildingRegions.style_for_province(province_id)
+	# Lot TF : colombage ou enduit/pierre selon la région de la province.
+	BuildingKit.region_style = BuildingRegions.style_for_province(province_id)
 	# Lot GA3-L1 : variantes générées du kit dans le décor (`--no-ga3` : kit seul).
 	Ga3Kit.active = Ga3Kit.requested()
-	da6 = not OS.get_cmdline_user_args().has("--no-da6")
-	ga2 = not OS.get_cmdline_user_args().has("--no-ga2")
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--bench-ab=") and arg.contains("da6"):
-			da6_ab = true
-			da6 = true
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--ground="):
 			ground_key = arg.trim_prefix("--ground=")  # rendu seulement, comme --weather=
-	biome = BIOMES.get(terrain_key, BIOMES["plains"]) if site_render else BIOMES["plains"]
-	_coast = terrain.get("coast", {}) if site_render else {}
-	_pools = terrain.get("pools", []) if site_render else []
+	biome = BIOMES.get(terrain_key, BIOMES["plains"])
+	_coast = terrain.get("coast", {})
+	_pools = terrain.get("pools", [])
 	_heights = terrain.get("heights", PackedFloat32Array())
 	_nx = int(terrain.get("nx", 0))
 	_nz = int(terrain.get("nz", 0))
@@ -376,31 +359,23 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	vegetation.name = "Vegetation"
 	add_child(vegetation)
 	vegetation.build(self, weather)
-	if da6_ab:
-		_old_vegetation = BattleVegetation.new()
-		_old_vegetation.name = "VegetationNoDa6"
-		_old_vegetation.visible = false
-		add_child(_old_vegetation)
-		_old_vegetation.build(self, weather, false)
-	if site_render:
-		village_view = BattleVillage.new()
-		village_view.name = "Site"
-		add_child(village_view)
-		village_view.build(self, terrain, weather)
-		if decor_render:
-			decor_view = BattleDecor.new()
-			decor_view.name = "Decor"
-			add_child(decor_view)
-			decor_view.build(self, terrain.get("decor", {}), weather)
-		var village: Dictionary = terrain.get("village", {})
-		print("BattleTerrain: site %s, %s, ground %s, village %s, coast %s, %d pools, %d obstacles, %d reeds" % [
-			terrain_key, season_key, ground_key,
-			"(%.0f, %.0f) r %.0f, %d houses" % [float(village["x"]), float(village["z"]), float(village["radius"]), village_view.house_count] if not village.is_empty() else "none",
-			str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), village_view.reed_count])
-		for pool in _pools:
-			print("BattleTerrain: pool (%.0f, %.0f) r %.0f" % [float(pool["x"]), float(pool["z"]), float(pool["radius"])])
-		for wood in terrain.get("forests", []):
-			print("BattleTerrain: wood (%.0f, %.0f) r %.0f, ground %.1f m" % [float(wood["x"]), float(wood["z"]), float(wood["radius"]), height_at(float(wood["x"]), float(wood["z"]))])
+	village_view = BattleVillage.new()
+	village_view.name = "Site"
+	add_child(village_view)
+	village_view.build(self, terrain, weather)
+	decor_view = BattleDecor.new()
+	decor_view.name = "Decor"
+	add_child(decor_view)
+	decor_view.build(self, terrain.get("decor", {}), weather)
+	var village: Dictionary = terrain.get("village", {})
+	print("BattleTerrain: site %s, %s, ground %s, village %s, coast %s, %d pools, %d obstacles, %d reeds" % [
+		terrain_key, season_key, ground_key,
+		"(%.0f, %.0f) r %.0f, %d houses" % [float(village["x"]), float(village["z"]), float(village["radius"]), village_view.house_count] if not village.is_empty() else "none",
+		str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), village_view.reed_count])
+	for pool in _pools:
+		print("BattleTerrain: pool (%.0f, %.0f) r %.0f" % [float(pool["x"]), float(pool["z"]), float(pool["radius"])])
+	for wood in terrain.get("forests", []):
+		print("BattleTerrain: wood (%.0f, %.0f) r %.0f, ground %.1f m" % [float(wood["x"]), float(wood["z"]), float(wood["radius"]), height_at(float(wood["x"]), float(wood["z"]))])
 
 
 ## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?
@@ -425,12 +400,12 @@ func field_scale_x() -> float:
 
 
 func snowy() -> bool:
-	return weather_key == "snow" or (site_render and ground_key == "snowy")
+	return weather_key == "snow" or ground_key == "snowy"
 
 
 ## B8 : le sol est-il détrempé (pluie ou sol de saison boueux), pour le piétinement en boue ?
 func muddy() -> bool:
-	return weather_key == "rain" or (site_render and ground_key == "muddy")
+	return weather_key == "rain" or ground_key == "muddy"
 
 
 ## B7/B8 : piétinement (neige ou boue). Carte L8 sur le rectangle des splatmaps
@@ -448,10 +423,8 @@ func _setup_trample() -> void:
 	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
 	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
 	_trample_bytes.resize(w * h)
-	_trample_map = null
-	if ClassDB.class_exists(&"StampMap") and not OS.get_cmdline_user_args().has("--no-pb3e"):
-		_trample_map = ClassDB.instantiate(&"StampMap")
-		_trample_map.call("setup", w, h, 1, SPLAT_RECT.position, TRAMPLE_TEXEL)
+	_trample_map = ClassDB.instantiate(&"StampMap")
+	_trample_map.call("setup", w, h, 1, SPLAT_RECT.position, TRAMPLE_TEXEL)
 	trample_image = Image.create_from_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
 	_trample_texture = ImageTexture.create_from_image(trample_image)
 	ground_material.set_shader_parameter("trample_map", _trample_texture)
@@ -468,8 +441,6 @@ func update_trample(units: Array, dt: float) -> void:
 		return
 	var step := _trample_timer
 	_trample_timer = 0.0
-	var w := trample_image.get_width()
-	var h := trample_image.get_height()
 	for unit in units:
 		if not bool(unit["present"]):
 			continue
@@ -487,38 +458,15 @@ func update_trample(units: Array, dt: float) -> void:
 				continue
 		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
 		var facing := float(unit["facing"])
-		if _trample_map != null:
-			_trample_map.call("stamp_box", pos, facing, half, add, 0, 255)
-			continue
-		var axis_x := Vector2(cos(facing), -sin(facing))
-		var axis_z := Vector2(sin(facing), cos(facing))
-		var reach := half.length()
-		var c := (pos - SPLAT_RECT.position) / TRAMPLE_TEXEL
-		var r := reach / TRAMPLE_TEXEL
-		for iz in range(maxi(int(c.y - r), 0), mini(int(c.y + r) + 1, h)):
-			for ix in range(maxi(int(c.x - r), 0), mini(int(c.x + r) + 1, w)):
-				var d := SPLAT_RECT.position + (Vector2(ix, iz) + Vector2(0.5, 0.5)) * TRAMPLE_TEXEL - pos
-				if absf(d.dot(axis_x)) > half.x or absf(d.dot(axis_z)) > half.y:
-					continue
-				var i := iz * w + ix
-				_trample_bytes[i] = mini(_trample_bytes[i] + add, 255)
-	if _trample_map != null:
-		_trample_map.call("upload", trample_image, _trample_texture)
-		return
-	trample_image.set_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
-	_trample_texture.update(trample_image)
+		_trample_map.call("stamp_box", pos, facing, half, add, 0, 255)
+	_trample_map.call("upload", trample_image, _trample_texture)
 
 
 ## B7 : piétinement (0-1) à un point du monde (tests, captures).
 func trample_at(x: float, z: float) -> float:
 	if trample_image == null:
 		return 0.0
-	if _trample_map != null:
-		return float(_trample_map.call("sample", x, z, 0))
-	var c := ((Vector2(x, z) - SPLAT_RECT.position) / TRAMPLE_TEXEL).floor()
-	if c.x < 0 or c.y < 0 or c.x >= trample_image.get_width() or c.y >= trample_image.get_height():
-		return 0.0
-	return float(_trample_bytes[int(c.y) * trample_image.get_width() + int(c.x)]) / 255.0
+	return float(_trample_map.call("sample", x, z, 0))
 
 
 ## Niveau d'une mare : hauteur moyenne du sol de la simulation sur son disque, un peu relevée
@@ -896,10 +844,9 @@ func _build_textures() -> void:
 	for zone in terrain.get("forests", []):
 		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]) + 5.0, 0, 12.0)
 	for zone in terrain.get("mud", []):
-		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]), 2, 14.0, 0.5 if site_render and terrain_key == "marsh" else 1.0)
-	if site_render:
-		_stamp_site(a, b)
-		_stamp_decor(a, b)
+		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]), 2, 14.0, 0.5 if terrain_key == "marsh" else 1.0)
+	_stamp_site(a, b)
+	_stamp_decor(a, b)
 	# Rivière : galets dans le lit et sur les gués, berges humides.
 	if _river_points.size() >= 2:
 		var banks: Array = terrain["river"].get("banks", [])
@@ -1093,7 +1040,7 @@ func _stamp_disc(image: Image, center: Vector2, radius: float, channel: int, fea
 
 ## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
 func _apply_terrain_tint() -> void:
-	if not site_render or ground_material == null:
+	if ground_material == null:
 		return
 	var tint := terrain_tint(terrain_key)
 	if tint == Color(1, 1, 1):
@@ -1115,10 +1062,8 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("splat_rect", Vector4(SPLAT_RECT.position.x, SPLAT_RECT.position.y, SPLAT_RECT.size.x, SPLAT_RECT.size.y))
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	ground_material.set_shader_parameter("calm_rect", calm)
-	ground_material.set_shader_parameter("da6_on", 1.0 if da6 else 0.0)
 	ground_material.set_shader_parameter("near_detail_albedo", NEAR_DETAIL_ALBEDO)
 	ground_material.set_shader_parameter("near_detail_normal", NEAR_DETAIL_NORMAL)
-	ground_material.set_shader_parameter("near_detail_on", 1.0 if da6 else 0.0)
 	ground_material.set_shader_parameter("decor_saturation", decor_saturation())
 	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
 	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données
@@ -1134,7 +1079,6 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("idx_trodden_grass", ground_role_index("trodden_grass"))
 	ground_material.set_shader_parameter("idx_stubble", ground_role_index("stubble"))
 	ground_material.set_shader_parameter("idx_fresh_plough", ground_role_index("fresh_plough"))
-	ground_material.set_shader_parameter("ga2_on", 1.0 if ga2 else 0.0)
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
 		ground_material.set_shader_parameter("decor_on", 1.0)
@@ -1147,35 +1091,34 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("relief_on", 1.0)
 	ground_material.set_shader_parameter("outcrops", clampf((float(biome["rocks"]) - 0.7) / 1.5, 0.0, 1.0))
 	ground_material.set_shader_parameter("detail_bump", lerpf(0.5, 1.0, clampf(float(biome["relief"]) / 3.4, 0.0, 1.0)))
-	if site_render:
-		# B5 : sol de saison (neige au sol sans chute de neige, sol détrempé sans pluie), neiges
-		# des sommets en montagne, herbe d'hiver ou de plein été.
-		var snow_line := float(biome["snow_line"])
-		if season_key != "winter" and snow_line < 10000.0:
-			snow_line *= 2.2
-		if horizon != null and horizon.active:
-			# EP2 : limite des neiges en altitude réelle ; le sol détaillé (neige uniforme) la prend
-			# un peu plus haut que l'anneau d'horizon (neige en plaques).
-			snow_line = horizon.snow_line_world() + 450.0
-		ground_material.set_shader_parameter("snow_line", snow_line)
-		if ground_key == "snowy" and weather != "snow":
-			ground_material.set_shader_parameter("snow", 0.75)
-			ground_material.set_shader_parameter("grass_tint", Color(0.85, 0.82, 0.7))
-			return
-		if ground_key == "muddy" and weather != "rain":
-			ground_material.set_shader_parameter("wetness", 0.45)
-		if weather == "clear":
-			match season_key:
-				"winter":
-					ground_material.set_shader_parameter("grass_tint", Color(0.92, 0.9, 0.72))
+	# B5 : sol de saison (neige au sol sans chute de neige, sol détrempé sans pluie), neiges
+	# des sommets en montagne, herbe d'hiver ou de plein été.
+	var snow_line := float(biome["snow_line"])
+	if season_key != "winter" and snow_line < 10000.0:
+		snow_line *= 2.2
+	if horizon != null and horizon.active:
+		# EP2 : limite des neiges en altitude réelle ; le sol détaillé (neige uniforme) la prend
+		# un peu plus haut que l'anneau d'horizon (neige en plaques).
+		snow_line = horizon.snow_line_world() + 450.0
+	ground_material.set_shader_parameter("snow_line", snow_line)
+	if ground_key == "snowy" and weather != "snow":
+		ground_material.set_shader_parameter("snow", 0.75)
+		ground_material.set_shader_parameter("grass_tint", Color(0.85, 0.82, 0.7))
+		return
+	if ground_key == "muddy" and weather != "rain":
+		ground_material.set_shader_parameter("wetness", 0.45)
+	if weather == "clear":
+		match season_key:
+			"winter":
+				ground_material.set_shader_parameter("grass_tint", Color(0.92, 0.9, 0.72))
+				return
+			"autumn":
+				ground_material.set_shader_parameter("grass_tint", Color(1.0, 0.95, 0.72))
+				return
+			"summer":
+				if terrain_key != "marsh":
+					ground_material.set_shader_parameter("grass_tint", Color(0.94, 1.0, 0.78))
 					return
-				"autumn":
-					ground_material.set_shader_parameter("grass_tint", Color(1.0, 0.95, 0.72))
-					return
-				"summer":
-					if terrain_key != "marsh":
-						ground_material.set_shader_parameter("grass_tint", Color(0.94, 1.0, 0.78))
-						return
 	match weather:
 		"rain":
 			ground_material.set_shader_parameter("wetness", 0.75)
@@ -1538,9 +1481,8 @@ func road_distance(p: Vector2) -> float:
 func _prepare_decor() -> void:
 	_decor_clear.clear()
 	decor_on = false
-	decor_render = not OS.get_cmdline_user_args().has("--no-ep6-decor")
 	var decor: Dictionary = terrain.get("decor", {})
-	if decor.is_empty() or not site_render or not decor_render:
+	if decor.is_empty():
 		return
 	for b in decor.get("buildings", []):
 		_decor_clear.append([Vector2(float(b["x"]), float(b["z"])), Vector2(float(b["length"]), float(b["width"])) * 0.5 + Vector2(4, 4), float(b["yaw"])])
@@ -1568,7 +1510,7 @@ func _in_decor(p: Vector2) -> bool:
 ## des maisons et du camp ; boue du fossé du manoir ; pas de parcelles procédurales sous le décor.
 func _stamp_decor(a: Image, b: Image) -> void:
 	var decor: Dictionary = terrain.get("decor", {})
-	if decor.is_empty() or not decor_render:
+	if decor.is_empty():
 		return
 	var sw := a.get_width()
 	var sh := a.get_height()
@@ -1612,7 +1554,7 @@ func _stamp_decor(a: Image, b: Image) -> void:
 					a.set_pixel(ix, iz, ca)
 					continue
 				# DA6 : rampe de lisière sur 8 m (fondu, bord bruité dans les shaders), 3 m sinon.
-				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / (8.0 if da6 else 3.0), 0.0, 1.0), 1.0))
+				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / 8.0, 0.0, 1.0), 1.0))
 	# Cours de ferme, abords des maisons et des moulins : terre battue.
 	for bld in decor.get("buildings", []):
 		var p := Vector2(float(bld["x"]), float(bld["z"]))
@@ -1667,16 +1609,15 @@ func _plant_orchards(sets: Dictionary, tints: Dictionary) -> void:
 				if rng.randf() < 0.06 or _near_road(p, 3.0):
 					continue  # un arbre mort arraché, ou le chemin
 				# DA6 : fruitiers à part (essence « fruit », taille réelle : échelle 0,85-1,1).
-				var fruit := "fruit" if da6 else "oak"
-				var t := _tree_transform(rng, p.x, p.y, 0.85, 1.1) if da6 else _tree_transform(rng, p.x, p.y, 0.38, 0.52)
+				var t := _tree_transform(rng, p.x, p.y, 0.85, 1.1)
 				t.origin.y = height_at(p.x, p.y) - 0.2
-				sets[fruit].append(t)
+				sets["fruit"].append(t)
 				if blossom:
 					# Fleurs blanc rosé mêlées aux jeunes feuilles : éclairci, pas blanc pur.
 					var w := rng.randf_range(1.12, 1.35)
-					tints[fruit].append(Color(w * 1.08, w * rng.randf_range(0.92, 1.0), w * rng.randf_range(0.82, 0.92)))
+					tints["fruit"].append(Color(w * 1.08, w * rng.randf_range(0.92, 1.0), w * rng.randf_range(0.82, 0.92)))
 				else:
-					tints[fruit].append(_tree_tint(rng) * Color(0.95, 1.05, 0.9))
+					tints["fruit"].append(_tree_tint(rng) * Color(0.95, 1.05, 0.9))
 			v += step
 			row += 1
 
@@ -1703,23 +1644,17 @@ func _tree_transform(rng: RandomNumberGenerator, x: float, z: float, scale_min: 
 func _tree_tint(rng: RandomNumberGenerator) -> Color:
 	# B5 : feuillage de la saison (roux d'automne, feuilles sèches et brunes des chênes l'hiver).
 	var autumn_share := 0.12
-	if site_render:
-		match season_key:
-			"autumn":
-				autumn_share = 0.55
-			"summer":
-				autumn_share = 0.04
-			"winter":
-				if da6:
-					# DA6 : feuillus nus (ramilles grises) ; la teinte ne module que la luminance.
-					var g := rng.randf_range(0.85, 1.12)
-					return Color(g, g * 0.98, g * 0.95)
-				var w := rng.randf_range(0.62, 0.85)
-				if snowy():
-					w *= 1.15
-				return Color(w * 1.95, w * 0.78, w * 0.36)
+	match season_key:
+		"autumn":
+			autumn_share = 0.55
+		"summer":
+			autumn_share = 0.04
+		"winter":
+			# DA6 : feuillus nus (ramilles grises) ; la teinte ne module que la luminance.
+			var g := rng.randf_range(0.85, 1.12)
+			return Color(g, g * 0.98, g * 0.95)
 	var autumn := rng.randf() < autumn_share
-	if autumn and site_render and season_key == "autumn":
+	if autumn and season_key == "autumn":
 		# Automne marqué : roux, ocre et or (la texture des feuilles est verte : forte modulation).
 		return Color(rng.randf_range(1.5, 2.0), rng.randf_range(0.8, 1.05), rng.randf_range(0.3, 0.45))
 	if autumn:
@@ -1739,7 +1674,7 @@ func _build_trees() -> void:
 	var near_woods := float(biome["near_woods"])
 	var far_woods := float(biome["far_woods"])
 	# B5 : densité des bois selon le terrain (forêt serrée, lande clairsemée).
-	var area_per_tree := lerpf(85.0, 36.0, woodland) if site_render else 55.0
+	var area_per_tree := lerpf(85.0, 36.0, woodland)
 	# Bois de la simulation : denses, lisière de buissons. R2 : un bois est une grappe de disques
 	# qui se chevauchent (ancre, lobes, bosquets) : un arbre tiré dans un disque déjà couvert par
 	# un disque précédent est écarté (densité uniforme), les buissons de lisière ne restent que
@@ -1812,8 +1747,7 @@ func _build_trees() -> void:
 			continue
 		sets["bush"].append(_tree_transform(rng, p.x, p.y, 0.6, 1.3))
 		tints["bush"].append(_tree_tint(rng))
-	if site_render:
-		_plant_hedges(rng, sets, tints)
+	_plant_hedges(rng, sets, tints)
 	# Bois lointains (anneau lointain) : arbres simplifiés, plus gros, sans ombre.
 	step = 42.0
 	z = FAR_RECT.position.y
@@ -1831,41 +1765,12 @@ func _build_trees() -> void:
 			tints["far"].append(_tree_tint(rng))
 		z += step
 	tree_count = 0
-	if site_render and decor_render:
-		_plant_orchards(sets, tints)
+	_plant_orchards(sets, tints)
 	for kind in sets:
 		tree_count += (sets[kind] as Array).size()
-	if da6:
-		_plant_da6(sets, tints)
-		if not da6_ab:
-			return
-		_old_trees = Node3D.new()
-		_old_trees.name = "TreesNoDa6"
-		_old_trees.visible = false
-		add_child(_old_trees)
-		_tree_parent = _old_trees
-		# Ancienne végétation du banc A/B : fruitiers remis parmi les chênes, à l'ancienne échelle.
-		for i in (sets["fruit"] as Array).size():
-			var t: Transform3D = sets["fruit"][i]
-			t.basis = t.basis * 0.45
-			sets["oak"].append(t)
-			tints["oak"].append(tints["fruit"][i])
-		sets["fruit"] = []
-	for kind in sets:
-		_tree_layer(kind, sets[kind], tints[kind])
-	_tree_parent = null
+	_plant_da6(sets, tints)
 
 
-## DA6 : bascule du banc A/B (`--bench-ab=da6,no-da6`) entre la végétation DA6 et l'ancienne.
-func set_da6_view(on: bool) -> void:
-	if not da6_ab:
-		return
-	tree_view.visible = on
-	_old_trees.visible = not on
-	vegetation.visible = on
-	_old_vegetation.visible = not on
-	ground_material.set_shader_parameter("da6_on", 1.0 if on else 0.0)
-	ground_material.set_shader_parameter("near_detail_on", 1.0 if on else 0.0)
 
 
 ## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
@@ -1902,7 +1807,7 @@ func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
 				impostors[key][0].append(t)
 				impostors[key][1].append(tints[kind][i])
 				impostors[key][2].append(row)
-	var winter := site_render and season_key == "winter"
+	var winter := season_key == "winter"
 	var lod_k := RenderQuality.battle_lod_scale
 	var lod1 := BattleTrees.LOD1_DISTANCE * lod_k
 	var far := BattleTrees.IMPOSTOR_DISTANCE
@@ -2023,8 +1928,6 @@ func _in_sea(x: float, z: float) -> bool:
 
 ## B5 : pas de buissons épars dans les mares, le village et sur la plage.
 func _in_site_clearing(p: Vector2) -> bool:
-	if not site_render:
-		return false
 	if _in_zones(_pools, p.x, p.y, 4.0):
 		return true
 	if not _decor_clear.is_empty() and _in_decor(p):
@@ -2081,11 +1984,10 @@ func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictiona
 				break
 		if near_house:
 			continue
-		var fruit := "fruit" if da6 else "oak"
-		var t := _tree_transform(rng, p.x, p.y, 0.9, 1.2) if da6 else _tree_transform(rng, p.x, p.y, 0.4, 0.6)
+		var t := _tree_transform(rng, p.x, p.y, 0.9, 1.2)
 		t.origin.y = height_at(p.x, p.y) - 0.2
-		sets[fruit].append(t)
-		tints[fruit].append(_tree_tint(rng))
+		sets["fruit"].append(t)
+		tints["fruit"].append(_tree_tint(rng))
 
 
 ## Arbres par tuiles (lot V4b) : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur
@@ -2135,7 +2037,7 @@ func _tree_tile(kind: String, members: Array, transforms: Array, tints: Array, k
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.visibility_range_begin = range_begin
 	instance.visibility_range_end = range_end
-	(_tree_parent if _tree_parent != null else self).add_child(instance)
+	add_child(instance)
 
 
 ## Rochers : sur les pentes raides du champ et dans les collines de l'anneau proche.

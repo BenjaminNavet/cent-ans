@@ -11,8 +11,7 @@ extends Node3D
 ## - panorama peint (bande cylindrique qui suit la caméra) recalé colonne par colonne sur la ligne
 ##   d'horizon réelle (profil cuit de 12 à 150 km), horizon marin dans les secteurs de mer ;
 ## - silhouettes lointaines (clochers, château, fumées) posées sur l'anneau lointain.
-## Données : `data/fx/horizon.json`. Options : `--no-horizon` (tout coupé, mesures A/B),
-## `--horizon-province=<id>` (tuile d'une autre province, captures), `--panorama=<id>`.
+## Données : `data/fx/horizon.json`. Options : `--horizon-province=<id>` (tuile d'une autre province, captures), `--panorama=<id>`.
 
 const DATA_PATH := "fx/horizon.json"
 const PANORAMA_META := "res://assets/horizon/panoramas/panoramas.json"
@@ -74,10 +73,6 @@ static func data() -> Dictionary:
 	return _data
 
 
-static func disabled_by_flag() -> bool:
-	return OS.get_cmdline_user_args().has("--no-horizon")
-
-
 ## Charge la tuile de `p_province` et aligne sa côte sur le flanc côtier du champ (`flank` :
 ## "west", "east" ou ""). `mean_height` : hauteur moyenne du champ. Faux si pas de tuile.
 func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank: String, terrain_key: String, season: String) -> bool:
@@ -91,7 +86,7 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 		if arg.begins_with("--horizon-province="):
 			province = arg.trim_prefix("--horizon-province=")
 	_cfg = data()
-	if _cfg.is_empty() or disabled_by_flag() or province == "":
+	if _cfg.is_empty() or province == "":
 		return false
 	var relief: Dictionary = _cfg.get("relief", {})
 	_blend_start = float(relief.get("blend_start_m", 700.0))

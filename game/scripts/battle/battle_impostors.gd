@@ -33,11 +33,6 @@ const FOOT := 0.06
 const COPIES := {false: 3, true: 2}
 const SHADOW_SHADER := preload("res://shaders/battle_impostor_shadow.gdshader")
 
-## NT10 : `--no-nt10` après `--` : imposteurs de BV3 (une copie, sans ombre ni sang), banc A/B.
-static func nt10_enabled() -> bool:
-	return not ("--no-nt10" in OS.get_cmdline_user_args())
-
-
 ## NT10 : identifiants de cuisson des `copies` copies : les `round(livery_share × copies)`
 ## premières portent la livrée, les autres un habit non teint (même test que le shader skinné,
 ## `h5 < livery_share`, avec une marge contre l'écart du dernier bit du sinus GPU).
@@ -133,7 +128,7 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	var cell_px: Vector2i = CELL_PX[mounted]
 	var cell_m: Vector2 = CELL_M[mounted]
 	var rows := SETS.size() * FRAMES
-	var copies: int = COPIES[mounted] if nt10_enabled() else 1
+	var copies: int = COPIES[mounted]
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(cell_px.x * COLS * copies, cell_px.y * rows)
 	viewport.own_world_3d = true

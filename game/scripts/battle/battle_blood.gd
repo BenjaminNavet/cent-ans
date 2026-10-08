@@ -18,24 +18,12 @@ const MODERATE := 1
 const FULL := 2
 
 const MAX_DECALS := 6000
-const SPRAY_EMITTERS := 16
 ## Au-delà, ni gerbe ni décalque (la tache ne se verrait pas).
 const BLOOD_DISTANCE := 450.0
-## Gerbes et décalques au plus par régiment et par mise à jour (les grosses pertes d'un coup ne
-## doivent pas vider le pool).
-const MAX_PER_UNIT := 6
 
 var level: int = MODERATE
-## Multiplicateur de taille des unités (ADR 0016) : plus de figurines tombent, plus de sang.
-var figure_scale: float = 1.0
 var time_now: float = 0.0
 var decal_count: int = 0
-## Fusion BV1/BV2 : une seule source par événement. Quand BV2 est actif, chaque mort arrive par
-## `on_corpse` (signal `BattleSoldiers.corpse_fallen`) : BV2 dessine la gerbe (gouttes de
-## `BattleGore`), BV1 seulement la flaque persistante sous le corps. Les pertes en mêlée et les
-## touches des volées ne produisent alors plus rien ici (elles aboutissent à ces mêmes morts).
-## Sans BV2 (`--no-bv2`) : ancien chemin BV1 (gerbes GPU et flaques sur pertes et touches).
-var corpse_driven: bool = false
 ## Dernier décalque posé (captures : cadrer la caméra dessus).
 var last_pos: Vector3 = Vector3.ZERO
 
@@ -44,9 +32,6 @@ var _water_at: Callable
 var _rng := RandomNumberGenerator.new()
 var _decals: MultiMesh
 var _decal_mat: ShaderMaterial
-var _sprays: Array[GPUParticles3D] = []
-var _spray_next: int = 0
-var _pending: Array = []  # [{time, pos, strength}] touches à venir (traits encore en vol)
 var _track: Dictionary = {}  # unit id -> {soldiers, trail_at}
 
 
@@ -76,8 +61,6 @@ func setup(height_at: Callable, blood_level: int, water_at: Callable = Callable(
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.custom_aabb = _decals.custom_aabb
 	add_child(instance)
-	for i in SPRAY_EMITTERS:
-		_sprays.append(_spray_emitter("BloodSpray%d" % i))
 
 
 func tick_time(now: float) -> void:
@@ -85,9 +68,6 @@ func tick_time(now: float) -> void:
 	if level == OFF:
 		return
 	_decal_mat.set_shader_parameter("time_now", now)
-	while not _pending.is_empty() and float(_pending[0]["time"]) <= now:
-		var hit: Dictionary = _pending.pop_front()
-		_wound(hit["pos"], float(hit["strength"]), Vector3.ZERO)
 
 
 ## Mort d'une figurine (BV2, `corpse_fallen`) : flaque sous le corps, éclaboussures en complet ;
@@ -102,12 +82,6 @@ func on_corpse(pos: Vector3, _side: String, kind: String, cause: String, camera_
 		_add_decal(pos + off, 1, Vector2.ONE * _rng.randf_range(1.0, 1.8), _rng.randf() * TAU, 0.9)
 
 
-## Touche d'un trait qui se fichera à l'instant `time` (le trait est encore en vol).
-func add_hit(pos: Vector3, time: float, camera_pos: Vector3) -> void:
-	if level == OFF or corpse_driven or camera_pos.distance_to(pos) > BLOOD_DISTANCE:
-		return
-	_pending.append({"time": time, "pos": pos, "strength": 0.7})
-	_pending.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["time"]) < float(b["time"]))
 
 
 ## Pertes des régiments au contact (mêlée) et traînées des fuyards.
@@ -136,11 +110,6 @@ func update(units: Array, camera_pos: Vector3) -> void:
 		var depth := float(unit.get("depth", 4.0))
 		if lost > 0:
 			rec["losses"] = float(rec["losses"]) + lost
-		if lost > 0 and not corpse_driven and (state == "melee" or state == "routing"):
-			# Au premier rang, là où l'on se bat (les pertes au tir arrivent avec les traits).
-			for _i in mini(ceili(lost * figure_scale), MAX_PER_UNIT):
-				var p := pos + fwd * depth * 0.5 * _rng.randf_range(0.4, 1.1) + right * width * 0.5 * _rng.randf_range(-1.0, 1.0)
-				_wound(p, 1.0, fwd)
 		# Traînées : un régiment en déroute qui a beaucoup saigné laisse des traces derrière lui.
 		if level == FULL and state == "routing" and float(rec["losses"]) > 8.0 and time_now >= float(rec["trail_at"]):
 			rec["trail_at"] = time_now + 1.2
@@ -149,32 +118,8 @@ func update(units: Array, camera_pos: Vector3) -> void:
 				_add_decal(p, 2, Vector2(_rng.randf_range(1.6, 3.2), _rng.randf_range(0.35, 0.6)), atan2(fwd.x, fwd.z) + PI * 0.5 + _rng.randf_range(-0.3, 0.3), 0.8)
 
 
-## Un homme touché en `pos` : gerbe, flaque, éclaboussures (complet), parfois une traînée
-## (blessé traîné, sens `dir`).
-func _wound(pos: Vector3, strength: float, dir: Vector3) -> void:
-	pos.y = _h(pos.x, pos.z)
-	_spray(pos + Vector3(0, 1.0, 0), strength)
-	var big := level == FULL
-	var size := _rng.randf_range(0.7, 1.4) * (1.0 if big else 0.7) * strength
-	_add_decal(pos, 0, Vector2(size, size * _rng.randf_range(0.7, 1.0)), _rng.randf() * TAU, 1.0)
-	if big:
-		var off := Vector3(_rng.randf_range(-0.8, 0.8), 0, _rng.randf_range(-0.8, 0.8))
-		_add_decal(pos + off, 1, Vector2.ONE * _rng.randf_range(1.0, 1.8), _rng.randf() * TAU, 0.9)
-		if dir != Vector3.ZERO and _rng.randf() < 0.25:
-			var back := -dir.rotated(Vector3.UP, _rng.randf_range(-0.6, 0.6))
-			_add_decal(pos + back * 1.2, 2, Vector2(_rng.randf_range(1.8, 2.8), 0.45), atan2(back.x, back.z) + PI * 0.5, 0.85)
 
 
-func _spray(pos: Vector3, strength: float) -> void:
-	if _sprays.is_empty():
-		return
-	var particles: GPUParticles3D = _sprays[_spray_next]
-	_spray_next = (_spray_next + 1) % _sprays.size()
-	particles.position = pos
-	particles.amount_ratio = clampf(strength * (1.0 if level == FULL else 0.45), 0.1, 1.0)
-	particles.scale = Vector3.ONE * (1.0 if level == FULL else 0.7)
-	particles.restart()
-	particles.emitting = true
 
 
 ## Décalque au sol : `kind` 0 flaque, 1 éclaboussures, 2 traînée ; `size` (x, z) en mètres ;
@@ -203,58 +148,3 @@ func _add_decal(pos: Vector3, kind: int, size: Vector2, yaw: float, intensity: f
 func _h(x: float, z: float) -> float:
 	return float(_height_at.call(x, z)) if _height_at.is_valid() else 0.0
 
-
-func _spray_emitter(node_name: String) -> GPUParticles3D:
-	var particles := GPUParticles3D.new()
-	particles.name = node_name
-	particles.amount = 28
-	particles.lifetime = 0.9
-	particles.one_shot = true
-	particles.explosiveness = 0.95
-	particles.randomness = 0.4
-	particles.local_coords = false
-	particles.emitting = false
-	particles.fixed_fps = 30
-	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	particles.visibility_aabb = AABB(Vector3(-6, -3, -6), Vector3(12, 8, 12))
-	var mat := ParticleProcessMaterial.new()
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	mat.emission_sphere_radius = 0.25
-	mat.direction = Vector3(0, 1, 0)
-	mat.spread = 60.0
-	mat.initial_velocity_min = 1.5
-	mat.initial_velocity_max = 4.5
-	mat.gravity = Vector3(0, -9.8, 0)
-	mat.scale_min = 0.05
-	mat.scale_max = 0.16
-	var fade := Gradient.new()
-	fade.offsets = PackedFloat32Array([0.0, 0.7, 1.0])
-	fade.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0)])
-	var ramp := GradientTexture1D.new()
-	ramp.gradient = fade
-	mat.color_ramp = ramp
-	particles.process_material = mat
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1, 1)
-	var draw := StandardMaterial3D.new()
-	draw.albedo_color = Color(0.42, 0.02, 0.03)
-	draw.vertex_color_use_as_albedo = true
-	draw.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	draw.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	draw.billboard_keep_scale = true
-	draw.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	var drop := GradientTexture2D.new()
-	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
-	g.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.8), Color(1, 1, 1, 0)])
-	drop.gradient = g
-	drop.fill = GradientTexture2D.FILL_RADIAL
-	drop.fill_from = Vector2(0.5, 0.5)
-	drop.fill_to = Vector2(1.0, 0.5)
-	drop.width = 32
-	drop.height = 32
-	draw.albedo_texture = drop
-	quad.material = draw
-	particles.draw_pass_1 = quad
-	add_child(particles)
-	return particles

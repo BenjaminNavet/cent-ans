@@ -10,7 +10,7 @@ extends RefCounted
 ## `assets/models/battle_fine/` remplacent celles qu'elles couvrent (rigs renommés `fine_human` /
 ## `fine_cavalry`, chemins absolus dans le manifeste fusionné). Lot FG5 (ADR 0089) : rendu par
 ## défaut ; `--coarse-figures` après `--` rend les figurines Quaternius (V2) le temps de la
-## transition, `--no-fg3` les figurines fines sans cartes cuites.
+## transition.
 
 const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
@@ -24,8 +24,8 @@ const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
 ## NT14 : clips de mêlée par défaut (meilleure source par geste), voir `melee_default_enabled`.
 const MELEE_DIR := "res://assets/models/battle_fine/melee/"
 ## FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`, posés par-dessus les
-## clips en place : ceux marqués `default` dans le manifeste par défaut, tous avec `--fa-anim`,
-## aucun avec `--no-fa-anim` (voir `fa_anim_mode`).
+## clips en place : ceux marqués `default` dans le manifeste par défaut, tous avec `--fa-anim`
+## (voir `fa_anim_mode`).
 const FA_ANIM_DIR := "res://assets/models/battle_fine/fa3_anim/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
@@ -62,11 +62,8 @@ static func animation_settings() -> Dictionary:
 	return _animation
 
 
-## NT7 : durée (s) du fondu entre deux clips d'un cycle de mêlée ; 0 avec `--no-nt7` après `--`
-## (banc A/B : changement sec comme avant).
+## NT7 : durée (s) du fondu entre deux clips d'un cycle de mêlée.
 static func cycle_blend_s() -> float:
-	if "--no-nt7" in OS.get_cmdline_user_args():
-		return 0.0
 	return float(animation_settings().get("cycle_blend_s", 0.0))
 
 
@@ -95,10 +92,8 @@ static func cycle_blend_at(config: Dictionary, h: Vector4, anim_time: float, ble
 
 
 ## NT10 : durée (s) du fondu au changement de clip des figurines en mode CUSTOM (porte-étendards,
-## musiciens, servants d'engins) ; 0 avec `--no-nt10` après `--` (banc A/B, changement sec).
+## musiciens, servants d'engins).
 static func role_blend_s() -> float:
-	if "--no-nt10" in OS.get_cmdline_user_args():
-		return 0.0
 	return float(animation_settings().get("role_blend_s", 0.0))
 
 
@@ -187,8 +182,7 @@ const FINE_MAPS := {
 }
 ## Lot GA1 (ADR 0104) : matières générées. `detail` prend `fine_detail_ga1.png` (12 couches,
 ## `data/art/materials.yaml`) et `detail_albedo` s'ajoute (albédo de détail centré, multiplié à
-## la couleur de sommet). `--no-ga1` après `--` : tuiles FG3 d'origine (mesures A/B) ; l'ancien
-## tableau n'est alors chargé qu'à la place du nouveau (pas de double mémoire).
+## la couleur de sommet).
 const GA1_DETAIL := "fine_detail_ga1.png"
 const GA1_ALBEDO := "fine_detail_albedo.png"
 static var _fine_maps: Dictionary = {}
@@ -198,14 +192,7 @@ static var _fine_maps_loaded := false
 static func fine_maps() -> Dictionary:
 	if not _fine_maps_loaded:
 		_fine_maps_loaded = true
-		# `--no-fg3` : figurines fines sans cartes cuites (mesures A/B).
-		if OS.get_cmdline_user_args().has("--no-fg3"):
-			return _fine_maps
-		var ga1 := (
-			not OS.get_cmdline_user_args().has("--no-ga1")
-			and ResourceLoader.exists(FINE_TEX_DIR + GA1_DETAIL)
-			and ResourceLoader.exists(FINE_TEX_DIR + GA1_ALBEDO)
-		)
+		var ga1 := ResourceLoader.exists(FINE_TEX_DIR + GA1_DETAIL) and ResourceLoader.exists(FINE_TEX_DIR + GA1_ALBEDO)
 		for key in FINE_MAPS:
 			var file := GA1_DETAIL if ga1 and key == "detail" else str(FINE_MAPS[key])
 			var path: String = FINE_TEX_DIR + file
@@ -227,17 +214,13 @@ static func fine_maps_ready() -> bool:
 	return not fine_maps().is_empty()
 
 
-## Lot SR2 : usure des figurines fines cuites (0-1). `--no-sr2` après `--` : 0 (rendu SR1 exact).
+## Lot SR2 : usure des figurines fines cuites (0-1).
 const SR2_WEATHERING := 0.85
 const SR2_MUD_HEIGHT := 0.45
 const SR2_MUD_HEIGHT_HORSE := 0.65
 
 
-static func sr2_weathering() -> float:
-	return 0.0 if OS.get_cmdline_user_args().has("--no-sr2") else SR2_WEATHERING
-
-
-## GA1 : albédo de détail généré actif (absent avec `--no-ga1` ou sans les tableaux).
+## GA1 : albédo de détail généré actif (absent sans les tableaux).
 static func ga1_enabled() -> bool:
 	return fine_maps().has("detail_albedo")
 
@@ -265,7 +248,7 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
 	# SR2 : usure (boue des pieds, crasse des creux, acier vivant, teintes passées) ; les
 	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
-	mat.set_shader_parameter("weathering", sr2_weathering())
+	mat.set_shader_parameter("weathering", SR2_WEATHERING)
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 	_setup_lance(mat, fig)
 
@@ -370,9 +353,9 @@ static func melee_default_enabled() -> bool:
 const GA3_DIR := "res://assets/models/battle_ga3/"
 
 
-## Figurines générées actives : par défaut ; `--no-ga3-fig` après `--` rend les figurines fines.
+## Figurines générées actives avec les figurines fines.
 static func ga3_figures_enabled() -> bool:
-	return fine_enabled() and not OS.get_cmdline_user_args().has("--no-ga3-fig")
+	return fine_enabled()
 
 
 static func _merge_ga3(figures: Dictionary) -> void:
@@ -419,8 +402,8 @@ static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
 	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
 	mat.set_shader_parameter("ga3_head_y", float(fig.get("ga3_head_y", 99.0)))
-	# L4 : usure SR2 des figurines générées (boue, crasse, acier patiné), `--no-sr2` : 0.
-	mat.set_shader_parameter("weathering", sr2_weathering())
+	# L4 : usure SR2 des figurines générées (boue, crasse, acier patiné).
+	mat.set_shader_parameter("weathering", SR2_WEATHERING)
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 
 
@@ -446,7 +429,7 @@ static func mocap_trial_enabled() -> bool:
 ## FA3 : couche de clips libres reciblés (figurines fines seulement). `FA_DEFAULT` (sans option) :
 ## seuls les clips marqués `default` dans `fa3_anim/manifest.json` (champ recopié de la table
 ## `data/fx/fa3_anim_sources.json` à la cuisson) ; `FA_ALL` (`--fa-anim` après `--`) : tous ;
-## `FA_NONE` (`--no-fa-anim`) : aucun, pour l'A/B. La couche se pose par-dessus la couche déjà
+## `FA_NONE` : aucun (kit grossier). La couche se pose par-dessus la couche déjà
 ## fusionnée (défaut NT14) : un clip que FA3 ne couvre pas reste celui de cette couche.
 ## `fa_anim_forced` : -1 = ligne de commande, sinon le mode forcé (tests, captures A/B), puis
 ## `reload_caches()`.
@@ -455,10 +438,7 @@ static func fa_anim_mode() -> int:
 		return FA_NONE
 	if fa_anim_forced >= 0:
 		return fa_anim_forced
-	var args := OS.get_cmdline_user_args()
-	if args.has("--no-fa-anim"):
-		return FA_NONE
-	return FA_ALL if args.has("--fa-anim") else FA_DEFAULT
+	return FA_ALL if OS.get_cmdline_user_args().has("--fa-anim") else FA_DEFAULT
 
 
 ## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).

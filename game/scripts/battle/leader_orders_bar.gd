@@ -90,7 +90,7 @@ func _side() -> String:
 ## Relit la barre depuis la simulation (création des boutons au premier appel).
 func refresh() -> void:
 	var battle := _battle()
-	if battle == null or not battle.has_method("get_leader_orders"):
+	if battle == null:
 		visible = false
 		return
 	_orders = battle.call("get_leader_orders", _side())
@@ -114,8 +114,6 @@ func refresh() -> void:
 
 ## RS-F : l'ordre d'incendie proposé par le cœur pour la sélection (toute l'armée sans sélection).
 func _query_burn(battle: Object) -> Dictionary:
-	if not battle.has_method("get_burn_order"):
-		return {"siege": false}
 	return battle.call("get_burn_order", _side(), PackedInt32Array(_selection()))
 
 

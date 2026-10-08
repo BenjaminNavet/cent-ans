@@ -7,12 +7,10 @@ extends SceneTree
 ## trois LOD chargent sous les plafonds des fantassins fins (11 900 / 1 350 / 260) et décroissent,
 ## os < nombre d'os du rig et poids normalisés, UV du corps dans [0, 1] et de l'équipement en
 ## u < 0, faces de livrée présentes (buste pour les armoiries), matériau en variante `GA3_TEX`
-## (albédo et luminances posés, cadavres compris) ; avec `--no-ga3-fig`, la figurine fine
-## d'origine ; les autres figurines (`archer_1`, `infantry_2`) ne changent pas. Lancer les deux
-## modes. Chevalier : plafonds de la figurine montée fine (cavalier + cheval), atlas FG3 gardé
+## (albédo et luminances posés, cadavres compris) ; les autres figurines (`archer_1`, `infantry_2`) ne changent pas. Chevalier : plafonds de la figurine montée fine (cavalier + cheval), atlas FG3 gardé
 ## (variantes `FG3_BAKED` + `GA3_TEX`), cavalier sur les os `R:` avec l'albédo, cheval sans
 ## UV d'albédo (u < 0, sauf armoiries du caparaçon).
-## Usage : godot --headless --path game --script res://tests/ga3_l3_figures_test.gd [-- --no-ga3-fig]
+## Usage : godot --headless --path game --script res://tests/ga3_l3_figures_test.gd
 
 const CAPS := [11900, 1350, 260]
 ## Figurine montée : cavalier (`RIDER_CAP` 9 000 / 1 000 / 180, équipement compris) et cheval
@@ -188,15 +186,11 @@ func _check_fine(kind: String, variant: int) -> bool:
 
 func _init() -> void:
 	var ok := true
-	var cmd_off := OS.get_cmdline_user_args().has("--no-ga3-fig")
-	if BattleSkinned.ga3_figures_enabled() == cmd_off:
-		push_error("ga3_l3: option --no-ga3-fig mal lue")
+	if not BattleSkinned.ga3_figures_enabled():
+		push_error("ga3_l3: figurines générées inactives")
 		ok = false
 	for f in GENERATED:
-		if cmd_off:
-			ok = _check_fine(f[0], f[1]) and ok
-		else:
-			ok = _check_generated(f[0], f[1]) and ok
+		ok = _check_generated(f[0], f[1]) and ok
 	for f in UNTOUCHED:
 		ok = _check_fine(f[0], f[1]) and ok
 	print("ga3_l3: %s" % ("OK" if ok else "ECHEC"))

@@ -7,7 +7,7 @@ extends SceneTree
 ## pas d'option de scène : ce script la met en scène lui-même (`--view=encounter`).
 ## Usage :
 ##   godot --path game --script res://tests/po_shot.gd -- [--out=<dossier>] [--only=<n,n>] [--extra=<a,b>]
-## `--extra` : options ajoutées à chaque vue de scène (GA6 : `--extra=--no-ga1,--no-ga2,--no-ga4`).
+## `--extra` : options ajoutées à chaque vue de scène.
 ## `--out` relatif : relatif à la racine du dépôt. PO6 : `--out=docs/img/po/apres`.
 ## Chaque PNG est converti en JPEG (qualité 85) puis supprimé : la planche pèse ≈ 4 Mo.
 

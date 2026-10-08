@@ -12,7 +12,7 @@
 // `data/fx/battle_ground_layers.json`) : les 9 rôles historiques ci-dessous restent des index
 // fixes (occupation du sol déjà spécifique à chaque rôle), les rôles ajoutés sont des index de
 // données (-1 si absents). Macro-variation supplémentaire (50–200 m, teinte et luminance, faible
-// amplitude) sous `ga2_on` (`--no-ga2`).
+// amplitude).
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
@@ -41,7 +41,6 @@ uniform int idx_flowering_meadow = -1;
 uniform int idx_trodden_grass = -1;
 uniform int idx_stubble = -1;
 uniform int idx_fresh_plough = -1;
-uniform float ga2_on = 1.0;
 uniform sampler2D macro_noise : filter_linear_mipmap, repeat_enable;
 // r = sous-bois, g = chemin, b = boue, a = galets (lit de rivière, gués).
 uniform sampler2D splat_a : filter_linear, repeat_disable;
@@ -83,8 +82,7 @@ uniform float relief_on = 0.0;
 // Roche affleurante (0 en plaine, 1 en montagne) et force des normales de détail.
 uniform float outcrops : hint_range(0.0, 1.0) = 0.0;
 uniform float detail_bump = 0.7;
-// DA6 : lisières douces des parcelles et détail du sol de près (`--no-da6` : 0).
-uniform float da6_on = 0.0;
+// DA6 : lisières douces des parcelles et détail du sol de près.
 uniform float decor_saturation = 0.6; // DA6 : part de la saturation gardée (bible § 3.3)
 uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
 // PO4 : texture de détail proche (Poly Haven CC0, terre et herbe rase, `near_detail/SOURCE.md`),
@@ -92,7 +90,6 @@ uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est p
 // normale s'ajoute ; fondue avec la distance (au-delà de `near_detail_dist`, aucun échantillon).
 uniform sampler2D near_detail_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D near_detail_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform float near_detail_on = 0.0;
 uniform float near_detail_size = 1.4; // m par tuile
 uniform float near_detail_dist = 32.0;
 uniform float near_detail_strength = 0.6;
@@ -168,13 +165,13 @@ void fragment() {
 	vec2 calm_d = max(calm_rect.xy - p, p - calm_rect.zw);
 	float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
 	// DA6 : lisières ondulées et fondues (mêmes formules que l'herbe).
-	vec3 field = da6_on > 0.5 ? bt_field_info_soft(p) : bt_field_info(p);
+	vec3 field = bt_field_info_soft(p);
 	float field_w = (field.x > 0.5 ? 1.0 : 0.0) * outside_calm * (1.0 - sb.g) * field.z;
 	// EP6 : parcelles posées par le cœur (labours, blé, prés, semis, vignes, chaumes).
 	float decor_kind = 0.0;
 	float furrow_period = 1.3;
 	if (decor_on > 0.5 && inside) {
-		vec2 duv = da6_on > 0.5 ? (p + bt_edge_warp(p) - splat_rect.xy) / splat_rect.zw : suv;
+		vec2 duv = (p + bt_edge_warp(p) - splat_rect.xy) / splat_rect.zw;
 		vec4 df = texture(decor_fields, duv);
 		if (df.a > 0.5) {
 			field = bt_decor_field(df, p);
@@ -185,7 +182,7 @@ void fragment() {
 			} else if (decor_kind == 6.0) {
 				field.x = 2.0;
 			}
-			field_w = da6_on > 0.5 ? bt_decor_edge_soft(field.z, p) : field.z;
+			field_w = bt_decor_edge_soft(field.z, p);
 		}
 	}
 
@@ -330,7 +327,7 @@ void fragment() {
 	// DA6 : détail de près (sol net sous la caméra rapprochée). La couche dominante est relue à
 	// ~1/4 de son échelle, tournée : sa luminance seule module l'albédo (grain, brindilles,
 	// mottes), sa normale s'ajoute à celle du sol ; fondu avec la distance (coût nul au loin).
-	float near_k = da6_on > 0.5 ? 1.0 - smoothstep(detail_near, detail_near * 2.6, view_dist) : 0.0;
+	float near_k = 1.0 - smoothstep(detail_near, detail_near * 2.6, view_dist);
 	if (near_k > 0.01) {
 		float dom = 0.0;
 		float wmax = -1.0;
@@ -352,7 +349,7 @@ void fragment() {
 	}
 	// PO4 : détail proche réel (grain de terre, brins ras) sur l'herbe, les prés, la terre et la
 	// boue ; pas sur la roche ni la neige. Lecture tournée (axes du champ).
-	float nd_k = near_detail_on * (1.0 - smoothstep(near_detail_dist * 0.45, near_detail_dist, view_dist));
+	float nd_k = (1.0 - smoothstep(near_detail_dist * 0.45, near_detail_dist, view_dist));
 	nd_k *= clamp(1.0 - w[int(L_ROCK)] - w[int(L_SNOW)] - w[int(L_PEBBLES)] * 0.5, 0.0, 1.0);
 	if (nd_k > 0.01) {
 		vec2 nuv = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / near_detail_size + vec2(0.37, 0.11);
@@ -418,18 +415,14 @@ void fragment() {
 
 	// GA2 : macro-variation supplémentaire (4 octaves, 50 à 200 m) de teinte et de luminance,
 	// faible amplitude, pour casser la répétition à moyenne échelle (indépendante des taches de
-	// prairie ci-dessus, à plus grande échelle). `--no-ga2` la coupe (comparaison A/B).
-	if (ga2_on > 0.5) {
-		float ga2_h = texture(macro_noise, p / 50.0 + vec2(0.11, 0.37)).r * 0.4
-			+ texture(macro_noise, p / 90.0 + vec2(0.53, 0.02)).r * 0.3
-			+ texture(macro_noise, p / 140.0 + vec2(0.29, 0.71)).r * 0.2
-			+ texture(macro_noise, p / 200.0 + vec2(0.83, 0.19)).r * 0.1;
-		albedo *= ga_macro_variation(ga2_h, 0.5, 1.0, 0.0);  // GA4 : fonction partagée
-	}
+	// prairie ci-dessus, à plus grande échelle).
+	float ga2_h = texture(macro_noise, p / 50.0 + vec2(0.11, 0.37)).r * 0.4
+		+ texture(macro_noise, p / 90.0 + vec2(0.53, 0.02)).r * 0.3
+		+ texture(macro_noise, p / 140.0 + vec2(0.29, 0.71)).r * 0.2
+		+ texture(macro_noise, p / 200.0 + vec2(0.83, 0.19)).r * 0.1;
+	albedo *= ga_macro_variation(ga2_h, 0.5, 1.0, 0.0);  // GA4 : fonction partagée
 	// DA6 (bible § 3.3) : décor sourd, saturation ramenée vers la luminance.
-	if (da6_on > 0.5) {
-		albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, decor_saturation);
-	}
+	albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, decor_saturation);
 	ALBEDO = albedo;
 	// Lot R2 : relief de détail sous la grille de 10 m (normales, rendu seulement), plus marqué sur
 	// les sols caillouteux, effacé au loin (anti-crénelage) et sous la neige.

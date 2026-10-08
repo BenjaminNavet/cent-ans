@@ -347,8 +347,7 @@ func _set_enemy_ai(enabled: bool) -> void:
 	if battle != null:
 		var side := str(scene.get("enemy_side"))
 		battle.call("set_ai", side, enabled)
-		if battle.has_method("set_hold"):
-			battle.call("set_hold", side, not enabled)
+		battle.call("set_hold", side, not enabled)
 
 
 ## Contrôle ou point à surligner pour la cible `target` ({} : rien).

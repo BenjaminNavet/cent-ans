@@ -31,7 +31,7 @@ func open(p_scene: Node) -> bool:
 	var height_at := func(x: float, z: float) -> float: return scene.terrain.height_at(x, z)
 	zone_view.build(zone, height_at)
 	# CV3-2 : l'embusqué peut avoir deux zones, une sur chaque flanc de la colonne ennemie.
-	var zones: Array = scene.battle.call("get_deployment_zones", scene.player_side) if scene.battle.has_method("get_deployment_zones") else []
+	var zones: Array = scene.battle.call("get_deployment_zones", scene.player_side)
 	for k in range(1, zones.size()):
 		var view := DeploymentZone.new()
 		view.name = "DeploymentZone%d" % (k + 1)
@@ -123,7 +123,7 @@ func plan(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> Array:
 	for k in order.size():
 		var unit := _unit(int(order[k]))
 		var size := Vector2(float(unit.get("width", 30.0)), float(unit.get("depth", 6.0)))
-		if dragged and scene.battle.has_method("formation_extent"):
+		if dragged:
 			size = scene.battle.call("formation_extent", int(order[k]), shares[k])
 		sizes.append(size)
 		total += size.x + UNIT_GAP

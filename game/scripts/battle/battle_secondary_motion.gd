@@ -27,9 +27,9 @@ static func settings() -> Dictionary:
 	return AtmosphereLibrary.data().get("secondary_motion", {})
 
 
-## Éteint par les données (`enabled`) ou par `--no-an1a` (banc A/B).
+## Éteint par les données (`enabled`).
 static func enabled() -> bool:
-	return bool(settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-an1a")
+	return bool(settings().get("enabled", false))
 
 
 static func set_wind(wind: Dictionary) -> void:

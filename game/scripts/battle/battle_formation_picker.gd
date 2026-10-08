@@ -48,7 +48,7 @@ func setup(p_scene: Node) -> void:
 	scene = p_scene
 	name = "FormationPicker"
 	add_to_group(SiegeHealthBars.OCCLUDER_GROUP)
-	if scene.battle != null and scene.battle.has_method("formation_presets"):
+	if scene.battle != null:
 		presets = scene.battle.call("formation_presets")
 	_build()
 	visible = not presets.is_empty()
@@ -252,14 +252,14 @@ func _process(_delta: float) -> void:
 ## formation reste ; `width`/`depth` : taille d'arrivée, pour les fantômes).
 func slots_for(ids: Array, point: Vector2, facing: float) -> Array:
 	var out: Array = []
-	if active_id == "" or ids.is_empty() or scene.battle == null or not scene.battle.has_method("formation_slots"):
+	if active_id == "" or ids.is_empty() or scene.battle == null:
 		return out
 	var raw: Array = scene.battle.call("formation_slots", active_id, PackedInt32Array(ids), point.x, point.y, facing)
 	for slot in raw:
 		var id := int(slot["id"])
 		var order_width := float(slot["width"])
 		var size := Vector2.ZERO
-		if order_width > 0.0 and scene.battle.has_method("formation_extent"):
+		if order_width > 0.0:
 			size = scene.battle.call("formation_extent", id, order_width)
 		else:
 			var unit := _unit(id)

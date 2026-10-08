@@ -2,8 +2,7 @@ extends SceneTree
 
 ## Lot AN1a : mouvement secondaire en shader (ADR 0096). Vérifications sans rendu :
 ## - données `secondary_motion` d'`atmosphere.json` lues, uniformes posés sur les matériaux
-##   (os des jambes, chaîne de la queue, amplitudes, vent), éteints pour les cadavres et avec
-##   `--no-an1a` ;
+##   (os des jambes, chaîne de la queue, amplitudes, vent), éteints pour les cadavres ;
 ## - réplique CPU du tri des sommets du shader (`sm_weight`) sur les maillages des trois LOD :
 ##   surcots et jaques bougent (bas seulement), chausses et bas des jambes non ; caparaçon,
 ##   crinière et queue reconnus sur les montés.

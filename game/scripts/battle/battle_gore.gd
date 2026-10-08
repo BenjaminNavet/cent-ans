@@ -71,8 +71,6 @@ static func blood_level() -> int:
 ## Intensités du niveau courant ({stains, sprays, corpse_blood, dismember}).
 static func level_settings() -> Dictionary:
 	var levels: Dictionary = settings().get("levels", {})
-	if OS.get_cmdline_user_args().has("--no-bv2"):
-		return levels.get("off", {})
 	return levels.get(LEVEL_NAMES[blood_level()], {"stains": 0.0, "sprays": 0.0, "corpse_blood": 0.0, "dismember": false})
 
 

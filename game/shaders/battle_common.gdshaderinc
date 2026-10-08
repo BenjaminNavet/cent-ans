@@ -86,10 +86,6 @@ vec3 bt_field_info_ex(vec2 p, float ramp, float soft) {
 	return vec3(kind, q.y, z);
 }
 
-vec3 bt_field_info(vec2 p) {
-	return bt_field_info_ex(p, 4.0, 0.0);
-}
-
 // DA6 : parcelle à lisière douce (bords déformés par `bt_edge_warp`, rampe de 9 m).
 vec3 bt_field_info_soft(vec2 p) {
 	vec3 f = bt_field_info_ex(p + bt_edge_warp(p), 9.0, 1.0);
