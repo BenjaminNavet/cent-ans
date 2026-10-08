@@ -57,3 +57,11 @@ Dès que le point de contrôle est vert (relance propre cargo test + tests carte
 ### Vague 6 (lancée 08/10 depuis main 632ce7e0e)
 - plancache (CC10 PlanCache explicite + CA8 + sels alignment, ADR 0205), rt5 (tests sim-battle/ai en binaires thématiques), fixtests (8 tests Godot en échec), lookups2 (JsonLookup restants + validateurs nus Python).
 - Ensuite : lots doc en dernier (UI10, MC15, CA10, CC15, GB7), puis push.
+
+## Vague 7 (08/10, depuis feat/sc 07b1c0bd8)
+Inventaire des restes (agent Explore) : ≈ 55 lots faits, 40 partiels, 120 non faits ; CB2/CB3 vetoés.
+Lots lancés : orders (CB4/CB5 module + RecruitContext), movement (CB8/CB9/CB13 + Dijkstra unique CA4/CA8),
+battlepower (CB6/CB11, ADR 0208 si l'équilibrage bouge), keyenum (BB11/AD14/GB7 macro key_enum!),
+gdtests (GT3/GT4 TestCase + run_all), gdshared (MC7 Hash, MC9 ConfirmDialog, MC8 army_markers).
+Suivants candidats : BB14/BB5 siege_layouts, BA6/BA11 constantes bataille en data, CC6 save, CC13 missions,
+PF-02 relief_quadtree → Rust, UI4 encyclopédie data, GB5 trait BattleSim ; docs (UI10, MC15, CA10, CC15, GB7 doc) en dernier.
