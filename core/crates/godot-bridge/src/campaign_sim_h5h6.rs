@@ -113,18 +113,6 @@ impl CampaignSim {
         }
     }
 
-    /// Price level of every faction: `{faction_id: price_level}`.
-    #[func]
-    fn get_price_levels(&self) -> VarDictionary {
-        let mut dict = VarDictionary::new();
-        if let Some(state) = &self.state {
-            for (id, f) in &state.factions {
-                dict.set(id.as_str(), f.price_level);
-            }
-        }
-        dict
-    }
-
     /// Captives of both sides for the player: `{ours: [...], held: [...],
     /// debts: [...]}`. A captive: `{character, name, faction, captor, rank,
     /// rank_label, prestige, ransom, terms{kind, province}, plans[

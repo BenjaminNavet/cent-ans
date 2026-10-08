@@ -428,14 +428,6 @@ impl BattleSim {
         }
     }
 
-    /// Width and depth of the field in metres (EP1), `(0, 0)` before `setup`.
-    #[func]
-    fn get_field_size(&self) -> Vector2 {
-        self.sim.as_ref().map_or(Vector2::ZERO, |sim| {
-            Vector2::new(sim.field().width as f32, sim.field().depth as f32)
-        })
-    }
-
     /// Visual unit size (BV1, ADR 0016): figures drawn per simulated soldier
     /// (0.5 small, 1 normal, 1.5 large, 2.5 ultra). Changes only
     /// `get_soldier_buffer` and the `figures` key of `get_units`.
@@ -1548,26 +1540,6 @@ impl BattleSim {
         self.sim
             .as_ref()
             .map_or(0.0, |s| s.field().walk_height(x, z))
-    }
-
-    /// EP3 (for EP6, a water mill): a spot on a bank near (x, z), `setback`
-    /// metres from the water, clear of fords, bridges and roads:
-    /// `{x, z, yaw (facing the water, from +x towards +z), stream (-1: the
-    /// river)}`, or an empty dictionary without water.
-    #[func]
-    fn get_waterside_spot(&self, x: f64, z: f64, setback: f64) -> VarDictionary {
-        let Some(spot) = self
-            .sim
-            .as_ref()
-            .and_then(|s| s.field().waterside_spot((x, z), setback))
-        else {
-            return VarDictionary::new();
-        };
-        vdict! {
-            "x" => spot.x, "z" => spot.z,
-            "yaw" => spot.towards_water.1.atan2(spot.towards_water.0),
-            "stream" => spot.stream.map_or(-1, |s| s as i64),
-        }
     }
 
     /// B6: the battle site in one compact French line, e.g. « Terre gelée ·

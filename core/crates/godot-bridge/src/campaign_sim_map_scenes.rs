@@ -36,36 +36,4 @@ impl CampaignSim {
             })
             .collect()
     }
-
-    /// Tuning of the living map (`data/rules/map_scenes.json`, every key of
-    /// `MapSceneRules` but `description`, with `durations: {kind: turns}`);
-    /// empty before a campaign starts. The renderer reads the same file
-    /// directly (`FolkPool.load_settings`, needed before a campaign exists).
-    #[func]
-    fn get_map_scene_rules(&self) -> VarDictionary {
-        let Some(data) = &self.data else {
-            return VarDictionary::new();
-        };
-        let rules = &data.map_scene_rules;
-        let mut durations = VarDictionary::new();
-        for kind in map_scenes::SceneKind::ALL {
-            durations.set(kind.as_str(), i64::from(rules.duration(kind)));
-        }
-        vdict! {
-            "devastation_threshold" => i64::from(rules.devastation_threshold),
-            "pool_cap" => i64::from(rules.pool_cap),
-            "activity_radius" => rules.activity_radius,
-            "figure_max_distance" => rules.figure_max_distance,
-            "road_folk_per_unit" => rules.road_folk_per_unit,
-            "field_work_probability" => rules.field_work_probability,
-            "herd_probability" => rules.herd_probability,
-            "woodcutter_probability" => rules.woodcutter_probability,
-            "pilgrim_probability" => rules.pilgrim_probability,
-            "carts_per_trade_value" => rules.carts_per_trade_value,
-            "guard_value" => rules.guard_value,
-            "scene_figures_min" => i64::from(rules.scene_figures_min),
-            "scene_figures_max" => i64::from(rules.scene_figures_max),
-            "durations" => &durations,
-        }
-    }
 }

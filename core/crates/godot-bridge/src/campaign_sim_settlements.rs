@@ -260,11 +260,4 @@ impl CampaignSim {
             .map(|s| GString::from(s.as_str()))
             .collect()
     }
-
-    /// French message of the last failed `load_from_string` (lot C4: a save
-    /// older than the settlements is refused), empty otherwise.
-    #[func]
-    fn last_load_error(&self) -> GString {
-        GString::from(self.last_load_error.as_str())
-    }
 }

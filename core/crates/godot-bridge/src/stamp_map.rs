@@ -209,19 +209,6 @@ impl StampMap {
         PackedByteArray::from(self.marks.bytes.as_slice())
     }
 
-    /// A new image of the map (creation of the texture).
-    #[func]
-    fn make_image(&self) -> Option<Gd<Image>> {
-        let m = &self.marks;
-        Image::create_from_data(
-            m.width as i32,
-            m.height as i32,
-            false,
-            m.format(),
-            &self.get_bytes(),
-        )
-    }
-
     /// Sends the map to `texture` through `image` if it changed (full
     /// upload: Godot 4.7 has no partial texture update). True if sent.
     #[func]

@@ -3,7 +3,7 @@
 //! Read-only views; orders go through `submit_order` (`recruit_agent`,
 //! `move_agent`, `agent_action`, `dismiss_agent`).
 
-use data_model::{FactionId, SettlementId};
+use data_model::SettlementId;
 use godot::prelude::*;
 use sim_campaign::agents::{self, Agent, AgentId, AgentReport};
 use sim_campaign::siege::settlement_name;
@@ -108,25 +108,6 @@ impl CampaignSim {
         dict
     }
 
-    /// Settlements the agent walks through to `target` (empty when
-    /// unreachable or already there).
-    #[func]
-    fn get_agent_path(&self, id: GString, target: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
-            return PackedStringArray::new();
-        };
-        let (Some(id), Ok(target)) = (
-            AgentId::parse(&id.to_string()),
-            SettlementId::new(target.to_string()),
-        ) else {
-            return PackedStringArray::new();
-        };
-        state
-            .agent_find_path(data, &id, &target)
-            .map(|path| path.iter().map(|s| GString::from(s.as_str())).collect())
-            .unwrap_or_default()
-    }
-
     /// The action bar: `[{action, name, target, target_name, character,
     /// available, reason, chance, cost, death_risk, description}]`.
     #[func]
@@ -202,65 +183,5 @@ impl CampaignSim {
             .and_then(|s| s.agents.last_report.as_ref())
             .map(report_dict)
             .unwrap_or_default()
-    }
-
-    /// Upkeep of `faction`'s agents during the last resolved turn.
-    #[func]
-    fn get_agent_upkeep(&self, faction: GString) -> i64 {
-        let Some(state) = &self.state else {
-            return 0;
-        };
-        let Ok(faction) = FactionId::new(faction.to_string()) else {
-            return 0;
-        };
-        state
-            .agents
-            .upkeep_last_turn
-            .get(&faction)
-            .copied()
-            .unwrap_or(0)
-    }
-
-    /// Agent types for the encyclopedia: `[{kind, name, cost, upkeep, max,
-    /// description, actions: [{action, name, base_chance, per_level,
-    /// death_risk, description}]}]`.
-    #[func]
-    fn get_agent_types(&self) -> VarArray {
-        let Some(data) = &self.data else {
-            return VarArray::new();
-        };
-        let rules = agents::rules(data);
-        rules
-            .types
-            .iter()
-            .map(|(kind, t)| {
-                let actions: VarArray = rules
-                    .actions
-                    .iter()
-                    .filter(|(action, _)| action.agent() == *kind)
-                    .map(|(action, r)| {
-                        vdict! {
-                            "action" => action.key(),
-                            "name" => r.name.as_str(),
-                            "base_chance" => i64::from(r.base_chance),
-                            "per_level" => i64::from(r.per_level),
-                            "death_risk" => i64::from(r.death_risk),
-                            "description" => r.description.as_deref().unwrap_or(""),
-                        }
-                        .to_variant()
-                    })
-                    .collect();
-                let mut dict = vdict! {
-                    "kind" => kind.key(),
-                    "name" => t.name.as_str(),
-                    "cost" => i64::from(t.cost),
-                    "upkeep" => i64::from(t.upkeep),
-                    "max" => i64::from(t.max_per_faction),
-                    "description" => t.description.as_deref().unwrap_or(""),
-                };
-                dict.set("actions", &actions);
-                dict.to_variant()
-            })
-            .collect()
     }
 }
