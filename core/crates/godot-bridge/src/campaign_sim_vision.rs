@@ -11,9 +11,7 @@ use crate::campaign_sim::{CampaignSim, Ctx};
 
 impl CampaignSim {
     fn faction_vision(&self, faction: &GString) -> Option<Vision> {
-        let Some(Ctx { state, data }) = self.ctx() else {
-            return None;
-        };
+        let Ctx { state, data } = self.ctx()?;
         let faction = FactionId::new(faction.to_string()).ok()?;
         Some(state.vision(data, &faction))
     }
