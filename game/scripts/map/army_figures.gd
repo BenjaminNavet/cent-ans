@@ -315,12 +315,7 @@ var _bearer_bob: float = 0.0
 
 static func walk_settings() -> Dictionary:
 	if _walk_settings.is_empty():
-		var parsed: Variant = null
-		var path := _data_dir().path_join(WALK_DATA)
-		if not FileAccess.file_exists(path):
-			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(WALK_DATA)
-		if FileAccess.file_exists(path):
-			parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var parsed: Variant = DataFile.read_json(WALK_DATA) if DataFile.exists(WALK_DATA) else null
 		_walk_settings = parsed if parsed is Dictionary else {"enabled": false}
 	return _walk_settings
 
