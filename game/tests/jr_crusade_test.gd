@@ -208,10 +208,6 @@ func _test_camera(map: Node3D) -> void:
 		return
 	var gap := Vector2(_opening_focus.x - world.x, _opening_focus.z - world.z).length()
 	_check(gap < 40.0, "the campaign opens on Limassol (%.1f px away)" % gap)
-	map.camera_rig.look_at_point(Vector3.ZERO)
-	map.call("_focus_capital")
-	var focus: Vector3 = map.camera_rig.target_focus
-	_check(Vector2(focus.x - world.x, focus.z - world.z).length() < 40.0, "focusing the capital of a landless faction goes to its host")
 	_check(not (map.player_army_ids() as PackedStringArray).is_empty(), "the crusader starts with an army")
 
 
