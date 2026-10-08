@@ -34,6 +34,8 @@
           "speed": { "$ref": "#/$defs/range", "description": "Vitesse angulaire rad/s (orbit, wade) ou unités/s (transit)." },
           "jitter": { "type": "number", "minimum": 0, "description": "Dispersion horizontale des oiseaux d'un vol." },
           "height_jitter": { "type": "number", "minimum": 0 },
+          "radius_spread": { "type": "number", "minimum": 0, "description": "Écart de rayon d'orbite entre oiseaux d'un vol (défaut 0,8)." },
+          "phase_spread": { "type": "number", "minimum": 0, "maximum": 1, "description": "Dispersion des phases d'orbite (défaut 0,1 : vol groupé ; 1 : nuée)." },
           "flap_rate": { "type": "number", "minimum": 0 },
           "flap_amount": { "type": "number", "minimum": 0, "maximum": 2 },
           "wing_fold": { "type": "number", "minimum": 0, "maximum": 1 },

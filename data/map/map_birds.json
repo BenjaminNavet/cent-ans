@@ -144,7 +144,9 @@
      "mediterranean"
     ],
     "max_height_m": 700
-   }
+   },
+   "radius_spread": 3.0,
+   "phase_spread": 1.0
   },
   {
    "id": "gull",
