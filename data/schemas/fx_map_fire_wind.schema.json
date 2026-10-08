@@ -16,6 +16,9 @@
       "properties": {
         "flame_size": { "type": "array", "items": { "$ref": "#/$defs/positive" }, "minItems": 2, "maxItems": 2, "description": "Largeur, hauteur d'une flamme (unités monde à l'échelle de la carte)." },
         "frames": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "minItems": 2, "maxItems": 2, "description": "Colonnes, lignes de la planche." },
+        "flipbook": { "type": "string", "pattern": "^res://assets/textures/fx/[A-Za-z0-9_]+\\.png$", "description": "Planche de flammes (RVB = chaleur, A = couverture, même grille `frames`)." },
+        "flicker_hz": { "$ref": "#/$defs/positive", "description": "Fréquence du vacillement de la lueur." },
+        "source": { "type": "string", "minLength": 1 },
         "loops_per_s": { "$ref": "#/$defs/positive" },
         "emission": { "type": "number", "minimum": 0 },
         "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -50,11 +53,23 @@
       "properties": {
         "amplitude": { "type": "number", "minimum": 0, "description": "Ondulation (part de la taille de la bannière)." },
         "wave_speed": { "type": "number", "minimum": 0 },
+        "source": { "type": "string", "minLength": 1 },
         "wave_length": { "$ref": "#/$defs/positive" },
         "gust_gain": { "type": "number", "minimum": 0 },
         "calm": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'amplitude hors rafale." }
       },
       "required": ["amplitude", "wave_speed", "wave_length", "gust_gain", "calm"],
+      "additionalProperties": false
+    },
+    "grass_measured": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "sway_hz": { "type": "array", "items": { "$ref": "#/$defs/positive" }, "minItems": 1 },
+        "spectral_centroid_hz": { "$ref": "#/$defs/positive" },
+        "gust_peak_over_mean": { "$ref": "#/$defs/positive" }
+      },
+      "required": ["source", "sway_hz"],
       "additionalProperties": false
     },
     "battle_tree_impostor": {

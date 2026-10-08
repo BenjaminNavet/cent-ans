@@ -843,13 +843,16 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 ## importée ou avec `--no-as5`, aucune flamme (les fumées restent).
 func _setup_flames() -> void:
 	_flame_cfg = MapFireWind.section("fire")
-	if _flame_cfg.is_empty() or not ResourceLoader.exists(FLAME_FLIPBOOK):
+	var flipbook_path := str(_flame_cfg.get("flipbook", FLAME_FLIPBOOK))
+	if _flame_cfg.is_empty() or not ResourceLoader.exists(flipbook_path):
 		_flame_cfg = {}
 		return
 	_flame_material = ShaderMaterial.new()
 	_flame_material.shader = FLAME_SHADER
 	_flame_material.render_priority = 2
-	_flame_material.set_shader_parameter("flipbook", load(FLAME_FLIPBOOK))
+	_flame_material.set_shader_parameter("flipbook", load(flipbook_path))
+	if _flame_cfg.has("flicker_hz"):
+		_flame_material.set_shader_parameter("flicker_rate", TAU * float(_flame_cfg["flicker_hz"]))
 	var frames: Array = _flame_cfg["frames"]
 	_flame_material.set_shader_parameter("frames_h", float(frames[0]))
 	_flame_material.set_shader_parameter("frames_v", float(frames[1]))

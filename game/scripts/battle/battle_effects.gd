@@ -126,8 +126,8 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 		_clods.append(_emitter("Clods%d" % i, _clod_material(), 320, 1.0, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
-		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
-		"flash": _burst_pool("Flash", _flash_material(), 24, 0.25),
+		"smoke": _burst_pool("Smoke", _smoke_material(), 40, _bombard_time("smoke_s", 5.5)),
+		"flash": _burst_pool("Flash", _flash_material(), 24, _bombard_time("flash_s", 0.15) + 0.1),
 		# B8 : gerbe renforcée à l'entrée d'une charge dans l'eau (écume, pas la poussière brune).
 		"ford": _burst_pool("Ford", _splash_material(), 64, 1.0),
 	}
@@ -157,7 +157,7 @@ func tick_time(now: float, dt: float) -> void:
 		var hit: Dictionary = _pending.pop_front()
 		burst(hit["pos"], "impact", float(hit.get("scale", 1.0)))
 	if _flash_energy > 0.0:
-		_flash_energy = maxf(_flash_energy - dt * 40.0, 0.0)
+		_flash_energy = maxf(_flash_energy - dt * 9.0 / _bombard_time("flash_s", 0.15), 0.0)
 		_flash.light_energy = _flash_energy
 		_flash.visible = _flash_energy > 0.0
 	for i in _dust_spots.size():
@@ -359,6 +359,13 @@ func _process(_delta: float) -> void:
 		_dirty = false
 		_arrows.buffer = _arrow_data
 		_arrow_trails.buffer = _arrow_data
+
+
+## Durées de l'éclair et de la fumée de bombarde, mesurées sur vidéo (lot AS8d,
+## `data/fx/siege_engines.json`, `bombard.flash_s` / `smoke_s`) ; `fallback` sans données.
+static func _bombard_time(key: String, fallback: float) -> float:
+	var bombard: Dictionary = SiegeEnginesFx.settings().get("bombard", {})
+	return float(bombard.get(key, fallback))
 
 
 ## Coup de bombarde : éclair, fumée à la bouche (`muzzle`, direction `dir`).

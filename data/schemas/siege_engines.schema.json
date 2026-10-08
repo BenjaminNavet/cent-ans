@@ -142,6 +142,39 @@
         },
         "predict": {
           "type": "boolean"
+        },
+        "swing_curve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "lut"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "measured_swing_s": {
+              "$ref": "#/$defs/positive"
+            },
+            "measured_arc_deg": {
+              "$ref": "#/$defs/positive"
+            },
+            "measured_vertical_phase": {
+              "$ref": "#/$defs/phase"
+            },
+            "lut": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1.2
+              },
+              "description": "Part de l'arc (0 armé, 1 fin du dépassement) à phases régulières 0..1 du basculement ; interpolée linéairement."
+            }
+          }
         }
       }
     },
@@ -230,6 +263,16 @@
         },
         "smoke_scale": {
           "$ref": "#/$defs/positive"
+        },
+        "flash_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "smoke_s": {
+          "$ref": "#/$defs/positive"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },

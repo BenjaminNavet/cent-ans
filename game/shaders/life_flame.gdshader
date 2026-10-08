@@ -15,6 +15,7 @@ uniform sampler2D flipbook : filter_linear_mipmap, repeat_disable;
 uniform float frames_h = 8.0;
 uniform float frames_v = 8.0;
 uniform float loops_per_s = 0.55;
+uniform float flicker_rate = 8.0; // rad/s, mesuré sur vidéo (AS8d), data/fx/map_fire_wind.json
 uniform float emission = 2.6;
 uniform float opacity = 0.85;
 uniform float lean = 0.22;
@@ -73,7 +74,7 @@ void fragment() {
 		discard;
 	}
 	// Vacillement lent de l'intensité, propre à chaque foyer.
-	float flicker = 0.85 + 0.15 * sin(TIME * 8.0 + seed_v * 40.0);
+	float flicker = 0.85 + 0.15 * sin(TIME * flicker_rate + seed_v * 40.0);
 	ALBEDO = blackbody(heat) * emission * (0.35 + heat * 1.2) * flicker * coverage;
 	ALPHA = coverage * opacity;
 }
