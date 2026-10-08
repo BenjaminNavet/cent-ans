@@ -587,29 +587,3 @@ func recruit(settlement_id: String, kind: String) -> Dictionary:
 	else:
 		map.ui.show_toast(str(result.get("error", "Recrutement refusé")), true)
 	return result
-
-
-# --- Capture (`--stage=agents`) -----------------------------------------------------------
-
-
-## Recrute un espion dans la capitale, lui donne une saison, le sélectionne et cadre la carte.
-func stage_screenshot(open_registry: bool = false) -> void:
-	if not available():
-		return
-	var place := recruit_place()
-	for kind in ["spy", "emissary", "preacher"]:
-		recruit(place, kind)
-	map.sim.call("end_turn")
-	map.refresh_all()
-	var spy := ""
-	for entry in map.sim.call("get_agents"):
-		if str(entry.get("faction", "")) == map.player_faction and str(entry.get("kind", "")) == "spy":
-			spy = str(entry.get("id", ""))
-	if spy == "":
-		return
-	select_agent(spy)
-	var world: Vector3 = map.settlement_layer.world_position_of(str(_agents.get(spy, {}).get("location", "")))
-	map.camera_rig.look_at_point(world, 260.0)
-	map.camera_rig.snap()
-	if open_registry:
-		toggle_registry()

@@ -79,11 +79,11 @@ static func load_default() -> ReliefExaggerationProfile:
 	if _default == null:
 		_default = ReliefExaggerationProfile.new()
 	# `--no-relief-exaggeration` (après `--`) : comportement du lot ZG4 (captures « avant »).
-	if _default.enabled and OS.get_cmdline_user_args().has("--no-relief-exaggeration"):
+	if _default.enabled and CmdArgs.has("--no-relief-exaggeration"):
 		_default = _default.duplicate()
 		_default.enabled = false
 	# `--no-mountain-squash` : sans l'écrasement des montagnes du lot SZ1 (captures « avant »).
-	if OS.get_cmdline_user_args().has("--no-mountain-squash"):
+	if CmdArgs.has("--no-mountain-squash"):
 		_default = _default.duplicate()
 		_default.mountain_knee_m = 0.0
 		_default.true_scale_squash = 0.0

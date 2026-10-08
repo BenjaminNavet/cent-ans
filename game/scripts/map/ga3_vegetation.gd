@@ -33,13 +33,13 @@ static var _forced: int = -1  # tests : -1 = ligne de commande, 0 = inactif, 1 =
 static func enabled() -> bool:
 	if _forced >= 0:
 		return _forced == 1
-	return not ("--no-ga3-veg" in OS.get_cmdline_user_args())
+	return not CmdArgs.has("--no-ga3-veg")
 
 
 ## Imposteurs GA3 aussi pour les arbres proches (à la place des cartes FC5) ; `--no-ga3-near`
 ## garde les cartes (avec l'atlas de feuilles GA3).
 static func near_impostors() -> bool:
-	return enabled() and not ("--no-ga3-near" in OS.get_cmdline_user_args()) and has_impostors()
+	return enabled() and not CmdArgs.has("--no-ga3-near") and has_impostors()
 
 
 ## Tests : force l'état (`true` / `false`), ou `null` pour relire la ligne de commande.

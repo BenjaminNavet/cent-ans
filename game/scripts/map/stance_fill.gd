@@ -37,7 +37,7 @@ var _last_distance: float = -1.0
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = OS.get_cmdline_user_args().has("--no-stance-fill")
+	_cli_disabled = CmdArgs.has("--no-stance-fill")
 	tuning = load_tuning()
 	_set_param("sf_saturation", float(tuning.get("saturation", 0.6)))
 	_set_param("sf_flat", float(tuning.get("flat_mix", 0.0)))

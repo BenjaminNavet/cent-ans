@@ -129,7 +129,7 @@ static func _headless() -> bool:
 
 
 func _build_backdrop() -> void:
-	var use_3d := not _headless() and not OS.get_cmdline_user_args().has("--no-menu-3d")
+	var use_3d := not _headless() and not CmdArgs.has("--no-menu-3d")
 	if use_3d:
 		var scene := MenuBackdrop3D.new()
 		scene.name = "Backdrop3D"

@@ -289,7 +289,7 @@ static func manifest() -> Dictionary:
 ## Lot FG1 : figurines fines actives. FG5 : par défaut ; `--coarse-figures` après `--` les
 ## coupe (figurines Quaternius du lot V2). `--fine-figures` reste accepté (sans effet).
 static func fine_enabled() -> bool:
-	return not OS.get_cmdline_user_args().has("--coarse-figures")
+	return not CmdArgs.has("--coarse-figures")
 
 
 ## FG5 : figurine fine (LOD0 dessiné par soldat, voir `BattleSoldiers.FINE_DETAIL_DISTANCE`).
@@ -343,7 +343,7 @@ static func _merge_fine(base: Dictionary) -> void:
 static func melee_default_enabled() -> bool:
 	if melee_forced >= 0:
 		return fine_enabled() and melee_forced == 1
-	return fine_enabled() and not OS.get_cmdline_user_args().has("--keyframed-melee")
+	return fine_enabled() and not CmdArgs.has("--keyframed-melee")
 
 
 ## GA3-L3 (ADR 0140) : figurines générées (image → 3D, `tools/blender_scripts/ga3_figures.py`)
@@ -423,7 +423,7 @@ static func _ga3_defines(fig: Dictionary, corpse: bool) -> Array:
 static func mocap_trial_enabled() -> bool:
 	if mocap_trial_forced >= 0:
 		return fine_enabled() and mocap_trial_forced == 1
-	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
+	return fine_enabled() and CmdArgs.has("--mocap-trial")
 
 
 ## FA3 : couche de clips libres reciblés (figurines fines seulement). `FA_DEFAULT` (sans option) :
@@ -438,7 +438,7 @@ static func fa_anim_mode() -> int:
 		return FA_NONE
 	if fa_anim_forced >= 0:
 		return fa_anim_forced
-	return FA_ALL if OS.get_cmdline_user_args().has("--fa-anim") else FA_DEFAULT
+	return FA_ALL if CmdArgs.has("--fa-anim") else FA_DEFAULT
 
 
 ## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
@@ -446,7 +446,7 @@ static func fa_anim_mode() -> int:
 static func video_trial_enabled() -> bool:
 	if video_trial_forced >= 0:
 		return fine_enabled() and video_trial_forced == 1
-	return fine_enabled() and OS.get_cmdline_user_args().has("--video-trial")
+	return fine_enabled() and CmdArgs.has("--video-trial")
 
 
 ## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.

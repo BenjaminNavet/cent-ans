@@ -603,35 +603,3 @@ func _process(delta: float) -> void:
 	if tutorial_objective_met():
 		tutorial.mark_done()
 		advance_tutorial()
-
-
-# --- Captures (`campaign_map.gd --stage=feudal_*`) ------------------------
-
-
-## Mise en scène : arbre ouvert sur un vassal (actions visibles), filtre « Féodalité » cadré sur
-## la Guyenne (hachures, écu parti), ou confirmation de guerre contre Albret (escalade).
-func stage_screenshot(stage: String) -> void:
-	var map_data: MapData = map.get("map_data")
-	var guyenne := map_data.index_of_id("prov_guyenne") if map_data != null else 0
-	match stage:
-		"feudal_tree":
-			map.call("_focus_capital")
-			map.ui.hide_province()
-			open_for("")
-			var vassals: Array = (map.sim.call("get_feudal_sheet", player()) as Dictionary).get("direct_vassals", [])
-			if not vassals.is_empty():
-				selected = str(vassals[0].get("id", ""))
-				fill()
-		"feudal_map":
-			map.map_modes.set_mode("feudal")
-			if guyenne > 0:
-				var centroid: Vector2 = map_data.get_province(guyenne).get("centroid", Vector2.ZERO)
-				map.camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y),
-					maxf(map_data.size.x, map_data.size.y) * 0.22)
-				map.camera_rig.snap()
-		"feudal_war":
-			map.call("_focus_capital")
-			map.ui.hide_province()
-			var dialog: WarDeclarationDialog = map.movement_ctl.war_dialog if map.get("movement_ctl") != null else null
-			if dialog != null:
-				dialog.ask(map.sim, "fac_albret", str((map.sim.call("get_feudal_sheet", "fac_albret") as Dictionary).get("name", "Albret")), "la place de Casteljaloux")

@@ -1220,7 +1220,7 @@ func _configure_step_thread() -> void:
 ## RJ-b : poses interpolées entre deux pas (fraction du pas en cours, `step_fraction` du cœur).
 ## `--pose-lerp` force l'interpolation en headless (test, banc).
 func _configure_pose_lerp() -> void:
-	var forced := OS.get_cmdline_user_args().has("--pose-lerp")
+	var forced := CmdArgs.has("--pose-lerp")
 	var wanted := (forced or DisplayServer.get_name() != "headless")
 	if wanted == _pose_lerp_on:
 		return
@@ -2353,7 +2353,7 @@ func _apply_camera_override() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
-	if OS.get_cmdline_user_args().has("--no-hud"):
+	if CmdArgs.has("--no-hud"):
 		# EP2 : captures de décor sans interface.
 		for layer in find_children("*", "CanvasLayer", true, false):
 			(layer as CanvasLayer).visible = false

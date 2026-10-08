@@ -44,7 +44,7 @@ const SR5_WALL_MOSS := 0.25
 const SR5_GRIME := {"Door": 0.5, "Timber": 0.7, "Planks": 0.8, "TimberFrame": 0.8, "TimberFrameFar": 0.8}
 ## `--no-sr5` après `--` : StandardMaterial3D d'avant SR5 et usure nulle (comparaison A/B).
 ## Modifiable par les tests (suivi de `clear_cache()`).
-static var sr5_enabled: bool = not OS.get_cmdline_user_args().has("--no-sr5")
+static var sr5_enabled: bool = not CmdArgs.has("--no-sr5")
 
 static var _materials: Dictionary = {}  # "variante|nom" → Material
 static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh

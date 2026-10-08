@@ -173,7 +173,7 @@ static func _clear_water(sea_at: Callable, p: Vector2, radius: float) -> bool:
 
 ## `--no-fa-parchment` après `--` : ornements dessinés par code d'avant FA6 (captures A/B).
 static func painted_enabled() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-fa-parchment")
+	return not CmdArgs.has("--no-fa-parchment")
 
 
 ## Lit le catalogue des ornements peints et pose la rose sur le shader de la mer.

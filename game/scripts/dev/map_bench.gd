@@ -119,7 +119,7 @@ func _ready() -> void:
 		elif arg == "--bench-towns":
 			_descent_sites = TOWN_DESCENT_SITES
 			_descent_hold = TOWN_DESCENT_HOLD
-	if OS.get_cmdline_user_args().has("--bench-listeners"):
+	if CmdArgs.has("--bench-listeners"):
 		_wrap_listeners.call_deferred()
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--bench-hide="):  # PF : coût d'une couche dans le scénario du banc
@@ -128,8 +128,8 @@ func _ready() -> void:
 			_bench_sets = arg.trim_prefix("--bench-set=").split(",")
 		elif arg.begins_with("--bench-ab="):
 			_ab_configs = arg.trim_prefix("--bench-ab=").split(";")
-	PerfProbe.enabled = OS.get_cmdline_user_args().has("--bench-probe")
-	if OS.get_cmdline_user_args().has("--bench-hover"):  # FL : survol avec le curseur au centre
+	PerfProbe.enabled = CmdArgs.has("--bench-probe")
+	if CmdArgs.has("--bench-hover"):  # FL : survol avec le curseur au centre
 		get_parent().set("bench_mouse", get_viewport().get_visible_rect().size * 0.5)
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0

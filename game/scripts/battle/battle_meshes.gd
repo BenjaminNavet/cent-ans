@@ -325,7 +325,7 @@ static func soldier_level(kind: String, variant: int, level: int) -> ArrayMesh:
 		return _cache[key]
 	var mesh: ArrayMesh = null
 	# `--legacy-figures` (après `--`) : figurines procédurales V4, pour les comparaisons avant/après.
-	if kind != "siege" and not OS.get_cmdline_user_args().has("--legacy-figures"):
+	if kind != "siege" and not CmdArgs.has("--legacy-figures"):
 		mesh = _load_figure(kind, variant, level)
 	if mesh == null:
 		mesh = _procedural_soldier(kind, variant, level != LEVEL_FULL)

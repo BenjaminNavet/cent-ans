@@ -146,7 +146,7 @@ func _ready() -> void:
 ## PO (ADR 0097, bible DA § 12.5) : vrai en mode développeur (réglage `dev/mode` ou `-- --dev`).
 ## Hors mode dev, aucun texte d'outil (commande, chemin, identifiant brut) n'est affiché.
 func is_dev() -> bool:
-	return bool(get_value("dev/mode")) or OS.get_cmdline_user_args().has("--dev")
+	return bool(get_value("dev/mode")) or CmdArgs.has("--dev")
 
 
 ## Smoke test : valeurs par défaut, fichier dédié (le fichier du joueur n'est pas touché).

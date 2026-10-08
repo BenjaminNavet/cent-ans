@@ -61,7 +61,7 @@ var _focus_factions := Vector2i(-1, -1)
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = OS.get_cmdline_user_args().has("--no-faction-borders")
+	_cli_disabled = CmdArgs.has("--no-faction-borders")
 	tuning = load_tuning()
 	_apply_tuning()
 	add_to_group(RenderQuality.CLIENT_GROUP)

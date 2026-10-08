@@ -25,7 +25,7 @@ static func data() -> Dictionary:
 
 
 static func enabled() -> bool:
-	return bool(data().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-as5")
+	return bool(data().get("enabled", false)) and not CmdArgs.has("--no-as5")
 
 
 ## Section `name` (`fire`, `maquette_banner`, `battle_tree_impostor`), {} si éteint ou absente.

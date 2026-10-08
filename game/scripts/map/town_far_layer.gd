@@ -167,7 +167,7 @@ func _plan_tiles(settlement_ids: Array) -> void:
 	var wanted: Dictionary = {}
 	for id in settlement_ids:
 		wanted[str(id)] = true
-	var v2_enabled := not "--no-landmarks-1to1" in OS.get_cmdline_user_args()
+	var v2_enabled := not CmdArgs.has("--no-landmarks-1to1")
 	# Index stable : ordre du fichier, puis villes v2 triées par colonie.
 	var n := 0
 	var town_index: Dictionary = {}

@@ -295,4 +295,4 @@ func _maybe_screenshot() -> void:
 
 ## Capture : `-- --loading-plate` impose une enluminure AR1 (écran reproductible).
 func _forced_plate() -> bool:
-	return "--loading-plate" in OS.get_cmdline_user_args()
+	return CmdArgs.has("--loading-plate")

@@ -703,27 +703,3 @@ func _focus_for_step(step_id: String) -> void:
 			if map_data.index_of_id(capital) > 0:
 				var centroid := map_data.centroid_of_id(capital)
 				rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), extent * 0.12)
-
-
-# --- Captures ---------------------------------------------------------------------------
-
-
-## `--stage=tutorial` : armée sélectionnée avec aperçu de chemin, étape « ordre de marche ».
-## `--stage=encyclopedia` : encyclopédie ouverte sur une fiche d'unité riche en liens.
-func stage_screenshot(stage: String) -> void:
-	match stage:
-		"tutorial":
-			map.call("_stage_screenshot")
-			start(TutorialSteps.STEP_IDS.find("move_army"))
-			overlay.set_target(resolve_target("royal_army"))
-		"tutorial_toc":  # UX2 : sommaire ouvert, cible dans la barre du haut
-			map.call("_focus_capital")
-			map.get("ui").call("hide_province")
-			start(TutorialSteps.STEP_IDS.find("research"))
-			overlay.set_toc_open(true)
-			overlay.set_target(resolve_target("research"))
-		"encyclopedia":
-			map.call("_focus_capital")
-			map.get("ui").call("hide_province")
-			encyclopedia.open_window("unit_longbowmen")
-			encyclopedia.search_field.release_focus.call_deferred()

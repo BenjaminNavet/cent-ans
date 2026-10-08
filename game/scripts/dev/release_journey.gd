@@ -376,7 +376,7 @@ func _ab(map: Node) -> Dictionary:
 	var out: Dictionary = {}
 	# `--ab-passes` : temps GPU par passe du moteur (horodatages du profileur visuel), médianes
 	# sur 30 images de la configuration de base.
-	if "--ab-passes" in OS.get_cmdline_user_args():
+	if CmdArgs.has("--ab-passes"):
 		out["passes"] = await _gpu_passes(map)
 	for config: String in configs:
 		var frame: Array = samples[config]

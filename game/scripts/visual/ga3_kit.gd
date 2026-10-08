@@ -35,7 +35,7 @@ static func clear_cache() -> void:
 
 ## Option de ligne de commande : `--no-ga3` revient au kit seul.
 static func requested() -> bool:
-	return not OS.get_cmdline_user_args().has("--no-ga3")
+	return not CmdArgs.has("--no-ga3")
 
 
 static func manifest() -> Dictionary:
