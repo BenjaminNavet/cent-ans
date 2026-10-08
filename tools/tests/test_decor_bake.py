@@ -20,6 +20,7 @@ SETTLEMENTS = json.loads(
 
 
 def test_types_use_catalogue_ids() -> None:
+    """Every type points at an id of the DN map-extra catalogue."""
     missing = [
         t for t, spec in DECOR["types"].items() if spec["model"] not in CATALOG_IDS
     ]
@@ -27,6 +28,7 @@ def test_types_use_catalogue_ids() -> None:
 
 
 def test_rules_and_sites_reference_known_types() -> None:
+    """Rules and sites only use declared types."""
     types = set(DECOR["types"])
     for rule in DECOR["rules"]:
         assert set(rule["types"]) <= types, rule["id"]
@@ -35,6 +37,7 @@ def test_rules_and_sites_reference_known_types() -> None:
 
 
 def test_route_nodes_are_settlements() -> None:
+    """Baked route nodes are real settlements."""
     for rule in DECOR["rules"]:
         if rule["mode"] == "route":
             assert len(rule["nodes"]) >= 2, rule["id"]
