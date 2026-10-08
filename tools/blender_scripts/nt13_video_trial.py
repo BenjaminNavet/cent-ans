@@ -177,9 +177,31 @@ AS8A = {
     "source": "Roscheiderhof Spaetmittelter 2018 (Helge Klaus Rieder, CC BY-SA 3.0)",
 }
 CLIPS_AS8A = [
-    clip("vf_thrust", "vf_fight", 104, 150, 1.0, False, 90.0, "lunge, sword thrust", **AS8A),
-    clip("vf_guard", "vf_fight", 148, 172, 1.0, True, 20.0, "guard with buckler", **AS8A),
-    clip("vf_strike", "vf_fight", 358, 392, 1.0, False, 80.0, "sword raised, step and cut", **AS8A),
+    clip(
+        "vf_thrust",
+        "vf_fight",
+        104,
+        150,
+        1.0,
+        False,
+        90.0,
+        "lunge, sword thrust",
+        **AS8A,
+    ),
+    clip(
+        "vf_guard", "vf_fight", 148, 172, 1.0, True, 20.0, "guard with buckler", **AS8A
+    ),
+    clip(
+        "vf_strike",
+        "vf_fight",
+        358,
+        392,
+        1.0,
+        False,
+        80.0,
+        "sword raised, step and cut",
+        **AS8A,
+    ),
 ]
 # Baked into ``video_trial/``: per gesture the better of NT13 and NT14 (docs/wip/nt14-video-set2.md).
 CLIPS = [CLIPS_NT13[2]] + CLIPS_NT14
@@ -329,7 +351,9 @@ class Clip:
         world = data["world"][first : last + 1]
         image = data["image"][first : last + 1]
         cam_path = os.path.join(POSE_DIR, f"{video}_cam.npz")
-        if os.path.exists(cam_path):  # AS8a: handheld camera, feet's image speed minus the pan
+        if os.path.exists(
+            cam_path
+        ):  # AS8a: handheld camera, feet's image speed minus the pan
             image = image.copy()
             image[..., :2] -= np.load(cam_path)["shift"][first : last + 1, None, :]
         extra, normals = {}, None
@@ -1006,7 +1030,12 @@ def measure_all(path):
         _b, _l, record = video_entry(tgt, rest, spec)
         row = res.setdefault(VF_ROLES[spec["name"]], {})
         row[spec["name"]] = dict(record["quality"], yaw_deg=record["yaw_deg"])
-        print("MEASURE", VF_ROLES[spec["name"]], spec["name"], json.dumps(row[spec["name"]]))
+        print(
+            "MEASURE",
+            VF_ROLES[spec["name"]],
+            spec["name"],
+            json.dumps(row[spec["name"]]),
+        )
     with open(path, "w") as f:
         json.dump(res, f, indent=1, sort_keys=True)
     print("OK", path)

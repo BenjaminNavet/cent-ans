@@ -75,7 +75,11 @@ def main() -> int:
         if prev is not None:
             mask = person_mask(gray.shape, image[index])
             d = step_shift(prev, gray, mask)
-            d = np.zeros(2) if d is None else d / np.array([gray.shape[1], gray.shape[0]])
+            d = (
+                np.zeros(2)
+                if d is None
+                else d / np.array([gray.shape[1], gray.shape[0]])
+            )
             shifts.append(shifts[-1] + d)
         prev = gray
         index += 1
