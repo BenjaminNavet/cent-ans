@@ -226,3 +226,4 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 - NAMES (fait, −250) : reste godot-bridge `province_name` (campaign_sim.rs), `faction_label` (campaign_sim_treaty.rs), `faction_name` (campaign_sim_feudal.rs), `splitmix64` (battle_pose_lerp.rs) → GameData / util (à inclure dans GB1).
 - MOCK (fait, −1840) : après FL, suppr stub campaign_sim_mock.gd, `_ensure_city/characters_capable_sim`, `SimFacade.engine_label` (campaign_map:465), commentaire campaign_map:61, branches « mock ignoré » smoke.gd 474/603/687/919.
 - BRIDGE (fait) : Ctx/CtxMut, run_order, convert.rs, battle_sim éclaté en 6 fichiers ; GB3 déjà vide. Avertissement « pas de campagne » émis une fois par processus.
+- PRE4 : nt4_prologue_test échoue aussi sur main (step move / charge / tir non vus, sensible à la charge machine) ; sur feat/sc : « held enemy stayed in place ». À revoir machine calme.
