@@ -493,6 +493,15 @@ def geo_pyramid(
     )
 
 
+@geo_app.command("agri-regions")
+def geo_agri_regions() -> None:
+    """Paysages agricoles régionaux (lot ME8) : agri_regions.png depuis agri_landscapes.json."""
+    from cent_ans_tools.geo import agri_regions
+
+    path = agri_regions.build()
+    console.print(f"{path.name} : {path.stat().st_size / 1e3:.0f} ko")
+
+
 @geo_app.command("landcover")
 def geo_landcover() -> None:
     """Occupation du sol vers 1340 : splat.png (forêts KK10 + massifs nommés), wetlands.png, forest_kind.png."""
