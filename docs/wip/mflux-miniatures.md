@@ -35,7 +35,11 @@
 - Essai réel 10-08 (`--stop-before-3d`, 0 $) : archer longbowman, planche 3 vues (face, profil
   3/4, dos) cohérentes, réalistes (gambison, chapeau de fer, arc long), détourage rembg propre,
   3 vues découpées. Bras le long du corps plutôt qu'en A-pose stricte ; arc tenu derrière en vue
-  de dos. Prochaine étape : TRELLIS multi (0,02 $) sur ces vues et comparaison avec l'archer L3.
+  de dos. Essai 2 (`--attempt 2 --strength 0.3`, prompt « A-pose stricte, mains vides ») : arc retiré,
+  couleurs proches de L3 (gambison vert, chausses bleues), mais bras toujours le long du corps.
+  TRELLIS bloqué : compte fal.ai sans crédit (403, cf. ADR 0152). Choix joueur en attente :
+  recréditer fal.ai ou essayer une 3D locale (TripoSR/Stable Fast 3D sur Mac ; TRELLIS exige CUDA ;
+  Hunyuan3D exclu, licence hors UE).
 - Essai réel à lancer GPU libre (une unité) :
   `uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy python
   tools/experiments/ga3_fal_figure.py ~/dev/cent-ans-raw/ga3/local --unit longbowman
