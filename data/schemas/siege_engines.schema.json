@@ -584,6 +584,178 @@
               "additionalProperties": false
             }
           }
+        },
+        "haul": {
+          "type": "object",
+          "description": "AS4 : servants porteurs. Un servant va chercher une pierre, un boulet ou un baril de poudre à un tas placé près de l'engin, le porte (clip carry, sinon walk, objet tenu en main), revient et charge, calé sur la phase de rechargement de l'engin (0 : vient de tirer, 1 : prêt). Rendu seulement.",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "walk_clip": {
+              "type": "string"
+            },
+            "carry_clip": {
+              "type": "string"
+            },
+            "grab_clip": {
+              "type": "string"
+            },
+            "drop_clip": {
+              "type": "string"
+            },
+            "objects": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "enum": [
+                      "sphere",
+                      "cylinder"
+                    ]
+                  },
+                  "radius": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "y_scale": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "height": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 2
+                  },
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                },
+                "required": [
+                  "shape",
+                  "radius",
+                  "color"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "by_engine": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "piles": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "object": {
+                          "type": "string"
+                        },
+                        "x": {
+                          "type": "number"
+                        },
+                        "z": {
+                          "type": "number"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 16
+                        },
+                        "spread": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 3
+                        }
+                      },
+                      "required": [
+                        "object",
+                        "x",
+                        "z",
+                        "count",
+                        "spread"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "haulers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "pile": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "post": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3,
+                          "description": "x, z, cap en degrés du poste de chargement."
+                        },
+                        "figure": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "trip": {
+                          "type": "array",
+                          "items": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "minItems": 5,
+                          "maxItems": 5,
+                          "description": "Phases croissantes : départ, arrivée au tas, saisie finie, retour au poste, charge finie."
+                        },
+                        "hold": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3,
+                          "description": "Position de l'objet porté dans le repère du servant (x, y, z)."
+                        }
+                      },
+                      "required": [
+                        "pile",
+                        "post",
+                        "figure",
+                        "trip",
+                        "hold"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "piles",
+                  "haulers"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "enabled",
+            "walk_clip",
+            "carry_clip",
+            "grab_clip",
+            "drop_clip",
+            "objects",
+            "by_engine"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

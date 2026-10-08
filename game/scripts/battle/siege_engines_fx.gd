@@ -282,6 +282,7 @@ func _crew_engine(id: int, i: int, node: Node3D, model: String, c: Dictionary, u
 			var rest: Array = s["rest"]
 			s = {"x": rest[0], "z": rest[1], "yaw_deg": rest[2], "figure": s.get("figure", 0)}
 		_add_servant("e%d/%d/%d" % [id, i, k], node.global_transform, s, crew.clip_of(act, model, k), side)
+	crew.add_haulers(id * 100 + i, model, node.global_transform, phase if reloading else -1.0, side)  # AS4
 
 
 func _add_servant(key: String, frame: Transform3D, s: Dictionary, clip: String, side: String) -> void:
