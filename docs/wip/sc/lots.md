@@ -290,3 +290,8 @@ TL5 mocap/FA3/AN1b/FG blender -4.8k ; TL6 pipeline payant OpenRouter/fal/TTS -8k
 
 ## LOOKUPS (fusionné d59f8d795)
 - JsonLookup sur 14 sites de plus (+ `found`). Pas d'index par id (un seul site). Délégués RichTooltip gardés pour encyclopedia.gd.
+
+## RUSTPERF (fusionné a453fb7ea)
+- vegetation : ExclusionGrid (clairières/vergers, 2 sites), PageKeyHasher pour Ground::Pages, hauteur calculée une fois ; checksum figé sur l'ancien code (3 scénarios). MB12 côté Rust sans objet (le semis est en GDScript).
+- Morts : relief-lod clear_pages/clear_slots ; bridge get_interactive_battles, get_naval_state, get_province_ids, StampMap::is_dirty/get_bytes.
+- Naval : 4 constantes de ship.rs dans NavalRules. `pending` reste un Vec (liste indexée sérialisée).
