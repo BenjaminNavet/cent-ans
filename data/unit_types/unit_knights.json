@@ -28,6 +28,7 @@
     "charge_lance",
     "dismount"
   ],
+  "figure": "cavalry_0",
   "equipment": "Destrier caparaçonné, lance de frêne, épée, mailles et plates, bassinet, cotte d'armes blasonnée.",
   "description": "Cavalerie lourde des bannerets et bacheliers ; malgré [[cdx_crecy|Crécy]] et [[cdx_poitiers|Poitiers]], la charge de lance reste l'arme décisive de la [[cdx_chevalerie|chevalerie]] française.",
   "sources": [

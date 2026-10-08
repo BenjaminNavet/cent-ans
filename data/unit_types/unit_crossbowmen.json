@@ -26,6 +26,7 @@
     "pavise",
     "rain_penalty"
   ],
+  "figure": "archer_2",
   "equipment": "Arbalète à étrier ou à crochet, pavois, chapel de fer, gambison.",
   "description": "Arbalétriers des [[cdx_milices_urbaines|communes]] et des garnisons ; les confréries de tir des villes du Nord fournissent des tireurs entraînés.",
   "sources": [

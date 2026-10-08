@@ -27,6 +27,7 @@
   "abilities": [
     "charge_lance"
   ],
+  "figure": "cavalry_3",
   "equipment": "Roncin, haubergeon, chapel de fer, lance et épée.",
   "description": "Cavalerie moyenne non noble : sergents fieffés, gens de métier montés, hommes des [[cdx_milices_urbaines|communes]].",
   "sources": [

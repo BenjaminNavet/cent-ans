@@ -32,6 +32,7 @@
     "fac_genoa",
     "fac_france"
   ],
+  "figure": "archer_1",
   "equipment": "Arbalète à étrier, pavois porté par un valet, chapel de fer, gambison ou cotte de plates.",
   "description": "Mercenaires professionnels de Gênes, engagés par la France ; décimés à [[cdx_crecy|Crécy]] (Ottone Doria, Carlo Grimaldi), sans leurs [[cdx_pavois|pavois]] restés aux bagages.",
   "sources": [

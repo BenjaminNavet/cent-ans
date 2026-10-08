@@ -26,6 +26,7 @@
     "shield_wall",
     "dismount"
   ],
+  "figure": "infantry_0",
   "equipment": "Haubert de mailles, cotte de plates, bassinet à visière, écu, épée, hache ou marteau d'armes.",
   "description": "Chevaliers et écuyers combattant à pied, cœur des lignes de bataille anglaises ([[cdx_tactique_anglaise|Halidon Hill]], [[cdx_crecy|Crécy]]) et, plus tard, françaises.",
   "sources": [
