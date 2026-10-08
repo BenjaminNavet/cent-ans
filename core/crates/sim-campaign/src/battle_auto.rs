@@ -24,8 +24,8 @@
 //! campaign state.
 
 use data_model::{
-    Ability, AutoResolveRules, GameData, Province, RiverCrossingRules, Terrain, UnitCategory,
-    UnitType, WeatherChances,
+    Ability, AutoResolveRules, GameData, Province, RiverCrossingRules, Terrain, TerrainEffects,
+    UnitCategory, UnitType, WeatherChances,
 };
 use serde::{Deserialize, Serialize};
 use sim_battle::Weather;
@@ -271,48 +271,6 @@ fn average(values: impl Iterator<Item = f64>) -> f64 {
     } else {
         sum / count as f64
     }
-}
-
-/// Head-count weighted average armour of a side (0-100).
-pub fn average_armor(side: &Side) -> f64 {
-    let total: u32 = side.units.iter().map(|u| u.strength).sum();
-    if total == 0 {
-        return 0.0;
-    }
-    side.units
-        .iter()
-        .map(|u| f64::from(u.strength) * f64::from(u.armor))
-        .sum::<f64>()
-        / f64::from(total)
-}
-
-/// Quick power estimate of `side` facing an enemy of average armour
-/// `enemy_armor` (the pre-N1 formula, kept for odds shown in the UI).
-pub fn side_power(side: &Side, enemy_armor: f64, modifier: f64) -> f64 {
-    let base: f64 = side
-        .units
-        .iter()
-        .map(|unit| {
-            let attack = if unit.is_ranged {
-                f64::from(unit.ranged)
-                    * (1.0 - enemy_armor / 200.0)
-                    * (1.0 + side.general_ranged_percent / 100.0)
-            } else {
-                f64::from(unit.melee) * (1.0 + side.general_charge_percent / 100.0)
-            };
-            f64::from(unit.strength) / 100.0 * attack * (1.0 + f64::from(unit.experience) / 10.0)
-        })
-        .sum();
-    base * (0.5 + side_morale(side) / 200.0)
-        * (0.7 + 0.3 * f64::from(side.supply) / 100.0)
-        * (1.0 + f64::from(side.general_command) * 0.03)
-        * modifier
-}
-
-/// `average_armor` plus the general's `BattleDefense` bonus, folded in the
-/// same units (percentage points of the 0-100 armour scale, spec § 2).
-pub fn effective_armor(side: &Side) -> f64 {
-    (average_armor(side) + side.general_defense_percent).clamp(0.0, 100.0)
 }
 
 fn side_morale(side: &Side) -> f64 {
@@ -891,189 +849,242 @@ pub fn resolve_with_crossings(
     crossing_rules: &RiverCrossingRules,
     rng: &mut CampaignRng,
 ) -> BattleResult {
-    let weather = conditions.weather.unwrap_or_else(|| {
-        conditions
-            .season
-            .map_or(Weather::Clear, |season| draw_weather(rules, season, rng))
-    });
-    let terrain = conditions.terrain.map(|t| rules.terrain_effects(t));
-    let field = Field {
+    Matchup::prepare(
+        (attacker, attacker_profiles),
+        (defender, defender_profiles),
+        context,
+        conditions,
         rules,
-        weather,
-        terrain_charge: terrain.map_or(1.0, |t| t.charge),
-        terrain_ranged: terrain.map_or(1.0, |t| t.ranged),
-    };
-    let mut a = Host::new(attacker, attacker_profiles, false);
-    let mut d = Host::new(defender, defender_profiles, true);
-    if let Some(crossing) = context.crossing {
-        a.damage *= crossing.attacker_factor(crossing_rules);
-        d.ranged *= crossing.defender_ranged_factor(crossing_rules);
-    } else if context.river_crossing {
-        a.damage *= rules.river_attacker;
-    }
-    if context.walls {
-        a.damage *= rules.walls_attacker
-            * (1.0 + f64::from(context.assault_bonus_percent) / 100.0)
-            * rules.wall_attacker_factor(
+        crossing_rules,
+    )
+    .play(rng)
+}
+
+/// A battle ready to be fought: both hosts built once with every situation
+/// modifier (river, walls, terrain) applied. [`Matchup::play`] fights it
+/// from a copy, so the forecast prepares once and plays many times.
+pub struct Matchup<'a> {
+    attacker: &'a Side,
+    defender: &'a Side,
+    attacker_host: Host,
+    defender_host: Host,
+    conditions: &'a FieldConditions,
+    rules: &'a AutoResolveRules,
+    context: &'a BattleContext,
+    terrain: Option<TerrainEffects>,
+}
+
+impl<'a> Matchup<'a> {
+    pub fn prepare(
+        attacker: (&'a Side, &[UnitProfile]),
+        defender: (&'a Side, &[UnitProfile]),
+        context: &'a BattleContext,
+        conditions: &'a FieldConditions,
+        rules: &'a AutoResolveRules,
+        crossing_rules: &RiverCrossingRules,
+    ) -> Self {
+        let terrain = conditions.terrain.map(|t| rules.terrain_effects(t));
+        let mut a = Host::new(attacker.0, attacker.1, false);
+        let mut d = Host::new(defender.0, defender.1, true);
+        if let Some(crossing) = context.crossing {
+            a.damage *= crossing.attacker_factor(crossing_rules);
+            d.ranged *= crossing.defender_ranged_factor(crossing_rules);
+        } else if context.river_crossing {
+            a.damage *= rules.river_attacker;
+        }
+        if context.walls {
+            a.damage *= rules.walls_attacker
+                * (1.0 + f64::from(context.assault_bonus_percent) / 100.0)
+                * rules.wall_attacker_factor(
+                    context.wall.level,
+                    context.wall.breach_percent,
+                    context.wall.engines_ready_percent,
+                );
+            d.ranged *= rules.walls_defender_ranged;
+            let stand = rules.wall_stand(
                 context.wall.level,
                 context.wall.breach_percent,
                 context.wall.engines_ready_percent,
             );
-        d.ranged *= rules.walls_defender_ranged;
-        let stand = rules.wall_stand(
-            context.wall.level,
-            context.wall.breach_percent,
-            context.wall.engines_ready_percent,
-        );
-        a.morale_loss *= 1.0 + rules.wall_attacker_morale * stand;
-        d.morale_loss /= 1.0 + rules.wall_defender_steadiness * stand;
-    }
-    d.damage *= match terrain {
-        Some(t) => t.defender,
-        None if context.defender_terrain_bonus => rules.legacy_defender_bonus,
-        None => 1.0,
-    };
-    let attacker_power = estimate(&a, &d, &field);
-    let defender_power = estimate(&d, &a, &field);
-    // Fog of war: one draw per side for the whole battle (A6-L1, ADR 0181),
-    // so that nearly equal forces do not always end the same way.
-    if rules.battle_fortune > 0.0 {
-        a.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
-        d.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
-    }
-
-    // Phases: volleys, one charge, melee rounds.
-    #[derive(Clone, Copy)]
-    enum Phase {
-        Volley,
-        Charge,
-        Melee,
-    }
-    let phases = std::iter::repeat_n(Phase::Volley, rules.volleys as usize)
-        .chain(std::iter::once(Phase::Charge))
-        .chain(std::iter::repeat_n(
-            Phase::Melee,
-            rules.melee_rounds as usize,
-        ));
-    let mut broken = (false, false);
-    // A6 integration: where neither side breaks, standing walls hold the
-    // place for the garrison (an assault must carry them or break it).
-    let wall_hold = if context.walls {
-        rules.wall_hold_morale
-            * rules.wall_stand(
-                context.wall.level,
-                context.wall.breach_percent,
-                context.wall.engines_ready_percent,
-            )
-    } else {
-        0.0
-    };
-    for phase in phases {
-        let mut on_d = vec![0.0; d.fighters.len()];
-        let mut on_a = vec![0.0; a.fighters.len()];
-        match phase {
-            Phase::Volley => {
-                fire(&field, &a, &d, 1.0, &mut on_d);
-                fire(&field, &d, &a, 1.0, &mut on_a);
-            }
-            Phase::Charge => {
-                let mut back_on_a = vec![0.0; a.fighters.len()];
-                let mut back_on_d = vec![0.0; d.fighters.len()];
-                charge(&field, &a, &d, &mut on_d, &mut back_on_a);
-                charge(&field, &d, &a, &mut on_a, &mut back_on_d);
-                on_a.iter_mut().zip(back_on_a).for_each(|(k, b)| *k += b);
-                on_d.iter_mut().zip(back_on_d).for_each(|(k, b)| *k += b);
-            }
-            Phase::Melee => {
-                melee(&field, &a, &d, &mut on_d);
-                melee(&field, &d, &a, &mut on_a);
-            }
+            a.morale_loss *= 1.0 + rules.wall_attacker_morale * stand;
+            d.morale_loss /= 1.0 + rules.wall_defender_steadiness * stand;
         }
-        let fortune_a = 1.0 + rules.jitter * (2.0 * rng.unit_f64() - 1.0);
-        let fortune_d = 1.0 + rules.jitter * (2.0 * rng.unit_f64() - 1.0);
-        on_d.iter_mut().for_each(|k| *k *= fortune_a);
-        on_a.iter_mut().for_each(|k| *k *= fortune_d);
-        suffer(&mut a, &on_a, rules);
-        suffer(&mut d, &on_d, rules);
-        broken = (
-            a.morale < rules.break_morale || a.men() <= 0.0,
-            d.morale < rules.break_morale || d.men() <= 0.0,
-        );
-        if broken.0 || broken.1 {
-            break;
-        }
-    }
-    let winner = match broken {
-        (true, false) => Winner::Defender,
-        (false, true) => Winner::Attacker,
-        // Both break, or neither: the steadier side holds the field; the
-        // attacker must do better than the defender to win.
-        _ => {
-            if a.morale > d.morale + wall_hold {
-                Winner::Attacker
-            } else {
-                Winner::Defender
-            }
-        }
-    };
-
-    // Rout and pursuit.
-    let (winning, losing) = match winner {
-        Winner::Attacker => (&a, &mut d),
-        Winner::Defender => (&d, &mut a),
-    };
-    let remaining = losing.men();
-    if remaining > 0.0 {
-        let chasers = winning.cavalry_men() / remaining;
-        let fraction = (rules.pursuit_base + rules.pursuit_per_cavalry * chasers).min(1.0);
-        let mut kills = vec![0.0; losing.fighters.len()];
-        spread(
-            remaining * fraction,
-            losing,
-            |f| match f.profile.family {
-                UnitFamily::Cavalry | UnitFamily::HorseArchers => 0.3,
-                _ => 1.0,
-            },
-            |_| 1.0,
-            &mut kills,
-        );
-        for (fighter, kill) in losing.fighters.iter_mut().zip(kills) {
-            fighter.men -= kill.min(fighter.men);
+        d.damage *= match terrain {
+            Some(t) => t.defender,
+            None if context.defender_terrain_bonus => rules.legacy_defender_bonus,
+            None => 1.0,
+        };
+        Matchup {
+            attacker: attacker.0,
+            defender: defender.0,
+            attacker_host: a,
+            defender_host: d,
+            conditions,
+            rules,
+            context,
+            terrain,
         }
     }
 
-    let won_a = winner == Winner::Attacker;
-    let a_losses = capped_losses(&a, won_a, rules);
-    let d_losses = capped_losses(&d, !won_a, rules);
-    let mut outcome = |side: &Side, enemy: &Side, power: f64, losses: Vec<u32>, won: bool| {
-        let total_losses = losses.iter().sum();
-        let morale_delta = if won { 5 } else { -20 };
-        let morale_after = average(
-            side.units
-                .iter()
-                .map(|u| (f64::from(u.morale) + f64::from(morale_delta)).max(0.0)),
-        );
-        let routed = !won && morale_after < ROUT_MORALE;
-        let general_captured = !won
-            && side.general_command > 0
-            && rng.below(100)
-                < capture_chance_percent(enemy.general_intrigue, side.general_intrigue);
-        SideOutcome {
-            power,
-            losses,
-            total_losses,
-            morale_delta,
-            routed,
-            general_captured,
-            general_killed: false,
+    /// Fights the prepared battle once; deterministic for a given RNG state.
+    pub fn play(&self, rng: &mut CampaignRng) -> BattleResult {
+        let (rules, context, attacker, defender) =
+            (self.rules, self.context, self.attacker, self.defender);
+        let weather = self.conditions.weather.unwrap_or_else(|| {
+            self.conditions
+                .season
+                .map_or(Weather::Clear, |season| draw_weather(rules, season, rng))
+        });
+        let field = Field {
+            rules,
+            weather,
+            terrain_charge: self.terrain.map_or(1.0, |t| t.charge),
+            terrain_ranged: self.terrain.map_or(1.0, |t| t.ranged),
+        };
+        let mut a = self.attacker_host.clone();
+        let mut d = self.defender_host.clone();
+        let attacker_power = estimate(&a, &d, &field);
+        let defender_power = estimate(&d, &a, &field);
+        // Fog of war: one draw per side for the whole battle (A6-L1, ADR 0181),
+        // so that nearly equal forces do not always end the same way.
+        if rules.battle_fortune > 0.0 {
+            a.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
+            d.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
         }
-    };
-    let attacker_outcome = outcome(attacker, defender, attacker_power, a_losses, won_a);
-    let defender_outcome = outcome(defender, attacker, defender_power, d_losses, !won_a);
-    BattleResult {
-        winner,
-        attacker: attacker_outcome,
-        defender: defender_outcome,
+
+        // Phases: volleys, one charge, melee rounds.
+        #[derive(Clone, Copy)]
+        enum Phase {
+            Volley,
+            Charge,
+            Melee,
+        }
+        let phases = std::iter::repeat_n(Phase::Volley, rules.volleys as usize)
+            .chain(std::iter::once(Phase::Charge))
+            .chain(std::iter::repeat_n(
+                Phase::Melee,
+                rules.melee_rounds as usize,
+            ));
+        let mut broken = (false, false);
+        // A6 integration: where neither side breaks, standing walls hold the
+        // place for the garrison (an assault must carry them or break it).
+        let wall_hold = if context.walls {
+            rules.wall_hold_morale
+                * rules.wall_stand(
+                    context.wall.level,
+                    context.wall.breach_percent,
+                    context.wall.engines_ready_percent,
+                )
+        } else {
+            0.0
+        };
+        for phase in phases {
+            let mut on_d = vec![0.0; d.fighters.len()];
+            let mut on_a = vec![0.0; a.fighters.len()];
+            match phase {
+                Phase::Volley => {
+                    fire(&field, &a, &d, 1.0, &mut on_d);
+                    fire(&field, &d, &a, 1.0, &mut on_a);
+                }
+                Phase::Charge => {
+                    let mut back_on_a = vec![0.0; a.fighters.len()];
+                    let mut back_on_d = vec![0.0; d.fighters.len()];
+                    charge(&field, &a, &d, &mut on_d, &mut back_on_a);
+                    charge(&field, &d, &a, &mut on_a, &mut back_on_d);
+                    on_a.iter_mut().zip(back_on_a).for_each(|(k, b)| *k += b);
+                    on_d.iter_mut().zip(back_on_d).for_each(|(k, b)| *k += b);
+                }
+                Phase::Melee => {
+                    melee(&field, &a, &d, &mut on_d);
+                    melee(&field, &d, &a, &mut on_a);
+                }
+            }
+            let fortune_a = 1.0 + rules.jitter * (2.0 * rng.unit_f64() - 1.0);
+            let fortune_d = 1.0 + rules.jitter * (2.0 * rng.unit_f64() - 1.0);
+            on_d.iter_mut().for_each(|k| *k *= fortune_a);
+            on_a.iter_mut().for_each(|k| *k *= fortune_d);
+            suffer(&mut a, &on_a, rules);
+            suffer(&mut d, &on_d, rules);
+            broken = (
+                a.morale < rules.break_morale || a.men() <= 0.0,
+                d.morale < rules.break_morale || d.men() <= 0.0,
+            );
+            if broken.0 || broken.1 {
+                break;
+            }
+        }
+        let winner = match broken {
+            (true, false) => Winner::Defender,
+            (false, true) => Winner::Attacker,
+            // Both break, or neither: the steadier side holds the field; the
+            // attacker must do better than the defender to win.
+            _ => {
+                if a.morale > d.morale + wall_hold {
+                    Winner::Attacker
+                } else {
+                    Winner::Defender
+                }
+            }
+        };
+
+        // Rout and pursuit.
+        let (winning, losing) = match winner {
+            Winner::Attacker => (&a, &mut d),
+            Winner::Defender => (&d, &mut a),
+        };
+        let remaining = losing.men();
+        if remaining > 0.0 {
+            let chasers = winning.cavalry_men() / remaining;
+            let fraction = (rules.pursuit_base + rules.pursuit_per_cavalry * chasers).min(1.0);
+            let mut kills = vec![0.0; losing.fighters.len()];
+            spread(
+                remaining * fraction,
+                losing,
+                |f| match f.profile.family {
+                    UnitFamily::Cavalry | UnitFamily::HorseArchers => 0.3,
+                    _ => 1.0,
+                },
+                |_| 1.0,
+                &mut kills,
+            );
+            for (fighter, kill) in losing.fighters.iter_mut().zip(kills) {
+                fighter.men -= kill.min(fighter.men);
+            }
+        }
+
+        let won_a = winner == Winner::Attacker;
+        let a_losses = capped_losses(&a, won_a, rules);
+        let d_losses = capped_losses(&d, !won_a, rules);
+        let mut outcome = |side: &Side, enemy: &Side, power: f64, losses: Vec<u32>, won: bool| {
+            let total_losses = losses.iter().sum();
+            let morale_delta = if won { 5 } else { -20 };
+            let morale_after = average(
+                side.units
+                    .iter()
+                    .map(|u| (f64::from(u.morale) + f64::from(morale_delta)).max(0.0)),
+            );
+            let routed = !won && morale_after < ROUT_MORALE;
+            let general_captured = !won
+                && side.general_command > 0
+                && rng.below(100)
+                    < capture_chance_percent(enemy.general_intrigue, side.general_intrigue);
+            SideOutcome {
+                power,
+                losses,
+                total_losses,
+                morale_delta,
+                routed,
+                general_captured,
+                general_killed: false,
+            }
+        };
+        let attacker_outcome = outcome(attacker, defender, attacker_power, a_losses, won_a);
+        let defender_outcome = outcome(defender, attacker, defender_power, d_losses, !won_a);
+        BattleResult {
+            winner,
+            attacker: attacker_outcome,
+            defender: defender_outcome,
+        }
     }
 }
 

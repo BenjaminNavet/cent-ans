@@ -9,12 +9,6 @@
 //! victory is the share of wins of the auto-resolver itself over
 //! `forecast_samples` resolutions on private generators ([`forecast_sides`]).
 //!
-//! LR-13: the forecast used to run the pre-N1 formula
-//! ([`battle_auto::side_power`] and one ±10 % roll, [`win_chance`]): any
-//! deficit beyond ~18 % of that rough power read "0 %", while the phased
-//! resolver (volleys, charge, melee, morale breaks, unit families, weather,
-//! terrain) often won those battles.
-//!
 //! [`CampaignState::withdraw_pending_battle`] lets the player decline a
 //! battle he started: an assault is called off and the siege goes on; an
 //! attacking army pulls back and its regiments lose
@@ -32,11 +26,6 @@ use crate::state::{BattleRequest, CampaignState};
 
 /// Morale lost by every regiment of an army that calls off its attack.
 pub const WITHDRAW_MORALE_LOSS: u8 = 10;
-/// Half-width of the auto-resolver's fortune of war (±10 %).
-const FORTUNE: f64 = 0.10;
-/// Integration steps of the win chance.
-const STEPS: usize = 400;
-
 /// Estimated balance of power of a pending battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BattleForecast {
@@ -72,32 +61,6 @@ pub struct Reinforcement {
     pub general: String,
 }
 
-/// Probability that `a × u1 ≥ d × u2` with `u1`, `u2` uniform on
-/// `[1 − FORTUNE, 1 + FORTUNE]`: the pre-N1 odds, kept for comparison
-/// (LR-13 probe) and for callers that only have two powers.
-pub fn win_chance(attacker_power: f64, defender_power: f64) -> f64 {
-    if defender_power <= f64::EPSILON {
-        return if attacker_power > f64::EPSILON {
-            1.0
-        } else {
-            0.5
-        };
-    }
-    if attacker_power <= f64::EPSILON {
-        return 0.0;
-    }
-    let low = 1.0 - FORTUNE;
-    let width = 2.0 * FORTUNE;
-    let ratio = attacker_power / defender_power;
-    let total: f64 = (0..STEPS)
-        .map(|i| {
-            let u1 = low + width * (i as f64 + 0.5) / STEPS as f64;
-            ((ratio * u1 - low) / width).clamp(0.0, 1.0)
-        })
-        .sum();
-    total / STEPS as f64
-}
-
 /// Odds of a battle between two given sides (LR-13).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SideOdds {
@@ -121,21 +84,19 @@ pub fn forecast_sides(
     crossing_rules: &RiverCrossingRules,
     seed: u64,
 ) -> SideOdds {
+    let matchup = battle_auto::Matchup::prepare(
+        attacker,
+        defender,
+        context,
+        conditions,
+        rules,
+        crossing_rules,
+    );
     let (mut wins, mut attacker_power, mut defender_power) = (0u64, 0.0, 0.0);
     let samples = u64::from(rules.forecast_samples.max(1));
     for run in 0..samples {
         let mut rng = CampaignRng::from_seed(seed.wrapping_add(run));
-        let result = battle_auto::resolve_with_crossings(
-            attacker.0,
-            attacker.1,
-            defender.0,
-            defender.1,
-            context,
-            conditions,
-            rules,
-            crossing_rules,
-            &mut rng,
-        );
+        let result = matchup.play(&mut rng);
         if result.winner == Winner::Attacker {
             wins += 1;
         }

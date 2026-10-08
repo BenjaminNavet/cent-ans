@@ -4,7 +4,6 @@
 //! See `docs/design/m6-technologies.md` § 2.
 
 use data_model::{EffectKind, GameData, ProvinceId, TechnologyId, UnitTypeId};
-use sim_campaign::battle_auto::{effective_armor, side_power};
 use sim_campaign::research::{self, effective_cost, BASE_RESEARCH_POINTS};
 use sim_campaign::test_support::{idle, start};
 use sim_campaign::{
@@ -285,8 +284,10 @@ fn technologies_strengthen_armies_in_battle() {
             .insert(tech(id));
     }
     let with = research::army_battle_side(&state, data, &army).unwrap();
-    assert!(effective_armor(&with) > effective_armor(&without));
-    assert!(side_power(&with, 30.0, 1.0) > side_power(&without, 30.0, 1.0));
+    let armor = |side: &sim_campaign::battle_auto::Side| -> u32 {
+        side.units.iter().map(|u| u32::from(u.armor)).sum()
+    };
+    assert!(armor(&with) > armor(&without));
     let bonus =
         research::tech_unit_bonus(&state, data, &france_id, data_model::UnitCategory::Cavalry);
     assert_eq!(bonus.armor, 5.0);
