@@ -885,8 +885,8 @@
     "wayside_cross": 6,
     "milestone": 2
    },
-   "spacing_px": 15,
-   "chance": 0.55,
+   "spacing_px": 38,
+   "chance": 0.5,
    "lateral_px": [
     0.04,
     0.12
@@ -925,8 +925,8 @@
    "types": {
     "wayside_shrine": 1
    },
-   "spacing_px": 34,
-   "chance": 0.5,
+   "spacing_px": 90,
+   "chance": 0.4,
    "lateral_px": [
     0.04,
     0.12
@@ -945,8 +945,8 @@
     "pack_train": 1,
     "cart_ox": 2
    },
-   "spacing_px": 26,
-   "chance": 0.4,
+   "spacing_px": 70,
+   "chance": 0.35,
    "lateral_px": [
     0.0,
     0.05
@@ -980,7 +980,7 @@
    "types": {
     "pilgrim_hostel": 1
    },
-   "spacing_px": 50,
+   "spacing_px": 150,
    "chance": 0.35,
    "lateral_px": [
     0.06,
@@ -1023,6 +1023,7 @@
    ],
    "offset_px": 0.18,
    "chance": 0.3,
+   "allow_river": true,
    "seed": 18
   },
   {
@@ -1033,8 +1034,8 @@
     "fish_trap_stakes": 2,
     "drying_racks_fish": 1
    },
-   "spacing_px": 7,
-   "chance": 0.3,
+   "spacing_px": 16,
+   "chance": 0.22,
    "inland_px": 0.35,
    "seed": 21,
    "provinces_resource": [
@@ -1049,8 +1050,8 @@
     "signal_tower": 2,
     "beacon_hill": 1
    },
-   "spacing_px": 34,
-   "chance": 0.35,
+   "spacing_px": 70,
+   "chance": 0.3,
    "inland_px": 0.6,
    "seed": 22,
    "min_height_m": 25,
@@ -1081,8 +1082,8 @@
    "types": {
     "shipwreck": 1
    },
-   "spacing_px": 30,
-   "chance": 0.2,
+   "spacing_px": 70,
+   "chance": 0.15,
    "inland_px": 0.25,
    "seed": 24,
    "min_settlement_px": 2.0
@@ -1093,8 +1094,8 @@
    "types": {
     "tidal_mill": 1
    },
-   "spacing_px": 26,
-   "chance": 0.25,
+   "spacing_px": 50,
+   "chance": 0.2,
    "inland_px": 0.35,
    "seed": 25,
    "climates": [
@@ -1393,12 +1394,12 @@
      45.0447
     ],
     [
-     2.5686,
-     44.5992
+     2.3978,
+     44.599
     ],
     [
-     -0.9,
-     43.2
+     1.0833,
+     44.105
     ],
     [
      -1.3198,
@@ -1416,8 +1417,8 @@
    "nodes": [
     "set_vezelay",
     "set_la_chaise_dieu",
-    "set_estaing",
-    "set_abbaye_de_sauvelade",
+    "set_conques",
+    "set_montcuq",
     "set_roncesvalles"
    ]
   },

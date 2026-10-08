@@ -44,7 +44,7 @@ def bake(path: Path = DECOR_PATH) -> dict:
         if "lonlat" in site:
             site["px"] = lonlat_to_px(*site["lonlat"], map_doc, transformer)
     for rule in document.get("rules", []):
-        if rule.get("mode") == "route":
+        if rule.get("mode") == "route" and "waypoints" in rule:
             nodes: list[str] = []
             for lon, lat in rule["waypoints"]:
                 node = nearest_settlement(

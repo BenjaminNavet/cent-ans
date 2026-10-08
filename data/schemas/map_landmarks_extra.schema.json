@@ -74,6 +74,7 @@
         "min_height_m": {"type": "number"},
         "max_height_m": {"type": "number"},
         "min_settlement_px": {"type": "number", "minimum": 0, "description": "Distance minimale à une colonie (px carte)."},
+        "allow_river": {"type": "boolean", "description": "Accepte un point dans le lit d'un fleuve (ponts)."},
         "near_river_px": {"type": "number", "exclusiveMinimum": 0, "description": "Distance maximale à un fleuve (px carte)."},
         "from_year": {"type": "integer"},
         "to_year": {"type": "integer"},
