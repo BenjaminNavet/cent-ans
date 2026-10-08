@@ -665,15 +665,15 @@ func _journal_line(event: Dictionary, text: String) -> String:
 	var kind: String = str(event.get("kind", ""))
 	var line: String
 	if kind == "battle" or kind == "siege_started" or kind == "province_captured":
-		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [GlyphIcon.bbcode("glyph_swords", "⚔"), text]
+		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_swords", "⚔"), text]
 	elif kind == "revolt":
-		line = "[color=#a1121a][b]%s %s[/b][/color]" % [GlyphIcon.bbcode("glyph_flag", "⚑"), text]
+		line = "[color=#a1121a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_flag", "⚑"), text]
 	elif kind == "plague":
 		line = "[color=#4a6b2a][b]☠ %s[/b][/color]" % text
 	elif kind == "famine":
 		line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
 	elif kind == "building_completed":
-		line = "[color=#1a5c8b]%s %s[/color]" % [GlyphIcon.bbcode("glyph_hammer", "⚒"), text]
+		line = "[color=#1a5c8b]%s %s[/color]" % [InkGlyph.bbcode("glyph_hammer", "⚒"), text]
 	elif kind == "birth":
 		line = "[color=#2a7a4a]✚ %s[/color]" % text
 	elif kind == "marriage":
@@ -687,23 +687,23 @@ func _journal_line(event: Dictionary, text: String) -> String:
 	elif kind == "trait_acquired":
 		line = "[color=#2a5a7a]✦ %s[/color]" % text
 	elif kind == "skill_learned":
-		line = "[color=#2a5a7a]%s %s[/color]" % [GlyphIcon.bbcode("glyph_star", "★"), text]
+		line = "[color=#2a5a7a]%s %s[/color]" % [InkGlyph.bbcode("glyph_star", "★"), text]
 	elif kind == "appointment":
-		line = "[color=#4a3a10]%s %s[/color]" % [GlyphIcon.bbcode("glyph_flag", "⚑"), text]
+		line = "[color=#4a3a10]%s %s[/color]" % [InkGlyph.bbcode("glyph_flag", "⚑"), text]
 	elif kind == "war_declared":
-		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [GlyphIcon.bbcode("glyph_swords", "⚔"), text]
+		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_swords", "⚔"), text]
 	elif kind == "peace_signed":
 		line = "[color=#2a6a2a][b]☮ %s[/b][/color]" % text
 	elif kind == "alliance_formed" or kind == "vassalage":
-		line = "[color=#1a3a8b][b]%s %s[/b][/color]" % [GlyphIcon.bbcode("glyph_fleur", "⚜"), text]
+		line = "[color=#1a3a8b][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_fleur", "⚜"), text]
 	elif kind == "alliance_broken" or kind == "vassal_rebellion":
 		line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
 	elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
-		line = "[color=#4a3a10]%s %s[/color]" % [GlyphIcon.bbcode("glyph_letter", "✉"), text]
+		line = "[color=#4a3a10]%s %s[/color]" % [InkGlyph.bbcode("glyph_letter", "✉"), text]
 	elif kind == "trade":  # C5
 		line = "[color=#4a3a10]⚓ %s[/color]" % text
 	elif kind == "excommunication" or kind == "schism" or kind == "heresy":
-		line = "[color=#5a2a6a][b]%s %s[/b][/color]" % [GlyphIcon.bbcode("glyph_cross", "✠"), text]
+		line = "[color=#5a2a6a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_cross", "✠"), text]
 	elif kind == "chronicle":  # M10
 		line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
 	elif kind == "technology_researched":
@@ -712,7 +712,7 @@ func _journal_line(event: Dictionary, text: String) -> String:
 		line = "[color=#4a3a10]%s[/color]" % text
 	elif SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
 		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
-		line = "[color=%s]%s %s[/color]" % [style["color"], GlyphIcon.bbcode(str(style.get("icon", "")), str(style["glyph"])), text]
+		line = "[color=%s]%s %s[/color]" % [style["color"], InkGlyph.bbcode(str(style.get("icon", "")), str(style["glyph"])), text]
 	else:
 		line = text
 	return line

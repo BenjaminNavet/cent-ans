@@ -1,4 +1,4 @@
-class_name GlyphIcon
+class_name InkGlyph
 extends RefCounted
 
 ## DN ui-prod : icônes à l'encre (groupe `glyph` de `data/ui/icons_ink.json`) à la place des

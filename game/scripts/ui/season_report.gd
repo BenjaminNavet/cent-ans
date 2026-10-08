@@ -345,7 +345,7 @@ func _render() -> void:
 	title_label.text = "Rapport de saison — %s" % _title
 	_update_vignette()
 	for group in groups:
-		var heading_parts := GlyphIcon.heading_row(str(group.get("icon", "")), str(group["glyph"]), str(group["title"]))
+		var heading_parts := InkGlyph.heading_row(str(group.get("icon", "")), str(group["glyph"]), str(group["title"]))
 		var heading: Label = heading_parts["label"]
 		UiType.apply(heading, UiType.HEADING)
 		heading.add_theme_color_override("font_color", HudStyle.RUBRIC)

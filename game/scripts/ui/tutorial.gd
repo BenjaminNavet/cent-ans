@@ -187,7 +187,7 @@ func show_step(step: Dictionary, index: int, total: int) -> void:
 
 ## Objectif rempli : bref retour visuel avant l'étape suivante (le contrôleur enchaîne).
 func mark_done() -> void:
-	objective_label.text = "[color=#2a6a2a][b]%s Objectif rempli.[/b][/color]" % GlyphIcon.bbcode("glyph_check", "✔")
+	objective_label.text = "[color=#2a6a2a][b]%s Objectif rempli.[/b][/color]" % InkGlyph.bbcode("glyph_check", "✔")
 
 
 func set_target(new_target: Dictionary) -> void:
