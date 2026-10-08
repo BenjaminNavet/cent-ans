@@ -13,11 +13,11 @@
     "enabled": true,
     "base_height": 34.0,
     "layer_height": 1.6,
-    "opacity": 0.62,
-    "soft": 0.16,
-    "fray": 0.1,
-    "fray_scale": 0.28,
-    "layer_step": 0.075,
+    "opacity": 0.6,
+    "soft": 0.2,
+    "fray": 0.05,
+    "fray_scale": 0.08,
+    "layer_step": 0.06,
     "gain": 5.0,
     "distance_in": [
       260.0,
@@ -37,11 +37,13 @@
       0.56,
       0.67
     ],
-    "description": "Champ lu dans le même bruit que les ombres de cumulus RV-C (bloc clouds de campaign_map.json : cumulus_scale, cover, drift) ; trois plans empilés.",
+    "description": "Bancs : champ RV-C basse fréquence (domaine déformé, dérive et champ régional RV-C) seuillé haut, mer pénalisée ; trois plans empilés ; opacité max au centre 0,6.",
     "bank_band": [
-      0.42,
-      0.62
-    ]
+      0.66,
+      0.8
+    ],
+    "bank_scale": 0.45,
+    "sea_penalty": 0.14
   },
   "cirrus": {
     "enabled": true,
@@ -130,7 +132,7 @@
     "seed": 31
   },
   "aurora": {
-    "enabled": true,
+    "enabled": false,
     "north_margin_px": 0.0,
     "height": [
       0.0,

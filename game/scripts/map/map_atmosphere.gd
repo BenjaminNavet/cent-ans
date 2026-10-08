@@ -35,6 +35,7 @@ var _fog: MultiMeshInstance3D
 var _aurora: MeshInstance3D
 var _wet_sky := 0.0
 var _focus_kind := "clear"
+var _provinces_bound := false
 
 
 static func data() -> Dictionary:
@@ -140,6 +141,7 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	if not enabled:
 		return
 	var clear := 1.0 - parchment
+	_bind_provinces()
 	var focus_rule: Dictionary = tuning.get("focus_clear", {})
 	var radius := distance * float(focus_rule.get("radius_per_distance", 0.0))
 	var feather := maxf(distance * float(focus_rule.get("feather_per_distance", 0.2)), 1.0)
@@ -186,6 +188,22 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 		material.set_shader_parameter("atm_clear_feather", feather)
 		material.set_shader_parameter("atm_sun_dir", sun_dir)
 		material.set_shader_parameter("atm_sun_color", Vector3(sun_color.r, sun_color.g, sun_color.b))
+
+
+## Carte des provinces du sol (mer = 0) pour réduire les nuages en pleine mer ; lue une fois.
+func _bind_provinces() -> void:
+	if _provinces_bound or _cumulus == null or _weather_view == null:
+		return
+	var terrain: Variant = _weather_view.get("_terrain")
+	if terrain == null or terrain.material == null:
+		return
+	var ids: Variant = terrain.material.get_shader_parameter("province_ids")
+	if ids == null:
+		return
+	_provinces_bound = true
+	var material := _cumulus.material_override as ShaderMaterial
+	material.set_shader_parameter("province_ids", ids)
+	material.set_shader_parameter("have_provinces", true)
 
 
 # --- Construction ---------------------------------------------------------------------------
@@ -242,10 +260,10 @@ func _build_cumulus() -> void:
 		_cumulus.multimesh.set_instance_transform(index, transform)
 		_cumulus.multimesh.set_instance_custom_data(index, Color(index * 0.5, 0.0, 0.0, 0.0))
 	var material := _cumulus.material_override as ShaderMaterial
-	for key: String in ["opacity", "soft", "fray", "fray_scale", "layer_step", "gain"]:
+	for key: String in ["opacity", "soft", "fray", "fray_scale", "layer_step", "gain", "bank_scale", "sea_penalty"]:
 		if rule.has(key):
 			material.set_shader_parameter(key, float(rule[key]))
-	material.set_shader_parameter("bank_band", pair(rule.get("bank_band"), Vector2(0.42, 0.62)))
+	material.set_shader_parameter("bank_band", pair(rule.get("bank_band"), Vector2(0.66, 0.8)))
 	material.set_shader_parameter("lit_color", color3(rule.get("lit_color"), Vector3(1.0, 0.97, 0.92)))
 	material.set_shader_parameter("shade_color", color3(rule.get("shade_color"), Vector3(0.56, 0.62, 0.72)))
 

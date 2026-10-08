@@ -66,7 +66,7 @@ func _check_build() -> void:
 	var cumulus := atmosphere.get_node_or_null("CumulusField") as MultiMeshInstance3D
 	_check(cumulus != null and cumulus.multimesh.instance_count == 3 and atmosphere.cumulus_material() != null, "champ de cumulus en trois plans")
 	_check(atmosphere.get_node_or_null("Cirrus") != null, "cirrus")
-	_check(atmosphere.get_node_or_null("Aurora") != null, "aurore")
+	_check((atmosphere.get_node_or_null("Aurora") != null) == bool(MapAtmosphere.data()["aurora"]["enabled"]), "aurore selon les données")
 	var fog := atmosphere.get_node_or_null("RiverFog") as MultiMeshInstance3D
 	_check(fog != null and fog.multimesh.instance_count <= int(MapAtmosphere.data()["river_fog"]["max_banks"]), "bancs de fleuve plafonnés")
 	# Rideaux : provinces en pluie ou orage seulement, plafond, orages d'abord.

@@ -117,6 +117,13 @@
         },
         "bank_band": {
           "$ref": "#/$defs/pair"
+        },
+        "bank_scale": {
+          "$ref": "#/$defs/positive"
+        },
+        "sea_penalty": {
+          "type": "number",
+          "minimum": 0
         }
       }
     },
