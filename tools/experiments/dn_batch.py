@@ -104,6 +104,16 @@ def append_jsonl(path: Path, record: dict) -> None:
 
 
 CATALOG_NAME = ""
+SPEND_CAP_USD = float(os.environ.get("DN_FAL_CAP_USD", "29.5"))
+
+
+def check_cap() -> None:
+    """Refuse a fal call when the cumulative spend of ``fal_spend.jsonl`` reached the cap."""
+    path = DN / "fal_spend.jsonl"
+    if path.exists():
+        total = sum(json.loads(line)["usd"] for line in path.read_text().splitlines() if line)
+        if total >= SPEND_CAP_USD:
+            raise RuntimeError(f"fal cap {SPEND_CAP_USD} $ reached ({total:.2f} $)")
 
 
 def gen_event(entry_id: str, section: str, record: dict) -> None:
@@ -207,6 +217,7 @@ def fal_image(entry: dict, seed: int, target: Path) -> None:
     if target.exists():
         return
     try:
+        check_cap()
         with timed(entry["id"], "zimage-fal", seed=seed):
             result = fal_client.subscribe(
                 FAL_IMAGE_ENDPOINT,
@@ -499,6 +510,7 @@ def fal_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
     """One ``fal-ai/trellis`` call (0.02 $), glb saved to ``target``, spend logged."""
     import fal_client
 
+    check_cap()
     with timed(entry_id, "trellis-fal", seed=seed):
         url = fal_client.upload_file(str(cut))
         result = fal_client.subscribe(
@@ -599,6 +611,7 @@ def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
     import fal_client
     from PIL import Image
 
+    check_cap()
     entry_id = entry["id"]
     views = out_dir / "views"
     views.mkdir(exist_ok=True)
