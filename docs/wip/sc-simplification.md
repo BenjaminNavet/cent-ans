@@ -96,3 +96,6 @@ main avancé de 93 commits DN depuis la base de la vague 7 (07b1c0bd8), aucun da
 
 ## Vague 9 (09/10, 8 agents, charge redescendue)
 siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 bundle), battleai (BA6 + data/rules/battle_ai.json), missions (CC13, ADR 0207), devflags (PF-06 + BT4), saves (CC6). Disque 75 Go : core/target supprimé en fin de lot.
+- Vague 9 fusionnés : siegedet (course FireRules::install dans les tests, install_for_thread ; test assaut engin prêt), battleai (68 constantes → data/rules/battle_ai.json), codex (bundle data/codex_bundle.json, `cent-ans codex-bundle`, ~230 → ~60 ms), missions (ADR 0207, 6 gabarits en data). Hors lot : ga3_fal_figure importe fal_client paresseusement.
+- Lancés ensuite (charge redescendue) : gb5 (trait BattleSim/Naval + Columns), ui8 (ProvinceSection, sections restantes), agents (CA3 ActionSpec, ADR 0209). En cours : movement, gdtests, devflags, saves.
+- À faire après fusions Rust : core/build.sh + import + smoke sur main.
