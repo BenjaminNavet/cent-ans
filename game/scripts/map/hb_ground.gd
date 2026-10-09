@@ -72,8 +72,34 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	material.set_shader_parameter("hb_albedo", arrays["albedo"])
 	material.set_shader_parameter("hb_biomes", ImageTexture.create_from_image(biomes))
 	material.set_shader_parameter("hb_table", ImageTexture.create_from_image(table))
+	apply_view((mix as Dictionary).get("view", {}), material)
 	material.set_shader_parameter("has_hb", true)
 	return true
+
+
+## ADR 0253 : réglages de lisibilité des champs peints (bloc `view` du mélange) -> uniforms
+## `hb_*` ; une clé absente laisse la valeur par défaut du shader.
+const VIEW_UNIFORMS := {
+	"fade_start": "hb_fade_start",
+	"fade_end": "hb_fade_end",
+	"hue_keep": "hb_hue_keep",
+	"cell_jitter": "hb_cell_jitter",
+	"cell_hue": "hb_cell_hue",
+	"patch_gain": "hb_patch_gain",
+	"patch_start": "hb_patch_start",
+	"patch_end": "hb_patch_end",
+	"far_hedge": "hb_far_hedge",
+	"open_farm": "hb_open_farm",
+	"cell_scale": "hb_cell_scale",
+}
+
+
+static func apply_view(view: Variant, material: ShaderMaterial) -> void:
+	if not view is Dictionary:
+		return
+	for key in VIEW_UNIFORMS:
+		if (view as Dictionary).has(key):
+			material.set_shader_parameter(VIEW_UNIFORMS[key], float(view[key]))
 
 
 ## TX (ADR 0243) : source du parcellaire demandée par le mélange (`parcels_source`, « hb » par

@@ -37,6 +37,11 @@ uniform float hb_cell_hue = 0.3;        // variation de teinte (jaune ↔ vert) 
 uniform float hb_season_strength = 0.8; // TB1 : part de la saison sur les matières (0 : matières d'une seule saison)
 uniform float hb_season_gain = 1.0;     // TB1 : luminance des couleurs de saison des parcelles
 uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à travers la neige
+uniform float hb_patch_gain = 0.0;      // champs peints lisibles (ADR 0253) : part de la couleur de culture de la parcelle à distance
+uniform float hb_patch_start = 0.05;    // empreinte où la couleur de culture commence à remplacer la matière
+uniform float hb_patch_end = 0.16;      // empreinte où elle est pleine
+uniform float hb_open_farm = 0.0;       // ADR 0253 : part minimale de cultures sur les terres ouvertes (le splat range presque tout en prairie)
+uniform float hb_far_hedge = 0.0;       // ADR 0253 : visibilité minimale des haies à distance (0 : fines comme un pixel, pâles)
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 // ME8 : ligne de paysage agricole au point p (px carte), 0 sans paysage.
@@ -221,7 +226,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec3 wild = mix(hb_sample(wild_a.r, wild_a.b, p, dpx, dpy, ang_r * 0.3),
 		hb_sample(wild_b.r, wild_b.b, p, dpx, dpy, 1.1), wild_mix);
 	vec3 open_col = wild * pow(k_wild, vec3(hb_season_strength));  // TB1
-	bool farmed = h_farm < farm_share * presence;
+	bool farmed = h_farm < max(farm_share, hb_open_farm) * presence;
 	if (farmed) {
 		float layer = -1.0;
 		float tile = 120.0;
@@ -260,13 +265,22 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 				vec3 season_col = season_field(ref, cls, hb_hash(cid + 61.3)) * hb_season_gain;
 				open_col = mix(open_col, season_col * grain, hb_season_strength * (1.0 - sw.y));
 			}
+			// ADR 0253 : à distance la matière n'est que sa couleur moyenne (olive uniforme) ; la parcelle
+			// prend alors la couleur de sa culture (blé, chaume, labour, jachère), nuancée par parcelle,
+			// pour que le patchwork reste lisible de la vue de jeu jusqu'à la vue régionale.
+			float patch_k = hb_patch_gain * smoothstep(hb_patch_start, hb_patch_end, footprint);
+			if (patch_k > 0.001) {
+				float lumv = 1.0 + 2.0 * hb_cell_jitter * (hb_hash(cid + 3.3) - 0.5);
+				vec3 far_col = season_field(crop_refs[cls].rgb, cls, hb_hash(cid + 61.3)) * hb_season_gain * lumv;
+				open_col = mix(open_col, far_col, patch_k);
+			}
 			// Haies et talus sur les bords des parcelles cultivées.
 			float edge_m = edge_u * cell * hb_meters_px;
 			float px_m = footprint * hb_meters_px;
 			float hedge_w = hb_hedge_m * hedge_k;
 			// Couverture de la haie dans le pixel : reste lisible (plus pâle) quand elle est plus fine
 			// qu'un pixel au lieu de disparaître.
-			float hedge = hedge_k > 0.01 ? (1.0 - smoothstep(0.0, max(px_m, hedge_w), edge_m - hedge_w)) * clamp(2.0 * hedge_w / max(px_m, 1e-3), 0.35, 1.0) : 0.0;
+			float hedge = hedge_k > 0.01 ? (1.0 - smoothstep(0.0, max(px_m, hedge_w), edge_m - hedge_w)) * clamp(2.0 * hedge_w / max(px_m, 1e-3), max(0.35, hb_far_hedge), 1.0) : 0.0;
 			float balk = 1.0 - smoothstep(1.5, 1.5 + px_m, edge_m);
 			open_col = mix(open_col, open_col * 0.82, balk * 0.6);
 			// DN-SOL : liséré de parcelle lisible à moyenne distance (maquette), estompé au loin.

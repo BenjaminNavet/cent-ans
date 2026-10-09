@@ -88,6 +88,68 @@
         "additionalProperties": false
       }
     },
+    "view": {
+      "type": "object",
+      "description": "ADR 0253 : lisibilité des champs peints (uniforms hb_* du sol) : fondu vers la carte de couleur (empreinte px carte / px écran), teinte gardée, variation par parcelle, couleur de culture à distance, haies minimales.",
+      "properties": {
+        "fade_start": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "fade_end": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "hue_keep": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cell_jitter": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cell_hue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "patch_gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "patch_start": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "patch_end": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "far_hedge": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "open_farm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "cell_scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 10
+        }
+      },
+      "additionalProperties": false
+    },
     "parcels_source": {
       "enum": [
         "hb",

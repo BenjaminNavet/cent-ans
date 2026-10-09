@@ -363,6 +363,19 @@
       ]
     }
   },
+  "view": {
+    "fade_start": 0.3,
+    "fade_end": 0.8,
+    "hue_keep": 0.15,
+    "cell_jitter": 0.28,
+    "cell_hue": 0.35,
+    "patch_gain": 0.65,
+    "patch_start": 0.05,
+    "patch_end": 0.16,
+    "far_hedge": 0.4,
+    "open_farm": 0.8,
+    "cell_scale": 4.2
+  },
   "parcels_source": "tx",
   "tx_overrides": {
     "4": {
