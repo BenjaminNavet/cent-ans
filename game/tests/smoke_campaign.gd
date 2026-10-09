@@ -200,7 +200,7 @@ func _run_agents() -> void:
 	_check(ctl.has_token(spy), "the spy token should survive a refresh")
 	ctl.select_agent(spy)
 	_check(ctl.selected_agent == spy and ctl.bar.visible, "selecting the spy should show the action bar")
-	_check(ctl.action_button_count() == 4, "a spy has 4 actions, got %d" % ctl.action_button_count())
+	_check(ctl.action_button_count() == 7, "a spy has 7 actions, got %d" % ctl.action_button_count())
 	_check(ctl.markers.marker_count() > 0, "reachable rings expected for the spy")
 	var percent_shown := false
 	for option in sim.call("get_agent_actions", spy):
