@@ -1,4 +1,4 @@
-# 0272 — Champs peints lisibles à distance de jeu
+# 0290 — Champs peints lisibles à distance de jeu
 
 ## Contexte
 Les modèles 3D de parcelles (`FieldLayer`, ADR 0222) sont coupés (`dn_fields.json` `"enabled": false`) : les champs ne sont plus que peints dans le sol (`hb_ground.gdshaderinc`, parcellaire de Voronoi ADR 0213, matières TX ADR 0243). De rig 15 à 60 le sol était un olive presque uniforme : (1) les matières TX, moyennées par le mipmapping, n'ont presque plus de contraste entre cultures ; (2) le fondu vers la carte de couleur commençait à 0,14 d'empreinte (px carte / px écran) ; (3) les haies, plus fines qu'un pixel, étaient pâles.
