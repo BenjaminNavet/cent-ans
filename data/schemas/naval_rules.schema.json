@@ -24,6 +24,10 @@
       "type": "number",
       "minimum": 0
     },
+    "crew_ammo_cap": {
+      "type": "integer",
+      "minimum": 1
+    },
     "ranged_lethality": {
       "type": "number",
       "minimum": 0
@@ -315,6 +319,7 @@
     "crossbow_range_m",
     "bow_reload_s",
     "crossbow_reload_s",
+    "crew_ammo_cap",
     "ranged_lethality",
     "armor_vs_ranged",
     "height_per_m",

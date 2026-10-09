@@ -56,7 +56,7 @@ impl Crew {
             ranged: f64::from(unit.stats.ranged),
             armor: f64::from(unit.stats.armor),
             range,
-            ammo: f64::from(unit.stats.ammo.min(60)),
+            ammo: f64::from(unit.stats.ammo.min(rules.ammo_cap)),
             missile: if bolt {
                 MissileKind::Bolt
             } else {
@@ -77,6 +77,8 @@ impl Crew {
 pub struct RangeRules {
     pub bow: f64,
     pub crossbow: f64,
+    /// Most volleys a group carries aboard.
+    pub ammo_cap: u32,
 }
 
 /// Where a ship stands in the battle.

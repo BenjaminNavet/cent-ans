@@ -322,7 +322,7 @@ fn turns_to_starve(supplies: u8, drain: u8) -> u32 {
 }
 
 /// Wall damage per turn from the besiegers' engines (`siege_attack`).
-pub fn breach_per_turn(
+pub(crate) fn breach_per_turn(
     state: &CampaignState,
     data: &GameData,
     besiegers: &[ArmyId],

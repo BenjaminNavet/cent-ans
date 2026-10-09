@@ -112,6 +112,8 @@ pub struct NavalRules {
     /// Seconds between two volleys of bows / crossbows.
     pub bow_reload_s: f64,
     pub crossbow_reload_s: f64,
+    /// Volleys a shooter group carries aboard at most (caps the unit's `ammo`).
+    pub crew_ammo_cap: u32,
     /// Men killed per shooter and per point of `ranged` / 100, per volley,
     /// at point-blank range.
     pub ranged_lethality: f64,

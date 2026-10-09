@@ -39,6 +39,7 @@ impl Fleets {
         let ranges = RangeRules {
             bow: setup.rules.bow_range_m,
             crossbow: setup.rules.crossbow_range_m,
+            ammo_cap: setup.rules.crew_ammo_cap,
         };
         let mut ships = Vec::new();
         for side in SideId::BOTH {

@@ -4,6 +4,7 @@
   "crossbow_range_m": 160.0,
   "bow_reload_s": 6.0,
   "crossbow_reload_s": 12.0,
+  "crew_ammo_cap": 60,
   "ranged_lethality": 0.09,
   "armor_vs_ranged": 0.7,
   "height_per_m": 0.1,

@@ -33,10 +33,10 @@ GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crate
 ## CB sim-campaign
 CB1 | RIEN À FAIRE | settle_side_outcomes/losses_percent/retreat_losers n'existent plus nulle part dans core/ (grep `fn`), battle_flow absent : déjà refondu | - | -
 CB7 | PARTIEL | GameData::province_name/faction_name existent ; restes bridge (campaign_sim.rs, treaty, feudal), custom.rs faction_name, From<Season>/dist | core/crates/godot-bridge/src, sim-battle/src/custom.rs | oui
-CB8 | PARTIEL | hostile_settlement_cells toujours fonction non cachée, passe-plats/depart() à vérifier | core/crates/sim-campaign/src/march.rs, movement/ | oui
+CB8 | FAIT | hostile_settlement_cells toujours fonction non cachée, passe-plats/depart() à vérifier | core/crates/sim-campaign/src/march.rs, movement/ | oui ; RIEN À FAIRE : depart() n'existe plus ; hostile_blocker garde 4 appelants ; cache dans CampaignState = risque de périmé sans gain mesuré (PlanCache existe pour l'IA)
 CB10 | FAIT 7822c9ba6 | debug_stage_siege/landmark_siege/battle + debug_put_encounter_site regroupés dans src/staging.rs ; sg3_assault_probe.rs conservé (2 tests avec assertions, sonde en --ignored) | core/crates/sim-campaign/src/staging.rs | oui
-CB12 | PARTIEL | constantes naval en data faites ; mémo win_chance non vérifié | core/crates/sim-battle/src/naval | oui
-CB13 | PARTIEL | constantes siège/débarquement en data (movement) ; pub->pub(crate), doc Order non vérifiés | core/crates/sim-campaign/src | oui
+CB12 | FAIT | constantes naval en data faites ; mémo win_chance non vérifié | core/crates/sim-battle/src/naval | oui ; RIEN À FAIRE : win_chance (vue UI) simule 5 combats par requête distincte, jamais deux fois les mêmes entrées
+CB13 | FAIT | constantes siège/débarquement en data (movement) ; pub->pub(crate), doc Order non vérifiés | core/crates/sim-campaign/src | oui ; FAIT : breach_per_turn en pub(crate) (les autres pub sont utilisés par les tests d'intégration) ; Order déjà documenté
 PROBES | FAIT (sc/cc) | examples diplomacy_probe, dynasty_probe, income_probe (sim-campaign) ; tests century/settlements/ia_quality probes à revérifier | core/crates/sim-campaign/examples | oui
 
 ## BB sim-battle
@@ -130,7 +130,7 @@ AD7 | FAIT (ADR 0204, sc/veg) | vegetation V4 legacy (species None) + repli GD v
 AD8 | FAIT (sc/relief, ADR 0203) | relief_quadtree.gd repli GD (= PF-02), has_page mort | core/crates/relief-lod, game/scripts/map/relief_quadtree.gd | oui
 AD9 | PARTIEL | data-model/util.rs créé ; segment_distance et hash01 dupliqués dans vegetation/lib.rs, siege_fx.rs, splitmix bridge | core/crates/data-model/src/util.rs, vegetation/src/lib.rs | oui
 AD10 | FAIT f663a1c46 | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
-AD11 | PARTIEL | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui
+AD11 | FAIT | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui ; RIEN À FAIRE : fallback_edges/fallback_city_id sont testés (c4_settlements) et servent aux données réduites
 AD12 | FAIT 99a2b89fa | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui
 AD13 | PARTIEL | ai/campaign découpé ; doc restante (plan_field.rs 862 l) | core/crates/ai | oui
 
@@ -200,7 +200,7 @@ DT8 | PARTIEL | schémas town_footprint, forced_sea_edges, 4 orphelins à vérif
 SCH | PARTIEL | ~10 tests tools avec Draft202012Validator nu, 12 schémas sans registre | tools/tests, tools/cent_ans_tools/geo | non
 PRE | À FAIRE | test_relief_update bake tier3 5 vs 6 (autre session) | tools/tests/test_relief_update.py | non
 SIMSPLIT | PARTIEL | ai/plan_field.rs 862 l | core/crates/sim-battle/src/ai/plan_field.rs | oui
-NAVAL-reste | PARTIEL | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui
+NAVAL-reste | FAIT | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui ; FAIT : crew_ammo_cap en data/naval/rules.json + schéma, pending en VecDeque
 BATTLEDEV | PARTIEL | RenderQuality.override_level/upscale_override, da6/site_render/fa_on (battle_vegetation GELÉ) | game/scripts/battle/battle_vegetation.gd | non
 UIKIT | PARTIEL | RichTooltip.thousands (encyclopedia), délégués make_panel/attach_plain | game/scripts/ui/rich_tooltip.gd | non
 BUGS-ouverts | À FAIRE | 2 tests Godot préexistants (cb0 golden ?), LOOKUPS2 FAIT (sc/lk2 : game/scripts propre, 2 lookups morts retirés dans tests pb1_turns/q8_start_faction) | game/scripts | non

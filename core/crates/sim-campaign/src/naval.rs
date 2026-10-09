@@ -10,7 +10,7 @@
 //! pools), control of the sea to the victor, blockade of the enemy's ports
 //! of a sea held (treasury toll each season).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 use data_model::{
     FactionId, GameData, Marines, NavalRules, SeaZoneId, SettlementId, ShipClassId, UnitTypeId,
@@ -59,8 +59,8 @@ pub struct NavalState {
     pub fleets: BTreeMap<FactionId, BTreeMap<ShipClassId, u32>>,
     #[serde(default)]
     pub control: BTreeMap<SeaZoneId, SeaControl>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub pending: Vec<NavalRequest>,
+    #[serde(default, skip_serializing_if = "VecDeque::is_empty")]
+    pub pending: VecDeque<NavalRequest>,
     /// Ports blockaded during the last season.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub blockaded: Vec<SettlementId>,
@@ -296,7 +296,7 @@ pub(crate) fn intercept(
     let player = state.player_faction.clone();
     let player_involved = faction == player || hostile == player;
     if player_involved && state.interactive_battles && state.ai_turn.is_none() {
-        state.naval.pending.push(request);
+        state.naval.pending.push_back(request);
         events.push(
             GameEvent::new(
                 EventKind::Battle,
@@ -943,10 +943,11 @@ impl CampaignState {
     }
 
     fn take_naval(&mut self, index: usize) -> Result<NavalRequest, NavalRequestError> {
-        if index >= self.naval.pending.len() {
-            return Err(NavalRequestError::Unknown(index));
-        }
-        let request = self.naval.pending.remove(index);
+        let request = self
+            .naval
+            .pending
+            .remove(index)
+            .ok_or(NavalRequestError::Unknown(index))?;
         if !self.armies.contains_key(&request.army) {
             return Err(NavalRequestError::Stale(index));
         }
@@ -991,7 +992,7 @@ impl CampaignState {
             return None;
         }
         let seed = self.rng.next_u64();
-        self.naval.pending.push(NavalRequest {
+        self.naval.pending.push_back(NavalRequest {
             army: army.clone(),
             from,
             to: to_port.clone(),
@@ -1014,9 +1015,7 @@ pub(crate) fn auto_resolve_all_pending(
         match state.auto_resolve_naval_battle(data, 0) {
             Ok(mut fought) => events.append(&mut fought),
             Err(_) => {
-                if !state.naval.pending.is_empty() {
-                    state.naval.pending.remove(0);
-                }
+                state.naval.pending.pop_front();
             }
         }
     }
