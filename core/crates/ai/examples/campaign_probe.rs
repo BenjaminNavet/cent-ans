@@ -13,8 +13,11 @@
 //! Measures per seed: outcome and turn, France-England war share of turns,
 //! active wars (distinct pairs) and declarations per turn, factions
 //! eliminated, revolts, bankruptcies, top-K income and treasury at the end,
-//! provinces of the largest faction (end and peak), seconds per turn.
-use std::collections::BTreeSet;
+//! provinces of the largest faction (end and peak), seconds per turn, and the
+//! sieges (RX iaplay): begun, ended by capture, by peace (no war left between
+//! besieger and holder) or otherwise (lifted, army lost), plus the share of
+//! sieges that end in a capture.
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
 
@@ -56,6 +59,37 @@ fn biggest(state: &CampaignState) -> (String, usize) {
         .unwrap_or_default()
 }
 
+/// Walled sieges in progress: settlement -> (besieger, holder, turns, armies).
+/// Villages are left out: any hostile army standing on one "besieges" it,
+/// which is a passage, not a siege.
+fn sieges(
+    state: &CampaignState,
+) -> BTreeMap<String, (FactionId, FactionId, u32, Vec<sim_campaign::ArmyId>)> {
+    state
+        .settlements
+        .iter()
+        .filter(|(id, _)| state.settlement_kind(id) != data_model::SettlementKind::Village)
+        .filter_map(|(id, s)| {
+            s.siege.as_ref().map(|siege| {
+                (
+                    id.as_str().to_owned(),
+                    (
+                        siege.attacker.clone(),
+                        s.controller.clone(),
+                        siege.turns_elapsed,
+                        state
+                            .armies
+                            .iter()
+                            .filter(|(_, a)| a.faction == siege.attacker && a.is_at(id))
+                            .map(|(aid, _)| aid.clone())
+                            .collect(),
+                    ),
+                )
+            })
+        })
+        .collect()
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value {
     let started = Instant::now();
     let france = fid("fac_france");
@@ -73,6 +107,11 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let mut open: std::collections::BTreeMap<(String, String), u32> = Default::default();
     let mut ended: std::collections::BTreeMap<(String, String), u32> = Default::default();
     let (mut durations, mut starts, mut fast_redeclared) = (Vec::<u32>::new(), 0u32, 0u32);
+    let mut live_sieges = sieges(&state);
+    let (mut sieges_begun, mut sieges_captured, mut sieges_peace, mut sieges_other) =
+        (0u32, 0u32, 0u32, 0u32);
+    let mut sieges_walked_off = 0u32;
+    let (mut sieges_relieved, mut sieges_abandoned, mut abandoned_turns) = (0u32, 0u32, 0u64);
     for _ in 0..turns {
         for offer in state.factions[&france].offers.clone() {
             let accept = sim_campaign::negotiation::evaluate_treaty(
@@ -96,6 +135,45 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         }
         let events = state.end_turn_with(data, ai::plan_turn);
         played += 1;
+        let now = sieges(&state);
+        for (id, (attacker, holder, _, _)) in &now {
+            if live_sieges
+                .get(id)
+                .is_none_or(|(a, h, _, _)| a != attacker || h != holder)
+            {
+                sieges_begun += 1;
+            }
+        }
+        for (id, (attacker, holder, elapsed, armies)) in &live_sieges {
+            if now
+                .get(id)
+                .is_some_and(|(a, h, _, _)| a == attacker && h == holder)
+            {
+                continue;
+            }
+            let controller = state
+                .settlements
+                .get(&data_model::SettlementId::new(id).expect("id"))
+                .map(|s| &s.controller);
+            if controller == Some(attacker) {
+                sieges_captured += 1;
+            } else if !state.is_at_war(attacker, holder) {
+                sieges_peace += 1;
+            } else {
+                sieges_other += 1;
+                let sid = data_model::SettlementId::new(id).expect("id");
+                if state.friendly_armies_at(holder, &sid).is_empty() {
+                    if armies.iter().all(|a| state.armies.contains_key(a)) {
+                        sieges_walked_off += 1;
+                    }
+                    sieges_abandoned += 1;
+                    abandoned_turns += u64::from(*elapsed);
+                } else {
+                    sieges_relieved += 1;
+                }
+            }
+        }
+        live_sieges = now;
         for e in &events {
             match e.kind {
                 EventKind::Revolt if !e.text_fr.contains("passe aux mains") => revolts += 1,
@@ -194,6 +272,16 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "bankruptcies": bankruptcies,
         "biggest_end": {"faction": big_name, "provinces": big_n},
         "biggest_peak": {"faction": peak.0, "provinces": peak.1, "turn": peak.2},
+        "sieges_begun": sieges_begun,
+        "sieges_captured": sieges_captured,
+        "sieges_peace": sieges_peace,
+        "sieges_other": sieges_other,
+        "sieges_other_relieved": sieges_relieved,
+        "sieges_other_abandoned": sieges_abandoned,
+        "sieges_abandoned_army_alive": sieges_walked_off,
+        "abandoned_mean_turns": abandoned_turns as f64 / f64::from(sieges_abandoned.max(1)),
+        "siege_capture_share": f64::from(sieges_captured)
+            / f64::from((sieges_captured + sieges_peace + sieges_other).max(1)),
         "top": top_rows,
         "series_every_40_turns": series,
         "seconds": started.elapsed().as_secs_f64(),
@@ -247,7 +335,7 @@ fn main() {
     }
     for r in &reports {
         println!(
-            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | {:.2} s/turn",
+            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | sieges {} (captured {}, peace {}, other {} [relieved {}, abandoned {} (army alive {}) after {:.1} turns]: {:.0} % taken) | {:.2} s/turn",
             r["seed"],
             r["turns_played"],
             r["end_year"],
@@ -265,6 +353,15 @@ fn main() {
             r["biggest_end"]["provinces"],
             r["biggest_peak"]["provinces"],
             r["biggest_peak"]["turn"],
+            r["sieges_begun"],
+            r["sieges_captured"],
+            r["sieges_peace"],
+            r["sieges_other"],
+            r["sieges_other_relieved"],
+            r["sieges_other_abandoned"],
+            r["sieges_abandoned_army_alive"],
+            r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
+            100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
         );
         for t in r["top"].as_array().into_iter().flatten() {
