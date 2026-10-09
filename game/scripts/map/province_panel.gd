@@ -172,7 +172,7 @@ func _compact_header() -> void:
 		holder.add_theme_constant_override("separation", 2)
 		key.text = chip[2]
 		key.tooltip_text = full_name
-		key.add_theme_font_size_override("font_size", 14)  # Intitulé abrégé, taille Caption (plancher PO2)
+		key.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))  # Intitulé abrégé (plancher PO2)
 		holder.add_child(key)
 		holder.add_child(value)
 		gauges_row.add_child(holder)

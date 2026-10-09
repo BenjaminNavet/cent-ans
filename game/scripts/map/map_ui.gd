@@ -1237,6 +1237,8 @@ func layout_hud() -> void:
 	general_seal.position = Vector2(0.0, zone_size.y - general_seal.size.y)
 	var left := general_seal.size.x + 8.0 if general_seal.visible else 0.0
 	var right := minf(end_turn_cluster.position.x + end_turn_cluster.fan_left_edge() - 10.0, bottom.end.x) - bottom.position.x
+	# WH uicards (C2) : le bandeau, plus haut que sa zone, s'arrête à gauche du panneau latéral.
+	right = minf(right, UiZones.rect(UiZones.Zone.SIDE_PANEL).position.x - 6.0 - bottom.position.x)
 	var gap := maxf(right - left, 0.0)
 	var picking := general_picker != null and general_picker.visible
 	if picking:
