@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Lance chaque game/tests/*_test.gd en headless, l'un après l'autre, et récapitule pass/fail.
 # Usage : tools/run_godot_tests.sh [motif ...]   (motif = sous-chaîne du nom ; sans motif : tous)
-# Variables : LOG_DIR (journaux par test, défaut /tmp/cent-ans-gdtests), CENT_ANS_TEST_TIMEOUT_S
+# Variables : GODOT (binaire, défaut godot), LOG_DIR (journaux par test, défaut /tmp/cent-ans-gdtests), CENT_ANS_TEST_TIMEOUT_S
 # (garde-fou par test, défaut 600 s). Code de sortie : 0 si tout passe, 1 sinon.
 set -uo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 log_dir="${LOG_DIR:-/tmp/cent-ans-gdtests}"
 export CENT_ANS_TEST_TIMEOUT_S="${CENT_ANS_TEST_TIMEOUT_S:-600}"
+GODOT="${GODOT:-godot}"
 mkdir -p "$log_dir"
 
 passed=0
@@ -22,7 +23,7 @@ for script in "$root"/game/tests/*_test.gd; do
 		[ "$match" -eq 1 ] || continue
 	fi
 	started=$SECONDS
-	godot --headless --path "$root/game" --script "res://tests/$name.gd" >"$log_dir/$name.log" 2>&1
+	"$GODOT" --headless --path "$root/game" --script "res://tests/$name.gd" >"$log_dir/$name.log" 2>&1
 	code=$?
 	# Godot sort en code 0 sur une erreur d'analyse : le journal fait foi.
 	if [ "$code" -eq 0 ] && grep -q "Failed to load script" "$log_dir/$name.log"; then
