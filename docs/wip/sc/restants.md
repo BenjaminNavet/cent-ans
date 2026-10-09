@@ -143,9 +143,9 @@ MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) | ga
 MB6 | FAIT (sc/dt2) | relief_cache_notice (117) + relief_cache_status (241) -> push_warning | game/scripts/map/relief_cache_*.gd | non
 MB7 | À FAIRE | parchemin décor marin animé suppr, redraw à la demande | game/scripts/map/parchment_decor.gd, shaders/parchment_sea.gdshaderinc | non | [MÉCANIQUE visuelle]
 MB9 | À FAIRE | life_effects points typés (life reground GELÉ) | game/scripts/map/life_effects.gd | non
-MB10 | À FAIRE | war_scars voie events suppr | game/scripts/map/war_scars.gd | non
-MB11 | À FAIRE | vegetation_mask repli sans splat | game/scripts/map/vegetation_mask.gd | non
-MB13 | À FAIRE | morts | game/scripts/map | non
+MB10 | FAIT | war_scars voie events suppr | game/scripts/map/war_scars.gd | non
+MB11 | FAIT | vegetation_mask repli sans splat | game/scripts/map/vegetation_mask.gd | non
+MB13 | FAIT | morts | game/scripts/map | non
 MB14 | À FAIRE | étude fusion rendus rivière/route | game/scripts/map/{rivers,road}_renderer.gd | non
 
 ## UI

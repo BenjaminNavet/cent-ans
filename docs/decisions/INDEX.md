@@ -188,3 +188,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0216 | [Plus de villages, moins de villes sur la carte de campagne](0216-plus-de-villages-moins-de-villes.md) | accepté |
 | 0219 | [Codex du décor naturel et bulle de survol différée](0219-codex-du-decor-naturel.md) | accepté |
 | 0230 | [Effets secondaires de bataille retirés](0230-effets-secondaires-bataille-retires.md) | accepté |
+| 0231 | [Carte : suppression de replis morts](0231-carte-replis-morts.md) | accepté |
