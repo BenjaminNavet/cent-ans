@@ -34,10 +34,24 @@ fal Z-Image Turbo 2048 natif (coordinateur). Mesures prairie : ESRGAN x4plus 142
 1536 = 292 s (machine chargée). `realesr-general-x4v3` n'existe pas en ncnn. Banc arrêté après
 la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-détail).
 
+## État 09/10 soir (reprise)
+
+- Joueur : autonomie totale (choix, fusion, push). Enveloppe fal relevée à 13 $ ; dépensé 10,26 $.
+- Toutes les images générées (376 + 28 eau/micro-détail), planches dans `~/dev/cent-ans-raw/textures/planches/`.
+- Branche `tx-merge` (worktree scratchpad `txmerge`) = main + biomes + catalogues végétation/bâtiments
+  + eau/micro-détail + `TextureQuality` (79e60b9ee) ; vérification cargo/smoke en cours avant ff main.
+- 3 agents partis de 79e60b9ee : `tx-campaign` (sols campagne + planche champs), `tx-battle`,
+  `tx-veg-build` (végétation, bâtiments, eau). Notes : docs/wip/tx-campaign.md, tx-battle.md, tx-veg-build.md.
+- Prochaine étape : fusionner tx-merge, puis chaque branche d'agent, juger la planche champs
+  (`fields_compare.png`), choisir `parcels_source`, push.
+
 ## Réservations
 
 - ADR 0236 : fabrique de textures locale (T1f).
-- ADR 0237 : 14 biomes (T2a).
+- ADR 0238 : 14 biomes (T2a ; 0237 pris par l'UI).
+- ADR 0239 : sols de campagne régionaux (T2b3-4).
+- ADR 0240 : sols de bataille régionaux (T2c).
+- ADR 0241 : végétation, bâtiments et eau régionaux (T3-T4).
 
 ## Tranches et lots
 
