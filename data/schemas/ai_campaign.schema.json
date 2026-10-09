@@ -54,6 +54,7 @@
         "peace_military_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du revenu net consacrée aux armées en paix." },
         "high_tax_max_unrest": { "type": "number", "description": "Agitation pondérée au-dessus de laquelle l'IA ne lève plus d'impôt « Haut »." },
         "low_tax_min_unrest": { "type": "number", "description": "Agitation pondérée au-dessus de laquelle l'impôt passe à « Bas »." },
+        "province_tax_relief_unrest": { "type": "number", "description": "WH econ : agitation pondérée d'une province au-delà de laquelle l'IA la passe seule à « Bas » (au-dessus de 100 : jamais) ; elle revient au taux du royaume sous high_tax_max_unrest." },
         "revolt_margin": { "type": "number", "description": "Marge sous le seuil de révolte qui interdit l'impôt « Haut »." },
         "high_tax_hysteresis": { "type": "number", "description": "Agitation tolérée en plus tant qu'un impôt « Haut » déjà levé reste nécessaire." },
         "safety_margin_percent": { "type": "integer", "minimum": 0, "description": "Excédent saisonnier gardé contre les aléas, en % du revenu brut." },

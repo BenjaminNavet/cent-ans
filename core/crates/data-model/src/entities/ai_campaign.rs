@@ -70,6 +70,10 @@ fn default_noise_epoch() -> u32 {
     16
 }
 
+fn never_unrest() -> f64 {
+    101.0
+}
+
 /// Taxes, recruitment, treasury and construction.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -79,6 +83,10 @@ pub struct EconomyRules {
     pub high_tax_max_unrest: f64,
     pub low_tax_min_unrest: f64,
     pub revolt_margin: f64,
+    /// WH econ: weighted unrest above which the AI eases one province to
+    /// « Bas » on its own (above 100: never).
+    #[serde(default = "never_unrest")]
+    pub province_tax_relief_unrest: f64,
     pub high_tax_hysteresis: f64,
     pub safety_margin_percent: i64,
     pub max_building_upkeep_percent: i64,

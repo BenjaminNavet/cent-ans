@@ -118,7 +118,7 @@ fn plan_tax_rate(ctx: &Context, orders: &mut Vec<Order>) {
     }
 }
 
-/// WH econ: a province that grumbles while the realm's bracket is heavier
+/// WH econ: a province that grumbles (above `province_tax_relief_unrest`) while the realm's bracket is heavier
 /// than « Bas » is eased to « Bas » on its own, and goes back to the realm's
 /// bracket once calm again (below the unrest that would allow « Haut »).
 /// Never raises a single province: the realm-wide choice stays with
@@ -132,7 +132,8 @@ fn plan_province_taxes(ctx: &Context, orders: &mut Vec<Order>) {
         }
         let unrest = weighted_unrest(&province.population);
         let own = state.has_province_tax(id);
-        let order = if !own && realm_rate != TaxRate::Low && unrest > eco.low_tax_min_unrest {
+        let order = if !own && realm_rate != TaxRate::Low && unrest > eco.province_tax_relief_unrest
+        {
             Some(Some(TaxRate::Low))
         } else if own && unrest < eco.high_tax_max_unrest {
             Some(None)
