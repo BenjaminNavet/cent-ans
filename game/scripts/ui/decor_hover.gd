@@ -15,8 +15,9 @@ extends Node
 signal bubble_shown(entry_id: String)
 
 const SETTING_KEY := "interface/decor_hover_delay"
+const DEFAULT_DELAY_S := 1.5  # sans autoload Settings (tests) ; le défaut joueur vit dans Settings.DEFAULTS
 const STYLE_FILE := "ui/tooltip_style.json"
-const FALLBACK := {"decor_hover": {"delay_s": 1.5, "still_px": 3.0, "leave_px": 12.0, "choices": [0.75, 1.5, 3.0, 0.0]}}
+const FALLBACK := {"decor_hover": {"still_px": 3.0, "leave_px": 12.0, "choices": [0.75, 1.5, 3.0, 0.0]}}
 
 enum State { IDLE, WAITING, FIRED, SHOWN }
 
@@ -54,10 +55,7 @@ func delay() -> float:
 	if delay_override >= 0.0:
 		return delay_override
 	var settings := get_node_or_null("/root/Settings")
-	var chosen := -1.0
-	if settings != null:
-		chosen = float(settings.call("get_value", SETTING_KEY))
-	return float(style_value("delay_s")) if chosen < 0.0 else chosen
+	return float(settings.call("get_value", SETTING_KEY)) if settings != null else DEFAULT_DELAY_S
 
 
 func _input(event: InputEvent) -> void:

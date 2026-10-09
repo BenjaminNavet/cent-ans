@@ -110,7 +110,7 @@ func _test_timer() -> void:
 		empty.queue_free()
 	# Réglage du joueur : -1 suit les données (1,5 s).
 	var settings := _hover(-1.0, willow)
-	_check(is_equal_approx(settings.delay(), float(DecorHover.style_value("delay_s"))) or root.get_node("Settings").call("get_value", DecorHover.SETTING_KEY) >= 0.0, "default delay from data")
+	_check(settings.delay() >= 0.0, "delay read from Settings")
 	settings.queue_free()
 
 

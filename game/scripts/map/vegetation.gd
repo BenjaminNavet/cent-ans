@@ -1130,6 +1130,9 @@ func _evict() -> void:
 ## se projette loin de son pied sous une caméra rasante). Renvoie [{species, position: Vector3 (pied),
 ## height, radius}] (unités monde) ; l'appelant départage en espace écran. Tuiles et parties
 ## masquées, instances éclaircies (au-delà de `visible_instance_count`) ignorées.
+const DECOR_MAX_SCALE := 2.5  # échelle d'instance au plus, pour écarter d'emblée les parties lointaines
+
+
 func decor_candidates(ground: Vector2, reach_scale: float = 3.0) -> Array:
 	var found: Array = []
 	var species_table := TreeSpecies.shared()
@@ -1148,6 +1151,9 @@ func decor_candidates(ground: Vector2, reach_scale: float = 3.0) -> Array:
 				var shown := multimesh.visible_instance_count if multimesh.visible_instance_count >= 0 else multimesh.instance_count
 				var buffer: PackedFloat32Array = (entry["buffers"] as Array)[int(part["slot0"]) + kind]
 				var mesh_box := multimesh.mesh.get_aabb() if multimesh.mesh != null else AABB(Vector3.ZERO, Vector3.ONE)
+				# Partie trop loin du point (x, z monde = px carte) : aucun de ses arbres n'atteint le curseur.
+				if _rect_distance(part["rect"], ground) > mesh_box.size.y * DECOR_MAX_SCALE * reach_scale:
+					continue
 				shown = mini(shown, buffer.size() / VegetationTileJob.FLOATS_PER_INSTANCE)
 				for n in shown:
 					var k := n * VegetationTileJob.FLOATS_PER_INSTANCE

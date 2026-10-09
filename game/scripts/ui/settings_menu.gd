@@ -199,13 +199,8 @@ func _build_decor_delay(grid: GridContainer) -> void:
 	var choices: Array = Array(DecorHover.style_value("choices"))
 	var labels: Array = choices.map(func(seconds: float) -> String:
 		return "Désactivée" if seconds <= 0.0 else "%s s" % String.num(seconds, 2).trim_suffix("0").trim_suffix("."))
-	var current := float(settings.call("get_value", DecorHover.SETTING_KEY))
-	if current < 0.0:
-		settings.call("set_value", DecorHover.SETTING_KEY, float(DecorHover.style_value("delay_s")), false)
 	_options(grid, DecorHover.SETTING_KEY, "Bulle du décor naturel", choices, labels,
 		"Arbres, troupeaux et rochers de la carte et des batailles : une bulle du Codex apparaît quand la souris reste immobile dessus.")
-	if current < 0.0:
-		settings.call("set_value", DecorHover.SETTING_KEY, -1.0, false)
 
 
 func _build_game(grid: GridContainer) -> void:
