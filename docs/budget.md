@@ -387,6 +387,10 @@ estimé de chaque lot et refuse au-delà de `--max-cost` (2 $ par défaut). Sold
 | 2026-10-09 | fal.ai | végétation `vegetation_cards` : 85 cartes 1024² (70 cartes au sol, 15 herbes de bataille), 85 appels, tout au 1er essai | 0,45 $ | 0,45 $ | 8,10 $ |
 | 2026-10-09 | fal.ai | feuillages et écorces `foliage_bark` : 24 images 2048² (12 essences), 24 appels | 0,50 $ | 0,50 $ | 8,60 $ |
 | 2026-10-09 | fal.ai | matières de bâtiments `building_materials` : 80 images 1536² (1536 pour tenir dans l'enveloppe), 80 appels | 0,94 $ | 0,94 $ | **9,54 $** (reste 0,46 $) |
+| 2026-10-09 | fal.ai | matières de bâtiments : enduit rose d'Alsace refait 2 fois (images noires, filtre fal ; prompt reformulé), 2 appels 1536² | 0,02 $ | 0,02 $ | 9,56 $ |
+| 2026-10-09 | — | **enveloppe TX relevée de 3 $ par le joueur (13 $)** pour le micro-détail et l'eau générés | — | — | — |
+| 2026-10-09 | fal.ai | surfaces d'eau `water_surfaces` : 12 images 2048² + 5 reprises (eaux plates, berges), 17 appels | 0,36 $ | 0,36 $ | 9,92 $ |
+| 2026-10-09 | fal.ai | micro-détail `micro_detail` : 16 grains 2048² (sol, écorce, maçonnerie), 16 appels | 0,34 $ | 0,34 $ | **10,26 $** (reste 2,74 $) |
 
 ## Figurine yaya QW-E (09/10) — fal.ai Z-Image Turbo + TRELLIS 1, enveloppe propre 1 $ (validée par le joueur)
 
