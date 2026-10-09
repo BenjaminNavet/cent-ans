@@ -39,7 +39,11 @@ static func available() -> bool:
 ## Style régional des maisons de la bataille en cours (`BuildingRegions.style_for_province`,
 ## posé par `BattleTerrain.build`) : `framed` (part de colombage), `southern` (variantes du Midi).
 ## Vide : colombage selon les modèles, sans variantes du Midi.
-static var region_style: Dictionary = {}
+static var region_style: Dictionary = {}:
+	set(value):
+		region_style = value
+		# TX T4 : la région du style (`BuildingRegions.style_for_province`) choisit les matières régionales.
+		BuildingMaterials.set_region(str(value.get("region", "")))
 ## Types dont le kit exporte des variantes à colombage et du Midi (`manifest.json` : `framed`,
 ## `southern`).
 const REGIONAL_KINDS: Array[String] = ["cottage", "timber", "townhouse"]

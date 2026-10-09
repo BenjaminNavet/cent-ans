@@ -68,8 +68,13 @@ uniform sampler2D drape_heightmap : filter_linear, repeat_disable, hint_default_
 uniform vec4 drape_info = vec4(1.0, 1.0, 0.0, 0.0);
 
 #include "res://shaders/building_aging.gdshaderinc"
+// TX T4 : matières régionales par ville (`BuildingMaterials`, indice de région posé par
+// `TownBuilder` en paramètre d'instance ; -1 = matières par défaut).
+#include "res://shaders/building_regional.gdshaderinc"
+instance uniform float town_region = -1.0;
 
 varying flat int layer;
+varying flat int region;
 varying float tint_shift;
 varying vec3 world_m;
 varying vec3 world_n;
@@ -80,6 +85,7 @@ varying float v_soot;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
+	region = int(floor(town_region + 0.5));
 	float base = base_source == 0 ? INSTANCE_CUSTOM.r : (base_source == 2 ? CUSTOM0.r : UV2.x);
 	tint_shift = base_source == 0 ? INSTANCE_CUSTOM.g - 0.5 : (base_source == 2 ? CUSTOM0.a - 0.5 : 0.0);
 	// Ancrage : origine de l'instance (bâtiments rigides), celle du monument fusionné, ou le
@@ -128,7 +134,20 @@ void fragment() {
 			uv = n.y > max(n.x, n.z) ? world_m.xz : (n.x > n.z ? world_m.zy : world_m.xy);
 			uv.y = -uv.y;
 		}
-		base = texture(albedo_array, vec3(uv * layer_tile[layer], float(layer))).rgb;
+		int regional = regional_layer(region, layer);
+		vec2 uv_dx = dFdx(uv);
+		vec2 uv_dy = dFdy(uv);
+		if (regional >= 0) {
+			float tile = regional_tile[regional];
+			base = textureGrad(regional_albedo, vec3(uv * tile, float(regional)), uv_dx * tile, uv_dy * tile).rgb;
+			tint.rgb = vec3(1.0);
+		} else {
+			float tile = layer_tile[layer];
+			base = textureGrad(albedo_array, vec3(uv * tile, float(layer)), uv_dx * tile, uv_dy * tile).rgb;
+		}
+		if (layer < roof_first || layer > roof_last) {
+			base *= micro_grain(uv, length(world_m - CAMERA_POSITION_WORLD * meters_per_unit));
+		}
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb * (1.0 + tint_shift * 0.35);
 	float far = ba_far(v_age_pos);

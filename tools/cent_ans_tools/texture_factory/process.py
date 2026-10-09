@@ -36,6 +36,7 @@ PROCESSING_DEFAULTS = {
     "target_luminance": 0.18,
     "height_strength": 2.0,
     "roughness": 0.85,
+    "equalize": True,
 }
 
 
@@ -88,7 +89,8 @@ def process_entry(
         linear, int(params["blend_width"] * scale), feather=params["feather"] * scale
     )
     tiled = flatten_lighting(tiled, sigma=source.width / 8)
-    tiled = equalize_luminance(tiled, params["target_luminance"])
+    if params["equalize"]:
+        tiled = equalize_luminance(tiled, params["target_luminance"])
     albedo = Image.fromarray(
         np.clip(np.rint(linear_to_srgb(tiled) * 255), 0, 255).astype(np.uint8)
     )
@@ -117,6 +119,10 @@ def build_pack(
     ``size`` overrides the pack's ``layer_size`` (normals at half size) and writes the
     arrays under the pack's ``hi_dir`` (outside the repository budget) instead.
     """
+    if pack_spec.get("kind", "tile") != "tile":
+        from cent_ans_tools.texture_factory.cards import build_card_pack
+
+        return build_card_pack(document, pack_spec, raw_dir, repo_root, size)
     manifest = load_manifest(document, raw_dir)
     entries = pack_entries(document, pack_spec, manifest)
     if not entries:
@@ -134,6 +140,8 @@ def build_pack(
                 "layer": layer,
                 "role": entry["role"],
                 "biomes": entry.get("biomes", []),
+                **({"regions": entry["regions"]} if "regions" in entry else {}),
+                **({"species": entry["species"]} if "species" in entry else {}),
                 "tile_m": entry["tile_m"],
             }
         )
@@ -161,6 +169,8 @@ def build_pack(
         normal_name=pack_spec["normal"],
         res_dir=res_dir,
         max_bytes=pack_spec.get("max_mb", 40) * 1_000_000 if not size else 10**10,
+        albedo_quality=pack_spec.get("albedo_quality", 88),
+        normal_quality=pack_spec.get("normal_quality", 90),
     )
     _rename_ids(manifest_path, {m["id"]: m["name"] for m in materials})
     return result

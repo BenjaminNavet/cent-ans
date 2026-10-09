@@ -1,0 +1,710 @@
+{
+ "layer_size": 1024,
+ "grid": [
+  7,
+  10
+ ],
+ "albedo": "res://assets/textures/vegetation/tx_ground_cards_array.webp",
+ "layers": [
+  {
+   "id": "card_heather_oceanic_b01",
+   "layer": 0,
+   "role": "ground_card",
+   "biomes": [
+    1
+   ],
+   "tile_m": 0.6,
+   "aspect": 1.02
+  },
+  {
+   "id": "card_bracken_fern_b01",
+   "layer": 1,
+   "role": "ground_card",
+   "biomes": [
+    1
+   ],
+   "tile_m": 0.9,
+   "aspect": 1.381
+  },
+  {
+   "id": "card_foxglove_b01",
+   "layer": 2,
+   "role": "ground_card",
+   "biomes": [
+    1
+   ],
+   "tile_m": 1.0,
+   "aspect": 0.35
+  },
+  {
+   "id": "card_gorse_low_b01",
+   "layer": 3,
+   "role": "ground_card",
+   "biomes": [
+    1
+   ],
+   "tile_m": 0.8,
+   "aspect": 0.926
+  },
+  {
+   "id": "card_bluebell_clump_b01",
+   "layer": 4,
+   "role": "ground_card",
+   "biomes": [
+    1
+   ],
+   "tile_m": 0.4,
+   "aspect": 0.939
+  },
+  {
+   "id": "card_cornflower_b02",
+   "layer": 5,
+   "role": "ground_card",
+   "biomes": [
+    2
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.636
+  },
+  {
+   "id": "card_oxeye_daisy_b02",
+   "layer": 6,
+   "role": "ground_card",
+   "biomes": [
+    2
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.635
+  },
+  {
+   "id": "card_nettle_patch_b02",
+   "layer": 7,
+   "role": "ground_card",
+   "biomes": [
+    2
+   ],
+   "tile_m": 0.8,
+   "aspect": 0.87
+  },
+  {
+   "id": "card_cow_parsley_b02",
+   "layer": 8,
+   "role": "ground_card",
+   "biomes": [
+    2
+   ],
+   "tile_m": 1.0,
+   "aspect": 0.684
+  },
+  {
+   "id": "card_dock_plant_b02",
+   "layer": 9,
+   "role": "ground_card",
+   "biomes": [
+    2
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.622
+  },
+  {
+   "id": "card_rosemary_shrub_b03",
+   "layer": 10,
+   "role": "ground_card",
+   "biomes": [
+    3
+   ],
+   "tile_m": 0.8,
+   "aspect": 0.632
+  },
+  {
+   "id": "card_thyme_cushion_b03",
+   "layer": 11,
+   "role": "ground_card",
+   "biomes": [
+    3
+   ],
+   "tile_m": 0.4,
+   "aspect": 1.764
+  },
+  {
+   "id": "card_lavender_clump_b03",
+   "layer": 12,
+   "role": "ground_card",
+   "biomes": [
+    3
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.766
+  },
+  {
+   "id": "card_acanthus_b03",
+   "layer": 13,
+   "role": "ground_card",
+   "biomes": [
+    3
+   ],
+   "tile_m": 1.0,
+   "aspect": 1.033
+  },
+  {
+   "id": "card_broom_spanish_b03",
+   "layer": 14,
+   "role": "ground_card",
+   "biomes": [
+    3
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.703
+  },
+  {
+   "id": "card_feather_grass_stipa_b04",
+   "layer": 15,
+   "role": "ground_card",
+   "biomes": [
+    4
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.809
+  },
+  {
+   "id": "card_sagebrush_steppe_b04",
+   "layer": 16,
+   "role": "ground_card",
+   "biomes": [
+    4
+   ],
+   "tile_m": 0.6,
+   "aspect": 0.678
+  },
+  {
+   "id": "card_steppe_tulip_b04",
+   "layer": 17,
+   "role": "ground_card",
+   "biomes": [
+    4
+   ],
+   "tile_m": 0.4,
+   "aspect": 0.754
+  },
+  {
+   "id": "card_fescue_tussock_b04",
+   "layer": 18,
+   "role": "ground_card",
+   "biomes": [
+    4
+   ],
+   "tile_m": 0.6,
+   "aspect": 1.556
+  },
+  {
+   "id": "card_sage_steppe_b04",
+   "layer": 19,
+   "role": "ground_card",
+   "biomes": [
+    4
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.674
+  },
+  {
+   "id": "card_blueberry_boreal_b05",
+   "layer": 20,
+   "role": "ground_card",
+   "biomes": [
+    5
+   ],
+   "tile_m": 0.4,
+   "aspect": 0.774
+  },
+  {
+   "id": "card_lingonberry_b05",
+   "layer": 21,
+   "role": "ground_card",
+   "biomes": [
+    5
+   ],
+   "tile_m": 0.3,
+   "aspect": 0.777
+  },
+  {
+   "id": "card_reindeer_lichen_boreal_b05",
+   "layer": 22,
+   "role": "ground_card",
+   "biomes": [
+    5
+   ],
+   "tile_m": 0.3,
+   "aspect": 1.6
+  },
+  {
+   "id": "card_fern_boreal_b05",
+   "layer": 23,
+   "role": "ground_card",
+   "biomes": [
+    5
+   ],
+   "tile_m": 0.9,
+   "aspect": 1.443
+  },
+  {
+   "id": "card_labrador_tea_b05",
+   "layer": 24,
+   "role": "ground_card",
+   "biomes": [
+    5
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.738
+  },
+  {
+   "id": "card_edelweiss_b06",
+   "layer": 25,
+   "role": "ground_card",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.25,
+   "aspect": 0.685
+  },
+  {
+   "id": "card_gentian_alpine_b06",
+   "layer": 26,
+   "role": "ground_card",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.2,
+   "aspect": 0.493
+  },
+  {
+   "id": "card_alpine_rose_b06",
+   "layer": 27,
+   "role": "ground_card",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.6,
+   "aspect": 0.835
+  },
+  {
+   "id": "card_alpine_aster_b06",
+   "layer": 28,
+   "role": "ground_card",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.3,
+   "aspect": 0.709
+  },
+  {
+   "id": "card_cushion_saxifrage_b06",
+   "layer": 29,
+   "role": "ground_card",
+   "biomes": [
+    6
+   ],
+   "tile_m": 0.25,
+   "aspect": 1.773
+  },
+  {
+   "id": "card_wormwood_arid_b07",
+   "layer": 30,
+   "role": "ground_card",
+   "biomes": [
+    7
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.908
+  },
+  {
+   "id": "card_esparto_tuft_b07",
+   "layer": 31,
+   "role": "ground_card",
+   "biomes": [
+    7
+   ],
+   "tile_m": 0.7,
+   "aspect": 1.07
+  },
+  {
+   "id": "card_thorny_burnet_b07",
+   "layer": 32,
+   "role": "ground_card",
+   "biomes": [
+    7
+   ],
+   "tile_m": 0.6,
+   "aspect": 1.243
+  },
+  {
+   "id": "card_rockrose_arid_b07",
+   "layer": 33,
+   "role": "ground_card",
+   "biomes": [
+    7
+   ],
+   "tile_m": 0.8,
+   "aspect": 1.096
+  },
+  {
+   "id": "card_dry_thistle_b07",
+   "layer": 34,
+   "role": "ground_card",
+   "biomes": [
+    7
+   ],
+   "tile_m": 0.8,
+   "aspect": 0.503
+  },
+  {
+   "id": "card_tamarisk_b08",
+   "layer": 35,
+   "role": "ground_card",
+   "biomes": [
+    8
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.88
+  },
+  {
+   "id": "card_halfa_grass_b08",
+   "layer": 36,
+   "role": "ground_card",
+   "biomes": [
+    8
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.739
+  },
+  {
+   "id": "card_desert_acacia_sapling_b08",
+   "layer": 37,
+   "role": "ground_card",
+   "biomes": [
+    8
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.729
+  },
+  {
+   "id": "card_colocynth_vine_b08",
+   "layer": 38,
+   "role": "ground_card",
+   "biomes": [
+    8
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.704
+  },
+  {
+   "id": "card_saltbush_desert_b08",
+   "layer": 39,
+   "role": "ground_card",
+   "biomes": [
+    8
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.681
+  },
+  {
+   "id": "card_reindeer_lichen_b09",
+   "layer": 40,
+   "role": "ground_card",
+   "biomes": [
+    9
+   ],
+   "tile_m": 0.3,
+   "aspect": 1.731
+  },
+  {
+   "id": "card_crowberry_camarine_b09",
+   "layer": 41,
+   "role": "ground_card",
+   "biomes": [
+    9
+   ],
+   "tile_m": 0.3,
+   "aspect": 1.021
+  },
+  {
+   "id": "card_arctic_willow_b09",
+   "layer": 42,
+   "role": "ground_card",
+   "biomes": [
+    9
+   ],
+   "tile_m": 0.25,
+   "aspect": 0.594
+  },
+  {
+   "id": "card_cotton_grass_b09",
+   "layer": 43,
+   "role": "ground_card",
+   "biomes": [
+    9
+   ],
+   "tile_m": 0.4,
+   "aspect": 0.781
+  },
+  {
+   "id": "card_moss_campion_b09",
+   "layer": 44,
+   "role": "ground_card",
+   "biomes": [
+    9
+   ],
+   "tile_m": 0.2,
+   "aspect": 1.215
+  },
+  {
+   "id": "card_meadow_sage_forest_steppe_b10",
+   "layer": 45,
+   "role": "ground_card",
+   "biomes": [
+    10
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.7
+  },
+  {
+   "id": "card_tansy_b10",
+   "layer": 46,
+   "role": "ground_card",
+   "biomes": [
+    10
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.686
+  },
+  {
+   "id": "card_fireweed_b10",
+   "layer": 47,
+   "role": "ground_card",
+   "biomes": [
+    10
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.33
+  },
+  {
+   "id": "card_bedstraw_clump_b10",
+   "layer": 48,
+   "role": "ground_card",
+   "biomes": [
+    10
+   ],
+   "tile_m": 0.6,
+   "aspect": 0.672
+  },
+  {
+   "id": "card_knapweed_b10",
+   "layer": 49,
+   "role": "ground_card",
+   "biomes": [
+    10
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.54
+  },
+  {
+   "id": "card_heather_atlantic_b11",
+   "layer": 50,
+   "role": "ground_card",
+   "biomes": [
+    11
+   ],
+   "tile_m": 0.6,
+   "aspect": 1.158
+  },
+  {
+   "id": "card_gorse_ajonc_b11",
+   "layer": 51,
+   "role": "ground_card",
+   "biomes": [
+    11
+   ],
+   "tile_m": 1.0,
+   "aspect": 0.971
+  },
+  {
+   "id": "card_broom_atlantic_b11",
+   "layer": 52,
+   "role": "ground_card",
+   "biomes": [
+    11
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.671
+  },
+  {
+   "id": "card_gorse_dwarf_b11",
+   "layer": 53,
+   "role": "ground_card",
+   "biomes": [
+    11
+   ],
+   "tile_m": 0.5,
+   "aspect": 0.737
+  },
+  {
+   "id": "card_royal_fern_b11",
+   "layer": 54,
+   "role": "ground_card",
+   "biomes": [
+    11
+   ],
+   "tile_m": 1.1,
+   "aspect": 1.184
+  },
+  {
+   "id": "card_pannonian_feather_grass_b12",
+   "layer": 55,
+   "role": "ground_card",
+   "biomes": [
+    12
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.766
+  },
+  {
+   "id": "card_steppe_sage_pannonian_b12",
+   "layer": 56,
+   "role": "ground_card",
+   "biomes": [
+    12
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.589
+  },
+  {
+   "id": "card_poppy_field_b12",
+   "layer": 57,
+   "role": "ground_card",
+   "biomes": [
+    12
+   ],
+   "tile_m": 0.6,
+   "aspect": 0.685
+  },
+  {
+   "id": "card_chicory_b12",
+   "layer": 58,
+   "role": "ground_card",
+   "biomes": [
+    12
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.434
+  },
+  {
+   "id": "card_yarrow_b12",
+   "layer": 59,
+   "role": "ground_card",
+   "biomes": [
+    12
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.705
+  },
+  {
+   "id": "card_blueberry_hemiboreal_b13",
+   "layer": 60,
+   "role": "ground_card",
+   "biomes": [
+    13
+   ],
+   "tile_m": 0.4,
+   "aspect": 0.811
+  },
+  {
+   "id": "card_wood_sorrel_b13",
+   "layer": 61,
+   "role": "ground_card",
+   "biomes": [
+    13
+   ],
+   "tile_m": 0.25,
+   "aspect": 0.957
+  },
+  {
+   "id": "card_lily_valley_b13",
+   "layer": 62,
+   "role": "ground_card",
+   "biomes": [
+    13
+   ],
+   "tile_m": 0.3,
+   "aspect": 0.957
+  },
+  {
+   "id": "card_wood_anemone_b13",
+   "layer": 63,
+   "role": "ground_card",
+   "biomes": [
+    13
+   ],
+   "tile_m": 0.3,
+   "aspect": 1.105
+  },
+  {
+   "id": "card_male_fern_b13",
+   "layer": 64,
+   "role": "ground_card",
+   "biomes": [
+    13
+   ],
+   "tile_m": 0.9,
+   "aspect": 1.288
+  },
+  {
+   "id": "card_rockrose_cistus_b14",
+   "layer": 65,
+   "role": "ground_card",
+   "biomes": [
+    14
+   ],
+   "tile_m": 0.9,
+   "aspect": 0.845
+  },
+  {
+   "id": "card_lentisk_b14",
+   "layer": 66,
+   "role": "ground_card",
+   "biomes": [
+    14
+   ],
+   "tile_m": 1.2,
+   "aspect": 0.699
+  },
+  {
+   "id": "card_kermes_oak_shrub_b14",
+   "layer": 67,
+   "role": "ground_card",
+   "biomes": [
+    14
+   ],
+   "tile_m": 1.0,
+   "aspect": 0.812
+  },
+  {
+   "id": "card_phrygana_thyme_b14",
+   "layer": 68,
+   "role": "ground_card",
+   "biomes": [
+    14
+   ],
+   "tile_m": 0.5,
+   "aspect": 1.64
+  },
+  {
+   "id": "card_sage_aegean_b14",
+   "layer": 69,
+   "role": "ground_card",
+   "biomes": [
+    14
+   ],
+   "tile_m": 0.7,
+   "aspect": 0.722
+  }
+ ]
+}

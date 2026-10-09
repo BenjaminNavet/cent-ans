@@ -92,6 +92,9 @@ static func bark_material(species: String, lod_near: float, lod_far: float) -> S
 	mat.set_shader_parameter("bark_normal", BARK_NORMAL)
 	mat.set_shader_parameter("tint", p["bark"])
 	mat.set_shader_parameter("smooth_bark", float(p["smooth"]))
+	if TreeTextures.apply_bark(mat, species):
+		# TX T3 : l'écorce générée a sa propre teinte ; la teinte de l'essence ne fait que la nuancer.
+		mat.set_shader_parameter("tint", (p["bark"] as Color).lerp(Color(1, 1, 1), 0.75))
 	mat.set_shader_parameter("lod_near", lod_near)
 	mat.set_shader_parameter("lod_far", lod_far)
 	mat.set_shader_parameter("lod_band", LOD_BAND)
@@ -109,6 +112,8 @@ static func foliage_material(species: String, winter: bool, lod_near: float, lod
 		tint = Color(1, 1, 1)
 		mat.set_shader_parameter("backlight", Color(0.08, 0.07, 0.05))
 	mat.set_shader_parameter("leaves", texture)
+	if not winter and TreeTextures.apply_leaves(mat, species):
+		tint = tint.lerp(Color(1, 1, 1), 0.6)  # TX T3 : feuilles générées, déjà colorées
 	mat.set_shader_parameter("tint", tint)
 	mat.set_shader_parameter("wind_strength", 0.5 if winter else 1.0)
 	mat.set_shader_parameter("sway_height", maxf(float(p["height"]) * 0.8, 2.0))

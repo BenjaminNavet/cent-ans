@@ -24,10 +24,15 @@ uniform vec3 bush_color : source_color = vec3(0.28, 0.37, 0.18);
 // Mipmaps + compensation de l'alpha : les brins restent lisibles quand la touffe fait 10 px.
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform bool has_grass_texture = false;
+// TX T3 (ADR 0241) : cartes de plantes du biome (`GroundCards`, RGBA 1024). `INSTANCE_CUSTOM.x` =
+// sorte (0 herbe, 1 broussaille) + 2 × (couche + 1) quand l'instance est une carte.
+uniform sampler2DArray cards : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform bool has_cards = false;
 uniform vec3 autumn_color : source_color = vec3(0.45, 0.30, 0.12);
 uniform vec3 winter_color : source_color = vec3(0.36, 0.32, 0.24);
 
 varying float v_kind;
+varying flat float v_card;  // couche du tableau de cartes, -1 : touffe ou broussaille d'avant
 varying float v_tint;
 varying float v_seed;
 // Lot L5 : taches de prairie (bruit basse fréquence sur la position), comme le terrain.
@@ -49,12 +54,13 @@ float value_noise(vec2 p) {
 }
 
 void vertex() {
-	v_kind = INSTANCE_CUSTOM.x;
+	v_card = INSTANCE_CUSTOM.x >= 2.0 ? floor(INSTANCE_CUSTOM.x * 0.5) - 1.0 : -1.0;
+	v_kind = INSTANCE_CUSTOM.x >= 2.0 ? INSTANCE_CUSTOM.x - 2.0 * floor(INSTANCE_CUSTOM.x * 0.5) : INSTANCE_CUSTOM.x;
 	v_tint = INSTANCE_CUSTOM.y;
 	v_seed = INSTANCE_CUSTOM.z;
 	float up = 1.0 - UV.y;
 	// Lot L5 : touffes d'herbe plus étroites (brins verticaux lisibles de haut, pas des boules).
-	if (INSTANCE_CUSTOM.x < 0.5) {
+	if (v_kind < 0.5 && v_card < 0.0) {
 		VERTEX.xz *= 0.7;
 	}
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -111,7 +117,13 @@ void fragment() {
 	ALPHA_SCISSOR_THRESHOLD = 0.05;
 	ALPHA_ANTIALIASING_EDGE = 0.45;
 	ALPHA_TEXTURE_COORDINATE = UV;
-	if (is_bush) {
+	vec4 card = vec4(0.0);
+	if (v_card >= 0.0 && has_cards) {
+		vec2 uv = vec2(v_seed > 0.5 ? 1.0 - UV.x : UV.x, UV.y);
+		card = texture(cards, vec3(uv, v_card));
+		ALPHA = card.a;
+		ALPHA_TEXTURE_COORDINATE = uv * vec2(textureSize(cards, 0).xy);
+	} else if (is_bush) {
 		ALPHA = edge_alpha(bush(UV, v_seed));
 	} else if (has_grass_texture) {
 		// Une touffe sur deux retournée : moins de répétition.
@@ -128,6 +140,9 @@ void fragment() {
 	float dry = clamp(smoothstep(0.45, 0.8, v_patch) * 0.7 + (v_tint - 0.5) * 0.25, 0.0, 1.0);
 	vec3 base = is_bush ? bush_color : mix(grass_color * mix(0.85, 1.05, v_patch), grass_dry, dry);
 	base *= mix(0.9, 1.12, v_tint) * shade;
+	if (v_card >= 0.0 && has_cards) {
+		base = card.rgb * mix(0.92, 1.1, v_tint);  // la plante garde ses couleurs
+	}
 	vec4 w = campaign_season;
 	// Printemps tendre, été sec, automne roux, hiver brun-gris.
 	vec3 color = base * (w.x * vec3(1.03, 1.12, 0.92) + w.y * vec3(1.05, 1.0, 0.85));

@@ -235,6 +235,10 @@
     1.25
    ],
    "tone": 1.0,
+   "textures": {
+    "bark": "oak_bark",
+    "leaves": "oak_leaves"
+   },
    "prompt": "a single mature pedunculate oak tree (Quercus robur) standing alone, short thick gnarled trunk, broad irregular domed crown of dense summer foliage with visible leaf clumps and a few sky gaps",
    "row": 0,
    "season_class": 0
@@ -271,6 +275,10 @@
     1.0
    ],
    "tone": 1.0,
+   "textures": {
+    "bark": "beech_bark",
+    "leaves": "beech_leaves"
+   },
    "prompt": "a single mature European beech tree (Fagus sylvatica) standing alone, smooth silver-grey trunk, tall dense oval crown of fresh green summer foliage with visible leaf clumps",
    "row": 1,
    "season_class": 1
@@ -425,6 +433,10 @@
     0.9
    ],
    "tone": 1.05,
+   "textures": {
+    "bark": "birch_bark",
+    "leaves": "birch_leaves"
+   },
    "seed": 7,
    "prompt": "a single mature silver birch tree (Betula pendula) standing alone, slender white trunk with black marks, full dense oval crown of small bright green leaves on drooping branches, the foliage mass clearly visible",
    "row": 5,
@@ -464,6 +476,10 @@
     0.85
    ],
    "tone": 0.92,
+   "textures": {
+    "bark": "spruce_bark",
+    "leaves": "spruce_leaves"
+   },
    "prompt": "a single tall Norway spruce tree (Picea abies) standing alone, straight narrow spire-shaped evergreen, very dark green drooping branches with hanging twigs down to the ground",
    "row": 6,
    "season_class": 2
@@ -506,6 +522,10 @@
     1.0
    ],
    "tone": 1.0,
+   "textures": {
+    "bark": "scots_pine_bark",
+    "leaves": "scots_pine_leaves"
+   },
    "prompt": "a single mature Scots pine tree (Pinus sylvestris) standing alone, tall straight trunk with orange-red bark in its upper part, bare lower trunk, irregular flat-topped crown of blue-green needles",
    "row": 7,
    "season_class": 2
@@ -615,6 +635,10 @@
     1.2
    ],
    "tone": 0.85,
+   "textures": {
+    "bark": "holm_oak_bark",
+    "leaves": "holm_oak_leaves"
+   },
    "prompt": "a single mature holm oak tree (Quercus ilex) standing alone, short dark trunk, dense rounded compact evergreen crown of small leathery dark grey-green leaves",
    "row": 10,
    "season_class": 2
@@ -651,6 +675,10 @@
     1.2
    ],
    "tone": 1.1,
+   "textures": {
+    "bark": "olive_bark",
+    "leaves": "olive_leaves"
+   },
    "prompt": "a single ancient olive tree (Olea europaea) standing alone, thick twisted gnarled hollow trunk, broad irregular open crown of silvery grey-green narrow leaves",
    "row": 11,
    "season_class": 2
@@ -730,6 +758,10 @@
     0.8
    ],
    "tone": 1.05,
+   "textures": {
+    "bark": "poplar_bark",
+    "leaves": "poplar_leaves"
+   },
    "prompt": "a single tall black poplar tree (Populus nigra) standing alone, straight grey furrowed trunk, tall narrow upright crown of fluttering triangular bright green leaves",
    "row": 13,
    "season_class": 4
@@ -771,6 +803,10 @@
     1.25
    ],
    "tone": 1.12,
+   "textures": {
+    "bark": "willow_bark",
+    "leaves": "willow_leaves"
+   },
    "prompt": "a single mature white willow tree (Salix alba) standing alone, short leaning split trunk, broad rounded loose crown of narrow silvery pale green leaves on long flexible branches",
    "row": 14,
    "season_class": 4
@@ -842,6 +878,10 @@
     0.9
    ],
    "tone": 1.1,
+   "textures": {
+    "bark": "larch_bark",
+    "leaves": "larch_leaves"
+   },
    "prompt": "a single mature European larch tree (Larix decidua) standing alone, straight trunk, light open conical crown of soft fresh light green needle tufts on slightly drooping branches",
    "row": 16,
    "season_class": 4
@@ -879,6 +919,10 @@
     1.15
    ],
    "tone": 1.12,
+   "textures": {
+    "bark": "aleppo_pine_bark",
+    "leaves": "aleppo_pine_leaves"
+   },
    "prompt": "a single Aleppo pine tree (Pinus halepensis) standing alone, crooked leaning grey trunk, sparse irregular airy crown of light yellow-green needles with sky gaps",
    "row": 17,
    "season_class": 2

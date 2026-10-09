@@ -43,9 +43,25 @@ const SR5_WALL_MOSS := 0.25
 ## Poids des salissures de mur (boue, coulures) ; 0 pour les toits.
 const SR5_GRIME := {"Door": 0.5, "Timber": 0.7, "Planks": 0.8, "TimberFrame": 0.8, "TimberFrameFar": 0.8}
 
-static var _materials: Dictionary = {}  # "variante|nom" → Material
-static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh
+## TX T4 (ADR 0241) : matières régionales générées (tableau de couches, `tx_building_pack.json`).
+const PACK_FILE := "art/tx_building_pack.json"
+const MICRO_MASONRY := "res://assets/textures/buildings/tx_micro_masonry.jpg"
+## Régions et couches de l'atlas des shaders (`building_regional.gdshaderinc`).
+const REGION_CAP := 40
+const REGIONAL_TILE_CAP := 96
+## Micro-détail de maçonnerie de près : force, fondu entre `MICRO_NEAR` et `MICRO_FAR` mètres.
+const MICRO_STRENGTH := 0.6
+const MICRO_NEAR := 2.0
+const MICRO_FAR := 12.0
+
+static var _materials: Dictionary = {}  # "variante|nom|région" → Material
+static var _meshes: Dictionary = {}  # "variante|id du maillage|région" → Mesh
 static var _data_loaded: bool = false
+static var _regional_loaded: bool = false
+static var _regional: Dictionary = {}  # {"table", "tile", "albedo", "normal"} ; {} : inactif
+## Région de la bataille en cours (`set_region`) : ses matières remplacent celles de l'atlas.
+static var _region: String = ""
+static var _settlement_region: Dictionary = {}  # id de colonie → indice de région (campagne)
 
 
 ## Charge `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` depuis les données (dossier de données
@@ -86,6 +102,112 @@ static func _ensure_data() -> void:
 static func clear_cache() -> void:
 	_materials.clear()
 	_meshes.clear()
+	_regional_loaded = false
+	_regional = {}
+
+
+## TX T4 : région des bâtiments de la bataille en cours ("" : matières par défaut). Les matériaux
+## et maillages déjà remappés pour une autre région sont oubliés.
+static func set_region(region: String) -> void:
+	if region == _region:
+		return
+	_region = region
+	_materials.clear()
+	_meshes.clear()
+
+
+static func region() -> String:
+	return _region
+
+
+## Campagne : région (nom) de chaque colonie, posée par `SettlementLayer` ; les villes en tirent
+## leur paramètre d'instance `town_region`.
+static func set_settlement_regions(regions: Dictionary) -> void:
+	var ids := BuildingRegions.region_ids()
+	_settlement_region.clear()
+	for id: String in regions:
+		var index := ids.find(str(regions[id]))
+		if index >= 0 and index < REGION_CAP:
+			_settlement_region[id] = index
+
+
+## Indice de région de la colonie `id` pour les shaders, -1 sans matières régionales.
+static func settlement_region_index(id: String) -> int:
+	_ensure_regional()
+	return int(_settlement_region.get(id, -1)) if not _regional.is_empty() else -1
+
+
+## Tables régionales prêtes (paquet présent, `--legacy-textures` absent).
+static func regional_ready() -> bool:
+	_ensure_regional()
+	return not _regional.is_empty()
+
+
+## Charge le paquet régional et bâtit `region_table` (région × couche de l'atlas → couche du
+## tableau régional ou -1) et `regional_tile` (1 / taille de tuile par couche du tableau).
+static func _ensure_regional() -> void:
+	if _regional_loaded:
+		return
+	_regional_loaded = true
+	_regional = {}
+	_ensure_data()
+	if not TextureQuality.use_tx():
+		return
+	var pack_file := PACK_FILE
+	var hi := PACK_FILE.get_basename() + "_%d.json" % TextureQuality.HI_SIZE
+	if TextureQuality.is_high() and DataFile.exists(hi):
+		pack_file = hi
+	var parsed: Variant = DataFile.read_json(pack_file) if DataFile.exists(pack_file) else null
+	if not parsed is Dictionary:
+		return
+	var pack := parsed as Dictionary
+	var layers: Dictionary = {}
+	var tiles := PackedFloat32Array()
+	tiles.resize(REGIONAL_TILE_CAP)
+	tiles.fill(1.0)
+	for layer_v in pack.get("layers", []):
+		var layer := layer_v as Dictionary
+		var index := int(layer["layer"])
+		if index < REGIONAL_TILE_CAP:
+			layers[str(layer["id"])] = index
+			tiles[index] = 1.0 / maxf(float(layer["tile_m"]), 0.1)
+	var albedo := load(TextureQuality.texture_path(str(pack["albedo"]))) as Texture
+	var normal := load(TextureQuality.texture_path(str(pack["normal"]))) as Texture
+	if albedo == null or layers.is_empty():
+		return
+	var table := PackedInt32Array()
+	table.resize(REGION_CAP * 16)
+	table.fill(-1)
+	var ids := BuildingRegions.region_ids()
+	for r in mini(ids.size(), REGION_CAP):
+		var wanted := BuildingRegions.materials_for_region(str(ids[r]))
+		for role: String in wanted:
+			if not layers.has(str(wanted[role])):
+				continue
+			# `TimberFrameFar` (lattis lointain) prend aussi le colombage régional.
+			var targets: Array = [role, "TimberFrameFar"] if role == "TimberFrame" else [role]
+			for atlas_role: String in targets:
+				var slot: int = ATLAS_LAYERS.find(atlas_role)
+				if slot >= 0 and slot < 16:
+					table[r * 16 + slot] = int(layers[str(wanted[role])])
+	_regional = {"table": table, "tile": tiles, "albedo": albedo, "normal": normal}
+
+
+## Pose les tables régionales sur un matériau `building_atlas`/`town_building` ; `region_index` -1
+## laisse le choix de la région à l'instance (villes) ou aux matières par défaut.
+static func apply_regional(mat: ShaderMaterial, region_index: int = -1) -> void:
+	_ensure_regional()
+	if mat == null or _regional.is_empty():
+		return
+	mat.set_shader_parameter("use_regional", true)
+	mat.set_shader_parameter("region_table", _regional["table"])
+	mat.set_shader_parameter("regional_tile", _regional["tile"])
+	mat.set_shader_parameter("regional_albedo", _regional["albedo"])
+	mat.set_shader_parameter("regional_normal", _regional["normal"])
+	mat.set_shader_parameter("region_id", region_index)
+	if ResourceLoader.exists(MICRO_MASONRY):
+		mat.set_shader_parameter("micro_masonry", load(MICRO_MASONRY))
+		mat.set_shader_parameter("micro_fade", Vector3(MICRO_STRENGTH, MICRO_NEAR, MICRO_FAR))
 
 
 ## Ordre des couches de l'atlas `Building` (`ATLAS_LAYERS`, chargé depuis les données).
@@ -97,7 +219,7 @@ static func atlas_layers() -> Array:
 ## Matériau partagé `name` (variante "", "snow" ou "far") ; null si le nom est inconnu.
 static func material(name: String, variant: String = "") -> Material:
 	_ensure_data()
-	var key := variant + "|" + name
+	var key := variant + "|" + name + "|" + _region
 	if _materials.has(key):
 		return _materials[key]
 	if name == "Building":
@@ -161,6 +283,8 @@ static func _atlas(variant: String) -> ShaderMaterial:
 	if variant != "far":
 		mat.set_shader_parameter("normal_array", load(TEX + "buildings/building_normal_array.jpg"))
 		mat.set_shader_parameter("use_normals", true)
+	if regional_ready():
+		apply_regional(mat, BuildingRegions.region_ids().find(_region) if _region != "" else -1)
 	return mat
 
 
@@ -199,7 +323,7 @@ static func _textured(name: String, variant: String) -> ShaderMaterial:
 static func remap_mesh(mesh: Mesh, variant: String = "") -> Mesh:
 	if mesh == null:
 		return null
-	var key := variant + "|" + str(mesh.get_instance_id())
+	var key := variant + "|" + str(mesh.get_instance_id()) + "|" + _region
 	if _meshes.has(key):
 		return _meshes[key]
 	var copy := mesh.duplicate() as Mesh

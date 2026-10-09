@@ -1,0 +1,216 @@
+{
+ "layer_size": 1024,
+ "normal_size": 512,
+ "grid": [
+  3,
+  4
+ ],
+ "albedo": "res://assets/textures/vegetation/tx_bark_albedo_array.jpg",
+ "normal": "res://assets/textures/vegetation/tx_bark_normal_array.jpg",
+ "layers": [
+  {
+   "id": "oak_bark",
+   "layer": 0,
+   "role": "bark",
+   "biomes": [
+    1,
+    2,
+    10,
+    11,
+    12
+   ],
+   "species": "oak",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1882,
+    0.1719,
+    0.1573
+   ]
+  },
+  {
+   "id": "beech_bark",
+   "layer": 1,
+   "role": "bark",
+   "biomes": [
+    1,
+    2,
+    6,
+    13
+   ],
+   "species": "beech",
+   "tile_m": 1,
+   "mean_linear": [
+    0.4724,
+    0.4831,
+    0.497
+   ]
+  },
+  {
+   "id": "birch_bark",
+   "layer": 2,
+   "role": "bark",
+   "biomes": [
+    5,
+    9,
+    10,
+    13
+   ],
+   "species": "birch",
+   "tile_m": 1,
+   "mean_linear": [
+    0.5267,
+    0.5271,
+    0.5231
+   ]
+  },
+  {
+   "id": "scots_pine_bark",
+   "layer": 3,
+   "role": "bark",
+   "biomes": [
+    5,
+    10,
+    11,
+    13
+   ],
+   "species": "scots_pine",
+   "tile_m": 1,
+   "mean_linear": [
+    0.2727,
+    0.1614,
+    0.1213
+   ]
+  },
+  {
+   "id": "spruce_bark",
+   "layer": 4,
+   "role": "bark",
+   "biomes": [
+    5,
+    6,
+    13
+   ],
+   "species": "spruce",
+   "tile_m": 1,
+   "mean_linear": [
+    0.3082,
+    0.1561,
+    0.1043
+   ]
+  },
+  {
+   "id": "olive_bark",
+   "layer": 5,
+   "role": "bark",
+   "biomes": [
+    3,
+    14
+   ],
+   "species": "olive",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1894,
+    0.1887,
+    0.183
+   ]
+  },
+  {
+   "id": "holm_oak_bark",
+   "layer": 6,
+   "role": "bark",
+   "biomes": [
+    3,
+    11,
+    14
+   ],
+   "species": "holm_oak",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1405,
+    0.1408,
+    0.1376
+   ]
+  },
+  {
+   "id": "aleppo_pine_bark",
+   "layer": 7,
+   "role": "bark",
+   "biomes": [
+    3,
+    14
+   ],
+   "species": "aleppo_pine",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1862,
+    0.1802,
+    0.1745
+   ]
+  },
+  {
+   "id": "date_palm_bark",
+   "layer": 8,
+   "role": "bark",
+   "biomes": [
+    8
+   ],
+   "tile_m": 1,
+   "mean_linear": [
+    0.2438,
+    0.1867,
+    0.1479
+   ]
+  },
+  {
+   "id": "poplar_bark",
+   "layer": 9,
+   "role": "bark",
+   "biomes": [
+    2,
+    7,
+    12
+   ],
+   "species": "poplar",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1962,
+    0.1981,
+    0.1962
+   ]
+  },
+  {
+   "id": "willow_bark",
+   "layer": 10,
+   "role": "bark",
+   "biomes": [
+    1,
+    2,
+    12
+   ],
+   "species": "willow",
+   "tile_m": 1,
+   "mean_linear": [
+    0.1726,
+    0.1585,
+    0.1423
+   ]
+  },
+  {
+   "id": "larch_bark",
+   "layer": 11,
+   "role": "bark",
+   "biomes": [
+    5,
+    6,
+    9
+   ],
+   "species": "larch",
+   "tile_m": 1,
+   "mean_linear": [
+    0.2177,
+    0.1402,
+    0.1366
+   ]
+  }
+ ]
+}

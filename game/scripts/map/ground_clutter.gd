@@ -29,6 +29,10 @@ const SHADER := preload("res://shaders/ground_clutter.gdshader")
 ## Lot FC5 : touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
 const GRASS_TEXTURE := "res://assets/textures/vegetation/campaign_grass_tuft.png"
 const FLOATS_PER_INSTANCE := 16
+## TX T3 (ADR 0241) : part des touffes d'herbe remplacées par une carte de plante du biome
+## (`GroundCards`, cinq par biome) ; la donnée d'instance `x` porte alors 2 × (couche + 1) en plus
+## de la sorte (0 herbe, 1 broussaille).
+const CARD_SHARE := 0.45
 const METERS_PER_UNIT := 719.0  # transformation 3 × 4 + données personnalisées
 const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 
@@ -302,6 +306,9 @@ func _ensure_resources() -> void:
 	if ResourceLoader.exists(grass_path):
 		_material.set_shader_parameter("grass_texture", load(grass_path))
 		_material.set_shader_parameter("has_grass_texture", true)
+	if GroundCards.ready():
+		_material.set_shader_parameter("cards", GroundCards.albedo())
+		_material.set_shader_parameter("has_cards", true)
 	_mesh = crossed_cards_mesh()
 	_rock_meshes = Ga3Vegetation.rock_meshes() if use_rocks else []
 	_rock_materials.clear()
@@ -421,6 +428,7 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 	buffer.resize(candidates * FLOATS_PER_INSTANCE)
 	var top := 0.0
 	var o := 0
+	var cards_on := mask != null and not weight_sampler.is_valid() and GroundCards.ready()
 	for n in candidates:
 		var p := rect.position + Vector2(rng.randf(), rng.randf()) * cell_size
 		var roll := rng.randf()
@@ -436,6 +444,14 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 		points.append(p)
 		var bush := 1.0 if kind_roll < w.y else 0.0
 		var s := size * (bush_height_m if bush > 0.5 else grass_height_m) / METERS_PER_UNIT
+		if cards_on and bush < 0.5:
+			# TX T3 : carte de plante du biome (tirée par la position, le flux aléatoire reste intact).
+			var pick_key := hash(Vector2i(int(p.x * 4099.0), int(p.y * 4099.0)))
+			if posmod(pick_key, 1000) < int(CARD_SHARE * 1000.0):
+				var layer := GroundCards.pick(mask.biome_at(p.x, p.y), pick_key / 1000)
+				if layer >= 0:
+					bush = 2.0 * float(layer + 1)
+					s = size * GroundCards.size_m(layer) / METERS_PER_UNIT
 		var c := cos(yaw) * s
 		var si := sin(yaw) * s
 		buffer[o] = c

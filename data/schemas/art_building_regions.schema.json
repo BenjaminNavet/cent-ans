@@ -14,6 +14,12 @@
       "properties": {
         "framed": {"type": "number", "minimum": 0, "maximum": 1},
         "southern": {"type": "boolean"},
+        "materials": {
+          "type": "object",
+          "description": "TX T4 : matière régionale par rôle de `building_materials.json` (Plaster, Masonry, RoofTile…) -> id d'une couche du tableau `tx_building_pack.json` (catalogue `data/art/textures/building_materials.yaml`, écrit par `cent-ans textures regions`). Rôle absent : matière par défaut du rôle.",
+          "propertyNames": {"pattern": "^[A-Z][A-Za-z]*$"},
+          "additionalProperties": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+        },
         "note": {"type": "string"}
       }
     }

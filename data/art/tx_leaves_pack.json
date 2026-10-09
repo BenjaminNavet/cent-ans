@@ -1,0 +1,166 @@
+{
+ "layer_size": 1024,
+ "grid": [
+  3,
+  4
+ ],
+ "albedo": "res://assets/textures/vegetation/tx_leaves_array.webp",
+ "layers": [
+  {
+   "id": "oak_leaves",
+   "layer": 0,
+   "role": "leaves",
+   "biomes": [
+    1,
+    2,
+    10,
+    11,
+    12
+   ],
+   "species": "oak",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "beech_leaves",
+   "layer": 1,
+   "role": "leaves",
+   "biomes": [
+    1,
+    2,
+    6,
+    13
+   ],
+   "species": "beech",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "birch_leaves",
+   "layer": 2,
+   "role": "leaves",
+   "biomes": [
+    5,
+    9,
+    10,
+    13
+   ],
+   "species": "birch",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "scots_pine_leaves",
+   "layer": 3,
+   "role": "leaves",
+   "biomes": [
+    5,
+    10,
+    11,
+    13
+   ],
+   "species": "scots_pine",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "spruce_leaves",
+   "layer": 4,
+   "role": "leaves",
+   "biomes": [
+    5,
+    6,
+    13
+   ],
+   "species": "spruce",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "olive_leaves",
+   "layer": 5,
+   "role": "leaves",
+   "biomes": [
+    3,
+    14
+   ],
+   "species": "olive",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "holm_oak_leaves",
+   "layer": 6,
+   "role": "leaves",
+   "biomes": [
+    3,
+    11,
+    14
+   ],
+   "species": "holm_oak",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "aleppo_pine_leaves",
+   "layer": 7,
+   "role": "leaves",
+   "biomes": [
+    3,
+    14
+   ],
+   "species": "aleppo_pine",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "date_palm_leaves",
+   "layer": 8,
+   "role": "leaves",
+   "biomes": [
+    8
+   ],
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "poplar_leaves",
+   "layer": 9,
+   "role": "leaves",
+   "biomes": [
+    2,
+    7,
+    12
+   ],
+   "species": "poplar",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "willow_leaves",
+   "layer": 10,
+   "role": "leaves",
+   "biomes": [
+    1,
+    2,
+    12
+   ],
+   "species": "willow",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  },
+  {
+   "id": "larch_leaves",
+   "layer": 11,
+   "role": "leaves",
+   "biomes": [
+    5,
+    6,
+    9
+   ],
+   "species": "larch",
+   "tile_m": 0.5,
+   "aspect": 1.0
+  }
+ ]
+}
