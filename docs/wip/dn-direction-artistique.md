@@ -23,3 +23,10 @@ Priorité quand le temps machine manque : **campagne > bataille > UI**. 20 agent
 
 - ME2/3/4/8 fusionnés f4963ebcf (faune, oiseaux, marais/névés, paysages agricoles).
 - ME1 mer (10-09) : fusionnée dans main (55f48ba84), motif de vaguelettes supprimé (fondu selon la période écran, houle déformée par bruit) ; note docs/wip/dn/me1-mer.md.
+
+## Clôture (09/10 soir)
+- Tous les chantiers DN fusionnés dans main : SOL/MAQ (ADR 0213-0214), MER (0215), FLEUVE (0217), RELIEF (0218), PAYS (0220), FORET (0221), CHAMPS (0222), TROUS (8a05f8a55), villes multi-vues + champs (968ebdcf4). Aucun worktree DN restant.
+- 14 villes/châteaux adoptés en multi-vues TRELLIS 1 ; 7 refusés (ancien modèle gardé) : city_iber_mudejar, city_ital_maritime, city_steppe, city_hansa, castle_west, castle_med, town_iber.
+- fal : 43,51 $ dépensés (plafond 46). Règle : TRELLIS 1 (+multi) et le modèle de vues profil/dos uniquement.
+- Paquet modèles `models-v2` publié (2118 fichiers, 922 Mo), `data/art/dn_models_hosting.json` → v2.
+- Restes : autres villes/châteaux (castle_isl_*, castle_rus, town_isl, town_rus…), town_port_harbour encore TRELLIS 2, fragment de chaume sur le glacier, figurines archer_3_jack / fig_sled_driver_north non cuites (ga3_figures.py sur dn/fig-bake), réingestion siege_cannon_early_1340, imposteurs d'arbres (ga3_vegetation_l2.py sheet/atlas), roche HB cliff_limestone locale manquante.
