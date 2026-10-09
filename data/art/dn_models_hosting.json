@@ -3,5 +3,10 @@
   "package_name": "cent-ans-models",
   "base_url": "https://github.com/BenjaminNavet/cent-ans-relief/releases/download/models-v{version}/",
   "version": 1,
-  "manifest_name": "manifest.json"
+  "manifest_name": "manifest.json",
+  "content": {
+    "files": 2001,
+    "bytes": 895298992,
+    "signature": "d1709670ad554726c8c5b416b164ea90ca7fb9630070c1973605c4becda97852"
+  }
 }
