@@ -1,0 +1,2730 @@
+{
+ "description": "Lot DN ME6/ME7/ME9 : décor ponctuel hors les villes de la carte de campagne (croix, gibets, péages, phares, mines, forges, mégalithes, ruines romaines, champs de bataille, pèlerins, foires, steppe). Rendu seulement. `types` : id -> modèle du catalogue DN (`data/art/dn_catalog_map_extra.json`, fichiers listés dans `data/art/dn_manifest.json`, `_lod0/1/2.glb`) ; tant qu'il manque, `shape`/`color`/`size_m` (mètres) donnent un volume de repli. `fraction` : largeur tenue à l'écran (part de la hauteur d'écran), `max_distance` : portée en unités de distance du rig. `rules` : placement par données (road : le long des routes ; gate : aux portes des villes ; crossing : ponts ; coast : côtes ; province : par province selon ressources/terrain ; route : itinéraire de pèlerins ou de caravanes entre colonies). `sites` : lieux historiques réels (lonlat ; `px` cuits par `tools/cent_ans_tools/decor_bake.py`). `from_year`/`to_year` : période d'existence ; `seasons` : saisons de présence.",
+ "version": 1,
+ "seed": 1337,
+ "render": {
+  "view_range_units": 70.0,
+  "fade_from_units": 56.0,
+  "load_factor": 2.6,
+  "load_min_units": 8.0,
+  "load_max_units": 140.0,
+  "max_instances": 5000,
+  "lod_distances": [
+   14.0,
+   38.0
+  ],
+  "shadow_range_units": 16.0,
+  "cell_px": 24.0,
+  "screen": {
+   "real_below": 8.0,
+   "full_from": 14.0,
+   "max_factor": 220.0,
+   "fov_deg": 55.0
+  },
+  "maquette": {
+   "size_distance": 50.0,
+   "distance_scale": 3.0,
+   "view_range_units": 220.0,
+   "fade_from_units": 180.0,
+   "load_factor": 1.8,
+   "load_min_units": 30.0,
+   "load_max_units": 260.0
+  }
+ },
+ "types": {
+  "wayside_cross": {
+   "label": "Croix de chemin",
+   "model": "env_cross_wayside_stone",
+   "shape": "pillar",
+   "color": [
+    0.55,
+    0.52,
+    0.46
+   ],
+   "size_m": [
+    1.0,
+    2.6
+   ],
+   "fraction": 0.0042,
+   "max_distance": 26,
+   "category": "road"
+  },
+  "calvary": {
+   "label": "Calvaire",
+   "model": "env_calvary_breton",
+   "shape": "pillar",
+   "color": [
+    0.5,
+    0.48,
+    0.44
+   ],
+   "size_m": [
+    3.0,
+    4.5
+   ],
+   "fraction": 0.0055,
+   "max_distance": 30,
+   "category": "road"
+  },
+  "wayside_shrine": {
+   "label": "Oratoire",
+   "model": "env_wayside_shrine",
+   "shape": "hut",
+   "color": [
+    0.6,
+    0.55,
+    0.45
+   ],
+   "size_m": [
+    2.0,
+    3.0
+   ],
+   "fraction": 0.0048,
+   "max_distance": 26,
+   "category": "road"
+  },
+  "gibbet": {
+   "label": "Gibet de bois",
+   "model": "env_gibbet",
+   "shape": "pillar",
+   "color": [
+    0.28,
+    0.2,
+    0.14
+   ],
+   "size_m": [
+    3.0,
+    5.5
+   ],
+   "fraction": 0.0055,
+   "max_distance": 30,
+   "category": "road"
+  },
+  "gibbet_stone": {
+   "label": "Gibet de pierre",
+   "model": "env_gibbet_stone",
+   "shape": "tower",
+   "color": [
+    0.46,
+    0.44,
+    0.4
+   ],
+   "size_m": [
+    6.0,
+    9.0
+   ],
+   "fraction": 0.007,
+   "max_distance": 36,
+   "category": "road"
+  },
+  "toll_bar": {
+   "label": "Péage",
+   "model": "env_toll_bar",
+   "shape": "hut",
+   "color": [
+    0.45,
+    0.33,
+    0.2
+   ],
+   "size_m": [
+    5.0,
+    3.0
+   ],
+   "fraction": 0.0055,
+   "max_distance": 26,
+   "category": "road"
+  },
+  "milestone": {
+   "label": "Borne",
+   "model": "env_milestone",
+   "shape": "pillar",
+   "color": [
+    0.6,
+    0.58,
+    0.52
+   ],
+   "size_m": [
+    0.5,
+    1.4
+   ],
+   "fraction": 0.0036,
+   "max_distance": 20,
+   "category": "road"
+  },
+  "hospice_alpine": {
+   "label": "Hospice de col",
+   "model": "env_hospice_alpine",
+   "shape": "hut",
+   "color": [
+    0.58,
+    0.54,
+    0.48
+   ],
+   "size_m": [
+    18.0,
+    10.0
+   ],
+   "fraction": 0.011,
+   "max_distance": 48,
+   "category": "road"
+  },
+  "pilgrim_hostel": {
+   "label": "Hôtellerie de pèlerins",
+   "model": "env_pilgrim_hostel",
+   "shape": "hut",
+   "color": [
+    0.62,
+    0.5,
+    0.36
+   ],
+   "size_m": [
+    16.0,
+    8.0
+   ],
+   "fraction": 0.01,
+   "max_distance": 40,
+   "category": "road"
+  },
+  "chapel_pilgrim": {
+   "label": "Chapelle de pèlerinage",
+   "model": "env_chapel_pilgrim",
+   "shape": "hut",
+   "color": [
+    0.66,
+    0.62,
+    0.55
+   ],
+   "size_m": [
+    10.0,
+    9.0
+   ],
+   "fraction": 0.009,
+   "max_distance": 40,
+   "category": "road"
+  },
+  "lighthouse": {
+   "label": "Phare",
+   "model": "env_lighthouse_medieval",
+   "shape": "tower",
+   "color": [
+    0.74,
+    0.72,
+    0.66
+   ],
+   "size_m": [
+    10.0,
+    32.0
+   ],
+   "fraction": 0.014,
+   "max_distance": 70,
+   "category": "coast"
+  },
+  "signal_tower": {
+   "label": "Tour à signaux",
+   "model": "env_signal_tower",
+   "shape": "tower",
+   "color": [
+    0.55,
+    0.5,
+    0.44
+   ],
+   "size_m": [
+    6.0,
+    14.0
+   ],
+   "fraction": 0.0085,
+   "max_distance": 50,
+   "category": "coast"
+  },
+  "beacon_hill": {
+   "label": "Balise de colline",
+   "model": "env_beacon_hill",
+   "shape": "pillar",
+   "color": [
+    0.35,
+    0.24,
+    0.14
+   ],
+   "size_m": [
+    3.0,
+    4.0
+   ],
+   "fraction": 0.0055,
+   "max_distance": 36,
+   "category": "coast"
+  },
+  "shipyard_slip": {
+   "label": "Chantier naval",
+   "model": "env_shipyard_slip",
+   "shape": "hut",
+   "color": [
+    0.52,
+    0.4,
+    0.28
+   ],
+   "size_m": [
+    24.0,
+    9.0
+   ],
+   "fraction": 0.011,
+   "max_distance": 34,
+   "category": "coast"
+  },
+  "shipwreck": {
+   "label": "Épave",
+   "model": "env_shipwreck_hull",
+   "shape": "hut",
+   "color": [
+    0.3,
+    0.22,
+    0.16
+   ],
+   "size_m": [
+    14.0,
+    5.0
+   ],
+   "fraction": 0.007,
+   "max_distance": 28,
+   "category": "coast"
+  },
+  "fishing_weir": {
+   "label": "Pêcherie",
+   "model": "env_fishing_weir",
+   "shape": "slab",
+   "color": [
+    0.4,
+    0.32,
+    0.22
+   ],
+   "size_m": [
+    22.0,
+    1.5
+   ],
+   "fraction": 0.0075,
+   "max_distance": 24,
+   "category": "coast"
+  },
+  "fish_trap_stakes": {
+   "label": "Bordigue à pieux",
+   "model": "env_fish_trap_stakes",
+   "shape": "slab",
+   "color": [
+    0.36,
+    0.3,
+    0.22
+   ],
+   "size_m": [
+    18.0,
+    1.4
+   ],
+   "fraction": 0.0065,
+   "max_distance": 22,
+   "category": "coast"
+  },
+  "drying_racks_fish": {
+   "label": "Séchoirs à poisson",
+   "model": "env_drying_racks_fish",
+   "shape": "slab",
+   "color": [
+    0.55,
+    0.45,
+    0.32
+   ],
+   "size_m": [
+    12.0,
+    2.5
+   ],
+   "fraction": 0.0065,
+   "max_distance": 22,
+   "category": "coast"
+  },
+  "tidal_mill": {
+   "label": "Moulin à marée",
+   "model": "env_tidal_mill",
+   "shape": "hut",
+   "color": [
+    0.5,
+    0.42,
+    0.32
+   ],
+   "size_m": [
+    14.0,
+    8.0
+   ],
+   "fraction": 0.0085,
+   "max_distance": 30,
+   "category": "coast"
+  },
+  "mine_headframe": {
+   "label": "Mine",
+   "model": "env_mine_headframe",
+   "shape": "tower",
+   "color": [
+    0.42,
+    0.34,
+    0.26
+   ],
+   "size_m": [
+    8.0,
+    10.0
+   ],
+   "fraction": 0.009,
+   "max_distance": 34,
+   "category": "industry"
+  },
+  "quarry_face": {
+   "label": "Carrière",
+   "model": "env_quarry_face",
+   "shape": "slab",
+   "color": [
+    0.7,
+    0.66,
+    0.58
+   ],
+   "size_m": [
+    30.0,
+    6.0
+   ],
+   "fraction": 0.009,
+   "max_distance": 32,
+   "category": "industry"
+  },
+  "charcoal_kiln": {
+   "label": "Charbonnière",
+   "model": "env_charcoal_kiln",
+   "shape": "cone",
+   "color": [
+    0.18,
+    0.14,
+    0.11
+   ],
+   "size_m": [
+    8.0,
+    4.0
+   ],
+   "fraction": 0.0065,
+   "max_distance": 26,
+   "category": "industry",
+   "smoke": true
+  },
+  "glassworks": {
+   "label": "Verrerie",
+   "model": "env_glassworks",
+   "shape": "hut",
+   "color": [
+    0.5,
+    0.4,
+    0.3
+   ],
+   "size_m": [
+    14.0,
+    8.0
+   ],
+   "fraction": 0.0085,
+   "max_distance": 28,
+   "category": "industry",
+   "smoke": true
+  },
+  "forge_water": {
+   "label": "Forge hydraulique",
+   "model": "env_forge_water",
+   "shape": "hut",
+   "color": [
+    0.38,
+    0.3,
+    0.24
+   ],
+   "size_m": [
+    12.0,
+    7.0
+   ],
+   "fraction": 0.0085,
+   "max_distance": 30,
+   "category": "industry",
+   "smoke": true
+  },
+  "windmill_polder": {
+   "label": "Moulin de polder",
+   "model": "env_windmill_dutch_polder",
+   "shape": "tower",
+   "color": [
+    0.62,
+    0.56,
+    0.46
+   ],
+   "size_m": [
+    12.0,
+    18.0
+   ],
+   "fraction": 0.0095,
+   "max_distance": 36,
+   "category": "industry"
+  },
+  "water_wheel": {
+   "label": "Noria",
+   "model": "env_water_wheel_noria",
+   "shape": "pillar",
+   "color": [
+    0.5,
+    0.38,
+    0.26
+   ],
+   "size_m": [
+    8.0,
+    8.0
+   ],
+   "fraction": 0.0065,
+   "max_distance": 24,
+   "category": "industry"
+  },
+  "hermitage_cliff": {
+   "label": "Ermitage",
+   "model": "env_hermitage_cliff",
+   "shape": "hut",
+   "color": [
+    0.6,
+    0.55,
+    0.48
+   ],
+   "size_m": [
+    6.0,
+    6.0
+   ],
+   "fraction": 0.0065,
+   "max_distance": 34,
+   "category": "religion"
+  },
+  "monastery_cliff": {
+   "label": "Monastère de falaise",
+   "model": "env_monastery_cliff",
+   "shape": "hut",
+   "color": [
+    0.64,
+    0.58,
+    0.5
+   ],
+   "size_m": [
+    40.0,
+    25.0
+   ],
+   "fraction": 0.016,
+   "max_distance": 60,
+   "category": "religion"
+  },
+  "megalith_dolmen": {
+   "label": "Dolmen",
+   "model": "env_megalith_dolmen",
+   "shape": "pillar",
+   "color": [
+    0.55,
+    0.54,
+    0.5
+   ],
+   "size_m": [
+    6.0,
+    3.0
+   ],
+   "fraction": 0.0065,
+   "max_distance": 40,
+   "category": "ancient"
+  },
+  "megalith_row": {
+   "label": "Alignement de menhirs",
+   "model": "env_megalith_menhir_row",
+   "shape": "slab",
+   "color": [
+    0.5,
+    0.5,
+    0.46
+   ],
+   "size_m": [
+    60.0,
+    3.5
+   ],
+   "fraction": 0.011,
+   "max_distance": 50,
+   "category": "ancient"
+  },
+  "stone_circle": {
+   "label": "Cromlech",
+   "model": "env_stone_circle",
+   "shape": "ring",
+   "color": [
+    0.52,
+    0.52,
+    0.48
+   ],
+   "size_m": [
+    30.0,
+    3.0
+   ],
+   "fraction": 0.0095,
+   "max_distance": 50,
+   "category": "ancient"
+  },
+  "roman_aqueduct": {
+   "label": "Aqueduc romain",
+   "model": "env_roman_aqueduct",
+   "shape": "arch",
+   "color": [
+    0.72,
+    0.64,
+    0.5
+   ],
+   "size_m": [
+    140.0,
+    40.0
+   ],
+   "fraction": 0.02,
+   "max_distance": 70,
+   "category": "ancient"
+  },
+  "roman_arena": {
+   "label": "Arènes romaines",
+   "model": "env_roman_arena_ruin",
+   "shape": "ring",
+   "color": [
+    0.74,
+    0.66,
+    0.52
+   ],
+   "size_m": [
+    70.0,
+    18.0
+   ],
+   "fraction": 0.016,
+   "max_distance": 70,
+   "category": "ancient"
+  },
+  "roman_temple": {
+   "label": "Temple romain",
+   "model": "env_roman_temple_ruin",
+   "shape": "arch",
+   "color": [
+    0.78,
+    0.72,
+    0.6
+   ],
+   "size_m": [
+    30.0,
+    14.0
+   ],
+   "fraction": 0.012,
+   "max_distance": 60,
+   "category": "ancient"
+  },
+  "roman_arch": {
+   "label": "Arc romain",
+   "model": "env_roman_arch_triumph",
+   "shape": "arch",
+   "color": [
+    0.76,
+    0.7,
+    0.58
+   ],
+   "size_m": [
+    14.0,
+    15.0
+   ],
+   "fraction": 0.011,
+   "max_distance": 60,
+   "category": "ancient"
+  },
+  "ruin_village": {
+   "label": "Village abandonné",
+   "model": "env_ruin_village_abandoned",
+   "shape": "hut",
+   "color": [
+    0.42,
+    0.38,
+    0.32
+   ],
+   "size_m": [
+    40.0,
+    4.0
+   ],
+   "fraction": 0.011,
+   "max_distance": 34,
+   "category": "ruin"
+  },
+  "ruin_burnt_hamlet": {
+   "label": "Hameau brûlé",
+   "model": "env_ruin_burnt_hamlet",
+   "shape": "hut",
+   "color": [
+    0.16,
+    0.13,
+    0.11
+   ],
+   "size_m": [
+    25.0,
+    4.0
+   ],
+   "fraction": 0.009,
+   "max_distance": 30,
+   "category": "ruin"
+  },
+  "plague_pit": {
+   "label": "Fosse de peste",
+   "model": "env_plague_pit",
+   "shape": "slab",
+   "color": [
+    0.22,
+    0.2,
+    0.16
+   ],
+   "size_m": [
+    10.0,
+    0.8
+   ],
+   "fraction": 0.005,
+   "max_distance": 24,
+   "category": "ruin"
+  },
+  "plague_hut": {
+   "label": "Lazaret",
+   "model": "env_plague_isolation_hut",
+   "shape": "hut",
+   "color": [
+    0.45,
+    0.4,
+    0.34
+   ],
+   "size_m": [
+    12.0,
+    5.0
+   ],
+   "fraction": 0.0075,
+   "max_distance": 28,
+   "category": "ruin"
+  },
+  "battlefield_graves": {
+   "label": "Champ de bataille",
+   "model": "env_battlefield_stakes_graves",
+   "shape": "slab",
+   "color": [
+    0.36,
+    0.3,
+    0.22
+   ],
+   "size_m": [
+    40.0,
+    2.0
+   ],
+   "fraction": 0.01,
+   "max_distance": 40,
+   "category": "ruin"
+  },
+  "battlefield_arms": {
+   "label": "Champ de bataille (armes)",
+   "model": "env_battlefield_bones_arms",
+   "shape": "slab",
+   "color": [
+    0.4,
+    0.38,
+    0.34
+   ],
+   "size_m": [
+    30.0,
+    1.2
+   ],
+   "fraction": 0.008,
+   "max_distance": 36,
+   "category": "ruin"
+  },
+  "pilgrim_group": {
+   "label": "Pèlerins",
+   "model": "env_pilgrim_group_staff",
+   "shape": "slab",
+   "color": [
+    0.4,
+    0.3,
+    0.2
+   ],
+   "size_m": [
+    6.0,
+    1.8
+   ],
+   "fraction": 0.0045,
+   "max_distance": 22,
+   "category": "folk"
+  },
+  "caravan_camels": {
+   "label": "Caravane de chameaux",
+   "model": "env_merchant_caravan_camels",
+   "shape": "slab",
+   "color": [
+    0.55,
+    0.44,
+    0.28
+   ],
+   "size_m": [
+    30.0,
+    3.0
+   ],
+   "fraction": 0.0085,
+   "max_distance": 34,
+   "category": "folk"
+  },
+  "cart_ox": {
+   "label": "Charrette à bœufs",
+   "model": "env_cart_ox_peasant",
+   "shape": "slab",
+   "color": [
+    0.46,
+    0.34,
+    0.22
+   ],
+   "size_m": [
+    6.0,
+    2.2
+   ],
+   "fraction": 0.0042,
+   "max_distance": 20,
+   "category": "folk"
+  },
+  "pack_train": {
+   "label": "Mulets bâtés",
+   "model": "env_cart_pack_train_mules",
+   "shape": "slab",
+   "color": [
+    0.4,
+    0.32,
+    0.24
+   ],
+   "size_m": [
+    12.0,
+    2.0
+   ],
+   "fraction": 0.005,
+   "max_distance": 22,
+   "category": "folk"
+  },
+  "fair_tents": {
+   "label": "Foire",
+   "model": "env_market_fair_tents",
+   "shape": "hut",
+   "color": [
+    0.78,
+    0.7,
+    0.52
+   ],
+   "size_m": [
+    40.0,
+    5.0
+   ],
+   "fraction": 0.013,
+   "max_distance": 40,
+   "category": "folk"
+  },
+  "yurt_steppe": {
+   "label": "Yourtes",
+   "model": "env_yurt_steppe",
+   "shape": "cone",
+   "color": [
+    0.82,
+    0.78,
+    0.7
+   ],
+   "size_m": [
+    6.0,
+    3.2
+   ],
+   "fraction": 0.0055,
+   "max_distance": 30,
+   "category": "folk"
+  },
+  "steppe_camp_carts": {
+   "label": "Campement de chariots",
+   "model": "env_steppe_camp_carts",
+   "shape": "slab",
+   "color": [
+    0.5,
+    0.4,
+    0.3
+   ],
+   "size_m": [
+    24.0,
+    3.0
+   ],
+   "fraction": 0.008,
+   "max_distance": 32,
+   "category": "folk"
+  },
+  "shepherd_hut": {
+   "label": "Cabane de berger",
+   "model": "env_shepherd_hut_wheeled",
+   "shape": "hut",
+   "color": [
+    0.5,
+    0.4,
+    0.3
+   ],
+   "size_m": [
+    4.0,
+    2.6
+   ],
+   "fraction": 0.0042,
+   "max_distance": 22,
+   "category": "folk"
+  },
+  "sheepfold": {
+   "label": "Bergerie",
+   "model": "env_sheepfold_stone",
+   "shape": "slab",
+   "color": [
+    0.58,
+    0.54,
+    0.46
+   ],
+   "size_m": [
+    14.0,
+    1.6
+   ],
+   "fraction": 0.0058,
+   "max_distance": 24,
+   "category": "folk"
+  }
+ },
+ "rules": [
+  {
+   "id": "road_crosses",
+   "mode": "road",
+   "types": {
+    "wayside_cross": 6,
+    "milestone": 2
+   },
+   "spacing_px": 38,
+   "chance": 0.5,
+   "lateral_px": [
+    0.04,
+    0.12
+   ],
+   "seed": 11,
+   "terrains": [
+    "plains",
+    "hills",
+    "forest",
+    "bocage",
+    "heath"
+   ]
+  },
+  {
+   "id": "road_calvaries_bretagne",
+   "mode": "road",
+   "types": {
+    "calvary": 1
+   },
+   "spacing_px": 14,
+   "chance": 0.5,
+   "lateral_px": [
+    0.04,
+    0.1
+   ],
+   "seed": 12,
+   "provinces": [
+    "prov_bretagne",
+    "prov_bretagne_ouest",
+    "prov_penthievre"
+   ]
+  },
+  {
+   "id": "road_shrines",
+   "mode": "road",
+   "types": {
+    "wayside_shrine": 1
+   },
+   "spacing_px": 90,
+   "chance": 0.4,
+   "lateral_px": [
+    0.04,
+    0.12
+   ],
+   "seed": 13,
+   "terrains": [
+    "hills",
+    "mountains",
+    "forest"
+   ]
+  },
+  {
+   "id": "road_pack_trains",
+   "mode": "road",
+   "types": {
+    "pack_train": 1,
+    "cart_ox": 2
+   },
+   "spacing_px": 70,
+   "chance": 0.35,
+   "lateral_px": [
+    0.0,
+    0.05
+   ],
+   "seed": 14,
+   "terrains": [
+    "plains",
+    "hills"
+   ],
+   "from_year": 1337
+  },
+  {
+   "id": "road_pass_hospices",
+   "mode": "road",
+   "types": {
+    "hospice_alpine": 1
+   },
+   "spacing_px": 10,
+   "chance": 0.35,
+   "lateral_px": [
+    0.06,
+    0.15
+   ],
+   "seed": 15,
+   "min_height_m": 1500,
+   "min_settlement_px": 2.0
+  },
+  {
+   "id": "road_pilgrim_hostels",
+   "mode": "road",
+   "types": {
+    "pilgrim_hostel": 1
+   },
+   "spacing_px": 150,
+   "chance": 0.35,
+   "lateral_px": [
+    0.06,
+    0.15
+   ],
+   "seed": 16,
+   "terrains": [
+    "hills",
+    "mountains",
+    "forest"
+   ],
+   "min_settlement_px": 2.0
+  },
+  {
+   "id": "gate_gibbets",
+   "mode": "gate",
+   "types": {
+    "gibbet": 3,
+    "gibbet_stone": 1
+   },
+   "kinds": [
+    "city",
+    "town"
+   ],
+   "distance_px": [
+    0.9,
+    1.8
+   ],
+   "chance": 0.25,
+   "seed": 17
+  },
+  {
+   "id": "bridge_tolls",
+   "mode": "crossing",
+   "types": {
+    "toll_bar": 1
+   },
+   "crossing_types": [
+    "bridge"
+   ],
+   "offset_px": 0.18,
+   "chance": 0.3,
+   "allow_river": true,
+   "seed": 18
+  },
+  {
+   "id": "coast_fishing",
+   "mode": "coast",
+   "types": {
+    "fishing_weir": 2,
+    "fish_trap_stakes": 2,
+    "drying_racks_fish": 1
+   },
+   "spacing_px": 16,
+   "chance": 0.22,
+   "inland_px": 0.35,
+   "seed": 21,
+   "provinces_resource": [
+    "res_fish"
+   ],
+   "min_settlement_px": 1.0
+  },
+  {
+   "id": "coast_signal_towers",
+   "mode": "coast",
+   "types": {
+    "signal_tower": 2,
+    "beacon_hill": 1
+   },
+   "spacing_px": 70,
+   "chance": 0.3,
+   "inland_px": 0.6,
+   "seed": 22,
+   "min_height_m": 25,
+   "min_settlement_px": 2.0
+  },
+  {
+   "id": "coast_shipyards",
+   "mode": "coast",
+   "types": {
+    "shipyard_slip": 1
+   },
+   "spacing_px": 4,
+   "chance": 0.55,
+   "inland_px": 0.3,
+   "seed": 23,
+   "settlement_px": [
+    1.2,
+    3.2
+   ],
+   "settlement_kinds": [
+    "city",
+    "town"
+   ]
+  },
+  {
+   "id": "coast_wrecks",
+   "mode": "coast",
+   "types": {
+    "shipwreck": 1
+   },
+   "spacing_px": 70,
+   "chance": 0.15,
+   "inland_px": 0.25,
+   "seed": 24,
+   "min_settlement_px": 2.0
+  },
+  {
+   "id": "coast_tide_mills",
+   "mode": "coast",
+   "types": {
+    "tidal_mill": 1
+   },
+   "spacing_px": 50,
+   "chance": 0.2,
+   "inland_px": 0.35,
+   "seed": 25,
+   "climates": [
+    "oceanic"
+   ],
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "mines",
+   "mode": "province",
+   "types": {
+    "mine_headframe": 1
+   },
+   "resources_any": [
+    "res_iron",
+    "res_tin"
+   ],
+   "terrains": [
+    "hills",
+    "mountains"
+   ],
+   "per_province": 1.0,
+   "per_area_px": 4e-05,
+   "seed": 31,
+   "min_height_m": 100,
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "quarries",
+   "mode": "province",
+   "types": {
+    "quarry_face": 1
+   },
+   "resources_any": [
+    "res_stone"
+   ],
+   "per_province": 1.2,
+   "per_area_px": 3e-05,
+   "seed": 32,
+   "min_settlement_px": 1.0
+  },
+  {
+   "id": "charcoal_kilns",
+   "mode": "province",
+   "types": {
+    "charcoal_kiln": 1
+   },
+   "resources_all": [
+    "res_wood",
+    "res_iron"
+   ],
+   "terrains": [
+    "forest",
+    "hills"
+   ],
+   "per_province": 2.0,
+   "per_area_px": 5e-05,
+   "seed": 33,
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "glassworks",
+   "mode": "province",
+   "types": {
+    "glassworks": 1
+   },
+   "resources_any": [
+    "res_wood"
+   ],
+   "terrains": [
+    "forest"
+   ],
+   "per_province": 0.35,
+   "per_area_px": 0.0,
+   "seed": 34,
+   "min_settlement_px": 1.5
+  },
+  {
+   "id": "water_forges",
+   "mode": "province",
+   "types": {
+    "forge_water": 1
+   },
+   "resources_any": [
+    "res_iron"
+   ],
+   "per_province": 1.0,
+   "per_area_px": 2e-05,
+   "seed": 35,
+   "near_river_px": 3.0,
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "noria_orient",
+   "mode": "province",
+   "types": {
+    "water_wheel": 1
+   },
+   "terrains": [
+    "desert",
+    "steppe"
+   ],
+   "climates": [
+    "arid",
+    "mediterranean"
+   ],
+   "per_province": 0.8,
+   "per_area_px": 1e-05,
+   "seed": 36,
+   "near_river_px": 2.0,
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "polder_mills",
+   "mode": "province",
+   "types": {
+    "windmill_polder": 1
+   },
+   "provinces": [
+    "prov_holland",
+    "prov_utrecht",
+    "prov_frisia",
+    "prov_flandre",
+    "prov_zeeland",
+    "prov_gueldre",
+    "prov_brabant"
+   ],
+   "per_province": 3.0,
+   "per_area_px": 8e-05,
+   "seed": 37,
+   "max_height_m": 15,
+   "min_settlement_px": 1.0
+  },
+  {
+   "id": "hermitages",
+   "mode": "province",
+   "types": {
+    "hermitage_cliff": 1
+   },
+   "terrains": [
+    "mountains"
+   ],
+   "per_province": 0.8,
+   "per_area_px": 2e-05,
+   "seed": 41,
+   "min_height_m": 500,
+   "min_settlement_px": 1.5
+  },
+  {
+   "id": "dolmens_atlantic",
+   "mode": "province",
+   "types": {
+    "megalith_dolmen": 1
+   },
+   "climates": [
+    "oceanic"
+   ],
+   "terrains": [
+    "heath",
+    "hills",
+    "bocage"
+   ],
+   "per_province": 0.5,
+   "per_area_px": 1e-05,
+   "seed": 42,
+   "min_settlement_px": 1.5
+  },
+  {
+   "id": "abandoned_villages",
+   "mode": "province",
+   "types": {
+    "ruin_village": 1
+   },
+   "terrains": [
+    "hills",
+    "heath",
+    "mountains"
+   ],
+   "per_province": 0.5,
+   "per_area_px": 1e-05,
+   "seed": 43,
+   "min_settlement_px": 1.5
+  },
+  {
+   "id": "shepherd_huts",
+   "mode": "province",
+   "types": {
+    "shepherd_hut": 2,
+    "sheepfold": 1
+   },
+   "terrains": [
+    "mountains",
+    "hills",
+    "heath"
+   ],
+   "per_province": 1.5,
+   "per_area_px": 4e-05,
+   "seed": 44,
+   "min_settlement_px": 1.0,
+   "min_height_m": 150
+  },
+  {
+   "id": "steppe_camps",
+   "mode": "province",
+   "types": {
+    "yurt_steppe": 3,
+    "steppe_camp_carts": 1
+   },
+   "terrains": [
+    "steppe"
+   ],
+   "per_province": 3.0,
+   "per_area_px": 6e-05,
+   "seed": 45,
+   "min_settlement_px": 1.2
+  },
+  {
+   "id": "route_compostela",
+   "mode": "route",
+   "types": {
+    "pilgrim_group": 3,
+    "chapel_pilgrim": 1
+   },
+   "waypoints": [
+    [
+     2.3522,
+     48.8566
+    ],
+    [
+     0.6848,
+     47.3941
+    ],
+    [
+     0.3404,
+     46.5802
+    ],
+    [
+     -0.5792,
+     44.8378
+    ],
+    [
+     -1.3198,
+     43.0094
+    ],
+    [
+     -1.6432,
+     42.8125
+    ],
+    [
+     -3.7038,
+     42.344
+    ],
+    [
+     -5.57,
+     42.5987
+    ],
+    [
+     -8.5449,
+     42.8805
+    ]
+   ],
+   "spacing_px": 11,
+   "chance": 0.55,
+   "lateral_px": [
+    0.0,
+    0.08
+   ],
+   "seed": 51,
+   "min_settlement_px": 0.8,
+   "nodes": [
+    "set_paris",
+    "set_tours",
+    "set_poitiers",
+    "set_bordeaux",
+    "set_roncesvalles",
+    "set_pampelune",
+    "set_burgos",
+    "set_leon",
+    "set_saint_jacques"
+   ]
+  },
+  {
+   "id": "route_via_podiensis",
+   "mode": "route",
+   "types": {
+    "pilgrim_group": 3,
+    "chapel_pilgrim": 1
+   },
+   "waypoints": [
+    [
+     3.75,
+     47.4667
+    ],
+    [
+     3.8856,
+     45.0447
+    ],
+    [
+     2.3978,
+     44.599
+    ],
+    [
+     1.0833,
+     44.105
+    ],
+    [
+     -1.3198,
+     43.0094
+    ]
+   ],
+   "spacing_px": 11,
+   "chance": 0.5,
+   "lateral_px": [
+    0.0,
+    0.08
+   ],
+   "seed": 52,
+   "min_settlement_px": 0.8,
+   "nodes": [
+    "set_vezelay",
+    "set_la_chaise_dieu",
+    "set_conques",
+    "set_montcuq",
+    "set_roncesvalles"
+   ]
+  },
+  {
+   "id": "route_francigena",
+   "mode": "route",
+   "types": {
+    "pilgrim_group": 3,
+    "chapel_pilgrim": 1
+   },
+   "waypoints": [
+    [
+     1.0833,
+     51.2778
+    ],
+    [
+     1.3575,
+     51.1279
+    ],
+    [
+     1.8581,
+     50.9513
+    ],
+    [
+     4.0317,
+     49.2583
+    ],
+    [
+     6.024,
+     47.2378
+    ],
+    [
+     7.1712,
+     45.8689
+    ],
+    [
+     7.315,
+     45.737
+    ],
+    [
+     10.5,
+     43.8429
+    ],
+    [
+     12.4964,
+     41.9028
+    ]
+   ],
+   "spacing_px": 11,
+   "chance": 0.5,
+   "lateral_px": [
+    0.0,
+    0.08
+   ],
+   "seed": 53,
+   "min_settlement_px": 0.8,
+   "nodes": [
+    "set_cantorbery",
+    "set_dover",
+    "set_calais",
+    "set_reims",
+    "set_besancon",
+    "set_beaufort",
+    "set_lucca",
+    "set_rome"
+   ]
+  },
+  {
+   "id": "route_caravans_levant",
+   "mode": "route",
+   "types": {
+    "caravan_camels": 1
+   },
+   "waypoints": [
+    [
+     31.2357,
+     30.0444
+    ],
+    [
+     35.2137,
+     31.7683
+    ],
+    [
+     36.2765,
+     33.5138
+    ],
+    [
+     37.1343,
+     36.2021
+    ]
+   ],
+   "spacing_px": 14,
+   "chance": 0.5,
+   "lateral_px": [
+    0.0,
+    0.1
+   ],
+   "seed": 54,
+   "min_settlement_px": 1.0,
+   "nodes": [
+    "set_cairo",
+    "set_jerusalem",
+    "set_damascus",
+    "set_aleppo"
+   ]
+  },
+  {
+   "id": "route_caravans_maghreb",
+   "mode": "route",
+   "types": {
+    "caravan_camels": 1
+   },
+   "waypoints": [
+    [
+     10.1815,
+     36.8065
+    ],
+    [
+     10.0,
+     35.0
+    ],
+    [
+     9.8,
+     33.9
+    ],
+    [
+     13.19,
+     32.89
+    ]
+   ],
+   "spacing_px": 14,
+   "chance": 0.5,
+   "lateral_px": [
+    0.0,
+    0.1
+   ],
+   "seed": 55,
+   "min_settlement_px": 1.0,
+   "nodes": [
+    "set_tunis",
+    "set_kairouan",
+    "set_gabes",
+    "set_tripoli"
+   ]
+  }
+ ],
+ "sites": [
+  {
+   "id": "carnac_alignments",
+   "name": "Alignements de Carnac",
+   "type": "megalith_row",
+   "lonlat": [
+    -3.077,
+    47.384
+   ],
+   "note": "Alignements de Kermario et du Ménec",
+   "px": [
+    1626.3,
+    3351.0
+   ]
+  },
+  {
+   "id": "gavrinis",
+   "name": "Cairn de Gavrinis",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    -2.8997,
+    47.5725
+   ],
+   "px": [
+    1649.5,
+    3325.5
+   ]
+  },
+  {
+   "id": "stonehenge",
+   "name": "Stonehenge",
+   "type": "stone_circle",
+   "lonlat": [
+    -1.8262,
+    51.1789
+   ],
+   "px": [
+    1848.0,
+    2792.4
+   ]
+  },
+  {
+   "id": "avebury",
+   "name": "Avebury",
+   "type": "stone_circle",
+   "lonlat": [
+    -1.8544,
+    51.4286
+   ],
+   "px": [
+    1851.6,
+    2753.7
+   ]
+  },
+  {
+   "id": "callanish",
+   "name": "Callanish",
+   "type": "stone_circle",
+   "lonlat": [
+    -6.7449,
+    58.1976
+   ],
+   "px": [
+    1635.4,
+    1638.8
+   ]
+  },
+  {
+   "id": "brodgar",
+   "name": "Cercle de Brodgar",
+   "type": "stone_circle",
+   "lonlat": [
+    -3.2297,
+    59.0013
+   ],
+   "px": [
+    1940.0,
+    1576.6
+   ]
+  },
+  {
+   "id": "newgrange",
+   "name": "Newgrange",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    -6.4755,
+    53.6947
+   ],
+   "px": [
+    1493.7,
+    2324.4
+   ]
+  },
+  {
+   "id": "poulnabrone",
+   "name": "Poulnabrone",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    -9.1405,
+    53.049
+   ],
+   "px": [
+    1231.0,
+    2361.6
+   ]
+  },
+  {
+   "id": "bagneux",
+   "name": "Dolmen de Bagneux",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    -0.0994,
+    47.2569
+   ],
+   "px": [
+    1932.2,
+    3419.3
+   ]
+  },
+  {
+   "id": "menga",
+   "name": "Dolmen de Menga",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    -4.5606,
+    37.0265
+   ],
+   "px": [
+    1187.7,
+    4894.3
+   ]
+  },
+  {
+   "id": "almendres",
+   "name": "Cromlech des Almendres",
+   "type": "stone_circle",
+   "lonlat": [
+    -8.0575,
+    38.5575
+   ],
+   "px": [
+    811.8,
+    4571.9
+   ]
+  },
+  {
+   "id": "visbek",
+   "name": "Tombes géantes de Visbek",
+   "type": "megalith_dolmen",
+   "lonlat": [
+    8.3,
+    52.8
+   ],
+   "px": [
+    2833.0,
+    2632.5
+   ]
+  },
+  {
+   "id": "pont_du_gard",
+   "name": "Pont du Gard",
+   "type": "roman_aqueduct",
+   "lonlat": [
+    4.535,
+    43.9475
+   ],
+   "px": [
+    2381.5,
+    3980.3
+   ]
+  },
+  {
+   "id": "arenes_nimes",
+   "name": "Arènes de Nîmes",
+   "type": "roman_arena",
+   "lonlat": [
+    4.3604,
+    43.8346
+   ],
+   "px": [
+    2360.8,
+    3996.2
+   ]
+  },
+  {
+   "id": "arenes_arles",
+   "name": "Arènes d'Arles",
+   "type": "roman_arena",
+   "lonlat": [
+    4.6306,
+    43.6778
+   ],
+   "px": [
+    2389.3,
+    4022.6
+   ]
+  },
+  {
+   "id": "orange_arch",
+   "name": "Arc d'Orange",
+   "type": "roman_arch",
+   "lonlat": [
+    4.808,
+    44.1388
+   ],
+   "px": [
+    2413.9,
+    3953.0
+   ]
+  },
+  {
+   "id": "segovia_aqueduct",
+   "name": "Aqueduc de Ségovie",
+   "type": "roman_aqueduct",
+   "lonlat": [
+    -4.1184,
+    40.948
+   ],
+   "px": [
+    1342.5,
+    4310.0
+   ]
+  },
+  {
+   "id": "merida_milagros",
+   "name": "Aqueduc Los Milagros",
+   "type": "roman_aqueduct",
+   "lonlat": [
+    -6.35,
+    38.9207
+   ],
+   "px": [
+    1025.0,
+    4563.7
+   ]
+  },
+  {
+   "id": "tarragona_ferreres",
+   "name": "Pont du Diable (Tarragone)",
+   "type": "roman_aqueduct",
+   "lonlat": [
+    1.257,
+    41.1346
+   ],
+   "px": [
+    1969.6,
+    4376.6
+   ]
+  },
+  {
+   "id": "pula_arena",
+   "name": "Arènes de Pula",
+   "type": "roman_arena",
+   "lonlat": [
+    13.85,
+    44.8734
+   ],
+   "px": [
+    3416.2,
+    3848.9
+   ]
+  },
+  {
+   "id": "porta_nigra",
+   "name": "Porta Nigra",
+   "type": "roman_arch",
+   "lonlat": [
+    6.6441,
+    49.7597
+   ],
+   "px": [
+    2656.2,
+    3097.1
+   ]
+  },
+  {
+   "id": "saintes_arch",
+   "name": "Arc de Germanicus",
+   "type": "roman_arch",
+   "lonlat": [
+    -0.6322,
+    45.7456
+   ],
+   "px": [
+    1844.6,
+    3643.0
+   ]
+  },
+  {
+   "id": "vienne_temple",
+   "name": "Temple d'Auguste et Livie",
+   "type": "roman_temple",
+   "lonlat": [
+    4.8745,
+    45.5252
+   ],
+   "px": [
+    2435.2,
+    3740.0
+   ]
+  },
+  {
+   "id": "housesteads",
+   "name": "Mur d'Hadrien",
+   "type": "roman_temple",
+   "lonlat": [
+    -2.333,
+    55.023
+   ],
+   "px": [
+    1901.1,
+    2196.7
+   ]
+  },
+  {
+   "id": "ephesus",
+   "name": "Éphèse",
+   "type": "roman_temple",
+   "lonlat": [
+    27.3417,
+    37.9394
+   ],
+   "px": [
+    5107.7,
+    4685.1
+   ]
+  },
+  {
+   "id": "baalbek",
+   "name": "Baalbek",
+   "type": "roman_temple",
+   "lonlat": [
+    36.2039,
+    34.0069
+   ],
+   "px": [
+    6327.8,
+    4955.5
+   ]
+  },
+  {
+   "id": "zaghouan",
+   "name": "Aqueduc de Zaghouan",
+   "type": "roman_aqueduct",
+   "lonlat": [
+    10.03,
+    36.4
+   ],
+   "px": [
+    2996.2,
+    5162.1
+   ]
+  },
+  {
+   "id": "el_djem",
+   "name": "Amphithéâtre d'El Djem",
+   "type": "roman_arena",
+   "lonlat": [
+    10.7066,
+    35.2964
+   ],
+   "px": [
+    3082.8,
+    5330.3
+   ]
+  },
+  {
+   "id": "dougga",
+   "name": "Dougga",
+   "type": "roman_temple",
+   "lonlat": [
+    9.2203,
+    36.4233
+   ],
+   "px": [
+    2894.3,
+    5158.0
+   ]
+  },
+  {
+   "id": "dover_pharos",
+   "name": "Phare romain de Douvres",
+   "type": "roman_temple",
+   "lonlat": [
+    1.3225,
+    51.1281
+   ],
+   "px": [
+    2149.8,
+    2843.0
+   ]
+  },
+  {
+   "id": "cordouan",
+   "name": "Tour de Cordouan (ermitage)",
+   "type": "signal_tower",
+   "lonlat": [
+    -1.1724,
+    45.5864
+   ],
+   "from_year": 1360,
+   "coastal": true,
+   "px": [
+    1783.2,
+    3658.8
+   ]
+  },
+  {
+   "id": "torre_hercules",
+   "name": "Tour d'Hercule",
+   "type": "lighthouse",
+   "lonlat": [
+    -8.4063,
+    43.3859
+   ],
+   "coastal": true,
+   "px": [
+    936.2,
+    3835.1
+   ]
+  },
+  {
+   "id": "lanterna_genova",
+   "name": "Lanterna de Gênes",
+   "type": "lighthouse",
+   "lonlat": [
+    8.9042,
+    44.4056
+   ],
+   "coastal": true,
+   "px": [
+    2870.8,
+    3931.0
+   ]
+  },
+  {
+   "id": "hook_head",
+   "name": "Phare de Hook Head",
+   "type": "lighthouse",
+   "lonlat": [
+    -6.93,
+    52.1243
+   ],
+   "coastal": true,
+   "px": [
+    1396.5,
+    2552.2
+   ]
+  },
+  {
+   "id": "mouse_tower_bingen",
+   "name": "Mäuseturm (péage du Rhin)",
+   "type": "signal_tower",
+   "lonlat": [
+    7.8964,
+    50.005
+   ],
+   "px": [
+    2782.7,
+    3063.9
+   ]
+  },
+  {
+   "id": "pfalzgrafenstein",
+   "name": "Péage de Kaub",
+   "type": "toll_bar",
+   "lonlat": [
+    7.764,
+    50.0864
+   ],
+   "px": [
+    2769.9,
+    3050.9
+   ]
+  },
+  {
+   "id": "danube_toll_engelhartszell",
+   "name": "Péage de l'Engelhartszell",
+   "type": "toll_bar",
+   "lonlat": [
+    13.741,
+    48.508
+   ],
+   "px": [
+    3376.9,
+    3288.6
+   ]
+  },
+  {
+   "id": "deptford_yard",
+   "name": "Chantier de Deptford",
+   "type": "shipyard_slip",
+   "lonlat": [
+    -0.027,
+    51.48
+   ],
+   "coastal": true,
+   "px": [
+    2027.1,
+    2772.2
+   ]
+  },
+  {
+   "id": "eling_tide_mill",
+   "name": "Moulin à marée d'Eling",
+   "type": "tidal_mill",
+   "lonlat": [
+    -1.473,
+    50.91
+   ],
+   "coastal": true,
+   "px": [
+    1875.4,
+    2839.0
+   ]
+  },
+  {
+   "id": "woodbridge_tide_mill",
+   "name": "Moulin à marée de Woodbridge",
+   "type": "tidal_mill",
+   "lonlat": [
+    1.315,
+    52.0873
+   ],
+   "coastal": true,
+   "px": [
+    2166.7,
+    2695.4
+   ]
+  },
+  {
+   "id": "montfaucon",
+   "name": "Gibet de Montfaucon",
+   "type": "gibbet_stone",
+   "lonlat": [
+    2.3751,
+    48.8793
+   ],
+   "px": [
+    2215.9,
+    3200.7
+   ]
+  },
+  {
+   "id": "tyburn",
+   "name": "Tyburn",
+   "type": "gibbet",
+   "lonlat": [
+    -0.1604,
+    51.5131
+   ],
+   "px": [
+    2015.1,
+    2765.4
+   ]
+  },
+  {
+   "id": "wapping",
+   "name": "Execution Dock de Wapping",
+   "type": "gibbet",
+   "lonlat": [
+    -0.0554,
+    51.5063
+   ],
+   "px": [
+    2025.0,
+    2767.8
+   ]
+  },
+  {
+   "id": "gd_st_bernard",
+   "name": "Hospice du Grand-Saint-Bernard",
+   "type": "hospice_alpine",
+   "lonlat": [
+    7.1712,
+    45.8689
+   ],
+   "px": [
+    2686.7,
+    3700.3
+   ]
+  },
+  {
+   "id": "gotthard_hospice",
+   "name": "Hospice du Saint-Gothard",
+   "type": "hospice_alpine",
+   "lonlat": [
+    8.5603,
+    46.5594
+   ],
+   "px": [
+    2838.8,
+    3598.0
+   ]
+  },
+  {
+   "id": "mont_cenis_hospice",
+   "name": "Hospice du Mont-Cenis",
+   "type": "hospice_alpine",
+   "lonlat": [
+    6.9833,
+    45.2333
+   ],
+   "px": [
+    2662.6,
+    3797.6
+   ]
+  },
+  {
+   "id": "simplon_hospice",
+   "name": "Hospice du Simplon",
+   "type": "hospice_alpine",
+   "lonlat": [
+    8.0333,
+    46.25
+   ],
+   "px": [
+    2781.3,
+    3644.5
+   ]
+  },
+  {
+   "id": "somport_hospital",
+   "name": "Hôpital du Somport",
+   "type": "hospice_alpine",
+   "lonlat": [
+    -0.5317,
+    42.7895
+   ],
+   "px": [
+    1794.8,
+    4097.0
+   ]
+  },
+  {
+   "id": "brenner_hospice",
+   "name": "Hospice du Brenner",
+   "type": "hospice_alpine",
+   "lonlat": [
+    11.5083,
+    47.0016
+   ],
+   "px": [
+    3152.1,
+    3529.6
+   ]
+  },
+  {
+   "id": "roncesvalles",
+   "name": "Hôtellerie de Roncevaux",
+   "type": "pilgrim_hostel",
+   "lonlat": [
+    -1.3198,
+    43.0094
+   ],
+   "px": [
+    1710.6,
+    4050.4
+   ]
+  },
+  {
+   "id": "aubrac_domerie",
+   "name": "Dômerie d'Aubrac",
+   "type": "pilgrim_hostel",
+   "lonlat": [
+    2.9708,
+    44.6169
+   ],
+   "px": [
+    2216.3,
+    3862.8
+   ]
+  },
+  {
+   "id": "meteora",
+   "name": "Météores",
+   "type": "monastery_cliff",
+   "lonlat": [
+    21.6306,
+    39.7217
+   ],
+   "from_year": 1344,
+   "px": [
+    4381.0,
+    4546.5
+   ]
+  },
+  {
+   "id": "montserrat",
+   "name": "Montserrat",
+   "type": "monastery_cliff",
+   "lonlat": [
+    1.8376,
+    41.5933
+   ],
+   "px": [
+    2044.3,
+    4313.9
+   ]
+  },
+  {
+   "id": "sumela",
+   "name": "Sumela",
+   "type": "monastery_cliff",
+   "lonlat": [
+    39.6586,
+    40.6906
+   ],
+   "px": [
+    6394.4,
+    3823.8
+   ]
+  },
+  {
+   "id": "simonopetra",
+   "name": "Simonopétra (Athos)",
+   "type": "monastery_cliff",
+   "lonlat": [
+    24.317,
+    40.129
+   ],
+   "px": [
+    4687.1,
+    4429.9
+   ]
+  },
+  {
+   "id": "sinai",
+   "name": "Sainte-Catherine du Sinaï",
+   "type": "monastery_cliff",
+   "lonlat": [
+    33.976,
+    28.556
+   ],
+   "px": [
+    6267.4,
+    5852.8
+   ]
+  },
+  {
+   "id": "rocamadour",
+   "name": "Rocamadour",
+   "type": "hermitage_cliff",
+   "lonlat": [
+    1.6194,
+    44.7995
+   ],
+   "px": [
+    2070.7,
+    3819.4
+   ]
+  },
+  {
+   "id": "skellig_michael",
+   "name": "Skellig Michael",
+   "type": "hermitage_cliff",
+   "lonlat": [
+    -10.539,
+    51.7717
+   ],
+   "coastal": true,
+   "px": [
+    1050.7,
+    2517.2
+   ]
+  },
+  {
+   "id": "aiguilhe",
+   "name": "Saint-Michel d'Aiguilhe",
+   "type": "hermitage_cliff",
+   "lonlat": [
+    3.8856,
+    45.0475
+   ],
+   "px": [
+    2322.2,
+    3805.4
+   ]
+  },
+  {
+   "id": "goreme",
+   "name": "Göreme",
+   "type": "hermitage_cliff",
+   "lonlat": [
+    34.8286,
+    38.6431
+   ],
+   "px": [
+    5958.6,
+    4329.0
+   ]
+  },
+  {
+   "id": "battle_courtrai",
+   "name": "Courtrai (1302)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    3.2403,
+    50.8159
+   ],
+   "px": [
+    2330.9,
+    2910.8
+   ]
+  },
+  {
+   "id": "battle_bannockburn",
+   "name": "Bannockburn (1314)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    -3.9183,
+    56.0963
+   ],
+   "px": [
+    1795.6,
+    2007.8
+   ]
+  },
+  {
+   "id": "battle_mons_en_pevele",
+   "name": "Mons-en-Pévèle (1304)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    3.1,
+    50.4778
+   ],
+   "px": [
+    2312.4,
+    2961.7
+   ]
+  },
+  {
+   "id": "battle_stirling_bridge",
+   "name": "Stirling Bridge (1297)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    -3.9505,
+    56.1262
+   ],
+   "px": [
+    1793.8,
+    2002.7
+   ]
+  },
+  {
+   "id": "battle_halidon_hill",
+   "name": "Halidon Hill (1333)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    -2.007,
+    55.774
+   ],
+   "px": [
+    1949.5,
+    2086.7
+   ]
+  },
+  {
+   "id": "battle_morgarten",
+   "name": "Morgarten (1315)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    8.6,
+    47.0933
+   ],
+   "px": [
+    2844.5,
+    3515.6
+   ]
+  },
+  {
+   "id": "battle_laupen",
+   "name": "Laupen (1339)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    7.24,
+    46.9
+   ],
+   "from_year": 1339,
+   "px": [
+    2699.8,
+    3541.4
+   ]
+  },
+  {
+   "id": "battle_crecy",
+   "name": "Crécy (1346)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    1.9439,
+    50.2557
+   ],
+   "from_year": 1346,
+   "px": [
+    2195.2,
+    2984.2
+   ]
+  },
+  {
+   "id": "battle_poitiers",
+   "name": "Maupertuis (1356)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    0.382,
+    46.556
+   ],
+   "from_year": 1356,
+   "px": [
+    1968.9,
+    3533.6
+   ]
+  },
+  {
+   "id": "battle_cocherel",
+   "name": "Cocherel (1364)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    1.3517,
+    49.0844
+   ],
+   "from_year": 1364,
+   "px": [
+    2115.9,
+    3157.7
+   ]
+  },
+  {
+   "id": "battle_auray",
+   "name": "Auray (1364)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    -2.9833,
+    47.6667
+   ],
+   "from_year": 1364,
+   "px": [
+    1643.3,
+    3309.6
+   ]
+  },
+  {
+   "id": "battle_agincourt",
+   "name": "Azincourt (1415)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    2.136,
+    50.46
+   ],
+   "from_year": 1415,
+   "px": [
+    2217.5,
+    2954.8
+   ]
+  },
+  {
+   "id": "battle_bauge",
+   "name": "Baugé (1421)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    -0.1068,
+    47.543
+   ],
+   "from_year": 1421,
+   "px": [
+    1937.3,
+    3375.3
+   ]
+  },
+  {
+   "id": "battle_verneuil",
+   "name": "Verneuil (1424)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    0.9272,
+    48.7388
+   ],
+   "from_year": 1424,
+   "px": [
+    2066.7,
+    3205.6
+   ]
+  },
+  {
+   "id": "battle_formigny",
+   "name": "Formigny (1450)",
+   "type": "battlefield_arms",
+   "lonlat": [
+    -0.9,
+    49.332
+   ],
+   "from_year": 1450,
+   "px": [
+    1894.9,
+    3089.4
+   ]
+  },
+  {
+   "id": "battle_castillon",
+   "name": "Castillon (1453)",
+   "type": "battlefield_graves",
+   "lonlat": [
+    -0.022,
+    44.846
+   ],
+   "from_year": 1453,
+   "px": [
+    1892.2,
+    3790.0
+   ]
+  },
+  {
+   "id": "plague_london",
+   "name": "Fosse de peste d'East Smithfield",
+   "type": "plague_pit",
+   "lonlat": [
+    -0.073,
+    51.5097
+   ],
+   "from_year": 1349,
+   "px": [
+    2023.4,
+    2767.0
+   ]
+  },
+  {
+   "id": "plague_florence",
+   "name": "Fosse de peste de Florence",
+   "type": "plague_pit",
+   "lonlat": [
+    11.2558,
+    43.76
+   ],
+   "from_year": 1349,
+   "px": [
+    3133.5,
+    4030.3
+   ]
+  },
+  {
+   "id": "plague_marseille",
+   "name": "Fosse de peste de Marseille",
+   "type": "plague_pit",
+   "lonlat": [
+    5.39,
+    43.29
+   ],
+   "from_year": 1348,
+   "px": [
+    2471.1,
+    4087.9
+   ]
+  },
+  {
+   "id": "plague_siena",
+   "name": "Fosse de peste de Sienne",
+   "type": "plague_pit",
+   "lonlat": [
+    11.35,
+    43.32
+   ],
+   "from_year": 1348,
+   "px": [
+    3145.2,
+    4097.9
+   ]
+  },
+  {
+   "id": "lazaret_ragusa",
+   "name": "Lazaret de Raguse",
+   "type": "plague_hut",
+   "lonlat": [
+    18.11,
+    42.6429
+   ],
+   "from_year": 1377,
+   "coastal": true,
+   "px": [
+    3918.4,
+    4153.7
+   ]
+  },
+  {
+   "id": "lazaret_venice",
+   "name": "Lazaret de Venise",
+   "type": "plague_hut",
+   "lonlat": [
+    12.377,
+    45.4378
+   ],
+   "from_year": 1423,
+   "coastal": true,
+   "px": [
+    3251.5,
+    3768.5
+   ]
+  },
+  {
+   "id": "fair_provins",
+   "name": "Foire de Provins",
+   "type": "fair_tents",
+   "near": "set_provins",
+   "offset_px": [
+    0.9,
+    0.5
+   ],
+   "seasons": [
+    "summer",
+    "autumn"
+   ]
+  },
+  {
+   "id": "fair_troyes",
+   "name": "Foire de Troyes",
+   "type": "fair_tents",
+   "near": "set_troyes",
+   "offset_px": [
+    0.9,
+    0.5
+   ],
+   "seasons": [
+    "summer",
+    "autumn"
+   ]
+  },
+  {
+   "id": "fair_bar",
+   "name": "Foire de Bar-sur-Aube",
+   "type": "fair_tents",
+   "near": "set_bar_sur_aube",
+   "offset_px": [
+    0.9,
+    0.5
+   ],
+   "seasons": [
+    "summer",
+    "autumn"
+   ]
+  },
+  {
+   "id": "fair_frankfurt",
+   "name": "Foire de Francfort",
+   "type": "fair_tents",
+   "near": "set_frankfurt",
+   "offset_px": [
+    0.9,
+    0.5
+   ],
+   "seasons": [
+    "summer",
+    "autumn"
+   ]
+  }
+ ]
+}

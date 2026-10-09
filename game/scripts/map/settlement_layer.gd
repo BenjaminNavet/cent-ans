@@ -186,6 +186,8 @@ var maquettes: TownMaquetteLayer
 var _town_data: TownData
 ## Lot TB3 (ADR 0162) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
 var outbuildings: OutbuildingLayer
+## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (croix, gibets, phares, mines, ruines…).
+var decor: DecorLayer
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
 var _soot_turn := -1
@@ -776,6 +778,8 @@ func refresh(sim: Object, color_of: Callable) -> void:
 	_refresh_shields(sim, controllers_changed, player, stances)
 	_refresh_label_inks(sim, stances)
 	_refresh_capital(sim)
+	if decor != null:
+		decor.refresh(sim)
 	if outbuildings != null and outbuildings.refresh(sim):
 		# TB3 : la suie ne change qu'avec le tour (dévastation, sièges) ou une prise de place.
 		var turn := int(sim.call("get_turn")) if sim != null and sim.has_method("get_turn") else 0
@@ -891,6 +895,8 @@ func update_view(camera_distance: float) -> void:
 		tp = PerfProbe.lap("settle/maquettes", tp)
 	if outbuildings != null:  # TB3 : bâtiments hors les murs
 		outbuildings.update_view(camera_distance)
+	if decor != null:  # DN ME6 : décor ponctuel hors les villes
+		decor.update_view(camera_distance)
 	tp = PerfProbe.lap("settle/outbuildings", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
@@ -1604,6 +1610,9 @@ func flush() -> void:
 	if outbuildings != null:  # TB3
 		outbuildings.update_view(_camera_distance)
 		outbuildings.flush()
+	if decor != null:  # DN ME6
+		decor.update_view(_camera_distance)
+		decor.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -2085,6 +2094,7 @@ func _setup_towns() -> void:
 		add_child(outbuildings)
 		outbuildings.setup(self, map_data, terrain, data, 719.0)
 		soot = TownSoot.new(outbuildings.config.get("soot", {}))
+		_setup_decor()
 		return
 	towns = TownLayer.new()
 	add_child(towns)
@@ -2104,6 +2114,15 @@ func _setup_towns() -> void:
 	add_child(outbuildings)
 	outbuildings.setup(self, map_data, terrain, data, towns.data.meters_per_unit if towns.data != null else 719.0)
 	soot = TownSoot.new(outbuildings.config.get("soot", {}))
+	_setup_decor()
+
+
+## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (placement par données, un MultiMesh par type).
+func _setup_decor() -> void:
+	decor = DecorLayer.new()
+	decor.name = "Decor"
+	add_child(decor)
+	decor.setup(self, map_data, terrain, data, 719.0)
 
 
 ## VH4 : villes emblématiques 1:1.
