@@ -28,7 +28,7 @@
   "required_faction": [
     "fac_ottoman"
   ],
-  "figure": "cavalry_6",
+  "figure": "cavalry_2",
   "equipment": "Cheval turkmène, lance légère, sabre, arc court, écu rond ; bonnet de feutre ou calotte de fer, rarement de maille.",
   "description": "Coureurs de frontière des [[cdx_ottomans|Ottomans]] d'Orhan, payés sur le butin : ils ravagent la Bithynie byzantine puis la Thrace sous des chefs comme les Mihaloğlu et Evrenos.",
   "sources": [

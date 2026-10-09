@@ -993,7 +993,7 @@ const STYLES := {
 	},
 	"bow": {
 		"idle": {"set": ["bow_idle", "idle", "bow_look", "idle_look"]},
-		"marching": {"set": ["walk"]},
+		"marching": {"set": ["bow_walk"], "fallback": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
@@ -1003,7 +1003,7 @@ const STYLES := {
 	},
 	"crossbow": {
 		"idle": {"set": ["xbow_idle", "xbow_idle", "xbow_look"]},
-		"marching": {"set": ["walk"]},
+		"marching": {"set": ["xbow_walk"], "fallback": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
