@@ -3,12 +3,11 @@
 use super::*;
 
 /// B6: does a charge of `i` at `j` break on the site (a hedge or a ditch in
-/// front of the target, the lanes of a village)?
+/// front of the target)?
 pub(super) fn charge_breaks(view: &View, i: usize, j: usize) -> bool {
     let (u, e) = (&view.units[i], &view.units[j]);
     let field = view.sim.field();
     field.breaks_charge((u.x, u.z), (e.x, e.z))
-        || field.in_village(e.x, e.z)
         || charge_breaks_on_water(field, e)
         || ReliefMap::river_between(field, (u.x, u.z), (e.x, e.z))
 }
@@ -73,9 +72,6 @@ pub(super) fn detour_past(
 pub(super) fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
     let (u, e) = (&view.units[i], &view.units[j]);
     let field = view.sim.field();
-    if field.in_village(e.x, e.z) {
-        return None;
-    }
     let to = (e.x, e.z);
     let mut probe = (u.x, u.z);
     let mut moved = false;

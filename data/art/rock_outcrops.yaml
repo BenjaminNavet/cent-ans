@@ -8,10 +8,17 @@
 # Couche Godot : game/scripts/map/rock_outcrops.gd (RockOutcrops). Schéma :
 # data/schemas/art_rock_outcrops.schema.json.
 # Écrit en syntaxe de flux (JSON) : YAML valide, lu tel quel par Godot (lignes # retirées).
+# DN-RELIEF (ADR 0218) : les affleurements utilisent les modèles générés DN (`model`,
+# dn/rocks/*, taille réelle, ramenés à 1 m par `model_length_m`) ; `coast` = roches de côte.
 {
-  "description": "Affleurements rocheux de la carte de campagne (HB5, ADR 0143).",
+  "description": "Affleurements rocheux de la carte de campagne (HB5, ADR 0143 ; modèles DN, ADR 0218).",
   "style_suffix": ", seen as a detailed photogrammetry scan of a real landscape rock formation, three-quarter view from slightly above at about 30 degrees, the whole formation visible with a margin, isolated on a plain uniform neutral mid-grey studio background, no sky, no ground plane, no trees, no people, no buildings, soft diffuse overcast daylight, photorealistic, sharp focus, high detail",
-  "cleanup": {"lod0": 400, "tex": 512, "length": 1.0, "strip_base": 0.02},
+  "cleanup": {
+    "lod0": 400,
+    "tex": 512,
+    "length": 1.0,
+    "strip_base": 0.02
+  },
   "render": {
     "tile_units": 256,
     "grid_step": 3.5,
@@ -20,9 +27,12 @@
     "cluster_bias": 0.15,
     "near_distance": 10.0,
     "far_distance": 70.0,
-    "far_scale": 1.6,
+    "far_scale": 2.6,
     "vertical_follow": 0.3,
-    "lod_distances": [45.0, 160.0],
+    "lod_distances": [
+      30.0,
+      120.0
+    ],
     "fade_start": 950.0,
     "fade_end": 1200.0,
     "far_share": 0.55,
@@ -31,12 +41,15 @@
     "max_shear": 3.0,
     "min_pixels": 4.0,
     "pixel_fade": 3.0,
-    "cluster_threshold": [-0.05, 0.25],
+    "cluster_threshold": [
+      -0.05,
+      0.25
+    ],
     "forest_shading": 0.7,
-    "max_visible_triangles": 900000,
+    "max_visible_triangles": 450000,
     "max_cached_tiles": 48,
     "max_view_radius": 1000.0,
-    "shadow_max_lod": 1,
+    "shadow_max_lod": 0,
     "view_radius_factor": 1.8,
     "min_view_radius": 160.0,
     "road_clearance": 1.2,
@@ -47,83 +60,43 @@
     "alpine_altitude_m": 1500.0,
     "south_y": 0.62,
     "north_y": 0.26,
-    "east_x": 0.40,
+    "east_x": 0.4,
     "steppe_x": 0.78
   },
   "outcrops": [
     {
-      "id": "limestone_cliff",
-      "group": [2, 4],
-      "voxel_divs": [64, 44, 24],
-      "island_min": 0.04,
-      "along_contour": true,
-      "albedo_mean": [0.207, 0.192, 0.173],
-      "color": [0.7, 0.68, 0.62],
-      "label": "Falaise calcaire claire",
-      "prompt": "A long pale cream-white limestone cliff escarpment segment, sheer vertical fluted faces with horizontal bedding lines and dark water streaks, flat grassy-free top edge, pale scree fan at its foot, longer than tall",
-      "seed": 1337,
-      "exposure": 1.0,
-      "size_m": [900.0, 2200.0],
-      "biomes": [1, 2, 3, 6, 7],
-      "min_slope": 0.1,
-      "min_altitude_m": 100.0,
-      "max_altitude_m": 2600.0,
-      "ridge": 0.2,
-      "heath": 0.0,
-      "density": 1.0
-    },
-    {
-      "id": "granite_chaos",
-      "group": [1, 3],
-      "albedo_mean": [0.132, 0.104, 0.101],
-      "color": [0.34, 0.34, 0.35],
-      "label": "Chaos de granit arrondi",
-      "prompt": "A heap of huge rounded weathered grey-pink granite boulders piled on each other, smooth eroded tor forms with deep cracks, patches of pale lichen, wider than tall",
-      "seed": 1337,
-      "exposure": 1.0,
-      "size_m": [300.0, 700.0],
-      "biomes": [1, 2, 5, 6],
-      "min_slope": 0.05,
-      "min_altitude_m": 150.0,
-      "max_altitude_m": 2200.0,
-      "ridge": 0.5,
-      "heath": 0.6,
-      "density": 0.6
-    },
-    {
-      "id": "stratified_ridge",
-      "group": [2, 4],
-      "voxel_divs": [64, 40, 22],
-      "island_min": 0.04,
-      "along_contour": true,
-      "albedo_mean": [0.03, 0.027, 0.026],
-      "color": [0.55, 0.53, 0.49],
-      "label": "Barre rocheuse stratifiée",
-      "prompt": "A long narrow tilted rock ridge of grey-brown stratified sedimentary layers dipping at 40 degrees, jagged serrated crest, rubble at the base, much longer than wide",
-      "seed": 1337,
-      "exposure": 1.0,
-      "size_m": [800.0, 1800.0],
-      "biomes": [2, 3, 4, 6, 7],
-      "min_slope": 0.12,
-      "min_altitude_m": 300.0,
-      "max_altitude_m": 3000.0,
-      "ridge": 1.0,
-      "heath": 0.2,
-      "density": 0.9
-    },
-    {
       "id": "alpine_spire",
-      "group": [1, 3],
-      "voxel_divs": [48, 32, 18],
+      "group": [
+        1,
+        3
+      ],
+      "voxel_divs": [
+        48,
+        32,
+        18
+      ],
       "island_min": 0.04,
-      "albedo_mean": [0.014, 0.014, 0.015],
-      "color": [0.44, 0.44, 0.47],
+      "albedo_mean": [
+        0.014,
+        0.014,
+        0.015
+      ],
+      "color": [
+        0.44,
+        0.44,
+        0.47
+      ],
       "label": "Piton et aiguille alpine",
       "prompt": "A cluster of sharp dark grey granite alpine needles and spires rising from a steep rocky base, vertical cracks, small snow patches on ledges, taller than wide",
       "seed": 1337,
       "exposure": 1.0,
-      "size_m": [500.0, 1100.0],
-      "biomes": [6],
+      "size_m": [
+        500.0,
+        1100.0
+      ],
+      "biomes": [
+        6
+      ],
       "min_slope": 0.2,
       "min_altitude_m": 1900.0,
       "max_altitude_m": 4800.0,
@@ -132,40 +105,967 @@
       "density": 1.0
     },
     {
-      "id": "red_sandstone",
-      "group": [1, 3],
-      "albedo_mean": [0.031, 0.006, 0.002],
-      "color": [0.58, 0.3, 0.2],
-      "label": "Affleurement de grès rouge",
-      "prompt": "A rugged outcrop of deep red-orange sandstone and volcanic porphyry, rounded eroded towers and ledges with cross-bedding, sparse dry crevices, wider than tall",
-      "seed": 1337,
-      "exposure": 1.0,
-      "size_m": [300.0, 800.0],
-      "biomes": [3, 7, 4],
-      "min_slope": 0.06,
+      "id": "cliff_limestone",
+      "label": "Falaise calcaire",
+      "model": "dn/rocks/rock_cliff_face_limestone",
+      "model_length_m": 8.07,
+      "color": [
+        0.7,
+        0.68,
+        0.62
+      ],
+      "albedo_mean": [
+        0.105,
+        0.094,
+        0.073
+      ],
+      "size_m": [
+        500.0,
+        1200.0
+      ],
+      "biomes": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "min_slope": 0.1,
+      "min_altitude_m": 100.0,
+      "max_altitude_m": 2600.0,
+      "ridge": 0.2,
+      "heath": 0,
+      "density": 1.0,
+      "group": [
+        2,
+        4
+      ],
+      "along_contour": true
+    },
+    {
+      "id": "cliff_basalt",
+      "label": "Falaise basaltique",
+      "model": "dn/rocks/rock_cliff_basalt",
+      "model_length_m": 8.05,
+      "color": [
+        0.3,
+        0.3,
+        0.32
+      ],
+      "albedo_mean": [
+        0.074,
+        0.071,
+        0.065
+      ],
+      "size_m": [
+        400.0,
+        1000.0
+      ],
+      "biomes": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "min_slope": 0.12,
+      "min_altitude_m": 300.0,
+      "max_altitude_m": 2800.0,
+      "ridge": 0.3,
+      "heath": 0.1,
+      "density": 0.5,
+      "group": [
+        2,
+        3
+      ],
+      "along_contour": true
+    },
+    {
+      "id": "cliff_red_sandstone",
+      "label": "Falaise de grès rouge",
+      "model": "dn/rocks/rock_cliff_red_sandstone",
+      "model_length_m": 8.09,
+      "color": [
+        0.58,
+        0.3,
+        0.2
+      ],
+      "albedo_mean": [
+        0.144,
+        0.115,
+        0.083
+      ],
+      "size_m": [
+        400.0,
+        1000.0
+      ],
+      "biomes": [
+        2,
+        3,
+        4,
+        7
+      ],
+      "min_slope": 0.1,
       "min_altitude_m": 0.0,
       "max_altitude_m": 2200.0,
       "ridge": 0.4,
-      "heath": 0.8,
-      "density": 0.8
+      "heath": 0.5,
+      "density": 0.7,
+      "group": [
+        2,
+        3
+      ],
+      "along_contour": true
+    },
+    {
+      "id": "schist_ridge",
+      "label": "Barre de schiste",
+      "model": "dn/rocks/rock_schist_slab",
+      "model_length_m": 2.02,
+      "color": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "albedo_mean": [
+        0.061,
+        0.055,
+        0.048
+      ],
+      "size_m": [
+        500.0,
+        1300.0
+      ],
+      "biomes": [
+        2,
+        3,
+        4,
+        6,
+        7
+      ],
+      "min_slope": 0.12,
+      "min_altitude_m": 300.0,
+      "max_altitude_m": 3000.0,
+      "ridge": 1.0,
+      "heath": 0.2,
+      "density": 0.9,
+      "group": [
+        2,
+        4
+      ],
+      "along_contour": true
+    },
+    {
+      "id": "granite_tor",
+      "label": "Chaos granitique de lande",
+      "model": "dn/rocks/rock_granite_tor_moor",
+      "model_length_m": 4.02,
+      "color": [
+        0.34,
+        0.34,
+        0.35
+      ],
+      "albedo_mean": [
+        0.07,
+        0.065,
+        0.057
+      ],
+      "size_m": [
+        300.0,
+        700.0
+      ],
+      "biomes": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "min_slope": 0.05,
+      "min_altitude_m": 150.0,
+      "max_altitude_m": 2200.0,
+      "ridge": 0.5,
+      "heath": 0.6,
+      "density": 0.6,
+      "group": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "roche_moutonnee",
+      "label": "Roche moutonnée",
+      "model": "dn/rocks/rock_roche_moutonnee",
+      "model_length_m": 5.01,
+      "color": [
+        0.42,
+        0.42,
+        0.4
+      ],
+      "albedo_mean": [
+        0.063,
+        0.058,
+        0.05
+      ],
+      "size_m": [
+        300.0,
+        700.0
+      ],
+      "biomes": [
+        5,
+        6
+      ],
+      "min_slope": 0.08,
+      "min_altitude_m": 400.0,
+      "max_altitude_m": 2200.0,
+      "ridge": 0.5,
+      "heath": 0.2,
+      "density": 0.4,
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "scree",
+      "label": "Éboulis",
+      "model": "dn/rocks/rock_scree_pile",
+      "model_length_m": 2.5,
+      "color": [
+        0.5,
+        0.48,
+        0.44
+      ],
+      "albedo_mean": [
+        0.074,
+        0.069,
+        0.059
+      ],
+      "size_m": [
+        250.0,
+        600.0
+      ],
+      "biomes": [
+        1,
+        2,
+        3,
+        5,
+        6
+      ],
+      "min_slope": 0.2,
+      "min_altitude_m": 800.0,
+      "max_altitude_m": 3500.0,
+      "ridge": 0.6,
+      "heath": 0,
+      "density": 1.0,
+      "group": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "moraine",
+      "label": "Champ de blocs morainique",
+      "model": "dn/rocks/rock_moraine_boulder_field",
+      "model_length_m": 4.01,
+      "color": [
+        0.45,
+        0.44,
+        0.42
+      ],
+      "albedo_mean": [
+        0.098,
+        0.094,
+        0.087
+      ],
+      "size_m": [
+        300.0,
+        700.0
+      ],
+      "biomes": [
+        1,
+        5,
+        6
+      ],
+      "min_slope": 0.06,
+      "min_altitude_m": 700.0,
+      "max_altitude_m": 2800.0,
+      "ridge": 0.2,
+      "heath": 0.3,
+      "density": 0.7,
+      "group": [
+        2,
+        3
+      ]
     },
     {
       "id": "mossy_erratic",
-      "group": [1, 2],
-      "albedo_mean": [0.023, 0.022, 0.016],
-      "color": [0.3, 0.34, 0.26],
       "label": "Blocs erratiques moussus",
-      "prompt": "A group of three enormous angular glacial erratic boulders of dark grey gneiss, thickly covered in green moss and yellow-grey lichen on the tops, resting close together, wider than tall",
-      "seed": 1337,
-      "exposure": 1.0,
-      "size_m": [200.0, 450.0],
-      "biomes": [1, 5],
+      "model": "dn/rocks/rock_mossy_erratic",
+      "model_length_m": 2.21,
+      "color": [
+        0.3,
+        0.34,
+        0.26
+      ],
+      "albedo_mean": [
+        0.061,
+        0.058,
+        0.039
+      ],
+      "size_m": [
+        200.0,
+        450.0
+      ],
+      "biomes": [
+        1,
+        5
+      ],
       "min_slope": 0.03,
       "min_altitude_m": 20.0,
       "max_altitude_m": 1600.0,
       "ridge": 0.3,
       "heath": 0.9,
-      "density": 0.35
+      "density": 0.35,
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "sarsen",
+      "label": "Blocs de sarsen des downs",
+      "model": "dn/rocks/rock_sarsen_stone",
+      "model_length_m": 2.5,
+      "color": [
+        0.5,
+        0.48,
+        0.43
+      ],
+      "albedo_mean": [
+        0.074,
+        0.068,
+        0.058
+      ],
+      "size_m": [
+        150.0,
+        300.0
+      ],
+      "biomes": [
+        1
+      ],
+      "min_slope": 0.02,
+      "min_altitude_m": 60.0,
+      "max_altitude_m": 300.0,
+      "ridge": 0.2,
+      "heath": 0.6,
+      "density": 0.3,
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "karst_lapiaz",
+      "label": "Lapiaz calcaire",
+      "model": "dn/rocks/rock_karst_lapiaz",
+      "model_length_m": 3.02,
+      "color": [
+        0.62,
+        0.6,
+        0.56
+      ],
+      "albedo_mean": [
+        0.079,
+        0.075,
+        0.065
+      ],
+      "size_m": [
+        200.0,
+        500.0
+      ],
+      "biomes": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "min_slope": 0.04,
+      "min_altitude_m": 250.0,
+      "max_altitude_m": 2000.0,
+      "ridge": 0.3,
+      "heath": 0.5,
+      "density": 0.6,
+      "group": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "karst_pinnacle",
+      "label": "Pitons karstiques",
+      "model": "dn/rocks/env_rock_pinnacle_karst",
+      "model_length_m": 19.95,
+      "color": [
+        0.58,
+        0.56,
+        0.52
+      ],
+      "albedo_mean": [
+        0.064,
+        0.06,
+        0.051
+      ],
+      "size_m": [
+        300.0,
+        700.0
+      ],
+      "biomes": [
+        3,
+        6,
+        7
+      ],
+      "min_slope": 0.15,
+      "min_altitude_m": 200.0,
+      "max_altitude_m": 1800.0,
+      "ridge": 0.8,
+      "heath": 0.1,
+      "density": 0.3,
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "hamada",
+      "label": "Hamada rocailleuse",
+      "model": "dn/rocks/rock_hamada_desert",
+      "model_length_m": 3.01,
+      "color": [
+        0.62,
+        0.52,
+        0.38
+      ],
+      "albedo_mean": [
+        0.079,
+        0.071,
+        0.062
+      ],
+      "size_m": [
+        200.0,
+        500.0
+      ],
+      "biomes": [
+        4,
+        7
+      ],
+      "min_slope": 0.02,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 1500.0,
+      "ridge": 0.1,
+      "heath": 0.9,
+      "density": 0.8,
+      "group": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "gypsum_badland",
+      "label": "Badlands gypseux",
+      "model": "dn/rocks/rock_gypsum_badland",
+      "model_length_m": 4.0,
+      "color": [
+        0.66,
+        0.62,
+        0.54
+      ],
+      "albedo_mean": [
+        0.077,
+        0.071,
+        0.06
+      ],
+      "size_m": [
+        250.0,
+        600.0
+      ],
+      "biomes": [
+        3,
+        4,
+        7
+      ],
+      "min_slope": 0.06,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 1300.0,
+      "ridge": 0.3,
+      "heath": 0.8,
+      "density": 0.5,
+      "group": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "sandstone_dry",
+      "label": "Grès sec",
+      "model": "dn/rocks/rock_sandstone_outcrop",
+      "model_length_m": 2.21,
+      "color": [
+        0.62,
+        0.45,
+        0.3
+      ],
+      "albedo_mean": [
+        0.065,
+        0.057,
+        0.044
+      ],
+      "size_m": [
+        200.0,
+        500.0
+      ],
+      "biomes": [
+        3,
+        4,
+        7
+      ],
+      "min_slope": 0.05,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 1800.0,
+      "ridge": 0.3,
+      "heath": 0.8,
+      "density": 0.7,
+      "group": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "tuff_chimneys",
+      "label": "Cheminées de fée",
+      "model": "dn/rocks/rock_tuff_fairy_chimneys",
+      "model_length_m": 8.0,
+      "color": [
+        0.66,
+        0.55,
+        0.42
+      ],
+      "albedo_mean": [
+        0.093,
+        0.075,
+        0.057
+      ],
+      "size_m": [
+        300.0,
+        700.0
+      ],
+      "biomes": [
+        3,
+        7
+      ],
+      "min_slope": 0.08,
+      "min_altitude_m": 300.0,
+      "max_altitude_m": 1900.0,
+      "ridge": 0.5,
+      "heath": 0.4,
+      "density": 0.25,
+      "group": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "basalt_columns",
+      "label": "Orgues basaltiques",
+      "model": "dn/rocks/rock_basalt_columns",
+      "model_length_m": 4.01,
+      "color": [
+        0.28,
+        0.28,
+        0.3
+      ],
+      "albedo_mean": [
+        0.049,
+        0.046,
+        0.039
+      ],
+      "size_m": [
+        250.0,
+        550.0
+      ],
+      "biomes": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "min_slope": 0.1,
+      "min_altitude_m": 100.0,
+      "max_altitude_m": 2000.0,
+      "ridge": 0.4,
+      "heath": 0.2,
+      "density": 0.25,
+      "group": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "volcanic_cone",
+      "label": "Cône volcanique",
+      "model": "dn/rocks/env_volcanic_cone_ash",
+      "model_length_m": 40.51,
+      "color": [
+        0.3,
+        0.28,
+        0.27
+      ],
+      "albedo_mean": [
+        0.062,
+        0.058,
+        0.052
+      ],
+      "size_m": [
+        600.0,
+        1100.0
+      ],
+      "biomes": [
+        2,
+        3,
+        6,
+        7
+      ],
+      "min_slope": 0.1,
+      "min_altitude_m": 500.0,
+      "max_altitude_m": 1800.0,
+      "ridge": 0.5,
+      "heath": 0,
+      "density": 0.07,
+      "group": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "dolmen",
+      "label": "Dolmen",
+      "model": "dn/rocks/env_megalith_dolmen",
+      "model_length_m": 6.0,
+      "color": [
+        0.5,
+        0.48,
+        0.43
+      ],
+      "albedo_mean": [
+        0.089,
+        0.081,
+        0.069
+      ],
+      "size_m": [
+        120.0,
+        200.0
+      ],
+      "biomes": [
+        1,
+        5,
+        3
+      ],
+      "min_slope": 0.02,
+      "min_altitude_m": 10.0,
+      "max_altitude_m": 500.0,
+      "ridge": 0,
+      "heath": 0.6,
+      "density": 0.06,
+      "group": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": "menhir_row",
+      "label": "Alignement de menhirs",
+      "model": "dn/rocks/env_megalith_menhir_row",
+      "model_length_m": 20.08,
+      "color": [
+        0.5,
+        0.48,
+        0.43
+      ],
+      "albedo_mean": [
+        0.082,
+        0.073,
+        0.053
+      ],
+      "size_m": [
+        250.0,
+        450.0
+      ],
+      "biomes": [
+        1,
+        5
+      ],
+      "min_slope": 0.02,
+      "min_altitude_m": 10.0,
+      "max_altitude_m": 400.0,
+      "ridge": 0,
+      "heath": 0.6,
+      "density": 0.05,
+      "group": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "stone_circle",
+      "label": "Cercle de pierres",
+      "model": "dn/rocks/env_stone_circle",
+      "model_length_m": 30.12,
+      "color": [
+        0.5,
+        0.48,
+        0.43
+      ],
+      "albedo_mean": [
+        0.048,
+        0.046,
+        0.037
+      ],
+      "size_m": [
+        180.0,
+        300.0
+      ],
+      "biomes": [
+        1,
+        5
+      ],
+      "min_slope": 0.02,
+      "min_altitude_m": 10.0,
+      "max_altitude_m": 500.0,
+      "ridge": 0,
+      "heath": 0.6,
+      "density": 0.05,
+      "group": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "coast_granite",
+      "label": "Chaos granitique de côte",
+      "model": "dn/rocks/rock_granite_tor_breton",
+      "model_length_m": 5.06,
+      "color": [
+        0.47,
+        0.4,
+        0.38
+      ],
+      "albedo_mean": [
+        0.082,
+        0.077,
+        0.069
+      ],
+      "size_m": [
+        250.0,
+        500.0
+      ],
+      "biomes": [
+        1,
+        3,
+        5
+      ],
+      "min_slope": 0.0,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 400.0,
+      "ridge": 0,
+      "heath": 0,
+      "density": 1.0,
+      "group": [
+        1,
+        3
+      ],
+      "coast": {
+        "max_px": 6.0,
+        "weight": 0.9,
+        "rock": [
+          "granite"
+        ]
+      }
+    },
+    {
+      "id": "coast_chalk",
+      "label": "Falaise de craie",
+      "model": "dn/rocks/env_cliff_chalk_coast",
+      "model_length_m": 34.4,
+      "color": [
+        0.8,
+        0.79,
+        0.74
+      ],
+      "albedo_mean": [
+        0.049,
+        0.048,
+        0.044
+      ],
+      "size_m": [
+        500.0,
+        900.0
+      ],
+      "biomes": [
+        1,
+        2
+      ],
+      "min_slope": 0.0,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 500.0,
+      "ridge": 0,
+      "heath": 0,
+      "density": 1.0,
+      "group": [
+        1,
+        3
+      ],
+      "along_contour": true,
+      "coast": {
+        "max_px": 5.0,
+        "weight": 0.95,
+        "rock": [
+          "chalk"
+        ],
+        "cliff_only": true
+      }
+    },
+    {
+      "id": "coast_stack",
+      "label": "Aiguilles marines",
+      "model": "dn/rocks/rock_sea_stack",
+      "model_length_m": 6.05,
+      "color": [
+        0.46,
+        0.44,
+        0.4
+      ],
+      "albedo_mean": [
+        0.058,
+        0.053,
+        0.043
+      ],
+      "size_m": [
+        200.0,
+        400.0
+      ],
+      "biomes": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7
+      ],
+      "min_slope": 0.0,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 300.0,
+      "ridge": 0,
+      "heath": 0,
+      "density": 0.35,
+      "group": [
+        0,
+        1
+      ],
+      "coast": {
+        "max_px": 3.0,
+        "weight": 0.8,
+        "rock": [
+          "rock",
+          "granite"
+        ],
+        "cliff_only": true
+      }
+    },
+    {
+      "id": "coast_arch",
+      "label": "Arche marine",
+      "model": "dn/rocks/env_cliff_sea_arch",
+      "model_length_m": 16.17,
+      "color": [
+        0.62,
+        0.58,
+        0.5
+      ],
+      "albedo_mean": [
+        0.064,
+        0.06,
+        0.047
+      ],
+      "size_m": [
+        300.0,
+        500.0
+      ],
+      "biomes": [
+        1,
+        2,
+        3
+      ],
+      "min_slope": 0.0,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 300.0,
+      "ridge": 0,
+      "heath": 0,
+      "density": 0.08,
+      "group": [
+        0,
+        0
+      ],
+      "coast": {
+        "max_px": 3.0,
+        "weight": 0.7,
+        "rock": [
+          "rock",
+          "chalk"
+        ],
+        "cliff_only": true
+      }
+    },
+    {
+      "id": "coast_rock",
+      "label": "Blocs de côte calcaire",
+      "model": "dn/rocks/rock_limestone_boulder",
+      "model_length_m": 1.61,
+      "color": [
+        0.7,
+        0.68,
+        0.62
+      ],
+      "albedo_mean": [
+        0.105,
+        0.094,
+        0.075
+      ],
+      "size_m": [
+        150.0,
+        300.0
+      ],
+      "biomes": [
+        3,
+        7,
+        2,
+        1
+      ],
+      "min_slope": 0.0,
+      "min_altitude_m": 0.0,
+      "max_altitude_m": 300.0,
+      "ridge": 0,
+      "heath": 0,
+      "density": 0.6,
+      "group": [
+        1,
+        3
+      ],
+      "coast": {
+        "max_px": 4.0,
+        "weight": 0.7,
+        "rock": [
+          "rock"
+        ],
+        "cliff_only": true
+      }
     }
   ]
 }

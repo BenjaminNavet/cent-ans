@@ -35,10 +35,6 @@ impl ReasonList {
         self.0.iter().map(|(_, points)| points).sum()
     }
 
-    pub fn into_vec(self) -> Vec<(String, i32)> {
-        self.0
-    }
-
     /// The `count` heaviest objections, « raison (-12), … », for a refusal.
     pub fn heaviest_objections(&self, count: usize) -> String {
         let mut sorted: Vec<&(String, i32)> = self.0.iter().collect();

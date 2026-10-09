@@ -170,12 +170,6 @@ pub fn captive_rank(state: &CampaignState, character: &CharacterId) -> CaptiveRa
     }
 }
 
-/// Wealth factor of a faction: its seasonal tax income / 10 000, between
-/// 0.5 and 2 (a rich kingdom pays more for the same knight).
-pub fn wealth_factor(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
-    wealth_of(state.faction_income(data, faction))
-}
-
 fn wealth_of(income: i64) -> f64 {
     (income.max(0) as f64 / 10_000.0).clamp(0.5, 2.0)
 }

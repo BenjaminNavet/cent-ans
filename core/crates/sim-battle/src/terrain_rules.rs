@@ -26,10 +26,6 @@ pub struct TerrainProfile {
     pub relief: ReliefStyle,
     /// Tree density of the woods, 0-1 (rendering).
     pub woodland: f64,
-    /// Chance of a village or a farm.
-    pub village_chance: f64,
-    /// Share of the houses that are timber-framed (the rest are cottages).
-    pub timbered_share: f64,
     /// Scatter on a standard field.
     pub scatter: Scatter,
 }
@@ -74,7 +70,7 @@ mod tests {
             Terrain::Desert,
         ] {
             let profile = TerrainRules::of(terrain);
-            assert!(profile.woodland > 0.0 && profile.village_chance > 0.0);
+            assert!(profile.woodland > 0.0);
         }
         assert_eq!(TerrainRules::of(Terrain::Hills).scatter.hills, 7);
     }

@@ -241,7 +241,6 @@ fn a_siege_ignores_the_crossing() {
     battle.siege = Some(sim_battle::SiegeSetup {
         fortification: 1,
         breach: 0,
-        place: Default::default(),
         engines: None,
     });
     assert_eq!(battle.field_crossing(), None);

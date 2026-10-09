@@ -495,10 +495,6 @@ impl Selector {
         }
     }
 
-    pub fn has_page(&self, key: i64) -> bool {
-        self.pages.contains_key(&key)
-    }
-
     pub fn page_count(&self) -> usize {
         self.pages.len()
     }

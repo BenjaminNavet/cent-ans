@@ -1,6 +1,6 @@
 //! Battlefields drawn from the campaign site (lot B5): one field per terrain,
 //! determinism, compatibility with the pre-B5 draws, and the game effects of
-//! villages, hedges, pools, beaches and snow.
+//! hedges, pools, beaches and snow.
 
 use crate::common;
 
@@ -27,7 +27,6 @@ fn site(terrain: Terrain) -> FieldSite {
         river: false,
         coastal: false,
         season: BattleSeason::Summer,
-        village: None,
     }
 }
 
@@ -46,8 +45,7 @@ fn lines_are_clear(field: &Battlefield) -> bool {
     [ATTACKER_LINE_Z, DEFENDER_LINE_Z].iter().all(|&z| {
         (0..=24).all(|i| {
             let x = FIELD_WIDTH * 0.5 - 300.0 + 25.0 * f64::from(i);
-            !field.in_village(x, z)
-                && field.obstacles.iter().all(|o| o.distance(x, z) > 30.0)
+            field.obstacles.iter().all(|o| o.distance(x, z) > 30.0)
                 && field.water_at(x, z).is_none()
         })
     })
@@ -65,12 +63,6 @@ fn one_field_per_terrain() {
                 lines_are_clear(&f),
                 "{terrain:?} seed {seed}: lines blocked"
             );
-            if let Some(v) = &f.village {
-                assert!(!v.houses.is_empty());
-                for h in &v.houses {
-                    assert!(f.inside(h.x, h.z));
-                }
-            }
         }
     }
 }
@@ -135,7 +127,6 @@ fn site_features_do_not_shift_the_older_draws() {
             let mut s = site(terrain);
             s.river = true;
             s.coastal = true;
-            s.village = Some(true);
             let mut rng = BattleRng::from_seed(seed);
             let rich = Battlefield::generate_site(&s, Weather::Rain, &mut rng);
             // Same RNG state after the field: every later draw of the
@@ -147,7 +138,7 @@ fn site_features_do_not_shift_the_older_draws() {
             if rich.coast.is_none() {
                 assert_eq!(plain.heights, rich.heights);
             }
-            assert!(plain.village.is_none() && plain.obstacles.is_empty());
+            assert!(plain.obstacles.is_empty());
         }
     }
 }
@@ -209,53 +200,29 @@ fn coastal_provinces_get_a_beach_on_a_flank() {
 }
 
 #[test]
-fn a_forced_village_has_houses_and_crofts() {
-    for terrain in TERRAINS {
-        let mut s = site(terrain);
-        s.village = Some(true);
-        let f = field(&s, Weather::Clear, 5);
-        let v = f.village.as_ref().expect("forced village");
-        assert!(!v.farm);
-        assert!(
-            v.houses.len() >= 5,
-            "{terrain:?}: {} houses",
-            v.houses.len()
-        );
-        assert!(f.obstacles.iter().any(|o| o.kind == ObstacleKind::Hedge));
-        assert!(f.in_village(v.zone.x, v.zone.z));
-        assert!(f.site_speed_factor(v.zone.x, v.zone.z, true, Weather::Clear) < 0.6);
-        s.village = Some(false);
-        assert!(field(&s, Weather::Clear, 5).village.is_none());
-    }
-}
-
-#[test]
 fn battles_carry_the_site_and_sieges_drop_it() {
     let data = data();
     let army = || vec![unit(data, "unit_longbowmen"), unit(data, "unit_knights")];
     let mut s = setup(army(), army(), None);
     s.terrain = Terrain::Marsh;
-    s.village = Some(true);
     s.coastal = true;
     s.season = BattleSeason::Winter;
     let sim = BattleSim::new(s.clone(), 3).unwrap();
     assert_eq!(sim.field().terrain, Terrain::Marsh);
     assert_eq!(sim.field().season, BattleSeason::Winter);
-    assert!(sim.field().village.is_some());
     // The setup crosses the bridge as JSON: the new keys are optional.
     let json = serde_json::to_value(&s).unwrap();
     let mut legacy = json.clone();
     legacy.as_object_mut().unwrap().remove("coastal");
-    legacy.as_object_mut().unwrap().remove("village");
     let old: sim_battle::BattleSetup = serde_json::from_value(legacy).unwrap();
-    assert!(!old.coastal && old.village.is_none());
+    assert!(!old.coastal);
     s.siege = Some(sim_battle::SiegeSetup {
         fortification: 1,
         breach: 0,
         ..Default::default()
     });
     let siege = BattleSim::new(s, 3).unwrap();
-    assert!(siege.field().village.is_none() && siege.field().coast.is_none());
+    assert!(siege.field().coast.is_none());
 }
 
 fn run(sim: &mut BattleSim, seconds: f64) {
@@ -288,7 +255,6 @@ fn hedge(kind: ObstacleKind) -> Obstacle {
 fn clear_site(sim: &mut BattleSim) {
     let field = sim.field_mut();
     field.obstacles.clear();
-    field.village = None;
     field.pools.clear();
     field.coast = None;
     field.ground = Ground::Dry;
@@ -394,7 +360,7 @@ fn lab_sim(
     defender: Vec<sim_battle::UnitSetup>,
 ) -> BattleSim {
     let mut s = setup(attacker, defender, None);
-    s.village = Some(false);
+    s.bare_field = true;
     let mut sim = BattleSim::new(s, 7).unwrap();
     lab(&mut sim);
     clear_site(&mut sim);

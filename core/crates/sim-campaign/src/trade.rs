@@ -348,16 +348,6 @@ pub fn common_routes(
         .count()
 }
 
-/// `true` when a route of the catalogue links a hub of `a` to a hub of `b`.
-pub fn have_common_route(
-    state: &CampaignState,
-    data: &GameData,
-    a: &FactionId,
-    b: &FactionId,
-) -> bool {
-    common_routes(state, data, a, b) > 0
-}
-
 /// Income `faction` collects this season from every route touching one of
 /// its hubs (query, used by [`crate::economy::FactionEconomy`] and by
 /// [`resolve_trade`]).

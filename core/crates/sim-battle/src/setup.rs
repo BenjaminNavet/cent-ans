@@ -210,13 +210,6 @@ pub struct SiegeSetup {
     /// Campaign wall damage (0-100): from 50 a breach is already open.
     #[serde(default)]
     pub breach: u8,
-    /// NT1 (ADR 0126): kind of place (ring city, fortified borough,
-    /// castle); a landmark plan (`siege_layout`) takes precedence.
-    #[serde(
-        default,
-        skip_serializing_if = "crate::siege_layouts::PlaceKind::is_city"
-    )]
-    pub place: crate::siege_layouts::PlaceKind,
     /// NT5 (N7): the engines the besiegers built during the campaign siege.
     /// `None` (older replays, hand-made setups): the ram every besieging
     /// army brings and ladders for every foot regiment.
@@ -299,10 +292,10 @@ pub struct BattleSetup {
     /// (B5).
     #[serde(default)]
     pub coastal: bool,
-    /// Village or farm on the field (B5): `Some(true)` forces one,
-    /// `Some(false)` forbids it, `None` draws it from the terrain.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub village: Option<bool>,
+    /// A bare field (labs, tests): the EP6 countryside is not laid, only
+    /// the camps.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub bare_field: bool,
     pub attacker: SideSetup,
     pub defender: SideSetup,
     /// Side commanded by the player; the other one (both when `None`) is
@@ -344,8 +337,8 @@ pub struct BattleSetup {
 }
 
 impl BattleSetup {
-    /// The campaign site of the battle (B5). Sieges have no coast and no
-    /// village on the field (the town is the settlement).
+    /// The campaign site of the battle (B5). Sieges have no coast on the
+    /// field (the town is the settlement).
     pub fn field_site(&self) -> crate::site::FieldSite {
         let siege = self.siege.is_some();
         crate::site::FieldSite {
@@ -353,7 +346,6 @@ impl BattleSetup {
             river: self.river && !siege,
             coastal: self.coastal && !siege,
             season: self.season,
-            village: if siege { Some(false) } else { self.village },
         }
     }
 

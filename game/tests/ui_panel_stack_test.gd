@@ -83,4 +83,3 @@ func _panel(parent: Node, panel_name: String) -> PanelContainer:
 	return panel
 
 
-		print("FAIL: " + message)

@@ -74,11 +74,25 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "label", "prompt", "color", "albedo_mean", "size_m", "biomes", "min_slope", "min_altitude_m", "max_altitude_m", "ridge", "heath", "density"],
+        "required": ["id", "label", "color", "albedo_mean", "size_m", "biomes", "min_slope", "min_altitude_m", "max_altitude_m", "ridge", "heath", "density"],
         "additionalProperties": false,
         "properties": {
           "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Modèles `game/assets/models/rocks/hb/<id>_lod{0,1,2}.glb`."},
           "label": {"type": "string"},
+          "model": {"type": "string", "pattern": "^dn/rocks/[a-z0-9_]+$", "description": "Modèle DN (`game/assets/models/dn/rocks/<stem>_lod{0,1,2}.glb`, paquet ADR 0212, taille réelle en m) au lieu de `rocks/hb/<id>`."},
+          "model_length_m": {"type": "number", "exclusiveMinimum": 0, "description": "Plus grand côté horizontal du modèle DN (manifeste `dimensions_m`) : le maillage est ramené à 1 m au chargement, puis mis à `size_m` à la pose."},
+          "coast": {
+            "type": "object",
+            "description": "Roche de côte : terme d'aptitude propre au littoral (sans exigence de pente), par distance au rivage (`coast_dist.png`) et géologie de la côte (`coast_types.json`).",
+            "required": ["max_px", "weight"],
+            "additionalProperties": false,
+            "properties": {
+              "max_px": {"type": "number", "exclusiveMinimum": 0, "description": "Distance au rivage (px carte) au-delà de laquelle le terme est nul (plein jusqu'à la moitié)."},
+              "weight": {"type": "number", "minimum": 0, "maximum": 1},
+              "rock": {"type": "array", "items": {"type": "string", "enum": ["rock", "chalk", "granite"]}, "minItems": 1, "uniqueItems": true, "description": "Géologies de côte admises (`coast_types.json`, champ `rock`) ; absent : toutes."},
+              "cliff_only": {"type": "boolean", "description": "Seulement où la côte est une falaise (altitude à l'intérieur ≥ `cliff.max_m`)."}
+            }
+          },
           "prompt": {"type": "string", "description": "Sujet de l'image, suivi de `style_suffix`."},
           "seed": {"type": "integer"},
           "albedo_mean": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 3, "maxItems": 3, "description": "Moyenne linéaire mesurée de l'albédo cuit du LOD0 (texels couverts)."},

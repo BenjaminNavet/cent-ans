@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot GA3-L1 : décor de bataille généré (`data/art/ga3_decor.json`, `Ga3Kit`). Vérifie pour
 ## chaque variante branchée du manifeste `assets/models/props_ga/manifest.json` : les trois LOD
@@ -6,7 +6,6 @@ extends SceneTree
 ## puis l'option : un lot du kit (`BuildingKit.Batch`) remplace une part des maisons par la
 ## variante GA3 (poignées, masquage, tuiles LOD), rien sous la neige.
 ## Usage : godot --headless --path game --script res://tests/ga3_l1_decor_test.gd
-
 
 
 func _catalog() -> Dictionary:
@@ -32,13 +31,13 @@ func _stats(root: Node) -> Dictionary:
 
 
 func _init() -> void:
-	var ok := true
 	var caps: Dictionary = {}
 	for entry in _catalog().get("objects", []):
 		caps["ga3_" + str(entry["id"])] = int(entry["lod0"])
 	if caps.is_empty():
 		push_error("ga3_l1: catalogue data/art/ga3_decor.json introuvable")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	var manifest := Ga3Kit.manifest()
 	var wired := 0
@@ -52,8 +51,7 @@ func _init() -> void:
 			var path := Ga3Kit.DIR + "%s_lod%d.glb" % [model_name, lod]
 			var scene := load(path) as PackedScene
 			if scene == null:
-				push_error("ga3_l1: %s introuvable" % path)
-				ok = false
+				check(false, "ga3_l1: %s introuvable" % path)
 				continue
 			var node := scene.instantiate()
 			var stats := _stats(node)
@@ -63,21 +61,16 @@ func _init() -> void:
 			print("ga3_l1: %s lod%d %d tri, %.2f x %.2f x %.2f m, pied y=%.2f" % [
 				model_name, lod, tris, box.size.x, box.size.y, box.size.z, box.position.y])
 			if lod == 0 and tris > int(caps.get(model_name, 3000)):
-				push_error("ga3_l1: %s LOD0 %d tri > plafond %d" % [model_name, tris, caps.get(model_name, 3000)])
-				ok = false
+				check(false, "ga3_l1: %s LOD0 %d tri > plafond %d" % [model_name, tris, caps.get(model_name, 3000)])
 			if tris >= previous:
-				push_error("ga3_l1: %s lod%d pas plus léger que le précédent" % [model_name, lod])
-				ok = false
+				check(false, "ga3_l1: %s lod%d pas plus léger que le précédent" % [model_name, lod])
 			previous = tris
 			if absf(box.position.y) > 0.05:
-				push_error("ga3_l1: %s lod%d pied à y=%.3f" % [model_name, lod, box.position.y])
-				ok = false
+				check(false, "ga3_l1: %s lod%d pied à y=%.3f" % [model_name, lod, box.position.y])
 		if Ga3Kit.mesh(model_name, 0) == null:
-			push_error("ga3_l1: Ga3Kit.mesh(%s) nul" % model_name)
-			ok = false
+			check(false, "ga3_l1: Ga3Kit.mesh(%s) nul" % model_name)
 	if wired == 0:
-		push_error("ga3_l1: aucune variante branchée dans le manifeste")
-		ok = false
+		check(false, "ga3_l1: aucune variante branchée dans le manifeste")
 
 	# Option : 200 chaumières du kit sur une grille, variante GA3 pour une part d'entre elles.
 	Ga3Kit.active = true
@@ -97,15 +90,12 @@ func _init() -> void:
 		var ga3 := batch.ga3_count()
 		print("ga3_l1: variante '%s', %d / %d chaumières GA3" % [variant, ga3, batch.count()])
 		if batch.count() != 200:
-			push_error("ga3_l1: %d instances au lieu de 200" % batch.count())
-			ok = false
+			check(false, "ga3_l1: %d instances au lieu de 200" % batch.count())
 		var expected_some: bool = variant == "" and not Ga3Kit.variants_of("cottage").is_empty()
 		if expected_some and (ga3 < 40 or ga3 > 160):
-			push_error("ga3_l1: part GA3 %d hors de [40, 160] (share 0,5)" % ga3)
-			ok = false
+			check(false, "ga3_l1: part GA3 %d hors de [40, 160] (share 0,5)" % ga3)
 		if not expected_some and ga3 != 0:
-			push_error("ga3_l1: %d variantes GA3 alors qu'elles sont coupées" % ga3)
-			ok = false
+			check(false, "ga3_l1: %d variantes GA3 alors qu'elles sont coupées" % ga3)
 		# Poignée GA3 : lecture, déplacement, masquage.
 		for handle in handles:
 			if str(handle[0]).begins_with("ga3_"):
@@ -113,21 +103,17 @@ func _init() -> void:
 				batch.hide(handle)
 				var after := batch.get_transform(handle)
 				if after.origin.y > before.origin.y - 40.0:
-					push_error("ga3_l1: masquage d'une poignée GA3 sans effet")
-					ok = false
+					check(false, "ga3_l1: masquage d'une poignée GA3 sans effet")
 				break
 	var lod_nodes := 0
 	for child in root.find_children("Ga3_*", "MultiMeshInstance3D", true, false):
 		var mmi := child as MultiMeshInstance3D
 		lod_nodes += 1
 		if mmi.visibility_range_end <= mmi.visibility_range_begin:
-			push_error("ga3_l1: portées LOD incohérentes sur %s" % mmi.name)
-			ok = false
+			check(false, "ga3_l1: portées LOD incohérentes sur %s" % mmi.name)
 	print("ga3_l1: %d nœuds MultiMesh GA3 (tuiles × LOD)" % lod_nodes)
 	if lod_nodes > 0 and lod_nodes % 3 != 0:
-		push_error("ga3_l1: tuiles sans leurs trois LOD")
-		ok = false
+		check(false, "ga3_l1: tuiles sans leurs trois LOD")
 	root.free()
 	Ga3Kit.active = false
-	print("ga3_l1: %s" % ("OK" if ok else "ÉCHEC"))
-	quit(0 if ok else 1)
+	finish()

@@ -73,7 +73,3 @@ func _test_step_thread() -> void:
 		last_versions = versions
 	var stats: Dictionary = threaded.call("get_step_stats")
 	check(int(stats.get("adopted", 0)) > 50, "steps adopted from the worker: %s" % str(stats))
-
-
-		print("FAIL pb3e: " + label)
-	return ok

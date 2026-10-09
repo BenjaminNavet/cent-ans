@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot OM3 (ADR 0116) : la steppe et le désert réutilisent le sol de plaine avec leur teinte
 ## (`terrain_tints` de `data/fx/battle_ground_layers.json`) ; libellés français des terrains.
@@ -21,25 +21,19 @@ func _tint_of(key: String) -> Color:
 
 
 func _init() -> void:
-	var ok := true
 	if BattleTerrain.terrain_tint("plains") != Color(1, 1, 1):
-		print("OM3: la plaine ne doit pas être teintée")
-		ok = false
+		check(false, "OM3: la plaine ne doit pas être teintée")
 	for key in ["steppe", "desert"]:
 		if BattleTerrain.terrain_tint(key) == Color(1, 1, 1):
-			print("OM3: teinte absente pour %s" % key)
-			ok = false
+			check(false, "OM3: teinte absente pour %s" % key)
 	await process_frame
 	var plains := _tint_of("plains")
 	var desert := _tint_of("desert")
 	print("OM3 herbe plaine %s, désert %s" % [plains, desert])
 	if not (desert.r > plains.r and desert.b < plains.b):
-		print("OM3: le désert doit tirer vers le sable")
-		ok = false
+		check(false, "OM3: le désert doit tirer vers le sable")
 	var panel_labels: Dictionary = load("res://scripts/map/province_panel.gd").TERRAIN_LABELS
 	var tooltip_labels: Dictionary = load("res://scripts/ui/rich_tooltip.gd").TERRAIN_LABELS
 	if panel_labels.get("desert") != "Désert" or panel_labels.get("steppe") != "Steppe" or tooltip_labels.get("desert") != "désert":
-		print("OM3: libellés français manquants")
-		ok = false
-	print("om3_terrain_test: OK" if ok else "om3_terrain_test: ECHEC")
-	quit(0 if ok else 1)
+		check(false, "OM3: libellés français manquants")
+	finish()

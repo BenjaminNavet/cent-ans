@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot AN1a : mouvement secondaire en shader (ADR 0096). Vérifications sans rendu :
 ## - données `secondary_motion` d'`atmosphere.json` lues, uniformes posés sur les matériaux
@@ -14,13 +14,11 @@ const C_ARMS := 6
 const C_COAT := 10
 const C_QUILT := 12
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
 	var cfg := BattleSecondaryMotion.settings()
-	_expect(not cfg.is_empty() and bool(cfg.get("enabled", false)), "secondary_motion lu et actif")
+	check(not cfg.is_empty() and bool(cfg.get("enabled", false)), "secondary_motion lu et actif")
 	_check_material("infantry", 0, false)
 	_check_material("cavalry", 0, true)
 	_check_corpse()
@@ -29,15 +27,7 @@ func _init() -> void:
 	for kind_variant in [["infantry", 0], ["infantry", 4], ["archer", 0], ["cavalry", 0], ["standard", 1], ["archer", 2], ["infantry", 1], ["infantry", 5]]:
 		for level in 3:
 			_check_mesh(str(kind_variant[0]), int(kind_variant[1]), level)
-	if _failures == 0:
-		print("an1a_motion_test OK")
-	quit(0 if _failures == 0 else 1)
-
-
-func _expect(condition: bool, message: String) -> void:
-	if not condition:
-		_failures += 1
-		push_error("an1a_motion_test: " + message)
+	finish()
 
 
 func _material(kind: String, variant: int) -> ShaderMaterial:
@@ -50,26 +40,26 @@ func _material(kind: String, variant: int) -> ShaderMaterial:
 
 func _check_material(kind: String, variant: int, mounted: bool) -> void:
 	var mat := _material(kind, variant)
-	_expect(bool(mat.get_shader_parameter("sm_enabled")), "%s : mouvement secondaire actif" % kind)
+	check(bool(mat.get_shader_parameter("sm_enabled")), "%s : mouvement secondaire actif" % kind)
 	var legs: Vector2i = mat.get_shader_parameter("sm_leg_bones")
-	_expect(legs.y - legs.x == 5, "%s : six os de jambes contigus (%s)" % [kind, legs])
+	check(legs.y - legs.x == 5, "%s : six os de jambes contigus (%s)" % [kind, legs])
 	var tail: Vector2i = mat.get_shader_parameter("sm_tail_bones")
 	if mounted:
-		_expect(tail.y - tail.x == 6, "cheval : chaîne Tail1-7 (%s)" % tail)
-		_expect(legs.x > tail.y, "cavalier : os des jambes du cavalier (préfixe R:) après ceux du cheval")
+		check(tail.y - tail.x == 6, "cheval : chaîne Tail1-7 (%s)" % tail)
+		check(legs.x > tail.y, "cavalier : os des jambes du cavalier (préfixe R:) après ceux du cheval")
 	else:
-		_expect(tail.y < 0, "à pied : pas de queue")
+		check(tail.y < 0, "à pied : pas de queue")
 	var amps: Array = mat.get_shader_parameter("sm_amp")
-	_expect(amps.size() == 4 and (amps[0] as Vector4).x > 0.0, "amplitudes par pièce")
-	_expect(float(mat.get_shader_parameter("wind_strength")) > 0.0, "vent posé")
+	check(amps.size() == 4 and (amps[0] as Vector4).x > 0.0, "amplitudes par pièce")
+	check(float(mat.get_shader_parameter("wind_strength")) > 0.0, "vent posé")
 
 
 func _check_corpse() -> void:
 	var soldiers := BattleSoldiers.new()
 	var mat: ShaderMaterial = soldiers._make_skinned_material("attacker", "infantry", 0, true)
-	_expect(not bool(mat.get_shader_parameter("sm_enabled")), "cadavres : mouvement secondaire éteint")
+	check(not bool(mat.get_shader_parameter("sm_enabled")), "cadavres : mouvement secondaire éteint")
 	var alive: ShaderMaterial = soldiers._make_skinned_material("attacker", "infantry", 0, false)
-	_expect(bool(alive.get_shader_parameter("sm_enabled")), "vivants : mouvement secondaire actif")
+	check(bool(alive.get_shader_parameter("sm_enabled")), "vivants : mouvement secondaire actif")
 	soldiers.free()
 
 
@@ -78,8 +68,8 @@ func _check_flag() -> void:
 	mat.shader = BattleStandards.FLAG_SHADER
 	BattleSecondaryMotion.setup_flag(mat)
 	var gait: Vector4 = mat.get_shader_parameter("flag_gait_wind")
-	_expect(gait.z > gait.y and gait.y > 0.0, "étendard : l'allure ajoute du vent apparent (%s)" % gait)
-	_expect(float(mat.get_shader_parameter("flag_ripple")) > 0.0, "étendard : ondulation le long de la hampe")
+	check(gait.z > gait.y and gait.y > 0.0, "étendard : l'allure ajoute du vent apparent (%s)" % gait)
+	check(float(mat.get_shader_parameter("flag_ripple")) > 0.0, "étendard : ondulation le long de la hampe")
 
 
 ## Réplique de `sm_weight` (shader) : nombre de sommets par pièce, et aucun sommet des chausses.
@@ -88,7 +78,7 @@ func _check_mesh(kind: String, variant: int, level: int) -> void:
 		return
 	var mesh: ArrayMesh = BattleSkinned.mesh(kind, variant, level)
 	if mesh == null:
-		_expect(false, "%s_%d LOD%d : maillage absent" % [kind, variant, level])
+		check(false, "%s_%d LOD%d : maillage absent" % [kind, variant, level])
 		return
 	var mat := _material(kind, variant)
 	var legs: Vector2i = mat.get_shader_parameter("sm_leg_bones")
@@ -144,10 +134,10 @@ func _check_mesh(kind: String, variant: int, level: int) -> void:
 					shin_moves += 1
 	var label := "%s_%d LOD%d" % [kind, variant, level]
 	print("AN1a %s : étoffe %d, caparaçon %d, crinière %d, queue %d" % [label, counts[0], counts[1], counts[2], counts[3]])
-	_expect(shin_moves == 0, "%s : %d sommets de chausses sous le genou déplacés" % [label, shin_moves])
+	check(shin_moves == 0, "%s : %d sommets de chausses sous le genou déplacés" % [label, shin_moves])
 	if kind == "cavalry" or (kind == "standard" and variant == 1):
-		_expect(counts[3] > 0, "%s : queue reconnue" % label)
+		check(counts[3] > 0, "%s : queue reconnue" % label)
 		if BattleSkinned.fine_enabled():
-			_expect(counts[2] > 0, "%s : crinière reconnue" % label)
+			check(counts[2] > 0, "%s : crinière reconnue" % label)
 	if kind == "infantry" and variant == 0:
-		_expect(counts[0] > 0, "%s : bas du surcot reconnu" % label)
+		check(counts[0] > 0, "%s : bas du surcot reconnu" % label)

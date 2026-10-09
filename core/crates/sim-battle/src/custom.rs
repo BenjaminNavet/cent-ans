@@ -110,9 +110,6 @@ pub struct CustomBattle {
     /// Fortification level (0-3) of the place; `None`: the default.
     #[serde(default)]
     pub fortification: Option<u32>,
-    /// NT1 kind of place (city, borough, castle); `None`: a ring city.
-    #[serde(default)]
-    pub place: Option<crate::siege_layouts::PlaceKind>,
     /// Side commanded by the player (`attacker`, `defender`); empty: AI
     /// against AI.
     #[serde(default)]
@@ -529,14 +526,13 @@ impl CustomBattle {
             river: false,
             season: self.season().unwrap_or_default(),
             coastal: false,
-            village: None,
+            bare_field: false,
             attacker: side(SideId::Attacker)?,
             defender: side(SideId::Defender)?,
             player_side: self.player_side(),
             siege: self.siege.then(|| SiegeSetup {
                 fortification: self.fortification(rules),
                 breach: 0,
-                place: self.place.unwrap_or_default(),
                 // NT11: the engines chosen on the screen (NT5, ADR 0128).
                 engines: Some(self.engine_setup(data, rules)),
             }),

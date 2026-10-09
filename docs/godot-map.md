@@ -106,10 +106,9 @@ X monde = x carte (pixel), Z monde = y carte, Y monde = altitude (m) × `MapData
 
 ### Terrain (`TerrainBuilder`, `shaders/terrain.gdshader`)
 
-- 256 tuiles (`CHUNKS = 16`) de `size/16` pixels ; sommets tous les `far_step` px (LOD lointain,
-  construit au chargement) ou `near_step` px (LOD proche, construit à la demande quand la caméra
-  est à moins de `near_distance` du centre de tuile, au plus 4 tuiles par frame, puis mis en cache).
-  Pas réglés par la scène selon la taille : 4096² → 4/8, 512² → 1/2.
+- Morceaux E0 (`size/16` pixels) ; sommets tous les `far_step` px, construits au chargement
+  (vue parchemin et bornes du quadtree ; ADR 0203 : plus de LOD proche ni de relief fin tuilé,
+  la pyramide est obligatoire). Pas réglé par la scène selon la taille : 4096² → 8, 512² → 2.
 - Les maillages ne portent que positions + indices ; le shader dérive la normale de la heightmap
   (différences finies sur ±2 px), donc aucune couture entre tuiles ni entre LOD.
 - Shader : palette par altitude, pentes tirant vers la roche, teinte parchemin ; frontières par
@@ -363,13 +362,13 @@ Battle (Node3D, battle_scene.gd)   tick, rendu, entrées, écran de fin
 godot --path game res://scenes/battle/battle.tscn                       # démo France–Angleterre
 godot --path game res://scenes/battle/battle.tscn -- --screenshot=/chemin/absolu/godot-battle.png
 godot --path game res://scenes/campaign_map.tscn -- --screenshot=/chemin/absolu/godot-battle-dialog.png --stage=battle
-godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20 --benchmark
+godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --units=20
 ```
 
   Seule, la scène crée une campagne France 1337 et met en scène (`debug_stage_battle`) la plus grande
   armée française contre la plus grande anglaise. `--screenshot` joue les deux IA jusqu'au premier
   contact + 12 s puis capture ; `--units=n` complète chaque camp à n régiments de 120 soldats (banc
-  d'essai, pas de retour campagne) ; `--benchmark` mesure les FPS sur 600 images ; `--autoplay` confie
+  d'essai, pas de retour campagne) ; `--autoplay` confie
   aussi le camp du joueur à l'IA.
 - **Performances** (M4 Pro, Metal, bibliothèque Rust en debug) : 2 × 20 régiments de 120 soldats
   (4 800 soldats, 8 MultiMesh mis à jour à chaque image) : **60 FPS** vsync (58,7 de moyenne sur 600
@@ -549,7 +548,6 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 | `scripts/map/settlement_data.gd` | Lecture de `data/settlements/*.json`, `data/map/settlements_px.json`, `hamlets.json`, `roads.geojson` ; tri par priorité d'étiquette ; `apply_live(sim)`. |
 | `scripts/map/settlement_layer.gd` (`CampaignMap/Settlements`, créé par le code) | Icônes (`MultiMesh`, `shaders/settlement_icon.gdshader`, taille constante à l'écran, sans test de profondeur), étiquettes `Label3D` dé-chevauchées (cité > ville > château > abbaye > village), maquettes, hameaux, picking, sélection. |
 | `scripts/map/road_renderer.gd` (`CampaignMap/Roads`) | Palier moyen : routes principales (`type` = `main`) et secondaires / calculées en traits `shaders/road_line.gdshader` (lot C7b, ci-dessous) ; palier près : rubans de chemin de terre (`shaders/road.gdshader`) par tuile de terrain. |
-| `scripts/map/fine_terrain_job.gd` | Maillage de relief fin d'une tuile, construit dans `WorkerThreadPool`. |
 | `tools/blender_scripts/settlements.py` | Générateur Blender headless des maquettes (voir ci-dessous). |
 
 ### Relief fin (`TerrainBuilder`, 3ᵉ niveau)
@@ -564,7 +562,6 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 - `surface_height_at(x, y)` rend la hauteur exacte de la surface affichée (interpolation dans le triangle
   du maillage courant, quel que soit le niveau) ; le signal `chunk_surface_changed(index)` recale
   maquettes, hameaux et rubans de la tuile. Les normales restent tirées de la heightmap 4096 (shader).
-- Option de mesure : `--fine-step=2` (sommet par unité).
 
 ### Maquettes et hameaux
 
@@ -628,7 +625,7 @@ viendra au lot C5). Ailleurs, picking de province inchangé. `--select-settlemen
 Les FPS restent collés à la fréquence de l'écran (synchro verticale imposée par Metal) : la mesure ne
 révèle pas de goulot. Les couches C6 coûtent ≈ 0,3 ms de CPU par image (LOD du terrain 0,16 ms,
 colonies + routes 0,14 ms). Le gros des primitives vient des passes d'ombre du relief fin
-(2,1 M triangles pour 4 tuiles) ; `--fine-step=2` divise ce coût par 4 si besoin.
+(2,1 M triangles pour 4 tuiles) .
 
 Lot C7b, mesure A/B (`main` `ff21e60` puis C7b, même machine chargée par d'autres sessions, 1440 × 900,
 `--fps-probe`) : comté Île-de-France (d = 55) 32,2 → 32,8 FPS, 9,78 → 9,77 M primitives ; Chartreuse
@@ -741,8 +738,8 @@ plus bas qui les mentionnent sont historiques :
 Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées
 `data/map/pyramid/E{k}/{col}_{row}.png`, cuites par ZG1/ZG3), `TerrainBuilder` crée un
 `ReliefQuadtree` qui dessine **tout** le terrain ; les 16 × 16 morceaux E0 sont masqués (ils restent
-construits : repli, bornes, vue parchemin). Sans cache, rien ne change
-(morceaux E0 + relief fin `FineTerrainJob`) : le test de fumée tourne sans cache.
+construits : repli, bornes, vue parchemin). Sans pyramide (ADR 0203),
+pas de repli : erreur au journal et toast au lancement de la carte.
 
 | Fichier | Rôle |
 |---|---|
@@ -772,7 +769,7 @@ construits : repli, bornes, vue parchemin). Sans cache, rien ne change
 ### Géométrie : patch partagé, morphing, jupes
 
 - Deux maillages partagés : patch 64 × 64 quads (65² sommets) et demi-patch 32 × 32, en coordonnées de
-  grille entières, plus une jupe (sommets y = −1, même disposition que `FineTerrainJob`). Chaque nœud est
+  grille entières, plus une jupe (sommets y = −1, y = −1 marque la jupe). Chaque nœud est
   un `MeshInstance3D` (réutilisé) avec le **matériau partagé du terrain** (splat, forêts, frontières,
   brouillard, surbrillance, météo : tout reste), transformation = origine + échelle s.
 - Paramètres du nœud en `instance uniform` : origine et espacement, pages fine (étage du nœud) et
@@ -844,8 +841,7 @@ construits : repli, bornes, vue parchemin). Sans cache, rien ne change
 - `godot --path game res://scenes/campaign_map.tscn -- --stage=map --hide-armies --bench-map` (fenêtré) :
   panoramique Caen → Rouen → Paris → Chartres → Évreux à d = 30 (`--bench-distance`, `--bench-seconds`)
   puis aller-retour de zoom 150 ↔ minimum sur Paris ; imprime i/s moyen, médiane et 99ᵉ centile des
-  images, pire image, images > 50 ms, statistiques du quadtree et, avec `--bench-listeners`, le temps
-  passé dans chaque écouteur de `chunk_surface_changed`.
+  images, pire image, images > 50 ms, statistiques du quadtree.
   Aussi : coût CPU du rendu, primitives et appels de dessin (médianes), `update_ms_avg` du quadtree.
   ZG4 : puis parcours « descente » (`descent` dans le rapport) au-dessus de Rouen, de la Grande Chartreuse
   et de Paris (150 → 5 → distance minimale, pause, remontée ; `--bench-descent-only` pour lui seul ;
@@ -1277,7 +1273,7 @@ Consommateurs :
 | Consommateur | Passage par la fonction |
 |---|---|
 | `terrain.gdshader` + `relief_quadtree.gdshaderinc` | sommets des patchs (`qt_vertex`), normale d'ombrage (`campaign_display_gradient`) |
-| Morceaux E0 / repli (`_chunk_vertices`, `FineTerrainJob`) | cuits avec `display_height_with(…, HEIGHT_SCALE, gain lointain)` |
+| Morceaux E0 (`_chunk_vertices`) | cuits avec `display_height_with(…, HEIGHT_SCALE, gain lointain)` |
 | `ReliefQuadtree.surface_height_at`, `sample_pages`, instantanés | `_bilinear` rend des mètres, `display_height` au point ; `sample_pages_m` pour les rubans |
 | `MapData.height_world_at` / `surface_world_at` | `display_height` : armées, caméra (plancher, visée), sondes de survol, marqueurs, végétation, routes C7b |
 | `river_fine`, `road_fine` (ZG5b) | sommets en mètres → `campaign_display_height` |

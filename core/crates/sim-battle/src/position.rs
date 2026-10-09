@@ -224,9 +224,6 @@ pub fn reverse_slope(field: &Battlefield, front: Front) -> Option<(f64, f64)> {
 /// [`HEDGE_COVER_REACH`]), by the share of the front it covers.
 pub fn cover_points(field: &Battlefield, front: Front) -> f64 {
     let (x, z) = front.center;
-    if field.in_village(x, z) {
-        return COVER_POINTS;
-    }
     let ahead = (x, z + front.forward * HEDGE_COVER_REACH);
     let width = front.width.max(60.0);
     field

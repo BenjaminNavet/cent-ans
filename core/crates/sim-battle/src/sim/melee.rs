@@ -112,20 +112,12 @@ impl BattleSim {
         } else {
             None
         };
-        if cavalry
-            && (self.field.breaks_charge(from, to)
-                || self.field.in_village(to.0, to.1)
-                || water.is_some()
-                || decor.is_some())
-        {
+        if cavalry && (self.field.breaks_charge(from, to) || water.is_some() || decor.is_some()) {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
-            let in_village = self.field.in_village(to.0, to.1);
             self.log_unit(i, |label| {
                 if let Some(how) = water {
                     format!("La charge des {label} {how}.")
-                } else if in_village {
-                    format!("La charge des {label} se brise dans le village.")
                 } else if let Some(place) = decor {
                     format!("La charge des {label} se brise {place}.")
                 } else {

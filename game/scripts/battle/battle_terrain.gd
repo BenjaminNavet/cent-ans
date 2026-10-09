@@ -15,9 +15,9 @@ extends Node3D
 ## Lot B5 (champ tiré de la campagne) : le terrain de la province règle la densité des bois, le relief
 ## et les bois de l'horizon (`BIOMES`), la saison la teinte des feuillages, le sol (`ground`) la neige
 ## ou la boue ; haies des courtils et du bocage semées avec les buissons (et chênes têtards), fossés,
-## cour du village, mares et plage cuits dans la splatmap ; maisons, clôtures, mares, roseaux et mer
-## dans `BattleVillage`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
-## bocage|steppe|desert>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
+## mares et plage cuits dans la splatmap ; clôtures, palissades, mares, roseaux et mer
+## dans `BattleSiteFeatures`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
+## bocage|steppe|desert>`, `--season=<spring|summer|autumn|winter>`, `--coast`,
 ## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
 ## (réécrivent la mise en place avant la simulation, captures).
 ##
@@ -194,7 +194,7 @@ var woodland: float = 0.5
 var biome: Dictionary = BIOMES["plains"]
 ## Toujours vrai : `BattleVegetation` le lit encore.
 var site_render: bool = true
-var village_view: BattleVillage
+var site_view: BattleSiteFeatures
 ## EP6 : décor du champ (hameaux, moulins, église, manoir, vignes, camps) et parcelles peintes au
 ## sol (r = nature/8 : 1 labour, 2 blé, 3 pré, 4 semis, 5 vigne, 6 chaume ; g = lacet/π ; b = bord ;
 ## a = parcelle), même rectangle que les splatmaps.
@@ -237,7 +237,7 @@ var horizon: BattleHorizon = null
 
 
 ## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
-## saison, village, côte) avant la simulation : captures des variantes sans campagne dédiée.
+## saison, côte) avant la simulation : captures des variantes sans campagne dédiée.
 static func apply_site_overrides(setup: Dictionary) -> void:
 	for arg in CmdArgs.args():
 		if arg.begins_with("--terrain="):
@@ -247,10 +247,6 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 			setup["river"] = true
 		elif arg.begins_with("--season="):
 			setup["season"] = arg.trim_prefix("--season=")
-		elif arg == "--village":
-			setup["village"] = true
-		elif arg == "--no-village":
-			setup["village"] = false
 		elif arg == "--coast":
 			setup["coastal"] = true
 		elif arg.begins_with("--province="):
@@ -346,19 +342,17 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	vegetation.name = "Vegetation"
 	add_child(vegetation)
 	vegetation.build(self, weather)
-	village_view = BattleVillage.new()
-	village_view.name = "Site"
-	add_child(village_view)
-	village_view.build(self, terrain, weather)
+	site_view = BattleSiteFeatures.new()
+	site_view.name = "Site"
+	add_child(site_view)
+	site_view.build(self, terrain, weather)
 	decor_view = BattleDecor.new()
 	decor_view.name = "Decor"
 	add_child(decor_view)
 	decor_view.build(self, terrain.get("decor", {}), weather)
-	var village: Dictionary = terrain.get("village", {})
-	print("BattleTerrain: site %s, %s, ground %s, village %s, coast %s, %d pools, %d obstacles, %d reeds" % [
+	print("BattleTerrain: site %s, %s, ground %s, coast %s, %d pools, %d obstacles, %d reeds" % [
 		terrain_key, season_key, ground_key,
-		"(%.0f, %.0f) r %.0f, %d houses" % [float(village["x"]), float(village["z"]), float(village["radius"]), village_view.house_count] if not village.is_empty() else "none",
-		str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), village_view.reed_count])
+		str(_coast.get("flank", "none")), _pools.size(), (terrain.get("obstacles", []) as Array).size(), site_view.reed_count])
 	for pool in _pools:
 		print("BattleTerrain: pool (%.0f, %.0f) r %.0f" % [float(pool["x"]), float(pool["z"]), float(pool["radius"])])
 	for wood in terrain.get("forests", []):
@@ -553,7 +547,7 @@ func world_height(x: float, z: float) -> float:
 		var beyond := -x if west else x - FIELD_W
 		if beyond > 0.0:
 			var offset := absf(float(_coast["shore_x"]) - (0.0 if west else FIELD_W))
-			h = lerpf(base, BattleVillage.SEA_LEVEL - 4.0, smoothstep(0.0, offset * 2.5 + 40.0, beyond))
+			h = lerpf(base, BattleSiteFeatures.SEA_LEVEL - 4.0, smoothstep(0.0, offset * 2.5 + 40.0, beyond))
 	return h
 
 
@@ -717,7 +711,7 @@ func _extend_river() -> void:
 		x += 10.0
 
 
-## EP3 : routes de la simulation (ponts, gués, village, bords du champ), prolongées hors du
+## EP3 : routes de la simulation (ponts, gués, bords du champ), prolongées hors du
 ## champ par une marche aléatoire ; plus un chemin de traverse à l'arrière (décor) ; en siège, la
 ## route de la porte. Sans routes de la simulation (anciens terrains) : un chemin par gué.
 func _plan_roads() -> void:
@@ -945,8 +939,8 @@ func _relief_map(hdata: PackedFloat32Array, hw: int, hh: int) -> ImageTexture:
 	return ImageTexture.create_from_image(image)
 
 
-## B5 : mares (vase et berges humides), fossés (vase), cour et ruelles du village (terre battue,
-## sans parcelles), plage (sable, sans parcelles) dans les splatmaps.
+## B5 : mares (vase et berges humides), fossés (vase),
+## plage (sable, sans parcelles) dans les splatmaps.
 func _stamp_site(a: Image, b: Image) -> void:
 	for pool in _pools:
 		var c := Vector2(float(pool["x"]), float(pool["z"]))
@@ -965,18 +959,6 @@ func _stamp_site(a: Image, b: Image) -> void:
 				_stamp_disc(b, p, 3.5, 0, 3.0)
 			# Pas de labours sous les haies et les clôtures (lisière d'herbe).
 			_stamp_disc(b, p, 4.0, 1, 4.0)
-	var village: Dictionary = terrain.get("village", {})
-	if not village.is_empty():
-		var c := Vector2(float(village["x"]), float(village["z"]))
-		var r := float(village["radius"])
-		_stamp_disc(b, c, r + 30.0, 1, 20.0)
-		for house in village.get("houses", []):
-			var p := Vector2(float(house["x"]), float(house["z"]))
-			_stamp_disc(a, p, float(house["width"]) * 0.5 + 2.5, 1, 3.0, 0.7)
-			# Ruelle de terre battue jusqu'au centre du hameau.
-			var steps := maxi(int(p.distance_to(c) / 2.5), 1)
-			for s in steps + 1:
-				_stamp_disc(a, p.lerp(c, float(s) / float(steps)), 1.8, 1, 2.0, 0.65)
 	if not _coast.is_empty():
 		var west := str(_coast["flank"]) == "west"
 		var beach := float(_coast["beach"])
@@ -1923,7 +1905,7 @@ func _setup_horizon() -> void:
 	horizon.setup(province_id, field_size(), _mean_height, flank, terrain_key, season_key)
 
 
-## EP2 : emprise de la mer du champ (B5, `BattleVillage._build_sea`), vide sans côte.
+## EP2 : emprise de la mer du champ (B5, `BattleSiteFeatures._build_sea`), vide sans côte.
 func _sea_rect() -> Rect2:
 	if _coast.is_empty():
 		return Rect2()
@@ -1941,17 +1923,14 @@ func _in_sea(x: float, z: float) -> bool:
 	var west := str(_coast["flank"]) == "west"
 	if (west and x > 0.0) or (not west and x < FIELD_W):
 		return false
-	return world_height(x, z) < BattleVillage.SEA_LEVEL + 0.8
+	return world_height(x, z) < BattleSiteFeatures.SEA_LEVEL + 0.8
 
 
-## B5 : pas de buissons épars dans les mares, le village et sur la plage.
+## B5 : pas de buissons épars dans les mares et sur la plage.
 func _in_site_clearing(p: Vector2) -> bool:
 	if _in_zones(_pools, p.x, p.y, 4.0):
 		return true
 	if not _decor_clear.is_empty() and _in_decor(p):
-		return true
-	var village: Dictionary = terrain.get("village", {})
-	if not village.is_empty() and p.distance_to(Vector2(float(village["x"]), float(village["z"]))) < float(village["radius"]) + 8.0:
 		return true
 	if not _coast.is_empty():
 		var west := str(_coast["flank"]) == "west"
@@ -1962,7 +1941,7 @@ func _in_site_clearing(p: Vector2) -> bool:
 
 
 ## B5 : haies vives (buissons serrés tous les 1,8 m, portée longue), chênes têtards dans les
-## haies du bocage ; quelques arbres fruitiers dans les courtils du village.
+## haies du bocage .
 func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictionary) -> void:
 	var bocage := terrain_key == "bocage"
 	for o in terrain.get("obstacles", []):
@@ -1987,25 +1966,6 @@ func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictiona
 				t.origin.y = height_at(p.x, p.y) - 0.25
 				sets["oak"].append(t)
 				tints["oak"].append(_tree_tint(rng))
-	var village: Dictionary = terrain.get("village", {})
-	if village.is_empty():
-		return
-	var c := Vector2(float(village["x"]), float(village["z"]))
-	var r := float(village["radius"])
-	for _i in int(r * 0.25):
-		var ang := rng.randf() * TAU
-		var p := c + Vector2(cos(ang), sin(ang)) * r * rng.randf_range(0.9, 1.25)
-		var near_house := false
-		for house in village.get("houses", []):
-			if p.distance_to(Vector2(float(house["x"]), float(house["z"]))) < float(house["length"]) * 0.6 + 3.0:
-				near_house = true
-				break
-		if near_house:
-			continue
-		var t := _tree_transform(rng, p.x, p.y, 0.9, 1.2)
-		t.origin.y = height_at(p.x, p.y) - 0.2
-		sets["fruit"].append(t)
-		tints["fruit"].append(_tree_tint(rng))
 
 
 ## Arbres par tuiles (lot V4b) : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur

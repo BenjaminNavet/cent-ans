@@ -14,6 +14,9 @@ uniform float flap_rate = 11.0;
 uniform float flap_amount = 0.55;
 uniform float wing_fold = 0.0;
 uniform float span = 60.0;
+// DN-FLEUVE : oiseau en glb généré, albédo baké (sinon couleur unie).
+uniform bool use_texture = false;
+uniform sampler2D albedo_tex : source_color, filter_linear;
 
 void vertex() {
 	float radius = INSTANCE_CUSTOM.r;
@@ -47,5 +50,5 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = bird_color;
+	ALBEDO = use_texture ? texture(albedo_tex, UV).rgb : bird_color;
 }

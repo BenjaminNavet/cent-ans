@@ -73,16 +73,6 @@ impl CampaignState {
             .max(0.0) as u32
     }
 
-    /// Units of `unit_type` `settlement` holds at most.
-    pub fn recruit_pool_cap(
-        &self,
-        data: &GameData,
-        settlement: &SettlementId,
-        _unit_type: &UnitTypeId,
-    ) -> u32 {
-        self.pool_cap_with(data, settlement, self.pool_slot_points(data, settlement))
-    }
-
     fn pool_cap_with(&self, data: &GameData, settlement: &SettlementId, slot_points: u32) -> u32 {
         let Some(state) = self.settlements.get(settlement) else {
             return 0;

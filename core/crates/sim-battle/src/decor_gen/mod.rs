@@ -251,9 +251,6 @@ impl<'a> Layout<'a> {
             .iter()
             .chain(&f.forest_parts)
             .all(|z| fp.signed_distance(z.x, z.z) > z.radius + 3.0)
-            && f.village
-                .as_ref()
-                .is_none_or(|v| fp.signed_distance(v.zone.x, v.zone.z) > v.zone.radius + 15.0)
     }
 
     fn free(&self, fp: &Footprint, gap: f64) -> bool {

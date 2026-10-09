@@ -82,4 +82,3 @@ func _init() -> void:
 	finish()
 
 
-		print("FAIL: " + message)

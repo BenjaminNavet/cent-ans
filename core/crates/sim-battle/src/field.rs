@@ -1,6 +1,6 @@
 //! Battlefield (height, forests, mud, river) and weather, generated from the
 //! seed, the province terrain and the season (spec § 1), plus the features of
-//! the campaign site (coast, marsh pools, village, hedges, ground of the
+//! the campaign site (coast, marsh pools, hedges, ground of the
 //! season: lot B5, [`crate::site`]).
 
 use data_model::key_enum;
@@ -14,7 +14,7 @@ use crate::scale::FieldSize;
 pub use crate::scale::GRID_RESOLUTION;
 use crate::setup::{BattleSeason, CrossingStructure};
 use crate::site::{
-    self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, Village, HEDGE_COVER_REACH,
+    self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, HEDGE_COVER_REACH,
     OBSTACLE_REACH,
 };
 use crate::terrain_rules::{Scatter, TerrainRules};
@@ -212,8 +212,6 @@ pub struct Battlefield {
     /// Hedges, fences and ditches (B5).
     #[serde(default)]
     pub obstacles: Vec<Obstacle>,
-    #[serde(default)]
-    pub village: Option<Village>,
     /// EP3: tributary and brooks (shallow).
     #[serde(default)]
     pub streams: Vec<crate::hydro::Stream>,
@@ -260,7 +258,7 @@ pub const DEFENDER_LINE_Z: f64 = 550.0;
 
 impl Battlefield {
     /// Builds a standard field for `terrain`, adding a river when `river` is
-    /// set and extra mud in the rain or snow (no coast, no village: pre-B5
+    /// set and extra mud in the rain or snow (no coast: pre-B5
     /// field).
     pub fn generate(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
         Self::generate_sized(FieldSize::STANDARD, terrain, river, weather, rng)
@@ -312,7 +310,7 @@ impl Battlefield {
 
     /// Builds the field of a campaign site (B5) on a field of `size` (EP1):
     /// the pre-B5 field (same draws from `rng`), then ground, coast, pools,
-    /// village and hedges from a derived stream that leaves `rng` where the
+    /// hedges from a derived stream that leaves `rng` where the
     /// pre-B5 field left it.
     pub fn generate_site_sized(
         site: &FieldSite,
@@ -363,7 +361,6 @@ impl Battlefield {
         field.mud.extend(features.extra_mud);
         field.pools = features.pools;
         field.obstacles = features.obstacles;
-        field.village = features.village;
         field.coast = features.coast;
         if let Some(coast) = field.coast {
             field.shape_coast(coast);
@@ -563,7 +560,6 @@ impl Battlefield {
             pools: Vec::new(),
             coast: None,
             obstacles: Vec::new(),
-            village: None,
             streams: Vec::new(),
             bridges: Vec::new(),
             oxbows: Vec::new(),
@@ -614,9 +610,6 @@ impl Battlefield {
         self.forest_parts.retain(keep);
         self.mud_parts.retain(keep);
         self.pools.retain(keep);
-        if self.village.as_ref().is_some_and(|v| !keep(&v.zone)) {
-            self.village = None;
-        }
         self.obstacles.retain(|o| {
             [o.a, o.b]
                 .iter()
@@ -634,7 +627,7 @@ impl Battlefield {
     }
 
     /// Speed multiplier of the site features at (x, z) (B5): hedges, fences
-    /// and ditches being crossed, village lanes, beach sand, snow on the
+    /// and ditches being crossed, beach sand, snow on the
     /// ground. Marsh pools count as shallow water ([`Self::water_at`]).
     pub fn site_speed_factor(&self, x: f64, z: f64, mounted: bool, weather: Weather) -> f64 {
         let mut factor = self.ground.speed_factor(weather);
@@ -650,9 +643,6 @@ impl Battlefield {
         {
             factor *= obstacle.kind.crossing_factor(mounted);
         }
-        if self.in_village(x, z) {
-            factor *= Village::speed_factor(mounted);
-        }
         if self.coast.is_some_and(|c| c.on_beach(x)) {
             factor *= Coast::SAND_FACTOR;
         }
@@ -662,8 +652,7 @@ impl Battlefield {
     }
 
     /// Parts of the one-line description of the site (B6), in French:
-    /// ground (« Terre gelée » for dry winter ground), season, village or
-    /// farm, hedges, ditches, fences, pools, river, coast.
+    /// ground (« Terre gelée » for dry winter ground), season, hedges, ditches, fences, pools, river, coast.
     pub fn site_parts_fr(&self) -> Vec<String> {
         use crate::site::{Flank, ObstacleKind};
         let ground = if self.ground == Ground::Dry && self.season == BattleSeason::Winter {
@@ -672,9 +661,6 @@ impl Battlefield {
             self.ground.label_fr()
         };
         let mut parts = vec![ground.to_owned(), self.season.label_fr().to_owned()];
-        if let Some(village) = &self.village {
-            parts.push(if village.farm { "ferme" } else { "village" }.to_owned());
-        }
         for (kind, label) in [
             (ObstacleKind::Hedge, "haies"),
             (ObstacleKind::Ditch, "fossés"),
@@ -712,14 +698,10 @@ impl Battlefield {
         parts
     }
 
-    /// The site in one compact line (B6): « Terre gelée · hiver · village ·
+    /// The site in one compact line (B6): « Terre gelée · hiver ·
     /// haies · côte ouest ».
     pub fn site_label_fr(&self) -> String {
         self.site_parts_fr().join(" · ")
-    }
-
-    pub fn in_village(&self, x: f64, z: f64) -> bool {
-        self.village.as_ref().is_some_and(|v| v.zone.contains(x, z))
     }
 
     /// `true` when a hedge stands between `from` and a target at `to`, close

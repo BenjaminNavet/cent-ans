@@ -6,7 +6,9 @@ For every model used by ``data/art/dn_campaign_models.json`` (raw TRELLIS glb of
 * ``open_ratio``: length of open boundary edges / sqrt(surface area) (torn walls, missing faces);
 * ``floaters``: share of the surface in connected components smaller than 3 % of the largest;
 * ``sliver``: share of faces whose aspect ratio (longest edge^2 / (2 area)) exceeds 40;
-* ``score``: open_ratio + 4 * floaters + 4 * sliver (relative ranking, calibrated on the four
+* ``inverted``: share of the surface in shells with negative signed volume (turned inside out:
+  back-face culling then shows torn walls and black interiors, the real cause found by DN-TROUS);
+* ``score``: open_ratio + 4 * floaters + 4 * sliver + 10 * inverted (relative ranking, calibrated on the four
   towns cited by the player: Kingston, Montargis, Nuremberg, Slesvig).
 
 Usage: ``uv run --with trimesh --with numpy --with networkx python tools/experiments/dn_holes.py
@@ -55,14 +57,21 @@ def measure(path: Path) -> dict:
     areas = np.array([mesh.area_faces[p].sum() for p in parts])
     floaters = float(areas[areas < 0.03 * areas.max()].sum() / areas.sum()) if len(areas) else 0.0
     tri = mesh.vertices[mesh.faces]
+    centred = tri - mesh.bounds.mean(axis=0)  # signed volume of an open shell depends on the origin
+    volumes = np.einsum("ij,ij->i", centred[:, 0], np.cross(centred[:, 1], centred[:, 2])) / 6.0
+    inverted_area = 0.0
+    for part, part_area in zip(parts, areas, strict=True):
+        if part_area > 0.002 * area and volumes[part].sum() < 0:  # shell turned inside out
+            inverted_area += part_area
+    inverted = float(inverted_area / area)
     e = np.stack([np.linalg.norm(tri[:, i] - tri[:, (i + 1) % 3], axis=1) for i in range(3)], axis=1)
     aspect = e.max(axis=1) ** 2 / np.maximum(2 * mesh.area_faces, 1e-12)
     sliver = float((mesh.area_faces[aspect > 40].sum()) / area)
     return {
         "faces": int(len(mesh.faces)), "components": int(len(parts)),
         "open_ratio": round(open_ratio, 3), "floaters": round(floaters, 4),
-        "sliver": round(sliver, 4),
-        "score": round(open_ratio + 4 * floaters + 4 * sliver, 3),
+        "sliver": round(sliver, 4), "inverted": round(inverted, 4),
+        "score": round(open_ratio + 4 * floaters + 4 * sliver + 10 * inverted, 3),
     }  # fmt: skip
 
 

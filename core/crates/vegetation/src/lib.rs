@@ -20,8 +20,6 @@ use species::{
     B_RIPARIAN_PX, B_SCRUB, CUSTOM_STRIDE, ROLE_EDGE, ROLE_ISOLATED, ROLE_MASSIF, ROLE_ORCHARD,
     ROLE_RIPARIAN, ROLE_SCRUB,
 };
-const KIND_OAK: usize = 0;
-const KIND_BEECH: usize = 1;
 const KIND_CONIFER: usize = 2;
 pub const KIND_HEDGE: usize = 3;
 pub const KIND_COUNT: usize = 4;
@@ -36,7 +34,6 @@ const GROUND_SINK: f64 = 0.08;
 const RIVER_CLEARANCE: f64 = 0.3;
 const HEDGE_STEP: f64 = 0.62;
 const HEDGE_GAP: f64 = 0.1;
-const HEDGE_TREE: f64 = 0.07;
 /// `VegetationFields.LAYOUTS`: [k (shear), fu, fv (parcel size, px), warp phase].
 const LAYOUTS: [[f64; 4]; 2] = [[0.35, 5.0, 4.2, 0.0], [-0.8, 4.6, 3.8, 2.1]];
 
@@ -240,7 +237,8 @@ pub struct TileRequest {
     pub detail: Option<DetailArea>,
     /// Lot HB4: biome index per coarse cell (`side × side`, nearest; empty = default biome).
     pub biome: Vec<f32>,
-    /// Lot HB4: species table; `None` keeps the V4 scatter (oak, beech, conifer).
+    /// Lot HB4: species table, required to scatter (ADR 0204: no V4 fallback); `None` only for
+    /// ground re-seating requests.
     pub species: Option<Arc<SpeciesTable>>,
 }
 
@@ -676,6 +674,8 @@ struct Scatter<'a> {
 const FOREST: usize = 0;
 const CROPS: usize = 1;
 const CONIFER: usize = 2;
+// Layout of the coarse grids sent by Godot; unused by the species scatter.
+#[allow(dead_code)]
 const BEECH: usize = 3;
 const HEDGE: usize = 4;
 const GROVE: usize = 5;
@@ -722,6 +722,10 @@ impl<'a> Scatter<'a> {
 
     fn run(&mut self) {
         let req = self.req;
+        // ADR 0204: the species table is mandatory (no V4 scatter); without it nothing is planted.
+        let Some(table) = req.species.as_deref() else {
+            return;
+        };
         let (ox, oy) = req.origin;
         let (rx0, ry0, rx1, ry1) = self.rect;
         let cells_x = ((rx1 - rx0) / req.spacing).ceil() as usize;
@@ -736,50 +740,7 @@ impl<'a> Scatter<'a> {
                 let gy = (y - oy) / req.coarse_step;
                 let forest = self.lerp_grid(FOREST, gx, gy);
                 let yaw = self.rng.randf() * TAU;
-                if let Some(table) = req.species.as_deref() {
-                    self.species_candidate(table, x, y, roll, roll_kind, forest, yaw);
-                    continue;
-                }
-                let mut kind = None;
-                let mut scale_factor = 1.0;
-                if roll < forest * 0.9 {
-                    kind = Some(if roll_kind < self.lerp_grid(CONIFER, gx, gy) {
-                        KIND_CONIFER
-                    } else if self.rng.randf() < self.lerp_grid(BEECH, gx, gy) {
-                        KIND_BEECH
-                    } else {
-                        KIND_OAK
-                    });
-                    scale_factor = 1.0 + CANOPY_SPREAD * smoothstep(0.45, 0.9, forest);
-                } else {
-                    let crops = self.lerp_grid(CROPS, gx, gy);
-                    if crops > 0.15 {
-                        let grove = self.lerp_grid(GROVE, gx, gy);
-                        if roll < crops * (grove * 0.55 + 0.012) {
-                            kind = Some(if self.rng.randf() < 0.2 {
-                                KIND_BEECH
-                            } else {
-                                KIND_OAK
-                            });
-                            scale_factor = 0.9;
-                        }
-                    }
-                }
-                let Some(kind) = kind else {
-                    continue;
-                };
-                if self.excluded(x, y) || !self.has_point(x, y) || self.in_corridor(x, y) {
-                    continue;
-                }
-                if self.map.river_sd_at(x, y) < RIVER_CLEARANCE {
-                    continue;
-                }
-                let ground = req.height_world_at(self.map, x, y);
-                if ground <= 0.0 {
-                    continue;
-                }
-                let ground = req.display_ground(self.map, x, y, ground);
-                self.push(kind, x, ground, y, yaw, scale_factor);
+                self.species_candidate(table, x, y, roll, roll_kind, forest, yaw);
             }
         }
         if req.detail.is_none() {
@@ -914,71 +875,36 @@ impl<'a> Scatter<'a> {
         }
         let ground = req.display_ground(self.map, px, py, ground);
         let yaw = (-(next.1 - pos.1)).atan2(next.0 - pos.0) + self.rng.range(-0.15, 0.15);
-        let hedge_tree = req
-            .species
-            .as_deref()
-            .map_or(HEDGE_TREE, |t| t.dist.hedge_tree);
-        if tree < hedge_tree {
+        let Some(table) = req.species.as_deref() else {
+            return;
+        };
+        if tree < table.dist.hedge_tree {
             let tree_yaw = self.rng.randf() * TAU;
-            if let Some(table) = req.species.as_deref() {
-                // Lot HB4: hedge trees of the local biome (role "isolated").
-                let roll = self.rng.randf();
-                let (b, conifer) = self.biome_and_conifer(table, gx, gy);
-                let sd = self.map.river_sd_at(px, py);
-                if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll) {
-                    self.push_species(table, sp, px, ground, py, tree_yaw, 0.78);
-                }
-                return;
+            // Lot HB4: hedge trees of the local biome (role "isolated").
+            let roll = self.rng.randf();
+            let (b, conifer) = self.biome_and_conifer(table, gx, gy);
+            let sd = self.map.river_sd_at(px, py);
+            if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll) {
+                self.push_species(table, sp, px, ground, py, tree_yaw, 0.78);
             }
-            self.push(KIND_OAK, px, ground, py, tree_yaw, 0.78);
         } else {
-            self.push(KIND_HEDGE, px, ground, py, yaw, 1.0);
+            self.push_hedge(px, ground, py, yaw);
         }
     }
 
-    /// `VegetationTileJob._make_instance`.
-    fn push(&mut self, kind: usize, x: f64, ground: f64, y: f64, yaw: f64, scale_factor: f64) {
+    /// One hedge shrub: low and thin, varied tints (hawthorn, hazel, brambles).
+    fn push_hedge(&mut self, x: f64, ground: f64, y: f64, yaw: f64) {
         let rng = &mut self.rng;
-        let (height, width, tint): (f64, f64, [f64; 3]);
-        match kind {
-            KIND_CONIFER => {
-                height = rng.range(1.3, 2.1);
-                width = height * rng.range(0.85, 1.1);
-                let b = rng.range(0.8, 1.15);
-                tint = [b * rng.range(0.9, 1.05), b, b * rng.range(0.95, 1.1)];
-            }
-            KIND_HEDGE => {
-                height = rng.range(0.3, 0.46);
-                width = rng.range(0.72, 0.95);
-                let b = rng.range(1.0, 1.3);
-                let warm = rng.randf() > 0.7;
-                tint = [
-                    b * if warm { 1.12 } else { 1.0 },
-                    b,
-                    b * if warm { 0.78 } else { 0.9 },
-                ];
-            }
-            KIND_BEECH => {
-                height = rng.range(1.35, 1.95);
-                width = height * rng.range(0.78, 0.98);
-                let b = rng.range(0.88, 1.12);
-                tint = [b * rng.range(0.95, 1.05), b, b * rng.range(0.9, 1.0)];
-            }
-            _ => {
-                height = rng.range(1.1, 1.7);
-                width = height * rng.range(0.95, 1.3);
-                let b = rng.range(0.82, 1.18);
-                let warm = rng.randf();
-                tint = if warm > 0.9 {
-                    [b * 1.35, b * 1.15, b * 0.7]
-                } else if warm > 0.7 {
-                    [b * 1.12, b * 1.08, b * 0.85]
-                } else {
-                    [b * rng.range(0.9, 1.02), b, b * rng.range(0.9, 1.05)]
-                };
-            }
-        }
-        self.emit(kind, x, ground, y, yaw, scale_factor, height, width, tint);
+        let height = rng.range(0.3, 0.46);
+        let width = rng.range(0.72, 0.95);
+        let b = rng.range(1.0, 1.3);
+        let warm = rng.randf() > 0.7;
+        let tint = [
+            b * if warm { 1.12 } else { 1.0 },
+            b,
+            b * if warm { 0.78 } else { 0.9 },
+        ];
+        self.emit(KIND_HEDGE, x, ground, y, yaw, 1.0, height, width, tint);
     }
 
     /// Lot HB4: biome (nearest coarse cell, default on sea / missing grid) and conifer share.
@@ -1328,7 +1254,7 @@ mod tests {
             ground: Ground::None,
             detail: None,
             biome: Vec::new(),
-            species: None,
+            species: Some(Arc::new(species::tests::table())),
         }
     }
 
@@ -1356,7 +1282,6 @@ mod tests {
     fn species_request(biome: f32, forest: f32, crops: f32) -> TileRequest {
         let mut req = request(forest, crops, 0.0, 1.0);
         req.biome = vec![biome; req.side * req.side];
-        req.species = Some(Arc::new(species::tests::table()));
         req
     }
 
@@ -1387,14 +1312,12 @@ mod tests {
             "steppe {}",
             count(&steppe)
         );
-        // open fields: far fewer trees than the V4 scatter (hedge trees and a few isolated ones)
-        let mut legacy = species_request(2.0, 0.0, 1.0);
-        legacy.species = None;
-        let legacy = count(&scatter_tile(&legacy, &map));
+        // open fields: only hedge trees and a few isolated ones
         assert!(
-            count(&fields) * 4 < legacy * 3,
-            "fields {} vs {legacy}",
-            count(&fields)
+            count(&fields) * 20 < count(&forest),
+            "fields {} vs forest {}",
+            count(&fields),
+            count(&forest)
         );
     }
 
@@ -1515,18 +1438,21 @@ mod tests {
     #[test]
     fn dense_forest_fills_tile_and_is_deterministic() {
         let map = flat_map(40000);
-        let req = request(1.0, 0.0, 0.0, 1.0);
+        let req = species_request(2.0, 1.0, 0.0);
         let a = scatter_tile(&req, &map);
         let b = scatter_tile(&req, &map);
         assert_eq!(a.counts, b.counts);
         assert_eq!(a.buffers, b.buffers);
         let trees: i32 = a.counts.iter().sum();
         let cells = (64.0f64 / 1.35).ceil().powi(2);
-        // roll < 0.9 on in-rect cells (the last column overflows by up to one spacing).
-        assert!(trees as f64 > cells * 0.8 && (trees as f64) < cells * 0.92);
+        // massif role on most in-rect cells (the last column overflows by up to one spacing).
+        assert!(
+            trees as f64 > cells * 0.5 && (trees as f64) < cells * 1.0,
+            "{trees} trees for {cells} cells"
+        );
         for (slot, buffer) in a.buffers.iter().enumerate() {
             assert_eq!(buffer.len(), a.counts[slot] as usize * FLOATS_PER_INSTANCE);
-            if slot % KIND_COUNT == KIND_HEDGE || slot % KIND_COUNT == KIND_CONIFER {
+            if slot % KIND_COUNT == KIND_HEDGE {
                 assert!(buffer.is_empty());
             }
             let n = a.counts[slot] as usize;
@@ -1671,11 +1597,7 @@ mod tests {
         assert!((buffer[7] - (5.0 - 0.08 * height)).abs() < 1e-3);
     }
 
-    const GOLDEN_SUMS: [u64; 3] = [
-        1156438309204118281,
-        13900807228414749860,
-        17832588344718662683,
-    ];
+    const GOLDEN_SUMS: [u64; 2] = [13900807228414749860, 17832588344718662683];
 
     /// FNV-1a over the packed buffers and counts: pins the exact output of a scatter.
     fn checksum(result: &TileResult) -> u64 {
@@ -1711,13 +1633,11 @@ mod tests {
     #[test]
     fn scatter_output_is_pinned_with_clearings() {
         let map = flat_map(30000);
-        let mut v4 = request(0.6, 0.8, 0.5, 1.0);
-        v4.exclusions = clearings(40);
         let mut species = species_request(2.0, 0.5, 0.8);
         species.exclusions = clearings(40);
         let mut dense = species_request(2.0, 0.7, 0.9);
         dense.exclusions = clearings(300);
-        let sums = [&v4, &species, &dense].map(|req| checksum(&scatter_tile(req, &map)));
+        let sums = [&species, &dense].map(|req| checksum(&scatter_tile(req, &map)));
         assert_eq!(sums, GOLDEN_SUMS, "{sums:?}");
     }
 

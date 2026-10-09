@@ -36,7 +36,7 @@ fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
         river: false,
         season: BattleSeason::Summer,
         coastal: false,
-        village: None,
+        bare_field: false,
         attacker: side("fac_france", "France", attacker),
         defender: side("fac_england", "Angleterre", defender),
         player_side: None,

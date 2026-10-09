@@ -78,7 +78,7 @@
    "jitter": 0.0,
    "height_jitter": 0.0,
    "flap_rate": 7,
-   "flap_amount": 0.5,
+   "flap_amount": 0.25,
    "wing_fold": 0,
    "model": "",
    "seasons": {
@@ -98,7 +98,8 @@
     "span": 60,
     "v_spacing": 1.6,
     "v_angle_deg": 32
-   }
+   },
+   "dn_model": "bird_goose"
   },
   {
    "id": "starling",
@@ -175,7 +176,7 @@
    "jitter": 1.5,
    "height_jitter": 0.8,
    "flap_rate": 8,
-   "flap_amount": 0.35,
+   "flap_amount": 0.25,
    "wing_fold": 0,
    "model": "",
    "seasons": {
@@ -187,7 +188,8 @@
    "habitat": {
     "surface": "any",
     "coast_max_px": 12
-   }
+   },
+   "dn_model": "bird_gull"
   },
   {
    "id": "flamingo",
@@ -269,8 +271,8 @@
    "jitter": 1.4,
    "height_jitter": 0.0,
    "flap_rate": 3,
-   "flap_amount": 0.08,
-   "wing_fold": 0.55,
+   "flap_amount": 0,
+   "wing_fold": 0,
    "model": "",
    "seasons": {
     "spring": 1,
@@ -296,7 +298,8 @@
      "flanders_moss",
      "hansag"
     ]
-   }
+   },
+   "dn_model": "bird_crane"
   },
   {
    "id": "stork",
@@ -325,8 +328,8 @@
    "jitter": 0.0,
    "height_jitter": 0.0,
    "flap_rate": 0,
-   "flap_amount": 0.0,
-   "wing_fold": 0.65,
+   "flap_amount": 0,
+   "wing_fold": 0,
    "model": "",
    "seasons": {
     "spring": 1,
@@ -347,7 +350,8 @@
      "set_sandomierz"
     ],
     "town_radius": 4.0
-   }
+   },
+   "dn_model": "bird_stork"
   },
   {
    "id": "raptor",
@@ -389,6 +393,111 @@
     "surface": "land",
     "min_height_m": 900
    }
+  },
+  {
+   "id": "swan",
+   "label": "Cygnes tuberculés (étangs et lacs de plaine)",
+   "behavior": "wade",
+   "flocks": 2,
+   "per_flock": 3,
+   "scale": 0.7,
+   "color": [
+    0.45,
+    0.46,
+    0.48
+   ],
+   "height": [
+    0.3,
+    0.4
+   ],
+   "radius": [
+    0.5,
+    3.0
+   ],
+   "speed": [
+    0.03,
+    0.06
+   ],
+   "jitter": 1.4,
+   "height_jitter": 0.0,
+   "flap_rate": 3,
+   "flap_amount": 0,
+   "wing_fold": 0,
+   "model": "",
+   "seasons": {
+    "spring": 1,
+    "summer": 1,
+    "autumn": 0.8,
+    "winter": 0.6
+   },
+   "habitat": {
+    "surface": "land",
+    "wetland_ids": [
+     "dombes",
+     "brenne",
+     "sologne",
+     "etangs_lorraine",
+     "broads",
+     "somerset_levels",
+     "marais_poitevin",
+     "audomarois",
+     "zeelande",
+     "hollande_veen",
+     "thames_marshes",
+     "fens",
+     "bresse",
+     "etangs_forez"
+    ]
+   },
+   "dn_model": "bird_swan"
+  },
+  {
+   "id": "pelican",
+   "label": "Pélicans (deltas et lagunes de la Méditerranée)",
+   "behavior": "wade",
+   "flocks": 2,
+   "per_flock": 3,
+   "scale": 0.8,
+   "color": [
+    0.45,
+    0.46,
+    0.48
+   ],
+   "height": [
+    0.3,
+    0.4
+   ],
+   "radius": [
+    0.5,
+    3.0
+   ],
+   "speed": [
+    0.03,
+    0.06
+   ],
+   "jitter": 1.4,
+   "height_jitter": 0.0,
+   "flap_rate": 3,
+   "flap_amount": 0,
+   "wing_fold": 0,
+   "model": "",
+   "seasons": {
+    "spring": 1,
+    "summer": 0.8,
+    "autumn": 0.5,
+    "winter": 0.2
+   },
+   "habitat": {
+    "surface": "land",
+    "wetland_ids": [
+     "camargue",
+     "delta_ebre",
+     "delta_po",
+     "etangs_languedoc",
+     "brouage"
+    ]
+   },
+   "dn_model": "bird_pelican"
   }
  ]
 }

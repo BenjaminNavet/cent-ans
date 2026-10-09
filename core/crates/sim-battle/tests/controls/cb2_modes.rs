@@ -643,7 +643,7 @@ fn defensive_sim(seed: u64) -> BattleSim {
         "unit_mounted_archers",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);

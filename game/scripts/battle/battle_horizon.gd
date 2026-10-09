@@ -111,8 +111,8 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 	_cos = cos(rotation_rad)
 	_sin = sin(rotation_rad)
 	# Altitude : le champ est posé sur l'altitude réelle moyenne de son emprise ; une bataille
-	# côtière garde la mer réelle au niveau de la mer du champ (`BattleVillage.SEA_LEVEL`).
-	offset_y = BattleVillage.SEA_LEVEL if flank != "" else mean_height - ref_m
+	# côtière garde la mer réelle au niveau de la mer du champ (`BattleSiteFeatures.SEA_LEVEL`).
+	offset_y = BattleSiteFeatures.SEA_LEVEL if flank != "" else mean_height - ref_m
 	panorama_id = _choose_panorama(entry)
 	active = true
 	print("BattleHorizon: %s, ref %.0f m, offset %.1f, rotation %.0f°, panorama %s" % [province, ref_m, offset_y, rad_to_deg(rotation_rad), panorama_id])

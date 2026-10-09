@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot SR5 : usure des bâtiments. Vérifie que les shaders `building_atlas`, `town_building` et
 ## `building_pbr` se compilent avec l'uniforme `aging`, que les matières texturées du kit sont des
@@ -12,12 +12,9 @@ const SHADERS := [
 	"res://shaders/building_pbr.gdshader",
 ]
 
-var ok := true
-
 
 func _fail(message: String) -> void:
-	print("SR5 : " + message)
-	ok = false
+	check(false, "SR5 : " + message)
 
 
 func _has_uniform(shader: Shader, uniform_name: String) -> bool:
@@ -88,5 +85,4 @@ func _init() -> void:
 	if int(counts[""][0]) == 0:
 		_fail("aucune matière chargée")
 	BuildingMaterials.clear_cache()
-	print("SR5 OK" if ok else "SR5 ECHEC")
-	quit(0 if ok else 1)
+	finish()

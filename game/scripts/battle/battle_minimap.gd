@@ -132,12 +132,6 @@ func _draw() -> void:
 			color = Color(0.42, 0.27, 0.12, 1.0)
 			width = 2.5
 		draw_line(to_map(obstacle["a"]), to_map(obstacle["b"]), color, width)
-	# B8 : village (emprise + maisons).
-	var village: Dictionary = _terrain.get("village", {})
-	if village.has("x"):
-		draw_circle(to_map(Vector2(float(village["x"]), float(village["z"]))), float(village.get("radius", 0.0)) * scale_x, Color(0.55, 0.42, 0.3, 0.45))
-		for house in village.get("houses", []):
-			draw_circle(to_map(Vector2(float(house["x"]), float(house["z"]))), maxf(float(house.get("length", 6.0)) * 0.25 * scale_x, 1.0), Color(0.42, 0.28, 0.18, 0.85))
 	# B8 : côte (trait le long du rivage).
 	var coast: Dictionary = _terrain.get("coast", {})
 	if coast.has("shore_x"):

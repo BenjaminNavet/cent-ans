@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Chantier IB (ADR 0109), lot IB2 : infobulles brutes migrées (spec § 2.4).
 ## - `TooltipHost.attach_plain(control, key)` pose une clé `ib:plain:<key>` qui rend en sections
@@ -17,25 +17,13 @@ const ENABLED := true
 ## Chemins relatifs à `res://`. Se réduit lot par lot au fil de la migration.
 const LITERAL_EXCEPTIONS: Array[String] = []
 
-var _failures := 0
-var _checks := 0
-
 
 func _init() -> void:
 	if not ENABLED:
 		print("ib_plain_test: disabled")
-		quit(0)
+		finish()
 		return
 	_run.call_deferred()
-
-
-func _check(condition: bool, message: String) -> bool:
-	_checks += 1
-	if not condition:
-		_failures += 1
-		push_error("ib_plain_test: " + message)
-		print("FAIL: " + message)
-	return condition
 
 
 func _run() -> void:
@@ -45,38 +33,37 @@ func _run() -> void:
 	_check_attach_on_native_control()
 	_check_dynamic_override()
 	_check_no_stray_literals()
-	print("ib_plain_test: %d checks, %s" % [_checks, "OK" if _failures == 0 else "%d failure(s)" % _failures])
-	quit(0 if _failures == 0 else 1)
+	finish()
 
 
 ## `plain_spec` lit `tooltips.json` (clé de test posée par le pytest de schéma : ib2_smoke_test).
 func _check_plain_entry() -> void:
 	var spec := RichTooltip.plain_spec("ib2_smoke_test", {"title": "Titre de test", "body": "Corps de test"})
-	_check(spec.get("kind", "") == "plain", "plain_spec kind")
-	_check(str(spec.get("title", "")) == "Titre de test", "plain_spec title from live")
-	_check(not (spec.get("effects", []) as Array).is_empty(), "plain_spec body becomes a body line")
+	check(spec.get("kind", "") == "plain", "plain_spec kind")
+	check(str(spec.get("title", "")) == "Titre de test", "plain_spec title from live")
+	check(not (spec.get("effects", []) as Array).is_empty(), "plain_spec body becomes a body line")
 
 
 ## Un `RichButton` (déjà scripté) garde son script ; `attach_plain` ne fait que poser la clé.
 func _check_attach_on_rich_button() -> void:
 	var button := RichButton.new()
 	TooltipHost.attach_plain(button, "ib2_smoke_test", {"title": "Fermer", "hint": "Échap"})
-	_check(button.tooltip_text.begins_with("ib:plain:ib2_smoke_test"), "RichButton tooltip_text carries the ib:plain: key")
+	check(button.tooltip_text.begins_with("ib:plain:ib2_smoke_test"), "RichButton tooltip_text carries the ib:plain: key")
 	var panel := button._make_custom_tooltip(button.tooltip_text)
-	_check(panel is Control, "RichButton still renders a sectioned tooltip")
+	check(panel is Control, "RichButton still renders a sectioned tooltip")
 	button.free()
 
 
 ## Un `Button` natif sans script reçoit `plain_tooltip_host.gd` et rend, lui aussi, une spec.
 func _check_attach_on_native_control() -> void:
 	var button := Button.new()
-	_check(button.get_script() == null, "plain native control starts without a script")
+	check(button.get_script() == null, "plain native control starts without a script")
 	TooltipHost.attach_plain(button, "ib2_smoke_test", {"title": "Fermer"})
-	_check(button.get_script() != null, "attach_plain scripts a native control")
+	check(button.get_script() != null, "attach_plain scripts a native control")
 	var panel: Object = button.call("_make_custom_tooltip", button.tooltip_text)
-	_check(panel is Control, "native control renders a sectioned tooltip once hosted")
+	check(panel is Control, "native control renders a sectioned tooltip once hosted")
 	var title := (panel as Control).find_child("Title", true, false) as RichTextLabel
-	_check(title != null and title.text.contains("Fermer"), "hosted tooltip shows the title")
+	check(title != null and title.text.contains("Fermer"), "hosted tooltip shows the title")
 	button.free()
 
 
@@ -86,7 +73,7 @@ func _check_dynamic_override() -> void:
 	var text := ""
 	for effect in spec.get("effects", []):
 		text += str(effect.get("text", ""))
-	_check(text.contains("×4"), "live body overrides the static tooltips.json text")
+	check(text.contains("×4"), "live body overrides the static tooltips.json text")
 
 
 ## Aucun `tooltip_text = "…"` littéral ne reste dans `game/scripts`, hors `LITERAL_EXCEPTIONS`.
@@ -100,7 +87,7 @@ func _check_no_stray_literals() -> void:
 	for path in offenders:
 		if not LITERAL_EXCEPTIONS.has(path):
 			kept.append(path)
-	_check(kept.is_empty(), "tooltip_text literals outside the exception list: %s" % ", ".join(kept))
+	check(kept.is_empty(), "tooltip_text literals outside the exception list: %s" % ", ".join(kept))
 
 
 func _scan_dir(path: String, regex: RegEx, offenders: PackedStringArray) -> void:

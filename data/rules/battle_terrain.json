@@ -26,8 +26,6 @@
     "warp": 0.35
    },
    "woodland": 0.55,
-   "village_chance": 0.7,
-   "timbered_share": 0.5,
    "scatter": {
     "hills": 4,
     "hill_height_m": 5.0,
@@ -60,8 +58,6 @@
     "warp": 0.45
    },
    "woodland": 0.35,
-   "village_chance": 0.4,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 5,
     "hill_height_m": 7.0,
@@ -94,8 +90,6 @@
     "warp": 0.4
    },
    "woodland": 0.75,
-   "village_chance": 0.75,
-   "timbered_share": 0.5,
    "scatter": {
     "hills": 5,
     "hill_height_m": 7.0,
@@ -128,8 +122,6 @@
     "warp": 0.4
    },
    "woodland": 1.0,
-   "village_chance": 0.35,
-   "timbered_share": 0.5,
    "scatter": {
     "hills": 5,
     "hill_height_m": 9.0,
@@ -162,8 +154,6 @@
     "warp": 0.5
    },
    "woodland": 0.7,
-   "village_chance": 0.5,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 7,
     "hill_height_m": 22.0,
@@ -196,8 +186,6 @@
     "warp": 0.55
    },
    "woodland": 0.5,
-   "village_chance": 0.3,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 8,
     "hill_height_m": 45.0,
@@ -230,8 +218,6 @@
     "warp": 0.3
    },
    "woodland": 0.3,
-   "village_chance": 0.35,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 3,
     "hill_height_m": 2.0,
@@ -264,8 +250,6 @@
     "warp": 0.35
    },
    "woodland": 0.1,
-   "village_chance": 0.25,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 3,
     "hill_height_m": 4.0,
@@ -298,8 +282,6 @@
     "warp": 0.35
    },
    "woodland": 0.02,
-   "village_chance": 0.15,
-   "timbered_share": 0.25,
    "scatter": {
     "hills": 4,
     "hill_height_m": 6.0,

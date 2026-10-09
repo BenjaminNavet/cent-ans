@@ -162,17 +162,13 @@ impl BattleSim {
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
         }
-        if self.field.in_village(target.x, target.z) {
-            kills *= crate::site::VILLAGE_COVER;
-        } else {
-            // EP6: hamlets, churchyards, manors, orchards, vineyards, camps.
-            kills *= self.field.decor_cover(target.x, target.z);
-            if self
-                .field
-                .hedge_between((shooter.x, shooter.z), (target.x, target.z))
-            {
-                kills *= crate::site::HEDGE_COVER;
-            }
+        // EP6: hamlets, churchyards, manors, orchards, vineyards, camps.
+        kills *= self.field.decor_cover(target.x, target.z);
+        if self
+            .field
+            .hedge_between((shooter.x, shooter.z), (target.x, target.z))
+        {
+            kills *= crate::site::HEDGE_COVER;
         }
         kills *= self.missile_cover(target, attack_angle(target, shooter.x, shooter.z));
         // RJ-a: formation and reform (a schiltron is a dense target).

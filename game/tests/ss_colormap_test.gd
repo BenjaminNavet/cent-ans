@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot SS2 (ADR 0142) : carte de couleur du sol. Vérifie que le shader du terrain compile avec
 ## `satellite_ground.gdshaderinc`, et selon `map.json` :
@@ -7,40 +7,32 @@ extends SceneTree
 ## - sans : `load_colormap` rend null (repli sur l'ancien rendu procédural).
 ## Usage : godot --headless --path game --script res://tests/ss_colormap_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 
 
 func _init() -> void:
-	var ok := true
 	var uniforms := TERRAIN_SHADER.get_shader_uniform_list().map(func(u: Dictionary) -> String: return str(u["name"]))
 	for name in ["colormap", "has_colormap", "sg_strength", "sg_near_keep"]:
 		if not uniforms.has(name):
-			push_error("SS2: terrain shader lacks uniform %s" % name)
-			ok = false
+			check(false, "SS2: terrain shader lacks uniform %s" % name)
 	var map_dir := str(MAP_PATHS.default_data_dir()).path_join("map")
 	var image := ReliefLandcover.load_colormap(map_dir)
 	if not ReliefLandcover.load_colormap_meta(map_dir):
 		if image != null:
-			push_error("SS2: colormap loaded without map.json entry")
-			ok = false
+			check(false, "SS2: colormap loaded without map.json entry")
 		print("SS2 colormap: absent (fallback)")
 	elif image == null:
-		push_error("SS2: map.json declares a colormap that does not load")
-		ok = false
+		check(false, "SS2: map.json declares a colormap that does not load")
 	else:
-		ok = _check_image(image, map_dir) and ok
-	if ok:
-		print("SS2 colormap test OK")
-	quit(0 if ok else 1)
+		_check_image(image, map_dir)
+	finish()
 
 
-func _check_image(image: Image, map_dir: String) -> bool:
-	var ok := true
+func _check_image(image: Image, map_dir: String) -> void:
 	var size := MapData.read_world_size(map_dir) * 2
 	if image.get_size() != size or image.get_format() != Image.FORMAT_DXT1 or not image.has_mipmaps():
-		push_error("SS2: colormap %s fmt %d mips %s, expected %s DXT1 with mipmaps" % [image.get_size(), image.get_format(), image.has_mipmaps(), size])
-		return false
+		check(false, "SS2: colormap %s fmt %d mips %s, expected %s DXT1 with mipmaps" % [image.get_size(), image.get_format(), image.has_mipmaps(), size])
+		return
 	var rgb := image.duplicate() as Image
 	rgb.decompress()
 	# Échantillon régulier des terres : saturation moyenne (max - min des canaux).
@@ -56,9 +48,6 @@ func _check_image(image: Image, map_dir: String) -> bool:
 	var sat := sat_sum / maxf(n, 1)
 	print("SS2 colormap: %s, mean saturation %.3f, %d colour bins" % [image.get_size(), sat, distinct.size()])
 	if sat < 0.08:
-		push_error("SS2: colormap too grey (saturation %.3f < 0.08)" % sat)
-		ok = false
+		check(false, "SS2: colormap too grey (saturation %.3f < 0.08)" % sat)
 	if distinct.size() < 24:
-		push_error("SS2: colormap too uniform (%d colour bins)" % distinct.size())
-		ok = false
-	return ok
+		check(false, "SS2: colormap too uniform (%d colour bins)" % distinct.size())

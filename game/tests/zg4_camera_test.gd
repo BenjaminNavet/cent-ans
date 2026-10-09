@@ -282,9 +282,9 @@ func _test_rescale() -> void:
 	check(not terrain.set_vertical_scale(target), "same scale: no-op")
 	terrain.reset_vertical_scale()
 	check(is_equal_approx(MapData.vertical_scale(), MapData.HEIGHT_SCALE), "reset to strategic scale")
-	# Repli sans pyramide : échelle fixe.
+	# Pyramide absente (erreur signalée, pas de repli) : échelle fixe.
 	var fallback := TerrainBuilder.new()
-	fallback.pyramid_enabled = false
+	fallback.pyramid_manifest_path = "res://does_not_exist/relief_pyramid.json"
 	world.add_child(fallback)
 	fallback.build(map_data)
 	check(not fallback.set_vertical_scale(target) and is_equal_approx(MapData.vertical_scale(), MapData.HEIGHT_SCALE), "no dynamic scale without pyramid")

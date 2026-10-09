@@ -6,13 +6,11 @@ extends RefCounted
 ## `uv run --project tools cent-ans geo relief-shade` et `cent-ans geo landcover`.
 ## Rendu seulement ; fichiers optionnels (le shader garde son rendu V2 sans eux).
 ##
-## - `relief_shade.png` (LA8, 2 × la carte) : L détail d'altitude, A occlusion/courbure (mipmaps).
-##   Depuis OM2 (ADR 0115), écrit en bandes horizontales `relief_shade_<i>.png`
-##   (`map.json.relief_shade.bands`) empilées ici en une seule image.
-##   OMR-R2 : copie GPU `map.json.relief_shade.bc5` (BC5 = RGTC RG, mipmaps précalculés, parts
-##   zlib `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo gpu-textures`, ADR 0118) lue en priorité :
-##   235 Mo au lieu de 470, ni décodage PNG ni calcul de mipmaps. Canaux R = L, G = A
-##   (`relief_shade_rg` dans le shader).
+## - `relief_shade` (L détail d'altitude, A occlusion/courbure, 2 × la carte) : uniquement la copie GPU
+##   `map.json.relief_shade.bc5` (BC5 = RGTC RG, mipmaps précalculés, parts zlib
+##   `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo gpu-textures`, ADR 0118) : canaux R = L,
+##   G = A (`relief_shade_rg` dans le shader). Les bandes PNG `relief_shade_<i>.png` ne sont plus
+##   versionnées ni lues ici (DT2) ; elles restent la source locale de `gpu-textures`.
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides. OMR-R2 : copie BC1
 ##   `map.json.wetlands_gpu` lue en priorité (22 Mo au lieu de 126).
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
@@ -22,7 +20,6 @@ extends RefCounted
 ## terrain s'affiche aussitôt, les textures sont posées sur le matériau à la frame suivante la
 ## fin du chargement (`pending()` faux ensuite).
 
-const SHADE_FILE := "relief_shade.png"
 const WETLANDS_FILE := "wetlands.png"
 
 ## Chargements en cours (garde les chargeurs en vie jusqu'à leur fin).
@@ -63,11 +60,7 @@ static func pending() -> bool:
 func _load() -> void:
 	_shade = load_bc5(_map_dir)
 	if _shade == null:
-		_shade = _load_bands(_map_dir, Image.FORMAT_LA8)
-		if _shade == null:
-			_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
-		if _shade != null:
-			_shade.generate_mipmaps()
+		push_warning("ReliefLandcover: relief_shade BC5 copy missing (run `cent-ans geo gpu-textures`)")
 	_wet = load_wetlands_gpu(_map_dir)
 	if _wet == null:
 		_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
@@ -114,7 +107,7 @@ const GPU_FORMATS := {"rgtc_rg": Image.FORMAT_RGTC_RG, "dxt1": Image.FORMAT_DXT1
 
 
 ## OMR-R2 : image BC5 (RGTC RG) avec mipmaps de `map.json.relief_shade.bc5` ; null sans copie GPU
-## ou si une part manque ou ne correspond pas (repli sur les bandes PNG).
+## ou si une part manque ou ne correspond pas.
 static func load_bc5(map_dir: String) -> Image:
 	var relief: Variant = _map_meta(map_dir).get("relief_shade")
 	return load_gpu_copy(map_dir, relief.get("bc5") if relief is Dictionary else null)
@@ -169,33 +162,6 @@ static func load_gpu_copy(map_dir: String, entry: Variant) -> Image:
 static func _map_meta(map_dir: String) -> Dictionary:
 	var meta: Variant = DataFile.parse_file(map_dir.path_join("map.json"))
 	return meta if meta is Dictionary else {}
-
-
-## Bandes horizontales de `map.json.relief_shade.bands` empilées de haut en bas ; null sans bandes.
-static func _load_bands(map_dir: String, format: int) -> Image:
-	var meta: Variant = DataFile.parse_file(map_dir.path_join("map.json"))
-	if not (meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary):
-		return null
-	var bands: Variant = meta["relief_shade"].get("bands")
-	if not bands is Dictionary:
-		return null
-	var pattern := String(bands.get("pattern", ""))
-	var images: Array[Image] = []
-	var height := 0
-	for i in int(bands.get("count", 0)):
-		var band := _load_image(map_dir, pattern.replace("{band}", str(i)), format)
-		if band == null:
-			return null
-		images.append(band)
-		height += band.get_height()
-	if images.is_empty():
-		return null
-	var full := Image.create_empty(images[0].get_width(), height, false, format)
-	var y := 0
-	for band in images:
-		full.blit_rect(band, Rect2i(Vector2i.ZERO, band.get_size()), Vector2i(0, y))
-		y += band.get_height()
-	return full
 
 
 static func _detail_scale_of(map_dir: String) -> float:

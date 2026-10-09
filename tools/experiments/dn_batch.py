@@ -138,7 +138,7 @@ def copy_previous_image(entry_id: str) -> None:
     for name in ("img", "cut_raw", "cut"):
         if (source / name).is_dir() and not (target / name).exists():
             shutil.copytree(source / name, target / name)
-    for name in ("chosen.json", "scores.json", "contact.png"):
+    for name in ("chosen.json",):
         if (source / name).exists() and not (target / name).exists():
             shutil.copy2(source / name, target / name)
 
@@ -656,7 +656,11 @@ def fal2_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
     with timed(entry_id, "trellis2-fal", seed=seed):
         url = fal_client.upload_file(str(cut))
         result = fal_client.subscribe(
-            FAL2_ENDPOINT, arguments={"image_url": url, "seed": seed, **TRELLIS2_ARGS}
+            FAL2_ENDPOINT,
+            arguments={
+                "image_url": url, "seed": seed, **TRELLIS2_ARGS,
+                "decimation_target": int(os.environ.get("DN_T2_FACES", TRELLIS2_ARGS["decimation_target"])),
+            },
         )
         glb = result.get("model_glb") or result.get("model_mesh") or result["model_file"]
         urllib.request.urlretrieve(glb["url"], target)  # noqa: S310
@@ -765,6 +769,97 @@ def log_spend(entry_id: str, endpoint: str, seed: int, usd: float, category: str
     )  # fmt: skip
 
 
+VIEW_LIGHT = (
+    " Evenly and brightly lit overall, the whole far side fully textured and visible in "
+    "daylight, no black or dark areas, no deep shadow."
+)
+VIEW_LUMA_MIN = 0.7  # view mean luminance / front mean luminance
+VIEW_TRIES = 3
+
+
+def cut_stats(path: Path) -> tuple[float, float]:
+    """(mean luminance 0-255 of the opaque pixels, opaque fraction) of a framed cut-out."""
+    import numpy as np
+    from PIL import Image
+
+    rgba = np.asarray(Image.open(path).convert("RGBA")).astype(float)
+    mask = rgba[..., 3] > 128
+    if not mask.any():
+        return 0.0, 0.0
+    luma = rgba[..., :3] @ np.array([0.299, 0.587, 0.114])
+    return float(luma[mask].mean()), float(mask.mean())
+
+
+def view_ok(front: Path, view: Path) -> tuple[bool, dict]:
+    """A generated view passes when it is as bright as the front and not an empty silhouette."""
+    front_luma, front_area = cut_stats(front)
+    luma, area = cut_stats(view)
+    ok = (
+        luma >= VIEW_LUMA_MIN * front_luma
+        and front_area > 0
+        and 0.5 <= area / front_area <= 1.6
+    )
+    return ok, {
+        "front_luma": round(front_luma, 1), "luma": round(luma, 1),
+        "area_ratio": round(area / front_area, 2) if front_area else 0.0,
+    }  # fmt: skip
+
+
+def make_view(entry: dict, out_dir: Path, seed: int, name: str, front_cut: Path) -> Path:
+    """One generated view (flux-2/edit then rembg), checked against the front, retried when dark.
+
+    The best try (highest luminance) is kept when every try fails (a dark back beats no model).
+    """
+    import fal_client
+    from PIL import Image
+
+    entry_id = entry["id"]
+    views = out_dir / "views"
+    best, best_luma = None, -1.0
+    for attempt in range(VIEW_TRIES):
+        view_seed = seed + 13 * attempt
+        raw = views / f"{name}_s{view_seed}.png"
+        framed = views / f"{name}_cut_s{view_seed}.png"
+        if not raw.exists():
+            check_cap(FAL_EDIT_COST_USD)
+            source_url = fal_client.upload_file(str(out_dir / "img" / f"s{seed}.png"))
+            prompt = view_prompt(entry, name) + VIEW_LIGHT
+            with timed(entry_id, f"edit-{name}", seed=view_seed):
+                result = fal_client.subscribe(
+                    FAL_EDIT_ENDPOINT,
+                    arguments={
+                        "prompt": prompt, "image_urls": [source_url],
+                        "image_size": {"width": SIZE, "height": SIZE}, "seed": view_seed,
+                        "output_format": "png",
+                    },
+                )  # fmt: skip
+                urllib.request.urlretrieve(result["images"][0]["url"], raw)  # noqa: S310
+            log_spend(entry_id, FAL_EDIT_ENDPOINT, view_seed, FAL_EDIT_COST_USD, "view")
+            gen_event(
+                entry_id, "views",
+                {
+                    "seed": view_seed, "view": name, "endpoint": FAL_EDIT_ENDPOINT,
+                    "prompt": prompt, "source": f"img/s{seed}.png",
+                    "file": f"views/{name}_s{view_seed}.png", "usd": FAL_EDIT_COST_USD,
+                },
+            )  # fmt: skip
+        if not framed.exists():
+            with _rembg_lock:
+                frame_square(rembg_cut(Image.open(raw).convert("RGB"))).save(framed)
+        ok, stats = view_ok(front_cut, framed)
+        append_jsonl(
+            DN / "view_checks.jsonl",
+            {"id": entry_id, "view": name, "attempt": attempt, "ok": ok, **stats,
+             "file": str(framed)},
+        )  # fmt: skip
+        print(f"[{entry_id}] view {name} try {attempt}: {'ok' if ok else 'DARK'} {stats}", flush=True)
+        if stats["luma"] > best_luma:
+            best, best_luma = framed, stats["luma"]
+        if ok:
+            return framed
+    return best
+
+
 def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
     """Back (and side) views by flux-2/edit, rembg, then ``fal-ai/trellis/multi``."""
     import fal_client
@@ -774,38 +869,12 @@ def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
     entry_id = entry["id"]
     views = out_dir / "views"
     views.mkdir(exist_ok=True)
-    names = ["back"] + (["side"] if entry["ingest"]["class"] in SIDE_VIEW_CLASSES else [])
+    names = ["back"] + (
+        ["side"] if entry["ingest"]["class"] in SIDE_VIEW_CLASSES or entry.get("side_view") else []
+    )
     cuts = [out_dir / "cut" / f"s{seed}.png"]
-    source_url = None
     for name in names:
-        raw, framed = views / f"{name}_s{seed}.png", views / f"{name}_cut_s{seed}.png"
-        if not raw.exists():
-            source_url = source_url or fal_client.upload_file(
-                str(out_dir / "img" / f"s{seed}.png")
-            )
-            with timed(entry_id, f"edit-{name}", seed=seed):
-                result = fal_client.subscribe(
-                    FAL_EDIT_ENDPOINT,
-                    arguments={
-                        "prompt": view_prompt(entry, name), "image_urls": [source_url],
-                        "image_size": {"width": SIZE, "height": SIZE}, "seed": seed,
-                        "output_format": "png",
-                    },
-                )  # fmt: skip
-                urllib.request.urlretrieve(result["images"][0]["url"], raw)  # noqa: S310
-            log_spend(entry_id, FAL_EDIT_ENDPOINT, seed, FAL_EDIT_COST_USD, "view")
-            gen_event(
-                entry_id, "views",
-                {
-                    "seed": seed, "view": name, "endpoint": FAL_EDIT_ENDPOINT,
-                    "prompt": view_prompt(entry, name), "source": f"img/s{seed}.png",
-                    "file": f"views/{name}_s{seed}.png", "usd": FAL_EDIT_COST_USD,
-                },
-            )  # fmt: skip
-        if not framed.exists():
-            with _rembg_lock:
-                frame_square(rembg_cut(Image.open(raw).convert("RGB"))).save(framed)
-        cuts.append(framed)
+        cuts.append(make_view(entry, out_dir, seed, name, cuts[0]))
     with timed(entry_id, "trellis-multi", seed=seed):
         urls = [fal_client.upload_file(str(path)) for path in cuts]
         result = fal_client.subscribe(
@@ -1098,6 +1167,9 @@ def main() -> None:
         "--reuse-image", action="store_true",
         help="copy the existing image/cut/chosen of <id>/ into the variant (no new image)",
     )
+    parser.add_argument(
+        "--side-view", action="store_true", help="multi-view entries also get a generated side view"
+    )
     parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
     parser.add_argument(
         "--no-local-fallback", action="store_true", help="disable the automatic local fallback"
@@ -1123,6 +1195,8 @@ def main() -> None:
             entry["backend3d"] = args.backend3d
         if args.seeds:
             entry["seeds"] = args.seeds
+        if args.side_view:
+            entry["side_view"] = True
     if "FAL_KEY" not in os.environ and any("fal" in backends(e) for e in entries):
         print(
             "warning: FAL_KEY not set, fal calls will fail (logged in failures.jsonl)"

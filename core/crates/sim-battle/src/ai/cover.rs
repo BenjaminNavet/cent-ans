@@ -235,14 +235,6 @@ pub(super) fn cover_candidates(
         if !within(mid.0, mid.1) || !standable(center.0, center.1) {
             continue;
         }
-        // A croft hedge with the houses in front of it would mask the
-        // shooting.
-        let masked = field.village.as_ref().is_some_and(|v| {
-            (v.zone.z - mid.1) * forward > 0.0 && (v.zone.x - mid.0).abs() < v.zone.radius
-        });
-        if masked {
-            continue;
-        }
         let score = weight * len.min(120.0) - penalty(mid.0, mid.1);
         if score > tuning().cover_threshold {
             found.push((
@@ -255,29 +247,6 @@ pub(super) fn cover_candidates(
                 },
                 score,
             ));
-        }
-    }
-    if let Some(village) = &field.village {
-        let zone = village.zone;
-        let edge = (
-            zone.x,
-            zone.z + forward * (zone.radius - tuning().village_setback).max(0.0),
-        );
-        if within(edge.0, edge.1) && standable(edge.0, edge.1) {
-            let width = (zone.radius * 1.4).max(30.0);
-            let score = width.min(120.0) - penalty(edge.0, edge.1);
-            if score > tuning().cover_threshold {
-                found.push((
-                    Cover {
-                        kind: CoverKind::Village,
-                        center: edge,
-                        along: (1.0, 0.0),
-                        width,
-                        breaks_charge: true,
-                    },
-                    score,
-                ));
-            }
         }
     }
     // EP6: the edge of a hamlet, churchyard, manor or farm of the decor

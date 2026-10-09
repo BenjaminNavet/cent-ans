@@ -89,21 +89,19 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 	# Vue lointaine au zénith : toutes les racines, aucune subdivision.
 	camera.look_at_from_position(Vector3(3584.0, 60000.0, 3072.0), Vector3(3584.0, 0.0, 3072.1))
 	qt.max_vertex_px = 1000.0
-	qt._prepare_camera(camera)
-	qt._items.clear()
-	qt._wanted.clear()
-	qt._page_cache.clear()
-	qt._select_roots()
-	check(qt._items.size() == 42, "far view: %d nodes, 42 roots expected" % qt._items.size())
-	var area := 0.0
-	for item: Dictionary in qt._items:
-		var size := qt.node_size(int(item["n"]))
-		area += size * size
-	check(is_equal_approx(area, float(WORLD.x * WORLD.y)), "roots cover the world exactly")
-	qt.max_vertex_px = 4.0
 	if not qt.is_native():
 		check(false, "ReliefLod (native) unavailable: build core/build.sh")
 		return
+	qt._prepare_camera(camera)
+	qt._native_update()
+	var far_keys: PackedInt64Array = (qt._native.call("items") as Dictionary)["keys"]
+	check(far_keys.size() == 42, "far view: %d nodes, 42 roots expected" % far_keys.size())
+	var area := 0.0
+	for key: int in far_keys:
+		var size := qt.node_size(key >> 40)
+		area += size * size
+	check(is_equal_approx(area, float(WORLD.x * WORLD.y)), "roots cover the world exactly")
+	qt.max_vertex_px = 4.0
 	var views := [
 		[Vector3(3584.0, 60000.0, 3072.0), Vector3(3584.0, 0.0, 3072.1)],
 		[Vector3(5200.0, 40.0, 2300.0), Vector3(5250.0, 0.0, 2150.0)],  # sur les tuiles E1 décalées
@@ -114,14 +112,8 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 		camera.look_at_from_position(view[0], view[1])
 		qt._prepare_camera(camera)
 		qt._native_update()
-		var cmp := qt.compare_selection(camera)
-		var native: Dictionary = cmp["native"]
-		var gd: Dictionary = cmp["gdscript"]
-		var label := str(view[0])
-		check((native["keys"] as PackedInt64Array).size() > 0, "%s: empty selection" % label)
-		check(native["keys"] == gd["keys"], "%s: node keys differ (%d native / %d GDScript)" % [label, (native["keys"] as PackedInt64Array).size(), (gd["keys"] as PackedInt64Array).size()])
-		check(native["fine"] == gd["fine"] and native["coarse"] == gd["coarse"], "%s: pages differ" % label)
-		check(cmp["native_wanted"] == cmp["gd_wanted"], "%s: wanted pages differ" % label)
+		var keys: PackedInt64Array = (qt._native.call("items") as Dictionary)["keys"]
+		check(keys.size() > 0, "%s: empty selection" % str(view[0]))
 	# Vue sur les tuiles décalées : la page E1 monde (40 + i, 16 + j) est voulue.
 	camera.look_at_from_position(Vector3(5200.0, 40.0, 2150.0), Vector3(5250.0, 0.0, 2100.0))
 	qt._prepare_camera(camera)

@@ -50,9 +50,9 @@ impl BattleSim {
         if !is_siege {
             // EP6: countryside and camps (derived stream), then the hand-made
             // decor of a historical map.
-            // A bare field (`village: Some(false)`: labs, tests) keeps its
+            // A bare field (`bare_field`: labs, tests) keeps its
             // camps only.
-            if setup.village == Some(false) {
+            if setup.bare_field {
                 field.lay_camps(&rng);
             } else {
                 field.lay_decor(&setup.province, &rng);
@@ -66,8 +66,6 @@ impl BattleSim {
                 s.fortification,
                 s.breach,
                 setup.siege_layout.as_ref(),
-                s.place,
-                crate::siege_layouts::place_seed(&setup.province),
                 &mut rng,
             )
         });
@@ -191,7 +189,6 @@ impl BattleSim {
             path_cache: Default::default(),
             obstacle_cache: Default::default(),
             relief_map: Default::default(),
-            village_props: Default::default(),
             fire,
             assault: Default::default(),
             scale,

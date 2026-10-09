@@ -1,9 +1,9 @@
 class_name ReliefQuadtree
 extends Node3D
 
-## Quadtree de relief streamé (chantier ZG, lot ZG2, ADR 0036). Quand la pyramide de relief est
-## en cache, il dessine tout le terrain de campagne à la place des morceaux E0 de
-## `TerrainBuilder` (qui restent le repli sans cache, avec le relief fin `FineTerrainJob`).
+## Quadtree de relief streamé (chantier ZG, lot ZG2, ADR 0036). Il dessine tout le terrain de
+## campagne ; la pyramide de relief est obligatoire (ADR 0203). Les morceaux E0 de `TerrainBuilder`
+## ne servent plus qu'à la vue parchemin et aux bornes.
 ##
 ## - Arbre : nœud (n, col, row) de côté `DEPTH0_UNITS / 2^n` (4096 / 2^n) aligné sur la grille
 ##   des tuiles de la pyramide (étage L = n − 4 : un nœud de profondeur 4 est une tuile E0 de 256
@@ -25,10 +25,9 @@ extends Node3D
 ##   nœud et table des pages en `instance uniform` (couche, emprise, couches des 8 voisines).
 ##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`, repli `Png16`),
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
-## - PB3g (ADR 0092) : sélection, résidence (LRU) et paramètres d'instance calculés par la classe
-##   native `ReliefLod` (crate `relief-lod`) quand l'extension l'expose ; GDScript ne fait que
-##   créer, déplacer et masquer les nœuds signalés. Repli GDScript complet sans l'extension
-##   (mêmes nœuds sélectionnés, `pb3g_quadtree_test.gd`).
+## - PB3g (ADR 0092, 0203) : sélection, résidence (LRU) et paramètres d'instance calculés par la
+##   classe native `ReliefLod` (crate `relief-lod`), obligatoire ; GDScript ne fait que créer,
+##   déplacer et masquer les nœuds signalés.
 ## - Processeur : les octets des pages chargées sont gardés ; `surface_height_at` rend la surface
 ##   bilinéaire de la page chargée la plus fine (indépendante de la vue), `surface_changed(rect)`
 ##   signale l'arrivée ou l'éviction d'une page.
@@ -43,11 +42,7 @@ const DEPTH_E0 := 4
 const PAGE_PX := ReliefPyramid.TILE_PX
 const ROOT_TILE_UNITS := ReliefPyramid.ROOT_TILE_UNITS
 const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_fine_diag", "qt_coarse_nbr", "qt_coarse_diag", "qt_morph"]
-const SIDES: Array[Vector2i] = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
-const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
 
-## PB3g : sélection native (`ReliefLod`) si l'extension l'expose.
-@export var use_native_select: bool = true
 ## Espacement maximal des sommets à l'écran (pixels).
 @export var max_vertex_px: float = 4.0
 @export var max_items: int = 700
@@ -82,7 +77,7 @@ var material: ShaderMaterial
 var map_data: MapData
 var stats: Dictionary = {}
 
-## Pages chargées : clé de tuile → {"layer", "last_used", "t_upload"} ; octets à part (lus par les
+## Pages chargées : clé de tuile → {"layer", "t_upload"} ; octets à part (lus par les
 ## fils de travail via les instantanés).
 var _pages: Dictionary = {}
 var _page_bytes: Dictionary = {}
@@ -103,14 +98,13 @@ var _decoder: Object = null
 var _requested: Dictionary = {}
 ## Demandes de l'image courante : clé → priorité (étage × 1e6 + distance).
 var _wanted: Dictionary = {}
-var _items: Array[Dictionary] = []
 var _slots: Dictionary = {}
 var _pool: Array[MeshInstance3D] = []
 var _patch_full: ArrayMesh
 var _patch_half: ArrayMesh
 var _frame: int = 0
+## Compteur de résidence des pages (invalide le cache de lecture de `surface_height_at`).
 var _residency_version: int = 0
-var _range_version: int = 0
 var _bounds: PackedVector2Array = PackedVector2Array()
 ## Tuiles E0 en x et en y (grille des morceaux, `pyramid.root_cols` × `pyramid.root_rows`).
 var _root_cols: int = 0
@@ -119,10 +113,7 @@ var _root_rows: int = 0
 var _root_depth: int = 0
 var _cam: Vector3 = Vector3.ZERO
 var _planes: Array[Plane] = []
-var _k_proj: float = 1.0
 var _px_scale: float = 1.0
-var _ranges: PackedFloat32Array = PackedFloat32Array()
-var _page_cache: Dictionary = {}
 ## Par morceau E0 (16 × 16, coordonnées carte) : étage le plus fin des pages chargées qui le
 ## touchent (-1 : aucune) ; `surface_height_at` y commence sa recherche.
 var _chunk_top: PackedInt32Array = PackedInt32Array()
@@ -133,16 +124,13 @@ var _hit_origin: Vector2 = Vector2.ZERO
 var _hit_units: float = 0.0
 var _hit_px: float = 1.0
 var _hit_bytes: PackedByteArray = PackedByteArray()
-var _param_cache: Dictionary = {}
 ## PB3g : sélection native (`ReliefLod`), pages voulues triées par priorité, nombre de nœuds,
 ## `px_scale` utilisé par la dernière sélection native (comparaison des sélections), facteur de
 ## projection de la dernière caméra.
 var _native: Object = null
 var _wanted_order: PackedInt64Array = PackedInt64Array()
 var _item_count: int = 0
-var _native_px_used: float = 1.0
 var _last_k: float = 1.0
-var _param_cache_version: int = -1
 var _missing_wanted: int = 0
 var _decode_ms: PackedFloat32Array = PackedFloat32Array()
 var _upload_ms_max: float = 0.0
@@ -206,7 +194,7 @@ func _set_world(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void
 	_root_depth = root_depth(_root_cols, _root_rows)
 
 
-## Tests (lot OM1) : sélection seule, sans pages ni matériau ; `ReliefLod` natif si disponible.
+## Tests (lot OM1) : sélection seule, sans pages ni matériau.
 func setup_selection(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void:
 	_set_world(relief, chunk_bounds)
 	_chunk_top.resize(_root_cols * _root_rows)
@@ -221,9 +209,10 @@ func root_depth_used() -> int:
 
 ## PB3g : `ReliefLod` avec les tuiles de la pyramide et les bornes des morceaux.
 func _setup_native() -> void:
-	_native = null
 	_wanted_order = PackedInt64Array()
-	if not use_native_select or not ClassDB.class_exists("ReliefLod"):
+	if not ClassDB.class_exists("ReliefLod"):
+		push_error("ReliefQuadtree: the ReliefLod native class is missing (rebuild the GDExtension with core/build.sh); the relief cannot be drawn")
+		_native = null
 		return
 	_native = ClassDB.instantiate("ReliefLod")
 	var tiles: Array = []
@@ -246,7 +235,7 @@ func _exit_tree() -> void:
 
 ## Sélection des nœuds, demandes de pages, téléversements et paramètres d'instance pour `camera`.
 func update_view(camera: Camera3D) -> void:
-	if pyramid == null:
+	if pyramid == null or _native == null:
 		return
 	if camera == null:
 		# Vue parchemin (CM2) ou hors arbre : rien n'est dessiné ni voulu. Sans cette remise à
@@ -261,27 +250,10 @@ func update_view(camera: Camera3D) -> void:
 	var t0 := Time.get_ticks_usec()
 	_collect_jobs()
 	var t1 := Time.get_ticks_usec()
-	var t2 := t1
-	# Portées et facteur de projection : aussi en natif (miroir pour les comparaisons, bon marché).
 	_prepare_camera(camera)
-	if _native != null:
-		var result := _native_update()
-		t2 = Time.get_ticks_usec()
-		_apply_native(result)
-	else:
-		_items.clear()
-		_wanted.clear()
-		_page_cache.clear()
-		_missing_wanted = 0
-		_select_roots()
-		if _items.size() > max_items:
-			_px_scale = minf(_px_scale * 1.2, 8.0)
-		elif _items.size() < max_items * 0.6 and _px_scale > 1.0:
-			_px_scale = maxf(_px_scale / 1.1, 1.0)
-		_item_count = _items.size()
-		_wanted_order = _sorted_wanted(_wanted)
-		t2 = Time.get_ticks_usec()
-		_apply_items()
+	var result := _native_update()
+	var t2 := Time.get_ticks_usec()
+	_apply_native(result)
 	var t3 := Time.get_ticks_usec()
 	_start_jobs()
 	var t4 := Time.get_ticks_usec()
@@ -294,9 +266,6 @@ func update_view(camera: Camera3D) -> void:
 	material.set_shader_parameter("qt_camera", _cam)
 
 
-# --- Sélection -------------------------------------------------------------------------
-
-
 func _prepare_camera(camera: Camera3D) -> void:
 	_cam = camera.global_position
 	_planes = camera.get_frustum()
@@ -307,31 +276,7 @@ func _prepare_camera(camera: Camera3D) -> void:
 		# sous l'échelle 50 % de l'ADR 0123, un seuil en pixels affichés donnait des triangles
 		# de ~2 px rendus, ombrés plusieurs fois (quads 2 × 2) par le shader du terrain.
 		viewport_h = maxf(viewport.get_visible_rect().size.y * clampf(viewport.scaling_3d_scale, 0.25, 2.0), 64.0)
-	var k := viewport_h * 0.5 / tan(deg_to_rad(camera.fov) * 0.5)
-	_last_k = k
-	var threshold := max_vertex_px * _px_scale
-	if absf(k / threshold - _k_proj) > 0.001 * _k_proj or _ranges.is_empty():
-		_k_proj = k / threshold
-		_ranges.resize(max_depth + 2)
-		for n in max_depth + 2:
-			var size := DEPTH0_UNITS / float(1 << n)
-			# Portée du niveau n = distance d'acceptation du parent : 2 × s_n × K / seuil, au moins
-			# 3 côtés (le morphing doit s'achever avant le voisin plus grossier).
-			_ranges[n] = maxf(2.0 * size / PATCH_QUADS * _k_proj, 3.0 * size)
-		_range_version += 1
-
-
-## Clés voulues triées par priorité croissante (étage le plus grossier, puis distance ; clé).
-static func _sorted_wanted(wanted: Dictionary) -> PackedInt64Array:
-	var order: Array = []
-	for key: int in wanted:
-		order.append([float(wanted[key]), key])
-	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
-	var out := PackedInt64Array()
-	out.resize(order.size())
-	for i in order.size():
-		out[i] = order[i][1]
-	return out
+	_last_k = viewport_h * 0.5 / tan(deg_to_rad(camera.fov) * 0.5)
 
 
 # --- Sélection native (PB3g) -----------------------------------------------------------
@@ -344,7 +289,6 @@ func _native_update() -> Dictionary:
 		Time.get_ticks_msec() / 1000.0, shadow_cast_distance, float(_frame),
 	])
 	var config := PackedFloat64Array([max_vertex_px, max_items, max_depth, extra_depth, morph_ratio, skirt_factor, skirt_max, fade_seconds])
-	_native_px_used = _px_scale
 	var result: Dictionary = _native.call("update", _cam, _planes, view, config)
 	_px_scale = float(result["px_scale"])
 	_item_count = int(result["items"])
@@ -397,42 +341,6 @@ func _apply_native(result: Dictionary) -> void:
 	stats["items"] = _item_count
 
 
-## PB3g (tests) : sélections native et GDScript de la dernière image, sur le même état des pages
-## et le même `px_scale` : {native: `ReliefLod.items()`, gdscript: {keys, fine, coarse, dist},
-## native_missing, gd_missing, native_wanted, gd_wanted}. Vide sans sélection native.
-func compare_selection(camera: Camera3D) -> Dictionary:
-	if _native == null:
-		return {}
-	var saved_px := _px_scale
-	var saved_missing := _missing_wanted
-	_px_scale = _native_px_used
-	_prepare_camera(camera)
-	_items.clear()
-	_wanted.clear()
-	_page_cache.clear()
-	_missing_wanted = 0
-	_select_roots()
-	var keys := PackedInt64Array()
-	var fine := PackedInt64Array()
-	var coarse := PackedInt64Array()
-	var dist := PackedFloat64Array()
-	for item in _items:
-		keys.append(item["key"])
-		fine.append(item["fine"])
-		coarse.append(item["coarse"])
-		dist.append(item["dist"])
-	var out := {
-		"native": _native.call("items"), "gdscript": {"keys": keys, "fine": fine, "coarse": coarse, "dist": dist},
-		"native_missing": saved_missing, "gd_missing": _missing_wanted,
-		"native_wanted": _wanted_order, "gd_wanted": _sorted_wanted(_wanted),
-	}
-	_items.clear()
-	_wanted.clear()
-	_missing_wanted = saved_missing
-	_px_scale = saved_px
-	return out
-
-
 func node_size(n: int) -> float:
 	return DEPTH0_UNITS / float(1 << n)
 
@@ -445,245 +353,6 @@ static func root_depth(cols: int, rows: int) -> int:
 		if cols % span == 0 and rows % span == 0:
 			return n
 	return DEPTH_E0
-
-
-## Parcourt la grille des racines (ordre ligne par ligne, comme `ReliefLod`).
-func _select_roots() -> void:
-	var span := 1 << (DEPTH_E0 - _root_depth)
-	for r in _root_rows / span:
-		for c in _root_cols / span:
-			_select(_root_depth, c, r)
-
-
-func _select(n: int, c: int, r: int) -> bool:
-	var size := node_size(n)
-	var ox := c * size + ReliefPyramid.GRID_OFFSET
-	var oz := r * size + ReliefPyramid.GRID_OFFSET
-	var yb := _y_bounds(n, c, r)
-	var bmin := Vector3(ox, yb.x, oz)
-	var bmax := Vector3(ox + size, yb.y, oz + size)
-	if n > _root_depth and not _box_in_sphere(bmin, bmax, _ranges[n]):
-		return false
-	if not _box_in_frustum(bmin, bmax):
-		return true
-	if n >= _depth_cap(n, c, r) or not _box_in_sphere(bmin, bmax, _ranges[n + 1]):
-		_add_item(n, c, r, 4, bmin, bmax)
-		return true
-	for q in 4:
-		if not _select(n + 1, c * 2 + (q & 1), r * 2 + (q >> 1)):
-			var half := size * 0.5
-			var qmin := Vector3(ox + (q & 1) * half, yb.x, oz + (q >> 1) * half)
-			_add_item(n, c, r, q, qmin, qmin + Vector3(half, yb.y - yb.x, half))
-	return true
-
-
-func _depth_cap(n: int, c: int, r: int) -> int:
-	if n < DEPTH_E0:
-		return max_depth
-	var level := n - DEPTH_E0
-	var data := pyramid.max_level_under(level, c, r)
-	if data < 0:
-		data = pyramid.finest_ancestor(level, c, r)
-	return mini(DEPTH_E0 + data + extra_depth, max_depth)
-
-
-## Bornes (min, max) des hauteurs monde du nœud, depuis les morceaux E0 (mètres, marges
-## comprises) et le facteur vertical courant.
-func _y_bounds(n: int, c: int, r: int) -> Vector2:
-	if _root_cols <= 0 or _root_rows <= 0 or _bounds.size() < _root_cols * _root_rows:
-		return _to_world_bounds(Vector2(-400.0, 5000.0))
-	if n >= DEPTH_E0:
-		var shift := n - DEPTH_E0
-		return _to_world_bounds(_bounds[clampi(r >> shift, 0, _root_rows - 1) * _root_cols + clampi(c >> shift, 0, _root_cols - 1)])
-	var span := 1 << (DEPTH_E0 - n)
-	var result := Vector2(INF, -INF)
-	for j in span:
-		for i in span:
-			var b := _bounds[(r * span + j) * _root_cols + c * span + i]
-			result = Vector2(minf(result.x, b.x), maxf(result.y, b.y))
-	return _to_world_bounds(result)
-
-
-## Bornes en mètres → hauteurs affichées (ZG8, SZ1 : s·(1 − c·k)·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
-static func _to_world_bounds(bounds_m: Vector2) -> Vector2:
-	var vs := MapData.vertical_scale()
-	var up := 1.0 + MapData.relief_gain()
-	var down := 1.0 - MapData.relief_squash_max_for_scale(vs)
-	return Vector2(bounds_m.x * vs * (down if bounds_m.x > 0.0 else 1.0), bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
-
-
-func _box_in_sphere(bmin: Vector3, bmax: Vector3, radius: float) -> bool:
-	var closest := _cam.clamp(bmin, bmax)
-	return closest.distance_squared_to(_cam) <= radius * radius
-
-
-func _box_in_frustum(bmin: Vector3, bmax: Vector3) -> bool:
-	for plane in _planes:
-		var nrm := plane.normal
-		var p := Vector3(bmin.x if nrm.x > 0.0 else bmax.x, bmin.y if nrm.y > 0.0 else bmax.y, bmin.z if nrm.z > 0.0 else bmax.z)
-		if plane.distance_to(p) > 0.0:
-			return false
-	return true
-
-
-func _add_item(n: int, c: int, r: int, quadrant: int, bmin: Vector3, bmax: Vector3) -> void:
-	var center := (bmin + bmax) * 0.5
-	var dist := _cam.distance_to(_cam.clamp(bmin, bmax))
-	var fine := _page_of(n, c, r, dist)
-	var coarse := fine if n == _root_depth else _page_of(n - 1, c >> 1, r >> 1, dist)
-	_items.append({
-		"key": (n << 40) | (r << 20) | (c << 3) | quadrant,
-		"n": n, "origin": Vector2(bmin.x, bmin.z), "quadrant": quadrant,
-		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center, "dist": dist,
-	})
-
-
-## Page (clé de tuile, -1 = heightmap) utilisée pour le nœud (n, c, r) : la tuile de son étage
-## (ou de l'ancêtre le plus fin qui existe), demandée si absente ; en attendant, l'ancêtre chargé
-## le plus fin.
-func _page_of(n: int, c: int, r: int, dist: float) -> int:
-	if n < DEPTH_E0:
-		return -1
-	var level := n - DEPTH_E0
-	var cache_key := (n << 40) | (r << 20) | c
-	if _page_cache.has(cache_key):
-		return _page_cache[cache_key]
-	var result := -1
-	var target := pyramid.finest_ancestor(level, c, r)
-	if target >= 0:
-		var shift := level - target
-		var want := ReliefPyramid.key_of(target, c >> shift, r >> shift)
-		if _pages.has(want):
-			result = want
-		else:
-			_missing_wanted += 1
-			var priority := target * 1.0e6 + dist
-			if priority < float(_wanted.get(want, INF)):
-				_wanted[want] = priority
-			for up in range(target - 1, -1, -1):
-				var s := level - up
-				var key := ReliefPyramid.key_of(up, c >> s, r >> s)
-				if _pages.has(key):
-					result = key
-					break
-	_page_cache[cache_key] = result
-	return result
-
-
-# --- Instances -------------------------------------------------------------------------
-
-
-func _apply_items() -> void:
-	var now := Time.get_ticks_msec() / 1000.0
-	var alive := {}
-	for item in _items:
-		var key: int = item["key"]
-		alive[key] = true
-		var slot: MeshInstance3D = _slots.get(key)
-		var fresh := slot == null
-		if fresh:
-			slot = _take_slot()
-			_slots[key] = slot
-			var n: int = item["n"]
-			var quadrant: int = item["quadrant"]
-			var s := node_size(n) / PATCH_QUADS
-			var origin: Vector2 = item["origin"]
-			slot.mesh = _patch_full if quadrant == 4 else _patch_half
-			slot.transform = Transform3D(Basis.from_scale(Vector3(s, 1.0, s)), Vector3(origin.x, 0.0, origin.y))
-			var quads := PATCH_QUADS if quadrant == 4 else PATCH_QUADS / 2
-			var skirt := minf(s * skirt_factor, skirt_max) + 0.02
-			# Boîte en hauteurs monde de l'échelle courante (ZG4 : `on_vertical_scale_changed`).
-			slot.custom_aabb = AABB(Vector3(0.0, float(item["ymin"]) - skirt, 0.0), Vector3(quads, float(item["ymax"]) - float(item["ymin"]) + skirt, quads))
-			slot.set_instance_shader_parameter("qt_node", Vector4(origin.x, origin.y, s, n))
-			slot.visible = true
-		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if float(item["dist"]) < shadow_cast_distance else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if slot.cast_shadow != cast:
-			slot.cast_shadow = cast
-		var fine: int = item["fine"]
-		var coarse: int = item["coarse"]
-		var fade := 1.0
-		if fine >= 0:
-			var page: Dictionary = _pages[fine]
-			page["last_used"] = _frame
-			fade = clampf((now - float(page["t_upload"])) / maxf(fade_seconds, 0.001), 0.0, 1.0)
-		if coarse >= 0:
-			_pages[coarse]["last_used"] = _frame
-		var sig := Vector4i(fine, coarse, _residency_version, _range_version)
-		if fresh or slot.get_meta("sig", Vector4i.ZERO) != sig or fade < 1.0 or slot.get_meta("fading", false):
-			slot.set_meta("sig", sig)
-			slot.set_meta("fading", fade < 1.0)
-			_set_page_params(slot, item, fine, coarse, fade, fresh)
-	for key: int in _slots.keys():
-		if not alive.has(key):
-			var slot: MeshInstance3D = _slots[key]
-			_slots.erase(key)
-			slot.visible = false
-			_pool.append(slot)
-	stats["items"] = _items.size()
-
-
-## Paramètres d'instance du nœud ; seuls ceux qui ont changé depuis la dernière image sont
-## renvoyés au serveur de rendu (valeurs mémorisées dans les métadonnées du nœud).
-func _set_page_params(slot: MeshInstance3D, item: Dictionary, fine: int, coarse: int, fade: float, fresh: bool) -> void:
-	var n: int = item["n"]
-	var s := node_size(n) / PATCH_QUADS
-	var morph := Vector4(1.0e9, 1.0, fade, minf(s * skirt_factor, skirt_max) + 0.02)
-	if n > _root_depth:
-		var reach: float = _ranges[n]
-		morph.x = morph_ratio * reach
-		morph.y = 1.0 / maxf((1.0 - morph_ratio) * reach, 1e-4)
-	var fine_params := _page_params(fine)
-	var coarse_params := _page_params(coarse)
-	var values := [fine_params[0], coarse_params[0], fine_params[1], fine_params[2], coarse_params[1], coarse_params[2], morph]
-	var previous: Array = [] if fresh else slot.get_meta("params", [])
-	for i in PARAM_NAMES.size():
-		if previous.size() != values.size() or previous[i] != values[i]:
-			slot.set_instance_shader_parameter(PARAM_NAMES[i], values[i])
-	slot.set_meta("params", values)
-
-
-## [emprise, voisines, diagonales] d'une page, mémorisés jusqu'au prochain changement de résidence.
-func _page_params(key: int) -> Array:
-	if _param_cache_version != _residency_version:
-		_param_cache.clear()
-		_param_cache_version = _residency_version
-	var cached: Array = _param_cache.get(key, [])
-	if cached.is_empty():
-		cached = [_page_vec(key), _neighbors(key, false), _neighbors(key, true)]
-		_param_cache[key] = cached
-	return cached
-
-
-func _page_vec(key: int) -> Vector4:
-	if key < 0 or not _pages.has(key):
-		return Vector4(-1.0, 0.0, 0.0, 1.0)
-	var level := ReliefPyramid.level_of_key(key)
-	var origin := ReliefPyramid.tile_origin(level, ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-	return Vector4(float(_pages[key]["layer"]), origin.x, origin.y, ReliefPyramid.tile_units(level))
-
-
-## Couches des voisines de même étage : (O, E, N, S) ou (NO, NE, SO, SE) ; -1 si non chargée.
-func _neighbors(key: int, diagonal: bool) -> Vector4:
-	if key < 0:
-		return Vector4(-1.0, -1.0, -1.0, -1.0)
-	var level := ReliefPyramid.level_of_key(key)
-	var c := ReliefPyramid.col_of_key(key)
-	var r := ReliefPyramid.row_of_key(key)
-	var offsets: Array[Vector2i] = DIAGONALS if diagonal else SIDES
-	var result := Vector4()
-	var across := pyramid.cols(level)
-	var down := pyramid.rows(level)
-	for i in 4:
-		var nc := c + offsets[i].x
-		var nr := r + offsets[i].y
-		var layer := -1.0
-		if nc >= 0 and nr >= 0 and nc < across and nr < down:
-			var page: Dictionary = _pages.get(ReliefPyramid.key_of(level, nc, nr), {})
-			if not page.is_empty():
-				layer = float(page["layer"])
-				page["last_used"] = _frame
-		result[i] = layer
-	return result
 
 
 ## Lot ZG4 : l'échelle verticale a changé ; les boîtes englobantes des nœuds affichés (hauteurs
@@ -713,7 +382,7 @@ func _take_slot() -> MeshInstance3D:
 
 
 ## Patch de `quads` × `quads` quads en coordonnées de grille entières (y = 0), plus une jupe
-## (même disposition et mêmes index que `FineTerrainJob`, y = -1 marque les sommets de jupe).
+## (y = -1 marque les sommets de jupe).
 static func _build_patch(quads: int) -> ArrayMesh:
 	var side := quads + 1
 	var vertices := PackedVector3Array()
@@ -732,7 +401,7 @@ static func _build_patch(quads: int) -> ArrayMesh:
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_INDEX] = FineTerrainJob.build_indices(side)
+	arrays[Mesh.ARRAY_INDEX] = _build_indices(side)
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
@@ -852,8 +521,7 @@ func _dispatch_image(key: int, job: PageJob) -> void:
 func _finish_job(key: int, job: PageJob) -> bool:
 	if not job.ok:
 		pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-		if _native != null:
-			_native.call("mark_broken", key)
+		_native.call("mark_broken", key)
 		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
 		return false
 	if page_filter != null and job.filter == null and not job.filter_checked:
@@ -881,15 +549,14 @@ func _upload(key: int, job: PageJob) -> bool:
 	_upload_ms_max = maxf(_upload_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
 	_note_step("layer", Time.get_ticks_usec() - t0)
 	var t_upload := Time.get_ticks_msec() / 1000.0
-	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": t_upload}
+	_pages[key] = {"layer": layer, "t_upload": t_upload}
 	_page_bytes[key] = job.bytes
+	_residency_version += 1
 	_note_level_page(key, true)
 	var t_add := Time.get_ticks_usec()
-	if _native != null:
-		_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
+	_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
 	PerfProbe.add("qt/add_page", Time.get_ticks_usec() - t_add)  # RS-K
 	_layer_keys[layer] = key
-	_residency_version += 1
 	var rect := _tile_rect(key)
 	var level := ReliefPyramid.level_of_key(key)
 	for index in _chunks_of(rect):
@@ -923,25 +590,15 @@ func _chunks_of(rect: Rect2) -> PackedInt32Array:
 func _alloc_layer() -> int:
 	if not _free_layers.is_empty():
 		return _free_layers.pop_back()
-	var oldest := -1
-	if _native != null:
-		oldest = int(_native.call("oldest_page", _frame - 1))  # PB3g : `last_used` tenu en Rust
-	else:
-		var oldest_frame := _frame - 1
-		for key: int in _pages:
-			var used: int = _pages[key]["last_used"]
-			if used < oldest_frame:
-				oldest_frame = used
-				oldest = key
+	var oldest := int(_native.call("oldest_page", _frame - 1))  # PB3g : `last_used` tenu en Rust
 	if oldest < 0:
 		return -1
 	var layer: int = _pages[oldest]["layer"]
 	_pages.erase(oldest)
+	_residency_version += 1
 	_page_bytes.erase(oldest)
 	_note_level_page(oldest, false)
-	if _native != null:
-		_native.call("remove_page", oldest)
-	_residency_version += 1
+	_native.call("remove_page", oldest)
 	var rect := _tile_rect(oldest)
 	# ZG7a : seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
 	# (un parcours des 256 pages par éviction, deux évictions par image au pire, sinon).
@@ -1293,3 +950,47 @@ class PageJob:
 		image.generate_mipmaps()
 		decode_ms = (Time.get_ticks_usec() - t0) / 1000.0
 		ok = true
+
+
+
+## Index du patch (grille + jupe), partagés par tous les nœuds de même `side`.
+static func _build_indices(grid_side: int) -> PackedInt32Array:
+	var quads := grid_side - 1
+	var indices := PackedInt32Array()
+	indices.resize(quads * quads * 6 + 4 * quads * 12)
+	var k := 0
+	for j in quads:
+		for i in quads:
+			var a := j * grid_side + i
+			var b := a + 1
+			var c := a + grid_side
+			var d := c + 1
+			indices[k] = a
+			indices[k + 1] = b
+			indices[k + 2] = d
+			indices[k + 3] = a
+			indices[k + 4] = d
+			indices[k + 5] = c
+			k += 6
+	var base := grid_side * grid_side
+	# Faces de jupe dans les deux sens (visibles de part et d'autre de la couture).
+	for i in quads:
+		# Nord (vue depuis -Z) : bord j = 0.
+		k = _skirt_quad(indices, k, i + 1, i, base + i + 1, base + i)
+		# Sud (vue depuis +Z).
+		var s0 := (grid_side - 1) * grid_side + i
+		k = _skirt_quad(indices, k, s0, s0 + 1, base + grid_side + i, base + grid_side + i + 1)
+		# Ouest (vue depuis -X).
+		k = _skirt_quad(indices, k, i * grid_side, (i + 1) * grid_side, base + 2 * grid_side + i, base + 2 * grid_side + i + 1)
+		# Est (vue depuis +X).
+		var e0 := i * grid_side + grid_side - 1
+		k = _skirt_quad(indices, k, e0 + grid_side, e0, base + 3 * grid_side + i + 1, base + 3 * grid_side + i)
+	return indices
+
+
+## Quad de jupe : (top_a, top_b) en haut, (low_a, low_b) en dessous, deux faces.
+static func _skirt_quad(indices: PackedInt32Array, k: int, top_a: int, top_b: int, low_a: int, low_b: int) -> int:
+	var order := [top_a, top_b, low_b, top_a, low_b, low_a, top_b, top_a, low_b, low_b, top_a, low_a]
+	for n in 12:
+		indices[k + n] = order[n]
+	return k + 12

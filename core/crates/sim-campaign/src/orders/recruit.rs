@@ -531,18 +531,6 @@ impl CampaignState {
             .count()
     }
 
-    /// [`RecruitContext::price`] for one-off callers.
-    pub fn recruit_price(
-        &self,
-        data: &GameData,
-        faction: &FactionId,
-        settlement: &SettlementId,
-        unit_type: &UnitTypeId,
-        supply: &BTreeMap<ResourceId, u32>,
-    ) -> Option<RecruitPrice> {
-        RecruitContext::new(self, data, faction, settlement)?.price(unit_type, supply)
-    }
-
     /// [`RecruitContext::cost`] for one-off callers (0 for an unknown
     /// settlement or faction).
     pub fn recruit_cost(

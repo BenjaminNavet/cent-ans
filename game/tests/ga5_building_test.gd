@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot GA5 : matières de bâtiments en 2k (données `data/art/building_materials.json`, lue par
 ## `BuildingMaterials`) — vérifie que les 12 matières texturées (dont `TimberFrame`, torchis/
@@ -32,7 +32,6 @@ func _tex(mat: Material, param: String) -> Texture2D:
 
 
 func _init() -> void:
-	var ok := true
 	var names := BuildingMaterials.SPECS.keys()
 	# _ensure_data() est privé ; le premier appel à material() charge les données (cf.
 	# `BuildingMaterials.material()`), donc on force ce chargement avant de lire SPECS.keys().
@@ -40,30 +39,25 @@ func _init() -> void:
 	names = BuildingMaterials.SPECS.keys()
 	print("GA5 matières texturées : %d" % names.size())
 	if names.size() != 13:
-		print("GA5: 13 matières texturées attendues (11 historiques + TimberFrame, TimberFrameFar), trouvé %d" % names.size())
-		ok = false
+		check(false, "GA5: 13 matières texturées attendues (11 historiques + TimberFrame, TimberFrameFar), trouvé %d" % names.size())
 	if not ("TimberFrame" in names):
-		print("GA5: TimberFrame absente des données")
-		ok = false
+		check(false, "GA5: TimberFrame absente des données")
 	# Lot TF : `TimberFrame` câblée, dernière couche de l'atlas (indice 14), texturée malgré sa
 	# place après les couches unies (détail : `tf_timber_frame_test.gd`).
 	if BuildingMaterials.ATLAS_LAYERS.find("TimberFrame") != 14:
-		print("GA5: TimberFrame attendue en couche 14 de l'atlas (lot TF), trouvé %d" % BuildingMaterials.ATLAS_LAYERS.find("TimberFrame"))
-		ok = false
+		check(false, "GA5: TimberFrame attendue en couche 14 de l'atlas (lot TF), trouvé %d" % BuildingMaterials.ATLAS_LAYERS.find("TimberFrame"))
 
 	var total := 0
 	for name in names:
 		var mat := BuildingMaterials.material(name)
 		if mat == null:
-			print("GA5: matériau %s introuvable" % name)
-			ok = false
+			check(false, "GA5: matériau %s introuvable" % name)
 			continue
 		var albedo_tex := _tex(mat, "albedo_texture")
 		var normal_tex := _tex(mat, "normal_texture")
 		var rough_tex := _tex(mat, "roughness_texture")
 		if albedo_tex == null:
-			print("GA5: %s sans albédo_texture" % name)
-			ok = false
+			check(false, "GA5: %s sans albédo_texture" % name)
 			continue
 		var diff_bytes := _texture_bytes(albedo_tex)
 		var nor_bytes := _texture_bytes(normal_tex)
@@ -82,8 +76,6 @@ func _init() -> void:
 
 	print("GA5 mémoire totale des matières de bâtiments : %.2f Mo" % (total / 1048576.0))
 	if total > 60 * 1048576:
-		print("GA5: mémoire des bâtiments > 60 Mo (repli 1k à envisager, cf. docs/wip/ga.md)")
-		ok = false
+		check(false, "GA5: mémoire des bâtiments > 60 Mo (repli 1k à envisager, cf. docs/wip/ga.md)")
 
-	print("GA5 OK" if ok else "GA5 ECHEC")
-	quit(0 if ok else 1)
+	finish()

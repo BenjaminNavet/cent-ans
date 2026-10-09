@@ -10,24 +10,12 @@
 //! against those few rectangles.
 
 use super::BattleSim;
-use crate::town::{Footprint, Prop, TownRules};
+use crate::town::{Footprint, TownRules};
 use crate::unit::Unit;
 
 impl BattleSim {
-    /// BR3: the props of the battle village (derived from its houses,
-    /// computed on first use).
-    pub fn village_props(&self) -> &[Prop] {
-        self.village_props.get_or_init(|| {
-            self.field
-                .village
-                .as_ref()
-                .map(|v| crate::props::village_props(v, TownRules::bundled()))
-                .unwrap_or_default()
-        })
-    }
-
     /// BR3: the solid footprints within `radius` of (x, z): standing house
-    /// blocks and their props (siege), village houses and props.
+    /// blocks and their props (siege).
     pub fn obstacles_near(&self, x: f64, z: f64, radius: f64) -> Vec<Footprint> {
         let mut out = Vec::new();
         let mut take = |f: Footprint| {
@@ -50,26 +38,12 @@ impl BattleSim {
         for f in grid.near(x, z, radius) {
             take(f);
         }
-        if let Some(village) = &self.field.village {
-            // Houses stand within the zone (a little slack for their size).
-            if (village.zone.x - x).hypot(village.zone.z - z) < village.zone.radius + radius + 30.0
-            {
-                for h in &village.houses {
-                    take(Footprint::new(h.x, h.z, h.length, h.width, h.yaw));
-                }
-                for prop in self.village_props() {
-                    take(prop.footprint());
-                }
-            }
-        }
         out
     }
 
     /// BR3: moves the figures of `unit` out of the footprints near it.
     pub(super) fn push_figures_out(&self, unit: &Unit, positions: &mut [(f64, f64, f64)]) {
-        if positions.is_empty()
-            || (self.siege.is_none() && self.field.village.is_none() && self.field.decor.is_empty())
-        {
+        if positions.is_empty() || (self.siege.is_none() && self.field.decor.is_empty()) {
             return;
         }
         let reach = positions

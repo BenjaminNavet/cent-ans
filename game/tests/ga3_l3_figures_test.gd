@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lots GA3-L3a/L3b : figurines générées à la place des figurines fines (longbowman `archer_0`,
 ## homme d'armes `infantry_0`, arbalétrier génois `archer_2`, sergent `infantry_1`, milicien
@@ -30,14 +30,13 @@ const SINGLE_HEAD := ["standard_1"]
 const UNTOUCHED := [["archer", 3], ["cavalry", 1], ["standard", 0]]
 
 
-func _check_generated(kind: String, variant: int) -> bool:
-	var ok := true
+func _check_generated(kind: String, variant: int) -> void:
 	var name := "%s_%d" % [kind, variant]
 	var fig := BattleSkinned.figure(kind, variant)
 	var mounted := str(fig.get("rig", "")).ends_with("cavalry")
 	if not fig.has("ga3_albedo") or fig.has("atlas_layer") != mounted:
-		push_error("ga3_l3: %s non remplacée (%s)" % [name, fig.keys()])
-		return false
+		check(false, "ga3_l3: %s non remplacée (%s)" % [name, fig.keys()])
+		return
 	var bone_names: Array = BattleSkinned.rig(kind, variant).get("bones", [])
 	var bones := bone_names.size()
 	var caps: Array = CAPS_MOUNTED if mounted else CAPS
@@ -45,18 +44,15 @@ func _check_generated(kind: String, variant: int) -> bool:
 	for level in 3:
 		var path := str((fig["lods"] as Array)[level])
 		if not path.begins_with(BattleSkinned.GA3_DIR):
-			push_error("ga3_l3: %s LOD%d hors de battle_ga3 : %s" % [name, level, path])
-			ok = false
+			check(false, "ga3_l3: %s LOD%d hors de battle_ga3 : %s" % [name, level, path])
 		var mesh := BattleSkinned.mesh(kind, variant, level)
 		if mesh == null:
-			push_error("ga3_l3: %s LOD%d illisible" % [name, level])
-			ok = false
+			check(false, "ga3_l3: %s LOD%d illisible" % [name, level])
 			continue
 		var arrays := mesh.surface_get_arrays(0)
 		var tris := (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 		if tris > caps[level] or tris >= previous:
-			push_error("ga3_l3: %s LOD%d %d triangles (plafond %d, précédent %d)" % [name, level, tris, caps[level], previous])
-			ok = false
+			check(false, "ga3_l3: %s LOD%d %d triangles (plafond %d, précédent %d)" % [name, level, tris, caps[level], previous])
 		previous = tris
 		var idx: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM0]
 		var w: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM1]
@@ -94,17 +90,14 @@ func _check_generated(kind: String, variant: int) -> bool:
 				elif uvs[i].x >= 0.0 and code != C_ARMS:
 					horse_textured += 1
 		if bad_bone > 0 or bad_weight > 0 or body == 0 or gear == 0 or livery == 0:
-			push_error("ga3_l3: %s LOD%d os hors rig %d, poids %d, corps %d, équipement %d, livrée %d" % [name, level, bad_bone, bad_weight, body, gear, livery])
-			ok = false
+			check(false, "ga3_l3: %s LOD%d os hors rig %d, poids %d, corps %d, équipement %d, livrée %d" % [name, level, bad_bone, bad_weight, body, gear, livery])
 		if mounted and (rider < body_plain or horse_textured > 0):
-			push_error("ga3_l3: %s LOD%d cavalier %d sommets sur R: (corps %d), cheval texturé %d" % [name, level, rider, body, horse_textured])
-			ok = false
+			check(false, "ga3_l3: %s LOD%d cavalier %d sommets sur R: (corps %d), cheval texturé %d" % [name, level, rider, body, horse_textured])
 		print("ga3_l3: %s LOD%d %d triangles, %d sommets (corps %d, équipement %d, livrée %d)" % [name, level, tris, uvs.size(), body, gear, livery])
 	# L4 : têtes variantes (masques de variante, bit v) au LOD0, teint au-dessus du cou.
 	var heads := int(fig.get("variants", 1))
 	if heads < (1 if name in SINGLE_HEAD else 2) or float(fig.get("ga3_head_y", 99.0)) > 3.0:
-		push_error("ga3_l3: %s %d têtes, cou %s" % [name, heads, fig.get("ga3_head_y")])
-		ok = false
+		check(false, "ga3_l3: %s %d têtes, cou %s" % [name, heads, fig.get("ga3_head_y")])
 	var lod0 := BattleSkinned.mesh(kind, variant, 0).surface_get_arrays(0)
 	var masks: PackedVector2Array = lod0[Mesh.ARRAY_TEX_UV2]
 	var seen := {}
@@ -112,37 +105,29 @@ func _check_generated(kind: String, variant: int) -> bool:
 		seen[int(m.x + 0.5) & 63] = true
 	for v in heads if heads > 1 else 0:
 		if not seen.has(1 << v):
-			push_error("ga3_l3: %s sans tête de variante %d" % [name, v])
-			ok = false
+			check(false, "ga3_l3: %s sans tête de variante %d" % [name, v])
 	if BattleSkinned.chest_box(kind, variant).is_empty():
-		push_error("ga3_l3: %s sans buste en livrée (armoiries)" % name)
-		ok = false
+		check(false, "ga3_l3: %s sans buste en livrée (armoiries)" % name)
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER
 	BattleSkinned.setup_material(mat, kind, variant)
 	var tex := mat.get_shader_parameter("ga3_albedo") as Texture2D
 	var lum: Vector2 = mat.get_shader_parameter("ga3_lum")
 	if not mat.shader.code.contains("#define GA3_TEX") or tex == null or tex.get_width() > 1024 or tex.get_height() > 1536 or lum.x <= 0.0:
-		push_error("ga3_l3: %s matériau GA3 incomplet" % name)
-		ok = false
+		check(false, "ga3_l3: %s matériau GA3 incomplet" % name)
 	# UV en convention Blender (v vers le haut) : le shader lit la ligne 1 - v ; les sommets
 	# texturés du LOD0 doivent y tomber sur l'albédo cuit, pas sur le fond noir de l'atlas.
 	if tex != null and not _uvs_on_albedo(name, tex, lod0) or not mat.shader.code.contains("texture(ga3_albedo, vec2(UV.x, 1.0 - UV.y))"):
-		push_error("ga3_l3: %s UV hors de l'albédo (sens de v)" % name)
-		ok = false
+		check(false, "ga3_l3: %s UV hors de l'albédo (sens de v)" % name)
 	var corpse := BattleSkinned.corpse_shader(kind, variant)
 	if not corpse.code.contains("#define GA3_TEX"):
-		push_error("ga3_l3: %s cadavre sans GA3_TEX" % name)
-		ok = false
+		check(false, "ga3_l3: %s cadavre sans GA3_TEX" % name)
 	# L3c : le cheval fin garde ses cartes cuites (robe, caparaçon), vivant comme cadavre.
 	if mounted and BattleSkinned.fine_maps_ready():
 		if not mat.shader.code.contains("#define FG3_BAKED") or not corpse.code.contains("#define FG3_BAKED"):
-			push_error("ga3_l3: %s sans FG3_BAKED (cheval fin)" % name)
-			ok = false
+			check(false, "ga3_l3: %s sans FG3_BAKED (cheval fin)" % name)
 		if int(mat.get_shader_parameter("fine_layer")) != int(fig["atlas_layer"]):
-			push_error("ga3_l3: %s couche d'atlas non posée" % name)
-			ok = false
-	return ok
+			check(false, "ga3_l3: %s couche d'atlas non posée" % name)
 
 
 ## Part des sommets texturés (corps hors armoiries) lus sur un texel noir de l'albédo en
@@ -170,28 +155,24 @@ func _uvs_on_albedo(name: String, tex: Texture2D, arrays: Array) -> bool:
 	return share < 0.1
 
 
-func _check_fine(kind: String, variant: int) -> bool:
+func _check_fine(kind: String, variant: int) -> void:
 	var fig := BattleSkinned.figure(kind, variant)
 	if fig.has("ga3_albedo") or not str((fig["lods"] as Array)[0]).begins_with(BattleSkinned.FINE_DIR):
-		push_error("ga3_l3: %s_%d fine attendue (%s)" % [kind, variant, fig.get("lods")])
-		return false
+		check(false, "ga3_l3: %s_%d fine attendue (%s)" % [kind, variant, fig.get("lods")])
+		return
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER
 	BattleSkinned.setup_material(mat, kind, variant)
 	if mat.shader.code.contains("#define GA3_TEX"):
-		push_error("ga3_l3: %s_%d en GA3_TEX" % [kind, variant])
-		return false
-	return true
+		check(false, "ga3_l3: %s_%d en GA3_TEX" % [kind, variant])
+		return
 
 
 func _init() -> void:
-	var ok := true
 	if not BattleSkinned.ga3_figures_enabled():
-		push_error("ga3_l3: figurines générées inactives")
-		ok = false
+		check(false, "ga3_l3: figurines générées inactives")
 	for f in GENERATED:
-		ok = _check_generated(f[0], f[1]) and ok
+		_check_generated(f[0], f[1])
 	for f in UNTOUCHED:
-		ok = _check_fine(f[0], f[1]) and ok
-	print("ga3_l3: %s" % ("OK" if ok else "ECHEC"))
-	quit(0 if ok else 1)
+		_check_fine(f[0], f[1])
+	finish()

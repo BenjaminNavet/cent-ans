@@ -306,8 +306,6 @@ pub struct PropRules {
     pub street_kinds: Vec<PropKind>,
     pub suburb_chance: f64,
     pub suburb_kinds: Vec<PropKind>,
-    pub village_chance: f64,
-    pub village_kinds: Vec<PropKind>,
     pub market: MarketRules,
     pub path_margin_m: f64,
 }
@@ -342,8 +340,6 @@ pub struct TownRules {
     pub suburb: SuburbRules,
     pub props: PropRules,
     pub figures: FigureRules,
-    /// NT1 (ADR 0126): kinds of besieged places and their plans.
-    pub places: crate::siege_layouts::PlaceRules,
 }
 
 data_model::bundled_rules!(TownRules, "rules/siege_town.json");

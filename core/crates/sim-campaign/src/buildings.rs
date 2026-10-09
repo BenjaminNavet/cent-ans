@@ -590,12 +590,6 @@ impl CampaignState {
         level.max(0.0) as u32
     }
 
-    /// Fortification level of the city of `province`.
-    pub fn province_fortification_level(&self, data: &GameData, province: &ProvinceId) -> u32 {
-        self.province_city_id(province)
-            .map_or(0, |city| self.fortification_level(data, city))
-    }
-
     /// Siege resistance (0-80 %) of `settlement` against `attacker` (F1): its
     /// buildings (walls, castle, artillery bastion), the controller's
     /// fortification technologies (positive `SiegeResistance`) and the

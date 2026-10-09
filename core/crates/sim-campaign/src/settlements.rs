@@ -173,11 +173,6 @@ impl CampaignState {
         u32::try_from(weighted / 100).unwrap_or(u32::MAX)
     }
 
-    /// `true` while the city of `province` is besieged.
-    pub fn province_besieged(&self, province: &ProvinceId) -> bool {
-        self.city_state(province).is_some_and(|s| s.siege.is_some())
-    }
-
     /// Kind of `settlement` (a village when unknown).
     pub fn settlement_kind(&self, settlement: &SettlementId) -> SettlementKind {
         self.settlements
@@ -207,18 +202,5 @@ impl CampaignState {
             s.garrison.clear();
         }
         ids
-    }
-
-    /// Settlements of `province` owned by `owner` and controlled by `holder`.
-    pub fn occupied_settlements(
-        &self,
-        province: &ProvinceId,
-        owner: &FactionId,
-        holder: &FactionId,
-    ) -> Vec<SettlementId> {
-        self.settlements_of(province)
-            .filter(|(_, s)| &s.owner == owner && &s.controller == holder)
-            .map(|(id, _)| id.clone())
-            .collect()
     }
 }

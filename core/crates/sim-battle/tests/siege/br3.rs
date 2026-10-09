@@ -214,43 +214,6 @@ fn no_figure_stands_in_a_house_or_a_prop_during_a_siege() {
     }
 }
 
-#[test]
-fn no_figure_stands_in_a_village_house() {
-    let data = data();
-    let mut s = setup(
-        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(data, &["unit_urban_militia", "unit_knights"]),
-        None,
-    );
-    s.village = Some(true);
-    let mut sim = BattleSim::new(s, 5).unwrap();
-    lab(&mut sim);
-    let village = sim.field().village.clone().expect("a village");
-    assert!(!sim.village_props().is_empty(), "props before the houses");
-    assert_eq!(
-        sim.village_props(),
-        BattleSim::new(sim_setup_village(data), 5)
-            .unwrap()
-            .village_props()
-    );
-    let ids: Vec<u32> = sim.units().iter().map(|u| u.id).collect();
-    for (k, h) in village.houses.iter().enumerate() {
-        let id = ids[k % ids.len()];
-        place(&mut sim, id, h.x, h.z, h.yaw);
-        assert_figures_clear(&sim, "village");
-    }
-}
-
-fn sim_setup_village(data: &GameData) -> sim_battle::BattleSetup {
-    let mut s = setup(
-        units(data, &["unit_men_at_arms_foot", "unit_longbowmen"]),
-        units(data, &["unit_urban_militia", "unit_knights"]),
-        None,
-    );
-    s.village = Some(true);
-    s
-}
-
 /// Plan of each town as SVG in `$BR3_SVG_DIR` (layout review).
 #[test]
 #[ignore = "debug: writes the town plans as SVG"]

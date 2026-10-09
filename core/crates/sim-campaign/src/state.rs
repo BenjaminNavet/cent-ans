@@ -1167,16 +1167,6 @@ impl CampaignState {
         })
     }
 
-    /// Ids of the armies standing in `province` (in one of its settlements
-    /// or in the field inside it), in id order.
-    pub fn armies_in(&self, data: &GameData, province: &ProvinceId) -> Vec<ArmyId> {
-        self.armies
-            .iter()
-            .filter(|(_, army)| self.army_province(data, army).as_ref() == Some(province))
-            .map(|(id, _)| id.clone())
-            .collect()
-    }
-
     /// Ids of the armies stationed in `settlement`, in id order.
     pub fn armies_at(&self, settlement: &SettlementId) -> Vec<ArmyId> {
         self.armies
@@ -1303,23 +1293,6 @@ impl CampaignState {
             .iter()
             .filter(|(_, army)| {
                 self.is_at_war(faction, &army.faction)
-                    && self.army_province(data, army).as_ref() == Some(province)
-            })
-            .map(|(id, _)| id.clone())
-            .collect()
-    }
-
-    /// Ids of the armies in `province` allied with (or belonging to) `faction`.
-    pub fn friendly_armies_in(
-        &self,
-        data: &GameData,
-        faction: &FactionId,
-        province: &ProvinceId,
-    ) -> Vec<ArmyId> {
-        self.armies
-            .iter()
-            .filter(|(_, army)| {
-                self.is_allied(faction, &army.faction)
                     && self.army_province(data, army).as_ref() == Some(province)
             })
             .map(|(id, _)| id.clone())

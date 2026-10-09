@@ -50,8 +50,17 @@ def import_joined(path: str) -> "bpy.types.Object":
     return obj
 
 
+def is_closed(bm: "bmesh.types.BMesh", key: list) -> bool:
+    """True when every edge, compared by vertex position, is shared by exactly two faces."""
+    counts: dict = {}
+    for edge in bm.edges:
+        pair = frozenset((key[edge.verts[0].index], key[edge.verts[1].index]))
+        counts[pair] = counts.get(pair, 0) + len(edge.link_faces)
+    return all(count == 2 for count in counts.values())
+
+
 def clean(obj: "bpy.types.Object", island_min: float) -> int:
-    """Drop debris islands (< ``island_min`` of the vertices) and fix normals; return vertices removed.
+    """Drop debris islands (< ``island_min`` of the vertices) and fix normals of a single shell; return vertices removed.
 
     Islands are computed on positions, not on vertex indices: UV seams split vertices, and a
     chart cut by a seam must not be mistaken for debris. The mesh itself is not welded
@@ -83,7 +92,11 @@ def clean(obj: "bpy.types.Object", island_min: float) -> int:
         v for v, k in zip(bm.verts, key, strict=True) if sizes[find(k)] < threshold
     ]
     bmesh.ops.delete(bm, geom=debris, context="VERTS")
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    # Normals are recalculated only for a single closed shell (an open one has no reliable inside): on a scene of many shells (a town) the
+    # recalculation flips whole buildings inside out, and back-face culling then shows torn walls
+    # and black interiors.
+    if len({find(k) for k in key}) == 1 and is_closed(bm, key):
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(obj.data)
     bm.free()
     return len(debris)

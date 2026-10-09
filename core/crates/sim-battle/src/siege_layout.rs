@@ -297,19 +297,16 @@ fn densify(ring: &[(f64, f64)], step: f64) -> Vec<(f64, f64)> {
 
 impl SiegeWorks {
     /// Siege works of the setup: the town of the landmark plan when the
-    /// setup carries a usable layout, otherwise the place of kind `place`
-    /// (NT1: ring city, borough or castle; variations from `seed`).
+    /// setup carries a usable layout, otherwise the generic ring town.
     pub fn for_battle(
         fortification: u32,
         breach: u8,
         layout: Option<&SiegeLayout>,
-        place: crate::siege_layouts::PlaceKind,
-        seed: u64,
         rng: &mut BattleRng,
     ) -> Self {
         layout
             .and_then(|l| SiegeWorks::from_layout(l, fortification, breach, rng))
-            .unwrap_or_else(|| SiegeWorks::generate_place(place, fortification, breach, seed, rng))
+            .unwrap_or_else(|| SiegeWorks::generate(fortification, breach, rng))
     }
 
     /// Farthest point of the ring from [`TOWN_CENTER`] (flattening of the
@@ -548,8 +545,6 @@ impl SiegeWorks {
             gate_fire: Blaze::default(),
             wind: (0.0, 0.0),
             landmark: None,
-            place: crate::siege_layouts::PlaceKind::City,
-            streets: Vec::new(),
         };
         if works.front_walls().is_empty() {
             return None;
@@ -720,14 +715,7 @@ mod tests {
         layout.square = Some((0.0, -300.0));
         let mut rng = BattleRng::from_seed(3);
         assert!(SiegeWorks::from_layout(&layout, 1, 0, &mut rng).is_none());
-        let works = SiegeWorks::for_battle(
-            1,
-            0,
-            Some(&layout),
-            crate::siege_layouts::PlaceKind::City,
-            0,
-            &mut BattleRng::from_seed(3),
-        );
+        let works = SiegeWorks::for_battle(1, 0, Some(&layout), &mut BattleRng::from_seed(3));
         assert!(works.landmark.is_none());
     }
 }

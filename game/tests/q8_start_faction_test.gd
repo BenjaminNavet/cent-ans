@@ -1,11 +1,9 @@
-extends SceneTree
+extends TestCase
 
 ## Q8 : « Commencer » doit lancer la faction choisie (recette : Angleterre choisie, partie
 ## lancée en Transylvanie). Choisit chaque départ recommandé, presse le bouton, lit la faction
 ## transmise à `SimFacade`.
 ## Usage : godot --headless --path game --script res://tests/q8_start_faction_test.gd
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -35,7 +33,6 @@ func _run() -> void:
 		var pending := str(root.get_node("SimFacade").get("pending_faction"))
 		print("q8 start %s -> pending %s (selected %s)" % [id, pending, select.selected_faction])
 		if pending != id:
-			_failures += 1
+			failures += 1
 			push_error("q8: chose %s, starting %s" % [id, pending])
-	print("q8 start faction: %s" % ("OK" if _failures == 0 else "%d FAILURES" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()

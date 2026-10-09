@@ -178,6 +178,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0200 | [Chantier SC : une seule voie de code](0200-chantier-simplification.md) | n/d |
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
+| 0204 | [Semis de végétation de campagne : Rust seul](0204-vegetation-semis-rust-seul.md) | accepté |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
 | 0206 | [Chargeur Rust des données vectorielles de la carte](0206-chargeur-carte-rust.md) | accepté |
 | 0207 | [Un seul moteur de missions piloté par les données](0207-missions-donnees.md) | accepté |

@@ -111,7 +111,20 @@ une même entrée). Piège d'installation (libomp) : voir `docs/wip/i3d-local.md
 
 ### Payant (dernier recours)
 TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul appel, ligne dans
-`docs/budget.md`. Pas de TRELLIS 2 ni de Meshy (trop chers).
+`docs/budget.md`. Meshy : trop cher.
+**TRELLIS 2 (`fal-ai/trellis-2`, 0,30 $ à 1024, autorisé par le joueur le 09/10 pour les sujets complexes)** :
+dn_batch `--backend3d fal2` (une vue, glb `3d/fal2__s<seed>.glb`). À réserver aux sujets que TRELLIS 1 rate
+(feuillages : arbres sans couronne, grands ensembles ville/port, objets fusionnés avec une maison) ; sur
+`tree_argan`, `tree_pomegranate`, `bombard`, `cart_litter_noble` il a rendu des modèles complets là où TRELLIS 1
+donnait un tronc nu ou une caisse. Sortie sans écraser l'ancien : `--variant rv2` (écrit `<id>/rv2/…`),
+`--reuse-image` (recopie l'image/découpe déjà choisie, aucune nouvelle image). Plafond `DN_FAL_CAP_USD` (43,5).
+Z-Image ignore les négations (« no house » fait apparaître une maison) : décrire le sujet seul, sans nommer ce
+qu'on ne veut pas ; à défaut recadrer la découpe `cut_raw` avant la 3D.
+**Trous des maquettes (DN-TROUS)** : la cause n'était pas TRELLIS mais la décimation de `dn_ingest.py` (sommets
+des coutures UV non soudés : les murs se déchiraient, des éclats flottaient). Depuis le soudage exact avant
+décimation, les LOD ont la même étanchéité que le brut. Mesure libre : `tools/experiments/dn_holes.py` (arêtes de
+bord ouvertes / √surface, composantes flottantes, faces allongées) ; ré-ingestion en masse :
+`tools/experiments/dn_reingest.py`. Voir `docs/wip/dn/trous.md`.
 
 ### Objets orientés : au moins deux vues (règle du joueur, nuit DN 08/10)
 Depuis une seule vue de face, TRELLIS (et SF3D) **invente le dos** : sur `city_west` il l'a rendu noir.

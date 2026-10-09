@@ -145,9 +145,7 @@ impl BattleSim {
     /// `ground_label`, `site_label` (B6), `woodland` (0-1), `pools[{x, z, radius}]`,
     /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch|palisade}]`
     /// (CV3-2: `palisade` = entrenched camp),
-    /// `coast?{flank: west|east, shore_x, beach}`,
-    /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}],
-    /// props[{kind, x, z, yaw, length, depth, house}]}` (BR3).
+    /// `coast?{flank: west|east, shore_x, beach}`.
     /// R2: `forests` and `mud` are overlapping discs (anchors first, then
     /// lobes and copses).
     /// EP3: `river` also carries `widths` (water width at each point),
@@ -216,32 +214,6 @@ impl BattleSim {
             dict.set(
                 "coast",
                 &vdict! { "flank" => flank, "shore_x" => coast.shore_x, "beach" => coast.beach },
-            );
-        }
-        if let Some(village) = &field.village {
-            let houses: VarArray = village
-                .houses
-                .iter()
-                .map(|h| {
-                    vdict! {
-                        "x" => h.x, "z" => h.z, "length" => h.length, "width" => h.width,
-                        "yaw" => h.yaw, "kind" => h.kind.key(),
-                    }
-                    .to_variant()
-                })
-                .collect();
-            // BR3: props laid by the core (solid for the figures).
-            let props: VarArray = sim
-                .village_props()
-                .iter()
-                .map(|p| prop_dict(p).to_variant())
-                .collect();
-            dict.set(
-                "village",
-                &vdict! {
-                    "x" => village.zone.x, "z" => village.zone.z, "radius" => village.zone.radius,
-                    "farm" => village.farm, "houses" => &houses, "props" => &props,
-                },
             );
         }
         if let Some(river) = &field.river {
@@ -471,8 +443,6 @@ impl BattleSim {
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
-            // NT1 (ADR 0126): "city" | "borough" | "castle".
-            "place" => works.place.key(),
             "houses" => &houses,
             "props" => &props,
             "engines" => &engines,
@@ -602,7 +572,7 @@ impl BattleSim {
     }
 
     /// B6: the battle site in one compact French line, e.g. « Terre gelée ·
-    /// hiver · village · haies · côte ouest » (empty without a battle).
+    /// hiver · haies · côte ouest » (empty without a battle).
     #[func]
     fn get_site_label(&self) -> GString {
         self.sim

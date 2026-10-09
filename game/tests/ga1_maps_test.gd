@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot GA1 (ADR 0104) : matières générées des figurines fines. Vérifie que les tableaux
 ## `fine_detail_ga1.png` (RG/B/A) et `fine_detail_albedo.png` se chargent compressés, une
@@ -23,36 +23,34 @@ func _compressed(arr: TextureLayered) -> bool:
 
 
 func _init() -> void:
-	var ok := true
 	var maps := BattleSkinned.fine_maps()
 	var detail = maps.get("detail")
 	if not detail is TextureLayered:
 		print("GA1 detail absent")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	var arr := detail as TextureLayered
 	var albedo = maps.get("detail_albedo")
 	print("GA1 detail : %dx%d x%d, %.2f Mo" % [arr.get_width(), arr.get_height(), arr.get_layers(), _bytes(arr) / 1048576.0])
 	if not _compressed(arr):
-		print("GA1 detail non compressé (format %d)" % arr.get_format())
-		ok = false
+		check(false, "GA1 detail non compressé (format %d)" % arr.get_format())
 	if not BattleSkinned.ga1_enabled() or not albedo is TextureLayered:
 		print("GA1 albédo de détail absent")
-		quit(1)
+		failures += 1
+		finish()
 		return
 	var alb := albedo as TextureLayered
 	print("GA1 albedo : %dx%d x%d, %.2f Mo" % [alb.get_width(), alb.get_height(), alb.get_layers(), _bytes(alb) / 1048576.0])
 	if arr.get_layers() != MATERIAL_LAYERS or alb.get_layers() != MATERIAL_LAYERS:
-		print("GA1 : %d couches attendues" % MATERIAL_LAYERS)
-		ok = false
+		check(false, "GA1 : %d couches attendues" % MATERIAL_LAYERS)
 	if not _compressed(alb):
-		print("GA1 albedo non compressé (format %d)" % alb.get_format())
-		ok = false
+		check(false, "GA1 albedo non compressé (format %d)" % alb.get_format())
 	var fg3 := int(FG3_TILE * FG3_TILE * FG3_LAYERS * 4.0 / 3.0)
 	var added := _bytes(arr) + _bytes(alb) - fg3
 	print("GA1 ajout mémoire : %.2f Mo (plafond 4)" % (added / 1048576.0))
 	if added > MAX_ADDED_BYTES:
-		ok = false
+		failures += 1
 	# Une figurine cuite reçoit le drapeau et le tableau d'albédo.
 	var figures: Dictionary = BattleSkinned.manifest().get("figures", {})
 	var checked := 0
@@ -65,12 +63,9 @@ func _init() -> void:
 		BattleSkinned.setup_material(mat, parts[0], int(parts[1]))
 		var flag = mat.get_shader_parameter("ga1_detail")
 		if not bool(flag):
-			print("GA1 %s : ga1_detail = %s" % [fig_name, flag])
-			ok = false
+			check(false, "GA1 %s : ga1_detail = %s" % [fig_name, flag])
 		checked += 1
 		break
 	if checked == 0 and BattleSkinned.fine_enabled():
-		print("GA1 : aucune figurine cuite")
-		ok = false
-	print("GA1_MAPS %s" % ("OK" if ok else "FAIL"))
-	quit(0 if ok else 1)
+		check(false, "GA1 : aucune figurine cuite")
+	finish()

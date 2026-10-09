@@ -174,9 +174,9 @@ func _test_grounding() -> void:
 	var map_data := MapData.load_from_dir(map_dir)
 	var world := Node3D.new()
 	root.add_child(world)
-	# Repli E0 (sans pyramide) : sommets cuits à la hauteur affichée (gain lointain).
+	# Morceaux E0 (vue parchemin, bornes) : sommets cuits à la hauteur affichée (gain lointain).
 	var terrain := TerrainBuilder.new()
-	terrain.pyramid_enabled = false
+	terrain.pyramid_manifest_path = "res://does_not_exist/relief_pyramid.json"
 	world.add_child(terrain)
 	terrain.build(map_data)
 	check(MapData.has_relief_floor(), "terrain build publishes the valley floor")
@@ -193,7 +193,6 @@ func _test_grounding() -> void:
 		var y := heights[k]
 		var h_m := MapData.height_from_display(y, p.x, p.y)
 		worst = maxf(worst, absf(MapData.display_height(h_m, p.x, p.y) - y))
-		check(absf(terrain.surface_height_at(p.x, p.y) - maxf(y, 0.0)) < 1e-4, "object on a vertex = mesh height")
 	check(worst < 1e-4, "baked E0 vertices round-trip through the display height (%f)" % worst)
 	# Maquette (LandmarkModel) : mètres = inverse de la surface, reposés par le shader à la même hauteur.
 	for p in [Vector2(2214.0, 3204.0), Vector2(1860.0, 4110.0), Vector2(2652.0, 3684.0)]:

@@ -55,9 +55,6 @@ var quality_max_distance: float = -1.0
 ## tard (premier zoom sous la portée) : l'attendre bloquait alors le fil principal 240-300 ms
 ## (mesuré) ; hors de cette fenêtre, les premières tuiles arrivent en tâche de fond.
 @export var warm_start_frames: int = 60
-## Lot PB2 : semis natif (`VegetationScatter`, Rust) quand l'extension l'expose ; sinon tout le
-## semis tourne en GDScript dans le `WorkerThreadPool`.
-@export var use_native_scatter: bool = true
 ## Lot SZ4b : forêt dense autour du point visé (`ForestDetail`, semis natif requis).
 @export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
@@ -184,7 +181,7 @@ func build(data: MapData) -> void:
 	clear()
 	_built_frame = Engine.get_process_frames()
 	map_data = data
-	_native = _make_native(data) if use_native_scatter else null
+	_native = _make_native(data)
 	_native_floor_version = -1
 	var grid := TerrainBuilder.chunk_grid_for(data.size)
 	chunk_px = grid.x
@@ -202,8 +199,11 @@ func build(data: MapData) -> void:
 		mask.default_biome = int(species.d("default_biome", 2.0))
 		if _native != null:
 			if not _native.has_method("set_species") or not bool(_native.call("set_species", species.table())):
-				push_warning("Vegetation: native scatter without species table, GDScript scatter")
+				push_error("Vegetation: native scatter refused the species table, no trees")
 				_native = null
+	elif _native != null:
+		push_error("Vegetation: species table unavailable, no trees")
+		_native = null
 	stats["species"] = species.count if species != null else 0
 	stats["biomes"] = mask.has_biomes()
 	_material = ShaderMaterial.new()
@@ -663,6 +663,8 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 		var near_end := near_distance * quality_detail if _impostor_material != null else 1e9
 		_cards_material.set_shader_parameter("near_end", near_end)
 		_cards_material.set_shader_parameter("near_start", near_end - near_fade)
+	if _native == null:  # ADR 0204 : semis Rust seul, sans extension pas d'arbres
+		return
 	var wanted: Array = []
 	for cy in chunks_y:
 		for cx in chunks_x:
@@ -841,8 +843,6 @@ func _start_job(index: int) -> void:
 	if terrain != null:
 		level = terrain.chunk_level(index)
 		job.ground_grid = terrain.surface_grid(index)
-	job.coarse_only = _native != null
-	job.species = species
 	var task := WorkerThreadPool.add_task(job.run, false, "vegetation tile %d" % index)
 	_jobs[index] = {"task": task, "job": job, "level": level}
 
@@ -870,13 +870,7 @@ func _collect_jobs() -> void:
 		if item.has("native") or not WorkerThreadPool.is_task_completed(item["task"]):
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
-		if (item["job"] as VegetationTileJob).coarse_only:
-			_submit_native(index, item)
-			continue
-		_jobs.erase(index)
-		_install_tile(index, item["job"], item["level"])
-		if _jobs.is_empty() and _log_bursts:
-			print("Vegetation: %s" % JSON.stringify(stats))
+		_submit_native(index, item)
 	_poll_native()
 
 
@@ -898,11 +892,8 @@ func _submit_native(index: int, item: Dictionary) -> void:
 	_native_serial += 1
 	var job: VegetationTileJob = item["job"]
 	if not _native.call("request", _native_serial, job.native_params()):
-		# Requête refusée (données malformées) : semis GDScript complet dans le fil principal.
-		job.coarse_only = false
-		job.run()
+		push_error("Vegetation: tile %d scatter request refused" % index)
 		_jobs.erase(index)
-		_install_tile(index, job, item["level"])
 		return
 	item["native"] = _native_serial
 	_native_ids[_native_serial] = index
