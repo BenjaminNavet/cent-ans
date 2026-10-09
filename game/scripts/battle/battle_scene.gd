@@ -1,6 +1,8 @@
 class_name BattleScene
 extends Node3D
 
+const _TerrainTip := preload("res://scripts/battle/battle_terrain_tip.gd")
+
 ## Scène de bataille 3D temps réel avec pause (spec M7 § 4). Toute la simulation est dans
 ## `BattleSim` (Rust) : la scène avance le temps, affiche terrain, soldats (MultiMesh par camp et
 ## par famille), bannières, HUD, et convertit clics et touches en commandes.
@@ -120,6 +122,8 @@ var formation_picker: BattleFormationPicker = null
 var card_hover := -1
 ## CB-M3 : infobulle « file d'ordres pleine » (Maj tenue).
 var queue_tip: BattleQueueTip = null
+## QW-G1 : étiquette du terrain (décor) sous le curseur.
+var terrain_tip = null
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
 var last_hover: Dictionary = {}
 var hover_calls := 0
@@ -693,6 +697,7 @@ func _build_scene() -> bool:
 	_frame_camera()
 	_setup_staging(terrain_data)
 	hud.minimap.flipped = player_side == "attacker"
+	hud.minimap.player_side = player_side
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
 	_leader_bar = LEADER_ORDERS_BAR.new(self)
@@ -1625,6 +1630,7 @@ func _update_hover_cursor() -> void:
 	_hover_dirty = false
 	if replay_mode:
 		cursor.apply("none")
+		_show_terrain_tip(false)
 		return
 	var target: int = markers.world_hover if markers != null else -1
 	var point := Vector3.ZERO
@@ -1648,7 +1654,21 @@ func _update_hover_cursor() -> void:
 	if full:
 		context = "forbidden"
 	_show_queue_tip(full)
+	_show_terrain_tip(target < 0 and not full)
 	cursor.apply(context)
+
+
+func _show_terrain_tip(allowed: bool) -> void:
+	var decor: Dictionary = last_hover.get("decor", {}) if allowed else {}
+	if decor.is_empty():
+		if terrain_tip != null:
+			terrain_tip.hide_tip()
+		return
+	if terrain_tip == null and hud != null:
+		terrain_tip = _TerrainTip.new()
+		hud.root.add_child(terrain_tip)
+	if terrain_tip != null:
+		terrain_tip.show_at(_hover_mouse, decor)
 
 
 func _show_queue_tip(full: bool) -> void:

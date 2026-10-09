@@ -1,6 +1,8 @@
 class_name BattleMinimap
 extends Control
 
+const _Access := preload("res://scripts/battle/battle_access.gd")
+
 ## Minicarte de bataille (F5b) : champ, régiments en points aux couleurs des camps, cadre de la
 ## caméra ; clic (ou glisser) = déplacer la caméra. Pure présentation.
 
@@ -15,7 +17,9 @@ var field_size: Vector2 = Vector2(1200, 800)
 var side_colors: Dictionary = {}
 var _terrain: Dictionary = {}
 var _relief: ImageTexture = null
-var _dots: Array = []  # [Vector2 monde, Color]
+var _dots: Array = []  # [Vector2 monde, Color, ennemi ?]
+## Camp du joueur (daltonisme : bleu/vermillon et losanges pour l'ennemi, QW-G2).
+var player_side: String = ""
 var _frame := PackedVector2Array()  # cadre de la caméra au sol (monde x, z)
 var _ping_world: Vector2 = Vector2.ZERO  # CB5 : lieu d'une alerte cliquée
 var _ping_time: float = -1.0  # < 0 : pas de repère actif
@@ -58,8 +62,9 @@ func update(units: Array, frame: PackedVector2Array) -> void:
 	_dots.clear()
 	for unit in units:
 		if bool(unit["present"]):
-			var color: Color = side_colors.get(str(unit["side"]), Color.WHITE)
-			_dots.append([Vector2(float(unit["x"]), float(unit["z"])), color])
+			var is_player := str(unit["side"]) == player_side
+			var color: Color = _Access.side_color(side_colors.get(str(unit["side"]), Color.WHITE), is_player)
+			_dots.append([Vector2(float(unit["x"]), float(unit["z"])), color, not is_player and player_side != ""])
 	_frame = frame
 	queue_redraw()
 
@@ -168,7 +173,11 @@ func _draw() -> void:
 		var along := Vector2(cos(float(bridge["yaw"])), sin(float(bridge["yaw"]))) * float(bridge["length"]) * 0.5
 		draw_line(to_map(centre - along), to_map(centre + along), Color(0.35, 0.26, 0.18), 3.0)
 	for dot in _dots:
-		draw_rect(Rect2(to_map(dot[0]) - Vector2(2, 2), Vector2(4, 4)), dot[1])
+		if _Access.active() and dot[2]:
+			var at := to_map(dot[0])
+			draw_colored_polygon(PackedVector2Array([at + Vector2(0, -3.5), at + Vector2(3.5, 0), at + Vector2(0, 3.5), at + Vector2(-3.5, 0)]), dot[1])
+		else:
+			draw_rect(Rect2(to_map(dot[0]) - Vector2(2, 2), Vector2(4, 4)), dot[1])
 	if _frame.size() >= 3:
 		var outline := PackedVector2Array()
 		for point in _frame:

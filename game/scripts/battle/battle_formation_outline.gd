@@ -1,6 +1,8 @@
 class_name BattleFormationOutline
 extends Node3D
 
+const _Access := preload("res://scripts/battle/battle_access.gd")
+
 ## CB-M1 : contour de formation projeté sur le relief, un `Decal` par régiment (remplace l'anneau
 ## jaune de sélection). États (spec CB-M, « Contour de formation ») :
 ## - Sélectionnée : trait plein, or pâle teinté du camp (PO4) ;
@@ -137,7 +139,7 @@ func _process(delta: float) -> void:
 	var wave := 0.5 + 0.5 * sin(_pulse_time * TAU * PULSE_HZ)
 	var alpha := lerpf(PULSE_MIN, 1.0, wave)
 	for decal in _pulsing:
-		decal.modulate = Color(ENEMY_RED, alpha)
+		decal.modulate = Color(_Access.enemy_red(ENEMY_RED), alpha)
 
 
 ## Nombre de décales créées (tests).
@@ -181,9 +183,9 @@ func _color(state: int, side: String) -> Color:
 		State.HOVERED:
 			return Color(PALE_GOLD.lerp(Color.WHITE, 0.4), 0.6)
 		State.ENEMY_HOVERED:
-			return Color(ENEMY_RED, 0.95)
+			return Color(_Access.enemy_red(ENEMY_RED), 0.95)
 		State.ENEMY_TARGETED:
-			return Color(ENEMY_RED, 1.0)
+			return Color(_Access.enemy_red(ENEMY_RED), 1.0)
 	return Color.TRANSPARENT
 
 
