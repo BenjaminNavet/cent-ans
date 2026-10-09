@@ -16,3 +16,10 @@ Etat : chaine gratuite en cours (cout 0). Plan : feuille Qwen-Image-Edit local d
 `ga3_figures.py` (nouvelle unite `yaya`, figure `archer_6`, copie de `archer_3` dans FIGURES et le manifeste fin)
 -> `unit_yaya.figure = archer_6`.
 Prochaine etape : verifier `l5/yaya/sheet.png`, puis 3D.
+
+Etat 09/10 (arret) : placeholder `archer_6` (FIGURES + manifeste fin) et unite `yaya` de `ga3_figures.py` commites ;
+`unit_yaya.figure` reste `archer_3`. La generation Qwen locale (feuille `~/dev/cent-ans-raw/ga3/l5/yaya/`, prompt.txt pret)
+a ete interrompue a 60 % sur consigne du coordinateur (passage a fal : Z-Image Turbo + TRELLIS 1, enveloppe 1 $ de
+`docs/budget.md`). L'appel `dn_batch.py` fal (catalogue `fig_yaya`, `DN_FAL_CAP_USD`=44.512, `--until 3d`) a ete refuse par
+le systeme de permissions (depense cloud sans autorisation directe du joueur) : aucun appel fait, cout 0.
+Reprise : soit autoriser la depense fal, soit relancer la commande Qwen locale (~45 min) puis TRELLIS HF / SF3D.
