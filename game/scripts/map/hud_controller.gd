@@ -144,7 +144,11 @@ func refresh() -> void:
 	if sim == null or ui == null:
 		return
 	ui.end_turn_cluster.set_date(str(sim.call("get_date_label")), int(sim.call("get_turn")))
-	ui.end_turn_cluster.set_alerts(CampaignAlerts.collect(map, last_events))
+	var alerts := CampaignAlerts.collect(map, last_events)
+	ui.end_turn_cluster.set_alerts(alerts)
+	var minimap_ctl: MinimapController = map.get("minimap_ctl")
+	if minimap_ctl != null:  # WH mapb2 : pings des alertes nouvelles
+		minimap_ctl.on_alerts(alerts)
 
 
 ## Après `end_turn` : événements du tour, puis rafraîchissement des alertes.

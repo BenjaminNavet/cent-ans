@@ -15,7 +15,7 @@
     "description": {"type": "string"},
     "campaign": {
       "type": "object",
-      "required": ["pan_accel", "pan_friction", "follow_damping", "zoom_damping", "rotate_damping", "focus_glide_s", "drag_release_inertia"],
+      "required": ["pan_accel", "pan_friction", "follow_damping", "zoom_damping", "rotate_damping", "focus_glide_s", "drag_release_inertia", "rotate_mouse_deg_per_px", "follow_release_px", "minimap_ping_s", "minimap_ping_radius_px"],
       "additionalProperties": false,
       "properties": {
         "pan_accel": {"$ref": "#/$defs/rate", "description": "Montée de la vitesse de déplacement vers celle demandée (clavier, bords d'écran)."},
@@ -24,7 +24,11 @@
         "zoom_damping": {"$ref": "#/$defs/rate", "description": "Poursuite de la distance cible (zoom lissé)."},
         "rotate_damping": {"$ref": "#/$defs/rate", "description": "Poursuite du lacet cible (Q / E)."},
         "focus_glide_s": {"$ref": "#/$defs/glide"},
-        "drag_release_inertia": {"$ref": "#/$defs/inertia"}
+        "drag_release_inertia": {"$ref": "#/$defs/inertia"},
+        "rotate_mouse_deg_per_px": {"description": "WH mapb2 : degrés de lacet par pixel de souris (bouton du milieu + Alt ou Maj).", "type": "number", "exclusiveMinimum": 0, "maximum": 2},
+        "follow_release_px": {"description": "WH mapb2 : déplacement de souris (px) au-delà duquel un glisser manuel libère le suivi de l'armée.", "type": "number", "minimum": 0, "maximum": 100},
+        "minimap_ping_s": {"description": "WH mapb2 : durée du cercle de ping de la minicarte (s).", "type": "number", "exclusiveMinimum": 0, "maximum": 10},
+        "minimap_ping_radius_px": {"description": "WH mapb2 : rayon final du ping de la minicarte (px).", "type": "number", "exclusiveMinimum": 0, "maximum": 100}
       }
     },
     "battle": {

@@ -12,6 +12,8 @@ extends PanelContainer
 ## Pure présentation : `MinimapController` lui passe couleurs, visibilité, armées et vue.
 
 signal clicked(map_pos: Vector2)
+## WH mapb2 : clic droit = ordre de marche de l'armée sélectionnée vers ce point de la carte.
+signal ordered(map_pos: Vector2)
 signal mode_changed(mode: String)
 ## Bouton « Légende » basculé (le contrôleur ouvre ou ferme `MapLegend`).
 signal legend_toggled(pressed: bool)
@@ -32,6 +34,7 @@ const LOWLAND := Color(0.86, 0.80, 0.62)
 const HIGHLAND := Color(0.58, 0.47, 0.32)
 const FRAME_COLOR := Color(1.0, 0.96, 0.82)
 const PLAYER_RING := Color(0.95, 0.80, 0.30)
+const PING_COLOR := Color(0.80, 0.16, 0.12)
 
 var map_data: MapData
 var mode: String = MODE_POLITICAL
@@ -46,12 +49,14 @@ var _mode_buttons: Dictionary = {}  # mode → Button
 var _modes_row: HBoxContainer
 var legend_button: Button
 var _armies: Array = []  # [{pos: Vector2 carte, color: Color, player: bool}]
+var _pings: Array = []  # [{pos: Vector2 carte, start: int ms}]
 var _frame := PackedVector2Array()  # quadrilatère de la vue caméra (coordonnées carte)
 var _visible_count: int = -1
 
 
 func _init() -> void:
 	name = "CampaignMinimap"
+	set_process(false)  # Allumé seulement tant qu'un ping vit
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	# Boutons des modes au thème parchemin, comme le reste du HUD.
 	theme = load("res://scenes/ui/parchment_theme.tres")
@@ -373,6 +378,42 @@ func click_at(local: Vector2) -> void:
 	clicked.emit(view_to_map(local))
 
 
+## WH mapb2 : ping d'alerte (cercle qui s'élargit `minimap_ping_s` secondes) à un point carte.
+func ping(map_pos: Vector2) -> void:
+	_pings.append({"pos": map_pos, "start": Time.get_ticks_msec()})
+	set_process(true)
+	_overlay.queue_redraw()
+
+
+func ping_count() -> int:
+	return _pings.size()
+
+
+func _process(_delta: float) -> void:
+	var duration_ms := CameraFeel.get_value("campaign", "minimap_ping_s") * 1000.0
+	var now := Time.get_ticks_msec()
+	_pings = _pings.filter(func(p: Dictionary) -> bool: return float(now - int(p["start"])) < duration_ms)
+	if _pings.is_empty():
+		set_process(false)
+	_overlay.queue_redraw()
+
+
+## Simule un clic droit à `local` (repère de `Overlay`) : tests headless.
+func order_at(local: Vector2) -> void:
+	ordered.emit(view_to_map(local))
+
+
+func _draw_pings() -> void:
+	var duration_ms := maxf(CameraFeel.get_value("campaign", "minimap_ping_s") * 1000.0, 1.0)
+	var max_radius := CameraFeel.get_value("campaign", "minimap_ping_radius_px")
+	var now := Time.get_ticks_msec()
+	for p: Dictionary in _pings:
+		var k := clampf(float(now - int(p["start"])) / duration_ms, 0.0, 1.0)
+		var center := map_to_view(p["pos"])
+		_overlay.draw_arc(center, maxf(max_radius * k, 1.0), 0.0, TAU, 24, Color(HudStyle.INK, 1.0 - k), 3.0)
+		_overlay.draw_arc(center, maxf(max_radius * k, 1.0), 0.0, TAU, 24, Color(PING_COLOR, 1.0 - k), 1.5)
+
+
 func _draw_overlay() -> void:
 	for army in _armies:
 		var center := map_to_view(army["pos"])
@@ -395,10 +436,15 @@ func _draw_overlay() -> void:
 		outline.append(outline[0])
 		_overlay.draw_polyline(outline, HudStyle.INK, 3.0)
 		_overlay.draw_polyline(outline, FRAME_COLOR, 1.5)
+	_draw_pings()
 	_overlay.draw_rect(Rect2(Vector2.ZERO, _overlay.size), HudStyle.INK, false, 1.5)
 
 
 func _on_overlay_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		ordered.emit(view_to_map(event.position))
+		_overlay.accept_event()
+		return
 	var pressed: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
 	var dragged: bool = event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0
 	if pressed or dragged:

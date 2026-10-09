@@ -497,6 +497,12 @@ func handle_hotkey(action: String) -> void:
 				ui.show_toast("Aucune armée sélectionnée.")
 			else:
 				focus_army(selected)
+		"army_follow":
+			toggle_follow_selected()
+		"campaign_commerce":
+			ui.faction_panel_requested.emit()
+			if ui.faction_panel.trade_panel == null or not ui.faction_panel.trade_panel.visible:
+				ui.faction_panel.toggle_trade()
 		"army_split":
 			if _player_army_selected(ui):
 				ui.army_strip.call("_on_split_pressed")
@@ -507,6 +513,25 @@ func handle_hotkey(action: String) -> void:
 			var stance := CampaignHotkeys.stance_of(action)
 			if stance != "" and _player_army_selected(ui):
 				ui.stance_changed.emit(str(map.get("selected_army")), stance)
+
+
+## WH mapb2 : la caméra suit l'armée sélectionnée jusqu'au prochain déplacement manuel
+## (clavier, glisser, recentrage) ; une seconde pression, ou aucune sélection, arrête le suivi.
+func toggle_follow_selected() -> void:
+	var rig: CampaignCamera = map.get("camera_rig")
+	var armies: ArmyMarkers = map.get("armies")
+	var selected := str(map.get("selected_army"))
+	if rig.is_following():
+		rig.stop_follow()
+		map.get("ui").show_toast("Suivi de l'armée terminé.")
+		return
+	if selected == "" or armies == null or not armies.has_army(selected):
+		map.get("ui").show_toast("Aucune armée sélectionnée.")
+		return
+	rig.start_follow(func() -> Variant:
+		var current := str(map.get("selected_army"))
+		return armies.world_position_of(current) if current != "" and armies.has_army(current) else null)
+	map.get("ui").show_toast("La caméra suit l'armée (un déplacement manuel l'arrête).")
 
 
 ## Vrai si une armée du joueur est sélectionnée ; sinon l'indique au joueur.

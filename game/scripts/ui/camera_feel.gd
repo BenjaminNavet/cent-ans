@@ -11,6 +11,7 @@ const FALLBACK := {
 	"campaign": {
 		"pan_accel": 14.0, "pan_friction": 5.5, "follow_damping": 12.0, "zoom_damping": 9.0,
 		"rotate_damping": 10.0, "focus_glide_s": 0.4, "drag_release_inertia": 0.6,
+		"rotate_mouse_deg_per_px": 0.25, "follow_release_px": 4.0, "minimap_ping_s": 1.5, "minimap_ping_radius_px": 16.0,
 	},
 	"battle": {
 		"zoom_damping": 9.0, "focus_glide_s": 0.4, "opening_distance_m": 155.0, "opening_ahead_m": 10.0,

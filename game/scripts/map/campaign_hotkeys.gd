@@ -10,7 +10,7 @@ extends RefCounted
 ## Actions routées vers `FlowController.handle_hotkey`.
 const ACTIONS: Array[String] = [
 	"campaign_next_idle", "campaign_prev_idle", "campaign_next_settlement", "campaign_capital",
-	"campaign_end_turn_fast", "army_center", "army_split", "army_garrison",
+	"campaign_end_turn_fast", "army_center", "army_follow", "campaign_commerce", "army_split", "army_garrison",
 	"army_stance_normal", "army_stance_raid", "army_stance_siege", "army_stance_ambush",
 	"army_stance_forced_march", "army_stance_entrenched",
 ]

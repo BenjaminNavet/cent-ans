@@ -44,6 +44,7 @@ func setup(campaign_map: Node) -> void:
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
+	minimap.ordered.connect(order_march_to)
 	# Le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
 	var trade_button: Button = ui.get("trade_button")
 	if trade_button != null:
@@ -225,6 +226,51 @@ func refresh() -> void:
 		for ghost in armies.ghosts:
 			dots.append({"pos": ghost["pos"], "color": Color.WHITE, "player": false, "ghost": true})
 	minimap.set_armies(dots)
+
+
+## Alertes `siege` / `enemy_army` déjà annoncées (id → true) ; `_alerts_primed` : la première
+## série (chargement, début de partie) ne sonne pas.
+var _seen_alerts: Dictionary = {}
+var _alerts_primed := false
+
+
+## WH mapb2 : ping sur la minicarte pour chaque alerte siège / armée ennemie nouvelle depuis le
+## dernier appel. Une armée n'est signalée que si le brouillard la montre (`is_army_visible`).
+## Rend les points pingués (tests).
+func on_alerts(alerts: Array) -> PackedVector2Array:
+	var pinged := PackedVector2Array()
+	var current: Dictionary = {}
+	var sim := _sim()
+	var map_data: MapData = map.get("map_data")
+	for alert: Dictionary in alerts:
+		var kind := str(alert.get("kind", ""))
+		if kind != "siege" and kind != "enemy_army":
+			continue
+		var id := str(alert.get("id", ""))
+		current[id] = true
+		if not _alerts_primed or _seen_alerts.has(id) or minimap == null or sim == null:
+			continue
+		var point := Vector2(-1.0, -1.0)
+		if kind == "enemy_army":
+			var army: Dictionary = sim.call("get_army", str(alert.get("army_id", "")))
+			if army.is_empty() or not is_army_visible(str(alert.get("army_id", "")), army):
+				continue
+			point = army.get("position", Vector2(-1.0, -1.0))
+		if point.x < 0.0:
+			point = map_data.centroid_of_id(str(alert.get("province_id", "")))
+		if point.x < 0.0:
+			continue
+		minimap.ping(point)
+		pinged.append(point)
+	_seen_alerts = current
+	_alerts_primed = true
+	return pinged
+
+
+## Clic droit sur la minicarte : ordre de marche de l'armée sélectionnée vers ce point.
+func order_march_to(map_pos: Vector2) -> bool:
+	var movement: ArmyMovementController = map.get("movement_ctl")
+	return movement != null and movement.order_to_map_point(map_pos)
 
 
 ## Recentre la caméra sur un point de la carte (coordonnées carte).

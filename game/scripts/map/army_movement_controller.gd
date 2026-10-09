@@ -257,6 +257,15 @@ func try_right_click(screen_position: Vector2) -> bool:
 	return true
 
 
+## WH mapb2 : ordre de marche de l'armée sélectionnée vers un point de la carte donné
+## (clic droit sur la minicarte). Faux si aucune armée du joueur n'est sélectionnée.
+func order_to_map_point(point: Vector2) -> bool:
+	if not active():
+		return false
+	_execute(map.selected_army, {"kind": "ground", "point": point})
+	return true
+
+
 func _execute(army_id: String, target: Dictionary) -> void:
 	var report := order_target(army_id, target)
 	UiSounds.play_order_result(report)  # UB1 / U13

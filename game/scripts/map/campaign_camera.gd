@@ -65,6 +65,11 @@ var target_yaw: float = 0.0
 var bounds: Rect2 = Rect2()
 
 var _dragging := false
+## WH mapb2 : rotation à la souris (bouton du milieu + Alt ou Maj) ; suivi d'une cible mobile.
+var _rotating := false
+## Cible suivie : `Callable() -> Variant` (Vector3 monde, ou autre valeur = fin du suivi). Vide = pas de suivi.
+var _follow: Callable = Callable()
+var _follow_moved_px := 0.0
 ## Vitesse de déplacement dans le plan de la carte (unités/s), inertie comprise.
 var pan_velocity: Vector3 = Vector3.ZERO
 ## Glissement de focus en cours (`look_at_point`) : départ, durée, temps écoulé.
@@ -103,6 +108,7 @@ func snap() -> void:
 
 
 func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
+	stop_follow()  # Un recentrage manuel (minicarte, liste) met fin au suivi
 	target_focus = point
 	if new_distance > 0.0:
 		target_distance = clampf(new_distance, min_distance_at(point), max_distance)
@@ -118,6 +124,23 @@ func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
 	_glide_duration = glide
 	_glide_elapsed = 0.0
 	pan_velocity = Vector3.ZERO
+
+
+## Suit `target` (Callable sans argument rendant un `Vector3` monde) jusqu'au prochain déplacement
+## manuel (clavier, bords d'écran, glisser, recentrage) ou jusqu'à ce qu'il ne rende plus de point.
+func start_follow(target: Callable) -> void:
+	_follow = target
+	_follow_moved_px = 0.0
+	_glide_active = false
+	pan_velocity = Vector3.ZERO
+
+
+func stop_follow() -> void:
+	_follow = Callable()
+
+
+func is_following() -> bool:
+	return _follow.is_valid()
 
 
 ## Vrai pendant un glissement de focus (`look_at_point`).
@@ -169,15 +192,25 @@ func _unhandled_input(event: InputEvent) -> void:
 				pan_velocity = Vector3.ZERO
 				_drag_accum = Vector3.ZERO
 				_drag_velocity = Vector3.ZERO
-			_dragging = mb.pressed
+			if mb.pressed:  # Alt ou Maj : rotation au lieu du glisser (WH mapb2)
+				_rotating = mb.alt_pressed or mb.shift_pressed
+				_follow_moved_px = 0.0
+			else:
+				_rotating = false
+			_dragging = mb.pressed and not _rotating
 	elif event is InputEventPanGesture:
 		# Pad macOS : glissement vertical à deux doigts = molette continue.
 		_zoom_by(exp(zoom_step * (event as InputEventPanGesture).delta.y))
 	elif event is InputEventMagnifyGesture:
 		# Pad macOS : pincement (facteur > 1 = écarter les doigts = rapprocher).
 		_zoom_by(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
+	elif event is InputEventMouseMotion and _rotating:
+		target_yaw -= deg_to_rad((event as InputEventMouseMotion).relative.x * CameraFeel.get_value("campaign", "rotate_mouse_deg_per_px"))
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
+		_follow_moved_px += motion.relative.length()
+		if _follow_moved_px > CameraFeel.get_value("campaign", "follow_release_px"):
+			stop_follow()
 		var viewport_height := float(get_viewport().get_visible_rect().size.y)
 		var units_per_px := distance * 1.6 / maxf(viewport_height, 1.0)
 		var before := target_focus
@@ -195,6 +228,9 @@ func _process(delta: float) -> void:
 	pan.y += Input.get_action_strength("map_pan_down") - Input.get_action_strength("map_pan_up")
 	if edge_pan_enabled:
 		pan += _edge_pan_vector()
+	if pan != Vector2.ZERO:
+		stop_follow()
+	_update_follow()
 	_update_pan_velocity(pan, delta)
 	var rotate := Input.get_action_strength("map_rotate_right") - Input.get_action_strength("map_rotate_left")
 	target_yaw += deg_to_rad(rotate_speed_deg) * rotate * delta
@@ -218,6 +254,19 @@ func _process(delta: float) -> void:
 		distance = lerpf(distance, target_distance, zoom_t)
 	yaw = lerp_angle(yaw, target_yaw, yaw_t)
 	_apply_transform()
+
+
+## Suivi : le point visé reste sur la cible tant qu'aucun déplacement manuel n'a eu lieu.
+func _update_follow() -> void:
+	if not _follow.is_valid():
+		return
+	var point: Variant = _follow.call()
+	if not (point is Vector3):
+		_follow = Callable()
+		return
+	_glide_active = false
+	target_focus = Vector3((point as Vector3).x, target_focus.y, (point as Vector3).z)
+	_move_target(Vector3.ZERO)
 
 
 ## Inertie. La vitesse monte vers celle demandée (clavier, bords d'écran) puis décroît en

@@ -558,6 +558,10 @@
     "end_turn_finish": {"title": "Finir la saison", "hint": "Entrée"},
     "trade_income_detail": {"title": "Revenus du commerce"},
     "table_upkeep_detail": {"title": "La Table"},
+    "trade_routes_panel": {
+      "title": "Routes commerciales",
+      "body": "Chaque route avec sa valeur de la saison, son mode (terre ou mer) et la raison d'une coupure. Raccourci : I."
+    },
     "captives_and_ransoms": {
       "title": "Captifs et rançons",
       "body": "Nos captifs, nos prisonniers et les dettes de rançon."

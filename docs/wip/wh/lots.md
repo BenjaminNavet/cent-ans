@@ -15,4 +15,4 @@ Sources : `docs/wip/wh/<rôle>.md` (§3 top 10). Brief commun : `docs/wip/wh/bri
 | turn | tour top2 (sauvegarde auto), top5 (suivi de missions), top7 (dilemmes conditionnels), top8 (rapport de saison auto), top9 (missions de faction), top10 (bilan de fin) | 0281 | vague 2 |
 | diplob | diplomatie top5 (ligue anti-hégémon), top6 (JoinWar), top7 (appel d'un allié au joueur), top8 (non-agression/défensive), top9 (ultimatums IA) | 0282-0283 | vague 2 |
 | charsb | personnages top4 (loyauté), top5 (assassinat), top7 (déclencheurs de traits), top8 (compétences par rôle), top10 (aide d'agent) | 0284 | vague 2 |
-| mapb2 | carte top8 (rotation souris + suivi), top9 (ping minicarte + clic droit) ; economie top9 (onglet commerce) | 0285 | vague 2 |
+| mapb2 | carte top8 (rotation souris + suivi), top9 (ping minicarte + clic droit) ; economie top9 (onglet commerce) | 0285 | vague 2 — FAIT (branche wh/mapb2) |
