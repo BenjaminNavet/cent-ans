@@ -20,4 +20,9 @@ lui prendre le focus.
 5. ADR 0219, CLAUDE.md (règle), mémoire.
 
 ## État
-- Étape 1 en cours.
+- Étape 1 commitée (4d4f27cf4), jamais exécutée jusqu'au bout.
+- 09/10 10:24 : disque plein (888/926 Gio utilisés avant l'essai, 654 Mio libres au pire) pendant
+  `docker build` de l'image ; build échoué (I/O error containerd), démon Docker en erreur 500.
+  Après coup : 25 Gio libres. Image `cent-ans-shot:probe` (779 Mo) à supprimer.
+- Besoin disque estimé : image ~1,5 Gio + cible cargo Linux (plusieurs Gio) + clone APFS de .godot.
+- En attente du joueur : place disque / redémarrage de Docker Desktop.
