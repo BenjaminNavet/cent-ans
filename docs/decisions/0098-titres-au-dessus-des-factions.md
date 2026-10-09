@@ -1,7 +1,7 @@
 # 0098 — Titres féodaux au-dessus des factions (chantier FE)
 
 Date : 2026-09-28. Statut : accepté. Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`.
-Plan : `docs/superpowers/plans/2026-09-28-feodalite.md`.
+Plan : `docs/archive/superpowers-plans/2026-09-28-feodalite.md`.
 
 ## Contexte
 

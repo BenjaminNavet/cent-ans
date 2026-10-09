@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M5, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M5 — Diplomatie et religion : spécification
 
 Date : 2026-09-23. Objectif : toutes les mécaniques diplomatiques du design (§ 4.4) et la religion (§ 4.5) :

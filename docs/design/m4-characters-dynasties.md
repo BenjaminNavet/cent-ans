@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M4, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M4 — Personnages et dynasties : spécification
 
 Date : 2026-09-23. Objectif : les personnages deviennent des acteurs. Ils gagnent de l'expérience, montent

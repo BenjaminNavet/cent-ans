@@ -3,7 +3,7 @@ extends Node
 
 ## CB0 : entrées de bataille (clics, glisser, touches, groupes, sélection rapide), extraites de
 ## `battle_scene.gd` (même comportement, seul l'emplacement change ; voir
-## `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, section CB0). Nœud enfant de
+## `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, section CB0). Nœud enfant de
 ## `BattleScene` : lit l'état partagé sur `scene` (sélection, unités, caméra, HUD, pont) et
 ## notifie ses décisions par signal ; la scène connecte ces signaux à `issue()`, au rendu et au
 ## pont. `game/tests/smoke.gd` continue d'appeler `scene.issue` et `scene.handle_group_key`

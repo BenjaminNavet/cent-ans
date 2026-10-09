@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M10, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M10 (partie 1) — Événements historiques et aléatoires : spécification
 
 Date : 2026-09-23. Objectif : un moteur d'événements piloté par les données, qui fait vivre la chronique de

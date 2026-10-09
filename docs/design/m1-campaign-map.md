@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M1, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M1 — Carte de campagne : spécification
 
 Date : 2026-09-23. Objectif : une carte 3D de l'Europe de l'Ouest élargie, réelle, découpée

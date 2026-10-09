@@ -1,7 +1,7 @@
 # Plan d'implémentation — Contrôles de bataille façon Total War (lots CB)
 
 Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md` (validée).
-Première action après approbation : copier ce plan dans `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, créer la note d'orchestration `docs/archive/chantiers.md` (tableau des lots, état, prochaine étape), réserver l'ADR `docs/decisions/0095-controles-bataille-tw.md`, commit `docs:`.
+Première action après approbation : copier ce plan dans `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, créer la note d'orchestration `docs/archive/chantiers.md` (tableau des lots, état, prochaine étape), réserver l'ADR `docs/decisions/0095-controles-bataille-tw.md`, commit `docs:`.
 
 ## Contexte
 

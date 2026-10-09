@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M7, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M7 — Batailles temps réel avec pause en 3D : spécification
 
 Date : 2026-09-23. Objectif : quand une armée du joueur rencontre une armée ennemie, le joueur choisit

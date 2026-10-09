@@ -6,6 +6,8 @@ Une carte de campagne au tour par saison sur l'Europe réelle, puis des bataille
 temps réel avec pause, dans l'esprit de *Total War*. Incarnez la France des Valois, l'Angleterre des
 Plantagenêts ou la Bourgogne, et menez un siècle de guerre, de diplomatie, de dynasties et de crises.
 
+Architecture du dépôt : [`docs/architecture.md`](docs/architecture.md).
+
 ![Mêlée de chevaliers autour des étendards de France et d'Angleterre](docs/img/readme/bataille.jpg)
 
 | Paris en 1337 sur la carte de campagne | Londres et la Tamise |

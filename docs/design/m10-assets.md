@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M10, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M10 (partie 2) — Assets, sons et musique : spécification
 
 Date : 2026-09-23. Objectif : remplacer les placeholders par des assets cohérents avec le style « manuscrit

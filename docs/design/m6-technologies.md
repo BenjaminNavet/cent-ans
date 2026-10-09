@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M6, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M6 — Technologies : spécification
 
 Date : 2026-09-23. Objectif : deux arbres de technologies (militaire, civil) financés par des points de
