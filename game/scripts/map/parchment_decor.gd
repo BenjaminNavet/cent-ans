@@ -43,10 +43,21 @@ var monsters: Array[Vector3] = []  # x, y, variante
 var ship_ornaments: Array[Dictionary] = []
 var monster_ornaments: Array[Dictionary] = []
 var rose_texture: Texture2D
+## PF-09 : navires et monstres résolus une fois au chargement (position monde, ornement peint ou
+## vignette dessinée, cap) ; le dessin n'a plus qu'à projeter à l'écran.
+## {kind: "ship"|"serpent"|"whale", world: Vector3, ornament: Dictionary ({} = vignette), unit: float,
+## heading_right: bool, mirror: bool}
+var sea_items: Array[Dictionary] = []
 
 
 ## `coast_dist` : raster L8 signé (valeur × 255 − 128) / `scale` px, < 0 en mer.
 static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
+	var decor := _place(map, coast_scale)
+	decor._resolve_sea_items()
+	return decor
+
+
+static func _place(map: MapData, coast_scale: float) -> ParchmentDecor:
 	var decor := ParchmentDecor.new()
 	decor._load_ornaments()
 	var img := map.coast_dist_image
@@ -151,6 +162,31 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 				if decor.monsters.size() >= 4:
 					break
 	return decor
+
+
+## Ornement (peint ou vignette) de chaque navire et monstre, calculé une fois (PF-09).
+func _resolve_sea_items() -> void:
+	sea_items.clear()
+	for i in ships.size():
+		var ship := ships[i]
+		sea_items.append({
+			"kind": "ship",
+			"world": Vector3(ship.x, 0.0, ship.y),
+			"ornament": ship_ornaments[i % ship_ornaments.size()] if not ship_ornaments.is_empty() else {},
+			"unit": 16.0,
+			"heading_right": ship.z > 0.0,
+			"mirror": ship.z < 0.0,
+		})
+	for i in monsters.size():
+		var monster := monsters[i]
+		sea_items.append({
+			"kind": ("serpent" if monster.z < 0.5 else "whale"),
+			"world": Vector3(monster.x, 0.0, monster.y),
+			"ornament": monster_ornaments[int(monster.z) % monster_ornaments.size()] if not monster_ornaments.is_empty() else {},
+			"unit": 20.0,
+			"heading_right": i % 2 == 1,
+			"mirror": false,
+		})
 
 
 static func sx_of(img: Image, map: MapData) -> float:
