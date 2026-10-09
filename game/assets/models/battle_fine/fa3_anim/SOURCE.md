@@ -2,9 +2,9 @@
 
 Clips cuits (`human.bones.bin`, `CAB1`, os du rig fin `human`) par
 `tools/blender_scripts/fa3_anim_retarget.py` d'après la table
-`data/fx/fa3_anim_sources.json`, posés par-dessus les clips de mêlée par défaut NT14 : sans
-option, les clips marqués `default` dans la table (`parry`, `death`, `death_back`) ; tous avec
-`--fa-anim` après `--` ; aucun avec `--no-fa-anim`. Source, licence et mesures de chaque clip : `manifest.json`
+`data/fx/fa3_anim_sources.json`, posés par-dessus les clips de mêlée par défaut NT14 : seuls
+les clips marqués `default` dans la table (`parry`, `death`, `death_back`) sont fusionnés par
+`tools/cent_ans_tools/bake_skinned_manifest.py` dans `battle_skinned/manifest_merged.json`. Source, licence et mesures de chaque clip : `manifest.json`
 (`clip_sources` : glissement des pieds, écart de boucle, bouclier devant le visage, et les
 mêmes mesures sur le clip remplacé).
 

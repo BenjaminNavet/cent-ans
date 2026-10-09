@@ -45,7 +45,11 @@ def _texture_frames(path: Path) -> int:
 
 
 def _res_to_path(res_path: str, base: Path) -> Path:
-    return MODELS / res_path.removeprefix(RES) if res_path.startswith("res://") else base / res_path
+    return (
+        MODELS / res_path.removeprefix(RES)
+        if res_path.startswith("res://")
+        else base / res_path
+    )
 
 
 def _merge_fine(base: dict) -> None:
@@ -72,7 +76,9 @@ def _merge_clip_layer(rigs: dict, layer_dir: str, only_default: bool) -> None:
         return
     if entry.get("bones", []) != trial.get("bones", []):
         raise SystemExit(f"bones of layer {layer_dir} differ from the rig")
-    base_frames = _texture_frames(_res_to_path(entry["texture"], MODELS / "battle_skinned"))
+    base_frames = _texture_frames(
+        _res_to_path(entry["texture"], MODELS / "battle_skinned")
+    )
     if base_frames <= 0:
         raise SystemExit("unreadable rig texture")
     layers = entry.get("mocap_textures", [])
@@ -132,7 +138,9 @@ def bake() -> dict:
 
 def main() -> None:
     """Write the merged manifest."""
-    OUT.write_text(json.dumps(bake(), indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    OUT.write_text(
+        json.dumps(bake(), indent=1, sort_keys=True) + "\n", encoding="utf-8"
+    )
     print(f"wrote {OUT.relative_to(ROOT)}")
 
 

@@ -206,3 +206,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
 | 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
 | 0238 | [Fin de la figurine rigide des soldats de bataille](0238-fin-figurine-rigide.md) | accepté |
+| 0239 | [Manifeste skinné cuit hors ligne, fin des essais mocap et des modes fa_anim](0239-manifeste-skinne-cuit.md) | accepté |
