@@ -1,7 +1,7 @@
 class_name WaterDetail
 extends RefCounted
 
-## Lot RC5 (ADR 0141) : branche les textures de détail d'eau générées (mer, océan, fleuve,
+## Branche les textures de détail d'eau générées (mer, océan, fleuve (ADR 0141),
 ## rivière) sur un `ShaderMaterial` qui inclut `res://shaders/water_detail.gdshaderinc`.
 ## Réglages (force, échelle, écoulement) dans `data/fx/water_detail.json`, jamais codés en dur.
 ## Sans texture (`<id>_normal.png` absente) ou sans données : `water_detail_strength` reste à 0

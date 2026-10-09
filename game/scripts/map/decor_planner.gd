@@ -1,7 +1,7 @@
 class_name DecorPlanner
 extends RefCounted
 
-## Lots DN ME6/ME7/ME9 : planification du décor ponctuel hors les villes (croix, gibets, péages,
+## Planification du décor ponctuel hors les villes (croix, gibets, péages,
 ## phares, mines, forges, mégalithes, ruines romaines, champs de bataille, pèlerins, foires…).
 ## Données dans `data/map/map_landmarks_extra.json` (schéma `map_landmarks_extra.schema.json`) :
 ## les règles `rules` placent des instances de façon déterministe (graine = graine du fichier x

@@ -1,8 +1,8 @@
 class_name HeraldryAtlas
 extends RefCounted
 
-## Lot DV2 (ADR 0124) : atlas des écus de faction, composé à l'exécution depuis
-## `PortraitLoader.heraldry_texture` (extrait de `SettlementMarkers`, lot DA3). Sert à l'écu posé
+## Atlas des écus de faction, composé à l'exécution depuis (ADR 0124)
+## `PortraitLoader.heraldry_texture` (extrait de `SettlementMarkers`). Sert à l'écu posé
 ## au-dessus du nom des lieux (`settlement_icon.gdshader`). Rendu seulement.
 
 ## Taille d'une case de l'atlas (px) et nombre de colonnes.

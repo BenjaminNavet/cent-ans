@@ -1,7 +1,7 @@
 class_name MapReadability
 extends RefCounted
 
-## Lot TB2 (plan `docs/design/2026-10-02-campagne-tob.md` § 3) : réglages de lisibilité de la carte
+## Réglages de lisibilité de la carte
 ## de campagne, lus dans `data/ui/campaign_map.json` (schéma `campaign_map_ui.schema.json`) :
 ## voile du brouillard de guerre (`fog_of_war`), signes de ville (`signs`), étiquettes (`labels`),
 ## noms de région (`region_labels`), nuées (`clouds`). Les valeurs de repli sont celles du fichier.

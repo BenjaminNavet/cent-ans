@@ -1,7 +1,7 @@
 class_name NextHintCard
 extends PanelContainer
 
-## Lot UX2 — encart parchemin du conseil « que faire maintenant » (haut gauche de la carte,
+## Encart parchemin du conseil « que faire maintenant » (haut gauche de la carte,
 ## sous la barre). Un titre court, une phrase, une croix pour le masquer jusqu'à la saison
 ## suivante. Un clic sur l'encart émet `activated` (le contrôleur exécute ou ouvre l'action).
 ## Ne connaît ni la simulation ni les règles : `NextHintController` fournit le conseil.

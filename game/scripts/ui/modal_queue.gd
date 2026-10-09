@@ -1,7 +1,7 @@
 class_name ModalQueue
 extends RefCounted
 
-## Lot A6-L6 (U10) : file unique des fenêtres modales de la campagne. Une seule est visible à la
+## L6 (U10) : file unique des fenêtres modales de la campagne. Une seule est visible à la
 ## fois ; les décisions (chronique, sort d'une place prise) passent avant les rapports (rapport de
 ## saison). Les autres attendent la fermeture de la fenêtre active. Aucune règle de jeu : de la
 ## présentation pure.

@@ -1,7 +1,7 @@
 class_name MenuBackdrop3D
 extends Node3D
 
-## Lot MM1 — décor 3D vivant du menu principal : Paris (maquette L1 `paris_siege.glb`, ADR 0015)
+## Décor 3D vivant du menu principal : Paris (maquette L1 `paris_siege.glb`, ADR 0015)
 ## au crépuscule sous un ciel HDRI V3 (`AtmosphereLibrary`), plans de caméra lents enchaînés par
 ## un fondu au noir, ost au premier plan (figurines skinnées V2 en `MultiMesh`, ADR 0014) avec
 ## bannières au vent. Réglages dans `data/ui/front_end.json` (`backdrop`). Rendu seulement.

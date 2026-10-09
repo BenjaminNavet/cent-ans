@@ -5,7 +5,7 @@ extends Node3D
 ## dérivé du zoom (30° de près, plus rasant en vue comté → 70° de loin), amortissement.
 ## Entrées : WASD/flèches, bords d'écran (désactivable), molette ou pad (deux doigts / pincement), glisser molette.
 ##
-## Lot ZG4 (ADR 0036) : caméra rapprochée quand la pyramide de relief est en cache (`relief`
+## Caméra rapprochée quand la pyramide de relief est en cache (`relief` (ADR 0036)
 ## posé par la carte) : distance minimale selon l'étage le plus fin sous le point visé
 ## (`CloseCameraProfile`, ≈ 5 unités sur E2, 1,5 sur E4, 0,3 dans les zones E5-E7), adoucie dans
 ## l'espace ; tangage de plus en plus rasant sous 22 unités ; point visé posé sur le sol
@@ -17,7 +17,7 @@ extends Node3D
 ## glissement de focus de `focus_glide_s` (0,4 s, courbe douce) au lieu d'un saut pour
 ## `look_at_point`. `snap()` applique tout de suite les cibles (tests, captures).
 
-## Lot C6 : vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
+## Vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
 @export var min_distance: float = 22.0
 ## GC (ADR 0158) : plancher dur de la carte généralisée (maquettes stylisées) : aucune zone proche
 ## ni étage de relief ne laisse descendre en dessous (0 : pas de plancher). `--camera-min` le lève.
@@ -35,7 +35,7 @@ var floor_distance: float = 0.0
 @export var zoom_step: float = 0.15
 @export var edge_pan_enabled: bool = true
 @export var edge_margin_px: float = 14.0
-## Lot L1 : zoom plus proche au-dessus des villes emblématiques (Paris) ; `close_zones` liste
+## Zoom plus proche au-dessus des villes emblématiques (Paris) ; `close_zones` liste
 ## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
 @export var close_min_distance: float = 7.0
 var close_zones: PackedVector3Array = PackedVector3Array()
@@ -43,7 +43,7 @@ var close_zones: PackedVector3Array = PackedVector3Array()
 ## tant qu'elles ne sont pas fournies (`floor_zones_set`), `close_zones` sert.
 var floor_zones: PackedVector3Array = PackedVector3Array()
 var floor_zones_set := false
-## Lot ZG4 : réglages de la caméra rapprochée ; `relief` (`ReliefPyramid` : étages disponibles) et
+## Réglages de la caméra rapprochée ; `relief` (`ReliefPyramid` : étages disponibles) et
 ## `ground_height(x, y) -> float` (surface affichée, `TerrainBuilder.surface_height_at`) sont posés
 ## par la carte ; null / vide = comportement historique.
 var profile: CloseCameraProfile = CloseCameraProfile.load_default()

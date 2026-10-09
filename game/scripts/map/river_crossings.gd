@@ -1,7 +1,7 @@
 class_name RiverCrossings
 extends Node3D
 
-## Ponts, gués et bacs de la carte de campagne (lot V4, A1-11), rendu seulement.
+## Ponts, gués et bacs de la carte de campagne, rendu seulement.
 ##
 ## - Franchissements : `data/map/crossings_px.json` (sortie de `cent-ans geo rivers-render`) :
 ##   passages historiques de `crossings.json` recalés sur le fleuve affiché (et sur la route qui
@@ -12,7 +12,7 @@ extends Node3D
 ##   pierre crénelé à tours (cité, ville, château) ou un pont de bois (village, abbaye) sur le
 ##   bord de l'emprise ; un franchissement historique situé dans l'emprise lui donne son nom et,
 ##   pour les colonies ouvertes, sa structure.
-## - Zones personnalisées (lot L1) : rien dedans ; pont-porte au bord si `boundary_bridges`.
+## - Zones personnalisées : rien dedans ; pont-porte au bord si `boundary_bridges`.
 ## Posés sur la surface affichée et recalés quand une tuile change de niveau.
 
 const CROSSINGS_FILE := "crossings_px.json"
@@ -24,7 +24,7 @@ const HEIGHT_SCALE := 2.0
 const DECK_SCALE := 2.0
 ## Largeur (px carte) sous laquelle un pont-porte n'a pas de tours (simple pont de pierre).
 const GATE_MIN_WIDTH := 0.3
-## Lot ZG5b : réduction des ouvrages en mode fin (culées de 0,5 unité → 50 m, tablier ≈ 10-25 m).
+## Réduction des ouvrages en mode fin (culées de 0,5 unité → 50 m, tablier ≈ 10-25 m).
 const FINE_SCALE := 0.14
 
 var renderer: RiversRenderer
@@ -32,19 +32,19 @@ var renderer: RiversRenderer
 var items: Array[Dictionary] = []
 
 var _by_chunk: Dictionary = {}
-## Lot ZG5b : ancrages fins (`fine_anchors.json` → `crossings`, ordre de `crossings_px.json`) et
+## Ancrages fins (`fine_anchors.json` → `crossings`, ordre de `crossings_px.json`) et
 ## mode fin (au palier près, sur le fleuve fin : position, sens du courant, largeur réelle, eau
 ## à `z_water`) ; ponts-portes cachés (recalculés sur le fleuve fin par `FineGeoLayer`).
 var _fine_anchors: Array[Dictionary] = []
 var _fine_mode := false
 var _gates_hidden := false
-## Lot ZG4b : ouvrages à remettre en forme après une bascule de mode (index dans `items`),
+## Ouvrages à remettre en forme après une bascule de mode (index dans `items`),
 ## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
 var _reshape_queue: Array[int] = []
 ## FL3 : ouvrages à construire (tuile passée au niveau proche), étalés comme `_reshape_queue` : un
 ## maillage de pont bâti sur le fil principal coûtait jusqu'à 20 ms dans l'image de la bascule.
 var _spawn_queue: Array[int] = []
-## Lot ZG7a : maillages fins préparés dans un fil dès `set_fine_anchors` (clé du cache
+## Maillages fins préparés dans un fil dès `set_fine_anchors` (clé du cache
 ## `BridgeMeshes` → tableaux) : la bascule n'a plus qu'à créer les `ArrayMesh` (≤ 1 ms par
 ## ouvrage au lieu de 5-16 ms de `SurfaceTool` sous charge).
 var _prepared_fine: Dictionary = {}
@@ -269,7 +269,7 @@ func _shape(item: Dictionary) -> void:
 	_ground(item)
 
 
-# --- Lot DN-FLEUVE : ponts générés -------------------------------------------------------------
+# Ponts générés -------------------------------------------------------------
 
 
 ## Données du glb généré de l'ouvrage (`DnWaterModels`), {} si la table n'en donne pas, si le glb
@@ -372,7 +372,7 @@ func _on_chunk_surface_changed(index: int) -> void:
 			pump_reshape(true)
 
 
-# --- Lot ZG5b : ancrages fins -------------------------------------------------------------
+# Ancrages fins -------------------------------------------------------------
 
 
 ## Ancrages de `fine_anchors.json` (même ordre que `crossings_px.json`).

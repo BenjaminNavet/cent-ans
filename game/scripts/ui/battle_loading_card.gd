@@ -1,7 +1,7 @@
 class_name BattleLoadingCard
 extends CanvasLayer
 
-## Lot AR1 — écran de chargement illustré des batailles, sièges et batailles navales : une
+## Écran de chargement illustré des batailles, sièges et batailles navales : une
 ## enluminure (Froissart, Vigiles de Charles VII…) en grand dans un cadre d'or, la même en fond
 ## assombri, le titre de l'épisode et une citation de chroniqueur (`data/ui/illustrations.json`,
 ## `loading`). Affiché au moins `min_seconds` (3 s) même si la scène se construit plus vite ;
@@ -12,7 +12,7 @@ extends CanvasLayer
 ##   ... instancier la bataille ...
 ##   card.close()               # attend le reste du temps minimal, fondu, puis libère
 ## Capture : `-- --battle-loading-shot=<chemin.png>` enregistre l'écran puis quitte.
-## Lot P2e (ADR 0097, bible DA § 12.2) : tailles de texte par `UiType`, comme `loading_screen.gd`
+## Tailles de texte par `UiType`, comme `loading_screen.gd` (ADR 0097)
 ## (transition plein écran par `CanvasLayer` à étage élevé, hors zones `UiLayout` : ni « choix
 ## bloquant » ni panneau, la zone `MODAL` ne convient pas à un écran de transition).
 

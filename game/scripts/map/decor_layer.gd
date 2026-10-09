@@ -1,7 +1,7 @@
 class_name DecorLayer
 extends Node3D
 
-## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes de la carte de campagne (croix de chemin,
+## Décor ponctuel hors les villes de la carte de campagne (croix de chemin,
 ## gibets, péages, phares, mines, forges, mégalithes, ruines romaines, champs de bataille passés,
 ## pèlerins, foires, steppe…). Rendu seulement : aucune règle de jeu.
 ## - Placement : `DecorPlanner` (règles et sites de `data/map/map_landmarks_extra.json`), calculé

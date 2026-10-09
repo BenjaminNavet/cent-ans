@@ -1,7 +1,7 @@
 class_name SeaLaneLayer
 extends Node3D
 
-## Lot SL1 (ADR 0139) : routes maritimes tracées sur la mer, en tirets à l'encre comme sur un
+## Routes maritimes tracées sur la mer, en tirets à l'encre comme sur un (ADR 0139)
 ## portulan. Géométrie : `data/map/sea_lanes_px.json` (sortie de `cent-ans geo sea-lanes`,
 ## pixels carte = coordonnées monde X/Z) ; état du tour : `CampaignSim.get_sea_lanes()` (mer,
 ## maîtrise, blocus, gros temps, routes commerciales). Rendu seulement : les règles vivent dans

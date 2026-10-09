@@ -1,7 +1,7 @@
 class_name TownLayer
 extends Node3D
 
-## Lot ZG6 (ADR 0036, 0138) : villes ordinaires à l'échelle réelle quand le rig est à moins de
+## Villes ordinaires à l'échelle réelle quand le rig est à moins de (ADR 0036, 0138)
 ## `TownRenderProfile.max_rig_distance` (pyramide de relief en cache). Rendu seulement.
 ## - Données : `data/map/towns_1340.json` (`TownData`, outil `cent-ans geo towns`).
 ## - Streaming : les villes à moins de `TownRenderProfile` × distance du rig de la caméra sont
@@ -116,7 +116,7 @@ func town_ids() -> Array[String]:
 	return _ids
 
 
-## Cercles de finage (x, y, rayon en unités monde) : parcellaire du lot ZG5b.
+## Cercles de finage (x, y, rayon en unités monde) : parcellaire.
 func finage_zones() -> PackedVector3Array:
 	return data.finage_zones() if data != null else PackedVector3Array()
 
@@ -259,7 +259,7 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 	return missing
 
 
-## Finages des `FINAGE_SLOTS` villes les plus proches du point visé → parcellaire du lot ZG5b
+## Finages des `FINAGE_SLOTS` villes les plus proches du point visé → parcellaire
 ## (`fp_towns` de `fine_parcels.gdshaderinc` : x, y, rayon du finage, rayon bâti en unités).
 func _push_finage(here: Vector2) -> void:
 	if terrain == null or terrain.material == null:

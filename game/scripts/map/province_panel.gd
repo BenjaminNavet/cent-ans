@@ -11,7 +11,7 @@ signal create_army_requested(province_id: String, unit_indices: Array)
 signal build_requested(province_id: String, building_id: String)
 signal cancel_build_requested(province_id: String)
 signal court_requested
-## Lot C5 : clic sur une colonie de l'onglet « Colonies ».
+## Clic sur une colonie de l'onglet « Colonies ».
 signal settlement_requested(settlement_id: String)
 signal closed
 ## FE6 : clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
@@ -64,8 +64,8 @@ var _garrison_checks: Array[CheckBox] = []
 var table_section: TableSection
 ## Classes de population de l'onglet Ville (remplace le conteneur `ClassesList` de la scène).
 var classes_list: ClassesSection
-var edict_section: EdictSection  # lot C4
-## Lot C5 : onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
+var edict_section: EdictSection
+## Onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
 ## renvoie les lignes `[{id, name, kind, controller, owner, garrison_units, garrison_strength,
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
 var settlements_list: SettlementsSection
@@ -111,7 +111,7 @@ func _ready() -> void:
 	classes_list.add_theme_constant_override("separation", 3)
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
-	edict_section = EdictSection.new()  # lot C4
+	edict_section = EdictSection.new()
 	# Q2 : en tête de l'onglet Ville (en bas, il fallait défiler pour le trouver) ; la liste
 	# des édits reste repliée derrière « Changer d'édit ».
 	var city_box := classes_list.get_parent()
@@ -254,7 +254,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 		recruit_panel.hide()
 	_fill_city(city, is_player_owner)
 	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
-	edict_section.show_for(province_id, is_player_owner and not state.is_empty())  # lot C4
+	edict_section.show_for(province_id, is_player_owner and not state.is_empty())
 	_fill_settlements(label_of, is_player_owner)  # C5
 	_fill_breadcrumb()  # FE6
 	show()
@@ -360,7 +360,7 @@ func show_ville_tab() -> void:
 	tabs.current_tab = 1
 
 
-# --- Lot C5 : onglet « Colonies » ----------------------------------------------------
+# Onglet « Colonies » ----------------------------------------------------
 
 
 func _build_settlements_tab() -> void:

@@ -1,8 +1,8 @@
 class_name LegendSample
 extends Control
 
-## Lot UX1 : échantillon dessiné d'un symbole de la carte pour la légende (`MapLegend`).
-## Les symboles reprennent le vrai rendu : lieux de la vue normale (lot DV2, ADR 0124 : nom
+## Échantillon dessiné d'un symbole de la carte pour la légende (`MapLegend`).
+## Les symboles reprennent le vrai rendu : lieux de la vue normale (ADR 0124 : nom
 ## surmonté de l'écu du royaume, tailles par rang de `SettlementMarkers`, comme
 ## `settlement_icon.gdshader`), vignette à l'encre du parchemin (`ParchmentOverlay.paint_town`),
 ## plaque d'effectif (`ArmyPlate.build`), jeton d'agent
@@ -46,7 +46,7 @@ class Worksite:
 		for y: float in [0.3, 0.6]:
 			draw_line(Vector2(w * 0.06, h * y), Vector2(w * 0.68, h * y), HAMMER, 2.0)
 		draw_colored_polygon(PackedVector2Array([Vector2(w * 0.78, h * 0.94), Vector2(w * 0.9, h * 0.7), Vector2(w, h * 0.94)]), stone.darkened(0.15))
-## Catalogue des marqueurs (lot DA3), chargé une fois.
+## Catalogue des marqueurs, chargé une fois.
 static var _markers: SettlementMarkers
 
 
@@ -244,14 +244,14 @@ func _draw_swatch(color: Color) -> void:
 	draw_rect(rect, HudStyle.INK, false, 1.0)
 
 
-## Lot DA3 : catalogue des marqueurs de lieux (chargé une fois).
+## Catalogue des marqueurs de lieux (chargé une fois).
 static func catalog() -> SettlementMarkers:
 	if _markers == null:
 		_markers = SettlementMarkers.load_default()
 	return _markers
 
 
-## Lieu de la vue normale (lot DV2) : nom `name` (encre, base du texte sur `base`) surmonté de
+## Lieu de la vue normale : nom `name` (encre, base du texte sur `base`) surmonté de
 ## l'écu du royaume `faction` ("" : sans écu), comme `settlement_icon.gdshader`. `half` :
 ## demi-côté de l'écu en pixels. Sans nom, l'écu seul, sa base sur `base`.
 static func draw_marker(canvas: CanvasItem, base: Vector2, half: float, faction: String, name: String = "") -> void:

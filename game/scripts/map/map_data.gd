@@ -31,7 +31,7 @@ var height_bytes: PackedByteArray
 const height_bpp: int = 2
 const height_little_endian: bool = true
 const height_decoder: String = "rust"
-## Fichier d'altitude chargé : `heightmap_render.png` (lot R1 : Copernicus 90 m moyenné, relief
+## Fichier d'altitude chargé : `heightmap_render.png` (Copernicus 90 m moyenné, relief
 ## local rehaussé pour le rendu, même trait de côte) s'il existe (`map.json.render_heightmap`),
 ## sinon `heightmap.png` (source des règles : grille de navigation). Surface unique du rendu :
 ## terrain, armées, villes, fleuves et sélection passent tous par `MapData`.
@@ -44,14 +44,14 @@ var land_mask: Image
 var splat_image: Image
 var border_dist_image: Image
 var coast_dist_image: Image
-## Lot V4 : lit des fleuves (`cent-ans geo rivers-render`), L8, distance signée à la berge
+## Lit des fleuves (`cent-ans geo rivers-render`), L8, distance signée à la berge
 ## ((valeur − 128) / 16 px, négative dans le lit) ; null si absent.
 var river_bed_image: Image
-## Lot RV-D : occlusion de vallée (`cent-ans geo relief-occlusion`), L8 demi-grille, 128 neutre,
+## Occlusion de vallée (`cent-ans geo relief-occlusion`), L8 demi-grille, 128 neutre,
 ## > 128 vallée, < 128 crête ; null si absente (le terrain s'en passe).
 var relief_occlusion_image: Image
 ## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
-## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
+## `VegetationFields.landuse` ; null tant qu'elle n'a pas été demandée.
 var landuse_image: Image
 var province_ids_image: Image
 var _preloaded_ids: Image = null
@@ -156,7 +156,7 @@ static func height_from_display_with(y: float, x: float, z: float, scale: float,
 
 
 ## Taille du monde (`size_px` de `<map_dir>/map.json`, unités carte), sans charger la carte ;
-## Vector2i.ZERO si illisible (lot OM1, ADR 0115 : aucune taille codée en dur).
+## Vector2i.ZERO si illisible (ADR 0115 : aucune taille codée en dur).
 static func read_world_size(map_dir: String) -> Vector2i:
 	var path := map_dir.path_join("map.json")
 	if not FileAccess.file_exists(path):
@@ -373,7 +373,7 @@ func height_m_at(x: float, y: float) -> float:
 	return height_min_m + h * (height_max_m - height_min_m)
 
 
-## Lot PF-11 : `height_m_at` pour une série de points (mêmes valeurs), les champs de la carte
+## `height_m_at` pour une série de points (mêmes valeurs), les champs de la carte
 ## et les bornes lus une seule fois ; à préférer aux boucles de `height_m_at` point par point.
 func heights_m_at(points: PackedVector2Array) -> PackedFloat32Array:
 	var out := PackedFloat32Array()
@@ -448,7 +448,7 @@ func centroid_of_id(id: String) -> Vector2:
 	return province["centroid"]
 
 
-## Lot V4 : distance signée (px carte) à la berge du fleuve le plus proche, négative dans le lit ;
+## Distance signée (px carte) à la berge du fleuve le plus proche, négative dans le lit ;
 ## 8 (loin de tout fleuve) sans `river_bed.png`. Plus proche voisin (semis de la végétation).
 func river_sd_at(x: float, y: float) -> float:
 	if river_bed_image == null:
@@ -466,7 +466,7 @@ func is_land_px(px: int, py: int) -> bool:
 	return land_mask.get_pixel(px, py).r > 0.5
 
 
-## Position (coordonnées carte) d'une colonie (lot C4, `settlements_px.json`) ;
+## Position (coordonnées carte) d'une colonie (`settlements_px.json`) ;
 ## Vector2(-1, -1) si inconnue ou si le fichier manque.
 func settlement_px(id: String) -> Vector2:
 	if _settlements_px == null:

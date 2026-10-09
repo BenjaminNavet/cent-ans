@@ -1,7 +1,7 @@
 class_name LandmarkSiegeTown
 extends Node3D
 
-## Lot L3 (ADR 0026) — ville assiégée tirée du plan d'une ville emblématique : le cœur construit
+## Ville assiégée tirée du plan d'une ville emblématique : le cœur construit (ADR 0026)
 ## l'enceinte, les portes et les maisons (`SiegeWorks::from_layout`) ; ce nœud ajoute ce que le
 ## rendu générique de `BattleSiege` ne connaît pas : les grandes rues du plan pavées entre les
 ## maisons (Saint-Jacques, la Harpe à Paris ; Cheapside à Londres…). Rendu seulement.

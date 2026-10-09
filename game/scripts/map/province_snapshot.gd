@@ -1,7 +1,7 @@
 class_name ProvinceSnapshot
 extends RefCounted
 
-## Lot PB3d : état des provinces lu en un seul appel (`CampaignSim.get_provinces_snapshot`,
+## État des provinces lu en un seul appel (`CampaignSim.get_provinces_snapshot`,
 ## tableaux groupés) pour les calques de la carte — couleurs politiques, frontières, parchemin,
 ## hameaux, vie des campagnes — au lieu d'un `get_province_state` complet (garnison, gouverneur)
 ## par province et par boucle. Un instantané est partagé par tous les calques d'un même
@@ -18,7 +18,7 @@ var population_total := PackedInt64Array()
 var besieged := PackedByteArray()
 ## Chantier en cours dans la cité ; vide sans l'appel groupé (lire alors `get_province_city`).
 var constructing := PackedByteArray()
-## Lot RS-L : détail du siège (vide/0 si `besieged` est faux), mêmes champs que le dict `siege` de
+## Détail du siège (vide/0 si `besieged` est faux), mêmes champs que le dict `siege` de
 ## `get_province_state`. Évite à `alerts.gd` une relecture par province assiégée.
 var siege_attacker := PackedStringArray()
 var siege_supplies := PackedInt32Array()

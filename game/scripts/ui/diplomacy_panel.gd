@@ -1,10 +1,10 @@
 class_name DiplomacyPanel
 extends PanelContainer
 
-## Écran de diplomatie plein écran (lot DP1, ADR 0025), en registre de manuscrit enluminé :
+## Écran de diplomatie plein écran (ADR 0025), en registre de manuscrit enluminé :
 ## - à gauche, les factions (blason, souverain, relation, attitude ; raisons en infobulle) ;
 ## - au centre, la carte diplomatique (provinces teintées selon notre position diplomatique,
-##   lot DP2 : allié, accord, neutre, tension, guerre, vassal ; un clic choisit la faction qui
+##   allié, accord, neutre, tension, guerre, vassal ; un clic choisit la faction qui
 ##   tient la province) ;
 ## - à droite, la fiche de la faction choisie et trois onglets : « Négociation » (clauses
 ##   communes, colonnes « Vous offrez » / « Vous demandez », barre d'acceptation en direct,
@@ -23,7 +23,7 @@ signal closed
 ## U16 : ouvre la couche des routes commerciales (même vue que la touche V).
 signal trade_view_requested
 
-## VN lot 3 : largeur plancher de la colonne de négociation (elle grandit avec l'écran ; la colonne
+## Largeur plancher de la colonne de négociation (elle grandit avec l'écran ; la colonne
 ## des puissances est `DiplomacyFactionList.MIN_WIDTH`, le panneau tient dans une vue de 1138 px).
 const DETAIL_COLUMN_MIN_WIDTH := 380.0
 const DONATION_AMOUNT := 1000

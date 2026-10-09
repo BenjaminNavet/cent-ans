@@ -1,11 +1,11 @@
 class_name LifeEffects
 extends Node3D
 
-## Lot CV1 : effets vivants de la carte (rendu seulement) : fumées de cheminée au-dessus des
+## Effets vivants de la carte (rendu seulement) : fumées de cheminée au-dessus des
 ## colonies et des hameaux (plus fournies l'hiver), fumées d'incendie des hameaux brûlés et des
 ## villes assiégées, vols d'oiseaux, bateaux. Instanciés par `MultiMesh` (un appel de rendu par
 ## famille), visibles au palier près (fumées d'incendie jusqu'au palier moyen).
-## Lot SZ4 : les fumées d'incendie passent continûment de leur taille de carte à leur taille réelle
+## Les fumées d'incendie passent continûment de leur taille de carte à leur taille réelle
 ## (`MapPropScale`). VT2 (ADR 0138, addendum) : moulins et panaches de cheminée sont à l'échelle
 ## 1:1 à toute distance, dessinés en deçà de leur portée (`windmill_max_distance`,
 ## `chimney_max_distance`).
@@ -87,7 +87,7 @@ var _plume_dark: PackedFloat32Array = PackedFloat32Array()
 var regional_plumes_enabled := true
 ## Points des panaches : [Vector2 px (courant), hauteur au-dessus du sol, graine, colonie (-1 :
 ## hameau), décalage au centre à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle]
-## (lot SZ4b : les points d'une colonie suivent l'échelle de sa maquette, `_settlement_pose`).
+## (les points d'une colonie suivent l'échelle de sa maquette, `_settlement_pose`).
 var _chimney_points: Array = []
 var _fire_points: Array = []
 var _reground_timer := -1.0

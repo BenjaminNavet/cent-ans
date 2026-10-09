@@ -1,7 +1,7 @@
 class_name ArmyMovementPath
 extends Node3D
 
-## Lot M4 : chemin prévu de l'armée sélectionnée, posé sur le relief, en deux couleurs :
+## Chemin prévu de l'armée sélectionnée, posé sur le relief, en deux couleurs :
 ## la partie parcourue ce tour (or) puis celle des tours suivants (encre rouge), avec un
 ## jalon à la fin de chaque tour. Rendu seulement : la polyligne et ses coupures viennent de
 ## `CampaignSim.find_path_points` (ou du `planned_path` d'une armée déjà en marche).
@@ -15,7 +15,7 @@ const LIFT := 0.5
 @export var now_color: Color = Color(0.47, 0.74, 0.38, 1.0)
 @export var later_color: Color = Color(0.76, 0.41, 0.28, 0.95)
 @export var marker_color: Color = Color(1.0, 0.90, 0.60, 1.0)
-## Lot DP2 : chemin sans droit de passage (incident diplomatique), en rouge franc.
+## Chemin sans droit de passage (incident diplomatique), en rouge franc.
 @export var trespass_color: Color = Color(0.93, 0.08, 0.06, 1.0)
 
 var map_data: MapData
@@ -74,7 +74,7 @@ func _line_instance(node_name: String, color: Color, min_px: float, priority: in
 
 ## `points` : polyligne carte (départ compris) ; `stop_index` : fin de ce tour ;
 ## `turn_ends` : fin de chaque tour (la dernière = fin du trajet).
-## `warning` (lot DP2) : la marche entre sans droit de passage sur les terres d'une faction en
+## `warning` : la marche entre sans droit de passage sur les terres d'une faction en
 ## paix ; le chemin est tracé en rouge.
 func show_plan(points: PackedVector2Array, stop_index: int, turn_ends: PackedInt32Array, camera_distance: float, warning: bool = false) -> void:
 	if points.size() < 2 or map_data == null:

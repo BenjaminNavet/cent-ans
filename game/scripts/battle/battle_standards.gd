@@ -1,7 +1,7 @@
 class_name BattleStandards
 extends Node3D
 
-## Vent de la bataille, porte-étendards et musiciens (lots BV3 puis EP5, ADR 0034), rendu seulement.
+## Vent de la bataille, porte-étendards et musiciens (ADR 0034), rendu seulement.
 ## - Vent : direction tirée de la graine de la bataille, force et rafales selon la météo
 ##   (`data/fx/battle_finish.json`, `wind`) ; partagé par les drapeaux-repères, les étendards
 ##   portés et l'herbe. Aucune règle n'en dépend.

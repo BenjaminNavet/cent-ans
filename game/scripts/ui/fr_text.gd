@@ -1,7 +1,7 @@
 class_name FrText
 extends RefCounted
 
-## Lot U8 (audit A3) : petits outils de français pour l'interface — pluriels exacts au lieu de
+## Petits outils de français pour l'interface — pluriels exacts au lieu de
 ## « (s) », dates en toutes lettres (« 24 sept. 2026, 23 h 19 »). Aucune règle de jeu.
 
 const MONTHS_SHORT := ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]

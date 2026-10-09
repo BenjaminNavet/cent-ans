@@ -1,7 +1,7 @@
 class_name MapScale
 extends RefCounted
 
-## Lot GC (ADR 0158) : carte généralisée. Les positions sont vraies, les objets sont grossis d'un
+## Carte généralisée. Les positions sont vraies, les objets sont grossis d'un (ADR 0158)
 ## facteur constant, indépendant de la distance de caméra. Purement visuel.
 ##
 ## `town_scale()` : grossissement des villes autour de leur centre (`map.town_scale` de

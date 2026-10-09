@@ -1,8 +1,8 @@
 class_name LifeAmbient
 extends Node3D
 
-## Lot CV1 : vie ambiante de la carte (rendu seulement) :
-## - oiseaux (lot ME3 : `MapBirdFlocks`, espèces/habitats/saisons dans `data/map/map_birds.json`) ;
+## Vie ambiante de la carte (rendu seulement) :
+## - oiseaux (`MapBirdFlocks`, espèces/habitats/saisons dans `data/map/map_birds.json`) ;
 ## - bateaux sur les grands fleuves (va-et-vient le long du tracé) et navires sur la Manche et
 ##   les côtes (lignes entre ports voisins dont le trajet reste en mer).
 ## Palier près (oiseaux) et près/moyen (bateaux) ; un `MultiMesh` par famille.
@@ -129,7 +129,7 @@ func _at_sea(a: Vector2, b: Vector2) -> bool:
 	return water > 4
 
 
-## Groupes d'instances d'une famille de trajets : un `MultiMesh` par modèle généré (lot DN-FLEUVE),
+## Groupes d'instances d'une famille de trajets : un `MultiMesh` par modèle généré,
 ## sinon (table vide ou glb non importé) un seul groupe avec la cogue d'origine.
 func _route_groups(parent: Node3D, routes: Array, legacy_scale: float, generated_scale: float) -> Array[Dictionary]:
 	var groups: Array[Dictionary] = []

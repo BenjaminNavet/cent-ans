@@ -21,7 +21,7 @@ signal tax_rate_changed(faction_id: String, rate: String)
 signal stance_changed(army_id: String, stance: String)
 ## Bandeau d'ost : régiments à détacher de l'armée `army_id` (ordre `split_army`).
 signal army_split_requested(army_id: String, unit_indices: Array)
-## Bandeau d'ost (lot C7d) : régiments de l'armée `army_id` à laisser en garnison de la
+## Bandeau d'ost : régiments de l'armée `army_id` à laisser en garnison de la
 ## colonie où elle se trouve (ordre `garrison_units`).
 signal army_garrison_requested(army_id: String, unit_indices: Array)
 ## TW2-T3 : bouton « Mercenaires » du bandeau de l'armée `army_id`.
@@ -75,9 +75,9 @@ const TOAST_GRACE_MS := 300
 @onready var general_seal: GeneralSeal = %GeneralSeal
 @onready var end_turn_cluster: EndTurnCluster = %EndTurnCluster
 @onready var news_letters: NewsLetters = %NewsLetters
-## Minicarte (lot C1), ajoutée par `MinimapController` ; placée en haut à droite, lettres dessous.
+## Minicarte, ajoutée par `MinimapController` ; placée en haut à droite, lettres dessous.
 var minimap: Control = null
-## Lot C7b : panneaux ancrés comme le panneau de province, à gauche de la minicarte (panneau de
+## Panneaux ancrés comme le panneau de province, à gauche de la minicarte (panneau de
 ## colonie) ; voir `dock_right_panel`.
 var docked_panels: Array[Control] = []
 ## Abscisse écran du bord droit de ces panneaux (dernier `layout_hud`).
@@ -109,11 +109,11 @@ var top_fit: TopBarFit
 ## Journal des événements (créé au `_ready`).
 var journal: JournalView
 
-## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
+## Pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
 var panels := PanelStack.new()
 ## Province affichée par le panneau de province (une autre province = nouvelle sélection).
 var _province_panel_id: String = ""
-## Lot A6-L6 (U10) : file unique des fenêtres modales (une à la fois, décisions avant rapports) ;
+## L6 (U10) : file unique des fenêtres modales (une à la fois, décisions avant rapports) ;
 ## les avis (toasts) attendent la fermeture de la fenêtre active.
 var modal_queue := ModalQueue.new()
 var _held_toasts: Array = []
@@ -183,7 +183,7 @@ func _ready() -> void:
 	_apply_access_args()  # U12 : captures
 
 
-## Captures (lot U12) : `--access=colorblind,contrast,motion` active ces réglages sans les
+## Captures : `--access=colorblind,contrast,motion` active ces réglages sans les
 ## enregistrer dans le fichier du joueur.
 func _apply_access_args() -> void:
 	var settings := get_node_or_null("/root/Settings")
@@ -354,7 +354,7 @@ func set_faction(label: String, color: Color) -> void:
 
 ## `economy` : `get_faction_economy` (vide si indisponible). Affiche le solde **net** prévu
 ## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
-## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
+## rapport à la saison passée ». Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	top_fit.set_text(treasury_label, "Trésor : %s" % Money.amount(treasury), Money.amount(treasury))
 	if economy.is_empty():
@@ -536,7 +536,7 @@ var journal_faction_name: Callable = Callable():
 		journal.faction_name = value
 	get:
 		return journal.faction_name
-## Lot U5 : filtre d'intérêt des lettres et du bandeau, posé par `HudController.update_interest`.
+## Filtre d'intérêt des lettres et du bandeau, posé par `HudController.update_interest`.
 var news_interest: NewsInterest = null:
 	set(value):
 		journal.interest = value
@@ -633,7 +633,7 @@ func _on_faction_swatch_input(event: InputEvent) -> void:
 ## F10b : armée sélectionnée dans le bandeau et le sceau. `army` = `get_army(id)`,
 ## `character` = `get_character(army.general)` (vide = sans chef), `title` = rubrique du
 ## bandeau, `status` = position et ordre en cours (étiquette au-dessus du bandeau),
-## `can_split` = la simulation accepte `split_army` et l'armée est au joueur. Lot C7d :
+## `can_split` = la simulation accepte `split_army` et l'armée est au joueur.
 ## `can_garrison` affiche le bouton « Garnison » (armée du joueur sur une colonie qu'il
 ## contrôle) ; `garrison_disabled_reason` le désactive avec une infobulle française
 ## (colonie assiégée ou pleine) quand il n'est pas vide.
@@ -676,7 +676,7 @@ func hide_army() -> void:
 	queue_layout()
 
 
-## Lot U10 (audit A3 § 4) : choix du général d'une armée sans chef, ouvert depuis le sceau
+## Choix du général d'une armée sans chef, ouvert depuis le sceau
 ## « Sans chef ». `candidates` : `[{id, name, detail, reason}]` (`reason` non vide = grisé, avec
 ## le motif). Choisir émet `general_requested(personnage, armée)` ; « Toute la Cour… » émet
 ## `court_panel_requested`.
@@ -868,7 +868,7 @@ func _update_log_visibility() -> void:
 	event_log.visible = not covered
 
 
-## Lot U5 (audit A3, T5) : bandeau « Tour des autres factions » affiché pendant la résolution de
+## Bandeau « Tour des autres factions » affiché pendant la résolution de
 ## la fin de saison. `end_turn_gate` (posé par `FlowController`) dit si la fin de tour aura lieu
 ## tout de suite (pas de confirmation en attente) ; invalide = oui.
 var end_turn_gate: Callable = Callable()
@@ -1006,7 +1006,7 @@ func _setup_hud() -> void:
 	queue_layout()
 
 
-# --- Zones fixes (chantier PO, lot PO1) --------------------------------------------------
+# --- Zones fixes (chantier PO) --------------------------------------------------
 
 
 ## PO1 (ADR 0097, bible DA § 12.1) : les éléments de la carte rejoignent les zones de `UiLayout`
@@ -1080,7 +1080,7 @@ func _placed_by_map(panel: Control) -> bool:
 	return panel.get_parent() == self or panel.has_meta(_SCREEN_ANCHORED)
 
 
-# --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
+# --- Pile des panneaux (audit A3) ------------------------------------------------
 
 
 func _setup_panel_stack() -> void:
@@ -1131,7 +1131,7 @@ func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array =
 		panel.resized.connect(queue_layout)
 
 
-## Lot U11 : fenêtre commune Codex / encyclopédie.
+## Fenêtre commune Codex / encyclopédie.
 var codex_hub: CodexHub
 
 
@@ -1166,7 +1166,7 @@ func _join_modal_then_register(panel: Control) -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if get_tree().paused or not visible or event.is_echo():
 		return
-	# Lot U7 (partiel) : sauvegarde rapide F5, chargement rapide F9.
+	# Sauvegarde rapide F5, chargement rapide F9.
 	if event is InputEventKey and event.pressed and not panels.has_modal_open():
 		if event.is_action_pressed("quick_save"):
 			save_requested.emit(QUICK_SAVE_NAME)
@@ -1333,7 +1333,7 @@ func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 		panel.global_position += shift
 
 
-## Lot C7b, PO1 : `panel` (panneau de colonie) rejoint la zone `SIDE_PANEL`, comme le panneau
+## `panel` (panneau de colonie) rejoint la zone `SIDE_PANEL`, comme le panneau
 ## de province (un seul occupant à la fois).
 func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
@@ -1374,7 +1374,7 @@ func _fit_hover_label() -> void:
 	queue_layout()
 
 
-## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; lot U7 : icône, libellé
+## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; icône, libellé
 ## « Codex » et lettre de raccourci (K), bien visible.
 func _add_codex_button() -> void:
 	var bubbles := get_node_or_null("/root/CodexBubbles")
@@ -1395,7 +1395,7 @@ func _add_codex_button() -> void:
 	top_fit.register_label(button, "Codex")
 
 
-# --- Raccourcis sur les boutons (lot U7) ------------------------------------------------
+# --- Raccourcis sur les boutons ------------------------------------------------
 
 ## [cartouche, action, bouton] des boutons de la barre.
 var _keycaps: Array = []
@@ -1403,7 +1403,7 @@ var _keycaps: Array = []
 
 ## Cartouche de la touche d'`action` dans le coin bas droit de `button`, et rappel dans
 ## l'infobulle (« Cour (C) »).
-## Lot MF1 : pose la touche d'une action sur un bouton ajouté par un contrôleur.
+## Pose la touche d'une action sur un bouton ajouté par un contrôleur.
 func add_keycap(button: Button, action: String) -> void:
 	_add_keycap(button, action)
 

@@ -7,7 +7,7 @@ extends Node
 ## (utilisée par le smoke test pour pointer sur `game/tests/fixtures`).
 
 const ENV_VAR := "CENT_ANS_DATA_DIR"
-## Lot ZG7b (ADR 0036) : dossier contenant `pyramid/` (cache du relief fin, ~3 Go, non versionné
+## Dossier contenant `pyramid/` (cache du relief fin, ~3 Go, non versionné (ADR 0036)
 ## et hors `.pck`) quand il n'est pas dans `data/map/`.
 const RELIEF_ENV_VAR := "CENT_ANS_RELIEF_DIR"
 ## Nom du dossier de relief livré à part, posé à côté de l'application (`Cent Ans.app`).

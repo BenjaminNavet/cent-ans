@@ -1,7 +1,7 @@
 class_name MarkerDeclutter
 extends RefCounted
 
-## Lot DA7d (ADR 0066) : placement glouton par priorité de rectangles écran (marqueurs de lieux et
+## Placement glouton par priorité de rectangles écran (marqueurs de lieux et (ADR 0066)
 ## leurs noms), à la manière de Total War : on pose dans l'ordre de priorité ; un rectangle qui
 ## recouvre un rectangle déjà posé cède la place (sauf s'il est épinglé). Grille spatiale à cases
 ## fixes : chaque essai ne teste que les rectangles des cases qu'il touche (coût ~linéaire).

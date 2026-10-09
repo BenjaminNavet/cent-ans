@@ -1,7 +1,7 @@
 class_name BudgetTable
 extends VBoxContainer
 
-## Tableau du budget du panneau de faction (audit A3 E1/E2, lot U3), à la manière de 3K :
+## Tableau du budget du panneau de faction (audit A3 E1/E2), à la manière de 3K :
 ## rubriques en lignes, colonnes « Prévu » (prochaine fin de tour), « Saison passée » (ce qui a
 ## été réellement porté au trésor) et « Écart ». Recettes en vert, dépenses en rouge, solde en
 ## gras ; « Autres mouvements » regroupe ce que le budget n'explique pas (rançons, tributs,

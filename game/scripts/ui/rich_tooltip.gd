@@ -469,7 +469,7 @@ static func plain(title: String, body: String = "", hint: String = "") -> String
 
 
 ## Forces et faiblesses : statistiques ≥ 130 % ou ≤ 70 % de la moyenne des types d'unités.
-## Lot UR1 : époque de recrutement d'un type d'unité (`available_from` / `available_until`),
+## Époque de recrutement d'un type d'unité (`available_from` / `available_until`),
 ## « » si l'unité est de tout temps.
 static func unit_period(definition: Dictionary) -> String:
 	var from := int(definition.get("available_from", 0))

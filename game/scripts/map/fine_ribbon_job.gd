@@ -1,11 +1,11 @@
 class_name FineRibbonJob
 extends RefCounted
 
-## Maillage des rubans d'une tuile E2 (lot ZG5b) : fleuves fins et routes drapées, construit
+## Maillage des rubans d'une tuile E2 : fleuves fins et routes drapées, construit
 ## dans un fil de travail (`run`) puis installé sur le fil principal (`FineGeoLayer`).
 ##
 ## Hauteurs en **mètres** dans `VERTEX.y` : les shaders multiplient par l'échelle verticale
-## courante (`height_scale`), donc un changement d'exagération (lot ZG4) ne demande aucun
+## courante (`height_scale`), donc un changement d'exagération ne demande aucun
 ## remaillage. Surface sous le ruban : instantané des pages chargées (`surface_snapshot`), relu
 ## quand les pages de la tuile changent.
 ##

@@ -1,7 +1,7 @@
 class_name FolkPool
 extends Node3D
 
-## Chantier FK, lot FK3 (`docs/design/2026-09-29-carte-vivante-folk.md` § 2.2, § 5) : réservoir de
+## Chantier FK (`docs/design/2026-09-29-carte-vivante-folk.md` § 2.2, § 5) : réservoir de
 ## figurines de la carte vivante. Rendu seulement.
 ##
 ## - Un `MultiMesh` par (rôle, activité) pour les figurines skinnées des batailles (mêmes

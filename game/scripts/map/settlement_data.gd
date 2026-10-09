@@ -1,13 +1,13 @@
 class_name SettlementData
 extends RefCounted
 
-## Données de rendu des colonies, hameaux et routes (lot C6). Lecture seule, aucune règle :
+## Données de rendu des colonies, hameaux et routes. Lecture seule, aucune règle :
 ## - `data/settlements/<province>.json` : id, province, kind, nom (statique) ;
 ## - `data/map/settlements_px.json` : position de jeu (pixels carte 4096) ;
 ## - `data/map/hamlets.json` : hameaux décoratifs `{name, px, province}` ;
 ## - `data/map/roads.geojson` : routes `LineString` en pixels carte (`type` main / secondary /
 ##   computed) ;
-## - `data/map/settlement_edge_paths.json` (lot C7b) : tracé routier des arêtes `road` du graphe
+## - `data/map/settlement_edge_paths.json` : tracé routier des arêtes `road` du graphe
 ##   (`{"edges": [{from, to, points}]}`, `from < to`), pour l'aperçu de chemin d'armée.
 ## `apply_live(sim)` met à jour contrôleur / propriétaire depuis `CampaignSim.settlements()`
 ## (repli : propriétaire de la province dans `data/`). Tous les fichiers sont facultatifs.

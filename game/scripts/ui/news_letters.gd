@@ -1,7 +1,7 @@
 class_name NewsLetters
 extends Control
 
-## Lettres scellées (HUD de campagne, haut à droite sous la minicarte ; lot F10a) : chaque
+## Lettres scellées (HUD de campagne, haut à droite sous la minicarte) : chaque
 ## nouvelle est une lettre pliée, scellée d'une cire à l'écu de la faction concernée, avec
 ## une rubrique (type) et un titre court. La plus récente est en haut.
 ##
@@ -39,7 +39,7 @@ const KIND_LABELS := {
 	"revolt": "Révolte",
 	"plague": "Peste",
 	"table": "La Table",  # H9
-	"edict": "Édit régional",  # lot C4
+	"edict": "Édit régional",
 	"medicine": "Médecine",  # H9
 	"coinage": "Monnaie",  # H11
 	"ransom": "Rançon",  # H11
@@ -60,7 +60,7 @@ const MAX_KEPT := 40
 
 ## Lettres visibles ; au-delà, une ligne « + n lettres plus anciennes ».
 @export var max_visible: int = 5
-## Lot U5 : plafond de `max_visible` et hauteur estimée d'une lettre repliée (`fit_height`).
+## Plafond de `max_visible` et hauteur estimée d'une lettre repliée (`fit_height`).
 const MAX_VISIBLE_DEFAULT := 5
 const LETTER_HEIGHT_ESTIMATE := 98.0
 
@@ -99,7 +99,7 @@ func _notification(what: int) -> void:
 		_more_pill.free()
 
 
-## Lot U5 : nombre de lettres visibles ajusté à la hauteur disponible (au-dessus des pastilles
+## Nombre de lettres visibles ajusté à la hauteur disponible (au-dessus des pastilles
 ## d'alerte de la cloche) ; 0 = seule l'étiquette « + n lettres » reste.
 func fit_height(max_height: float) -> void:
 	var fitting := clampi(int((max_height - 26.0 + 6.0) / (LETTER_HEIGHT_ESTIMATE + 6.0)), 0, MAX_VISIBLE_DEFAULT)

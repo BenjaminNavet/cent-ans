@@ -1,7 +1,7 @@
 class_name RockOutcrops
 extends Node3D
 
-## Lot HB5 (ADR 0143) : affleurements rocheux à l'échelle du paysage sur la carte de campagne
+## Affleurements rocheux à l'échelle du paysage sur la carte de campagne (ADR 0143)
 ## (falaises calcaires, chaos granitiques, barres stratifiées, aiguilles alpines, grès rouges,
 ## blocs erratiques), lisibles de la vue moyenne (d ≈ 100-400) à la vue proche.
 ##

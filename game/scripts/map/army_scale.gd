@@ -17,7 +17,7 @@ const DEFAULT_SCALE_EXPONENT := 0.65
 ## faisait recouvrir Paris par l'ost au plus près.
 const MIN_SCALE := 0.27
 const MAX_SCALE := 14.0
-## Lot ZG4 : distance sous laquelle l'échelle décroît de nouveau avec la distance.
+## Distance sous laquelle l'échelle décroît de nouveau avec la distance.
 const CLOSE_KNEE_DISTANCE := 12.0
 
 ## SA (ADR 0160) : exposant de la loi d'échelle (`map.army_scale_exponent` de
@@ -27,7 +27,7 @@ static func scale_exponent() -> float:
 
 
 ## Échelle des marqueurs d'armée pour une distance caméra.
-## - Sous `CLOSE_KNEE_DISTANCE` (lot ZG4, vues vallée et site) : proportionnelle à la distance
+## - Sous `CLOSE_KNEE_DISTANCE` (vues vallée et site) : proportionnelle à la distance
 ##   (pas d'étendard de 2 km au-dessus d'un site vu à 200 m).
 ## - Jusqu'à `MIN_SCALE / SCALE_PER_DISTANCE` (≈ 19) : taille monde fixe `MIN_SCALE` (Q2).
 ## - Au-delà, vue normale (SA, ADR 0160) : `MIN_SCALE × (d / 19)^exponent`. Avec un exposant

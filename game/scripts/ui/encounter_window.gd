@@ -1,7 +1,7 @@
 class_name EncounterWindow
 extends ChronicleWindow
 
-## Lot CV3-4 : fenêtre de choix d'une rencontre sur la carte, au gabarit de la chronique
+## Fenêtre de choix d'une rencontre sur la carte, au gabarit de la chronique
 ## (`ChronicleWindow` : rubrique, titre, lieu, texte d'époque, un bouton par option avec ses
 ## effets en petit, « Plus tard »). Une option que le cœur refuse est grisée avec sa raison.
 ## Aucune règle : la rencontre vient de `CampaignSim.get_pending_encounters()` (`{site,

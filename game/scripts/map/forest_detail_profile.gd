@@ -1,7 +1,7 @@
 class_name ForestDetailProfile
 extends Resource
 
-## Lot SZ4b : réglages de la couche « forêt dense » (`ForestDetail`, `res://resources/forest_detail.tres`).
+## Réglages de la couche « forêt dense » (`ForestDetail`, `res://resources/forest_detail.tres`).
 ## Purement visuel.
 ##
 ## Les arbres de la carte (`Vegetation`) sont semés au pas `Vegetation.spacing` (1,35 unité, ~970 m) :
@@ -42,7 +42,7 @@ extends Resource
 @export var keep_margin: float = 1.25
 ## Ombres des parties à moins de `detail_factor` × la distance du rig (maillage bas partout).
 @export var detail_factor: float = 1.2
-## Couloirs laissés sans arbres de part et d'autre des fleuves fins et des routes drapées (lot ZG5b),
+## Couloirs laissés sans arbres de part et d'autre des fleuves fins et des routes drapées,
 ## en mètres au-delà de la demi-largeur : berges, et houppiers qui débordent (~15 m).
 @export var river_clearance_m: float = 25.0
 @export var road_clearance_m: float = 10.0

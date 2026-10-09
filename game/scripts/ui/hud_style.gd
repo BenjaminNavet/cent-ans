@@ -1,11 +1,11 @@
 class_name HudStyle
 extends RefCounted
 
-## Palette et petits outils de dessin communs aux composants du HUD de campagne (lot F10a) :
+## Palette et petits outils de dessin communs aux composants du HUD de campagne :
 ## registre « manuscrit enluminé » — parchemin opaque, encre sépia, rubriques rouges, filets
 ## d'or sobres, cire à sceller. Les couleurs reprennent `parchment_theme.tres`.
 ##
-## Icônes : si l'autoload `IconLibrary` (lot F2) est présent, `icon(id, category)` lui délègue ;
+## Icônes : si l'autoload `IconLibrary` est présent, `icon(id, category)` lui délègue ;
 ## sinon `draw_glyph` dessine un pictogramme sobre au trait (aucune police spéciale requise).
 
 const PARCHMENT := Color(0.93, 0.87, 0.72, 1.0)
@@ -32,7 +32,7 @@ const FONT_BODY := 14
 const FONT_TITLE := 17
 
 
-## Kit enluminé (lot UI1, `tools/cent_ans_tools/ui_illumination.py`) : textures 9-slice.
+## Kit enluminé (`tools/cent_ans_tools/ui_illumination.py`) : textures 9-slice.
 const KIT_DIR := "res://assets/ui/illumination/"
 const PAGE_MARGIN := 20
 const ILLUMINATED_MARGIN := 38

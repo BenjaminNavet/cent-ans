@@ -1,7 +1,7 @@
 class_name BattleDroppedArms
 extends Node3D
 
-## Lot EP12 (ADR 0070) : armes et boucliers laissés au sol par les fuyards et les blessés.
+## Armes et boucliers laissés au sol par les fuyards et les blessés (ADR 0070).
 ## Rendu seulement : la déroute est décidée par le cœur (état `routing` du régiment) ; ici, un
 ## `MultiMeshInstance3D` par sorte d'objet (épée, bouclier, arme d'hast, arc, arbalète), tampon
 ## circulaire plafonné (`dropped_arms` de `data/fx/battle_gore.json`) : au-delà, l'objet le plus

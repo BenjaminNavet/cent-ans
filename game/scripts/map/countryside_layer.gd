@@ -1,7 +1,7 @@
 class_name CountrysideLayer
 extends Node3D
 
-## Lot DN-PAYS : campagne vivante hors champs (rendu seulement, aucune règle de jeu) : haies et
+## Campagne vivante hors champs (rendu seulement, aucune règle de jeu) : haies et
 ## clôtures de bocage, puits, croix de chemin et calvaires, moulins à vent, salines, ruines,
 ## piloris, charrettes et caravanes au bord des routes. Les troupeaux restent à `FaunaLayer`.
 ##

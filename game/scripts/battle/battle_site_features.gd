@@ -1,7 +1,7 @@
 class_name BattleSiteFeatures
 extends Node3D
 
-## Lot B5 : ce que le site de campagne pose sur le champ en plus du relief et des bois, d'après
+## Ce que le site de campagne pose sur le champ en plus du relief et des bois, d'après
 ## `BattleSim.get_terrain()` : clôtures de plessis, palissades de camp, mares du marais (eau stagnante) et roselières, mer le long d'un
 ## flanc côtier. Les haies sont semées avec les arbres (`BattleTerrain._build_trees`), les fossés,
 ## la cour et la plage dans la splatmap. Rendu seulement : positions et emprises viennent de la
@@ -118,7 +118,7 @@ func _build_palisades(obstacles: Array) -> void:
 	add_child(mi)
 
 
-## Lot GA3-L1 : palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
+## L1 : palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
 ## de la simulation reçoit un nombre entier de segments étirés en longueur (±25 %), posés sur le
 ## sol. Faux (procédural gardé) sans variante, ou sous la neige.
 func _ga3_palisades(obstacles: Array) -> bool:

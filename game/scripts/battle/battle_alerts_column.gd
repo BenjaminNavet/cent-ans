@@ -1,7 +1,7 @@
 class_name BattleAlertsColumn
 extends PanelContainer
 
-## Lot CB5 (ADR 0095) : colonne d'alertes de bataille, en haut à gauche (le journal est en haut
+## Colonne d'alertes de bataille, en haut à gauche (le journal est en haut (ADR 0095)
 ## à droite, `BattleHud._build_log`). Cinq alertes au plus, glyphe dessiné en code (comme
 ## `BattleHud._draw_command_icon`, pas d'icône DA5), texte court en français, effacement après
 ## `cb5_alert_duration_s` (RuleValues) ; deux alertes du même type dans la même zone à moins de
@@ -243,7 +243,7 @@ func _row(entry: Dictionary) -> Control:
 	return row
 
 
-## Icône à l'encre DA5 par type d'alerte (lot CB, clé `battle_alert_<kind>`) ; glyphe vectoriel
+## Icône à l'encre DA5 par type d'alerte (clé `battle_alert_<kind>`) ; glyphe vectoriel
 ## en repli si le PNG manque, même esprit que `BattleHud._draw_command_icon`.
 func _draw_glyph(glyph: Control) -> void:
 	var kind := str(glyph.get_meta("kind", ""))

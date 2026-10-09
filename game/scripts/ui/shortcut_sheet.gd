@@ -1,7 +1,7 @@
 class_name ShortcutSheet
 extends RefCounted
 
-## Lot U7 (audit A3, C9 et M5) : fiche des raccourcis générée depuis l'`InputMap` (touches
+## Fiche des raccourcis générée depuis l'`InputMap` (touches
 ## réelles du projet, libellées selon la disposition du clavier) et libellés de touches pour
 ## les boutons. Disposition : réglage `input/layout` (« auto », « azerty », « qwerty ») ; en
 ## « auto », celle que signale le système. Aucune règle de jeu.

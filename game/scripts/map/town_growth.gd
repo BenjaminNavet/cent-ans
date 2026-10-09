@@ -1,7 +1,7 @@
 class_name TownGrowth
 extends RefCounted
 
-## Lot TB3 (ADR 0162), point 4 : croissance visible des villes 1:1 de `towns_1340.json`. Le plan
+## ADR 0162, point 4 : croissance visible des villes 1:1 de `towns_1340.json`. Le plan
 ## de 1340 reste figé (ADR 0138) ; cette couche lui ajoute, par-dessus :
 ## - des **quartiers de faubourg** le long des routes des portes, au-delà des faubourgs de 1340,
 ##   quand la population simulée de la province dépasse celle de 1337 (`growth.suburbs`) ;

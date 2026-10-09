@@ -1,7 +1,7 @@
 class_name LabelPlacer
 extends RefCounted
 
-## Lot UX1 (audit A3, C8) : placement des plaques d'effectif d'armée hors des noms de ville et
+## Placement des plaques d'effectif d'armée hors des noms de ville et
 ## des autres plaques. Rendu seulement, logique pure sur des rectangles écran (testable sans
 ## scène).
 ##

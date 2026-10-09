@@ -1,7 +1,7 @@
 class_name RiversRenderer
 extends MeshInstance3D
 
-## Fleuves de la carte de campagne (lot V4, A1-11), rendu seulement.
+## Fleuves de la carte de campagne, rendu seulement.
 ##
 ## - Eau : rubans `river_water.gdshader` le long des tronçons de `data/map/rivers_render.json`
 ##   (orientés vers l'aval, largeur selon le fleuve et l'altitude, `cent-ans geo rivers-render`),
@@ -12,7 +12,7 @@ extends MeshInstance3D
 ##   tuiles de relief fin où creuser (`carved_rects`, partagé avec l'eau).
 ## - Colonies : l'eau passe *sous* les colonies (tronçons coupés dans l'emprise des maquettes, lit
 ##   effacé) ; ponts-portes aux murs (`RiverCrossings`).
-## - Zones personnalisées (`river_styles.json` → `custom_zones`, ex. Paris pour le lot L1) : rien
+## - Zones personnalisées (`river_styles.json` → `custom_zones`, ex. Paris pour) : rien
 ##   n'est dessiné dedans ; voir `docs/archive/chantiers.md`.
 ## Repli sans `rivers_render.json` : rubans depuis `MapData.rivers` (largeur selon l'importance).
 
@@ -35,7 +35,7 @@ const MAJOR_WIDTH := 0.5
 var map_data: MapData
 var terrain: TerrainBuilder
 var crossings: RiverCrossings
-## Lot ZG5b : hydrographie fine, routes drapées et ancrages au palier près (null sans cache).
+## Hydrographie fine, routes drapées et ancrages au palier près (null sans cache).
 var fine: FineGeoLayer
 ## Tronçons affichés : {name, importance, points: PackedVector2Array, widths: PackedFloat32Array}.
 var rivers: Array[Dictionary] = []
@@ -149,7 +149,7 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	print("RiversRenderer: %s" % JSON.stringify(stats))
 
 
-## Zones personnalisées (lot L1) : [{id, name, px: Vector2, radius_px, boundary_bridges}].
+## Zones personnalisées : [{id, name, px: Vector2, radius_px, boundary_bridges}].
 func custom_zones() -> Array[Dictionary]:
 	return zones
 
@@ -400,7 +400,7 @@ static func _max(values: PackedFloat32Array) -> float:
 
 ## Rubans : chaque sommet est sur la ligne médiane (le shader l'écarte de la demi-largeur).
 ## NORMAL = perpendiculaire signée ; UV = (largeur, côté ±1) ; UV2 = (abscisse vers l'aval,
-## importance 0-6 : largeur écran minimale, lot RC).
+## importance 0-6 : largeur écran minimale).
 func _build_mesh(pieces: Array) -> ArrayMesh:
 	# OMR-R2 : tronçons calculés en parallèle (tableaux dimensionnés d'avance, décalage de sommets
 	# connu par somme préfixe), puis concaténés dans l'ordre : même maillage qu'en série.
@@ -578,7 +578,7 @@ func _set_fords(fords: Array[Vector4]) -> void:
 		material.set_shader_parameter("ford_count", mini(fords.size(), 32))
 
 
-## Lot ZG5b : matériaux des anciens rubans (fondu dans le disque du réseau fin).
+## Matériaux des anciens rubans (fondu dans le disque du réseau fin).
 func old_materials() -> Array[ShaderMaterial]:
 	var result: Array[ShaderMaterial] = []
 	for material in [_water_major, _water_minor]:
@@ -587,13 +587,13 @@ func old_materials() -> Array[ShaderMaterial]:
 	return result
 
 
-## Lot ZG5b : routes de près (lot C6) à effacer dans le disque des routes fines.
+## Routes de près à effacer dans le disque des routes fines.
 func attach_roads(roads: RoadRenderer) -> void:
 	if fine != null:
 		fine.attach_roads(roads)
 
 
-## Lot ZG5b : charge et maille tout de suite le réseau fin autour de la vue (captures, tests).
+## Charge et maille tout de suite le réseau fin autour de la vue (captures, tests).
 func flush_fine(camera_distance: float) -> void:
 	if fine != null:
 		fine.flush(camera_distance)

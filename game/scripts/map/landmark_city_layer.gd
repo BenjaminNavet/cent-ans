@@ -1,7 +1,7 @@
 class_name LandmarkCityLayer
 extends Node3D
 
-## Lot VH4 (ADR 0078, 0138) : villes emblématiques à l'échelle 1:1 (format v2) quand le rig est à
+## Villes emblématiques à l'échelle 1:1 (format v2) quand le rig est à (ADR 0078, 0138)
 ## moins de `TownRenderProfile.max_rig_distance`, sur le relief fin. Rendu seulement.
 ## - Données : `data/landmarks_v2/<id>.json` (`LandmarkV2Library`).
 ## - Plan dans un fil de travail (`LandmarkPlan.generate` sur un instantané des pages du

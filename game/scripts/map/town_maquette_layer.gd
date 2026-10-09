@@ -1,13 +1,13 @@
 class_name TownMaquetteLayer
 extends Node3D
 
-## Lot GC2 (ADR 0158) : villes stylisées de la carte de campagne. Chaque lieu est une maquette du
+## Villes stylisées de la carte de campagne. Chaque lieu est une maquette du (ADR 0158)
 ## kit (`assets/models/settlements/<type>[_<famille>]_<a|b>.glb`) posée à sa vraie position, à
 ## taille monde constante par type (`data/art/town_maquettes.json`, voir `TownMaquetteData`) :
 ## - un `MultiMesh` par (modèle, tuile de carte de `tile_size` unités) : culling par tuile, portée
 ##   par type (fondu sur `fade_margin` selon la distance du rig) ;
 ## - une seule surface par modèle des six familles (matériau `Kit`, teintes cuites en couleur de
-##   sommet, lot GC6-perf) et un seul `ShaderMaterial` (`maquette_kit.gdshader`) pour tous : un
+##   sommet) et un seul `ShaderMaterial` (`maquette_kit.gdshader`) pour tous : un
 ##   appel de dessin par MultiMesh ; l'ancien kit (repli) garde ses surfaces par matière ;
 ## - famille d'architecture par province (culture, région, religion), repli sur l'Ouest tant que
 ##   le modèle de la famille manque ; variante et lacet tirés par id de lieu ;
@@ -19,7 +19,7 @@ extends Node3D
 ##   par morceau recalé puis par tranches) ;
 ## - les villes emblématiques (`data/landmarks/`) gardent leur `LandmarkModel`, grossi de
 ##   `landmark_scale`.
-## - lot DN camp-bati (D1) : si `data/art/dn_campaign_models.json` donne un glb généré pour le type
+## - si `data/art/dn_campaign_models.json` donne un glb généré pour le type
 ##   et la famille d'un lieu, ce glb (mono-surface texturé, éclairage standard) remplace la maquette
 ##   sous `near_distance` (fondu croisé sur `fade_margin`) ; la maquette stylisée garde le lointain.
 ##   Un MultiMesh par (modèle généré, tuile) ; la couleur du contrôleur ne teinte qu'une bannière

@@ -1,12 +1,12 @@
 class_name FolkModels
 extends RefCounted
 
-## Chantier FK, lot FK3 (`docs/design/2026-09-29-carte-vivante-folk.md` § 2.2, § 2.3) : table des
+## Chantier FK (`docs/design/2026-09-29-carte-vivante-folk.md` § 2.2, § 2.3) : table des
 ## modèles de la carte vivante. Rendu seulement.
 ##
 ## - **Figurines** (`ROLES`) : figurines skinnées des batailles (`BattleSkinned`, texture d'os).
 ##   Chaque rôle liste des candidats [famille, variante] ; le premier présent dans le manifeste
-##   `battle_skinned` l'emporte : villageois du lot FK2 (`villager_0` mains vides, `villager_1`
+##   `battle_skinned` l'emporte : villageois (`villager_0` mains vides, `villager_1`
 ##   faucheurs, `villager_3` porteurs ; `villager_2` émeutiers réservés aux scènes FK4), sinon
 ##   servants d'engins (`crew`, sans armure) et miliciens.
 ## - **Activités** (`ACTIVITIES`) : villageois animés par `BattleSkinned.state_config` (états
@@ -149,7 +149,7 @@ static func prop_mesh(role: String) -> ArrayMesh:
 		mesh = _mesh_from_scene(path)
 		if mesh != null:
 			_prop_sources[role] = path
-			# Lot AS1 : allure des bêtes et roues des attelages (mesures de `animal_motion.json`).
+			# Allure des bêtes et roues des attelages (mesures de `animal_motion.json`).
 			for s in mesh.get_surface_count():
 				AnimalMotion.apply_prop(mesh.surface_get_material(s) as ShaderMaterial, str(entry.get("model", role)))
 	if mesh == null:

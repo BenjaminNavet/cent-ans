@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Maillages procéduraux des batailles (SurfaceTool) : engins de siège (mangonneau, trébuchet,
 ## bombarde) avec leurs servants de repli, arbres (tronc texturé + houppier en cartes alpha),
-## rochers, hampe, drapeau. Lot SC bt3 (ADR 0238) : les fantassins, archers et cavaliers sont
+## rochers, hampe, drapeau. ADR 0238 : les fantassins, archers et cavaliers sont
 ## tous des figurines skinnées (`BattleSkinned`) ; la voie « figurine rigide » (glb Blender,
 ## figurines procédurales) a disparu. Reste ici ce qu'utilisent les engins et le décor.
 ##
@@ -54,11 +54,11 @@ const LEVEL_MEDIUM := 1
 const LEVEL_FAR := 2
 
 static var _cache: Dictionary = {}
-static var _variant_cache: Dictionary = {}  # type d'unité → variante (lot UR1)
+static var _variant_cache: Dictionary = {}  # type d'unité → variante
 
 
 ## Variante de figurine d'un type d'unité : champ `figure` (`<famille>_<variante>`) de
-## `data/unit_types` (lot UR1), sinon table `VARIANTS`, repli 0.
+## `data/unit_types`, sinon table `VARIANTS`, repli 0.
 static func variant_of(unit_type: String) -> int:
 	if _variant_cache.has(unit_type):
 		return int(_variant_cache[unit_type])

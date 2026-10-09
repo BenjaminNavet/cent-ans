@@ -1,9 +1,9 @@
 class_name TownRenderProfile
 extends Resource
 
-## Lot ZG6 (ADR 0036) : réglages du rendu des villes ordinaires à l'échelle réelle
+## Réglages du rendu des villes ordinaires à l'échelle réelle (ADR 0036)
 ## (`res://resources/town_render.tres`). Distances en unités monde (1 unité ≈ 719 m), mesurées
-## de la caméra. Les facteurs par préréglage de qualité (`RenderQuality`, lot PF1) multiplient
+## de la caméra. Les facteurs par préréglage de qualité (`RenderQuality`) multiplient
 ## portées et rayon de chargement. Purement visuel.
 
 ## Maisons du kit (détail) jusqu'à cette distance, puis blocs simples jusqu'à `block_range`.
@@ -19,7 +19,7 @@ extends Resource
 ## le lointain est rendu par `TownFarLayer`. Hystérésis de `rig_hysteresis` (part) à la sortie.
 @export var max_rig_distance: float = 45.0
 @export var rig_hysteresis: float = 0.1
-## Lot SZ4 : vu de loin, le sol bâti prend la teinte moyenne des toits du kit (imposteur des
+## Vu de loin, le sol bâti prend la teinte moyenne des toits du kit (imposteur des
 ## maisons devenues sous-pixel ; sans lui, une ville vue à 4 km n'était qu'un disque de terre
 ## battue). Fondu selon la distance caméra → sol (unités) de `roofscape_near` à `roofscape_far` ;
 ## `roofscape_strength` : part maximale ; `roofscape_cell_m` : taille d'un « toit » (variation de

@@ -1,7 +1,7 @@
 class_name TurnWaitIndicator
 extends PanelContainer
 
-## Lot PB3d : cartouche enluminé affiché pendant que le cœur résout la fin de tour dans son fil
+## Cartouche enluminé affiché pendant que le cœur résout la fin de tour dans son fil
 ## (« Les cours d'Europe délibèrent… », sablier qui se retourne ; PO5 : sortie en fondu). Discret : n'apparaît qu'après
 ## un court délai (pas de clignotement pour une fin de tour rapide), en fondu, en haut de l'écran
 ## sous la barre supérieure ; il n'intercepte pas la souris (caméra et survol continuent).

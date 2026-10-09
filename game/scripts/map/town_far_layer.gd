@@ -1,7 +1,7 @@
 class_name TownFarLayer
 extends Node3D
 
-## Lot VT-E (ADR 0138) : maillage lointain des villes à l'échelle 1:1 (paliers F1/F2), par tuiles.
+## Maillage lointain des villes à l'échelle 1:1 (paliers F1/F2), par tuiles (ADR 0138).
 ## Rendu seulement.
 ## - Index de ville stable (masque `TownFarMask`) : ordre de `towns_1340.json`, puis les villes v2
 ##   (`LandmarkV2Library.all()`, triées par colonie). Une colonie qui a une ville v2 prend son

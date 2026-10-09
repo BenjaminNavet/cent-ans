@@ -1,16 +1,16 @@
 class_name RoadRenderer
 extends Node3D
 
-## Routes de la carte (lot C6), purement visuelles :
+## Routes de la carte, purement visuelles :
 ## - palier moyen : routes principales (`type` = `main`) en traits deux tons (liseré sombre, cœur
-##   clair) dont la largeur à l'écran suit la distance (`road_line.gdshader`, lot C7b), routes
+##   clair) dont la largeur à l'écran suit la distance (`road_line.gdshader`), routes
 ##   secondaires et calculées en traits fins et pâles qui s'effacent avant le haut du palier ;
 ##   le tout en fondu selon le poids du palier ;
 ## - palier près : toutes les routes en rubans de chemin de terre (`road.gdshader`) drapés sur la
 ##   surface exacte du terrain affiché (`TerrainBuilder.surface_height_at`), un maillage par
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
-## Palier moyen (lot C7b) : cœur et liseré des routes principales, largeur écran selon la distance.
+## Palier moyen : cœur et liseré des routes principales, largeur écran selon la distance.
 ## SS2 (ADR 0142) : terre battue claire et liseré discret (plus de trait crème cartographique) ;
 ## avec la carte de couleur, les routes y sont peintes de loin : `main_far_alpha_colormap`.
 @export var main_fill: Color = Color(0.66, 0.56, 0.41, 1.0)
@@ -403,7 +403,7 @@ static func _densify(points: PackedVector2Array, sample_step: float) -> PackedVe
 	return result
 
 
-## Lot ZG5b : disque (centre x, z ; rayon ; poids) où les routes drapées fines remplacent les
+## Disque (centre x, z ; rayon ; poids) où les routes drapées fines remplacent les
 ## rubans de chemin de terre (`FineGeoLayer`).
 func set_fine_zone(zone: Vector4) -> void:
 	if _ribbon_material != null:

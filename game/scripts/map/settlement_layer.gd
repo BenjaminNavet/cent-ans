@@ -1,7 +1,7 @@
 class_name SettlementLayer
 extends Node3D
 
-## Colonies et hameaux sur la carte de campagne (lot C6), rendu seulement. Lot DV2 (ADR 0124) :
+## Colonies et hameaux sur la carte de campagne, rendu seulement. ADR 0124 :
 ## tout vit dans la vue normale (`normal = 1 − ZoomTiers.strategic_weight`), le parchemin prend le
 ## relais au-delà ; plus de marqueur peint.
 ## VT (ADR 0138) : plus de maquette de colonie ni de ville emblématique sur la carte ; les villes
@@ -16,7 +16,7 @@ extends Node3D
 ##   densité par rang et distance caméra (`SettlementMarkers`, données) ; estompés par `normal` ;
 ## - détail proche (`ZoomTiers.near_weight`) : hameaux en `MultiMesh` par tuile (orientation et
 ##   variante déterministes, brûlés selon la dévastation de la province).
-## Dé-encombrement écran (lot DA7d, ADR 0066) : couples nom + écu posés par priorité (rang puis
+## Dé-encombrement écran (ADR 0066) : couples nom + écu posés par priorité (rang puis
 ## poids, `MarkerDeclutter`) ; ceux qui recouvrent un rectangle déjà posé cèdent la place (fondu
 ## du shader), sauf la capitale du joueur, la colonie sélectionnée et celle survolée. Recalcul
 ## seulement quand la caméra bouge nettement (paramètres dans `settlement_markers.json`).
@@ -24,7 +24,7 @@ extends Node3D
 
 signal settlement_selected(id: String)
 
-## Lot PO3 (bible DA § 4, § 12.2) : noms dans le registre manuscrit — EB Garamond, graisse et taille
+## Noms dans le registre manuscrit — EB Garamond, graisse et taille
 ## selon le rang (cité `Heading`, ville `Body`, bourg `Caption`), encre sombre sur un halo de
 ## parchemin léger (plus de pastille claire).
 ## Tailles de base de `UiType` (PO2) : Label3D n'a pas de variation de type de thème.
@@ -85,10 +85,10 @@ var label_top_inset: Callable = Callable()
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
-## Lot DA3 : catalogue des marqueurs ; par colonie : rang, taille écran de l'écu (px), distance de
+## Catalogue des marqueurs ; par colonie : rang, taille écran de l'écu (px), distance de
 ## retrait.
 var markers: SettlementMarkers
-## Lot DV2 : atlas des écus des détenteurs.
+## Atlas des écus des détenteurs.
 var heraldry := HeraldryAtlas.new()
 var _marker_rank: PackedInt32Array = PackedInt32Array()
 var _marker_size: PackedFloat32Array = PackedFloat32Array()
@@ -108,7 +108,7 @@ var _banner_signature: Array = []
 const BANNER_CUES := {"self": 1, "friend": 2, "enemy": 3}
 ## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
 var _shield_until: PackedFloat32Array = PackedFloat32Array()
-## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
+## État de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
 var _priority_order: PackedInt32Array = PackedInt32Array()
@@ -134,7 +134,7 @@ var _marker_screen: PackedVector2Array = PackedVector2Array()
 var last_declutter_ms := 0.0
 var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
-## Lot EN : encre du nom de chaque colonie (rouge : détenue par un ennemi du joueur).
+## Encre du nom de chaque colonie (rouge : détenue par un ennemi du joueur).
 var _label_ink: PackedColorArray = PackedColorArray()
 ## DC4 : taille du texte de chaque étiquette (police, contour compris), mesurée à la demande.
 var _label_size: PackedVector2Array = PackedVector2Array()
@@ -146,7 +146,7 @@ var _model_radius: PackedFloat32Array = PackedFloat32Array()
 var _model_top: PackedFloat32Array = PackedFloat32Array()
 var _finage_radius: PackedFloat32Array = PackedFloat32Array()
 var _ground_y: PackedFloat32Array = PackedFloat32Array()
-## Villes emblématiques (lot L1) : index de colonie → cercle (x, z, rayon de zone) lu dans
+## Villes emblématiques : index de colonie → cercle (x, z, rayon de zone) lu dans
 ## `data/landmarks/` sans instancier de maquette (zones caméra et armées, hameaux).
 var _landmarks: Dictionary = {}
 var _labels_dirty: bool = false
@@ -184,19 +184,19 @@ var town_far: TownFarLayer
 var maquettes: TownMaquetteLayer
 ## GC2 : emprises réelles (`towns_1340.json`) lues sans `TownLayer` (finage, rayon réel).
 var _town_data: TownData
-## Lot TB3 (ADR 0162) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
+## Bâtiments hors les murs, chantiers et croissance des villes 1:1 (ADR 0162).
 var outbuildings: OutbuildingLayer
-## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (croix, gibets, phares, mines, ruines…).
+## Décor ponctuel hors les villes (croix, gibets, phares, mines, ruines…).
 var decor: DecorLayer
 var fields: FieldLayer  # DN-CHAMPS (ADR 0222)
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
 var _soot_turn := -1
-## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
+## Positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
 var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
-## Lot SZ4 : échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
+## Échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
 ## `MapPropScale.hamlet_scale`) ; les tuiles sont reconstruites par pas de `rewrite_step`.
 var _hamlet_scale := 1.0
 ## VT : rayon réel au sol (unités, < 0 si la colonie est absente de `towns_1340.json`).
@@ -565,9 +565,9 @@ func _build_icons() -> void:
 	add_child(_icons)
 
 
-## Lot DA3 : écus des détenteurs. L'atlas d'écus est recomposé quand une faction nouvelle
+## Écus des détenteurs. L'atlas d'écus est recomposé quand une faction nouvelle
 ## apparaît (rare : révolte, succession), sinon seules les instances changées sont réécrites.
-## Lot RJ-c (ADR 0175) : bannière du PROPRIÉTAIRE de droit, plus le petit écu de l'OCCUPANT si la
+## Bannière du PROPRIÉTAIRE de droit, plus le petit écu de l'OCCUPANT si la (ADR 0175)
 ## place est occupée ; liserés à la couleur de position du joueur (`StanceCues`, ADR 0155).
 func _refresh_shields(sim: Object = null, holders_changed: bool = true, player: String = "", stances: Variant = null) -> void:
 	if _icons == null or markers == null:
@@ -692,7 +692,7 @@ func marker_in_tier(i: int) -> bool:
 
 
 ## Vrai si la colonie `i` montre un écu à la distance caméra courante : détenteur armorié et,
-## lot TB2, rang assez élevé pour cette distance (la colonie sélectionnée garde le sien).
+## rang assez élevé pour cette distance (la colonie sélectionnée garde le sien).
 func has_shield(i: int) -> bool:
 	return i >= 0 and i < _shielded.size() and _shielded[i] == 1 and (_is_selected(i) or _camera_distance < _shield_until[i])
 
@@ -710,7 +710,7 @@ func _is_selected(i: int) -> bool:
 	return i == _selected_index
 
 
-## Lot DA7d : ordre de priorité fixe des colonies (rang décroissant, puis poids, puis ordre des
+## Ordre de priorité fixe des colonies (rang décroissant, puis poids, puis ordre des
 ## données : cité > ville > château > abbaye > village).
 func _build_priority_order() -> void:
 	var order: Array = range(data.settlements.size())
@@ -816,7 +816,7 @@ func refresh(sim: Object, color_of: Callable) -> void:
 					break
 
 
-## Lot DA7d : colonie de la capitale du joueur (la plus prioritaire de la province capitale).
+## Colonie de la capitale du joueur (la plus prioritaire de la province capitale).
 func _refresh_capital(sim: Object) -> void:
 	var index := -1
 	var facade := get_node_or_null("/root/SimFacade") if is_inside_tree() else null
@@ -1065,7 +1065,7 @@ func _label_alpha(i: int) -> float:
 	return clampf(_weights.y * (1.0 - smoothstep(until - fade, until, _camera_distance)), 0.0, 1.0)
 
 
-## Lot DA7d (ADR 0066) : dé-encombrement écran unique des marqueurs et des noms. Colonie par
+## Dé-encombrement écran unique des marqueurs et des noms. Colonie par (ADR 0066)
 ## colonie dans l'ordre de priorité (épinglés, puis rang, poids, ordre des données) : le marqueur,
 ## puis son nom. Un marqueur qui recouvre un rectangle déjà posé cède la place (fondu du shader)
 ## et son nom avec lui ; un nom qui recouvre un rectangle posé est masqué. Rectangles des noms
@@ -1268,12 +1268,12 @@ func _show_label(i: int, shown: bool, alpha: float) -> void:
 	label.outline_modulate = _halo(alpha)
 
 
-## Lot EN (ADR 0155) : encre du nom de la colonie `i` (sans opacité).
+## Encre du nom de la colonie `i` (sans opacité) (ADR 0155).
 func label_ink(i: int) -> Color:
 	return _label_ink[i] if i < _label_ink.size() else label_color
 
 
-## Lot EN : noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
+## Noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
 func _refresh_label_inks(sim: Object, known_stances: Variant = null) -> void:
 	if sim == null or not sim.has_method("get_player_faction"):
 		return
@@ -1380,7 +1380,7 @@ func _label_screen_rect(i: int, camera: Camera3D, scale: float, margin: float) -
 	return Rect2(center - size * 0.5, size).grow(margin)
 
 
-## Lot DA7d : colonies toujours affichées : sélection, survol, capitale du joueur (dans cet ordre).
+## Colonies toujours affichées : sélection, survol, capitale du joueur (dans cet ordre).
 func _pinned_indices() -> PackedInt32Array:
 	var pins := PackedInt32Array()
 	if bool(markers.declutter_value("pin_selected", true)) and selected_id != "":
@@ -1408,7 +1408,7 @@ func _pinned_indices() -> PackedInt32Array:
 	return result
 
 
-## Lot DA7d : bascule l'état affiché / cédé d'un marqueur (fondu côté shader, sans CPU par image).
+## Bascule l'état affiché / cédé d'un marqueur (fondu côté shader, sans CPU par image).
 func _set_marker_shown(i: int, shown: bool) -> void:
 	var value := 1 if shown else 0
 	if _marker_shown[i] == value:
@@ -1466,7 +1466,7 @@ func _camera_moved() -> bool:
 
 
 
-## Lot UX1 : rectangles écran des noms de colonies affichés (obstacles des plaques d'armée).
+## Rectangles écran des noms de colonies affichés (obstacles des plaques d'armée).
 func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 	var rects: Array[Rect2] = []
 	if camera == null:
@@ -1478,12 +1478,12 @@ func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 	return rects
 
 
-## Lot DA7d, DV2 : rectangle écran de l'écu `i` (marge `margin` en px).
+## Rectangle écran de l'écu `i` (marge `margin` en px).
 func _marker_rect(i: int, camera: Camera3D, margin: float) -> Rect2:
 	return _shield_rect(i, camera.unproject_position(_marker_world[i]), _label_screen_scale(camera), margin)
 
 
-## Lot DA7d (mesures, tests) : rectangles écran (sans marge) des marqueurs et des noms affichés
+## Rectangles écran (sans marge) des marqueurs et des noms affichés
 ## dans l'écran : {rects, owners (index de colonie), markers, labels}.
 ## `kinds` (parallèle à `rects`/`owners`) : "marker" ou "label", pour filtrer par type (CV3-0 #7 :
 ## un marqueur de capitale épinglé peut toucher une plaque d'armée, un nom de colonie non).
@@ -1947,12 +1947,12 @@ func world_position_of(id: String) -> Vector3:
 	return Vector3(px.x, terrain.surface_height_at(px.x, px.y), px.y)
 
 
-## Lot ZG5b : position de rendu de la maquette `i` (ancrage fin, sinon position de règle).
+## Position de rendu de la maquette `i` (ancrage fin, sinon position de règle).
 func model_px(i: int) -> Vector2:
 	return _anchor_px.get(i, data.settlements[i]["px"])
 
 
-## Lot ZG5b : position de rendu du hameau `h` (ancrage fin, sinon `hamlets.json`).
+## Position de rendu du hameau `h` (ancrage fin, sinon `hamlets.json`).
 func hamlet_px(h: int) -> Vector2:
 	if h < _hamlet_anchors.size():
 		var a := _hamlet_anchors[h]
@@ -1960,7 +1960,7 @@ func hamlet_px(h: int) -> Vector2:
 	return data.hamlets[h]["px"]
 
 
-## Lot ZG5b : emprises des colonies (hors villes emblématiques) et hameaux posés aux ancrages fins
+## Emprises des colonies (hors villes emblématiques) et hameaux posés aux ancrages fins
 ## de `fine_anchors.json` (déplacés de ≤ 300 m hors des lits et des pentes fortes), puis recalés
 ## sur la surface affichée. Icônes, étiquettes, et règles gardent les positions de `data`.
 func apply_fine_anchors(store: FineGeoStore) -> void:
@@ -2006,12 +2006,12 @@ func vegetation_exclusions() -> PackedVector3Array:
 
 # --- Accès pour les effets de vie (fumées, foule, rivières) ---------------------------------
 # VT (ADR 0138) : plus de maquette ; signatures gardées pour les consommateurs (`LifeEffects`,
-# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G. TB3 (ADR 0162) : la
+# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés. TB3 (ADR 0162) : la
 # croissance passe par `outbuildings` (`OutbuildingLayer`, `TownGrowth`).
 
 
 ## Pas de nœud par colonie : la ville 1:1 est dans `towns` / `landmark_cities`, et sa croissance
-## (faubourgs, enceinte, bâtiments hors les murs, lot TB3) dans les `MultiMesh` partagés de
+## (faubourgs, enceinte, bâtiments hors les murs) dans les `MultiMesh` partagés de
 ## `outbuildings`. Toujours null ; signature gardée pour `LifeEffects` (surcouche par maquette,
 ## remplacée par la suie par ville de `set_town_soot`).
 func model_holder(_i: int) -> Node3D:
@@ -2100,7 +2100,7 @@ func real_radius(i: int) -> float:
 	return _real_radius[i] if i >= 0 and i < _real_radius.size() else -1.0
 
 
-## TB3 : croissance affichée de la colonie `id` (remplace `replace_models` du lot CV1) :
+## TB3 : croissance affichée de la colonie `id` (remplace `replace_models`) :
 ## `{outbuildings: [{family, level, model}], suburb_houses, enclosure}` pour l'état courant de la
 ## simulation, que la colonie soit ou non dans le voisinage dessiné.
 func growth_of(id: String) -> Dictionary:
@@ -2124,7 +2124,7 @@ func override_devastation(values: Dictionary) -> void:
 		_hamlet_dirty[index] = true
 
 
-# --- Lot ZG6 : villes ordinaires à l'échelle réelle ------------------------------------------
+# Villes ordinaires à l'échelle réelle ------------------------------------------
 
 
 ## GC2 (ADR 0158) : style `maquette` (défaut, `TownMaquetteData.style`) : maquettes stylisées à
@@ -2169,7 +2169,7 @@ func _setup_towns() -> void:
 	_setup_decor()
 
 
-## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (placement par données, un MultiMesh par type).
+## Décor ponctuel hors les villes (placement par données, un MultiMesh par type).
 func _setup_decor() -> void:
 	decor = DecorLayer.new()
 	decor.name = "Decor"

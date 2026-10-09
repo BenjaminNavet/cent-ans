@@ -1,7 +1,7 @@
 class_name FrontEndStyle
 extends RefCounted
 
-## Lot MM1 — style des écrans d'accueil (menu, choix de faction, introduction, chargement) :
+## Style des écrans d'accueil (menu, choix de faction, introduction, chargement) :
 ## polices (IM Fell English pour les titres, EB Garamond pour le texte), couleurs (or, azur,
 ## encre, vélin), cadres enluminés et boutons de menu (texte seul, filet
 ## d'or au survol). Rendu seulement.

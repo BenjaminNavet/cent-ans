@@ -1,7 +1,7 @@
 class_name RuleValues
 extends RefCounted
 
-## Lot SV4 : valeurs de règles citées par les textes d'interface (aide, infobulles,
+## Valeurs de règles citées par les textes d'interface (aide, infobulles,
 ## encyclopédie), lues dans le cœur par `GameDataStore.get_rule_constants()` au lieu d'être
 ## recopiées dans les GDScript. Un texte écrit `{rule.nom}` là où il cite une valeur ;
 ## `format()` la remplace par le nombre au format français (« 1,5 », « 1 000 ») ;

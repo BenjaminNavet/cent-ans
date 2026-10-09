@@ -1,7 +1,7 @@
 class_name DnCampaignModels
 extends RefCounted
 
-## Lot DN camp-bati (D1) : table des glb générés semi-réalistes des lieux de la carte de campagne
+## Table des glb générés semi-réalistes des lieux de la carte de campagne
 ## (`data/art/dn_campaign_models.json`, schéma `art_dn_campaign_models.schema.json`). Type de lieu
 ## × famille d'architecture → liste de modèles ; `TownMaquetteLayer` les affiche aux zooms proche
 ## et moyen, la maquette stylisée gardant le lointain. Table vide ou fichier absent : aucun

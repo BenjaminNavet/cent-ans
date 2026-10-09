@@ -1,7 +1,7 @@
 class_name WarScars
 extends Node3D
 
-## Lot TB4 (`docs/design/2026-10-02-campagne-tob.md` § 3) : conséquences visibles de la guerre et
+## Conséquences visibles de la guerre et
 ## des fléaux sur la carte de campagne. Rendu seulement : tout l'état vient du pont, les seuils et
 ## durées de `data/ui/war_scars.json` (schéma `war_scars_ui`). Aucun pictogramme d'interface.
 ##

@@ -1,7 +1,7 @@
 class_name UnitCard
 extends RichPanel
 
-## Carte d'unité en vignette (lot B2, après F5b) : illustration du type d'unité en
+## Carte d'unité en vignette (après F5b) : illustration du type d'unité en
 ## fond (`res://assets/illustrations/<type>.jpg` si elle existe ; sinon composition du blason de
 ## la faction, de la couleur du camp et de l'icône de classe), effectif en gros, barres fines
 ## moral / fatigue / munitions, état en pastille, étoile du général, numéros de groupe. Le nom,
@@ -320,7 +320,7 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	art.draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## CB1 : cadenas centré en `center`, à l'échelle `k` : icône à l'encre DA5 `battle_lock` (lot CB)
+## CB1 : cadenas centré en `center`, à l'échelle `k` : icône à l'encre DA5 `battle_lock`
 ## sur une pastille de parchemin, sinon glyphe doré dessiné en code (repli sans PNG).
 static func draw_padlock(canvas: CanvasItem, center: Vector2, k: float) -> void:
 	if HudStyle.icon("battle_lock") != null:
@@ -344,7 +344,7 @@ static func bar_y_top(size: Vector2, bars: int) -> float:
 
 
 ## CB2 : modes actifs en petites icônes sur pastille claire, de droite à gauche depuis `right`
-## (centre du premier) ; icônes DA5 du lot CB, glyphes en repli (`BattleModeIcons.draw_mode`).
+## (centre du premier) ; icônes DA5, glyphes en repli (`BattleModeIcons.draw_mode`).
 static func draw_modes(canvas: CanvasItem, modes: Array[String], right: Vector2) -> void:
 	for i in modes.size():
 		var c := right - Vector2(i * 13.0, 0)

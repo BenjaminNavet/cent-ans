@@ -1,7 +1,7 @@
 class_name NextHintController
 extends Node
 
-## Lot UX2 — conseil « que faire maintenant » de la carte de campagne. Rassemble l'état déjà
+## Conseil « que faire maintenant » de la carte de campagne. Rassemble l'état déjà
 ## exposé (alertes calculées pour la cloche, armées du joueur, trésor, chantiers, guide mis de
 ## côté), choisit un seul conseil (`NextHint.choose`, textes dans `data/ui/next_hints.json`) et
 ## l'affiche dans `NextHintCard`. Un clic exécute ou ouvre l'action. Masqué pendant le

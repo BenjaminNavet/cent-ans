@@ -1,7 +1,7 @@
 class_name LandmarkModel
 extends Node3D
 
-## Ville emblématique sur la carte de campagne (lot L1, Paris d'abord), rendu seulement.
+## Ville emblématique sur la carte de campagne (Paris d'abord), rendu seulement.
 ##
 ## Plan dans `data/landmarks/<id>.json` (schéma `landmark.schema.json`), maquette générée par
 ## `tools/blender_scripts/landmark_city.py` → `res://assets/models/landmarks/<id>.glb`. La
@@ -172,7 +172,7 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("drape_scale", 1.0 / _model_scale)
 
 
-## Hauteurs de la surface affichée sur une grille couvrant la zone réservée, en mètres (lot ZG4 :
+## Hauteurs de la surface affichée sur une grille couvrant la zone réservée, en mètres (
 ## le shader les met à l'échelle verticale courante, `campaign_vertical_scale`, sans nouvelle
 ## cuisson quand l'exagération change). Cuisson complète et synchrone (construction) ; ensuite,
 ## `_on_chunk_surface_changed` la relance par tranches de lignes étalées sur plusieurs images

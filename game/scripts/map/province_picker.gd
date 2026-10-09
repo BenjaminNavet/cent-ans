@@ -22,7 +22,7 @@ var selected_index: int = 0
 ## Interception des clics gauches : `Callable(screen_position: Vector2) -> bool` ; si elle
 ## renvoie vrai (ex. une armée a été cliquée), la sélection de province n'a pas lieu.
 var click_interceptor: Callable = Callable()
-## Lot C5 : même principe pour le clic droit (ordre de déplacement vers une colonie).
+## Même principe pour le clic droit (ordre de déplacement vers une colonie).
 var right_click_interceptor: Callable = Callable()
 
 var _mouse_dirty := false

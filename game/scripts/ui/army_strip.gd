@@ -1,7 +1,7 @@
 class_name ArmyStrip
 extends PanelContainer
 
-## Bandeau d'ost (HUD de campagne, bas au centre ; lot F10a) : une carte par régiment de
+## Bandeau d'ost (HUD de campagne, bas au centre) : une carte par régiment de
 ## l'armée sélectionnée — icône de classe, nom court, barre d'effectif, moral en liseré —,
 ## compteur de « lances » (`8/20`), effectif total et entretien de l'armée.
 ##
@@ -21,7 +21,7 @@ signal unit_selected(index: int)
 signal selection_changed(indices: PackedInt32Array)
 ## Bouton « Séparer » : les régiments choisis formeraient une nouvelle armée.
 signal split_requested(indices: PackedInt32Array)
-## Bouton « Garnison » (lot C7d) : les régiments choisis rejoindraient la garnison de la
+## Bouton « Garnison » : les régiments choisis rejoindraient la garnison de la
 ## colonie où l'armée se trouve (ordre `garrison_units`).
 signal garrison_requested(indices: PackedInt32Array)
 ## TW2-T3 : bouton « Mercenaires » (compagnies engageables dans la région de l'armée).
@@ -49,7 +49,7 @@ const CLASS_LABELS := {
 		_refresh()
 ## Faux pour une armée étrangère : pas de multisélection ni de bouton « Séparer ».
 @export var can_split: bool = true
-## Lot C7d : vrai quand l'armée est sur une colonie que le joueur contrôle (bouton
+## Vrai quand l'armée est sur une colonie que le joueur contrôle (bouton
 ## « Garnison » affiché, désactivé si `garrison_disabled_reason` n'est pas vide).
 @export var can_garrison: bool = false
 ## Raison en français si le bouton « Garnison » doit rester désactivé (colonie assiégée ou

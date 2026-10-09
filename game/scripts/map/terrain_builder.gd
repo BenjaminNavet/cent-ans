@@ -15,10 +15,10 @@ extends Node3D
 ## `surface_flush_interval_ms`) : les objets posés dessus doivent être recalés.
 
 signal chunk_surface_changed(index: int)
-## Lot ZG2 : rectangle carte dont la surface a changé (page de la pyramide arrivée ou évincée),
-## émis à chaque page, sans regroupement : pour les recalages fins (lot ZG5).
+## Rectangle carte dont la surface a changé (page de la pyramide arrivée ou évincée),
+## émis à chaque page, sans regroupement : pour les recalages fins.
 signal surface_rect_changed(rect: Rect2)
-## Lot ZG4 : l'échelle verticale (`MapData.vertical_scale()`) vient de changer. Les calques
+## L'échelle verticale (`MapData.vertical_scale()`) vient de changer. Les calques
 ## d'objets ponctuels (armées, étiquettes) s'y recalent ; les calques par morceau reçoivent en
 ## plus `chunk_surface_changed` (étalé, `rescaling_vertical` vrai).
 signal vertical_scale_changed(old_scale: float, new_scale: float)
@@ -46,7 +46,7 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var max_surface_emits_per_flush: int = 2
 ## Un morceau n'est recalé qu'après ce délai sans nouvelle page (E1 → E2 → E3 → E4 : un seul recalage).
 @export var surface_settle_ms: int = 700
-## Lot ZG4 : budget par image des recalages après un changement d'échelle verticale.
+## Budget par image des recalages après un changement d'échelle verticale.
 @export var rescale_budget_ms: float = 3.0
 ## Délai sans changement d'échelle avant de recaler les calques (zoom continu : un seul recalage).
 @export var rescale_settle_ms: int = 180
@@ -286,7 +286,7 @@ func surface_heights_at(points: PackedVector2Array) -> PackedFloat32Array:
 
 ## Grille de hauteurs du maillage affiché pour la tuile `index` ({"heights", "side", "unit"},
 ## origine au coin de la tuile ; vide si inconnue). Jamais modifiée après construction : lisible
-## depuis un fil de travail (recalage de la végétation, lot C7b) avec `grid_height`.
+## depuis un fil de travail (recalage de la végétation) avec `grid_height`.
 func surface_grid(index: int) -> Dictionary:
 	if index < 0 or index >= _is_near.size():
 		return {}
@@ -297,7 +297,7 @@ func surface_grid(index: int) -> Dictionary:
 
 
 ## Hauteur dans une grille régulière triangulée comme les maillages (diagonale a → d).
-## Lot ZG2 : accepte aussi un instantané du quadtree (`ReliefQuadtree.surface_snapshot`).
+## Accepte aussi un instantané du quadtree (`ReliefQuadtree.surface_snapshot`).
 static func grid_height(grid: Dictionary, lx: float, ly: float) -> float:
 	if grid.has("qt_pages"):
 		return ReliefQuadtree.sample_snapshot(grid, lx, ly)
@@ -365,7 +365,7 @@ func set_reachable(reachable: PackedInt32Array, path: PackedInt32Array = PackedI
 	material.set_shader_parameter("mask_enabled", not reachable.is_empty() or not path.is_empty())
 
 
-## Brouillard de guerre (lot C1) : `visible` = index raster des provinces vues ; les autres
+## Brouillard de guerre : `visible` = index raster des provinces vues ; les autres
 ## sont voilées par le shader. `enabled` faux efface le voile.
 func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
 	if map_data == null or material == null:
@@ -381,7 +381,7 @@ func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
 	material.set_shader_parameter("fog_by_cell", false)
 
 
-## Brouillard par case (lot M5a) : `cells` = texture de vue R8 de la simulation (255 = vu,
+## Brouillard par case : `cells` = texture de vue R8 de la simulation (255 = vu,
 ## bords doux), couvrant `size_px` pixels carte depuis l'origine. Remplace le masque par province.
 func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2) -> void:
 	if material == null:
@@ -428,7 +428,7 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 	return result
 
 
-# --- Relief streamé (lot ZG2) ----------------------------------------------------------
+# --- Relief streamé ----------------------------------------------------------
 
 
 func _setup_quadtree() -> void:
@@ -612,7 +612,7 @@ func _note_emit(t0: int, count: int) -> void:
 	build_stats["surface_emit_ms_total"] = float(build_stats.get("surface_emit_ms_total", 0.0)) + ms
 
 
-# --- Exagération verticale dynamique (lot ZG4) ------------------------------------------
+# --- Exagération verticale dynamique ------------------------------------------
 
 
 ## Change l'échelle verticale (`MapData.set_vertical_scale`, paramètre global des shaders) et
@@ -780,7 +780,7 @@ func coast_texture() -> Texture2D:
 	return _coast_texture
 
 
-## Lot V4 : texture du lit des fleuves (null si absente) ; `RiversRenderer` la partage avec l'eau
+## Texture du lit des fleuves (null si absente) ; `RiversRenderer` la partage avec l'eau
 ## et y efface le lit sous les villes fortifiées (`update_river_bed`).
 func river_bed_texture() -> ImageTexture:
 	return _river_bed_texture
@@ -921,15 +921,15 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_coast_dist", _coast_texture != null)
 	material.set_shader_parameter("rvd_occlusion", _occlusion_texture)  # RV-D
 	material.set_shader_parameter("rvd_has_occlusion", _occlusion_texture != null)
-	# Lot V4 : lit des fleuves (les tuiles creusées sont réglées par RiversRenderer).
+	# Lit des fleuves (les tuiles creusées sont réglées par RiversRenderer).
 	material.set_shader_parameter("river_bed", _river_bed_texture)
 	material.set_shader_parameter("has_river_bed", _river_bed_texture != null)
-	# Occupation du sol (vigne, sécheresse, bocage) partagée avec la végétation (lot V2b).
+	# Occupation du sol (vigne, sécheresse, bocage) partagée avec la végétation.
 	_landuse_texture = ImageTexture.create_from_image(VegetationFields.landuse(map_data))
 	material.set_shader_parameter("landuse", _landuse_texture)
 	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
-	ReliefLandcover.apply(material, map_data)  # lot R1 : relief fin, zones humides
+	ReliefLandcover.apply(material, map_data)  # Relief fin, zones humides
 	HbGround.apply(material, map_data.map_dir.get_base_dir())  # HB3 : habillage par biome
 	CoastLook.apply(material, map_data.size)  # TB5 : falaises et plages
 	# ZG8 : roche sur les falaises du relief exagéré (désactivée avec le profil).

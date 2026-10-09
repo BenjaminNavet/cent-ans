@@ -1,7 +1,7 @@
 class_name MapBench
 extends Node
 
-## Banc de la carte de campagne (lot ZG2, `--bench-map`) : panoramique puis zoom scriptés
+## Banc de la carte de campagne (`--bench-map`) : panoramique puis zoom scriptés
 ## au-dessus de la Normandie et de l'Île-de-France, en fenêtré (le GPU compte), synchronisation
 ## verticale coupée. Mesure la durée réelle de chaque image (i/s moyen, 1 % des pires, pire image,
 ## images > 50 ms) et, si le quadtree de relief est actif, ses statistiques (nœuds, pages,
@@ -9,7 +9,7 @@ extends Node
 ##
 ## Options : `--bench-distance=N` (distance du panoramique, 30 par défaut), `--bench-seconds=N`
 ## (durée du panoramique, 20 s), `--camera-min=N` (distance minimale de la caméra, essais seulement).
-## Lot ZG4 : parcours « descente » ensuite (`descent` dans le rapport) : au-dessus de Rouen, de la
+## Parcours « descente » ensuite (`descent` dans le rapport) : au-dessus de Rouen, de la
 ## Grande Chartreuse et de Paris, stratégique (150) → vallée (5) → site (distance minimale du lieu)
 ## en `DESCENT_SECONDS` (logarithme de la distance), pause, remontée ; `--bench-descent-only` saute
 ## panoramique et zoom. Rapporte aussi les recalages d'échelle verticale et les cuissons des

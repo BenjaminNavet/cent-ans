@@ -1,7 +1,7 @@
 class_name FactionBorders
 extends Node
 
-## Lot FR1 (ADR 0074) : frontières de faction lumineuses de la carte de campagne, façon Total War.
+## Frontières de faction lumineuses de la carte de campagne, façon Total War (ADR 0074).
 ##
 ## Rendu dans le fragment du terrain (`faction_borders.gdshaderinc`, crochet `fr1_borders` de
 ## terrain.gdshader et terrain_parchment.gdshader) : les frontières sont peintes sur le relief
@@ -12,7 +12,7 @@ extends Node
 ##   un changement de propriétaire se voit à l'image suivante, sans reconstruction de géométrie ;
 ## - opacité et largeur selon le zoom, le filtre de carte (MF1) et la qualité (PF1) ;
 ## - respiration du halo du joueur (un uniforme par image) ;
-## - lot TB2 : style « au repos » (bloc `rest` : trait plus fin, désaturé, presque sans halo) ; la
+## - style « au repos » (bloc `rest` : trait plus fin, désaturé, presque sans halo) ; la
 ##   pleine intensité est réservée aux royaumes des provinces sélectionnée et survolée
 ##   (`set_focus_provinces`), aux modes de carte marqués `full` (Diplomatie) et au parchemin.
 ## Réglages : `data/map/faction_borders.json` (schéma `faction_borders.schema.json`).
@@ -44,14 +44,14 @@ var _player: String = ""
 var _band_saved: Variant = null
 var _last_distance: float = -1.0
 var _last_mode: String = ""
-## Lot EN (ADR 0155) : position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie
+## Position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie (ADR 0155)
 ## le trait dit la relation (ennemis en rouge, héraldique assourdie en paix). Vide : héraldique.
 var _stances: Dictionary = {}
-## Lot DZ : couleurs imposées par faction (mode Diplomatie : position envers la faction observée)
+## Couleurs imposées par faction (mode Diplomatie : position envers la faction observée)
 ## et faction mise en valeur (halo du joueur) ; vides : couleurs héraldiques, joueur.
 var _color_override: Dictionary = {}
 var _highlight: String = ""
-## Lot TB2 : provinces (index raster) survolée et sélectionnée, dont les royaumes passent à
+## Provinces (index raster) survolée et sélectionnée, dont les royaumes passent à
 ## pleine intensité ; index de palette correspondants posés sur le shader (x = survol).
 var _focus_provinces := Vector2i.ZERO
 var _focus_factions := Vector2i(-1, -1)
@@ -207,7 +207,7 @@ func set_ownership(owners: PackedStringArray, controllers: PackedStringArray, pl
 	return true
 
 
-## Lot EN : positions du joueur envers chaque faction (`StanceCues.stances`) ; la palette passe
+## Positions du joueur envers chaque faction (`StanceCues.stances`) ; la palette passe
 ## aux couleurs de relation. Renvoie vrai si elle a changé.
 func set_stances(stances: Dictionary) -> bool:
 	if stances == _stances:
@@ -218,7 +218,7 @@ func set_stances(stances: Dictionary) -> bool:
 	return true
 
 
-## Lot DZ : couleur de trait par faction ({id: Color}, les absentes en encre neutre) et faction
+## Couleur de trait par faction ({id: Color}, les absentes en encre neutre) et faction
 ## dont le halo respire comme celui du joueur ; `{}` et "" : retour aux couleurs héraldiques.
 func set_color_override(colors: Dictionary, highlight: String = "") -> void:
 	if colors == _color_override and highlight == _highlight:
@@ -278,7 +278,7 @@ func faction_color(faction: String) -> Color:
 	return StanceCues.border_color(heraldic, StanceCues.category_of(faction, _player, _stances))  # EN
 
 
-## Lot EN : vrai si `faction` est un ennemi du joueur signalé par les frontières (hors DZ).
+## Vrai si `faction` est un ennemi du joueur signalé par les frontières (hors DZ).
 func is_enemy(faction: String) -> bool:
 	return _color_override.is_empty() and not _stances.is_empty() and StanceCues.category_of(faction, _player, _stances) == StanceCues.ENEMY
 
@@ -313,7 +313,7 @@ func mode_style(map_mode: String) -> Dictionary:
 	return {"alpha": float(style.get("alpha", 1.0)), "neutral": bool(style.get("neutral", false)), "full": bool(style.get("full", false))}
 
 
-## Lot TB2 : provinces (index raster, 0 = aucune) survolée et sélectionnée ; les frontières des
+## Provinces (index raster, 0 = aucune) survolée et sélectionnée ; les frontières des
 ## royaumes qui les possèdent passent à pleine intensité, les autres restent au repos.
 func set_focus_provinces(hovered: int, selected: int) -> void:
 	var provinces := Vector2i(hovered, selected)

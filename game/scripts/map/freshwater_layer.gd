@@ -1,7 +1,7 @@
 class_name FreshwaterLayer
 extends Node3D
 
-## Lot DN-ME4 : eaux douces et zones humides de la carte de campagne (rendu seulement).
+## Eaux douces et zones humides de la carte de campagne (rendu seulement).
 ##
 ## - Roselières et mares : `data/map/freshwater_px.json` (sortie de `cent-ans geo freshwater-sites`,
 ##   ellipses de `wetlands.json` en pixels) et réglages `data/map/map_freshwater.json`. Deux

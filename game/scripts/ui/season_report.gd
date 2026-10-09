@@ -2,7 +2,7 @@ class_name SeasonReport
 extends PanelContainer
 
 ## F3 — rapport de saison : fenêtre parchemin ouverte en fin de tour, qui liste les
-## événements majeurs du journal de la simulation (`end_turn`). Lot U5 (audit A3, T1) : cinq
+## événements majeurs du journal de la simulation (`end_turn`). Audit A3 (T1) : cinq
 ## rubriques dans l'ordre d'urgence — « Vos terres » (pertes et prises en rouge, en premier),
 ## « Trésor », « Armées », « Constructions et recherches », « Le monde » (nouvelles étrangères
 ## filtrées par intérêt : voisins, alliés, ennemis, grandes puissances). Chaque ligne liée à un

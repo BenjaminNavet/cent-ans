@@ -1,7 +1,7 @@
 class_name FolkCaravans
 extends RefCounted
 
-## Chantier FK, lot FK3 (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.2) : marchands en
+## Chantier FK (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.2) : marchands en
 ## charrette sur les routes commerciales. Rendu seulement : lit `get_trade_routes` du pont (les
 ## routes de `TradeRouteLayer` : chemin de colonies, valeur, état coupé), une fois par tour.
 ##

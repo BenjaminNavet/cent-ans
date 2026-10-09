@@ -1,7 +1,7 @@
 class_name VegetationMeshes
 extends RefCounted
 
-## Maillages procéduraux des arbres de la carte (lot V3) : feuillu (houppier en trois
+## Maillages procéduraux des arbres de la carte : feuillu (houppier en trois
 ## masses bosselées sur un tronc) et conifère (trois cônes étagés). Hauteur totale 1,0 :
 ## l'instance fixe la taille réelle. Couleur de sommet : RVB = albédo de base (teinté par
 ## instance dans `foliage.gdshader`), A = poids du balancement au vent (0 au pied, 1 en haut).
@@ -15,17 +15,17 @@ const NEEDLE_LIGHT := Color(0.10, 0.17, 0.08)
 
 static var _cache: Dictionary = {}
 
-## Lot V4 (A1-10) : essences modélisées sous Blender (`tools/blender_scripts/campaign_trees.py`).
+## Essences modélisées sous Blender (`tools/blender_scripts/campaign_trees.py`).
 const TREES_GLB := "res://assets/models/vegetation/campaign_trees.glb"
 ## Identifiant d'essence (UV.x des sommets, lu par `foliage.gdshader` pour la teinte saisonnière).
 const ESSENCE_ID := {"oak": 0.0, "beech": 1.0, "fir": 2.0, "hedge": 3.0}
-## Lot FC2 : atlas des imposteurs (`tools/blender_scripts/campaign_tree_impostors.py`), une ligne
+## Atlas des imposteurs (`tools/blender_scripts/campaign_tree_impostors.py`), une ligne
 ## par essence dans cet ordre, `IMPOSTOR_VIEWS` colonnes (azimuts cuits).
 const IMPOSTOR_ALBEDO := "res://assets/textures/vegetation/campaign_impostors_albedo.png"
 const IMPOSTOR_NORMAL := "res://assets/textures/vegetation/campaign_impostors_normal.png"
 const IMPOSTOR_ROWS: Array[String] = ["oak", "beech", "fir"]
 const IMPOSTOR_VIEWS := 8
-## Lot FC5 : atlas des cartes de feuillage des arbres proches (`build_leaf_cards.py`).
+## Atlas des cartes de feuillage des arbres proches (`build_leaf_cards.py`).
 const CARD_TEXTURE := "res://assets/textures/vegetation/campaign_leaf_cards.png"
 ## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
 const PALETTES := {
@@ -51,7 +51,7 @@ static func essence(name: String, detailed: bool) -> ArrayMesh:
 	return mesh
 
 
-## Lot FC2 : quadrilatère d'imposteur d'une essence (`oak`, `beech`, `fir`), 2 triangles. Les
+## Quadrilatère d'imposteur d'une essence (`oak`, `beech`, `fir`), 2 triangles. Les
 ## sommets sont recalculés par `campaign_tree_impostor.gdshader` (panneau face à la caméra) :
 ## UV = coin (x droite, y 0 en haut), UV2.x = ligne de l'essence dans l'atlas. Boîte englobante
 ## explicite : celle d'un arbre de hauteur 1 (le MultiMesh en déduit la sienne).
@@ -74,7 +74,7 @@ static func impostor(name: String) -> ArrayMesh:
 	return mesh
 
 
-## Lot FC5 : variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 250
+## Variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 250
 ## triangles pour les feuillus, 145 pour le sapin), dessinée avec `foliage_cards.gdshader`
 ## (texture `CARD_TEXTURE`, découpe alpha). UV2 = coordonnées dans l'atlas des cartes (moitié
 ## gauche : feuilles, droite : brindille de sapin). Null si le GLB n'a pas la variante.
@@ -104,7 +104,7 @@ static func essence_mid(name: String) -> ArrayMesh:
 	return mesh
 
 
-## Lot FC6 : quadrilatère d'imposteur ajouté aux arbres proches (UV2 = coin + (0, 2), UV.x =
+## Quadrilatère d'imposteur ajouté aux arbres proches (UV2 = coin + (0, 2), UV.x =
 ## essence) : `foliage_cards.gdshader` passe de l'un à l'autre par arbre, en fondu tramé.
 static func _append_impostor_quad(st: SurfaceTool, essence_id: float) -> void:
 	var corners: Array[Vector2] = [Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)]
@@ -140,7 +140,7 @@ static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
 
 ## Ajoute une partie importée : couleurs de sommet (feuillage selon l'exposition, écorce), normales
 ## « gonflées » depuis le centre du houppier (ombrage doux), UV = (essence, 1 houppier / 0 tronc).
-## `card_offset` ≥ 0 (lot FC5) : cartes de feuillage, UV2 = UV importé ramené dans la moitié de
+## `card_offset` ≥ 0 : cartes de feuillage, UV2 = UV importé ramené dans la moitié de
 ## l'atlas des cartes qui commence à `card_offset`.
 static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float, card_offset: float = -1.0) -> void:
 	var xform := Transform3D.IDENTITY

@@ -1,7 +1,7 @@
 class_name Vegetation
 extends Node3D
 
-## Végétation de la carte de campagne (lot V3, ADR 0004) : forêts, bosquets et haies en
+## Végétation de la carte de campagne (ADR 0004) : forêts, bosquets et haies en
 ## `MultiMeshInstance3D`, par tuile (même découpage 16 × 16 que `TerrainBuilder`).
 ##
 ## - Construction paresseuse : seules les tuiles proches de la caméra sont semées, dans des
@@ -13,13 +13,13 @@ extends Node3D
 ##   `tree_max_distance`) : la canopée du terrain (`terrain.gdshader`) porte la forêt au loin.
 ## - Autonome : se branche seul sur la scène parente (`map_data`, `load_ok`, `terrain`) et sur le
 ##   rig de caméra ; `build(map_data)` peut aussi être appelé directement.
-## - Lot C7b : les arbres sont posés sur la surface du maillage de terrain affiché
+## - Les arbres sont posés sur la surface du maillage de terrain affiché
 ##   (`TerrainBuilder.surface_grid`) et recalés quand une tuile change de niveau (relief fin
 ##   8192², LOD proche ou lointain, signal `chunk_surface_changed`) : nouveaux tampons calculés
 ##   dans une tâche `VegetationGroundJob`, installés en une fois (pas d'à-coup).
-## - Lot V4 (A1-10) : quatre essences (chêne, hêtre, conifère de montagne, haie ; maillages Blender
+## - Quatre essences (chêne, hêtre, conifère de montagne, haie ; maillages Blender
 ##   `campaign_trees.glb`), houppiers élargis au cœur des massifs (canopée continue), teinte
-##   saisonnière par essence (`foliage.gdshaderinc`, poids globaux `campaign_season` du lot CV1 ;
+##   saisonnière par essence (`foliage.gdshaderinc`, poids globaux `campaign_season` ;
 ##   `--season=winter` les force pour les captures). Couverture forestière : `data/map/forest_cover.json`.
 ## Purement visuel : aucune règle de jeu.
 
@@ -37,7 +37,7 @@ enum Lod { FAR, DETAILED, NEAR }
 ## Au-delà de cette distance caméra → point visé, plus d'arbres (VT3 : plafond, la portée réelle
 ## est `MapPropScale.tree_max_distance`, ≈ 30).
 @export var max_camera_distance: float = 700.0
-## Lot L5 : portée selon le préréglage (`veg_max_distance`, Basse 500 … Ultra 1100), appliquée
+## Portée selon le préréglage (`veg_max_distance`, Basse 500 … Ultra 1100), appliquée
 ## seulement avec les imposteurs (FC2) ; sans eux, `max_camera_distance` (VT3 : plafonds).
 var quality_max_distance: float = -1.0
 ## Tuiles (point le plus proche) à moins de cette distance de la caméra : maillage détaillé ;
@@ -55,7 +55,7 @@ var quality_max_distance: float = -1.0
 ## tard (premier zoom sous la portée) : l'attendre bloquait alors le fil principal 240-300 ms
 ## (mesuré) ; hors de cette fenêtre, les premières tuiles arrivent en tâche de fond.
 @export var warm_start_frames: int = 60
-## Lot SZ4b : forêt dense autour du point visé (`ForestDetail`, semis natif requis).
+## Forêt dense autour du point visé (`ForestDetail`, semis natif requis).
 @export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
 ## VT3 : tuiles semées (sans être affichées) jusqu'à cette distance caméra : la portée des arbres
@@ -67,24 +67,24 @@ var quality_max_distance: float = -1.0
 ## discernables individuellement mais restent payées en pleine géométrie d'ombre côté GPU (V6,
 ## perf ; zoom moyen d≈300-500).
 @export var shadow_camera_distance: float = 300.0
-## Recalages (lot C7b) simultanés au plus.
+## Recalages simultanés au plus.
 @export var max_ground_jobs: int = 2
-## Lot FC2 : au-delà de `detail_distance`, chênes, hêtres et conifères en imposteurs (quadrilatère
+## Au-delà de `detail_distance`, chênes, hêtres et conifères en imposteurs (quadrilatère
 ## texturé par les atlas cuits sous Blender, 2 triangles) au lieu du maillage bas (≈ 20 triangles) ;
 ## haies inchangées.
 @export var use_impostors: bool = true
-## Lot FC5 : parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
+## Parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
 ## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 145-250 triangles) ; entre
 ## `near_distance` et `detail_distance`, imposteurs (ombres gardées) au lieu des maillages
 ## détaillés de 90 triangles.
 @export var use_near_cards: bool = true
 @export var near_distance: float = 45.0
-## Lot FC6 : largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
+## Largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
 @export var near_fade: float = 8.0
 ## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
 ## arbre proche) ; faux sans imposteurs.
 var ga3_near_impostors: bool = false
-## Lot DN-FORET (ADR 0221) : arbres proches (`generalised_mesh_distance`) en maillages décimés des
+## Arbres proches (`generalised_mesh_distance`) en maillages décimés des (ADR 0221)
 ## modèles générés du paquet (`DnTreeModels`), un MultiMesh par essence et par partie ; null sans
 ## paquet de modèles (imposteurs seuls, comportement précédent).
 var use_dn_models: bool = true
@@ -93,7 +93,7 @@ var _foliage_params: Dictionary = {}
 var _zone_center := Vector2.ZERO
 var _zone_radius := 0.0
 var _zone_gen := 0
-## Lot HB4 (ADR 0143) : essences par biome (`TreeSpecies`, `data/art/tree_species.json`) .
+## Essences par biome (`TreeSpecies`, `data/art/tree_species.json`)  (ADR 0143).
 @export var use_species: bool = true
 ## Table active (null : semis V4).
 var species: TreeSpecies = null
@@ -106,17 +106,17 @@ var quality_shadow_distance: float = -1.0
 
 var map_data: MapData
 var mask: VegetationMask
-## Lot SZ4b : forêts denses autour du point visé aux paliers vallée et site (semis natif requis).
+## Forêts denses autour du point visé aux paliers vallée et site (semis natif requis).
 var forest_detail: ForestDetail
-## Terrain affiché (lot C7b) : null → arbres sur la heightmap 4096 bilinéaire, sans recalage.
+## Terrain affiché : null → arbres sur la heightmap 4096 bilinéaire, sans recalage.
 var terrain: TerrainBuilder
-## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
+## Cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
 var extra_exclusions: PackedVector3Array = PackedVector3Array()
-## Lot HC1 (ADR 0161) : style généralisé (`MapPropScale.trees_generalised()`, lu à `build`) :
+## Style généralisé (`MapPropScale.trees_generalised()`, lu à `build`)  (ADR 0161):
 ## arbres à taille monde constante grossie, dessinés jusqu'à la vue stratégique ; forêt dense et
 ## cartes proches 1:1 éteintes. Faux : rendu VT3 inchangé.
 var generalised: bool = false
-## Lot HC1 : contours des lacs (px carte ; vide : lus dans `lakes.json`) et polylignes des routes
+## Contours des lacs (px carte ; vide : lus dans `lakes.json`) et polylignes des routes
 ## principales à dégager, à poser avant `build`.
 var clearance_lakes: Array = []
 var clearance_roads: Array = []
@@ -130,20 +130,20 @@ var enabled: bool = true
 var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": "", "regrounds": 0, "reground_ms_max": 0.0}
 
 var _material: ShaderMaterial
-## Lot FC2 : matériau des imposteurs (null : atlas absents) ; mêmes uniformes de
+## Matériau des imposteurs (null : atlas absents) ; mêmes uniformes de
 ## feuillage que `_material` (`_set_foliage_param`).
 var _impostor_material: ShaderMaterial
-## Lot FC5 : matériau des cartes de feuillage (null : texture absente).
+## Matériau des cartes de feuillage (null : texture absente).
 var _cards_material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
 var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int[, "native": id]}
-## Lot PB2 : pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
+## Pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
 var _native: Object = null
 var _native_ids: Dictionary = {}
 var _native_ground_ids: Dictionary = {}  # recalages : id → index de tuile
 var _native_serial: int = 0
 var _native_floor_version: int = -1
-## Lot C7b : recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
+## Recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
 var _ground_jobs: Dictionary = {}
 var _ground_dirty: Dictionary = {}
 var _generation: int = 0
@@ -208,7 +208,7 @@ func build(data: MapData) -> void:
 		mask.default_biome = int(species.d("default_biome", 2.0))
 		if _native != null:
 			var species_table := species.table()
-			# Lot DN-FORET : peuplements forestiers (absents : semis HB4 inchangé).
+			# Peuplements forestiers (absents : semis HB4 inchangé).
 			var stand_table := ForestStands.table(species, data)
 			if not stand_table.is_empty():
 				species_table["stands"] = stand_table
@@ -278,7 +278,7 @@ func build(data: MapData) -> void:
 		forest_detail.setup(self, terrain)
 
 
-## Lot HC1 : table des essences du style généralisé : copie de la table partagée dont les
+## Table des essences du style généralisé : copie de la table partagée dont les
 ## probabilités hors forêt (réglées pour le pas 1:1) sont multipliées par les gains de
 ## `MapPropScale` (`generalised_*_gain`, indices de `TreeSpecies.BIOME_KEYS`) ; le poids du bocage
 ## sur les arbres épars (`hedge_boost`) remplace les haies alignées, non dessinées dans ce style.
@@ -298,7 +298,7 @@ static func _generalised_species(props: MapPropScale) -> TreeSpecies:
 	return table
 
 
-## Lot FC2 : matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
+## Matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
 ## GA3-L2 : grille générée (`Ga3Vegetation`), même cadrage.
 static func _make_impostor_material() -> ShaderMaterial:
 	var ga3 := Ga3Vegetation.enabled() and Ga3Vegetation.has_impostors()
@@ -311,7 +311,7 @@ static func _make_impostor_material() -> ShaderMaterial:
 	material.set_shader_parameter("albedo_atlas", load(albedo_path))
 	material.set_shader_parameter("normal_atlas", load(normal_path))
 	material.set_shader_parameter("views", VegetationMeshes.IMPOSTOR_VIEWS)
-	# Lot HB4 : l'atlas GA3 porte une ligne par essence du catalogue (lignes 0-2 : chêne, hêtre,
+	# L'atlas GA3 porte une ligne par essence du catalogue (lignes 0-2 : chêne, hêtre,
 	# sapin comme FC2) ; la ligne vient alors de la donnée d'instance (`species_rows`).
 	var albedo: Texture2D = material.get_shader_parameter("albedo_atlas")
 	var rows := VegetationMeshes.IMPOSTOR_ROWS.size()
@@ -322,7 +322,7 @@ static func _make_impostor_material() -> ShaderMaterial:
 	return material
 
 
-## Lot L5 : zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
+## Zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
 ## VT3 (ADR 0138) : arbres à l'échelle 1:1, plus dessinés au-delà de
 ## `MapPropScale.tree_max_distance` (≈ 1 px) ; les portées d'avant (`max_camera_distance`,
 ## `veg_max_distance` du préréglage) ne sont plus que des plafonds.
@@ -346,7 +346,7 @@ func effective_max_distance() -> float:
 	return minf(legacy, MapPropScale.shared().tree_max_distance)
 
 
-## Lot FC2 : imposteurs actifs (matériau prêt).
+## Imposteurs actifs (matériau prêt).
 func impostors_active() -> bool:
 	return _impostor_material != null
 
@@ -355,7 +355,7 @@ func impostor_material() -> ShaderMaterial:
 	return _impostor_material
 
 
-## Lot FC2 (tests, bancs) : MultiMesh d'arbres (haies exclues) des parties visibles, par maillage :
+## MultiMesh d'arbres (haies exclues) des parties visibles, par maillage :
 ## {"impostor", "low", "detailed", "impostor_triangles", "low_triangles"} (triangles des instances
 ## visibles).
 func lod_census() -> Dictionary:
@@ -389,7 +389,7 @@ func lod_census() -> Dictionary:
 	return census
 
 
-## Lot HC1 (tests, mesures) : tuiles et instances réellement soumises au rendu (parties visibles,
+## Tuiles et instances réellement soumises au rendu (parties visibles,
 ## `visible_instance_count`), avant le tri par le champ de la caméra.
 func visible_census() -> Dictionary:
 	var census := {"tiles": 0, "parts": 0, "instances": 0, "shadow_parts": 0}
@@ -435,7 +435,7 @@ func _set_foliage_param(param: String, value: Variant) -> void:
 		_impostor_material.set_shader_parameter(param, value)
 
 
-## Lot PO3 : couverture forestière réduite (1024 px) pour les lisières du feuillage
+## Couverture forestière réduite (1024 px) pour les lisières du feuillage
 ## (`foliage.gdshaderinc` : arbres plus bas et clairsemés sur la rampe de la couverture).
 func _bind_forest_cover(data: MapData) -> void:
 	var image := mask.forest_cover_image(1024)
@@ -452,7 +452,7 @@ func _bind_forest_cover(data: MapData) -> void:
 	_set_foliage_param("cover_high", float(params["high"]))
 
 
-## Lot PB2 : pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.
+## Pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.
 static func _make_native(data: MapData) -> Object:
 	if not ClassDB.class_exists("VegetationScatter") or data.height_bytes.is_empty():
 		return null
@@ -498,7 +498,7 @@ func pending_jobs() -> int:
 	return _jobs.size() + (forest_detail.pending() if forest_detail != null else 0)
 
 
-# --- Lot SZ4b : accès pour la couche de forêt dense (`ForestDetail`) -----------------------
+# Accès pour la couche de forêt dense (`ForestDetail`) -----------------------
 
 
 func has_native() -> bool:
@@ -569,7 +569,7 @@ func _process(_delta: float) -> void:
 		_update_season()
 
 
-## Hiver (poids `campaign_season.w` du lot CV1 > 0,5) → variante ajourée du feuillage ; le reste
+## Hiver (poids `campaign_season.w` > 0,5) → variante ajourée du feuillage ; le reste
 ## de l'année, le shader sans discard garde le test de profondeur anticipé (moins de surdessin).
 func _update_season() -> void:
 	if _material == null:
@@ -597,7 +597,7 @@ func _try_autobind() -> void:
 		build(data)
 
 
-## Lot C7b : pose les arbres sur la surface affichée de `terrain_builder` et les recale quand une
+## Pose les arbres sur la surface affichée de `terrain_builder` et les recale quand une
 ## tuile change de niveau. À appeler avant `build`.
 func bind_terrain(terrain_builder: TerrainBuilder) -> void:
 	if terrain != null and terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
@@ -770,7 +770,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	if detailed:
 		lod = Lod.NEAR if _cards_material != null and lod_d < near_distance * quality_detail else Lod.DETAILED
 	var mmis: Array = entry["mmis"]
-	# Lot DN-FORET : MultiMesh de modèles générés dans la zone autour du point visé.
+	# MultiMesh de modèles générés dans la zone autour du point visé.
 	if _dn_models != null and entry.get("models_gen", -1) != _zone_gen:
 		_refresh_part_models(entry)
 	if entry.get("lod", -1) != lod:
@@ -801,7 +801,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 			multimesh.visible_instance_count = ceili(multimesh.instance_count * fraction)
 
 
-## Lot DN-FORET : zone autour du point visé où les arbres sont les maillages décimés des modèles
+## Zone autour du point visé où les arbres sont les maillages décimés des modèles
 ## générés (un MultiMesh par essence et par partie, construit depuis les tampons découpés par ligne
 ## d'atlas côté Rust) ; les imposteurs y sont masqués par le sommet (`model_zone`). La zone se
 ## déplace par paliers (¼ de rayon) pour que les reconstructions restent rares.
@@ -892,10 +892,10 @@ static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -
 	return multimesh
 
 
-## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
+## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; chêne, hêtre et
 ## conifère modélisés sous Blender (`VegetationMeshes.essence`).
-## Lot FC2 : au loin, imposteurs pour les trois essences (haies : maillage bas).
-## Lot FC5 : de près, cartes de feuillage ; entre les deux portées, imposteurs si les cartes sont
+## Au loin, imposteurs pour les trois essences (haies : maillage bas).
+## De près, cartes de feuillage ; entre les deux portées, imposteurs si les cartes sont
 ## actives (sinon maillages détaillés). Haies : maillage détaillé dès `detail_distance`.
 func _meshes(lod: int) -> Array:
 	var detailed := lod != Lod.FAR
@@ -908,7 +908,7 @@ func _meshes(lod: int) -> Array:
 		VegetationMeshes.essence("fir", detailed), hedge]
 
 
-## Lot FC5 : maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
+## Maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
 ## (`near`), imposteurs sinon.
 func forest_meshes(near: bool) -> Array:
 	if _cards_material == null and not ga3_near_impostors:
@@ -963,7 +963,7 @@ func _start_job(index: int) -> void:
 ## Exclusions qui touchent une tuile (le semis teste chaque candidat contre toute la liste).
 func _exclusions_for(rect: Rect2) -> PackedVector3Array:
 	var result := PackedVector3Array()
-	# Lot HB4 : les clairières voisines comptent aussi pour l'anneau des vergers.
+	# Les clairières voisines comptent aussi pour l'anneau des vergers.
 	var ring := species.max_orchard_ring() if species != null else 0.0
 	for e in _exclusions:
 		if rect.grow(e.z + ring).has_point(Vector2(e.x, e.y)):
@@ -987,7 +987,7 @@ func _collect_jobs() -> void:
 	_poll_native()
 
 
-## Lot PB2 : recopie le fond de vallée (ZG8) dans le pool natif quand il a été republié.
+## Recopie le fond de vallée (ZG8) dans le pool natif quand il a été republié.
 func _sync_native_floor() -> void:
 	var grid := MapData.relief_floor_grid()
 	if int(grid["version"]) == _native_floor_version:
@@ -999,7 +999,7 @@ func _sync_native_floor() -> void:
 	_native.call("set_relief_fields", grid["base"], grid["squash"])
 
 
-## Lot PB2 : grille grossière prête → semis natif (conversion des données sur le fil principal).
+## Grille grossière prête → semis natif (conversion des données sur le fil principal).
 func _submit_native(index: int, item: Dictionary) -> void:
 	_sync_native_floor()
 	_native_serial += 1
@@ -1193,7 +1193,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 		parts.append({"node": part_node, "mmis": mmis, "tile": index, "slot0": part_index * VegetationTileJob.KIND_COUNT, "rect":Rect2(Vector2(job.origin_px) + cell * part_px, Vector2(part_px, part_px))})
 	add_child(node)
 	_generation += 1
-	# Tampons CPU gardés pour le recalage (lot C7b) : 64 octets par instance.
+	# Tampons CPU gardés pour le recalage : 64 octets par instance.
 	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame, "buffers": job.buffers, "slots": slots, "generation": _generation, "level": level,
 		"coarse": job.coarse_params()}
 	if terrain != null and terrain.chunk_level(index) != level:

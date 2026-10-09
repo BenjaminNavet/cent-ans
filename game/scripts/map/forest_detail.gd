@@ -1,7 +1,7 @@
 class_name ForestDetail
 extends Node3D
 
-## Lot SZ4b (suites SZ4, ADR 0036 / 0062) : forêts denses autour du point visé aux paliers vallée et
+## Forêts denses autour du point visé aux paliers vallée et (ADR 0036 / 0062)
 ## site. Rendu seulement.
 ##
 ## Les arbres de la carte (`Vegetation`) sont semés pour des arbres de ~1 km ; à leur taille réelle
@@ -19,7 +19,7 @@ extends Node3D
 ## - Recalage sur la surface affichée (pages du quadtree) quand une tuile change, groupé par tuile.
 
 var profile: ForestDetailProfile
-## Lot FC5 : parties à moins de `near_factor` × distance caméra du point visé en cartes de
+## Parties à moins de `near_factor` × distance caméra du point visé en cartes de
 ## feuillage (les autres en imposteurs) ; borne le coût des arbres proches.
 var near_factor: float = 0.4
 var vegetation: Vegetation
@@ -226,7 +226,7 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 	return total
 
 
-## Lot FC5 : maillages d'une partie (cartes de près, imposteurs sinon) ; MultiMesh recréé depuis
+## Maillages d'une partie (cartes de près, imposteurs sinon) ; MultiMesh recréé depuis
 ## la copie processeur du tampon (comme `Vegetation._with_mesh`), boîte fixe gardée.
 func _swap_meshes(entry: Dictionary, part: Dictionary, near: bool) -> void:
 	var meshes := _meshes(near)
@@ -249,7 +249,7 @@ func _swap_meshes(entry: Dictionary, part: Dictionary, near: bool) -> void:
 		mmi.material_override = vegetation.forest_material(kind, near)
 
 
-## Lot FC5 : cartes de feuillage au plus près, imposteurs ailleurs (`Vegetation.forest_meshes`).
+## Cartes de feuillage au plus près, imposteurs ailleurs (`Vegetation.forest_meshes`).
 func _meshes(near: bool) -> Array:
 	return vegetation.forest_meshes(near)
 
@@ -300,7 +300,7 @@ func _start_jobs(wanted: Array) -> void:
 		stats["request_ms_max"] = maxf(float(stats.get("request_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
 
 
-## Couloirs sans arbres d'une cellule : fleuves fins (rang affiché, lot ZG5b) et routes drapées,
+## Couloirs sans arbres d'une cellule : fleuves fins (rang affiché) et routes drapées,
 ## segments `x0, y0, x1, y1, demi-largeur` (unités monde) ; la trame du lit des fleuves 4096 ne
 ## connaît pas ces tracés fins. Tuiles CAFV lues à la demande (cache LRU du magasin).
 func _corridors(rect: Rect2) -> PackedFloat32Array:

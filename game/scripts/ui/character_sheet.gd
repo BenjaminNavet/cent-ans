@@ -1,7 +1,7 @@
 class_name CharacterSheet
 extends PanelContainer
 
-## Fiche personnage (lot C3) : colonne de gauche = grand portrait encadré
+## Fiche personnage : colonne de gauche = grand portrait encadré
 ## d'or avec l'écu de la faction, titres, pastilles d'âge/piété/prestige, niveaux des
 ## domaines, famille, actions (gouverneur/commandement/mariage) ; à droite = description
 ## (Codex), traits en pastilles illustrées (infobulles riches) et arbre de compétences

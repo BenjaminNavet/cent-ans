@@ -1,7 +1,7 @@
 class_name SkillTreeView
 extends Control
 
-## Arbre de compétences visuel de la fiche de personnage (lot C3) : une bande par domaine
+## Arbre de compétences visuel de la fiche de personnage : une bande par domaine
 ## (Commandement, Gouvernance, Cour), les rangs en colonnes de gauche à droite, chaque
 ## compétence en médaillon relié à ses prérequis par un trait d'encre (doré une fois appris).
 ## États : appris (or), disponible (filet rubrique, cliquable), verrouillé (grisé).

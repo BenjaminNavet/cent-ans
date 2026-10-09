@@ -1,7 +1,7 @@
 class_name TradeRouteLayer
 extends MeshInstance3D
 
-## Lot C5 : routes commerciales tracées sur la carte — ruban fin façon parchemin posé sur le
+## Routes commerciales tracées sur la carte — ruban fin façon parchemin posé sur le
 ## relief (`PolylineMesh`, comme `PathPreview`), épaisseur selon la valeur de la route. Couche
 ## activable (bouton de la barre de filtres ou touche V, `map_toggle_trade`) ; respecte le
 ## brouillard (C1) : une route dont aucun bout n'est dans une province visible de la faction
@@ -17,14 +17,14 @@ const COLOR_CUT := Color(0.4, 0.4, 0.4, 0.35)
 var map_data: MapData
 var settlement_layer: SettlementLayer
 var settlement_data: SettlementData
-## Lot SL1 : tracé des routes maritimes ; un tronçon port à port relié par une route suit la
+## Tracé des routes maritimes ; un tronçon port à port relié par une route suit la
 ## mer au lieu de couper à travers les terres.
 var sea_lanes: SeaLaneLayer
 var _cut_mesh: MeshInstance3D
 
 ## Routes affichées ce tour : id -> {points: PackedVector2Array (carte), route: Dictionary}.
 var _routes_screen: Dictionary = {}
-## Lot ZG4 : rubans larges d'un kilomètre ou plus (lisibles en vue stratégique), masqués aux
+## Rubans larges d'un kilomètre ou plus (lisibles en vue stratégique), masqués aux
 ## paliers vallée / site ; `_wanted_visible` garde l'état voulu par la couche.
 var _wanted_visible: bool = false
 var _close_hidden: bool = false
@@ -110,7 +110,7 @@ func set_layer_visible(value: bool) -> void:
 	_apply_visible()
 
 
-## Lot ZG4 : masque la couche aux paliers vallée / site sans perdre l'état voulu.
+## Masque la couche aux paliers vallée / site sans perdre l'état voulu.
 func set_close_hidden(value: bool) -> void:
 	if value != _close_hidden:
 		_close_hidden = value

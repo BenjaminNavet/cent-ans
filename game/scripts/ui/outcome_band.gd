@@ -1,7 +1,7 @@
 class_name OutcomeBand
 extends PanelContainer
 
-## Lot CV3-4 : bandeau de classe de résultat d'une bataille (« Victoire héroïque », « Désastre »…),
+## Bandeau de classe de résultat d'une bataille (« Victoire héroïque », « Désastre »…),
 ## libellé du cœur et couleur par classe. Posé sur l'écran de fin de bataille (B2) et sur la
 ## notice d'auto-résolution de la carte. Aucune règle : la classe et son libellé viennent de
 ## `CampaignSim.get_last_battle_outcome()` / `resolve_battle().outcome` (`battle_outcome.rs`).

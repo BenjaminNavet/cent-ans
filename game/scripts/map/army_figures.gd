@@ -1,9 +1,9 @@
 class_name ArmyFigures
 extends Node3D
 
-## Armée figurée sur la carte de campagne (lot CV2) : général à cheval,
+## Armée figurée sur la carte de campagne : général à cheval,
 ## porte-étendard à pied et quelques soldats selon l'effectif et la composition, en figurines
-## skinnées du lot V2 (maillages `battle_skinned`, animations cuites en texture d'os, un
+## skinnées (maillages `battle_skinned`, animations cuites en texture d'os, un
 ## `MultiMesh` par figurine) aux couleurs et armes de la faction. Animées : marche pendant le
 ## déplacement (`set_walking`, piloté par l'animation M4), repos à l'arrêt ; camp (tentes et
 ## fumée) en siège ou au bivouac en rase campagne. Flotte : cogues ou nefs (voile aux couleurs
@@ -11,7 +11,7 @@ extends Node3D
 ## `ZoomTiers`), les figurines se fondent dans l'étendard et la plaque d'effectif.
 ## Rendu seulement : lit le dictionnaire `get_army` du pont, aucune règle.
 ##
-## Lot CV3-5 : « lord » à l'échelle de la grande stratégie. Le général à cheval est agrandi
+## « lord » à l'échelle de la grande stratégie. Le général à cheval est agrandi
 ## (`map.army_figure_scale`, `data/ui/campaign_map.json`) et porte lui-même l'étendard de l'ost
 ## (plus de porte-étendard à pied) ; l'escorte reste derrière lui. Au palier « loin », il se fond
 ## comme le reste dans l'étendard et la plaque (retour au marqueur).
@@ -30,7 +30,7 @@ const LEADER_SLOT := Vector2(1.5, 0.2)
 const BEARER_SLOT := Vector2(0.1, -1.4)
 ## Pied de la hampe dans le repère du porte-étendard (main droite, un peu en avant).
 const POLE_IN_HAND := Vector2(0.35, 0.55)
-## Lot CV3-5 : main droite du cavalier (repère du général à l'échelle 1 : en avant, à droite,
+## Main droite du cavalier (repère du général à l'échelle 1 : en avant, à droite,
 ## hauteur de la main au-dessus du sol) ; recul du général par unité d'agrandissement (sa monture
 ## grandit vers l'avant, pas sur l'escorte).
 const LORD_HAND := Vector3(0.4, 3.8, 0.7)
@@ -73,7 +73,7 @@ var _level: int = -1
 var _weight: float = 1.0
 var _color: Color = Color.WHITE
 var _heraldry: Texture2D
-## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
+## Agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
 var lord_scale: float = 1.0
 
 static var _map_lookup := JsonLookup.new(CAMPAIGN_MAP_DATA, {"army_figure_scale": 1.0}, "map")
@@ -94,7 +94,7 @@ static func clear_cache() -> void:
 	_map_lookup.reload()
 
 
-## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
+## Réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
 static func map_settings() -> Dictionary:
 	return _map_lookup.data()
 
@@ -138,7 +138,7 @@ static func escort_roster(army: Dictionary) -> Array:
 		men_total += strength
 		var unit_type := str(unit.get("unit_type", ""))
 		var figure_kind: String = {"ranged": "archer", "cavalry": "cavalry", "infantry": "infantry"}.get(ModelLibrary.unit_category(unit_type), "")
-		# Lot UR1 : la figurine déclarée prime (tireurs montés : famille cavalry).
+		# La figurine déclarée prime (tireurs montés : famille cavalry).
 		if figure_kind != "" and BattleMeshes.figure_kind_of(unit_type) != "":
 			figure_kind = BattleMeshes.figure_kind_of(unit_type)
 		if figure_kind == "":
@@ -190,7 +190,7 @@ static func escort_roster(army: Dictionary) -> Array:
 func _build_troop(army: Dictionary) -> void:
 	var slots: Dictionary = {}  # "kind_variant" → Array[Transform3D]
 	if is_lord():
-		# Lot CV3-5 : le général agrandi porte l'étendard ; pas de porte-étendard à pied.
+		# Le général agrandi porte l'étendard ; pas de porte-étendard à pied.
 		_add_slot(slots, "cavalry", 0, lord_slot(), 0.0, lord_scale)
 	else:
 		_add_slot(slots, "cavalry", 0, LEADER_SLOT, 0.0)
@@ -233,12 +233,12 @@ func _build_troop(army: Dictionary) -> void:
 		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material, "clock": _anim_time, "factor": 1.0}
 
 
-## Lot CV3-5 : vrai quand le général agrandi porte l'étendard (réglage > 1).
+## Vrai quand le général agrandi porte l'étendard (réglage > 1).
 func is_lord() -> bool:
 	return lord_scale > 1.001
 
 
-## Lot CV3-5 : place du général agrandi (avancé pour que sa monture ne couvre pas l'escorte).
+## Place du général agrandi (avancé pour que sa monture ne couvre pas l'escorte).
 func lord_slot() -> Vector2:
 	return LEADER_SLOT + Vector2(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
 
@@ -296,7 +296,7 @@ func set_walking(value: bool) -> void:
 		smoke.emitting = not walking
 
 
-# --- Lot AS2 : cadence de marche et balancement de la hampe ----------------------------
+# Cadence de marche et balancement de la hampe ----------------------------
 
 const WALK_DATA := "fx/campaign_army_walk.json"
 static var _walk_lookup := JsonLookup.new(WALK_DATA, {"enabled": false})
@@ -429,7 +429,7 @@ func bearer_anchor() -> Vector3:
 			stern = Basis.from_euler(ship.rotation) * stern + Vector3(0.0, ship.position.y, 0.0)
 		return Basis(Vector3.UP, rotation.y) * stern - Vector3(0.0, 3.0, 0.0)
 	if is_lord():
-		# Lot CV3-5 : dans la main du général ; suit le fondu des figurines (au loin, la hampe
+		# Dans la main du général ; suit le fondu des figurines (au loin, la hampe
 		# redescend au pied du marqueur).
 		var slot := lord_slot()
 		var hand := Vector3(slot.x + LORD_HAND.x * lord_scale, LORD_HAND.y * lord_scale, slot.y + LORD_HAND.z * lord_scale)
@@ -484,7 +484,7 @@ func _add_wake(index: int, slot: Vector2) -> void:
 		_wakes.append(wake)
 
 
-## Lot DN-FLEUVE : identifiants des navires générés de la flotte (culture de la faction, sinon
+## Identifiants des navires générés de la flotte (culture de la faction, sinon
 ## bassin du lieu), vide sans table ou sans position.
 func _generated_fleet_ids(army: Dictionary) -> Array:
 	if DnWaterModels.is_empty():

@@ -1,7 +1,7 @@
 class_name TownMaquetteData
 extends RefCounted
 
-## Lot GC2 (ADR 0158) : données des maquettes stylisées des lieux de la carte de campagne
+## Données des maquettes stylisées des lieux de la carte de campagne (ADR 0158)
 ## (`data/art/town_maquettes.json`, schéma `town_maquettes.schema.json`). Tailles monde par type,
 ## portées, réduction des voisins trop proches, famille d'architecture d'une province (culture,
 ## puis région, puis religion, sinon la famille par défaut), nom du modèle avec repli sur la
@@ -202,7 +202,7 @@ static func model_name_raw(kind: String, family: String, variant: String) -> Str
 
 
 ## Nom du modèle à charger : celui de la famille s'il est importé, sinon celui de la famille par
-## défaut, sinon l'ancien kit occidental `<type>_<variante>` (lot C6).
+## défaut, sinon l'ancien kit occidental `<type>_<variante>`.
 static func model_name(kind: String, family: String, variant: String) -> String:
 	var key := "%s|%s|%s" % [kind, family, variant]
 	if not _model_names.has(key):

@@ -1,7 +1,7 @@
 class_name IntroCards
 extends Control
 
-## Lot MM1 — introduction facultative et passable : cartons illustrés sur les origines de la
+## Introduction facultative et passable : cartons illustrés sur les origines de la
 ## guerre (1328-1337), miniature encadrée d'or qui s'approche lentement, date, titre et texte en
 ## fondu, musique de cour. Clic, Espace ou Entrée : carton suivant ; Échap ou « Passer » : fin.
 ## Textes : `data/ui/front_end.json` (`intro`). Signal `finished` à la fin (la vue se libère).

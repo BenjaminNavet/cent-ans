@@ -1,9 +1,9 @@
 class_name HoldingsController
 extends Node
 
-## Liste « Colonies » (touche B), lot HL2 : accès rapide aux colonies du joueur façon Total
+## Liste « Colonies » (touche B) : accès rapide aux colonies du joueur façon Total
 ## War, groupées par province repliable. Rendu, UI et entrées seulement ; toutes les données
-## viennent de `CampaignSim.get_holdings_overview(faction)` (lot HL1) :
+## viennent de `CampaignSim.get_holdings_overview(faction)` :
 ## `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 2.
 ## Un clic sur une colonie ouvre son panneau (`SettlementController.open_settlement`) ; un clic
 ## sur « ⌖ » d'une province centre la caméra et ouvre le panneau de province. On ne construit

@@ -57,7 +57,7 @@ const JOURNAL_STYLES := {
 var player_faction: String = ""
 var faction_name: Callable = Callable()
 
-## Lot U5 : filtre d'intérêt des lettres et du bandeau (voisins, alliés, ennemis, grandes
+## Filtre d'intérêt des lettres et du bandeau (voisins, alliés, ennemis, grandes
 ## puissances), recalculé en fin de tour par `HudController.update_interest` ; nul = tout passe.
 var interest: NewsInterest = null
 

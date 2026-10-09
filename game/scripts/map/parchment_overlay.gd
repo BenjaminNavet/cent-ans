@@ -1,7 +1,7 @@
 class_name ParchmentOverlay
 extends Control
 
-## Lot CM2 : couche 2D de la vue stratégique parchemin, dessinée au-dessus de la carte selon
+## Couche 2D de la vue stratégique parchemin, dessinée au-dessus de la carte selon
 ## la projection de la caméra : noms des royaumes (capitales espacées, en arc) et des provinces
 ## (italique calligraphique), villes en vignettes, armées en jetons à blason, navires et
 ## monstres marins. Opacité = poids du parchemin (fondu). Purement visuel ; la sélection des
@@ -22,13 +22,13 @@ const REF_DISTANCE := 1400.0
 var weight: float = 0.0
 var camera_distance: float = REF_DISTANCE
 ## Vignettes de villes à l'encre ; faux quand les marqueurs peints de `SettlementLayer` restent
-## affichés au palier Europe (lot DA3).
+## affichés au palier Europe.
 var draw_towns: bool = true
 var camera: Camera3D
 var map_data: MapData
 var decor: ParchmentDecor
 var armies: ArmyMarkers
-## Lot CM2 météo : nuées dessinées sur le parchemin (pluie, neige, orage, brouillard).
+## Météo : nuées dessinées sur le parchemin (pluie, neige, orage, brouillard).
 var weather_view: CampaignWeatherView
 
 var _realms: Array[Dictionary] = []  # {name, points: PackedVector2Array (arc), size}
@@ -103,7 +103,7 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 	queue_redraw()
 
 
-## Lot TB2 : noms courts et centroïdes des provinces ([{id, name, px, world, area}], les plus vastes
+## Noms courts et centroïdes des provinces ([{id, name, px, world, area}], les plus vastes
 ## d'abord), source partagée avec les noms de région de la vue moyenne (`RegionLabels`).
 func province_names() -> Array[Dictionary]:
 	return _provinces
@@ -270,7 +270,7 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 	_sea_layer.queue_redraw()
 
 
-## Lot FA6 : navires et monstres peints (Atlas catalan), dessinés sous la couche (villes, noms et
+## Navires et monstres peints (Atlas catalan), dessinés sous la couche (villes, noms et
 ## jetons restent au-dessus) avec filtrage trilinéaire : les découpes sont bien plus grandes que
 ## leur taille à l'écran. Un appel de dessin par texture visible.
 var _sea_layer: SeaLayer
@@ -472,7 +472,7 @@ func _make_glyphs() -> void:
 		_weather_glyphs[kind] = _make_glyph(WEATHER_GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_weather(ci, WEATHER_ANCHOR, WEATHER_UNIT, kind))
 
 
-# --- Météo (lot CM2) ---------------------------------------------------------------------
+# --- Météo ---------------------------------------------------------------------
 
 const WEATHER_GLYPHS := ["rain", "snow", "storm", "fog"]
 const WEATHER_GLYPH_SIZE := Vector2i(64, 56)

@@ -1,11 +1,11 @@
 class_name ArmyMovementBubble
 extends MeshInstance3D
 
-## Lot M4 : bulle des cases atteignables ce tour par l'armée sélectionnée, dessinée au sol
+## Bulle des cases atteignables ce tour par l'armée sélectionnée, dessinée au sol
 ## (`reachable_bubble.gdshader`). Rendu seulement : le masque vient de
 ## `CampaignSim.get_reachable_area` (une case de la grille de navigation par texel, recadré
 ## sur la bulle) ; le maillage est une grille posée sur le relief couvrant ce cadre.
-## Lot CV3-5 : deux tons, ce tour (canal R, vif) et tour suivant (canal B, plus pâle) ; la
+## Deux tons, ce tour (canal R, vif) et tour suivant (canal B, plus pâle) ; la
 ## bulle est suspendue (masquée) pendant la fin de tour et le rejeu des marches de l'IA.
 
 const SHADER := preload("res://shaders/reachable_bubble.gdshader")
@@ -19,7 +19,7 @@ var _material: ShaderMaterial
 var _cells := 0
 var _next_cells := 0
 var _rect := Rect2()
-## Lot CV3-5 : masquée sans être oubliée (fin de tour, rejeu IA).
+## Masquée sans être oubliée (fin de tour, rejeu IA).
 var _suspended := false
 
 
@@ -65,7 +65,7 @@ func hide_bubble() -> void:
 	visible = false
 
 
-## Lot CV3-5 : suspend l'affichage (fin de tour, rejeu IA) sans oublier la bulle.
+## Suspend l'affichage (fin de tour, rejeu IA) sans oublier la bulle.
 func set_suspended(value: bool) -> void:
 	if value == _suspended:
 		return
@@ -82,7 +82,7 @@ func cell_count() -> int:
 	return _cells if visible else 0
 
 
-## Lot CV3-5 : nombre de cases atteignables au seul tour suivant (0 si masquée).
+## Nombre de cases atteignables au seul tour suivant (0 si masquée).
 func next_cell_count() -> int:
 	return _next_cells if visible else 0
 

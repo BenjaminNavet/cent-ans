@@ -6,14 +6,14 @@ extends RefCounted
 ## fonctions renvoient null / false et les marqueurs gardent leurs placeholders.
 ##
 ## Villes : castle (capitale de faction), cathedral (bâtiment `bld_cathedral`), town
-## (murailles ou fortification ≥ 2), village sinon ; lot V3 : villes fortifiées entières
+## (murailles ou fortification ≥ 2), village sinon ; villes fortifiées entières
 ## (`city_cathedral` pour les cathédrales). Armées : chef monté et escorte (fantassins,
 ## arbalétriers, cavaliers) selon la composition, plus camp de
 ## siège (posture `siege`) ou cogue (`embarked`/`at_sea` vrai). Le matériau `Banner`
 ## est teinté à la couleur de la faction.
 
 const MODELS_DIR := "res://assets/models/"
-## Échelle monde des modèles de ville (lot V3 : une ville fortifiée ≈ 2,1 unités Blender
+## Échelle monde des modèles de ville (une ville fortifiée ≈ 2,1 unités Blender
 ## → ≈ 10 px de carte ; maisons de la taille des arbres, cohérentes avec le relief).
 const CITY_SCALE := 4.8
 ## Échelle du porte-étendard dans l'espace local du marqueur d'armée (hampe placeholder ≈ 7).
@@ -146,7 +146,7 @@ static func city_kind(province_id: String) -> String:
 	return kind
 
 
-# --- Colonies et hameaux (lot C6) ----------------------------------------------------
+# --- Colonies et hameaux ----------------------------------------------------
 
 const HAMLET_VARIANTS: Array[String] = ["hamlet_a", "hamlet_b", "hamlet_c"]
 const HAMLET_SCALE := 3.6

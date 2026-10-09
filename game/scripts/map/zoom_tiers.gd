@@ -5,8 +5,8 @@ extends Resource
 ## (point visé → caméra, en unités monde = pixels de carte 4096). Chaque transition se fait en
 ## fondu sur une bande de largeur `*_fade` centrée sur le seuil.
 ##
-## Lot DV (ADR 0124, `docs/superpowers/specs/2026-09-29-dv-deux-vues-campagne-design.md`) : deux
-## vues seulement, qui remplacent les paliers près / moyen / loin du lot C6 :
+## Deux (ADR 0124)
+## vues seulement, qui remplacent les paliers près / moyen / loin :
 ## - vue normale (`distance < strategic_threshold`) : relief 3D, maquettes jusqu'à `model_range`,
 ##   nom + écu au-dessus des villes, frontières, marqueurs d'armée 3D ;
 ## - vue stratégique : le parchemin CM2 seul (`StrategicView`). `strategic_weight` est la seule
@@ -14,7 +14,7 @@ extends Resource
 ## Sous-paliers de la vue normale :
 ## - « détail proche » (`distance < near_threshold`, ancien palier « près » du C6) : hameaux,
 ##   toutes les routes, relief fin, gens et effets de vie. `near_weight` le pèse.
-## - Lot ZG4 (ADR 0036) : « vallée » (`distance < valley_threshold`, ~5 km de terrain à l'écran) :
+## - ADR 0036 : « vallée » (`distance < valley_threshold`, ~5 km de terrain à l'écran) :
 ##   frontières et brouillard de guerre estompés, étiquettes limitées aux colonies proches,
 ##   marqueurs d'armée à taille écran bornée ; « site » (`distance < site_threshold`, ~1 km,
 ##   jusqu'à ~200 m dans les zones de détail) : frontières presque effacées, seules les
@@ -35,7 +35,7 @@ enum Tier { NEAR, VALLEY, SITE, STRATEGIC }
 ## Portée des maquettes (distance caméra → objet, fondu `visibility_range`) : toute la vue normale.
 @export var model_range: float = 1250.0
 @export var hamlet_range: float = 600.0
-## Lot ZG4 : seuils Près → Vallée → Site (distance caméra) et largeurs de fondu.
+## Seuils Près → Vallée → Site (distance caméra) et largeurs de fondu.
 @export var valley_threshold: float = 8.0
 @export var valley_fade: float = 3.0
 @export var site_threshold: float = 1.8
@@ -46,7 +46,7 @@ enum Tier { NEAR, VALLEY, SITE, STRATEGIC }
 ## Portée des étiquettes de colonies aux paliers vallée / site, en multiples de la distance caméra
 ## (en vue rasante, l'horizon ne se couvre pas de noms).
 @export var close_label_range_factor: float = 40.0
-## Échelle des arbres et autres accessoires de carte : lot SZ4, `MapPropScale`
+## Échelle des arbres et autres accessoires de carte : `MapPropScale`
 ## (`res://resources/map_prop_scale.tres`).
 
 
@@ -61,7 +61,7 @@ func tier_at(distance: float) -> Tier:
 	return Tier.STRATEGIC
 
 
-## Lot DV : poids [0, 1] de la vue stratégique (0 en vue normale, 1 sur le parchemin).
+## Poids [0, 1] de la vue stratégique (0 en vue normale, 1 sur le parchemin).
 func strategic_weight(distance: float) -> float:
 	return smoothstep(strategic_threshold - strategic_fade * 0.5, strategic_threshold + strategic_fade * 0.5, distance)
 
@@ -71,22 +71,22 @@ func near_weight(distance: float) -> float:
 	return 1.0 - smoothstep(near_threshold - near_fade * 0.5, near_threshold + near_fade * 0.5, distance)
 
 
-## Lot ZG4 : poids [0, 1] du palier « vallée » et en deçà (1 sous le seuil, 0 au-dessus).
+## Poids [0, 1] du palier « vallée » et en deçà (1 sous le seuil, 0 au-dessus).
 func valley_weight(distance: float) -> float:
 	return 1.0 - smoothstep(valley_threshold - valley_fade * 0.5, valley_threshold + valley_fade * 0.5, distance)
 
 
-## Lot ZG4 : poids [0, 1] du palier « site ».
+## Poids [0, 1] du palier « site ».
 func site_weight(distance: float) -> float:
 	return 1.0 - smoothstep(site_threshold - site_fade * 0.5, site_threshold + site_fade * 0.5, distance)
 
 
-## Lot ZG4 : opacité des frontières (1 jusqu'au palier comté, `site_border_alpha` au palier site).
+## Opacité des frontières (1 jusqu'au palier comté, `site_border_alpha` au palier site).
 func border_alpha(distance: float) -> float:
 	return lerpf(1.0, lerpf(0.5, site_border_alpha, site_weight(distance)), valley_weight(distance))
 
 
-## Lot ZG4 : opacité du voile du brouillard de guerre (même principe).
+## Opacité du voile du brouillard de guerre (même principe).
 func fog_alpha(distance: float) -> float:
 	return lerpf(1.0, lerpf(0.7, site_fog_alpha, site_weight(distance)), valley_weight(distance))
 

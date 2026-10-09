@@ -1,7 +1,7 @@
 class_name KeyBindings
 extends RefCounted
 
-## Lot NT6d : réaffectation libre des touches. Les actions listées sont celles de la fiche des
+## Réaffectation libre des touches. Les actions listées sont celles de la fiche des
 ## raccourcis (`ShortcutSheet.CAMPAIGN_SECTIONS`, libellés français). Les touches modifiées sont
 ## enregistrées dans le réglage `input/bindings` (action → liste de touches physiques, modificateurs
 ## compris) et réappliquées à l'`InputMap` au démarrage (`Settings._ready`). Les défauts sont ceux

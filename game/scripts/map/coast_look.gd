@@ -1,7 +1,7 @@
 class_name CoastLook
 extends RefCounted
 
-## Lot TB5 : côtes de la carte de campagne, lues dans `data/map/coast_types.json` (schéma
+## Côtes de la carte de campagne, lues dans `data/map/coast_types.json` (schéma
 ## `data/schemas/coast_types.schema.json`). La région donne la géologie (roche : craie, granite ou
 ## roche ; plage : sable ou galets), la pente choisit entre falaise et plage : altitude lue à
 ## `cliff.probe_px` de la côte vers l'intérieur (même règle que `coast_common.gdshaderinc`).

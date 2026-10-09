@@ -2,7 +2,7 @@ class_name BattleModeIcons
 extends RefCounted
 
 ## CB2 : pictogrammes des modes d'unité (course, garde, escarmouche, mêlée, battre en brèche) et
-## des nouveaux états (hésite, sous le feu) : icônes à l'encre DA5 (lot CB, clés `battle_mode_<mode>`
+## des nouveaux états (hésite, sous le feu) : icônes à l'encre DA5 (clés `battle_mode_<mode>`
 ## et `battle_state_<état>` via `HudStyle.icon`), glyphes dessinés en code en repli si le PNG manque.
 ## Aucune règle : les modes et états viennent de `BattleSim.get_units()`.
 
@@ -53,7 +53,7 @@ static func active_modes(unit: Dictionary) -> Array[String]:
 	return out
 
 
-## Icône à l'encre DA5 (lot CB) de la clé `key` (`battle_mode_run`, `battle_state_rout`…) posée
+## Icône à l'encre DA5 de la clé `key` (`battle_mode_run`, `battle_state_rout`…) posée
 ## dans un carré de côté `side` centré en `c`, l'encre changée en `ink` ; faux si l'icône manque
 ## (le glyphe dessiné en code sert alors de repli : le jeu tourne sans les PNG).
 static func draw_ink_icon(canvas: CanvasItem, key: String, c: Vector2, side: float, ink: Color = INK) -> bool:

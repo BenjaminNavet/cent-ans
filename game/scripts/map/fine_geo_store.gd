@@ -1,7 +1,7 @@
 class_name FineGeoStore
 extends RefCounted
 
-## Données fines du lot ZG5a lues pour le rendu (lot ZG5b, ADR 0036) :
+## Données fines lues pour le rendu (ADR 0036) :
 ## - index des tuiles CAFV des fleuves (`data/map/rivers_fine.json`) et des routes drapées
 ##   (`fine_anchors.json` → `roads`), tuiles binaires hors git sous `data/map/pyramid/` ;
 ## - ancrages affinés des colonies, hameaux et franchissements (`fine_anchors.json`).

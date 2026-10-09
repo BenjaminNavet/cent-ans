@@ -1,7 +1,7 @@
 class_name MapLegend
 extends PanelContainer
 
-## Lot UX1 (audit A3, C14 / U14) : légende de la carte de campagne, panneau parchemin ouvert
+## Légende de la carte de campagne, panneau parchemin ouvert
 ## par le bouton « Légende » de la minicarte. Textes dans `data/ui/map_legend.json` (schéma
 ## `data/schemas/map_legend.schema.json`) ; chaque symbole a son échantillon dessiné
 ## (`LegendSample`). Les sections marquées `modes` ne s'affichent que dans ce mode de carte

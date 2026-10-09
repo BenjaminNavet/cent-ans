@@ -1,7 +1,7 @@
 class_name GeneralSeal
 extends Control
 
-## Sceau du chef (HUD de campagne, bas à gauche ; lot F10a) : médaillon de cire aux armes
+## Sceau du chef (HUD de campagne, bas à gauche) : médaillon de cire aux armes
 ## de la faction, ou portrait découpé en disque quand il existe (`PortraitLoader`), pastille
 ## des points de compétence non dépensés, rang sous le sceau ; à droite, un cartouche avec
 ## nom, titre, compétences (Cdt / Gouv / Cour), posture, ravitaillement et mouvement restant.
@@ -18,10 +18,10 @@ signal stance_selected(stance: String)
 
 const SEAL_RADIUS := 58.0
 const PLATE_WIDTH := 212.0
-## Lot CV3-4 : postures proposées, dans l'ordre des boutons (`StanceBar`).
+## Postures proposées, dans l'ordre des boutons (`StanceBar`).
 const STANCES := StanceBar.STANCES
 
-## Vrai pour une armée du joueur : une rangée de boutons de posture (`StanceBar`, lot CV3-4)
+## Vrai pour une armée du joueur : une rangée de boutons de posture (`StanceBar`)
 ## émet `stance_selected` ; `army.stance_options` (`get_stance_options`) grise les refus.
 @export var can_change_stance: bool = true
 
@@ -37,7 +37,7 @@ var _name_label: Label
 var _title_label: Label
 var _skills_label: Label
 var _status_row: HBoxContainer
-## Lot CV3-4 : boutons de posture (armée du joueur).
+## Boutons de posture (armée du joueur).
 var stance_bar: StanceBar
 
 
@@ -160,7 +160,7 @@ func _refresh() -> void:
 	queue_redraw()
 
 
-## Lot CV3-4 : le sceau s'agrandit pour contenir le cartouche (rangée des postures comprise).
+## Le sceau s'agrandit pour contenir le cartouche (rangée des postures comprise).
 func _fit_plate() -> void:
 	if _plate == null:
 		return

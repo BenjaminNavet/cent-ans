@@ -5,7 +5,7 @@ extends Node
 ## `campaign_map.gd` ; celui-ci n'appelle que `setup` et `handle_input`.
 
 ## Principes du jeu ; la fiche des commandes de la carte, en tête, est générée depuis
-## l'InputMap (`ShortcutSheet`, lot U7) à chaque ouverture (disposition du clavier à jour).
+## l'InputMap (`ShortcutSheet`) à chaque ouverture (disposition du clavier à jour).
 const HELP_TEXT := """[b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi ; un pays dévasté les nourrit mal, même chez soi.
 • Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte {rule.landing_loss_percent} % des hommes ({rule.landing_loss_winter_percent} % l'hiver).

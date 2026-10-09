@@ -1,7 +1,7 @@
 class_name NextHint
 extends RefCounted
 
-## Lot UX2 — choix du conseil « que faire maintenant » (encart parchemin de la carte). Textes,
+## Choix du conseil « que faire maintenant » (encart parchemin de la carte). Textes,
 ## actions et seuils dans `data/ui/next_hints.json` (schéma `data/schemas/next_hints.schema.json`),
 ## par ordre de priorité ; ici seulement les conditions, qui lisent un état déjà exposé par la
 ## simulation et rassemblé par `NextHintController` :

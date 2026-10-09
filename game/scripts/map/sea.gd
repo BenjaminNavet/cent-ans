@@ -60,7 +60,7 @@ func setup(map_size: Vector2i) -> void:
 	add_child(floor_instance)
 
 
-## Lot TB1 : mer de la saison (`weights` : poids printemps, été, automne, hiver de `SeasonVisuals`),
+## Mer de la saison (`weights` : poids printemps, été, automne, hiver de `SeasonVisuals`),
 ## valeurs de `data/ui/campaign_seasons.json`.
 func apply_season(weights: Vector4) -> void:
 	var material := material_override as ShaderMaterial
@@ -73,7 +73,7 @@ func apply_season(weights: Vector4) -> void:
 	material.set_shader_parameter("season_foam", look["foam"])
 
 
-## Lot TB1 : reprend du terrain le masque météo par province (CM2) et la carte des provinces,
+## Reprend du terrain le masque météo par province (CM2) et la carte des provinces,
 ## pour l'écume de tempête.
 func sync_weather(terrain_material: ShaderMaterial) -> void:
 	var material := material_override as ShaderMaterial

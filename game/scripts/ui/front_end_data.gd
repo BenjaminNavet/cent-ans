@@ -1,7 +1,7 @@
 class_name FrontEndData
 extends RefCounted
 
-## Lot MM1 — textes et réglages des écrans d'accueil (`data/ui/front_end.json`, schéma
+## Textes et réglages des écrans d'accueil (`data/ui/front_end.json`, schéma
 ## `data/schemas/front_end.schema.json`) : décor 3D du menu, présentation des factions, dates de
 ## départ, introduction, citations, conseils et illustrations des écrans de chargement.
 

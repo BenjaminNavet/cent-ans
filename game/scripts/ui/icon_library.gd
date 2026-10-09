@@ -9,14 +9,14 @@ extends Node
 ## `trait_`, `skill_`, `class_`, `gauge_`, `hud_`, `branch_`), puis l'icône par défaut.
 ## Godot importe les SVG nativement (64 px, taille déclarée dans le fichier).
 ##
-## Lot DA5 : famille unique d'icônes d'action à l'encre (PNG 128 px, RVB = `HudStyle.INK`,
+## Famille unique d'icônes d'action à l'encre (PNG 128 px, RVB = `HudStyle.INK`,
 ## alpha = encre ; `cent-ans assets ink-icons`, catalogue `data/ui/icons_ink.json`).
 ## `ink/index.json` (id → fichier) est lu en premier : un identifiant qu'il couvre prend
 ## l'icône à l'encre, sinon le SVG (repli si le PNG manque). Teinte au rendu : `tint(color)`
 ## donne la modulation qui change l'encre en `color` (or au survol, encre pâlie désactivé).
 ## Médaillons enluminés : `get_medallion(id)` (`res://assets/ui/medallions/`, même index).
 ##
-## Lot DA5b : icônes d'entité en miniatures peintes (unités, bâtiments, techniques, compétences,
+## Icônes d'entité en miniatures peintes (unités, bâtiments, techniques, compétences,
 ## ressources, régimes, catégories d'unité), PNG 128 px encadrés or et azur
 ## (`cent-ans assets entity-icons`, catalogue `data/ui/entity_icons.json`). `entity/index.json`
 ## est lu en premier : priorité miniature d'entité > encre > SVG. Une miniature n'est jamais

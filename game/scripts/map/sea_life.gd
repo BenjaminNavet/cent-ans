@@ -1,7 +1,7 @@
 class_name SeaLife
 extends RefCounted
 
-## Lot ME1 (chantier DN, mer vivante) : fonds clairs, crêtes du large, saturation bornée, liseré de
+## Fonds clairs, crêtes du large, saturation bornée, liseré de
 ## ressac lisible, estrans et sillages des flottes. Réglages dans `data/fx/sea_life.json` (schéma
 ## `fx_sea_life.schema.json`), jamais codés en dur ; shader `sea_life.gdshaderinc`. Rendu seulement.
 ## Fichier absent : le shader garde `sea_life_on` = false (rendu d'avant).

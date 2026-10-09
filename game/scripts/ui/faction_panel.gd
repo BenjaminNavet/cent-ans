@@ -48,7 +48,7 @@ var ransom_button: Button
 var ransom_panel: RansomPanel
 ## Audit A3 E1 : « Solde prévu » (le chiffre de la barre du haut, calculé par `core/`).
 var net_value: Label
-## Lot U3 : tableau recettes / dépenses / solde (prévu, saison passée, écart) et courbe du trésor.
+## Tableau recettes / dépenses / solde (prévu, saison passée, écart) et courbe du trésor.
 var budget_table: BudgetTable
 var treasury_chart: TreasuryChart
 var _tax_buttons: Dictionary = {}
@@ -255,7 +255,7 @@ func _arrange_budget() -> void:
 	recoin_key.text = "   dont refonte des monnaies"
 
 
-## Lot U3 : le budget passe en tableau (`BudgetTable`) suivi de la courbe du trésor ; la grille
+## Le budget passe en tableau (`BudgetTable`) suivi de la courbe du trésor ; la grille
 ## de la scène ne garde que la ligne « Trésor » (ses autres valeurs restent tenues à jour pour les
 ## tests et le tutoriel). Le panneau s'élargit pour les quatre colonnes.
 func _build_budget_view() -> void:

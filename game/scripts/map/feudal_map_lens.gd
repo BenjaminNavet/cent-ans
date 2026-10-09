@@ -1,7 +1,7 @@
 class_name FeudalMapLens
 extends RefCounted
 
-## Lot FE6 (spec FE § 6) : filtre de carte « Féodalité » (MF1). Fond : couleur du souverain au
+## Filtre de carte « Féodalité » (MF1). Fond : couleur du souverain au
 ## sommet de la chaîne de la province ; hachures : couleur du tenant direct de son titre quand ce
 ## n'est pas le souverain ; écu parti (tenant | seigneur de la province) sur les provinces en
 ## double allégeance (la Guyenne anglaise tenue du roi de France). Les valeurs viennent de

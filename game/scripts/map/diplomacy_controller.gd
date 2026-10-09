@@ -3,7 +3,7 @@ extends Node
 
 ## Branche la diplomatie et la religion (M5) sur la carte de campagne : bouton « Diplomatie »
 ## (touche P), panneau `DiplomacyPanel`, fenêtre des propositions reçues en fin de tour. Les modes
-## de carte « Diplomatie » et « Religion » vivent dans `MapModeController` (lot MF1). Séparé de
+## de carte « Diplomatie » et « Religion » vivent dans `MapModeController`. Séparé de
 ## `campaign_map.gd` pour garder chaque jalon dans son fichier ; `campaign_map` n'appelle que
 ## `setup`, `refresh`, `after_end_turn` et `handle_input`.
 

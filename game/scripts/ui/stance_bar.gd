@@ -1,7 +1,7 @@
 class_name StanceBar
 extends HBoxContainer
 
-## Lot CV3-4 : rangée de boutons de posture du sceau du chef (une icône à l'encre par posture :
+## Rangée de boutons de posture du sceau du chef (une icône à l'encre par posture :
 ## normale, chevauchée, siège, embuscade, marche forcée, camp retranché). La posture en cours
 ## est enfoncée ; une posture que le cœur refuse est grisée, sa raison en infobulle.
 ## Aucune règle : `set_state(stance, options)` reçoit la posture de `get_army` et

@@ -1,7 +1,7 @@
 class_name HbGround
 extends RefCounted
 
-## Lot HB3 (ADR 0143) : habillage du sol par biome dans `terrain.gdshader`
+## Habillage du sol par biome dans `terrain.gdshader` (ADR 0143)
 ## (`hb_ground.gdshaderinc`). Pose les tableaux de matières fal.ai (`GroundMaterials`), la carte
 ## des biomes (`data/map/biomes.png`) et la table du mélange par biome
 ## (`data/art/ground_biome_mix.json`) ; `has_hb` reste faux s'il manque l'un d'eux (rendu SS).

@@ -1,6 +1,6 @@
 class_name BattleUnitLooks
 extends RefCounted
-## Variantes de rendu des figurines par type d'unité (lot OMR R5, `data/fx/unit_looks.json`) :
+## Variantes de rendu des figurines par type d'unité (`data/fx/unit_looks.json`) :
 ## part des soldats en livrée, étoffes des vêtements non teints, robes des chevaux. Rendu
 ## seulement ; la figurine elle-même reste celle du champ `figure` du type d'unité.
 

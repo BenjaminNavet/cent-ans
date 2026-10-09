@@ -1,7 +1,7 @@
 class_name CloseCameraProfile
 extends Resource
 
-## Lot ZG4 (ADR 0036) : réglages de la caméra rapprochée de la carte de campagne et de
+## Réglages de la caméra rapprochée de la carte de campagne et de (ADR 0036)
 ## l'exagération verticale dynamique (`res://resources/close_camera.tres`). Purement visuel.
 ##
 ## Distances en unités monde (1 unité = 1 pixel de carte 4096 = 719 m), mesurées du point visé à
@@ -17,7 +17,7 @@ extends Resource
 ##   interpolation lisse (smoothstep) en logarithme de la distance entre les deux. L'échelle est
 ##   quantifiée par paliers géométriques de `exaggeration_step` (≈ 4 %) avec hystérésis, pour que
 ##   les calques qui posent des objets au sol ne se recalent qu'à chaque palier.
-## - Tangage : inchangé au-dessus de `pitch_reference_distance` (courbe historique du lot C6,
+## - Tangage : inchangé au-dessus de `pitch_reference_distance` (courbe historique,
 ##   30° → 70°) ; en deçà, de plus en plus rasant jusqu'à `pitch_closest_deg` à
 ##   `pitch_closest_distance` (vue « à hauteur de colline »).
 ## - Plans de coupe : `near` ∝ distance (bornée), `far` ∝ distance + marge (horizon visible en vue
@@ -28,12 +28,12 @@ extends Resource
 ## Croissance de la distance minimale par unité d'éloignement d'une zone plus fine.
 @export var min_distance_slope: float = 0.45
 
-## Lot ZG4b : plancher provisoire au-dessus des villes emblématiques (cercles
+## Plancher provisoire au-dessus des villes emblématiques (cercles
 ## `SettlementLayer.landmark_zones()`, données `data/landmarks/`). Leurs maquettes L1/L2 sont à la
 ## loupe (×3,5) et masquées au palier « site » ; rien de fin n'est dessiné dans leurs zones (ZG5b,
 ## ZG6 les excluent) : sans plancher, la caméra y descendait à 0,3 unité sur un sol nu. La caméra ne
 ## descend donc pas sous `landmark_min_distance` dans une zone (maquette encore crédible, au-dessus
-## du palier site), plancher adouci au-dehors avec `min_distance_slope`. **Le lot VH4** (villes
+## du palier site), plancher adouci au-dehors avec `min_distance_slope`. **La mise à l'échelle réelle** (villes
 ## emblématiques à l'échelle réelle, ADR 0036 addendum « villes emblématiques ») **le lève** : 0 =
 ## pas de plancher.
 @export var landmark_min_distance: float = 2.6
@@ -68,7 +68,7 @@ extends Resource
 ## fraction `occlusion_min_t` de la distance, en partant du point visé).
 @export var occlusion_samples: int = 6
 @export var occlusion_min_t: float = 0.25
-## Lot SZ1 : crêtes voisines. La caméra reste au-dessus du sol affiché sur un cercle de rayon
+## Crêtes voisines. La caméra reste au-dessus du sol affiché sur un cercle de rayon
 ## `crest_radius_factor` × distance autour d'elle (`crest_samples` points, plus garde au sol) :
 ## en montagne elle monte au-dessus des crêtes au lieu de rester au fond du canyon. Même cercle
 ## autour du point visé, hauteur pondérée par `crest_focus_weight` (0 : ignoré, 1 : la caméra
@@ -127,7 +127,7 @@ func soft_min_distance(p: Vector2, relief: Object) -> float:
 	return best
 
 
-## Lot ZG4b : plancher de distance au point carte `p` dû aux villes emblématiques (`zones` :
+## Plancher de distance au point carte `p` dû aux villes emblématiques (`zones` :
 ## cercles x, z, rayon) : `landmark_min_distance` dans un cercle, décroissant de
 ## `min_distance_slope` par unité au-dehors ; 0 si aucun (ou plancher désactivé).
 func landmark_floor(p: Vector2, zones: PackedVector3Array) -> float:
@@ -142,8 +142,8 @@ func landmark_floor(p: Vector2, zones: PackedVector3Array) -> float:
 
 
 
-## Plancher effectif de l'exagération de près : `exaggeration_near` (lot ZG4), relevé par le relief
-## exagéré du lot ZG8 (`ReliefExaggerationProfile.near_exaggeration`) quand il est actif.
+## Plancher effectif de l'exagération de près : `exaggeration_near`, relevé par le relief
+## exagéré (`ReliefExaggerationProfile.near_exaggeration`) quand il est actif.
 func near_exaggeration() -> float:
 	return ReliefExaggerationProfile.load_default().near_floor(exaggeration_near)
 

@@ -1,12 +1,12 @@
 class_name EndTurnCluster
 extends Control
 
-## Cloche de fin de saison (HUD de campagne, bas à droite ; lot F10a) : gros bouton rond
+## Cloche de fin de saison (HUD de campagne, bas à droite) : gros bouton rond
 ## (cloche + saison/année) qui termine le tour — raccourci `campaign_end_turn` (Entrée) —,
-## surmonté d'une colonne de pastilles d'alerte regroupées par type. Lot U5 (audit A3, C10) :
+## surmonté d'une colonne de pastilles d'alerte regroupées par type. Audit A3 (C10) :
 ## chaque pastille porte un libellé court et un compteur lisibles sans survol.
 ##
-## Aucune règle de jeu : les alertes sont fournies par l'appelant (`set_alerts`, lot F3) sous
+## Aucune règle de jeu : les alertes sont fournies par l'appelant (`set_alerts`) sous
 ## la forme `{kind, text, province_id?, army_id?, character_id?, blocking?}`. Types connus :
 ## `enemy_army`, `siege`, `construction_done`, `research_done`, `debt`, `chronicle_decision`,
 ## `idle_character` (les autres s'affichent avec une pastille neutre).
@@ -24,7 +24,7 @@ signal alert_activated(alert: Dictionary)
 ## Ordre d'affichage des types dans l'éventail (du bas-gauche vers le haut).
 const KIND_ORDER := [
 	"chronicle_decision", "enemy_army", "siege", "debt", "idle_character", "construction_done", "research_done"]
-## Libellés courts des pastilles (lot U5), écrits sur la pastille.
+## Libellés courts des pastilles, écrits sur la pastille.
 const SHORT_LABELS := {
 	"chronicle_decision": "Décision",
 	"enemy_army": "Armée ennemie",
@@ -66,7 +66,7 @@ const ICON_ALIASES := {"diplomacy_offer": "diplomacy", "research_idle": "researc
 const DANGER_KINDS := ["chronicle_decision", "enemy_army", "siege", "debt"]
 const BUTTON_RADIUS := 62.0
 const BADGE_RADIUS := 17.0
-## Colonne des pastilles au-dessus de la cloche (lot U5).
+## Colonne des pastilles au-dessus de la cloche.
 const PILL_WIDTH := 190.0
 const PILL_HEIGHT := 30.0
 const PILL_GAP := 4.0
@@ -85,7 +85,7 @@ var _badges: Array[AlertBadge] = []
 var _button: Button
 var _hover := false
 var _enabled := true
-## Lot A6-L6 (U20) : `() -> bool`, vrai quand une fenêtre modale est ouverte (file de `MapUI`) ;
+## L6 (U20) : `() -> bool`, vrai quand une fenêtre modale est ouverte (file de `MapUI`) ;
 ## la cloche se désactive alors (avec infobulle) au lieu d'ignorer le clic. Le menu pause
 ## (arbre en pause) compte aussi.
 var modal_check: Callable = Callable()
@@ -164,7 +164,7 @@ func _process(_delta: float) -> void:
 	refresh_modal()
 
 
-## Lot A6-L6 (U20) : cloche désactivée tant qu'une fenêtre modale ou le menu pause est ouvert.
+## L6 (U20) : cloche désactivée tant qu'une fenêtre modale ou le menu pause est ouvert.
 func refresh_modal() -> void:
 	var now := (modal_check.is_valid() and bool(modal_check.call())) or (is_inside_tree() and get_tree().paused)
 	if now == _modal:
@@ -435,7 +435,7 @@ class AlertBadge:
 	var group_index: int = 0
 	var kind: String = ""
 	var count: int = 1
-	## Libellé court écrit sur la pastille (lot U5).
+	## Libellé court écrit sur la pastille.
 	var label: String = ""
 	## Glyphe fourni par l'alerte (`glyph`), à défaut d'icône.
 	var glyph: String = ""

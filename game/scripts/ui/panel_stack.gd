@@ -1,7 +1,7 @@
 class_name PanelStack
 extends RefCounted
 
-## Pile des panneaux de la carte de campagne (audit A3, lot U1 « Empilement des fenêtres »).
+## Pile des panneaux de la carte de campagne (audit A3, « Empilement des fenêtres »).
 ##
 ## Chaque panneau enregistré a un genre :
 ## - `DOCKED` : panneaux ancrés à droite (province, colonie). Un panneau central les « met de

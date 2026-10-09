@@ -1,7 +1,7 @@
 class_name MapModeController
 extends Node
 
-## Lot MF1 : filtres de la carte de campagne, façon Total War. Un seul mode de teinte actif à la
+## Filtres de la carte de campagne, façon Total War. Un seul mode de teinte actif à la
 ## fois (politique, diplomatie, religion, mécontentement, richesse, population, loyauté des
 ## vassaux, ravitaillement, revendications) ; les routes commerciales restent un calque à part,
 ## combinable. Bouton « Filtres » (touche F) en tête de la rangée de la minicarte, qui ouvre le
@@ -98,7 +98,7 @@ var _tint_saved: Dictionary = {}
 var _lens: Dictionary = {}
 var _relations: Dictionary = {}
 var _religions: Dictionary = {}
-## Lot DZ : faction dont le mode Diplomatie montre les relations ("" : le joueur). Un clic sur une
+## Faction dont le mode Diplomatie montre les relations ("" : le joueur). Un clic sur une
 ## province la choisit (son contrôleur) ; un clic sur nos terres ou hors carte revient au joueur.
 var focus_faction: String = ""
 ## FE6 : filtre « Féodalité » (couleurs, hachures, écus partis).
@@ -330,7 +330,7 @@ func _clear_feudal() -> void:
 # ----- Diplomatie et religion (M5, DP1) ---------------------------------------------------------
 
 func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
-	# Lot DP2 : positions diplomatiques (allié, accord, neutre, tension, guerre, vassal).
+	# Positions diplomatiques (allié, accord, neutre, tension, guerre, vassal).
 	if DiplomaticStances.available(map.sim):
 		var stances := DiplomaticStances.stances(map.sim, ids, focus_faction)
 		var stance_colors := PackedColorArray()
@@ -357,14 +357,14 @@ func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
 	return colors
 
 
-## Lot DZ : faction observée par le mode Diplomatie (le joueur par défaut).
+## Faction observée par le mode Diplomatie (le joueur par défaut).
 func viewer() -> String:
 	if focus_faction != "":
 		return focus_faction
 	return str(map.get("player_faction")) if map != null else ""
 
 
-## Lot DZ : frontières de royaume aux couleurs de position envers la faction observée (rouge :
+## Frontières de royaume aux couleurs de position envers la faction observée (rouge :
 ## ses ennemis), halo respirant autour d'elle.
 func _apply_stance_borders() -> void:
 	var stances := DiplomaticStances.faction_stances(map.sim, viewer())
@@ -382,7 +382,7 @@ func _set_border_override(colors: Dictionary, highlight: String) -> void:
 		borders.call("set_color_override", colors, highlight if not colors.is_empty() else "")
 
 
-## Lot DZ : clic sur une province en mode Diplomatie — son contrôleur devient la faction
+## Clic sur une province en mode Diplomatie — son contrôleur devient la faction
 ## observée (nos terres, rebelles ou hors carte : retour au joueur). Vrai si la vue a changé.
 func focus_on_province(province_id: String) -> bool:
 	if mode != "diplomacy" or map == null or map.sim == null:
@@ -434,7 +434,7 @@ func _religion_colors(ids: PackedStringArray) -> PackedColorArray:
 	return colors
 
 
-## Lot U12 : en mode daltonien, un symbole par province sur la carte diplomatique (⚔ guerre,
+## En mode daltonien, un symbole par province sur la carte diplomatique (⚔ guerre,
 ## ⚭ alliance, ⚜ vassal ou suzerain, ⌛ trêve), lisible sans distinguer les couleurs.
 func _place_relation_markers(ids: PackedStringArray, relations: PackedStringArray) -> void:
 	_clear_relation_markers()

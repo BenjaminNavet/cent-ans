@@ -1,7 +1,7 @@
 class_name FamilyTreeView
 extends ScrollContainer
 
-## Arbre familial graphique (lot C3, onglet « Arbre familial » du panneau Cour) : registre
+## Arbre familial graphique (onglet « Arbre familial » du panneau Cour) : registre
 ## parchemin, médaillons de portrait reliés par des traits à l'encre. Génération courante
 ## centrée, ascendants au-dessus, descendants en dessous, conjoints à côté (double trait).
 ## Défunts grisés, héritier couronné, dirigeant cerclé d'or. Clic = fiche du personnage,

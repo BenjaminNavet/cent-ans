@@ -1,7 +1,7 @@
 class_name FolkScenes
 extends RefCounted
 
-## Chantier FK, lot FK4 (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.3) : mise en scène
+## Chantier FK (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.3) : mise en scène
 ## des scènes de province (`get_map_scenes` du pont : province, colonie, type, tour de début,
 ## intensité) sur la vue rapprochée. Rendu seulement : aucune règle de jeu.
 ##

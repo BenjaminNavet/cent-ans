@@ -1,7 +1,7 @@
 class_name SettlementPanel
 extends PanelContainer
 
-## Panneau parchemin d'une colonie (lot C5) : nom, type, contrôleur et propriétaire, siège,
+## Panneau parchemin d'une colonie : nom, type, contrôleur et propriétaire, siège,
 ## fortification, revenu ; onglets Garnison (recrutement, formation d'armée) et Bâtiments
 ## (construction). Construit en code, mêmes lignes que le panneau de province
 ## (`PanelWidgets`). Les ordres émis nomment la colonie (`settlement`), jamais la province.

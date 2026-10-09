@@ -28,19 +28,19 @@ const DEFAULTS := {
 	# TX (ADR 0236) : « Qualité des textures » : "high" charge les paquets 2k locaux s'ils existent
 	# (`assets/textures/**/hi/`), "medium" les paquets 1k du dépôt seuls (voir `TextureQuality`).
 	"video/texture_quality": "high",
-	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
+	# Échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
 	"interface/text_size": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
-	# Lot U5 (audit A3, T2) : portée des lettres et du bandeau (`NewsInterest.MODES`).
+	# Portée des lettres et du bandeau (`NewsInterest.MODES`).
 	"interface/news_filter": "interest",
-	# Lot U7 : disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
+	# Disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
 	"input/layout": "auto",
-	# Lot NT6d : touches réaffectées (action → liste de touches, voir `KeyBindings`).
+	# Touches réaffectées (action → liste de touches, voir `KeyBindings`).
 	"input/bindings": {},
-	# Lot U12 : accessibilité.
+	# Accessibilité.
 	"audio/bus_Master": 1.0,
 	"audio/bus_Musique": 0.6,
 	"audio/bus_Ambiance": 0.8,
@@ -106,7 +106,7 @@ const RESOLUTIONS: Array[Vector2i] = [
 ]
 const UI_SIZES: Array[float] = [0.8, 0.9, 1.0, 1.1, 1.25]
 const TEXT_SIZES: Array[float] = [0.9, 1.0, 1.15, 1.3]
-## Échelle automatique : hauteur de la fenêtre / 900, bornée (lot U4).
+## Échelle automatique : hauteur de la fenêtre / 900, bornée.
 const AUTO_SCALE_REFERENCE_HEIGHT := 900.0
 const AUTO_SCALE_MIN := 0.9
 const AUTO_SCALE_MAX := 1.6
@@ -287,7 +287,7 @@ func apply_display() -> void:
 			DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
 
 
-# --- Échelle de l'interface et taille du texte (lot U4) ------------------------------
+# --- Échelle de l'interface et taille du texte ------------------------------
 
 
 ## Échelle automatique pour une fenêtre de `height` pixels : 1 à 900 px, 0,9 au moins, 1,6 au plus.

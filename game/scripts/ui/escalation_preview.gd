@@ -1,7 +1,7 @@
 class_name EscalationPreview
 extends VBoxContainer
 
-## Lot FE6 (spec FE § 4.3, § 6) : « Qui peut entrer en guerre » avant une déclaration. Chaîne
+## « Qui peut entrer en guerre » avant une déclaration. Chaîne
 ## d'escalade lue dans `CampaignSim.get_war_escalation_preview(attaquant, cible)` : un maillon par
 ## suzerain appelé (ou l'arbitre d'une guerre privée), avec son estimation (probable, incertain,
 ## improbable) et la raison principale. Aucune règle ici.

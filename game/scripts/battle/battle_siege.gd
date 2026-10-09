@@ -7,7 +7,7 @@ extends Node3D
 ## régiments qui escaladent). `update()` montre les dégâts : pans assombris puis effondrés
 ## (éboulis), porte enfoncée, tour de siège accostée. Rendu seulement : tout vient de la
 ## simulation. Maillages procéduraux ; matières PBR Poly Haven (CC0) projetées en triplanaire
-## monde (lot V4) : pierre des murailles, ardoise, tuiles, chaume, enduit, pavés, bois.
+## monde : pierre des murailles, ardoise, tuiles, chaume, enduit, pavés, bois.
 
 const STONE := Color(0.95, 0.9, 0.8)
 const STONE_DARK := Color(0.55, 0.52, 0.47)

@@ -8,8 +8,8 @@ extends CenterContainer
 ## demande une seconde confirmation). Mode chargement : liste seule (les sauvegardes d'un
 ## autre moteur sont grisées). « Supprimer » efface l'emplacement choisi.
 ## Signaux `save_confirmed(name)` et `load_confirmed(path)`.
-## Lot P2e (ADR 0097, bible DA § 12.2) : tailles de texte par `UiType`, ouverture et fermeture
-## par `UiMotion`. Lot P2g : ses trois propriétaires (`pause_menu.gd`, `start_menu.gd`,
+## Tailles de texte par `UiType`, ouverture et fermeture (ADR 0097)
+## par `UiMotion`. Ses trois propriétaires (`pause_menu.gd`, `start_menu.gd`,
 ## `map_ui.gd`) le réclament dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille).
 
 signal save_confirmed(save_name: String)

@@ -1,6 +1,6 @@
 extends Node3D
 
-## Rendu des incendies de siège (lot S2, `docs/design/s2-incendies.md`).
+## Rendu des incendies de siège (`docs/design/s2-incendies.md`).
 ##
 ## Purement visuel : l'état du feu vient du cœur Rust (`BattleSim.get_siege()` : `houses[i].fire =
 ## {state, intensity}`, `gate_fire`, `wind`). Par maison en feu : flammes et fumée
@@ -8,7 +8,7 @@ extends Node3D
 ## une `OmniLight3D` qui vacille ; une maison brûlée s'effondre (instances abaissées dans les
 ## `MultiMesh` des maisons de `BattleSiege`) et laisse un tas noirci de poutres calcinées.
 ## Paramètres : `data/fx/siege_fire.json` (schéma `data/schemas/fx_siege_fire.schema.json`).
-## Lot V3 (A1-13) : flammes et fumée en planches animées procédurales (`fire_flame.gdshader`,
+## Flammes et fumée en planches animées procédurales (`fire_flame.gdshader`,
 ## `fire_smoke.gdshader`, planches de `data/fx/fire_flipbooks.json`), braises
 ## (`fire_ember.gdshader`) qui dérivent au vent, lumière qui vacille (bruit, couleur, position).
 

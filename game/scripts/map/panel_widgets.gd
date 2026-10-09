@@ -1,7 +1,7 @@
 class_name PanelWidgets
 extends RefCounted
 
-## Lignes partagées des panneaux de province et de colonie (lot C5) : garnison, recrutement,
+## Lignes partagées des panneaux de province et de colonie : garnison, recrutement,
 ## bâtiments, chantier et constructions possibles. Rendu seulement : les listes, la
 ## disponibilité et les raisons de refus viennent de la simulation.
 
@@ -228,7 +228,7 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 
 ## Constructions possibles (`buildable`), sans celles déjà construites (`built_ids`) ;
 ## `on_build(building_id)` au clic. Rien si `is_player_owner` est faux.
-## Lot C4 : rang de chaîne de `building_id` (`Building.tier`, 1 = palier de
+## Rang de chaîne de `building_id` (`Building.tier`, 1 = palier de
 ## base), pour lire les options de construction comme un arbre trié plutôt
 ## qu'un ordre alphabétique.
 static func _building_tier(building_id: String) -> int:
@@ -246,7 +246,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 	if rows.is_empty():
 		placeholder(list, "—")
 		return
-	# Lot C4 : catégorie puis rang, pour que chaque chaîne (marché → maison des
+	# Catégorie puis rang, pour que chaque chaîne (marché → maison des
 	# métiers → foire, etc.) s'affiche dans l'ordre de ses paliers.
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var cat_a: String = str(GameCatalog.building(str(a.get("building", ""))).get("category", ""))

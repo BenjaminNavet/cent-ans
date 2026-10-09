@@ -1,7 +1,7 @@
 class_name SettlementGrowth
 extends RefCounted
 
-## Lot CV1 : colonies qui grandissent avec leur niveau (rendu seulement). Niveau visuel :
+## Colonies qui grandissent avec leur niveau (rendu seulement). Niveau visuel :
 ## 0 village, 1 bourg (ouvert, halle), 2 ville (murailles), 3 cité (cathédrale, halle,
 ## château, faubourgs). Calculé depuis le type, les bâtiments et la fortification
 ## (`CampaignSim.settlement_detail`) et la population de la province (`get_province_state`) :
@@ -9,10 +9,10 @@ extends RefCounted
 ## - bourg → ville : murailles (`bld_stone_walls`, `bld_palisade`) ou fortification ≥ 2 ;
 ## - ville → cité : cité épiscopale (cathédrale) ou capitale de province très peuplée ;
 ## - cité : château de Kenney Castle Kit (CC0) en plus si fortification ≥ 6.
-## Châteaux et abbayes gardent leur maquette. Paris (monument dédié, lot L1) est exclu.
+## Châteaux et abbayes gardent leur maquette. Paris (monument dédié) est exclu.
 
 const LEVEL_NAMES: Array[String] = ["village", "bourg", "ville", "cité"]
-## Colonies exclues de la croissance générique (monuments dédiés, lot L1).
+## Colonies exclues de la croissance générique (monuments dédiés).
 const EXCLUDED: Array[String] = ["set_paris"]
 ## Maquettes par niveau (`game/assets/models/settlements/`).
 const LEVEL_MODELS := [["village_a", "village_b"], ["bourg_a", "bourg_b"], ["town_a", "town_b"], ["cite_a", "cite_b"]]
@@ -25,7 +25,7 @@ const CITE_POPULATION := 600000.0
 const CASTLE_FORTIFICATION := 6
 ## Pièces Kenney du château (tour carrée + toit, tours hexagonales).
 const KENNEY_DIR := "res://assets/third_party/buildings/kenney_castle_kit/"
-## Lot TF : mètres par unité Kenney (une tour carrée ≈ 8 m) : UV de l'atlas et usure en mètres.
+## Mètres par unité Kenney (une tour carrée ≈ 8 m) : UV de l'atlas et usure en mètres.
 const KENNEY_METERS := 8.0
 
 
@@ -83,7 +83,7 @@ static func build_model(level: int, variant_seed: int, castle: bool) -> Node3D:
 
 ## Château de Kenney Castle Kit : donjon carré coiffé, deux tours hexagonales, courtine ;
 ## pièces fusionnées en un seul maillage (un appel de rendu par château, mis en cache).
-## Lot TF : converti au matériau atlas `Building` des maquettes (`BuildingMaterials`, variante
+## Converti au matériau atlas `Building` des maquettes (`BuildingMaterials`, variante
 ## `far`) au lieu de la palette Kenney teintée (toits bleus) : chaque face lit sa couleur dans la
 ## palette du kit, les bleus deviennent ardoise (`RoofSlate`), les bruns sombres bois (`Timber`),
 ## le reste pierre de taille (`Masonry`) ; UV en mètres projetées selon la normale.
@@ -142,7 +142,7 @@ static func _kenney_castle_mesh() -> ArrayMesh:
 	return _castle_mesh
 
 
-## Lot TF : maillage Kenney (palette) → maillage de l'atlas `Building` : sommets en mètres
+## Maillage Kenney (palette) → maillage de l'atlas `Building` : sommets en mètres
 ## (`KENNEY_METERS`), couche de chaque face dans l'alpha de la couleur de sommet, RVB = nuance
 ## de la palette (relief des pièces conservé), UV projetées selon la normale de la face.
 static func _to_atlas(source: ArrayMesh, palette: Image) -> ArrayMesh:

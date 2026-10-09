@@ -1,7 +1,7 @@
 class_name VegetationGroundJob
 extends RefCounted
 
-## Lot C7b : recalage des arbres d'une tuile de végétation sur la surface de terrain affichée
+## Recalage des arbres d'une tuile de végétation sur la surface de terrain affichée
 ## (relief fin 8192², LOD proche ou lointain), exécuté dans un `WorkerThreadPool`.
 ##
 ## Entrée : les tampons `MultiMesh` de la tuile (un par emplacement partie × essence, copie CPU

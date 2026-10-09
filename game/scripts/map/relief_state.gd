@@ -1,23 +1,23 @@
 class_name ReliefState
 extends RefCounted
 
-## État du relief exagéré, partagé par tout le jeu (lot SC MC11) : échelle verticale (ADR 0036,
-## lot ZG4), gain de relief local et fond de vallée (lot ZG8, SZ1). Statique : un seul état par
+## État du relief exagéré, partagé par tout le jeu : échelle verticale (ADR 0036),
+## gain de relief local et fond de vallée. Statique : un seul état par
 ## processus. `MapData` en garde l'API publique par délégation (`MapData.display_height`…).
 
 ## Facteur vertical courant (unités monde par mètre), propriétaire unique de l'échelle verticale
-## (ADR 0036, lot ZG4) : `MapData.HEIGHT_SCALE` (×4,3) en vue stratégique, ramené vers ×1,5 au zoom le
+## (ADR 0036) : `MapData.HEIGHT_SCALE` (×4,3) en vue stratégique, ramené vers ×1,5 au zoom le
 ## plus rapproché quand la pyramide de relief est en cache (`CloseCameraProfile`). Lu par les
 ## shaders (paramètre global `campaign_vertical_scale`), le quadtree et `surface_height_at`.
 ## Les maillages E0 du repli sans cache restent cuits à `MapData.HEIGHT_SCALE` (l'échelle ne bouge pas).
 static var _vertical_scale: float = MapData.HEIGHT_SCALE
-## Lot ZG8 : relief exagéré (hauteur affichée = s·(h + g·max(h − fond, 0)), voir
+## Relief exagéré (hauteur affichée = s·(h + g·max(h − fond, 0)), voir
 ## `ReliefExaggerationProfile`). Gain de relief local courant (fonction de l'échelle, publié avec
 ## elle), fond de vallée (m, grille `ReliefFloor`, lecture seule une fois publiée : lisible depuis
-## les fils de travail). Sans fond publié, le gain est nul : comportement du lot ZG4.
+## les fils de travail). Sans fond publié, le gain est nul : comportement.
 static var _relief_gain: float = 0.0
 static var _floor: PackedFloat32Array = PackedFloat32Array()
-## Lot SZ1 : base (fond non plafonné, m) et facteur d'écrasement des montagnes k (0..1) par cellule
+## Base (fond non plafonné, m) et facteur d'écrasement des montagnes k (0..1) par cellule
 ## de la même grille ; poids courant c de l'écrasement (fonction de l'échelle, publié avec elle).
 static var _floor_base: PackedFloat32Array = PackedFloat32Array()
 static var _floor_squash: PackedFloat32Array = PackedFloat32Array()
@@ -25,7 +25,7 @@ static var _floor_squash_max: float = 0.0
 static var _relief_squash: float = 0.0
 static var _floor_side: Vector2i = Vector2i.ZERO
 static var _floor_cell: float = 8.0
-## Lot PB2 : incrémenté à chaque publication du fond (le semis natif le recopie alors).
+## Incrémenté à chaque publication du fond (le semis natif le recopie alors).
 static var _floor_version: int = 0
 
 
@@ -33,7 +33,7 @@ static func vertical_scale() -> float:
 	return _vertical_scale
 
 
-## Lot ZG4 : change l'échelle verticale (propriétaire unique) et la publie aux shaders par le
+## Change l'échelle verticale (propriétaire unique) et la publie aux shaders par le
 ## paramètre global `campaign_vertical_scale` (terrain, quadtree, fleuves, maquettes). Rend vrai
 ## si la valeur a changé. Appelé par `TerrainBuilder.set_vertical_scale`, qui recale les calques ;
 ## ne pas l'appeler directement ailleurs (sinon les objets posés ne suivent pas).
@@ -47,7 +47,7 @@ static func set_vertical_scale(value: float) -> bool:
 	return true
 
 
-# --- Relief exagéré (lot ZG8) ------------------------------------------------------------
+# --- Relief exagéré ------------------------------------------------------------
 
 
 ## Plancher de l'échelle verticale de près (unités monde par mètre), selon les profils.
@@ -82,7 +82,7 @@ static func _publish_gain() -> void:
 	RenderingServer.global_shader_parameter_set("campaign_relief_squash", squash)
 
 
-## Lot SZ1 : échelle (unités monde par mètre) à partir de laquelle l'écrasement des montagnes est
+## Échelle (unités monde par mètre) à partir de laquelle l'écrasement des montagnes est
 ## entier (`ReliefExaggerationProfile.mountain_squash_full_exaggeration`).
 static func squash_full_vertical_scale() -> float:
 	var camera := CloseCameraProfile.load_default()
@@ -90,19 +90,19 @@ static func squash_full_vertical_scale() -> float:
 	return MapData.HEIGHT_SCALE * relief.mountain_squash_full_exaggeration / camera.exaggeration_far
 
 
-## Lot SZ1 : poids c de l'écrasement des montagnes pour une échelle (nul sans fond publié).
+## Poids c de l'écrasement des montagnes pour une échelle (nul sans fond publié).
 static func relief_squash_for_scale(scale: float) -> float:
 	if _floor.is_empty() or _floor_squash_max <= 0.0:
 		return 0.0
 	return ReliefExaggerationProfile.load_default().squash_weight_for_scale(scale, squash_full_vertical_scale())
 
 
-## Lot SZ1 : poids courant de l'écrasement des montagnes.
+## Poids courant de l'écrasement des montagnes.
 static func relief_squash() -> float:
 	return _relief_squash
 
 
-## Lot SZ1 : plus grand écrasement c·k pour une échelle (boîtes englobantes : y ≥ s·(1 − c·k)·h).
+## Plus grand écrasement c·k pour une échelle (boîtes englobantes : y ≥ s·(1 − c·k)·h).
 static func relief_squash_max_for_scale(scale: float) -> float:
 	return relief_squash_for_scale(scale) * _floor_squash_max
 
@@ -138,7 +138,7 @@ static func set_relief_floor(grid: Dictionary) -> void:
 	_publish_gain()
 
 
-## Lot PB2 : fond de vallée publié {data, side, cell, version} (lecture seule ; semis natif).
+## Fond de vallée publié {data, side, cell, version} (lecture seule ; semis natif).
 static func relief_floor_grid() -> Dictionary:
 	return {"data": _floor, "base": _floor_base, "squash": _floor_squash, "side": _floor_side, "cell": _floor_cell, "version": _floor_version}
 
@@ -154,7 +154,7 @@ static func relief_floor_at(x: float, z: float) -> float:
 	return relief_fields_at(x, z).x
 
 
-## Lot SZ1 : champs du relief au point carte (x, z) : (fond, base, facteur d'écrasement k), même
+## Champs du relief au point carte (x, z) : (fond, base, facteur d'écrasement k), même
 ## interpolation que `campaign_relief_fields` (campaign_relief.gdshaderinc). Sans fond : zéro.
 static func relief_fields_at(x: float, z: float) -> Vector3:
 	if _floor.is_empty():

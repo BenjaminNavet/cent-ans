@@ -1,7 +1,7 @@
 class_name MapDataLoader
 extends RefCounted
 
-## Point d'accès unique aux données vectorielles de la carte (lot SC DT4, ADR 0206) : provinces,
+## Point d'accès unique aux données vectorielles de la carte (ADR 0206) : provinces,
 ## rivières, côte, routes et rivières rendues, lues par le chargeur natif `MapGeoLoader`
 ## (GDExtension, serde) et rendues en tableaux compacts. Les provinces ne sont parsées qu'une fois
 ## par chemin (cache côté Rust). Les chemins sont ceux du dossier `data/map/`.

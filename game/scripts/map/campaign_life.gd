@@ -1,7 +1,7 @@
 class_name CampaignLife
 extends Node3D
 
-## Lot CV1 : campagne vivante, rendu seulement (aucune règle de jeu ; tout vient du pont).
+## Campagne vivante, rendu seulement (aucune règle de jeu ; tout vient du pont).
 ## - saisons visibles (`SeasonVisuals`, paramètre global `campaign_season`) ;
 ## - terroirs autour des colonies (`TerroirMask` → `terrain.gdshader`) : cultures, vignes,
 ##   pâtures à la densité de population, brûlis selon la dévastation ;
@@ -21,7 +21,7 @@ extends Node3D
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
 var terroir: TerroirMask = null
-## Niveau visuel appliqué par colonie (id → niveau), lot CV1 § 3.
+## Niveau visuel appliqué par colonie (id → niveau).
 var levels: Dictionary = {}
 var effects: LifeEffects = null
 var ambient: LifeAmbient = null

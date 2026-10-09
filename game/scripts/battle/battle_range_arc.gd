@@ -1,7 +1,7 @@
 class_name BattleRangeArc
 extends Node3D
 
-## Lot CB-M4 : portée au sol façon Total War. Pour chaque tireur sélectionné ou survolé, un arc
+## Portée au sol façon Total War. Pour chaque tireur sélectionné ou survolé, un arc
 ## tracé à sa portée effective (`effective_range` de `get_units`, 0 sans tir ni munitions) dans le
 ## secteur de tir centré sur son cap (`fire_arc`, demi-angle en radians, `battle_hover.json`),
 ## avec les deux bords du secteur en plus pâle. Plaqué au relief : chaque sommet prend la hauteur

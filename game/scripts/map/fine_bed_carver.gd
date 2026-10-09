@@ -1,7 +1,7 @@
 class_name FineBedCarver
 extends RefCounted
 
-## Lit des fleuves fins creusé dans les pages du quadtree de relief (lot ZG5b, ADR 0036).
+## Lit des fleuves fins creusé dans les pages du quadtree de relief (ADR 0036).
 ##
 ## Choix : **abaissement des pages** plutôt qu'une texture de lit à part. Chaque page de hauteurs
 ## (tuile 512² de la pyramide, étage ≥ E3) est retouchée dans un fil de travail avant son

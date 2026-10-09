@@ -9,7 +9,7 @@ extends Node
 ## - `MODAL` assombrit le fond et bloque les entrées derrière.
 ## - `TOASTS` empile 3 avis au plus (conseiller, annonces, avis de résultat), effacés après `seconds`.
 ##
-## Lot PO1 — fonctionnement :
+## Fonctionnement :
 ## - Un « hôte » porte les zones : chaque zone est un `Control` nu (taille minimale nulle), ancré
 ##   en proportion de l'écran et qui coupe ce qui dépasse (`clip_contents`) ; un occupant plus grand
 ##   que sa zone est coupé ou défile (à lui de porter un `ScrollContainer`), la zone ne grandit

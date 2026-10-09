@@ -1,7 +1,7 @@
 class_name SeasonLook
 extends RefCounted
 
-## Lot TB1 : réglages visuels des saisons de la carte de campagne, lus dans
+## Réglages visuels des saisons de la carte de campagne, lus dans
 ## `data/ui/campaign_seasons.json` (schéma `data/schemas/campaign_seasons_ui.schema.json`) : mer
 ## selon la saison, mer sous la tempête, étalonnage de saison de la carte, neige des toits des villes 1:1 (ADR 0150). Sans fichier (données de test), valeurs neutres : rendu
 ## inchangé. Purement visuel : aucune règle de jeu.

@@ -1,7 +1,7 @@
 class_name AgentController
 extends Node
 
-## Lot C6 : agents de campagne (espions, hérauts, prédicateurs) sur la carte. Rendu, UI et
+## Agents de campagne (espions, hérauts, prédicateurs) sur la carte. Rendu, UI et
 ## entrées seulement ; toute règle vient de `CampaignSim` (`get_agents`, `get_agent_actions`,
 ## `get_agent_reachable`, ordres `recruit_agent` / `move_agent` / `agent_action` /
 ## `dismiss_agent`) :

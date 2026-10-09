@@ -8,7 +8,7 @@ extends Control
 ## Ne connaît ni la simulation ni la carte : `TutorialController` fournit l'étape
 ## (`show_step`), la liste des étapes (`set_steps`) et la cible à chaque image (`set_target`).
 ##
-## Lot UX2 (audit A3, U1 et U2) : le parchemin évite la cible (placement automatique du côté
+## Le parchemin évite la cible (placement automatique du côté
 ## libre de l'écran, `place_panel`) ; la surbrillance dorée remplace la flèche rouge ; elle ne
 ## pulse pas quand le réglage `access/reduce_motion` est coché.
 
@@ -45,7 +45,7 @@ var skip_all_button: Button
 var later_button: Button
 var toc_button: Button
 var toc_box: VBoxContainer
-## VN lot 3 : le sommaire défile quand le parchemin ne tient pas dans la hauteur de l'écran.
+## Le sommaire défile quand le parchemin ne tient pas dans la hauteur de l'écran.
 var toc_scroll: ScrollContainer
 
 ## Cible courante : `{rect: Rect2}` (contrôle) ou `{point: Vector2}` (carte), vide sinon.
@@ -213,7 +213,7 @@ func toc_open() -> bool:
 	return toc_scroll.visible
 
 
-## VN lot 3 : hauteur du sommaire bornée à la place restante sous la barre du haut (le reste du
+## Hauteur du sommaire bornée à la place restante sous la barre du haut (le reste du
 ## parchemin garde sa taille) ; hors de cette borne, le sommaire défile.
 func _fit_toc_height() -> void:
 	if not toc_scroll.visible:

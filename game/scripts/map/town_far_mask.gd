@@ -1,7 +1,7 @@
 class_name TownFarMask
 extends RefCounted
 
-## Lot VT-C (ADR 0138) : masque des villes 1:1 construites, lu par `town_far.gdshader`
+## Masque des villes 1:1 construites, lu par `town_far.gdshader` (ADR 0138)
 ## (`built_mask`). Image R8 de 64 × 64 = 4 096 villes, index i → texel (i % 64, i / 64) ; 1 : la
 ## ville 1:1 est construite, son maillage lointain s'enfonce près de la caméra. La texture n'est
 ## renvoyée à la carte graphique que si le masque a changé.

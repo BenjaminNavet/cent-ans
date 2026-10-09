@@ -1,7 +1,7 @@
 class_name FolkRoutine
 extends RefCounted
 
-## Chantier FK, lot FK3 (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.1) : vie ordinaire de
+## Chantier FK (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.1) : vie ordinaire de
 ## la vue rapprochée. Rendu seulement : aucune règle de jeu ; tout vient du pont (population,
 ## dévastation, saison) via `CampaignLife`, qui renseigne `province_states`, `season`, `cities`
 ## et `terroir` avant `refresh`.

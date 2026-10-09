@@ -1,7 +1,7 @@
 class_name WarScarMeshes
 extends RefCounted
 
-## Lot TB4 : maillages procéduraux des traces de guerre et de peste de la carte de campagne
+## Maillages procéduraux des traces de guerre et de peste de la carte de campagne
 ## (`WarScars`). Boîtes et calottes aux couleurs par sommet, un seul matériau mat partagé ; aucune
 ## texture, aucun fichier. Unités : mètres pour la peste (fosse, porte marquée), unités du repère
 ## des figurines d'armée pour le champ de bataille et les engins de siège.

@@ -1,7 +1,7 @@
 class_name StanceFill
 extends Node
 
-## Lot RJ-d (ADR 0175) : lavis translucide de chaque province selon la position diplomatique de
+## Lavis translucide de chaque province selon la position diplomatique de (ADR 0175)
 ## son CONTRÔLEUR envers le joueur — or : nous, vert : alliés et vassaux, rouge : ennemis en
 ## guerre, gris très léger : les autres. Le lavis suit le contrôle (une cité prise passe à l'or :
 ## la progression se voit) ; la possession de droit reste dite par le trait de frontière et les

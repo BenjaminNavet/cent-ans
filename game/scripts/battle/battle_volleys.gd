@@ -1,7 +1,7 @@
 class_name BattleVolleys
 extends Node3D
 
-## Volées massives (lot BV1, idée du joueur) : chaque tir d'archers ou d'arbalétriers résolu par
+## Volées massives (idée du joueur) : chaque tir d'archers ou d'arbalétriers résolu par
 ## la simulation (`BattleSim.get_shots()`) devient une vraie volée de centaines à milliers de
 ## traits. Rendu seulement, aucune règle :
 ## - traits en vol : MultiMesh de « paquets » de 256 traits (`battle_volley.gdshader`) ; le

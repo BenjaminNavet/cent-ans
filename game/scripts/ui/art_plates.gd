@@ -1,7 +1,7 @@
 class_name ArtPlates
 extends RefCounted
 
-## Lot AR1 — habillage illustré (`data/ui/illustrations.json`, schéma
+## Habillage illustré (`data/ui/illustrations.json`, schéma
 ## `data/schemas/illustrations.schema.json`) : écrans de chargement par contexte (bataille,
 ## siège, bataille navale, campagne) avec citation de chroniqueur, vignettes des événements
 ## (par genre d'événement du cœur ; l'ordre du fichier fait la priorité) et écrans de fin.

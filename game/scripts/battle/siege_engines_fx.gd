@@ -459,7 +459,7 @@ func _cup_at_release(node: Node3D, c: Dictionary) -> Vector3:
 
 
 ## Part de l'arc (0 : armé, 1 : fin du dépassement) à la phase `u`. Courbe mesurée sur la vidéo
-## d'un vrai trébuchet (`swing_curve.lut`, lot AS8d) quand elle est fournie, sinon la courbe
+## d'un vrai trébuchet (`swing_curve.lut`) quand elle est fournie, sinon la courbe
 ## procédurale d'origine (verge qui accélère sous le contrepoids).
 static func _swing_progress(c: Dictionary, u: float) -> float:
 	var curve: Variant = c.get("swing_curve", null)

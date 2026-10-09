@@ -1,7 +1,7 @@
 class_name LandmarkV2Library
 extends RefCounted
 
-## Lots VH0/VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1, format v2 géoréférencé
+## Villes emblématiques à l'échelle 1:1, format v2 géoréférencé (ADR 0078)
 ## (`data/landmarks_v2/<id>.json`, schéma `landmark_v2.schema.json`). Lecture et conversions :
 ## EPSG:3035 (`origin_3035` + décalages [dE, dN] en mètres) → unités carte (grille de
 ## `data/map/map.json`, +Z vers le sud) et repère local de `TownPlan` / `TownBuilder` (mètres, x vers +X monde,

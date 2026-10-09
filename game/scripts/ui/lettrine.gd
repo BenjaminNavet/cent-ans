@@ -1,7 +1,7 @@
 class_name Lettrine
 extends Control
 
-## Lot UI1 — lettrine enluminée pour les titres de fenêtres : initiale d'or cernée d'encre sur
+## Lettrine enluminée pour les titres de fenêtres : initiale d'or cernée d'encre sur
 ## champ d'azur semé de points d'or (filet d'or, filet de gueules), suite du titre en IM Fell.
 ##
 ## Posée en surimpression sur un `Label` existant (`Lettrine.attach(label)`) : le label garde
@@ -9,7 +9,7 @@ extends Control
 ## de lire `label.text`) ; il est seulement rendu transparent et la lettrine redessine le titre.
 ## Suit les changements de texte et de couleur du label. Rendu seulement.
 ##
-## Lot FA5 : quand une initiale enluminée réelle existe pour la première lettre du titre
+## Quand une initiale enluminée réelle existe pour la première lettre du titre
 ## (`FaUi.initial_for`, feuillets du domaine public), elle remplace l'initiale dessinée, un peu
 ## plus grande (`display.initial_scale`) pour rester lisible ; sinon rien ne change.
 

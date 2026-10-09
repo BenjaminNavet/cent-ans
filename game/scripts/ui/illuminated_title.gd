@@ -1,7 +1,7 @@
 class_name IlluminatedTitle
 extends Control
 
-## Lot MM1 — titre enluminé « Cent Ans » : lettrine d'or sur champ d'azur semé de points d'or
+## Titre enluminé « Cent Ans » : lettrine d'or sur champ d'azur semé de points d'or
 ## (double filet), suite du titre en capitales de livre, sous-titre italique et filet orné.
 ## Dessiné en code (aucune image) ; un lent reflet parcourt la lettrine.
 

@@ -1,7 +1,7 @@
 class_name Ga3Vegetation
 extends RefCounted
 
-## Lot GA3-L2 : végétation réaliste de la carte de campagne (images générées, voir
+## L2 : végétation réaliste de la carte de campagne (images générées, voir
 ## `docs/archive/chantiers.md`). Purement visuel.
 ##
 ## - Imposteurs des chênes, hêtres et sapins : grille `IMPOSTOR_ALBEDO` / `IMPOSTOR_NORMAL`, même

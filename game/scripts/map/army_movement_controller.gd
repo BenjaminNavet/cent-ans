@@ -1,7 +1,7 @@
 class_name ArmyMovementController
 extends Node
 
-## Lot M4 : mouvement libre des armées sur la carte de campagne (spec
+## Mouvement libre des armées sur la carte de campagne (spec
 ## `docs/design/2026-09-24-mouvement-libre.md` § 6). Rendu, UI et entrées seulement ; toute
 ## règle vient de `CampaignSim` :
 ## - bulle des cases atteignables ce tour (`get_reachable_area`, `ArmyMovementBubble`) ;
@@ -9,7 +9,7 @@ extends Node
 ##   `ArmyMovementPath`), qui suit le curseur ;
 ## - clic droit : sur le sol → `move_army_to` ; sur une armée ennemie → `attack_army` ; sur
 ##   une colonie → `move_army_to_settlement` (marche, siège ou stationnement) ;
-## - attaque (lot AT1) : curseur « épées croisées » (`AttackCursor`) sur une armée ou une place
+## - attaque : curseur « épées croisées » (`AttackCursor`) sur une armée ou une place
 ##   attaquable ; sur une place ennemie, l'arrivée ce tour enchaîne l'assaut (dialogue
 ##   d'avant-bataille de siège : assaut, résolution automatique ou maintien du siège) ; contre
 ##   une faction en paix, une confirmation (`WarDeclarationDialog`) déclare d'abord la guerre ;
@@ -53,7 +53,7 @@ var _last_hover_ms := 0
 var _last_hover_key := ""
 var _last_distance := -1.0
 var _zoc_army := ""
-## Lot AT1 : confirmation de la déclaration de guerre, attaque en attente de cette réponse
+## Confirmation de la déclaration de guerre, attaque en attente de cette réponse
 ## ({army, target}) et relations du joueur (faction → {status, name}, `get_diplomacy`).
 var war_dialog: WarDeclarationDialog = null
 var _pending_attack: Dictionary = {}
@@ -208,7 +208,7 @@ func target_faction(target: Dictionary) -> String:
 	return ""
 
 
-## Lot AT1 : relation du joueur avec `faction` pour un ordre d'attaque : "war" (attaque
+## Relation du joueur avec `faction` pour un ordre d'attaque : "war" (attaque
 ## directe), "peace" (paix, trêve, vassal ou suzerain : attaque après déclaration de guerre,
 ## qui rompt le lien vassalique côté simulation), "friend" (soi, allié, faction inconnue :
 ## pas d'attaque).
@@ -269,7 +269,7 @@ func _ripple_at(target: Dictionary) -> void:
 	OrderRipple.spawn(map.ui, map.camera, Vector3(at.x, map.map_data.surface_world_at(at.x, at.y), at.y))
 
 
-## Lot AT1 : attaque d'une cible en paix : confirmation, puis déclaration de guerre et attaque.
+## Attaque d'une cible en paix : confirmation, puis déclaration de guerre et attaque.
 func ask_war(army_id: String, target: Dictionary) -> void:
 	var faction := target_faction(target)
 	_pending_attack = {"army": army_id, "target": target, "faction": faction}
@@ -337,7 +337,7 @@ func order_attack(army_id: String, target_army: String) -> Dictionary:
 	return _run(army_id, map.sim.call("attack_army", army_id, target_army))
 
 
-## Lot AT1 : attaque d'une place ennemie. L'armée qui l'assiège déjà donne l'assaut ; sinon
+## Attaque d'une place ennemie. L'armée qui l'assiège déjà donne l'assaut ; sinon
 ## elle marche, et si elle met le siège dès ce tour, l'assaut suit aussitôt (le dialogue
 ## d'avant-bataille permet encore de « Maintenir le siège »). Une armée ennemie postée dans
 ## la place et qui arrête la marche aux portes est attaquée.
@@ -546,11 +546,11 @@ func _process(delta: float) -> void:
 		return
 	for army_id in _animations.keys():
 		_step_animation(army_id, delta)
-	# Lot CV3-5 : pas de zone atteignable pendant la fin de tour ni le rejeu des marches IA.
+	# Pas de zone atteignable pendant la fin de tour ni le rejeu des marches IA.
 	if bubble != null:
 		var replay: Variant = map.get("ai_replay")
 		bubble.set_suspended(map.get("end_turn_running") == true or (replay != null and replay.get("playing") == true))
-	# Lot AT1 : pas d'épées sur l'interface, ni hors de la carte (bataille, menus).
+	# Pas d'épées sur l'interface, ni hors de la carte (bataille, menus).
 	if AttackCursor.is_shown() and (not map.visible or not active() or get_viewport().gui_get_hovered_control() != null):
 		AttackCursor.show_attack(false)
 	var distance: float = map.camera_rig.distance
@@ -601,7 +601,7 @@ func preview_target(target: Dictionary) -> void:
 		path_line.hide_path()
 		_set_hover_text("%s — aucun chemin" % _target_label(target))
 		return
-	# Lot DP2 : avertissement avant l'ordre quand la marche entre sans droit de passage.
+	# Avertissement avant l'ordre quand la marche entre sans droit de passage.
 	var trespass: Dictionary = {}
 	if map.sim.has_method("find_path_trespass"):
 		trespass = map.sim.call("find_path_trespass", map.selected_army, point.x, point.y)

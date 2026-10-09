@@ -1,7 +1,7 @@
 class_name WallCollapseFx
 extends Node3D
 
-## Effondrement physique des murailles d'un siège (lot S1) : rendu seulement (ADR 0007).
+## Effondrement physique des murailles d'un siège : rendu seulement (ADR 0007).
 ##
 ## `BattleSiege.update` lit les PV des pans dans la simulation (`core/`) et nous passe, pour
 ## chaque pan dont le rapport change, `sync_piece(index, vue, rapport, intact)`. Rien de ce qui

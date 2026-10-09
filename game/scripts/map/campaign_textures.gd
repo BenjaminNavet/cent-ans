@@ -1,7 +1,7 @@
 class_name CampaignTextures
 extends RefCounted
 
-## Lot GA4 (ADR 0105) : textures 2k du terrain de campagne, macro-variation à l'échelle de la
+## Textures 2k du terrain de campagne, macro-variation à l'échelle de la (ADR 0105)
 ## carte et eau (normales animées, couleur de profondeur). Identité des couches et réglages dans
 ## `data/fx/campaign_terrain_textures.json` (schéma `fx_campaign_terrain_textures.schema.json`),
 ## jamais codés en dur ici ; seul l'ordre des couches est un contrat du shader (index fixes de

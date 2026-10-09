@@ -1,7 +1,7 @@
 class_name LandmarkMonuments
 extends RefCounted
 
-## Lot VH4 (ADR 0078) : gabarits paramétrés des monuments des villes emblématiques 1:1, à
+## Gabarits paramétrés des monuments des villes emblématiques 1:1, à (ADR 0078)
 ## l'échelle réelle (mètres). Calcul pur (fil de travail) : `build(monument)` rend les tableaux
 ## d'un maillage (`SurfaceTool.commit_to_arrays`) dans le repère du monument : +X le long de
 ## l'axe (églises : vers le chœur), +Z à droite de l'axe, +Y en haut, origine au centre de

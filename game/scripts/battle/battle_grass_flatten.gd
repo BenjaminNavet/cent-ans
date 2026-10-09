@@ -1,7 +1,7 @@
 class_name BattleGrassFlatten
 extends RefCounted
 
-## Herbe couchée et herbe tachée de sang (lot BV3, rendu seulement).
+## Herbe couchée et herbe tachée de sang (rendu seulement).
 ## Carte RG8 à 1 m le texel sur le champ de bataille : R = herbe couchée (0-1), G = sang sur
 ## l'herbe (0-1). Lue par `battle_grass.gdshader` (`flatten_map`) : les touffes couchées se
 ## plient au ras du sol, s'éclaircissent et jaunissent, et le sang les teinte ; les flaques de

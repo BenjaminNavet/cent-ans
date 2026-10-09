@@ -1,12 +1,12 @@
 class_name ReliefExaggerationProfile
 extends Resource
 
-## Lot ZG8 (ADR 0036) : relief exagéré « façon Total War » sur la carte de campagne. Purement
+## Relief exagéré « façon Total War » sur la carte de campagne. Purement (ADR 0036)
 ## visuel (`res://resources/relief_exaggeration.tres`, voisin de `close_camera.tres`).
 ##
 ## Hauteur affichée (unités monde) en un point (x, z) d'altitude h (m) :
 ##     y = s(d) · (h + g(d) · max(h − fond(x, z), 0))
-## - `s(d)` : échelle verticale dynamique du lot ZG4 (`MapData.vertical_scale()`), dont le plancher
+## - `s(d)` : échelle verticale dynamique (`MapData.vertical_scale()`), dont le plancher
 ##   de près devient `near_exaggeration` (au lieu de `CloseCameraProfile.exaggeration_near`).
 ## - `g(d)` : gain de relief LOCAL, de `gain_far` (vue stratégique) à `gain_near` (au ras du sol),
 ##   fonction de l'échelle quantifiée (même paliers : un seul signal de recalage).
@@ -14,7 +14,7 @@ extends Resource
 ##   fois au chargement (`ReliefFloor`), toujours ≥ 0 : la côte (h = 0) ne bouge pas, la mer non
 ##   plus ; plaines et fonds de vallée (h ≈ fond) restent plats, rivières et ponts aussi.
 ## Interrupteur : `enabled = false` (ou gains nuls et `near_exaggeration` = 1,5) rend exactement
-## le comportement du lot ZG4.
+## le comportement.
 
 @export var enabled: bool = true
 ## Plancher de l'exagération verticale de près (× relief vrai).

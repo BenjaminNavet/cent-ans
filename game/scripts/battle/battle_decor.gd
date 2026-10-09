@@ -1,7 +1,7 @@
 class_name BattleDecor
 extends Node3D
 
-## Lot EP6 : décor du champ de bataille posé par le cœur (`get_terrain().decor`) : bâtiments des
+## Décor du champ de bataille posé par le cœur (`get_terrain().decor`) : bâtiments des
 ## hameaux, fermes, moulins, église, manoir (kit Blender BR1), murs de cimetière et porche,
 ## tombes, fossé en eau du manoir, rangs de vigne, meules, charrettes, puits, bûchers ; camp de
 ## chaque armée (tentes, pavillons, chariots, feux, chevaux au piquet) et convoi de bagages. Les
@@ -365,7 +365,7 @@ func _build_camp(camp: Dictionary) -> void:
 	var batch := BuildingKit.Batch.new("snow" if _snowy else "", CAMP_RANGE * lod)
 	var horses := BuildingKit.Batch.new("", HORSE_RANGE * lod)
 	var horse_models := BuildingKit.models_of("horse")
-	# Lot AS1 : chevaux animés (respiration, queue, tête), un MultiMesh par modèle.
+	# Chevaux animés (respiration, queue, tête), un MultiMesh par modèle.
 	var horse_moves: Variant = {} if AnimalMotion.enabled() else null
 	var tents: Array = []
 	var fires: Array[Vector3] = []
@@ -411,7 +411,7 @@ func _build_camp(camp: Dictionary) -> void:
 
 
 ## Chevaux au piquet des deux côtés d'une corde tendue entre deux poteaux, tête vers la corde.
-## `moves` (lot AS1) : non nul, il recueille les poses par modèle pour les chevaux animés.
+## `moves` : non nul, il recueille les poses par modèle pour les chevaux animés.
 func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, posts: PackedVector3Array, moves: Variant) -> void:
 	var c := Vector2(float(item["x"]), float(item["z"]))
 	var yaw := float(item["yaw"])
@@ -437,7 +437,7 @@ func _horse_line(item: Dictionary, batch: BuildingKit.Batch, models: Array, post
 		if moves == null:
 			batch.add(model, xform)
 		else:
-			# Lot AS1 : posé par `AnimalMotion.build_camp_horses` (shader de sommets).
+			# Posé par `AnimalMotion.build_camp_horses` (shader de sommets).
 			if not moves.has(model):
 				moves[model] = []
 			(moves[model] as Array).append(xform)

@@ -1,7 +1,7 @@
 class_name StanceBadge
 extends RefCounted
 
-## Lot CV3-4 : posture visible sur le marqueur d'armée — pastille parchemin à l'icône à l'encre
+## Posture visible sur le marqueur d'armée — pastille parchemin à l'icône à l'encre
 ## de la posture (DA5) au sommet de la hampe (enfant du fleuron, elle suit le porte-étendard),
 ## absente en posture normale ; en embuscade, l'armée du joueur est dessinée semi-transparente
 ## (l'ennemi ne la voit pas : la vision du cœur la cache). Appelé en fin de `ArmyMarker.setup`.

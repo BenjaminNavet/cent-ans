@@ -1,7 +1,7 @@
 class_name BattleComparePanel
 extends PanelContainer
 
-## Lot CB-M4 : comparaison face à face au survol d'un ennemi, façon Total War. Ouverte seulement
+## Comparaison face à face au survol d'un ennemi, façon Total War. Ouverte seulement
 ## quand UNE seule troupe du joueur est sélectionnée et qu'un ennemi est survolé (sur le terrain,
 ## par sa bannière ou par une carte). Les chiffres et les drapeaux d'avantage net viennent tels
 ## quels du dictionnaire `compare` de `hover_context` (cœur, `hover.rs`) : neuf lignes, en vert

@@ -1,7 +1,7 @@
 class_name MapFireWind
 extends RefCounted
 
-## Lot AS5 : paramètres des restes statiques passés en shader (flammes de la carte, vent des
+## Paramètres des restes statiques passés en shader (flammes de la carte, vent des
 ## bannières de maquette, balancement des imposteurs d'arbres de bataille), lus dans
 ## `data/fx/map_fire_wind.json` (schéma `fx_map_fire_wind.schema.json`). Rendu seulement. Fichier
 ## absent (fixtures de test) : effets éteints. Éteint aussi par `enabled`.

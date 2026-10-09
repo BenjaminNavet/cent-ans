@@ -1,7 +1,7 @@
 class_name CampaignMinimap
 extends PanelContainer
 
-## Minicarte de campagne (lot C1), dans un cadre de parchemin : terres et mer,
+## Minicarte de campagne, dans un cadre de parchemin : terres et mer,
 ## couleurs de faction par province, frontières, provinces voilées par le brouillard, armées
 ## visibles en points, cadre de la vue caméra. Clic ou glisser = `clicked(map_pos)` (la carte
 ## recentre la caméra). Deux modes : politique (aplats de faction) et relief.
@@ -121,7 +121,7 @@ func _init() -> void:
 	_sync_mode_buttons()
 
 
-## Lot C5 : range un bouton de couche de la carte (routes commerciales) dans la rangée des modes,
+## Range un bouton de couche de la carte (routes commerciales) dans la rangée des modes,
 ## en tête ; la barre du haut n'a plus la place de le porter en 1280 px.
 func add_layer_button(button: Button) -> void:
 	if _modes_row == null or button == null:
@@ -256,7 +256,7 @@ func set_fog(enabled: bool, visible_ids: PackedStringArray) -> void:
 	_material.set_shader_parameter("fog_by_cell", false)
 
 
-## Brouillard par case (lot M5a) : `cells` = texture de vue de la simulation couvrant `size_px`
+## Brouillard par case : `cells` = texture de vue de la simulation couvrant `size_px`
 ## pixels carte ; `visible_count` = nombre de provinces visibles (statistique, tests).
 func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2, visible_count: int) -> void:
 	fog_enabled = enabled

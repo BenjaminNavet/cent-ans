@@ -22,7 +22,7 @@ const ENTITY_ART := ["res://assets/events/%s.jpg", "res://assets/illustrations/%
 ## Repli par identifiant : fiche `cdx_<x>` d'un personnage dont le portrait est `chr_<x>`.
 const SLUG_ART := ["res://assets/portraits/chr_%s.png"]
 
-## Lot U11 : vue intégrée à `CodexHub` (onglet « Histoire ») : sans cadre, titre, recherche ni
+## Vue intégrée à `CodexHub` (onglet « Histoire ») : sans cadre, titre, recherche ni
 ## bouton de fermeture propres ; la recherche commune passe par `set_query`.
 var embedded := false
 var _header_title: Label

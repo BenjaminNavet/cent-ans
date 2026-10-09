@@ -1,7 +1,7 @@
 class_name NewsInterest
 extends RefCounted
 
-## Lot U5 (audit A3, T2) : filtre d'intérêt des nouvelles (lettres scellées, bandeau du haut,
+## Filtre d'intérêt des nouvelles (lettres scellées, bandeau du haut,
 ## rubrique « Le monde » du rapport de saison). Une nouvelle d'une autre faction n'est gardée que
 ## si elle touche le joueur, un voisin, un allié, un ennemi, un vassal ou une grande puissance.
 ## Aucune règle de jeu : lecture des relations (`get_diplomacy`), des propriétaires de province

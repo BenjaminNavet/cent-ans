@@ -16,11 +16,11 @@ extends RefCounted
 ##
 ## Aucun accès à l'arbre de scène : sûr hors du fil principal.
 
-## Lot V4 (A1-10) : essences — chêne (chênaies, bocage, arbres des champs), hêtre (hêtraies),
+## Essences — chêne (chênaies, bocage, arbres des champs), hêtre (hêtraies),
 ## conifère de montagne (sapin, épicéa), haie.
 enum Kind { OAK, BEECH, CONIFER, HEDGE }
 const KIND_COUNT := 4
-## Lot V4 : au cœur des massifs, houppiers élargis jusqu'à se toucher (canopée continue).
+## Au cœur des massifs, houppiers élargis jusqu'à se toucher (canopée continue).
 const CANOPY_SPREAD := 0.4
 ## La tuile est rendue en PARTS_SIDE × PARTS_SIDE parties (culling et LOD plus fins).
 const PARTS_SIDE := 2
@@ -28,7 +28,7 @@ const PARTS := PARTS_SIDE * PARTS_SIDE
 const FLOATS_PER_INSTANCE := 16
 ## Enfoncement du pied (part de la hauteur) : le tronc ne flotte pas sur une pente.
 const GROUND_SINK := 0.08
-## Lot V4 : distance minimale (px carte) à la berge d'un fleuve pour planter.
+## Distance minimale (px carte) à la berge d'un fleuve pour planter.
 const RIVER_CLEARANCE := 0.3
 
 var mask: VegetationMask
@@ -40,18 +40,18 @@ var coarse_step: int = 4
 var tree_scale: float = 1.0
 ## Cercles d'exclusion (villes) : Vector3(x, y, rayon) en pixels de carte.
 var exclusions: PackedVector3Array = PackedVector3Array()
-## Lot C7b : grille de hauteurs du maillage de terrain affiché (`TerrainBuilder.surface_grid`)
+## Grille de hauteurs du maillage de terrain affiché (`TerrainBuilder.surface_grid`)
 ## au lancement du semis ; les arbres y sont posés (vide : heightmap 4096 bilinéaire). Le tri
 ## terre / mer reste fait sur la heightmap : même semis quel que soit le niveau de relief.
 var ground_grid: Dictionary = {}
-## Lot HC1 (ADR 0161) : dégagements des arbres généralisés (houppiers hors de l'eau et des routes
+## Dégagements des arbres généralisés (houppiers hors de l'eau et des routes (ADR 0161)
 ## principales), appliqués aux tampons après le semis (`apply_clearance`) ; null : aucun.
 var clearance: TreeClearance.TileFilter = null
-## Lot HC1 : style généralisé — pas de buissons de haie alignés sur la trame du parcellaire (des
+## Style généralisé — pas de buissons de haie alignés sur la trame du parcellaire (des
 ## arbres grossis ne peuvent pas dessiner des enclos d'un à deux px) : les emplacements `Kind.HEDGE`
 ## sont vidés après le semis ; les arbres épars du bocage viennent du rôle « isolé » (`hedge_boost`).
 var drop_hedges: bool = false
-## Lot HC1 : seuils du bruit des bosquets (grille grossière `_grove`).
+## Seuils du bruit des bosquets (grille grossière `_grove`).
 var grove_low: float = 0.28
 var grove_high: float = 0.42
 
@@ -67,7 +67,7 @@ var _beech := PackedFloat32Array()
 var _hedge := PackedFloat32Array()
 var _grove := PackedFloat32Array()
 var _region := PackedFloat32Array()
-## Lot HB4 : biome par cellule grossière (indice, plus proche).
+## Biome par cellule grossière (indice, plus proche).
 var _biome := PackedFloat32Array()
 var _side: int = 0
 
@@ -82,7 +82,7 @@ func run() -> void:
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
 
 
-## Lot HC1 : retire les arbres dont le houppier grossi déborde sur l'eau ou une route principale
+## Retire les arbres dont le houppier grossi déborde sur l'eau ou une route principale
 ## (sûr hors du fil principal ; sans effet sans `clearance`).
 func apply_clearance() -> void:
 	if drop_hedges:
@@ -97,7 +97,7 @@ func apply_clearance() -> void:
 	build_ms += clearance.filter_ms
 
 
-## Lot PB2 : paramètres de `VegetationScatter.request` (après `run` en mode `coarse_only`).
+## Paramètres de `VegetationScatter.request` (après `run` en mode `coarse_only`).
 func native_params() -> Dictionary:
 	return {
 		"tile_index": tile_index, "origin_x": float(origin_px.x), "origin_y": float(origin_px.y),
@@ -110,7 +110,7 @@ func native_params() -> Dictionary:
 	}
 
 
-## Lot PB2 : résultat de `VegetationScatter.poll` (tampons et nombres par emplacement).
+## Résultat de `VegetationScatter.poll` (tampons et nombres par emplacement).
 func apply_native(result: Dictionary) -> void:
 	buffers.clear()
 	for buffer: PackedFloat32Array in result["buffers"]:
@@ -119,7 +119,7 @@ func apply_native(result: Dictionary) -> void:
 	build_ms += float(result["ms"])
 
 
-## Lot SZ4b : grilles grossières gardées pour la forêt dense (`ForestDetail`), {} si absentes.
+## Grilles grossières gardées pour la forêt dense (`ForestDetail`), {} si absentes.
 func coarse_params() -> Dictionary:
 	if _side < 2:
 		return {}
@@ -162,7 +162,7 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			k += 1
 
 
-## Lot C7b : repose les instances d'un tampon (16 flottants par instance) sur la grille `grid` d'une tuile dont le
+## Repose les instances d'un tampon (16 flottants par instance) sur la grille `grid` d'une tuile dont le
 ## coin est en `origin` (px carte) : même enfoncement que le semis Rust (8 % de la hauteur,
 ## longueur de la colonne Y de la base). Rend un nouveau tampon ; sûr hors du fil principal.
 static func reground(buffer: PackedFloat32Array, grid: Dictionary, origin: Vector2) -> PackedFloat32Array:

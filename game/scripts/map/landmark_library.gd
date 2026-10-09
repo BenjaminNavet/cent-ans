@@ -1,7 +1,7 @@
 class_name LandmarkLibrary
 extends RefCounted
 
-## Villes emblématiques (lot L1) : lecture de `data/landmarks/*.json`, index par colonie.
+## Villes emblématiques : lecture de `data/landmarks/*.json`, index par colonie.
 ## Rendu seulement ; sans dossier ou sans modèle importé, rien ne change (maquette générique).
 
 

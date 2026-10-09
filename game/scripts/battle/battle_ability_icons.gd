@@ -2,7 +2,7 @@ class_name BattleAbilityIcons
 extends RefCounted
 
 ## CB4 : capacités actives des régiments sur les cartes d'unité (tir tendu, pavois, ralliement à la
-## bannière, rangs serrés, piques plantées). Icônes à l'encre DA5 (lot CB, glyphes dessinés en code
+## bannière, rangs serrés, piques plantées). Icônes à l'encre DA5 (glyphes dessinés en code
 ## en repli si le PNG manque), cadran de
 ## recharge, infobulle chiffrée par RuleValues (`<id>_cooldown`, `<id>_<effet>_percent`…).
 ## Aucune règle : l'état de chaque capacité vient de `BattleSim.get_units()` (`abilities`), les
@@ -130,7 +130,7 @@ static func draw_button(canvas: CanvasItem, rect: Rect2, kind: String, state: Di
 
 
 ## Pictogramme de la capacité `kind` centré en `c`, dans un carré d'environ 16 px × `k` : icône à
-## l'encre DA5 `battle_ability_<kind>` (lot CB) si elle existe, sinon glyphe dessiné en code.
+## l'encre DA5 `battle_ability_<kind>` si elle existe, sinon glyphe dessiné en code.
 static func draw_ability(canvas: CanvasItem, kind: String, c: Vector2, k: float, ink: Color = INK) -> void:
 	if BattleModeIcons.draw_ink_icon(canvas, "battle_ability_" + kind, c, 12.5 * k, ink):
 		return

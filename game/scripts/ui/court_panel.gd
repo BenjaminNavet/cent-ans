@@ -226,7 +226,7 @@ func _render() -> void:
 		rows_list.add_child(_make_row(row))
 
 
-## Lot U10 (audit A3, P1) : la ligne entière est cliquable (survol surligné, curseur main) ;
+## La ligne entière est cliquable (survol surligné, curseur main) ;
 ## plus de bouton « Voir » répété.
 func _make_row(row: Dictionary) -> Control:
 	var character_id: String = str(row.get("id", ""))
@@ -296,7 +296,7 @@ func _make_row(row: Dictionary) -> Control:
 	return frame
 
 
-## Ligne de la Cour cliquable (lot U10).
+## Ligne de la Cour cliquable.
 class CourtRow:
 	extends PanelContainer
 

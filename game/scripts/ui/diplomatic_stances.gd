@@ -1,7 +1,7 @@
 class_name DiplomaticStances
 extends RefCounted
 
-## Lot DP2 : couleurs de la carte diplomatique (mode « Diplomatie » de la carte 3D, de la
+## Couleurs de la carte diplomatique (mode « Diplomatie » de la carte 3D, de la
 ## minicarte et de la carte du panneau de diplomatie). Rendu seulement : la position de chaque
 ## faction vient de `CampaignSim.get_province_stances` (règle dans `sim_campaign::stance`).
 ##
@@ -47,7 +47,7 @@ static func available(sim: Object) -> bool:
 
 
 ## Clés de position par province (`ids`) ; vide si la simulation ne les calcule pas.
-## `viewer` (lot DZ) : faction dont on lit les relations ("" : le joueur).
+## `viewer` : faction dont on lit les relations ("" : le joueur).
 static func stances(sim: Object, ids: PackedStringArray, viewer: String = "") -> PackedStringArray:
 	if not available(sim):
 		return PackedStringArray()
@@ -56,7 +56,7 @@ static func stances(sim: Object, ids: PackedStringArray, viewer: String = "") ->
 	return sim.call("get_province_stances", ids)
 
 
-## Lot DZ : position de `viewer` envers chaque faction ({id: clé}, rebelles en guerre) ; vide si
+## Position de `viewer` envers chaque faction ({id: clé}, rebelles en guerre) ; vide si
 ## la simulation ne la calcule pas.
 static func faction_stances(sim: Object, viewer: String) -> Dictionary:
 	if sim == null or viewer == "" or not sim.has_method("get_faction_stances_for"):

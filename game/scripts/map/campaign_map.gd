@@ -80,9 +80,9 @@ var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, 
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
 var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
-## Lot C6 : paliers de zoom, colonies, hameaux et routes.
+## Paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
-## Lot SS3 (ADR 0142) : nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement.
+## Nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement (ADR 0142).
 var lakes: LakesRenderer = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
@@ -138,7 +138,7 @@ func _ready() -> void:
 	rivers.minor_max_distance = map_extent * 0.35
 	coast.build(map_data)
 	_setup_settlements()
-	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
+	# Après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
 	rivers.attach_roads(roads)  # ZG5b : routes drapées fines
 	lakes = LakesRenderer.new()  # SS3
@@ -197,7 +197,7 @@ func _ready() -> void:
 	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
 	add_child(units_ctl)
 	units_ctl.setup(self)
-	holdings_ctl = HoldingsController.new()  # lot HL2, après C5 : lit `settlement_detail`/HL1
+	holdings_ctl = HoldingsController.new()  # Après C5 : lit `settlement_detail`/HL1
 	add_child(holdings_ctl)
 	holdings_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
@@ -297,7 +297,7 @@ func _ready() -> void:
 	_parse_cmdline()
 
 
-## Lot C6 : colonies (villes 1:1, étiquettes), hameaux et routes, paliers de zoom.
+## Colonies (villes 1:1, étiquettes), hameaux et routes, paliers de zoom.
 func _setup_settlements() -> void:
 	zoom_tiers = ZoomTiers.load_default()
 	settlement_data = SettlementData.load_from(MapPaths.data_dir, MapPaths.map_dir())
@@ -423,7 +423,7 @@ func pick_decor(screen_position: Vector2) -> Dictionary:
 	return best
 
 
-## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
+## Sélection d'une colonie (le panneau viendra).
 func _on_settlement_selected(settlement_id: String) -> void:
 	if settlements_ctl != null and settlements_ctl.available():
 		return  # C5 : le panneau de colonie s'ouvre
@@ -1202,7 +1202,7 @@ func _on_research_requested(technology_id: String) -> void:
 	_submit({"type": "research", "technology": technology_id}, "Recherche lancée.")
 
 
-## Lot C5 : bascule la couche des routes commerciales (touche `map_toggle_trade` ou bouton de
+## Bascule la couche des routes commerciales (touche `map_toggle_trade` ou bouton de
 ## la barre de filtres).
 func _toggle_trade_layer() -> void:
 	trade_mode = not trade_mode
@@ -1520,7 +1520,7 @@ func _process(_delta: float) -> void:
 		settlement_layer.update_view(distance)
 		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
-		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
+		# palier « site » (routes drapées à leur vraie largeur).
 		# DV : traits (principales ; secondaires effacées d'elles-mêmes au-delà de
 		# `minor_fade_distance`) sur toute la vue normale hors détail proche, où les rubans de toutes
 		# les routes prennent le relais ; rien sur le parchemin.
@@ -1580,7 +1580,7 @@ func _process(_delta: float) -> void:
 			_take_screenshot(_screenshot_path, true)
 
 
-## Lot ZG4 : paliers vallée / site : frontières et brume du brouillard de guerre estompées sur le
+## Paliers vallée / site : frontières et brume du brouillard de guerre estompées sur le
 ## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
 const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_mist_max", "fog_mist_min"]
 var _close_tier_defaults: Dictionary = {}

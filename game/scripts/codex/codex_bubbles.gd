@@ -436,7 +436,7 @@ func set_pinned(bubble: PanelContainer, pinned: bool) -> void:
 func _apply_pinned(bubble: PanelContainer, pinned: bool, chain: bool = false) -> void:
 	bubble.set_meta("pinned", pinned)
 	bubble.set_meta("chain_locked", pinned and chain)
-	# Épinglée : page à bande d'or (lot UI1) plutôt que simple note marginale.
+	# Épinglée : page à bande d'or plutôt que simple note marginale.
 	var style: StyleBox = HudStyle.panel_box(10) if pinned else TooltipHost.panel_style()
 	bubble.add_theme_stylebox_override("panel", style)
 	var footer := bubble.find_child("Footer", true, false) as Label

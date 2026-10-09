@@ -1,7 +1,7 @@
 class_name TreasuryChart
 extends Control
 
-## Courbe du trésor sur les dernières saisons (audit A3 E2, lot U3) : une seule série, à l'encre
+## Courbe du trésor sur les dernières saisons (audit A3 E2) : une seule série, à l'encre
 ## sur le parchemin, points aux saisons résolues, ligne du zéro pointillée si le trésor passe
 ## sous zéro, valeur actuelle écrite au bout de la courbe, plus bas et plus haut à gauche.
 ## Données : `get_faction_economy().budget_history` (`{turn, treasury, net, change}`, au plus

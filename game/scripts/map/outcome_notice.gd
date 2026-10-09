@@ -1,7 +1,7 @@
 class_name OutcomeNotice
 extends Node
 
-## Lot CV3-4 : notice de la classe de résultat d'une bataille livrée sans la 3D (résolution
+## Notice de la classe de résultat d'une bataille livrée sans la 3D (résolution
 ## automatique depuis le dialogue, fin de tour, attaque d'une armée IA) : bandeau
 ## `OutcomeBand` (« Victoire décisive · Normandie ») sous la barre du haut pendant quelques
 ## secondes (la ligne de chronique vient du cœur). Une bataille jouée en 3D a déjà son bandeau sur

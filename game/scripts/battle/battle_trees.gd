@@ -1,11 +1,11 @@
 class_name BattleTrees
 extends Node3D
 
-## Arbres des batailles (lot DA6, bible DA § 6) : feuillus ramifiés procéduraux par essence, en
+## Arbres des batailles (bible DA § 6) : feuillus ramifiés procéduraux par essence, en
 ## remplacement des houppiers « sucette » (boule de cartes sur un bâton) de `BattleMeshes.tree`.
 ## - Squelette : tronc, charpentières, branches, rameaux (récursif, graine par essence), tenu dans
 ##   l'enveloppe du houppier de l'essence ; les rameaux terminaux portent des bouquets de deux
-##   cartes (`leaf_spray_<essence>.png`, vraies feuilles photographiées, lot FA1 ; à défaut le
+##   cartes (`leaf_spray_<essence>.png`, vraies feuilles photographiées ; à défaut le
 ##   rameau dessiné `leaf_spray.png`) : une dans l'axe du rameau, une tournée vers l'extérieur. Normales
 ##   arrondies (houppier + bouquet), ombre propre cuite dans la couleur de sommet (cœur et bas du
 ##   houppier plus sombres). Hiver : ramilles nues (`twig_spray.png`), chêne marcescent

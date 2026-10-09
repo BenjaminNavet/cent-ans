@@ -269,7 +269,7 @@ func _render_chance() -> void:
 	_reasons.text = text
 
 
-## Lot DP2 : leur raisonnement ligne à ligne, chaque raison avec son poids (à la Warhammer III :
+## Leur raisonnement ligne à ligne, chaque raison avec son poids (à la Warhammer III :
 ## « Ils se méfient de vous −12 », « Accord commercial — routes communes +8 »), puis la
 ## contre-offre quand un seul point bloque. Faux si la simulation ne l'explique pas.
 func _render_explanation() -> bool:

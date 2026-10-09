@@ -1,7 +1,7 @@
 class_name ReachableMarkers
 extends MultiMeshInstance3D
 
-## Anneaux au sol sur les colonies atteignables ce tour par l'armée sélectionnée (lot C5).
+## Anneaux au sol sur les colonies atteignables ce tour par l'armée sélectionnée.
 ## Rendu seulement : la liste vient de `CampaignSim.get_reachable_settlements`. Taille à
 ## peu près constante à l'écran (proportionnelle à la distance caméra, bornée).
 

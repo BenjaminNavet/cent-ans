@@ -1,7 +1,7 @@
 class_name StrategicView
 extends Node
 
-## Lot CM2 : vue stratégique « parchemin enluminé » au zoom
+## Vue stratégique « parchemin enluminé » au zoom
 ## maximal. Pilote le paramètre global de shader `campaign_parchment` (fondu selon la
 ## distance caméra : terrain, mer, fleuves passent en carte dessinée, cf.
 ## `parchment_*.gdshaderinc`), la couche 2D (`ParchmentOverlay` : noms, vignettes, jetons,
@@ -9,7 +9,7 @@ extends Node
 ## provinces, étendards et plaques d'armées). Purement visuel.
 ## Option (après `--`) : `--parchment=<0..1>` (poids imposé).
 
-## Lot DV (ADR 0124) : la bande de fondu vue normale → parchemin est celle de
+## La bande de fondu vue normale → parchemin est celle de (ADR 0124)
 ## `ZoomTiers.strategic_weight` (seuil 1200, largeur 200), seule source des deux vues.
 ## Au-delà de ce poids, les marqueurs 3D d'armée cèdent la place aux jetons.
 @export var marker_cutoff: float = 0.6

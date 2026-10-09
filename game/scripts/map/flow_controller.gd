@@ -251,7 +251,7 @@ func autosave() -> String:
 # --- Fin de tour ------------------------------------------------------------------
 
 
-## Lot U5 : vrai si `before_end_turn` laissera passer la fin de tour (sans effet de bord).
+## Vrai si `before_end_turn` laissera passer la fin de tour (sans effet de bord).
 func end_turn_would_proceed() -> bool:
 	return not is_paused() and (_end_turn_confirmed or not bool(_setting("interface/confirm_end_turn", false)))
 
@@ -299,7 +299,7 @@ func after_end_turn(events: Array) -> void:
 		show_season_report(events)
 
 
-## Lot U5 : rubriques du rapport ; « Le monde » filtré par intérêt (`MapUI.keeps_news`) ; bilan
+## Rubriques du rapport ; « Le monde » filtré par intérêt (`MapUI.keeps_news`) ; bilan
 ## du trésor en tête de la rubrique « Trésor ».
 func report_groups(events: Array) -> Array:
 	var ui: Node = map.get("ui")

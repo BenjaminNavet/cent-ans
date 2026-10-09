@@ -1,7 +1,7 @@
 class_name FaUi
 extends RefCounted
 
-## Lot FA5 — ornements réels de l'interface : initiales enluminées, rinceaux, sceaux de cire et
+## Ornements réels de l'interface : initiales enluminées, rinceaux, sceaux de cire et
 ## matières découpés dans des œuvres du domaine public (`game/assets/ui/fa/`, sources dans
 ## `SOURCE.md`). Le catalogue des découpes est `data/ui/fa_ui_assets.json` (schéma
 ## `data/schemas/ui_fa_assets.schema.json`), lu ici pour savoir quelle initiale existe.

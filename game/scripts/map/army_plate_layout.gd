@@ -5,10 +5,10 @@ extends RefCounted
 ## masque les plaques hors champ / trop lointaines, puis écarte les chevauchements avec
 ## `LabelPlacer`. Les plaques et marqueurs restent la propriété d'`ArmyMarkers`.
 
-## Lot ZG4 : portée des plaques sous `ArmyScale.CLOSE_KNEE_DISTANCE`, en multiples de la
+## Portée des plaques sous `ArmyScale.CLOSE_KNEE_DISTANCE`, en multiples de la
 ## distance caméra.
 const CLOSE_PLATE_RANGE_FACTOR := 40.0
-## Lot UX1 : période de recalcul du placement des plaques quand la caméra est immobile (les
+## Période de recalcul du placement des plaques quand la caméra est immobile (les
 ## armées animées et les noms de ville qui apparaissent sont repris à ce rythme).
 const PLACEMENT_INTERVAL := 0.25
 
@@ -69,7 +69,7 @@ func update(
 		_place(camera, plates, bases, selected_army, obstacles)
 
 
-## Lot UX1 : recalcul quand la caméra ou la vue change, quand les armées changent, sinon à
+## Recalcul quand la caméra ou la vue change, quand les armées changent, sinon à
 ## `PLACEMENT_INTERVAL` ; entre deux, les plaques gardent leur décalage (pas de clignotement).
 func _due(camera: Camera3D, view: Vector2) -> bool:
 	var moved := not camera.global_transform.is_equal_approx(_camera_transform) or view != _view

@@ -1,7 +1,7 @@
 class_name SeasonVisuals
 extends RefCounted
 
-## Lot CV1 : saison visible sur la carte de campagne (rendu seulement). La saison vient du pont
+## Saison visible sur la carte de campagne (rendu seulement). La saison vient du pont
 ## (`CampaignSim.get_date_label`, « Printemps 1337 ») ; elle est publiée dans le paramètre de
 ## shader global `campaign_season` (poids printemps, été, automne, hiver, somme 1), lu par
 ## `terrain.gdshader` (via `campaign_life.gdshaderinc`), `foliage.gdshader` et la surcouche de

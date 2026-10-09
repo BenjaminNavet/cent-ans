@@ -1,7 +1,7 @@
 class_name FaunaLayer
 extends Node3D
 
-## Lot DN-ME2 : troupeaux et faune de la carte de campagne (rendu seulement, aucune règle de jeu).
+## Troupeaux et faune de la carte de campagne (rendu seulement, aucune règle de jeu).
 ##
 ## - Données : `data/map/map_fauna.json` (schéma `map_fauna.schema.json`) : espèces (ids des animaux
 ##   de `data/art/dn_catalog_map_extra.json`), zones géographiques (ellipses lon/lat) et densités de

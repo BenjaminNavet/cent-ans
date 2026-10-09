@@ -1,7 +1,7 @@
 class_name PrecipitationProfile
 extends Resource
 
-## Lot SZ5 (suite de ZG7c, défaut S7) : réglages de la pluie et de la neige de près de la carte de
+## Réglages de la pluie et de la neige de près de la carte de
 ## campagne (`res://resources/precipitation.tres`), lues par `CampaignWeatherView`. Purement
 ## visuel, aucune règle de jeu.
 ##

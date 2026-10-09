@@ -1,14 +1,14 @@
 class_name BattleSkinned
 extends RefCounted
 
-## Figurines skinnées (lot V2) : chargement des maillages et des textures d'os cuits par
+## Figurines skinnées : chargement des maillages et des textures d'os cuits par
 ## `tools/blender_scripts/battle_skinned.py` (`assets/models/battle_skinned/`), matériau
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
-## Lot SC bt3 (ADR 0238) : plus de repli rigide pour les soldats ; seuls les engins de siège
+## ADR 0238 : plus de repli rigide pour les soldats ; seuls les engins de siège
 ## gardent des maillages rigides (`BattleMeshes`, `battle_soldier.gdshader`).
-## Lot FG1 : les figurines fines (corps MakeHuman, rigs aux proportions réalistes) de
+## Les figurines fines (corps MakeHuman, rigs aux proportions réalistes) de
 ## `assets/models/battle_fine/` remplacent celles qu'elles couvrent (rigs renommés `fine_human` /
-## `fine_cavalry`, chemins absolus dans le manifeste fusionné). Lot FG5 (ADR 0089) : rendu par
+## `fine_cavalry`, chemins absolus dans le manifeste fusionné). ADR 0089 : rendu par
 ## défaut ; `--coarse-figures` après `--` rend les figurines Quaternius (V2) le temps de la
 ## transition.
 
@@ -116,7 +116,7 @@ static func _hash1(n: float) -> float:
 	return x - floorf(x)
 
 
-## Lot BV2 : variante « cadavres » du shader (`BV2_CORPSE` : coupe des parties tranchées par
+## Variante « cadavres » du shader (`BV2_CORPSE` : coupe des parties tranchées par
 ## `discard`, réservée aux cadavres pour ne pas pénaliser les soldats vivants).
 static var _corpse_shader: Shader = null
 
@@ -153,7 +153,7 @@ static func _variant(defines: Array) -> Shader:
 	return shader
 
 
-## Lot FG3 : cartes cuites des figurines fines (`assets/models/battle_fine/textures/`).
+## Cartes cuites des figurines fines (`assets/models/battle_fine/textures/`).
 ## `lod0` / `lod1` : atlas par figurine (Texture2DArray, couche = `atlas_layer` du manifeste ;
 ## RG normale de forme, B occlusion, A masque selon la matière) ; `detail` : tuiles partagées
 ## par matière (Texture2DArray) ; `horse` : pelage CC0 réduit (normale, relief, occlusion).
@@ -164,7 +164,7 @@ const FINE_MAPS := {
 	"detail": "fine_detail.png",
 	"horse": "fine_horse.png",
 }
-## Lot GA1 (ADR 0104) : matières générées. `detail` prend `fine_detail_ga1.png` (12 couches,
+## Matières générées. `detail` prend `fine_detail_ga1.png` (12 couches (ADR 0104),
 ## `data/art/materials.yaml`) et `detail_albedo` s'ajoute (albédo de détail centré, multiplié à
 ## la couleur de sommet).
 const GA1_DETAIL := "fine_detail_ga1.png"
@@ -198,7 +198,7 @@ static func fine_maps_ready() -> bool:
 	return not fine_maps().is_empty()
 
 
-## Lot SR2 : usure des figurines fines cuites (0-1).
+## Usure des figurines fines cuites (0-1).
 const SR2_WEATHERING := 0.85
 const SR2_MUD_HEIGHT := 0.45
 const SR2_MUD_HEIGHT_HORSE := 0.65
@@ -266,8 +266,8 @@ static func manifest() -> Dictionary:
 	return _manifest
 
 
-## Lot FG1 : figurines fines actives. FG5 : par défaut ; `--coarse-figures` après `--` les
-## coupe (figurines Quaternius du lot V2). `--fine-figures` reste accepté (sans effet).
+## Figurines fines actives. FG5 : par défaut ; `--coarse-figures` après `--` les
+## coupe (figurines Quaternius). `--fine-figures` reste accepté (sans effet).
 static func fine_enabled() -> bool:
 	return not CmdArgs.has("--coarse-figures")
 
@@ -383,7 +383,7 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 
 
 ## Maillage binaire `CAM1` (zlib) : positions, normales, couleurs (rgb + code), UV, os, poids,
-## masques de variante, indices. `CAM2` (lot FG3) : en plus, après les masques, l'UV d'atlas
+## masques de variante, indices. `CAM2` : en plus, après les masques, l'UV d'atlas
 ## empaquetée des cartes cuites (u, v sur 11 bits, source sur 2 bits).
 static func _load_mesh(path: String, large: bool) -> ArrayMesh:
 	var bytes := FileAccess.get_file_as_bytes(path)
@@ -560,7 +560,7 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 
 
-## Lot EP12 : blessés au sol (mode CUSTOM, INSTANCE_CUSTOM.y = indice dans ce jeu) ; vide si
+## Blessés au sol (mode CUSTOM, INSTANCE_CUSTOM.y = indice dans ce jeu) ; vide si
 ## le rig n'a pas les clips (kit antérieur) ou pour les cavaliers.
 static func wounded_config(kind: String, variant: int) -> Dictionary:
 	if kind == "cavalry":
@@ -580,7 +580,7 @@ static func style_of(kind: String, variant: int) -> String:
 	return _style(kind, variant)
 
 
-## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
+## Style d'animation de la figurine : champ `style` du manifeste, sinon règle
 ## historique par famille et variante.
 static func _style(kind: String, variant: int) -> String:
 	var style := str(figure(kind, variant).get("style", ""))
@@ -596,7 +596,7 @@ static func _style(kind: String, variant: int) -> String:
 	return "sword"
 
 
-## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste (lot UR1), sinon
+## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste, sinon
 ## variante 0 des fantassins et des cavaliers.
 ## DA1 : boîte du buste en pose de repos, où le shader peint les armoiries (surcot, jaque) ou la
 ## croix de livrée : sommets livrée (code 0) dont l'os dominant est le torse ou la poitrine.
@@ -655,13 +655,13 @@ static func is_noble(kind: String, variant: int) -> bool:
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
-## Lot EP12 : blessés (rampe, assis, à genoux) ; ordre = INSTANCE_CUSTOM.y de la couche.
+## Blessés (rampe, assis, à genoux) ; ordre = INSTANCE_CUSTOM.y de la couche.
 const WOUNDED_FOOT := ["crawl", "wounded_sit", "wounded_kneel"]
-## Lot EP12 : drapeau ajouté au code de INSTANCE_CUSTOM.w (cadavre ou blessé désarmé).
+## Drapeau ajouté au code de INSTANCE_CUSTOM.w (cadavre ou blessé désarmé).
 const CODE_UNARMED := 8
-## Lot BV2 : `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
+## `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
 const DEATHS_CAVALRY := ["c_death", "c_death_m", "c_fall"]
-## Lot BV2 : parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
+## Parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
 ## os isolés : l'arme suit la main). Entrée 0 : os du cheval (tout ce qui n'est pas `R:`).
 const SEVER_PARTS := {
 	"head": [1, ["Head"]],
@@ -693,14 +693,14 @@ static func clip_seconds(kind: String, variant: int, clip: String) -> float:
 	return float(c.get("frames", 24)) / float(entry.get("fps", 24))
 
 
-## Renversés (lot BV2) : clip `knockdown` en mode CUSTOM (à pied seulement).
+## Renversés : clip `knockdown` en mode CUSTOM (à pied seulement).
 static func knockdown_config(kind: String, variant: int) -> Dictionary:
 	var rig_entry := rig(kind, variant)
 	var ids: Array[int] = [clip_index(rig_entry, "knockdown")]
 	return {"key": "%s/%d/knock" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 
 
-## Table `sever_bones` du shader (lot BV2) pour le rig de la figurine.
+## Table `sever_bones` du shader pour le rig de la figurine.
 static func sever_table(kind: String, variant: int) -> Array[Vector4i]:
 	var bones: Array = rig(kind, variant).get("bones", [])
 	var prefix := "R:" if kind == "cavalry" else ""
@@ -758,7 +758,7 @@ const STYLES := {
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
-	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
+	# Lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
 	"militia": {
 		"idle": {"set": ["pike_idle", "pike_idle", "pike_look"]},
 		"victory": {"set": ["victory_pike"]},
@@ -777,7 +777,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
-		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
+		# Piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
@@ -833,7 +833,7 @@ const STYLES := {
 		"routing": {"set": ["c_gallop"]},
 		"victory": {"set": ["c_victory"]},
 	},
-	## Lot FK2 : civils de la carte vivante (figurines `villager_*`). Les états de travail
+	## Civils de la carte vivante (figurines `villager_*`). Les états de travail
 	## (`scythe` fauche, `carry` porte un fardeau à l'épaule, `plough` laboure) sont demandés par
 	## le rendu de la carte (`state_config(kind, variant, "scythe", false)`) ; sans ces clips (kit
 	## grossier antérieur), repli sur la marche ou l'attente.

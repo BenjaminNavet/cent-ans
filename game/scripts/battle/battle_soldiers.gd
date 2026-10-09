@@ -1,7 +1,7 @@
 class_name BattleSoldiers
 extends Node3D
 
-## Rendu des soldats (lot V4) : un `MultiMeshInstance3D` par régiment (maillage de sa famille et
+## Rendu des soldats : un `MultiMeshInstance3D` par régiment (maillage de sa famille et
 ## de sa variante, matériau `battle_soldier.gdshader` propre : livrée, blason, état d'animation),
 ## rempli chaque image par tranches du tampon `BattleSim.get_soldier_buffer(side, render)` —
 ## la simulation reste seule maîtresse des positions. Les soldats tombés deviennent des cadavres
@@ -11,14 +11,14 @@ extends Node3D
 ## Le tampon Rust concatène les soldats des régiments d'un camp et d'une famille dans l'ordre de
 ## `get_units()` ; chaque régiment présent y occupe exactement `soldiers` transformées.
 ##
-## Lot BV2 (bataille vivante) : la mort tirée suit la cause des pertes venue du cœur
+## La mort tirée suit la cause des pertes venue du cœur
 ## (`loss_cause`, `loss_by` : flèche, mêlée, charge, boulet, pieux, piques…) ; les cadavres
 ## restent toute la bataille, rangés par cellules de terrain (LOD et masquage au loin, plafond
 ## global) ; les chocs de cavalerie (`get_impacts`) renversent et projettent des fantassins qui se
 ## relèvent (couche « renversés »), ralentissent les chevaux ; sang sur les figurines, gerbes et
 ## démembrements (`BattleGore`, réglage « Sang »).
 
-## Émis à chaque cadavre posé (point d'accroche pour les flèches plantées du lot BV1) :
+## Émis à chaque cadavre posé (point d'accroche pour les flèches plantées) :
 ## position au sol, camp, famille, cause des pertes.
 signal corpse_fallen(position: Vector3, side: String, kind: String, cause: String)
 
@@ -27,14 +27,14 @@ const KINDS := BattleKinds.ALL
 const MAX_CORPSES := 4000
 const TRIM_GOLD := Color(0.83, 0.66, 0.24)
 const TRIM_SILVER := Color(0.85, 0.85, 0.82)
-## Niveaux de détail (lots V4b, B1), distance caméra → régiment (m) : maillage complet en deçà
+## Niveaux de détail, distance caméra → régiment (m) : maillage complet en deçà
 ## de `DETAIL_DISTANCE`, moyen jusqu'à `LOD_DISTANCE` (leur ombre est portée par le maillage
 ## lointain), maillage lointain au-delà, sans ombre portée après `SHADOW_DISTANCE`.
 const DETAIL_DISTANCE := 32.0
-## Figurines skinnées (lot V2) : maillage complet plus tôt relayé (skinning plus coûteux).
+## Figurines skinnées : maillage complet plus tôt relayé (skinning plus coûteux).
 const SKINNED_DETAIL_DISTANCE := 24.0
 const LOD_DISTANCE := 75.0
-## Lot FG5 (ADR 0089) : figurines fines, LOD0 par soldat. Leur LOD0 (9-17 k triangles) n'est
+## Figurines fines, LOD0 par soldat. Leur LOD0 (9-17 k triangles) n'est (ADR 0089)
 ## dessiné que pour les soldats à moins de `FINE_DETAIL_DISTANCE` m de la caméra (× préréglage),
 ## par un calque à part qui partage le tampon du régiment ; le calque principal dessine le LOD1
 ## des autres (bande `lod_band` du shader). Par régiment (lignes de 40 à 150 m), le LOD0 coûtait
@@ -94,9 +94,8 @@ var _side_colors: Dictionary = {}
 var _side_heraldry: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _warned: bool = false
-var _anim_track: Dictionary = {}  # unit id -> {ammo, state, since} (lot B4 : volées, chocs)
-var _skinned: Dictionary = {}  # unit id -> true : figurine skinnée (lot V2, `BattleSkinned`)
-## Lot BV2.
+var _anim_track: Dictionary = {}  # unit id -> {ammo, state, since} (volées, chocs)
+var _skinned: Dictionary = {}  # unit id -> true : figurine skinnée (`BattleSkinned`)
 var gore: BattleGore = null
 var knocked_count: int = 0
 var severed_count: int = 0
@@ -128,7 +127,7 @@ var victor_side: String = ""
 var _pike_units: Dictionary = {}  # unit id -> true si armes d'hast (cabrage des chevaux)
 var _frame_dt: float = 0.0
 var _audio: Script = null
-## Lot EP12 (ADR 0070) : blessés au sol et fuyards désarmés.
+## Blessés au sol et fuyards désarmés (ADR 0070).
 var dropped_arms: BattleDroppedArms = null
 var wounded_count: int = 0
 var last_wounded_pos: Variant = null
@@ -305,7 +304,7 @@ func _make_material(side: String, _kind: String, _variant: int, corpse: bool) ->
 	return mat
 
 
-## Matériau des figurines skinnées (lot V2) : même livrée et blason que `_make_material`,
+## Matériau des figurines skinnées : même livrée et blason que `_make_material`,
 ## texture d'os et table des clips du rig ; cadavres en mode CUSTOM (clips de mort).
 ## DA1 : `unit_id` (>= 0) tire les bannerets du régiment ; les cadavres (partagés par camp)
 ## prennent les trois premiers bannerets du camp.
@@ -387,7 +386,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	if gore != null:
 		gore.update(anim_dt, _camera_pos)
 	_update_batched(battle, units, selected)
-	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
+	# Chocs de cavalerie résolus par le cœur depuis l'image précédente.
 	var impacts: Array = battle.call("get_impacts")
 	if not impacts.is_empty():
 		apply_impacts(impacts)
@@ -480,7 +479,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			_spawn_corpses(unit, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n, prev_n)
 	_previous[id] = slice
 	_drawn[id] = n
-	# Renversés (lot BV2) : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
+	# Renversés : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
 	if _hidden.has(id):
 		slice = _hide_knocked(id, slice, n)
 	if _drive.has(id):
@@ -593,7 +592,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if victor_side != "" and shown_state != "victory":
 			# AN1b : l'horloge des autres régiments reste figée après la fin (comme avant).
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt
-		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
+		# Cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
 		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
 		var cadence := _cadence(id, config)
 		if cadence != 1.0:
@@ -606,7 +605,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	_param(mat, sent, &"anim_state", anim_state(unit))
 	_param(mat, sent, &"highlight", 1.0 if is_selected else 0.0)
 	_param(mat, sent, &"far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
-	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
+	# Décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
 	var track: Dictionary = _anim_track.get(id, {})
 	if track.is_empty():
 		track = {"ammo": ammo, "state": state, "since": local - 100.0}
@@ -828,7 +827,7 @@ func _impostor_layer(id: int, side: String, kind: String, variant: int, count: i
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
-## depuis un point tiré au hasard (départs des traits d'une volée, lot B4).
+## depuis un point tiré au hasard (départs des traits d'une volée).
 func soldier_positions(id: int, count: int) -> PackedVector3Array:
 	var out := PackedVector3Array()
 	if not _previous.has(id) or count <= 0:
@@ -847,7 +846,7 @@ func soldier_positions(id: int, count: int) -> PackedVector3Array:
 
 
 ## Ajoute `count` cadavres pris au hasard dans la tranche précédente (plutôt au premier rang).
-## Lot BV2 : mort tirée selon la cause des pertes (`loss_cause`), projection en arrière loin du
+## Mort tirée selon la cause des pertes (`loss_cause`), projection en arrière loin du
 ## tueur (charge, boulet), démembrement sur coup critique (réglage « complet »), sang, gerbe ;
 ## cadavres rangés par cellules de terrain (LOD, plafond global `corpses.max_total`).
 func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int, prev_n: int = -1) -> void:
@@ -1114,7 +1113,7 @@ func _update_corpse_lods() -> void:
 			(layer["mm"] as MultiMesh).mesh = BattleSkinned.mesh(str(layer["kind"]), int(layer["variant"]), level)
 
 
-## Lot BV2 : applique les chocs de cavalerie du cœur (renversés projetés qui se relèvent,
+## Applique les chocs de cavalerie du cœur (renversés projetés qui se relèvent,
 ## chevaux ralentis ou arrêtés, gerbes, sons).
 func apply_impacts(impacts: Array) -> void:
 	var knock: Dictionary = _gore.get("knockdown", {})
@@ -1262,7 +1261,7 @@ func _is_pike_unit(uid: int) -> bool:
 
 
 ## Piquiers et miliciens qui abaissent leurs armes d'hast devant une charge de cavalerie
-## ennemie à moins de 90 m (rendu seulement, lot BV2).
+## ennemie à moins de 90 m (rendu seulement).
 func _find_braced(units: Array) -> void:
 	_braced.clear()
 	for unit in units:
@@ -1292,7 +1291,7 @@ func _cadence(id: int, config: Dictionary) -> float:
 	return clampf(float(_speed.get(id, nominal)) / maxf(nominal, 0.1), 0.35, 1.8)
 
 
-## Cavaliers qui entrent dans la masse après un choc (lot BV2) : la formation rendue avance de
+## Cavaliers qui entrent dans la masse après un choc : la formation rendue avance de
 ## la pénétration du cœur (`depth`) plus l'écart de contact, s'y tient, puis se replie.
 func _drive_in(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
 	var entry: Dictionary = _drive[id]
@@ -1375,7 +1374,7 @@ func timing_report() -> String:
 
 
 ## Temps d'animation propagé aux cadavres (chute) et aux renversés ; LOD des cellules de
-## cadavres (lot BV2).
+## cadavres.
 func _process(delta: float) -> void:
 	if _timing:
 		_frame_times.append(delta)

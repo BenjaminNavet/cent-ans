@@ -1,7 +1,7 @@
 class_name SeaBasins
 extends RefCounted
 
-## Lot TB5 : mers de la carte de campagne par bassin, lues dans `data/map/sea_basins.json` (schéma
+## Mers de la carte de campagne par bassin, lues dans `data/map/sea_basins.json` (schéma
 ## `data/schemas/sea_basins.schema.json`) : mer du Nord et Manche sombres, Atlantique houleux,
 ## Méditerranée claire. Les bassins (quatre au plus) sont cuits dans une texture de poids (un canal
 ## chacun, limites fondues) ; leurs réglages sont des tableaux du shader (`sea_basins.gdshaderinc`,

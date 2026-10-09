@@ -1,9 +1,9 @@
 class_name VegetationMask
 extends RefCounted
 
-## Masques de végétation de la carte de campagne (lot V3, rendu seulement).
+## Masques de végétation de la carte de campagne (rendu seulement).
 ##
-## Source préférée : `data/map/splat.png` (lot V2), RGBA dans le repère de `province_ids.png` :
+## Source préférée : `data/map/splat.png`, RGBA dans le repère de `province_ids.png` :
 ## R = prairie, G = cultures, B = forêt, A = roche/lande (obligatoire depuis la pyramide de relief,
 ## ADR 0203 ; plus de repli procédural). Les densités sont dans [0, 1].
 ##
@@ -11,9 +11,9 @@ extends RefCounted
 ## des tâches de `WorkerThreadPool` (le bruit est dupliqué par tâche, voir `make_noise`).
 
 const SPLAT_FILE := "splat.png"
-## Lot V4 : sources interchangeables de la couverture forestière et des essences.
+## Sources interchangeables de la couverture forestière et des essences.
 const FOREST_COVER_FILE := "forest_cover.json"
-## Lot HB4 (ADR 0143) : carte des biomes (indice 8 bits, 0 mer, 1 océanique … 7 semi-aride).
+## Carte des biomes (indice 8 bits, 0 mer, 1 océanique … 7 semi-aride) (ADR 0143).
 const BIOMES_FILE := "biomes.png"
 const CHANNELS := {"r": 0, "g": 1, "b": 2, "a": 3}
 
@@ -28,7 +28,7 @@ var _terrain_by_index: PackedStringArray = PackedStringArray()
 var _hedge_terrain: PackedByteArray = PackedByteArray()
 var _landuse_bytes: PackedByteArray = PackedByteArray()
 var _landuse_size: Vector2i = Vector2i.ZERO
-## Lot V4 : couverture forestière (octets RGBA8, canal, seuils) et essences optionnelles.
+## Couverture forestière (octets RGBA8, canal, seuils) et essences optionnelles.
 var cover_source: String = ""
 var _cover_bytes: PackedByteArray = PackedByteArray()
 var _cover_size: Vector2i = Vector2i.ZERO
@@ -38,11 +38,11 @@ var _cover_high: float = 0.68
 var _essence_bytes: PackedByteArray = PackedByteArray()
 var _essence_size: Vector2i = Vector2i.ZERO
 var _essence_channels: Vector3i = Vector3i(0, 1, 2)
-## Part de résineux (0..1) lue dans un raster (lot R1 : `forest_kind.png`) ; vide : procédural.
+## Part de résineux (0..1) lue dans un raster (`forest_kind.png`) ; vide : procédural.
 var _conifer_bytes: PackedByteArray = PackedByteArray()
 var _conifer_size: Vector2i = Vector2i.ZERO
 var _conifer_channel: int = 0
-## Lot HB4 : biomes (octets L8) ; vide : `default_biome` partout.
+## Biomes (octets L8) ; vide : `default_biome` partout.
 var _biome_bytes: PackedByteArray = PackedByteArray()
 var _biome_size: Vector2i = Vector2i.ZERO
 var default_biome: int = 2
@@ -66,7 +66,7 @@ func has_splat() -> bool:
 
 
 func _load_splat() -> void:
-	# Déjà chargée par `MapData` (lot V2) ; sinon lecture directe (compatibilité).
+	# Déjà chargée par `MapData` ; sinon lecture directe (compatibilité).
 	var image: Image = map_data.get("splat_image") as Image
 	if image == null:
 		var path := map_data.map_dir.path_join(SPLAT_FILE)
@@ -85,7 +85,7 @@ func _load_splat() -> void:
 	source = "splat"
 
 
-## Lot V4 : `data/map/forest_cover.json` → raster de couverture (défaut : splat, canal B) et,
+## `data/map/forest_cover.json` → raster de couverture (défaut : splat, canal B) et,
 ## en option, raster des essences (chêne, hêtre, conifères).
 func _load_forest_cover() -> void:
 	var path := map_data.map_dir.path_join(FOREST_COVER_FILE)
@@ -131,7 +131,7 @@ func _load_forest_cover() -> void:
 		_beech.merge(beech, true)
 
 
-## Lot HB4 : `data/map/biomes.png` (produit par `cent-ans geo biomes`, lot HB1) ; absent :
+## `data/map/biomes.png` (produit par `cent-ans geo biomes`) ; absent :
 ## repli sur `default_biome`.
 func _load_biomes() -> void:
 	var path := map_data.map_dir.path_join(BIOMES_FILE)
@@ -144,7 +144,7 @@ func _load_biomes() -> void:
 	set_biome_image(image)
 
 
-## Lot HB4 : biomes depuis une image (tests : image synthétique) ; null les retire.
+## Biomes depuis une image (tests : image synthétique) ; null les retire.
 func set_biome_image(image: Image) -> void:
 	if image == null:
 		_biome_bytes = PackedByteArray()
@@ -192,7 +192,7 @@ func has_forest_cover() -> bool:
 	return not _cover_bytes.is_empty()
 
 
-## Lot PO3 : raster de couverture forestière réduit à `max_side` px au plus (moyenne par mipmaps),
+## Raster de couverture forestière réduit à `max_side` px au plus (moyenne par mipmaps),
 ## pour les lisières du shader de feuillage ; null sans couverture. Canal et seuils :
 ## `forest_cover_params`.
 func forest_cover_image(max_side: int = 1024) -> Image:
@@ -206,7 +206,7 @@ func forest_cover_image(max_side: int = 1024) -> Image:
 	return image
 
 
-## Lot PO3 : {channel: 0-3, low, high} de la couverture (densité = smoothstep(low, high, canal)).
+## {channel: 0-3, low, high} de la couverture (densité = smoothstep(low, high, canal)).
 func forest_cover_params() -> Dictionary:
 	return {"channel": _cover_channel, "low": _cover_low, "high": _cover_high}
 
@@ -301,7 +301,7 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	result["conifer"] = clampf(conifer + n * 0.25, 0.0, 1.0)
 	if not _conifer_bytes.is_empty():
 		result["conifer"] = _texel(_conifer_bytes, _conifer_size, map_data.size, x, y, _conifer_channel)
-	# Lot V4 : chênaie / hêtraie, par taches (le hêtre monte en altitude, recule dans le Midi).
+	# Chênaie / hêtraie, par taches (le hêtre monte en altitude, recule dans le Midi).
 	var patch: float = 48.0 / float(_beech["patch_px"])
 	var n2 := noise.get_noise_2d(x * patch + 5171.0, y * patch - 3307.0)
 	var south := smoothstep(0.55, 0.78, clampf(y / maxf(map_data.size.y, 1.0), 0.0, 1.0))

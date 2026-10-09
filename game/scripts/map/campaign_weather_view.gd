@@ -1,7 +1,7 @@
 class_name CampaignWeatherView
 extends Node3D
 
-## Lot CM2 : météo de la carte de campagne, rendue à partir du cœur (`get_campaign_weather`,
+## Météo de la carte de campagne, rendue à partir du cœur (`get_campaign_weather`,
 ## ADR 0027 ; aucune météo inventée ici). Une fois par tour : masque par province (R pluie,
 ## G neige, B brouillard, A orage) posé sur le terrain (sol mouillé, neige fraîche, brouillard
 ## matinal qui se lève, ombre des nuées, éclairs) et sur un plan de nuées qui défilent avec le
@@ -33,7 +33,7 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## Valeurs du bloc `clouds` de `data/ui/campaign_map.json` (repli : ces exports).
 @export var cloud_medium_alpha: float = 0.2
 @export var cloud_medium: Vector2 = Vector2(600.0, 1000.0)
-## TB2 : ombres de nuages du terrain (`cloud_shadow_amount`, lot CV1) : seulement quand il y a de
+## TB2 : ombres de nuages du terrain (`cloud_shadow_amount`) : seulement quand il y a de
 ## vraies nuées (pluie, neige, orage) sous le point visé ; nulles par temps clair.
 @export var weather_shadow_amount: float = 0.12
 @export var fair_shadow_amount: float = 0.0

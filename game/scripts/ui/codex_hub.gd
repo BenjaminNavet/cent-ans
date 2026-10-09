@@ -1,7 +1,7 @@
 class_name CodexHub
 extends PanelContainer
 
-## Lot U11 (audit A3, D4 et D5) : une seule fenêtre « Codex » sur la carte, à deux onglets —
+## Une seule fenêtre « Codex » sur la carte, à deux onglets —
 ## « Histoire » (le Codex, `CodexWindow`, touche K) et « Règles » (l'encyclopédie de jeu,
 ## `Encyclopedia`, touche L) — avec une recherche commune et des onglets au style parchemin.
 ## Panneau central de la pile de `MapUI`. Les deux vues gardent leur API : ouvrir l'une (bulle,

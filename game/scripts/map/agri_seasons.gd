@@ -1,7 +1,7 @@
 class_name AgriSeasons
 extends RefCounted
 
-## Lot ME8 (DN) : variantes saisonnières d'arbres (sapin enneigé, chêne doré, hêtre cuivré,
+## Variantes saisonnières d'arbres (sapin enneigé, chêne doré, hêtre cuivré,
 ## mélèze doré) déclarées dans `data/map/agri_landscapes.json` (`seasonal_variants`). Tant que le
 ## modèle n'est pas ingéré (`data/art/dn_manifest.json`), `model_for` rend "" : le feuillage reste
 ## celui de l'essence, teinté par la saison dans `foliage_common.gdshaderinc`. Brancher un

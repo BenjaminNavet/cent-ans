@@ -1,7 +1,7 @@
 class_name FactionMapPicker
 extends Control
 
-## Lot FE6 (spec FE § 6) : choix de faction sur la carte de 1337 (les factions jouables ne
+## Choix de faction sur la carte de 1337 (les factions jouables ne
 ## tiennent plus en cartes). Chaque province est peinte aux couleurs de son propriétaire ; survol :
 ## fiche de la faction (souverain, titres, suzerain, royaume, difficulté, objectifs) ; clic :
 ## `faction_chosen`. Filtres par royaume et par rang (les autres factions sont voilées).

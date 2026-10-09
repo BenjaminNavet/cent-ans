@@ -389,7 +389,7 @@ func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictiona
 				tints["oak"].append(_tree_tint(rng))
 
 
-## Arbres par tuiles (lot V4b) : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur
+## Arbres par tuiles : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur
 ## écarte ce qui est hors champ ou hors des ombres. Chênes et peupliers ont deux niveaux de
 ## détail par distance (`visibility_range`) : houppier complet avec ombre portée près, maillage
 ## allégé sans ombre au-delà de `TREE_LOD_DISTANCE`.

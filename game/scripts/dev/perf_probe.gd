@@ -1,7 +1,7 @@
 class_name PerfProbe
 extends RefCounted
 
-## Lot SZ6 : minuteries par section de l'image, pour attribuer les pics de la carte de campagne
+## Minuteries par section de l'image, pour attribuer les pics de la carte de campagne
 ## aux scripts (banc `--bench-map --bench-probe`). Coupées par défaut : un appel à
 ## `Time.get_ticks_usec` et un test booléen par section.
 ##

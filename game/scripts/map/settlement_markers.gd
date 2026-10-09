@@ -1,7 +1,7 @@
 class_name SettlementMarkers
 extends RefCounted
 
-## Lot DA3 (ADR 0066), refondu au lot DV2 (ADR 0124) : rangs, tailles et densité des lieux de la
+## ADR 0066, refondu (ADR 0124) : rangs, tailles et densité des lieux de la
 ## carte de campagne. Lecture seule de `data/map/settlement_markers.json` : rang (1 à 4) déduit
 ## des données statiques des colonies (type, poids, fortification), taille écran de l'écu par
 ## rang, distance de retrait par rang (densité des noms), dé-encombrement écran. Plus de marqueur
@@ -76,17 +76,17 @@ func fade_distance() -> float:
 	return float(catalog.get("fade_distance", 60.0))
 
 
-## Lot DA7d : paramètre du dé-encombrement écran (bloc `declutter` du catalogue).
+## Paramètre du dé-encombrement écran (bloc `declutter` du catalogue).
 func declutter_value(key: String, default: Variant) -> Variant:
 	return catalog.get("declutter", {}).get(key, default)
 
 
-## Lot DV2 : écu au-dessus du nom : taille (fraction de `size_px`) et écart (px) au texte.
+## Écu au-dessus du nom : taille (fraction de `size_px`) et écart (px) au texte.
 func shield_size_factor() -> float:
 	return float(catalog.get("shield", {}).get("size_factor", 0.45))
 
 
-## Lot TB2 : distance caméra jusqu'à laquelle un lieu de rang `rank` porte son écu
+## Distance caméra jusqu'à laquelle un lieu de rang `rank` porte son écu
 ## (`shield.max_distance_by_rank`) ; au-delà, le nom seul. Rang absent : écu à toute distance.
 func shield_until(rank: int) -> float:
 	var limits: Dictionary = catalog.get("shield", {}).get("max_distance_by_rank", {})
@@ -97,6 +97,6 @@ func shield_gap_px() -> float:
 	return float(catalog.get("shield", {}).get("gap_px", 1.0))
 
 
-## Lot RJ-c (ADR 0175) : réglage `key` de la bannière possesseur / occupant (`banner`).
+## Réglage `key` de la bannière possesseur / occupant (`banner`) (ADR 0175).
 func banner_value(key: String, default: Variant) -> Variant:
 	return catalog.get("banner", {}).get(key, default)

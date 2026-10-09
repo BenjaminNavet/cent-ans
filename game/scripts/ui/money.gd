@@ -1,7 +1,7 @@
 class_name Money
 extends RefCounted
 
-## Montants en livres tournois (audit A3 E3, lot U3) : un seul symbole, `₶`, et un seul format
+## Montants en livres tournois (audit A3 E3) : un seul symbole, `₶`, et un seul format
 ## dans toute l'interface — chiffres groupés par trois (espace insécable), vrai signe moins
 ## (U+2212), signe explicite pour les soldes et les écarts. Même format que
 ## `economy_balance::signed_livres` côté `core/`.

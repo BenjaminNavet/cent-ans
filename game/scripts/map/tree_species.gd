@@ -1,7 +1,7 @@
 class_name TreeSpecies
 extends RefCounted
 
-## Lot HB4 (ADR 0143) : essences d'arbres de la carte de campagne et leur répartition par biome.
+## Essences d'arbres de la carte de campagne et leur répartition par biome (ADR 0143).
 ##
 ## Table compilée `data/art/tree_species.json` (source `data/art/tree_species.yaml`, chaîne
 ## `tools/blender_scripts/ga3_vegetation_l2.py species`) : une essence = une ligne de l'atlas
@@ -38,7 +38,7 @@ static var _cached: TreeSpecies = null
 
 var ok: bool = false
 var ids: PackedStringArray = PackedStringArray()
-## Lot DN-FORET : identifiant du glb généré de chaque essence ("" : pas de modèle).
+## Identifiant du glb généré de chaque essence ("" : pas de modèle).
 var dn_ids: PackedStringArray = PackedStringArray()
 var count: int = 0
 ## base[(biome * ROLE_COUNT + role) * count + s] = poids biome × poids rôle.

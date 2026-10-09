@@ -1,9 +1,9 @@
 class_name CafvTile
 extends RefCounted
 
-## Tuile binaire CAFV v1 (lot ZG5a, `docs/geo.md` § « Hydrographie fine ») : lignes du réseau
+## Tuile binaire CAFV v1 (`docs/geo.md` § « Hydrographie fine ») : lignes du réseau
 ## fin (couche 1, fleuves) ou des routes drapées (couche 2) d'une tuile E2 (64 unités monde).
-## Lecture seule, rendu seulement (lot ZG5b). Une fois lue, la tuile n'est plus modifiée :
+## Lecture seule, rendu seulement. Une fois lue, la tuile n'est plus modifiée :
 ## lisible depuis un fil de travail (lit creusé des pages, maillage des rubans).
 ##
 ## En-tête petit-boutiste `4s H H H H I I I I` (28 octets : la table de `docs/geo.md` annonce

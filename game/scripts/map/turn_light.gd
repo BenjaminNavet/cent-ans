@@ -1,8 +1,8 @@
 class_name TurnLight
 extends Node
 
-## Lot CM2 : cycle jour et nuit léger en fin de tour. Pendant le tour des autres factions
-## (bandeau « Tour des autres factions » du lot U5 affiché), le soleil descend vers l'ouest et
+## Cycle jour et nuit léger en fin de tour. Pendant le tour des autres factions
+## (bandeau « Tour des autres factions » affiché), le soleil descend vers l'ouest et
 ## dore la carte (soir) ; au retour du joueur, une aube brève ramène la lumière du jour. Jamais
 ## de nuit noire : l'énergie baisse d'au plus `dusk_energy_drop`, la carte reste lisible.
 ## Purement visuel. `--dusk` (après `--`) fige la lumière du soir (captures).

@@ -1,7 +1,7 @@
 class_name BattleSpeech
 extends Node
 
-## Discours du général avant la bataille (lot BV3), rendu seulement.
+## Discours du général avant la bataille, rendu seulement.
 ## Texte composé depuis `data/speeches/battle_speeches.json` selon la faction, le général, le
 ## rapport de forces, le terrain et la météo (choix déterministes : graine de la bataille), puis
 ## le cri de guerre de la faction (`data/battle_orders/order_war_cry.json`). Affiché en

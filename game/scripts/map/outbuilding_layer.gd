@@ -1,7 +1,7 @@
 class_name OutbuildingLayer
 extends Node3D
 
-## Lot TB3 (ADR 0162) : bâtiments hors les murs de la carte de campagne (ferme, moulin, vignoble,
+## Bâtiments hors les murs de la carte de campagne (ferme, moulin, vignoble (ADR 0162),
 ## mine, saline, abbaye, marché, port), posés sur le terroir autour des colonies selon les
 ## bâtiments construits que le moteur expose (`CampaignSim.get_settlements_live`, sinon
 ## `settlement_detail`), au niveau 1 à 3 donné par `data/map/building_models.json`. Rendu
@@ -19,7 +19,7 @@ extends Node3D
 ##   (`band_top`), sans recouvrement, hors mer, fleuves, routes principales et autres colonies ;
 ##   celles qui ne tiennent pas sont retirées à ce palier.
 ## - Brouillard de guerre : rien n'est posé dans une province hors de vue.
-## - Les autres pièces de la croissance (faubourgs, enceinte, lot TB3 point 4) passent par le même
+## - Les autres pièces de la croissance (faubourgs, enceinte) passent par le même
 ##   rendu : `TownGrowth` fournit ses instances par colonie.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")

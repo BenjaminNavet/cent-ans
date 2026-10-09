@@ -59,7 +59,7 @@ func show_path(province_ids: PackedStringArray, camera_distance: float) -> void:
 	_show(points, camera_distance, 0.8)
 
 
-## Lot C5 : chemin sur le graphe des colonies. `points` : positions carte (x, z) des colonies
+## Chemin sur le graphe des colonies. `points` : positions carte (x, z) des colonies
 ## successives (départ compris) ; chaque arête est un segment subdivisé posé sur le relief.
 ## `ids` : identifiants des colonies (retournés par `shown_ids`).
 func show_points(points_in: PackedVector2Array, camera_distance: float, ids: PackedStringArray = PackedStringArray()) -> void:

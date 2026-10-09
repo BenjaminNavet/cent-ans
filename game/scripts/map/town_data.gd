@@ -1,7 +1,7 @@
 class_name TownData
 extends RefCounted
 
-## Lot ZG6 (ADR 0036) : lecture de `data/map/towns_1340.json` (généré par `cent-ans geo towns`),
+## Lecture de `data/map/towns_1340.json` (généré par `cent-ans geo towns`) (ADR 0036),
 ## emprise vers 1340 des villes ordinaires. Lecture seule, rendu seulement.
 
 
@@ -53,8 +53,8 @@ func extent_units(id: String) -> float:
 	return (r + 80.0) / meters_per_unit
 
 
-## Cercles de finage (x, y, rayon en unités monde) de toutes les villes, pour le parcellaire du
-## lot ZG5b : ce qui est à l'intérieur est le finage (champs) de la ville.
+## Cercles de finage (x, y, rayon en unités monde) de toutes les villes, pour le parcellaire :
+## ce qui est à l'intérieur est le finage (champs) de la ville.
 func finage_zones() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for id in towns:

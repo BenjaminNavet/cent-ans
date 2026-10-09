@@ -2,7 +2,7 @@ class_name VegetationFields
 extends RefCounted
 
 ## Parcellaire partagé entre le shader de terrain (`terrain.gdshader`, fonction `field_at`) et le
-## semis des haies (`VegetationTileJob`), lot V2b. Purement visuel.
+## semis des haies (`VegetationTileJob`). Purement visuel.
 ##
 ## - Deux trames de parcelles (orientations différentes) selon une région lente `layout_at` ;
 ##   la limite entre régions devient un chemin de terre.
@@ -12,7 +12,7 @@ extends RefCounted
 ## - Le shader inverse la déformation par point fixe : mêmes constantes, même hachage entier
 ##   (bits de poids faible identiques en 64 bits GDScript et en `uint` GLSL). Toute modification
 ##   ici doit être reportée dans `terrain.gdshader` et dans le semis natif
-##   (`core/crates/vegetation`, lot PB2, ADR 0062).
+##   (`core/crates/vegetation`, ADR 0062).
 ##
 ## Occupation du sol par province (`landuse`) : image RGBA8 basse résolution floutée, dans le
 ## repère de la carte ; R = part de vigne, G = sécheresse (climat méditerranéen, sud),

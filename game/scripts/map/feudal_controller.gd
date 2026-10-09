@@ -1,7 +1,7 @@
 class_name FeudalController
 extends Node
 
-## Lot FE6 (spec FE § 6) : interface de la féodalité sur la carte de campagne.
+## Interface de la féodalité sur la carte de campagne.
 ## - Menu → « Arbre féodal » (la barre du haut est pleine en 1280 px) et bouton « Arbre féodal… » de
 ##   la section « Féodalité » du panneau de faction : panneau « Arbre féodal » (zone `SIDE_PANEL`), ouvert sur la
 ##   position du joueur — chaîne de ses suzerains, ses vassaux, pastilles d'état (loyal,

@@ -1,7 +1,7 @@
 class_name ParchmentDecor
 extends RefCounted
 
-## Lot CM2 : emplacements des ornements de la mer des portulans (roses des vents, navires,
+## Emplacements des ornements de la mer des portulans (roses des vents, navires,
 ## monstres marins), choisis au démarrage à partir de la distance à la côte (aucune donnée
 ## codée en dur) : roses et monstres au large, navires près des côtes. Purement visuel.
 
@@ -10,7 +10,7 @@ const GRID := 24
 ## Distance à la côte au-delà de laquelle la mer compte comme « large » (px carte).
 const OPEN_SEA_PX := 45.0
 
-## Lot FA6 : ornements réels (Atlas catalan de 1375, domaine public) découpés par
+## Ornements réels (Atlas catalan de 1375, domaine public) découpés par
 ## `tools/cent_ans_tools/parchment_ornaments.py` ; catalogue `data/map/parchment_ornaments.json`.
 const ORNAMENTS_FILE := "map/parchment_ornaments.json"
 const ORNAMENTS_DIR := "res://assets/textures/parchment/"

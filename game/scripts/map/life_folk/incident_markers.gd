@@ -1,7 +1,7 @@
 class_name IncidentMarkers
 extends Node
 
-## Lot FK5a (`docs/design/2026-09-29-carte-vivante-folk.md` § 3.4) : incidents posés sur la carte.
+## Incidents posés sur la carte.
 ## Chaque décision en attente du joueur de présentation `map` (`CampaignSim.get_pending_decisions`,
 ## champs `province`, `presentation`, `expires_in`) reçoit un sceau de cire au-dessus de sa province,
 ## visible à tous les zooms (contrôle d'écran, comme les sites de rencontre CV3), avec le nombre

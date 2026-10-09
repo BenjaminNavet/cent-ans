@@ -5,7 +5,7 @@ extends PanelContainer
 ## (Affichage, Carte, Partie, Son) liés à l'autoload `Settings`, qui persiste chaque
 ## changement dans `user://settings.cfg` et l'applique aussitôt. Échap ou « Fermer » :
 ## signal `closed` (la fenêtre se libère).
-## Lot P2e (ADR 0097, bible DA § 12.1) : rejoint la zone `MODAL` de `UiLayout` dans `_ready`
+## Rejoint la zone `MODAL` de `UiLayout` dans `_ready` (ADR 0097)
 ## (plus de veil ni de `CenterContainer` propres) — vaut pour ses deux points d'ouverture
 ## (`pause_menu.gd`, `flow_controller.gd`, ce dernier hors lot) puisque le rattachement se fait
 ## ici, une seule fois. Tailles par `UiType` ; ouverture et fermeture par `UiMotion`.
@@ -167,7 +167,7 @@ func _build_display(grid: GridContainer) -> void:
 	upscale_labels[0] = "Automatique (%s)" % RenderQuality.upscale_label(RenderQuality.preset_upscale(RenderQuality.preset()))
 	_options(grid, "video/upscale", "Mise à l'échelle", Array(RenderQuality.UPSCALE_CHOICES), upscale_labels,
 		"Calcule l'image 3D en plus petit puis l'agrandit avec MetalFX (puces Apple ; FSR ailleurs) : plus d'images par seconde, image un peu plus douce. Qualité : trois quarts de la définition. Performance : moitié de la définition, pour les machines modestes ou les très grands écrans. Automatique : selon la qualité graphique. L'interface reste nette dans tous les cas.")
-	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
+	# L'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
 	_options(grid, "interface/ui_size", "Taille de l'interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
@@ -239,7 +239,7 @@ func _build_sound(grid: GridContainer) -> void:
 	_check(grid, "voice/barks", "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute.")
 
 
-## Lot U7 + NT6d : disposition du clavier (préréglage), puis liste des actions de l'`InputMap`
+## Disposition du clavier (préréglage), puis liste des actions de l'`InputMap`
 ## avec leur touche, un bouton « Changer » qui capture la prochaine touche (conflit : les deux
 ## actions échangent leur touche, avec avertissement) et « Rétablir par défaut ».
 func _build_controls(grid: GridContainer) -> void:
@@ -361,7 +361,7 @@ func _show_notice(text: String) -> void:
 		_key_notice.visible = text != ""
 
 
-## Lot U12 : mode daltonien, animations réduites, contraste renforcé.
+## Mode daltonien, animations réduites, contraste renforcé.
 func _build_accessibility(grid: GridContainer) -> void:
 	_check(grid, Accessibility.KEY_COLORBLIND, "Mode daltonien",
 		"Ajoute motifs et symboles aux couleurs : carte diplomatique hachurée, relations et moral marqués de symboles.")

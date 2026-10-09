@@ -1,7 +1,7 @@
 class_name LandmarkBackdrop
 extends Node3D
 
-## Toile de fond d'une bataille de siège dans une ville emblématique (lot L1, Paris ; L3 : les sept
+## Toile de fond d'une bataille de siège dans une ville emblématique (Paris ; L3 : les sept
 ## villes) : la ville assiégée vient du cœur (depuis L3, tirée du plan : enceinte, portes, rues ;
 ## ADR 0026), ce qui est au-delà de sa muraille du fond est posé derrière elle à l'échelle réelle —
 ## à Paris la Seine, l'île de la Cité avec Notre-Dame et la rive droite ; à Londres la Tamise, le

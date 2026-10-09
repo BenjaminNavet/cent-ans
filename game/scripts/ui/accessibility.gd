@@ -1,7 +1,7 @@
 class_name Accessibility
 extends RefCounted
 
-## Lot U12 (audit A3 § 6) : lecture des réglages d'accessibilité (onglet « Accessibilité » des
+## Lecture des réglages d'accessibilité (onglet « Accessibilité » des
 ## réglages, autoload `Settings`) et petits outils partagés : motifs du mode daltonien, symboles
 ## de relation et de moral, encre renforcée du mode contrasté. Aucune règle de jeu.
 

@@ -1,7 +1,7 @@
 class_name MapBirdFlocks
 extends Node3D
 
-## Lot ME3 (chantier DN) : oiseaux de la carte de campagne, plusieurs espèces et comportements
+## Oiseaux de la carte de campagne, plusieurs espèces et comportements
 ## (rendu seulement). Tout vient de `data/map/map_birds.json` (espèces, habitats par biome /
 ## côte / zone humide / ville / altitude, saisons) ; un `MultiMesh` par espèce, mouvement et
 ## battement d'ailes dans `life_birds.gdshader`. Comportements : `orbit` (tourne autour d'un

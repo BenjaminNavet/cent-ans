@@ -1,7 +1,7 @@
 class_name RegionLabels
 extends Control
 
-## Lot TB2 : noms de région discrets en vue moyenne (ils n'existaient qu'en vue stratégique). Même
+## Noms de région discrets en vue moyenne (ils n'existaient qu'en vue stratégique). Même
 ## source que le parchemin (`ParchmentOverlay.province_names`, ADR 0124) : nom court et centroïde de
 ## chaque province, les plus vastes d'abord. Italique espacée, pâle, sans écu ni cadre ; un nom ne
 ## s'affiche que s'il tient entier dans l'écran et ne touche ni un nom de ville ni un autre nom de

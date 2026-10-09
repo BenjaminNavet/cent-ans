@@ -1,7 +1,7 @@
 class_name GroundClutter
 extends Node3D
 
-## Lot FC3 : touffes d'herbe et broussailles proches de la caméra sur la carte de campagne.
+## Touffes d'herbe et broussailles proches de la caméra sur la carte de campagne.
 ##
 ## - Cellules de `cell_size` unités (plus fines que les tuiles de terrain de 256 : une tuile
 ##   entière ferait des centaines de milliers de touffes) semées autour du point visé, un
@@ -19,14 +19,14 @@ extends Node3D
 ##   du disque visible. Au-delà, la texture du terrain suffit.
 ## - Recalage sur la surface affichée : cellules touchées par `chunk_surface_changed` /
 ##   `surface_rect_changed` re-posées (hauteurs seules) par tranches.
-## - Lot GA3-L2 : touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
+## - Touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
 ##   (3 variantes × 3 niveaux de détail) sur roche/lande, pentes et reliefs : un `MultiMesh`
 ##   enfant de celui de la cellule (même visibilité, même éviction), variante tirée par cellule,
 ##   niveau de détail commun choisi par la distance caméra.
 ## Purement visuel : aucune règle de jeu.
 
 const SHADER := preload("res://shaders/ground_clutter.gdshader")
-## Lot FC5 : touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
+## Touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
 const GRASS_TEXTURE := "res://assets/textures/vegetation/campaign_grass_tuft.png"
 const FLOATS_PER_INSTANCE := 16
 ## TX T3 (ADR 0241) : part des touffes d'herbe remplacées par une carte de plante du biome
@@ -55,14 +55,14 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 ## (avant : 0,18 / 0,42 unité de carte réduites par le shader, ~45 / 110 m près du sol).
 @export var grass_height_m: float = 0.6
 @export var bush_height_m: float = 1.8
-## Lot FC6 : au zoom rapproché (d < `close_distance`), part des candidats semés jusqu'à
+## Au zoom rapproché (d < `close_distance`), part des candidats semés jusqu'à
 ## ×`close_boost` (sans nouveau semis) ; `far_share` à d ≥ 2 × `close_distance`.
 @export var close_distance: float = 0.8
 @export var close_boost: float = 1.5
-## Lot L5 : part affichée à d ≥ 2 × `close_distance`.
+## Part affichée à d ≥ 2 × `close_distance`.
 @export var far_share: float = 0.62
 ## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
-## Lot FC6 : une seule cellule posée par image (le semis et les hauteurs sont faits dans le
+## Une seule cellule posée par image (le semis et les hauteurs sont faits dans le
 ## `WorkerThreadPool` ; le fil principal ne crée que le MultiMesh).
 @export var max_cells_per_frame: int = 1
 @export var max_concurrent_jobs: int = 4
@@ -71,7 +71,7 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
-## Lot GA3-L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur réelle
+## L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur réelle
 ## (VT3, mètres, × 0,45-1,4, un sur huit × 1,8), distances caméra des niveaux de détail
 ## 120 → 60 → 18 triangles.
 @export var use_rocks: bool = true
@@ -473,7 +473,7 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 	return seeded
 
 
-## Lot GA3-L2 : probabilité de rocher au point (x, y) : roche/lande de la splatmap (canal A),
+## L2 : probabilité de rocher au point (x, y) : roche/lande de la splatmap (canal A),
 ## pente, altitude et terrain de province (montagnes, collines) ; moins sous la forêt.
 func _rock_weight(x: float, y: float, forest: float) -> float:
 	if rock_sampler.is_valid():
@@ -490,7 +490,7 @@ func _rock_weight(x: float, y: float, forest: float) -> float:
 	return clampf(rock, 0.0, 0.85) * (1.0 - forest * 0.7)
 
 
-## Lot GA3-L2 : semis des rochers d'une cellule (flux aléatoire propre : le semis des touffes
+## L2 : semis des rochers d'une cellule (flux aléatoire propre : le semis des touffes
 ## est inchangé). Une variante par cellule ; lacet, échelle anisotrope, pied au sol.
 func _seed_rocks(key: Vector2i, rect: Rect2, forest: PackedFloat32Array, circles: PackedVector3Array) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -585,7 +585,7 @@ func _excluded(p: Vector2, circles: PackedVector3Array) -> bool:
 	return false
 
 
-## Lot FC6 : source de hauteurs lisible depuis un fil de travail, prise sur le fil principal :
+## Source de hauteurs lisible depuis un fil de travail, prise sur le fil principal :
 ## instantané des pages du quadtree qui touchent `rect` (octets partagés en copie sur écriture),
 ## sinon {} (échantillonneur de test ou heightmap de la carte, lus directement).
 func _height_source(rect: Rect2) -> Dictionary:
@@ -611,7 +611,7 @@ func _heights_from(points: PackedVector2Array, source: Dictionary) -> PackedFloa
 	return result
 
 
-## Lot FC6 (fil de travail) : pose les touffes semées sur la surface, bornes verticales.
+## Pose les touffes semées sur la surface, bornes verticales.
 func _ground_seeded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 	var points: PackedVector2Array = seeded.get("points", PackedVector2Array())
 	var buffer: PackedFloat32Array = seeded.get("buffer", PackedFloat32Array())
@@ -642,7 +642,7 @@ func _ground_seeded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 	return seeded
 
 
-## Lot FC6 : recalages (surface affichée changée) dans le `WorkerThreadPool` ; au plus une
+## Recalages (surface affichée changée) dans le `WorkerThreadPool` ; au plus une
 ## cellule remplacée par image sur le fil principal.
 func _update_regrounds() -> void:
 	for key: Vector2i in _ground_jobs.keys():
@@ -714,7 +714,7 @@ func _reground_cell(key: Vector2i, source: Dictionary = {}) -> void:
 		_set_rock_buffer(rocks, _regrounded(rocks["points"], rocks["buffer"], source, 0.0))
 
 
-## Lot GA3-L2 : MultiMesh des rochers d'une cellule (boîte de la cellule, pas de relecture GPU).
+## L2 : MultiMesh des rochers d'une cellule (boîte de la cellule, pas de relecture GPU).
 static func _rock_multimesh(mesh: Mesh, buffer: PackedFloat32Array, aabb: AABB) -> MultiMesh:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -734,7 +734,7 @@ func _set_rock_buffer(rocks: Dictionary, buffer: PackedFloat32Array) -> void:
 		rock_mmi.multimesh.buffer = buffer
 
 
-## Lot GA3-L2 : niveau de détail commun des rochers (MultiMesh recréés depuis la copie processeur,
+## L2 : niveau de détail commun des rochers (MultiMesh recréés depuis la copie processeur,
 ## comme `Vegetation._with_mesh` : changer `mesh` après `buffer` relirait le tampon au GPU).
 func _update_rock_lod(lod: int) -> void:
 	if lod == _rock_lod or _rock_meshes.is_empty():

@@ -1,7 +1,7 @@
 class_name SettlementController
 extends Node
 
-## Lot C5 : interface des colonies sur la carte de campagne. Rendu, UI et entrées seulement ;
+## Interface des colonies sur la carte de campagne. Rendu, UI et entrées seulement ;
 ## toute règle vient de `CampaignSim` :
 ## - panneau de colonie (`SettlementPanel`) ouvert par `SettlementLayer.settlement_selected`
 ##   ou par l'onglet « Colonies » du panneau de province (qui centre aussi la caméra) ;
@@ -94,7 +94,7 @@ func open_settlement(id: String, focus: bool = false) -> void:
 	_opening = false
 
 
-## Lot C7b : décalage du point visé pour que la colonie centrée apparaisse au milieu de la
+## Décalage du point visé pour que la colonie centrée apparaisse au milieu de la
 ## partie de l'écran laissée libre à gauche du panneau (même échelle que le glisser de la caméra).
 func _panel_shift(distance: float) -> Vector3:
 	var view: Vector2 = map.get_viewport().get_visible_rect().size

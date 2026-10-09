@@ -6,7 +6,7 @@ extends Control
 ## fichier, un texte intégré. Markdown simple converti en BBCode (titres, listes, gras,
 ## italique, liens réduits à leur texte). Molette ou glisser : défilement manuel.
 ## Échap ou « Retour » : signal `closed`.
-## Lot P2e (ADR 0097, bible DA § 12.1/12.2) : `self` reste un `Control` plein écran, seul hôte du
+## `self` reste un `Control` plein écran, seul hôte du (ADR 0097)
 ## fond illustré voilé (`MenuBackground`, propre à cet écran — la zone `MODAL` ne fournit qu'un
 ## voile uni) ; le cadre du parchemin (`_panel`, ex-`CenterContainer` + `PanelContainer`) rejoint
 ## lui la zone `MODAL` de `UiLayout`. Tailles par `UiType` (titre, bouton) et par la même échelle

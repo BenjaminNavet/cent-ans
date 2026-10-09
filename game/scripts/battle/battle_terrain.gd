@@ -1,7 +1,7 @@
 class_name BattleTerrain
 extends Node3D
 
-## Champ de bataille maillé depuis `BattleSim.get_terrain()` (lot V4, rendu semi-réaliste) :
+## Champ de bataille maillé depuis `BattleSim.get_terrain()` (rendu semi-réaliste) :
 ## - sol texturé (shader `battle_ground`, 9 couches PBR Poly Haven) piloté par une splatmap cuite
 ##   ici (sous-bois, chemins, boue, galets du lit et des gués, berges humides) ;
 ## - anneaux de terrain autour du champ (proche à 20 m, lointain à 200 m) : collines qui montent
@@ -12,7 +12,7 @@ extends Node3D
 ## Rendu seulement : relief, zones, rivière et gués viennent de la simulation ; chemins, parcelles
 ## et bois hors du champ sont décoratifs.
 ##
-## Lot B5 (champ tiré de la campagne) : le terrain de la province règle la densité des bois, le relief
+## Le terrain de la province règle la densité des bois, le relief
 ## et les bois de l'horizon (`BIOMES`), la saison la teinte des feuillages, le sol (`ground`) la neige
 ## ou la boue ; haies des courtils et du bocage semées avec les buissons (et chênes têtards), fossés,
 ## mares et plage cuits dans la splatmap ; clôtures, palissades, mares, roseaux et mer
@@ -25,7 +25,7 @@ extends Node3D
 ## `BattleTerrainSplat` (textures cuites, matériau), `BattleTerrainMesh` (sol, anneaux, rivière),
 ## `BattleTerrainScatter` (arbres, haies, rochers, décor) ; l'état et les requêtes restent ici.
 ##
-## Lot EP3 (eau et chemins) : rivière de largeur variable (`river.widths`), berges escarpées ou
+## Rivière de largeur variable (`river.widths`), berges escarpées ou
 ## marécageuses, affluent et ruisseaux (rubans d'eau étroits), gués caillouteux (galets et pierres
 ## affleurantes), ponts du kit Blender (`BattleBridges`), routes de la simulation (`roads`)
 ## prolongées hors du champ (ornières et bas-côtés dans la splatmap).
@@ -323,7 +323,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	season_key = str(terrain.get("season", "summer"))
 	ground_key = str(terrain.get("ground", "dry"))
 	woodland = float(terrain.get("woodland", 0.5))
-	# Lot TF : colombage ou enduit/pierre selon la région de la province.
+	# Colombage ou enduit/pierre selon la région de la province.
 	BuildingKit.region_style = BuildingRegions.style_for_province(province_id)
 	Ga3Kit.active = true
 	ground_key = CmdArgs.value("--ground", ground_key)  # rendu seulement, comme --weather=

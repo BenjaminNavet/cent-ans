@@ -1,16 +1,16 @@
 class_name MinimapController
 extends Node
 
-## Minicarte et brouillard de guerre de la carte de campagne (lot C1).
+## Minicarte et brouillard de guerre de la carte de campagne.
 ##
 ## - Minicarte (`CampaignMinimap`) posée dans `MapUI` (placement : `MapUI.layout_hud`, en haut à
 ##   droite sous la barre, lettres scellées dessous) ; clic ou glisser = recentre la caméra par son
 ##   API publique (`CampaignCamera.look_at_point`) ; cadre de la vue suivi à chaque image.
 ## - Brouillard : la portée de vue est une règle de jeu, calculée par la simulation ; ici on ne
-##   fait qu'afficher. Lot M5a : vue par case (`CampaignSim.get_vision` : texture R8 512², bords
+##   fait qu'afficher. Vue par case (`CampaignSim.get_vision` : texture R8 512², bords
 ##   doux, provinces visibles, armées vues ; rayons dans `data/movement/rules.json`) ; le terrain et
 ##   la minicarte voilent ce qui n'est pas vu, les armées étrangères hors de vue n'ont ni marqueur
-##   ni point. Repli sans `get_vision` : masque par province (`get_visible_provinces`, lot C1).
+##   ni point. Repli sans `get_vision` : masque par province (`get_visible_provinces`).
 ##   Réglage `map/fog_of_war` (menu Réglages, onglet Carte). Sans getter, pas de brouillard.
 ##
 ## `campaign_map.gd` n'appelle que `setup`, `refresh_fog` (avant les marqueurs d'armée),
@@ -22,15 +22,15 @@ var map: Node = null  # CampaignMap
 var minimap: CampaignMinimap = null
 ## Provinces vues par le joueur (id → true) ; vide quand le brouillard est inactif.
 var visible_provinces: Dictionary = {}
-## Lot M5a : armées montrées au joueur (id → true) ; vide quand le brouillard est inactif.
+## Armées montrées au joueur (id → true) ; vide quand le brouillard est inactif.
 var visible_armies: Dictionary = {}
-## Lot M5a : vrai quand la vue vient de la texture par case (`get_vision`).
+## Vrai quand la vue vient de la texture par case (`get_vision`).
 var fog_by_cell: bool = false
-## Lot M5a : dernière texture de vue (tests, captures) et part de la carte vue.
+## Dernière texture de vue (tests, captures) et part de la carte vue.
 var fog_texture: ImageTexture = null
 var seen_share: float = 0.0
 var fog_active: bool = false
-## Lot UX1 : légende de la carte (créée à la première ouverture).
+## Légende de la carte (créée à la première ouverture).
 var legend: MapLegend = null
 
 
@@ -44,7 +44,7 @@ func setup(campaign_map: Node) -> void:
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
-	# Lot C5 : le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
+	# Le bouton « Commerce » quitte la barre du haut pour la rangée des modes.
 	var trade_button: Button = ui.get("trade_button")
 	if trade_button != null:
 		minimap.add_layer_button(trade_button)
@@ -57,7 +57,7 @@ func setup(campaign_map: Node) -> void:
 	ui.call("queue_layout")
 
 
-# --- Légende de la carte (lot UX1) ------------------------------------------------------
+# --- Légende de la carte ------------------------------------------------------
 
 
 ## Ouvre ou ferme la légende (panneau posé à gauche de la minicarte).
@@ -213,7 +213,7 @@ func refresh() -> void:
 		var faction := str(army.get("faction", ""))
 		if not is_army_visible(str(army_id), army):
 			continue
-		# Lot M5a : le point suit la position libre de l'armée (M2), à défaut sa province.
+		# Le point suit la position libre de l'armée (M2), à défaut sa province.
 		var centroid: Vector2 = army.get("position", Vector2(-1.0, -1.0))
 		if centroid.x < 0.0:
 			centroid = map_data.centroid_of_id(str(army.get("location_province", army.get("location", ""))))

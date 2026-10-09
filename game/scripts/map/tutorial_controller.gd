@@ -13,7 +13,7 @@ extends Node
 ##
 ## Encyclopédie : touche L ou Menu → Encyclopédie. Menu → Tutoriel relance le guide.
 ##
-## Lot UX2 (U15) : « Plus tard » range le guide (`postpone`, réglage `tutorial/postponed`) ;
+## « Plus tard » range le guide (`postpone`, réglage `tutorial/postponed`) ;
 ## il reprend à la même étape (`resume`) par le conseil « que faire maintenant », l'aide (F1)
 ## ou Menu → Tutoriel. Le sommaire du parchemin mène à n'importe quelle étape (`jump_to`).
 ## Aucune règle de jeu : lecture de l'état seulement.
@@ -437,7 +437,7 @@ func _army_orders() -> Dictionary:
 	return result
 
 
-## Lieu d'une armée pour le tutoriel : colonie, et position libre (lot M4 : une marche courte
+## Lieu d'une armée pour le tutoriel : colonie, et position libre (une marche courte
 ## peut laisser l'armée près de la même colonie).
 static func _army_place(army: Dictionary) -> String:
 	return "%s@%s" % [army.get("location", ""), army.get("position", "")]

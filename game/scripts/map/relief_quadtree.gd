@@ -1,13 +1,13 @@
 class_name ReliefQuadtree
 extends Node3D
 
-## Quadtree de relief streamé (chantier ZG, lot ZG2, ADR 0036). Il dessine tout le terrain de
+## Quadtree de relief streamé (chantier ZG, ADR 0036). Il dessine tout le terrain de
 ## campagne ; la pyramide de relief est obligatoire (ADR 0203). Les morceaux E0 de `TerrainBuilder`
 ## ne servent plus qu'à la vue parchemin et aux bornes.
 ##
 ## - Arbre : nœud (n, col, row) de côté `DEPTH0_UNITS / 2^n` (4096 / 2^n) aligné sur la grille
 ##   des tuiles de la pyramide (étage L = n − 4 : un nœud de profondeur 4 est une tuile E0 de 256
-##   unités). Racines (lot OM1, ADR 0115) : grille de nœuds à la profondeur `_root_depth`, la plus
+##   unités). Racines (ADR 0115) : grille de nœuds à la profondeur `_root_depth`, la plus
 ##   petite dont le côté divise la largeur et la hauteur du monde (4096² : une racine, profondeur 0 ;
 ##   7168 × 6144 : 7 × 6 racines de 1024). Profondeur maximale : étage de données le plus
 ##   fin sous le nœud + `extra_depth` (au-delà, les sommets suréchantillonneraient la page).
@@ -68,7 +68,7 @@ const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_f
 var shadow_cast_distance: float = INF
 
 var pyramid: ReliefPyramid
-## Lot ZG5b : objet optionnel dont `carve_job(key) -> Object` (sur le fil principal) rend une
+## Objet optionnel dont `carve_job(key) -> Object` (sur le fil principal) rend une
 ## tâche `apply(bytes) -> PackedByteArray` exécutée dans un fil avant le téléversement de la page
 ## (lit des fleuves fins, `FineBedCarver`), ou null.
 var page_filter: Object = null
@@ -186,7 +186,7 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	material.set_shader_parameter("qt_page_h_range", pyramid.height_range_m)
 
 
-## Pyramide, grille des racines (lot OM1, ADR 0115) et bornes des morceaux E0.
+## Pyramide, grille des racines (ADR 0115) et bornes des morceaux E0.
 func _set_world(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void:
 	pyramid = relief
 	_bounds = chunk_bounds
@@ -195,7 +195,7 @@ func _set_world(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void
 	_root_depth = root_depth(_root_cols, _root_rows)
 
 
-## Tests (lot OM1) : sélection seule, sans pages ni matériau.
+## Tests : sélection seule, sans pages ni matériau.
 func setup_selection(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void:
 	_set_world(relief, chunk_bounds)
 	_chunk_top.resize(_root_cols * _root_rows)
@@ -356,7 +356,7 @@ static func root_depth(cols: int, rows: int) -> int:
 	return DEPTH_E0
 
 
-## Lot ZG4 : l'échelle verticale a changé ; les boîtes englobantes des nœuds affichés (hauteurs
+## L'échelle verticale a changé ; les boîtes englobantes des nœuds affichés (hauteurs
 ## monde) sont remises à l'échelle (les nouveaux nœuds lisent directement la nouvelle échelle).
 func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
@@ -887,7 +887,7 @@ class PageJob:
 	var image: Image
 	var decode_ms: float = 0.0
 	var ok: bool = false
-	## Lot ZG5b : retouche des octets (lit creusé) dans un fil, puis image refaite.
+	## Retouche des octets (lit creusé) dans un fil, puis image refaite.
 	var filter: Object = null
 	## ZG7a : creusement déjà demandé (ou page sans lit) : pas de second passage.
 	var filter_checked: bool = false

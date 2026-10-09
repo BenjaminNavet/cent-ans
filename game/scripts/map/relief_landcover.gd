@@ -1,7 +1,7 @@
 class_name ReliefLandcover
 extends RefCounted
 
-## Lot R1 (ADR 0019) : rasters de relief fin et de zones humides du shader de terrain
+## Rasters de relief fin et de zones humides du shader de terrain (ADR 0019)
 ## (`game/shaders/relief_landcover.gdshaderinc`), produits hors ligne par
 ## `uv run --project tools cent-ans geo relief-shade` et `cent-ans geo landcover`.
 ## Rendu seulement ; fichiers optionnels (le shader garde son rendu V2 sans eux).
@@ -14,7 +14,7 @@ extends RefCounted
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides. OMR-R2 : copie BC1
 ##   `map.json.wetlands_gpu` lue en priorité (22 Mo au lieu de 126).
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
-##   des forêts (lot V4), comme `splat.png`.
+##   des forêts, comme `splat.png`.
 ##
 ## Le décodage (≈ 1 s pour le PNG 8192² et ses mipmaps) se fait dans `WorkerThreadPool` : le
 ## terrain s'affiche aussitôt, les textures sont posées sur le matériau à la frame suivante la

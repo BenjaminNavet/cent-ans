@@ -1,7 +1,7 @@
 class_name LandmarkPlan
 extends RefCounted
 
-## Lot VH4 (ADR 0078) : plan 1:1 d'une ville emblématique (format v2, `LandmarkV2Library`).
+## Plan 1:1 d'une ville emblématique (format v2, `LandmarkV2Library`) (ADR 0078).
 ## Calcul pur et déterministe (graine de la ville), exécutable dans un fil de travail. Sortie au
 ## format de `TownPlan.generate` (rues drapées, parcelles et maisons, murailles, tours, portes,
 ## pont, arbres, sol) que `TownBuilder` construit, plus :

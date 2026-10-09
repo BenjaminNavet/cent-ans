@@ -6,7 +6,7 @@ extends Node3D
 ## (appelé après chaque fin de tour ou ordre) ; `pick_screen` renvoie l'armée sous le
 ## curseur (priorité sur la province).
 ##
-## Lot V3 : chaque armée a une plaque d'effectif 2D (cartouche parchemin : écu de la faction,
+## Chaque armée a une plaque d'effectif 2D (cartouche parchemin : écu de la faction,
 ## nombre d'hommes, état « en marche » / « siège » / « à bord »), de taille constante à l'écran,
 ## posée au-dessus de l'étendard (couche `PLATE_LAYER`, sous l'interface).
 
@@ -24,10 +24,10 @@ const PLATE_LAYER := 0
 var map_data: MapData
 var camera: Camera3D
 var selected_army: String = ""
-## Brouillard (lot C1) : provinces hors de vue (id → true) ; les armées étrangères qui s'y
+## Brouillard : provinces hors de vue (id → true) ; les armées étrangères qui s'y
 ## trouvent ne reçoivent pas de marqueur. Rempli par `MinimapController.refresh_fog`.
 var hidden_provinces: Dictionary = {}
-## Lot M5a : armées montrées au joueur (id → true, vue par case de la simulation). Quand
+## Armées montrées au joueur (id → true, vue par case de la simulation). Quand
 ## `army_filter_active`, ce filtre remplace `hidden_provinces` pour les armées : une armée
 ## étrangère n'a de marqueur que si son point est vu.
 var visible_armies: Dictionary = {}
@@ -44,10 +44,10 @@ var settlement_position: Callable = Callable()
 var settlement_radius: Callable = Callable()
 ## SA : armée sous le curseur ("" = aucune).
 var hovered_army: String = ""
-## Lot UX1 (A3 C8) : noms de ville à éviter, `func(camera: Camera3D) -> Array[Rect2]` (rectangles
+## Noms de ville à éviter, `func(camera: Camera3D) -> Array[Rect2]` (rectangles
 ## écran), posé par la carte ; les plaques s'en écartent (`LabelPlacer`).
 var label_obstacles: Callable = Callable()
-## Lot ZG4 : surface affichée (`TerrainBuilder.surface_height_at`) quand le relief streamé est
+## Surface affichée (`TerrainBuilder.surface_height_at`) quand le relief streamé est
 ## actif ; à défaut, heightmap 4096 (`MapData.surface_world_at`).
 var ground_height: Callable = Callable()
 
@@ -56,11 +56,11 @@ var _homes: Dictionary = {}  # army_id → position de base issue de la simulati
 var _plates: Dictionary = {}  # army_id → PanelContainer
 var _plate_layer: CanvasLayer
 var _current_scale: float = 1.0
-## Lot CV2 : paliers de zoom (fondu des figurines au palier « loin ») et dernière distance.
+## Paliers de zoom (fondu des figurines au palier « loin ») et dernière distance.
 var _zoom_tiers: ZoomTiers
 var _camera_distance: float = -1.0
 var _layout := ArmyPlateLayout.new()
-## Lot UX1 : placement des plaques hors des noms de ville et des autres plaques.
+## Placement des plaques hors des noms de ville et des autres plaques.
 
 
 func setup(data: MapData, view_camera: Camera3D) -> void:
@@ -105,7 +105,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 					continue
 			elif hidden_provinces.has(location):
 				continue
-		# Lot M4 : une armée en campagne se tient à sa position libre ; seules les armées
+		# Une armée en campagne se tient à sa position libre ; seules les armées
 		# stationnées dans une colonie s'empilent sur celle-ci.
 		var in_field := army.has("position") and str(army.get("settlement", "")) == ""
 		var centroid := Vector2(-1.0, -1.0)
@@ -191,7 +191,7 @@ static func _signature(army: Dictionary, color: Color, player: bool) -> String:
 ## Direction d'avance (coordonnées carte) : vers la prochaine étape du chemin, sinon un
 ## trois-quarts vers le sud-est (lisible avec la caméra par défaut).
 func _heading(army: Dictionary, from: Vector2) -> Vector2:
-	# Lot M4 : prochain coin du trajet libre en cours.
+	# Prochain coin du trajet libre en cours.
 	var planned: PackedVector2Array = army.get("planned_path", PackedVector2Array())
 	if not planned.is_empty() and planned[0].distance_to(from) > 0.5:
 		return (planned[0] - from).normalized()
@@ -295,13 +295,13 @@ func pick_screen_scored(screen_position: Vector2, exclude: String = "") -> Dicti
 	return ArmyPicker.pick_scored(camera, _markers, _plates, screen_position, exclude)
 
 
-## Lot M4 (animation) : pose le marqueur de `army_id` au point carte `point`, tourné vers
+## Pose le marqueur de `army_id` au point carte `point`, tourné vers
 ## `heading` ; `point.x < 0` le remet à sa position issue de la simulation.
 func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZERO) -> void:
 	var marker: ArmyMarker = _markers.get(army_id)
 	if marker == null:
 		return
-	# Lot CV2 : les figurines marchent pendant l'animation du déplacement.
+	# Les figurines marchent pendant l'animation du déplacement.
 	marker.set_walking(point.x >= 0.0)
 	# SA : l'écart à la ville est suspendu pendant la marche (trajet réel), repris à l'arrivée.
 	marker.set_standoff_enabled(point.x < 0.0)
@@ -314,7 +314,7 @@ func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZE
 		marker.face(heading.normalized())
 
 
-## Lot CV3-4 : point du monde au sol d'un point carte (pixels, convention de `position` des
+## Point du monde au sol d'un point carte (pixels, convention de `position` des
 ## armées) — sites de rencontre posés comme les armées.
 func world_at_pixel(p: Vector2) -> Vector3:
 	return to_global(Vector3(p.x, _ground(p), p.y))
@@ -327,7 +327,7 @@ func _ground(p: Vector2) -> float:
 	return map_data.surface_world_at(p.x, p.y)
 
 
-## Lot ZG4 : repose tous les marqueurs sur le sol (échelle verticale changée, pages de relief
+## Repose tous les marqueurs sur le sol (échelle verticale changée, pages de relief
 ## arrivées) ; quelques dizaines d'appels à `surface_height_at`, bon marché.
 func reground() -> void:
 	for army_id: String in _markers:
@@ -367,7 +367,7 @@ func update_scale(camera_distance: float) -> void:
 		marker.apply_scale(_current_scale)
 
 
-## Lot CV2 / DV : présence des figurines (1 en vue normale, 0 sur le parchemin, fondu sur la
+## Présence des figurines (1 en vue normale, 0 sur le parchemin, fondu sur la
 ## bande de `ZoomTiers.strategic_weight`) ; au loin restent l'étendard et la plaque.
 func figure_weight(camera_distance: float) -> float:
 	if _zoom_tiers == null:

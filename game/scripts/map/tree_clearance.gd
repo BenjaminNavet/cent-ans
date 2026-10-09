@@ -1,7 +1,7 @@
 class_name TreeClearance
 extends RefCounted
 
-## Lot HC1 (ADR 0161) : dégagements des arbres généralisés. Un arbre grossi (houppier d'environ
+## Dégagements des arbres généralisés. Un arbre grossi (houppier d'environ (ADR 0161)
 ## une demi-unité de rayon) ne doit pas déborder sur l'eau ni sur une route principale : après le
 ## semis (natif ou GDScript, qui n'écarte que le pied des arbres), les instances dont le houppier
 ## touche un fleuve, un lac (`data/map/lakes.json`), la mer ou une eau raster (`coast_dist.png`) ou dont le pied est

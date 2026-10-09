@@ -1,7 +1,7 @@
 class_name BattleResultScreen
 extends Control
 
-## Écran de fin de bataille (lot B2 / T2, refait par UB1) : grande bannière
+## Écran de fin de bataille (refait par UB1) : grande bannière
 ## illustrée « Victoire », « Défaite » ou « Victoire à la Pyrrhus » avec le verdict nuancé, bilan
 ## chiffré, puis pour chaque camp les régiments en cartes (`RosterCard` : pertes, ennemis abattus,
 ## héros) et un tableau par régiment (engagés, pertes, tués, sort) ; ensuite le héros de la
@@ -181,7 +181,7 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	mentions_box = VBoxContainer.new()
 	mentions_box.name = "Mentions"
 	mentions_box.add_theme_constant_override("separation", 1)
-	# VN lot 3 : les faits notables ont leur propre défilement au-delà de `MENTIONS_MAX_HEIGHT`, pour
+	# Les faits notables ont leur propre défilement au-delà de `MENTIONS_MAX_HEIGHT`, pour
 	# que les cartes des régiments restent visibles à l'ouverture (1080p compris).
 	mentions_scroll = ScrollContainer.new()
 	mentions_scroll.name = "MentionsScroll"

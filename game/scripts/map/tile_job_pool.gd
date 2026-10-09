@@ -1,7 +1,7 @@
 class_name TileJobPool
 extends RefCounted
 
-## File de tâches de tuiles dans le `WorkerThreadPool` (lot SC PF-12) : une entrée par clé
+## File de tâches de tuiles dans le `WorkerThreadPool` : une entrée par clé
 ## (tuile, cellule, page…), un identifiant de tâche et une charge (le « job » ou le dictionnaire
 ## de résultat que la tâche remplit). Les résultats sont repris sur le fil principal, qui attend
 ## chaque tâche exactement une fois (un identifiant attendu n'est plus valide).

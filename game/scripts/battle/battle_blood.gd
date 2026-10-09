@@ -1,7 +1,7 @@
 class_name BattleBlood
 extends Node3D
 
-## Sang au sol (lot BV1, idée du joueur), rendu seulement, piloté par l'état de la simulation :
+## Sang au sol (idée du joueur), rendu seulement, piloté par l'état de la simulation :
 ## - gerbes à l'impact (particules GPU, pool fixe) : touches des volées (`BattleVolleys`, pertes
 ##   rapportées par le cœur) et pertes en mêlée (baisse des effectifs d'un régiment au contact) ;
 ## - flaques qui s'étalent, éclaboussures et traînées : décalques persistants posés à plat sur le
@@ -9,7 +9,7 @@ extends Node3D
 ##   traînées derrière les régiments qui fuient après de lourdes pertes.
 ## Réglage « Sang » (`Settings`, `battle/blood`) : 0 désactivé, 1 modéré (gerbes discrètes,
 ## flaques plus petites), 2 complet (gerbes, flaques, éclaboussures, traînées).
-## Le sang SUR les figurines, les chutes et les démembrements relèvent du lot suivant (BV2).
+## Le sang SUR les figurines, les chutes et les démembrements relèvent d'un autre module (voir `BattleSoldiers`).
 
 const DECAL_SHADER := preload("res://shaders/battle_blood_decal.gdshader")
 

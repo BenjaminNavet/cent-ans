@@ -1,7 +1,7 @@
 class_name BattleBridges
 extends Node3D
 
-## Lot EP3 : ponts du champ de bataille, d'après `BattleSim.get_terrain()["bridges"]` (position,
+## Ponts du champ de bataille, d'après `BattleSim.get_terrain()["bridges"]` (position,
 ## lacet, longueur, largeur du tablier, largeur de l'eau franchie, hauteur du tablier, pierre ou
 ## bois). Assemblés avec les pièces du kit Blender (`building_kit.py`, même atlas que les maisons) :
 ## travées répétées au-dessus de l'eau (arches de pierre ou palées de pieux), culées en rampe sur

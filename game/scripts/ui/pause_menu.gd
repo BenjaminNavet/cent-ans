@@ -6,7 +6,7 @@ extends Control
 ## pendant que le menu est ouvert ; ce nœud et ses fenêtres tournent en `PROCESS_MODE_ALWAYS`.
 ## Quitter ou revenir au menu avec une partie non sauvegardée demande confirmation
 ## (`unsaved_turns` > 0 : tours joués depuis la dernière sauvegarde, auto comprise).
-## Lot P2e (ADR 0097, bible DA § 12.1) : `self` reste un `Control` coordinateur sans voile ni
+## `self` reste un `Control` coordinateur sans voile ni (ADR 0097)
 ## taille propres ; `_menu_panel`, `_confirm_panel` et l'instance locale de `SaveLoadDialog`
 ## (celle créée ici, pas celles de `start_menu.gd`/`map_ui.gd`, hors lot) rejoignent
 ## individuellement la zone `MODAL` de `UiLayout`, qui fournit le voile commun (un seul tant que

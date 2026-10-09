@@ -1,7 +1,7 @@
 class_name ReliefFloor
 extends RefCounted
 
-## Lot ZG8 (ADR 0036) : fond de vallée lissé de la carte de campagne, base du relief exagéré
+## Fond de vallée lissé de la carte de campagne, base du relief exagéré (ADR 0036)
 ## (`MapData.display_height`). Grille basse résolution calculée une fois au chargement :
 ## 1. par cellule de `floor_cell_px` pixels (8 px = 5,75 km), minimum des altitudes échantillonnées
 ##    tous les `floor_sample_step` pixels, altitudes bornées à 0 (la mer ne creuse pas le fond :

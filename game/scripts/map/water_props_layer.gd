@@ -1,7 +1,7 @@
 class_name WaterPropsLayer
 extends Node3D
 
-## Lot DN-FLEUVE : décors de rive en glb générés (rendu seulement) : moulins à eau sur les berges
+## Décors de rive en glb générés (rendu seulement) : moulins à eau sur les berges
 ## des lieux qui en ont un (`bld_water_mill`), jetées, grues et navires amarrés des ports,
 ## chantiers navals, épaves. Règles et modèles : `data/art/dn_water_models.json` (`DnWaterModels`).
 ## Un `MultiMesh` par modèle et par tuile de `TILE` unités (portée de visibilité par tuile, comme

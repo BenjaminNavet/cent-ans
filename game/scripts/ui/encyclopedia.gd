@@ -362,7 +362,7 @@ func build_entries() -> void:
 		_entries[tab_id] = rows
 
 
-## Lot U11 : vue intégrée à la fenêtre `CodexHub` (onglet « Règles ») : sans cadre, titre,
+## Vue intégrée à la fenêtre `CodexHub` (onglet « Règles ») : sans cadre, titre,
 ## recherche ni bouton de fermeture propres (ceux de la fenêtre commune les remplacent).
 var embedded := false
 var _window_panel: PanelContainer

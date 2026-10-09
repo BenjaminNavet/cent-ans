@@ -1,7 +1,7 @@
 class_name MapAtmosphere
 extends Node3D
 
-## Lot ME5 (chantier DN, carte) : atmosphère de la carte de campagne, rendu seulement. Réglages
+## Atmosphère de la carte de campagne, rendu seulement. Réglages
 ## dans `data/fx/map_atmosphere.json` (schéma `fx_map_atmosphere.schema.json`) :
 ## - champ de cumulus du ciel lu dans le même bruit que les ombres RV-C (nuage et ombre se correspondent) ;
 ## - cirrus de haute couche ; rideaux de pluie lointains sur les provinces en pluie ou orage du

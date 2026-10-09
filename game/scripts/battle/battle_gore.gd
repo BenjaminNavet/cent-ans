@@ -1,7 +1,7 @@
 class_name BattleGore
 extends Node3D
 
-## Lot BV2 — gerbes de sang à l'impact et morceaux tranchés (rendu seulement ; qui tombe et qui
+## Gerbes de sang à l'impact et morceaux tranchés (rendu seulement ; qui tombe et qui
 ## meurt vient du cœur). Deux tampons circulaires en `MultiMesh`, trajectoires balistiques
 ## calculées dans le shader (`battle_gore.gdshader`) : l'instance porte le point de départ au
 ## sol et INSTANCE_CUSTOM = (vitesse initiale, instant). Aucun corps physique : coût fixe, rien à

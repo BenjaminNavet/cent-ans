@@ -1,7 +1,7 @@
 class_name BattleCavalryGaits
 extends RefCounted
 
-## Lot AS3 : allures de la cavalerie de bataille (rendu seulement, aucune règle de jeu).
+## Allures de la cavalerie de bataille (rendu seulement, aucune règle de jeu).
 ## La simulation ne connaît que « marche » et « course » ; le rendu choisit, d'après la vitesse
 ## lissée du régiment et la variation de son orientation, entre le pas (`c_walk`), le trot
 ## (`c_trot`, bande intermédiaire), le galop (`c_gallop`) et les virages (`c_turn_l/r`,

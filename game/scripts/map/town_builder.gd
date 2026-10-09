@@ -1,7 +1,7 @@
 class_name TownBuilder
 extends RefCounted
 
-## Lot ZG6 (ADR 0036) : nœuds d'une ville à l'échelle réelle depuis son plan (`TownPlan`),
+## Nœuds d'une ville à l'échelle réelle depuis son plan (`TownPlan`) (ADR 0036),
 ## construits par petites étapes sur le fil principal (`step`, budget en µs, ADR 0051).
 ## Le nœud racine est posé à l'ancrage de la ville et mis à l'échelle 1 / (m par unité) : tout
 ## est en mètres dessous. Hauteurs de base en mètres dans les instances (`INSTANCE_CUSTOM.r`) ou

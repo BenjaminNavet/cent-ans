@@ -1,7 +1,7 @@
 class_name BattleEffects
 extends Node3D
 
-## Effets des batailles (lot B4), purement visuels et dérivés de l'état de la simulation :
+## Effets des batailles, purement visuels et dérivés de l'état de la simulation :
 ## - poussière soulevée par les régiments en mouvement (surtout la cavalerie qui charge), sur sol
 ##   sec seulement (ni pluie ni neige) ; éclaboussures au passage des gués et de la rivière ;
 ## - traits en vol : chaque volée (munitions d'un régiment qui baissent) lance des flèches en
@@ -361,7 +361,7 @@ func _process(_delta: float) -> void:
 		_arrow_trails.buffer = _arrow_data
 
 
-## Durées de l'éclair et de la fumée de bombarde, mesurées sur vidéo (lot AS8d,
+## Durées de l'éclair et de la fumée de bombarde, mesurées sur vidéo (
 ## `data/fx/siege_engines.json`, `bombard.flash_s` / `smoke_s`) ; `fallback` sans données.
 static func _bombard_time(key: String, fallback: float) -> float:
 	var bombard: Dictionary = SiegeEnginesFx.settings().get("bombard", {})
@@ -921,7 +921,7 @@ static func _clod_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(image)
 
 
-## Fumée de bombarde : planche de fumée animée du lot V3 (A1-13, `fire_smoke.gdshader`), blanche
+## Fumée de bombarde : planche de fumée animée (A1-13, `fire_smoke.gdshader`), blanche
 ## (poudre noire), sans lueur de feu ; disque flou (B4) si la planche n'est pas importée.
 func _smoke_material() -> Material:
 	var flipbook := "res://assets/textures/fx/smoke_flipbook.png"

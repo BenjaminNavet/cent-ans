@@ -1,7 +1,7 @@
 class_name PossessionText
 extends RefCounted
 
-## Lot RJ-c (ADR 0175) : textes de possession et d'occupation (survol de province, panneaux de
+## Textes de possession et d'occupation (survol de province, panneaux de (ADR 0175)
 ## province et de colonie). Le statut vient du cœur (`CampaignSim.province_possession` /
 ## `settlement_possession`) : `own`, `own_occupied`, `occupied_by_viewer`, `foreign`,
 ## `foreign_occupied`. Aucune règle ici : seulement la mise en mots et la couleur de position

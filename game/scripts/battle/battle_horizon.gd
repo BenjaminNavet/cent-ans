@@ -1,7 +1,7 @@
 class_name BattleHorizon
 extends Node3D
 
-## Horizon des batailles (lot EP2, ADR 0032). Rendu seulement, aucune collision :
+## Horizon des batailles (ADR 0032). Rendu seulement, aucune collision :
 ## - relief réel autour du lieu de la bataille (tuile de 26 km cuite hors ligne par province,
 ##   `cent-ans geo horizon`), raccordé au relief généré du champ par `blend()` (appelé depuis
 ##   `BattleTerrain.world_height`) : 0 près du champ, 1 au-delà de `blend_end_m` ;

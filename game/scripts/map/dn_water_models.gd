@@ -1,7 +1,7 @@
 class_name DnWaterModels
 extends RefCounted
 
-## Lot DN-FLEUVE : glb générés de ce qui est sur ou au bord de l'eau (navires, bateaux de fleuve,
+## Glb générés de ce qui est sur ou au bord de l'eau (navires, bateaux de fleuve,
 ## ponts, moulins, ports, chantiers, épaves). Registre et règles dans `data/art/dn_water_models.json`
 ## (schéma `art_dn_water_models.schema.json`) : les règles désignent des identifiants du registre,
 ## ce module choisit (bassin, culture, fleuve, structure, année) et prépare maillage + repère de

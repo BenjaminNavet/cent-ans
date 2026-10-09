@@ -1,7 +1,7 @@
 class_name TerroirMask
 extends RefCounted
 
-## Lot CV1 : masque des terroirs autour des colonies, lu par `terrain.gdshader`
+## Masque des terroirs autour des colonies, lu par `terrain.gdshader`
 ## (`campaign_life.gdshaderinc`). Image RGBA8 `SIZE`² couvrant la carte :
 ## R = mise en culture (champs à la place des prés et friches), G = vigne (régions viticoles,
 ## selon l'occupation du sol), B = brûlis (dévastation), A = pâtures (couronne autour des champs).

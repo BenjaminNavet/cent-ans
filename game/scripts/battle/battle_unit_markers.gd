@@ -3,13 +3,13 @@ extends Control
 
 const _Access := preload("res://scripts/battle/battle_access.gd")
 
-## Bannières flottantes d'unité (lot B2) : au-dessus de chaque régiment présent,
+## Bannières flottantes d'unité : au-dessus de chaque régiment présent,
 ## un repère à taille écran constante (plaque aux couleurs du camp, icône de classe, barres
 ## d'effectif et de moral, pastilles d'état, étoile du général). Un seul Control plein écran
 ## dessine tous les repères ; `_has_point` ne le rend cliquable que sur eux, le reste du champ
 ## reste à la scène. Clic gauche : sélection ; clic droit sur un repère ennemi : attaque.
 ## Deux repères qui se chevauchent sont dépilés vers le haut (un trait les relie à leur troupe).
-## Lot B7 : en vue très lointaine (distance de caméra au-delà de `CLUSTER_ON`), les repères
+## En vue très lointaine (distance de caméra au-delà de `CLUSTER_ON`), les repères
 ## proches d'un même camp se regroupent en une pastille (couleur du camp, nombre de régiments,
 ## effectif et moral cumulés) ; clic = sélection de tout le groupe. De près, rien ne change.
 ## Aucune règle : tout vient du dictionnaire de `BattleSim.get_units()` ; seuils d'affichage
@@ -460,7 +460,7 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 	elif kind == "wavering" or kind == "under_fire":
 		BattleModeIcons.draw_state(canvas, kind, c, ink)
 	else:
-		# Lot CB : icône à l'encre DA5 (`battle_state_<kind>`), glyphe dessiné en repli sans PNG.
+		# Icône à l'encre DA5 (`battle_state_<kind>`), glyphe dessiné en repli sans PNG.
 		var tint := ink if kind != "tired" else Color(0.2, 0.4, 0.75)
 		if not BattleModeIcons.draw_ink_icon(canvas, "battle_state_" + kind, c, BattleModeIcons.BADGE_ICON_SIDE, tint):
 			_draw_badge_glyph(canvas, kind, c, ink)

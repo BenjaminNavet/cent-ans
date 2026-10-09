@@ -1,7 +1,7 @@
 class_name EncounterController
 extends Node
 
-## Lot CV3-4 : rencontres sur la carte de campagne (spec campagne vivante § 2 et § 4).
+## Rencontres sur la carte de campagne (spec campagne vivante § 2 et § 4).
 ## - Marqueurs des sites que le joueur voit (`CampaignSim.get_encounter_sites`, positions en
 ##   pixels de carte comme les armées) : médaillon parchemin à l'icône à l'encre, bulle au
 ##   survol (titre, province, expiration) ; clic (gauche ou droit) avec une armée du joueur

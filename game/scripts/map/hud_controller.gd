@@ -1,7 +1,7 @@
 class_name HudController
 extends Node
 
-## HUD de campagne branché sur la carte (lot F10b) : bandeau d'ost + sceau du chef pour
+## HUD de campagne branché sur la carte : bandeau d'ost + sceau du chef pour
 ## l'armée sélectionnée, cloche de fin de saison et ses alertes, lettres scellées. Les
 ## composants vivent dans `MapUI` (nœuds `ArmyStrip`, `GeneralSeal`, `EndTurnCluster`,
 ## `NewsLetters`) ; ce contrôleur les alimente depuis la simulation et relie leurs signaux.
@@ -38,7 +38,7 @@ func setup(campaign_map: Node) -> void:
 	refresh()
 
 
-## Lot U5 : instantané des voisins, alliés, ennemis et grandes puissances du joueur (filtre des
+## Instantané des voisins, alliés, ennemis et grandes puissances du joueur (filtre des
 ## lettres et du bandeau), à refaire après chaque fin de tour (`CampaignMap._on_end_turn`).
 func update_interest() -> void:
 	var sim := _sim()
@@ -66,11 +66,11 @@ func split_supported() -> bool:
 	return sim != null and sim.has_method("supports_order") and bool(sim.call("supports_order", "split_army"))
 
 
-## Lot C7d : disponibilité du bouton « Garnison » pour `army` (résultat de `get_army`).
+## Disponibilité du bouton « Garnison » pour `army` (résultat de `get_army`).
 ## `{can_garrison, reason}` : `can_garrison` vrai seulement si l'armée est au joueur, sur une
 ## colonie qu'il contrôle ; `reason` (français, vide = actif) désactive le bouton si la
 ## colonie est assiégée ou si sa garnison est pleine. Aucune règle ici : tout vient de
-## `settlement_detail` (`garrison_cap` / `garrison_free`, lot C7d).
+## `settlement_detail` (`garrison_cap` / `garrison_free`).
 func garrison_availability(army: Dictionary, is_player: bool) -> Dictionary:
 	var sim := _sim()
 	var location := str(army.get("location", ""))
@@ -220,7 +220,7 @@ func _on_general_clicked(character_id: String) -> void:
 		open_general_picker(ui.current_army_id)  # U10 : « Sans chef » → choix du général
 
 
-## Lot U10 : choix du général de l'armée `army_id` (armée du joueur).
+## Choix du général de l'armée `army_id` (armée du joueur).
 func open_general_picker(army_id: String) -> void:
 	var army: Dictionary = _sim().call("get_army", army_id)
 	if str(army.get("faction", "")) != str(map.get("player_faction")):
@@ -229,7 +229,7 @@ func open_general_picker(army_id: String) -> void:
 	ui.show_general_picker(army_id, "Choisir le chef de l'ost (%s)" % place, general_candidates(army))
 
 
-## Lot U10 : personnages du joueur pour commander `army` : `[{id, name, detail, reason}]`, les
+## Personnages du joueur pour commander `army` : `[{id, name, detail, reason}]`, les
 ## disponibles sur place d'abord (`reason` vide), puis les autres avec leur empêchement.
 func general_candidates(army: Dictionary) -> Array:
 	var sim := _sim()
@@ -265,7 +265,7 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 	map.call("_submit", {"type": "split_army", "army": army_id, "unit_indices": unit_indices}, "Armée séparée.")
 
 
-## Lot C7d : bouton « Garnison ». Le refus éventuel du cœur (siège survenu entre-temps,
+## Bouton « Garnison ». Le refus éventuel du cœur (siège survenu entre-temps,
 ## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
 func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
 	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment laissé en garnison." if unit_indices.size() <= 1 else "Régiments laissés en garnison.")

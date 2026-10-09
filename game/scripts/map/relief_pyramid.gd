@@ -7,7 +7,7 @@ extends RefCounted
 ## `height_tiles`, versionné). Obligatoire (ADR 0203) : sans cache, `is_available()` est faux
 ## et `TerrainBuilder` signale l'erreur (journal et toast), sans repli.
 ##
-## Géoréférencement (ADR 0086, lot SZ2b ; même convention que les outils `geo` et toutes les
+## Géoréférencement (ADR 0086 ; même convention que les outils `geo` et toutes les
 ## données vectorielles, x = (E − minx) / m) : le pixel global j de l'étage k (taille
 ## `0,5 / 2^k` unité) est centré en `(j + 0,5) × taille` ; la tuile (k, col, row) couvre
 ## `[col × T, (col + 1) × T]` avec T = `tile_units(k)`. Avant SZ2b, la grille était décalée de
@@ -15,7 +15,7 @@ extends RefCounted
 ## fleuves fins, colonies et villes 1:1.
 ## Rendu seulement : aucune règle de jeu ne lit la pyramide.
 ##
-## Monde rectangulaire (lot OM1, ADR 0115) : la grille E0 compte `root_cols` × `root_rows` tuiles
+## Monde rectangulaire (ADR 0115) : la grille E0 compte `root_cols` × `root_rows` tuiles
 ## (map.json `size_px` / 256). Le manifeste peut porter `root_origin_tiles` [dx, dy] : la tuile du
 ## cache (k, col, row) est la tuile monde (col + dx·2^k, row + dy·2^k). Index, clés et requêtes sont
 ## en coordonnées monde ; seul `tile_path` revient aux noms de fichiers du cache.

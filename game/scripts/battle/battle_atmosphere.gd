@@ -1,11 +1,11 @@
 class_name BattleAtmosphere
 extends RefCounted
 
-## Ciel, lumière et météo des batailles (lot V4) : ciel procédural (`battle_sky.gdshader`),
+## Ciel, lumière et météo des batailles : ciel procédural (`battle_sky.gdshader`),
 ## tonemapping AgX, SSAO, halo, brouillard de distance avec perspective aérienne (l'horizon se
 ## fond dans le ciel), étalonnage léger, soleil et ombres réglés ; pluie et neige en particules
 ## GPU accrochées à la caméra. Un préréglage par temps de la simulation (clear, fog, rain, snow).
-## Lot V3 (A1-05, A1-14) : ciel HDRI Poly Haven et LUT d'étalonnage par météo et par saison
+## Ciel HDRI Poly Haven et LUT d'étalonnage par météo et par saison
 ## (`AtmosphereLibrary`, `data/fx/atmosphere.json`) — le ciel procédural reste le repli ; brouillard
 ## volumétrique (nappes basses par temps de brouillard) et effets réglés par `RenderQuality`.
 

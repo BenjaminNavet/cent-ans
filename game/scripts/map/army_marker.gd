@@ -1,7 +1,7 @@
 class_name ArmyMarker
 extends Node3D
 
-## Marqueur d'armée (lot V3) : groupe de figurines (chef monté, fantassins,
+## Marqueur d'armée : groupe de figurines (chef monté, fantassins,
 ## arbalétriers selon la composition, teintés aux couleurs de la faction), étendard aux
 ## armoiries (`map_banner.gdshader`), anneau au sol projeté sur le relief (`Decal`, couleur de
 ## la faction, doré et plus vif quand l'armée est sélectionnée). La plaque d'effectif est un
@@ -43,7 +43,7 @@ var unit_count: int = 0
 ## "siege", "moving", "embarked" ou "".
 var status: String = ""
 var faction_color: Color = Color.WHITE
-## Lot EN : catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
+## Catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
 var cue: String = StanceCues.OTHER
 ## Position de base (centroïde de la province) et décalage unitaire (armées empilées).
 var base_position: Vector3 = Vector3.ZERO
@@ -68,7 +68,7 @@ var standard_mode: int = 0
 @onready var selection: Decal = $Selection
 
 var _flag_material: ShaderMaterial
-## Lot CV2 : figurines animées (null en repli sur les figurines M10/V3).
+## Figurines animées (null en repli sur les figurines M10/V3).
 var figures: ArmyFigures
 ## Hauteurs de repos de la hampe, du fleuron et du drapeau (avant décalage vers le porteur).
 var _rest_y: Array = []
@@ -112,7 +112,7 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 	_apply_standard(standard_for(faction_id, army))
 	(banner.material_override as StandardMaterial3D).albedo_color = color
 	_rest_y = [pole.position.y, $Finial.position.y, flag.position.y]
-	# Lot CV2 : figurines skinnées animées (général, porte-étendard, escorte), flotte, camp ;
+	# Figurines skinnées animées (général, porte-étendard, escorte), flotte, camp ;
 	# repli sur les figurines M10/V3 (`--legacy-army-markers` ou modèles absents).
 	var previous := get_node_or_null(ModelLibrary.MODEL_NODE)
 	if previous != null:
@@ -132,7 +132,7 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		$Finial.visible = false
 		flag.position = Vector3(0.1, 11.0 if standard_mode == 2 else 9.6, 0.0)
 	_update_ring()
-	# Lot CV3-4 : pastille de posture sur la hampe, fantôme en embuscade (armée du joueur).
+	# Pastille de posture sur la hampe, fantôme en embuscade (armée du joueur).
 	StanceBadge.apply(self, str(army.get("stance", "normal")), player)
 
 
@@ -223,7 +223,7 @@ func is_hovered() -> bool:
 	return _hovered
 
 
-## Lot EN : catégorie de relation avec le joueur ; l'anneau au sol des ennemis passe au rouge.
+## Catégorie de relation avec le joueur ; l'anneau au sol des ennemis passe au rouge.
 func set_cue(value: String) -> void:
 	if value == cue:
 		return
@@ -268,8 +268,8 @@ func face(direction: Vector2) -> void:
 		_follow_bearer()
 
 
-## Lot CV2 : la hampe suit le porte-étendard (ou la hampe de poupe du navire amiral).
-## Lot AS2 : et son balancement (rebond/roulis de la marche, tangage du navire) : le pied de la
+## La hampe suit le porte-étendard (ou la hampe de poupe du navire amiral).
+## Et son balancement (rebond/roulis de la marche, tangage du navire) : le pied de la
 ## hampe est à `anchor`, la hampe, le fleuron et le drapeau pivotent autour avec `bearer_tilt`.
 func _follow_bearer() -> void:
 	var anchor := figures.bearer_anchor()
@@ -285,7 +285,7 @@ func _follow_bearer() -> void:
 	_flag_material.set_shader_parameter("gust", figures.bearer_gust())
 
 
-## Lot AS2 : n'anime la hampe que pendant la marche (et son fondu) ou en mer.
+## N'anime la hampe que pendant la marche (et son fondu) ou en mer.
 func _process(_delta: float) -> void:
 	if figures == null or not is_visible_in_tree():
 		return
@@ -297,13 +297,13 @@ func _process(_delta: float) -> void:
 		_follow_bearer()
 
 
-## Lot CV2 : marche (animation du déplacement) ou repos des figurines.
+## Marche (animation du déplacement) ou repos des figurines.
 func set_walking(value: bool) -> void:
 	if figures != null:
 		figures.set_walking(value)
 
 
-## Lot CV2 : niveau de détail et présence des figurines selon la distance caméra.
+## Niveau de détail et présence des figurines selon la distance caméra.
 func set_view(camera_distance: float, weight: float) -> void:
 	if figures != null:
 		figures.set_view(camera_distance, weight)

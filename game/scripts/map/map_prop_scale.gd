@@ -1,8 +1,8 @@
 class_name MapPropScale
 extends Resource
 
-## Lot SZ4 (suites du zoom ZG, ADR 0036) : échelle des accessoires dessinés à l'échelle de la carte
-## (arbres, moulins, hameaux, fumées ; lot SZ4b : maquettes des colonies) selon la distance du rig
+## Échelle des accessoires dessinés à l'échelle de la carte (ADR 0036)
+## (arbres, moulins, hameaux, fumées, maquettes des colonies) selon la distance du rig
 ## de caméra (`res://resources/map_prop_scale.tres`). Purement visuel.
 ##
 ## Historique : SZ4 / SZ4b grossissaient tous les accessoires d'une exagération commune E(d)
@@ -84,7 +84,7 @@ extends Resource
 ## Distance caméra → partie de tuile en deçà de laquelle les arbres sont en maillage détaillé
 ## (sans imposteurs générés GA3) ; imposteur ou maillage bas au-delà.
 @export var generalised_mesh_distance: float = 60.0
-## Lot DN-FORET (ADR 0221) : zone autour du point visé où les arbres sont les maillages décimés des
+## Zone autour du point visé où les arbres sont les maillages décimés des (ADR 0221)
 ## modèles générés (un MultiMesh par essence) ; imposteurs au-delà. Rayon (unités carte) =
 ## `generalised_model_radius_factor` × distance du rig, bornés ; pas de modèles au-delà de
 ## `generalised_model_max_distance` (coût : ≈ 1 200 triangles par arbre, ombres comprises).

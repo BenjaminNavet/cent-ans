@@ -1,7 +1,7 @@
 class_name DnWaterBirds
 extends RefCounted
 
-## Lot DN-FLEUVE : oiseaux d'eau en glb générés (mouettes, oies, cigognes, grues, cygnes,
+## Oiseaux d'eau en glb générés (mouettes, oies, cigognes, grues, cygnes,
 ## pélicans). Le maillage est cuit à plat, orientation d'origine du glb (envergure sur X, bec vers
 ## -Z comme le V de `MapBirdFlocks`), grande dimension horizontale ramenée à `length` du registre
 ## `data/art/dn_water_models.json`, centré en X/Z, pied à y = 0. Le battement d'ailes et la

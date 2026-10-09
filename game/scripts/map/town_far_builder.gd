@@ -1,7 +1,7 @@
 class_name TownFarBuilder
 extends RefCounted
 
-## Lot VT-B (ADR 0138) : maillage lointain des villes à l'échelle 1:1, sans `TownPlan`.
+## Maillage lointain des villes à l'échelle 1:1, sans `TownPlan` (ADR 0138).
 ## - F1 (rig < ~300) : nappe de toits polaire sur les relèvements de `radii` (centre + 2 anneaux),
 ##   jupe, faubourgs, enceinte (mur, chemin de ronde, tours, portes), monuments simplifiés ;
 ## - F2 (au-delà) : polygone à 16 côtés, jupe, une flèche au plus ;
@@ -10,7 +10,7 @@ extends RefCounted
 ## travail. `LandmarkV2Library.anchor_units` lit un fichier au premier appel : le fil principal
 ## doit l'avoir déjà appelé, ou passer `anchor` à `build_v2_far`.
 ##
-## Contrat de sommets (partagé avec `town_far.gdshader`, lot VT-C) :
+## Contrat de sommets (partagé avec `town_far.gdshader`) :
 ## - VERTEX.x / z : position monde en unités carte (ancre `px` + mètres locaux / m par unité ;
 ##   repère local de `TownPlan` : x vers +X monde (est), y vers +Z monde) ;
 ## - VERTEX.y : altitude ABSOLUE en mètres (sol + hauteur du bâti ; pied de jupe = sol − 30) ;

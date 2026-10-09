@@ -1,7 +1,7 @@
 class_name BattleImpostors
 extends Node
 
-## Imposteurs lointains des figurines skinnées (lot BV3, ADR 0024), rendu seulement.
+## Imposteurs lointains des figurines skinnées (ADR 0024), rendu seulement.
 ## Au-delà de `DISTANCE` mètres, un régiment n'est plus dessiné en maillages (LOD2, ≈ 230 à
 ## 430 triangles) mais en quadrilatères face à la caméra (2 triangles par figurine), texturés
 ## par un atlas cuit au début de la bataille depuis les figurines V2 elles-mêmes :

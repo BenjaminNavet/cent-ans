@@ -1,7 +1,7 @@
 class_name TownPlan
 extends RefCounted
 
-## Lot ZG6 (ADR 0036) : plan procédural d'une ville ordinaire vers 1340, à l'échelle réelle.
+## Plan procédural d'une ville ordinaire vers 1340, à l'échelle réelle (ADR 0036).
 ## Calcul pur et déterministe (graine de la colonie), sans accès à la scène : exécutable dans un
 ## fil de travail (`WorkerThreadPool`). Entrée : l'emprise de `data/map/towns_1340.json`
 ## (polygone d'enceinte adapté au relief, portes, faubourgs, monuments, fleuve, pont) et un

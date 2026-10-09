@@ -1,7 +1,7 @@
 class_name FineGeoLayer
 extends Node3D
 
-## Rendu de près de l'hydrographie fine, des routes drapées et des ancrages (lot ZG5b, ADR 0036).
+## Rendu de près de l'hydrographie fine, des routes drapées et des ancrages (ADR 0036).
 ## Enfant de `RiversRenderer` (`Rivers/FineGeo`), actif seulement avec la pyramide de relief et
 ## les données ZG5a en cache (`FineGeoStore`), et en deçà du palier « comté » (poids du palier
 ## près de `ZoomTiers`) : aucun coût en vue stratégique.
@@ -17,13 +17,13 @@ extends Node3D
 ## - Ancrages : colonies et hameaux (`SettlementLayer.apply_fine_anchors`), ponts historiques
 ##   et génériques (`RiverCrossings.set_fine_anchors`), ponts-portes recalculés sur le fleuve fin.
 ## - Échelle verticale : hauteurs en mètres dans les maillages, `height_scale` relu à chaque
-##   image (`MapData.vertical_scale()`, dynamique au lot ZG4) : rien à remailler.
+##   image (`MapData.vertical_scale()`, dynamique) : rien à remailler.
 
 const RIVER_SHADER := preload("res://shaders/river_fine.gdshader")
 const ROAD_SHADER := preload("res://shaders/road_fine.gdshader")
 const WALLED := ["city", "town", "castle"]
 const GATE_MIN_WIDTH := 0.3
-## Lot ZG4b : hauteur (m) du tablier des ponts-portes au-dessus de l'eau (pas d'ancrage `z_deck`
+## Hauteur (m) du tablier des ponts-portes au-dessus de l'eau (pas d'ancrage `z_deck`
 ## pour eux) ; ouvrages à l'échelle réelle comme les ponts ancrés (`RiverCrossings.FINE_SCALE`).
 const GATE_DECK_RISE_M := 7.0
 
@@ -165,7 +165,7 @@ func apply_render_quality(p: Dictionary) -> void:
 			entry["dirty"] = now
 
 
-## Routes (lot C6) : leurs rubans de près s'effacent dans le disque fin.
+## Routes : leurs rubans de près s'effacent dans le disque fin.
 func attach_roads(road_renderer: RoadRenderer) -> void:
 	roads = road_renderer
 

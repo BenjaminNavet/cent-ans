@@ -1,7 +1,7 @@
 class_name BridgeMeshes
 extends RefCounted
 
-## Maillages procéduraux des franchissements de la carte de campagne (lot V4, A1-11) : pont de
+## Maillages procéduraux des franchissements de la carte de campagne : pont de
 ## pierre à arches (avec avant-becs), pont de bois sur pilotis, pont de bateaux, bac (barge et
 ## pontons), gué (pierres et perches de balisage), pont-porte des murailles (pierre crénelée).
 ##
@@ -144,7 +144,7 @@ static func deck_width(width: float) -> float:
 	return 0.15 + 0.05 * width
 
 
-## Lot ZG7a : largeur réelle du tablier (m) des ouvrages à l'échelle réelle (ponts fins, ponts-
+## Largeur réelle du tablier (m) des ouvrages à l'échelle réelle (ponts fins, ponts-
 ## portes). Ponts médiévaux : 4-8 m entre parapets (pont Valentré 5 m, pont Saint-Bénézet 4 m,
 ## London Bridge ≈ 6 m hors maisons) ; pont-porte un peu plus large (châtelet).
 const FINE_DECK_M := {"gate": 9.0, "stone": 7.0, "wood": 4.5, "boats": 5.0, "ferry": 8.0, "ford": 6.0}
