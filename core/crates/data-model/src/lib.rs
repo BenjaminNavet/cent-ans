@@ -33,7 +33,8 @@ pub use common::{
 };
 pub use cover::{CoverClass, CoverMap};
 pub use entities::agent::{
-    AgentActionKind, AgentActionRules, AgentEffects, AgentKind, AgentRules, AgentTypeRules,
+    ActionAim, ActionCheck, ActionCondition, ActionCost, ActionEffect, ActionSpec, AgentActionKind,
+    AgentKind, AgentRules, AgentTypeRules, EffectSubject,
 };
 pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,

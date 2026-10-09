@@ -80,6 +80,16 @@ impl PopulationClasses {
         }
     }
 
+    /// The mutable entry for a given class.
+    pub fn get_mut(&mut self, class: SocialClass) -> &mut PopulationClass {
+        match class {
+            SocialClass::Peasants => &mut self.peasants,
+            SocialClass::Burghers => &mut self.burghers,
+            SocialClass::Clergy => &mut self.clergy,
+            SocialClass::Nobility => &mut self.nobility,
+        }
+    }
+
     /// Iterates over `(class, entry)` in schema order.
     pub fn iter(&self) -> impl Iterator<Item = (SocialClass, &PopulationClass)> {
         SocialClass::ALL

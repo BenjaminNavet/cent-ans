@@ -14,8 +14,9 @@ use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt;
 
 use data_model::{
-    AgentActionKind, AgentKind, AgentRules, BuildingCategory, CharacterId, FactionId, GameData,
-    ProvinceId, SettlementId, SettlementKind,
+    ActionAim, ActionCheck, ActionEffect, ActionSpec, AgentActionKind, AgentKind, AgentRules,
+    BuildingCategory, CharacterId, EffectSubject, FactionId, GameData, ProvinceId, SettlementId,
+    SettlementKind,
 };
 use serde::{Deserialize, Serialize};
 
@@ -491,7 +492,23 @@ impl CampaignState {
                     description: r.and_then(|r| r.description.clone()).unwrap_or_default(),
                 }
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .fold(Vec::<AgentActionOption>::new(), |mut bar, option| {
+                // Actions of one group share a button: the first available one.
+                let group = |o: &AgentActionOption| {
+                    rules.actions.get(&o.action).and_then(|s| s.group.as_ref())
+                };
+                match bar
+                    .iter()
+                    .position(|o| group(o).is_some() && group(o) == group(&option))
+                {
+                    Some(at) if !bar[at].available && option.available => bar[at] = option,
+                    Some(_) => {}
+                    None => bar.push(option),
+                }
+                bar
+            })
     }
 
     /// Success chance (percent) and cost of `action` by `agent` on `target`
@@ -508,7 +525,8 @@ impl CampaignState {
             .map(|plan| (plan.chance, plan.cost))
     }
 
-    /// Validates an action and computes its odds (see the design § 6).
+    /// Validates an action against its [`ActionSpec`] and computes its odds
+    /// (see the design § 6 and ADR 0209).
     fn check_action(
         &self,
         data: &GameData,
@@ -518,10 +536,13 @@ impl CampaignState {
         character: Option<&CharacterId>,
     ) -> Result<ActionPlan, AgentError> {
         let rules = rules(data);
-        let effects = &rules.effects;
         let agent = self
             .agent(agent_id)
             .ok_or_else(|| AgentError::UnknownAgent(agent_id.clone()))?;
+        let spec = rules
+            .actions
+            .get(&action)
+            .ok_or_else(|| AgentError::InvalidTarget("action inconnue".to_owned()))?;
         if action.agent() != agent.kind {
             return Err(AgentError::WrongAgent);
         }
@@ -540,132 +561,73 @@ impl CampaignState {
             .ok_or_else(|| AgentError::UnknownSettlement(target.clone()))?;
         let province = settlement.province.clone();
         let controller = settlement.controller.clone();
-        let invalid = |text: &str| Err(AgentError::InvalidTarget(text.to_owned()));
+        let aim = match spec.aim {
+            ActionAim::SettlementMaster => Some(controller.clone()),
+            ActionAim::ProvinceMaster => self.province_controller(&province).cloned(),
+        };
         let at_war = self.is_at_war(faction, &controller);
-        let mut cost = 0i64;
-        let mut character_out = None;
-        let mut hostile = false;
-        let mut malus = 0i32;
-        match action {
-            AgentActionKind::Scout => {
-                if &controller == faction {
-                    return invalid("colonie déjà à vous");
-                }
-                hostile = true;
-            }
-            AgentActionKind::Sabotage | AgentActionKind::Incite => {
-                if !at_war {
-                    return invalid("il faut être en guerre avec le maître des lieux");
-                }
-                hostile = true;
-            }
-            AgentActionKind::Counter => {
-                if !self.is_allied(faction, &controller) {
-                    return invalid("le contre-espionnage se mène en terre amie");
-                }
-            }
-            AgentActionKind::Parley => {
-                if &controller == faction || controller.as_str() == REBELS_FACTION {
-                    return invalid("il faut une colonie d'une autre faction");
-                }
-                if at_war {
-                    return invalid("en guerre : le héraut ne peut porter qu'une trêve");
-                }
-                let already = self.factions.get(&controller).is_some_and(|f| {
+        let mut captive = None;
+        for condition in &spec.conditions {
+            let met = match condition.check {
+                ActionCheck::ForeignMaster => &controller != faction,
+                ActionCheck::NotRebels => controller.as_str() != REBELS_FACTION,
+                ActionCheck::AtWar => at_war,
+                ActionCheck::NotAtWar => !at_war,
+                ActionCheck::AlliedMaster => self.is_allied(faction, &controller),
+                ActionCheck::NoEmbassy => !self.factions.get(&controller).is_some_and(|f| {
                     f.modifiers.iter().any(|m| {
                         &m.with == faction
                             && m.reason_fr == PARLEY_REASON
                             && m.expires_turn > self.turn
                     })
-                });
-                if already {
-                    return invalid("une ambassade est déjà en cours auprès de cette cour");
+                }),
+                ActionCheck::NoTruce => !self.has_truce(faction, &controller),
+                ActionCheck::NoHostileArmy => self.hostile_armies_at(faction, &target).is_empty(),
+                ActionCheck::CaptiveHeld => {
+                    captive = character
+                        .cloned()
+                        .or_else(|| self.first_captive_held_by(faction, &controller))
+                        .filter(|c| {
+                            herald_may_ransom(self, c)
+                                && self.characters.get(c).is_some_and(|c| {
+                                    c.alive
+                                        && c.captive
+                                        && &c.faction == faction
+                                        && c.captor.as_ref() == Some(&controller)
+                                })
+                        });
+                    captive.is_some()
                 }
-            }
-            AgentActionKind::Truce => {
-                if !at_war || controller.as_str() == REBELS_FACTION {
-                    return invalid("il faut être en guerre avec le maître des lieux");
-                }
-                if self.has_truce(faction, &controller) {
-                    return invalid("une trêve court déjà");
-                }
-            }
-            AgentActionKind::Bribe => {
-                if !at_war {
-                    return invalid("il faut être en guerre avec le maître des lieux");
-                }
-                if !self.hostile_armies_at(faction, &target).is_empty() {
-                    return invalid("une armée ennemie tient la place");
-                }
-                let men = settlement.garrison_strength();
-                cost = crate::coinage::priced(
-                    self,
-                    faction,
-                    i64::from(effects.bribe_base_cost)
-                        + i64::from(men) * i64::from(effects.bribe_cost_per_man_percent) / 100,
-                );
-                malus += (men / effects.bribe_men_per_malus.max(1)) as i32;
-                hostile = true;
-            }
-            AgentActionKind::Ransom => {
-                let captive = match character {
-                    Some(c) => Some(c.clone()),
-                    None => self.first_captive_held_by(faction, &controller),
-                };
-                let Some(captive) = captive else {
-                    return invalid("aucun de vos captifs n'est détenu par le maître des lieux");
-                };
-                let held = self.characters.get(&captive).is_some_and(|c| {
-                    c.alive
-                        && c.captive
-                        && &c.faction == faction
-                        && c.captor.as_ref() == Some(&controller)
-                });
-                if !held {
-                    return invalid("ce captif n'est pas détenu ici");
-                }
-                if !herald_may_ransom(self, &captive) {
-                    return invalid("son geôlier refuse de le rendre contre de l'argent");
-                }
-                cost = ransom_price(self, data, &captive, agent.level);
-                character_out = Some(captive);
-            }
-            AgentActionKind::Preach => {
-                if !self.is_friendly_territory(faction, &province) {
-                    return invalid("on prêche en terre amie");
-                }
-            }
-            AgentActionKind::Denounce => {
-                let Some(master) = self.province_controller(&province).cloned() else {
-                    return invalid("province sans maître");
-                };
-                if &master == faction || !self.denounceable(data, faction, &master) {
-                    return invalid(
-                        "il faut un prince ennemi, excommunié ou de l'obédience rivale",
-                    );
-                }
-                hostile = true;
-            }
-            AgentActionKind::Curia => {
-                if controller.as_str() != PAPACY_FACTION {
-                    return invalid("il faut se rendre dans une ville du pape (Avignon, Rome…)");
-                }
-                if !crate::religion::is_catholic(self, data, faction) {
-                    return invalid("seul un prince catholique plaide à la Curie");
-                }
-                if at_war {
-                    return invalid("en guerre avec le pape");
-                }
+                ActionCheck::FriendlyProvince => self.is_friendly_territory(faction, &province),
+                ActionCheck::DenounceableMaster => aim
+                    .as_ref()
+                    .is_some_and(|m| m != faction && self.denounceable(data, faction, m)),
+                ActionCheck::PapalCity => controller.as_str() == PAPACY_FACTION,
+                ActionCheck::CatholicFaction => crate::religion::is_catholic(self, data, faction),
+            };
+            if !met {
+                return Err(AgentError::InvalidTarget(condition.reason_fr.clone()));
             }
         }
-        let target_faction = if action == AgentActionKind::Denounce {
-            self.province_controller(&province)
-                .cloned()
-                .unwrap_or(controller.clone())
-        } else {
-            controller.clone()
-        };
-        if hostile {
+        let target_faction = aim.unwrap_or_else(|| controller.clone());
+        let men = settlement.garrison_strength();
+        let mut cost = 0i64;
+        if spec.cost.ransom {
+            let captive = captive
+                .as_ref()
+                .ok_or_else(|| AgentError::InvalidTarget("aucun captif désigné".to_owned()))?;
+            cost += ransom_price(self, data, captive, agent.level);
+        }
+        cost += crate::coinage::priced(
+            self,
+            faction,
+            i64::from(spec.cost.flat) + i64::from(men) * i64::from(spec.cost.per_man_percent) / 100,
+        );
+        let mut malus = 0i32;
+        if spec.garrison_men_per_malus > 0 {
+            malus += (men / spec.garrison_men_per_malus) as i32;
+        }
+        if spec.hostile {
             malus += rules.fortification_malus * i32::from(settlement.fortification_level);
             let spies: i32 = self
                 .agents_in_province(&province)
@@ -676,11 +638,6 @@ impl CampaignState {
                 .sum();
             malus += spies.min(rules.counter_spy_malus_cap);
         }
-        let r = rules
-            .actions
-            .get(&action)
-            .ok_or_else(|| AgentError::InvalidTarget("action inconnue".to_owned()))?;
-        cost += crate::coinage::priced(self, faction, i64::from(r.cost));
         let available = self.factions.get(faction).map_or(0, |f| f.treasury);
         if cost > 0 && available < cost {
             return Err(AgentError::InsufficientFunds {
@@ -688,13 +645,13 @@ impl CampaignState {
                 available,
             });
         }
-        let chance = (r.base_chance + r.per_level * (i32::from(agent.level) - 1) - malus)
+        let chance = (spec.base_chance + spec.per_level * (i32::from(agent.level) - 1) - malus)
             .clamp(rules.min_chance, rules.max_chance);
         Ok(ActionPlan {
             target,
             province,
             target_faction,
-            character: character_out,
+            character: captive,
             chance: chance.max(0) as u32,
             cost,
         })
@@ -1071,6 +1028,7 @@ impl CampaignState {
         self.own_agent(faction, id)?;
         let plan = self.check_action(data, id, action, target, character)?;
         let rules = rules(data).clone();
+        let spec = &rules.actions[&action];
         let serial = self.agents.action_serial;
         self.agents.action_serial += 1;
         let mut rng = derived_rng(self.seed, self.turn, id.index(), serial);
@@ -1083,25 +1041,20 @@ impl CampaignState {
         let agent = self.agents.agents[id].clone();
         let mut events = Vec::new();
         let text = if success {
-            self.apply_success(data, &agent, action, &plan, &mut events)
+            self.apply_effects(data, &agent, &spec.success, &plan, &mut events)
         } else {
-            failure_text(data, &agent, action, &plan, self)
+            let text = failure_text(data, &agent, spec, &plan, self);
+            self.apply_effects(data, &agent, &spec.failure, &plan, &mut events);
+            text
         };
-        let death_risk = rules.actions.get(&action).map_or(0, |r| r.death_risk);
-        let lost = !success && death_risk > 0 && rng.below(100) < death_risk;
-        if !success && action == AgentActionKind::Bribe {
-            self.add_modifier(
-                &plan.target_faction,
-                faction,
-                rules.effects.bribe_fail_opinion,
-                BRIBE_REASON,
-                rules.effects.parley_turns,
-            );
-        }
+        let lost = !success && spec.death_risk > 0 && rng.below(100) < spec.death_risk;
         let mut text = text;
         if lost {
             text.push(' ');
-            text.push_str(&lost_text(agent.kind, &agent.name));
+            text.push_str(&fill(
+                &rules.types[&agent.kind].lost_fr,
+                &[("agent", &agent.name)],
+            ));
         }
         let report = AgentReport {
             turn: self.turn,
@@ -1130,14 +1083,7 @@ impl CampaignState {
         // Journal: only what concerns the player.
         let player = self.player_faction.clone();
         let target_is_player = plan.target_faction == player && &player != faction;
-        let visible_to_target = matches!(
-            action,
-            AgentActionKind::Sabotage
-                | AgentActionKind::Incite
-                | AgentActionKind::Bribe
-                | AgentActionKind::Denounce
-                | AgentActionKind::Parley
-        ) || !success;
+        let visible_to_target = spec.reveals || !success;
         if faction == &player {
             self.push_order_event(
                 GameEvent::new(EventKind::Agent, text)
@@ -1165,210 +1111,202 @@ impl CampaignState {
         Ok(report)
     }
 
-    /// Applies a successful action; returns the French report.
-    fn apply_success(
+    /// Applies the effects of an action in table order; returns the French
+    /// report (the non-empty texts of the effects, joined).
+    fn apply_effects(
         &mut self,
         data: &GameData,
         agent: &Agent,
-        action: AgentActionKind,
+        effects: &[ActionEffect],
         plan: &ActionPlan,
         events: &mut Vec<GameEvent>,
     ) -> String {
-        let effects = rules(data).effects.clone();
         let faction = &agent.faction;
+        let seal = i32::from(agent.level) - 1;
         let place = data.settlement_name(&plan.target);
         let province_label = data.province_name(&plan.province);
-        match action {
-            AgentActionKind::Scout => {
-                let text = self.scouting_report(data, &plan.target);
-                self.agents
-                    .intel
-                    .retain(|i| !(&i.faction == faction && i.province == plan.province));
-                self.agents.intel.push(Intel {
-                    faction: faction.clone(),
-                    province: plan.province.clone(),
-                    until_turn: self.turn + effects.intel_turns,
-                });
-                format!("{} renseigne sur {place} : {text}", agent.name)
-            }
-            AgentActionKind::Sabotage => {
-                let s = self.settlements.get_mut(&plan.target).expect("validated");
-                if let Some(siege) = s.siege.as_mut() {
-                    siege.breach = siege
-                        .breach
-                        .saturating_add(effects.sabotage_breach)
-                        .min(100);
-                    siege.supplies = siege.supplies.saturating_sub(effects.sabotage_supplies);
-                    format!(
-                        "{} ouvre une brèche et gâte les vivres de {place} assiégée.",
-                        agent.name
-                    )
-                } else {
-                    for unit in &mut s.garrison {
-                        unit.morale = unit.morale.saturating_sub(effects.sabotage_morale);
-                    }
-                    if let Some(c) = s.construction.as_mut() {
-                        c.turns_left += effects.sabotage_delay_turns;
-                        format!(
-                            "{} incendie le chantier de {place} (retard de {} saisons) et sème le trouble dans la garnison.",
-                            agent.name, effects.sabotage_delay_turns
-                        )
+        let province_de = crate::events::de(&province_label);
+        let target = data.faction_name(&plan.target_faction);
+        let cost = plan.cost.to_string();
+        let captive = plan
+            .character
+            .as_ref()
+            .map_or_else(String::new, |c| self.character_name(data, c));
+        let say = |template: &str, extra: &[(&str, &str)]| {
+            let mut vars = vec![
+                ("agent", agent.name.as_str()),
+                ("place", place.as_str()),
+                ("province", province_de.as_str()),
+                ("target", target.as_str()),
+                ("cost", cost.as_str()),
+                ("captive", captive.as_str()),
+            ];
+            vars.extend_from_slice(extra);
+            fill(template, &vars)
+        };
+        let mut texts: Vec<String> = Vec::new();
+        for effect in effects {
+            let text = match effect {
+                ActionEffect::Scout {
+                    intel_turns,
+                    text_fr,
+                } => {
+                    let report = self.scouting_report(data, &plan.target);
+                    self.agents
+                        .intel
+                        .retain(|i| !(&i.faction == faction && i.province == plan.province));
+                    self.agents.intel.push(Intel {
+                        faction: faction.clone(),
+                        province: plan.province.clone(),
+                        until_turn: self.turn + intel_turns,
+                    });
+                    say(text_fr, &[("report", &report)])
+                }
+                ActionEffect::Sabotage {
+                    breach,
+                    supplies,
+                    delay_turns,
+                    morale,
+                    siege_fr,
+                    works_fr,
+                    troubled_fr,
+                } => {
+                    let s = self.settlements.get_mut(&plan.target).expect("validated");
+                    let (turns, value) = (delay_turns.to_string(), morale.to_string());
+                    let extra = [("turns", turns.as_str()), ("value", value.as_str())];
+                    if let Some(siege) = s.siege.as_mut() {
+                        siege.breach = siege.breach.saturating_add(*breach).min(100);
+                        siege.supplies = siege.supplies.saturating_sub(*supplies);
+                        say(siege_fr, &extra)
                     } else {
-                        format!(
-                            "{} sème le trouble dans la garnison de {place} (moral −{}).",
-                            agent.name, effects.sabotage_morale
-                        )
-                    }
-                }
-            }
-            AgentActionKind::Incite => {
-                if let Some(p) = self.provinces.get_mut(&plan.province) {
-                    for class in [&mut p.population.peasants, &mut p.population.burghers] {
-                        class.unrest = class.unrest.saturating_add(effects.incite_unrest).min(100);
-                    }
-                }
-                format!(
-                    "{} attise la colère des paysans et des bourgeois {} (mécontentement +{}).",
-                    agent.name,
-                    crate::events::de(&province_label),
-                    effects.incite_unrest
-                )
-            }
-            AgentActionKind::Counter => self.counter_espionage(data, agent, plan, events),
-            AgentActionKind::Parley => {
-                let value = effects.parley_opinion
-                    + effects.parley_opinion_per_level * (i32::from(agent.level) - 1);
-                self.add_capped_modifier(
-                    data,
-                    &plan.target_faction,
-                    faction,
-                    value,
-                    PARLEY_REASON,
-                    effects.parley_turns,
-                );
-                format!(
-                    "{} est reçu en ambassade par {} : opinion +{value} pour {} saisons.",
-                    agent.name,
-                    data.faction_name(&plan.target_faction),
-                    effects.parley_turns
-                )
-            }
-            AgentActionKind::Truce => {
-                let value = (effects.parley_opinion
-                    + effects.parley_opinion_per_level * (i32::from(agent.level) - 1))
-                    / 2;
-                self.add_capped_modifier(
-                    data,
-                    &plan.target_faction,
-                    faction,
-                    value,
-                    PARLEY_REASON,
-                    effects.parley_turns,
-                );
-                let target = plan.target_faction.clone();
-                let result = self.propose(
-                    data,
-                    faction,
-                    &target,
-                    Treaty::single(Article::Mediation {
-                        turns: effects.truce_turns,
-                    }),
-                );
-                let enemy = data.faction_name(&target);
-                match result {
-                    Ok(()) if target == self.player_faction => {
-                        format!("{} porte une proposition de trêve à {enemy}.", agent.name)
-                    }
-                    Ok(()) => format!(
-                        "{} obtient une trêve de {} saisons avec {enemy}.",
-                        agent.name, effects.truce_turns
-                    ),
-                    Err(e) => format!("{} est entendu, mais {e}", agent.name),
-                }
-            }
-            AgentActionKind::Bribe => {
-                crate::siege::capture(self, data, &plan.target, faction, events);
-                format!(
-                    "{} achète la garnison de {place} pour {} livres : elle ouvre ses portes.",
-                    agent.name, plan.cost
-                )
-            }
-            AgentActionKind::Ransom => {
-                let captive = plan.character.clone().expect("validated");
-                crate::chronicle::release_character(self, data, &captive, plan.cost, events);
-                format!(
-                    "{} rachète {} pour {} livres.",
-                    agent.name,
-                    self.character_name(data, &captive),
-                    plan.cost
-                )
-            }
-            AgentActionKind::Preach => {
-                let drop = effects.preach_heresy.saturating_add(
-                    effects
-                        .preach_heresy_per_level
-                        .saturating_mul(agent.level - 1),
-                );
-                let mut heresy_text = String::new();
-                if let Some(p) = self.provinces.get_mut(&plan.province) {
-                    if p.heresy > 0 {
-                        p.heresy = p.heresy.saturating_sub(drop);
-                        heresy_text = format!(" L'hérésie recule (−{drop}).");
-                        if p.heresy == 0 {
-                            p.heresy_religion = None;
-                            heresy_text = " L'hérésie est extirpée.".to_owned();
+                        for unit in &mut s.garrison {
+                            unit.morale = unit.morale.saturating_sub(*morale);
+                        }
+                        if let Some(c) = s.construction.as_mut() {
+                            c.turns_left += delay_turns;
+                            say(works_fr, &extra)
+                        } else {
+                            say(troubled_fr, &extra)
                         }
                     }
-                    for class in [&mut p.population.clergy, &mut p.population.peasants] {
-                        class.unrest = class.unrest.saturating_sub(effects.preach_unrest);
+                }
+                ActionEffect::Unrest {
+                    classes,
+                    delta,
+                    per_level,
+                    text_fr,
+                } => {
+                    let delta = delta + per_level * seal;
+                    if let Some(p) = self.provinces.get_mut(&plan.province) {
+                        for class in classes {
+                            let gauge = &mut p.population.get_mut(*class).unrest;
+                            *gauge = (i32::from(*gauge) + delta).clamp(0, 100) as u8;
+                        }
+                    }
+                    say(text_fr, &[("value", &delta.to_string())])
+                }
+                ActionEffect::Heresy {
+                    drop,
+                    per_level,
+                    receded_fr,
+                    uprooted_fr,
+                } => {
+                    let drop = drop.saturating_add(per_level.saturating_mul(agent.level - 1));
+                    match self.provinces.get_mut(&plan.province) {
+                        Some(p) if p.heresy > 0 => {
+                            p.heresy = p.heresy.saturating_sub(drop);
+                            if p.heresy == 0 {
+                                p.heresy_religion = None;
+                                say(uprooted_fr, &[])
+                            } else {
+                                say(receded_fr, &[("value", &drop.to_string())])
+                            }
+                        }
+                        _ => String::new(),
                     }
                 }
-                format!(
-                    "{} prêche dans la province {} : les esprits s'apaisent.{heresy_text}",
-                    agent.name,
-                    crate::events::de(&province_label)
-                )
-            }
-            AgentActionKind::Denounce => {
-                if let Some(p) = self.provinces.get_mut(&plan.province) {
-                    p.population.clergy.unrest = p
-                        .population
-                        .clergy
-                        .unrest
-                        .saturating_add(effects.denounce_clergy_unrest)
-                        .min(100);
-                    p.population.peasants.unrest = p
-                        .population
-                        .peasants
-                        .unrest
-                        .saturating_add(effects.denounce_peasant_unrest)
-                        .min(100);
+                ActionEffect::Opinion {
+                    reason_fr,
+                    value,
+                    per_level,
+                    divisor,
+                    turns,
+                    text_fr,
+                } => {
+                    let value = (value + per_level * seal) / (*divisor).max(1);
+                    self.add_capped_modifier(
+                        data,
+                        &plan.target_faction,
+                        faction,
+                        value,
+                        reason_fr,
+                        *turns,
+                    );
+                    say(
+                        text_fr,
+                        &[("value", &value.to_string()), ("turns", &turns.to_string())],
+                    )
                 }
-                crate::religion::change_favor(
-                    self,
-                    &plan.target_faction,
-                    -i32::from(effects.denounce_favor),
-                );
-                format!(
-                    "{} tonne en chaire contre {} : le clergé {} s'agite et le pape s'en émeut.",
-                    agent.name,
-                    data.faction_name(&plan.target_faction),
-                    crate::events::de(&province_label)
-                )
-            }
-            AgentActionKind::Curia => {
-                let gain = effects.curia_favor.saturating_add(
-                    effects
-                        .curia_favor_per_level
-                        .saturating_mul(agent.level - 1),
-                );
-                crate::religion::change_favor(self, faction, i32::from(gain));
-                format!(
-                    "{} plaide la cause de son prince à la Curie : faveur pontificale +{gain}.",
-                    agent.name
-                )
+                ActionEffect::Mediation {
+                    turns,
+                    proposed_fr,
+                    agreed_fr,
+                    refused_fr,
+                } => {
+                    let result = self.propose(
+                        data,
+                        faction,
+                        &plan.target_faction.clone(),
+                        Treaty::single(Article::Mediation { turns: *turns }),
+                    );
+                    match result {
+                        Ok(()) if plan.target_faction == self.player_faction => {
+                            say(proposed_fr, &[])
+                        }
+                        Ok(()) => say(agreed_fr, &[("turns", &turns.to_string())]),
+                        Err(e) => say(refused_fr, &[("error", &e.to_string())]),
+                    }
+                }
+                ActionEffect::Favor {
+                    on,
+                    amount,
+                    per_level,
+                    text_fr,
+                } => {
+                    let amount = amount + per_level * seal;
+                    let who = match on {
+                        EffectSubject::Own => faction,
+                        EffectSubject::Target => &plan.target_faction,
+                    };
+                    crate::religion::change_favor(self, &who.clone(), amount);
+                    say(text_fr, &[("value", &amount.to_string())])
+                }
+                ActionEffect::Capture { text_fr } => {
+                    crate::siege::capture(self, data, &plan.target, faction, events);
+                    say(text_fr, &[])
+                }
+                ActionEffect::Release { text_fr } => {
+                    let captive = plan.character.clone().expect("validated");
+                    crate::chronicle::release_character(self, data, &captive, plan.cost, events);
+                    say(text_fr, &[])
+                }
+                ActionEffect::Unmask {
+                    found_fr,
+                    none_fr,
+                    executed_fr,
+                } => self.counter_espionage(
+                    data,
+                    agent,
+                    plan,
+                    events,
+                    [found_fr, none_fr, executed_fr],
+                ),
+            };
+            if !text.is_empty() {
+                texts.push(text);
             }
         }
+        texts.join(" ")
     }
 
     /// Detailed report on a settlement (scouting).
@@ -1424,8 +1362,10 @@ impl CampaignState {
         agent: &Agent,
         plan: &ActionPlan,
         events: &mut Vec<GameEvent>,
+        [found_fr, none_fr, executed_fr]: [&str; 3],
     ) -> String {
         let rules = rules(data);
+        let province_de = crate::events::de(&data.province_name(&plan.province));
         let intruders: Vec<(AgentId, u8)> = self
             .agents_in_province(&plan.province)
             .filter(|(_, a)| !self.is_allied(&agent.faction, &a.faction))
@@ -1447,10 +1387,9 @@ impl CampaignState {
             }
         }
         if caught.is_empty() {
-            return format!(
-                "{} fouille les auberges {} : aucun agent étranger démasqué.",
-                agent.name,
-                crate::events::de(&data.province_name(&plan.province))
+            return fill(
+                none_fr,
+                &[("agent", &agent.name), ("province", &province_de)],
             );
         }
         let names: Vec<String> = caught
@@ -1464,10 +1403,9 @@ impl CampaignState {
                     events.push(
                         GameEvent::new(
                             EventKind::Agent,
-                            format!(
-                                "{} est démasqué {} et exécuté.",
-                                victim.name,
-                                crate::events::de(&data.province_name(&plan.province))
+                            fill(
+                                executed_fr,
+                                &[("agent", &victim.name), ("province", &province_de)],
                             ),
                         )
                         .province(&plan.province)
@@ -1476,48 +1414,48 @@ impl CampaignState {
                 }
             }
         }
-        format!("{} démasque {}.", agent.name, names.join(", "))
+        fill(
+            found_fr,
+            &[("agent", &agent.name), ("names", &names.join(", "))],
+        )
     }
 }
 
 fn failure_text(
     data: &GameData,
     agent: &Agent,
-    action: AgentActionKind,
+    spec: &ActionSpec,
     plan: &ActionPlan,
     state: &CampaignState,
 ) -> String {
     let place = data.settlement_name(&plan.target);
-    let action_name = rules(data)
-        .actions
-        .get(&action)
-        .map_or_else(|| action.key().to_owned(), |r| r.name.to_lowercase());
-    let extra = match action {
-        AgentActionKind::Bribe => format!(" ({} livres perdues)", plan.cost),
-        AgentActionKind::Truce | AgentActionKind::Parley => format!(
-            " : {} ne le reçoit pas",
-            data.faction_name(&plan.target_faction)
-        ),
-        AgentActionKind::Ransom => format!(
-            " : le geôlier de {} refuse",
-            plan.character
-                .as_ref()
-                .map_or_else(String::new, |c| state.character_name(data, c))
-        ),
-        _ => String::new(),
-    };
+    let extra = fill(
+        &spec.failure_extra_fr,
+        &[
+            ("cost", &plan.cost.to_string()),
+            ("target", &data.faction_name(&plan.target_faction)),
+            (
+                "captive",
+                &plan
+                    .character
+                    .as_ref()
+                    .map_or_else(String::new, |c| state.character_name(data, c)),
+            ),
+        ],
+    );
     format!(
-        "{} échoue à {action_name} ({place}, {} % de chances){extra}.",
-        agent.name, plan.chance
+        "{} échoue à {} ({place}, {} % de chances){extra}.",
+        agent.name,
+        spec.name.to_lowercase(),
+        plan.chance
     )
 }
 
-fn lost_text(kind: AgentKind, name: &str) -> String {
-    match kind {
-        AgentKind::Spy => format!("{name} est pris et pendu."),
-        AgentKind::Emissary => format!("{name}, pris à trahir son office, est jeté en geôle."),
-        AgentKind::Preacher => format!("{name} est jeté en geôle."),
-    }
+/// Fills the `{key}` placeholders of a French template.
+fn fill(template: &str, vars: &[(&str, &str)]) -> String {
+    vars.iter().fold(template.to_owned(), |text, (key, value)| {
+        text.replace(&format!("{{{key}}}"), value)
+    })
 }
 
 /// Walks `id` along the path to its destination while its points allow.
@@ -1862,7 +1800,7 @@ fn ai_emissary(
     let action_cost = rules(data)
         .actions
         .get(&AgentActionKind::Ransom)
-        .map_or(0, |r| i64::from(r.cost));
+        .map_or(0, |r| i64::from(r.cost.flat));
     let action_cost = crate::coinage::priced(state, faction, action_cost);
     let captor = state
         .characters

@@ -99,14 +99,176 @@ pub struct AgentTypeRules {
     pub names: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    /// Report when an action fails and the agent is lost (`{agent}`).
+    pub lost_fr: String,
 }
 
-/// Odds and risk of one action.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// A condition on the target of an action, evaluated in table order: the
+/// first one that fails refuses the action with its `reason_fr`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ActionCheck {
+    /// The settlement's master is another faction than the agent's.
+    ForeignMaster,
+    /// The master is not the rebels.
+    NotRebels,
+    AtWar,
+    NotAtWar,
+    /// The master is the agent's faction or an ally of it.
+    AlliedMaster,
+    /// No embassy of this faction is still running at the master's court.
+    NoEmbassy,
+    NoTruce,
+    /// No hostile army stands on the settlement.
+    NoHostileArmy,
+    /// The faction has a captive the master holds for money (selects it).
+    CaptiveHeld,
+    /// The province is friendly territory.
+    FriendlyProvince,
+    /// The province's master is an enemy, an excommunicated or a rival-obedience prince.
+    DenounceableMaster,
+    /// The settlement belongs to the Papacy.
+    PapalCity,
+    CatholicFaction,
+}
+
+/// One condition of an action and its French refusal text.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AgentActionRules {
+pub struct ActionCondition {
+    pub check: ActionCheck,
+    pub reason_fr: String,
+}
+
+/// Whose opinion/favour an effect touches.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ActionAim {
+    /// The master of the targeted settlement (default).
+    #[default]
+    SettlementMaster,
+    /// The master of the targeted settlement's province.
+    ProvinceMaster,
+}
+
+/// Who an effect applies to (papal favour).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EffectSubject {
+    /// The agent's own faction.
+    #[default]
+    Own,
+    /// The action's target faction.
+    Target,
+}
+
+/// One effect of an action. Texts are French templates with `{agent}`,
+/// `{place}`, `{province}` (as "de X"), `{target}`, `{value}`, `{turns}`,
+/// `{cost}`, `{captive}`, `{report}`, `{names}`; an empty text says nothing.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ActionEffect {
+    /// Detailed report on the settlement, province kept in sight.
+    Scout { intel_turns: u32, text_fr: String },
+    /// Breach and spoiled supplies in a siege, else delayed works and morale.
+    Sabotage {
+        breach: u8,
+        supplies: u8,
+        delay_turns: u32,
+        morale: u8,
+        siege_fr: String,
+        works_fr: String,
+        troubled_fr: String,
+    },
+    /// Unrest of the province's classes (`delta` signed, plus `per_level` per seal above the first).
+    Unrest {
+        classes: Vec<crate::SocialClass>,
+        delta: i32,
+        #[serde(default)]
+        per_level: i32,
+        #[serde(default)]
+        text_fr: String,
+    },
+    /// Pushes the province's heresy back.
+    Heresy {
+        drop: u8,
+        per_level: u8,
+        receded_fr: String,
+        uprooted_fr: String,
+    },
+    /// Opinion modifier of the target faction about the agent's, optionally
+    /// negative; `value + per_level * (seal - 1)`, divided by `divisor`.
+    Opinion {
+        reason_fr: String,
+        value: i32,
+        #[serde(default)]
+        per_level: i32,
+        #[serde(default = "one")]
+        divisor: i32,
+        turns: u32,
+        #[serde(default)]
+        text_fr: String,
+    },
+    /// Proposes a mediation (truce) treaty to the target faction.
+    Mediation {
+        turns: u32,
+        proposed_fr: String,
+        agreed_fr: String,
+        refused_fr: String,
+    },
+    /// Papal favour (negative: lost).
+    Favor {
+        on: EffectSubject,
+        amount: i32,
+        #[serde(default)]
+        per_level: i32,
+        #[serde(default)]
+        text_fr: String,
+    },
+    /// The garrison opens the gates.
+    Capture { text_fr: String },
+    /// Buys the selected captive back.
+    Release { text_fr: String },
+    /// Rolls against every foreign agent of the province.
+    Unmask {
+        found_fr: String,
+        none_fr: String,
+        executed_fr: String,
+    },
+}
+
+fn one() -> i32 {
+    1
+}
+
+/// Price of an action: `ransom` (price of the selected captive at the
+/// agent's seal) plus `flat + garrison * per_man_percent / 100`, the latter
+/// times the faction's price level.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ActionCost {
+    #[serde(default)]
+    pub flat: u32,
+    #[serde(default)]
+    pub per_man_percent: u32,
+    #[serde(default)]
+    pub ransom: bool,
+}
+
+/// An action of the table `data/rules/agents.json` `actions`: price, range,
+/// conditions, odds, effects and labels, run by the single engine of
+/// `sim-campaign/src/agents.rs` (ADR 0209).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ActionSpec {
     /// French display name.
     pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// Actions of one group share a single button of the action bar (the
+    /// first available one is shown).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group: Option<String>,
     /// Success chance (percent) of a first-seal agent.
     pub base_chance: i32,
     /// Extra percent per seal above the first.
@@ -114,56 +276,36 @@ pub struct AgentActionRules {
     /// Percent chance of death (or jail) when the action fails.
     #[serde(default)]
     pub death_risk: u32,
-    /// Flat cost in livres (times the price level); the bribe adds its own.
+    /// Hostile: fortification and enemy spies lower the chance.
     #[serde(default)]
-    pub cost: u32,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub hostile: bool,
+    /// One percent of success lost per this many men of garrison (0: none).
+    #[serde(default)]
+    pub garrison_men_per_malus: u32,
+    #[serde(default)]
+    pub cost: ActionCost,
+    #[serde(default)]
+    pub aim: ActionAim,
+    /// The target's master learns of the attempt (always on failure).
+    #[serde(default)]
+    pub reveals: bool,
+    #[serde(default)]
+    pub conditions: Vec<ActionCondition>,
+    pub success: Vec<ActionEffect>,
+    /// Applied on failure (the base text is built by the engine).
+    #[serde(default)]
+    pub failure: Vec<ActionEffect>,
+    /// Failure suffix, with `{cost}`, `{target}`, `{captive}`.
+    #[serde(default)]
+    pub failure_extra_fr: String,
 }
-
-/// Magnitudes of the action effects.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct AgentEffects {
-    /// Seasons a successful scouting keeps the target province in sight.
-    pub intel_turns: u32,
-    pub sabotage_breach: u8,
-    pub sabotage_supplies: u8,
-    pub sabotage_delay_turns: u32,
-    pub sabotage_morale: u8,
-    pub incite_unrest: u8,
-    pub parley_opinion: i32,
-    pub parley_opinion_per_level: i32,
-    pub parley_turns: u32,
-    pub truce_turns: u32,
-    pub bribe_base_cost: u32,
-    /// Livres per man of the garrison, in per cent (50: half a livre).
-    pub bribe_cost_per_man_percent: u32,
-    /// One percent of success lost per this many men of garrison.
-    pub bribe_men_per_malus: u32,
-    pub bribe_fail_opinion: i32,
-    /// Share of the ransom paid (percent) by a first-seal herald.
-    pub ransom_price_percent: i64,
-    pub ransom_price_per_level: i64,
-    pub ransom_price_floor: i64,
-    pub preach_heresy: u8,
-    pub preach_heresy_per_level: u8,
-    pub preach_unrest: u8,
-    pub denounce_clergy_unrest: u8,
-    pub denounce_peasant_unrest: u8,
-    pub denounce_favor: u8,
-    pub curia_favor: u8,
-    pub curia_favor_per_level: u8,
-}
-
-crate::bundled_rules!(AgentEffects, "rules/agents.json", at "/effects", default);
 
 /// Contents of `data/rules/agents.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AgentRules {
     pub types: BTreeMap<AgentKind, AgentTypeRules>,
-    pub actions: BTreeMap<AgentActionKind, AgentActionRules>,
+    pub actions: BTreeMap<AgentActionKind, ActionSpec>,
     /// Experience needed for seals 2, 3, 4 and 5.
     pub experience_thresholds: Vec<u32>,
     #[serde(default = "default_xp_success")]
@@ -199,8 +341,6 @@ pub struct AgentRules {
     /// faction keeps one agent of each kind.
     #[serde(default)]
     pub ai_network_min_income: i64,
-    #[serde(default)]
-    pub effects: AgentEffects,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
