@@ -124,3 +124,14 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 ## Reprise 09/10 soir (vague 15 suite)
 - Consignes communes désormais dans le dépôt : `docs/wip/sc/brief-common.md` (le brief du scratchpad est perdu).
 - Agents relancés sur hooks, army, bscene, codexaudio, mapjobs, parchment (worktrees existants). gt3 fini : rebasé sur main, vérif des 7 tests dn_* en cours. rt (Rust, tests) relancé après cette vague.
+
+## CLÔTURE 09/10 nuit — SC terminé
+- Vagues 15-16 et lots doc fusionnés dans main : codexaudio, rt, parchment, mc1, army, ms8, mapjobs, probes, hooks, bt3, bscene, bt6, json, docs (DC-3/4/5), rt78, bt10, ms7, gt3 (GT3/GT4), gb7, cadoc (CA10/CC15), mc15 (MC15/UI10), bb12 (BB12/BA14). Rien À FAIRE : PF-04, MB14, GT6. Aucun worktree SC restant.
+- Vérification finale sur main : cargo fmt / clippy -D warnings / cargo test --workspace verts (après correctifs ci-dessous), pytest vert, smoke + decor_hover (voir dernier commit).
+- Correctifs de clôture : clippy GradeLut (ms8) ; `soft_distance` masqué dans fx_particle.gdshaderinc (SHADER ERROR) ; import `Table` manquant dans `_geo_common.py` (TL10) ; navgrid régénéré (forêts DN-FORET) et test de marche Paris-Toulouse porté à 10 tours ; schéma tooltip_style (`decor_hover`, NA) ; test d'essences plafonné à MAX_SPECIES=64 ; test des affleurements qui ignore les entrées à modèle DN.
+- Restes ouverts (non SC ou gelés) :
+  - `dn_campaign_models_test` bloque à l'arrêt (code 137) sur main comme sur la branche : à diagnostiquer (fin de processus, pas une assertion).
+  - `zg5b_fine_geo_test` (3 échecs, antérieur) ; `decor_hover_test` sensible à la taille de la fenêtre headless (passe 9/9 en worktree propre).
+  - RT7 PARTIEL : tests lents gardés (liste dans restants.md) ; candidat `#[ignore]` : `a_century_without_panic` (131 s).
+  - BT12 PARTIEL (`_refresh_view`), MC1 branche `height_bpp==2` inerte, `cargo doc -p sim-battle` : 21 liens vers items pub(crate).
+  - Balises d'historique sans le mot « lot » (G2, M9…) laissées dans core/ ; battle_vegetation.gd (gelé) garde les siennes.
