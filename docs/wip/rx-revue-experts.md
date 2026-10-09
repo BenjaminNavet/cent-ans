@@ -25,3 +25,8 @@ Mandat : méthode code + tests + captures (≈ 10 par critique visuel) ; correct
 
 ## Notes
 - Disque 21 Go libres au départ : worktrees de correction avec `CARGO_PROFILE_DEV_DEBUG=0 CARGO_INCREMENTAL=0`, `rm -rf core/target` en fin de lot.
+
+## Vérification finale (10-10)
+- `cargo fmt --check`, `clippy --workspace --all-targets -D warnings`, `cargo test --workspace` : verts.
+- `smoke.gd` complet : 32 étapes OK, 0 erreur de script ou de shader (après `--import` et reconstruction de la dylib : les classes `ExpectedErrors` et `MissionTracker` n'étaient pas dans le cache local).
+- pytest : 3389 réussis ; échecs restants hors RX : `test_budget` (lignes de cumul saisies à la main par DN), `test_settlement_graph` ×2 et `test_settlements_schema[prov_bar]` (déjà en échec avant RX : relancer `geo roads` puis `geo hamlets`). `test_icons` corrigé par WH (af7d60fde).
