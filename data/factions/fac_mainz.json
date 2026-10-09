@@ -19,7 +19,7 @@
   "primary_title": "tit_mainz",
   "heraldry": {
     "blazon": "De gueules à la roue d'argent à six rais.",
-    "description": "La roue de Mayence, attribut héraldique de l'archevêché-électorat depuis le XIIIe siècle.",
+    "description": "La roue de Mayence, attribut héraldique de l’archevêché-électorat depuis le XIIIe siècle.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
   },
@@ -47,7 +47,7 @@
     "trade": 55,
     "piety": 80
   },
-  "description": "Électorat ecclésiastique de Mayence, tenu par l'archevêque Henri III de Virnebourg, archichancelier du royaume de Germanie ; Francfort, cité impériale et grande foire du Main, relève de son diocèse.",
+  "description": "Électorat ecclésiastique de Mayence, tenu par l’archevêque Henri III de Virnebourg, archichancelier du royaume de Germanie ; Francfort, cité impériale et grande foire du Main, relève de son diocèse.",
   "sources": [
     "Électorat de Mayence",
     "Henri III de Virnebourg"

@@ -1,7 +1,7 @@
 {
   "id": "fac_aydin",
   "name": {
-    "display": "Beylik d'Aydın",
+    "display": "Beylik d’Aydın",
     "local": "Aydınoğulları",
     "local_language": "turc ottoman"
   },
@@ -68,7 +68,7 @@
     "trade": 65,
     "piety": 55
   },
-  "description": "Beylik de l'Égée d'Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; il réside à Birgi, tandis que son frère aîné Hızır Bey tient Ayasoluk (Éphèse).",
+  "description": "Beylik de l’Égée d’Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; il réside à Birgi, tandis que son frère aîné Hızır Bey tient Ayasoluk (Éphèse).",
   "sources": [
     "Aydınids",
     "Umur Bey"

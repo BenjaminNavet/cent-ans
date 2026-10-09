@@ -98,7 +98,7 @@ func _run_minimap_fog() -> void:
 	var layout: Node = root.get_node("/root/UiLayout")
 	_check(minimap.get_parent() == layout.zone_node(layout.Zone.MINIMAP), "minimap should sit in the MINIMAP zone")
 	_check(layout.occupants(layout.Zone.SIDE_PANEL).has(map.ui.news_letters), "news letters should sit in the SIDE_PANEL zone")
-	_check(minimap.army_dot_count() > 0, "minimap should show the player's armies")
+	_check(minimap.army_dot_count() > 0, "minimap should show the player’s armies")
 	# Clic : la caméra vise le point cliqué (coordonnées carte).
 	var local: Vector2 = minimap.map_rect().size * Vector2(0.25, 0.7)
 	var expected: Vector2 = minimap.view_to_map(local)

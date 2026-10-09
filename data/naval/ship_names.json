@@ -1,5 +1,5 @@
 {
-  "description": "Noms des navires de campagne (lot NV2), par faction et par port d'attache. Une flotte qui appareille d'un port prend d'abord les noms de ce port, puis les noms généraux de sa faction. Les navires médiévaux portaient surtout des noms de saints (la Marie, le Saint-Denis), souvent suivis du port : « la Marguerite de Rye », « la Nicolas de Sandwich ». Les noms des rôles de 1337-1340 (Cinq-Ports, flotte de l'Écluse) sont complétés de noms plausibles de la même forme.",
+  "description": "Noms des navires de campagne (lot NV2), par faction et par port d’attache. Une flotte qui appareille d’un port prend d’abord les noms de ce port, puis les noms généraux de sa faction. Les navires médiévaux portaient surtout des noms de saints (la Marie, le Saint-Denis), souvent suivis du port : « la Marguerite de Rye », « la Nicolas de Sandwich ». Les noms des rôles de 1337-1340 (Cinq-Ports, flotte de l’Écluse) sont complétés de noms plausibles de la même forme.",
   "factions": [
     {
       "faction": "fac_england",

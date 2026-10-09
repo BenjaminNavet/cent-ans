@@ -1,5 +1,5 @@
 {
-  "description": "Rendu des cours d'eau de la carte de campagne (lot V4, A1-11) : largeur affichée à l'embouchure (pixels carte, 1 px = 719 m), exagérée environ 2,5 fois par rapport au lit réel pour rester lisible. La largeur décroît vers l'amont selon l'altitude (taper_*). Rendu seulement : aucune règle de jeu.",
+  "description": "Rendu des cours d’eau de la carte de campagne (lot V4, A1-11) : largeur affichée à l’embouchure (pixels carte, 1 px = 719 m), exagérée environ 2,5 fois par rapport au lit réel pour rester lisible. La largeur décroît vers l’amont selon l’altitude (taper_*). Rendu seulement : aucune règle de jeu.",
   "width_by_importance": [0.16, 0.18, 0.22, 0.28, 0.36, 0.46, 0.56],
   "taper_min": 0.45,
   "taper_low_m": 20.0,

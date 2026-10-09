@@ -42,7 +42,7 @@ const CAMPAIGN_SECTIONS := [
 		["campaign_next_idle", "Armée inactive suivante (centre et sélectionne)"],
 		["campaign_prev_idle", "Armée inactive précédente"],
 		["campaign_next_settlement", "Colonie suivante"], ["campaign_capital", "Aller à la capitale"],
-		["army_center", "Centrer sur l'armée sélectionnée"],
+		["army_center", "Centrer sur l’armée sélectionnée"],
 		["army_split", "Séparer les régiments choisis"], ["army_garrison", "Laisser les régiments choisis en garnison"],
 		["army_stance_normal", "Posture : normale"], ["army_stance_raid", "Posture : chevauchée"],
 		["army_stance_siege", "Posture : siège"], ["army_stance_ambush", "Posture : embuscade"],
@@ -50,7 +50,7 @@ const CAMPAIGN_SECTIONS := [
 	{"title": "Partie", "actions": [
 		["campaign_end_turn", "Finir la saison"], ["campaign_end_turn_fast", "Finir la saison sans confirmation"], ["campaign_pause", "Fermer la fenêtre du dessus, puis menu pause"],
 		["quick_save", "Sauvegarde rapide"], ["quick_load", "Chargement rapide"],
-		["map_screenshot", "Capture d'écran"], ["codex_pin_tooltip", "Maintenir ouverte la bulle ou l'infobulle"],
+		["map_screenshot", "Capture d’écran"], ["codex_pin_tooltip", "Maintenir ouverte la bulle ou l’infobulle"],
 		["tooltip_explore", "Maintenir : explorer les infobulles en chaîne (survol des mots-clés)"]]},
 ]
 ## Commandes à la souris (hors `InputMap`).

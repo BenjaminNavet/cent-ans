@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Comté de Hainaut tenu par Guillaume Ier d'Avesnes, beau-père d'Édouard III, qui meurt le 7 juin 1337 ; son fils Guillaume II, beau-frère du roi anglais, lui succède ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
+    "description": "Comté de Hainaut tenu par Guillaume Ier d’Avesnes, beau-père d’Édouard III, qui meurt le 7 juin 1337 ; son fils Guillaume II, beau-frère du roi anglais, lui succède ; Valenciennes est une place drapière. Cambrai, cité impériale, y est enclavée.",
     "sources": [
       "Comté de Hainaut",
       "Guillaume II de Hainaut",
@@ -54,7 +54,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande de l'Escaut, l'une des principales places de Hainaut, où naît vers 1337 le futur chroniqueur Jean Froissart.",
+    "description": "Ville marchande de l’Escaut, l’une des principales places de Hainaut, où naît vers 1337 le futur chroniqueur Jean Froissart.",
     "sources": [
       "Valenciennes"
     ]
@@ -103,7 +103,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne sur la Sambre, l'une des plus riches du Hainaut.",
+    "description": "Abbaye cistercienne sur la Sambre, l’une des plus riches du Hainaut.",
     "sources": [
       "Abbaye d'Aulne"
     ]
@@ -129,7 +129,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville fortifiée berceau de la maison d'Avesnes, famille comtale de Hainaut depuis 1280 et de Hollande depuis 1299.",
+    "description": "Ville fortifiée berceau de la maison d’Avesnes, famille comtale de Hainaut depuis 1280 et de Hollande depuis 1299.",
     "sources": [
       "Avesnes-sur-Helpe",
       "Maison d'Avesnes"
@@ -179,7 +179,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg fortifié d'une seigneurie du sud du Hainaut, à la frontière du comté de Namur.",
+    "description": "Bourg fortifié d’une seigneurie du sud du Hainaut, à la frontière du comté de Namur.",
     "sources": [
       "Beaumont (Hainaut)"
     ]
@@ -189,7 +189,7 @@
     "province": "prov_hainaut",
     "kind": "village",
     "name": {
-      "display": "Condé-sur-l'Escaut",
+      "display": "Condé-sur-l’Escaut",
       "local": "Condé",
       "local_language": "ancien français"
     },
@@ -205,9 +205,9 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg fortifié au confluent de l'Escaut et de la Haine, à la frontière nord du Hainaut.",
+    "description": "Bourg fortifié au confluent de l’Escaut et de la Haine, à la frontière nord du Hainaut.",
     "sources": [
-      "Condé-sur-l'Escaut"
+      "Condé-sur-l’Escaut"
     ]
   },
   {
@@ -231,7 +231,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine sur la Haine, fondée autour de l'ermitage de saint Ghislain au VIIe siècle.",
+    "description": "Abbaye bénédictine sur la Haine, fondée autour de l’ermitage de saint Ghislain au VIIe siècle.",
     "sources": [
       "Abbaye de Saint-Ghislain"
     ]

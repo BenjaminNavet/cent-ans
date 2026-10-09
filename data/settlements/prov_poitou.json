@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close à l'orée du Marais poitevin, marché du sel et du cuir.",
+    "description": "Ville close à l’orée du Marais poitevin, marché du sel et du cuir.",
     "sources": [
       "Niort"
     ]
@@ -63,7 +63,7 @@
     "province": "prov_poitou",
     "kind": "town",
     "name": {
-      "display": "Les Sables-d'Olonne",
+      "display": "Les Sables-d’Olonne",
       "local": "Les Sables",
       "local_language": "ancien français"
     },
@@ -82,7 +82,7 @@
     "port": true,
     "description": "Port fondé en 1218 sur le cordon dunaire, pour la pêche et le sel.",
     "sources": [
-      "Les Sables-d'Olonne"
+      "Les Sables-d’Olonne"
     ]
   },
   {
@@ -217,7 +217,7 @@
     "province": "prov_poitou",
     "kind": "abbey",
     "name": {
-      "display": "Saint-Maixent-l'École",
+      "display": "Saint-Maixent-l’École",
       "local": "Saint Maixent",
       "local_language": "ancien français"
     },
@@ -308,7 +308,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg minier ayant frappé le denier carolingien, réputé pour ses mines d'argent.",
+    "description": "Bourg minier ayant frappé le denier carolingien, réputé pour ses mines d’argent.",
     "sources": [
       "Melle (Deux-Sèvres)"
     ]

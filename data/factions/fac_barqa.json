@@ -2,7 +2,7 @@
   "id": "fac_barqa",
   "name": {
     "display": "Confédération de Barqa",
-    "local": "Qabā'il Barqa",
+    "local": "Qabā’il Barqa",
     "local_language": "arabe"
   },
   "short_name": "Barqa",
@@ -17,7 +17,7 @@
   "primary_title": "tit_barqa",
   "heraldry": {
     "blazon": "De sable à la lune décroissante d'or.",
-    "description": "Croissant d'or sur champ noir, étendard de tribus bédouines ; emblème de jeu, non attesté.",
+    "description": "Croissant d’or sur champ noir, étendard de tribus bédouines ; emblème de jeu, non attesté.",
     "primary_color": "#1C1C1C",
     "secondary_color": "#E0B33A",
     "uncertain": true,
@@ -49,7 +49,7 @@
     "trade": 30,
     "piety": 55
   },
-  "description": "Confédération de tribus arabes (Banu Sulaym et clientèles) de la Cyrénaïque, sous une suzeraineté mamelouke seulement nominale : les sultans du Caire n'y exercent aucun contrôle réel et achètent des chevaux aux Bédouins. Choix de modélisation : faction tribale autonome ; le lien nominal avec fac_mamluks n'est pas codé (faction créée par le lot D5), à ajouter à l'intégration.",
+  "description": "Confédération de tribus arabes (Banu Sulaym et clientèles) de la Cyrénaïque, sous une suzeraineté mamelouke seulement nominale : les sultans du Caire n’y exercent aucun contrôle réel et achètent des chevaux aux Bédouins. Choix de modélisation : faction tribale autonome ; le lien nominal avec fac_mamluks n’est pas codé (faction créée par le lot D5), à ajouter à l’intégration.",
   "sources": [
     "Cyrénaïque",
     "Banu Sulaym"

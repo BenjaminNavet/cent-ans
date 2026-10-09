@@ -1,7 +1,7 @@
 {
   "id": "evt_pragmatique_sanction",
   "title": "La Pragmatique Sanction de Bourges",
-  "text": "Le 7 juillet 1438, à Bourges, Charles VII promulgue la Pragmatique Sanction après une assemblée du clergé de France. Évêques et abbés seront élus, le pape ne disposera plus des bénéfices du royaume, et le concile général est proclamé supérieur au pape. L'Église de France devient [[cdx_gallicanisme|gallicane]] : elle regarde vers son roi plus que vers Rome.",
+  "text": "Le 7 juillet 1438, à Bourges, Charles VII promulgue la Pragmatique Sanction après une assemblée du clergé de France. Évêques et abbés seront élus, le pape ne disposera plus des bénéfices du royaume, et le concile général est proclamé supérieur au pape. L’Église de France devient [[cdx_gallicanisme|gallicane]] : elle regarde vers son roi plus que vers Rome.",
   "kind": "historical",
   "trigger": {
     "date": {

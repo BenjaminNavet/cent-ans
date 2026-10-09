@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Cité épiscopale d'Auvergne, où fut prêchée la première croisade en 1095 ; siège du bailliage royal voisin.",
+    "description": "Cité épiscopale d’Auvergne, où fut prêchée la première croisade en 1095 ; siège du bailliage royal voisin.",
     "sources": [
       "Clermont-Ferrand",
       "Concile de Clermont"
@@ -50,7 +50,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close rivale de Clermont, siège du bailliage royal d'Auvergne.",
+    "description": "Ville close rivale de Clermont, siège du bailliage royal d’Auvergne.",
     "sources": [
       "Riom"
     ]
@@ -152,7 +152,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close de Basse-Auvergne, sur l'Allier.",
+    "description": "Ville close de Basse-Auvergne, sur l’Allier.",
     "sources": [
       "Issoire"
     ]
@@ -178,7 +178,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancienne capitale du comté puis du Dauphiné d'Auvergne, résidence des comtes avant leur repli sur Vertaizon.",
+    "description": "Ancienne capitale du comté puis du Dauphiné d’Auvergne, résidence des comtes avant leur repli sur Vertaizon.",
     "sources": [
       "Vic-le-Comte"
     ]
@@ -203,7 +203,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse des comtes d'Auvergne dominant la Limagne depuis les monts Dôme.",
+    "description": "Forteresse des comtes d’Auvergne dominant la Limagne depuis les monts Dôme.",
     "sources": [
       "Château de Tournoël"
     ]
@@ -253,7 +253,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg de Limagne, chef-lieu d'une petite châtellenie.",
+    "description": "Bourg de Limagne, chef-lieu d’une petite châtellenie.",
     "sources": [
       "Aigueperse"
     ]

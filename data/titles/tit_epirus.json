@@ -2,13 +2,13 @@
   "id": "tit_epirus",
   "rank": "county",
   "name": {
-    "display": "Despotat d'Épire",
+    "display": "Despotat d’Épire",
     "local": "Δεσποτᾶτον τῆς Ἠπείρου",
     "local_language": "grec"
   },
   "heraldry": {
     "blazon": "Bandé d'argent et de gueules, au chef d'argent chargé d'une rose de gueules.",
-    "description": "Armes des Orsini (bandé, chef à la rose), maison des despotes d'Épire depuis 1323.",
+    "description": "Armes des Orsini (bandé, chef à la rose), maison des despotes d’Épire depuis 1323.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
@@ -18,7 +18,7 @@
   "holder_1337": {
     "faction": "fac_epirus",
     "sources": [
-      "Despotat d'Épire",
+      "Despotat d’Épire",
       "Nikephoros II Orsini"
     ]
   },
@@ -36,7 +36,7 @@
     {
       "id": "obj_epirus_indep",
       "title": "Refuser Byzance",
-      "description": "Ne jamais se soumettre à l'empereur.",
+      "description": "Ne jamais se soumettre à l’empereur.",
       "condition": {
         "kind": "be_independent"
       }
@@ -53,9 +53,9 @@
       }
     }
   ],
-  "description": "Despotat d'Arta et de Janina, tenu par la maison Orsini, réduit à l'Épire propre.",
+  "description": "Despotat d’Arta et de Janina, tenu par la maison Orsini, réduit à l’Épire propre.",
   "sources": [
-    "Despotat d'Épire",
+    "Despotat d’Épire",
     "Nikephoros II Orsini"
   ]
 }

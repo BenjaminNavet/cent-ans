@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à la croix d'argent.",
-    "description": "Croix blanche sur champ rouge de l'ancienne marine pisane, inverse des couleurs de la croix de Gênes.",
+    "description": "Croix blanche sur champ rouge de l’ancienne marine pisane, inverse des couleurs de la croix de Gênes.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
@@ -35,7 +35,7 @@
     {
       "id": "obj_pisa_revenge",
       "title": "Revanche sur Gênes",
-      "description": "Effacer l'humiliation de la Meloria (1284) en soumettant Gênes.",
+      "description": "Effacer l’humiliation de la Meloria (1284) en soumettant Gênes.",
       "condition": {
         "kind": "be_liege_of",
         "faction": "fac_genoa"

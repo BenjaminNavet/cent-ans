@@ -52,7 +52,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Vieux port marchand frison du Zuiderzee, jadis le plus actif de Frise, déjà sur le déclin ; il ne rejoindra la Hanse qu'à la fin du siècle.",
+    "description": "Vieux port marchand frison du Zuiderzee, jadis le plus actif de Frise, déjà sur le déclin ; il ne rejoindra la Hanse qu’à la fin du siècle.",
     "sources": [
       "Stavoren"
     ]
@@ -78,7 +78,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port frison à l'embouchure de l'Ems, marché du commerce de la mer du Nord.",
+    "description": "Port frison à l’embouchure de l’Ems, marché du commerce de la mer du Nord.",
     "sources": [
       "Emden"
     ]
@@ -156,7 +156,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne fondée en 1165 près de Rinsumageest, principale maison religieuse de Frise et centre d'influence politique frison.",
+    "description": "Abbaye cistercienne fondée en 1165 près de Rinsumageest, principale maison religieuse de Frise et centre d’influence politique frison.",
     "sources": [
       "Abbaye de Klaarkamp"
     ]

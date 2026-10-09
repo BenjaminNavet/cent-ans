@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Lille, Douai et Orchies, détachées du comté de Flandre et rattachées au domaine royal par le traité d'Athis (1305) et le transport de Flandre (1312).",
+    "description": "Lille, Douai et Orchies, détachées du comté de Flandre et rattachées au domaine royal par le traité d’Athis (1305) et le transport de Flandre (1312).",
     "sources": [
       "Transport de Flandre",
       "Lille",
@@ -102,7 +102,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine sur la Scarpe, l'une des plus anciennes de la région.",
+    "description": "Abbaye bénédictine sur la Scarpe, l’une des plus anciennes de la région.",
     "sources": [
       "Abbaye de Marchiennes"
     ]
@@ -127,7 +127,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Chef-lieu de châtellenie au sud de Lille, doté d'une collégiale et d'un marché actif.",
+    "description": "Chef-lieu de châtellenie au sud de Lille, doté d’une collégiale et d’un marché actif.",
     "sources": [
       "Seclin"
     ]
@@ -203,7 +203,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Village du Pévèle, ancienne possession de l'ordre du Temple.",
+    "description": "Village du Pévèle, ancienne possession de l’ordre du Temple.",
     "sources": [
       "Templeuve (Nord)"
     ]

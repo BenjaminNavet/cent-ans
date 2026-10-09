@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "Bandé d'or et de gueules.",
-    "description": "Bandes d'or et de gueules : armes de convention pour la commune de Raguse.",
+    "description": "Bandes d’or et de gueules : armes de convention pour la commune de Raguse.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -46,7 +46,7 @@
     {
       "id": "obj_ragusa_hum",
       "title": "Le Pelješac et le Hum",
-      "description": "Étendre les terres de la République jusqu'à l'arrière-pays.",
+      "description": "Étendre les terres de la République jusqu’à l’arrière-pays.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

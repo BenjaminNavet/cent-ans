@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "Fascé d'or et de sable.",
-    "description": "Armes primitives de la maison Gonzague (fasces d'or et de sable), avant le lion de Bohême (1394) et la croix pattée aux quatre aigles concédée par Sigismond (1433).",
+    "description": "Armes primitives de la maison Gonzague (fasces d’or et de sable), avant le lion de Bohême (1394) et la croix pattée aux quatre aigles concédée par Sigismond (1433).",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
@@ -36,7 +36,7 @@
     },
     {
       "id": "obj_mantua_independence",
-      "title": "S'affranchir de l'Empire",
+      "title": "S’affranchir de l’Empire",
       "description": "Mettre fin au vicariat impérial et régner en toute souveraineté.",
       "condition": {
         "kind": "be_independent"

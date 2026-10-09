@@ -1,7 +1,7 @@
 {
   "id": "evt_banqueroute_bardi",
   "title": "La banqueroute des Bardi et des Peruzzi",
-  "text": "Le roi d'Angleterre ne rembourse plus les sommes prodigieuses que lui ont avancées les compagnies florentines. Les Peruzzi sombrent les premiers, puis les Bardi ; les déposants assiègent les comptoirs du Mercato Nuovo.",
+  "text": "Le roi d’Angleterre ne rembourse plus les sommes prodigieuses que lui ont avancées les compagnies florentines. Les Peruzzi sombrent les premiers, puis les Bardi ; les déposants assiègent les comptoirs du Mercato Nuovo.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -22,7 +22,7 @@
   },
   "options": [
     {
-      "text": "Soutenir les compagnies avec l'argent de la Commune",
+      "text": "Soutenir les compagnies avec l’argent de la Commune",
       "effects": [
         {
           "type": "treasury",

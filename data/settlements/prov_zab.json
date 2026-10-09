@@ -59,7 +59,7 @@
     "province": "prov_zab",
     "kind": "town",
     "name": {
-      "display": "M'Sila",
+      "display": "M’Sila",
       "local": "Al-Masīla",
       "local_language": "arabe maghrébin"
     },
@@ -77,7 +77,7 @@
     "port": false,
     "description": "Ville du Hodna, fondée par les Fatimides (Muhammadiya).",
     "sources": [
-      "M'Sila"
+      "M’Sila"
     ]
   }
 ]

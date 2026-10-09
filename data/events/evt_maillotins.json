@@ -1,7 +1,7 @@
 {
   "id": "evt_maillotins",
   "title": "Les Maillotins",
-  "text": "Un percepteur ayant voulu taxer une marchande de cresson aux Halles, le peuple de Paris s'arme de maillets de plomb pris à l'Hôtel de Ville. Les collecteurs sont tués, les prisons ouvertes. Le jeune roi et ses oncles doivent choisir entre clémence et châtiment.",
+  "text": "Un percepteur ayant voulu taxer une marchande de cresson aux Halles, le peuple de Paris s’arme de maillets de plomb pris à l’Hôtel de Ville. Les collecteurs sont tués, les prisons ouvertes. Le jeune roi et ses oncles doivent choisir entre clémence et châtiment.",
   "kind": "historical",
   "trigger": {
     "date": {

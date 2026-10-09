@@ -194,7 +194,7 @@ func _on_confirm() -> void:
 		var exists := _saves.any(func(save: Dictionary) -> bool: return save["name"] == save_name.validate_filename())
 		if exists and _overwrite_armed != save_name:
 			_overwrite_armed = save_name
-			status_label.text = "« %s » existe : confirmez pour l'écraser." % save_name
+			status_label.text = "« %s » existe : confirmez pour l’écraser." % save_name
 			return
 		save_confirmed.emit(save_name)
 	else:

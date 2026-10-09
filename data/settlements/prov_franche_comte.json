@@ -24,7 +24,7 @@
     "fortification_level": 3,
     "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
     "port": false,
-    "description": "Cité impériale libre dans une boucle du Doubs, distincte du comté de Bourgogne bien qu'enclavée en son sein, directement rattachée à l'Empire.",
+    "description": "Cité impériale libre dans une boucle du Doubs, distincte du comté de Bourgogne bien qu’enclavée en son sein, directement rattachée à l’Empire.",
     "sources": ["Besançon", "Ville libre d'Empire"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market"],
     "port": false,
-    "description": "Bourg comtal, siège d'un bailliage du comté de Bourgogne.",
+    "description": "Bourg comtal, siège d’un bailliage du comté de Bourgogne.",
     "sources": ["Vesoul"]
   },
   {

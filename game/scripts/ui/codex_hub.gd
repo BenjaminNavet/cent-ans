@@ -53,7 +53,7 @@ func _ready() -> void:
 	UiBuild.spacer(header)
 	search = LineEdit.new()
 	search.name = "HubSearch"
-	search.placeholder_text = "Rechercher dans l'histoire et les règles…"
+	search.placeholder_text = "Rechercher dans l’histoire et les règles…"
 	search.clear_button_enabled = true
 	search.custom_minimum_size = Vector2(340, 0)
 	# Texte d'aide lisible (encre passée, pas clair sur clair).

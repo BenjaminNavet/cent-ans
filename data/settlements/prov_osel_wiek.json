@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Château-cathédrale de l'évêque d'Ösel-Wiek.",
+    "description": "Château-cathédrale de l’évêque d’Ösel-Wiek.",
     "sources": [
       "Haapsalu"
     ]
@@ -48,7 +48,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'évêque sur la côte de Wiek.",
+    "description": "Château de l’évêque sur la côte de Wiek.",
     "sources": [
       "Lihula"
     ]
@@ -99,7 +99,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Commanderie de l'Ordre à Ösel (ordre Livonien), face à l'évêché ; l'île n'est accessible que par mer (mouillage de la côte est, emplacement approximatif).",
+    "description": "Commanderie de l’Ordre à Ösel (ordre Livonien), face à l’évêché ; l’île n’est accessible que par mer (mouillage de la côte est, emplacement approximatif).",
     "sources": [
       "Pöide"
     ]

@@ -12,7 +12,7 @@ const MODE_ALL := "all"
 const MODE_INTEREST := "interest"
 const MODE_OWN := "own"
 const MODES: Array[String] = [MODE_INTEREST, MODE_ALL, MODE_OWN]
-const MODE_LABELS: Array[String] = ["Voisins, alliés, ennemis et grandes puissances", "Toute l'Europe", "Seulement mon royaume"]
+const MODE_LABELS: Array[String] = ["Voisins, alliés, ennemis et grandes puissances", "Toute l’Europe", "Seulement mon royaume"]
 ## Nombre de grandes puissances (factions les plus puissantes, joueur exclu).
 const GREAT_POWER_COUNT := 5
 ## Statuts diplomatiques qui rendent une faction « proche » du joueur.

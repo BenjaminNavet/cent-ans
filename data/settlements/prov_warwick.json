@@ -25,7 +25,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Warwickshire, Staffordshire, Leicestershire, Derbyshire, Nottinghamshire : Coventry (draps bleus), forêt d'Arden, Sherwood, plomb du Peak. Comté de Derby créé le 16 mars 1337 pour Henri de Grosmont.",
+    "description": "Warwickshire, Staffordshire, Leicestershire, Derbyshire, Nottinghamshire : Coventry (draps bleus), forêt d’Arden, Sherwood, plomb du Peak. Comté de Derby créé le 16 mars 1337 pour Henri de Grosmont.",
     "sources": [
       "Mercie",
       "Coventry",
@@ -52,7 +52,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château siège des comtes de Warwick, l'une des plus puissantes familles du royaume.",
+    "description": "Château siège des comtes de Warwick, l’une des plus puissantes familles du royaume.",
     "sources": [
       "Château de Warwick"
     ]
@@ -129,7 +129,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg-marché fondé par l'évêque de Worcester sur l'Avon.",
+    "description": "Bourg-marché fondé par l’évêque de Worcester sur l’Avon.",
     "sources": [
       "Stratford-upon-Avon"
     ]
@@ -154,7 +154,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg romain puis médiéval au confluent de l'Alne et de l'Arrow.",
+    "description": "Bourg romain puis médiéval au confluent de l’Alne et de l’Arrow.",
     "sources": [
       "Alcester"
     ]
@@ -204,7 +204,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-marché de la forêt d'Arden.",
+    "description": "Bourg-marché de la forêt d’Arden.",
     "sources": [
       "Henley-in-Arden"
     ]

@@ -1,5 +1,5 @@
 {
-  "description": "Constantes numériques de l'IA de campagne (core/crates/ai/src/campaign) : portée de planification, valeur des cibles de siège, défense, impôts, recrutement, trésorerie. Chaque valeur était auparavant codée en dur dans le planificateur.",
+  "description": "Constantes numériques de l’IA de campagne (core/crates/ai/src/campaign) : portée de planification, valeur des cibles de siège, défense, impôts, recrutement, trésorerie. Chaque valeur était auparavant codée en dur dans le planificateur.",
   "military": {
     "planning_range": 10,
     "city_target_bonus": 25.0,

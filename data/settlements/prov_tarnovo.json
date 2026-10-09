@@ -24,7 +24,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Capitale de l'Empire bulgare, siège du patriarche.",
+    "description": "Capitale de l’Empire bulgare, siège du patriarche.",
     "sources": [
       "Veliko Tarnovo"
     ]
@@ -51,7 +51,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Forteresse de l'Osam, ancienne place royale.",
+    "description": "Forteresse de l’Osam, ancienne place royale.",
     "sources": [
       "Lovech"
     ]

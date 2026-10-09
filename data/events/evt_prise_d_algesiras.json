@@ -1,7 +1,7 @@
 {
   "id": "evt_prise_d_algesiras",
-  "title": "La prise d'Algésiras",
-  "text": "Depuis l'été 1342, Alphonse XI assiège Algésiras avec des croisés venus de toute la Chrétienté, des galères génoises et l'argent du pape. Affamée, la ville capitule le 26 mars 1344 ; la garnison mérinide gagne Gibraltar, qui tient encore, ou l'Afrique.",
+  "title": "La prise d’Algésiras",
+  "text": "Depuis l’été 1342, Alphonse XI assiège Algésiras avec des croisés venus de toute la Chrétienté, des galères génoises et l’argent du pape. Affamée, la ville capitule le 26 mars 1344 ; la garnison mérinide gagne Gibraltar, qui tient encore, ou l’Afrique.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -31,7 +31,7 @@
   },
   "options": [
     {
-      "text": "Pousser le siège jusqu'à la reddition",
+      "text": "Pousser le siège jusqu’à la reddition",
       "effects": [
         {
           "type": "transfer_province",
@@ -59,7 +59,7 @@
           "type": "opinion",
           "faction": "fac_marinids",
           "amount": -20,
-          "reason": "Perte d'Algésiras"
+          "reason": "Perte d’Algésiras"
         }
       ],
       "ai_weight": 2

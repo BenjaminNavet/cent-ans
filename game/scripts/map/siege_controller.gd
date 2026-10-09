@@ -34,7 +34,7 @@ func setup(campaign_map: Node) -> void:
 	box.add_child(engines_label)
 	assault_button = Button.new()
 	assault_button.name = "AssaultButton"
-	assault_button.text = "Donner l'assaut"
+	assault_button.text = "Donner l’assaut"
 	assault_button.pressed.connect(_on_assault)
 	box.add_child(assault_button)
 	map.ui.army_actions_box.add_child(box)
@@ -71,10 +71,10 @@ func _update(is_player: bool) -> void:
 	var blocker := str(odds.get("blocker", ""))
 	assault_button.disabled = blocker != ""
 	if blocker != "":
-		assault_button.text = "Donner l'assaut (aucun engin prêt)"
+		assault_button.text = "Donner l’assaut (aucun engin prêt)"
 		TooltipHost.attach_plain(assault_button, "assault_blocked", {"body": "Assaut impossible : %s." % blocker})
 	else:
-		assault_button.text = "Donner l'assaut (chances ≈ %d %%)" % int(odds["odds"])
+		assault_button.text = "Donner l’assaut (chances ≈ %d %%)" % int(odds["odds"])
 		assault_button.tooltip_text = ""
 	box.show()
 
@@ -97,7 +97,7 @@ func _on_assault() -> void:
 	var result: Dictionary = map.sim.call("submit_order", {"type": "assault", "army": _army_id})
 	if result.get("ok", false):
 		var pending: Array = map.sim.call("get_pending_events")
-		map.ui.show_toast(str(pending[-1].get("text_fr", "L'assaut est donné.")) if not pending.is_empty() else "L'assaut est donné.")
+		map.ui.show_toast(str(pending[-1].get("text_fr", "L’assaut est donné.")) if not pending.is_empty() else "L’assaut est donné.")
 		# M8 § 2 : avec les batailles interactives, l'assaut attend en bataille de siège.
 		if map.has_method("_offer_pending_battles"):
 			map._offer_pending_battles()

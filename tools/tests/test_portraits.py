@@ -64,7 +64,7 @@ def test_prompt_uses_character_data() -> None:
     prompt = portraits.build_prompt(character, factions, traits)
     assert "Édouard III" in prompt
     assert "aged 25 in 1337" in prompt
-    assert "Roi d'Angleterre" in prompt
+    assert "Roi d’Angleterre" in prompt
     assert "Plantagenêt" in prompt
     assert "léopards" in prompt
     assert traits["trait_ambitious"]["name"]["display"] in prompt

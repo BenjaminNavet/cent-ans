@@ -1,7 +1,7 @@
 {
   "id": "prov_sis",
   "name": {
-    "display": "Sis et l'Anti-Taurus",
+    "display": "Sis et l’Anti-Taurus",
     "local": "Սիս",
     "local_language": "arménien"
   },
@@ -82,7 +82,7 @@
   ],
   "fortification_level": 4,
   "base_supply": 1000,
-  "description": "Massif de Cilicie Montagneuse où le roi Léon IV se retranche à Sis, la capitale, avec la forteresse d'Anavarza et la résidence des catholicos.",
+  "description": "Massif de Cilicie Montagneuse où le roi Léon IV se retranche à Sis, la capitale, avec la forteresse d’Anavarza et la résidence des catholicos.",
   "sources": [
     "Kingdom of Armenia (Cilicia)",
     "Sis",

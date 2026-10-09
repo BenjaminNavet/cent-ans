@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d'Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
+    "description": "Souabe : comté de Wurtemberg (Ulrich III), Habsbourg antérieurs, cités impériales d’Ulm, Augsbourg, Constance, Zurich. Futaine, laine, Danube.",
     "sources": [
       "Duché de Souabe",
       "Comté de Wurtemberg",
@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire sur le Danube, grand marché de toile et de blé de Souabe.",
+    "description": "Ville libre d’empire sur le Danube, grand marché de toile et de blé de Souabe.",
     "sources": [
       "Ulm"
     ]
@@ -132,7 +132,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité impériale et siège d'un vaste évêché sur les rives du lac de Constance, grand carrefour commercial vers l'Italie.",
+    "description": "Cité impériale et siège d’un vaste évêché sur les rives du lac de Constance, grand carrefour commercial vers l’Italie.",
     "sources": [
       "Constance (Allemagne)",
       "Évêché de Constance"
@@ -158,7 +158,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville libre d'empire depuis 1276, berceau du tissage de la toile de lin en Haute-Souabe.",
+    "description": "Ville libre d’empire depuis 1276, berceau du tissage de la toile de lin en Haute-Souabe.",
     "sources": [
       "Ravensbourg"
     ]
@@ -184,7 +184,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Puissante abbaye bénédictine, l'une des plus riches d'Empire, qui conserve une relique du Saint-Sang vénérée en pèlerinage.",
+    "description": "Puissante abbaye bénédictine, l’une des plus riches d’Empire, qui conserve une relique du Saint-Sang vénérée en pèlerinage.",
     "sources": [
       "Abbaye de Weingarten"
     ]

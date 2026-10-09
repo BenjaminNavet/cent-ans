@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Saragosse, capitale du royaume d'Aragon depuis la Reconquête de 1118, sur l'Èbre.",
+    "description": "Saragosse, capitale du royaume d’Aragon depuis la Reconquête de 1118, sur l’Èbre.",
     "sources": [
       "Royaume d'Aragon",
       "Pierre IV d'Aragon",
@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancienne capitale du royaume d'Aragon, siège épiscopal.",
+    "description": "Ancienne capitale du royaume d’Aragon, siège épiscopal.",
     "sources": [
       "Huesca"
     ]
@@ -132,7 +132,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Ancienne capitale du royaume d'Aragon avant Huesca, siège épiscopal pyrénéen et étape du chemin de Saint-Jacques.",
+    "description": "Ancienne capitale du royaume d’Aragon avant Huesca, siège épiscopal pyrénéen et étape du chemin de Saint-Jacques.",
     "sources": [
       "Jaca"
     ]
@@ -209,7 +209,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ancien siège du comté de Sobrarbe, bourg fortifié dominant le confluent de l'Ara et du Cinca.",
+    "description": "Ancien siège du comté de Sobrarbe, bourg fortifié dominant le confluent de l’Ara et du Cinca.",
     "sources": [
       "Aínsa"
     ]

@@ -70,7 +70,7 @@ func _init() -> void:
 					with_atlas += 1
 			var expected := level < 2
 			if (with_atlas > 0) != expected:
-				check(false, "FG3 %s LOD%d : UV d'atlas %d/%d" % [fig_name, level, with_atlas, uv2.size()])
+				check(false, "FG3 %s LOD%d : UV d’atlas %d/%d" % [fig_name, level, with_atlas, uv2.size()])
 	if not fine:
 		var mat := ShaderMaterial.new()
 		mat.shader = BattleSkinned.SHADER

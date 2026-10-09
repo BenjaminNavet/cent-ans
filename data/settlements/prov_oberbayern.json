@@ -24,7 +24,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Duché de Haute-Bavière, domaine propre de l'empereur Louis IV de Wittelsbach, qui sera réuni à la Basse-Bavière en 1340. Munich, résidence impériale ; Ratisbonne, cité libre ; sel de Reichenhall.",
+    "description": "Duché de Haute-Bavière, domaine propre de l’empereur Louis IV de Wittelsbach, qui sera réuni à la Basse-Bavière en 1340. Munich, résidence impériale ; Ratisbonne, cité libre ; sel de Reichenhall.",
     "sources": [
       "Duché de Bavière",
       "Louis IV du Saint-Empire",
@@ -79,7 +79,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancienne cité épiscopale sur l'Isar, l'un des plus vieux évêchés de Bavière.",
+    "description": "Ancienne cité épiscopale sur l’Isar, l’un des plus vieux évêchés de Bavière.",
     "sources": [
       "Freising"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "« Montagne sainte » de l'ancien château des comtes d'Andechs (détruit en 1248), dont la chapelle garde des reliques vénérées ; lieu de pèlerinage. (Anachronisme de jeu : le chapitre de chanoines n'est fondé qu'en 1438 et l'abbaye bénédictine qu'en 1455 ; présente dès 1337.)",
+    "description": "« Montagne sainte » de l’ancien château des comtes d’Andechs (détruit en 1248), dont la chapelle garde des reliques vénérées ; lieu de pèlerinage. (Anachronisme de jeu : le chapitre de chanoines n’est fondé qu’en 1438 et l’abbaye bénédictine qu’en 1455 ; présente dès 1337.)",
     "sources": [
       "Andechs"
     ]
@@ -130,7 +130,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg sur l'Isar, port de flottage du bois et du sel entre le Tyrol et Munich (le préfixe « Bad » n'apparaît qu'en 1899).",
+    "description": "Bourg sur l’Isar, port de flottage du bois et du sel entre le Tyrol et Munich (le préfixe « Bad » n’apparaît qu’en 1899).",
     "sources": [
       "Bad Tölz"
     ]
@@ -156,7 +156,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande wittelsbachoise enserrée dans un méandre de l'Inn, étape du commerce du sel entre Reichenhall et le Danube.",
+    "description": "Ville marchande wittelsbachoise enserrée dans un méandre de l’Inn, étape du commerce du sel entre Reichenhall et le Danube.",
     "sources": [
       "Wasserburg am Inn"
     ]

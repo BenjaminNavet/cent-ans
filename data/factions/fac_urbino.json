@@ -1,7 +1,7 @@
 {
   "id": "fac_urbino",
   "name": {
-    "display": "Comté d'Urbin",
+    "display": "Comté d’Urbin",
     "local": "Contea di Urbino",
     "local_language": "marchigian"
   },
@@ -17,7 +17,7 @@
   "primary_title": "tit_urbino",
   "heraldry": {
     "blazon": "De gueules à l'aigle d'or.",
-    "description": "Aigle attribuée aux Montefeltro, rendue en gueules et or pour se distinguer de l'aigle impériale (or et sable) ; blason incertain, voir le titre.",
+    "description": "Aigle attribuée aux Montefeltro, rendue en gueules et or pour se distinguer de l’aigle impériale (or et sable) ; blason incertain, voir le titre.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230"
   },
@@ -49,7 +49,7 @@
     "trade": 35,
     "piety": 40
   },
-  "description": "Seigneurie gibeline des Montefeltro, maîtres d'Urbino depuis 1234, souvent en lutte contre le pouvoir pontifical et rivaux des guelfes Malatesta de Rimini.",
+  "description": "Seigneurie gibeline des Montefeltro, maîtres d’Urbino depuis 1234, souvent en lutte contre le pouvoir pontifical et rivaux des guelfes Malatesta de Rimini.",
   "sources": [
     "Urbin",
     "Maison de Montefeltro"

@@ -47,7 +47,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville de l'ancienne principauté de Vaŭkavysk.",
+    "description": "Ville de l’ancienne principauté de Vaŭkavysk.",
     "sources": [
       "Vaŭkavysk"
     ]
@@ -70,7 +70,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg de la Zelvianka, cité par la chronique hypatienne sous l'année 1258.",
+    "description": "Bourg de la Zelvianka, cité par la chronique hypatienne sous l’année 1258.",
     "sources": [
       "Zelva"
     ]

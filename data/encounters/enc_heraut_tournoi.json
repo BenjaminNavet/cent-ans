@@ -1,7 +1,7 @@
 {
   "id": "enc_heraut_tournoi",
-  "title": "Le héraut d'un tournoi",
-  "text": "Un héraut aux armes d'un grand seigneur crie par les chemins une joute à outrance et à plaisance : trois chevaliers tiendront le pas trente jours durant contre tout venant. Les jeunes bacheliers de l'ost brûlent d'y courir.",
+  "title": "Le héraut d’un tournoi",
+  "text": "Un héraut aux armes d’un grand seigneur crie par les chemins une joute à outrance et à plaisance : trois chevaliers tiendront le pas trente jours durant contre tout venant. Les jeunes bacheliers de l’ost brûlent d’y courir.",
   "spawn": {
     "seasons": [
       "spring",
@@ -62,7 +62,7 @@
       "ai_weight": 1
     },
     {
-      "label": "Décliner l'invitation",
+      "label": "Décliner l’invitation",
       "ai_weight": 1,
       "default": true
     }

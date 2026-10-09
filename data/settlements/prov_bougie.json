@@ -62,7 +62,7 @@
     "kind": "castle",
     "name": {
       "display": "Kalâa des Béni Hammad",
-      "local": "Qal'at Banī Ḥammād",
+      "local": "Qal’at Banī Ḥammād",
       "local_language": "berbère"
     },
     "lonlat": [
@@ -77,7 +77,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Ruines de l'ancienne capitale hammadide (XIe siècle), désertée depuis 1090.",
+    "description": "Ruines de l’ancienne capitale hammadide (XIe siècle), désertée depuis 1090.",
     "sources": [
       "Kalâa des Béni Hammad"
     ]

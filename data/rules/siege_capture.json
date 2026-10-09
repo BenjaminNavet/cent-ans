@@ -1,5 +1,5 @@
 {
-  "description": "Points de capture des batailles de siège (lot TW2 T4, ADR 0108) : place du marché (point de victoire) et porte. Un point progresse tant que l'assaillant y a plus d'hommes valides que le défenseur (× supériorité exigée) ; il recule sinon. La place tenue le temps voulu donne la ville ; la porte prise ouvre la porte et fait taire les tours voisines. Les défenseurs sur la place et à ses abords tiennent un « dernier carré » (moral). Embarqué dans sim-battle à la compilation.",
+  "description": "Points de capture des batailles de siège (lot TW2 T4, ADR 0108) : place du marché (point de victoire) et porte. Un point progresse tant que l’assaillant y a plus d’hommes valides que le défenseur (× supériorité exigée) ; il recule sinon. La place tenue le temps voulu donne la ville ; la porte prise ouvre la porte et fait taire les tours voisines. Les défenseurs sur la place et à ses abords tiennent un « dernier carré » (moral). Embarqué dans sim-battle à la compilation.",
   "square": {
     "radius_m": 35.0,
     "hold_s": 60.0,

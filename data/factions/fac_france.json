@@ -19,7 +19,7 @@
   "primary_title": "tit_france",
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or.",
-    "description": "France ancien : champ bleu semé de fleurs de lis d'or. Les armes « France moderne » à trois fleurs de lis n'apparaissent qu'à partir de Charles V (vers 1376).",
+    "description": "France ancien : champ bleu semé de fleurs de lis d’or. Les armes « France moderne » à trois fleurs de lis n’apparaissent qu’à partir de Charles V (vers 1376).",
     "primary_color": "#1F3A93",
     "secondary_color": "#F2C230"
   },
@@ -109,7 +109,7 @@
     "trade": 40,
     "piety": 65
   },
-  "description": "Le royaume le plus peuplé d'Occident (15 à 20 millions d'habitants). Philippe VI, premier Valois, règne depuis 1328 sur un royaume où la noblesse tient encore la guerre pour son métier.",
+  "description": "Le royaume le plus peuplé d’Occident (15 à 20 millions d’habitants). Philippe VI, premier Valois, règne depuis 1328 sur un royaume où la noblesse tient encore la guerre pour son métier.",
   "sources": [
     "Philippe VI de France",
     "Guerre de Cent Ans",
@@ -135,12 +135,12 @@
   "victory": {
     "end_year": 1453,
     "hold_turns": 40,
-    "summary": "Bouter les Anglais hors du royaume, réunir la Flandre, l'Artois et le Dauphiné au domaine royal.",
+    "summary": "Bouter les Anglais hors du royaume, réunir la Flandre, l’Artois et le Dauphiné au domaine royal.",
     "objectives": [
       {
         "id": "obj_fr_expel",
         "title": "Bouter les Anglais hors de France",
-        "description": "Aucune province du royaume (Guyenne, Gascogne, Ponthieu, Normandie…) ne doit rester aux mains de l'Angleterre.",
+        "description": "Aucune province du royaume (Guyenne, Gascogne, Ponthieu, Normandie…) ne doit rester aux mains de l’Angleterre.",
         "condition": {
           "kind": "no_foreign_control",
           "faction": "fac_england",
@@ -177,8 +177,8 @@
       },
       {
         "id": "obj_fr_crown",
-        "title": "Réunir la Flandre et l'Artois",
-        "description": "Le comté de Flandre et l'Artois (tenu par la Bourgogne) doivent passer sous l'autorité directe de la Couronne.",
+        "title": "Réunir la Flandre et l’Artois",
+        "description": "Le comté de Flandre et l’Artois (tenu par la Bourgogne) doivent passer sous l’autorité directe de la Couronne.",
         "condition": {
           "kind": "control_all",
           "provinces": [
@@ -202,7 +202,7 @@
       {
         "id": "obj_fr_dauphine",
         "title": "Acquérir le Dauphiné",
-        "description": "Le Dauphiné, terre d'Empire, doit rejoindre le domaine royal, comme en 1349.",
+        "description": "Le Dauphiné, terre d’Empire, doit rejoindre le domaine royal, comme en 1349.",
         "condition": {
           "kind": "control_all",
           "provinces": [

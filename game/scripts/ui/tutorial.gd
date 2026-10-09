@@ -129,7 +129,7 @@ func _ready() -> void:
 	later_button.pressed.connect(func() -> void: later_pressed.emit())
 	buttons.add_child(later_button)
 	UiBuild.spacer(buttons)
-	skip_step_button = UiBuild.button("Passer l'étape", func() -> void: skip_step_pressed.emit())
+	skip_step_button = UiBuild.button("Passer l’étape", func() -> void: skip_step_pressed.emit())
 	skip_step_button.name = "SkipStepButton"
 	buttons.add_child(skip_step_button)
 	continue_button = UiBuild.button("Continuer", func() -> void: continue_pressed.emit())

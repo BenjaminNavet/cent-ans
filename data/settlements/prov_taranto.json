@@ -22,7 +22,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Capitale de la principauté angevine de Tarente, apanage des cadets de la maison d'Anjou-Naples.",
+    "description": "Capitale de la principauté angevine de Tarente, apanage des cadets de la maison d’Anjou-Naples.",
     "sources": [
       "Principauté de Tarente"
     ]
@@ -47,7 +47,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg des Pouilles, à l'intérieur des terres de la principauté de Tarente.",
+    "description": "Bourg des Pouilles, à l’intérieur des terres de la principauté de Tarente.",
     "sources": [
       "Massafra"
     ]

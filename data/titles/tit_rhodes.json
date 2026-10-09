@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à la croix d'argent, au chef d'azur.",
-    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean, avec un chef d'azur ajouté pour distinguer le Couvent de Rhodes.",
+    "description": "Croix blanche sur fond rouge, armes de l’Ordre de Saint-Jean, avec un chef d’azur ajouté pour distinguer le Couvent de Rhodes.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -29,7 +29,7 @@
     {
       "id": "obj_rhodes_hold",
       "title": "Garder Rhodes",
-      "description": "Le Grand Maître doit garder l'île.",
+      "description": "Le Grand Maître doit garder l’île.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_rhodes"
@@ -55,7 +55,7 @@
       }
     }
   ],
-  "description": "État souverain de l'Ordre de l'Hôpital à Rhodes ; rang « comté » du schéma.",
+  "description": "État souverain de l’Ordre de l’Hôpital à Rhodes ; rang « comté » du schéma.",
   "sources": [
     "Ordre de Saint-Jean de Jérusalem",
     "Hélion de Villeneuve"

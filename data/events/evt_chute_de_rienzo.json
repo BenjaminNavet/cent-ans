@@ -1,7 +1,7 @@
 {
   "id": "evt_chute_de_rienzo",
   "title": "La chute du tribun",
-  "text": "Le tribun s'est fait couronner de sept couronnes et vêtir de pourpre ; il lève des impôts et fait décapiter à tort. Les barons reviennent, le peuple se détourne : Cola s'enfuit du Capitole déguisé en moine.",
+  "text": "Le tribun s’est fait couronner de sept couronnes et vêtir de pourpre ; il lève des impôts et fait décapiter à tort. Les barons reviennent, le peuple se détourne : Cola s’enfuit du Capitole déguisé en moine.",
   "kind": "chained",
   "trigger": {
     "conditions": [

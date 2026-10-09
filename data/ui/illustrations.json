@@ -1,5 +1,5 @@
 {
-  "description": "AR1 — habillage illustré : écrans de chargement (batailles, sièges, batailles navales, campagne) avec citation de chroniqueur, vignettes des événements de la chronique (par genre d'événement du cœur), écrans de fin de bataille et de campagne. Enluminures du domaine public (Wikimedia Commons, crédits dans CREDITS.md) ; les manques sont comblés par génération (OpenRouter). Pipeline : `uv run --project tools cent-ans assets art-plates`.",
+  "description": "AR1 — habillage illustré : écrans de chargement (batailles, sièges, batailles navales, campagne) avec citation de chroniqueur, vignettes des événements de la chronique (par genre d’événement du cœur), écrans de fin de bataille et de campagne. Enluminures du domaine public (Wikimedia Commons, crédits dans CREDITS.md) ; les manques sont comblés par génération (OpenRouter). Pipeline : `uv run --project tools cent-ans assets art-plates`.",
   "loading": {
     "min_seconds": 3.0,
     "max_seconds": 4.0,
@@ -90,7 +90,7 @@
         "image": "res://assets/art/loading/ld_auray.jpg",
         "title": "Auray, 29 septembre 1364",
         "quote": {
-          "text": "Quand le noble roi Édouard commença de régner, on ne tenait guère les Anglais pour gens d'armes ; ils sont à présent les mieux aguerris qu'on connaisse.",
+          "text": "Quand le noble roi Édouard commença de régner, on ne tenait guère les Anglais pour gens d’armes ; ils sont à présent les mieux aguerris qu’on connaisse.",
           "author": "Jean le Bel",
           "source": "d'après les Vraies Chroniques",
           "date": "vers 1360"
@@ -116,7 +116,7 @@
         "image": "res://assets/art/loading/ld_calais.jpg",
         "title": "Devant Calais, 1347-1350",
         "quote": {
-          "text": "Ah ! gentil sire, depuis que je repassai la mer en grand péril, je ne vous ai rien demandé ; or vous prié-je humblement, pour l'amour de moi, que vous ayez de ces six hommes merci.",
+          "text": "Ah ! gentil sire, depuis que je repassai la mer en grand péril, je ne vous ai rien demandé ; or vous prié-je humblement, pour l’amour de moi, que vous ayez de ces six hommes merci.",
           "author": "La reine Philippa, pour les bourgeois de Calais",
           "source": "Jean Froissart, Chroniques, livre I",
           "date": "Calais, août 1347"
@@ -142,7 +142,7 @@
         "image": "res://assets/art/loading/ld_hennebont.jpg",
         "title": "Hennebont, 1342",
         "quote": {
-          "text": "La comtesse, qui bien avait courage d'homme et cœur de lion, chevauchait par les rues et semonnait les gens de bien défendre.",
+          "text": "La comtesse, qui bien avait courage d’homme et cœur de lion, chevauchait par les rues et semonnait les gens de bien défendre.",
           "author": "Jean Froissart, de Jeanne de Flandre, comtesse de Montfort",
           "source": "d'après Jean Froissart, Chroniques, livre I",
           "date": "Hennebont, 1342"
@@ -168,7 +168,7 @@
         "image": "res://assets/art/loading/ld_reims.jpg",
         "title": "Reims, hiver 1359-1360",
         "quote": {
-          "text": "Le roi d'Angleterre vint mettre le siège devant la cité de Reims, en intention d'y être couronné roi de France.",
+          "text": "Le roi d’Angleterre vint mettre le siège devant la cité de Reims, en intention d’y être couronné roi de France.",
           "author": "Jean Froissart",
           "source": "d'après les Chroniques, livre I",
           "date": "décembre 1359"
@@ -192,12 +192,12 @@
           "naval"
         ],
         "image": "res://assets/art/loading/ld_sluys.jpg",
-        "title": "L'Écluse, 24 juin 1340",
+        "title": "L’Écluse, 24 juin 1340",
         "quote": {
           "text": "Cette bataille fut moult félonne et moult horrible, car batailles et assauts sur mer sont plus durs que sur terre : là ne peut-on reculer ni fuir.",
           "author": "Jean Froissart",
           "source": "Chroniques, livre I",
-          "date": "L'Écluse, 24 juin 1340"
+          "date": "L’Écluse, 24 juin 1340"
         },
         "source": {
           "commons": {
@@ -272,7 +272,7 @@
         "image": "res://assets/art/loading/ld_avignon.jpg",
         "title": "Avignon, la cité des papes",
         "quote": {
-          "text": "Avignon, Babylone de l'Occident, où tout n'est que fraude et vanité.",
+          "text": "Avignon, Babylone de l’Occident, où tout n’est que fraude et vanité.",
           "author": "Pétrarque",
           "source": "d'après les Lettres sans titre",
           "date": "vers 1350"
@@ -473,7 +473,7 @@
     },
     {
       "id": "vg_church",
-      "title": "L'Église",
+      "title": "L’Église",
       "kinds": [
         "excommunication",
         "schism",
@@ -495,7 +495,7 @@
     },
     {
       "id": "vg_diplomacy",
-      "title": "L'hommage",
+      "title": "L’hommage",
       "kinds": [
         "peace_signed",
         "alliance_formed",
@@ -559,7 +559,7 @@
     },
     {
       "id": "vg_intrigue",
-      "title": "L'intrigue",
+      "title": "L’intrigue",
       "kinds": [
         "agent"
       ],

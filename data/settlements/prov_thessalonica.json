@@ -25,7 +25,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Grand port de l'Empire, sanctuaire de saint Démétrios.",
+    "description": "Grand port de l’Empire, sanctuaire de saint Démétrios.",
     "sources": [
       "Thessalonique"
     ]
@@ -51,7 +51,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Monastère fondé en 963, cœur de la Sainte Montagne et de l'hésychasme.",
+    "description": "Monastère fondé en 963, cœur de la Sainte Montagne et de l’hésychasme.",
     "sources": [
       "Mont Athos"
     ]

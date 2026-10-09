@@ -37,7 +37,7 @@
     {
       "id": "obj_rimini_urbino",
       "title": "Abaisser Urbin",
-      "description": "Soumettre les rivaux gibelins Montefeltro d'Urbin.",
+      "description": "Soumettre les rivaux gibelins Montefeltro d’Urbin.",
       "condition": {
         "kind": "be_liege_of",
         "faction": "fac_urbino"

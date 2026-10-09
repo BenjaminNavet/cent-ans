@@ -1,5 +1,5 @@
 {
-  "description": "Exemple de décor posé à la main (lot EP6) pour les cartes historiques d'EP7, sur un champ standard de 1200 × 800 m : un moulin à vent sur sa butte derrière la ligne du défenseur (comme à Crécy), un hameau en rue, une église et son cimetière, un manoir à fossé, des vergers, des vignes, des labours, des meules et les deux camps.",
+  "description": "Exemple de décor posé à la main (lot EP6) pour les cartes historiques d’EP7, sur un champ standard de 1200 × 800 m : un moulin à vent sur sa butte derrière la ligne du défenseur (comme à Crécy), un hameau en rue, une église et son cimetière, un manoir à fossé, des vergers, des vignes, des labours, des meules et les deux camps.",
   "clear": true,
   "items": [
     { "type": "windmill", "x": 640, "z": 700, "mound": true },

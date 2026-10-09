@@ -81,7 +81,7 @@ static func lines(sheet: Dictionary, obligations: Dictionary) -> Array:
 	result.append(["Titres : %s." % ", ".join(titles), HudStyle.INK, "Titles"])
 	var liege := str(sheet.get("liege_name", ""))
 	if liege == "":
-		result.append(["Souverain : ne doit l'hommage à personne.", HudStyle.INK, "Liege"])
+		result.append(["Souverain : ne doit l’hommage à personne.", HudStyle.INK, "Liege"])
 	else:
 		var chain := PackedStringArray()
 		for link in sheet.get("liege_chain", []):
@@ -92,7 +92,7 @@ static func lines(sheet: Dictionary, obligations: Dictionary) -> Array:
 		result.append(["Tribut : %d %% des revenus, %s cette saison à %s." % [int(obligations.get("tribute_percent", 0)),
 			Money.amount(int(obligations.get("tribute", 0))), liege], HudStyle.INK_SOFT, "Tribute"])
 		var host := _names(obligations.get("host_against", []))
-		result.append(["Ost dû contre : %s." % host if host != "" else "Ost : votre suzerain n'est en guerre contre personne.",
+		result.append(["Ost dû contre : %s." % host if host != "" else "Ost : votre suzerain n’est en guerre contre personne.",
 			HudStyle.POOR if host != "" else HudStyle.INK_SOFT, "Host"])
 	var vassals := _names(sheet.get("direct_vassals", []))
 	result.append(["Vassaux directs : %s." % vassals if vassals != "" else "Aucun vassal direct.", HudStyle.INK_SOFT, "Vassals"])

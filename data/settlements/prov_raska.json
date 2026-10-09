@@ -21,7 +21,7 @@
       "bld_cathedral"
     ],
     "port": false,
-    "description": "Ancienne capitale de la Rascie (Stari Ras), forteresse de l'Ibar.",
+    "description": "Ancienne capitale de la Rascie (Stari Ras), forteresse de l’Ibar.",
     "sources": [
       "Stari Ras"
     ]
@@ -98,7 +98,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Marché de l'Ibar.",
+    "description": "Marché de l’Ibar.",
     "sources": [
       "Novi Pazar"
     ]

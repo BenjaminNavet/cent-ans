@@ -1,7 +1,7 @@
 {
   "id": "fac_england",
   "name": {
-    "display": "Royaume d'Angleterre",
+    "display": "Royaume d’Angleterre",
     "local": "Kingdom of England",
     "local_language": "moyen anglais"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_england",
   "heraldry": {
     "blazon": "De gueules à trois léopards d'or, armés et lampassés d'azur.",
-    "description": "Trois lions passants gardants (« léopards ») d'or sur champ rouge. Édouard III écartèlera ces armes avec la France ancienne en janvier 1340 en prenant le titre de roi de France.",
+    "description": "Trois lions passants gardants (« léopards ») d’or sur champ rouge. Édouard III écartèlera ces armes avec la France ancienne en janvier 1340 en prenant le titre de roi de France.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230"
   },
@@ -100,7 +100,7 @@
     "trade": 65,
     "piety": 50
   },
-  "description": "Royaume de 4 à 5 millions d'habitants, riche de sa laine, doté d'une administration fiscale efficace et d'une infanterie d'archers redoutable. Édouard III, 24 ans, sort victorieux des campagnes d'Écosse.",
+  "description": "Royaume de 4 à 5 millions d’habitants, riche de sa laine, doté d’une administration fiscale efficace et d’une infanterie d’archers redoutable. Édouard III, 24 ans, sort victorieux des campagnes d’Écosse.",
   "sources": [
     "Édouard III",
     "Guerre de Cent Ans",
@@ -116,12 +116,12 @@
   "victory": {
     "end_year": 1453,
     "hold_turns": 12,
-    "summary": "Faire valoir les droits d'Édouard III sur la couronne de France : Paris, Reims et les terres ancestrales.",
+    "summary": "Faire valoir les droits d’Édouard III sur la couronne de France : Paris, Reims et les terres ancestrales.",
     "objectives": [
       {
         "id": "obj_en_reims",
         "title": "Le sacre à Reims",
-        "description": "Tenir Reims et Paris pour faire sacrer le roi d'Angleterre roi de France.",
+        "description": "Tenir Reims et Paris pour faire sacrer le roi d’Angleterre roi de France.",
         "condition": {
           "kind": "control_all",
           "provinces": [
@@ -132,8 +132,8 @@
       },
       {
         "id": "obj_en_aquitaine",
-        "title": "L'héritage des Plantagenêts",
-        "description": "Tenir la Guyenne, la Gascogne, la Normandie et l'Anjou.",
+        "title": "L’héritage des Plantagenêts",
+        "description": "Tenir la Guyenne, la Gascogne, la Normandie et l’Anjou.",
         "condition": {
           "kind": "control_all",
           "provinces": [
@@ -184,8 +184,8 @@
       },
       {
         "id": "obj_en_scotland",
-        "title": "Soumettre l'Écosse",
-        "description": "L'Écosse doit devenir vassale de l'Angleterre ou disparaître.",
+        "title": "Soumettre l’Écosse",
+        "description": "L’Écosse doit devenir vassale de l’Angleterre ou disparaître.",
         "condition": {
           "kind": "subjugate",
           "faction": "fac_scotland"

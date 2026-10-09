@@ -1,7 +1,7 @@
 {
   "id": "evt_treve_de_tours",
   "title": "La trêve de Tours",
-  "text": "Le 28 mai 1444, au Plessis-lès-Tours, le comte de Suffolk et les envoyés de Charles VII signent une trêve et arrêtent le mariage d'Henri VI avec Marguerite d'Anjou, nièce de la reine de France. La trêve, prolongée jusqu'en 1449, laisse au roi le temps de réformer son armée ; en secret, les Anglais promettront même de rendre le Maine.",
+  "text": "Le 28 mai 1444, au Plessis-lès-Tours, le comte de Suffolk et les envoyés de Charles VII signent une trêve et arrêtent le mariage d’Henri VI avec Marguerite d’Anjou, nièce de la reine de France. La trêve, prolongée jusqu’en 1449, laisse au roi le temps de réformer son armée ; en secret, les Anglais promettront même de rendre le Maine.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -29,7 +29,7 @@
   "map_scene": "celebration",
   "options": [
     {
-      "text": "Signer la trêve et réformer l'armée",
+      "text": "Signer la trêve et réformer l’armée",
       "effects": [
         {
           "type": "peace",

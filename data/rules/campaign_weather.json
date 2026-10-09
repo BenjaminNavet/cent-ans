@@ -1,5 +1,5 @@
 {
-  "description": "Météo de la carte de campagne (lot CM2) : tirée à chaque tour pour chaque province à partir de la graine de la partie, de la date et de la position de sa capitale (fronts qui balaient la carte d'ouest en est). Chances en pour cent par climat et par saison, du plus sec au plus humide. Purement visuelle et sonore pour l'instant (ADR 0027).",
+  "description": "Météo de la carte de campagne (lot CM2) : tirée à chaque tour pour chaque province à partir de la graine de la partie, de la date et de la position de sa capitale (fronts qui balaient la carte d’ouest en est). Chances en pour cent par climat et par saison, du plus sec au plus humide. Purement visuelle et sonore pour l’instant (ADR 0027).",
   "front_scale_deg": 3.5,
   "local_jitter": 0.22,
   "drift_deg_per_turn": [2.2, 0.35],

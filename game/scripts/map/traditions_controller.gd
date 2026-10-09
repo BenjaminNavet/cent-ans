@@ -85,7 +85,7 @@ func kept_title(id: String) -> String:
 	if not bool(info.get("named", false)):
 		return ""
 	var name := str(info.get("name", ""))
-	return "Ost" + name.substr(5) if name.begins_with("L'ost") else name
+	return "Ost" + name.substr(5) if name.begins_with("L’ost") else name
 
 
 func open_for(id: String) -> void:
@@ -123,7 +123,7 @@ static func next_by_branch(options: Array) -> Array:
 static func rank_line(info: Dictionary) -> String:
 	var text := "Rang %d sur %d — %d" % [int(info.get("rank", 0)), int(info.get("max_rank", 0)), int(info.get("xp", 0))]
 	var next := int(info.get("next_threshold", -1))
-	text += " / %d d'expérience" % next if next >= 0 else " d'expérience (rang maximal)"
+	text += " / %d d’expérience" % next if next >= 0 else " d’expérience (rang maximal)"
 	return text
 
 
@@ -147,7 +147,7 @@ func _fill(info: Dictionary) -> void:
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(titles)
-	titles.add_child(HudStyle.label("Traditions de l'armée", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
+	titles.add_child(HudStyle.label("Traditions de l’armée", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
 	var heading := HudStyle.label(str(info.get("name", "")), UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	heading.name = "Heading"
 	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -169,7 +169,7 @@ func _fill(info: Dictionary) -> void:
 	bar.value = float(info.get("xp", 0))
 	_box.add_child(bar)
 	var chosen: PackedStringArray = info.get("chosen", PackedStringArray())
-	var chosen_text := "Aucune tradition encore : l'armée en gagne une par rang, en livrant bataille." if chosen.is_empty() \
+	var chosen_text := "Aucune tradition encore : l’armée en gagne une par rang, en livrant bataille." if chosen.is_empty() \
 		else "Traditions : %s." % ", ".join(chosen)
 	var chosen_label := HudStyle.label(chosen_text, UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	chosen_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -254,9 +254,9 @@ func notify_new_ranks() -> Array:
 		notified.append(id)
 	if notified.size() == 1:
 		var info := traditions_of(str(notified[0]))
-		map.ui.show_toast("%s atteint le rang %d : une tradition d'armée est à choisir." % [str(info.get("name", "Une armée")), int(info.get("rank", 0))])
+		map.ui.show_toast("%s atteint le rang %d : une tradition d’armée est à choisir." % [str(info.get("name", "Une armée")), int(info.get("rank", 0))])
 	elif notified.size() > 1:
-		map.ui.show_toast("%d armées peuvent choisir une tradition d'armée." % notified.size())
+		map.ui.show_toast("%d armées peuvent choisir une tradition d’armée." % notified.size())
 	return notified
 
 

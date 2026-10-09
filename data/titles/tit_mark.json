@@ -35,7 +35,7 @@
     },
     {
       "id": "obj_mark_cleve",
-      "title": "L'héritage de Clèves",
+      "title": "L’héritage de Clèves",
       "description": "Obtenir le comté de Clèves (Adolphe de La Marck, 1368).",
       "condition": {
         "kind": "hold_title",

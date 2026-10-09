@@ -27,7 +27,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Venise, république maritime dominant l'Adriatique.",
+    "description": "Venise, république maritime dominant l’Adriatique.",
     "sources": [
       "République de Venise",
       "Francesco Dandolo",
@@ -56,7 +56,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville de la Marche trévisane conquise par Cangrande della Scala en 1329, tenue par les Scaligers de Vérone jusqu'à sa reddition à Venise en 1339.",
+    "description": "Ville de la Marche trévisane conquise par Cangrande della Scala en 1329, tenue par les Scaligers de Vérone jusqu’à sa reddition à Venise en 1339.",
     "sources": [
       "Trévise",
       "Guerre scaligère"
@@ -135,7 +135,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville berceau de la maison d'Este, sous la seigneurie padouane de Carrare depuis 1337.",
+    "description": "Ville berceau de la maison d’Este, sous la seigneurie padouane de Carrare depuis 1337.",
     "sources": [
       "Este (Italie)",
       "Maison d'Este"

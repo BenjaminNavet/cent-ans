@@ -27,14 +27,14 @@ func _run() -> void:
 	check(FaUi.initial_for("Zélande").is_empty() or has_initials, "catalogue sans initiale : aucune initiale réelle")
 	if not has_initials:
 		for title in ["Diplomatie", "Cour — France", "France"]:
-			check(FaUi.initial_for(title).is_empty(), "pas d'initiale réelle pour « %s »" % title)
+			check(FaUi.initial_for(title).is_empty(), "pas d’initiale réelle pour « %s »" % title)
 			var lettrine := await _titled(title, false)
 			check(lettrine.get("_initial") == null, "lettrine dessinée pour « %s »" % title)
 			check(float(lettrine.get("_field")) == float(lettrine.get("_box")), "champ de la lettrine inchangé pour « %s »" % title)
 	var spray_id := str((catalogue.get("display", {}) as Dictionary).get("title_spray", ""))
 	check(spray_id.is_empty() == (FaUi.ornament(spray_id) == null), "rinceau des titres : présent si et seulement si le catalogue le désigne")
 	var fitted := await _titled("Diplomatie", true)
-	check(fitted.get("_initial") == null, "pas d'initiale réelle dans un en-tête ajusté")
+	check(fitted.get("_initial") == null, "pas d’initiale réelle dans un en-tête ajusté")
 
 	var seal := FaUi.seal_rect("chronicle", 34.0)
 	check(seal != null and seal.custom_minimum_size.y == 34.0, "sceau de la chronique posé à la hauteur demandée")
@@ -45,7 +45,7 @@ func _run() -> void:
 
 	var button := Button.new()
 	FrontEndStyle.style_action_button(button, true)
-	check(button.get_theme_stylebox("normal") is StyleBoxTexture, "bouton d'action : plaque de cuir")
+	check(button.get_theme_stylebox("normal") is StyleBoxTexture, "bouton d’action : plaque de cuir")
 	check(button.get_theme_stylebox("normal").get_content_margin(SIDE_LEFT) == 28.0, "marges de contenu conservées")
 	button.free()
 
@@ -53,7 +53,7 @@ func _run() -> void:
 	check(FaUi.seal_rect("chronicle", 34.0) == null, "désactivé : pas de sceau")
 	var flat := Button.new()
 	FrontEndStyle.style_action_button(flat, true)
-	check(flat.get_theme_stylebox("normal") is StyleBoxFlat, "désactivé : bouton d'action plat")
+	check(flat.get_theme_stylebox("normal") is StyleBoxFlat, "désactivé : bouton d’action plat")
 	flat.free()
 	FaUi.enabled = true
 

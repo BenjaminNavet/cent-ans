@@ -45,7 +45,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg de la plaine de l'Hermos.",
+    "description": "Bourg de la plaine de l’Hermos.",
     "sources": [
       "Saruhanids"
     ]
@@ -71,7 +71,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port de l'alun tenu par les Génois (Cattaneo) ; assiégé en 1336 par Andronic III et Saruhan, il reste génois sous suzeraineté byzantine jusqu'en 1340.",
+    "description": "Port de l’alun tenu par les Génois (Cattaneo) ; assiégé en 1336 par Andronic III et Saruhan, il reste génois sous suzeraineté byzantine jusqu’en 1340.",
     "sources": [
       "Saruhanids",
       "Phocaea",

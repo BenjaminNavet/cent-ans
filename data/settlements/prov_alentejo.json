@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Évora, capitale de l'Alentejo, résidence royale fréquente et siège épiscopal.",
+    "description": "Évora, capitale de l’Alentejo, résidence royale fréquente et siège épiscopal.",
     "sources": [
       "Alentejo",
       "Royaume de l'Algarve",
@@ -53,7 +53,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville de l'Alentejo prise une première fois en 1162, définitivement chrétienne vers 1234, au cœur d'un vaste terroir à blé.",
+    "description": "Ville de l’Alentejo prise une première fois en 1162, définitivement chrétienne vers 1234, au cœur d’un vaste terroir à blé.",
     "sources": [
       "Beja",
       "Alentejo"
@@ -107,7 +107,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Port de l'Algarve conquis en 1249, relais commercial après le déclin de Silves, l'ancienne capitale maure.",
+    "description": "Port de l’Algarve conquis en 1249, relais commercial après le déclin de Silves, l’ancienne capitale maure.",
     "sources": [
       "Faro",
       "Algarve"
@@ -135,7 +135,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville royale fortifiée où mourut la reine Isabelle d'Aragon (« Rainha Santa ») en 1336, réputée pour son marbre.",
+    "description": "Ville royale fortifiée où mourut la reine Isabelle d’Aragon (« Rainha Santa ») en 1336, réputée pour son marbre.",
     "sources": [
       "Estremoz",
       "Isabelle d'Aragon (reine du Portugal)"
@@ -187,7 +187,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié doté d'un foral en 1290, dominé par son château.",
+    "description": "Bourg fortifié doté d’un foral en 1290, dominé par son château.",
     "sources": [
       "Arraiolos"
     ]
@@ -212,7 +212,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Monastère cistercien féminin fondé vers 1274 près d'Évora.",
+    "description": "Monastère cistercien féminin fondé vers 1274 près d’Évora.",
     "sources": [
       "Mosteiro de São Bento de Cástris"
     ]

@@ -178,7 +178,7 @@ func _check_live() -> void:
 				if str(item.get("text", "")).contains(GameCatalog.display_name(str(requirement.get("id", "")))) and item.get("met") == bool(requirement.get("met")):
 					tech_state = true
 	check(tech_arrow, "a technology tooltip should show a « before → after » line")
-	check(tech_state, "technology prerequisites should follow the core's state")
+	check(tech_state, "technology prerequisites should follow the core’s state")
 	# Recrutement : chaque ligne porte l'état de ses prérequis.
 	var recruit: Array = sim.call("get_recruitable", capital)
 	check(not recruit.is_empty() and (recruit[0] as Dictionary).has("requirements"), "recruitable rows should carry requirements")

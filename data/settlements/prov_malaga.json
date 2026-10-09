@@ -53,7 +53,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Ville-forteresse perchée sur les gorges du Tajo, verrou nasride vers l'ouest.",
+    "description": "Ville-forteresse perchée sur les gorges du Tajo, verrou nasride vers l’ouest.",
     "sources": [
       "Ronda"
     ]
@@ -106,7 +106,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Petit bourg agricole perché de l'arrière-pays de Málaga.",
+    "description": "Petit bourg agricole perché de l’arrière-pays de Málaga.",
     "sources": [
       "Comares"
     ]
@@ -157,7 +157,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Petite ville côtière nasride close de murs, dotée d'une alcazaba.",
+    "description": "Petite ville côtière nasride close de murs, dotée d’une alcazaba.",
     "sources": [
       "Marbella"
     ]

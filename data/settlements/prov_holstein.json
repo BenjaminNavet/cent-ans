@@ -53,7 +53,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Grande ville hanséatique de l'Elbe, alliée de Lübeck pour la sécurité des routes du hareng.",
+    "description": "Grande ville hanséatique de l’Elbe, alliée de Lübeck pour la sécurité des routes du hareng.",
     "sources": [
       "Hambourg"
     ]
@@ -79,7 +79,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville portuaire comtale du Holstein sur la Baltique (le Holstein ne sera duché qu'en 1474).",
+    "description": "Ville portuaire comtale du Holstein sur la Baltique (le Holstein ne sera duché qu’en 1474).",
     "sources": [
       "Kiel"
     ]
@@ -130,7 +130,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ancienne résidence comtale sur la Stör, l'une des plus vieilles villes du Holstein (droits urbains dès 1238).",
+    "description": "Ancienne résidence comtale sur la Stör, l’une des plus vieilles villes du Holstein (droits urbains dès 1238).",
     "sources": [
       "Itzehoe"
     ]

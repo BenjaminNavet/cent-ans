@@ -20,7 +20,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Capitale du comté de Charolais, tenu en 1337 par Jean Ier d'Armagnac du chef de sa femme Béatrice de Clermont.",
+    "description": "Capitale du comté de Charolais, tenu en 1337 par Jean Ier d’Armagnac du chef de sa femme Béatrice de Clermont.",
     "sources": [
       "Comté de Charolais"
     ]
@@ -45,7 +45,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Prieuré clunisien fondé au Xe siècle, dépendance majeure de l'ordre de Cluny en Charolais.",
+    "description": "Prieuré clunisien fondé au Xe siècle, dépendance majeure de l’ordre de Cluny en Charolais.",
     "sources": [
       "Paray-le-Monial"
     ]
@@ -70,7 +70,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de moyenne noblesse gardant l'accès méridional du comté vers le Brionnais.",
+    "description": "Château de moyenne noblesse gardant l’accès méridional du comté vers le Brionnais.",
     "sources": [
       "La Clayette"
     ]

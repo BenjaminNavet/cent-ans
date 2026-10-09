@@ -1,7 +1,7 @@
 {
   "id": "evt_preteurs_lombards",
   "title": "Les prêteurs lombards",
-  "text": "Des banquiers italiens proposent une avance sur les revenus des aides à venir. L'intérêt est lourd, mais les coffres sont vides et les soldes attendent.",
+  "text": "Des banquiers italiens proposent une avance sur les revenus des aides à venir. L’intérêt est lourd, mais les coffres sont vides et les soldes attendent.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80

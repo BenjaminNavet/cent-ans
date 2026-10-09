@@ -1,5 +1,5 @@
 {
-  "description": "Flottes de guerre au printemps 1337 (lot NV1). Ordres de grandeur : les rois réquisitionnent les navires marchands (cogues) et louent des galères génoises ; les effectifs réels varient d'une campagne à l'autre.",
+  "description": "Flottes de guerre au printemps 1337 (lot NV1). Ordres de grandeur : les rois réquisitionnent les navires marchands (cogues) et louent des galères génoises ; les effectifs réels varient d’une campagne à l’autre.",
   "fleets": [
     {
       "faction": "fac_england",

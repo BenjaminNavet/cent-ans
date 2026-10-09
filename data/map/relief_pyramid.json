@@ -1,5 +1,5 @@
 {
-  "description": "Manifeste de la pyramide de relief (ADR 0036). Étages vides tant que `cent-ans geo pyramid` / `geo detail-dem` n'ont pas cuit le cache.",
+  "description": "Manifeste de la pyramide de relief (ADR 0036). Étages vides tant que `cent-ans geo pyramid` / `geo detail-dem` n’ont pas cuit le cache.",
   "version": 1,
   "tile_px": 512,
   "root_tile_units": 256,

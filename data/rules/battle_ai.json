@@ -1,5 +1,5 @@
 {
-  "description": "Réglages de l'IA de bataille (lot BA6) : distances, délais et seuils des décisions de ai/. Valeurs identiques aux anciennes constantes de sim-battle/src/ai/.",
+  "description": "Réglages de l’IA de bataille (lot BA6) : distances, délais et seuils des décisions de ai/. Valeurs identiques aux anciennes constantes de sim-battle/src/ai/.",
   "cover_lateral": 110.0,
   "cover_ahead": 110.0,
   "cover_behind": 90.0,

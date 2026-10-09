@@ -21,7 +21,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Maître de l'ordre de Calatrava",
+      "title": "Maître de l’ordre de Calatrava",
       "from": {
         "value": "1328"
       }
@@ -39,7 +39,7 @@
   "piety": 70,
   "starting_location": "prov_calatrava",
   "status": "at_court",
-  "description": "Maître de l'ordre de Calatrava de 1328 à 1355, élu à la déposition de García López de Padilla, qui lui dispute longtemps la maîtrise ; il mène l'ordre sur la frontière de Grenade sous Alphonse XI, avant d'être déposé puis mis à mort sous Pierre Ier.",
+  "description": "Maître de l’ordre de Calatrava de 1328 à 1355, élu à la déposition de García López de Padilla, qui lui dispute longtemps la maîtrise ; il mène l’ordre sur la frontière de Grenade sous Alphonse XI, avant d’être déposé puis mis à mort sous Pierre Ier.",
   "sources": [
     "Ordre de Calatrava",
     "Orden de Calatrava (es)",

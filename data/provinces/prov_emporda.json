@@ -27,8 +27,8 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Castelló d'Empúries",
-      "local": "Castelló d'Empúries",
+      "display": "Castelló d’Empúries",
+      "local": "Castelló d’Empúries",
       "local_language": "catalan"
     },
     "lat": 42.2564,
@@ -90,10 +90,10 @@
   ],
   "fortification_level": 2,
   "base_supply": 1000,
-  "description": "Comté d'Empúries, sur la côte de l'Alt Empordà ; racheté à la maison de Cardona par la couronne en 1325 et tenu en 1337 par l'infant Pierre d'Aragon avec le comté de Ribagorce.",
+  "description": "Comté d’Empúries, sur la côte de l’Alt Empordà ; racheté à la maison de Cardona par la couronne en 1325 et tenu en 1337 par l’infant Pierre d’Aragon avec le comté de Ribagorce.",
   "sources": [
     "Comté d'Empúries",
     "Pierre d'Aragon, comte de Ribagorce et d'Empúries",
-    "Castelló d'Empúries"
+    "Castelló d’Empúries"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "id": "evt_chute_de_tlemcen",
   "title": "La chute de Tlemcen",
-  "text": "Après un siège de plus de deux ans, [[cdx_abu_al_hasan_ali|Abu l-Hasan]] force les murailles de Tlemcen ; le sultan abdalwadide Abu Tashufin tombe les armes à la main. Les [[cdx_marinides|Mérinides]] tiennent désormais tout le Maghreb central, de Fès aux portes de l'Ifriqiya.",
+  "text": "Après un siège de plus de deux ans, [[cdx_abu_al_hasan_ali|Abu l-Hasan]] force les murailles de Tlemcen ; le sultan abdalwadide Abu Tashufin tombe les armes à la main. Les [[cdx_marinides|Mérinides]] tiennent désormais tout le Maghreb central, de Fès aux portes de l’Ifriqiya.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -27,7 +27,7 @@
   },
   "options": [
     {
-      "text": "Élever la mosquée d'al-Eubbad sur le tombeau de Sidi Boumediene",
+      "text": "Élever la mosquée d’al-Eubbad sur le tombeau de Sidi Boumediene",
       "effects": [
         {
           "type": "prestige",

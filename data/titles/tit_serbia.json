@@ -53,7 +53,7 @@
     },
     {
       "id": "obj_serbia_empire",
-      "title": "Rêve d'empire",
+      "title": "Rêve d’empire",
       "description": "Contrôler Constantinople.",
       "condition": {
         "kind": "hold_provinces",

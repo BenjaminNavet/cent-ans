@@ -50,7 +50,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close sur un éperon dominant la Vézère, surnommée la « pucelle du Limousin » pour n'avoir jamais été prise.",
+    "description": "Ville close sur un éperon dominant la Vézère, surnommée la « pucelle du Limousin » pour n’avoir jamais été prise.",
     "sources": [
       "Uzerche"
     ]
@@ -101,7 +101,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Maison mère de l'ordre de Grandmont, fondée au XIe siècle dans les monts d'Ambazac.",
+    "description": "Maison mère de l’ordre de Grandmont, fondée au XIe siècle dans les monts d’Ambazac.",
     "sources": [
       "Abbaye de Grandmont"
     ]
@@ -126,7 +126,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg castral sur l'Auvézère, siège d'une châtellenie vicomtale.",
+    "description": "Bourg castral sur l’Auvézère, siège d’une châtellenie vicomtale.",
     "sources": [
       "Ségur-le-Château"
     ]
@@ -279,7 +279,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg autour d'une collégiale romane, en Basse-Marche.",
+    "description": "Bourg autour d’une collégiale romane, en Basse-Marche.",
     "sources": [
       "Le Dorat"
     ]

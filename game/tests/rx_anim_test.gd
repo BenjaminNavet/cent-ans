@@ -16,7 +16,7 @@ func _init() -> void:
 	# Facteur de lecture à l'entrée dans chaque allure : jamais « accéléré » à l'entrée du galop
 	# (≤ 1,1), trot entre 0,75 et 1,35 sur toute sa bande, pas jamais au-delà du plafond 1,8.
 	var gallop_entry := (gallop_min + hyst) / float(cadence["c_gallop"])
-	check(gallop_entry >= 0.9 and gallop_entry <= 1.1, "galop à l'entrée lu à x%.2f" % gallop_entry)
+	check(gallop_entry >= 0.9 and gallop_entry <= 1.1, "galop à l’entrée lu à x%.2f" % gallop_entry)
 	check(float(cadence["c_charge"]) == float(cadence["c_gallop"]), "charge et galop : même cadence nominale")
 	var trot_low := (trot_min + hyst) / float(cadence["c_trot"])
 	var trot_high := (gallop_min + hyst) / float(cadence["c_trot"])
@@ -28,7 +28,7 @@ func _init() -> void:
 	var walk := BattleSkinned.state_config("infantry", 0, "marching", false)
 	var idle := BattleSkinned.state_config("infantry", 0, "idle", false)
 	check(absf(float(walk["jitter"]) - 0.03) < 0.001, "jitter de marche %s" % walk["jitter"])
-	check(absf(float(idle["jitter"]) - 0.07) < 0.001, "jitter d'attente %s" % idle["jitter"])
+	check(absf(float(idle["jitter"]) - 0.07) < 0.001, "jitter d’attente %s" % idle["jitter"])
 	var trot := BattleSkinned.state_config("cavalry", 0, "trotting", false)
 	check(absf(float(trot["jitter"]) - 0.03) < 0.001, "jitter de trot")
 	# Cadence par unité : facteur absent = 1.

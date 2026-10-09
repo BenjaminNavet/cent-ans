@@ -1,5 +1,5 @@
 {
-  "description": "Missions de campagne à court terme (lot NT3, ADR 0127) : gabarits tirés selon la situation de la faction du joueur, 1 à 2 actives, 3 à 12 tours, récompense à la réussite, faible perte de prestige à l'échéance. L'IA n'en reçoit pas. Un seul moteur paramétré par cette table (ADR 0207) : cible, but, compteur, textes. Voir docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md (NT3).",
+  "description": "Missions de campagne à court terme (lot NT3, ADR 0127) : gabarits tirés selon la situation de la faction du joueur, 1 à 2 actives, 3 à 12 tours, récompense à la réussite, faible perte de prestige à l’échéance. L’IA n’en reçoit pas. Un seul moteur paramétré par cette table (ADR 0207) : cible, but, compteur, textes. Voir docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md (NT3).",
   "max_active": 2,
   "first_turn": 1,
   "offer_cooldown_turns": 1,
@@ -10,7 +10,7 @@
       "target": "enemy_neighbour",
       "goal": "control",
       "title": "Prendre {cible}",
-      "objective": "Prenez la cité de {cible}, tenue par l'ennemi à nos frontières.",
+      "objective": "Prenez la cité de {cible}, tenue par l’ennemi à nos frontières.",
       "duration": 10,
       "weight": 3,
       "steps": [
@@ -96,7 +96,7 @@
       "target": "threatened_own",
       "goal": "hold",
       "title": "Tenir {cible}",
-      "objective": "Gardez la cité de {cible}, menacée par l'ennemi, pendant {n} saisons.",
+      "objective": "Gardez la cité de {cible}, menacée par l’ennemi, pendant {n} saisons.",
       "duration": 4,
       "weight": 2,
       "progress": "{done}/{n} saisons tenues",

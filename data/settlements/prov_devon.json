@@ -26,7 +26,7 @@
       "bld_archery_butts"
     ],
     "port": true,
-    "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d'embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset.",
+    "description": "Devon et Somerset : Exeter (comte Hugh Courtenay), Dartmouth et Plymouth (ports d’embarquement pour la Gascogne), Wells et Glastonbury. Étain du Dartmoor, draps de Somerset.",
     "sources": [
       "Devon",
       "Somerset",
@@ -80,7 +80,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port abrité à l'embouchure de la Dart, base de corsaires et d'armateurs.",
+    "description": "Port abrité à l’embouchure de la Dart, base de corsaires et d’armateurs.",
     "sources": [
       "Dartmouth (Devon)"
     ]
@@ -157,7 +157,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port et ville marchande de la côte nord du Devon, sur l'estuaire de la Taw.",
+    "description": "Port et ville marchande de la côte nord du Devon, sur l’estuaire de la Taw.",
     "sources": [
       "Barnstaple"
     ]
@@ -258,7 +258,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg drapier sur l'Exe, au nord d'Exeter.",
+    "description": "Bourg drapier sur l’Exe, au nord d’Exeter.",
     "sources": [
       "Tiverton"
     ]

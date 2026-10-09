@@ -3,7 +3,7 @@
   "kind": "dismount",
   "rank": 3,
   "name": "Pied à terre",
-  "description": "Les [[cdx_hommes_d_armes|hommes d'armes]] renvoient leurs chevaux à l'arrière et combattent à pied, lance raccourcie : plus lents, sans [[cdx_jeu_charge|charge]], mais bien plus solides. Irréversible pour la bataille. Pratique anglaise ([[cdx_crecy|Crécy]], 1346), reprise par les Français à [[cdx_poitiers|Poitiers]] (1356).",
+  "description": "Les [[cdx_hommes_d_armes|hommes d’armes]] renvoient leurs chevaux à l’arrière et combattent à pied, lance raccourcie : plus lents, sans [[cdx_jeu_charge|charge]], mais bien plus solides. Irréversible pour la bataille. Pratique anglaise ([[cdx_crecy|Crécy]], 1346), reprise par les Français à [[cdx_poitiers|Poitiers]] (1356).",
   "icon": "dismount",
   "scope": "selected",
   "requires_general": false,
@@ -18,7 +18,7 @@
     "armor": 8
   },
   "journal": "Les {unit} mettent pied à terre.",
-  "journal_assault": "Les chevaliers {of_faction} mettent pied à terre pour l'assaut.",
+  "journal_assault": "Les chevaliers {of_faction} mettent pied à terre pour l’assaut.",
   "ai": {
     "min_units": 1,
     "when_defensive": true

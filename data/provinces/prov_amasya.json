@@ -82,7 +82,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 1000,
-  "description": "Vallée du Yeşilırmak, dont Amasya et Niksar contrôlent l'accès au Pont.",
+  "description": "Vallée du Yeşilırmak, dont Amasya et Niksar contrôlent l’accès au Pont.",
   "sources": [
     "Amasya",
     "Niksar"

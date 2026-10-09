@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Centre régional de l'Olténie, sur les plaines du Jiu (site incertain pour 1337).",
+    "description": "Centre régional de l’Olténie, sur les plaines du Jiu (site incertain pour 1337).",
     "sources": [
       "Craiova"
     ]
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse de la marche de l'Olténie occidentale (localisation approximative).",
+    "description": "Forteresse de la marche de l’Olténie occidentale (localisation approximative).",
     "sources": [
       "Strehaia"
     ]
@@ -69,7 +69,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Poste de douane sur l'Olt, sur la route des marchands de Brașov (première mention 1368, à préciser).",
+    "description": "Poste de douane sur l’Olt, sur la route des marchands de Brașov (première mention 1368, à préciser).",
     "sources": [
       "Slatina"
     ]

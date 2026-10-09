@@ -150,7 +150,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_water_mill"],
     "port": false,
-    "description": "Bourg ancien au confluent de l'Azergues et de la Saône, avec prieuré.",
+    "description": "Bourg ancien au confluent de l’Azergues et de la Saône, avec prieuré.",
     "sources": ["Anse (Rhône)"]
   }
 ]

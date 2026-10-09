@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à l'aigle d'argent, à la bordure d'or.",
-    "description": "Aigle blanc de Mazovie, bordure d'or.",
+    "description": "Aigle blanc de Mazovie, bordure d’or.",
     "primary_color": "#C8102E",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -29,7 +29,7 @@
     {
       "id": "obj_warsaw_hold",
       "title": "Garder Varsovie",
-      "description": "Trojden doit préserver l'héritage de ses ancêtres.",
+      "description": "Trojden doit préserver l’héritage de ses ancêtres.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_warsaw"
@@ -46,7 +46,7 @@
     {
       "id": "obj_warsaw_rawa",
       "title": "Réunir la Mazovie",
-      "description": "Recueillir Rawa, l'héritage de Siemowit II (léguée aux fils de Trojden en 1345).",
+      "description": "Recueillir Rawa, l’héritage de Siemowit II (léguée aux fils de Trojden en 1345).",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

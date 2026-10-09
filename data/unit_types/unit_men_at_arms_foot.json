@@ -1,8 +1,8 @@
 {
   "id": "unit_men_at_arms_foot",
   "name": {
-    "display": "Hommes d'armes à pied",
-    "local": "gens d'armes",
+    "display": "Hommes d’armes à pied",
+    "local": "gens d’armes",
     "local_language": "ancien français"
   },
   "category": "infantry",

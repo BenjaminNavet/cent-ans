@@ -50,7 +50,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse restée invaincue face à Guillaume le Conquérant, dominant l'Erve.",
+    "description": "Forteresse restée invaincue face à Guillaume le Conquérant, dominant l’Erve.",
     "sources": [
       "Château de Sainte-Suzanne"
     ]
@@ -60,8 +60,8 @@
     "province": "prov_maine",
     "kind": "abbey",
     "name": {
-      "display": "L'Épau",
-      "local": "L'Espau",
+      "display": "L’Épau",
+      "local": "L’Espau",
       "local_language": "ancien français"
     },
     "lonlat": [
@@ -227,7 +227,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié du Perche mainiot, sur l'Huisne.",
+    "description": "Bourg fortifié du Perche mainiot, sur l’Huisne.",
     "sources": [
       "La Ferté-Bernard"
     ]

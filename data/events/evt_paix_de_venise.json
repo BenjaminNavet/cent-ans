@@ -1,7 +1,7 @@
 {
   "id": "evt_paix_de_venise",
   "title": "La paix des Scaliger",
-  "text": "Padoue perdue, Trévise menacée, Mastino della Scala doit traiter. À Venise, la Ligue lui dicte ses conditions : la Sérénissime garde Trévise et sa marche, les Carrara reprennent Padoue, Florence n'obtient guère que des promesses sur Lucques.",
+  "text": "Padoue perdue, Trévise menacée, Mastino della Scala doit traiter. À Venise, la Ligue lui dicte ses conditions : la Sérénissime garde Trévise et sa marche, les Carrara reprennent Padoue, Florence n’obtient guère que des promesses sur Lucques.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -34,7 +34,7 @@ func _render() -> void:
 	fill.bg_color = HudStyle.GOOD if score >= 0 else HudStyle.POOR
 	bar.add_theme_stylebox_override("fill", fill)
 	add_child(bar)
-	add_child(_label("Batailles, sièges et provinces occupées remplissent le score ; les buts de guerre tenus comptent double. Plus il est haut, plus l'ennemi cédera de terres. À la paix, seules les places cédées par le traité deviennent vôtres ; les autres places occupées sont rendues.", UiType.CAPTION, HudStyle.INK_FADED))
+	add_child(_label("Batailles, sièges et provinces occupées remplissent le score ; les buts de guerre tenus comptent double. Plus il est haut, plus l’ennemi cédera de terres. À la paix, seules les places cédées par le traité deviennent vôtres ; les autres places occupées sont rendues.", UiType.CAPTION, HudStyle.INK_FADED))
 	(get_child(get_child_count() - 1) as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_label("Fatigue de guerre : nous %d/100, eux %d/100" % [int(summary.get("weariness_ours", 0)), int(summary.get("weariness_theirs", 0))], UiType.BODY, HudStyle.INK))
 	for pair in [["Nos buts de guerre", "goals_ours"], ["Leurs buts de guerre", "goals_theirs"]]:

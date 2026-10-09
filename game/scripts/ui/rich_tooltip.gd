@@ -479,7 +479,7 @@ static func unit_period(definition: Dictionary) -> String:
 	if from > 0:
 		return "à partir de %d" % from
 	if until > 0:
-		return "jusqu'en %d" % until
+		return "jusqu’en %d" % until
 	return ""
 
 
@@ -933,7 +933,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 	if inflation > 0:
 		lines.append("Prix : [color=%s]%s+%d / saison[/color] (recrutement, entretien et constructions renchérissent)" % [RED, mark(-1), inflation])
 	elif deflation > 0:
-		lines.append("Prix : [color=%s]%s−%d / saison[/color] (jusqu'aux prix de 1337)" % [GREEN, mark(1), deflation])
+		lines.append("Prix : [color=%s]%s−%d / saison[/color] (jusqu’aux prix de 1337)" % [GREEN, mark(1), deflation])
 	else:
 		lines.append("Prix : stables")
 	var unrest := float(option.get("burgher_unrest", 0.0))
@@ -944,7 +944,7 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 		lines.append("Prestige du souverain : [color=%s]%s%s%d / saison[/color]" % [GREEN if prestige > 0 else RED, mark(1 if prestige > 0 else -1), "+" if prestige > 0 else "", prestige])
 	lines.append("[color=%s][i]Un seul changement de monnaie par année civile.[/i][/color]" % MUTED)
 	if changed_this_year and not current:
-		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; prochain changement possible l'an prochain.[/color]" % RED)
+		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; prochain changement possible l’an prochain.[/color]" % RED)
 	return _join(lines)
 
 
@@ -953,7 +953,7 @@ static func chivalric_order(option: Dictionary) -> String:
 	var lines: Array = [_title("hud_court", str(option.get("name", option.get("id", ""))), "disponible" if bool(option.get("available", false)) else "indisponible", "hud")]
 	lines.append("Coût : %s %s · prestige requis : %d" % [Money.digits(int(option.get("cost", 0))), POUND, int(option.get("prestige_required", 0))])
 	lines.append("Membres : %d (historiquement : %s)" % [int(option.get("members", 0)), str(option.get("historical_members", "—"))])
-	lines.append("Membres : loyauté +%d, moral des armées qu'ils mènent +%d" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0))])
+	lines.append("Membres : loyauté +%d, moral des armées qu’ils mènent +%d" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0))])
 	lines.append("Souverain : prestige +%d à la fondation, +%d par an" % [int(option.get("founder_prestige", 0)), int(option.get("yearly_prestige", 0))])
 	if int(option.get("min_year", 0)) > 0:
 		lines.append("Fondation possible dès %d" % int(option.get("min_year", 0)))
@@ -975,7 +975,7 @@ static func chivalric_order(option: Dictionary) -> String:
 const TEXTS_FILE := "ui/tooltips.json"
 ## Ordre de recherche d'une clé de règle dans `tooltips.json`.
 const RULE_BLOCKS := ["effects", "stats", "gauges"]
-const RULE_SUBTITLES := {"effects": "effet", "stats": "caractéristique d'unité", "gauges": "jauge"}
+const RULE_SUBTITLES := {"effects": "effet", "stats": "caractéristique d’unité", "gauges": "jauge"}
 ## Préfixe d'id → `kind` de lien d'entité.
 const ENTITY_KINDS := {
 	"unit_": "unit", "bld_": "building", "tech_": "technology", "res_": "resource",

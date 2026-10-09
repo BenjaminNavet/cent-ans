@@ -1,5 +1,5 @@
 {
-  "description": "Niveaux de difficulté de la campagne (lot DF1, ADR 0037) : choisis au lancement et figés pour la partie. « Normale » est neutre (le jeu tel qu'il est équilibré) ; les autres niveaux modulent les revenus, l'entretien et le recrutement des IA, les revenus et l'agitation du joueur, l'hostilité des IA envers le joueur et le moral des armées IA qui l'affrontent (bataille 3D et auto-résolution).",
+  "description": "Niveaux de difficulté de la campagne (lot DF1, ADR 0037) : choisis au lancement et figés pour la partie. « Normale » est neutre (le jeu tel qu’il est équilibré) ; les autres niveaux modulent les revenus, l’entretien et le recrutement des IA, les revenus et l’agitation du joueur, l’hostilité des IA envers le joueur et le moral des armées IA qui l’affrontent (bataille 3D et auto-résolution).",
   "default": "normal",
   "levels": [
     {
@@ -18,7 +18,7 @@
     {
       "id": "normal",
       "label": "Normale",
-      "description": "Le jeu tel qu'il est équilibré : aucune faveur, aucun handicap, ni pour vous ni pour l'IA.",
+      "description": "Le jeu tel qu’il est équilibré : aucune faveur, aucun handicap, ni pour vous ni pour l’IA.",
       "ai_income_percent": 100,
       "player_income_percent": 100,
       "ai_upkeep_percent": 100,
@@ -31,7 +31,7 @@
     {
       "id": "hard",
       "label": "Difficile",
-      "description": "Les couronnes rivales lèvent davantage d'impôts, entretiennent leurs armées à moindre coût et vous regardent d'un œil plus hostile ; leurs soldats tiennent mieux face à vous.",
+      "description": "Les couronnes rivales lèvent davantage d’impôts, entretiennent leurs armées à moindre coût et vous regardent d’un œil plus hostile ; leurs soldats tiennent mieux face à vous.",
       "ai_income_percent": 120,
       "player_income_percent": 100,
       "ai_upkeep_percent": 90,
@@ -44,7 +44,7 @@
     {
       "id": "very_hard",
       "label": "Très difficile",
-      "description": "Pour les connétables aguerris : l'IA est riche, recrute et entretient ses osts à bon compte et vous déclare la guerre au moindre signe de faiblesse ; vos revenus sont maigres et vos provinces promptes à gronder.",
+      "description": "Pour les connétables aguerris : l’IA est riche, recrute et entretient ses osts à bon compte et vous déclare la guerre au moindre signe de faiblesse ; vos revenus sont maigres et vos provinces promptes à gronder.",
       "ai_income_percent": 140,
       "player_income_percent": 90,
       "ai_upkeep_percent": 80,

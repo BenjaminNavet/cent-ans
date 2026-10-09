@@ -1,7 +1,7 @@
 {
   "id": "enc_loups_hiver",
-  "title": "Les loups de l'hiver",
-  "text": "Le froid a chassé les loups des bois. La nuit, ils rôdent autour du camp, égorgent les chevaux au piquet et emportent les traînards ; les paysans parlent d'une bande menée par un vieux loup à la queue coupée.",
+  "title": "Les loups de l’hiver",
+  "text": "Le froid a chassé les loups des bois. La nuit, ils rôdent autour du camp, égorgent les chevaux au piquet et emportent les traînards ; les paysans parlent d’une bande menée par un vieux loup à la queue coupée.",
   "spawn": {
     "seasons": [
       "winter"

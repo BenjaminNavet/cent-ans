@@ -1,7 +1,7 @@
 {
   "id": "evt_reliques_miraculeuses",
   "title": "Des reliques miraculeuses",
-  "text": "Un ossement trouvé sous l'autel d'une chapelle en ruine passe pour celui d'un saint. On dit que des boiteux ont marché et les fidèles affluent avec des cierges.",
+  "text": "Un ossement trouvé sous l’autel d’une chapelle en ruine passe pour celui d’un saint. On dit que des boiteux ont marché et les fidèles affluent avec des cierges.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 90
@@ -34,7 +34,7 @@
       "ai_weight": 3
     },
     {
-      "text": "Faire examiner la relique par l'évêque",
+      "text": "Faire examiner la relique par l’évêque",
       "effects": [
         {
           "type": "unrest",
@@ -48,7 +48,7 @@
       "ai_weight": 3
     },
     {
-      "text": "Interdire le culte jusqu'à preuve du miracle",
+      "text": "Interdire le culte jusqu’à preuve du miracle",
       "effects": [
         {
           "type": "unrest",

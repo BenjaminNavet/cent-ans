@@ -18,7 +18,7 @@
   "primary_title": "tit_denmark",
   "heraldry": {
     "blazon": "De gueules à la feuille d'ortie d'argent.",
-    "description": "Feuille d'ortie des Schauenbourg, comtes de Holstein.",
+    "description": "Feuille d’ortie des Schauenbourg, comtes de Holstein.",
     "primary_color": "#B22222",
     "secondary_color": "#F5F1E6"
   },
@@ -55,7 +55,7 @@
     "trade": 60,
     "piety": 40
   },
-  "description": "Le Danemark n'a plus de roi depuis 1332 : ses provinces sont engagées aux comtes de Holstein. Gérard le Grand tient le Jutland jusqu'à son assassinat en 1340, qui ouvre la voie à Valdemar IV.",
+  "description": "Le Danemark n’a plus de roi depuis 1332 : ses provinces sont engagées aux comtes de Holstein. Gérard le Grand tient le Jutland jusqu’à son assassinat en 1340, qui ouvre la voie à Valdemar IV.",
   "sources": [
     "Gérard III de Holstein-Rendsbourg",
     "Interrègne danois (1332-1340)"

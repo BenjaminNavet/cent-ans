@@ -19,7 +19,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Grande ville de l'Iaïk inférieur, résidence des princes de l'ulus oriental.",
+    "description": "Grande ville de l’Iaïk inférieur, résidence des princes de l’ulus oriental.",
     "sources": [
       "Saraïtchik"
     ]
@@ -29,7 +29,7 @@
     "province": "prov_saraichik",
     "kind": "village",
     "name": {
-      "display": "Camps de l'Iaïk",
+      "display": "Camps de l’Iaïk",
       "local": "Яик",
       "local_language": "tatar kiptchak"
     },
@@ -42,7 +42,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Campements des tribus sur l'Iaïk moyen (nom et emplacement génériques, incertain).",
+    "description": "Campements des tribus sur l’Iaïk moyen (nom et emplacement génériques, incertain).",
     "sources": [
       "Iaïk"
     ]
@@ -65,7 +65,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Petite ville de la Horde d'Or sur l'Iaïk moyen (site archéologique de Jaïk près d'Ouralsk, XIIIe-XIVe siècles).",
+    "description": "Petite ville de la Horde d’Or sur l’Iaïk moyen (site archéologique de Jaïk près d’Ouralsk, XIIIe-XIVe siècles).",
     "sources": [
       "Zhaiyk"
     ]

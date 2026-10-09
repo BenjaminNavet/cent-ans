@@ -1,5 +1,5 @@
 {
-  "description": "Chantier IB (ADR 0109) — textes des infobulles : libellés d'effets et de stats, textes des jauges et du HUD, infobulles simples (titre, corps, raccourci). Les {rule.…} sont résolus depuis les règles du core, comme dans RichTooltip. Blocs effects, stats et gauges : textes des bulles de règle (liens ib:rule:<clé>, lot IB4) ; le reste est rempli par le lot IB2 à partir des tables de game/scripts/ui/rich_tooltip.gd.",
+  "description": "Chantier IB (ADR 0109) — textes des infobulles : libellés d’effets et de stats, textes des jauges et du HUD, infobulles simples (titre, corps, raccourci). Les {rule.…} sont résolus depuis les règles du core, comme dans RichTooltip. Blocs effects, stats et gauges : textes des bulles de règle (liens ib:rule:<clé>, lot IB4) ; le reste est rempli par le lot IB2 à partir des tables de game/scripts/ui/rich_tooltip.gd.",
   "effects": {
     "unrest": {
       "label": "Mécontentement",
@@ -7,7 +7,7 @@
     },
     "prestige": {
       "label": "Prestige",
-      "body": "Modifie le prestige du souverain ou du personnage qui porte l'effet."
+      "body": "Modifie le prestige du souverain ou du personnage qui porte l’effet."
     },
     "army_morale": {
       "label": "Moral des armées",
@@ -15,7 +15,7 @@
     },
     "piety": {
       "label": "Piété",
-      "body": "Modifie la piété du souverain ou du personnage qui porte l'effet."
+      "body": "Modifie la piété du souverain ou du personnage qui porte l’effet."
     },
     "health": {
       "label": "Santé",
@@ -23,11 +23,11 @@
     },
     "wealth": {
       "label": "Richesse",
-      "body": "Modifie la richesse produite par la population d'une province chaque saison."
+      "body": "Modifie la richesse produite par la population d’une province chaque saison."
     },
     "trade_income": {
       "label": "Revenus du commerce",
-      "body": "Modifie les revenus tirés du commerce bourgeois d'une province chaque saison."
+      "body": "Modifie les revenus tirés du commerce bourgeois d’une province chaque saison."
     },
     "research_points": {
       "label": "Points de recherche",
@@ -43,23 +43,23 @@
     },
     "loyalty": {
       "label": "Loyauté",
-      "body": "Abaisse d'autant le mécontentement vers lequel tend la province."
+      "body": "Abaisse d’autant le mécontentement vers lequel tend la province."
     },
     "army_ranged": {
       "label": "Tir",
-      "body": "Ajoute un bonus de tir aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+      "body": "Ajoute un bonus de tir aux unités d’une catégorie donnée (technologies, bâtiments), appliqué en bataille."
     },
     "army_armor": {
       "label": "Armure",
-      "body": "Ajoute un bonus d'armure aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+      "body": "Ajoute un bonus d’armure aux unités d’une catégorie donnée (technologies, bâtiments), appliqué en bataille."
     },
     "army_melee": {
       "label": "Mêlée",
-      "body": "Ajoute un bonus de mêlée aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+      "body": "Ajoute un bonus de mêlée aux unités d’une catégorie donnée (technologies, bâtiments), appliqué en bataille."
     },
     "tax_income": {
       "label": "Impôts",
-      "body": "Modifie la base d'imposition d'une province chaque saison."
+      "body": "Modifie la base d’imposition d’une province chaque saison."
     },
     "production": {
       "label": "Production",
@@ -67,31 +67,31 @@
     },
     "intrigue": {
       "label": "Intrigue",
-      "body": "Modifie l'intrigue du personnage qui porte l'effet."
+      "body": "Modifie l’intrigue du personnage qui porte l’effet."
     },
     "diplomacy": {
       "label": "Diplomatie",
-      "body": "Modifie la diplomatie du personnage qui porte l'effet."
+      "body": "Modifie la diplomatie du personnage qui porte l’effet."
     },
     "battle_charge": {
       "label": "Charge en bataille",
-      "body": "Ajoute un bonus de charge, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+      "body": "Ajoute un bonus de charge, en pourcentage, aux troupes commandées par le général qui porte l’effet."
     },
     "battle_ranged": {
       "label": "Tir en bataille",
-      "body": "Ajoute un bonus de précision au tir, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+      "body": "Ajoute un bonus de précision au tir, en pourcentage, aux troupes commandées par le général qui porte l’effet."
     },
     "battle_defense": {
       "label": "Défense en bataille",
-      "body": "Ajoute un bonus d'armure, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+      "body": "Ajoute un bonus d’armure, en pourcentage, aux troupes commandées par le général qui porte l’effet."
     },
     "siege_resistance": {
       "label": "Résistance aux sièges",
-      "body": "Renforce la résistance d'une place assiégée face à l'attaquant."
+      "body": "Renforce la résistance d’une place assiégée face à l’attaquant."
     },
     "siege_speed": {
       "label": "Vitesse de siège",
-      "body": "Accélère la progression d'un siège mené par le général qui porte l'effet, réduisant sa durée."
+      "body": "Accélère la progression d’un siège mené par le général qui porte l’effet, réduisant sa durée."
     },
     "army_experience": {
       "label": "Expérience des troupes",
@@ -103,93 +103,93 @@
     },
     "recruit_cost": {
       "label": "Coût de recrutement",
-      "body": "Modifie le coût de recrutement des unités d'une province ou d'une catégorie d'unités."
+      "body": "Modifie le coût de recrutement des unités d’une province ou d’une catégorie d’unités."
     },
     "fortification_level": {
       "label": "Fortifications",
-      "body": "Modifie le niveau de fortification d'une place, qui renforce sa garnison en défense et lors des sièges."
+      "body": "Modifie le niveau de fortification d’une place, qui renforce sa garnison en défense et lors des sièges."
     },
     "growth": {
       "label": "Croissance",
-      "body": "Modifie la croissance de la population d'une province chaque saison."
+      "body": "Modifie la croissance de la population d’une province chaque saison."
     },
     "movement": {
       "label": "Mouvement",
-      "body": "Modifie la portée de déplacement d'une armée ou d'une catégorie d'unités sur la carte de campagne."
+      "body": "Modifie la portée de déplacement d’une armée ou d’une catégorie d’unités sur la carte de campagne."
     },
     "goods_satisfaction": {
       "label": "Satisfaction en biens",
-      "body": "Modifie la satisfaction de la population d'une province en biens de consommation chaque saison."
+      "body": "Modifie la satisfaction de la population d’une province en biens de consommation chaque saison."
     },
     "garrison": {
       "label": "Garnison",
-      "body": "Chaque point réduit la part de l'entretien de la garnison payée par le contrôleur et accélère la reconstitution de ses effectifs chaque saison, jusqu'à un plafond des règles."
+      "body": "Chaque point réduit la part de l’entretien de la garnison payée par le contrôleur et accélère la reconstitution de ses effectifs chaque saison, jusqu’à un plafond des règles."
     },
     "fertility": {
       "label": "Fécondité",
-      "body": "Modifie la fécondité du personnage qui porte l'effet."
+      "body": "Modifie la fécondité du personnage qui porte l’effet."
     },
     "construction_speed": {
       "label": "Vitesse de construction",
       "body": "Accélère la construction des bâtiments dans une province."
     },
     "attrition_resistance": {
-      "label": "Résistance à l'attrition",
+      "label": "Résistance à l’attrition",
       "body": "Réduit les pertes subies par une armée par attrition (manque de ravitaillement, terrain hostile)."
     },
     "supply": {
       "label": "Ravitaillement",
-      "body": "Améliore la récupération du ravitaillement d'une armée et atténue les pertes liées à son manque, y compris en bataille."
+      "body": "Améliore la récupération du ravitaillement d’une armée et atténue les pertes liées à son manque, y compris en bataille."
     },
     "army_upkeep": {
       "label": "Entretien des armées",
-      "body": "Modifie le coût d'entretien des troupes d'une catégorie donnée ou d'une province."
+      "body": "Modifie le coût d’entretien des troupes d’une catégorie donnée ou d’une province."
     },
     "plague_resistance": {
       "label": "Résistance à la peste",
-      "body": "Réduit la probabilité et la gravité des épidémies dans une province, dans la limite d'un plafond fixé par les règles."
+      "body": "Réduit la probabilité et la gravité des épidémies dans une province, dans la limite d’un plafond fixé par les règles."
     },
     "wound_recovery": {
       "label": "Soin des blessés",
-      "body": "Augmente la part des pertes d'une bataille récupérée comme blessés par les troupes survivantes, dans la limite d'un plafond fixé par les règles."
+      "body": "Augmente la part des pertes d’une bataille récupérée comme blessés par les troupes survivantes, dans la limite d’un plafond fixé par les règles."
     },
     "diet_health": {
       "label": "Santé tirée des régimes",
-      "body": "Modifie en pourcentage les effets de santé apportés par le régime alimentaire d'une province."
+      "body": "Modifie en pourcentage les effets de santé apportés par le régime alimentaire d’une province."
     }
   },
   "stats": {
     "melee": {
       "label": "Mêlée",
-      "body": "Puissance de l'unité au corps à corps en bataille."
+      "body": "Puissance de l’unité au corps à corps en bataille."
     },
     "ranged": {
       "label": "Tir",
-      "body": "Puissance de tir de l'unité ; nulle si l'unité n'a pas de portée."
+      "body": "Puissance de tir de l’unité ; nulle si l’unité n’a pas de portée."
     },
     "range": {
       "label": "Portée",
-      "body": "Distance de tir de l'unité, en mètres ; 0 pour une unité de mêlée pure."
+      "body": "Distance de tir de l’unité, en mètres ; 0 pour une unité de mêlée pure."
     },
     "armor": {
       "label": "Armure",
-      "body": "Protection de l'unité, qui réduit les dégâts reçus en bataille."
+      "body": "Protection de l’unité, qui réduit les dégâts reçus en bataille."
     },
     "morale": {
       "label": "Moral",
-      "body": "Résistance de l'unité au stress du combat avant de rompre ou de fuir."
+      "body": "Résistance de l’unité au stress du combat avant de rompre ou de fuir."
     },
     "speed": {
       "label": "Vitesse",
-      "body": "Vitesse de déplacement de l'unité sur le champ de bataille."
+      "body": "Vitesse de déplacement de l’unité sur le champ de bataille."
     },
     "ammo": {
       "label": "Munitions",
-      "body": "Nombre de tirs disponibles avant qu'une unité à distance ne soit à court de munitions."
+      "body": "Nombre de tirs disponibles avant qu’une unité à distance ne soit à court de munitions."
     },
     "charge": {
       "label": "Charge",
-      "body": "Bonus de dégâts au moment de l'impact d'une charge, notamment pour la cavalerie."
+      "body": "Bonus de dégâts au moment de l’impact d’une charge, notamment pour la cavalerie."
     },
     "siege_attack": {
       "label": "Attaque de siège",
@@ -199,7 +199,7 @@
   "gauges": {
     "unrest": {
       "title": "Mécontentement",
-      "body": "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de {rule.revolt_unrest_threshold} pendant {rule.revolt_seasons} saisons : révolte (le compte repart ensuite de zéro) ; au-delà de {rule.revolt_control_threshold} : la province passe aux rebelles."
+      "body": "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l’occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l’apaisent. Au-delà de {rule.revolt_unrest_threshold} pendant {rule.revolt_seasons} saisons : révolte (le compte repart ensuite de zéro) ; au-delà de {rule.revolt_control_threshold} : la province passe aux rebelles."
     },
     "health": {
       "title": "Santé",
@@ -223,11 +223,11 @@
     },
     "morale": {
       "title": "Moral",
-      "body": "Au plus bas, l'unité rompt et fuit le combat."
+      "body": "Au plus bas, l’unité rompt et fuit le combat."
     },
     "supply": {
       "title": "Ravitaillement",
-      "body": "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."
+      "body": "Vivres de l’armée : baisse hors du territoire ami (plus vite l’hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."
     },
     "movement": {
       "title": "Mouvement",
@@ -235,7 +235,7 @@
     },
     "strength": {
       "title": "Effectif",
-      "body": "Hommes présents / effectif complet de l'unité."
+      "body": "Hommes présents / effectif complet de l’unité."
     }
   },
   "hud": {
@@ -245,7 +245,7 @@
     },
     "hud_income": {
       "title": "Solde",
-      "body": "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."
+      "body": "Recettes de la saison (impôts, commerce, seigneuriage) moins l’entretien des armées, des bâtiments, de la Table et de l’administration : ce qui sera ajouté au trésor en fin de tour."
     },
     "hud_research": {
       "title": "Recherche",
@@ -281,15 +281,15 @@
     },
     "hud_stance_raid": {
       "title": "Chevauchée",
-      "body": "L'armée pille le pays ennemi qu'elle traverse : butin pour le trésor, dévastation et colère chez l'adversaire."
+      "body": "L’armée pille le pays ennemi qu’elle traverse : butin pour le trésor, dévastation et colère chez l’adversaire."
     },
     "hud_stance_siege": {
       "title": "Siège",
-      "body": "L'armée investit la place ennemie devant laquelle elle se tient."
+      "body": "L’armée investit la place ennemie devant laquelle elle se tient."
     },
     "hud_stance_ambush": {
       "title": "Embuscade",
-      "body": "L'armée se cache dans le couvert (forêt, bocage, marais) et surprend l'ennemi qui passe à portée. Il faut garder {rule.ambush_min_movement_percent} % du mouvement du tour ; une armée ennemie à moins de {rule.ambush_detect_radius_km} km, ou un espion à moins de {rule.ambush_detect_spy_km} km, l'évente."
+      "body": "L’armée se cache dans le couvert (forêt, bocage, marais) et surprend l’ennemi qui passe à portée. Il faut garder {rule.ambush_min_movement_percent} % du mouvement du tour ; une armée ennemie à moins de {rule.ambush_detect_radius_km} km, ou un espion à moins de {rule.ambush_detect_spy_km} km, l’évente."
     },
     "hud_stance_forced_march": {
       "title": "Marche forcée",
@@ -301,7 +301,7 @@
     },
     "hud_incident": {
       "title": "Incident",
-      "body": "Une affaire locale attend votre décision dans cette province. Cliquez le sceau pour trancher ; à l'échéance, le conseil choisit à votre place."
+      "body": "Une affaire locale attend votre décision dans cette province. Cliquez le sceau pour trancher ; à l’échéance, le conseil choisit à votre place."
     },
     "hud_encounter": {
       "title": "Rencontre",
@@ -378,7 +378,7 @@
     },
     "siege_engines": {
       "title": "Engins de siège",
-      "body": "Construits sur place par l'armée assiégeante, l'un après l'autre ; plus l'armée est nombreuse, plus vite ils sont prêts. Les engins prêts servent à l'assaut."
+      "body": "Construits sur place par l’armée assiégeante, l’un après l’autre ; plus l’armée est nombreuse, plus vite ils sont prêts. Les engins prêts servent à l’assaut."
     },
     "click_to_close": {"title": "Cliquer pour fermer"},
     "open_character_sheet": {"title": "Ouvrir la fiche du personnage"},
@@ -386,7 +386,7 @@
     "ransom_pay_full": {"title": "Rançon"},
     "ransom_cedable_province": {
       "title": "Province cessible",
-      "body": "Tenue par sa faction, pas sa capitale, voisine d'une des nôtres."
+      "body": "Tenue par sa faction, pas sa capitale, voisine d’une des nôtres."
     },
     "ransom_parole": {
       "title": "Libération sans rançon",
@@ -399,11 +399,11 @@
     "replay_wrong_format": {"title": "Rejeu incompatible"},
     "battle_demo_hour": {
       "title": "Heure de la bataille",
-      "body": "L'aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
+      "body": "L’aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
     },
     "custom_battle_budget": {
       "title": "Budget de points",
-      "body": "Chaque unité coûte son prix de recrutement en livres. L'armée ne peut dépasser ni le budget ni le plafond d'unités."
+      "body": "Chaque unité coûte son prix de recrutement en livres. L’armée ne peut dépasser ni le budget ni le plafond d’unités."
     },
     "custom_battle_terrain": {
       "title": "Terrain",
@@ -419,11 +419,11 @@
     },
     "custom_battle_player": {
       "title": "Camp du joueur",
-      "body": "Le camp que vous commandez ; l'autre est mené par l'IA. « Aucun » : les deux camps sont menés par l'IA."
+      "body": "Le camp que vous commandez ; l’autre est mené par l’IA. « Aucun » : les deux camps sont menés par l’IA."
     },
     "custom_battle_siege": {
       "title": "Siège",
-      "body": "Le camp 2 tient une place fortifiée ; le camp 1 donne l'assaut aux murs."
+      "body": "Le camp 2 tient une place fortifiée ; le camp 1 donne l’assaut aux murs."
     },
     "custom_battle_year": {
       "title": "Année",
@@ -431,19 +431,19 @@
     },
     "custom_battle_technologies": {
       "title": "Technologies",
-      "body": "Chaque faction dispose de ses technologies de départ de la campagne. Les unités qui exigent une autre technologie (arquebusiers, bombardes, francs-archers…) n'apparaissent au roster que si vous la cochez ici."
+      "body": "Chaque faction dispose de ses technologies de départ de la campagne. Les unités qui exigent une autre technologie (arquebusiers, bombardes, francs-archers…) n’apparaissent au roster que si vous la cochez ici."
     },
     "custom_battle_hold": {
       "title": "Adversaire immobile",
-      "body": "L'armée adverse garde sa place : elle ne marche ni ne charge de son propre chef et ne recule pas. Elle se bat si on l'attaque et peut encore se débander sous la pression."
+      "body": "L’armée adverse garde sa place : elle ne marche ni ne charge de son propre chef et ne recule pas. Elle se bat si on l’attaque et peut encore se débander sous la pression."
     },
     "custom_battle_engines": {
       "title": "Engins de siège",
-      "body": "Engins de l'assiégeant : échelles d'escalade, bélier contre la porte, beffrois. Ils ne coûtent pas de points et ne comptent pas dans le plafond d'unités."
+      "body": "Engins de l’assiégeant : échelles d’escalade, bélier contre la porte, beffrois. Ils ne coûtent pas de points et ne comptent pas dans le plafond d’unités."
     },
     "custom_battle_place": {
       "title": "Type de place",
-      "body": "Plan de la place assiégée : cité en anneaux de maisons, bourg fortifié le long d'une grand-rue, ou château avec donjon et basse-cour."
+      "body": "Plan de la place assiégée : cité en anneaux de maisons, bourg fortifié le long d’une grand-rue, ou château avec donjon et basse-cour."
     },
     "custom_battle_fortification": {
       "title": "Fortification",
@@ -451,16 +451,16 @@
     },
     "historical_battle_ai_both": {
       "title": "Bataille automatique",
-      "body": "Les deux armées sont menées par l'IA."
+      "body": "Les deux armées sont menées par l’IA."
     },
     "hint_card_hide": {
       "title": "Masquer ce conseil",
-      "body": "Jusqu'à la saison prochaine.\nRéglages → Carte → « Conseil : que faire maintenant » pour ne plus en voir."
+      "body": "Jusqu’à la saison prochaine.\nRéglages → Carte → « Conseil : que faire maintenant » pour ne plus en voir."
     },
     "hint_card_act": {"title": "Cliquez pour agir."},
     "choose_edict": {
       "title": "Édit",
-      "body": "Choisir l'édit de la province (délai avant effet selon l'édit)."
+      "body": "Choisir l’édit de la province (délai avant effet selon l’édit)."
     },
     "choose_diet": {"title": "Table"},
     "faction_challenge_indicative": {
@@ -469,7 +469,7 @@
     },
     "difficulty_fixed_effects": {
       "title": "Figée pour toute la partie",
-      "body": "Revenus et entretien de l'IA, vos revenus, l'agitation de vos provinces, l'hostilité de l'IA et le moral de ses armées contre vous."
+      "body": "Revenus et entretien de l’IA, vos revenus, l’agitation de vos provinces, l’hostilité de l’IA et le moral de ses armées contre vous."
     },
     "seed_same_draw": {
       "title": "Même graine, même tirage des événements et des batailles",
@@ -478,12 +478,12 @@
     "news_card_actions": {"title": "Actions"},
     "tradition_choice": {"title": "Tradition"},
     "army_traditions": {
-      "title": "Traditions de l'armée",
+      "title": "Traditions de l’armée",
       "body": "Expérience, rangs et choix"
     },
     "agent_dismiss": {
-      "title": "Congédier l'agent",
-      "body": "Plus d'entretien."
+      "title": "Congédier l’agent",
+      "body": "Plus d’entretien."
     },
     "agent_identity": {"title": "Agent"},
     "agent_action": {"title": "Action"},
@@ -495,7 +495,7 @@
     "chronicle_pending": {"title": "Événements en attente de décision"},
     "diplomacy_open": {"title": "Diplomatie et religion (P)"},
     "diplomacy_map_view": {"title": "Vue de la faction choisie", "body": "Coché : la carte montre les ennemis (rouge), neutres et alliés de la faction choisie. Décoché : vos propres relations."},
-    "help_resume_tutorial": {"title": "Reprend le tutoriel à l'étape où vous l'aviez laissé, sinon le relance depuis le début."},
+    "help_resume_tutorial": {"title": "Reprend le tutoriel à l’étape où vous l’aviez laissé, sinon le relance depuis le début."},
     "close_list_b": {"title": "Fermer la liste", "hint": "B"},
     "close_list_u": {"title": "Fermer la liste", "hint": "U"},
     "holdings_weighted_unrest": {"title": "Agitation pondérée"},
@@ -503,38 +503,38 @@
     "close_legend": {"title": "Fermer la légende"},
     "map_mode_filters": {"title": "Filtres de la carte", "body": "Diplomatie, religion, ordre public, richesse…", "hint": "F"},
     "map_mode_trade_overlay": {"title": "Calque des routes commerciales, combinable avec tout filtre"},
-    "map_mode_signs_overlay": {"title": "Calque des signes : chantiers (échafaudages), sceaux d'incident et sites de rencontre. Sans lui, la carte ne montre que les signes qui pressent."},
+    "map_mode_signs_overlay": {"title": "Calque des signes : chantiers (échafaudages), sceaux d’incident et sites de rencontre. Sans lui, la carte ne montre que les signes qui pressent."},
     "research_none": {"title": "Recherche"},
     "research_progress": {"title": "Recherche"},
     "income_gross_last_turn": {"title": "Revenu brut du dernier tour."},
     "seat_unavailable": {"title": "Impossible"},
     "codex_open_hint": {
       "title": "Codex",
-      "body": "L'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
+      "body": "L’histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
     },
     "recruit_pool": {"title": "Réserve de recrutement"},
     "colony_focus_open": {"title": "Ouvrir le panneau de la colonie et centrer la carte"},
     "province_possession": {"title": "Possession et occupation", "body": "La cité de la province donne son contrôle ; la possession ne change que par traité (cession). À la paix, les places occupées et non cédées reviennent à leur propriétaire.", "hint": "Codex : Conquête et possession"},
-    "relief_notice_hide": {"title": "Masquer cet avis jusqu'au prochain lancement du jeu"},
+    "relief_notice_hide": {"title": "Masquer cet avis jusqu’au prochain lancement du jeu"},
     "relief_command": {"title": "À lancer à la racine du dépôt"},
     "relief_copy_command": {"title": "Copier la commande dans le presse-papiers"},
     "province_panel_open": {"title": "Ouvrir le panneau de la province"},
     "roster_toggle": {"title": "Liste"},
     "campaign_score": {
       "title": "Score de campagne",
-      "body": "Provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
+      "body": "Provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s’achève à l’échéance sans que tous les objectifs soient remplis."
     },
-    "army_contracted_regiments": {"title": "Régiments sous contrat d'endenture / capacité du chef"},
+    "army_contracted_regiments": {"title": "Régiments sous contrat d’endenture / capacité du chef"},
     "army_split_regiments": {"title": "Maj ou Ctrl + clic pour choisir les régiments à détacher"},
-    "army_mercenaries_available": {"title": "Compagnies à engager dans la région où se trouve l'armée"},
-    "army_upkeep_per_season": {"title": "Entretien de l'armée par saison"},
+    "army_mercenaries_available": {"title": "Compagnies à engager dans la région où se trouve l’armée"},
+    "army_upkeep_per_season": {"title": "Entretien de l’armée par saison"},
     "budget_line_hint": {"title": "Ligne budgétaire"},
     "budget_projected_hint": {"title": "Prévision pour la prochaine fin de tour."},
     "budget_last_hint": {"title": "Dernier tour"},
     "budget_delta_hint": {"title": "Par rapport à la saison passée."},
     "ransom_refused": {"title": "Refusé"},
     "close_decision_pending": {"title": "Fermer", "body": "La décision reste en attente."},
-    "decision_default_choice": {"title": "Sans réponse, le choix que ferait votre conseil (celui de l'IA) s'appliquera d'office à l'expiration."},
+    "decision_default_choice": {"title": "Sans réponse, le choix que ferait votre conseil (celui de l’IA) s’appliquera d’office à l’expiration."},
     "open_named_sheet": {"title": "Ouvrir la fiche"},
     "faction_attitude": {"title": "Attitude"},
     "treaty_clause_detail": {"title": "Clause"},
@@ -548,8 +548,8 @@
       "title": "Demander une contre-offre",
       "body": "Ce qui les ferait accepter (captifs, terres occupées, or, tribut, exigences retirées)."
     },
-    "decision_default_choice_turn": {"title": "Sans réponse, l'option par défaut s'appliquera à la fin du tour."},
-    "close_encounter_pending": {"title": "Fermer", "body": "La rencontre reste en attente jusqu'à la fin du tour."},
+    "decision_default_choice_turn": {"title": "Sans réponse, l’option par défaut s’appliquera à la fin du tour."},
+    "close_encounter_pending": {"title": "Fermer", "body": "La rencontre reste en attente jusqu’à la fin du tour."},
     "encyclopedia_open_codex": {"title": "Ouvrir la fiche du Codex", "hint": "K"},
     "encyclopedia_previous_entry": {"title": "Fiche précédente"},
     "close_escape_k": {"title": "Fermer", "hint": "Échap ou K"},
@@ -588,7 +588,7 @@
     },
     "tutorial_later": {
       "title": "Range le guide",
-      "body": "Pour le reprendre à cette étape : le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel."
+      "body": "Pour le reprendre à cette étape : le conseil en haut à gauche, l’aide (F1) ou Menu → Tutoriel."
     },
     "tutorial_go_to_step": {"title": "Aller à cette étape."},
     "season_report_disable": {
@@ -598,19 +598,19 @@
     "season_event_action": {"title": "Action"},
     "battle_command": {"title": "Ordre"},
     "battle_mode": {"title": "Mode"},
-    "battle_no_leader": {"title": "Sans chef", "body": "L'ost combat sans général."},
+    "battle_no_leader": {"title": "Sans chef", "body": "L’ost combat sans général."},
     "battle_leader": {"title": "Chef"},
     "battle_log_toggle": {"title": "Journal", "hint": "J"},
     "battle_withdraw_all": {
       "title": "Sonner la retraite",
-      "body": "Toute l'armée (confirmation demandée)."
+      "body": "Toute l’armée (confirmation demandée)."
     },
-    "battle_opening_conditions": {"title": "Conditions d'ouverture"},
+    "battle_opening_conditions": {"title": "Conditions d’ouverture"},
     "click_camera_focus": {"title": "Cliquer pour y porter la caméra"},
     "formation_picker_toggle": {"title": "Replier ou déplier le sélecteur", "body": "Les raccourcis Alt+Maj+1…6 restent actifs."},
     "formation_place_proposal": {
       "title": "Proposer les places",
-      "body": "À chaque régiment de la sélection (sans sélection : toute l'armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
+      "body": "À chaque régiment de la sélection (sans sélection : toute l’armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
     },
     "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra"},
     "replay_play_pause": {"title": "Lecture / pause", "hint": "Espace"},
@@ -622,12 +622,12 @@
     },
     "roster_card_detail": {"title": "Régiment"},
     "battle_postpone_assault": {
-      "title": "Remettre l'assaut",
+      "title": "Remettre l’assaut",
       "body": "Le siège continue et affame la garnison."
     },
     "battle_decline": {
       "title": "Refuser la bataille",
-      "body": "L'ost se replie et perd du moral."
+      "body": "L’ost se replie et perd du moral."
     },
     "leader_command_level": {"title": "Commandement"},
     "battle_auto_resolve": {
@@ -644,7 +644,7 @@
     },
     "naval_balance_estimate": {
       "title": "Estimation du cœur",
-      "body": "Cinq combats résolus automatiquement avec les mêmes flottes (navires, hauteur de bord, archers aux châteaux, hommes d'armes pour l'abordage)."
+      "body": "Cinq combats résolus automatiquement avec les mêmes flottes (navires, hauteur de bord, archers aux châteaux, hommes d’armes pour l’abordage)."
     },
     "naval_withdraw": {"title": "Se dérober"},
     "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"},
@@ -652,8 +652,8 @@
     "feudal_tree_open": {"title": "Suzerains, vassaux, loyautés et actions féodales"},
     "feudal_take_side": {"title": "Arbitrage féodal"},
     "trade_routes_toggle": {"title": "Routes commerciales", "body": "Affiche les routes commerciales sur la carte.", "hint": "V"},
-    "restore_keys": {"title": "Rétablir par défaut", "body": "Remet toutes les touches de la carte à leur valeur d'origine."},
-    "tech_queue_toggle": {"title": "Mettre en file", "body": "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d'elles-mêmes."},
+    "restore_keys": {"title": "Rétablir par défaut", "body": "Remet toutes les touches de la carte à leur valeur d’origine."},
+    "tech_queue_toggle": {"title": "Mettre en file", "body": "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d’elles-mêmes."},
     "menu_button": {"title": "Menu", "body": "Sauvegarder, charger, retour au menu principal, quitter.", "hint": "Échap"},
     "crusade_fervor": {"title": "Ferveur", "hint": "Clic : panneau de faction"},
     "slot_locked": {"title": "Emplacement verrouillé"}

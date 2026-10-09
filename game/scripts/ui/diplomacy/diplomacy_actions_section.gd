@@ -37,20 +37,20 @@ func _render() -> void:
 	elif status != "alliance" and status != "vassal" and status != "suzerain":
 		_add_action("Déclarer la guerre", {"type": "declare_war", "target": id}, "La guerre est déclarée.", true)
 	if status == "alliance":
-		_add_action("Rompre l'alliance", {"type": "break_alliance", "target": id}, "Alliance rompue.", true)
+		_add_action("Rompre l’alliance", {"type": "break_alliance", "target": id}, "Alliance rompue.", true)
 	# Accès militaire que nous avons accordé : révocable (leur opinion de nous baisse).
 	if bool(entry.get("access_given", false)):
-		_add_action("Retirer l'accès militaire", {"type": "revoke_military_access", "target": id}, "Accès militaire retiré.", true)
+		_add_action("Retirer l’accès militaire", {"type": "revoke_military_access", "target": id}, "Accès militaire retiré.", true)
 	if status == "vassal":
 		_add_action("Libérer le vassal", {"type": "release_vassal", "target": id}, "Vassal libéré.", true)
 	var embargo := bool(entry.get("embargo_by_us", false))
-	_add_action("Lever l'embargo" if embargo else "Imposer un embargo",
+	_add_action("Lever l’embargo" if embargo else "Imposer un embargo",
 		{"type": "set_embargo", "target": id, "active": not embargo},
 		"Embargo levé." if embargo else "Embargo imposé.", true)
 	_add_action("Présents (%s)" % Money.amount(GIFT_AMOUNT), {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
 	# L'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
 	if bool(entry.get("trade_agreement", false)):
-		_add_action("Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
+		_add_action("Rompre l’accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
 
 
 func _add_action(label: String, order: Dictionary, success_text: String, unilateral: bool) -> void:

@@ -28,7 +28,7 @@
     {
       "id": "obj_liege_hold",
       "title": "Garder la principauté",
-      "description": "L'évêque de Liège doit conserver son autorité temporelle sur la principauté épiscopale.",
+      "description": "L’évêque de Liège doit conserver son autorité temporelle sur la principauté épiscopale.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_liege"

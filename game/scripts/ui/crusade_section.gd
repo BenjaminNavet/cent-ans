@@ -212,7 +212,7 @@ static func marks_text(view: Dictionary, marks: Dictionary) -> String:
 ## Infobulle de la jauge et du repère du HUD : valeur, causes du tour (`changes`), seuils.
 static func tooltip(view: Dictionary) -> String:
 	var lines := PackedStringArray(["[b]Ferveur : %d / 100[/b]" % int(view.get("fervor", 0)),
-		"Elle paie l'ost par les aumônes, le renforce par le passage et le disperse quand elle s'éteint.",
+		"Elle paie l’ost par les aumônes, le renforce par le passage et le disperse quand elle s’éteint.",
 		"", "[b]Ce tour[/b]"])
 	var changes: Array = view.get("changes", [])
 	var listed := 0

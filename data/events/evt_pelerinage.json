@@ -1,7 +1,7 @@
 {
   "id": "evt_pelerinage",
   "title": "Le pèlerinage",
-  "text": "Le prince fait vœu de se rendre en pèlerinage à Saint-Jacques ou au Puy. Les clercs l'y encouragent ; les conseillers rappellent le coût d'une telle absence.",
+  "text": "Le prince fait vœu de se rendre en pèlerinage à Saint-Jacques ou au Puy. Les clercs l’y encouragent ; les conseillers rappellent le coût d’une telle absence.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80

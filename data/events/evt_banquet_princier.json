@@ -1,7 +1,7 @@
 {
   "id": "evt_banquet_princier",
   "title": "Le banquet du prince",
-  "text": "La cour attend des ambassadeurs, et le maître queux propose un festin à la manière de [[cdx_taillevent|Taillevent]] : trois services de rôts et de potages, un [[cdx_blanc_manger|blanc-manger]] pour les délicats, de l'[[cdx_hypocras|hypocras]] en fin de repas. Entre les services viendront les entremets, spectacles mangeables : un paon rôti recousu dans ses plumes, qui crache le feu par le bec, ou un château de pâte peuplé de chanteurs. On se souviendra longtemps d'un tel festin, et de ce qu'il a coûté.",
+  "text": "La cour attend des ambassadeurs, et le maître queux propose un festin à la manière de [[cdx_taillevent|Taillevent]] : trois services de rôts et de potages, un [[cdx_blanc_manger|blanc-manger]] pour les délicats, de l'[[cdx_hypocras|hypocras]] en fin de repas. Entre les services viendront les entremets, spectacles mangeables : un paon rôti recousu dans ses plumes, qui crache le feu par le bec, ou un château de pâte peuplé de chanteurs. On se souviendra longtemps d’un tel festin, et de ce qu’il a coûté.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 100,

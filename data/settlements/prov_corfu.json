@@ -24,7 +24,7 @@
     ],
     "port": true,
     "sea_zone": "sea_ionian",
-    "description": "Château et ville sur la presqu'île de la Vieille Forteresse.",
+    "description": "Château et ville sur la presqu’île de la Vieille Forteresse.",
     "sources": [
       "Corfou"
     ]
@@ -50,7 +50,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse de l'ouest de l'île.",
+    "description": "Forteresse de l’ouest de l’île.",
     "sources": [
       "Angelokastro"
     ]

@@ -1,7 +1,7 @@
 {
   "id": "evt_loup_dans_la_bergerie",
   "title": "Un loup dans la bergerie",
-  "text": "Un loup a égorgé une vingtaine de brebis dans la nuit. Le berger jure qu'il n'a pas dormi, et les paysans réclament que le seigneur fasse lever les louvetiers.",
+  "text": "Un loup a égorgé une vingtaine de brebis dans la nuit. Le berger jure qu’il n’a pas dormi, et les paysans réclament que le seigneur fasse lever les louvetiers.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60

@@ -3,7 +3,7 @@
   "kind": "banner_rally",
   "rank": 1,
   "name": "Se rallier à la bannière",
-  "description": "Après le choc, les cavaliers s'arrêtent et se reforment derrière la bannière de leur capitaine au lieu de poursuivre ou de s'égailler : ils reprennent cœur bien plus vite, mais restent immobiles. Les chroniqueurs louent les capitaines qui « se recueillent » à leur bannière et rechargent ; les charges françaises successives et désordonnées de [[cdx_crecy|Crécy]] montrent le contraire.",
+  "description": "Après le choc, les cavaliers s’arrêtent et se reforment derrière la bannière de leur capitaine au lieu de poursuivre ou de s’égailler : ils reprennent cœur bien plus vite, mais restent immobiles. Les chroniqueurs louent les capitaines qui « se recueillent » à leur bannière et rechargent ; les charges françaises successives et désordonnées de [[cdx_crecy|Crécy]] montrent le contraire.",
   "icon": "banner_rally",
   "eligible": {
     "unit_types": ["unit_knights", "unit_breton_knights", "unit_ordonnance_gendarmes", "unit_mounted_sergeants"],

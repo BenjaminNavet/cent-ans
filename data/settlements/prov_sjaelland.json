@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s'est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu'à Valdemar IV (1340).",
+    "description": "Seeland engagé au comte Jean III de Holstein ; la Scanie (Lund, foires au hareng de Skanör) s’est donnée en 1332 à Magnus IV de Suède. Terres royales danoises en déshérence jusqu’à Valdemar IV (1340).",
     "sources": [
       "Interrègne danois (1332-1340)",
       "Scanie",
@@ -53,7 +53,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Ville marchande fortifiée de l'évêque de Roskilde, en plein essor sur le Sund.",
+    "description": "Ville marchande fortifiée de l’évêque de Roskilde, en plein essor sur le Sund.",
     "sources": [
       "Copenhague"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye Saint-Benoît, ancienne nécropole des rois danois de la dynastie des Valdemar et site d'assemblée (thing) du Sjælland.",
+    "description": "Abbaye Saint-Benoît, ancienne nécropole des rois danois de la dynastie des Valdemar et site d’assemblée (thing) du Sjælland.",
     "sources": [
       "Église Sainte-Bende de Ringsted"
     ]
@@ -130,7 +130,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ancien bourg marchand de l'ouest du Sjælland, sur la route entre Roskilde et le Grand-Belt.",
+    "description": "Ancien bourg marchand de l’ouest du Sjælland, sur la route entre Roskilde et le Grand-Belt.",
     "sources": [
       "Slagelse"
     ]

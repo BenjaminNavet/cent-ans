@@ -38,7 +38,7 @@
     },
     {
       "id": "obj_haute_oka_both",
-      "title": "Tenir l'ensemble",
+      "title": "Tenir l’ensemble",
       "description": "Tenir Kozelsk et Novossil.",
       "condition": {
         "kind": "hold_provinces",

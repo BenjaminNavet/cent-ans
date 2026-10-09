@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Siège de l'évêché de Kuyavie sur la Vistule, à la frontière de l'Ordre.",
+    "description": "Siège de l’évêché de Kuyavie sur la Vistule, à la frontière de l’Ordre.",
     "sources": [
       "Włocławek"
     ]
@@ -46,7 +46,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville des salines de Kuyavie, capitale d'un duché piast.",
+    "description": "Ville des salines de Kuyavie, capitale d’un duché piast.",
     "sources": [
       "Inowrocław"
     ]

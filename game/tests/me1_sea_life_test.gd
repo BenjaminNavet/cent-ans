@@ -13,7 +13,7 @@ func _init() -> void:
 	check(SeaLife.tide_zone_at(Vector2(1814, 3180)).get("id", "") == "mont_saint_michel", "zone du Mont-Saint-Michel")
 	check(SeaLife.tide_zone_at(Vector2(2700, 2550)).get("id", "") == "wadden", "zone des Wadden")
 	check(SeaLife.tide_zone_at(Vector2(2080, 2550)).get("id", "") == "wash", "zone du Wash")
-	check(SeaLife.tide_zone_at(Vector2(1479, 3620)).is_empty(), "pas d'estran en plein Atlantique")
+	check(SeaLife.tide_zone_at(Vector2(1479, 3620)).is_empty(), "pas d’estran en plein Atlantique")
 	var image := SeaLife.tide_texture(MAP_SIZE).get_image()
 	var msm := image.get_pixelv(Vector2i(1814 / 16, 3180 / 16)).r
 	check(msm > 0.5 and image.get_pixelv(Vector2i(1479 / 16, 3620 / 16)).r == 0.0, "texture des estrans (R = %.2f)" % msm)

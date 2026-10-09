@@ -23,11 +23,11 @@ func _run() -> void:
 	await process_frame
 	check(title.text == "Cour — Angleterre", "texte du label intact : %s" % title.text)
 	check(lettrine.get("_text") == title.text, "la lettrine suit le texte")
-	check(title.self_modulate.a == 0.0, "label d'origine transparent")
+	check(title.self_modulate.a == 0.0, "label d’origine transparent")
 	check(title.get_combined_minimum_size().y >= 30.0, "hauteur du champ réservée")
 	title.text = "« entre guillemets »"
 	await process_frame
-	check(not lettrine.call("_has_initial"), "pas d'initiale sur un titre non alphabétique")
+	check(not lettrine.call("_has_initial"), "pas d’initiale sur un titre non alphabétique")
 	panel.queue_free()
 	await process_frame
 	await _check_accented_titles()

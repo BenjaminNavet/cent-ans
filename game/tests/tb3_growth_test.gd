@@ -180,7 +180,7 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 		var px: Vector2 = inst["px"]
 		spots[str(inst["family"])] = px
 		check(px.distance_to(layer.model_px(index)) > built, "%s stands outside the built area" % inst["family"])
-		check(px.distance_to(layer.model_px(index)) < built + (3.0 if _real else 12.0), "%s stays on the town's land" % inst["family"])
+		check(px.distance_to(layer.model_px(index)) < built + (3.0 if _real else 12.0), "%s stays on the town’s land" % inst["family"])
 		check(str(inst["model"]) == "%s_1" % inst["family"], "level 1 model for %s, got %s" % [inst["family"], inst["model"]])
 	for a: String in spots:
 		for b: String in spots:
@@ -309,7 +309,7 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 			for inst: Dictionary in own:
 				check((inst["px"] as Vector2).distance_to(town_px) >= sign_reach + float(inst["radius_m"]) * float(inst["factor"]) / 719.0, "%s clears the town sign at distance %.0f" % [inst["model"], distance])
 		check(float(own[0]["factor"]) > 1.0 if not own.is_empty() else false, "models are enlarged at distance %.0f" % distance)
-		print("tb3_growth_test: distance %.0f : %d maquettes (%d autour de %s), largeur de %d d'entre elles %.1f à %.1f px en 900 px de haut, niveau 1 %.2f u, niveau 3 %.2f u, mise en place %.1f ms" % [distance, models.size(), own.size(), TOWN, measured, narrowest, widest, level_width[1][1], level_width[3][0], float(out.stats.get("build_ms", 0.0))])
+		print("tb3_growth_test: distance %.0f : %d maquettes (%d autour de %s), largeur de %d d’entre elles %.1f à %.1f px en 900 px de haut, niveau 1 %.2f u, niveau 3 %.2f u, mise en place %.1f ms" % [distance, models.size(), own.size(), TOWN, measured, narrowest, widest, level_width[1][1], level_width[3][0], float(out.stats.get("build_ms", 0.0))])
 	check(float(screen["real_below"]) < float(screen["full_from"]), "real scale below the held sizes")
 	# Brouillard de guerre : rien n'est posé dans une province hors de vue.
 	fog.hidden_provinces[PROVINCE] = true

@@ -24,7 +24,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Capitale du duché welf de Brunswick-Lunebourg, grande ville hanséatique de l'Oker.",
+    "description": "Capitale du duché welf de Brunswick-Lunebourg, grande ville hanséatique de l’Oker.",
     "sources": [
       "Duché de Brunswick-Lunebourg"
     ]
@@ -75,7 +75,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château welf sur l'Aller, future résidence des ducs de Brunswick-Lunebourg après leur départ de Lunebourg en 1378.",
+    "description": "Château welf sur l’Aller, future résidence des ducs de Brunswick-Lunebourg après leur départ de Lunebourg en 1378.",
     "sources": [
       "Celle"
     ]
@@ -101,7 +101,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'Empire au pied du Rammelsberg, dont les mines d'argent et de cuivre font la richesse depuis le Xe siècle.",
+    "description": "Ville libre d’Empire au pied du Rammelsberg, dont les mines d’argent et de cuivre font la richesse depuis le Xe siècle.",
     "sources": [
       "Goslar",
       "Rammelsberg"

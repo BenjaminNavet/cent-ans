@@ -55,7 +55,7 @@ func _init() -> void:
 	check(BattleCavalryGaits.pick(mem, 4.5, true, 0.0) == "trotting", "régiment qui court mais lent : trot")
 	check(BattleCavalryGaits.pick(mem, 7.0, true, 0.0) == "running", "galop à 7 m/s")
 	check(BattleCavalryGaits.pick(mem, 5.4, true, 0.0) == "running", "hystérésis : 5,4 m/s depuis le galop reste au galop")
-	check(BattleCavalryGaits.pick(mem, 7.0, false, 0.0) == "trotting", "sans l'ordre de courir, pas de galop")
+	check(BattleCavalryGaits.pick(mem, 7.0, false, 0.0) == "trotting", "sans l’ordre de courir, pas de galop")
 	mem = {}
 	check(BattleCavalryGaits.pick(mem, 1.8, false, 0.3) == "turn_l", "virage à gauche au pas")
 	check(BattleCavalryGaits.pick(mem, 1.8, false, 0.12) == "turn_l", "hystérésis du virage")
@@ -70,6 +70,6 @@ func _init() -> void:
 	# Les réglages livrés respectent la bande trot entre pas et galop.
 	BattleCavalryGaits.set_override({})
 	var cfg := BattleCavalryGaits.settings()
-	check(float(cfg["trot_min_speed"]) > float(cadence["c_walk"]) and float(cfg["gallop_min_speed"]) < 1.8 * float(cadence["c_gallop"]), "seuils entre c_walk et c_gallop (cadence jusqu'à ×1,8, AS8b)")
+	check(float(cfg["trot_min_speed"]) > float(cadence["c_walk"]) and float(cfg["gallop_min_speed"]) < 1.8 * float(cadence["c_gallop"]), "seuils entre c_walk et c_gallop (cadence jusqu’à ×1,8, AS8b)")
 	check(float(cfg["trot_min_speed"]) < float(cfg["gallop_min_speed"]), "trot_min < gallop_min")
 	finish()

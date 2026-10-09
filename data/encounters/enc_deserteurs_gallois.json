@@ -1,7 +1,7 @@
 {
   "id": "enc_deserteurs_gallois",
   "title": "Des déserteurs gallois",
-  "text": "Une poignée de lanciers et d'archers gallois ont quitté l'ost de leur capitaine, faute de gages. Ils vivent de maraude et se disent prêts à suivre qui les nourrira.",
+  "text": "Une poignée de lanciers et d’archers gallois ont quitté l’ost de leur capitaine, faute de gages. Ils vivent de maraude et se disent prêts à suivre qui les nourrira.",
   "spawn": {
     "from_year": 1337,
     "to_year": 1420,
@@ -72,7 +72,7 @@
           ]
         },
         "on_loss": {
-          "text": "Les Gallois se dérobent dans les haies après avoir malmené l'avant-garde.",
+          "text": "Les Gallois se dérobent dans les haies après avoir malmené l’avant-garde.",
           "army_effects": [
             {
               "effect": "army_morale",

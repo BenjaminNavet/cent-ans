@@ -20,7 +20,7 @@ const RECENT_MAX := 12
 ## Kinds des événements du cœur portant la féodalité (hommage, commise, félonie, révolte d'un
 ## vassal, héritage des titres, guerre de succession).
 const FEUDAL_KINDS := ["vassalage", "vassal_rebellion", "succession"]
-const FEUDAL_WORDS := ["commise", "félonie", "suzerain", "vassal", "hommage", "l'ost", "protection", "déshérence", "arbitr"]
+const FEUDAL_WORDS := ["commise", "félonie", "suzerain", "vassal", "hommage", "l’ost", "protection", "déshérence", "arbitr"]
 const STATUS_COLORS := {
 	"loyal": Color(0.20, 0.45, 0.22), "discontent": Color(0.70, 0.45, 0.08),
 	"felon": Color(0.62, 0.10, 0.08), "in_revolt": Color(0.45, 0.05, 0.30),
@@ -29,10 +29,10 @@ const STATUS_GLYPHS := {"loyal": "●", "discontent": "◐", "felon": "✖", "in
 const TUTORIAL_SCENE := "res://scenes/ui/tutorial.tscn"
 const TUTORIAL_STEPS := [
 	{"id": "feudal_tree", "title": "Votre place dans la féodalité",
-		"text": "Au-dessus des factions, des titres : royaumes, duchés, comtés. Cliquez sur votre écu, en haut à gauche : la section « Féodalité » du panneau de faction donne vos obligations et vos objectifs, et son bouton [b]« Arbre féodal… »[/b] (ou Menu → Arbre féodal) montre votre suzerain, vos vassaux et leur loyauté. Un vassal mécontent peut refuser l'ost, se révolter ou prêter hommage ailleurs.",
-		"objective": "Ouvrir l'arbre féodal.", "target": "feudal_button"},
+		"text": "Au-dessus des factions, des titres : royaumes, duchés, comtés. Cliquez sur votre écu, en haut à gauche : la section « Féodalité » du panneau de faction donne vos obligations et vos objectifs, et son bouton [b]« Arbre féodal… »[/b] (ou Menu → Arbre féodal) montre votre suzerain, vos vassaux et leur loyauté. Un vassal mécontent peut refuser l’ost, se révolter ou prêter hommage ailleurs.",
+		"objective": "Ouvrir l’arbre féodal.", "target": "feudal_button"},
 	{"id": "feudal_filter", "title": "La carte des fiefs",
-		"text": "Le filtre de carte [b]« Féodalité »[/b] (bouton « Filtres ») peint chaque royaume ; les hachures montrent les terres des grands vassaux, l'écu parti les doubles allégeances, comme la Guyenne anglaise tenue du roi de France. Dans la fiche d'une province, le fil d'Ariane donne ses titres, du royaume au comté.",
+		"text": "Le filtre de carte [b]« Féodalité »[/b] (bouton « Filtres ») peint chaque royaume ; les hachures montrent les terres des grands vassaux, l’écu parti les doubles allégeances, comme la Guyenne anglaise tenue du roi de France. Dans la fiche d’une province, le fil d’Ariane donne ses titres, du royaume au comté.",
 		"objective": "Choisir le filtre « Féodalité ».", "target": "filters_button"},
 	{"id": "feudal_war", "title": "Avant de déclarer la guerre",
 		"text": "Attaquer un vassal appelle son suzerain, puis le suzerain de celui-ci. Avant toute déclaration, le cadre [b]« Qui peut entrer en guerre »[/b] estime chaque maillon (probable, incertain, improbable). Un vassal félon peut être frappé de [b]commise[/b] : vous reprenez ses fiefs si vous gagnez. Voir le Codex, « Vassalité ».",
@@ -241,7 +241,7 @@ func _fill_position() -> void:
 	actions.name = "Actions"
 	_position_box.add_child(actions)
 	if str(sheet.get("liege", "")) != "":
-		var revolt_button := _button(actions, "Se révolter", "Rompre avec %s : guerre d'indépendance, et un cas de félonie contre vous." % str(sheet.get("liege_name", "")), "RevoltButton", revolt)
+		var revolt_button := _button(actions, "Se révolter", "Rompre avec %s : guerre d’indépendance, et un cas de félonie contre vous." % str(sheet.get("liege_name", "")), "RevoltButton", revolt)
 		revolt_button.disabled = str(sheet.get("status", "")) == "in_revolt"
 	var lords: Array = duties.get("homage_candidates", [])
 	if not lords.is_empty():
@@ -273,7 +273,7 @@ func _fill_calls() -> void:
 		if str(call.get("kind", "")) == "protection":
 			_button(row, "Intervenir", "Entrer en guerre contre %s aux côtés de votre vassal." % str(call.get("aggressor_name", "")), "Intervene",
 				func() -> void: answer_call(offer, true))
-			_button(row, "Se dérober", "Perte de prestige et de loyauté de vos vassaux ; le vassal peut changer d'allégeance.", "Shirk",
+			_button(row, "Se dérober", "Perte de prestige et de loyauté de vos vassaux ; le vassal peut changer d’allégeance.", "Shirk",
 				func() -> void: answer_call(offer, false))
 		elif str(call.get("kind", "")) == "peace_summons":  # ADR 0146 : sommation de paix du suzerain
 			_button(row, "Obéir", "Paix blanche et trêve avec %s." % str(call.get("target_name", "")), "Obey",
@@ -285,7 +285,7 @@ func _fill_calls() -> void:
 				func() -> void: arbitrate(offer, "impose_peace", ""))
 			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
 				var side_id := str(call.get(side[0], ""))
-				_button(row, "Soutenir %s" % str(call.get(side[1], "")), "Prendre son parti : guerre contre l'autre vassal.", "Side_%s" % side_id,
+				_button(row, "Soutenir %s" % str(call.get(side[1], "")), "Prendre son parti : guerre contre l’autre vassal.", "Side_%s" % side_id,
 					func() -> void: arbitrate(offer, "take_side", side_id))
 			_button(row, "Laisser faire", "Ils vident leur querelle entre eux.", "LetBe",
 				func() -> void: arbitrate(offer, "let_be", ""))
@@ -480,7 +480,7 @@ func after_end_turn(events: Array) -> void:
 	if not calls.is_empty():
 		map.ui.show_toast("Appel féodal : %s" % str(calls[0].get("text", "")))
 	elif mine > 0:
-		map.ui.show_toast("%s vous concernant : voir l'arbre féodal." % FrText.count(mine, "événement féodal", "événements féodaux"))
+		map.ui.show_toast("%s vous concernant : voir l’arbre féodal." % FrText.count(mine, "événement féodal", "événements féodaux"))
 	if panel.visible:
 		fill()
 	maybe_start_tutorial()  # tutoriel général terminé depuis : le guide féodal prend la suite

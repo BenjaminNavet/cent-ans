@@ -1,7 +1,7 @@
 {
   "id": "chr_jeanne_d_auvergne",
   "name": {
-    "display": "Jeanne Ire d'Auvergne"
+    "display": "Jeanne Ire d’Auvergne"
   },
   "sex": "female",
   "house": "Auvergne-Boulogne",
@@ -32,8 +32,8 @@
   },
   "starting_location": "prov_bourgogne",
   "status": "at_court",
-  "description": "Comtesse d'Auvergne et de Boulogne, épouse (1338) de Philippe de Bourgogne dit Monsieur ; mère de Philippe de Rouvres, né après la mort de son père.",
+  "description": "Comtesse d’Auvergne et de Boulogne, épouse (1338) de Philippe de Bourgogne dit Monsieur ; mère de Philippe de Rouvres, né après la mort de son père.",
   "sources": [
-    "Jeanne Ire d'Auvergne"
+    "Jeanne Ire d’Auvergne"
   ]
 }

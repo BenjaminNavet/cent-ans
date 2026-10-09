@@ -26,7 +26,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d'Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux.",
+    "description": "Yorkshire : York (archevêché, siège du gouvernement pendant les guerres d’Écosse), Hull (port royal de la laine), abbayes cisterciennes (Fountains, Rievaulx) et leurs troupeaux.",
     "sources": [
       "Yorkshire",
       "York",
@@ -159,7 +159,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville collégiale et marché de la plaine de Holderness, célèbre pour son droit d'asile.",
+    "description": "Ville collégiale et marché de la plaine de Holderness, célèbre pour son droit d’asile.",
     "sources": [
       "Beverley"
     ]
@@ -210,7 +210,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Abbaye cistercienne de Fountains, l'une des plus riches d'Angleterre.",
+    "description": "Abbaye cistercienne de Fountains, l’une des plus riches d’Angleterre.",
     "sources": [
       "Abbaye de Fountains"
     ]
@@ -311,7 +311,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye bénédictine de Selby, fondée en 1069 sur l'Ouse.",
+    "description": "Abbaye bénédictine de Selby, fondée en 1069 sur l’Ouse.",
     "sources": [
       "Abbaye de Selby"
     ]

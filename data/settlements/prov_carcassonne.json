@@ -24,7 +24,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_port", "bld_collegiate_church", "bld_stone_walls"],
     "port": true,
-    "description": "Archevêché et ancien grand port romain, dont l'accès à la mer s'ensable peu à peu.",
+    "description": "Archevêché et ancien grand port romain, dont l’accès à la mer s’ensable peu à peu.",
     "sources": ["Narbonne"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_weaving_workshop", "bld_stone_walls"],
     "port": false,
-    "description": "Ville close sur l'Orb, marquée par le sac de 1209 lors de la croisade des Albigeois.",
+    "description": "Ville close sur l’Orb, marquée par le sac de 1209 lors de la croisade des Albigeois.",
     "sources": ["Béziers", "Massacre de Béziers"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 4,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château royal perché des Corbières, l'un des « cinq fils de Carcassonne » gardant la frontière d'Aragon.",
+    "description": "Château royal perché des Corbières, l’un des « cinq fils de Carcassonne » gardant la frontière d’Aragon.",
     "sources": ["Château de Peyrepertuse"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville marchande du Razès sur l'Aude, réputée pour ses vins et son pont médiéval.",
+    "description": "Ville marchande du Razès sur l’Aude, réputée pour ses vins et son pont médiéval.",
     "sources": ["Limoux"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_weaving_workshop"],
     "port": false,
-    "description": "Ville de foires et de draperie sur l'Hérault, siège d'une viguerie de la sénéchaussée de Béziers.",
+    "description": "Ville de foires et de draperie sur l’Hérault, siège d’une viguerie de la sénéchaussée de Béziers.",
     "sources": ["Pézenas"]
   },
   {
@@ -122,7 +122,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg où les archevêques de Narbonne possèdent une résidence, sur l'étang du même nom.",
+    "description": "Bourg où les archevêques de Narbonne possèdent une résidence, sur l’étang du même nom.",
     "sources": ["Capestang"]
   },
   {
@@ -136,7 +136,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Grande abbaye bénédictine des Corbières, fondée à l'époque carolingienne.",
+    "description": "Grande abbaye bénédictine des Corbières, fondée à l’époque carolingienne.",
     "sources": ["Abbaye de Lagrasse"]
   },
   {
@@ -150,7 +150,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château royal des Corbières, l'un des « cinq fils de Carcassonne » gardant la frontière d'Aragon.",
+    "description": "Château royal des Corbières, l’un des « cinq fils de Carcassonne » gardant la frontière d’Aragon.",
     "sources": ["Château de Puilaurens"]
   }
 ]

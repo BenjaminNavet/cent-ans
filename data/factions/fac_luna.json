@@ -19,7 +19,7 @@
   "primary_title": "tit_luna",
   "heraldry": {
     "blazon": "De gueules à la lune décroissante d'argent.",
-    "description": "Armes parlantes de la maison de Luna : croissant d'argent, pointes en bas (renversé), sur champ de gueules, celui que portera le pape Benoît XIII (Pedro de Luna).",
+    "description": "Armes parlantes de la maison de Luna : croissant d’argent, pointes en bas (renversé), sur champ de gueules, celui que portera le pape Benoît XIII (Pedro de Luna).",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
@@ -46,7 +46,7 @@
     "trade": 45,
     "piety": 45
   },
-  "description": "Seigneurie de l'Aragon septentrional tenue par Lope de Luna, futur premier comte de Luna (1348), l'un des plus influents conseillers de Pierre IV.",
+  "description": "Seigneurie de l’Aragon septentrional tenue par Lope de Luna, futur premier comte de Luna (1348), l’un des plus influents conseillers de Pierre IV.",
   "sources": [
     "Lope de Luna"
   ]

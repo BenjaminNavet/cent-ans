@@ -25,7 +25,7 @@
       "bld_university"
     ],
     "port": false,
-    "description": "Oxfordshire, Buckinghamshire, Bedfordshire, Northamptonshire : université d'Oxford, laine des Cotswolds, château de Windsor. Ancienne Mercie méridionale.",
+    "description": "Oxfordshire, Buckinghamshire, Bedfordshire, Northamptonshire : université d’Oxford, laine des Cotswolds, château de Windsor. Ancienne Mercie méridionale.",
     "sources": [
       "Oxford",
       "Université d'Oxford",
@@ -53,7 +53,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Bourg marchand tenu par l'évêque de Lincoln.",
+    "description": "Bourg marchand tenu par l’évêque de Lincoln.",
     "sources": [
       "Banbury"
     ]
@@ -79,7 +79,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "L'un des plus grands châteaux royaux d'Angleterre, gardant un gué stratégique de la Tamise.",
+    "description": "L’un des plus grands châteaux royaux d’Angleterre, gardant un gué stratégique de la Tamise.",
     "sources": [
       "Château de Wallingford"
     ]
@@ -130,7 +130,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-marché de la vallée de la Tamise, à l'est d'Oxford.",
+    "description": "Bourg-marché de la vallée de la Tamise, à l’est d’Oxford.",
     "sources": [
       "Thame"
     ]
@@ -231,7 +231,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg royal doté d'un palais où résident souvent les rois d'Angleterre.",
+    "description": "Bourg royal doté d’un palais où résident souvent les rois d’Angleterre.",
     "sources": [
       "Woodstock, Oxfordshire"
     ]
@@ -256,7 +256,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château à motte du nord de l'Oxfordshire.",
+    "description": "Château à motte du nord de l’Oxfordshire.",
     "sources": [
       "Château de Deddington"
     ]

@@ -325,7 +325,7 @@ func _set_caption(faction: String) -> void:
 		return
 	var facade := get_node_or_null("/root/SimFacade")
 	var name_fr: String = str(facade.call("faction_short_name", faction)) if facade != null else faction
-	_caption_label.text = "Tour de l'IA : %s  —  Espace ou Entrée : passer" % name_fr
+	_caption_label.text = "Tour de l’IA : %s  —  Espace ou Entrée : passer" % name_fr
 	var view := get_viewport().get_visible_rect().size
 	_caption.reset_size()
 	_caption.position = Vector2((view.x - _caption.size.x) * 0.5, view.y - _caption.size.y - 120.0)

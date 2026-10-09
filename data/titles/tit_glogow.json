@@ -28,7 +28,7 @@
     {
       "id": "obj_glogow_hold",
       "title": "Garder Głogów",
-      "description": "Conserver l'héritage de Przemko II.",
+      "description": "Conserver l’héritage de Przemko II.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_glogow"
@@ -36,7 +36,7 @@
     },
     {
       "id": "obj_glogow_wroclaw",
-      "title": "Étendre l'influence",
+      "title": "Étendre l’influence",
       "description": "Obtenir Legnica.",
       "condition": {
         "kind": "hold_provinces",

@@ -1,7 +1,7 @@
 {
   "id": "evt_valdemar_iv",
   "title": "Valdemar restaure le Danemark",
-  "text": "À Randers, le chevalier Niels Ebbesen a surpris dans son lit le comte Gérard de Holstein, le « Chauve », qui tenait le Jutland en gage, et l'a tué. Le jeune Valdemar, fils de Christophe II, est proclamé roi et rachète le royaume château par château.",
+  "text": "À Randers, le chevalier Niels Ebbesen a surpris dans son lit le comte Gérard de Holstein, le « Chauve », qui tenait le Jutland en gage, et l’a tué. Le jeune Valdemar, fils de Christophe II, est proclamé roi et rachète le royaume château par château.",
   "kind": "historical",
   "trigger": {
     "date": {

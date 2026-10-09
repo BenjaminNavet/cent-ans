@@ -1,7 +1,7 @@
 {
   "id": "fac_utrecht",
   "name": {
-    "display": "Principauté épiscopale d'Utrecht",
+    "display": "Principauté épiscopale d’Utrecht",
     "local": "Sticht Utrecht",
     "local_language": "moyen néerlandais"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_utrecht",
   "heraldry": {
     "blazon": "Écartelé : aux 1 et 4 de gueules à la croix d'argent ; aux 2 et 3 d'or à deux fasces de sable.",
-    "description": "Croix d'argent sur gueules du Sticht (la principauté épiscopale d'Utrecht), écartelée des armes de la maison de Diest (d'or à deux fasces de sable), selon l'usage des évêques d'Utrecht ; l'écartelé exact de Jean de Diest n'est pas attesté.",
+    "description": "Croix d’argent sur gueules du Sticht (la principauté épiscopale d’Utrecht), écartelée des armes de la maison de Diest (d’or à deux fasces de sable), selon l’usage des évêques d’Utrecht ; l’écartelé exact de Jean de Diest n’est pas attesté.",
     "uncertain": true,
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
@@ -56,9 +56,9 @@
     "trade": 65,
     "piety": 70
   },
-  "description": "Principauté épiscopale du Bas-Rhin, tenue depuis 1322 par Jean de Diest ; ses villes de l'IJssel (Deventer, Zwolle, Kampen) sont tournées vers le commerce hanséatique.",
+  "description": "Principauté épiscopale du Bas-Rhin, tenue depuis 1322 par Jean de Diest ; ses villes de l’IJssel (Deventer, Zwolle, Kampen) sont tournées vers le commerce hanséatique.",
   "sources": [
     "Jean de Diest",
-    "Principauté épiscopale d'Utrecht"
+    "Principauté épiscopale d’Utrecht"
   ]
 }

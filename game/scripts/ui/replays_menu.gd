@@ -77,7 +77,7 @@ func _menu_title() -> String:
 
 
 func _menu_hint() -> String:
-	return "Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas."
+	return "Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu’à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas."
 
 
 func _menu_width() -> float:
@@ -94,7 +94,7 @@ func _load_entries() -> void:
 
 func _build_entries(box: VBoxContainer) -> void:
 	if replays.is_empty():
-		empty_label = UiBuild.label("Aucun rejeu pour l'instant : chaque bataille livrée est enregistrée à sa fin.", 0, null, true, 720, box)
+		empty_label = UiBuild.label("Aucun rejeu pour l’instant : chaque bataille livrée est enregistrée à sa fin.", 0, null, true, 720, box)
 	for entry in replays:
 		_add_replay(box, entry as Dictionary)
 

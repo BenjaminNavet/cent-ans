@@ -49,7 +49,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Forteresse du sud de l'Eubée.",
+    "description": "Forteresse du sud de l’Eubée.",
     "sources": [
       "Karystos"
     ]
@@ -75,7 +75,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Fortin du nord de l'Eubée.",
+    "description": "Fortin du nord de l’Eubée.",
     "sources": [
       "Oreoi"
     ]

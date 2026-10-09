@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à trois pals d'argent, à la bordure d'or.",
-    "description": "Colonnes de Gediminas, approximées en trois pals d'argent, bordure d'or de jeu (emblème du sceau de la dynastie) ; le cavalier Vytis n'est attesté que plus tard.",
+    "description": "Colonnes de Gediminas, approximées en trois pals d’argent, bordure d’or de jeu (emblème du sceau de la dynastie) ; le cavalier Vytis n’est attesté que plus tard.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -59,7 +59,7 @@
     },
     {
       "id": "obj_lithuania_kiev",
-      "title": "Étendre l'influence sur Kiev",
+      "title": "Étendre l’influence sur Kiev",
       "description": "Devenir suzerain de Kiev.",
       "condition": {
         "kind": "be_liege_of",

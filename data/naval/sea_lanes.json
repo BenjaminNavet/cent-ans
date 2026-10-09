@@ -47,7 +47,7 @@
       "to": "set_bordeaux",
       "sea": "sea_bay_of_biscay",
       "kind": "open_sea",
-      "description": "Flotte du vin : chaque automne, des centaines de nefs chargent à Bordeaux le vin nouveau pour Southampton et Londres ; artère du duché d'Aquitaine anglais.",
+      "description": "Flotte du vin : chaque automne, des centaines de nefs chargent à Bordeaux le vin nouveau pour Southampton et Londres ; artère du duché d’Aquitaine anglais.",
       "source": "Wikipédia (fr), « Vin de Bordeaux » (commerce avec l'Angleterre au Moyen Âge)"
     },
     {
@@ -67,7 +67,7 @@
       "to": "set_bayonne",
       "sea": "sea_bay_of_biscay",
       "kind": "open_sea",
-      "description": "Bayonne, port anglais de l'Adour, arme ses nefs pour le roi et commerce avec l'Angleterre par le golfe de Gascogne.",
+      "description": "Bayonne, port anglais de l’Adour, arme ses nefs pour le roi et commerce avec l’Angleterre par le golfe de Gascogne.",
       "source": "Wikipédia (fr), « Bayonne » (période anglaise)"
     },
     {
@@ -77,7 +77,7 @@
       "to": "set_la_rochelle",
       "sea": "sea_bay_of_biscay",
       "kind": "open_sea",
-      "description": "Sel de Brouage et vin d'Aunis vers les ports du Devon ; la flotte anglaise y est défaite par les Castillans en 1372.",
+      "description": "Sel de Brouage et vin d’Aunis vers les ports du Devon ; la flotte anglaise y est défaite par les Castillans en 1372.",
       "source": "Wikipédia (fr), « Bataille de La Rochelle (1372) »"
     },
     {
@@ -87,7 +87,7 @@
       "to": "set_brest",
       "sea": "sea_channel",
       "kind": "open_sea",
-      "description": "Les expéditions anglaises de la guerre de Succession de Bretagne (1342) traversent de Plymouth vers Brest, tenue par les Anglais jusqu'en 1397.",
+      "description": "Les expéditions anglaises de la guerre de Succession de Bretagne (1342) traversent de Plymouth vers Brest, tenue par les Anglais jusqu’en 1397.",
       "source": "Wikipédia (fr), « Guerre de Succession de Bretagne »"
     },
     {
@@ -97,7 +97,7 @@
       "to": "set_cherbourg",
       "sea": "sea_channel",
       "kind": "open_sea",
-      "description": "Route de la chevauchée de 1346 : la flotte d'Édouard III part de Portsmouth et débarque à Saint-Vaast-la-Hougue.",
+      "description": "Route de la chevauchée de 1346 : la flotte d’Édouard III part de Portsmouth et débarque à Saint-Vaast-la-Hougue.",
       "source": "Wikipédia (fr), « Chevauchée d'Édouard III en 1346 »"
     },
     {
@@ -107,7 +107,7 @@
       "to": "set_dieppe",
       "sea": "sea_channel",
       "kind": "open_sea",
-      "description": "Winchelsea et Rye, membres des Cinq-Ports, face aux Normands de Dieppe : raids et représailles de part et d'autre de la Manche.",
+      "description": "Winchelsea et Rye, membres des Cinq-Ports, face aux Normands de Dieppe : raids et représailles de part et d’autre de la Manche.",
       "source": "Wikipédia (fr), « Cinq-Ports »"
     },
     {
@@ -117,7 +117,7 @@
       "to": "set_sluis",
       "sea": "sea_channel",
       "kind": "coastal",
-      "description": "Les galées de Gênes et de Venise font escale à Southampton avant de remonter la Manche vers L'Écluse et Bruges.",
+      "description": "Les galées de Gênes et de Venise font escale à Southampton avant de remonter la Manche vers L’Écluse et Bruges.",
       "source": "Wikipédia (en), « Flanders Galleys »"
     },
     {
@@ -127,7 +127,7 @@
       "to": "set_sluis",
       "sea": "sea_north_sea",
       "kind": "open_sea",
-      "description": "Traversée de la flotte d'Édouard III vers le Zwin en juin 1340, conclue par la bataille de l'Écluse.",
+      "description": "Traversée de la flotte d’Édouard III vers le Zwin en juin 1340, conclue par la bataille de l’Écluse.",
       "source": "Wikipédia (fr), « Bataille de L'Écluse »"
     },
     {
@@ -147,7 +147,7 @@
       "to": "set_calais",
       "sea": "sea_channel",
       "kind": "coastal",
-      "description": "Après 1363, toute laine exportée d'Angleterre doit passer par l'Étape de Calais.",
+      "description": "Après 1363, toute laine exportée d’Angleterre doit passer par l’Étape de Calais.",
       "source": "Wikipédia (fr), « Étape de Calais »"
     },
     {
@@ -197,7 +197,7 @@
       "to": "set_la_rochelle",
       "sea": "sea_bay_of_biscay",
       "kind": "coastal",
-      "description": "Cabotage le long des côtes de Saintonge, de la Gironde au pertuis d'Antioche.",
+      "description": "Cabotage le long des côtes de Saintonge, de la Gironde au pertuis d’Antioche.",
       "source": "Wikipédia (fr), « La Rochelle » (Moyen Âge)"
     },
     {
@@ -207,7 +207,7 @@
       "to": "set_bayonne",
       "sea": "sea_bay_of_biscay",
       "kind": "coastal",
-      "description": "Les deux grands ports du duché d'Aquitaine reliés le long de la côte landaise.",
+      "description": "Les deux grands ports du duché d’Aquitaine reliés le long de la côte landaise.",
       "source": "Wikipédia (fr), « Duché d'Aquitaine »"
     },
     {
@@ -217,7 +217,7 @@
       "to": "set_nantes",
       "sea": "sea_bay_of_biscay",
       "kind": "coastal",
-      "description": "Sel de la baie de Bourgneuf et vin du Poitou vers l'estuaire de la Loire.",
+      "description": "Sel de la baie de Bourgneuf et vin du Poitou vers l’estuaire de la Loire.",
       "source": "Wikipédia (fr), « Baie de Bourgneuf » (sel)"
     },
     {
@@ -227,7 +227,7 @@
       "to": "set_brest",
       "sea": "sea_bay_of_biscay",
       "kind": "coastal",
-      "description": "Tour de la Bretagne sud, de l'estuaire de la Loire à la rade de Brest.",
+      "description": "Tour de la Bretagne sud, de l’estuaire de la Loire à la rade de Brest.",
       "source": "Wikipédia (fr), « Duché de Bretagne »"
     },
     {
@@ -247,7 +247,7 @@
       "to": "set_a_coruna",
       "sea": "sea_bay_of_biscay",
       "kind": "coastal",
-      "description": "La côte nord de l'Espagne, des ports de la Hermandad jusqu'à la Galice.",
+      "description": "La côte nord de l’Espagne, des ports de la Hermandad jusqu’à la Galice.",
       "source": "Wikipédia (fr), « Hermandad de las Marismas »"
     },
     {
@@ -257,7 +257,7 @@
       "to": "set_lisbonne",
       "sea": "sea_atlantic",
       "kind": "coastal",
-      "description": "Cabotage atlantique de la Galice à l'estuaire du Tage.",
+      "description": "Cabotage atlantique de la Galice à l’estuaire du Tage.",
       "source": "Wikipédia (fr), « Lisbonne » (Moyen Âge)"
     },
     {

@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'or au lion de sable, armé et lampassé de gueules, au bâton de gueules brochant sur le tout.",
-    "description": "Lion de Flandre brisé d'un bâton de gueules, adopté par la branche de Dampierre-Namur, cadette de la maison de Flandre.",
+    "description": "Lion de Flandre brisé d’un bâton de gueules, adopté par la branche de Dampierre-Namur, cadette de la maison de Flandre.",
     "primary_color": "#F2C230",
     "secondary_color": "#1A1A1A"
   },
@@ -29,7 +29,7 @@
     {
       "id": "obj_namur_hold",
       "title": "Garder le marquisat",
-      "description": "La maison de Dampierre-Namur doit conserver son comté, marquisat d'Empire depuis 1188.",
+      "description": "La maison de Dampierre-Namur doit conserver son comté, marquisat d’Empire depuis 1188.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_namur"

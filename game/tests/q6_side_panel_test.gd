@@ -77,7 +77,7 @@ func _test_edict_button(label: String) -> void:
 	await _wait(10)
 	var choose: Button = section.get("choose_button")
 	await _check_fits_zone(panel, label)
-	if check(choose != null and choose.is_visible_in_tree(), "%s: « Changer d'édit » not visible" % label):
+	if check(choose != null and choose.is_visible_in_tree(), "%s: « Changer d’édit » not visible" % label):
 		await _check_reachable(choose, "%s, edicts" % label)
 	panel.hide()
 	await _wait(6)

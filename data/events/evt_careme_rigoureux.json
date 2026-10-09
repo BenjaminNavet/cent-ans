@@ -1,7 +1,7 @@
 {
   "id": "evt_careme_rigoureux",
   "title": "Un Carême trop rigoureux",
-  "text": "Quarante jours sans viande, sans œufs, sans lait ni beurre : le [[cdx_careme|Carême]] pèse lourd cette année, car le [[cdx_hareng|hareng]] salé manque et l'huile d'olive, qui vient du Midi, coûte trop cher. Au nord, où l'on cuisine au beurre, les évêques songent à demander une dispense ; les fidèles qui en profitent verseront une aumône pour ce [[cdx_beurre_de_careme|beurre de Carême]] ; à Rouen, ces aumônes paieront un jour toute une tour de la cathédrale.",
+  "text": "Quarante jours sans viande, sans œufs, sans lait ni beurre : le [[cdx_careme|Carême]] pèse lourd cette année, car le [[cdx_hareng|hareng]] salé manque et l’huile d’olive, qui vient du Midi, coûte trop cher. Au nord, où l’on cuisine au beurre, les évêques songent à demander une dispense ; les fidèles qui en profitent verseront une aumône pour ce [[cdx_beurre_de_careme|beurre de Carême]] ; à Rouen, ces aumônes paieront un jour toute une tour de la cathédrale.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 100,

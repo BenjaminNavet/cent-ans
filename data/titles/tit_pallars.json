@@ -29,7 +29,7 @@
     {
       "id": "obj_pallars_heir",
       "title": "Assurer sa succession",
-      "description": "Arnau Roger II, trois fois marié, n'a pas d'héritier direct.",
+      "description": "Arnau Roger II, trois fois marié, n’a pas d’héritier direct.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_pallars"
@@ -45,7 +45,7 @@
       }
     }
   ],
-  "description": "Comté pyrénéen dont les comtes durent défendre les terres face aux prétentions de Comminges et de Foix, avec l'appui du roi d'Aragon ; Arnau Roger II mourra sans descendance en 1343.",
+  "description": "Comté pyrénéen dont les comtes durent défendre les terres face aux prétentions de Comminges et de Foix, avec l’appui du roi d’Aragon ; Arnau Roger II mourra sans descendance en 1343.",
   "sources": [
     "Arnau Roger II de Pallars Sobirà",
     "Comtat de Pallars Sobirà"

@@ -83,7 +83,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Siège de l'une des plus anciennes universités d'Europe, fondée en 1218 et reconnue « studium generale » en 1254.",
+    "description": "Siège de l’une des plus anciennes universités d’Europe, fondée en 1218 et reconnue « studium generale » en 1254.",
     "sources": [
       "Salamanque",
       "Université de Salamanque"
@@ -110,7 +110,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château templier du Bierzo, revenu à la Couronne après la suppression de l'ordre du Temple en 1312.",
+    "description": "Château templier du Bierzo, revenu à la Couronne après la suppression de l’ordre du Temple en 1312.",
     "sources": [
       "Château de Ponferrada"
     ]
@@ -188,7 +188,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié sur l'Esla, connu au Moyen Âge sous le nom de Coyanza, siège d'un concile en 1055.",
+    "description": "Bourg fortifié sur l’Esla, connu au Moyen Âge sous le nom de Coyanza, siège d’un concile en 1055.",
     "sources": [
       "Valencia de Don Juan"
     ]

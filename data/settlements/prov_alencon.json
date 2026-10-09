@@ -20,7 +20,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Capitale du comté d'Alençon et du Perche, tenu par Charles II d'Alençon, frère du roi.",
+    "description": "Capitale du comté d’Alençon et du Perche, tenu par Charles II d’Alençon, frère du roi.",
     "sources": [
       "Alençon",
       "Comté d'Alençon"
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château du Perche, réuni au comté d'Alençon dans l'apanage de Charles de Valois (1293).",
+    "description": "Château du Perche, réuni au comté d’Alençon dans l’apanage de Charles de Valois (1293).",
     "sources": [
       "Bellême"
     ]
@@ -71,7 +71,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d'Alençon.",
+    "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d’Alençon.",
     "sources": [
       "Sées"
     ]

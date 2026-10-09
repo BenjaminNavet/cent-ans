@@ -2,7 +2,7 @@
   "id": "tit_aydin",
   "rank": "duchy",
   "name": {
-    "display": "Beylik d'Aydın",
+    "display": "Beylik d’Aydın",
     "local": "Aydınoğulları",
     "local_language": "turc ottoman"
   },
@@ -28,7 +28,7 @@
   "objectives": [
     {
       "id": "obj_aydin_smyrna",
-      "title": "Les rades de l'Égée",
+      "title": "Les rades de l’Égée",
       "description": "Tenir Smyrne et Ayasuluk.",
       "condition": {
         "kind": "hold_provinces",
@@ -39,8 +39,8 @@
     },
     {
       "id": "obj_aydin_chios",
-      "title": "Maîtres de l'Égée",
-      "description": "Umur Bey veut Chios, clef des routes de l'Égée.",
+      "title": "Maîtres de l’Égée",
+      "description": "Umur Bey veut Chios, clef des routes de l’Égée.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -49,7 +49,7 @@
       }
     }
   ],
-  "description": "Beylik de l'Égée d'Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; il réside à Birgi, tandis que son frère aîné Hızır Bey tient Ayasoluk (Éphèse).",
+  "description": "Beylik de l’Égée d’Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; il réside à Birgi, tandis que son frère aîné Hızır Bey tient Ayasoluk (Éphèse).",
   "sources": [
     "Aydınids",
     "Umur Bey"

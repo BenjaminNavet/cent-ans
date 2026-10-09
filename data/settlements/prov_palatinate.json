@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Comté palatin du Rhin, tenu par les Wittelsbach palatins (Rodolphe II et Robert Ier), neveux rivaux de l'empereur Louis IV (traité de Pavie, 1329). Worms et Spire, cités impériales.",
+    "description": "Comté palatin du Rhin, tenu par les Wittelsbach palatins (Rodolphe II et Robert Ier), neveux rivaux de l’empereur Louis IV (traité de Pavie, 1329). Worms et Spire, cités impériales.",
     "sources": [
       "Palatinat du Rhin",
       "Traité de Pavie (1329)",
@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire, siège de la cathédrale impériale et nécropole des empereurs saliens.",
+    "description": "Ville libre d’empire, siège de la cathédrale impériale et nécropole des empereurs saliens.",
     "sources": [
       "Spire"
     ]
@@ -79,7 +79,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire sur le Rhin, siège fréquent des diètes impériales.",
+    "description": "Ville libre d’empire sur le Rhin, siège fréquent des diètes impériales.",
     "sources": [
       "Worms"
     ]
@@ -157,7 +157,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Bourg élevé au rang de ville libre d'empire en 1291, au pied de la forêt palatine.",
+    "description": "Bourg élevé au rang de ville libre d’empire en 1291, au pied de la forêt palatine.",
     "sources": [
       "Landau"
     ]

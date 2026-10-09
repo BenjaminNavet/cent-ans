@@ -54,7 +54,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Autre capitale ducale, siège d'un évêché, porte orientale de la Bretagne.",
+    "description": "Autre capitale ducale, siège d’un évêché, porte orientale de la Bretagne.",
     "sources": [
       "Rennes"
     ]
@@ -106,7 +106,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château du comté de Porhoët sur l'Oust, que tiendra Jean de Beaumanoir lors du Combat des Trente (1351) ; il ne passera aux Rohan qu'en 1407.",
+    "description": "Château du comté de Porhoët sur l’Oust, que tiendra Jean de Beaumanoir lors du Combat des Trente (1351) ; il ne passera aux Rohan qu’en 1407.",
     "sources": [
       "Château de Josselin"
     ]
@@ -183,7 +183,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château ducal de chasse sur la presqu'île de Rhuys, près de Vannes.",
+    "description": "Château ducal de chasse sur la presqu’île de Rhuys, près de Vannes.",
     "sources": [
       "Château de Suscinio"
     ]
@@ -235,7 +235,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville et seigneurie marchoise gardant la frontière avec le Maine et l'Anjou.",
+    "description": "Ville et seigneurie marchoise gardant la frontière avec le Maine et l’Anjou.",
     "sources": [
       "Vitré (Ille-et-Vilaine)"
     ]
@@ -335,7 +335,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié dominant les marais salants presqu'îliens.",
+    "description": "Bourg fortifié dominant les marais salants presqu’îliens.",
     "sources": [
       "Guérande"
     ]

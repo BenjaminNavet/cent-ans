@@ -83,7 +83,7 @@ func _run() -> void:
 	DnWaterModels.year_override = 0
 	check(DnWaterModels.lane_ids("baltic") == ["b"] and DnWaterModels.lane_ids("") == ["a"], "lane rules")
 	check(DnWaterModels.river_ids("Volga") == ["b"] and DnWaterModels.river_ids("Seine") == ["a"], "river rules")
-	check(DnWaterModels.bridge_id("stone", "x_1", "Pont d'Avignon", 3) == "av", "bridge by_id before structure")
+	check(DnWaterModels.bridge_id("stone", "x_1", "Pont d’Avignon", 3) == "av", "bridge by_id before structure")
 	check(DnWaterModels.bridge_id("stone", "x_1", "Pont", 3) == "br", "bridge by structure")
 	check(DnWaterModels.bridge_id("ford", "x_1", "Gué", 0) == "", "no model for a ford")
 	check(DnWaterModels.pick(null, 0) == "" and DnWaterModels.pick(["nope"], 0) == "", "unknown ids give no model")

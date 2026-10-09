@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'argent à la croix pattée de gueules.",
-    "description": "Croix pattée de gueules sur champ d'argent, variante distinctive de la croix pleine traditionnellement attribuée à l'électorat de Trèves.",
+    "description": "Croix pattée de gueules sur champ d’argent, variante distinctive de la croix pleine traditionnellement attribuée à l’électorat de Trèves.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#C8102E",
     "uncertain": true,
@@ -26,7 +26,7 @@
     ]
   },
   "succession_law": "elective",
-  "description": "Principauté ecclésiastique de l'archevêque-électeur de Trèves, classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans. Baudouin de Luxembourg, frère de l'empereur Henri VII et oncle du roi Jean de Bohême, archevêque depuis 1307.",
+  "description": "Principauté ecclésiastique de l’archevêque-électeur de Trèves, classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans. Baudouin de Luxembourg, frère de l’empereur Henri VII et oncle du roi Jean de Bohême, archevêque depuis 1307.",
   "sources": [
     "Électorat de Trèves",
     "Baudouin de Luxembourg"

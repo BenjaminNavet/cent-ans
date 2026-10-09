@@ -231,7 +231,7 @@ func clear() -> void:
 	world_lines = PackedStringArray()
 	_render_world()
 	_letters.clear()
-	_text.text = "[i]Aucun événement pour l'instant.[/i]"
+	_text.text = "[i]Aucun événement pour l’instant.[/i]"
 	_title.text = "Journal"
 
 

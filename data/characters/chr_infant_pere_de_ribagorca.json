@@ -1,8 +1,8 @@
 {
   "id": "chr_infant_pere_de_ribagorca",
   "name": {
-    "display": "Pierre d'Aragon, comte de Ribagorce",
-    "local": "Pere d'Aragó",
+    "display": "Pierre d’Aragon, comte de Ribagorce",
+    "local": "Pere d’Aragó",
     "local_language": "catalan"
   },
   "sex": "male",
@@ -23,7 +23,7 @@
       "title": "Comte de Ribagorce"
     },
     {
-      "title": "Comte d'Empúries"
+      "title": "Comte d’Empúries"
     },
     {
       "title": "Seigneur de Gandie"
@@ -42,7 +42,7 @@
   "piety": 55,
   "starting_location": "prov_ribagorca",
   "status": "at_court",
-  "description": "Quatrième fils de Jacques II d'Aragon et de Blanche de Naples, oncle de Pierre IV ; diplomate, homme de lettres et mécène, comte de Ribagorce depuis 1322 et d'Empúries depuis 1325 (qu'il échangera contre Prades en 1341).",
+  "description": "Quatrième fils de Jacques II d’Aragon et de Blanche de Naples, oncle de Pierre IV ; diplomate, homme de lettres et mécène, comte de Ribagorce depuis 1322 et d’Empúries depuis 1325 (qu’il échangera contre Prades en 1341).",
   "sources": [
     "Peter, Count of Ribagorza"
   ]

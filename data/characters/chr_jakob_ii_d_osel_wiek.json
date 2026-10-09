@@ -1,7 +1,7 @@
 {
   "id": "chr_jakob_ii_d_osel_wiek",
   "name": {
-    "display": "Jakob II d'Ösel-Wiek",
+    "display": "Jakob II d’Ösel-Wiek",
     "local": "Jakob von Ösel-Wiek",
     "local_language": "moyen bas-allemand"
   },
@@ -30,7 +30,7 @@
   "piety": 70,
   "starting_location": "prov_osel_wiek",
   "status": "at_court",
-  "description": "Évêque d'Ösel-Wiek depuis 1322 ; son épiscopat prend fin en 1337 (Hermann II Osenbrügge lui succède en 1338).",
+  "description": "Évêque d’Ösel-Wiek depuis 1322 ; son épiscopat prend fin en 1337 (Hermann II Osenbrügge lui succède en 1338).",
   "sources": [
     "Évêché d'Ösel-Wiek"
   ]

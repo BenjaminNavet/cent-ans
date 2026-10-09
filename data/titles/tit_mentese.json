@@ -27,7 +27,7 @@
     {
       "id": "obj_mentese_independent",
       "title": "Rester libre",
-      "description": "Garder l'indépendance de Menteşe.",
+      "description": "Garder l’indépendance de Menteşe.",
       "condition": {
         "kind": "be_independent"
       }

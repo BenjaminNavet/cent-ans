@@ -1,7 +1,7 @@
 {
   "id": "evt_etienne_marcel",
   "title": "Étienne Marcel à Paris",
-  "text": "Le prévôt des marchands Étienne Marcel soulève Paris contre le dauphin. Ses partisans au chaperon rouge et bleu envahissent le palais et massacrent les maréchaux de Champagne et de Normandie sous les yeux du prince. Les bourgeois exigent de contrôler l'impôt.",
+  "text": "Le prévôt des marchands Étienne Marcel soulève Paris contre le dauphin. Ses partisans au chaperon rouge et bleu envahissent le palais et massacrent les maréchaux de Champagne et de Normandie sous les yeux du prince. Les bourgeois exigent de contrôler l’impôt.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -60,7 +60,7 @@
       "ai_weight": 1
     },
     {
-      "text": "Quitter Paris et l'assiéger",
+      "text": "Quitter Paris et l’assiéger",
       "effects": [
         {
           "type": "unrest",

@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Comté d'Ulster en déshérence depuis le meurtre de Guillaume de Burgh (1333) ; Connacht aux Burke gaélisés et aux Ó Conchobhair ; Ó Néill de Tír Eoghain, Ó Domhnaill. Autorité anglaise réduite à Carrickfergus et Galway.",
+    "description": "Comté d’Ulster en déshérence depuis le meurtre de Guillaume de Burgh (1333) ; Connacht aux Burke gaélisés et aux Ó Conchobhair ; Ó Néill de Tír Eoghain, Ó Domhnaill. Autorité anglaise réduite à Carrickfergus et Galway.",
     "sources": [
       "Comté d'Ulster",
       "Connacht",
@@ -99,7 +99,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg sur la Bann, dans le nord de l'Ulster.",
+    "description": "Bourg sur la Bann, dans le nord de l’Ulster.",
     "sources": [
       "Coleraine"
     ]

@@ -1,7 +1,7 @@
 {
   "id": "evt_pirates",
   "title": "Les écumeurs de mer",
-  "text": "Des nefs d'écumeurs ont surgi à l'aube, pillé le port et incendié les navires à quai. Les marchands exigent qu'on arme des galées pour protéger la côte.",
+  "text": "Des nefs d’écumeurs ont surgi à l’aube, pillé le port et incendié les navires à quai. Les marchands exigent qu’on arme des galées pour protéger la côte.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 70,

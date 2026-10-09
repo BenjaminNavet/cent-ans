@@ -86,8 +86,8 @@
     "province": "prov_capitanata",
     "kind": "abbey",
     "name": {
-      "display": "Monte Sant'Angelo",
-      "local": "Monte Sant'Angelo",
+      "display": "Monte Sant’Angelo",
+      "local": "Monte Sant’Angelo",
       "local_language": "italien"
     },
     "lonlat": [
@@ -103,7 +103,7 @@
     "port": false,
     "description": "Sanctuaire de saint Michel, but de pèlerinage.",
     "sources": [
-      "Monte Sant'Angelo"
+      "Monte Sant’Angelo"
     ]
   }
 ]

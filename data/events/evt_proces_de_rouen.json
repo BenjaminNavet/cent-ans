@@ -1,7 +1,7 @@
 {
   "id": "evt_proces_de_rouen",
   "title": "Le procès de Rouen",
-  "text": "Prise devant Compiègne et vendue aux Anglais par Jean de Luxembourg, la Pucelle est jugée à Rouen pour hérésie par l'évêque Cauchon. Elle répond avec une assurance qui trouble ses juges ; on la dit relapse, et le bûcher est dressé place du Vieux-Marché.",
+  "text": "Prise devant Compiègne et vendue aux Anglais par Jean de Luxembourg, la Pucelle est jugée à Rouen pour hérésie par l’évêque Cauchon. Elle répond avec une assurance qui trouble ses juges ; on la dit relapse, et le bûcher est dressé place du Vieux-Marché.",
   "kind": "historical",
   "trigger": {
     "date": {

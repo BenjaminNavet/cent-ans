@@ -1,7 +1,7 @@
 {
   "id": "chr_david_ii",
   "name": {
-    "display": "David II d'Écosse",
+    "display": "David II d’Écosse",
     "local": "Dàibhidh Bruis",
     "local_language": "gaélique écossais"
   },
@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Roi d'Écosse",
+      "title": "Roi d’Écosse",
       "from": {
         "value": "1329-06-07"
       },

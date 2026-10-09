@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Grande ville de Basse-Normandie sur l'Orne, dotée des abbayes de Guillaume le Conquérant.",
+    "description": "Grande ville de Basse-Normandie sur l’Orne, dotée des abbayes de Guillaume le Conquérant.",
     "sources": [
       "Caen"
     ]
@@ -50,7 +50,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Capitale du comté de Mortain, cédé en 1336 à Jeanne II de Navarre et Philippe d'Évreux.",
+    "description": "Capitale du comté de Mortain, cédé en 1336 à Jeanne II de Navarre et Philippe d’Évreux.",
     "sources": [
       "Mortain",
       "Comté de Mortain"
@@ -182,7 +182,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité épiscopale perchée dominant la baie, porte d'accès au Mont-Saint-Michel.",
+    "description": "Cité épiscopale perchée dominant la baie, porte d’accès au Mont-Saint-Michel.",
     "sources": [
       "Avranches"
     ]
@@ -257,7 +257,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Port de pêche du Cotentin, jadis principal point de traversée vers l'Angleterre.",
+    "description": "Port de pêche du Cotentin, jadis principal point de traversée vers l’Angleterre.",
     "sources": [
       "Barfleur"
     ]

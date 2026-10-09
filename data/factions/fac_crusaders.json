@@ -17,7 +17,7 @@
   "succession_law": "elective",
   "heraldry": {
     "blazon": "D'argent à la croix potencée d'or cantonnée de quatre croisettes du même.",
-    "description": "Croix de Jérusalem d'or sur fond d'argent, armes du royaume latin de Jérusalem reprises par les croisés du patriarche.",
+    "description": "Croix de Jérusalem d’or sur fond d’argent, armes du royaume latin de Jérusalem reprises par les croisés du patriarche.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#C9A227",
     "uncertain": true,
@@ -63,7 +63,7 @@
     "trade": 20,
     "piety": 100
   },
-  "description": "Uchronie de jeu. En 1336, Benoît XII annule le passage général prêché par Jean XXII ; les croisés qui refusent d'être relevés de leur vœu suivent le patriarche Pierre de la Palud à Limassol. Sans terres, vivant des aumônes de la Chrétienté et de l'élan de leur vœu, ils n'ont qu'un but : prendre et tenir Jérusalem.",
+  "description": "Uchronie de jeu. En 1336, Benoît XII annule le passage général prêché par Jean XXII ; les croisés qui refusent d’être relevés de leur vœu suivent le patriarche Pierre de la Palud à Limassol. Sans terres, vivant des aumônes de la Chrétienté et de l’élan de leur vœu, ils n’ont qu’un but : prendre et tenir Jérusalem.",
   "sources": [
     "Pierre de la Palud",
     "Passagium generale",
@@ -90,7 +90,7 @@
   "victory": {
     "end_year": 1453,
     "hold_turns": 20,
-    "summary": "Délivrer Jérusalem, s'assurer un port en Terre sainte et tenir le tout jusqu'au terme de la partie.",
+    "summary": "Délivrer Jérusalem, s’assurer un port en Terre sainte et tenir le tout jusqu’au terme de la partie.",
     "objectives": [
       {
         "id": "obj_cr_jerusalem",

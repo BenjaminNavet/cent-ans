@@ -206,7 +206,7 @@ func _check_advisor(settings: Node) -> void:
 	]
 	var count := advisor.said.size()
 	Advisor.on_turn_events(events, "fac_france", 5)
-	check(advisor.said.size() == count + 1 and advisor.said.back() == "adv_plague", "one alert, player's faction")
+	check(advisor.said.size() == count + 1 and advisor.said.back() == "adv_plague", "one alert, player’s faction")
 	advisor.dismiss()
 	Advisor.on_turn_events([{"kind": "plague", "faction": "fac_france"}], "fac_france", 6)
 	check(advisor.said.size() == count + 1, "same alert not repeated within the cooldown")

@@ -17,7 +17,7 @@
   "primary_title": "tit_estonia",
   "heraldry": {
     "blazon": "D'or à trois léopards d'azur passant.",
-    "description": "Armes de l'Estonie danoise : trois lions bleus sur or, dérivés des armes danoises.",
+    "description": "Armes de l’Estonie danoise : trois lions bleus sur or, dérivés des armes danoises.",
     "primary_color": "#F2C230",
     "secondary_color": "#1F3A93"
   },
@@ -45,7 +45,7 @@
     "trade": 60,
     "piety": 50
   },
-  "description": "Le duché d'Estonie, possession danoise depuis 1219, a perdu son roi avec le Danemark en 1332 : le parti danois de l'évêque de Reval s'oppose au parti allemand du capitaine Marquard Breide.",
+  "description": "Le duché d’Estonie, possession danoise depuis 1219, a perdu son roi avec le Danemark en 1332 : le parti danois de l’évêque de Reval s’oppose au parti allemand du capitaine Marquard Breide.",
   "sources": [
     "Estonie danoise",
     "Olaf de Roskilde"

@@ -444,6 +444,6 @@ func _fill_breadcrumb() -> void:
 		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		var holder := str(link.get("holder", ""))
 		var holder_name := str(link.get("holder_name", ""))
-		TooltipHost.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
+		TooltipHost.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l’arbre féodal" % holder_name if holder != "" else "Titre vacant"})
 		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
 		breadcrumb.add_child(crumb)

@@ -1,7 +1,7 @@
 {
   "id": "evt_medecin_de_montpellier",
   "title": "Un médecin de Montpellier",
-  "text": "Un maître en médecine, formé à la faculté de [[cdx_montpellier|Montpellier]], propose de s'installer en ville contre une pension. Il examine l'urine des malades dans un flacon de verre, consulte les astres avant de saigner et prescrit des régimes selon les [[cdx_humeurs|humeurs]] de chacun. Il a lu Galien et Avicenne en latin, ce que ne font ni les barbiers ni les rebouteux ; il coûte aussi dix fois plus cher qu'eux.",
+  "text": "Un maître en médecine, formé à la faculté de [[cdx_montpellier|Montpellier]], propose de s’installer en ville contre une pension. Il examine l’urine des malades dans un flacon de verre, consulte les astres avant de saigner et prescrit des régimes selon les [[cdx_humeurs|humeurs]] de chacun. Il a lu Galien et Avicenne en latin, ce que ne font ni les barbiers ni les rebouteux ; il coûte aussi dix fois plus cher qu’eux.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 120,

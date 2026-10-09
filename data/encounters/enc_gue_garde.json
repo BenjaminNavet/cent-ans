@@ -1,7 +1,7 @@
 {
   "id": "enc_gue_garde",
   "title": "Le gué gardé",
-  "text": "Le seul gué praticable est tenu par des arbalétriers retranchés derrière des pieux. Un valet de ferme promet, contre une récompense, de montrer à marée basse un autre passage, comme ce Gobin Agache qui guida le roi d'Angleterre à Blanchetaque.",
+  "text": "Le seul gué praticable est tenu par des arbalétriers retranchés derrière des pieux. Un valet de ferme promet, contre une récompense, de montrer à marée basse un autre passage, comme ce Gobin Agache qui guida le roi d’Angleterre à Blanchetaque.",
   "spawn": {
     "war": "war",
     "terrains": [
@@ -58,7 +58,7 @@
           ]
         },
         "on_loss": {
-          "text": "L'ost est rejeté dans la rivière et doit chercher un autre passage.",
+          "text": "L’ost est rejeté dans la rivière et doit chercher un autre passage.",
           "army_effects": [
             {
               "effect": "army_morale",

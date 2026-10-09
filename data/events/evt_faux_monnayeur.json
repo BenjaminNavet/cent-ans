@@ -1,7 +1,7 @@
 {
   "id": "evt_faux_monnayeur",
   "title": "Un faux-monnayeur",
-  "text": "Un orfèvre du bourg a rogné et coulé de la fausse monnaie avec de l'étain. Des pièces de mauvais aloi courent déjà sur les marchés et les changeurs s'alarment.",
+  "text": "Un orfèvre du bourg a rogné et coulé de la fausse monnaie avec de l’étain. Des pièces de mauvais aloi courent déjà sur les marchés et les changeurs s’alarment.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 75

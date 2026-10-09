@@ -19,10 +19,10 @@ func _init() -> void:
 
 	var water_tex := load(CampaignTextures.WATER_NORMAL_PATH) as Texture2D
 	if water_tex == null:
-		check(false, "GA4: normale d'eau absente")
+		check(false, "GA4: normale d’eau absente")
 	else:
 		var wb := int(water_tex.get_width() * water_tex.get_height() * 1.0 * 4.0 / 3.0)
-		print("GA4 normale d'eau : %dx%d, %.2f Mo" % [water_tex.get_width(), water_tex.get_height(), wb / 1048576.0])
+		print("GA4 normale d’eau : %dx%d, %.2f Mo" % [water_tex.get_width(), water_tex.get_height(), wb / 1048576.0])
 
 	var terrain_mat := ShaderMaterial.new()
 	terrain_mat.shader = load("res://shaders/terrain.gdshader")

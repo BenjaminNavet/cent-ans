@@ -28,7 +28,7 @@
     {
       "id": "obj_ferrara_hold",
       "title": "Garder le marquisat",
-      "description": "La maison d'Este doit conserver Ferrare.",
+      "description": "La maison d’Este doit conserver Ferrare.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_ferrara"

@@ -1,7 +1,7 @@
 {
   "id": "enc_reliquaire_procession",
   "title": "Le reliquaire en procession",
-  "text": "Les chanoines promènent la châsse du saint patron à travers les paroisses pour détourner la guerre et la peste. La procession barre la route ; le clergé attend que les gens d'armes se découvrent et fassent offrande.",
+  "text": "Les chanoines promènent la châsse du saint patron à travers les paroisses pour détourner la guerre et la peste. La procession barre la route ; le clergé attend que les gens d’armes se découvrent et fassent offrande.",
   "spawn": {
     "seasons": [
       "spring",

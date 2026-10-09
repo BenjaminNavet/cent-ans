@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Confédération d'Uri, Schwyz, Unterwald et Lucerne (1332), en conflit avec les Habsbourg (Morgarten, 1315) ; évêché et cité de Bâle, évêché de Coire (Grisons). Col du Saint-Gothard.",
+    "description": "Confédération d’Uri, Schwyz, Unterwald et Lucerne (1332), en conflit avec les Habsbourg (Morgarten, 1315) ; évêché et cité de Bâle, évêché de Coire (Grisons). Col du Saint-Gothard.",
     "sources": [
       "Ancienne Confédération suisse",
       "Bataille de Morgarten",
@@ -73,7 +73,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Chef-lieu du canton d'Uri, associé par la légende à Guillaume Tell.",
+    "description": "Chef-lieu du canton d’Uri, associé par la légende à Guillaume Tell.",
     "sources": [
       "Altdorf (Uri)"
     ]
@@ -96,7 +96,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Chef-lieu de Nidwald, l'une des deux moitiés du canton fondateur d'Unterwald.",
+    "description": "Chef-lieu de Nidwald, l’une des deux moitiés du canton fondateur d’Unterwald.",
     "sources": [
       "Stans (Nidwald)"
     ]
@@ -119,7 +119,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Chef-lieu d'Obwald, l'autre moitié du canton fondateur d'Unterwald.",
+    "description": "Chef-lieu d’Obwald, l’autre moitié du canton fondateur d’Unterwald.",
     "sources": [
       "Sarnen"
     ]

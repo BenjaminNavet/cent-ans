@@ -1,7 +1,7 @@
 {
   "id": "enc_pelerins_compostelle",
   "title": "Pèlerins de Saint-Jacques",
-  "text": "Une troupe de pèlerins, coquille au chapeau et bourdon en main, chemine vers Compostelle. La guerre rend les routes peu sûres : ils demandent escorte jusqu'au prochain hospice.",
+  "text": "Une troupe de pèlerins, coquille au chapeau et bourdon en main, chemine vers Compostelle. La guerre rend les routes peu sûres : ils demandent escorte jusqu’au prochain hospice.",
   "spawn": {
     "seasons": [
       "spring",
@@ -22,7 +22,7 @@
   },
   "options": [
     {
-      "label": "Les escorter jusqu'à l'hospice",
+      "label": "Les escorter jusqu’à l’hospice",
       "effects": [
         {
           "type": "piety",
@@ -42,7 +42,7 @@
       "ai_weight": 2
     },
     {
-      "label": "Leur faire l'aumône",
+      "label": "Leur faire l’aumône",
       "effects": [
         {
           "type": "treasury",

@@ -1,7 +1,7 @@
 {
   "id": "chr_louis_d_anjou",
   "name": {
-    "display": "Louis d'Anjou"
+    "display": "Louis d’Anjou"
   },
   "sex": "male",
   "house": "Valois",
@@ -24,7 +24,7 @@
   },
   "starting_location": "prov_ile_de_france",
   "status": "unborn",
-  "description": "Deuxième fils de Jean de Normandie ; futur premier duc d'Anjou et fondateur de la maison capétienne d'Anjou-[[cdx_valois|Valois]].",
+  "description": "Deuxième fils de Jean de Normandie ; futur premier duc d’Anjou et fondateur de la maison capétienne d’Anjou-[[cdx_valois|Valois]].",
   "sources": [
     "Louis Ier d'Anjou"
   ]

@@ -25,7 +25,7 @@
       "bld_archery_butts"
     ],
     "port": true,
-    "description": "Seigneurie d'Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent les terres anglaises (le futur « Pale », mot du XVe siècle) depuis les monts de Wicklow.",
+    "description": "Seigneurie d’Irlande : Dublin (justicier), Meath, Kildare (FitzGerald), Leinster anglo-normand ; les clans Ó Broin et Ó Tuathail harcèlent les terres anglaises (le futur « Pale », mot du XVe siècle) depuis les monts de Wicklow.",
     "sources": [
       "Seigneurie d'Irlande",
       "Dublin",
@@ -54,7 +54,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Ville close sur la Boyne, siège fréquent du parlement d'Irlande.",
+    "description": "Ville close sur la Boyne, siège fréquent du parlement d’Irlande.",
     "sources": [
       "Drogheda"
     ]
@@ -80,7 +80,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Première abbaye cistercienne d'Irlande, fondée en 1142.",
+    "description": "Première abbaye cistercienne d’Irlande, fondée en 1142.",
     "sources": [
       "Abbaye de Mellifont"
     ]
@@ -105,7 +105,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville marchande des Butler sur la Nore, où se réunit parfois le parlement d'Irlande.",
+    "description": "Ville marchande des Butler sur la Nore, où se réunit parfois le parlement d’Irlande.",
     "sources": [
       "Kilkenny"
     ]

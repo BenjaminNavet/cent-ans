@@ -1,7 +1,7 @@
 {
   "id": "chr_charles_d_alencon",
   "name": {
-    "display": "Charles II d'Alençon"
+    "display": "Charles II d’Alençon"
   },
   "sex": "male",
   "house": "Valois",
@@ -18,7 +18,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Comte d'Alençon",
+      "title": "Comte d’Alençon",
       "from": {
         "value": "1325-12-16"
       }
@@ -53,8 +53,8 @@
   },
   "starting_location": "prov_normandie",
   "status": "at_court",
-  "description": "Frère cadet de [[cdx_philippe_vi|Philippe VI]], comte d'Alençon ; il mène la charge désordonnée de la [[cdx_chevalerie|chevalerie]] française à Crécy et y meurt.",
+  "description": "Frère cadet de [[cdx_philippe_vi|Philippe VI]], comte d’Alençon ; il mène la charge désordonnée de la [[cdx_chevalerie|chevalerie]] française à Crécy et y meurt.",
   "sources": [
-    "Charles II d'Alençon"
+    "Charles II d’Alençon"
   ]
 }

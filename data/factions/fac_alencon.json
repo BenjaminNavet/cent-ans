@@ -1,7 +1,7 @@
 {
   "id": "fac_alencon",
   "name": {
-    "display": "Comté d'Alençon",
+    "display": "Comté d’Alençon",
     "local": "Alençon",
     "local_language": "ancien français"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_alencon",
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules chargée de huit besants d'argent.",
-    "description": "Armes de France ancien brisées d'une bordure de gueules besantée d'argent, portées par Charles II d'Alençon (la bordure de gueules seule est celle de son père Charles de Valois).",
+    "description": "Armes de France ancien brisées d’une bordure de gueules besantée d’argent, portées par Charles II d’Alençon (la bordure de gueules seule est celle de son père Charles de Valois).",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B"
   },
@@ -48,9 +48,9 @@
     "trade": 35,
     "piety": 55
   },
-  "description": "Comté-apanage donné en 1293 à Charles de Valois, dont hérite en 1325 son fils Charles II d'Alençon, frère cadet de Philippe VI ; il mènera la charge de la chevalerie française à Crécy en 1346.",
+  "description": "Comté-apanage donné en 1293 à Charles de Valois, dont hérite en 1325 son fils Charles II d’Alençon, frère cadet de Philippe VI ; il mènera la charge de la chevalerie française à Crécy en 1346.",
   "sources": [
     "Charles II d'Alençon",
-    "Comté d'Alençon"
+    "Comté d’Alençon"
   ]
 }

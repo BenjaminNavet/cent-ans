@@ -18,7 +18,7 @@
   "primary_title": "tit_rhodes",
   "heraldry": {
     "blazon": "De gueules à la croix d'argent, au chef d'azur.",
-    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean, avec un chef d'azur ajouté pour distinguer le Couvent de Rhodes.",
+    "description": "Croix blanche sur fond rouge, armes de l’Ordre de Saint-Jean, avec un chef d’azur ajouté pour distinguer le Couvent de Rhodes.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -77,7 +77,7 @@
     "trade": 45,
     "piety": 90
   },
-  "description": "Ordre militaire installé à Rhodes depuis 1306-1310 : couvent-forteresse, flotte de galères, corsaires contre les Turcs d'Aydın. Hélion de Villeneuve, Grand Maître depuis 1319, a rendu à l'Ordre sa puissance.",
+  "description": "Ordre militaire installé à Rhodes depuis 1306-1310 : couvent-forteresse, flotte de galères, corsaires contre les Turcs d’Aydın. Hélion de Villeneuve, Grand Maître depuis 1319, a rendu à l’Ordre sa puissance.",
   "sources": [
     "Knights Hospitaller",
     "Hélion de Villeneuve"

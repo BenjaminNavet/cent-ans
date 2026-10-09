@@ -2,13 +2,13 @@
   "id": "tit_urgell",
   "rank": "county",
   "name": {
-    "display": "Comté d'Urgell",
-    "local": "Comtat d'Urgell",
+    "display": "Comté d’Urgell",
+    "local": "Comtat d’Urgell",
     "local_language": "catalan"
   },
   "heraldry": {
     "blazon": "Échiqueté d'or et de sable.",
-    "description": "Échiqueté des anciens comtes d'Urgell ; Jacques Ier l'écartèle avec les pals d'Aragon, rendu ici seul.",
+    "description": "Échiqueté des anciens comtes d’Urgell ; Jacques Ier l’écartèle avec les pals d’Aragon, rendu ici seul.",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
@@ -35,15 +35,15 @@
     },
     {
       "id": "obj_urgell_crown",
-      "title": "La couronne d'Aragon",
-      "description": "Faire valoir le droit des comtes d'Urgell au trône d'Aragon (Caspe, 1412).",
+      "title": "La couronne d’Aragon",
+      "description": "Faire valoir le droit des comtes d’Urgell au trône d’Aragon (Caspe, 1412).",
       "condition": {
         "kind": "hold_crown",
         "title": "tit_aragon"
       }
     }
   ],
-  "description": "L'un des plus anciens comtés catalans ; Jacques Ier l'a hérité à huit ans en 1328, à la mort de sa mère Thérèse d'Entença et à l'avènement de son père comme roi Alphonse IV.",
+  "description": "L’un des plus anciens comtés catalans ; Jacques Ier l’a hérité à huit ans en 1328, à la mort de sa mère Thérèse d’Entença et à l’avènement de son père comme roi Alphonse IV.",
   "sources": [
     "James I, Count of Urgell",
     "County of Urgell"

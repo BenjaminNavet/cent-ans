@@ -2,13 +2,13 @@
   "id": "tit_archipelago",
   "rank": "county",
   "name": {
-    "display": "Duché de l'Archipel",
-    "local": "Ducato dell'Arcipelago",
+    "display": "Duché de l’Archipel",
+    "local": "Ducato dell’Arcipelago",
     "local_language": "vénitien"
   },
   "heraldry": {
     "blazon": "Écartelé d'argent et de gueules.",
-    "description": "Armes des Sanudo, ducs de l'Archipel, écartelées d'argent et de gueules.",
+    "description": "Armes des Sanudo, ducs de l’Archipel, écartelées d’argent et de gueules.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -20,7 +20,7 @@
   "holder_1337": {
     "faction": "fac_archipelago",
     "sources": [
-      "Duché de l'Archipel",
+      "Duché de l’Archipel",
       "Nicolas Ier Sanudo"
     ]
   },
@@ -46,7 +46,7 @@
     {
       "id": "obj_archipelago_chios",
       "title": "Chios latine",
-      "description": "Rendre Chios aux Latins : les Zaccaria génois l'ont tenue de 1304 à 1329, avant la reprise byzantine.",
+      "description": "Rendre Chios aux Latins : les Zaccaria génois l’ont tenue de 1304 à 1329, avant la reprise byzantine.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -57,7 +57,7 @@
   ],
   "description": "Duché de Naxos, Paros, Milos : État latin des Cyclades sous protection vénitienne. Rang « comté » du schéma.",
   "sources": [
-    "Duché de l'Archipel",
+    "Duché de l’Archipel",
     "Nicolas Ier Sanudo"
   ]
 }

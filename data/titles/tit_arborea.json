@@ -2,13 +2,13 @@
   "id": "tit_arborea",
   "rank": "duchy",
   "name": {
-    "display": "Judicat d'Arborée",
+    "display": "Judicat d’Arborée",
     "local": "Judicatu de Arborea",
     "local_language": "sarde"
   },
   "heraldry": {
     "blazon": "D'argent à la bordure de sinople.",
-    "description": "Les armes du judicat d'Arborée sont un arbre arraché de sinople sur champ d'argent (attesté) ; le générateur ne dessine pas encore l'arbre, remplacé par la bordure de sinople.",
+    "description": "Les armes du judicat d’Arborée sont un arbre arraché de sinople sur champ d’argent (attesté) ; le générateur ne dessine pas encore l’arbre, remplacé par la bordure de sinople.",
     "primary_color": "#F2EFE6",
     "secondary_color": "#2E7D4F",
     "uncertain": true,
@@ -21,13 +21,13 @@
   "holder_1337": {
     "faction": "fac_arborea",
     "sources": [
-      "Judicat d'Arborée"
+      "Judicat d’Arborée"
     ]
   },
   "objectives": [
     {
       "id": "obj_arborea_hold",
-      "title": "Garder l'Arborée",
+      "title": "Garder l’Arborée",
       "description": "Le juge doit conserver son judicat.",
       "condition": {
         "kind": "hold_title",
@@ -37,7 +37,7 @@
     {
       "id": "obj_arborea_sardegna",
       "title": "Toute la Sardaigne",
-      "description": "Unifier l'île sous la maison de Bas-Serra en tenant Oristano et Cagliari.",
+      "description": "Unifier l’île sous la maison de Bas-Serra en tenant Oristano et Cagliari.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -47,8 +47,8 @@
       }
     }
   ],
-  "description": "Judicat d'Arborée, l'un des quatre anciens judicats sardes, gouverné par la maison de Bas-Serra.",
+  "description": "Judicat d’Arborée, l’un des quatre anciens judicats sardes, gouverné par la maison de Bas-Serra.",
   "sources": [
-    "Judicat d'Arborée"
+    "Judicat d’Arborée"
   ]
 }

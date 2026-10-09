@@ -80,7 +80,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville née d'une abbaye bénédictine, devenue capitale du Sarladais, gouvernée par ses consuls.",
+    "description": "Ville née d’une abbaye bénédictine, devenue capitale du Sarladais, gouvernée par ses consuls.",
     "sources": ["Sarlat-la-Canéda"]
   },
   {
@@ -150,7 +150,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_vineyard_press"],
     "port": false,
-    "description": "Bourg agricole appartenant à l'évêque de Sarlat, au confluent de la Banège et de la Dropt.",
+    "description": "Bourg agricole appartenant à l’évêque de Sarlat, au confluent de la Banège et de la Dropt.",
     "sources": ["Issigeac"]
   }
 ]

@@ -2,13 +2,13 @@
   "id": "tit_armagnac",
   "rank": "county",
   "name": {
-    "display": "Comté d'Armagnac",
-    "local": "Comtat d'Armanhac",
+    "display": "Comté d’Armagnac",
+    "local": "Comtat d’Armanhac",
     "local_language": "occitan"
   },
   "heraldry": {
     "blazon": "D'argent au lion de gueules.",
-    "description": "Armes du comté d'Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d'or).",
+    "description": "Armes du comté d’Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d’or).",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },
@@ -20,14 +20,14 @@
     "faction": "fac_armagnac",
     "sources": [
       "Jean Ier d'Armagnac",
-      "Comté d'Armagnac"
+      "Comté d’Armagnac"
     ]
   },
   "objectives": [
     {
       "id": "obj_armagnac_hold",
       "title": "Garder le comté",
-      "description": "Le comte d'Armagnac doit conserver son comté.",
+      "description": "Le comte d’Armagnac doit conserver son comté.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_armagnac"
@@ -43,9 +43,9 @@
       }
     }
   ],
-  "description": "Comté gascon tenu par Jean Ier d'Armagnac, fidèle de Philippe VI, rival acharné de Gaston II de Foix-Béarn.",
+  "description": "Comté gascon tenu par Jean Ier d’Armagnac, fidèle de Philippe VI, rival acharné de Gaston II de Foix-Béarn.",
   "sources": [
     "Jean Ier d'Armagnac",
-    "Comté d'Armagnac"
+    "Comté d’Armagnac"
   ]
 }

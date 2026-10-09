@@ -1,6 +1,6 @@
 {
   "id": "evt_incendie",
-  "title": "L'incendie de la ville",
+  "title": "L’incendie de la ville",
   "text": "Un four de boulanger mal éteint a mis le feu à une rue entière. Les maisons de bois et de torchis flambent comme paille ; il faut des jours pour éteindre les dernières braises.",
   "kind": "random",
   "trigger": {
@@ -25,7 +25,7 @@
       "ai_weight": 1
     },
     {
-      "text": "Laisser les bourgeois s'en charger",
+      "text": "Laisser les bourgeois s’en charger",
       "effects": [
         {
           "type": "devastation",

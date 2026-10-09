@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Despote d'Épire",
+      "title": "Despote d’Épire",
       "from": {
         "value": "1335"
       }
@@ -40,7 +40,7 @@
   },
   "starting_location": "prov_epirus",
   "status": "minor",
-  "description": "Fils de Jean II Orsini et d'Anne Paléologine ; despote enfant, il sera conduit à Constantinople en 1338 et se révoltera plus tard.",
+  "description": "Fils de Jean II Orsini et d’Anne Paléologine ; despote enfant, il sera conduit à Constantinople en 1338 et se révoltera plus tard.",
   "sources": [
     "Nikephoros II Orsini"
   ]

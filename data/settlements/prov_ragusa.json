@@ -24,7 +24,7 @@
       "bld_guild_hall"
     ],
     "port": true,
-    "description": "Cité patricienne et port sur l'Adriatique.",
+    "description": "Cité patricienne et port sur l’Adriatique.",
     "sources": [
       "Dubrovnik"
     ]
@@ -75,7 +75,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye bénédictine de l'îlot de Lokrum.",
+    "description": "Abbaye bénédictine de l’îlot de Lokrum.",
     "sources": [
       "Lokrum"
     ]

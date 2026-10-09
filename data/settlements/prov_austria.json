@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Duchés d'Autriche, de Styrie et de Carinthie (acquise en 1335) tenus conjointement par Albert II de Habsbourg et son frère Othon le Joyeux (mort en 1339). Linz, sur le Danube, tient ici lieu de cité de la province ; Vienne en est la grande ville.",
+    "description": "Duchés d’Autriche, de Styrie et de Carinthie (acquise en 1335) tenus conjointement par Albert II de Habsbourg et son frère Othon le Joyeux (mort en 1339). Linz, sur le Danube, tient ici lieu de cité de la province ; Vienne en est la grande ville.",
     "sources": [
       "Duché d'Autriche",
       "Albert II d'Autriche",
@@ -55,7 +55,7 @@
       "bld_counting_house"
     ],
     "port": false,
-    "description": "Résidence principale des ducs Habsbourg d'Autriche, grande place marchande sur le Danube.",
+    "description": "Résidence principale des ducs Habsbourg d’Autriche, grande place marchande sur le Danube.",
     "sources": [
       "Vienne (Autriche)"
     ]
@@ -159,7 +159,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg au confluent de l'Enns et de la Steyr, porte du commerce du fer de l'Eisenwurzen styrien.",
+    "description": "Bourg au confluent de l’Enns et de la Steyr, porte du commerce du fer de l’Eisenwurzen styrien.",
     "sources": [
       "Steyr"
     ]

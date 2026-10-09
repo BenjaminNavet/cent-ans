@@ -27,7 +27,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Barcelone, capitale de la Catalogne et principal port de la Couronne d'Aragon.",
+    "description": "Barcelone, capitale de la Catalogne et principal port de la Couronne d’Aragon.",
     "sources": [
       "Principauté de Catalogne",
       "Barcelone",
@@ -56,7 +56,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Siège épiscopal catalan doté d'un important quartier juif (le Call).",
+    "description": "Siège épiscopal catalan doté d’un important quartier juif (le Call).",
     "sources": [
       "Gérone"
     ]
@@ -112,7 +112,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville du bas Segre dotée d'un studium generale fondé en 1300, l'un des premiers d'Espagne.",
+    "description": "Ville du bas Segre dotée d’un studium generale fondé en 1300, l’un des premiers d’Espagne.",
     "sources": [
       "Lérida",
       "Université de Lérida"
@@ -165,7 +165,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Siège épiscopal d'Osona, important marché drapier de l'intérieur catalan.",
+    "description": "Siège épiscopal d’Osona, important marché drapier de l’intérieur catalan.",
     "sources": [
       "Vic (Espagne)"
     ]
@@ -191,7 +191,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville marchande du Bages, sur la route entre Barcelone et l'intérieur catalan.",
+    "description": "Ville marchande du Bages, sur la route entre Barcelone et l’intérieur catalan.",
     "sources": [
       "Manresa"
     ]

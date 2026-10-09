@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'argent à la croix de gueules.",
-    "description": "Croix rouge sur champ blanc de la commune de Bologne, accompagnée du chef d'azur à « LIBERTAS » d'or ; reprise par la seigneurie de fait de Taddeo Pepoli en 1337.",
+    "description": "Croix rouge sur champ blanc de la commune de Bologne, accompagnée du chef d’azur à « LIBERTAS » d’or ; reprise par la seigneurie de fait de Taddeo Pepoli en 1337.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },
@@ -35,8 +35,8 @@
     },
     {
       "id": "obj_bologna_emilia",
-      "title": "Dominer l'Émilie",
-      "description": "Étendre l'influence de Bologne sur Ferrare et l'Émilie.",
+      "title": "Dominer l’Émilie",
+      "description": "Étendre l’influence de Bologne sur Ferrare et l’Émilie.",
       "condition": {
         "kind": "be_liege_of",
         "faction": "fac_ferrara"

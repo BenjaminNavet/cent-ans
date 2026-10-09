@@ -1,5 +1,5 @@
 {
- "description": "ME8 (DN) : paysages agricoles régionaux de la carte de campagne. Chaque paysage est une ligne de la table du sol (hb_table, lignes 8 et suivantes) ; les régions (ellipses lon/lat, comme wetlands.json) sont cuites en data/map/agri_regions.png par `cent-ans geo agri-regions` et prennent le pas sur le biome pour le parcellaire. open_to_farm : part de la prairie du splat convertie en cultures (Provence : prés verts devenus oliveraies et vignes). material_fallbacks : matière souhaitée -> matière existante tant que la texture dédiée n'est pas générée ; ajouter la matière dans ground_materials.yaml suffit à la brancher. seasonal_variants : modèles glb saisonniers du catalogue, utilisés quand ils sont ingérés (sinon teinte de saison du shader). Rendu seulement.",
+ "description": "ME8 (DN) : paysages agricoles régionaux de la carte de campagne. Chaque paysage est une ligne de la table du sol (hb_table, lignes 8 et suivantes) ; les régions (ellipses lon/lat, comme wetlands.json) sont cuites en data/map/agri_regions.png par `cent-ans geo agri-regions` et prennent le pas sur le biome pour le parcellaire. open_to_farm : part de la prairie du splat convertie en cultures (Provence : prés verts devenus oliveraies et vignes). material_fallbacks : matière souhaitée -> matière existante tant que la texture dédiée n’est pas générée ; ajouter la matière dans ground_materials.yaml suffit à la brancher. seasonal_variants : modèles glb saisonniers du catalogue, utilisés quand ils sont ingérés (sinon teinte de saison du shader). Rendu seulement.",
  "landscapes": {
   "openfield_north": {
    "label": "Openfields du nord (lanières)",
@@ -28,7 +28,7 @@
    ]
   },
   "bocage_west": {
-   "label": "Bocage de l'ouest",
+   "label": "Bocage de l’ouest",
    "cell_m": 110,
    "strip": 1.2,
    "hedge": 1.7,
@@ -131,7 +131,7 @@
    ]
   },
   "swidden_east": {
-   "label": "Brûlis et essarts de l'est",
+   "label": "Brûlis et essarts de l’est",
    "cell_m": 200,
    "strip": 1.3,
    "hedge": 0.15,

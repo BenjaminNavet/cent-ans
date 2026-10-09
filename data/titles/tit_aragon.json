@@ -2,8 +2,8 @@
   "id": "tit_aragon",
   "rank": "kingdom",
   "name": {
-    "display": "Couronne d'Aragon",
-    "local": "Corona d'Aragó",
+    "display": "Couronne d’Aragon",
+    "local": "Corona d’Aragó",
     "local_language": "catalan"
   },
   "heraldry": {
@@ -19,7 +19,7 @@
     "faction": "fac_aragon",
     "sources": [
       "Pierre IV d'Aragon",
-      "Couronne d'Aragon"
+      "Couronne d’Aragon"
     ]
   }
 }

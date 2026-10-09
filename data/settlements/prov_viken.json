@@ -21,7 +21,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Capitale de Håkon V, forteresse d'Akershus.",
+    "description": "Capitale de Håkon V, forteresse d’Akershus.",
     "sources": [
       "Oslo"
     ]
@@ -73,7 +73,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Siège épiscopal de l'intérieur, sur le lac Mjøsa.",
+    "description": "Siège épiscopal de l’intérieur, sur le lac Mjøsa.",
     "sources": [
       "Hamar"
     ]

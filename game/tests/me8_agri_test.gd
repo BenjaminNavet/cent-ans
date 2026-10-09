@@ -40,7 +40,7 @@ func _init() -> void:
 	# Cultures du sud : oliveraie en tête, cumul normalisé.
 	var olive := int(layers["olive_grove"])
 	if int(round(table.get_pixel(0, south).r * HbGround.LAYER_NORM)) != olive:
-		check(false, "ME8: première culture du sud n'est pas l'oliveraie")
+		check(false, "ME8: première culture du sud n’est pas l’oliveraie")
 	# Pose complète sur un matériau.
 	var material := ShaderMaterial.new()
 	material.shader = load("res://shaders/terrain.gdshader")

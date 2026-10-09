@@ -123,11 +123,11 @@ func _build_header() -> Control:
 	_religion_label = DiplomacyView._label("", UiType.BODY, HudStyle.INK_SOFT)
 	titles.add_child(_religion_label)
 	header.add_child(titles)
-	var donate := UiBuild.button("Don à l'Église (%s)" % Money.amount(DONATION_AMOUNT))
+	var donate := UiBuild.button("Don à l’Église (%s)" % Money.amount(DONATION_AMOUNT))
 	donate.tooltip_text = RuleValues.format("Augmente la faveur pontificale (+1 par {rule.donation_livres_per_favor} livres).")
 	donate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	donate.pressed.connect(func() -> void:
-		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
+		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l’Église."))
 	header.add_child(donate)
 	var trade := UiBuild.button("Commerce")
 	trade.name = "TradeButton"

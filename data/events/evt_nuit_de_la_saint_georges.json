@@ -1,7 +1,7 @@
 {
   "id": "evt_nuit_de_la_saint_georges",
   "title": "La nuit de la Saint-Georges",
-  "text": "Dans la nuit de la Saint-Georges, les paysans estes de Harrie se soulèvent, brûlent les manoirs et le monastère de Padis et tuent les Allemands. Ils assiègent Reval et appellent les Suédois de Viborg. Le maître de l'ordre Livonien fait tuer leurs quatre « rois » venus parlementer à Weissenstein.",
+  "text": "Dans la nuit de la Saint-Georges, les paysans estes de Harrie se soulèvent, brûlent les manoirs et le monastère de Padis et tuent les Allemands. Ils assiègent Reval et appellent les Suédois de Viborg. Le maître de l’ordre Livonien fait tuer leurs quatre « rois » venus parlementer à Weissenstein.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -51,7 +51,7 @@
           "type": "opinion",
           "faction": "fac_danish_estonia",
           "amount": 10,
-          "reason": "Secours de l'Ordre"
+          "reason": "Secours de l’Ordre"
         }
       ],
       "ai_weight": 2

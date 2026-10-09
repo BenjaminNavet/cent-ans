@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Siège de l'archevêque, primat de Scandinavie.",
+    "description": "Siège de l’archevêque, primat de Scandinavie.",
     "sources": [
       "Lund"
     ]
@@ -73,7 +73,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Bourg marchand sur l'Øresund, avec un petit château.",
+    "description": "Bourg marchand sur l’Øresund, avec un petit château.",
     "sources": [
       "Malmö"
     ]
@@ -99,7 +99,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château gardant le point le plus étroit de l'Øresund, face à Elseneur.",
+    "description": "Château gardant le point le plus étroit de l’Øresund, face à Elseneur.",
     "sources": [
       "Helsingborg"
     ]

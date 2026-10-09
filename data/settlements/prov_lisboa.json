@@ -26,7 +26,7 @@
       "bld_university"
     ],
     "port": true,
-    "description": "Lisbonne, capitale du royaume de Portugal sur l'estuaire du Tage.",
+    "description": "Lisbonne, capitale du royaume de Portugal sur l’estuaire du Tage.",
     "sources": [
       "Alphonse IV de Portugal",
       "Lisbonne",
@@ -186,7 +186,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié doté d'un foral dès le XIIIe siècle, dominant la vallée du Sizandro.",
+    "description": "Bourg fortifié doté d’un foral dès le XIIIe siècle, dominant la vallée du Sizandro.",
     "sources": [
       "Torres Vedras"
     ]
@@ -211,7 +211,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Bourg de pêcheurs à l'embouchure du Tage, mentionné dès le XIIe siècle.",
+    "description": "Bourg de pêcheurs à l’embouchure du Tage, mentionné dès le XIIe siècle.",
     "sources": [
       "Cascais"
     ]

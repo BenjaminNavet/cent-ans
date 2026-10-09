@@ -75,7 +75,7 @@ func _run() -> void:
 	# 1. Le marché est refusé (la maison des métiers en dépend) ; raison en français, pas
 	# technique, donnée par le cœur.
 	check(market_button.disabled, "raising bld_market should be refused (bld_weaving_workshop depends on it)")
-	check(market_button.tooltip_text.contains("dépend"), "market tooltip should give the core's French reason: %s" % market_button.tooltip_text)
+	check(market_button.tooltip_text.contains("dépend"), "market tooltip should give the core’s French reason: %s" % market_button.tooltip_text)
 	check(not weaving_button.disabled, "bld_weaving_workshop has no dependent: Raser should be enabled")
 	check(weaving_button.tooltip_text.contains("Rembourse"), "weaving tooltip should mention the refund: %s" % weaving_button.tooltip_text)
 
@@ -102,7 +102,7 @@ func _run() -> void:
 	check(not (after.get("buildings", PackedStringArray()) as PackedStringArray).has("bld_weaving_workshop"),
 		"confirming should raze bld_weaving_workshop")
 	var treasury_after := int(sim.call("get_faction_summary", "fac_france").get("treasury", 0))
-	check(treasury_after > treasury_before, "razing should refund part of the building's cost (%d -> %d)" % [treasury_before, treasury_after])
+	check(treasury_after > treasury_before, "razing should refund part of the building’s cost (%d -> %d)" % [treasury_before, treasury_after])
 
 	map.queue_free()
 	await process_frame

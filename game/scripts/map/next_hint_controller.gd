@@ -203,7 +203,7 @@ func _army_name(army_id: String) -> String:
 	if army_id == "":
 		return ""
 	var general := str((_sim().call("get_army", army_id) as Dictionary).get("general_name", ""))
-	return "l'ost de %s" % general if general != "" else "votre armée"
+	return "l’ost de %s" % general if general != "" else "votre armée"
 
 
 # --- Actions ------------------------------------------------------------------------------

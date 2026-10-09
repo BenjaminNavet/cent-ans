@@ -50,8 +50,8 @@ func _check_pure() -> void:
 	check(BattleFormationPicker.shortcut_index(_key(KEY_3, false, true)) == 0, "Shift+3 alone is not a preset")
 	check(BattleFormationPicker.shortcut_index(_key(KEY_3, true, false)) == 0, "Alt+3 is left to the abilities (CB4)")
 	check(BattleFormationPicker.shortcut_index(_key(KEY_A, true, true)) == 0, "Alt+Shift+A is not a preset")
-	var tip := BattleFormationPicker.tooltip_for({"name_fr": "La herse", "description_fr": "Défense à l'anglaise."}, 2)
-	check(tip.contains("La herse") and tip.contains("Défense à l'anglaise.") and tip.contains("Alt+Maj+2"), "tooltip: name, description, shortcut (%s)" % tip)
+	var tip := BattleFormationPicker.tooltip_for({"name_fr": "La herse", "description_fr": "Défense à l’anglaise."}, 2)
+	check(tip.contains("La herse") and tip.contains("Défense à l’anglaise.") and tip.contains("Alt+Maj+2"), "tooltip: name, description, shortcut (%s)" % tip)
 
 	var places := [
 		{"id": 3, "x": 10.0, "z": 20.0, "facing": 0.5, "order_width": 0.0},
@@ -130,7 +130,7 @@ func _check_integration() -> void:
 	_scene.issued_log.clear()
 	_press_right(screen, true)
 	_scene.input._preview_right(screen, true)
-	check(_scene.path_preview.live_ghost_sizes().size() >= own.size() - 1, "ghosts at the preset's places (%d for %d)" % [_scene.path_preview.live_ghost_sizes().size(), own.size()])
+	check(_scene.path_preview.live_ghost_sizes().size() >= own.size() - 1, "ghosts at the preset’s places (%d for %d)" % [_scene.path_preview.live_ghost_sizes().size(), own.size()])
 	_press_right(screen, false)
 	_scene.input._last_right_click_ms = -10000
 	var log: Array = _scene.issued_log
@@ -148,7 +148,7 @@ func _check_integration() -> void:
 	var same := slots.size() == log.size()
 	for k in mini(slots.size(), log.size()):
 		same = same and absf(float(slots[k]["x"]) - float(log[k]["x"])) < 0.5 and absf(float(slots[k]["z"]) - float(log[k]["z"])) < 0.5
-	check(same, "orders go to the core's places")
+	check(same, "orders go to the core’s places")
 
 	# Déploiement : proposition puis validation.
 	_scene.hud.groups.locks.clear()

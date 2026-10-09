@@ -408,7 +408,7 @@ static func budget_tooltip(economy: Dictionary) -> String:
 static func treasury_tooltip(economy: Dictionary) -> String:
 	var history: Array = economy.get("budget_history", [])
 	if history.is_empty():
-		return "Aucune saison résolue pour l'instant."
+		return "Aucune saison résolue pour l’instant."
 	var last: Dictionary = history.back()
 	var text := "Saison passée : %s au trésor" % Money.signed(int(last.get("change", 0)))
 	var other := int(last.get("other", 0))
@@ -738,7 +738,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 				general_requested.emit(character_id, army_id))
 		box.add_child(button)
 	if not any_free:
-		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
+		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu’à l’armée.", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
 	var court := Button.new()
 	court.text = "Toute la Cour…"
 	court.pressed.connect(func() -> void:
@@ -810,7 +810,7 @@ func set_research_progress(research: Dictionary, points_per_turn: int, queue: Ar
 		research_label.text = research_bar_text("", -1, top_fit.compact)
 		research_bar.max_value = maxi(1, int(reserve.get("cap", 1)))
 		research_bar.value = int(reserve.get("points", 0))
-		TooltipHost.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s'accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
+		TooltipHost.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s’accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
 			points_per_turn, int(reserve.get("points", 0)), int(reserve.get("cap", 0)), queue_text]})
 		return
 	var turns := int(research.get("turns_left", -1))
@@ -930,7 +930,7 @@ func show_turn_banner() -> void:
 	if _turn_banner_tween != null:
 		_turn_banner_tween.kill()
 	_turn_banner_title.text = "Tour des autres factions"
-	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
+	_turn_banner_detail.text = "Les princes d’Europe jouent leur saison…"
 	turn_banner.modulate.a = 1.0
 	queue_restack()  # Étage BANNER, au-dessus des panneaux
 	turn_banner.show()
@@ -1450,7 +1450,7 @@ func _update_keycap(entry: Array) -> void:
 
 func _place_keycap(cap: Label, button: Button) -> void:
 	cap.size = cap.get_combined_minimum_size()
-	cap.position = button.size - cap.size + Vector2(2, 2)
+	cap.position = button.size - cap.size - Vector2(4, 3)  # RX uifin : dans le bouton, plus sur son bord
 
 
 ## Libellés des touches recalculés (réglage « Disposition du clavier »).

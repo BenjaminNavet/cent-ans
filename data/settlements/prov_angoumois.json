@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Capitale du comté d'Angoulême, cédée en 1336 par Philippe VI à Jeanne II de Navarre et Philippe d'Évreux en compensation de leurs droits sur la Champagne.",
+    "description": "Capitale du comté d’Angoulême, cédée en 1336 par Philippe VI à Jeanne II de Navarre et Philippe d’Évreux en compensation de leurs droits sur la Champagne.",
     "sources": ["Angoulême", "Comté d'Angoulême"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville close sur la Charente, port fluvial pour le vin et le sel remontant vers l'intérieur.",
+    "description": "Ville close sur la Charente, port fluvial pour le vin et le sel remontant vers l’intérieur.",
     "sources": ["Cognac (Charente)"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Abbaye augustinienne fondée au XIIe siècle près d'Angoulême.",
+    "description": "Abbaye augustinienne fondée au XIIe siècle près d’Angoulême.",
     "sources": ["Abbaye de La Couronne"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Bourg-pont sur la Charente au nord d'Angoulême, doté d'un prieuré et d'un péage sur la route de Poitiers.",
+    "description": "Bourg-pont sur la Charente au nord d’Angoulême, doté d’un prieuré et d’un péage sur la route de Poitiers.",
     "sources": ["Mansle"]
   },
   {
@@ -122,7 +122,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg castral, siège d'une vicomté tenue par la maison de La Rochefoucauld.",
+    "description": "Bourg castral, siège d’une vicomté tenue par la maison de La Rochefoucauld.",
     "sources": ["Villebois-Lavalette"]
   },
   {

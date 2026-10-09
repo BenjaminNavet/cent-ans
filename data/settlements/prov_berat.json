@@ -22,7 +22,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité forteresse sur l'Osum, capitale des marches byzantines d'Albanie.",
+    "description": "Cité forteresse sur l’Osum, capitale des marches byzantines d’Albanie.",
     "sources": [
       "Berat"
     ]
@@ -50,7 +50,7 @@
     ],
     "port": true,
     "sea_zone": "sea_adriatic",
-    "description": "Port de l'Adriatique méridionale (Vlorë).",
+    "description": "Port de l’Adriatique méridionale (Vlorë).",
     "sources": [
       "Vlorë"
     ]

@@ -20,7 +20,7 @@
   "primary_title": "tit_burgundy",
   "heraldry": {
     "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.",
-    "description": "Bourgogne ancien : bandes obliques or et bleu, bordure rouge. Armes des ducs capétiens jusqu'à Philippe de Rouvres (1361).",
+    "description": "Bourgogne ancien : bandes obliques or et bleu, bordure rouge. Armes des ducs capétiens jusqu’à Philippe de Rouvres (1361).",
     "primary_color": "#F2C230",
     "secondary_color": "#1F3A93"
   },
@@ -68,7 +68,7 @@
     "trade": 55,
     "piety": 60
   },
-  "description": "Le duché capétien, uni depuis 1330 au comté de Bourgogne et à l'Artois par le mariage d'Eudes IV et de Jeanne III. Puissance secondaire mais stratégique entre France et Empire ; la Bourgogne des Valois naîtra en 1363.",
+  "description": "Le duché capétien, uni depuis 1330 au comté de Bourgogne et à l’Artois par le mariage d’Eudes IV et de Jeanne III. Puissance secondaire mais stratégique entre France et Empire ; la Bourgogne des Valois naîtra en 1363.",
   "sources": [
     "Eudes IV de Bourgogne",
     "Jeanne III de Bourgogne",
@@ -77,7 +77,7 @@
   "victory": {
     "end_year": 1477,
     "hold_turns": 12,
-    "summary": "Bâtir entre France et Empire l'État bourguignon : les Pays-Bas, l'indépendance, le lien entre les deux Bourgognes.",
+    "summary": "Bâtir entre France et Empire l’État bourguignon : les Pays-Bas, l’indépendance, le lien entre les deux Bourgognes.",
     "objectives": [
       {
         "id": "obj_bu_independence",
@@ -89,7 +89,7 @@
       },
       {
         "id": "obj_bu_low_countries",
-        "title": "Le grand-duc d'Occident",
+        "title": "Le grand-duc d’Occident",
         "description": "Réunir les Pays-Bas : Flandre, Artois, Brabant, Hainaut, Hollande, Namur et Luxembourg.",
         "condition": {
           "kind": "control_all",

@@ -1,7 +1,7 @@
 {
   "id": "chr_mariano_iv_d_arborea",
   "name": {
-    "display": "Mariano IV d'Arborée",
+    "display": "Mariano IV d’Arborée",
     "local": "Mariano IV de Arborea",
     "local_language": "sarde"
   },
@@ -35,8 +35,8 @@
   },
   "starting_location": "prov_arborea",
   "status": "minor",
-  "description": "Frère cadet de Pierre III, encore adolescent ; il deviendra juge en 1347 et mènera la guerre contre l'Aragon (1353-1375).",
+  "description": "Frère cadet de Pierre III, encore adolescent ; il deviendra juge en 1347 et mènera la guerre contre l’Aragon (1353-1375).",
   "sources": [
-    "Mariano IV d'Arborée"
+    "Mariano IV d’Arborée"
   ]
 }

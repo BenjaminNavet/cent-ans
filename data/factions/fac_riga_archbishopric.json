@@ -18,7 +18,7 @@
   "primary_title": "tit_riga",
   "heraldry": {
     "blazon": "D'azur à deux clefs d'or en sautoir.",
-    "description": "Deux clefs de saint Pierre croisées, emblème de l'Église de Riga.",
+    "description": "Deux clefs de saint Pierre croisées, emblème de l’Église de Riga.",
     "primary_color": "#1F3A93",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -53,7 +53,7 @@
     "trade": 45,
     "piety": 80
   },
-  "description": "Métropolite de toute la Livonie et prince d'Empire, l'archevêque Friedrich de Pernstein tient des seigneuries dispersées et une autorité contestée par l'Ordre et par sa propre ville.",
+  "description": "Métropolite de toute la Livonie et prince d’Empire, l’archevêque Friedrich de Pernstein tient des seigneuries dispersées et une autorité contestée par l’Ordre et par sa propre ville.",
   "sources": [
     "Archevêché de Riga",
     "Friedrich von Pernstein"

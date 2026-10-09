@@ -30,7 +30,7 @@ func _check_stage() -> void:
 	var want := {-1.0: "idle", 0.05: "idle", 0.2: "out", 0.35: "grab", 0.5: "back", 0.7: "drop", 0.9: "idle"}
 	for phase in want:
 		check(str(SiegeCrewFx.haul_stage(trip, phase)["stage"]) == want[phase], "étape à la phase %.2f" % phase)
-	check(not bool(SiegeCrewFx.haul_stage(trip, 0.2)["holding"]), "rien en main à l'aller")
+	check(not bool(SiegeCrewFx.haul_stage(trip, 0.2)["holding"]), "rien en main à l’aller")
 	check(bool(SiegeCrewFx.haul_stage(trip, 0.5)["holding"]), "objet en main au retour")
 	check(not bool(SiegeCrewFx.haul_stage(trip, 0.78)["holding"]), "objet lâché en fin de charge")
 

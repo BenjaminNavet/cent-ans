@@ -385,7 +385,7 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 	if _groups != "" or locked:
 		var groups := "Groupe(s) : %s" % _groups if _groups != "" else ""
 		if locked:
-			groups += (" · " if groups != "" else "") + "verrouillé, se déplace d'un bloc (Ctrl+G : déverrouiller)"
+			groups += (" · " if groups != "" else "") + "verrouillé, se déplace d’un bloc (Ctrl+G : déverrouiller)"
 		effects.append({"text": groups, "sign": 0})
 	var live := {
 		"name": unit_name, "strength": int(unit["soldiers"]), "max_strength": int(unit["initial_soldiers"]),

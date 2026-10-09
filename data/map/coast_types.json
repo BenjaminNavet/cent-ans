@@ -1,5 +1,5 @@
 {
-  "description": "TB5 : type de côte de la carte de campagne (rendu seulement, aucune règle de jeu). `regions` : géologie de la côte par région (polygones en pixels carte, grille de map.json ; la dernière région qui contient un point l'emporte) ; hors région : `default`. La pente choisit entre falaise et plage : altitude lue à `cliff.probe_px` de la côte vers l'intérieur, plage sous `cliff.min_m`, falaise au-dessus de `cliff.max_m`. `types` : couleurs linéaires des roches et des plages. `swash` : ressac (lame d'écume qui avance et recule au trait de côte : période en secondes, recul vers le large, montée sur la plage, liseré et dentelle en pixels carte, part de la montée au pied des falaises). Lu par game/scripts/map/coast_look.gd, game/shaders/coast_band.gdshaderinc et game/shaders/coast_common.gdshaderinc.",
+  "description": "TB5 : type de côte de la carte de campagne (rendu seulement, aucune règle de jeu). `regions` : géologie de la côte par région (polygones en pixels carte, grille de map.json ; la dernière région qui contient un point l’emporte) ; hors région : `default`. La pente choisit entre falaise et plage : altitude lue à `cliff.probe_px` de la côte vers l’intérieur, plage sous `cliff.min_m`, falaise au-dessus de `cliff.max_m`. `types` : couleurs linéaires des roches et des plages. `swash` : ressac (lame d’écume qui avance et recule au trait de côte : période en secondes, recul vers le large, montée sur la plage, liseré et dentelle en pixels carte, part de la montée au pied des falaises). Lu par game/scripts/map/coast_look.gd, game/shaders/coast_band.gdshaderinc et game/shaders/coast_common.gdshaderinc.",
   "cell_px": 16,
   "cliff": {
     "probe_px": 1.6,
@@ -65,7 +65,7 @@
   "regions": [
     {
       "id": "chalk_south_england",
-      "label": "Craie du sud de l'Angleterre : Purbeck, île de Wight, Sept Sœurs, Douvres, Thanet",
+      "label": "Craie du sud de l’Angleterre : Purbeck, île de Wight, Sept Sœurs, Douvres, Thanet",
       "rock": "chalk",
       "beach": "shingle",
       "beach_width": 1.0,
@@ -111,7 +111,7 @@
     },
     {
       "id": "granite_brittany",
-      "label": "Granite du Massif armoricain : Bretagne, Cotentin de l'ouest, îles Anglo-Normandes",
+      "label": "Granite du Massif armoricain : Bretagne, Cotentin de l’ouest, îles Anglo-Normandes",
       "rock": "granite",
       "beach": "sand",
       "beach_width": 1.0,

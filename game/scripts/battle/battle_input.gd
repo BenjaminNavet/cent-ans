@@ -286,7 +286,7 @@ func toggle_lock() -> void:
 		return
 	var tag: int = scene.hud.groups.toggle_lock(scene.selected, scene.units)
 	if tag != 0:
-		scene.hud.show_toast("Groupe verrouillé : il se déplace d'un bloc, à l'allure du plus lent (Ctrl+G : déverrouiller).")
+		scene.hud.show_toast("Groupe verrouillé : il se déplace d’un bloc, à l’allure du plus lent (Ctrl+G : déverrouiller).")
 	else:
 		scene.hud.show_toast("Groupe déverrouillé.")
 	scene.hud.update_cards(scene.units, scene.player_side, scene.selected)
@@ -301,7 +301,7 @@ func _queued(command: Dictionary, queued: bool) -> Dictionary:
 
 ## Texte de la file pleine (borne lue dans `data/rules/battle_queue.json` par RuleValues).
 static func queue_full_text() -> String:
-	return "File d'ordres pleine : %d ordres en attente au plus par régiment." % int(RuleValues.value("battle_queue_max", 8.0))
+	return "File d’ordres pleine : %d ordres en attente au plus par régiment." % int(RuleValues.value("battle_queue_max", 8.0))
 
 
 ## Point visé et orientation d'un clic droit (ou glisser-droit) en cours, comme
@@ -458,7 +458,7 @@ func use_ability_slot(slot: int) -> void:
 		return
 	var command := ability_command(scene.units, _available_selection(), slot)
 	if command.is_empty():
-		scene.hud.show_toast("Aucune unité sélectionnée n'a de capacité en Alt+%d." % slot)
+		scene.hud.show_toast("Aucune unité sélectionnée n’a de capacité en Alt+%d." % slot)
 		return
 	command_requested.emit(command)
 

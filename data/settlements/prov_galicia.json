@@ -158,7 +158,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port et place de commerce sur l'estuaire du Lérez, un des plus actifs de Galice au XIVe siècle.",
+    "description": "Port et place de commerce sur l’estuaire du Lérez, un des plus actifs de Galice au XIVe siècle.",
     "sources": [
       "Pontevedra"
     ]
@@ -183,7 +183,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye cistercienne fondée en 1137, l'une des plus riches de Galice.",
+    "description": "Abbaye cistercienne fondée en 1137, l’une des plus riches de Galice.",
     "sources": [
       "Monastère d'Osera"
     ]

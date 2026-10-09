@@ -1,7 +1,7 @@
 {
   "id": "evt_pain_de_feves",
   "title": "Le pain de fèves",
-  "text": "C'est la soudure, ces semaines de printemps où les greniers sont vides et la moisson encore verte (voir les [[cdx_travaux_des_mois|travaux des mois]]). Le blé manque ; les boulangers mêlent à la farine ce qu'ils trouvent : orge, avoine, pois et surtout fèves moulues. Le pain est lourd et noir, bien plus noir que le [[cdx_pain_bis|pain bis]] ordinaire, mais les [[cdx_legumineuses|légumineuses]] nourrissent, et leur farine sauve des vies.",
+  "text": "C’est la soudure, ces semaines de printemps où les greniers sont vides et la moisson encore verte (voir les [[cdx_travaux_des_mois|travaux des mois]]). Le blé manque ; les boulangers mêlent à la farine ce qu’ils trouvent : orge, avoine, pois et surtout fèves moulues. Le pain est lourd et noir, bien plus noir que le [[cdx_pain_bis|pain bis]] ordinaire, mais les [[cdx_legumineuses|légumineuses]] nourrissent, et leur farine sauve des vies.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 120,

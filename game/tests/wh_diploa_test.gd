@@ -49,7 +49,7 @@ func _run() -> void:
 	check(" ".join(texts).find(str(entry["attitude_band"])) >= 0, "head should show the attitude label")
 	# 1. Noms cliquables : un clic sur un lien ouvre la fiche de cette faction.
 	var links := head.find_children("Link_*", "Button", true, false)
-	if check(not links.is_empty(), "england's sheet should link allies/enemies/vassals"):
+	if check(not links.is_empty(), "england’s sheet should link allies/enemies/vassals"):
 		var target := (links[0] as Button).name.trim_prefix("Link_")
 		(links[0] as Button).pressed.emit()
 		await _wait(4)
@@ -78,10 +78,10 @@ func _run() -> void:
 	var fake: Dictionary = (panel.call("_entry", "fac_england") as Dictionary).duplicate()
 	fake["access_given"] = false
 	actions.show_for(sim, map.player_faction, "fac_england", fake)
-	check(_button_texts(actions).find("Retirer l'accès militaire") < 0, "no revoke button without access")
+	check(_button_texts(actions).find("Retirer l’accès militaire") < 0, "no revoke button without access")
 	fake["access_given"] = true
 	actions.show_for(sim, map.player_faction, "fac_england", fake)
-	check(_button_texts(actions).find("Retirer l'accès militaire") >= 0, "revoke button expected when access is given")
+	check(_button_texts(actions).find("Retirer l’accès militaire") >= 0, "revoke button expected when access is given")
 	# 4. Historique : un pacte rompu porte son libellé de rupture.
 	check(DiplomacyHistoryTab.RUPTURE_LABELS.has("perjury") and DiplomacyHistoryTab.RUPTURE_LABELS.has("broken"), "rupture labels")
 	map.queue_free()

@@ -490,7 +490,7 @@ class FamilyTreeNode:
 			lines.append("[color=#8b6a1a]♛ %s[/color]" % ("Héritière désignée" if female else "Héritier désigné"))
 		if not bool(entry.get("alive", true)):
 			lines.append("[color=#6b5a40]%s[/color]" % ("Défunte" if female else "Défunt"))
-		lines.append("[color=#6b5a40]Clic : fiche — clic droit : recentrer l'arbre[/color]")
+		lines.append("[color=#6b5a40]Clic : fiche — clic droit : recentrer l’arbre[/color]")
 		return "\n".join(lines)
 
 	func _make_custom_tooltip(for_text: String) -> Object:

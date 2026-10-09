@@ -60,9 +60,9 @@ func _check_troop() -> void:
 	figures.set_walking(false)
 	for i in 240:
 		figures._process(dt)
-	check(absf(figures.group_factor("archer_0") - 1.0) < 0.02 or absf(figures.group_factor("infantry_0") - 1.0) < 0.02, "à l'arrêt, cadence 1")
-	check(figures.bearer_tilt().is_equal_approx(Basis.IDENTITY), "à l'arrêt la hampe est droite")
-	check(not figures.bearer_dynamic(), "hampe immobile à l'arrêt")
+	check(absf(figures.group_factor("archer_0") - 1.0) < 0.02 or absf(figures.group_factor("infantry_0") - 1.0) < 0.02, "à l’arrêt, cadence 1")
+	check(figures.bearer_tilt().is_equal_approx(Basis.IDENTITY), "à l’arrêt la hampe est droite")
+	check(not figures.bearer_dynamic(), "hampe immobile à l’arrêt")
 	marker.queue_free()
 	await process_frame
 

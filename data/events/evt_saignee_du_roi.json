@@ -1,7 +1,7 @@
 {
   "id": "evt_saignee_du_roi",
   "title": "La saignée du prince",
-  "text": "Le prince se plaint de lourdeurs et de fièvres : trop de sang, disent ses médecins, qui veulent rétablir l'équilibre des [[cdx_humeurs|humeurs]] par une [[cdx_saignee|saignée]]. Avant de prendre la lancette, ils consultent l'almanach : l'« homme zodiacal » montre quel signe gouverne chaque partie du corps, et l'on ne saigne pas un membre quand la lune passe dans son signe. Le jour favorable est dans trois jours ; d'autres conseillent plutôt un [[cdx_regimen_sanitatis|régime de santé]].",
+  "text": "Le prince se plaint de lourdeurs et de fièvres : trop de sang, disent ses médecins, qui veulent rétablir l’équilibre des [[cdx_humeurs|humeurs]] par une [[cdx_saignee|saignée]]. Avant de prendre la lancette, ils consultent l’almanach : l'« homme zodiacal » montre quel signe gouverne chaque partie du corps, et l’on ne saigne pas un membre quand la lune passe dans son signe. Le jour favorable est dans trois jours ; d’autres conseillent plutôt un [[cdx_regimen_sanitatis|régime de santé]].",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 150,
@@ -28,7 +28,7 @@
       "ai_weight": 1
     },
     {
-      "text": "Saigner encore, jusqu'à ce que la fièvre cède",
+      "text": "Saigner encore, jusqu’à ce que la fièvre cède",
       "effects": [
         { "type": "add_trait", "character": "ruler", "trait": "trait_sickly" }
       ],

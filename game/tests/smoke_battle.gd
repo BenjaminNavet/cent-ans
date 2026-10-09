@@ -79,7 +79,7 @@ func _run_battle() -> void:
 	# F10b : ordres du chef (catalogue de data/battle_orders, cri de guerre propre à la faction).
 	var orders: Array = battle.call("get_leader_orders", "attacker")
 	# CB4 : quatre ordres, le pavois est devenu une capacité des arbalétriers.
-	_check(orders.size() == 4, "battle: expected 4 leader's orders, got %d" % orders.size())
+	_check(orders.size() == 4, "battle: expected 4 leader’s orders, got %d" % orders.size())
 	# CB4 : capacités actives (catalogue de data/battle_abilities, état dans get_units).
 	var catalog: Dictionary = battle.call("get_ability_catalog")
 	_check(catalog.size() == 5, "battle: expected 5 abilities, got %d" % catalog.size())
@@ -269,7 +269,7 @@ func _check_battle_markers_b2(scene: BattleScene) -> void:
 		if str(unit["side"]) == scene.player_side and markers.marker_rect(id).size.x > 0.0 and markers.marker_at(markers.marker_rect(id).get_center()) == id:
 			own = id
 			break
-	if _check(own >= 0, "battle markers: no clickable banner for the player's regiments"):
+	if _check(own >= 0, "battle markers: no clickable banner for the player’s regiments"):
 		var rect := markers.marker_rect(own)
 		_check(markers._has_point(rect.get_center()) and not markers._has_point(Vector2(-5000, -5000)), "battle markers: hit test")
 		var click := InputEventMouseButton.new()
@@ -302,7 +302,7 @@ func _check_battle_markers_b2(scene: BattleScene) -> void:
 	for key in markers._placed.keys():
 		if str(markers._placed[key]["unit"]["side"]) == scene.player_side:
 			own_key = key
-	if _check(own_key >= 0, "battle markers: no cluster for the player's side"):
+	if _check(own_key >= 0, "battle markers: no cluster for the player’s side"):
 		var group_click := InputEventMouseButton.new()
 		group_click.button_index = MOUSE_BUTTON_LEFT
 		group_click.pressed = true

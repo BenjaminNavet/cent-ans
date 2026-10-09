@@ -1,5 +1,5 @@
 {
-  "description": "Reconstitution saisonnière des armées de campagne et réserves de recrutement des établissements (lot TW2-T2, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T2, ADR 0102). Pourcentages en points ; réserves en millièmes d'unité (1000 = une unité recrutable).",
+  "description": "Reconstitution saisonnière des armées de campagne et réserves de recrutement des établissements (lot TW2-T2, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T2, ADR 0102). Pourcentages en points ; réserves en millièmes d’unité (1000 = une unité recrutable).",
   "replenishment": {
     "territory_percent": {
       "own": 20,

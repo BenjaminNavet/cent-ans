@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_stone_walls", "bld_muster_field"],
     "port": true,
-    "description": "Port de l'Adour, principal arsenal naval du duché anglais d'Aquitaine, arme des navires pour le roi d'Angleterre.",
+    "description": "Port de l’Adour, principal arsenal naval du duché anglais d’Aquitaine, arme des navires pour le roi d’Angleterre.",
     "sources": ["Bayonne", "Histoire de Bayonne"]
   },
   {
@@ -24,7 +24,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville thermale et épiscopale sur l'Adour, close de remparts gallo-romains encore debout.",
+    "description": "Ville thermale et épiscopale sur l’Adour, close de remparts gallo-romains encore debout.",
     "sources": ["Dax"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Abbaye bénédictine fondée au Xe siècle sur l'Adour, étape du chemin de Saint-Jacques.",
+    "description": "Abbaye bénédictine fondée au Xe siècle sur l’Adour, étape du chemin de Saint-Jacques.",
     "sources": ["Saint-Sever (Landes)", "Abbaye de Saint-Sever"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château d'origine de la maison d'Albret, dont les sires portent le titre de sires de Labrit avant celui d'Albret.",
+    "description": "Château d’origine de la maison d’Albret, dont les sires portent le titre de sires de Labrit avant celui d’Albret.",
     "sources": ["Labrit", "Maison d'Albret"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market"],
     "port": false,
-    "description": "Bastide et ancienne capitale du comté de Marsan, avant l'essor de Mont-de-Marsan.",
+    "description": "Bastide et ancienne capitale du comté de Marsan, avant l’essor de Mont-de-Marsan.",
     "sources": ["Villeneuve-de-Marsan"]
   },
   {
@@ -108,7 +108,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg sur la Douze, chef-lieu d'une petite châtellenie du pays de Marsan.",
+    "description": "Bourg sur la Douze, chef-lieu d’une petite châtellenie du pays de Marsan.",
     "sources": ["Roquefort (Landes)"]
   },
   {
@@ -136,21 +136,21 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg au confluent des gaves de Pau et d'Oloron, poste de batellerie vers Bayonne.",
+    "description": "Bourg au confluent des gaves de Pau et d’Oloron, poste de batellerie vers Bayonne.",
     "sources": ["Peyrehorade"]
   },
   {
     "id": "set_abbaye_de_sorde",
     "province": "prov_gascogne",
     "kind": "abbey",
-    "name": { "display": "Sorde-l'Abbaye", "local": "Sòrda", "local_language": "gascon" },
+    "name": { "display": "Sorde-l’Abbaye", "local": "Sòrda", "local_language": "gascon" },
     "lonlat": [-1.0800, 43.5800],
     "weight": 7,
     "owner": null,
     "fortification_level": 1,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Abbaye bénédictine sur le gave d'Oloron, étape de la via Podiensis vers Compostelle.",
+    "description": "Abbaye bénédictine sur le gave d’Oloron, étape de la via Podiensis vers Compostelle.",
     "sources": ["Abbaye de Sorde"]
   }
 ]

@@ -18,14 +18,14 @@
   "historical": true,
   "titles": [
     {
-      "title": "Grand Sénéchal d'Écosse",
+      "title": "Grand Sénéchal d’Écosse",
       "from": {
         "value": "1327-04-09",
         "uncertain": true
       }
     },
     {
-      "title": "Gardien d'Écosse",
+      "title": "Gardien d’Écosse",
       "from": {
         "value": "1338"
       },
@@ -34,7 +34,7 @@
       }
     },
     {
-      "title": "Roi d'Écosse",
+      "title": "Roi d’Écosse",
       "from": {
         "value": "1371-02-22"
       },

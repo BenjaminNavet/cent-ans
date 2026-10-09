@@ -20,7 +20,7 @@ const RED := Color(0.55, 0.1, 0.08)
 const GREEN := Color(0.16, 0.4, 0.16)
 const GOLD := Color(0.85, 0.65, 0.12)
 const PANEL_MAX := Vector2(1180, 860)
-const ROW_FONT := 13
+const ROW_FONT := 15
 ## Proportions de pertes (pertes / engagés) qui qualifient le verdict.
 const DECISIVE_ENEMY := 0.5
 const DECISIVE_OWN := 0.25
@@ -169,6 +169,8 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side_name in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side_name, 20)
+	# RX uifin : marge basse, la dernière rangée (suites) ne finit plus coupée par le défilement.
+	margin.add_theme_constant_override("margin_bottom", 28)
 	scroll.add_child(margin)
 	var content := VBoxContainer.new()
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -335,7 +337,7 @@ func _balance_row(sides: Dictionary, player_side: String, enemy_side: String, to
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	grid.add_theme_constant_override("h_separation", 28)
 	for text in ["", "Engagés", "Pertes", "Survivants"]:
-		grid.add_child(_label(text, 13, MUTED))
+		grid.add_child(_label(text, 14, MUTED))
 	for side in [player_side, enemy_side]:
 		grid.add_child(_label(str(sides[side]["name"]), 16, INK, true))
 		grid.add_child(_label(Money.digits(int(totals[side]["engaged"])), 16))
@@ -371,7 +373,7 @@ func _side_column(side: String, side_info: Dictionary, units: Array, totals: Dic
 	column.add_child(grid)
 	_tables[side] = grid
 	for text in ["", "Régiment", "Engagés", "Pertes", "Tués", "Sort"]:
-		grid.add_child(_label(text, 12, MUTED))
+		grid.add_child(_label(text, 14, MUTED))
 	var icons := get_node_or_null("/root/IconLibrary")
 	var color: Color = side_info.get("color", Color.GRAY)
 	for unit in units:
@@ -442,7 +444,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 		if int(unit["id"]) == hero_id:
 			hero_lines.append("%s : %d ennemis abattus, %d survivants." % [str(names.get(hero_id, unit["name"])), int(unit.get("kills", 0)), int(unit["soldiers"])])
 	if hero_lines.is_empty():
-		hero_lines.append("Aucun régiment ne s'est distingué.")
+		hero_lines.append("Aucun régiment ne s’est distingué.")
 	var foe := _hero(units, enemy_side)
 	if foe >= 0:
 		var foe_names := BattleHud.distinct_names(units, enemy_side)
@@ -477,7 +479,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 			if fate != "":
 				xp_lines.append("%s : %s." % [general_name, fate])
 			else:
-				var line := "%s : +%d d'expérience" % [general_name, int(aftermath.get("general_xp", 0))]
+				var line := "%s : +%d d’expérience" % [general_name, int(aftermath.get("general_xp", 0))]
 				if int(aftermath.get("skill_points", 0)) > 0:
 					line += ", +%d point de compétence" % int(aftermath["skill_points"])
 				xp_lines.append(line + ".")
@@ -498,7 +500,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 		loot_lines.append("Trophées : %s." % ", ".join(trophy_labels(trophies)))
 	var lost_standards := int((outcome.get(player_side, {}) as Dictionary).get("standards_lost", 0))
 	if lost_standards > 0:
-		loot_lines.append("%s aux mains de l'ennemi." % ("Un de nos étendards" if lost_standards == 1 else "%d de nos étendards" % lost_standards))
+		loot_lines.append("%s aux mains de l’ennemi." % ("Un de nos étendards" if lost_standards == 1 else "%d de nos étendards" % lost_standards))
 	loot_lines.append("Le pillage vient des chevauchées et des villes prises.")
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
 
@@ -507,7 +509,7 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 const FATE_LABELS := {
 	"destroyed": "anéanti",
 	"routed": "en déroute",
-	"withdrawn": "s'est retiré",
+	"withdrawn": "s’est retiré",
 	"reserve": "en réserve",
 	"held": "tient le champ",
 }
@@ -548,12 +550,12 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 		if not destroyed.is_empty():
 			lines.append("%s : %s anéanti%s (%s)." % [side_name, "un régiment" if destroyed.size() == 1 else "%d régiments" % destroyed.size(), "" if destroyed.size() == 1 else "s", ", ".join(destroyed)])
 		if bool(result.get("general_killed", false)):
-			lines.append("Le chef de l'ost %s est tombé sur le champ." % BattleScene.de(side_name))
+			lines.append("Le chef de l’ost %s est tombé sur le champ." % BattleScene.de(side_name))
 		elif bool(result.get("general_captured", false)):
 			var other_name := str(sides[enemy_side if side == player_side else player_side]["name"])
-			lines.append("Le chef de l'ost %s est aux mains de l'ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
+			lines.append("Le chef de l’ost %s est aux mains de l’ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
 		if bool(result.get("no_quarter", false)):
-			lines.append("%s a déployé l'étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
+			lines.append("%s a déployé l’étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
 		# Étendards pris à l'ennemi (trophées comptés par le cœur).
 		var taken: Array = result.get("standards_taken", [])
 		if not taken.is_empty():
@@ -561,11 +563,11 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 		if ending != "" and str(outcome.get("end", "")) in ["refused", "lull"]:
 			pass  # La mention de fin dit déjà qui s'est retiré
 		elif bool(result.get("withdrew", false)):  # Retraite en bon ordre, pas une déroute
-			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
+			lines.append("L’ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
 		elif bool(result.get("routed", false)):
-			lines.append("L'ost %s a été mis en déroute." % BattleScene.de(side_name))
+			lines.append("L’ost %s a été mis en déroute." % BattleScene.de(side_name))
 	if lines.is_empty():
-		lines.append("Aucun fait d'armes notable : les deux osts se sont séparés en bon ordre.")
+		lines.append("Aucun fait d’armes notable : les deux osts se sont séparés en bon ordre.")
 	return lines
 
 
@@ -580,11 +582,11 @@ static func end_mention(sides: Dictionary, outcome: Dictionary) -> String:
 	var loser_name := str(sides[loser]["name"])
 	match str(outcome.get("end", "")):
 		"refused":
-			return "Bataille refusée : personne n'a engagé le combat. L'ost %s renonce et se retire, l'ost %s garde le champ." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
+			return "Bataille refusée : personne n’a engagé le combat. L’ost %s renonce et se retire, l’ost %s garde le champ." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
 		"broken":
-			return "L'armée %s, trop entamée, s'est brisée : déroute générale." % BattleScene.de(loser_name)
+			return "L’armée %s, trop entamée, s’est brisée : déroute générale." % BattleScene.de(loser_name)
 		"lull":
-			return "Le combat est retombé : l'ost %s a cédé le terrain à l'ost %s." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
+			return "Le combat est retombé : l’ost %s a cédé le terrain à l’ost %s." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
 	return ""
 
 
@@ -593,7 +595,7 @@ static func trophy_labels(trophies: Array) -> Array[String]:
 	var out: Array[String] = []
 	for trophy in trophies:
 		var entry: Dictionary = trophy
-		var label := "la bannière du chef" if bool(entry.get("general", false)) else "l'étendard des %s" % str(entry.get("unit_name", "?"))
+		var label := "la bannière du chef" if bool(entry.get("general", false)) else "l’étendard des %s" % str(entry.get("unit_name", "?"))
 		if entry.get("captor") != null and str(entry.get("captor", "")) != "":
 			label += " (par les %s)" % str(entry["captor"])
 		out.append(label)

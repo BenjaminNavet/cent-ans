@@ -1,5 +1,5 @@
 {
-  "description": "Lot CT1 — relecture du tour de l'IA sur la carte de campagne (à la Total War) : les armées IA vues par le joueur marchent le long de leur vrai trajet, la caméra suit les mouvements qui le concernent puis revient. Les trajets, la visibilité et l'intérêt de chaque mouvement viennent du cœur (get_ai_turn_moves) ; ce fichier ne règle que la mise en scène. Aucune règle de jeu.",
+  "description": "Lot CT1 — relecture du tour de l’IA sur la carte de campagne (à la Total War) : les armées IA vues par le joueur marchent le long de leur vrai trajet, la caméra suit les mouvements qui le concernent puis revient. Les trajets, la visibilité et l’intérêt de chaque mouvement viennent du cœur (get_ai_turn_moves) ; ce fichier ne règle que la mise en scène. Aucune règle de jeu.",
   "max_followed_moves": 6,
   "notable_radius_km": 60,
   "march_speed_px_per_s": 55,

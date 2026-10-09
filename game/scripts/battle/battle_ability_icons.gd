@@ -27,7 +27,7 @@ const EFFECTS := [
 	["horse_taken_front_percent", "pertes face aux cavaliers de front", "%"],
 	["vs_horse_front_percent", "pertes infligées aux cavaliers de front", "%"],
 	["melee_fatigue_percent", "fatigue en mêlée", "%"],
-	["morale_bonus", "moral regagné d'un coup", ""],
+	["morale_bonus", "moral regagné d’un coup", ""],
 	["morale_recovery", "moral regagné par seconde hors contact", ""],
 ]
 
@@ -51,7 +51,7 @@ static func tip(entry: Dictionary, state: Dictionary, slot: int) -> String:
 	var lines: PackedStringArray = [title, str(entry.get("description", ""))]
 	var timing := "Recharge : %s s" % RuleValues.text(id + "_cooldown")
 	var duration := RuleValues.value(id + "_duration", 0.0)
-	timing += " · durée : %s s" % RuleValues.text(id + "_duration") if duration > 0.0 else " · tant que l'unité s'y tient"
+	timing += " · durée : %s s" % RuleValues.text(id + "_duration") if duration > 0.0 else " · tant que l’unité s’y tient"
 	if RuleValues.value(id + "_setup_time", 0.0) > 0.0:
 		timing += " · mise en place : %s s" % RuleValues.text(id + "_setup_time")
 	lines.append(timing)

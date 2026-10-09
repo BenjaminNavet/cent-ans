@@ -1,7 +1,7 @@
 {
   "id": "enc_village_protection",
   "title": "Un village demande protection",
-  "text": "Les gens d'un village sont venus au-devant de l'ost, le curé en tête : des pillards ont brûlé leurs granges la semaine passée et reviendront. Ils supplient qu'on les en délivre ou qu'on leur laisse de quoi passer la saison.",
+  "text": "Les gens d’un village sont venus au-devant de l’ost, le curé en tête : des pillards ont brûlé leurs granges la semaine passée et reviendront. Ils supplient qu’on les en délivre ou qu’on leur laisse de quoi passer la saison.",
   "spawn": {
     "war": "war",
     "regions": [
@@ -56,7 +56,7 @@
           ]
         },
         "on_loss": {
-          "text": "Les pillards échappent à l'ost et reviennent brûler le village.",
+          "text": "Les pillards échappent à l’ost et reviennent brûler le village.",
           "effects": [
             {
               "type": "unrest",

@@ -18,7 +18,7 @@
   "primary_title": "tit_empire",
   "heraldry": {
     "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
-    "description": "Aigle impériale à une tête (l'aigle bicéphale ne devient l'emblème impérial qu'avec Sigismond au XVe siècle).",
+    "description": "Aigle impériale à une tête (l’aigle bicéphale ne devient l’emblème impérial qu’avec Sigismond au XVe siècle).",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
@@ -74,7 +74,7 @@
     "trade": 50,
     "piety": 35
   },
-  "description": "Empire électif dominé par la maison de Wittelsbach ; Louis IV, en lutte avec Avignon, cherche l'argent anglais. Ses vassaux rhénans et lorrains ne suivent pas toujours.",
+  "description": "Empire électif dominé par la maison de Wittelsbach ; Louis IV, en lutte avec Avignon, cherche l’argent anglais. Ses vassaux rhénans et lorrains ne suivent pas toujours.",
   "sources": [
     "Louis IV du Saint-Empire",
     "Saint-Empire romain germanique"

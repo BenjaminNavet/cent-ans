@@ -1,7 +1,7 @@
 {
   "id": "skill_archerie",
   "name": {
-    "display": "Art de l'arc"
+    "display": "Art de l’arc"
   },
   "branch": "command",
   "tier": 1,

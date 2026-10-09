@@ -659,7 +659,7 @@ static func _retinue_fiche(entry_id: String, definition: Dictionary) -> String:
 		limits.append("Commandement %d au moins" % int(conditions["min_command"]))
 	if not (conditions.get("excludes_traits", []) as Array).is_empty():
 		limits.append("Jamais avec : " + _links(conditions["excludes_traits"]))
-	var heir := "Passe à l'héritier (fils aîné majeur, sinon le nouveau souverain) à la mort de son maître." \
+	var heir := "Passe à l’héritier (fils aîné majeur, sinon le nouveau souverain) à la mort de son maître." \
 		if bool(definition.get("inheritable", false)) else "Quitte la maison à la mort de son maître."
 	return _join([
 		_heading("", name_of(entry_id), subtitle), _description(definition),
@@ -841,7 +841,7 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
 	elif definition.has("satisfies_classes"):
-		lines.append("Satisfait : aucune classe (matériau de construction ou d'armement)")
+		lines.append("Satisfait : aucune classe (matériau de construction ou d’armement)")
 	var used_by: Array = _referencing("buildings", "required_resource", entry_id)
 	for id in GameCatalog.definitions("buildings"):
 		var cost: Variant = GameCatalog.definitions("buildings")[id].get("cost", {})
@@ -1091,7 +1091,7 @@ static func _agent_fiche(definition: Dictionary) -> String:
 	var steps := int(definition.get("movement_steps", 3))
 	var step_km := RuleValues.value("step_km")
 	var reach := "" if is_nan(step_km) else " (%s km)" % RuleValues.number(steps * step_km)
-	var moves := "%d pas par saison%s, un de moins l'hiver, sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % [steps, reach]
+	var moves := "%d pas par saison%s, un de moins l’hiver, sur le graphe des colonies ; ni les places ennemies ni les armées ne l’arrêtent." % [steps, reach]
 	if int(definition.get("vision_range", 0)) > 0:
 		moves += " Voit à %d pas autour de lui (brouillard)." % int(definition.get("vision_range", 0))
 	var lines := PackedStringArray()
@@ -1099,10 +1099,10 @@ static func _agent_fiche(definition: Dictionary) -> String:
 		var risk := int(action.get("death_risk", 0))
 		lines.append("• [b]%s[/b] — %d %% (+%d par sceau)%s : %s" % [
 			str(action.get("name", "")), int(action.get("base_chance", 0)), int(action.get("per_level", 0)),
-			", mort %d %% en cas d'échec" % risk if risk > 0 else "", str(action.get("description", "")),
+			", mort %d %% en cas d’échec" % risk if risk > 0 else "", str(action.get("description", "")),
 		])
 	var thresholds: Array = definition.get("thresholds", [])
-	var seals := RuleValues.format("Sceau 1 à %d : l'expérience (+{rule.agent_xp_success} par réussite, +{rule.agent_xp_failure} par échec survécu) monte le sceau aux seuils %s.") % [thresholds.size() + 1, ", ".join(PackedStringArray(thresholds.map(func(t: Variant) -> String: return str(int(t)))))]
+	var seals := RuleValues.format("Sceau 1 à %d : l’expérience (+{rule.agent_xp_success} par réussite, +{rule.agent_xp_failure} par échec survécu) monte le sceau aux seuils %s.") % [thresholds.size() + 1, ", ".join(PackedStringArray(thresholds.map(func(t: Variant) -> String: return str(int(t)))))]
 	return _join([
 		_heading(str(definition.get("icon", "")), str(definition.get("name", "")), "Agent de campagne", "hud"),
 		_description(definition),

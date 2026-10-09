@@ -26,7 +26,7 @@
       }
     },
     {
-      "title": "Comtesse d'Artois",
+      "title": "Comtesse d’Artois",
       "from": {
         "value": "1330-01-21"
       }
@@ -58,7 +58,7 @@
   },
   "starting_location": "prov_bourgogne",
   "status": "at_court",
-  "description": "Fille aînée de Philippe V le Long ; hérite en 1330 de sa mère Jeanne II le comté de Bourgogne et l'Artois, unis au duché.",
+  "description": "Fille aînée de Philippe V le Long ; hérite en 1330 de sa mère Jeanne II le comté de Bourgogne et l’Artois, unis au duché.",
   "sources": [
     "Jeanne III de Bourgogne"
   ]

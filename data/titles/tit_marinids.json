@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'argent à la bordure de sable.",
-    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
+    "description": "Bannière blanche des Mérinides (Banu Marin) ; l’étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
     "primary_color": "#F2EFE6",
     "secondary_color": "#2A2A2A",
     "uncertain": true,
@@ -50,7 +50,7 @@
     {
       "id": "obj_marinids_maghreb",
       "title": "Réunifier le Maghreb",
-      "description": "Tenir Fès, Tlemcen et Tunis pour restaurer l'empire almohade.",
+      "description": "Tenir Fès, Tlemcen et Tunis pour restaurer l’empire almohade.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

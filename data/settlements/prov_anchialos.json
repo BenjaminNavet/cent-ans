@@ -76,7 +76,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port fortifié sur la péninsule d'Apollonie.",
+    "description": "Port fortifié sur la péninsule d’Apollonie.",
     "sources": [
       "Sozopol"
     ]
@@ -102,7 +102,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse de la passe de l'Aïtos, sur la frontière bulgare.",
+    "description": "Forteresse de la passe de l’Aïtos, sur la frontière bulgare.",
     "sources": [
       "Aytos"
     ]

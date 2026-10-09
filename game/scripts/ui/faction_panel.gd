@@ -166,7 +166,7 @@ func _add_trade_row() -> void:
 ## Revenu des routes commerciales (projection courante) ; détail des routes en infobulle.
 func _show_trade_income(economy: Dictionary) -> void:
 	trade_income_value.text = "%s ℔" % Money.digits(int(economy.get("trade_income", 0)))
-	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l'impôt.",
+	var lines := PackedStringArray(["[b]Commerce[/b]", "Revenu des routes commerciales, réglé après l’impôt.",
 		"Saison passée : %s ℔" % Money.digits(int(economy.get("trade_income_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
@@ -186,7 +186,7 @@ func _show_trade_income(economy: Dictionary) -> void:
 ## `table_upkeep` (projection) ; détail par province (`get_table_budget`) en infobulle.
 func _show_table_upkeep(economy: Dictionary) -> void:
 	table_upkeep_value.text = _charge(int(economy.get("table_upkeep", 0)))
-	var lines := PackedStringArray(["Régimes alimentaires payés chaque saison (inclus dans l'entretien).",
+	var lines := PackedStringArray(["Régimes alimentaires payés chaque saison (inclus dans l’entretien).",
 		"Saison passée : %s" % Money.amount(int(economy.get("table_upkeep_last_turn", 0)))])
 	var facade := get_node_or_null("/root/SimFacade")
 	var sim: Object = facade.get("sim") if facade != null else null
@@ -358,7 +358,7 @@ func _show_h11(economy: Dictionary = {}) -> void:
 		seigniorage_value.text = Money.signed(seigniorage) if seigniorage > 0 else Money.amount(seigniorage)
 		TooltipHost.attach_plain(seigniorage_value, "seigniorage_detail", {"body": "Profit du monnayage prévu cette saison (inclus dans le revenu prévisionnel).\nSaison passée : %s" % Money.amount(int(economy.get("seigniorage_last_turn", 0)))})
 		recoinage_value.text = _charge(int(economy.get("recoinage", 0)))
-		TooltipHost.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
+		TooltipHost.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l’administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
 	crusade_section.show_for(is_player)

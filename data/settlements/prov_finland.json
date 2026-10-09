@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Capitale de la Finlande suédoise : cathédrale (consacrée en 1300) et château d'Åbo.",
+    "description": "Capitale de la Finlande suédoise : cathédrale (consacrée en 1300) et château d’Åbo.",
     "sources": [
       "Turku"
     ]
@@ -75,7 +75,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château des évêques d'Åbo, en construction depuis 1317 sur l'île de Kuusisto (Kastelholm, sur Åland, n'est cité qu'en 1388).",
+    "description": "Château des évêques d’Åbo, en construction depuis 1317 sur l’île de Kuusisto (Kastelholm, sur Åland, n’est cité qu’en 1388).",
     "sources": [
       "Kuusisto Castle"
     ]

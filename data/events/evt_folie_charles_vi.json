@@ -1,7 +1,7 @@
 {
   "id": "evt_folie_charles_vi",
   "title": "La folie du roi",
-  "text": "Dans la forêt du Mans, par une chaleur accablante, un page laisse tomber une lance sur un casque. Le roi, se croyant trahi, tire l'épée et tue quatre hommes de sa suite avant d'être maîtrisé. Les médecins ne savent quel mal l'habite ; les oncles du roi reprennent le pouvoir.",
+  "text": "Dans la forêt du Mans, par une chaleur accablante, un page laisse tomber une lance sur un casque. Le roi, se croyant trahi, tire l’épée et tue quatre hommes de sa suite avant d’être maîtrisé. Les médecins ne savent quel mal l’habite ; les oncles du roi reprennent le pouvoir.",
   "kind": "historical",
   "trigger": {
     "date": {

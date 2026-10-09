@@ -34,7 +34,7 @@
     {
       "id": "obj_novgorod_hold",
       "title": "La Grande Novgorod",
-      "description": "Garder l'ensemble du domaine de Novgorod.",
+      "description": "Garder l’ensemble du domaine de Novgorod.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_novgorod"
@@ -58,7 +58,7 @@
       }
     }
   ],
-  "description": "Vaste république marchande du nord, gouvernée par le vétché, le posadnik et l'archevêque Vassili Kalika ; elle s'étend de la Baltique à l'Oural, contrôle le commerce des fourrures avec la Hanse et n'admet qu'un prince invité, sans pouvoir.",
+  "description": "Vaste république marchande du nord, gouvernée par le vétché, le posadnik et l’archevêque Vassili Kalika ; elle s’étend de la Baltique à l’Oural, contrôle le commerce des fourrures avec la Hanse et n’admet qu’un prince invité, sans pouvoir.",
   "sources": [
     "République de Novgorod",
     "Vassili Kalika",

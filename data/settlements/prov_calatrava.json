@@ -20,7 +20,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité royale fondée en 1255 par Alphonse X pour contrebalancer le pouvoir de l'ordre de Calatrava sur la région.",
+    "description": "Cité royale fondée en 1255 par Alphonse X pour contrebalancer le pouvoir de l’ordre de Calatrava sur la région.",
     "sources": [
       "Ciudad Real"
     ]
@@ -45,7 +45,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Forteresse-couvent, siège du grand maître de l'ordre militaire du Calatrava depuis 1217.",
+    "description": "Forteresse-couvent, siège du grand maître de l’ordre militaire du Calatrava depuis 1217.",
     "sources": [
       "Ordre de Calatrava",
       "Calatrava la Nueva"

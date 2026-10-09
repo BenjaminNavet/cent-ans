@@ -76,7 +76,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye de Fleury, dépositaire des reliques de saint Benoît, l'un des grands foyers intellectuels du royaume.",
+    "description": "Abbaye de Fleury, dépositaire des reliques de saint Benoît, l’un des grands foyers intellectuels du royaume.",
     "sources": [
       "Abbaye de Fleury"
     ]
@@ -179,7 +179,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Ancienne abbaye Saint-Mesmin fondée au VIe siècle, près d'Orléans.",
+    "description": "Ancienne abbaye Saint-Mesmin fondée au VIe siècle, près d’Orléans.",
     "sources": [
       "Abbaye de Micy"
     ]
@@ -279,7 +279,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg avec résidence seigneuriale sur la Loire, en aval d'Orléans.",
+    "description": "Bourg avec résidence seigneuriale sur la Loire, en aval d’Orléans.",
     "sources": [
       "Châteauneuf-sur-Loire"
     ]
@@ -305,7 +305,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg épiscopal sur la Loire, siège d'un château des évêques d'Orléans.",
+    "description": "Bourg épiscopal sur la Loire, siège d’un château des évêques d’Orléans.",
     "sources": [
       "Meung-sur-Loire"
     ]

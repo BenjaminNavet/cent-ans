@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Ferrare, capitale de la maison d'Este, vicaires pontificaux d'Émilie.",
+    "description": "Ferrare, capitale de la maison d’Este, vicaires pontificaux d’Émilie.",
     "sources": [
       "Maison d'Este",
       "Obizzo III d'Este",
@@ -50,7 +50,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville passée à la maison d'Este en 1336, vicaires pontificaux d'Émilie.",
+    "description": "Ville passée à la maison d’Este en 1336, vicaires pontificaux d’Émilie.",
     "sources": [
       "Modène",
       "Maison d'Este"
@@ -77,7 +77,7 @@
       "bld_scriptorium"
     ],
     "port": true,
-    "description": "Grande abbaye bénédictine du delta du Pô, entourée d'eau et desservie par le Po di Volano jusqu'à l'Adriatique, où travailla le théoricien musical Guy d'Arezzo.",
+    "description": "Grande abbaye bénédictine du delta du Pô, entourée d’eau et desservie par le Po di Volano jusqu’à l’Adriatique, où travailla le théoricien musical Guy d’Arezzo.",
     "sources": [
       "Abbaye de Pomposa"
     ]
@@ -129,7 +129,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Chef-lieu de la Polésine, tenu par la maison d'Este jusqu'à sa cession à Venise par la paix de Bagnolo (1484).",
+    "description": "Chef-lieu de la Polésine, tenu par la maison d’Este jusqu’à sa cession à Venise par la paix de Bagnolo (1484).",
     "sources": [
       "Rovigo",
       "Polésine"
@@ -156,7 +156,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg de la Polésine sur l'Adigetto, dans la seigneurie des Este.",
+    "description": "Bourg de la Polésine sur l’Adigetto, dans la seigneurie des Este.",
     "sources": [
       "Lendinara"
     ]
@@ -182,7 +182,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye camaldule de Badia Polesine, sur l'Adige, protégée et dotée par la maison d'Este.",
+    "description": "Abbaye camaldule de Badia Polesine, sur l’Adige, protégée et dotée par la maison d’Este.",
     "sources": [
       "Badia Polesine",
       "Abbaye de la Vangadizza"

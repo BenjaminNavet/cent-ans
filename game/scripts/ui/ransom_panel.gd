@@ -92,9 +92,9 @@ func show_data(ransoms: Dictionary) -> void:
 	var ours: Array = ransoms.get("ours", [])
 	var held: Array = ransoms.get("held", [])
 	var debts: Array = ransoms.get("debts", [])
-	list_box.add_child(_heading("Nos captifs", "Nos gens aux mains de l'ennemi : payez leur rançon (voir [[cdx_rancon]])."))
+	list_box.add_child(_heading("Nos captifs", "Nos gens aux mains de l’ennemi : payez leur rançon (voir [[cdx_rancon]])."))
 	if ours.is_empty():
-		list_box.add_child(_muted("Aucun des nôtres n'est captif."))
+		list_box.add_child(_muted("Aucun des nôtres n’est captif."))
 	for captive in ours:
 		list_box.add_child(_captive_row(captive, true))
 	list_box.add_child(_heading("Nos prisonniers", "Captifs ennemis que nous détenons : fixez leurs termes."))

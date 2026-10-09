@@ -20,7 +20,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Château-résidence des comtes d'Urgell, sur le Sègre.",
+    "description": "Château-résidence des comtes d’Urgell, sur le Sègre.",
     "sources": [
       "Balaguer",
       "Comté d'Urgell"
@@ -31,8 +31,8 @@
     "province": "prov_urgell",
     "kind": "town",
     "name": {
-      "display": "La Seu d'Urgell",
-      "local": "La Seu d'Urgell",
+      "display": "La Seu d’Urgell",
+      "local": "La Seu d’Urgell",
       "local_language": "catalan"
     },
     "lonlat": [
@@ -46,9 +46,9 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité épiscopale pyrénéenne, siège du diocèse d'Urgell depuis le haut Moyen Âge.",
+    "description": "Cité épiscopale pyrénéenne, siège du diocèse d’Urgell depuis le haut Moyen Âge.",
     "sources": [
-      "La Seu d'Urgell"
+      "La Seu d’Urgell"
     ]
   },
   {
@@ -69,7 +69,7 @@
     "fortification_level": 1,
     "buildings": [],
     "port": false,
-    "description": "Bourg fortifié du comté d'Urgell, sur les rives du Sió.",
+    "description": "Bourg fortifié du comté d’Urgell, sur les rives du Sió.",
     "sources": [
       "Agramunt"
     ]

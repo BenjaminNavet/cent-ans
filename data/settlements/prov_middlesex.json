@@ -27,7 +27,7 @@
       "bld_armoury"
     ],
     "port": true,
-    "description": "Cité de Londres (capitale de jeu de l'Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street.",
+    "description": "Cité de Londres (capitale de jeu de l’Angleterre), Westminster (Parlement, Échiquier), Tour de Londres ; Middlesex, Essex et Hertfordshire. Étape de la laine, marchands italiens de Lombard Street.",
     "sources": [
       "Londres au Moyen Âge",
       "Westminster",
@@ -55,7 +55,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Plus ancienne ville romaine de Bretagne, dotée d'un donjon normand et d'un commerce drapier actif.",
+    "description": "Plus ancienne ville romaine de Bretagne, dotée d’un donjon normand et d’un commerce drapier actif.",
     "sources": [
       "Colchester"
     ]
@@ -81,7 +81,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Grand château royal sur la Tamise, résidence favorite d'Édouard III.",
+    "description": "Grand château royal sur la Tamise, résidence favorite d’Édouard III.",
     "sources": [
       "Château de Windsor"
     ]
@@ -107,7 +107,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Grande abbaye bénédictine sur la voie Watling, l'une des plus riches d'Angleterre.",
+    "description": "Grande abbaye bénédictine sur la voie Watling, l’une des plus riches d’Angleterre.",
     "sources": [
       "Abbaye de St Albans"
     ]
@@ -130,7 +130,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": true,
-    "description": "Petit port producteur de sel sur l'estuaire de la Blackwater.",
+    "description": "Petit port producteur de sel sur l’estuaire de la Blackwater.",
     "sources": [
       "Maldon (Essex)"
     ]
@@ -180,7 +180,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg au nord de Londres, dans la forêt d'Enfield.",
+    "description": "Bourg au nord de Londres, dans la forêt d’Enfield.",
     "sources": [
       "Enfield"
     ]
@@ -231,7 +231,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye bénédictine de femmes de Barking, l'une des plus riches d'Angleterre.",
+    "description": "Abbaye bénédictine de femmes de Barking, l’une des plus riches d’Angleterre.",
     "sources": [
       "Abbaye de Barking"
     ]

@@ -145,7 +145,7 @@ static func site_tooltip(site: Dictionary) -> String:
 		lines.append(province)
 	var expires := int(site.get("expires_in", 0))
 	if bool(site.get("claimed", false)):
-		lines.append("[color=#9e2114]Une de vos armées l'a atteinte : décision en attente.[/color]")
+		lines.append("[color=#9e2114]Une de vos armées l’a atteinte : décision en attente.[/color]")
 	elif expires <= 1:
 		lines.append("Disparaît à la fin de la saison.")
 	else:
@@ -191,7 +191,7 @@ func site_clicked(site_id: int) -> void:
 	var army_id := str(map.selected_army)
 	var army: Dictionary = map.sim.call("get_army", army_id) if army_id != "" else {}
 	if army.is_empty() or str(army.get("faction", "")) != str(map.player_faction):
-		map.ui.show_toast("Sélectionnez d'abord une de vos armées pour marcher vers « %s »." % str(node.site.get("title", "")))
+		map.ui.show_toast("Sélectionnez d’abord une de vos armées pour marcher vers « %s »." % str(node.site.get("title", "")))
 		return
 	var point: Vector2 = node.site.get("position", Vector2.ZERO)
 	var report: Dictionary = map.movement_ctl.order_move_point(army_id, point) if map.movement_ctl != null \

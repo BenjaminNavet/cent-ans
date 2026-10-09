@@ -43,7 +43,7 @@ func _render() -> void:
 			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
 				var side_id := str(call.get(side[0], ""))
 				var take := UiBuild.button("Soutenir %s" % str(call.get(side[1], side_id)))
-				TooltipHost.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
+				TooltipHost.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l’autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
 		var no := UiBuild.button({"protection": "Se dérober", "arbitration": "Laisser faire", "peace_summons": "Passer outre"}.get(kind, "Refuser"), func() -> void: offer_answered.emit(offer_id, false), row)

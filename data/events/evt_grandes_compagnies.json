@@ -1,7 +1,7 @@
 {
   "id": "evt_grandes_compagnies",
   "title": "Les Grandes Compagnies",
-  "text": "La paix a laissé sans solde des milliers de routiers anglais, gascons et bretons. Réunis en Grandes Compagnies, ils rançonnent les villes, pillent les campagnes et ont battu l'armée royale à Brignais. On murmure qu'on pourrait les envoyer guerroyer en Castille.",
+  "text": "La paix a laissé sans solde des milliers de routiers anglais, gascons et bretons. Réunis en Grandes Compagnies, ils rançonnent les villes, pillent les campagnes et ont battu l’armée royale à Brignais. On murmure qu’on pourrait les envoyer guerroyer en Castille.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -15,7 +15,7 @@
   },
   "options": [
     {
-      "text": "Payer les routiers pour qu'ils passent en Castille",
+      "text": "Payer les routiers pour qu’ils passent en Castille",
       "effects": [
         {
           "type": "treasury",

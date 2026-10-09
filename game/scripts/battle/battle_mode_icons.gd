@@ -9,7 +9,7 @@ extends RefCounted
 ## Modes dans l'ordre des boutons (clé de `set_mode`, champ de `get_units`, libellé, infobulle).
 const MODES := [
 	{"mode": "run", "field": "mode_run", "label": "Course", "tip": "Tous les déplacements au pas de course (le double clic droit fait courir un seul ordre)."},
-	{"mode": "guard", "field": "guard", "label": "Garde", "tip": "Tenir sa position : pas de poursuite d'un ennemi en fuite ni d'un adversaire qui rompt le contact."},
+	{"mode": "guard", "field": "guard", "label": "Garde", "tip": "Tenir sa position : pas de poursuite d’un ennemi en fuite ni d’un adversaire qui rompt le contact."},
 	{"mode": "skirmish", "field": "skirmish", "label": "Escarmouche", "tip": "Les tireurs reculent de {rule.unit_modes_skirmish_retreat_m} m devant une troupe de mêlée qui approche à moins de {rule.unit_modes_skirmish_trigger_m} m."},
 	{"mode": "melee", "field": "melee_mode", "label": "Mêlée", "tip": "Les tireurs rangent leurs armes de trait et engagent au corps à corps."},
 	{"mode": "breach", "field": "breach", "label": "Battre en brèche", "tip": "Engins de siège : tir concentré sur les murs et les portes (+{rule.unit_modes_breach_damage_percent} % de dégâts, mangonneau +{rule.unit_modes_breach_mangonel_percent} %, recharge +{rule.unit_modes_breach_reload_percent} %), jamais sur les hommes."},

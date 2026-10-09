@@ -21,7 +21,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancienne capitale du royaume lombard, commune gibeline dominée par les Beccaria ; elle ne tombera aux mains des Visconti qu'en 1359.",
+    "description": "Ancienne capitale du royaume lombard, commune gibeline dominée par les Beccaria ; elle ne tombera aux mains des Visconti qu’en 1359.",
     "sources": [
       "Pavie"
     ]
@@ -46,7 +46,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Site monastique visconti, la grande chartreuse n'est fondée qu'en 1396 : simple prieuré en 1337.",
+    "description": "Site monastique visconti, la grande chartreuse n’est fondée qu’en 1396 : simple prieuré en 1337.",
     "sources": [
       "Certosa di Pavia"
     ]
@@ -71,7 +71,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville de l'Oltrepò pavese, sur la route de Gênes.",
+    "description": "Ville de l’Oltrepò pavese, sur la route de Gênes.",
     "sources": [
       "Voghera"
     ]

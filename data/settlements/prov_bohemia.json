@@ -25,7 +25,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Royaume de Bohême de Jean de Luxembourg (le roi combat pour la France), gouverné en son absence par son fils Charles, margrave de Moravie. Mines d'argent de Kutná Hora.",
+    "description": "Royaume de Bohême de Jean de Luxembourg (le roi combat pour la France), gouverné en son absence par son fils Charles, margrave de Moravie. Mines d’argent de Kutná Hora.",
     "sources": [
       "Royaume de Bohême",
       "Jean Ier de Bohême",
@@ -54,7 +54,7 @@
       "bld_counting_house"
     ],
     "port": false,
-    "description": "Ville minière au deuxième rang du royaume, où sont frappés les gros de Prague grâce aux mines d'argent.",
+    "description": "Ville minière au deuxième rang du royaume, où sont frappés les gros de Prague grâce aux mines d’argent.",
     "sources": [
       "Kutná Hora"
     ]
@@ -157,7 +157,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville royale fondée en 1265 sur la route de l'argent vers l'Autriche, en Bohême du Sud.",
+    "description": "Ville royale fondée en 1265 sur la route de l’argent vers l’Autriche, en Bohême du Sud.",
     "sources": [
       "České Budějovice"
     ]
@@ -182,7 +182,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville de douaire des reines de Bohême, en Bohême orientale sur l'Elbe.",
+    "description": "Ville de douaire des reines de Bohême, en Bohême orientale sur l’Elbe.",
     "sources": [
       "Hradec Králové"
     ]

@@ -1,5 +1,5 @@
 {
-  "description": "Affichage des cours d'eau de la carte de campagne (chantier RC, ADR 0141) : largeur écran minimale, couleurs, visibilité des rivières mineures et étiquettes des noms. Rendu seulement : aucune règle de jeu. Les distances sont des fractions de la plus grande dimension de la carte.",
+  "description": "Affichage des cours d’eau de la carte de campagne (chantier RC, ADR 0141) : largeur écran minimale, couleurs, visibilité des rivières mineures et étiquettes des noms. Rendu seulement : aucune règle de jeu. Les distances sont des fractions de la plus grande dimension de la carte.",
   "major_min_px": 4.0,
   "minor_min_px": 1.5,
   "importance_min_px_scale": [

@@ -89,7 +89,7 @@ func _check_roles() -> void:
 		var figure: Array = BattleStandards.FIGURES[role]
 		var ids := BattleStandards.role_ids(role)
 		if not BattleSkinned.has_figure(str(figure[0]), int(figure[1])):
-			check(ids.is_empty(), "%s sans figurine : pas d'indices" % role)
+			check(ids.is_empty(), "%s sans figurine : pas d’indices" % role)
 			continue
 		check(ids.size() == BattleStandards.role_set(role).size(), "%s : un indice par clip" % role)
 		var clips: Dictionary = BattleSkinned.rig(str(figure[0]), int(figure[1])).get("clips", {})

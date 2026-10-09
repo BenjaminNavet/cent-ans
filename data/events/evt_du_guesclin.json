@@ -1,7 +1,7 @@
 {
   "id": "evt_du_guesclin",
   "title": "Du Guesclin connétable",
-  "text": "Le roi Charles fait de Bertrand du Guesclin, petit noble breton rompu à la guerre d'embuscade, le connétable de France. Plus de grandes batailles rangées : on harcèlera l'Anglais, on reprendra ses places une à une.",
+  "text": "Le roi Charles fait de Bertrand du Guesclin, petit noble breton rompu à la guerre d’embuscade, le connétable de France. Plus de grandes batailles rangées : on harcèlera l’Anglais, on reprendra ses places une à une.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -28,7 +28,7 @@
   },
   "options": [
     {
-      "text": "Adopter la guerre d'usure",
+      "text": "Adopter la guerre d’usure",
       "effects": [
         {
           "type": "prestige",

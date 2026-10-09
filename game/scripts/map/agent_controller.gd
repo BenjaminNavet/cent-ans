@@ -408,7 +408,7 @@ func _action_button(option: Dictionary) -> Button:
 		if int(option.get("cost", 0)) > 0:
 			tip.append("Coût : %s" % Money.amount(int(option.get("cost", 0))))
 		if int(option.get("death_risk", 0)) > 0:
-			tip.append("Risque de perdre l'agent en cas d'échec : %d %%" % int(option.get("death_risk", 0)))
+			tip.append("Risque de perdre l’agent en cas d’échec : %d %%" % int(option.get("death_risk", 0)))
 	else:
 		tip.append("Indisponible : %s" % option.get("reason", ""))
 	TooltipHost.attach_plain(button, "agent_action", {"title": str(option.get("name", "")), "body": "\n".join(tip)})

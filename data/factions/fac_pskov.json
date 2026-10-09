@@ -19,7 +19,7 @@
   "primary_title": "tit_pskov",
   "heraldry": {
     "blazon": "D'azur au léopard d'argent.",
-    "description": "Léopard d'argent sur champ d'azur, emblème de Pskov attesté plus tard (XVIIIe siècle) mais rattaché à l'ancienne tradition de la ville.",
+    "description": "Léopard d’argent sur champ d’azur, emblème de Pskov attesté plus tard (XVIIIe siècle) mais rattaché à l’ancienne tradition de la ville.",
     "primary_color": "#2B5DF2",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -52,7 +52,7 @@
     "trade": 55,
     "piety": 60
   },
-  "description": "Ville-forteresse de la frontière livonienne, qui a offert l'asile à Alexandre de Tver (1327) contre la Horde et Moscou ; son vétché élit ses princes et veut se libérer de la tutelle de Novgorod (achevé en 1348).",
+  "description": "Ville-forteresse de la frontière livonienne, qui a offert l’asile à Alexandre de Tver (1327) contre la Horde et Moscou ; son vétché élit ses princes et veut se libérer de la tutelle de Novgorod (achevé en 1348).",
   "sources": [
     "Pskov",
     "République de Pskov"

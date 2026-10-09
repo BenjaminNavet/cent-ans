@@ -207,7 +207,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château royal du Wiltshire, résidence fréquente des rois d'Angleterre.",
+    "description": "Château royal du Wiltshire, résidence fréquente des rois d’Angleterre.",
     "sources": [
       "Château de Marlborough"
     ]
@@ -232,7 +232,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-marché du Wiltshire, autour d'un château royal.",
+    "description": "Bourg-marché du Wiltshire, autour d’un château royal.",
     "sources": [
       "Devizes"
     ]

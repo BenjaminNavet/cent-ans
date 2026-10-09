@@ -49,7 +49,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse royale au donjon du XIe siècle dominant l'Indre, l'une des plus puissantes du royaume.",
+    "description": "Forteresse royale au donjon du XIe siècle dominant l’Indre, l’une des plus puissantes du royaume.",
     "sources": [
       "Château de Loches"
     ]
@@ -178,7 +178,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville fortifiée sur la Loire, autour d'un donjon du Xe siècle.",
+    "description": "Ville fortifiée sur la Loire, autour d’un donjon du Xe siècle.",
     "sources": [
       "Langeais"
     ]
@@ -203,7 +203,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye bénédictine de l'est de la Touraine, sur l'Indrois.",
+    "description": "Abbaye bénédictine de l’est de la Touraine, sur l’Indrois.",
     "sources": [
       "Abbaye de Villeloin"
     ]
@@ -253,7 +253,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-château de la vallée de l'Indrois.",
+    "description": "Bourg-château de la vallée de l’Indrois.",
     "sources": [
       "Montrésor"
     ]

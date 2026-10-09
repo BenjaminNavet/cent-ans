@@ -61,7 +61,7 @@ func open_window(modal_only: bool = false) -> bool:
 		window.hide()
 		map.ui.modal_queue.cancel("chronicle")
 		if available() and not modal_only:
-			map.ui.show_toast("Aucun événement n'attend votre décision.")
+			map.ui.show_toast("Aucun événement n’attend votre décision.")
 		return false
 	_present(decisions[0], pending().size())
 	return true
@@ -114,7 +114,7 @@ func refresh() -> void:
 	if count > 0:
 		tooltip += "%s %s votre décision : deux saisons pour choisir, sinon le conseil tranche." % [FrText.count(count, "événement"), "attend" if count == 1 else "attendent"]
 	else:
-		tooltip += "Aucun événement n'attend votre décision pour l'instant. Les grands événements, historiques (Crécy, la Peste noire…) ou aléatoires, arrivent en fin de saison : le bouton affichera alors leur nombre."
+		tooltip += "Aucun événement n’attend votre décision pour l’instant. Les grands événements, historiques (Crécy, la Peste noire…) ou aléatoires, arrivent en fin de saison : le bouton affichera alors leur nombre."
 	button.set_meta("tooltip", tooltip)
 	if map.ui.has_method("refresh_top_button") and button.has_meta("top_label"):
 		map.ui.refresh_top_button(button)

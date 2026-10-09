@@ -1,7 +1,7 @@
 {
   "id": "enc_marchands_lombards",
   "title": "Des marchands lombards",
-  "text": "Un convoi de marchands lombards, facteurs d'une compagnie d'Asti ou de Florence, suit la route avec draps, épices et lettres de change. Ils offrent de vendre des vivres à l'ost, ou de prêter à bon intérêt.",
+  "text": "Un convoi de marchands lombards, facteurs d’une compagnie d’Asti ou de Florence, suit la route avec draps, épices et lettres de change. Ils offrent de vendre des vivres à l’ost, ou de prêter à bon intérêt.",
   "spawn": {
     "regions": [
       "france_nord",

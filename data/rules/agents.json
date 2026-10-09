@@ -1,5 +1,5 @@
 {
-  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les colonies, marchant sur le graphe des colonies (pas × points_per_step), une action par saison. Table `actions` (ADR 0209) : une entrée par action, lue par le moteur unique (conditions, coût, chance, effets, libellés). Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/archive/chantiers.md) : incite_unrest 12 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la jauge ne revient vers son équilibre que de 20 % par saison) : 16 révoltes / 200 tours sur 1337-1453 à 15, 8,1 à 12, 4,7 à 10 (464 tours × 10 graines), 1 sans l'incitation en début de partie.",
+  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les colonies, marchant sur le graphe des colonies (pas × points_per_step), une action par saison. Table `actions` (ADR 0209) : une entrée par action, lue par le moteur unique (conditions, coût, chance, effets, libellés). Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/archive/chantiers.md) : incite_unrest 12 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la jauge ne revient vers son équilibre que de 20 % par saison) : 16 révoltes / 200 tours sur 1337-1453 à 15, 8,1 à 12, 4,7 à 10 (464 tours × 10 graines), 1 sans l’incitation en début de partie.",
   "types": {
     "spy": {
       "name": "Espion",
@@ -10,7 +10,7 @@
       "vision_range": 1,
       "settlement_kinds": ["city", "town", "castle", "abbey"],
       "lost_fr": "{agent} est pris et pendu.",
-      "description": "Les « espies » et chevaucheurs payés à la pièce par les comptes royaux : marchands, pèlerins, ménestrels qui rapportent l'état des garnisons et des chemins.",
+      "description": "Les « espies » et chevaucheurs payés à la pièce par les comptes royaux : marchands, pèlerins, ménestrels qui rapportent l’état des garnisons et des chemins.",
       "names": [
         "Colin le Picard",
         "Perrin Gosselin",
@@ -35,7 +35,7 @@
       "vision_range": 0,
       "settlement_kinds": ["city"],
       "lost_fr": "{agent}, pris à trahir son office, est jeté en geôle.",
-      "description": "Le héraut d'armes porte les défis, les sauf-conduits et les propositions de trêve ; sa cotte aux armes de son seigneur le rend inviolable, sauf s'il trahit son office.",
+      "description": "Le héraut d’armes porte les défis, les sauf-conduits et les propositions de trêve ; sa cotte aux armes de son seigneur le rend inviolable, sauf s’il trahit son office.",
       "names": [
         "Montjoie",
         "Chandos le héraut",
@@ -59,7 +59,7 @@
       "settlement_kinds": ["city", "town", "castle", "abbey"],
       "requires_religious_building": true,
       "lost_fr": "{agent} est jeté en geôle.",
-      "description": "Frère prêcheur ou mineur, prélat en mission : il prêche contre l'hérésie, dénonce le prince excommunié ou l'obédience rivale, plaide la cause de son roi à la Curie.",
+      "description": "Frère prêcheur ou mineur, prélat en mission : il prêche contre l’hérésie, dénonce le prince excommunié ou l’obédience rivale, plaide la cause de son roi à la Curie.",
       "names": [
         "Frère Jacques de Lausanne",
         "Frère Vincent",
@@ -109,7 +109,7 @@
     },
     "incite": {
       "name": "Soulever",
-      "description": "Attise le mécontentement des paysans et des bourgeois d'une province ennemie.",
+      "description": "Attise le mécontentement des paysans et des bourgeois d’une province ennemie.",
       "base_chance": 40,
       "per_level": 7,
       "death_risk": 35,
@@ -142,21 +142,21 @@
     },
     "parley": {
       "name": "Ambassade",
-      "description": "Améliore l'opinion du maître de la colonie envers votre faction.",
+      "description": "Améliore l’opinion du maître de la colonie envers votre faction.",
       "group": "embassy",
       "base_chance": 70,
       "per_level": 5,
       "reveals": true,
       "conditions": [
-        {"check": "foreign_master", "reason_fr": "il faut une colonie d'une autre faction"},
-        {"check": "not_rebels", "reason_fr": "il faut une colonie d'une autre faction"},
-        {"check": "not_at_war", "reason_fr": "en guerre : le héraut ne peut porter qu'une trêve"},
+        {"check": "foreign_master", "reason_fr": "il faut une colonie d’une autre faction"},
+        {"check": "not_rebels", "reason_fr": "il faut une colonie d’une autre faction"},
+        {"check": "not_at_war", "reason_fr": "en guerre : le héraut ne peut porter qu’une trêve"},
         {"check": "no_embassy", "reason_fr": "une ambassade est déjà en cours auprès de cette cour"}
       ],
       "success": [
         {
           "kind": "opinion",
-          "reason_fr": "Ambassade d'un héraut",
+          "reason_fr": "Ambassade d’un héraut",
           "value": 10,
           "per_level": 2,
           "turns": 12,
@@ -167,7 +167,7 @@
     },
     "truce": {
       "name": "Trêve",
-      "description": "Porte une proposition de trêve à un ennemi, appuyée par l'ambassade.",
+      "description": "Porte une proposition de trêve à un ennemi, appuyée par l’ambassade.",
       "group": "embassy",
       "base_chance": 55,
       "per_level": 6,
@@ -179,7 +179,7 @@
       "success": [
         {
           "kind": "opinion",
-          "reason_fr": "Ambassade d'un héraut",
+          "reason_fr": "Ambassade d’un héraut",
           "value": 10,
           "per_level": 2,
           "divisor": 2,
@@ -197,7 +197,7 @@
     },
     "bribe": {
       "name": "Soudoyer",
-      "description": "Achète la garnison d'une colonie ennemie, qui ouvre ses portes ; le prix est versé même en cas d'échec.",
+      "description": "Achète la garnison d’une colonie ennemie, qui ouvre ses portes ; le prix est versé même en cas d’échec.",
       "base_chance": 35,
       "per_level": 7,
       "death_risk": 40,
@@ -220,14 +220,14 @@
     },
     "ransom": {
       "name": "Rançon",
-      "description": "Négocie le rachat d'un captif à prix réduit auprès de son geôlier.",
+      "description": "Négocie le rachat d’un captif à prix réduit auprès de son geôlier.",
       "base_chance": 60,
       "per_level": 6,
       "cost": {"ransom": true},
       "conditions": [
         {
           "check": "captive_held",
-          "reason_fr": "aucun de vos captifs n'est détenu ici, ou son geôlier refuse de le rendre contre de l'argent"
+          "reason_fr": "aucun de vos captifs n’est détenu ici, ou son geôlier refuse de le rendre contre de l’argent"
         }
       ],
       "success": [{"kind": "release", "text_fr": "{agent} rachète {captive} pour {cost} livres."}],
@@ -235,7 +235,7 @@
     },
     "preach": {
       "name": "Prêcher",
-      "description": "Recule l'hérésie et apaise le clergé et les paysans d'une province amie.",
+      "description": "Recule l’hérésie et apaise le clergé et les paysans d’une province amie.",
       "base_chance": 70,
       "per_level": 5,
       "conditions": [{"check": "friendly_province", "reason_fr": "on prêche en terre amie"}],
@@ -257,7 +257,7 @@
     },
     "denounce": {
       "name": "Dénoncer",
-      "description": "Prêche contre un prince ennemi, excommunié ou de l'obédience rivale : trouble son clergé et lui coûte la faveur pontificale.",
+      "description": "Prêche contre un prince ennemi, excommunié ou de l’obédience rivale : trouble son clergé et lui coûte la faveur pontificale.",
       "base_chance": 50,
       "per_level": 6,
       "death_risk": 15,
@@ -265,7 +265,7 @@
       "aim": "province_master",
       "reveals": true,
       "conditions": [
-        {"check": "denounceable_master", "reason_fr": "il faut un prince ennemi, excommunié ou de l'obédience rivale"}
+        {"check": "denounceable_master", "reason_fr": "il faut un prince ennemi, excommunié ou de l’obédience rivale"}
       ],
       "success": [
         {"kind": "unrest", "classes": ["clergy"], "delta": 10},

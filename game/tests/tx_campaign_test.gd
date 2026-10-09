@@ -59,7 +59,7 @@ func _test_layer_table() -> void:
 				var own := false
 				for b in listed:
 					own = own or int(b) == biome
-				_check(own, "biome %d rôle %d : couche %s d'un autre biome" % [biome, role, info.get("id", "?")])
+				_check(own, "biome %d rôle %d : couche %s d’un autre biome" % [biome, role, info.get("id", "?")])
 	# Les couches partagées (neige, sable) sont les mêmes partout.
 	for role in [5, 6]:
 		for biome in range(2, CampaignTextures.BIOME_COUNT):
@@ -129,4 +129,4 @@ func _test_parcels() -> void:
 	var biome8: Dictionary = (merged["biomes"] as Dictionary)["8"]
 	_check((biome8["wild"] as Array).has("dunes"), "surcharge TX du désert non appliquée")
 	# Le mélange d'origine reste intact.
-	_check(not ((mix["biomes"] as Dictionary)["8"]["wild"] as Array).has("dunes"), "with_tx_overrides a modifié le mélange d'origine")
+	_check(not ((mix["biomes"] as Dictionary)["8"]["wild"] as Array).has("dunes"), "with_tx_overrides a modifié le mélange d’origine")

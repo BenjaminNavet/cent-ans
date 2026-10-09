@@ -1,7 +1,7 @@
 {
   "id": "chr_leopold_d_egloffstein",
   "name": {
-    "display": "Léopold II d'Egloffstein",
+    "display": "Léopold II d’Egloffstein",
     "local": "Leopold II. von Egloffstein",
     "local_language": "moyen haut-allemand"
   },
@@ -40,7 +40,7 @@
   "piety": 70,
   "starting_location": "prov_bamberg",
   "status": "at_court",
-  "description": "Prince-évêque de Bamberg de 1335 à sa mort en 1343, issu de la famille noble franconienne d'Egloffstein.",
+  "description": "Prince-évêque de Bamberg de 1335 à sa mort en 1343, issu de la famille noble franconienne d’Egloffstein.",
   "sources": [
     "Léopold d'Egloffstein"
   ]

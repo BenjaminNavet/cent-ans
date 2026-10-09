@@ -201,7 +201,7 @@ func _army_entries() -> Array:
 
 func army_entry(army_id: String, army: Dictionary) -> Dictionary:
 	var general := str(army.get("general_name", ""))
-	var title := "⚔ Ost de %s" % (general if general != "" else "l'ost sans chef")
+	var title := "⚔ Ost de %s" % (general if general != "" else "l’ost sans chef")
 	var units: Array = army.get("units", [])
 	var men := 0
 	for unit in units:

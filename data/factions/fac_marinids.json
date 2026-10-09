@@ -18,7 +18,7 @@
   "primary_title": "tit_marinids",
   "heraldry": {
     "blazon": "De gueules au chef d'or.",
-    "description": "Les Mérinides (Banu Marin) n'ont pas d'armoiries : les chroniqueurs attestent un étendard blanc, sans meuble. Écu rouge et or de convention pour la distinction en jeu.",
+    "description": "Les Mérinides (Banu Marin) n’ont pas d’armoiries : les chroniqueurs attestent un étendard blanc, sans meuble. Écu rouge et or de convention pour la distinction en jeu.",
     "primary_color": "#A01E1E",
     "secondary_color": "#E0B33A",
     "uncertain": true,
@@ -64,7 +64,7 @@
     "trade": 55,
     "piety": 70
   },
-  "description": "Sultanat de la dynastie des Banu Marin, maître de Fès et du Maroc atlantique, qui vient de prendre Tlemcen (1er mai 1337) et met fin au royaume zayyanide ; Abu l-Hasan Ali rêve de restaurer l'empire almohade et se prépare à la guerre du détroit puis à la conquête de l'Ifriqiya.",
+  "description": "Sultanat de la dynastie des Banu Marin, maître de Fès et du Maroc atlantique, qui vient de prendre Tlemcen (1er mai 1337) et met fin au royaume zayyanide ; Abu l-Hasan Ali rêve de restaurer l’empire almohade et se prépare à la guerre du détroit puis à la conquête de l’Ifriqiya.",
   "sources": [
     "Marinides",
     "Abu al-Hasan Ali ibn Othman",

@@ -1,7 +1,7 @@
 {
   "id": "skill_capitaine_d_elite",
   "name": {
-    "display": "Capitaine d'élite"
+    "display": "Capitaine d’élite"
   },
   "branch": "command",
   "tier": 3,
@@ -17,5 +17,5 @@
       "mode": "percent"
     }
   ],
-  "description": "Forme des troupes d'élite reconnues sur les champs de bataille."
+  "description": "Forme des troupes d’élite reconnues sur les champs de bataille."
 }

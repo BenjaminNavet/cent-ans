@@ -1,7 +1,7 @@
 {
   "id": "evt_cola_di_rienzo",
   "title": "Cola di Rienzo tribun de Rome",
-  "text": "Fils d'aubergiste et lecteur passionné de Tite-Live, Cola di Rienzo soulève Rome le jour de la Pentecôte, chasse les barons Colonna et Orsini et se proclame tribun. Il écrit aux princes d'Italie de venir recevoir leurs lois du peuple romain.",
+  "text": "Fils d’aubergiste et lecteur passionné de Tite-Live, Cola di Rienzo soulève Rome le jour de la Pentecôte, chasse les barons Colonna et Orsini et se proclame tribun. Il écrit aux princes d’Italie de venir recevoir leurs lois du peuple romain.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -23,7 +23,7 @@
   },
   "options": [
     {
-      "text": "Reconnaître le tribun par l'entremise du vicaire",
+      "text": "Reconnaître le tribun par l’entremise du vicaire",
       "effects": [
         {
           "type": "unrest",
@@ -46,7 +46,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Excommunier l'usurpateur",
+      "text": "Excommunier l’usurpateur",
       "effects": [
         {
           "type": "unrest",

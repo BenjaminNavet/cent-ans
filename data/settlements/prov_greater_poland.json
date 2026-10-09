@@ -21,7 +21,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Capitale de la Grande-Pologne, ville épiscopale sur la Warta ; l'assemblée de la noblesse s'y réunit.",
+    "description": "Capitale de la Grande-Pologne, ville épiscopale sur la Warta ; l’assemblée de la noblesse s’y réunit.",
     "sources": [
       "Poznań"
     ]
@@ -47,7 +47,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Première capitale des Piast et siège de l'archevêque, où se couronnent les rois avant Cracovie.",
+    "description": "Première capitale des Piast et siège de l’archevêque, où se couronnent les rois avant Cracovie.",
     "sources": [
       "Gniezno"
     ]
@@ -73,7 +73,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville murée aux confins de la Silésie, chef-lieu d'une ancienne principauté piast.",
+    "description": "Ville murée aux confins de la Silésie, chef-lieu d’une ancienne principauté piast.",
     "sources": [
       "Kalisz"
     ]

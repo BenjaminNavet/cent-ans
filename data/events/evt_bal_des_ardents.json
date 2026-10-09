@@ -1,7 +1,7 @@
 {
   "id": "evt_bal_des_ardents",
   "title": "Le bal des Ardents",
-  "text": "Pour les noces d'une dame de la reine, le roi et cinq seigneurs dansent déguisés en sauvages, couverts de poix et d'étoupe. Une torche approchée par imprudence les embrase : quatre meurent brûlés vifs. Le roi ne doit la vie qu'à la duchesse de Berry qui l'abrite sous sa robe.",
+  "text": "Pour les noces d’une dame de la reine, le roi et cinq seigneurs dansent déguisés en sauvages, couverts de poix et d’étoupe. Une torche approchée par imprudence les embrase : quatre meurent brûlés vifs. Le roi ne doit la vie qu’à la duchesse de Berry qui l’abrite sous sa robe.",
   "kind": "historical",
   "trigger": {
     "date": {

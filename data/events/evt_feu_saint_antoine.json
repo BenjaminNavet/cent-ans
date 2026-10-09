@@ -1,7 +1,7 @@
 {
   "id": "evt_feu_saint_antoine",
   "title": "Le feu de Saint-Antoine",
-  "text": "Après un été pourri, des villageois se plaignent d'un feu qui leur brûle les membres ; chez certains, les doigts noircissent et tombent. C'est le [[cdx_feu_de_saint_antoine|feu de Saint-Antoine]], le mal des ardents. Nul ne sait que le coupable est un champignon, l'ergot, caché dans le pain de seigle ; mais on a remarqué que les malades guérissent souvent chez les Antonins, où l'on mange du pain de froment. Des frères au tau bleu proposent d'ouvrir une maison et de mener les plus atteints en [[cdx_pelerinage|pèlerinage]] en Dauphiné.",
+  "text": "Après un été pourri, des villageois se plaignent d’un feu qui leur brûle les membres ; chez certains, les doigts noircissent et tombent. C’est le [[cdx_feu_de_saint_antoine|feu de Saint-Antoine]], le mal des ardents. Nul ne sait que le coupable est un champignon, l’ergot, caché dans le pain de seigle ; mais on a remarqué que les malades guérissent souvent chez les Antonins, où l’on mange du pain de froment. Des frères au tau bleu proposent d’ouvrir une maison et de mener les plus atteints en [[cdx_pelerinage|pèlerinage]] en Dauphiné.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 150,

@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'or à la fasce de sable.",
-    "description": "Couleurs jaune et noir de l'étendard mamelouk ; blason de jeu.",
+    "description": "Couleurs jaune et noir de l’étendard mamelouk ; blason de jeu.",
     "primary_color": "#F2C230",
     "secondary_color": "#2A2A2A",
     "uncertain": true,
@@ -61,14 +61,14 @@
     {
       "id": "obj_mamluks_cilicia",
       "title": "La porte de Cilicie",
-      "description": "Réduire l'Arménie de Cilicie.",
+      "description": "Réduire l’Arménie de Cilicie.",
       "condition": {
         "kind": "be_liege_of",
         "faction": "fac_cilicia"
       }
     }
   ],
-  "description": "Sultanat de la caste militaire des mamelouks, surtout turcs (Kiptchaks) à cette époque (les Circassiens ne domineront qu'après 1382), maître de l'Égypte, de la Syrie et du Hedjaz ; al-Nasir Muhammad, à son troisième règne (1310-1341), au sommet de sa puissance, tient Le Caire, Damas et Alep.",
+  "description": "Sultanat de la caste militaire des mamelouks, surtout turcs (Kiptchaks) à cette époque (les Circassiens ne domineront qu’après 1382), maître de l’Égypte, de la Syrie et du Hedjaz ; al-Nasir Muhammad, à son troisième règne (1310-1341), au sommet de sa puissance, tient Le Caire, Damas et Alep.",
   "sources": [
     "Mamluk Sultanate",
     "Al-Nasir Muhammad"

@@ -2,7 +2,7 @@
   "id": "tit_angoumois",
   "rank": "county",
   "name": {
-    "display": "Comté d'Angoulême",
+    "display": "Comté d’Angoulême",
     "local": "Engolesme",
     "local_language": "ancien français"
   },
@@ -13,7 +13,7 @@
   "holder_1337": {
     "faction": "fac_navarre",
     "sources": [
-      "Comté d'Angoulême",
+      "Comté d’Angoulême",
       "Jeanne II de Navarre"
     ]
   }

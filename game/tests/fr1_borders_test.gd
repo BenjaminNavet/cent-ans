@@ -84,7 +84,7 @@ func _run() -> void:
 	var pixel := info.get_image().get_pixel(paris, 0)
 	check(roundi(pixel.b * 255.0) == 255, "player flag expected on a province the player occupies")
 	borders.refresh()
-	check(borders.ownership_of(paris) == Vector2i(france, france), "refresh should restore the simulation's owner")
+	check(borders.ownership_of(paris) == Vector2i(france, france), "refresh should restore the simulation’s owner")
 
 	# 4. Filtres de carte.
 	var modes: Node = map.map_modes

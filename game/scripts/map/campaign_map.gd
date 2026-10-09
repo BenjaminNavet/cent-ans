@@ -1126,7 +1126,7 @@ func _on_stance_changed(army_id: String, stance: String) -> void:
 
 
 func _on_recruit(province_id: String, unit_type: String) -> void:
-	_submit({"type": "recruit", "province": province_id, "unit_type": unit_type}, "Recrutement lancé : l'unité rejoindra la garnison au prochain tour.")
+	_submit({"type": "recruit", "province": province_id, "unit_type": unit_type}, "Recrutement lancé : l’unité rejoindra la garnison au prochain tour.")
 
 
 func _on_create_army(province_id: String, unit_indices: Array) -> void:
@@ -1144,7 +1144,7 @@ func _on_cancel_build(province_id: String) -> void:
 
 
 func _on_tax_rate_changed(faction_id: String, rate: String) -> void:
-	var result := _submit({"type": "set_tax_rate", "rate": rate}, "Taux d'imposition modifié.")
+	var result := _submit({"type": "set_tax_rate", "rate": rate}, "Taux d’imposition modifié.")
 	if result.get("ok", false):
 		_show_faction_panel(faction_id)
 

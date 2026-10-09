@@ -1,7 +1,7 @@
 {
   "id": "chr_pietro_iii_d_arborea",
   "name": {
-    "display": "Pierre III, juge d'Arborée",
+    "display": "Pierre III, juge d’Arborée",
     "local": "Pedru III de Arborea",
     "local_language": "sarde"
   },
@@ -35,7 +35,7 @@
   },
   "starting_location": "prov_arborea",
   "status": "at_court",
-  "description": "Juge d'Arborée de 1335 à 1347, fidèle allié de la couronne d'Aragon ; il laisse le pouvoir à son frère Mariano IV.",
+  "description": "Juge d’Arborée de 1335 à 1347, fidèle allié de la couronne d’Aragon ; il laisse le pouvoir à son frère Mariano IV.",
   "sources": [
     "Pierre III d'Arborée"
   ]

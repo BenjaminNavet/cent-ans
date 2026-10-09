@@ -1,7 +1,7 @@
 {
   "id": "evt_seisme_de_gallipoli",
   "title": "Le séisme de Gallipoli",
-  "text": "Dans la nuit, la terre tremble sur la Chersonèse de Thrace ; les murailles de Gallipoli s'effondrent et les habitants grecs s'enfuient. Süleyman Pacha y installe aussitôt des colons turcs venus d'Anatolie : les [[cdx_ottomans|Ottomans]] ont désormais une ville en Europe.",
+  "text": "Dans la nuit, la terre tremble sur la Chersonèse de Thrace ; les murailles de Gallipoli s’effondrent et les habitants grecs s’enfuient. Süleyman Pacha y installe aussitôt des colons turcs venus d’Anatolie : les [[cdx_ottomans|Ottomans]] ont désormais une ville en Europe.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -1,7 +1,7 @@
 {
   "id": "evt_constance",
   "title": "Le concile de Constance",
-  "text": "À l'appel de l'empereur Sigismond, prélats, docteurs et princes de toute la chrétienté se réunissent à Constance pour rendre à l'Église un seul pasteur. Le concile se proclame au-dessus des papes et entend juger aussi l'hérésie de Jean Hus.",
+  "text": "À l’appel de l’empereur Sigismond, prélats, docteurs et princes de toute la chrétienté se réunissent à Constance pour rendre à l’Église un seul pasteur. Le concile se proclame au-dessus des papes et entend juger aussi l’hérésie de Jean Hus.",
   "kind": "historical",
   "trigger": {
     "date": {

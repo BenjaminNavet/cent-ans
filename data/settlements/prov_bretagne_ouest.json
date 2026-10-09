@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Cité épiscopale de Cornouaille au confluent de l'Odet et du Steir.",
+    "description": "Cité épiscopale de Cornouaille au confluent de l’Odet et du Steir.",
     "sources": [
       "Quimper"
     ]
@@ -103,7 +103,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg de pèlerinage autour du culte de saint Ronan (la Troménie) ; ses toiles à voile ne feront sa richesse qu'au XVe siècle.",
+    "description": "Bourg de pèlerinage autour du culte de saint Ronan (la Troménie) ; ses toiles à voile ne feront sa richesse qu’au XVe siècle.",
     "sources": [
       "Locronan"
     ]
@@ -206,7 +206,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Bourg-pont sur l'Elorn, tête de navigation vers la rade de Brest.",
+    "description": "Bourg-pont sur l’Elorn, tête de navigation vers la rade de Brest.",
     "sources": [
       "Landerneau"
     ]
@@ -256,7 +256,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg autour d'un prieuré augustin sur la rade de Brest.",
+    "description": "Bourg autour d’un prieuré augustin sur la rade de Brest.",
     "sources": [
       "Daoulas"
     ]

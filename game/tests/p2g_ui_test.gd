@@ -237,7 +237,7 @@ func _check_start_menu() -> void:
 			_collect_tool_texts(dialog)
 		dialog.call("close")
 		await _settle()
-		_check_closed(layout, dialog, "SaveLoadDialog (menu d'accueil)")
+		_check_closed(layout, dialog, "SaveLoadDialog (menu d’accueil)")
 	menu.queue_free()
 	await _settle()
 	_check_c2(not is_instance_valid(dialog), "the start menu SaveLoadDialog should be freed with the menu")

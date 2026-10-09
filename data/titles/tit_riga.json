@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'azur à deux clefs d'or en sautoir.",
-    "description": "Deux clefs de saint Pierre croisées, emblème de l'Église de Riga.",
+    "description": "Deux clefs de saint Pierre croisées, emblème de l’Église de Riga.",
     "primary_color": "#1F3A93",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -27,8 +27,8 @@
   "objectives": [
     {
       "id": "obj_riga_arch_hold",
-      "title": "Garder l'Erzstift",
-      "description": "Tenir les terres de l'Église de Riga.",
+      "title": "Garder l’Erzstift",
+      "description": "Tenir les terres de l’Église de Riga.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_riga"
@@ -46,7 +46,7 @@
       }
     }
   ],
-  "description": "Principauté séculière de l'archevêque de Riga, prince d'Empire depuis 1255.",
+  "description": "Principauté séculière de l’archevêque de Riga, prince d’Empire depuis 1255.",
   "sources": [
     "Archevêché de Riga"
   ]

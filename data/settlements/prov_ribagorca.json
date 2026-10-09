@@ -45,7 +45,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg marchand de la Ribagorce, sur l'Ésera.",
+    "description": "Bourg marchand de la Ribagorce, sur l’Ésera.",
     "sources": [
       "Graus"
     ]
@@ -56,7 +56,7 @@
     "kind": "abbey",
     "name": {
       "display": "Roda de Isábena",
-      "local": "Roda d'Isàvena",
+      "local": "Roda d’Isàvena",
       "local_language": "catalan"
     },
     "lonlat": [

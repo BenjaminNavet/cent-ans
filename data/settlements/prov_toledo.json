@@ -25,7 +25,7 @@
       "bld_forge"
     ],
     "port": false,
-    "description": "Tolède, ancienne capitale wisigothique et siège primatial d'Espagne.",
+    "description": "Tolède, ancienne capitale wisigothique et siège primatial d’Espagne.",
     "sources": [
       "Alphonse XI de Castille",
       "Tolède",
@@ -54,7 +54,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville modeste de Nouvelle-Castille dotée d'un alcázar, encore loin de son destin de capitale.",
+    "description": "Ville modeste de Nouvelle-Castille dotée d’un alcázar, encore loin de son destin de capitale.",
     "sources": [
       "Madrid"
     ]
@@ -108,7 +108,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande close sur le Tage, dépendant de l'archevêché de Tolède.",
+    "description": "Ville marchande close sur le Tage, dépendant de l’archevêché de Tolède.",
     "sources": [
       "Talavera de la Reina"
     ]
@@ -134,7 +134,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Seigneurie et résidence des archevêques de Tolède, dotée d'un studium generale par Sanche IV en 1293.",
+    "description": "Seigneurie et résidence des archevêques de Tolède, dotée d’un studium generale par Sanche IV en 1293.",
     "sources": [
       "Alcalá de Henares",
       "Université d'Alcalá"
@@ -160,7 +160,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg de la Manche tolédane, commanderie de l'ordre de Santiago.",
+    "description": "Bourg de la Manche tolédane, commanderie de l’ordre de Santiago.",
     "sources": [
       "Ocaña (Espagne)",
       "Ordre de Santiago"

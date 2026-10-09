@@ -1,7 +1,7 @@
 {
   "id": "prov_ancona",
   "name": {
-    "display": "Marche d'Ancône et Ombrie",
+    "display": "Marche d’Ancône et Ombrie",
     "local": "Ancona",
     "local_language": "toscan"
   },
@@ -95,7 +95,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 4500,
-  "description": "Marche d'Ancône et duché de Spolète (Pérouse, Assise) : terres pontificales gouvernées par des recteurs pendant l'exil avignonnais, disputées par les seigneurs locaux (Montefeltro, Malatesta).",
+  "description": "Marche d’Ancône et duché de Spolète (Pérouse, Assise) : terres pontificales gouvernées par des recteurs pendant l’exil avignonnais, disputées par les seigneurs locaux (Montefeltro, Malatesta).",
   "sources": [
     "Marche d'Ancône",
     "Duché de Spolète",

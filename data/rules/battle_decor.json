@@ -1,5 +1,5 @@
 {
-  "description": "Villages et décor du champ de bataille (lot EP6) : paysages régionaux (hameaux en rue ou groupés autour de l'église, fermes isolées, moulins, église et cimetière, manoir à fossé, vignes, vergers, labours, prés et meules, haies bocagères), effets de saison, effets sur le terrain (couvert, vitesse, défense, charges brisées), camp et convoi de bagages de chaque armée et pillage du camp. Les nombres de hameaux, parcelles et fermes sont donnés pour le champ standard (1200 × 800 m) et suivent la surface du champ. Embarqué dans sim-battle à la compilation.",
+  "description": "Villages et décor du champ de bataille (lot EP6) : paysages régionaux (hameaux en rue ou groupés autour de l’église, fermes isolées, moulins, église et cimetière, manoir à fossé, vignes, vergers, labours, prés et meules, haies bocagères), effets de saison, effets sur le terrain (couvert, vitesse, défense, charges brisées), camp et convoi de bagages de chaque armée et pillage du camp. Les nombres de hameaux, parcelles et fermes sont donnés pour le champ standard (1200 × 800 m) et suivent la surface du champ. Embarqué dans sim-battle à la compilation.",
   "default_profile": "plaine",
   "terrain_profiles": {
     "plains": "plaine",

@@ -180,9 +180,9 @@ func open_panel() -> void:
 		var streak := int(outcome.get("victory_streak", 0))
 		if streak > 0:
 			var left := hold - streak
-			score_label.text += "\nTous les objectifs sont remplis : encore %d %s à les tenir pour l'emporter." % [left, "saison" if left <= 1 else "saisons"]
+			score_label.text += "\nTous les objectifs sont remplis : encore %d %s à les tenir pour l’emporter." % [left, "saison" if left <= 1 else "saisons"]
 		else:
-			score_label.text += "\nLa victoire exige de tenir tous les objectifs %d saisons d'affilée." % hold
+			score_label.text += "\nLa victoire exige de tenir tous les objectifs %d saisons d’affilée." % hold
 	score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	score_label.custom_minimum_size.x = WRAP_WIDTH
 	# Audit A3 D2 : le score n'était pas expliqué.
@@ -190,7 +190,7 @@ func open_panel() -> void:
 	TooltipHost.attach_plain(score_label, "campaign_score")
 	if objectives.is_empty():
 		var none := Label.new()
-		none.text = "Cette faction n'a pas d'objectifs historiques : survivre et prospérer."
+		none.text = "Cette faction n’a pas d’objectifs historiques : survivre et prospérer."
 		list.add_child(none)
 	for objective in objectives:
 		var row := VBoxContainer.new()

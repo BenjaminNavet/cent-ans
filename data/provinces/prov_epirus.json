@@ -1,7 +1,7 @@
 {
   "id": "prov_epirus",
   "name": {
-    "display": "Despotat d'Épire",
+    "display": "Despotat d’Épire",
     "local": "Ἤπειρος",
     "local_language": "grec"
   },
@@ -90,9 +90,9 @@
   ],
   "fortification_level": 3,
   "base_supply": 4000,
-  "description": "Despotat d'Arta et de Janina, aux mains des Orsini ; l'empereur Andronic III l'annexera en 1338 sans combat. Le pays vit une transition dynastique trouble.",
+  "description": "Despotat d’Arta et de Janina, aux mains des Orsini ; l’empereur Andronic III l’annexera en 1338 sans combat. Le pays vit une transition dynastique trouble.",
   "sources": [
-    "Despotat d'Épire",
+    "Despotat d’Épire",
     "Arta",
     "Ioannina"
   ]

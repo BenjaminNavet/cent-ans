@@ -51,7 +51,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ancienne capitale des Fatimides, presqu'île fortifiée.",
+    "description": "Ancienne capitale des Fatimides, presqu’île fortifiée.",
     "sources": [
       "Mahdia"
     ]
@@ -104,7 +104,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port d'huile d'olive et d'éponges, ville marchande de l'Ifriqiya.",
+    "description": "Port d’huile d’olive et d’éponges, ville marchande de l’Ifriqiya.",
     "sources": [
       "Sfax"
     ]

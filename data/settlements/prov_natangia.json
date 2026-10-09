@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château et ville de Barthie sur l'Alle.",
+    "description": "Château et ville de Barthie sur l’Alle.",
     "sources": [
       "Bartoszyce"
     ]
@@ -47,7 +47,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville de l'évêque de Warmie sur la Passarge, de droit de Lübeck.",
+    "description": "Ville de l’évêque de Warmie sur la Passarge, de droit de Lübeck.",
     "sources": [
       "Braniewo"
     ]
@@ -72,7 +72,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse de l'évêque de Warmie, alors en bois et terre.",
+    "description": "Forteresse de l’évêque de Warmie, alors en bois et terre.",
     "sources": [
       "Lidzbark Warmiński"
     ]

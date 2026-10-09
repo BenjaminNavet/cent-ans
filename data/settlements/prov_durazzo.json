@@ -49,7 +49,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse de l'Arbanon.",
+    "description": "Forteresse de l’Arbanon.",
     "sources": [
       "Krujë"
     ]
@@ -76,7 +76,7 @@
       "bld_collegiate_church"
     ],
     "port": true,
-    "description": "Ville portuaire à l'embouchure du Drin.",
+    "description": "Ville portuaire à l’embouchure du Drin.",
     "sources": [
       "Lezhë"
     ]

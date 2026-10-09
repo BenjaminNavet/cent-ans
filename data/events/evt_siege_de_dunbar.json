@@ -1,7 +1,7 @@
 {
   "id": "evt_siege_de_dunbar",
   "title": "Black Agnes tient Dunbar",
-  "text": "Depuis le 13 janvier 1338, le comte de Salisbury assiège Dunbar. Face à lui, une femme : Agnès Randolph, « [[cdx_black_agnes|Black Agnes]] », qui fait épousseter ses créneaux d'un linge après chaque volée de pierres et écrase d'un rocher la « truie » des sapeurs anglais. Ravitaillée par mer, la forteresse tient cinq mois ; le 10 juin, Salisbury lève le camp après avoir englouti près de 6 000 livres.",
+  "text": "Depuis le 13 janvier 1338, le comte de Salisbury assiège Dunbar. Face à lui, une femme : Agnès Randolph, « [[cdx_black_agnes|Black Agnes]] », qui fait épousseter ses créneaux d’un linge après chaque volée de pierres et écrase d’un rocher la « truie » des sapeurs anglais. Ravitaillée par mer, la forteresse tient cinq mois ; le 10 juin, Salisbury lève le camp après avoir englouti près de 6 000 livres.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -35,7 +35,7 @@
   },
   "options": [
     {
-      "text": "Lever le siège et sauver ce qui peut l'être",
+      "text": "Lever le siège et sauver ce qui peut l’être",
       "effects": [
         {
           "type": "prestige",
@@ -55,7 +55,7 @@
       "ai_weight": 2
     },
     {
-      "text": "S'obstiner et payer de nouveaux engins",
+      "text": "S’obstiner et payer de nouveaux engins",
       "effects": [
         {
           "type": "prestige",

@@ -1,8 +1,8 @@
 {
   "id": "chr_obizzo_iii_d_este",
   "name": {
-    "display": "Obizzo III d'Este",
-    "local": "Obizzo III d'Este",
+    "display": "Obizzo III d’Este",
+    "local": "Obizzo III d’Este",
     "local_language": "italien"
   },
   "sex": "male",
@@ -24,10 +24,10 @@
   "piety": 55,
   "starting_location": "prov_ferrara",
   "status": "at_court",
-  "description": "Marquis de Ferrare, vicaire pontifical depuis 1329 après la guerre de Ferrare ; gouverne en 1337 avec son frère Nicolò Ier (leur aîné Rinaldo est mort en 1335), selon un partage du pouvoir propre à la maison d'Este de cette génération. Son fils Aldobrandino II est né en 1335.",
+  "description": "Marquis de Ferrare, vicaire pontifical depuis 1329 après la guerre de Ferrare ; gouverne en 1337 avec son frère Nicolò Ier (leur aîné Rinaldo est mort en 1335), selon un partage du pouvoir propre à la maison d’Este de cette génération. Son fils Aldobrandino II est né en 1335.",
   "sources": [
     "Maison d'Este",
-    "Obizzo III d'Este"
+    "Obizzo III d’Este"
   ],
   "titles": [
     {

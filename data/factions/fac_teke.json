@@ -17,7 +17,7 @@
   "primary_title": "tit_teke",
   "heraldry": {
     "blazon": "D'or à la nef de sinople.",
-    "description": "Nef d'Antalya ; couleurs de convention.",
+    "description": "Nef d’Antalya ; couleurs de convention.",
     "primary_color": "#F2C230",
     "secondary_color": "#2E7D46",
     "uncertain": true,
@@ -40,7 +40,7 @@
     "trade": 70,
     "piety": 50
   },
-  "description": "Beylik d'Antalya, fondé vers 1321 ; port marchand et base de corsaires face à Chypre ; le bey en exercice n'est pas identifié.",
+  "description": "Beylik d’Antalya, fondé vers 1321 ; port marchand et base de corsaires face à Chypre ; le bey en exercice n’est pas identifié.",
   "sources": [
     "Teke"
   ]

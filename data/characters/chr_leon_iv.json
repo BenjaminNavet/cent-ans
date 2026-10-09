@@ -1,7 +1,7 @@
 {
   "id": "chr_leon_iv",
   "name": {
-    "display": "Léon IV d'Arménie",
+    "display": "Léon IV d’Arménie",
     "local": "Լևոն Դ",
     "local_language": "arménien"
   },
@@ -22,7 +22,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Roi d'Arménie",
+      "title": "Roi d’Arménie",
       "from": {
         "value": "1320"
       },
@@ -41,7 +41,7 @@
   "piety": 65,
   "starting_location": "prov_sis",
   "status": "at_court",
-  "description": "Fils d'Oshin, roi à onze ans ; époux de Constance de Sicile depuis 1331. Au printemps 1337, les Mamelouks envahissent la Cilicie et lui imposent la cession d'Ayas.",
+  "description": "Fils d’Oshin, roi à onze ans ; époux de Constance de Sicile depuis 1331. Au printemps 1337, les Mamelouks envahissent la Cilicie et lui imposent la cession d’Ayas.",
   "sources": [
     "Leo IV, King of Armenia"
   ]

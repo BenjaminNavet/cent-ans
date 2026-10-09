@@ -21,7 +21,7 @@
       "mode": "percent"
     }
   ],
-  "description": "Ordre de paiement tiré sur un correspondant d'une autre place : l'argent voyage sans escorte.",
+  "description": "Ordre de paiement tiré sur un correspondant d’une autre place : l’argent voyage sans escorte.",
   "sources": [
     "Lettre de change",
     "Compagnie des Bardi",

@@ -2,13 +2,13 @@
   "id": "tit_urbino",
   "rank": "county",
   "name": {
-    "display": "Comté d'Urbin",
+    "display": "Comté d’Urbin",
     "local": "Contea di Urbino",
     "local_language": "marchigian"
   },
   "heraldry": {
     "blazon": "D'or à l'aigle de sable.",
-    "description": "Aigle noire sur or, motif attribué aux Montefeltro au XIVe siècle ; les armes exactes de cette période restent incertaines (le blason ducal fixé au XVe siècle ne s'applique pas encore).",
+    "description": "Aigle noire sur or, motif attribué aux Montefeltro au XIVe siècle ; les armes exactes de cette période restent incertaines (le blason ducal fixé au XVe siècle ne s’applique pas encore).",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },

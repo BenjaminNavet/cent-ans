@@ -1,5 +1,5 @@
 {
-  "description": "Compagnies de mercenaires (lot TW2-T3, ADR 0103) : réserves régionales par époque, engagement par l'armée elle-même dans sa région, coût initial élevé, solde majorée, impayés. Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T3.",
+  "description": "Compagnies de mercenaires (lot TW2-T3, ADR 0103) : réserves régionales par époque, engagement par l’armée elle-même dans sa région, coût initial élevé, solde majorée, impayés. Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T3.",
   "hire_cost_percent": 150,
   "upkeep_percent": 175,
   "hires_per_army_per_turn": 2,

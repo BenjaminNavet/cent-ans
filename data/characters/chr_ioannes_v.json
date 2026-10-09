@@ -18,7 +18,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Héritier de l'Empire"
+      "title": "Héritier de l’Empire"
     }
   ],
   "skills": {
@@ -36,7 +36,7 @@
   },
   "starting_location": "prov_constantinople",
   "status": "minor",
-  "description": "Fils aîné d'Andronic III, à cinq ans ; monté sur le trône à neuf ans, il subira Cantacuzène et les Turcs.",
+  "description": "Fils aîné d’Andronic III, à cinq ans ; monté sur le trône à neuf ans, il subira Cantacuzène et les Turcs.",
   "sources": [
     "John V Palaiologos"
   ]

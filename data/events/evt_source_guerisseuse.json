@@ -1,7 +1,7 @@
 {
   "id": "evt_source_guerisseuse",
   "title": "Une source guérisseuse",
-  "text": "Une source, près d'un vieux chêne, passe pour guérir les fièvres et les yeux malades. Des pèlerins de trois évêchés y viennent, et le curé se plaint de ces dévotions sans messe.",
+  "text": "Une source, près d’un vieux chêne, passe pour guérir les fièvres et les yeux malades. Des pèlerins de trois évêchés y viennent, et le curé se plaint de ces dévotions sans messe.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 90

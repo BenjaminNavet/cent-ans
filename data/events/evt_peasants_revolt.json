@@ -1,7 +1,7 @@
 {
   "id": "evt_peasants_revolt",
   "title": "La révolte des Paysans",
-  "text": "La troisième capitation en quatre ans a mis le feu à l'Essex et au Kent. Wat Tyler et le prêtre John Ball marchent sur Londres, brûlent le Savoy et décapitent l'archevêque de Cantorbéry. « Quand Adam bêchait et Ève filait, qui donc était gentilhomme ? »",
+  "text": "La troisième capitation en quatre ans a mis le feu à l’Essex et au Kent. Wat Tyler et le prêtre John Ball marchent sur Londres, brûlent le Savoy et décapitent l’archevêque de Cantorbéry. « Quand Adam bêchait et Ève filait, qui donc était gentilhomme ? »",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Principauté épiscopale d'Utrecht (Nedersticht et Oversticht : Deventer, Zwolle, Kampen), évêque Jean III de Diest (1322-1340). Villes de l'IJssel liées à la Hanse.",
+    "description": "Principauté épiscopale d’Utrecht (Nedersticht et Oversticht : Deventer, Zwolle, Kampen), évêque Jean III de Diest (1322-1340). Villes de l’IJssel liées à la Hanse.",
     "sources": [
       "Principauté épiscopale d'Utrecht",
       "Utrecht"
@@ -51,7 +51,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande sur l'Eem, l'une des principales villes de la principauté épiscopale d'Utrecht.",
+    "description": "Ville marchande sur l’Eem, l’une des principales villes de la principauté épiscopale d’Utrecht.",
     "sources": [
       "Amersfoort"
     ]
@@ -76,7 +76,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié des seigneurs d'IJsselstein sur la Hollandse IJssel, ayant obtenu des droits de ville en 1330.",
+    "description": "Bourg fortifié des seigneurs d’IJsselstein sur la Hollandse IJssel, ayant obtenu des droits de ville en 1330.",
     "sources": [
       "IJsselstein"
     ]
@@ -102,7 +102,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville sur le Rhin-Lek héritière de l'ancien emporium de Dorestad, dotée de droits urbains vers 1300.",
+    "description": "Ville sur le Rhin-Lek héritière de l’ancien emporium de Dorestad, dotée de droits urbains vers 1300.",
     "sources": [
       "Wijk bij Duurstede"
     ]
@@ -154,7 +154,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine fondée en 1122 près de De Bilt, aux portes d'Utrecht.",
+    "description": "Abbaye bénédictine fondée en 1122 près de De Bilt, aux portes d’Utrecht.",
     "sources": [
       "Abdij Oostbroek"
     ]
@@ -179,7 +179,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château des seigneurs de Montfoort, vassaux puissants de l'évêque d'Utrecht, sur la Hollandse IJssel.",
+    "description": "Château des seigneurs de Montfoort, vassaux puissants de l’évêque d’Utrecht, sur la Hollandse IJssel.",
     "sources": [
       "Montfoort"
     ]

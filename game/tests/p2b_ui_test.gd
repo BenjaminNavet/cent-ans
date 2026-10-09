@@ -135,7 +135,7 @@ func _check_tech_panel(map: Node3D) -> void:
 	map.call("_on_tech_panel_requested")
 	await process_frame
 	var panel: Control = map.ui.tech_panel
-	if not _check_c2(panel.visible, "le panneau des technologies devrait s'ouvrir"):
+	if not _check_c2(panel.visible, "le panneau des technologies devrait s’ouvrir"):
 		return
 	_collect_font_sizes(panel)
 	_collect_tool_texts(panel)
@@ -153,16 +153,16 @@ func _check_diplomacy_panel(map: Node3D) -> void:
 	controller.call("open_panel")
 	await process_frame
 	var panel: Control = controller.panel
-	if not _check_c2(panel.visible, "l'écran de diplomatie devrait s'ouvrir"):
+	if not _check_c2(panel.visible, "l’écran de diplomatie devrait s’ouvrir"):
 		return
 	_collect_font_sizes(panel)
 	_collect_tool_texts(panel)
 	# Fermeture par le bouton « × » du panneau (construit en code, sans référence exposée).
 	var close_button := _find_close_button(panel)
-	if check(close_button != null, "bouton de fermeture de l'écran de diplomatie introuvable"):
+	if check(close_button != null, "bouton de fermeture de l’écran de diplomatie introuvable"):
 		close_button.pressed.emit()
 		await process_frame
-		_check_c2(not panel.visible, "l'écran de diplomatie devrait se refermer (bouton ×, UiMotion)")
+		_check_c2(not panel.visible, "l’écran de diplomatie devrait se refermer (bouton ×, UiMotion)")
 
 
 func _find_close_button(node: Node) -> Button:

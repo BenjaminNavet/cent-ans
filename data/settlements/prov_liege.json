@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancienne cité mosane, l'une des « bonnes villes » de la principauté épiscopale de Liège.",
+    "description": "Ancienne cité mosane, l’une des « bonnes villes » de la principauté épiscopale de Liège.",
     "sources": [
       "Huy"
     ]
@@ -104,7 +104,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse épiscopale liégeoise gardant l'approche des Ardennes.",
+    "description": "Forteresse épiscopale liégeoise gardant l’approche des Ardennes.",
     "sources": [
       "Château de Franchimont"
     ]
@@ -182,7 +182,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Plus ancienne ville des Pays-Bas, d'origine romaine, « bonne ville » thioise de la principauté de Liège, enceinte du XIIIe siècle.",
+    "description": "Plus ancienne ville des Pays-Bas, d’origine romaine, « bonne ville » thioise de la principauté de Liège, enceinte du XIIIe siècle.",
     "sources": [
       "Tongres"
     ]
@@ -207,7 +207,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "« Bonne ville » de la principauté sur la Meuse, en aval de Liège, siège d'un chapitre collégial.",
+    "description": "« Bonne ville » de la principauté sur la Meuse, en aval de Liège, siège d’un chapitre collégial.",
     "sources": [
       "Visé"
     ]

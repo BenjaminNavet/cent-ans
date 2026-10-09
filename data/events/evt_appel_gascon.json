@@ -1,7 +1,7 @@
 {
   "id": "evt_appel_gascon",
-  "title": "L'appel des seigneurs gascons",
-  "text": "Accablés par le [[cdx_taille|fouage]] du prince de Galles, le comte d'Armagnac et le sire d'Albret en appellent au roi de France, suzerain de l'Aquitaine. Charles V cite le prince devant le Parlement ; celui-ci répond qu'il viendra, le bassinet en tête et soixante mille hommes derrière lui.",
+  "title": "L’appel des seigneurs gascons",
+  "text": "Accablés par le [[cdx_taille|fouage]] du prince de Galles, le comte d’Armagnac et le sire d’Albret en appellent au roi de France, suzerain de l’Aquitaine. Charles V cite le prince devant le Parlement ; celui-ci répond qu’il viendra, le bassinet en tête et soixante mille hommes derrière lui.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -26,7 +26,7 @@
   },
   "options": [
     {
-      "text": "Recevoir l'appel et confisquer l'Aquitaine",
+      "text": "Recevoir l’appel et confisquer l’Aquitaine",
       "effects": [
         {
           "type": "declare_war",

@@ -167,8 +167,8 @@ static func demo_army(count: int = 8) -> Dictionary:
 		{"unit_type": "unit_knights", "name": "Chevaliers", "strength": 60, "max_strength": 60, "morale": 80},
 		{"unit_type": "unit_knights", "name": "Chevaliers", "strength": 52, "max_strength": 60, "morale": 74},
 		{"unit_type": "unit_knights", "name": "Chevaliers", "strength": 60, "max_strength": 60, "morale": 80},
-		{"unit_type": "unit_men_at_arms_foot", "name": "Hommes d'armes à pied", "strength": 80, "max_strength": 80, "morale": 75},
-		{"unit_type": "unit_men_at_arms_foot", "name": "Hommes d'armes à pied", "strength": 61, "max_strength": 80, "morale": 58},
+		{"unit_type": "unit_men_at_arms_foot", "name": "Hommes d’armes à pied", "strength": 80, "max_strength": 80, "morale": 75},
+		{"unit_type": "unit_men_at_arms_foot", "name": "Hommes d’armes à pied", "strength": 61, "max_strength": 80, "morale": 58},
 		{"unit_type": "unit_crossbowmen", "name": "Arbalétriers", "strength": 100, "max_strength": 100, "morale": 45},
 		{"unit_type": "unit_genoese_crossbowmen", "name": "Arbalétriers génois", "strength": 34, "max_strength": 100, "morale": 18},
 		{"unit_type": "unit_mounted_sergeants", "name": "Sergents montés", "strength": 80, "max_strength": 80, "morale": 55},
@@ -199,7 +199,7 @@ static func demo_character() -> Dictionary:
 
 static func demo_alerts() -> Array:
 	return [
-		{"kind": "chronicle_decision", "text": "Confisquer la Guyenne d'Édouard III, vassal félon ?", "blocking": true},
+		{"kind": "chronicle_decision", "text": "Confisquer la Guyenne d’Édouard III, vassal félon ?", "blocking": true},
 		{"kind": "enemy_army", "text": "Ost anglais signalé en Flandre wallonne", "province_id": "prov_flandre_wallonne", "army_id": "army_12"},
 		{"kind": "enemy_army", "text": "Troupes du comte de Hainaut aux marches du Cambrésis", "province_id": "prov_hainaut", "army_id": "army_17"},
 		{"kind": "siege", "text": "Le connétable assiège Saint-Macaire (Guyenne)", "province_id": "prov_guyenne"},
@@ -216,16 +216,16 @@ static func demo_news() -> Array:
 		{"kind": "birth", "title": "Naissance de Venceslas, fils du roi Jean de Bohême",
 			"text": "À Prague, la reine Béatrice donne un fils au roi aveugle.", "faction_id": "fac_bohemia"},
 		{"kind": "death", "title": "Mort de Guillaume Iᵉʳ, comte de Hainaut",
-			"text": "Le beau-père d'Édouard III s'éteint à Valenciennes.", "faction_id": "fac_hainaut"},
+			"text": "Le beau-père d’Édouard III s’éteint à Valenciennes.", "faction_id": "fac_hainaut"},
 		{"kind": "succession", "title": "Guillaume II succède en Hainaut",
 			"text": "Le nouveau comte penche pour le parti anglais.", "faction_id": "fac_hainaut"},
 		{"kind": "faction_met", "title": "Le comte Louis de Nevers se range au parti du roi",
 			"text": "La Flandre reste fidèle à son suzerain, malgré les villes drapières.", "faction_id": "fac_flanders"},
 		{"kind": "war_declared", "title": "Philippe VI confisque la Guyenne",
-			"text": "Le 24 mai 1337, le roi déclare le duché confisqué pour félonie : Édouard III a donné asile à Robert d'Artois.",
+			"text": "Le 24 mai 1337, le roi déclare le duché confisqué pour félonie : Édouard III a donné asile à Robert d’Artois.",
 			"faction_id": "fac_france", "province_id": "prov_guyenne"},
 		{"kind": "war_declared", "title": "Édouard III revendique la couronne de France",
-			"text": "Petit-fils de Philippe le Bel par sa mère Isabelle, le roi d'Angleterre défie « Philippe de Valois, qui se dit roi de France ».",
+			"text": "Petit-fils de Philippe le Bel par sa mère Isabelle, le roi d’Angleterre défie « Philippe de Valois, qui se dit roi de France ».",
 			"faction_id": "fac_england"},
 	]
 

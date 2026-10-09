@@ -1,7 +1,7 @@
 {
   "id": "enc_ecorcheurs",
   "title": "Les écorcheurs",
-  "text": "Des bandes licenciées après la paix d'Arras battent l'estrade : on les appelle écorcheurs, car ils ne laissent aux gens que la chemise. Leur chef exige vivres et argent pour passer son chemin.",
+  "text": "Des bandes licenciées après la paix d’Arras battent l’estrade : on les appelle écorcheurs, car ils ne laissent aux gens que la chemise. Leur chef exige vivres et argent pour passer son chemin.",
   "spawn": {
     "from_year": 1435,
     "to_year": 1445,
@@ -52,7 +52,7 @@
           ]
         },
         "on_loss": {
-          "text": "Les écorcheurs l'emportent et redoublent de cruauté.",
+          "text": "Les écorcheurs l’emportent et redoublent de cruauté.",
           "effects": [
             {
               "type": "prestige",

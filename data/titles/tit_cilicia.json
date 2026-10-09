@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'or au lion de gueules.",
-    "description": "Lion de gueules sur or des rois d'Arménie, tel que le donnent les armoriaux occidentaux (écartelés des Lusignan d'Arménie).",
+    "description": "Lion de gueules sur or des rois d’Arménie, tel que le donnent les armoriaux occidentaux (écartelés des Lusignan d’Arménie).",
     "primary_color": "#F2C230",
     "secondary_color": "#B0182B",
     "uncertain": true,
@@ -37,7 +37,7 @@
     },
     {
       "id": "obj_cilicia_ayas",
-      "title": "Le port d'Ayas",
+      "title": "Le port d’Ayas",
       "description": "Conserver Adana, Tarse et Ayas.",
       "condition": {
         "kind": "hold_provinces",
@@ -58,7 +58,7 @@
       }
     }
   ],
-  "description": "Dernier royaume arménien, en Cilicie, pris en étau entre Mamelouks et Turkmènes ; Léon IV (1320-1341) attend en vain l'aide de l'Occident. Ayas tombera dans le courant de 1337.",
+  "description": "Dernier royaume arménien, en Cilicie, pris en étau entre Mamelouks et Turkmènes ; Léon IV (1320-1341) attend en vain l’aide de l’Occident. Ayas tombera dans le courant de 1337.",
   "sources": [
     "Kingdom of Armenia (Cilicia)",
     "Leo IV, King of Armenia"

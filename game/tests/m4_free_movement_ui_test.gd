@@ -118,7 +118,7 @@ func _run() -> void:
 	check(ctl.is_animating(army_id), "the march should be animated")
 	ctl.finish_animations()
 	var marker_world: Vector3 = map.armies.world_position_of(army_id)
-	check(Vector2(marker_world.x, marker_world.z).distance_to(position) < 0.5, "the marker should stand at the army's free position")
+	check(Vector2(marker_world.x, marker_world.z).distance_to(position) < 0.5, "the marker should stand at the army’s free position")
 	check(ctl.bubble.visible, "the bubble should be redrawn after the move")
 
 	# 4-5. Armée ennemie à portée : cercle de zone de contrôle, attaque.

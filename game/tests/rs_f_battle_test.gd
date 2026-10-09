@@ -49,7 +49,7 @@ func _key(code: Key, alt: bool = false, shift: bool = false) -> InputEventKey:
 func _check_pure() -> void:
 	var off: Dictionary = BAR.burn_view({"siege": true, "available": false, "reason": "aucune maison à portée"})
 	check(str(off["id"]) == "burn" and str(off["name"]) == "Incendier", "burn view: id and name")
-	check(not bool(off["available"]) and str(off["reason"]) == "aucune maison à portée", "burn view: unavailable with the core's reason")
+	check(not bool(off["available"]) and str(off["reason"]) == "aucune maison à portée", "burn view: unavailable with the core’s reason")
 	var on: Dictionary = BAR.burn_view({"siege": true, "available": true, "target": "la porte", "distance_m": 4.4})
 	check(bool(on["available"]) and str(on["description"]).contains("Cible : la porte, à 4 m"), "burn view: target named (%s)" % on["description"])
 	check(BattleHotkeys.key_label("burn") == "I", "burn shortcut in the key table (%s)" % BattleHotkeys.key_label("burn"))

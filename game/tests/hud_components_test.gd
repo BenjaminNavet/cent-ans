@@ -66,7 +66,7 @@ func _test_army_strip() -> void:
 
 	# Noms : jamais coupés au milieu d'un mot (mot entier ou abréviation terminée par un point).
 	var font := strip.get_theme_default_font()
-	for name: String in ["Hommes d'armes à pied", "Arbalétriers génois", "Archers à l'arc long", "Arbalétriers"]:
+	for name: String in ["Hommes d’armes à pied", "Arbalétriers génois", "Archers à l’arc long", "Arbalétriers"]:
 		for width in [40.0, 54.0, 74.0]:
 			var fitted := ArmyStrip.fit_name(name, font, width)
 			var original: PackedStringArray = str(name).split(" ", false)
@@ -153,7 +153,7 @@ func _test_news_letters() -> void:
 	check(letters.get_items().size() == 5, "dismiss should remove a letter")
 	letters.clear()
 	check(letters.get_items().is_empty(), "clear should empty the pile")
-	var war := NewsLetters.news_from_event({"kind": "war_declared", "text_fr": "L'Angleterre déclare la guerre à la France.", "faction": "fac_england", "province": "", "army": ""})
+	var war := NewsLetters.news_from_event({"kind": "war_declared", "text_fr": "L’Angleterre déclare la guerre à la France.", "faction": "fac_england", "province": "", "army": ""})
 	check(war.get("kind") == "war_declared" and war.get("faction_id") == "fac_england", "news_from_event: %s" % war)
 	check(NewsLetters.news_from_event({"kind": "income", "text_fr": "Revenus"}).is_empty(), "income is not news")
 	letters.queue_free()

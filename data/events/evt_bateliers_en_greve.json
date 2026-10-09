@@ -1,7 +1,7 @@
 {
   "id": "evt_bateliers_en_greve",
   "title": "Les bateliers cessent le travail",
-  "text": "Les bateliers du fleuve refusent de haler les bateaux : ils réclament une hausse du prix du passage, que les péagers ont gelé. Les denrées s'amoncellent sur les quais.",
+  "text": "Les bateliers du fleuve refusent de haler les bateaux : ils réclament une hausse du prix du passage, que les péagers ont gelé. Les denrées s’amoncellent sur les quais.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 65,

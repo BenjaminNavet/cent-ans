@@ -18,7 +18,7 @@
   "primary_title": "tit_kiev",
   "heraldry": {
     "blazon": "D'azur à la croix d'or.",
-    "description": "Croix d'or sur azur, substitution pour la principauté (le trident rurikide n'est pas dessinable ici).",
+    "description": "Croix d’or sur azur, substitution pour la principauté (le trident rurikide n’est pas dessinable ici).",
     "primary_color": "#1F3F8F",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -52,7 +52,7 @@
     "trade": 50,
     "piety": 80
   },
-  "description": "L'ancienne capitale de la Rus', ruinée par les Mongols en 1240 ; le prince Fiodor, tributaire de la Horde d'Or, y règne sous l'influence lituanienne (incertain).",
+  "description": "L’ancienne capitale de la Rus', ruinée par les Mongols en 1240 ; le prince Fiodor, tributaire de la Horde d’Or, y règne sous l’influence lituanienne (incertain).",
   "sources": [
     "Fiodor de Kiev",
     "Principauté de Kiev"

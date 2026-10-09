@@ -44,13 +44,30 @@ static func bind_army_cap(button: Button, checks: Array[CheckBox], cap: int) -> 
 	refresh.call()
 
 
+static func _garrison_text(unit: Dictionary) -> String:
+	return "%s — %d/%d, moral %d" % [
+		unit_label(unit), int(unit.get("strength", 0)),
+		int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
+
+
 static func fill_garrison(list: Container, garrison: Array, selectable: bool) -> Array[CheckBox]:
 	clear(list)
 	var checks: Array[CheckBox] = []
+	# RX uifin : en lecture seule, les lignes identiques sont regroupées (« 2 × … »). Les cases à
+	# cocher restent une par unité (indices de la garnison envoyés au cœur).
+	var counts: Dictionary = {}
+	if not selectable:
+		for unit in garrison:
+			var key := _garrison_text(unit)
+			counts[key] = int(counts.get(key, 0)) + 1
+	var shown: Dictionary = {}
 	for unit in garrison:
-		var text := "%s — %d/%d, moral %d" % [
-			unit_label(unit), int(unit.get("strength", 0)),
-			int(unit.get("max_strength", 0)), int(unit.get("morale", 0))]
+		if not selectable and shown.has(_garrison_text(unit)):
+			continue
+		shown[_garrison_text(unit)] = true
+		var text := _garrison_text(unit)
+		if not selectable and int(counts[text]) > 1:
+			text = "%d × %s" % [int(counts[text]), text]
 		var unit_type: String = str(unit.get("unit_type", ""))
 		if selectable:
 			var check := CheckBox.new()
@@ -218,7 +235,7 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 	var refund := int(preview.get("refund", 0))
 	var upkeep_saved := int(preview.get("upkeep_saved", 0))
 	if can_demolish:
-		TooltipHost.attach_plain(button, "raze_building", {"body": "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]})
+		TooltipHost.attach_plain(button, "raze_building", {"body": "Rembourse %s ; économise %s d’entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]})
 	else:
 		TooltipHost.attach_plain(button, "raze_building", {"body": str(preview.get("reason", "indisponible"))})
 	if on_raze.is_valid():

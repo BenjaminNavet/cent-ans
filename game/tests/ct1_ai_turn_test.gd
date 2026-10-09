@@ -88,7 +88,7 @@ func _run() -> void:
 		if shown > 0:
 			check(replay.playing and _started == started_before + 1, "%s: replay started" % mode)
 			check(not _report_visible(map), "%s: season report waits for the replay" % mode)
-			check(replay.caption_text().begins_with("Tour de l'IA"), "%s: caption shown (%s)" % [mode, replay.caption_text()])
+			check(replay.caption_text().begins_with("Tour de l’IA"), "%s: caption shown (%s)" % [mode, replay.caption_text()])
 		check(int(stats.get("followed", -1)) <= int(tuning["max_followed_moves"]), "follow: capped followed moves")
 		var deadline := Time.get_ticks_msec() + TIMEOUT_MS
 		while replay.playing and Time.get_ticks_msec() < deadline:

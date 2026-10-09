@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Ville hanséatique enserrée d'une muraille de pierre, entrepôt de la Baltique.",
+    "description": "Ville hanséatique enserrée d’une muraille de pierre, entrepôt de la Baltique.",
     "sources": [
       "Visby"
     ]
@@ -49,7 +49,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne au centre de l'île.",
+    "description": "Abbaye cistercienne au centre de l’île.",
     "sources": [
       "Abbaye de Roma"
     ]

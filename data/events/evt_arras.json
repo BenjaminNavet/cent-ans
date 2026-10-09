@@ -1,7 +1,7 @@
 {
   "id": "evt_arras",
-  "title": "La paix d'Arras",
-  "text": "Sous l'égide des légats du pape, le duc de Bourgogne se réconcilie avec le roi Charles à Arras. Le roi désavoue le meurtre de [[cdx_traite_troyes|Montereau]] ; le duc est dispensé de lui rendre hommage. Les Anglais quittent le congrès, furieux.",
+  "title": "La paix d’Arras",
+  "text": "Sous l’égide des légats du pape, le duc de Bourgogne se réconcilie avec le roi Charles à Arras. Le roi désavoue le meurtre de [[cdx_traite_troyes|Montereau]] ; le duc est dispensé de lui rendre hommage. Les Anglais quittent le congrès, furieux.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -34,13 +34,13 @@
           "type": "opinion",
           "faction": "fac_france",
           "amount": 30,
-          "reason": "Paix d'Arras"
+          "reason": "Paix d’Arras"
         },
         {
           "type": "opinion",
           "faction": "fac_england",
           "amount": -30,
-          "reason": "La Bourgogne abandonne l'Angleterre"
+          "reason": "La Bourgogne abandonne l’Angleterre"
         },
         {
           "type": "prestige",
@@ -50,7 +50,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Rester fidèle à l'alliance anglaise",
+      "text": "Rester fidèle à l’alliance anglaise",
       "effects": [
         {
           "type": "opinion",

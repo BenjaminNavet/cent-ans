@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Château de l'Ordre et trois villes sur la Pregel ; cathédrale du Kneiphof en chantier.",
+    "description": "Château de l’Ordre et trois villes sur la Pregel ; cathédrale du Kneiphof en chantier.",
     "sources": [
       "Königsberg"
     ]
@@ -49,7 +49,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château de l'évêque de Sambie sur le Frisches Haff.",
+    "description": "Château de l’évêque de Sambie sur le Frisches Haff.",
     "sources": [
       "Primorsk (Fischhausen)"
     ]
@@ -74,7 +74,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'Ordre au bord méridional du Kurisches Haff.",
+    "description": "Château de l’Ordre au bord méridional du Kurisches Haff.",
     "sources": [
       "Polessk"
     ]
@@ -99,7 +99,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse de l'Ordre sur la Pregel, base des raids contre la Lituanie.",
+    "description": "Forteresse de l’Ordre sur la Pregel, base des raids contre la Lituanie.",
     "sources": [
       "Gvardeïsk"
     ]

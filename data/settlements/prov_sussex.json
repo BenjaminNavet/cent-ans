@@ -25,7 +25,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Sussex (rapes de Lewes, Arundel, Pevensey) et Surrey : forêt du Weald, forges, Cinque Ports de Hastings, Rye et Winchelsea. Comte d'Arundel Richard FitzAlan.",
+    "description": "Sussex (rapes de Lewes, Arundel, Pevensey) et Surrey : forêt du Weald, forges, Cinque Ports de Hastings, Rye et Winchelsea. Comte d’Arundel Richard FitzAlan.",
     "sources": [
       "Sussex",
       "Weald",
@@ -53,7 +53,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port des Cinque Ports, célèbre depuis la bataille de 1066, dont le havre commence à s'ensabler.",
+    "description": "Port des Cinque Ports, célèbre depuis la bataille de 1066, dont le havre commence à s’ensabler.",
     "sources": [
       "Hastings"
     ]
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Ville neuve des Cinque Ports reconstruite sur un plan en damier après la submersion de l'ancienne cité en 1287.",
+    "description": "Ville neuve des Cinque Ports reconstruite sur un plan en damier après la submersion de l’ancienne cité en 1287.",
     "sources": [
       "Winchelsea"
     ]
@@ -153,7 +153,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château des comtes d'Arundel, sur l'Arun.",
+    "description": "Château des comtes d’Arundel, sur l’Arun.",
     "sources": [
       "Château d'Arundel"
     ]
@@ -228,7 +228,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ancien port fluvial sur l'Adur, bourg royal saxon puis normand.",
+    "description": "Ancien port fluvial sur l’Adur, bourg royal saxon puis normand.",
     "sources": [
       "Steyning"
     ]

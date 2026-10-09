@@ -53,7 +53,7 @@
   },
   {
    "id": "goose",
-   "label": "Oies sauvages en V (passage d'automne et de printemps)",
+   "label": "Oies sauvages en V (passage d’automne et de printemps)",
    "behavior": "transit",
    "flocks": 2,
    "per_flock": 9,
@@ -103,7 +103,7 @@
   },
   {
    "id": "starling",
-   "label": "Nuée d'étourneaux (murmuration)",
+   "label": "Nuée d’étourneaux (murmuration)",
    "behavior": "orbit",
    "flocks": 2,
    "per_flock": 40,
@@ -246,7 +246,7 @@
   },
   {
    "id": "crane",
-   "label": "Grues cendrées (marais du Nord et de l'Est)",
+   "label": "Grues cendrées (marais du Nord et de l’Est)",
    "behavior": "wade",
    "flocks": 2,
    "per_flock": 6,
@@ -303,7 +303,7 @@
   },
   {
    "id": "stork",
-   "label": "Cigognes sur les toits (villes d'Alsace et de Pologne)",
+   "label": "Cigognes sur les toits (villes d’Alsace et de Pologne)",
    "behavior": "perch",
    "flocks": 6,
    "per_flock": 1,

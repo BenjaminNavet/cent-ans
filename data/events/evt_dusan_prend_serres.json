@@ -1,7 +1,7 @@
 {
   "id": "evt_dusan_prend_serres",
   "title": "Dušan prend Serrès",
-  "text": "Profitant de la guerre civile byzantine, [[cdx_etienne_dusan|Étienne Dušan]] a conquis la Macédoine place après place. Serrès, la grande ville du Strymon, lui ouvre ses portes ; à Noël, il s'y fait proclamer empereur des Serbes et des Grecs.",
+  "text": "Profitant de la guerre civile byzantine, [[cdx_etienne_dusan|Étienne Dušan]] a conquis la Macédoine place après place. Serrès, la grande ville du Strymon, lui ouvre ses portes ; à Noël, il s’y fait proclamer empereur des Serbes et des Grecs.",
   "kind": "historical",
   "trigger": {
     "date": {

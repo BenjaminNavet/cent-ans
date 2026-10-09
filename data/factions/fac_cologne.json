@@ -19,7 +19,7 @@
   "primary_title": "tit_cologne",
   "heraldry": {
     "blazon": "D'argent à la croix de sable.",
-    "description": "Croix noire sur champ d'argent, armes traditionnelles de l'archevêché-électorat de Cologne.",
+    "description": "Croix noire sur champ d’argent, armes traditionnelles de l’archevêché-électorat de Cologne.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#111111"
   },
@@ -48,7 +48,7 @@
     "trade": 65,
     "piety": 65
   },
-  "description": "Électorat ecclésiastique de Cologne, tenu par Walram de Juliers, archevêque de 1332 à 1349 ; la ville libre de Cologne, la plus grande cité d'Allemagne, échappe à son autorité temporelle directe depuis sa victoire communale de Worringen (1288).",
+  "description": "Électorat ecclésiastique de Cologne, tenu par Walram de Juliers, archevêque de 1332 à 1349 ; la ville libre de Cologne, la plus grande cité d’Allemagne, échappe à son autorité temporelle directe depuis sa victoire communale de Worringen (1288).",
   "sources": [
     "Électorat de Cologne",
     "Walram de Juliers"

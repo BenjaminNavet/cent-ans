@@ -51,7 +51,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port et bourg fortifié d'origine almoravide.",
+    "description": "Port et bourg fortifié d’origine almoravide.",
     "sources": [
       "Mostaganem"
     ]
@@ -78,7 +78,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Petit port commerçant du golfe d'Arzew.",
+    "description": "Petit port commerçant du golfe d’Arzew.",
     "sources": [
       "Arzew"
     ]

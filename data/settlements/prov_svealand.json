@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Siège de l'archevêque, cathédrale gothique en achèvement et vieille Uppsala.",
+    "description": "Siège de l’archevêque, cathédrale gothique en achèvement et vieille Uppsala.",
     "sources": [
       "Uppsala"
     ]
@@ -48,7 +48,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Ville insulaire à l'entrée du Mälar, château royal (le futur Tre Kronor) et port du fer.",
+    "description": "Ville insulaire à l’entrée du Mälar, château royal (le futur Tre Kronor) et port du fer.",
     "sources": [
       "Stockholm"
     ]

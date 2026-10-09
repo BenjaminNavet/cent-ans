@@ -1,7 +1,7 @@
 {
   "id": "evt_lords_appelants",
   "title": "Les lords Appelants",
-  "text": "Gloucester, Arundel et Warwick accusent de trahison les favoris du roi Richard. Robert de Vere est battu à Radcot Bridge ; le Parlement « sans merci » fait pendre ou exiler les conseillers du jeune roi, qui n'oubliera rien.",
+  "text": "Gloucester, Arundel et Warwick accusent de trahison les favoris du roi Richard. Robert de Vere est battu à Radcot Bridge ; le Parlement « sans merci » fait pendre ou exiler les conseillers du jeune roi, qui n’oubliera rien.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -42,7 +42,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Lever l'armée de Robert de Vere",
+      "text": "Lever l’armée de Robert de Vere",
       "effects": [
         {
           "type": "unrest",

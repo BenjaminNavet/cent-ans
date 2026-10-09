@@ -11,7 +11,7 @@ signal coinage_changed(level: String)
 
 const PRICE_MIN := 100.0
 const PRICE_MAX := 400.0
-const EXPLANATION := "Les rois « muent » la monnaie : moins d'argent fin dans chaque pièce rapporte un [[cdx_mutations_monetaires|seigneuriage]] immédiat, mais les prix montent et les rentes fixes des bourgeois et du clergé fondent. [[cdx_nicole_oresme|Nicole Oresme]] plaide pour une monnaie forte, stable, comptée en [[cdx_livre_tournois|livres tournois]]."
+const EXPLANATION := "Les rois « muent » la monnaie : moins d’argent fin dans chaque pièce rapporte un [[cdx_mutations_monetaires|seigneuriage]] immédiat, mais les prix montent et les rentes fixes des bourgeois et du clergé fondent. [[cdx_nicole_oresme|Nicole Oresme]] plaide pour une monnaie forte, stable, comptée en [[cdx_livre_tournois|livres tournois]]."
 
 var coinage: Dictionary = {}
 ## Boutons du sélecteur, par niveau (`strong`, `sound`, `debased`, `heavily_debased`).
@@ -59,7 +59,7 @@ func _init() -> void:
 	recoinage_label = _small_label(13)
 	add_child(recoinage_label)
 	changed_label = _small_label(12)
-	changed_label.text = "Monnaie déjà changée cette année : prochain changement l'an prochain."
+	changed_label.text = "Monnaie déjà changée cette année : prochain changement l’an prochain."
 	changed_label.add_theme_color_override("font_color", MUTED_COLOR)
 	changed_label.hide()
 	add_child(changed_label)

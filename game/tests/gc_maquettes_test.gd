@@ -160,7 +160,7 @@ func _run() -> void:
 	var color_of := func(faction: String) -> Color:
 		return palette.get(faction, Color(0.3, 0.6, 0.3))
 	maquettes.refresh(null, color_of)
-	check(maquettes.banner_color(amiens) == color_of.call(controller), "Amiens banner takes its controller's colour")
+	check(maquettes.banner_color(amiens) == color_of.call(controller), "Amiens banner takes its controller’s colour")
 	data.settlements[amiens]["controller"] = "fac_b"
 	maquettes.refresh(null, color_of)
 	check(maquettes.banner_color(amiens) == palette["fac_b"], "Amiens banner follows a new controller")

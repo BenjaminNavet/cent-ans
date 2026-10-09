@@ -45,8 +45,8 @@ func _init() -> void:
 				check(rig_clips.has(str(c)), "%s %s: clip %s absent du rig" % [fig_name, state, c])
 	if fine:
 		var sword := BattleSkinned.state_config("infantry", 0, "melee", false)
-		check((sword["names"] as Array).has("overhead") and (sword["names"] as Array).has("parry"), "mêlée à l'épée sans parade ni coup par-dessus")
-		check((BattleSkinned.state_config("infantry", 0, "victory", false)["names"] as Array).has("victory"), "victoire à l'épée")
+		check((sword["names"] as Array).has("overhead") and (sword["names"] as Array).has("parry"), "mêlée à l’épée sans parade ni coup par-dessus")
+		check((BattleSkinned.state_config("infantry", 0, "victory", false)["names"] as Array).has("victory"), "victoire à l’épée")
 		check((BattleSkinned.state_config("cavalry", 0, "melee_pikes", false)["names"] as Array).has("c_rear"), "cabrage devant les piques")
 		check((BattleSkinned.state_config("cavalry", 0, "charging", false)["names"] as Array).has("c_stumble"), "trébuchement en charge")
 		# Le cycle de charge couvre un nombre entier de foulées de galop (pas de saut au cycle).

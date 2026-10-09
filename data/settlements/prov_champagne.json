@@ -38,7 +38,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Cité épiscopale sur la Marne, siège d'un bailliage royal.",
+    "description": "Cité épiscopale sur la Marne, siège d’un bailliage royal.",
     "sources": ["Châlons-en-Champagne"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville close, siège de l'une des grandes foires de Champagne.",
+    "description": "Ville close, siège de l’une des grandes foires de Champagne.",
     "sources": ["Bar-sur-Aube", "Foires de Champagne"]
   },
   {
@@ -129,7 +129,7 @@
     "id": "set_orbais",
     "province": "prov_champagne",
     "kind": "abbey",
-    "name": { "display": "Orbais-l'Abbaye", "local": "Orbais", "local_language": "ancien français" },
+    "name": { "display": "Orbais-l’Abbaye", "local": "Orbais", "local_language": "ancien français" },
     "lonlat": [3.8333, 49.0167],
     "weight": 5,
     "owner": null,
@@ -164,7 +164,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Forteresse verrouillant le passage de l'Argonne, sur l'Aisne.",
+    "description": "Forteresse verrouillant le passage de l’Argonne, sur l’Aisne.",
     "sources": ["Sainte-Menehould"]
   },
   {

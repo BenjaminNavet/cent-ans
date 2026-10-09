@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Kasbah du Tadla, dressée sur l'Oum Errabia ; poste avancé mérinide entre Fès et Marrakech.",
+    "description": "Kasbah du Tadla, dressée sur l’Oum Errabia ; poste avancé mérinide entre Fès et Marrakech.",
     "sources": [
       "Kasba Tadla"
     ]
@@ -49,7 +49,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Bourg de source au pied de l'Atlas, kasbah de Ras el Aïn.",
+    "description": "Bourg de source au pied de l’Atlas, kasbah de Ras el Aïn.",
     "sources": [
       "Béni Mellal"
     ]
@@ -72,7 +72,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg berbère au pied de l'Atlas, sur la route de Marrakech (à préciser).",
+    "description": "Bourg berbère au pied de l’Atlas, sur la route de Marrakech (à préciser).",
     "sources": [
       "Ouaouizeght"
     ]

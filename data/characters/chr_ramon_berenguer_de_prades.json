@@ -1,8 +1,8 @@
 {
   "id": "chr_ramon_berenguer_de_prades",
   "name": {
-    "display": "Ramon Berenguer, infant d'Aragon",
-    "local": "Ramon Berenguer d'Aragó",
+    "display": "Ramon Berenguer, infant d’Aragon",
+    "local": "Ramon Berenguer d’Aragó",
     "local_language": "catalan"
   },
   "sex": "male",
@@ -28,6 +28,6 @@
   "piety": 50,
   "starting_location": "prov_barcelona",
   "status": "at_court",
-  "description": "Dernier fils de Jacques II d'Aragon, frère de l'infant Pierre de Ribagorce et oncle de Pierre IV ; comte de Prades et baron d'Entença depuis 1324, il échangera ces domaines en 1341 contre le comté d'Empúries de son frère Pierre.",
+  "description": "Dernier fils de Jacques II d’Aragon, frère de l’infant Pierre de Ribagorce et oncle de Pierre IV ; comte de Prades et baron d’Entença depuis 1324, il échangera ces domaines en 1341 contre le comté d’Empúries de son frère Pierre.",
   "sources": ["Ramon Berenguer, comte de Prades"]
 }

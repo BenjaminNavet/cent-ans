@@ -1,7 +1,7 @@
 {
   "id": "chr_otton_d_autriche",
   "name": {
-    "display": "Otton d'Autriche",
+    "display": "Otton d’Autriche",
     "local": "Otto der Fröhliche",
     "local_language": "moyen haut-allemand"
   },
@@ -34,8 +34,8 @@
   },
   "starting_location": "prov_austria",
   "status": "at_court",
-  "description": "Frère cadet et co-duc d'Albert II, duc de Carinthie (1335).",
+  "description": "Frère cadet et co-duc d’Albert II, duc de Carinthie (1335).",
   "sources": [
-    "Otton d'Autriche"
+    "Otton d’Autriche"
   ]
 }

@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d'Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu'en 1339, Stirling jusqu'en 1342).",
+    "description": "Fife, Strathearn et Menteith : Saint Andrews (primat d’Écosse), Scone, Dunfermline. Perth et Stirling sont tenues par des garnisons anglaises (Perth jusqu’en 1339, Stirling jusqu’en 1342).",
     "sources": [
       "Fife",
       "Perth (Écosse)",
@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Grand burgh royal du Tay, plusieurs fois assiégé pendant les guerres d'indépendance.",
+    "description": "Grand burgh royal du Tay, plusieurs fois assiégé pendant les guerres d’indépendance.",
     "sources": [
       "Dundee"
     ]
@@ -79,7 +79,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "« Clé de l'Écosse » commandant le passage du Forth : forteresse reprise par les Anglais lors de la campagne d'Édouard III de 1336.",
+    "description": "« Clé de l’Écosse » commandant le passage du Forth : forteresse reprise par les Anglais lors de la campagne d’Édouard III de 1336.",
     "sources": [
       "Château de Stirling"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye royale, nécropole des rois d'Écosse dont Robert Bruce.",
+    "description": "Abbaye royale, nécropole des rois d’Écosse dont Robert Bruce.",
     "sources": [
       "Abbaye de Dunfermline"
     ]
@@ -155,7 +155,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château des comtes de Fife, future résidence de chasse des rois d'Écosse.",
+    "description": "Château des comtes de Fife, future résidence de chasse des rois d’Écosse.",
     "sources": [
       "Château de Falkland"
     ]

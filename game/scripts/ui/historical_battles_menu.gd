@@ -43,7 +43,7 @@ func _menu_title() -> String:
 
 
 func _menu_hint() -> String:
-	return "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
+	return "Le champ réel, les armées de ce jour-là, la météo et l’heure : menez l’un des camps, ou regardez. Hors campagne : le résultat n’est pas conservé."
 
 
 func _menu_width() -> float:
@@ -61,7 +61,7 @@ func _load_entries() -> void:
 func _build_entries(box: VBoxContainer) -> void:
 	_add_prologue(box)
 	if battles.is_empty():
-		UiBuild.label("Aucune bataille historique n'a été trouvée.", 0, null, false, 0.0, box)
+		UiBuild.label("Aucune bataille historique n’a été trouvée.", 0, null, false, 0.0, box)
 	for entry in battles:
 		_add_battle(box, entry as Dictionary)
 
@@ -145,7 +145,7 @@ static func _the_army(faction_name: String) -> String:
 		"France":
 			return "les Français"
 		_:
-			return "l'armée de %s" % faction_name
+			return "l’armée de %s" % faction_name
 
 
 ## Lance la bataille `id`, `side` menée par le joueur ("" : IA contre IA).

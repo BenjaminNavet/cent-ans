@@ -67,7 +67,7 @@ func _menu_title() -> String:
 
 
 func _menu_hint() -> String:
-	return "Hors campagne : le résultat n'est pas conservé."
+	return "Hors campagne : le résultat n’est pas conservé."
 
 
 func _load_entries() -> void:

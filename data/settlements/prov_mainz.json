@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Cité capitale de l'électorat de Mayence, siège de l'archevêque-électeur Henri III de Virnebourg, archichancelier du royaume de Germanie.",
+    "description": "Cité capitale de l’électorat de Mayence, siège de l’archevêque-électeur Henri III de Virnebourg, archichancelier du royaume de Germanie.",
     "sources": [
       "Électorat de Mayence",
       "Henri III de Virnebourg"
@@ -52,7 +52,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire sur le Main, lieu traditionnel d'élection des rois des Romains et grande foire commerciale.",
+    "description": "Ville libre d’empire sur le Main, lieu traditionnel d’élection des rois des Romains et grande foire commerciale.",
     "sources": [
       "Francfort-sur-le-Main"
     ]
@@ -77,7 +77,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de péage de l'archevêque de Mayence surveillant le trafic sur le Rhin près de Bingen.",
+    "description": "Château de péage de l’archevêque de Mayence surveillant le trafic sur le Rhin près de Bingen.",
     "sources": [
       "Château d'Ehrenfels"
     ]
@@ -129,7 +129,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Bourg viticole du Rheinhessen, site de l'ancien palais impérial carolingien.",
+    "description": "Bourg viticole du Rheinhessen, site de l’ancien palais impérial carolingien.",
     "sources": [
       "Ingelheim am Rhein"
     ]
@@ -155,7 +155,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Bourg viticole du Rheinhessen, domaine propre de l'archevêché de Mayence.",
+    "description": "Bourg viticole du Rheinhessen, domaine propre de l’archevêché de Mayence.",
     "sources": [
       "Bodenheim"
     ]
@@ -181,7 +181,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Ville libre d'empire du Rheinhessen, cité viticole fortifiée sur le Rhin.",
+    "description": "Ville libre d’empire du Rheinhessen, cité viticole fortifiée sur le Rhin.",
     "sources": [
       "Oppenheim"
     ]

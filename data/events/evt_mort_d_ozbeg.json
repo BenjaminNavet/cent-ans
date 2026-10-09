@@ -1,7 +1,7 @@
 {
   "id": "evt_mort_d_ozbeg",
-  "title": "La mort d'Özbeg",
-  "text": "[[cdx_ozbeg|Özbeg]], le khan qui a fait de l'islam la religion de la [[cdx_horde_d_or|Horde d'Or]], meurt après trente ans de règne. Son fils aîné Tini Beg lui succède, mais son cadet Djanibek, soutenu par la khatun Taydula, guette le trône.",
+  "title": "La mort d’Özbeg",
+  "text": "[[cdx_ozbeg|Özbeg]], le khan qui a fait de l’islam la religion de la [[cdx_horde_d_or|Horde d’Or]], meurt après trente ans de règne. Son fils aîné Tini Beg lui succède, mais son cadet Djanibek, soutenu par la khatun Taydula, guette le trône.",
   "kind": "historical",
   "trigger": {
     "date": {

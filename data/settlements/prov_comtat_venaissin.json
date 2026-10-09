@@ -10,7 +10,7 @@
     "fortification_level": 3,
     "buildings": ["bld_windmill", "bld_vineyard_press", "bld_weaving_workshop", "bld_cathedral", "bld_fair", "bld_hotel_dieu", "bld_castle", "bld_muster_field", "bld_university"],
     "port": false,
-    "description": "Résidence de la cour pontificale de Benoît XII, qui y bâtit le Palais des papes, mais la ville relève encore juridiquement du comte de Provence, le roi Robert de Naples, jusqu'à son achat à la reine Jeanne Ire en 1348.",
+    "description": "Résidence de la cour pontificale de Benoît XII, qui y bâtit le Palais des papes, mais la ville relève encore juridiquement du comte de Provence, le roi Robert de Naples, jusqu’à son achat à la reine Jeanne Ire en 1348.",
     "sources": ["Avignon", "Papauté d'Avignon"]
   },
   {
@@ -80,14 +80,14 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_water_mill"],
     "port": false,
-    "description": "Capitale du Comtat Venaissin jusqu'en 1320, date à laquelle le recteur pontifical s'établit à Carpentras.",
+    "description": "Capitale du Comtat Venaissin jusqu’en 1320, date à laquelle le recteur pontifical s’établit à Carpentras.",
     "sources": ["Pernes-les-Fontaines"]
   },
   {
     "id": "set_isle_sur_la_sorgue",
     "province": "prov_comtat_venaissin",
     "kind": "village",
-    "name": { "display": "L'Isle-sur-la-Sorgue", "local": "La Isla", "local_language": "occitan" },
+    "name": { "display": "L’Isle-sur-la-Sorgue", "local": "La Isla", "local_language": "occitan" },
     "lonlat": [5.0511, 43.9186],
     "weight": 4,
     "owner": null,
@@ -95,6 +95,6 @@
     "buildings": ["bld_water_mill"],
     "port": false,
     "description": "Bourg bâti sur les bras de la Sorgue, vivant de la pêche et de ses moulins à roues à aubes.",
-    "sources": ["L'Isle-sur-la-Sorgue"]
+    "sources": ["L’Isle-sur-la-Sorgue"]
   }
 ]

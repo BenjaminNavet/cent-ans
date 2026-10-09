@@ -120,7 +120,7 @@ func _test_stances(map: Node, sim: Object, army_id: String) -> void:
 					ghosts += 1
 			check(ghosts > 0, "an ambushing player army should be semi-transparent")
 			StanceBadge.apply(marker, "ambush", false)
-			check(float(marker.get_meta("stance_transparency", -1.0)) == 0.0, "no ghost for another faction's army")
+			check(float(marker.get_meta("stance_transparency", -1.0)) == 0.0, "no ghost for another faction’s army")
 		map.call("_on_stance_changed", army_id, "normal")
 		check(str(sim.call("get_army", army_id).get("stance", "")) == "normal", "back to the normal stance")
 
@@ -211,10 +211,10 @@ func _test_outcomes(map: Node, sim: Object) -> void:
 	}
 	var outcome := {"winner": "attacker", "duration": 600.0, "attacker": {"total_losses": 20}, "defender": {"total_losses": 400}}
 	var aftermath := {"campaign_outcome": {"attacker_class": "heroic", "attacker_label": "Victoire héroïque", "defender_class": "disaster", "defender_label": "Désastre"}}
-	screen.show_result("Bataille d'essai", "attacker", sides, [], outcome, aftermath)
+	screen.show_result("Bataille d’essai", "attacker", sides, [], outcome, aftermath)
 	await process_frame
 	check(screen.outcome_band != null and screen.outcome_band.visible and screen.outcome_band.label.text == "Victoire héroïque",
-		"the result screen should show the class band of the player's side")
+		"the result screen should show the class band of the player’s side")
 	if screen.outcome_band != null:
 		check(screen.outcome_band.get_theme_stylebox("panel").bg_color == OutcomeBand.color_for("heroic"), "the band colour should follow the class")
 	screen.queue_free()

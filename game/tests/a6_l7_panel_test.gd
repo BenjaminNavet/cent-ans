@@ -17,7 +17,7 @@ func _init() -> void:
 	}
 	var recruits := [
 		{"unit_type": "u1", "name": "Milice", "cost": 10, "upkeep": 1, "available": true, "group": "ready"},
-		{"unit_type": "u2", "name": "Mamelouks", "cost": 10, "upkeep": 1, "available": false, "group": "elsewhere", "reason": "réservé à d'autres factions"},
+		{"unit_type": "u2", "name": "Mamelouks", "cost": 10, "upkeep": 1, "available": false, "group": "elsewhere", "reason": "réservé à d’autres factions"},
 		{"unit_type": "u3", "name": "Arbalétriers", "cost": 10, "upkeep": 1, "available": false, "group": "soon", "reason": "technologie requise : X"},
 		{"unit_type": "u4", "name": "Lanciers", "cost": 10, "upkeep": 1, "available": false, "group": "blocked", "reason": "trésor insuffisant (10 livres nécessaires)"},
 	]

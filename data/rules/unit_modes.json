@@ -1,5 +1,5 @@
 {
-  "description": "Modes d'unité en bataille (lot CB2, ADR 0095) : course persistante (R), garde (G), escarmouche (K), mode mêlée des tireurs (M) et « Battre en brèche » des engins de siège ; seuils des pastilles d'état (sous le feu, hésitation) et règle d'IA défensive. Lu par sim-battle (UnitModeRules) ; chiffres cités à l'interface par RuleValues (unit_modes_*).",
+  "description": "Modes d’unité en bataille (lot CB2, ADR 0095) : course persistante (R), garde (G), escarmouche (K), mode mêlée des tireurs (M) et « Battre en brèche » des engins de siège ; seuils des pastilles d’état (sous le feu, hésitation) et règle d’IA défensive. Lu par sim-battle (UnitModeRules) ; chiffres cités à l’interface par RuleValues (unit_modes_*).",
   "run": {
     "speed_multiplier": 1.0,
     "fatigue_multiplier": 1.0

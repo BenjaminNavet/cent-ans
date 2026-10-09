@@ -51,7 +51,7 @@
     {
       "id": "obj_tripoli_sirte",
       "title": "La côte de Syrte",
-      "description": "Étendre Tripoli vers l'est, jusqu'à Syrte.",
+      "description": "Étendre Tripoli vers l’est, jusqu’à Syrte.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

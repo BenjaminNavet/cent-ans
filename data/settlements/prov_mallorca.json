@@ -25,7 +25,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Palma, capitale du royaume de Majorque, réuni à la Couronne d'Aragon en 1344 (encore autonome en 1337).",
+    "description": "Palma, capitale du royaume de Majorque, réuni à la Couronne d’Aragon en 1344 (encore autonome en 1337).",
     "sources": [
       "Royaume de Majorque",
       "Jacques III de Majorque",
@@ -54,7 +54,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Port principal de Minorque, sur l'un des meilleurs mouillages naturels de Méditerranée.",
+    "description": "Port principal de Minorque, sur l’un des meilleurs mouillages naturels de Méditerranée.",
     "sources": [
       "Mahón",
       "Minorque"
@@ -82,7 +82,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Ville fortifiée d'Ibiza, place du commerce du sel du royaume de Majorque.",
+    "description": "Ville fortifiée d’Ibiza, place du commerce du sel du royaume de Majorque.",
     "sources": [
       "Ibiza (ville)"
     ]
@@ -108,7 +108,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié bâti sur le site de l'antique Pollentia, au nord de Majorque.",
+    "description": "Bourg fortifié bâti sur le site de l’antique Pollentia, au nord de Majorque.",
     "sources": [
       "Alcúdia"
     ]

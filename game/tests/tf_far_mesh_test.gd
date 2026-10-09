@@ -69,7 +69,7 @@ func _test_all(towns: Dictionary, mpu: float, wall_params: Dictionary) -> void:
 	check(mean1 <= F1_MEAN_MAX, "F1 moyenne %.0f > %.0f" % [mean1, F1_MEAN_MAX])
 	check(f1_max <= F1_MAX, "F1 max %d > %d (%s)" % [f1_max, F1_MAX, f1_max_id])
 	check(f2_max <= F2_MAX, "F2 max %d > %d" % [f2_max, F2_MAX])
-	check(bad_extent == 0, "%d villes débordent de l'emprise (rayon max × 1,2)" % bad_extent)
+	check(bad_extent == 0, "%d villes débordent de l’emprise (rayon max × 1,2)" % bad_extent)
 	check(bad_contract == 0, "%d villes hors contrat de sommets" % bad_contract)
 
 

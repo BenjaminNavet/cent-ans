@@ -1,7 +1,7 @@
 {
   "id": "evt_piquiers_suisses",
   "title": "Des piquiers à louer",
-  "text": "Des capitaines lombards et des princes d'Empire envoient leurs recruteurs dans les vallées : ils veulent les piquiers des Waldstätten, qui ne reculent jamais. Les anciens hésitent à laisser partir tant de jeunes gens.",
+  "text": "Des capitaines lombards et des princes d’Empire envoient leurs recruteurs dans les vallées : ils veulent les piquiers des Waldstätten, qui ne reculent jamais. Les anciens hésitent à laisser partir tant de jeunes gens.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 40

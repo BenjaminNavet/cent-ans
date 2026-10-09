@@ -21,7 +21,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Nicomédie, ancienne capitale de Dioclétien, au fond du golfe d'Astakos ; conquise par Orhan en 1337 (incertain).",
+    "description": "Nicomédie, ancienne capitale de Dioclétien, au fond du golfe d’Astakos ; conquise par Orhan en 1337 (incertain).",
     "sources": [
       "Nicomedia"
     ]
@@ -46,7 +46,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg de la route de Constantinople ; tombeau d'Hannibal selon la tradition.",
+    "description": "Bourg de la route de Constantinople ; tombeau d’Hannibal selon la tradition.",
     "sources": [
       "Nicomedia"
     ]

@@ -1,7 +1,7 @@
 {
   "id": "evt_verneuil",
   "title": "La bataille de Verneuil",
-  "text": "L'armée du dauphin, renforcée de six mille Écossais du comte de Douglas, rencontre le duc de Bedford devant Verneuil. Les Lombards pillent le camp au lieu de charger ; les Écossais, qui avaient juré de ne pas faire de quartier, meurent presque tous.",
+  "text": "L’armée du dauphin, renforcée de six mille Écossais du comte de Douglas, rencontre le duc de Bedford devant Verneuil. Les Lombards pillent le camp au lieu de charger ; les Écossais, qui avaient juré de ne pas faire de quartier, meurent presque tous.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -32,7 +32,7 @@
   },
   "options": [
     {
-      "text": "Pleurer l'armée d'Écosse",
+      "text": "Pleurer l’armée d’Écosse",
       "effects": [
         {
           "type": "prestige",

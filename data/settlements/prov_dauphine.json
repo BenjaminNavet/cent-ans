@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l'Isère.",
+    "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l’Isère.",
     "sources": ["Grenoble", "Dauphiné de Viennois"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l'ordre des Chartreux dans le massif éponyme.",
+    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l’ordre des Chartreux dans le massif éponyme.",
     "sources": ["Grande Chartreuse"]
   },
   {
@@ -122,7 +122,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg de la Matheysine, chef-lieu d'une châtellenie des dauphins de Viennois.",
+    "description": "Bourg de la Matheysine, chef-lieu d’une châtellenie des dauphins de Viennois.",
     "sources": ["La Mure"]
   }
 ]

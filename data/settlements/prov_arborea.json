@@ -21,7 +21,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Capitale du judicat d'Arborée, résidence des juges de la maison de Bas-Serra ; port sur le golfe d'Oristano.",
+    "description": "Capitale du judicat d’Arborée, résidence des juges de la maison de Bas-Serra ; port sur le golfe d’Oristano.",
     "sources": [
       "Judicat d'Arborea",
       "Oristano"
@@ -47,7 +47,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l'île.",
+    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l’île.",
     "sources": [
       "Bosa (Italie)"
     ]
@@ -72,7 +72,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Cathédrale romane et évêché sur l'étang.",
+    "description": "Cathédrale romane et évêché sur l’étang.",
     "sources": [
       "Santa Giusta"
     ]

@@ -107,7 +107,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Petit bourg fortifié près de l'embouchure du Tibre, sur le site de l'antique port de Rome, poste de douane pontifical.",
+    "description": "Petit bourg fortifié près de l’embouchure du Tibre, sur le site de l’antique port de Rome, poste de douane pontifical.",
     "sources": [
       "Ostie antique"
     ]
@@ -133,7 +133,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ancienne ville latine perchée au-dessus de l'Aniene, souvent en conflit avec Rome.",
+    "description": "Ancienne ville latine perchée au-dessus de l’Aniene, souvent en conflit avec Rome.",
     "sources": [
       "Tivoli"
     ]
@@ -159,7 +159,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité pontificale du Latium, ville natale du pape Boniface VIII, théâtre de l'« attentat d'Anagni » en 1303.",
+    "description": "Cité pontificale du Latium, ville natale du pape Boniface VIII, théâtre de l'« attentat d’Anagni » en 1303.",
     "sources": [
       "Anagni",
       "Attentat d'Anagni"
@@ -213,7 +213,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Place forte des Colonna, bâtie sur les vestiges de l'antique sanctuaire de la Fortune Primigénie, souvent en guerre contre la papauté.",
+    "description": "Place forte des Colonna, bâtie sur les vestiges de l’antique sanctuaire de la Fortune Primigénie, souvent en guerre contre la papauté.",
     "sources": [
       "Palestrina",
       "Colonna (famille)"

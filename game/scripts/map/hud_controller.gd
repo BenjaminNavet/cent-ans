@@ -80,7 +80,7 @@ func garrison_availability(army: Dictionary, is_player: bool) -> Dictionary:
 	if detail.is_empty() or str(detail.get("controller", "")) != str(map.get("player_faction")):
 		return {"can_garrison": false, "reason": ""}
 	if not (detail.get("siege", {}) as Dictionary).is_empty():
-		return {"can_garrison": true, "reason": "Colonie assiégée : impossible d'y laisser une garnison."}
+		return {"can_garrison": true, "reason": "Colonie assiégée : impossible d’y laisser une garnison."}
 	var free := int(detail.get("garrison_free", -1))
 	if free == 0:
 		return {"can_garrison": true, "reason": "Garnison complète (%s au maximum)." % FrText.count(int(detail.get("garrison_cap", 0)), "unité")}
@@ -226,7 +226,7 @@ func open_general_picker(army_id: String) -> void:
 	if str(army.get("faction", "")) != str(map.get("player_faction")):
 		return
 	var place := str(map.call("province_name_of", str(army.get("location_province", army.get("location", "")))))
-	ui.show_general_picker(army_id, "Choisir le chef de l'ost (%s)" % place, general_candidates(army))
+	ui.show_general_picker(army_id, "Choisir le chef de l’ost (%s)" % place, general_candidates(army))
 
 
 ## Personnages du joueur pour commander `army` : `[{id, name, detail, reason}]`, les
@@ -294,6 +294,6 @@ func show_mercenaries(army_id: String) -> void:
 ## Un clic sur une compagnie : ordre `hire_mercenary` (refus du cœur dans le toast d'erreur de
 ## `_submit`), puis le panneau se met à jour (réserve, engagements restants, trésor).
 func _on_hire_requested(army_id: String, unit_type: String) -> void:
-	map.call("_submit", {"type": "hire_mercenary", "army": army_id, "unit": unit_type}, "Compagnie engagée : elle rejoint l'ost.")
+	map.call("_submit", {"type": "hire_mercenary", "army": army_id, "unit": unit_type}, "Compagnie engagée : elle rejoint l’ost.")
 	if mercenary_panel != null and mercenary_panel.visible:
 		show_mercenaries(army_id)

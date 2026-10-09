@@ -1,7 +1,7 @@
 {
   "id": "evt_crue",
   "title": "La crue",
-  "text": "Après des semaines de pluie, la rivière est sortie de son lit. Les moulins sont emportés, les champs noyés et les faubourgs submergés jusqu'aux étages.",
+  "text": "Après des semaines de pluie, la rivière est sortie de son lit. Les moulins sont emportés, les champs noyés et les faubourgs submergés jusqu’aux étages.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80,

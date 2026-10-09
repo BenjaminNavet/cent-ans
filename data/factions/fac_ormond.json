@@ -1,6 +1,6 @@
 {
   "name": {
-    "display": "Comté d'Ormond",
+    "display": "Comté d’Ormond",
     "local": "Earldom of Ormond",
     "local_language": "moyen anglais"
   },
@@ -60,10 +60,10 @@
     "trade": 50,
     "piety": 55
   },
-  "description": "James Butler, 1er comte d'Ormond, grand bouteiller héréditaire d'Irlande, mourra à Gowran en janvier 1338 ; son fils, encore enfant, est déjà promis à un riche mariage anglais. Les Butler, plus proches de la couronne que les FitzGerald, deviendront les plus fidèles serviteurs anglais d'Irlande.",
+  "description": "James Butler, 1er comte d’Ormond, grand bouteiller héréditaire d’Irlande, mourra à Gowran en janvier 1338 ; son fils, encore enfant, est déjà promis à un riche mariage anglais. Les Butler, plus proches de la couronne que les FitzGerald, deviendront les plus fidèles serviteurs anglais d’Irlande.",
   "sources": [
     "James Butler, 1er comte d'Ormond",
-    "Comté d'Ormond"
+    "Comté d’Ormond"
   ],
   "id": "fac_ormond"
 }

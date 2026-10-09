@@ -19,7 +19,7 @@
   "primary_title": "tit_bulgaria",
   "heraldry": {
     "blazon": "De gueules au lion d'or couronné.",
-    "description": "Lion d'or sur champ rouge, attribué à l'empire de Tarnovo dans les armoriaux occidentaux.",
+    "description": "Lion d’or sur champ rouge, attribué à l’empire de Tarnovo dans les armoriaux occidentaux.",
     "primary_color": "#A31621",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -74,7 +74,7 @@
     "trade": 50,
     "piety": 75
   },
-  "description": "Ivan Alexandre règne depuis 1331 sur l'empire bulgare, restauré après la défaite de Velbazhd (1330) ; il doit contenir la Serbie sans perdre Byzance de vue, et une culture hésychaste fleurit à Tarnovo.",
+  "description": "Ivan Alexandre règne depuis 1331 sur l’empire bulgare, restauré après la défaite de Velbazhd (1330) ; il doit contenir la Serbie sans perdre Byzance de vue, et une culture hésychaste fleurit à Tarnovo.",
   "sources": [
     "Ivan Alexander of Bulgaria",
     "Second Bulgarian Empire"

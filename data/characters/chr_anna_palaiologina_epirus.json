@@ -1,7 +1,7 @@
 {
   "id": "chr_anna_palaiologina_epirus",
   "name": {
-    "display": "Anne Paléologine d'Épire",
+    "display": "Anne Paléologine d’Épire",
     "local": "Ἄννα Παλαιολογίνα",
     "local_language": "grec"
   },
@@ -17,7 +17,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Régente d'Épire",
+      "title": "Régente d’Épire",
       "from": {
         "value": "1335"
       }
@@ -41,7 +41,7 @@
   },
   "starting_location": "prov_epirus",
   "status": "at_court",
-  "description": "Fille d'Andronic Ange Paléologue et veuve de Jean II Orsini (empoisonné selon la tradition), elle gouverne l'Épire pour son fils et négociera sa reddition à Andronic III (1338).",
+  "description": "Fille d’Andronic Ange Paléologue et veuve de Jean II Orsini (empoisonné selon la tradition), elle gouverne l’Épire pour son fils et négociera sa reddition à Andronic III (1338).",
   "sources": [
     "Anna Palaiologina (daughter of Andronikos Angelos Palaiologos)"
   ]

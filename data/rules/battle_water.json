@@ -1,5 +1,5 @@
 {
-  "description": "Eau et chemins des champs de bataille (lot EP3, ADR 0033) : largeur de la rivière selon le terrain, gués et ponts selon la largeur, affluent et ruisseaux, berges escarpées ou marécageuses, bras morts, routes ; vitesses dans l'eau et sur route, noyade, combat sur un pont ou dans un gué. Embarqué dans sim-battle à la compilation.",
+  "description": "Eau et chemins des champs de bataille (lot EP3, ADR 0033) : largeur de la rivière selon le terrain, gués et ponts selon la largeur, affluent et ruisseaux, berges escarpées ou marécageuses, bras morts, routes ; vitesses dans l’eau et sur route, noyade, combat sur un pont ou dans un gué. Embarqué dans sim-battle à la compilation.",
   "river": {
     "width_m": {
       "plains": [14, 38],

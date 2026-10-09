@@ -1,7 +1,7 @@
 {
   "id": "chr_philippe_d_evreux",
   "name": {
-    "display": "Philippe III d'Évreux"
+    "display": "Philippe III d’Évreux"
   },
   "epithet": "le Sage",
   "sex": "male",
@@ -19,7 +19,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Comte d'Évreux",
+      "title": "Comte d’Évreux",
       "from": {
         "value": "1319"
       }

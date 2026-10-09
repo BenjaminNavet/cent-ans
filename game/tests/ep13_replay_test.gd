@@ -65,13 +65,13 @@ func _record_battle() -> String:
 	if not check(battle.call("is_finished"), "the recorded battle ends"):
 		return ""
 	_outcome = battle.call("get_outcome")
-	var path := str(battle.call("save_replay", _dir, "Bataille d'essai"))
+	var path := str(battle.call("save_replay", _dir, "Bataille d’essai"))
 	check(path != "" and FileAccess.file_exists(path), "save_replay writes a file: %s" % path)
 	var listed: Array = battle.call("list_replays", _dir)
 	check(listed.size() == 1, "one replay listed, got %d" % listed.size())
 	if listed.size() == 1:
 		var entry: Dictionary = listed[0]
-		check(str(entry["title"]) == "Bataille d'essai" and bool(entry["readable"]), "title and readable: %s" % str(entry))
+		check(str(entry["title"]) == "Bataille d’essai" and bool(entry["readable"]), "title and readable: %s" % str(entry))
 		check(str(entry["winner"]) == str(_outcome["winner"]), "listed winner")
 		check(absf(float(entry["duration"]) - float(_outcome["duration"])) < 1.0, "listed duration")
 		check(ReplaysMenu.summary(entry).contains("contre"), "summary line: %s" % ReplaysMenu.summary(entry))

@@ -1,7 +1,7 @@
 {
   "id": "evt_jacquerie",
   "title": "La Jacquerie",
-  "text": "En Beauvaisis, les « Jacques » se lèvent contre les nobles qui n'ont su défendre le pays. Les châteaux flambent, les familles seigneuriales sont massacrées. Guillaume Carle mène une armée de paysans que la noblesse s'apprête à écraser.",
+  "text": "En Beauvaisis, les « Jacques » se lèvent contre les nobles qui n’ont su défendre le pays. Les châteaux flambent, les familles seigneuriales sont massacrées. Guillaume Carle mène une armée de paysans que la noblesse s’apprête à écraser.",
   "kind": "historical",
   "trigger": {
     "date": {

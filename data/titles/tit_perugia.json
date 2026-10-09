@@ -34,8 +34,8 @@
     },
     {
       "id": "obj_perugia_umbria",
-      "title": "Dominer l'Ombrie",
-      "description": "Étendre l'influence de Pérouse sur les communes voisines d'Ombrie.",
+      "title": "Dominer l’Ombrie",
+      "description": "Étendre l’influence de Pérouse sur les communes voisines d’Ombrie.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

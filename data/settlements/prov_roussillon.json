@@ -55,7 +55,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Résidence d'été fortifiée des rois de Majorque, sur la côte roussillonnaise.",
+    "description": "Résidence d’été fortifiée des rois de Majorque, sur la côte roussillonnaise.",
     "sources": [
       "Collioure",
       "Château royal de Collioure"
@@ -82,7 +82,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Ancienne Illiberis romaine, siège du diocèse du Roussillon (jusqu'au transfert à Perpignan en 1602).",
+    "description": "Ancienne Illiberis romaine, siège du diocèse du Roussillon (jusqu’au transfert à Perpignan en 1602).",
     "sources": [
       "Elne"
     ]

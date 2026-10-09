@@ -20,7 +20,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville de l'Oka, conquise sur Riazan en 1301.",
+    "description": "Ville de l’Oka, conquise sur Riazan en 1301.",
     "sources": [
       "Kolomna"
     ]
@@ -45,7 +45,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Place forte de l'Oka du sud (apanage à partir de 1341).",
+    "description": "Place forte de l’Oka du sud (apanage à partir de 1341).",
     "sources": [
       "Serpoukhov"
     ]
@@ -68,7 +68,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg de l'Oka (fondation de date incertaine).",
+    "description": "Bourg de l’Oka (fondation de date incertaine).",
     "sources": [
       "Kachira"
     ]

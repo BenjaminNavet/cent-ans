@@ -138,4 +138,4 @@ func _check_integration() -> void:
 	check(bool(s.get("shown", false)), "gate bar shown at half HP")
 	check(absf(float(s.get("ratio", 0.0)) - 0.5) < 0.01, "gate bar at 50 %%: %s" % s.get("ratio"))
 	check(str(s.get("text", "")).begins_with("Porte : "), "gate caption: %s" % s.get("text"))
-	check(view.health_bars.side_colors.get("defender") == _scene.side_colors.get("defender"), "bars use the scene's side colours")
+	check(view.health_bars.side_colors.get("defender") == _scene.side_colors.get("defender"), "bars use the scene’s side colours")

@@ -24,7 +24,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Duché de Lorraine tenu par Raoul de Lorraine, fief d'Empire d'expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois.",
+    "description": "Duché de Lorraine tenu par Raoul de Lorraine, fief d’Empire d’expression française ; Metz, Toul et Verdun sont des cités impériales et évêchés distincts. Salines du Saulnois.",
     "sources": [
       "Duché de Lorraine",
       "Raoul de Lorraine",
@@ -54,7 +54,7 @@
       "bld_counting_house"
     ],
     "port": false,
-    "description": "Cité-république libre d'empire et siège d'un évêché lorrain, gouvernée par l'oligarchie marchande de ses paraiges.",
+    "description": "Cité-république libre d’empire et siège d’un évêché lorrain, gouvernée par l’oligarchie marchande de ses paraiges.",
     "sources": [
       "Metz"
     ]
@@ -81,7 +81,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité épiscopale libre d'empire, l'un des trois évêchés lorrains avec Metz et Verdun (les « Trois-Évêchés » ne formeront un gouvernement qu'après 1552).",
+    "description": "Cité épiscopale libre d’empire, l’un des trois évêchés lorrains avec Metz et Verdun (les « Trois-Évêchés » ne formeront un gouvernement qu’après 1552).",
     "sources": [
       "Toul"
     ]
@@ -160,7 +160,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité épiscopale libre d'empire, troisième des Trois-Évêchés lorrains avec Metz et Toul.",
+    "description": "Cité épiscopale libre d’empire, troisième des Trois-Évêchés lorrains avec Metz et Toul.",
     "sources": [
       "Verdun"
     ]
@@ -212,7 +212,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg du Saulnois, centre des salines exploitées par l'évêché de Metz et le duché de Lorraine.",
+    "description": "Bourg du Saulnois, centre des salines exploitées par l’évêché de Metz et le duché de Lorraine.",
     "sources": [
       "Vic-sur-Seille",
       "Saulnois"

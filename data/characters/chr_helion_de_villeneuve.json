@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Grand Maître de l'Hôpital",
+      "title": "Grand Maître de l’Hôpital",
       "from": {
         "value": "1319"
       }
@@ -39,7 +39,7 @@
   "piety": 85,
   "starting_location": "prov_rhodes",
   "status": "at_court",
-  "description": "Grand maître depuis 1319, il consolide Rhodes, guerroie les Turcs d'Aydın et participe à la ligue de 1334 ; il mourra en 1346.",
+  "description": "Grand maître depuis 1319, il consolide Rhodes, guerroie les Turcs d’Aydın et participe à la ligue de 1334 ; il mourra en 1346.",
   "sources": [
     "Hélion de Villeneuve"
   ]

@@ -1,7 +1,7 @@
 {
   "id": "chr_boleslas_ii_d_opole",
   "name": {
-    "display": "Boleslas II d'Opole",
+    "display": "Boleslas II d’Opole",
     "local": "Bolko II opolski",
     "local_language": "polonais"
   },
@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Duc d'Opole",
+      "title": "Duc d’Opole",
       "from": {
         "value": "1313"
       },
@@ -39,8 +39,8 @@
   "piety": 50,
   "starting_location": "prov_upper_silesia",
   "status": "at_court",
-  "description": "Duc d'Opole depuis 1313, vassal de Jean de Bohême ; dates de vie approximatives.",
+  "description": "Duc d’Opole depuis 1313, vassal de Jean de Bohême ; dates de vie approximatives.",
   "sources": [
-    "Boleslas II d'Opole"
+    "Boleslas II d’Opole"
   ]
 }

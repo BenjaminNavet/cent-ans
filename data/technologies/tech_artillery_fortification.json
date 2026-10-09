@@ -1,7 +1,7 @@
 {
   "id": "tech_artillery_fortification",
   "name": {
-    "display": "Fortification adaptée à l'artillerie"
+    "display": "Fortification adaptée à l’artillerie"
   },
   "branch": "civil",
   "tier": 4,

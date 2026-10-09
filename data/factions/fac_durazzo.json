@@ -1,7 +1,7 @@
 {
   "id": "fac_durazzo",
   "name": {
-    "display": "Duché de Durazzo (royaume d'Albanie)",
+    "display": "Duché de Durazzo (royaume d’Albanie)",
     "local": "Ducato di Durazzo",
     "local_language": "latin"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_durazzo",
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
-    "description": "Armes d'Anjou-Sicile brisées d'une bordure et d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
+    "description": "Armes d’Anjou-Sicile brisées d’une bordure et d’un lambel, comme les branches angevines de Durazzo et de Gravina.",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B",
     "uncertain": true,
@@ -60,7 +60,7 @@
     "trade": 45,
     "piety": 60
   },
-  "description": "Reste du royaume d'Albanie fondé par Charles d'Anjou en 1272 ; Durazzo, Kruja et Alessio, avec une frontière minée de seigneuries albanaises. Le jeune Charles règne sous la régence de sa mère Agnès de Périgord.",
+  "description": "Reste du royaume d’Albanie fondé par Charles d’Anjou en 1272 ; Durazzo, Kruja et Alessio, avec une frontière minée de seigneuries albanaises. Le jeune Charles règne sous la régence de sa mère Agnès de Périgord.",
   "sources": [
     "Kingdom of Albania (medieval)",
     "Charles, Duke of Durazzo"

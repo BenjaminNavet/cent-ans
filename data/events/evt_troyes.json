@@ -1,7 +1,7 @@
 {
   "id": "evt_troyes",
   "title": "Le traité de Troyes",
-  "text": "Le duc de Bourgogne a été assassiné sur le pont de Montereau ; son fils s'est jeté dans les bras de l'Anglais. À Troyes, la reine Isabeau fait signer au roi malade un traité qui déshérite le dauphin : Henri d'Angleterre épousera Catherine de France et sera régent, puis roi.",
+  "text": "Le duc de Bourgogne a été assassiné sur le pont de Montereau ; son fils s’est jeté dans les bras de l’Anglais. À Troyes, la reine Isabeau fait signer au roi malade un traité qui déshérite le dauphin : Henri d’Angleterre épousera Catherine de France et sera régent, puis roi.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -55,6 +55,9 @@ expand_margin_bottom = 2.0
 [sub_resource type="FontVariation" id="FontVariation_body"]
 fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols"), ExtResource("5_noto_symbols2")])
 base_font = ExtResource("1_garamond")
+opentype_features = {
+1819178349: 1
+}
 variation_opentype = {
 2003265652: 470
 }
@@ -62,6 +65,9 @@ variation_opentype = {
 [sub_resource type="FontVariation" id="FontVariation_bold"]
 fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols"), ExtResource("5_noto_symbols2")])
 base_font = ExtResource("1_garamond")
+opentype_features = {
+1819178349: 1
+}
 variation_opentype = {
 2003265652: 650
 }
@@ -69,6 +75,9 @@ variation_opentype = {
 [sub_resource type="FontVariation" id="FontVariation_italic"]
 fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols"), ExtResource("5_noto_symbols2")])
 base_font = ExtResource("2_garamond_italic")
+opentype_features = {
+1819178349: 1
+}
 variation_opentype = {
 2003265652: 470
 }
@@ -76,6 +85,9 @@ variation_opentype = {
 [sub_resource type="FontVariation" id="FontVariation_bold_italic"]
 fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols"), ExtResource("5_noto_symbols2")])
 base_font = ExtResource("2_garamond_italic")
+opentype_features = {
+1819178349: 1
+}
 variation_opentype = {
 2003265652: 650
 }

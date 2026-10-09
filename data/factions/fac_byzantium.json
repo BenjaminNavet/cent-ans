@@ -19,7 +19,7 @@
   "primary_title": "tit_byzantium",
   "heraldry": {
     "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
-    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l’aigle bicéphale reste l’emblème impérial.",
     "primary_color": "#A81C22",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -112,7 +112,7 @@
     "trade": 50,
     "piety": 75
   },
-  "description": "Restes majestueux de l'Empire romain : Constantinople, la Thrace, la Macédoine, la Thessalie reprise en 1333 et la Morée byzantine. Andronic III Paléologue, empereur depuis 1328, avec son ami Jean Cantacuzène, tente d'arrêter le déclin face à la Serbie, à la Bulgarie et aux émirats turcs.",
+  "description": "Restes majestueux de l’Empire romain : Constantinople, la Thrace, la Macédoine, la Thessalie reprise en 1333 et la Morée byzantine. Andronic III Paléologue, empereur depuis 1328, avec son ami Jean Cantacuzène, tente d’arrêter le déclin face à la Serbie, à la Bulgarie et aux émirats turcs.",
   "sources": [
     "Andronikos III Palaiologos",
     "Empire byzantin"

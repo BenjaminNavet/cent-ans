@@ -1,7 +1,7 @@
 {
   "id": "evt_charbonniers_en_conflit",
   "title": "Les charbonniers et le seigneur",
-  "text": "Les charbonniers de la forêt s'obstinent à couper le bois de chauffe que le seigneur veut réserver à la chasse. Les maîtres de forges s'en plaignent, car leurs fourneaux manquent de charbon.",
+  "text": "Les charbonniers de la forêt s’obstinent à couper le bois de chauffe que le seigneur veut réserver à la chasse. Les maîtres de forges s’en plaignent, car leurs fourneaux manquent de charbon.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 70
@@ -11,7 +11,7 @@
   },
   "options": [
     {
-      "text": "Confirmer les droits d'usage des charbonniers",
+      "text": "Confirmer les droits d’usage des charbonniers",
       "effects": [
         {
           "type": "unrest",

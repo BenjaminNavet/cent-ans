@@ -21,8 +21,8 @@
   ],
   "capital_city": {
     "name": {
-      "display": "L'Aquila",
-      "local": "L'Aquila",
+      "display": "L’Aquila",
+      "local": "L’Aquila",
       "local_language": "italien"
     },
     "lat": 42.3498,
@@ -82,10 +82,10 @@
   ],
   "fortification_level": 2,
   "base_supply": 1500,
-  "description": "Les Abruzzes, marches septentrionales du royaume de Naples ; L'Aquila, fondée en 1254, et ses privilèges ; transhumance ovine vers les Pouilles.",
+  "description": "Les Abruzzes, marches septentrionales du royaume de Naples ; L’Aquila, fondée en 1254, et ses privilèges ; transhumance ovine vers les Pouilles.",
   "sources": [
     "Abruzzes",
-    "L'Aquila",
+    "L’Aquila",
     "Justiciarat d'Abruzzes"
   ],
   "sea_zones": [

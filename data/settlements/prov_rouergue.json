@@ -49,7 +49,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse royale dominant l'Aveyron, verrou du Rouergue.",
+    "description": "Forteresse royale dominant l’Aveyron, verrou du Rouergue.",
     "sources": [
       "Château de Najac"
     ]
@@ -100,7 +100,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Village blotti au pied de son château, sur l'Aveyron.",
+    "description": "Village blotti au pied de son château, sur l’Aveyron.",
     "sources": [
       "Belcastel"
     ]
@@ -126,7 +126,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Bastide royale fondée en 1252 au confluent de l'Aveyron et de l'Alzou, grand marché du sel et du blé.",
+    "description": "Bastide royale fondée en 1252 au confluent de l’Aveyron et de l’Alzou, grand marché du sel et du blé.",
     "sources": [
       "Villefranche-de-Rouergue"
     ]
@@ -202,7 +202,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château des seigneurs d'Estaing dominant un pont médiéval sur le Lot.",
+    "description": "Château des seigneurs d’Estaing dominant un pont médiéval sur le Lot.",
     "sources": [
       "Château d'Estaing"
     ]
@@ -277,7 +277,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye cistercienne isolée aux confins de l'Aubrac, fondée au XIIe siècle.",
+    "description": "Abbaye cistercienne isolée aux confins de l’Aubrac, fondée au XIIe siècle.",
     "sources": [
       "Abbaye de Bonneval (Aveyron)"
     ]

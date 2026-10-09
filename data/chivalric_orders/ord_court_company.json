@@ -5,7 +5,7 @@
     "local": "Compagnie",
     "local_language": "moyen français"
   },
-  "description": "À l'exemple de l'ordre castillan de la Bande (1330), de la Jarretière ou du Collier de Savoie (1364), tout prince du XIVe siècle peut réunir ses meilleurs chevaliers dans une compagnie à devise et à insigne, qui les attache à sa personne. Ordre générique pour les factions sans ordre historique dans le jeu ; voir [[cdx_chevalerie]].",
+  "description": "À l’exemple de l’ordre castillan de la Bande (1330), de la Jarretière ou du Collier de Savoie (1364), tout prince du XIVe siècle peut réunir ses meilleurs chevaliers dans une compagnie à devise et à insigne, qui les attache à sa personne. Ordre générique pour les factions sans ordre historique dans le jeu ; voir [[cdx_chevalerie]].",
   "cost": 1500,
   "prestige_required": 10,
   "members": 4,

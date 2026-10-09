@@ -20,7 +20,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville d'Angora, foyer des confréries d'ahis.",
+    "description": "Ville d’Angora, foyer des confréries d’ahis.",
     "sources": [
       "Ankara"
     ]
@@ -64,7 +64,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Village de l'ouest du plateau.",
+    "description": "Village de l’ouest du plateau.",
     "sources": [
       "Ankara"
     ]

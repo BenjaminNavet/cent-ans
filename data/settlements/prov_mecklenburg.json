@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Cité épiscopale sur son lac et siège des comtes de Schwerin ; Albert II de Mecklembourg n'achètera le comté qu'en 1358.",
+    "description": "Cité épiscopale sur son lac et siège des comtes de Schwerin ; Albert II de Mecklembourg n’achètera le comté qu’en 1358.",
     "sources": [
       "Schwerin"
     ]
@@ -47,7 +47,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Grand port hanséatique du Mecklembourg, l'une des « villes vendes » avec Lübeck, Wismar et Stralsund.",
+    "description": "Grand port hanséatique du Mecklembourg, l’une des « villes vendes » avec Lübeck, Wismar et Stralsund.",
     "sources": [
       "Rostock"
     ]

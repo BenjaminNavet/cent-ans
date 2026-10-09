@@ -128,7 +128,7 @@ func _build_confirm(parchment: Theme) -> void:
 	box.add_child(row)
 	for spec in [
 		["Annuler", _cancel_exit],
-		["Sauvegarder d'abord", func() -> void:
+		["Sauvegarder d’abord", func() -> void:
 			UiMotion.fade_out(_confirm_panel)
 			open_save()],
 		["Quitter sans sauvegarder", _confirm_exit],
@@ -199,7 +199,7 @@ func _request_exit(kind: String) -> void:
 		_confirm_exit()
 		return
 	var what := "revenir au menu principal" if kind == "main_menu" else "quitter le jeu"
-	_confirm_label.text = "La partie n'a pas été sauvegardée depuis %d tour%s. Voulez-vous vraiment %s ?" % [
+	_confirm_label.text = "La partie n’a pas été sauvegardée depuis %d tour%s. Voulez-vous vraiment %s ?" % [
 		unsaved_turns, "s" if unsaved_turns > 1 else "", what]
 	UiMotion.fade_out(_menu_panel)
 	_confirm_panel.show()

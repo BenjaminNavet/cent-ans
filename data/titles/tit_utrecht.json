@@ -2,13 +2,13 @@
   "id": "tit_utrecht",
   "rank": "county",
   "name": {
-    "display": "Principauté épiscopale d'Utrecht",
+    "display": "Principauté épiscopale d’Utrecht",
     "local": "Sticht Utrecht",
     "local_language": "moyen néerlandais"
   },
   "heraldry": {
     "blazon": "Écartelé : aux 1 et 4 de gueules à la croix d'argent ; aux 2 et 3 d'or à deux fasces de sable.",
-    "description": "Croix d'argent sur gueules du Sticht (la principauté épiscopale d'Utrecht), écartelée des armes de la maison de Diest (d'or à deux fasces de sable), selon l'usage des évêques d'Utrecht ; l'écartelé exact de Jean de Diest n'est pas attesté.",
+    "description": "Croix d’argent sur gueules du Sticht (la principauté épiscopale d’Utrecht), écartelée des armes de la maison de Diest (d’or à deux fasces de sable), selon l’usage des évêques d’Utrecht ; l’écartelé exact de Jean de Diest n’est pas attesté.",
     "uncertain": true,
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
@@ -21,7 +21,7 @@
     "faction": "fac_utrecht",
     "sources": [
       "Jean de Diest",
-      "Principauté épiscopale d'Utrecht"
+      "Principauté épiscopale d’Utrecht"
     ]
   },
   "succession_law": "elective",
@@ -29,7 +29,7 @@
     {
       "id": "obj_utrecht_hold",
       "title": "Garder la principauté",
-      "description": "L'évêque d'Utrecht doit conserver son autorité temporelle sur le Nedersticht et l'Oversticht.",
+      "description": "L’évêque d’Utrecht doit conserver son autorité temporelle sur le Nedersticht et l’Oversticht.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_utrecht"
@@ -38,16 +38,16 @@
     {
       "id": "obj_utrecht_guelders",
       "title": "Contenir la Gueldre",
-      "description": "Soumettre le comté de Gueldre, rival de l'évêché.",
+      "description": "Soumettre le comté de Gueldre, rival de l’évêché.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_guelders"
       }
     }
   ],
-  "description": "Principauté épiscopale d'Utrecht, État ecclésiastique du Saint-Empire couvrant le Nedersticht (autour d'Utrecht) et l'Oversticht (Deventer, Zwolle, Kampen), villes liées à la Hanse.",
+  "description": "Principauté épiscopale d’Utrecht, État ecclésiastique du Saint-Empire couvrant le Nedersticht (autour d’Utrecht) et l’Oversticht (Deventer, Zwolle, Kampen), villes liées à la Hanse.",
   "sources": [
     "Jean de Diest",
-    "Principauté épiscopale d'Utrecht"
+    "Principauté épiscopale d’Utrecht"
   ]
 }

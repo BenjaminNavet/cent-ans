@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à l'épée et à la clef d'argent passées en sautoir.",
-    "description": "Épée de saint Paul et clef de saint Pierre, patrons de la cathédrale de Dorpat, d'après les sceaux et monnaies épiscopaux.",
+    "description": "Épée de saint Paul et clef de saint Pierre, patrons de la cathédrale de Dorpat, d’après les sceaux et monnaies épiscopaux.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6",
     "note": "Émaux du XIVe siècle non attestés avec certitude.",
@@ -28,7 +28,7 @@
     {
       "id": "obj_dorpat_hold",
       "title": "Garder Dorpat",
-      "description": "Conserver l'évêché.",
+      "description": "Conserver l’évêché.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_dorpat"
@@ -37,13 +37,13 @@
     {
       "id": "obj_dorpat_indep",
       "title": "Un évêque libre",
-      "description": "Ne jamais dépendre de l'Ordre.",
+      "description": "Ne jamais dépendre de l’Ordre.",
       "condition": {
         "kind": "be_independent"
       }
     }
   ],
-  "description": "Principauté épiscopale de Dorpat, prince d'Empire.",
+  "description": "Principauté épiscopale de Dorpat, prince d’Empire.",
   "sources": [
     "Évêché de Dorpat"
   ]

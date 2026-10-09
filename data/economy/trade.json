@@ -62,7 +62,7 @@
       "goods": [
         "res_wine"
       ],
-      "description": "Premier port viticole d'Europe, le vin de Guyenne part chaque automne pour l'Angleterre.",
+      "description": "Premier port viticole d’Europe, le vin de Guyenne part chaque automne pour l’Angleterre.",
       "sources": [
         "James, The Medieval Wine Trade, 1971"
       ]
@@ -111,7 +111,7 @@
       "goods": [
         "res_cloth"
       ],
-      "description": "Autre foire de Champagne, en déclin depuis l'ouverture du détroit de Gibraltar à la navigation génoise (1277)."
+      "description": "Autre foire de Champagne, en déclin depuis l’ouverture du détroit de Gibraltar à la navigation génoise (1277)."
     },
     {
       "id": "hub_genes",
@@ -134,7 +134,7 @@
       "goods": [
         "res_cloth"
       ],
-      "description": "Convois d'État vénitiens (mude) vers la Flandre."
+      "description": "Convois d’État vénitiens (mude) vers la Flandre."
     }
   ],
   "routes": [
@@ -147,7 +147,7 @@
         "res_cloth"
       ],
       "base_value": 180,
-      "description": "Laine anglaise brute vers les métiers à tisser flamands, drap fini vers l'Angleterre."
+      "description": "Laine anglaise brute vers les métiers à tisser flamands, drap fini vers l’Angleterre."
     },
     {
       "id": "route_calais_londres",
@@ -177,7 +177,7 @@
         "res_wine"
       ],
       "base_value": 220,
-      "description": "La flotte des vins descend chaque automne (vendanges) vers l'Angleterre."
+      "description": "La flotte des vins descend chaque automne (vendanges) vers l’Angleterre."
     },
     {
       "id": "route_la_rochelle_londres",
@@ -218,7 +218,7 @@
         "res_cloth"
       ],
       "base_value": 150,
-      "description": "Convoi d'État des mude de Flandre."
+      "description": "Convoi d’État des mude de Flandre."
     },
     {
       "id": "route_bruges_troyes",

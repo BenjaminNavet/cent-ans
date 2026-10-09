@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Capitale du comté de Savoie, résidence d'Aymon le Pacifique, en guerre contre le Dauphin.",
+    "description": "Capitale du comté de Savoie, résidence d’Aymon le Pacifique, en guerre contre le Dauphin.",
     "sources": ["Chambéry", "Comté de Savoie"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 4,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Rocher fortifié verrouillant la vallée de l'Isère, clé militaire de la Savoie.",
+    "description": "Rocher fortifié verrouillant la vallée de l’Isère, clé militaire de la Savoie.",
     "sources": ["Montmélian"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Village d'estive du Beaufortain, aux confins de la Tarentaise.",
+    "description": "Village d’estive du Beaufortain, aux confins de la Tarentaise.",
     "sources": ["Beaufort (Savoie)"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_collegiate_church"],
     "port": false,
-    "description": "Cité épiscopale, l'un des plus anciens évêchés des Alpes, capitale de la Maurienne.",
+    "description": "Cité épiscopale, l’un des plus anciens évêchés des Alpes, capitale de la Maurienne.",
     "sources": ["Saint-Jean-de-Maurienne", "Maurienne"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_collegiate_church"],
     "port": false,
-    "description": "Siège de l'archevêché de Tarentaise, sur l'Isère.",
+    "description": "Siège de l’archevêché de Tarentaise, sur l’Isère.",
     "sources": ["Moûtiers (Savoie)", "Tarentaise"]
   },
   {
@@ -115,7 +115,7 @@
     "id": "set_abbaye_d_aulps",
     "province": "prov_savoie",
     "kind": "abbey",
-    "name": { "display": "Abbaye d'Aulps", "local": "Aups", "local_language": "franco-provençal" },
+    "name": { "display": "Abbaye d’Aulps", "local": "Aups", "local_language": "franco-provençal" },
     "lonlat": [6.6167, 46.2667],
     "weight": 6,
     "owner": null,
@@ -123,7 +123,7 @@
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
     "description": "Abbaye cistercienne fondée en 1090 dans la vallée de la Dranse, dans le Chablais.",
-    "sources": ["Abbaye d'Aulps"]
+    "sources": ["Abbaye d’Aulps"]
   },
   {
     "id": "set_ugine",
@@ -136,7 +136,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg de la vallée de l'Arly connu pour ses forges de fer.",
+    "description": "Bourg de la vallée de l’Arly connu pour ses forges de fer.",
     "sources": ["Ugine"]
   }
 ]

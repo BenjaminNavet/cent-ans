@@ -18,7 +18,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ancienne Prousa byzantine, capitale ottomane depuis 1326 ; tombeau d'Osman.",
+    "description": "Ancienne Prousa byzantine, capitale ottomane depuis 1326 ; tombeau d’Osman.",
     "sources": [
       "Bursa"
     ]
@@ -64,7 +64,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg de la plaine de Bursa, futur foyer de l'aristocratie ottomane.",
+    "description": "Bourg de la plaine de Bursa, futur foyer de l’aristocratie ottomane.",
     "sources": [
       "Bursa"
     ]

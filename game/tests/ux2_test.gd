@@ -44,7 +44,7 @@ func _test_hint_choice() -> void:
 	var config := NextHint.data()
 	check(not (config.get("hints", []) as Array).is_empty(), "data/ui/next_hints.json should load")
 	var research := {"kind": "research_idle", "text": "Aucune recherche en cours"}
-	var base := {"alerts": [research], "idle_army": "army_1", "idle_army_name": "l'ost de Philippe VI",
+	var base := {"alerts": [research], "idle_army": "army_1", "idle_army_name": "l’ost de Philippe VI",
 		"treasury": 60000, "income": 0, "constructions": 0, "can_build": true, "tutorial_step": -1, "dismissed": []}
 	var hint := NextHint.choose(base)
 	check(str(hint.get("id", "")) == "research_idle" and str(hint.get("action", "")) == "alert", "idle research first, got %s" % [hint])

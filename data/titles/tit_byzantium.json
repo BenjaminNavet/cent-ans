@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
-    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l’aigle bicéphale reste l’emblème impérial.",
     "primary_color": "#A81C22",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -34,7 +34,7 @@
     {
       "id": "obj_byz_hold",
       "title": "Garder la Ville",
-      "description": "Andronic III doit garder Constantinople et l'Empire.",
+      "description": "Andronic III doit garder Constantinople et l’Empire.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_byzantium"
@@ -42,8 +42,8 @@
     },
     {
       "id": "obj_byz_epirus",
-      "title": "Reprendre l'Épire",
-      "description": "Annexer le despotat d'Épire (Arta, Janina) et remonter jusqu'à l'Adriatique.",
+      "title": "Reprendre l’Épire",
+      "description": "Annexer le despotat d’Épire (Arta, Janina) et remonter jusqu’à l’Adriatique.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -56,7 +56,7 @@
     {
       "id": "obj_byz_morea",
       "title": "Restaurer la Morée",
-      "description": "Contrôler toute la Morée, y compris la principauté latine d'Achaïe.",
+      "description": "Contrôler toute la Morée, y compris la principauté latine d’Achaïe.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -66,7 +66,7 @@
       }
     }
   ],
-  "description": "L'Empire romain d'Orient, ou plutôt ce qu'il en reste : Thrace, Macédoine, Thessalie, Morée et îles, sous Andronic III. Rang « royaume » du schéma.",
+  "description": "L’Empire romain d’Orient, ou plutôt ce qu’il en reste : Thrace, Macédoine, Thessalie, Morée et îles, sous Andronic III. Rang « royaume » du schéma.",
   "sources": [
     "Empire byzantin",
     "Andronic III Paléologue"

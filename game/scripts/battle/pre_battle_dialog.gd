@@ -279,7 +279,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	if season != "":
 		sub += " · %s" % season
 	if ambush_victim != "":
-		var caught := "Votre ost est surpris" if ambush_victim == player_side else "L'ennemi est surpris"
+		var caught := "Votre ost est surpris" if ambush_victim == player_side else "L’ennemi est surpris"
 		sub = "%s en colonne de marche · %s" % [caught, sub]
 	subtitle_label.text = sub
 	# Enluminure du contexte (siège ou bataille rangée), repli sur l'ancienne miniature.
@@ -299,7 +299,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	for i in 2:
 		_fill_column(_columns[i], player_side if i == 0 else enemy_side, i)
 	_fill_conditions(siege)
-	fight_button.text = "Donner l'assaut" if siege else "Combattre"
+	fight_button.text = "Donner l’assaut" if siege else "Combattre"
 	fight_button.disabled = setup.is_empty()
 	withdraw_button.text = "Maintenir le siège" if siege else "Retraite"
 	var can_withdraw := bool(forecast.get("can_withdraw", false))
@@ -338,7 +338,7 @@ func _fill_balance(siege: bool) -> void:
 		verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
 		# Ces chances sont celles de la résolution automatique ; la bataille jouée en 3D
 		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
-		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l'issue" % [
+		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l’issue" % [
 			roundi(chance * 100.0),
 			Money.digits(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
 			Money.digits(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
@@ -469,7 +469,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	texts.alignment = BoxContainer.ALIGNMENT_CENTER
 	var name_label := BattleUiKit.label(name_text, UiType.size(UiType.HEADING), INK, false, true)
 	texts.add_child(name_label)
-	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
+	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L’ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, UiType.size(UiType.CAPTION), BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
 	TooltipHost.attach_plain(stars_label, "leader_command_level", {"body": "%d / %s" % [command, RuleValues.text("max_skill_level")]})
@@ -511,7 +511,7 @@ func _fill_conditions(siege: bool) -> void:
 	for entry in modifiers:
 		mods.append(str(entry))
 	if siege and mods.is_empty():
-		mods.append("Brèche ouverte ou tours de siège : les murailles ne gênent plus l'assaut")
+		mods.append("Brèche ouverte ou tours de siège : les murailles ne gênent plus l’assaut")
 	for line in opening_notes(setup, battle):
 		mods.append(line)
 	modifiers_label.text = " · ".join(mods)
@@ -533,7 +533,7 @@ static func opening_notes(p_setup: Dictionary, p_battle: Dictionary) -> PackedSt
 	var notes := PackedStringArray()
 	var victim := ambush_victim_of(p_setup)
 	if victim != "":
-		notes.append("Embuscade ! %s en colonne de marche, sans déploiement ; l'embusqué se range sur ses flancs" % str(p_battle.get("%s_name" % victim, "la victime")))
+		notes.append("Embuscade ! %s en colonne de marche, sans déploiement ; l’embusqué se range sur ses flancs" % str(p_battle.get("%s_name" % victim, "la victime")))
 	for side in ["attacker", "defender"]:
 		var side_setup: Dictionary = p_setup.get(side, {})
 		var side_name := str(p_battle.get("%s_name" % side, side))

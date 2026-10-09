@@ -30,7 +30,7 @@
     {
       "id": "obj_lorraine_hold",
       "title": "Garder le duché",
-      "description": "La maison de Lorraine doit conserver son duché, fief d'Empire d'expression française tourné vers la France.",
+      "description": "La maison de Lorraine doit conserver son duché, fief d’Empire d’expression française tourné vers la France.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_lorraine"

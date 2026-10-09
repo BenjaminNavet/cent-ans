@@ -18,14 +18,14 @@ func _run() -> void:
 	# Fondus : bornes et monotonie.
 	var in_band := Vector2(100, 200)
 	var out_band := Vector2(500, 600)
-	check(MapAtmosphere.band_fade(50, in_band, out_band) == 0.0, "fondu nul avant l'entrée")
+	check(MapAtmosphere.band_fade(50, in_band, out_band) == 0.0, "fondu nul avant l’entrée")
 	check(MapAtmosphere.band_fade(350, in_band, out_band) == 1.0, "fondu plein au milieu")
 	check(MapAtmosphere.band_fade(700, in_band, out_band) == 0.0, "fondu nul après la sortie")
 	check(MapAtmosphere.band_fade(150, in_band, out_band) < MapAtmosphere.band_fade(180, in_band, out_band), "fondu monotone")
 	# Saison et aurore.
-	check(is_equal_approx(MapAtmosphere.season_share(Vector4(0, 0, 0, 1), [0.3, 0.1, 0.8, 1.0]), 1.0), "brouillard d'hiver")
-	check(MapAtmosphere.aurora_strength(0.0, 1.0, 0.35) == 0.0, "pas d'aurore hors hiver")
-	check(MapAtmosphere.aurora_strength(1.0, 0.0, 0.35) > 0.3 and MapAtmosphere.aurora_strength(1.0, 1.0, 0.35) == 1.0, "aurore d'hiver : plancher puis soir")
+	check(is_equal_approx(MapAtmosphere.season_share(Vector4(0, 0, 0, 1), [0.3, 0.1, 0.8, 1.0]), 1.0), "brouillard d’hiver")
+	check(MapAtmosphere.aurora_strength(0.0, 1.0, 0.35) == 0.0, "pas d’aurore hors hiver")
+	check(MapAtmosphere.aurora_strength(1.0, 0.0, 0.35) > 0.3 and MapAtmosphere.aurora_strength(1.0, 1.0, 0.35) == 1.0, "aurore d’hiver : plancher puis soir")
 	# Bancs de fleuve : plafond respecté, déterministe, seuil d'importance.
 	var line := PackedVector2Array()
 	for index in 200:
@@ -72,7 +72,7 @@ func _check_build() -> void:
 		if entry["kind"] in ["rain", "storm"]:
 			wet += 1
 	check(placements.size() == mini(wet * int(rule["per_province"]), int(rule["max_curtains"])), "un rideau par pluie/orage (%d)" % placements.size())
-	check(placements.size() > 0 and float(placements[0]["storm"]) == 1.0, "orages d'abord")
+	check(placements.size() > 0 and float(placements[0]["storm"]) == 1.0, "orages d’abord")
 	var curtains := atmosphere.get_node_or_null("RainCurtains") as MultiMeshInstance3D
 	check(curtains != null and curtains.multimesh.instance_count == placements.size(), "rideaux en un MultiMesh")
 	var nodes := 0

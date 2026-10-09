@@ -27,7 +27,7 @@ const ANIM_MAX_SECONDS := 1.8
 ## Aperçu de chemin recalculé au plus toutes les HOVER_INTERVAL_MS.
 const HOVER_INTERVAL_MS := 40
 const STOP_MESSAGES := {
-	"stationed": "%s : l'armée y stationne.",
+	"stationed": "%s : l’armée y stationne.",
 	"siege_started": "Siège de %s commencé.",
 	"settlement_taken": "%s est prise.",
 	"out_of_movement": "Plus de mouvement : la marche reprendra au prochain tour.",
@@ -298,7 +298,7 @@ func _on_war_confirmed() -> void:
 	# ADR 0146 : une guerre aussitôt éteinte (paix imposée) ne doit pas laisser l'armée entrer
 	# dans la place comme en temps de paix.
 	if not is_enemy_faction(str(pending["faction"])):
-		map.ui.show_toast("La guerre n'a pas pu commencer : voir le journal.", true)
+		map.ui.show_toast("La guerre n’a pas pu commencer : voir le journal.", true)
 		return
 	map.ui.show_toast("La guerre est déclarée.")
 	_execute(str(pending["army"]), pending["target"])
@@ -374,7 +374,7 @@ func order_assault(army_id: String) -> Dictionary:
 		return result
 	map.refresh_all()
 	var pending: Array = map.sim.call("get_pending_events")
-	map.ui.show_toast(str(pending[-1].get("text_fr", "L'assaut est donné.")) if not pending.is_empty() else "L'assaut est donné.")
+	map.ui.show_toast(str(pending[-1].get("text_fr", "L’assaut est donné.")) if not pending.is_empty() else "L’assaut est donné.")
 	if map.has_method("_offer_pending_battles"):
 		map.call("_offer_pending_battles")
 	return result
@@ -414,7 +414,7 @@ func is_water(point: Vector2) -> bool:
 func _water_refusal(army_id: String) -> String:
 	var army: Dictionary = map.sim.call("get_army", army_id)
 	if str(army.get("settlement", "")) == "":
-		return "Pour prendre la mer, l'armée doit d'abord entrer dans un port."
+		return "Pour prendre la mer, l’armée doit d’abord entrer dans un port."
 	return "Aucune route maritime depuis ce port."
 
 
@@ -660,7 +660,7 @@ func _preview_voyage(target: Dictionary) -> bool:
 func attack_hint(target: Dictionary) -> String:
 	if not is_attack_target(target):
 		return "clic droit pour partir"
-	var hint := "clic droit pour donner l'assaut" if str(target["kind"]) == "settlement" else "clic droit pour attaquer"
+	var hint := "clic droit pour donner l’assaut" if str(target["kind"]) == "settlement" else "clic droit pour attaquer"
 	if relation_to(target_faction(target)) == "peace":
 		hint += " (déclare la guerre)"
 	return hint

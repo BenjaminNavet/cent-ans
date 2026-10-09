@@ -1,7 +1,7 @@
 {
   "id": "fac_golden_horde",
   "name": {
-    "display": "Horde d'Or (ulus de Djötchi)",
+    "display": "Horde d’Or (ulus de Djötchi)",
     "local": "Ulugh Ulus",
     "local_language": "kiptchak"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_golden_horde",
   "heraldry": {
     "blazon": "De gueules à la lune d'or.",
-    "description": "Couleurs dynastiques des Djötchides (rouge et or) ; le croissant rappelle l'islam d'Özbeg. La tamga de la maison de Djötchi (trident) n'est pas rendue.",
+    "description": "Couleurs dynastiques des Djötchides (rouge et or) ; le croissant rappelle l’islam d’Özbeg. La tamga de la maison de Djötchi (trident) n’est pas rendue.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -139,7 +139,7 @@
     "trade": 55,
     "piety": 70
   },
-  "description": "Empire nomade et marchand des steppes, du Danube à l'Oural, converti à l'islam sunnite sous Özbeg (1313-1341) ; suzerain de tous les princes russes, dont il perçoit le tribut (« vyhod ») et confirme les yarlyks. Sa capitale, Saraï, est l'une des plus grandes villes du monde.",
+  "description": "Empire nomade et marchand des steppes, du Danube à l’Oural, converti à l’islam sunnite sous Özbeg (1313-1341) ; suzerain de tous les princes russes, dont il perçoit le tribut (« vyhod ») et confirme les yarlyks. Sa capitale, Saraï, est l’une des plus grandes villes du monde.",
   "sources": [
     "Horde d'Or",
     "Özbeg",

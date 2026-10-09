@@ -1,7 +1,7 @@
 {
   "id": "evt_desastre_de_kairouan",
   "title": "Le désastre de Kairouan",
-  "text": "Maître de Tunis depuis l'automne, [[cdx_abu_al_hasan_ali|Abu l-Hasan]] a voulu soumettre les tribus arabes de l'Ifriqiya. Elles l'écrasent sous Kairouan, où il reste assiégé ; le bruit de sa mort court jusqu'à Fès, et son fils Abu Inan se fait proclamer sultan à Tlemcen.",
+  "text": "Maître de Tunis depuis l’automne, [[cdx_abu_al_hasan_ali|Abu l-Hasan]] a voulu soumettre les tribus arabes de l’Ifriqiya. Elles l’écrasent sous Kairouan, où il reste assiégé ; le bruit de sa mort court jusqu’à Fès, et son fils Abu Inan se fait proclamer sultan à Tlemcen.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -35,7 +35,7 @@
   },
   "options": [
     {
-      "text": "Tenir Kairouan et rallier les tribus à prix d'or",
+      "text": "Tenir Kairouan et rallier les tribus à prix d’or",
       "effects": [
         {
           "type": "treasury",
@@ -59,7 +59,7 @@
       "ai_weight": 1
     },
     {
-      "text": "Abandonner l'Ifriqiya aux Hafsides",
+      "text": "Abandonner l’Ifriqiya aux Hafsides",
       "effects": [
         {
           "type": "prestige",
@@ -74,7 +74,7 @@
           "type": "opinion",
           "faction": "fac_hafsids",
           "amount": 15,
-          "reason": "Retrait mérinide d'Ifriqiya"
+          "reason": "Retrait mérinide d’Ifriqiya"
         }
       ],
       "ai_weight": 1

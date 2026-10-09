@@ -21,7 +21,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Siège de l'évêché de Transylvanie et de la voïvodie, cathédrale Saint-Michel.",
+    "description": "Siège de l’évêché de Transylvanie et de la voïvodie, cathédrale Saint-Michel.",
     "sources": [
       "Alba Iulia"
     ]
@@ -47,7 +47,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande de la Transylvanie du nord, fondée par des Saxons, siège d'un comitat.",
+    "description": "Ville marchande de la Transylvanie du nord, fondée par des Saxons, siège d’un comitat.",
     "sources": [
       "Kolozsvár"
     ]

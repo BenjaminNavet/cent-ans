@@ -7,7 +7,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à trois léopards d'or, à la bande d'azur brochant sur le tout.",
-    "description": "Armes d'Angleterre brisées d'une bande d'azur, portées par Henri, 3e comte de Lancastre, petit-fils de Henri III par Edmond Crouchback.",
+    "description": "Armes d’Angleterre brisées d’une bande d’azur, portées par Henri, 3e comte de Lancastre, petit-fils de Henri III par Edmond Crouchback.",
     "primary_color": "#B0182B",
     "secondary_color": "#1F3A93"
   },
@@ -34,7 +34,7 @@
     {
       "id": "obj_lancaster_duchy",
       "title": "Le duché à venir",
-      "description": "Le comté sera érigé en duché en 1351 : devancer l'histoire en s'élevant au rang de duc.",
+      "description": "Le comté sera érigé en duché en 1351 : devancer l’histoire en s’élevant au rang de duc.",
       "condition": {
         "kind": "be_independent"
       }

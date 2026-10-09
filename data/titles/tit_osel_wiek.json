@@ -2,13 +2,13 @@
   "id": "tit_osel_wiek",
   "rank": "county",
   "name": {
-    "display": "Évêché d'Ösel-Wiek",
+    "display": "Évêché d’Ösel-Wiek",
     "local": "Bistum Ösel-Wiek",
     "local_language": "moyen bas-allemand"
   },
   "heraldry": {
     "blazon": "D'azur à la croix d'argent.",
-    "description": "Croix blanche de l'évêché d'Ösel-Wiek (armes simplifiées).",
+    "description": "Croix blanche de l’évêché d’Ösel-Wiek (armes simplifiées).",
     "primary_color": "#1F3A93",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -21,13 +21,13 @@
   "holder_1337": {
     "faction": "fac_osel_wiek",
     "sources": [
-      "Évêché d'Ösel-Wiek"
+      "Évêché d’Ösel-Wiek"
     ]
   },
   "objectives": [
     {
       "id": "obj_osel_hold",
-      "title": "Garder l'évêché",
+      "title": "Garder l’évêché",
       "description": "Conserver Ösel-Wiek.",
       "condition": {
         "kind": "hold_title",
@@ -37,14 +37,14 @@
     {
       "id": "obj_osel_indep",
       "title": "Un évêque libre",
-      "description": "Ne jamais dépendre de l'Ordre.",
+      "description": "Ne jamais dépendre de l’Ordre.",
       "condition": {
         "kind": "be_independent"
       }
     }
   ],
-  "description": "Principauté épiscopale d'Ösel-Wiek, prince d'Empire.",
+  "description": "Principauté épiscopale d’Ösel-Wiek, prince d’Empire.",
   "sources": [
-    "Évêché d'Ösel-Wiek"
+    "Évêché d’Ösel-Wiek"
   ]
 }

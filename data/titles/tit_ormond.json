@@ -1,7 +1,7 @@
 {
   "rank": "county",
   "name": {
-    "display": "Comté d'Ormond",
+    "display": "Comté d’Ormond",
     "local": "Earldom of Ormond",
     "local_language": "moyen anglais"
   },
@@ -25,7 +25,7 @@
     {
       "id": "obj_ormond_hold",
       "title": "Garder le comté",
-      "description": "Les Butler doivent conserver leur comté et leur charge héréditaire de grand bouteiller d'Irlande.",
+      "description": "Les Butler doivent conserver leur comté et leur charge héréditaire de grand bouteiller d’Irlande.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_ormond"
@@ -34,7 +34,7 @@
     {
       "id": "obj_ormond_kilkenny",
       "title": "Kilkenny",
-      "description": "Étendre le comté jusqu'à Kilkenny, future capitale de la maison.",
+      "description": "Étendre le comté jusqu’à Kilkenny, future capitale de la maison.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -44,9 +44,9 @@
       }
     }
   ],
-  "description": "Comté érigé en 1328 pour James Butler, grand bouteiller héréditaire d'Irlande depuis 1177 ; la maison Butler déplacera son siège à Kilkenny au siècle suivant.",
+  "description": "Comté érigé en 1328 pour James Butler, grand bouteiller héréditaire d’Irlande depuis 1177 ; la maison Butler déplacera son siège à Kilkenny au siècle suivant.",
   "sources": [
-    "Comté d'Ormond",
+    "Comté d’Ormond",
     "James Butler, 1er comte d'Ormond",
     "Grand bouteiller d'Irlande"
   ],

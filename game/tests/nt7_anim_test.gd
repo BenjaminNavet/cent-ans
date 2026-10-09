@@ -40,7 +40,7 @@ func _check_blend() -> void:
 ## Miroir du shader : un soldat de mêlée, instants autour de ses changements de cycle.
 func _check_mirror() -> void:
 	var config := BattleSkinned.state_config("infantry", 0, "melee", false)
-	check(int(config["mode"]) == BattleSkinned.M_CYCLE and (config["set"] as Array).size() >= 2, "mêlée à l'épée : jeu CYCLE")
+	check(int(config["mode"]) == BattleSkinned.M_CYCLE and (config["set"] as Array).size() >= 2, "mêlée à l’épée : jeu CYCLE")
 	var blend := 0.2
 	var cycle := float(config["cycle"])
 	var found_blend := false

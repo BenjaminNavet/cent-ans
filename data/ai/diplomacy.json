@@ -1,5 +1,5 @@
 {
-  "description": "Réglages des guerres, alliances et paix de l'IA autour de ses frontières (lot G5) : voisin menaçant, nouveaux fronts, cobelligérance, paix. Le voisinage est celui de la carte (graphe des provinces). Voir docs/design/m9-ai.md § 7.",
+  "description": "Réglages des guerres, alliances et paix de l’IA autour de ses frontières (lot G5) : voisin menaçant, nouveaux fronts, cobelligérance, paix. Le voisinage est celui de la carte (graphe des provinces). Voir docs/design/m9-ai.md § 7.",
   "menacing_neighbour": {
     "power_ratio": 1.5,
     "attitude": -15,

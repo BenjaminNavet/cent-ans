@@ -1,7 +1,7 @@
 {
   "id": "evt_mort_prince_noir",
   "title": "La mort du Prince noir",
-  "text": "Rongé par une dysenterie contractée en Castille, Édouard de Woodstock, prince de Galles, s'éteint à Westminster un an avant son père. L'Angleterre perd son plus grand capitaine ; l'héritier est un enfant de neuf ans.",
+  "text": "Rongé par une dysenterie contractée en Castille, Édouard de Woodstock, prince de Galles, s’éteint à Westminster un an avant son père. L’Angleterre perd son plus grand capitaine ; l’héritier est un enfant de neuf ans.",
   "kind": "historical",
   "trigger": {
     "date": {

@@ -21,7 +21,7 @@
       "bld_forge"
     ],
     "port": false,
-    "description": "Grande ville marchande de l'est du royaume, sur la route de Pologne.",
+    "description": "Grande ville marchande de l’est du royaume, sur la route de Pologne.",
     "sources": [
       "Kassa"
     ]
@@ -47,7 +47,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville saxonne de Spiš, siège de l'union des villes de Szepes.",
+    "description": "Ville saxonne de Spiš, siège de l’union des villes de Szepes.",
     "sources": [
       "Lőcse"
     ]
@@ -72,7 +72,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Vaste forteresse royale au-dessus de la Hornád, l'une des plus grandes d'Europe centrale.",
+    "description": "Vaste forteresse royale au-dessus de la Hornád, l’une des plus grandes d’Europe centrale.",
     "sources": [
       "Château de Szepes"
     ]

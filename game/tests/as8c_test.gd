@@ -35,7 +35,7 @@ func _init() -> void:
 		check(lift == measured["cattle"]["lift_lut"], "lift_lut différent de la mesure")
 	# La table de pas : zéro en montée à la phase 0, amplitude 1, profil non sinusoïdal (mesuré).
 	if swing.size() == 16:
-		check(absf(AnimalMotion.lut_at(swing, 0.0)) < 0.05, "swing_lut : phase 0 n'est pas le milieu du balancé")
+		check(absf(AnimalMotion.lut_at(swing, 0.0)) < 0.05, "swing_lut : phase 0 n’est pas le milieu du balancé")
 		check(AnimalMotion.lut_at(swing, 1.0 / 16.0) > 0.4, "swing_lut : le balancé avant ne monte pas")
 		var peak := 0.0
 		var worst := 0.0
@@ -44,7 +44,7 @@ func _init() -> void:
 			peak = maxf(peak, absf(AnimalMotion.lut_at(swing, u)))
 			worst = maxf(worst, absf(AnimalMotion.lut_at(swing, u) - sin(TAU * u)))
 		check(peak > 0.9 and peak < 1.1, "swing_lut : amplitude %.2f" % peak)
-		check(worst > 0.1, "swing_lut : profil indistinguable d'un sinus (%.2f)" % worst)
+		check(worst > 0.1, "swing_lut : profil indistinguable d’un sinus (%.2f)" % worst)
 		check(is_equal_approx(AnimalMotion.lut_at(swing, 0.25 + 1.0), AnimalMotion.lut_at(swing, 0.25)), "lut_at : pas de bouclage")
 	# Uniformes d'un attelage et d'une bête.
 	for role in ["ox", "cow", "horse", "sheep", "stone_cart", "merchant_cart", "dead_cart"]:
@@ -93,7 +93,7 @@ func _init() -> void:
 	# Le shader lit bien les tables et les raies (et non plus le sinus unique de l'AS1).
 	var inc := FileAccess.get_file_as_string(SHADER_INC)
 	check(inc.contains("am_swing_at(leg_u)") and inc.contains("am_lift_at(leg_u)"), "shader : tables de pas non lues")
-	check(not inc.contains("sin(leg_phase)"), "shader : sinus de pas de l'AS1 encore présent")
+	check(not inc.contains("sin(leg_phase)"), "shader : sinus de pas de l’AS1 encore présent")
 	check(inc.contains("am_jolt_amp[k]") and inc.contains("am_extra.y"), "shader : cahot / roulis mesurés non lus")
 	check(FileAccess.get_file_as_string(CAMP_SHADER_PATH).contains("ch_head3.w"), "shader de camp : durée de descente non lue")
 	finish()

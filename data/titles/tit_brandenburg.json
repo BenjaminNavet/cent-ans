@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or.",
-    "description": "Aigle rouge margraviale de Brandebourg, distincte de l'aigle noire impériale.",
+    "description": "Aigle rouge margraviale de Brandebourg, distincte de l’aigle noire impériale.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
   },
@@ -23,7 +23,7 @@
       "Marche de Brandebourg"
     ]
   },
-  "description": "Marche électorale de Brandebourg, rang de duché retenu par convention politique comme les autres grands électorats de l'Empire (rang réel : margraviat).",
+  "description": "Marche électorale de Brandebourg, rang de duché retenu par convention politique comme les autres grands électorats de l’Empire (rang réel : margraviat).",
   "sources": [
     "Louis V de Bavière",
     "Marche de Brandebourg"

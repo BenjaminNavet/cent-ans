@@ -17,7 +17,7 @@
   "primary_title": "tit_montferrat",
   "heraldry": {
     "blazon": "D'argent à la fasce de gueules.",
-    "description": "Approximation du chef historique (D'argent au chef de gueules) : le moteur de rendu simplifié des factions ne trace pas de chef, remplacé par une fasce. Armes exactes dans data/heraldry/houses.json et le titre.",
+    "description": "Approximation du chef historique (D’argent au chef de gueules) : le moteur de rendu simplifié des factions ne trace pas de chef, remplacé par une fasce. Armes exactes dans data/heraldry/houses.json et le titre.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },

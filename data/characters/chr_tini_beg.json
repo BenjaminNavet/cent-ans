@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Khan de la Horde d'Or",
+      "title": "Khan de la Horde d’Or",
       "from": {
         "value": "1341"
       },
@@ -41,7 +41,7 @@
   },
   "starting_location": "prov_saray",
   "status": "at_court",
-  "description": "Fils aîné d'Özbeg et de Taïdoula ; il sera khan de 1341 à 1342, avant que son frère Djanibeg le fasse tuer.",
+  "description": "Fils aîné d’Özbeg et de Taïdoula ; il sera khan de 1341 à 1342, avant que son frère Djanibeg le fasse tuer.",
   "sources": [
     "Özbeg Khan"
   ]

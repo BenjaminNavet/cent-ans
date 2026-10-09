@@ -26,7 +26,7 @@
       "bld_stables"
     ],
     "port": true,
-    "description": "Deuxième ville du royaume, port sur la Seine et capitale de l'apanage de Jean, duc de Normandie.",
+    "description": "Deuxième ville du royaume, port sur la Seine et capitale de l’apanage de Jean, duc de Normandie.",
     "sources": [
       "Rouen"
     ]
@@ -51,7 +51,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse de Richard Cœur de Lion dominant la Seine aux Andelys, où réside en exil David II, roi d'Écosse.",
+    "description": "Forteresse de Richard Cœur de Lion dominant la Seine aux Andelys, où réside en exil David II, roi d’Écosse.",
     "sources": [
       "Château-Gaillard",
       "David II d'Écosse"
@@ -79,7 +79,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Port de pêche et d'armement sur la Manche, aux confins du pays de Caux.",
+    "description": "Port de pêche et d’armement sur la Manche, aux confins du pays de Caux.",
     "sources": [
       "Dieppe (Seine-Maritime)"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Grande abbaye bénédictine sur la Seine, l'une des plus riches de Normandie.",
+    "description": "Grande abbaye bénédictine sur la Seine, l’une des plus riches de Normandie.",
     "sources": [
       "Abbaye de Jumièges"
     ]
@@ -182,7 +182,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Ville drapière sur l'Eure, marché de foulons réputé.",
+    "description": "Ville drapière sur l’Eure, marché de foulons réputé.",
     "sources": [
       "Louviers"
     ]
@@ -258,7 +258,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg né autour d'une abbaye ducale, marché du Lieuvin.",
+    "description": "Bourg né autour d’une abbaye ducale, marché du Lieuvin.",
     "sources": [
       "Bernay (Eure)"
     ]
@@ -268,8 +268,8 @@
     "province": "prov_normandie",
     "kind": "village",
     "name": {
-      "display": "Pont-de-l'Arche",
-      "local": "Pont de l'Arche",
+      "display": "Pont-de-l’Arche",
+      "local": "Pont de l’Arche",
       "local_language": "ancien français"
     },
     "lonlat": [
@@ -285,7 +285,7 @@
     "port": false,
     "description": "Bourg fortifié verrouillant un pont stratégique sur la Seine entre Rouen et Paris.",
     "sources": [
-      "Pont-de-l'Arche"
+      "Pont-de-l’Arche"
     ]
   }
 ]

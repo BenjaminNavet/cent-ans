@@ -3,7 +3,7 @@
   "name": {
     "display": "Pain blanc et vin"
   },
-  "description": "Pain de froment blanc et vin à chaque repas : l'ordinaire des bourgeois. Le [[cdx_vin_de_gascogne|vin de Gascogne]], ce [[cdx_clairet|clairet]] que les Anglais appellent « claret », fait la fortune du [[cdx_commerce_de_bordeaux|commerce de Bordeaux]].",
+  "description": "Pain de froment blanc et vin à chaque repas : l’ordinaire des bourgeois. Le [[cdx_vin_de_gascogne|vin de Gascogne]], ce [[cdx_clairet|clairet]] que les Anglais appellent « claret », fait la fortune du [[cdx_commerce_de_bordeaux|commerce de Bordeaux]].",
   "requirements": {
     "resources": [
       "res_wine"

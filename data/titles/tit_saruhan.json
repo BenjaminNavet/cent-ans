@@ -28,7 +28,7 @@
     {
       "id": "obj_saruhan_independent",
       "title": "Rester libre",
-      "description": "Garder l'indépendance de Saruhan.",
+      "description": "Garder l’indépendance de Saruhan.",
       "condition": {
         "kind": "be_independent"
       }
@@ -36,7 +36,7 @@
     {
       "id": "obj_saruhan_smyrna",
       "title": "Smyrne",
-      "description": "Disputer Smyrne à l'émirat d'Aydın.",
+      "description": "Disputer Smyrne à l’émirat d’Aydın.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -45,7 +45,7 @@
       }
     }
   ],
-  "description": "Beylik fondé vers 1300 par Saruhan Bey, riche plaine du Gediz ; allié des Aydın, tributaire de la piraterie de l'Égée.",
+  "description": "Beylik fondé vers 1300 par Saruhan Bey, riche plaine du Gediz ; allié des Aydın, tributaire de la piraterie de l’Égée.",
   "sources": [
     "Saruhanids",
     "Saruhan"

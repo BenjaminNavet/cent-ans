@@ -1,7 +1,7 @@
 {
   "id": "prov_livonia",
   "name": {
-    "display": "Livonie de l'Ordre",
+    "display": "Livonie de l’Ordre",
     "local": "Lyvlant",
     "local_language": "moyen bas-allemand"
   },
@@ -82,7 +82,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 1500,
-  "description": "Le domaine central de l'ordre Livonien autour de Wenden (Cēsis), résidence du maître, et de Fellin (Viljandi) : forteresses de pierre en ligne sur la frontière de Pskov.",
+  "description": "Le domaine central de l’ordre Livonien autour de Wenden (Cēsis), résidence du maître, et de Fellin (Viljandi) : forteresses de pierre en ligne sur la frontière de Pskov.",
   "sources": [
     "Ordre Livonien",
     "Cēsis",

@@ -2,13 +2,13 @@
   "id": "tit_albret",
   "rank": "county",
   "name": {
-    "display": "Seigneurie d'Albret",
+    "display": "Seigneurie d’Albret",
     "local": "Lebret",
     "local_language": "gascon"
   },
   "heraldry": {
     "blazon": "De gueules plain.",
-    "description": "Écu de gueules plain, armes des sires d'Albret jusqu'en 1389, quand Charles VI accorde à Arnaud Amanieu d'écarteler de France.",
+    "description": "Écu de gueules plain, armes des sires d’Albret jusqu’en 1389, quand Charles VI accorde à Arnaud Amanieu d’écarteler de France.",
     "primary_color": "#B0182B",
     "secondary_color": "#B0182B"
   },
@@ -28,7 +28,7 @@
     {
       "id": "obj_albret_hold",
       "title": "Garder Albret",
-      "description": "Le sire d'Albret doit conserver sa seigneurie.",
+      "description": "Le sire d’Albret doit conserver sa seigneurie.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_albret"
@@ -37,7 +37,7 @@
     {
       "id": "obj_albret_expand",
       "title": "Étendre en Gascogne",
-      "description": "Élargir l'influence albretaise sur l'Agenais voisin.",
+      "description": "Élargir l’influence albretaise sur l’Agenais voisin.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -47,7 +47,7 @@
       }
     }
   ],
-  "description": "Seigneurie gasconne, rang réduit à comté par convention de schéma (rang réel : simple seigneurie). Tenue du duc d'Aquitaine (le roi d'Angleterre).",
+  "description": "Seigneurie gasconne, rang réduit à comté par convention de schéma (rang réel : simple seigneurie). Tenue du duc d’Aquitaine (le roi d’Angleterre).",
   "sources": [
     "Maison d'Albret",
     "Nérac"

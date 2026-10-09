@@ -88,7 +88,7 @@ func _test_bridge() -> void:
 	check(_ids(france.get("direct_vassals", [])).has("fac_burgundy"), "Burgundy is a direct vassal of France")
 	check(_ids(france.get("title_vassals", [])).has("fac_england"), "England holds Guyenne of France")
 	var burgundy: Dictionary = sim.call("get_feudal_sheet", "fac_burgundy")
-	check(str(burgundy.get("liege", "")) == "fac_france", "Burgundy's liege is France")
+	check(str(burgundy.get("liege", "")) == "fac_france", "Burgundy’s liege is France")
 	check(int(burgundy.get("loyalty", -1)) >= 0 and str(burgundy.get("status", "")) != "", "a vassal has a loyalty and a status")
 	var crumbs: Array = sim.call("get_province_breadcrumb", "prov_charolais")
 	check(crumbs.size() == 3 and str(crumbs[0].get("title_name", "")) == "Royaume de France"
@@ -139,7 +139,7 @@ func _test_tree_france(map: Node) -> void:
 	if france_item != null:
 		check(france_item.get_text(0).contains("(vous)"), "the player is marked in the tree")
 	var liege := _find(feudal.panel, "Liege") as Label
-	check(liege != null and liege.text.contains("Souverain"), "France's position: sovereign")
+	check(liege != null and liege.text.contains("Souverain"), "France’s position: sovereign")
 	# Retour 03-arbre-feodal : aucune ligne n'élargit le panneau au-delà de sa zone.
 	# Zone `SIDE_PANEL` à 1280 px : 30 % de la largeur (la fenêtre headless est plus petite).
 	var zone_width := UiZones.ZONE_RECTS[UiZones.Zone.SIDE_PANEL].size.x * 1280.0
@@ -191,7 +191,7 @@ func _test_breadcrumb(map: Node) -> void:
 	if check(last != null, "last crumb is a link"):
 		last.emit_signal("pressed")
 		await process_frame
-		check(feudal.panel.visible and feudal.focus == "fac_burgundy", "a crumb opens the tree on the title's holder")
+		check(feudal.panel.visible and feudal.focus == "fac_burgundy", "a crumb opens the tree on the title’s holder")
 	map.ui.hide_province()
 
 
@@ -214,7 +214,7 @@ func _test_map_filter(map: Node) -> void:
 func _test_escalation(map: Node) -> void:
 	var dialog := WarDeclarationDialog.new()
 	map.ui.add_child(dialog)
-	dialog.ask(map.sim, "fac_albret", "Albret", "la place d'Albret")
+	dialog.ask(map.sim, "fac_albret", "Albret", "la place d’Albret")
 	await process_frame
 	check(dialog.escalation.visible and not dialog.escalation.steps.is_empty(), "attacking Albret shows who may enter the war")
 	if not dialog.escalation.steps.is_empty():
@@ -247,7 +247,7 @@ func _test_orders(map: Node) -> void:
 		feudal.select("fac_burgundy")
 		await process_frame
 		var choice := _find(feudal.panel, "GrantChoice") as OptionButton
-		check(choice != null and choice.item_count == titles.size(), "grant choice lists France's grantable titles")
+		check(choice != null and choice.item_count == titles.size(), "grant choice lists France’s grantable titles")
 		check(feudal.grant_title(title, "fac_burgundy"), "granting %s to Burgundy is accepted" % title)
 		var titles_after := _ids((sim.call("get_feudal_sheet", "fac_burgundy") as Dictionary).get("titles", []))
 		check(titles_after.has(title), "Burgundy now holds %s" % title)

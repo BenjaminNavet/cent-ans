@@ -52,7 +52,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Port fortifié de la côte nord de l'île, fidèle à Gênes depuis la fin du XIIIe siècle.",
+    "description": "Port fortifié de la côte nord de l’île, fidèle à Gênes depuis la fin du XIIIe siècle.",
     "sources": [
       "Calvi (Haute-Corse)"
     ]
@@ -78,7 +78,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Bourg perché de l'intérieur, au cœur des seigneuries corses de l'En-deçà-des-Monts, que Gênes ne contrôle pas. (Anachronisme de jeu : sa citadelle n'est élevée qu'en 1419 par Vincentello d'Istria.)",
+    "description": "Bourg perché de l’intérieur, au cœur des seigneuries corses de l’En-deçà-des-Monts, que Gênes ne contrôle pas. (Anachronisme de jeu : sa citadelle n’est élevée qu’en 1419 par Vincentello d’Istria.)",
     "sources": [
       "Corte (Haute-Corse)"
     ]
@@ -104,7 +104,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château au bord de l'étang de Biguglia, siège du gouverneur génois de Corse avant la fondation de Bastia en 1380.",
+    "description": "Château au bord de l’étang de Biguglia, siège du gouverneur génois de Corse avant la fondation de Bastia en 1380.",
     "sources": [
       "Biguglia",
       "Histoire de la Corse"
@@ -130,7 +130,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Ancien comptoir grec puis romain de la côte orientale, réduit à un modeste bourg mais toujours doté d'un mouillage.",
+    "description": "Ancien comptoir grec puis romain de la côte orientale, réduit à un modeste bourg mais toujours doté d’un mouillage.",
     "sources": [
       "Aléria"
     ]
@@ -163,7 +163,7 @@
     "province": "prov_corsica",
     "kind": "village",
     "name": {
-      "display": "Ajaccio (l'ancien)",
+      "display": "Ajaccio (l’ancien)",
       "local": "Aiacciu",
       "local_language": "corse"
     },
@@ -178,7 +178,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Établissement médiéval au fond du golfe d'Ajaccio, précédant la ville neuve génoise fondée en 1492 à quelques kilomètres.",
+    "description": "Établissement médiéval au fond du golfe d’Ajaccio, précédant la ville neuve génoise fondée en 1492 à quelques kilomètres.",
     "sources": [
       "Ajaccio",
       "Histoire d'Ajaccio"

@@ -1,8 +1,8 @@
 {
   "id": "fac_urgell",
   "name": {
-    "display": "Comté d'Urgell",
-    "local": "Comtat d'Urgell",
+    "display": "Comté d’Urgell",
+    "local": "Comtat d’Urgell",
     "local_language": "catalan"
   },
   "short_name": "Urgell",
@@ -19,7 +19,7 @@
   "primary_title": "tit_urgell",
   "heraldry": {
     "blazon": "Échiqueté d'or et de sable.",
-    "description": "Échiqueté des anciens comtes d'Urgell ; Jacques Ier l'écartèle avec les pals d'Aragon, rendu ici seul.",
+    "description": "Échiqueté des anciens comtes d’Urgell ; Jacques Ier l’écartèle avec les pals d’Aragon, rendu ici seul.",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
@@ -48,7 +48,7 @@
     "trade": 40,
     "piety": 55
   },
-  "description": "L'un des plus anciens comtés catalans, hérité à huit ans par Jacques Ier en 1328 ; branche cadette de la maison royale d'Aragon.",
+  "description": "L’un des plus anciens comtés catalans, hérité à huit ans par Jacques Ier en 1328 ; branche cadette de la maison royale d’Aragon.",
   "sources": [
     "James I, Count of Urgell"
   ]

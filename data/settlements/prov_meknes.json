@@ -17,7 +17,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Sanctuaire d'Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
+    "description": "Sanctuaire d’Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
     "sources": [
       "Moulay Idriss Zerhoun"
     ]
@@ -95,7 +95,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Ruines romaines de Volubilis, site fortifié d'Idris Ier ; en 1337 simple bourg en ruine.",
+    "description": "Ruines romaines de Volubilis, site fortifié d’Idris Ier ; en 1337 simple bourg en ruine.",
     "sources": [
       "Volubilis"
     ]

@@ -1,7 +1,7 @@
 {
   "id": "fac_osel_wiek",
   "name": {
-    "display": "Évêché d'Ösel-Wiek",
+    "display": "Évêché d’Ösel-Wiek",
     "local": "Bistum Ösel-Wiek",
     "local_language": "moyen bas-allemand"
   },
@@ -18,7 +18,7 @@
   "primary_title": "tit_osel_wiek",
   "heraldry": {
     "blazon": "D'azur à la croix d'argent.",
-    "description": "Croix blanche de l'évêché d'Ösel-Wiek (armes simplifiées).",
+    "description": "Croix blanche de l’évêché d’Ösel-Wiek (armes simplifiées).",
     "primary_color": "#1F3A93",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -48,9 +48,9 @@
     "trade": 55,
     "piety": 80
   },
-  "description": "Évêché de la côte occidentale de l'Estonie et des îles ; son évêque Jakob II vit ses derniers mois, et Hapsal reste un refuge fragile face à l'Ordre.",
+  "description": "Évêché de la côte occidentale de l’Estonie et des îles ; son évêque Jakob II vit ses derniers mois, et Hapsal reste un refuge fragile face à l’Ordre.",
   "sources": [
-    "Évêché d'Ösel-Wiek",
+    "Évêché d’Ösel-Wiek",
     "Haapsalu"
   ]
 }

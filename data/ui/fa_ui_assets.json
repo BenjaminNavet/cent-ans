@@ -1,5 +1,5 @@
 {
-  "description": "Lot FA5 — découpes d'enluminures, de sceaux et de matières du domaine public pour l'interface (outil tools/cent_ans_tools/fa_ui_assets.py, sorties game/assets/ui/fa/).",
+  "description": "Lot FA5 — découpes d’enluminures, de sceaux et de matières du domaine public pour l’interface (outil tools/cent_ans_tools/fa_ui_assets.py, sorties game/assets/ui/fa/).",
   "sources": {
     "met_466080": {"file": "met/met_466080.jpg", "institution": "The Metropolitan Museum of Art", "object": "Seal Impression, Saint Giles (inv. 466080)", "origin": "Angleterre, fin du XIIIe siècle, cire rouge", "url": "https://www.metmuseum.org/art/collection/search/466080", "licence": "Domaine public (Met Open Access, CC0 1.0)"},
     "met_466082": {"file": "met/met_466082.jpg", "institution": "The Metropolitan Museum of Art", "object": "Seal Impression, Bishop (inv. 466082)", "origin": "Pays-Bas, XIVe siècle, cire brune", "url": "https://www.metmuseum.org/art/collection/search/466082", "licence": "Domaine public (Met Open Access, CC0 1.0)"},

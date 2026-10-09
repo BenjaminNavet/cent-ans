@@ -1,5 +1,5 @@
 {
-  "description": "Rendu des morts, chutes, chocs de cavalerie, sang et démembrements en bataille (lot BV2). Rendu seulement : qui tombe, qui meurt et la perte de cohésion sont décidés par le cœur (sim-battle, événements d'impact et cause des pertes).",
+  "description": "Rendu des morts, chutes, chocs de cavalerie, sang et démembrements en bataille (lot BV2). Rendu seulement : qui tombe, qui meurt et la perte de cohésion sont décidés par le cœur (sim-battle, événements d’impact et cause des pertes).",
   "levels": {
     "off": { "stains": 0.0, "sprays": 0.0, "corpse_blood": 0.0, "dismember": false },
     "moderate": { "stains": 0.55, "sprays": 0.45, "corpse_blood": 0.5, "dismember": false },
@@ -125,7 +125,7 @@
     "c_charge": 4.5
   },
   "cadence_unit": {
-    "description": "RX anim : facteur de foulée par type d'unité, appliqué à la vitesse nominale du clip (cadence) : > 1 foulée plus longue (léger), < 1 plus courte (lourd). Absent = 1. Teinte les types extrêmes de la table de caractéristiques (vitesse, armure) ; à affiner à l'œil.",
+    "description": "RX anim : facteur de foulée par type d’unité, appliqué à la vitesse nominale du clip (cadence) : > 1 foulée plus longue (léger), < 1 plus courte (lourd). Absent = 1. Teinte les types extrêmes de la table de caractéristiques (vitesse, armure) ; à affiner à l’œil.",
     "unit_english_retinue": 0.9,
     "unit_men_at_arms_foot": 0.9,
     "unit_routiers": 0.93,

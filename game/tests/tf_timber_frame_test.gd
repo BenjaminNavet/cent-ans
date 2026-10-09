@@ -15,7 +15,7 @@ extends TestCase
 func _init() -> void:
 	var layers := BuildingMaterials.atlas_layers()
 	var index := layers.find("TimberFrame")
-	check(index == 14, "TimberFrame est la couche 14 de l'atlas (trouvé %d)" % index)
+	check(index == 14, "TimberFrame est la couche 14 de l’atlas (trouvé %d)" % index)
 	var doc: Variant = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../data/art/building_materials.json")))
 	var wired := false
 	for entry in (doc as Dictionary)["textured"]:
@@ -31,7 +31,7 @@ func _init() -> void:
 	check(far_index == 15, "TimberFrameFar est la couche 15 (trouvé %d)" % far_index)
 	check(str(BuildingMaterials.SPECS["TimberFrame"][0]).contains("daub"), "TimberFrame (niveau high) : torchis sans poutres peintes")
 	var albedo := atlas.get_shader_parameter("albedo_array") as TextureLayered
-	check(albedo != null and albedo.get_layers() == layers.size(), "tableau d'albédos à %d tranches (trouvé %d)" % [layers.size(), albedo.get_layers() if albedo != null else -1])
+	check(albedo != null and albedo.get_layers() == layers.size(), "tableau d’albédos à %d tranches (trouvé %d)" % [layers.size(), albedo.get_layers() if albedo != null else -1])
 
 	# Modèles exportés : faces de la couche 14 dans un modèle marqué `framed`.
 	var manifest := BuildingKit.manifest()
@@ -71,7 +71,7 @@ func _init() -> void:
 		var mesh: Mesh = castle.mesh
 		check(mesh.get_surface_count() == 1, "château : une seule surface")
 		check(mesh.surface_get_material(0) == BuildingMaterials.material("Building", "far"), "château : matériau atlas partagé")
-		check(_mesh_layer_count(mesh, layers.find("RoofSlate")) > 0, "château : toits d'ardoise (RoofSlate)")
+		check(_mesh_layer_count(mesh, layers.find("RoofSlate")) > 0, "château : toits d’ardoise (RoofSlate)")
 		check(_mesh_layer_count(mesh, layers.find("Masonry")) > 0, "château : murs de pierre (Masonry)")
 		castle.free()
 	finish()

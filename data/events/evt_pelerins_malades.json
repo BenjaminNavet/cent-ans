@@ -1,7 +1,7 @@
 {
   "id": "evt_pelerins_malades",
   "title": "Des pèlerins malades",
-  "text": "Une troupe de pèlerins en route pour Compostelle s'est arrêtée dans la province : plusieurs sont fiévreux et l'on craint qu'ils ne répandent le mal. L'hôpital du bourg est plein.",
+  "text": "Une troupe de pèlerins en route pour Compostelle s’est arrêtée dans la province : plusieurs sont fiévreux et l’on craint qu’ils ne répandent le mal. L’hôpital du bourg est plein.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 70
@@ -11,7 +11,7 @@
   },
   "options": [
     {
-      "text": "Les héberger à l'hôpital aux frais du seigneur",
+      "text": "Les héberger à l’hôpital aux frais du seigneur",
       "effects": [
         {
           "type": "treasury",

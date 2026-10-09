@@ -514,7 +514,7 @@ func _player_army_selected(ui: MapUI) -> bool:
 	var selected := str(map.get("selected_army"))
 	if selected != "" and selected in Array(map.call("player_army_ids")):
 		return true
-	ui.show_toast("Sélectionnez d'abord une de vos armées.")
+	ui.show_toast("Sélectionnez d’abord une de vos armées.")
 	return false
 
 

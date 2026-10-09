@@ -18,7 +18,7 @@
   "primary_title": "tit_makki",
   "heraldry": {
     "blazon": "De sinople au chef d'argent.",
-    "description": "Couleurs vertes de l'islam et croissant ; blason de jeu, non attesté pour les Banu Makki.",
+    "description": "Couleurs vertes de l’islam et croissant ; blason de jeu, non attesté pour les Banu Makki.",
     "primary_color": "#2E7D4F",
     "secondary_color": "#F2EFE6",
     "uncertain": true,
@@ -51,7 +51,7 @@
     "trade": 55,
     "piety": 55
   },
-  "description": "Famille des Banu Makki, émirs de Gabès depuis 1282, sous suzeraineté hafside ; nom de l'émir de 1337 non établi (aucun ruler renseigné).",
+  "description": "Famille des Banu Makki, émirs de Gabès depuis 1282, sous suzeraineté hafside ; nom de l’émir de 1337 non établi (aucun ruler renseigné).",
   "sources": [
     "Banu Makki"
   ]

@@ -28,7 +28,7 @@
     {
       "id": "obj_hamid_independent",
       "title": "Rester libre",
-      "description": "Garder l'indépendance de Hamid.",
+      "description": "Garder l’indépendance de Hamid.",
       "condition": {
         "kind": "be_independent"
       }
@@ -36,7 +36,7 @@
     {
       "id": "obj_hamid_teke",
       "title": "Réunir les Hamidides",
-      "description": "Réunir la branche de Teke et celle d'Eğirdir.",
+      "description": "Réunir la branche de Teke et celle d’Eğirdir.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

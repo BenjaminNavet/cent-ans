@@ -35,7 +35,7 @@
     "province": "prov_brandenburg",
     "kind": "town",
     "name": {
-      "display": "Francfort-sur-l'Oder",
+      "display": "Francfort-sur-l’Oder",
       "local": "Frankinvorde",
       "local_language": "moyen bas-allemand"
     },
@@ -51,9 +51,9 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande du margraviat de Brandebourg sur l'Oder (charte de 1253), carrefour vers la Pologne ; elle rejoindra la Hanse en 1368.",
+    "description": "Ville marchande du margraviat de Brandebourg sur l’Oder (charte de 1253), carrefour vers la Pologne ; elle rejoindra la Hanse en 1368.",
     "sources": [
-      "Francfort-sur-l'Oder"
+      "Francfort-sur-l’Oder"
     ]
   },
   {
@@ -77,7 +77,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse margraviale au confluent de la Havel et de la Sprée, gardant l'approche de Berlin.",
+    "description": "Forteresse margraviale au confluent de la Havel et de la Sprée, gardant l’approche de Berlin.",
     "sources": [
       "Spandau"
     ]

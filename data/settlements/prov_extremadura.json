@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Badajoz, capitale de l'Estrémadure, ville-frontière face au Portugal.",
+    "description": "Badajoz, capitale de l’Estrémadure, ville-frontière face au Portugal.",
     "sources": [
       "Estrémadure",
       "Ordre d'Alcántara",
@@ -52,7 +52,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville close d'origine almohade, repeuplée après la Reconquête de 1229.",
+    "description": "Ville close d’origine almohade, repeuplée après la Reconquête de 1229.",
     "sources": [
       "Cáceres"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Commanderie-siège de l'ordre militaire d'Alcántara depuis 1218, près du pont romain sur le Tage.",
+    "description": "Commanderie-siège de l’ordre militaire d’Alcántara depuis 1218, près du pont romain sur le Tage.",
     "sources": [
       "Alcántara (Espagne)",
       "Ordre d'Alcántara"
@@ -133,7 +133,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville close dominée par un alcazar d'origine musulmane, reconquise en 1232.",
+    "description": "Ville close dominée par un alcazar d’origine musulmane, reconquise en 1232.",
     "sources": [
       "Trujillo (Espagne)"
     ]
@@ -160,7 +160,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville fondée par Alphonse VIII en 1186, siège épiscopal, verrou du nord de l'Estrémadure.",
+    "description": "Ville fondée par Alphonse VIII en 1186, siège épiscopal, verrou du nord de l’Estrémadure.",
     "sources": [
       "Plasencia"
     ]
@@ -211,7 +211,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg agricole du sud de l'Estrémadure, sur la route de Séville, reconquis en 1241.",
+    "description": "Bourg agricole du sud de l’Estrémadure, sur la route de Séville, reconquis en 1241.",
     "sources": [
       "Zafra"
     ]

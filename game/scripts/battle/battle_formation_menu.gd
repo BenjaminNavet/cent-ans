@@ -131,11 +131,11 @@ static func effect_lines(entry: Dictionary) -> Array:
 		lines.append({"text": "%s %s%d %%" % [factor[1], "+" if percent > 0 else "", percent], "sign": 1 if better else -1})
 	var ranks := float(m.get("fighting_ranks", 2.0))
 	if not is_equal_approx(ranks, 2.0):
-		lines.append({"text": "%d hommes combattent par file du front (2 d'ordinaire)" % roundi(ranks), "sign": 1 if ranks > 2.0 else -1})
+		lines.append({"text": "%d hommes combattent par file du front (2 d’ordinaire)" % roundi(ranks), "sign": 1 if ranks > 2.0 else -1})
 	if bool(entry.get("all_round", false)):
 		lines.append({"text": "Ni flanc ni dos : tout coup porte de face", "sign": 1})
 	if bool(entry.get("braced", false)):
-		lines.append({"text": "Hérissée : la charge ne renverse personne ni n'ébranle le moral", "sign": 1})
+		lines.append({"text": "Hérissée : la charge ne renverse personne ni n’ébranle le moral", "sign": 1})
 	return lines
 
 
@@ -171,7 +171,7 @@ static func tooltip_spec(key: String, live: Dictionary) -> Dictionary:
 	for line in effect_lines(live):
 		spec["effects"].append({"key": "", "text": str(line["text"]), "sign": int(line["sign"])})
 	if effect_lines(live).is_empty():
-		spec["effects"].append({"key": "", "text": "Aucun effet particulier : l'ordre de référence", "sign": 0})
+		spec["effects"].append({"key": "", "text": "Aucun effet particulier : l’ordre de référence", "sign": 0})
 	var reform: Dictionary = live.get("reform", {})
 	var seconds := float(live.get("reform_s", 0.0))
 	if seconds > 0.0:

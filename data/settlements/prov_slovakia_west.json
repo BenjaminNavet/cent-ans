@@ -21,7 +21,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Forteresse et ville danubienne à la frontière de l'Autriche et de la Moravie.",
+    "description": "Forteresse et ville danubienne à la frontière de l’Autriche et de la Moravie.",
     "sources": [
       "Presbourg"
     ]
@@ -47,7 +47,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Siège d'un évêché, plus ancienne citadelle de la région.",
+    "description": "Siège d’un évêché, plus ancienne citadelle de la région.",
     "sources": [
       "Nitra"
     ]
@@ -73,7 +73,7 @@
       "bld_forge"
     ],
     "port": false,
-    "description": "Ville minière où Charles Robert établit la frappe des florins d'or (1328).",
+    "description": "Ville minière où Charles Robert établit la frappe des florins d’or (1328).",
     "sources": [
       "Kremnica"
     ]

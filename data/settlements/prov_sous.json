@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale du Sous, ville de canne à sucre et d'artisanat.",
+    "description": "Capitale du Sous, ville de canne à sucre et d’artisanat.",
     "sources": [
       "Taroudant"
     ]
@@ -46,7 +46,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Ribat sur l'Atlantique, sanctuaire de l'Anti-Atlas.",
+    "description": "Ribat sur l’Atlantique, sanctuaire de l’Anti-Atlas.",
     "sources": [
       "Massa (Maroc)"
     ]
@@ -73,7 +73,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Petit port et grenier fortifié sur l'Atlantique, prédécesseur d'Agadir.",
+    "description": "Petit port et grenier fortifié sur l’Atlantique, prédécesseur d’Agadir.",
     "sources": [
       "Agadir"
     ]

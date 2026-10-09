@@ -23,7 +23,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Port et château, capitale de l'île.",
+    "description": "Port et château, capitale de l’île.",
     "sources": [
       "Chios"
     ]
@@ -74,7 +74,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château du nord de l'île.",
+    "description": "Château du nord de l’île.",
     "sources": [
       "Volissos"
     ]

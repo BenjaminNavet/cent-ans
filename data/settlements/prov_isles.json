@@ -19,7 +19,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Île du Loch Finlaggan, à Islay : siège du conseil et lieu d'inauguration des seigneurs des Îles.",
+    "description": "Île du Loch Finlaggan, à Islay : siège du conseil et lieu d’inauguration des seigneurs des Îles.",
     "sources": [
       "Finlaggan"
     ]
@@ -45,7 +45,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Forteresse navale du Clan Donald sur la côte sud d'Islay, gardant l'accès à Finlaggan.",
+    "description": "Forteresse navale du Clan Donald sur la côte sud d’Islay, gardant l’accès à Finlaggan.",
     "sources": [
       "Château de Dunyvaig"
     ]
@@ -71,7 +71,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château d'Aros, sur l'île de Mull, place d'armes du Clan Donald face aux Highlands.",
+    "description": "Château d’Aros, sur l’île de Mull, place d’armes du Clan Donald face aux Highlands.",
     "sources": [
       "Château d'Aros"
     ]

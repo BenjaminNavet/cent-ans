@@ -1,7 +1,7 @@
 {
   "id": "fac_albret",
   "name": {
-    "display": "Seigneurie d'Albret",
+    "display": "Seigneurie d’Albret",
     "local": "Lebret",
     "local_language": "gascon"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_albret",
   "heraldry": {
     "blazon": "De gueules plain.",
-    "description": "Écu de gueules plain, armes des sires d'Albret jusqu'en 1389, quand Charles VI accorde à Arnaud Amanieu d'écarteler de France.",
+    "description": "Écu de gueules plain, armes des sires d’Albret jusqu’en 1389, quand Charles VI accorde à Arnaud Amanieu d’écarteler de France.",
     "primary_color": "#B0182B",
     "secondary_color": "#B0182B"
   },
@@ -48,7 +48,7 @@
     "trade": 55,
     "piety": 40
   },
-  "description": "Petite seigneurie gasconne sur la Baïse, vassaux du duc d'Aquitaine (le roi d'Angleterre) ; la maison d'Albret basculera plusieurs fois d'allégeance pendant la guerre.",
+  "description": "Petite seigneurie gasconne sur la Baïse, vassaux du duc d’Aquitaine (le roi d’Angleterre) ; la maison d’Albret basculera plusieurs fois d’allégeance pendant la guerre.",
   "sources": [
     "Nérac",
     "Maison d'Albret"

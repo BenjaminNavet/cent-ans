@@ -43,7 +43,7 @@ const BINDINGS := [
 	# Sélection et groupes.
 	{"group": "selection", "action": "select_all", "key": KEY_A, "mods": "ctrl", "help": "sélectionner toutes ses unités"},
 	{"group": "selection", "action": "groups", "label": "Ctrl+1…9 / 1…9", "help": "enregistrer / rappeler un groupe (deux fois : centrer la caméra)"},
-	{"group": "selection", "action": "lock_group", "key": KEY_G, "mods": "ctrl", "dispatch": true, "help": "verrouiller le groupe (il garde sa forme et l'allure du plus lent)"},
+	{"group": "selection", "action": "lock_group", "key": KEY_G, "mods": "ctrl", "dispatch": true, "help": "verrouiller le groupe (il garde sa forme et l’allure du plus lent)"},
 	{"group": "selection", "action": "group_formation", "label": "Alt+Maj+1…6", "lot": "CB6", "help": "formation de groupe (placement proposé)"},
 	{"group": "selection", "action": "deselect", "key": KEY_ESCAPE, "help": "désélectionner"},
 	# Temps, caméra et affichage.

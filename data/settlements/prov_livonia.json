@@ -22,7 +22,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Résidence du maître de Livonie et forteresse de l'Ordre.",
+    "description": "Résidence du maître de Livonie et forteresse de l’Ordre.",
     "sources": [
       "Cēsis"
     ]
@@ -47,7 +47,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Commanderie de l'Ordre en Estonie méridionale.",
+    "description": "Commanderie de l’Ordre en Estonie méridionale.",
     "sources": [
       "Viljandi"
     ]
@@ -72,7 +72,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'Ordre sur l'Aa, héritage des Porte-Glaive.",
+    "description": "Château de l’Ordre sur l’Aa, héritage des Porte-Glaive.",
     "sources": [
       "Sigulda"
     ]
@@ -97,7 +97,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Petite ville de l'Ordre, base des armées contre Pskov.",
+    "description": "Petite ville de l’Ordre, base des armées contre Pskov.",
     "sources": [
       "Valmiera"
     ]

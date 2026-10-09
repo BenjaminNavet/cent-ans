@@ -25,7 +25,7 @@ const CAPTION_PX := 16
 const HEADING_PX := 22
 const TITLE_PX := 28
 const SIDE_WIDTH := 420.0
-const ART_HEIGHT := 150.0
+const ART_HEIGHT := 112.0
 ## Taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
 const FIT_SIZE := Vector2(1280.0, 720.0)
 
@@ -476,6 +476,7 @@ func _build_card(entry: Dictionary) -> Control:
 
 	text_box.add_child(_ruler_row(str(info.get("ruler", ""))))
 	text_box.add_child(_difficulty_row(int(entry.get("difficulty", 1))))
+	text_box.add_child(_key_figures(faction_id))
 
 	panel.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -488,6 +489,52 @@ func _build_card(entry: Dictionary) -> Control:
 	panel.mouse_exited.connect(func() -> void: shade.color = Color(0, 0, 0, 0.0))
 	_cards[faction_id] = panel
 	return panel
+
+
+## RX uifin : fiche de départ (1337) de `faction_id` — provinces, trésor, revenu, armées — lue une fois dans le magasin de données (cœur), `{}` si indisponible.
+var _start_sheets: Dictionary = {}
+
+
+func _start_sheet(faction_id: String) -> Dictionary:
+	if _start_sheets.is_empty():
+		var facade := _facade()
+		var store: Object = facade.get("store") if facade != null else null
+		if store != null and store.has_method("get_feudal_start_sheets"):
+			for sheet in store.call("get_feudal_start_sheets"):
+				_start_sheets[str((sheet as Dictionary).get("id", ""))] = sheet
+		if _start_sheets.is_empty():
+			_start_sheets["_none"] = {}
+	return _start_sheets.get(faction_id, {})
+
+
+## Chiffres clés comparables d'une carte (données du cœur, aucune règle ici).
+func _key_figures(faction_id: String) -> Control:
+	var sheet := _start_sheet(faction_id)
+	var grid := GridContainer.new()
+	grid.name = "KeyFigures"
+	grid.columns = 2
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 2)
+	if sheet.is_empty():
+		return grid
+	var province_count := (sheet.get("provinces", PackedStringArray()) as PackedStringArray).size()
+	var rows: Array = [
+		["Provinces", str(province_count)],
+		["Trésor", "%s ₶" % Money.digits(int(sheet.get("treasury", 0)))],
+		["Revenu", "%s ₶ / saison" % Money.digits(int(sheet.get("projected_income", 0)))],
+		["Armées", str(int(sheet.get("armies_count", 0)))],
+	]
+	for row in rows:
+		var key := FrontEndStyle.label(str(row[0]), CAPTION_PX, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic())
+		key.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		grid.add_child(key)
+		var value := FrontEndStyle.label(str(row[1]), CAPTION_PX, FrontEndStyle.INK)
+		value.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(value)
+	return grid
 
 
 func _ruler_row(ruler_id: String) -> Control:
@@ -622,7 +669,9 @@ func _build_difficulty_selector() -> Control:
 	TooltipHost.attach_plain(heading, "difficulty_fixed_effects")
 	heading.mouse_filter = Control.MOUSE_FILTER_PASS
 	column.add_child(heading)
-	var row := HFlowContainer.new()
+	# RX uifin : grille 2 x 2 à boutons de même largeur (plus de « Très difficile » orphelin).
+	var row := GridContainer.new()
+	row.columns = 2
 	row.add_theme_constant_override("h_separation", 8)
 	row.add_theme_constant_override("v_separation", 6)
 	column.add_child(row)
@@ -643,6 +692,7 @@ func _build_difficulty_selector() -> Control:
 		button.toggle_mode = true
 		button.button_group = group
 		button.text = str(level.get("label", id))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.tooltip_text = _difficulty_tooltip(level)
 		button.pressed.connect(func() -> void: select_difficulty(id))
 		row.add_child(button)

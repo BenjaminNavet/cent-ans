@@ -1,7 +1,7 @@
 {
   "id": "evt_roosebeke",
   "title": "La bataille de Roosebeke",
-  "text": "Les Gantois de Philippe van [[cdx_jacob_van_artevelde|Artevelde]] se sont soulevés contre le comte de Flandre. L'ost de France vient au secours du comte : à Roosebeke, les milices flamandes, serrées en un bloc, sont étouffées sous la [[cdx_chevalerie|chevalerie]]. Artevelde est retrouvé parmi les morts.",
+  "text": "Les Gantois de Philippe van [[cdx_jacob_van_artevelde|Artevelde]] se sont soulevés contre le comte de Flandre. L’ost de France vient au secours du comte : à Roosebeke, les milices flamandes, serrées en un bloc, sont étouffées sous la [[cdx_chevalerie|chevalerie]]. Artevelde est retrouvé parmi les morts.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -49,7 +49,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Appeler les Anglais à l'aide",
+      "text": "Appeler les Anglais à l’aide",
       "effects": [
         {
           "type": "unrest",
@@ -66,7 +66,7 @@
           "type": "opinion",
           "faction": "fac_france",
           "amount": -20,
-          "reason": "Les Flamands appellent l'Anglais"
+          "reason": "Les Flamands appellent l’Anglais"
         }
       ],
       "ai_weight": 1

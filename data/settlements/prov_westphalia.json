@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire, membre actif de la Hanse en Westphalie.",
+    "description": "Ville libre d’empire, membre actif de la Hanse en Westphalie.",
     "sources": [
       "Dortmund"
     ]
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Grande abbaye bénédictine d'immédiateté impériale sur la Weser, fondée depuis Corbie.",
+    "description": "Grande abbaye bénédictine d’immédiateté impériale sur la Weser, fondée depuis Corbie.",
     "sources": [
       "Abbaye de Corvey"
     ]
@@ -131,7 +131,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité épiscopale westphalienne aux sources de la Pader, résidence de l'évêque-prince de Paderborn.",
+    "description": "Cité épiscopale westphalienne aux sources de la Pader, résidence de l’évêque-prince de Paderborn.",
     "sources": [
       "Paderborn",
       "Principauté épiscopale de Paderborn"
@@ -184,7 +184,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg westphalien connu pour ses sources salées exploitées depuis l'époque carolingienne.",
+    "description": "Bourg westphalien connu pour ses sources salées exploitées depuis l’époque carolingienne.",
     "sources": [
       "Werl"
     ]

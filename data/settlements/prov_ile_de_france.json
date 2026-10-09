@@ -80,7 +80,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu'en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
+    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu’en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
     "sources": [
       "Château de Vincennes"
     ]
@@ -132,7 +132,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville et prévôté royale au sud de Paris, étape sur la route d'Orléans.",
+    "description": "Ville et prévôté royale au sud de Paris, étape sur la route d’Orléans.",
     "sources": [
       "Étampes"
     ]
@@ -184,7 +184,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville et prévôté royale sur l'Oise, chef-lieu du Vexin français.",
+    "description": "Ville et prévôté royale sur l’Oise, chef-lieu du Vexin français.",
     "sources": [
       "Pontoise"
     ]
@@ -235,7 +235,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Puissant donjon royal dominant la route d'Orléans, symbole de l'autorité capétienne.",
+    "description": "Puissant donjon royal dominant la route d’Orléans, symbole de l’autorité capétienne.",
     "sources": [
       "Château de Montlhéry"
     ]
@@ -363,7 +363,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg et ancienne vicomté au confluent de la Seine et de l'Essonne, moulins à blé.",
+    "description": "Bourg et ancienne vicomté au confluent de la Seine et de l’Essonne, moulins à blé.",
     "sources": [
       "Corbeil-Essonnes"
     ]

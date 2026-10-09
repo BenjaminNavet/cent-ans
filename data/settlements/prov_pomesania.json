@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Résidence du grand maître : la plus grande forteresse de briques de l'Occident, sur la Nogat.",
+    "description": "Résidence du grand maître : la plus grande forteresse de briques de l’Occident, sur la Nogat.",
     "sources": [
       "Château de Malbork"
     ]
@@ -101,7 +101,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'Ordre, où fut signé le traité de 1249 avec les Prussiens.",
+    "description": "Château de l’Ordre, où fut signé le traité de 1249 avec les Prussiens.",
     "sources": [
       "Dzierzgoń"
     ]

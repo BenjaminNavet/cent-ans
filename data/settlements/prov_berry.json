@@ -126,7 +126,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande au confluent du Cher et de l'Yèvre.",
+    "description": "Ville marchande au confluent du Cher et de l’Yèvre.",
     "sources": [
       "Vierzon"
     ]
@@ -177,7 +177,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château fort sur l'Yèvre, futur séjour favori du duc Jean de Berry.",
+    "description": "Château fort sur l’Yèvre, futur séjour favori du duc Jean de Berry.",
     "sources": [
       "Mehun-sur-Yèvre"
     ]
@@ -227,7 +227,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg royal sur l'Auron, au sud de Bourges.",
+    "description": "Bourg royal sur l’Auron, au sud de Bourges.",
     "sources": [
       "Dun-sur-Auron"
     ]

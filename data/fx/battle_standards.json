@@ -1,5 +1,5 @@
 {
-  "description": "Étendards et musiciens des régiments en bataille (lot EP5, ADR 0034), rendu seulement : forme et étoffe de l'étendard selon l'unité et le rang de son chef, bannière du général (oriflamme de Saint-Denis quand le roi de France est présent), musiciens, distances d'affichage. Les règles (chute, relève, prise) sont dans data/rules/battle_standards.json.",
+  "description": "Étendards et musiciens des régiments en bataille (lot EP5, ADR 0034), rendu seulement : forme et étoffe de l’étendard selon l’unité et le rang de son chef, bannière du général (oriflamme de Saint-Denis quand le roi de France est présent), musiciens, distances d’affichage. Les règles (chute, relève, prise) sont dans data/rules/battle_standards.json.",
   "kinds": {
     "pennon": {
       "label": "pennon",

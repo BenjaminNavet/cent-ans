@@ -83,7 +83,7 @@ func _run_campaign_loop() -> void:
 		var zone: Dictionary = map.sim.call("get_reachable_area", army_ids[0])
 		_check(int(zone.get("cells", 0)) > 1 and int(zone.get("next_cells", 0)) > 0,
 				"CV3-5: reachable area should have two rings, got %d + %d cells" % [int(zone.get("cells", 0)), int(zone.get("next_cells", 0))])
-		_check(int(zone.get("next_budget", 0)) > 0 and (zone.get("image") as Image).get_format() == Image.FORMAT_RGB8, "CV3-5: RGB8 two-ring mask with the next turn's budget")
+		_check(int(zone.get("next_budget", 0)) > 0 and (zone.get("image") as Image).get_format() == Image.FORMAT_RGB8, "CV3-5: RGB8 two-ring mask with the next turn’s budget")
 		_check(map.movement_ctl.bubble.cell_count() > 1 and map.movement_ctl.bubble.next_cell_count() > 0, "CV3-5: the bubble shows both rings")
 	var target: String = str(reachable.keys()[0])
 	# Aperçu de chemin au survol de la cible.

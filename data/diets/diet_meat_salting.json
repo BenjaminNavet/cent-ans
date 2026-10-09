@@ -3,7 +3,7 @@
   "name": {
     "display": "Lard, bœuf et salaisons"
   },
-  "description": "Porc tué à la Saint-Martin, bœuf et lard mis au sel pour l'année : la [[cdx_salaison|salaison]] nourrit les ménages aisés et les garnisons. Le sel coûte cher depuis que Philippe VI a établi la [[cdx_gabelle|gabelle]] (1341). Manger gras pendant le [[cdx_careme|Carême]] scandalise le clergé.",
+  "description": "Porc tué à la Saint-Martin, bœuf et lard mis au sel pour l’année : la [[cdx_salaison|salaison]] nourrit les ménages aisés et les garnisons. Le sel coûte cher depuis que Philippe VI a établi la [[cdx_gabelle|gabelle]] (1341). Manger gras pendant le [[cdx_careme|Carême]] scandalise le clergé.",
   "requirements": {
     "resources": [
       "res_salt"

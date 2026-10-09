@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II, marié à Éléonore, sœur d'Édouard III : allié anglais. Nimègue, ville impériale engagée.",
+    "description": "Comté de Gueldre (duché en 1339) et comté de Zutphen, tenus par Renaud II, marié à Éléonore, sœur d’Édouard III : allié anglais. Nimègue, ville impériale engagée.",
     "sources": [
       "Duché de Gueldre",
       "Renaud II de Gueldre",
@@ -52,7 +52,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville impériale d'origine romaine et carolingienne, engagée depuis 1247 au comte de Gueldre, qui la tient en gage.",
+    "description": "Ville impériale d’origine romaine et carolingienne, engagée depuis 1247 au comte de Gueldre, qui la tient en gage.",
     "sources": [
       "Nimègue"
     ]
@@ -78,7 +78,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville hanséatique de l'Yssel, l'une des principales villes du comté de Gueldre.",
+    "description": "Ville hanséatique de l’Yssel, l’une des principales villes du comté de Gueldre.",
     "sources": [
       "Zutphen"
     ]
@@ -129,7 +129,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville marchande du Betuwe sur le Waal, membre de la ligue rhénane, réputée pour son commerce de vin et d'étain.",
+    "description": "Ville marchande du Betuwe sur le Waal, membre de la ligue rhénane, réputée pour son commerce de vin et d’étain.",
     "sources": [
       "Tiel (Pays-Bas)"
     ]
@@ -155,7 +155,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville fortifiée du comté de Zutphen au confluent de l'Yssel et de l'Oude IJssel, chartée en 1237.",
+    "description": "Ville fortifiée du comté de Zutphen au confluent de l’Yssel et de l’Oude IJssel, chartée en 1237.",
     "sources": [
       "Doesburg"
     ]
@@ -233,7 +233,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg frontalier de l'Achterhoek face à l'évêché de Münster, charté en 1277 par le comte Renaud Ier.",
+    "description": "Bourg frontalier de l’Achterhoek face à l’évêché de Münster, charté en 1277 par le comte Renaud Ier.",
     "sources": [
       "Groenlo"
     ]
@@ -284,7 +284,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg de marché de l'Achterhoek sur l'Oude IJssel, doté de droits urbains par le comte de Gueldre en 1236.",
+    "description": "Bourg de marché de l’Achterhoek sur l’Oude IJssel, doté de droits urbains par le comte de Gueldre en 1236.",
     "sources": [
       "Doetinchem"
     ]

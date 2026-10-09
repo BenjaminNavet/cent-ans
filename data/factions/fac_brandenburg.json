@@ -19,7 +19,7 @@
   "primary_title": "tit_brandenburg",
   "heraldry": {
     "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or.",
-    "description": "Aigle rouge margraviale de Brandebourg, distincte de l'aigle noire impériale.",
+    "description": "Aigle rouge margraviale de Brandebourg, distincte de l’aigle noire impériale.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
   },
@@ -46,7 +46,7 @@
     "trade": 50,
     "piety": 40
   },
-  "description": "Margraviat donné en 1323 par l'empereur Louis IV à son fils aîné Louis V, dit « le Brandebourgeois » ; gouvernement noté ici comme comté (rang réel de margraviat), le titre étant traité au rang de duché par convention politique parmi les grands électorats de l'Empire.",
+  "description": "Margraviat donné en 1323 par l’empereur Louis IV à son fils aîné Louis V, dit « le Brandebourgeois » ; gouvernement noté ici comme comté (rang réel de margraviat), le titre étant traité au rang de duché par convention politique parmi les grands électorats de l’Empire.",
   "sources": [
     "Louis V de Bavière",
     "Marche de Brandebourg"

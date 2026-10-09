@@ -1,7 +1,7 @@
 {
   "id": "evt_mort_d_ivan_kalita",
-  "title": "La mort d'Ivan Kalita",
-  "text": "Ivan Kalita, « l'Escarcelle », meurt moine au Kremlin. Son fils Siméon doit courir à Saraï : seul le yarlyk du khan fait le grand-prince de Vladimir, et les princes de Tver et de Souzdal le briguent aussi.",
+  "title": "La mort d’Ivan Kalita",
+  "text": "Ivan Kalita, « l’Escarcelle », meurt moine au Kremlin. Son fils Siméon doit courir à Saraï : seul le yarlyk du khan fait le grand-prince de Vladimir, et les princes de Tver et de Souzdal le briguent aussi.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -54,7 +54,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Garder l'argent et s'appuyer sur le métropolite",
+      "text": "Garder l’argent et s’appuyer sur le métropolite",
       "effects": [
         {
           "type": "kill_character",

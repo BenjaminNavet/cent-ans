@@ -1,5 +1,5 @@
 {
-  "description": "Noms français des cours d'eau de la carte de campagne (chantier RC, ADR 0141). Clé : nom de la source (Natural Earth, rivers_render.json) ; valeur : nom affiché. Un nom absent s'affiche tel quel ; une valeur vide masque l'étiquette.",
+  "description": "Noms français des cours d’eau de la carte de campagne (chantier RC, ADR 0141). Clé : nom de la source (Natural Earth, rivers_render.json) ; valeur : nom affiché. Un nom absent s’affiche tel quel ; une valeur vide masque l’étiquette.",
   "names": {
     "Aare": "Aar",
     "Acheloos": "Achéloos",

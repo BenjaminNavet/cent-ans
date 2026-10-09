@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Turin, ville piémontaise tenue par la branche d'Achaïe de la maison de Savoie (Jacques de Savoie-Achaïe, seigneur depuis 1334).",
+    "description": "Turin, ville piémontaise tenue par la branche d’Achaïe de la maison de Savoie (Jacques de Savoie-Achaïe, seigneur depuis 1334).",
     "sources": [
       "Savoie-Achaïe",
       "Marquisat de Saluces",
@@ -53,7 +53,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Résidence des princes d'Achaïe, branche cadette de la maison de Savoie qui tient le Piémont.",
+    "description": "Résidence des princes d’Achaïe, branche cadette de la maison de Savoie qui tient le Piémont.",
     "sources": [
       "Pignerol"
     ]
@@ -79,7 +79,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Verrou alpin sur la route de France, marqué par l'arc romain d'Auguste.",
+    "description": "Verrou alpin sur la route de France, marqué par l’arc romain d’Auguste.",
     "sources": [
       "Suse (Italie)"
     ]
@@ -89,8 +89,8 @@
     "province": "prov_piemont",
     "kind": "abbey",
     "name": {
-      "display": "Sant'Antonio di Ranverso",
-      "local": "Sant'Antòni ëd Ranvers",
+      "display": "Sant’Antonio di Ranverso",
+      "local": "Sant’Antòni ëd Ranvers",
       "local_language": "piémontais"
     },
     "lonlat": [
@@ -105,7 +105,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Précepterie-hôpital de l'ordre des Antonins sur la route de la via Francigena vers la France.",
+    "description": "Précepterie-hôpital de l’ordre des Antonins sur la route de la via Francigena vers la France.",
     "sources": [
       "Précepterie de Sant'Antonio di Ranverso"
     ]
@@ -132,7 +132,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Riche commune drapière du Piémont, indépendante jusqu'à sa soumission à la Savoie en 1347.",
+    "description": "Riche commune drapière du Piémont, indépendante jusqu’à sa soumission à la Savoie en 1347.",
     "sources": [
       "Chieri"
     ]

@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville reconquise en 1227, cathédrale bâtie sur l'ancienne mosquée majeure.",
+    "description": "Ville reconquise en 1227, cathédrale bâtie sur l’ancienne mosquée majeure.",
     "sources": [
       "Baeza"
     ]
@@ -106,7 +106,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse dominant le Guadalquivir, d'origine islamique passée à la Couronne de Castille.",
+    "description": "Forteresse dominant le Guadalquivir, d’origine islamique passée à la Couronne de Castille.",
     "sources": [
       "Château d'Almodóvar del Río"
     ]
@@ -158,7 +158,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ancienne ville juive d'al-Andalus, castillane depuis 1240.",
+    "description": "Ancienne ville juive d’al-Andalus, castillane depuis 1240.",
     "sources": [
       "Lucena (Espagne)"
     ]

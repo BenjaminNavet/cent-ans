@@ -29,7 +29,7 @@
   "objectives": [
     {
       "id": "obj_hama_hold",
-      "title": "L'émirat de Hama",
+      "title": "L’émirat de Hama",
       "description": "Conserver Hama.",
       "condition": {
         "kind": "hold_title",
@@ -38,14 +38,14 @@
     },
     {
       "id": "obj_hama_free",
-      "title": "L'héritage ayyoubide",
+      "title": "L’héritage ayyoubide",
       "description": "Les derniers Ayyoubides ne règnent à Hama que par la grâce du sultan (la principauté sera supprimée en 1341) : secouer la tutelle mamelouke.",
       "condition": {
         "kind": "be_independent"
       }
     }
   ],
-  "description": "Dernière lignée ayyoubide, vassale du Caire ; Abu l'Fida est mort en 1331 et a laissé Hama à son fils al-Afdal Muhammad.",
+  "description": "Dernière lignée ayyoubide, vassale du Caire ; Abu l’Fida est mort en 1331 et a laissé Hama à son fils al-Afdal Muhammad.",
   "sources": [
     "Hama",
     "Abu al-Fida",

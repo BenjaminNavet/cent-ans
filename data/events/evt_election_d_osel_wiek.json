@@ -1,7 +1,7 @@
 {
   "id": "evt_election_d_osel_wiek",
-  "title": "L'élection de Hapsal",
-  "text": "L'épiscopat de Jakob II s'achève. Le chapitre d'Ösel-Wiek élit Hermann Osenbrügge, qui doit tenir l'évêché entre les vassaux de la Wiek et l'ordre Livonien, maître d'une commanderie sur Ösel.",
+  "title": "L’élection de Hapsal",
+  "text": "L’épiscopat de Jakob II s’achève. Le chapitre d’Ösel-Wiek élit Hermann Osenbrügge, qui doit tenir l’évêché entre les vassaux de la Wiek et l’ordre Livonien, maître d’une commanderie sur Ösel.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -31,7 +31,7 @@
   },
   "options": [
     {
-      "text": "Confirmer l'élu du chapitre",
+      "text": "Confirmer l’élu du chapitre",
       "effects": [
         {
           "type": "set_ruler",
@@ -45,7 +45,7 @@
           "type": "opinion",
           "faction": "fac_livonian_order",
           "amount": -5,
-          "reason": "Évêque élu sans l'Ordre"
+          "reason": "Évêque élu sans l’Ordre"
         }
       ],
       "ai_weight": 3

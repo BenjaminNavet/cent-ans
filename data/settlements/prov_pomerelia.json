@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Grande ville de l'Ordre et de la Hanse, à l'embouchure de la Vistule, avec le château des chevaliers.",
+    "description": "Grande ville de l’Ordre et de la Hanse, à l’embouchure de la Vistule, avec le château des chevaliers.",
     "sources": [
       "Gdańsk"
     ]
@@ -48,7 +48,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse de l'Ordre sur la Vistule, siège d'une commanderie.",
+    "description": "Forteresse de l’Ordre sur la Vistule, siège d’une commanderie.",
     "sources": [
       "Gniew"
     ]
@@ -74,7 +74,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Bourg de la Vistule, péage de l'Ordre.",
+    "description": "Bourg de la Vistule, péage de l’Ordre.",
     "sources": [
       "Tczew"
     ]

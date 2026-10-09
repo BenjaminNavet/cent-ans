@@ -3,7 +3,7 @@
   "name": "Bataille d'Azincourt",
   "date": "1415-10-25",
   "year": 1415,
-  "summary": "25 octobre 1415, jour de la Saint-Crépin. Après une nuit de pluie, l'armée d'Henri V, épuisée et affamée, barre la route de Calais entre les bois d'Azincourt et de Tramecourt. Les archers anglais s'avancent à portée d'arc et plantent leurs pieux. L'avant-garde française, à pied et serrée entre les deux bois, s'enlise dans les labours détrempés sous les volées ; les ailes de cavalerie chargent les archers. Derrière, la bataille principale et l'arrière-garde montée attendent leur tour.",
+  "summary": "25 octobre 1415, jour de la Saint-Crépin. Après une nuit de pluie, l’armée d’Henri V, épuisée et affamée, barre la route de Calais entre les bois d’Azincourt et de Tramecourt. Les archers anglais s’avancent à portée d’arc et plantent leurs pieux. L’avant-garde française, à pied et serrée entre les deux bois, s’enlise dans les labours détrempés sous les volées ; les ailes de cavalerie chargent les archers. Derrière, la bataille principale et l’arrière-garde montée attendent leur tour.",
   "province": "prov_artois",
   "province_name": "Artois",
   "terrain": "plains",
@@ -43,7 +43,7 @@
     { "kind": "hedge", "a": [1520, 430], "b": [1560, 700] }
   ],
   "decor": {
-    "description": "Azincourt et son château à l'ouest, Tramecourt et son manoir à l'est, leurs bois de part et d'autre de l'entonnoir, les labours fraîchement semés détrempés au milieu, le camp anglais à Maisoncelle au sud, la route de Calais.",
+    "description": "Azincourt et son château à l’ouest, Tramecourt et son manoir à l’est, leurs bois de part et d’autre de l’entonnoir, les labours fraîchement semés détrempés au milieu, le camp anglais à Maisoncelle au sud, la route de Calais.",
     "clear": true,
     "items": [
       { "type": "hamlet", "layout": "green", "x": 260, "z": 330, "yaw": 0.0, "houses": 12, "seed": 1415 },
@@ -73,18 +73,18 @@
       "army": "Ost du connétable d'Albret",
       "general": { "name": "Charles d'Albret, connétable de France", "character": "chr_charles_d_albret", "regiment": 4, "command": 5 },
       "regiments": [
-        { "unit_type": "unit_men_at_arms_foot", "count": 12, "soldiers": 230, "x": 1050, "z": 540, "facing_deg": 0, "gap_m": 4, "wave": 0, "morale": 72, "label": "Hommes d'armes de l'avant-garde (Albret, Boucicaut, Orléans)" },
-        { "unit_type": "unit_knights", "count": 3, "soldiers": 120, "x": 720, "z": 610, "facing_deg": 8, "gap_m": 6, "wave": 0, "label": "Chevaliers de l'aile gauche (Clignet de Brébant)" },
-        { "unit_type": "unit_knights", "count": 3, "soldiers": 120, "x": 1380, "z": 610, "facing_deg": -8, "gap_m": 6, "wave": 0, "label": "Chevaliers de l'aile droite (Guillaume de Saveuse)" },
-        { "unit_type": "unit_crossbowmen", "count": 4, "soldiers": 180, "x": 1060, "z": 465, "facing_deg": 0, "gap_m": 8, "wave": 1, "morale": 40, "label": "Arbalétriers tassés derrière les hommes d'armes" },
-        { "unit_type": "unit_men_at_arms_foot", "count": 8, "soldiers": 220, "x": 1060, "z": 390, "facing_deg": 0, "gap_m": 4, "wave": 1, "morale": 68, "label": "Hommes d'armes de la bataille principale (Bar, Alençon)" },
-        { "unit_type": "unit_knights", "count": 4, "soldiers": 150, "x": 1060, "z": 250, "facing_deg": 0, "gap_m": 8, "wave": 2, "morale": 45, "label": "Chevaliers de l'arrière-garde (Marle, Fauquembergues)" },
-        { "unit_type": "unit_mounted_sergeants", "count": 4, "soldiers": 150, "x": 1060, "z": 185, "facing_deg": 0, "gap_m": 8, "wave": 2, "morale": 38, "label": "Sergents à cheval de l'arrière-garde" }
+        { "unit_type": "unit_men_at_arms_foot", "count": 12, "soldiers": 230, "x": 1050, "z": 540, "facing_deg": 0, "gap_m": 4, "wave": 0, "morale": 72, "label": "Hommes d’armes de l’avant-garde (Albret, Boucicaut, Orléans)" },
+        { "unit_type": "unit_knights", "count": 3, "soldiers": 120, "x": 720, "z": 610, "facing_deg": 8, "gap_m": 6, "wave": 0, "label": "Chevaliers de l’aile gauche (Clignet de Brébant)" },
+        { "unit_type": "unit_knights", "count": 3, "soldiers": 120, "x": 1380, "z": 610, "facing_deg": -8, "gap_m": 6, "wave": 0, "label": "Chevaliers de l’aile droite (Guillaume de Saveuse)" },
+        { "unit_type": "unit_crossbowmen", "count": 4, "soldiers": 180, "x": 1060, "z": 465, "facing_deg": 0, "gap_m": 8, "wave": 1, "morale": 40, "label": "Arbalétriers tassés derrière les hommes d’armes" },
+        { "unit_type": "unit_men_at_arms_foot", "count": 8, "soldiers": 220, "x": 1060, "z": 390, "facing_deg": 0, "gap_m": 4, "wave": 1, "morale": 68, "label": "Hommes d’armes de la bataille principale (Bar, Alençon)" },
+        { "unit_type": "unit_knights", "count": 4, "soldiers": 150, "x": 1060, "z": 250, "facing_deg": 0, "gap_m": 8, "wave": 2, "morale": 45, "label": "Chevaliers de l’arrière-garde (Marle, Fauquembergues)" },
+        { "unit_type": "unit_mounted_sergeants", "count": 4, "soldiers": 150, "x": 1060, "z": 185, "facing_deg": 0, "gap_m": 8, "wave": 2, "morale": 38, "label": "Sergents à cheval de l’arrière-garde" }
       ],
       "waves": [
-        { "label": "L'avant-garde et les ailes de cavalerie", "assault": true },
-        { "label": "La bataille principale (ducs de Bar et d'Alençon)", "release_s": 330, "after": 0, "assault": true },
-        { "label": "L'arrière-garde montée", "release_s": 620, "after": 1, "assault": true }
+        { "label": "L’avant-garde et les ailes de cavalerie", "assault": true },
+        { "label": "La bataille principale (ducs de Bar et d’Alençon)", "release_s": 330, "after": 0, "assault": true },
+        { "label": "L’arrière-garde montée", "release_s": 620, "after": 1, "assault": true }
       ]
     },
     "defender": {
@@ -94,10 +94,10 @@
       "general": { "name": "Henri V", "character": "chr_henry_v", "regiment": 0, "command": 9, "sovereign": true },
       "regiments": [
         { "unit_type": "unit_english_retinue", "count": 2, "soldiers": 120, "x": 1085, "z": 975, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 4, "label": "Chevaliers de la maison du roi Henri" },
-        { "unit_type": "unit_men_at_arms_foot", "count": 2, "soldiers": 120, "x": 1320, "z": 975, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 3, "label": "Hommes d'armes du duc d'York (aile droite)" },
-        { "unit_type": "unit_men_at_arms_foot", "count": 2, "soldiers": 120, "x": 850, "z": 975, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 3, "label": "Hommes d'armes de lord Camoys (aile gauche)" },
-        { "unit_type": "unit_longbowmen", "count": 4, "soldiers": 200, "x": 735, "z": 935, "facing_deg": 165, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers de l'aile gauche (lisière du bois d'Azincourt)" },
-        { "unit_type": "unit_longbowmen", "count": 4, "soldiers": 200, "x": 1415, "z": 930, "facing_deg": 195, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers de l'aile droite (lisière du bois de Tramecourt)" },
+        { "unit_type": "unit_men_at_arms_foot", "count": 2, "soldiers": 120, "x": 1320, "z": 975, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 3, "label": "Hommes d’armes du duc d’York (aile droite)" },
+        { "unit_type": "unit_men_at_arms_foot", "count": 2, "soldiers": 120, "x": 850, "z": 975, "facing_deg": 180, "gap_m": 6, "hold": true, "leash_m": 90, "experience": 3, "label": "Hommes d’armes de lord Camoys (aile gauche)" },
+        { "unit_type": "unit_longbowmen", "count": 4, "soldiers": 200, "x": 735, "z": 935, "facing_deg": 165, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers de l’aile gauche (lisière du bois d’Azincourt)" },
+        { "unit_type": "unit_longbowmen", "count": 4, "soldiers": 200, "x": 1415, "z": 930, "facing_deg": 195, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers de l’aile droite (lisière du bois de Tramecourt)" },
         { "unit_type": "unit_longbowmen", "count": 2, "soldiers": 200, "x": 968, "z": 945, "facing_deg": 180, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers en coin entre les batailles" },
         { "unit_type": "unit_longbowmen", "count": 2, "soldiers": 200, "x": 1203, "z": 945, "facing_deg": 180, "gap_m": 5, "hold": true, "leash_m": 50, "experience": 4, "label": "Archers en coin entre les batailles" }
       ]

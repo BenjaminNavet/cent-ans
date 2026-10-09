@@ -17,7 +17,7 @@
   "primary_title": "tit_siena",
   "heraldry": {
     "blazon": "De sable à la fasce d'argent.",
-    "description": "Approximation de la balzana (parti d'argent et de sable) : le moteur de rendu simplifié des factions ne trace pas de parti, remplacé par une fasce. Balzana exacte décrite dans le titre.",
+    "description": "Approximation de la balzana (parti d’argent et de sable) : le moteur de rendu simplifié des factions ne trace pas de parti, remplacé par une fasce. Balzana exacte décrite dans le titre.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#111111"
   },
@@ -45,7 +45,7 @@
     "trade": 65,
     "piety": 50
   },
-  "description": "République guelfe gouvernée par le Governo dei Nove depuis 1287 ; elle élève la Torre del Mangia (1325-1348) et lancera en 1339 l'agrandissement inabouti du Duomo.",
+  "description": "République guelfe gouvernée par le Governo dei Nove depuis 1287 ; elle élève la Torre del Mangia (1325-1348) et lancera en 1339 l’agrandissement inabouti du Duomo.",
   "sources": [
     "République de Sienne",
     "Governo dei Nove"

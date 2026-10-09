@@ -38,7 +38,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Siège épiscopal et capitale du comté de Bigorre, sur l'Adour, terre disputée entre France et Angleterre.",
+    "description": "Siège épiscopal et capitale du comté de Bigorre, sur l’Adour, terre disputée entre France et Angleterre.",
     "sources": ["Tarbes", "Comté de Bigorre"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville double née de la réunion de la cité épiscopale d'Oloron et du bourg marchand de Sainte-Marie, au confluent des gaves d'Aspe et d'Ossau.",
+    "description": "Ville double née de la réunion de la cité épiscopale d’Oloron et du bourg marchand de Sainte-Marie, au confluent des gaves d’Aspe et d’Ossau.",
     "sources": ["Oloron-Sainte-Marie"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville fortifiée sur le gave d'Oloron, poste de péage doté du pont dit « de la Légende ».",
+    "description": "Ville fortifiée sur le gave d’Oloron, poste de péage doté du pont dit « de la Légende ».",
     "sources": ["Sauveterre-de-Béarn"]
   },
   {
@@ -108,7 +108,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg salinier bâti autour de sources d'eau saumâtre exploitées depuis l'Antiquité.",
+    "description": "Bourg salinier bâti autour de sources d’eau saumâtre exploitées depuis l’Antiquité.",
     "sources": ["Salies-de-Béarn"]
   }
 ]

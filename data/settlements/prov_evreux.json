@@ -20,7 +20,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Capitale du comté d'Évreux, enclave normande de Philippe d'Évreux, roi consort de Navarre.",
+    "description": "Capitale du comté d’Évreux, enclave normande de Philippe d’Évreux, roi consort de Navarre.",
     "sources": [
       "Évreux",
       "Comté d'Évreux"
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château sur l'Ouche, place forte occidentale du comté d'Évreux.",
+    "description": "Château sur l’Ouche, place forte occidentale du comté d’Évreux.",
     "sources": [
       "Conches-en-Ouche"
     ]
@@ -71,7 +71,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville close sur l'Avre, verrou méridional du comté vers le domaine royal.",
+    "description": "Ville close sur l’Avre, verrou méridional du comté vers le domaine royal.",
     "sources": [
       "Nonancourt"
     ]

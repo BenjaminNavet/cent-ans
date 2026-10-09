@@ -26,6 +26,9 @@ const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const TAB_GARRISON := 0
 const TAB_BUILDINGS := 1
 
+## RX uifin : largeur fixe de la colonne des libellés (valeurs alignées).
+const KEY_COLUMN_WIDTH := 120.0
+
 var settlement_id: String = ""
 var province_id: String = ""
 var is_player_owner: bool = false
@@ -110,11 +113,18 @@ func _build() -> void:
 	kind_value = _grid_row(grid, "Type")
 	var province_key := Label.new()
 	province_key.text = "Province"
+	province_key.custom_minimum_size.x = KEY_COLUMN_WIDTH
 	grid.add_child(province_key)
 	province_button = Button.new()
 	province_button.name = "ProvinceButton"
 	province_button.flat = true
 	province_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	# RX uifin : valeur alignée sur celle des autres lignes (pas de marge de bouton à gauche).
+	var flush := StyleBoxEmpty.new()
+	flush.content_margin_top = 0.0
+	flush.content_margin_bottom = 0.0
+	province_button.add_theme_stylebox_override("normal", flush)
+	province_button.add_theme_stylebox_override("focus", flush)
 	TooltipHost.attach_plain(province_button, "province_panel_open")
 	province_button.pressed.connect(func() -> void: province_requested.emit(province_id))
 	grid.add_child(province_button)
@@ -133,7 +143,7 @@ func _build() -> void:
 	box.add_child(HSeparator.new())
 	tabs = TabContainer.new()
 	tabs.name = "Tabs"
-	tabs.custom_minimum_size = Vector2(0, 240)
+	tabs.custom_minimum_size = Vector2(0, 120)  # RX uifin : hauteur au contenu (plus de grand vide)
 	box.add_child(tabs)
 	_build_garrison_tab()
 	_build_buildings_tab()
@@ -145,6 +155,7 @@ func _build() -> void:
 func _grid_row(grid: GridContainer, key: String) -> Label:
 	var key_label := Label.new()
 	key_label.text = key
+	key_label.custom_minimum_size.x = KEY_COLUMN_WIDTH
 	grid.add_child(key_label)
 	var value := Label.new()
 	value.set_meta(&"row_key", key_label)

@@ -1,7 +1,7 @@
 {
   "id": "evt_annexion_de_l_epire",
-  "title": "L'Épire passe à Byzance",
-  "text": "À la mort du despote Jean II Orsini, empoisonné par sa femme Anne Paléologine, l'Épire est gouvernée au nom du jeune Nicéphore II. Andronic III y envoie son armée à l'automne 1337 : Arta et Janina se rendent et le despotat est ramené sous l'autorité de l'empereur ; Nicéphore II, bientôt rétabli dans le gouvernement local, ne sera plus qu'un vassal éphémère.",
+  "title": "L’Épire passe à Byzance",
+  "text": "À la mort du despote Jean II Orsini, empoisonné par sa femme Anne Paléologine, l’Épire est gouvernée au nom du jeune Nicéphore II. Andronic III y envoie son armée à l’automne 1337 : Arta et Janina se rendent et le despotat est ramené sous l’autorité de l’empereur ; Nicéphore II, bientôt rétabli dans le gouvernement local, ne sera plus qu’un vassal éphémère.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -35,7 +35,7 @@
   },
   "options": [
     {
-      "text": "Soumettre le despotat d'Épire",
+      "text": "Soumettre le despotat d’Épire",
       "effects": [
         {
           "type": "transfer_title",
@@ -55,13 +55,13 @@
           "type": "opinion",
           "faction": "fac_epirus",
           "amount": -25,
-          "reason": "Annexion de l'Épire"
+          "reason": "Annexion de l’Épire"
         }
       ],
       "ai_weight": 3
     },
     {
-      "text": "Accepter l'hommage de la régente sans occuper Arta",
+      "text": "Accepter l’hommage de la régente sans occuper Arta",
       "effects": [
         {
           "type": "prestige",

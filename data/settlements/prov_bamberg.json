@@ -21,7 +21,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Siège de la principauté épiscopale de Bamberg, fondée par l'empereur Henri II en 1007, sur les sept collines de la Regnitz.",
+    "description": "Siège de la principauté épiscopale de Bamberg, fondée par l’empereur Henri II en 1007, sur les sept collines de la Regnitz.",
     "sources": [
       "Bamberg",
       "Évêché de Bamberg"
@@ -48,7 +48,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ancien palais royal carolingien, place forte méridionale de l'évêché de Bamberg face à Nuremberg.",
+    "description": "Ancien palais royal carolingien, place forte méridionale de l’évêché de Bamberg face à Nuremberg.",
     "sources": [
       "Forchheim"
     ]
@@ -98,7 +98,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye bénédictine fondée en 1069, dominant la vallée du Main au nord de l'évêché.",
+    "description": "Abbaye bénédictine fondée en 1069, dominant la vallée du Main au nord de l’évêché.",
     "sources": [
       "Abbaye de Banz"
     ]

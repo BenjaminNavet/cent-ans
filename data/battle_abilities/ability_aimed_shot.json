@@ -3,7 +3,7 @@
   "kind": "aimed_shot",
   "rank": 1,
   "name": "Tir tendu",
-  "description": "Quand l'ennemi approche, les archers cessent de tirer en cloche et visent à plat, au plus près : portée réduite, tir bien plus précis, surtout contre les chevaux et les hommes mal protégés, sans percer pour autant le bon harnois. À [[cdx_poitiers|Poitiers]], le comte d'Oxford mène ses archers sur le flanc pour tirer dans l'arrière-train des chevaux bardés (Geoffrey le Baker) : le tir de flanc reste le vrai multiplicateur.",
+  "description": "Quand l’ennemi approche, les archers cessent de tirer en cloche et visent à plat, au plus près : portée réduite, tir bien plus précis, surtout contre les chevaux et les hommes mal protégés, sans percer pour autant le bon harnois. À [[cdx_poitiers|Poitiers]], le comte d’Oxford mène ses archers sur le flanc pour tirer dans l’arrière-train des chevaux bardés (Geoffrey le Baker) : le tir de flanc reste le vrai multiplicateur.",
   "icon": "aimed_shot",
   "eligible": {
     "unit_types": ["unit_longbowmen", "unit_francs_archers", "unit_mounted_archers"],

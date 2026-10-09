@@ -1,7 +1,7 @@
 {
   "id": "chr_pedro_iv",
   "name": {
-    "display": "Pierre IV d'Aragon",
+    "display": "Pierre IV d’Aragon",
     "local": "Pere IV",
     "local_language": "catalan"
   },
@@ -21,7 +21,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Roi d'Aragon",
+      "title": "Roi d’Aragon",
       "from": {
         "value": "1336-01-24"
       }
@@ -60,6 +60,6 @@
   "status": "at_court",
   "description": "Roi à 16 ans ; réannexe Majorque (1343), règne cinquante ans et rédige ses propres chroniques.",
   "sources": [
-    "Pierre IV d'Aragon"
+    "Pierre IV d’Aragon"
   ]
 }

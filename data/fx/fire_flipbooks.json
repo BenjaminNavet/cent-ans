@@ -1,5 +1,5 @@
 {
-  "description": "Lot FA2 : planches de flammes et de fumée cuites depuis les séquences simulées d'Unity Labs Paris (« Free VFX image sequences & flipbooks », CC0 d'après le billet `licence_url`), par `tools/cent_ans_tools/vfx_flipbooks.py`. Même codage que les planches synthétiques du lot V3 (planches procédurales retirées) : 8×8 images ; flammes RVB = chaleur, A = couverture ; fumée R/A = densité, V = éclairage auto-ombré, image = âge.",
+  "description": "Lot FA2 : planches de flammes et de fumée cuites depuis les séquences simulées d’Unity Labs Paris (« Free VFX image sequences & flipbooks », CC0 d’après le billet `licence_url`), par `tools/cent_ans_tools/vfx_flipbooks.py`. Même codage que les planches synthétiques du lot V3 (planches procédurales retirées) : 8×8 images ; flammes RVB = chaleur, A = couverture ; fumée R/A = densité, V = éclairage auto-ombré, image = âge.",
   "licence_url": "https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks",
   "source_url": "https://unity3d.com/files/labs/downloads/vfx/assets01/{name}/{name}-flipbooks.zip",
   "flame": {

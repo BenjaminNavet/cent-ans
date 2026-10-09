@@ -1,5 +1,5 @@
 {
-  "description": "Lot FA6 : ornements de portulan de la vue parchemin (carte de campagne, caméra > 1200), découpés dans des numérisations d'œuvres du domaine public par `tools/cent_ans_tools/parchment_ornaments.py`. Coordonnées en pixels du fichier source. `display` : indications lues par le jeu (`ParchmentDecor`).",
+  "description": "Lot FA6 : ornements de portulan de la vue parchemin (carte de campagne, caméra > 1200), découpés dans des numérisations d’œuvres du domaine public par `tools/cent_ans_tools/parchment_ornaments.py`. Coordonnées en pixels du fichier source. `display` : indications lues par le jeu (`ParchmentDecor`).",
   "output_dir": "game/assets/textures/parchment",
   "preview_colours": [[214, 196, 150], [150, 165, 155]],
   "use": {"rose": "real", "ship": "drawn", "monster": "real"},

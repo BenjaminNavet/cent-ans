@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château et chapitre de l'évêque de Courlande.",
+    "description": "Château et chapitre de l’évêque de Courlande.",
     "sources": [
       "Piltene"
     ]
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'évêque sur la marche de Courlande.",
+    "description": "Château de l’évêque sur la marche de Courlande.",
     "sources": [
       "Aizpute"
     ]
@@ -71,7 +71,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de l'évêque au sud-ouest du cap Kolka.",
+    "description": "Château de l’évêque au sud-ouest du cap Kolka.",
     "sources": [
       "Dundaga"
     ]

@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à l'aigle d'argent, à la bordure d'azur.",
-    "description": "Aigle blanc des Piast de Mazovie, bordure d'azur.",
+    "description": "Aigle blanc des Piast de Mazovie, bordure d’azur.",
     "primary_color": "#C8102E",
     "secondary_color": "#1F3F8F",
     "uncertain": true,
@@ -30,7 +30,7 @@
     {
       "id": "obj_plock_hold",
       "title": "Sauver le duché",
-      "description": "Le jeune duc doit conserver Płock jusqu'à sa majorité.",
+      "description": "Le jeune duc doit conserver Płock jusqu’à sa majorité.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_plock"

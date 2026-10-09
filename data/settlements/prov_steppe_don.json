@@ -19,7 +19,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Campements d'hiver des tribus kiptchak de la Horde sur le bas Don, près du gué de l'ancienne Sarkel (Belaïa Vèja), forteresse khazare puis russe abandonnée depuis le XIIe siècle ; nom générique, emplacement incertain.",
+    "description": "Campements d’hiver des tribus kiptchak de la Horde sur le bas Don, près du gué de l’ancienne Sarkel (Belaïa Vèja), forteresse khazare puis russe abandonnée depuis le XIIe siècle ; nom générique, emplacement incertain.",
     "sources": [
       "Sarkel",
       "Steppe pontique"
@@ -43,7 +43,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Campements d'été des tribus kiptchak sur le Don (nom et emplacement génériques, incertain).",
+    "description": "Campements d’été des tribus kiptchak sur le Don (nom et emplacement génériques, incertain).",
     "sources": [
       "Steppe pontique"
     ]

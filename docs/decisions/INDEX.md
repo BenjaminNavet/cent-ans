@@ -211,6 +211,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0245 | [Victoire féodale générique non passive](0245-victoire-feodale-active.md) | accepté |
 | 0246 | [Outil de mesure de campagne officiel](0246-outil-de-mesure-de-campagne.md) | accepté |
 | 0247 | [Audio : sonie des morceaux, enchaînement, listes fallback, langues de bataille](0247-audio-sonie-enchainement-voix.md) | n/d |
+| 0249 | [Finitions d'interface RX (uifin)](0249-finitions-ui-rx.md) | n/d |
 | 0250 | [Mêlée des figurines synchronisée sur les pertes résolues par le cœur](0250-melee-synchronisee-aux-pertes.md) | accepté |
 | 0251 | [Seuils d'allure, cadence nominale par unité, jitter de locomotion](0251-allures-et-cadence-par-unite.md) | accepté |
 | 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |

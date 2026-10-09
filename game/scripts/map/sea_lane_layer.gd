@@ -299,7 +299,7 @@ static func tooltip(lane: Dictionary) -> String:
 		var holder := str(lane.get("control_name", ""))
 		if bool(lane.get("hostile", false)):
 			var threat := "blocus, commerce coupé" if bool(lane.get("blockade", false)) else "traversées et commerce menacés"
-			lines.append("Mer tenue par l'ennemi (%s, %d %%) : %s" % [holder, level, threat])
+			lines.append("Mer tenue par l’ennemi (%s, %d %%) : %s" % [holder, level, threat])
 		else:
 			lines.append("Mer tenue par %s (%d %%)" % [holder, level])
 	var storm := float(lane.get("storm_loss_percent", 0.0))

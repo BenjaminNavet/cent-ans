@@ -15,7 +15,7 @@ const PLACES := {
 	"Douvres (South Foreland)": [Vector2(2153.0, 2841.0), "chalk_cliff"],
 	"Étretat": [Vector2(2012.6, 3047.0), "chalk_cliff"],
 	"Pointe du Raz": [Vector2(1474.6, 3218.5), "granite_cliff"],
-	"Land's End": [Vector2(1441.8, 2889.8), "granite_cliff"],
+	"Land’s End": [Vector2(1441.8, 2889.8), "granite_cliff"],
 	"Mimizan (Landes)": [Vector2(1739.1, 3867.2), "sand_beach"],
 	"Calais": [Vector2(2197.8, 2874.5), "sand_beach"],
 }

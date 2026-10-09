@@ -19,7 +19,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "2e comte d'Ormond",
+      "title": "2e comte d’Ormond",
       "from": {
         "value": "1338-01-06"
       }
@@ -39,7 +39,7 @@
   },
   "starting_location": "prov_ormond",
   "status": "minor",
-  "description": "Cinq ans en 1337 ; confié en pupille à Maurice FitzGerald, 1er comte de Desmond, puis à Sir John Darcy, dont il épousera la fille Elizabeth. Justicier d'Irlande à trois reprises (1359, 1364, 1376).",
+  "description": "Cinq ans en 1337 ; confié en pupille à Maurice FitzGerald, 1er comte de Desmond, puis à Sir John Darcy, dont il épousera la fille Elizabeth. Justicier d’Irlande à trois reprises (1359, 1364, 1376).",
   "sources": [
     "James Butler, 2e comte d'Ormond"
   ],

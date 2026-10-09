@@ -57,7 +57,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Maison mère de l'ordre vallombrosain, fondé au XIe siècle dans les collines du Pratomagno.",
+    "description": "Maison mère de l’ordre vallombrosain, fondé au XIe siècle dans les collines du Pratomagno.",
     "sources": [
       "Vallombrosa"
     ]
@@ -109,7 +109,7 @@
       "bld_weaving_workshop"
     ],
     "port": false,
-    "description": "Ville drapière toscane, seigneurie directe des rois angevins de Naples depuis son achat en 1313 (jusqu'à sa vente à Florence en 1350).",
+    "description": "Ville drapière toscane, seigneurie directe des rois angevins de Naples depuis son achat en 1313 (jusqu’à sa vente à Florence en 1350).",
     "sources": [
       "Prato",
       "Robert Ier de Naples"

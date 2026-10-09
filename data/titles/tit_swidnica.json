@@ -28,7 +28,7 @@
     {
       "id": "obj_swidnica_hold",
       "title": "Garder Świdnica",
-      "description": "Bolko II doit conserver l'héritage de ses pères.",
+      "description": "Bolko II doit conserver l’héritage de ses pères.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_swidnica"
@@ -44,7 +44,7 @@
     },
     {
       "id": "obj_swidnica_legnica",
-      "title": "L'héritage piast",
+      "title": "L’héritage piast",
       "description": "Réunir Legnica au duché de Świdnica.",
       "condition": {
         "kind": "hold_provinces",
@@ -54,7 +54,7 @@
       }
     }
   ],
-  "description": "Duché piast de Świdnica-Jawor, indépendant de la Bohême jusqu'en 1392 (mort de la veuve de Bolko II) ; rang « royaume » approximé pour marquer la souveraineté.",
+  "description": "Duché piast de Świdnica-Jawor, indépendant de la Bohême jusqu’en 1392 (mort de la veuve de Bolko II) ; rang « royaume » approximé pour marquer la souveraineté.",
   "sources": [
     "Bolko II de Świdnica",
     "Duché de Świdnica"

@@ -1,7 +1,7 @@
 {
   "id": "evt_salado",
   "title": "La bataille du Salado",
-  "text": "Le sultan mérinide et le roi de Grenade assiègent Tarifa. Alphonse de Castille et Alphonse de Portugal franchissent le rio Salado et mettent en déroute l'armée musulmane : c'est la dernière grande invasion venue d'Afrique.",
+  "text": "Le sultan mérinide et le roi de Grenade assiègent Tarifa. Alphonse de Castille et Alphonse de Portugal franchissent le rio Salado et mettent en déroute l’armée musulmane : c’est la dernière grande invasion venue d’Afrique.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -56,7 +56,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Tenir Tarifa sans risquer l'ost",
+      "text": "Tenir Tarifa sans risquer l’ost",
       "effects": [
         {
           "type": "prestige",

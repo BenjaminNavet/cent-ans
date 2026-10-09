@@ -25,7 +25,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Porte de l'Angleterre face au continent : les Cinque Ports (Douvres, Sandwich, Hythe, Romney) fournissent la flotte royale ; Cantorbéry est le siège du primat. Fer du Weald.",
+    "description": "Porte de l’Angleterre face au continent : les Cinque Ports (Douvres, Sandwich, Hythe, Romney) fournissent la flotte royale ; Cantorbéry est le siège du primat. Fer du Weald.",
     "sources": [
       "Kent",
       "Cinque Ports",
@@ -55,7 +55,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "« Clé de l'Angleterre » : port des Cinque Ports et immense château royal contrôlant le passage du Pas-de-Calais.",
+    "description": "« Clé de l’Angleterre » : port des Cinque Ports et immense château royal contrôlant le passage du Pas-de-Calais.",
     "sources": [
       "Douvres",
       "Château de Douvres"
@@ -210,7 +210,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Un des Cinq-Ports, ancien port aujourd'hui ensablé par les galets de la côte.",
+    "description": "Un des Cinq-Ports, ancien port aujourd’hui ensablé par les galets de la côte.",
     "sources": [
       "New Romney"
     ]

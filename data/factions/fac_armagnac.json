@@ -1,8 +1,8 @@
 {
   "id": "fac_armagnac",
   "name": {
-    "display": "Comté d'Armagnac",
-    "local": "Comtat d'Armanhac",
+    "display": "Comté d’Armagnac",
+    "local": "Comtat d’Armanhac",
     "local_language": "occitan"
   },
   "short_name": "Armagnac",
@@ -19,7 +19,7 @@
   "primary_title": "tit_armagnac",
   "heraldry": {
     "blazon": "D'argent au lion de gueules.",
-    "description": "Armes du comté d'Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d'or).",
+    "description": "Armes du comté d’Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d’or).",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },
@@ -54,6 +54,6 @@
   "description": "Grand seigneur du Midi, fidèle de Philippe VI et rival acharné de Gaston II de Foix-Béarn pour la domination du Languedoc et de la Gascogne.",
   "sources": [
     "Jean Ier d'Armagnac",
-    "Comté d'Armagnac"
+    "Comté d’Armagnac"
   ]
 }

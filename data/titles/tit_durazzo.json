@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
-    "description": "Armes d'Anjou-Sicile brisées d'une bordure et d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
+    "description": "Armes d’Anjou-Sicile brisées d’une bordure et d’un lambel, comme les branches angevines de Durazzo et de Gravina.",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B",
     "uncertain": true,
@@ -38,7 +38,7 @@
     },
     {
       "id": "obj_durazzo_berat",
-      "title": "Vers l'intérieur",
+      "title": "Vers l’intérieur",
       "description": "Prendre Bérat et Avlona à Byzance.",
       "condition": {
         "kind": "hold_provinces",
@@ -48,7 +48,7 @@
       }
     }
   ],
-  "description": "Duché de Durazzo et royaume angevin d'Albanie ; fief de la maison d'Anjou-Durazzo.",
+  "description": "Duché de Durazzo et royaume angevin d’Albanie ; fief de la maison d’Anjou-Durazzo.",
   "sources": [
     "Royaume d'Albanie (médiéval)",
     "Charles de Durazzo"

@@ -154,23 +154,23 @@ func _build_display(grid: GridContainer) -> void:
 	var resolutions: Array = _constant("RESOLUTIONS")
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
-	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
+	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l’affichage à la fréquence de l’écran.")
 	var detected_label: String = RenderQuality.LABELS[RenderQuality.LEVELS.find(RenderQuality.detected_level())]
 	_options(grid, "video/quality", "Qualité graphique", [RenderQuality.AUTO] + Array(RenderQuality.LEVELS),
 		["Automatique (%s)" % detected_label] + Array(RenderQuality.LABELS),
-		"Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples et proches, sans occlusion ni halo, relief sans détail fin, moitié moins d'arbres et de particules, soldats simplifiés plus tôt. Moyenne : occlusion ambiante, trois quarts des arbres et de l'herbe. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps, tout le détail. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres et détails plus lointains.")
+		"Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples et proches, sans occlusion ni halo, relief sans détail fin, moitié moins d’arbres et de particules, soldats simplifiés plus tôt. Moyenne : occlusion ambiante, trois quarts des arbres et de l’herbe. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps, tout le détail. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres et détails plus lointains.")
 	# TX (ADR 0243) : textures de sol régionales 2k ou 1k, prises en compte au prochain chargement de la carte.
 	_options(grid, "video/texture_quality", "Qualité des textures", ["high", "medium"], ["Haute", "Moyenne"],
 		"Haute : sols et parcelles en 2k quand les paquets haute définition sont installés (environ 280 Mo de mémoire vidéo). Moyenne : paquets 1k seuls (environ 70 Mo). Prise en compte au prochain chargement de la carte ou de la bataille.")
 	# Mise à l'échelle 3D MetalFX (FSR hors Metal).
 	var upscale_labels: Array = Array(RenderQuality.UPSCALE_LABELS).duplicate()
 	upscale_labels[0] = "Automatique (%s)" % RenderQuality.upscale_label(RenderQuality.preset_upscale(RenderQuality.preset()))
-	_options(grid, "video/upscale", "Mise à l'échelle", Array(RenderQuality.UPSCALE_CHOICES), upscale_labels,
-		"Calcule l'image 3D en plus petit puis l'agrandit avec MetalFX (puces Apple ; FSR ailleurs) : plus d'images par seconde, image un peu plus douce. Qualité : trois quarts de la définition. Performance : moitié de la définition, pour les machines modestes ou les très grands écrans. Automatique : selon la qualité graphique. L'interface reste nette dans tous les cas.")
+	_options(grid, "video/upscale", "Mise à l’échelle", Array(RenderQuality.UPSCALE_CHOICES), upscale_labels,
+		"Calcule l’image 3D en plus petit puis l’agrandit avec MetalFX (puces Apple ; FSR ailleurs) : plus d’images par seconde, image un peu plus douce. Qualité : trois quarts de la définition. Performance : moitié de la définition, pour les machines modestes ou les très grands écrans. Automatique : selon la qualité graphique. L’interface reste nette dans tous les cas.")
 	# L'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
-	_options(grid, "interface/ui_size", "Taille de l'interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+	_options(grid, "interface/ui_size", "Taille de l’interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
 		"Échelle automatique selon la hauteur de la fenêtre (actuellement %d %%), multipliée par ce réglage." % roundi(float(settings.call("effective_ui_scale")) * 100.0))
 	var texts: Array = _constant("TEXT_SIZES")
 	var text_labels := {0.9: "Petite", 1.0: "Normale", 1.15: "Grande", 1.3: "Très grande"}
@@ -179,21 +179,21 @@ func _build_display(grid: GridContainer) -> void:
 
 
 func _build_map(grid: GridContainer) -> void:
-	_check(grid, "camera/edge_pan", "Défilement par les bords de l'écran", "Aussi basculé par F2 sur la carte.")
+	_check(grid, "camera/edge_pan", "Défilement par les bords de l’écran", "Aussi basculé par F2 sur la carte.")
 	_slider(grid, "Vitesse de la caméra", float(settings.call("get_value", "camera/speed")), 0.4, 2.5, 0.1,
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
-	_check(grid, "map/stance_fill", "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur : or vos terres, vert vos alliés et vassaux, rouge vos ennemis en guerre, gris léger les autres. Une province occupée garde les hachures de l'occupant au bord.")
+	_check(grid, "map/stance_fill", "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur : or vos terres, vert vos alliés et vassaux, rouge vos ennemis en guerre, gris léger les autres. Une province occupée garde les hachures de l’occupant au bord.")
 	_check(grid, "map/show_zoc", "Zones de contrôle ennemies", "Avec une de vos armées sélectionnée, un cercle rouge marque la zone de contrôle de chaque armée ennemie en vue.")
 	var replay_speeds: Array = AiTurnReplay.speeds()
-	_options(grid, "map/ai_moves_speed", "Vitesse des mouvements de l'IA", replay_speeds,
+	_options(grid, "map/ai_moves_speed", "Vitesse des mouvements de l’IA", replay_speeds,
 		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")),
-		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte et la caméra suit celles qui vous concernent. Espace passe l'animation.")
+		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte et la caméra suit celles qui vous concernent. Espace passe l’animation.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_options(grid, "interface/confirm_end_turn", "Confirmer la fin du tour", ["off", "warnings", "always"],
 		["Jamais", "Si oubli", "Toujours"],
-		"Si oubli : demande confirmation quand une armée n'a pas d'ordre, qu'un emplacement de construction est libre ou qu'aucune recherche n'est en cours. Maj+Entrée termine la saison sans confirmation.")
-	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l'action la plus utile du moment (clic : l'exécute). Masqué pendant le tutoriel.")
+		"Si oubli : demande confirmation quand une armée n’a pas d’ordre, qu’un emplacement de construction est libre ou qu’aucune recherche n’est en cours. Maj+Entrée termine la saison sans confirmation.")
+	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment (clic : l’exécute). Masqué pendant le tutoriel.")
 	_build_decor_delay(grid)
 	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
 		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
@@ -216,7 +216,7 @@ func _build_game(grid: GridContainer) -> void:
 		return "Chaque tour" if turns == 1 else "Tous les %d tours" % turns)
 	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
-	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
+	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d’une nouvelle partie. Décoché : jamais affiché.")
 
 
 ## Sang et taille des unités (appliqués à la bataille suivante).
@@ -224,7 +224,7 @@ func _build_battle(grid: GridContainer) -> void:
 	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
 		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
 	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)", "Épique (× 4)"],
-		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra et Épique sont exigeants pour la carte graphique (Épique : masses serrées, pour les grandes batailles).")
+		"Figurines dessinées par soldat simulé : les effectifs et l’équilibre ne changent pas. Ultra et Épique sont exigeants pour la carte graphique (Épique : masses serrées, pour les grandes batailles).")
 	var budgets: Array = _constant("MAX_FIGURES_CHOICES")
 	_options(grid, "battle/max_figures", "Figurines maximum", budgets, budgets.map(func(count: int) -> String: return Money.digits(count)),
 		"Nombre maximal de figurines dessinées sur tout le champ de bataille. Si les armées sont plus nombreuses, la taille des unités est réduite pour tenir dans ce plafond. Baissez-le si les grandes batailles ralentissent.")
@@ -247,7 +247,7 @@ func _build_sound(grid: GridContainer) -> void:
 ## actions échangent leur touche, avec avertissement) et « Rétablir par défaut ».
 func _build_controls(grid: GridContainer) -> void:
 	_options(grid, "input/layout", "Disposition du clavier", Array(ShortcutSheet.LAYOUTS), Array(ShortcutSheet.LAYOUT_LABELS),
-		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY). Les touches réaffectées ci-dessous s'ajoutent à ce préréglage.")
+		"Change les lettres affichées sur les boutons et dans l’aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY). Les touches réaffectées ci-dessous s’ajoutent à ce préréglage.")
 	var sheet := GridContainer.new()
 	sheet.name = "ShortcutGrid"
 	sheet.columns = 3

@@ -1,7 +1,7 @@
 {
   "id": "evt_pont_effondre",
-  "title": "Le pont s'est effondré",
-  "text": "Après les eaux de printemps, une arche du vieux pont s'est rompue et une charrette avec elle. Marchands et laboureurs doivent faire un long détour par le gué.",
+  "title": "Le pont s’est effondré",
+  "text": "Après les eaux de printemps, une arche du vieux pont s’est rompue et une charrette avec elle. Marchands et laboureurs doivent faire un long détour par le gué.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60,

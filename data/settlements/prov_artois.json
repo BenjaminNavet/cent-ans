@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Capitale du comté d'Artois, célèbre pour ses draperies et ses tapisseries.",
+    "description": "Capitale du comté d’Artois, célèbre pour ses draperies et ses tapisseries.",
     "sources": [
       "Arras",
       "Comté d'Artois"
@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Grande ville drapière close, autour de l'abbaye Saint-Bertin.",
+    "description": "Grande ville drapière close, autour de l’abbaye Saint-Bertin.",
     "sources": [
       "Saint-Omer"
     ]
@@ -78,7 +78,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Résidence fortifiée des comtes d'Artois sur la Canche.",
+    "description": "Résidence fortifiée des comtes d’Artois sur la Canche.",
     "sources": [
       "Hesdin",
       "Vieil-Hesdin"
@@ -104,7 +104,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Abbaye augustinienne sur une colline dominant la plaine d'Arras.",
+    "description": "Abbaye augustinienne sur une colline dominant la plaine d’Arras.",
     "sources": [
       "Abbaye du Mont-Saint-Éloi"
     ]
@@ -129,7 +129,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Village agricole aux confins de l'Artois et du comté de Saint-Pol, où se livrera la bataille du 25 octobre 1415.",
+    "description": "Village agricole aux confins de l’Artois et du comté de Saint-Pol, où se livrera la bataille du 25 octobre 1415.",
     "sources": [
       "Azincourt"
     ]
@@ -155,7 +155,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close, chef-lieu d'une importante seigneurie artésienne.",
+    "description": "Ville close, chef-lieu d’une importante seigneurie artésienne.",
     "sources": [
       "Béthune"
     ]
@@ -231,7 +231,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg agricole du comté d'Artois, sur la rivière Souchez.",
+    "description": "Bourg agricole du comté d’Artois, sur la rivière Souchez.",
     "sources": [
       "Lens (Pas-de-Calais)"
     ]
@@ -256,7 +256,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié sur la route d'Arras à Péronne.",
+    "description": "Bourg fortifié sur la route d’Arras à Péronne.",
     "sources": [
       "Bapaume"
     ]
@@ -306,7 +306,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Petit bourg seigneurial de l'Artois central.",
+    "description": "Petit bourg seigneurial de l’Artois central.",
     "sources": [
       "Avesnes-le-Comte"
     ]

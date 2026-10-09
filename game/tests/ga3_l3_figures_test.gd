@@ -120,7 +120,7 @@ func _check_generated(kind: String, variant: int) -> void:
 	# UV en convention Blender (v vers le haut) : le shader lit la ligne 1 - v ; les sommets
 	# texturés du LOD0 doivent y tomber sur l'albédo cuit, pas sur le fond noir de l'atlas.
 	if tex != null and not _uvs_on_albedo(name, tex, lod0) or not mat.shader.code.contains("texture(ga3_albedo, vec2(UV.x, 1.0 - UV.y))"):
-		check(false, "ga3_l3: %s UV hors de l'albédo (sens de v)" % name)
+		check(false, "ga3_l3: %s UV hors de l’albédo (sens de v)" % name)
 	var corpse := BattleSkinned.corpse_shader(kind, variant)
 	if not corpse.code.contains("#define GA3_TEX"):
 		check(false, "ga3_l3: %s cadavre sans GA3_TEX" % name)
@@ -129,7 +129,7 @@ func _check_generated(kind: String, variant: int) -> void:
 		if not mat.shader.code.contains("#define FG3_BAKED") or not corpse.code.contains("#define FG3_BAKED"):
 			check(false, "ga3_l3: %s sans FG3_BAKED (cheval fin)" % name)
 		if int(mat.get_shader_parameter("fine_layer")) != int(fig["atlas_layer"]):
-			check(false, "ga3_l3: %s couche d'atlas non posée" % name)
+			check(false, "ga3_l3: %s couche d’atlas non posée" % name)
 
 
 ## Part des sommets texturés (corps hors armoiries) lus sur un texel noir de l'albédo en

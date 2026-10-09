@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d'Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard.",
+    "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d’Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard.",
     "sources": [
       "Seconde guerre d'indépendance écossaise",
       "Édouard Balliol",
@@ -53,7 +53,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Place forte et port disputés à l'embouchure de la Tweed, repris par Édouard III après Halidon Hill en 1333.",
+    "description": "Place forte et port disputés à l’embouchure de la Tweed, repris par Édouard III après Halidon Hill en 1333.",
     "sources": [
       "Berwick-upon-Tweed"
     ]
@@ -79,7 +79,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château des Marches écossaises tenu par l'Angleterre, un des piliers de son autorité au sud de l'Écosse.",
+    "description": "Château des Marches écossaises tenu par l’Angleterre, un des piliers de son autorité au sud de l’Écosse.",
     "sources": [
       "Château de Roxburgh"
     ]
@@ -130,7 +130,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg royal et marché de l'East Lothian, sur la Tyne.",
+    "description": "Bourg royal et marché de l’East Lothian, sur la Tyne.",
     "sources": [
       "Haddington"
     ]
@@ -155,7 +155,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg royal du West Lothian, doté d'un palais royal au bord du loch.",
+    "description": "Bourg royal du West Lothian, doté d’un palais royal au bord du loch.",
     "sources": [
       "Linlithgow"
     ]

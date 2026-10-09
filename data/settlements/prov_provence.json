@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Siège de la cour comtale de Robert d'Anjou, roi de Naples et comte de Provence.",
+    "description": "Siège de la cour comtale de Robert d’Anjou, roi de Naples et comte de Provence.",
     "sources": ["Aix-en-Provence", "Comté de Provence"]
   },
   {
@@ -81,7 +81,7 @@
     "buildings": ["bld_port", "bld_market"],
     "port": true,
     "sea_zone": "sea_mediterranean",
-    "description": "Port fortifié dominé par son château sur la colline, principale place du comté de Provence à l'est du Var, avant son passage à la Savoie en 1388.",
+    "description": "Port fortifié dominé par son château sur la colline, principale place du comté de Provence à l’est du Var, avant son passage à la Savoie en 1388.",
     "sources": ["Nice", "Comté de Nice"]
   },
   {
@@ -110,7 +110,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_collegiate_church"],
     "port": false,
-    "description": "Résidence favorite des comtes de Provence de la maison d'Anjou, qui y séjournent régulièrement au palais comtal.",
+    "description": "Résidence favorite des comtes de Provence de la maison d’Anjou, qui y séjournent régulièrement au palais comtal.",
     "sources": ["Brignoles"]
   },
   {
@@ -124,7 +124,7 @@
     "fortification_level": 0,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Abbaye cistercienne du Var, l'une des « trois sœurs provençales » avec Silvacane et Sénanque.",
+    "description": "Abbaye cistercienne du Var, l’une des « trois sœurs provençales » avec Silvacane et Sénanque.",
     "sources": ["Abbaye du Thoronet"]
   },
   {

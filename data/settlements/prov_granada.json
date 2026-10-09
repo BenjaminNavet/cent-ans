@@ -26,7 +26,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Grenade, capitale du dernier royaume musulman d'Espagne, sous la dynastie nasride.",
+    "description": "Grenade, capitale du dernier royaume musulman d’Espagne, sous la dynastie nasride.",
     "sources": [
       "Royaume de Grenade",
       "Yusuf Ier de Grenade",
@@ -107,7 +107,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville nasride close dotée d'une alcazaba, sur la route de Grenade à Almería.",
+    "description": "Ville nasride close dotée d’une alcazaba, sur la route de Grenade à Almería.",
     "sources": [
       "Guadix"
     ]
@@ -133,7 +133,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Place forte nasride sur le Genil, gardant l'accès occidental de la vega de Grenade.",
+    "description": "Place forte nasride sur le Genil, gardant l’accès occidental de la vega de Grenade.",
     "sources": [
       "Loja (Espagne)"
     ]

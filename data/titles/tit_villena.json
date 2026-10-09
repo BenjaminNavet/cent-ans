@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "Écartelé de Castille et de León, à la bordure d'argent.",
-    "description": "Armes royales de Castille-León brisées d'une bordure, portées par les cadets de la maison de Castille issus de l'infant Manuel.",
+    "description": "Armes royales de Castille-León brisées d’une bordure, portées par les cadets de la maison de Castille issus de l’infant Manuel.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -28,7 +28,7 @@
   "objectives": [
     {
       "id": "obj_villena_hold",
-      "title": "Garder l'autonomie",
+      "title": "Garder l’autonomie",
       "description": "Don Juan Manuel doit conserver ses terres, pratiquement un royaume dans le royaume.",
       "condition": {
         "kind": "hold_title",
@@ -37,7 +37,7 @@
     },
     {
       "id": "obj_villena_murcia",
-      "title": "L'adelantamiento de Murcie",
+      "title": "L’adelantamiento de Murcie",
       "description": "Tenir Murcie, dont Don Juan Manuel fut adelantado mayor.",
       "condition": {
         "kind": "hold_provinces",

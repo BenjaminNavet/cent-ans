@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château de l'Ordre sur la Venta, chef-lieu de commanderie.",
+    "description": "Château de l’Ordre sur la Venta, chef-lieu de commanderie.",
     "sources": [
       "Kuldīga"
     ]
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de brique sur la Lielupe, rempart de l'Ordre contre la Lituanie.",
+    "description": "Château de brique sur la Lielupe, rempart de l’Ordre contre la Lituanie.",
     "sources": [
       "Jelgava"
     ]
@@ -73,7 +73,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Port et château de l'Ordre à l'embouchure de la Venta, lié à la Hanse.",
+    "description": "Port et château de l’Ordre à l’embouchure de la Venta, lié à la Hanse.",
     "sources": [
       "Ventspils"
     ]

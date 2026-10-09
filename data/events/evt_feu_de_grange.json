@@ -1,7 +1,7 @@
 {
   "id": "evt_feu_de_grange",
   "title": "Le feu de la grange",
-  "text": "La grange où l'on entassait la dîme a pris feu par une nuit d'été. Le grain est perdu et l'on murmure qu'un fermier lésé y a mis la main.",
+  "text": "La grange où l’on entassait la dîme a pris feu par une nuit d’été. Le grain est perdu et l’on murmure qu’un fermier lésé y a mis la main.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 50,
@@ -31,7 +31,7 @@
       "ai_weight": 3
     },
     {
-      "text": "Rechercher l'incendiaire",
+      "text": "Rechercher l’incendiaire",
       "effects": [
         {
           "type": "treasury",

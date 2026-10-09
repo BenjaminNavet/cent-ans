@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bande d'argent brochant sur le tout.",
-    "description": "Lion noir à la cotice d'argent, armes du prince-évêché de Bamberg.",
+    "description": "Lion noir à la cotice d’argent, armes du prince-évêché de Bamberg.",
     "primary_color": "#F2C230",
     "secondary_color": "#F5F1E6",
     "note": "Le générateur d'écus ne dessine que la bande d'argent ; le lion (identique à celui de Namur et de Flandre dans le dessin) est omis."
@@ -25,7 +25,7 @@
       "Évêché de Bamberg"
     ]
   },
-  "description": "Principauté épiscopale de Bamberg, fondée en 1007 par l'empereur Henri II.",
+  "description": "Principauté épiscopale de Bamberg, fondée en 1007 par l’empereur Henri II.",
   "sources": [
     "Léopold d'Egloffstein",
     "Évêché de Bamberg"

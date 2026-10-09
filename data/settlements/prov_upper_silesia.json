@@ -20,7 +20,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Résidence des ducs d'Opole sur l'Oder, avec sa collégiale et son château.",
+    "description": "Résidence des ducs d’Opole sur l’Oder, avec sa collégiale et son château.",
     "sources": [
       "Opole"
     ]
@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Résidence de l'Oder haut, à la porte de la Moravie ; passée en 1337 au Přemyslide Nicolas II d'Opava, vassal de la Bohême (propriétaire : couronne de Bohême, faute de faction d'Opava).",
+    "description": "Résidence de l’Oder haut, à la porte de la Moravie ; passée en 1337 au Přemyslide Nicolas II d’Opava, vassal de la Bohême (propriétaire : couronne de Bohême, faute de faction d’Opava).",
     "sources": [
       "Racibórz"
     ]
@@ -98,7 +98,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Résidence des ducs de Brzeg sur l'Oder.",
+    "description": "Résidence des ducs de Brzeg sur l’Oder.",
     "sources": [
       "Brzeg"
     ]

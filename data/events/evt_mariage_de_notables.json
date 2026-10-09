@@ -1,7 +1,7 @@
 {
   "id": "evt_mariage_de_notables",
   "title": "Un mariage de notables",
-  "text": "Le fils d'un riche bourgeois épouse la fille d'un chevalier du voisinage, et les deux familles veulent des noces qui fassent parler du pays. On attend du seigneur qu'il y paraisse.",
+  "text": "Le fils d’un riche bourgeois épouse la fille d’un chevalier du voisinage, et les deux familles veulent des noces qui fassent parler du pays. On attend du seigneur qu’il y paraisse.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 65
@@ -30,7 +30,7 @@
       "ai_weight": 3
     },
     {
-      "text": "Envoyer un présent et s'excuser",
+      "text": "Envoyer un présent et s’excuser",
       "effects": [
         {
           "type": "treasury",

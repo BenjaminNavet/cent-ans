@@ -1,6 +1,6 @@
 {
   "name": {
-    "display": "Jean d'Islay",
+    "display": "Jean d’Islay",
     "local": "Iain Mac Dhòmhnaill",
     "local_language": "gaélique écossais"
   },
@@ -43,7 +43,7 @@
   },
   "starting_location": "prov_isles",
   "status": "at_court",
-  "description": "Chef du Clan Donald, se proclame « Dominus Insularum » (seigneur des Îles) en 1336. Épouse en 1337 Amy MacRuairi, héritière des îles du Nord et de Garmoran : leur union lui donne le contrôle de tout le littoral occidental d'Argyll aux Hébrides, hors Skye. Réputé pour sa bienveillance envers l'Église.",
+  "description": "Chef du Clan Donald, se proclame « Dominus Insularum » (seigneur des Îles) en 1336. Épouse en 1337 Amy MacRuairi, héritière des îles du Nord et de Garmoran : leur union lui donne le contrôle de tout le littoral occidental d’Argyll aux Hébrides, hors Skye. Réputé pour sa bienveillance envers l’Église.",
   "sources": [
     "Jean d'Islay, seigneur des Îles"
   ],

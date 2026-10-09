@@ -31,7 +31,7 @@
       "note": "Maître de la citadelle de Smyrne depuis 1329."
     },
     {
-      "title": "Bey d'Aydın",
+      "title": "Bey d’Aydın",
       "from": {
         "value": "1334"
       },
@@ -51,7 +51,7 @@
   "piety": 55,
   "starting_location": "prov_izmir",
   "status": "at_court",
-  "description": "Dit « Umur le Ghazi », il pille les côtes de l'Égée et s'allie à Jean Cantacuzène.",
+  "description": "Dit « Umur le Ghazi », il pille les côtes de l’Égée et s’allie à Jean Cantacuzène.",
   "sources": [
     "Umur Bey"
   ]

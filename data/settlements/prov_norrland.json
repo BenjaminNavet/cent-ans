@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Marché médiéval de Medelpad, à l'embouchure de la Selångersån.",
+    "description": "Marché médiéval de Medelpad, à l’embouchure de la Selångersån.",
     "sources": [
       "Selånger"
     ]
@@ -96,7 +96,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Paroisse de la côte d'Ångermanland.",
+    "description": "Paroisse de la côte d’Ångermanland.",
     "sources": [
       "Nordmaling"
     ]

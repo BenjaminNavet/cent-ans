@@ -2,13 +2,13 @@
   "id": "tit_alencon",
   "rank": "county",
   "name": {
-    "display": "Comté d'Alençon",
+    "display": "Comté d’Alençon",
     "local": "Alençon",
     "local_language": "ancien français"
   },
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules chargée de huit besants d'argent.",
-    "description": "Armes de France ancien brisées d'une bordure de gueules besantée d'argent, portées par Charles II d'Alençon (la bordure de gueules seule est celle de son père Charles de Valois).",
+    "description": "Armes de France ancien brisées d’une bordure de gueules besantée d’argent, portées par Charles II d’Alençon (la bordure de gueules seule est celle de son père Charles de Valois).",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B"
   },
@@ -20,14 +20,14 @@
     "faction": "fac_alencon",
     "sources": [
       "Charles II d'Alençon",
-      "Comté d'Alençon"
+      "Comté d’Alençon"
     ]
   },
   "objectives": [
     {
       "id": "obj_alencon_hold",
       "title": "Garder le Perche",
-      "description": "Le comte d'Alençon doit conserver son apanage.",
+      "description": "Le comte d’Alençon doit conserver son apanage.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_alencon"
@@ -46,9 +46,9 @@
       }
     }
   ],
-  "description": "Comté-apanage donné en 1293 à Charles de Valois ; son fils Charles II d'Alençon, frère cadet de Philippe VI, en hérite en 1325.",
+  "description": "Comté-apanage donné en 1293 à Charles de Valois ; son fils Charles II d’Alençon, frère cadet de Philippe VI, en hérite en 1325.",
   "sources": [
     "Charles II d'Alençon",
-    "Comté d'Alençon"
+    "Comté d’Alençon"
   ]
 }

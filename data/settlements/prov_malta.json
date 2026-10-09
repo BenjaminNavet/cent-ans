@@ -51,7 +51,7 @@
     ],
     "port": true,
     "sea_zone": "sea_mediterranean",
-    "description": "Port du Grand Port, futur foyer de l'ordre de Saint-Jean ; alors simple bourg de pêcheurs et de marins.",
+    "description": "Port du Grand Port, futur foyer de l’ordre de Saint-Jean ; alors simple bourg de pêcheurs et de marins.",
     "sources": [
       "Birgu"
     ]
@@ -77,7 +77,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Château de Gozo (Rabat), refuge de l'île.",
+    "description": "Château de Gozo (Rabat), refuge de l’île.",
     "sources": [
       "Gozo"
     ]

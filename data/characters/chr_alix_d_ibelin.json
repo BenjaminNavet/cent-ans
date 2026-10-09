@@ -1,7 +1,7 @@
 {
   "id": "chr_alix_d_ibelin",
   "name": {
-    "display": "Alix d'Ibelin"
+    "display": "Alix d’Ibelin"
   },
   "sex": "female",
   "house": "Ibelin",
@@ -45,8 +45,8 @@
   },
   "starting_location": "prov_cyprus",
   "status": "at_court",
-  "description": "Épouse d'Hugues IV, mariée en 1318, mère du futur Pierre Ier.",
+  "description": "Épouse d’Hugues IV, mariée en 1318, mère du futur Pierre Ier.",
   "sources": [
-    "Alix d'Ibelin"
+    "Alix d’Ibelin"
   ]
 }

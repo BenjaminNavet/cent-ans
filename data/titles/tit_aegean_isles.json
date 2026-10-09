@@ -2,13 +2,13 @@
   "id": "tit_aegean_isles",
   "rank": "county",
   "name": {
-    "display": "Îles byzantines de l'Égée",
+    "display": "Îles byzantines de l’Égée",
     "local": "Νῆσοι",
     "local_language": "grec"
   },
   "heraldry": {
     "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
-    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l’aigle bicéphale reste l’emblème impérial.",
     "primary_color": "#A81C22",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -26,7 +26,7 @@
       "Chios"
     ]
   },
-  "description": "Lesbos et Chios, dernières îles de l'Égée orientale sous le sceptre impérial.",
+  "description": "Lesbos et Chios, dernières îles de l’Égée orientale sous le sceptre impérial.",
   "sources": [
     "Lesbos",
     "Chios"

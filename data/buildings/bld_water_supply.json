@@ -1,7 +1,7 @@
 {
   "id": "bld_water_supply",
   "name": {
-    "display": "Adduction d'eau"
+    "display": "Adduction d’eau"
   },
   "category": "sanitary",
   "tier": 2,

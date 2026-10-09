@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De sinople à la croix d'argent.",
-    "description": "Croix blanche de l'évêché de Courlande (armes simplifiées).",
+    "description": "Croix blanche de l’évêché de Courlande (armes simplifiées).",
     "primary_color": "#1E783C",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -28,7 +28,7 @@
     {
       "id": "obj_courland_hold",
       "title": "Garder Pilten",
-      "description": "Conserver l'évêché.",
+      "description": "Conserver l’évêché.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_courland"
@@ -37,7 +37,7 @@
     {
       "id": "obj_courland_indep",
       "title": "Un évêque libre",
-      "description": "Ne jamais dépendre de l'Ordre.",
+      "description": "Ne jamais dépendre de l’Ordre.",
       "condition": {
         "kind": "be_independent"
       }

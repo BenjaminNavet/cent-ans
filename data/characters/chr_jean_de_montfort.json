@@ -18,7 +18,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Comte de Montfort-l'Amaury",
+      "title": "Comte de Montfort-l’Amaury",
       "from": {
         "value": "1322"
       }
@@ -47,7 +47,7 @@
   },
   "starting_location": "prov_ile_de_france",
   "status": "at_court",
-  "description": "Demi-frère de Jean III, issu du second mariage d'Arthur II avec Yolande de Dreux ; il se saisira du duché en 1341 avec l'appui anglais.",
+  "description": "Demi-frère de Jean III, issu du second mariage d’Arthur II avec Yolande de Dreux ; il se saisira du duché en 1341 avec l’appui anglais.",
   "sources": [
     "Jean de Montfort (1295-1345)"
   ]

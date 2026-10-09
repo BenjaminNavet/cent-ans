@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Étape caravanière de l'arrière-pays du golfe de Syrte.",
+    "description": "Étape caravanière de l’arrière-pays du golfe de Syrte.",
     "sources": [
       "Ajdabiya"
     ]
@@ -69,7 +69,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": true,
-    "description": "Mouillage d'Ajdabiya sur le golfe de Syrte (incertain).",
+    "description": "Mouillage d’Ajdabiya sur le golfe de Syrte (incertain).",
     "sources": [
       "Zuwaytina"
     ]

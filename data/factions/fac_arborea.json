@@ -1,7 +1,7 @@
 {
   "id": "fac_arborea",
   "name": {
-    "display": "Judicat d'Arborée",
+    "display": "Judicat d’Arborée",
     "local": "Judicatu de Arborea",
     "local_language": "sarde"
   },
@@ -19,7 +19,7 @@
   "primary_title": "tit_arborea",
   "heraldry": {
     "blazon": "D'argent à la bordure de sinople.",
-    "description": "Les armes du judicat d'Arborée sont un arbre arraché de sinople sur champ d'argent (attesté) ; le générateur ne dessine pas encore l'arbre, remplacé par la bordure de sinople.",
+    "description": "Les armes du judicat d’Arborée sont un arbre arraché de sinople sur champ d’argent (attesté) ; le générateur ne dessine pas encore l’arbre, remplacé par la bordure de sinople.",
     "primary_color": "#F2EFE6",
     "secondary_color": "#2E7D4F",
     "uncertain": true,
@@ -53,9 +53,9 @@
     "trade": 40,
     "piety": 55
   },
-  "description": "Judicat d'Arborée, dernier judicat sarde autonome, allié de l'Aragon depuis la conquête de 1323-1326 ; Pierre III (1335-1347) tient Oristano et prépare, sans le savoir, la grande révolte de son frère Mariano IV.",
+  "description": "Judicat d’Arborée, dernier judicat sarde autonome, allié de l’Aragon depuis la conquête de 1323-1326 ; Pierre III (1335-1347) tient Oristano et prépare, sans le savoir, la grande révolte de son frère Mariano IV.",
   "sources": [
-    "Judicat d'Arborée",
+    "Judicat d’Arborée",
     "Pierre III d'Arborée"
   ]
 }

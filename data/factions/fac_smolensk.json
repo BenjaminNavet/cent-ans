@@ -19,7 +19,7 @@
   "primary_title": "tit_smolensk",
   "heraldry": {
     "blazon": "De gueules à la guivre d'or.",
-    "description": "Blason de convention pour Smolensk (armes historiques : un oiseau Gamayoun sur un canon, d'époque moderne).",
+    "description": "Blason de convention pour Smolensk (armes historiques : un oiseau Gamayoun sur un canon, d’époque moderne).",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -58,7 +58,7 @@
     "trade": 60,
     "piety": 70
   },
-  "description": "Grande principauté du haut Dniepr, tenue depuis 1313 par Ivan Alexandrovitch, prise entre Lituanie, Moscou et Horde ; il préfère les liens avec Gediminas, ce qui lui vaudra en 1339 une expédition tatare renforcée par les troupes d'Ivan Kalita.",
+  "description": "Grande principauté du haut Dniepr, tenue depuis 1313 par Ivan Alexandrovitch, prise entre Lituanie, Moscou et Horde ; il préfère les liens avec Gediminas, ce qui lui vaudra en 1339 une expédition tatare renforcée par les troupes d’Ivan Kalita.",
   "sources": [
     "Principauté de Smolensk",
     "Ivan Alexandrovitch de Smolensk"

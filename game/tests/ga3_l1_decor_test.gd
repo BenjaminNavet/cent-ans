@@ -95,7 +95,7 @@ func _init() -> void:
 		if expected_some and (ga3 < 40 or ga3 > 160):
 			check(false, "ga3_l1: part GA3 %d hors de [40, 160] (share 0,5)" % ga3)
 		if not expected_some and ga3 != 0:
-			check(false, "ga3_l1: %d variantes GA3 alors qu'elles sont coupées" % ga3)
+			check(false, "ga3_l1: %d variantes GA3 alors qu’elles sont coupées" % ga3)
 		# Poignée GA3 : lecture, déplacement, masquage.
 		for handle in handles:
 			if str(handle[0]).begins_with("ga3_"):
@@ -103,7 +103,7 @@ func _init() -> void:
 				batch.hide(handle)
 				var after := batch.get_transform(handle)
 				if after.origin.y > before.origin.y - 40.0:
-					check(false, "ga3_l1: masquage d'une poignée GA3 sans effet")
+					check(false, "ga3_l1: masquage d’une poignée GA3 sans effet")
 				break
 	var lod_nodes := 0
 	for child in root.find_children("Ga3_*", "MultiMeshInstance3D", true, false):

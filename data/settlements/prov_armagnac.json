@@ -20,7 +20,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Capitale du comté d'Armagnac, résidence principale de Jean Ier d'Armagnac.",
+    "description": "Capitale du comté d’Armagnac, résidence principale de Jean Ier d’Armagnac.",
     "sources": [
       "Comté d'Armagnac",
       "Lectoure"
@@ -46,7 +46,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bastide fondée en 1274 par les comtes d'Armagnac sur les rives du Gers.",
+    "description": "Bastide fondée en 1274 par les comtes d’Armagnac sur les rives du Gers.",
     "sources": [
       "Fleurance"
     ]
@@ -71,7 +71,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château comtal d'Armagnac, verrou oriental du comté vers la Lomagne.",
+    "description": "Château comtal d’Armagnac, verrou oriental du comté vers la Lomagne.",
     "sources": [
       "Mauvezin (Gers)"
     ]

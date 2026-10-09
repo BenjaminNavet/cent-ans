@@ -1,7 +1,7 @@
 {
   "id": "evt_neville_cross",
-  "title": "La bataille de Neville's Cross",
-  "text": "Pour secourir son allié de France après [[cdx_crecy|Crécy]], le roi David a envahi le Northumberland. Devant Durham, les archers de l'archevêque d'York brisent les schiltrons ; blessé de deux flèches au visage, le roi est pris sous un pont par John Coupland.",
+  "title": "La bataille de Neville’s Cross",
+  "text": "Pour secourir son allié de France après [[cdx_crecy|Crécy]], le roi David a envahi le Northumberland. Devant Durham, les archers de l’archevêque d’York brisent les schiltrons ; blessé de deux flèches au visage, le roi est pris sous un pont par John Coupland.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -58,7 +58,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Refuser toute négociation avec l'Anglais",
+      "text": "Refuser toute négociation avec l’Anglais",
       "effects": [
         {
           "type": "capture_character",
@@ -83,7 +83,7 @@
           "type": "opinion",
           "faction": "fac_england",
           "amount": -15,
-          "reason": "L'Écosse refuse de traiter"
+          "reason": "L’Écosse refuse de traiter"
         }
       ],
       "ai_weight": 1

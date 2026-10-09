@@ -109,7 +109,7 @@ func _build() -> void:
 	FrontEndStyle.style_action_button(next_button, false, 18)
 	next_button.pressed.connect(next)
 	footer.add_child(next_button)
-	var skip := UiBuild.button("Passer l'introduction")
+	var skip := UiBuild.button("Passer l’introduction")
 	FrontEndStyle.style_action_button(skip, false, 18)
 	skip.pressed.connect(close)
 	footer.add_child(skip)

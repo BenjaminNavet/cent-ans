@@ -21,7 +21,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville-port à l'embouchure du Dniestr, comptoir génois de Maurocastro sous suzeraineté de la Horde.",
+    "description": "Ville-port à l’embouchure du Dniestr, comptoir génois de Maurocastro sous suzeraineté de la Horde.",
     "sources": [
       "Cetatea Albă"
     ]
@@ -72,7 +72,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville du bas Danube, siège d'un hôtel de la monnaie de la Horde.",
+    "description": "Ville du bas Danube, siège d’un hôtel de la monnaie de la Horde.",
     "sources": [
       "Isaccea"
     ]

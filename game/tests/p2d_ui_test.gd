@@ -222,7 +222,7 @@ func _check_siege_dialog() -> void:
 		await process_frame
 		await process_frame
 		check(dialog.visible and bool(pending[0].get("siege", false)), "the staged battle should be a siege")
-		check(dialog.fight_button.text == "Donner l'assaut", "siege dialog: fight button should read « Donner l'assaut »")
+		check(dialog.fight_button.text == "Donner l’assaut", "siege dialog: fight button should read « Donner l’assaut »")
 		if first:
 			_collect(dialog)
 			first = false

@@ -88,8 +88,8 @@ func _run() -> void:
 
 	# Fenêtre de capture : rappel « occuper n'est pas posséder ».
 	var captures: Array = sim.call("get_pending_captures")
-	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("Occuper n'est pas posséder"), "capture decision should remind that occupying is not possessing")
-	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("C'est la cité de"), "capture of a city should say it gives the province's control")
+	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("Occuper n’est pas posséder"), "capture decision should remind that occupying is not possessing")
+	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("C’est la cité de"), "capture of a city should say it gives the province’s control")
 
 	# 3. UI.
 	map.refresh_all()
@@ -129,8 +129,8 @@ func _run() -> void:
 		var holder := str(layer._marker_holder[index]).split("|")
 		var color := Color(float(holder[0]), float(holder[1]), 0.0)
 		var packed := int(round(color.g))
-		check(int(round(color.r)) == layer.heraldry.shield_of(OWNER), "main shield = the owner's arms")
-		check(packed / 16 - 1 == layer.heraldry.shield_of(PLAYER), "second shield = the occupant's arms")
+		check(int(round(color.r)) == layer.heraldry.shield_of(OWNER), "main shield = the owner’s arms")
+		check(packed / 16 - 1 == layer.heraldry.shield_of(PLAYER), "second shield = the occupant’s arms")
 		check(packed % 4 == layer.BANNER_CUES["self"], "occupant edge = self")
 		var owner_cue := StanceCues.category_of(OWNER, PLAYER, StanceCues.stances(sim, PLAYER))
 		check((packed / 4) % 4 == int(layer.BANNER_CUES.get(owner_cue, 0)), "owner edge follows the stance")

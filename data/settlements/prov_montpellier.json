@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_windmill", "bld_port", "bld_vineyard_press", "bld_weaving_workshop", "bld_cathedral", "bld_fair", "bld_hotel_dieu", "bld_stone_walls", "bld_muster_field", "bld_university"],
     "port": false,
-    "description": "Seigneurie tenue par Jacques III de Majorque, grande place du commerce des épices et siège d'une université de médecine réputée dans toute l'Europe.",
+    "description": "Seigneurie tenue par Jacques III de Majorque, grande place du commerce des épices et siège d’une université de médecine réputée dans toute l’Europe.",
     "sources": ["Montpellier", "Université de médecine de Montpellier"]
   },
   {
@@ -24,7 +24,7 @@
     "fortification_level": 1,
     "buildings": ["bld_market", "bld_port", "bld_palisade"],
     "port": true,
-    "description": "Avant-port de Montpellier sur le Lez, par lequel transitent les draps et les épices, déjà menacé par l'ensablement.",
+    "description": "Avant-port de Montpellier sur le Lez, par lequel transitent les draps et les épices, déjà menacé par l’ensablement.",
     "sources": ["Lattes"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Abbaye cistercienne dite « cathédrale des vignes », à l'ouest de Montpellier.",
+    "description": "Abbaye cistercienne dite « cathédrale des vignes », à l’ouest de Montpellier.",
     "sources": ["Abbaye de Valmagne"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg autour du prieuré Saint-Martin, sur la route de Montpellier à l'étang de Thau.",
+    "description": "Bourg autour du prieuré Saint-Martin, sur la route de Montpellier à l’étang de Thau.",
     "sources": ["Gigean"]
   },
   {
@@ -108,7 +108,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_vineyard_press"],
     "port": false,
-    "description": "Bourg viticole à l'ouest de Montpellier, sur la route de Gigean.",
+    "description": "Bourg viticole à l’ouest de Montpellier, sur la route de Gigean.",
     "sources": ["Cournonterral"]
   },
   {
@@ -122,7 +122,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_water_mill"],
     "port": false,
-    "description": "Bourg agricole à l'ouest de Montpellier, sur la route de Gignac.",
+    "description": "Bourg agricole à l’ouest de Montpellier, sur la route de Gignac.",
     "sources": ["Pignan"]
   },
   {

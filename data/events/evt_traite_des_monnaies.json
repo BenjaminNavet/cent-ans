@@ -1,7 +1,7 @@
 {
   "id": "evt_traite_des_monnaies",
   "title": "Le Traité des monnaies",
-  "text": "Un maître de l'Université, [[cdx_nicole_oresme|Nicole Oresme]], soumet au dauphin Charles un petit livre latin, De moneta. Sa thèse est audacieuse : la monnaie n'appartient pas au prince mais à la communauté qui s'en sert ; le roi qui change la valeur des pièces pour son profit agit en tyran et en voleur. Les [[cdx_mutations_monetaires|mutations monétaires]], dit-il, ruinent les rentiers, trompent les marchands et font fuir le bon or à l'étranger. Le dauphin, qui a vu les [[cdx_etats_generaux|états généraux]] exiger une monnaie stable, l'écoute.",
+  "text": "Un maître de l’Université, [[cdx_nicole_oresme|Nicole Oresme]], soumet au dauphin Charles un petit livre latin, De moneta. Sa thèse est audacieuse : la monnaie n’appartient pas au prince mais à la communauté qui s’en sert ; le roi qui change la valeur des pièces pour son profit agit en tyran et en voleur. Les [[cdx_mutations_monetaires|mutations monétaires]], dit-il, ruinent les rentiers, trompent les marchands et font fuir le bon or à l’étranger. Le dauphin, qui a vu les [[cdx_etats_generaux|états généraux]] exiger une monnaie stable, l’écoute.",
   "kind": "historical",
   "trigger": {
     "date": { "year": 1356, "season": "autumn" },

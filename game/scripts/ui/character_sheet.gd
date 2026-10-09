@@ -600,7 +600,7 @@ func _fill_retinue(character: Dictionary) -> void:
 		or str(character.get("faction", "")) == str(sim.call("get_player_faction"))
 	_retinue_hint.text = "Clic : confier à un général réuni" if not companions.is_empty() and mine else ""
 	if companions.is_empty():
-		_retinue_hint.text = "Aucun compagnon pour l'instant." if bool(character.get("alive", true)) else ""
+		_retinue_hint.text = "Aucun compagnon pour l’instant." if bool(character.get("alive", true)) else ""
 
 
 func _sim() -> Object:

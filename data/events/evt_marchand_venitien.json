@@ -1,7 +1,7 @@
 {
   "id": "evt_marchand_venitien",
   "title": "Une galée de Venise",
-  "text": "Une galée vénitienne en route pour Bruges fait escale au port. Son marchand déballe des sacs de [[cdx_poivre|poivre]] noir, de gingembre et de clou de girofle, et une petite boîte de [[cdx_safran|safran]] qu'il pèse comme de l'or. Tout vient d'Alexandrie, où Venise achète aux marchands d'Orient ; chaque intermédiaire a pris sa part, et le prix a décuplé en chemin. À la table d'un prince, ces [[cdx_epices_medievales|épices]] disent la richesse et, croit-on, réchauffent les humeurs.",
+  "text": "Une galée vénitienne en route pour Bruges fait escale au port. Son marchand déballe des sacs de [[cdx_poivre|poivre]] noir, de gingembre et de clou de girofle, et une petite boîte de [[cdx_safran|safran]] qu’il pèse comme de l’or. Tout vient d’Alexandrie, où Venise achète aux marchands d’Orient ; chaque intermédiaire a pris sa part, et le prix a décuplé en chemin. À la table d’un prince, ces [[cdx_epices_medievales|épices]] disent la richesse et, croit-on, réchauffent les humeurs.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 120,

@@ -1,7 +1,7 @@
 {
   "id": "prov_riga_archbishopric",
   "name": {
-    "display": "Terres de l'archevêque de Riga",
+    "display": "Terres de l’archevêque de Riga",
     "local": "Erzstift Riga",
     "local_language": "moyen bas-allemand"
   },
@@ -83,7 +83,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 1000,
-  "description": "Le domaine séculier de l'archevêque de Riga sur la Dvina et l'Aa : Kokenhusen, Treiden, Lemsal et Ronneburg, dispersés entre les terres de l'Ordre.",
+  "description": "Le domaine séculier de l’archevêque de Riga sur la Dvina et l’Aa : Kokenhusen, Treiden, Lemsal et Ronneburg, dispersés entre les terres de l’Ordre.",
   "sources": [
     "Archevêché de Riga",
     "Koknese",

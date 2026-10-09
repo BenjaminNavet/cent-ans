@@ -52,7 +52,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Grand port méditerranéen hérité de l'Antiquité, rade naturelle protégée.",
+    "description": "Grand port méditerranéen hérité de l’Antiquité, rade naturelle protégée.",
     "sources": [
       "Carthagène (Espagne)"
     ]
@@ -130,7 +130,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville-château de l'intérieur murcien, castillane depuis 1244.",
+    "description": "Ville-château de l’intérieur murcien, castillane depuis 1244.",
     "sources": [
       "Mula (Espagne)"
     ]
@@ -155,7 +155,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de frontière face à Grenade, ancienne commanderie templière jusqu'en 1310, sanctuaire de la Vraie Croix.",
+    "description": "Château de frontière face à Grenade, ancienne commanderie templière jusqu’en 1310, sanctuaire de la Vraie Croix.",
     "sources": [
       "Caravaca de la Cruz"
     ]

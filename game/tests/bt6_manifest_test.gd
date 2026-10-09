@@ -51,7 +51,7 @@ func _init() -> void:
 			check(got == base_clips[c], "%s : clip du rig" % c)
 	check(not fa_default.is_empty(), "des clips FA3 par défaut")
 	var tex := BattleSkinned.bone_texture(RIG)
-	check(tex != null and tex.get_height() == base_frames + melee_frames + fa_frames, "texture d'os concaténée")
+	check(tex != null and tex.get_height() == base_frames + melee_frames + fa_frames, "texture d’os concaténée")
 	var generated: Dictionary = _json(BattleSkinned.GA3_DIR + "manifest.json").get("figures", {})
 	var figures: Dictionary = BattleSkinned.manifest().get("figures", {})
 	for f in generated:

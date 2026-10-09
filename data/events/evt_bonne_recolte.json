@@ -1,7 +1,7 @@
 {
   "id": "evt_bonne_recolte",
   "title": "Une bonne récolte",
-  "text": "Le printemps a été doux et l'été sans grêle : les granges débordent de blé et les vignes ploient. Les paysans bénissent le ciel et les marchands comptent déjà leurs profits.",
+  "text": "Le printemps a été doux et l’été sans grêle : les granges débordent de blé et les vignes ploient. Les paysans bénissent le ciel et les marchands comptent déjà leurs profits.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60,

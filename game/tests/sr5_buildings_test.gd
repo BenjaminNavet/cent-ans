@@ -57,12 +57,12 @@ func _check_materials() -> Dictionary:
 			var mat := BuildingMaterials.material(str(name), variant)
 			var shader_mat := mat as ShaderMaterial
 			if shader_mat == null or shader_mat.shader != BuildingMaterials.PBR_SHADER:
-				_fail("%s/%s n'est pas un ShaderMaterial building_pbr" % [name, variant])
+				_fail("%s/%s n’est pas un ShaderMaterial building_pbr" % [name, variant])
 				continue
 			if float(shader_mat.get_shader_parameter("aging")) <= 0.0:
 				_fail("%s/%s sans usure" % [name, variant])
 			if mat != BuildingMaterials.material(str(name), variant):
-				_fail("%s/%s n'est pas partagé" % [name, variant])
+				_fail("%s/%s n’est pas partagé" % [name, variant])
 		var atlas := BuildingMaterials.material("Building", variant) as ShaderMaterial
 		if float(atlas.get_shader_parameter("aging")) <= 0.0:
 			_fail("atlas %s sans usure" % variant)

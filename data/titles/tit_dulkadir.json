@@ -40,7 +40,7 @@
     {
       "id": "obj_dulkadir_kayseri",
       "title": "Césarée",
-      "description": "Étendre l'émirat jusqu'à Kayseri.",
+      "description": "Étendre l’émirat jusqu’à Kayseri.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

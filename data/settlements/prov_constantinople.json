@@ -26,7 +26,7 @@
     ],
     "port": true,
     "sea_zone": "sea_aegean",
-    "description": "Capitale de l'Empire, siège du patriarche ; Sainte-Sophie, le Grand Palais et les Blachernes.",
+    "description": "Capitale de l’Empire, siège du patriarche ; Sainte-Sophie, le Grand Palais et les Blachernes.",
     "sources": [
       "Constantinople"
     ]
@@ -55,7 +55,7 @@
     ],
     "port": true,
     "sea_zone": "sea_aegean",
-    "description": "Colonie génoise sur la Corne d'Or, concédée en 1267 ; comptoir plus riche que la Ville elle-même.",
+    "description": "Colonie génoise sur la Corne d’Or, concédée en 1267 ; comptoir plus riche que la Ville elle-même.",
     "sources": [
       "Galata"
     ]

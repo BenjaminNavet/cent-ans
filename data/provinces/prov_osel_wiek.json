@@ -1,7 +1,7 @@
 {
   "id": "prov_osel_wiek",
   "name": {
-    "display": "Évêché d'Ösel-Wiek",
+    "display": "Évêché d’Ösel-Wiek",
     "local": "Bistum Ösel-Wiek",
     "local_language": "moyen bas-allemand"
   },
@@ -88,9 +88,9 @@
   ],
   "fortification_level": 2,
   "base_supply": 1300,
-  "description": "L'évêché de la côte occidentale estonienne et des îles (Ösel, Moon, Dagö) : Hapsal (Haapsalu), Leal et Pernau, marché maritime sur le golfe de Riga.",
+  "description": "L’évêché de la côte occidentale estonienne et des îles (Ösel, Moon, Dagö) : Hapsal (Haapsalu), Leal et Pernau, marché maritime sur le golfe de Riga.",
   "sources": [
-    "Évêché d'Ösel-Wiek",
+    "Évêché d’Ösel-Wiek",
     "Haapsalu",
     "Saaremaa"
   ]

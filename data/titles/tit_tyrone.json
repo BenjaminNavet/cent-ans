@@ -7,7 +7,7 @@
   },
   "heraldry": {
     "blazon": "D'argent à la main dextre coupée de gueules.",
-    "description": "La « main rouge » (Lámh Dhearg), emblème des Ó Néill et de l'Ulster gaélique ; attestation héraldique tardive (XVe-XVIe s.), utilisée ici par convention pour 1337.",
+    "description": "La « main rouge » (Lámh Dhearg), emblème des Ó Néill et de l’Ulster gaélique ; attestation héraldique tardive (XVe-XVIe s.), utilisée ici par convention pour 1337.",
     "primary_color": "#F2F2F2",
     "secondary_color": "#B0182B",
     "uncertain": true
@@ -25,7 +25,7 @@
     {
       "id": "obj_tyrone_hold",
       "title": "Garder Tír Eoghain",
-      "description": "Les Ó Néill n'ont jamais plié devant les Anglo-Normands : conserver le royaume libre.",
+      "description": "Les Ó Néill n’ont jamais plié devant les Anglo-Normands : conserver le royaume libre.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_tyrone"
@@ -33,8 +33,8 @@
     },
     {
       "id": "obj_tyrone_ulster",
-      "title": "Le grand roi d'Ulster",
-      "description": "Réunir les terres de l'ancien royaume d'Ulster.",
+      "title": "Le grand roi d’Ulster",
+      "description": "Réunir les terres de l’ancien royaume d’Ulster.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

@@ -1,7 +1,7 @@
 {
   "id": "evt_brigands",
   "title": "Les brigands",
-  "text": "Une bande de brigands et de soldats sans maître tient les bois et rançonne les voyageurs. Les marchands n'osent plus prendre la route.",
+  "text": "Une bande de brigands et de soldats sans maître tient les bois et rançonne les voyageurs. Les marchands n’osent plus prendre la route.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60
@@ -25,7 +25,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Laisser les seigneurs locaux s'en charger",
+      "text": "Laisser les seigneurs locaux s’en charger",
       "effects": [
         {
           "type": "devastation",

@@ -17,7 +17,7 @@
   "primary_title": "tit_florence",
   "heraldry": {
     "blazon": "D'argent au lis florencé de gueules.",
-    "description": "Le giglio rouge des guelfes sur champ d'argent.",
+    "description": "Le giglio rouge des guelfes sur champ d’argent.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B22222"
   },
@@ -61,7 +61,7 @@
     "trade": 95,
     "piety": 45
   },
-  "description": "Commune guelfe gouvernée par la Seigneurie et les arts majeurs : laine de Calimala, florin d'or, compagnies bancaires des Bardi et des Peruzzi. Giotto élève le campanile en 1334.",
+  "description": "Commune guelfe gouvernée par la Seigneurie et les arts majeurs : laine de Calimala, florin d’or, compagnies bancaires des Bardi et des Peruzzi. Giotto élève le campanile en 1334.",
   "sources": [
     "République de Florence",
     "Compagnie des Bardi"

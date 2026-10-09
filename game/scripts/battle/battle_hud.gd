@@ -520,7 +520,7 @@ func _draw_leader_seal() -> void:
 
 ## « Retraite générale » : demande de confirmation (audit A3 B3).
 func _build_confirm() -> void:
-	confirm_panel = _build_dialog("ConfirmWithdrawAll", "Sonner la retraite générale ?", "Tous vos régiments encore en ordre quittent le champ. La bataille sera perdue, mais l'ost sera sauf.", "Sonner la retraite", "Tenir le champ", func() -> void: command_pressed.emit("withdraw_all"))
+	confirm_panel = _build_dialog("ConfirmWithdrawAll", "Sonner la retraite générale ?", "Tous vos régiments encore en ordre quittent le champ. La bataille sera perdue, mais l’ost sera sauf.", "Sonner la retraite", "Tenir le champ", func() -> void: command_pressed.emit("withdraw_all"))
 	# Échap sans sélection : « Quitter la bataille » (texte fixé par `ask_quit`).
 	quit_panel = _build_dialog("ConfirmQuitBattle", "Quitter la bataille ?", "", "Quitter la bataille", "Reprendre", func() -> void: quit_confirmed.emit())
 	quit_panel.cancelled.connect(func() -> void: quit_cancelled.emit())
@@ -568,7 +568,7 @@ func ask_withdraw_all() -> void:
 func ask_quit(campaign: bool) -> void:
 	var text := quit_panel.text_label
 	if campaign:
-		text.text = "Vos régiments encore en ordre quittent le champ : la bataille est perdue, mais l'ost est sauf. Retour à la carte de campagne."
+		text.text = "Vos régiments encore en ordre quittent le champ : la bataille est perdue, mais l’ost est sauf. Retour à la carte de campagne."
 	else:
 		text.text = "La bataille est perdue ; retour au menu principal."
 	quit_panel.visible = true
@@ -655,15 +655,15 @@ func set_opening(opening: Dictionary, player_side: String) -> void:
 	if str(opening.get("kind", "standard")) == "ambush":
 		parts.append("Embuscade !")
 		var victim := str(opening.get("victim", ""))
-		tips.append("Vous êtes surpris en colonne de marche : aucun déploiement." if victim == player_side else "L'ennemi est surpris en colonne de marche : frappez ses flancs.")
+		tips.append("Vous êtes surpris en colonne de marche : aucun déploiement." if victim == player_side else "L’ennemi est surpris en colonne de marche : frappez ses flancs.")
 	for side in ["attacker", "defender"]:
 		var own: bool = side == player_side
 		if bool(opening.get("%s_forced_march" % side, false)):
 			parts.append("Marche forcée")
-			tips.append(("Votre ost" if own else "L'ennemi") + " arrive fourbu de marche forcée.")
+			tips.append(("Votre ost" if own else "L’ennemi") + " arrive fourbu de marche forcée.")
 		if bool(opening.get("%s_entrenched" % side, false)):
 			parts.append("Camp retranché")
-			tips.append(("Votre ost" if own else "L'ennemi") + " tient un camp retranché : pieux et palissade.")
+			tips.append(("Votre ost" if own else "L’ennemi") + " tient un camp retranché : pieux et palissade.")
 	opening_badge.text = " · ".join(parts)
 	TooltipHost.attach_plain(opening_badge, "battle_opening_conditions", {"body": "\n".join(tips)})
 	opening_badge.visible = not parts.is_empty()

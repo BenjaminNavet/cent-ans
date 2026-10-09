@@ -90,7 +90,7 @@ func _check_column_pure() -> void:
 		(col._box.get_child(0) as BaseButton).pressed.emit()
 		check(got.size() == 1, "clicking a row emits pinged once")
 		if got.size() == 1:
-			check(absf(float(got[0][0]) - 321.0) < 0.01 and absf(float(got[0][1]) - 654.0) < 0.01, "pinged carries the alert's world position")
+			check(absf(float(got[0][0]) - 321.0) < 0.01 and absf(float(got[0][1]) - 654.0) < 0.01, "pinged carries the alert’s world position")
 	col.queue_free()
 
 
@@ -111,5 +111,5 @@ func _check_integration() -> void:
 	# Clic direct (sans attendre une vraie alerte en jeu) : caméra + repère minicarte.
 	_scene._on_alert_pinged(400.0, 250.0)
 	var target: Vector3 = _scene.camera_rig.target
-	check(absf(target.x - 400.0) < 0.01 and absf(target.z - 250.0) < 0.01, "the camera targets the alert's world position")
+	check(absf(target.x - 400.0) < 0.01 and absf(target.z - 250.0) < 0.01, "the camera targets the alert’s world position")
 	check(hud.minimap._ping_time >= 0.0, "the minimap ping is armed after a click")

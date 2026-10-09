@@ -245,7 +245,7 @@ func _test_london() -> void:
 	for id in ["old_st_pauls", "white_tower", "tower_outer", "tower_inner", "westminster_hall", "westminster_abbey_east", "guildhall", "st_mary_overie", "london_bridge_chapel", "savoy"]:
 		check(ids.has(id), "London monument %s" % id)
 	if ids.has("old_st_pauls"):
-		check(float(ids["old_st_pauls"]["top"]) > 140.0, "Old St Paul's spire %.0f m" % float(ids["old_st_pauls"]["top"]))
+		check(float(ids["old_st_pauls"]["top"]) > 140.0, "Old St Paul’s spire %.0f m" % float(ids["old_st_pauls"]["top"]))
 	if ids.has("westminster_hall"):
 		check(absf(float(ids["westminster_hall"]["length"]) - 73.0) < 1.0, "Westminster Hall 73 m")
 	if ids.has("london_bridge_chapel"):

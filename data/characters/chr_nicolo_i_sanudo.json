@@ -20,7 +20,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Duc de l'Archipel",
+      "title": "Duc de l’Archipel",
       "from": {
         "value": "1323"
       }
@@ -38,7 +38,7 @@
   "piety": 55,
   "starting_location": "prov_archipelago",
   "status": "at_court",
-  "description": "Cinquième duc de Naxos, vétéran d'Halmyros ; il traite avec les Turcs pour préserver les Cyclades.",
+  "description": "Cinquième duc de Naxos, vétéran d’Halmyros ; il traite avec les Turcs pour préserver les Cyclades.",
   "sources": [
     "Nicholas I Sanudo"
   ]

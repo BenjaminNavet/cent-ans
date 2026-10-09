@@ -1,7 +1,7 @@
 {
   "id": "evt_couronnement_de_dusan",
   "title": "Le couronnement de Dušan",
-  "text": "Le jour de Pâques, à Skopje, l'archevêque de Peć, élevé au rang de patriarche, couronne [[cdx_etienne_dusan|Étienne Dušan]] « empereur des Serbes et des Romains » en présence du patriarche de Tarnovo et de l'archevêque d'Ohrid. Constantinople crie à l'usurpation.",
+  "text": "Le jour de Pâques, à Skopje, l’archevêque de Peć, élevé au rang de patriarche, couronne [[cdx_etienne_dusan|Étienne Dušan]] « empereur des Serbes et des Romains » en présence du patriarche de Tarnovo et de l’archevêque d’Ohrid. Constantinople crie à l’usurpation.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -27,7 +27,7 @@
   },
   "options": [
     {
-      "text": "Revendiquer l'héritage de Constantin",
+      "text": "Revendiquer l’héritage de Constantin",
       "effects": [
         {
           "type": "prestige",
@@ -52,7 +52,7 @@
       "ai_weight": 2
     },
     {
-      "text": "S'en tenir au titre de tsar des Serbes",
+      "text": "S’en tenir au titre de tsar des Serbes",
       "effects": [
         {
           "type": "prestige",

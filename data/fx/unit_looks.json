@@ -1,5 +1,5 @@
 {
-  "description": "Variantes de rendu des figurines par type d'unité (lot OMR R5, rendu seulement) : part des soldats en livrée du camp (livery_share, sinon valeur de la figurine), étoffes des vêtements non teints à la livrée (cloth, couleurs sRGB, au plus 4, à la place de la palette commune) et robes des chevaux (coats : bay bai, chestnut alezan, black noir, grey gris, dun isabelle ; au plus 4). Les figurines restent celles du champ figure des types d'unité.",
+  "description": "Variantes de rendu des figurines par type d’unité (lot OMR R5, rendu seulement) : part des soldats en livrée du camp (livery_share, sinon valeur de la figurine), étoffes des vêtements non teints à la livrée (cloth, couleurs sRGB, au plus 4, à la place de la palette commune) et robes des chevaux (coats : bay bai, chestnut alezan, black noir, grey gris, dun isabelle ; au plus 4). Les figurines restent celles du champ figure des types d’unité.",
   "looks": {
     "unit_mamluk_cavalry": {
       "livery_share": 0.3,

@@ -1,7 +1,7 @@
 {
   "id": "enc_grandes_compagnies",
   "title": "Une compagnie de routiers",
-  "text": "Une compagnie de routiers sans solde tient le pays : ils ont fortifié une grange, rançonnent les laboureurs et vendent des « patis » aux villages qui veulent être épargnés. Leur capitaine fait savoir qu'il servirait qui le paierait.",
+  "text": "Une compagnie de routiers sans solde tient le pays : ils ont fortifié une grange, rançonnent les laboureurs et vendent des « patis » aux villages qui veulent être épargnés. Leur capitaine fait savoir qu’il servirait qui le paierait.",
   "spawn": {
     "from_year": 1357,
     "to_year": 1392,
@@ -53,7 +53,7 @@
           ]
         },
         "on_loss": {
-          "text": "Les routiers repoussent l'ost et continuent de piller le pays.",
+          "text": "Les routiers repoussent l’ost et continuent de piller le pays.",
           "effects": [
             {
               "type": "prestige",

@@ -6,7 +6,7 @@
 | probe | mecaniques #3 (sonde de campagne) | mech | 0246 | FAIT (campaign_probe, ADR 0246) |
 | audio | audio (tous) | mech | 0247 | FAIT sauf : nouvelles voix (65 factions slaves/turques/arabes/grecques…), mp3→ogg (proposition), écoute à faire |
 | histoire | historien (tous) | mech | 0248 | FAIT (blasons Montferrat/Siena non modifiés, voir historien.md) |
-| uifin | ui (tous) | mech | 0249 | à faire |
+| uifin | ui (tous) | mech | 0249 | PARTIEL : panneau de colonie masque la carte, pastille B, chiffres IM Fell ; voir docs/wip/rx/uifin.md |
 | anim | animation (tous) | dev | 0250-0251 | FAIT sauf pas du cheval Muybridge (pas de source) et sync du coup porté ; tests verts (rx_anim, an1b, as3, as8b, nt7) |
 | (vague 2) | bataille-v2, campagne-v2, ia, perf, équilibrage campagne avec la sonde | — | 0252+ | en attente |
 | mapa | campagne + campagne-v2 : dalles blanches (champs/parcelles), maquettes blanches surexposées, sol de Paris | dev | 0252 | FAIT (gain d’albédo lu en sRGB, test rx_mapa_textures_test ; sol olive de Paris non traité) |

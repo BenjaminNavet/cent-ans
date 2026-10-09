@@ -176,7 +176,7 @@ func postpone(notify: bool = true) -> void:
 	_set_setting("tutorial/postponed", true)
 	if notify:
 		var ui: Node = map.get("ui")
-		ui.call("show_toast", "Guide mis de côté à l'étape %d : reprenez-le par le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel." % (index + 1))
+		ui.call("show_toast", "Guide mis de côté à l’étape %d : reprenez-le par le conseil en haut à gauche, l’aide (F1) ou Menu → Tutoriel." % (index + 1))
 
 
 ## Reprend le guide à l'étape où « Plus tard » l'avait laissé (sinon au début).
@@ -254,7 +254,7 @@ func finish() -> void:
 func skip_all() -> void:
 	finish()
 	var ui: Node = map.get("ui")
-	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel ou l'aide (F1) pour le relancer.")
+	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel ou l’aide (F1) pour le relancer.")
 
 
 ## Vérifie l'objectif tout de suite ; passe à l'étape suivante s'il est rempli. Sert au smoke.

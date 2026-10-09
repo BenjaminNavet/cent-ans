@@ -54,7 +54,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Port brabançon sur l'Escaut, marché en pleine croissance qui concurrencera bientôt Bruges.",
+    "description": "Port brabançon sur l’Escaut, marché en pleine croissance qui concurrencera bientôt Bruges.",
     "sources": [
       "Anvers"
     ]
@@ -80,7 +80,7 @@
       "bld_guild_hall"
     ],
     "port": false,
-    "description": "Résidence ducale sur la Senne, l'une des quatre bonnes villes de Brabant.",
+    "description": "Résidence ducale sur la Senne, l’une des quatre bonnes villes de Brabant.",
     "sources": [
       "Bruxelles"
     ]
@@ -106,7 +106,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville neuve fondée par le duc de Brabant, l'une des quatre bonnes villes du duché.",
+    "description": "Ville neuve fondée par le duc de Brabant, l’une des quatre bonnes villes du duché.",
     "sources": [
       "Bois-le-Duc"
     ]
@@ -131,7 +131,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville franche du Brabant sur la Senne (charte de 1192). (Anachronisme de jeu : le château ducal, future prison d'État, n'est bâti qu'à partir de 1375.)",
+    "description": "Ville franche du Brabant sur la Senne (charte de 1192). (Anachronisme de jeu : le château ducal, future prison d’État, n’est bâti qu’à partir de 1375.)",
     "sources": [
       "Vilvorde"
     ]
@@ -235,7 +235,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Petite ville fortifiée du Brabant oriental, dotée d'un droit d'étape et comptée parmi les bonnes villes du duché.",
+    "description": "Petite ville fortifiée du Brabant oriental, dotée d’un droit d’étape et comptée parmi les bonnes villes du duché.",
     "sources": [
       "Zoutleeuw"
     ]

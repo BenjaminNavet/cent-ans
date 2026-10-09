@@ -1,8 +1,8 @@
 {
   "id": "chr_guillaume_ii_d_athenes",
   "name": {
-    "display": "Guillaume II d'Athènes",
-    "local": "Guillem II d'Atenes",
+    "display": "Guillaume II d’Athènes",
+    "local": "Guillem II d’Atenes",
     "local_language": "catalan"
   },
   "sex": "male",
@@ -18,7 +18,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Duc d'Athènes et de Néopatras",
+      "title": "Duc d’Athènes et de Néopatras",
       "from": {
         "value": "1317"
       }

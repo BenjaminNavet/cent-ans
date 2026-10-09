@@ -540,6 +540,14 @@ impl GameDataStore {
                     .map(|p| GString::from(p.id.as_str()))
                     .collect();
                 sheet.set("provinces", &provinces);
+                // RX uifin: comparable key figures for the chooser cards.
+                if let Some(summary) = state.faction_summary(id) {
+                    sheet.set("armies_count", summary.armies_count as i64);
+                }
+                if let Some(economy) = state.faction_economy(data, id) {
+                    sheet.set("treasury", economy.treasury);
+                    sheet.set("projected_income", economy.projected_income);
+                }
                 let sovereign = feudal::liege_chain(&state, data, id)
                     .last()
                     .cloned()

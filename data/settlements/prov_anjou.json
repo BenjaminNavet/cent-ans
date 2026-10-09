@@ -25,7 +25,7 @@
       "bld_university"
     ],
     "port": false,
-    "description": "Capitale du comté d'Anjou, réuni à la couronne avec Philippe VI en 1328 puis donné en apanage à son fils Jean de Normandie (1332) ; réputée pour son ardoise.",
+    "description": "Capitale du comté d’Anjou, réuni à la couronne avec Philippe VI en 1328 puis donné en apanage à son fils Jean de Normandie (1332) ; réputée pour son ardoise.",
     "sources": [
       "Angers",
       "Comté d'Anjou"
@@ -77,7 +77,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Petite ville close du Baugeois, à l'est d'Angers.",
+    "description": "Petite ville close du Baugeois, à l’est d’Angers.",
     "sources": [
       "Baugé-en-Anjou"
     ]
@@ -128,7 +128,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Village de l'île de Béhuard sur la Loire, lieu de dévotion mariale.",
+    "description": "Village de l’île de Béhuard sur la Loire, lieu de dévotion mariale.",
     "sources": [
       "Béhuard"
     ]
@@ -179,7 +179,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château fort des sires du Plessis, vassaux des comtes d'Anjou, à l'ouest d'Angers.",
+    "description": "Château fort des sires du Plessis, vassaux des comtes d’Anjou, à l’ouest d’Angers.",
     "sources": [
       "Château du Plessis-Macé"
     ]
@@ -254,7 +254,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg du sud angevin bâti sur d'anciennes carrières de tuffeau, marché agricole.",
+    "description": "Bourg du sud angevin bâti sur d’anciennes carrières de tuffeau, marché agricole.",
     "sources": [
       "Doué-la-Fontaine"
     ]
@@ -264,8 +264,8 @@
     "province": "prov_anjou",
     "kind": "village",
     "name": {
-      "display": "Le Lion-d'Angers",
-      "local": "Lion d'Angers",
+      "display": "Le Lion-d’Angers",
+      "local": "Lion d’Angers",
       "local_language": "ancien français"
     },
     "lonlat": [
@@ -280,9 +280,9 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg sur l'Oudon, au nord d'Angers.",
+    "description": "Bourg sur l’Oudon, au nord d’Angers.",
     "sources": [
-      "Le Lion-d'Angers"
+      "Le Lion-d’Angers"
     ]
   },
   {
@@ -306,7 +306,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Bourg viticole sur la Loire en aval d'Angers.",
+    "description": "Bourg viticole sur la Loire en aval d’Angers.",
     "sources": [
       "Chalonnes-sur-Loire"
     ]

@@ -20,14 +20,14 @@ func _init() -> void:
 func _test_season_report() -> void:
 	var player := "fac_france"
 	var events := [
-		{"kind": "birth", "text_fr": "Naissance d'un prince.", "faction": player},
-		{"kind": "province_captured", "text_fr": "Wissant tombe aux mains d'Angleterre (auparavant France).", "faction": "fac_england", "province": "prov_calais"},
+		{"kind": "birth", "text_fr": "Naissance d’un prince.", "faction": player},
+		{"kind": "province_captured", "text_fr": "Wissant tombe aux mains d’Angleterre (auparavant France).", "faction": "fac_england", "province": "prov_calais"},
 		{"kind": "province_captured", "text_fr": "Bordeaux tombe aux mains de France.", "faction": player, "province": "prov_guyenne"},
 		{"kind": "building_completed", "text_fr": "Marché achevé à Paris.", "faction": player, "province": "prov_ile_de_france"},
 		{"kind": "battle", "text_fr": "Bataille de Sluys.", "faction": player, "army": "army_1"},
 		{"kind": "income", "text_fr": "Revenus : 100 livres.", "faction": player},
 		{"kind": "alliance_formed", "text_fr": "Alliance Vérone–Autriche.", "faction": "fac_verona"},
-		{"kind": "war_declared", "text_fr": "L'Angleterre déclare la guerre.", "faction": "fac_england"},
+		{"kind": "war_declared", "text_fr": "L’Angleterre déclare la guerre.", "faction": "fac_england"},
 	]
 	var relevant := func(event: Dictionary) -> bool:
 		return str(event.get("faction", "")) == player or str(event.get("text_fr", "")).contains("auparavant France")
@@ -51,7 +51,7 @@ func _test_news_interest() -> void:
 	interest.player = "fac_france"
 	interest.factions = {"fac_france": NewsInterest.Interest.PLAYER, "fac_england": NewsInterest.Interest.CLOSE, "fac_castile": NewsInterest.Interest.GREAT_POWER}
 	interest.owners = {"prov_calais": "fac_france", "prov_lucca": "fac_florence"}
-	check(interest.keeps({"kind": "province_captured", "faction": "fac_england", "province": "prov_calais"}), "news about the player's land")
+	check(interest.keeps({"kind": "province_captured", "faction": "fac_england", "province": "prov_calais"}), "news about the player’s land")
 	check(not interest.keeps({"kind": "province_captured", "faction": "fac_florence", "province": "prov_lucca"}), "distant capture filtered")
 	check(interest.keeps({"kind": "war_declared", "faction": "fac_castile"}), "great power war kept")
 	check(not interest.keeps({"kind": "battle", "faction": "fac_castile"}), "great power battle far away filtered")

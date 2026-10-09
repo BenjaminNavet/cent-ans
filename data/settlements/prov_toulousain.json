@@ -79,7 +79,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close sur la Garonne, mémoire de la bataille décisive de 1213 contre le roi d'Aragon.",
+    "description": "Ville close sur la Garonne, mémoire de la bataille décisive de 1213 contre le roi d’Aragon.",
     "sources": [
       "Muret",
       "Bataille de Muret"
@@ -106,7 +106,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne, l'une des plus riches du Languedoc médiéval.",
+    "description": "Abbaye cistercienne, l’une des plus riches du Languedoc médiéval.",
     "sources": [
       "Abbaye de Grandselve"
     ]
@@ -158,7 +158,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité archiépiscopale sur le Gers, berceau du comté d'Armagnac ; Jean Ier d'Armagnac, dont la résidence principale est Lectoure, y partage la seigneurie avec l'archevêque.",
+    "description": "Cité archiépiscopale sur le Gers, berceau du comté d’Armagnac ; Jean Ier d’Armagnac, dont la résidence principale est Lectoure, y partage la seigneurie avec l’archevêque.",
     "sources": [
       "Auch",
       "Comté d'Armagnac"
@@ -185,7 +185,7 @@
       "bld_collegiate_church"
     ],
     "port": false,
-    "description": "Cité érigée en siège épiscopal en 1317 au confluent de la Garonne et de l'Arize, en Volvestre.",
+    "description": "Cité érigée en siège épiscopal en 1317 au confluent de la Garonne et de l’Arize, en Volvestre.",
     "sources": [
       "Rieux-Volvestre",
       "Diocèse de Rieux"
@@ -212,7 +212,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Bastide fondée en 1290 par l'abbaye de Grandselve sur la Garonne, au nord de Toulouse.",
+    "description": "Bastide fondée en 1290 par l’abbaye de Grandselve sur la Garonne, au nord de Toulouse.",
     "sources": [
       "Grenade (Haute-Garonne)"
     ]
@@ -313,7 +313,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bastide fondée en 1266 par les moines de l'abbaye de Planselve, en Gascogne toulousaine.",
+    "description": "Bastide fondée en 1266 par les moines de l’abbaye de Planselve, en Gascogne toulousaine.",
     "sources": [
       "Gimont"
     ]
@@ -323,8 +323,8 @@
     "province": "prov_toulousain",
     "kind": "village",
     "name": {
-      "display": "L'Isle-Jourdain",
-      "local": "L'Isla Jordan",
+      "display": "L’Isle-Jourdain",
+      "local": "L’Isla Jordan",
       "local_language": "occitan"
     },
     "lonlat": [
@@ -339,7 +339,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg marchand sur la Save, siège de la vicomté de L'Isle-Jourdain.",
+    "description": "Bourg marchand sur la Save, siège de la vicomté de L’Isle-Jourdain.",
     "sources": [
       "L'Isle-Jourdain (Gers)"
     ]

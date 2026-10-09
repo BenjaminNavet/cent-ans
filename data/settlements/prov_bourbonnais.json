@@ -23,7 +23,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale montante du duché de Bourbon, érigé en 1327 pour Louis Ier, sur l'Allier.",
+    "description": "Capitale montante du duché de Bourbon, érigé en 1327 pour Louis Ier, sur l’Allier.",
     "sources": [
       "Moulins (Allier)",
       "Duché de Bourbon"
@@ -34,7 +34,7 @@
     "province": "prov_bourbonnais",
     "kind": "castle",
     "name": {
-      "display": "Bourbon-l'Archambault",
+      "display": "Bourbon-l’Archambault",
       "local": "Bourbon",
       "local_language": "ancien français"
     },
@@ -75,7 +75,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close aux confins du Bourbonnais et de l'Auvergne.",
+    "description": "Ville close aux confins du Bourbonnais et de l’Auvergne.",
     "sources": [
       "Gannat"
     ]
@@ -152,7 +152,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse des sires de Bourbon dominant l'Aumance.",
+    "description": "Forteresse des sires de Bourbon dominant l’Aumance.",
     "sources": [
       "Hérisson (Allier)"
     ]
@@ -228,7 +228,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg sur l'Allier, entre Moulins et Vichy.",
+    "description": "Bourg sur l’Allier, entre Moulins et Vichy.",
     "sources": [
       "Varennes-sur-Allier"
     ]
@@ -278,7 +278,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg agricole sur la Besbre, à l'est du Bourbonnais.",
+    "description": "Bourg agricole sur la Besbre, à l’est du Bourbonnais.",
     "sources": [
       "Dompierre-sur-Besbre"
     ]

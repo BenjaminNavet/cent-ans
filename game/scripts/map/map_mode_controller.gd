@@ -15,13 +15,13 @@ const POLITICAL := "political"
 const MODES := [
 	[POLITICAL, "Politique", "", "Couleurs des royaumes"],
 	["diplomacy", "Diplomatie", "map_mode_diplomacy", "Vert allié, bleu accord, jaune neutre, orange tension, rouge guerre, gris vassal"],
-	["religion", "Religion", "map_mode_religion", "Obédience d'Avignon ou de Rome, foyers d'hérésie"],
+	["religion", "Religion", "map_mode_religion", "Obédience d’Avignon ou de Rome, foyers d’hérésie"],
 	["unrest", "Mécontentement", "map_toggle_unrest", "Mécontentement moyen de la population (ordre public)"],
 	["wealth", "Richesse", "", "Impôt de base par saison : population, aisance, dévastation"],
-	["population", "Population", "", "Nombre d'habitants de chaque province"],
+	["population", "Population", "", "Nombre d’habitants de chaque province"],
 	["loyalty", "Loyauté des vassaux", "", "Loyauté de chaque vassal envers son suzerain"],
 	["supply", "Ravitaillement", "", "Ravitaillement gagné ou perdu par saison par une armée sans général"],
-	["claims", "Revendications", "", "Provinces que vous revendiquez, ou que d'autres vous disputent"],
+	["claims", "Revendications", "", "Provinces que vous revendiquez, ou que d’autres vous disputent"],
 	# Fond du royaume, hachures du tenant direct, écu parti des doubles allégeances.
 	["feudal", "Féodalité", "", "Royaumes, grands vassaux (hachures) et doubles allégeances (écu parti)"],
 ]
@@ -655,7 +655,7 @@ func _relation_legend() -> Array:
 
 
 func _religion_legend() -> Array:
-	return [[RELIGION_AVIGNON, "Obédience d'Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_ORTHODOX, "Orthodoxie"], [RELIGION_ARMENIAN, "Église arménienne"], [RELIGION_ISLAM, "Islam"], [RELIGION_PAGAN, "Paganisme"], [RELIGION_OTHER, "Autre foi"]]
+	return [[RELIGION_AVIGNON, "Obédience d’Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_ORTHODOX, "Orthodoxie"], [RELIGION_ARMENIAN, "Église arménienne"], [RELIGION_ISLAM, "Islam"], [RELIGION_PAGAN, "Paganisme"], [RELIGION_OTHER, "Autre foi"]]
 
 
 func _feudal_legend() -> Variant:
@@ -679,7 +679,7 @@ func _loyalty_legend() -> Array:
 
 
 func _supply_legend() -> Array:
-	return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d'hiver"]]
+	return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d’hiver"]]
 
 
 func _claims_legend() -> Array:

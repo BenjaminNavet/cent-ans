@@ -9,7 +9,7 @@ extends PanelContainer
 
 signal slot_activated(settlement_id: String, slot: Dictionary)
 
-const CELL_SIZE := Vector2(46.0, 56.0)
+const CELL_SIZE := Vector2(58.0, 60.0)
 const ICON_SIZE := 26
 const SEPARATION := 4
 const TITLE_WIDTH := 76.0
@@ -85,6 +85,7 @@ func _cell(slot: Dictionary, player_owner: bool) -> Button:
 	button.name = "Slot_" + str(slot.get("root", ""))
 	button.custom_minimum_size = CELL_SIZE
 	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	button.focus_mode = Control.FOCUS_NONE
 	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -100,7 +101,7 @@ func _cell(slot: Dictionary, player_owner: bool) -> Button:
 		"upgradable":
 			button.text = "%d/%d +" % [level, max_level]
 		"locked":
-			button.text = "verrou"
+			button.text = "—"
 			button.modulate = Color(1.0, 1.0, 1.0, 0.45)
 		_:
 			button.text = "+"

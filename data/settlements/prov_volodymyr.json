@@ -21,7 +21,7 @@
       "bld_cathedral"
     ],
     "port": false,
-    "description": "Siège d'un évêché orthodoxe, tombeau des princes de Volhynie.",
+    "description": "Siège d’un évêché orthodoxe, tombeau des princes de Volhynie.",
     "sources": [
       "Volodymyr"
     ]
@@ -73,7 +73,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Chef-lieu d'une ancienne principauté ruthène.",
+    "description": "Chef-lieu d’une ancienne principauté ruthène.",
     "sources": [
       "Belz"
     ]

@@ -1,5 +1,5 @@
 {
-  "description": "Retenues de barrages postérieures à 1340 du cœur de la pyramide de relief (ADR 0036, lot ZG1). Le point lon/lat est sur le plan d'eau ; année de mise en eau, hauteur du barrage (ou des digues) et surface d'après les articles cités. `cent-ans geo pyramid` détecte le plan d'eau (WorldCover eau, niveau plat de GLO-30) et le remplace par une vallée reconstituée depuis les berges.",
+  "description": "Retenues de barrages postérieures à 1340 du cœur de la pyramide de relief (ADR 0036, lot ZG1). Le point lon/lat est sur le plan d’eau ; année de mise en eau, hauteur du barrage (ou des digues) et surface d’après les articles cités. `cent-ans geo pyramid` détecte le plan d’eau (WorldCover eau, niveau plat de GLO-30) et le remplace par une vallée reconstituée depuis les berges.",
   "reservoirs": [
     { "id": "serre_poncon", "name": "Lac de Serre-Ponçon", "country": "FR", "river": "Durance, Ubaye", "lon": 6.36, "lat": 44.52, "search_km": 14, "dam_year": 1960, "dam_height_m": 123, "area_km2": 28.2, "source": "fr.wikipedia.org/wiki/Lac_de_Serre-Ponçon ; fr.wikipedia.org/wiki/Barrage_de_Serre-Ponçon" },
     { "id": "sainte_croix", "name": "Lac de Sainte-Croix", "country": "FR", "river": "Verdon", "lon": 6.16, "lat": 43.76, "search_km": 8, "dam_year": 1974, "dam_height_m": 94, "area_km2": 22.0, "source": "fr.wikipedia.org/wiki/Lac_de_Sainte-Croix" },

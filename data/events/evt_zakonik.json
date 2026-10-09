@@ -1,7 +1,7 @@
 {
   "id": "evt_zakonik",
   "title": "Le Zakonik de Dušan",
-  "text": "Réunie à Skopje, l'assemblée des seigneurs et des prélats adopte le code de l'empereur : 135 articles fixent les droits de l'Église, des nobles et des paysans, punissent les juges vénaux et l'hérésie. Tout le royaume, dit le préambule, doit vivre sous une seule loi.",
+  "text": "Réunie à Skopje, l’assemblée des seigneurs et des prélats adopte le code de l’empereur : 135 articles fixent les droits de l’Église, des nobles et des paysans, punissent les juges vénaux et l’hérésie. Tout le royaume, dit le préambule, doit vivre sous une seule loi.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -27,7 +27,7 @@
   },
   "options": [
     {
-      "text": "Promulguer le code dans tout l'empire",
+      "text": "Promulguer le code dans tout l’empire",
       "effects": [
         {
           "type": "prestige",

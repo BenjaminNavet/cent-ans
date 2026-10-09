@@ -1,7 +1,7 @@
 {
   "id": "evt_proces_d_armes",
-  "title": "Un procès d'armes",
-  "text": "À la montre de l'armée, un [[cdx_herauts|héraut]] remarque que deux chevaliers portent exactement le même écu. Chacun jure que ses ancêtres l'arboraient avant ceux de l'autre, et menace de régler l'affaire l'épée à la main. Or un [[cdx_blason|blason]] est une identité : le porter à deux, c'est usurper l'honneur d'un lignage. En Angleterre, l'affaire [[cdx_scrope_grosvenor|Scrope contre Grosvenor]], de 1385 à 1390, occupe cinq ans la cour de chevalerie et fait témoigner des centaines de gens, dont le poète Chaucer.",
+  "title": "Un procès d’armes",
+  "text": "À la montre de l’armée, un [[cdx_herauts|héraut]] remarque que deux chevaliers portent exactement le même écu. Chacun jure que ses ancêtres l’arboraient avant ceux de l’autre, et menace de régler l’affaire l’épée à la main. Or un [[cdx_blason|blason]] est une identité : le porter à deux, c’est usurper l’honneur d’un lignage. En Angleterre, l’affaire [[cdx_scrope_grosvenor|Scrope contre Grosvenor]], de 1385 à 1390, occupe cinq ans la cour de chevalerie et fait témoigner des centaines de gens, dont le poète Chaucer.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 150

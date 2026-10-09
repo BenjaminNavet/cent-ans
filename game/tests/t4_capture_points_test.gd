@@ -124,4 +124,4 @@ func _check_integration() -> void:
 	if not check(view != null and view.capture_points != null, "siege view has capture points"):
 		return
 	check(view.capture_points.flag("square") != null, "square flag planted in the battle")
-	check(view.capture_points.side_colors.get("attacker") == _scene.side_colors.get("attacker"), "flags use the scene's side colours")
+	check(view.capture_points.side_colors.get("attacker") == _scene.side_colors.get("attacker"), "flags use the scene’s side colours")

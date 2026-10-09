@@ -1,7 +1,7 @@
 {
   "id": "fac_eretna",
   "name": {
-    "display": "Beylik d'Eretna",
+    "display": "Beylik d’Eretna",
     "local": "Eretna Beyliği",
     "local_language": "turc ottoman"
   },
@@ -18,7 +18,7 @@
   "primary_title": "tit_eretna",
   "heraldry": {
     "blazon": "D'argent au sautoir d'azur.",
-    "description": "Couleurs de convention d'Eretna.",
+    "description": "Couleurs de convention d’Eretna.",
     "primary_color": "#F3F0E4",
     "secondary_color": "#2B4A9E",
     "uncertain": true,
@@ -53,7 +53,7 @@
     "trade": 55,
     "piety": 55
   },
-  "description": "Ancien gouverneur ilkhanide de Roum, Eretna devient autonome après la mort d'Abu Saïd (1335) ; il ne prend le titre de sultan qu'en 1341-1343.",
+  "description": "Ancien gouverneur ilkhanide de Roum, Eretna devient autonome après la mort d’Abu Saïd (1335) ; il ne prend le titre de sultan qu’en 1341-1343.",
   "sources": [
     "Eretna",
     "Eretnids"

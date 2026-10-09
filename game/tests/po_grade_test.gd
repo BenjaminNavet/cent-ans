@@ -73,7 +73,7 @@ func _check_battle() -> Array[String]:
 					continue
 				var grades: Array = look.get("grades", [])
 				if grades.size() < 3 or (grades[grades.size() - 1] as Dictionary).is_empty():
-					problems.append(ctx + " : étalonnage de l'heure absent")
+					problems.append(ctx + " : étalonnage de l’heure absent")
 				if AtmosphereLibrary.grade_lut(grades, 1.0) == null:
 					problems.append(ctx + " : LUT absente")
 				var sun := BattleAtmosphere.sun_for(weather, time_key, look)

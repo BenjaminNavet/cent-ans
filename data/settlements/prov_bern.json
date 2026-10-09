@@ -51,7 +51,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville et château des Zähringen, puis des comtes de Kybourg, au débouché du lac de Thoune ; elle ne passera à Berne qu'en 1384.",
+    "description": "Ville et château des Zähringen, puis des comtes de Kybourg, au débouché du lac de Thoune ; elle ne passera à Berne qu’en 1384.",
     "sources": [
       "Thoune"
     ]
@@ -77,7 +77,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Château zähringien surplombant l'Emme, résidence des comtes de Kybourg, adversaires de Berne à Laupen (1339).",
+    "description": "Château zähringien surplombant l’Emme, résidence des comtes de Kybourg, adversaires de Berne à Laupen (1339).",
     "sources": [
       "Berthoud"
     ]
@@ -180,7 +180,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château seigneurial sous suzeraineté des Habsbourg-Kybourg, gardant l'entrée du Simmental au sud du lac de Thoune.",
+    "description": "Château seigneurial sous suzeraineté des Habsbourg-Kybourg, gardant l’entrée du Simmental au sud du lac de Thoune.",
     "sources": [
       "Wimmis"
     ]

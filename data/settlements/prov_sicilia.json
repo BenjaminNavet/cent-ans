@@ -56,7 +56,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Grand port du détroit, porte d'entrée de la Sicile aragonaise face au royaume de Naples angevin.",
+    "description": "Grand port du détroit, porte d’entrée de la Sicile aragonaise face au royaume de Naples angevin.",
     "sources": [
       "Messine"
     ]
@@ -84,7 +84,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Ville portuaire au pied de l'Etna, résidence royale favorite de Frédéric III de Sicile.",
+    "description": "Ville portuaire au pied de l’Etna, résidence royale favorite de Frédéric III de Sicile.",
     "sources": [
       "Catane"
     ]
@@ -110,7 +110,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ancienne cité grecque, verrouillée par le château Maniace sur l'îlot d'Ortygie.",
+    "description": "Ancienne cité grecque, verrouillée par le château Maniace sur l’îlot d’Ortygie.",
     "sources": [
       "Syracuse"
     ]
@@ -136,7 +136,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port de l'ouest sicilien, escale entre le royaume et la Sardaigne aragonaise.",
+    "description": "Port de l’ouest sicilien, escale entre le royaume et la Sardaigne aragonaise.",
     "sources": [
       "Trapani"
     ]
@@ -188,7 +188,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse au centre géographique de l'île, surnommée l'« ombilic de la Sicile », verrou stratégique du royaume.",
+    "description": "Forteresse au centre géographique de l’île, surnommée l'« ombilic de la Sicile », verrou stratégique du royaume.",
     "sources": [
       "Enna"
     ]

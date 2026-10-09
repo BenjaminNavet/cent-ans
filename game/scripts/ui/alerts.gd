@@ -75,7 +75,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 		result.append({
 			"id": "debt", "kind": "debt", "severity": "danger",
 			"text": "Trésor endetté : %s" % Money.amount(int(summary.get("treasury", 0))),
-			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l'impôt.",
+			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l’impôt.",
 		})
 	# WH idle : « recherche inactive » rétablie en pastille de la cloche (le conseil `research_idle`
 	# et la confirmation de fin de tour en dépendent ; la barre du haut seule se faisait oublier).
@@ -169,7 +169,7 @@ static func idle_army_alerts(map: Node) -> Array:
 			"id": "idle:" + army_id, "kind": "idle_army", "severity": "warning", "glyph": "⚔",
 			"army_id": army_id,
 			"text": "Armée sans ordre : %s" % (general if general != "" else "ost"),
-			"tooltip": "Cette armée n'a pas d'ordre de marche et garde du mouvement. Tab : armée inactive suivante.",
+			"tooltip": "Cette armée n’a pas d’ordre de marche et garde du mouvement. Tab : armée inactive suivante.",
 		})
 	return result
 

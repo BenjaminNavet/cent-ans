@@ -1,7 +1,7 @@
 {
   "id": "enc_peage_pont",
   "title": "Le péage du pont",
-  "text": "Le seigneur du lieu a barré le pont d'une chaîne. Ses sergents réclament le péage coutumier sur chaque cheval, chaque charrette et chaque homme d'armes qui passe.",
+  "text": "Le seigneur du lieu a barré le pont d’une chaîne. Ses sergents réclament le péage coutumier sur chaque cheval, chaque charrette et chaque homme d’armes qui passe.",
   "spawn": {
     "terrains": [
       "plains",
@@ -70,7 +70,7 @@
           ]
         },
         "on_loss": {
-          "text": "Les sergents tiennent le pont ; l'ost doit rebrousser chemin.",
+          "text": "Les sergents tiennent le pont ; l’ost doit rebrousser chemin.",
           "effects": [
             {
               "type": "prestige",

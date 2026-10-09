@@ -1,7 +1,7 @@
 {
   "id": "skill_saint_protecteur",
   "name": {
-    "display": "Protecteur de l'Église"
+    "display": "Protecteur de l’Église"
   },
   "branch": "court",
   "tier": 3,
@@ -21,5 +21,5 @@
       "mode": "add"
     }
   ],
-  "description": "Devient un pilier reconnu de l'Église dans le royaume."
+  "description": "Devient un pilier reconnu de l’Église dans le royaume."
 }

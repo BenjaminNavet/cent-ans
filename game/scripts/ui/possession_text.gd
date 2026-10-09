@@ -58,7 +58,7 @@ static func ink(cue: String, ordinary: Color) -> Color:
 
 ## Phrase d'aide du panneau de province : la cité donne le contrôle, le traité la possession.
 static func province_help(city_name: String) -> String:
-	return "La cité de %s donne le contrôle de la province ; la possession s'obtient par traité (cession)." % city_name
+	return "La cité de %s donne le contrôle de la province ; la possession s’obtient par traité (cession)." % city_name
 
 
 ## Ligne « places tenues » du panneau de province : `held` sur `total`, et le bonus de province
@@ -86,7 +86,7 @@ static func occupied_mention(status: String, owner_label: String, controller_lab
 static func settlement_help(is_city: bool, province_name: String, city_name: String) -> String:
 	if is_city:
 		return "Cité de %s : qui la tient contrôle la province. La possession ne change que par traité (cession)." % province_name
-	return "Place de %s : la tenir ne donne pas la province (c'est la cité de %s qui la donne) ; elle compte pour le bonus de province complète." % [province_name, city_name]
+	return "Place de %s : la tenir ne donne pas la province (c’est la cité de %s qui la donne) ; elle compte pour le bonus de province complète." % [province_name, city_name]
 
 
 ## `possession` (dictionnaire du cœur, `province_possession` ou `settlement_possession`) complété

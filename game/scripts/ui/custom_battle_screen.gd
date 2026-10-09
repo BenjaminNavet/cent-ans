@@ -166,7 +166,7 @@ func _build() -> void:
 	var title := UiBuild.label("Bataille personnalisée")
 	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
-	var hint := UiBuild.label("Chaque camp achète ses unités sur son budget de points. Hors campagne : le résultat n'est pas conservé.")
+	var hint := UiBuild.label("Chaque camp achète ses unités sur son budget de points. Hors campagne : le résultat n’est pas conservé.")
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(hint)
@@ -249,7 +249,7 @@ func _build_side(side: String) -> Control:
 	var lists := UiBuild.hbox(8, column)
 	roster_boxes[side] = _list_column(lists, "Roster (clic : acheter)")
 	army_boxes[side] = _list_column(lists, "Armée (clic : retirer)")
-	var clear := UiBuild.button("Vider l'armée", func() -> void: clear_army(side))
+	var clear := UiBuild.button("Vider l’armée", func() -> void: clear_army(side))
 	clear.name = "Clear"
 	clear.size_flags_horizontal = Control.SIZE_SHRINK_END
 	column.add_child(clear)

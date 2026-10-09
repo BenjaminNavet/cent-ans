@@ -2,7 +2,7 @@
   "id": "chr_robert_de_tarente",
   "name": {
     "display": "Robert de Tarente",
-    "local": "Roberto d'Angiò-Taranto",
+    "local": "Roberto d’Angiò-Taranto",
     "local_language": "napolitain"
   },
   "sex": "male",
@@ -26,7 +26,7 @@
   "piety": 45,
   "starting_location": "prov_taranto",
   "status": "at_court",
-  "description": "Fils aîné survivant de Philippe Ier de Tarente et de Catherine de Valois-Courtenay, prince de Tarente depuis la mort de son père (fin 1331) ; majeur en 1337 (s'il est né en 1319), il laisse encore sa mère conduire la politique de la principauté.",
+  "description": "Fils aîné survivant de Philippe Ier de Tarente et de Catherine de Valois-Courtenay, prince de Tarente depuis la mort de son père (fin 1331) ; majeur en 1337 (s’il est né en 1319), il laisse encore sa mère conduire la politique de la principauté.",
   "sources": [
     "Principauté de Tarente",
     "Philippe Ier de Tarente"

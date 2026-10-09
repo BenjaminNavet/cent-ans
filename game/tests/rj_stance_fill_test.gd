@@ -54,8 +54,8 @@ func _pure() -> void:
 	check(colors.size() == controllers.size(), "one colour per province")
 	check(colors[0] == gold, "our province is gold")
 	check(colors[1] == red, "a province held by an enemy at war is red")
-	check(colors[2] == green, "an ally's province is green")
-	check(colors[3] == grey, "a neutral's province is light grey")
+	check(colors[2] == green, "an ally’s province is green")
+	check(colors[3] == grey, "a neutral’s province is light grey")
 	check(colors[4].a == 0.0, "a province without controller is left bare")
 	check(colors[5] == green, "a vassal counts as a friend")
 

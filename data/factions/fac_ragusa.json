@@ -18,7 +18,7 @@
   "primary_title": "tit_ragusa",
   "heraldry": {
     "blazon": "Bandé d'or et de gueules.",
-    "description": "Bandes d'or et de gueules : armes de convention pour la commune de Raguse.",
+    "description": "Bandes d’or et de gueules : armes de convention pour la commune de Raguse.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -59,7 +59,7 @@
     "trade": 90,
     "piety": 55
   },
-  "description": "Cité patricienne de l'Adriatique, prospère par le sel de Ston et le commerce des Balkans. Vénitienne pour la forme, elle cultive déjà l'art de jouer les puissances l'une contre l'autre.",
+  "description": "Cité patricienne de l’Adriatique, prospère par le sel de Ston et le commerce des Balkans. Vénitienne pour la forme, elle cultive déjà l’art de jouer les puissances l’une contre l’autre.",
   "sources": [
     "Republic of Ragusa",
     "Ston"

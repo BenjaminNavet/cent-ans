@@ -20,13 +20,13 @@
   "historical": true,
   "titles": [
     {
-      "title": "1er comte d'Ormond",
+      "title": "1er comte d’Ormond",
       "from": {
         "value": "1328"
       }
     },
     {
-      "title": "Grand bouteiller héréditaire d'Irlande"
+      "title": "Grand bouteiller héréditaire d’Irlande"
     }
   ],
   "skills": {
@@ -46,7 +46,7 @@
   },
   "starting_location": "prov_ormond",
   "status": "at_court",
-  "description": "Fils d'Edmond Butler, justicier d'Irlande ; grand bouteiller héréditaire d'Irlande, créé comte d'Ormond par Édouard III en 1328. Meurt à Gowran le 6 janvier 1338, peu après le début de la guerre de Cent Ans.",
+  "description": "Fils d’Edmond Butler, justicier d’Irlande ; grand bouteiller héréditaire d’Irlande, créé comte d’Ormond par Édouard III en 1328. Meurt à Gowran le 6 janvier 1338, peu après le début de la guerre de Cent Ans.",
   "sources": [
     "James Butler, 1er comte d'Ormond"
   ],

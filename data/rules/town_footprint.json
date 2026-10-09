@@ -1,15 +1,15 @@
 {
-  "description": "Lot ZG6 (ADR 0036) : entrées de l'emprise des villes ordinaires vers 1340 (rendu seulement, aucune règle de jeu). L'outil `cent-ans geo towns` en tire data/map/towns_1340.json. Population : référence quand elle existe (sinon modèle par type, poids et bâtiments de la colonie) ; surface bâtie = population / densité ; enceinte = surface bâtie × part intra-muros × marge de jardins, ou surface de référence ; faubourgs le long des routes d'accès pour le reste. Chiffres de population : ordres de grandeur, à recaler par VH3 sur l'État des paroisses et des feux de 1328.",
+  "description": "Lot ZG6 (ADR 0036) : entrées de l’emprise des villes ordinaires vers 1340 (rendu seulement, aucune règle de jeu). L’outil `cent-ans geo towns` en tire data/map/towns_1340.json. Population : référence quand elle existe (sinon modèle par type, poids et bâtiments de la colonie) ; surface bâtie = population / densité ; enceinte = surface bâtie × part intra-muros × marge de jardins, ou surface de référence ; faubourgs le long des routes d’accès pour le reste. Chiffres de population : ordres de grandeur, à recaler par VH3 sur l’État des paroisses et des feux de 1328.",
   "year": 1340,
   "sources": [
-    {"id": "russell1972", "text": "J. C. Russell, Medieval Regions and Their Cities, Newton Abbot, 1972 : convention d'environ 100 habitants par hectare intra-muros pour les villes moyennes."},
+    {"id": "russell1972", "text": "J. C. Russell, Medieval Regions and Their Cities, Newton Abbot, 1972 : convention d’environ 100 habitants par hectare intra-muros pour les villes moyennes."},
     {"id": "hfu1980", "text": "G. Duby (dir.), A. Chédeville, J. Le Goff, J. Rossiaud, Histoire de la France urbaine, t. 2, La ville médiévale, Paris, Seuil, 1980 : densités de 100 à 200 habitants par hectare, davantage dans les très grandes villes."},
     {"id": "bairoch1988", "text": "P. Bairoch, J. Batou, P. Chèvre, La population des villes européennes de 800 à 1850, Genève, Droz, 1988 : ordres de grandeur des populations vers 1300."},
     {"id": "leiden1574", "text": "Université de Leyde, projet « Ranking the towns » : à Leyde (1574), de 75 hab./ha en périphérie à près de 200 hab./ha au centre (https://www.universiteitleiden.nl/en/research/research-projects/archaeology/ranking-the-towns)."},
     {"id": "nicholas1987", "text": "D. Nicholas, The Metamorphosis of a Medieval City: Ghent in the Age of the Arteveldes, 1302-1390, 1987 : environ 64 000 habitants, enceinte de 644 ha."},
-    {"id": "polltax1377", "text": "Impôt par tête de 1377 (contribuables de plus de 14 ans), population totale d'après la liste « List of towns and cities in England by historical population » (Wikipédia, d'après Dyer) ; avant la Peste noire (1348-1349), population ≈ × 1,6."},
-    {"id": "wiki_chartres", "text": "Fortifications de Chartres (Wikipédia) : enceinte de la fin du XIIe siècle d'environ 60 ha et 3,7 km de circonférence, 12 portes et poternes. Chartres n'est pas une colonie des données : sert de contrôle de la table des densités (≈ 10 000 habitants sur 60 ha, soit ≈ 165 hab./ha)."},
-    {"id": "wiki_poitiers", "text": "Enceintes de Poitiers (Wikipédia) : enceinte d'Henri II et d'Aliénor (1162-1170), 6,5 km de périmètre, tout le promontoire avec faubourgs, marchés et établissements religieux (enceinte très lâche)."},
+    {"id": "polltax1377", "text": "Impôt par tête de 1377 (contribuables de plus de 14 ans), population totale d’après la liste « List of towns and cities in England by historical population » (Wikipédia, d’après Dyer) ; avant la Peste noire (1348-1349), population ≈ × 1,6."},
+    {"id": "wiki_chartres", "text": "Fortifications de Chartres (Wikipédia) : enceinte de la fin du XIIe siècle d’environ 60 ha et 3,7 km de circonférence, 12 portes et poternes. Chartres n’est pas une colonie des données : sert de contrôle de la table des densités (≈ 10 000 habitants sur 60 ha, soit ≈ 165 hab./ha)."},
+    {"id": "wiki_poitiers", "text": "Enceintes de Poitiers (Wikipédia) : enceinte d’Henri II et d’Aliénor (1162-1170), 6,5 km de périmètre, tout le promontoire avec faubourgs, marchés et établissements religieux (enceinte très lâche)."},
     {"id": "kit_br1", "text": "Kit de bâtiments BR1 (ADR 0021) : façades de maisons de ville de 5 à 8 m, parcelles en lanières de 20 à 40 m de profondeur (ADR 0037, lot VH4)."}
   ],
   "persons_per_household": 4.5,
@@ -106,7 +106,7 @@
     {"settlement": "set_lubeck", "population": 20000, "source": "bairoch1988", "confidence": "faible"}
   ],
   "walls": {
-    "description": "Enceinte : pierre si la colonie a bld_stone_walls ou si sa fortification atteint `stone_from_fortification` pour son type (en 1340, presque toutes les cités sont closes, même quand le jeu ne compte que leur château), palissade si bld_palisade, sinon aucune (village, bourg ouvert). Part de la population intra-muros ; marge de jardins et vergers enclos (l'enceinte est plus vaste que le bâti) ; hauteurs et flanquement.",
+    "description": "Enceinte : pierre si la colonie a bld_stone_walls ou si sa fortification atteint `stone_from_fortification` pour son type (en 1340, presque toutes les cités sont closes, même quand le jeu ne compte que leur château), palissade si bld_palisade, sinon aucune (village, bourg ouvert). Part de la population intra-muros ; marge de jardins et vergers enclos (l’enceinte est plus vaste que le bâti) ; hauteurs et flanquement.",
     "intra_muros_share": {"city": 0.8, "town": 0.8, "castle": 0.5, "abbey": 0.4, "village": 0.0},
     "stone_from_fortification": {"city": 2, "town": 3},
     "open_core_share": 0.75,
@@ -118,7 +118,7 @@
     "min_gates": 2
   },
   "site": {
-    "description": "Adaptation au relief fin : l'enceinte suit la rupture de pente (éperon, butte) sans descendre sous `min_radius_factor` × rayon du disque équivalent ni dépasser `max_radius_factor` ; bords coupés par un fleuve pour les petites villes (une seule rive).",
+    "description": "Adaptation au relief fin : l’enceinte suit la rupture de pente (éperon, butte) sans descendre sous `min_radius_factor` × rayon du disque équivalent ni dépasser `max_radius_factor` ; bords coupés par un fleuve pour les petites villes (une seule rive).",
     "bearings": 32,
     "edge_slope": 0.18,
     "edge_drop_m": 8.0,
@@ -131,14 +131,14 @@
     "road_bridge_max_width_m": 80.0
   },
   "faubourgs": {
-    "description": "Faubourgs le long des routes d'accès (part hors les murs, bourgs ouverts en entier) : longueur par route ∝ racine de la population hors les murs.",
+    "description": "Faubourgs le long des routes d’accès (part hors les murs, bourgs ouverts en entier) : longueur par route ∝ racine de la population hors les murs.",
     "length_per_sqrt_pop_m": 6.0,
     "min_length_m": 60.0,
     "max_length_m": 900.0,
     "main_road_weight": 1.5
   },
   "finage": {
-    "description": "Rayon du finage (champs cultivés autour de l'agglomération), exposé au parcellaire de ZG5b : rayon = k × racine(population), borné.",
+    "description": "Rayon du finage (champs cultivés autour de l’agglomération), exposé au parcellaire de ZG5b : rayon = k × racine(population), borné.",
     "radius_per_sqrt_pop_m": 30.0,
     "min_radius_m": 900.0,
     "max_radius_m": 4500.0

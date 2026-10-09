@@ -19,7 +19,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château sur la Baïse, résidence favorite des sires d'Albret, vassaux gascons du roi-duc.",
+    "description": "Château sur la Baïse, résidence favorite des sires d’Albret, vassaux gascons du roi-duc.",
     "sources": [
       "Nérac",
       "Maison d'Albret"
@@ -45,7 +45,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Bastide et château fondés par Alphonse de Poitiers en 1259, passés à la maison d'Albret.",
+    "description": "Bastide et château fondés par Alphonse de Poitiers en 1259, passés à la maison d’Albret.",
     "sources": [
       "Casteljaloux"
     ]
@@ -68,7 +68,7 @@
     "fortification_level": 1,
     "buildings": [],
     "port": false,
-    "description": "Ancien berceau castral de la maison d'Albret, avant le transfert du siège à Nérac.",
+    "description": "Ancien berceau castral de la maison d’Albret, avant le transfert du siège à Nérac.",
     "sources": [
       "Maison d'Albret"
     ]

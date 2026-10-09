@@ -19,7 +19,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Site de campement d'été au confluent de la Belaïa et de l'Oufa ; ville fondée en 1574 seulement.",
+    "description": "Site de campement d’été au confluent de la Belaïa et de l’Oufa ; ville fondée en 1574 seulement.",
     "sources": [
       "Oufa"
     ]
@@ -65,7 +65,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Campement des Bourdjan dans l'Oural méridional (emplacement approximatif).",
+    "description": "Campement des Bourdjan dans l’Oural méridional (emplacement approximatif).",
     "sources": [
       "Bachkirs"
     ]

@@ -78,7 +78,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Antique forteresse rocheuse gardant l'estuaire de la Clyde, l'une des plus anciennes places fortes d'Écosse.",
+    "description": "Antique forteresse rocheuse gardant l’estuaire de la Clyde, l’une des plus anciennes places fortes d’Écosse.",
     "sources": [
       "Château de Dumbarton"
     ]
@@ -105,7 +105,7 @@
       "bld_castle"
     ],
     "port": true,
-    "description": "Burgh royal où Robert Bruce tint l'un de ses premiers parlements en 1315.",
+    "description": "Burgh royal où Robert Bruce tint l’un de ses premiers parlements en 1315.",
     "sources": [
       "Ayr"
     ]
@@ -155,7 +155,7 @@
       "bld_parish_church"
     ],
     "port": true,
-    "description": "Bourg royal et petit port de l'Ayrshire.",
+    "description": "Bourg royal et petit port de l’Ayrshire.",
     "sources": [
       "Irvine, Ayrshire"
     ]
@@ -180,7 +180,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château royal des Stewart sur l'île de Bute.",
+    "description": "Château royal des Stewart sur l’île de Bute.",
     "sources": [
       "Château de Rothesay"
     ]

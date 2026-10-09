@@ -89,7 +89,7 @@ func show_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_
 	_queue_toggle.disabled = research.is_empty() and queue.is_empty()
 	if research.is_empty():
 		var banked := int(reserve.get("points", 0))
-		research_label.text = "Aucune recherche en cours — %d points par tour s'accumulent en réserve (%d / %d) : choisissez une technologie." % [
+		research_label.text = "Aucune recherche en cours — %d points par tour s’accumulent en réserve (%d / %d) : choisissez une technologie." % [
 			points_per_turn, banked, int(reserve.get("cap", 0))] + queue_text
 		research_bar.max_value = maxi(1, int(reserve.get("cap", 1)))
 		research_bar.value = banked

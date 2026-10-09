@@ -1,7 +1,7 @@
 {
   "id": "evt_auld_alliance",
-  "title": "L'Auld Alliance renouvelée",
-  "text": "À Vincennes, les envoyés de Robert II, premier roi Stewart, et ceux de Charles V renouvellent l'alliance de Corbeil : nul des deux rois ne traitera avec l'Anglais sans l'autre, et l'or de France paiera les lances écossaises.",
+  "title": "L’Auld Alliance renouvelée",
+  "text": "À Vincennes, les envoyés de Robert II, premier roi Stewart, et ceux de Charles V renouvellent l’alliance de Corbeil : nul des deux rois ne traitera avec l’Anglais sans l’autre, et l’or de France paiera les lances écossaises.",
   "kind": "historical",
   "trigger": {
     "date": {

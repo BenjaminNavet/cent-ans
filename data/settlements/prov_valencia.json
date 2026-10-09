@@ -79,7 +79,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Commanderie fortifiée de l'ordre de Montesa, fondé en 1317 pour recevoir les biens du Temple (dissous en 1312) dans le royaume de Valence.",
+    "description": "Commanderie fortifiée de l’ordre de Montesa, fondé en 1317 pour recevoir les biens du Temple (dissous en 1312) dans le royaume de Valence.",
     "sources": [
       "Peñíscola",
       "Ordre de Montesa"
@@ -132,7 +132,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse antique de l'acropole ibéro-romaine, reconstruite au Moyen Âge sur la côte valencienne.",
+    "description": "Forteresse antique de l’acropole ibéro-romaine, reconstruite au Moyen Âge sur la côte valencienne.",
     "sources": [
       "Sagonte"
     ]

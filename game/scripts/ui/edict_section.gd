@@ -15,7 +15,7 @@ var pending_label: Label
 
 
 func _init() -> void:
-	super("EdictSection", "Édit régional", "Changer d'édit", "get_province_edict", "get_edict_options", "edict", "cat_building", "building")
+	super("EdictSection", "Édit régional", "Changer d’édit", "get_province_edict", "get_edict_options", "edict", "cat_building", "building")
 	pending_label = UiBuild.label("", UiType.size(UiType.CAPTION), MUTED_COLOR, true)
 	pending_label.hide()
 	add_child(pending_label)
@@ -26,7 +26,7 @@ func _refresh_extra(state: Dictionary, _current: Dictionary) -> void:
 	var pending := bool(state.get("pending", false))
 	pending_label.visible = pending and is_player_owner
 	if pending:
-		pending_label.text = "« %s » entre en vigueur dans %d tour(s) ; l'édit actuel s'applique en attendant." % [str(state.get("pending_name", "")), int(state.get("turns_left", 0))]
+		pending_label.text = "« %s » entre en vigueur dans %d tour(s) ; l’édit actuel s’applique en attendant." % [str(state.get("pending_name", "")), int(state.get("turns_left", 0))]
 	TooltipHost.attach_plain(choose_button, "choose_edict")
 
 

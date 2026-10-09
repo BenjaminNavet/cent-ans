@@ -25,7 +25,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d'Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343).",
+    "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343).",
     "sources": [
       "Principauté de Galles",
       "Gwynedd",
@@ -54,7 +54,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville close édifiée par Édouard Ier autour de son château, l'un des maillons du « cercle de fer ».",
+    "description": "Ville close édifiée par Édouard Ier autour de son château, l’un des maillons du « cercle de fer ».",
     "sources": [
       "Château de Conwy"
     ]
@@ -181,7 +181,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-marché du sud du Gwynedd, près de l'abbaye de Cymer.",
+    "description": "Bourg-marché du sud du Gwynedd, près de l’abbaye de Cymer.",
     "sources": [
       "Dolgellau"
     ]

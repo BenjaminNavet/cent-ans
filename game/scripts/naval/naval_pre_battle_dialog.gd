@@ -45,12 +45,12 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	for i in 2:
 		_fill_fleet(_columns[i], player_side if i == 0 else enemy_side)
 	body_label.text = _conditions()
-	modifiers_label.text = "Les archers tirent des châteaux ; le plus haut bord domine l'abordage ; qui tient le vent choisit l'heure du combat."
+	modifiers_label.text = "Les archers tirent des châteaux ; le plus haut bord domine l’abordage ; qui tient le vent choisit l’heure du combat."
 	modifiers_label.visible = true
 	fight_button.visible = false
 	withdraw_button.text = "Rentrer au port" if player_side == "defender" else "Refuser le combat"
 	withdraw_button.disabled = false
-	TooltipHost.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
+	TooltipHost.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l’armée ne traverse pas ce tour." if player_side == "defender" else "L’escadre ne s’engage pas ; la flotte ennemie, menacée, regagne son port."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")
@@ -129,5 +129,5 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 func _conditions() -> String:
 	var parts := PackedStringArray(["Saison : %s" % str(SEASON_FR.get(str(setup.get("season", "")), ""))])
 	if bool(setup.get("rain", false)):
-		parts.append("pluie : cordes d'arc mouillées")
+		parts.append("pluie : cordes d’arc mouillées")
 	return "   ·   ".join(parts)

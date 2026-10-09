@@ -45,7 +45,7 @@ func _init() -> void:
 	# Lot TF : `TimberFrame` câblée, dernière couche de l'atlas (indice 14), texturée malgré sa
 	# place après les couches unies (détail : `tf_timber_frame_test.gd`).
 	if BuildingMaterials.ATLAS_LAYERS.find("TimberFrame") != 14:
-		check(false, "GA5: TimberFrame attendue en couche 14 de l'atlas (lot TF), trouvé %d" % BuildingMaterials.ATLAS_LAYERS.find("TimberFrame"))
+		check(false, "GA5: TimberFrame attendue en couche 14 de l’atlas (lot TF), trouvé %d" % BuildingMaterials.ATLAS_LAYERS.find("TimberFrame"))
 
 	var total := 0
 	for name in names:

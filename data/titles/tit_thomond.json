@@ -25,7 +25,7 @@
     {
       "id": "obj_thomond_hold",
       "title": "Garder le Clare",
-      "description": "Conserver le royaume repris aux Anglo-Normands à Dysert O'Dea (1318).",
+      "description": "Conserver le royaume repris aux Anglo-Normands à Dysert O’Dea (1318).",
       "condition": {
         "kind": "hold_title",
         "title": "tit_thomond"
@@ -46,7 +46,7 @@
       }
     }
   ],
-  "description": "Royaume gaélique de Thomond, tenu par les Ó Briain, descendants de Brian Boru ; repris aux colons anglo-normands de Bunratty après la victoire de Dysert O'Dea en 1318.",
+  "description": "Royaume gaélique de Thomond, tenu par les Ó Briain, descendants de Brian Boru ; repris aux colons anglo-normands de Bunratty après la victoire de Dysert O’Dea en 1318.",
   "sources": [
     "Muircheartach Ó Briain",
     "Bataille de Dysert O'Dea",

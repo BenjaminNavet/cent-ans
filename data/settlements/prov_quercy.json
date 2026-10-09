@@ -24,7 +24,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville consulaire née d'une abbaye bénédictine, sur le Célé, prospère du commerce et du cuir.",
+    "description": "Ville consulaire née d’une abbaye bénédictine, sur le Célé, prospère du commerce et du cuir.",
     "sources": ["Figeac"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château des barons de Castelnau, l'une des plus puissantes baronnies du Quercy, dominant la Dordogne.",
+    "description": "Château des barons de Castelnau, l’une des plus puissantes baronnies du Quercy, dominant la Dordogne.",
     "sources": ["Château de Castelnau-Bretenoux"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville fortifiée sur son éperon rocheux du Quercy blanc, chef-lieu d'une vicomté et d'une châtellenie disputées durant la croisade des albigeois.",
+    "description": "Ville fortifiée sur son éperon rocheux du Quercy blanc, chef-lieu d’une vicomté et d’une châtellenie disputées durant la croisade des albigeois.",
     "sources": ["Montcuq"]
   },
   {
@@ -94,7 +94,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville fortifiée sur son promontoire, chef-lieu d'une baronnie querçynoise.",
+    "description": "Ville fortifiée sur son promontoire, chef-lieu d’une baronnie querçynoise.",
     "sources": ["Gourdon (Lot)"]
   },
   {
@@ -122,22 +122,22 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Sanctuaire marial bâti à flanc de falaise, l'un des grands lieux de pèlerinage d'Occident depuis le XIIe siècle.",
+    "description": "Sanctuaire marial bâti à flanc de falaise, l’un des grands lieux de pèlerinage d’Occident depuis le XIIe siècle.",
     "sources": ["Rocamadour"]
   },
   {
     "id": "set_puy_leveque",
     "province": "prov_quercy",
     "kind": "village",
-    "name": { "display": "Puy-l'Évêque", "local": "Puei Evesque", "local_language": "occitan" },
+    "name": { "display": "Puy-l’Évêque", "local": "Puei Evesque", "local_language": "occitan" },
     "lonlat": [1.1381, 44.5044],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_water_mill"],
     "port": false,
-    "description": "Bourg fluvial sur le Lot, possession de l'évêque de Cahors, port batelier vers Bordeaux.",
-    "sources": ["Puy-l'Évêque"]
+    "description": "Bourg fluvial sur le Lot, possession de l’évêque de Cahors, port batelier vers Bordeaux.",
+    "sources": ["Puy-l’Évêque"]
   },
   {
     "id": "set_cajarc",
@@ -150,7 +150,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg sur le Lot, doté d'une charte de coutumes accordée par l'évêque de Cahors.",
+    "description": "Bourg sur le Lot, doté d’une charte de coutumes accordée par l’évêque de Cahors.",
     "sources": ["Cajarc"]
   }
 ]

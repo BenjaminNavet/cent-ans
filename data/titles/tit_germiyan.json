@@ -27,7 +27,7 @@
     {
       "id": "obj_germiyan_independent",
       "title": "Rester libre",
-      "description": "Garder l'indépendance de Germiyan.",
+      "description": "Garder l’indépendance de Germiyan.",
       "condition": {
         "kind": "be_independent"
       }
@@ -42,7 +42,7 @@
       }
     }
   ],
-  "description": "Grand beylik de l'ouest de l'Anatolie, avec Kütahya et Afyon ; Yakub Ier (1300-1340) est le plus puissant bey d'Anatolie occidentale.",
+  "description": "Grand beylik de l’ouest de l’Anatolie, avec Kütahya et Afyon ; Yakub Ier (1300-1340) est le plus puissant bey d’Anatolie occidentale.",
   "sources": [
     "Germiyan"
   ]

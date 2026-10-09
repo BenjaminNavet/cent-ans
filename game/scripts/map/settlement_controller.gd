@@ -210,7 +210,7 @@ func _on_province_requested(province_id: String) -> void:
 
 
 func _on_recruit(settlement_id: String, unit_type: String) -> void:
-	map._submit({"type": "recruit", "settlement": settlement_id, "unit_type": unit_type}, "Recrutement lancé : l'unité rejoindra la garnison au prochain tour.")
+	map._submit({"type": "recruit", "settlement": settlement_id, "unit_type": unit_type}, "Recrutement lancé : l’unité rejoindra la garnison au prochain tour.")
 
 
 func _on_create_army(settlement_id: String, unit_indices: Array) -> void:
@@ -239,7 +239,7 @@ func _on_raze_requested(settlement_id: String, building_id: String, preview: Dic
 	var building_name := str(preview.get("name", building_id))
 	var refund := Money.amount(int(preview.get("refund", 0)))
 	var upkeep_saved := Money.amount(int(preview.get("upkeep_saved", 0)))
-	raze_dialog.open("Raser %s ?" % building_name, "Le bâtiment est détruit sans retour possible. Rembourse %s ; économise %s d'entretien par saison." % [refund, upkeep_saved])
+	raze_dialog.open("Raser %s ?" % building_name, "Le bâtiment est détruit sans retour possible. Rembourse %s ; économise %s d’entretien par saison." % [refund, upkeep_saved])
 
 
 func _on_raze_confirmed() -> void:

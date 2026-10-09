@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": true,
-    "description": "Capitale du duché d'Aquitaine anglais sur la Garonne, premier port d'exportation du vin de Guyenne vers l'Angleterre.",
+    "description": "Capitale du duché d’Aquitaine anglais sur la Garonne, premier port d’exportation du vin de Guyenne vers l’Angleterre.",
     "sources": ["Bordeaux", "Duché d'Aquitaine"]
   },
   {
@@ -24,7 +24,7 @@
     "fortification_level": 3,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Place forte sur la Garonne, frontière du duché d'Aquitaine, assiégée durant la guerre de Saint-Sardos (1324).",
+    "description": "Place forte sur la Garonne, frontière du duché d’Aquitaine, assiégée durant la guerre de Saint-Sardos (1324).",
     "sources": ["La Réole", "Guerre de Saint-Sardos"]
   },
   {
@@ -38,7 +38,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle", "bld_port"],
     "port": true,
-    "description": "Citadelle verrouillant l'estuaire de la Gironde en amont de Bordeaux.",
+    "description": "Citadelle verrouillant l’estuaire de la Gironde en amont de Bordeaux.",
     "sources": ["Blaye"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
     "port": true,
-    "description": "Bastide anglaise fondée en 1270 au confluent de l'Isle et de la Dordogne, port du vin du Libournais.",
+    "description": "Bastide anglaise fondée en 1270 au confluent de l’Isle et de la Dordogne, port du vin du Libournais.",
     "sources": ["Libourne"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Grande abbaye bénédictine fondée en 1079 dans l'Entre-deux-Mers.",
+    "description": "Grande abbaye bénédictine fondée en 1079 dans l’Entre-deux-Mers.",
     "sources": ["Abbaye de La Sauve-Majeure"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls", "bld_vineyard_press"],
     "port": false,
-    "description": "Cité close née autour de l'ermitage du moine Émilion, juridiction viticole dotée de sa propre charte communale (1199).",
+    "description": "Cité close née autour de l’ermitage du moine Émilion, juridiction viticole dotée de sa propre charte communale (1199).",
     "sources": ["Saint-Émilion", "Juridiction de Saint-Émilion"]
   },
   {
@@ -150,7 +150,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Abbaye bénédictine fondée au IXe siècle sur l'Isle, dans le Libournais.",
+    "description": "Abbaye bénédictine fondée au IXe siècle sur l’Isle, dans le Libournais.",
     "sources": ["Guîtres"]
   },
   {
@@ -164,7 +164,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bastide anglaise fondée en 1315 dans l'Entre-deux-Mers.",
+    "description": "Bastide anglaise fondée en 1315 dans l’Entre-deux-Mers.",
     "sources": ["Créon (Gironde)"]
   },
   {

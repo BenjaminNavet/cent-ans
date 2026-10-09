@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale de l'Agenais sur la Garonne, siège d'un évêché et d'une sénéchaussée ; occupée par la France depuis la guerre de Saint-Sardos (1324).",
+    "description": "Capitale de l’Agenais sur la Garonne, siège d’un évêché et d’une sénéchaussée ; occupée par la France depuis la guerre de Saint-Sardos (1324).",
     "sources": [
       "Agen",
       "Agenais",
@@ -64,7 +64,7 @@
     "kind": "town",
     "name": {
       "display": "Villeneuve-sur-Lot",
-      "local": "Vilanova d'Agenés",
+      "local": "Vilanova d’Agenés",
       "local_language": "occitan"
     },
     "lonlat": [
@@ -106,7 +106,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine sur le Lot, fondée au haut Moyen Âge, dotée d'un scriptorium actif.",
+    "description": "Abbaye bénédictine sur le Lot, fondée au haut Moyen Âge, dotée d’un scriptorium actif.",
     "sources": [
       "Clairac (Lot-et-Garonne)"
     ]
@@ -158,7 +158,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d'Angleterre.",
+    "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d’Angleterre.",
     "sources": [
       "Marmande (Lot-et-Garonne)"
     ]
@@ -168,8 +168,8 @@
     "province": "prov_agenais",
     "kind": "town",
     "name": {
-      "display": "Penne-d'Agenais",
-      "local": "Pena d'Agenés",
+      "display": "Penne-d’Agenais",
+      "local": "Pena d’Agenés",
       "local_language": "occitan"
     },
     "lonlat": [
@@ -186,7 +186,7 @@
     "port": false,
     "description": "Ville fortifiée perchée au-dessus du Lot, dont le château fut plusieurs fois pris et détruit lors des guerres entre Capétiens et Plantagenêts.",
     "sources": [
-      "Penne-d'Agenais"
+      "Penne-d’Agenais"
     ]
   },
   {
@@ -209,7 +209,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Prieuré clunisien fondé vers 1049 près d'Agen, connu pour son église romane.",
+    "description": "Prieuré clunisien fondé vers 1049 près d’Agen, connu pour son église romane.",
     "sources": [
       "Prieuré de Moirax"
     ]
@@ -234,7 +234,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg sur l'Arrats, étape du chemin de Saint-Jacques-de-Compostelle en direction d'Agen.",
+    "description": "Bourg sur l’Arrats, étape du chemin de Saint-Jacques-de-Compostelle en direction d’Agen.",
     "sources": [
       "Astaffort"
     ]
@@ -260,7 +260,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Village agricole sur la Garonne en aval d'Agen, doté d'un prieuré.",
+    "description": "Village agricole sur la Garonne en aval d’Agen, doté d’un prieuré.",
     "sources": [
       "Sérignac-sur-Garonne"
     ]

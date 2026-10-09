@@ -1,7 +1,7 @@
 {
   "id": "fac_epirus",
   "name": {
-    "display": "Despotat d'Épire",
+    "display": "Despotat d’Épire",
     "local": "Δεσποτᾶτον τῆς Ἠπείρου",
     "local_language": "grec"
   },
@@ -18,7 +18,7 @@
   "primary_title": "tit_epirus",
   "heraldry": {
     "blazon": "Bandé d'argent et de gueules, au chef d'argent chargé d'une rose de gueules.",
-    "description": "Armes des Orsini (bandé, chef à la rose), maison des despotes d'Épire depuis 1323.",
+    "description": "Armes des Orsini (bandé, chef à la rose), maison des despotes d’Épire depuis 1323.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
@@ -45,9 +45,9 @@
     "trade": 30,
     "piety": 60
   },
-  "description": "Despotat d'Arta et de Janina, aux mains des Orsini ; Jean II est mort empoisonné par sa femme Anna Paléologine, qui gouverne pour son fils Nicéphore II. Andronic III mettra la main sur l'Épire en 1338.",
+  "description": "Despotat d’Arta et de Janina, aux mains des Orsini ; Jean II est mort empoisonné par sa femme Anna Paléologine, qui gouverne pour son fils Nicéphore II. Andronic III mettra la main sur l’Épire en 1338.",
   "sources": [
-    "Despotat d'Épire",
+    "Despotat d’Épire",
     "Nikephoros II Orsini",
     "Anna Palaiologina (fille d'Andronikos Angelos Palaiologos)"
   ]

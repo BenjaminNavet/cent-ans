@@ -37,13 +37,13 @@
     {
       "id": "obj_riga_indep",
       "title": "Une ville libre",
-      "description": "Secouer la tutelle de l'Ordre.",
+      "description": "Secouer la tutelle de l’Ordre.",
       "condition": {
         "kind": "be_independent"
       }
     }
   ],
-  "description": "Ville hanséatique de Riga, sous l'autorité de l'Ordre depuis 1330 ; conseil et guildes.",
+  "description": "Ville hanséatique de Riga, sous l’autorité de l’Ordre depuis 1330 ; conseil et guildes.",
   "sources": [
     "Riga"
   ]

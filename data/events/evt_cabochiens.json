@@ -1,7 +1,7 @@
 {
   "id": "evt_cabochiens",
   "title": "La révolte cabochienne",
-  "text": "Les bouchers de Paris, menés par l'écorcheur Simon Caboche et soutenus par le duc de Bourgogne, prennent la Bastille et imposent au roi une grande ordonnance de réforme. Le chaperon blanc est partout dans les rues.",
+  "text": "Les bouchers de Paris, menés par l’écorcheur Simon Caboche et soutenus par le duc de Bourgogne, prennent la Bastille et imposent au roi une grande ordonnance de réforme. Le chaperon blanc est partout dans les rues.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -28,7 +28,7 @@
   "map_scene": "revolt",
   "options": [
     {
-      "text": "Promulguer l'ordonnance cabochienne",
+      "text": "Promulguer l’ordonnance cabochienne",
       "effects": [
         {
           "type": "unrest",

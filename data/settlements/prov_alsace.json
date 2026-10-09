@@ -54,7 +54,7 @@
       "bld_vineyard_press"
     ],
     "port": false,
-    "description": "Ville libre d'empire prospère du vignoble alsacien, gouvernée par ses propres magistrats.",
+    "description": "Ville libre d’empire prospère du vignoble alsacien, gouvernée par ses propres magistrats.",
     "sources": [
       "Colmar"
     ]
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire, siège du bailliage impérial de la forêt de Haguenau.",
+    "description": "Ville libre d’empire, siège du bailliage impérial de la forêt de Haguenau.",
     "sources": [
       "Haguenau"
     ]
@@ -106,7 +106,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse impériale dominant la plaine d'Alsace, tenue en fief par des dynasties rivales.",
+    "description": "Forteresse impériale dominant la plaine d’Alsace, tenue en fief par des dynasties rivales.",
     "sources": [
       "Haut-Kœnigsbourg"
     ]
@@ -132,7 +132,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine fondée au VIIe siècle, l'une des plus anciennes d'Alsace.",
+    "description": "Abbaye bénédictine fondée au VIIe siècle, l’une des plus anciennes d’Alsace.",
     "sources": [
       "Abbaye de Marmoutier (Bas-Rhin)"
     ]
@@ -158,7 +158,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg viticole du pied des Vosges, sous la suzeraineté de l'évêque de Strasbourg.",
+    "description": "Bourg viticole du pied des Vosges, sous la suzeraineté de l’évêque de Strasbourg.",
     "sources": [
       "Barr"
     ]
@@ -184,7 +184,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg de la vallée vosgienne né autour de l'abbaye Saint-Grégoire, doté de franchises de marché dès le XIIIe siècle.",
+    "description": "Bourg de la vallée vosgienne né autour de l’abbaye Saint-Grégoire, doté de franchises de marché dès le XIIIe siècle.",
     "sources": [
       "Munster (Haut-Rhin)"
     ]
@@ -210,7 +210,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire fortifiée sur l'Ill, future tête de la Décapole alsacienne.",
+    "description": "Ville libre d’empire fortifiée sur l’Ill, future tête de la Décapole alsacienne.",
     "sources": [
       "Sélestat"
     ]
@@ -236,7 +236,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye impériale de chanoinesses nobles fondée en 880 par l'impératrice Richarde.",
+    "description": "Abbaye impériale de chanoinesses nobles fondée en 880 par l’impératrice Richarde.",
     "sources": [
       "Abbaye d'Andlau"
     ]

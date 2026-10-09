@@ -21,7 +21,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Seigneurie des comtes de Montefeltro, maîtres d'Urbino depuis 1234, gibelins souvent en lutte contre le pouvoir pontifical.",
+    "description": "Seigneurie des comtes de Montefeltro, maîtres d’Urbino depuis 1234, gibelins souvent en lutte contre le pouvoir pontifical.",
     "sources": [
       "Urbino",
       "Montefeltro"
@@ -72,7 +72,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg du comté d'Urbin sur le Metauro.",
+    "description": "Bourg du comté d’Urbin sur le Metauro.",
     "sources": [
       "Fermignano"
     ]

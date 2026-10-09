@@ -27,7 +27,7 @@
       "bld_archery_butts"
     ],
     "port": false,
-    "description": "Norfolk, Suffolk, Cambridgeshire et Lincolnshire : la région la plus peuplée d'Angleterre. Norwich (worsted), Yarmouth (hareng), Boston et Lynn (laine vers la Flandre), Ely et les Fens.",
+    "description": "Norfolk, Suffolk, Cambridgeshire et Lincolnshire : la région la plus peuplée d’Angleterre. Norwich (worsted), Yarmouth (hareng), Boston et Lynn (laine vers la Flandre), Ely et les Fens.",
     "sources": [
       "Norfolk",
       "Lincolnshire",
@@ -56,7 +56,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Grand port du hareng d'Est-Anglie, l'un des plus actifs du royaume et rival des ports flamands.",
+    "description": "Grand port du hareng d’Est-Anglie, l’un des plus actifs du royaume et rival des ports flamands.",
     "sources": [
       "Great Yarmouth"
     ]
@@ -67,7 +67,7 @@
     "kind": "town",
     "name": {
       "display": "Lynn",
-      "local": "Bishop's Lynn",
+      "local": "Bishop’s Lynn",
       "local_language": "moyen anglais"
     },
     "lonlat": [
@@ -83,7 +83,7 @@
       "bld_counting_house"
     ],
     "port": true,
-    "description": "Port hanséatique lié à la Hanse allemande, l'un des plus fréquentés d'Angleterre.",
+    "description": "Port hanséatique lié à la Hanse allemande, l’un des plus fréquentés d’Angleterre.",
     "sources": [
       "King's Lynn"
     ]
@@ -109,7 +109,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Grand port de l'étape de la laine, foire annuelle fréquentée par les marchands hanséates.",
+    "description": "Grand port de l’étape de la laine, foire annuelle fréquentée par les marchands hanséates.",
     "sources": [
       "Boston (Lincolnshire)"
     ]
@@ -160,7 +160,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ancienne capitale des rois d'Est-Anglie, importante ville monastique et marché.",
+    "description": "Ancienne capitale des rois d’Est-Anglie, importante ville monastique et marché.",
     "sources": [
       "Thetford"
     ]
@@ -185,7 +185,7 @@
       "bld_abbey"
     ],
     "port": false,
-    "description": "Prieuré augustinien de Walsingham, l'un des plus grands sanctuaires marials d'Europe.",
+    "description": "Prieuré augustinien de Walsingham, l’un des plus grands sanctuaires marials d’Europe.",
     "sources": [
       "Walsingham"
     ]
@@ -336,7 +336,7 @@
       "bld_university"
     ],
     "port": false,
-    "description": "Université née vers 1209 d'une dispersion des maîtres d'Oxford ; Peterhouse (1284), Clare (1326) et Pembroke (1347) sont déjà ou bientôt fondés. Voir [[cdx_universite_paris]].",
+    "description": "Université née vers 1209 d’une dispersion des maîtres d’Oxford ; Peterhouse (1284), Clare (1326) et Pembroke (1347) sont déjà ou bientôt fondés. Voir [[cdx_universite_paris]].",
     "sources": [
       "Université de Cambridge"
     ]

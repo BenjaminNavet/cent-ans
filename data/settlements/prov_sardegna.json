@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Cagliari, enlevée aux Pisans en 1326 par la Couronne d'Aragon, qui en fait la capitale de son royaume de Sardaigne ; la conquête de l'île reste inachevée (Arborée, Doria).",
+    "description": "Cagliari, enlevée aux Pisans en 1326 par la Couronne d’Aragon, qui en fait la capitale de son royaume de Sardaigne ; la conquête de l’île reste inachevée (Arborée, Doria).",
     "sources": [
       "Royaume de Sardaigne",
       "Judicat d'Arborea",
@@ -53,7 +53,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Commune du nord de la Sardaigne, soumise à la Couronne d'Aragon depuis 1323 ; après ses révoltes contre les Catalans, elle est repeuplée de colons catalans et aragonais.",
+    "description": "Commune du nord de la Sardaigne, soumise à la Couronne d’Aragon depuis 1323 ; après ses révoltes contre les Catalans, elle est repeuplée de colons catalans et aragonais.",
     "sources": [
       "Sassari"
     ]
@@ -79,7 +79,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Bastide fondée vers 1102 par la famille génoise Doria, qui la tient encore en 1337 malgré la conquête aragonaise de l'île ; prise par l'Aragon en 1354, repeuplée de Catalans, elle deviendra L'Alguer.",
+    "description": "Bastide fondée vers 1102 par la famille génoise Doria, qui la tient encore en 1337 malgré la conquête aragonaise de l’île ; prise par l’Aragon en 1354, repeuplée de Catalans, elle deviendra L’Alguer.",
     "sources": [
       "Alghero",
       "Famille Doria"
@@ -106,7 +106,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville minière (argent, plomb) fondée par Pise, passée sous la Couronne d'Aragon en 1324.",
+    "description": "Ville minière (argent, plomb) fondée par Pise, passée sous la Couronne d’Aragon en 1324.",
     "sources": [
       "Iglesias (Italie)"
     ]

@@ -6,7 +6,7 @@ extends TestCase
 ##  3. panneau des technologies : entièrement dans la vue.
 ## Usage : godot --headless --path game --script res://tests/lr09_overflow_test.gd
 
-const LONG := "Bohême propose un traité. Traité entre la Bohême et la France : paix, commerce et mariage de la princesse avec votre héritier, sous réserve de l'accord des États généraux réunis à Paris pour la circonstance."
+const LONG := "Bohême propose un traité. Traité entre la Bohême et la France : paix, commerce et mariage de la princesse avec votre héritier, sous réserve de l’accord des États généraux réunis à Paris pour la circonstance."
 const CONFIGS := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.25], [Vector2i(1280, 720), 1.25]]
 
 var map: Node3D

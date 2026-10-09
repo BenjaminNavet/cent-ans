@@ -22,7 +22,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Cité de l'archevêque Burchard Grelle, ville hanséatique largement autonome face à son suzerain, grand port de la Weser (elle ne sera reconnue ville libre d'Empire qu'en 1646).",
+    "description": "Cité de l’archevêque Burchard Grelle, ville hanséatique largement autonome face à son suzerain, grand port de la Weser (elle ne sera reconnue ville libre d’Empire qu’en 1646).",
     "sources": [
       "Brême",
       "Burchard Grelle"
@@ -75,7 +75,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville de l'Elbe inférieure, bailliage et péage de l'archevêché de Brême face au duché de Brunswick-Lunebourg.",
+    "description": "Ville de l’Elbe inférieure, bailliage et péage de l’archevêché de Brême face au duché de Brunswick-Lunebourg.",
     "sources": [
       "Stade"
     ]
@@ -100,7 +100,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Petite cité épiscopale sur l'Aller, siège d'un évêché depuis l'époque carolingienne.",
+    "description": "Petite cité épiscopale sur l’Aller, siège d’un évêché depuis l’époque carolingienne.",
     "sources": [
       "Verden (Aller)"
     ]

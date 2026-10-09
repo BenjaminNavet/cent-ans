@@ -1,7 +1,7 @@
 {
   "id": "chr_bernard_ezi_d_albret",
   "name": {
-    "display": "Bernard Ezi II d'Albret",
+    "display": "Bernard Ezi II d’Albret",
     "local": "Bernat Ezi II de Lebret",
     "local_language": "gascon"
   },
@@ -19,7 +19,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Sire d'Albret",
+      "title": "Sire d’Albret",
       "from": {
         "value": "1324",
         "uncertain": true
@@ -38,7 +38,7 @@
   "piety": 40,
   "starting_location": "prov_albret",
   "status": "at_court",
-  "description": "Sire d'Albret, grand vassal gascon du duc d'Aquitaine, fidèle à Édouard III au début de la guerre ; sa maison changera plusieurs fois de camp au cours de la guerre de Cent Ans.",
+  "description": "Sire d’Albret, grand vassal gascon du duc d’Aquitaine, fidèle à Édouard III au début de la guerre ; sa maison changera plusieurs fois de camp au cours de la guerre de Cent Ans.",
   "sources": [
     "Maison d'Albret",
     "Nérac"

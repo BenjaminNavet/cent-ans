@@ -22,7 +22,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Château ducal des Griffons sur l'Oder et port hanséatique.",
+    "description": "Château ducal des Griffons sur l’Oder et port hanséatique.",
     "sources": [
       "Szczecin"
     ]
@@ -75,7 +75,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville de l'Oder frontalière de la Marche.",
+    "description": "Ville de l’Oder frontalière de la Marche.",
     "sources": [
       "Gartz (Oder)"
     ]

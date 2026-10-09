@@ -18,7 +18,7 @@
   "primary_title": "tit_courland",
   "heraldry": {
     "blazon": "De sinople à la croix d'argent.",
-    "description": "Croix blanche de l'évêché de Courlande (armes simplifiées).",
+    "description": "Croix blanche de l’évêché de Courlande (armes simplifiées).",
     "primary_color": "#1E783C",
     "secondary_color": "#F5F1E6",
     "uncertain": true,
@@ -47,7 +47,7 @@
     "trade": 50,
     "piety": 80
   },
-  "description": "Le plus petit des évêchés livoniens : Pilten, Hasenpoth et Dondangen, coincés dans les terres de l'Ordre, dont l'évêque est le chapelain-confrère.",
+  "description": "Le plus petit des évêchés livoniens : Pilten, Hasenpoth et Dondangen, coincés dans les terres de l’Ordre, dont l’évêque est le chapelain-confrère.",
   "sources": [
     "Évêché de Courlande"
   ]

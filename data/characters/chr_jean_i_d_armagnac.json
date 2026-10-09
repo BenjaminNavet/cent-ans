@@ -1,8 +1,8 @@
 {
   "id": "chr_jean_i_d_armagnac",
   "name": {
-    "display": "Jean Ier d'Armagnac",
-    "local": "Jean Ier d'Armagnac",
+    "display": "Jean Ier d’Armagnac",
+    "local": "Jean Ier d’Armagnac",
     "local_language": "gascon"
   },
   "sex": "male",
@@ -19,7 +19,7 @@
   "historical": true,
   "titles": [
     {
-      "title": "Comte d'Armagnac"
+      "title": "Comte d’Armagnac"
     },
     {
       "title": "Comte de Rodez",
@@ -40,7 +40,7 @@
   "status": "at_court",
   "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Par sa femme Béatrice de Clermont, il tient aussi le Charolais depuis 1327.",
   "sources": [
-    "Jean Ier d'Armagnac",
+    "Jean Ier d’Armagnac",
     "Comté d'Armagnac"
   ]
 }

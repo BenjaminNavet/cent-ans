@@ -160,7 +160,7 @@ func _run() -> void:
 	check(layer._icons.visible, "shields shown at 1100 (normal view)")
 	var paris_index: int = data.index_by_id["set_paris"]
 	check(layer.marker_in_tier(paris_index), "Paris name + shield in tier at 1100 (rank 4)")
-	check(layer.has_shield(paris_index), "Paris has its holder's shield")
+	check(layer.has_shield(paris_index), "Paris has its holder’s shield")
 	var village_index := -1
 	for i in data.settlements.size():
 		if str(data.settlements[i]["kind"]) == "village":

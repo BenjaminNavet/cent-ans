@@ -1,5 +1,5 @@
 {
-  "description": "Poids de l'IA féodale (lot FE5, spec FE § 5) : chaque décision d'un seigneur ou d'un vassal est un score de ces poids, infléchi par le tempérament (ai_personality) de la faction.",
+  "description": "Poids de l’IA féodale (lot FE5, spec FE § 5) : chaque décision d’un seigneur ou d’un vassal est un score de ces poids, infléchi par le tempérament (ai_personality) de la faction.",
   "protection": {
     "base": 30,
     "power_weight": 20,

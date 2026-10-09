@@ -29,4 +29,4 @@ static func message(ids: Array) -> String:
 	var names := PackedStringArray()
 	for id in ids:
 		names.append(str(codex.call("title", str(id))) if codex != null else str(id))
-	return "%s dans l'herbier : %s" % ["Nouvelle plante" if ids.size() == 1 else "Nouvelles plantes", ", ".join(names)]
+	return "%s dans l’herbier : %s" % ["Nouvelle plante" if ids.size() == 1 else "Nouvelles plantes", ", ".join(names)]

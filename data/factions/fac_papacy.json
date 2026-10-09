@@ -1,7 +1,7 @@
 {
   "id": "fac_papacy",
   "name": {
-    "display": "Papauté d'Avignon",
+    "display": "Papauté d’Avignon",
     "local": "Sancta Sedes",
     "local_language": "latin"
   },
@@ -70,6 +70,6 @@
   "description": "Benoît XII, cistercien austère, entame la construction du Palais des papes (1335) et tente de prévenir la guerre entre Valois et Plantagenêt.",
   "sources": [
     "Benoît XII",
-    "Papauté d'Avignon"
+    "Papauté d’Avignon"
   ]
 }

@@ -59,7 +59,7 @@ func _check_pure() -> void:
 		{"id": 4, "abilities": [close]},
 	]
 	var command := BattleInput.ability_command(units, [1, 2, 3], 1)
-	check(command == {"type": "use_ability", "units": [1], "ability": "ability_pavise"}, "Alt+1: the first unit's first ability, for those that have it (%s)" % command)
+	check(command == {"type": "use_ability", "units": [1], "ability": "ability_pavise"}, "Alt+1: the first unit’s first ability, for those that have it (%s)" % command)
 	command = BattleInput.ability_command(units, [2, 3, 4], 2)
 	check(command.get("ability", "") == "ability_close_ranks" and command["units"] == [3, 4], "Alt+2: close ranks for the militia and the men-at-arms (%s)" % command)
 	check(BattleInput.ability_command(units, [2], 1).is_empty(), "no ability: no order")

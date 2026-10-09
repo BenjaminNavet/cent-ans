@@ -43,15 +43,15 @@
     },
     {
       "id": "obj_bearn_armagnac",
-      "title": "Vaincre l'Armagnac",
-      "description": "Soumettre le comté d'Armagnac, rival de la maison de Foix (Launac, 1362).",
+      "title": "Vaincre l’Armagnac",
+      "description": "Soumettre le comté d’Armagnac, rival de la maison de Foix (Launac, 1362).",
       "condition": {
         "kind": "hold_title",
         "title": "tit_armagnac"
       }
     }
   ],
-  "description": "Vicomté relevant en 1337 du duc d'Aquitaine (le roi d'Angleterre), d'où son rattachement de jure au duché de Guyenne ; Gaston Fébus la déclarera tenue « de Dieu seul » en 1347 (rang de comté par convention de schéma).",
+  "description": "Vicomté relevant en 1337 du duc d’Aquitaine (le roi d’Angleterre), d’où son rattachement de jure au duché de Guyenne ; Gaston Fébus la déclarera tenue « de Dieu seul » en 1347 (rang de comté par convention de schéma).",
   "sources": [
     "Vicomté de Béarn",
     "Gaston II de Foix-Béarn"

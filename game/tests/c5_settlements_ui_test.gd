@@ -124,7 +124,7 @@ func _run() -> void:
 	var here_detail := sim.call("settlement_detail", here) as Dictionary
 	if check(here != "" and str(here_detail.get("controller", "")) == "fac_france", "%s should be a French settlement" % here):
 		var strip: Control = map.ui.army_strip
-		check(strip.visible and strip.can_garrison, "the garrison button should be offered on the army's own settlement")
+		check(strip.visible and strip.can_garrison, "the garrison button should be offered on the army’s own settlement")
 		check(str(strip.garrison_disabled_reason) == "", "the garrison button should be enabled: %s" % strip.garrison_disabled_reason)
 		var before_army := sim.call("get_army", army_id) as Dictionary
 		var before_units: int = (before_army.get("units", []) as Array).size()
@@ -135,7 +135,7 @@ func _run() -> void:
 			var after_army := sim.call("get_army", army_id) as Dictionary
 			var after_detail := sim.call("settlement_detail", here) as Dictionary
 			check((after_detail.get("garrison", []) as Array).size() == before_garrison + 1,
-				"garrisoning a regiment should grow %s's garrison" % here)
+				"garrisoning a regiment should grow %s’s garrison" % here)
 			check((after_army.get("units", []) as Array).size() == before_units - 1,
 				"the army should shrink by the garrisoned regiment")
 

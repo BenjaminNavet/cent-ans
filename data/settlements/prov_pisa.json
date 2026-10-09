@@ -49,7 +49,7 @@
       "bld_abbey"
     ],
     "port": true,
-    "description": "Basilique et ancien port fluvial pisan sur l'Arno, lieu de débarquement traditionnel de saint Pierre selon la légende locale.",
+    "description": "Basilique et ancien port fluvial pisan sur l’Arno, lieu de débarquement traditionnel de saint Pierre selon la légende locale.",
     "sources": [
       "San Piero a Grado"
     ]
@@ -74,7 +74,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Place forte pisane contrôlant l'Arno face à Florence.",
+    "description": "Place forte pisane contrôlant l’Arno face à Florence.",
     "sources": [
       "Vicopisano"
     ]

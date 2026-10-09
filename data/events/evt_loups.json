@@ -1,7 +1,7 @@
 {
   "id": "evt_loups",
   "title": "Les loups",
-  "text": "L'hiver est si rude que les loups sortent des forêts et entrent dans les villages. On en a vu jusque sous les murs de la ville.",
+  "text": "L’hiver est si rude que les loups sortent des forêts et entrent dans les villages. On en a vu jusque sous les murs de la ville.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 80,

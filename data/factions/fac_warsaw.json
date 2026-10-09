@@ -18,7 +18,7 @@
   "primary_title": "tit_warsaw",
   "heraldry": {
     "blazon": "De gueules à l'aigle d'argent, à la bordure d'or.",
-    "description": "Aigle blanc de Mazovie, bordure d'or.",
+    "description": "Aigle blanc de Mazovie, bordure d’or.",
     "primary_color": "#C8102E",
     "secondary_color": "#F2C230",
     "uncertain": true,
@@ -63,7 +63,7 @@
     "trade": 45,
     "piety": 60
   },
-  "description": "Duché de Trojden Ier, à cheval sur Czersk, Varsovie et Liw ; son fils Bolesław est devenu prince de Galicie-Volhynie en 1323 et lui vaut d'être tuteur du jeune duc de Płock.",
+  "description": "Duché de Trojden Ier, à cheval sur Czersk, Varsovie et Liw ; son fils Bolesław est devenu prince de Galicie-Volhynie en 1323 et lui vaut d’être tuteur du jeune duc de Płock.",
   "sources": [
     "Trojden Ier de Mazovie",
     "Varsovie",

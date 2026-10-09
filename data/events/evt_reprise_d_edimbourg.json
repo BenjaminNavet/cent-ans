@@ -1,7 +1,7 @@
 {
   "id": "evt_reprise_d_edimbourg",
-  "title": "La reprise d'Édimbourg",
-  "text": "Au printemps 1341, William Douglas et quelques hommes entrent dans le château d'Édimbourg, tenu par les Anglais depuis 1335, déguisés en marchands avec des barils de vin et d'avoine ; la garnison est massacrée. En juin, David II rentre de France après sept ans d'exil et reprend possession de son royaume.",
+  "title": "La reprise d’Édimbourg",
+  "text": "Au printemps 1341, William Douglas et quelques hommes entrent dans le château d’Édimbourg, tenu par les Anglais depuis 1335, déguisés en marchands avec des barils de vin et d’avoine ; la garnison est massacrée. En juin, David II rentre de France après sept ans d’exil et reprend possession de son royaume.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -55,7 +55,7 @@
           "type": "opinion",
           "faction": "fac_england",
           "amount": -20,
-          "reason": "Perte d'Édimbourg"
+          "reason": "Perte d’Édimbourg"
         }
       ],
       "ai_weight": 3

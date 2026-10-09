@@ -2,7 +2,7 @@
   "id": "tit_papacy",
   "rank": "kingdom",
   "name": {
-    "display": "Papauté d'Avignon",
+    "display": "Papauté d’Avignon",
     "local": "Sancta Sedes",
     "local_language": "latin"
   },
@@ -21,7 +21,7 @@
     "faction": "fac_papacy",
     "sources": [
       "Benoît XII",
-      "Papauté d'Avignon"
+      "Papauté d’Avignon"
     ]
   }
 }

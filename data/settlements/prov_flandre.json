@@ -26,7 +26,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s'oppose à ses bourgeois qui dépendent de la laine anglaise.",
+    "description": "Comté sous suzeraineté française, dominé par les trois « bonnes villes » drapières. Le comte Louis de Nevers, fidèle au Valois, s’oppose à ses bourgeois qui dépendent de la laine anglaise.",
     "sources": [
       "Comté de Flandre",
       "Gand",
@@ -92,7 +92,7 @@
     "province": "prov_flandre",
     "kind": "town",
     "name": {
-      "display": "L'Écluse",
+      "display": "L’Écluse",
       "local": "Sluis",
       "local_language": "moyen néerlandais"
     },
@@ -135,7 +135,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville drapière de la Lys, tristement célèbre côté français depuis la bataille des Éperons d'or de 1302.",
+    "description": "Ville drapière de la Lys, tristement célèbre côté français depuis la bataille des Éperons d’or de 1302.",
     "sources": [
       "Courtrai"
     ]
@@ -187,7 +187,7 @@
       "bld_weaving_workshop"
     ],
     "port": false,
-    "description": "Ville drapière flamande sur l'Escaut, chef-lieu de châtellenie.",
+    "description": "Ville drapière flamande sur l’Escaut, chef-lieu de châtellenie.",
     "sources": [
       "Audenarde"
     ]
@@ -213,7 +213,7 @@
       "bld_guild_hall"
     ],
     "port": false,
-    "description": "Ville drapière sur la Dendre, chef-lieu du Land van Aalst tenu par le comte de Flandre en fief de l'Empire.",
+    "description": "Ville drapière sur la Dendre, chef-lieu du Land van Aalst tenu par le comte de Flandre en fief de l’Empire.",
     "sources": [
       "Alost"
     ]
@@ -238,7 +238,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville fortifiée au confluent de l'Escaut et de la Dendre, place de marché du nord-est flamand.",
+    "description": "Ville fortifiée au confluent de l’Escaut et de la Dendre, place de marché du nord-est flamand.",
     "sources": [
       "Termonde"
     ]
@@ -289,7 +289,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg drapier de la châtellenie d'Ypres, réputé pour son houblon et ses draps.",
+    "description": "Bourg drapier de la châtellenie d’Ypres, réputé pour son houblon et ses draps.",
     "sources": [
       "Poperinge"
     ]
@@ -314,7 +314,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Petite ville marchande sur l'Yser, dans les polders du littoral flamand.",
+    "description": "Petite ville marchande sur l’Yser, dans les polders du littoral flamand.",
     "sources": [
       "Dixmude"
     ]

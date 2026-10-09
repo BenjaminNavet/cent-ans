@@ -54,7 +54,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Port basque fondé sous fuero navarrais en 1180, passé à la Castille en 1200 ; actif dans le commerce de la laine avec l'Angleterre et la Flandre.",
+    "description": "Port basque fondé sous fuero navarrais en 1180, passé à la Castille en 1200 ; actif dans le commerce de la laine avec l’Angleterre et la Flandre.",
     "sources": [
       "Saint-Sébastien",
       "Histoire de Saint-Sébastien"
@@ -82,7 +82,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville fondée par Sanche VI de Navarre en 1181, principal centre de l'Alava.",
+    "description": "Ville fondée par Sanche VI de Navarre en 1181, principal centre de l’Alava.",
     "sources": [
       "Vitoria-Gasteiz"
     ]
@@ -134,7 +134,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port de pêche et de baleiniers basque, chef-lieu de la seigneurie de Biscaye jusqu'au XIVe siècle.",
+    "description": "Port de pêche et de baleiniers basque, chef-lieu de la seigneurie de Biscaye jusqu’au XIVe siècle.",
     "sources": [
       "Bermeo",
       "Seigneurie de Biscaye"

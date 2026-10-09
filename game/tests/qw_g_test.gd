@@ -40,7 +40,7 @@ func _check_marks() -> void:
 	check_eq(RichTooltip.mark(-1), "▼ ", "G3: mauvais = ▼")
 	check_eq(RichTooltip.mark(0), "", "G3: neutre sans marque")
 	var bbcode := RichTooltip.to_bbcode({"title": "T", "effects": [{"sign": 1, "text": "x"}, {"sign": -1, "text": "y"}]})
-	check(bbcode.contains("▲") and bbcode.contains("▼"), "G3: effets de l'infobulle marqués ▲/▼")
+	check(bbcode.contains("▲") and bbcode.contains("▼"), "G3: effets de l’infobulle marqués ▲/▼")
 
 
 func _check_terrain_tip() -> void:
@@ -48,7 +48,7 @@ func _check_terrain_tip() -> void:
 	var text := TerrainTip.text_for(decor)
 	check(text.begins_with("Verger — "), "G1: étiquette « Verger — … » (%s)" % text)
 	check(text.contains("couvert ▲ +20 %") and text.contains("vitesse ▼ −15 %"), "G1: valeurs signées (%s)" % text)
-	check_eq(TerrainTip.text_for({}), "", "G1: pas de décor, pas d'étiquette")
+	check_eq(TerrainTip.text_for({}), "", "G1: pas de décor, pas d’étiquette")
 
 
 func _check_colorblind(settings: Node) -> void:

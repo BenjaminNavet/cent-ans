@@ -1,7 +1,7 @@
 {
   "id": "evt_fougeres",
   "title": "Le sac de Fougères",
-  "text": "Au mépris de la trêve de Tours, le capitaine aragonais François de Surienne, au service du roi d'Angleterre, surprend et pille Fougères, place du duc de Bretagne. Charles VII, qui a réformé son armée, tient enfin le prétexte qu'il attendait.",
+  "text": "Au mépris de la trêve de Tours, le capitaine aragonais François de Surienne, au service du roi d’Angleterre, surprend et pille Fougères, place du duc de Bretagne. Charles VII, qui a réformé son armée, tient enfin le prétexte qu’il attendait.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -47,7 +47,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Exiger réparation de l'Angleterre",
+      "text": "Exiger réparation de l’Angleterre",
       "effects": [
         {
           "type": "treasury",

@@ -1,7 +1,7 @@
 {
   "id": "evt_algirdas_grand_duc",
   "title": "Algirdas grand-duc",
-  "text": "Pendant l'hiver, Kęstutis surprend Vilnius et s'empare de Jaunutis, qui s'enfuit ensuite à Moscou. Il appelle son frère aîné Algirdas, prince de Vitebsk, au trône grand-ducal ; les deux frères se partagent la Lituanie, Algirdas à l'est, Kęstutis à l'ouest face aux Ordres.",
+  "text": "Pendant l’hiver, Kęstutis surprend Vilnius et s’empare de Jaunutis, qui s’enfuit ensuite à Moscou. Il appelle son frère aîné Algirdas, prince de Vitebsk, au trône grand-ducal ; les deux frères se partagent la Lituanie, Algirdas à l’est, Kęstutis à l’ouest face aux Ordres.",
   "kind": "historical",
   "trigger": {
     "date": {

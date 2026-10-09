@@ -4,8 +4,8 @@
     "province": "prov_emporda",
     "kind": "city",
     "name": {
-      "display": "Castelló d'Empúries",
-      "local": "Castelló d'Empúries",
+      "display": "Castelló d’Empúries",
+      "local": "Castelló d’Empúries",
       "local_language": "catalan"
     },
     "lonlat": [
@@ -20,9 +20,9 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Capitale historique du comté d'Empúries.",
+    "description": "Capitale historique du comté d’Empúries.",
     "sources": [
-      "Castelló d'Empúries",
+      "Castelló d’Empúries",
       "Comté d'Empúries"
     ]
   },
@@ -46,7 +46,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg marchand de l'Empordà.",
+    "description": "Bourg marchand de l’Empordà.",
     "sources": [
       "Figueres"
     ]

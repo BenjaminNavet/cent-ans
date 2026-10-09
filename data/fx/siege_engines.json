@@ -1,5 +1,5 @@
 {
-  "description": "Engins de siège animés (lot SG2) : modèles Blender à pièces nommées (tools/blender_scripts/siege_engines.py), animés par nœuds d'après les tirs du cœur (get_shots, get_siege_events) et le rechargement qu'il expose (get_units().reload). Rendu seulement : aucune règle ici. Angles en degrés, durées en secondes (temps de bataille), longueurs en mètres.",
+  "description": "Engins de siège animés (lot SG2) : modèles Blender à pièces nommées (tools/blender_scripts/siege_engines.py), animés par nœuds d’après les tirs du cœur (get_shots, get_siege_events) et le rechargement qu’il expose (get_units().reload). Rendu seulement : aucune règle ici. Angles en degrés, durées en secondes (temps de bataille), longueurs en mètres.",
   "models_dir": "res://assets/models/siege/",
   "engines": {
     "unit_trebuchet": "trebuchet",
@@ -64,7 +64,7 @@
     "sway_per_m": 0.55
   },
   "ga3": {
-    "description": "Lot GA3-L5 (ADR 0140) : variante générée d'un modèle animé (découpe GA3, outil retiré : maillage GA3 découpé sur les nœuds du modèle procédural, mêmes noms). `model` = glb de models_dir (et `<model>_lod.glb`) ; les autres clés remplacent les réglages de l'engin pour cette variante (roues et cordes de la poutre plus grandes). `--no-ga3` rend le modèle procédural.",
+    "description": "Lot GA3-L5 (ADR 0140) : variante générée d’un modèle animé (découpe GA3, outil retiré : maillage GA3 découpé sur les nœuds du modèle procédural, mêmes noms). `model` = glb de models_dir (et `<model>_lod.glb`) ; les autres clés remplacent les réglages de l’engin pour cette variante (roues et cordes de la poutre plus grandes). `--no-ga3` rend le modèle procédural.",
     "trebuchet": {
       "model": "ga3_trebuchet"
     },

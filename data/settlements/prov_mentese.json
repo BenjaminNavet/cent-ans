@@ -43,7 +43,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg de l'intérieur.",
+    "description": "Bourg de l’intérieur.",
     "sources": [
       "Menteşe"
     ]
@@ -95,7 +95,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port de Carie ; le château de Saint-Pierre n'est bâti qu'en 1406.",
+    "description": "Port de Carie ; le château de Saint-Pierre n’est bâti qu’en 1406.",
     "sources": [
       "Menteşe"
     ]

@@ -53,7 +53,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Grande commune du Vermandois, siège d'une riche draperie.",
+    "description": "Grande commune du Vermandois, siège d’une riche draperie.",
     "sources": [
       "Saint-Quentin (Aisne)"
     ]
@@ -130,7 +130,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville forte sur la Somme, siège d'une châtellenie royale ; elle ne sera surnommée « la Pucelle » qu'après le siège de 1536.",
+    "description": "Ville forte sur la Somme, siège d’une châtellenie royale ; elle ne sera surnommée « la Pucelle » qu’après le siège de 1536.",
     "sources": [
       "Péronne (Somme)"
     ]
@@ -156,7 +156,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close sur la Somme, dotée d'un château comtal réputé imprenable.",
+    "description": "Ville close sur la Somme, dotée d’un château comtal réputé imprenable.",
     "sources": [
       "Château de Ham"
     ]
@@ -181,7 +181,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse royale gardant la frontière picarde face à l'Artois.",
+    "description": "Forteresse royale gardant la frontière picarde face à l’Artois.",
     "sources": [
       "Doullens"
     ]
@@ -256,7 +256,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg seigneurial dominant la vallée de l'Avre.",
+    "description": "Bourg seigneurial dominant la vallée de l’Avre.",
     "sources": [
       "Moreuil"
     ]

@@ -18,12 +18,12 @@ const RUBRICS := {
 	"other": "Autres mouvements",
 }
 const RUBRIC_HINTS := {
-	"receipts": "Impôts des colonies, commerce et seigneuriage, selon le taux d'imposition.",
+	"receipts": "Impôts des colonies, commerce et seigneuriage, selon le taux d’imposition.",
 	"armies": "Solde et vivres des armées et des garnisons (plus chers si la monnaie est affaiblie).",
 	"buildings": "Entretien des bâtiments des colonies ; réduit par la dévastation.",
 	"table": "Régimes alimentaires des provinces (La Table).",
-	"administration": "Part du revenu prise par la cour et l'administration (plus de provinces, plus de frais), refonte des monnaies comprise.",
-	"other": "Ce que le budget n'explique pas : rançons, tributs, agents, choix de la chronique, butin des chevauchées. Connu seulement après coup.",
+	"administration": "Part du revenu prise par la cour et l’administration (plus de provinces, plus de frais), refonte des monnaies comprise.",
+	"other": "Ce que le budget n’explique pas : rançons, tributs, agents, choix de la chronique, butin des chevauchées. Connu seulement après coup.",
 }
 const PREMIUM_NAME := "Surprime des mercenaires"
 const PREMIUM_HINT := "Ce que les compagnies coûtent au-delà de la solde ordinaire ; prélevé sur le trésor en fin de tour, en plus du solde. Impayée, une compagnie déserte ou pille."

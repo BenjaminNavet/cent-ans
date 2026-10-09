@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "Écartelé en sautoir : en chef et en pointe d'or à quatre pals de gueules ; aux flancs d'argent à l'aigle de sable.",
-    "description": "Armes des rois aragonais de Sicile : écartelé en sautoir d'Aragon (pals) et de Souabe (aigle des Hohenstaufen), rappelant l'héritage souabe revendiqué par la maison de Barcelone depuis le mariage de Pierre III avec Constance de Hohenstaufen.",
+    "description": "Armes des rois aragonais de Sicile : écartelé en sautoir d’Aragon (pals) et de Souabe (aigle des Hohenstaufen), rappelant l’héritage souabe revendiqué par la maison de Barcelone depuis le mariage de Pierre III avec Constance de Hohenstaufen.",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
@@ -38,7 +38,7 @@
     {
       "id": "obj_sicily_naples",
       "title": "Réunir les deux Siciles",
-      "description": "Reprendre Naples aux Angevins et réunifier le royaume de Sicile d'avant 1282.",
+      "description": "Reprendre Naples aux Angevins et réunifier le royaume de Sicile d’avant 1282.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_naples"

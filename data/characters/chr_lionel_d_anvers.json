@@ -1,7 +1,7 @@
 {
   "id": "chr_lionel_d_anvers",
   "name": {
-    "display": "Lionel d'Anvers",
+    "display": "Lionel d’Anvers",
     "local": "Lionel of Antwerp",
     "local_language": "moyen anglais"
   },
@@ -28,6 +28,6 @@
   "status": "unborn",
   "description": "Second fils survivant d'[[cdx_edouard_iii|Édouard III]], né à Anvers ; futur duc de Clarence.",
   "sources": [
-    "Lionel d'Anvers"
+    "Lionel d’Anvers"
   ]
 }

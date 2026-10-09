@@ -1,7 +1,7 @@
 {
   "id": "evt_annexion_de_majorque",
-  "title": "L'annexion de Majorque",
-  "text": "Pierre IV d'Aragon reproche à son cousin Jacques III de Majorque d'avoir refusé de lui prêter hommage lige. Il débarque aux Baléares au printemps 1343, puis envahit le Roussillon et la Cerdagne ; Jacques III, abandonné par Philippe VI, vend Montpellier à la France en 1349 et meurt à Llucmajor en tentant de reprendre son île.",
+  "title": "L’annexion de Majorque",
+  "text": "Pierre IV d’Aragon reproche à son cousin Jacques III de Majorque d’avoir refusé de lui prêter hommage lige. Il débarque aux Baléares au printemps 1343, puis envahit le Roussillon et la Cerdagne ; Jacques III, abandonné par Philippe VI, vend Montpellier à la France en 1349 et meurt à Llucmajor en tentant de reprendre son île.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -35,7 +35,7 @@
   },
   "options": [
     {
-      "text": "Réunir le royaume de Majorque à la couronne d'Aragon",
+      "text": "Réunir le royaume de Majorque à la couronne d’Aragon",
       "effects": [
         {
           "type": "transfer_title",
@@ -65,7 +65,7 @@
       "ai_weight": 3
     },
     {
-      "text": "Se contenter de l'hommage lige de Jacques III",
+      "text": "Se contenter de l’hommage lige de Jacques III",
       "effects": [
         {
           "type": "prestige",

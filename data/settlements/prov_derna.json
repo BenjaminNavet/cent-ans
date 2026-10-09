@@ -17,7 +17,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Port de pêcheurs et de caravanes sur la côte, dernière étape avant l'Égypte.",
+    "description": "Port de pêcheurs et de caravanes sur la côte, dernière étape avant l’Égypte.",
     "sources": [
       "Bardia"
     ]
@@ -70,7 +70,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Baie naturelle et puits, étape côtière vers l'Égypte.",
+    "description": "Baie naturelle et puits, étape côtière vers l’Égypte.",
     "sources": [
       "Tobrouk"
     ]

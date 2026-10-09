@@ -34,7 +34,7 @@
     {
       "id": "obj_connacht_high_king",
       "title": "Ard rí Éireann",
-      "description": "Deux des derniers grands rois d'Irlande furent des Ó Conchobhair : reconstituer un royaume d'Irlande gaélique.",
+      "description": "Deux des derniers grands rois d’Irlande furent des Ó Conchobhair : reconstituer un royaume d’Irlande gaélique.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
@@ -46,7 +46,7 @@
       }
     }
   ],
-  "description": "Royaume gaélique de Connacht, tenu par les Ó Conchobhair, dont deux membres furent les derniers grands rois d'Irlande (Toirdelbach Mór et Ruaidrí) ; site royal de Rathcroghan.",
+  "description": "Royaume gaélique de Connacht, tenu par les Ó Conchobhair, dont deux membres furent les derniers grands rois d’Irlande (Toirdelbach Mór et Ruaidrí) ; site royal de Rathcroghan.",
   "sources": [
     "Toirdelbach Ó Conchobair",
     "Royaume de Connacht",

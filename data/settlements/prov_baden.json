@@ -22,7 +22,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Résidence des margraves de Bade, station thermale connue depuis l'Antiquité romaine (Aquae Aureliae).",
+    "description": "Résidence des margraves de Bade, station thermale connue depuis l’Antiquité romaine (Aquae Aureliae).",
     "sources": [
       "Baden-Baden"
     ]
@@ -48,7 +48,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Seconde résidence des margraves de Bade, au confluent de la Nagold et de l'Enz.",
+    "description": "Seconde résidence des margraves de Bade, au confluent de la Nagold et de l’Enz.",
     "sources": [
       "Pforzheim"
     ]
@@ -98,7 +98,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg sur l'Alb, ancienne résidence carolingienne devenue ville margraviale.",
+    "description": "Bourg sur l’Alb, ancienne résidence carolingienne devenue ville margraviale.",
     "sources": [
       "Ettlingen"
     ]

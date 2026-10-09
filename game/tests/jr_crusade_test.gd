@@ -34,7 +34,7 @@ func _run() -> void:
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.call("use_test_file")
-		check(str(settings.get("path")) != "user://settings.cfg", "the test must not use the player's settings file")
+		check(str(settings.get("path")) != "user://settings.cfg", "the test must not use the player’s settings file")
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)
 		settings.call("set_value", "feudal_tutorial/done", true, false)
@@ -94,9 +94,9 @@ func _test_texts() -> void:
 	check(CrusadeSection.pending_text({"port_name": "Limassol", "units": 1, "turns_left": 1}) == "Limassol : 1 unité, dans 1 tour",
 		"pending: %s" % CrusadeSection.pending_text({"port_name": "Limassol", "units": 1, "turns_left": 1}))
 	var view := {"fervor": 59, "floor": 50, "target_name": "Jérusalem", "alms": 1480,
-		"changes": [{"cause": "Le vœu s'use", "delta": -1}, {"cause": "Victoire sur une autre foi", "delta": 6}]}
+		"changes": [{"cause": "Le vœu s’use", "delta": -1}, {"cause": "Victoire sur une autre foi", "delta": 6}]}
 	var tip := CrusadeSection.tooltip(view)
-	check(tip.contains("Ferveur : 59 / 100") and tip.contains("Le vœu s'use") and tip.contains("%s1" % Money.MINUS)
+	check(tip.contains("Ferveur : 59 / 100") and tip.contains("Le vœu s’use") and tip.contains("%s1" % Money.MINUS)
 		and tip.contains("+6") and tip.contains("Plancher : 50"), "gauge tooltip: %s" % tip)
 	check(CrusadeSection.tooltip({"fervor": 60}).contains("Aucun mouvement"), "tooltip without changes")
 	var marks := CrusadeSection.thresholds()
@@ -117,11 +117,11 @@ func _test_texts() -> void:
 
 func _test_events() -> void:
 	var freed := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true,
-		"text_fr": "Jérusalem délivrée ! L'ost tient la cité de son vœu et y établit son siège."}
+		"text_fr": "Jérusalem délivrée ! L’ost tient la cité de son vœu et y établit son siège."}
 	var preached := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_cyprus",
 		"text_fr": "Les croisés prêchent le passage : 3 unités de volontaires sont attendues à Limassol dans 2 tours."}
 	var lost := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true, "loss": true,
-		"text_fr": "Jérusalem est perdue : la ferveur des croisés n'a plus de plancher."}
+		"text_fr": "Jérusalem est perdue : la ferveur des croisés n’a plus de plancher."}
 	# JR5 : le caractère public vient du champ `public`, plus du texte.
 	var marked := {"kind": "crusade", "faction": CRUSADERS, "text_fr": "Jérusalem délivrée !"}
 	check(SeasonReport.is_public(freed) and not SeasonReport.is_public(preached) and not SeasonReport.is_public(marked),
@@ -160,7 +160,7 @@ func _test_section(map: Node3D) -> void:
 	await process_frame
 	var panel: FactionPanel = map.ui.faction_panel
 	var section: CrusadeSection = panel.crusade_section
-	if not check(panel.visible and section != null and section.is_visible_in_tree(), "the fervour section shows in the crusader's faction panel"):
+	if not check(panel.visible and section != null and section.is_visible_in_tree(), "the fervour section shows in the crusader’s faction panel"):
 		return
 	var fervor := int(view["fervor"])
 	check(section.header_label.text == "Ferveur" and section.value_label.text == "%d / 100" % fervor, "starting fervour shown: %s" % section.value_label.text)

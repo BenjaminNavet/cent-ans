@@ -247,7 +247,7 @@ func _run_assets() -> void:
 			var cv3_hand := cv2_figures.bearer_anchor()
 			_check(cv3_hand.y > 3.0, "CV3-5: the standard is held high by the mounted lord, got %.2f" % cv3_hand.y)
 			cv2_figures.set_view(900.0, 0.0)
-			_check(cv2_figures.bearer_anchor().length() < 0.01, "CV3-5: far away the standard is back at the marker's foot")
+			_check(cv2_figures.bearer_anchor().length() < 0.01, "CV3-5: far away the standard is back at the marker’s foot")
 		_check(cv2_figures.get_node_or_null("Bivouac") != null, "CV2: idle army in the field should camp")
 		cv2_figures.set_walking(true)
 		cv2_figures.set_view(100.0, 1.0)
@@ -515,7 +515,7 @@ func _check_codex_homonyms_b8() -> void:
 	_check(place.contains(poitiers_link + "[color="), "B8: « à Poitiers » should link the battle: %s" % place)
 	var both := CodexText.format("Louis de Poitiers meurt ; dix ans plus tard, à Poitiers.", true)
 	_check(both.count("url=cdx:cdx_poitiers") == 1 and both.find(poitiers_link) > both.find("à "), "B8: only the later « à Poitiers » is linked: %s" % both)
-	var longest := CodexText.format("Le duc Louis d'Orléans est assassiné.", true)
+	var longest := CodexText.format("Le duc Louis d’Orléans est assassiné.", true)
 	_check(longest.contains("[url=cdx:cdx_louis_d_orleans]") and not longest.contains("[url=cdx:cdx_orleans]"), "B8: the longest alias should win: %s" % longest)
 	var hyphen := CodexText.format("Les foires de Poitiers-la-Neuve.", true)
 	_check(not hyphen.contains(poitiers_link), "B8: an alias glued by a hyphen is not linked: %s" % hyphen)
@@ -650,7 +650,7 @@ func _run_flow() -> void:
 		return
 	# Réglages : écriture, relecture, section audio conservée.
 	var test_path: String = settings.get("path")
-	_check(test_path != "user://settings.cfg", "smoke must not use the player's settings file")
+	_check(test_path != "user://settings.cfg", "smoke must not use the player’s settings file")
 	var seeded := ConfigFile.new()
 	seeded.set_value("audio", "legacy_key", 0.42)
 	seeded.save(test_path)
@@ -997,7 +997,7 @@ func _run_tutorial() -> void:
 
 	# BP1 : le journal et l'aide F1 sont branchés sur les bulles du Codex.
 	_check(bool(map.ui.log_text.has_meta("codex_attached")), "BP1: campaign log should be attached to CodexBubbles")
-	map.ui.add_events([{"kind": "chronicle", "text": "La victoire de Crécy marque l'Europe."}], "Test BP1")
+	map.ui.add_events([{"kind": "chronicle", "text": "La victoire de Crécy marque l’Europe."}], "Test BP1")
 	_check(map.ui.log_text.text.contains("[url=cdx:"), "BP1: a known alias in a log event should be auto-linked: %s" % map.ui.log_text.text)
 	map.help.toggle()
 	_check(bool(map.help.text.has_meta("codex_attached")) and map.help.text.text.contains("[url=cdx:"), "BP1: F1 help should be attached to CodexBubbles and auto-link known aliases (Crécy, Peste noire…)")

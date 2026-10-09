@@ -26,7 +26,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Électorat de Cologne (archevêque Walram de Juliers) et ville libre de Cologne, la plus grande cité d'Allemagne ; comtés de Juliers (Guillaume, allié d'Édouard III, marquis en 1336), de Berg et de Clèves.",
+    "description": "Électorat de Cologne (archevêque Walram de Juliers) et ville libre de Cologne, la plus grande cité d’Allemagne ; comtés de Juliers (Guillaume, allié d’Édouard III, marquis en 1336), de Berg et de Clèves.",
     "sources": [
       "Électorat de Cologne",
       "Cologne",
@@ -54,7 +54,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Résidence de l'archevêque-électeur de Cologne depuis que la ville de Cologne a conquis son autonomie communale en 1288.",
+    "description": "Résidence de l’archevêque-électeur de Cologne depuis que la ville de Cologne a conquis son autonomie communale en 1288.",
     "sources": [
       "Bonn"
     ]
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville rhénane de l'archevêché de Cologne (depuis 1167), port fluvial et centre du commerce du tuf et des meules volcaniques de l'Eifel.",
+    "description": "Ville rhénane de l’archevêché de Cologne (depuis 1167), port fluvial et centre du commerce du tuf et des meules volcaniques de l’Eifel.",
     "sources": [
       "Andernach"
     ]
@@ -106,7 +106,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Forteresse de l'archevêché de Cologne dominant la vallée du Rhin près de Bonn.",
+    "description": "Forteresse de l’archevêché de Cologne dominant la vallée du Rhin près de Bonn.",
     "sources": [
       "Godesburg"
     ]
@@ -158,7 +158,7 @@
       "bld_water_mill"
     ],
     "port": false,
-    "description": "Bourg d'origine romaine de l'Eifel, sous la juridiction de l'archevêché de Cologne.",
+    "description": "Bourg d’origine romaine de l’Eifel, sous la juridiction de l’archevêché de Cologne.",
     "sources": [
       "Zülpich"
     ]
@@ -184,7 +184,7 @@
       "bld_windmill"
     ],
     "port": false,
-    "description": "Bourg de l'électorat de Cologne doté de droits de marché depuis 1276.",
+    "description": "Bourg de l’électorat de Cologne doté de droits de marché depuis 1276.",
     "sources": [
       "Bergheim"
     ]
@@ -210,7 +210,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville siège du comté de Juliers, élevé en marquisat en 1336 pour Guillaume, allié d'Édouard III.",
+    "description": "Ville siège du comté de Juliers, élevé en marquisat en 1336 pour Guillaume, allié d’Édouard III.",
     "sources": [
       "Duché de Juliers",
       "Juliers"

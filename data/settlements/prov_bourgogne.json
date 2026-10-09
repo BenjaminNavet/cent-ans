@@ -38,7 +38,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Abbaye fondée en 1098, maison mère de l'ordre cistercien.",
+    "description": "Abbaye fondée en 1098, maison mère de l’ordre cistercien.",
     "sources": ["Abbaye de Cîteaux"]
   },
   {
@@ -52,7 +52,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château féodal dominant la plaine de l'Auxois.",
+    "description": "Château féodal dominant la plaine de l’Auxois.",
     "sources": ["Château de Châteauneuf (Côte-d'Or)"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg perché autour d'une ancienne abbaye bénédictine, en Auxois.",
+    "description": "Bourg perché autour d’une ancienne abbaye bénédictine, en Auxois.",
     "sources": ["Flavigny-sur-Ozerain"]
   },
   {
@@ -80,7 +80,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ancienne cité épiscopale d'Augustodunum, ceinte de remparts antiques, siège d'un comté réuni au duché.",
+    "description": "Ancienne cité épiscopale d’Augustodunum, ceinte de remparts antiques, siège d’un comté réuni au duché.",
     "sources": ["Autun"]
   },
   {
@@ -108,7 +108,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville forte perchée sur un éperon rocheux de l'Armançon, capitale de l'Auxois.",
+    "description": "Ville forte perchée sur un éperon rocheux de l’Armançon, capitale de l’Auxois.",
     "sources": ["Semur-en-Auxois"]
   },
   {
@@ -122,7 +122,7 @@
     "fortification_level": 1,
     "buildings": ["bld_abbey", "bld_scriptorium"],
     "port": false,
-    "description": "Maison mère de l'ordre clunisien, fondée en 910, l'une des plus puissantes abbayes de la chrétienté.",
+    "description": "Maison mère de l’ordre clunisien, fondée en 910, l’une des plus puissantes abbayes de la chrétienté.",
     "sources": ["Abbaye de Cluny"]
   },
   {
@@ -150,7 +150,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Forteresse ducale sur la Brenne, gardant la marche nord de l'Auxois.",
+    "description": "Forteresse ducale sur la Brenne, gardant la marche nord de l’Auxois.",
     "sources": ["Château de Montbard"]
   },
   {

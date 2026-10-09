@@ -45,7 +45,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château de Peel, sur l'îlot de Saint Patrick.",
+    "description": "Château de Peel, sur l’îlot de Saint Patrick.",
     "sources": [
       "Château de Peel"
     ]
@@ -68,7 +68,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": true,
-    "description": "Petit port de pêche sur la côte est de l'île.",
+    "description": "Petit port de pêche sur la côte est de l’île.",
     "sources": [
       "Douglas (Île de Man)"
     ]

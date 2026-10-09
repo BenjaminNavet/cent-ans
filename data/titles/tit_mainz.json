@@ -8,7 +8,7 @@
   },
   "heraldry": {
     "blazon": "De gueules à la roue d'argent à six rais.",
-    "description": "La roue de Mayence, attribut héraldique de l'archevêché-électorat depuis le XIIIe siècle.",
+    "description": "La roue de Mayence, attribut héraldique de l’archevêché-électorat depuis le XIIIe siècle.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
   },
@@ -25,7 +25,7 @@
     ]
   },
   "succession_law": "elective",
-  "description": "Principauté ecclésiastique de l'archevêque-électeur de Mayence, archichancelier du royaume de Germanie ; classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans, bien qu'il s'agisse formellement d'un prince-évêché électif.",
+  "description": "Principauté ecclésiastique de l’archevêque-électeur de Mayence, archichancelier du royaume de Germanie ; classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans, bien qu’il s’agisse formellement d’un prince-évêché électif.",
   "sources": [
     "Électorat de Mayence",
     "Henri III de Virnebourg"

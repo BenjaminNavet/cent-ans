@@ -1,7 +1,7 @@
 {
   "id": "evt_cadzand",
   "title": "Le raid de Cadzand",
-  "text": "Le 9 novembre 1337, les nefs anglaises de [[cdx_gautier_de_mauny|Gautier de Mauny]] et du comte de Derby abordent l'île de Cadzand, à l'entrée du Zwin. La garnison flamande de Guy, bâtard de Flandre, est taillée en pièces par les archers ; Guy lui-même est pris. C'est le premier vrai combat de la guerre : Édouard montre aux villes de Flandre ce qu'il en coûte de servir Philippe.",
+  "text": "Le 9 novembre 1337, les nefs anglaises de [[cdx_gautier_de_mauny|Gautier de Mauny]] et du comte de Derby abordent l’île de Cadzand, à l’entrée du Zwin. La garnison flamande de Guy, bâtard de Flandre, est taillée en pièces par les archers ; Guy lui-même est pris. C’est le premier vrai combat de la guerre : Édouard montre aux villes de Flandre ce qu’il en coûte de servir Philippe.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -57,7 +57,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Piller l'île et rembarquer",
+      "text": "Piller l’île et rembarquer",
       "effects": [
         {
           "type": "prestige",

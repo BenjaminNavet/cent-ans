@@ -15,7 +15,7 @@
     "rally_morale": 45.0
   },
   "journal": "{general} rallie les {unit} !",
-  "journal_failure": "Les {unit} n'entendent pas l'appel de {general}.",
+  "journal_failure": "Les {unit} n’entendent pas l’appel de {general}.",
   "ai": {
     "min_units": 1
   },

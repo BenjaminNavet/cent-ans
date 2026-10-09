@@ -75,7 +75,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Nécropole royale des Mérinides, enceinte fortifiée sur l'ancienne Sala.",
+    "description": "Nécropole royale des Mérinides, enceinte fortifiée sur l’ancienne Sala.",
     "sources": [
       "Chellah"
     ]
@@ -102,7 +102,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Port d'Anfa (futur Casablanca), débarcadère de blé et de laine de la Chaouia.",
+    "description": "Port d’Anfa (futur Casablanca), débarcadère de blé et de laine de la Chaouia.",
     "sources": [
       "Casablanca"
     ]

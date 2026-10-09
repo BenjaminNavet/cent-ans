@@ -3,7 +3,7 @@
   "name": {
     "display": "Hareng saur et poisson de carême"
   },
-  "description": "Plus de cent cinquante [[cdx_jours_maigres|jours maigres]] par an : le [[cdx_hareng|hareng]] salé ou saur des pêcheries de la [[cdx_hanse|Hanse]] et de la Manche remplit les tonneaux. En 1429, la [[cdx_bataille_des_harengs|bataille des Harengs]] se livre autour d'un convoi de poisson de [[cdx_careme|Carême]] destiné aux Anglais devant Orléans.",
+  "description": "Plus de cent cinquante [[cdx_jours_maigres|jours maigres]] par an : le [[cdx_hareng|hareng]] salé ou saur des pêcheries de la [[cdx_hanse|Hanse]] et de la Manche remplit les tonneaux. En 1429, la [[cdx_bataille_des_harengs|bataille des Harengs]] se livre autour d’un convoi de poisson de [[cdx_careme|Carême]] destiné aux Anglais devant Orléans.",
   "requirements": {
     "resources": [
       "res_fish",

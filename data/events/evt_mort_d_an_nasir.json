@@ -1,7 +1,7 @@
 {
   "id": "evt_mort_d_an_nasir",
-  "title": "La mort d'an-Nasir Muhammad",
-  "text": "Après trente ans de règne, [[cdx_an_nasir_muhammad|an-Nasir Muhammad]] s'éteint au Caire. Ses émirs placent sur le trône son fils Abu Bakr, puis le déposent en quelques semaines : le sultanat des [[cdx_mamelouks|Mamelouks]] entre dans le temps des sultans enfants, jouets des grands émirs.",
+  "title": "La mort d’an-Nasir Muhammad",
+  "text": "Après trente ans de règne, [[cdx_an_nasir_muhammad|an-Nasir Muhammad]] s’éteint au Caire. Ses émirs placent sur le trône son fils Abu Bakr, puis le déposent en quelques semaines : le sultanat des [[cdx_mamelouks|Mamelouks]] entre dans le temps des sultans enfants, jouets des grands émirs.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -45,7 +45,7 @@
       "ai_weight": 2
     },
     {
-      "text": "Laisser l'émir Qawsun faire et défaire les sultans",
+      "text": "Laisser l’émir Qawsun faire et défaire les sultans",
       "effects": [
         {
           "type": "kill_character",

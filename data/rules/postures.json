@@ -1,5 +1,5 @@
 {
-  "description": "Postures d'armée de la campagne (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 1) : embuscade, marche forcée, camp retranché. Chances en fraction (0-1), pourcentages en points, distances en km. Les classes de couvert d'une case viennent de la couverture forestière (forest_cover.json) et de wetlands.png, le bocage du terrain de la province.",
+  "description": "Postures d’armée de la campagne (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 1) : embuscade, marche forcée, camp retranché. Chances en fraction (0-1), pourcentages en points, distances en km. Les classes de couvert d’une case viennent de la couverture forestière (forest_cover.json) et de wetlands.png, le bocage du terrain de la province.",
   "ambush": {
     "min_movement_left_percent": 25.0,
     "detect_radius_army_km": 3.0,

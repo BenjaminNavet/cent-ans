@@ -6,7 +6,7 @@ extends PanelContainer
 ## un court délai (pas de clignotement pour une fin de tour rapide), en fondu, en haut de l'écran
 ## sous la barre supérieure ; il n'intercepte pas la souris (caméra et survol continuent).
 
-const TEXT := "Les cours d'Europe délibèrent…"
+const TEXT := "Les cours d’Europe délibèrent…"
 ## Délai avant l'apparition (s) et durée du fondu (s).
 const SHOW_DELAY := 0.15
 const FADE := 0.25

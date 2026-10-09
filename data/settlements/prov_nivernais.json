@@ -52,7 +52,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité épiscopale sur l'Yonne, siège du comté d'Auxerre tenu par Jean II de Chalon-Auxerre.",
+    "description": "Cité épiscopale sur l’Yonne, siège du comté d’Auxerre tenu par Jean II de Chalon-Auxerre.",
     "sources": [
       "Auxerre",
       "Comté d'Auxerre"
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Ville close autour d'un prieuré clunisien, sur le pont franchissant la Loire.",
+    "description": "Ville close autour d’un prieuré clunisien, sur le pont franchissant la Loire.",
     "sources": [
       "La Charité-sur-Loire"
     ]
@@ -181,7 +181,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg sur l'Yonne, port du flottage du bois du Morvan vers Paris.",
+    "description": "Bourg sur l’Yonne, port du flottage du bois du Morvan vers Paris.",
     "sources": [
       "Clamecy (Nièvre)"
     ]
@@ -231,7 +231,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg autour d'une ancienne abbaye bénédictine, en Morvan.",
+    "description": "Bourg autour d’une ancienne abbaye bénédictine, en Morvan.",
     "sources": [
       "Corbigny"
     ]

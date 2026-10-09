@@ -1,7 +1,7 @@
 {
   "id": "evt_legat_pontifical",
   "title": "Le légat pontifical",
-  "text": "Un légat du pape arrive, porteur de bulles et de demandes de décimes. Il sollicite l'aide du prince pour les affaires de l'Église et fait miroiter la bienveillance du Saint-Père.",
+  "text": "Un légat du pape arrive, porteur de bulles et de demandes de décimes. Il sollicite l’aide du prince pour les affaires de l’Église et fait miroiter la bienveillance du Saint-Père.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 90,

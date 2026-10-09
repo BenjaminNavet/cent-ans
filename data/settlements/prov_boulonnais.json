@@ -25,7 +25,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "Capitale du comté de Boulogne, tenu par la jeune Jeanne Ire d'Auvergne ; grand port de pêche sur la Manche.",
+    "description": "Capitale du comté de Boulogne, tenu par la jeune Jeanne Ire d’Auvergne ; grand port de pêche sur la Manche.",
     "sources": [
       "Boulogne-sur-Mer",
       "Comté de Boulogne"
@@ -54,7 +54,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "Ville close et port français face à l'Angleterre ; sa prise par Édouard III n'aura lieu qu'en 1347.",
+    "description": "Ville close et port français face à l’Angleterre ; sa prise par Édouard III n’aura lieu qu’en 1347.",
     "sources": [
       "Calais",
       "Siège de Calais (1346-1347)"
@@ -106,7 +106,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "Petit port de pêche du détroit, ancien point de traversée vers l'Angleterre avant l'essor de Calais.",
+    "description": "Petit port de pêche du détroit, ancien point de traversée vers l’Angleterre avant l’essor de Calais.",
     "sources": [
       "Wissant"
     ]
@@ -133,7 +133,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "Ancien port devenu ville close en amont de l'ensablement de la Canche, chef-lieu de comté.",
+    "description": "Ancien port devenu ville close en amont de l’ensablement de la Canche, chef-lieu de comté.",
     "sources": [
       "Montreuil-sur-Mer"
     ]
@@ -158,7 +158,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse comtale gardant l'accès à Calais, au cœur d'un comté disputé avec l'Angleterre.",
+    "description": "Forteresse comtale gardant l’accès à Calais, au cœur d’un comté disputé avec l’Angleterre.",
     "sources": [
       "Comté de Guînes"
     ]
@@ -209,7 +209,7 @@
     ],
     "port": true,
     "sea_zone": "sea_channel",
-    "description": "Petit port de pêche à l'embouchure de la Canche.",
+    "description": "Petit port de pêche à l’embouchure de la Canche.",
     "sources": [
       "Étaples"
     ]

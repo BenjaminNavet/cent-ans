@@ -72,7 +72,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville libre d'empire fortifiée dominant la vallée de la Tauber.",
+    "description": "Ville libre d’empire fortifiée dominant la vallée de la Tauber.",
     "sources": [
       "Rothenburg ob der Tauber"
     ]
@@ -98,7 +98,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye cistercienne fondée en 1127, première de l'ordre en Franconie, dans la forêt de Steigerwald.",
+    "description": "Abbaye cistercienne fondée en 1127, première de l’ordre en Franconie, dans la forêt de Steigerwald.",
     "sources": [
       "Ebrach"
     ]

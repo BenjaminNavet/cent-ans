@@ -25,7 +25,7 @@
       "bld_muster_field"
     ],
     "port": true,
-    "description": "Capitale du comté de Ponthieu, hérité par Édouard III d'Angleterre de sa grand-mère Éléonore de Castille.",
+    "description": "Capitale du comté de Ponthieu, hérité par Édouard III d’Angleterre de sa grand-mère Éléonore de Castille.",
     "sources": [
       "Abbeville",
       "Comté de Ponthieu"
@@ -80,7 +80,7 @@
       "bld_stone_walls"
     ],
     "port": true,
-    "description": "Port à l'embouchure de la Somme, ancien point d'embarquement de Guillaume le Conquérant, dans le comté de Ponthieu.",
+    "description": "Port à l’embouchure de la Somme, ancien point d’embarquement de Guillaume le Conquérant, dans le comté de Ponthieu.",
     "sources": [
       "Saint-Valery-sur-Somme"
     ]
@@ -183,7 +183,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg du Vimeu ponthevin autour d'un manoir fortifié des sires de Rambures.",
+    "description": "Bourg du Vimeu ponthevin autour d’un manoir fortifié des sires de Rambures.",
     "sources": [
       "Rambures"
     ]
@@ -208,7 +208,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg fortifié sur l'Authie, ancien chef-lieu de châtellenie.",
+    "description": "Bourg fortifié sur l’Authie, ancien chef-lieu de châtellenie.",
     "sources": [
       "Auxi-le-Château"
     ]

@@ -43,7 +43,7 @@
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Bourg de la Nerl avec l'église Saint-Boris-et-Gleb (1152).",
+    "description": "Bourg de la Nerl avec l’église Saint-Boris-et-Gleb (1152).",
     "sources": [
       "Kidekcha"
     ]
@@ -68,7 +68,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville de l'Opolié, fondée en 1152.",
+    "description": "Ville de l’Opolié, fondée en 1152.",
     "sources": [
       "Iouriev-Polski"
     ]

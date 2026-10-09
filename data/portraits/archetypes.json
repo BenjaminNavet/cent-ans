@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "DA2 : banque d'archétypes de portraits pour les personnages sans portrait historique (nés en jeu) et variantes âgées des grandes figures. Les images sont générées par `cent-ans assets portrait-archetypes` (tools/cent_ans_tools/portrait_archetypes.py) ; le jeu choisit l'image par hachage déterministe de l'id du personnage dans la case (rang, sexe, tranche d'âge, aire culturelle). Rendu seulement : aucune règle de jeu.",
+  "description": "DA2 : banque d’archétypes de portraits pour les personnages sans portrait historique (nés en jeu) et variantes âgées des grandes figures. Les images sont générées par `cent-ans assets portrait-archetypes` (tools/cent_ans_tools/portrait_archetypes.py) ; le jeu choisit l’image par hachage déterministe de l’id du personnage dans la case (rang, sexe, tranche d’âge, aire culturelle). Rendu seulement : aucune règle de jeu.",
   "image_size": 512,
   "archetype_dir": "portraits/archetypes",
   "aged_dir": "portraits/aged",
@@ -227,7 +227,7 @@
     },
     {
       "id": "horde",
-      "label": "Horde d'Or, Bachkirs, Crimée",
+      "label": "Horde d’Or, Bachkirs, Crimée",
       "factions": [
         "fac_golden_horde",
         "fac_bashkir"
@@ -236,7 +236,7 @@
     },
     {
       "id": "anatolie",
-      "label": "Beyliks turcs d'Anatolie",
+      "label": "Beyliks turcs d’Anatolie",
       "factions": [
         "fac_ottoman",
         "fac_karasi",

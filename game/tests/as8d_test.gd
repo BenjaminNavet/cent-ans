@@ -30,7 +30,7 @@ func _check_curve(tre: Dictionary) -> void:
 		return
 	check(is_zero_approx(float(lut[0])) and is_equal_approx(float(lut[lut.size() - 1]), 1.0), "lut de 0 à 1")
 	var half := float(lut[lut.size() / 2])
-	check(half > 0.3 and half < 0.9, "la verge a franchi l'essentiel de l'arc à mi-course (%.2f)" % half)
+	check(half > 0.3 and half < 0.9, "la verge a franchi l’essentiel de l’arc à mi-course (%.2f)" % half)
 	for v in lut:
 		check(float(v) >= 0.0 and float(v) <= 1.2, "valeur de lut bornée")
 	var cocked := float(tre["cocked_deg"])
@@ -49,7 +49,7 @@ func _check_curve(tre: Dictionary) -> void:
 func _check_bombard(bombard: Dictionary) -> void:
 	var flash := float(bombard.get("flash_s", 0.0))
 	var smoke := float(bombard.get("smoke_s", 0.0))
-	check(flash > 0.05 and flash < 0.5, "durée d'éclair plausible (%.2f s)" % flash)
+	check(flash > 0.05 and flash < 0.5, "durée d’éclair plausible (%.2f s)" % flash)
 	check(smoke > 2.0 and smoke < 10.0, "durée de fumée plausible (%.2f s)" % smoke)
 	check(str(bombard.get("source", "")) != "", "bombarde : source")
 	check(BattleEffects._bombard_time("flash_s", -1.0) == flash, "BattleEffects lit flash_s")
@@ -72,7 +72,7 @@ func _check_fire_wind() -> void:
 	check(str(fire.get("source", "")) != "", "fire : source")
 	var banner: Dictionary = MapFireWind.data().get("maquette_banner", {})
 	check(str(banner.get("source", "")) != "", "bannière : source")
-	check(float(banner.get("wave_speed", 0.0)) > 3.0 and float(banner.get("wave_speed", 0.0)) < 7.0, "vitesse d'onde de bannière plausible")
-	check(float(banner.get("wave_length", 0.0)) > 0.2 and float(banner.get("wave_length", 0.0)) < 1.5, "longueur d'onde de bannière plausible")
+	check(float(banner.get("wave_speed", 0.0)) > 3.0 and float(banner.get("wave_speed", 0.0)) < 7.0, "vitesse d’onde de bannière plausible")
+	check(float(banner.get("wave_length", 0.0)) > 0.2 and float(banner.get("wave_length", 0.0)) < 1.5, "longueur d’onde de bannière plausible")
 	var grass: Dictionary = MapFireWind.data().get("grass_measured", {})
 	check(str(grass.get("source", "")) != "" and (grass.get("sway_hz", []) as Array).size() > 0, "herbe mesurée avec source")

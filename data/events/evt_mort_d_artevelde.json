@@ -1,7 +1,7 @@
 {
   "id": "evt_mort_d_artevelde",
-  "title": "La mort d'Artevelde",
-  "text": "Artevelde veut faire reconnaître le fils d'Édouard III, le prince de Galles, comme comte de Flandre à la place de Louis de Nevers. Les métiers gantois, soupçonneux d'une vente de la ville aux Anglais, s'ameutent : le 24 juillet 1345, le « sage homme de Gand » est massacré devant sa maison. Édouard III perd son meilleur allié aux Pays-Bas.",
+  "title": "La mort d’Artevelde",
+  "text": "Artevelde veut faire reconnaître le fils d’Édouard III, le prince de Galles, comme comte de Flandre à la place de Louis de Nevers. Les métiers gantois, soupçonneux d’une vente de la ville aux Anglais, s’ameutent : le 24 juillet 1345, le « sage homme de Gand » est massacré devant sa maison. Édouard III perd son meilleur allié aux Pays-Bas.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -45,13 +45,13 @@
           "type": "opinion",
           "faction": "fac_england",
           "amount": -20,
-          "reason": "Mort d'Artevelde"
+          "reason": "Mort d’Artevelde"
         }
       ],
       "ai_weight": 3
     },
     {
-      "text": "Étouffer l'émeute et protéger le capitaine",
+      "text": "Étouffer l’émeute et protéger le capitaine",
       "effects": [
         {
           "type": "unrest",

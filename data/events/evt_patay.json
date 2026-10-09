@@ -1,7 +1,7 @@
 {
   "id": "evt_patay",
   "title": "La bataille de Patay",
-  "text": "Les Anglais se retirent de la Loire. À Patay, un cerf débusqué trahit la position des archers de Talbot avant qu'ils aient planté leurs pieux : l'avant-garde de La Hire les charge et les disperse. Talbot est pris, Fastolf s'enfuit.",
+  "text": "Les Anglais se retirent de la Loire. À Patay, un cerf débusqué trahit la position des archers de Talbot avant qu’ils aient planté leurs pieux : l’avant-garde de La Hire les charge et les disperse. Talbot est pris, Fastolf s’enfuit.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -32,7 +32,7 @@
   },
   "options": [
     {
-      "text": "Poursuivre les Anglais jusqu'en Beauce",
+      "text": "Poursuivre les Anglais jusqu’en Beauce",
       "effects": [
         {
           "type": "prestige",

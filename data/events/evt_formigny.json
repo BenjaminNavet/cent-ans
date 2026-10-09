@@ -1,7 +1,7 @@
 {
   "id": "evt_formigny",
   "title": "La bataille de Formigny",
-  "text": "L'armée de secours de Thomas Kyriell a débarqué à Cherbourg. À Formigny, les couleuvrines de Jean Bureau délogent les archers de leurs retranchements, et le connétable de Richemont surgit sur leur flanc : la Normandie est perdue pour l'Angleterre.",
+  "text": "L’armée de secours de Thomas Kyriell a débarqué à Cherbourg. À Formigny, les couleuvrines de Jean Bureau délogent les archers de leurs retranchements, et le connétable de Richemont surgit sur leur flanc : la Normandie est perdue pour l’Angleterre.",
   "kind": "historical",
   "trigger": {
     "date": {
