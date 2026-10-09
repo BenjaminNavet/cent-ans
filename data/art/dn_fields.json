@@ -15,7 +15,7 @@
   "plan_budget_ms": 4.0,
   "rebuild_period_frames": 12,
   "shadow_range_units": 9.0,
-  "albedo_gain": 2.0,
+  "albedo_gain": 2.6,
   "sink_m": 3.0
  },
  "plan": {

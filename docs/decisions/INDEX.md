@@ -204,11 +204,12 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0233 | [Ajustement JR4b des garnisons précalculé](0233-ajustement-garnisons-precalcule.md) | accepté |
 | 0235 | [Outils de génération et d'aide à la 3D retirés](0235-outils-generation-retires.md) | accepté |
 | 0236 | [Fabrique de textures régionales (TX)](0236-fabrique-de-textures.md) | accepté |
-| 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | accepté |
-| 0238 | [Fin de la figurine rigide des soldats de bataille](0238-fin-figurine-rigide.md) | accepté |
-| 0239 | [Manifeste skinné cuit hors ligne, fin des essais mocap et des modes fa_anim](0239-manifeste-skinne-cuit.md) | accepté |
-| 0240 | [Sols de bataille régionaux (paquet par biome, grain fin)](0240-sols-de-bataille-regionaux.md) | accepté |
+| 0237 | [Interface : scènes .tscn ou construction en code](0237-ui-tscn-vs-code.md) | n/d |
+| 0238 | [Fin de la figurine rigide des soldats de bataille](0238-fin-figurine-rigide.md) | n/d |
+| 0239 | [Manifeste skinné cuit hors ligne, fin des essais mocap et des modes fa_anim](0239-manifeste-skinne-cuit.md) | n/d |
+| 0240 | [Sols de bataille régionaux](0240-sols-de-bataille-regionaux.md) | accepté |
 | 0241 | [Végétation, bâtiments et eau régionaux](0241-vegetation-batiments-eau-regionaux.md) | accepté |
-| 0242 | [Quatorze biomes (sous-classes régionales 8-14 et repli sur le parent)](0242-quatorze-biomes.md) | accepté |
-| 0243 | [Sols de campagne régionaux (fond par biome, fondu, grain, parcellaire TX)](0243-sols-de-campagne-regionaux.md) | accepté |
+| 0242 | [Quatorze biomes](0242-quatorze-biomes.md) | accepté |
+| 0243 | [Sols de campagne régionaux](0243-sols-de-campagne-regionaux.md) | n/d |
 | 0244 | [Retrait des sols Poly Haven (bataille et campagne)](0244-retrait-sols-poly-haven.md) | accepté |
+| 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |

@@ -126,6 +126,12 @@ static func model_name(entry: Dictionary) -> String:
 ## Les albédos baked par TRELLIS sont sombres (beaucoup de noir) : sur le sol de la carte les lieux
 ## ressortent en silhouettes noires. Gain d'albédo (`albedo_gain` de l'entrée, sinon des défauts) et
 ## rugosité maximale appliqués à une copie du matériau de chaque surface.
+## Le gain est un facteur LINÉAIRE sur l'albédo. `albedo_color` est lue comme du sRGB : `Color(g, g, g)`
+## serait multipliée par ~5 pour g = 2 et ~7 pour g = 2,4 (surexposition, maquettes et champs blancs).
+static func gain_color(gain: float) -> Color:
+	return Color(gain, gain, gain, 1.0).linear_to_srgb()
+
+
 static func brighten(mesh: Mesh, entry: Dictionary) -> void:
 	var gain := float(entry.get("albedo_gain", default_value("albedo_gain", 1.0)))
 	for surface in mesh.get_surface_count():
@@ -133,7 +139,7 @@ static func brighten(mesh: Mesh, entry: Dictionary) -> void:
 		if source == null:
 			continue
 		var material := source.duplicate() as BaseMaterial3D
-		material.albedo_color = Color(gain, gain, gain, 1.0)
+		material.albedo_color = gain_color(gain)
 		material.roughness = 1.0
 		mesh.surface_set_material(surface, material)
 
