@@ -256,14 +256,14 @@ func _run_ib4() -> void:
 	check(not bool(chain[0].get_meta("collapsed", false)) and chain[0].find_child("CollapsedHeader", true, false) == null, "a collapsed bubble reopens")
 
 	# Placement pur : droite, sinon gauche, sinon dessous ; jamais sur une ancêtre.
-	var script: Script = _bubbles.get_script()
+	var layout_script: Script = BubbleLayout
 	var area := Rect2(0, 0, 1280, 720)
 	var parent_rect := Rect2(900, 100, 360, 300)
-	var left: Vector2 = script.call("place_beside", Vector2(360, 200), parent_rect, 150.0, area, [parent_rect])
+	var left: Vector2 = layout_script.call("place_beside", Vector2(360, 200), parent_rect, 150.0, area, [parent_rect])
 	check(is_equal_approx(left.x, 900 - 6 - 360) and is_equal_approx(left.y, 150), "no room on the right → left, aligned on the keyword line: %s" % left)
-	var blocked: Vector2 = script.call("place_beside", Vector2(360, 200), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(460, 100, 360, 300), Rect2(826, 0, 454, 720), Rect2(0, 0, 454, 720)])
+	var blocked: Vector2 = layout_script.call("place_beside", Vector2(360, 200), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(460, 100, 360, 300), Rect2(826, 0, 454, 720), Rect2(0, 0, 454, 720)])
 	check(is_equal_approx(blocked.x, 460) and blocked.y >= 406, "sides taken → below the parent: %s" % blocked)
-	var none: Vector2 = script.call("place_beside", Vector2(360, 700), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(0, 0, 1280, 720)])
+	var none: Vector2 = layout_script.call("place_beside", Vector2(360, 700), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(0, 0, 1280, 720)])
 	check(is_nan(none.x), "no room at all → NAN")
 
 	_bubbles.call("close_all")

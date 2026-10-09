@@ -8,6 +8,7 @@ shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled;
 
 #include "res://shaders/fx_flipbook.gdshaderinc"
+#include "res://shaders/fx_particle.gdshaderinc"
 
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 uniform vec3 smoke_color : source_color = vec3(0.16, 0.15, 0.14);
@@ -33,14 +34,7 @@ varying float frame_blend;
 varying float age;
 
 void vertex() {
-	mat4 world = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);
-	float angle = INSTANCE_CUSTOM.x;
-	mat4 spin = mat4(vec4(cos(angle), -sin(angle), 0.0, 0.0), vec4(sin(angle), cos(angle), 0.0, 0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
-	MODELVIEW_MATRIX = VIEW_MATRIX * world * spin * mat4(
-		vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0),
-		vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0),
-		vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0),
-		vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_MATRIX = particle_billboard(VIEW_MATRIX, INV_VIEW_MATRIX, MODEL_MATRIX, INSTANCE_CUSTOM.x);
 	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 	age = clamp(INSTANCE_CUSTOM.y, 0.0, 1.0);
 	vec3 frames = flipbook_clamped(age * (frames_h * frames_v - 1.0));
@@ -54,9 +48,7 @@ void fragment() {
 	float fade_in = smoothstep(0.0, 0.06, age);
 	float alpha = texel.a * COLOR.a * density * fade_in * mix(young_density, 1.0, smoothstep(0.0, young_span, age));
 	float depth = texture(depth_texture, SCREEN_UV).r;
-	vec4 scene = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-	float scene_distance = -scene.z / scene.w;
-	alpha *= clamp((scene_distance + VERTEX.z) / soft_distance, 0.0, 1.0);
+	alpha *= particle_contact_fade(depth, SCREEN_UV, INV_PROJECTION_MATRIX, VERTEX.z, soft_distance);
 	if (near_fade > 0.0) {
 		alpha *= smoothstep(near_fade * 0.3, near_fade, -VERTEX.z);
 	}
