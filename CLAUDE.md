@@ -3,6 +3,7 @@
 Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent-ans-design.md` avant tout travail.
 
 ## Règles
+- Vue d'ensemble du dépôt (crates, `game/`, flux campagne→bataille, ADR clés) : `docs/architecture.md`.
 - Code, identifiants, commits en anglais ; docs, UI et communication en français.
 - Toute règle de jeu vit dans `core/` (Rust). `game/` (Godot, GDScript) ne fait que rendu, UI, entrées.
 - Données de jeu dans `data/` (JSON/YAML) validées par `data/schemas/`. Jamais de données codées en dur.
