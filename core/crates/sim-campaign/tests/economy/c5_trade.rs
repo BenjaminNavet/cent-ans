@@ -198,3 +198,23 @@ fn trade_article_counts_common_routes_in_the_evaluation() {
         .iter()
         .any(|(text, value)| text == "Routes commerciales communes" && *value > 0));
 }
+
+/// WH mapb2: the « Commerce » panel's per-route shares add up to the
+/// faction's trade income, for every faction (view only, no extra rule).
+#[test]
+fn per_route_shares_sum_to_faction_trade_income() {
+    let data = game_data();
+    let state = france(data, 7);
+    let routes = trade::trade_routes(&state, data);
+    assert!(!routes.is_empty());
+    for faction in state.factions.keys() {
+        let sum: i64 = routes.iter().map(|r| r.value_for(faction)).sum();
+        assert_eq!(sum, trade::faction_trade_income(&state, data, faction));
+        let touching: i64 = routes
+            .iter()
+            .filter(|r| r.touches(faction))
+            .map(|r| r.value_for(faction))
+            .sum();
+        assert_eq!(touching, sum);
+    }
+}

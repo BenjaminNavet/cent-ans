@@ -98,6 +98,24 @@ impl TradeRouteView {
     pub fn total_value(&self) -> i64 {
         self.value_from + self.value_to
     }
+
+    /// Livres this route credits to `faction` (0 when it holds neither hub);
+    /// the per-route share of [`faction_trade_income`] (panel « Commerce »).
+    pub fn value_for(&self, faction: &FactionId) -> i64 {
+        let mut total = 0;
+        if self.from_faction.as_ref() == Some(faction) {
+            total += self.value_from;
+        }
+        if self.to_faction.as_ref() == Some(faction) {
+            total += self.value_to;
+        }
+        total
+    }
+
+    /// Whether `faction` holds one of the two hubs.
+    pub fn touches(&self, faction: &FactionId) -> bool {
+        self.from_faction.as_ref() == Some(faction) || self.to_faction.as_ref() == Some(faction)
+    }
 }
 
 /// Every trade route of `data/economy/trade.json`, resolved against `state`
@@ -354,16 +372,7 @@ pub fn common_routes(
 pub fn faction_trade_income(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
     trade_routes(state, data)
         .iter()
-        .map(|route| {
-            let mut total = 0;
-            if route.from_faction.as_ref() == Some(faction) {
-                total += route.value_from;
-            }
-            if route.to_faction.as_ref() == Some(faction) {
-                total += route.value_to;
-            }
-            total
-        })
+        .map(|route| route.value_for(faction))
         .sum()
 }
 

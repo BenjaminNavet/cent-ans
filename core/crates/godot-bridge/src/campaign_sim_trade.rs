@@ -4,8 +4,9 @@
 //! [{"kind": "trade_agreement"}], ...})`, ADR 0012) and end with
 //! `break_trade_agreement` (`Order` derives `Deserialize`).
 
+use data_model::FactionId;
 use godot::prelude::*;
-use sim_campaign::trade::{trade_routes, TradeRouteView};
+use sim_campaign::trade::{faction_trade_income, trade_routes, TradeRouteView};
 
 use crate::campaign_sim::{CampaignSim, Ctx};
 
@@ -63,5 +64,34 @@ impl CampaignSim {
             .iter()
             .map(|route| route_dict(data, route).to_variant())
             .collect()
+    }
+
+    /// Panel « Commerce » (view only): `{income, routes}` for `faction`; each
+    /// route dict of [`get_trade_routes`] plus `mine` (a hub is held by
+    /// `faction`) and `my_value` (livres credited to `faction`; the sum over
+    /// `routes` equals `income`). Sorted by `total_value`, highest first.
+    #[func]
+    fn get_trade_overview(&self, faction: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(faction) = FactionId::new(faction.to_string()) else {
+            return VarDictionary::new();
+        };
+        let mut routes = trade_routes(state, data);
+        routes.sort_by(|a, b| b.total_value().cmp(&a.total_value()).then(a.id.cmp(&b.id)));
+        let list: VarArray = routes
+            .iter()
+            .map(|route| {
+                let mut dict = route_dict(data, route);
+                dict.set("mine", route.touches(&faction));
+                dict.set("my_value", route.value_for(&faction));
+                dict.to_variant()
+            })
+            .collect();
+        vdict! {
+            "income" => faction_trade_income(state, data, &faction),
+            "routes" => &list,
+        }
     }
 }
