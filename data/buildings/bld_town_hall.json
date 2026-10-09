@@ -16,7 +16,7 @@
   "effects": [
     {
       "effect": "unrest",
-      "value": -4
+      "value": -2
     },
     {
       "effect": "tax_income",

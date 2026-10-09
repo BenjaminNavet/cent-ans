@@ -22,10 +22,6 @@
     {
       "effect": "loyalty",
       "value": 4
-    },
-    {
-      "effect": "unrest",
-      "value": -2
     }
   ],
   "description": "Siège du bailli ou du sénéchal, qui rend la justice du prince, lève ses recettes et contrôle prévôts et châtelains de la province. Bâtiment de la cité de la province.",
