@@ -24,6 +24,7 @@ const FAMILIES := [
 	["Religion", ["religion"], "Religion"],
 	["Table", ["cuisine", "ingredient", "recette"], "Table"],
 	["Médecine et herbier", ["medecine", "plante"], "Médecine"],
+	["Nature", ["arbre", "animal", "oiseau", "roche"], "Nature"],
 	["Savoirs", ["savoir"], "Savoirs"],
 	["Armées, navires et bâtiments", ["unite", "batiment", "technique"], "Armées"],
 	["Mécaniques du jeu", ["mecanique"], "Le jeu"],
@@ -35,12 +36,14 @@ const CATEGORY_LABELS := {
 	"ingredient": "Ingrédient", "recette": "Recette", "medecine": "Médecine", "plante": "Plante",
 	"savoir": "Savoir", "vie_quotidienne": "Vie quotidienne", "mecanique": "Mécanique du jeu",
 	"batiment": "Bâtiment", "unite": "Unité", "technique": "Technique",
+	"arbre": "Arbre", "animal": "Animal", "oiseau": "Oiseau", "roche": "Roche",
 }
 
 var entries: Dictionary = {}  # id → fiche
 var bundle_path: String = ""
 var _aliases: Dictionary = {}  # alias en minuscules → id
 var _by_entity: Dictionary = {}  # entité de jeu → id
+var _by_decor: Dictionary = {}  # « tree:oak », « fauna:animal_wolf_grey »… → id (NA)
 var _exclusions: Dictionary = {}  # id → expressions en minuscules où l'alias n'est pas lié (B8)
 var _discovered: Dictionary = {}  # id → true
 var _save_path: String = SAVE_PATH
@@ -60,6 +63,7 @@ func reload(path: String = "") -> void:
 	entries.clear()
 	_aliases.clear()
 	_by_entity.clear()
+	_by_decor.clear()
 	_exclusions.clear()
 	_alias_regex = null
 	var parsed: Variant = DataFile.parse_file(bundle_path)
@@ -80,6 +84,8 @@ func _add(entry: Dictionary) -> void:
 	var entity := str(entry.get("entity", ""))
 	if entity != "":
 		_by_entity[entity] = id
+	for key in entry.get("decor", []):
+		_by_decor[str(key)] = id
 	var contexts: Array = []
 	for context in entry.get("exclude_contexts", []):
 		var lowered := str(context).strip_edges().to_lower()
@@ -119,6 +125,11 @@ func era_label(id: String) -> String:
 ## Fiche liée à une entité de jeu (`chr_…`, `evt_…`, `tech_…`), vide sinon.
 func entry_for_entity(entity_id: String) -> String:
 	return str(_by_entity.get(entity_id, ""))
+
+
+## Fiche d'un élément du décor naturel (NA) : `kind` ∈ tree, battle_tree, fauna, bird, rock ; vide sinon.
+func entry_for_decor(kind: String, species: String) -> String:
+	return str(_by_decor.get("%s:%s" % [kind, species], ""))
 
 
 ## Id désigné par un alias (casse ignorée), vide sinon.

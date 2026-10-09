@@ -35,7 +35,11 @@
         "mecanique",
         "batiment",
         "unite",
-        "technique"
+        "technique",
+        "arbre",
+        "animal",
+        "oiseau",
+        "roche"
       ]
     },
     "aliases": {
@@ -91,6 +95,21 @@
       "type": "string",
       "description": "Entité de jeu liée (personnage, événement, technologie, bâtiment, unité, province, faction, régime, ressource, édit, ordre de bataille, capacité de bataille, navire). Le titre de l'infobulle riche de cette entité devient un lien vers la fiche.",
       "pattern": "^(chr|evt|tech|bld|unit|prov|fac|diet|res|edict|order|ability|ship)_[a-z0-9_]+$"
+    },
+    "latin": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Nom scientifique (espèces du décor naturel, NA), affiché dans la bulle de survol du décor."
+    },
+    "decor": {
+      "type": "array",
+      "description": "Éléments du décor naturel couverts par la fiche (NA, ADR 0217) : `tree:<id>` (data/art/tree_species.json), `battle_tree:<id>` (data/art/battle_tree_leaves.json), `fauna:<id>` (data/map/map_fauna.json), `bird:<id>` (data/map/map_birds.json), `rock:<id>` (data/art/rock_outcrops.yaml). Survoler l'élément en jeu ouvre la bulle de cette fiche.",
+      "items": {
+        "type": "string",
+        "pattern": "^(tree|battle_tree|fauna|bird|rock):[a-z0-9_]+$"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "see_also": {
       "type": "array",

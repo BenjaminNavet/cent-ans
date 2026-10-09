@@ -10,7 +10,8 @@ Checks performed by `validate_codex`:
 - aliases (and titles) are unique across entries, case-insensitively;
 - every `exclude_contexts` expression contains the title or an alias of its entry (B8);
 - `[[!text]]` escapes (plain text, never auto-linked) are not links and must not be empty;
-- `entity` points to an existing game entity file.
+- `entity` points to an existing game entity file;
+- every `decor` key names an existing natural-decor species and belongs to a single entry (NA).
 """
 
 import json
@@ -19,6 +20,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import yaml
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
@@ -178,6 +180,7 @@ def validate_codex(data_dir: Path) -> CodexReport:
         entity = entry.get("entity")
         if entity and not _entity_exists(data_dir, entity):
             report.errors.append(f"{entry_id}.entity: {entity} not found in data/")
+    _check_decor(report, decor_keys(data_dir))
 
     for path in sorted(data_dir.rglob("*.json")):
         if "schemas" in path.parts or path.name == BUNDLE_NAME:
@@ -234,3 +237,47 @@ def _entity_exists(data_dir: Path, entity: str) -> bool:
     """True if `data/<directory>/<entity>.json` exists for the entity prefix."""
     directory = ENTITY_DIRECTORIES.get(entity.split("_", 1)[0])
     return directory is not None and (data_dir / directory / f"{entity}.json").exists()
+
+
+def decor_keys(data_dir: Path) -> set[str]:
+    """Keys `<kind>:<id>` of every natural-decor species the game can show under the cursor."""
+
+    def ids(items: object) -> list[str]:
+        if isinstance(items, dict):
+            return [str(key) for key in items]
+        return [
+            str(item["id"])
+            for item in items or []
+            if isinstance(item, dict) and "id" in item
+        ]
+
+    def load_json(relative: str) -> dict:
+        return json.loads((data_dir / relative).read_text(encoding="utf-8"))
+
+    rocks = yaml.safe_load(
+        (data_dir / "art/rock_outcrops.yaml").read_text(encoding="utf-8")
+    )
+    sources = {
+        "tree": ids(load_json("art/tree_species.json")["species"]),
+        "battle_tree": ids(load_json("art/battle_tree_leaves.json")["species"]),
+        "fauna": ids(load_json("map/map_fauna.json")["species"]),
+        "bird": ids(load_json("map/map_birds.json")["species"]),
+        "rock": ids(rocks["outcrops"]),
+    }
+    return {
+        f"{kind}:{species}"
+        for kind, species_ids in sources.items()
+        for species in species_ids
+    }
+
+
+def _check_decor(report: CodexReport, known_keys: set[str]) -> None:
+    """Each `decor` key must exist and belong to one entry only."""
+    owners: dict[str, str] = {}
+    for entry_id, entry in report.entries.items():
+        for key in entry.get("decor", []):
+            if key not in known_keys:
+                report.errors.append(f"{entry_id}.decor: unknown species {key}")
+            owner = owners.setdefault(key, entry_id)
+            if owner != entry_id:
+                report.errors.append(f"decor {key} shared by {owner} and {entry_id}")

@@ -9,6 +9,8 @@
   "anachronism": "L'écorce de saule comme remède courant contre les fièvres n'est clairement attestée qu'au XVIIIe siècle (Edward Stone, 1763) ; les textes médiévaux, fidèles à Dioscoride, lui prêtent surtout des vertus astringentes et rafraîchissantes.",
   "gameplay": "Recherche : 180 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_culture_des_simples|Jardin des simples]]. Effets, pour toute la faction : +3 à la santé visée.",
   "entity": "tech_willow_bark",
+  "latin": "Salix alba",
+  "decor": ["tree:willow", "battle_tree:willow"],
   "see_also": ["cdx_reine_des_pres", "cdx_camomille", "cdx_humeurs", "cdx_jardin_des_simples"],
   "sources": ["Saule blanc", "Salicine", "Acide acétylsalicylique", "De materia medica"]
 }

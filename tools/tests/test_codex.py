@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from cent_ans_tools.codex import escapes_in, links_in, validate_codex
+from cent_ans_tools.codex import decor_keys, escapes_in, links_in, validate_codex
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -119,3 +119,16 @@ def test_codex_bundle_matches_schema() -> None:
     from conftest import assert_matches_schema
 
     assert_matches_schema("codex_bundle.json", "codex_bundle.schema.json")
+
+
+def test_decor_keys_cover_every_rendered_kind() -> None:
+    """NA: the decor keys list trees, battle trees, fauna, birds and rocks of the real data."""
+    keys = decor_keys(DATA)
+    for key in (
+        "tree:oak",
+        "battle_tree:ash",
+        "fauna:animal_wolf_grey",
+        "bird:crane",
+        "rock:limestone_cliff",
+    ):
+        assert key in keys
