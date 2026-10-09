@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Cent Ans"
+config/icon="res://icon.png"
 config/use_custom_user_dir.template=true
 config/custom_user_dir_name.template="Cent Ans"
 run/main_scene="res://scenes/start_menu.tscn"
