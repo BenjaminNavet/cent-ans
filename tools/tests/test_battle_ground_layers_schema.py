@@ -51,10 +51,10 @@ def test_battle_packs_stay_within_budget() -> None:
 
 
 def test_micro_grains_exist_in_pack() -> None:
-    """Every grain named by the micro section is in the micro_battle pack."""
+    """Every grain named by the micro section is in the micro_ground pack."""
     document = _document()
     micro = document["micro"]
-    manifest = json.loads((DATA / "art" / "tx_micro_battle_pack.json").read_text(encoding="utf-8"))
+    manifest = json.loads((DATA / "art" / "tx_micro_ground_pack.json").read_text(encoding="utf-8"))
     ids = {layer["id"] for layer in manifest["layers"]}
     named = {micro["default"], *micro["role_grain"].values(), *micro["dry_role_grain"].values()}
     assert named <= ids, named - ids

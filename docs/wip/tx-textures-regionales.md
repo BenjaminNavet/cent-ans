@@ -83,8 +83,8 @@ Mandat joueur : « occupe toi de ça » sur les 5 points ouverts. Branche `tx-fi
   `docs/wip/tx-polyhaven.md` ; `micro_battle` remplace `near_detail`), `BattleGrassGroups.biome_for`
   délègue à `BattleGroundTextures.biome_for`, garde tableau vide dans `building_materials.gd`,
   `decor_hover_test` réessaie la sélection de la ville (échec intermittent sous charge).
-- Reste (optionnel) : fusionner les deux paquets de grain (`micro_battle` de bataille et
-  `tx_micro_ground` de campagne) ; vérification visuelle du sol de bataille sans `near_detail`.
+- Paquets de grain fusionnés : la bataille lit `tx_micro_ground` (`micro_battle` supprimé, -4,8 Mo).
+- Reste (optionnel) : vérification visuelle du sol de bataille sans `near_detail`.
 
 ## Réservations
 

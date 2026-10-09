@@ -129,7 +129,7 @@ static func _manifests(rel: String) -> Array[Dictionary]:
 	return found
 
 
-## Grain fin du sol (paquet `micro_battle`) : {"albedo", "normal", "layer": PackedFloat32Array,
+## Grain fin du sol (paquet `micro_ground`, partagé avec la campagne) : {"albedo", "normal", "layer": PackedFloat32Array,
 ## "size": PackedFloat32Array} (une entrée par couche de sol, valeurs lues par le shader) ou {}.
 static func micro_for(biome: int, ground_layers: Array) -> Dictionary:
 	var micro: Dictionary = spec().get("micro", {})

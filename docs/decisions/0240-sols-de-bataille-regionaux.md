@@ -26,7 +26,8 @@ sols de bataille pour 13 rôles × 14 biomes (ADR 0242). Seul le biome du lieu d
 - Grain fin : paquet `micro_battle` (8 grains `micro_ground`, 1024) fondu sous ~32 m par le shader
   à la place du détail proche Poly Haven ; une couche de grain par couche de sol (données), grains
   secs pour les biomes 7, 8, 14. Paquet propre au sol de bataille (celui de la campagne,
-  `micro_ground`, vit dans une autre branche : à fusionner en un seul après coup).
+  `micro_ground`, vit dans une autre branche : à fusionner en un seul après coup). Fusionné le
+  2026-10-09 : les 8 grains étaient identiques, la bataille lit `tx_micro_ground_pack.json`.
 - Shader : `tx_ground` atténue les teintes calées sur Poly Haven (saison/taches de prairie à 60 %,
   teinte de terre supprimée, boue ramenée de 0,7 à 0,2) ; la teinte par terrain disparaît.
 

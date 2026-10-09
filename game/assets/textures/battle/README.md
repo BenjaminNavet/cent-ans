@@ -8,7 +8,7 @@ Toutes les textures photographiques viennent de **Poly Haven** (https://polyhave
 
 Le sol ne vient plus de Poly Haven (ADR 0244) : les paquets TX régionaux de `tx/` (un par biome,
 `data/art/tx_battle_bNN_pack.json`, ADR 0240) sont la seule voie, avec le grain fin
-`micro_battle`. L'identité et l'ordre des couches vivent dans `data/fx/battle_ground_layers.json`.
+`micro_ground` (paquet partagé avec la campagne, `data/art/tx_micro_ground_pack.json`). L'identité et l'ordre des couches vivent dans `data/fx/battle_ground_layers.json`.
 
 ## Bâtiments et écorce (lot V4 ; 3 matières en 2k depuis GA5)
 

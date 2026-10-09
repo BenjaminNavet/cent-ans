@@ -238,7 +238,7 @@
   }
  },
  "micro": {
-  "manifest": "art/tx_micro_battle_pack.json",
+  "manifest": "art/tx_micro_ground_pack.json",
   "default": "micro_soil_grain",
   "role_grain": {
    "grass": "micro_grass_fine",

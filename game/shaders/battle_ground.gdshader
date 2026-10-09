@@ -86,7 +86,7 @@ uniform float detail_bump = 0.7;
 uniform float decor_saturation = 0.6; // DA6 : part de la saturation gardée (bible § 3.3)
 uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
 // TX T2c : sols générés par biome (`tx_ground` = 1) : les teintes d'herbe, de terre et de boue sont
-// atténuées ; grain fin (`micro_*`, paquet `micro_battle`), une couche de grain par couche de sol
+// atténuées ; grain fin (`micro_*`, paquet `micro_ground`), une couche de grain par couche de sol
 // (`micro_layer_of[]`, `micro_tile_m[]`), fondu avec la distance (`micro_dist`).
 uniform float tx_ground = 0.0;
 uniform float micro_on = 0.0;
@@ -353,7 +353,7 @@ void fragment() {
 		n_near.xy += (dn.xy * 2.0 - 1.0) * near_k * 0.6;
 		nrm = normalize(n_near) * 0.5 + 0.5;
 	}
-	// PO4 : grain fin du sol de près (paquet TX `micro_battle`) sur l'herbe, les prés, la terre et la
+	// PO4 : grain fin du sol de près (paquet TX `micro_ground`) sur l'herbe, les prés, la terre et la
 	// boue ; pas sur la roche ni la neige. Lecture tournée (axes du champ).
 	float nd_k = (1.0 - smoothstep(micro_dist * 0.45, micro_dist, view_dist));
 	nd_k *= clamp(1.0 - w[int(L_ROCK)] - w[int(L_SNOW)] - w[int(L_PEBBLES)] * 0.5, 0.0, 1.0);
