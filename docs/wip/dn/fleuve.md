@@ -1,6 +1,6 @@
 # DN-FLEUVE : glb générés sur et au bord de l'eau (carte de campagne)
 
-Branche worktree `worktree-agent-a956a1c66be203390`, non fusionnée. ADR provisoire 0220 (`docs/decisions/0220-glb-generes-sur-l-eau.md`) (à renuméroter à la fusion).
+Branche worktree `worktree-agent-a956a1c66be203390`, non fusionnée. ADR 0217 (`docs/decisions/0217-glb-generes-sur-l-eau.md`).
 
 Périmètre : navires d'armée et de commerce, bateaux de fleuve, ponts, moulins à eau, ports, chantiers navals, épaves, oiseaux d'eau. Hors périmètre : rendu de l'eau (DN-MER), forêts, champs, roches, pâtures.
 

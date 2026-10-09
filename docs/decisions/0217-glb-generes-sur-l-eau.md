@@ -1,4 +1,4 @@
-# 0220 — glb générés sur et au bord de l'eau (numéro provisoire, lot DN-FLEUVE)
+# 0217 — glb générés sur et au bord de l'eau (lot DN-FLEUVE)
 
 Date : 2026-10-09 (`docs/wip/dn/fleuve.md`). Numéro provisoire : à renuméroter à la fusion.
 
