@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot DN-CHAMPS (ADR 0222) : champs en modèles générés.
 ##  1. données : table lue, glb présents (si le paquet de modèles est installé) ;
@@ -6,15 +6,6 @@ extends SceneTree
 ##     (vignes au sud, blé au nord), aucune parcelle en forêt dense ;
 ##  3. `FieldLayer` : MultiMesh par modèle, budget d'instances, coût de reconstruction.
 ## Usage : godot --headless --path game --script res://tests/dn_fields_test.gd
-
-var _failures := 0
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("dn_fields_test: " + message)
-	return condition
 
 
 func _init() -> void:
@@ -25,21 +16,16 @@ func _init() -> void:
 func _run() -> void:
 	var data_dir := OutbuildingLayer.data_dir()
 	var config := FieldLayer._read_json(data_dir.path_join(FieldLayer.CONFIG_FILE))
-	if not _check(not config.is_empty(), "dn_fields.json not read"):
-		_finish()
+	if not check(not config.is_empty(), "dn_fields.json not read"):
+		finish()
 		return
 	var map_data := MapData.load_from_dir(data_dir.path_join("map"))
-	_check(map_data.load_error == "", "map load failed: %s" % map_data.load_error)
+	check(map_data.load_error == "", "map load failed: %s" % map_data.load_error)
 	var plan := _make_plan(config, map_data, data_dir)
-	_check(plan.is_ready(), "plan not ready (splat or biomes missing)")
+	check(plan.is_ready(), "plan not ready (splat or biomes missing)")
 	_check_plan(plan, config, map_data)
 	await _check_layer(map_data)
-	_finish()
-
-
-func _finish() -> void:
-	print("dn_fields_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 func _make_plan(config: Dictionary, map_data: MapData, data_dir: String) -> FieldPlan:
@@ -51,11 +37,11 @@ func _make_plan(config: Dictionary, map_data: MapData, data_dir: String) -> Fiel
 
 func _check_plan(plan: FieldPlan, config: Dictionary, map_data: MapData) -> void:
 	# Tirage entier stable et réparti.
-	_check(is_equal_approx(FieldPlan.hash01(3, 4, 5), FieldPlan.hash01(3, 4, 5)), "hash not stable")
+	check(is_equal_approx(FieldPlan.hash01(3, 4, 5), FieldPlan.hash01(3, 4, 5)), "hash not stable")
 	var mean := 0.0
 	for i in 2000:
 		mean += FieldPlan.hash01(i, i * 7, 13) / 2000.0
-	_check(absf(mean - 0.5) < 0.05, "hash mean %.3f" % mean)
+	check(absf(mean - 0.5) < 0.05, "hash mean %.3f" % mean)
 	# Cultures dominantes sur toute la carte (pas de 8 px).
 	var tally := {}
 	var step := 8
@@ -68,7 +54,7 @@ func _check_plan(plan: FieldPlan, config: Dictionary, map_data: MapData) -> void
 			tally[material] = int(tally.get(material, 0)) + 1
 	print("dn_fields_test: dominant materials ", tally)
 	for needed in ["wheat_ripe", "vineyard_rows", "olive_grove"]:
-		_check(int(tally.get(needed, 0)) > 0, "no region dominated by %s" % needed)
+		check(int(tally.get(needed, 0)) > 0, "no region dominated by %s" % needed)
 	# Parcelles : forêt dense exclue, déterminisme, tailles cohérentes.
 	var farmed := 0
 	var forested := 0
@@ -90,14 +76,14 @@ func _check_plan(plan: FieldPlan, config: Dictionary, map_data: MapData) -> void
 			if forest > float(config["plan"]["forest_max"]) + 0.01:
 				forested += 1
 			checked.x += 1
-	_check(forested == 0, "%d farmed parcels in dense forest" % forested)
-	_check(farmed > 100, "few farmed parcels (%d)" % farmed)
+	check(forested == 0, "%d farmed parcels in dense forest" % forested)
+	check(farmed > 100, "few farmed parcels (%d)" % farmed)
 	var a := plan.plan_cell(Vector2i(1048, 1550))
 	var b := plan.plan_cell(Vector2i(1048, 1550))
 	var same := a.size() == b.size()
 	for id: String in a:
 		same = same and b.has(id) and (a[id] as PackedFloat32Array) == (b[id] as PackedFloat32Array)
-	_check(same, "plan_cell not deterministic")
+	check(same, "plan_cell not deterministic")
 	# Une instance par parcelle cultivée, à l'échelle de la parcelle.
 	var cell_instances := 0
 	var scale_ok := true
@@ -112,8 +98,8 @@ func _check_plan(plan: FieldPlan, config: Dictionary, map_data: MapData) -> void
 					cell_instances += 1
 					var size_m := buffer[n * FieldPlan.STRIDE + 3]
 					scale_ok = scale_ok and absf(size_m / footprint - 1.0) <= float(config["plan"]["size_jitter"]) + 0.001 and size_m < parcel_m
-	_check(cell_instances > 0, "no parcel instance in sample area")
-	_check(scale_ok, "instance size is not the parcel footprint")
+	check(cell_instances > 0, "no parcel instance in sample area")
+	check(scale_ok, "instance size is not the parcel footprint")
 
 
 func _check_layer(map_data: MapData) -> void:
@@ -131,7 +117,7 @@ func _check_layer(map_data: MapData) -> void:
 	world.add_child(layer)
 	layer.setup(map_data, terrain, data, ZoomTiers.load_default())
 	var fields := layer.fields
-	if not _check(fields != null and fields.enabled, "no field layer"):
+	if not check(fields != null and fields.enabled, "no field layer"):
 		return
 	fields.force_active = true
 	var t_warm := Time.get_ticks_msec()
@@ -152,11 +138,11 @@ func _check_layer(map_data: MapData) -> void:
 			fields.flush(focus)
 			print("dn_fields_test: %s rig %.0f : %d instances, %d nodes, plan %.1f ms (max cell %.1f), build %.1f ms, models %s" % [name_spot, rig,
 				fields.instance_count(), fields.node_count(), fields.stats["plan_ms"], fields.stats["plan_ms_max"], fields.stats["build_ms"], str(fields.shown_models())])
-			_check(fields.instance_count() <= int(config_cap(fields)), "instance cap exceeded")
-			_check(float(fields.stats["build_ms"]) < 150.0, "rebuild too slow %.1f" % fields.stats["build_ms"])
+			check(fields.instance_count() <= int(config_cap(fields)), "instance cap exceeded")
+			check(float(fields.stats["build_ms"]) < 150.0, "rebuild too slow %.1f" % fields.stats["build_ms"])
 	fields.force_active = false
 	fields.update_view(200.0)
-	_check(not fields.visible, "layer visible beyond view range")
+	check(not fields.visible, "layer visible beyond view range")
 
 
 func config_cap(fields: FieldLayer) -> int:

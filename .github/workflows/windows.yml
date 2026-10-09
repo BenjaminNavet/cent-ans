@@ -73,16 +73,15 @@ jobs:
           GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
         run: tools/check_gd_scripts.sh
 
-      # GT4: every game/tests/*_test.gd in headless, one after the other (bash script, Git Bash).
-      # GODOT is the console build, as above; the import was done by the launcher step.
-      # Non-blocking: known failing tests must not hold `stable` back (smoke.gd stays the gate).
-      - name: Godot tests (game/tests/*_test.gd)
+      # GT4: the headless unit tests (game/tests/*_test.gd, TestCase) that need no generated asset
+      # pack and no GPU: pure data, rules and UI-theme checks. The full list is `tools/run_godot_tests.sh`
+      # without argument (too long for CI). Each test prints `<name>: OK`; the runner fails on Parse Error too.
+      - name: GDScript unit tests (fast subset)
         continue-on-error: true
         shell: bash
         env:
           GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
-          LOG_DIR: ${{ runner.temp }}/gdtests
-        run: tools/run_godot_tests.sh
+        run: tools/run_godot_tests.sh dn_ui_kit dn_freshwater
 
       - uses: actions/upload-artifact@v4
         if: always()

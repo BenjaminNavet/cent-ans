@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot DN-RELIEF (roches DN sur la carte de campagne, ADR 0218) :
 ##  1. catalogue : chaque modèle DN se charge en 3 niveaux, ramené à 1 m (plus grand côté
@@ -9,30 +9,15 @@ extends SceneTree
 ##     triangles, appels de dessin, durées de semis).
 ## Usage : godot --headless --path game --script res://tests/dn_relief_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const MONT_BLANC := Vector2(2653.0, 3705.0)
 const BEAUCE := Vector2(2140.0, 3290.0)
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	_test_catalogue()
 	await _test_map()
-	if _failures > 0:
-		push_error("dn_relief_test: %d failure(s)" % _failures)
-		quit(1)
-		return
-	print("dn_relief_test: OK")
-	quit(0)
-
-
-func _check(condition: bool, label: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("FAIL: " + label)
-	return condition
+	finish()
 
 
 func _test_catalogue() -> void:
@@ -43,16 +28,16 @@ func _test_catalogue() -> void:
 			continue
 		dn_entries += 1
 		var mesh := RockOutcrops._entry_mesh(entry, 0)
-		if not _check(mesh != null, "%s lod0 loads" % entry["id"]):
+		if not check(mesh != null, "%s lod0 loads" % entry["id"]):
 			continue
 		var box := mesh.get_aabb()
 		var side := maxf(box.size.x, box.size.z)
-		_check(absf(side - 1.0) < 0.12, "%s normalised to 1 m (%.3f)" % [entry["id"], side])
-		_check(absf(box.position.y) < 0.02, "%s foot at y=0 (%.3f)" % [entry["id"], box.position.y])
+		check(absf(side - 1.0) < 0.12, "%s normalised to 1 m (%.3f)" % [entry["id"], side])
+		check(absf(box.position.y) < 0.02, "%s foot at y=0 (%.3f)" % [entry["id"], box.position.y])
 		if entry.has("coast"):
 			for rock: String in (entry["coast"] as Dictionary).get("rock", []):
-				_check(rock in ["rock", "chalk", "granite"], "%s coast rock %s" % [entry["id"], rock])
-	_check(dn_entries >= 20, "DN entries catalogued (%d)" % dn_entries)
+				check(rock in ["rock", "chalk", "granite"], "%s coast rock %s" % [entry["id"], rock])
+	check(dn_entries >= 20, "DN entries catalogued (%d)" % dn_entries)
 
 
 func _settle(rig: CampaignCamera, at: Vector2, distance: float, data: MapData, outcrops: RockOutcrops) -> void:
@@ -105,17 +90,17 @@ func _test_map() -> void:
 	root.add_child(map)
 	for i in 5:
 		await process_frame
-	if not _check(map.get("load_ok") == true, "campaign map loads"):
+	if not check(map.get("load_ok") == true, "campaign map loads"):
 		map.queue_free()
 		return
 	var rig: CampaignCamera = map.camera_rig
 	rig.edge_pan_enabled = false
 	var data: MapData = map.map_data
 	var outcrops: RockOutcrops = map.get_node_or_null("RockOutcrops")
-	if not _check(outcrops != null, "RockOutcrops node"):
+	if not check(outcrops != null, "RockOutcrops node"):
 		map.queue_free()
 		return
-	_check(outcrops.models.size() >= 20, "models loaded (%d)" % outcrops.models.size())
+	check(outcrops.models.size() >= 20, "models loaded (%d)" % outcrops.models.size())
 	# Côtes : craie de Caux, granit de Bretagne.
 	var chalk_total := 0
 	var granite_total := 0
@@ -134,16 +119,16 @@ func _test_map() -> void:
 			else:
 				granite_total += int(ids.get("coast_granite", 0))
 				wrong += int(ids.get("coast_chalk", 0))
-	_check(chalk_total > 0, "chalk cliffs on the Caux coast (%d)" % chalk_total)
-	_check(granite_total > 0, "granite blocks on the Brittany/Cornwall coast (%d)" % granite_total)
-	_check(wrong == 0, "no rock of the wrong geology (%d)" % wrong)
+	check(chalk_total > 0, "chalk cliffs on the Caux coast (%d)" % chalk_total)
+	check(granite_total > 0, "granite blocks on the Brittany/Cornwall coast (%d)" % granite_total)
+	check(wrong == 0, "no rock of the wrong geology (%d)" % wrong)
 	await _settle(rig, BEAUCE, 150.0, data, outcrops)
 	var inland := _ids_near(outcrops, BEAUCE, 40.0)
-	_check(inland.is_empty(), "nothing in the Beauce %s" % inland)
+	check(inland.is_empty(), "nothing in the Beauce %s" % inland)
 	await _settle(rig, MONT_BLANC, 150.0, data, outcrops)
 	var alps := _ids_near(outcrops, MONT_BLANC, 40.0)
 	print("dn-relief: Mont-Blanc %s" % alps)
-	_check(int(alps.get("scree", 0)) + int(alps.get("cliff_limestone", 0)) + int(alps.get("schist_ridge", 0)) > 20, "scree and cliffs in the Alps")
+	check(int(alps.get("scree", 0)) + int(alps.get("cliff_limestone", 0)) + int(alps.get("schist_ridge", 0)) > 20, "scree and cliffs in the Alps")
 	for d: float in [60.0, 250.0, 400.0]:
 		await _settle(rig, MONT_BLANC, d, data, outcrops)
 		print("dn-relief: Alps d=%d stats %s" % [int(d), JSON.stringify(outcrops.stats)])
