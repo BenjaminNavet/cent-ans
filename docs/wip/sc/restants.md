@@ -131,7 +131,7 @@ AD8 | FAIT (sc/relief, ADR 0203) | relief_quadtree.gd repli GD (= PF-02), has_pa
 AD9 | PARTIEL | data-model/util.rs créé ; segment_distance et hash01 dupliqués dans vegetation/lib.rs, siege_fx.rs, splitmix bridge | core/crates/data-model/src/util.rs, vegetation/src/lib.rs | oui
 AD10 | À FAIRE | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
 AD11 | PARTIEL | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui
-AD12 | À FAIRE | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui
+AD12 | FAIT 99a2b89fa | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui
 AD13 | PARTIEL | ai/campaign découpé ; doc restante (plan_field.rs 862 l) | core/crates/ai | oui
 
 ## MB map terrain/nature
