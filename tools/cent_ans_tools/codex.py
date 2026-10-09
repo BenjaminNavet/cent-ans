@@ -240,35 +240,36 @@ def _entity_exists(data_dir: Path, entity: str) -> bool:
 
 
 def decor_keys(data_dir: Path) -> set[str]:
-    """Keys `<kind>:<id>` of every natural-decor species the game can show under the cursor."""
+    """Keys `<kind>:<id>` of every natural-decor species the game can show under the cursor.
 
-    def ids(items: object) -> list[str]:
-        if isinstance(items, dict):
-            return [str(key) for key in items]
-        return [
-            str(item["id"])
-            for item in items or []
-            if isinstance(item, dict) and "id" in item
-        ]
-
-    def load_json(relative: str) -> dict:
-        return json.loads((data_dir / relative).read_text(encoding="utf-8"))
-
-    rocks = yaml.safe_load(
-        (data_dir / "art/rock_outcrops.yaml").read_text(encoding="utf-8")
-    )
+    A missing source file contributes no key (test fixtures carry a partial `data/`).
+    """
     sources = {
-        "tree": ids(load_json("art/tree_species.json")["species"]),
-        "battle_tree": ids(load_json("art/battle_tree_leaves.json")["species"]),
-        "fauna": ids(load_json("map/map_fauna.json")["species"]),
-        "bird": ids(load_json("map/map_birds.json")["species"]),
-        "rock": ids(rocks["outcrops"]),
+        "tree": ("art/tree_species.json", "species"),
+        "battle_tree": ("art/battle_tree_leaves.json", "species"),
+        "fauna": ("map/map_fauna.json", "species"),
+        "bird": ("map/map_birds.json", "species"),
+        "rock": ("art/rock_outcrops.yaml", "outcrops"),
     }
-    return {
-        f"{kind}:{species}"
-        for kind, species_ids in sources.items()
-        for species in species_ids
-    }
+    keys: set[str] = set()
+    for kind, (relative, field_name) in sources.items():
+        path = data_dir / relative
+        if not path.exists():
+            continue
+        content = yaml.safe_load(
+            path.read_text(encoding="utf-8")
+        )  # YAML reads JSON too
+        species = content.get(field_name) or []
+        if isinstance(species, dict):
+            ids = [str(key) for key in species]
+        else:
+            ids = [
+                str(item["id"])
+                for item in species
+                if isinstance(item, dict) and "id" in item
+            ]
+        keys |= {f"{kind}:{species_id}" for species_id in ids}
+    return keys
 
 
 def _check_decor(report: CodexReport, known_keys: set[str]) -> None:
