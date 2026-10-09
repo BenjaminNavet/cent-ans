@@ -38,7 +38,8 @@ func _init() -> void:
 		values.sort()
 		print("p2b_ui_test C3: OK (tailles vues : %s)" % str(values))
 	else:
-		finish()
+		print("p2b_ui_test C3: %d failure(s)" % (failures - _c1_failures - _c2_failures))
+	finish()
 
 
 func _check_c2(condition: bool, message: String) -> bool:
