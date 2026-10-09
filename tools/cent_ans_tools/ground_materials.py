@@ -29,7 +29,7 @@ from typing import Any
 
 import numpy as np
 import yaml
-from jsonschema import Draft202012Validator
+from cent_ans_tools.codex import schema_validator
 from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import gaussian_filter
 
@@ -60,8 +60,8 @@ DEFAULT_HEIGHT_STRENGTH = 2.0
 def load_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
     """Catalogue validated against its schema; layers must be 0..n-1 in order."""
     document = yaml.safe_load(path.read_text(encoding="utf-8"))
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    errors = list(Draft202012Validator(schema).iter_errors(document))
+    validator = schema_validator(SCHEMA_PATH.parent.parent, SCHEMA_PATH.name)
+    errors = list(validator.iter_errors(document))
     if errors:
         raise ValueError(f"{path.name} invalide : {errors[0].message}")
     ids = [m["id"] for m in document["materials"]]

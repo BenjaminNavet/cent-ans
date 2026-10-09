@@ -112,13 +112,12 @@ class ColormapInputs:
 def load_style(path: Path = STYLE_PATH, schema_path: Path = SCHEMA_PATH) -> dict:
     """Parse ``colormap_style.yaml`` and validate it against its schema."""
     import yaml
-    from jsonschema import Draft202012Validator
+    from cent_ans_tools.codex import schema_validator
 
     style = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(style), key=lambda e: list(e.path)
-    )
+    schema_path = Path(schema_path)
+    validator = schema_validator(schema_path.parent.parent, schema_path.name)
+    errors = sorted(validator.iter_errors(style), key=lambda e: list(e.path))
     if errors:
         details = "; ".join(
             f"{'/'.join(map(str, e.path)) or '<racine>'}: {e.message}" for e in errors

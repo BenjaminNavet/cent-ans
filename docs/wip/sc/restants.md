@@ -211,3 +211,5 @@ DC-1 DC-2 | GT3(partiel) | RT1 RT3 RT4 RT5 | GB1 GB2 GB3 GB4 GB5 | CB4 CB5 CB6 C
 - PF-07b : résidus --bench-ab/--bench-set/--map-ab dans battle_vegetation.gd, settlement_layer.gd (fichiers DN, après leur session), terrain_builder.gd, campaign_weather_view.gd, render_quality.gd [mech]. Préchauffage GPU post-export (--journey) retiré d export_macos.sh : à remplacer si saccades au 1er lancement.
 - Fin de chantier : clippy workspace échoue sur sim-campaign (clippy::manual_checked_ops), signalé par veg.
 - GT9 : un script de test qui ne compile pas sort en code 0 (Parse Error invisible pour CI/agents). Ajouter une vérif --check-only de game/tests/*.gd (CI ou outil) [mech]. Balayage du 09/10 : 8 cassés réparés (48172e05a, 2907579fa).
+
+GT9/DT5 (reprise 09/10) : check_gd_scripts.sh vérifié (détecte un script cassé, rc 1) ; DT5 : colormap.py et ground_materials.py passent par codex.schema_validator ($ref résolus). pytest tools : 3226 OK, 3 échecs hors lot (rock outcrops glb absents, budget : aussi sur main ; relief_update tier3 : branche en retard sur main).
