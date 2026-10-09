@@ -9,6 +9,8 @@ const _Access := preload("res://scripts/battle/battle_access.gd")
 ## - Survolée : trait pâle ;
 ## - Ennemie survolée : rouge, trait pointillé ;
 ## - Ennemie ciblée (cible `target` d'une unité sélectionnée) : rouge pulsé ;
+## - Au corps à corps (RX batvis), sans autre état : trait fin de la livrée du camp (rouge pâle pour
+##   l'ennemi), pour lire les régiments dans la mêlée ;
 ## - En déroute, absente (détruite, sortie du champ, en réserve) : rien.
 ##
 ## Rendu seulement : la scène fournit `get_units()`, la sélection et les régiments survolés.
@@ -19,7 +21,7 @@ const _Access := preload("res://scripts/battle/battle_access.gd")
 ## l'albédo ; le fond transparent de la texture doit donc être NOIR (0, 0, 0, 0), sinon tout le
 ## rectangle émet la couleur de `modulate` (rectangle plein au lieu d'un cadre).
 
-enum State { NONE, SELECTED, HOVERED, ENEMY_HOVERED, ENEMY_TARGETED }
+enum State { NONE, SELECTED, HOVERED, ENEMY_HOVERED, ENEMY_TARGETED, ENGAGED }
 
 ## PO4 (bible DA, ADR 0097) : liseré or pâle mince, jamais de jaune pur ; rouge garance pour
 ## l'ennemi. La livrée du camp ne teinte plus que légèrement l'or (`LIVERY_TINT`).
@@ -95,6 +97,8 @@ func update(units: Array, selected: Array, hovered: Array) -> void:
 			decal = _make_decal(id)
 		var entry: Array = _entries[id]
 		var state := outline_state(unit, selected.has(id), hovered.has(id), _targets.has(id), _player_side)
+		if state == State.NONE and bool(unit.get("present", true)) and str(unit.get("state", "")) == "melee":
+			state = State.ENGAGED
 		var state_changed := state != int(entry[0])
 		if state_changed:
 			pulsing_dirty = pulsing_dirty or state == State.ENEMY_TARGETED or int(entry[0]) == State.ENEMY_TARGETED
@@ -186,6 +190,10 @@ func _color(state: int, side: String) -> Color:
 			return Color(_Access.enemy_red(ENEMY_RED), 0.95)
 		State.ENEMY_TARGETED:
 			return Color(_Access.enemy_red(ENEMY_RED), 1.0)
+		State.ENGAGED:
+			if side == _player_side:
+				return Color(livery.lerp(Color.WHITE, 0.45), 0.7)
+			return Color(_Access.enemy_red(ENEMY_RED).lerp(Color.WHITE, 0.25), 0.6)
 	return Color.TRANSPARENT
 
 

@@ -96,6 +96,12 @@ uniform float micro_layer_of[MAX_GROUND_LAYERS];
 uniform float micro_tile_m[MAX_GROUND_LAYERS];
 uniform float micro_strength = 0.7;
 uniform float micro_dist = 32.0; // m : au-delà, aucun échantillon de grain
+// RX batvis : à moyenne distance le motif des textures (feuilles, lattes de neige) se répète et sa
+// luminance dépasse celle des soldats ; l'albédo et la normale de chaque couche glissent vers leur
+// moyenne (mip bas) entre `far_flatten_start` et `far_flatten_end`, de `far_flatten` au plus.
+uniform float far_flatten : hint_range(0.0, 1.0) = 0.7;
+uniform float far_flatten_start = 45.0;
+uniform float far_flatten_end = 260.0;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -118,7 +124,7 @@ float layer_size(float layer) {
 }
 
 // Échantillon anti-tuilage : deux échelles tournées, mélangées selon le bruit macro.
-void sample_layer(float layer, vec2 p, float blend, inout vec3 albedo, inout vec3 nrm, float w) {
+void sample_layer(float layer, vec2 p, float blend, float far_k, inout vec3 albedo, inout vec3 nrm, float w) {
 	if (w < 0.004) {
 		return;
 	}
@@ -127,6 +133,10 @@ void sample_layer(float layer, vec2 p, float blend, inout vec3 albedo, inout vec
 	vec2 uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / (s * 2.3) + vec2(0.37, 0.71);
 	vec3 a = mix(texture(albedo_array, vec3(uv1, layer)).rgb, texture(albedo_array, vec3(uv2, layer)).rgb, blend);
 	vec3 n = mix(texture(normal_array, vec3(uv1, layer)).rgb, texture(normal_array, vec3(uv2, layer)).rgb, blend);
+	if (far_k > 0.01) {
+		a = mix(a, textureLod(albedo_array, vec3(uv1, layer), 9.0).rgb, far_k);
+		n = mix(n, vec3(0.5, 0.5, 1.0), far_k);
+	}
 	albedo += a * w;
 	nrm += n * w;
 }
@@ -284,8 +294,9 @@ void fragment() {
 
 	vec3 albedo = vec3(0.0);
 	vec3 nrm = vec3(0.0);
+	float far_k = smoothstep(far_flatten_start, far_flatten_end, view_dist) * far_flatten;
 	for (int i = 0; i < layer_count; i++) {
-		sample_layer(float(i), p, blend, albedo, nrm, w[i]);
+		sample_layer(float(i), p, blend, far_k, albedo, nrm, w[i]);
 	}
 
 	// Herbe : teinte de saison, blé doré, macro-variation de luminosité et de teinte. GA2 :

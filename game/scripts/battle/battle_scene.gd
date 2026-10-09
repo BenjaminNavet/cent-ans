@@ -484,7 +484,7 @@ func _build_scene() -> bool:
 	outlines.setup(side_colors, player_side)
 	path_preview = BattlePathPreview.new()
 	add_child(path_preview)
-	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.height_at(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
+	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.surface_height(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
 	cursor = BattleCursor.new()
 	range_arc = BattleRangeArc.new()
 	add_child(range_arc)
