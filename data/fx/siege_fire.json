@@ -28,7 +28,10 @@
     "size_m": [7.0, 18.0],
     "velocity_m_s": [3.0, 5.0],
     "spread_m": 3.0,
-    "color": [0.26, 0.25, 0.235, 0.9],
+    "color": [0.52, 0.55, 0.60, 0.9],
+    "age_darken": 0.72,
+    "young_density": 0.55,
+    "point_light_share": 0.08,
     "wind_drift_m_s": 3.5
   },
   "embers": {

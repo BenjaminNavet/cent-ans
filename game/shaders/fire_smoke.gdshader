@@ -21,6 +21,11 @@ uniform float point_light_share = 0.2;
 // CR1 : fondu des volutes proches de la caméra (m ; 0 = aucun). En gros plan, une volute de 9 m
 // à quelques mètres devenait une grande tache blanche ronde.
 uniform float near_fade = 0.0;
+// QW-F : la fumée vieillit vers `smoke_color * age_darken` (1 = couleur constante, défaut) ; la
+// fumée toute jeune est allégée par `young_density` (1 = inchangé) jusqu'à `young_span` (âge 0-1).
+uniform float age_darken = 1.0;
+uniform float young_density = 1.0;
+uniform float young_span = 0.25;
 
 varying vec2 uv_a;
 varying vec2 uv_b;
@@ -47,7 +52,7 @@ void vertex() {
 void fragment() {
 	vec4 texel = flipbook_texel(uv_a, uv_b, frame_blend);
 	float fade_in = smoothstep(0.0, 0.06, age);
-	float alpha = texel.a * COLOR.a * density * fade_in;
+	float alpha = texel.a * COLOR.a * density * fade_in * mix(young_density, 1.0, smoothstep(0.0, young_span, age));
 	float depth = texture(depth_texture, SCREEN_UV).r;
 	vec4 scene = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
 	float scene_distance = -scene.z / scene.w;
@@ -56,7 +61,7 @@ void fragment() {
 		alpha *= smoothstep(near_fade * 0.3, near_fade, -VERTEX.z);
 	}
 	float lighting = texel.g;
-	ALBEDO = smoke_color * (0.45 + 0.75 * lighting);
+	ALBEDO = smoke_color * mix(1.0, age_darken, smoothstep(0.0, 1.0, age)) * (0.45 + 0.75 * lighting);
 	// Lueur du feu sous la fumée jeune (ventre des volutes, côté ombré).
 	float glow = pow(1.0 - age, 7.0) * (1.0 - lighting * 0.7);
 	EMISSION = ember_glow * glow * ember_glow_energy;
