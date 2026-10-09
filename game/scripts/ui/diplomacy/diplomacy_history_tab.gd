@@ -1,7 +1,12 @@
 class_name DiplomacyHistoryTab
 extends DiplomacyView
 
-## Onglet « Traités » : historique des traités du joueur avec la faction choisie.
+## Onglet « Traités » : historique des traités du joueur avec la faction choisie ; les ruptures de
+## pacte et les parjures y figurent, en rouge.
+
+const RUPTURE_LABELS := {
+	"broken": "pacte rompu", "perjury": "PARJURE (trêve rompue)", "refused_call": "appel aux armes refusé",
+}
 
 
 func _init() -> void:
@@ -17,7 +22,9 @@ func _render() -> void:
 		if str(record.get("with", "")) != faction_id:
 			continue
 		var accepted := bool(record.get("accepted", false))
-		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""), "signé" if accepted else "refusé"]
+		var rupture := str(record.get("rupture", ""))
+		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""),
+			RUPTURE_LABELS.get(rupture, "signé" if accepted else "refusé")]
 		var head_label := _label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC)
 		var wax := FaUi.seal_rect("treaty", float(TREATY_SEAL_SIZE)) if accepted else null
 		if wax != null:  # Un traité signé porte son sceau

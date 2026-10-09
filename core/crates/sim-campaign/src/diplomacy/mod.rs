@@ -188,6 +188,7 @@ pub use ai::{
 pub use upkeep::loyalty_target;
 pub(crate) use upkeep::{on_line_extinct, resolve_diplomacy};
 pub use view::DiplomacyEntry;
+pub use war::{AGGRESSION_PRESTIGE, PERJURY_PRESTIGE};
 
 mod ai;
 mod attitude;

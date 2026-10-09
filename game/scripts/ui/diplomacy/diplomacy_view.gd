@@ -6,6 +6,8 @@ extends PanelSection
 ## remontés au panneau. La fille remplit sa vue dans `_render` ; aucune règle ici.
 
 signal order_requested(order: Dictionary, success_text: String)
+## Un nom de faction cliquable (alliés, ennemis, vassaux) demande l'ouverture de sa fiche.
+signal faction_requested(faction: String)
 
 ## Côté du sceau de cire réel (bouton « Proposer le traité », traités signés).
 const TREATY_SEAL_SIZE := 28

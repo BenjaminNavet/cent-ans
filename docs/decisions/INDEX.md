@@ -109,7 +109,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0115 | [Emprise Oural–Méditerranée](0115-emprise-oural-mediterranee.md) | n/d |
 | 0116 | [Terrains, climats, religions et mers de l'Est](0116-terrains-religions-de-l-est.md) | n/d |
 | 0117 | [Garde du seigneur : l'unité de la capitale entretenue par le domaine (lot OMR R3)](0117-garde-du-seigneur.md) | accepté |
-| 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
 | 0118 | [Copies GPU compressées des rasters monde de la carte de campagne](0118-copies-gpu-compressees-de-la-carte.md) | accepté |
 | 0119 | [Portée de planification de l'IA (index partagés en lecture seule)](0119-portee-de-planification-ia.md) | remplacé par l'ADR 0205 |
 | 0121 | [Relief fin dans le cadre monde, palier 1 étendu à tout le monde OM](0121-relief-fin-cadre-monde.md) | accepté |
@@ -132,10 +131,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0144 | [Ville détaillée plus haut, une seule teinte de toits de loin](0144-ville-detaillee-plus-haut.md) | acceptée |
 | 0145 | [Voix de combat criées : ElevenLabs v3 et cris de guerre en chœur](0145-voix-criees-elevenlabs.md) | n/d |
 | 0146 | [Deux fois plus de régiments par bataille](0146-regiments-doubles.md) | n/d |
-| 0146 bis | [Sommation de paix du suzerain au joueur](0146-sommation-de-paix-du-suzerain.md) | n/d |
 | 0148 | [Mesurer l'IA avant de la changer : sondage de bataille et duel A/B de campagne](0148-mesure-de-l-ia.md) | n/d |
 | 0149 | [fal.ai hors plafond v1 pour le chantier TB (campagne façon Thrones of Britannia)](0149-fal-ai-hors-plafond-campagne-tob.md) | remplacée par l'ADR 0152 |
-| 0149 bis | [Le paquet de relief se met à jour tout seul](0149-paquet-de-relief-automatique.md) | n/d |
 | 0150 | [Saisons de la carte : écart posé sur la carte de couleur, réglages dans `data/ui/`](0150-saisons-de-carte-donnees-et-surcouches.md) | n/d |
 | 0151 | [Un signe par ville ; signes d'évènement réservés à une couche](0151-signes-de-carte-reserves.md) | n/d |
 | 0152 | [Chantier TB sans fal.ai](0152-chantier-tb-sans-fal-ai.md) | acceptée |
@@ -181,7 +178,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0203 | [La pyramide de relief devient obligatoire](0203-pyramide-relief-obligatoire.md) | accepté |
 | 0204 | [Semis de végétation de campagne : Rust seul](0204-vegetation-semis-rust-seul.md) | n/d |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
-| 0205 bis | [Retrait du village de bataille B5](0205-retrait-village-bataille.md) | accepté |
 | 0206 | [Chargeur Rust des données vectorielles de la carte](0206-chargeur-carte-rust.md) | accepté |
 | 0207 | [Un seul moteur de missions, piloté par `data/missions.json`](0207-missions-donnees.md) | accepté |
 | 0208 | [Sauvegardes : version 9, plus de compatibilité ascendante](0208-sauvegardes-version-9.md) | accepté |
@@ -223,3 +219,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0255 | [Franchissement d'un pont, contagion de déroute et sonde d'issue (lot RX batsim)](0255-bataille-pont-contagion-sonde.md) | accepté |
 | 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
 | 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
+| 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |
+| 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
+| 0146 bis | [Sommation de paix du suzerain au joueur](0146-sommation-de-paix-du-suzerain.md) | n/d |
+| 0149 bis | [Le paquet de relief se met à jour tout seul](0149-paquet-de-relief-automatique.md) | n/d |
+| 0205 bis | [Retrait du village de bataille B5](0205-retrait-village-bataille.md) | accepté |

@@ -75,9 +75,12 @@ func _faction_row(row_entry: Dictionary) -> Control:
 	row.custom_minimum_size = Vector2(0, 58)
 	row.focus_mode = Control.FOCUS_NONE
 	row.pressed.connect(func() -> void: faction_chosen.emit(id))
-	var reasons := PackedStringArray(["Attitude envers nous : %+d" % attitude])
+	var band := str(row_entry.get("attitude_band", ""))
+	var reasons := PackedStringArray(["Attitude envers nous : %s%+d" % [band + " " if band != "" else "", attitude]])
 	for reason in row_entry.get("attitude_reasons", []):
-		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
+		var turns := int(reason.get("turns_left", 0))
+		var tail := " (encore %s)" % FrText.count(turns, "tour", "tours") if turns > 0 else ""
+		reasons.append("%+d  %s%s" % [int(reason["value"]), str(reason["text"]), tail])
 	TooltipHost.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
 	var line := UiBuild.hbox(8)
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

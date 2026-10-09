@@ -2,7 +2,29 @@
 
 use super::*;
 
+/// Prestige the ruler loses declaring war in the middle of a truce.
+pub const PERJURY_PRESTIGE: i32 = -30;
+/// Prestige the ruler loses declaring war without a casus belli.
+pub const AGGRESSION_PRESTIGE: i32 = -20;
+
 impl CampaignState {
+    /// Prestige `attacker`'s ruler would lose declaring war on `target`
+    /// (0 with a casus belli and no truce), as shown by the war preview.
+    pub fn declaration_prestige_cost(
+        &self,
+        data: &GameData,
+        attacker: &FactionId,
+        target: &FactionId,
+    ) -> i32 {
+        if self.has_truce(attacker, target) {
+            PERJURY_PRESTIGE
+        } else if self.casus_belli(data, attacker, target).is_none() {
+            AGGRESSION_PRESTIGE
+        } else {
+            0
+        }
+    }
+
     /// Queues an event produced by an order (orders apply immediately; the
     /// event joins the next turn's journal).
     pub(crate) fn push_order_event(&mut self, event: GameEvent) {
@@ -44,7 +66,7 @@ impl CampaignState {
                 self.add_modifier(other, attacker, -40, PERJURY_REASON, 40);
             }
             religion::change_favor(self, attacker, -30);
-            self.change_ruler_prestige(attacker, -30);
+            self.change_ruler_prestige(attacker, PERJURY_PRESTIGE);
             let text = format!(
                 "{} rompt la trêve qui le liait à {} : parjure.",
                 data.faction_name(attacker),
@@ -62,7 +84,7 @@ impl CampaignState {
             for other in &others {
                 self.add_modifier(other, attacker, -20, AGGRESSION_REASON, 40);
             }
-            self.change_ruler_prestige(attacker, -20);
+            self.change_ruler_prestige(attacker, AGGRESSION_PRESTIGE);
         }
         let excommunicate = religion::is_catholic(self, data, attacker)
             && religion::is_catholic(self, data, target)
