@@ -119,7 +119,8 @@ entries:
   role: Plaster
   regions: [empire_est, empire_rhin, empire_sud, france_est]
   prompt: >-
-    Soft pink and salmon coloured lime plaster, warm rosy cream with faint pale patches and fine cracks.
+    Flat frontal photo of an old Alsatian town house wall in salmon-red tinted lime render, ochre and
+    brick-red limewash with brush marks, faint weathered patches and hairline cracks, even daylight.
   seed: 9080
   tile_m: 2.4
   checks:
