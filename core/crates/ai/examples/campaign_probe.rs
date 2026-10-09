@@ -10,6 +10,9 @@
 //!   measure covers the whole span). Without it a run stops at the outcome.
 //! - `CENT_ANS_DATA_DIR` plays another copy of the data (variants of a rule).
 //!
+//! WH `diplob` measures: seasons under a league against a hegemon, leagues
+//! formed, ultimatums sent to France, calls of allies to France.
+//!
 //! Measures per seed: outcome and turn, France-England war share of turns,
 //! active wars (distinct pairs) and declarations per turn, factions
 //! eliminated, revolts, bankruptcies, top-K income and treasury at the end,
@@ -90,6 +93,29 @@ fn sieges(
         .collect()
 }
 
+/// Province share of the largest faction and its military power over the
+/// second power (what the league of WH `diplob` weighs).
+fn dominance(state: &CampaignState) -> (f64, f64) {
+    let (name, count) = biggest(state);
+    let total = state
+        .provinces
+        .keys()
+        .filter(|p| state.province_owner(p).is_some())
+        .count();
+    let power = |f: &FactionId| state.faction_power(f);
+    let top = fid(&name);
+    let second = state
+        .factions
+        .iter()
+        .filter(|(f, s)| s.alive && **f != top && !f.is_rebels() && f.as_str() != "fac_papacy")
+        .map(|(f, _)| power(f))
+        .fold(0.0, f64::max);
+    (
+        count as f64 / total.max(1) as f64,
+        power(&top) / second.max(1.0),
+    )
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value {
     let started = Instant::now();
     let france = fid("fac_france");
@@ -100,6 +126,8 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let (mut revolts, mut bankruptcies, mut declarations, mut eliminated) =
         (0u32, 0u32, 0u32, 0u32);
     let (mut wars_sum, mut wars_max) = (0usize, 0usize);
+    let (mut league_turns, mut leagues, mut ultimatums, mut ally_calls) = (0u32, 0u32, 0u32, 0u32);
+    let mut seen_offers: BTreeSet<u32> = BTreeSet::new();
     let mut peak = (String::new(), 0usize, 0u32);
     let mut series: Vec<Value> = Vec::new();
     // War lifetimes: start turn of the open pairs, end turn of the last war
@@ -174,7 +202,26 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             }
         }
         live_sieges = now;
+}
+
+        if state.league.is_some() {
+            league_turns += 1;
+        }
+        for offer in &state.factions[&france].offers {
+            if !seen_offers.insert(offer.id) {
+                continue;
+            }
+            if offer.proposal.is_ultimatum() {
+                ultimatums += 1;
+            }
+            if offer.proposal.is_ally_call() {
+                ally_calls += 1;
+            }
+        }
         for e in &events {
+            if e.text_fr.contains("se liguent") {
+                leagues += 1;
+            }
             match e.kind {
                 EventKind::Revolt if !e.text_fr.contains("passe aux mains") => revolts += 1,
                 EventKind::Bankruptcy => bankruptcies += 1,
@@ -215,8 +262,10 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             peak = (name, n, state.turn);
         }
         if state.turn.is_multiple_of(40) {
+            let (share, ratio) = dominance(&state);
             series.push(json!({"turn": state.turn, "year": state.year, "wars": wars,
-                "biggest": biggest(&state).0, "biggest_provinces": n}));
+                "biggest": biggest(&state).0, "biggest_provinces": n,
+                "biggest_share": share, "power_ratio": ratio}));
         }
         if state.outcome.is_some() && !full {
             break;
@@ -268,6 +317,10 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "factions_start": factions_start,
         "factions_end": state.factions.values().filter(|f| f.alive).count(),
         "eliminated": eliminated,
+        "league_turns": league_turns,
+        "leagues_formed": leagues,
+        "ultimatums_to_player": ultimatums,
+        "ally_calls_to_player": ally_calls,
         "revolts": revolts,
         "bankruptcies": bankruptcies,
         "biggest_end": {"faction": big_name, "provinces": big_n},
@@ -363,6 +416,24 @@ fn main() {
             r["abandoned_mean_turns"].as_f64().unwrap_or(0.0),
             100.0 * r["siege_capture_share"].as_f64().unwrap_or(0.0),
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
+        );
+        for s in r["series_every_40_turns"].as_array().into_iter().flatten() {
+            println!(
+                "    t{:<4} wars {:>3} | {} {} prov = {:.1} % of the map, power x{:.2} the second",
+                s["turn"],
+                s["wars"],
+                s["biggest"].as_str().unwrap_or("?"),
+                s["biggest_provinces"],
+                100.0 * s["biggest_share"].as_f64().unwrap_or(0.0),
+                s["power_ratio"].as_f64().unwrap_or(0.0)
+            );
+        }
+        println!(
+            "    league: {} leagues, {} turns | ultimatums to France {} | ally calls to France {}",
+            r["leagues_formed"],
+            r["league_turns"],
+            r["ultimatums_to_player"],
+            r["ally_calls_to_player"]
         );
         for t in r["top"].as_array().into_iter().flatten() {
             println!(

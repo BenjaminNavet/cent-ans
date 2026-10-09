@@ -725,34 +725,20 @@ fn plan_alliances(
             };
             cache.attitude(data, faction, id).0 > floor
         })
-        .filter_map(|(id, liking)| {
-            let article = if id == state.player_faction {
-                Article::Alliance
-            } else {
-                [Article::Alliance, Article::DefensiveAlliance]
-                    .into_iter()
-                    .find(|a| {
-                        crate::negotiation::evaluate_treaty_with(
-                            cache,
-                            data,
-                            faction,
-                            &id,
-                            std::slice::from_ref(a),
-                        )
-                        .accept
-                    })?
-            };
-            Some((id, liking, article))
+        .filter(|(id, _)| {
+            id == &state.player_faction
+                || crate::negotiation::evaluate_treaty_with(
+                    cache,
+                    data,
+                    faction,
+                    id,
+                    &[Article::Alliance],
+                )
+                .accept
         })
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
-    if let Some((target, _, article)) = candidate {
-        orders.push(match article {
-            Article::Alliance => Order::ProposeAlliance { target },
-            other => Order::ProposeTreaty {
-                target,
-                articles: vec![other],
-            },
-        });
+    if let Some((target, _)) = candidate {
+        orders.push(Order::ProposeAlliance { target });
     }
 }
 

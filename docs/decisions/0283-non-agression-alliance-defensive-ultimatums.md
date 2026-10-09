@@ -9,7 +9,7 @@ aucun pacte de non-agression, et l'IA ne s'adresse au joueur que pour la paix, l
   le « serde default militaire » est le variant inchangé). `Article::DefensiveAlliance` forme la même alliance et marque les deux
   camps dans `ledger.defensive_allies` (`#[serde(default)]`). Une alliance défensive répond à l'appel aux armes d'un allié attaqué
   mais ne suit pas ses guerres offensives (`ally_war_to_join` l'ignore) ; son engagement pèse `alliance.defensive_commitment` (−5)
-  contre −15 ; elle se transforme en alliance militaire en proposant `Alliance`. L'IA propose une alliance défensive quand la militaire serait refusée.
+  contre −15 ; elle se transforme en alliance militaire en proposant `Alliance`. L'IA ne propose que des alliances militaires : lui faire proposer la défensive quand la militaire est refusée a fait passer les guerres déclarées de 197 à 355 sur 120 saisons (la sonde `campaign_probe`, graine 1), chaque alliance de plus amenant des appels aux armes ; la défensive reste donc un choix du joueur.
 - **Pacte de non-agression.** `Article::NonAggression { turns }`, durée bornée par `non_aggression.min_turns..max_turns`, stocké dans
   `ledger.non_aggression` (échéance, des deux côtés, purgé chaque saison, effacé par `start_war`). Il lie comme une trêve :
   déclarer la guerre à un signataire est un parjure (−40 d'opinion partout, −30 de prestige, historique `Perjury` avec l'article
@@ -26,4 +26,4 @@ aucun pacte de non-agression, et l'IA ne s'adresse au joueur que pour la paix, l
 ## Conséquences
 - Toutes les valeurs sont dans `data/ai/diplomacy.json` (blocs `league`, `ally_call`, `non_aggression`, `ultimatum`, `treaty_weights.join_war`).
 - Les guerres contre le joueur sont désormais précédées d'une exigence quand l'agresseur domine : le joueur peut payer pour les éviter.
-- Pas encore : l'IA ne propose pas de pactes de non-agression ; ni durée ni renouvellement de l'alliance.
+- Pas encore : l'IA ne propose ni pacte de non-agression ni alliance défensive ; ni durée ni renouvellement de l'alliance.
