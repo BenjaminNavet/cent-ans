@@ -256,15 +256,26 @@ def collapse_passes(obj: "bpy.types.Object", target: int) -> int:
     return len(obj.data.polygons)
 
 
+def weld(obj: "bpy.types.Object", distance: float) -> None:
+    """Merge vertices closer than ``distance`` (loop UVs are kept, so seams stay textured)."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=distance)
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+
+
 def decimate(obj: "bpy.types.Object", target: int) -> int:
     """Collapse-decimate to roughly ``target`` triangles, return the count.
 
     Collapse stalls on meshes with many UV islands (seams block it); the fallback welds
     vertices at a growing distance (texture seams blur, harmless at low LOD) and retries.
     """
-    count = collapse_passes(obj, target)
     low, high = bounds(obj)
     diagonal = max(high[i] - low[i] for i in range(3))
+    weld(obj, diagonal * 1e-5)  # exact weld: UV-seam splits would otherwise tear on collapse
+    count = collapse_passes(obj, target)
     for fraction in (0.002, 0.006, 0.015, 0.04, 0.08, 0.15, 0.25):
         if count <= target * 1.04:
             break

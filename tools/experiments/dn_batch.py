@@ -1,7 +1,7 @@
 """Non-interactive, resumable batch of the image -> 3D procedure (docs/pipeline-assets-3d.md).
 
 Catalogue JSON: a list of ``{"id", "kind": "decor"|"figure", "prompt", "seeds": N,
-"backend3d": "fal"|"sf3d"|"hf"|"both"}`` (``both`` = fal + sf3d; ``hf`` = free TRELLIS Space,
+"backend3d": "fal"|"fal2"|"sf3d"|"hf"|"both"}`` (``both`` = fal + sf3d; ``fal2`` = TRELLIS 2, 0.30 $; ``hf`` = free TRELLIS Space,
 best effort, a failure is logged and skipped). Run::
 
     uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy \
@@ -121,21 +121,40 @@ def append_jsonl(path: Path, record: dict) -> None:
 
 
 CATALOG_NAME = ""
-SPEND_CAP_USD = float(os.environ.get("DN_FAL_CAP_USD", "29.5"))
+SPEND_CAP_USD = float(os.environ.get("DN_FAL_CAP_USD", "43.5"))
+VARIANT = ""  # --variant: outputs go to <id>/<variant>/ (old artefacts stay untouched)
 
 
-def check_cap() -> None:
+def work_dir(entry_id: str) -> Path:
+    """Output directory of an entry: ``<id>/`` or, with ``--variant``, ``<id>/<variant>/``."""
+    return DN / entry_id / VARIANT if VARIANT else DN / entry_id
+
+
+def copy_previous_image(entry_id: str) -> None:
+    """``--reuse-image``: copy (never move) the chosen image files of ``<id>/`` into the variant."""
+    import shutil
+
+    source, target = DN / entry_id, work_dir(entry_id)
+    for name in ("img", "cut_raw", "cut"):
+        if (source / name).is_dir() and not (target / name).exists():
+            shutil.copytree(source / name, target / name)
+    for name in ("chosen.json", "scores.json", "contact.png"):
+        if (source / name).exists() and not (target / name).exists():
+            shutil.copy2(source / name, target / name)
+
+
+def check_cap(cost: float = 0.0) -> None:
     """Refuse a fal call when the cumulative spend of ``fal_spend.jsonl`` reached the cap."""
     path = DN / "fal_spend.jsonl"
     if path.exists():
         total = sum(json.loads(line)["usd"] for line in path.read_text().splitlines() if line)
-        if total >= SPEND_CAP_USD:
+        if total + cost > SPEND_CAP_USD:
             raise RuntimeError(f"fal cap {SPEND_CAP_USD} $ reached ({total:.2f} $)")
 
 
 def gen_event(entry_id: str, section: str, record: dict) -> None:
     """Append ``record`` to ``<id>/generation.json[section]`` (provenance, merged not replaced)."""
-    path = DN / entry_id / "generation.json"
+    path = work_dir(entry_id) / "generation.json"
     record = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), **record}
     with _append_lock:
         data = json.loads(path.read_text()) if path.exists() else {"id": entry_id}
@@ -146,7 +165,7 @@ def gen_event(entry_id: str, section: str, record: dict) -> None:
 
 def gen_base(entry: dict) -> None:
     """Static provenance fields and ``prompt.txt`` (fal path writes them like the local one)."""
-    out_dir = DN / entry["id"]
+    out_dir = work_dir(entry["id"])
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "prompt.txt").write_text(full_prompt(entry))
     path = out_dir / "generation.json"
@@ -325,7 +344,7 @@ def run_image_entries(entries: list[dict], workers: int) -> None:
     jobs = []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for entry in entries:
-            out_dir = DN / entry["id"]
+            out_dir = work_dir(entry["id"])
             (out_dir / "img").mkdir(parents=True, exist_ok=True)
             gen_base(entry)
             seed = seed_list(entry)[0]
@@ -344,7 +363,7 @@ def prefetch_images(entries: list[dict], workers: int) -> None:
     jobs = []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for entry in entries:
-            out_dir = DN / entry["id"]
+            out_dir = work_dir(entry["id"])
             (out_dir / "img").mkdir(parents=True, exist_ok=True)
             for seed in seed_list(entry):
                 target = out_dir / "img" / f"s{seed}.png"
@@ -566,9 +585,9 @@ def global_contact(entries: list[dict]) -> Path:
     from PIL import Image
 
     sheets = [
-        Image.open(DN / e["id"] / "contact.png")
+        Image.open(work_dir(e["id"]) / "contact.png")
         for e in entries
-        if (DN / e["id"] / "contact.png").exists()
+        if (work_dir(e["id"]) / "contact.png").exists()
     ]
     target = DN / "_contact.png"
     if sheets:
@@ -606,7 +625,7 @@ def fal_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
         entry_id, "calls_3d",
         {
             "seed": seed, "endpoint": FAL_ENDPOINT, "mode": "single-view",
-            "views": [str(cut.relative_to(DN / entry_id))], "file": f"3d/{target.name}",
+            "views": [str(cut.relative_to(work_dir(entry_id)))], "file": f"3d/{target.name}",
             "usd": FAL_COST_USD,
         },
     )  # fmt: skip
@@ -617,6 +636,48 @@ def fal_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
             "endpoint": FAL_ENDPOINT, "seed": seed, "usd": FAL_COST_USD,
         },
     )  # fmt: skip
+
+
+FAL2_ENDPOINT = "fal-ai/trellis-2"
+FAL2_COST_USD = 0.30
+TRELLIS2_ARGS = {
+    "resolution": "1024",
+    "texture_size": 2048,
+    "decimation_target": 100000,
+    "remesh": True,
+}
+
+
+def fal2_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
+    """One ``fal-ai/trellis-2`` call (0.30 $ at 1024), glb saved to ``target``, spend logged."""
+    import fal_client
+
+    check_cap(FAL2_COST_USD)
+    with timed(entry_id, "trellis2-fal", seed=seed):
+        url = fal_client.upload_file(str(cut))
+        result = fal_client.subscribe(
+            FAL2_ENDPOINT, arguments={"image_url": url, "seed": seed, **TRELLIS2_ARGS}
+        )
+        glb = result.get("model_glb") or result.get("model_mesh") or result["model_file"]
+        urllib.request.urlretrieve(glb["url"], target)  # noqa: S310
+    log_spend(entry_id, FAL2_ENDPOINT, seed, FAL2_COST_USD, "3d")
+    gen_event(
+        entry_id, "calls_3d",
+        {
+            "seed": seed, "endpoint": FAL2_ENDPOINT, "mode": "single-view",
+            "views": [str(cut.relative_to(work_dir(entry_id)))],
+            "file": f"3d/{target.name}", "usd": FAL2_COST_USD,
+        },
+    )  # fmt: skip
+
+
+def fal2_job(entry_id: str, cut: Path, target: Path, seed: int) -> None:
+    """Wrapper logging a trellis-2 failure instead of killing the batch."""
+    try:
+        fal2_trellis(entry_id, cut, target, seed)
+    except Exception as error:  # noqa: BLE001
+        append_jsonl(DN / "failures.jsonl", {"id": entry_id, "step": "fal2", "error": str(error)[:400]})
+        print(f"[{entry_id}] fal2 failed: {str(error)[:200]}", flush=True)
 
 
 def sf3d_run(entry_id: str, cut: Path, target: Path, seed: int) -> None:
@@ -949,8 +1010,10 @@ def process(
     entry: dict, args, executor: ThreadPoolExecutor, futures: list[Future]
 ) -> None:
     """Run the stages of one entry; fal jobs go to the executor, the rest runs here."""
-    out_dir = DN / entry["id"]
+    out_dir = work_dir(entry["id"])
     out_dir.mkdir(parents=True, exist_ok=True)
+    if args.reuse_image:
+        copy_previous_image(entry["id"])
     if entry["kind"] == "figure":
         (out_dir / "kind_figure").touch()
     until = STAGES.index(args.until)
@@ -985,6 +1048,12 @@ def process(
             )
         )
         pending_fal.append((entry, out_dir, seed))
+    if "fal2" in wanted and not (out_dir / "3d" / f"fal2__s{seed}.glb").exists():
+        futures.append(
+            executor.submit(
+                fal2_job, entry["id"], cut, out_dir / "3d" / f"fal2__s{seed}.glb", seed
+            )
+        )
     if "hf" in wanted and not (out_dir / "3d" / f"hf__s{seed}.glb").exists():
         hf_trellis(entry["id"], cut, out_dir / "3d" / f"hf__s{seed}.glb", seed)
     if "sf3d" in wanted and not (out_dir / "3d" / f"sf3d__s{seed}.glb").exists():
@@ -1018,16 +1087,24 @@ def main() -> None:
     parser.add_argument("--charter-s-p95", type=float, default=MAX_SAT_P95)
     parser.add_argument("--charter-s-mean", type=float, default=MAX_SAT_MEAN)
     parser.add_argument("--fal-workers", type=int, default=4)
-    parser.add_argument("--backend3d", default="", help="override every entry (fal|sf3d|hf|both)")
+    parser.add_argument("--backend3d", default="", help="override every entry (fal|fal2|sf3d|hf|both)")
     parser.add_argument("--seeds", type=int, default=0, help="override seeds per entry")
     parser.add_argument("--image-backend", choices=("local", "fal"), default="local")
     parser.add_argument("--image-workers", type=int, default=6)
+    parser.add_argument(
+        "--variant", default="", help="write to <id>/<variant>/ (old artefacts untouched)"
+    )
+    parser.add_argument(
+        "--reuse-image", action="store_true",
+        help="copy the existing image/cut/chosen of <id>/ into the variant (no new image)",
+    )
     parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
     parser.add_argument(
         "--no-local-fallback", action="store_true", help="disable the automatic local fallback"
     )
     args = parser.parse_args()
-    global LOCAL_FALLBACK
+    global LOCAL_FALLBACK, VARIANT
+    VARIANT = args.variant
     LOCAL_FALLBACK = not args.no_local_fallback
     CHARTER_MODE, MAX_SAT_P95, MAX_SAT_MEAN = (
         args.charter,
@@ -1057,7 +1134,7 @@ def main() -> None:
         run_image_entries(image_entries, args.image_workers)
         if not entries:
             return
-    if args.image_backend == "fal":
+    if args.image_backend == "fal" and not args.reuse_image:
         prefetch_images(entries, args.image_workers)
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=args.fal_workers) as executor:
@@ -1074,7 +1151,7 @@ def main() -> None:
     until = STAGES.index(args.until)
     if until >= 4:
         for entry in entries:
-            stage_sheet(entry, DN / entry["id"])
+            stage_sheet(entry, work_dir(entry["id"]))
     if until >= 5:
         stage_gallery()
     print(f"contact sheet: {DN / '_contact.png'}")
