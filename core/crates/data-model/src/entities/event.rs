@@ -514,6 +514,14 @@ pub struct EventOption {
     /// Relative weight of the option for the AI (highest wins).
     #[serde(default = "default_ai_weight")]
     pub ai_weight: u32,
+    /// WH turn: conditions the option needs (scope = the deciding faction and
+    /// the event's province); otherwise it is greyed out with `requires_reason`
+    /// and refused by the core.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub requires: Vec<Condition>,
+    /// French reason shown when `requires` fails ("Exige de tenir Calais").
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub requires_reason: String,
 }
 
 fn default_ai_weight() -> u32 {

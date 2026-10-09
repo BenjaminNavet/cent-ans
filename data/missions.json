@@ -105,6 +105,177 @@
         "prestige": 8,
         "public_order": 6
       }
+    },
+    {
+      "id": "fr_guyenne",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Chasser l'Anglais de Guyenne",
+      "objective": "Reprenez la Guyenne, fief tenu par le roi d'Angleterre depuis 1259 (traité de Paris) : la cause première du conflit.",
+      "duration": 12,
+      "weight": 6,
+      "faction": "fac_france",
+      "province": "prov_guyenne",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 900,
+        "prestige": 20,
+        "public_order": 10
+      },
+      "source": "Froissart, Chroniques ; traité de Paris (1259), saisie de la Guyenne par Philippe VI (1337)."
+    },
+    {
+      "id": "fr_normandie",
+      "target": "fixed",
+      "goal": "control",
+      "title": "La Normandie reconquise",
+      "objective": "Rendez la Normandie à la couronne : Formigny (1450), puis Caen et Cherbourg.",
+      "duration": 12,
+      "weight": 6,
+      "faction": "fac_france",
+      "after": "fr_guyenne",
+      "province": "prov_normandie",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 900,
+        "prestige": 20,
+        "free_unit": true
+      },
+      "source": "Chronique de Mathieu d'Escouchy ; campagne de Normandie (1449-1450)."
+    },
+    {
+      "id": "fr_reims",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Le sacre à Reims",
+      "objective": "Tenez la Champagne et Reims, où se font les rois : le sacre de Charles VII (17 juillet 1429) fonde sa légitimité.",
+      "duration": 10,
+      "weight": 6,
+      "faction": "fac_france",
+      "after": "fr_normandie",
+      "province": "prov_champagne",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 600,
+        "prestige": 25,
+        "public_order": 12
+      },
+      "source": "Jeanne d'Arc, campagne de la Loire et chevauchée du sacre (1429)."
+    },
+    {
+      "id": "en_calais",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Le siège de Calais",
+      "objective": "Prenez Calais et le Boulonnais : après Crécy, Édouard III assiège la ville onze mois (1346-1347) et en fait un port anglais jusqu'en 1558.",
+      "duration": 10,
+      "weight": 6,
+      "faction": "fac_england",
+      "province": "prov_boulonnais",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 800,
+        "prestige": 20,
+        "public_order": 8
+      },
+      "source": "Jean le Bel, Chronique ; siège de Calais (sept. 1346 - août 1347)."
+    },
+    {
+      "id": "en_chevauchee",
+      "target": "at_war",
+      "goal": "count",
+      "title": "La chevauchée",
+      "objective": "Remportez deux batailles contre nos ennemis : Crécy (1346) puis Poitiers (1356) ont fondé la réputation des archers anglais.",
+      "duration": 10,
+      "weight": 6,
+      "faction": "fac_england",
+      "after": "en_calais",
+      "counter": "battle_won",
+      "count": 2,
+      "progress": "{done}/{n} victoire(s)",
+      "reward": {
+        "gold": 700,
+        "prestige": 20,
+        "free_unit": true
+      },
+      "source": "Froissart, Chroniques ; Crécy (1346), Poitiers (1356)."
+    },
+    {
+      "id": "en_normandie",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Henri V en Normandie",
+      "objective": "Conquérez la Normandie, comme Henri V (1417-1419), pour tenir les clefs du royaume.",
+      "duration": 12,
+      "weight": 6,
+      "faction": "fac_england",
+      "after": "en_chevauchee",
+      "province": "prov_normandie",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 900,
+        "prestige": 25,
+        "public_order": 10
+      },
+      "source": "Gesta Henrici Quinti ; conquête de la Normandie (1417-1419), traité de Troyes (1420)."
+    },
+    {
+      "id": "bg_flandre",
+      "target": "fixed",
+      "goal": "control",
+      "title": "L'héritage de Flandre",
+      "objective": "Faites entrer la Flandre dans la maison de Bourgogne, comme Philippe le Hardi par son mariage avec Marguerite de Male (1384).",
+      "duration": 12,
+      "weight": 6,
+      "faction": "fac_burgundy",
+      "province": "prov_flandre",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 900,
+        "prestige": 20,
+        "public_order": 10
+      },
+      "source": "Succession de Louis de Male (1384) ; Georges Chastellain, Chronique."
+    },
+    {
+      "id": "bg_picardie",
+      "target": "fixed",
+      "goal": "control",
+      "title": "Les villes de la Somme",
+      "objective": "Obtenez la Picardie et les villes de la Somme, cédées à Philippe le Bon au traité d'Arras (1435).",
+      "duration": 10,
+      "weight": 6,
+      "faction": "fac_burgundy",
+      "after": "bg_flandre",
+      "province": "prov_picardie",
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 700,
+        "prestige": 20,
+        "free_unit": true
+      },
+      "source": "Traité d'Arras (21 septembre 1435)."
     }
   ]
 }

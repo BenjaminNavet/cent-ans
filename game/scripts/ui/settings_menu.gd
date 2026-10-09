@@ -189,7 +189,9 @@ func _build_map(grid: GridContainer) -> void:
 	_options(grid, "map/ai_moves_speed", "Vitesse des mouvements de l’IA", replay_speeds,
 		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")),
 		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte et la caméra suit celles qui vous concernent. Espace passe l’animation.")
-	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
+	_options(grid, "interface/season_report", "Rapport de saison", ["always", "auto", "off"],
+		["Toujours", "Si important", "Jamais"],
+		"Si important : fenêtre seulement quand vous perdez ou prenez une place, ou qu’une bataille a eu lieu ; sinon une ligne discrète.")
 	_options(grid, "interface/confirm_end_turn", "Confirmer la fin du tour", ["off", "warnings", "always"],
 		["Jamais", "Si oubli", "Toujours"],
 		"Si oubli : demande confirmation quand une armée n’a pas d’ordre, qu’un emplacement de construction est libre ou qu’aucune recherche n’est en cours. Maj+Entrée termine la saison sans confirmation.")
@@ -214,7 +216,7 @@ func _build_game(grid: GridContainer) -> void:
 		if turns == 0:
 			return "Désactivée"
 		return "Chaque tour" if turns == 1 else "Tous les %d tours" % turns)
-	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
+	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Cinq emplacements tournants (auto_1 à auto_5), plus une sauvegarde avant chaque bataille.")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d’une nouvelle partie. Décoché : jamais affiché.")
 

@@ -149,6 +149,9 @@ func refresh() -> void:
 	var minimap_ctl: MinimapController = map.get("minimap_ctl")
 	if minimap_ctl != null:  # WH mapb2 : pings des alertes nouvelles
 		minimap_ctl.on_alerts(alerts)
+	var victory: Node = map.get("victory")
+	if victory != null and victory.has_method("refresh_tracker"):
+		victory.call("refresh_tracker")
 
 
 ## Après `end_turn` : événements du tour, puis rafraîchissement des alertes.
@@ -177,6 +180,13 @@ func _on_alert_activated(alert: Dictionary) -> void:
 			return
 		"research_idle":
 			ui.tech_panel_requested.emit()
+			return
+		"mission_due":  # WH turn : province visée, sinon le panneau Objectifs
+			var victory: Node = map.get("victory")
+			if str(alert.get("province_id", "")) != "" and flow != null:
+				flow.call("focus_province", str(alert.get("province_id", "")))
+			elif victory != null:
+				victory.call("open_panel")
 			return
 		"diplomacy_offer":  # Q5
 			var diplomacy: Node = map.get("diplomacy")

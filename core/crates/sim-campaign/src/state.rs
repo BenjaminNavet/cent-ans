@@ -1027,6 +1027,9 @@ pub struct CampaignState {
     /// The player's short-term missions.
     #[serde(default)]
     pub missions: crate::missions::MissionsState,
+    /// WH turn: figures for the end screen's report.
+    #[serde(default)]
+    pub stats: crate::campaign_stats::CampaignStats,
     /// The crusader faction's fervour (`None` without
     /// `data/rules/crusade.json` or its faction, and in older saves; no
     /// change of [`STATE_VERSION`]).
@@ -1095,6 +1098,7 @@ impl CampaignState {
             mercenaries: crate::mercenaries::MercenaryState::default(),
             feudal: crate::feudal::FeudalState::default(),
             missions: crate::missions::MissionsState::default(),
+            stats: crate::campaign_stats::CampaignStats::default(),
             crusade: None,
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),

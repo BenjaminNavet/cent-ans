@@ -1833,6 +1833,8 @@ func _offer_pending_battles() -> void:
 	if pending.is_empty():
 		_close_battle_dialog()
 		return
+	if flow != null and (_battle_dialog == null or not _battle_dialog.visible):
+		flow.autosave_before_battle()  # WH turn : retour possible avant la bataille
 	if _battle_dialog == null:
 		_battle_dialog = load(PRE_BATTLE_DIALOG).instantiate()
 		ui.add_child(_battle_dialog)

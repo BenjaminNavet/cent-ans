@@ -11,7 +11,7 @@ use crate::campaign_sim::{CampaignSim, Ctx, CtxMut};
 impl CampaignSim {
     /// Decisions waiting for the player, oldest first:
     /// `[{id, event, title, text, historical, options[{index, text,
-    /// effects_text}], expires_in, province, province_name, presentation}]`;
+    /// effects_text, allowed, reason}], expires_in, province, province_name, presentation}]`;
     /// `presentation` (FK1) is `map` (incident posed on the map) or `dialog`.
     #[func]
     fn get_pending_decisions(&self) -> VarArray {
@@ -30,6 +30,8 @@ impl CampaignSim {
                             "index" => option.index as i64,
                             "text" => option.text.as_str(),
                             "effects_text" => option.effects_text.as_str(),
+                            "allowed" => option.allowed,
+                            "reason" => option.reason.as_str(),
                         }
                         .to_variant()
                     })

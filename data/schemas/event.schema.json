@@ -112,7 +112,9 @@
       "properties": {
         "text": { "type": "string" },
         "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
-        "ai_weight": { "type": "integer", "minimum": 0, "default": 1 }
+        "ai_weight": { "type": "integer", "minimum": 0, "default": 1 },
+        "requires": { "type": "array", "items": { "$ref": "#/$defs/condition" }, "description": "WH turn : conditions de l'option ; fausses, elle est grisée et refusée par le cœur." },
+        "requires_reason": { "type": "string", "minLength": 1, "description": "Raison affichée quand requires échoue." }
       },
       "required": ["text"],
       "additionalProperties": false

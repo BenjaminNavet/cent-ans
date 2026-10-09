@@ -743,6 +743,11 @@ pub(crate) fn apply_assault_result(
     let won = result.winner == crate::battle_auto::Winner::Attacker;
     // NT3: a won assault (taken or repelled) counts towards the missions.
     crate::missions::note_battle_won(state, if won { &faction } else { &defender_faction });
+    if won {
+        crate::campaign_stats::note_battle(state, &faction, &defender_faction);
+    } else {
+        crate::campaign_stats::note_battle(state, &defender_faction, &faction);
+    }
     let general = crate::movement::coalition_commander(state, attackers)
         .and_then(|id| state.armies.get(&id))
         .and_then(|a| a.general.clone());
@@ -955,6 +960,11 @@ fn sortie(
             &besieger_faction
         },
     );
+    if won {
+        crate::campaign_stats::note_battle(state, &garrison.faction, &besieger_faction);
+    } else {
+        crate::campaign_stats::note_battle(state, &besieger_faction, &garrison.faction);
+    }
     // JR1: a sortie is a battle for the crusade's fervour too. JR5: it
     // answers the siege, so the besiegers are the side that sought the
     // fight (a besieged crusade sallying against brothers in faith only

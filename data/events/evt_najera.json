@@ -51,7 +51,14 @@
           "trait": "trait_sickly"
         }
       ],
-      "ai_weight": 1
+      "ai_weight": 1,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "amount": 5000
+        }
+      ],
+      "requires_reason": "Exige 5000 livres au trésor."
     },
     {
       "text": "Laisser les Anglais repartir sans solde",

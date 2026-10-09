@@ -50,7 +50,14 @@
           "reason": "Achat du Dauphiné"
         }
       ],
-      "ai_weight": 2
+      "ai_weight": 2,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "amount": 12000
+        }
+      ],
+      "requires_reason": "Exige 12000 livres au trésor."
     },
     {
       "text": "Laisser le Savoyard acheter la principauté",

@@ -41,6 +41,9 @@ pub enum MissionTarget {
     ThreatenedOwn => "threatened_own",
     /// A building the player can start in one of its cities (`{lieu}`).
     Buildable => "buildable",
+    /// The template's own `province` (faction missions, WH turn): offered
+    /// while the player does not hold it (`control`) or holds it (`hold`).
+    Fixed => "fixed",
 }
 }
 
@@ -105,6 +108,18 @@ pub struct MissionTemplate {
     #[serde(default = "one")]
     pub weight: u32,
     pub reward: MissionReward,
+    /// Faction mission: offered to this faction only (absent: everyone).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub faction: Option<crate::FactionId>,
+    /// Chain: offered only once the template of this id has succeeded.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after: Option<String>,
+    /// Target province of a `fixed` mission.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub province: Option<crate::ProvinceId>,
+    /// French historical note shown in the objectives panel (source).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub source: String,
 }
 
 fn one() -> u32 {

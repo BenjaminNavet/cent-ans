@@ -5,14 +5,16 @@ extends RefCounted
 ## - fiche `user://saves/<nom>.meta.json` (faction, date de jeu, tour, difficulté, date réelle,
 ##   moteur, libellé) écrite à côté de chaque sauvegarde : la liste n'a pas à relire l'état complet ;
 ## - vignette `user://saves/<nom>.png` (320 × 180, capture de la carte) ;
-## - sauvegarde automatique tous les N tours sur 3 emplacements tournants `auto_1..3` ;
+## - sauvegarde automatique tous les N tours sur 5 emplacements tournants `auto_1..5` + `auto_battle` (avant bataille, WH turn) ;
 ## - `latest()` pour « Continuer ».
 ## Les autoloads sont obtenus par le nœud racine (script compilé tôt par le smoke test).
 
 ## Redirigeable par `use_test_dir` (smoke test), voir `SimFacade.use_test_saves_dir`.
 static var SAVES_DIR := "user://saves"
 const AUTOSAVE_PREFIX := "auto_"
-const AUTOSAVE_SLOTS := 3
+const AUTOSAVE_SLOTS := 5
+## Sauvegarde automatique prise juste avant le dialogue d'une bataille (un seul emplacement).
+const BATTLE_SAVE := "auto_battle"
 const THUMBNAIL_SIZE := Vector2i(320, 180)
 
 
@@ -39,6 +41,8 @@ static func is_autosave(save_name: String) -> bool:
 
 
 static func display_name(save_name: String) -> String:
+	if save_name == BATTLE_SAVE:
+		return "Avant la bataille"
 	if is_autosave(save_name):
 		return "Sauvegarde automatique %s" % save_name.trim_prefix(AUTOSAVE_PREFIX)
 	return save_name
@@ -123,6 +127,13 @@ static func autosave(turn: int, interval: int, thumbnail: Image = null) -> Strin
 	if save_name == "":
 		return ""
 	return save_name if save(save_name, thumbnail) else ""
+
+
+## Sauvegarde « avant bataille » (WH turn), sauf si la sauvegarde automatique est désactivée.
+static func autosave_battle(interval: int, thumbnail: Image = null) -> String:
+	if interval <= 0:
+		return ""
+	return BATTLE_SAVE if save(BATTLE_SAVE, thumbnail) else ""
 
 
 ## Sauvegardes, plus récentes d'abord : `{path, name, label, faction, date, turn, difficulty,

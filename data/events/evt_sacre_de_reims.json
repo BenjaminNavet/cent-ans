@@ -39,7 +39,14 @@
           "amount": -2000
         }
       ],
-      "ai_weight": 2
+      "ai_weight": 2,
+      "requires": [
+        {
+          "type": "controls",
+          "province": "prov_champagne"
+        }
+      ],
+      "requires_reason": "Exige de tenir la Champagne, où se trouve Reims."
     },
     {
       "text": "Marcher d’abord sur Paris",

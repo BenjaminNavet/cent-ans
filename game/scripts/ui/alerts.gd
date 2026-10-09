@@ -88,6 +88,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 		})
 	result.append_array(idle_army_alerts(map))
 	result.append_array(free_slot_alerts(sim, player, int(summary.get("treasury", 0))))
+	result.append_array(mission_alerts(sim))
 	if sim.has_method("get_offers"):  # Offres en attente, sans rouvrir la diplomatie à chaque tour
 		var offers: Array = sim.call("get_offers")
 		if not offers.is_empty():
@@ -201,6 +202,24 @@ static func free_slot_alerts(sim: Object, player: String, treasury: int) -> Arra
 			"province_id": first_province,
 			"text": FrText.count(count, "emplacement de construction libre", "emplacements de construction libres"),
 			"tooltip": "Colonies sans chantier où le trésor permet de bâtir. Colonies (B) pour la liste.",
+		})
+	return result
+
+
+## WH turn : une pastille par mission dont l'échéance tombe cette saison ou la suivante
+## (`get_missions`, `turns_left <= 1`) ; clic : la province visée, sinon le panneau Objectifs.
+static func mission_alerts(sim: Object) -> Array:
+	var result: Array = []
+	if sim == null or not sim.has_method("get_missions"):
+		return result
+	for mission: Dictionary in sim.call("get_missions"):
+		if not MissionTracker.is_due(mission):
+			continue
+		result.append({
+			"id": "mission:%d" % int(mission.get("id", 0)), "kind": "mission_due", "severity": "warning", "glyph": "✠",
+			"province_id": str(mission.get("province", "")), "mission_id": int(mission.get("id", 0)),
+			"text": "Mission à l'échéance : %s" % str(mission.get("title", "")),
+			"tooltip": "%s Récompense : %s." % [str(mission.get("progress", "")), str(mission.get("reward", ""))],
 		})
 	return result
 

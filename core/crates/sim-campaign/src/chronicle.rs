@@ -139,6 +139,9 @@ pub enum ChronicleError {
     UnknownDecision(u32),
     #[error("choix invalide : {0}")]
     InvalidOption(usize),
+    /// WH turn: the option's `requires` or the treasury floor is not met.
+    #[error("choix indisponible : {0}")]
+    OptionUnavailable(String),
 }
 
 /// Faction and province an event is about.
@@ -155,6 +158,10 @@ pub struct DecisionOptionView {
     pub text: String,
     /// French summary of the effects, one per line.
     pub effects_text: String,
+    /// WH turn: false when the option is greyed out.
+    pub allowed: bool,
+    /// French reason when `allowed` is false.
+    pub reason: String,
 }
 
 /// A pending decision, for the UI.
@@ -311,6 +318,69 @@ impl CampaignState {
         now >= start && self.year <= until
     }
 
+    /// Why `option` of `event` cannot be chosen by `faction` (French), or
+    /// `None`. A negative treasury effect the realm cannot pay greys the
+    /// option out (unless that would leave no option at all).
+    pub fn option_unavailable(
+        &self,
+        data: &GameData,
+        event: &Event,
+        option: usize,
+        ctx: &EventContext,
+    ) -> Option<String> {
+        let opt = event.options.get(option)?;
+        if !opt
+            .requires
+            .iter()
+            .all(|c| self.condition_holds(data, c, ctx))
+        {
+            return Some(if opt.requires_reason.is_empty() {
+                "Condition non remplie".to_owned()
+            } else {
+                opt.requires_reason.clone()
+            });
+        }
+        let cost = self.option_treasury_cost(data, opt, ctx.faction.as_ref());
+        let treasury = ctx
+            .faction
+            .as_ref()
+            .and_then(|f| self.factions.get(f))
+            .map_or(0, |f| f.treasury);
+        if cost > 0 && cost > treasury {
+            let others_payable = (0..event.options.len()).any(|i| {
+                let o = &event.options[i];
+                o.requires
+                    .iter()
+                    .all(|c| self.condition_holds(data, c, ctx))
+                    && self.option_treasury_cost(data, o, ctx.faction.as_ref()) <= treasury
+            });
+            if others_payable {
+                return Some(format!("Trésor insuffisant ({cost} livres requis)"));
+            }
+        }
+        None
+    }
+
+    /// Livres the option spends from the deciding faction's own treasury.
+    fn option_treasury_cost(
+        &self,
+        data: &GameData,
+        option: &data_model::EventOption,
+        faction: Option<&FactionId>,
+    ) -> i64 {
+        option
+            .effects
+            .iter()
+            .map(|e| match e {
+                EventEffect::Treasury {
+                    faction: None,
+                    amount,
+                } if *amount < 0 => -event_treasury_amount(self, data, faction, *amount),
+                _ => 0,
+            })
+            .sum()
+    }
+
     /// Pending decisions of `faction`, for the UI.
     pub fn decision_views(&self, data: &GameData, faction: &FactionId) -> Vec<DecisionView> {
         self.chronicle
@@ -335,10 +405,15 @@ impl CampaignState {
                             .filter(|line| !line.is_empty())
                             .collect::<Vec<_>>()
                             .join("\n");
+                        let reason = self
+                            .option_unavailable(data, event, index, &ctx)
+                            .unwrap_or_default();
                         Some(DecisionOptionView {
                             index,
                             text: option.text.clone(),
                             effects_text,
+                            allowed: reason.is_empty(),
+                            reason,
                         })
                     })
                     .collect();
@@ -383,6 +458,16 @@ impl CampaignState {
             .contains(&option)
         {
             return Err(ChronicleError::InvalidOption(option));
+        }
+        let pending = &self.chronicle.pending_decisions[position];
+        if let Some(event) = data.events.get(&pending.event) {
+            let ctx = EventContext {
+                faction: Some(pending.faction.clone()),
+                province: pending.province.clone(),
+            };
+            if let Some(reason) = self.option_unavailable(data, event, option, &ctx) {
+                return Err(ChronicleError::OptionUnavailable(reason));
+            }
         }
         let decision = self.chronicle.pending_decisions.remove(position);
         let mut events = Vec::new();
@@ -501,11 +586,31 @@ pub fn ai_affordable_choice_among(
     decider: Option<&FactionId>,
     offered: &[usize],
 ) -> usize {
-    let offered: Vec<usize> = offered
+    let mut offered: Vec<usize> = offered
         .iter()
         .copied()
         .filter(|i| *i < event.options.len())
         .collect();
+    // WH turn: an option whose `requires` fails is set aside when another remains.
+    if let Some(f) = decider {
+        let ctx = EventContext {
+            faction: Some(f.clone()),
+            province: None,
+        };
+        let open: Vec<usize> = offered
+            .iter()
+            .copied()
+            .filter(|i| {
+                event.options[*i]
+                    .requires
+                    .iter()
+                    .all(|c| state.condition_holds(data, c, &ctx))
+            })
+            .collect();
+        if !open.is_empty() {
+            offered = open;
+        }
+    }
     let Some(means) = decider
         .and_then(|f| state.factions.get(f))
         .map(|f| f.treasury.max(0) + 2 * f.last_budget.income.max(0))

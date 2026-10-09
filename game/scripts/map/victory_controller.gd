@@ -22,6 +22,7 @@ const MAX_LIST_HEIGHT := 420.0
 ## Hauteur réservée au titre, au score et aux marges du panneau.
 const PANEL_CHROME_HEIGHT := 230.0
 var list_scroll: ScrollContainer
+var tracker: MissionTracker = null  # WH turn : suivi toujours visible
 
 
 func setup(campaign_map: Node) -> void:
@@ -58,6 +59,7 @@ func setup(campaign_map: Node) -> void:
 	map.ui.add_child(panel)
 	map.ui.hide_log_while(panel)  # VN : le panneau recouvre le bouton « Déplier » du journal
 	panel.hide()
+	_setup_tracker()
 
 	# Écran de fin illustré — enluminure plein écran, cartouche de parchemin en bas.
 	end_dialog = Control.new()
@@ -224,6 +226,65 @@ static func _fit_centered(p: Control) -> void:
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
+const TRACKER_COLLAPSED_KEY := "interface/mission_tracker_collapsed"
+
+
+func _setup_tracker() -> void:
+	tracker = MissionTracker.new()
+	tracker.mission_activated.connect(_on_tracker_mission)
+	var settings := map.get_node_or_null("/root/Settings")
+	if settings != null:
+		tracker.collapsed = bool(settings.call("get_value", TRACKER_COLLAPSED_KEY))
+		tracker.collapsed_changed.connect(func(value: bool) -> void:
+			settings.call("set_value", TRACKER_COLLAPSED_KEY, value))
+	map.ui.add_child(tracker)
+	# Coin haut droit, sous la barre du haut (zone TOP_BAR : 8 % de la hauteur).
+	tracker.anchor_left = 1.0
+	tracker.anchor_right = 1.0
+	tracker.anchor_top = 0.0
+	tracker.anchor_bottom = 0.0
+	tracker.offset_left = -MissionTracker.WIDTH - 12.0
+	tracker.offset_right = -12.0
+	tracker.offset_top = 72.0
+	tracker.grow_vertical = Control.GROW_DIRECTION_END
+	tracker.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	refresh_tracker()
+
+
+## Met à jour le suivi d'après `get_missions` ; masqué sous les panneaux latéraux et fenêtres.
+func refresh_tracker() -> void:
+	if tracker == null or map == null or map.sim == null or not map.sim.has_method("get_missions"):
+		return
+	tracker.set_missions(map.sim.call("get_missions"))
+	tracker.visible = not tracker.missions.is_empty() and not _tracker_covered()
+
+
+var _tracker_timer := 0.0
+
+
+func _process(delta: float) -> void:
+	_tracker_timer -= delta
+	if _tracker_timer > 0.0 or tracker == null:
+		return
+	_tracker_timer = 0.4
+	tracker.visible = not tracker.missions.is_empty() and not _tracker_covered()
+
+
+func _tracker_covered() -> bool:
+	var ui: MapUI = map.ui
+	return ui == null or not ui.panels.visible_panels().is_empty() or ui.province_panel.visible or ui.is_dialog_open() \
+		or (panel != null and panel.visible)
+
+
+func _on_tracker_mission(mission: Dictionary) -> void:
+	var province := str(mission.get("province", ""))
+	var flow: Node = map.get("flow")
+	if province != "" and flow != null:
+		flow.call("focus_province", province)
+	else:
+		open_panel()
+
+
 ## Section « Missions » (missions à court terme de la faction du joueur, `get_missions`) :
 ## objectif, progression, échéance, récompense.
 func _add_missions_section() -> void:
@@ -285,6 +346,15 @@ static func mission_row(mission: Dictionary) -> VBoxContainer:
 	terms.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	terms.add_theme_color_override("font_color", Color(0.40, 0.30, 0.18))
 	row.add_child(terms)
+	if str(mission.get("source", "")) != "":  # WH turn : missions de faction, source historique
+		var source := Label.new()
+		source.name = "Source"
+		source.text = "Source : %s" % str(mission.get("source", ""))
+		source.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		source.custom_minimum_size.x = WRAP_WIDTH
+		source.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+		source.add_theme_color_override("font_color", HudStyle.INK_FADED)
+		row.add_child(source)
 	return row
 
 
@@ -296,6 +366,7 @@ func show_mission_notices() -> void:
 		map.ui.show_toast(str(notice.get("text", "")), str(notice.get("kind", "")) == "failed")
 	if panel != null and panel.visible:
 		open_panel()
+	refresh_tracker()
 
 
 func after_end_turn() -> void:

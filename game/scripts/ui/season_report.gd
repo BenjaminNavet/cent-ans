@@ -269,6 +269,26 @@ static func with_summary(report_groups: Array, section_id: String, lines: Array)
 	return result if inserted else report_groups
 
 
+## WH turn : en mode `auto`, le rapport ne s'ouvre en fenêtre que s'il y a une perte, une prise
+## ou une bataille qui concerne le joueur ; sinon une ligne (toast).
+static func needs_modal(report_groups: Array) -> bool:
+	for group in report_groups:
+		for entry: Dictionary in group["entries"]:
+			if str(entry.get("_tone", "")) in [TONE_LOSS, TONE_GAIN]:
+				return true
+			if str(entry.get("kind", "")) == "battle" and group.get("id", "") != "world":
+				return true
+	return false
+
+
+## Ligne du toast du mode `auto` : date et nombre de nouvelles.
+static func quiet_line(date_label: String, report_groups: Array) -> String:
+	var count := entry_count(report_groups)
+	if count == 0:
+		return "%s : rien à signaler." % date_label
+	return "%s : %s dans le journal (rien d'urgent)." % [date_label, FrText.count(count, "nouvelle")]
+
+
 static func entry_count(report_groups: Array) -> int:
 	var total := 0
 	for group in report_groups:

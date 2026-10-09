@@ -61,9 +61,10 @@
             "treaty_partner",
             "enemy_neighbour",
             "threatened_own",
-            "buildable"
+            "buildable",
+            "fixed"
           ],
-          "description": "Cibles que le générateur peut tirer (vide : gabarit non proposé). at_war : en guerre avec une faction vivante ; can_recruit : une place où lever une unité ; treaty_partner : une autre faction avec qui traiter ; enemy_neighbour : province voisine tenue par un ennemi ; threatened_own : province du joueur voisine d'une province ennemie ; buildable : bâtiment disponible dans une cité du joueur ({lieu})."
+          "description": "Cibles que le générateur peut tirer (vide : gabarit non proposé). at_war : en guerre avec une faction vivante ; can_recruit : une place où lever une unité ; treaty_partner : une autre faction avec qui traiter ; enemy_neighbour : province voisine tenue par un ennemi ; threatened_own : province du joueur voisine d'une province ennemie ; buildable : bâtiment disponible dans une cité du joueur ({lieu}). fixed : la province propre au gabarit (champ province), missions de faction."
         },
         "goal": {
           "enum": [
@@ -107,7 +108,7 @@
         "duration": {
           "type": "integer",
           "minimum": 3,
-          "maximum": 12,
+          "maximum": 24,
           "description": "Tours (saisons) avant l'échéance ; pour hold, durée à tenir."
         },
         "count": {
@@ -124,6 +125,22 @@
         },
         "reward": {
           "$ref": "#/$defs/reward"
+        },
+        "faction": {
+          "$ref": "common.schema.json#/$defs/snake_id",
+          "description": "Mission de faction : proposée à cette faction seulement (ex. fac_france)."
+        },
+        "after": {
+          "$ref": "common.schema.json#/$defs/snake_id",
+          "description": "Chaîne : proposée seulement après la réussite du gabarit de cet id."
+        },
+        "province": {
+          "$ref": "common.schema.json#/$defs/snake_id",
+          "description": "Province visée d'un gabarit fixed (ex. prov_guyenne)."
+        },
+        "source": {
+          "type": "string",
+          "description": "Note historique (source) affichée avec la mission."
         }
       },
       "required": [

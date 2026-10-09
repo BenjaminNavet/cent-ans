@@ -8,7 +8,7 @@ use crate::campaign_sim::{CampaignSim, Ctx};
 #[godot_api(secondary)]
 impl CampaignSim {
     /// The player's active missions: `[{id, kind, title, objective, progress,
-    /// progress_ratio, turns_left, deadline, reward, province}]` (French
+    /// progress_ratio, turns_left, deadline, reward, province, faction_mission, source}]` (French
     /// labels; `province` is `""` when the mission has no target province).
     #[func]
     fn get_missions(&self) -> VarArray {
@@ -30,6 +30,8 @@ impl CampaignSim {
                     "deadline" => m.deadline.as_str(),
                     "reward" => m.reward.as_str(),
                     "province" => m.province.as_ref().map_or("", |p| p.as_str()),
+                    "faction_mission" => m.faction_mission,
+                    "source" => m.source.as_str(),
                 }
                 .to_variant()
             })

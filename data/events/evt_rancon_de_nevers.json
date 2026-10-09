@@ -34,7 +34,14 @@
           "trait": "trait_captive_ransomed"
         }
       ],
-      "ai_weight": 2
+      "ai_weight": 2,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "amount": 12000
+        }
+      ],
+      "requires_reason": "Exige 12000 livres au trésor."
     },
     {
       "text": "Emprunter aux Lombards et taxer les Flandres",

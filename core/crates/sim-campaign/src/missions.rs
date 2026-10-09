@@ -35,6 +35,9 @@ pub struct MissionsState {
     /// Turn of the last success or failure (offer cooldown).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_closed_turn: Option<u32>,
+    /// Ids of the templates that succeeded (chains of faction missions).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub done: Vec<String>,
     /// Notices of the last resolution, for the interface's toasts.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notices: Vec<MissionNotice>,
@@ -107,6 +110,12 @@ pub struct MissionView {
     pub reward: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub province: Option<ProvinceId>,
+    /// Faction mission (own to the player's faction, possibly chained).
+    #[serde(default)]
+    pub faction_mission: bool,
+    /// Historical note of a faction mission.
+    #[serde(default)]
+    pub source: String,
 }
 
 /// Where a mission points to, before its texts are filled in.
@@ -145,6 +154,9 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
     for mission in active {
         match verdict(state, &player, &mission) {
             Verdict::Success => {
+                if !state.missions.done.contains(&mission.template) {
+                    state.missions.done.push(mission.template.clone());
+                }
                 apply_reward(state, data, &player, &mission);
                 let text = format!(
                     "Mission accomplie : {}. Récompense : {}.",
@@ -383,6 +395,7 @@ fn offer_mission(
         .templates
         .iter()
         .filter(|t| !active_templates.contains(t.id.as_str()))
+        .filter(|t| template_open(state, player, t))
         .map(|t| (t, candidates(state, data, player, t)))
         .filter(|(_, c)| !c.is_empty())
         .collect();
@@ -455,6 +468,22 @@ fn offer_mission(
         text,
     });
     state.missions.active.push(mission);
+}
+
+/// Faction missions go to their faction only, once, and chained ones after
+/// their predecessor succeeded.
+fn template_open(state: &CampaignState, player: &FactionId, template: &MissionTemplate) -> bool {
+    if template.faction.as_ref().is_some_and(|f| f != player) {
+        return false;
+    }
+    if template
+        .after
+        .as_ref()
+        .is_some_and(|a| !state.missions.done.contains(a))
+    {
+        return false;
+    }
+    template.faction.is_none() || !state.missions.done.contains(&template.id)
 }
 
 /// Generator of the offers of `turn`, independent of the campaign's own.
@@ -562,6 +591,24 @@ fn candidates(
                 }
             }
             targets
+        }
+        MissionTarget::Fixed => {
+            let Some(p) = template.province.as_ref() else {
+                return Vec::new();
+            };
+            if !state.provinces.contains_key(p) {
+                return Vec::new();
+            }
+            let held_by_player = state.controls_province(player, p);
+            if held_by_player == (template.goal == MissionGoal::Control) {
+                return Vec::new();
+            }
+            vec![Target {
+                target_name: province_name(p),
+                settlement: state.province_city_id(p).cloned(),
+                province: Some(p.clone()),
+                ..Target::default()
+            }]
         }
         MissionTarget::TreatyPartner => single(state.factions.iter().any(|(id, f)| {
             id != player && f.alive && !faction.allies.contains(id) && id != &state.player_faction
@@ -673,7 +720,14 @@ impl CampaignState {
             .iter()
             .map(|m| {
                 let (progress, progress_ratio) = progress_of(self, data, m);
+                let template = data
+                    .mission_rules
+                    .templates
+                    .iter()
+                    .find(|t| t.id == m.template);
                 MissionView {
+                    faction_mission: template.is_some_and(|t| t.faction.is_some()),
+                    source: template.map(|t| t.source.clone()).unwrap_or_default(),
                     id: m.id,
                     kind: m.template.clone(),
                     title: m.title.clone(),

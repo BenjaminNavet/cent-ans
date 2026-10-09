@@ -54,7 +54,14 @@
           "amount": -10
         }
       ],
-      "ai_weight": 1
+      "ai_weight": 1,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "amount": 6000
+        }
+      ],
+      "requires_reason": "Exige 6000 livres au trésor."
     }
   ],
   "historical_date": {

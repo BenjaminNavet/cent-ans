@@ -32,7 +32,7 @@ const DEFAULTS := {
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
 	"interface/text_size": 1.0,
-	"interface/season_report": true,
+	"interface/season_report": "auto",  # WH turn : always | auto | off
 	# WH idle : confirmation de fin de tour « off » | « warnings » (défaut : seulement s'il y a des
 	# oublis : armée sans ordre, chantier libre, recherche inactive) | « always ». Ancien booléen
 	# migré par `_coerce` (vrai → always, faux → warnings).
@@ -62,7 +62,8 @@ const DEFAULTS := {
 	"map/show_zoc": true,  # WH hover (ADR 0271) : zones de contrôle ennemies pendant un ordre
 	# Vitesse des mouvements des armées IA en fin de tour (×1, ×2, ×4, voir `AiTurnReplay`).
 	"map/ai_moves_speed": 1.0,
-	"game/autosave_interval": 4,
+	"interface/mission_tracker_collapsed": false,  # WH turn
+	"game/autosave_interval": 1,  # WH turn : chaque saison, 5 emplacements tournants
 	"game/interactive_battles": true,
 	# Tutoriel des premiers tours (désactivable, progression persistée).
 	"tutorial/enabled": true,
@@ -222,6 +223,10 @@ func _coerce(key: String, value: Variant) -> Variant:
 		if value is bool:
 			return "always" if value else "warnings"
 		return str(value) if str(value) in ["off", "warnings", "always"] else default
+	if key == "interface/season_report":  # WH turn : l'ancien booléen (vrai : auto, faux : off)
+		if value is bool:
+			return "auto" if value else "off"
+		return str(value) if str(value) in ["always", "auto", "off"] else default
 	match typeof(default):
 		TYPE_BOOL:
 			return bool(value)

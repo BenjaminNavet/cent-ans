@@ -59,7 +59,7 @@ func setup(campaign_map: Node) -> void:
 	ui.panels.changed.connect(_on_panels_changed.bind(ui))
 	season_report.disable_requested.connect(func() -> void:
 		if settings != null:
-			settings.call("set_value", "interface/season_report", false))
+			settings.call("set_value", "interface/season_report", "off"))
 	ui.end_turn_gate = end_turn_would_proceed  # Bandeau des autres factions
 	ui.hotkey_pressed.connect(handle_hotkey)
 	ui.save_requested.connect(_on_save_requested)
@@ -242,12 +242,17 @@ func _on_load_requested(_path: String) -> void:
 
 
 func autosave() -> String:
-	var interval := int(_setting("game/autosave_interval", 4))
+	var interval := int(_setting("game/autosave_interval", 1))
 	var saved := SaveSlots.autosave(_turn(), interval, _capture_now())
 	if saved != "":
 		last_autosave = saved
 		_last_saved_turn = _turn()
 	return saved
+
+
+## WH turn : sauvegarde « avant bataille », appelée juste avant d'ouvrir le dialogue.
+func autosave_before_battle() -> String:
+	return SaveSlots.autosave_battle(int(_setting("game/autosave_interval", 1)), _capture_now())
 
 
 # --- Fin de tour ------------------------------------------------------------------
@@ -350,8 +355,9 @@ func after_end_turn(events: Array) -> void:
 	map.get("ui").ensure_relevance(events)  # A6-L6 : un seul appel au cœur pour tout le lot
 	autosave()
 	refresh()
-	if bool(_setting("interface/season_report", true)):
-		show_season_report(events)
+	var mode := str(_setting("interface/season_report", "auto"))
+	if mode == "always" or mode == "auto":
+		show_season_report(events, mode == "auto")
 
 
 ## Rubriques du rapport ; « Le monde » filtré par intérêt (`MapUI.keeps_news`) ; bilan
@@ -382,10 +388,15 @@ func treasury_summary() -> Array:
 	return [{"kind": "summary", "action": "faction", "text_fr": text, "_tone": SeasonReport.TONE_LOSS if net < 0 else ""}]
 
 
-func show_season_report(events: Array) -> bool:
+func show_season_report(events: Array, quiet_if_calm: bool = false) -> bool:
 	var sim: Object = map.get("sim")
 	if sim == null or season_report == null:
 		return false
+	if quiet_if_calm:  # WH turn : mode « auto », une ligne si rien de grave
+		var groups := report_groups(last_events)
+		if not SeasonReport.needs_modal(groups):
+			map.get("ui").show_toast(SeasonReport.quiet_line(str(sim.call("get_date_label")), groups), false)
+			return false
 	# A6-L6 (U10) : le rapport (début de tour) passe par la file modale, après toute décision ;
 	# il est construit au moment de son tour, avec les événements tardifs déjà fusionnés.
 	var date_label := str(sim.call("get_date_label"))
@@ -404,7 +415,7 @@ func report_late_events(events: Array) -> void:
 	last_events += events
 	# A6-L6 (U10) : le rapport n'est montré qu'au début du tour : une bataille livrée en milieu de
 	# tour s'y fusionne sans le rouvrir (il se met à jour s'il est encore à l'écran).
-	if bool(_setting("interface/season_report", true)) and season_report.visible:
+	if str(_setting("interface/season_report", "auto")) != "off" and season_report.visible:
 		var sim: Object = map.get("sim")
 		season_report.add_events(events, _concerns_player, Callable(map.get("ui"), "keeps_news"), str(map.get("player_faction")),
 			str(sim.call("get_date_label")) if sim != null else "")
