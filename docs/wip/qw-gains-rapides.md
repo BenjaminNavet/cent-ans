@@ -15,6 +15,6 @@ Travail sur `main` (pas de worktree), commits à chemins explicites ; une note p
 | G | Bataille : terrain et effet sous le curseur ; daltonien en bataille ; plancher de texte 720p | 1 | à faire |
 | D | Compression VRAM des textures de modèles, mipmaps de l'eau, contrôle CI | 2 | à faire |
 | H | Icône d'application + image Open Graph | 2 | à faire |
-| I | Sauvegarde datée du paquet DN (session principale) | 1 | à faire |
+| I | Sauvegarde datée du paquet DN (session principale) | 1 | fait : `~/dev/cent-ans-raw/backup/dn-models-2026-10-09/` (8 341 fichiers, `SHA256SUMS`) ; même disque — copie hors machine à décider (ADR 0212) |
 
 Hors lots : séance AS7 (le joueur regarde l'animation en jeu).
