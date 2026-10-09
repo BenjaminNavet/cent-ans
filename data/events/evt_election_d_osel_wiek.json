@@ -45,7 +45,7 @@
           "type": "opinion",
           "faction": "fac_livonian_order",
           "amount": -5,
-          "reason": "Évêque élu sans l’Ordre"
+          "reason": "Évêque élu sans l'Ordre"
         }
       ],
       "ai_weight": 3

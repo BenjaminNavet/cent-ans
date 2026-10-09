@@ -101,7 +101,7 @@ fn waves_are_held_then_released() {
         .filter(|&i| {
             sim.units()[i]
                 .name
-                .starts_with("Chevaliers du comte d'Alençon")
+                .starts_with("Chevaliers du comte d’Alençon")
         })
         .collect();
     assert!(!knights.is_empty());

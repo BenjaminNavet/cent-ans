@@ -967,7 +967,7 @@ fn succession_follows_heir_then_house_then_none() {
         sim_campaign::characters::kill(&mut state, data, &ruler, &mut events);
         if events.iter().any(|e| {
             e.kind == EventKind::Succession
-                && (e.text_fr.contains("nouvelle maison") || e.text_fr.contains("s'empare"))
+                && (e.text_fr.contains("nouvelle maison") || e.text_fr.contains("s’empare"))
         }) {
             new_house = true;
             break;

@@ -13,3 +13,5 @@ La critique UI/UX de la revue RX a relevé dix défauts de finition (étiquettes
 ## Conséquences
 - Un nouveau texte visible avec une apostrophe droite se corrige en relançant le script.
 - Le panneau de colonie reste ancré dans la zone `SIDE_PANEL` (réduction ou déplacement : non traité, choix de conception ouvert).
+- Exclusions du script : les clés `reason` et `reason_fr` (identités comparées au code, p. ex. `PARLEY_REASON`) et les chaînes Rust de `core/` ne sont pas converties ; le codex rend la correspondance des alias insensible à l'apostrophe (`codex_store.gd`, `_plain`).
+- Les tests Rust et GDScript qui comparent un texte affiché à une donnée suivent la donnée (’).

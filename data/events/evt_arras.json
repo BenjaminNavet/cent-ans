@@ -34,13 +34,13 @@
           "type": "opinion",
           "faction": "fac_france",
           "amount": 30,
-          "reason": "Paix d’Arras"
+          "reason": "Paix d'Arras"
         },
         {
           "type": "opinion",
           "faction": "fac_england",
           "amount": -30,
-          "reason": "La Bourgogne abandonne l’Angleterre"
+          "reason": "La Bourgogne abandonne l'Angleterre"
         },
         {
           "type": "prestige",

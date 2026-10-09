@@ -32,7 +32,7 @@
           "type": "opinion",
           "faction": "fac_france",
           "amount": 10,
-          "reason": "Trêve d’Esplechin"
+          "reason": "Trêve d'Esplechin"
         },
         {
           "type": "unrest",
@@ -62,7 +62,7 @@
           "type": "opinion",
           "faction": "fac_france",
           "amount": -10,
-          "reason": "Pourparlers d’Esplechin rompus"
+          "reason": "Pourparlers d'Esplechin rompus"
         }
       ],
       "ai_weight": 1

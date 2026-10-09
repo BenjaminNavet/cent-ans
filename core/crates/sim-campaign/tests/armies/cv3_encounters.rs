@@ -376,7 +376,7 @@ fn a_lost_encounter_battle_applies_on_loss() {
     choose(&mut state, data, &army, site, 0);
     assert!(state.encounters.battles.is_empty(), "auto-resolved at once");
     assert!(state.pending_battles.is_empty());
-    assert!(texts(&state).contains("repoussent l'ost"));
+    assert!(texts(&state).contains("repoussent l’ost"));
     assert!(state.provinces[&province].devastation >= devastation_before + 10);
     assert!(state
         .armies

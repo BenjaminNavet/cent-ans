@@ -100,7 +100,7 @@ fn catalogue_loads_the_four_orders() {
     assert_eq!(cry.label_for("fac_castile"), "¡Santiago!");
     assert_eq!(cry.label_for("fac_navarre"), "Cri de guerre");
     let banner = &data.battle_orders["order_no_quarter"];
-    assert_eq!(banner.label_for("fac_france"), "Déployer l'oriflamme");
+    assert_eq!(banner.label_for("fac_france"), "Déployer l’oriflamme");
     assert_eq!(
         banner.label_for("fac_england"),
         "Lever la bannière au dragon"
@@ -230,7 +230,7 @@ fn no_quarter_emboldens_the_whole_army_once_and_is_reported() {
     assert!((sim.units()[0].morale - 60.0).abs() < 1e-9);
     assert!((sim.units()[1].morale - 60.0).abs() < 1e-9);
     assert!((sim.units()[2].morale - 40.0).abs() < 1e-9);
-    assert!(has_event(&sim, "Déployer l'oriflamme"));
+    assert!(has_event(&sim, "Déployer l’oriflamme"));
     assert!(sim.no_quarter(SideId::Attacker));
     let again = reason(order(
         &mut sim,
@@ -313,7 +313,7 @@ fn siege_assault_dismount_uses_the_order_wording() {
     let sim = BattleSim::new(s, 2).unwrap();
     assert!(has_event(
         &sim,
-        "Les chevaliers de France mettent pied à terre pour l'assaut."
+        "Les chevaliers de France mettent pied à terre pour l’assaut."
     ));
     let knights = &sim.units()[1];
     assert!(knights.dismounted && !knights.mounted);
@@ -430,7 +430,7 @@ fn rally_depends_on_the_chance_and_is_logged() {
     }
     assert!(has_event(
         &hopeless,
-        "n'entendent pas l'appel de Le connétable"
+        "n’entendent pas l’appel de Le connétable"
     ));
     // Nobody fleeing near the general: refused.
     let s = order_setup(data, &["unit_men_at_arms_foot"], &["unit_urban_militia"]);

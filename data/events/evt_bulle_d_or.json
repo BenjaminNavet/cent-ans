@@ -41,7 +41,7 @@
           "type": "opinion",
           "faction": "fac_papacy",
           "amount": -10,
-          "reason": "Bulle d’or"
+          "reason": "Bulle d'or"
         }
       ],
       "ai_weight": 2

@@ -40,7 +40,7 @@ fn afonso_iv_is_succeeded_by_his_son() {
         .find(|e| e.kind == EventKind::Succession)
         .expect("succession event");
     assert!(
-        !succession.text_fr.contains("lignée s'éteint"),
+        !succession.text_fr.contains("lignée s’éteint"),
         "{}",
         succession.text_fr
     );
@@ -54,7 +54,7 @@ fn portugal_keeps_its_house_through_1337_in_a_france_game() {
         let events = state.end_turn(data);
         assert!(
             !events.iter().any(|e| e.kind == EventKind::Succession
-                && e.text_fr.contains("lignée s'éteint")
+                && e.text_fr.contains("lignée s’éteint")
                 && e.faction == Some(fac("fac_portugal"))),
             "Portugal loses its dynasty in {}",
             state.date_label()

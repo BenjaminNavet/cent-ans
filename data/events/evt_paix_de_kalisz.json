@@ -1,7 +1,7 @@
 {
   "id": "evt_paix_de_kalisz",
   "title": "La paix de Kalisz",
-  "text": "Pour sauver le royaume, [[cdx_casimir_iii|Casimir III]] traite avec l'[[cdx_ordre_teutonique|Ordre teutonique]] : les chevaliers rendent la Kuyavie et la terre de Dobrzyń, et le roi leur abandonne la Pomérélie « en aumône perpétuelle ». La sentence pontificale de Varsovie, qui donnait raison à la [[cdx_pologne|Pologne]], reste lettre morte.",
+  "text": "Pour sauver le royaume, [[cdx_casimir_iii|Casimir III]] traite avec l’[[cdx_ordre_teutonique|Ordre teutonique]] : les chevaliers rendent la Kuyavie et la terre de Dobrzyń, et le roi leur abandonne la Pomérélie « en aumône perpétuelle ». La sentence pontificale de Varsovie, qui donnait raison à la [[cdx_pologne|Pologne]], reste lettre morte.",
   "kind": "historical",
   "trigger": {
     "date": {

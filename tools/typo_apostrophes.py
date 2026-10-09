@@ -30,9 +30,7 @@ INCLUDED_KEYS = {
     "label",
     "objective",
     "display",
-    "reason",
     "description_fr",
-    "reason_fr",
     "journal",
     "journal_failure",
     "journal_assault",
@@ -48,7 +46,7 @@ EXCLUDED_DIRS = {
     "landmarks_v2",
     "landmarks",
 }
-WORD_APOSTROPHE = re.compile(r"(?<=\w)'(?=\w)")
+WORD_APOSTROPHE = re.compile(r"(?<=\w)'(?=[\w\[])")
 GD_STRING = re.compile(r'"(?:[^"\\\n]|\\.)*"')
 
 
@@ -60,7 +58,9 @@ def _collect(node, key: str, found: set[str]) -> None:
         for child in node:
             _collect(child, key, found)
     elif (
-        isinstance(node, str) and key in INCLUDED_KEYS and WORD_APOSTROPHE.search(node)
+        isinstance(node, str)
+        and (key in INCLUDED_KEYS or key.startswith("fac_"))
+        and WORD_APOSTROPHE.search(node)
     ):
         found.add(node)
 

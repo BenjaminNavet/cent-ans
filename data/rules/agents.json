@@ -148,15 +148,15 @@
       "per_level": 5,
       "reveals": true,
       "conditions": [
-        {"check": "foreign_master", "reason_fr": "il faut une colonie d’une autre faction"},
-        {"check": "not_rebels", "reason_fr": "il faut une colonie d’une autre faction"},
-        {"check": "not_at_war", "reason_fr": "en guerre : le héraut ne peut porter qu’une trêve"},
+        {"check": "foreign_master", "reason_fr": "il faut une colonie d'une autre faction"},
+        {"check": "not_rebels", "reason_fr": "il faut une colonie d'une autre faction"},
+        {"check": "not_at_war", "reason_fr": "en guerre : le héraut ne peut porter qu'une trêve"},
         {"check": "no_embassy", "reason_fr": "une ambassade est déjà en cours auprès de cette cour"}
       ],
       "success": [
         {
           "kind": "opinion",
-          "reason_fr": "Ambassade d’un héraut",
+          "reason_fr": "Ambassade d'un héraut",
           "value": 10,
           "per_level": 2,
           "turns": 12,
@@ -179,7 +179,7 @@
       "success": [
         {
           "kind": "opinion",
-          "reason_fr": "Ambassade d’un héraut",
+          "reason_fr": "Ambassade d'un héraut",
           "value": 10,
           "per_level": 2,
           "divisor": 2,
@@ -227,7 +227,7 @@
       "conditions": [
         {
           "check": "captive_held",
-          "reason_fr": "aucun de vos captifs n’est détenu ici, ou son geôlier refuse de le rendre contre de l’argent"
+          "reason_fr": "aucun de vos captifs n'est détenu ici, ou son geôlier refuse de le rendre contre de l'argent"
         }
       ],
       "success": [{"kind": "release", "text_fr": "{agent} rachète {captive} pour {cost} livres."}],
@@ -265,7 +265,7 @@
       "aim": "province_master",
       "reveals": true,
       "conditions": [
-        {"check": "denounceable_master", "reason_fr": "il faut un prince ennemi, excommunié ou de l’obédience rivale"}
+        {"check": "denounceable_master", "reason_fr": "il faut un prince ennemi, excommunié ou de l'obédience rivale"}
       ],
       "success": [
         {"kind": "unrest", "classes": ["clergy"], "delta": 10},

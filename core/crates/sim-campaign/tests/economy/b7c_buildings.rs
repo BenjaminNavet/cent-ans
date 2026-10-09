@@ -121,7 +121,7 @@ fn enables_units_gates_recruitment() {
         blocked
             .reason
             .as_deref()
-            .is_some_and(|r| r.contains("Atelier d'engins")),
+            .is_some_and(|r| r.contains("Atelier d’engins")),
         "{:?}",
         blocked.reason
     );

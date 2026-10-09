@@ -28,13 +28,13 @@
           "faction": "fac_burgundy",
           "towards": "fac_england",
           "amount": 30,
-          "reason": "Alliance d’Arras"
+          "reason": "Alliance d'Arras"
         },
         {
           "type": "opinion",
           "faction": "fac_england",
           "amount": 30,
-          "reason": "Alliance d’Arras"
+          "reason": "Alliance d'Arras"
         },
         {
           "type": "opinion",
@@ -57,7 +57,7 @@
           "faction": "fac_burgundy",
           "towards": "fac_england",
           "amount": 10,
-          "reason": "Pourparlers d’Arras"
+          "reason": "Pourparlers d'Arras"
         },
         {
           "type": "prestige",

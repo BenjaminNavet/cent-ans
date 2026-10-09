@@ -3,7 +3,7 @@
   "name": {
     "display": "Fèves, pois et lentilles"
   },
-  "description": "L'[[cdx_assolement_triennal|assolement triennal]] fait place aux [[cdx_legumineuses|légumineuses]] semées au printemps : fèves, pois et lentilles nourrissent le paysan et enrichissent la terre. Maigres par nature, elles ne craignent pas le [[cdx_careme|Carême]].",
+  "description": "L’[[cdx_assolement_triennal|assolement triennal]] fait place aux [[cdx_legumineuses|légumineuses]] semées au printemps : fèves, pois et lentilles nourrissent le paysan et enrichissent la terre. Maigres par nature, elles ne craignent pas le [[cdx_careme|Carême]].",
   "requirements": {
     "technology": "tech_three_field_rotation"
   },

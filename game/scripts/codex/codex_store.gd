@@ -78,7 +78,7 @@ func _add(entry: Dictionary) -> void:
 	var id := str(entry["id"])
 	entries[id] = entry
 	for form in [str(entry.get("title", ""))] + Array(entry.get("aliases", [])):
-		var key := str(form).strip_edges().to_lower()
+		var key := _plain(str(form))
 		if key.length() >= 2 and not _aliases.has(key):
 			_aliases[key] = id
 	var entity := str(entry.get("entity", ""))
@@ -88,7 +88,7 @@ func _add(entry: Dictionary) -> void:
 		_by_decor[str(key)] = id
 	var contexts: Array = []
 	for context in entry.get("exclude_contexts", []):
-		var lowered := str(context).strip_edges().to_lower()
+		var lowered := _plain(str(context))
 		if lowered != "":
 			contexts.append(lowered)
 	if not contexts.is_empty():
@@ -134,7 +134,7 @@ func entry_for_decor(kind: String, species: String) -> String:
 
 ## Id désigné par un alias (casse ignorée), vide sinon.
 func id_for_alias(alias: String) -> String:
-	return str(_aliases.get(alias.strip_edges().to_lower(), ""))
+	return str(_aliases.get(_plain(alias), ""))
 
 
 ## Expressions (minuscules) de la fiche `id` dans lesquelles un alias n'est pas auto-lié
@@ -149,12 +149,13 @@ func is_excluded(id: String, text: String, start: int, end: int) -> bool:
 	var contexts: Array = _exclusions.get(id, [])
 	if contexts.is_empty():
 		return false
-	var alias := text.substr(start, end - start).to_lower()
+	var alias := _plain(text.substr(start, end - start))
+	text = text.to_lower().replace("’", "'")  # même longueur : « ’ » et « ' » valent un caractère
 	for context: String in contexts:
 		var offset := context.find(alias)
 		while offset >= 0:
 			var from := start - offset
-			if from >= 0 and text.substr(from, context.length()).to_lower() == context:
+			if from >= 0 and text.substr(from, context.length()) == context:
 				return true
 			offset = context.find(alias, offset + 1)
 	return false
@@ -177,10 +178,19 @@ func alias_regex() -> RegEx:
 	return _alias_regex
 
 
+## RX uifin : minuscules, bords rognés, apostrophe typographique ramenée à l'apostrophe droite
+## (les textes affichés portent « ’ », les alias et expressions exclues restent en « ' »).
+static func _plain(text: String) -> String:
+	return text.strip_edges().to_lower().replace("’", "'")
+
+
 static func _escape(text: String) -> String:
 	var out := ""
 	for character in text:
-		out += "\\" + character if "\\^$.|?*+()[]{}-/".contains(character) else character
+		if character == "'":
+			out += "['’]"  # l'alias droit lie aussi l'apostrophe typographique du texte
+		else:
+			out += "\\" + character if "\\^$.|?*+()[]{}-/".contains(character) else character
 	return out
 
 

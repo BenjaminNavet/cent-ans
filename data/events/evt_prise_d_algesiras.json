@@ -59,7 +59,7 @@
           "type": "opinion",
           "faction": "fac_marinids",
           "amount": -20,
-          "reason": "Perte d’Algésiras"
+          "reason": "Perte d'Algésiras"
         }
       ],
       "ai_weight": 2

@@ -162,7 +162,7 @@ fn research_completes_with_an_event_and_clears_the_slot() {
         .find(|e| e.kind == EventKind::TechnologyResearched)
         .unwrap()
         .text_fr;
-    assert!(text.contains("Entraînement à l'arc long"), "{text}");
+    assert!(text.contains("Entraînement à l’arc long"), "{text}");
 }
 
 #[test]

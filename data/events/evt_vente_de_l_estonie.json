@@ -69,13 +69,13 @@
           "type": "opinion",
           "faction": "fac_livonian_order",
           "amount": -20,
-          "reason": "Vente de l’Estonie refusée"
+          "reason": "Vente de l'Estonie refusée"
         },
         {
           "type": "opinion",
           "faction": "fac_teutonic",
           "amount": -15,
-          "reason": "Vente de l’Estonie refusée"
+          "reason": "Vente de l'Estonie refusée"
         }
       ],
       "ai_weight": 1
