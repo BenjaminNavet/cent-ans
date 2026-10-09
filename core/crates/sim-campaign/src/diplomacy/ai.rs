@@ -725,20 +725,39 @@ fn plan_alliances(
             };
             cache.attitude(data, faction, id).0 > floor
         })
-        .filter(|(id, _)| {
-            id == &state.player_faction
-                || crate::negotiation::evaluate_treaty_with(
+        .filter_map(|(id, liking)| {
+            if id == state.player_faction {
+                return Some((id, liking, Article::Alliance));
+            }
+            let accepts = |article: &Article| {
+                crate::negotiation::evaluate_treaty_with(
                     cache,
                     data,
                     faction,
-                    id,
-                    &[Article::Alliance],
+                    &id,
+                    std::slice::from_ref(article),
                 )
                 .accept
+            };
+            // Only the league settles for a defensive pact: elsewhere an AI
+            // that proposed one more alliance made more calls to arms, hence
+            // more wars (ADR 0283).
+            let league = state.league_peers(data, faction, &id);
+            [Article::Alliance, Article::DefensiveAlliance]
+                .into_iter()
+                .take(if league { 2 } else { 1 })
+                .find(|a| accepts(a))
+                .map(|article| (id, liking, article))
         })
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
-    if let Some((target, _)) = candidate {
-        orders.push(Order::ProposeAlliance { target });
+    if let Some((target, _, article)) = candidate {
+        orders.push(match article {
+            Article::Alliance => Order::ProposeAlliance { target },
+            other => Order::ProposeTreaty {
+                target,
+                articles: vec![other],
+            },
+        });
     }
 }
 

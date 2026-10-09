@@ -9,7 +9,7 @@ aucun pacte de non-agression, et l'IA ne s'adresse au joueur que pour la paix, l
   le « serde default militaire » est le variant inchangé). `Article::DefensiveAlliance` forme la même alliance et marque les deux
   camps dans `ledger.defensive_allies` (`#[serde(default)]`). Une alliance défensive répond à l'appel aux armes d'un allié attaqué
   mais ne suit pas ses guerres offensives (`ally_war_to_join` l'ignore) ; son engagement pèse `alliance.defensive_commitment` (−5)
-  contre −15 ; elle se transforme en alliance militaire en proposant `Alliance`. L'IA ne propose que des alliances militaires : lui faire proposer la défensive quand la militaire est refusée a fait passer les guerres déclarées de 197 à 355 sur 120 saisons (la sonde `campaign_probe`, graine 1), chaque alliance de plus amenant des appels aux armes ; la défensive reste donc un choix du joueur.
+  contre −15 ; elle se transforme en alliance militaire en proposant `Alliance`. L'IA ne propose que des alliances militaires, sauf entre deux membres de la ligue (ADR 0282), qui se contentent d'un pacte défensif : lui faire proposer la défensive quand la militaire est refusée a fait passer les guerres déclarées de 197 à 355 sur 120 saisons (la sonde `campaign_probe`, graine 1), chaque alliance de plus amenant des appels aux armes ; la défensive reste donc un choix du joueur (hors ligue).
 - **Pacte de non-agression.** `Article::NonAggression { turns }`, durée bornée par `non_aggression.min_turns..max_turns`, stocké dans
   `ledger.non_aggression` (échéance, des deux côtés, purgé chaque saison, effacé par `start_war`). Il lie comme une trêve :
   déclarer la guerre à un signataire est un parjure (−40 d'opinion partout, −30 de prestige, historique `Perjury` avec l'article
