@@ -56,6 +56,7 @@ const DEFAULTS := {
 	# Brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
 	"map/fog_of_war": true,
 	"map/stance_fill": true,  # RJ-d (ADR 0175)
+	"map/show_zoc": true,  # WH hover (ADR 0271) : zones de contrôle ennemies pendant un ordre
 	# Vitesse des mouvements des armées IA en fin de tour (×1, ×2, ×4, voir `AiTurnReplay`).
 	"map/ai_moves_speed": 1.0,
 	"game/autosave_interval": 4,

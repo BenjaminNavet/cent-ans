@@ -90,6 +90,27 @@
         }
       }
     },
+    "fog_memory": {
+      "type": "object",
+      "description": "WH hover (ADR 0271) : mémoire d'une armée ennemie perdue de vue. Éphémère (UI seulement, hors sauvegarde).",
+      "required": ["turns", "ghost_alpha"],
+      "additionalProperties": false,
+      "properties": {
+        "turns": {"type": "integer", "minimum": 0, "maximum": 20, "description": "Saisons (tours) pendant lesquelles le fantôme reste affiché ; 0 = pas de mémoire."},
+        "ghost_alpha": {"$ref": "#/$defs/unit", "description": "Opacité du jeton fantôme grisé."}
+      }
+    },
+    "zoc": {
+      "type": "object",
+      "description": "WH hover (ADR 0271) : zones de contrôle des armées ennemies visibles pendant qu'une armée du joueur est sélectionnée.",
+      "required": ["max_rings", "color", "alpha"],
+      "additionalProperties": false,
+      "properties": {
+        "max_rings": {"type": "integer", "minimum": 1, "maximum": 32},
+        "color": {"$ref": "#/$defs/color", "description": "Rouge réservé aux ennemis (ADR 0155)."},
+        "alpha": {"$ref": "#/$defs/unit", "description": "Opacité de l'anneau fin ; le disque de fond est à 12 % de cette valeur d'anneau."}
+      }
+    },
     "town": {
       "type": "object",
       "required": ["label"],

@@ -42,6 +42,8 @@ var men: int = 0
 var unit_count: int = 0
 ## "siege", "moving", "embarked" ou "".
 var status: String = ""
+## WH hover : posture lue du cœur ("normal" par défaut ; l'embuscade ennemie n'y figure pas).
+var stance: String = "normal"
 var faction_color: Color = Color.WHITE
 ## Catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
 var cue: String = StanceCues.OTHER
@@ -107,6 +109,7 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		unit_count += 1
 		men += int(unit.get("strength", 0))
 	status = army_status(army)
+	stance = str(army.get("stance", "normal"))
 	name = "Army_" + id
 	_flag_material.set_shader_parameter("faction_color", color)
 	_apply_standard(standard_for(faction_id, army))

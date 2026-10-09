@@ -184,6 +184,7 @@ func _build_map(grid: GridContainer) -> void:
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "map/stance_fill", "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur : or vos terres, vert vos alliés et vassaux, rouge vos ennemis en guerre, gris léger les autres. Une province occupée garde les hachures de l'occupant au bord.")
+	_check(grid, "map/show_zoc", "Zones de contrôle ennemies", "Avec une de vos armées sélectionnée, un cercle rouge marque la zone de contrôle de chaque armée ennemie en vue.")
 	var replay_speeds: Array = AiTurnReplay.speeds()
 	_options(grid, "map/ai_moves_speed", "Vitesse des mouvements de l'IA", replay_speeds,
 		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")),
