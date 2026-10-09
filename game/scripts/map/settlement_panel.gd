@@ -45,6 +45,8 @@ var controller_value: Label
 var fortification_value: Label
 var siege_value: Label
 var income_value: Label
+var population_value: Label
+var unrest_value: Label
 ## RJ-c (ADR 0175) : aide sous la grille (cité ou place, possession par traité).
 var possession_help: Label
 var tabs: TabContainer
@@ -140,6 +142,9 @@ func _build() -> void:
 	fortification_value = _grid_row(grid, "Fortification")
 	siege_value = _grid_row(grid, "Siège")
 	income_value = _grid_row(grid, "Revenu")
+	# WH uicards (top4) : état de la province de la colonie.
+	population_value = _grid_row(grid, "Population")
+	unrest_value = _grid_row(grid, "Mécontentement")
 	possession_help = Label.new()
 	possession_help.name = "PossessionHelp"
 	possession_help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -348,6 +353,13 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		_show_row(siege_value, true)
 		siege_value.text = "%s, %s, brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), FrText.count(int(siege.get("turns_left", 0)), "tour"), int(siege.get("breach", 0))]
 	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
+	# WH uicards (top4) : population et mécontentement de la province (`province_state` du contrôleur).
+	var province_state: Dictionary = detail.get("province_state", {}) if detail.get("province_state") is Dictionary else {}
+	var population := int(province_state.get("population_total", 0))
+	population_value.text = Money.digits(population) if population > 0 else "—"
+	unrest_value.text = PanelWidgets.unrest_text(province_state)
+	unrest_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	unrest_value.tooltip_text = RichTooltip.gauge("unrest", float(province_state.get("unrest", -1)))
 	# WH econ : d'où vient ce revenu, source par source.
 	income_value.mouse_filter = Control.MOUSE_FILTER_PASS
 	TooltipHost.attach_plain(income_value, "income_breakdown", {"body": IncomeLines.as_text(detail.get("income_lines", []))})

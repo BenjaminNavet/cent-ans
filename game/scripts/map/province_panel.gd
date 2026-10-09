@@ -230,12 +230,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	_fill_possession(detail)  # RJ-c, après la ligne compacte de LR-09 qu'il remplace
 	var population := int(state.get("population_total", province.get("population_total", 0)))
 	population_value.text = Money.digits(population) if population > 0 else "—"
-	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
-	# The revolt countdown, as soon as unrest is above the threshold.
-	var revolt_seasons := int(state.get("revolt_seasons", 0))
-	if revolt_seasons > 0:
-		var left := maxi(int(state.get("revolt_seasons_needed", 3)) - revolt_seasons, 1)
-		unrest_value.text += " — révolte dans %s" % FrText.count(left, "saison")
+	unrest_value.text = PanelWidgets.unrest_text(state)  # + compte à rebours de révolte dès le seuil
 	devastation_value.text = ("%d %%" % int(state["devastation"])) if state.has("devastation") else "—"
 	unrest_value.tooltip_text = RichTooltip.gauge("unrest", float(state.get("unrest", -1)))
 	devastation_value.tooltip_text = RichTooltip.gauge("devastation", float(state.get("devastation", -1)))

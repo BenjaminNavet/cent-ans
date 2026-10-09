@@ -383,3 +383,14 @@ static func faction_label(faction_id: String, display_name: String, label_of: Ca
 	if label_of.is_valid():
 		return str(label_of.call(faction_id))
 	return faction_id
+
+
+## Mécontentement d'une province (`CampaignSim.get_province_state`) : « 70 % — révolte dans 2 saisons »,
+## « — » sans la mesure. Partagé par les panneaux de province et de colonie.
+static func unrest_text(state: Dictionary) -> String:
+	var text := ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
+	var revolt_seasons := int(state.get("revolt_seasons", 0))
+	if revolt_seasons > 0:
+		var left := maxi(int(state.get("revolt_seasons_needed", 3)) - revolt_seasons, 1)
+		text += " — révolte dans %s" % FrText.count(left, "saison")
+	return text

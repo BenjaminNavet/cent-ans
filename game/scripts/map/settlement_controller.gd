@@ -118,10 +118,12 @@ func _show(detail: Dictionary) -> void:
 	var recruitable: Array = map.sim.call("get_recruitable", id) if player_owner else []
 	var buildable: Array = map.sim.call("settlement_buildable", id) if player_owner and map.sim.has_method("settlement_buildable") else []
 	var demolition: Array = map.sim.call("settlement_demolition_preview", id) if player_owner and map.sim.has_method("settlement_demolition_preview") else []
-	var shown := detail
+	var shown := detail.duplicate()
+	var province_id := str(detail.get("province", ""))
+	if province_id != "" and map.sim.has_method("get_province_state"):
+		shown["province_state"] = map.sim.call("get_province_state", province_id)  # WH uicards top4
 	var possession := possession_of_settlement(id)  # RJ-c : statut possédé / occupé
 	if not possession.is_empty():
-		shown = detail.duplicate()
 		shown["possession"] = possession
 	panel.show_settlement(shown, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
 	_fill_slot_bar(id, str(detail.get("name", id)), player_owner)
