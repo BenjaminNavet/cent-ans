@@ -1,4 +1,4 @@
-//! Forest stands (« peuplements »): what a whole massif is made of (lot DN-FORET, ADR 0216).
+//! Forest stands (« peuplements »): what a whole massif is made of (lot DN-FORET, ADR 0219).
 //!
 //! The species table of `species.rs` draws a species per biome, role and altitude; two forests of
 //! the same biome therefore looked alike. A stand type adds a regional identity: a multiplier per
