@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqf4w0cj7mc8m"
-path="res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.ctex"
+path.s3tc="res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "df2f0e27d351e11dfb2e75bd8b5a8480"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_church_lod2_ga3_church_lod2_roughness.jpg"
-dest_files=["res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.ctex"]
+dest_files=["res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.s3tc.ctex", "res://.godot/imported/ga3_church_lod2_ga3_church_lod2_roughness.jpg-bee359d6917826e8708d4d3fc40482be.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

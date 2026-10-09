@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3s6ru544uatn"
-path="res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.ctex"
+path.s3tc="res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.s3tc.ctex"
+path.etc2="res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d23add3ed71bf88cb1c5937d1b3bf4cf"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg"
-dest_files=["res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.ctex"]
+dest_files=["res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.s3tc.ctex", "res://.godot/imported/mossy_erratic_lod2_mossy_erratic_lod2_albedo.jpg-fa53e607ebab3c315ae47ab71a8d82d5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://nxk0rklw00ob"
-path="res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.ctex"
+path.s3tc="res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f1bae909ecd7d058054f42c1101e7495"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.ctex"]
+dest_files=["res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.s3tc.ctex", "res://.godot/imported/ga3_cart_lod1_ga3_cart_lod1_albedo.jpg-3cc4f50beace157955a18fc352219058.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

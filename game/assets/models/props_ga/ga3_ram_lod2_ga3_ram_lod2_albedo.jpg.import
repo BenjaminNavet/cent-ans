@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6ggs0w5ea1ue"
-path="res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.ctex"
+path.s3tc="res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3c5450aeba9f911ae41a8c27db47a6d9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.ctex"]
+dest_files=["res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.s3tc.ctex", "res://.godot/imported/ga3_ram_lod2_ga3_ram_lod2_albedo.jpg-e759d850ed60ef62bef4b7a6560e783a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

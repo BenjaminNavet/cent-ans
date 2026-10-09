@@ -186,3 +186,24 @@ def art_models_update(
             "Fichier suivi à commiter : data/art/dn_models_hosting.json "
             "(après la publication, avant tout push)."
         )
+
+
+@art_app.command("models-textures-fix")
+def art_models_textures_fix(
+    check: bool = typer.Option(
+        False, "--check", help="Ne rien écrire ; code 1 s'il reste des écarts"
+    ),
+) -> None:
+    """Impose VRAM compressé + mipmaps aux textures 3D (QW-D).
+
+    À lancer après un import Godot qui a extrait de nouvelles textures de glb ;
+    `tools/launch.sh` le fait puis réimporte.
+    """
+    from cent_ans_tools import texture_import_rules as rules
+
+    if check:
+        bad = [p for p in rules.import_files() if rules.violations(p)]
+        console.print(f"{len(bad)} texture(s) hors règle")
+        raise typer.Exit(1 if bad else 0)
+    changed = rules.fix_all()
+    console.print(f"{len(changed)} .import corrigé(s)")

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://uww744lac3sp"
-path="res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.ctex"
+path.s3tc="res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "42ac0a7220e6bd3adb1622f0f9c32d5c"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_well_lod2_ga3_well_lod2_normal.jpg"
-dest_files=["res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.ctex"]
+dest_files=["res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.s3tc.ctex", "res://.godot/imported/ga3_well_lod2_ga3_well_lod2_normal.jpg-ad6af68065bb8ecc516c5f33630db9fc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

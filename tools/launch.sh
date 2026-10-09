@@ -322,6 +322,13 @@ fi
 if [[ $NEED_IMPORT -eq 1 ]]; then
     say "Import des ressources Godot ($REASON)…"
     "$GODOT_CLI" --headless --path "$GAME" --import || fail "L'import Godot a échoué (voir ci-dessus)."
+    # QW-D : Godot importe les textures extraites des glb sans compression ; on impose VRAM + mipmaps
+    # (tools/cent_ans_tools/texture_import_rules.py) et on réimporte seulement si un .import change.
+    if command -v uv >/dev/null &&
+        [[ "$(uv run --project tools cent-ans art models-textures-fix 2>/dev/null)" != "0 "* ]]; then
+        say "Textures 3D : compression VRAM imposée, réimport…"
+        "$GODOT_CLI" --headless --path "$GAME" --import || fail "L'import Godot a échoué (voir ci-dessus)."
+    fi
     # Fingerprint taken after the import: it writes the .import/.uid files next to the assets.
     game_fingerprint >"$STAMP"
 else

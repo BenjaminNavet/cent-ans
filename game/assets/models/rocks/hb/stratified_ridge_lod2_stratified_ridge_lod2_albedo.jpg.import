@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcf7iw0sb8h1a"
-path="res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.ctex"
+path.s3tc="res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.s3tc.ctex"
+path.etc2="res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "df6921e5362772e333e2e0952f248115"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg"
-dest_files=["res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.ctex"]
+dest_files=["res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.s3tc.ctex", "res://.godot/imported/stratified_ridge_lod2_stratified_ridge_lod2_albedo.jpg-14c0ff6ea159bbd702c2f2e8b1bd6d52.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

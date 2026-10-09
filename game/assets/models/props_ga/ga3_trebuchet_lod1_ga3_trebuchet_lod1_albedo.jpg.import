@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkb8ltdl0fy43"
-path="res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.ctex"
+path.s3tc="res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "274ab456a803bef9d60bcfcc5030640d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.ctex"]
+dest_files=["res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.s3tc.ctex", "res://.godot/imported/ga3_trebuchet_lod1_ga3_trebuchet_lod1_albedo.jpg-3aa9b06eb5391ca630cecc09bf02421c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

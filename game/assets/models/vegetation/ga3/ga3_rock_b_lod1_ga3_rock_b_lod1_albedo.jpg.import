@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfsbtmb8vprjf"
-path="res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.ctex"
+path.s3tc="res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f127ba6fbd52f0cc780b15972f4c33ba"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/vegetation/ga3/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.ctex"]
+dest_files=["res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.s3tc.ctex", "res://.godot/imported/ga3_rock_b_lod1_ga3_rock_b_lod1_albedo.jpg-9e28f4925394e7a991d86208445d170d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

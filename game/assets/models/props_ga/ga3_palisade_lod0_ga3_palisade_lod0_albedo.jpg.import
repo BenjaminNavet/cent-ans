@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhaj7of4tc36t"
-path="res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.ctex"
+path.s3tc="res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bb987e77f68dce40a592665b5face10e"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.ctex"]
+dest_files=["res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.s3tc.ctex", "res://.godot/imported/ga3_palisade_lod0_ga3_palisade_lod0_albedo.jpg-21560c85e945b5895e528c73770adfb6.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

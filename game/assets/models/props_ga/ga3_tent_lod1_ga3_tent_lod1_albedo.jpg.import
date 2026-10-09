@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dv2qpkgmoxekj"
-path="res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.ctex"
+path.s3tc="res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2033813d85dc1e75028af3febb8380a2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.ctex"]
+dest_files=["res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.s3tc.ctex", "res://.godot/imported/ga3_tent_lod1_ga3_tent_lod1_albedo.jpg-c4b491320c4970c8b0d4df723097fcce.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

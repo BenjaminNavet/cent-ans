@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csfvtrmdbfd6x"
-path="res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.ctex"
+path.s3tc="res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.s3tc.ctex"
+path.etc2="res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "091a2c3f2d35373e1b3cfbbd422e84c8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg"
-dest_files=["res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.ctex"]
+dest_files=["res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.s3tc.ctex", "res://.godot/imported/limestone_cliff_lod2_limestone_cliff_lod2_albedo.jpg-785b4f6f195e3e4890b5f118880e999e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

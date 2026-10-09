@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk5wa4sm7f0l0"
-path="res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.ctex"
+path.s3tc="res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.s3tc.ctex"
+path.etc2="res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "35a197f06e811a84a62c4ad4a4ee6f29"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg"
-dest_files=["res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.ctex"]
+dest_files=["res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.s3tc.ctex", "res://.godot/imported/alpine_spire_lod0_alpine_spire_lod0_albedo.jpg-ad6787cdc43086ef27bd30e1742e80da.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

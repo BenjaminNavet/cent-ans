@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://676aayh1x76j"
-path="res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.ctex"
+path.s3tc="res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "274ab456a803bef9d60bcfcc5030640d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/siege/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg"
-dest_files=["res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.ctex"]
+dest_files=["res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.s3tc.ctex", "res://.godot/imported/ga3_trebuchet_lod_Ga3TrebuchetLod_BASECOLOR.jpg-17ed58816ff7ad13a39710c6cc2782f7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

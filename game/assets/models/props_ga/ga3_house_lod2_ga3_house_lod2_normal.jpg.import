@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd8ymagjrgu38"
-path="res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.ctex"
+path.s3tc="res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d972cb9f262ca73cd9cf7a7f4ec4c7a2"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_house_lod2_ga3_house_lod2_normal.jpg"
-dest_files=["res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.ctex"]
+dest_files=["res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.s3tc.ctex", "res://.godot/imported/ga3_house_lod2_ga3_house_lod2_normal.jpg-6afeadc46779c56adc829dd03f95a014.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

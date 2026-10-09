@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hnitm1y4gq4b"
-path="res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.ctex"
+path.s3tc="res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.s3tc.ctex"
+path.etc2="res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "840612abecfdf94468e63993937fb264"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg"
-dest_files=["res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.ctex"]
+dest_files=["res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.s3tc.ctex", "res://.godot/imported/granite_chaos_lod0_granite_chaos_lod0_albedo.jpg-73ab872c079213357e774faceb1f141e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

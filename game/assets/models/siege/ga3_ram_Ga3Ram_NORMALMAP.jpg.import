@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://beiyms7v4chas"
-path="res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.ctex"
+path.s3tc="res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a091fc2831fcb74abf0780f2607db551"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/siege/ga3_ram_Ga3Ram_NORMALMAP.jpg"
-dest_files=["res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.ctex"]
+dest_files=["res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.s3tc.ctex", "res://.godot/imported/ga3_ram_Ga3Ram_NORMALMAP.jpg-7909aa60ff53280c87e679d5419d1ea4.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

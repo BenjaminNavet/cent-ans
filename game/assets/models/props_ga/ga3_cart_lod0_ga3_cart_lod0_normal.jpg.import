@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://rjfewxfrduag"
-path="res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.ctex"
+path.s3tc="res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9687d92b027b383fc419954d41f7ffe9"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_cart_lod0_ga3_cart_lod0_normal.jpg"
-dest_files=["res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.ctex"]
+dest_files=["res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.s3tc.ctex", "res://.godot/imported/ga3_cart_lod0_ga3_cart_lod0_normal.jpg-c265b5369de3d7fabb893ac751ef4bae.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

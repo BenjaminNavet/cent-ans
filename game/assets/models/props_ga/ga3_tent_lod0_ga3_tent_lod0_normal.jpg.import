@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ewwm03qvprvf"
-path="res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.ctex"
+path.s3tc="res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b02013f2eb2b6c3510d14d00b1b0c9ec"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_tent_lod0_ga3_tent_lod0_normal.jpg"
-dest_files=["res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.ctex"]
+dest_files=["res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.s3tc.ctex", "res://.godot/imported/ga3_tent_lod0_ga3_tent_lod0_normal.jpg-a4d79ccb3e574da807bbbce6c4e5c37f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mecstcl4kmpl"
-path="res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.ctex"
+path.s3tc="res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.s3tc.ctex"
+path.etc2="res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "43984169f8f80a89cee41e9793554d69"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/props_ga/ga3_well_lod1_ga3_well_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.ctex"]
+dest_files=["res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.s3tc.ctex", "res://.godot/imported/ga3_well_lod1_ga3_well_lod1_albedo.jpg-0e5de4296d6ee1ccfc577aff8b2a4e2d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

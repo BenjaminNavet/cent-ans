@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bj1ot0okk07or"
-path="res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.ctex"
+path.s3tc="res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.s3tc.ctex"
+path.etc2="res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "29547ae5c839fdb065347a9fe82b8878"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/rocks/hb/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg"
-dest_files=["res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.ctex"]
+dest_files=["res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.s3tc.ctex", "res://.godot/imported/red_sandstone_lod1_red_sandstone_lod1_albedo.jpg-ef9e2d91e87f5497f4bb9ead1aac6798.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
