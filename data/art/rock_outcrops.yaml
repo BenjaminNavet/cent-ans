@@ -27,7 +27,7 @@
     "cluster_bias": 0.15,
     "near_distance": 10.0,
     "far_distance": 70.0,
-    "far_scale": 1.6,
+    "far_scale": 2.6,
     "vertical_follow": 0.3,
     "lod_distances": [
       30.0,
@@ -49,7 +49,7 @@
     "max_visible_triangles": 450000,
     "max_cached_tiles": 48,
     "max_view_radius": 1000.0,
-    "shadow_max_lod": 1,
+    "shadow_max_lod": 0,
     "view_radius_factor": 1.8,
     "min_view_radius": 160.0,
     "road_clearance": 1.2,

@@ -1048,7 +1048,7 @@ func _apply_counts(fade: float) -> void:
 		var share := float(entry["share"]) * factor
 		for part: Dictionary in entry["parts"]:
 			var mmi: MultiMeshInstance3D = part["mmi"]
-			var n := int(ceil(mmi.multimesh.instance_count * share))
+			var n := int(floor(mmi.multimesh.instance_count * share + 0.5))
 			mmi.multimesh.visible_instance_count = n
 			instances += mmi.multimesh.instance_count
 			if mmi.visible:
