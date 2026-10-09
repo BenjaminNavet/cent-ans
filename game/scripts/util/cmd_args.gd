@@ -47,3 +47,17 @@ static func args() -> PackedStringArray:
 ## Valeurs de `--clé=a,b,c` découpées sur `separator` (sans éléments vides), vide si absente.
 static func list(key: String, separator: String = ",") -> PackedStringArray:
 	return value(key).split(separator, false)
+
+
+## Script principal passé au moteur (`--script` / `-s`), vide sans script.
+static func main_script() -> String:
+	var engine_args := OS.get_cmdline_args()
+	var at := engine_args.find("--script")
+	if at < 0:
+		at = engine_args.find("-s")
+	return str(engine_args[at + 1]) if at >= 0 and at + 1 < engine_args.size() else ""
+
+
+## Vrai pour un script de `res://tests/` (tests, sondes, captures) : réglages par défaut.
+static func is_test_run() -> bool:
+	return main_script().begins_with("res://tests/")

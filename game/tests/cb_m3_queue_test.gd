@@ -24,9 +24,6 @@ func _init() -> void:
 
 func _check_integration() -> void:
 	root.size = Vector2i(1440, 900)  # headless : la fenêtre par défaut est minuscule (64x64)
-	# Les événements poussés sont en pixels de fenêtre : le test ne dépend pas de la « Taille de l'interface » du joueur.
-	(root.get_node("Settings")).call("use_test_file")
-	root.content_scale_factor = 1.0
 	_scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	_scene.autoplay = true
 	_scene.log_orders_for_test = true

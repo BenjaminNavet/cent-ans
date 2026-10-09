@@ -49,7 +49,7 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless" or Engine.is_editor_hint():
 		return
 	_max_errors = _env_int("CENT_ANS_MAX_ERRORS", DEFAULT_MAX_ERRORS)
-	if _main_script().begins_with("res://tests/"):
+	if CmdArgs.is_test_run():
 		_timeout_ms = _env_int("CENT_ANS_TEST_TIMEOUT_S", DEFAULT_TEST_TIMEOUT_S) * 1000
 	if _max_errors <= 0 and _timeout_ms <= 0:
 		return
@@ -78,7 +78,7 @@ func _watch() -> void:
 			reason = "test bloqué plus de %d s (CENT_ANS_TEST_TIMEOUT_S)" % (_timeout_ms / 1000)
 		if reason == "":
 			continue
-		printerr("HeadlessWatchdog: arrêt de %s : %s" % [_main_script(), reason])
+		printerr("HeadlessWatchdog: arrêt de %s : %s" % [CmdArgs.main_script(), reason])
 		get_tree().call_deferred("quit", EXIT_CODE)
 		var deadline := Time.get_ticks_msec() + KILL_GRACE_MS
 		while not _stop and Time.get_ticks_msec() < deadline:
@@ -93,10 +93,3 @@ static func _env_int(name: String, fallback: int) -> int:
 	var raw := OS.get_environment(name)
 	return int(raw) if raw.is_valid_int() else fallback
 
-
-static func _main_script() -> String:
-	var args := OS.get_cmdline_args()
-	var at := args.find("--script")
-	if at < 0:
-		at = args.find("-s")
-	return str(args[at + 1]) if at >= 0 and at + 1 < args.size() else ""

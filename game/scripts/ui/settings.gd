@@ -137,7 +137,12 @@ func _ready() -> void:
 		window_overridden_by_cmdline = window_differs_from_project(
 			DisplayServer.window_get_size(), DisplayServer.window_get_mode()
 		)
-	load_settings()
+	# Scripts de `res://tests/` : valeurs par défaut et fichier dédié, jamais les réglages du
+	# joueur (une taille d'interface ≠ 1 décale les clics poussés par `push_input`).
+	if CmdArgs.is_test_run():
+		use_test_file()
+	else:
+		load_settings()
 	KeyBindings.apply_saved(get_value(KeyBindings.SETTING_KEY))
 	apply_display()
 	apply_audio()
