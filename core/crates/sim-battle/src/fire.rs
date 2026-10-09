@@ -221,6 +221,14 @@ pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
 /// `None`: the bundled ones.
 static INSTALLED: RwLock<Option<Arc<FireRules>>> = RwLock::new(None);
 
+thread_local! {
+    /// Rules installed for the current thread only: they win over the
+    /// process-wide ones, so a test can tune the fire without leaking into
+    /// the battles built by tests running in parallel.
+    static THREAD_INSTALLED: std::cell::RefCell<Option<Arc<FireRules>>> =
+        const { std::cell::RefCell::new(None) };
+}
+
 impl FireRules {
     /// Parses the contents of a rules file.
     pub fn from_json(text: &str) -> Result<FireRules, String> {
@@ -243,8 +251,19 @@ impl FireRules {
         *guard = rules.map(Arc::new);
     }
 
-    /// The installed rules, else the bundled ones.
+    /// Like [`FireRules::install`], but for the calling thread only (tests
+    /// run in parallel in one process; a process-wide install would change
+    /// the fire of their battles).
+    pub fn install_for_thread(rules: Option<FireRules>) {
+        THREAD_INSTALLED.with(|cell| *cell.borrow_mut() = rules.map(Arc::new));
+    }
+
+    /// The installed rules (this thread's, else the process-wide ones), else
+    /// the bundled ones.
     pub fn current() -> Arc<FireRules> {
+        if let Some(rules) = THREAD_INSTALLED.with(|cell| cell.borrow().clone()) {
+            return rules;
+        }
         let guard = INSTALLED.read().unwrap_or_else(|e| e.into_inner());
         guard
             .clone()

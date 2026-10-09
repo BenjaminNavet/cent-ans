@@ -1,8 +1,9 @@
 //! RS-F (ADR 0099): the siege fire rules are read from `data/` at load time
 //! (`FireRules::load` + `install`), the compiled-in copy staying the default.
 //!
-//! One test only in this binary: `install` changes the rules of every
-//! battle built afterwards in the process.
+//! The test installs the rules for its own thread only
+//! (`install_for_thread`): a process-wide `install` would change the fire
+//! of the battles built by the other tests running in parallel.
 
 use crate::common;
 
@@ -49,11 +50,11 @@ fn fire_rules_come_from_the_data_folder_once_installed() {
     // A tuned file changes the next battles, without recompiling.
     let mut tuned = loaded.clone();
     tuned.suburbs.count = 2;
-    FireRules::install(Some(tuned.clone()));
+    FireRules::install_for_thread(Some(tuned.clone()));
     assert_eq!(*FireRules::current(), tuned);
     assert_eq!(suburbs(data), 2);
 
-    FireRules::install(None);
+    FireRules::install_for_thread(None);
     assert_eq!(*FireRules::current(), *FireRules::bundled());
     assert_eq!(suburbs(data), bundled);
 }
