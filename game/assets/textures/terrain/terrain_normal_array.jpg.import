@@ -3,8 +3,8 @@
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
 uid="uid://dc65y4tkcixd3"
-path.s3tc="res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.s3tc.ctexarray"
-path.etc2="res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.etc2.ctexarray"
+path.bptc="res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.bptc.ctexarray"
+path.astc="res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.astc.ctexarray"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -13,12 +13,12 @@ metadata={
 [deps]
 
 source_file="res://assets/textures/terrain/terrain_normal_array.jpg"
-dest_files=["res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.s3tc.ctexarray", "res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.etc2.ctexarray"]
+dest_files=["res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.bptc.ctexarray", "res://.godot/imported/terrain_normal_array.jpg-058c6cfa11b8acaf06c9e058be7a8026.astc.ctexarray"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
