@@ -91,8 +91,8 @@ entries:
   - 10
   - 11
   - 12
-  prompt: Top-down view of a wide lowland river surface, silty brown-green water with soft ripples and
-    faint current streaks running in one direction across the whole frame.
+  prompt: Close top-down view of a wide silty brown-green river surface, dense small ripples, swirls and
+    current streaks covering the entire frame uniformly, open water only.
   seed: 10050
   tile_m: 20
   checks: *id001
@@ -114,8 +114,8 @@ entries:
   - 4
   - 7
   - 8
-  prompt: Top-down view of a slow steppe river surface, ochre and khaki silt-laden water with gentle ripples
-    and faint current streaks across the whole frame.
+  prompt: Close top-down view of an ochre silt-laden steppe river surface, dense small ripples, eddies
+    and current streaks covering the entire frame uniformly, open water only.
   seed: 10070
   tile_m: 20
   checks: *id001
@@ -123,8 +123,8 @@ entries:
   role: river_small
   biomes:
   - 6
-  prompt: Top-down view of a mountain glacial torrent, milky pale turquoise water with fast ripples and
-    small white foam streaks across the whole frame.
+  prompt: Close top-down view of a fast glacial torrent, milky pale turquoise water with rapids, white
+    foam streaks and ripples covering the entire frame uniformly, open water only.
   seed: 10080
   tile_m: 8
   checks: *id001
@@ -134,8 +134,8 @@ entries:
   - 5
   - 9
   - 13
-  prompt: Top-down view of a still northern forest lake surface, dark tea-brown water with very fine wind
-    ripples evenly spread over the whole frame.
+  prompt: Close top-down view of a dark peaty forest lake surface ruffled by a breeze, dense small ripples
+    and wavelets with soft sky reflections covering the entire frame uniformly, open water only.
   seed: 10090
   tile_m: 30
   checks: *id001
@@ -157,8 +157,8 @@ entries:
   biomes:
   - 7
   - 8
-  prompt: Top-down view of still oasis pool water, clear green water over pale sand with faint ripples,
-    uniform coverage of the whole frame.
+  prompt: Close top-down view of clear green oasis pool water, gentle ripples with sunlit sand visible
+    through the water, the same water covering the entire frame uniformly, open water only.
   seed: 10110
   tile_m: 10
   checks: *id001
