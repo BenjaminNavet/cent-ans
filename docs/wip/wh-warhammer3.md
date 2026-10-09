@@ -7,7 +7,7 @@ Session parallèle RX active (worktrees `../gp-rx-*`, ADR jusqu'à 0258) : ne pa
 ## État
 - [x] Vague critique faite (7 Sonnet : carte, armees, economie, personnages, diplomatie, tour, ui ; brief docs/wip/wh/brief-critique.md) → `docs/wip/wh/<rôle>.md`
 - [x] Synthèse + lots → `docs/wip/wh/lots.md` (12 lots, 2 vagues)
-- [~] Vague 1 : hover + idle FUSIONNÉS (62e2cae95) ; turn + mapb2 (vague 2) lancés ; reste vague 1 en cours. Vague 1 lancée (idle, hover, armya, econ, chars, diploa ; agents cent-ans-mech) ; vague 2 ensuite (armyb, uicards, turn, diplob, charsb, mapb2)
+- [~] FUSIONNÉS dans main : hover, idle, diploa, chars, mapb2, econ, turn, armya (bd06cd4e8). En cours : diplob, charsb, armyb, uicards (uicards doit aussi faire repasser po_ui_test, déjà rouge sur main : bandeau d'ost sur SIDE_PANEL, polices 14 px). cv3_ai_stances : graines 1, 3, 5 (balayage 1-8 refait après chaque lot qui décale le flux). Hors WH, rouge sur main : tools/tests/test_budget.py (ligne 0,049 $ d'une autre session).
 - [ ] Vagues de corrections (worktrees `../gp-wh-<lot>`, branches `wh/<lot>`, ff-only)
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
 
