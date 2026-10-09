@@ -1,7 +1,7 @@
 //! Street furniture laid out by the core (lot BR3, ADR 0047): stalls on the
 //! facades facing the square, barrels, carts and woodpiles on the street
 //! side, the market (a well and groups of stalls leaving the streets open),
-//! the props of the suburbs and of the battle village. Deterministic from the
+//! the props of the suburbs. Deterministic from the
 //! houses (index and position, [`crate::rng::hash01`]), never from the
 //! battle's random stream, so that laying them out shifts no other draw.
 //!
