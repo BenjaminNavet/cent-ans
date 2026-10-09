@@ -319,7 +319,7 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
         "unit_knights",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     battle.attacker.general = Some(general("Philippe"));
     battle.defender.general = Some(general("Edouard"));
     battle.defender.general.as_mut().unwrap().unit_index = 4;

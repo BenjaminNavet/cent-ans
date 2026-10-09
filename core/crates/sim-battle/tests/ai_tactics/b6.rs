@@ -1,12 +1,12 @@
-//! B6: the tactical AI uses the campaign site (hedges, ditches, village).
+//! B6: the tactical AI uses the campaign site (hedges, ditches).
 
 use crate::common;
 
 use common::*;
-use sim_battle::ai::{defensive_cover, CoverKind};
+use sim_battle::ai::defensive_cover;
 use sim_battle::{
-    BattleSetup, BattleSim, Obstacle, ObstacleKind, SideId, Unit, UnitState, Village, Weather,
-    Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH,
+    BattleSetup, BattleSim, Obstacle, ObstacleKind, SideId, Unit, UnitState, Weather,
+    ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH,
 };
 
 fn demo_setup() -> BattleSetup {
@@ -36,7 +36,7 @@ fn digest(sim: &mut BattleSim) -> String {
     format!("{:.0} {:?} {:?}", sim.elapsed(), sim.winner(), hp)
 }
 
-/// A mixed field battle with no site at all (no village, inland plains).
+/// A mixed field battle with no site at all (inland plains).
 fn no_site_sim(seed: u64) -> BattleSim {
     let data = data();
     let french = [
@@ -54,14 +54,14 @@ fn no_site_sim(seed: u64) -> BattleSim {
         "unit_knights",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     sim
 }
 
-/// The demo armies on a bocage field with a village: cover is found and
+/// The demo armies on a bocage field: cover is found and
 /// the armies still meet within B4's one to three minutes.
 #[test]
 fn bocage_battles_still_engage() {
@@ -69,8 +69,7 @@ fn bocage_battles_still_engage() {
     for seed in 0..8 {
         let mut battle = demo_setup();
         battle.terrain = data_model::Terrain::Bocage;
-        battle.village = Some(true);
-        // EP3: hedges and village only (a river is crossed at a bridge or
+        // EP3: hedges only (a river is crossed at a bridge or
         // a ford, and delays the contact).
         battle.river = false;
         let mut sim = BattleSim::new(battle, seed).unwrap();
@@ -93,7 +92,7 @@ fn the_site_reads_in_one_line() {
     // (EP3: bridged, with brooks).
     assert_eq!(
         sim.field().site_label_fr(),
-        "Sol sec · printemps · ferme · haies · clôtures · rivière et ponts · ruisseaux"
+        "Sol sec · printemps · haies · clôtures · rivière et ponts · ruisseaux"
     );
     let field = sim.field_mut();
     field.season = sim_battle::BattleSeason::Winter;
@@ -101,7 +100,6 @@ fn the_site_reads_in_one_line() {
     field.streams.clear();
     field.bridges.clear();
     field.obstacles.retain(|o| o.kind == ObstacleKind::Hedge);
-    field.village.as_mut().unwrap().farm = false;
     field.coast = Some(sim_battle::Coast {
         flank: sim_battle::Flank::West,
         shore_x: -20.0,
@@ -110,7 +108,7 @@ fn the_site_reads_in_one_line() {
     });
     assert_eq!(
         sim.field().site_label_fr(),
-        "Terre gelée · hiver · village · haies · côte ouest"
+        "Terre gelée · hiver · haies · côte ouest"
     );
 }
 
@@ -127,7 +125,7 @@ fn demo_contact_stays_near_seventy_seconds() {
     );
 }
 
-/// Without a site (no village, no hedge), the AI keeps the B6 shape of the
+/// Without a site (no hedge), the AI keeps the B6 shape of the
 /// fight (winner, order of magnitude of the losses) but the digests move
 /// with B8: the two sides here are unequal in numbers (6 French units, 4
 /// English), so their centroids are never square to begin with, and the
@@ -192,7 +190,7 @@ fn battles_without_a_site_are_unchanged() {
     ];
     for (seed, digest_before) in expected {
         let mut sim = no_site_sim(seed);
-        assert!(sim.field().obstacles.is_empty() && sim.field().village.is_none());
+        assert!(sim.field().obstacles.is_empty());
         assert!(defensive_cover(sim.field(), SideId::Defender).is_none());
         assert_eq!(digest(&mut sim), digest_before, "seed {seed}");
     }
@@ -227,8 +225,8 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
         "unit_longbowmen",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
-    // The hedge and the village are laid for the standard 300 m line gap (ADR 0184
+    battle.bare_field = true;
+    // The hedge is laid for the standard 300 m line gap (ADR 0184
     // widened the field battles' gap).
     let mut sim = BattleSim::new_scaled(battle, seed, sim_battle::BattleScale::default()).unwrap();
     sim.set_ai(SideId::Attacker, true);
@@ -300,29 +298,6 @@ fn without_the_hedge_the_archers_keep_their_old_ground() {
     }
 }
 
-#[test]
-fn a_village_edge_is_cover_too() {
-    let mut sim = english_on_the_defensive(5);
-    sim.field_mut().village = Some(Village {
-        zone: Zone {
-            x: 640.0,
-            z: DEFENDER_LINE_Z - 20.0,
-            radius: 60.0,
-        },
-        farm: false,
-        houses: Vec::new(),
-    });
-    let cover = defensive_cover(sim.field(), SideId::Defender).expect("the village is cover");
-    assert_eq!(cover.kind, CoverKind::Village);
-    assert!(sim.field().in_village(cover.center.0, cover.center.1));
-    run(&mut sim, 270.0);
-    let inside = english_archers(&sim)
-        .iter()
-        .filter(|u| sim.field().in_village(u.x, u.z))
-        .count();
-    assert!(inside >= 1, "no archer in the village");
-}
-
 /// Isolated archers behind a hedge, knights of the AI facing them.
 fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
     let data = data();
@@ -331,7 +306,7 @@ fn knights_facing_archers(obstacle: Obstacle) -> BattleSim {
         units(data, &["unit_longbowmen", "unit_men_at_arms_foot"]),
         None,
     );
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, 9).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);
@@ -359,15 +334,14 @@ fn cavalry_rides_round_a_hedge() {
     assert!(!has_event(&sim, "se brise sur la haie"));
 }
 
-/// B8: bocage + village, seed 5 — used to be the worst case (French knights
+/// B8: bocage, seed 5 — used to be the worst case (French knights
 /// chasing the English mounted archers past the hedge line delayed contact
 /// to 152 s); the leashed pursuit (`PURSUIT_LEASH`) and the hedge-network
 /// detour bring it back near the demo's usual rhythm.
 #[test]
-fn bocage_village_seed_5_engages_near_seventy_seconds() {
+fn bocage_seed_5_engages_near_seventy_seconds() {
     let mut battle = demo_setup();
     battle.terrain = data_model::Terrain::Bocage;
-    battle.village = Some(true);
     battle.river = false;
     let mut sim = BattleSim::new(battle, 5).unwrap();
     sim.set_ai(SideId::Attacker, true);
@@ -388,7 +362,7 @@ fn horse_leaves_a_rout_too_far_from_the_line() {
         units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, 4).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);
@@ -418,7 +392,7 @@ fn horse_still_chases_a_rout_within_the_leash() {
         units(data, &["unit_men_at_arms_foot", "unit_men_at_arms_foot"]),
         None,
     );
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, 4).unwrap();
     lab(&mut sim);
     sim.set_ai(SideId::Attacker, true);

@@ -19,7 +19,6 @@ fn site(terrain: Terrain, season: BattleSeason) -> FieldSite {
         river: true,
         coastal: false,
         season,
-        village: None,
     }
 }
 
@@ -442,7 +441,7 @@ fn decor_areas_give_cover_slow_and_defend() {
             units(data, &["unit_men_at_arms_foot"]),
             None,
         );
-        battle.village = Some(false);
+        battle.bare_field = true;
         let mut sim = BattleSim::new(battle, 4).unwrap();
         lab(&mut sim);
         sim.field_mut().clear_decor();
@@ -481,7 +480,7 @@ fn raid(guarded: bool) -> BattleSim {
         units(data, &["unit_knights"]),
         None,
     );
-    battle.village = Some(false);
+    battle.bare_field = true;
     let mut sim = BattleSim::new(battle, 11).unwrap();
     lab(&mut sim);
     let camp = sim
@@ -512,7 +511,6 @@ fn a_manor_before_the_line_is_a_defensive_cover() {
         2,
     );
     f.clear_decor();
-    f.village = None;
     f.obstacles.clear();
     assert!(sim_battle::ai::defensive_cover(&f, SideId::Defender).is_none());
     f.place_manor(600.0, f.defender_line_z() - 30.0, 0.0, false);

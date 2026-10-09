@@ -83,7 +83,7 @@ fn ai_beats_a_passive_side_on_every_relief() {
 /// no wood, mud or river.
 fn ridge_sim(data: &GameData, attacker: &[&str], defender: &[&str], crest_z: f64) -> BattleSim {
     let mut battle = setup(units(data, attacker), units(data, defender), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     // The ridge is laid for the standard 300 m line gap (ADR 0184 widened the
     // field battles' gap).
     let scale = sim_battle::BattleScale::default();

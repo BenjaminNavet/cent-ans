@@ -477,7 +477,7 @@ impl HistoricalMap {
             river: false,
             season: self.season,
             coastal: false,
-            village: Some(false),
+            bare_field: true,
             attacker: side(SideId::Attacker)?,
             defender: side(SideId::Defender)?,
             player_side,
@@ -518,7 +518,6 @@ impl HistoricalMap {
         field.ground = self.ground;
         field.river = None;
         field.coast = None;
-        field.village = None;
         field.oxbows.clear();
         field.bridges.clear();
         field.forests = self.woods.clone();

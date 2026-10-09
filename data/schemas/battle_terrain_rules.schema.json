@@ -141,18 +141,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -193,8 +181,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -329,18 +315,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -381,8 +355,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -517,18 +489,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -569,8 +529,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -705,18 +663,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -757,8 +703,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -893,18 +837,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -945,8 +877,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -1081,18 +1011,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -1133,8 +1051,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -1269,18 +1185,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -1321,8 +1225,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -1457,18 +1359,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -1509,8 +1399,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false
@@ -1645,18 +1533,6 @@
               "maximum": 1,
               "description": "Densité d'arbres des bois (rendu)."
             },
-            "village_chance": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Chance d'un village ou d'une ferme."
-            },
-            "timbered_share": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1,
-              "description": "Part des maisons à colombage."
-            },
             "scatter": {
               "type": "object",
               "properties": {
@@ -1697,8 +1573,6 @@
           "required": [
             "relief",
             "woodland",
-            "village_chance",
-            "timbered_share",
             "scatter"
           ],
           "additionalProperties": false

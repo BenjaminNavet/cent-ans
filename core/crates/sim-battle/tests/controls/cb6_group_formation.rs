@@ -37,7 +37,7 @@ fn mixed_setup() -> BattleSetup {
         "unit_knights",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     battle
 }
 
@@ -50,7 +50,7 @@ fn big_setup() -> BattleSetup {
     french.extend(["unit_trebuchet"; 3]);
     let english = ["unit_longbowmen", "unit_men_at_arms_foot", "unit_knights"];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     battle
 }
 
@@ -65,7 +65,7 @@ fn shooters_setup() -> BattleSetup {
         "unit_knights",
     ];
     let mut battle = setup(units(data, &a), units(data, &d), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     battle
 }
 
@@ -182,7 +182,7 @@ fn army_setup() -> BattleSetup {
         "unit_trebuchet",
     ];
     let mut battle = setup(units(data, &a), units(data, &["unit_urban_militia"]), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     battle.attacker.general = Some(
         serde_json::from_value(serde_json::json!({
             "character": "chr_test",

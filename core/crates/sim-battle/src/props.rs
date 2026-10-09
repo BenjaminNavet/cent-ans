@@ -12,7 +12,6 @@
 
 use crate::rng::hash01;
 use crate::siege::{House, SiegeWorks};
-use crate::site::Village;
 use crate::town::{Footprint, Prop, PropKind, TownRules};
 
 const SALT_COUNT: u64 = 0xB3_0001;
@@ -271,42 +270,5 @@ pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
     let seed = key(works.houses.len(), cx, cz);
     props.extend(market(works, rules, seed));
     let footprints: Vec<Footprint> = works.houses.iter().map(House::footprint).collect();
-    keep_clear(props, &footprints)
-}
-
-/// Props in front of the houses of a battle village (a woodpile, a cart,
-/// barrels), not before the church.
-pub fn village_props(village: &Village, rules: &TownRules) -> Vec<Prop> {
-    let p = &rules.props;
-    let mut props = Vec::new();
-    let footprints: Vec<Footprint> = village
-        .houses
-        .iter()
-        .map(|h| Footprint::new(h.x, h.z, h.length, h.width, h.yaw))
-        .collect();
-    for (i, h) in village.houses.iter().enumerate() {
-        if h.kind == crate::site::HouseKind::Church {
-            continue;
-        }
-        let seed = key(i, h.x, h.z);
-        if hash01(seed, SALT_COUNT) >= p.village_chance {
-            continue;
-        }
-        let side = if hash01(seed, SALT_SIDE) < 0.5 {
-            1.0
-        } else {
-            -1.0
-        };
-        along_face(
-            &mut props,
-            &footprints[i],
-            side,
-            &p.village_kinds,
-            1,
-            i,
-            seed,
-            rules,
-        );
-    }
     keep_clear(props, &footprints)
 }

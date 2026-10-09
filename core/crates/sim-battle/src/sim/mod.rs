@@ -188,7 +188,6 @@ pub struct BattleSim {
     relief_map: Derived<crate::relief_ai::ReliefMap>,
     /// BR3: props of the battle village (derived data, reset by
     /// [`BattleSim::field_mut`]).
-    village_props: Derived<Vec<crate::town::Prop>>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
@@ -383,7 +382,6 @@ impl BattleSim {
         self.relief_map = Default::default();
         self.crossings = Default::default();
         self.road_index = Default::default();
-        self.village_props = Default::default();
         self.decor_grid = Default::default();
         Arc::make_mut(&mut self.field)
     }

@@ -153,9 +153,7 @@ pub use sim::{
     SiegeEngineView, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF,
     ZONE_DEPTH,
 };
-pub use site::{
-    Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
-};
+pub use site::{Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind};
 pub use time_of_day::{DayPhase, TimeOfDayRules};
 pub use town::{Footprint, Prop, PropKind, TownRules};
 pub use unit::{Formation, Unit, UnitFate, UnitState};

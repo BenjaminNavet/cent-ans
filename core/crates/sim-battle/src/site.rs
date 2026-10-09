@@ -1,5 +1,5 @@
 //! Battle site drawn from the campaign (lot B5): ground of the season (mud,
-//! snow), coast on a flank, marsh pools, a village or farm with its hedges,
+//! snow), coast on a flank, marsh pools, hedges,
 //! fences and ditches, bocage hedgerows.
 //!
 //! These features are drawn from a stream *derived* from the battle RNG
@@ -181,8 +181,6 @@ pub const OBSTACLE_REACH: f64 = 4.0;
 pub const HEDGE_COVER_REACH: f64 = 14.0;
 /// Multiplier on missile casualties behind a hedge.
 pub const HEDGE_COVER: f64 = 0.6;
-/// Multiplier on missile casualties inside a village.
-pub const VILLAGE_COVER: f64 = 0.6;
 
 /// A straight hedge, fence or ditch from `a` to `b` (x, z).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -213,7 +211,7 @@ impl Obstacle {
 }
 
 key_enum! {
-/// Kind of a village building (rendering).
+/// Kind of a building (rendering).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HouseKind {
@@ -249,27 +247,6 @@ pub struct House {
     pub kind: HouseKind,
 }
 
-/// A hamlet or a farm: the zone is cover (houses, walls, gardens) and broken
-/// ground; its crofts are enclosed by hedges and fences.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Village {
-    pub zone: Zone,
-    /// A lone farm (a few buildings round a yard) rather than a hamlet.
-    pub farm: bool,
-    pub houses: Vec<House>,
-}
-
-impl Village {
-    /// Speed multiplier through the lanes, yards and gardens.
-    pub fn speed_factor(mounted: bool) -> f64 {
-        if mounted {
-            0.55
-        } else {
-            0.8
-        }
-    }
-}
-
 /// What the campaign knows of the battle site.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FieldSite {
@@ -277,9 +254,6 @@ pub struct FieldSite {
     pub river: bool,
     pub coastal: bool,
     pub season: BattleSeason,
-    /// `Some(true)` forces a village, `Some(false)` forbids it, `None` draws
-    /// it from the terrain.
-    pub village: Option<bool>,
 }
 
 /// Tree density of the woods of a terrain, 0-1 (rendering).
@@ -295,7 +269,6 @@ pub struct SiteFeatures {
     pub pools: Vec<Zone>,
     pub coast: Option<Coast>,
     pub obstacles: Vec<Obstacle>,
-    pub village: Option<Village>,
 }
 
 /// What is already on the field (placement must avoid it).
@@ -319,16 +292,6 @@ impl Occupied<'_> {
         // the water's edge, 9 m less, whatever the water).
         self.river_z.is_some_and(|f| (z - f(x)).abs() < margin)
             || self.water_gap.is_some_and(|g| g(x, z) < margin - 9.0)
-    }
-
-    fn in_zones(&self, x: f64, z: f64, margin: f64) -> bool {
-        self.forests
-            .iter()
-            .chain(self.mud)
-            .chain(self.parts)
-            .any(|zone| {
-                (x - zone.x).powi(2) + (z - zone.z).powi(2) < (zone.radius + margin).powi(2)
-            })
     }
 }
 
@@ -388,16 +351,6 @@ impl SiteFeatures {
                 field_width: occupied.size.width,
             });
         }
-        let wants_village = site
-            .village
-            .unwrap_or_else(|| rng.unit() < TerrainRules::of(site.terrain).village_chance);
-        if wants_village {
-            let farm = !matches!(site.village, Some(true)) && rng.unit() < 0.4;
-            features.village = draw_village(farm, site.terrain, &features, occupied, rng);
-        }
-        if let Some(village) = &features.village {
-            features.obstacles = crofts(village, &occupied.size, rng);
-        }
         if site.terrain == Terrain::Bocage {
             let mut hedgerows = bocage_hedgerows(&features, occupied, rng);
             features.obstacles.append(&mut hedgerows);
@@ -456,236 +409,12 @@ fn draw_pools(occupied: &Occupied, rng: &mut BattleRng) -> Vec<Zone> {
     pools
 }
 
-/// A hamlet (6-11 buildings round a green, with a church) or a farm (3-4
-/// buildings round a yard), on a flank of the field or behind a line.
-fn draw_village(
-    farm: bool,
-    terrain: Terrain,
-    features: &SiteFeatures,
-    occupied: &Occupied,
-    rng: &mut BattleRng,
-) -> Option<Village> {
-    let radius = if farm {
-        rng.range(35.0, 45.0)
-    } else {
-        rng.range(60.0, 85.0)
-    };
-    let (width, depth) = (occupied.size.width, occupied.size.depth);
-    for attempt in 0..60 {
-        // Flanks first (the classic village on the wing), then anywhere
-        // off the lines.
-        let (x, z) = if attempt < 30 {
-            let west = rng.unit() < 0.5;
-            let x = if west {
-                rng.range(radius + 30.0, 300.0)
-            } else {
-                rng.range(width - 300.0, width - radius - 30.0)
-            };
-            (x, rng.range(radius + 60.0, depth - radius - 60.0))
-        } else {
-            (
-                rng.range(radius + 30.0, width - radius - 30.0),
-                rng.range(radius + 40.0, depth - radius - 40.0),
-            )
-        };
-        if on_line(&occupied.size, x, z, radius)
-            || occupied.in_zones(x, z, radius + 15.0)
-            || occupied.near_river(x, z, radius + 25.0)
-            || features
-                .pools
-                .iter()
-                .any(|p| (x - p.x).powi(2) + (z - p.z).powi(2) < (radius + p.radius + 15.0).powi(2))
-            || features
-                .extra_mud
-                .iter()
-                .any(|m| (x - m.x).powi(2) + (z - m.z).powi(2) < (radius + m.radius + 10.0).powi(2))
-            || features
-                .coast
-                .is_some_and(|c| c.from_edge(x) < c.beach + radius + 15.0)
-        {
-            continue;
-        }
-        let zone = Zone { x, z, radius };
-        let houses = if farm {
-            farm_buildings(zone, terrain, rng)
-        } else {
-            hamlet_buildings(zone, terrain, rng)
-        };
-        return Some(Village { zone, farm, houses });
-    }
-    None
-}
-
-fn house_kind(terrain: Terrain, rng: &mut BattleRng) -> HouseKind {
-    // Timber framing in the bocage and the plains of the north, cob and
-    // thatch elsewhere.
-    let timbered = TerrainRules::of(terrain).timbered_share;
-    if rng.unit() < timbered {
-        HouseKind::Timbered
-    } else {
-        HouseKind::Cottage
-    }
-}
-
-fn hamlet_buildings(zone: Zone, terrain: Terrain, rng: &mut BattleRng) -> Vec<House> {
-    let mut houses: Vec<House> = Vec::new();
-    // The church faces east (+x) on the green.
-    let church_angle = rng.range(0.0, std::f64::consts::TAU);
-    houses.push(House {
-        x: zone.x + church_angle.cos() * zone.radius * 0.25,
-        z: zone.z + church_angle.sin() * zone.radius * 0.25,
-        length: rng.range(16.0, 22.0),
-        width: rng.range(7.0, 9.0),
-        yaw: rng.range(-0.15, 0.15),
-        kind: HouseKind::Church,
-    });
-    let count = 6 + rng.below(6) as usize;
-    let mut tries = 0;
-    while houses.len() < count + 1 && tries < 200 {
-        tries += 1;
-        // Houses line the lanes: a ring round the green, facing its centre.
-        let angle = rng.range(0.0, std::f64::consts::TAU);
-        let dist = zone.radius * rng.range(0.45, 0.85);
-        let (x, z) = (zone.x + angle.cos() * dist, zone.z + angle.sin() * dist);
-        let barn = rng.unit() < 0.2;
-        let (length, width) = if barn {
-            (rng.range(12.0, 18.0), rng.range(6.5, 8.5))
-        } else {
-            (rng.range(8.0, 13.0), rng.range(5.0, 6.5))
-        };
-        let candidate = House {
-            x,
-            z,
-            length,
-            width,
-            yaw: angle + std::f64::consts::FRAC_PI_2 + rng.range(-0.25, 0.25),
-            kind: if barn {
-                HouseKind::Barn
-            } else {
-                house_kind(terrain, rng)
-            },
-        };
-        if houses.iter().all(|h| apart(h, &candidate, 3.0)) {
-            houses.push(candidate);
-        }
-    }
-    houses
-}
-
-fn farm_buildings(zone: Zone, terrain: Terrain, rng: &mut BattleRng) -> Vec<House> {
-    // A farmhouse, a barn and a byre round a yard (a U or an L).
-    let yaw = rng.range(0.0, std::f64::consts::TAU);
-    let (c, s) = (yaw.cos(), yaw.sin());
-    let at = |u: f64, v: f64| (zone.x + u * c - v * s, zone.z + u * s + v * c);
-    let mut houses = Vec::new();
-    let (x, z) = at(0.0, -11.0);
-    houses.push(House {
-        x,
-        z,
-        length: rng.range(12.0, 15.0),
-        width: 6.5,
-        yaw,
-        kind: house_kind(terrain, rng),
-    });
-    let (x, z) = at(-12.0, 3.0);
-    houses.push(House {
-        x,
-        z,
-        length: rng.range(14.0, 18.0),
-        width: 8.0,
-        yaw: yaw + std::f64::consts::FRAC_PI_2,
-        kind: HouseKind::Barn,
-    });
-    if rng.unit() < 0.7 {
-        let (x, z) = at(12.0, 3.0);
-        houses.push(House {
-            x,
-            z,
-            length: rng.range(9.0, 12.0),
-            width: 5.5,
-            yaw: yaw + std::f64::consts::FRAC_PI_2,
-            kind: HouseKind::Barn,
-        });
-    }
-    if rng.unit() < 0.5 {
-        let (x, z) = at(rng.range(-6.0, 6.0), 16.0);
-        houses.push(House {
-            x,
-            z,
-            length: 7.0,
-            width: 4.5,
-            yaw,
-            kind: HouseKind::Cottage,
-        });
-    }
-    houses
-}
-
-/// Conservative separation test of two footprints (bounding circles).
-fn apart(a: &House, b: &House, gap: f64) -> bool {
-    let ra = 0.5 * (a.length.powi(2) + a.width.powi(2)).sqrt();
-    let rb = 0.5 * (b.length.powi(2) + b.width.powi(2)).sqrt();
-    (a.x - b.x).powi(2) + (a.z - b.z).powi(2) > (ra + rb + gap).powi(2)
-}
-
-/// Crofts behind the houses and the pound: hedged and fenced plots around
-/// the village, with gaps for the lanes.
-fn crofts(village: &Village, size: &FieldSize, rng: &mut BattleRng) -> Vec<Obstacle> {
-    let zone = village.zone;
-    let mut obstacles = Vec::new();
-    let sides = if village.farm { 7 } else { 12 };
-    let outer = zone.radius + rng.range(10.0, 25.0);
-    let start = rng.range(0.0, std::f64::consts::TAU);
-    let step = std::f64::consts::TAU / f64::from(sides);
-    for k in 0..sides {
-        // Gaps for the lanes and the fields beyond.
-        if rng.unit() < 0.25 {
-            continue;
-        }
-        let a0 = start + step * f64::from(k);
-        let a1 = a0 + step * rng.range(0.7, 0.95);
-        let r0 = outer * rng.range(0.92, 1.08);
-        let r1 = outer * rng.range(0.92, 1.08);
-        let kind = if rng.unit() < 0.7 {
-            ObstacleKind::Hedge
-        } else {
-            ObstacleKind::Fence
-        };
-        obstacles.push(Obstacle {
-            a: (zone.x + a0.cos() * r0, zone.z + a0.sin() * r0),
-            b: (zone.x + a1.cos() * r1, zone.z + a1.sin() * r1),
-            kind,
-        });
-    }
-    // Radial croft boundaries between the ring and the houses.
-    let radial = if village.farm { 2 } else { 5 };
-    for _ in 0..radial {
-        let angle = rng.range(0.0, std::f64::consts::TAU);
-        let r0 = zone.radius * rng.range(0.85, 1.0);
-        let kind = if rng.unit() < 0.5 {
-            ObstacleKind::Fence
-        } else {
-            ObstacleKind::Hedge
-        };
-        obstacles.push(Obstacle {
-            a: (zone.x + angle.cos() * r0, zone.z + angle.sin() * r0),
-            b: (zone.x + angle.cos() * outer, zone.z + angle.sin() * outer),
-            kind,
-        });
-    }
-    obstacles
-        .into_iter()
-        .filter(|o| inside_field(size, o.a) && inside_field(size, o.b))
-        .collect()
-}
-
 fn inside_field(size: &FieldSize, p: (f64, f64)) -> bool {
     (5.0..=size.width - 5.0).contains(&p.0) && (5.0..=size.depth - 5.0).contains(&p.1)
 }
 
 /// Bocage: hedgerows on banks on a skewed grid of fields 90-170 m wide,
-/// with gaps (gates), clear of the deployment lines, the river and the
-/// village.
+/// with gaps (gates), clear of the deployment lines, the river.
 fn bocage_hedgerows(
     features: &SiteFeatures,
     occupied: &Occupied,
@@ -770,7 +499,7 @@ fn marsh_ditches(
 }
 
 /// A line obstacle stays inside the field, off the deployment lines, the
-/// river, the forests and the village.
+/// river and the forests.
 fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> bool {
     let size = &occupied.size;
     if !inside_field(size, line.a) || !inside_field(size, line.b) || line.length() < 25.0 {
@@ -787,20 +516,12 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
             && !occupied.parts.iter().any(|f| f.contains(x, z))
             && !features.pools.iter().any(|p| p.contains(x, z))
             && !features
-                .village
-                .as_ref()
-                .is_some_and(|v| v.zone.contains(x, z) || near(v.zone, x, z, 35.0))
-            && !features
                 .coast
                 .is_some_and(|c| c.from_edge(x) < c.beach + 10.0)
     }) && {
         let (mx, mz) = line.midpoint();
         (0.0..=size.width).contains(&mx) && (0.0..=size.depth).contains(&mz)
     }
-}
-
-fn near(zone: Zone, x: f64, z: f64, margin: f64) -> bool {
-    (x - zone.x).powi(2) + (z - zone.z).powi(2) < (zone.radius + margin).powi(2)
 }
 
 #[cfg(test)]

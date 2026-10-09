@@ -526,7 +526,7 @@ impl CustomBattle {
             river: false,
             season: self.season().unwrap_or_default(),
             coastal: false,
-            village: None,
+            bare_field: false,
             attacker: side(SideId::Attacker)?,
             defender: side(SideId::Defender)?,
             player_side: self.player_side(),

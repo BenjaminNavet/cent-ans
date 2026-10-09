@@ -105,8 +105,6 @@
         "street_kinds": { "$ref": "#/$defs/kinds", "description": "Rangée tournée vers la rue extérieure." },
         "suburb_chance": { "$ref": "#/$defs/chance" },
         "suburb_kinds": { "$ref": "#/$defs/kinds" },
-        "village_chance": { "$ref": "#/$defs/chance" },
-        "village_kinds": { "$ref": "#/$defs/kinds" },
         "market": {
           "type": "object",
           "properties": {
@@ -122,7 +120,7 @@
         },
         "path_margin_m": { "$ref": "#/$defs/distance", "description": "Marge du centre d'un régiment autour du mobilier de la place." }
       },
-      "required": ["footprints", "wall_gap_m", "block_row_chances", "square_kinds", "street_kinds", "suburb_chance", "suburb_kinds", "village_chance", "village_kinds", "market", "path_margin_m"],
+      "required": ["footprints", "wall_gap_m", "block_row_chances", "square_kinds", "street_kinds", "suburb_chance", "suburb_kinds", "market", "path_margin_m"],
       "additionalProperties": false
     },
     "figures": {

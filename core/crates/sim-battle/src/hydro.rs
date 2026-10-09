@@ -892,14 +892,7 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
             let radius = stream.range(28.0, 55.0);
             let gap = river.width_at(x) * 0.5 + stream.range(18.0, 40.0);
             let c = (x, river.center_z(x) + sign * (gap + radius));
-            if !clear_of_lines(lines, c.1, radius + 8.0)
-                || field.in_forest(c.0, c.1)
-                || field.village.is_some()
-                    && field
-                        .village
-                        .as_ref()
-                        .is_some_and(|v| v.zone.contains(c.0, c.1))
-            {
+            if !clear_of_lines(lines, c.1, radius + 8.0) || field.in_forest(c.0, c.1) {
                 continue;
             }
             // Arc opening away from the river (the old bend).
@@ -1119,41 +1112,6 @@ pub(crate) fn lay_roads(field: &mut Battlefield, rules: &WaterRules, stream: &mu
             RoadKind::Main,
             stream,
         ));
-    }
-    if let Some(village) = field.village.clone() {
-        let centre = (village.zone.x, village.zone.z);
-        // A lane from the village to the nearest road ...
-        let nearest = roads
-            .iter()
-            .map(|r| nearest_on(&r.points, centre))
-            .min_by(|a, b| {
-                let da = (a.0 - centre.0).hypot(a.1 - centre.1);
-                let db = (b.0 - centre.0).hypot(b.1 - centre.1);
-                da.total_cmp(&db)
-            });
-        if let Some(q) = nearest {
-            let d = (q.0 - centre.0).hypot(q.1 - centre.1);
-            if d > 20.0 && !field.path_wet(centre, q) {
-                let mut pts = meander(centre, q, (d * 0.08).min(20.0), stream);
-                pts = chaikin(&pts);
-                roads.push(Road {
-                    kind: RoadKind::Track,
-                    points: pts,
-                    width: rr.track_width_m,
-                });
-            }
-        }
-        // ... and a road out to the nearer side edge.
-        let west = centre.0 < field.width * 0.5;
-        let dir = if west { (-1.0, 0.0) } else { (1.0, 0.0) };
-        let out = road_to_edge(field, centre, dir, rr.wander_m, stream);
-        if !out.windows(2).any(|w| field.path_wet(w[0], w[1])) {
-            roads.push(Road {
-                kind: RoadKind::Main,
-                points: chaikin(&out),
-                width: rr.main_width_m,
-            });
-        }
     }
     // Footbridges where a road meets the tributary.
     let mut footbridges = Vec::new();

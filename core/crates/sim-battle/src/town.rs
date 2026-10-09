@@ -306,8 +306,6 @@ pub struct PropRules {
     pub street_kinds: Vec<PropKind>,
     pub suburb_chance: f64,
     pub suburb_kinds: Vec<PropKind>,
-    pub village_chance: f64,
-    pub village_kinds: Vec<PropKind>,
     pub market: MarketRules,
     pub path_margin_m: f64,
 }

@@ -215,7 +215,7 @@ fn crest_field(data: &GameData, crest_z: f64, hedges: &[Obstacle]) -> BattleSim 
         "unit_longbowmen",
     ];
     let mut battle = setup(units(data, &french), units(data, &english), None);
-    battle.village = Some(false);
+    battle.bare_field = true;
     // The crest and its hedges are laid for the standard 300 m line gap (ADR 0184
     // widened the field battles' gap).
     let mut sim = BattleSim::new_scaled(battle, 5, sim_battle::BattleScale::default()).unwrap();

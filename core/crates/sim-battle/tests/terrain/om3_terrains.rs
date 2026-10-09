@@ -13,7 +13,6 @@ fn site(terrain: Terrain) -> FieldSite {
         river: false,
         coastal: false,
         season: BattleSeason::Summer,
-        village: None,
     }
 }
 

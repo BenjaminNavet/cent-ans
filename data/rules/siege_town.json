@@ -44,8 +44,6 @@
     "street_kinds": ["barrels", "barrels", "woodpile", "cart"],
     "suburb_chance": 0.55,
     "suburb_kinds": ["woodpile", "cart", "barrels"],
-    "village_chance": 0.5,
-    "village_kinds": ["woodpile", "woodpile", "cart", "barrels"],
     "market": {
       "ring_factor": 0.8,
       "stall_spacing_m": 4.0,
