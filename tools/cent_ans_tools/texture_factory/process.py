@@ -244,7 +244,10 @@ def build_packs(
     repo_root: Path = REPO_ROOT,
     size: int | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Every (or the named) pack of a catalogue."""
+    """Every (or the named) pack of a catalogue.
+
+    With ``size`` only the packs that have a ``hi_dir`` are built (the others stay 1k).
+    """
     specs = document.get("packs", [])
     unknown = set(names or []) - {spec["name"] for spec in specs}
     if unknown:
@@ -252,5 +255,5 @@ def build_packs(
     return {
         spec["name"]: build_pack(document, spec, raw_dir, repo_root, size)
         for spec in specs
-        if not names or spec["name"] in names
+        if (not names or spec["name"] in names) and (not size or "hi_dir" in spec)
     }
