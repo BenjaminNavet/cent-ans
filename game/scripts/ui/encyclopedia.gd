@@ -1056,8 +1056,8 @@ static func agent_definitions() -> Dictionary:
 	var types: Dictionary = parsed.get("types", {})
 	var actions: Dictionary = parsed.get("actions", {})
 	var action_kinds := {
-		"spy": ["scout", "sabotage", "incite", "counter"],
-		"emissary": ["parley", "truce", "bribe", "ransom"],
+		"spy": ["scout", "sabotage", "incite", "counter", "assassinate", "poison", "ambush"],
+		"emissary": ["parley", "truce", "bribe", "ransom", "guide_army"],
 		"preacher": ["preach", "denounce", "curia"],
 	}
 	for kind in AGENT_KIND_ORDER:

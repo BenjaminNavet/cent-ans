@@ -404,6 +404,8 @@ func _action_button(option: Dictionary) -> Button:
 	var tip := PackedStringArray([str(option.get("description", ""))])
 	if available_now:
 		tip.append("Cible : %s" % option.get("target_name", ""))
+		if str(option.get("character_name", "")) != "":
+			tip.append("Personnage visé : %s" % option["character_name"])  # WH charsb
 		tip.append("Réussite : %d %%" % int(option.get("chance", 0)))
 		if int(option.get("cost", 0)) > 0:
 			tip.append("Coût : %s" % Money.amount(int(option.get("cost", 0))))

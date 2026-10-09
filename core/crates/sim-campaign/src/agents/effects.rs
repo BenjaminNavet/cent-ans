@@ -219,7 +219,7 @@ impl CampaignState {
                     self.seed,
                     self.turn,
                     crate::loyalty::stable_hash(victim.as_str()),
-                    serial as u32 ^ 0x57_0000,
+                    serial ^ 0x57_0000,
                 );
                 let kill = kill_percent + kill_per_level * u32::from(agent.level - 1);
                 let (text, died) = if rng.below(100) < kill {

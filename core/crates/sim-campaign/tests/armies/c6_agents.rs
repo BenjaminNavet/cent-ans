@@ -761,8 +761,8 @@ fn upkeep_is_paid_each_season_and_points_come_back() {
         state.agent_movement_allowance(data, AgentKind::Spy)
     );
     assert!(!agent.acted);
-    // The action bar lists the four spy actions.
+    // The action bar lists the seven spy actions (WH charsb: assassinate, poison, ambush).
     let bar = state.agent_actions(data, &id);
-    assert_eq!(bar.len(), 4);
+    assert_eq!(bar.len(), 7);
     assert!(bar.iter().all(|o| o.available || o.reason.is_some()));
 }

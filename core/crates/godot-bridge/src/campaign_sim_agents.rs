@@ -126,12 +126,18 @@ impl CampaignSim {
                     .as_ref()
                     .map(|t| data.settlement_name(t))
                     .unwrap_or_default();
+                let character_name = option
+                    .character
+                    .as_ref()
+                    .map(|c| state.character_name(data, c))
+                    .unwrap_or_default();
                 vdict! {
                     "action" => option.action.key(),
                     "name" => option.name.as_str(),
                     "target" => option.target.as_ref().map_or("", |t| t.as_str()),
                     "target_name" => target_name.as_str(),
                     "character" => option.character.as_ref().map_or("", |c| c.as_str()),
+                    "character_name" => character_name.as_str(),
                     "available" => option.available,
                     "reason" => option.reason.as_deref().unwrap_or(""),
                     "chance" => i64::from(option.chance),
