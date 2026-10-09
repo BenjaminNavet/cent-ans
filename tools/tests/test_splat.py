@@ -101,4 +101,3 @@ def test_pack_normal_rough_keeps_xy_and_stores_roughness_in_blue() -> None:
     assert packed.shape == (2, 2, 3)
     assert np.all(packed[..., 0] == 120) and np.all(packed[..., 1] == 130)
     assert np.all(packed[..., 2] == 200)
-    assert list(textures.LAYERS)[:4] == ["grass", "farmland", "forest", "rock"]

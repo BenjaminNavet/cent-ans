@@ -153,20 +153,7 @@ func _stamp_disc(image: StampMap, center: Vector2, radius: float, channel: int, 
 	image.stamp_soft_disc(center, radius, channel, feather, strength)
 
 
-## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
-func _apply_terrain_tint() -> void:
-	if host.ground_material == null:
-		return
-	var tint := host.terrain_tint(host.terrain_key)
-	if tint == Color(1, 1, 1):
-		return
-	var current: Variant = host.ground_material.get_shader_parameter("grass_tint")
-	var base: Color = current if current is Color else Color(0.9, 1.0, 0.8)
-	host.ground_material.set_shader_parameter("grass_tint", base * tint)
-
-
-## TX T2c : réglages propres aux sols générés (teintes de l'ancien jeu Poly Haven atténuées, grain
-## fin par couche). Sans paquet TX, tout reste à l'état d'avant (`tx_ground` = 0).
+## TX T2c : réglages propres aux sols générés (teintes atténuées, grain fin par couche).
 func _apply_tx_ground(layers: Array) -> void:
 	var material := host.ground_material
 	material.set_shader_parameter("tx_ground", 1.0 if host.ground_tx else 0.0)
@@ -202,8 +189,6 @@ func _build_material(weather: String) -> void:
 	host.ground_material.set_shader_parameter("splat_rect", Vector4(host.SPLAT_RECT.position.x, host.SPLAT_RECT.position.y, host.SPLAT_RECT.size.x, host.SPLAT_RECT.size.y))
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	host.ground_material.set_shader_parameter("calm_rect", calm)
-	host.ground_material.set_shader_parameter("near_detail_albedo", host.NEAR_DETAIL_ALBEDO)
-	host.ground_material.set_shader_parameter("near_detail_normal", host.NEAR_DETAIL_NORMAL)
 	host.ground_material.set_shader_parameter("decor_saturation", host.decor_saturation())
 	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
 	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données

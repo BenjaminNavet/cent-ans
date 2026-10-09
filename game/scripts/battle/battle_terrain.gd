@@ -74,51 +74,33 @@ const BIOMES := {
 ## GA2 / TX T2c : identité des couches du sol, jamais codée en dur ici
 ## (`data/fx/battle_ground_layers.json`, schéma `fx_battle_ground_layers.schema.json`). `roles` fixe
 ## l'ordre des couches du `Texture2DArray` ; le paquet généré du biome du lieu
-## (`BattleGroundTextures`) donne leurs matières et tailles de répétition ; `legacy` garde le jeu
-## Poly Haven d'avant TX (`--legacy-textures`, ou repli si le paquet manque).
+## (`BattleGroundTextures`) donne leurs matières et tailles de répétition (ADR 0244 : plus de jeu
+## Poly Haven, repli biome -> parent -> biome par défaut).
 const GROUND_LAYERS_FILE := "fx/battle_ground_layers.json"
 ## Taille fixe du tableau `layer_tile_size` du shader (couches réelles ≤ cette taille).
 const MAX_GROUND_LAYERS := 16
+## Taille de répétition (m) d'une couche quand aucun paquet n'est chargé.
+const DEFAULT_TILE_SIZE_M := 5.0
 static var _ground_layers: Array = []
 static var _ground_layers_loaded: bool = false
 static var _ground_role_index: Dictionary = {}
-## OM3 (ADR 0116) : teinte de l'herbe par terrain de province, jeu Poly Haven seulement (la steppe
-## et le désert ont leur propre biome et leurs propres matières en TX).
-static var _terrain_tints: Dictionary = {}
 
 
-## Couches du sol du jeu Poly Haven (`legacy`) ; l'ordre est celui de `roles`.
+## Couches du sol dans l'ordre de `roles` : [{id, role, tile_size_m}] (le paquet TX remplace les
+## tailles par les siennes).
 static func ground_layers() -> Array:
 	if _ground_layers_loaded:
 		return _ground_layers
 	_ground_layers_loaded = true
-	if DataFile.exists(GROUND_LAYERS_FILE):
-		var parsed: Variant = DataFile.read_json(GROUND_LAYERS_FILE)
-		if parsed is Dictionary and (parsed as Dictionary).get("legacy") is Dictionary:
-			var legacy: Dictionary = (parsed as Dictionary)["legacy"]
-			_ground_layers = legacy.get("layers", [])
-			var tints: Variant = legacy.get("terrain_tints", {})
-			if tints is Dictionary:
-				_terrain_tints = tints
-			for i in _ground_layers.size():
-				var role := str((_ground_layers[i] as Dictionary).get("role", ""))
-				if role != "":
-					_ground_role_index[role] = i
-			return _ground_layers
-	push_warning("BattleTerrain: %s introuvable, sol replié sur les couches historiques" % GROUND_LAYERS_FILE)
+	var roles: Array = BattleGroundTextures.roles()
+	if roles.is_empty():
+		push_warning("BattleTerrain: %s introuvable, aucune couche de sol" % GROUND_LAYERS_FILE)
+		return _ground_layers
+	for i in roles.size():
+		var role := str(roles[i])
+		_ground_layers.append({"id": role, "role": role, "tile_size_m": DEFAULT_TILE_SIZE_M})
+		_ground_role_index[role] = i
 	return _ground_layers
-
-
-## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données
-## ou avec les sols générés TX, qui portent déjà la couleur régionale).
-func terrain_tint(key: String) -> Color:
-	ground_layers()
-	if ground_tx:
-		return Color(1, 1, 1)
-	var rgb: Variant = _terrain_tints.get(key, null)
-	if rgb is Array and (rgb as Array).size() == 3:
-		return Color(float(rgb[0]), float(rgb[1]), float(rgb[2]))
-	return Color(1, 1, 1)
 
 
 ## GA2 : index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
@@ -127,18 +109,17 @@ static func ground_role_index(role: String) -> int:
 	return int(_ground_role_index.get(role, -1))
 
 
-## TX T2c : choisit les tableaux du sol de cette bataille (paquet du biome du lieu, sinon Poly
-## Haven). Pose `ground_tx`, `ground_biome`, `ground_layer_list`, `albedo_array`, `normal_array`
-## et le grain fin (`micro`).
+## TX T2c : choisit les tableaux du sol de cette bataille (paquet du biome du lieu, sinon de son
+## parent, sinon du biome par défaut). Pose `ground_tx`, `ground_biome`, `ground_layer_list`,
+## `albedo_array`, `normal_array` et le grain fin (`micro`). Sans aucun paquet (non importé), le
+## sol reste sans texture et un avertissement est émis.
 func resolve_ground() -> void:
 	ground_tx = false
 	ground_biome = 0
 	ground_layer_list = ground_layers()
-	albedo_array = ALBEDO_ARRAY
-	normal_array = NORMAL_ARRAY
+	albedo_array = null
+	normal_array = null
 	micro = {}
-	if not TextureQuality.use_tx():
-		return
 	var wanted := BattleGroundTextures.biome_for(province_id, terrain_key)
 	var pack := BattleGroundTextures.pack_for(wanted)
 	if pack.is_empty():
@@ -178,19 +159,14 @@ func _apply_ground_noise() -> void:
 
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
-const ALBEDO_ARRAY := preload("res://assets/textures/battle/ground_albedo_array.jpg")
-const NORMAL_ARRAY := preload("res://assets/textures/battle/ground_normal_array.jpg")
-## PO4 : détail proche du sol (Poly Haven CC0, `near_detail/SOURCE.md`), avec DA6.
-const NEAR_DETAIL_ALBEDO := preload("res://assets/textures/battle/near_detail/grass_path_2_diff_2k.jpg")
-const NEAR_DETAIL_NORMAL := preload("res://assets/textures/battle/near_detail/grass_path_2_nor_gl_2k.jpg")
 
-## TX T2c : tableaux du sol de cette bataille (paquet du biome, sinon Poly Haven), liste des couches
-## correspondante, grain fin (`micro`), biome retenu (0 = Poly Haven).
+## TX T2c : tableaux du sol de cette bataille (paquet du biome, de son parent ou du biome par
+## défaut), liste des couches correspondante, grain fin (`micro`), biome retenu (0 = aucun paquet).
 var ground_tx: bool = false
 var ground_biome: int = 0
 var ground_layer_list: Array = []
-var albedo_array: TextureLayered = ALBEDO_ARRAY
-var normal_array: TextureLayered = NORMAL_ARRAY
+var albedo_array: TextureLayered = null
+var normal_array: TextureLayered = null
 var micro: Dictionary = {}
 var terrain: Dictionary = {}
 var weather_key: String = "clear"
@@ -371,7 +347,6 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_plan_roads()
 	_splat._build_textures()
 	_splat._build_material(weather)
-	_splat._apply_terrain_tint()
 	_setup_trample()
 	_mesh._add_mesh("Ground", _mesh._field_mesh(), true)
 	_mesh._add_mesh("NearRing", _mesh._ring_mesh(NEAR_RECT, NEAR_STEP, Rect2(0, 0, FIELD_W, FIELD_D), 0.0), true)

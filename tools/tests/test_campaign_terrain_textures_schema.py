@@ -13,15 +13,12 @@ def _document() -> dict:
     )
 
 
-def test_campaign_terrain_layers_follow_shader_order() -> None:
-    """Layer order is the fixed index contract of ``terrain.gdshader``."""
-    assert [layer["id"] for layer in _document()["layers"]] == SHADER_ORDER
-
-
-def test_campaign_terrain_layer_means_filled() -> None:
-    """Layer means were written by the texture build (never left at zero)."""
-    for layer in _document()["layers"]:
-        assert sum(layer["mean_linear"]) > 0.0, layer["id"]
+def test_campaign_terrain_has_no_poly_haven_layers() -> None:
+    """ADR 0244: the global GA4 Poly Haven layers are gone; the regional block is the only path."""
+    document = _document()
+    assert "layers" not in document
+    assert "poly_haven" not in json.dumps(document)
+    assert set(document["regional"]["roles"]) == set(SHADER_ORDER)
 
 
 def test_water_normal_tiles_seamlessly() -> None:
@@ -38,11 +35,3 @@ def test_water_normal_tiles_seamlessly() -> None:
     edge_v = np.abs(normal[0] - normal[-1]).mean()
     assert edge_v <= interior_v * 1.5
     assert normal[..., 2].min() > 128  # normals point up (z > 0)
-
-
-def test_format_spec_round_trips() -> None:
-    """``format_spec`` writes the same data it reads."""
-    from cent_ans_tools.geo import textures
-
-    spec = _document()
-    assert json.loads(textures.format_spec(spec)) == spec

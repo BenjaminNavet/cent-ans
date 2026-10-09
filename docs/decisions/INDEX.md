@@ -211,3 +211,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0241 | [Végétation, bâtiments et eau régionaux](0241-vegetation-batiments-eau-regionaux.md) | accepté |
 | 0242 | [Quatorze biomes (sous-classes régionales 8-14 et repli sur le parent)](0242-quatorze-biomes.md) | accepté |
 | 0243 | [Sols de campagne régionaux (fond par biome, fondu, grain, parcellaire TX)](0243-sols-de-campagne-regionaux.md) | accepté |
+| 0244 | [Retrait des sols Poly Haven (bataille et campagne)](0244-retrait-sols-poly-haven.md) | accepté |

@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "fx_battle_ground_layers.schema.json",
   "title": "Couches du sol de bataille (lots GA2 puis TX T2c, ADR 0240)",
-  "description": "Sol de bataille régional : `roles` donne l'ordre fixe des couches du `Texture2DArray` (contrat de `battle_ground.gdshader`, index = position), `materials` associe à chaque rôle la matière générée de chaque biome (1..14, écrit par `cent-ans textures battle-data` depuis les paquets `battle_bNN` de `data/art/textures/ground_battle.yaml`), `pack_manifest` le manifeste du paquet d'un biome (`{biome}` sur deux chiffres ; tailles de répétition = `tile_m` des couches du manifeste). Repli : biome, parent (`data/map/biome_parents.json`), `default_biome`, puis le jeu Poly Haven de `legacy` (aussi utilisé avec `--legacy-textures`). `micro` : grain fin fondu sous ~30 m de caméra, par rôle. `terrain_biomes` : biome d'une bataille sans province, selon le terrain de simulation.",
+  "description": "Sol de bataille régional : `roles` donne l'ordre fixe des couches du `Texture2DArray` (contrat de `battle_ground.gdshader`, index = position), `materials` associe à chaque rôle la matière générée de chaque biome (1..14, écrit par `cent-ans textures battle-data` depuis les paquets `battle_bNN` de `data/art/textures/ground_battle.yaml`), `pack_manifest` le manifeste du paquet d'un biome (`{biome}` sur deux chiffres ; tailles de répétition = `tile_m` des couches du manifeste). Repli : biome, parent (`data/map/biome_parents.json`), puis `default_biome` (ADR 0244 : plus de jeu Poly Haven). `micro` : grain fin fondu sous ~30 m de caméra, par rôle. `terrain_biomes` : biome d'une bataille sans province, selon le terrain de simulation.",
   "type": "object",
-  "required": ["roles", "default_biome", "terrain_biomes", "pack_manifest", "materials", "micro", "legacy"],
+  "required": ["roles", "default_biome", "terrain_biomes", "pack_manifest", "materials", "micro"],
   "additionalProperties": false,
   "$defs": {
     "role": {
@@ -58,40 +58,6 @@
           "type": "object",
           "propertyNames": {"$ref": "#/$defs/role"},
           "additionalProperties": {"$ref": "common.schema.json#/$defs/snake_id"}
-        }
-      }
-    },
-    "legacy": {
-      "type": "object",
-      "description": "Jeu Poly Haven d'avant TX (`--legacy-textures`) : couches dans l'ordre de `roles` et teinte de l'herbe par terrain (lot OM3, ADR 0116).",
-      "required": ["layers", "terrain_tints"],
-      "additionalProperties": false,
-      "properties": {
-        "terrain_tints": {
-          "type": "object",
-          "propertyNames": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
-          "additionalProperties": {
-            "type": "array",
-            "minItems": 3,
-            "maxItems": 3,
-            "items": {"type": "number", "minimum": 0, "maximum": 2}
-          }
-        },
-        "layers": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 16,
-          "items": {
-            "type": "object",
-            "required": ["id", "poly_haven_id", "tile_size_m"],
-            "additionalProperties": false,
-            "properties": {
-              "id": {"$ref": "common.schema.json#/$defs/snake_id"},
-              "poly_haven_id": {"$ref": "common.schema.json#/$defs/snake_id"},
-              "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
-              "role": {"$ref": "#/$defs/role"}
-            }
-          }
         }
       }
     }

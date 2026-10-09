@@ -31,10 +31,11 @@ sols de bataille pour 13 rôles × 14 biomes (ADR 0242). Seul le biome du lieu d
   teinte de terre supprimée, boue ramenée de 0,7 à 0,2) ; la teinte par terrain disparaît.
 
 ## Conséquences
-- `BattleTerrain.terrain_tint` devient une méthode d'instance (blanche avec les sols TX).
+- `BattleTerrain.terrain_tint` devenait une méthode d'instance (blanche avec les sols TX) ; supprimée par l'ADR 0244.
+- ADR 0244 : le jeu Poly Haven (`legacy`), le détail proche `near_detail/` et `--legacy-textures` pour le sol sont retirés ; le repli est biome, parent, biome par défaut (paquet TX).
 - `battle_vegetation.gd` lit `terrain.albedo_array` (le tableau du biome) pour la couleur de l'herbe.
 - Rendu comparé à Poly Haven sur plaine et steppe : le sol généré est plus lisible et régional, le
-  jeu Poly Haven est sombre et boueux ; TX est la valeur par défaut.
+  jeu Poly Haven (retiré, ADR 0244) était sombre et boueux ; TX est la seule voie.
 - Points ouverts : grain fin non jugé de près (la caméra de bataille ne descend pas assez), boréal
   vu en blé doré au printemps, 77 Mo de dépôt (dédoublonnage possible par un tableau par groupe de
   biomes si le budget devient critique).

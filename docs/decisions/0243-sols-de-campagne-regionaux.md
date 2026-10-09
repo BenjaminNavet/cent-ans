@@ -34,3 +34,4 @@ sable) ne distinguent pas les régions. Les paquets `tx_campaign_bg` (45 couches
 - Défaut `parcels_source = tx` (planche `fields_compare.png`, 2026-10-09) : les trois vues sont quasi
   identiques, `tx` ajoute les matières régionales absentes de `hb` ; champs 3D DN inchangés.
   `hue_keep` relevé à 0,9 (fond régional trop discret à 0,6).
+- ADR 0244 : les 7 couches GA4 globales Poly Haven, leur chemin de repli 1k et `--legacy-textures` pour le sol de campagne sont retirés ; le bloc `regional` est la seule voie (repli parent puis couche 0).
