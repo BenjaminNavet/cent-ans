@@ -21,7 +21,7 @@ const KEYCAP_GAP := 4.0
 ## solde et de la date (le détail reste en infobulle), nom de faction masqué, recherche étroite.
 var compact := false
 
-var _host: Control
+var _host: Node
 var _top_bar: PanelContainer
 var _bar: HBoxContainer  # rangée de boutons (parent du bouton Techniques)
 var _faction_label: Label
@@ -33,7 +33,7 @@ var _fit_queued := false
 var _texts: Dictionary = {}  # Label → [texte complet, texte compact]
 
 
-func _init(host: Control, top_bar: PanelContainer, bar: HBoxContainer, faction_label: Label,
+func _init(host: Node, top_bar: PanelContainer, bar: HBoxContainer, faction_label: Label,
 		research_box: Control, research_label: Label) -> void:
 	_host = host
 	_top_bar = top_bar
