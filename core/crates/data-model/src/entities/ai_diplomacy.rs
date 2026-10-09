@@ -48,6 +48,14 @@ pub struct WarPlanningRules {
     /// his mother). `false`: kinship counts as for any war (pre-EQ6).
     #[serde(default)]
     pub claim_war_ignores_kinship: bool,
+    /// RX equil (ADR 0257): turns between two war declarations of the same
+    /// faction (0: the historical 12).
+    #[serde(default)]
+    pub rest_turns: u32,
+    /// RX equil (ADR 0257): a faction already fighting this many enemies
+    /// (rebels excluded) declares no further war of its own (0: no cap).
+    #[serde(default)]
+    pub max_enemies: u32,
 }
 
 /// When a faction joins an ally's war (co-belligerence).

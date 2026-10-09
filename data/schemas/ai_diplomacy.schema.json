@@ -26,7 +26,9 @@
         "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." },
         "main_claim_first": { "type": "boolean", "description": "EQ6 (ADR 0085) : la guerre pour la couronne principale revendiquée (le plus grand royaume dont on revendique le trône) passe avant toute autre prétention, et le repos qui suit une autre déclaration ne la retarde pas. Faux par défaut (comportement antérieur)." },
         "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0085) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." },
-        "claim_war_ignores_kinship": { "type": "boolean", "description": "EQ6 (ADR 0085) : les liens de parenté (mariages entre les deux maisons, même maison régnante) ne retiennent pas le prétendant de sa guerre de prétention principale, puisque la prétention naît de cette parenté (Édouard III, petit-fils de Philippe IV par sa mère). Faux par défaut." }
+        "claim_war_ignores_kinship": { "type": "boolean", "description": "EQ6 (ADR 0085) : les liens de parenté (mariages entre les deux maisons, même maison régnante) ne retiennent pas le prétendant de sa guerre de prétention principale, puisque la prétention naît de cette parenté (Édouard III, petit-fils de Philippe IV par sa mère). Faux par défaut." },
+        "rest_turns": { "type": "integer", "minimum": 0, "description": "RX equil (ADR 0257) : tours entre deux déclarations de guerre d'une même faction (0 : 12, valeur historique)." },
+        "max_enemies": { "type": "integer", "minimum": 0, "description": "RX equil (ADR 0257) : une faction qui combat déjà ce nombre d'ennemis (rebelles exclus) ne déclare plus de guerre de son initiative (0 : sans plafond)." }
       },
       "required": ["front_share", "pretender_ratio", "pretender_ratio_alone"],
       "additionalProperties": false

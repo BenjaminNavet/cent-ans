@@ -160,7 +160,7 @@ pub(crate) fn resolve_victory(
         && state.settlements.values().any(|s| s.controller == player);
     let objectives = state.objectives(data, &player);
     let victory = data.factions.get(&player).and_then(|f| f.victory.as_ref());
-    let end_year = victory.map(|v| v.end_year);
+    let end_year = victory.map_or(data.feudal_rules.default_end_year, |v| v.end_year);
     let hold = victory.and_then(|v| v.hold_turns).unwrap_or(1).max(1);
     let all_done = !objectives.is_empty() && objectives.iter().all(|o| o.done);
     if all_done {
@@ -206,7 +206,7 @@ pub(crate) fn resolve_victory(
             OutcomeKind::Victory,
             format!("Victoire ! {name} {}.", path.text_fr()),
         )
-    } else if end_year.is_some_and(|y| state.year > y) {
+    } else if state.year > end_year {
         let done = objectives.iter().filter(|o| o.done).count();
         (
             OutcomeKind::Ended,

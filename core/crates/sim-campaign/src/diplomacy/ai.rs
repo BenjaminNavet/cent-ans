@@ -271,13 +271,24 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
 
     plan_alliances(cache, data, faction, slot, &mut orders);
 
-    let rested = me
-        .last_war_declared
-        .is_none_or(|t| t + WAR_REST_TURNS <= turn);
+    let war_rules = &data.ai_diplomacy.war;
+    let rest = if war_rules.rest_turns == 0 {
+        WAR_REST_TURNS
+    } else {
+        war_rules.rest_turns
+    };
+    let rested = me.last_war_declared.is_none_or(|t| t + rest <= turn);
+    // RX equil: a realm already fighting its quota of enemies declares no
+    // further war of its own, except a pretender pressing its main claim
+    // (the Hundred Years' War does not wait for the quota).
+    let overstretched = war_rules.max_enemies > 0
+        && me.at_war_with.iter().filter(|e| !e.is_rebels()).count() as u32 >= war_rules.max_enemies
+        && !crate::negotiation::pretender_ready(state, data, faction);
     // DP1: a weary realm opens no new front; a pretender waits less.
     let weary = treaties && me.ledger.weariness > weariness_to_declare(data, me);
     let able = turn >= 4
         && !weary
+        && !overstretched
         && (war_ready(state, faction) || crate::negotiation::pretender_ready(state, data, faction));
     let ready = able && rested;
     // EQ6: the rest after another declaration does not hold back the war

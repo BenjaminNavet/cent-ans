@@ -45,10 +45,12 @@ fn a_hoarded_treasury_feeds_the_court() {
     state.factions.get_mut(&france).unwrap().treasury =
         data.economy_rules.opulence_seasons * income + 1_000_000;
     let rich = state.faction_administration_upkeep(data, &france);
+    let rules = &data.economy_rules;
     assert_eq!(
         rich - base,
-        1_000_000 * data.economy_rules.opulence_percent / 100
+        rules.opulence(state.factions[&france].treasury, income)
     );
+    assert!(rich - base >= 1_000_000 * rules.opulence_percent / 100);
 }
 
 #[test]

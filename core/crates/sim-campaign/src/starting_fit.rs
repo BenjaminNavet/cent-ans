@@ -77,9 +77,7 @@ pub(crate) mod compute {
         let rules = &data.economy_rules;
         let income = state.faction_income(data, faction);
         let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
-        let opulence = (treasury - rules.opulence_seasons * income.max(0)).max(0)
-            * rules.opulence_percent
-            / 100;
+        let opulence = rules.opulence(treasury, income);
         (
             economy.net_income() + opulence,
             economy.projected_income + economy.trade_income,

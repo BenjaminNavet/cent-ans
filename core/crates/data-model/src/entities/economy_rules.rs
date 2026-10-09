@@ -87,6 +87,19 @@ pub struct EconomyRules {
     /// ... which spends this percentage of the excess every season.
     #[serde(default = "default_opulence_percent")]
     pub opulence_percent: i64,
+    /// RX equil (ADR 0257): a vast hoard, beyond this many seasons of income
+    /// (0: none), is drained faster...
+    #[serde(default)]
+    pub opulence_high_seasons: i64,
+    /// ... by this extra percentage of what exceeds that second threshold
+    /// every season.
+    #[serde(default)]
+    pub opulence_high_percent: i64,
+    /// RX equil (ADR 0257): each technology already owned slows research by
+    /// this percentage (0: none), so that small realms do not exhaust the
+    /// tree in a few decades.
+    #[serde(default)]
+    pub research_slowdown_percent_per_tech: u32,
     /// LR-04: seasonal revenue (livres) of the lord's own demesne (rents,
     /// tolls, mills and dues of his domain), collected by every faction that
     /// holds its capital city, whatever the population taxed. A one-province
@@ -343,4 +356,21 @@ fn default_garrison_reinforce_percent_per_point() -> u32 {
 }
 fn default_garrison_reinforce_max_percent() -> u32 {
     50
+}
+
+impl EconomyRules {
+    /// Seasonal cost of an idle hoard: `opulence_percent` of the treasury
+    /// beyond `opulence_seasons` of income, plus `opulence_high_percent` of
+    /// what exceeds `opulence_high_seasons`.
+    pub fn opulence(&self, treasury: i64, income: i64) -> i64 {
+        let income = income.max(0);
+        let base = (treasury - self.opulence_seasons * income).max(0) * self.opulence_percent / 100;
+        let high = if self.opulence_high_seasons > 0 {
+            (treasury - self.opulence_high_seasons * income).max(0) * self.opulence_high_percent
+                / 100
+        } else {
+            0
+        };
+        base + high
+    }
 }

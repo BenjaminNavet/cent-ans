@@ -10,6 +10,7 @@
   "ascension_turns": 60,
   "ascension_power_ratio": 0.5,
   "generic_victory_min_year": 1360,
+  "default_end_year": 1453,
   "loyalty": {
     "base": 55,
     "power_ratio": 2.0,

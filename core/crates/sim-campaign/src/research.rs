@@ -324,7 +324,13 @@ impl CampaignState {
             flat += bonus.flat;
             percent += bonus.percent;
         }
-        (flat * (1.0 + percent / 100.0)).round().max(0.0) as u32
+        // RX equil (ADR 0257): every technology owned slows the next one.
+        let slowdown = f64::from(data.economy_rules.research_slowdown_percent_per_tech)
+            * faction_state.technologies.len() as f64
+            / 100.0;
+        (flat * (1.0 + percent / 100.0) / (1.0 + slowdown))
+            .round()
+            .max(0.0) as u32
     }
 
     /// Current research of `faction`, if any (spec § 3 `get_research`).

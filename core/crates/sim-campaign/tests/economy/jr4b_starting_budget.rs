@@ -12,10 +12,7 @@ fn structural(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i
     let e = state.faction_economy(data, faction).expect("economy");
     let rules = &data.economy_rules;
     let income = state.faction_income(data, faction);
-    let opulence = (state.factions[faction].treasury - rules.opulence_seasons * income.max(0))
-        .max(0)
-        * rules.opulence_percent
-        / 100;
+    let opulence = rules.opulence(state.factions[faction].treasury, income);
     (
         e.net_income() + opulence,
         e.projected_income + e.trade_income,

@@ -35,6 +35,11 @@ pub struct FeudalRules {
     /// No generic feudal victory before this year (ADR 0245): a faction
     /// cannot win passively right after the 1337 start.
     pub generic_victory_min_year: i32,
+    /// Last year of the campaign for a faction without a `victory` block
+    /// (RX equil): the campaign ends in `Ended` after it, as for the four
+    /// historical factions.
+    #[serde(default = "default_campaign_end_year")]
+    pub default_end_year: i32,
     pub loyalty: LoyaltyWeights,
     /// Liege's war score against the felon, at the peace, needed to seize
     /// the forfeited titles (§ 4.4).
@@ -233,3 +238,7 @@ pub struct ArbitrationRules {
 }
 
 crate::bundled_rules!(ArbitrationRules, "rules/feudal.json", at "/escalation/arbitration", default);
+
+fn default_campaign_end_year() -> i32 {
+    1453
+}

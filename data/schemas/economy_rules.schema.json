@@ -57,6 +57,9 @@
       "minimum": 0,
       "description": "Lot LR-04 : revenu de saison (livres) du domaine propre du seigneur (cens, péages, moulins, droits), perçu par toute faction qui tient la cité de sa capitale, indépendamment de la population imposée. 0 : aucun."
     },
+    "opulence_high_seasons": { "type": "integer", "minimum": 0, "description": "RX equil (ADR 0257) : au-delà de ce nombre de saisons de revenu (0 : aucun), le trésor oisif est ponctionné en plus." },
+    "opulence_high_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage supplémentaire de l'excédent au-delà d'opulence_high_seasons, perdu chaque saison." },
+    "research_slowdown_percent_per_tech": { "type": "integer", "minimum": 0, "description": "RX equil (ADR 0257) : chaque technologie déjà possédée ralentit la recherche de ce pourcentage (0 : aucun)." },
     "opulence_percent": {
       "type": "integer",
       "minimum": 0,

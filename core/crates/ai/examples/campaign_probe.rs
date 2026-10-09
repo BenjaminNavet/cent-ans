@@ -26,8 +26,8 @@ fn fid(raw: &str) -> FactionId {
     FactionId::new(raw).expect("well-formed id")
 }
 
-/// Distinct (unordered) war pairs among living factions.
-fn active_wars(state: &CampaignState) -> usize {
+/// Distinct (unordered) war pairs among living factions (ids as strings).
+fn war_pairs(state: &CampaignState) -> BTreeSet<(String, String)> {
     let mut pairs: BTreeSet<(&FactionId, &FactionId)> = BTreeSet::new();
     for (a, fa) in &state.factions {
         if !fa.alive {
@@ -39,7 +39,10 @@ fn active_wars(state: &CampaignState) -> usize {
             }
         }
     }
-    pairs.len()
+    pairs
+        .into_iter()
+        .map(|(a, b)| (a.as_str().to_owned(), b.as_str().to_owned()))
+        .collect()
 }
 
 /// Largest living faction (excluding rebels) and its province count.
@@ -65,6 +68,11 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
     let (mut wars_sum, mut wars_max) = (0usize, 0usize);
     let mut peak = (String::new(), 0usize, 0u32);
     let mut series: Vec<Value> = Vec::new();
+    // War lifetimes: start turn of the open pairs, end turn of the last war
+    // of a pair, completed durations, redeclarations within 12 turns.
+    let mut open: std::collections::BTreeMap<(String, String), u32> = Default::default();
+    let mut ended: std::collections::BTreeMap<(String, String), u32> = Default::default();
+    let (mut durations, mut starts, mut fast_redeclared) = (Vec::<u32>::new(), 0u32, 0u32);
     for _ in 0..turns {
         for offer in state.factions[&france].offers.clone() {
             let accept = sim_campaign::negotiation::evaluate_treaty(
@@ -100,7 +108,28 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         if state.is_at_war(&france, &england) {
             war_turns += 1;
         }
-        let wars = active_wars(&state);
+        let now = war_pairs(&state);
+        for pair in &now {
+            if !open.contains_key(pair) {
+                starts += 1;
+                if ended
+                    .get(pair)
+                    .is_some_and(|end| state.turn.saturating_sub(*end) <= 12)
+                {
+                    fast_redeclared += 1;
+                }
+                open.insert(pair.clone(), state.turn);
+            }
+        }
+        let closed: Vec<(String, String)> =
+            open.keys().filter(|p| !now.contains(*p)).cloned().collect();
+        for pair in closed {
+            if let Some(start) = open.remove(&pair) {
+                durations.push(state.turn.saturating_sub(start));
+                ended.insert(pair, state.turn);
+            }
+        }
+        let wars = now.len();
         wars_sum += wars;
         wars_max = wars_max.max(wars);
         let (name, n) = biggest(&state);
@@ -142,7 +171,13 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         |o| json!({"kind": format!("{:?}", o.kind), "turn": o.turn, "score": o.score}),
     );
     let denom = f64::from(played.max(1));
+    durations.sort_unstable();
+    let median_war = durations.get(durations.len() / 2).copied().unwrap_or(0);
     json!({
+        "war_median_turns": median_war,
+        "wars_ended": durations.len(),
+        "wars_started": starts,
+        "fast_redeclared_share": f64::from(fast_redeclared) / f64::from(starts.max(1)),
         "seed": seed,
         "turns_played": played,
         "end_year": state.year,
@@ -212,7 +247,7 @@ fn main() {
     }
     for r in &reports {
         println!(
-            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | biggest {} {} prov (peak {} t{}) | {:.2} s/turn",
+            "seed {} | {} turns (to {}) | outcome {} | FR-EN war {:.0} % | wars active {:.1} (max {}), declared {} | eliminated {} | revolts {} | bankruptcies {} | war median {} t, fast-redeclare {:.0} % | biggest {} {} prov (peak {} t{}) | {:.2} s/turn",
             r["seed"],
             r["turns_played"],
             r["end_year"],
@@ -224,6 +259,8 @@ fn main() {
             r["eliminated"],
             r["revolts"],
             r["bankruptcies"],
+            r["war_median_turns"],
+            100.0 * r["fast_redeclared_share"].as_f64().unwrap_or(0.0),
             r["biggest_end"]["faction"],
             r["biggest_end"]["provinces"],
             r["biggest_peak"]["provinces"],

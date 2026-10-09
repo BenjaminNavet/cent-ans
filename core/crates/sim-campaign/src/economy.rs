@@ -564,10 +564,7 @@ impl CampaignState {
         let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
         // An idle hoard feeds court luxury, patronage and embezzlement.
         let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
-        let opulence = (treasury - rules.opulence_seasons * income.max(0)).max(0)
-            * rules.opulence_percent
-            / 100;
-        share + opulence
+        share + rules.opulence(treasury, income)
     }
 
     /// Full economic snapshot for the bridge (spec § 2).

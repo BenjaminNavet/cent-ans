@@ -11,7 +11,9 @@
     "pretender_ratio_alone": 0.8,
     "main_claim_first": true,
     "claim_war_ignores_difficulty": true,
-    "claim_war_ignores_kinship": true
+    "claim_war_ignores_kinship": true,
+    "rest_turns": 24,
+    "max_enemies": 3
   },
   "join_war": {
     "ratio": 0.6,
@@ -49,7 +51,7 @@
     "unmet_goals_reluctance": 15,
     "demand_score": 15,
     "ai_min_chance": 60,
-    "peace_truce_turns": 8,
+    "peace_truce_turns": 20,
     "pretender_reluctance": 45,
     "max_weariness_gain": 2,
     "sue_weariness": 70,
