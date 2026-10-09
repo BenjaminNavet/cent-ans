@@ -236,7 +236,7 @@ pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
     let (cx, cz) = works.center;
     let mut props = Vec::new();
     for (i, h) in works.houses.iter().enumerate() {
-        if h.church || h.keep {
+        if h.church {
             continue;
         }
         let fp = h.footprint();

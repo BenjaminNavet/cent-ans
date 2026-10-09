@@ -42,7 +42,7 @@ PROBES | FAIT (sc/cc) | examples diplomacy_probe, dynasty_probe, income_probe (s
 ## BB sim-battle
 BB1 | FAIT (sc/bb1, ADR 0205) | village B5 : battle_village.gd 612 l + props/obstacles/ai/field/setup/bridge | game/scripts/battle/battle_village.gd, core/crates/sim-battle/src/{town,props,site}.rs | oui | [MÉCANIQUE]
 BB14 | FAIT (sc/bb14) | générateurs borough/castle de siege_layouts.rs (912 l) à supprimer | core/crates/sim-battle/src/siege_layouts.rs | oui | [MÉCANIQUE]
-BB5 | À FAIRE | WallPiece::new, SiegeWorks::skeleton, from_layout découpé (après BB14) | core/crates/sim-battle/src/siege_layout.rs, siege.rs | oui
+BB5 | FAIT (sc/bb5) | WallPiece::new, SiegeWorks::skeleton, from_layout découpé (après BB14) | core/crates/sim-battle/src/siege_layout.rs, siege.rs | oui
 BB6 | PARTIEL | battle_terrain.json fait ; battle_relief/site.json non | core/crates/sim-battle/src/{relief,site}.rs, data/rules | oui
 BB8 | PARTIEL | place_plot/place_manor encore pub, decor_effect_at unique à vérifier | core/crates/sim-battle/src/decor_gen | oui
 BB9 | À FAIRE | cache crossings/bridge_at (piste water_kind par SegmentGrid) | core/crates/sim-battle/src/{hydro,sim/movement}.rs | oui
@@ -207,7 +207,7 @@ BUGS-ouverts | À FAIRE | 2 tests Godot préexistants (cb0 golden ?), LOOKUPS2 b
 
 ## FAITS
 DC-1 DC-2 | GT3(partiel) | RT1 RT3 RT4 RT5 | GB1 GB2 GB3 GB4 GB5 | CB4 CB5 CB6 CB9 CB11 | BB2 BB3 BB4 BB7 BB11 BB13 | PF-05 | BA2 BA3 BA4 BA5 BA6 BA7 | MC2 MC4 MC5 MC7 MC9 MC12 MC14 | CA1 CA3 CA4 CA6 CA8 | CC1 CC2 CC4 CC6 CC10 CC13 CC16 | BT1 | SH3 | AD1 AD2 AD3 AD4 AD5 AD6 AD14 | MB8 MB12 | UI1 UI2 UI3 UI5 UI6 UI7 UI8 | MA3 MA10 | TL8 | MS1 MS6 | DT1 DT4 DT6(refusé) DT7 | NV2 RL1 | MA3 | CB2/CB3 annulés
-- BB14b : House.keep/terrace + _build_keeps (donjon) plus produits par aucun générateur depuis BB14 → à supprimer [mech, Rust+GD].
+- BB14b : FAIT (sc/bb5) - House.keep/terrace + _build_keeps (donjon) plus produits par aucun générateur depuis BB14 → à supprimer [mech, Rust+GD].
 - PF-07b : résidus --bench-ab/--bench-set/--map-ab dans battle_vegetation.gd, settlement_layer.gd (fichiers DN, après leur session), terrain_builder.gd, campaign_weather_view.gd, render_quality.gd [mech]. Préchauffage GPU post-export (--journey) retiré d export_macos.sh : à remplacer si saccades au 1er lancement.
 - Fin de chantier : clippy workspace échoue sur sim-campaign (clippy::manual_checked_ops), signalé par veg.
 - GT9 : un script de test qui ne compile pas sort en code 0 (Parse Error invisible pour CI/agents). Ajouter une vérif --check-only de game/tests/*.gd (CI ou outil) [mech]. Balayage du 09/10 : 8 cassés réparés (48172e05a, 2907579fa).
