@@ -29,7 +29,10 @@ import json
 import urllib.request
 from pathlib import Path
 
-import fal_client
+try:
+    import fal_client  # only needed for paid calls
+except ImportError:  # free local stages and tests run without it
+    fal_client = None
 import numpy as np
 from PIL import Image
 
