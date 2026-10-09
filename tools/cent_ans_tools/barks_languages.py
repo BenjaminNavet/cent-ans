@@ -47,7 +47,12 @@ def complete_faction_language() -> int:
         if faction not in existing and culture in CULTURE_LANGUAGE
     ]
     # Insère avant l'entrée "default" (dernière du bloc).
-    text = re.sub(r'(    "default": "fr"\n  \},\n  "noble_language")', "".join(lines) + r"\1", text, count=1)
+    text = re.sub(
+        r'(    "default": "fr"\n  \},\n  "noble_language")',
+        "".join(lines) + r"\1",
+        text,
+        count=1,
+    )
     BARKS.write_text(text, encoding="utf-8")
     return len(lines)
 

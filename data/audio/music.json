@@ -169,10 +169,10 @@
     "menu": {
       "primary": [
         "assets/third_party/music/ars_nova/onques_ne_fut.ogg",
-        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
-        "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3"
+        "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3"
       ],
       "fallback": [
+        "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3",
         "assets/third_party/music/kevin_macleod/village_consort.mp3"
       ]
     },
@@ -334,5 +334,7 @@
     "assets/third_party/music/wikimedia/znamenny_carju_nebesnyj.mp3": 1.0,
     "assets/third_party/music/wikimedia/znamenny_da_molchit_vsjaka_plot.mp3": -1.0,
     "assets/third_party/music/wikimedia/znamenny_se_zhenih_grjadet.mp3": 0.0
-  }
+  },
+  "crossfade_seconds": 3.0,
+  "fallback_every": 4
 }

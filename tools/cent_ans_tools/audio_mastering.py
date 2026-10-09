@@ -29,7 +29,12 @@ DUPLICATE_MONO = "pan=stereo|c0=c0|c1=c0"
 
 def _ogg_codec() -> list[str]:
     """Options d'encodage Vorbis : libvorbis si présent, sinon l'encodeur natif (stéréo, 128 k)."""
-    encoders = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True, check=True).stdout
+    encoders = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-encoders"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     if "libvorbis" in encoders:
         return ["-c:a", "libvorbis", "-q:a", "5"]
     # L'encodeur natif n'écrit que de la stéréo : le mono est dupliqué sans perte de niveau.
@@ -38,7 +43,16 @@ def _ogg_codec() -> list[str]:
 
 def _channels(path: Path) -> int:
     probe = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "stream=channels", "-of", "csv=p=0", str(path)],
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "stream=channels",
+            "-of",
+            "csv=p=0",
+            str(path),
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -58,7 +72,18 @@ def _native_vorbis() -> bool:
 def measure(path: Path) -> tuple[float, float]:
     """Sonie intégrée (LUFS) et crête vraie (dBTP) d'un fichier audio."""
     result = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-af", "ebur128=peak=true", "-f", "null", "-"],
+        [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostats",
+            "-i",
+            str(path),
+            "-af",
+            "ebur128=peak=true",
+            "-f",
+            "null",
+            "-",
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -89,7 +114,9 @@ def gain_for(loudness: float, true_peak: float, target: float) -> float:
     return round(gain * 2) / 2
 
 
-def track_gains(music: dict, target: float | None = None) -> tuple[float, dict[str, float]]:
+def track_gains(
+    music: dict, target: float | None = None
+) -> tuple[float, dict[str, float]]:
     """Cible (LUFS) et gain de chaque morceau présent sur disque.
 
     Sans cible, la médiane des morceaux « primary » : le niveau global ne bouge pas, seuls les
@@ -102,7 +129,9 @@ def track_gains(music: dict, target: float | None = None) -> tuple[float, dict[s
             measured[track] = measure(path)
     if target is None:
         primary = {t for p in music["playlists"].values() for t in p.get("primary", [])}
-        target = round(statistics.median(measured[t][0] for t in primary if t in measured))
+        target = round(
+            statistics.median(measured[t][0] for t in primary if t in measured)
+        )
     return target, {t: gain_for(*m, target) for t, m in measured.items()}
 
 
@@ -112,7 +141,18 @@ def limit_peaks(path: Path, ceiling_db: float = -1.0) -> None:
     temporary = path.with_name(path.stem + ".limited" + path.suffix)
     codec = ["-c:a", "pcm_s16le"] if path.suffix == ".wav" else _ogg_codec()
     subprocess.run(
-        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(path), "-af", f"alimiter=limit={limit:.4f}:level=disabled:attack=2:release=40,{_mono_fix(path, path.suffix != '.wav' and _native_vorbis())}", *codec, str(temporary)],
+        [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            str(path),
+            "-af",
+            f"alimiter=limit={limit:.4f}:level=disabled:attack=2:release=40,{_mono_fix(path, path.suffix != '.wav' and _native_vorbis())}",
+            *codec,
+            str(temporary),
+        ],
         check=True,
     )
     temporary.replace(path)
@@ -122,7 +162,16 @@ def loop_crossfade(path: Path, seconds: float = 1.5) -> None:
     """Fond la fin de `path` dans son début (durée − `seconds`) : la boucle devient continue."""
     duration = float(
         subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "csv=p=0",
+                str(path),
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -138,7 +187,20 @@ def loop_crossfade(path: Path, seconds: float = 1.5) -> None:
     )
     temporary = path.with_name(path.stem + ".loop" + path.suffix)
     subprocess.run(
-        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(path), "-filter_complex", graph, "-map", "[out]", *_ogg_codec(), str(temporary)],
+        [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            str(path),
+            "-filter_complex",
+            graph,
+            "-map",
+            "[out]",
+            *_ogg_codec(),
+            str(temporary),
+        ],
         check=True,
     )
     temporary.replace(path)
@@ -152,7 +214,18 @@ VARIANT_MAX_DB = 6.0
 def mean_level(path: Path) -> tuple[float, float]:
     """Niveau moyen et crête (dBFS, `volumedetect`) d'un fichier."""
     result = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-af", "volumedetect", "-f", "null", "-"],
+        [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostats",
+            "-i",
+            str(path),
+            "-af",
+            "volumedetect",
+            "-f",
+            "null",
+            "-",
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -175,9 +248,15 @@ def variant_gains(levels: dict[str, tuple[float, float]]) -> dict[str, float]:
         deviation = level - median
         if abs(deviation) <= VARIANT_BAND_DB:
             continue
-        gain = -(deviation - VARIANT_BAND_DB if deviation > 0 else deviation + VARIANT_BAND_DB)
+        gain = -(
+            deviation - VARIANT_BAND_DB
+            if deviation > 0
+            else deviation + VARIANT_BAND_DB
+        )
         gain = max(-VARIANT_MAX_DB, min(VARIANT_MAX_DB, gain, -1.0 - peak))
-        gain = int(gain * 2) / 2  # arrondi vers zéro : la marge de crête reste respectée
+        gain = (
+            int(gain * 2) / 2
+        )  # arrondi vers zéro : la marge de crête reste respectée
         if gain:
             gains[name] = gain
     return gains
@@ -192,12 +271,24 @@ def apply_variant_gains() -> int:
         files = entry.get("files", [])
         if len(files) < 3 or event in {"ui_click"}:
             continue
-        levels = {name: mean_level(GAME / "assets" / "audio" / f"{name}.ogg") for name in files if (GAME / "assets" / "audio" / f"{name}.ogg").exists()}
+        levels = {
+            name: mean_level(GAME / "assets" / "audio" / f"{name}.ogg")
+            for name in files
+            if (GAME / "assets" / "audio" / f"{name}.ogg").exists()
+        }
         gains = variant_gains(levels) if len(levels) >= 3 else {}
         if not gains:
             continue
-        pattern = re.compile(r'("' + re.escape(event) + r'": \{[^\n]*?"files": \[[^\]]*\])')
-        text, replaced = pattern.subn(lambda m, g=gains: m.group(1) + ', "file_gain_db": ' + json.dumps(g, ensure_ascii=False), text, count=1)
+        pattern = re.compile(
+            r'("' + re.escape(event) + r'": \{[^\n]*?"files": \[[^\]]*\])'
+        )
+        text, replaced = pattern.subn(
+            lambda m, g=gains: (
+                m.group(1) + ', "file_gain_db": ' + json.dumps(g, ensure_ascii=False)
+            ),
+            text,
+            count=1,
+        )
         count += replaced
     BANK_JSON.write_text(text, encoding="utf-8")
     json.loads(text)
@@ -205,12 +296,23 @@ def apply_variant_gains() -> int:
 
 
 def main() -> None:
+    """Point d'entrée : `gains`, `variants`, `limit`, `loopfade`."""
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     gains = sub.add_parser("gains", help="calcule `track_gain_db` de music.json")
-    gains.add_argument("--target", type=float, default=None, help="cible en LUFS (défaut : médiane des primary)")
-    gains.add_argument("--apply", action="store_true", help="écrit dans data/audio/music.json")
-    sub.add_parser("variants", help="écrit `file_gain_db` (variantes d'un événement) dans sound_bank.json")
+    gains.add_argument(
+        "--target",
+        type=float,
+        default=None,
+        help="cible en LUFS (défaut : médiane des primary)",
+    )
+    gains.add_argument(
+        "--apply", action="store_true", help="écrit dans data/audio/music.json"
+    )
+    sub.add_parser(
+        "variants",
+        help="écrit `file_gain_db` (variantes d'un événement) dans sound_bank.json",
+    )
     limit = sub.add_parser("limit", help="limiteur -1 dBFS sur des fichiers")
     limit.add_argument("files", nargs="+", type=Path)
     loop = sub.add_parser("loopfade", help="fondu de boucle interne")
@@ -220,11 +322,15 @@ def main() -> None:
     if args.command == "gains":
         music = json.loads(MUSIC_JSON.read_text(encoding="utf-8"))
         target, table = track_gains(music, args.target)
-        print(f"cible {target} LUFS, {len(table)} morceaux, gain de {min(table.values())} à {max(table.values())} dB")
+        print(
+            f"cible {target} LUFS, {len(table)} morceaux, gain de {min(table.values())} à {max(table.values())} dB"
+        )
         if args.apply:
             music["loudness_target_lufs"] = target
             music["track_gain_db"] = dict(sorted(table.items()))
-            MUSIC_JSON.write_text(json.dumps(music, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            MUSIC_JSON.write_text(
+                json.dumps(music, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            )
     elif args.command == "variants":
         print(apply_variant_gains(), "événements mis à jour")
     elif args.command == "limit":

@@ -29,7 +29,7 @@ français, pas de réglage séparé de la musique de bataille.
 - **Bataille** : plus de boucle. `BattleMusicDirector` tire dans le sac mélangé et sauvegardé de
   `battle` (`AudioDirector.next_track("battle")`, jamais deux fois de suite) et enchaîne à la fin du
   morceau. `battle` = estampie (Robertsbridge) + 4 pièces martiales de Kevin MacLeod (≥ 90 s) ;
-  seul `war.ogg` boucle, en dernier recours. Le chant d'Azincourt (9 s) sort de toutes les listes de
+  seul `war.ogg` boucle, en dernier recours. La règle « Kevin MacLeod jamais en `primary` » (`test_era_music.py`) est levée pour `battle` seul : pas d'enregistrement d'époque martial de plus de 90 s. Le chant d'Azincourt (9 s) sort de toutes les listes de
   fond (fichier conservé, utilisable comme jingle).
 - **Pièces exclusives** : menu, guerre et bataille n'ont aucune pièce commune, ni entre elles ni
   par fusion `war` + liste régionale (les pièces de menu/bataille sont retirées des listes de

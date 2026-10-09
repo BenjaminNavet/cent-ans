@@ -107,8 +107,10 @@ def test_menu_and_court_playlists_exist() -> None:
 
 
 def test_kevin_macleod_is_fallback_only() -> None:
-    """Les pistes Kevin MacLeod (repli, jamais supprimées) ne sont jamais en `primary`."""
+    """Les pistes Kevin MacLeod (repli) ne sont en `primary` que pour `battle` (ADR 0247)."""
     for context, playlist in _music()["playlists"].items():
+        if context == "battle":  # pièces martiales de plus de 90 s, faute d'enregistrement d'époque
+            continue
         for track in playlist.get("primary", []):
             assert "kevin_macleod" not in track, (
                 f"{context} : Kevin MacLeod doit être en repli (fallback), pas en primary"
