@@ -91,3 +91,8 @@ main avancé de 93 commits DN depuis la base de la vague 7 (07b1c0bd8), aucun da
 ## Vague 8 (09/10, priorité joueur : bugs visibles + chargement)
 - battlepower fusionné dans main (1ee017ee6, tests verts, équilibrage inchangé). Main réécrit par DN (ancien main 28e2c0337) : rebaser les sc/* avec `git rebase --onto main 28e2c0337 <branche>`.
 - Lancés : bugs (bouton scinder, clé summons/peace_summons, OutbuildingLayer warm), attack (at1 siège au lieu d'assaut), mapload (DT4 chargeur Rust rivières/routes/côte/provinces, ADR 0206 si besoin). Worktrees ../gp-sc-<lot>.
+- Fusionnés dans main (09/10) : mapload (DT4, ADR 0206, chargement carte ~500 → ~200 ms), attack (test at1 aligné sur ADR 0128), keyenum, orders, bugs (bouton scinder, clé peace_summons, warm-up OutbuildingLayer). Dylib main reconstruite, import + smoke verts.
+- En cours : movement (rebasé, own_army), gdtests.
+
+## Vague 9 (09/10, 8 agents, charge redescendue)
+siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 bundle), battleai (BA6 + data/rules/battle_ai.json), missions (CC13, ADR 0207), devflags (PF-06 + BT4), saves (CC6). Disque 75 Go : core/target supprimé en fin de lot.
