@@ -68,9 +68,9 @@ PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) |
 BA1 | PARTIEL | sim-battle/ai propres ; seuls restent les examples sim-campaign (voir PROBES) | core/crates/sim-campaign/examples | oui
 BA8 | FAIT b19d13f32 | replay digest simplifié, builder ReplayStart, suppr soldier_positions alias (unit.rs:961) | core/crates/sim-battle/src/replay.rs, unit.rs | oui
 BA9 | FAIT b19d13f32 | cache figure_positions layout local | core/crates/sim-battle/src/unit.rs | oui
-BA10 | PARTIEL | sim/commands.rs existe ; apply_command découpé à vérifier | core/crates/sim-battle/src/sim/commands.rs | oui
-BA11 | PARTIEL | missile_arc.json existe ; table missiles + fire() découpé (sim/fire.rs 625 l) | core/crates/sim-battle/src/sim/fire.rs | oui
-BA12 | À FAIRE | géométrie grille formations unifiée (group_formation.rs 825 l) | core/crates/sim-battle/src/group_formation.rs, formations.rs | oui
+BA10 | FAIT | apply_command déjà découpé en handlers par commande (command_move, command_attack, …) avec dispatch par match ; audit 10-09, rien à changer | core/crates/sim-battle/src/sim/commands.rs | oui
+BA11 | FAIT | audit 10-09 : sim/fire.rs = incendies de siège, déjà pilotés par data/rules/siege_fire.json ; tables de projectiles déjà en data (missile_arc/missile_morale) ; aucune fonction > 80 l ; rien à extraire | core/crates/sim-battle/src/sim/fire.rs | oui
+BA12 | FAIT | primitive unique `Strip` (bande de grille : curseur + sens + écart) pour rangées, ailes et colonne de group_formation.rs | core/crates/sim-battle/src/group_formation.rs | oui
 BA13 | FAIT c55198a89 | MovementRules data (sim/movement.rs 624 l) | core/crates/sim-battle/src/sim/movement.rs | oui
 BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs | oui
 
@@ -132,7 +132,7 @@ AD9 | FAIT | data_model::util::segment_distance_xz (f64) partagé par sim-battle
 AD10 | FAIT f663a1c46 | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
 AD11 | FAIT | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui ; RIEN À FAIRE : fallback_edges/fallback_city_id sont testés (c4_settlements) et servent aux données réduites
 AD12 | FAIT 99a2b89fa | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui
-AD13 | PARTIEL | ai/campaign découpé ; doc restante (plan_field.rs 862 l) | core/crates/ai | oui
+AD13 | FAIT | plan_field découpé en sous-modules documentés (cf. SIMSPLIT) | core/crates/ai | oui
 
 ## MB map terrain/nature
 MB1 | FAIT (sc/relief, ADR 0203) | = PF-02 (pyramide obligatoire, suppr tuilé, png16, 672 tuiles far) | game/scripts/map/terrain_builder.gd | non
@@ -199,7 +199,7 @@ DT5 | FAIT 7d3292c3b | defs communes color_hex/rgb3/snake_id dans common.schema.
 DT8 | PARTIEL | schémas town_footprint, forced_sea_edges, 4 orphelins à vérifier | data/schemas | non
 SCH | PARTIEL | ~10 tests tools avec Draft202012Validator nu, 12 schémas sans registre | tools/tests, tools/cent_ans_tools/geo | non
 PRE | À FAIRE | test_relief_update bake tier3 5 vs 6 (autre session) | tools/tests/test_relief_update.py | non
-SIMSPLIT | PARTIEL | ai/plan_field.rs 862 l | core/crates/sim-battle/src/ai/plan_field.rs | oui
+SIMSPLIT | FAIT | ai/plan_field.rs → ai/plan_field/{mod,charge,measures,reserve,orders}.rs, plan_engines extrait | core/crates/sim-battle/src/ai/plan_field/ | oui
 NAVAL-reste | FAIT | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui ; FAIT : crew_ammo_cap en data/naval/rules.json + schéma, pending en VecDeque
 BATTLEDEV | PARTIEL | RenderQuality.override_level/upscale_override, da6/site_render/fa_on (battle_vegetation GELÉ) | game/scripts/battle/battle_vegetation.gd | non
 UIKIT | PARTIEL | RichTooltip.thousands (encyclopedia), délégués make_panel/attach_plain | game/scripts/ui/rich_tooltip.gd | non

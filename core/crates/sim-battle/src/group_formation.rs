@@ -358,6 +358,44 @@ pub struct Placed {
     pub width: Option<f64>,
 }
 
+/// One strip of the grid: items of given extents laid end to end from a
+/// cursor along an axis (`dir` = +1 or -1), `gap` apart. The single
+/// primitive of the rows, the wings and the column.
+#[derive(Debug, Clone, Copy)]
+struct Strip {
+    cursor: f64,
+    dir: f64,
+}
+
+impl Strip {
+    fn new(start: f64, dir: f64) -> Strip {
+        Strip { cursor: start, dir }
+    }
+
+    /// Moves the cursor `by` along the axis (a gap before the next item).
+    fn skip(&mut self, by: f64) {
+        self.cursor += self.dir * by;
+    }
+
+    /// Centre of the next item laid from the cursor edge: `edge + extent / 2`
+    /// (rows: positions kept bit for bit).
+    fn next_from_edge(&mut self, extent: f64, gap: f64) -> f64 {
+        let centre = self.cursor + self.dir * (extent * 0.5);
+        self.cursor += self.dir * (extent + gap);
+        centre
+    }
+
+    /// Centre of the next item of `extent`, walking half of it, then
+    /// half of it and the `gap` that follows (wings and column).
+    fn next(&mut self, extent: f64, gap: f64) -> f64 {
+        let half = extent * 0.5;
+        self.cursor += self.dir * half;
+        let centre = self.cursor;
+        self.cursor += self.dir * (half + gap);
+        centre
+    }
+}
+
 struct Builder<'a> {
     rules: &'a GroupFormationRules,
     units: &'a [Unit],
@@ -435,13 +473,13 @@ impl Builder<'_> {
             if line_index == 0 {
                 first_width = total.max(0.0);
             }
-            let mut s = self.frame.s0 - total * 0.5;
+            let mut strip = Strip::new(self.frame.s0 - total * 0.5, 1.0);
             let t_line = t + -self.rules.wrap_depth_m * line_index as f64;
             for &k in line {
                 let w = fronts[k];
                 let facing = self.frame.facing;
-                self.put(list[k], s + w * 0.5, t_line, facing, widths[k], false);
-                s += w + line_gap;
+                let s = strip.next_from_edge(w, line_gap);
+                self.put(list[k], s, t_line, facing, widths[k], false);
             }
         }
         first_width
@@ -460,8 +498,8 @@ impl Builder<'_> {
     ) {
         let offset = place.wing_offset_m.unwrap_or(20.0);
         let turn = place.turn_in_deg.to_radians();
-        let mut left = self.frame.s0 - front_width * 0.5 - offset;
-        let mut right = self.frame.s0 + front_width * 0.5 + offset;
+        let mut left = Strip::new(self.frame.s0 - front_width * 0.5 - offset, -1.0);
+        let mut right = Strip::new(self.frame.s0 + front_width * 0.5 + offset, 1.0);
         // (unit, on the right wing)
         let assignment: Vec<(usize, bool)> = if single {
             list.iter().map(|&i| (i, true)).collect()
@@ -487,15 +525,9 @@ impl Builder<'_> {
             let width = self.width_of(i, place.files);
             let (w, _) = self.frontage(i, width);
             let s = if on_right {
-                right += w * 0.5;
-                let s = right;
-                right += w * 0.5 + gap;
-                s
+                right.next(w, gap)
             } else {
-                left -= w * 0.5;
-                let s = left;
-                left -= w * 0.5 + gap;
-                s
+                left.next(w, gap)
             };
             let facing = self.frame.turned(if on_right { turn } else { -turn });
             self.put(i, s, t, facing, width, true);
@@ -673,18 +705,17 @@ fn column(builder: &mut Builder, preset: &Preset, by_role: &[Vec<usize>; 5]) {
             }
         }
     }
-    let mut t = builder.frame.t0;
+    let mut strip = Strip::new(builder.frame.t0, -1.0);
     for (k, (i, role)) in order.into_iter().enumerate() {
         let width = builder.width_of(i, preset.column_files.get(role));
         let (_, depth) = builder.frontage(i, width);
         if k > 0 {
-            t -= preset.column_gap_m;
+            strip.skip(preset.column_gap_m);
         }
-        t -= depth * 0.5;
+        let t = strip.next(depth, 0.0);
         let facing = builder.frame.facing;
         let s0 = builder.frame.s0;
         builder.put(i, s0, t, facing, width, false);
-        t -= depth * 0.5;
     }
 }
 
