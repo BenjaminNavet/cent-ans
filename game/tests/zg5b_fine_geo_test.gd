@@ -267,7 +267,13 @@ func _run() -> void:
 
 
 func _test_bridge(store: FineGeoStore) -> void:
-	var map := MapData.load_from_dir(MAP_PATHS.default_data_dir().path_join("map"))
+	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
+	# Le pont se pose sur le relief de la carte : sans pyramide installée (dépôt sans relief,
+	# worktree, CI) il n'a pas de sol où se poser, ce n'est pas une régression de placement.
+	if not DirAccess.dir_exists_absolute(MAP_PATHS.relief_root_for(map_dir).path_join("pyramid")):
+		print("zg5b_fine_geo_test: pas de pyramide de relief installée, test du pont sauté (docs/relief)")
+		return
+	var map := MapData.load_from_dir(map_dir)
 	var renderer := RiversRenderer.new()
 	renderer.map_data = map
 	var crossings := RiverCrossings.new()

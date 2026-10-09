@@ -10,9 +10,13 @@ func _run_campaign_map() -> void:
 		_fail("cannot load campaign_map.tscn")
 		return
 	var map: Node3D = scene.instantiate()
+	# Les fixtures n'ont ni pyramide de relief ni données de simulation : les erreurs de ce repli
+	# (relief indisponible, simulation refusée, campagne non démarrée) sont attendues.
+	ExpectedErrors.begin()
 	root.add_child(map)
 	await process_frame
 	await process_frame
+	ExpectedErrors.end()
 
 	if not _check(map.load_ok, "campaign map failed to load: %s" % (map.map_data.load_error if map.map_data else "no data")):
 		return

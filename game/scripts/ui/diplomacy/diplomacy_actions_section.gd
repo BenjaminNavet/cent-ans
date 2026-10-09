@@ -38,6 +38,9 @@ func _render() -> void:
 		_add_action("Déclarer la guerre", {"type": "declare_war", "target": id}, "La guerre est déclarée.", true)
 	if status == "alliance":
 		_add_action("Rompre l'alliance", {"type": "break_alliance", "target": id}, "Alliance rompue.", true)
+	# Accès militaire que nous avons accordé : révocable (leur opinion de nous baisse).
+	if bool(entry.get("access_given", false)):
+		_add_action("Retirer l'accès militaire", {"type": "revoke_military_access", "target": id}, "Accès militaire retiré.", true)
 	if status == "vassal":
 		_add_action("Libérer le vassal", {"type": "release_vassal", "target": id}, "Vassal libéré.", true)
 	var embargo := bool(entry.get("embargo_by_us", false))

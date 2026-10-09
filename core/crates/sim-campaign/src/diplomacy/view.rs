@@ -1,6 +1,7 @@
 //! Diplomatic panel view.
 
 use super::*;
+use std::collections::BTreeMap;
 
 impl CampaignState {
     /// Diplomatic view of every other living faction for `faction`.
@@ -10,6 +11,21 @@ impl CampaignState {
             .filter(|(id, f)| *id != faction && f.alive && !id.is_rebels())
             .map(|(id, f)| {
                 let (attitude, reasons) = self.attitude(data, id, faction);
+                let reason_turns = self.reason_turns_left(id, faction);
+                let living = |ids: Vec<FactionId>| -> Vec<FactionId> {
+                    ids.into_iter()
+                        .filter(|o| !o.is_rebels() && self.factions.get(o).is_some_and(|x| x.alive))
+                        .collect()
+                };
+                let allies = living(f.allies.iter().cloned().collect());
+                let enemies = living(f.at_war_with.iter().cloned().collect());
+                let vassals = living(
+                    self.factions
+                        .iter()
+                        .filter(|(_, x)| x.suzerain.as_ref() == Some(id))
+                        .map(|(k, _)| k.clone())
+                        .collect(),
+                );
                 let claims = self.factions[faction]
                     .claims
                     .iter()
@@ -26,7 +42,12 @@ impl CampaignState {
                     faction: id.clone(),
                     relation: self.relation(faction, id),
                     attitude,
+                    attitude_band: data.diplomacy_rules.attitude_band(attitude).to_owned(),
                     attitude_reasons: reasons,
+                    reason_turns,
+                    allies,
+                    enemies,
+                    vassals,
                     truce_turns_left: self.factions[faction]
                         .truces
                         .get(id)
@@ -58,7 +79,21 @@ pub struct DiplomacyEntry {
     pub faction: FactionId,
     pub relation: RelationKind,
     pub attitude: i32,
+    /// Qualitative label of `attitude` (`attitude_bands` in the data).
+    #[serde(default)]
+    pub attitude_band: String,
     pub attitude_reasons: Vec<(String, i32)>,
+    /// Turns left of the timed reasons (by reason text).
+    #[serde(default)]
+    pub reason_turns: BTreeMap<String, u32>,
+    /// WH `diploa`: this faction's own allies, enemies (not rebels) and
+    /// vassals, in identifier order.
+    #[serde(default)]
+    pub allies: Vec<FactionId>,
+    #[serde(default)]
+    pub enemies: Vec<FactionId>,
+    #[serde(default)]
+    pub vassals: Vec<FactionId>,
     pub truce_turns_left: u32,
     pub embargo_by_us: bool,
     pub embargo_on_us: bool,

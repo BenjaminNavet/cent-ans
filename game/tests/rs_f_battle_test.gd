@@ -85,7 +85,10 @@ func _check_picker() -> void:
 	check(picker.get_combined_minimum_size().y < tall * 0.6, "collapsed picker is short (%.0f < %.0f)" % [picker.get_combined_minimum_size().y, tall])
 	var rect := picker.get_global_rect()
 	check(rect.end.x <= 1440.0 and rect.end.y <= 900.0 - BattleHud.BAND_HEIGHT, "collapsed picker stays in its corner (%s)" % rect)
-	check(rect.size.y < 60.0, "collapsed picker shrinks to its header (%s)" % rect)
+	# Hauteur de l'en-tête (police et échelle d'interface comprises) + marges du panneau, et non un
+	# seuil en pixels : la taille de police change avec le préréglage de qualité et la machine.
+	var header_limit := picker.header.size.y + 32.0
+	check(rect.size.y <= header_limit, "collapsed picker shrinks to its header (%s, header %.0f)" % [rect, picker.header.size.y])
 	# Replié, le raccourci garde son effet et l'en-tête rappelle le préréglage.
 	_scene.get_viewport().push_input(_key(KEY_2, true, true))
 	check(picker.active_id != "" and picker.header.text.contains(picker.name_of(picker.active_id)), "active preset shown in the header (%s)" % picker.header.text)

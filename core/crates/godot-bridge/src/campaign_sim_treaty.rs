@@ -135,6 +135,7 @@ impl CampaignSim {
                     "with_name" => data.faction_name(&record.with).as_str(),
                     "proposed" => record.proposed,
                     "accepted" => record.accepted,
+                    "rupture" => record.rupture.map_or("", |r| r.key()),
                     "articles" => &keys,
                     "text" => record.text_fr.as_str(),
                 }

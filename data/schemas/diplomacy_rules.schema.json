@@ -12,15 +12,81 @@
       "type": "object",
       "description": "Plafond (valeur absolue) du total des modificateurs d'opinion en cours d'un même motif qu'une faction garde envers une autre. marriage : « Mariage entre nos maisons » ; herald_embassy : « Ambassade d'un héraut » ; gift : « Présents diplomatiques » ; treaty : « Traité signé ».",
       "propertyNames": {
-        "enum": ["marriage", "herald_embassy", "gift", "treaty"]
+        "enum": [
+          "marriage",
+          "herald_embassy",
+          "gift",
+          "treaty"
+        ]
       },
       "additionalProperties": {
         "type": "integer",
         "minimum": 1,
         "maximum": 100
       }
+    },
+    "attitude_bands": {
+      "type": "array",
+      "description": "Étiquettes qualitatives de l'attitude : une attitude d'au moins `min` porte `label` (la bande de plus grand `min` non dépassé l'emporte).",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "integer",
+            "minimum": -100,
+            "maximum": 100
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "min",
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "revoke_access": {
+      "type": "object",
+      "description": "Retrait d'un accès militaire : modificateur d'opinion du bénéficiaire envers l'hôte.",
+      "properties": {
+        "attitude": {
+          "type": "integer",
+          "maximum": 0
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "attitude",
+        "duration"
+      ],
+      "additionalProperties": false
+    },
+    "call_forecast": {
+      "type": "object",
+      "description": "Prévision de la réponse d'un allié à l'appel aux armes (aperçu de guerre).",
+      "properties": {
+        "hesitate_floor": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 0,
+          "description": "Un allié valide dont l'attitude envers le défenseur est au moins ce seuil hésite au lieu de refuser."
+        }
+      },
+      "required": [
+        "hesitate_floor"
+      ],
+      "additionalProperties": false
     }
   },
-  "required": ["opinion_caps"],
+  "required": [
+    "opinion_caps"
+  ],
   "additionalProperties": false
 }

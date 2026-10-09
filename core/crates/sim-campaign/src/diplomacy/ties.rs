@@ -62,6 +62,14 @@ impl CampaignState {
             data.faction_name(faction),
             data.faction_name(target)
         );
+        crate::negotiation::record_rupture(
+            self,
+            faction,
+            target,
+            crate::negotiation::Rupture::Broken,
+            &["alliance"],
+            &text,
+        );
         self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(faction));
         Ok(())
     }
@@ -96,7 +104,60 @@ impl CampaignState {
             data.faction_name(faction),
             data.faction_name(target)
         );
+        crate::negotiation::record_rupture(
+            self,
+            faction,
+            target,
+            crate::negotiation::Rupture::Broken,
+            &["trade_agreement"],
+            &text,
+        );
         self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(faction));
+        Ok(())
+    }
+
+    /// WH `diploa`: `faction` withdraws the military access it granted to
+    /// `target` (its armies lose the right of passage). The guest resents it
+    /// (`revoke_access` in `data/rules/diplomacy.json`).
+    pub fn revoke_military_access(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        target: &FactionId,
+    ) -> Result<(), DiplomacyError> {
+        self.check_pair(faction, target)?;
+        let removed = self
+            .factions
+            .get_mut(faction)
+            .expect("checked")
+            .ledger
+            .military_access
+            .remove(target);
+        if !removed {
+            return Err(DiplomacyError::NoMilitaryAccess);
+        }
+        let rules = &data.diplomacy_rules.revoke_access;
+        self.add_modifier(
+            target,
+            faction,
+            rules.attitude,
+            "Accès retiré",
+            rules.duration,
+        );
+        let text = format!(
+            "{} retire à {} le droit de passage sur ses terres.",
+            data.faction_name(faction),
+            data.faction_name(target)
+        );
+        crate::negotiation::record_rupture(
+            self,
+            faction,
+            target,
+            crate::negotiation::Rupture::Broken,
+            &["military_access"],
+            &text,
+        );
+        self.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(faction));
         Ok(())
     }
 

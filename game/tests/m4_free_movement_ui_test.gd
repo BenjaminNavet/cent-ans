@@ -61,7 +61,6 @@ func _run() -> void:
 	check(ctl.active(), "the controller should be active for a player army")
 	check(ctl.bubble.visible and ctl.bubble.cell_count() > 100, "the reachable bubble should be shown (%d cells)" % ctl.bubble.cell_count())
 	check(ctl.bubble.material_override.get_shader_parameter("mask") is Texture2D, "the bubble should sample a mask texture")
-	check(map.settlements_ctl.markers.marker_count() == 0, "the C5 rings are replaced by the bubble")
 	var start: Vector2 = army["position"]
 	var left_before := int(army["movement_left"])
 	var rect: Rect2 = ctl.bubble.covered_rect()

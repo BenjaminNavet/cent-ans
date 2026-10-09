@@ -1,6 +1,7 @@
 //! Attitude of one faction towards another, with its reasons.
 
 use super::*;
+use std::collections::BTreeMap;
 
 impl PlanCache<'_> {
     /// Attitude of `a` towards `b` (-100..100) with its reasons.
@@ -118,5 +119,32 @@ impl PlanCache<'_> {
         }
         let total: i32 = reasons.iter().map(|(_, v)| v).sum();
         (total.clamp(-100, 100), reasons)
+    }
+}
+
+impl CampaignState {
+    /// WH `diploa`: turns left of each running timed reason of `a`'s opinion
+    /// of `b` (the longest when a reason repeats; permanent ones and the
+    /// structural reasons are absent). Keys are the reason texts of
+    /// [`CampaignState::attitude`].
+    pub fn reason_turns_left(&self, a: &FactionId, b: &FactionId) -> BTreeMap<String, u32> {
+        let state = self;
+        let mut left: BTreeMap<String, u32> = BTreeMap::new();
+        let Some(fa) = state.factions.get(a) else {
+            return left;
+        };
+        for modifier in fa
+            .modifiers
+            .iter()
+            .filter(|m| &m.with == b && m.expires_turn > state.turn && m.expires_turn != FOREVER)
+        {
+            let remaining = modifier.expires_turn - state.turn;
+            let entry = left.entry(modifier.reason_fr.clone()).or_insert(0);
+            *entry = (*entry).max(remaining);
+        }
+        if let Some(until) = fa.truces.get(b).filter(|u| **u > state.turn) {
+            left.insert("Trêve récente".to_owned(), until - state.turn);
+        }
+        left
     }
 }

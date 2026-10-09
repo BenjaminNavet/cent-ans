@@ -3,6 +3,7 @@
 
 use data_model::{FactionId, GameData, ProvinceId};
 use godot::prelude::*;
+use sim_campaign::diplomacy::{call_to_arms_forecast, CallForecast};
 use sim_campaign::negotiation::{evaluate_treaty, Article};
 use sim_campaign::religion::{faction_religion, is_excommunicated, religion_display};
 use sim_campaign::{CampaignState, Order};
@@ -44,7 +45,11 @@ impl CampaignSim {
                     "color" => static_faction.map_or("#888888", |f| f.heraldry.primary_color.as_str()),
                     "status" => entry.relation.key(),
                     "attitude" => i64::from(entry.attitude),
-                    "attitude_reasons" => &reasons_array(&entry.attitude_reasons),
+                    "attitude_band" => entry.attitude_band.as_str(),
+                    "attitude_reasons" => &timed_reasons_array(&entry.attitude_reasons, &entry.reason_turns),
+                    "allies_info" => &faction_refs(data, &entry.allies),
+                    "enemies_info" => &faction_refs(data, &entry.enemies),
+                    "vassals_info" => &faction_refs(data, &entry.vassals),
                     "truce_turns_left" => i64::from(entry.truce_turns_left),
                     "embargo_by_us" => entry.embargo_by_us,
                     "embargo_on_us" => entry.embargo_on_us,
@@ -222,6 +227,33 @@ impl CampaignSim {
     }
 }
 
+/// `reasons_array` with `turns_left` (0: permanent or structural reason).
+fn timed_reasons_array(
+    reasons: &[(String, i32)],
+    turns: &std::collections::BTreeMap<String, u32>,
+) -> VarArray {
+    reasons
+        .iter()
+        .map(|(text, value)| {
+            vdict! {
+                "text" => text.as_str(),
+                "value" => i64::from(*value),
+                "turns_left" => i64::from(turns.get(text).copied().unwrap_or(0)),
+            }
+            .to_variant()
+        })
+        .collect()
+}
+
+/// `[{id, name}]` of factions, for clickable names in the faction sheet.
+fn faction_refs(data: &GameData, ids: &[FactionId]) -> VarArray {
+    ids.iter()
+        .map(|id| {
+            vdict! { "id" => id.as_str(), "name" => data.faction_name(id).as_str() }.to_variant()
+        })
+        .collect()
+}
+
 fn verdict(accept: bool, score: i32, reasons: &[(String, i32)]) -> VarDictionary {
     vdict! {
         "accept" => accept,
@@ -250,22 +282,46 @@ fn war_verdict(
         Some(motive) => reasons.push((format!("Motif : {motive}"), 0)),
         None => reasons.push(("Sans motif : réputation -20 auprès de tous".to_owned(), -20)),
     }
-    let allies: Vec<String> = state.factions[target]
-        .allies
+    // WH diploa: how each ally of the target (and its suzerain) will answer.
+    let defender = &state.factions[target];
+    let mut called: Vec<FactionId> = defender.allies.iter().cloned().collect();
+    called.extend(defender.suzerain.iter().cloned());
+    called.sort();
+    called.dedup();
+    let mut forecast = VarArray::new();
+    for ally in called
         .iter()
-        .filter(|a| *a != player)
-        .filter_map(|a| {
-            data.factions
-                .get(a)
-                .map(|f| f.short_or_display_name().to_owned())
-        })
-        .collect();
-    if !allies.is_empty() {
-        reasons.push((
-            format!("Alliés appelés aux armes : {}", allies.join(", ")),
-            0,
-        ));
+        .filter(|a| *a != player && state.factions.get(*a).is_some_and(|f| f.alive))
+        .filter(|a| !state.is_at_war(a, player) && !state.is_allied(a, player))
+    {
+        let name = data.faction_name(ally);
+        let (answer, line) = match call_to_arms_forecast(state, data, ally, target, player) {
+            CallForecast::Joins => ("joins", format!("{name} viendra à son secours")),
+            CallForecast::Hesitates => ("hesitates", format!("{name} hésite")),
+            CallForecast::Refuses(why) => ("refuses", format!("{name} refusera : {why}")),
+        };
+        reasons.push((line.clone(), 0));
+        forecast.push(
+            &vdict! {
+                "id" => ally.as_str(),
+                "name" => name.as_str(),
+                "answer" => answer,
+                "text" => line.as_str(),
+            }
+            .to_variant(),
+        );
     }
+    let prestige = state.declaration_prestige_cost(data, player, target);
+    reasons.push((
+        if prestige == 0 {
+            "Prestige du souverain : inchangé".to_owned()
+        } else {
+            format!("Prestige du souverain : {prestige}")
+        },
+        0, // already counted in the opinion lines above
+    ));
     let score = reasons.iter().map(|(_, v)| v).sum();
-    verdict(true, score, &reasons)
+    let mut result = verdict(true, score, &reasons);
+    result.set("allies", &forecast);
+    result
 }

@@ -467,7 +467,7 @@ func _setup_quadtree() -> void:
 ## affiché par la carte.
 func _fail_relief(reason: String) -> void:
 	relief_error = "Relief indisponible : %s." % reason
-	push_error("TerrainBuilder: " + relief_error)
+	ExpectedErrors.report("TerrainBuilder: " + relief_error)
 
 
 ## Bornes (min, max) en mètres des morceaux E0, depuis les maillages lointains (lissés : marges).

@@ -10,7 +10,7 @@ use data_model::{
     BuildingId, CharacterId, Effect, EffectKind, FactionId, GameData, PopulationClass, ProvinceId,
     Role, SettlementId, Skill,
 };
-use godot::classes::RefCounted;
+use godot::classes::{Engine, RefCounted};
 use godot::prelude::*;
 use sim_campaign::buildings::demolition_preview;
 use sim_campaign::{
@@ -86,10 +86,16 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
     match load_shared_data(dir) {
         Ok((data, _)) => Some(data),
         Err(error) => {
-            godot_error!(
+            let message = format!(
                 "CampaignSim: cannot load data from {}: {error}",
                 dir.display()
             );
+            // Test fixtures exercise this fallback on purpose (`ExpectedErrors`, game/scripts/debug).
+            if Engine::singleton().has_meta("expected_errors") {
+                godot_warn!("[attendu] {message}");
+            } else {
+                godot_error!("{message}");
+            }
             None
         }
     }

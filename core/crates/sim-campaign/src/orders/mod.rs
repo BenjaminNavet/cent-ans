@@ -281,6 +281,9 @@ impl CampaignState {
             }
             Order::DeclareWar { target } => Ok(self.declare_war(data, faction, &target)?),
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
+            Order::RevokeMilitaryAccess { target } => {
+                Ok(self.revoke_military_access(data, faction, &target)?)
+            }
             Order::BreakTradeAgreement { target } => {
                 Ok(self.break_trade_agreement(data, faction, &target)?)
             }

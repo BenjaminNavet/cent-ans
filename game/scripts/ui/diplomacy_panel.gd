@@ -151,6 +151,7 @@ func _build_detail_column() -> Control:
 	var column := UiBuild.vbox(6)
 	column.custom_minimum_size = Vector2(DETAIL_COLUMN_MIN_WIDTH, 0)
 	_head = DiplomacyHeadSection.new()
+	_head.faction_requested.connect(select_faction)
 	column.add_child(_head)
 	var tabs := UiBuild.hbox(4)
 	for index in 3:
