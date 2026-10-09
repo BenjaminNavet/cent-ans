@@ -88,7 +88,7 @@ MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/
 CA2 | PARTIEL | effects.rs créé (EFFECTS) mais chronicle.rs reste 1361 l, apply/describe_effect non unifiés | core/crates/sim-campaign/src/chronicle.rs | oui
 CA5 | PARTIEL | names.rs absent ; helpers sur GameData ; copies is_rebels/faction_label/splitmix restantes (bridge) | core/crates/data-model/src/{load,util}.rs, godot-bridge | oui
 CA7 | PARTIEL | constantes diplo/nego en data (treaty) ; dynasty/feudal à vérifier | core/crates/sim-campaign/src/{dynasty,feudal}.rs | oui
-CA9 | À FAIRE | dynasty marriage_candidates dupli, crusade tests inline, feudal/escalation.rs | core/crates/sim-campaign/src/{dynasty,crusade}.rs | oui
+CA9 | FAIT fdf3c8465 | dynasty marriage_blocker partagé, crusade/tests.rs (feudal/escalation.rs absent) | core/crates/sim-campaign/src/{dynasty,crusade}.rs | oui
 CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
 
 ## CC sim-campaign reste
