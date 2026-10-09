@@ -6,4 +6,4 @@ Branche `sc/smoke`.
   `nt5_cap_engines_test` (plafond d'armée), `r2_relief_bc5_test` (bande BC1).
 - GT7 : `smoke.gd` ne garde que `_init` ; les sections sont dans `smoke_{base,map,campaign,ui,battle}.gd`,
   chaînés par héritage (base → carte → campagne → interface → bataille) pour partager l'état.
-- Reste : vérification du smoke complet en headless.
+- Vérifié : smoke.gd complet en headless, 32 "smoke OK", code de sortie 0.
