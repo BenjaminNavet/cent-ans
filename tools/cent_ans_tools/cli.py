@@ -425,6 +425,16 @@ def geo_battle_site(
     console.print(f"Sites cuits : {', '.join(done) or 'aucun'}")
 
 
+@app.command("codex-bundle")
+def codex_bundle_command() -> None:
+    """Régénère data/codex_bundle.json (lu par le jeu) depuis data/codex/cdx_*.json."""
+    from cent_ans_tools import codex
+
+    data_dir = Path(__file__).resolve().parents[2] / "data"
+    target = codex.write_bundle(data_dir)
+    console.print(f"Bundle du codex écrit : {target}")
+
+
 @app.command("export-data")
 def export_data_command(
     app_path: str | None = typer.Option(

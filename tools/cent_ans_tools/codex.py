@@ -66,6 +66,35 @@ def schema_validator(data_dir: Path, schema_name: str) -> Draft202012Validator:
     return Draft202012Validator(schemas[schema_name], registry=registry)
 
 
+BUNDLE_NAME = "codex_bundle.json"
+BUNDLE_VERSION = 1
+
+
+def build_bundle(data_dir: Path) -> dict:
+    """Single-file form of `data_dir/codex/cdx_*.json`, entries sorted by id.
+
+    The game reads this bundle at start-up (one file instead of ~480); the entry files stay the
+    editable source of truth. Regenerate with `cent-ans codex-bundle`.
+    """
+    entries = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted((data_dir / "codex").glob("cdx_*.json"))
+    ]
+    return {"version": BUNDLE_VERSION, "entries": entries}
+
+
+def bundle_text(bundle: dict) -> str:
+    """Canonical serialisation of a bundle (compact, UTF-8, trailing newline)."""
+    return json.dumps(bundle, ensure_ascii=False, separators=(",", ":")) + "\n"
+
+
+def write_bundle(data_dir: Path) -> Path:
+    """Regenerates `data_dir/codex_bundle.json` from the entry files."""
+    target = data_dir / BUNDLE_NAME
+    target.write_text(bundle_text(build_bundle(data_dir)), encoding="utf-8")
+    return target
+
+
 def iter_strings(value: object, where: str) -> Iterator[tuple[str, str]]:
     """Yields `(location, text)` for every string nested in a JSON value."""
     if isinstance(value, str):
@@ -151,7 +180,7 @@ def validate_codex(data_dir: Path) -> CodexReport:
             report.errors.append(f"{entry_id}.entity: {entity} not found in data/")
 
     for path in sorted(data_dir.rglob("*.json")):
-        if "schemas" in path.parts:
+        if "schemas" in path.parts or path.name == BUNDLE_NAME:
             continue
         try:
             content = json.loads(path.read_text(encoding="utf-8"))

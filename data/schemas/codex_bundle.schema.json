@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/codex_bundle.schema.json",
+  "title": "Bundle du Codex",
+  "description": "Fichier généré `data/codex_bundle.json` (`cent-ans codex-bundle`) : toutes les fiches de `data/codex/cdx_*.json`, triées par id, lues par le jeu en un seul fichier. Les fiches restent la source éditable.",
+  "type": "object",
+  "properties": {
+    "version": { "const": 1 },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "codex.schema.json" }
+    }
+  },
+  "required": ["version", "entries"],
+  "additionalProperties": false
+}

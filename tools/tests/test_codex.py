@@ -102,3 +102,20 @@ def test_exclude_contexts_must_contain_an_alias(tmp_path: Path) -> None:
     assert "Louis de POITIERS" not in errors
     assert "empty escape" in errors
     assert "unresolved link" not in errors
+
+
+def test_codex_bundle_is_up_to_date() -> None:
+    """data/codex_bundle.json (read by the game) equals a fresh build from the entry files."""
+    from cent_ans_tools.codex import BUNDLE_NAME, build_bundle, bundle_text
+
+    committed = (DATA / BUNDLE_NAME).read_text(encoding="utf-8")
+    assert committed == bundle_text(build_bundle(DATA)), (
+        "stale bundle: run `uv run --project tools cent-ans codex-bundle`"
+    )
+
+
+def test_codex_bundle_matches_schema() -> None:
+    """The bundle is valid against codex_bundle.schema.json (entries against codex.schema.json)."""
+    from conftest import assert_matches_schema
+
+    assert_matches_schema("codex_bundle.json", "codex_bundle.schema.json")
