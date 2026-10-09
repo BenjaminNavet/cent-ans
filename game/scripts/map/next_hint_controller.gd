@@ -247,6 +247,11 @@ func _look_at(world: Vector3) -> void:
 		rig.look_at_point(world, maxf(map_data.size.x, map_data.size.y) * 0.12)
 
 
+## Touche « capitale » : même chemin que le conseil « Ouvrez votre capitale ».
+func open_capital() -> void:
+	_open_capital_city()
+
+
 ## Ville de la capitale : caméra dessus et panneau de la colonie (onglets Bâtiments…).
 func _open_capital_city() -> void:
 	var capital := str(GameCatalog.definitions("factions").get(_player(), {}).get("capital", ""))

@@ -38,8 +38,17 @@ const CAMPAIGN_SECTIONS := [
 		["map_filters_menu", "Menu des filtres (richesse, population, loyauté, ravitaillement…)"],
 		["map_toggle_unrest", "Mécontentement"], ["map_mode_diplomacy", "Carte diplomatique"],
 		["map_mode_religion", "Carte religieuse"], ["map_toggle_trade", "Routes commerciales"]]},
+	{"title": "Armées et colonies", "actions": [
+		["campaign_next_idle", "Armée inactive suivante (centre et sélectionne)"],
+		["campaign_prev_idle", "Armée inactive précédente"],
+		["campaign_next_settlement", "Colonie suivante"], ["campaign_capital", "Aller à la capitale"],
+		["army_center", "Centrer sur l'armée sélectionnée"],
+		["army_split", "Séparer les régiments choisis"], ["army_garrison", "Laisser les régiments choisis en garnison"],
+		["army_stance_normal", "Posture : normale"], ["army_stance_raid", "Posture : chevauchée"],
+		["army_stance_siege", "Posture : siège"], ["army_stance_ambush", "Posture : embuscade"],
+		["army_stance_forced_march", "Posture : marche forcée"], ["army_stance_entrenched", "Posture : camp retranché"]]},
 	{"title": "Partie", "actions": [
-		["campaign_end_turn", "Finir la saison"], ["campaign_pause", "Fermer la fenêtre du dessus, puis menu pause"],
+		["campaign_end_turn", "Finir la saison"], ["campaign_end_turn_fast", "Finir la saison sans confirmation"], ["campaign_pause", "Fermer la fenêtre du dessus, puis menu pause"],
 		["quick_save", "Sauvegarde rapide"], ["quick_load", "Chargement rapide"],
 		["map_screenshot", "Capture d'écran"], ["codex_pin_tooltip", "Maintenir ouverte la bulle ou l'infobulle"],
 		["tooltip_explore", "Maintenir : explorer les infobulles en chaîne (survol des mots-clés)"]]},

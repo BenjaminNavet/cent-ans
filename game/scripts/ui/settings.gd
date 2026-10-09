@@ -33,7 +33,10 @@ const DEFAULTS := {
 	"interface/ui_size": 1.0,
 	"interface/text_size": 1.0,
 	"interface/season_report": true,
-	"interface/confirm_end_turn": false,
+	# WH idle : confirmation de fin de tour « off » | « warnings » (défaut : seulement s'il y a des
+	# oublis : armée sans ordre, chantier libre, recherche inactive) | « always ». Ancien booléen
+	# migré par `_coerce` (vrai → always, faux → warnings).
+	"interface/confirm_end_turn": "warnings",
 	# Portée des lettres et du bandeau (`NewsInterest.MODES`).
 	"interface/news_filter": "interest",
 	# Disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
@@ -164,6 +167,8 @@ func is_dev() -> bool:
 func use_test_file(test_path: String = TEST_SETTINGS_PATH) -> void:
 	path = test_path
 	values = DEFAULTS.duplicate()
+	# Les tests finissent le tour sans dialogue : pas de confirmation (WH idle).
+	values["interface/confirm_end_turn"] = "off"
 	apply_display_enabled = false
 
 
@@ -213,6 +218,10 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 
 func _coerce(key: String, value: Variant) -> Variant:
 	var default: Variant = DEFAULTS[key]
+	if key == "interface/confirm_end_turn":
+		if value is bool:
+			return "always" if value else "warnings"
+		return str(value) if str(value) in ["off", "warnings", "always"] else default
 	match typeof(default):
 		TYPE_BOOL:
 			return bool(value)

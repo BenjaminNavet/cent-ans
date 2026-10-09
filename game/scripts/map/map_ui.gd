@@ -20,6 +20,8 @@ signal cancel_build_requested(province_id: String)
 signal tax_rate_changed(faction_id: String, rate: String)
 signal stance_changed(army_id: String, stance: String)
 ## Bandeau d'ost : régiments à détacher de l'armée `army_id` (ordre `split_army`).
+## WH idle : raccourci de `CampaignHotkeys.ACTIONS` pressé (exécuté par `FlowController`).
+signal hotkey_pressed(action: String)
 signal army_split_requested(army_id: String, unit_indices: Array)
 ## Bandeau d'ost : régiments de l'armée `army_id` à laisser en garnison de la
 ## colonie où elle se trouve (ordre `garrison_units`).
@@ -1180,6 +1182,13 @@ func _shortcut_input(event: InputEvent) -> void:
 				show_toast("Aucune sauvegarde rapide (F5 pour en faire une).", true)
 			get_viewport().set_input_as_handled()
 			return
+		var focused := get_viewport().gui_get_focus_owner()
+		if not (focused is LineEdit or focused is TextEdit):
+			for action in CampaignHotkeys.ACTIONS:
+				if event.is_action_pressed(action, false, true):
+					hotkey_pressed.emit(action)
+					get_viewport().set_input_as_handled()
+					return
 	if not event.is_action_pressed("ui_cancel"):
 		return
 	if panels.close_top():

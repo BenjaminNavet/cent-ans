@@ -190,7 +190,9 @@ func _build_map(grid: GridContainer) -> void:
 		replay_speeds.map(func(value: float) -> String: return "×%s" % String.num(value, 1).trim_suffix(".0")),
 		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte et la caméra suit celles qui vous concernent. Espace passe l'animation.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
-	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_options(grid, "interface/confirm_end_turn", "Confirmer la fin du tour", ["off", "warnings", "always"],
+		["Jamais", "Si oubli", "Toujours"],
+		"Si oubli : demande confirmation quand une armée n'a pas d'ordre, qu'un emplacement de construction est libre ou qu'aucune recherche n'est en cours. Maj+Entrée termine la saison sans confirmation.")
 	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l'action la plus utile du moment (clic : l'exécute). Masqué pendant le tutoriel.")
 	_build_decor_delay(grid)
 	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
