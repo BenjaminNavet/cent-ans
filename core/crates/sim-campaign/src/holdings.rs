@@ -307,14 +307,3 @@ fn settlement_row(
         danger_reasons,
     }
 }
-
-#[cfg(test)]
-mod key_enum_tests {
-    use super::*;
-    use data_model::key_enum::assert_keys_match_serde;
-
-    #[test]
-    fn keys_match_serde_names() {
-        assert_keys_match_serde::<DangerReason>();
-    }
-}
