@@ -6,6 +6,17 @@ size: 2048
 output_size: 2048
 style_prefix: Photorealistic macro photograph, soft diffuse lighting, natural colours, high detail.
 style_suffix: Seamless tileable texture, sharp fine detail across the whole image, evenly lit.
+# Paquet campagne/bataille : grains de sol (rôle micro_ground), mélangés par terrain.gdshader de près.
+packs:
+  - name: micro_ground
+    roles: [micro_ground]
+    texture_dir: assets/textures/terrain/
+    hi_dir: hi/
+    albedo: tx_micro_ground_albedo_array.jpg
+    normal: tx_micro_ground_normal_array.jpg
+    manifest: data/art/tx_micro_ground_pack.json
+    layer_size: 1024
+    normal_size: 512
 entries:
 - id: micro_soil_grain
   role: micro_ground
