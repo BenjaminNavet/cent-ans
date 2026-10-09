@@ -15,3 +15,4 @@
 | batsim | bataille : pont unique en colonne, déroute par contagion (arbalétriers 0 perte), régiment anéanti 0 tué, sonde d'issue `--autoplay` avec graine, smoke_battle court + test long, message « Chevaliers à placer » permanent, avertissement CampaignSim | dev | 0255 | en cours |
 | robust | perf (tous sauf tests UI de mise en page → après uifin) : tests bloqués/cassés, erreurs moteur, migration de sauvegarde, smoke bruyant | dev | 0256 | en cours |
 | equil | mecaniques + ia + victory #11 : équilibrage campagne avec campaign_probe | dev | 0257-0258 | en attente (rapport IA) |
+| restes | batvis + mapb + mapa + assets3d : maisons de siège orange (atlas/BuildingMaterials), stries de neige, décales d’aperçu sur l’eau, toits ardoise étirés, rectangle vert de Grand Perm + ocre colormap Oural (geo colormap), sol olive de Paris, réf. cassée map_freshwater.json:23 | dev | 0259 | en attente (charge machine) |
