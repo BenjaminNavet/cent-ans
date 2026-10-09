@@ -1,0 +1,92 @@
+[
+ {
+  "id": "archer_3_jack",
+  "problem": "tient un arc (règle A-pose : rien en main)",
+  "fix_prompt": "Archer in a padded jack and sallet standing in a symmetrical A-pose, both arms raised high and open near T-pose, empty open palms, nothing held, no bow, no quiver in hand",
+  "stage": "image"
+ },
+ {
+  "id": "bombard",
+  "problem": "caisse en bois avec boulets, aucun tube de fer forgé visible (pas une bombarde)",
+  "fix_prompt": "A single large forged iron bombard: a long hooped wrought-iron barrel with a visible round muzzle opening, resting on a heavy oak timber bed, a few stone balls beside it; the iron barrel must be clearly visible, not a wooden box",
+  "stage": "image"
+ },
+ {
+  "id": "bird_starling_flying",
+  "problem": "étourneau posé sur une chaumière, fusionné avec un bâtiment (3D = cabane + oiseau)",
+  "fix_prompt": "A single common starling in flight, wings spread mid-flap, side view, alone on plain grey background, no house, no building, no perch, no ground",
+  "stage": "image"
+ },
+ {
+  "id": "cart_litter_noble",
+  "problem": "deux mules attelées alors que le sujet est un chariot vide ; animaux fusionnés dans la 3D",
+  "fix_prompt": "A noble curtained wooden litter cart with painted roof and poles, EMPTY shafts, no horses, no mules, no animals, no people, isolated single object",
+  "stage": "image"
+ },
+ {
+  "id": "debris_ram_wreck",
+  "problem": "cadre de bélier fusionné avec une petite maison blanche",
+  "fix_prompt": "A wrecked battering ram: a split timber roof frame and a fallen iron-capped log lying beside it, isolated, no hut, no building, no stone walls",
+  "stage": "image"
+ },
+ {
+  "id": "econ_saltpan_mediterranean",
+  "problem": "image fantôme délavée, marais salants invisibles, moulin flottant ; 3D = deux huttes noires",
+  "fix_prompt": "Mediterranean solar salt pans: several flat rectangular shallow basins with white salt cones separated by low earth banks, a small windmill pump and a small stone store hut on the bank, strong clear contrast, objects fully visible and solid, on a small base",
+  "stage": "image"
+ },
+ {
+  "id": "econ_terrace_olive_grove",
+  "problem": "la 3D a perdu les couronnes des oliviers (souches noires nues)",
+  "fix_prompt": "Terraced olive grove with two ancient twisted olive trees with full grey-green leafy crowns on a dry-stone terrace wall with rock steps, single compact object",
+  "stage": "3d"
+ },
+ {
+  "id": "env_glacier_ice_tongue",
+  "problem": "cabane de pierre avec un bloc de glace au lieu d'une langue glaciaire",
+  "fix_prompt": "A glacier tongue snout: blue-white crevassed ice ending in a heap of grey moraine rubble and boulders, natural landform only, no hut, no building, no roof",
+  "stage": "image"
+ },
+ {
+  "id": "env_iceberg_floe",
+  "problem": "maison de pierre à toit de glace au lieu d'un floe flottant",
+  "fix_prompt": "A drifting ice floe: a single jagged slab of blue-white ice with a rough top, natural ice only, no house, no building, no roof, no wall",
+  "stage": "image"
+ },
+ {
+  "id": "env_reef_rocks_awash",
+  "problem": "deux chaumières sur un îlot au lieu d'un récif nu",
+  "fix_prompt": "A low dark rocky reef awash: black wet rocks covered with kelp and barnacle crust, tidal flat outcrop, natural rocks only, no house, no building, no roof",
+  "stage": "image"
+ },
+ {
+  "id": "fig_sled_driver_north",
+  "problem": "traîneau fusionné aux jambes du personnage",
+  "fix_prompt": "A northern sled driver in a fur hat and tunic standing alone in A-pose, arms raised, open empty palms, feet apart on the ground; no sled, no runners, no object touching the legs",
+  "stage": "image"
+ },
+ {
+  "id": "siege_handgonne_pair",
+  "problem": "deux tonneaux fermés au lieu de deux canons à main (pas de bouche)",
+  "fix_prompt": "Two medieval hand gonnes lying side by side: each a short forged iron barrel with a visible open bore mounted on a long wooden tiller, plain, no barrels or casks",
+  "stage": "image"
+ },
+ {
+  "id": "tree_argan",
+  "problem": "3D : tronc nu et calotte plate sombre, couronne perdue",
+  "fix_prompt": "An argan tree with a gnarled trunk and a broad round leafy dark-green crown with dense foliage, full canopy clearly attached to the trunk, single tree",
+  "stage": "3d"
+ },
+ {
+  "id": "tree_orchard_apple",
+  "problem": "3D : arche de fragments de tronc, couronne absente",
+  "fix_prompt": "A single apple orchard tree with a short stout trunk and a rounded dense leafy crown with a few red apples, full canopy attached to the trunk",
+  "stage": "3d"
+ },
+ {
+  "id": "tree_pomegranate",
+  "problem": "3D : tronc nu tordu coiffé d'un disque noir, couronne perdue",
+  "fix_prompt": "A single pomegranate tree with a twisted trunk and a rounded leafy green crown with a few red pomegranates, full canopy attached to the trunk",
+  "stage": "3d"
+ }
+]
