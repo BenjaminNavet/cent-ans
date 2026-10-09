@@ -1,21 +1,365 @@
 {
+ "roles": [
+  "grass",
+  "meadow",
+  "forest",
+  "dirt",
+  "mud",
+  "pebbles",
+  "rock",
+  "plough",
+  "snow",
+  "flowering_meadow",
+  "trodden_grass",
+  "stubble",
+  "fresh_plough"
+ ],
+ "default_biome": 2,
+ "terrain_biomes": {
+  "plains": 2,
+  "heath": 1,
+  "bocage": 1,
+  "forest": 2,
+  "hills": 2,
+  "mountains": 6,
+  "marsh": 1,
+  "steppe": 4,
+  "desert": 8
+ },
+ "pack_manifest": "art/tx_battle_b{biome}_pack.json",
+ "materials": {
+  "grass": {
+   "1": "grass_atlantic",
+   "2": "grass_continental",
+   "3": "grass_mediterranean",
+   "4": "grass_steppe",
+   "5": "grass_boreal",
+   "6": "grass_alpine",
+   "7": "grass_semi_arid",
+   "8": "grass_desert",
+   "9": "grass_arctic",
+   "10": "grass_forest_steppe",
+   "11": "grass_atlantic",
+   "12": "grass_forest_steppe",
+   "13": "grass_continental",
+   "14": "grass_aegean"
+  },
+  "meadow": {
+   "1": "meadow_atlantic",
+   "2": "meadow_continental",
+   "3": "meadow_mediterranean",
+   "4": "meadow_steppe",
+   "5": "meadow_northern",
+   "6": "meadow_alpine",
+   "7": "meadow_semi_arid",
+   "8": "meadow_desert",
+   "9": "meadow_northern",
+   "10": "meadow_steppe",
+   "11": "meadow_atlantic",
+   "12": "meadow_steppe",
+   "13": "meadow_continental",
+   "14": "meadow_mediterranean"
+  },
+  "forest": {
+   "1": "understory_oak_beech",
+   "2": "understory_continental_leaf",
+   "3": "understory_mediterranean",
+   "4": "understory_steppe_wood",
+   "5": "understory_boreal_moss",
+   "6": "understory_mountain",
+   "7": "understory_dry",
+   "8": "understory_dry",
+   "9": "understory_arctic",
+   "10": "understory_steppe_wood",
+   "11": "understory_pine_atlantic",
+   "12": "understory_continental_leaf",
+   "13": "understory_boreal_moss",
+   "14": "understory_aegean"
+  },
+  "dirt": {
+   "1": "dirt_loam",
+   "2": "dirt_continental",
+   "3": "dirt_terra_rossa",
+   "4": "dirt_black_earth",
+   "5": "dirt_northern",
+   "6": "dirt_alpine",
+   "7": "dirt_semi_arid",
+   "8": "dirt_desert",
+   "9": "dirt_northern",
+   "10": "dirt_black_earth",
+   "11": "dirt_loam",
+   "12": "dirt_continental",
+   "13": "dirt_loam",
+   "14": "dirt_terra_rossa"
+  },
+  "mud": {
+   "1": "mud_brown",
+   "2": "mud_continental",
+   "3": "mud_mediterranean",
+   "4": "mud_black",
+   "5": "mud_peaty",
+   "6": "mud_alpine",
+   "7": "mud_arid",
+   "8": "mud_arid",
+   "9": "mud_peaty",
+   "10": "mud_black",
+   "11": "mud_brown",
+   "12": "mud_continental",
+   "13": "mud_brown",
+   "14": "mud_mediterranean"
+  },
+  "pebbles": {
+   "1": "gravel_river",
+   "2": "gravel_river",
+   "3": "gravel_limestone",
+   "4": "gravel_steppe",
+   "5": "gravel_dark_northern",
+   "6": "gravel_alpine",
+   "7": "gravel_arid",
+   "8": "gravel_arid",
+   "9": "gravel_dark_northern",
+   "10": "gravel_steppe",
+   "11": "gravel_river",
+   "12": "gravel_river",
+   "13": "gravel_river",
+   "14": "gravel_limestone"
+  },
+  "rock": {
+   "1": "rock_granite",
+   "2": "rock_granite",
+   "3": "rock_limestone",
+   "4": "rock_steppe_rock",
+   "5": "rock_shield",
+   "6": "rock_alpine",
+   "7": "rock_marl",
+   "8": "rock_desert_rock",
+   "9": "rock_shield",
+   "10": "rock_steppe_rock",
+   "11": "rock_atlantic_granite",
+   "12": "rock_granite",
+   "13": "rock_granite",
+   "14": "rock_limestone"
+  },
+  "plough": {
+   "1": "plowed_brown",
+   "2": "plowed_continental",
+   "3": "plowed_mediterranean",
+   "4": "plowed_black_earth",
+   "5": "plowed_northern",
+   "6": "plowed_alpine",
+   "7": "plowed_semi_arid",
+   "8": "plowed_desert",
+   "9": "plowed_northern",
+   "10": "plowed_black_earth",
+   "11": "plowed_brown",
+   "12": "plowed_continental",
+   "13": "plowed_brown",
+   "14": "plowed_mediterranean"
+  },
+  "snow": {
+   "1": "snow_wet",
+   "2": "snow_wet",
+   "3": "snow_wet",
+   "4": "snow_patchy_dry",
+   "5": "snow_deep_cold",
+   "6": "snow_alpine",
+   "7": "snow_patchy_dry",
+   "8": "snow_patchy_dry",
+   "9": "snow_deep_cold",
+   "10": "snow_patchy_dry",
+   "11": "snow_wet",
+   "12": "snow_wet",
+   "13": "snow_wet",
+   "14": "snow_wet"
+  },
+  "flowering_meadow": {
+   "1": "flower_meadow_atlantic",
+   "2": "flower_meadow_continental",
+   "3": "flower_meadow_mediterranean",
+   "4": "flower_meadow_steppe",
+   "5": "flower_meadow_northern",
+   "6": "flower_meadow_alpine",
+   "7": "flower_meadow_arid",
+   "8": "flower_meadow_arid",
+   "9": "flower_meadow_northern",
+   "10": "flower_meadow_steppe",
+   "11": "flower_meadow_atlantic",
+   "12": "flower_meadow_steppe",
+   "13": "flower_meadow_continental",
+   "14": "flower_meadow_mediterranean"
+  },
+  "trodden_grass": {
+   "1": "trampled_grass_atlantic",
+   "2": "trampled_grass_continental",
+   "3": "trampled_grass_mediterranean",
+   "4": "trampled_grass_steppe",
+   "5": "trampled_grass_northern",
+   "6": "trampled_grass_alpine",
+   "7": "trampled_grass_semi_arid",
+   "8": "trampled_grass_desert",
+   "9": "trampled_grass_northern",
+   "10": "trampled_grass_steppe",
+   "11": "trampled_grass_atlantic",
+   "12": "trampled_grass_continental",
+   "13": "trampled_grass_atlantic",
+   "14": "trampled_grass_mediterranean"
+  },
+  "stubble": {
+   "1": "stubble_atlantic",
+   "2": "stubble_continental",
+   "3": "stubble_mediterranean",
+   "4": "stubble_steppe",
+   "5": "stubble_northern",
+   "6": "stubble_alpine",
+   "7": "stubble_arid",
+   "8": "stubble_arid",
+   "9": "stubble_northern",
+   "10": "stubble_steppe",
+   "11": "stubble_atlantic",
+   "12": "stubble_continental",
+   "13": "stubble_atlantic",
+   "14": "stubble_mediterranean"
+  },
+  "fresh_plough": {
+   "1": "fresh_plow_brown",
+   "2": "fresh_plow_continental",
+   "3": "fresh_plow_mediterranean",
+   "4": "fresh_plow_black_earth",
+   "5": "fresh_plow_northern",
+   "6": "fresh_plow_alpine",
+   "7": "fresh_plow_arid",
+   "8": "fresh_plow_arid",
+   "9": "fresh_plow_northern",
+   "10": "fresh_plow_black_earth",
+   "11": "fresh_plow_brown",
+   "12": "fresh_plow_continental",
+   "13": "fresh_plow_brown",
+   "14": "fresh_plow_mediterranean"
+  }
+ },
+ "micro": {
+  "manifest": "art/tx_micro_battle_pack.json",
+  "default": "micro_soil_grain",
+  "role_grain": {
+   "grass": "micro_grass_fine",
+   "meadow": "micro_grass_fine",
+   "forest": "micro_soil_grain",
+   "dirt": "micro_soil_grain",
+   "mud": "micro_mud_fine",
+   "pebbles": "micro_gravel_fine",
+   "rock": "micro_rock_grain",
+   "plough": "micro_soil_grain",
+   "snow": "micro_snow_grain",
+   "flowering_meadow": "micro_grass_fine",
+   "trodden_grass": "micro_grass_fine",
+   "stubble": "micro_soil_grain",
+   "fresh_plough": "micro_soil_grain"
+  },
+  "dry_biomes": [
+   7,
+   8,
+   14
+  ],
+  "dry_role_grain": {
+   "grass": "micro_dry_crust",
+   "meadow": "micro_dry_crust",
+   "dirt": "micro_sand_grain",
+   "trodden_grass": "micro_dry_crust",
+   "stubble": "micro_dry_crust"
+  }
+ },
+ "legacy": {
   "layers": [
-    {"id": "grass", "poly_haven_id": "sparse_grass", "tile_size_m": 5.0, "role": "grass"},
-    {"id": "meadow", "poly_haven_id": "rocky_terrain_02", "tile_size_m": 7.0, "role": "meadow"},
-    {"id": "forest", "poly_haven_id": "forest_leaves_04", "tile_size_m": 4.0, "role": "forest"},
-    {"id": "dirt", "poly_haven_id": "coast_sand_01", "tile_size_m": 5.0, "role": "dirt"},
-    {"id": "mud", "poly_haven_id": "muddy_tracks", "tile_size_m": 4.5, "role": "mud"},
-    {"id": "pebbles", "poly_haven_id": "river_small_rocks", "tile_size_m": 3.5, "role": "pebbles"},
-    {"id": "rock", "poly_haven_id": "aerial_rocks_02", "tile_size_m": 9.0, "role": "rock"},
-    {"id": "plough", "poly_haven_id": "farm_soil", "tile_size_m": 4.0, "role": "plough"},
-    {"id": "snow", "poly_haven_id": "snow_02", "tile_size_m": 6.0, "role": "snow"},
-    {"id": "flowering_meadow", "poly_haven_id": "leafy_grass", "tile_size_m": 6.0, "role": "flowering_meadow"},
-    {"id": "trodden_grass", "poly_haven_id": "grassy_cobblestone", "tile_size_m": 4.5, "role": "trodden_grass"},
-    {"id": "stubble", "poly_haven_id": "withered_grass", "tile_size_m": 5.0, "role": "stubble"},
-    {"id": "fresh_plough", "poly_haven_id": "farm_furrows", "tile_size_m": 4.0, "role": "fresh_plough"}
+   {
+    "id": "grass",
+    "poly_haven_id": "sparse_grass",
+    "tile_size_m": 5.0,
+    "role": "grass"
+   },
+   {
+    "id": "meadow",
+    "poly_haven_id": "rocky_terrain_02",
+    "tile_size_m": 7.0,
+    "role": "meadow"
+   },
+   {
+    "id": "forest",
+    "poly_haven_id": "forest_leaves_04",
+    "tile_size_m": 4.0,
+    "role": "forest"
+   },
+   {
+    "id": "dirt",
+    "poly_haven_id": "coast_sand_01",
+    "tile_size_m": 5.0,
+    "role": "dirt"
+   },
+   {
+    "id": "mud",
+    "poly_haven_id": "muddy_tracks",
+    "tile_size_m": 4.5,
+    "role": "mud"
+   },
+   {
+    "id": "pebbles",
+    "poly_haven_id": "river_small_rocks",
+    "tile_size_m": 3.5,
+    "role": "pebbles"
+   },
+   {
+    "id": "rock",
+    "poly_haven_id": "aerial_rocks_02",
+    "tile_size_m": 9.0,
+    "role": "rock"
+   },
+   {
+    "id": "plough",
+    "poly_haven_id": "farm_soil",
+    "tile_size_m": 4.0,
+    "role": "plough"
+   },
+   {
+    "id": "snow",
+    "poly_haven_id": "snow_02",
+    "tile_size_m": 6.0,
+    "role": "snow"
+   },
+   {
+    "id": "flowering_meadow",
+    "poly_haven_id": "leafy_grass",
+    "tile_size_m": 6.0,
+    "role": "flowering_meadow"
+   },
+   {
+    "id": "trodden_grass",
+    "poly_haven_id": "grassy_cobblestone",
+    "tile_size_m": 4.5,
+    "role": "trodden_grass"
+   },
+   {
+    "id": "stubble",
+    "poly_haven_id": "withered_grass",
+    "tile_size_m": 5.0,
+    "role": "stubble"
+   },
+   {
+    "id": "fresh_plough",
+    "poly_haven_id": "farm_furrows",
+    "tile_size_m": 4.0,
+    "role": "fresh_plough"
+   }
   ],
   "terrain_tints": {
-    "steppe": [1.02, 0.94, 0.72],
-    "desert": [1.18, 0.98, 0.66]
+   "steppe": [
+    1.02,
+    0.94,
+    0.72
+   ],
+   "desert": [
+    1.18,
+    0.98,
+    0.66
+   ]
   }
+ }
 }

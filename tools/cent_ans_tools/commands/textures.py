@@ -165,6 +165,27 @@ def pack_command(
         )
 
 
+@textures_app.command("battle-data")
+def battle_data_command() -> None:
+    """Réécrit `materials` de battle_ground_layers.json et battle_province_biomes.json.
+
+    À lancer après `textures pack ground_battle` (lit les manifestes des paquets).
+    """
+    import json
+
+    from cent_ans_tools.texture_factory import battle_ground
+    from cent_ans_tools.texture_factory.catalog import load_catalog
+
+    document = load_catalog("ground_battle")
+    battle_ground.write_layers(document)
+    biomes = battle_ground.province_biomes()
+    battle_ground.PROVINCE_BIOMES_PATH.write_text(
+        json.dumps({"provinces": biomes}, indent=1, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    typer.echo(f"{len(biomes)} provinces, matières par biome écrites")
+
+
 @textures_app.command("families")
 def families() -> None:
     """Liste les familles de textures connues."""

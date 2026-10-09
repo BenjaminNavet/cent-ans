@@ -71,30 +71,33 @@ const BIOMES := {
 	"marsh": {"relief": 0.2, "near_woods": 0.42, "far_woods": 0.38, "rocks": 0.2, "snow_line": 10000.0, "ridges": 0.0, "rolls": 1.0},
 }
 
-## GA2 : identité des couches du sol (Poly Haven, ordre d'empilement, taille de répétition),
-## jamais codée en dur ici (`data/fx/battle_ground_layers.json`, schéma
-## `fx_battle_ground_layers.schema.json`) ; même repli que `BattleGore.settings()`.
+## GA2 / TX T2c : identité des couches du sol, jamais codée en dur ici
+## (`data/fx/battle_ground_layers.json`, schéma `fx_battle_ground_layers.schema.json`). `roles` fixe
+## l'ordre des couches du `Texture2DArray` ; le paquet généré du biome du lieu
+## (`BattleGroundTextures`) donne leurs matières et tailles de répétition ; `legacy` garde le jeu
+## Poly Haven d'avant TX (`--legacy-textures`, ou repli si le paquet manque).
 const GROUND_LAYERS_FILE := "fx/battle_ground_layers.json"
 ## Taille fixe du tableau `layer_tile_size` du shader (couches réelles ≤ cette taille).
 const MAX_GROUND_LAYERS := 16
 static var _ground_layers: Array = []
 static var _ground_layers_loaded: bool = false
 static var _ground_role_index: Dictionary = {}
-## OM3 (ADR 0116) : teinte de l'herbe par terrain de province (`terrain_tints` du même fichier) ;
-## la steppe et le désert réutilisent le sol de plaine, teinté, tant qu'ils n'ont pas de décor dédié.
+## OM3 (ADR 0116) : teinte de l'herbe par terrain de province, jeu Poly Haven seulement (la steppe
+## et le désert ont leur propre biome et leurs propres matières en TX).
 static var _terrain_tints: Dictionary = {}
 
 
-## GA2 : couches du sol depuis les données (dossier de données du jeu, puis `data/` du dépôt).
+## Couches du sol du jeu Poly Haven (`legacy`) ; l'ordre est celui de `roles`.
 static func ground_layers() -> Array:
 	if _ground_layers_loaded:
 		return _ground_layers
 	_ground_layers_loaded = true
 	if DataFile.exists(GROUND_LAYERS_FILE):
 		var parsed: Variant = DataFile.read_json(GROUND_LAYERS_FILE)
-		if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
-			_ground_layers = (parsed as Dictionary)["layers"]
-			var tints: Variant = (parsed as Dictionary).get("terrain_tints", {})
+		if parsed is Dictionary and (parsed as Dictionary).get("legacy") is Dictionary:
+			var legacy: Dictionary = (parsed as Dictionary)["legacy"]
+			_ground_layers = legacy.get("layers", [])
+			var tints: Variant = legacy.get("terrain_tints", {})
 			if tints is Dictionary:
 				_terrain_tints = tints
 			for i in _ground_layers.size():
@@ -106,9 +109,12 @@ static func ground_layers() -> Array:
 	return _ground_layers
 
 
-## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données).
-static func terrain_tint(key: String) -> Color:
+## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données
+## ou avec les sols générés TX, qui portent déjà la couleur régionale).
+func terrain_tint(key: String) -> Color:
 	ground_layers()
+	if ground_tx:
+		return Color(1, 1, 1)
 	var rgb: Variant = _terrain_tints.get(key, null)
 	if rgb is Array and (rgb as Array).size() == 3:
 		return Color(float(rgb[0]), float(rgb[1]), float(rgb[2]))
@@ -119,6 +125,31 @@ static func terrain_tint(key: String) -> Color:
 static func ground_role_index(role: String) -> int:
 	ground_layers()
 	return int(_ground_role_index.get(role, -1))
+
+
+## TX T2c : choisit les tableaux du sol de cette bataille (paquet du biome du lieu, sinon Poly
+## Haven). Pose `ground_tx`, `ground_biome`, `ground_layer_list`, `albedo_array`, `normal_array`
+## et le grain fin (`micro`).
+func resolve_ground() -> void:
+	ground_tx = false
+	ground_biome = 0
+	ground_layer_list = ground_layers()
+	albedo_array = ALBEDO_ARRAY
+	normal_array = NORMAL_ARRAY
+	micro = {}
+	if not TextureQuality.use_tx():
+		return
+	var wanted := BattleGroundTextures.biome_for(province_id, terrain_key)
+	var pack := BattleGroundTextures.pack_for(wanted)
+	if pack.is_empty():
+		return
+	ground_tx = true
+	ground_biome = int(pack["biome"])
+	ground_layer_list = pack["layers"]
+	albedo_array = pack["albedo"]
+	normal_array = pack["normal"]
+	micro = BattleGroundTextures.micro_for(ground_biome, ground_layer_list)
+	print("BattleTerrain: sol TX biome %d (demandé %d), %d couches%s" % [ground_biome, wanted, ground_layer_list.size(), ", grain fin" if not micro.is_empty() else ""])
 
 
 ## A6-L14 : échelles de bruit et variation macro du sol (`data/fx/battle_ground.json`, schéma
@@ -153,6 +184,14 @@ const NORMAL_ARRAY := preload("res://assets/textures/battle/ground_normal_array.
 const NEAR_DETAIL_ALBEDO := preload("res://assets/textures/battle/near_detail/grass_path_2_diff_2k.jpg")
 const NEAR_DETAIL_NORMAL := preload("res://assets/textures/battle/near_detail/grass_path_2_nor_gl_2k.jpg")
 
+## TX T2c : tableaux du sol de cette bataille (paquet du biome, sinon Poly Haven), liste des couches
+## correspondante, grain fin (`micro`), biome retenu (0 = Poly Haven).
+var ground_tx: bool = false
+var ground_biome: int = 0
+var ground_layer_list: Array = []
+var albedo_array: TextureLayered = ALBEDO_ARRAY
+var normal_array: TextureLayered = NORMAL_ARRAY
+var micro: Dictionary = {}
 var terrain: Dictionary = {}
 var weather_key: String = "clear"
 var tree_count: int = 0

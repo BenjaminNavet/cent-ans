@@ -165,12 +165,37 @@ func _apply_terrain_tint() -> void:
 	host.ground_material.set_shader_parameter("grass_tint", base * tint)
 
 
+## TX T2c : réglages propres aux sols générés (teintes de l'ancien jeu Poly Haven atténuées, grain
+## fin par couche). Sans paquet TX, tout reste à l'état d'avant (`tx_ground` = 0).
+func _apply_tx_ground(layers: Array) -> void:
+	var material := host.ground_material
+	material.set_shader_parameter("tx_ground", 1.0 if host.ground_tx else 0.0)
+	var micro_on := host.ground_tx and not host.micro.is_empty()
+	material.set_shader_parameter("micro_on", 1.0 if micro_on else 0.0)
+	if not micro_on:
+		return
+	var layer_of := PackedFloat32Array()
+	var size_of := PackedFloat32Array()
+	layer_of.resize(host.MAX_GROUND_LAYERS)
+	size_of.resize(host.MAX_GROUND_LAYERS)
+	var micro_layers: PackedFloat32Array = host.micro["layer"]
+	var micro_sizes: PackedFloat32Array = host.micro["size"]
+	for i in mini(layers.size(), host.MAX_GROUND_LAYERS):
+		layer_of[i] = micro_layers[i]
+		size_of[i] = micro_sizes[i]
+	material.set_shader_parameter("micro_albedo", host.micro["albedo"])
+	material.set_shader_parameter("micro_normal", host.micro["normal"])
+	material.set_shader_parameter("micro_layer_of", layer_of)
+	material.set_shader_parameter("micro_tile_m", size_of)
+
+
 func _build_material(weather: String) -> void:
+	host.resolve_ground()
 	host.ground_material = ShaderMaterial.new()
 	host.ground_material.shader = host.GROUND_SHADER
 	host._apply_ground_noise()
-	host.ground_material.set_shader_parameter("albedo_array", host.ALBEDO_ARRAY)
-	host.ground_material.set_shader_parameter("normal_array", host.NORMAL_ARRAY)
+	host.ground_material.set_shader_parameter("albedo_array", host.albedo_array)
+	host.ground_material.set_shader_parameter("normal_array", host.normal_array)
 	host.ground_material.set_shader_parameter("macro_noise", host.macro_noise)
 	host.ground_material.set_shader_parameter("splat_a", host.splat_a)
 	host.ground_material.set_shader_parameter("splat_b", host.splat_b)
@@ -183,13 +208,14 @@ func _build_material(weather: String) -> void:
 	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
 	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données
 	# (`data/fx/battle_ground_layers.json`), jamais codés en dur dans le shader.
-	var ground_layer_list := host.ground_layers()
+	var ground_layer_list := host.ground_layer_list
 	host.ground_material.set_shader_parameter("layer_count", ground_layer_list.size())
 	var tile_sizes := PackedFloat32Array()
 	tile_sizes.resize(host.MAX_GROUND_LAYERS)
 	for i in mini(ground_layer_list.size(), host.MAX_GROUND_LAYERS):
 		tile_sizes[i] = float((ground_layer_list[i] as Dictionary).get("tile_size_m", 6.0))
 	host.ground_material.set_shader_parameter("layer_tile_size", tile_sizes)
+	_apply_tx_ground(ground_layer_list)
 	host.ground_material.set_shader_parameter("idx_flowering_meadow", host.ground_role_index("flowering_meadow"))
 	host.ground_material.set_shader_parameter("idx_trodden_grass", host.ground_role_index("trodden_grass"))
 	host.ground_material.set_shader_parameter("idx_stubble", host.ground_role_index("stubble"))

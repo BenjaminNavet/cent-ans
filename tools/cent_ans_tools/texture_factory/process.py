@@ -47,13 +47,56 @@ def processing(document: dict[str, Any]) -> dict[str, Any]:
 def pack_entries(
     document: dict[str, Any], pack_spec: dict[str, Any], manifest: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    """Entries of one pack, in catalogue order, with their retained attempt."""
+    """Entries of one pack, in catalogue order, with their retained attempt.
+
+    With ``biome`` in the pack spec the pack holds one entry per role for that biome
+    (roles in catalogue order). A role without a usable entry for the biome (flagged
+    or failed) is taken from the biome ``borrow[role]`` instead.
+    """
     roles = set(pack_spec["roles"])
+    if "biome" in pack_spec:
+        return _biome_pack_entries(document, pack_spec, manifest, roles)
     chosen = []
     for entry in document["entries"]:
         record = manifest.get(entry["id"], {})
         if entry["role"] in roles and record.get("status") == "ok":
             chosen.append({**entry, "attempt": record["attempt"]})
+    return chosen
+
+
+def _biome_pack_entries(
+    document: dict[str, Any],
+    pack_spec: dict[str, Any],
+    manifest: dict[str, Any],
+    roles: set[str],
+) -> list[dict[str, Any]]:
+    """One retained entry per role for ``pack_spec['biome']`` (see :func:`pack_entries`)."""
+    borrow = pack_spec.get("borrow", {})
+    chosen = []
+    seen: set[str] = set()
+    for entry in document["entries"]:
+        role = entry["role"]
+        if role not in roles or role in seen:
+            continue
+        seen.add(role)
+        for biome in (pack_spec["biome"], borrow.get(role)):
+            found = next(
+                (
+                    e
+                    for e in document["entries"]
+                    if e["role"] == role
+                    and biome in e.get("biomes", [])
+                    and manifest.get(e["id"], {}).get("status") == "ok"
+                ),
+                None,
+            )
+            if found:
+                chosen.append({**found, "attempt": manifest[found["id"]]["attempt"]})
+                break
+        else:
+            raise ValueError(
+                f"{pack_spec['name']} : aucune entrée {role} pour le biome {pack_spec['biome']}"
+            )
     return chosen
 
 
@@ -161,6 +204,8 @@ def build_pack(
         normal_name=pack_spec["normal"],
         res_dir=res_dir,
         max_bytes=pack_spec.get("max_mb", 40) * 1_000_000 if not size else 10**10,
+        albedo_quality=pack_spec.get("albedo_quality", 88),
+        normal_quality=pack_spec.get("normal_quality", 90),
     )
     _rename_ids(manifest_path, {m["id"]: m["name"] for m in materials})
     return result

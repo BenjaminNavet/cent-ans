@@ -44,6 +44,10 @@
           "layer_size": {"enum": [512, 1024, 2048]},
           "normal_size": {"enum": [256, 512, 1024]},
           "strip_prefix": {"type": "string"},
+          "albedo_quality": {"type": "integer", "minimum": 50, "maximum": 100, "description": "Qualité JPEG de l'albédo (88 par défaut)."},
+          "normal_quality": {"type": "integer", "minimum": 50, "maximum": 100, "description": "Qualité JPEG des normales (90 par défaut)."},
+          "biome": {"type": "integer", "minimum": 1, "maximum": 14, "description": "Paquet d'un seul biome : une couche par rôle, dans l'ordre du catalogue."},
+          "borrow": {"type": "object", "description": "Rôle -> biome dont on prend l'entrée quand celle du biome du paquet est absente ou écartée.", "additionalProperties": {"type": "integer", "minimum": 1, "maximum": 14}},
           "max_mb": {"type": "number", "exclusiveMinimum": 0}
         }
       }

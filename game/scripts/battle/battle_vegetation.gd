@@ -80,7 +80,7 @@ func _build_set(terrain: BattleTerrain, weather: String, da6: bool, use_fa: bool
 		var hw := float(int(hr.size.x / t) + 1) * t
 		var hh := float(int(hr.size.y / t) + 1) * t
 		mat.set_shader_parameter("height_rect", Vector4(hr.position.x - t * 0.5, hr.position.y - t * 0.5, hw, hh))
-		mat.set_shader_parameter("albedo_array", BattleTerrain.ALBEDO_ARRAY)
+		mat.set_shader_parameter("albedo_array", terrain.albedo_array)
 		mat.set_shader_parameter("macro_noise", terrain.macro_noise)
 		mat.set_shader_parameter("splat_a", terrain.splat_a)
 		mat.set_shader_parameter("splat_b", terrain.splat_b)
