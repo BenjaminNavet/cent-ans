@@ -10,7 +10,7 @@ Travail sur `main` (pas de worktree), commits à chemins explicites ; une note p
 | A | Paquet de relief v3 commité, fin de RA (Release, ADR, `docs/geo.md`) | 1 | fait (5a8f99091) ; Release v3 complétée (part002 + manifeste manquaient) ; reste : push, suppression de `dist/relief` (~5 Go, au joueur) |
 | B | Règles du joueur dans le code : pas de TRELLIS 2, pas de repli local par défaut, pas de multi-graines payant ; doc corrigée | 1 | fait (637ad1442) |
 | C | Budget réconcilié (`docs/budget.md`, `budget.py`) + section IA dans `CREDITS.md` / `LICENSE-ASSETS.md` | 1 | fait (efae70056) ; ouvert : plafond v1 et `DN_FAL_CAP_USD` 43,5 $ à trancher par le joueur |
-| E | `bow_walk`/`xbow_walk` branchés + attributions `figure` corrigées | 1 | à faire |
+| E | `bow_walk`/`xbow_walk` branchés + attributions `figure` corrigées | 1 | fait (65e925ea5) ; yaya sans figure adaptée (nouvelle figurine nécessaire) |
 | F | Fumée brun-rouge près des feux | 1 | fait (31fbcd504) ; à revoir dans un vrai siège après reconstruction du noyau (smoke.gd bloqué par `crew_ammo_cap`, autre session) |
 | G | Bataille : terrain et effet sous le curseur ; daltonien en bataille ; plancher de texte 720p | 1 | fait (7af5fd604, 3fe7a9401, fb76838f7, 1d2869d98) ; à confirmer : cargo test sim-battle/godot-bridge, smoke.gd, vue à l’écran |
 | D | Compression VRAM des textures de modèles, mipmaps de l'eau, contrôle CI | 2 | à faire |
