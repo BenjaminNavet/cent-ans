@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot GA3-L2 (végétation générée de la carte de campagne) :
 ##  1. textures GA3 : grille d'imposteurs 8 azimuts × une ligne par essence (HB4 ; lignes 0-2
@@ -14,8 +14,6 @@ extends SceneTree
 const ORLEANS_FOREST := Vector2(2180.0, 3333.0)
 const ROCK_TRIANGLES: Array[int] = [120, 60, 18]
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
@@ -27,19 +25,7 @@ func _init() -> void:
 	await _test_map()
 	Ga3Vegetation.force(null)
 	RenderQuality.override_level = ""
-	if _failures > 0:
-		push_error("ga3_l2_vegetation_test: %d failure(s)" % _failures)
-		quit(1)
-		return
-	print("ga3_l2_vegetation_test: OK")
-	quit(0)
-
-
-func _check(condition: bool, label: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("FAIL: " + label)
-	return condition
+	finish()
 
 
 func _test_textures() -> void:
@@ -53,26 +39,26 @@ func _test_textures() -> void:
 	}
 	for path: String in sizes:
 		var texture := load(path) as Texture2D
-		if not _check(texture != null, "texture loads (%s)" % path):
+		if not check(texture != null, "texture loads (%s)" % path):
 			continue
-		_check(texture is CompressedTexture2D, "VRAM texture (%s)" % path)
-		_check(Vector2i(texture.get_width(), texture.get_height()) == sizes[path], "size %s (%s)" % [sizes[path], path])
+		check(texture is CompressedTexture2D, "VRAM texture (%s)" % path)
+		check(Vector2i(texture.get_width(), texture.get_height()) == sizes[path], "size %s (%s)" % [sizes[path], path])
 		var config := ConfigFile.new()
-		if _check(config.load(path + ".import") == OK, "import file (%s)" % path):
-			_check(bool(config.get_value("params", "mipmaps/generate", false)), "mipmaps (%s)" % path)
+		if check(config.load(path + ".import") == OK, "import file (%s)" % path):
+			check(bool(config.get_value("params", "mipmaps/generate", false)), "mipmaps (%s)" % path)
 	# Grille : chaque cellule porte un arbre (couverture), pied en bas de cellule comme FC2.
 	var atlas := Image.load_from_file(ProjectSettings.globalize_path(Ga3Vegetation.IMPOSTOR_ALBEDO))
-	if _check(atlas != null, "albedo atlas image"):
+	if check(atlas != null, "albedo atlas image"):
 		for row in VegetationMeshes.IMPOSTOR_ROWS.size():
 			for view in VegetationMeshes.IMPOSTOR_VIEWS:
 				var cov := _coverage(atlas, Rect2i(view * 256, row * 256, 256, 256))
-				_check(cov > 0.06 and cov < 0.6, "cell %d,%d covered (%.3f)" % [row, view, cov])
+				check(cov > 0.06 and cov < 0.6, "cell %d,%d covered (%.3f)" % [row, view, cov])
 	var tuft := Image.load_from_file(ProjectSettings.globalize_path(Ga3Vegetation.GRASS_TUFT))
 	var old := Image.load_from_file(ProjectSettings.globalize_path(GroundClutter.GRASS_TEXTURE))
-	if _check(tuft != null and old != null, "grass images"):
+	if check(tuft != null and old != null, "grass images"):
 		var cov := _coverage(tuft, Rect2i(0, 0, tuft.get_width(), tuft.get_height()))
 		print("ga3_l2: grass coverage %.3f (FC5 %.3f)" % [cov, _coverage(old, Rect2i(0, 0, old.get_width(), old.get_height()))])
-		_check(cov > 0.3, "dense grass tuft (coverage %.3f > 0.3)" % cov)
+		check(cov > 0.3, "dense grass tuft (coverage %.3f > 0.3)" % cov)
 
 
 func _coverage(image: Image, rect: Rect2i) -> float:
@@ -86,16 +72,16 @@ func _coverage(image: Image, rect: Rect2i) -> float:
 
 func _test_option() -> void:
 	Ga3Vegetation.force(true)
-	_check(Ga3Vegetation.enabled() and Ga3Vegetation.near_impostors(), "GA3 on by default")
-	_check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == Ga3Vegetation.GRASS_TUFT, "GA3 grass picked")
+	check(Ga3Vegetation.enabled() and Ga3Vegetation.near_impostors(), "GA3 on by default")
+	check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == Ga3Vegetation.GRASS_TUFT, "GA3 grass picked")
 	var material := Vegetation._make_impostor_material()
-	_check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == Ga3Vegetation.IMPOSTOR_ALBEDO, "GA3 impostor atlas")
+	check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == Ga3Vegetation.IMPOSTOR_ALBEDO, "GA3 impostor atlas")
 	Ga3Vegetation.force(false)
-	_check(not Ga3Vegetation.near_impostors(), "--no-ga3-veg: no near impostors")
-	_check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == "x", "--no-ga3-veg: FC grass")
-	_check(Ga3Vegetation.rock_meshes().is_empty(), "--no-ga3-veg: no rocks")
+	check(not Ga3Vegetation.near_impostors(), "--no-ga3-veg: no near impostors")
+	check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == "x", "--no-ga3-veg: FC grass")
+	check(Ga3Vegetation.rock_meshes().is_empty(), "--no-ga3-veg: no rocks")
 	material = Vegetation._make_impostor_material()
-	_check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == VegetationMeshes.IMPOSTOR_ALBEDO, "--no-ga3-veg: FC impostor atlas")
+	check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == VegetationMeshes.IMPOSTOR_ALBEDO, "--no-ga3-veg: FC impostor atlas")
 	Ga3Vegetation.force(true)
 
 
@@ -126,36 +112,36 @@ func _make_clutter() -> GroundClutter:
 func _test_rocks() -> void:
 	Ga3Vegetation.force(true)
 	var meshes := Ga3Vegetation.rock_meshes()
-	_check(meshes.size() == Ga3Vegetation.ROCKS.size(), "%d rock variants (%d)" % [Ga3Vegetation.ROCKS.size(), meshes.size()])
+	check(meshes.size() == Ga3Vegetation.ROCKS.size(), "%d rock variants (%d)" % [Ga3Vegetation.ROCKS.size(), meshes.size()])
 	for v in meshes.size():
 		for lod in Ga3Vegetation.ROCK_LODS:
 			var tris := _triangles(meshes[v][lod])
-			_check(tris > 8 and tris <= ROCK_TRIANGLES[lod] + 4, "rock %d lod %d: %d triangles (<= %d)" % [v, lod, tris, ROCK_TRIANGLES[lod]])
+			check(tris > 8 and tris <= ROCK_TRIANGLES[lod] + 4, "rock %d lod %d: %d triangles (<= %d)" % [v, lod, tris, ROCK_TRIANGLES[lod]])
 	var clutter := _make_clutter()
 	clutter.update_view(Vector2(500, 500), 0.5)
 	var near := clutter.rock_stats()
 	print("ga3_l2: rocks at d=10 %s, cells %d" % [near, clutter.visible_cells().size()])
-	_check(clutter.rock_variants() == meshes.size(), "clutter loads the rock variants")
-	_check(int(near["rocks"]) > 0 and int(near["lod"]) == 0, "rocks seeded on rocky ground, LOD0 close")
-	_check(int(near["draw_calls"]) <= clutter.visible_cells().size(), "at most one rock draw call per cell")
+	check(clutter.rock_variants() == meshes.size(), "clutter loads the rock variants")
+	check(int(near["rocks"]) > 0 and int(near["lod"]) == 0, "rocks seeded on rocky ground, LOD0 close")
+	check(int(near["draw_calls"]) <= clutter.visible_cells().size(), "at most one rock draw call per cell")
 	# Semis sur la moitié rocheuse seulement (x > 500).
 	for entry: Dictionary in clutter._cells.values():
 		if entry.has("rocks"):
 			for p: Vector2 in (entry["rocks"]["points"] as PackedVector2Array):
 				if p.x <= 500.0:
-					_check(false, "rock outside the rocky half at %s" % p)
+					check(false, "rock outside the rocky half at %s" % p)
 					break
 	clutter.update_view(Vector2(500, 500), 2.0)
 	var far := clutter.rock_stats()
-	_check(int(far["lod"]) == 2, "LOD2 at d=2 (VT3 1:1 range)")
+	check(int(far["lod"]) == 2, "LOD2 at d=2 (VT3 1:1 range)")
 	if int(far["rocks"]) > 0 and int(near["rocks"]) > 0:
-		_check(float(far["triangles"]) / float(far["rocks"]) < float(near["triangles"]) / float(near["rocks"]), "fewer triangles per rock far away")
+		check(float(far["triangles"]) / float(far["rocks"]) < float(near["triangles"]) / float(near["rocks"]), "fewer triangles per rock far away")
 	clutter.free()
 	Ga3Vegetation.force(false)
 	var fc := _make_clutter()
 	fc.update_view(Vector2(500, 500), 0.5)
-	_check(fc.rock_variants() == 0 and int(fc.rock_stats()["rocks"]) == 0, "--no-ga3-veg: no rocks")
-	_check(fc.visible_instances() > 0, "--no-ga3-veg: grass still there")
+	check(fc.rock_variants() == 0 and int(fc.rock_stats()["rocks"]) == 0, "--no-ga3-veg: no rocks")
+	check(fc.visible_instances() > 0, "--no-ga3-veg: grass still there")
 	fc.free()
 	Ga3Vegetation.force(true)
 
@@ -176,14 +162,14 @@ func _test_map() -> void:
 	root.add_child(map)
 	for i in 5:
 		await process_frame
-	if not _check(map.get("load_ok") == true, "campaign map loads"):
+	if not check(map.get("load_ok") == true, "campaign map loads"):
 		map.queue_free()
 		return
 	var rig: CampaignCamera = map.camera_rig
 	rig.edge_pan_enabled = false
 	var data: MapData = map.map_data
 	var vegetation: Vegetation = map.get_node_or_null("Vegetation")
-	if not _check(vegetation != null, "vegetation node"):
+	if not check(vegetation != null, "vegetation node"):
 		map.queue_free()
 		return
 	for i in 3:
@@ -199,13 +185,13 @@ func _test_map() -> void:
 	var after := vegetation.lod_census()
 	print("ga3_l2: census d=25 FC %s" % before)
 	print("ga3_l2: census d=25 GA3 %s" % after)
-	_check(vegetation.ga3_near_impostors, "GA3: near impostors active")
-	_check(int(after["near"]) == 0 and int(after["detailed"]) == 0 and int(after["low"]) == 0, "GA3: no leaf cards nor meshes for oak/beech/fir (d=25)")
-	_check(int(after["impostor"]) > 0, "GA3: impostors at d=25")
+	check(vegetation.ga3_near_impostors, "GA3: near impostors active")
+	check(int(after["near"]) == 0 and int(after["detailed"]) == 0 and int(after["low"]) == 0, "GA3: no leaf cards nor meshes for oak/beech/fir (d=25)")
+	check(int(after["impostor"]) > 0, "GA3: impostors at d=25")
 	var tri_before := int(before["near_triangles"]) + int(before["impostor_triangles"]) + int(before["detailed_triangles"]) + int(before["low_triangles"])
 	var tri_after := int(after["near_triangles"]) + int(after["impostor_triangles"]) + int(after["detailed_triangles"]) + int(after["low_triangles"])
 	print("ga3_l2: tree triangles d=25 FC %d -> GA3 %d" % [tri_before, tri_after])
 	if int(before["near"]) > 0:
-		_check(tri_after < tri_before, "GA3: fewer tree triangles close up")
+		check(tri_after < tri_before, "GA3: fewer tree triangles close up")
 	map.queue_free()
 	await process_frame

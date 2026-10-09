@@ -1,10 +1,8 @@
-extends SceneTree
+extends TestCase
 
 ## Lot UI1 — lettrines de titres : la lettrine se pose sur le label sans toucher à son texte,
 ## suit ses changements, et un second `attach` ne la duplique pas.
 ##   godot --headless --path game --script res://tests/ui1_lettrine_test.gd
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -17,25 +15,24 @@ func _run() -> void:
 	await process_frame
 	var title: Label = panel.get_node("%TitleLabel")
 	var lettrine := title.get_node_or_null("Lettrine") as Lettrine
-	_check(lettrine != null, "lettrine posée sur le titre de la cour")
-	_check(Lettrine.attach(title) == lettrine, "attach idempotent")
-	_check(title.get_children().filter(func(c: Node) -> bool: return c is Lettrine).size() == 1, "une seule lettrine")
+	check(lettrine != null, "lettrine posée sur le titre de la cour")
+	check(Lettrine.attach(title) == lettrine, "attach idempotent")
+	check(title.get_children().filter(func(c: Node) -> bool: return c is Lettrine).size() == 1, "une seule lettrine")
 	var rows: Array[Dictionary] = []
 	panel.call("show_court", rows, "Angleterre", Color(0.6, 0.1, 0.1))
 	await process_frame
-	_check(title.text == "Cour — Angleterre", "texte du label intact : %s" % title.text)
-	_check(lettrine.get("_text") == title.text, "la lettrine suit le texte")
-	_check(title.self_modulate.a == 0.0, "label d'origine transparent")
-	_check(title.get_combined_minimum_size().y >= 30.0, "hauteur du champ réservée")
+	check(title.text == "Cour — Angleterre", "texte du label intact : %s" % title.text)
+	check(lettrine.get("_text") == title.text, "la lettrine suit le texte")
+	check(title.self_modulate.a == 0.0, "label d'origine transparent")
+	check(title.get_combined_minimum_size().y >= 30.0, "hauteur du champ réservée")
 	title.text = "« entre guillemets »"
 	await process_frame
-	_check(not lettrine.call("_has_initial"), "pas d'initiale sur un titre non alphabétique")
+	check(not lettrine.call("_has_initial"), "pas d'initiale sur un titre non alphabétique")
 	panel.queue_free()
 	await process_frame
 	await _check_accented_titles()
 	await _check_diplomacy_panel()
-	print("ui1_lettrine_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
-	quit(0 if _failures == 0 else 1)
+	finish()
 
 
 ## CV3-0 (#10) : un titre à initiale accentuée (« Île-de-France ») doit réserver la même place
@@ -56,9 +53,9 @@ func _check_accented_titles() -> void:
 		var lettrine := Lettrine.attach(label)
 		for f in 3:
 			await process_frame
-		_check(bool(lettrine.call("_has_initial")), "initiale détectée sur « %s »" % text)
+		check(bool(lettrine.call("_has_initial")), "initiale détectée sur « %s »" % text)
 		var rest_width: float = float(label.size.x) - (float(lettrine.get("_box")) + 1.0)
-		_check(rest_width > 0.0, "place réservée pour la lettrine de « %s » (largeur label %s)" % [text, label.size.x])
+		check(rest_width > 0.0, "place réservée pour la lettrine de « %s » (largeur label %s)" % [text, label.size.x])
 		box.queue_free()
 		await process_frame
 
@@ -74,9 +71,9 @@ func _check_diplomacy_panel() -> void:
 	for label in _all_labels(panel):
 		if label.text == "Diplomatie":
 			found = true
-			_check(label.get_node_or_null("Lettrine") != null, "lettrine posée sur le titre « Diplomatie »")
-		_check(label.text != "iplomatie", "le titre ne doit plus être tronqué à la main")
-	_check(found, "le titre « Diplomatie » (texte complet) est présent")
+			check(label.get_node_or_null("Lettrine") != null, "lettrine posée sur le titre « Diplomatie »")
+		check(label.text != "iplomatie", "le titre ne doit plus être tronqué à la main")
+	check(found, "le titre « Diplomatie » (texte complet) est présent")
 	panel.queue_free()
 	await process_frame
 
@@ -90,7 +87,3 @@ func _all_labels(node: Node) -> Array[Label]:
 	return result
 
 
-func _check(condition: bool, message: String) -> void:
-	if not condition:
-		_failures += 1
-		push_error("ÉCHEC : " + message)

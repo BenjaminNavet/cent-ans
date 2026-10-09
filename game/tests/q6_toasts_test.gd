@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless Q6 (recette du 2026-09-28) : fenêtres ouvertes par le joueur et zone des avis
 ## (`TOASTS`, haut gauche), vérifié par l'état des nœuds et de vrais clics (`push_input`).
@@ -11,24 +11,13 @@ extends SceneTree
 ##     dans la largeur de la zone (le texte se replie au lieu d'être coupé au bord).
 ## Usage : godot --headless --path game --script res://tests/q6_toasts_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const LONG_TOAST := "Bohême propose un traité. Traité entre la Bohême et la France : paix, commerce et mariage de la princesse avec votre héritier."
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("q6_toasts_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("q6_toasts_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
@@ -111,7 +100,7 @@ func _fill_toasts(map: Node3D) -> void:
 func _test_registry_click(map: Node3D) -> void:
 	var ctl: Node = map.agents_ctl
 	var result: Dictionary = ctl.recruit(ctl.recruit_place(), "spy")
-	_check(not result.is_empty(), "recruit returned nothing")
+	check(not result.is_empty(), "recruit returned nothing")
 	map.sim.call("end_turn")
 	map.refresh_all()
 	await _fill_toasts(map)
@@ -122,14 +111,14 @@ func _test_registry_click(map: Node3D) -> void:
 		if child is Button and not child.is_queued_for_deletion():
 			row = child
 			break
-	if not _check(row != null, "no agent row in the registry"):
+	if not check(row != null, "no agent row in the registry"):
 		return
 	var center := row.get_global_rect().get_center()
 	var hovered := await _hovered_at(center)
-	_check(hovered != null and (hovered == row or row.is_ancestor_of(hovered)), "registry row covered by %s" % (hovered.get_path() if hovered != null else "nothing"))
+	check(hovered != null and (hovered == row or row.is_ancestor_of(hovered)), "registry row covered by %s" % (hovered.get_path() if hovered != null else "nothing"))
 	ctl.selected_agent = ""
 	await _click(center)
-	_check(ctl.selected_agent != "", "click on the agent row did not select the agent")
+	check(ctl.selected_agent != "", "click on the agent row did not select the agent")
 	ctl.registry.hide()
 	await _frames()
 
@@ -151,15 +140,15 @@ func _test_top_left_windows(map: Node3D) -> void:
 
 ## `window` est dessinée après la zone des avis et reçoit la souris là où elle la recouvre.
 func _check_above(map: Node3D, zone: Control, window: Control) -> void:
-	if not _check(window != null and window.visible, "%s not open" % (window.name if window != null else "window")):
+	if not check(window != null and window.visible, "%s not open" % (window.name if window != null else "window")):
 		return
 	var window_index := window.get_index() if window.get_parent() == map.ui else -1
 	if window.get_parent() == map.ui:
-		_check(window_index > zone.get_index(), "%s (index %d) is under the TOASTS zone (index %d)" % [window.name, window_index, zone.get_index()])
+		check(window_index > zone.get_index(), "%s (index %d) is under the TOASTS zone (index %d)" % [window.name, window_index, zone.get_index()])
 	var overlap := window.get_global_rect().intersection(zone.get_global_rect())
 	if overlap.has_area():
 		var hovered := await _hovered_at(overlap.get_center())
-		_check(hovered != null and (hovered == window or window.is_ancestor_of(hovered)), "%s covered by %s" % [window.name, hovered.get_path() if hovered != null else "nothing"])
+		check(hovered != null and (hovered == window or window.is_ancestor_of(hovered)), "%s covered by %s" % [window.name, hovered.get_path() if hovered != null else "nothing"])
 
 
 func _test_narrow_toasts(map: Node3D) -> void:
@@ -169,19 +158,19 @@ func _test_narrow_toasts(map: Node3D) -> void:
 	await _frames(4)
 	var zone: Control = map.ui.get_node("UiZone_TOASTS")
 	var zone_rect := zone.get_global_rect()
-	_check(zone_rect.size.x < 320.0, "narrow view expected, TOASTS zone is %s" % zone_rect)
+	check(zone_rect.size.x < 320.0, "narrow view expected, TOASTS zone is %s" % zone_rect)
 	var log: Control = map.ui.event_log
-	_check(log.get_global_rect().end.x <= zone_rect.end.x + 0.5, "event log %s wider than the TOASTS zone %s" % [log.get_global_rect(), zone_rect])
+	check(log.get_global_rect().end.x <= zone_rect.end.x + 0.5, "event log %s wider than the TOASTS zone %s" % [log.get_global_rect(), zone_rect])
 	var log_text: Control = map.ui.log_text
-	_check(log_text.get_global_rect().end.x <= zone_rect.end.x + 0.5, "log text %s cut by the TOASTS zone %s" % [log_text.get_global_rect(), zone_rect])
+	check(log_text.get_global_rect().end.x <= zone_rect.end.x + 0.5, "log text %s cut by the TOASTS zone %s" % [log_text.get_global_rect(), zone_rect])
 	var toasts: Array = UiZones.layout().toasts()
-	_check(not toasts.is_empty(), "no toast shown")
+	check(not toasts.is_empty(), "no toast shown")
 	for entry: Control in toasts:
 		if not entry.visible:
 			continue
 		var label := entry.find_child("Text", true, false) as Label
 		var rect := label.get_global_rect()
-		_check(rect.end.x <= zone_rect.end.x + 0.5, "toast text %s cut by the TOASTS zone %s" % [rect, zone_rect])
-		_check(label.get_line_count() > 1, "long toast should wrap on several lines")
+		check(rect.end.x <= zone_rect.end.x + 0.5, "toast text %s cut by the TOASTS zone %s" % [rect, zone_rect])
+		check(label.get_line_count() > 1, "long toast should wrap on several lines")
 	root.size = Vector2i(1920, 1080)
 	await _frames()

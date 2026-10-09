@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test du lot HC2 (ADR 0161 §3, eaux lisibles à hauteur de jeu), sur les vraies données :
 ##  1. `data/map/lakes.json` (seuil de surface abaissé) : plus de lacs qu'avant HC2 (762), Léman
@@ -14,7 +14,6 @@ extends SceneTree
 ##         godot --path game --resolution 640x400 --script res://tests/hc_water_test.gd --
 ##           --hide-armies --map-weather=clear        (contrôle chiffré sur image en plus)
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const VIEW := preload("res://tests/hc_water_view.gd")
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const LANDCOVER_INCLUDE := "res://shaders/relief_landcover.gdshaderinc"
@@ -34,8 +33,6 @@ const LAKE_UNIFORMS := ["lake_color", "lake_shallow_color", "lake_bank_color", "
 const DOMBES_CHECKS := [[150.0, 6, 0.0006], [300.0, 2, 0.0001]]
 const POND_BLOB_PX := 6
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
@@ -45,40 +42,32 @@ func _init() -> void:
 		print("hc_water_test: image check skipped (headless, run with a window for it)")
 	else:
 		await _check_image()
-	print("hc_water_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("hc_water_test: " + message)
-	return condition
+	finish()
 
 
 func _check_lakes() -> void:
 	var map_data := MapData.load_from_dir(MAP_PATHS.default_data_dir().path_join("map"))
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var lakes := LakesRenderer.new()
 	root.add_child(lakes)
 	lakes.build(map_data)
 	var stats := lakes.stats
-	_check(int(stats.get("lakes", 0)) > LAKES_BEFORE, "no more lakes than before HC2: %s" % stats)
-	_check(int(stats.get("failed", 0)) * 50 <= int(stats.get("lakes", 0)), "too many triangulation failures: %s" % stats)
-	_check(int(stats.get("triangles", 0)) < MAX_TRIANGLES, "lake sheet too heavy: %s" % stats)
+	check(int(stats.get("lakes", 0)) > LAKES_BEFORE, "no more lakes than before HC2: %s" % stats)
+	check(int(stats.get("failed", 0)) * 50 <= int(stats.get("lakes", 0)), "too many triangulation failures: %s" % stats)
+	check(int(stats.get("triangles", 0)) < MAX_TRIANGLES, "lake sheet too heavy: %s" % stats)
 	var geneva := lakes.lake_named("Léman")
-	if _check(not geneva.is_empty(), "Léman missing from lakes.json"):
-		_check(int(geneva["triangles"]) > 10, "Léman not meshed: %s triangles" % geneva["triangles"])
+	if check(not geneva.is_empty(), "Léman missing from lakes.json"):
+		check(int(geneva["triangles"]) > 10, "Léman not meshed: %s triangles" % geneva["triangles"])
 	var small := 0
 	for lake: Dictionary in lakes.lakes:
 		if absf(LakesRenderer._signed_area(lake["polygon"])) < 30.0:
 			small += 1
-	_check(small > 100, "only %d lakes under 30 px²" % small)
+	check(small > 100, "only %d lakes under 30 px²" % small)
 	var material := lakes.water_material
-	if _check(material != null, "no lake sheet material"):
-		_check(material.get_shader_parameter("deep_color") == lakes.deep_color, "lake sheet deep colour not set")
-		_check(material.get_shader_parameter("shallow_color") == lakes.shallow_color, "lake sheet shallow colour not set")
+	if check(material != null, "no lake sheet material"):
+		check(material.get_shader_parameter("deep_color") == lakes.deep_color, "lake sheet deep colour not set")
+		check(material.get_shader_parameter("shallow_color") == lakes.shallow_color, "lake sheet shallow colour not set")
 	print("hc_water_test: lakes %s, %d under 30 px²" % [JSON.stringify(stats), small])
 	lakes.queue_free()
 
@@ -88,22 +77,22 @@ func _check_shader() -> void:
 	for uniform: Dictionary in TERRAIN_SHADER.get_shader_uniform_list():
 		uniforms.append(str(uniform["name"]))
 	# Liste vide si le shader ne compile pas.
-	if not _check(not uniforms.is_empty(), "terrain.gdshader does not compile"):
+	if not check(not uniforms.is_empty(), "terrain.gdshader does not compile"):
 		return
 	for uniform_name: String in POND_UNIFORMS + LAKE_UNIFORMS:
-		_check(uniforms.has(uniform_name), "terrain.gdshader lacks uniform %s" % uniform_name)
+		check(uniforms.has(uniform_name), "terrain.gdshader lacks uniform %s" % uniform_name)
 	# Valeurs par défaut lues dans le source (le serveur de rendu headless ne les rend pas).
 	var lake := _default_of(TERRAIN_SHADER.code, "lake_color")
 	var forest := _default_of(TERRAIN_SHADER.code, "tint_forest")
-	if _check(lake.size() == 3 and forest.size() == 3, "lake_color / tint_forest defaults unreadable: %s %s" % [lake, forest]):
+	if check(lake.size() == 3 and forest.size() == 3, "lake_color / tint_forest defaults unreadable: %s %s" % [lake, forest]):
 		var weights := Vector3(0.2126, 0.7152, 0.0722)
 		var lake_v := Vector3(lake[0], lake[1], lake[2])
 		var forest_v := Vector3(forest[0], forest[1], forest[2])
-		_check(lake_v.dot(weights) > 1.8 * forest_v.dot(weights), "lake %s not clearly lighter than forest %s" % [lake_v, forest_v])
-		_check(lake_v.z > lake_v.y and lake_v.y > lake_v.x, "lake %s is not blue-grey" % lake_v)
+		check(lake_v.dot(weights) > 1.8 * forest_v.dot(weights), "lake %s not clearly lighter than forest %s" % [lake_v, forest_v])
+		check(lake_v.z > lake_v.y and lake_v.y > lake_v.x, "lake %s is not blue-grey" % lake_v)
 		print("hc_water_test: lake_color %s (luminance %.3f), tint_forest %s (luminance %.3f)" % [lake_v, lake_v.dot(weights), forest_v, forest_v.dot(weights)])
 	var min_px := _default_of(FileAccess.get_file_as_string(LANDCOVER_INCLUDE), "rl_pond_min_px")
-	_check(min_px.size() == 1 and min_px[0] >= 5.0, "rl_pond_min_px default %s under 5 px" % [min_px])
+	check(min_px.size() == 1 and min_px[0] >= 5.0, "rl_pond_min_px default %s under 5 px" % [min_px])
 
 
 ## Valeur par défaut d'un uniforme `float` ou `vec3` dans un source de shader (tableau vide sinon).
@@ -121,7 +110,7 @@ func _default_of(source: String, uniform_name: String) -> Array[float]:
 ## Fenêtre réelle : la Dombes montre des nappes d'eau distinctes à rig 150 et encore à rig 300.
 func _check_image() -> void:
 	var map: Node3D = await VIEW.open_map(self)
-	if not _check(map != null, "campaign map failed to load"):
+	if not check(map != null, "campaign map failed to load"):
 		return
 	for entry: Array in DOMBES_CHECKS:
 		await VIEW.frame(self, map, VIEW.DOMBES, entry[0])
@@ -136,11 +125,11 @@ func _check_image() -> void:
 		var share := float(stats["share"]) - float(bare["share"])
 		print("hc_water_test: Dombes rig %d ponds: %d sheets, share %.4f (view %.4f, without ponds %.4f), water %s land %s" % [
 			int(entry[0]), sheets, share, stats["share"], bare["share"], stats["core_rgb"], stats["land_rgb"]])
-		_check(sheets >= int(entry[1]), "Dombes rig %d: %d pond sheets, %d wanted" % [int(entry[0]), sheets, entry[1]])
-		_check(share > float(entry[2]), "Dombes rig %d: pond share %.4f under %.4f" % [int(entry[0]), share, entry[2]])
+		check(sheets >= int(entry[1]), "Dombes rig %d: %d pond sheets, %d wanted" % [int(entry[0]), sheets, entry[1]])
+		check(share > float(entry[2]), "Dombes rig %d: pond share %.4f under %.4f" % [int(entry[0]), share, entry[2]])
 		var water: Vector3 = stats["core_rgb"]
 		var land: Vector3 = stats["land_rgb"]
-		_check(water.z > land.z * 1.5 and water.z > water.x * 1.2, "Dombes rig %d: water %s does not stand out from the land %s" % [int(entry[0]), water, land])
+		check(water.z > land.z * 1.5 and water.z > water.x * 1.2, "Dombes rig %d: water %s does not stand out from the land %s" % [int(entry[0]), water, land])
 	map.queue_free()
 	await process_frame
 

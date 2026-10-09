@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot SZ6 (pics d'images côté scripts) sur les vraies données et la pyramide de
 ## relief en cache (sauté, avec un message, sans quadtree) :
@@ -12,10 +12,6 @@ extends SceneTree
 ##  6. `TerrainBuilder` : changements de niveau étalés dans une image ouverte, tous hors image.
 ## Usage : godot --headless --path game --script res://tests/sz6_spikes_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
@@ -23,22 +19,14 @@ func _init() -> void:
 	MapPropScale.set_tree_style(MapPropScale.TREE_STYLE_REAL)
 	await _run()
 	ModelLibrary.clear_cache()
-	print("sz6_spikes_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("sz6_spikes_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
 	var data_dir := MAP_PATHS.default_data_dir()
 	var map_dir := data_dir.path_join("map")
 	var map_data := MapData.load_from_dir(map_dir)
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var data := SettlementData.load_from(data_dir, map_dir)
 	var paris_px: Vector2 = data.get_settlement("set_paris")["px"]
@@ -65,7 +53,7 @@ func _run() -> void:
 		if terrain.quadtree.is_settled():
 			break
 		await process_frame
-	_check(terrain.quadtree.page_count() > 0, "no relief page loaded near Paris")
+	check(terrain.quadtree.page_count() > 0, "no relief page loaded near Paris")
 
 	# 1. Instantané des pages.
 	var rect := Rect2(paris_px - Vector2(40.0, 40.0), Vector2(80.0, 80.0))
@@ -74,25 +62,25 @@ func _run() -> void:
 	for k in 400:
 		var p := rect.position + Vector2(fposmod(k * 7.31, 80.0), fposmod(k * 3.17, 80.0))
 		worst = maxf(worst, absf(maxf(ReliefQuadtree.sample_snapshot(snapshot, p.x, p.y), 0.0) - terrain.surface_height_at(p.x, p.y)))
-	_check(worst < 1e-5, "snapshot surface differs from surface_height_at by %.6f" % worst)
+	check(worst < 1e-5, "snapshot surface differs from surface_height_at by %.6f" % worst)
 
 	# 2. Rubans de route.
 	var roads := RoadRenderer.new()
 	world.add_child(roads)
 	roads.build(map_data, data, terrain)
 	var index := terrain.chunk_index_at(paris_px.x, paris_px.y)
-	if _check(roads._runs_by_chunk.has(index), "no road run in the Paris chunk"):
+	if check(roads._runs_by_chunk.has(index), "no road run in the Paris chunk"):
 		var runs: Array = roads._runs_by_chunk[index]
 		var sync := RoadRenderer.ribbon_arrays(runs, roads.sample_step, roads.lift, {}, terrain)
 		var threaded := RoadRenderer.ribbon_arrays(runs, roads.sample_step, roads.lift, terrain.quadtree.surface_snapshot(roads._run_bounds[index], Vector2.ZERO), null)
-		_check(_same_arrays(sync, threaded), "threaded road ribbon differs from the synchronous one")
+		check(_same_arrays(sync, threaded), "threaded road ribbon differs from the synchronous one")
 	var roads_deadline := Time.get_ticks_msec() + 10000
 	while Time.get_ticks_msec() < roads_deadline:
 		roads.update_view(0.0, 1.0)
 		if roads.ribbon_count() > 0 and roads.pending_jobs() == 0:
 			break
 		await process_frame
-	_check(roads.ribbon_count() > 0, "no road ribbon built by worker threads")
+	check(roads.ribbon_count() > 0, "no road ribbon built by worker threads")
 
 	# 3. Maquette de ville emblématique.
 	var plan := LandmarkLibrary.for_settlement("set_paris")
@@ -112,7 +100,7 @@ func _run() -> void:
 		for j in LandmarkModel.HEIGHT_RES:
 			for i in LandmarkModel.HEIGHT_RES:
 				diff = maxf(diff, absf(sync_image.get_pixel(i, j).r - landmark._bake_image.get_pixel(i, j).r))
-		_check(diff < 1e-4, "threaded landmark bake differs by %.6f m" % diff)
+		check(diff < 1e-4, "threaded landmark bake differs by %.6f m" % diff)
 		landmark._finish_bake()
 		landmark._bake_pending = true
 		var deadline := Time.get_ticks_msec() + 10000  # fil de travail : machine parfois très chargée
@@ -121,7 +109,7 @@ func _run() -> void:
 			if landmark._bake_task < 0 and not landmark._bake_pending:
 				break
 			await process_frame
-		_check(landmark._bake_task < 0 and landmark._bake_row < 0, "landmark rebake did not finish in a worker thread (task %d, row %d, pending %s)" % [landmark._bake_task, landmark._bake_row, landmark._bake_pending])
+		check(landmark._bake_task < 0 and landmark._bake_row < 0, "landmark rebake did not finish in a worker thread (task %d, row %d, pending %s)" % [landmark._bake_task, landmark._bake_row, landmark._bake_pending])
 
 	# 6. Changements de niveau étalés.
 	var far := focus + Vector3(0.0, 400.0, 400.0)
@@ -131,13 +119,13 @@ func _run() -> void:
 	FrameBudget.begin_frame()
 	terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)
 	var changed := _changed_count(before, _levels(terrain))
-	_check(changed == 1, "in a frame with no budget, expected exactly one level change, got %d" % changed)
+	check(changed == 1, "in a frame with no budget, expected exactly one level change, got %d" % changed)
 	await process_frame
 	terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)  # hors image : tout
 	var settled := _levels(terrain)
-	_check(_changed_count(before, settled) > 1, "expected several level changes when zooming back in")
+	check(_changed_count(before, settled) > 1, "expected several level changes when zooming back in")
 	terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)
-	_check(_changed_count(settled, _levels(terrain)) == 0, "level changes still pending outside a frame")
+	check(_changed_count(settled, _levels(terrain)) == 0, "level changes still pending outside a frame")
 
 
 func _levels(terrain: TerrainBuilder) -> PackedInt32Array:
@@ -187,7 +175,7 @@ func _check_with_mesh() -> void:
 	old.visible_instance_count = 7
 	var sphere := SphereMesh.new()
 	var swapped := Vegetation._with_mesh(old, sphere, buffer)
-	_check(swapped.mesh == sphere and swapped.instance_count == 10 and swapped.visible_instance_count == 7 and swapped.use_custom_data and swapped.transform_format == MultiMesh.TRANSFORM_3D, "Vegetation._with_mesh lost MultiMesh settings")
+	check(swapped.mesh == sphere and swapped.instance_count == 10 and swapped.visible_instance_count == 7 and swapped.use_custom_data and swapped.transform_format == MultiMesh.TRANSFORM_3D, "Vegetation._with_mesh lost MultiMesh settings")
 
 
 func _check_changed_points(terrain: TerrainBuilder) -> void:
@@ -202,8 +190,8 @@ func _check_changed_points(terrain: TerrainBuilder) -> void:
 		var px: Vector2 = points[n][0]
 		if changed.has(terrain.chunk_index_at(px.x, px.y)):
 			expected.append(n)
-	_check(fx._changed_points("test", points, changed) == expected, "LifeEffects._changed_points differs from a full scan")
+	check(fx._changed_points("test", points, changed) == expected, "LifeEffects._changed_points differs from a full scan")
 	points.append([points[5][0], 0.0, 0.0])  # liste modifiée : index refait
 	expected.append(points.size() - 1)
-	_check(fx._changed_points("test", points, changed) == expected, "LifeEffects._changed_points not refreshed when the list grows")
+	check(fx._changed_points("test", points, changed) == expected, "LifeEffects._changed_points not refreshed when the list grows")
 	fx.free()

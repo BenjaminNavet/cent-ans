@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot MF1 (filtres de la carte de campagne) sur la vraie simulation :
 ##  1. bouton « Filtres » dans la rangée de la minicarte, ancien bouton « Commerce » masqué ;
@@ -10,24 +10,13 @@ extends SceneTree
 ##  6. mécontentement : teinte proportionnelle (l'ancien mode saturait au rouge dès 1 %).
 ## Usage : godot --headless --path game --script res://tests/mf1_map_modes_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const PARIS := "prov_ile_de_france"
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("mf1_map_modes_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("mf1_map_modes_test: " + message)
-	return condition
+	finish()
 
 
 func _key(map: Node, keycode: Key) -> void:
@@ -47,7 +36,7 @@ func _legends(map: Node) -> int:
 
 
 func _run() -> void:
-	if not _check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_map_lens"),
+	if not check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_map_lens"),
 			"CampaignSim.get_map_lens missing (run core/build.sh)"):
 		return
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -64,55 +53,55 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
+	if not check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 	var modes: Node = map.map_modes  # non typé : SimFacade (autoload) hors de portée à la compilation du test
 
 	# 1. Bouton et rangée de la minicarte.
-	_check(modes != null and modes.button != null, "MapModeController or its button missing")
-	_check(modes.button.get_parent() != null and modes.button.get_parent().get_parent() != null
+	check(modes != null and modes.button != null, "MapModeController or its button missing")
+	check(modes.button.get_parent() != null and modes.button.get_parent().get_parent() != null
 			and modes.button.get_parent().get_parent().get_parent() == map.ui.minimap,
 			"filters button should sit in the minimap row")
-	_check(not map.ui.trade_button.visible, "the old trade button should be hidden")
+	check(not map.ui.trade_button.visible, "the old trade button should be hidden")
 
 	# 2. Filtres du cœur : légende et valeur au survol.
 	for mode in ["unrest", "wealth", "population", "loyalty", "supply", "claims", "diplomacy", "religion"]:
 		modes.set_mode(mode)
 		await process_frame
-		_check(modes.mode == mode, "mode %s not set" % mode)
-		_check(modes.legend() != null, "%s: no legend" % mode)
+		check(modes.mode == mode, "mode %s not set" % mode)
+		check(modes.legend() != null, "%s: no legend" % mode)
 		var hover: String = modes.hover_text(PARIS)
-		_check(hover != "", "%s: empty hover text for Paris" % mode)
+		check(hover != "", "%s: empty hover text for Paris" % mode)
 		print("mf1: %s → %s" % [mode, hover])
 
 	# 3. Exclusivité.
 	modes.set_mode("diplomacy")
 	modes.set_mode("wealth")
 	await process_frame
-	_check(_legends(map) == 1, "exactly one legend expected, got %d" % _legends(map))
+	check(_legends(map) == 1, "exactly one legend expected, got %d" % _legends(map))
 	modes.toggle_mode("wealth")
 	await process_frame
-	_check(modes.mode == "political" and modes.legend() == null, "same mode twice should return to political")
+	check(modes.mode == "political" and modes.legend() == null, "same mode twice should return to political")
 
 	# 4. Touches.
 	_key(map, KEY_R)
-	_check(modes.mode == "religion", "R should open the religion map")
-	_check(not map.trade_mode, "R must not toggle trade routes any more")
+	check(modes.mode == "religion", "R should open the religion map")
+	check(not map.trade_mode, "R must not toggle trade routes any more")
 	_key(map, KEY_R)
-	_check(modes.mode == "political", "R twice should return to political")
+	check(modes.mode == "political", "R twice should return to political")
 	_key(map, KEY_V)
-	_check(map.trade_mode, "V should show trade routes")
+	check(map.trade_mode, "V should show trade routes")
 	_key(map, KEY_M)
-	_check(modes.mode == "unrest" and map.trade_mode, "unrest mode combines with the trade layer")
+	check(modes.mode == "unrest" and map.trade_mode, "unrest mode combines with the trade layer")
 	_key(map, KEY_V)
 	_key(map, KEY_M)
 
 	# 5. Menu.
 	_key(map, KEY_F)
-	_check(modes.menu.visible, "F should open the filters menu")
+	check(modes.menu.visible, "F should open the filters menu")
 	(modes._menu_buttons["population"] as Button).emit_signal("pressed")
-	_check(modes.mode == "population" and not modes.menu.visible, "menu entry should set the mode and close")
+	check(modes.mode == "population" and not modes.menu.visible, "menu entry should set the mode and close")
 	modes.set_mode("political")
 
 	# 6. Mécontentement proportionnel.
@@ -120,8 +109,8 @@ func _run() -> void:
 	var row: Dictionary = modes._lens.get(PARIS, {})
 	var unrest := float(row.get("unrest", 0.0))
 	var color: Color = modes._unrest_color(row, 0.0)
-	_check(unrest >= 0.0 and unrest <= 100.0, "unrest out of range: %s" % unrest)
+	check(unrest >= 0.0 and unrest <= 100.0, "unrest out of range: %s" % unrest)
 	if unrest < 90.0:
-		_check(not color.is_equal_approx((modes.get_script().BAD as Color)), "Paris unrest %.1f should not be full red" % unrest)
+		check(not color.is_equal_approx((modes.get_script().BAD as Color)), "Paris unrest %.1f should not be full red" % unrest)
 	modes.set_mode("political")
 	map.queue_free()

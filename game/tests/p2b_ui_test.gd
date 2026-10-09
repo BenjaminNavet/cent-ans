@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Chantier PO phase 2 (P2b, ADR 0097) : critères C1-C3 sur les écrans de techniques
 ## (`TechPanel` / `TechTreeView`) et de diplomatie (`DiplomacyPanel` / `DiplomaticStances`),
@@ -12,7 +12,6 @@ extends SceneTree
 ##   contrôles visibles des deux écrans.
 ## Usage : godot --headless --path game --script res://tests/p2b_ui_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Bible DA § 12.2 : Title 26, Heading 20, Body 17, Caption 14 (base 900 px). Rien en dessous ;
 ## 4 valeurs au plus (mêmes seuils que `po_ui_test.gd`).
 const MIN_SIZE := 14
@@ -20,7 +19,6 @@ const MAX_DISTINCT_SIZES := 4
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
 
-var _failures := 0
 var _c1_failures := 0
 var _c1_texts := 0
 var _c2_failures := 0
@@ -35,27 +33,19 @@ func _init() -> void:
 	await _run()
 	print("p2b_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
 	print("p2b_ui_test C2: %s (%d contrôles)" % ["OK" if _c2_failures == 0 else "%d failure(s)" % _c2_failures, _c2_checks])
-	if _failures - _c1_failures - _c2_failures == 0:
+	if failures - _c1_failures - _c2_failures == 0:
 		var values := _sizes.keys()
 		values.sort()
 		print("p2b_ui_test C3: OK (tailles vues : %s)" % str(values))
 	else:
-		print("p2b_ui_test C3: %d failure(s)" % (_failures - _c1_failures - _c2_failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("p2b_ui_test: " + message)
-	return condition
+		finish()
 
 
 func _check_c2(condition: bool, message: String) -> bool:
 	_c2_checks += 1
 	if not condition:
 		_c2_failures += 1
-	return _check(condition, "C2: " + message)
+	return check(condition, "C2: " + message)
 
 
 ## Parcourt les `Control` visibles sous `node` et ajoute leur taille de police à `_sizes` (mêmes
@@ -91,7 +81,7 @@ func _collect_tool_texts(node: Node) -> void:
 			var found := regex.search(text)
 			if found != null:
 				_c1_failures += 1
-				_check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
+				check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
 				break
 	for child in node.get_children():
 		_collect_tool_texts(child)
@@ -118,7 +108,7 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
+	if not check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 
@@ -128,9 +118,9 @@ func _run() -> void:
 	map.queue_free()
 	await process_frame
 
-	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
+	check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
 		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(_sizes)])
-	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
+	check(_sizes.size() <= MAX_DISTINCT_SIZES,
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 
 
@@ -139,7 +129,7 @@ func _run() -> void:
 ## `UiLayout` (voir `docs/wip/p2b-tech-diplo.md` « Point ouvert ») : C2 se limite ici à
 ## l'ouverture/fermeture effective du panneau.
 func _check_tech_panel(map: Node3D) -> void:
-	if not _check(map.has_method("_tech_available") and map.call("_tech_available"), "technologies indisponibles avec cette simulation"):
+	if not check(map.has_method("_tech_available") and map.call("_tech_available"), "technologies indisponibles avec cette simulation"):
 		return
 	map.call("_on_tech_panel_requested")
 	await process_frame
@@ -157,7 +147,7 @@ func _check_tech_panel(map: Node3D) -> void:
 ## ouverture et fermeture animées (`UiMotion`). Ne rejoint pas de zone `UiLayout` non plus.
 func _check_diplomacy_panel(map: Node3D) -> void:
 	var controller: Node = map.diplomacy
-	if not _check(controller != null and controller.call("available"), "diplomatie indisponible avec cette simulation"):
+	if not check(controller != null and controller.call("available"), "diplomatie indisponible avec cette simulation"):
 		return
 	controller.call("open_panel")
 	await process_frame
@@ -168,7 +158,7 @@ func _check_diplomacy_panel(map: Node3D) -> void:
 	_collect_tool_texts(panel)
 	# Fermeture par le bouton « × » du panneau (construit en code, sans référence exposée).
 	var close_button := _find_close_button(panel)
-	if _check(close_button != null, "bouton de fermeture de l'écran de diplomatie introuvable"):
+	if check(close_button != null, "bouton de fermeture de l'écran de diplomatie introuvable"):
 		close_button.pressed.emit()
 		await process_frame
 		_check_c2(not panel.visible, "l'écran de diplomatie devrait se refermer (bouton ×, UiMotion)")

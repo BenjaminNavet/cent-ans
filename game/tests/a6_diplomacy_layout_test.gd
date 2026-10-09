@@ -1,27 +1,15 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless A6-L5 (U15, U16, M6) : le panneau de diplomatie tient dans 1280×720 (taille de base du
 ## viewport) sans qu'aucun bouton ne dépasse son cadre, avec des clauses ajoutées ; le bouton
 ## « Commerce » existe ; l'étiquette de verdict affiche un score signé, pas un pourcentage.
 ## Usage : godot --headless --path game --script res://tests/a6_diplomacy_layout_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("a6_diplomacy_layout_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("a6_diplomacy_layout_test: " + message)
-	return condition
+	finish()
 
 
 func _buttons(node: Node, out: Array) -> void:
@@ -44,7 +32,7 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null, "campaign map failed to start"):
+	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		return
 	var sim: Object = map.sim
 	# Un SubViewport de 1280×720 : la taille de base du viewport, quel que soit l'écran de la machine.
@@ -73,7 +61,7 @@ func _run() -> void:
 		await process_frame
 	var rect := Rect2(panel.global_position, panel.size)
 	var view := Rect2(Vector2.ZERO, panel.get_viewport_rect().size)
-	_check(view.encloses(rect.grow(-0.5)), "panel %s exceeds the 1280x720 viewport" % rect)
+	check(view.encloses(rect.grow(-0.5)), "panel %s exceeds the 1280x720 viewport" % rect)
 	var buttons: Array = []
 	_buttons(panel, buttons)
 	var names := PackedStringArray()
@@ -88,11 +76,11 @@ func _run() -> void:
 			continue
 		if not rect.grow(1.0).encloses(button_rect):
 			names.append("%s %s" % [control.name, button_rect])
-	_check(names.is_empty(), "buttons outside the panel %s : %s" % [rect, ", ".join(names.slice(0, 8))])
-	_check(found_trade, "no « Commerce » button in the panel")
+	check(names.is_empty(), "buttons outside the panel %s : %s" % [rect, ", ".join(names.slice(0, 8))])
+	check(found_trade, "no « Commerce » button in the panel")
 	var chance_label: Label = negotiation.get("chance_label")
-	_check(not chance_label.text.contains("%"), "verdict label still shows a percentage: " + chance_label.text)
-	_check(chance_label.text.contains("(") and (chance_label.text.begins_with("Accepterait") or chance_label.text.begins_with("Refuserait")), "verdict label lacks signed score: " + chance_label.text)
+	check(not chance_label.text.contains("%"), "verdict label still shows a percentage: " + chance_label.text)
+	check(chance_label.text.contains("(") and (chance_label.text.begins_with("Accepterait") or chance_label.text.begins_with("Refuserait")), "verdict label lacks signed score: " + chance_label.text)
 	sub.queue_free()
 
 

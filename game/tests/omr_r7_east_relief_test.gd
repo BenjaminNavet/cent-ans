@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 ## Relief fin à l'Est et au Sud (lot OMR R7, ADR 0121) : pyramide dans le cadre monde.
 ##
 ## 1. Manifeste réel : `root_origin_tiles` [0, 0], étages E1-E2 listés au Bosphore, à Moscou,
@@ -8,22 +8,10 @@ extends SceneTree
 ##
 ## godot --headless --path game --script res://tests/omr_r7_east_relief_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-
-var _failures := 0
-
 
 func _init() -> void:
 	_run()
-	print("omr_r7_east_relief_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("omr_r7_east_relief_test: " + message)
-	return condition
+	finish()
 
 
 ## Hauteurs (m) extrêmes des 3 × 3 pixels autour d'un point monde, page PNG 16 bits de `level`
@@ -54,9 +42,9 @@ func _range_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> Vector
 func _run() -> void:
 	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
 	var manifest: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("relief_pyramid.json")))
-	if not _check(manifest is Dictionary, "manifeste illisible"):
+	if not check(manifest is Dictionary, "manifeste illisible"):
 		return
-	_check(str((manifest as Dictionary).get("root_origin_tiles", [])) == str([0.0, 0.0]), "root_origin_tiles " + str((manifest as Dictionary).get("root_origin_tiles")))
+	check(str((manifest as Dictionary).get("root_origin_tiles", [])) == str([0.0, 0.0]), "root_origin_tiles " + str((manifest as Dictionary).get("root_origin_tiles")))
 	var pyramid := ReliefPyramid.new()
 	# Tuiles listées (sans le contrôle de présence sur le disque) : `tiles_override` vide = manifeste.
 	if not pyramid.load_manifest(map_dir):
@@ -72,17 +60,17 @@ func _run() -> void:
 	for name in places:
 		var p: Vector2 = places[name]
 		var level := pyramid.finest_level_at(p.x, p.y)
-		_check(level >= 2, "%s : étage le plus fin %d (E2 attendu)" % [name, level])
+		check(level >= 2, "%s : étage le plus fin %d (E2 attendu)" % [name, level])
 	var rouen := pyramid.finest_level_at(2097.0, 3099.0)
-	_check(rouen >= 4, "Rouen : étage le plus fin %d (E4+ attendu)" % rouen)
+	check(rouen >= 4, "Rouen : étage le plus fin %d (E4+ attendu)" % rouen)
 	# Page E2 réelle du Bosphore, profil à 41,10° N : détroit (Rumeli Hisarı, ≈ 29,057° E)
 	# et collines de Beykoz (≈ 29,12° E, ≈ 320 m).
 	var strait := _range_at(pyramid, 2, 5201.9, 4160.6)
 	var hills := _range_at(pyramid, 2, 5209.2, 4158.7)
 	if is_nan(strait.x) or is_nan(hills.y):
-		_failures += 1
+		failures += 1
 		push_error("omr_r7_east_relief_test: page E2 du Bosphore illisible")
 		return
 	print("omr_r7_east_relief_test: Bosphore %.1f m, collines de Beykoz %.1f m" % [strait.x, hills.y])
-	_check(strait.x <= 0.0, "détroit à %.1f m" % strait.x)
-	_check(hills.y > 150.0, "collines de Beykoz à %.1f m" % hills.y)
+	check(strait.x <= 0.0, "détroit à %.1f m" % strait.x)
+	check(hills.y > 150.0, "collines de Beykoz à %.1f m" % hills.y)

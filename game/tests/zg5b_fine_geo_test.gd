@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot ZG5b (rendu de l'hydrographie fine, ADR 0036), sans dépendre du cache :
 ##  1. `CafvTile` : lecture d'une tuile CAFV écrite ici (en-tête 28 o, lignes, drapeaux, x/y/z/w) ;
@@ -13,24 +13,13 @@ extends SceneTree
 ##  6. données réelles si le cache ZG5a est là : tuile de Rouen, lit creusé d'une page E4 réelle.
 ## Usage : godot --headless --path game --script res://tests/zg5b_fine_geo_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TEST_DIR := "user://zg5b_test"
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	_run()
-	print("zg5b_fine_geo_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("zg5b_fine_geo_test: " + message)
-	return condition
+	finish()
 
 
 ## Tuile CAFV : lignes (entité, flags, points [x, y, z, w]).
@@ -84,15 +73,15 @@ func _run() -> void:
 
 	# 1. Lecture CAFV.
 	var tile := CafvTile.parse(river_bytes)
-	if _check(tile != null, "CAFV tile not parsed"):
-		_check(tile.layer == 1 and tile.col == 32 and tile.row == 29, "CAFV header")
-		_check(tile.lines() == 2 and tile.points() == 5, "CAFV counts %d/%d" % [tile.lines(), tile.points()])
-		_check(CafvTile.order_of(tile.line_flags[0]) == 5 and CafvTile.source_of(tile.line_flags[0]) == 1, "CAFV flags")
-		_check(tile.line_flags[0] & CafvTile.FLAG_TIDAL != 0, "CAFV tidal flag")
-		_check(is_equal_approx(tile.z[1], 47.0) and is_equal_approx(tile.w[4], 5.0), "CAFV arrays")
-		_check(tile.line_bounds[0].is_equal_approx(Vector4(2050, 1890, 2110, 1890)), "CAFV bounds")
-		_check(tile.line_rank[0] == 7 and tile.line_rank[1] == 3, "CAFV rank (order vs width)")
-	_check(CafvTile.parse(PackedByteArray([1, 2, 3])) == null, "garbage accepted")
+	if check(tile != null, "CAFV tile not parsed"):
+		check(tile.layer == 1 and tile.col == 32 and tile.row == 29, "CAFV header")
+		check(tile.lines() == 2 and tile.points() == 5, "CAFV counts %d/%d" % [tile.lines(), tile.points()])
+		check(CafvTile.order_of(tile.line_flags[0]) == 5 and CafvTile.source_of(tile.line_flags[0]) == 1, "CAFV flags")
+		check(tile.line_flags[0] & CafvTile.FLAG_TIDAL != 0, "CAFV tidal flag")
+		check(is_equal_approx(tile.z[1], 47.0) and is_equal_approx(tile.w[4], 5.0), "CAFV arrays")
+		check(tile.line_bounds[0].is_equal_approx(Vector4(2050, 1890, 2110, 1890)), "CAFV bounds")
+		check(tile.line_rank[0] == 7 and tile.line_rank[1] == 3, "CAFV rank (order vs width)")
+	check(CafvTile.parse(PackedByteArray([1, 2, 3])) == null, "garbage accepted")
 
 	# 2. Store : fixture dans user://.
 	var dir := ProjectSettings.globalize_path(TEST_DIR)
@@ -113,21 +102,21 @@ func _run() -> void:
 		"roads": {"dir": "pyramid/roads_fine", "pattern": "E2/{col}_{row}.bin", "tiles": [{"col": 32, "row": 29}]},
 	})
 	var store := FineGeoStore.new()
-	_check(store.load_from(dir), "store not available")
-	_check(store.has_tile(1, 32, 29) and store.has_tile(2, 32, 29) and not store.has_tile(2, 33, 29), "store index")
-	_check(store.settlements.has("set_test") and (store.settlements["set_test"]["px"] as Vector2).is_equal_approx(Vector2(2070.5, 1885.25)), "settlement anchor")
-	_check(store.hamlets.size() == 1 and store.crossings.size() == 1, "hamlet / crossing anchors")
+	check(store.load_from(dir), "store not available")
+	check(store.has_tile(1, 32, 29) and store.has_tile(2, 32, 29) and not store.has_tile(2, 33, 29), "store index")
+	check(store.settlements.has("set_test") and (store.settlements["set_test"]["px"] as Vector2).is_equal_approx(Vector2(2070.5, 1885.25)), "settlement anchor")
+	check(store.hamlets.size() == 1 and store.crossings.size() == 1, "hamlet / crossing anchors")
 	store.request(1, 32, 29)
-	_check(store.pending() == 1, "request queued")
+	check(store.pending() == 1, "request queued")
 	store.poll(true)
 	var loaded := store.get_tile(1, 32, 29)
-	_check(loaded != null and loaded.lines() == 2, "threaded load")
+	check(loaded != null and loaded.lines() == 2, "threaded load")
 	store.max_cached_tiles = 2
 	store.load_sync(1, 33, 29)
 	store.poll()  # image suivante : les tuiles précédentes deviennent évinçables
 	store.load_sync(1, 34, 29)
-	_check((store._tiles[1] as Dictionary).size() <= 2, "LRU bounded: %d" % (store._tiles[1] as Dictionary).size())
-	_check(store.load_sync(1, 40, 40) == null, "missing tile")
+	check((store._tiles[1] as Dictionary).size() <= 2, "LRU bounded: %d" % (store._tiles[1] as Dictionary).size())
+	check(store.load_sync(1, 40, 40) == null, "missing tile")
 
 	# 2b. Cache dans le cadre de la pyramide (ADR 0115, `root_origin_tiles` [0, 5]) : index et points
 	# en coordonnées monde (+5 × 256 = +1280 en y, +20 tuiles E2), fichiers en coordonnées de cache.
@@ -137,21 +126,21 @@ func _run() -> void:
 	_write_json(shifted_dir.path_join("rivers_fine.json"), {"format": "CAFV", "dir": "pyramid/hydro_fine", "pattern": "E2/{col}_{row}.bin", "tiles": [{"col": 32, "row": 29}]})
 	_write_json(shifted_dir.path_join("relief_pyramid.json"), {"root_origin_tiles": [0, 5]})
 	var shifted := FineGeoStore.new()
-	_check(shifted.load_from(shifted_dir), "shifted store not available")
-	_check(shifted.origin_tiles == Vector2i(0, 20), "E2 origin %s" % shifted.origin_tiles)
-	_check(shifted.has_tile(1, 32, 49) and not shifted.has_tile(1, 32, 29), "shifted index in world tiles")
-	_check(shifted.tile_path(1, 32, 49).ends_with("E2/32_29.bin"), "shifted path in cache tiles: %s" % shifted.tile_path(1, 32, 49))
+	check(shifted.load_from(shifted_dir), "shifted store not available")
+	check(shifted.origin_tiles == Vector2i(0, 20), "E2 origin %s" % shifted.origin_tiles)
+	check(shifted.has_tile(1, 32, 49) and not shifted.has_tile(1, 32, 29), "shifted index in world tiles")
+	check(shifted.tile_path(1, 32, 49).ends_with("E2/32_29.bin"), "shifted path in cache tiles: %s" % shifted.tile_path(1, 32, 49))
 	var moved := shifted.load_sync(1, 32, 49)
-	if _check(moved != null, "shifted tile not loaded"):
-		_check(moved.row == 49 and moved.col == 32, "shifted header %d, %d" % [moved.col, moved.row])
-		_check(is_equal_approx(moved.x[0], 2050.0) and is_equal_approx(moved.y[0], 1890.0 + 1280.0), "shifted points %s, %s" % [moved.x[0], moved.y[0]])
-		_check(moved.line_bounds[0].is_equal_approx(Vector4(2050, 3170, 2110, 3170)), "shifted bounds %s" % moved.line_bounds[0])
-		_check(FineGeoStore.tile_rect(32, 49).has_point(Vector2(moved.x[1], moved.y[1])), "shifted points inside their world tile")
+	if check(moved != null, "shifted tile not loaded"):
+		check(moved.row == 49 and moved.col == 32, "shifted header %d, %d" % [moved.col, moved.row])
+		check(is_equal_approx(moved.x[0], 2050.0) and is_equal_approx(moved.y[0], 1890.0 + 1280.0), "shifted points %s, %s" % [moved.x[0], moved.y[0]])
+		check(moved.line_bounds[0].is_equal_approx(Vector4(2050, 3170, 2110, 3170)), "shifted bounds %s" % moved.line_bounds[0])
+		check(FineGeoStore.tile_rect(32, 49).has_point(Vector2(moved.x[1], moved.y[1])), "shifted points inside their world tile")
 	(shifted._tiles[1] as Dictionary).clear()
 	shifted.request(1, 32, 49)
 	shifted.poll(true)
 	var threaded := shifted.get_tile(1, 32, 49)
-	_check(threaded != null and is_equal_approx(threaded.y[0], 3170.0), "threaded shifted load")
+	check(threaded != null and is_equal_approx(threaded.y[0], 3170.0), "threaded shifted load")
 
 	# 3. Lit creusé : page E4 plate à 50 m contenant le fleuve (tuile E4 (131, 118) :
 	# x ∈ [2096, 2112), y ∈ [1888, 1904) depuis SZ2b, ADR 0086).
@@ -160,39 +149,39 @@ func _run() -> void:
 	var level := 4
 	var key := ReliefPyramid.key_of(level, 131, 118)
 	var origin := ReliefPyramid.tile_origin(level, 131, 118)
-	_check(origin.is_equal_approx(Vector2(2096.0, 1888.0)), "E4 origin %s" % origin)
+	check(origin.is_equal_approx(Vector2(2096.0, 1888.0)), "E4 origin %s" % origin)
 	var page := _flat_page(50.0)
 	var task: Object = carver.carve_job(key)
-	if _check(task != null, "no carve task for a page crossed by a river"):
+	if check(task != null, "no carve task for a page crossed by a river"):
 		var carved: PackedByteArray = task.call("apply", page.duplicate())
 		var px_units := ReliefPyramid.pixel_units(level)
 		var h_center := _page_h(carved, origin, px_units, Vector2(2100.0, 1890.0))
 		var h_bank := _page_h(carved, origin, px_units, Vector2(2100.0, 1890.0 + 60.0 / 719.0))
 		var h_far := _page_h(carved, origin, px_units, Vector2(2100.0, 1900.0))
-		_check(h_center < 46.6 - FineBedCarver.EDGE_DEPTH, "bed not below water: %.2f" % h_center)
-		_check(h_bank > h_center and h_bank < 50.0, "bank not blended: %.2f" % h_bank)
-		_check(absf(h_far - 50.0) < 0.1, "far pixel changed: %.2f" % h_far)
+		check(h_center < 46.6 - FineBedCarver.EDGE_DEPTH, "bed not below water: %.2f" % h_center)
+		check(h_bank > h_center and h_bank < 50.0, "bank not blended: %.2f" % h_bank)
+		check(absf(h_far - 50.0) < 0.1, "far pixel changed: %.2f" % h_far)
 		# Emprise de colonie : rien de creusé dedans.
 		carver.covers = PackedVector4Array([Vector4(2100.0, 1890.0, 1.0, 0)])
 		var covered: PackedByteArray = carver.carve_job(key).call("apply", page.duplicate())
-		_check(absf(_page_h(covered, origin, px_units, Vector2(2100.0, 1890.0)) - 50.0) < 0.1, "carved under a settlement cover")
+		check(absf(_page_h(covered, origin, px_units, Vector2(2100.0, 1890.0)) - 50.0) < 0.1, "carved under a settlement cover")
 		carver.covers = PackedVector4Array()
-	_check(carver.carve_job(ReliefPyramid.key_of(1, 16, 14)) == null, "E1 page carved")
+	check(carver.carve_job(ReliefPyramid.key_of(1, 16, 14)) == null, "E1 page carved")
 	# Pages E1-E2 jamais creusées ; E3 : seul le rang ≥ 5 (le ruisseau de 5 m, rang 3, ne l'est pas).
-	_check(carver.carve_job(ReliefPyramid.key_of(2, 32, 29)) == null, "E2 page carved")
+	check(carver.carve_job(ReliefPyramid.key_of(2, 32, 29)) == null, "E2 page carved")
 	var e3_key := ReliefPyramid.key_of(3, 65, 59)
 	var e3_task: Object = carver.carve_job(e3_key)
-	if _check(e3_task != null, "no carve task for E3"):
+	if check(e3_task != null, "no carve task for E3"):
 		var e3 := (e3_task.call("apply", _flat_page(80.0)) as PackedByteArray)
 		var o3 := ReliefPyramid.tile_origin(3, 65, 59)
 		var u3 := ReliefPyramid.pixel_units(3)
-		_check(_page_h(e3, o3, u3, Vector2(2090.0, 1890.0)) < 47.0, "E3 rank-7 river not carved")
+		check(_page_h(e3, o3, u3, Vector2(2090.0, 1890.0)) < 47.0, "E3 rank-7 river not carved")
 	var brook_key := ReliefPyramid.key_of(3, 65, 58)
 	var brook_task: Object = carver.carve_job(brook_key)
 	var brook := _flat_page(80.0)
 	if brook_task != null:
 		brook = brook_task.call("apply", brook)
-	_check(absf(_page_h(brook, ReliefPyramid.tile_origin(3, 65, 58), ReliefPyramid.pixel_units(3), Vector2(2090.0, 1870.0)) - 80.0) < 0.1, "E3 rank-3 brook carved")
+	check(absf(_page_h(brook, ReliefPyramid.tile_origin(3, 65, 58), ReliefPyramid.pixel_units(3), Vector2(2090.0, 1870.0)) - 80.0) < 0.1, "E3 rank-3 brook carved")
 
 	# 4. Rubans.
 	var job := FineRibbonJob.new()
@@ -201,7 +190,7 @@ func _run() -> void:
 	job.meters_per_unit = 719.0
 	job.covers = PackedVector4Array([Vector4(2080.0, 1890.0, 3.0, 5)])
 	job.run()
-	_check(not job.river_arrays.is_empty() and not job.road_arrays.is_empty(), "ribbons empty")
+	check(not job.river_arrays.is_empty() and not job.road_arrays.is_empty(), "ribbons empty")
 	if not job.river_arrays.is_empty():
 		var v: PackedVector3Array = job.river_arrays[Mesh.ARRAY_VERTEX]
 		# SZ2b : l'eau traverse l'emprise, ses sommets y sont marqués (effacés par le shader tant
@@ -217,8 +206,8 @@ func _run() -> void:
 				wrong += 0 if mark == FineRibbonJob.INSIDE_COVER else 1
 			elif d > 3.01:
 				wrong += 0 if mark == 0 else 1
-		_check(inside > 0, "river cut inside a settlement cover")
-		_check(wrong == 0, "cover marks wrong on %d vertices" % wrong)
+		check(inside > 0, "river cut inside a settlement cover")
+		check(wrong == 0, "cover marks wrong on %d vertices" % wrong)
 		# Zone personnalisée d'une maquette sans ville 1:1 : coupée ; d'une ville 1:1 : marquée.
 		var closed := FineRibbonJob.new()
 		closed.river_tile = job.river_tile
@@ -230,7 +219,7 @@ func _run() -> void:
 		for p in cv:
 			if Vector2(p.x, p.z).distance_to(Vector2(2080.0, 1890.0)) < 2.9:
 				in_closed += 1
-		_check(in_closed == 0, "river drawn inside a closed custom zone")
+		check(in_closed == 0, "river drawn inside a closed custom zone")
 		var opened := FineRibbonJob.new()
 		opened.river_tile = job.river_tile
 		opened.meters_per_unit = 719.0
@@ -242,21 +231,21 @@ func _run() -> void:
 		for k in ov.size():
 			if Vector2(ov[k].x, ov[k].z).distance_to(Vector2(2080.0, 1890.0)) < 2.9 and int(floor(ou[k].y / FineRibbonJob.MARK_STEP)) == FineRibbonJob.INSIDE_ZONE:
 				zone_marks += 1
-		_check(zone_marks > 0, "open zone (1:1 city) not marked")
-		_check(opened.gates.is_empty(), "gate bridges on an open zone")
-		_check(is_equal_approx(v[0].y, 48.0), "river height is the water level in metres: %.2f" % v[0].y)
+		check(zone_marks > 0, "open zone (1:1 city) not marked")
+		check(opened.gates.is_empty(), "gate bridges on an open zone")
+		check(is_equal_approx(v[0].y, 48.0), "river height is the water level in metres: %.2f" % v[0].y)
 		var colors: PackedColorArray = job.river_arrays[Mesh.ARRAY_COLOR]
-		_check(colors[0].g > 0.5, "tidal flag lost")
-	_check(job.gates.size() == 2, "gate bridges: %d" % job.gates.size())
+		check(colors[0].g > 0.5, "tidal flag lost")
+	check(job.gates.size() == 2, "gate bridges: %d" % job.gates.size())
 	for gate in job.gates:
-		_check(absf((gate["px"] as Vector2).distance_to(Vector2(2080.0, 1890.0)) - 3.0) < 0.01, "gate not on the cover edge")
-		_check(absf((gate["dir"] as Vector2).x - 1.0) < 1e-3, "gate flow direction")
+		check(absf((gate["px"] as Vector2).distance_to(Vector2(2080.0, 1890.0)) - 3.0) < 0.01, "gate not on the cover edge")
+		check(absf((gate["dir"] as Vector2).x - 1.0) < 1e-3, "gate flow direction")
 	if not job.road_arrays.is_empty():
 		var rv: PackedVector3Array = job.road_arrays[Mesh.ARRAY_VERTEX]
-		_check(rv.size() > 4 * 2, "road not densified: %d" % rv.size())
-		_check(rv[0].y > 52.0 and rv[0].y < 52.5, "road height: %.2f" % rv[0].y)
+		check(rv.size() > 4 * 2, "road not densified: %d" % rv.size())
+		check(rv[0].y > 52.0 and rv[0].y < 52.5, "road height: %.2f" % rv[0].y)
 		var rc: PackedColorArray = job.road_arrays[Mesh.ARRAY_COLOR]
-		_check(rc[0].r > 0.5, "main road flag lost")
+		check(rc[0].r > 0.5, "main road flag lost")
 	# Surface plus haute que l'eau (lit pas encore creusé) : l'eau passe au-dessus.
 	var lifted := FineRibbonJob.new()
 	lifted.river_tile = job.river_tile
@@ -268,7 +257,7 @@ func _run() -> void:
 	lifted.snapshot = {"qt_pages": pages, "max_level": 4, "h_min": -200.0, "h_range": 5000.0, "origin": e2_origin, "map": null}
 	lifted.run()
 	var lv: PackedVector3Array = lifted.river_arrays[Mesh.ARRAY_VERTEX]
-	_check(absf(lv[0].y - (60.0 + FineRibbonJob.RIVER_LIFT_M)) < 0.1, "uncarved river not lifted: %.2f" % lv[0].y)
+	check(absf(lv[0].y - (60.0 + FineRibbonJob.RIVER_LIFT_M)) < 0.1, "uncarved river not lifted: %.2f" % lv[0].y)
 
 	# 5. Pont sur son ancrage fin.
 	_test_bridge(store)
@@ -287,29 +276,29 @@ func _test_bridge(store: FineGeoStore) -> void:
 	crossings._add({"id": "bridge_test", "name": "Pont", "structure": "stone", "px": Vector2(2080.3, 1890.4), "dir": Vector2(0.0, 1.0), "width": 0.4, "type": "bridge", "index": 0})
 	var item: Dictionary = crossings.items[0]
 	var node: MeshInstance3D = item["node"]
-	_check(node != null, "bridge not instantiated")
+	check(node != null, "bridge not instantiated")
 	crossings.set_fine_anchors(store.crossings)
 	crossings.set_fine_mode(true)
-	_check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.0, 1890.0)), "bridge not on its fine anchor: %s" % node.position)
-	_check(absf(node.position.y - 47.0 * MapData.vertical_scale()) < 1e-4, "bridge not at water level")
+	check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.0, 1890.0)), "bridge not on its fine anchor: %s" % node.position)
+	check(absf(node.position.y - 47.0 * MapData.vertical_scale()) < 1e-4, "bridge not at water level")
 	var across := node.transform.basis.x.normalized()
-	_check(absf(across.dot(Vector3(1.0, 0.0, 0.0))) < 1e-3, "bridge not across the current")
+	check(absf(across.dot(Vector3(1.0, 0.0, 0.0))) < 1e-3, "bridge not across the current")
 	var span := node.mesh.get_aabb().size.x * node.transform.basis.x.length()
 	var river := 100.0 / 719.0
-	_check(span > river and span < river * 1.3 + 0.1, "bridge span %.3f for a river of %.3f" % [span, river])
+	check(span > river and span < river * 1.3 + 0.1, "bridge span %.3f for a river of %.3f" % [span, river])
 	var deck := node.transform.basis.y.length() * (0.05 + 0.02 * river / RiverCrossings.FINE_SCALE)
-	_check(absf(deck - 11.0 * MapData.vertical_scale()) < 1e-4, "deck not at z_deck: %.4f" % deck)
+	check(absf(deck - 11.0 * MapData.vertical_scale()) < 1e-4, "deck not at z_deck: %.4f" % deck)
 	crossings.set_fine_mode(false)
-	_check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.3, 1890.4)), "bridge did not return to the V4 crossing")
+	check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.3, 1890.4)), "bridge did not return to the V4 crossing")
 	# ZG4b : bascule étalée — budget de l'image épuisé, un seul ouvrage remis en forme par image.
 	for k in 3:
 		crossings._add({"id": "bridge_test", "name": "Pont", "structure": "stone", "px": Vector2(2080.3 + k, 1890.4), "dir": Vector2(0.0, 1.0), "width": 0.4, "type": "bridge", "index": 0})
 	FrameBudget.begin_frame()
 	FrameBudget._frame_start_usec -= 1000000
 	crossings.set_fine_mode(true)
-	_check(crossings.pending_reshapes() == 3, "spread bridge switch: %d pending" % crossings.pending_reshapes())
+	check(crossings.pending_reshapes() == 3, "spread bridge switch: %d pending" % crossings.pending_reshapes())
 	crossings.pump_reshape(true)
-	_check(crossings.pending_reshapes() == 0 and Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.0, 1890.0)), "bridge switch completed")
+	check(crossings.pending_reshapes() == 0 and Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.0, 1890.0)), "bridge switch completed")
 	FrameBudget._frame = -1
 	crossings.queue_free()
 	renderer.free()
@@ -323,14 +312,14 @@ func _test_real_cache() -> void:
 		return
 	# Rouen ≈ (2097, 3099) en unités monde : tuile E2 (32, 48) (cache dans le cadre monde, ADR 0121).
 	var tile := store.load_sync(1, 32, 48)
-	if not _check(tile != null and tile.lines() > 0, "Rouen tile missing"):
+	if not check(tile != null and tile.lines() > 0, "Rouen tile missing"):
 		return
 	var seine := 0
 	for i in tile.lines():
 		if tile.line_rank[i] >= 7:
 			seine += 1
-	_check(seine > 0, "no large river near Rouen")
-	_check(store.crossings.size() > 800 and store.hamlets.size() > 2000, "anchors: %d crossings, %d hamlets" % [store.crossings.size(), store.hamlets.size()])
+	check(seine > 0, "no large river near Rouen")
+	check(store.crossings.size() > 800 and store.hamlets.size() > 2000, "anchors: %d crossings, %d hamlets" % [store.crossings.size(), store.hamlets.size()])
 	# Page E4 réelle sous la Seine, creusée (temps mesuré).
 	var pyramid := ReliefPyramid.new()
 	if not pyramid.load_manifest(map_dir):
@@ -349,13 +338,13 @@ func _test_real_cache() -> void:
 	var decoder: Object = ClassDB.instantiate("GameDataStore")
 	var bytes: PackedByteArray = decoder.call("load_heightmap_u16", pyramid.tile_path(4, ReliefPyramid.col_of_key(best_key), ReliefPyramid.row_of_key(best_key)))
 	var task: Object = carver.carve_job(best_key)
-	if not _check(task != null and bytes.size() == 512 * 512 * 2, "real E4 page under the Seine not carved"):
+	if not check(task != null and bytes.size() == 512 * 512 * 2, "real E4 page under the Seine not carved"):
 		return
 	var t0 := Time.get_ticks_usec()
 	task.call("apply", bytes.duplicate())
 	var ms := (Time.get_ticks_usec() - t0) / 1000.0
 	print("zg5b_fine_geo_test: real E4 page carved in %.1f ms (%d px)" % [ms, int(task.get("carved_px"))])
-	_check(int(task.get("carved_px")) > 100, "too few carved pixels")
+	check(int(task.get("carved_px")) > 100, "too few carved pixels")
 
 
 static func _flat_page(h_m: float) -> PackedByteArray:

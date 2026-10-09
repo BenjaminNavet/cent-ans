@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## CB0 : test d'équivalence des entrées de bataille. Rejoue, par `get_viewport().push_input()`,
 ## une séquence scriptée sur la démo autonome de bataille (France-Angleterre, graine 1337,
@@ -19,7 +19,6 @@ extends SceneTree
 
 const GOLDEN_PATH := "res://tests/data/cb0_orders_golden.json"
 
-var _failures := 0
 var _scene: Node = null
 
 
@@ -28,15 +27,7 @@ func _init() -> void:
 	await _run()
 	if _scene != null and is_instance_valid(_scene):
 		_scene.queue_free()
-	print("cb0_input_equivalence_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("cb0_input_equivalence_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
@@ -45,14 +36,14 @@ func _run() -> void:
 	_scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	# Script de scène non compilé (classe non importée) : une erreur d'appel interromprait _run()
 	# sans compter d'échec, et le test sortirait « OK ».
-	if not _check(_scene.has_method("issue"), "battle scene script failed to load (run godot --import?)"):
+	if not check(_scene.has_method("issue"), "battle scene script failed to load (run godot --import?)"):
 		return
 	_scene.autoplay = true  # F5c : saute le déploiement (comme la démo autonome, les captures).
 	_scene.log_orders_for_test = true
 	root.add_child(_scene)
 	for _i in 6:
 		await process_frame
-	if not _check(_scene.battle != null and (_scene.units as Array).size() > 0, "battle demo failed to stage (run core/build.sh?)"):
+	if not check(_scene.battle != null and (_scene.units as Array).size() > 0, "battle demo failed to stage (run core/build.sh?)"):
 		return
 	_scene.battle.call("set_ai", _scene.player_side, false)  # entrées manuelles seulement
 	_scene.paused = true  # aucun tic pendant la séquence : positions stables
@@ -67,14 +58,14 @@ func _run() -> void:
 		print("cb0_input_equivalence_test: golden written (%d commands) at %s" % [actual.size(), GOLDEN_PATH])
 		return
 	var golden_text := FileAccess.get_file_as_string(GOLDEN_PATH)
-	if not _check(golden_text != "", "golden missing: %s (run once with -- --record)" % GOLDEN_PATH):
+	if not check(golden_text != "", "golden missing: %s (run once with -- --record)" % GOLDEN_PATH):
 		return
 	var golden: Variant = JSON.parse_string(golden_text)
-	if not _check(golden is Array and golden.size() == actual.size(), "command count: got %d, expected %s" % [actual.size(), golden.size() if golden is Array else "?"]):
+	if not check(golden is Array and golden.size() == actual.size(), "command count: got %d, expected %s" % [actual.size(), golden.size() if golden is Array else "?"]):
 		print("cb0_input_equivalence_test: actual = %s" % JSON.stringify(actual))
 		return
 	for i in golden.size():
-		_check(_approx_equal(golden[i], actual[i]), "command %d differs:\n  golden: %s\n  actual: %s" % [i, golden[i], actual[i]])
+		check(_approx_equal(golden[i], actual[i]), "command %d differs:\n  golden: %s\n  actual: %s" % [i, golden[i], actual[i]])
 
 
 ## Compare deux valeurs JSON en tolérant les écarts d'arrondi flottant (ré-encodage JSON, calculs
@@ -104,7 +95,7 @@ func _play_sequence() -> void:
 	var units: Array = _scene.battle.call("get_units")
 	var mine: Array = units.filter(func(u: Dictionary) -> bool: return str(u["side"]) == _scene.player_side and bool(u["present"]))
 	var foes: Array = units.filter(func(u: Dictionary) -> bool: return str(u["side"]) == _scene.enemy_side and bool(u["present"]))
-	if not _check(mine.size() >= 3 and foes.size() >= 1, "not enough regiments to script the sequence (%d allies, %d foes)" % [mine.size(), foes.size()]):
+	if not check(mine.size() >= 3 and foes.size() >= 1, "not enough regiments to script the sequence (%d allies, %d foes)" % [mine.size(), foes.size()]):
 		return
 	# Vue plongeante sur tout le champ (les deux camps sont visibles) plutôt que sur le seul
 	# camp du joueur : la cible ennemie (étape 7) doit être à l'écran.
@@ -170,11 +161,11 @@ func _check_quick_select() -> void:
 	for unit in units:
 		if str(unit["side"]) == _scene.player_side and bool(unit["present"]) and str(unit["state"]) != "routing":
 			expected_all.append(int(unit["id"]))
-	_check(_ids_match(_scene.selected, expected_all), "Ctrl+A: got %s, expected %s" % [_scene.selected, expected_all])
+	check(_ids_match(_scene.selected, expected_all), "Ctrl+A: got %s, expected %s" % [_scene.selected, expected_all])
 
 	_scene.selected.clear()
 	var mine: Array = units.filter(func(u: Dictionary) -> bool: return str(u["side"]) == _scene.player_side and bool(u["present"]))
-	if not _check(mine.size() >= 1, "no player regiment for the quick-select check"):
+	if not check(mine.size() >= 1, "no player regiment for the quick-select check"):
 		return
 	var target: Dictionary = mine[0]
 	var kind := str(target["type"])
@@ -185,14 +176,14 @@ func _check_quick_select() -> void:
 	var s: Vector2 = _scene._unit_screen(target)
 	_left_click(s, false)  # simple clic : sélection normale
 	_left_click(s, false)  # aussitôt après : double clic, même type
-	_check(_ids_match(_scene.selected, expected_same_type), "double left click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
+	check(_ids_match(_scene.selected, expected_same_type), "double left click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
 
 	_scene.selected.clear()
 	_scene.camera_rig.look_at_point(Vector3.ZERO, 750.0, 0.0)  # loin de la cible : le recentrage doit bouger la caméra
 	_scene._on_card_double_clicked(int(target["id"]))
-	_check(_ids_match(_scene.selected, expected_same_type), "card double click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
+	check(_ids_match(_scene.selected, expected_same_type), "card double click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
 	var recentered: float = _scene.camera_rig.target.distance_to(Vector3(float(target["x"]), 0.0, float(target["z"])))
-	_check(recentered < 5.0, "card double click should recenter the camera on the regiment (off by %.1f m)" % recentered)
+	check(recentered < 5.0, "card double click should recenter the camera on the regiment (off by %.1f m)" % recentered)
 
 
 func _ids_match(actual: Array, expected: Array[int]) -> bool:

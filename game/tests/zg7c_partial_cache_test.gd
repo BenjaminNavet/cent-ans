@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot ZG7c : pyramide de relief trouée (cache partiel, cuisson interrompue).
 ## Une pyramide factice est écrite dans `user://zg7c_test/` (tuiles E0 versionnées recopiées comme
@@ -10,24 +10,13 @@ extends SceneTree
 ## la tuile corrompue est écartée à l'exécution, et le quadtree finit par se stabiliser.
 ## Usage : godot --headless --path game --script res://tests/zg7c_partial_cache_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TEST_DIR := "user://zg7c_test"
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("zg7c_partial_cache_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("zg7c_partial_cache_test: " + message)
-	return condition
+	finish()
 
 
 func _write_fixture(map_dir: String) -> String:
@@ -74,27 +63,27 @@ func _write_fixture(map_dir: String) -> String:
 func _run() -> void:
 	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
 	var map_data := MapData.load_from_dir(map_dir)
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var manifest := _write_fixture(map_dir)
 
 	# 1. Pyramide : les étages ne sont pas ignorés en bloc, seuls les trous le sont.
 	var pyramid := ReliefPyramid.new()
-	_check(pyramid.load_manifest(map_dir, manifest), "holed pyramid should load: %s" % pyramid.load_error)
-	_check(pyramid.max_level == 3, "E3 should stay available, got E%d" % pyramid.max_level)
+	check(pyramid.load_manifest(map_dir, manifest), "holed pyramid should load: %s" % pyramid.load_error)
+	check(pyramid.max_level == 3, "E3 should stay available, got E%d" % pyramid.max_level)
 	# Listées : 4 + 5 + 5 ; absentes : E1 (16, 14), E2 (32, 28), (33, 29), (34, 28), E3 (66, 60).
-	_check(pyramid.missing_tiles == 5, "expected 5 missing tiles, got %d" % pyramid.missing_tiles)
-	_check(pyramid.tile_count() == 9, "expected 9 tiles on disk, got %d" % pyramid.tile_count())
-	_check(not pyramid.has_tile(1, 16, 14) and pyramid.has_tile(1, 17, 14), "E1 hole")
-	_check(not pyramid.has_tile(2, 32, 28) and pyramid.has_tile(2, 32, 29), "E2 hole")
-	_check(not pyramid.has_tile(3, 66, 60), "a .part.png leftover is not a tile")
+	check(pyramid.missing_tiles == 5, "expected 5 missing tiles, got %d" % pyramid.missing_tiles)
+	check(pyramid.tile_count() == 9, "expected 9 tiles on disk, got %d" % pyramid.tile_count())
+	check(not pyramid.has_tile(1, 16, 14) and pyramid.has_tile(1, 17, 14), "E1 hole")
+	check(not pyramid.has_tile(2, 32, 28) and pyramid.has_tile(2, 32, 29), "E2 hole")
+	check(not pyramid.has_tile(3, 66, 60), "a .part.png leftover is not a tile")
 	# Trou E1 (16, 14) : retombe sur E0 ; trou E2 (32, 28) : sur E1 (16, 14) absent → E0.
-	_check(pyramid.finest_ancestor(1, 16, 14) == 0, "E1 hole falls back to E0")
-	_check(pyramid.finest_ancestor(2, 32, 28) == 0, "E2 hole under an E1 hole falls back to E0")
-	_check(pyramid.finest_ancestor(2, 34, 28) == 1, "E2 hole falls back to E1")
-	_check(pyramid.finest_ancestor(3, 66, 58) == 3, "E3 tile under a missing E2 tile stays usable")
-	_check(pyramid.max_level_under(2, 33, 29) == 3, "E3 below the E2 hole is indexed")
-	_check(pyramid.finest_ancestor(5, 66 * 4, 58 * 4) == 3, "finest ancestor of an E5 key")
+	check(pyramid.finest_ancestor(1, 16, 14) == 0, "E1 hole falls back to E0")
+	check(pyramid.finest_ancestor(2, 32, 28) == 0, "E2 hole under an E1 hole falls back to E0")
+	check(pyramid.finest_ancestor(2, 34, 28) == 1, "E2 hole falls back to E1")
+	check(pyramid.finest_ancestor(3, 66, 58) == 3, "E3 tile under a missing E2 tile stays usable")
+	check(pyramid.max_level_under(2, 33, 29) == 3, "E3 below the E2 hole is indexed")
+	check(pyramid.finest_ancestor(5, 66 * 4, 58 * 4) == 3, "finest ancestor of an E5 key")
 
 	# 2. Quadtree au-dessus des trous : doit se stabiliser malgré la tuile corrompue.
 	var world := Node3D.new()
@@ -103,7 +92,7 @@ func _run() -> void:
 	terrain.pyramid_manifest_path = manifest
 	world.add_child(terrain)
 	terrain.build(map_data)
-	if not _check(terrain.quadtree != null, "quadtree should be active with a holed pyramid"):
+	if not check(terrain.quadtree != null, "quadtree should be active with a holed pyramid"):
 		world.queue_free()
 		return
 	var camera := Camera3D.new()
@@ -123,11 +112,11 @@ func _run() -> void:
 			if terrain.quadtree.is_settled():
 				settled = true
 				break
-		_check(settled, "quadtree should settle over the holes at d = %.0f" % d)
-	_check(not terrain.pyramid.has_tile(2, 33, 28), "corrupt tile should be marked broken")
-	_check(terrain.quadtree.page_count() > 0, "some pages should be resident")
-	_check(terrain.fine_ready(), "fine_ready after settling")
+		check(settled, "quadtree should settle over the holes at d = %.0f" % d)
+	check(not terrain.pyramid.has_tile(2, 33, 28), "corrupt tile should be marked broken")
+	check(terrain.quadtree.page_count() > 0, "some pages should be resident")
+	check(terrain.fine_ready(), "fine_ready after settling")
 	var h := terrain.surface_height_at(spot.x, spot.y)
-	_check(is_finite(h), "surface height over the corrupt tile should be finite")
+	check(is_finite(h), "surface height over the corrupt tile should be finite")
 	world.queue_free()
 	await process_frame

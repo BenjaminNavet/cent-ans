@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot C6 (rendu par paliers) sur les vraies données `data/` :
 ##  1. `SettlementData` : colonies (positions + types), hameaux, routes (principales comprises) ;
@@ -12,9 +12,7 @@ extends SceneTree
 ##  6. lot DV2 : maquettes et couples nom + écu sur toute la vue normale, rien au-delà.
 ## Usage : godot --headless --path game --script res://tests/settlements_render_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
-var _failures := 0
 var _selected := ""
 
 
@@ -24,48 +22,40 @@ func _init() -> void:
 	MapPropScale.set_tree_style(MapPropScale.TREE_STYLE_REAL)
 	await _run()
 	ModelLibrary.clear_cache()
-	print("settlements_render_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("settlements_render_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
 	var data_dir := MAP_PATHS.default_data_dir()
 	var map_dir := data_dir.path_join("map")
 	var map_data := MapData.load_from_dir(map_dir)
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	# 1. Données.
 	var data := SettlementData.load_from(data_dir, map_dir)
-	_check(data.settlements.size() >= 500, "expected >= 500 settlements, got %d" % data.settlements.size())
-	_check(data.hamlets.size() >= 2000, "expected >= 2000 hamlets, got %d" % data.hamlets.size())
-	_check(data.roads.size() > 100, "expected roads, got %d" % data.roads.size())
+	check(data.settlements.size() >= 500, "expected >= 500 settlements, got %d" % data.settlements.size())
+	check(data.hamlets.size() >= 2000, "expected >= 2000 hamlets, got %d" % data.hamlets.size())
+	check(data.roads.size() > 100, "expected roads, got %d" % data.roads.size())
 	var kinds := {}
 	for entry in data.settlements:
 		kinds[entry["kind"]] = true
 	for kind in SettlementData.KINDS:
-		_check(kinds.has(kind), "no settlement of kind %s" % kind)
-	_check(str(data.settlements[0]["kind"]) == "city", "settlements should be sorted by label priority (city first)")
+		check(kinds.has(kind), "no settlement of kind %s" % kind)
+	check(str(data.settlements[0]["kind"]) == "city", "settlements should be sorted by label priority (city first)")
 	var paris := data.get_settlement("set_paris")
-	if not _check(not paris.is_empty(), "set_paris missing"):
+	if not check(not paris.is_empty(), "set_paris missing"):
 		return
 	var paris_px: Vector2 = paris["px"]
 	# Lot C7b : tracés routiers des arêtes du graphe, orientés dans les deux sens.
-	_check(data.edge_paths.size() >= 400, "expected >= 400 traced graph edges, got %d" % data.edge_paths.size())
+	check(data.edge_paths.size() >= 400, "expected >= 400 traced graph edges, got %d" % data.edge_paths.size())
 	var some_key: String = data.edge_paths.keys()[0] if not data.edge_paths.is_empty() else "|"
 	var ends := some_key.split("|")
 	var forward := data.edge_path(ends[0], ends[1])
 	var backward := data.edge_path(ends[1], ends[0])
-	_check(forward.size() >= 2 and forward.size() == backward.size() and forward[0] == backward[backward.size() - 1], "edge_path orientation")
+	check(forward.size() >= 2 and forward.size() == backward.size() and forward[0] == backward[backward.size() - 1], "edge_path orientation")
 	var from_entry := data.get_settlement(ends[0])
-	_check(not from_entry.is_empty() and forward.size() >= 2 and forward[0].distance_to(from_entry["px"]) < 0.1, "edge path should start on its settlement")
-	_check(data.edge_path("set_paris", "set_nowhere").is_empty(), "unknown edge should have no path")
+	check(not from_entry.is_empty() and forward.size() >= 2 and forward[0].distance_to(from_entry["px"]) < 0.1, "edge path should start on its settlement")
+	check(data.edge_path("set_paris", "set_nowhere").is_empty(), "unknown edge should have no path")
 
 	# 2. Terrain + relief fin.
 	var world := Node3D.new()
@@ -86,12 +76,12 @@ func _run() -> void:
 			break
 		terrain.wait_fine_jobs()
 		await process_frame
-	_check(terrain.fine_chunk_count() > 0, "no fine relief chunk near Paris (tiles in %s)" % map_dir.path_join("height"))
+	check(terrain.fine_chunk_count() > 0, "no fine relief chunk near Paris (tiles in %s)" % map_dir.path_join("height"))
 	var worst := 0.0
 	for k in 20:
 		var p := paris_px + Vector2(cos(k) * 30.0, sin(k * 1.7) * 30.0)
 		worst = maxf(worst, absf(terrain.surface_height_at(p.x, p.y) - map_data.surface_world_at(p.x, p.y)))
-	_check(worst < 3.0, "fine surface too far from the 4096 heightmap near Paris: %.2f" % worst)
+	check(worst < 3.0, "fine surface too far from the 4096 heightmap near Paris: %.2f" % worst)
 
 	# 3. Colonies.
 	var roads := RoadRenderer.new()
@@ -114,21 +104,21 @@ func _run() -> void:
 	# VT (ADR 0138) : plus de maquette par nœud ; emprise réelle par colonie lue dans
 	# `towns_1340.json`. GC2 (ADR 0158) : maquettes stylisées en MultiMesh par défaut, l'emprise
 	# affichée est alors celle de la maquette (`gc_maquettes_test.gd`).
-	_check(layer.get_node_or_null("Models") == null and layer.get_node_or_null("Landmarks") == null, "no per-settlement model node on the campaign map")
-	_check((layer.maquettes != null) == TownMaquetteData.enabled() and (layer.towns == null) == TownMaquetteData.enabled(), "town layers follow the town style")
-	_check(int(layer.stats.get("footprints", 0)) > 0, "no real footprint read, got %s" % layer.stats)
+	check(layer.get_node_or_null("Models") == null and layer.get_node_or_null("Landmarks") == null, "no per-settlement model node on the campaign map")
+	check((layer.maquettes != null) == TownMaquetteData.enabled() and (layer.towns == null) == TownMaquetteData.enabled(), "town layers follow the town style")
+	check(int(layer.stats.get("footprints", 0)) > 0, "no real footprint read, got %s" % layer.stats)
 	var paris_footprint: int = data.index_by_id["set_paris"]
-	_check(layer.model_radius(paris_footprint) > 0.0 and layer.model_holder(paris_footprint) == null, "Paris footprint without model")
-	_check(layer.hamlet_instance_count() > 0, "no hamlet instances near Paris")
-	_check(roads.ribbon_count() > 0, "no road ribbon near Paris")
-	_check(int(roads.stats.get("main_roads", 0)) > 0, "no main road")
+	check(layer.model_radius(paris_footprint) > 0.0 and layer.model_holder(paris_footprint) == null, "Paris footprint without model")
+	check(layer.hamlet_instance_count() > 0, "no hamlet instances near Paris")
+	check(roads.ribbon_count() > 0, "no road ribbon near Paris")
+	check(int(roads.stats.get("main_roads", 0)) > 0, "no main road")
 	var screen := camera.unproject_position(layer.world_position_of("set_paris") + Vector3(0.0, 1.0, 0.0))
 	var picked := layer.pick_screen(screen)
-	_check(picked == "set_paris", "picking at Paris returned '%s'" % picked)
+	check(picked == "set_paris", "picking at Paris returned '%s'" % picked)
 	layer.select(picked)
-	_check(_selected == "set_paris", "settlement_selected not emitted")
+	check(_selected == "set_paris", "settlement_selected not emitted")
 	layer.declutter()
-	_check(layer.visible_label_count() > 0, "no settlement label visible in county view")
+	check(layer.visible_label_count() > 0, "no settlement label visible in county view")
 
 	# 4 bis. Lot C7b : arbres posés sur la surface affichée (relief fin compris) et recalés quand
 	# une tuile change de niveau.
@@ -144,41 +134,41 @@ func _run() -> void:
 		await process_frame
 		vegetation.update_view(camera.global_position, 20.0)
 	vegetation.flush_ground()
-	_check(vegetation.instance_count() > 0, "no tree near Paris")
+	check(vegetation.instance_count() > 0, "no tree near Paris")
 	var fine_tree_tiles := 0
 	for index in vegetation._tiles:
 		if terrain.chunk_level(index) == 2:
 			fine_tree_tiles += 1
-	_check(fine_tree_tiles > 0, "no tree tile on fine relief near Paris")
+	check(fine_tree_tiles > 0, "no tree tile on fine relief near Paris")
 	var tree_error := vegetation.max_ground_error()
-	_check(tree_error < 0.05, "trees off the displayed surface by %.2f" % tree_error)
+	check(tree_error < 0.05, "trees off the displayed surface by %.2f" % tree_error)
 	# Relief fin désactivé : les tuiles repassent au LOD proche, les arbres suivent.
 	terrain.fine_enabled = false
 	terrain.update_lod(camera.global_position, 55.0, focus, tiers.fine_terrain_distance)
-	_check(vegetation.pending_regrounds() > 0, "no reground queued after a chunk level change")
+	check(vegetation.pending_regrounds() > 0, "no reground queued after a chunk level change")
 	vegetation.flush_ground()
 	var tree_error_near := vegetation.max_ground_error()
-	_check(tree_error_near < 0.05, "trees off the near LOD surface by %.2f" % tree_error_near)
+	check(tree_error_near < 0.05, "trees off the near LOD surface by %.2f" % tree_error_near)
 	terrain.fine_enabled = true
 
 	# 5. Paliers (lot DV : vue normale / vue stratégique).
-	_check(tiers.strategic_weight(1000.0) < 0.001 and tiers.strategic_weight(1400.0) > 0.999, "strategic fade 1100-1300")
-	_check(tiers.tier_at(40.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1100.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1400.0) == ZoomTiers.Tier.STRATEGIC, "tier_at thresholds")
+	check(tiers.strategic_weight(1000.0) < 0.001 and tiers.strategic_weight(1400.0) > 0.999, "strategic fade 1100-1300")
+	check(tiers.tier_at(40.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1100.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1400.0) == ZoomTiers.Tier.STRATEGIC, "tier_at thresholds")
 	# 6. Lot DV2 : maquettes et couples nom + écu dans toute la vue normale, rien sur le parchemin.
 	layer.refresh(null, Callable())  # écus des détenteurs des données statiques
 	layer.update_view(1100.0)
-	_check(layer._icons.visible, "shields shown at 1100 (normal view)")
+	check(layer._icons.visible, "shields shown at 1100 (normal view)")
 	var paris_index: int = data.index_by_id["set_paris"]
-	_check(layer.marker_in_tier(paris_index), "Paris name + shield in tier at 1100 (rank 4)")
-	_check(layer.has_shield(paris_index), "Paris has its holder's shield")
+	check(layer.marker_in_tier(paris_index), "Paris name + shield in tier at 1100 (rank 4)")
+	check(layer.has_shield(paris_index), "Paris has its holder's shield")
 	var village_index := -1
 	for i in data.settlements.size():
 		if str(data.settlements[i]["kind"]) == "village":
 			village_index = i
 			break
-	_check(village_index < 0 or not layer.marker_in_tier(village_index), "village name hidden at 1100 (rank rule)")
+	check(village_index < 0 or not layer.marker_in_tier(village_index), "village name hidden at 1100 (rank rule)")
 	layer.update_view(1400.0)
-	_check(not layer._icons.visible, "no shield on the parchment (1400)")
+	check(not layer._icons.visible, "no shield on the parchment (1400)")
 	layer.update_view(55.0)
 	print("settlements_render_test: %s" % JSON.stringify({
 		"settlements": data.settlements.size(), "hamlets": data.hamlets.size(), "roads": data.roads.size(),

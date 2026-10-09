@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot DA7d (ADR 0066) : plus aucun chevauchement des marqueurs de lieux et de
 ## leurs noms dans les régions denses, aux zooms types de la carte de campagne.
@@ -10,7 +10,6 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/da7d_overlap_test.gd [-- --measure]
 ## (`--measure` imprime le tableau sans échouer : mesures « avant ».)
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Régions denses (coordonnées carte 4096) et zooms types (distance caméra) : palier Europe,
 ## province, province rapprochée, moyen près du palier comté.
 const REGIONS := {"flandre": Vector2(2330, 2910), "ile_de_france": Vector2(2213, 3203), "normandie": Vector2(2030, 3120)}
@@ -20,7 +19,6 @@ const DISTANCES := [1100.0, 600.0, 330.0, 200.0]
 ## algorithmique (quadratique), pas un réglage fin. Le chevauchement, lui, reste exact.
 const MAX_DECLUTTER_MS := 30.0
 
-var _failures := 0
 var _measure := false
 
 
@@ -29,29 +27,20 @@ func _init() -> void:
 	await process_frame
 	_test_synthetic()
 	await _test_map()
-	if _failures == 0:
-		print("da7d OK")
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("da7d: " + message)
-	return condition
+	finish()
 
 
 func _test_synthetic() -> void:
 	var placer := MarkerDeclutter.new()
 	placer.reset(32.0)
-	_check(placer.try_place(Rect2(100, 100, 40, 40), 0), "first rect placed")
-	_check(not placer.try_place(Rect2(120, 120, 40, 40), 1), "overlapping lower-priority rect yields")
-	_check(placer.try_place(Rect2(141, 100, 40, 40), 2), "touching-free rect placed")
-	_check(placer.try_place(Rect2(110, 110, 10, 10), 3, true), "pinned rect always placed")
-	_check(placer.overlaps(Rect2(100, 90, 40, 12)), "rect over the first one overlaps")
-	_check(not placer.overlaps(Rect2(100, 90, 40, 12), 0), "own rects are ignored for their owner")
-	_check(not placer.overlaps(Rect2(100, 60, 40, 30)), "free space is free")
-	_check(placer.placed_count() == 3, "three rects placed")
+	check(placer.try_place(Rect2(100, 100, 40, 40), 0), "first rect placed")
+	check(not placer.try_place(Rect2(120, 120, 40, 40), 1), "overlapping lower-priority rect yields")
+	check(placer.try_place(Rect2(141, 100, 40, 40), 2), "touching-free rect placed")
+	check(placer.try_place(Rect2(110, 110, 10, 10), 3, true), "pinned rect always placed")
+	check(placer.overlaps(Rect2(100, 90, 40, 12)), "rect over the first one overlaps")
+	check(not placer.overlaps(Rect2(100, 90, 40, 12), 0), "own rects are ignored for their owner")
+	check(not placer.overlaps(Rect2(100, 60, 40, 30)), "free space is free")
+	check(placer.placed_count() == 3, "three rects placed")
 	# Grille : un grand nombre de rectangles, résultat identique à la recherche exhaustive.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
@@ -68,8 +57,8 @@ func _test_synthetic() -> void:
 				break
 		if free:
 			kept.append(rects[k])
-		_check(placer.try_place(rects[k], k) == free, "grid agrees with brute force (%d)" % k)
-	_check(MarkerDeclutter.count_overlaps(placer.placed_rects()) == 0, "no overlap among placed rects")
+		check(placer.try_place(rects[k], k) == free, "grid agrees with brute force (%d)" % k)
+	check(MarkerDeclutter.count_overlaps(placer.placed_rects()) == 0, "no overlap among placed rects")
 
 
 func _test_map() -> void:
@@ -88,7 +77,7 @@ func _test_map() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null, "campaign map failed to start"):
+	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		map.queue_free()
 		return
 	var layer: SettlementLayer = map.settlement_layer
@@ -113,7 +102,7 @@ func _test_map() -> void:
 			total += overlaps
 			print("da7d: %-13s %8.0f %8d %7d %9d" % [region, distance, occupancy["markers"], occupancy["labels"], overlaps])
 			if not _measure:
-				_check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
+				check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
 				# CV3-0 (#7) : les NOMS de colonies (lisibilité, le défaut rapporté : Saint-Denis,
 				# Paris, compteur d'armée qui se chevauchaient) ne doivent pas chevaucher les
 				# plaques/étendards d'armée. Un marqueur épinglé (capitale) peut toucher une
@@ -128,10 +117,10 @@ func _test_map() -> void:
 					for army_rect: Rect2 in army_rects:
 						if (occ_rects[k] as Rect2).intersects(army_rect):
 							cross_overlaps += 1
-				_check(cross_overlaps == 0, "%s at %.0f: %d army/settlement label overlaps" % [region, distance, cross_overlaps])
+				check(cross_overlaps == 0, "%s at %.0f: %d army/settlement label overlaps" % [region, distance, cross_overlaps])
 				var capital := layer.capital_index()
 				if region == "ile_de_france":
-					_check(capital >= 0 and layer.marker_visible(capital), "player capital always shown (%.0f)" % distance)
+					check(capital >= 0 and layer.marker_visible(capital), "player capital always shown (%.0f)" % distance)
 	print("da7d: total overlapping pairs %d" % total)
 	if not _measure:
 		await _test_selection_pinned(map, layer)
@@ -150,7 +139,7 @@ func _test_map() -> void:
 		ms = minf(ms, float(Time.get_ticks_usec() - t0) / 1000.0 / 10.0)
 	print("da7d: declutter %.3f ms per full pass" % ms)
 	if not _measure:
-		_check(ms < MAX_DECLUTTER_MS, "declutter too slow: %.2f ms" % ms)
+		check(ms < MAX_DECLUTTER_MS, "declutter too slow: %.2f ms" % ms)
 	map.queue_free()
 	await process_frame
 
@@ -172,12 +161,12 @@ func _test_selection_pinned(map: Node3D, layer: SettlementLayer) -> void:
 				if layer.marker_in_tier(i) and not layer.marker_visible(i) and (data.settlements[i]["px"] as Vector2).distance_to(paris) < 80.0:
 					small = str(data.settlements[i]["id"])
 					break
-			if not _check(small != "", "a hidden settlement near Paris at 330"):
+			if not check(small != "", "a hidden settlement near Paris at 330"):
 				return
 			layer.select(small)
 			layer.declutter()
 		var index: int = data.index_by_id[small]
-		_check(layer.marker_visible(index), "selected %s stays shown at %.0f" % [small, distance])
-		_check(layer.marker_visible(layer.capital_index()), "capital still shown with a selection at %.0f" % distance)
+		check(layer.marker_visible(index), "selected %s stays shown at %.0f" % [small, distance])
+		check(layer.marker_visible(layer.capital_index()), "capital still shown with a selection at %.0f" % distance)
 	layer.select("")
 	layer.declutter()

@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot TB2 (désencombrement de la carte de campagne, plan
 ## `docs/design/2026-10-02-campagne-tob.md` § 3) : un seul signe par ville et par palier de zoom,
@@ -6,21 +6,16 @@ extends SceneTree
 ## sélection, brouillard de guerre en voile de parchemin, nuages réservés à la météo réelle.
 ## Usage : godot --headless --path game --script res://tests/tb2_declutter_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const PARIS := Vector2(2213.2, 3203.9)
 ## Paliers de zoom vérifiés : vue large, moyenne, proche (distance caméra, unités carte).
 const SCREEN := Vector2i(1600, 900)
 const TIERS: Array[float] = [1100.0, 400.0, 90.0]
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	if _failures == 0:
-		print("tb2_declutter OK")
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 func _run() -> void:
@@ -41,7 +36,7 @@ func _run() -> void:
 	root.add_child(map)
 	for i in 5:
 		await process_frame
-	if not _check(map.load_ok and map.sim != null, "campaign map failed to start"):
+	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		map.queue_free()
 		return
 	_test_fog(map)
@@ -57,17 +52,17 @@ func _run() -> void:
 func _test_fog(map: Node3D) -> void:
 	var material: ShaderMaterial = map.terrain.material
 	var fog := MapReadability.section("fog_of_war")
-	_check(not fog.is_empty(), "fog_of_war block missing in data/ui/campaign_map.json")
+	check(not fog.is_empty(), "fog_of_war block missing in data/ui/campaign_map.json")
 	var veil: Color = material.get_shader_parameter("fog_veil_color")
-	_check(veil.r > veil.g and veil.g > veil.b, "fog veil should be a warm parchment tone, got %s" % veil)
-	_check(veil.get_luminance() < 0.75, "fog veil should not be a white wash (luminance %.2f)" % veil.get_luminance())
+	check(veil.r > veil.g and veil.g > veil.b, "fog veil should be a warm parchment tone, got %s" % veil)
+	check(veil.get_luminance() < 0.75, "fog veil should not be a white wash (luminance %.2f)" % veil.get_luminance())
 	var dim := float(material.get_shader_parameter("fog_dim"))
-	_check(dim >= 0.55 and dim < 0.9, "fogged ground should be dimmed but readable (dim %.2f)" % dim)
-	_check(float(material.get_shader_parameter("fog_desaturation")) >= 0.4, "fogged ground should be desaturated")
+	check(dim >= 0.55 and dim < 0.9, "fogged ground should be dimmed but readable (dim %.2f)" % dim)
+	check(float(material.get_shader_parameter("fog_desaturation")) >= 0.4, "fogged ground should be desaturated")
 	# La brume résiduelle ne doit plus couvrir le relief (elle montait à 0,66 avant TB2). Le
 	# palier de zoom peut encore la réduire (`_apply_close_tiers`), jamais l'augmenter.
-	_check(float(material.get_shader_parameter("fog_mist_max")) <= 0.15, "residual mist must stay thin")
-	_check(float(material.get_shader_parameter("fog_mist_glow")) <= 0.05, "mist must not glow (it washed the ground white)")
+	check(float(material.get_shader_parameter("fog_mist_max")) <= 0.15, "residual mist must stay thin")
+	check(float(material.get_shader_parameter("fog_mist_glow")) <= 0.05, "mist must not glow (it washed the ground white)")
 	print("tb2 fog: veil %s dim %.2f desaturation %.2f mist_max %.2f" % [veil.to_html(false), dim, float(material.get_shader_parameter("fog_desaturation")), float(material.get_shader_parameter("fog_mist_max"))])
 
 
@@ -83,35 +78,35 @@ func _test_borders(map: Node3D) -> void:
 	map.hovered_index = 0
 	map.selected_index = 0
 	borders.update_view(300.0)
-	_check(float(material.get_shader_parameter("fr1_rest_width_scale")) <= 0.7, "rest borders should be thinner")
-	_check(float(material.get_shader_parameter("fr1_rest_saturation")) <= 0.6, "rest borders should be less saturated")
-	_check(float(material.get_shader_parameter("fr1_rest_glow_scale")) <= 0.4, "rest borders should barely glow")
-	_check(is_zero_approx(float(material.get_shader_parameter("fr1_focus"))), "political map: no global full intensity")
-	_check(borders.focus_factions() == Vector2i.ZERO, "nothing hovered or selected: no realm in focus")
+	check(float(material.get_shader_parameter("fr1_rest_width_scale")) <= 0.7, "rest borders should be thinner")
+	check(float(material.get_shader_parameter("fr1_rest_saturation")) <= 0.6, "rest borders should be less saturated")
+	check(float(material.get_shader_parameter("fr1_rest_glow_scale")) <= 0.4, "rest borders should barely glow")
+	check(is_zero_approx(float(material.get_shader_parameter("fr1_focus"))), "political map: no global full intensity")
+	check(borders.focus_factions() == Vector2i.ZERO, "nothing hovered or selected: no realm in focus")
 	var rest := borders.intensity_of(paris)
-	_check(rest <= 0.5, "border intensity out of selection should be at most half, got %.2f" % rest)
+	check(rest <= 0.5, "border intensity out of selection should be at most half, got %.2f" % rest)
 	# Sélection : le royaume de la province passe à pleine intensité, les autres restent au repos.
 	map.selected_index = paris
 	borders.update_view(301.0)
 	var france := borders.faction_index("fac_france")
-	_check(france > 0 and int(material.get_shader_parameter("fr1_focus_b")) == france, "selecting Paris should put France in focus")
-	_check(is_equal_approx(borders.intensity_of(paris), 1.0), "selected realm at full intensity")
-	_check(borders.intensity_of(guyenne) <= 0.5, "other realms stay at rest while France is selected")
+	check(france > 0 and int(material.get_shader_parameter("fr1_focus_b")) == france, "selecting Paris should put France in focus")
+	check(is_equal_approx(borders.intensity_of(paris), 1.0), "selected realm at full intensity")
+	check(borders.intensity_of(guyenne) <= 0.5, "other realms stay at rest while France is selected")
 	# Survol.
 	map.selected_index = 0
 	map.hovered_index = guyenne
 	borders.update_view(302.0)
-	_check(int(material.get_shader_parameter("fr1_focus_a")) == borders.faction_index("fac_england"), "hovering Guyenne should put England in focus")
-	_check(is_equal_approx(borders.intensity_of(guyenne), 1.0) and borders.intensity_of(paris) <= 0.5, "hovered realm only at full intensity")
+	check(int(material.get_shader_parameter("fr1_focus_a")) == borders.faction_index("fac_england"), "hovering Guyenne should put England in focus")
+	check(is_equal_approx(borders.intensity_of(guyenne), 1.0) and borders.intensity_of(paris) <= 0.5, "hovered realm only at full intensity")
 	map.hovered_index = 0
 	# Mode Diplomatie : tout à pleine intensité.
 	modes.set_mode("diplomacy")
 	borders.update_view(303.0)
-	_check(is_equal_approx(float(material.get_shader_parameter("fr1_focus")), 1.0), "diplomacy map shows every border in full")
-	_check(is_equal_approx(borders.intensity_of(paris), 1.0), "diplomacy map: full intensity")
+	check(is_equal_approx(float(material.get_shader_parameter("fr1_focus")), 1.0), "diplomacy map shows every border in full")
+	check(is_equal_approx(borders.intensity_of(paris), 1.0), "diplomacy map: full intensity")
 	modes.set_mode("political")
 	borders.update_view(304.0)
-	_check(borders.intensity_of(paris) <= 0.5, "back to political: borders at rest again")
+	check(borders.intensity_of(paris) <= 0.5, "back to political: borders at rest again")
 	print("tb2 borders: rest intensity %.2f (width %.2f x alpha %.2f), saturation %.2f, glow %.2f ; full on selection, hover, diplomacy" % [rest, borders.rest_value("width_scale"), borders.rest_value("alpha_scale"), borders.rest_value("saturation"), borders.rest_value("glow_scale")])
 
 
@@ -157,7 +152,7 @@ func _test_signs(map: Node3D) -> void:
 	var sim: Object = map.sim
 	var layer: SettlementLayer = map.settlement_layer
 	var limit := int(MapReadability.section("signs").get("max_per_town", 0))
-	_check(limit == 1, "signs.max_per_town should be 1")
+	check(limit == 1, "signs.max_per_town should be 1")
 	MapReadability.signs_layer_on = false
 	var seal_id := -1
 	if sim.has_method("debug_offer_decision"):
@@ -186,13 +181,13 @@ func _test_signs(map: Node3D) -> void:
 			worst = maxi(worst, int(signs_of[i]))
 		var towns := signs_of.size()
 		var shields := int(occupancy["markers"])
-		_check(towns > 0, "some town names expected at distance %.0f" % distance)
-		_check(worst <= limit, "at most %d sign per town at distance %.0f, got %d" % [limit, distance, worst])
-		_check(extras.is_empty(), "no hammer, seal or encounter sign on the political map at distance %.0f" % distance)
+		check(towns > 0, "some town names expected at distance %.0f" % distance)
+		check(worst <= limit, "at most %d sign per town at distance %.0f, got %d" % [limit, distance, worst])
+		check(extras.is_empty(), "no hammer, seal or encounter sign on the political map at distance %.0f" % distance)
 		if distance >= 400.0:
 			# Vue moyenne et large : l'écu est réservé aux lieux majeurs (rang 3 et 4).
 			for i: int in signs_of:
-				_check(int(signs_of[i]) == 0 or layer._marker_rank[i] >= 3, "minor place %s should lose its shield at distance %.0f" % [layer.data.settlements[i]["id"], distance])
+				check(int(signs_of[i]) == 0 or layer._marker_rank[i] >= 3, "minor place %s should lose its shield at distance %.0f" % [layer.data.settlements[i]["id"], distance])
 		print("tb2 signs: distance %.0f -> %d places named on screen, %d shields, %d other signs, max %d per place" % [distance, towns, shields, extras.size(), worst])
 	# Sceau d'incident : caché en mode politique (sauf dernier tour), montré par la couche et par
 	# le mode Mécontentement.
@@ -201,24 +196,24 @@ func _test_signs(map: Node3D) -> void:
 	if seal != null:
 		await _look(map, Vector2(seal.get("world").x, seal.get("world").z), 400.0)
 		var urgent := int(seal.call("turns_left")) <= 1
-		_check(seal.visible == urgent, "incident seal hidden on the political map unless it expires this turn")
+		check(seal.visible == urgent, "incident seal hidden on the political map unless it expires this turn")
 		map.map_modes.set_mode("unrest")
 		await process_frame
-		_check(seal.visible, "incident seal shown on the unrest map")
+		check(seal.visible, "incident seal shown on the unrest map")
 		map.map_modes.set_mode("political")
 		MapReadability.signs_layer_on = true
 		await process_frame
-		_check(seal.visible, "incident seal shown by the signs layer")
+		check(seal.visible, "incident seal shown by the signs layer")
 		MapReadability.signs_layer_on = false
 		await process_frame
 	else:
 		print("tb2 signs: incident staging unavailable (seal checks skipped)")
-	_check(not MapReadability.sign_shown("construction", "political"), "construction hammers hidden on the political map")
-	_check(MapReadability.sign_shown("construction", "wealth"), "construction hammers shown on the wealth map")
-	_check(not MapReadability.sign_shown("encounter", "political"), "encounter sites hidden by default")
-	_check(MapReadability.sign_shown("encounter", "political", false, true), "encounter sites shown while an army is selected")
-	_check(MapReadability.sign_shown("encounter", "political", true), "a claimed or expiring encounter stays visible")
-	_check(not map.construction_markers.visible, "construction markers node hidden on the political map")
+	check(not MapReadability.sign_shown("construction", "political"), "construction hammers hidden on the political map")
+	check(MapReadability.sign_shown("construction", "wealth"), "construction hammers shown on the wealth map")
+	check(not MapReadability.sign_shown("encounter", "political"), "encounter sites hidden by default")
+	check(MapReadability.sign_shown("encounter", "political", false, true), "encounter sites shown while an army is selected")
+	check(MapReadability.sign_shown("encounter", "political", true), "a claimed or expiring encounter stays visible")
+	check(not map.construction_markers.visible, "construction markers node hidden on the political map")
 
 
 ## 4. Étiquettes : hiérarchie typographique, aucun nom coupé en bord d'écran, noms de région en
@@ -227,9 +222,9 @@ func _test_labels(map: Node3D) -> void:
 	var layer: SettlementLayer = map.settlement_layer
 	var data: SettlementData = layer.data
 	var paris := int(data.index_by_id.get("set_paris", -1))
-	if _check(paris >= 0, "set_paris missing"):
-		_check(layer._marker_rank[paris] == 4 and layer.label_is_small_caps(paris), "capital names should be set in small caps")
-		_check(SettlementLayer.has_small_caps(layer._labels[paris].font), "EB Garamond should provide true small caps (smcp)")
+	if check(paris >= 0, "set_paris missing"):
+		check(layer._marker_rank[paris] == 4 and layer.label_is_small_caps(paris), "capital names should be set in small caps")
+		check(SettlementLayer.has_small_caps(layer._labels[paris].font), "EB Garamond should provide true small caps (smcp)")
 	var roman := 0
 	var minor := 0
 	for i in data.settlements.size():
@@ -237,9 +232,9 @@ func _test_labels(map: Node3D) -> void:
 			minor += 1
 			if not layer.label_is_small_caps(i):
 				roman += 1
-	_check(minor > 0 and roman >= minor - 3, "towns below capital rank should be set in roman (%d of %d)" % [roman, minor])
+	check(minor > 0 and roman >= minor - 3, "towns below capital rank should be set in roman (%d of %d)" % [roman, minor])
 	var regions: RegionLabels = map.strategic.region_labels
-	_check(regions != null, "StrategicView.region_labels missing")
+	check(regions != null, "StrategicView.region_labels missing")
 	# Centres de vue : Paris, puis des points où des villes tombent près des bords (Manche, Loire).
 	var spots: Array[Vector2] = [PARIS, PARIS + Vector2(-140.0, -90.0), PARIS + Vector2(60.0, 170.0)]
 	var cut_total := 0
@@ -269,18 +264,18 @@ func _test_labels(map: Node3D) -> void:
 				var screen: Rect2 = map.get_viewport().get_visible_rect()
 				var town_rects: Array[Rect2] = layer.screen_label_rects(map.camera)
 				for rect in regions.placed_rects:
-					_check(screen.encloses(rect), "region name cut by the screen edge at distance %.0f" % distance)
+					check(screen.encloses(rect), "region name cut by the screen edge at distance %.0f" % distance)
 					for other in town_rects:
-						_check(not other.intersects(rect), "region name over a town name at distance %.0f" % distance)
+						check(not other.intersects(rect), "region name over a town name at distance %.0f" % distance)
 				if spot == PARIS:
 					print("tb2 labels: distance %.0f -> %d region names (%s), weight %.2f" % [distance, regions.placed_rects.size(), ", ".join(regions.placed_names.slice(0, 4)), regions.weight])
 					if distance == 400.0:
-						_check(regions.visible and regions.placed_rects.size() >= 2, "region names expected in the medium view, got %d" % regions.placed_rects.size())
-						_check(MapReadability.number("region_labels", "alpha", 1.0) <= 0.6, "region names should stay discreet")
+						check(regions.visible and regions.placed_rects.size() >= 2, "region names expected in the medium view, got %d" % regions.placed_rects.size())
+						check(MapReadability.number("region_labels", "alpha", 1.0) <= 0.6, "region names should stay discreet")
 					elif distance == 90.0:
-						_check(regions.placed_rects.is_empty(), "no region name in the close view")
-	_failures += cut_total
-	_check(names_total > 50, "label sample too small (%d)" % names_total)
+						check(regions.placed_rects.is_empty(), "no region name in the close view")
+	failures += cut_total
+	check(names_total > 50, "label sample too small (%d)" % names_total)
 	print("tb2 labels: %d names and shields checked over %d views, %d cut by the screen edge (placement rect %s)" % [names_total, TIERS.size() * spots.size(), cut_total, layer.label_safe_rect()])
 
 
@@ -288,7 +283,7 @@ func _test_labels(map: Node3D) -> void:
 ## province sélectionnée.
 func _test_clouds(map: Node3D) -> void:
 	var view: CampaignWeatherView = map.weather_view
-	if not _check(view != null and view.enabled, "campaign weather view missing"):
+	if not check(view != null and view.enabled, "campaign weather view missing"):
 		return
 	var terrain_material: ShaderMaterial = map.terrain.material
 	var cloud_material: ShaderMaterial = view._cloud_material
@@ -296,32 +291,27 @@ func _test_clouds(map: Node3D) -> void:
 	var close := view.cloud_alpha_at(90.0)
 	var medium := view.cloud_alpha_at(400.0)
 	var wide := view.cloud_alpha_at(1100.0)
-	_check(is_zero_approx(close), "no cloud plane in the close view")
-	_check(medium <= 0.2 and medium < wide * 0.6, "clouds should be thinner in the medium view (%.2f vs %.2f wide)" % [medium, wide])
+	check(is_zero_approx(close), "no cloud plane in the close view")
+	check(medium <= 0.2 and medium < wide * 0.6, "clouds should be thinner in the medium view (%.2f vs %.2f wide)" % [medium, wide])
 	# Météo réelle seulement : pas d'ombre de nuage par temps clair, nuées coupées sans météo.
-	_check(is_zero_approx(view.shadow_amount_for("clear")) and is_zero_approx(view.shadow_amount_for("fog")), "no cloud shadow without real clouds")
-	_check(view.shadow_amount_for("rain") > 0.0 and view.shadow_amount_for("rain") <= 0.15, "light cloud shadow under real rain")
+	check(is_zero_approx(view.shadow_amount_for("clear")) and is_zero_approx(view.shadow_amount_for("fog")), "no cloud shadow without real clouds")
+	check(view.shadow_amount_for("rain") > 0.0 and view.shadow_amount_for("rain") <= 0.15, "light cloud shadow under real rain")
 	var saved: Dictionary = view.weather.duplicate(true)
 	view.weather = {}
 	view._upload_mask()
-	_check(not bool(cloud_material.get_shader_parameter("weather_enabled")), "clear weather everywhere: cloud plane disabled")
+	check(not bool(cloud_material.get_shader_parameter("weather_enabled")), "clear weather everywhere: cloud plane disabled")
 	view.weather = saved
 	view._upload_mask()
 	# Province sélectionnée dégagée (nuées, ombres de nuées et nappes de brume).
 	var paris: int = map.map_data.index_of_id("prov_ile_de_france")
 	map.selected_index = paris
 	await _look(map, PARIS, 400.0)
-	_check(int(cloud_material.get_shader_parameter("weather_clear_id")) == paris, "clouds should clear the selected province")
-	_check(int(terrain_material.get_shader_parameter("weather_clear_id")) == paris, "ground mist should clear the selected province")
+	check(int(cloud_material.get_shader_parameter("weather_clear_id")) == paris, "clouds should clear the selected province")
+	check(int(terrain_material.get_shader_parameter("weather_clear_id")) == paris, "ground mist should clear the selected province")
 	map.selected_index = 0
 	await process_frame
 	await process_frame
-	_check(int(cloud_material.get_shader_parameter("weather_clear_id")) == 0, "no cleared province once the selection is dropped")
+	check(int(cloud_material.get_shader_parameter("weather_clear_id")) == 0, "no cleared province once the selection is dropped")
 	print("tb2 clouds: alpha close %.2f, medium %.2f, wide %.2f ; cloud shadow clear %.2f, rain %.2f" % [close, medium, wide, view.shadow_amount_for("clear"), view.shadow_amount_for("rain")])
 
 
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("tb2_declutter: " + message)
-	return condition

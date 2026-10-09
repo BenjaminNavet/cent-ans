@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot OM1 (ADR 0115) : monde rectangulaire synthétique 7168 × 6144.
 ## - `ReliefPyramid` : grille E0 28 × 24 lue dans map.json, décalage `root_origin_tiles` [0, 5]
@@ -14,7 +14,6 @@ extends SceneTree
 const WORLD := Vector2i(7168, 6144)
 const ORIGIN := Vector2i(0, 5)
 
-var _failures := 0
 var _dir := ""
 
 
@@ -22,15 +21,7 @@ func _init() -> void:
 	await process_frame
 	_dir = OS.get_user_data_dir().path_join("om1_wide_world")
 	await _run()
-	print("om1_wide_world_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("om1_wide_world_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
@@ -42,10 +33,10 @@ func _run() -> void:
 
 
 func _test_chunk_grid() -> void:
-	_check(TerrainBuilder.chunk_grid_for(Vector2i(4096, 4096)) == Vector3i(256, 16, 16), "4096² keeps 16 × 16 chunks of 256")
-	_check(TerrainBuilder.chunk_grid_for(WORLD) == Vector3i(256, 28, 24), "7168 × 6144 has 28 × 24 chunks of 256")
-	_check(TerrainBuilder.chunk_grid_for(Vector2i(512, 512)) == Vector3i(32, 16, 16), "512² test map keeps 16 × 16 chunks")
-	_check(ReliefQuadtree.root_depth(16, 16) == 0 and ReliefQuadtree.root_depth(28, 24) == 2, "root depth mirrors relief_lod")
+	check(TerrainBuilder.chunk_grid_for(Vector2i(4096, 4096)) == Vector3i(256, 16, 16), "4096² keeps 16 × 16 chunks of 256")
+	check(TerrainBuilder.chunk_grid_for(WORLD) == Vector3i(256, 28, 24), "7168 × 6144 has 28 × 24 chunks of 256")
+	check(TerrainBuilder.chunk_grid_for(Vector2i(512, 512)) == Vector3i(32, 16, 16), "512² test map keeps 16 × 16 chunks")
+	check(ReliefQuadtree.root_depth(16, 16) == 0 and ReliefQuadtree.root_depth(28, 24) == 2, "root depth mirrors relief_lod")
 
 
 ## Jeu de données synthétique : map.json 7168 × 6144 (sans tuiles E0), manifeste E1 avec décalage
@@ -66,19 +57,19 @@ func _test_pyramid() -> ReliefPyramid:
 			_write(_dir.path_join("pyramid/E1/%d_%d.png" % [col, row]), "")
 	var pyramid := ReliefPyramid.new()
 	var ok := pyramid.load_manifest(_dir)
-	if not _check(ok, "synthetic pyramid should load: %s" % pyramid.load_error):
+	if not check(ok, "synthetic pyramid should load: %s" % pyramid.load_error):
 		return null
-	_check(pyramid.root_cols == 28 and pyramid.root_rows == 24, "root grid %d × %d" % [pyramid.root_cols, pyramid.root_rows])
-	_check(pyramid.origin_tiles == ORIGIN, "origin offset read from the manifest")
-	_check(pyramid.cols(1) == 56 and pyramid.rows(1) == 48, "E1 grid 56 × 48")
+	check(pyramid.root_cols == 28 and pyramid.root_rows == 24, "root grid %d × %d" % [pyramid.root_cols, pyramid.root_rows])
+	check(pyramid.origin_tiles == ORIGIN, "origin offset read from the manifest")
+	check(pyramid.cols(1) == 56 and pyramid.rows(1) == 48, "E1 grid 56 × 48")
 	# Cache (40, 6) → monde (40, 16).
-	_check(pyramid.has_tile(1, 40, 16) and pyramid.has_tile(1, 41, 17), "offset tiles present in world coordinates")
-	_check(not pyramid.has_tile(1, 40, 6), "cache coordinates are not world coordinates")
-	_check(pyramid.tile_path(1, 41, 17).ends_with("E1/41_7.png"), "file path back in cache coordinates: %s" % pyramid.tile_path(1, 41, 17))
-	_check(pyramid.max_level_under(0, 20, 8) == 1, "ancestor index in world coordinates")
-	_check(pyramid.finest_level_at(40 * 128.0 + 10.0, 16 * 128.0 + 10.0) == 1, "finest level at a world point")
-	_check(ReliefPyramid.cache_to_world(3, 5, 7, ORIGIN) == Vector2i(5, 47), "cache_to_world at E3")
-	_check(ReliefPyramid.world_to_cache(3, 5, 47, ORIGIN) == Vector2i(5, 7), "world_to_cache at E3")
+	check(pyramid.has_tile(1, 40, 16) and pyramid.has_tile(1, 41, 17), "offset tiles present in world coordinates")
+	check(not pyramid.has_tile(1, 40, 6), "cache coordinates are not world coordinates")
+	check(pyramid.tile_path(1, 41, 17).ends_with("E1/41_7.png"), "file path back in cache coordinates: %s" % pyramid.tile_path(1, 41, 17))
+	check(pyramid.max_level_under(0, 20, 8) == 1, "ancestor index in world coordinates")
+	check(pyramid.finest_level_at(40 * 128.0 + 10.0, 16 * 128.0 + 10.0) == 1, "finest level at a world point")
+	check(ReliefPyramid.cache_to_world(3, 5, 7, ORIGIN) == Vector2i(5, 47), "cache_to_world at E3")
+	check(ReliefPyramid.world_to_cache(3, 5, 47, ORIGIN) == Vector2i(5, 7), "world_to_cache at E3")
 	return pyramid
 
 
@@ -89,7 +80,7 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 	var qt := ReliefQuadtree.new()
 	root.add_child(qt)
 	qt.setup_selection(pyramid, bounds)
-	_check(qt.root_depth_used() == 2, "root depth 2 for 28 × 24")
+	check(qt.root_depth_used() == 2, "root depth 2 for 28 × 24")
 	var camera := Camera3D.new()
 	camera.fov = 60.0
 	camera.far = 200000.0
@@ -103,15 +94,15 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 	qt._wanted.clear()
 	qt._page_cache.clear()
 	qt._select_roots()
-	_check(qt._items.size() == 42, "far view: %d nodes, 42 roots expected" % qt._items.size())
+	check(qt._items.size() == 42, "far view: %d nodes, 42 roots expected" % qt._items.size())
 	var area := 0.0
 	for item: Dictionary in qt._items:
 		var size := qt.node_size(int(item["n"]))
 		area += size * size
-	_check(is_equal_approx(area, float(WORLD.x * WORLD.y)), "roots cover the world exactly")
+	check(is_equal_approx(area, float(WORLD.x * WORLD.y)), "roots cover the world exactly")
 	qt.max_vertex_px = 4.0
 	if not qt.is_native():
-		_check(false, "ReliefLod (native) unavailable: build core/build.sh")
+		check(false, "ReliefLod (native) unavailable: build core/build.sh")
 		return
 	var views := [
 		[Vector3(3584.0, 60000.0, 3072.0), Vector3(3584.0, 0.0, 3072.1)],
@@ -127,10 +118,10 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 		var native: Dictionary = cmp["native"]
 		var gd: Dictionary = cmp["gdscript"]
 		var label := str(view[0])
-		_check((native["keys"] as PackedInt64Array).size() > 0, "%s: empty selection" % label)
-		_check(native["keys"] == gd["keys"], "%s: node keys differ (%d native / %d GDScript)" % [label, (native["keys"] as PackedInt64Array).size(), (gd["keys"] as PackedInt64Array).size()])
-		_check(native["fine"] == gd["fine"] and native["coarse"] == gd["coarse"], "%s: pages differ" % label)
-		_check(cmp["native_wanted"] == cmp["gd_wanted"], "%s: wanted pages differ" % label)
+		check((native["keys"] as PackedInt64Array).size() > 0, "%s: empty selection" % label)
+		check(native["keys"] == gd["keys"], "%s: node keys differ (%d native / %d GDScript)" % [label, (native["keys"] as PackedInt64Array).size(), (gd["keys"] as PackedInt64Array).size()])
+		check(native["fine"] == gd["fine"] and native["coarse"] == gd["coarse"], "%s: pages differ" % label)
+		check(cmp["native_wanted"] == cmp["gd_wanted"], "%s: wanted pages differ" % label)
 	# Vue sur les tuiles décalées : la page E1 monde (40 + i, 16 + j) est voulue.
 	camera.look_at_from_position(Vector3(5200.0, 40.0, 2150.0), Vector3(5250.0, 0.0, 2100.0))
 	qt._prepare_camera(camera)
@@ -139,8 +130,8 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 	for key: int in qt._wanted_order:
 		wanted_levels[ReliefPyramid.level_of_key(key)] = true
 		if ReliefPyramid.level_of_key(key) == 1:
-			_check(pyramid.has_tile(1, ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key)), "wanted E1 page listed by the pyramid")
-	_check(wanted_levels.has(1), "E1 pages of the offset cache wanted near them")
+			check(pyramid.has_tile(1, ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key)), "wanted E1 page listed by the pyramid")
+	check(wanted_levels.has(1), "E1 pages of the offset cache wanted near them")
 	qt.queue_free()
 	camera.queue_free()
 
@@ -153,11 +144,11 @@ func _test_camera() -> void:
 	root.add_child(rig)
 	rig.edge_pan_enabled = false
 	rig.setup(Rect2(Vector2.ZERO, Vector2(WORLD)), 500.0)
-	_check(is_equal_approx(rig.target_focus.x, 3584.0) and is_equal_approx(rig.target_focus.z, 3072.0), "camera starts at the world centre")
+	check(is_equal_approx(rig.target_focus.x, 3584.0) and is_equal_approx(rig.target_focus.z, 3072.0), "camera starts at the world centre")
 	rig._move_target(Vector3(10000.0, 0.0, 10000.0))
-	_check(is_equal_approx(rig.target_focus.x, 7168.0) and is_equal_approx(rig.target_focus.z, 6144.0), "camera clamped to 7168 × 6144: %s" % rig.target_focus)
+	check(is_equal_approx(rig.target_focus.x, 7168.0) and is_equal_approx(rig.target_focus.z, 6144.0), "camera clamped to 7168 × 6144: %s" % rig.target_focus)
 	rig._move_target(Vector3(-20000.0, 0.0, -20000.0))
-	_check(rig.target_focus.x == 0.0 and rig.target_focus.z == 0.0, "camera clamped to the origin")
+	check(rig.target_focus.x == 0.0 and rig.target_focus.z == 0.0, "camera clamped to the origin")
 	rig.queue_free()
 
 

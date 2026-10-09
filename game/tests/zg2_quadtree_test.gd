@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot ZG2 (relief streamé en quadtree, ADR 0036), sans dépendre du cache réel :
 ## une pyramide factice est écrite dans `user://zg2_test/` (tuiles E0 versionnées recopiées comme
@@ -14,25 +14,15 @@ extends SceneTree
 ##  5. quadtree absent quand le manifeste ne liste aucune tuile.
 ## Usage : godot --headless --path game --script res://tests/zg2_quadtree_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TEST_DIR := "user://zg2_test"
 
-var _failures := 0
 var _changed := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("zg2_quadtree_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("zg2_quadtree_test: " + message)
-	return condition
+	finish()
 
 
 ## Tuiles E1 de la tuile E0 (8, 7) (Paris) et E2 de son quart nord-ouest ; contenu = tuile E0.
@@ -70,25 +60,25 @@ func _write_fixture(map_dir: String, list_tiles: bool) -> String:
 func _run() -> void:
 	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
 	var map_data := MapData.load_from_dir(map_dir)
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var manifest := _write_fixture(map_dir, true)
 	var empty_manifest := _write_fixture(map_dir, false)
 
 	# 1. Pyramide.
 	var pyramid := ReliefPyramid.new()
-	_check(pyramid.load_manifest(map_dir, manifest), "fixture pyramid should load: %s" % pyramid.load_error)
-	_check(pyramid.max_level == 2 and pyramid.tile_count() == 8, "expected E2 max and 8 tiles, got E%d / %d" % [pyramid.max_level, pyramid.tile_count()])
-	_check(pyramid.has_tile(1, 17, 15) and not pyramid.has_tile(1, 18, 15), "has_tile E1")
-	_check(pyramid.has_tile(0, 8, 7), "E0 tiles from data/map/height")
+	check(pyramid.load_manifest(map_dir, manifest), "fixture pyramid should load: %s" % pyramid.load_error)
+	check(pyramid.max_level == 2 and pyramid.tile_count() == 8, "expected E2 max and 8 tiles, got E%d / %d" % [pyramid.max_level, pyramid.tile_count()])
+	check(pyramid.has_tile(1, 17, 15) and not pyramid.has_tile(1, 18, 15), "has_tile E1")
+	check(pyramid.has_tile(0, 8, 7), "E0 tiles from data/map/height")
 	# Tuile E2 (32, 28) : [2047,5 ; 2111,5] × [1791,5 ; 1855,5].
-	_check(pyramid.finest_level_at(2060.0, 1800.0) == 2, "finest level in the E2 block")
-	_check(pyramid.finest_level_at(2200.0, 1900.0) == 1, "finest level in the E1 block")
-	_check(pyramid.finest_level_at(100.0, 100.0) == 0, "finest level elsewhere = E0")
-	_check(pyramid.max_level_under(0, 8, 7) == 2 and pyramid.max_level_under(1, 17, 15) == 1, "max_level_under")
-	_check(pyramid.finest_ancestor(5, 32 * 8, 28 * 8) == 2 and pyramid.finest_ancestor(3, 70, 60) == 1, "finest_ancestor")
+	check(pyramid.finest_level_at(2060.0, 1800.0) == 2, "finest level in the E2 block")
+	check(pyramid.finest_level_at(2200.0, 1900.0) == 1, "finest level in the E1 block")
+	check(pyramid.finest_level_at(100.0, 100.0) == 0, "finest level elsewhere = E0")
+	check(pyramid.max_level_under(0, 8, 7) == 2 and pyramid.max_level_under(1, 17, 15) == 1, "max_level_under")
+	check(pyramid.finest_ancestor(5, 32 * 8, 28 * 8) == 2 and pyramid.finest_ancestor(3, 70, 60) == 1, "finest_ancestor")
 	var none := ReliefPyramid.new()
-	_check(not none.load_manifest(map_dir, empty_manifest) and not none.is_available(), "empty manifest must not be available")
+	check(not none.load_manifest(map_dir, empty_manifest) and not none.is_available(), "empty manifest must not be available")
 
 	# 2. Terrain + quadtree au-dessus de Paris.
 	var world := Node3D.new()
@@ -97,14 +87,14 @@ func _run() -> void:
 	terrain.pyramid_manifest_path = manifest
 	world.add_child(terrain)
 	terrain.build(map_data)
-	if not _check(terrain.quadtree != null, "quadtree should be active with the fixture pyramid"):
+	if not check(terrain.quadtree != null, "quadtree should be active with the fixture pyramid"):
 		return
 	terrain.chunk_surface_changed.connect(func(_i: int) -> void: _changed += 1)
 	var hidden := true
 	for child in terrain.get_children():
 		if child is MeshInstance3D and child.visible:
 			hidden = false
-	_check(hidden, "E0 chunks should be hidden under the quadtree")
+	check(hidden, "E0 chunks should be hidden under the quadtree")
 	var camera := Camera3D.new()
 	world.add_child(camera)
 	var paris := Vector2(2213.2, 1923.9)
@@ -119,11 +109,11 @@ func _run() -> void:
 		terrain.wait_fine_jobs()
 	var qt := terrain.quadtree
 	print("zg2_quadtree_test: %s" % JSON.stringify(qt.perf_stats()))
-	_check(qt.item_count() > 8, "expected several quadtree nodes, got %d" % qt.item_count())
-	_check(qt.page_count() >= 4, "expected E1/E2 pages resident, got %d" % qt.page_count())
-	_check(terrain.fine_ready(), "quadtree should settle")
-	_check(terrain.chunk_level(terrain.chunk_index_at(paris.x, paris.y)) == 2, "Paris chunk should be at level 2")
-	_check(_changed > 0, "chunk_surface_changed should fire when pages arrive")
+	check(qt.item_count() > 8, "expected several quadtree nodes, got %d" % qt.item_count())
+	check(qt.page_count() >= 4, "expected E1/E2 pages resident, got %d" % qt.page_count())
+	check(terrain.fine_ready(), "quadtree should settle")
+	check(terrain.chunk_level(terrain.chunk_index_at(paris.x, paris.y)) == 2, "Paris chunk should be at level 2")
+	check(_changed > 0, "chunk_surface_changed should fire when pages arrive")
 	# Vue parchemin (caméra nulle) : plus rien de voulu, le quadtree doit se déclarer stable
 	# (régression PB1 : `is_settled()` restait faux à d = 1500).
 	qt.update_view(camera)
@@ -132,7 +122,7 @@ func _run() -> void:
 		await process_frame
 		if qt.is_settled():
 			break
-	_check(qt.is_settled(), "quadtree should settle when the camera is gone (parchment view)")
+	check(qt.is_settled(), "quadtree should settle when the camera is gone (parchment view)")
 
 	# 3. Surface : E1 (17, 15) = contenu de h_8_7 ; son pixel (100, 200) est centré en
 	#    origine + (100,5 ; 200,5) × 0,25.
@@ -151,19 +141,19 @@ func _run() -> void:
 	# ZG8 : hauteur affichée (relief local exagéré) de l'altitude de la page.
 	var expected := MapData.display_height(-200.0 + decoded.decode_u16((200 * 512 + 100) * 2) / 65535.0 * 5000.0, x, y)
 	if qt.surface_height_at(x, y) == qt.surface_height_at(x, y):  # page E1 chargée
-		_check(absf(qt.surface_height_at(x, y) - expected) < 1e-4, "E1 surface %f vs %f" % [qt.surface_height_at(x, y), expected])
+		check(absf(qt.surface_height_at(x, y) - expected) < 1e-4, "E1 surface %f vs %f" % [qt.surface_height_at(x, y), expected])
 		var index := terrain.chunk_index_at(x, y)
 		var grid := terrain.surface_grid(index)
 		var local := Vector2(x, y) - Vector2((index % terrain.chunks_x) * terrain.chunk_px, (index / terrain.chunks_x) * terrain.chunk_px)
-		_check(absf(TerrainBuilder.grid_height(grid, local.x, local.y) - qt.surface_height_at(x, y)) < 1e-4, "snapshot grid matches surface")
+		check(absf(TerrainBuilder.grid_height(grid, local.x, local.y) - qt.surface_height_at(x, y)) < 1e-4, "snapshot grid matches surface")
 	else:
-		_check(false, "E1 page (17, 15) should be resident")
+		check(false, "E1 page (17, 15) should be resident")
 	var t_probe := Time.get_ticks_usec()
 	for k in 20000:
 		terrain.surface_height_at(paris.x + (k % 141) * 0.07, paris.y + (k / 141) * 0.07)
 	print("zg2_quadtree_test: surface_height_at %.2f us/call" % ((Time.get_ticks_usec() - t_probe) / 20000.0))
-	_check(is_nan(qt.surface_height_at(100.0, 100.0)), "no page far from Paris")
-	_check(absf(terrain.surface_height_at(100.0, 100.0) - map_data.surface_world_at(100.0, 100.0)) < 1e-4, "heightmap fallback outside pages")
+	check(is_nan(qt.surface_height_at(100.0, 100.0)), "no page far from Paris")
+	check(absf(terrain.surface_height_at(100.0, 100.0) - map_data.surface_world_at(100.0, 100.0)) < 1e-4, "heightmap fallback outside pages")
 
 	# 4. LRU borné.
 	terrain.queue_free()
@@ -181,13 +171,13 @@ func _run() -> void:
 		small.update_lod(camera.global_position, 16.0, f, 170.0)
 		small.wait_fine_jobs()
 		await process_frame
-	_check(small.quadtree.page_count() <= 12, "LRU should bound resident pages, got %d" % small.quadtree.page_count())
+	check(small.quadtree.page_count() <= 12, "LRU should bound resident pages, got %d" % small.quadtree.page_count())
 
 	# 5. Sans tuile listée : repli sans quadtree.
 	var fallback := TerrainBuilder.new()
 	fallback.pyramid_manifest_path = empty_manifest
 	world.add_child(fallback)
 	fallback.build(map_data)
-	_check(fallback.quadtree == null, "no quadtree without pyramid tiles")
+	check(fallback.quadtree == null, "no quadtree without pyramid tiles")
 	world.queue_free()
 	await process_frame

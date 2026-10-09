@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot DZ (frontières diplomatiques) sur la vraie simulation :
 ##  1. mode Diplomatie : les frontières prennent les couleurs de position (palette imposée), la
@@ -9,25 +9,14 @@ extends SceneTree
 ##  4. panneau de diplomatie : la carte suit la faction choisie, bascule « vos relations ».
 ## Usage : godot --headless --path game --script res://tests/dz_diplo_borders_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const PARIS := "prov_ile_de_france"
 const GUYENNE := "prov_guyenne"
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("dz_diplo_borders_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("dz_diplo_borders_test: " + message)
-	return condition
+	finish()
 
 
 func _palette_color(borders: FactionBorders, faction: String) -> Color:
@@ -56,11 +45,11 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null, "campaign map failed to start"):
+	if not check(map.load_ok and map.sim != null, "campaign map failed to start"):
 		map.queue_free()
 		return
 	var sim: Object = map.sim
-	if not _check(sim.has_method("get_faction_stances_for"), "get_faction_stances_for missing (rebuild core)"):
+	if not check(sim.has_method("get_faction_stances_for"), "get_faction_stances_for missing (rebuild core)"):
 		map.queue_free()
 		return
 	var borders: FactionBorders = map.faction_borders
@@ -69,8 +58,8 @@ func _run() -> void:
 
 	# 1. Mode Diplomatie : palette de positions vue de la France.
 	modes.set_mode("diplomacy")
-	_check(borders.color_override_active(), "diplomacy mode should override border colours")
-	_check(_same(_palette_color(borders, "fac_france"), DiplomaticStances.COLORS["self"]), "player borders should use the 'self' colour")
+	check(borders.color_override_active(), "diplomacy mode should override border colours")
+	check(_same(_palette_color(borders, "fac_france"), DiplomaticStances.COLORS["self"]), "player borders should use the 'self' colour")
 	var of_france: Dictionary = sim.call("get_faction_stances_for", "fac_france")
 	var enemy := ""
 	for faction in of_france:
@@ -78,28 +67,28 @@ func _run() -> void:
 			enemy = str(faction)
 			break
 	if enemy != "":
-		_check(_same(_palette_color(borders, enemy), DiplomaticStances.COLORS["war"]), "enemy %s borders should be red" % enemy)
+		check(_same(_palette_color(borders, enemy), DiplomaticStances.COLORS["war"]), "enemy %s borders should be red" % enemy)
 	else:
 		print("dz_diplo_borders_test: no enemy of France holding land at the start (red check skipped)")
 
 	# 2. Clic sur la Guyenne : vue de l'Angleterre.
 	var guyenne_index: int = map.map_data.index_of_id(GUYENNE)
 	map._on_province_selected(guyenne_index)
-	_check(modes.focus_faction == "fac_england", "clicking Guyenne should focus England, got '%s'" % modes.focus_faction)
-	_check(_same(_palette_color(borders, "fac_england"), DiplomaticStances.COLORS["self"]), "England borders should be 'self' in its view")
+	check(modes.focus_faction == "fac_england", "clicking Guyenne should focus England, got '%s'" % modes.focus_faction)
+	check(_same(_palette_color(borders, "fac_england"), DiplomaticStances.COLORS["self"]), "England borders should be 'self' in its view")
 	var of_england: Dictionary = sim.call("get_faction_stances_for", "fac_england")
 	var france_seen := str(of_england.get("fac_france", ""))
-	_check(_same(_palette_color(borders, "fac_france"), DiplomaticStances.COLORS[france_seen]), "France borders should show England's stance '%s'" % france_seen)
-	_check(modes.hover_text(GUYENNE) == "terres de %s" % facade.call("faction_short_name", "fac_england"), "hover: %s" % modes.hover_text(GUYENNE))
+	check(_same(_palette_color(borders, "fac_france"), DiplomaticStances.COLORS[france_seen]), "France borders should show England's stance '%s'" % france_seen)
+	check(modes.hover_text(GUYENNE) == "terres de %s" % facade.call("faction_short_name", "fac_england"), "hover: %s" % modes.hover_text(GUYENNE))
 	var legend: Node = modes.legend()
-	_check(legend != null and _legend_text(legend).contains("relations de"), "legend title should name the observed faction")
+	check(legend != null and _legend_text(legend).contains("relations de"), "legend title should name the observed faction")
 
 	# 3. Clic sur Paris : retour au joueur ; sortie du mode : héraldique.
 	map._on_province_selected(map.map_data.index_of_id(PARIS))
-	_check(modes.focus_faction == "", "clicking our lands should return to the player's view")
+	check(modes.focus_faction == "", "clicking our lands should return to the player's view")
 	modes.set_mode("political")
-	_check(not borders.color_override_active(), "leaving diplomacy should restore heraldic borders")
-	_check(_same(_palette_color(borders, "fac_france"), heraldic_france), "France heraldic colour should be back")
+	check(not borders.color_override_active(), "leaving diplomacy should restore heraldic borders")
+	check(_same(_palette_color(borders, "fac_france"), heraldic_france), "France heraldic colour should be back")
 
 	# 4. Panneau de diplomatie : la carte suit la faction choisie.
 	var panel_script: Script = load("res://scripts/ui/diplomacy/diplomacy_map_view.gd")
@@ -107,9 +96,9 @@ func _run() -> void:
 	panel.set("sim", sim)
 	panel.set("player_faction", "fac_france")
 	panel.set("faction_id", "fac_england")
-	_check(str(panel.call("map_viewer")) == "fac_england", "panel map should show the selected faction's view")
+	check(str(panel.call("map_viewer")) == "fac_england", "panel map should show the selected faction's view")
 	panel.set("their_view", false)
-	_check(str(panel.call("map_viewer")) == "", "toggle off: panel map shows our relations")
+	check(str(panel.call("map_viewer")) == "", "toggle off: panel map shows our relations")
 	panel.free()
 	map.queue_free()
 	await process_frame

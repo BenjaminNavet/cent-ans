@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot P2e (chantier PO, phase 2) : critères C1-C3 (ADR 0097) sur les menus secondaires migrés
 ## (démos, batailles historiques, rejeux, réglages, pause, crédits, sauvegarder/charger).
@@ -27,7 +27,6 @@ const MAX_DISTINCT_SIZES := 4
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
 
-var _failures := 0
 var _c1_failures := 0
 var _c1_texts := 0
 var _modal_checks := 0
@@ -50,16 +49,9 @@ func _init() -> void:
 	print("p2e_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
 	print("p2e_ui_test C2 (zone MODAL): %s (%d contrôles)" % ["OK" if _modal_failures == 0 else "%d failure(s)" % _modal_failures, _modal_checks])
 	print("p2e_ui_test C3: %s (tailles vues : %s)" % ["OK" if c3_ok else "FAIL", str(sizes)])
-	var failed := _failures + _c1_failures + _modal_failures + (0 if c3_ok else 1)
+	var failed := failures + _c1_failures + _modal_failures + (0 if c3_ok else 1)
 	print("p2e_ui_test done, %d failure(s)" % failed)
 	quit(1 if failed > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("p2e_ui_test: " + message)
-	return condition
 
 
 func _run() -> void:
@@ -184,7 +176,7 @@ func _collect_tool_texts(node: Node) -> void:
 			var found := regex.search(text)
 			if found != null:
 				_c1_failures += 1
-				_check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
+				check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
 				break
 	for child in node.get_children():
 		_collect_tool_texts(child)

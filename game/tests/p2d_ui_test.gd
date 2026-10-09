@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Chantier PO phase 2, lot P2d (ADR 0097, bible DA § 12) : critères C1-C3 sur les écrans de
 ## siège côté campagne et le résultat naval auto-résolu, en headless.
@@ -14,13 +14,11 @@ extends SceneTree
 ##  3. `NavalPreBattleDialog` (`debug_stage_naval`) — résultat naval auto-résolu.
 ## Usage : godot --headless --path game --script res://tests/p2d_ui_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const MIN_SIZE := 14
 const MAX_DISTINCT_SIZES := 4
 const C2_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1280, 640)]
 
 var _helper: Object
-var _failures := 0
 var _sizes: Dictionary = {}
 
 
@@ -37,24 +35,17 @@ func _init() -> void:
 	var c1: int = _helper.get("_c1_failures")
 	var c1_texts: int = _helper.get("_c1_texts")
 	print("p2d_ui_test C1: %s (%d textes lus)" % ["OK" if c1 == 0 else "%d failure(s)" % c1, c1_texts])
-	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
+	check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
 		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(_sizes)])
-	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
+	check(_sizes.size() <= MAX_DISTINCT_SIZES,
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 	var values := _sizes.keys()
 	values.sort()
-	print("p2d_ui_test C3: %s (tailles vues : %s)" % ["OK" if _failures == 0 else "voir plus haut", str(values)])
+	print("p2d_ui_test C3: %s (tailles vues : %s)" % ["OK" if failures == 0 else "voir plus haut", str(values)])
 	_helper.free()
-	var total := _failures + c1
+	var total := failures + c1
 	print("p2d_ui_test: %s" % ("OK" if total == 0 else "%d failure(s)" % total))
 	quit(1 if total > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("p2d_ui_test: " + message)
-	return condition
 
 
 ## Motifs C1 de `po_ui_test.gd` (constante interne au fichier, reconstruite ici : voir l'en-tête).
@@ -89,13 +80,13 @@ func _check_fits_screen(control: Control, label: String) -> void:
 			continue
 		var view: Vector2 = root.get_visible_rect().size
 		var rect := control.get_global_rect()
-		_check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
+		check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
 			"%s at %s: %s overflows the screen %s" % [label, resolution, rect, view])
 
 
 func _run() -> void:
 	if not ClassDB.class_exists("CampaignSim"):
-		_check(false, "CampaignSim missing (run core/build.sh)")
+		check(false, "CampaignSim missing (run core/build.sh)")
 		return
 	# Chaque écran a son propre `CampaignSim` (même approche que `ub1_ui_test.gd`) :
 	# `debug_stage_siege`/`debug_stage_naval` déplacent des armées et
@@ -130,7 +121,7 @@ func _load_map() -> Node3D:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
+	if not check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return null
 	var sim: Object = map.sim
@@ -144,18 +135,18 @@ func _load_map() -> Node3D:
 
 func _check_capture_window(map: Node) -> void:
 	var sim: Object = map.sim
-	if not _check(sim.has_method("debug_capture_place"), "debug_capture_place missing (run core/build.sh)"):
+	if not check(sim.has_method("debug_capture_place"), "debug_capture_place missing (run core/build.sh)"):
 		return
 	var controller: CaptureController = map.get("capture_fate")
-	if not _check(controller != null, "campaign map has no CaptureController"):
+	if not check(controller != null, "campaign map has no CaptureController"):
 		return
-	if not _check(sim.call("debug_capture_place", "prov_guyenne"), "debug capture of Guyenne refused"):
+	if not check(sim.call("debug_capture_place", "prov_guyenne"), "debug capture of Guyenne refused"):
 		return
 	map.refresh_all()
 	await process_frame
 	await process_frame
 	var window: ChronicleWindow = controller.window
-	if not _check(window.visible, "capture window should open after the capture"):
+	if not check(window.visible, "capture window should open after the capture"):
 		return
 	_collect(window)
 	await _check_fits_screen(window, "ChronicleWindow (sort de la ville prise)")
@@ -164,7 +155,7 @@ func _check_capture_window(map: Node) -> void:
 	var view_rect := Rect2(Vector2.ZERO, root.get_visible_rect().size)
 	for row in options.get_children():
 		var choice := (row as Control).get_child(0) as Control
-		_check(view_rect.encloses(choice.get_global_rect().grow(-0.5)) and window.get_global_rect().encloses(choice.get_global_rect().grow(-0.5)),
+		check(view_rect.encloses(choice.get_global_rect().grow(-0.5)) and window.get_global_rect().encloses(choice.get_global_rect().grow(-0.5)),
 			"Q7: capture choice %s at %s outside the screen / window" % [_text_of_button(choice), choice.get_global_rect()])
 	# Referme la décision (« Occuper », premier choix) pour ne pas gêner la suite du test.
 	var box: VBoxContainer = window.get("_options_box")
@@ -181,16 +172,16 @@ func _check_panel_fits(dialog: PreBattleDialog, label: String, resolution: Vecto
 	var view: Vector2 = root.get_visible_rect().size
 	var rect := dialog.panel.get_global_rect()
 	var minimum := dialog.panel.get_combined_minimum_size()
-	_check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
+	check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
 		"C2: %s at %s: panel %s overflows the screen %s" % [label, resolution, rect, view])
-	_check(minimum.x <= view.x + 0.5 and minimum.y <= view.y + 0.5,
+	check(minimum.x <= view.x + 0.5 and minimum.y <= view.y + 0.5,
 		"C2: %s at %s: panel minimum size %s exceeds the screen %s" % [label, resolution, minimum, view])
 	# Rangée d'actions (bas du panneau) : jamais rognée, les régiments défilent à sa place.
 	for button: Button in [dialog.withdraw_button, dialog.auto_button, dialog.fight_button]:
 		if not button.is_visible_in_tree():
 			continue
 		var button_rect := button.get_global_rect()
-		_check(rect.encloses(button_rect.grow(-0.5)) and button_rect.end.y <= view.y + 0.5,
+		check(rect.encloses(button_rect.grow(-0.5)) and button_rect.end.y <= view.y + 0.5,
 			"C2: %s at %s: button « %s » %s outside the panel %s" % [label, resolution, button.text, button_rect, rect])
 	print("p2d_ui_test C2: %s at %s: panel %s, minimum %s" % [label, resolution, rect, minimum])
 
@@ -213,15 +204,15 @@ func _check_siege_dialog() -> void:
 		root.size = resolution
 		await process_frame
 		var sim: Object = ClassDB.instantiate("CampaignSim")
-		if not _check(sim.has_method("debug_stage_siege"), "debug_stage_siege missing (run core/build.sh)"):
+		if not check(sim.has_method("debug_stage_siege"), "debug_stage_siege missing (run core/build.sh)"):
 			return
-		if not _check(sim.call("new_campaign", _data_dir(), "fac_france", 1337), "new_campaign failed"):
+		if not check(sim.call("new_campaign", _data_dir(), "fac_france", 1337), "new_campaign failed"):
 			return
 		var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
-		if not _check(not armies.is_empty(), "no French army to stage a siege"):
+		if not check(not armies.is_empty(), "no French army to stage a siege"):
 			continue
 		var index: int = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
-		if not _check(index >= 0, "debug_stage_siege refused"):
+		if not check(index >= 0, "debug_stage_siege refused"):
 			continue
 		var dialog: PreBattleDialog = (load("res://scenes/battle/pre_battle_dialog.tscn") as PackedScene).instantiate()
 		root.add_child(dialog)
@@ -230,8 +221,8 @@ func _check_siege_dialog() -> void:
 		dialog.show_battle(sim, pending[0])
 		await process_frame
 		await process_frame
-		_check(dialog.visible and bool(pending[0].get("siege", false)), "the staged battle should be a siege")
-		_check(dialog.fight_button.text == "Donner l'assaut", "siege dialog: fight button should read « Donner l'assaut »")
+		check(dialog.visible and bool(pending[0].get("siege", false)), "the staged battle should be a siege")
+		check(dialog.fight_button.text == "Donner l'assaut", "siege dialog: fight button should read « Donner l'assaut »")
 		if first:
 			_collect(dialog)
 			first = false
@@ -240,7 +231,7 @@ func _check_siege_dialog() -> void:
 		var withdrawn := [-1]
 		dialog.withdraw_requested.connect(func(i: int) -> void: withdrawn[0] = i)
 		dialog.withdraw_button.emit_signal("pressed")
-		_check(withdrawn[0] == index, "« Maintenir le siège » should emit withdraw_requested")
+		check(withdrawn[0] == index, "« Maintenir le siège » should emit withdraw_requested")
 		dialog.queue_free()
 		await process_frame
 	root.size = Vector2i(1280, 720)
@@ -258,18 +249,18 @@ func _check_naval_dialog() -> void:
 		root.size = resolution
 		await process_frame
 		var sim: Object = ClassDB.instantiate("CampaignSim")
-		if not _check(sim.has_method("debug_stage_naval"), "debug_stage_naval missing (run core/build.sh)"):
+		if not check(sim.has_method("debug_stage_naval"), "debug_stage_naval missing (run core/build.sh)"):
 			return
-		if not _check(sim.call("new_campaign", _data_dir(), "fac_england", 1337), "new_campaign failed"):
+		if not check(sim.call("new_campaign", _data_dir(), "fac_england", 1337), "new_campaign failed"):
 			return
 		var armies: Array = BattleScene.main_armies(sim, "fac_england", "fac_france")
-		if not _check(not armies.is_empty(), "no English army to stage a naval interception"):
+		if not check(not armies.is_empty(), "no English army to stage a naval interception"):
 			continue
 		var index: int = sim.call("debug_stage_naval", armies[0], "set_calais", "fac_france")
-		if not _check(index >= 0, "debug_stage_naval refused"):
+		if not check(index >= 0, "debug_stage_naval refused"):
 			continue
 		var pending: Array = sim.call("get_pending_naval_battles")
-		if not _check(pending.size() == 1, "one pending naval battle expected"):
+		if not check(pending.size() == 1, "one pending naval battle expected"):
 			continue
 		var dialog := NavalPreBattleDialog.new()
 		root.add_child(dialog)
@@ -277,8 +268,8 @@ func _check_naval_dialog() -> void:
 		dialog.show_naval(sim, pending[0])
 		await process_frame
 		await process_frame
-		_check(dialog.visible and not dialog.fight_button.visible, "naval dialog: only auto-resolve is offered")
-		_check(not dialog.chance_label.text.is_empty(), "naval dialog: estimated chances missing")
+		check(dialog.visible and not dialog.fight_button.visible, "naval dialog: only auto-resolve is offered")
+		check(not dialog.chance_label.text.is_empty(), "naval dialog: estimated chances missing")
 		if first:
 			_collect(dialog)
 			first = false
@@ -288,8 +279,8 @@ func _check_naval_dialog() -> void:
 		await process_frame
 		# Résolution automatique : rend des évènements et vide l'attente (`NavalCampaign._on_auto`).
 		var result: Dictionary = sim.call("auto_resolve_naval_battle", index)
-		_check(bool(result.get("ok", false)), "auto_resolve_naval_battle failed: %s" % [result])
-		_check((sim.call("get_pending_naval_battles") as Array).is_empty(), "the naval interception should be resolved")
+		check(bool(result.get("ok", false)), "auto_resolve_naval_battle failed: %s" % [result])
+		check((sim.call("get_pending_naval_battles") as Array).is_empty(), "the naval interception should be resolved")
 	root.size = Vector2i(1280, 720)
 	await process_frame
 

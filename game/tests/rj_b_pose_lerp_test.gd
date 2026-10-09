@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## RJ-b : figurines et régiments interpolés entre deux pas de simulation (0,1 s).
 ## Bataille de démonstration (France 1337, armées principales), tous les régiments en marche
@@ -13,8 +13,6 @@ extends SceneTree
 
 const FRAME := 1.0 / 60.0
 
-var _failures := 0
-
 
 func _init() -> void:
 	var sim: Object = ClassDB.instantiate("CampaignSim")
@@ -28,7 +26,7 @@ func _init() -> void:
 	var setup: Dictionary = sim.call("get_battle_setup", index)
 	var plain := _battle(setup, false)
 	var blended := _battle(setup, true)
-	_check(blended.has_method("set_pose_lerp") and bool(blended.call("get_pose_lerp")), "set_pose_lerp missing")
+	check(blended.has_method("set_pose_lerp") and bool(blended.call("get_pose_lerp")), "set_pose_lerp missing")
 	# Tous les régiments marchent vers le centre du camp adverse ; 3 s simulées au pas fixe.
 	for battle in [plain, blended]:
 		_march(battle)
@@ -38,16 +36,16 @@ func _init() -> void:
 	print("rj_b_pose_lerp_test: ticks %d" % int(blended.call("get_ticks")))
 	var capacities := _capacities(blended.call("get_units"))
 	var mover := _moving_unit(blended, capacities)
-	_check(mover >= 0, "no marching regiment after 3 s")
+	check(mover >= 0, "no marching regiment after 3 s")
 	if mover >= 0:
 		var smooth := _track(blended, capacities, mover, 120)
 		var stepped := _track(plain, capacities, mover, 120)
 		print("rj_b_pose_lerp_test: regiment %d, figure moved on %d/%d frames (%d without lerp), max/mean step %.2f (%.2f without)" % [mover, smooth["moved"], smooth["frames"], stepped["moved"], smooth["ratio"], stepped["ratio"]])
-		_check(int(smooth["moved"]) >= int(smooth["frames"]) * 0.8, "blended figure still frozen between steps: %s" % [smooth])
-		_check(int(stepped["moved"]) <= int(stepped["frames"]) * 0.3, "plain figure should move only at steps: %s" % [stepped])
-		_check(float(smooth["ratio"]) < 2.5, "blended steps uneven: %s" % [smooth])
-		_check(int(smooth["centre_moved"]) >= int(smooth["frames"]) * 0.8, "regiment centre still stepped: %s" % [smooth])
-		_check(float(smooth["ground_speed"]) > 0.2, "ground_speed missing or zero: %s" % [smooth])
+		check(int(smooth["moved"]) >= int(smooth["frames"]) * 0.8, "blended figure still frozen between steps: %s" % [smooth])
+		check(int(stepped["moved"]) <= int(stepped["frames"]) * 0.3, "plain figure should move only at steps: %s" % [stepped])
+		check(float(smooth["ratio"]) < 2.5, "blended steps uneven: %s" % [smooth])
+		check(int(smooth["centre_moved"]) >= int(smooth["frames"]) * 0.8, "regiment centre still stepped: %s" % [smooth])
+		check(float(smooth["ground_speed"]) > 0.2, "ground_speed missing or zero: %s" % [smooth])
 	var idle := _battle(setup, true)
 	idle.call("set_ai", "attacker", false)
 	idle.call("set_ai", "defender", false)
@@ -56,15 +54,7 @@ func _init() -> void:
 		idle.call("get_units")
 	_check_idle_versions(idle, capacities)
 	_bench(setup)
-	print("rj_b_pose_lerp_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("rj_b_pose_lerp_test: " + message)
-	return condition
+	finish()
 
 
 func _battle(setup: Dictionary, lerp: bool) -> Object:
@@ -144,7 +134,7 @@ func _check_idle_versions(battle: Object, capacities: PackedInt32Array) -> void:
 	var first: Array = battle.call("get_soldier_buffers", capacities)
 	var ticks := int(battle.call("get_ticks"))
 	var frac := float(battle.call("get_step_fraction"))
-	_check(frac >= 0.0 and frac <= 1.0, "step fraction out of range: %f" % frac)
+	check(frac >= 0.0 and frac <= 1.0, "step fraction out of range: %f" % frac)
 	if frac + FRAME / 0.1 >= 1.0:
 		battle.call("tick", FRAME)
 		first = battle.call("get_soldier_buffers", capacities)
@@ -164,7 +154,7 @@ func _check_idle_versions(battle: Object, capacities: PackedInt32Array) -> void:
 		if a != b:
 			continue  # figures qui bougent dans un régiment arrêté (mêlée, poussée)
 		idle += 1
-		_check((first[2] as PackedInt64Array)[id] == (second[2] as PackedInt64Array)[id], "idle regiment %d got a new buffer version" % id)
+		check((first[2] as PackedInt64Array)[id] == (second[2] as PackedInt64Array)[id], "idle regiment %d got a new buffer version" % id)
 	print("rj_b_pose_lerp_test: %d idle regiments kept their buffer version" % idle)
 
 

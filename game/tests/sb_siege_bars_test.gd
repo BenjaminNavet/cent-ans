@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## SB (TW2, ADR 0107) : barres de vie flottantes des ouvrages de siège.
 ## 1. `SiegeHealthBars.states` (fonction pure) : visibilité (endommagée ou visée, masquée
@@ -10,7 +10,6 @@ extends SceneTree
 ##
 ## Usage : godot --headless --path game --script res://tests/sb_siege_bars_test.gd
 
-var _failures := 0
 var _scene: Node = null
 
 
@@ -21,15 +20,7 @@ func _init() -> void:
 	await _check_integration()
 	if _scene != null and is_instance_valid(_scene):
 		_scene.queue_free()
-	print("sb_siege_bars_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("sb_siege_bars_test: " + message)
-	return condition
+	finish()
 
 
 func _fake_siege() -> Dictionary:
@@ -51,23 +42,23 @@ func _fake_siege() -> Dictionary:
 func _check_states() -> void:
 	var ground := func(_x: float, _z: float) -> float: return 2.0
 	var s := SiegeHealthBars.states(_fake_siege(), ground, 8.0)
-	_check(not s["piece:0"]["shown"], "intact untouched wall hidden")
-	_check(s["piece:1"]["shown"], "battered gate shown")
-	_check(absf(float(s["piece:1"]["ratio"]) - 0.6) < 1e-4, "gate ratio 0.6: %s" % s["piece:1"]["ratio"])
-	_check(str(s["piece:1"]["text"]) == "Porte : 324/540", "gate caption: %s" % s["piece:1"]["text"])
-	_check(s["piece:2"]["shown"], "damaged wall shown although not under attack")
-	_check(str(s["piece:2"]["text"]) == "Muraille : 420/700", "wall caption: %s" % s["piece:2"]["text"])
-	_check(s["piece:3"]["shown"], "wall under attack shown although intact")
-	_check(not s["piece:4"]["shown"], "breached wall hidden (rubble)")
-	_check(not s["engine:7"]["shown"], "full-strength ram hidden")
-	_check(s["engine:8"]["shown"] and absf(float(s["engine:8"]["ratio"]) - 0.25) < 1e-4, "hurt tower shown at 25 %")
-	_check(str(s["engine:8"]["text"]) == "Beffroi : 9/36", "tower caption: %s" % s["engine:8"]["text"])
+	check(not s["piece:0"]["shown"], "intact untouched wall hidden")
+	check(s["piece:1"]["shown"], "battered gate shown")
+	check(absf(float(s["piece:1"]["ratio"]) - 0.6) < 1e-4, "gate ratio 0.6: %s" % s["piece:1"]["ratio"])
+	check(str(s["piece:1"]["text"]) == "Porte : 324/540", "gate caption: %s" % s["piece:1"]["text"])
+	check(s["piece:2"]["shown"], "damaged wall shown although not under attack")
+	check(str(s["piece:2"]["text"]) == "Muraille : 420/700", "wall caption: %s" % s["piece:2"]["text"])
+	check(s["piece:3"]["shown"], "wall under attack shown although intact")
+	check(not s["piece:4"]["shown"], "breached wall hidden (rubble)")
+	check(not s["engine:7"]["shown"], "full-strength ram hidden")
+	check(s["engine:8"]["shown"] and absf(float(s["engine:8"]["ratio"]) - 0.25) < 1e-4, "hurt tower shown at 25 %")
+	check(str(s["engine:8"]["text"]) == "Beffroi : 9/36", "tower caption: %s" % s["engine:8"]["text"])
 	var journal: Array[Rect2] = [Rect2(10, 60, 360, 240)]
-	_check(SiegeHealthBars._covered(Rect2(300, 250, 172, 33), journal), "bar under the battle log is covered")
-	_check(not SiegeHealthBars._covered(Rect2(500, 250, 172, 33), journal), "bar clear of the battle log is shown")
+	check(SiegeHealthBars._covered(Rect2(300, 250, 172, 33), journal), "bar under the battle log is covered")
+	check(not SiegeHealthBars._covered(Rect2(500, 250, 172, 33), journal), "bar clear of the battle log is shown")
 	var world: Vector3 = s["piece:1"]["world"]
-	_check(absf(world.y - (2.0 + 8.0 + SiegeHealthBars.WALL_LIFT)) < 1e-4 and absf(world.x - 27.0) < 1e-4, "gate bar above the wall walk: %s" % world)
-	_check(str(s["piece:1"]["side"]) == "defender" and str(s["engine:8"]["side"]) == "attacker", "owner sides")
+	check(absf(world.y - (2.0 + 8.0 + SiegeHealthBars.WALL_LIFT)) < 1e-4 and absf(world.x - 27.0) < 1e-4, "gate bar above the wall walk: %s" % world)
+	check(str(s["piece:1"]["side"]) == "defender" and str(s["engine:8"]["side"]) == "attacker", "owner sides")
 
 
 func _check_node() -> void:
@@ -87,35 +78,35 @@ func _check_node() -> void:
 	holder.add_child(bars)
 	bars.sync(_fake_siege())
 	await process_frame
-	_check(bars.bar("piece:0") == null, "no bar built for an intact untouched wall")
+	check(bars.bar("piece:0") == null, "no bar built for an intact untouched wall")
 	var gate: Control = bars.bar("piece:1")
-	if _check(gate != null, "gate bar built"):
-		_check(gate.visible, "gate bar on screen")
-		_check(gate.size == SiegeHealthBars.BAR_SIZE, "constant screen size: %s" % gate.size)
-		_check(absf(float(gate.get("ratio")) - 0.6) < 1e-4, "gate bar ratio")
-		_check((gate.get("caption") as Label).visible, "caption shown on a piece under attack")
-		_check((gate.get("fill") as Color).is_equal_approx(Color(0.7, 0.1, 0.1)), "defender colour")
+	if check(gate != null, "gate bar built"):
+		check(gate.visible, "gate bar on screen")
+		check(gate.size == SiegeHealthBars.BAR_SIZE, "constant screen size: %s" % gate.size)
+		check(absf(float(gate.get("ratio")) - 0.6) < 1e-4, "gate bar ratio")
+		check((gate.get("caption") as Label).visible, "caption shown on a piece under attack")
+		check((gate.get("fill") as Color).is_equal_approx(Color(0.7, 0.1, 0.1)), "defender colour")
 	var wall: Control = bars.bar("piece:2")
-	if _check(wall != null, "damaged wall bar built"):
-		_check(not (wall.get("caption") as Label).visible, "no caption on a quiet damaged wall (hover only)")
+	if check(wall != null, "damaged wall bar built"):
+		check(not (wall.get("caption") as Label).visible, "no caption on a quiet damaged wall (hover only)")
 	# Repaired to full and no longer attacked: hidden.
 	var healed := _fake_siege()
 	healed["pieces"][1]["hp"] = 540.0
 	healed["pieces"][1]["under_attack"] = false
 	bars.sync(healed)
 	await process_frame
-	_check(not gate.visible, "gate bar hidden once intact and quiet")
+	check(not gate.visible, "gate bar hidden once intact and quiet")
 	holder.queue_free()
 	await process_frame
 
 
 func _check_integration() -> void:
 	if not ClassDB.class_exists("CampaignSim") or not ClassDB.instantiate("CampaignSim").has_method("debug_stage_siege"):
-		_check(false, "CampaignSim.debug_stage_siege not registered (run core/build.sh)")
+		check(false, "CampaignSim.debug_stage_siege not registered (run core/build.sh)")
 		return
 	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
 	var sim: Object = ClassDB.instantiate("CampaignSim")
-	if not _check(sim.call("new_campaign", data_dir, "fac_france", 1337), "new_campaign"):
+	if not check(sim.call("new_campaign", data_dir, "fac_france", 1337), "new_campaign"):
 		return
 	var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
 	var index: int = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
@@ -127,24 +118,24 @@ func _check_integration() -> void:
 	var battle: Object = _scene.battle
 	var siege: Dictionary = battle.call("get_siege")
 	var pieces: Array = siege.get("pieces", [])
-	if not _check(not pieces.is_empty(), "siege pieces"):
+	if not check(not pieces.is_empty(), "siege pieces"):
 		return
-	_check((pieces[0] as Dictionary).has("under_attack"), "pieces expose under_attack")
-	_check(siege.has("engines"), "siege exposes engines")
+	check((pieces[0] as Dictionary).has("under_attack"), "pieces expose under_attack")
+	check(siege.has("engines"), "siege exposes engines")
 	for engine in siege.get("engines", []):
-		_check(str(engine["kind"]) in ["ram", "tower"] and float(engine["max_hp"]) > 0.0, "engine entry: %s" % engine)
+		check(str(engine["kind"]) in ["ram", "tower"] and float(engine["max_hp"]) > 0.0, "engine entry: %s" % engine)
 	var view: BattleSiege = _scene.siege_view
-	if not _check(view != null and view.health_bars != null, "siege view has health bars"):
+	if not check(view != null and view.health_bars != null, "siege view has health bars"):
 		return
 	var gate := int(siege["gate"])
 	var key := "piece:%d" % gate
-	_check(not view.health_bars.state(key).get("shown", true), "intact gate bar hidden at the start")
+	check(not view.health_bars.state(key).get("shown", true), "intact gate bar hidden at the start")
 	var max_hp := float(pieces[gate]["max_hp"])
 	battle.call("debug_set_piece_hp", gate, max_hp * 0.5)
 	for _i in 3:
 		await process_frame
 	var s := view.health_bars.state(key)
-	_check(bool(s.get("shown", false)), "gate bar shown at half HP")
-	_check(absf(float(s.get("ratio", 0.0)) - 0.5) < 0.01, "gate bar at 50 %%: %s" % s.get("ratio"))
-	_check(str(s.get("text", "")).begins_with("Porte : "), "gate caption: %s" % s.get("text"))
-	_check(view.health_bars.side_colors.get("defender") == _scene.side_colors.get("defender"), "bars use the scene's side colours")
+	check(bool(s.get("shown", false)), "gate bar shown at half HP")
+	check(absf(float(s.get("ratio", 0.0)) - 0.5) < 0.01, "gate bar at 50 %%: %s" % s.get("ratio"))
+	check(str(s.get("text", "")).begins_with("Porte : "), "gate caption: %s" % s.get("text"))
+	check(view.health_bars.side_colors.get("defender") == _scene.side_colors.get("defender"), "bars use the scene's side colours")

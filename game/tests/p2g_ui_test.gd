@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Chantier PO phase 2 (P2g, ADR 0097) : Techniques, Diplomatie, Cour, Fiche de personnage et
 ## `SaveLoadDialog` (carte et menu d'accueil) rejoignent la zone `MODAL` de `UiLayout`.
@@ -11,7 +11,6 @@ extends SceneTree
 ## - C3 : aucune taille de police sous `Caption` (14 px de base), 4 tailles au plus.
 ## Usage : godot --headless --path game --script res://tests/p2g_ui_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const START_MENU := "res://scenes/start_menu.tscn"
 const MIN_SIZE := 14
 const MAX_DISTINCT_SIZES := 4
@@ -22,7 +21,6 @@ const C2_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1280, 640), Vector2i(1920
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
 
-var _failures := 0
 var _c1_failures := 0
 var _c1_texts := 0
 var _c2_failures := 0
@@ -56,33 +54,25 @@ func _init() -> void:
 	await _check_start_menu()
 	root.size = initial
 	await process_frame
-	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
+	check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
 		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(_sizes)])
-	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
+	check(_sizes.size() <= MAX_DISTINCT_SIZES,
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 	var values := _sizes.keys()
 	values.sort()
 	print("p2g_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
 	print("p2g_ui_test C2: %s (%d contrôles)%s" % ["OK" if _c2_failures == 0 else "%d failure(s)" % _c2_failures, _c2_checks,
 		"" if _resizable else " — fenêtre non redimensionnable ici"])
-	var c3 := _failures - _c1_failures - _c2_failures
+	var c3 := failures - _c1_failures - _c2_failures
 	print("p2g_ui_test C3: %s (tailles vues : %s)" % ["OK" if c3 == 0 else "%d failure(s)" % c3, str(values)])
-	print("p2g_ui_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("p2g_ui_test: " + message)
-	return condition
+	finish()
 
 
 func _check_c2(condition: bool, message: String) -> bool:
 	_c2_checks += 1
 	if not condition:
 		_c2_failures += 1
-	return _check(condition, "C2: " + message)
+	return check(condition, "C2: " + message)
 
 
 # --- Carte de campagne ---------------------------------------------------------------------
@@ -98,7 +88,7 @@ func _check_campaign() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
+	if not check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 	var layout: Node = root.get_node("/root/UiLayout")
@@ -107,7 +97,7 @@ func _check_campaign() -> void:
 	_check_c2(ui.panels.is_registered(ui.codex_hub), "CodexHub should stay registered in the panel stack")
 
 	# Techniques.
-	if _check(map.call("_tech_available"), "technologies unavailable with this simulation"):
+	if check(map.call("_tech_available"), "technologies unavailable with this simulation"):
 		map.call("_on_tech_panel_requested")
 		await _settle()
 		await _check_window(map, layout, ui.tech_panel, "TechPanel", true)
@@ -117,7 +107,7 @@ func _check_campaign() -> void:
 
 	# Diplomatie (panneau ajouté par le contrôleur, réclamé en différé par la carte).
 	var diplomacy: Node = map.diplomacy
-	if _check(diplomacy != null and diplomacy.call("available"), "diplomacy unavailable with this simulation"):
+	if check(diplomacy != null and diplomacy.call("available"), "diplomacy unavailable with this simulation"):
 		diplomacy.call("open_panel")
 		await _settle()
 		await _check_window(map, layout, diplomacy.panel, "DiplomacyPanel", true)
@@ -132,7 +122,7 @@ func _check_campaign() -> void:
 	if _check_c2(court.visible, "the court should open"):
 		await _check_window(map, layout, court, "CourtPanel", true)
 		var ids: Array = map.sim.call("get_faction_characters", "fac_france")
-		if _check(not ids.is_empty(), "the court should list characters"):
+		if check(not ids.is_empty(), "the court should list characters"):
 			ui.character_selected.emit(str(ids[0]))
 			await _settle()
 			var sheet: Control = ui.character_sheet
@@ -228,7 +218,7 @@ func _check_start_menu() -> void:
 	await _settle()
 	var layout: Node = root.get_node("/root/UiLayout")
 	var dialog: Control = menu.get("save_load_dialog")
-	if not _check(dialog != null, "start menu without SaveLoadDialog"):
+	if not check(dialog != null, "start menu without SaveLoadDialog"):
 		menu.queue_free()
 		return
 	dialog.call("open_load")
@@ -285,7 +275,7 @@ func _collect_tool_texts(node: Node) -> void:
 			var found := regex.search(text)
 			if found != null:
 				_c1_failures += 1
-				_check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
+				check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
 				break
 	for child in node.get_children():
 		_collect_tool_texts(child)

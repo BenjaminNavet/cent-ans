@@ -1,10 +1,8 @@
-extends SceneTree
+extends TestCase
 
 ## RL1 : préréglage de qualité par défaut selon le GPU détecté, sans écraser le choix du joueur.
 ## Usage : godot --headless --path game --script res://tests/rl1_quality_test.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -15,31 +13,26 @@ func _init() -> void:
 		"AMD Radeon Pro 5500M": "medium", "Apple M10": "high",
 	}
 	for adapter: String in cases:
-		_check(RenderQuality.level_for_adapter(adapter) == cases[adapter], "%s -> %s (got %s)" % [adapter, cases[adapter], RenderQuality.level_for_adapter(adapter)])
+		check(RenderQuality.level_for_adapter(adapter) == cases[adapter], "%s -> %s (got %s)" % [adapter, cases[adapter], RenderQuality.level_for_adapter(adapter)])
 	var settings: Node = root.get_node_or_null("Settings")
-	_check(settings != null, "Settings autoload")
+	check(settings != null, "Settings autoload")
 	if settings != null:
 		var path := "user://rl1_quality_%d.cfg" % OS.get_process_id()
 		settings.call("use_test_file", path)
-		_check(str(settings.call("get_value", "video/quality")) == RenderQuality.AUTO, "default is auto")
-		_check(RenderQuality.current() == RenderQuality.detected_level(), "auto resolves to the detected level")
+		check(str(settings.call("get_value", "video/quality")) == RenderQuality.AUTO, "default is auto")
+		check(RenderQuality.current() == RenderQuality.detected_level(), "auto resolves to the detected level")
 		# Choix du joueur enregistré puis relu : il l'emporte sur la détection.
 		settings.call("set_value", "video/quality", "low")
 		settings.call("load_settings", path)
-		_check(RenderQuality.current() == "low", "saved player choice kept (got %s)" % RenderQuality.current())
+		check(RenderQuality.current() == "low", "saved player choice kept (got %s)" % RenderQuality.current())
 		# Ancien fichier sans la clé : détection.
 		var config := ConfigFile.new()
 		config.set_value("video", "vsync", true)
 		config.save(path)
 		settings.call("load_settings", path)
-		_check(RenderQuality.current() == RenderQuality.detected_level(), "missing key -> detected level")
+		check(RenderQuality.current() == RenderQuality.detected_level(), "missing key -> detected level")
 		DirAccess.remove_absolute(path)
-	print("rl1_quality_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
-func _check(condition: bool, message: String) -> void:
-	if not condition:
-		_failures += 1
-		push_error("FAIL: " + message)
 		print("FAIL: " + message)

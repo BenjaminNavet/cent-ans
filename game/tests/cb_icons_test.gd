@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot CB (icônes des contrôles de bataille, pipeline DA5) :
 ## 1. chaque clé lue par les scripts de bataille (`battle_mode_<mode>`, `battle_state_<pastille>`,
@@ -16,7 +16,6 @@ const STATES := ["rout", "wavering", "under_fire", "charge", "melee", "shoot", "
 const ALERTS := ["rout", "general_down", "flanked", "reinforcements", "ammo_out", "wall_breached", "gate_destroyed"]
 const ABILITIES := ["aimed_shot", "pavise", "banner_rally", "close_ranks", "planted_pikes"]
 
-var _failures := 0
 var _drawn := {}
 
 
@@ -25,15 +24,7 @@ func _init() -> void:
 	_check_keys()
 	_check_cursors()
 	await _check_fallback()
-	print("cb_icons_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("cb_icons_test: " + message)
-	return condition
+	finish()
 
 
 static func expected_keys() -> Array[String]:
@@ -52,26 +43,26 @@ static func expected_keys() -> Array[String]:
 
 func _check_keys() -> void:
 	var library: Node = root.get_node_or_null("/root/IconLibrary")
-	if not _check(library != null, "IconLibrary autoload missing"):
+	if not check(library != null, "IconLibrary autoload missing"):
 		return
 	for key in expected_keys():
-		_check(bool(library.call("is_ink", key)), "%s has no ink icon in ink/index.json" % key)
+		check(bool(library.call("is_ink", key)), "%s has no ink icon in ink/index.json" % key)
 		var texture := HudStyle.icon(key)
-		if _check(texture != null, "%s does not load" % key):
-			_check(texture.get_width() == 128 and texture.get_height() == 128, "%s is not 128 px" % key)
+		if check(texture != null, "%s does not load" % key):
+			check(texture.get_width() == 128 and texture.get_height() == 128, "%s is not 128 px" % key)
 	var ink: Dictionary = library.get("ink")
-	_check(not ink.has("order_pavise"), "order_pavise still claimed by an ink icon")
+	check(not ink.has("order_pavise"), "order_pavise still claimed by an ink icon")
 
 
 func _check_cursors() -> void:
 	for context in BattleCursor.CONTEXTS:
-		_check(BattleCursor.has_final_art(context), "cursor %s has no PNG" % context)
+		check(BattleCursor.has_final_art(context), "cursor %s has no PNG" % context)
 		var image := BattleCursor.image(context)
-		if _check(image != null, "cursor %s does not load" % context):
-			_check(image.get_size() == Vector2i(BattleCursor.SIZE, BattleCursor.SIZE), "cursor %s is not 32 px" % context)
-			_check(image.get_pixel(16, 16).a > 0.5 or context == "move", "cursor %s is empty at its hotspot" % context)
+		if check(image != null, "cursor %s does not load" % context):
+			check(image.get_size() == Vector2i(BattleCursor.SIZE, BattleCursor.SIZE), "cursor %s is not 32 px" % context)
+			check(image.get_pixel(16, 16).a > 0.5 or context == "move", "cursor %s is empty at its hotspot" % context)
 	var placeholder := BattleCursor.placeholder("move")
-	_check(placeholder != null and placeholder.get_size() == Vector2i(32, 32), "cursor placeholder broken")
+	check(placeholder != null and placeholder.get_size() == Vector2i(32, 32), "cursor placeholder broken")
 
 
 func _check_fallback() -> void:
@@ -98,9 +89,9 @@ func _check_fallback() -> void:
 	canvas.queue_redraw()
 	for i in 4:
 		await process_frame
-	_check(bool(_drawn.get("done", false)), "fallback canvas never drew")
-	_check(bool(_drawn.get("present", false)), "present icon not drawn")
-	_check(not bool(_drawn.get("absent", true)), "missing icon should fall back to the glyph")
+	check(bool(_drawn.get("done", false)), "fallback canvas never drew")
+	check(bool(_drawn.get("present", false)), "present icon not drawn")
+	check(not bool(_drawn.get("absent", true)), "missing icon should fall back to the glyph")
 	for key in removed:
 		ink[key] = removed[key]
 	canvas.queue_free()

@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test du lot CT1 (relecture du tour de l'IA) sur la vraie simulation et les vraies données :
 ## une fin de tour dans chaque mode des Réglages « Mouvements de l'IA » :
@@ -12,10 +12,8 @@ extends SceneTree
 ## Affiche `CT1_PERF` : durée synchrone de la fin de tour et durée totale jusqu'au rapport.
 ## Usage : godot --headless --path game --script res://tests/ct1_ai_turn_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TIMEOUT_MS := 90000
 
-var _failures := 0
 var _started := 0
 var _finished := 0
 
@@ -23,19 +21,11 @@ var _finished := 0
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("ct1_ai_turn_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("ct1_ai_turn_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
-	if not _check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_ai_turn_moves"),
+	if not check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_ai_turn_moves"),
 			"CampaignSim.get_ai_turn_moves missing (run core/build.sh)"):
 		return
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -57,27 +47,27 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
+	if not check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 	var replay: AiTurnReplay = map.ai_replay
-	if not _check(replay != null, "CampaignMap.ai_replay missing"):
+	if not check(replay != null, "CampaignMap.ai_replay missing"):
 		return
 	replay.replay_started.connect(func(_shown: int, _followed: int) -> void: _started += 1)
 	replay.replay_finished.connect(func() -> void: _finished += 1)
 	var tuning := AiTurnReplay.tuning()
-	_check(int(tuning.get("max_followed_moves", -1)) >= 0, "tuning data loaded")
+	check(int(tuning.get("max_followed_moves", -1)) >= 0, "tuning data loaded")
 
 	# 1. Masquer : synchrone, rien d'enregistré.
 	settings.call("set_value", "map/ai_moves", "hide", false)
 	var t := Time.get_ticks_usec()
 	map.call("_on_end_turn")
 	var sync_ms := (Time.get_ticks_usec() - t) / 1000.0
-	_check(not replay.playing, "hide: no replay running")
-	_check(str(replay.last_stats.get("mode", "")) == "hide", "hide: mode recorded")
-	_check((map.sim.call("get_ai_turn_moves") as Array).is_empty(), "hide: the core recorded nothing")
-	_check(_report_visible(map), "hide: season report shown when _on_end_turn returns")
-	_check(_started == 0, "hide: replay never started")
+	check(not replay.playing, "hide: no replay running")
+	check(str(replay.last_stats.get("mode", "")) == "hide", "hide: mode recorded")
+	check((map.sim.call("get_ai_turn_moves") as Array).is_empty(), "hide: the core recorded nothing")
+	check(_report_visible(map), "hide: season report shown when _on_end_turn returns")
+	check(_started == 0, "hide: replay never started")
 	print("CT1_PERF hide sync %.1f ms total %.1f ms" % [sync_ms, sync_ms])
 	_close_report(map)
 
@@ -92,28 +82,28 @@ func _run() -> void:
 		map.call("_on_end_turn")
 		sync_ms = (Time.get_ticks_usec() - t) / 1000.0
 		var stats: Dictionary = replay.last_stats
-		_check(int(stats.get("moves", 0)) > 0, "%s: the core recorded AI moves" % mode)
+		check(int(stats.get("moves", 0)) > 0, "%s: the core recorded AI moves" % mode)
 		var shown := int(stats.get("shown", 0))
-		_check(shown > 0, "%s: AI moves shown (fog off)" % mode)
+		check(shown > 0, "%s: AI moves shown (fog off)" % mode)
 		if shown > 0:
-			_check(replay.playing and _started == started_before + 1, "%s: replay started" % mode)
-			_check(not _report_visible(map), "%s: season report waits for the replay" % mode)
-			_check(replay.caption_text().begins_with("Tour de l'IA"), "%s: caption shown (%s)" % [mode, replay.caption_text()])
+			check(replay.playing and _started == started_before + 1, "%s: replay started" % mode)
+			check(not _report_visible(map), "%s: season report waits for the replay" % mode)
+			check(replay.caption_text().begins_with("Tour de l'IA"), "%s: caption shown (%s)" % [mode, replay.caption_text()])
 		if mode == "show":
-			_check(int(stats.get("followed", -1)) == 0, "show: the camera follows nothing")
+			check(int(stats.get("followed", -1)) == 0, "show: the camera follows nothing")
 		else:
-			_check(int(stats.get("followed", -1)) <= int(tuning["max_followed_moves"]), "follow: capped followed moves")
+			check(int(stats.get("followed", -1)) <= int(tuning["max_followed_moves"]), "follow: capped followed moves")
 		var deadline := Time.get_ticks_msec() + TIMEOUT_MS
 		while replay.playing and Time.get_ticks_msec() < deadline:
 			await process_frame
 		var total_ms := (Time.get_ticks_usec() - t) / 1000.0
-		_check(not replay.playing, "%s: replay ended" % mode)
-		_check(_finished == finished_before + (1 if shown > 0 else 0), "%s: replay_finished emitted" % mode)
+		check(not replay.playing, "%s: replay ended" % mode)
+		check(_finished == finished_before + (1 if shown > 0 else 0), "%s: replay_finished emitted" % mode)
 		await process_frame
-		_check(_report_visible(map), "%s: season report shown after the replay" % mode)
+		check(_report_visible(map), "%s: season report shown after the replay" % mode)
 		var back := Vector2(rig.target_focus.x, rig.target_focus.z).distance_to(Vector2(focus_before.x, focus_before.z))
-		_check(back < 0.5, "%s: camera back where the player was (%.2f off)" % [mode, back])
-		_check(replay.caption_text() == "", "%s: caption hidden" % mode)
+		check(back < 0.5, "%s: camera back where the player was (%.2f off)" % [mode, back])
+		check(replay.caption_text() == "", "%s: caption hidden" % mode)
 		print("CT1_PERF %s sync %.1f ms total %.1f ms (moves %d, shown %d, followed %d, speed x4)" % [
 			mode, sync_ms, total_ms, int(stats.get("moves", 0)), shown, int(stats.get("followed", 0))])
 		_close_report(map)
@@ -132,12 +122,12 @@ func _run() -> void:
 		while replay.playing and frames < 10:
 			await process_frame
 			frames += 1
-		_check(not replay.playing, "skip: replay stopped within 10 frames")
-		_check(bool(replay.last_stats.get("skipped", false)), "skip: recorded as skipped")
+		check(not replay.playing, "skip: replay stopped within 10 frames")
+		check(bool(replay.last_stats.get("skipped", false)), "skip: recorded as skipped")
 		await process_frame
-		_check(_report_visible(map), "skip: season report shown")
+		check(_report_visible(map), "skip: season report shown")
 	else:
-		_check(false, "skip: no replay to skip")
+		check(false, "skip: no replay to skip")
 	map.queue_free()
 	await process_frame
 

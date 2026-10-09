@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot AT1 (attaque depuis la carte de campagne) sur la vraie simulation :
 ##  1. une place ennemie gardée est une cible d'attaque (consigne « donner l'assaut ») ;
@@ -10,27 +10,15 @@ extends SceneTree
 ##  4. image du curseur « épées croisées » construite.
 ## Usage : godot --headless --path game --script res://tests/at1_attack_order_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("at1_attack_order_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("at1_attack_order_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
-	if not _check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_reachable_area"),
+	if not check(ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_reachable_area"),
 			"CampaignSim.get_reachable_area missing (run core/build.sh)"):
 		return
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -47,35 +35,35 @@ func _run() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
+	if not check(map.load_ok and map.sim != null and facade.is_real, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 	var ctl: Node = map.movement_ctl
 	var sim: Object = map.sim
 	var armies: PackedStringArray = map.player_army_ids()
-	if not _check(ctl != null and ctl.available() and not armies.is_empty(), "controller inactive or no French army"):
+	if not check(ctl != null and ctl.available() and not armies.is_empty(), "controller inactive or no French army"):
 		map.queue_free()
 		return
 
 	# Le curseur peut être le glyphe à l'encre livré (CampaignCursor) : taille libre.
-	_check(AttackCursor.image() != null and AttackCursor.image().get_width() > 0, "the attack cursor image should build")
+	check(AttackCursor.image() != null and AttackCursor.image().get_width() > 0, "the attack cursor image should build")
 
 	# 1-2. Place ennemie gardée : assaut dès l'arrivée.
 	var at_war: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
 	var fortress := _settlement_of(map, sim, at_war, true)
-	if _check(fortress != "", "no garrisoned enemy settlement without an army inside"):
+	if check(fortress != "", "no garrisoned enemy settlement without an army inside"):
 		var army_id := armies[0]
 		map.select_army(army_id)
 		var target := {"kind": "settlement", "id": fortress, "point": map.settlement_data.get_settlement(fortress)["px"]}
-		_check(ctl.is_attack_target(target), "an enemy settlement should be an attack target")
-		_check(ctl.attack_hint(target).contains("assaut"), "hint should offer the assault: %s" % ctl.attack_hint(target))
+		check(ctl.is_attack_target(target), "an enemy settlement should be an attack target")
+		check(ctl.attack_hint(target).contains("assaut"), "hint should offer the assault: %s" % ctl.attack_hint(target))
 		var spot := _spot_near(sim, army_id, target["point"], 6.0)
-		_check(sim.call("debug_place_army", army_id, spot.x, spot.y), "debug_place_army failed")
+		check(sim.call("debug_place_army", army_id, spot.x, spot.y), "debug_place_army failed")
 		map.refresh_all()
 		var pending_before: int = (sim.call("get_pending_battles") as Array).size()
 		var report: Dictionary = ctl.order_target(army_id, target)
 		print("at1: attack on %s → %s" % [fortress, report])
-		if _check(report.get("ok", false), "attack on the settlement refused: %s" % report.get("error", "")):
+		if check(report.get("ok", false), "attack on the settlement refused: %s" % report.get("error", "")):
 			var pending: Array = sim.call("get_pending_battles")
 			var siege_battle := false
 			for battle in pending:
@@ -85,7 +73,7 @@ func _run() -> void:
 			# d'arrivée, l'ordre met donc le siège (refus d'assaut) au lieu de donner l'assaut.
 			var detail: Dictionary = sim.call("settlement_detail", fortress)
 			var sieged: bool = str(report.get("stop", "")) == "siege_started" and str(report.get("settlement", "")) == fortress
-			_check(siege_battle or taken or sieged,
+			check(siege_battle or taken or sieged,
 				"reaching the settlement should lead to the assault or, behind standing walls, to a siege (ADR 0128) (pending %d → %d, %s)" % [pending_before, pending.size(), str(detail.get("siege", ""))])
 		map.call("_close_battle_dialog")
 
@@ -95,20 +83,20 @@ func _run() -> void:
 		if str(entry.get("status", "")) in ["peace", "truce"]:
 			peaceful.append(str(entry["id"]))
 	var neutral := _settlement_of(map, sim, peaceful, false)
-	if _check(neutral != "", "no settlement of a faction at peace"):
+	if check(neutral != "", "no settlement of a faction at peace"):
 		var army_id := armies[0]
 		map.select_army(army_id)
 		var target := {"kind": "settlement", "id": neutral, "point": map.settlement_data.get_settlement(neutral)["px"]}
 		var faction: String = ctl.target_faction(target)
-		_check(ctl.relation_to(faction) == "peace", "relation with %s should be peace" % faction)
-		_check(ctl.attack_hint(target).contains("déclare la guerre"), "hint should warn of the war: %s" % ctl.attack_hint(target))
+		check(ctl.relation_to(faction) == "peace", "relation with %s should be peace" % faction)
+		check(ctl.attack_hint(target).contains("déclare la guerre"), "hint should warn of the war: %s" % ctl.attack_hint(target))
 		ctl.ask_war(army_id, target)
-		_check(ctl.war_dialog.visible, "the war declaration should ask for confirmation")
+		check(ctl.war_dialog.visible, "the war declaration should ask for confirmation")
 		ctl.war_dialog.call("_on_confirm")
-		_check(not ctl.war_dialog.visible, "the dialog should close once confirmed")
+		check(not ctl.war_dialog.visible, "the dialog should close once confirmed")
 		var now_at_war: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
-		_check(now_at_war.has(faction), "confirming should declare war on %s" % faction)
-		_check(ctl.relation_to(faction) == "war", "the relation cache should follow the declaration")
+		check(now_at_war.has(faction), "confirming should declare war on %s" % faction)
+		check(ctl.relation_to(faction) == "war", "the relation cache should follow the declaration")
 
 	# 4. Vassal : attaquable après déclaration de guerre, qui rompt l'hommage.
 	var vassal := ""
@@ -116,16 +104,16 @@ func _run() -> void:
 		if str(entry.get("status", "")) == "vassal":
 			vassal = str(entry["id"])
 			break
-	if _check(vassal != "", "France should have a vassal"):
+	if check(vassal != "", "France should have a vassal"):
 		map.select_army(armies[0])
-		_check(ctl.relation_to(vassal) == "peace", "a vassal should be attackable after a declaration")
+		check(ctl.relation_to(vassal) == "peace", "a vassal should be attackable after a declaration")
 		var target := {"kind": "army", "id": "", "point": Vector2.ZERO, "faction": vassal}
-		_check(ctl.is_attack_target(target), "a vassal army should be an attack target")
+		check(ctl.is_attack_target(target), "a vassal army should be an attack target")
 		ctl.ask_war(armies[0], target)
-		_check(ctl.war_dialog.visible, "attacking a vassal should ask for confirmation")
+		check(ctl.war_dialog.visible, "attacking a vassal should ask for confirmation")
 		ctl.war_dialog.call("_on_confirm")
 		var at_war_now: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
-		_check(at_war_now.has(vassal), "confirming should declare war on the vassal %s" % vassal)
+		check(at_war_now.has(vassal), "confirming should declare war on the vassal %s" % vassal)
 	map.queue_free()
 	await process_frame
 

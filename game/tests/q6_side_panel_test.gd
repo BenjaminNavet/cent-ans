@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless Q6 (recette du 2026-09-28) : boutons du panneau latéral (`SIDE_PANEL`) atteignables
 ## à la souris. Configuration du joueur : fenêtre 1920×1080, taille d'interface 1,25 (vue 1280×720) ;
@@ -11,7 +11,6 @@ extends SceneTree
 ## injecté) doit être le bouton lui-même, pas la minicarte ni le bouton de fin de tour.
 ## Usage : godot --headless --path game --script res://tests/q6_side_panel_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## (taille de fenêtre, taille d'interface)
 const CONFIGS := [
 	[Vector2i(1920, 1080), 1.25],
@@ -19,22 +18,13 @@ const CONFIGS := [
 	[Vector2i(1280, 640), 1.0],
 ]
 
-var _failures := 0
 var map: Node3D
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("q6_side_panel_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("q6_side_panel_test: " + message)
-	return condition
+	finish()
 
 
 func _wait(frames: int) -> void:
@@ -76,10 +66,10 @@ func _test_edict_button(label: String) -> void:
 	map.flow.focus_province(_capital())
 	await _wait(20)
 	var panel: Control = map.ui.province_panel
-	if not _check(panel.is_visible_in_tree(), "%s: province panel not open" % label):
+	if not check(panel.is_visible_in_tree(), "%s: province panel not open" % label):
 		return
 	var section: Control = panel.get("edict_section")
-	if not _check(section != null, "%s: no edict section" % label):
+	if not check(section != null, "%s: no edict section" % label):
 		return
 	for tab in panel.tabs.get_tab_count():
 		if panel.tabs.get_tab_control(tab).is_ancestor_of(section):
@@ -87,7 +77,7 @@ func _test_edict_button(label: String) -> void:
 	await _wait(10)
 	var choose: Button = section.get("choose_button")
 	await _check_fits_zone(panel, label)
-	if _check(choose != null and choose.is_visible_in_tree(), "%s: « Changer d'édit » not visible" % label):
+	if check(choose != null and choose.is_visible_in_tree(), "%s: « Changer d'édit » not visible" % label):
 		await _check_reachable(choose, "%s, edicts" % label)
 	panel.hide()
 	await _wait(6)
@@ -104,11 +94,11 @@ func _test_recruit_button(label: String) -> void:
 	await create_timer(0.8).timeout
 	await _wait(4)
 	var panel: Control = map.settlements_ctl.panel
-	if not _check(panel != null and panel.is_visible_in_tree(), "%s: settlement panel not open" % label):
+	if not check(panel != null and panel.is_visible_in_tree(), "%s: settlement panel not open" % label):
 		return
 	await _check_fits_zone(panel, label)
 	var recruit: Button = panel.get("recruit_button")
-	if _check(recruit != null and recruit.is_visible_in_tree(), "%s: « Recruter » not visible" % label):
+	if check(recruit != null and recruit.is_visible_in_tree(), "%s: « Recruter » not visible" % label):
 		await _check_reachable(recruit, "%s, recruit" % label)
 	panel.hide()
 	await _wait(6)
@@ -127,8 +117,8 @@ func _check_reachable(button: Button, label: String) -> void:
 	var rect := button.get_global_rect()
 	var view := root.get_visible_rect()
 	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL).grow(1.0)  # défilement en pixels entiers
-	_check(view.grow(0.5).encloses(rect), "%s: « %s » %s outside the view %s" % [label, button.text, rect, view.size])
-	_check(side.encloses(rect), "%s: « %s » %s outside the side panel zone %s" % [label, button.text, rect, side])
+	check(view.grow(0.5).encloses(rect), "%s: « %s » %s outside the view %s" % [label, button.text, rect, view.size])
+	check(side.encloses(rect), "%s: « %s » %s outside the side panel zone %s" % [label, button.text, rect, side])
 	var point := root.get_final_transform() * rect.get_center()
 	var motion := InputEventMouseMotion.new()
 	motion.position = point
@@ -138,8 +128,7 @@ func _check_reachable(button: Button, label: String) -> void:
 	await _wait(2)
 	var hovered := root.gui_get_hovered_control()
 	var ok := hovered != null and (hovered == button or button.is_ancestor_of(hovered))
-	_check(ok, "%s: « %s » center %s covered by %s" % [label, button.text, rect.get_center(), hovered.get_path() if hovered != null else "nothing"])
-
+	check(ok, "%s: « %s » center %s covered by %s" % [label, button.text, rect.get_center(), hovered.get_path() if hovered != null else "nothing"])
 
 
 ## Chaque onglet du panneau (et son enveloppe défilante) tient dans la largeur de la zone : un
@@ -153,6 +142,6 @@ func _check_fits_zone(panel: Control, label: String) -> void:
 		await _wait(3)
 		var wrapper := panel.get_parent() as Control
 		var width := wrapper.get_combined_minimum_size().x
-		_check(width <= zone.size.x + 0.5, "%s: %s tab « %s » needs %.0f px, side zone is %.0f px" % [label, panel.name, tabs.get_tab_title(tab), width, zone.size.x])
+		check(width <= zone.size.x + 0.5, "%s: %s tab « %s » needs %.0f px, side zone is %.0f px" % [label, panel.name, tabs.get_tab_title(tab), width, zone.size.x])
 	tabs.current_tab = current
 	await _wait(3)

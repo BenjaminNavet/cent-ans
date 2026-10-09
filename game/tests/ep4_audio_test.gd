@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot EP4 (son de mêlée de proximité) :
 ##  1. banque élargie : nouveaux événements présents avec le nombre de variantes attendu ;
@@ -10,21 +10,11 @@ extends SceneTree
 ##  5. charge de cavalerie et sifflement de volée au-dessus de la caméra sont bien déclenchés.
 ## Usage : godot --headless --path game --script res://tests/ep4_audio_test.gd
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("ep4_audio_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("ep4_audio_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
@@ -37,7 +27,7 @@ func _run() -> void:
 func _check_bank() -> void:
 	var bank := SoundBank.load_default()
 	for event_name in ["armor_hit", "effort_cry", "body_fall", "cavalry_charge_impact", "arrow_flyby"]:
-		_check(bank.has_event(event_name), "event %s missing" % event_name)
+		check(bank.has_event(event_name), "event %s missing" % event_name)
 	var counts := {
 		"sword_clash": 12,
 		"shield_bash": 8,
@@ -49,11 +39,11 @@ func _check_bank() -> void:
 	}
 	for event_name in counts:
 		var files: Array = bank.event(event_name).get("files", [])
-		_check(files.size() >= int(counts[event_name]), "%s should have >= %d clips (%d)" % [event_name, counts[event_name], files.size()])
+		check(files.size() >= int(counts[event_name]), "%s should have >= %d clips (%d)" % [event_name, counts[event_name], files.size()])
 	for bed_name in ["melee_bed_1", "melee_bed_2", "melee_bed_3"]:
-		_check(bank.bed_stream(bed_name) != null, "bed %s missing" % bed_name)
-	_check(int(bank.fronts.get("max_emitters", 0)) >= 1, "fronts.max_emitters should be set")
-	_check((bank.fronts.get("beds", []) as Array).size() >= 3, "fronts should cycle through the 3 massive melee beds")
+		check(bank.bed_stream(bed_name) != null, "bed %s missing" % bed_name)
+	check(int(bank.fronts.get("max_emitters", 0)) >= 1, "fronts.max_emitters should be set")
+	check((bank.fronts.get("beds", []) as Array).size() >= 3, "fronts should cycle through the 3 massive melee beds")
 
 
 func _unit(id: int, side: String, x: float, z: float, soldiers: int, target: int, extra: Dictionary = {}) -> Dictionary:
@@ -82,22 +72,22 @@ func _check_layers_by_distance() -> void:
 	var far_b := _unit(4, "defender", 904.0, 0.0, 200, 3)
 	for step in 20:
 		audio.update([near_a, near_b, far_a, far_b], Vector3(450, 0, 0), 30.0, 0.2, 0.1, 1.0 + step * 0.2)
-	_check(audio._front_emitters.has("1:2"), "near front should have a dedicated emitter")
-	_check(not audio._front_emitters.has("3:4"), "far front should not keep a dedicated emitter")
+	check(audio._front_emitters.has("1:2"), "near front should have a dedicated emitter")
+	check(not audio._front_emitters.has("3:4"), "far front should not keep a dedicated emitter")
 	var near_names := _events(audio)
-	_check(near_names.size() > 0, "near front should have produced discrete events: %s" % [near_names])
+	check(near_names.size() > 0, "near front should have produced discrete events: %s" % [near_names])
 	var near_only := ["sword_clash", "shield_bash", "armor_hit", "effort_cry", "body_fall", "death_groan"]
 	var saw_near_event := false
 	for n in near_names:
 		if near_only.has(n):
 			saw_near_event = true
-	_check(saw_near_event, "near layer should pick individual clashes: %s" % [near_names])
+	check(saw_near_event, "near layer should pick individual clashes: %s" % [near_names])
 	# Pas de répétition immédiate du même type sur un front.
 	var repeats := 0
 	for i in range(1, near_names.size()):
 		if near_names[i] == near_names[i - 1] and near_only.has(near_names[i]):
 			repeats += 1
-	_check(repeats == 0, "the same clash type should not repeat back to back: %s" % [near_names])
+	check(repeats == 0, "the same clash type should not repeat back to back: %s" % [near_names])
 	audio.queue_free()
 	camera.queue_free()
 	await process_frame
@@ -120,7 +110,7 @@ func _check_voice_budget() -> void:
 		units.append(_unit(pair * 2 + 2, "defender", base + 4.0, 0.0, 300, pair * 2 + 1))
 	for step in 40:
 		audio.update(units, Vector3.ZERO, 30.0, 0.15, 0.1, 1.0 + step * 0.15)
-		_check(audio.busy_voices() <= audio.voice_count(), "voice pool should never exceed max_voices (%d/%d)" % [audio.busy_voices(), audio.voice_count()])
+		check(audio.busy_voices() <= audio.voice_count(), "voice pool should never exceed max_voices (%d/%d)" % [audio.busy_voices(), audio.voice_count()])
 	audio.queue_free()
 	camera.queue_free()
 	await process_frame
@@ -139,7 +129,7 @@ func _check_events() -> void:
 	audio.update([horse], Vector3.ZERO, 30.0, 0.1, 0.1, 1.0)
 	horse["state"] = "charging"
 	audio.update([horse], Vector3.ZERO, 30.0, 0.1, 0.1, 1.1)
-	_check(_events(audio).has("cavalry_charge_impact"), "cavalry charge should trigger the swell + impact event: %s" % [_events(audio)])
+	check(_events(audio).has("cavalry_charge_impact"), "cavalry charge should trigger the swell + impact event: %s" % [_events(audio)])
 	# Volée d'archers qui passe juste au-dessus de la caméra (postée entre tireur et cible).
 	var archer := {"id": 2, "side": "attacker", "type": "unit_longbowmen", "render": "infantry", "state": "shooting", "present": true, "soldiers": 100, "ammo": 20, "x": -30.0, "y": 0.0, "z": 0.0, "facing": 0.0, "depth": 8.0, "is_general": false, "target": 3}
 	var target := {"id": 3, "side": "defender", "type": "unit_men_at_arms", "render": "infantry", "state": "idle", "present": true, "soldiers": 100, "ammo": 0, "x": 30.0, "y": 0.0, "z": 0.0, "facing": 0.0, "depth": 8.0, "is_general": false, "target": -1}
@@ -148,7 +138,7 @@ func _check_events() -> void:
 	audio.update([archer, target], Vector3.ZERO, 30.0, 0.1, 0.1, 2.1)
 	for step in 20:
 		audio.update([archer, target], Vector3.ZERO, 30.0, 0.1, 0.1, 2.2 + step * 0.1)
-	_check(_events(audio).has("arrow_flyby"), "an overhead volley should whistle above the camera: %s" % [_events(audio)])
+	check(_events(audio).has("arrow_flyby"), "an overhead volley should whistle above the camera: %s" % [_events(audio)])
 	audio.queue_free()
 	camera.queue_free()
 	await process_frame

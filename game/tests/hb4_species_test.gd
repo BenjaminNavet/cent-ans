@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot HB4 (essences et répartition par biome, ADR 0143) :
 ##  1. catalogue `data/art/tree_species.json` chargé (≥ 16 essences, lignes 0-2 chêne/hêtre/sapin) ;
@@ -18,8 +18,6 @@ const GROWTH_CAP := 1.3
 ## Distance au lit (px) en deçà de laquelle un arbre hors forêt compte comme ripisylve.
 const RIPARIAN_BAND := 2.5
 
-var _failures := 0
-
 
 func _init() -> void:
 	await process_frame
@@ -28,42 +26,30 @@ func _init() -> void:
 	_test_atlas(species)
 	if species.ok:
 		_test_scatter(species)
-	if _failures > 0:
-		push_error("hb4_species_test: %d failure(s)" % _failures)
-		quit(1)
-		return
-	print("hb4_species_test: OK")
-	quit(0)
-
-
-func _check(condition: bool, label: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("FAIL: " + label)
-	return condition
+	finish()
 
 
 func _test_catalogue(species: TreeSpecies) -> void:
-	if not _check(species.ok, "catalogue loads (%s)" % TreeSpecies.data_path()):
+	if not check(species.ok, "catalogue loads (%s)" % TreeSpecies.data_path()):
 		return
-	_check(species.count >= 16, "%d species (>= 16)" % species.count)
-	_check(Array(species.ids.slice(0, 3)) == ["oak", "beech", "fir"], "rows 0-2 = oak, beech, fir")
+	check(species.count >= 16, "%d species (>= 16)" % species.count)
+	check(Array(species.ids.slice(0, 3)) == ["oak", "beech", "fir"], "rows 0-2 = oak, beech, fir")
 	for s in species.count:
-		_check(species.kind[s] >= 0 and species.kind[s] <= 2, "%s: fallback mesh" % species.ids[s])
-		_check(species.height[2 * s] > 0.0 and species.height[2 * s] <= species.height[2 * s + 1], "%s: height range" % species.ids[s])
+		check(species.kind[s] >= 0 and species.kind[s] <= 2, "%s: fallback mesh" % species.ids[s])
+		check(species.height[2 * s] > 0.0 and species.height[2 * s] <= species.height[2 * s + 1], "%s: height range" % species.ids[s])
 	print("hb4: %d species: %s" % [species.count, ", ".join(species.ids)])
 
 
 func _test_atlas(species: TreeSpecies) -> void:
 	var texture := load(Ga3Vegetation.IMPOSTOR_ALBEDO) as Texture2D
-	if not _check(texture != null, "GA3 albedo atlas loads"):
+	if not check(texture != null, "GA3 albedo atlas loads"):
 		return
 	var cell := texture.get_width() / VegetationMeshes.IMPOSTOR_VIEWS
-	_check(texture.get_height() == species.count * cell, "atlas: one row per species (%d x %d, %d species)" % [texture.get_width(), texture.get_height(), species.count])
+	check(texture.get_height() == species.count * cell, "atlas: one row per species (%d x %d, %d species)" % [texture.get_width(), texture.get_height(), species.count])
 	var normal := load(Ga3Vegetation.IMPOSTOR_NORMAL) as Texture2D
-	_check(normal != null and normal.get_size() == texture.get_size(), "normal atlas matches")
+	check(normal != null and normal.get_size() == texture.get_size(), "normal atlas matches")
 	var image := Image.load_from_file(ProjectSettings.globalize_path(Ga3Vegetation.IMPOSTOR_ALBEDO))
-	if _check(image != null, "atlas image"):
+	if check(image != null, "atlas image"):
 		image.convert(Image.FORMAT_RGBA8)
 		var bytes := image.get_data()
 		var width := image.get_width()
@@ -77,17 +63,17 @@ func _test_atlas(species: TreeSpecies) -> void:
 						if bytes[(y * width + x) * 4 + 3] > 127:
 							covered += 1
 				var cov := float(covered) / total
-				_check(cov > 0.03 and cov < 0.7, "cell %s/%d covered (%.3f)" % [species.ids[row], view, cov])
+				check(cov > 0.03 and cov < 0.7, "cell %s/%d covered (%.3f)" % [species.ids[row], view, cov])
 	var material := Vegetation._make_impostor_material()
-	if _check(material != null, "impostor material"):
-		_check(int(material.get_shader_parameter("rows")) == species.count, "material rows = species (%d)" % int(material.get_shader_parameter("rows")))
-		_check(bool(material.get_shader_parameter("species_rows")), "material reads the row per instance")
+	if check(material != null, "impostor material"):
+		check(int(material.get_shader_parameter("rows")) == species.count, "material rows = species (%d)" % int(material.get_shader_parameter("rows")))
+		check(bool(material.get_shader_parameter("species_rows")), "material reads the row per instance")
 
 
 func _test_scatter(species: TreeSpecies) -> void:
 	var map_dir := (load("res://scripts/map/map_paths.gd") as GDScript).call("default_data_dir").path_join("map") as String
 	var data := MapData.load_from_dir(map_dir)
-	if not _check(data.load_error == "", "map loads (%s)" % data.load_error):
+	if not check(data.load_error == "", "map loads (%s)" % data.load_error):
 		return
 	var mask := VegetationMask.new()
 	mask.setup(data)
@@ -104,20 +90,20 @@ func _test_scatter(species: TreeSpecies) -> void:
 		var stats := _stats(job, species)
 		per_biome[b] = stats
 		print("hb4: biome %d: %s" % [b, stats])
-		_check((stats["species"] as Dictionary).size() >= 2, "biome %d: >= 2 species (%s)" % [b, stats["species"]])
-		_check(int(stats["trees"]) <= legacy_stats["trees"] * GROWTH_CAP, "biome %d: trees %d <= +30%% of %d" % [b, stats["trees"], legacy_stats["trees"]])
-		_check(int(stats["slots"]) <= ceili(legacy_stats["slots"] * GROWTH_CAP), "biome %d: non-empty slots %d <= +30%% of %d" % [b, stats["slots"], legacy_stats["slots"]])
-		_check(int(stats["unencoded"]) == 0, "biome %d: every tree carries its species" % b)
+		check((stats["species"] as Dictionary).size() >= 2, "biome %d: >= 2 species (%s)" % [b, stats["species"]])
+		check(int(stats["trees"]) <= legacy_stats["trees"] * GROWTH_CAP, "biome %d: trees %d <= +30%% of %d" % [b, stats["trees"], legacy_stats["trees"]])
+		check(int(stats["slots"]) <= ceili(legacy_stats["slots"] * GROWTH_CAP), "biome %d: non-empty slots %d <= +30%% of %d" % [b, stats["slots"], legacy_stats["slots"]])
+		check(int(stats["unencoded"]) == 0, "biome %d: every tree carries its species" % b)
 	var temperate: Dictionary = per_biome[2]
-	_check(float(temperate["open_density"]) < 0.6 * float(legacy_stats["open_density"]), "fewer trees in open fields (%.4f vs V4 %.4f per px2)" % [temperate["open_density"], legacy_stats["open_density"]])
-	_check(float(temperate["open_density"]) < 0.03, "open-field density %.4f < 0.03 per px2" % temperate["open_density"])
-	_check(int(per_biome[4]["trees"]) * 4 < int(temperate["trees"]), "steppe nearly bare (%d vs %d)" % [per_biome[4]["trees"], temperate["trees"]])
+	check(float(temperate["open_density"]) < 0.6 * float(legacy_stats["open_density"]), "fewer trees in open fields (%.4f vs V4 %.4f per px2)" % [temperate["open_density"], legacy_stats["open_density"]])
+	check(float(temperate["open_density"]) < 0.03, "open-field density %.4f < 0.03 per px2" % temperate["open_density"])
+	check(int(per_biome[4]["trees"]) * 4 < int(temperate["trees"]), "steppe nearly bare (%d vs %d)" % [per_biome[4]["trees"], temperate["trees"]])
 	for b in [3, 7]:
 		for id in ["oak", "beech", "maple", "birch", "apple"]:
-			_check(not (per_biome[b]["species"] as Dictionary).has(id), "biome %d: no %s" % [b, id])
-	_check((temperate["species"] as Dictionary).has("apple"), "orchards around the villages (continental)")
-	_check((per_biome[3]["species"] as Dictionary).has("olive"), "olive groves (Mediterranean)")
-	_check((temperate["species"] as Dictionary).has("poplar") or (temperate["species"] as Dictionary).has("willow"), "riparian trees along the Loire")
+			check(not (per_biome[b]["species"] as Dictionary).has(id), "biome %d: no %s" % [b, id])
+	check((temperate["species"] as Dictionary).has("apple"), "orchards around the villages (continental)")
+	check((per_biome[3]["species"] as Dictionary).has("olive"), "olive groves (Mediterranean)")
+	check((temperate["species"] as Dictionary).has("poplar") or (temperate["species"] as Dictionary).has("willow"), "riparian trees along the Loire")
 	_test_native(data, mask, species, exclusions)
 
 
@@ -130,7 +116,7 @@ func _test_native(data: MapData, mask: VegetationMask, species: TreeSpecies, exc
 	var totals := {}
 	for mode in ["legacy", "species"]:
 		var table: Dictionary = species.table() if mode == "species" else {}
-		_check(bool(native.call("set_species", table)) == (mode == "species"), "native set_species (%s)" % mode)
+		check(bool(native.call("set_species", table)) == (mode == "species"), "native set_species (%s)" % mode)
 		var job := VegetationTileJob.new()
 		job.mask = mask
 		job.tile_index = 4242
@@ -140,7 +126,7 @@ func _test_native(data: MapData, mask: VegetationMask, species: TreeSpecies, exc
 		job.exclusions = exclusions
 		job.coarse_only = true
 		job.run()
-		_check(bool(native.call("request", 1, job.native_params())), "native request (%s)" % mode)
+		check(bool(native.call("request", 1, job.native_params())), "native request (%s)" % mode)
 		var result: Dictionary = {}
 		for attempt in 400:
 			var polled: Array = native.call("poll", 4)
@@ -148,17 +134,17 @@ func _test_native(data: MapData, mask: VegetationMask, species: TreeSpecies, exc
 				result = polled[0]
 				break
 			OS.delay_msec(10)
-		if not _check(not result.is_empty(), "native result (%s)" % mode):
+		if not check(not result.is_empty(), "native result (%s)" % mode):
 			return
 		job.apply_native(result)
 		totals[mode] = _stats(job, species if mode == "species" else null)
 		print("hb4: native %s: %s" % [mode, totals[mode]])
 	var s: Dictionary = totals["species"]
 	var l: Dictionary = totals["legacy"]
-	_check(int(s["trees"]) <= l["trees"] * GROWTH_CAP, "native: trees %d <= +30%% of %d" % [s["trees"], l["trees"]])
-	_check(int(s["slots"]) <= ceili(l["slots"] * GROWTH_CAP), "native: slots %d <= +30%% of %d" % [s["slots"], l["slots"]])
-	_check((s["species"] as Dictionary).size() >= 4, "native: several species (%s)" % s["species"])
-	_check(int(s["unencoded"]) == 0, "native: every tree carries its species")
+	check(int(s["trees"]) <= l["trees"] * GROWTH_CAP, "native: trees %d <= +30%% of %d" % [s["trees"], l["trees"]])
+	check(int(s["slots"]) <= ceili(l["slots"] * GROWTH_CAP), "native: slots %d <= +30%% of %d" % [s["slots"], l["slots"]])
+	check((s["species"] as Dictionary).size() >= 4, "native: several species (%s)" % s["species"])
+	check(int(s["unencoded"]) == 0, "native: every tree carries its species")
 
 
 func _biome_image(b: int) -> Image:

@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless Q6 (recette du 2026-09-28) autour du panneau de diplomatie, vérifié par l'état
 ## des nœuds (pas de capture), dans trois configurations d'écran :
@@ -12,29 +12,19 @@ extends SceneTree
 ##     même image ; le « Continuer » du rapport est au-dessus du panneau et reçoit la souris.
 ## Usage : godot --headless --path game --script res://tests/q6_diplomacy_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const CONFIGS := [
 	[Vector2i(1920, 1080), 1.25],
 	[Vector2i(1280, 720), 1.0],
 	[Vector2i(1280, 640), 1.0],
 ]
 
-var _failures := 0
 var map: Node3D = null
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("q6_diplomacy_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("q6_diplomacy_test: " + message)
-	return condition
+	finish()
 
 
 func _wait(frames: int) -> void:
@@ -88,9 +78,9 @@ func _control_at(point: Vector2) -> Control:
 func _check_reachable(button: Control, what: String) -> void:
 	var view := root.get_visible_rect()
 	var rect := Rect2(button.get_global_transform_with_canvas().origin, button.size * button.get_global_transform_with_canvas().get_scale())
-	_check(view.encloses(rect.grow(-0.5)), "%s %s outside the %s view" % [what, rect, view.size])
+	check(view.encloses(rect.grow(-0.5)), "%s %s outside the %s view" % [what, rect, view.size])
 	var hit: Control = await _control_at(rect.get_center())
-	_check(hit == button or (hit != null and button.is_ancestor_of(hit)), "%s: click at %s hits %s" % [what, rect.get_center(), hit.get_path() if hit != null else "nothing"])
+	check(hit == button or (hit != null and button.is_ancestor_of(hit)), "%s: click at %s hits %s" % [what, rect.get_center(), hit.get_path() if hit != null else "nothing"])
 
 
 func _test_send_treaty_reachable(label: String) -> void:
@@ -105,7 +95,7 @@ func _test_send_treaty_for(label: String, target: String, clause: String) -> voi
 	controller.open_panel(target)
 	await _wait(10)
 	var panel: Control = controller.panel
-	if not _check(str(panel.get("_selected")) == target, "%s: %s not selected" % [label, target]):
+	if not check(str(panel.get("_selected")) == target, "%s: %s not selected" % [label, target]):
 		return
 	var clause_menu: MenuButton = panel.get("negotiation").get("clause_menu")
 	panel.get("negotiation").call("fill_menu", clause_menu)
@@ -115,12 +105,12 @@ func _test_send_treaty_for(label: String, target: String, clause: String) -> voi
 		if popup.get_item_text(index) == clause:
 			popup.id_pressed.emit(popup.get_item_id(index))
 			picked = true
-	_check(picked, "%s: « %s » clause missing" % [label, clause])
+	check(picked, "%s: « %s » clause missing" % [label, clause])
 	await _wait(5)
 	panel.get("negotiation").call("ask_counter")
 	await _wait(10)
 	var send := panel.find_child("SendTreaty", true, false) as Button
-	if _check(send != null and send.is_visible_in_tree(), "%s: SendTreaty missing or hidden" % label):
+	if check(send != null and send.is_visible_in_tree(), "%s: SendTreaty missing or hidden" % label):
 		await _check_reachable(send, "%s: « Proposer le traité »" % label)
 	for text in ["Que faudrait-il ?", "Effacer"]:
 		for button in panel.find_children("*", "Button", true, false):
@@ -139,12 +129,12 @@ func _test_report_above_diplomacy(label: String) -> void:
 		{"kind": "plague", "text_fr": "La peste frappe la province.", "province": "", "faction": map.player_faction}],
 		func(_e: Dictionary) -> bool: return true, Callable(), map.player_faction))
 	await _wait(10)
-	_check(controller.panel.visible and report.visible, "%s: diplomacy %s, report %s (both expected open)" % [label, controller.panel.visible, report.visible])
+	check(controller.panel.visible and report.visible, "%s: diplomacy %s, report %s (both expected open)" % [label, controller.panel.visible, report.visible])
 	var ok: Button = null
 	for button in report.find_children("*", "Button", true, false):
 		if (button as Button).text == "Continuer":
 			ok = button
-	if _check(ok != null, "%s: report « Continuer » missing" % label):
+	if check(ok != null, "%s: report « Continuer » missing" % label):
 		await _check_reachable(ok, "%s: report « Continuer »" % label)
 	report.close()
 	controller.panel.hide()

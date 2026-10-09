@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du chantier FK, lot FK3 (carte vivante : réservoir, vie ordinaire, marchands) :
 ##  1. modèles : figurines de repli présentes, accessoires (FK2 ou maquettes) ;
@@ -15,26 +15,15 @@ extends SceneTree
 ## FK5 (incidents) ajoutera ses cas.
 ## Usage : godot --headless --path game --script res://tests/fk_folk_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Distance caméra de la vue rapprochée (VT2 : sous `figure_max_distance`, figurines 1:1).
 const NEAR_D := 2.0
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	await _run()
 	FolkModels.clear_cache()
-	print("fk_folk_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("fk_folk_test: " + message)
-	return condition
+	finish()
 
 
 ## Arête de colonies avec tracé routier (terre) proche de `near`, hors de `avoid`.
@@ -67,33 +56,33 @@ func _view(pool: FolkPool, focus: Vector2, distance: float, near_weight: float) 
 
 func _run() -> void:
 	# 1. Modèles.
-	_check(not FolkModels.figure_of("peasant").is_empty(), "peasant figure fallback")
-	_check(not FolkModels.figure_of("guard").is_empty(), "guard figure")
-	_check(not FolkModels.figure_of("rider").is_empty(), "rider figure")
-	_check(FolkModels.prop_mesh("merchant_cart") != null, "merchant cart mesh")
+	check(not FolkModels.figure_of("peasant").is_empty(), "peasant figure fallback")
+	check(not FolkModels.figure_of("guard").is_empty(), "guard figure")
+	check(not FolkModels.figure_of("rider").is_empty(), "rider figure")
+	check(FolkModels.prop_mesh("merchant_cart") != null, "merchant cart mesh")
 	print("fk_folk_test: merchant_cart from %s, peasant %s" % [FolkModels.prop_source("merchant_cart"), FolkModels.figure_of("peasant")])
 	var config := FolkModels.activity_config("crew", 0, "walk")
-	_check((config["set"] as Array).size() > 0, "walk config")
+	check((config["set"] as Array).size() > 0, "walk config")
 	# Modèles FK2 : villageois par rôle, accessoires du manifeste, emplacements (+X devant).
 	if BattleSkinned.has_figure("villager", 1):
-		_check(FolkModels.figure_of("reaper") == ["villager", 1], "reapers are villager_1: %s" % [FolkModels.figure_of("reaper")])
-		_check(FolkModels.figure_of("porter") == ["villager", 3], "porters are villager_3")
-		_check(FolkModels.figure_of("peasant") == ["villager", 0], "peasants are villager_0")
+		check(FolkModels.figure_of("reaper") == ["villager", 1], "reapers are villager_1: %s" % [FolkModels.figure_of("reaper")])
+		check(FolkModels.figure_of("porter") == ["villager", 3], "porters are villager_3")
+		check(FolkModels.figure_of("peasant") == ["villager", 0], "peasants are villager_0")
 		var scythe := FolkModels.activity_config("villager", 1, "scythe")
-		_check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
+		check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
 	if FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
-		_check(FolkModels.prop_source("merchant_cart").ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % FolkModels.prop_source("merchant_cart"))
-		_check(FolkModels.prop_source("peasant_cart").ends_with("stone_cart.glb"), "FK2 stone cart for peasants")
+		check(FolkModels.prop_source("merchant_cart").ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % FolkModels.prop_source("merchant_cart"))
+		check(FolkModels.prop_source("peasant_cart").ends_with("stone_cart.glb"), "FK2 stone cart for peasants")
 		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
-		_check(carter.is_equal_approx(Vector2(0.7, 2.2)), "carter slot (lateral, ahead): %s" % carter)
+		check(carter.is_equal_approx(Vector2(0.7, 2.2)), "carter slot (lateral, ahead): %s" % carter)
 		# Regard +X du glb tourné vers +Z (sens du déplacement) : le cheval est devant.
 		var cart_aabb := FolkModels.prop_mesh("merchant_cart").get_aabb()
-		_check(cart_aabb.end.z > 4.0 and cart_aabb.position.z > -1.5 and absf(cart_aabb.position.x) < 1.0, "cart faces +Z: %s" % cart_aabb)
+		check(cart_aabb.end.z > 4.0 and cart_aabb.position.z > -1.5 and absf(cart_aabb.position.x) < 1.0, "cart faces +Z: %s" % cart_aabb)
 
 	var data_dir := MAP_PATHS.default_data_dir()
 	var map_dir := data_dir.path_join("map")
 	var map_data := MapData.load_from_dir(map_dir)
-	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+	if not check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
 		return
 	var data := SettlementData.load_from(data_dir, map_dir)
 	var world := Node3D.new()
@@ -107,7 +96,7 @@ func _run() -> void:
 	var paris: Vector2 = data.get_settlement("set_paris")["px"]
 	var active_edge := _edge_near(data, paris, Vector2(-1e6, -1e6))
 	var cut_edge := _edge_near(data, paris + Vector2(0, 900), paris)
-	if not _check(active_edge.size() == 3 and cut_edge.size() == 3, "trade edges found"):
+	if not check(active_edge.size() == 3 and cut_edge.size() == 3, "trade edges found"):
 		return
 	var routes := [
 		{"id": "trade_active", "path": PackedStringArray([active_edge[0], active_edge[1]]), "cut": false, "total_value": 90.0, "mode": "land"},
@@ -117,9 +106,9 @@ func _run() -> void:
 	var pool := FolkPool.new()
 	world.add_child(pool)
 	pool.setup(map_data, terrain, 600)
-	_check(not pool.is_warm(), "warm-up queued")
+	check(not pool.is_warm(), "warm-up queued")
 	pool.warm_all()
-	_check(pool.is_warm(), "warm-up done")
+	check(pool.is_warm(), "warm-up done")
 	var caravans := FolkCaravans.new()
 	caravans.setup(map_data, data)
 	caravans.set_routes(routes)
@@ -135,49 +124,49 @@ func _run() -> void:
 
 	# 4. Route coupée : aucun trajet ; route active : des trajets.
 	var with_pieces := caravans.routes_with_pieces()
-	_check(with_pieces.has("trade_active"), "active route has caravan pieces")
-	_check(not with_pieces.has("trade_cut"), "cut route has no caravan piece")
+	check(with_pieces.has("trade_active"), "active route has caravan pieces")
+	check(not with_pieces.has("trade_cut"), "cut route has no caravan piece")
 
 	# 3. Palier proche sur la route active : charrettes, marchands et routine.
 	var focus: Vector2 = active_edge[2]
 	_view(pool, focus, NEAR_D, 1.0)
 	var near_ms := float(pool.stats.get("place_ms", 0.0)) - float(pool.stats.get("create_ms", 0.0))
-	_check(near_ms <= 8.0, "routine + caravans placement %.2f ms (> 8 ms)" % near_ms)
+	check(near_ms <= 8.0, "routine + caravans placement %.2f ms (> 8 ms)" % near_ms)
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
-	_check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
-	_check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
-	_check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
-	_check(pool.prop_count() <= pool.effective_cap / 4, "props capped")
-	_check(pool.visible, "pool visible near")
+	check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
+	check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
+	check(int(routine.stats.get("roads", 0)) + int(routine.stats.get("fields", 0)) > 0, "routine folk near: %s" % routine.stats)
+	check(pool.prop_count() <= pool.effective_cap / 4, "props capped")
+	check(pool.visible, "pool visible near")
 	var carts_mm := pool.get_node_or_null("Folk_merchant_cart") as MultiMeshInstance3D
-	_check(carts_mm != null and carts_mm.multimesh.instance_count == int(caravans.stats["carts"]), "cart multimesh matches")
+	check(carts_mm != null and carts_mm.multimesh.instance_count == int(caravans.stats["carts"]), "cart multimesh matches")
 	# Déplacement en shader : trajet non nul dans les données d'instance.
 	if carts_mm != null and carts_mm.multimesh.instance_count > 0:
-		_check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
+		check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
 
 	# Route coupée seule dans le rayon : aucune charrette.
 	_view(pool, cut_edge[2], NEAR_D, 1.0)
-	_check(int(caravans.stats.get("carts", -1)) == 0, "no cart on the cut route: %s" % caravans.stats)
+	check(int(caravans.stats.get("carts", -1)) == 0, "no cart on the cut route: %s" % caravans.stats)
 	print("fk_folk_test: second placement %s" % pool.stats)
 
 	# 2. Plafond : petit plafond atteint exactement, moitié en dépassement.
 	pool.cap = 20
 	pool.set_budget_exceeded(false)
 	_view(pool, focus, NEAR_D, 1.0)
-	_check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
+	check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
 	pool.set_budget_exceeded(true)
 	_view(pool, focus, NEAR_D, 1.0)
-	_check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
+	check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
 	pool.cap = 600
 	pool.set_budget_exceeded(false)
 
 	# Au loin : réservoir vide.
 	_view(pool, focus, 400.0, 0.0)
-	_check(pool.figure_count() == 0 and not pool.visible, "empty far away")
+	check(pool.figure_count() == 0 and not pool.visible, "empty far away")
 	var total := 0
 	for child in pool.get_children():
 		total += (child as MultiMeshInstance3D).multimesh.instance_count
-	_check(total == 0, "no instance far away: %d" % total)
+	check(total == 0, "no instance far away: %d" % total)
 
 	# Printemps : attelages de labour (charrue FK2 ou maquette) qui remontent leur sillon.
 	routine.season = "spring"
@@ -192,14 +181,14 @@ func _run() -> void:
 	else:
 		pool.settings["field_work_probability"] = field_probability
 	var ploughs := pool.get_node_or_null("Folk_plough") as MultiMeshInstance3D
-	_check(ploughs != null and ploughs.multimesh.instance_count > 0 and pool.instance_custom("plough", 0).r > 0.0, "plough teams in spring: %s" % routine.stats)
+	check(ploughs != null and ploughs.multimesh.instance_count > 0 and pool.instance_custom("plough", 0).r > 0.0, "plough teams in spring: %s" % routine.stats)
 
 	# Saisons : hiver, bûcherons possibles, champs clairsemés ; pas d'erreur.
 	routine.season = "winter"
 	pool.invalidate()
 	_view(pool, focus, NEAR_D, 1.0)
 	print("fk_folk_test: winter %s" % routine.stats)
-	_check(pool.figure_count() <= 600, "winter capped")
+	check(pool.figure_count() <= 600, "winter capped")
 
 	world.queue_free()
 	await process_frame
@@ -210,13 +199,13 @@ func _run() -> void:
 func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void:
 	# 5. Accessoires des scènes (FK2 ou maquettes) et réglages (source unique).
 	for prop in ["dead_cart", "market_stall", "pyre", "scaffold", "stone_cart", "procession_cross", "procession_banner", "sheep", "cow", "flood_water"]:
-		_check(FolkModels.is_prop(prop) and FolkModels.prop_mesh(prop) != null, "scene prop %s" % prop)
+		check(FolkModels.is_prop(prop) and FolkModels.prop_mesh(prop) != null, "scene prop %s" % prop)
 	var settings := FolkPool.load_settings()
 	for key in ["scene_figures_min", "scene_figures_max", "carts_per_trade_value", "figure_max_distance", "guard_value"]:
-		_check(settings.has(key), "map_scenes.json has %s" % key)
-	_check(not settings.has("peasants_per_thousand") and not settings.has("carts_per_value"), "old tuning keys gone")
-	_check(not settings.has("figure_height") and not settings.has("figure_min_view_fraction"), "VT2: no map-scale figure keys")
-	_check(FolkScenes.parse_forced("prov_x:plague,prov_y:dragon,bad").size() == 1, "--scene parsing")
+		check(settings.has(key), "map_scenes.json has %s" % key)
+	check(not settings.has("peasants_per_thousand") and not settings.has("carts_per_value"), "old tuning keys gone")
+	check(not settings.has("figure_height") and not settings.has("figure_min_view_fraction"), "VT2: no map-scale figure keys")
+	check(FolkScenes.parse_forced("prov_x:plague,prov_y:dragon,bad").size() == 1, "--scene parsing")
 
 	var world := Node3D.new()
 	root.add_child(world)
@@ -226,9 +215,9 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	var pool := FolkPool.new()
 	world.add_child(pool)
 	pool.setup(map_data, terrain, 600)
-	_check(not pool.is_warm(), "warm-up queued")
+	check(not pool.is_warm(), "warm-up queued")
 	pool.warm_all()
-	_check(pool.is_warm(), "warm-up done")
+	check(pool.is_warm(), "warm-up done")
 	var scenes := FolkScenes.new()
 	scenes.setup(map_data, data)
 	pool.register(scenes)
@@ -236,7 +225,7 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	var disks := _paris_disks(data)
 	pool.exclusions = disks
 	scenes.disks = disks
-	_check(disks.size() > 0, "Paris landmark footprint known")
+	check(disks.size() > 0, "Paris landmark footprint known")
 
 	var paris_entry: Dictionary = data.get_settlement("set_paris")
 	var province := str(paris_entry["province"])
@@ -250,14 +239,14 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		{"province": "prov_no_such_place", "kind": "famine", "settlement": "", "intensity": 1.0},
 	]
 	pool.refresh(null)
-	_check(int(scenes.stats.get("staged", 0)) == 3 and int(scenes.stats.get("skipped", 0)) == 1, "fallback and skip: %s" % scenes.stats)
+	check(int(scenes.stats.get("staged", 0)) == 3 and int(scenes.stats.get("skipped", 0)) == 1, "fallback and skip: %s" % scenes.stats)
 	var seat := ""
 	for scene in scenes.staged:
 		if str(scene["kind"]) == "revolt":
 			seat = str(scene["settlement"])
-	_check(seat != "" and str(data.get_settlement(seat).get("province", "")) == province, "fallback to the province seat: %s" % seat)
-	_check(scenes.quiet_settlements.has("set_paris"), "plague quiets Paris chimneys")
-	_check(scenes.fire_points.size() == 2, "pyre and riot smoke: %d" % scenes.fire_points.size())
+	check(seat != "" and str(data.get_settlement(seat).get("province", "")) == province, "fallback to the province seat: %s" % seat)
+	check(scenes.quiet_settlements.has("set_paris"), "plague quiets Paris chimneys")
+	check(scenes.fire_points.size() == 2, "pyre and riot smoke: %d" % scenes.fire_points.size())
 
 	# 6. Chaque type forcé : figurines au palier proche, rien au loin ; plus de figurants à
 	# l'intensité 1 qu'à l'intensité 0.
@@ -267,46 +256,46 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		_view(pool, paris, NEAR_D, 1.0)
 		var by_kind: Dictionary = scenes.stats.get("by_kind", {})
 		var shown: Dictionary = by_kind.get(kind, {})
-		_check(int(shown.get("figures", 0)) > 0, "%s scene has figures near: %s" % [kind, scenes.stats])
-		_check(pool.figure_count() == int(shown.get("figures", 0)), "%s: only the scene provider: %d" % [kind, pool.figure_count()])
+		check(int(shown.get("figures", 0)) > 0, "%s scene has figures near: %s" % [kind, scenes.stats])
+		check(pool.figure_count() == int(shown.get("figures", 0)), "%s: only the scene provider: %d" % [kind, pool.figure_count()])
 		var full := pool.figure_count()
 		var props := pool.prop_count()
 		var place_ms := float(pool.stats.get("place_ms", 0.0)) - float(pool.stats.get("create_ms", 0.0))
-		_check(place_ms <= 8.0, "%s: placement %.2f ms (> 8 ms)" % [kind, place_ms])
+		check(place_ms <= 8.0, "%s: placement %.2f ms (> 8 ms)" % [kind, place_ms])
 		var inside := 0
 		for p in pool.instance_origins():
 			if pool.excluded(p):
 				inside += 1
-		_check(inside == 0, "%s: %d instance(s) inside a landmark footprint" % [kind, inside])
+		check(inside == 0, "%s: %d instance(s) inside a landmark footprint" % [kind, inside])
 		# Hors emprise de Paris, mais ancrée près de son bord.
 		var nearest := INF
 		for p in pool.instance_origins():
 			nearest = minf(nearest, p.distance_to(paris))
 		# Dispositions en mètres × échelle des figurines (1:1, VT2) : marge d'ancrage fixe.
 		var margin := 12.0
-		_check(nearest < disks[disks.size() - 1].z + margin, "%s: scene next to Paris (%.1f)" % [kind, nearest])
+		check(nearest < disks[disks.size() - 1].z + margin, "%s: scene next to Paris (%.1f)" % [kind, nearest])
 		print("fk_folk_test: scene %s → %d figures, %d props" % [kind, full, props])
 		if kind in ["plague", "construction", "fair", "celebration", "flood"]:
-			_check(props > 0, "%s scene has props: %d" % [kind, props])
+			check(props > 0, "%s scene has props: %d" % [kind, props])
 		scenes.forced = [{"province": province, "kind": kind, "settlement": "set_paris", "intensity": 0.0}]
 		pool.refresh(null)
 		_view(pool, paris, NEAR_D, 1.0)
-		_check(pool.figure_count() > 0 and pool.figure_count() <= full, "%s: intensity 0 has fewer extras (%d vs %d)" % [kind, pool.figure_count(), full])
+		check(pool.figure_count() > 0 and pool.figure_count() <= full, "%s: intensity 0 has fewer extras (%d vs %d)" % [kind, pool.figure_count(), full])
 		# Au loin (palier moyen) : rien.
 		_view(pool, paris, 400.0, 0.0)
-		_check(pool.figure_count() == 0 and pool.prop_count() == 0 and not pool.visible, "%s: empty far away" % kind)
+		check(pool.figure_count() == 0 and pool.prop_count() == 0 and not pool.visible, "%s: empty far away" % kind)
 		# Palier proche mais loin de la scène : rien.
 		_view(pool, paris + Vector2(600.0, 600.0), NEAR_D, 1.0)
-		_check(pool.figure_count() == 0, "%s: nothing near another place: %d" % [kind, pool.figure_count()])
+		check(pool.figure_count() == 0, "%s: nothing near another place: %d" % [kind, pool.figure_count()])
 
 	# 9. VT2 : taille réelle (1 m du modèle = 1 / `meters_per_px` unité) à toute distance ; rien
 	# au-delà de `figure_max_distance`, même au palier proche.
 	for near_d in [0.5, NEAR_D]:
 		_view(pool, paris, near_d, 1.0)
-		_check(is_equal_approx(pool.current_scale(), 1.0 / map_data.meters_per_px), "figures 1:1 at d=%.1f: %.6f" % [near_d, pool.current_scale()])
-	_check(pool.figure_count() > 0, "figures within figure_max_distance")
+		check(is_equal_approx(pool.current_scale(), 1.0 / map_data.meters_per_px), "figures 1:1 at d=%.1f: %.6f" % [near_d, pool.current_scale()])
+	check(pool.figure_count() > 0, "figures within figure_max_distance")
 	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
-	_check(pool.figure_count() == 0 and not pool.visible, "no figure beyond figure_max_distance")
+	check(pool.figure_count() == 0 and not pool.visible, "no figure beyond figure_max_distance")
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).
 	var routine := FolkRoutine.new()
@@ -324,8 +313,8 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	_view(pool, paris, NEAR_D, 1.0)
 	var fields_after := int(routine.stats.get("fields", 0))
 	print("fk_folk_test: famine fields %d → %d" % [fields_before, fields_after])
-	_check(scenes.idle_provinces.has(province), "famine idles the province")
-	_check(fields_after < fields_before or fields_before == 0, "famine empties fields: %d → %d" % [fields_before, fields_after])
+	check(scenes.idle_provinces.has(province), "famine idles the province")
+	check(fields_after < fields_before or fields_before == 0, "famine empties fields: %d → %d" % [fields_before, fields_after])
 
 	world.queue_free()
 	await process_frame

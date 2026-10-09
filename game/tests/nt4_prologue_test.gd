@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## NT4 : bataille-prologue guidée — chargement des étapes, évaluation pure de chaque condition,
 ## entrée du menu, puis bataille réelle : ennemi passif, passage de chaque étape sur l'état de la
@@ -7,8 +7,6 @@ extends SceneTree
 ## Code de sortie 0 si tout passe, 1 sinon.
 
 const EXPECTED := ["intro", "camera", "select", "move", "formation", "charge", "fire", "pause", "victory", "outro"]
-
-var _failures := 0
 
 
 func _init() -> void:
@@ -25,22 +23,20 @@ func _init() -> void:
 		await _check_invite()
 		await _check_defeat()
 		await _check_battle()
-	if _failures == 0:
-		print("nt4 battle prologue OK")
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 func _check_data() -> void:
 	var data := BattlePrologue.load_data()
-	_check(not data.is_empty(), "prologue data loaded from %s" % BattlePrologue.data_path())
+	check(not data.is_empty(), "prologue data loaded from %s" % BattlePrologue.data_path())
 	var ids := []
 	for step in data.get("steps", []):
 		ids.append(str(step["id"]))
-	_check(ids == EXPECTED, "steps in order: %s" % str(ids))
-	_check(str((data.get("battle", {}) as Dictionary).get("player_side", "")) == "defender", "player leads the English")
+	check(ids == EXPECTED, "steps in order: %s" % str(ids))
+	check(str((data.get("battle", {}) as Dictionary).get("player_side", "")) == "defender", "player leads the English")
 	var prologue := BattlePrologue.new()
 	prologue.setup(data)
-	_check(prologue.index_of("victory") == 8, "victory step index")
+	check(prologue.index_of("victory") == 8, "victory step index")
 	prologue.free()
 
 
@@ -56,45 +52,45 @@ func _check_evaluate() -> void:
 		for key in changes:
 			s[key] = changes[key]
 		return BattlePrologue.evaluate(condition, s, base)
-	_check(not ev.call({"type": "manual"}, {}), "manual never passes by itself")
-	_check(not ev.call({"type": "camera_moved", "min_distance": 40.0}, {}), "camera still")
-	_check(ev.call({"type": "camera_moved", "min_distance": 40.0}, {"camera": {"target": Vector3(660, 0, 200), "distance": 220.0, "yaw": 0.0}}), "camera panned")
-	_check(ev.call({"type": "camera_moved"}, {"camera": {"target": Vector3(600, 0, 200), "distance": 150.0, "yaw": 0.0}}), "camera zoomed")
-	_check(ev.call({"type": "camera_moved"}, {"camera": {"target": Vector3(600, 0, 200), "distance": 220.0, "yaw": 0.6}}), "camera turned")
-	_check(not ev.call({"type": "selection", "min_count": 1}, {"selected": [2]}), "enemy selection does not count")
-	_check(ev.call({"type": "selection", "min_count": 1}, {"selected": [1]}), "own regiment selected")
+	check(not ev.call({"type": "manual"}, {}), "manual never passes by itself")
+	check(not ev.call({"type": "camera_moved", "min_distance": 40.0}, {}), "camera still")
+	check(ev.call({"type": "camera_moved", "min_distance": 40.0}, {"camera": {"target": Vector3(660, 0, 200), "distance": 220.0, "yaw": 0.0}}), "camera panned")
+	check(ev.call({"type": "camera_moved"}, {"camera": {"target": Vector3(600, 0, 200), "distance": 150.0, "yaw": 0.0}}), "camera zoomed")
+	check(ev.call({"type": "camera_moved"}, {"camera": {"target": Vector3(600, 0, 200), "distance": 220.0, "yaw": 0.6}}), "camera turned")
+	check(not ev.call({"type": "selection", "min_count": 1}, {"selected": [2]}), "enemy selection does not count")
+	check(ev.call({"type": "selection", "min_count": 1}, {"selected": [1]}), "own regiment selected")
 	var moved := unit.duplicate()
 	moved["x"] = 130.0
-	_check(not ev.call({"type": "moved", "min_distance": 25.0}, {}), "nobody moved")
-	_check(ev.call({"type": "moved", "min_distance": 25.0}, {"units": [moved, enemy]}), "regiment arrived 30 m away")
+	check(not ev.call({"type": "moved", "min_distance": 25.0}, {}), "nobody moved")
+	check(ev.call({"type": "moved", "min_distance": 25.0}, {"units": [moved, enemy]}), "regiment arrived 30 m away")
 	var wide := unit.duplicate()
 	wide["width"] = 60.0
 	var column := unit.duplicate()
 	column["formation"] = "column"
-	_check(not ev.call({"type": "formation_changed", "min_ratio": 0.15}, {}), "front unchanged")
-	_check(ev.call({"type": "formation_changed", "min_ratio": 0.15}, {"units": [wide, enemy]}), "front widened by dragging")
-	_check(ev.call({"type": "formation_changed"}, {"units": [column, enemy]}), "formation changed")
+	check(not ev.call({"type": "formation_changed", "min_ratio": 0.15}, {}), "front unchanged")
+	check(ev.call({"type": "formation_changed", "min_ratio": 0.15}, {"units": [wide, enemy]}), "front widened by dragging")
+	check(ev.call({"type": "formation_changed"}, {"units": [column, enemy]}), "formation changed")
 	var charging := unit.duplicate()
 	charging["state"] = "charging"
 	var charge := {"type": "unit_state", "category": "cavalry", "states": ["charging", "melee"]}
-	_check(not ev.call(charge, {}), "no charge yet")
-	_check(ev.call(charge, {"units": [charging, enemy]}), "cavalry charging")
-	_check(not ev.call({"type": "unit_state", "category": "ranged", "states": ["shooting"]}, {"units": [charging, enemy]}), "no archer shooting")
-	_check(not ev.call({"type": "paused"}, {}), "running")
-	_check(ev.call({"type": "paused"}, {"paused": true}), "paused")
-	_check(not ev.call({"type": "victory"}, {"finished": true, "winner": "attacker"}), "defeat is not victory")
-	_check(ev.call({"type": "victory"}, {"finished": true, "winner": "defender"}), "victory")
+	check(not ev.call(charge, {}), "no charge yet")
+	check(ev.call(charge, {"units": [charging, enemy]}), "cavalry charging")
+	check(not ev.call({"type": "unit_state", "category": "ranged", "states": ["shooting"]}, {"units": [charging, enemy]}), "no archer shooting")
+	check(not ev.call({"type": "paused"}, {}), "running")
+	check(ev.call({"type": "paused"}, {"paused": true}), "paused")
+	check(not ev.call({"type": "victory"}, {"finished": true, "winner": "attacker"}), "defeat is not victory")
+	check(ev.call({"type": "victory"}, {"finished": true, "winner": "defender"}), "victory")
 
 
 func _check_menu_entry() -> void:
 	var menu := HistoricalBattlesMenu.new()
 	root.add_child(menu)
 	await process_frame
-	_check(menu.prologue_button != null, "prologue entry in the historical battles screen")
+	check(menu.prologue_button != null, "prologue entry in the historical battles screen")
 	var start_menu: Control = (load("res://scenes/start_menu.tscn") as PackedScene).instantiate()
 	root.add_child(start_menu)
 	await process_frame
-	_check(start_menu.get("battles_button") != null, "battles submenu entry in the main menu")
+	check(start_menu.get("battles_button") != null, "battles submenu entry in the main menu")
 	start_menu.queue_free()
 	menu.queue_free()
 	await process_frame
@@ -110,24 +106,24 @@ func _check_battle() -> void:
 	await process_frame
 	var battle: Object = scene.get("battle")
 	var prologue: BattlePrologue = scene.get("prologue")
-	if not _check(battle != null and prologue != null, "prologue battle built"):
+	if not check(battle != null and prologue != null, "prologue battle built"):
 		scene.queue_free()
 		return
-	_check(BattleScene.prologue_data.is_empty(), "prologue data consumed")
-	_check(scene.get("deployment") == null, "no deployment phase")
-	_check(str(scene.get("player_side")) == "defender", "player side")
-	_check((battle.call("get_units") as Array).size() == 8, "4 regiments each")
-	_check(prologue.overlay != null and prologue.overlay.visible, "guide shown")
-	_check(not prologue.enemy_ai_enabled, "enemy passive at first")
-	_check(bool(battle.call("get_hold", "attacker")), "NT11: enemy holds its ground during the guide")
-	_check(not bool(battle.call("get_hold", "defender")), "NT11: the player side is free")
-	_check(prologue.current_step_id() == "intro", "starts on intro")
+	check(BattleScene.prologue_data.is_empty(), "prologue data consumed")
+	check(scene.get("deployment") == null, "no deployment phase")
+	check(str(scene.get("player_side")) == "defender", "player side")
+	check((battle.call("get_units") as Array).size() == 8, "4 regiments each")
+	check(prologue.overlay != null and prologue.overlay.visible, "guide shown")
+	check(not prologue.enemy_ai_enabled, "enemy passive at first")
+	check(bool(battle.call("get_hold", "attacker")), "NT11: enemy holds its ground during the guide")
+	check(not bool(battle.call("get_hold", "defender")), "NT11: the player side is free")
+	check(prologue.current_step_id() == "intro", "starts on intro")
 	scene.set("paused", true)  # le test fait avancer la bataille lui-même
 	var enemy_start := _positions(battle, "attacker")
 	# Introduction : « Continuer ».
 	prologue.overlay.continue_pressed.emit()
-	_check(prologue.current_step_id() == "camera", "continue -> camera")
-	_check(not prologue.check_now(), "camera untouched")
+	check(prologue.current_step_id() == "camera", "continue -> camera")
+	check(not prologue.check_now(), "camera untouched")
 	var rig: Node = scene.get("camera_rig")
 	rig.set("target", (rig.get("target") as Vector3) + Vector3(80, 0, 0))
 	_pass(prologue, "camera")
@@ -157,7 +153,7 @@ func _check_battle() -> void:
 		if prologue.check_now():
 			charged = true
 			break
-	_check(charged, "cavalry charge seen")
+	check(charged, "cavalry charge seen")
 	print("nt4: charge seen at %.0f s" % float(battle.call("get_elapsed")))
 	_advance(prologue, "charge")
 	# Tir d'archers : on les approche d'un ennemi encore en place (la charge a pu en mettre en
@@ -173,7 +169,7 @@ func _check_battle() -> void:
 		if prologue.check_now():
 			fired = true
 			break
-	_check(fired, "archers shooting seen")
+	check(fired, "archers shooting seen")
 	print("nt4: fire seen at %.0f s, finished %s" % [float(battle.call("get_elapsed")), battle.call("is_finished")])
 	_advance(prologue, "fire")
 	var enemy_moved := _max_shift(enemy_start, _positions(battle, "attacker"))
@@ -185,15 +181,15 @@ func _check_battle() -> void:
 			print("nt4:   enemy %d %s shift %.1f m" % [int(unit["id"]), str(unit.get("state", "?")), shift])
 			# NT11 (camp tenu) : l'ennemi n'avance pas vers le joueur (au sud, z croissant). Il peut
 			# reculer : déroute, ou poussée d'une mêlée prolongée (cadence de campagne).
-			_check(float(unit["z"]) - from.y < 8.0, "held enemy %d did not advance (%.1f m)" % [int(unit["id"]), float(unit["z"]) - from.y])
+			check(float(unit["z"]) - from.y < 8.0, "held enemy %d did not advance (%.1f m)" % [int(unit["id"]), float(unit["z"]) - from.y])
 	# Pause.
 	scene.set("paused", false)
-	_check(not prologue.check_now(), "not paused yet")
+	check(not prologue.check_now(), "not paused yet")
 	scene.set("paused", true)
 	_pass(prologue, "pause")
-	_check(prologue.current_step_id() == "victory", "pause -> victory")
-	_check(prologue.enemy_ai_enabled, "enemy wakes up on the victory step")
-	_check(not bool(battle.call("get_hold", "attacker")), "NT11: hold lifted on the victory step")
+	check(prologue.current_step_id() == "victory", "pause -> victory")
+	check(prologue.enemy_ai_enabled, "enemy wakes up on the victory step")
+	check(not bool(battle.call("get_hold", "attacker")), "NT11: hold lifted on the victory step")
 	# Victoire : l'IA mène aussi le joueur jusqu'à la fin.
 	battle.call("set_ai", "defender", true)
 	for _i in 1200:
@@ -203,14 +199,14 @@ func _check_battle() -> void:
 	scene.set("units", battle.call("get_units"))
 	var outcome: Dictionary = battle.call("get_outcome") if bool(battle.call("is_finished")) else {}
 	print("nt4: battle finished=%s winner=%s at %.0f s" % [battle.call("is_finished"), outcome.get("winner", "?"), float(battle.call("get_elapsed"))])
-	_check(str(outcome.get("winner", "")) == "defender", "the English win the skirmish")
+	check(str(outcome.get("winner", "")) == "defender", "the English win the skirmish")
 	_pass(prologue, "victory")
-	_check(prologue.current_step_id() == "outro", "victory -> outro")
+	check(prologue.current_step_id() == "outro", "victory -> outro")
 	prologue.overlay.continue_pressed.emit()
-	_check(prologue.done and not prologue.overlay.visible, "guide closed after the last step")
+	check(prologue.done and not prologue.overlay.visible, "guide closed after the last step")
 	var settings: Node = root.get_node_or_null("/root/Settings")
-	_check(settings == null or bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "prologue marked done")
-	_check(not BattlePrologueInvite.should_ask(), "no invite once the prologue is done")
+	check(settings == null or bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "prologue marked done")
+	check(not BattlePrologueInvite.should_ask(), "no invite once the prologue is done")
 	scene.queue_free()
 	await process_frame
 
@@ -225,20 +221,20 @@ func _check_defeat() -> void:
 	await process_frame
 	await process_frame
 	var prologue: BattlePrologue = scene.get("prologue")
-	if not _check(prologue != null, "second prologue battle built"):
+	if not check(prologue != null, "second prologue battle built"):
 		scene.queue_free()
 		return
 	prologue.overlay.continue_pressed.emit()  # intro -> camera
 	prologue.show_defeat()
-	_check(prologue.defeated and prologue.overlay.visible, "defeat text shown")
-	_check(prologue.overlay.title_label.text == str(data["defeat"]["title"]), "defeat title: %s" % prologue.overlay.title_label.text)
-	_check(prologue.restart_button != null and prologue.restart_button.visible and prologue.restart_button.text == "Recommencer", "restart button")
-	_check(prologue.overlay.continue_button.text == "Fermer", "close button")
-	_check(not prologue.check_now(), "no step check after the defeat")
+	check(prologue.defeated and prologue.overlay.visible, "defeat text shown")
+	check(prologue.overlay.title_label.text == str(data["defeat"]["title"]), "defeat title: %s" % prologue.overlay.title_label.text)
+	check(prologue.restart_button != null and prologue.restart_button.visible and prologue.restart_button.text == "Recommencer", "restart button")
+	check(prologue.overlay.continue_button.text == "Fermer", "close button")
+	check(not prologue.check_now(), "no step check after the defeat")
 	prologue.overlay.continue_pressed.emit()
-	_check(prologue.done and not prologue.overlay.visible, "defeat panel closed")
+	check(prologue.done and not prologue.overlay.visible, "defeat panel closed")
 	var settings: Node = root.get_node_or_null("/root/Settings")
-	_check(settings == null or not bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "defeat does not mark the prologue done")
+	check(settings == null or not bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "defeat does not mark the prologue done")
 	scene.queue_free()
 	await process_frame
 
@@ -250,24 +246,24 @@ func _check_invite() -> void:
 		return
 	settings.call("set_value", BattlePrologueInvite.DONE_KEY, false, false)
 	settings.call("set_value", BattlePrologueInvite.NEVER_KEY, false, false)
-	_check(BattlePrologueInvite.should_ask(), "invite asked at first launch")
+	check(BattlePrologueInvite.should_ask(), "invite asked at first launch")
 	var host := Control.new()
 	root.add_child(host)
 	var proceeded := [0]
 	var invite := BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
 	await process_frame
-	_check(invite != null and proceeded[0] == 0, "launch held by the invite")
+	check(invite != null and proceeded[0] == 0, "launch held by the invite")
 	if invite != null:
-		_check(invite.yes_button.text == "Oui" and invite.no_button.text == "Non" and invite.never_button.text == "Ne plus demander", "invite buttons")
+		check(invite.yes_button.text == "Oui" and invite.no_button.text == "Non" and invite.never_button.text == "Ne plus demander", "invite buttons")
 		invite.no_button.pressed.emit()
-	_check(proceeded[0] == 1 and BattlePrologueInvite.should_ask(), "« Non » proceeds and asks again later")
+	check(proceeded[0] == 1 and BattlePrologueInvite.should_ask(), "« Non » proceeds and asks again later")
 	invite = BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
 	await process_frame
 	if invite != null:
 		invite.never_button.pressed.emit()
-	_check(proceeded[0] == 2 and not BattlePrologueInvite.should_ask(), "« Ne plus demander » proceeds and remembers")
+	check(proceeded[0] == 2 and not BattlePrologueInvite.should_ask(), "« Ne plus demander » proceeds and remembers")
 	invite = BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
-	_check(invite == null and proceeded[0] == 3, "no invite after « Ne plus demander »")
+	check(invite == null and proceeded[0] == 3, "no invite after « Ne plus demander »")
 	settings.call("set_value", BattlePrologueInvite.NEVER_KEY, false, false)
 	host.queue_free()
 	await process_frame
@@ -275,8 +271,8 @@ func _check_invite() -> void:
 
 ## L'étape `id` doit passer à la vérification, puis on enchaîne (sans la pause de 0,8 s).
 func _pass(prologue: BattlePrologue, id: String) -> void:
-	_check(prologue.current_step_id() == id, "on step %s (at %s)" % [id, prologue.current_step_id()])
-	_check(prologue.check_now(), "step %s passes" % id)
+	check(prologue.current_step_id() == id, "on step %s (at %s)" % [id, prologue.current_step_id()])
+	check(prologue.check_now(), "step %s passes" % id)
 	_advance(prologue, id)
 
 
@@ -343,8 +339,3 @@ func _max_shift(before: Dictionary, after: Dictionary) -> float:
 	return best
 
 
-func _check(cond: bool, msg: String) -> bool:
-	if not cond:
-		_failures += 1
-		push_error("nt4: " + msg)
-	return cond

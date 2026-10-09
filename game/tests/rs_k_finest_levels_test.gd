@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot RS-K : `ReliefQuadtree.finest_levels` (étages parcourus du plus fin au
 ## plus grossier, tuiles candidates ou pages de l'étage) rend exactement le même résultat que le
@@ -7,25 +7,15 @@ extends SceneTree
 ## (morceaux E0, tuiles du réseau fin, pages, bords exacts de tuiles) ; affiche le gain.
 ## Usage : godot --headless --path game --script res://tests/rs_k_finest_levels_test.gd
 
-var _failures := 0
-
 
 func _init() -> void:
 	_run()
-	print("rs_k_finest_levels_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("rs_k_finest_levels_test: " + message)
-	return condition
+	finish()
 
 
 func _run() -> void:
 	var world := MapData.default_world_size()
-	if not _check(world.x > 0 and world.y > 0, "map.json size_px unreadable"):
+	if not check(world.x > 0 and world.y > 0, "map.json size_px unreadable"):
 		return
 	_run_world(world)
 	# Lot OM1 (ADR 0115) : monde rectangulaire synthétique 7168 × 6144.
@@ -63,7 +53,7 @@ func _run_world(world: Vector2i) -> void:
 				mismatches += 1
 				if mismatches <= 3:
 					push_error("rect %s: %d != %d" % [rects[i], fast[i], slow[i]])
-		_check(mismatches == 0, "trial %d: %d mismatches over %d rects" % [trial, mismatches, rects.size()])
+		check(mismatches == 0, "trial %d: %d mismatches over %d rects" % [trial, mismatches, rects.size()])
 		print("rs_k_finest_levels_test: %s trial %d, %d pages, %d rects: levels %.2f ms, scan %.2f ms" % [world, trial, qt._page_bytes.size(), rects.size(), (t1 - t0) / 1000.0, (t2 - t1) / 1000.0])
 		# Éviction : la page retirée ne compte plus.
 		var some_key: int = qt._page_bytes.keys()[0]
@@ -71,7 +61,7 @@ func _run_world(world: Vector2i) -> void:
 		qt._page_bytes.erase(some_key)
 		qt._note_level_page(some_key, false)
 		var probe: Array[Rect2] = [some_rect.grow(-0.01)]
-		_check(qt.finest_levels(probe)[0] == qt.finest_levels_scan(probe)[0], "trial %d: same result after eviction" % trial)
+		check(qt.finest_levels(probe)[0] == qt.finest_levels_scan(probe)[0], "trial %d: same result after eviction" % trial)
 		qt.free()
 
 

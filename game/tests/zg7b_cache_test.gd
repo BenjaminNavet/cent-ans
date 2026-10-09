@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Test headless du lot ZG7b (cache de relief absent ou partiel, ADR 0036), sans le vrai cache :
 ## un faux dossier `map/` (manifeste de pyramide à deux étages, index des fleuves et routes fins,
@@ -12,24 +12,13 @@ extends SceneTree
 ##     `CENT_ANS_RELIEF_DIR` sinon prioritaire.
 ## Usage : godot --headless --path game --script res://tests/zg7b_cache_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TEST_DIR := "user://zg7b_test"
-
-var _failures := 0
 
 
 func _init() -> void:
 	await process_frame
 	_run()
-	print("zg7b_cache_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("zg7b_cache_test: " + message)
-	return condition
+	finish()
 
 
 func _touch(path: String) -> void:
@@ -102,36 +91,36 @@ func _run() -> void:
 
 	# 1. États.
 	var status := ReliefCacheStatus.check(map_dir)
-	_check(status.state == ReliefCacheStatus.State.DISABLED, "no manifest → DISABLED")
-	_check(not status.needs_notice(), "no notice without manifest")
+	check(status.state == ReliefCacheStatus.State.DISABLED, "no manifest → DISABLED")
+	check(not status.needs_notice(), "no notice without manifest")
 
 	_write_map(map_dir)
 	status = ReliefCacheStatus.check(map_dir)
-	_check(status.state == ReliefCacheStatus.State.MISSING, "listed tiles, no pyramid dir → MISSING (got %d)" % status.state)
-	_check(status.needs_notice(), "MISSING needs the notice")
-	_check(status.expected.get(1, 0) == 4 and status.expected.get(2, 0) == 50, "RLE expanded (E1 4, E2 50)")
-	_check(not status.expected.has(5), "empty level ignored")
-	_check(int(status.sampled.get(2, 0)) == ReliefCacheStatus.SAMPLES_PER_LEVEL, "large level sampled, not scanned")
-	_check(status.notice_text().contains("introuvable"), "MISSING text says the cache is missing")
-	_check(status.summary().begins_with("ReliefCache: MISSING"), "log summary: %s" % status.summary())
+	check(status.state == ReliefCacheStatus.State.MISSING, "listed tiles, no pyramid dir → MISSING (got %d)" % status.state)
+	check(status.needs_notice(), "MISSING needs the notice")
+	check(status.expected.get(1, 0) == 4 and status.expected.get(2, 0) == 50, "RLE expanded (E1 4, E2 50)")
+	check(not status.expected.has(5), "empty level ignored")
+	check(int(status.sampled.get(2, 0)) == ReliefCacheStatus.SAMPLES_PER_LEVEL, "large level sampled, not scanned")
+	check(status.notice_text().contains("introuvable"), "MISSING text says the cache is missing")
+	check(status.summary().begins_with("ReliefCache: MISSING"), "log summary: %s" % status.summary())
 
 	_write_level(map_dir, 1)
 	_write_fine(map_dir, true)
 	status = ReliefCacheStatus.check(map_dir)
-	_check(status.state == ReliefCacheStatus.State.PARTIAL, "E2 missing → PARTIAL (got %d)" % status.state)
-	_check(status.incomplete_levels() == [2], "incomplete levels = [2] (got %s)" % [status.incomplete_levels()])
-	_check(status.notice_text().contains("E2"), "PARTIAL text names E2")
+	check(status.state == ReliefCacheStatus.State.PARTIAL, "E2 missing → PARTIAL (got %d)" % status.state)
+	check(status.incomplete_levels() == [2], "incomplete levels = [2] (got %s)" % [status.incomplete_levels()])
+	check(status.notice_text().contains("E2"), "PARTIAL text names E2")
 
 	_write_level(map_dir, 2)
 	status = ReliefCacheStatus.check(map_dir)
-	_check(status.state == ReliefCacheStatus.State.COMPLETE, "all tiles → COMPLETE (got %d) %s" % [status.state, status.summary()])
-	_check(not status.needs_notice(), "COMPLETE: no notice")
+	check(status.state == ReliefCacheStatus.State.COMPLETE, "all tiles → COMPLETE (got %d) %s" % [status.state, status.summary()])
+	check(not status.needs_notice(), "COMPLETE: no notice")
 
 	DirAccess.remove_absolute(map_dir.path_join("pyramid/hydro_fine/E2/5_6.bin"))
 	status = ReliefCacheStatus.check(map_dir)
-	_check(status.state == ReliefCacheStatus.State.PARTIAL, "one fine river tile missing → PARTIAL")
-	_check(status.incomplete_fine_layers() == ["rivers"], "incomplete fine layers = [rivers] (got %s)" % [status.incomplete_fine_layers()])
-	_check(status.notice_text().contains("fleuves fins"), "PARTIAL text names the fine rivers")
+	check(status.state == ReliefCacheStatus.State.PARTIAL, "one fine river tile missing → PARTIAL")
+	check(status.incomplete_fine_layers() == ["rivers"], "incomplete fine layers = [rivers] (got %s)" % [status.incomplete_fine_layers()])
+	check(status.notice_text().contains("fleuves fins"), "PARTIAL text names the fine rivers")
 
 	# 2. Avis une seule fois par session — en mode développeur seulement (PO1, bible DA § 12.5).
 	var ui := CanvasLayer.new()
@@ -139,34 +128,34 @@ func _run() -> void:
 	ReliefCacheNotice.shown_this_session = false
 	var settings: Node = root.get_node("/root/Settings")
 	settings.call("use_test_file")
-	_check(ReliefCacheNotice.report(ui, map_dir, map_dir) != null and ui.get_child_count() == 0, "no notice outside dev mode")
+	check(ReliefCacheNotice.report(ui, map_dir, map_dir) != null and ui.get_child_count() == 0, "no notice outside dev mode")
 	settings.call("set_value", "dev/mode", true, false)
 	var empty_dir := base.path_join("empty")
 	DirAccess.make_dir_recursive_absolute(empty_dir)
-	_check(ReliefCacheNotice.report(ui, empty_dir, empty_dir).state == ReliefCacheStatus.State.DISABLED, "report: DISABLED without manifest")
-	_check(ui.get_child_count() == 0, "no notice without manifest")
+	check(ReliefCacheNotice.report(ui, empty_dir, empty_dir).state == ReliefCacheStatus.State.DISABLED, "report: DISABLED without manifest")
+	check(ui.get_child_count() == 0, "no notice without manifest")
 	var reported := ReliefCacheNotice.report(ui, map_dir, map_dir)
-	_check(reported != null and reported.state == ReliefCacheStatus.State.PARTIAL, "report returns the checked status")
-	_check(ui.get_child_count() == 1, "notice added once")
+	check(reported != null and reported.state == ReliefCacheStatus.State.PARTIAL, "report returns the checked status")
+	check(ui.get_child_count() == 1, "notice added once")
 	var notice := ui.get_child(0) as ReliefCacheNotice
-	if _check(notice != null, "child is a ReliefCacheNotice"):
-		_check(notice.command_field != null and notice.command_field.text == ReliefCacheStatus.FETCH_COMMAND, "notice shows the fetch command first (SZ7, ADR 0077)")
-		_check(notice.mouse_filter == Control.MOUSE_FILTER_STOP and notice.anchor_left == 0.5, "notice: top-centred panel, clicks kept to itself")
+	if check(notice != null, "child is a ReliefCacheNotice"):
+		check(notice.command_field != null and notice.command_field.text == ReliefCacheStatus.FETCH_COMMAND, "notice shows the fetch command first (SZ7, ADR 0077)")
+		check(notice.mouse_filter == Control.MOUSE_FILTER_STOP and notice.anchor_left == 0.5, "notice: top-centred panel, clicks kept to itself")
 	ReliefCacheNotice.report(ui, map_dir, map_dir)
-	_check(ui.get_child_count() == 1, "second report in the same session: no second notice")
+	check(ui.get_child_count() == 1, "second report in the same session: no second notice")
 	if notice != null:
 		notice.dismiss()
-		_check(not notice.visible, "dismiss hides the notice")
+		check(not notice.visible, "dismiss hides the notice")
 
 	# 3. Résolution du dossier de relief.
-	_check(MAP_PATHS.relief_root_for(map_dir) == map_dir, "map_dir with pyramid/ is its own relief root")
-	_check(MAP_PATHS.relief_root_for(empty_dir) == empty_dir, "fallback: map_dir when nothing is found")
+	check(MAP_PATHS.relief_root_for(map_dir) == map_dir, "map_dir with pyramid/ is its own relief root")
+	check(MAP_PATHS.relief_root_for(empty_dir) == empty_dir, "fallback: map_dir when nothing is found")
 	var external := base.path_join("external")
 	_write_level(external, 1)
 	OS.set_environment(MAP_PATHS.RELIEF_ENV_VAR, external)
-	_check(MAP_PATHS.relief_root_for(empty_dir) == external, "CENT_ANS_RELIEF_DIR wins")
+	check(MAP_PATHS.relief_root_for(empty_dir) == external, "CENT_ANS_RELIEF_DIR wins")
 	status = ReliefCacheStatus.check(map_dir, MAP_PATHS.relief_root_for(map_dir))
-	_check(status.incomplete_levels() == [2], "external root: E1 found there, E2 missing")
+	check(status.incomplete_levels() == [2], "external root: E1 found there, E2 missing")
 	OS.unset_environment(MAP_PATHS.RELIEF_ENV_VAR)
 	ui.queue_free()
 	_remove_tree(base)

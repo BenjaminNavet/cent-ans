@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Chantier PO (ADR 0097) : critères C1-C3 sur la tranche verticale, en headless.
 ## - C1 (PO1) : aucun texte d'outil visible hors mode dev (`uv run`, `res://`, `user://`, `--…`,
@@ -11,7 +11,6 @@ extends SceneTree
 ##   de saison). Bataille et disposition fixe : hors lot, activés par PO1/PO4/PO5.
 ## Usage : godot --headless --path game --script res://tests/po_ui_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const PICK_PROVINCE_INDEX := 3
 ## Bible DA § 12.2 : Title 26, Heading 20, Body 17, Caption 14 (base 900 px). Rien en dessous ;
 ## 4 valeurs au plus.
@@ -20,7 +19,6 @@ const MAX_DISTINCT_SIZES := 4
 ## Classes dont le texte compte pour C3 (les autres — Panel, TextureRect… — n'affichent rien).
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
-var _failures := 0
 var _layout_failures := 0
 var _c1_failures := 0
 var _c1_texts := 0
@@ -42,20 +40,12 @@ func _init() -> void:
 	print("po_ui_test UiLayout: %s" % ("OK" if _layout_failures == 0 else "%d failure(s)" % _layout_failures))
 	print("po_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
 	print("po_ui_test C2: %s (%d contrôles)" % ["OK" if _c2_failures == 0 else "%d failure(s)" % _c2_failures, _c2_checks])
-	if _failures - _layout_failures - _c1_failures - _c2_failures == 0:
+	if failures - _layout_failures - _c1_failures - _c2_failures == 0:
 		var values := _sizes.keys()
 		values.sort()
 		print("po_ui_test C3: OK (tailles vues : %s)" % str(values))
 	else:
-		print("po_ui_test C3: %d failure(s)" % (_failures - _layout_failures - _c1_failures - _c2_failures))
-	quit(1 if _failures > 0 else 0)
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("po_ui_test: " + message)
-	return condition
+		finish()
 
 
 ## Parcourt les `Control` visibles sous `node` et ajoute leur taille de police à `_sizes`.
@@ -92,16 +82,16 @@ func _run() -> void:
 	await _check_campaign_map()
 	await _check_campaign_layout()
 	var all_sizes := _sizes.keys() + _wide_sizes.keys()
-	_check(all_sizes.is_empty() or all_sizes.min() >= MIN_SIZE,
+	check(all_sizes.is_empty() or all_sizes.min() >= MIN_SIZE,
 		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(all_sizes)])
-	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
+	check(_sizes.size() <= MAX_DISTINCT_SIZES,
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 
 
 ## Menu-titre et choix de faction (`start_menu.gd`, `faction_select.gd`).
 func _check_start_menu() -> void:
 	var scene: PackedScene = load("res://scenes/start_menu.tscn")
-	if not _check(scene != null, "cannot load start_menu.tscn"):
+	if not check(scene != null, "cannot load start_menu.tscn"):
 		return
 	var menu: Control = scene.instantiate()
 	root.add_child(menu)
@@ -144,7 +134,7 @@ func _check_campaign_map() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
+	if not check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
 	# Barre du haut seulement : `map.ui` porte aussi des panneaux d'autres lots (lettres, sceau du
@@ -160,9 +150,9 @@ func _check_campaign_map() -> void:
 	# Colonie : première de la province sélectionnée.
 	var overview: Dictionary = map.sim.call("get_holdings_overview", map.player_faction)
 	var provinces: Array = overview.get("provinces", [])
-	if _check(not provinces.is_empty(), "the player should start with provinces"):
+	if check(not provinces.is_empty(), "the player should start with provinces"):
 		var settlements: Array = provinces[0].get("settlements", [])
-		if _check(not settlements.is_empty(), "the first province should have a settlement"):
+		if check(not settlements.is_empty(), "the first province should have a settlement"):
 			var settlement_id := str((settlements[0] as Dictionary).get("id", ""))
 			map.settlements_ctl.open_settlement(settlement_id, true)
 			await process_frame
@@ -170,7 +160,7 @@ func _check_campaign_map() -> void:
 
 	# Armée sélectionnée : bandeau d'ost.
 	var army_ids: PackedStringArray = map.player_army_ids()
-	if _check(not army_ids.is_empty(), "the player should start with an army"):
+	if check(not army_ids.is_empty(), "the player should start with an army"):
 		map.select_army(str(army_ids[0]))
 		await process_frame
 		_collect_font_sizes(map.ui.army_strip)
@@ -193,7 +183,7 @@ func _check_campaign_map() -> void:
 func _check_layout(condition: bool, message: String) -> bool:
 	if not condition:
 		_layout_failures += 1
-	return _check(condition, "UiLayout: " + message)
+	return check(condition, "UiLayout: " + message)
 
 
 ## Zones, exclusivité du panneau latéral, voile modal, pile d'avis.
@@ -283,7 +273,7 @@ func _collect_tool_texts(node: Node) -> void:
 			var found := regex.search(text)
 			if found != null:
 				_c1_failures += 1
-				_check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
+				check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
 				break
 	for child in node.get_children():
 		_collect_tool_texts(child)
@@ -296,7 +286,7 @@ func _check_c2(condition: bool, message: String) -> bool:
 	_c2_checks += 1
 	if not condition:
 		_c2_failures += 1
-	return _check(condition, "C2: " + message)
+	return check(condition, "C2: " + message)
 
 
 ## Fenêtre à `resolution` (faux si l'environnement refuse le redimensionnement).
@@ -322,7 +312,7 @@ func _check_campaign_layout() -> void:
 	root.add_child(map)
 	await process_frame
 	await process_frame
-	if not _check(map.get("load_ok") and map.get("sim") != null, "C2: campaign map failed to start"):
+	if not check(map.get("load_ok") and map.get("sim") != null, "C2: campaign map failed to start"):
 		map.queue_free()
 		return
 	var initial: Vector2i = root.size

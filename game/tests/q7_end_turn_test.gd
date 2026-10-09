@@ -1,24 +1,15 @@
-extends SceneTree
+extends TestCase
 
 ## Q7 : Entrée (`campaign_end_turn`) finit la saison même quand la fiche d'une ville ou le rapport
 ## de saison est ouvert (la recette voyait une fin de tour sur deux ignorée).
 ## Usage : godot --headless --path game --script res://tests/q7_end_turn_test.gd
 
-const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
 var map: Node = null
-var _failures := 0
 
 
 func _init() -> void:
 	_run.call_deferred()
-
-
-func _check(condition: bool, message: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("q7_end_turn_test: " + message)
-	return condition
 
 
 func _wait(frames: int) -> void:
@@ -63,15 +54,15 @@ func _run() -> void:
 
 	var before := _date()
 	await _press_enter()
-	_check(_date() != before, "Enter on the bare map should end the season (still %s)" % before)
+	check(_date() != before, "Enter on the bare map should end the season (still %s)" % before)
 
 	# Fiche de Paris ouverte.
 	map.settlements_ctl.open_settlement("set_paris")
 	await _wait(5)
-	_check(map.settlements_ctl.panel.is_visible_in_tree(), "Paris panel should be open")
+	check(map.settlements_ctl.panel.is_visible_in_tree(), "Paris panel should be open")
 	before = _date()
 	await _press_enter()
-	_check(_date() != before, "Enter with the settlement panel open should end the season (still %s, panels %s)" % [before, _panel_names()])
+	check(_date() != before, "Enter with the settlement panel open should end the season (still %s, panels %s)" % [before, _panel_names()])
 
 	# Rapport de saison ouvert.
 	var report: Control = map.flow.season_report
@@ -81,21 +72,20 @@ func _run() -> void:
 	await _wait(3)
 	before = _date()
 	await _press_enter()
-	_check(_date() != before, "Enter with the season report open should end the season (still %s, panels %s)" % [before, _panel_names()])
+	check(_date() != before, "Enter with the season report open should end the season (still %s, panels %s)" % [before, _panel_names()])
 
 	# Relecture du tour de l'IA en cours : Entrée la passe, la saison ne change pas.
 	var replay: Node = map.ai_replay
-	if _check(replay != null, "no AiTurnReplay"):
+	if check(replay != null, "no AiTurnReplay"):
 		replay.playing = true
 		replay.set("_skip", false)
 		before = _date()
 		await _press_enter()
-		_check(bool(replay.get("_skip")) or not replay.playing, "Enter during the AI replay should skip it")
-		_check(_date() == before, "Enter during the AI replay must not start another season")
+		check(bool(replay.get("_skip")) or not replay.playing, "Enter during the AI replay should skip it")
+		check(_date() == before, "Enter during the AI replay must not start another season")
 		replay.playing = false
 
-	print("q7_end_turn_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
-	quit(1 if _failures > 0 else 0)
+	finish()
 
 
 func _panel_names() -> Array:
