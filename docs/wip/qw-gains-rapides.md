@@ -14,7 +14,7 @@ Travail sur `main` (pas de worktree), commits à chemins explicites ; une note p
 | F | Fumée brun-rouge près des feux | 1 | fait (31fbcd504) ; à revoir dans un vrai siège après reconstruction du noyau (smoke.gd bloqué par `crew_ammo_cap`, autre session) |
 | G | Bataille : terrain et effet sous le curseur ; daltonien en bataille ; plancher de texte 720p | 1 | fait (7af5fd604, 3fe7a9401, fb76838f7, 1d2869d98) ; à confirmer : cargo test sim-battle/godot-bridge, smoke.gd, vue à l’écran |
 | D | Compression VRAM des textures de modèles, mipmaps de l'eau, contrôle CI | 2 | à faire |
-| H | Icône d'application + image Open Graph | 2 | à faire |
+| H | Icône d'application + image Open Graph | 2 | fait (126c72d7d) ; restent : téléverser `docs/img/readme/og.png` dans GitHub (joueur), icône du lanceur Windows et `modify_resources` (rcedit) |
 | I | Sauvegarde datée du paquet DN (session principale) | 1 | fait : `~/dev/cent-ans-raw/backup/dn-models-2026-10-09/` (8 341 fichiers, `SHA256SUMS`) ; même disque — copie hors machine à décider (ADR 0212) |
 
 Hors lots : séance AS7 (le joueur regarde l'animation en jeu).
