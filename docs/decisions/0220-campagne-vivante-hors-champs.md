@@ -1,4 +1,4 @@
-# 0224 — La campagne vivante hors champs : une couche à règles en données, albédo partagé et réduit
+# 0220 — La campagne vivante hors champs : une couche à règles en données, albédo partagé et réduit
 
 Numéro provisoire (lot DN-PAYS) : l'orchestrateur renumérote à la fusion. Date : 2026-10-09
 (`docs/wip/dn/pays.md`).

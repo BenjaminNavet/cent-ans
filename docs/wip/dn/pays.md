@@ -1,6 +1,6 @@
 # DN-PAYS : campagne vivante hors champs (worktree agent-a3f5b4976ca8a4548)
 
-Périmètre : haies/clôtures (bocage), puits, croix de chemin et calvaires, moulins à vent, salines côtières, ruines, piloris, bord des routes (charrettes, chariots, caravanes). ADR provisoire : `docs/decisions/0224-campagne-vivante-hors-champs.md` (à renuméroter).
+Périmètre : haies/clôtures (bocage), puits, croix de chemin et calvaires, moulins à vent, salines côtières, ruines, piloris, bord des routes (charrettes, chariots, caravanes). ADR provisoire : `docs/decisions/0220-campagne-vivante-hors-champs.md` (à renuméroter).
 
 ## État (fait)
 - `game/scripts/map/countryside_layer.gd` + `game/shaders/countryside.gdshader` : semis par cellule de 96 px, un MultiMesh par modèle et par cellule, taille tenue à l'écran (`size_k`, `max_mult` par modèle), enclos qui s'écartent (`spread_exponent`), fondu par modèle, amincissement par modèle (`max_instances`), chargement des glb en tâche de fond, albédo unique réduit à 512 px par modèle.
