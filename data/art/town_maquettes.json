@@ -31,6 +31,17 @@
       15
     ]
   },
+  "display_demotion": {
+    "description": "Maquette d'un rang plus modeste pour les petits lieux (affichage seul, le type de règle ne change pas) : une cité de poids <= below_weight prend la maquette de bourg, un bourg celle de village. Évite une carte couverte de villes alors que la campagne de 1340 est faite de villages.",
+    "city": {
+      "below_weight": 12,
+      "as": "town"
+    },
+    "town": {
+      "below_weight": 8,
+      "as": "village"
+    }
+  },
   "native_width": {
     "city": 3.6,
     "town": 2.0,
@@ -40,19 +51,20 @@
   },
   "landmark_scale": 2.2,
   "props": {
-    "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig).",
+    "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig). hamlet_village_ratio : largeur d'un hameau dessiné par un village généré (DN), en part de la largeur d'un village.",
     "hamlet_ratio": 0.9,
     "windmill_ratio": 0.65,
     "windmill_range": 300.0,
     "chimney_ratio": 0.4,
-    "chimney_range": 300.0
+    "chimney_range": 300.0,
+    "hamlet_village_ratio": 0.7
   },
   "visibility": {
     "city": 1250.0,
     "town": 900.0,
     "castle": 500.0,
     "abbey": 400.0,
-    "village": 400.0,
+    "village": 900.0,
     "fade_margin": 60.0
   },
   "shadow_range": {

@@ -334,6 +334,67 @@
         "chimney_range": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "hamlet_village_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "display_demotion": {
+      "type": "object",
+      "description": "Affichage seul : un lieu de ce type et de poids <= below_weight prend la maquette du type `as`.",
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "city": {
+          "type": "object",
+          "required": [
+            "below_weight",
+            "as"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "below_weight": {
+              "type": "number",
+              "minimum": 0
+            },
+            "as": {
+              "enum": [
+                "city",
+                "town",
+                "castle",
+                "abbey",
+                "village"
+              ]
+            }
+          }
+        },
+        "town": {
+          "type": "object",
+          "required": [
+            "below_weight",
+            "as"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "below_weight": {
+              "type": "number",
+              "minimum": 0
+            },
+            "as": {
+              "enum": [
+                "city",
+                "town",
+                "castle",
+                "abbey",
+                "village"
+              ]
+            }
+          }
         }
       }
     }

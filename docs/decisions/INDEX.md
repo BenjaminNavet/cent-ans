@@ -184,3 +184,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
 | 0211 | [Charte semi-réaliste révisée (trois états, figurines générées, palette contrôlée)](0211-charte-semi-realiste.md) | accepté |
 | 0212 | [Les modèles 3D générés voyagent en paquet de release, pas par git](0212-paquet-de-modeles-generes.md) | n/d |
+| 0216 | [Plus de villages, moins de villes sur la carte de campagne](0216-plus-de-villages-moins-de-villes.md) | accepté |

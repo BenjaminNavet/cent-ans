@@ -34,7 +34,7 @@ enum Tier { NEAR, VALLEY, SITE, STRATEGIC }
 @export var fine_terrain_distance: float = 170.0
 ## Portée des maquettes (distance caméra → objet, fondu `visibility_range`) : toute la vue normale.
 @export var model_range: float = 1250.0
-@export var hamlet_range: float = 260.0
+@export var hamlet_range: float = 600.0
 ## Lot ZG4 : seuils Près → Vallée → Site (distance caméra) et largeurs de fondu.
 @export var valley_threshold: float = 8.0
 @export var valley_fade: float = 3.0

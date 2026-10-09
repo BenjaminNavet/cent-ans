@@ -646,28 +646,13 @@ func _dn_index(entry: Dictionary) -> int:
 	if _dn_models.has(path):
 		return _dn_models[path]
 	var index := -1
-	var scene := ModelLibrary.get_scene(DnCampaignModels.model_name(entry))
-	var root: Node3D = null
-	if scene != null:
-		root = scene.instantiate() as Node3D
-	if root != null:
-		var found := root.find_children("*", "MeshInstance3D", true, false)
-		if root is MeshInstance3D:
-			found.push_front(root)
-		if not found.is_empty():
-			var mesh_instance := found[0] as MeshInstance3D
-			var local := Transform3D.IDENTITY
-			var node: Node3D = mesh_instance
-			while node != null and node != root:
-				local = node.transform * local
-				node = node.get_parent() as Node3D
-			var mesh := mesh_instance.mesh.duplicate() as Mesh
-			DnCampaignModels.brighten(mesh, entry)
-			var box := local * mesh.get_aabb()
-			var width := float(entry.get("native_width", maxf(box.size.x, box.size.z)))
-			index = _dn_list.size()
-			_dn_list.append({"path": path, "mesh": mesh, "local": local, "top": maxf(box.end.y, 0.0), "width": maxf(width, 0.001), "entry": entry})
-		root.free()
+	var info := DnCampaignModels.prepare(entry)
+	if not info.is_empty():
+		index = _dn_list.size()
+		var item := info.duplicate()
+		item["path"] = path
+		item["entry"] = entry
+		_dn_list.append(item)
 	_dn_models[path] = index
 	return index
 

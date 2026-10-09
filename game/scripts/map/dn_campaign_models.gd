@@ -14,11 +14,13 @@ const PORT_KEY := "port"
 
 static var _doc: Dictionary = {}
 static var _loaded := false
+static var _prepared: Dictionary = {}  # chemin → {mesh, local, top, width} ({} : non importé)
 
 
 static func clear_cache() -> void:
 	_doc = {}
 	_loaded = false
+	_prepared = {}
 
 
 static func document() -> Dictionary:
@@ -134,6 +136,36 @@ static func brighten(mesh: Mesh, entry: Dictionary) -> void:
 		material.albedo_color = Color(gain, gain, gain, 1.0)
 		material.roughness = 1.0
 		mesh.surface_set_material(surface, material)
+
+
+## Glb généré préparé, partagé (premier maillage éclairci, repère local, hauteur et largeur native
+## mesurée si `native_width` manque) ; dictionnaire vide s'il n'est pas importé.
+static func prepare(entry: Dictionary) -> Dictionary:
+	var path := str(entry.get("path", ""))
+	if _prepared.has(path):
+		return _prepared[path]
+	var info := {}
+	var scene := ModelLibrary.get_scene(model_name(entry))
+	var root: Node3D = scene.instantiate() as Node3D if scene != null else null
+	if root != null:
+		var found := root.find_children("*", "MeshInstance3D", true, false)
+		if root is MeshInstance3D:
+			found.push_front(root)
+		if not found.is_empty():
+			var mesh_instance := found[0] as MeshInstance3D
+			var local := Transform3D.IDENTITY
+			var node: Node3D = mesh_instance
+			while node != null and node != root:
+				local = node.transform * local
+				node = node.get_parent() as Node3D
+			var mesh := mesh_instance.mesh.duplicate() as Mesh
+			brighten(mesh, entry)
+			var box := local * mesh.get_aabb()
+			var width := float(entry.get("native_width", maxf(box.size.x, box.size.z)))
+			info = {"mesh": mesh, "local": local, "top": maxf(box.end.y, 0.0), "width": maxf(width, 0.001)}
+		root.free()
+	_prepared[path] = info
+	return info
 
 
 static func near_distance(entry: Dictionary) -> float:

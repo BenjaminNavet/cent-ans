@@ -77,7 +77,14 @@ static func set_style(value: String) -> void:
 
 static func kind_of(entry: Dictionary) -> String:
 	var kind := str(entry.get("kind", "village"))
-	return kind if kind in KINDS else "village"
+	if kind not in KINDS:
+		return "village"
+	# Affichage seul : un petit lieu prend la maquette d'un rang plus modeste (`display_demotion`).
+	var demotion: Variant = (document().get("display_demotion", {}) as Dictionary).get(kind)
+	if demotion is Dictionary and float(entry.get("weight", 0)) <= float(demotion.get("below_weight", -1.0)):
+		var shown := str(demotion.get("as", kind))
+		return shown if shown in KINDS else kind
+	return kind
 
 
 ## Largeur monde (unités) de la maquette d'un type de lieu.

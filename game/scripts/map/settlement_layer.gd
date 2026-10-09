@@ -210,6 +210,8 @@ var _hamlet_seed: PackedInt64Array = PackedInt64Array()
 ## hameau : centre puis emprise), lacets, échelles]) : une reconstruction (recalage du relief,
 ## dévastation) ne relit plus que les hauteurs. Vidée avec les exclusions.
 var _hamlet_tiles: Dictionary = {}
+var _hamlet_dn_info: Dictionary = {}  # chemin du village généré → glb préparé (hameaux)
+var _hamlet_dn_choices: Dictionary = {}  # province → villages générés préparés de sa famille
 ## RS-K3, VT : emprises des colonies ordinaires autour d'un morceau (3 × 3 morceaux) : morceau →
 ## [centres, rayons + marge] ; même validité que les exclusions des hameaux.
 var _model_disks: Dictionary = {}
@@ -853,10 +855,11 @@ func update_view(camera_distance: float) -> void:
 		var icon_alpha := weights.y
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
-		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
-		_hamlets_root.visible = weights.x > 0.35
 		_declutter_timer = 0.0
 		_declutter_force = true
+	# Hameaux visibles jusqu'à `hamlet_range` (au-delà du détail proche) : la campagne ne paraît pas
+	# faite que de villes.
+	_hamlets_root.visible = camera_distance < tiers.hamlet_range
 	if not _labels_placed:
 		# VT : étiquettes toujours au sol (plus de maquette) : posées une fois, puis suivies par
 		# morceau recalé et par échelle verticale.
@@ -1533,7 +1536,7 @@ func _update_hamlet_scale(camera_distance: float) -> void:
 	for node: Node3D in _hamlet_nodes.values():
 		for mmi in node.get_children():
 			var instance := mmi as MultiMeshInstance3D
-			if instance != null and instance.multimesh != null and instance.has_meta("hamlet_entries"):
+			if instance != null and instance.multimesh != null and instance.has_meta("hamlet_entries") and not instance.has_meta("hamlet_local"):
 				_write_hamlet_transforms(instance.multimesh, instance.get_meta("hamlet_entries"))
 
 
@@ -1547,30 +1550,31 @@ func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
 ## PB3g : tampon `MultiMesh.buffer` des hameaux, écrit en une fois (disposition de
 ## `set_instance_transform` : chaque ligne de la base suivie de la composante de l'origine) au
 ## lieu d'un appel au serveur de rendu par instance.
-static func hamlet_buffer(entries: Array, s: float) -> PackedFloat32Array:
+static func hamlet_buffer(entries: Array, s: float, local := Transform3D.IDENTITY) -> PackedFloat32Array:
 	var buffer := PackedFloat32Array()
 	buffer.resize(entries.size() * 12)
 	for t in entries.size():
 		var e: PackedFloat32Array = entries[t]
 		var basis := Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s))
 		var y := lerpf(e[4], e[5], s) - 0.03 * s
+		var xf := Transform3D(basis, Vector3(e[0], y, e[1])) * local
 		var o := t * 12
-		buffer[o] = basis.x.x
-		buffer[o + 1] = basis.y.x
-		buffer[o + 2] = basis.z.x
-		buffer[o + 3] = e[0]
-		buffer[o + 4] = basis.x.y
-		buffer[o + 5] = basis.y.y
-		buffer[o + 6] = basis.z.y
-		buffer[o + 7] = y
-		buffer[o + 8] = basis.x.z
-		buffer[o + 9] = basis.y.z
-		buffer[o + 10] = basis.z.z
-		buffer[o + 11] = e[1]
+		buffer[o] = xf.basis.x.x
+		buffer[o + 1] = xf.basis.y.x
+		buffer[o + 2] = xf.basis.z.x
+		buffer[o + 3] = xf.origin.x
+		buffer[o + 4] = xf.basis.x.y
+		buffer[o + 5] = xf.basis.y.y
+		buffer[o + 6] = xf.basis.z.y
+		buffer[o + 7] = xf.origin.y
+		buffer[o + 8] = xf.basis.x.z
+		buffer[o + 9] = xf.basis.y.z
+		buffer[o + 10] = xf.basis.z.z
+		buffer[o + 11] = xf.origin.z
 	return buffer
 
 func _update_hamlets() -> void:
-	var show := _weights.x > 0.35
+	var show := _camera_distance < tiers.hamlet_range
 	var builds := 0
 	for index in _hamlets_by_chunk:
 		var level := terrain.chunk_level(index)
@@ -1673,6 +1677,29 @@ func _hamlet_tile(index: int) -> Array:
 	return [kept, points, yaws, scales]
 
 
+## Village généré (DN) dessinant les hameaux d'une province : modèle de la famille d'architecture
+## de la province tiré par la graine du hameau ; vide sans glb généré (repli : hameaux du kit).
+func _hamlet_dn(province: String, seed_value: int) -> Dictionary:
+	if DnCampaignModels.is_empty() or not TownMaquetteData.enabled():
+		return {}
+	var choices: Array = _hamlet_dn_choices.get(province, [])
+	if not _hamlet_dn_choices.has(province):
+		var family := TownMaquetteData.family_of_province(province)
+		for entry: Dictionary in DnCampaignModels.entries_for("village", family, TownMaquetteData.subfamily_of_province(province)):
+			var info := DnCampaignModels.prepare(entry)
+			if not info.is_empty():
+				var item := info.duplicate()
+				item["path"] = str(entry.get("path", ""))
+				choices.append(item)
+		_hamlet_dn_choices[province] = choices
+	return {} if choices.is_empty() else choices[absi(seed_value) % choices.size()]
+
+
+## Largeur monde d'un hameau dessiné par un village généré.
+func _hamlet_dn_width() -> float:
+	return TownMaquetteData.width("village") * TownMaquetteData.prop("hamlet_village_ratio", 0.7)
+
+
 ## Graine de tirage du hameau `h` (variante, lacet, taille, incendie).
 func _hamlet_seed_of(h: int) -> int:
 	var hamlet: Dictionary = data.hamlets[h]
@@ -1712,7 +1739,14 @@ func _build_hamlets(index: int) -> void:
 		var seed_value := _hamlet_seed[h] if memo else _hamlet_seed_of(h)
 		var devastation: float = _devastation.get(data.hamlets[h]["province"], 0.0)
 		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
-		var key := (seed_value % meshes.size()) * 2 + (1 if burned else 0)
+		var key: Variant = (seed_value % meshes.size()) * 2 + (1 if burned else 0)
+		var dn := _hamlet_dn(str(data.hamlets[h]["province"]), seed_value)
+		var scale := scales[p]
+		if not dn.is_empty():
+			# Village généré de la famille de la province, à `hamlet_village_ratio` d'un village.
+			key = "%s|%d" % [dn["path"], 1 if burned else 0]
+			scale = scales[p] / ModelLibrary.HAMLET_SCALE * _hamlet_dn_width() / float(dn["width"])
+			_hamlet_dn_info[dn["path"]] = dn
 		var px := points[p * 5]
 		var center := heights[p * 5]
 		var low := center
@@ -1721,15 +1755,24 @@ func _build_hamlets(index: int) -> void:
 		if not groups.has(key):
 			groups[key] = []
 		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
-		groups[key].append(PackedFloat32Array([px.x, px.y, yaws[p], scales[p], center, low]))
-	for key in groups:
+		groups[key].append(PackedFloat32Array([px.x, px.y, yaws[p], scale, center, low]))
+	for key: Variant in groups:
 		var entries: Array = groups[key]
-		var multimesh := MapInstancing.make(meshes[key / 2], entries.size())
-		_write_hamlet_transforms(multimesh, entries)
 		var mmi := MultiMeshInstance3D.new()
 		mmi.set_meta("hamlet_entries", entries)
-		mmi.multimesh = multimesh
-		if key % 2 == 1:
+		var burned := false
+		if key is String:
+			var parts := (key as String).rsplit("|", true, 1)
+			var dn: Dictionary = _hamlet_dn_info[parts[0]]
+			burned = parts[1] == "1"
+			mmi.multimesh = MapInstancing.make(dn["mesh"], entries.size())
+			mmi.multimesh.buffer = hamlet_buffer(entries, 1.0, dn["local"])
+			mmi.set_meta("hamlet_local", true)  # échelle absolue : pas de réécriture d'échelle
+		else:
+			burned = int(key) % 2 == 1
+			mmi.multimesh = MapInstancing.make(meshes[int(key) / 2], entries.size())
+			_write_hamlet_transforms(mmi.multimesh, entries)
+		if burned:
 			mmi.material_override = _burned_material
 		mmi.visibility_range_end = tiers.hamlet_range + terrain.chunk_px
 		node.add_child(mmi)
