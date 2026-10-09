@@ -5,7 +5,6 @@
 use crate::common;
 
 use std::path::PathBuf;
-use std::time::Instant;
 
 use common::*;
 use sim_battle::replay::{state_digest, ReplayRules};

@@ -20,10 +20,10 @@ GT8 | PARTIEL | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences
 HOOKS | PARTIEL | retirer stage_screenshot()/stage_example restants + smoke.gd:1150 | idem | non
 
 ## RT tests Rust
-RT2 | PARTIEL | 10 fichiers avec #[ignore] restent (fk_map_scenes, m3_grid_ai, ep13_replay, perf_step, cb6_group_formation, sb_siege_pace, br3, relief, ep1_scale, ai_relief) | core/crates/*/tests | oui
+RT2 | FAIT | sondes/benchs supprimés (perf_step, parties de ep13/ep1_scale/relief/sb_siege_pace/ai_relief) ; 5 #[ignore] restants = régénérateurs ou test long documentés (m3_grid_ai, ep13_replay, br3, cb6_group_formation, fk_map_scenes) | core/crates/*/tests | oui
 RT6 | FAIT f663a1c46 | review_tests/rs_c_tests/rs_n_tests toujours dans src (découpe) | core/crates/sim-campaign/src/review_tests.rs | oui
-RT7 | À FAIRE | raccourcir tests lents (mesurer d'abord) | core/crates/*/tests | oui
-RT8 | À FAIRE | fusion petits tests/tautologies (data-model 1 binaire, ok) | core/crates/*/tests | oui
+RT7 | À FAIRE (non mesuré, machine chargée) | raccourcir tests lents (mesurer d'abord) | core/crates/*/tests | oui
+RT8 | À FAIRE (non fait) | fusion petits tests/tautologies (data-model 1 binaire, ok) | core/crates/*/tests | oui
 RT9 | FAIT f663a1c46 | core/checks garde data_store_check et png_decode_check (garder campaign_sim_check seul) | core/checks/ | oui
 
 ## GB godot-bridge (304 #[func] contre 337)
