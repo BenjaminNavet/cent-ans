@@ -26,11 +26,6 @@ const MODES := [
 	["feudal", "Féodalité", "", "Royaumes, grands vassaux (hachures) et doubles allégeances (écu parti)"],
 ]
 
-const RELATION_COLORS := {
-	"self": Color(0.85, 0.75, 0.30), "war": Color(0.72, 0.12, 0.10), "truce": Color(0.85, 0.70, 0.20),
-	"peace": Color(0.55, 0.55, 0.52), "alliance": Color(0.20, 0.40, 0.78), "vassal": Color(0.50, 0.25, 0.65),
-	"suzerain": Color(0.50, 0.25, 0.65),
-}
 const RELIGION_AVIGNON := Color(0.20, 0.34, 0.80)  # A6-C8 : bleu, seul bleu de la carte des religions
 const RELIGION_ROME := Color(0.80, 0.65, 0.20)
 const RELIGION_OTHER := Color(0.45, 0.45, 0.45)
@@ -355,7 +350,7 @@ func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
 	for index in ids.size():
 		var relation := relations[index] if index < relations.size() else ""
 		_relations[ids[index]] = relation
-		var color: Color = RELATION_COLORS.get(relation, Color(0, 0, 0, 0))
+		var color: Color = DiplomaticStances.RELATION_COLORS.get(relation, Color(0, 0, 0, 0))
 		color.a = 0.0 if relation == "" else 1.0
 		colors.append(color)
 	_place_relation_markers(ids, relations)
@@ -462,7 +457,7 @@ func _place_relation_markers(ids: PackedStringArray, relations: PackedStringArra
 		label.font_size = 72
 		label.outline_size = 14
 		label.outline_modulate = Color(0.97, 0.93, 0.82)
-		label.modulate = (RELATION_COLORS.get(relation, Color.BLACK) as Color).darkened(0.35)
+		label.modulate = (DiplomaticStances.RELATION_COLORS.get(relation, Color.BLACK) as Color).darkened(0.35)
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.no_depth_test = true
 		label.fixed_size = true
@@ -741,7 +736,7 @@ func _show_legend() -> void:
 			var swatch := ColorRect.new()
 			swatch.custom_minimum_size = Vector2(16, 16)
 			swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			swatch.color = DiplomaticStances.COLORS.get(entry[0], RELATION_COLORS.get(entry[0], Color.GRAY)) if entry[0] is String else entry[0]
+			swatch.color = DiplomaticStances.COLORS.get(entry[0], DiplomaticStances.RELATION_COLORS.get(entry[0], Color.GRAY)) if entry[0] is String else entry[0]
 			chip.add_child(swatch)
 			var symbol_key: String = str(DiplomaticStances.SYMBOL_KEYS.get(entry[0], entry[0])) if entry[0] is String else ""
 			var symbol := Accessibility.relation_symbol(symbol_key) if mode == "diplomacy" and entry[0] is String and Accessibility.colorblind() else ""
