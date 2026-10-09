@@ -188,6 +188,11 @@
           "description": "Durée minimale d'un pacte (saisons).",
           "minimum": 1
         },
+        "durations": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "Durées (saisons) proposées par l'interface."
+        },
         "max_turns": {
           "type": "integer",
           "description": "Durée maximale d'un pacte (saisons).",

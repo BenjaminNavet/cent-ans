@@ -10,3 +10,4 @@ mod eq6_main_claim;
 mod lr11_bastion_peace;
 mod m5;
 mod wh_diploa;
+mod wh_diplob;

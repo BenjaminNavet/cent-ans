@@ -327,8 +327,17 @@ func fill_menu(menu: MenuButton) -> void:
 		if at_war:
 			items.append(["Paix", {"kind": "peace"}])
 			items.append(["Trêve de deux ans", {"kind": "truce", "turns": TRUCE_TURNS}])
-		if not bool(_options.get("allied", false)):
-			items.append(["Alliance", {"kind": "alliance"}])
+		var allied := bool(_options.get("allied", false))
+		if not allied or bool(_options.get("defensive_alliance", false)):
+			items.append(["Alliance militaire", {"kind": "alliance"}])
+		if not allied:
+			items.append(["Alliance défensive", {"kind": "defensive_alliance"}])
+			if not at_war and not bool(_options.get("non_aggression", false)):
+				var pacts: Array = []
+				for turns in _options.get("non_aggression_durations", []):
+					pacts.append(["%s" % FrText.count(int(turns) / 4, "an", "ans"), {"kind": "non_aggression", "turns": int(turns)}])
+				if not pacts.is_empty():
+					items.append(["Pacte de non-agression", null, pacts])
 		if not bool(_options.get("trade", false)):
 			items.append(["Accord commercial", {"kind": "trade_agreement"}])
 		var pairs: Array = []
@@ -384,6 +393,13 @@ func fill_menu(menu: MenuButton) -> void:
 			hostages.append([str(hostage["name"]), {"kind": "hostage", "giver": giver, "character": hostage["id"]}])
 		if not hostages.is_empty():
 			items.append(["Otage", null, hostages])
+		# « Rejoindre la guerre contre X » : le camp qui donne entre en guerre contre un ennemi de l'autre.
+		var wars: Array = []
+		var enemies: Array = (ours if giver == "recipient" else theirs).get("enemies", [])
+		for enemy in enemies:
+			wars.append([str(enemy["name"]), {"kind": "join_war", "giver": giver, "target": enemy["id"]}])
+		if not wars.is_empty():
+			items.append(["Rejoindre la guerre contre…" if giver == "recipient" else "Rejoindre leur guerre contre…", null, wars])
 		items.append(["Devenir vassal" if giver == "proposer" else "Vassalité", {"kind": "vassalage", "giver": giver}])
 	var id := 0
 	var lookup := {}

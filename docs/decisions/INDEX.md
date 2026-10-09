@@ -215,16 +215,16 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0250 | [Mêlée des figurines synchronisée sur les pertes résolues par le cœur](0250-melee-synchronisee-aux-pertes.md) | accepté |
 | 0251 | [Seuils d'allure, cadence nominale par unité, jitter de locomotion](0251-allures-et-cadence-par-unite.md) | accepté |
 | 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |
-| 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
 | 0253 | [Lisibilité de la carte de campagne après la revue d'experts (lot RX mapb)](0253-lisibilite-carte-rx-mapb.md) | accepté |
+| 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
 | 0254 | [Lissage lointain du sol de bataille et cadrage de gros plan hors bâtiments](0254-lissage-lointain-du-sol-de-bataille.md) | accepté |
 | 0255 | [Franchissement d'un pont, contagion de déroute et sonde d'issue (lot RX batsim)](0255-bataille-pont-contagion-sonde.md) | accepté |
 | 0256 | [Chaîne de migration des sauvegardes et erreurs de test attendues](0256-migration-sauvegardes-et-erreurs-attendues.md) | accepté |
 | 0257 | [Équilibrage de campagne après la revue d'experts (lot RX equil)](0257-equilibrage-campagne-rx-equil.md) | accepté |
 | 0258 | [L'IA de campagne lit la difficulté et tient ses sièges](0258-ia-difficulte-et-sieges.md) | accepté |
 | 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
-| 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
 | 0271 | [Lecture de la carte au survol (lot WH hover)](0271-lecture-de-la-carte-au-survol.md) | n/d |
+| 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
 | 0272 | [Entretien croissant des armées et chef requis](0272-entretien-croissant-et-chef-requis.md) | accepté |
 | 0273 | [Rayon de renfort et prévision de bataille](0273-rayon-de-renfort.md) | accepté |
 | 0274 | [Économie lisible : décompositions, impôt par province, édits à coût](0274-economie-lisible-wh.md) | accepté |
@@ -234,6 +234,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |
 | 0279 | [Recrues dans l'armée, sortie, sommation, chevauchée nourricière, repos de l'IA](0279-ordres-armee-sortie-sommation.md) | accepté |
 | 0281 | [Boucle du tour fluide et narrative (WH turn)](0281-boucle-du-tour-narrative.md) | accepté |
+| 0282 | [Ligue anti-hégémon, clause « Rejoindre la guerre », appel d'un allié au joueur (lot WH `diplob`)](0282-ligue-anti-hegemon-et-appels-d-allies.md) | n/d |
+| 0283 | [Non-agression, alliance défensive, ultimatums de l'IA (lot WH `diplob`)](0283-non-agression-alliance-defensive-ultimatums.md) | n/d |
 | 0284 | [Loyauté des personnages, attentats d'agents, compétences par rôle, déclencheurs de traits](0284-personnages-loyaute-agents-roles.md) | accepté |
 | 0285 | [Carte : rotation souris, suivi d'armée, pings de minicarte, panneau Commerce](0285-carte-rotation-ping-commerce.md) | accepté |
 | 0290 | [Champs peints lisibles à distance de jeu](0290-champs-peints-lisibles.md) | n/d |

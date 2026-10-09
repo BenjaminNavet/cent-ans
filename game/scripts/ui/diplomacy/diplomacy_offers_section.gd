@@ -36,7 +36,9 @@ func _render() -> void:
 		row.add_child(text)
 		var offer_id := int(offer["id"])
 		var kind := str(offer.get("kind", ""))
-		var yes := UiBuild.button({"protection": "Intervenir", "arbitration": "Imposer la paix", "peace_summons": "Obéir"}.get(kind, "Accepter"), func() -> void: offer_answered.emit(offer_id, true), row)
+		var ultimatum := bool(offer.get("ultimatum", false))
+		var yes_label: String = {"protection": "Intervenir", "arbitration": "Imposer la paix", "peace_summons": "Obéir", "ally_call": "Marcher à son secours"}.get(kind, "Céder" if ultimatum else "Accepter")
+		var yes := UiBuild.button(yes_label, func() -> void: offer_answered.emit(offer_id, true), row)
 		yes.theme_type_variation = &"PrimaryButton"  # DN ui-kit
 		if kind == "arbitration" and feudal.has(offer_id):
 			var call: Dictionary = feudal[offer_id]
@@ -46,5 +48,6 @@ func _render() -> void:
 				TooltipHost.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l’autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
-		var no := UiBuild.button({"protection": "Se dérober", "arbitration": "Laisser faire", "peace_summons": "Passer outre"}.get(kind, "Refuser"), func() -> void: offer_answered.emit(offer_id, false), row)
+		var no_label: String = {"protection": "Se dérober", "arbitration": "Laisser faire", "peace_summons": "Passer outre", "ally_call": "Se dérober"}.get(kind, "Refuser (la guerre)" if ultimatum else "Refuser")
+		var no := UiBuild.button(no_label, func() -> void: offer_answered.emit(offer_id, false), row)
 		add_child(row)

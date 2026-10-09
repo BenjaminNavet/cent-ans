@@ -198,6 +198,10 @@ impl CampaignState {
         if crate::feudal::has_forfeiture(self, a, b) {
             return Some("commise".to_owned()); // FE (F3)
         }
+        // WH `diplob`: a refused ultimatum is the casus belli of its sender.
+        if fa.ledger.ultimatum_refused.contains_key(b) {
+            return Some("ultimatum refusé".to_owned());
+        }
         for claim in &fa.claims {
             match claim.kind {
                 ClaimKind::Throne if claim.faction.as_ref() == Some(b) => {
@@ -222,10 +226,6 @@ impl CampaignState {
         }
         if fa.allies.iter().any(|ally| self.is_at_war(ally, b)) {
             return Some("défense d'un allié".to_owned());
-        }
-        // WH `diplob`: a refused ultimatum is the casus belli of its sender.
-        if fa.ledger.ultimatum_refused.contains_key(b) {
-            return Some("ultimatum refusé".to_owned());
         }
         // WH `diplob`: nobody needs another motive against the hegemon.
         if self.league_target_of(data, a) == Some(b) {

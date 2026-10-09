@@ -183,7 +183,7 @@
   "league": {
     "enabled": true,
     "include_player": false,
-    "province_share": 0.18,
+    "province_share": 0.055,
     "power_ratio": 2.0,
     "attitude": -25,
     "join_bonus": 15,
@@ -198,7 +198,12 @@
   "non_aggression": {
     "attitude": 5,
     "min_turns": 4,
-    "max_turns": 80
+    "max_turns": 80,
+    "durations": [
+      8,
+      20,
+      40
+    ]
   },
   "ultimatum": {
     "enabled": true,

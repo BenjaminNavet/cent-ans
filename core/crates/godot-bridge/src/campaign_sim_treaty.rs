@@ -96,6 +96,15 @@ impl CampaignSim {
         vdict! {
             "at_war" => state.is_at_war(&player, &target),
             "allied" => state.is_allied(&player, &target),
+            "defensive_alliance" => state.is_defensive_alliance(&player, &target),
+            "non_aggression" => state.has_non_aggression(&player, &target),
+            "non_aggression_durations" => &data
+                .ai_diplomacy
+                .non_aggression
+                .durations
+                .iter()
+                .map(|t| i64::from(*t))
+                .collect::<PackedInt64Array>(),
             "trade" => me.ledger.trade_agreements.contains(&target),
             "access_given" => me.ledger.military_access.contains(&target),
             "access_received" => state.factions[&target].ledger.military_access.contains(&player),
@@ -332,9 +341,18 @@ fn side_dict(
             .to_variant()
         })
         .collect();
+    // WH diplob: the enemies of `side` (« Rejoindre la guerre contre X »).
+    let enemies: VarArray = f
+        .at_war_with
+        .iter()
+        .filter(|e| *e != other && !e.is_rebels())
+        .filter(|e| state.factions.get(*e).is_some_and(|x| x.alive))
+        .map(|e| named(e.as_str(), data.faction_name(e)))
+        .collect();
     vdict! {
         "id" => side.as_str(),
         "name" => data.faction_name(side).as_str(),
+        "enemies" => &enemies,
         "ruler" => ruler_name(state, data, side).as_str(),
         "treasury" => f.treasury,
         "income" => f.last_budget.income,

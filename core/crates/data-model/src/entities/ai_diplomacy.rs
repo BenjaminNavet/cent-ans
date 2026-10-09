@@ -183,6 +183,8 @@ pub struct NonAggressionRules {
     pub attitude: i32,
     pub min_turns: u32,
     pub max_turns: u32,
+    /// Durations (seasons) the interface offers.
+    pub durations: Vec<u32>,
 }
 
 crate::bundled_rules!(NonAggressionRules, "ai/diplomacy.json", at "/non_aggression", default);

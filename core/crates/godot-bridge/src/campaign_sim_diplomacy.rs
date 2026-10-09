@@ -67,6 +67,20 @@ impl CampaignSim {
                     "trade_agreement" => state.factions[&faction].ledger.trade_agreements.contains(&entry.faction),
                     "access_given" => state.factions[&faction].ledger.military_access.contains(&entry.faction),
                     "access_received" => state.factions[&entry.faction].ledger.military_access.contains(&faction),
+                    // WH diplob: kind of alliance, non-aggression pact, hegemon of the league.
+                    "alliance_kind" => if entry.relation != sim_campaign::diplomacy::RelationKind::Alliance {
+                        ""
+                    } else if state.is_defensive_alliance(&faction, &entry.faction) {
+                        "defensive"
+                    } else {
+                        "military"
+                    },
+                    "non_aggression_turns_left" => state.factions[&faction]
+                        .ledger
+                        .non_aggression
+                        .get(&entry.faction)
+                        .map_or(0, |until| i64::from(until.saturating_sub(state.turn()))),
+                    "hegemon" => state.league.as_ref().is_some_and(|l| l.target == entry.faction),
                 }
                 .to_variant()
             })
@@ -108,6 +122,27 @@ impl CampaignSim {
         verdict(evaluation.accept, evaluation.score, &evaluation.reasons())
     }
 
+    /// WH diplob: the standing league against a hegemon, `{active, target,
+    /// target_name, since_turn, until_turn, bound}` (`bound`: the player is
+    /// allied to the hegemon, hence not part of the league).
+    #[func]
+    fn get_league(&self) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Some(league) = state.league.as_ref() else {
+            return vdict! { "active" => false };
+        };
+        vdict! {
+            "active" => true,
+            "target" => league.target.as_str(),
+            "target_name" => data.faction_name(&league.target).as_str(),
+            "since_turn" => i64::from(league.since_turn),
+            "until_turn" => i64::from(league.until_turn),
+            "bound" => state.is_allied(state.player_faction(), &league.target),
+        }
+    }
+
     /// Offers waiting for the player's answer.
     #[func]
     fn get_offers(&self) -> VarArray {
@@ -127,6 +162,7 @@ impl CampaignSim {
                     "from" => offer.from.as_str(),
                     "from_name" => data.factions.get(&offer.from).map_or(offer.from.as_str(), |f| f.short_or_display_name()),
                     "kind" => kind,
+                    "ultimatum" => offer.proposal.is_ultimatum(),
                     "text" => offer.text_fr.as_str(),
                     "expires_in" => i64::from(offer.expires_turn.saturating_sub(state.turn()).saturating_sub(1)),
                 }
@@ -275,6 +311,11 @@ fn war_verdict(
     if state.has_truce(player, target) {
         reasons.push((
             "Trêve rompue : parjure (-40 auprès de tous)".to_owned(),
+            -40,
+        ));
+    } else if state.has_non_aggression(player, target) {
+        reasons.push((
+            "Pacte de non-agression rompu : parjure (-40 auprès de tous)".to_owned(),
             -40,
         ));
     }

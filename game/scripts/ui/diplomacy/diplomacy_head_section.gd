@@ -24,7 +24,10 @@ func _render() -> void:
 	names.add_child(_label(ruler if ruler != "" else "Souverain inconnu", UiType.BODY, HudStyle.INK_SOFT))
 	var band := str(entry.get("attitude_band", ""))
 	var attitude_text := ("%s (%+d)" % [band, int(entry["attitude"])]) if band != "" else ("attitude %+d" % int(entry["attitude"]))
-	var line := "%s — %s" % [STATUS_LABELS.get(status, status), attitude_text]
+	var status_text: String = STATUS_LABELS.get(status, status)
+	if status == "alliance" and str(entry.get("alliance_kind", "")) == "defensive":
+		status_text = "Alliance défensive"
+	var line := "%s — %s" % [status_text, attitude_text]
 	names.add_child(_label(line, UiType.BODY, STATUS_COLORS.get(status, HudStyle.INK)))
 	top.add_child(names)
 	add_child(top)
@@ -33,6 +36,10 @@ func _render() -> void:
 	facts.append("Puissance : %s" % Money.digits(int(entry.get("power", 0))))
 	if int(entry.get("truce_turns_left", 0)) > 0:
 		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
+	if int(entry.get("non_aggression_turns_left", 0)) > 0:
+		facts.append("Pacte de non-agression : encore %s" % FrText.count(int(entry["non_aggression_turns_left"]), "tour", "tours"))
+	if bool(entry.get("hegemon", false)):
+		facts.append("Visé par la ligue des princes")
 	if bool(entry.get("trade_agreement", false)):
 		# Un embargo suspend les routes sans rompre l'accord (la guerre le rompt).
 		var suspended := bool(entry.get("embargo_by_us", false)) or bool(entry.get("embargo_on_us", false))
