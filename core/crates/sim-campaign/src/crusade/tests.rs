@@ -15,11 +15,11 @@ const HOLDER: &str = "fac_mamluks";
 const BASE: &str = "set_famagusta";
 const TARGET: &str = "prov_jerusalem";
 
-fn set(id: &str) -> SettlementId {
+pub(super) fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
 }
 
-fn synthetic_rules() -> CrusadeRules {
+pub(super) fn synthetic_rules() -> CrusadeRules {
     serde_json::from_value(serde_json::json!({
         "faction": CRUSADERS,
         "base_settlement": BASE,
@@ -71,7 +71,7 @@ fn synthetic_rules() -> CrusadeRules {
     .expect("synthetic rules are well formed")
 }
 
-fn data() -> &'static GameData {
+pub(super) fn data() -> &'static GameData {
     static DATA: OnceLock<GameData> = OnceLock::new();
     DATA.get_or_init(|| {
         let mut data = game_data().clone();
@@ -85,7 +85,7 @@ fn data() -> &'static GameData {
 
 /// A campaign played by the synthetic crusaders, at war with the holder
 /// of the target (no peace penalty unless a test asks for it).
-fn campaign() -> CampaignState {
+pub(super) fn campaign() -> CampaignState {
     let mut state = CampaignState::new_1337(data(), fac(CRUSADERS), 7).expect("campaign");
     for (a, b) in [(CRUSADERS, HOLDER), (HOLDER, CRUSADERS)] {
         let f = state.factions.get_mut(&fac(a)).unwrap();
@@ -96,7 +96,7 @@ fn campaign() -> CampaignState {
 }
 
 /// Units of the crusaders: garrisons of their places and armies.
-fn crusader_units(state: &CampaignState) -> usize {
+pub(super) fn crusader_units(state: &CampaignState) -> usize {
     let garrisons: usize = state
         .settlements
         .values()
@@ -112,32 +112,32 @@ fn crusader_units(state: &CampaignState) -> usize {
     garrisons + armies
 }
 
-fn set_fervor(state: &mut CampaignState, fervor: u8) {
+pub(super) fn set_fervor(state: &mut CampaignState, fervor: u8) {
     state.crusade.as_mut().unwrap().fervor = fervor;
 }
 
-fn fervor(state: &CampaignState) -> u8 {
+pub(super) fn fervor(state: &CampaignState) -> u8 {
     state.crusade.as_ref().unwrap().fervor
 }
 
-fn end_of_turn(state: &mut CampaignState) -> Vec<GameEvent> {
+pub(super) fn end_of_turn(state: &mut CampaignState) -> Vec<GameEvent> {
     let mut events = Vec::new();
     resolve_crusade(state, data(), &mut events);
     state.turn += 1;
     events
 }
 
-fn hand(state: &mut CampaignState, settlement: &SettlementId, to: &str) {
+pub(super) fn hand(state: &mut CampaignState, settlement: &SettlementId, to: &str) {
     let s = state.settlements.get_mut(settlement).unwrap();
     s.controller = fac(to);
 }
 
-fn target_city(state: &CampaignState) -> SettlementId {
+pub(super) fn target_city(state: &CampaignState) -> SettlementId {
     state.province_city_id(&prov(TARGET)).unwrap().clone()
 }
 
 #[test]
-fn setup_opens_the_crusade_and_bases_the_army() {
+pub(super) fn setup_opens_the_crusade_and_bases_the_army() {
     let state = campaign();
     let crusade = state.crusade.as_ref().expect("opened at setup");
     assert_eq!(crusade.fervor, 60);
@@ -158,7 +158,7 @@ fn setup_opens_the_crusade_and_bases_the_army() {
 }
 
 #[test]
-fn fervor_wears_off_and_stays_within_bounds() {
+pub(super) fn fervor_wears_off_and_stays_within_bounds() {
     let mut state = campaign();
     end_of_turn(&mut state);
     assert_eq!(fervor(&state), 59, "the vow wears off");
@@ -185,7 +185,7 @@ fn fervor_wears_off_and_stays_within_bounds() {
 }
 
 #[test]
-fn exaltation_falls_back_faster_above_the_high_threshold() {
+pub(super) fn exaltation_falls_back_faster_above_the_high_threshold() {
     let mut state = campaign();
     set_fervor(&mut state, 80);
     end_of_turn(&mut state);
@@ -203,7 +203,7 @@ fn exaltation_falls_back_faster_above_the_high_threshold() {
 }
 
 #[test]
-fn a_contingent_respects_the_garrison_cap() {
+pub(super) fn a_contingent_respects_the_garrison_cap() {
     let mut state = campaign();
     let rules = synthetic_rules();
     let base = set(BASE);
@@ -247,7 +247,7 @@ fn a_contingent_respects_the_garrison_cap() {
 }
 
 #[test]
-fn the_target_and_each_place_lift_the_fervour_once() {
+pub(super) fn the_target_and_each_place_lift_the_fervour_once() {
     let mut state = campaign();
     let city = target_city(&state);
     let ruler = state.factions[&fac(CRUSADERS)].ruler.clone().unwrap();
@@ -277,7 +277,7 @@ fn the_target_and_each_place_lift_the_fervour_once() {
 }
 
 #[test]
-fn the_capital_goes_back_when_the_target_is_lost() {
+pub(super) fn the_capital_goes_back_when_the_target_is_lost() {
     let mut state = campaign();
     let seat = state.factions[&fac(CRUSADERS)].capital.clone();
     let city = target_city(&state);
@@ -293,7 +293,7 @@ fn the_capital_goes_back_when_the_target_is_lost() {
 }
 
 #[test]
-fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
+pub(super) fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
     let mut state = campaign();
     let city = target_city(&state);
     let besiege = |state: &mut CampaignState| {
@@ -362,7 +362,7 @@ fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
 }
 
 #[test]
-fn peace_with_the_holder_of_the_target_costs_fervor() {
+pub(super) fn peace_with_the_holder_of_the_target_costs_fervor() {
     let mut state = campaign();
     for (a, b) in [(CRUSADERS, HOLDER), (HOLDER, CRUSADERS)] {
         let f = state.factions.get_mut(&fac(a)).unwrap();
@@ -373,7 +373,7 @@ fn peace_with_the_holder_of_the_target_costs_fervor() {
 }
 
 #[test]
-fn battles_and_wars_move_the_gauge() {
+pub(super) fn battles_and_wars_move_the_gauge() {
     let mut state = campaign();
     let brothers = fac("fac_hospitallers");
     // Lost to another faith: only the defeat.
@@ -432,7 +432,7 @@ fn battles_and_wars_move_the_gauge() {
 }
 
 #[test]
-fn holy_land_places_and_the_target_floor() {
+pub(super) fn holy_land_places_and_the_target_floor() {
     let mut state = campaign();
     let mut events = Vec::new();
     // A place of the Holy Land.
@@ -505,7 +505,7 @@ fn holy_land_places_and_the_target_floor() {
 }
 
 #[test]
-fn the_capture_of_the_target_city_goes_through_the_hook() {
+pub(super) fn the_capture_of_the_target_city_goes_through_the_hook() {
     let mut state = campaign();
     let city = target_city(&state);
     let mut events = Vec::new();
@@ -521,7 +521,7 @@ fn the_capture_of_the_target_city_goes_through_the_hook() {
 }
 
 #[test]
-fn alms_follow_fervor_and_are_income() {
+pub(super) fn alms_follow_fervor_and_are_income() {
     let mut state = campaign();
     assert_eq!(alms(&state, data(), &fac(CRUSADERS)), 100 + 10 * 60);
     assert_eq!(alms(&state, data(), &fac(HOLDER)), 0);
@@ -539,7 +539,7 @@ fn alms_follow_fervor_and_are_income() {
 }
 
 #[test]
-fn preach_is_refused_with_a_reason() {
+pub(super) fn preach_is_refused_with_a_reason() {
     let mut state = campaign();
     // Not the crusader faction.
     assert_eq!(
@@ -608,7 +608,7 @@ fn preach_is_refused_with_a_reason() {
 }
 
 #[test]
-fn contingent_size_follows_fervor() {
+pub(super) fn contingent_size_follows_fervor() {
     let passage = synthetic_rules().passage;
     assert_eq!(passage.units_at(0), 1);
     assert_eq!(passage.units_at(24), 1);
@@ -623,7 +623,7 @@ fn contingent_size_follows_fervor() {
 }
 
 #[test]
-fn contingent_lands_two_turns_later() {
+pub(super) fn contingent_lands_two_turns_later() {
     let mut state = campaign();
     state.factions.get_mut(&fac(CRUSADERS)).unwrap().treasury = 5000;
     preach_passage(&mut state, data(), &fac(CRUSADERS)).expect("preached");
@@ -652,7 +652,7 @@ fn contingent_lands_two_turns_later() {
 }
 
 #[test]
-fn contingent_finds_another_port_or_is_lost() {
+pub(super) fn contingent_finds_another_port_or_is_lost() {
     let mut state = campaign();
     let rules = synthetic_rules();
     state.factions.get_mut(&fac(CRUSADERS)).unwrap().treasury = 5000;
@@ -686,7 +686,7 @@ fn contingent_finds_another_port_or_is_lost() {
 }
 
 #[test]
-fn zeal_and_desertion_follow_the_thresholds() {
+pub(super) fn zeal_and_desertion_follow_the_thresholds() {
     let mut state = campaign();
     let crusaders = fac(CRUSADERS);
     assert_eq!(zeal_morale(&state, data(), &crusaders), 0);
@@ -747,7 +747,7 @@ fn zeal_and_desertion_follow_the_thresholds() {
 }
 
 #[test]
-fn inert_without_rules_state_or_a_living_faction() {
+pub(super) fn inert_without_rules_state_or_a_living_faction() {
     // Older save: no `crusade` field.
     let mut state = campaign();
     let mut json: serde_json::Value = serde_json::from_str(&state.save_json()).unwrap();
