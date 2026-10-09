@@ -230,11 +230,8 @@ fn one_turn_recruits_join_at_the_end_of_the_turn() {
 }
 
 #[test]
-fn legacy_queue_entries_load_as_one_turn_recruits() {
-    let entry: QueuedRecruit = serde_json::from_str("\"unit_knights\"").expect("legacy id");
-    assert_eq!(entry.unit_type.as_str(), "unit_knights");
-    assert_eq!(entry.turns_left, 1);
-    assert!(entry.ordered_during(12));
+fn queue_entries_round_trip() {
+    // ADR 0208: saves before version 9 are refused, the bare-id entry is gone.
     let full = serde_json::to_string(&QueuedRecruit {
         unit_type: UnitTypeId::new("unit_knights").unwrap(),
         turns_left: 2,
