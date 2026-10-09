@@ -37,6 +37,7 @@ fn the_great_realms_start_within_their_means_and_the_others_untouched() {
         .as_mut()
         .expect("settlement rules")
         .starting_budget = None;
+    raw_data.starting_fit = None;
     let raw = CampaignState::new_1337(&raw_data, fac("fac_france"), 1).expect("start");
 
     // The Mamluks were 21 % short; now within the allowed share.

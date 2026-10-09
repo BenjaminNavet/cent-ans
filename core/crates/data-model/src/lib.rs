@@ -148,6 +148,7 @@ pub use entities::settlement::{
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::starting_armies::{StartingArmies, StartingGarrisons};
+pub use entities::starting_fit::StartingFit;
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::title::{
     FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,

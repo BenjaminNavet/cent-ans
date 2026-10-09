@@ -78,226 +78,6 @@ fn garrison_composition(data: &GameData, role: GarrisonRole) -> Vec<&str> {
     units.iter().map(|u| u.as_str()).collect()
 }
 
-/// Balance of the season `faction` would pay from the start, without the
-/// idle hoard's share of the court (it melts with the treasury), and its
-/// receipts.
-fn structural_balance(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i64, i64) {
-    let Some(economy) = state.faction_economy(data, faction) else {
-        return (0, 0);
-    };
-    let rules = &data.economy_rules;
-    let income = state.faction_income(data, faction);
-    let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
-    let opulence =
-        (treasury - rules.opulence_seasons * income.max(0)).max(0) * rules.opulence_percent / 100;
-    (
-        economy.net_income() + opulence,
-        economy.projected_income + economy.trade_income,
-    )
-}
-
-/// Lot JR4b (`settlement_rules.starting_budget`): a great realm whose
-/// starting forces outrun its receipts sends home its costliest garrison
-/// units, one at a time, until the deficit is within the allowed share —
-/// never a settlement's last unit nor the capital's garrison; then (LR-15)
-/// field units down to `min_field_units`, and last the capital's garrison
-/// down to `min_capital_units`. (The Mamluks paid 4 000 livres of upkeep on
-/// 4 000 of receipts and their AI dismissed its whole field army by the
-/// eighth season.)
-fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
-    let Some(rule) = data
-        .settlement_rules
-        .as_ref()
-        .and_then(|r| r.starting_budget.clone())
-    else {
-        return;
-    };
-    // JR5: the reference balance ignores the difficulty (whatever level the
-    // campaign is or will be set to): measured at the neutral level, where
-    // neither the AI nor the player gets any favour.
-    let level = state.difficulty;
-    state.difficulty = crate::difficulty::Difficulty::Normal;
-    let factions: Vec<FactionId> = state.factions.keys().cloned().collect();
-    for faction in factions {
-        if state.controlled_provinces(&faction).count() < rule.min_provinces
-            || crate::crusade::starting_army(state, data, &faction).is_some()
-        {
-            continue;
-        }
-        // A6-L3 (ADR 0183): the treasury is capped at a few seasons of income.
-        if let Some(seasons) = rule.treasury_max_income_seasons {
-            let (_, receipts) = structural_balance(state, data, &faction);
-            if let Some(f) = state.factions.get_mut(&faction) {
-                f.treasury = f.treasury.min(seasons * receipts.max(0));
-            }
-        }
-        let capital = state.faction_capital_city(&faction).cloned();
-        let is_capital = |id: &data_model::SettlementId| Some(id) == capital.as_ref();
-        // 1. Garrisons other than the capital's, down to one unit each.
-        send_home_garrisons(state, data, &faction, &rule, false, |id| {
-            if is_capital(id) {
-                usize::MAX
-            } else {
-                1
-            }
-        });
-        // 2. LR-15: the starting field armies.
-        if let Some(min_units) = rule.min_field_units {
-            fit_starting_field_armies(state, data, &faction, min_units);
-        }
-        // 3. LR-15: the capital's garrison, as a last resort.
-        if let Some(min_units) = rule.min_capital_units {
-            send_home_garrisons(state, data, &faction, &rule, true, |id| {
-                if is_capital(id) {
-                    min_units
-                } else {
-                    usize::MAX
-                }
-            });
-        }
-        // 4. A6-L3: then the dearest building left unpaid for (a realm whose
-        // upkeep alone outruns its receipts).
-        while in_deficit(state, data, &faction) {
-            let dearest = state
-                .settlements
-                .iter()
-                .filter(|(_, s)| s.controller == faction)
-                .flat_map(|(id, s)| {
-                    let percent = crate::economy::building_upkeep_percent(data, s.kind);
-                    s.buildings.iter().enumerate().map(move |(index, b)| {
-                        let upkeep = data
-                            .buildings
-                            .get(b)
-                            .map_or(0, |t| i64::from(t.upkeep.unwrap_or(0)));
-                        (upkeep * percent, id.clone(), index)
-                    })
-                })
-                .filter(|(paid, _, _)| *paid > 0)
-                .max_by(|a, b| {
-                    a.0.cmp(&b.0)
-                        .then_with(|| b.1.cmp(&a.1))
-                        .then_with(|| b.2.cmp(&a.2))
-                });
-            let Some((_, id, index)) = dearest else {
-                break;
-            };
-            if let Some(place) = state.settlements.get_mut(&id) {
-                place.buildings.remove(index);
-            }
-        }
-    }
-    state.difficulty = level;
-}
-
-/// `true` while `faction` is beyond the deficit `rule` allows (A6-L3: the
-/// share may be negative, a surplus is then asked).
-fn over_budget(
-    state: &CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-    rule: &data_model::StartingBudget,
-) -> bool {
-    let (net, receipts) = structural_balance(state, data, faction);
-    net * 100 < -rule.max_deficit_percent * receipts.max(0)
-}
-
-/// `true` while `faction` is still in deficit. The fallbacks below (field
-/// armies, the capital's garrison, buildings) only bring a deficit to zero:
-/// the surplus asked of the others stops at their garrisons.
-fn in_deficit(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
-    structural_balance(state, data, faction).0 < 0
-}
-
-/// Sends home the costliest garrison units of `faction`, one at a time,
-/// while it is over budget; a place keeps at least `keep(place)` units.
-fn send_home_garrisons(
-    state: &mut CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-    rule: &data_model::StartingBudget,
-    fallback: bool,
-    keep: impl Fn(&data_model::SettlementId) -> usize,
-) {
-    while if fallback {
-        in_deficit(state, data, faction)
-    } else {
-        over_budget(state, data, faction, rule)
-    } {
-        let costliest = state
-            .settlements
-            .iter()
-            .filter(|(id, s)| &s.controller == faction && s.garrison.len() > keep(id))
-            .flat_map(|(id, s)| {
-                let percent = crate::economy::garrison_upkeep_percent(data, s.kind);
-                s.garrison.iter().enumerate().map(move |(index, unit)| {
-                    (
-                        crate::economy::unit_upkeep(data, unit) * percent,
-                        id.clone(),
-                        index,
-                    )
-                })
-            })
-            .filter(|(paid, _, _)| *paid > 0)
-            .max_by(|a, b| {
-                a.0.cmp(&b.0)
-                    .then_with(|| b.1.cmp(&a.1))
-                    .then_with(|| b.2.cmp(&a.2))
-            });
-        let Some((_, settlement, index)) = costliest else {
-            break;
-        };
-        if let Some(place) = state.settlements.get_mut(&settlement) {
-            place.garrison.remove(index);
-        }
-    }
-}
-
-/// Lot LR-15: the second step of [`fit_starting_garrisons`] — with its
-/// garrisons at the floor, a realm still beyond the allowed deficit sends
-/// home the costliest units of its starting field armies, keeping at least
-/// `min_units` of them and never emptying an army. (Serbia and Lithuania
-/// paid 1 080 livres for the three coded units on ~1 800 of receipts; their
-/// AI dismissed them all within five seasons.)
-fn fit_starting_field_armies(
-    state: &mut CampaignState,
-    data: &GameData,
-    faction: &FactionId,
-    min_units: usize,
-) {
-    while in_deficit(state, data, faction) {
-        let units: usize = state
-            .armies
-            .values()
-            .filter(|a| &a.faction == faction)
-            .map(|a| a.units.len())
-            .sum();
-        if units <= min_units {
-            break;
-        }
-        let costliest = state
-            .armies
-            .iter()
-            .filter(|(_, a)| &a.faction == faction && a.units.len() > 1)
-            .flat_map(|(id, a)| {
-                a.units.iter().enumerate().map(move |(index, unit)| {
-                    (crate::economy::unit_upkeep(data, unit), id.clone(), index)
-                })
-            })
-            .filter(|(paid, _, _)| *paid > 0)
-            .max_by(|a, b| {
-                a.0.cmp(&b.0)
-                    .then_with(|| b.1.cmp(&a.1))
-                    .then_with(|| b.2.cmp(&a.2))
-            });
-        let Some((_, army, index)) = costliest else {
-            break;
-        };
-        if let Some(army) = state.armies.get_mut(&army) {
-            army.units.remove(index);
-        }
-    }
-}
-
 fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError> {
     ids.iter()
         .map(|raw| {
@@ -385,6 +165,23 @@ impl CampaignState {
         player: FactionId,
         seed: u64,
     ) -> Result<CampaignState, CampaignError> {
+        let mut state = Self::new_1337_unfitted(data, player, seed)?;
+        // JR4b: the great realms start with garrisons they can pay
+        // (precomputed in `data/rules/starting_fit.json`, ADR 0233).
+        crate::starting_fit::apply_starting_fit(&mut state, data);
+        // JR1: the crusade opens when its rules and its faction exist.
+        crate::crusade::init_crusade(&mut state, data);
+        init_feudal_ties(&mut state, data);
+        Ok(state)
+    }
+
+    /// The 1337 start before the JR4b fit of the garrisons (the state the
+    /// fit's precomputation starts from, ADR 0233).
+    pub(crate) fn new_1337_unfitted(
+        data: &GameData,
+        player: FactionId,
+        seed: u64,
+    ) -> Result<CampaignState, CampaignError> {
         if !data.factions.contains_key(&player) {
             return Err(CampaignError::UnknownFaction(player));
         }
@@ -409,11 +206,6 @@ impl CampaignState {
 
         init_main_armies(&mut state, data)?;
         crate::economy::resolve_goods(&mut state, data);
-        // JR4b: the great realms start with garrisons they can pay.
-        fit_starting_garrisons(&mut state, data);
-        // JR1: the crusade opens when its rules and its faction exist.
-        crate::crusade::init_crusade(&mut state, data);
-        init_feudal_ties(&mut state, data);
         Ok(state)
     }
 }
@@ -807,6 +599,9 @@ mod tests {
 
     use super::*;
     use crate::difficulty::Difficulty;
+    use crate::starting_fit::compute::{
+        fit_starting_garrisons, in_deficit, over_budget, structural_balance,
+    };
 
     #[test]
     fn the_starting_garrisons_do_not_depend_on_the_difficulty() {
@@ -817,6 +612,7 @@ mod tests {
             .as_mut()
             .expect("settlement rules")
             .starting_budget = None;
+        raw_data.starting_fit = None;
         let player = FactionId::new("fac_france").unwrap();
         let garrisons = |level: Difficulty| {
             let mut state = CampaignState::new_1337(&raw_data, player.clone(), 1).unwrap();
@@ -879,7 +675,8 @@ mod tests {
         }
         let player = FactionId::new("fac_france").unwrap();
         let state = CampaignState::new_1337(data, player.clone(), 1).unwrap();
-        let jr4b = CampaignState::new_1337(&jr4b_data, player, 1).unwrap();
+        let mut jr4b = CampaignState::new_1337_unfitted(&jr4b_data, player, 1).unwrap();
+        fit_starting_garrisons(&mut jr4b, &jr4b_data);
         let mut touched = Vec::new();
         for faction in state.factions.keys() {
             let mine = |s: &CampaignState| {

@@ -615,9 +615,9 @@ impl CampaignState {
             i64::from(spec.cost.flat) + i64::from(men) * i64::from(spec.cost.per_man_percent) / 100,
         );
         let mut malus = 0i32;
-        if spec.garrison_men_per_malus > 0 {
-            malus += (men / spec.garrison_men_per_malus) as i32;
-        }
+        malus += men
+            .checked_div(spec.garrison_men_per_malus)
+            .map_or(0, |per| per as i32);
         if spec.hostile {
             malus += rules.fortification_malus * i32::from(settlement.fortification_level);
             let spies: i32 = self

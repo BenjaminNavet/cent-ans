@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/starting_fit.schema.json",
+  "title": "Ajustement JR4b des garnisons de 1337",
+  "description": "Fichier data/rules/starting_fit.json (ADR 0233) : ce que le budget de départ retire à chaque royaume, précalculé. Les listes d'entiers sont des positions dans les listes avant ajustement, croissantes. Un test de sim-campaign vérifie que le fichier égale le calcul.",
+  "type": "object",
+  "$defs": {
+    "positions": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "treasuries": {
+      "type": "object",
+      "description": "Trésorerie plafonnée à quelques saisons de revenu (A6-L3).",
+      "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
+      "additionalProperties": { "type": "integer" }
+    },
+    "garrisons": {
+      "type": "object",
+      "description": "Unités de garnison renvoyées, par établissement.",
+      "propertyNames": { "pattern": "^set_[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/positions" }
+    },
+    "armies": {
+      "type": "object",
+      "description": "Unités de campagne renvoyées, par armée (army_NNNN).",
+      "propertyNames": { "pattern": "^army_[0-9]+$" },
+      "additionalProperties": { "$ref": "#/$defs/positions" }
+    },
+    "buildings": {
+      "type": "object",
+      "description": "Bâtiments retirés faute d'entretien, par établissement.",
+      "propertyNames": { "pattern": "^set_[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/positions" }
+    }
+  },
+  "additionalProperties": false
+}

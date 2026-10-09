@@ -76,6 +76,9 @@ fn data() -> &'static GameData {
     DATA.get_or_init(|| {
         let mut data = game_data().clone();
         data.crusade_rules = Some(synthetic_rules());
+        // The precomputed JR4b fit (ADR 0233) is made for the real crusaders;
+        // these synthetic ones start unfitted, as the fit skips them.
+        data.starting_fit = None;
         data
     })
 }

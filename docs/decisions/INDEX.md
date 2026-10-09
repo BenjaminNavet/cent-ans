@@ -201,3 +201,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0222 | [champs, vergers et vignes en modèles 3D générés (DN-CHAMPS)](0222-champs-modeles-generes.md) | n/d |
 | 0230 | [Effets secondaires de bataille retirés](0230-effets-secondaires-bataille-retires.md) | accepté |
 | 0231 | [Carte : suppression de replis morts](0231-carte-replis-morts.md) | accepté |
+| 0233 | [Ajustement JR4b des garnisons précalculé](0233-ajustement-garnisons-precalcule.md) | accepté |

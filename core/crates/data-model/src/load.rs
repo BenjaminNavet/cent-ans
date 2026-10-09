@@ -126,6 +126,9 @@ pub mod folders {
     /// Starting armies and garrisons of 1337 (lot A6-L3b), inside `rules/`;
     /// optional.
     pub const STARTING_ARMIES: &str = "starting_armies.json";
+    /// Precomputed JR4b fit of the garrisons (ADR 0233), inside `rules/`;
+    /// optional.
+    pub const STARTING_FIT: &str = "starting_fit.json";
     pub const ARMY_RULES: &str = "armies.json";
     pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
     /// Short-term campaign missions (lot NT3), at the data root; optional.
@@ -382,6 +385,9 @@ pub struct GameData {
     /// `data/rules/starting_armies.json` (lot A6-L3b, ADR 0183); without
     /// it the 1337 start raises no army and no city garrison.
     pub starting_armies: Option<crate::entities::starting_armies::StartingArmies>,
+    /// `data/rules/starting_fit.json` (ADR 0233): the JR4b removals,
+    /// precomputed; without it the start keeps its full garrisons.
+    pub starting_fit: Option<crate::entities::starting_fit::StartingFit>,
     /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled
     /// file when absent.
     pub army_rules: crate::entities::army_rules::ArmyRules,
@@ -509,6 +515,7 @@ impl GameData {
             mercenary_rules: Default::default(),
             crusade_rules: None,
             starting_armies: None,
+            starting_fit: None,
             army_rules: Default::default(),
             siege_engine_rules: Default::default(),
             mission_rules: Default::default(),
@@ -664,6 +671,10 @@ impl GameData {
         read_some(
             &mut data.starting_armies,
             &root.join(folders::RULES).join(folders::STARTING_ARMIES),
+        )?;
+        read_some(
+            &mut data.starting_fit,
+            &root.join(folders::RULES).join(folders::STARTING_FIT),
         )?;
         read_into(
             &mut data.army_rules,
