@@ -44,3 +44,6 @@ data/map/.pyramid.*
 # Running Windows launcher set aside during a self-update (ADR 0159)
 *.exe.old
 *.exe.new
+
+# DT2 : bandes PNG du relief fin, source locale de gpu-textures (le jeu lit les .bin BC5)
+data/map/relief_shade_[0-9].png

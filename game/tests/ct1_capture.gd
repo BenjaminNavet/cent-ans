@@ -52,9 +52,6 @@ func _run() -> void:
 		for i in 8:  # panneaux ouverts par la fin de tour précédente (diplomatie, chronique…)
 			if stack == null or not bool(stack.call("close_top")):
 				break
-		var notice := ui.find_child("ReliefCacheNotice", true, false) as Control
-		if notice != null:
-			notice.hide()
 		map.call("_on_end_turn")
 		print("CT1_CAPTURE turn %d stats %s" % [turn, replay.last_stats])
 		var last_follow := ""

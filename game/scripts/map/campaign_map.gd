@@ -181,7 +181,8 @@ func _ready() -> void:
 	sea_lanes_layer.setup(map_data)
 	trade_layer.sea_lanes = sea_lanes_layer  # les tronçons maritimes suivent les routes
 	_connect_ui()
-	ReliefCacheNotice.report(ui, map_dir, MapPaths.relief_root())  # ZG7b : cache de relief absent
+	if not CmdArgs.has("--pyramid-dir") and not DirAccess.dir_exists_absolute(MapPaths.relief_root().path_join("pyramid")):
+		push_warning("ReliefCache: pyramid/ missing, close zoom limited; run `uv run --project tools cent-ans geo relief-fetch` (docs/geo.md)")
 	settlements_ctl = SettlementController.new()  # C5
 	add_child(settlements_ctl)
 	settlements_ctl.setup(self)
