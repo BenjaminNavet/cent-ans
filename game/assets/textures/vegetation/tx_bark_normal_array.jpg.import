@@ -3,8 +3,8 @@
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
 uid="uid://b0oieps0ok0u"
-path.s3tc="res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.s3tc.ctexarray"
-path.etc2="res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.etc2.ctexarray"
+path.bptc="res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.bptc.ctexarray"
+path.astc="res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.astc.ctexarray"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -13,7 +13,7 @@ metadata={
 [deps]
 
 source_file="res://assets/textures/vegetation/tx_bark_normal_array.jpg"
-dest_files=["res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.s3tc.ctexarray", "res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.etc2.ctexarray"]
+dest_files=["res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.bptc.ctexarray", "res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b863f2a0f8161cd.astc.ctexarray"]
 
 [params]
 

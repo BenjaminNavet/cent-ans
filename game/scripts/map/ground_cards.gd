@@ -55,7 +55,9 @@ static func _ensure() -> void:
 		for biome_v in layer.get("biomes", []):
 			var biome := int(biome_v)
 			if biome >= 0 and biome < BiomeParents.COUNT:
-				(_by_biome[biome] as PackedInt32Array).append(int(layer["layer"]))
+				var layers: PackedInt32Array = _by_biome[biome]
+				layers.append(int(layer["layer"]))
+				_by_biome[biome] = layers  # tableau compact : copie à la lecture
 
 
 ## Cartes disponibles (paquet chargé).

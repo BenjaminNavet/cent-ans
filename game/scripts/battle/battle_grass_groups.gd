@@ -74,14 +74,22 @@ static func group_of(biome: int) -> String:
 		return ""
 	var serves := func(b: int) -> bool:
 		for card: Dictionary in cards:
-			if b in (card.get("biomes", []) as Array):
+			if _lists(card, b):
 				return true
 		return false
 	var resolved := BiomeParents.resolve(biome, serves)
 	for card: Dictionary in cards:
-		if resolved in (card.get("biomes", []) as Array):
+		if _lists(card, resolved):
 			return str(card["id"]).get_slice("_", 2) if str(card["id"]).count("_") >= 2 else ""
 	return ""
+
+
+## `biomes` d'une carte lu du JSON (flottants) : comparaison entière.
+static func _lists(card: Dictionary, biome: int) -> bool:
+	for value: Variant in card.get("biomes", []):
+		if int(value) == biome:
+			return true
+	return false
 
 
 ## Cartes du groupe de `biome` : {rôle: {"file", "luma"}} (rôles `grass_blades`, `grass_tufts`,

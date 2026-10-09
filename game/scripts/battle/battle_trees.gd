@@ -94,7 +94,7 @@ static func bark_material(species: String, lod_near: float, lod_far: float) -> S
 	mat.set_shader_parameter("smooth_bark", float(p["smooth"]))
 	if TreeTextures.apply_bark(mat, species):
 		# TX T3 : l'écorce générée a sa propre teinte ; la teinte de l'essence ne fait que la nuancer.
-		mat.set_shader_parameter("tint", (p["bark"] as Color).lerp(Color(1, 1, 1), 0.75))
+		mat.set_shader_parameter("tint", (p["bark"] as Color).lerp(Color(1, 1, 1), 0.5))
 	mat.set_shader_parameter("lod_near", lod_near)
 	mat.set_shader_parameter("lod_far", lod_far)
 	mat.set_shader_parameter("lod_band", LOD_BAND)
