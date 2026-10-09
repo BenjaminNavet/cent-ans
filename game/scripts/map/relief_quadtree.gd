@@ -103,6 +103,8 @@ var _pool: Array[MeshInstance3D] = []
 var _patch_full: ArrayMesh
 var _patch_half: ArrayMesh
 var _frame: int = 0
+## Compteur de résidence des pages (invalide le cache de lecture de `surface_height_at`).
+var _residency_version: int = 0
 var _bounds: PackedVector2Array = PackedVector2Array()
 ## Tuiles E0 en x et en y (grille des morceaux, `pyramid.root_cols` × `pyramid.root_rows`).
 var _root_cols: int = 0
@@ -549,6 +551,7 @@ func _upload(key: int, job: PageJob) -> bool:
 	var t_upload := Time.get_ticks_msec() / 1000.0
 	_pages[key] = {"layer": layer, "t_upload": t_upload}
 	_page_bytes[key] = job.bytes
+	_residency_version += 1
 	_note_level_page(key, true)
 	var t_add := Time.get_ticks_usec()
 	_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
@@ -592,6 +595,7 @@ func _alloc_layer() -> int:
 		return -1
 	var layer: int = _pages[oldest]["layer"]
 	_pages.erase(oldest)
+	_residency_version += 1
 	_page_bytes.erase(oldest)
 	_note_level_page(oldest, false)
 	_native.call("remove_page", oldest)

@@ -50,7 +50,7 @@ BB10 | PARTIEL | rng::hash01 commun fait ; siege_fx::hash01 garde son flux ; veg
 BB12 | À FAIRE | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui
 
 ## PF perf transverse
-PF-02 | À FAIRE | suppr relief_quadtree.gd (1295 l) sélection GD + fine_terrain_job.gd (167) + repli sans pyramide terrain_builder (1493) | game/scripts/map/{relief_quadtree,fine_terrain_job,terrain_builder}.gd | non (Rust optionnel) | [MÉCANIQUE visuelle]
+PF-02 | FAIT (sc/relief, ADR 0203) | suppr relief_quadtree.gd (1295 l) sélection GD + fine_terrain_job.gd (167) + repli sans pyramide terrain_builder (1493) | game/scripts/map/{relief_quadtree,fine_terrain_job,terrain_builder}.gd | non (Rust optionnel) | [MÉCANIQUE visuelle]
 PF-03 | FAIT (ADR 0204, sc/veg) | suppr vegetation_tile_job.gd (649 l) + repli GD vegetation.gd [GELÉ vegetation.gd] | game/scripts/map/vegetation_tile_job.gd, vegetation.gd | non
 PF-06 | PARTIEL | CmdArgs partout ; 46 interrupteurs --no-* encore présents ; sc/devflags prêt (1f7987144) mais NON fusionné (attend settlement_layer propre) | game/scripts/**, branche sc/devflags (../gp-sc-devflags) | non
 PF-07 | À FAIRE | map_bench.gd 534, release_journey.gd 525, perf_probe.gd, _bench_* battle_scene (campaign_map ex-gelé FL) | game/scripts/dev/*.gd | non
@@ -79,7 +79,7 @@ MC1 | PARTIEL | relief_decoder.rs Rust existe ; png16.gd (GD) et chemins 8bit to
 MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants | game/scripts/util/cmd_args.gd | non
 MC6 | À FAIRE | folk_scenes 680 l, 10 archétypes -> 4 | game/scripts/map/life_folk/folk_scenes.gd | non | [MÉCANIQUE visuelle]
 MC8 | PARTIEL | army_markers 656 l non découpé | game/scripts/map/army_markers.gd | non
-MC10 | À FAIRE | = PF-02 | - | non
+MC10 | FAIT (sc/relief, ADR 0203) | = PF-02 | - | non
 MC11 | À FAIRE | ReliefState hors MapData | game/scripts/map/map_data.gd | non
 MC13 | PARTIEL | MapInstancing fait ; fusion marqueurs/feedback, AI replay 1 mode | game/scripts/map | non
 MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/scripts/** | non
@@ -127,7 +127,7 @@ SH10 | À FAIRE | uniformes jamais posés -> const | game/shaders | non
 
 ## AD ai/data-model/relief-lod/vegetation
 AD7 | FAIT (ADR 0204, sc/veg) | vegetation V4 legacy (species None) + repli GD vegetation_tile_job | core/crates/vegetation/src/lib.rs, game/scripts/map/vegetation_tile_job.gd | oui
-AD8 | À FAIRE | relief_quadtree.gd repli GD (= PF-02), has_page mort | core/crates/relief-lod, game/scripts/map/relief_quadtree.gd | oui
+AD8 | FAIT (sc/relief, ADR 0203) | relief_quadtree.gd repli GD (= PF-02), has_page mort | core/crates/relief-lod, game/scripts/map/relief_quadtree.gd | oui
 AD9 | PARTIEL | data-model/util.rs créé ; segment_distance et hash01 dupliqués dans vegetation/lib.rs, siege_fx.rs, splitmix bridge | core/crates/data-model/src/util.rs, vegetation/src/lib.rs | oui
 AD10 | À FAIRE | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
 AD11 | PARTIEL | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui
@@ -135,8 +135,8 @@ AD12 | À FAIRE | perf ai grid near spatial, threat_by_province, Arc<str> | core
 AD13 | PARTIEL | ai/campaign découpé ; doc restante (plan_field.rs 862 l) | core/crates/ai | oui
 
 ## MB map terrain/nature
-MB1 | À FAIRE | = PF-02 (pyramide obligatoire, suppr tuilé, png16, 672 tuiles far) | game/scripts/map/terrain_builder.gd | non
-MB2 | À FAIRE | relief_quadtree sélection GD (= AD8b) | game/scripts/map/relief_quadtree.gd | non
+MB1 | FAIT (sc/relief, ADR 0203) | = PF-02 (pyramide obligatoire, suppr tuilé, png16, 672 tuiles far) | game/scripts/map/terrain_builder.gd | non
+MB2 | FAIT (sc/relief, ADR 0203) | relief_quadtree sélection GD (= AD8b) | game/scripts/map/relief_quadtree.gd | non
 MB3 | FAIT (ADR 0204, sc/veg ; vegetation_tile_job.gd gardé réduit à la requête) | = PF-03 | game/scripts/map/vegetation_tile_job.gd | non
 MB4 | À FAIRE | StreamedTileLayer commun (5 couches) [vegetation GELÉ] | game/scripts/map | non
 MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) | game/scripts/map | non
