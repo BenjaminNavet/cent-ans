@@ -67,35 +67,6 @@
       "required": ["update_period_s", "keyframes"],
       "additionalProperties": false
     },
-    "cloud_shadows": {
-      "type": "object",
-      "properties": {
-        "texture_px": { "type": "integer", "minimum": 64, "maximum": 1024, "description": "Deux fois la résolution d'une tuile de bruit (px)." },
-        "tile_m": { "type": "number", "minimum": 200, "description": "Côté d'une tuile du bruit périodique (m) : le décal glisse d'au plus une tuile." },
-        "noise_cycles": { "type": "number", "minimum": 0.5, "maximum": 8, "description": "Nombre de périodes du bruit par tuile : plus petit = nuages plus larges." },
-        "octaves": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Octaves du bruit : moins = contours plus lisses." },
-        "edge_softness": { "type": "number", "minimum": 0.05, "maximum": 1, "description": "Largeur de la transition du bord des ombres (0..1 de densité) : plus grand = plus doux." },
-        "wind_speed_m_s": { "type": "number", "minimum": 0, "description": "Vitesse des ombres pour un vent de force 1." },
-        "by_weather": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": { "strength": { "type": "number", "minimum": 0, "maximum": 1 }, "coverage": { "type": "number", "minimum": 0, "maximum": 1 } },
-            "required": ["strength", "coverage"],
-            "additionalProperties": false
-          }
-        },
-        "night_strength_mul": { "type": "number", "minimum": 0, "maximum": 1 },
-        "quality": {
-          "type": "object",
-          "properties": { "low": { "type": "boolean" }, "medium": { "type": "boolean" }, "high": { "type": "boolean" }, "ultra": { "type": "boolean" } },
-          "required": ["low", "medium", "high"],
-          "additionalProperties": false
-        }
-      },
-      "required": ["texture_px", "tile_m", "wind_speed_m_s", "by_weather", "quality"],
-      "additionalProperties": false
-    },
     "dust": {
       "type": "object",
       "properties": {
@@ -124,25 +95,6 @@
       "required": ["max_sources", "campfire", "column", "bombard_linger", "camp_fires_per_side", "camp_depth_m"],
       "additionalProperties": false
     },
-    "birds": {
-      "type": "object",
-      "properties": {
-        "flocks": { "$ref": "#/$defs/by_quality_int" },
-        "birds_per_flock": { "$ref": "#/$defs/range" },
-        "trigger_radius_m": { "type": "number", "minimum": 0 },
-        "circle_radius_m": { "$ref": "#/$defs/range" },
-        "circle_height_m": { "$ref": "#/$defs/range" },
-        "flee_speed_m_s": { "type": "number", "minimum": 0 },
-        "circle_speed_m_s": { "type": "number", "minimum": 0 },
-        "flight_duration_s": { "$ref": "#/$defs/range" },
-        "crows_after_s": { "type": "number", "minimum": 0 },
-        "crows": { "type": "integer", "minimum": 0 },
-        "wing_span_m": { "type": "number", "exclusiveMinimum": 0 },
-        "color": { "$ref": "#/$defs/rgb" }
-      },
-      "required": ["flocks", "birds_per_flock", "trigger_radius_m", "circle_radius_m", "circle_height_m", "flee_speed_m_s", "circle_speed_m_s", "flight_duration_s", "crows_after_s", "crows", "wing_span_m", "color"],
-      "additionalProperties": false
-    },
     "cinematic": {
       "type": "object",
       "properties": {
@@ -159,6 +111,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["time_of_day", "cloud_shadows", "dust", "smoke", "birds", "cinematic"],
+  "required": ["time_of_day", "dust", "smoke", "cinematic"],
   "additionalProperties": false
 }

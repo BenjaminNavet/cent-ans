@@ -57,22 +57,6 @@ func _init() -> void:
 	smoke.remove_smoke_source(b)
 	check(smoke.sources.size() == 1, "source removed")
 	smoke.queue_free()
-	# Oiseaux : perchés, puis envolés par une charge à proximité ; corbeaux à la fin.
-	var birds := BattleBirds.new()
-	get_root().add_child(birds)
-	var terrain := {"width": 1800.0, "depth": 1200.0, "forests": [{"x": 900.0, "z": 400.0, "radius": 60.0}], "obstacles": []}
-	birds.setup(cfg["birds"], terrain, func(_x: float, _z: float) -> float: return 0.0, 7)
-	check(birds.flocks.size() >= 2, "a flock and the crows")
-	var charge := [{"present": true, "state": "charging", "x": 900.0, "z": 520.0, "soldiers": 200}]
-	birds.update(charge, 0.1, false)
-	check(birds.launched >= 1 and str(birds.flocks[0]["state"]) == "flee", "a charge flushes the flock")
-	for _i in 60:
-		birds.update(charge, 0.1, false)
-	check(str(birds.flocks[0]["state"]) == "circle", "the flock circles over the field")
-	var melee := [{"present": true, "state": "melee", "x": 900.0, "z": 600.0, "soldiers": 200}]
-	birds.update(melee, 0.1, true)
-	check(birds.crows_out, "crows after the battle")
-	birds.queue_free()
 	finish()
 
 

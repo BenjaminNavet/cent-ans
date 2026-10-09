@@ -18,26 +18,5 @@
     "max_distance_m": 220,
     "marker_hide_scale": 1.05,
     "bearer_rank": 0.5
-  },
-  "duels": {
-    "enabled_for": ["general", "unit_knights", "unit_men_at_arms_foot"],
-    "min_melee_s": 1.5,
-    "cooldown_s": 25.0,
-    "max_active": 4,
-    "max_camera_distance_m": 160,
-    "exchange_s": 0.9,
-    "sequence": [
-      { "a": "slash", "b": "guard" },
-      { "a": "guard", "b": "thrust" },
-      { "a": "slash", "b": "hit" },
-      { "a": "thrust", "b": "knockdown" }
-    ],
-    "mounted_sequence": [
-      { "a": "c_thrust", "b": "c_idle" },
-      { "a": "c_idle", "b": "c_thrust" },
-      { "a": "c_thrust", "b": "c_idle" }
-    ],
-    "gap_m": 1.3,
-    "mounted_gap_m": 2.6
   }
 }

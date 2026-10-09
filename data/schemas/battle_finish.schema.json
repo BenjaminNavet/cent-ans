@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_finish.schema.json",
-  "title": "Finitions de la bataille : vent, étendards, duels",
-  "description": "Fichier data/fx/battle_finish.json (lot BV3) lu par game/scripts/battle/battle_standards.gd et battle_duels.gd. Rendu seulement : le vent n'agit sur aucune règle et les duels sont cosmétiques (aucune perte, aucun moral).",
+  "title": "Finitions de la bataille : vent, étendards",
+  "description": "Fichier data/fx/battle_finish.json (lot BV3) lu par game/scripts/battle/battle_standards.gd. Rendu seulement : le vent n'agit sur aucune règle.",
   "type": "object",
   "$defs": {
     "wind": {
@@ -12,16 +12,6 @@
         "gust": { "type": "number", "minimum": 0, "maximum": 1, "description": "Amplitude des rafales." }
       },
       "required": ["strength", "gust"],
-      "additionalProperties": false
-    },
-    "exchange": {
-      "type": "object",
-      "description": "Une passe du duel : clip de chacun des deux combattants.",
-      "properties": {
-        "a": { "type": "string", "minLength": 1 },
-        "b": { "type": "string", "minLength": 1 }
-      },
-      "required": ["a", "b"],
       "additionalProperties": false
     }
   },
@@ -55,30 +45,8 @@
       },
       "required": ["pole_m", "cloth_scale", "mounted_lift_m", "general_pole_m", "general_cloth_scale", "max_distance_m", "marker_hide_scale", "bearer_rank"],
       "additionalProperties": false
-    },
-    "duels": {
-      "type": "object",
-      "description": "Duels appariés cosmétiques (généraux, champions) au contact de deux régiments.",
-      "properties": {
-        "enabled_for": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "description": "« general » ou identifiants de types d'unités dont les régiments provoquent des duels."
-        },
-        "min_melee_s": { "type": "number", "minimum": 0 },
-        "cooldown_s": { "type": "number", "minimum": 0 },
-        "max_active": { "type": "integer", "minimum": 0 },
-        "max_camera_distance_m": { "type": "number", "exclusiveMinimum": 0 },
-        "exchange_s": { "type": "number", "exclusiveMinimum": 0 },
-        "sequence": { "type": "array", "items": { "$ref": "#/$defs/exchange" }, "minItems": 1 },
-        "mounted_sequence": { "type": "array", "items": { "$ref": "#/$defs/exchange" }, "minItems": 1 },
-        "gap_m": { "type": "number", "exclusiveMinimum": 0 },
-        "mounted_gap_m": { "type": "number", "exclusiveMinimum": 0 }
-      },
-      "required": ["enabled_for", "min_melee_s", "cooldown_s", "max_active", "max_camera_distance_m", "exchange_s", "sequence", "mounted_sequence", "gap_m", "mounted_gap_m"],
-      "additionalProperties": false
     }
   },
-  "required": ["wind", "standards", "duels"],
+  "required": ["wind", "standards"],
   "additionalProperties": false
 }

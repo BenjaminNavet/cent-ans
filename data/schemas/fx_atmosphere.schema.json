@@ -142,37 +142,6 @@
       "required": ["grade_strength", "seasons"],
       "additionalProperties": false
     },
-    "secondary_motion": {
-      "type": "object",
-      "description": "Lot AN1a (ADR 0096) : mouvement secondaire en shader de sommets des figurines de bataille (bas des surcots et jaques, caparaçons, crinières, queues) et des étendards portés. Rendu seulement. Le vent de base (direction, force, rafales) vient de data/fx/battle_finish.json (wind).",
-      "properties": {
-        "description": { "type": "string" },
-        "enabled": { "type": "boolean" },
-        "max_distance_m": { "type": "number", "minimum": 0, "maximum": 1000, "description": "Au-delà (m, caméra → soldat), aucun mouvement secondaire (coût)." },
-        "speed_ref_m_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 20, "description": "Vitesse du régiment (m/s) qui donne le recul plein (plafonné à 1,5 fois)." },
-        "wind_scale": { "type": "number", "minimum": 0, "maximum": 3, "description": "Multiplie la force du vent de la bataille." },
-        "skirt": { "$ref": "#/$defs/motion_part" },
-        "caparison": { "$ref": "#/$defs/motion_part" },
-        "mane": { "$ref": "#/$defs/motion_part" },
-        "tail": { "$ref": "#/$defs/motion_part" },
-        "flag": {
-          "type": "object",
-          "description": "Étoffes des étendards portés (battle_standard_flag.gdshader).",
-          "properties": {
-            "amp_min": { "type": "number", "minimum": 0, "maximum": 1, "description": "Amplitude relative de l'onde par vent nul." },
-            "amp_max": { "type": "number", "minimum": 0, "maximum": 1, "description": "Amplitude relative de l'onde par vent fort." },
-            "wave_speed_min": { "type": "number", "minimum": 0, "maximum": 20, "description": "Vitesse de l'onde (rad/s) par vent nul." },
-            "wave_speed_max": { "type": "number", "minimum": 0, "maximum": 30, "description": "Vitesse de l'onde (rad/s) par vent fort." },
-            "ripple": { "type": "number", "minimum": 0, "maximum": 1, "description": "Ondulation le long de la hampe, relative à l'onde principale." },
-            "gait_wind": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4, "description": "Vent apparent ajouté par l'allure du porteur, par clip du jeu (arrêt, marche, course, sonnerie)." }
-          },
-          "required": ["amp_min", "amp_max", "wave_speed_min", "wave_speed_max", "ripple", "gait_wind"],
-          "additionalProperties": false
-        }
-      },
-      "required": ["enabled", "max_distance_m", "speed_ref_m_s", "wind_scale", "skirt", "caparison", "mane", "tail", "flag"],
-      "additionalProperties": false
-    },
     "time_of_day": {
       "type": "object",
       "description": "Chantier PO (ADR 0097, bible DA § 12.6) : préréglages d'heure du jour (soleil, ciel et étalonnage). Bataille (PO4) : la phase de départ donnée par le cœur (EP8, `phases`) choisit le préréglage ; sans heure du cœur, tirage de rendu déterministe sur la graine (`midday` exclu par temps couvert). Rendu seulement.",

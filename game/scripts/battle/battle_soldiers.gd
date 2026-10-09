@@ -352,10 +352,6 @@ func _make_skinned_material(side: String, kind: String, variant: int, corpse: bo
 	mat.set_shader_parameter("heraldry", arms)
 	mat.set_shader_parameter("has_heraldry", arms != null)
 	BattleSkinned.setup_material(mat, kind, variant)
-	# AN1a : mouvement secondaire (étoffes, caparaçons, crins) ; éteint sur les poses figées.
-	BattleSecondaryMotion.setup_material(mat, kind, variant)
-	if corpse:
-		mat.set_shader_parameter("sm_enabled", false)
 	mat.set_shader_parameter("reload_time", 9.0 if kind == "archer" and variant == 2 else 6.0)
 	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.92 if noble else 0.6)
@@ -640,9 +636,6 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	_param(mat, sent, &"anim_state", anim_state(unit))
 	_param(mat, sent, &"highlight", 1.0 if is_selected else 0.0)
 	_param(mat, sent, &"far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
-	if skinned:
-		# AN1a : vitesse du régiment (recul des étoffes et des crins), arrondie (PB3c : peu d'envois).
-		_param(mat, sent, &"move_speed", snappedf(float(_speed.get(id, 0.0)), 0.1))
 	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
 	var track: Dictionary = _anim_track.get(id, {})
 	if track.is_empty():

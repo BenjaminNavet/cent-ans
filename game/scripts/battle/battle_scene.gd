@@ -99,7 +99,6 @@ var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
 var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
 var standards: BattleStandards = null  # BV3 : vent, porte-étendards
-var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
 var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
 var enemy_speech: BattleSpeech = null  # NT6a : discours du général adverse, après celui du joueur
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
@@ -534,12 +533,11 @@ func _reset_battle_visuals() -> void:
 		kept_impostors = soldiers.impostors
 		soldiers.remove_child(kept_impostors)
 		soldiers.impostors = null
-	for node in [soldiers, standards, duels, effects, engines_fx, assault_fx]:
+	for node in [soldiers, standards, effects, engines_fx, assault_fx]:
 		if node != null and is_instance_valid(node):
 			(node as Node).get_parent().remove_child(node)
 			(node as Node).queue_free()
 	standards = null
-	duels = null
 	effects = null
 	blood = null
 	engines_fx = null
@@ -830,8 +828,6 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 		var general: Variant = (setup[side] as Dictionary).get("general", null)
 		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
 	_side_houses = houses
-	# AN1a : vent de la bataille (le même que celui des drapeaux) pour le mouvement secondaire.
-	BattleSecondaryMotion.set_wind(BattleStandards.wind_for(_weather_key, battle_seed))
 	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
@@ -883,10 +879,6 @@ func _setup_standards() -> void:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
 		terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
-	duels = BattleDuels.new()
-	duels.name = "Duels"
-	add_child(duels)
-	duels.setup()
 
 
 ## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
@@ -990,8 +982,6 @@ func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
 	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
-	if duels != null:
-		duels.update(units, soldiers, soldiers.anim_time, _camera_position())
 	if grass_flatten != null:
 		grass_flatten.update(units, dt)
 	if effects == null:

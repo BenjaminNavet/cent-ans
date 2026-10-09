@@ -5,11 +5,9 @@ extends Node3D
 ## - la lumière selon l'heure (`BattleTimeOfDay`) : l'heure vient du cœur
 ##   (`BattleSim.get_time_of_day()`, tirée par la campagne ou choisie en bataille rapide) et
 ##   avance avec la bataille ; le panorama EP2 est reteinté ;
-## - les ombres de nuages (`BattleCloudShadows`) ;
 ## - la poussière enrichie des charges et des colonnes (`BattleEffects.configure_staging`) ;
 ## - les fumées (`BattleSmoke`) : feux de camp derrière les lignes, fumée des bombardes qui
 ##   s'attarde, colonnes des maisons en feu (incendies S2 des sièges) ;
-## - les oiseaux (`BattleBirds`) ;
 ## - le plan cinématique au premier choc (`BattleCinematic`).
 ## Chaque effet suit les niveaux de qualité PF1. Paramètres : `data/fx/battle_staging.json`.
 ##
@@ -23,9 +21,7 @@ const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 var cfg: Dictionary = {}
 var auto_campfires: bool = true
 var time_of_day: BattleTimeOfDay = null
-var clouds: BattleCloudShadows = null
 var smoke: BattleSmoke = null
-var birds: BattleBirds = null
 var cinematic: BattleCinematic = null
 ## Dernier état de l'heure lu au cœur (`get_time_of_day`).
 var tod: Dictionary = {}
@@ -78,12 +74,6 @@ func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3
 		time_of_day = BattleTimeOfDay.new((cfg["time_of_day"] as Dictionary).get("keyframes", []))
 		time_of_day.capture(env, sun, weather)
 		_refresh_time(true)
-	if cfg.has("cloud_shadows"):
-		clouds = BattleCloudShadows.new()
-		add_child(clouds)
-		# Le champ et ses abords (bois de l'anneau proche) : 600 m de marge de chaque côté.
-		clouds.setup(cfg["cloud_shadows"], center, Vector2(width + 1200.0, depth + 1200.0), weather, wind, int(scene.get("battle_seed")) + 3)
-		clouds.set_light_level(time_of_day.light_level if time_of_day != null else 1.0)
 	if cfg.has("smoke"):
 		smoke = BattleSmoke.new()
 		add_child(smoke)
@@ -91,10 +81,6 @@ func setup(scene: Node, battle: Object, env: Environment, sun: DirectionalLight3
 		smoke.set_light_level(time_of_day.light_level if time_of_day != null else 1.0)
 		if auto_campfires and terrain_data.get("siege") == null:
 			_place_campfires(terrain_data, height_at)
-	if cfg.has("birds"):
-		birds = BattleBirds.new()
-		add_child(birds)
-		birds.setup(cfg["birds"], terrain_data, height_at, int(scene.get("battle_seed")) + 17)
 	if cfg.has("cinematic"):
 		cinematic = BattleCinematic.new()
 		add_child(cinematic)
@@ -137,10 +123,6 @@ func update(units: Array, dt: float, real_dt: float, finished: bool) -> void:
 	if _tod_timer <= 0.0:
 		_tod_timer = float((cfg.get("time_of_day", {}) as Dictionary).get("update_period_s", 1.5))
 		_refresh_time(false)
-	if clouds != null:
-		clouds.advance(dt)
-	if birds != null:
-		birds.update(units, dt, finished)
 	if smoke != null and _battle != null:
 		_fire_timer -= real_dt
 		if _fire_timer <= 0.0:
@@ -170,8 +152,6 @@ func _refresh_time(force: bool) -> void:
 	time_of_day.apply(hour)
 	if _horizon != null:
 		_horizon.call("apply_atmosphere", _env, _sun, _weather)
-	if clouds != null:
-		clouds.set_light_level(time_of_day.light_level)
 	if smoke != null:
 		smoke.set_light_level(time_of_day.light_level)
 
