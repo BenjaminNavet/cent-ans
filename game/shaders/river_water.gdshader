@@ -69,6 +69,12 @@ uniform int ford_count = 0;
 uniform bool sheet = false;
 uniform float sheet_alpha = 0.88;
 uniform float sheet_deep = 0.75;
+// DN-MER : rive des lacs lue dans le raster de côte (comme le terrain, rive adoucie au lieu du
+// contour polygonal du maillage), teinte et reflets du ciel variés comme la mer ME1.
+uniform sampler2D coast_dist : filter_linear, repeat_disable, hint_default_white;
+uniform bool has_coast_dist = false;
+uniform float coast_dist_scale = 2.0;
+uniform vec3 sheet_sky_color : source_color = vec3(0.60, 0.72, 0.82);
 
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 // RC5 (ADR 0141) : détail tuilable Nano Banana 2 (`river_large` / `river_small`) le long du
@@ -169,6 +175,12 @@ void fragment() {
 	// Loin (non creusé) : profondeur fictive décroissant vers les bords du ruban.
 	float fake_depth = 1.0 - smoothstep(0.35, 1.05, edge);
 	float deep = sheet ? sheet_deep : mix(fake_depth, depth_t, v_carved);
+	float lake_coast = -8.0;
+	if (sheet && has_coast_dist) {
+		lake_coast = (texture(coast_dist, v_world.xz / map_size).r * 255.0 - 128.0) / coast_dist_scale;
+		// Fonds : clairs près de la rive, profonds au large.
+		deep = mix(0.12, sheet_deep, smoothstep(0.0, -7.0, lake_coast));
+	}
 
 	// Écoulement : deux couches de bruit étirées dans le sens du courant, décalées dans le temps.
 	vec2 q = vec2(v_flow.x * 0.8, v_flow.y * 2.2) * ripple_scale;
@@ -201,6 +213,11 @@ void fragment() {
 
 	vec3 col = mix(shallow_color, deep_color, deep);
 	col *= 0.92 + 0.16 * n2;
+	if (sheet) {  // DN-MER : courants lents, taches de teinte (jamais un aplat uni)
+		float cur = vnoise(v_world.xz * 0.045) * 0.6 + vnoise(v_world.xz * 0.13 + 7.0) * 0.4;
+		col *= 0.8 + 0.4 * cur;
+		col = mix(col, col * vec3(0.9, 1.08, 1.0), smoothstep(0.35, 0.7, vnoise(v_world.xz * 0.02 + 3.0)));
+	}
 	// RC5 : coordonnées du courant (abscisse aval, travers) : la texture suit le lit.
 	vec2 rc_uv = vec2(v_flow.x, v_flow.y) * water_detail_scale;
 	col = water_detail_tint(col, rc_uv);
@@ -232,7 +249,8 @@ void fragment() {
 	n = normalize(n + (water_detail_normal_ws(v_flow, TIME, vec2(-water_detail_flow, 0.0)) - vec3(0.0, 1.0, 0.0)) * ripple_fade);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
-	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));
+	float sheet_sky = sheet ? 0.04 + 0.26 * vnoise(v_world.xz * 0.06 + TIME * 0.02) : 0.0;  // reflets du ciel par plaques
+	ALBEDO = mix(ALBEDO, sheet ? sheet_sky_color : sky_color, clamp(fresnel * sky_reflect + 0.12 + sheet_sky, 0.0, 0.85) * (1.0 - foam));
 	ALBEDO = mix(ALBEDO, bank_ink_color, ink);
 	// Bord : fondu (ruban) ou contact avec la berge (lit creusé : l'eau finit sur la pente).
 	float soft = 1.0 - (1.0 - smoothstep(0.0, edge_soft_px, px_edge)) * (1.0 - v_carved);
@@ -241,6 +259,10 @@ void fragment() {
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
 	if (sheet) {
 		ALPHA = sheet_alpha;
+		if (has_coast_dist) {  // rive : fondu sur la vraie côte (bruitée), pas sur le polygone
+			float shore_noise = vnoise(v_world.xz * 3.1) * 0.5 + vnoise(v_world.xz * 7.7) * 0.5;
+			ALPHA *= 1.0 - smoothstep(-1.6, 0.3 + 0.5 * (shore_noise - 0.5), lake_coast);
+		}
 	} else {
 		ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
 	}

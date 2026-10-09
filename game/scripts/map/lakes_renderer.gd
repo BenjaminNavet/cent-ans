@@ -15,15 +15,15 @@ const WATER_SHADER := preload("res://shaders/river_water.gdshader")
 const LAKES_FILE := "lakes.json"
 
 ## Débord du polygone sous la rive (px carte).
-@export var shore_overlap_px: float = 0.5
+@export var shore_overlap_px: float = 3.0
 ## Opacité de la nappe (l'eau peinte du terrain transparaît un peu).
 @export var sheet_alpha: float = 0.88
 ## HC2 (ADR 0161 §3) : couleurs propres aux lacs, plus claires que celles des fleuves et accordées
 ## à l'eau peinte du terrain (`lake_color`, `lake_shallow_color` de `terrain.gdshader`, en sRGB ici).
-@export var deep_color: Color = Color(0.29, 0.52, 0.65)
-@export var shallow_color: Color = Color(0.38, 0.57, 0.64)
+@export var deep_color: Color = Color(0.13, 0.31, 0.44)
+@export var shallow_color: Color = Color(0.26, 0.46, 0.52)
 ## Part de ciel reflétée en vue rasante (en plus du reflet constant du shader).
-@export var sky_reflect: float = 0.8
+@export var sky_reflect: float = 0.55
 
 ## Lacs chargés : {id, name, level_m, center: Vector2, polygon: PackedVector2Array, triangles}.
 var lakes: Array[Dictionary] = []
@@ -132,7 +132,7 @@ func _load_lakes(path: String) -> void:
 func _overlapped(polygon: PackedVector2Array) -> PackedVector2Array:
 	if shore_overlap_px <= 0.0:
 		return polygon
-	var grown := Geometry2D.offset_polygon(polygon, shore_overlap_px, Geometry2D.JOIN_MITER)
+	var grown := Geometry2D.offset_polygon(polygon, shore_overlap_px, Geometry2D.JOIN_ROUND)
 	var best := polygon
 	var best_area := -1.0
 	for candidate: PackedVector2Array in grown:
@@ -170,5 +170,11 @@ func _water_material() -> ShaderMaterial:
 	material.set_shader_parameter("sky_reflect", sky_reflect)
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("baked_vertical_scale", MapData.HEIGHT_SCALE)
+	var coast: Texture2D = null
+	if map_data.coast_dist_image != null and not map_data.coast_dist_image.is_empty():
+		coast = ImageTexture.create_from_image(map_data.coast_dist_image)
+	material.set_shader_parameter("has_coast_dist", coast != null)
+	if coast != null:
+		material.set_shader_parameter("coast_dist", coast)
 	material.render_priority = 1
 	return material

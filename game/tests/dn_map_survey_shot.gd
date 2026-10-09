@@ -16,6 +16,8 @@ const VIEWS := [
 	["4_paris", 2213.0, 3204.0],
 	["5_marais_poitevin", 1880.0, 3590.0],
 	["6_castille", 1450.0, 4160.0],
+	["7_constance", 2933.0, 3438.0],
+	["8_manche", 1750.0, 3000.0],
 ]
 
 
@@ -44,8 +46,12 @@ func _init() -> void:
 	var map_data: MapData = map.get("map_data")
 	DirAccess.make_dir_recursive_absolute(out)
 	for view in VIEWS:
-		if only != "" and not String(view[0]).contains(only):
-			continue
+		if only != "":  # `--only=a,b` : sous-chaînes séparées par des virgules
+			var wanted := false
+			for part in only.split(","):
+				wanted = wanted or String(view[0]).contains(part)
+			if not wanted:
+				continue
 		var x: float = view[1]
 		var z: float = view[2]
 		rig.look_at_point(Vector3(x, map_data.surface_world_at(x, z), z), distance)
