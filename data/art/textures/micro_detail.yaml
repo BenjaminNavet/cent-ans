@@ -1,0 +1,157 @@
+# TX micro-detail (spec § 1): fine grain textures blended near the camera by the ground, bark and
+# masonry shaders. Cost: 16 x 2048 px x 0.021 $ ~ 0.34 $.
+family: micro_detail
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: Photorealistic macro photograph, soft diffuse lighting, natural colours, high detail.
+style_suffix: Seamless tileable texture, sharp fine detail across the whole image, evenly lit.
+entries:
+- id: micro_soil_grain
+  role: micro_ground
+  biomes: &id001
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  prompt: Extreme close-up of bare brown soil grain, tiny crumbs and fine particles filling the whole
+    frame, flat front view.
+  seed: 10200
+  tile_m: 0.5
+  checks: &id002
+    luminance:
+    - 0.05
+    - 0.85
+    saturation:
+    - 0.0
+    - 0.8
+    seam_max: 0.08
+- id: micro_grass_fine
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up from above of short dense lawn grass blades, fine green blades filling the
+    whole frame, flat front view.
+  seed: 10210
+  tile_m: 0.5
+  checks: *id002
+- id: micro_sand_grain
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of fine pale sand grains filling the whole frame, flat front view.
+  seed: 10220
+  tile_m: 0.3
+  checks: *id002
+- id: micro_gravel_fine
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of fine grey and brown gravel and grit filling the whole frame, flat front
+    view.
+  seed: 10230
+  tile_m: 0.5
+  checks: *id002
+- id: micro_rock_grain
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of grey granular rock surface with crystals and tiny pits filling the whole
+    frame, flat front view.
+  seed: 10240
+  tile_m: 0.5
+  checks: *id002
+- id: micro_snow_grain
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of granular old snow crystals filling the whole frame, white with faint blue
+    shadows, flat front view.
+  seed: 10250
+  tile_m: 0.3
+  checks: *id002
+- id: micro_mud_fine
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of damp dark brown mud with fine smooth wrinkles filling the whole frame, flat
+    front view.
+  seed: 10260
+  tile_m: 0.5
+  checks: *id002
+- id: micro_dry_crust
+  role: micro_ground
+  biomes: *id001
+  prompt: Extreme close-up of dry cracked pale earth crust with fine cracks and dust filling the whole
+    frame, flat front view.
+  seed: 10270
+  tile_m: 0.5
+  checks: *id002
+- id: micro_bark_fibrous
+  role: micro_bark
+  biomes: *id001
+  prompt: Extreme close-up of fibrous tree bark texture, fine vertical fibres and tiny cracks filling
+    the whole frame, flat front view.
+  seed: 10280
+  tile_m: 0.3
+  checks: *id002
+- id: micro_bark_flaky
+  role: micro_bark
+  biomes: *id001
+  prompt: Extreme close-up of flaky tree bark texture, small overlapping scales filling the whole frame,
+    flat front view.
+  seed: 10290
+  tile_m: 0.3
+  checks: *id002
+- id: micro_stone_grain
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of cut limestone surface with fine grain, tiny pores and tool marks filling
+    the whole frame, flat front view.
+  seed: 10300
+  tile_m: 0.3
+  checks: *id002
+- id: micro_brick_grain
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of the surface of an old fired clay brick, fine sandy grain and tiny pits filling
+    the whole frame, flat front view.
+  seed: 10310
+  tile_m: 0.3
+  checks: *id002
+- id: micro_plaster_grain
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of rough lime plaster surface with fine sand grain and tiny hairline cracks
+    filling the whole frame, flat front view.
+  seed: 10320
+  tile_m: 0.3
+  checks: *id002
+- id: micro_wood_grain
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of weathered oak wood grain, fine fibres and small cracks filling the whole
+    frame, flat front view.
+  seed: 10330
+  tile_m: 0.3
+  checks: *id002
+- id: micro_thatch_fibre
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of thatch straw stems, fine golden-grey parallel fibres filling the whole frame,
+    flat front view.
+  seed: 10340
+  tile_m: 0.3
+  checks: *id002
+- id: micro_mortar_grain
+  role: micro_masonry
+  biomes: *id001
+  prompt: Extreme close-up of old lime mortar with coarse sand grains filling the whole frame, flat front
+    view.
+  seed: 10350
+  tile_m: 0.3
+  checks: *id002

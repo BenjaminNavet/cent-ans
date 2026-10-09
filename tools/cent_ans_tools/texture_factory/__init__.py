@@ -20,4 +20,6 @@ FAMILIES = (
     "vegetation_cards",
     "foliage_bark",
     "building_materials",
+    "water_surfaces",
+    "micro_detail",
 )

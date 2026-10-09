@@ -1,0 +1,164 @@
+# TX water (09/10, budget raised by the player to 3 $): top-down water surfaces per biome; the
+# pack pass derives a normal from the ripple pattern, the shader keeps the procedural flow.
+# Cost: 12 x 2048 px x 0.021 $ ~ 0.25 $.
+family: water_surfaces
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: Photorealistic aerial photograph, soft diffuse overcast lighting, natural colours, high
+  detail.
+style_suffix: Seamless tileable texture, sharp fine detail across the whole image, realistic colours.
+entries:
+- id: water_sea_atlantic
+  role: sea
+  biomes:
+  - 1
+  - 2
+  - 11
+  prompt: Top-down view of the surface of a grey-green Atlantic coastal sea with small choppy wind waves,
+    ripples evenly spread over the whole frame.
+  seed: 10000
+  tile_m: 40
+  checks: &id001
+    luminance:
+    - 0.05
+    - 0.85
+    saturation:
+    - 0.0
+    - 0.8
+    seam_max: 0.08
+- id: water_ocean_open
+  role: ocean
+  biomes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  prompt: Top-down view of the open ocean surface, dark blue-grey long swell with fine ripples on top,
+    waves evenly spread over the whole frame.
+  seed: 10010
+  tile_m: 120
+  checks: *id001
+- id: water_sea_mediterranean
+  role: sea
+  biomes:
+  - 3
+  - 7
+  - 8
+  - 14
+  prompt: Top-down view of a calm clear Mediterranean sea surface, deep turquoise-blue water with gentle
+    ripples evenly spread over the whole frame.
+  seed: 10020
+  tile_m: 40
+  checks: *id001
+- id: water_sea_northern
+  role: sea
+  biomes:
+  - 5
+  - 9
+  - 13
+  prompt: Top-down view of a cold northern sea surface, dark slate grey water with short choppy waves
+    evenly spread over the whole frame.
+  seed: 10030
+  tile_m: 40
+  checks: *id001
+- id: water_sea_black
+  role: sea
+  biomes:
+  - 4
+  - 10
+  - 12
+  prompt: Top-down view of the Black Sea surface near the coast, dark blue-green water with small regular
+    waves evenly spread over the whole frame.
+  seed: 10040
+  tile_m: 40
+  checks: *id001
+- id: water_river_large_muddy
+  role: river_large
+  biomes:
+  - 1
+  - 2
+  - 10
+  - 11
+  - 12
+  prompt: Top-down view of a wide lowland river surface, silty brown-green water with soft ripples and
+    faint current streaks running in one direction across the whole frame.
+  seed: 10050
+  tile_m: 20
+  checks: *id001
+- id: water_river_small_clear
+  role: river_small
+  biomes:
+  - 1
+  - 2
+  - 6
+  - 13
+  prompt: Top-down view of a shallow clear stream, transparent water with fine ripples over rounded brown
+    and grey pebbles, uniform coverage of the whole frame.
+  seed: 10060
+  tile_m: 8
+  checks: *id001
+- id: water_river_steppe_silty
+  role: river_large
+  biomes:
+  - 4
+  - 7
+  - 8
+  prompt: Top-down view of a slow steppe river surface, ochre and khaki silt-laden water with gentle ripples
+    and faint current streaks across the whole frame.
+  seed: 10070
+  tile_m: 20
+  checks: *id001
+- id: water_torrent_alpine
+  role: river_small
+  biomes:
+  - 6
+  prompt: Top-down view of a mountain glacial torrent, milky pale turquoise water with fast ripples and
+    small white foam streaks across the whole frame.
+  seed: 10080
+  tile_m: 8
+  checks: *id001
+- id: water_lake_boreal
+  role: lake
+  biomes:
+  - 5
+  - 9
+  - 13
+  prompt: Top-down view of a still northern forest lake surface, dark tea-brown water with very fine wind
+    ripples evenly spread over the whole frame.
+  seed: 10090
+  tile_m: 30
+  checks: *id001
+- id: water_marsh_still
+  role: marsh
+  biomes:
+  - 1
+  - 2
+  - 10
+  - 11
+  - 13
+  prompt: Top-down view of still marsh water, dark olive water partly covered with scattered green duckweed
+    and a few floating leaves, uniform coverage of the whole frame.
+  seed: 10100
+  tile_m: 6
+  checks: *id001
+- id: water_oasis_still
+  role: lake
+  biomes:
+  - 7
+  - 8
+  prompt: Top-down view of still oasis pool water, clear green water over pale sand with faint ripples,
+    uniform coverage of the whole frame.
+  seed: 10110
+  tile_m: 10
+  checks: *id001

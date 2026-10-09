@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": ["family", "size", "output_size", "style_prefix", "style_suffix", "entries"],
   "properties": {
-    "family": {"enum": ["ground_campaign", "ground_battle", "vegetation_cards", "foliage_bark", "building_materials"]},
+    "family": {"enum": ["ground_campaign", "ground_battle", "vegetation_cards", "foliage_bark", "building_materials", "water_surfaces", "micro_detail"]},
     "backend": {"enum": ["fal", "local"], "description": "fal (défaut) : Z-Image Turbo sur fal.ai ; local : mflux (ADR 0190)."},
     "size": {"enum": [1024, 1536, 2048]},
     "output_size": {"const": 2048},
