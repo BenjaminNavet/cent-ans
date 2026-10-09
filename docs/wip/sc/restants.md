@@ -210,3 +210,4 @@ DC-1 DC-2 | GT3(partiel) | RT1 RT3 RT4 RT5 | GB1 GB2 GB3 GB4 GB5 | CB4 CB5 CB6 C
 - BB14b : House.keep/terrace + _build_keeps (donjon) plus produits par aucun générateur depuis BB14 → à supprimer [mech, Rust+GD].
 - PF-07b : résidus --bench-ab/--bench-set/--map-ab dans battle_vegetation.gd, settlement_layer.gd (fichiers DN, après leur session), terrain_builder.gd, campaign_weather_view.gd, render_quality.gd [mech]. Préchauffage GPU post-export (--journey) retiré d export_macos.sh : à remplacer si saccades au 1er lancement.
 - Fin de chantier : clippy workspace échoue sur sim-campaign (clippy::manual_checked_ops), signalé par veg.
+- GT9 : un script de test qui ne compile pas sort en code 0 (Parse Error invisible pour CI/agents). Ajouter une vérif --check-only de game/tests/*.gd (CI ou outil) [mech]. Balayage du 09/10 : 8 cassés réparés (48172e05a, 2907579fa).
