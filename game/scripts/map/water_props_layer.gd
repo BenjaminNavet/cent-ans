@@ -163,7 +163,7 @@ func _add_port(entry: Dictionary, shore: Dictionary, by_kind: Dictionary, arsena
 	var ids: Array = by_basin.get(basin, ports_rule.get("moored_default", []))
 	for i in moored:
 		var lateral := (1.0 if i % 2 == 0 else -1.0) * (2.4 + 1.8 * float(i / 2))
-		var out := 2.6
+		var out := 3.8
 		var at := coast + dir * out + side * lateral
 		var tries := 0
 		while _land(at) and tries < 3:
@@ -173,7 +173,7 @@ func _add_port(entry: Dictionary, shore: Dictionary, by_kind: Dictionary, arsena
 		if _land(at):
 			continue
 		var heading := (side * (1.0 if i % 2 == 0 else -1.0) + dir * 0.15 * float((hash_value + i) % 5 - 2)).normalized()
-		_add(DnWaterModels.pick(ids, hash_value + i), "moored", at, heading, "water")
+		_add(DnWaterModels.pick(ids, hash_value + i), "moored", at, heading, "water", float(ports_rule.get("moored_scale", 1.0)))
 
 
 func _add_wreck(shore: Dictionary, id: String, model: String, distance: float) -> void:

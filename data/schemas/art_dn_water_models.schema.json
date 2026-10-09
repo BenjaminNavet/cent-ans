@@ -122,6 +122,7 @@
       "properties": {
         "description": {"type": "string"},
         "search_px": {"type": "number", "exclusiveMinimum": 0},
+        "moored_scale": {"type": "number", "exclusiveMinimum": 0, "description": "Réduction des navires amarrés (ils flanquent la maquette du lieu)."},
         "by_kind": {
           "type": "object",
           "propertyNames": {"enum": ["city", "town", "castle", "abbey", "village"]},

@@ -1,6 +1,6 @@
 # DN-FLEUVE : glb générés sur et au bord de l'eau (carte de campagne)
 
-Branche worktree `worktree-agent-a956a1c66be203390`, non fusionnée. ADR provisoire 0216 (à renuméroter à la fusion).
+Branche worktree `worktree-agent-a956a1c66be203390`, non fusionnée. ADR provisoire 0220 (`docs/decisions/0220-glb-generes-sur-l-eau.md`) (à renuméroter à la fusion).
 
 Périmètre : navires d'armée et de commerce, bateaux de fleuve, ponts, moulins à eau, ports, chantiers navals, épaves, oiseaux d'eau. Hors périmètre : rendu de l'eau (DN-MER), forêts, champs, roches, pâtures.
 
@@ -20,3 +20,12 @@ Périmètre : navires d'armée et de commerce, bateaux de fleuve, ponts, moulins
 
 ## État
 - [x] 1 squelette
+- [x] 2 flottes d'armée (culture > bassin), 3 lignes maritimes et fleuves (un MultiMesh par modèle)
+- [x] 4 ponts glb (enfant de l'ouvrage), 5 `WaterPropsLayer` (91 moulins, 641 pièces de port, 668 navires amarrés, 18 chantiers, 23 épaves), 6 oiseaux (gull, goose, stork, crane + swan, pelican)
+- [x] 7 test `game/tests/dn_water_models_test.gd`, smoke OK, 2 captures planche/jeu
+
+## Points ouverts
+- Proue des navires : sens non vérifié par modèle (`yaw_deg` dans le registre).
+- Année courante non branchée (`DnWaterModels.year_override`).
+- Coût : mesuré par smoke seulement (setup couche 290-430 ms headless) ; banc sur machine calme à faire.
+- Bateaux de fleuve pour les rivières non nommées : repli `default`.

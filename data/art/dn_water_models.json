@@ -165,6 +165,7 @@
   "ports": {
     "description": "Ports (lieux `port` ou `bld_port`) : sur la côte du lieu (recherche de l'eau dans `search_px`), jetée vers la mer, grue, navires amarrés en nombre croissant avec le poids ; les bourgs sans jetée ont des barques tirées au sec. Fleuve : repli sur le fleuve le plus proche. Les villes et bourgs ont leurs propres glb de camp-bati : pas d'entrepôt ajouté.",
     "search_px": 14.0,
+    "moored_scale": 0.75,
     "by_kind": {
       "city": {"props": ["port_pier", "port_crane"], "moored": 3},
       "town": {"props": ["port_pier", "port_crane"], "moored": 2},
