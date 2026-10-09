@@ -18,7 +18,7 @@ dest_files=["res://.godot/imported/tx_bark_normal_array.jpg-cd17ca3265cdc2939b86
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
