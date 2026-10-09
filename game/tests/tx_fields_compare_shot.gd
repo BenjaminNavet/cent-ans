@@ -59,6 +59,8 @@ func _init() -> void:
 		await process_frame
 	var rig: CampaignCamera = map.camera_rig
 	rig.edge_pan_enabled = false
+	rig.min_distance = 4.0
+	rig.close_min_distance = 4.0
 	for layer in root.find_children("*", "CanvasLayer", true, false):
 		(layer as CanvasLayer).visible = false
 	RenderingServer.global_shader_parameter_set("campaign_season", Vector4(0.0, 1.0, 0.0, 0.0))
