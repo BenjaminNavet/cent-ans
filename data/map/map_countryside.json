@@ -17,6 +17,7 @@
       60
     ],
     "town_clearance_px": 0.8,
+    "texture_px": 512,
     "defaults": {
       "alt_min_m": -50,
       "alt_max_m": 4000,

@@ -28,6 +28,7 @@
         "spread_exponent": {"type": "number", "minimum": 0, "maximum": 1, "description": "L'ecart entre pieces d'un enclos grossit comme (grossissement)^exposant."},
         "lod_distances": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
         "town_clearance_px": {"type": "number", "minimum": 0, "description": "Distance minimale (px carte) a une colonie."},
+        "texture_px": {"type": "integer", "minimum": 64, "maximum": 2048, "description": "Cote maximal (px) de l'albedo des modeles, partage entre leurs niveaux de detail (memoire video)."},
         "defaults": {
           "type": "object",
           "required": ["alt_min_m", "alt_max_m", "slope_max_deg", "marsh_max", "prairie_min", "open_min", "forest_max", "crops_max"],

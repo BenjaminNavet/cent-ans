@@ -31,7 +31,7 @@ var config: Dictionary = {}
 var enabled := true
 ## Affiche et construit quelle que soit la distance du rig (tests headless).
 var force_active := false
-var stats: Dictionary = {"cells": 0, "visible_cells": 0, "draw_calls": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0}
+var stats: Dictionary = {"cells": 0, "visible_cells": 0, "draw_calls": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0, "state_ms_max": 0.0}
 
 var _map_data: MapData
 var _mpp := 719.0
@@ -48,6 +48,8 @@ var _road_grid: Dictionary = {}  # Vector2i (cellule) → Array[{a, b, type, id}
 var _biomes: Image
 var _frame := 0
 var _lod := -1
+## Modèles à préparer (un par image) pour éviter l'à-coup de la première cellule.
+var _warm_queue: Array = []
 
 
 static func load_config() -> Dictionary:
@@ -85,6 +87,7 @@ func setup(map_data: MapData, rig: Node3D = null, towns: PackedVector2Array = Pa
 		list.append(town)
 		_town_grid[key] = list
 	_resolve_rules()
+	_request_models()
 	_index_villages(villages)
 	_index_roads(roads)
 	var needs_biomes := false
@@ -436,7 +439,7 @@ func _paddocks(entry: Dictionary, rule: Dictionary, rect: Rect2, clearance: floa
 				if side == gate_side and absf(float(s) + 0.5 - segments * 0.5) < maxf(1.0, segments * gap):
 					continue
 				var at := from + direction * length_px * (float(s) + 0.5) / segments
-				if not _map_data.is_land_px(int(at.x), int(at.y)):
+				if not _map_data.is_land_px(int(at.x), int(at.y)) or _map_data.river_sd_at(at.x, at.y) < 0.3 or (_fauna != null and _fauna.in_lake(at)):
 					continue
 				out.append({"prop": prop, "pos": at, "yaw": yaw, "len_m": length_px * _mpp / segments, "offset": at - center, "rank": rank, "profile": int(entry["profile"]), "rule": str(rule["id"])})
 
@@ -509,7 +512,7 @@ func _prop_state(prop_id: String) -> Dictionary:
 		var path := DN_DIR + "%s_lod%d.glb" % [str(prop["model"]), level]
 		if not ResourceLoader.exists(path):
 			break
-		var mesh := FaunaLayer.flat_mesh_of(path)
+		var mesh := mesh_of(path)
 		if mesh == null:
 			break
 		lods.append(mesh)
@@ -528,6 +531,7 @@ func _prop_state(prop_id: String) -> Dictionary:
 		"fade_from": float(prop.get("fade_from", _render("fade_from", 70.0))),
 		"stretched": bool(prop.get("stretched", false)),
 	}
+	var shared_texture: Texture2D = null
 	for mesh: ArrayMesh in lods:
 		var covered := mesh.duplicate() as ArrayMesh
 		for s in covered.get_surface_count():
@@ -537,7 +541,11 @@ func _prop_state(prop_id: String) -> Dictionary:
 			if source != null:
 				material.set_shader_parameter("albedo", source.albedo_color)
 				if source.albedo_texture != null:
-					material.set_shader_parameter("albedo_texture", source.albedo_texture)
+					# Les niveaux de détail d'un modèle partagent le même albédo (fichiers identiques) :
+					# une seule texture réduite par modèle, les autres sont libérées.
+					if shared_texture == null:
+						shared_texture = _small_texture(source.albedo_texture)
+					material.set_shader_parameter("albedo_texture", shared_texture)
 					material.set_shader_parameter("has_texture", true)
 			material.set_shader_parameter("albedo_gain", float(prop.get("albedo_gain", 1.0)))
 			material.set_shader_parameter("mesh_origin", Vector3(aabb.get_center().x, aabb.position.y, aabb.get_center().z))
@@ -550,6 +558,88 @@ func _prop_state(prop_id: String) -> Dictionary:
 		(state["lods"] as Array).append(covered)
 	_states[prop_id] = state
 	return state
+
+
+## Maillage d'un glb DN. Chemin rapide : une seule instance de maillage sans transformation (cas des
+## glb générés) → on reprend le maillage tel quel, sans repasser par les sommets en GDScript ;
+## sinon `FaunaLayer.flat_mesh_of` (nœuds aplatis).
+static func mesh_of(path: String) -> ArrayMesh:
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	var meshes := root.find_children("*", "MeshInstance3D", true, false)
+	var direct: ArrayMesh = null
+	if meshes.size() == 1:
+		var instance := meshes[0] as MeshInstance3D
+		var xf := instance.transform
+		var parent := instance.get_parent()
+		while parent != null and parent != root and parent is Node3D:
+			xf = (parent as Node3D).transform * xf
+			parent = parent.get_parent()
+		if root is Node3D:
+			xf = (root as Node3D).transform * xf
+		if xf.is_equal_approx(Transform3D.IDENTITY) and instance.mesh is ArrayMesh:
+			direct = (instance.mesh as ArrayMesh).duplicate() as ArrayMesh
+	root.free()
+	return direct if direct != null else FaunaLayer.flat_mesh_of(path)
+
+
+## Demande le chargement en tâche de fond de tous les niveaux de détail des modèles (décodage des
+## textures hors du fil principal).
+func _request_models() -> void:
+	_warm_queue = (config.get("props", {}) as Dictionary).keys()
+	for prop: Dictionary in (config.get("props", {}) as Dictionary).values():
+		for path in _model_paths(prop):
+			ResourceLoader.load_threaded_request(path)
+
+
+func _model_paths(prop: Dictionary) -> Array[String]:
+	var paths: Array[String] = []
+	for level in MAX_LODS:
+		var path := DN_DIR + "%s_lod%d.glb" % [str(prop["model"]), level]
+		if ResourceLoader.exists(path):
+			paths.append(path)
+	return paths
+
+
+## Prépare au plus un modèle par image, dès que tous ses niveaux sont chargés (jamais d'attente).
+func _warm_step() -> void:
+	for n in range(_warm_queue.size() - 1, -1, -1):
+		var prop_id := str(_warm_queue[n])
+		var ready := true
+		var paths := _model_paths((config["props"] as Dictionary)[prop_id])
+		for path in paths:
+			if ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				ready = false
+		if not ready:
+			continue
+		_warm_queue.remove_at(n)
+		var t_warm := Time.get_ticks_usec()
+		for path in paths:
+			ResourceLoader.load_threaded_get(path)
+		_prop_state(prop_id)
+		var took := (Time.get_ticks_usec() - t_warm) / 1000.0
+		if took > float(stats["state_ms_max"]):
+			stats["state_ms_max"] = took
+			stats["state_slowest"] = prop_id
+		return
+
+
+## Albédo réduit à `texture_px` (les props font quelques dizaines de pixels à l'écran : 1024 px × 108
+## niveaux de détail pèseraient ~450 Mo), avec mipmaps.
+func _small_texture(source: Texture2D) -> Texture2D:
+	var limit := int(_render("texture_px", 512.0))
+	var image := source.get_image()
+	if image == null:
+		return source
+	if image.is_compressed():
+		image.decompress()
+	if maxi(image.get_width(), image.get_height()) > limit:
+		var ratio := float(limit) / float(maxi(image.get_width(), image.get_height()))
+		image.resize(maxi(int(image.get_width() * ratio), 1), maxi(int(image.get_height() * ratio), 1), Image.INTERPOLATE_LANCZOS)
+	image.generate_mipmaps()
+	return ImageTexture.create_from_image(image)
 
 
 func _set_uniform(state: Dictionary, uniform_name: String, value: Variant) -> void:
@@ -646,6 +736,7 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 			stats["draw_calls"] = 0
 		return
 	visible = true
+	_warm_step()
 	var radius := clampf(rig_distance * _render("load_factor", 2.4), _render("min_radius_px", 24.0), _render("max_radius_px", 200.0))
 	var side := _cell_px()
 	var lo := Vector2i(floori((at.x - radius) / side), floori((at.y - radius) / side))
