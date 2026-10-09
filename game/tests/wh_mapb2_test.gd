@@ -163,22 +163,19 @@ class FakeMap:
 	var player_faction := "fac_france"
 
 
-class FakeController:
-	extends MinimapController
-
-	func is_army_visible(army_id: String, _army: Dictionary) -> bool:
-		return army_id == "seen"
-
-
 func _test_pings() -> void:
-	var controller := FakeController.new()
+	# Chargé à l'exécution : un `extends MinimapController` compilerait MapUI avant l'autoload IconLibrary.
+	var controller: Node = load("res://scripts/map/minimap_controller.gd").new()
 	controller.map = FakeMap.new()
+	controller.fog_active = true  # brouillard par cellule : seule « seen » est en vue
+	controller.fog_by_cell = true
+	controller.visible_armies = {"seen": true}
 	controller.minimap = CampaignMinimap.new()
 	var seen := {"id": "army:seen", "kind": "enemy_army", "army_id": "seen", "province_id": "p"}
 	var hidden := {"id": "army:hidden", "kind": "enemy_army", "army_id": "hidden", "province_id": "p"}
 	check(controller.on_alerts([seen]).is_empty(), "first series is silent (load / start)")
 	check(controller.on_alerts([seen]).is_empty(), "known alert does not ping again")
-	var pinged := controller.on_alerts([seen, hidden, {"id": "debt", "kind": "debt"}])
+	var pinged: Array = controller.on_alerts([seen, hidden, {"id": "debt", "kind": "debt"}])
 	check(pinged.is_empty(), "hidden army and non-map alerts never ping")
 	controller.on_alerts([])
 	pinged = controller.on_alerts([seen])
