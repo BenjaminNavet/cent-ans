@@ -84,7 +84,3 @@ func _compare(battle: Object, extra: int, label: String) -> void:
 				joined.append_array(buffer.slice(0, n * 12))
 			var expected: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
 			check(joined == expected, "%s: %s/%s buffers match get_soldier_buffer" % [label, side, kind])
-
-
-		print("FAIL pb3c: " + message)
-	return ok

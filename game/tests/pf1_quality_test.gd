@@ -91,6 +91,3 @@ func _test_user_dir() -> void:
 	check(not OS.has_feature("template"), "test runs on the editor binary")
 	check(not UserDirMigration.isolated(), "editor keeps the shared user dir")
 	check(UserDirMigration.migrate_legacy() == 0, "no migration outside the exported game")
-
-
-		print("FAIL: " + message)
