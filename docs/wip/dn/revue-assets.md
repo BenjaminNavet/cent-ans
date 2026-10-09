@@ -24,3 +24,9 @@ Limites : les ids sans 3D (fig_army_lord_mounted_islamic, _rus, cavalry_1/4/5, s
 | `tree_pomegranate` | tree | 3D : tronc nu tordu coiffé d'un disque noir, couronne perdue | A single pomegranate tree with a twisted trunk and a rounded leafy green crown with a few red pomegranates, full canopy attached to the trunk | 3d |
 
 Tout le reste (697 ids) : OK. Détail machine : `revue-assets.json`.
+
+
+## Reprise DN-TROUS (09/10)
+Les 13 flagrants non figures ont été refaits (nouvelle image fal d'après `fix_prompt`, puis TRELLIS 2, sorties dans `<id>/rv2/` ou `<id>/rv3/`, anciens artefacts intacts) et ré-ingérés : `bombard`, `cart_litter_noble`, `debris_ram_wreck`, `econ_saltpan_mediterranean`, `econ_terrace_olive_grove`, `env_iceberg_floe`, `env_reef_rocks_awash`, `siege_handgonne_pair`, `tree_argan`, `tree_orchard_apple`, `tree_pomegranate`, `bird_starling_flying` (image recadrée au-dessus de la maison), `env_glacier_ice_tongue` (image recadrée ; un reste de toit de chaume subsiste à gauche de la glace).
+Z-Image ignore les négations de `fix_prompt` (« no house » fait apparaître une maison) : pour oiseau, bélier, glacier, iceberg, récif le prompt a été reformulé sans nommer l'objet indésirable.
+Figures `archer_3_jack` et `fig_sled_driver_north` : nouvelles images (graine 1339, A-pose sans arc ni traîneau) et glb `3d/fal__s1339.glb` dans `<id>/rv2/` (multi-vues TRELLIS 1) ; **non cuites** : la chaîne de cuisson (`ga3_figures.py`) est sur la branche `dn/fig-bake`, non fusionnée.
