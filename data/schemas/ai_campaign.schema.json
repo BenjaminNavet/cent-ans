@@ -39,7 +39,10 @@
         "regroup_power_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Une armée sous cette part de la puissance de la principale la rejoint." },
         "defend_weight_capital": { "type": "number", "description": "Poids de défense de la capitale." },
         "defend_weight_city": { "type": "number", "description": "Poids de défense d'une ville." },
-        "defend_weight_other": { "type": "number", "description": "Poids de défense des autres colonies." }
+        "defend_weight_other": { "type": "number", "description": "Poids de défense des autres colonies." },
+        "siege_target_persistence": { "type": "number", "minimum": 1, "description": "Facteur sur la valeur de la place qu'une armée marche déjà assiéger : elle ne change de cible que pour une place valant autant de fois plus (1 = pas de mémoire). Optionnel, 1 par défaut." },
+        "defence_target_persistence": { "type": "number", "minimum": 1, "description": "Idem pour la place qu'une armée marche déjà défendre. Optionnel, 1 par défaut." },
+        "decision_noise_epoch_turns": { "type": "integer", "minimum": 1, "description": "Tours pendant lesquels dure la préférence bruitée (qualité de décision basse) de l'IA pour une cible de siège avant d'être retirée. Optionnel, 16 par défaut." }
       }
     },
     "economy": {

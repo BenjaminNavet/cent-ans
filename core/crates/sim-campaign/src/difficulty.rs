@@ -218,6 +218,30 @@ pub fn effect_summary(m: &DifficultyModifiers) -> Vec<String> {
             m.ai_morale_vs_player
         ));
     }
+    if m.ai_siege_superiority_percent != 100 {
+        lines.push(format!(
+            "Supériorité exigée par l'IA pour assiéger : {:+} %",
+            i64::from(m.ai_siege_superiority_percent) - 100
+        ));
+    }
+    if m.ai_assault_odds_delta != 0 {
+        lines.push(format!(
+            "Chances exigées par l'IA pour donner l'assaut : {:+}",
+            m.ai_assault_odds_delta
+        ));
+    }
+    if m.ai_decision_noise_percent != 0 {
+        lines.push(format!(
+            "Erreur de jugement de l'IA sur ses cibles : jusqu'à {} %",
+            m.ai_decision_noise_percent
+        ));
+    }
+    if m.ai_aggression_delta != 0 {
+        lines.push(format!(
+            "Agressivité de l'IA en campagne : {:+}",
+            m.ai_aggression_delta
+        ));
+    }
     if lines.is_empty() {
         lines.push("Aucun modificateur.".to_owned());
     }

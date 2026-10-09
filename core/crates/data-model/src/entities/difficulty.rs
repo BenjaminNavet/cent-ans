@@ -25,6 +25,27 @@ pub struct DifficultyModifiers {
     /// Morale bonus of the AI armies fighting the player (3D battle and
     /// auto-resolve alike).
     pub ai_morale_vs_player: i32,
+    /// RX iaplay: superiority an AI army demands over a place's defence
+    /// before besieging it, per cent of normal (above 100: more cautious).
+    #[serde(default = "neutral_percent")]
+    pub ai_siege_superiority_percent: u32,
+    /// RX iaplay: points added to the assault odds an AI army demands before
+    /// storming the walls (above 0: more cautious).
+    #[serde(default)]
+    pub ai_assault_odds_delta: i32,
+    /// RX iaplay: decision quality. Amplitude, per cent, of the deterministic
+    /// error on the value an AI army gives its siege targets (0: always the
+    /// best target, 40: it may prefer a target worth 40 % less).
+    #[serde(default)]
+    pub ai_decision_noise_percent: u32,
+    /// RX iaplay: points added to the aggression of every AI faction in its
+    /// military planning (raids, ambushes).
+    #[serde(default)]
+    pub ai_aggression_delta: i32,
+}
+
+fn neutral_percent() -> u32 {
+    100
 }
 
 impl DifficultyModifiers {
@@ -38,6 +59,10 @@ impl DifficultyModifiers {
         ai_attitude_to_player: 0,
         ai_war_ratio_percent: 100,
         ai_morale_vs_player: 0,
+        ai_siege_superiority_percent: 100,
+        ai_assault_odds_delta: 0,
+        ai_decision_noise_percent: 0,
+        ai_aggression_delta: 0,
     };
 
     pub fn is_neutral(&self) -> bool {

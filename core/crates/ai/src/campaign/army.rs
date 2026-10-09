@@ -250,6 +250,45 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         self.power_by_anchor.get(settlement).copied().unwrap_or(0.0)
     }
 
+    /// Assault odds demanded before storming (RX iaplay: the difficulty
+    /// shifts it for the AI).
+    fn assault_threshold(&self) -> u32 {
+        (i64::from(self.rules.assault_odds) + i64::from(self.ctx.difficulty.ai_assault_odds_delta))
+            .clamp(0, 100) as u32
+    }
+
+    /// Superiority demanded over a place's defence before besieging it.
+    fn siege_superiority(&self) -> f64 {
+        self.rules.siege_superiority * f64::from(self.ctx.difficulty.ai_siege_superiority_percent)
+            / 100.0
+    }
+
+    /// RX iaplay: the settlement the army is already marching to, if any
+    /// (the memory of its target from one turn to the next).
+    fn marching_to(turn: &ArmyTurn) -> Option<&SettlementId> {
+        match &turn.army.destination {
+            Some(sim_campaign::MoveTarget::Settlement(id)) => Some(id),
+            _ => None,
+        }
+    }
+
+    /// RX iaplay: deterministic error factor (in `1 - noise ..= 1`) on the
+    /// value this faction gives `target`, constant for an epoch of turns so
+    /// that a poor judgement is a lasting bias, not a flicker.
+    fn judgement(&self, target: &SettlementId) -> f64 {
+        let noise = self.ctx.difficulty.ai_decision_noise_percent;
+        if noise == 0 {
+            return 1.0;
+        }
+        let epoch = u64::from(self.ctx.state.turn / self.rules.decision_noise_epoch_turns.max(1));
+        let mut key = crate::salts::JUDGEMENT ^ (epoch << 24);
+        for b in target.as_str().bytes() {
+            key = key.rotate_left(7) ^ u64::from(b);
+        }
+        let roll = crate::alignment::campaign_roll(self.ctx.state, self.ctx.faction, key);
+        1.0 - f64::from(noise) / 100.0 * (roll as f64 / 1000.0)
+    }
+
     /// Province steps of a route cost.
     fn steps(&self, cost: u32) -> f64 {
         f64::from(cost) / self.step
@@ -386,7 +425,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 })
             && state
                 .assault_odds(data, turn.id)
-                .is_none_or(|(odds, _)| odds < self.rules.assault_odds);
+                .is_none_or(|(odds, _)| odds < self.assault_threshold());
         if turn.hopeless {
             self.targeted.insert(turn.anchor.clone());
         }
@@ -493,7 +532,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         let (state, data) = (ctx.state, ctx.data);
         if state
             .assault_odds(data, turn.id)
-            .is_some_and(|(odds, _)| odds >= self.rules.assault_odds)
+            .is_some_and(|(odds, _)| odds >= self.assault_threshold())
             && state.assault_blocker(data, turn.id).is_none()
         {
             self.orders.push(Order::Assault {
@@ -531,8 +570,11 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                         } else {
                             rules.defend_weight_other
                         };
-                        let value = weight * (ctx.settlement_income(id) + threat)
+                        let mut value = weight * (ctx.settlement_income(id) + threat)
                             / (1.0 + self.steps(reach.cost));
+                        if Self::marching_to(turn) == Some(id) {
+                            value *= rules.defence_target_persistence;
+                        }
                         (value, id.clone())
                     })
             })
@@ -556,7 +598,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 state.is_hostile_settlement(ctx.faction, id) && !self.targeted.contains(*id)
             })
             .filter(|(id, _)| {
-                state.settlement_defensive_power(data, id) * rules.siege_superiority < turn.power
+                state.settlement_defensive_power(data, id) * self.siege_superiority() < turn.power
             })
             .filter_map(|(id, reach)| {
                 state
@@ -591,6 +633,10 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 }
                 if crosses_sea(data, table, id) {
                     value *= rules.sea_invasion_factor;
+                }
+                value *= self.judgement(id);
+                if Self::marching_to(turn) == Some(id) {
+                    value *= rules.siege_target_persistence;
                 }
                 (
                     value.max(1.0) / (1.0 + self.steps(reach.cost) / 2.0),

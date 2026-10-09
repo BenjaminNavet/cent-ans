@@ -13,7 +13,11 @@
       "player_unrest": -5,
       "ai_attitude_to_player": 10,
       "ai_war_ratio_percent": 120,
-      "ai_morale_vs_player": -5
+      "ai_morale_vs_player": -5,
+      "ai_siege_superiority_percent": 130,
+      "ai_assault_odds_delta": 10,
+      "ai_decision_noise_percent": 35,
+      "ai_aggression_delta": -15
     },
     {
       "id": "normal",
@@ -26,7 +30,11 @@
       "player_unrest": 0,
       "ai_attitude_to_player": 0,
       "ai_war_ratio_percent": 100,
-      "ai_morale_vs_player": 0
+      "ai_morale_vs_player": 0,
+      "ai_siege_superiority_percent": 100,
+      "ai_assault_odds_delta": 0,
+      "ai_decision_noise_percent": 0,
+      "ai_aggression_delta": 0
     },
     {
       "id": "hard",
@@ -39,7 +47,11 @@
       "player_unrest": 3,
       "ai_attitude_to_player": -10,
       "ai_war_ratio_percent": 90,
-      "ai_morale_vs_player": 5
+      "ai_morale_vs_player": 5,
+      "ai_siege_superiority_percent": 90,
+      "ai_assault_odds_delta": -5,
+      "ai_decision_noise_percent": 0,
+      "ai_aggression_delta": 10
     },
     {
       "id": "very_hard",
@@ -52,7 +64,11 @@
       "player_unrest": 6,
       "ai_attitude_to_player": -20,
       "ai_war_ratio_percent": 80,
-      "ai_morale_vs_player": 10
+      "ai_morale_vs_player": 10,
+      "ai_siege_superiority_percent": 80,
+      "ai_assault_odds_delta": -10,
+      "ai_decision_noise_percent": 0,
+      "ai_aggression_delta": 20
     }
   ]
 }

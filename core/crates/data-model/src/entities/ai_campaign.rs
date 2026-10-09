@@ -48,6 +48,26 @@ pub struct MilitaryRules {
     pub defend_weight_capital: f64,
     pub defend_weight_city: f64,
     pub defend_weight_other: f64,
+    /// RX iaplay: factor on the value of the settlement an army is already
+    /// marching to besiege (its `destination`): it changes target only for
+    /// one worth this many times more. 1.0 = no memory.
+    #[serde(default = "one")]
+    pub siege_target_persistence: f64,
+    /// RX iaplay: same for the settlement an army marches to defend.
+    #[serde(default = "one")]
+    pub defence_target_persistence: f64,
+    /// RX iaplay: turns a noisy (low decision quality) preference of the AI
+    /// for one siege target lasts before it is redrawn.
+    #[serde(default = "default_noise_epoch")]
+    pub decision_noise_epoch_turns: u32,
+}
+
+fn one() -> f64 {
+    1.0
+}
+
+fn default_noise_epoch() -> u32 {
+    16
 }
 
 /// Taxes, recruitment, treasury and construction.

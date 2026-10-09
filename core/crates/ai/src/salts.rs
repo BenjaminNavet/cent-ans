@@ -14,3 +14,5 @@ pub(crate) const WOOL: u64 = 1;
 pub(crate) const DEFECTION: u64 = 2;
 /// The dynastic alliance and money fief roll (`alignment`).
 pub(crate) const DYNASTIC: u64 = 7;
+/// Judgement error on a siege target's value (`campaign::army`, difficulty).
+pub(crate) const JUDGEMENT: u64 = 0x1D6E_0001;

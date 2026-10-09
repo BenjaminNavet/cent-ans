@@ -15,7 +15,9 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use data_model::{AiCampaign, FactionId, GameData, ProvinceId, SettlementId, SettlementKind};
+use data_model::{
+    AiCampaign, DifficultyModifiers, FactionId, GameData, ProvinceId, SettlementId, SettlementKind,
+};
 use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::edges;
 use sim_campaign::plan_cache::PlanCache;
@@ -42,6 +44,9 @@ struct Context<'a> {
     faction: &'a FactionId,
     enemies: BTreeSet<FactionId>,
     aggression: i32,
+    /// RX iaplay: the difficulty levers an AI faction plays by (neutral for
+    /// the player's own faction).
+    difficulty: DifficultyModifiers,
     income: i64,
     /// Gross income of the season (the unit of « seasons of income »).
     gross_income: i64,
@@ -81,6 +86,12 @@ impl<'a> Context<'a> {
             .and_then(|f| f.ai_personality.as_ref())
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
+        let difficulty = if faction == &state.player_faction {
+            DifficultyModifiers::NEUTRAL
+        } else {
+            state.difficulty_modifiers(data)
+        };
+        let aggression = (aggression + difficulty.ai_aggression_delta).clamp(0, 100);
         let (grid, (anchors, gross_income)) = mode.join(
             || crate::grid::GridPlanner::with_mode(mode, cache, data, faction),
             || {
@@ -118,6 +129,7 @@ impl<'a> Context<'a> {
             faction,
             enemies: me.at_war_with.clone(),
             aggression,
+            difficulty,
             income,
             gross_income,
             army_upkeep: upkeep.0,

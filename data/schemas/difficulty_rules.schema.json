@@ -20,7 +20,11 @@
         "player_unrest": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Points ajoutés à l'agitation visée de chaque classe dans les provinces tenues par le joueur (négatif = plus calme)." },
         "ai_attitude_to_player": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points ajoutés à l'attitude de chaque faction IA envers le joueur (négatif = plus hostile)." },
         "ai_war_ratio_percent": { "$ref": "#/$defs/percent", "description": "Rapport de forces qu'une IA exige avant de déclarer la guerre au joueur, en % du normal (moins = plus agressive)." },
-        "ai_morale_vs_player": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Bonus de moral des armées IA qui affrontent le joueur (bataille 3D et auto-résolution)." }
+        "ai_morale_vs_player": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Bonus de moral des armées IA qui affrontent le joueur (bataille 3D et auto-résolution)." },
+        "ai_siege_superiority_percent": { "$ref": "#/$defs/percent", "description": "Supériorité qu'une armée IA exige sur la défense d'une place avant de l'assiéger, en % du normal (plus = plus prudente). Optionnel, 100 par défaut." },
+        "ai_assault_odds_delta": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Points ajoutés aux chances d'assaut qu'une armée IA exige avant de donner l'assaut (plus = plus prudente). Optionnel, 0 par défaut." },
+        "ai_decision_noise_percent": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Qualité de décision : amplitude (en %) de l'erreur déterministe sur la valeur que l'IA attribue à ses cibles de siège (0 = toujours la meilleure cible). Optionnel, 0 par défaut." },
+        "ai_aggression_delta": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points ajoutés à l'agressivité de chaque faction IA dans sa planification militaire (chevauchées, embuscades). Optionnel, 0 par défaut." }
       },
       "required": [
         "id",

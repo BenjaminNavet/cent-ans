@@ -27,7 +27,10 @@
     "regroup_power_share": 0.5,
     "defend_weight_capital": 3.0,
     "defend_weight_city": 2.0,
-    "defend_weight_other": 1.0
+    "defend_weight_other": 1.0,
+    "siege_target_persistence": 1.6,
+    "defence_target_persistence": 1.25,
+    "decision_noise_epoch_turns": 16
   },
   "economy": {
     "war_military_share": 0.7,
