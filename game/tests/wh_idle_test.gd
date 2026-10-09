@@ -16,6 +16,10 @@ func _init() -> void:
 	finish()
 
 
+func _flow_script() -> GDScript:
+	return load("res://scripts/map/flow_controller.gd")
+
+
 func _test_pure() -> void:
 	check(CampaignAlerts.army_is_idle({"path": [], "movement_points": 5}), "no path + movement left = idle")
 	check(not CampaignAlerts.army_is_idle({"path": [], "movement_points": 0}), "no movement left")
@@ -28,7 +32,7 @@ func _test_pure() -> void:
 	check(CampaignHotkeys.next_in_cycle(ids, "zz", 1) == "a" and CampaignHotkeys.next_in_cycle(ids, "zz", -1) == "c", "unknown current")
 	check(CampaignHotkeys.next_in_cycle([], "a", 1) == "", "empty cycle")
 	check(CampaignHotkeys.stance_of("army_stance_raid") == "raid" and CampaignHotkeys.stance_of("army_split") == "", "stance_of")
-	var text := FlowController.confirm_text("Printemps 1337", [
+	var text: String = _flow_script().confirm_text("Printemps 1337", [
 		{"kind": "idle_army"}, {"kind": "idle_army"}, {"kind": "research_idle", "text": "Aucune recherche en cours"}])
 	check(text.contains("2 armées sans ordre") and text.contains("Aucune recherche"), "confirm text lists the oversights: %s" % text)
 	# Migration du réglage booléen.
@@ -77,7 +81,7 @@ func _test_real_map() -> void:
 		map.queue_free()
 		return
 	var sim: Object = map.sim
-	var flow: FlowController = map.flow
+	var flow = map.flow
 	var own: PackedStringArray = map.player_army_ids()
 	check(own.size() >= 1, "French player has armies")
 
@@ -94,10 +98,10 @@ func _test_real_map() -> void:
 		alerts.any(func(a: Dictionary) -> bool: return a["kind"] == "free_slot"), research_idle])
 
 	# Plaque : « inactive » pour une armée du joueur sans ordre.
-	var marker: ArmyMarker = map.armies.marker_of(idle[0])
+	var marker = map.armies.marker_of(idle[0])
 	if check(marker != null, "marker of the idle army"):
 		check(marker.status == "idle", "marker status idle, got '%s'" % marker.status)
-		var plate := ArmyPlate.build(marker)
+		var plate = load("res://scripts/map/army_plate.gd").build(marker)
 		var has_text := false
 		for label in plate.find_children("*", "Label", true, false):
 			has_text = has_text or (label as Label).text == "inactive"
@@ -136,9 +140,9 @@ func _test_real_map() -> void:
 	settings.call("set_value", "interface/confirm_end_turn", "always", false)
 	check(not flow.end_turn_would_proceed(), "always: confirmation required")
 	settings.call("set_value", "interface/confirm_end_turn", "warnings", false)
-	var warnings := flow.end_turn_warnings()
+	var warnings: Array = flow.end_turn_warnings()
 	check(flow.end_turn_would_proceed() == warnings.is_empty(), "warnings: confirmation iff oversights (%d)" % warnings.size())
-	check(not warnings.is_empty() and warnings.all(func(a: Dictionary) -> bool: return a["kind"] in FlowController.FORGOTTEN_KINDS), "only oversights are listed")
+	check(not warnings.is_empty() and warnings.all(func(a: Dictionary) -> bool: return a["kind"] in _flow_script().FORGOTTEN_KINDS), "only oversights are listed")
 
 	# Fuite du brouillard : l'ennemi hors de vue ne produit aucune alerte, en vue si.
 	var enemies: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
