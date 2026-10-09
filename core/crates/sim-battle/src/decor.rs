@@ -977,6 +977,24 @@ impl Battlefield {
         })
     }
 
+    /// QW-G1: what the cursor shows over the ground at (x, z): the kind of
+    /// area and its rule values as signed percentages (cover = fewer missile
+    /// casualties, speed = change of pace, defense = fewer melee casualties).
+    pub fn decor_hover_at(&self, x: f64, z: f64) -> Option<DecorHover> {
+        let area = self.decor_area_at(x, z)?;
+        let e = area.effect();
+        let pct = |factor: f64| ((factor - 1.0) * 100.0).round() as i64;
+        Some(DecorHover {
+            kind: area.kind,
+            label: area.kind.label_fr(),
+            cover_pct: -pct(e.cover),
+            foot_speed_pct: pct(e.foot_speed),
+            horse_speed_pct: pct(e.horse_speed),
+            defense_pct: pct(e.defense),
+            breaks_charge: e.breaks_charge,
+        })
+    }
+
     /// Solid footprints of the decor within `radius` of (x, z): buildings,
     /// solid props, camp furniture and the baggage train (figures walk round
     /// them).
@@ -1006,6 +1024,20 @@ impl Battlefield {
         }
         out
     }
+}
+
+/// Rule values of the decor under the cursor (see [`Battlefield::decor_hover_at`]).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DecorHover {
+    pub kind: AreaKind,
+    pub label: &'static str,
+    /// Positive = fewer missile casualties.
+    pub cover_pct: i64,
+    pub foot_speed_pct: i64,
+    pub horse_speed_pct: i64,
+    /// Positive = fewer melee casualties.
+    pub defense_pct: i64,
+    pub breaks_charge: bool,
 }
 
 #[cfg(test)]

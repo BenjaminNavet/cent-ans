@@ -616,3 +616,25 @@ fn hand_placed_decor_plan_is_applied() {
         .iter()
         .any(|o| o.kind == ObstacleKind::Hedge && o.a == (300.0, 300.0)));
 }
+
+#[test]
+fn decor_hover_reports_rule_values() {
+    let mut f = decor_field(
+        "prov_test",
+        Terrain::Plains,
+        BattleSeason::Summer,
+        FieldSize::STANDARD,
+        1,
+    );
+    f.clear_decor();
+    f.place_plot(AreaKind::Vineyard, 300.0, 400.0, 80.0, 50.0, 0.0, None);
+    let hover = f.decor_hover_at(300.0, 400.0).expect("vineyard hover");
+    assert_eq!(hover.kind, AreaKind::Vineyard);
+    assert_eq!(hover.label, "vigne");
+    assert!(hover.horse_speed_pct < 0);
+    assert_eq!(
+        hover.cover_pct,
+        -(((f.decor_cover(300.0, 400.0) - 1.0) * 100.0).round() as i64)
+    );
+    assert!(f.decor_hover_at(700.0, 700.0).is_none());
+}

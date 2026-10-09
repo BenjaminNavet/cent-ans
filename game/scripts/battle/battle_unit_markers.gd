@@ -1,6 +1,8 @@
 class_name BattleUnitMarkers
 extends Control
 
+const _Access := preload("res://scripts/battle/battle_access.gd")
+
 ## Bannières flottantes d'unité (lot B2) : au-dessus de chaque régiment présent,
 ## un repère à taille écran constante (plaque aux couleurs du camp, icône de classe, barres
 ## d'effectif et de moral, pastilles d'état, étoile du général). Un seul Control plein écran
@@ -270,7 +272,7 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	var unit: Dictionary = entry["unit"]
 	var rect: Rect2 = entry["rect"]
 	var side := str(unit["side"])
-	var color: Color = side_colors.get(side, Color.GRAY)
+	var color: Color = _Access.side_color(side_colors.get(side, Color.GRAY), side == player_side)
 	var state := str(unit["state"])
 	var routing := state == "routing"
 	var is_selected := _selected.has(id)
@@ -294,6 +296,8 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 		draw_rect(plaque.grow(2.0), Color(1, 1, 1, 0.85), false, 1.5)
 	# Plaque : cadre aux couleurs du camp, fond parchemin, icône de classe.
 	draw_rect(plaque, frame)
+	if _Access.active() and side != player_side:
+		_Access.hatch(self, plaque, INK)  # QW-G2 : l'ennemi se reconnaît sans la couleur
 	var inner := plaque.grow(-3.0)
 	var fill := PARCHMENT if not routing else Color(0.95, 0.78, 0.72)
 	if not is_hovered and not is_selected:
@@ -325,7 +329,8 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 func _draw_cluster(entry: Dictionary, blink: bool) -> void:
 	var members: Array = entry["units"]
 	var rect: Rect2 = entry["rect"]
-	var color: Color = side_colors.get(str(entry["unit"]["side"]), Color.GRAY)
+	var cluster_side := str(entry["unit"]["side"])
+	var color: Color = _Access.side_color(side_colors.get(cluster_side, Color.GRAY), cluster_side == player_side)
 	var soldiers := 0.0
 	var initial := 0.0
 	var morale := 0.0

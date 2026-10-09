@@ -321,7 +321,7 @@ static func _headline(items: Array, _spec: Dictionary) -> Control:
 		value.autowrap_mode = TextServer.AUTOWRAP_OFF
 		var sign := int(item.get("sign", 0))
 		var color: String = RichTooltip.GREEN if sign > 0 else (RichTooltip.RED if sign < 0 else "")
-		value.text = "[b]%s[/b]" % str(item.get("value", "")) if color == "" else "[b][color=%s]%s[/color][/b]" % [color, str(item.get("value", ""))]
+		value.text = "[b]%s[/b]" % str(item.get("value", "")) if color == "" else "[b][color=%s]%s%s[/color][/b]" % [color, RichTooltip.mark(sign), str(item.get("value", ""))]
 		column.add_child(value)
 		column.add_child(_rule_caption(item))
 		badge.add_child(column)

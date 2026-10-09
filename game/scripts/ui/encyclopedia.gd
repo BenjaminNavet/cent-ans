@@ -738,9 +738,9 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var sw := RichTooltip.strengths_weaknesses(definition)
 	var traits := PackedStringArray()
 	if not (sw[0] as PackedStringArray).is_empty():
-		traits.append("[color=%s]Forces : %s[/color]" % [RichTooltip.GREEN, ", ".join(sw[0])])
+		traits.append("[color=%s]%sForces : %s[/color]" % [RichTooltip.GREEN, RichTooltip.mark(1), ", ".join(sw[0])])
 	if not (sw[1] as PackedStringArray).is_empty():
-		traits.append("[color=%s]Faiblesses : %s[/color]" % [RichTooltip.RED, ", ".join(sw[1])])
+		traits.append("[color=%s]%sFaiblesses : %s[/color]" % [RichTooltip.RED, RichTooltip.mark(-1), ", ".join(sw[1])])
 	var abilities := PackedStringArray()
 	for ability in definition.get("abilities", []):
 		abilities.append(RichTooltip.ability_label(ability))
