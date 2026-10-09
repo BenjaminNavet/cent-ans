@@ -1,18 +1,67 @@
-"""Local Z-Image rendering with resumable cache and retry (T1c).
+"""Z-Image rendering with resumable cache and retry (T1c, fal backend TX).
 
 Attempt ``n`` (1-based) uses seed ``entry.seed + n - 1`` and is cached as
 ``<id>_<n>.png``. The manifest records the latest attempt per entry.
+
+Backend (catalogue ``backend``, default ``fal``): ``fal`` calls Z-Image Turbo on
+fal.ai in parallel at the requested size (native 2048 allowed, 0.005 $/Mpx);
+``local`` renders with mflux one image at a time (ADR 0190). A fal failure is
+recorded as ``failed`` and never retried locally in the same run.
 """
 
 from __future__ import annotations
 
 import json
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from cent_ans_tools.texture_factory import RAW_ROOT
 from cent_ans_tools.texture_factory.catalog import build_prompt, select
 
 MAX_ATTEMPTS = 3
+FAL_MODEL = "fal-ai/z-image/turbo"
+FAL_PRICE_PER_MPX = 0.005  # USD, fal pricing page 2026-10-09
+FAL_WORKERS = 8
+
+
+def backend(document: dict) -> str:
+    """Rendering backend of a catalogue (``fal`` unless declared ``local``)."""
+    return document.get("backend", "fal")
+
+
+def entry_side(document: dict, entry: dict) -> int:
+    """Rendered side in pixels of one entry."""
+    return entry.get("size", document["size"])
+
+
+def estimate_cost(document: dict, entries: list[dict]) -> float:
+    """USD cost of one fal attempt per entry (0 for the local backend)."""
+    if backend(document) != "fal":
+        return 0.0
+    pixels = sum(entry_side(document, entry) ** 2 for entry in entries)
+    return round(pixels / 1e6 * FAL_PRICE_PER_MPX, 4)
+
+
+def fal_render(prompt: str, seed: int, side: int) -> bytes:
+    """One Z-Image Turbo call on fal.ai; returns the PNG bytes."""
+    import urllib.request
+
+    import fal_client  # only needed for paid calls
+
+    result = fal_client.subscribe(
+        FAL_MODEL,
+        arguments={
+            "prompt": prompt,
+            "image_size": {"width": side, "height": side},
+            "seed": seed,
+            "num_inference_steps": 8,
+            "enable_safety_checker": False,
+            "output_format": "png",
+        },
+    )
+    with urllib.request.urlopen(result["images"][0]["url"], timeout=120) as response:
+        return response.read()
 
 
 def _family_dir(document: dict, raw_dir: Path | None) -> Path:
@@ -39,22 +88,25 @@ def image_path(
 
 
 def _render(document, entry, attempt, raw_dir, runner) -> tuple[int, str]:
-    """Render one attempt unless cached; return (seed, ok|failed)."""
-    from cent_ans_tools.local_art import render_image
+    """Render one attempt unless cached; return (seed, ok|failed).
 
+    ``runner`` replaces the mflux subprocess (local) or ``fal_render`` (fal) in tests.
+    """
     seed = entry["seed"] + attempt - 1
     path = image_path(document, entry["id"], attempt, raw_dir)
     if path.is_file():
         return seed, "ok"
-    side = entry.get("size", document["size"])
+    side = entry_side(document, entry)
+    prompt = build_prompt(document, entry)
     try:
-        data = render_image(
-            build_prompt(document, entry),
-            aspect_ratio="1:1",
-            seed=seed,
-            runner=runner,
-            size=(side, side),
-        )
+        if backend(document) == "fal":
+            data = (runner or fal_render)(prompt, seed, side)
+        else:
+            from cent_ans_tools.local_art import render_image
+
+            data = render_image(
+                prompt, aspect_ratio="1:1", seed=seed, runner=runner, size=(side, side)
+            )
     except Exception as error:  # noqa: BLE001 - one failure must not stop the batch
         print(f"[textures] échec {entry['id']} (essai {attempt}) : {error}")
         return seed, "failed"
@@ -65,11 +117,18 @@ def _render(document, entry, attempt, raw_dir, runner) -> tuple[int, str]:
 
 def _run_attempt(document, entries, attempts, raw_dir, runner) -> dict:
     manifest = load_manifest(document, raw_dir)
-    for entry in entries:
+    lock = threading.Lock()
+
+    def run_one(entry: dict) -> None:
         attempt = attempts(entry)
         seed, status = _render(document, entry, attempt, raw_dir, runner)
-        manifest[entry["id"]] = {"attempt": attempt, "seed": seed, "status": status}
-        _save_manifest(document, raw_dir, manifest)
+        with lock:
+            manifest[entry["id"]] = {"attempt": attempt, "seed": seed, "status": status}
+            _save_manifest(document, raw_dir, manifest)
+
+    workers = FAL_WORKERS if backend(document) == "fal" else 1
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        list(pool.map(run_one, entries))
     return manifest
 
 

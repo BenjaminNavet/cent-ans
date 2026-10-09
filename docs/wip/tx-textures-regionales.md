@@ -1,17 +1,21 @@
 # TX — Textures régionales générées en local (plan et suivi)
 
 Spécification : `docs/superpowers/specs/2026-10-09-textures-regionales-design.md` (approuvée
-2026-10-09). Mandat : enchaîner les tranches sans redemander, 0 $, génération locale seulement
-(Z-Image mflux, ADR 0190), aucune fenêtre au premier plan.
+2026-10-09). Mandat : enchaîner les tranches sans redemander, aucune fenêtre au premier plan. **Amendé
+2026-10-09** : Z-Image Turbo sur fal.ai en 2048 natif, enveloppe 10 $ (`docs/budget.md` § TX),
+local (mflux + Real-ESRGAN) en secours seulement.
 
 ## État
 
 - 2026-10-09 : spec (43354418e), squelette T1a (78cf8abdd), T1b (c1faeeb19) et T1c (446ad06f6) fusionnés dans main ; 33 tests verts.
 - Real-ESRGAN ncnn-vulkan installé dans `~/models/realesrgan/` (v0.2.5.0, modèles x4plus, x4plus-anime, animevideov3).
 
+- 2026-10-09 : joueur valide fal (10 $). Backend fal dans `generate.py` (parallèle ×8, `--max-cost`,
+  coût estimé affiché) ; essai prairie 2048 natif concluant (0,02 $).
+
 ## Prochaine étape
 
-T1d (upscale) : trancher le point ouvert Real-ESRGAN ci-dessous, puis T1e.
+Fusionner T1d réduit (upscale = secours local), puis T1e.
 
 ## Réservations
 
@@ -89,7 +93,7 @@ Partie pilote du joueur ; supprimer les textures Poly Haven (ou les garder pour 
 
 ## Points ouverts
 
-- Real-ESRGAN `realesrgan-x4plus` mesuré sur M4 Pro : **118 s** pour 1024 → 4096 (grass_albedo), soit
+- (Tranché 2026-10-09 : fal 2048 natif ; Real-ESRGAN en secours local.) Real-ESRGAN `realesrgan-x4plus` mesuré sur M4 Pro : **118 s** pour 1024 → 4096 (grass_albedo), soit
   ~11 h pour ~330 images, plus que la génération. Pistes T1d : modèle léger `realesr-general-x4v3`
   (à télécharger), ou génération native en 1536 + Lanczos vers 2048 + micro-détail, Real-ESRGAN
   réservé aux sols de bataille. Comparer sur 3 matières avant de choisir.

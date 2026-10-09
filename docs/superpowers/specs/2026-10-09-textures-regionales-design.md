@@ -1,6 +1,7 @@
 # TX — Textures régionales générées en local (conception)
 
-Date : 2026-10-09. Statut : approuvé par le joueur en séance de conception.
+Date : 2026-10-09. Statut : approuvé par le joueur en séance de conception ; **amendé le même jour** :
+le joueur valide fal.ai (enveloppe 10 $) pour aller plus vite, voir « Amendement fal ».
 
 ## But
 
@@ -13,6 +14,19 @@ les sols et la végétation et **par région** pour les bâtiments, en **2k + mi
 Périmètre : familles A (sol de campagne), B (sol et végétation de bataille), C (matières de
 bâtiments), D (cartes de végétation, feuillages, écorces ; eau, voir § 3). Hors périmètre :
 textures cuites dans les modèles 3D DN (maquettes de villes, monuments, accessoires).
+
+## Amendement fal (2026-10-09)
+
+- Générateur par défaut : **Z-Image Turbo sur fal.ai** (`fal-ai/z-image/turbo`, 0,005 $/Mpx), en **2048
+  natif** (essai : vrai détail au pixel, pas d'agrandissement). Appels en parallèle (8), quelques
+  secondes par image au lieu de ~1 min + 2 min d'agrandissement en local.
+- Catalogue : champ `backend: fal | local` (défaut `fal`), taille 1024, 1536 ou 2048.
+- Local (mflux + Real-ESRGAN) : route de secours ; un échec fal n'est jamais refait en local dans le
+  même lot (listé pour une session locale à part).
+- Coût : ~330 images × 0,021 $ ≈ 7 $, enveloppe 10 $ consignée dans `docs/budget.md` ; la commande
+  refuse un lot au-delà de `--max-cost`.
+- Le reste (raccord, PBR, alpha rembg, micro-détail, paquets) reste local. Les lignes « 0 $ » et
+  « local » ci-dessous sont remplacées par cet amendement.
 
 ## Décisions prises
 

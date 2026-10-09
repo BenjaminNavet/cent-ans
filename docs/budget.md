@@ -366,3 +366,12 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-09 | fal.ai | DN-TROUS : 3D `fal-ai/trellis/multi`, 10 appels (8 maquettes + 2 figures). Solde fal épuisé en cours de lot (« Exhausted balance ») : le reste des maquettes en liste d'attente | 0,20 $ | 0,20 $ | 42,41 $ |
 | 2026-10-09 | fal.ai | env_harvest_sheaves : comparaison 3D `fal-ai/trellis`, 1 appel (image Z-Image locale ; SF3D local retenu par le joueur) | 0,02 $ | 0,02 $ | 42,43 $ |
 | 2026-10-09 | fal.ai | DN-CHAMPS (abandonné, branche supprimée) : 3D `fal-ai/trellis`, 12 appels (11 parcelles entières + terrasses refaites ; images Z-Image locales, 0 $) | 0,24 $ | 0,24 $ | 42,67 $ |
+
+## Textures régionales TX (09/10) — fal.ai Z-Image Turbo, enveloppe propre 10 $ (validée par le joueur, ADR 0236)
+
+`fal-ai/z-image/turbo` à 0,005 $/Mpx : 2048² ≈ 0,021 $, 1024² ≈ 0,005 $. `cent-ans textures generate` affiche le coût
+estimé de chaque lot et refuse au-delà de `--max-cost` (2 $ par défaut). Solde fal rechargé par le joueur le 09/10.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul TX |
+|---|---|---|---|---|---|
+| 2026-10-09 | fal.ai | essai de solde et de détail : prairie 2048² natif (`fal-ai/z-image/turbo`), 1 appel | 0,02 $ | 0,02 $ | 0,02 $ |

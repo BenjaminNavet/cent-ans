@@ -21,6 +21,7 @@ ENTRY = {
 }
 DOCUMENT = {
     "family": "ground_campaign",
+    "backend": "local",
     "size": 1024,
     "output_size": 2048,
     "style_prefix": "top-down photo,",
@@ -67,7 +68,8 @@ def test_load_catalog_accepts_regions_and_checks(tmp_path):
         lambda d: d["entries"][0].update(extra=1),
         lambda d: d["entries"][0].pop("seed"),
         lambda d: d["entries"][0].pop("biomes"),
-        lambda d: d.update(size=2048),
+        lambda d: d.update(size=4096),
+        lambda d: d.update(backend="cloud"),
         lambda d: d.update(output_size=1024),
         lambda d: d.pop("style_prefix"),
         lambda d: d["entries"][0].update(checks={"luminance": [1]}),
@@ -154,3 +156,40 @@ def test_retry_uses_next_seeds_then_flags(tmp_path):
     assert (tmp_path / "grass_a_2.png").is_file()
     assert (tmp_path / "grass_a_3.png").is_file()
     assert manifest["mud_b"]["attempt"] == 1
+
+
+FAL_DOCUMENT = {**DOCUMENT, "backend": "fal", "size": 2048}
+
+
+def test_fal_backend_renders_in_parallel_and_caches(tmp_path):
+    calls = []
+
+    def fal_runner(prompt, seed, side):
+        calls.append((seed, side))
+        return b"PNG"
+
+    manifest = generate.generate(FAL_DOCUMENT, raw_dir=tmp_path, runner=fal_runner)
+    assert sorted(calls) == [(100, 2048), (200, 1536)]
+    assert {record["status"] for record in manifest.values()} == {"ok"}
+    generate.generate(FAL_DOCUMENT, raw_dir=tmp_path, runner=fal_runner)
+    assert len(calls) == 2
+
+
+def test_fal_failure_is_recorded_without_local_retry(tmp_path):
+    def fal_runner(prompt, seed, side):
+        raise RuntimeError("Exhausted balance")
+
+    manifest = generate.generate(FAL_DOCUMENT, raw_dir=tmp_path, runner=fal_runner)
+    assert {record["status"] for record in manifest.values()} == {"failed"}
+
+
+def test_estimate_cost():
+    assert generate.estimate_cost(
+        FAL_DOCUMENT, FAL_DOCUMENT["entries"]
+    ) == pytest.approx((2048**2 + 1536**2) / 1e6 * 0.005, abs=1e-4)
+    assert generate.estimate_cost(DOCUMENT, DOCUMENT["entries"]) == 0.0
+
+
+def test_schema_accepts_backend_and_2048(tmp_path):
+    write_catalog(tmp_path, FAL_DOCUMENT)
+    assert catalog.load_catalog("ground_campaign", tmp_path)["backend"] == "fal"

@@ -16,13 +16,43 @@ def generate_command(
     only: list[str] = typer.Option(  # noqa: B008
         None, "--only", help="Identifiant d'entrée à produire (répétable)."
     ),
+    max_cost: float = typer.Option(
+        2.0,
+        "--max-cost",
+        help="Refuse le lot fal si son coût estimé dépasse ce montant ($).",
+    ),
 ) -> None:
-    """Génère les images brutes d'une famille (reprenable, cache respecté)."""
-    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
-    from cent_ans_tools.texture_factory.generate import generate
+    """Génère les images brutes d'une famille (reprenable, cache respecté).
+
+    Le coût fal estimé (une passe, sans le cache) s'affiche avant les appels ;
+    le consigner ensuite dans `docs/budget.md`.
+    """
+    from cent_ans_tools.texture_factory.catalog import (
+        CatalogError,
+        load_catalog,
+        select,
+    )
+    from cent_ans_tools.texture_factory.generate import (
+        backend,
+        estimate_cost,
+        generate,
+        image_path,
+    )
 
     try:
         document = load_catalog(family)
+        todo = [
+            entry
+            for entry in select(document, only or None)
+            if not image_path(document, entry["id"], 1).is_file()
+        ]
+        cost = estimate_cost(document, todo)
+        typer.echo(
+            f"{len(todo)} image(s) à produire ({backend(document)}), coût estimé {cost:.2f} $"
+        )
+        if cost > max_cost:
+            typer.echo(f"Refusé : {cost:.2f} $ > --max-cost {max_cost:.2f} $", err=True)
+            raise typer.Exit(1)
         manifest = generate(document, only=only or None)
     except CatalogError as error:
         typer.echo(f"Erreur : {error}", err=True)
