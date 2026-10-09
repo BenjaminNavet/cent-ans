@@ -80,6 +80,8 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
+    #[error("aucune recrue à cet emplacement de la file")]
+    NoQueuedRecruit,
     #[error("démolition impossible : {0}")]
     DemolitionRefused(String),
     #[error("la colonie est assiégée")]

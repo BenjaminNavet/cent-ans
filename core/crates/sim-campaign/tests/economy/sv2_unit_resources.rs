@@ -58,6 +58,7 @@ fn reserve_wood(state: &mut CampaignState, settlement: &SettlementId, amount: u3
             ordered_turn: 0,
             drawn: BTreeMap::from([(wood(), amount)]),
             into_army: None,
+            paid: 0,
         });
 }
 

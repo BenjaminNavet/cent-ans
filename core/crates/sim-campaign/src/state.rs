@@ -497,6 +497,14 @@ pub struct QueuedRecruit {
     /// is full.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub into_army: Option<ArmyId>,
+    /// WH uicards: livres paid at the order (refunded in part by
+    /// `Order::CancelRecruit`); 0 in older saves (the unit's base cost is used).
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub paid: u32,
+}
+
+fn is_zero_u32(value: &u32) -> bool {
+    *value == 0
 }
 
 impl QueuedRecruit {
@@ -963,6 +971,13 @@ pub struct FactionSummary {
     pub army_upkeep: i64,
     pub building_upkeep: i64,
     pub tax_rate: TaxRate,
+    /// WH uicards: prestige of the faction's ruler (0 without ruler).
+    pub prestige: i32,
+    /// WH uicards: head count of every army of the faction.
+    pub soldiers: u64,
+    /// WH uicards: population-weighted mean unrest (0-100, rounded) over the
+    /// controlled provinces (0 without province).
+    pub mean_unrest: u8,
 }
 
 /// Full state of a campaign at a given turn.
@@ -1210,7 +1225,38 @@ impl CampaignState {
             army_upkeep: faction.last_budget.army_upkeep,
             building_upkeep: faction.last_budget.building_upkeep,
             tax_rate: faction.tax_rate,
+            prestige: faction
+                .ruler
+                .as_ref()
+                .and_then(|ruler| self.character(ruler))
+                .map_or(0, |ruler| ruler.prestige),
+            soldiers: self
+                .armies
+                .values()
+                .filter(|a| &a.faction == id)
+                .flat_map(|a| a.units.iter())
+                .map(|u| u64::from(u.strength))
+                .sum(),
+            mean_unrest: self.mean_unrest(id),
         })
+    }
+
+    /// Population-weighted mean unrest (0-100) of the provinces `id` controls.
+    fn mean_unrest(&self, id: &FactionId) -> u8 {
+        let (mut weighted, mut total) = (0.0_f64, 0.0_f64);
+        for (province_id, province) in &self.provinces {
+            if !self.controls_province(id, province_id) {
+                continue;
+            }
+            let people = province.population.total() as f64;
+            weighted += crate::population::weighted_unrest(&province.population) * people;
+            total += people;
+        }
+        if total > 0.0 {
+            (weighted / total).round().clamp(0.0, 100.0) as u8
+        } else {
+            0
+        }
     }
 
     /// Ids of the armies stationed in `settlement`, in id order.

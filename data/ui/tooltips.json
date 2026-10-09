@@ -662,6 +662,9 @@
     "tech_queue_toggle": {"title": "Mettre en file", "body": "Les technologies cliquées attendent la fin de la recherche en cours, puis démarrent d’elles-mêmes."},
     "menu_button": {"title": "Menu", "body": "Sauvegarder, charger, retour au menu principal, quitter.", "hint": "Échap"},
     "crusade_fervor": {"title": "Ferveur", "hint": "Clic : panneau de faction"},
+    "chip_prestige": {"title": "Prestige", "body": "Renommée de votre souverain : elle paie les actes royaux et pèse dans les alliances et les déclarations de guerre."},
+    "chip_men": {"title": "Hommes sous les armes", "body": "Effectif total de vos armées en campagne (garnisons non comprises)."},
+    "chip_unrest": {"title": "Mécontentement moyen", "body": "Moyenne du mécontentement de vos provinces, pondérée par leur population. Au-delà du seuil, une province se révolte."},
     "slot_locked": {"title": "Emplacement verrouillé"}
   }
 }

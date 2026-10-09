@@ -758,6 +758,17 @@ fn france_income_is_positive_and_in_target_range() {
     // FE4a: prov_bourbonnais and prov_bearn moved to fac_bourbon/fac_foix_bearn,
     // prov_valois (new) stays with the crown: 27 - 2 + 1 = 26.
     assert_eq!(summary.provinces_count, 26);
+    // WH uicards: top-bar chips (prestige of the ruler, men under arms, mean unrest).
+    let men: u64 = state
+        .armies
+        .values()
+        .filter(|a| a.faction == france_id)
+        .flat_map(|a| a.units.iter())
+        .map(|u| u64::from(u.strength))
+        .sum();
+    assert_eq!(summary.soldiers, men);
+    assert!(summary.soldiers > 0);
+    assert!(summary.mean_unrest <= 100);
 }
 
 #[test]

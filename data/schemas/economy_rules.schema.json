@@ -280,6 +280,18 @@
       "description": "Lot RS-B : plafond de ce renfort (en %).",
       "maximum": 100
     },
+    "recruit_cancel_refund_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part (en %) du prix payé rendue quand on annule une recrue de la file le tour même de l'ordre (lot WH uicards)."
+    },
+    "recruit_cancel_refund_late_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part (en %) du prix payé rendue quand on annule une recrue de la file aux tours suivants (lot WH uicards)."
+    },
     "demolition_refund_percent": {
       "type": "integer",
       "minimum": 0,

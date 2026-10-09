@@ -253,9 +253,72 @@ fn queue_entries_round_trip() {
         ordered_turn: 5,
         drawn: Default::default(),
         into_army: None,
+        paid: 0,
     })
     .unwrap();
     let back: QueuedRecruit = serde_json::from_str(&full).unwrap();
     assert_eq!(back.turns_left, 2);
     assert!(back.ordered_during(5) && !back.ordered_during(6));
+}
+
+/// WH uicards top6: cancelling a queued recruit refunds the price (all of it the turn of the
+/// order, the late share afterwards), frees its slot and gives the unit back to the reserve.
+#[test]
+fn cancel_recruit_refunds_frees_the_slot_and_restores_the_reserve() {
+    let mut data = game_data().clone();
+    let mut state = start(&data, "fac_france", 7);
+    let city = capital_city(&state);
+    state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
+    let option = state
+        .recruitable(&data, &city)
+        .into_iter()
+        .find(|o| o.available && o.cost > 0)
+        .expect("the capital can recruit");
+    let unit: UnitTypeId = option.unit_type.clone();
+    data.unit_types.get_mut(&unit).unwrap().recruit_time_turns = Some(3);
+    let pool_before = state.recruit_pool(&data, &city, &unit).milli;
+    let free = state.recruit_slots_free(&data, &city);
+    let treasury = |state: &CampaignState| state.factions[&france()].treasury;
+    let rich = treasury(&state);
+    let order = |index| Order::CancelRecruit {
+        settlement: Place::Settlement(city.clone()),
+        index,
+    };
+    state
+        .submit_order(
+            &data,
+            Order::Recruit {
+                settlement: Place::Settlement(city.clone()),
+                unit_type: unit.clone(),
+            },
+        )
+        .expect("recruit");
+    let paid = rich - treasury(&state);
+    assert!(paid > 0);
+    assert!(state.recruit_pool(&data, &city, &unit).milli < pool_before);
+    // Bad index refused.
+    assert!(state.submit_order(&data, order(5)).is_err());
+    // Same turn: full refund, slot and reserve back.
+    state.submit_order(&data, order(0)).expect("cancel");
+    assert_eq!(treasury(&state), rich);
+    assert_eq!(state.recruit_slots_free(&data, &city), free);
+    assert_eq!(state.recruit_pool(&data, &city, &unit).milli, pool_before);
+    assert!(state.settlements[&city].recruit_queue.is_empty());
+    // A later turn: the late share (50 % by default).
+    state
+        .submit_order(
+            &data,
+            Order::Recruit {
+                settlement: Place::Settlement(city.clone()),
+                unit_type: unit.clone(),
+            },
+        )
+        .expect("recruit again");
+    state.end_turn_with(&data, idle);
+    let before_cancel = treasury(&state);
+    let queued = state.settlements[&city].recruit_queue[0].clone();
+    let expected = state.recruit_refund(&data, &queued);
+    assert!(expected > 0 && expected < paid);
+    state.submit_order(&data, order(0)).expect("cancel late");
+    assert_eq!(treasury(&state), before_cancel + expected);
 }

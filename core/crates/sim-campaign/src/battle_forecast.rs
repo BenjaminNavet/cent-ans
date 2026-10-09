@@ -35,6 +35,12 @@ pub struct BattleForecast {
     pub attacker_share: f64,
     /// Estimated chance that the attackers win an auto-resolved battle, 0-1.
     pub attacker_win_chance: f64,
+    /// Mean casualties of each side over the simulated battles, per cent of
+    /// its head count (WH uicards top5).
+    #[serde(default)]
+    pub attacker_losses_pct: f64,
+    #[serde(default)]
+    pub defender_losses_pct: f64,
     /// Head counts, allies included.
     pub attacker_soldiers: u32,
     pub defender_soldiers: u32,
@@ -83,6 +89,9 @@ pub struct SideOdds {
     /// morale (the resolver's own pre-battle estimate).
     pub attacker_power: f64,
     pub defender_power: f64,
+    /// Mean casualties of each side, per cent of its head count (0-100).
+    pub attacker_losses_pct: f64,
+    pub defender_losses_pct: f64,
 }
 
 /// Odds of `attacker` against `defender` under the auto-resolver itself:
@@ -106,6 +115,7 @@ pub fn forecast_sides(
         crossing_rules,
     );
     let (mut wins, mut attacker_power, mut defender_power) = (0u64, 0.0, 0.0);
+    let (mut attacker_losses, mut defender_losses) = (0.0, 0.0);
     let samples = u64::from(rules.forecast_samples.max(1));
     for run in 0..samples {
         let mut rng = CampaignRng::from_seed(seed.wrapping_add(run));
@@ -115,12 +125,20 @@ pub fn forecast_sides(
         }
         attacker_power += result.attacker.power;
         defender_power += result.defender.power;
+        attacker_losses += f64::from(result.attacker.total_losses);
+        defender_losses += f64::from(result.defender.total_losses);
     }
     let runs = samples as f64;
+    let loss_pct = |losses: f64, side: &Side| {
+        let men = f64::from(head_count(side)).max(1.0);
+        (losses / runs / men * 100.0).clamp(0.0, 100.0)
+    };
     SideOdds {
         win_chance: wins as f64 / runs,
         attacker_power: attacker_power / runs,
         defender_power: defender_power / runs,
+        attacker_losses_pct: loss_pct(attacker_losses, attacker.0),
+        defender_losses_pct: loss_pct(defender_losses, defender.0),
     }
 }
 
@@ -345,6 +363,8 @@ impl CampaignState {
             // A6-L1 (ADR 0181): the balance bar and the verdict share one probability.
             attacker_share: odds.win_chance,
             attacker_win_chance: odds.win_chance,
+            attacker_losses_pct: odds.attacker_losses_pct,
+            defender_losses_pct: odds.defender_losses_pct,
             attacker_soldiers: head_count(&attacker_side),
             defender_soldiers: head_count(&defender_side),
             attacker_reinforcements: self.reinforcements(data, &attackers),

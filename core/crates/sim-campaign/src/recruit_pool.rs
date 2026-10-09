@@ -185,6 +185,27 @@ impl CampaignState {
     }
 }
 
+impl CampaignState {
+    /// Gives one unit of `unit_type` back to the reserve of `settlement` (a
+    /// cancelled recruit); a full reserve leaves the map.
+    pub(crate) fn restore_recruit_pool(
+        &mut self,
+        data: &GameData,
+        settlement: &SettlementId,
+        unit_type: &UnitTypeId,
+    ) {
+        let view = self.recruit_pool(data, settlement, unit_type);
+        let milli = (view.milli + MILLI).min(view.cap * MILLI);
+        if let Some(state) = self.settlements.get_mut(settlement) {
+            if milli >= view.cap * MILLI {
+                state.recruit_pool.remove(unit_type);
+            } else {
+                state.recruit_pool.insert(unit_type.clone(), milli);
+            }
+        }
+    }
+}
+
 /// New season: every reserve below its cap refills by its rate; a full
 /// reserve leaves the map. A besieged settlement does not refill.
 pub fn resolve_recruit_pools(state: &mut CampaignState, data: &GameData) {

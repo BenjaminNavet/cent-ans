@@ -707,6 +707,7 @@ func _refresh_top_bar() -> void:
 	if _economy_available():
 		economy = sim.call("get_faction_economy", player_faction)
 	ui.set_treasury(int(summary.get("treasury", 0)), int(summary.get("income", 0)), economy)
+	ui.set_status_chips(summary)  # WH uicards top7
 	ui.set_crusade(sim.call("get_crusade") if sim.has_method("get_crusade") else {})  # JR3
 
 

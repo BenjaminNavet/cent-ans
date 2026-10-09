@@ -281,7 +281,8 @@ impl CampaignSim {
             .map_or_else(GString::new, |s| GString::from(s.player_faction().as_str()))
     }
 
-    /// `{treasury, income, at_war_with, allies, provinces_count, armies_count, alive}`.
+    /// `{treasury, income, at_war_with, allies, provinces_count, armies_count, alive, prestige,
+    /// soldiers, mean_unrest, ...}`.
     #[func]
     fn get_faction_summary(&self, id: GString) -> VarDictionary {
         let Some(Ctx { state, .. }) = self.ctx() else {
@@ -305,6 +306,9 @@ impl CampaignSim {
             "army_upkeep" => summary.army_upkeep,
             "building_upkeep" => summary.building_upkeep,
             "tax_rate" => summary.tax_rate.key(),
+            "prestige" => i64::from(summary.prestige),
+            "soldiers" => i64::try_from(summary.soldiers).unwrap_or(i64::MAX),
+            "mean_unrest" => i64::from(summary.mean_unrest),
         }
     }
 

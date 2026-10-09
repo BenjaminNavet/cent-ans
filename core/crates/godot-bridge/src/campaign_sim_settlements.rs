@@ -113,6 +113,11 @@ impl CampaignSim {
                 .iter()
                 .map(|r| r.turns_left as i32)
                 .collect::<PackedInt32Array>(),
+            "recruit_queue_refund" => &live
+                .recruit_queue
+                .iter()
+                .map(|r| state.recruit_refund(data, r) as i32)
+                .collect::<PackedInt32Array>(),
             "income" => income,
             "income_lines" => &income_lines,
             "is_city" => is_city,

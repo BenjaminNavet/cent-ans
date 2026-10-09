@@ -21,4 +21,18 @@ func _init() -> void:
 	detail.erase("province_state")
 	panel.show_settlement(detail)
 	check(panel.unrest_value.text == "—" and panel.population_value.text == "—", "no state shows dashes")
+	# top6 : file de recrutement en cartes annulables.
+	var cancelled: Array = []
+	panel.cancel_recruit_requested.connect(func(settlement: String, index: int) -> void: cancelled.append([settlement, index]))
+	detail["recruit_queue"] = PackedStringArray(["unit_knights", "unit_longbowmen"])
+	detail["recruit_queue_turns"] = PackedInt32Array([2, 1])
+	detail["recruit_queue_refund"] = PackedInt32Array([300, 50])
+	panel.show_settlement(detail, [], [], true)
+	check(panel.queue_cards.get_child_count() == 2, "2 queue cards, got %d" % panel.queue_cards.get_child_count())
+	var button := panel.queue_cards.get_child(1).find_child("CancelRecruitButton", true, false) as Button
+	check(button != null and button.tooltip_text.contains("rembours"), "cancel button with refund tooltip")
+	button.pressed.emit()
+	check(cancelled == [["set_x", 1]], "cancel signal: %s" % [cancelled])
+	panel.show_settlement(detail, [], [], false)
+	check(panel.queue_cards.find_child("CancelRecruitButton", true, false) == null, "no cancel on foreign settlement")
 	finish()

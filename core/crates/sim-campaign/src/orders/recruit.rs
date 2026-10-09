@@ -466,6 +466,7 @@ impl CampaignState {
                 ordered_turn,
                 drawn: price.draw.drawn,
                 into_army: into_army.cloned(),
+                paid: price.cost,
             });
         Ok(())
     }
@@ -497,6 +498,53 @@ impl CampaignState {
             });
         }
         Ok(())
+    }
+
+    /// WH uicards: cancels the queued recruit `index` of `settlement`: it
+    /// leaves the queue, the reserved resources are released, the reserve of
+    /// its type gets the unit back and the treasury is refunded
+    /// `recruit_cancel_refund_percent` of what was paid (same turn) or
+    /// `recruit_cancel_refund_late_percent` (later).
+    pub(super) fn order_cancel_recruit(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        index: usize,
+    ) -> Result<(), OrderError> {
+        self.own_settlement(faction, settlement)?;
+        let state = self.settlements.get_mut(settlement).expect("checked above");
+        if index >= state.recruit_queue.len() {
+            return Err(OrderError::NoQueuedRecruit);
+        }
+        let queued = state.recruit_queue.remove(index);
+        let refund = self.recruit_refund(data, &queued);
+        self.factions
+            .get_mut(faction)
+            .expect("checked above")
+            .treasury += refund;
+        self.restore_recruit_pool(data, settlement, &queued.unit_type);
+        Ok(())
+    }
+
+    /// Livres refunded if `queued` were cancelled now: what was paid (the
+    /// unit's base cost for older saves) times the same-turn or the late
+    /// refund share of `economy.json`.
+    pub fn recruit_refund(&self, data: &GameData, queued: &QueuedRecruit) -> i64 {
+        let paid = if queued.paid > 0 {
+            queued.paid
+        } else {
+            data.unit_types
+                .get(&queued.unit_type)
+                .map_or(0, |t| t.cost.money)
+        };
+        let rules = &data.economy_rules;
+        let percent = if queued.ordered_during(self.turn) {
+            rules.recruit_cancel_refund_percent
+        } else {
+            rules.recruit_cancel_refund_late_percent
+        };
+        i64::from(paid) * i64::from(percent) / 100
     }
 
     /// Recruitment options of `settlement` for its controller (the player's view).

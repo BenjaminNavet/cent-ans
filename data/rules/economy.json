@@ -52,6 +52,8 @@
   "garrison_reinforce_percent_per_point": 5,
   "garrison_reinforce_max_percent": 50,
   "demolition_refund_percent": 10,
+  "recruit_cancel_refund_percent": 100,
+  "recruit_cancel_refund_late_percent": 50,
   "ransom": {
     "income_cap_percent": 100,
     "sovereign_capture_only_if_routed": true

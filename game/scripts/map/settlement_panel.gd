@@ -20,6 +20,8 @@ signal cancel_queued_build_requested(settlement_id: String, index: int)
 ## RS-N : `preview` vient de `settlement_demolition_preview` (cœur) : `{building, name,
 ## can_demolish, reason, refund, upkeep_saved}`.
 signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
+## WH uicards (top6) : annule la recrue `index` de la file (remboursement selon le cœur).
+signal cancel_recruit_requested(settlement_id: String, index: int)
 signal province_requested(province_id: String)
 signal closed
 
@@ -62,6 +64,8 @@ var recruit_list: VBoxContainer
 var recruit_target: OptionButton
 var sortie_button: Button
 var queue_label: Label
+## WH uicards (top6) : une petite carte annulable par recrue en file.
+var queue_cards: HFlowContainer
 var buildings_list: VBoxContainer
 var construction_box: VBoxContainer
 var construction_label: Label
@@ -257,6 +261,11 @@ func _build_garrison_tab() -> void:
 	queue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	UiType.apply(queue_label, UiType.BODY)
 	inner.add_child(queue_label)
+	queue_cards = HFlowContainer.new()
+	queue_cards.name = "QueueCards"
+	queue_cards.add_theme_constant_override("h_separation", 4)
+	queue_cards.add_theme_constant_override("v_separation", 4)
+	inner.add_child(queue_cards)
 	recruit_panel = VBoxContainer.new()
 	recruit_panel.visible = false
 	inner.add_child(recruit_panel)
@@ -377,21 +386,14 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		recruit_panel.hide()
 	var queue: Array = Array(detail.get("recruit_queue", PackedStringArray()))
 	var queue_turns: Array = Array(detail.get("recruit_queue_turns", PackedInt32Array()))
-	var queue_names: Array = []
-	for index in queue.size():
-		var queue_name := GameCatalog.display_name(str(queue[index]))
-		# Une recrue longue à lever reste plusieurs tours dans la file.
-		var turns_left := int(queue_turns[index]) if index < queue_turns.size() else 1
-		if turns_left > 1:
-			queue_name += " (%s)" % FrText.count(turns_left, "tour")
-		queue_names.append(queue_name)
 	queue_label.visible = player_owner or not queue.is_empty()
 	var free_slots := int(detail.get("recruit_slots_free", 0))
-	queue_label.text = "Recrues attendues : %s (%s libre%s ce tour sur %d)" % [
-		", ".join(queue_names) if not queue_names.is_empty() else "aucune",
+	queue_label.text = "Recrues attendues : %s(%s libre%s ce tour sur %d)" % [
+		"aucune " if queue.is_empty() else "",
 		FrText.count(free_slots, "place"), FrText.s(free_slots), int(detail.get("recruit_slots", 0))]
 	sortie_button.visible = player_owner and not siege.is_empty() and bool(detail.get("can_sortie", false))
 	_fill_recruit_target(detail.get("recruit_armies", []))
+	_fill_queue_cards(queue, queue_turns, Array(detail.get("recruit_queue_refund", PackedInt32Array())), player_owner)
 	PanelWidgets.fill_recruitable(recruit_list, recruitable, _on_recruit_pressed)
 	# Bâtiments et construction.
 	var buildings: Array = detail.get("buildings_info", [])
@@ -437,6 +439,45 @@ func _fill_build_queue(queued: Array, player_owner: bool) -> void:
 			IconLibrary.decorate_button(cancel, "act_cancel_build", int(PanelWidgets.ROW_ICON))
 			row.add_child(cancel)
 		queue_box.add_child(row)
+
+
+## WH uicards (top6) : une carte par recrue en file (icône, nom, tours restants) ; la croix annule
+## l'entrée et rembourse `refunds[index]` livres (calculé par le cœur).
+func _fill_queue_cards(queue: Array, turns: Array, refunds: Array, can_cancel: bool) -> void:
+	for child in queue_cards.get_children():
+		queue_cards.remove_child(child)
+		child.queue_free()
+	for index in queue.size():
+		var unit_type := str(queue[index])
+		var card := PanelContainer.new()
+		card.name = "QueueCard%d" % index
+		card.add_theme_stylebox_override("panel", HudStyle.panel_box(4))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		card.add_child(row)
+		var texture := HudStyle.icon(unit_type, "unit")
+		if texture != null:
+			var icon := TextureRect.new()
+			icon.texture = texture
+			icon.custom_minimum_size = Vector2(24, 24)
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			row.add_child(icon)
+		var turns_left := int(turns[index]) if index < turns.size() else 1
+		var label := Label.new()
+		label.text = "%s · %d t." % [GameCatalog.display_name(unit_type), turns_left]
+		UiType.apply(label, UiType.CAPTION)
+		row.add_child(label)
+		if can_cancel:
+			var cancel := Button.new()
+			cancel.name = "CancelRecruitButton"
+			cancel.text = "×"
+			var refund := int(refunds[index]) if index < refunds.size() else 0
+			cancel.tooltip_text = "Annuler cette recrue (remboursement : %s)" % Money.amount(refund)
+			var queued_index := index
+			cancel.pressed.connect(func() -> void: cancel_recruit_requested.emit(settlement_id, queued_index))
+			row.add_child(cancel)
+		queue_cards.add_child(card)
 
 
 ## A6-U11 : le panneau n'ajuste plus la hauteur de ses onglets ; la zone latérale défile seule.

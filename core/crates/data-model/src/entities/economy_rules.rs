@@ -179,6 +179,13 @@ pub struct EconomyRules {
     /// demolished (`Order::Demolish`).
     #[serde(default = "default_demolition_refund_percent")]
     pub demolition_refund_percent: u32,
+    /// WH uicards: share (percent) of the price refunded when a queued recruit
+    /// is cancelled the very turn it was ordered...
+    #[serde(default = "default_recruit_cancel_refund_percent")]
+    pub recruit_cancel_refund_percent: u32,
+    /// ... and on later turns.
+    #[serde(default = "default_recruit_cancel_refund_late_percent")]
+    pub recruit_cancel_refund_late_percent: u32,
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,
@@ -308,6 +315,12 @@ crate::bundled_rules!(EconomyRules, "rules/economy.json", default);
 
 fn default_demolition_refund_percent() -> u32 {
     10
+}
+fn default_recruit_cancel_refund_percent() -> u32 {
+    100
+}
+fn default_recruit_cancel_refund_late_percent() -> u32 {
+    50
 }
 fn default_resource_import_multiplier() -> u32 {
     100

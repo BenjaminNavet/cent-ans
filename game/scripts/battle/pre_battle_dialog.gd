@@ -338,14 +338,26 @@ func _fill_balance(siege: bool) -> void:
 		verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
 		# Ces chances sont celles de la résolution automatique ; la bataille jouée en 3D
 		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
-		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l’issue" % [
+		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s%s · une bataille menée peut renverser l’issue" % [
 			roundi(chance * 100.0),
 			Money.digits(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
 			Money.digits(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
 			" (assaut)" if siege else "",
+			losses_text(forecast, player_side),
 		]
 	TooltipHost.attach_plain(balance_bar, "battle_balance_estimate")
 	balance_bar.queue_redraw()
+
+
+## WH uicards (top5) : « · pertes estimées : vous 18 %, ennemi 41 % » (moyenne de la résolution
+## automatique, `*_losses_pct` de la prévision) ; vide si la prévision ne les porte pas.
+static func losses_text(forecast: Dictionary, player_side: String) -> String:
+	if not forecast.has("attacker_losses_pct"):
+		return ""
+	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	return " · pertes estimées : vous %d %%, ennemi %d %%" % [
+		roundi(float(forecast.get("%s_losses_pct" % player_side, 0.0))),
+		roundi(float(forecast.get("%s_losses_pct" % enemy_side, 0.0)))]
 
 
 func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:

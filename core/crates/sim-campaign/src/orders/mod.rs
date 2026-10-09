@@ -208,6 +208,10 @@ impl CampaignState {
                 }
                 self.order_recruit(data, faction, &settlement, &unit_type, Some(&army))
             }
+            Order::CancelRecruit { settlement, index } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_cancel_recruit(data, faction, &settlement, index)
+            }
             Order::CreateArmy {
                 settlement,
                 units_from_garrison,

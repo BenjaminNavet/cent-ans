@@ -222,6 +222,7 @@ func _decorate_top_bar() -> void:
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	_add_fervor_indicator()  # JR3
+	_add_status_chips()  # WH uicards top7
 	# UX2 (C9) : chaque bouton porte un libellé court quand la barre a la place, sinon son
 	# icône seule (nom et touche dans l'infobulle) ; voir `fit_top_bar`.
 	# Chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
@@ -272,6 +273,38 @@ func _add_fervor_indicator() -> void:
 	fervor_label.gui_input.connect(_on_faction_swatch_input)
 	fervor_label.hide()
 	income_label.add_sibling(fervor_label)
+
+
+## WH uicards (top7) : pastilles prestige / hommes sous les armes / mécontentement moyen, après le
+## solde ; chacune se réduit (`top_fit`) quand la barre manque de place.
+var prestige_label: Label
+var men_label: Label
+var unrest_label: Label
+
+
+func _add_status_chips() -> void:
+	var anchor: Control = fervor_label
+	for spec in [["PrestigeLabel", "chip_prestige"], ["MenLabel", "chip_men"], ["UnrestLabel", "chip_unrest"]]:
+		var chip := RichLabel.new()
+		chip.name = spec[0]
+		chip.mouse_filter = Control.MOUSE_FILTER_PASS
+		TooltipHost.attach_plain(chip, spec[1])
+		anchor.add_sibling(chip)
+		anchor = chip
+	prestige_label = anchor.get_parent().get_node("PrestigeLabel")
+	men_label = anchor.get_parent().get_node("MenLabel")
+	unrest_label = anchor
+
+
+## `summary` : `get_faction_summary` du joueur (`prestige`, `soldiers`, `mean_unrest`).
+func set_status_chips(summary: Dictionary) -> void:
+	var prestige := int(summary.get("prestige", 0))
+	var men := int(summary.get("soldiers", 0))
+	var unrest := int(summary.get("mean_unrest", 0))
+	top_fit.set_text(prestige_label, "Prestige : %d" % prestige, "Pr. %d" % prestige)
+	top_fit.set_text(men_label, "Hommes : %s" % Money.digits(men), "H. %s" % Money.digits(men))
+	top_fit.set_text(unrest_label, "Troubles : %d %%" % unrest, "T. %d %%" % unrest)
+	unrest_label.add_theme_color_override("font_color", Money.LOSS_COLOR if unrest >= 50 else Money.INK_COLOR)
 
 
 ## `view` : `CampaignSim.get_crusade` (vide = le joueur n'est pas la faction croisée).

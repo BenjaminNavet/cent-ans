@@ -44,6 +44,7 @@ func setup(campaign_map: Node) -> void:
 	panel.build_requested.connect(_on_build)
 	panel.cancel_build_requested.connect(_on_cancel_build)
 	panel.cancel_queued_build_requested.connect(_on_cancel_queued_build)
+	panel.cancel_recruit_requested.connect(_on_cancel_recruit)
 	panel.raze_requested.connect(_on_raze_requested)
 	panel.province_requested.connect(_on_province_requested)
 	raze_dialog = ConfirmPanel.new("Raser")
@@ -239,6 +240,10 @@ func _on_build(settlement_id: String, building_id: String) -> void:
 
 func _on_cancel_queued_build(settlement_id: String, index: int) -> void:
 	map._submit({"type": "cancel_queued_build", "settlement": settlement_id, "index": index}, "Chantier en file annulé (moitié du coût remboursée).")
+
+
+func _on_cancel_recruit(settlement_id: String, index: int) -> void:
+	map._submit({"type": "cancel_recruit", "settlement": settlement_id, "index": index}, "Recrue annulée.")
 
 
 func _on_cancel_build(settlement_id: String) -> void:

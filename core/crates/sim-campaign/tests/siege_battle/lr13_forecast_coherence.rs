@@ -239,3 +239,41 @@ fn assault_forecast_matches_the_auto_assault() {
         "assault: forecast {forecast:.2}, auto-assault {seen:.2}"
     );
 }
+
+/// WH uicards top5: the forecast reports mean casualties per side in per cent of its head count.
+#[test]
+fn forecast_reports_estimated_losses() {
+    const MAA: &str = "unit_men_at_arms_foot";
+    let data = game_data();
+    let conditions = FieldConditions {
+        terrain: Some(Terrain::Plains),
+        season: Some(Season::Summer),
+        weather: None,
+    };
+    let odds = |a: usize, d: usize| {
+        let attacker = army(data, &[(MAA, a)]);
+        let defender = army(data, &[(MAA, d)]);
+        forecast_sides(
+            (&attacker.0, &attacker.1),
+            (&defender.0, &defender.1),
+            &BattleContext::default(),
+            &conditions,
+            &data.auto_resolve,
+            &data.river_crossing_rules,
+            0,
+        )
+    };
+    let even = odds(6, 6);
+    assert!(even.attacker_losses_pct > 0.0 && even.defender_losses_pct > 0.0);
+    assert!(
+        (even.attacker_losses_pct - even.defender_losses_pct).abs() < 15.0,
+        "equal armies lose alike: {} / {}",
+        even.attacker_losses_pct,
+        even.defender_losses_pct
+    );
+    // Three times stronger: the weak side loses a far larger share than the strong one.
+    let lopsided = odds(18, 6);
+    assert!(lopsided.defender_losses_pct > lopsided.attacker_losses_pct);
+    assert!(lopsided.defender_losses_pct > even.defender_losses_pct);
+    assert!(lopsided.attacker_losses_pct <= 100.0);
+}

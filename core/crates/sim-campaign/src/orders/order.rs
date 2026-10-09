@@ -123,6 +123,14 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// WH uicards: cancels the queued recruit `index` of the settlement's
+    /// queue, refunding part of its price (`economy.json`
+    /// `recruit_cancel_refund_percent`).
+    CancelRecruit {
+        #[serde(alias = "province")]
+        settlement: Place,
+        index: usize,
+    },
     /// Form a new army from garrison units (indices into the garrison).
     CreateArmy {
         #[serde(alias = "province")]
