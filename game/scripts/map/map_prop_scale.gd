@@ -84,7 +84,7 @@ extends Resource
 ## Distance caméra → partie de tuile en deçà de laquelle les arbres sont en maillage détaillé
 ## (sans imposteurs générés GA3) ; imposteur ou maillage bas au-delà.
 @export var generalised_mesh_distance: float = 60.0
-## Lot DN-FORET (ADR 0213) : zone autour du point visé où les arbres sont les maillages décimés des
+## Lot DN-FORET (ADR 0216) : zone autour du point visé où les arbres sont les maillages décimés des
 ## modèles générés (un MultiMesh par essence) ; imposteurs au-delà. Rayon (unités carte) =
 ## `generalised_model_radius_factor` × distance du rig, bornés ; pas de modèles au-delà de
 ## `generalised_model_max_distance` (coût : ≈ 1 200 triangles par arbre, ombres comprises).

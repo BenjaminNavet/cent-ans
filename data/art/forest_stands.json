@@ -1,5 +1,5 @@
 {
- "description": "Peuplements forestiers de la carte de campagne (lot DN-FORET, ADR 0213) : ce dont est faite chaque forêt (mélange d'essences, teinte, densité, hauteur). Un massif nommé de historical_forests.json reçoit son peuplement (regions) ; ailleurs, une cellule d'écorégion tire parmi les peuplements admissibles au lieu (biome, altitude, latitude, longitude, part de résineux). Règle de choix en Rust (core/crates/vegetation/src/stands.rs). Rendu seulement.",
+ "description": "Peuplements forestiers de la carte de campagne (lot DN-FORET, ADR 0216) : ce dont est faite chaque forêt (mélange d'essences, teinte, densité, hauteur). Un massif nommé de historical_forests.json reçoit son peuplement (regions) ; ailleurs, une cellule d'écorégion tire parmi les peuplements admissibles au lieu (biome, altitude, latitude, longitude, part de résineux). Règle de choix en Rust (core/crates/vegetation/src/stands.rs). Rendu seulement.",
  "distribution": {
   "cell_px": 36.0,
   "jitter": 0.8,

@@ -845,7 +845,7 @@ def atlas_step() -> None:
     (REPO / "data/art/tree_model_gains.json").write_text(
         json.dumps(
             {
-                "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0213). Lu par DnTreeModels.",
+                "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0216). Lu par DnTreeModels.",
                 "gains": gains,
             },
             indent=1,

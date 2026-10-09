@@ -1,7 +1,7 @@
 class_name DnTreeModels
 extends RefCounted
 
-## Lot DN-FORET (ADR 0213) : maillages décimés des arbres générés (glb DN, `lod2`, ≈ 300
+## Lot DN-FORET (ADR 0216) : maillages décimés des arbres générés (glb DN, `lod2`, ≈ 300
 ## triangles) pour les arbres proches de la carte de campagne.
 ##
 ## Une ligne d'atlas d'imposteurs (`TreeSpecies`, ordre du catalogue) = une essence = un glb

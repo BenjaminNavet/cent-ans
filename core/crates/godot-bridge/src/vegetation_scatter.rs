@@ -190,8 +190,11 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
 
 /// Lot DN-FORET: `ForestStands.table()` -> `StandTable` (validated by the caller).
 fn stands_of(d: &VarDictionary) -> StandTable {
-    let regions = floats_of(d, "regions")
-        .chunks_exact(7)
+    let flat = floats_of(d, "regions");
+    let regions = flat
+        .as_chunks::<7>()
+        .0
+        .iter()
         .map(|r| StandRegion {
             cx: r[0] as f64,
             cy: r[1] as f64,
@@ -360,7 +363,8 @@ impl VegetationScatter {
         let limit = radius * radius;
         for instance in buffer
             .as_slice()
-            .chunks_exact(vegetation::FLOATS_PER_INSTANCE)
+            .as_chunks::<{ vegetation::FLOATS_PER_INSTANCE }>()
+            .0
         {
             let (dx, dz) = (instance[3] as f64 - cx, instance[11] as f64 - cz);
             if dx * dx + dz * dz > limit {

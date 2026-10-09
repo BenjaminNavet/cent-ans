@@ -1,7 +1,7 @@
 class_name ForestStands
 extends RefCounted
 
-## Lot DN-FORET (ADR 0213) : peuplements forestiers de la carte de campagne.
+## Lot DN-FORET (ADR 0216) : peuplements forestiers de la carte de campagne.
 ##
 ## `data/art/forest_stands.json` décrit ce dont est faite chaque forêt (mélange d'essences, teinte,
 ## densité, hauteur) ; les massifs nommés de `data/map/historical_forests.json` reçoivent leur
