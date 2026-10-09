@@ -9,15 +9,15 @@ DC-5 | PARTIEL | docs/superpowers/plans (5) pas archivé, designs m1-m10 non mar
 (DC-1 : wip 508 -> ~170 fichiers, archive chantiers.md 2236 l, jugé FAIT ; DC-2 INDEX.md présent)
 
 ## GT tests Godot
-GT1 | PARTIEL | ~14 *_shot/probe/bench encore là (as1_shot, as5_shot, as8c_shader_probe, dn_*_shot, me1/me2/me5_shot, fl_weather_field_shot, tree_flicker_probe, codex_load_bench, mapload_bench) | game/tests/*_shot.gd | non
-GT2 | PARTIEL | q3_playtest.gd reste (pb1_turns à garder) | game/tests/q3_playtest.gd | non
+GT1 | FAIT (sc/hooks) | ~14 *_shot/probe/bench encore là (as1_shot, as5_shot, as8c_shader_probe, dn_*_shot, me1/me2/me5_shot, fl_weather_field_shot, tree_flicker_probe, codex_load_bench, mapload_bench) | game/tests/*_shot.gd | non
+GT2 | FAIT (sc/hooks) | q3_playtest.gd reste (pb1_turns à garder) | game/tests/q3_playtest.gd | non
 GT3 | PARTIEL | 151/197 *_test.gd sur TestCase, 46 non migrés | game/tests/*_test.gd, game/tests/lib/test_case.gd | non
 GT4 | FAIT | windows.yml : étape « Godot tests » (shell bash, GODOT console) lance tools/run_godot_tests.sh (qui honore maintenant $GODOT) ; non exécuté sur Windows réel | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
 GT5 | FAIT (sc/gt5) | inventaire docs/wip/sc/gt5-inventaire.md : 200 tests, 25 rouges -> 6 restants (po_ui = bug layout, hb5/dn_* = paquet DN absent, 2 blocages à l'arrêt) ; bug SC fine_geo_layer is_enabled corrigé | game/tests | non
 GT6 | À FAIRE | fusion des tests par thème | game/tests | non
 GT7 | FAIT (sc/smoke, 5 smoke_*.gd) | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
-GT8 | PARTIEL | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences _stage_/stage_screenshot/--stage restent | game/scripts/battle/battle_scene.gd, ui/*, map/* | non
-HOOKS | PARTIEL | retirer stage_screenshot()/stage_example restants + smoke.gd:1150 | idem | non
+GT8 | FAIT (sc/hooks) | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences _stage_/stage_screenshot/--stage restent | game/scripts/battle/battle_scene.gd, ui/*, map/* | non
+HOOKS | FAIT (sc/hooks) | retirer stage_screenshot()/stage_example restants + smoke.gd:1150 | idem | non
 
 ## RT tests Rust
 RT2 | FAIT | sondes/benchs supprimés (perf_step, parties de ep13/ep1_scale/relief/sb_siege_pace/ai_relief) ; 5 #[ignore] restants = régénérateurs ou test long documentés (m3_grid_ai, ep13_replay, br3, cb6_group_formation, fk_map_scenes) | core/crates/*/tests | oui
@@ -165,7 +165,7 @@ MA7 | FAIT (= PF-07) | = PF-07 (PerfProbe + map_bench) | game/scripts/dev | non
 MA8 | PARTIEL | PF-05 mock fait ; 246 has_method restent (campaign_map, settlement_*) | game/scripts/map | non
 MA9 | À FAIRE | règles visuelles villes + governable/commandable -> core | game/scripts/map/settlement_*.gd, core | oui
 MA11 | À FAIRE | outbuilding_layer découpe (1718 l) [GELÉ] | game/scripts/map/outbuilding_layer.gd | non
-MA12 | PARTIEL | stage_screenshot/morts du settlement_controller | game/scripts/map/settlement_controller.gd | non
+MA12 | FAIT (sc/hooks) | stage_screenshot/morts du settlement_controller | game/scripts/map/settlement_controller.gd | non
 
 ## TL tools
 TL1 | PARTIEL | tldel fait ; proto_moteur (5 fichiers) reste (experiments hors périmètre) | tools/proto_moteur | non
