@@ -32,9 +32,16 @@ petites instances) : +3 à +5 ms. Pas de LOD de distance au-delà des 3 niveaux 
 - Premier affichage : ~1 s de chargement des glb (préchargés en arrière-plan au setup).
 
 ## Révision : une parcelle = un modèle (retour joueur 10-09)
-Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ entier »). En cours :
-1. [fait] catalogue `data/art/dn_catalog_fields.json` (11 parcelles `field_<clé>`), classe d'ingest `field`
-   (props, axe long, base conservée), `dn_batch.py` accepte `style_suffix` par entrée.
-2. [à faire] génération fal (image Z-Image + TRELLIS), vérif des images, ingest, budget.
-3. [à faire] `FieldPlan`/`FieldLayer` : une instance par parcelle, échelle = parcelle - headland.
-4. [à faire] tests, schéma, mesures ON/OFF, captures, ADR 0220 section révision.
+Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ entier »). Voir ADR 0220.
+- [fait] catalogue `data/art/dn_catalog_fields.json` (11 parcelles `field_<clé>`), classe d'ingest `field`,
+  `dn_batch.py` accepte `style_suffix` par entrée (le suffixe décor interdit sol/socle).
+- [fait] `FieldPlan`/`FieldLayer` : une instance par parcelle, `dn_fields.json` + schéma + tests mis à jour.
+- BLOQUÉ : **génération fal impossible** (« User is locked. Reason: Exhausted balance », fal.ai).
+  0 $ dépensé, aucun appel TRELLIS ni multivue parti. Un repli mflux local s'est lancé tout seul (pas de
+  `--no-local-fallback` au premier essai) et a été tué : aucun fichier produit. Pas de repli local en session.
+- Reprise après recharge du solde fal :
+  `uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy python tools/experiments/dn_batch.py data/art/dn_catalog_fields.json --image-backend fal --no-local-fallback --until cut`
+  (relire chaque image `~/dev/cent-ans-raw/dn/field_*/img` : parcelle entière), puis sans `--until`, puis
+  `cent-ans dn-ingest <brut.glb> --id field_<clé> --class field --length 900` pour chacun, manifeste,
+  `art models-update`, lignes `docs/budget.md`, mesure ON/OFF et captures (`dn_fields_shot.gd` via `godot_bg.sh`).
+- Mesures ms ON/OFF et captures : non faites (aucun modèle).

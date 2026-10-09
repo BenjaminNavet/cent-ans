@@ -1,5 +1,5 @@
 {
- "description": "Lot DN-CHAMPS (ADR 0220) : champs, vergers, vignes et terrasses de la carte de campagne en modèles 3D générés (MultiMesh), par-dessus le sol peint (hb_ground.gdshaderinc). La culture d'une parcelle est tirée dans les poids de la table du sol (data/art/ground_biome_mix.json par biome, data/map/agri_landscapes.json par paysage régional), région dominante comme le shader. `crops` : matière de sol -> modèles (matière absente = champ sans modèle : labour, jachère, prés). Modèles : `dir/id` sous assets/models/dn, fichiers _lod0/1/2.glb. Tailles en mètres, volontairement grossies (style maquette) pour rester lisibles à moyenne distance.",
+ "description": "Lot DN-CHAMPS (ADR 0220, révision \"une parcelle = un modèle\") : champs, vergers, vignes et terrasses de la carte de campagne en modèles 3D générés (MultiMesh), un modèle de parcelle ENTIÈRE par parcelle cultivée, posé par-dessus le sol peint (hb_ground.gdshaderinc). La culture d'une parcelle est tirée dans les poids de la table du sol (data/art/ground_biome_mix.json par biome, data/map/agri_landscapes.json par paysage régional), région dominante comme le shader. `crops` : matière de sol -> modèles de parcelle (matière absente = champ sans modèle). Modèles : `dir/id` sous assets/models/dn, fichiers _lod0/1/2.glb ; la plus grande dimension du modèle est mise à l'emprise de la parcelle ((parcel_px - headland_px) * footprint_fill px), ses rangs suivent l'axe X du modèle, tourné sur le repère des rangs de la région.",
  "render": {
   "view_range_units": 38.0,
   "fade_from_units": 30.0,
@@ -11,12 +11,12 @@
   "load_min_units": 6.0,
   "load_max_units": 36.0,
   "cell_px": 2.0,
-  "max_instances": 14000,
+  "max_instances": 1500,
   "plan_budget_ms": 4.0,
   "rebuild_period_frames": 12,
   "shadow_range_units": 9.0,
   "albedo_gain": 2.0,
-  "sink_m": 6.0
+  "sink_m": 3.0
  },
  "plan": {
   "parcel_px": 1.6,
@@ -26,197 +26,101 @@
   "cross_share": 0.15,
   "forest_max": 0.4,
   "farm_gain": 1.0,
-  "headland_px": 0.06,
+  "headland_px": 0.1,
   "town_clear_px": 0.4,
-  "river_clear_px": 0.12
+  "river_clear_px": 0.12,
+  "footprint_fill": 0.9,
+  "yaw_jitter": 0.08,
+  "size_jitter": 0.06
  },
  "crops": {
   "wheat_ripe": {
    "variants": [
     {
-     "id": "props/crop_wheat_ripe",
-     "weight": 1.0,
-     "size_m": 640
+     "id": "props/field_wheat_ripe",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   },
   "barley_green": {
    "variants": [
     {
-     "id": "props/crop_barley_ripe",
-     "weight": 1.0,
-     "size_m": 640
+     "id": "props/field_barley_green",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   },
   "rye_field": {
    "variants": [
     {
-     "id": "props/crop_rye_tall",
-     "weight": 0.6,
-     "size_m": 640
-    },
-    {
-     "id": "props/crop_oats",
-     "weight": 0.4,
-     "size_m": 640
+     "id": "props/field_rye_field",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   },
   "buckwheat_field": {
    "variants": [
     {
-     "id": "props/crop_flax_blooming",
-     "weight": 0.5,
-     "size_m": 640
-    },
-    {
-     "id": "props/crop_woad_yellow",
-     "weight": 0.5,
-     "size_m": 640
+     "id": "props/field_buckwheat_field",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   },
   "vineyard_rows": {
    "variants": [
     {
-     "id": "props/crop_vine_stakes_row",
-     "weight": 1.0,
-     "size_m": 760
+     "id": "props/field_vineyard_rows",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 608,
-   "row_m": 274,
-   "accents": [
-    {
-     "id": "buildings/econ_vine_press_gascon",
-     "chance": 0.05,
-     "size_m": 909
-    },
-    {
-     "id": "buildings/econ_vine_terrace_rhine",
-     "chance": 0.03,
-     "size_m": 909
-    }
-   ],
-   "height_scale": 0.6
+   ]
   },
   "olive_grove": {
    "variants": [
     {
-     "id": "vegetation/tree_olive",
-     "weight": 1.0,
-     "size_m": 300
+     "id": "props/field_olive_grove",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 300,
-   "row_m": 300
+   ]
   },
   "apple_orchard": {
    "variants": [
     {
-     "id": "vegetation/tree_orchard_apple",
-     "weight": 0.6,
-     "size_m": 300
-    },
-    {
-     "id": "vegetation/tree_orchard_cherry",
-     "weight": 0.4,
-     "size_m": 300
+     "id": "props/field_apple_orchard",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 300,
-   "row_m": 300
+   ]
   },
   "fruit_orchard_rows": {
    "variants": [
     {
-     "id": "vegetation/tree_pear_wild_lone",
-     "weight": 0.3,
-     "size_m": 300
-    },
-    {
-     "id": "vegetation/tree_pomegranate",
-     "weight": 0.25,
-     "size_m": 300
-    },
-    {
-     "id": "vegetation/tree_orange_bitter",
-     "weight": 0.25,
-     "size_m": 300
-    },
-    {
-     "id": "vegetation/tree_mulberry_silk",
-     "weight": 0.2,
-     "size_m": 300
+     "id": "props/field_fruit_orchard_rows",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 300,
-   "row_m": 300
+   ]
   },
   "med_terraces": {
    "variants": [
     {
-     "id": "props/econ_terrace_olive_grove",
-     "weight": 0.6,
-     "size_m": 800
-    },
-    {
-     "id": "props/econ_terrace_wall_dry_stone",
-     "weight": 0.4,
-     "size_m": 800
-    }
-   ],
-   "spacing_m": 720,
-   "row_m": 720,
-   "accents": [
-    {
-     "id": "buildings/econ_vine_pergola_med",
-     "chance": 0.05,
-     "size_m": 564
+     "id": "props/field_med_terraces",
+     "weight": 1.0
     }
    ]
   },
   "rice_paddy": {
    "variants": [
     {
-     "id": "props/crop_rice_paddy",
-     "weight": 1.0,
-     "size_m": 640
+     "id": "props/field_rice_paddy",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   },
   "huerta_plots": {
    "variants": [
     {
-     "id": "props/crop_bean_field",
-     "weight": 0.5,
-     "size_m": 640
-    },
-    {
-     "id": "props/crop_turnip_cabbage_garden",
-     "weight": 0.5,
-     "size_m": 640
+     "id": "props/field_huerta_plots",
+     "weight": 1.0
     }
-   ],
-   "spacing_m": 256,
-   "row_m": 256,
-   "height_scale": 0.5
+   ]
   }
  }
 }

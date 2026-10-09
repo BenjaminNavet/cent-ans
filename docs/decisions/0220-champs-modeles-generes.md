@@ -25,3 +25,16 @@ les glb `crop_*`, `tree_*`, `econ_*` générés (ADR 0212).
 ## Conséquences
 Coût : voir `docs/wip/dn/champs.md`. À reprendre si le joueur voit un désaccord sol/modèles : cuire
 une carte de culture dominante (PNG) que le shader et `FieldPlan` liraient tous deux.
+
+## Révision : une parcelle = un modèle (retour joueur 10-09)
+Motif : le joueur a rejeté le rendu (« ça ne va pas du tout, il faut faire un asset du champ entier et pas
+d'un carré de blé ou une vigne »). Les touffes `crop_*` grossies et chevauchées donnaient un rendu en éclats.
+- Décision : chaque culture a un modèle de **parcelle entière** `props/field_<clé>` (maquette plate, base de
+  terre fine, rangs/grille/terrasses/casiers sur toute l'emprise), généré par le procédé classique
+  (Z-Image Turbo fal -> TRELLIS 1 `fal-ai/trellis`, une image, une graine, ni vues dos/côté ni multivue).
+  Catalogue `data/art/dn_catalog_fields.json`, classe d'ingest `field` (axe long, base conservée).
+- `FieldPlan` pose **une instance par parcelle cultivée**, au site de la parcelle ; plus grande dimension =
+  `(parcel_px - headland_px) * footprint_fill` ; lacet = repère des rangs de la région (+ `yaw_jitter`),
+  taille +- `size_jitter`. Disparus : `spacing_m`, `row_m`, `height_scale`, `size_m`, accents (pressoirs,
+  pergolas). Plafond d'instances 14 000 -> 1 500.
+- Conséquence : sans glb `field_*` ingéré, la couche ne dessine rien (modèles absents ignorés).

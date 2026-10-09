@@ -10,9 +10,8 @@ extends RefCounted
 ##   shader (`hb_region_cells`) ; les autres tirent seules.
 ## - Parcelles de Voronoi à sites jitterés (`parcel_px`) ; seules celles dont le centre est cultivé
 ##   (part de cultures du splat, hors forêt, hors villes et fleuves) portent des modèles.
-## - Modèles en rangées dans le repère de la région (champs parallèles par terroir), jachère de
-##   bordure (`headland_px`) entre parcelles ; arbres des vergers et vignes sur le même réseau.
-## - Un accent par parcelle au plus (pressoir, pergola), tirage par donnée.
+## - Révision « une parcelle = un modèle » : une instance par parcelle cultivée, modèle de parcelle
+##   entière centré sur le site, emprise = parcelle - `headland_px`, rangs sur le repère de la région.
 ## Sortie de `plan_cell` : id de modèle -> PackedFloat32Array de (x, z, lacet, taille en mètres).
 
 const STRIDE := 4
@@ -218,7 +217,8 @@ static func _pick_variant(variants: Array, roll: float) -> Dictionary:
 # --- Cellules --------------------------------------------------------------------------------
 
 
-## Instances des parcelles dont le site tombe dans la cellule (`cell_px`) de coordonnées `cell`.
+## Instances des parcelles dont le site tombe dans la cellule (`cell_px`) de coordonnées `cell` :
+## une instance par parcelle cultivée.
 func plan_cell(cell: Vector2i) -> Dictionary:
 	var out := {}
 	var cell_px := float(config.get("render", {}).get("cell_px", 2.0))
@@ -234,8 +234,14 @@ func plan_cell(cell: Vector2i) -> Dictionary:
 				continue
 			var found := parcel(id)
 			if not found.is_empty():
-				_fill_parcel(id, found, out)
+				_place_parcel(id, found, out)
 	return out
+
+
+## Emprise (mètres) d'un modèle de parcelle : la parcelle moins la bordure de chaintre.
+func footprint_m() -> float:
+	var side := float(_plan.get("parcel_px", 0.8)) - float(_plan.get("headland_px", 0.1))
+	return maxf(side, 0.01) * float(_plan.get("footprint_fill", 0.9)) * meters_per_px
 
 
 func _append(out: Dictionary, key: String, x: float, z: float, yaw: float, size_m: float) -> void:
@@ -247,50 +253,11 @@ func _append(out: Dictionary, key: String, x: float, z: float, yaw: float, size_
 	out[key] = buffer
 
 
-func _fill_parcel(id: Vector2i, found: Dictionary, out: Dictionary) -> void:
-	var size := float(_plan.get("parcel_px", 0.8))
+## Pose l'unique modèle de la parcelle : centré sur son site, plus grande dimension = emprise,
+## rangs (axe X du modèle) sur le repère de la région, petite variation de lacet et de taille.
+func _place_parcel(id: Vector2i, found: Dictionary, out: Dictionary) -> void:
 	var site: Vector2 = found["site"]
-	var crop: Dictionary = found["crop"]
 	var variant: Dictionary = found["variant"]
-	var angle: float = found["angle"]
-	var spacing := float(crop["spacing_m"]) / meters_per_px
-	var rows := float(crop["row_m"]) / meters_per_px
-	var headland := maxf(float(_plan.get("headland_px", 0.05)), 0.35 * float(variant["size_m"]) / meters_per_px)
-	# Sites voisins (poids additifs) : une instance appartient à la parcelle la plus proche.
-	var neighbours: Array = []
-	for j in range(-1, 2):
-		for i in range(-1, 2):
-			if i == 0 and j == 0:
-				continue
-			var other := Vector2i(id.x + i, id.y + j)
-			neighbours.append([parcel_site(other), _parcel_weight(other)])
-	var own_weight := _parcel_weight(id)
-	var rot := Transform2D(angle, Vector2.ZERO)
-	var reach := size * 0.95
-	var variant_size := float(variant["size_m"])
-	var us := int(reach / spacing)
-	var vs := int(reach / rows)
-	var half := 0.5 * spacing
-	for vi in range(-vs, vs + 1):
-		var shift := half if (vi & 1) == 1 else 0.0
-		for ui in range(-us, us + 1):
-			var q := site + rot * Vector2(ui * spacing + shift, vi * rows)
-			var own := q.distance_to(site) - own_weight
-			var wins := true
-			for n: Array in neighbours:
-				if q.distance_to(n[0]) - float(n[1]) < own + headland:
-					wins = false
-					break
-			if not wins:
-				continue
-			# Un seul hachage par instance : jitter, taille et lacet en dérivent.
-			var h := hash01(id.x * 131 + ui, id.y * 137 + vi, 67)
-			var jitter := Vector2(h - 0.5, fposmod(h * 17.31, 1.0) - 0.5) * 0.3
-			q += rot * Vector2(jitter.x * spacing, jitter.y * rows)
-			var grow := 0.85 + 0.3 * fposmod(h * 53.7, 1.0)
-			_append(out, str(variant["id"]), q.x, q.y, -angle + (fposmod(h * 131.9, 1.0) - 0.5) * 0.12, variant_size * grow)
-	# Accent : au plus un par parcelle, au site.
-	for accent: Dictionary in crop.get("accents", []):
-		if hash01(id.x, id.y, 79 + int(accent["chance"] * 1000.0)) < float(accent["chance"]):
-			_append(out, str(accent["id"]), site.x, site.y, hash01(id.x, id.y, 83) * TAU, float(accent["size_m"]))
-			break
+	var yaw := -float(found["angle"]) + (hash01(id.x, id.y, 67) - 0.5) * 2.0 * float(_plan.get("yaw_jitter", 0.08))
+	var grow := 1.0 + (hash01(id.x, id.y, 71) - 0.5) * 2.0 * float(_plan.get("size_jitter", 0.06))
+	_append(out, str(variant["id"]), site.x, site.y, yaw, footprint_m() * grow)

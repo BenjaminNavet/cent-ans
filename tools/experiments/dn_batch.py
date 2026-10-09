@@ -254,7 +254,7 @@ FAL_IMAGE_COST_USD = 0.005
 
 
 def image_size(entry: dict) -> dict:
-    """fal ``image_size``: the ingest size of an ``image`` entry (multiple of 16), else 1024 square."""
+    """Fal ``image_size``: the ingest size of an ``image`` entry (multiple of 16), else 1024 square."""
     if entry["kind"] == "image":
         width, height = entry["ingest"]["size"]
         return {"width": -(-width // 16) * 16, "height": -(-height // 16) * 16}
