@@ -152,7 +152,7 @@ MB14 | À FAIRE | étude fusion rendus rivière/route | game/scripts/map/{rivers
 UI4 | FAIT sc/ui (MechanicSheet + data/ui/encyclopedia.json) | encyclopedia MECHANICS (const L57) -> data/ui/encyclopedia.json + fiche commune | game/scripts/ui/encyclopedia.gd | non
 UI9 | FAIT sc/ui (thousands retiré, UiBuild.spacer partout ; spacer vertical army_strip laissé) | morts UI (thousands 2 occurrences, spacer) | game/scripts/ui | non
 UI10 | À FAIRE | doc (dernier) | game/scripts/ui | non
-UI11 | FAIT sc/ui ADR 0236 ; 3 tscn triviaux retirés, 11 coquilles restantes listées dans l ADR | tscn vs code (décision, 25 tscn) | game/ | non
+UI11 | FAIT sc/ui ADR 0237 ; 3 tscn triviaux retirés, 11 coquilles restantes listées dans l ADR | tscn vs code (décision, 25 tscn) | game/ | non
 UI12 | RIEN À FAIRE : MenuBackdrop3D instancié par start_menu.gd, LivingPortrait utilisé par portrait_frame/loader/family_tree | menu_backdrop_3d.gd, living_portrait.gd suppr ? (liés MM1 menu récent, prudence) | game/scripts/ui | non | [MÉCANIQUE visuelle]
 
 ## MA map villes/UI
