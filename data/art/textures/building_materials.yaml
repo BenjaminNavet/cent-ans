@@ -1,0 +1,949 @@
+# TX tranche 4 (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md section 4):
+# regional building materials. Each entry is one regional variant of an existing role of
+# data/art/building_materials.json (Plaster, Rubble, Ashlar, Masonry, Timber, Planks, TimberFrame,
+# RoofTile, RoofFlat, RoofSlate, Thatch); `regions` are ids of data/art/building_regions.json.
+# Every region is covered for each of these roles. Bricks live under Masonry, wooden shingles
+# (bardeaux) under RoofSlate, turf and heather under Thatch, earth terraces under RoofFlat.
+# Prompt sent = style_prefix ({tile_m} substituted) + prompt + style_suffix. Seeds: 9000 + index * 10.
+family: building_materials
+backend: fal
+size: 2048
+output_size: 2048
+style_prefix: >-
+  Front view of a surface seen exactly face-on, the camera straight in front of a perfectly flat
+  wall or roof, the material filling the whole frame edge to edge, seamless and tileable, uniform
+  coverage without a dominant central feature. Soft diffuse daylight, even lighting, natural
+  colours, photorealistic, high detail, medieval building material. The image covers about {tile_m}
+  metres on each side.
+style_suffix: >-
+  The same continuous, unbroken surface everywhere, rich fine detail and gentle variation of colour
+  at every scale, aged by centuries of weather. Only the material itself, flat and evenly lit.
+entries:
+- id: plaster_lime_whitewash_south
+  role: Plaster
+  regions: [aquitaine, aragon, chypre, egee, grece, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_nord, italie_sud, languedoc, maghreb, portugal, provence_alpes]
+  prompt: >-
+    Thick white lime wash brushed over rough plaster, soft chalky white with faint cream and grey
+    streaks, fine hairline cracks and gentle trowel undulations.
+  seed: 9000
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_lime_cream_north
+  role: Plaster
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
+  prompt: >-
+    Weathered cream lime plaster rendered by hand, warm off-white with pale grey damp stains, small
+    hollows and hairline cracks.
+  seed: 9010
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_cob_cream_southwest
+  role: Plaster
+  regions: [angleterre_sud, ecosse, france_ouest, galles, irlande]
+  prompt: >-
+    Lime-washed cob wall, thick uneven plaster the colour of pale straw with chopped straw showing
+    through, soft rounded surface and shallow cracks.
+  seed: 9020
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_pise_rammed_earth
+  role: Plaster
+  regions: [aquitaine, aragon, france_centre, france_est, iberie_centre, italie_nord, languedoc]
+  prompt: >-
+    Rammed earth wall in horizontal layers, warm ochre brown earth with small pebbles and thin pale lime
+    bands between the layers, fine erosion grooves.
+  seed: 9030
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_ochre_stucco_italian
+  role: Plaster
+  regions: [italie_centre, italie_nord, italie_sud, provence_alpes]
+  prompt: >-
+    Old ochre and terracotta coloured lime stucco, warm yellow-orange with faded patches and patina,
+    fine cracks and soft trowel marks.
+  seed: 9040
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_adobe_clay_smooth
+  role: Plaster
+  regions: [anatolie, aragon, egypte, iberie_sud, levant, maghreb]
+  prompt: >-
+    Smooth sun-dried clay adobe render, sandy beige to pale brown, soft rounded finger-wiped texture
+    with fine cracks and tiny straw flecks.
+  seed: 9050
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_terra_cruda_red
+  role: Plaster
+  regions: [aragon, iberie_centre, iberie_sud, maghreb, portugal]
+  prompt: >-
+    Raw red-brown earth plaster, rich terracotta tone with fine sand grains and shallow drying cracks,
+    matte and slightly uneven.
+  seed: 9060
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_blue_grey_lime_atlantic
+  role: Plaster
+  regions: [france_ouest, galles, iberie_nord, irlande, portugal]
+  prompt: >-
+    Pale grey lime render of a rainy Atlantic coast, soft grey-green tone with darker damp streaks and
+    fine lichen specks.
+  seed: 9070
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_pink_lime_alsace
+  role: Plaster
+  regions: [empire_est, empire_rhin, empire_sud, france_est]
+  prompt: >-
+    Soft pink and salmon coloured lime plaster, warm rosy cream with faint pale patches and fine cracks.
+  seed: 9080
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_sand_mud_desert
+  role: Plaster
+  regions: [egypte, levant, maghreb]
+  prompt: >-
+    Fine sandy desert mud plaster, pale yellow-beige with smooth wind-worn surface and delicate hairline
+    cracks.
+  seed: 9090
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: plaster_boreal_limewash_ochre
+  role: Plaster
+  regions: [empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Pale yellow ochre limewash over rough plaster, muted sunlit yellow with faint grey streaks and
+    shallow undulations.
+  seed: 9100
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_flint_knapped
+  role: Rubble
+  regions: [angleterre_est, angleterre_sud, france_nord, pays_bas]
+  prompt: >-
+    Knapped black and grey flint cobbles set in pale lime mortar, glossy dark broken faces with white
+    cortex rinds, closely packed.
+  seed: 9110
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_granite_grey
+  role: Rubble
+  regions: [ecosse, france_ouest, galles, iberie_nord, irlande, portugal, scandinavie]
+  prompt: >-
+    Rough grey granite fieldstones with silver mica and pale lichen, bedded in grey mortar, irregular
+    blocks of varied size.
+  seed: 9120
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_fieldstone_glacial
+  role: Rubble
+  regions: [empire_est, empire_nord, empire_rhin, pays_bas, scandinavie]
+  prompt: >-
+    Rounded glacial fieldstones in grey, pink and brown, tightly set in sandy mortar, varied sizes.
+  seed: 9130
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_limestone_blond
+  role: Rubble
+  regions: [angleterre_centre, aquitaine, aragon, empire_sud, france_centre, france_est, languedoc]
+  prompt: >-
+    Rough blond limestone rubble in cream and honey tones, irregular blocks set in pale lime mortar with
+    small gaps.
+  seed: 9140
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_slate_drystone
+  role: Rubble
+  regions: [angleterre_nord, ecosse, galles, irlande]
+  prompt: >-
+    Dry-laid flat slate and shale stones in dark grey and blue-grey, stacked in rough courses without
+    mortar, mossy in the crevices.
+  seed: 9150
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_sandstone_red
+  role: Rubble
+  regions: [angleterre_centre, angleterre_nord, empire_rhin, empire_sud]
+  prompt: >-
+    Rough red sandstone rubble in rose, brick-red and ochre, irregular blocks in pale mortar.
+  seed: 9160
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_volcanic_dark
+  role: Rubble
+  regions: [anatolie, egee, iberie_centre, italie_sud, provence_alpes]
+  prompt: >-
+    Dark volcanic stone rubble in charcoal, brown and rust, porous rough faces set in grey mortar.
+  seed: 9170
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rubble_fieldstone_mediterranean
+  role: Rubble
+  regions: [aquitaine, chypre, egypte, grece, iberie_sud, italie_centre, italie_nord, languedoc, levant, maghreb, provence_alpes]
+  prompt: >-
+    Rough dry-climate limestone fieldstones in beige, grey and pale ochre, set in sandy mortar with dark
+    gaps, sun-bleached.
+  seed: 9180
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_limestone_blond
+  role: Ashlar
+  regions: [angleterre_nord, aquitaine, france_est, france_nord]
+  prompt: >-
+    Dressed blond limestone ashlar in neat courses, honey-cream blocks with fine joints, subtle
+    weathering and small shell fossils.
+  seed: 9190
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_tuffeau_white
+  role: Ashlar
+  regions: [france_centre, france_ouest]
+  prompt: >-
+    Soft white tuffeau stone blocks in regular courses, creamy chalky white with fine chisel marks and
+    light grey weathering.
+  seed: 9200
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_bluestone_pays_bas
+  role: Ashlar
+  regions: [angleterre_est, pays_bas]
+  prompt: >-
+    Dressed blue-grey limestone blocks in regular courses, cool grey with darker veins and crisp narrow
+    joints.
+  seed: 9210
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_granite_grey
+  role: Ashlar
+  regions: [ecosse, galles, iberie_nord, irlande, portugal, scandinavie]
+  prompt: >-
+    Cut grey granite blocks in even courses, speckled grey with fine chisel dressing and thin joints.
+  seed: 9220
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_sandstone_red
+  role: Ashlar
+  regions: [angleterre_centre, empire_rhin, empire_sud]
+  prompt: >-
+    Dressed red sandstone ashlar, warm rose-red blocks with soft layering, fine joints and gentle
+    weathering.
+  seed: 9230
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_oolite_golden
+  role: Ashlar
+  regions: [angleterre_est, angleterre_sud]
+  prompt: >-
+    Golden oolitic limestone blocks in neat courses, warm honey tone with fine granular texture and thin
+    lime joints.
+  seed: 9240
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_marble_white
+  role: Ashlar
+  regions: [chypre, egee, grece, italie_centre, italie_nord]
+  prompt: >-
+    Dressed white marble blocks with grey veining in regular courses, creamy white with fine joints and
+    soft patina.
+  seed: 9250
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_travertine
+  role: Ashlar
+  regions: [anatolie, italie_centre, italie_sud, levant]
+  prompt: >-
+    Cut travertine blocks in warm cream and buff, finely pitted with horizontal banding and thin joints.
+  seed: 9260
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_sandstone_golden
+  role: Ashlar
+  regions: [aragon, egypte, iberie_centre, iberie_sud, languedoc, maghreb, provence_alpes]
+  prompt: >-
+    Golden sandstone ashlar in even courses, sunny tan blocks with fine grain and crisp thin joints.
+  seed: 9270
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: ashlar_limestone_baltic_grey
+  role: Ashlar
+  regions: [empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Dressed pale grey limestone blocks from the Baltic coast, cool grey-beige with fine horizontal
+    layering and thin joints.
+  seed: 9280
+  tile_m: 2.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_limestone_grey
+  role: Masonry
+  regions: [angleterre_centre, angleterre_nord, angleterre_sud, france_centre, france_est, france_nord]
+  prompt: >-
+    Large castle wall of squared grey limestone in broad courses, weathered grey-beige blocks with dark
+    joints and pale lichen.
+  seed: 9290
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_granite
+  role: Masonry
+  regions: [ecosse, france_ouest, galles, iberie_nord, irlande, portugal, scandinavie]
+  prompt: >-
+    Heavy castle wall of big rough grey granite blocks in broad courses, dark joints, moss and lichen
+    patches.
+  seed: 9300
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_sandstone_red
+  role: Masonry
+  regions: [empire_rhin, empire_sud]
+  prompt: >-
+    Massive castle wall of red sandstone blocks in broad courses, deep rose-red with weathered pale
+    joints.
+  seed: 9310
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_golden_south
+  role: Masonry
+  regions: [aquitaine, aragon, egypte, iberie_centre, iberie_sud, italie_centre, languedoc, maghreb, provence_alpes]
+  prompt: >-
+    Sun-baked castle wall of golden limestone blocks in broad courses, warm tan with darker joints.
+  seed: 9320
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_volcanic
+  role: Masonry
+  regions: [anatolie, chypre, egee, italie_sud]
+  prompt: >-
+    Massive castle wall of dark volcanic stone blocks in broad courses, charcoal and brown with rust
+    patches.
+  seed: 9330
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_castle_levant_ashlar
+  role: Masonry
+  regions: [grece, levant]
+  prompt: >-
+    Crusader style castle wall of large drafted pale limestone blocks with rough bosses, creamy beige
+    with crisp joints.
+  seed: 9340
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_brick_baltic
+  role: Masonry
+  regions: [empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Baltic brick wall in monk bond, deep red-brown bricks with darker glazed headers and pale lime
+    joints.
+  seed: 9350
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_brick_flemish
+  role: Masonry
+  regions: [angleterre_est, angleterre_sud, france_nord, pays_bas]
+  prompt: >-
+    Flemish bond brick wall, warm orange-red bricks alternating with darker headers, thin pale mortar
+    joints.
+  seed: 9360
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: masonry_brick_lombard_stone
+  role: Masonry
+  regions: [aragon, italie_nord, languedoc]
+  prompt: >-
+    Lombard wall of warm red brick courses alternating with bands of river pebbles and pale stone, pale
+    mortar joints.
+  seed: 9370
+  tile_m: 2.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_oak_hewn_weathered
+  role: Timber
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, galles, pays_bas]
+  prompt: >-
+    Hand-hewn weathered oak beams, silvery grey-brown with deep grain, axe marks and fine checks.
+  seed: 9380
+  tile_m: 1.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_pine_logs_horizontal
+  role: Timber
+  regions: [ecosse, empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Horizontal pine logs stacked tightly, rounded log faces in warm honey-brown darkened by age, with
+    fine cracks and dovetail rhythm.
+  seed: 9390
+  tile_m: 2.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_chestnut_dark
+  role: Timber
+  regions: [aquitaine, france_centre, iberie_nord, irlande, italie_centre, italie_nord, portugal]
+  prompt: >-
+    Dark chestnut beams, rich brown with coarse spiral grain and weathered surface.
+  seed: 9400
+  tile_m: 1.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_larch_alpine
+  role: Timber
+  regions: [aragon, empire_sud, italie_nord, provence_alpes]
+  prompt: >-
+    Alpine larch timber darkened by sun, deep reddish brown with fine tight grain and weathered cracks.
+  seed: 9410
+  tile_m: 1.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_cedar_levant
+  role: Timber
+  regions: [anatolie, chypre, egee, egypte, grece, levant, maghreb]
+  prompt: >-
+    Aged cedar beams, warm reddish brown with straight grain and silvery sun-bleached patches.
+  seed: 9420
+  tile_m: 1.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timber_olive_pine_southern
+  role: Timber
+  regions: [iberie_centre, iberie_sud, italie_sud, languedoc]
+  prompt: >-
+    Sun-dried pine and olive wood beams, pale tan to grey-brown with visible grain and fine splits.
+  seed: 9430
+  tile_m: 1.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: planks_oak_weathered_north
+  role: Planks
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, ecosse, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, galles, irlande, pays_bas]
+  prompt: >-
+    Vertical weathered oak planks, silvery brown with grain, narrow gaps and rusty nail heads.
+  seed: 9440
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: planks_pine_grey_nordic
+  role: Planks
+  regions: [ecosse, empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Vertical pine boards weathered to silver grey, long straight grain and hairline gaps.
+  seed: 9450
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: planks_red_ochre_nordic
+  role: Planks
+  regions: [empire_nord, scandinavie]
+  prompt: >-
+    Vertical boards painted with faded red ochre paint, soft brick-red with chipped patches showing grey
+    wood.
+  seed: 9460
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: planks_pine_sunbleached_south
+  role: Planks
+  regions: [anatolie, aquitaine, aragon, chypre, egee, egypte, grece, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_nord, italie_sud, languedoc, levant, maghreb, portugal, provence_alpes]
+  prompt: >-
+    Vertical sun-bleached pine planks, pale tan to grey with straight grain, split ends and narrow gaps.
+  seed: 9470
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_norman
+  role: TimberFrame
+  regions: [france_nord, france_ouest]
+  prompt: >-
+    Norman half-timbered wall, grey-brown oak beams in a lattice with cream lime plaster and cob infill
+    between them, weathered.
+  seed: 9480
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_alsatian
+  role: TimberFrame
+  regions: [empire_rhin, empire_sud, france_est]
+  prompt: >-
+    Alsatian half-timbered wall, red-brown oak beams with diagonal braces and ochre and pale pink
+    plaster panels.
+  seed: 9490
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_english
+  role: TimberFrame
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud]
+  prompt: >-
+    English timber-framed wall, silvery weathered oak studs with close spacing and cream lime plaster
+    panels, uneven and aged.
+  seed: 9500
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_flemish_brick
+  role: TimberFrame
+  regions: [pays_bas]
+  prompt: >-
+    Flemish timber frame with dark oak beams and red brick infill panels laid in herringbone pattern.
+  seed: 9510
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_saxon_brick
+  role: TimberFrame
+  regions: [empire_est, empire_nord, scandinavie]
+  prompt: >-
+    Lower Saxon timber frame, dark brown oak beams in a lattice with red-orange brick infill and pale
+    lime joints.
+  seed: 9520
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_central_france
+  role: TimberFrame
+  regions: [france_centre]
+  prompt: >-
+    Loire valley timber frame, grey oak beams with white tuffeau lime plaster panels, gently weathered.
+  seed: 9530
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_celtic
+  role: TimberFrame
+  regions: [ecosse, galles, irlande]
+  prompt: >-
+    Border timber frame, dark oak beams with pale limewashed wattle and daub panels, uneven and rustic.
+  seed: 9540
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_iberoitalian
+  role: TimberFrame
+  regions: [aquitaine, aragon, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_nord, italie_sud, languedoc, portugal, provence_alpes]
+  prompt: >-
+    Southern timber frame, sparse brown beams in pale lime plastered rubble infill, sun-faded and
+    cracked.
+  seed: 9550
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_himis_anatolian
+  role: TimberFrame
+  regions: [anatolie, chypre, egee, grece, levant]
+  prompt: >-
+    Anatolian himis wall, slender brown timber frame with mud-brick infill and pale lime plaster panels.
+  seed: 9560
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: timberframe_palm_mudbrick
+  role: TimberFrame
+  regions: [egypte, maghreb]
+  prompt: >-
+    Desert wall of mud bricks reinforced with palm wood lattice, sandy beige with brown timber ribs.
+  seed: 9570
+  tile_m: 3.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rooftile_clay_flat_north
+  role: RoofTile
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest]
+  prompt: >-
+    Flat red-orange clay roof tiles in overlapping rows, mottled terracotta with moss specks and darker
+    edges.
+  seed: 9580
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rooftile_clay_pan_flemish
+  role: RoofTile
+  regions: [angleterre_est, empire_nord, pays_bas, scandinavie]
+  prompt: >-
+    S-shaped clay pantiles in overlapping rows, deep orange-red with dark glaze and gentle waves.
+  seed: 9590
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rooftile_clay_mossy_celtic
+  role: RoofTile
+  regions: [angleterre_nord, ecosse, galles, irlande]
+  prompt: >-
+    Old clay roof tiles dulled to brown-red, thickly covered with moss and lichen in green and grey
+    patches.
+  seed: 9600
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rooftile_canal_terracotta
+  role: RoofTile
+  regions: [aquitaine, aragon, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_nord, italie_sud, languedoc, portugal, provence_alpes]
+  prompt: >-
+    Curved canal barrel tiles in alternating rows, faded terracotta orange with sun-bleached pale tops
+    and soot-dark gutters.
+  seed: 9610
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: rooftile_canal_aged_east
+  role: RoofTile
+  regions: [anatolie, chypre, egee, egypte, grece, levant, maghreb]
+  prompt: >-
+    Old curved barrel roof tiles in warm sandy orange and pink, bleached by sun with pale dusty surface.
+  seed: 9620
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofflat_lead_sheet
+  role: RoofFlat
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, empire_est, empire_nord, empire_rhin, empire_sud, france_centre, france_est, france_nord, france_ouest, pays_bas, scandinavie]
+  prompt: >-
+    Lead sheet roofing with raised seams, dull blue-grey metal with soft oxidized patina and gentle
+    ripples.
+  seed: 9630
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofflat_earth_terrace
+  role: RoofFlat
+  regions: [anatolie, aragon, egypte, iberie_centre, iberie_sud, levant, maghreb]
+  prompt: >-
+    Flat rammed earth roof terrace, dry beige-brown clay with fine cracks, tiny pebbles and smooth
+    trodden surface.
+  seed: 9640
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofflat_lime_terrace
+  role: RoofFlat
+  regions: [aquitaine, chypre, egee, grece, iberie_nord, italie_centre, italie_nord, italie_sud, languedoc, portugal, provence_alpes]
+  prompt: >-
+    Flat lime-plastered terrace roof, bleached white-cream with fine cracks and soft stained patches.
+  seed: 9650
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofflat_stone_slab
+  role: RoofFlat
+  regions: [ecosse, galles, irlande]
+  prompt: >-
+    Large flat grey stone slabs closely fitted, cool grey with lichen and fine joints.
+  seed: 9660
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_anjou_blue
+  role: RoofSlate
+  regions: [france_centre, france_nord, france_ouest, pays_bas]
+  prompt: >-
+    Thin blue-grey slates in neat overlapping rows, dark slate blue with lighter edges and subtle sheen.
+  seed: 9670
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_welsh_purple
+  role: RoofSlate
+  regions: [angleterre_centre, angleterre_est, angleterre_nord, angleterre_sud, ecosse, galles, irlande]
+  prompt: >-
+    Rough-cut purple-grey slates in overlapping rows, deep plum-grey with pale lichen specks.
+  seed: 9680
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_lauze_stone
+  role: RoofSlate
+  regions: [aquitaine, aragon, france_est, italie_nord, languedoc, provence_alpes]
+  prompt: >-
+    Thick irregular limestone and schist roofing slabs in overlapping rows, grey and pale tan with
+    lichen.
+  seed: 9690
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_shale_dark_north
+  role: RoofSlate
+  regions: [empire_est, empire_nord, empire_rhin, empire_sud]
+  prompt: >-
+    Dark grey-black shale slates in overlapping rows, steely dark with a soft sheen and pale edges.
+  seed: 9700
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_bardeaux_shingles
+  role: RoofSlate
+  regions: [empire_est, empire_sud, provence_alpes, scandinavie]
+  prompt: >-
+    Wooden shingles in overlapping rows, weathered silver-grey and brown with curled edges and moss
+    traces.
+  seed: 9710
+  tile_m: 2.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: roofslate_stone_slab_south
+  role: RoofSlate
+  regions: [anatolie, chypre, egee, egypte, grece, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_sud, levant, maghreb, portugal]
+  prompt: >-
+    Rough grey-beige stone slabs in overlapping rows, sun-bleached with darker joints and lichen specks.
+  seed: 9720
+  tile_m: 2.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_wheat_straw
+  role: Thatch
+  regions: [angleterre_centre, angleterre_sud, france_centre, france_est, france_nord, france_ouest, pays_bas]
+  prompt: >-
+    Combed wheat straw thatch, thick golden-brown bundles with weathered grey surface and neat
+    horizontal binding.
+  seed: 9730
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_water_reed
+  role: Thatch
+  regions: [angleterre_est, empire_est, empire_nord, pays_bas, scandinavie]
+  prompt: >-
+    Water reed thatch, tightly packed straight stems in warm tan and grey-brown, dense and slightly
+    shaggy.
+  seed: 9740
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_rye_long_straw
+  role: Thatch
+  regions: [empire_rhin, empire_sud, iberie_nord, portugal]
+  prompt: >-
+    Long rye straw thatch, shaggy golden grey bundles in overlapping layers, with moss in places.
+  seed: 9750
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_heather
+  role: Thatch
+  regions: [angleterre_nord, ecosse, galles, irlande]
+  prompt: >-
+    Heather thatch, dense brown and dark purple stems tightly layered and rough with a dull matte look.
+  seed: 9760
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_turf_sod
+  role: Thatch
+  regions: [ecosse, empire_nord, galles, irlande, scandinavie]
+  prompt: >-
+    Turf sod roof, living green grass and moss on dark brown earth with small wildflowers and soft wavy
+    cover.
+  seed: 9770
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_cane_mediterranean
+  role: Thatch
+  regions: [anatolie, aquitaine, aragon, chypre, egee, grece, iberie_centre, iberie_nord, iberie_sud, italie_centre, italie_nord, italie_sud, languedoc, levant, portugal, provence_alpes]
+  prompt: >-
+    Dry giant cane and marsh reed thatch, straight pale golden stems closely packed with a sun-bleached
+    sheen.
+  seed: 9780
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
+- id: thatch_palm_leaf
+  role: Thatch
+  regions: [egypte, levant, maghreb]
+  prompt: >-
+    Dry palm leaf thatch, long woven pale brown fronds in overlapping layers with a coarse look.
+  seed: 9790
+  tile_m: 2.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.7]
+    seam_max: 0.08
