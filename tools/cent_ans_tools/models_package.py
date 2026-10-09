@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import tarfile
 import urllib.request
@@ -41,8 +42,16 @@ RELEASE_NOTES = (
     "Modèles 3D générés (glb LOD0-2 et textures, game/assets/models/dn). Installés par "
     "tools/launch.sh, ou : uv run --project tools cent-ans art models-fetch"
 )
-#: Godot writes these next to the assets at import; they are not part of the package.
+#: Godot writes these next to the assets at import (``.import``, ``.uid``, and the textures it
+#: extracts from the glb as ``<name>_Image_<n>.jpg``); they are not part of the package.
 _SKIPPED_SUFFIXES = (".import", ".uid")
+_IMPORT_TEXTURE = re.compile(r"_Image_\d+\.(jpg|png)$")
+
+
+def _is_import_artifact(name: str) -> bool:
+    return name.endswith(_SKIPPED_SUFFIXES) or _IMPORT_TEXTURE.search(name) is not None
+
+
 _CHUNK = 1024 * 1024
 
 Log = Callable[[str], None]
@@ -70,7 +79,7 @@ def package_files(models_dir: Path = MODELS_DIR) -> list[Path]:
         for path in models_dir.rglob("*")
         if path.is_file()
         and path.name != INSTALLED_MARKER
-        and not path.name.endswith(_SKIPPED_SUFFIXES)
+        and not _is_import_artifact(path.name)
         and not path.name.startswith(".")
     )
 
@@ -146,9 +155,7 @@ def bump_version_if_changed(
 
 def _skip_unwanted(info: tarfile.TarInfo) -> tarfile.TarInfo | None:
     name = Path(info.name).name
-    if name.endswith(_SKIPPED_SUFFIXES) or (
-        name.startswith(".") and name != INSTALLED_MARKER
-    ):
+    if _is_import_artifact(name) or (name.startswith(".") and name != INSTALLED_MARKER):
         return None
     return info
 

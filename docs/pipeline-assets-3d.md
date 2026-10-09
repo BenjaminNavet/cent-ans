@@ -139,6 +139,12 @@ uv run --project tools cent-ans dn-ingest <brut.glb> --id <snake_id> --class <cl
   embarquée) et entrée dans `data/art/dn_manifest.json` (classe, chemins, dimensions, triangles par
   LOD, texture, brut, image source, modèle 3D, coût, statistiques d'étalonnage). Code de sortie 2 si
   un LOD dépasse son budget ou si S p95 > plafond. Aucune génération : l'outil ne touche pas au GPU.
+- **Les glb ne sont plus commités** (ADR 0212) : ils voyagent en paquet de release « Cent Ans modèles »,
+  comme le relief. Après une ingestion, commiter seulement `data/art/dn_manifest.json`, puis
+  `uv run --project tools cent-ans art models-update` (empaquette ; publie la Release `models-v<N>` avec
+  l'accord du joueur, `--no-publish` pour s'arrêter avant) et commiter `data/art/dn_models_hosting.json`.
+  Installer le paquet sur un autre poste : `cent-ans art models-fetch` (fait par `tools/launch.sh`,
+  `--no-models` pour passer). Sans paquet le jeu tourne avec les maquettes de repli.
 - Le contour des LOD dérive d'environ 1 % de la hauteur (mesuré sur une maison TRELLIS), sous la
   limite de 3 % de la bible. Ne pas souder les sommets avant la décimation (les LOD bloquent).
 - Lacet SF3D : `--yaw 180` tourne bien le maillage (vérifié sur les sommets) ; le sens « avant »

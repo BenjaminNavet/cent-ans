@@ -1,7 +1,8 @@
 extends SceneTree
 
 ## Test headless du lot DN camp-bati (D1) : glb générés des lieux de la carte de campagne.
-##  0. table livrée (production DN) : non vide, chaque entrée pointe un glb du manifeste ;
+##  0. table livrée (production DN) : non vide, chaque entrée pointe un glb existant (sauté, avec un
+##     message, quand le paquet de modèles générés n'est pas installé, ADR 0212) ;
 ##  1. table vide (forcée en mémoire) : aucun glb généré, comportement des maquettes inchangé ;
 ##  2. table fournie en mémoire (bouche-trous GA3 `props_ga/ga3_house_lod1`, `ga3_church_lod1`) :
 ##     un glb par lieu du kit concerné, une bannière procédurale par glb, mêmes emplacements ;
@@ -46,11 +47,21 @@ func _run() -> void:
 	_check(not DnCampaignModels.document().is_empty(), "dn_campaign_models.json missing")
 	_check(not DnCampaignModels.is_empty(), "shipped table holds the generated models")
 	var shipped: Dictionary = DnCampaignModels.document().get("table", {})
+	# Les glb générés ne sont pas dans git (paquet de release, ADR 0212) : sans paquet installé
+	# (CI), on saute la vérification des fichiers ; la table reste lue et validée ci-dessus.
+	var lod0_paths: Array[String] = []
 	for kind in shipped:
 		for family in shipped[kind]:
 			for entry in shipped[kind][family]:
-				var lod0 := "res://assets/models/%s_lod0.glb" % entry["path"]
-				_check(ResourceLoader.exists(lod0), "shipped entry %s/%s points to a missing glb: %s" % [kind, family, lod0])
+				lod0_paths.append("res://assets/models/%s_lod0.glb" % entry["path"])
+	var package_installed := FileAccess.file_exists("res://assets/models/dn/package.json")
+	for lod0 in lod0_paths:
+		package_installed = package_installed or ResourceLoader.exists(lod0)
+	if package_installed:
+		for lod0 in lod0_paths:
+			_check(ResourceLoader.exists(lod0), "shipped entry points to a missing glb: %s" % lod0)
+	else:
+		print("dn_campaign_models_test: paquet de modèles générés non installé, vérification des glb livrés sautée (cent-ans art models-fetch)")
 	DnCampaignModels.set_document({"table": {}})
 	_check(DnCampaignModels.entry_for("city", "west", 0).is_empty(), "no entry in an empty table")
 	DnCampaignModels.set_document({"defaults": {"near_distance": 400.0, "fade_margin": 60.0}, "table": {

@@ -19,7 +19,10 @@ def _tree(root: Path, payload: bytes = b"g") -> Path:
     models = root / "dn"
     (models / "buildings").mkdir(parents=True)
     (models / "buildings" / "a_lod0.glb").write_bytes(payload * 5000)
-    (models / "buildings" / "a_lod0_Image_0.jpg").write_bytes(b"j" * 3000)
+    (models / "buildings" / "a_lod0_Image_0.jpg").write_bytes(
+        b"j" * 3000
+    )  # Godot extract
+    (models / "buildings" / "a_tex.jpg").write_bytes(b"t" * 3000)
     (models / "buildings" / "a_lod0.glb.import").write_text("godot")  # never packed
     return models
 
@@ -60,7 +63,7 @@ def test_pack_splits_and_skips_godot_files(tmp_path: Path) -> None:
     models, hosting, out = _pack(tmp_path)
     manifest = json.loads((out / "manifest.json").read_text())
     assert len(manifest["parts"]) >= 2
-    assert manifest["content"]["files"] == 2
+    assert manifest["content"]["files"] == 2  # glb + real jpg; import artefacts skipped
     assert (
         manifest["content"]["signature"]
         == models_package.content_signature(models)["signature"]
