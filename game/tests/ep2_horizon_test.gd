@@ -24,7 +24,7 @@ func _init() -> void:
 	# Ponthieu côtier, côte à l'ouest : la mer réelle est tournée vers l'ouest et au niveau 0.
 	var coast := BattleHorizon.new()
 	check(coast.setup("prov_ponthieu", field, 3.0, "west", "plains", "summer"), "Ponthieu tile loads")
-	check(is_equal_approx(coast.offset_y, BattleVillage.SEA_LEVEL), "coastal: real sea at the field sea level")
+	check(is_equal_approx(coast.offset_y, BattleSiteFeatures.SEA_LEVEL), "coastal: real sea at the field sea level")
 	var west_sea := 0
 	var east_sea := 0
 	for k in 20:

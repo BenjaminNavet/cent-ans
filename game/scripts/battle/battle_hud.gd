@@ -62,7 +62,7 @@ var _corner_panel: PanelContainer = null
 var title_label: Label
 var clock_label: Label
 var weather_label: Label
-var site_label: Label  # B6 : « Sol sec · été · village · haies »
+var site_label: Label  # B6 : « Sol sec · été · haies »
 ## CV3-2 : badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
 var opening_badge: Label
 var _active_speed: int = 0  # -1 : pause
@@ -669,7 +669,7 @@ func set_opening(opening: Dictionary, player_side: String) -> void:
 	opening_badge.visible = not parts.is_empty()
 
 
-## B6 : le site de la bataille (sol, saison, village, haies, côte), vide pour le masquer.
+## B6 : le site de la bataille (sol, saison, haies, côte), vide pour le masquer.
 func set_site(text: String) -> void:
 	site_label.text = text
 	site_label.visible = text != ""

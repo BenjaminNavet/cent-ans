@@ -323,7 +323,7 @@ func begin() -> bool:
 	setup = campaign_sim.call("get_battle_setup", battle_index)
 	if setup.is_empty():
 		return false
-	BattleTerrain.apply_site_overrides(setup)  # B5 : --terrain= --season= --village --coast
+	BattleTerrain.apply_site_overrides(setup)  # B5 : --terrain= --season= --coast
 	# B3 : la musique de campagne cède la place à la musique de bataille (réveillée au retour).
 	_audio_director = get_node_or_null("/root/AudioDirector")
 	if _audio_director != null:

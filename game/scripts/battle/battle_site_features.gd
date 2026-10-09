@@ -1,13 +1,11 @@
-class_name BattleVillage
+class_name BattleSiteFeatures
 extends Node3D
 
 ## Lot B5 : ce que le site de campagne pose sur le champ en plus du relief et des bois, d'après
-## `BattleSim.get_terrain()` : maisons du hameau ou de la ferme (chaume, colombage, grange, église),
-## clôtures de plessis des courtils, mares du marais (eau stagnante) et roselières, mer le long d'un
+## `BattleSim.get_terrain()` : clôtures de plessis, palissades de camp, mares du marais (eau stagnante) et roselières, mer le long d'un
 ## flanc côtier. Les haies sont semées avec les arbres (`BattleTerrain._build_trees`), les fossés,
 ## la cour et la plage dans la splatmap. Rendu seulement : positions et emprises viennent de la
-## simulation. Maisons et clôtures regroupées en MultiMesh (`BattleSiegeBatcher`) : quelques appels
-## de dessin quel que soit le nombre de maisons.
+## simulation. Les maisons des hameaux viennent du décor EP6 (`BattleDecor`), plus du site.
 
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
 const SEA_SHADER := preload("res://shaders/battle_sea.gdshader")
@@ -17,16 +15,12 @@ const SEA_LEVEL := 0.0
 var _terrain: BattleTerrain
 var _snowy := false
 var _mats: Dictionary = {}
-var house_count: int = 0
 var reed_count: int = 0
 
 
 func build(terrain: BattleTerrain, data: Dictionary, weather: String) -> void:
 	_terrain = terrain
 	_snowy = terrain.ground_key == "snowy" or weather == "snow"
-	var village: Dictionary = data.get("village", {})
-	if not village.is_empty():
-		_build_houses(village)
 	_build_fences(data.get("obstacles", []))
 	_build_palisades(data.get("obstacles", []))
 	_build_pools(data.get("pools", []), weather)
@@ -40,241 +34,11 @@ func build(terrain: BattleTerrain, data: Dictionary, weather: String) -> void:
 
 func _mat(key: String) -> StandardMaterial3D:
 	if _mats.is_empty():
-		var snow_roof := Color.WHITE
 		_mats = {
-			"stone": BattleSiege._textured("stone", Color(0.86, 0.82, 0.74)),
-			"church": BattleSiege._textured("stone", Color(0.92, 0.88, 0.8)),
-			"cob0": BattleSiege._textured("plaster", Color(0.9, 0.82, 0.66)),
-			"cob1": BattleSiege._textured("plaster", Color(0.84, 0.76, 0.62)),
-			"lime": BattleSiege._textured("plaster", Color(0.95, 0.93, 0.87)),
 			"beam": BattleSiege._textured("wood", Color(0.33, 0.24, 0.17)),
-			"planks": BattleSiege._textured("wood", Color(0.52, 0.42, 0.32)),
-			"door": BattleSiege._textured("wood", Color(0.42, 0.31, 0.22)),
 			"wattle": BattleSiege._textured("wood", Color(0.58, 0.5, 0.4)),
-			"thatch": BattleSiege._textured("thatch", snow_roof if _snowy else Color(1.08, 0.93, 0.68), 1.0),
-			"thatch_old": BattleSiege._textured("thatch", snow_roof if _snowy else Color(0.86, 0.76, 0.6), 1.0),
-			"tiles": BattleSiege._textured("tiles", snow_roof if _snowy else Color(0.62, 0.45, 0.38), 0.85),
-			"slate": BattleSiege._textured("slate", snow_roof if _snowy else Color(0.55, 0.56, 0.6), 0.75),
 		}
-		if _snowy:
-			# Toits sous la neige : manteau blanc uni, légèrement bleuté.
-			var snow := StandardMaterial3D.new()
-			snow.albedo_color = Color(0.9, 0.92, 0.97)
-			snow.roughness = 0.85
-			for roof in ["thatch", "thatch_old", "tiles", "slate"]:
-				_mats[roof] = snow
 	return _mats[key]
-
-
-# --- Maisons ------------------------------------------------------------------------------
-
-
-func _build_houses(village: Dictionary) -> void:
-	var root := Node3D.new()
-	root.name = "Houses"
-	add_child(root)
-	if BuildingKit.available():
-		# BR1 : bâtiments réalistes du kit Blender, un MultiMesh par modèle.
-		var batch := BuildingKit.Batch.new("snow" if _snowy else "", 1600.0)
-		var props: Array = village.get("props", [])
-		var houses: Array = village.get("houses", [])
-		for i in houses.size():
-			if _kit_house(batch, houses[i], _prop_side(houses[i], i, props)):
-				house_count += 1
-		# BR3 : mobilier du cœur (solide pour les figurines), taille réelle, dos au mur.
-		for k in props.size():
-			var prop: Dictionary = props[k]
-			var model := BuildingKit.prop_model(str(prop["kind"]), k)
-			if model != "":
-				var y := _terrain.height_at(float(prop["x"]), float(prop["z"])) - 0.03
-				batch.add(model, BuildingKit.prop_transform(prop, y))
-		batch.build(root)
-		return
-	for house in village.get("houses", []):
-		_house(root, house)
-		house_count += 1
-	BattleSiegeBatcher.batch_and_replace(root)
-	for child in root.get_children():
-		if child is GeometryInstance3D:
-			(child as GeometryInstance3D).visibility_range_end = 1600.0
-
-
-## Type de modèle du kit pour une maison de la simulation (`kind` et emprise).
-static func kit_kind(kind: String, length: float, rng: RandomNumberGenerator) -> String:
-	match kind:
-		"church":
-			return "church"
-		"barn":
-			return "barn"
-		"timbered":
-			return "stonehouse" if rng.randf() < 0.15 else "timber"
-		_:
-			return "longere" if length > 11.0 else "cottage"
-
-
-## BR3 : côté de la façade d'une maison qui a du mobilier du cœur devant elle (+1 : face avant
-## (-sin, cos) du lacet, -1 : l'autre) ; 0 sans mobilier (côté tiré au hasard).
-static func _prop_side(house: Dictionary, index: int, props: Array) -> int:
-	var yaw := float(house["yaw"])
-	var front := Vector2(-sin(yaw), cos(yaw))
-	for prop in props:
-		if int(prop["house"]) == index:
-			var d := Vector2(float(prop["x"]) - float(house["x"]), float(prop["z"]) - float(house["z"]))
-			return 1 if d.dot(front) >= 0.0 else -1
-	return 0
-
-
-## Pose une maison du kit sur son emprise (lacet de la simulation, de +x vers +z) : origine au
-## centre, calée sur le bas de la pente sans descendre de plus de 1,4 m sous le haut (les
-## fondations du modèle comblent le reste). `side` : façade tournée vers le mobilier (BR3).
-## `false` si aucun modèle ne convient.
-func _kit_house(batch: BuildingKit.Batch, house: Dictionary, side: int = 0) -> bool:
-	var p := Vector2(float(house["x"]), float(house["z"]))
-	var length := float(house["length"])
-	var width := float(house["width"])
-	var yaw := float(house["yaw"])
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(p.x * 31.0 + p.y * 17.0)
-	var model := BuildingKit.pick(kit_kind(str(house["kind"]), length, rng), length, width, rng)
-	if model == "":
-		return false
-	var low := INF
-	var high := -INF
-	for corner in [Vector2(-length, -width), Vector2(length, -width), Vector2(length, width), Vector2(-length, width)]:
-		var q: Vector2 = p + (corner * 0.5).rotated(yaw)
-		var h := _terrain.height_at(q.x, q.y)
-		low = minf(low, h)
-		high = maxf(high, h)
-	# Façade (+Z du modèle) tournée d'un côté ou de l'autre du faîtage (vers le mobilier s'il y en a).
-	var flip := PI if rng.randf() < 0.5 else 0.0
-	if side != 0:
-		flip = 0.0 if side > 0 else PI
-	var basis := Basis(Vector3.UP, -yaw + flip) * Basis.from_scale(BuildingKit.fit_scale(model, length, width))
-	batch.add(model, Transform3D(basis, Vector3(p.x, minf(high, low + 1.4) - 0.05, p.y)))
-	return true
-
-
-func _box(parent: Node3D, size: Vector3, pos: Vector3, mat: StandardMaterial3D, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = size
-	mi.mesh = box
-	mi.material_override = mat
-	mi.position = pos
-	mi.rotation = rot
-	parent.add_child(mi)
-	return mi
-
-
-## Toit à deux pans : faîtage le long de x local, longueur `length`.
-func _roof(parent: Node3D, length: float, width: float, pitch: float, base_y: float, mat: StandardMaterial3D) -> void:
-	var mi := MeshInstance3D.new()
-	var prism := PrismMesh.new()
-	prism.size = Vector3(width + 1.1, pitch, length + 0.8)
-	mi.mesh = prism
-	mi.material_override = mat
-	mi.position = Vector3(0, base_y + pitch * 0.5, 0)
-	mi.rotation.y = PI * 0.5
-	parent.add_child(mi)
-
-
-## Une maison : emprise `length` × `width` (faîtage le long de `length`), lacet de la simulation
-## (de +x vers +z), posée sur le point le plus bas de son emprise, soubassement de pierre.
-func _house(parent: Node3D, house: Dictionary) -> void:
-	var p := Vector2(float(house["x"]), float(house["z"]))
-	var length := float(house["length"])
-	var width := float(house["width"])
-	var yaw := float(house["yaw"])
-	var kind := str(house["kind"])
-	var node := Node3D.new()
-	var low := INF
-	var high := -INF
-	for corner in [Vector2(-length, -width), Vector2(length, -width), Vector2(length, width), Vector2(-length, width)]:
-		var q: Vector2 = p + (corner * 0.5).rotated(yaw)
-		var h := _terrain.height_at(q.x, q.y)
-		low = minf(low, h)
-		high = maxf(high, h)
-	node.position = Vector3(p.x, low, p.y)
-	node.rotation.y = -yaw
-	parent.add_child(node)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(p.x * 31.0 + p.y * 17.0)
-	var plinth := high - low + 0.35
-	_box(node, Vector3(length + 0.2, plinth + 0.6, width + 0.2), Vector3(0, (plinth - 0.6) * 0.5, 0), _mat("stone"))
-	match kind:
-		"church":
-			_church(node, length, width, plinth, rng)
-		"barn":
-			var h := rng.randf_range(3.8, 4.6)
-			_box(node, Vector3(length, h, width), Vector3(0, plinth + h * 0.5, 0), _mat("planks"))
-			_box(node, Vector3(3.2, 3.2, 0.2), Vector3(0, plinth + 1.6, width * 0.5 + 0.05), _mat("door"))
-			_roof(node, length, width, width * 0.7, plinth + h, _mat("thatch_old"))
-		"timbered":
-			var h := rng.randf_range(3.6, 4.6)
-			_box(node, Vector3(length, h, width), Vector3(0, plinth + h * 0.5, 0), _mat("lime"))
-			_timbers(node, length, width, h, plinth)
-			_box(node, Vector3(1.1, 2.0, 0.16), Vector3(rng.randf_range(-length * 0.25, length * 0.25), plinth + 1.0, width * 0.5 + 0.08), _mat("door"))
-			var roof := "tiles" if rng.randf() < 0.4 else "thatch"
-			_roof(node, length, width, width * 0.8, plinth + h, _mat(roof))
-			if rng.randf() < 0.5:
-				_box(node, Vector3(0.8, width * 0.8 + 1.3, 0.8), Vector3(length * 0.3, plinth + h + width * 0.4 + 0.3, 0), _mat("stone"))
-		_:
-			var h := rng.randf_range(2.4, 3.0)
-			_box(node, Vector3(length, h, width), Vector3(0, plinth + h * 0.5, 0), _mat("cob%d" % rng.randi_range(0, 1)))
-			_box(node, Vector3(1.0, 1.8, 0.16), Vector3(rng.randf_range(-length * 0.2, length * 0.2), plinth + 0.9, width * 0.5 + 0.08), _mat("door"))
-			# Chaume épais et pentu, qui descend bas sur les murs.
-			_roof(node, length, width + 0.6, width * 0.95, plinth + h - 0.35, _mat("thatch"))
-
-
-## Colombage : poteaux, sablière, décharges en croix de Saint-André sur les longs pans, poteaux
-## d'angle sur les pignons.
-func _timbers(node: Node3D, length: float, width: float, h: float, base: float) -> void:
-	var beam := _mat("beam")
-	var posts := maxi(int(length / 1.8), 3)
-	for side in [-1.0, 1.0]:
-		var z: float = side * (width * 0.5 + 0.05)
-		for k in posts + 1:
-			var x := -length * 0.5 + length * float(k) / float(posts)
-			_box(node, Vector3(0.2, h, 0.1), Vector3(x, base + h * 0.5, z), beam)
-		_box(node, Vector3(length, 0.2, 0.1), Vector3(0, base + h * 0.52, z), beam)
-		_box(node, Vector3(length, 0.22, 0.1), Vector3(0, base + h - 0.11, z), beam)
-		var brace_len := sqrt(pow(length / float(posts), 2.0) + pow(h * 0.5, 2.0))
-		var angle := atan2(h * 0.5, length / float(posts))
-		for k in posts:
-			if k % 2 == 1:
-				continue
-			var cx := -length * 0.5 + length * (float(k) + 0.5) / float(posts)
-			_box(node, Vector3(brace_len, 0.16, 0.08), Vector3(cx, base + h * 0.25, z), beam, Vector3(0, 0, angle if k % 4 == 0 else -angle))
-	for side in [-1.0, 1.0]:
-		var x: float = side * (length * 0.5 + 0.05)
-		for k in 3:
-			_box(node, Vector3(0.1, h, 0.2), Vector3(x, base + h * 0.5, -width * 0.5 + width * float(k) * 0.5), beam)
-
-
-## Petite église de pierre : nef, chœur plus bas, clocher-mur à l'ouest.
-func _church(node: Node3D, length: float, width: float, base: float, rng: RandomNumberGenerator) -> void:
-	var h := rng.randf_range(6.0, 7.0)
-	var nave := length * 0.7
-	_box(node, Vector3(nave, h, width), Vector3(-length * 0.15, base + h * 0.5, 0), _mat("church"))
-	var roof := "slate" if rng.randf() < 0.5 else "tiles"
-	var sub := Node3D.new()
-	sub.position = Vector3(-length * 0.15, 0, 0)
-	node.add_child(sub)
-	_roof(sub, nave, width, width * 0.75, base + h, _mat(roof))
-	var choir := length * 0.3
-	var ch := h * 0.8
-	var cw := width * 0.75
-	_box(node, Vector3(choir, ch, cw), Vector3(length * 0.5 - choir * 0.5, base + ch * 0.5, 0), _mat("church"))
-	var sub2 := Node3D.new()
-	sub2.position = Vector3(length * 0.5 - choir * 0.5, 0, 0)
-	node.add_child(sub2)
-	_roof(sub2, choir, cw, cw * 0.75, base + ch, _mat(roof))
-	# Clocher-mur (pignon ouest surélevé, percé de deux baies).
-	var gx := -length * 0.5 - 0.2
-	var gh := h + width * 0.75 + 3.5
-	_box(node, Vector3(1.2, gh, width * 0.7), Vector3(gx, base + gh * 0.5, 0), _mat("church"))
-	for dz in [-0.9, 0.9]:
-		_box(node, Vector3(1.3, 1.4, 0.8), Vector3(gx, base + gh - 1.6, dz), _mat("beam"))
 
 
 # --- Clôtures de plessis ------------------------------------------------------------------
