@@ -327,6 +327,11 @@ func _finish_warm() -> void:
 		return
 	var task := _warm_task
 	_warm_task = -1  # d'abord : un rappel pendant l'attente ne peut plus se bloquer sur la même tâche
+	# Le fil de travail charge des `.glb` : ses appels au serveur de rendu passent par la file de
+	# commandes que seul ce fil vide ; une attente nue le bloquerait pour de bon (test headless).
+	while not WorkerThreadPool.is_task_completed(task):
+		RenderingServer.force_sync()
+		OS.delay_msec(1)
 	WorkerThreadPool.wait_for_task_completion(task)
 	for key: String in _warmed:
 		if not _meshes.has(key):

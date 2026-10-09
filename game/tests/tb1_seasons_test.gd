@@ -92,10 +92,11 @@ func _check_grade() -> void:
 		if grade.is_empty() or preset.is_empty() or not (preset["grades"] as Array).has(grade):
 			check(false, "TB1: %s season grade missing from the campaign preset" % season)
 			continue
-		var lut := AtmosphereLibrary.grade_lut([grade], 1.0)
-		var grey := _lut_sample(lut, Color(0.5, 0.5, 0.5))
+		var size := clampi(int(AtmosphereLibrary.data().get("lut_size", 24)), 8, 64)
+		var lut: PackedByteArray = ClassDB.instantiate("GradeLut").bake(JSON.stringify([grade]), 1.0, size)
+		var grey := _lut_sample(lut, size, Color(0.5, 0.5, 0.5))
 		warmth[season] = grey.r - grey.b
-		var vivid := _lut_sample(lut, Color(0.3, 0.6, 0.2))
+		var vivid := _lut_sample(lut, size, Color(0.3, 0.6, 0.2))
 		chroma[season] = maxf(vivid.r, maxf(vivid.g, vivid.b)) - minf(vivid.r, minf(vivid.g, vivid.b))
 	if warmth.size() != AtmosphereLibrary.SEASONS.size():
 		return
@@ -108,14 +109,16 @@ func _check_grade() -> void:
 		check(false, "TB1: winter should be desaturated (%s)" % chroma)
 
 
-## Lecture au nœud le plus proche d'une LUT 3D d'étalonnage (`AtmosphereLibrary.grade_lut`) :
-## les couches sont en bleu, les lignes en vert, les colonnes en rouge (espace sRGB).
-func _lut_sample(lut: ImageTexture3D, color: Color) -> Color:
-	var size := lut.get_width()
-	var layers := lut.get_data()
+## Lecture au nœud le plus proche de la LUT d'étalonnage cuite par `GradeLut` (octets RGB8 :
+## rouge, puis vert, puis couche bleue, espace sRGB). Les octets natifs servent de source car
+## `ImageTexture3D.get_data()` est vide en headless.
+func _lut_sample(bytes: PackedByteArray, size: int, color: Color) -> Color:
 	var last := float(size - 1)
+	var red := clampi(roundi(color.r * last), 0, size - 1)
+	var green := clampi(roundi(color.g * last), 0, size - 1)
 	var blue := clampi(roundi(color.b * last), 0, size - 1)
-	return layers[blue].get_pixel(clampi(roundi(color.r * last), 0, size - 1), clampi(roundi(color.g * last), 0, size - 1))
+	var at := ((blue * size + green) * size + red) * 3
+	return Color8(bytes[at], bytes[at + 1], bytes[at + 2])
 
 
 ## Point 4 : neige sur les toits des villes 1:1. Paramètre global `campaign_roof_snow` déclaré,
