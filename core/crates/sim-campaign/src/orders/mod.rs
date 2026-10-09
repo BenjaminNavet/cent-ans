@@ -176,6 +176,14 @@ impl CampaignState {
                 }
                 self.order_recruit(data, faction, &settlement, &unit_type, None)
             }
+            Order::Sortie { settlement } => {
+                let settlement = self.resolve_place(&settlement)?;
+                let mut events = Vec::new();
+                let result =
+                    crate::siege::order_sortie(self, data, faction, &settlement, &mut events);
+                self.pending_events.extend(events);
+                result.map(|_| ())
+            }
             Order::RecruitInto {
                 settlement,
                 unit_type,

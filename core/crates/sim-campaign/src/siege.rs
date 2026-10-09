@@ -141,7 +141,7 @@ pub(crate) fn resolve_sieges(
             siege_speed_percent,
         );
         // M8: the garrison sallies out when it outmatches the besiegers.
-        if sortie(state, data, &settlement_id, &besiegers, events) {
+        if sortie(state, data, &settlement_id, &besiegers, false, events) {
             continue;
         }
         let resistance = state.siege_resistance(data, &settlement_id, &attacker);
@@ -844,12 +844,14 @@ pub(crate) fn apply_assault_result(
 
 /// The garrison attacks the besiegers when clearly stronger than the whole
 /// besieging coalition (the lead besieger and its allies, as for an
-/// assault); returns `true` when the siege is broken.
+/// assault), or whatever the odds when `forced` (WH armyb: the player's
+/// `Sortie` order); returns `true` when the sortie is won.
 fn sortie(
     state: &mut CampaignState,
     data: &GameData,
     settlement: &SettlementId,
     besiegers: &[ArmyId],
+    forced: bool,
     events: &mut Vec<GameEvent>,
 ) -> bool {
     let Some(lead) = besiegers.first() else {
@@ -861,7 +863,7 @@ fn sortie(
     let targets = crate::movement::settlement_coalition(state, lead, &garrison.faction);
     let garrison_power = crate::state::unit_power(data, &garrison.units);
     let besieging_power: f64 = targets.iter().map(|id| state.army_power(data, id)).sum();
-    if garrison_power <= 1.3 * besieging_power {
+    if !forced && garrison_power <= 1.3 * besieging_power {
         return false;
     }
     let mut sallying = crate::movement::side_from_army(state, data, &garrison);
@@ -1022,6 +1024,39 @@ fn sortie(
         }
     }
     won
+}
+
+/// WH armyb: the player's `Sortie` order. The garrison of the besieged
+/// `settlement` of `faction` attacks the besiegers at once, whatever the
+/// odds (auto-resolved). A win breaks the siege; a defeat costs the
+/// garrison its losses and the siege goes on.
+pub(crate) fn order_sortie(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    settlement: &SettlementId,
+    events: &mut Vec<GameEvent>,
+) -> Result<bool, crate::orders::OrderError> {
+    use crate::orders::OrderError;
+    let place = state
+        .settlements
+        .get(settlement)
+        .ok_or_else(|| OrderError::UnknownSettlement(settlement.clone()))?;
+    if &place.controller != faction {
+        return Err(OrderError::NotYourSettlement(faction.clone()));
+    }
+    let besiegers = besiegers_of(state, settlement);
+    if place.siege.is_none() || besiegers.is_empty() {
+        return Err(OrderError::SortieUnavailable(
+            "la place n'est pas assiégée".to_owned(),
+        ));
+    }
+    if place.garrison.is_empty() {
+        return Err(OrderError::SortieUnavailable(
+            "la garnison est vide".to_owned(),
+        ));
+    }
+    Ok(sortie(state, data, settlement, &besiegers, true, events))
 }
 
 /// The armies still besieging `settlement` (its current controller).

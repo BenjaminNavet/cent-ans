@@ -111,6 +111,12 @@ pub enum Order {
         unit_type: UnitTypeId,
         army: ArmyId,
     },
+    /// WH armyb: the garrison of the besieged `settlement` sallies out at
+    /// once against the besiegers (auto-resolved, whatever the odds).
+    Sortie {
+        #[serde(alias = "province")]
+        settlement: Place,
+    },
     /// Form a new army from garrison units (indices into the garrison).
     CreateArmy {
         #[serde(alias = "province")]

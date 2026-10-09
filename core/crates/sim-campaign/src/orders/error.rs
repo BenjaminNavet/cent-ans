@@ -93,6 +93,8 @@ pub enum OrderError {
     /// NT5 (N6): the army would exceed `armies.json` `max_units`.
     #[error("armée complète : {cap} unités au plus par armée")]
     ArmyFull { cap: usize },
+    #[error("sortie impossible : {0}")]
+    SortieUnavailable(String),
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
     #[error(transparent)]

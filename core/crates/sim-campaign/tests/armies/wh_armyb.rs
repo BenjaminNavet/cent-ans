@@ -151,5 +151,106 @@ fn raiding_feeds_the_army_and_loot_diminishes_in_a_ravaged_province() {
     assert!(raid_supply > idle_supply, "{raid_supply} vs {idle_supply}");
     let (_, ravaged_loot) = england_in_boulonnais(Stance::Raid, 80);
     let (fresh, ravaged) = (loot_of(&fresh_loot), loot_of(&ravaged_loot));
-    assert!(fresh > 0 && ravaged * 2 <= fresh + 1, "{fresh} vs {ravaged}");
+    assert!(
+        fresh > 0 && ravaged * 2 <= fresh + 1,
+        "{fresh} vs {ravaged}"
+    );
+}
+
+/// England besieges French Boulogne; the siege has begun. `english_units` /
+/// `garrison_units` cap each side so the outcome of a sortie is known.
+fn besieged_boulogne(
+    english_units: usize,
+    garrison_units: usize,
+) -> (CampaignState, data_model::SettlementId, ArmyId) {
+    use sim_campaign::test_support::idle;
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 4).unwrap();
+    state.chronicle.disabled = true;
+    let english = main_army(&state, "fac_england");
+    let boulogne = data_model::SettlementId::new("set_boulogne").unwrap();
+    state
+        .armies
+        .get_mut(&english)
+        .unwrap()
+        .units
+        .truncate(english_units);
+    let garrison = &mut state.settlements.get_mut(&boulogne).unwrap().garrison;
+    while garrison.len() < garrison_units {
+        let copy = garrison[0].clone();
+        garrison.push(copy);
+    }
+    garrison.truncate(garrison_units);
+    state.armies.get_mut(&english).unwrap().position = ArmyPosition::Settlement(boulogne.clone());
+    state.armies.get_mut(&english).unwrap().stance = Stance::Siege;
+    state.end_turn_with(data, idle);
+    assert!(state.settlements[&boulogne].siege.is_some(), "siege begun");
+    (state, boulogne, english)
+}
+
+#[test]
+fn sortie_order_breaks_the_siege_when_won() {
+    let data = game_data();
+    // Even siege first (no automatic sortie), then the besiegers dwindle.
+    let (mut state, boulogne, english) = besieged_boulogne(8, 8);
+    state.armies.get_mut(&english).unwrap().units.truncate(1);
+    for unit in &mut state
+        .armies
+        .get_mut(&main_army(&state, "fac_england"))
+        .unwrap()
+        .units
+    {
+        unit.strength = unit.max_strength.min(20).max(1);
+    }
+    state
+        .submit_order(
+            data,
+            Order::Sortie {
+                settlement: boulogne.clone().into(),
+            },
+        )
+        .unwrap();
+    assert!(state.settlements[&boulogne].siege.is_none());
+}
+
+#[test]
+fn sortie_order_lost_costs_the_garrison_and_the_siege_goes_on() {
+    let data = game_data();
+    let (mut state, boulogne, english) = besieged_boulogne(8, 1);
+    let before = state.settlements[&boulogne].garrison_strength();
+    state
+        .submit_order(
+            data,
+            Order::Sortie {
+                settlement: boulogne.clone().into(),
+            },
+        )
+        .unwrap();
+    assert!(state.settlements[&boulogne].garrison_strength() < before);
+    assert!(state.settlements[&boulogne].siege.is_some());
+    assert_eq!(state.armies[&english].stance, Stance::Siege);
+}
+
+#[test]
+fn sortie_order_needs_a_siege_and_your_own_place() {
+    let (data, mut state) = start();
+    let paris = capital_city(&state, "fac_france");
+    assert!(matches!(
+        state.submit_order(
+            data,
+            Order::Sortie {
+                settlement: paris.into()
+            }
+        ),
+        Err(OrderError::SortieUnavailable(_))
+    ));
+    let london = capital_city(&state, "fac_england");
+    assert!(state
+        .submit_order(
+            data,
+            Order::Sortie {
+                settlement: london.into()
+            }
+        )
+        .is_err());
 }
