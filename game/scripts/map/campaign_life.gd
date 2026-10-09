@@ -29,6 +29,8 @@ var ambient: LifeAmbient = null
 var water_props: WaterPropsLayer = null
 ## FK3 : réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
 var fauna: FaunaLayer = null
+## DN-PAYS : bocage, puits, croix, moulins, salines, ruines, piloris, bord des routes.
+var countryside: CountrysideLayer = null
 var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
@@ -105,6 +107,7 @@ func setup(map: Node) -> void:
 		water_props.setup(_map_data, _terrain, _settlements.data)
 		stats["water_props"] = water_props.place_count()
 	_setup_fauna()
+	_setup_countryside()
 	_setup_folk()
 	_setup_incidents()
 	_setup_scars()
@@ -130,6 +133,26 @@ func _setup_fauna() -> void:
 	add_child(fauna)
 	fauna.setup(_map_data, _map.get("camera_rig") as Node3D if _map != null else null, towns, lake_polygons)
 	stats["fauna"] = fauna.stats
+
+
+## DN-PAYS : campagne vivante hors champs (rendu seul, `--no-countryside` ou `--life-off=countryside`).
+## Colonies, hameaux et routes viennent de `SettlementData` ; lacs et marais de la couche de faune.
+func _setup_countryside() -> void:
+	if _off.has("countryside") or CmdArgs.has("--no-countryside") or _settlements == null or _settlements.data == null:
+		return
+	var towns := PackedVector2Array()
+	var villages: Array = []
+	for entry in _settlements.data.settlements:
+		towns.append(entry["px"])
+		villages.append({"px": entry["px"], "kind": str(entry["kind"])})
+	for hamlet in _settlements.data.hamlets:
+		towns.append(hamlet["px"])
+		villages.append({"px": hamlet["px"], "kind": "hamlet"})
+	countryside = CountrysideLayer.new()
+	countryside.name = "Countryside"
+	add_child(countryside)
+	countryside.setup(_map_data, _map.get("camera_rig") as Node3D if _map != null else null, towns, villages, _settlements.data.roads, fauna)
+	stats["countryside"] = countryside.stats
 
 
 ## TB4 : fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.

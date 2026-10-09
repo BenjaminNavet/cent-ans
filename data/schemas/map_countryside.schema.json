@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "map_countryside.schema.json",
+  "title": "Campagne vivante hors champs de la carte de campagne (lot DN-PAYS)",
+  "description": "Fichier `data/map/map_countryside.json` lu par `game/scripts/map/countryside_layer.gd` : modeles generes (glb `dn/<dossier>/<nom>_lod{0,1,2}.glb`), regions (ellipses lon/lat) et regles de placement (bocage, puits, croix, moulins, salines, ruines, piloris, bord des routes). Rendu seulement.",
+  "type": "object",
+  "required": ["version", "render", "biome_index", "props", "regions", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "version": {"const": 1},
+    "render": {
+      "type": "object",
+      "required": ["max_visible_instances", "cell_px", "load_factor", "min_radius_px", "max_radius_px", "max_cached_cells", "cells_per_frame", "size_k", "size_exponent", "spread_exponent", "lod_distances", "town_clearance_px", "defaults"],
+      "additionalProperties": false,
+      "properties": {
+        "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Portee par defaut (distance du rig) d'un modele sans `max_distance`."},
+        "fade_from": {"type": "number", "exclusiveMinimum": 0},
+        "max_visible_instances": {"type": "integer", "minimum": 1, "description": "Plafond d'instances affichees (amincissement par rang au-dela)."},
+        "cell_px": {"type": "number", "exclusiveMinimum": 0},
+        "load_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon du disque garni = distance du rig x ce facteur, borne par min/max."},
+        "min_radius_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_radius_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_cached_cells": {"type": "integer", "minimum": 1},
+        "cells_per_frame": {"type": "integer", "minimum": 1},
+        "size_k": {"type": "number", "exclusiveMinimum": 0, "description": "Taille tenue a l'ecran : k x distance^exposant (unites monde), jamais sous la taille reelle."},
+        "size_exponent": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.5},
+        "spread_exponent": {"type": "number", "minimum": 0, "maximum": 1, "description": "L'ecart entre pieces d'un enclos grossit comme (grossissement)^exposant."},
+        "lod_distances": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "town_clearance_px": {"type": "number", "minimum": 0, "description": "Distance minimale (px carte) a une colonie."},
+        "defaults": {
+          "type": "object",
+          "required": ["alt_min_m", "alt_max_m", "slope_max_deg", "marsh_max", "prairie_min", "open_min", "forest_max", "crops_max"],
+          "additionalProperties": false,
+          "properties": {
+            "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "slope_max_deg": {"type": "number"},
+            "marsh_max": {"type": "number", "minimum": 0, "maximum": 1},
+            "prairie_min": {"type": "number", "minimum": 0, "maximum": 1},
+            "open_min": {"type": "number", "minimum": 0, "maximum": 2},
+            "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+            "crops_max": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
+      }
+    },
+    "biome_index": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Nom de biome -> indice de `biomes.png` (legende figee de `data/map/biomes.yaml`).",
+      "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 255}
+    },
+    "props": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["model", "max_mult"],
+        "additionalProperties": false,
+        "properties": {
+          "model": {"type": "string", "pattern": "^(props|buildings|fauna)/[a-z0-9_]+$", "description": "Chemin sous `dn/` sans suffixe `_lodN.glb`."},
+          "max_mult": {"type": "number", "minimum": 1, "description": "Grossissement d'ecran maximal."},
+          "size_scale": {"type": "number", "exclusiveMinimum": 0, "description": "Taille d'ecran relative (1 = taille commune)."},
+          "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
+          "fade_from": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig ou commence le fondu de sortie."},
+          "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-dela de laquelle le modele disparait."},
+          "stretched": {"type": "boolean", "description": "Segment etire a la longueur de l'enclos (clôtures)."}
+        }
+      }
+    },
+    "regions": {
+      "type": "object",
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["center", "radius_km"],
+        "additionalProperties": false,
+        "properties": {
+          "center": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}, "description": "[longitude, latitude] WGS84."},
+          "radius_km": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}, "description": "Demi-axes (est-ouest, nord-sud) de l'ellipse."}
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "mode", "props"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "mode": {"enum": ["scatter", "paddock", "village", "road"]},
+          "props": {"type": "object", "minProperties": 1, "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"}, "additionalProperties": {"type": "number", "exclusiveMinimum": 0}, "description": "Modele -> poids de tirage."},
+          "regions": {"type": "array", "minItems": 1, "items": {"$ref": "common.schema.json#/$defs/snake_id"}, "description": "Ids de `regions` ; absent = toute la carte (sauf `regions_from`)."},
+          "regions_from": {
+            "type": "object",
+            "required": ["file", "key"],
+            "additionalProperties": false,
+            "properties": {
+              "file": {"type": "string"}, "key": {"type": "string"},
+              "ids": {"type": "array", "items": {"type": "string"}},
+              "scale": {"type": "number", "exclusiveMinimum": 0}
+            },
+            "description": "Ellipses lues dans une liste d'un autre fichier de donnees (entrees {id, center, size_km})."
+          },
+          "density_per_1000km2": {"type": "number", "exclusiveMinimum": 0, "description": "scatter et paddock : objets (ou enclos) par 1000 km2."},
+          "seasons": {"type": "object", "additionalProperties": false, "properties": {"spring": {"type": "number"}, "summer": {"type": "number"}, "autumn": {"type": "number"}, "winter": {"type": "number"}}},
+          "paddock": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "size_m": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}},
+              "segment_m": {"type": "number", "exclusiveMinimum": 0},
+              "gap": {"type": "number", "minimum": 0, "maximum": 0.5, "description": "Part du cote laissee ouverte (porte) sur un cote tire au hasard."}
+            }
+          },
+          "village": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "kinds": {"type": "array", "minItems": 1, "items": {"enum": ["village", "hamlet", "town", "city", "castle", "abbey"]}},
+              "chance": {"type": "number", "minimum": 0, "maximum": 1},
+              "offset_m": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}}
+            }
+          },
+          "road": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "types": {"type": "array", "items": {"enum": ["main", "secondary", "computed"]}},
+              "per_100km": {"type": "number", "exclusiveMinimum": 0},
+              "offset_m": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}},
+              "parallel": {"type": "boolean", "description": "Oriente le long de la route (sinon lacet au hasard)."}
+            }
+          },
+          "filters": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "alt_min_m": {"type": "number"}, "alt_max_m": {"type": "number"}, "slope_max_deg": {"type": "number"},
+              "marsh_max": {"type": "number", "minimum": 0, "maximum": 1},
+              "prairie_min": {"type": "number", "minimum": 0, "maximum": 1},
+              "open_min": {"type": "number", "minimum": 0, "maximum": 2},
+              "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+              "crops_max": {"type": "number", "minimum": 0, "maximum": 1},
+              "biomes": {"type": "array", "items": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]}},
+              "coast_px": {"type": "integer", "minimum": 1, "description": "Le site touche une mer a cette distance (px)."},
+              "wet_ok": {"type": "boolean", "description": "Autorise les zones humides (salines, polders)."}
+            }
+          }
+        },
+        "allOf": [
+          {"if": {"properties": {"mode": {"enum": ["scatter", "paddock"]}}}, "then": {"required": ["density_per_1000km2"]}},
+          {"if": {"properties": {"mode": {"const": "road"}}}, "then": {"required": ["road"]}},
+          {"if": {"properties": {"mode": {"const": "village"}}}, "then": {"required": ["village"]}}
+        ]
+      }
+    }
+  }
+}

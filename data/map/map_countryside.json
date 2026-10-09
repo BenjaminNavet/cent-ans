@@ -1,0 +1,1061 @@
+{
+  "description": "Campagne vivante hors champs (lot DN-PAYS, `game/scripts/map/countryside_layer.gd`) : haies et clôtures de bocage, puits, croix de chemin et calvaires, moulins à vent, salines, ruines, piloris, charrettes et caravanes au bord des routes. Les modèles sont les glb générés `dn/<dossier>/<nom>_lod{0,1,2}.glb` (paquet de release, ADR 0212) ; sans glb, une boîte de 2 m. Une règle = un mode de placement (`scatter` semis par aire, `paddock` enclos de clôtures, `village` à côté des colonies et hameaux, `road` au bord des routes), des modèles pondérés, des régions (ellipses lon/lat) et des filtres de site. Troupeaux : `map_fauna.json`. Rendu seulement.",
+  "version": 1,
+  "render": {
+    "max_visible_instances": 2500,
+    "cell_px": 96,
+    "load_factor": 2.4,
+    "min_radius_px": 24,
+    "max_radius_px": 200,
+    "max_cached_cells": 64,
+    "cells_per_frame": 1,
+    "size_k": 0.007,
+    "size_exponent": 0.85,
+    "spread_exponent": 0.5,
+    "lod_distances": [
+      25,
+      60
+    ],
+    "town_clearance_px": 0.8,
+    "defaults": {
+      "alt_min_m": -50,
+      "alt_max_m": 4000,
+      "slope_max_deg": 90,
+      "marsh_max": 0.5,
+      "prairie_min": 0.0,
+      "open_min": 0.0,
+      "forest_max": 1.0,
+      "crops_max": 1.0
+    }
+  },
+  "biome_index": {
+    "oceanic": 1,
+    "continental": 2,
+    "mediterranean": 3,
+    "steppe": 4,
+    "boreal": 5,
+    "mountain": 6,
+    "semi_arid": 7
+  },
+  "props": {
+    "wattle_fence": {
+      "model": "props/wattle_fence",
+      "max_mult": 12,
+      "size_scale": 1.0,
+      "fade_from": 26,
+      "max_distance": 42,
+      "stretched": true
+    },
+    "well_stone": {
+      "model": "props/well_stone",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "village_well_stone": {
+      "model": "props/terrain_village_well_stone",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "well_covered": {
+      "model": "props/econ_well_covered_bruges",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "well_sweep": {
+      "model": "props/econ_well_sweep_shaduf",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "pillory_post": {
+      "model": "props/econ_pillory_post_stone",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "pillory_wheel": {
+      "model": "props/econ_pillory_wheel_post",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "wayside_cross": {
+      "model": "props/wayside_cross",
+      "max_mult": 30,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "cross_stone": {
+      "model": "props/env_cross_wayside_stone",
+      "max_mult": 28,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "cross_wood": {
+      "model": "props/terrain_wayside_cross_wood",
+      "max_mult": 14,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "calvary": {
+      "model": "props/terrain_wayside_cross_calvary",
+      "max_mult": 14,
+      "size_scale": 1.0,
+      "fade_from": 50,
+      "max_distance": 90
+    },
+    "shrine": {
+      "model": "props/env_wayside_shrine",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    },
+    "windmill_post": {
+      "model": "props/windmill_post",
+      "max_mult": 12,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120
+    },
+    "windmill_field": {
+      "model": "buildings/village_windmill_post_field",
+      "max_mult": 12,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120
+    },
+    "windmill_polder": {
+      "model": "buildings/env_windmill_dutch_polder",
+      "max_mult": 10,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120
+    },
+    "windmill_tower": {
+      "model": "buildings/env_windmill_tower_med",
+      "max_mult": 10,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120
+    },
+    "windmill_italian": {
+      "model": "buildings/econ_mill_windmill_post_italian",
+      "max_mult": 12,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120
+    },
+    "saltpan_atlantic": {
+      "model": "buildings/econ_saltpan_atlantic",
+      "max_mult": 8,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "saltpan_med": {
+      "model": "buildings/econ_saltpan_mediterranean",
+      "max_mult": 6,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "ruin_village": {
+      "model": "buildings/env_ruin_village_abandoned",
+      "max_mult": 6,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "ruin_burnt": {
+      "model": "buildings/env_ruin_burnt_hamlet",
+      "max_mult": 8,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "roman_temple": {
+      "model": "buildings/env_roman_temple_ruin",
+      "max_mult": 6,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "roman_arch": {
+      "model": "buildings/env_roman_arch_triumph",
+      "max_mult": 6,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "roman_arena": {
+      "model": "buildings/env_roman_arena_ruin",
+      "max_mult": 5,
+      "size_scale": 1.0,
+      "fade_from": 60,
+      "max_distance": 110
+    },
+    "cart_merchant": {
+      "model": "props/cart_merchant",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "cart_ox": {
+      "model": "props/env_cart_ox_peasant",
+      "max_mult": 22,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "wagon_four_wheel": {
+      "model": "props/wagon_four_wheel",
+      "max_mult": 20,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "haywain": {
+      "model": "props/terrain_haywain_wagon",
+      "max_mult": 20,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "cart_wool": {
+      "model": "props/cart_wool_bales",
+      "max_mult": 22,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "cart_wine": {
+      "model": "props/cart_wine_barrel_wagon",
+      "max_mult": 20,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "carreta": {
+      "model": "props/cart_carreta_iberian",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "arba": {
+      "model": "props/cart_arba_steppe",
+      "max_mult": 20,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "mule_train": {
+      "model": "fauna/env_cart_pack_train_mules",
+      "max_mult": 24,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "camel_caravan": {
+      "model": "fauna/env_merchant_caravan_camels",
+      "max_mult": 18,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "drover_cattle": {
+      "model": "fauna/herd_drover_cattle",
+      "max_mult": 20,
+      "size_scale": 1.0,
+      "fade_from": 40,
+      "max_distance": 70
+    },
+    "shepherd_hut": {
+      "model": "props/env_shepherd_hut_wheeled",
+      "max_mult": 22,
+      "size_scale": 1.0,
+      "fade_from": 45,
+      "max_distance": 80
+    }
+  },
+  "regions": {
+    "bocage_ouest": {
+      "center": [
+        -1.2,
+        47.8
+      ],
+      "radius_km": [
+        300,
+        190
+      ]
+    },
+    "bocage_angleterre_sw": {
+      "center": [
+        -3.3,
+        51.0
+      ],
+      "radius_km": [
+        170,
+        90
+      ]
+    },
+    "bocage_marches_galles": {
+      "center": [
+        -3.0,
+        52.4
+      ],
+      "radius_km": [
+        110,
+        90
+      ]
+    },
+    "bocage_irlande": {
+      "center": [
+        -7.8,
+        53.0
+      ],
+      "radius_km": [
+        200,
+        130
+      ]
+    },
+    "bocage_galice": {
+      "center": [
+        -8.2,
+        42.5
+      ],
+      "radius_km": [
+        160,
+        80
+      ]
+    },
+    "bretagne": {
+      "center": [
+        -3.0,
+        48.2
+      ],
+      "radius_km": [
+        170,
+        70
+      ]
+    },
+    "europe_occ": {
+      "center": [
+        8.0,
+        49.0
+      ],
+      "radius_km": [
+        1500,
+        900
+      ]
+    },
+    "europe_nord_plaine": {
+      "center": [
+        3.0,
+        51.0
+      ],
+      "radius_km": [
+        900,
+        450
+      ]
+    },
+    "pays_bas_flandre": {
+      "center": [
+        4.3,
+        52.0
+      ],
+      "radius_km": [
+        180,
+        130
+      ]
+    },
+    "mediterranee": {
+      "center": [
+        14.0,
+        39.5
+      ],
+      "radius_km": [
+        2200,
+        500
+      ]
+    },
+    "iberie": {
+      "center": [
+        -4.5,
+        40.0
+      ],
+      "radius_km": [
+        650,
+        500
+      ]
+    },
+    "italie": {
+      "center": [
+        12.5,
+        42.5
+      ],
+      "radius_km": [
+        500,
+        350
+      ]
+    },
+    "alpes_pyrenees": {
+      "center": [
+        7.6,
+        46.0
+      ],
+      "radius_km": [
+        300,
+        100
+      ]
+    },
+    "pyrenees": {
+      "center": [
+        0.4,
+        42.7
+      ],
+      "radius_km": [
+        180,
+        40
+      ]
+    },
+    "causses": {
+      "center": [
+        3.2,
+        44.3
+      ],
+      "radius_km": [
+        90,
+        60
+      ]
+    },
+    "maghreb": {
+      "center": [
+        6.0,
+        34.0
+      ],
+      "radius_km": [
+        1400,
+        500
+      ]
+    },
+    "levant": {
+      "center": [
+        38.0,
+        33.5
+      ],
+      "radius_km": [
+        700,
+        400
+      ]
+    },
+    "iran": {
+      "center": [
+        53.0,
+        33.0
+      ],
+      "radius_km": [
+        800,
+        500
+      ]
+    },
+    "steppe": {
+      "center": [
+        38.0,
+        48.0
+      ],
+      "radius_km": [
+        1500,
+        500
+      ]
+    },
+    "vignobles_france": {
+      "center": [
+        1.0,
+        46.5
+      ],
+      "radius_km": [
+        600,
+        350
+      ]
+    },
+    "vignobles_rhin": {
+      "center": [
+        8.0,
+        49.5
+      ],
+      "radius_km": [
+        250,
+        250
+      ]
+    },
+    "laine_angleterre": {
+      "center": [
+        -1.6,
+        52.0
+      ],
+      "radius_km": [
+        300,
+        200
+      ]
+    },
+    "elevage_charolais": {
+      "center": [
+        4.3,
+        46.8
+      ],
+      "radius_km": [
+        300,
+        200
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "bocage_enclos",
+      "mode": "paddock",
+      "props": {
+        "wattle_fence": 1
+      },
+      "regions": [
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles",
+        "bocage_irlande",
+        "bocage_galice"
+      ],
+      "density_per_1000km2": 9,
+      "paddock": {
+        "size_m": [
+          90,
+          220
+        ],
+        "segment_m": 30,
+        "gap": 0.1
+      },
+      "filters": {
+        "biomes": [
+          "oceanic"
+        ],
+        "prairie_min": 0.25,
+        "forest_max": 0.5,
+        "crops_max": 0.6,
+        "slope_max_deg": 12,
+        "alt_max_m": 500
+      }
+    },
+    {
+      "id": "puits_ouest",
+      "mode": "village",
+      "props": {
+        "well_stone": 1,
+        "village_well_stone": 1
+      },
+      "regions": [
+        "europe_occ"
+      ],
+      "village": {
+        "kinds": [
+          "village",
+          "hamlet"
+        ],
+        "chance": 0.5,
+        "offset_m": [
+          200,
+          380
+        ]
+      }
+    },
+    {
+      "id": "puits_flandre",
+      "mode": "village",
+      "props": {
+        "well_covered": 1
+      },
+      "regions": [
+        "pays_bas_flandre"
+      ],
+      "village": {
+        "kinds": [
+          "village",
+          "hamlet"
+        ],
+        "chance": 0.5,
+        "offset_m": [
+          200,
+          380
+        ]
+      }
+    },
+    {
+      "id": "puits_sud",
+      "mode": "village",
+      "props": {
+        "well_sweep": 1
+      },
+      "regions": [
+        "iberie",
+        "maghreb",
+        "levant"
+      ],
+      "village": {
+        "kinds": [
+          "village",
+          "hamlet"
+        ],
+        "chance": 0.5,
+        "offset_m": [
+          200,
+          380
+        ]
+      }
+    },
+    {
+      "id": "piloris",
+      "mode": "village",
+      "props": {
+        "pillory_post": 2,
+        "pillory_wheel": 1
+      },
+      "regions": [
+        "europe_occ"
+      ],
+      "village": {
+        "kinds": [
+          "village",
+          "town"
+        ],
+        "chance": 0.3,
+        "offset_m": [
+          160,
+          300
+        ]
+      }
+    },
+    {
+      "id": "croix_de_chemin",
+      "mode": "road",
+      "props": {
+        "wayside_cross": 4,
+        "cross_stone": 2,
+        "cross_wood": 2
+      },
+      "regions": [
+        "europe_occ"
+      ],
+      "road": {
+        "per_100km": 1.2,
+        "offset_m": [
+          5,
+          12
+        ],
+        "parallel": false
+      }
+    },
+    {
+      "id": "calvaires_bretons",
+      "mode": "road",
+      "props": {
+        "calvary": 1
+      },
+      "regions": [
+        "bretagne"
+      ],
+      "road": {
+        "per_100km": 1.6,
+        "offset_m": [
+          6,
+          14
+        ],
+        "parallel": false
+      }
+    },
+    {
+      "id": "oratoires_sud",
+      "mode": "road",
+      "props": {
+        "shrine": 1
+      },
+      "regions": [
+        "iberie",
+        "italie"
+      ],
+      "road": {
+        "per_100km": 1.0,
+        "offset_m": [
+          6,
+          14
+        ],
+        "parallel": false
+      }
+    },
+    {
+      "id": "moulins_a_vent_nord",
+      "mode": "scatter",
+      "props": {
+        "windmill_post": 3,
+        "windmill_field": 2
+      },
+      "regions": [
+        "europe_nord_plaine"
+      ],
+      "density_per_1000km2": 1.1,
+      "filters": {
+        "open_min": 0.4,
+        "forest_max": 0.3,
+        "slope_max_deg": 5,
+        "alt_max_m": 400
+      }
+    },
+    {
+      "id": "moulins_polder",
+      "mode": "scatter",
+      "props": {
+        "windmill_polder": 1
+      },
+      "regions": [
+        "pays_bas_flandre"
+      ],
+      "density_per_1000km2": 2.0,
+      "filters": {
+        "open_min": 0.2,
+        "forest_max": 0.4,
+        "slope_max_deg": 5,
+        "alt_max_m": 100,
+        "wet_ok": true
+      }
+    },
+    {
+      "id": "moulins_sud",
+      "mode": "scatter",
+      "props": {
+        "windmill_tower": 2,
+        "windmill_italian": 1
+      },
+      "regions": [
+        "mediterranee"
+      ],
+      "density_per_1000km2": 0.7,
+      "filters": {
+        "biomes": [
+          "mediterranean",
+          "semi_arid"
+        ],
+        "open_min": 0.1,
+        "forest_max": 0.4,
+        "slope_max_deg": 12,
+        "alt_max_m": 700
+      }
+    },
+    {
+      "id": "salines_atlantique",
+      "mode": "scatter",
+      "props": {
+        "saltpan_atlantic": 1
+      },
+      "density_per_1000km2": 350,
+      "regions_from": {
+        "file": "map/map_freshwater.json",
+        "key": "salt_pans",
+        "ids": [
+          "guerande",
+          "bourgneuf",
+          "re_brouage",
+          "aveiro",
+          "setubal",
+          "cadix"
+        ]
+      },
+      "filters": {
+        "wet_ok": true
+      }
+    },
+    {
+      "id": "salines_mediterranee",
+      "mode": "scatter",
+      "props": {
+        "saltpan_med": 1
+      },
+      "density_per_1000km2": 350,
+      "regions_from": {
+        "file": "map/map_freshwater.json",
+        "key": "salt_pans",
+        "ids": [
+          "aigues_mortes",
+          "giraud",
+          "peccais",
+          "hyeres",
+          "cervia",
+          "chioggia",
+          "secovlje",
+          "trapani",
+          "cagliari",
+          "ibiza",
+          "ebre",
+          "cabo_gata"
+        ]
+      },
+      "filters": {
+        "wet_ok": true
+      }
+    },
+    {
+      "id": "ruines_villages",
+      "mode": "scatter",
+      "props": {
+        "ruin_village": 1,
+        "ruin_burnt": 1
+      },
+      "regions": [
+        "europe_occ"
+      ],
+      "density_per_1000km2": 0.15,
+      "filters": {
+        "open_min": 0.2,
+        "forest_max": 0.6,
+        "alt_max_m": 1500
+      }
+    },
+    {
+      "id": "ruines_romaines",
+      "mode": "scatter",
+      "props": {
+        "roman_temple": 2,
+        "roman_arch": 1,
+        "roman_arena": 1
+      },
+      "regions": [
+        "mediterranee"
+      ],
+      "density_per_1000km2": 0.06,
+      "filters": {
+        "biomes": [
+          "mediterranean"
+        ],
+        "open_min": 0.1,
+        "alt_max_m": 800
+      }
+    },
+    {
+      "id": "charrettes_bord_de_route",
+      "mode": "road",
+      "props": {
+        "cart_merchant": 3,
+        "cart_ox": 3,
+        "wagon_four_wheel": 1
+      },
+      "regions": [
+        "europe_occ"
+      ],
+      "road": {
+        "per_100km": 1.6,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "fenaison",
+      "mode": "road",
+      "props": {
+        "haywain": 1
+      },
+      "regions": [
+        "europe_nord_plaine",
+        "europe_occ"
+      ],
+      "seasons": {
+        "spring": 0.3,
+        "summer": 1.0,
+        "autumn": 0.6,
+        "winter": 0.0
+      },
+      "road": {
+        "per_100km": 1.0,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "laine",
+      "mode": "road",
+      "props": {
+        "cart_wool": 1
+      },
+      "regions": [
+        "laine_angleterre"
+      ],
+      "road": {
+        "per_100km": 0.9,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "vin",
+      "mode": "road",
+      "props": {
+        "cart_wine": 1
+      },
+      "regions": [
+        "vignobles_france",
+        "vignobles_rhin"
+      ],
+      "road": {
+        "per_100km": 0.9,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "carretas",
+      "mode": "road",
+      "props": {
+        "carreta": 1
+      },
+      "regions": [
+        "iberie"
+      ],
+      "road": {
+        "per_100km": 1.2,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "muletiers",
+      "mode": "road",
+      "props": {
+        "mule_train": 1
+      },
+      "regions": [
+        "iberie",
+        "italie",
+        "alpes_pyrenees"
+      ],
+      "road": {
+        "per_100km": 0.8,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "arbas_steppe",
+      "mode": "road",
+      "props": {
+        "arba": 1
+      },
+      "regions": [
+        "steppe"
+      ],
+      "road": {
+        "per_100km": 1.0,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "caravanes_chameaux",
+      "mode": "road",
+      "props": {
+        "camel_caravan": 1
+      },
+      "regions": [
+        "maghreb",
+        "levant",
+        "iran"
+      ],
+      "road": {
+        "per_100km": 0.9,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "bouviers",
+      "mode": "road",
+      "props": {
+        "drover_cattle": 1
+      },
+      "regions": [
+        "elevage_charolais",
+        "laine_angleterre"
+      ],
+      "seasons": {
+        "spring": 1.0,
+        "summer": 1.0,
+        "autumn": 1.0,
+        "winter": 0.2
+      },
+      "road": {
+        "per_100km": 0.5,
+        "offset_m": [
+          5,
+          11
+        ],
+        "parallel": true
+      }
+    },
+    {
+      "id": "cabanes_de_bergers",
+      "mode": "scatter",
+      "props": {
+        "shepherd_hut": 1
+      },
+      "regions": [
+        "alpes_pyrenees",
+        "pyrenees",
+        "causses"
+      ],
+      "seasons": {
+        "spring": 0.5,
+        "summer": 1.0,
+        "autumn": 0.5,
+        "winter": 0.0
+      },
+      "density_per_1000km2": 0.7,
+      "filters": {
+        "alt_min_m": 800,
+        "slope_max_deg": 25,
+        "forest_max": 0.5
+      }
+    }
+  ]
+}
