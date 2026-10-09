@@ -70,7 +70,8 @@ var _near_level: Dictionary = {}  # unit id -> niveau de détail du maillage pro
 var _fine: Dictionary = {}  # unit id -> true : figurine fine (LOD0 par soldat, FG5)
 var _fine_near: Dictionary = {}  # unit id -> MultiMeshInstance3D (LOD0 des soldats proches, FG5)
 var _fine_band: Dictionary = {}  # unit id -> rayon du LOD0 posé sur les calques (0 : aucun)
-var _camera_frustum: Array[Plane] = []  # FG5 : plans du champ de la caméra (LOD0 hors champ omis)
+var _camera_planes := PackedFloat32Array()  # FG5 : plans du champ de la caméra (nx, ny, nz, d ; LOD0 hors champ omis)
+var _core: Object = null  # SC BT5 : cœur de bataille (tampons repliés / LOD0 proches calculés en Rust)
 var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
 ## PB3c : figurines de `_previous[id]` (le tampon groupé est complété à la capacité du MultiMesh :
@@ -387,7 +388,9 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	var camera := get_viewport().get_camera_3d()
 	if camera != null:
 		_camera_pos = camera.global_position
-		_camera_frustum = camera.get_frustum()
+		_camera_planes.clear()
+		for plane in camera.get_frustum():
+			_camera_planes.append_array(PackedFloat32Array([plane.normal.x, plane.normal.y, plane.normal.z, plane.d]))
 	_frame_dt = anim_dt
 	_frame_index += 1
 	var smooth := 1.0 - exp(-anim_dt / 0.6)
@@ -430,6 +433,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 ## la capacité de son MultiMesh ; régiments parcourus dans le même ordre qu'avant (camp, famille,
 ## ordre de `get_units`) : les tirages aléatoires (cadavres) restent les mêmes.
 func _update_batched(battle: Object, units: Array, selected: Array) -> void:
+	_core = battle
 	if not _core_loose_set:
 		_core_loose_set = true
 		battle.call("set_loose_ranks", LOOSE_OFFSET_M, LOOSE_YAW_DEG)
@@ -673,22 +677,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 ## mêmes soldats (bande `lod_band` du shader, qui tranche exactement : le tri CPU prend 1 m de
 ## marge). Ni l'un ni l'autre ne porte d'ombre (c'est le LOD2 qui la porte).
 func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, padded: PackedFloat32Array, n: int, radius: float) -> void:
+	# SC BT5 : tri des soldats proches (rayon, champ de la caméra) fait en Rust.
 	var near_buf := PackedFloat32Array()
-	var count := 0
 	if n > 0:
-		var r2 := (radius + 1.0) * (radius + 1.0)
-		var cx := _camera_pos.x
-		var cy := _camera_pos.y
-		var cz := _camera_pos.z
-		for i in n:
-			var o := i * 12
-			var dx := padded[o + 3] - cx
-			var dy := padded[o + 7] - cy
-			var dz := padded[o + 11] - cz
-			if dx * dx + dy * dy + dz * dz < r2 and _in_view(Vector3(padded[o + 3], padded[o + 7], padded[o + 11])):
-				near_buf.append_array(padded.slice(o, o + 12))
-				near_buf.append_array([float(i), 0.0, 0.0, 0.0])
-				count += 1
+		near_buf = _core.call("fine_near_buffer", padded, n, _camera_pos, radius, _camera_planes)
+	var count := near_buf.size() >> 4
 	var band := radius if count > 0 else 0.0
 	var near_layer: MultiMeshInstance3D = _fine_near.get(id)
 	if count > 0 and near_layer == null:
@@ -720,14 +713,6 @@ func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, pad
 		near_buf.resize(near_mm.instance_count * 16)
 		near_mm.buffer = near_buf
 		near_mm.visible_instance_count = count
-
-
-## FG5 : soldat (sphère de 2,5 m autour de son pied, cavalier compris) dans le champ de la caméra.
-func _in_view(p: Vector3) -> bool:
-	for plane in _camera_frustum:
-		if plane.distance_to(p + Vector3(0.0, 1.2, 0.0)) > 2.5:
-			return false
-	return true
 
 
 ## Banc d'essai (FG5) : régiments par niveau (proche LOD0, proche LOD1, LOD2 seul, imposteurs),
@@ -813,14 +798,8 @@ func figure_count(id: int) -> int:
 
 ## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
 func _hide_reserved(slots: PackedInt32Array, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
-	# Copie : `_previous` (même tableau) garde les vraies places (`figure_at`).
-	var out := slice.duplicate()
-	for slot in slots:
-		if slot >= 0 and slot < n:
-			var o := slot * 12
-			for q in [0, 1, 2, 4, 5, 6, 8, 9, 10]:
-				out[o + q] = 0.0
-	return out
+	# Copie (copy-on-write du paquet) : `_previous` garde les vraies places (`figure_at`).
+	return _core.call("fold_figure_slots", slice, slots, n)
 
 
 ## BV3 : rang (indice dans le tampon courant) de la figurine du régiment la plus proche de
@@ -1316,18 +1295,15 @@ func _tumble_layer(side: String, kind: String, variant: int, capacity: int) -> D
 ## Places vides des renversés dans la tranche rendue (base nulle = figurine repliée).
 func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
 	var hidden: Dictionary = _hidden[id]
-	var out := slice
+	var slots := PackedInt32Array()
 	for slot in hidden.keys():
 		if float(hidden[slot]) <= anim_time:
 			hidden.erase(slot)
-			continue
-		if int(slot) < n:
-			var o := int(slot) * 12
-			for q in [0, 1, 2, 4, 5, 6, 8, 9, 10]:
-				out[o + q] = 0.0
+		else:
+			slots.append(int(slot))
 	if hidden.is_empty():
 		_hidden.erase(id)
-	return out
+	return _core.call("fold_figure_slots", slice, slots, n)
 
 
 ## AN1b : état montré (rendu seulement, aucune règle) : piques abaissées devant une charge

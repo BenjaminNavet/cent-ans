@@ -12,6 +12,7 @@ use sim_battle::DT;
 
 use crate::battle_pose_lerp::{self as lerp, LooseRanks, Pose, TELEPORT_M_PER_STEP};
 use crate::battle_sim::BattleSim;
+use crate::battle_soldier_buffers as buffers;
 
 /// RJ-b: `capacities[id] = HOLD - capacity` asks [`BattleSim::get_soldier_buffers`]
 /// to keep regiment `id`'s buffer as it is (EP1 budget: far regiment not
@@ -67,9 +68,8 @@ pub(crate) struct PoseCache {
     moving: Vec<bool>,
     /// Unit id -> blend factor bits of the buffer (`None`: to build).
     built: Vec<Option<u64>>,
-    /// Unit id -> the transforms drawn (12 floats per figure).
-    raw: Vec<Vec<f32>>,
-    /// Unit id -> the buffer handed out (`raw` zero-padded to the capacity).
+    /// Unit id -> the buffer handed out: the transforms drawn (12 floats per
+    /// figure) zero-padded to the capacity.
     padded: Vec<PackedFloat32Array>,
     /// PB3e: unit id -> serial of `padded[id]` (changes whenever it is
     /// rebuilt): the renderer skips re-sending an unchanged buffer.
@@ -97,7 +97,6 @@ impl PoseCache {
         self.moving.resize(units, false);
         self.built.clear();
         self.built.resize(units, None);
-        self.raw.resize(units, Vec::new());
         self.padded.resize(units, PackedFloat32Array::new());
         self.versions.resize(units, -1);
     }
@@ -144,16 +143,6 @@ impl UnitFrames {
     fn span(&self) -> u64 {
         self.cur_ticks.saturating_sub(self.prev_ticks).max(1)
     }
-}
-
-/// The zero-padded copy of `raw` (`capacity` figures at least, never cut).
-fn padded_buffer(raw: &[f32], capacity: usize) -> PackedFloat32Array {
-    let len = raw.len().max(capacity * 12);
-    let mut out = PackedFloat32Array::from(raw);
-    if len > raw.len() {
-        out.resize(len);
-    }
-    out
 }
 
 /// `[a, b]` as a Godot array.
@@ -287,6 +276,46 @@ impl BattleSim {
         }
     }
 
+    /// SC BT5: `buffer` (12 floats per figure) with the basis of each figure
+    /// listed in `slots` (and below `n`) zeroed: standard-bearers, musicians
+    /// and knocked-down figures drawn folded away.
+    #[func]
+    fn fold_figure_slots(
+        &self,
+        mut buffer: PackedFloat32Array,
+        slots: PackedInt32Array,
+        n: i64,
+    ) -> PackedFloat32Array {
+        buffers::fold_slots(
+            buffer.as_mut_slice(),
+            slots.as_slice(),
+            usize::try_from(n).unwrap_or(0),
+        );
+        buffer
+    }
+
+    /// SC BT5 (FG5): the first `n` figures of `buffer` within `radius` m of
+    /// `camera` (plus 1 m) and inside the frustum `planes` (`[nx, ny, nz, d]`
+    /// per plane), 16 floats each: transform, then `[rank, 0, 0, 0]`.
+    #[func]
+    fn fine_near_buffer(
+        &self,
+        buffer: PackedFloat32Array,
+        n: i64,
+        camera: Vector3,
+        radius: f64,
+        planes: PackedFloat32Array,
+    ) -> PackedFloat32Array {
+        let near = buffers::fine_near(
+            buffer.as_slice(),
+            usize::try_from(n).unwrap_or(0),
+            [camera.x, camera.y, camera.z],
+            radius,
+            planes.as_slice(),
+        );
+        PackedFloat32Array::from(near.as_slice())
+    }
+
     /// PB3c: every regiment's `MultiMesh.buffer` in one call. `capacities[id]`
     /// is the instance count of regiment `id`'s `MultiMesh` (-1 or missing:
     /// not drawn, no buffer; `-2 - capacity`: skipped this frame, the
@@ -325,7 +354,6 @@ impl BattleSim {
             if !wanted(id) {
                 cache.cur[id] = None;
                 cache.built[id] = None;
-                cache.raw[id] = Vec::new();
                 cache.padded[id] = PackedFloat32Array::new();
                 buffers.push(&PackedFloat32Array::new().to_variant());
                 continue;
@@ -354,8 +382,13 @@ impl BattleSim {
             if cache.built[id] != Some(shown.to_bits()) {
                 let cur = cache.cur[id].as_deref().unwrap_or_default();
                 let prev = cache.prev[id].as_deref();
-                lerp::write_figures(
-                    &mut cache.raw[id],
+                // SC GB6: written straight into the packed buffer (no
+                // intermediate vector, no copy); its tail is zeroed.
+                let len = (cur.len() * 12).max(capacity * 12);
+                let mut buffer = std::mem::take(&mut cache.padded[id]);
+                buffer.resize(len);
+                lerp::write_figures_into(
+                    buffer.as_mut_slice(),
                     unit.id,
                     prev,
                     cur,
@@ -363,20 +396,21 @@ impl BattleSim {
                     teleport,
                     loose,
                 );
-                cache.padded[id] = padded_buffer(&cache.raw[id], capacity);
+                cache.padded[id] = buffer;
                 cache.built[id] = Some(shown.to_bits());
                 cache.serial += 1;
                 cache.versions[id] = cache.serial;
             }
-            let raw = &cache.raw[id];
-            let len = raw.len().max(capacity * 12);
+            let figures = cache.cur[id].as_ref().map_or(0, Vec::len);
+            let len = (figures * 12).max(capacity * 12);
             if cache.padded[id].len() != len {
-                cache.padded[id] = padded_buffer(raw, capacity);
+                // The `MultiMesh` grew: zero-filled tail.
+                cache.padded[id].resize(len);
                 cache.serial += 1;
                 cache.versions[id] = cache.serial;
             }
             versions[id] = cache.versions[id];
-            counts[id] = (raw.len() / 12) as i32;
+            counts[id] = figures as i32;
             buffers.push(&cache.padded[id].to_variant());
         }
         let mut out = pair(&counts, &buffers);

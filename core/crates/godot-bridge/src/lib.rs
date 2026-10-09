@@ -30,6 +30,7 @@ mod battle_sim_queue;
 mod battle_sim_state;
 mod battle_sim_terrain;
 mod battle_sim_units;
+mod battle_soldier_buffers;
 mod battle_step_job;
 mod battle_terrain_field;
 mod battle_terrain_kernel;
