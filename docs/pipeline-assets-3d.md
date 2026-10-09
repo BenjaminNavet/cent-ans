@@ -113,6 +113,28 @@ une même entrée). Piège d'installation (libomp) : voir `docs/wip/i3d-local.md
 TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul appel, ligne dans
 `docs/budget.md`. Pas de TRELLIS 2 ni de Meshy (trop chers).
 
+### Objets orientés : au moins deux vues (règle du joueur, nuit DN 08/10)
+Depuis une seule vue de face, TRELLIS (et SF3D) **invente le dos** : sur `city_west` il l'a rendu noir.
+Tout objet qui a un devant et un derrière passe donc en multivue : face + dos ¾ (+ profil pour les
+objets longs).
+
+- **Classes concernées** (`MULTI_VIEW_CLASSES` de `dn_batch.py`) : `house`, `major_building`, `bridge`,
+  `ship`, `cart`, `siege_engine`, `figure`, `figure_mounted` ; profil en plus pour `cart`,
+  `siege_engine`, `bridge`. Arbres, rochers, plantes, animaux : vue unique suffisante.
+- **Pourquoi un modèle d'édition** : Z-Image Turbo part d'un texte ; lui demander « le même objet vu de
+  dos » donne un *autre* objet. Il faut un modèle qui reçoit l'image de face et redessine le même objet
+  sous un autre angle (prompts `VIEW_PROMPTS` : mêmes matières, proportions, lumière, fond gris).
+- **Voie gratuite (choix 1)** : Qwen-Image-Edit-2511 local + LoRA Multiple-Angles (§ 3), ≈ plusieurs
+  minutes par vue sur le M4 Pro ; puis TRELLIS HF multivue (quota) ou, à défaut, SF3D depuis la face.
+- **Voie payante (nuit DN)** : `fal-ai/flux-2/edit` (0,024 $ par vue) → rembg → `fal-ai/trellis/multi`
+  (0,02 $, `multiimage_algo: stochastic`). Bilan de la nuit : 389 vues = **9,34 $, premier poste**
+  (sur 28,58 $), plus cher que l'image de face et la 3D réunies (0,025 $). Un bâtiment multivue coûte
+  ≈ 0,05-0,07 $ contre 0,025 $ en vue unique.
+- **Piège coûteux** : 52 vues sont parties sur des décors `env_*` (falaises, rochers, décors classés
+  bâtiment) qui n'ont ni face ni dos. Vérifier la classe d'ingest avant un lot : un décor sans
+  orientation doit rester en vue unique.
+- Les vues générées sont gardées dans `dn/<id>/views/` et listées dans `generation.json` (galerie).
+
 ## 6. Contrôle et rangement
 - Planche de comparaison : `tools/blender_scripts/ga3_compare_render.py` (`--ref`, `--yaw`,
   `--fit-width` pour cheval et décor).
