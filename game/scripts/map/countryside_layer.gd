@@ -14,7 +14,7 @@ extends Node3D
 ##   (graine = cellule, règle, région). Un `MultiMesh` par modèle et par cellule.
 ## - Taille tenue à l'écran (`size_k` × distance^`size_exponent`, jamais sous la taille réelle,
 ##   bornée par `max_mult` du modèle) ; les enclos s'écartent en proportion (`spread_exponent`).
-##   Fondu de distance propre à chaque modèle. `--no-countryside` : état d'avant (A/B).
+##   Fondu de distance propre à chaque modèle.
 ## - Réutilise `FaunaLayer` pour les lacs et les zones humides affichés (ne les duplique pas).
 
 const SHADER := preload("res://shaders/countryside.gdshader")
@@ -55,11 +55,6 @@ var _warm_queue: Array = []
 static func load_config() -> Dictionary:
 	var parsed: Variant = DataFile.read_json(DATA_FILE)
 	return parsed if parsed is Dictionary else {}
-
-
-func _ready() -> void:
-	if CmdArgs.has("--no-countryside"):
-		enabled = false
 
 
 ## Branche la couche sur la carte. `towns` : colonies à éviter (px) ; `villages` : {px, kind}

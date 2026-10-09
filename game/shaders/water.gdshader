@@ -41,7 +41,7 @@ uniform float sun_spec_max = 0.1;
 // GA4 (ADR 0105) : normale d'eau tuilable (CC0, `water_normal.png`) en deux couches défilantes
 // (échelles en pixels carte, vitesses en pixels carte par seconde) et couleur de profondeur à
 // trois paliers, réglées depuis `data/fx/campaign_terrain_textures.json`
-// (`CampaignTextures.apply_water`) ; `ga4_on` = 0 (`--no-ga4`) : houle procédurale d'origine.
+// (`CampaignTextures.apply_water`) ; `ga4_on` = 0 : houle procédurale d'origine.
 uniform float ga4_on = 0.0;
 uniform sampler2D water_normal : filter_linear_mipmap_anisotropic, repeat_enable, hint_default_black;
 uniform float ga4_scale_a = 1.7;

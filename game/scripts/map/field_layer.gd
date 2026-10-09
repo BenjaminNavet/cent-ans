@@ -11,7 +11,6 @@ extends Node3D
 ##   nouvelles cellules sont prêtes (au plus une fois toutes les `rebuild_period_frames` images).
 ## - Au-delà de `view_range_units` (palier parchemin, carte lointaine) rien n'est construit.
 ## - Les forêts, prés et haies ne sont pas à cette couche (cultures seulement).
-## - `--no-fields` coupe la couche (A/B).
 
 const CONFIG_FILE := "art/dn_fields.json"
 const MODEL_ROOT := "res://assets/models/dn/"
@@ -60,7 +59,7 @@ func setup(map: MapData, terrain: TerrainBuilder, towns: PackedVector2Array) -> 
 	stats = {"instances": 0, "nodes": 0, "cells": 0, "plan_ms": 0.0, "build_ms": 0.0, "build_ms_max": 0.0, "plan_ms_max": 0.0}
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
-	if config.is_empty() or CmdArgs.has("--no-fields"):
+	if config.is_empty():
 		enabled = false
 		return
 	var mix := _read_json(data_dir.path_join(HbGround.MIX_FILE))

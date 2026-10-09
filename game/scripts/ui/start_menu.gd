@@ -479,7 +479,7 @@ func _leave() -> void:
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS * 0.8)
 	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null and audio.has_method("duck_music"):
+	if audio != null:
 		audio.call("duck_music", -8.0, FADE_SECONDS)
 	await tween.finished
 	LoadingScreen.start(get_tree(), CAMPAIGN_SCENE)

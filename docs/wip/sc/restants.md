@@ -52,7 +52,7 @@ BB12 | À FAIRE | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui
 ## PF perf transverse
 PF-02 | FAIT (sc/relief, ADR 0203) | suppr relief_quadtree.gd (1295 l) sélection GD + fine_terrain_job.gd (167) + repli sans pyramide terrain_builder (1493) | game/scripts/map/{relief_quadtree,fine_terrain_job,terrain_builder}.gd | non (Rust optionnel) | [MÉCANIQUE visuelle]
 PF-03 | FAIT (ADR 0204, sc/veg) | suppr vegetation_tile_job.gd (649 l) + repli GD vegetation.gd [GELÉ vegetation.gd] | game/scripts/map/vegetation_tile_job.gd, vegetation.gd | non
-PF-06 | PARTIEL | CmdArgs partout ; 46 interrupteurs --no-* encore présents ; sc/devflags prêt (1f7987144) mais NON fusionné (attend settlement_layer propre) | game/scripts/**, branche sc/devflags (../gp-sc-devflags) | non
+PF-06 | PARTIEL | CmdArgs partout ; 46 interrupteurs --no-* encore présents ; sc/devflags prêt (1f7987144) mais NON fusionné (attend settlement_layer propre) ; sc/devflags 10-09 (refait à la main, main déjà largement nettoyé) : retirés --no-countryside/--no-fields/--no-dn-trees, has_method(duck_music) morts, mentions --no-* des shaders. Reste : --no-fa-grass (battle_vegetation gelé), uniform ga4_on/sea_life_on (data-pilotés, terrain/water), --no-hud/--no-fps/--no-fog (outils de capture, gardés) | game/scripts/**, branche sc/devflags (../gp-sc-devflags) | non
 PF-07 | FAIT (sc/bench) | map_bench.gd 534, release_journey.gd 525, perf_probe.gd, _bench_* battle_scene (campaign_map ex-gelé FL) | game/scripts/dev/*.gd | non
 PF-04 | PARTIEL | chargeur Rust vectoriel fait (DT4, ~500->200 ms) ; bake .bin geojson non | tools/cent_ans_tools/geo, core/crates/godot-bridge/src/map_geo.rs | oui
 PF-01 | À FAIRE | OutbuildingPacker Rust [GELÉ FL] | game/scripts/map/outbuilding_layer.gd | oui
@@ -76,7 +76,7 @@ BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs |
 
 ## MC map
 MC1 | PARTIEL | relief_decoder.rs Rust existe ; png16.gd (GD) et chemins 8bit toujours là | game/scripts/map/png16.gd | oui
-MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants | game/scripts/util/cmd_args.gd | non
+MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants ; voir PF-06 (sc/devflags 10-09) | game/scripts/util/cmd_args.gd | non
 MC6 | À FAIRE | folk_scenes 680 l, 10 archétypes -> 4 | game/scripts/map/life_folk/folk_scenes.gd | non | [MÉCANIQUE visuelle]
 MC8 | PARTIEL | army_markers 656 l non découpé | game/scripts/map/army_markers.gd | non
 MC10 | FAIT (sc/relief, ADR 0203) | = PF-02 | - | non
@@ -105,7 +105,7 @@ CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/
 ## BT battle (3D)
 BT2 | PARTIEL | stages/hooks retirés ; bench + flags A/B restent dans battle_scene (2439 l) | game/scripts/battle/battle_scene.gd | non
 BT3 | À FAIRE | figurine rigide : battle_meshes.gd 1093 l, battle_soldier.gdshader (garder engins), 27 glb | game/scripts/battle/battle_meshes.gd, game/shaders/battle_soldier.gdshader | non
-BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) | game/scripts/battle | non
+BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) ; voir PF-06 (sc/devflags 10-09) | game/scripts/battle | non
 BT5 | À FAIRE | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
 BT6 | À FAIRE | manifeste skinné cuit hors ligne, suppr NT12/NT13 mocap trials | game/scripts/battle/battle_skinned.gd, tools | non
 BT7 | FAIT 24bbff975 (Rust: hauteurs, rivière, relief, maillages ; split Splat/Mesh/Scatter) | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
@@ -118,7 +118,7 @@ BT12 | À FAIRE | battle_scene structure replay/banners/audio, perf _refresh_vie
 ## SH shaders
 SH1 | PARTIEL | fx_noise fait pour fx ; ~24 copies hash/vnoise/fbm restent, noise_common absent (terrain GELÉ) | game/shaders/*.gdshader | non | [visuel léger]
 SH2 | À FAIRE | campaign_map_data.gdshaderinc + river_common (terrain GELÉ) | game/shaders | non
-SH5 | PARTIEL | = BT4/PF-06 (uniform bool da6/ga*/sr2 restent dans battle_ground, battle_soldier_skinned) | game/shaders | non
+SH5 | PARTIEL | = BT4/PF-06 (uniform bool da6/ga*/sr2 restent dans battle_ground, battle_soldier_skinned) ; voir PF-06 (sc/devflags 10-09) | game/shaders | non
 SH6 | À FAIRE | sea_nearby cache terrain (GELÉ) | game/shaders/terrain.gdshader | non
 SH7 | FAIT 31cca7fa1 (2 uniformes morts ; fonctions mortes non traitées) | uniformes/fonctions morts | game/shaders | non
 SH8 | À FAIRE | battle_ground detail_height 9 lectures -> dFdx (change le rendu, écarté par battledev) | game/shaders/battle_ground.gdshader | non | [visuel]
@@ -139,7 +139,7 @@ MB1 | FAIT (sc/relief, ADR 0203) | = PF-02 (pyramide obligatoire, suppr tuilé, 
 MB2 | FAIT (sc/relief, ADR 0203) | relief_quadtree sélection GD (= AD8b) | game/scripts/map/relief_quadtree.gd | non
 MB3 | FAIT (ADR 0204, sc/veg ; vegetation_tile_job.gd gardé réduit à la requête) | = PF-03 | game/scripts/map/vegetation_tile_job.gd | non
 MB4 | À FAIRE | StreamedTileLayer commun (5 couches) [vegetation GELÉ] | game/scripts/map | non
-MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) | game/scripts/map | non
+MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) ; voir PF-06 (sc/devflags 10-09) | game/scripts/map | non
 MB6 | FAIT (sc/dt2) | relief_cache_notice (117) + relief_cache_status (241) -> push_warning | game/scripts/map/relief_cache_*.gd | non
 MB7 | À FAIRE | parchemin décor marin animé suppr, redraw à la demande | game/scripts/map/parchment_decor.gd, shaders/parchment_sea.gdshaderinc | non | [MÉCANIQUE visuelle]
 MB9 | À FAIRE | life_effects points typés (life reground GELÉ) | game/scripts/map/life_effects.gd | non

@@ -8,7 +8,7 @@ render_mode cull_disabled;
 // Lot AS5 : onde de vent. La toile ondule le long de sa normale (phase = position dans le plan de
 // la toile, avancée par le temps) ; l'amplitude (part de la taille de la bannière, `banner_size`)
 // croît avec la rafale partagée de la carte (`campaign_wind.gdshaderinc`, la même que pour les
-// forêts et les imposteurs d'arbres). `amplitude` = 0 : bannière immobile (`--no-as5`).
+// forêts et les imposteurs d'arbres). `amplitude` = 0 : bannière immobile.
 
 #include "res://shaders/campaign_wind.gdshaderinc"
 

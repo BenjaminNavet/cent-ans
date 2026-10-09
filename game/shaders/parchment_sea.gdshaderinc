@@ -8,7 +8,7 @@ uniform vec4 pm_roses[4];  // x, y (px carte), rayon (px carte), 1 = active
 uniform int pm_rose_count = 0;
 uniform float pm_rhumb_alpha = 0.4;
 // Lot FA6 : rose des vents peinte (Atlas catalan de 1375), texture par défaut du shader posée par
-// `ParchmentDecor` ; absente (`--no-fa-parchment`) = rose dessinée ci-dessous. Convention de
+// `ParchmentDecor` ; absente = rose dessinée ci-dessous. Convention de
 // `parchment_ornaments.py` : rose centrée, son cercle occupe `PM_ROSE_CIRCLE` du demi-côté de la
 // texture, nord de la carte en haut. La rose de l'Atlas est plus grande que la rose dessinée :
 // `PM_ROSE_EXTENT` = demi-côté de la texture en rayons de rose (`pm_roses[i].z`).

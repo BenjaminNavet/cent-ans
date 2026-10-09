@@ -1,7 +1,7 @@
 // ME1 (chantier DN, mer vivante) : fonds clairs et caustiques, crêtes du large, saturation bornée,
 // estrans (marée) et liseré de ressac lisible au dézoom. Inclus par `water.gdshader` après
 // `value_noise` ; réglé par `SeaLife.apply()` depuis `data/fx/sea_life.json`.
-// `sea_life_on` = false (`--no-sea-life`, ou pas de données) : rendu inchangé.
+// `sea_life_on` = false (pas de données) : rendu inchangé.
 uniform bool sea_life_on = false;
 uniform float sea_gain = 1.0;                 // luminosité de la mer
 uniform float sea_cloud_shadow_gain = 1.0;    // part de l'ombre des cumulus gardée sur l'eau

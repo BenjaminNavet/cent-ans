@@ -86,7 +86,7 @@ var quality_max_distance: float = -1.0
 var ga3_near_impostors: bool = false
 ## Lot DN-FORET (ADR 0221) : arbres proches (`generalised_mesh_distance`) en maillages décimés des
 ## modèles générés du paquet (`DnTreeModels`), un MultiMesh par essence et par partie ; null sans
-## paquet de modèles (imposteurs seuls, comportement précédent). `--no-dn-trees` : désactivé.
+## paquet de modèles (imposteurs seuls, comportement précédent).
 var use_dn_models: bool = true
 var _dn_models: DnTreeModels = null
 var _foliage_params: Dictionary = {}
@@ -235,7 +235,7 @@ func build(data: MapData) -> void:
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_dn_models = null
-	if use_dn_models and generalised and species != null and _native != null and _native.has_method("split_rows") and not CmdArgs.has("--no-dn-trees"):
+	if use_dn_models and generalised and species != null and _native != null and _native.has_method("split_rows"):
 		var models := DnTreeModels.new(species)
 		if models.available():
 			_dn_models = models

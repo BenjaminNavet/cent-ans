@@ -135,10 +135,10 @@ func _setup_fauna() -> void:
 	stats["fauna"] = fauna.stats
 
 
-## DN-PAYS : campagne vivante hors champs (rendu seul, `--no-countryside` ou `--life-off=countryside`).
+## DN-PAYS : campagne vivante hors champs (rendu seul, `--life-off=countryside`).
 ## Colonies, hameaux et routes viennent de `SettlementData` ; lacs et marais de la couche de faune.
 func _setup_countryside() -> void:
-	if _off.has("countryside") or CmdArgs.has("--no-countryside") or _settlements == null or _settlements.data == null:
+	if _off.has("countryside") or _settlements == null or _settlements.data == null:
 		return
 	var towns := PackedVector2Array()
 	var villages: Array = []

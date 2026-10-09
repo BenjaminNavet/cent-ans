@@ -190,7 +190,7 @@ func _start(line: Dictionary) -> void:
 	_player.stream = stream
 	_player.play()
 	var director := get_node_or_null("/root/AudioDirector")
-	if director != null and director.has_method("duck_music"):
+	if director != null:
 		director.call("duck_music", DUCK_DB, spoken + 0.5)
 
 

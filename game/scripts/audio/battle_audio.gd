@@ -251,7 +251,7 @@ func _duck(entry: Dictionary) -> void:
 	if duck_db >= 0.0:
 		return
 	var director := get_node_or_null("/root/AudioDirector")
-	if director != null and director.has_method("duck_music"):
+	if director != null:
 		director.call("duck_music", duck_db, float(entry.get("duck_seconds", 3.0)))
 
 
