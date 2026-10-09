@@ -13,6 +13,9 @@ Chantier SC (simplification) : voir `docs/wip/sc-simplification.md`, catalogue `
   `rm -rf core/target` en fin de lot (disque).
 - Godot : headless seulement (`godot --headless --path game --script res://tests/<test>.gd`), tests
   ciblés sur les fichiers touchés. Aucune capture, aucun lancement fenêtré.
+  Lot sans changement dans core/ : la dylib du worktree est souvent périmée → `rm -f game/bin/libcent_ans.*.dylib`
+  puis copier celles du checkout principal (jamais `cp` par-dessus : signature macOS cassée, Godot tué en 137
+  avec un journal vide), puis `--import`.
 - Commits `wip:` réguliers ; mettre à jour la ligne du lot dans `docs/wip/sc/restants.md`
   (FAIT / PARTIEL + ce qui reste). ADR dans le bloc indiqué si une mécanique change.
 - Rapport final concis : commits, ce qui est fait, ce qui reste, tests lancés et résultats.
