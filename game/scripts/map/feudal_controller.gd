@@ -275,7 +275,7 @@ func _fill_calls() -> void:
 				func() -> void: answer_call(offer, true))
 			_button(row, "Se dérober", "Perte de prestige et de loyauté de vos vassaux ; le vassal peut changer d'allégeance.", "Shirk",
 				func() -> void: answer_call(offer, false))
-		elif str(call.get("kind", "")) == "summons":  # ADR 0146 : sommation de paix du suzerain
+		elif str(call.get("kind", "")) == "peace_summons":  # ADR 0146 : sommation de paix du suzerain
 			_button(row, "Obéir", "Paix blanche et trêve avec %s." % str(call.get("target_name", "")), "Obey",
 				func() -> void: answer_call(offer, true, "Vous faites la paix."))
 			_button(row, "Passer outre", "La guerre continue ; votre loyauté envers votre suzerain baisse.", "Defy",
