@@ -45,6 +45,19 @@ impl CampaignState {
             }
             religion::change_favor(self, attacker, -30);
             self.change_ruler_prestige(attacker, -30);
+            let text = format!(
+                "{} rompt la trêve qui le liait à {} : parjure.",
+                data.faction_name(attacker),
+                data.faction_name(target)
+            );
+            crate::negotiation::record_rupture(
+                self,
+                attacker,
+                target,
+                crate::negotiation::Rupture::Perjury,
+                &["truce"],
+                &text,
+            );
         } else if casus_belli.is_none() {
             for other in &others {
                 self.add_modifier(other, attacker, -20, AGGRESSION_REASON, 40);
@@ -188,6 +201,20 @@ impl CampaignState {
                     crate::feudal::release_from_liege(self, &ally);
                 }
                 self.add_modifier(defender, &ally, -30, "A refusé l'appel aux armes", 40);
+                let refusal = format!(
+                    "{} refuse l'appel aux armes de {} contre {}.",
+                    data.faction_name(&ally),
+                    data.faction_name(defender),
+                    data.faction_name(aggressor)
+                );
+                crate::negotiation::record_rupture(
+                    self,
+                    &ally,
+                    defender,
+                    crate::negotiation::Rupture::RefusedCall,
+                    &["alliance"],
+                    &refusal,
+                );
                 let text = format!(
                     "{} refuse de soutenir {} : l'alliance est rompue.",
                     data.faction_name(&ally),

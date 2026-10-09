@@ -162,6 +162,8 @@ pub enum DiplomacyError {
     NoSchism,
     #[error("obédience invalide")]
     InvalidObedience,
+    #[error("aucun accès militaire accordé à cette faction")]
+    NoMilitaryAccess,
     #[error("pas d'accord commercial à rompre")]
     NoTradeAgreement,
     #[error("la faction virtuelle des rebelles ne négocie pas")]
@@ -178,10 +180,10 @@ mod upkeep;
 mod view;
 mod war;
 pub use ai::{
-    answers_call_to_arms, claim_stakes, claimed_provinces, is_cornered, main_claim, plan_diplomacy,
-    rivals, war_ready, weariness_to_declare, ClaimStakes, DESERTION_WAR_SCORE, MAX_ALLIANCES,
-    OPPORTUNIST_AGGRESSION, OPPORTUNIST_RATIO, PRETENDER_AGGRESSION, PRETENDER_PEACE_RELUCTANCE,
-    SURRENDER_WAR_SCORE, WAR_REST_TURNS,
+    answers_call_to_arms, call_to_arms_forecast, claim_stakes, claimed_provinces, is_cornered,
+    main_claim, plan_diplomacy, rivals, war_ready, weariness_to_declare, CallForecast, ClaimStakes,
+    DESERTION_WAR_SCORE, MAX_ALLIANCES, OPPORTUNIST_AGGRESSION, OPPORTUNIST_RATIO,
+    PRETENDER_AGGRESSION, PRETENDER_PEACE_RELUCTANCE, SURRENDER_WAR_SCORE, WAR_REST_TURNS,
 };
 pub use upkeep::loyalty_target;
 pub(crate) use upkeep::{on_line_extinct, resolve_diplomacy};

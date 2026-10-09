@@ -232,6 +232,10 @@ pub enum Order {
     BreakAlliance {
         target: FactionId,
     },
+    /// WH `diploa`: withdraws the military access granted to `target`.
+    RevokeMilitaryAccess {
+        target: FactionId,
+    },
     SetEmbargo {
         target: FactionId,
         active: bool,

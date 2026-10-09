@@ -355,6 +355,33 @@ pub struct TreatyRecord {
     /// Article keys.
     pub articles: Vec<String>,
     pub text_fr: String,
+    /// WH `diploa`: set when this entry records a breach of word rather than
+    /// a negotiated treaty (then `accepted` is false).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rupture: Option<Rupture>,
+}
+
+/// A breach recorded in the treaty history.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Rupture {
+    /// A pact (alliance, trade, military access) ended by one side.
+    Broken,
+    /// War declared in the middle of a truce.
+    Perjury,
+    /// An ally refused the call to arms.
+    RefusedCall,
+}
+
+impl Rupture {
+    /// Key shown to the UI.
+    pub fn key(self) -> &'static str {
+        match self {
+            Rupture::Broken => "broken",
+            Rupture::Perjury => "perjury",
+            Rupture::RefusedCall => "refused_call",
+        }
+    }
 }
 
 /// Diplomatic memory of a faction (DP1): war goals, weariness, standing
@@ -959,6 +986,35 @@ fn record(
                 accepted,
                 articles: keys.clone(),
                 text_fr: text.clone(),
+                rupture: None,
+            });
+            let excess = f.ledger.history.len().saturating_sub(HISTORY_LENGTH);
+            f.ledger.history.drain(..excess);
+        }
+    }
+}
+
+/// Records a breach of word (`breaker` towards `other`) in both histories
+/// (WH `diploa`): `breaker` is the one who broke, refused or perjured.
+pub(crate) fn record_rupture(
+    state: &mut CampaignState,
+    breaker: &FactionId,
+    other: &FactionId,
+    rupture: Rupture,
+    articles: &[&str],
+    text: &str,
+) {
+    let turn = state.turn;
+    for (me, with, proposed) in [(breaker, other, true), (other, breaker, false)] {
+        if let Some(f) = state.factions.get_mut(me) {
+            f.ledger.history.push(TreatyRecord {
+                turn,
+                with: with.clone(),
+                proposed,
+                accepted: false,
+                articles: articles.iter().map(|a| (*a).to_owned()).collect(),
+                text_fr: text.to_owned(),
+                rupture: Some(rupture),
             });
             let excess = f.ledger.history.len().saturating_sub(HISTORY_LENGTH);
             f.ledger.history.drain(..excess);

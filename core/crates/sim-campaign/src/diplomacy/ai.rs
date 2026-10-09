@@ -165,6 +165,18 @@ pub fn weariness_to_declare(data: &GameData, faction: &crate::state::FactionStat
     }
 }
 
+/// Answer of an ally to a call to arms, as shown by the war preview.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CallForecast {
+    /// The ally marches.
+    Joins,
+    /// Not crippled and not hostile (attitude within `call_forecast`
+    /// `hesitate_floor`..=0): it stays out, but only just.
+    Hesitates,
+    /// The ally stays out, for the given reason.
+    Refuses(&'static str),
+}
+
 /// Would `ally` answer the call to arms of `defender` attacked by
 /// `aggressor` (M5 § 2.3, F4)? Vassals follow a loyal tie, overlords
 /// protect their vassals, other allies march unless they resent the
@@ -176,30 +188,55 @@ pub fn answers_call_to_arms(
     defender: &FactionId,
     aggressor: &FactionId,
 ) -> bool {
+    call_to_arms_forecast(state, data, ally, defender, aggressor) == CallForecast::Joins
+}
+
+/// Pure forecast behind [`answers_call_to_arms`] (WH `diploa`): same
+/// decision, with the nuance and the reason of a refusal.
+pub fn call_to_arms_forecast(
+    state: &CampaignState,
+    data: &GameData,
+    ally: &FactionId,
+    defender: &FactionId,
+    aggressor: &FactionId,
+) -> CallForecast {
     let Some(ally_state) = state.factions.get(ally) else {
-        return false;
+        return CallForecast::Refuses("faction disparue");
     };
     if ally_state.suzerain.as_ref() == Some(defender) {
-        return crate::feudal::answers_host(state, data, ally, defender, aggressor);
+        return if crate::feudal::answers_host(state, data, ally, defender, aggressor) {
+            CallForecast::Joins
+        } else {
+            CallForecast::Refuses("vassal peu loyal")
+        };
     }
     if state
         .factions
         .get(defender)
         .is_some_and(|f| f.suzerain.as_ref() == Some(ally))
+        || ally == &state.player_faction
     {
-        return true;
-    }
-    if ally == &state.player_faction {
-        return true;
+        return CallForecast::Joins;
     }
     let attitude = state.attitude(data, ally, defender).0;
     // EQ6: an exhausted realm stays out, as a ruined one.
     let exhausted = data.ai_diplomacy.join_war.weary_stay_out
         && data.ai_diplomacy.negotiation.enabled
         && ally_state.ledger.weariness > weariness_to_declare(data, ally_state);
-    let crippled = ally_state.treasury < 0 || exhausted;
+    if ally_state.treasury < 0 {
+        return CallForecast::Refuses("trésorerie vide");
+    }
+    if exhausted {
+        return CallForecast::Refuses("épuisé par la guerre");
+    }
     let grudge = rivals(state, ally).contains(aggressor);
-    !crippled && (attitude > 0 || (grudge && attitude > -20))
+    if attitude > 0 || (grudge && attitude > -20) {
+        CallForecast::Joins
+    } else if attitude >= data.diplomacy_rules.call_forecast.hesitate_floor {
+        CallForecast::Hesitates
+    } else {
+        CallForecast::Refuses("rancune envers le défenseur")
+    }
 }
 
 /// Diplomatic orders of an AI faction for this turn (spec § 2.3, F4).
