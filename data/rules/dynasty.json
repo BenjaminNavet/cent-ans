@@ -1,0 +1,19 @@
+{
+  "majority_age": 15,
+  "marriage_min_age": 14,
+  "fertile_age_min": 16,
+  "fertile_age_max": 45,
+  "base_birth_permille": 250,
+  "wounded_after_defeat_permille": 150,
+  "veteran_battles": 5,
+  "siege_master_sieges": 3,
+  "cruel_raids": 3,
+  "general_death_permille": 50,
+  "ruler_death_permille": 10,
+  "regency_unrest_penalty": 5,
+  "prestige_victory": 5,
+  "prestige_marriage": 3,
+  "prestige_effect_divisor": 5.0,
+  "piety_effect_divisor": 10.0,
+  "max_yearly_building_piety": 3
+}

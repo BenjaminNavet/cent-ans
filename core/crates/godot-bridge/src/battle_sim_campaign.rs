@@ -56,14 +56,8 @@ impl CampaignSim {
                 let breach = settlement_state
                     .and_then(|s| s.siege.as_ref())
                     .map_or(0, |s| i64::from(s.breach));
-                let settlement_name = data
-                    .settlements
-                    .get(&view.location)
-                    .map_or_else(|| view.location.to_string(), |s| s.name.display.clone());
-                let province_name = data
-                    .provinces
-                    .get(&view.province)
-                    .map_or_else(|| view.province.to_string(), |p| p.name.display.clone());
+                let settlement_name = data.settlement_name(&view.location);
+                let province_name = data.province_name(&view.province);
                 let seed = state.seed
                     ^ (u64::from(state.turn()) << 20)
                     ^ ((view.index as u64) << 8)

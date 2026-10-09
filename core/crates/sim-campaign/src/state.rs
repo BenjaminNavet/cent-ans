@@ -881,7 +881,7 @@ impl CharacterState {
 
     /// `true` once the character has reached majority (spec § 2: 15 years).
     pub fn is_major(&self, year: i32) -> bool {
-        self.age(year) >= crate::dynasty::MAJORITY_AGE
+        self.age(year) >= crate::dynasty::rules().majority_age
     }
 }
 

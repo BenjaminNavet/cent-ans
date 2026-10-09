@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/dynasty_rules.schema.json",
+  "title": "Règles de la dynastie",
+  "description": "Fichier data/rules/dynasty.json (chantier SC CA7) : âges, naissances, morts au combat, seuils de traits, rendements de prestige et de piété. Lu par sim-campaign::dynasty::DynastyRules.",
+  "type": "object",
+  "properties": {
+    "majority_age": { "type": "integer", "minimum": 0, "maximum": 60, "description": "Âge de majorité : en deçà, ni commandement, ni gouvernement, ni règne seul (régence)." },
+    "marriage_min_age": { "type": "integer", "minimum": 0, "maximum": 60, "description": "Âge minimal du mariage." },
+    "fertile_age_min": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Plus jeune âge fertile de la mère (naissance d'hiver)." },
+    "fertile_age_max": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Plus vieil âge fertile de la mère, inclus." },
+    "base_birth_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Probabilité de base (pour mille) d'une naissance par couple fertile et par hiver." },
+    "wounded_after_defeat_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) d'être blessé après une défaite." },
+    "veteran_battles": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Batailles livrées avant le trait vétéran." },
+    "siege_master_sieges": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Sièges gagnés avant le trait maître de siège." },
+    "cruel_raids": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Raids menés avant le trait cruel." },
+    "general_death_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) qu'un général vaincu meure sur le champ." },
+    "ruler_death_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Même chance pour un souverain en titre, mieux protégé et plus souvent rançonné." },
+    "regency_unrest_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Troubles ajoutés à chaque province d'une faction en régence." },
+    "prestige_victory": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige gagné pour une victoire en bataille." },
+    "prestige_marriage": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Prestige gagné pour un mariage." },
+    "prestige_effect_divisor": { "type": "number", "exclusiveMinimum": 0, "description": "Les effets annuels de prestige (bâtiments, techniques, traits, compétences) sont divisés par ce nombre." },
+    "piety_effect_divisor": { "type": "number", "exclusiveMinimum": 0, "description": "La piété annuelle des bâtiments est divisée par ce nombre." },
+    "max_yearly_building_piety": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Piété maximale gagnée par un souverain grâce aux bâtiments en un an." }
+  },
+  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "veteran_battles", "siege_master_sieges", "cruel_raids", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety"],
+  "additionalProperties": false
+}

@@ -279,7 +279,7 @@ impl CampaignState {
         let mut unrest = 0.0;
         if let Some(f) = self.factions.get(controller) {
             if f.regency {
-                unrest += f64::from(crate::dynasty::REGENCY_UNREST_PENALTY);
+                unrest += f64::from(crate::dynasty::rules().regency_unrest_penalty);
             }
             if is_excommunicated(self, controller) {
                 unrest += 10.0;

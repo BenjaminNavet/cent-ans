@@ -93,10 +93,6 @@ fn coalition_power(cache: &PlanCache, faction: &FactionId, except: &[&FactionId]
     own + members
 }
 
-fn label(data: &GameData, faction: &FactionId) -> String {
-    data.faction_label(faction)
-}
-
 // =========================================================================
 // Reactive decisions (the core's call points)
 // =========================================================================
@@ -114,7 +110,7 @@ pub fn protection_score(
     let w = &weights(data).protection;
     let mut terms: Vec<(i32, String)> = vec![(
         w.base,
-        format!("devoir de protection envers {}", label(data, vassal)),
+        format!("devoir de protection envers {}", data.faction_label(vassal)),
     )];
     // The liege's side: itself and its loyal direct vassals (the host it
     // would summon), against the aggressor and its allies.
@@ -226,7 +222,7 @@ pub fn arbitration(
                 Arbitration::TakeSide {
                     side: favoured.clone(),
                 },
-                format!("préfère {}", label(data, favoured)),
+                format!("préfère {}", data.faction_label(favoured)),
             );
         }
     }

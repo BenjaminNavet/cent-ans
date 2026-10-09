@@ -822,8 +822,8 @@ impl CampaignState {
         let movement_left = entry.movement_left;
         let voyage = crate::voyage::sea_voyage(self, data, &army_faction, &from, to_port)
             .ok_or_else(|| OrderError::NoSeaRoute {
-                from: settlement_label(data, &from),
-                to: settlement_label(data, to_port),
+                from: data.settlement_name(&from),
+                to: data.settlement_name(to_port),
             })?;
         if movement_left < full {
             return Err(OrderError::EmbarkNeedsFullTurn);
@@ -979,9 +979,4 @@ pub fn settlements_near(
         })
         .cloned()
         .collect()
-}
-
-/// Display name of a settlement (its id when unknown), for order errors.
-fn settlement_label(data: &GameData, id: &SettlementId) -> String {
-    data.settlement_name(id)
 }

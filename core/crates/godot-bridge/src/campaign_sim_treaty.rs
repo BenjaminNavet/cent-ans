@@ -279,10 +279,7 @@ fn side_dict(
         .iter()
         .filter(|(_, s)| &s.owner == side && s.kind != SettlementKind::City)
         .map(|(id, s)| {
-            let name = data
-                .settlements
-                .get(id)
-                .map_or_else(|| id.to_string(), |d| d.name.display.clone());
+            let name = data.settlement_name(id);
             vdict! {
                 "id" => id.as_str(),
                 "name" => name.as_str(),

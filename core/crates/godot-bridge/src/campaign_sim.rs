@@ -1307,11 +1307,9 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
         .get(&view.id)
         .filter(|c| c.captive)
         .and_then(|c| c.captor.clone());
-    let captor_name = captor.as_ref().map_or(String::new(), |f| {
-        data.factions
-            .get(f)
-            .map_or_else(|| f.to_string(), |d| d.name.display.clone())
-    });
+    let captor_name = captor
+        .as_ref()
+        .map_or(String::new(), |f| data.faction_label(f));
     let ransom = if captor.is_some() {
         sim_campaign::ransom::ransom_amount(state, data, &view.id)
     } else {

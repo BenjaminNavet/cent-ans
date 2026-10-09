@@ -27,9 +27,7 @@ pub fn campaign_roll(state: &CampaignState, faction: &FactionId, salt: u64) -> u
     for b in faction.as_str().bytes() {
         x = x.rotate_left(5) ^ u64::from(b);
     }
-    x = (x ^ (x >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    x = (x ^ (x >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    (x ^ (x >> 31)) % 1000
+    data_model::util::splitmix_mix(x) % 1000
 }
 
 /// Planning slot of `faction` (same as `plan_diplomacy`'s), for the

@@ -32,7 +32,7 @@ GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crate
 
 ## CB sim-campaign
 CB1 | RIEN À FAIRE | settle_side_outcomes/losses_percent/retreat_losers n'existent plus nulle part dans core/ (grep `fn`), battle_flow absent : déjà refondu | - | -
-CB7 | PARTIEL | GameData::province_name/faction_name existent ; restes bridge (campaign_sim.rs, treaty, feudal), custom.rs faction_name, From<Season>/dist | core/crates/godot-bridge/src, sim-battle/src/custom.rs | oui
+CB7 | FAIT sc/ca2 | restes: custom.rs faction_name (sim-battle), From<Season>/dist, title_name, campaign_sim_diplomacy allies (filtre inconnus) laissés | core/crates/godot-bridge/src, sim-battle/src/custom.rs | oui
 CB8 | FAIT | hostile_settlement_cells toujours fonction non cachée, passe-plats/depart() à vérifier | core/crates/sim-campaign/src/march.rs, movement/ | oui ; RIEN À FAIRE : depart() n'existe plus ; hostile_blocker garde 4 appelants ; cache dans CampaignState = risque de périmé sans gain mesuré (PlanCache existe pour l'IA)
 CB10 | FAIT 7822c9ba6 | debug_stage_siege/landmark_siege/battle + debug_put_encounter_site regroupés dans src/staging.rs ; sg3_assault_probe.rs conservé (2 tests avec assertions, sonde en --ignored) | core/crates/sim-campaign/src/staging.rs | oui
 CB12 | FAIT | constantes naval en data faites ; mémo win_chance non vérifié | core/crates/sim-battle/src/naval | oui ; RIEN À FAIRE : win_chance (vue UI) simule 5 combats par requête distincte, jamais deux fois les mêmes entrées
@@ -85,14 +85,14 @@ MC13 | PARTIEL | MapInstancing fait ; fusion marqueurs/feedback, AI replay 1 mod
 MC15 | À FAIRE | commentaires Lot/ADR (293) + doc-comments (EN DERNIER) | game/scripts/** | non
 
 ## CA sim-campaign diplo/agents
-CA2 | PARTIEL | effects.rs créé (EFFECTS) mais chronicle.rs reste 1361 l, apply/describe_effect non unifiés | core/crates/sim-campaign/src/chronicle.rs | oui
-CA5 | PARTIEL | names.rs absent ; helpers sur GameData ; copies is_rebels/faction_label/splitmix restantes (bridge) | core/crates/data-model/src/{load,util}.rs, godot-bridge | oui
-CA7 | PARTIEL | constantes diplo/nego en data (treaty) ; dynasty/feudal à vérifier | core/crates/sim-campaign/src/{dynasty,feudal}.rs | oui
+CA2 | FAIT sc/ca2 | chronicle 1361 -> ~870 l (event_actions.rs, plague.rs) ; apply/describe déjà unifiés dans effects.rs | core/crates/sim-campaign/src/chronicle.rs | oui
+CA5 | FAIT sc/ca2 | copies splitmix (retinue, ai/alignment) et alias label (ai/feudal, march) supprimés ; siege_fx hash01 gardé (stream de bataille) | core/crates/data-model/src/{load,util}.rs, godot-bridge | oui
+CA7 | FAIT sc/ca2 | dynasty -> data/rules/dynasty.json + schéma (DynastyRules) ; feudal MAX_DEPTH = garde-fou structurel, laissé | core/crates/sim-campaign/src/{dynasty,feudal}.rs | oui
 CA9 | FAIT fdf3c8465 | dynasty marriage_blocker partagé, crusade/tests.rs (feudal/escalation.rs absent) | core/crates/sim-campaign/src/{dynasty,crusade}.rs | oui
 CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
 
 ## CC sim-campaign reste
-CC3 | PARTIEL | = CA5 | - | oui
+CC3 | FAIT sc/ca2 (= CA5) | - | oui
 CC5 | PARTIEL | TurnBudget fait ; economy legacy (province_income, alias) à vérifier | core/crates/sim-campaign/src/economy.rs | oui
 CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
 CC8 | FAIT c9eb470d1 | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui

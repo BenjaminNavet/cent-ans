@@ -55,6 +55,7 @@ pub mod economy_balance;
 pub mod edicts;
 pub mod effects;
 pub mod encounter;
+pub mod event_actions;
 pub mod events;
 pub mod feudal;
 pub mod frontier;
@@ -72,6 +73,7 @@ pub mod news_relevance;
 pub mod orders;
 pub mod passage;
 pub mod path_plan;
+pub mod plague;
 pub mod plan_cache;
 pub mod population;
 pub mod possession;
@@ -136,8 +138,7 @@ pub use coinage::{CoinageError, CoinageLevel, CoinageParams};
 pub use crusade::{CrusadeError, CrusadeState, CrusadeView, FervorChange, PendingPassage};
 pub use diplomacy::{Claim, DiplomacyEntry, DiplomacyError, Offer, OpinionModifier, RelationKind};
 pub use dynasty::{
-    CharacterView, ChildView, GovernorError, MarriageError, TraitView, MAJORITY_AGE,
-    MARRIAGE_MIN_AGE,
+    CharacterView, ChildView, DynastyRules, GovernorError, MarriageError, TraitView,
 };
 pub use economy::{FactionEconomy, TaxRate};
 pub use encounter::{

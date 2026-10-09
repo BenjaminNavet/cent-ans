@@ -14,37 +14,65 @@ use crate::events::{EventKind, GameEvent};
 use crate::skills;
 use crate::state::{CampaignState, CharacterState};
 
-/// Age of majority (spec § 2): below it, a character cannot command, govern
-/// or rule alone (a regency is opened for a ruler).
-pub const MAJORITY_AGE: i32 = 15;
-/// Minimum age to marry (spec § 2).
-pub const MARRIAGE_MIN_AGE: i32 = 14;
-/// Fertile age range of the mother for the winter birth roll (spec § 2).
-pub const FERTILE_AGE_RANGE: std::ops::RangeInclusive<i32> = 16..=45;
-/// Base probability (per mille) of a birth per married, fertile couple per
-/// winter (spec § 2: "probabilité 25 % × (1 + Fertility)").
-pub const BASE_BIRTH_PERMILLE: u32 = 250;
-/// Chance (per mille) of being wounded after a defeat (spec § 2).
-pub const WOUNDED_AFTER_DEFEAT_PERMILLE: u32 = 150;
-/// Battles fought before `trait_veteran` is granted (spec § 2).
-pub const VETERAN_BATTLES: u32 = 5;
-/// Sieges won before `trait_siege_master` is granted (spec § 2).
-pub const SIEGE_MASTER_SIEGES: u32 = 3;
-/// Raids led before `trait_cruel` is granted (spec § 2).
-pub const CRUEL_RAIDS: u32 = 3;
-/// Chance (per mille) that a defeated general dies on the field (spec § 2).
-pub const GENERAL_DEATH_PERMILLE: u32 = 50;
-/// Same for a reigning sovereign, better protected and more often ransomed
-/// than killed (F4: kings seldom fell in battle; Jean l'Aveugle at Crécy is
-/// the exception).
-pub const RULER_DEATH_PERMILLE: u32 = 10;
-/// Unrest penalty applied to every province of a faction under regency
-/// (spec § 2).
-pub const REGENCY_UNREST_PENALTY: u8 = 5;
-/// Prestige gained for a battle victory / a marriage / a new title.
-pub const PRESTIGE_VICTORY: i32 = 5;
-pub const PRESTIGE_MARRIAGE: i32 = 3;
-pub const PRESTIGE_TITLE: i32 = 10;
+/// Dynasty tuning (spec § 2, F1, F4, G1), `data/rules/dynasty.json`: ages,
+/// birth and death odds, trait thresholds, prestige and piety yields.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DynastyRules {
+    /// Age of majority: below it, a character cannot command, govern or rule
+    /// alone (a regency is opened for a ruler).
+    pub majority_age: i32,
+    /// Minimum age to marry.
+    pub marriage_min_age: i32,
+    /// Youngest fertile mother for the winter birth roll.
+    pub fertile_age_min: i32,
+    /// Oldest fertile mother for the winter birth roll (inclusive).
+    pub fertile_age_max: i32,
+    /// Base probability (per mille) of a birth per married, fertile couple
+    /// per winter ("probabilité 25 % x (1 + Fertility)").
+    pub base_birth_permille: u32,
+    /// Chance (per mille) of being wounded after a defeat.
+    pub wounded_after_defeat_permille: u32,
+    /// Battles fought before `trait_veteran` is granted.
+    pub veteran_battles: u32,
+    /// Sieges won before `trait_siege_master` is granted.
+    pub siege_master_sieges: u32,
+    /// Raids led before `trait_cruel` is granted.
+    pub cruel_raids: u32,
+    /// Chance (per mille) that a defeated general dies on the field.
+    pub general_death_permille: u32,
+    /// Same for a reigning sovereign, better protected and more often
+    /// ransomed than killed (F4).
+    pub ruler_death_permille: u32,
+    /// Unrest penalty applied to every province of a faction under regency.
+    pub regency_unrest_penalty: u8,
+    /// Prestige gained for a battle victory.
+    pub prestige_victory: i32,
+    /// Prestige gained for a marriage.
+    pub prestige_marriage: i32,
+    /// Yearly `Prestige` effects (buildings, technologies, traits, skills)
+    /// are divided by this (F1): a cathedral adds 2 a year.
+    pub prestige_effect_divisor: f64,
+    /// `Piety` of buildings is a yearly figure divided by this (G1).
+    pub piety_effect_divisor: f64,
+    /// Most piety a ruler gains from buildings in one year (G1).
+    pub max_yearly_building_piety: i32,
+}
+
+data_model::bundled_rules!(DynastyRules, "rules/dynasty.json");
+
+impl DynastyRules {
+    /// Fertile age range of the mother.
+    pub fn fertile_age_range(&self) -> std::ops::RangeInclusive<i32> {
+        self.fertile_age_min..=self.fertile_age_max
+    }
+}
+
+/// The bundled dynasty rules.
+pub fn rules() -> &'static DynastyRules {
+    DynastyRules::bundled()
+}
+
 /// Fallback first names used only when no `data.names` list matches a
 /// culture (spec § 1 asks for ~30 per culture; this is a tiny safety net).
 const FALLBACK_MALE_NAMES: &[&str] = &["Jean", "Guillaume", "Pierre", "Robert", "Thomas"];
@@ -98,7 +126,7 @@ fn marriage_blocker(
     if a.sex == b.sex {
         return Some(MarriageError::SameSex);
     }
-    if a.age(year) < MARRIAGE_MIN_AGE || b.age(year) < MARRIAGE_MIN_AGE {
+    if a.age(year) < rules().marriage_min_age || b.age(year) < rules().marriage_min_age {
         return Some(MarriageError::TooYoung);
     }
     if a.spouse.is_some() || b.spouse.is_some() {
@@ -155,7 +183,7 @@ pub fn propose_marriage(
         .spouse = Some(character.clone());
     for id in [character, spouse] {
         let c = state.characters.get_mut(id).expect("checked above");
-        c.prestige += PRESTIGE_MARRIAGE;
+        c.prestige += rules().prestige_marriage;
     }
     // Orders apply immediately and are not part of the turn journal (like
     // `Build`/`AssignGeneral`): `end_turn` overwrites `CampaignState::events`
@@ -280,7 +308,7 @@ pub fn on_battle_resolved(
     skills::grant_experience(state, general, xp);
     if won {
         let c = state.characters.get_mut(general).expect("exists");
-        c.prestige += PRESTIGE_VICTORY;
+        c.prestige += rules().prestige_victory;
     }
     // C7: a companion may join the general (victory first, then any battle).
     let joined = won
@@ -308,12 +336,15 @@ pub fn on_battle_resolved(
     };
     c.battles_fought += 1;
     let battles = c.battles_fought;
-    if battles >= VETERAN_BATTLES {
+    if battles >= rules().veteran_battles {
         let veteran = TraitId::new("trait_veteran").expect("well-formed id");
         skills::grant_trait(state, data, general, &veteran);
     }
     if !won {
-        if state.rng.chance_permille(WOUNDED_AFTER_DEFEAT_PERMILLE) {
+        if state
+            .rng
+            .chance_permille(rules().wounded_after_defeat_permille)
+        {
             let wounded = TraitId::new("trait_wounded").expect("well-formed id");
             if skills::grant_trait(state, data, general, &wounded) {
                 events.push(
@@ -334,9 +365,9 @@ pub fn on_battle_resolved(
             .get(faction)
             .is_some_and(|f| f.ruler.as_ref() == Some(general));
         let permille = if ruler {
-            RULER_DEATH_PERMILLE
+            rules().ruler_death_permille
         } else {
-            GENERAL_DEATH_PERMILLE
+            rules().general_death_permille
         };
         if state.rng.chance_permille(permille) {
             crate::characters::kill(state, data, general, events);
@@ -351,7 +382,7 @@ pub fn on_siege_won(state: &mut CampaignState, data: &GameData, general: &Charac
         return;
     };
     c.sieges_won += 1;
-    if c.sieges_won >= SIEGE_MASTER_SIEGES {
+    if c.sieges_won >= rules().siege_master_sieges {
         let siege_master = TraitId::new("trait_siege_master").expect("well-formed id");
         skills::grant_trait(state, data, general, &siege_master);
     }
@@ -363,7 +394,7 @@ pub fn on_raid_led(state: &mut CampaignState, data: &GameData, general: &Charact
         return;
     };
     c.raids_led += 1;
-    if c.raids_led >= CRUEL_RAIDS {
+    if c.raids_led >= rules().cruel_raids {
         let cruel = TraitId::new("trait_cruel").expect("well-formed id");
         skills::grant_trait(state, data, general, &cruel);
     }
@@ -687,7 +718,7 @@ pub(crate) fn resolve_births(
             c.alive
                 && c.sex == Sex::Female
                 && c.spouse.is_some()
-                && FERTILE_AGE_RANGE.contains(&c.age(year))
+                && rules().fertile_age_range().contains(&c.age(year))
         })
         .map(|(id, _)| id.clone())
         .collect();
@@ -706,7 +737,7 @@ pub(crate) fn resolve_births(
             [EffectKind::Fertility]
             .flat
             .max(skills::character_effects(state, data, &father_id)[EffectKind::Fertility].flat);
-        let permille = (f64::from(BASE_BIRTH_PERMILLE) * (1.0 + fertility_percent / 100.0))
+        let permille = (f64::from(rules().base_birth_permille) * (1.0 + fertility_percent / 100.0))
             .round()
             .clamp(0.0, 1000.0) as u32;
         if !state.rng.chance_permille(permille) {
@@ -809,7 +840,7 @@ pub(crate) fn resolve_regencies(
             {
                 province.unrest = province
                     .unrest
-                    .saturating_add(REGENCY_UNREST_PENALTY)
+                    .saturating_add(rules().regency_unrest_penalty)
                     .min(100);
             }
             if !was_regency {
@@ -846,10 +877,6 @@ pub(crate) fn resolve_regencies(
     }
 }
 
-/// Prestige effects (buildings, technologies, the ruler's traits and skills)
-/// are yearly figures divided by this (F1): a cathedral adds 2 a year.
-pub const PRESTIGE_EFFECT_DIVISOR: f64 = 5.0;
-
 /// Yearly prestige of a faction's ruler from its `Prestige` effects (F1):
 /// buildings of the provinces it controls, its technologies (gothic
 /// flamboyant, printing press) and the ruler's own traits and skills.
@@ -871,20 +898,14 @@ pub fn yearly_court_prestige(state: &CampaignState, data: &GameData, faction: &F
     let tech = crate::research::faction_tech_effects(state, data, faction)[EffectKind::Prestige]
         .apply(0.0);
     let own = skills::character_effects(state, data, &ruler)[EffectKind::Prestige].apply(0.0);
-    ((buildings + tech + own) / PRESTIGE_EFFECT_DIVISOR).round() as i32
+    ((buildings + tech + own) / rules().prestige_effect_divisor).round() as i32
         // C7: the retinue's prestige is already a yearly figure.
         + crate::retinue::yearly_prestige(state, data, &ruler)
 }
 
-/// G1: `Piety` of buildings is a yearly figure divided by this (a cathedral,
-/// +10, adds 1 piety a year to the ruler).
-pub const PIETY_EFFECT_DIVISOR: f64 = 10.0;
-/// G1: most piety a ruler gains from buildings in one year.
-pub const MAX_YEARLY_BUILDING_PIETY: i32 = 3;
-
 /// Yearly piety of a faction's ruler from the `Piety` effects of the
 /// buildings of the provinces it controls (G1), capped at
-/// [`MAX_YEARLY_BUILDING_PIETY`]. Trait and skill piety is read through
+/// `max_yearly_building_piety`. Trait and skill piety is read through
 /// `religion::effective_piety` instead.
 pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &FactionId) -> i32 {
     let buildings: f64 = state
@@ -893,7 +914,8 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
         .filter(|s| &s.controller == faction)
         .map(|s| crate::buildings::effects_of(data, &s.buildings)[EffectKind::Piety].apply(0.0))
         .sum();
-    ((buildings / PIETY_EFFECT_DIVISOR).round() as i32).clamp(0, MAX_YEARLY_BUILDING_PIETY)
+    ((buildings / rules().piety_effect_divisor).round() as i32)
+        .clamp(0, rules().max_yearly_building_piety)
 }
 
 /// Phase (winter): every ruler gains its [`yearly_court_prestige`], its

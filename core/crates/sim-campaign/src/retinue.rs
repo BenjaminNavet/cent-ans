@@ -112,14 +112,6 @@ fn fnv1a(parts: &[&[u8]]) -> u64 {
     hash
 }
 
-/// SplitMix64 finaliser.
-fn mix(mut z: u64) -> u64 {
-    z = z.wrapping_add(0x9e37_79b9_7f4a_7c15);
-    z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-    z ^ (z >> 31)
-}
-
 /// Deterministic roll in `0..1000` for `character` meeting `companion` on
 /// `occasion` this turn (seed, turn, ids and occasion hashed together).
 pub fn roll_permille(
@@ -135,7 +127,7 @@ pub fn roll_permille(
         companion.as_str().as_bytes(),
         occasion.as_bytes(),
     ]);
-    (mix(key) % 1000) as u32
+    (data_model::util::splitmix64(key) % 1000) as u32
 }
 
 /// `true` when `id` may gain `companion` now: alive, free, room left, not

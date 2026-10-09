@@ -9,16 +9,11 @@ use sim_campaign::sea_lanes::{sea_lanes, SeaLaneView};
 use crate::campaign_sim::{CampaignSim, Ctx};
 
 fn lane_dict(data: &data_model::GameData, lane: &SeaLaneView) -> VarDictionary {
-    let settlement_name = |id: &data_model::SettlementId| {
-        data.settlements
-            .get(id)
-            .map_or_else(|| id.to_string(), |s| s.name.display.clone())
-    };
-    let control_name = lane.control_faction.as_ref().map_or_else(String::new, |f| {
-        data.factions
-            .get(f)
-            .map_or_else(|| f.to_string(), |x| x.short_or_display_name().to_owned())
-    });
+    let settlement_name = |id: &data_model::SettlementId| data.settlement_name(id);
+    let control_name = lane
+        .control_faction
+        .as_ref()
+        .map_or_else(String::new, |f| data.faction_name(f));
     let trade: PackedStringArray = lane
         .trade_routes
         .iter()

@@ -64,7 +64,6 @@ fn portugal_keeps_its_house_through_1337_in_a_france_game() {
 
 #[test]
 fn sovereigns_are_safer_than_generals_in_defeat() {
-    const _: () = assert!(
-        sim_campaign::dynasty::RULER_DEATH_PERMILLE < sim_campaign::dynasty::GENERAL_DEATH_PERMILLE
-    );
+    let rules = sim_campaign::dynasty::rules();
+    assert!(rules.ruler_death_permille < rules.general_death_permille);
 }
