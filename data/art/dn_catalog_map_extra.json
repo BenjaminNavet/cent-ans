@@ -1874,7 +1874,7 @@
  {
   "id": "env_harvest_sheaves",
   "kind": "decor",
-  "prompt": "stooks of wheat sheaves standing in a field row, golden",
+  "prompt": "a medieval harvest stook: eight to ten bound sheaves of cut golden wheat leaned upright against each other in a small tent-shaped cluster, each sheaf tied around its middle with a twisted straw band, cut straw ends flat at the bottom, heavy bearded ears drooping at the top",
   "seeds": 3,
   "backend3d": "both",
   "ingest": {

@@ -25804,99 +25804,39 @@
         "dn/props/env_harvest_sheaves_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.85,
-        "width": 2.22,
-        "height": 1.27
+        "length": 1.243,
+        "width": 1.243,
+        "height": 1.303
       },
       "triangles": [
         1500,
         500,
-        104
+        121
       ],
       "tex": 512,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/3d/fal__s1337.glb",
-      "yaw_deg": 0.0,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/sheaves2/3d/sf3d_s1337/0/mesh.glb",
+      "yaw_deg": 180.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2991,
-          "mean_s": 0.4895,
-          "p95_s": 0.6016
+          "mean_luma": 0.3191,
+          "mean_s": 0.3578,
+          "p95_s": 1.0
         },
         "after": {
-          "mean_luma": 0.3094,
-          "mean_s": 0.3929,
+          "mean_luma": 0.3303,
+          "mean_s": 0.2569,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.045,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/sheaves2/cut/s1337.png",
+      "model_3d": "sf3d-local",
+      "cost_usd": 0.0,
       "generation": {
         "id": "env_harvest_sheaves",
-        "images": [
-          {
-            "ts": "2026-10-09T07:16:06",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:16:07",
-            "seed": 1339,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1339.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1339,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          },
-          {
-            "ts": "2026-10-09T07:16:12",
-            "seed": 1338,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1338.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1338,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_map_extra.json",
-        "target": "fields:sheaves (ete)",
-        "region": null,
-        "catalogue_prompt": "stooks of wheat sheaves standing in a field row, golden. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single stooks of wheat sheaves standing in a field row, golden. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_height_m": 1.2,
-          "class": "prop"
-        },
         "calls_3d": [
           {
-            "ts": "2026-10-09T07:25:17",
+            "ts": "2026-10-09T14:26:59",
             "seed": 1337,
             "endpoint": "fal-ai/trellis",
             "mode": "single-view",
