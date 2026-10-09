@@ -4,6 +4,8 @@ core/target*/
 game/.godot/
 game/*.import
 !game/**/*.import
+# Modèles 3D générés : paquet de release (ADR 0212), installés par tools/launch.sh
+game/assets/models/dn/
 game/export/
 # Python
 .venv/
