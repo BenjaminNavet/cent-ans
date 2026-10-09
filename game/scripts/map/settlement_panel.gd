@@ -375,11 +375,6 @@ func queue_fit_height() -> void:
 	pass
 
 
-func show_recruit() -> void:
-	tabs.current_tab = TAB_GARRISON
-	recruit_panel.show()
-
-
 func show_buildings_tab() -> void:
 	tabs.current_tab = TAB_BUILDINGS
 

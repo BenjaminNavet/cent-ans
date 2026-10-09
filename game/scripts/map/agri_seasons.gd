@@ -28,7 +28,3 @@ static func load_variants(data_dir: String) -> Array:
 	return (parsed as Dictionary).get("seasonal_variants", []) if parsed is Dictionary else []
 
 
-static func load_ingested(data_dir: String) -> Dictionary:
-	var text := FileAccess.get_file_as_string(data_dir.path_join(MANIFEST))
-	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
-	return (parsed as Dictionary).get("assets", {}) if parsed is Dictionary else {}

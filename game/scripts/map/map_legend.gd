@@ -134,13 +134,6 @@ func set_max_height(height: float) -> void:
 		reset_size()
 
 
-## Fait défiler la légende jusqu'à la section `section_id` (captures).
-func scroll_to_section(section_id: String) -> void:
-	var heading := _sections_box.get_node_or_null("Section_" + section_id) as Control
-	if heading != null:
-		_scroll.scroll_vertical = int(heading.position.y)
-
-
 func close_legend() -> void:
 	hide()
 	closed.emit()

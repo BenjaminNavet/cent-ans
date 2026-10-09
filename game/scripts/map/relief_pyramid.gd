@@ -54,11 +54,6 @@ var _broken: Dictionary = {}
 var _tile_count: int = 0
 
 
-## Tuiles le long d'un axe à l'étage k, pour `root_tiles` tuiles E0 sur cet axe.
-static func tiles_across(root_tiles: int, level: int) -> int:
-	return root_tiles << level
-
-
 ## Tuiles en x à l'étage k (index `row * cols(k) + col`).
 func cols(level: int) -> int:
 	return root_cols << level

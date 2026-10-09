@@ -409,10 +409,6 @@ func held_text() -> String:
 	return PossessionText.held_line(int(possession.get("held", 0)), int(possession.get("total", 0)), str(possession.get("whole_holder", "")), str(possession.get("player", "")))
 
 
-func show_settlements_tab() -> void:
-	tabs.current_tab = tabs.get_tab_count() - 1
-
-
 func _fill_settlements(label_of: Callable, is_player_owner: bool) -> void:
 	var rows: Array = settlement_rows_provider.call(province_id) if settlement_rows_provider.is_valid() else []
 	var help := "%s\n%s" % [possession_help(), held_text()] if not possession.is_empty() else ""

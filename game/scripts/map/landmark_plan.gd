@@ -412,17 +412,6 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 		(out["gates"] as Array).append({"x": p.x, "y": p.y, "yaw": atan2(d.y, d.x), "base": deck - 0.5, "height": 13.0, "palisade": false, "fixed": true, "bridge": bridge_index})
 
 
-## Niveaux d'un pont de `a` à `c` : [tablier, eau, berges] (m). Eau = point le plus bas du
-## milieu du pont ; tablier au moins à hauteur de la berge la plus basse.
-static func _deck_levels(a: Vector2, c: Vector2, deck_m: float, heights: TownPlan.Heights) -> Array:
-	var mid := (a + c) * 0.5
-	var bank := minf(heights.height_m(a.x, a.y), heights.height_m(c.x, c.y))
-	var water := heights.height_m(mid.x, mid.y)
-	for k in 5:
-		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
-	return [maxf(bank, water + deck_m), water, bank]
-
-
 ## Niveaux du pont (m) : eau sous le tablier (point le plus bas du milieu), rives aux deux bouts,
 ## tablier = max(rive la plus basse, eau + `deck_m`).
 static func _bridge_levels(bridge: Dictionary, heights: TownPlan.Heights) -> void:

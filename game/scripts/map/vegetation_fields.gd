@@ -53,33 +53,6 @@ static func to_map(layout: int, u: float, v: float) -> Vector2:
 	return Vector2(x0, y0) + warp(x0, y0, params[3])
 
 
-## (u, v) non déformés d'un point du repère intermédiaire (x0, y0).
-static func to_uv(layout: int, x0: float, y0: float) -> Vector2:
-	var params: Array = LAYOUTS[layout]
-	var k: float = params[0]
-	return Vector2((x0 + k * y0) / float(params[1]), (y0 - k * x0) / float(params[2]))
-
-
-## Décalage de rangée de la colonne `column` (jonctions en T).
-static func row_offset(layout: int, column: int) -> float:
-	return Hash.lcg01(column * 5023 + 17 + layout * 101)
-
-
-## Tirage d'un bord à u constant (`line`), segment `segment` = floor(v).
-static func roll_u_edge(layout: int, line: int, segment: int) -> float:
-	return Hash.lcg01(line * 7919 + segment * 104729 + layout * 7 + 1)
-
-
-## Tirage d'un bord de rangée (`row` dans le repère décalé de la colonne `column`).
-static func roll_v_edge(layout: int, row: int, column: int) -> float:
-	return Hash.lcg01(row * 7919 + column * 104729 + layout * 7 + 31)
-
-
-## Probabilité qu'un bord d'enclos porte une haie (même formule dans le shader).
-static func hedge_probability(open_land: float, bocage: float) -> float:
-	return open_land * lerpf(0.1, 0.75, bocage)
-
-
 # --- Occupation du sol ---
 
 

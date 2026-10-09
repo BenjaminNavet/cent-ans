@@ -22,8 +22,7 @@ class FakeSim:
 	extends RefCounted
 
 	var turn := 1
-	var events: Array = []
-	var pending: Array = []
+	var history: Array = []
 	var armies: Dictionary = {}
 	var engines: Dictionary = {}
 	var odds_calls := 0
@@ -31,11 +30,8 @@ class FakeSim:
 	func get_turn() -> int:
 		return turn
 
-	func get_events() -> Array:
-		return events
-
-	func get_pending_events() -> Array:
-		return pending
+	func get_battle_history() -> Array:
+		return history
 
 	func get_army(id: String) -> Dictionary:
 		return armies.get(id, {})
@@ -196,12 +192,7 @@ func _check_battlefield(block: Dictionary) -> void:
 	var sim := FakeSim.new()
 	var turns := int(block["turns"])
 	check(WarScars.battlefield_turns() == turns and turns >= 2, "battlefield duration read from data: %d" % WarScars.battlefield_turns())
-	armies.positions["army_1"] = Vector3(50.0, 3.0, 60.0)
-	sim.events = [
-		{"kind": "income", "province": "prov_a", "army": "", "text_fr": "Recettes."},
-		{"kind": "battle", "province": "prov_a", "army": "army_1", "text_fr": "Bataille de A."},
-		{"kind": "battle", "province": "prov_a", "army": "army_1", "text_fr": "L'ost gagne en renom."},
-	]
+	sim.history = [{"province": "prov_a", "turn": sim.turn, "position": Vector2(50.0, 60.0), "attacker_losses": 3, "defender_losses": 5}]
 	scars.refresh(sim)
 	check(scars.battlefield_keys() == ["prov_a"], "one marked field per battle province: %s" % [scars.battlefield_keys()])
 	var at := scars.battlefield_at("prov_a")
@@ -233,7 +224,6 @@ func _check_battlefield(block: Dictionary) -> void:
 	scars.update_view(float(block["max_distance"]) * 1.5, 1.0)
 	check(not node.visible, "battlefield hidden beyond max_distance")
 	# Les tours passent sans nouvelle bataille : corbeaux, débris, puis tertre s'en vont.
-	sim.events = []
 	for age in range(1, turns + 1):
 		sim.turn += 1
 		scars.refresh(sim)
@@ -245,24 +235,6 @@ func _check_battlefield(block: Dictionary) -> void:
 			break
 		check((_count(node, "Crow_") > 0) == (age < int(block["crow_turns"])), "crows at age %d: %d" % [age, _count(node, "Crow_")])
 		check((_count(node, "Debris_") > 0) == (age < int(block["debris_turns"])), "debris at age %d: %d" % [age, _count(node, "Debris_")])
-	# Bataille de la main du joueur (événement en attente, sans armée) : marquée tout de suite à
-	# la position lue du pont ; reprise au journal du tour suivant, elle ne repart pas de zéro.
-	sim.armies["army_2"] = {"position": Vector2(10.0, 20.0)}
-	sim.pending = [{"kind": "battle", "province": "", "army": "army_2", "text_fr": "Escarmouche."}]
-	scars.refresh(sim)
-	check(scars.battlefield_keys() == ["army:army_2"], "pending battle marked at once: %s" % [scars.battlefield_keys()])
-	check(scars.battlefield_at("army:army_2").distance_to(Vector2(10.0, 20.0)) <= WarScars.FIELD_OFFSET + 0.01, "pending battle at the army position")
-	var marked_turn := sim.turn
-	sim.turn += 1
-	sim.events = sim.pending
-	sim.pending = []
-	scars.refresh(sim)
-	check(int(scars._fields["army:army_2"]["turn"]) == marked_turn, "journal copy of a known battle does not restart the mark")
-	# Sans position connue : rien.
-	sim.events = [{"kind": "battle", "province": "prov_unknown", "army": "", "text_fr": "?"}]
-	sim.turn += 1
-	scars.refresh(sim)
-	check(not scars.battlefield_keys().has("prov_unknown"), "no mark without a known place")
 	# Partie chargée : oubli.
 	scars.reset()
 	check(scars.battlefield_keys().is_empty(), "reset forgets the marked fields")

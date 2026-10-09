@@ -234,10 +234,6 @@ func chunk_count() -> int:
 	return _chunks.size()
 
 
-func near_chunk_count() -> int:
-	return _is_near.count(1)
-
-
 func fine_chunk_count() -> int:
 	return _is_near.count(2)
 
@@ -320,15 +316,6 @@ static func grid_height(grid: Dictionary, lx: float, ly: float) -> float:
 	if tx >= ty:
 		return ha + (hb - ha) * tx + (hd - hb) * ty
 	return ha + (hd - hc) * tx + (hc - ha) * ty
-
-
-## Couleurs par propriétaire (id de faction → Color), repli quand `set_province_colors`
-## n'est pas appelé.
-func set_owner_colors(colors: Dictionary) -> void:
-	_owner_colors = colors
-	if map_data != null:
-		_build_faction_texture()
-		material.set_shader_parameter("faction_colors", _faction_texture)
 
 
 ## Couleur explicite par province (`colors[index - 1]`, alpha 0 = neutre) : source de vérité

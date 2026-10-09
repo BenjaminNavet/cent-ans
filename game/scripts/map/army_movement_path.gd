@@ -104,11 +104,6 @@ func _set_warning(on: bool) -> void:
 			material.set_shader_parameter("color", trespass_color if on else pair[1])
 
 
-## Vrai si le chemin affiché est un avertissement d'intrusion (DP2).
-func is_warning() -> bool:
-	return visible and _warning
-
-
 func hide_path() -> void:
 	_points = PackedVector2Array()
 	_turn_ends = PackedInt32Array()

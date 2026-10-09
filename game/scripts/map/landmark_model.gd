@@ -352,17 +352,6 @@ func set_year(new_year: int) -> void:
 			(child as Node3D).visible = year >= span.x and year <= span.y
 
 
-## VH4 (ADR 0078) : opacité de la maquette (tramage) pendant le fondu vers la ville 1:1 ;
-## cachée sous 1 %.
-func set_fade(alpha: float) -> void:
-	if is_equal_approx(alpha, _fade):
-		return
-	_fade = alpha
-	visible = alpha > 0.01
-	for material in _materials:
-		material.set_shader_parameter("fade", alpha)
-
-
 ## Hauteur de la surface au centre (pose des étiquettes et du picking).
 func ground_height() -> float:
 	return _terrain.surface_height_at(position.x, position.z) if _terrain != null else 0.0

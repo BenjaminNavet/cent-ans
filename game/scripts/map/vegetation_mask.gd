@@ -4,9 +4,8 @@ extends RefCounted
 ## Masques de végétation de la carte de campagne (lot V3, rendu seulement).
 ##
 ## Source préférée : `data/map/splat.png` (lot V2), RGBA dans le repère de `province_ids.png` :
-## R = prairie, G = cultures, B = forêt, A = roche/lande. Si le fichier manque (ou est illisible),
-## repli procédural : terrain dominant de la province (`data/provinces/<id>.json`, champ
-## `terrain`), altitude, pente et bruit. Les deux sources donnent des densités [0, 1].
+## R = prairie, G = cultures, B = forêt, A = roche/lande (obligatoire depuis la pyramide de relief,
+## ADR 0203 ; plus de repli procédural). Les densités sont dans [0, 1].
 ##
 ## Lecture seule après `setup` : les fonctions d'échantillonnage peuvent être appelées depuis
 ## des tâches de `WorkerThreadPool` (le bruit est dupliqué par tâche, voir `make_noise`).
@@ -17,35 +16,6 @@ const FOREST_COVER_FILE := "forest_cover.json"
 ## Lot HB4 (ADR 0143) : carte des biomes (indice 8 bits, 0 mer, 1 océanique … 7 semi-aride).
 const BIOMES_FILE := "biomes.png"
 const CHANNELS := {"r": 0, "g": 1, "b": 2, "a": 3}
-
-## Densité de forêt de base par terrain dominant (repli procédural).
-const FOREST_BY_TERRAIN := {
-	"forest": 0.80,
-	"bocage": 0.38,
-	"hills": 0.40,
-	"mountains": 0.42,
-	"plains": 0.20,
-	"heath": 0.08,
-	"marsh": 0.14,
-	"": 0.26,
-}
-## Part de terres cultivées par terrain dominant (repli procédural).
-const CROPS_BY_TERRAIN := {
-	"forest": 0.15,
-	"bocage": 0.85,
-	"hills": 0.45,
-	"mountains": 0.10,
-	"plains": 0.85,
-	"heath": 0.10,
-	"marsh": 0.20,
-	"": 0.35,
-}
-
-## Voisinage (px) moyenné pour le terrain dominant, décalé de manière irrégulière.
-const NEIGHBORHOOD: Array[Vector2] = [
-	Vector2(0, 0), Vector2(17, 5), Vector2(-6, 16), Vector2(-16, -7), Vector2(5, -18),
-	Vector2(30, -22), Vector2(-28, 26),
-]
 
 var map_data: MapData
 ## "splat" ou "procedural".
@@ -314,32 +284,12 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var altitude_factor := 1.0 - smoothstep(treeline - 350.0, treeline, height_m)
 	var slope_factor := 1.0 - smoothstep(0.35, 0.8, slope)
 	var n := noise.get_noise_2d(x, y)
-	var forest: float
-	var crops: float
-	if has_splat():
-		var splat := splat_at(x, y)
-		# Poids de mélange du terrain → densité de semis : massifs nets là où la texture de
-		# forêt domine, arbres isolés rares ailleurs.
-		forest = smoothstep(0.22, 0.68, splat.b)
-		# Campagne ouverte (cultures + prairies) : bosquets, arbres isolés et haies.
-		crops = clampf(splat.g + 0.6 * splat.r, 0.0, 1.0)
-	else:
-		# Terrain moyenné sur un voisinage : les lisières ne suivent pas les frontières de province.
-		var base := 0.0
-		var crop_base := 0.0
-		for offset in NEIGHBORHOOD:
-			var t := terrain_at(x + offset.x, y + offset.y)
-			base += float(FOREST_BY_TERRAIN.get(t, FOREST_BY_TERRAIN[""]))
-			crop_base += float(CROPS_BY_TERRAIN.get(t, CROPS_BY_TERRAIN[""]))
-		base /= NEIGHBORHOOD.size()
-		crop_base /= NEIGHBORHOOD.size()
-		# Massifs nets avec clairières : seuil du bruit d'autant plus bas que le terrain est boisé.
-		var threshold := 0.55 - base * 1.25
-		forest = smoothstep(threshold - 0.08, threshold + 0.10, n)
-		# Les fonds de vallée et le littoral bas sont plus défrichés.
-		forest *= lerpf(0.55, 1.0, smoothstep(20.0, 180.0, height_m))
-		crops = crop_base * (1.0 - forest)
-		crops *= 1.0 - smoothstep(600.0, 1100.0, height_m)
+	var splat := splat_at(x, y)
+	# Poids de mélange du terrain → densité de semis : massifs nets là où la texture de
+	# forêt domine, arbres isolés rares ailleurs.
+	var forest := smoothstep(0.22, 0.68, splat.b)
+	# Campagne ouverte (cultures + prairies) : bosquets, arbres isolés et haies.
+	var crops := clampf(splat.g + 0.6 * splat.r, 0.0, 1.0)
 	if has_forest_cover():
 		forest = smoothstep(_cover_low, _cover_high, _texel(_cover_bytes, _cover_size, map_data.size, x, y, _cover_channel))
 	forest *= altitude_factor * slope_factor

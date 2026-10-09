@@ -171,13 +171,6 @@ func request_exit(kind: String) -> void:
 	pause_menu._request_exit(kind)
 
 
-func toggle_pause() -> void:
-	if is_paused():
-		close_pause()
-	else:
-		open_pause()
-
-
 func go_to_main_menu() -> void:
 	get_tree().paused = false
 	SceneFader.go(START_MENU_SCENE)

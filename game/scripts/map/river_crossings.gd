@@ -324,15 +324,6 @@ func _place_generated(item: Dictionary) -> void:
 	child.transform = node.transform.affine_inverse() * wanted
 
 
-## Nombre d'ouvrages dont le maillage est construit (tests).
-func instantiated_count() -> int:
-	var count := 0
-	for item in items:
-		if item["node"] != null:
-			count += 1
-	return count
-
-
 ## Niveau de l'eau sous le pont : relief non creusé au milieu du fleuve (surface affichée).
 func _ground(item: Dictionary) -> void:
 	var node: MeshInstance3D = item["node"]
@@ -444,15 +435,6 @@ func _fine_of(item: Dictionary) -> Dictionary:
 		return {}
 	var width_m := float(anchor.get("width_m", 0.0))
 	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(renderer.generalised_width(width_m / renderer.map_data.meters_per_px), 0.01), "z_water": anchor["z_water"], "z_deck": anchor["z_deck"]}
-
-
-## Ancrage fin (mode fin actif ou non) de l'ouvrage `id`, pour les tests : {} si aucun.
-func fine_anchor_of(id: String) -> Dictionary:
-	for item in items:
-		if str(item["id"]) == id and item.has("index"):
-			var index: int = item["index"]
-			return _fine_anchors[index] if index < _fine_anchors.size() else {}
-	return {}
 
 
 ## Bascule tous les ouvrages construits entre le tracé V4 et les ancrages fins. ZG4b : remise en

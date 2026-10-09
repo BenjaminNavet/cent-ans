@@ -600,10 +600,6 @@ func flush(camera_distance: float) -> void:
 	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count(), "road_vertices": road_vertex_count()}.merged(perf_stats())))
 
 
-func built_tile_count() -> int:
-	return _built.size()
-
-
 func river_vertex_count() -> int:
 	var total := 0
 	for entry: Dictionary in _built.values():

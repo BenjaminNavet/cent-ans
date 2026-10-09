@@ -316,11 +316,6 @@ func pick_position() -> Vector3:
 	return flag.global_position + Vector3(0.0, -2.1 if standard_mode == 2 else -1.0, 0.0) * marker_scale
 
 
-## Points de picking : étendard et figurines.
-func pick_positions() -> PackedVector3Array:
-	return PackedVector3Array([pick_position(), global_position + Vector3(0.0, 1.5, 0.0) * marker_scale])
-
-
 ## SA (ADR 0160) : silhouette de visée à l'écran — boîte du socle (large de l'emprise) au haut de
 ## l'étendard, d'au moins `PICK_MIN_HALF_PX` de demi-côté, élargie de `PICK_MARGIN_PX`. Rectangle
 ## vide si le marqueur est derrière la caméra.

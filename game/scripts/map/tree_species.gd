@@ -66,11 +66,6 @@ static func data_path() -> String:
 	return DataFile.path_of(DATA_FILE) if DataFile.exists(DATA_FILE) else ""
 
 
-## Tests : oublie la table partagée (rechargée au prochain `shared`).
-static func reset_shared() -> void:
-	_cached = null
-
-
 func load_file(path: String) -> bool:
 	ok = false
 	if path == "" or not FileAccess.file_exists(path):
@@ -196,18 +191,3 @@ func pick(role: int, biome: int, altitude_m: float, river_sd: float, conifer_sha
 	return last
 
 
-## Tirage « par peuplement » (cellules de `stand_px`) : même valeur pour tous les arbres d'une
-## cellule (`Hash.lcg01`, identique au Rust).
-func stand_roll(x: float, y: float) -> float:
-	var side := maxf(d("stand_px", 3.0), 0.1)
-	var ix := floori(x / side)
-	var iy := floori(y / side)
-	return Hash.lcg01(ix * 7919 + iy * 104729 + 17)
-
-
-## Parcelle de verger : tirage haché de la parcelle (cellules de `orchard_parcel_px`).
-func parcel_roll(x: float, y: float) -> float:
-	var side := maxf(d("orchard_parcel_px", 2.2), 0.1)
-	var ix := floori(x / side)
-	var iy := floori(y / side)
-	return Hash.lcg01(ix * 15731 + iy * 789221 + 3)

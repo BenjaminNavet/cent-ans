@@ -65,7 +65,3 @@ func grid() -> Vector2:
 	return Vector2(columns, rows)
 
 
-## Rectangle (UV 0-1) d'une case.
-func uv_rect(cell: int) -> Rect2:
-	var size := Vector2(1.0 / columns, 1.0 / rows)
-	return Rect2(Vector2(cell % columns, cell / columns) * size, size)

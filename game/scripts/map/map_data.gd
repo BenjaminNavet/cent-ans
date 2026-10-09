@@ -101,11 +101,6 @@ static func vertical_scale() -> float:
 	return _vertical_scale
 
 
-## Lot ZG4 : exagération courante (× par rapport au relief vrai, 1 unité = `meters_per_px` m).
-static func vertical_exaggeration(meters_per_unit: float = 719.0) -> float:
-	return _vertical_scale * meters_per_unit
-
-
 ## Lot ZG4 : change l'échelle verticale (propriétaire unique) et la publie aux shaders par le
 ## paramètre global `campaign_vertical_scale` (terrain, quadtree, fleuves, maquettes). Rend vrai
 ## si la valeur a changé. Appelé par `TerrainBuilder.set_vertical_scale`, qui recale les calques ;

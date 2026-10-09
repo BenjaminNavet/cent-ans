@@ -1783,14 +1783,6 @@ func refresh_top_button(button: Button) -> void:
 			return
 
 
-## Vrai si le bouton `label` (« Cour », « Techniques »…) porte son libellé en ce moment.
-func top_button_labelled(label: String) -> bool:
-	for entry in _top_labels:
-		if str(entry["label"]) == label:
-			return bool(entry["labelled"])
-	return false
-
-
 func queue_fit_top_bar() -> void:
 	if _fit_queued or not is_inside_tree():
 		return

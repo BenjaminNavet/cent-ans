@@ -59,10 +59,5 @@ func update(delta: float) -> void:
 	_publish()
 
 
-## Neige visible (0-1) : hiver plein, un peu en fin d'automne / début de printemps.
-func snow_amount() -> float:
-	return clampf(weights.w + 0.2 * weights.z + 0.25 * weights.x, 0.0, 1.0)
-
-
 func _publish() -> void:
 	RenderingServer.global_shader_parameter_set(GLOBAL_PARAM, weights)

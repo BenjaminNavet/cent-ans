@@ -146,19 +146,6 @@ static func city_kind(province_id: String) -> String:
 	return kind
 
 
-## Modèle de ville prêt à poser, ou null (repli sur le cylindre).
-static func city_model(province_id: String) -> Node3D:
-	var kind := city_kind(province_id)
-	# Lot V3 : la ville épiscopale entière (`city_cathedral`) ; `cathedral` seul reste le
-	# bâtiment isolé (décor des batailles de siège).
-	var node := instantiate("city_cathedral", CITY_SCALE) if kind == "cathedral" else null
-	if node == null:
-		node = instantiate(kind, CITY_SCALE)
-	if node == null and kind != "village":
-		node = instantiate("village", CITY_SCALE)
-	return node
-
-
 # --- Colonies et hameaux (lot C6) ----------------------------------------------------
 
 const HAMLET_VARIANTS: Array[String] = ["hamlet_a", "hamlet_b", "hamlet_c"]

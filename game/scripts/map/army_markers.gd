@@ -309,10 +309,6 @@ func army_count() -> int:
 	return _markers.size()
 
 
-func plate_count() -> int:
-	return _plates.size()
-
-
 ## Texte de la plaque d'une armée ("" si absente) : effectif et état.
 func plate_text(army_id: String) -> String:
 	var plate: PanelContainer = _plates.get(army_id)
@@ -636,11 +632,6 @@ func _plate_before(a: Dictionary, b: Dictionary) -> bool:
 	if ma.men != mb.men:
 		return ma.men > mb.men
 	return str(a["id"]) < str(b["id"])
-
-
-## Lot UX1 : décalage écran appliqué à la plaque d'une armée (Vector2.ZERO = à sa place).
-func plate_offset(army_id: String) -> Vector2:
-	return _plate_offsets.get(army_id, Vector2.ZERO)
 
 
 ## CV3-0 (#7) : rectangles écran des plaques d'armée actuellement affichées (position finale,

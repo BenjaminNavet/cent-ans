@@ -132,10 +132,6 @@ func available() -> bool:
 	return sim != null and sim.has_method("get_agents") and map.settlement_layer != null
 
 
-func token_count() -> int:
-	return _tokens.size()
-
-
 func has_token(agent_id: String) -> bool:
 	return _tokens.has(agent_id)
 

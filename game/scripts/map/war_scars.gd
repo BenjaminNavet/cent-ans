@@ -14,9 +14,7 @@ extends Node3D
 ##   pendant `battlefield.turns` tours ; corbeaux puis débris partent plus tôt. Taille des
 ##   figurines d'armée (même loi d'échelle). Lieu et tour viennent de l'historique du cœur
 ##   (`get_battle_history`, ADR 0157 « révision ») : les marques survivent au rechargement, avec
-##   leur âge. Sans cette méthode (pont plus ancien, simulation factice) : ancienne déduction
-##   depuis les événements `battle` de `get_events` et `get_pending_events` (position de l'armée
-##   de l'événement, à défaut centre de la province), vieillie en mémoire du rendu.
+##   leur âge. Sans cette méthode (pont plus ancien, simulation factice) : aucune marque.
 ## - **Siège** (`refresh`, `get_assault_odds(armée).engines`) : les engins bâtis sur place (N7,
 ##   ADR 0128) près du camp des assiégeants : charpente et tas de bois, puis maquette sous
 ##   échafaudage, puis engin prêt. Enfants des figurines de l'armée (échelle et visibilité suivies).
@@ -138,11 +136,6 @@ func refresh(sim: Object) -> void:
 	_turn = turn
 	if sim.has_method("get_battle_history"):
 		_read_history(sim.call("get_battle_history"))
-	else:
-		if new_turn and sim.has_method("get_events"):
-			_read_battles(sim, sim.call("get_events"))
-		if sim.has_method("get_pending_events"):
-			_read_battles(sim, sim.call("get_pending_events"))
 	_age_fields()
 	_refresh_sieges(sim, new_turn)
 	_update_stats()
@@ -380,64 +373,6 @@ func _read_history(history: Variant) -> void:
 		var at := source + Vector2.from_angle(Hash.vec01(hash(str(province) + str(turn)), 7) * TAU) * FIELD_OFFSET
 		_fields[province] = {"at": at, "province": province, "turn": turn, "texts": {}, "node": null, "stage": "", "seed": absi(str(province).hash()),
 			"history": true, "source": source}
-
-
-## Ancienne déduction (pont sans historique) : événements `battle` du tour.
-func _read_battles(sim: Object, events: Variant) -> void:
-	if battlefield_turns() <= 0 or not (events is Array):
-		return
-	for entry in events:
-		if not (entry is Dictionary) or str((entry as Dictionary).get("kind", "")) != "battle":
-			continue
-		var event: Dictionary = entry
-		var province := str(event.get("province", ""))
-		var army := str(event.get("army", ""))
-		var key := province if province != "" else ("army:" + army if army != "" else "")
-		if key == "":
-			continue
-		var text := str(event.get("text_fr", ""))
-		var existing: Variant = _fields.get(key)
-		if existing != null and (existing["texts"] as Dictionary).has(text):
-			continue  # déjà lu (événement de la main du joueur repris au journal du tour suivant)
-		var at := _battle_position(sim, army, province)
-		if existing != null:
-			existing["turn"] = _turn
-			existing["texts"][text] = true
-			continue
-		if at.x < 0.0:
-			continue
-		add_battlefield(key, at, _turn, province)
-		_fields[key]["texts"][text] = true
-
-
-## Endroit de la bataille : position de l'armée de l'événement (marqueur, sinon état du pont), à
-## défaut centre de la province ; (-1, -1) si inconnu.
-func _battle_position(sim: Object, army: String, province: String) -> Vector2:
-	var at := Vector2(-1.0, -1.0)
-	if army != "":
-		if _armies != null and _armies.has_method("world_position_of"):
-			var world: Vector3 = _armies.call("world_position_of", army)
-			if world != Vector3.ZERO:
-				at = Vector2(world.x, world.z)
-		if at.x < 0.0 and sim != null and sim.has_method("get_army"):
-			var state: Dictionary = sim.call("get_army", army)
-			if state.get("position") is Vector2:
-				at = state["position"]
-	if at.x < 0.0 and province != "" and _map_data != null and _map_data.index_of_id(province) > 0:
-		at = _map_data.centroid_of_id(province)
-	if at.x < 0.0:
-		return at
-	var angle := Hash.vec01(hash(army + province), 7) * TAU
-	return at + Vector2.from_angle(angle) * FIELD_OFFSET
-
-
-## Marque un champ de bataille en `at` (point carte) au tour `turn` (aussi : captures, tests).
-func add_battlefield(key: String, at: Vector2, turn: int, province: String = "") -> void:
-	if _fields.has(key):
-		_drop_field(key)
-	_fields[key] = {"at": at, "province": province, "turn": turn, "texts": {}, "node": null, "stage": "", "seed": absi(key.hash())}
-	_age_fields()
-	_update_stats()
 
 
 func _drop_field(key: String) -> void:

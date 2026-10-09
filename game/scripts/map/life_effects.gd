@@ -667,15 +667,6 @@ static func _mill_pose(point: Array) -> Array:
 	return [point[0], 0.0, 0.0, point[5], point[6], point[7], point[8]]
 
 
-## Moulin : sol des deux poses relu, sol courant recalculé.
-func _reground_windmill(point: Array) -> void:
-	var pose := _mill_pose(point)
-	_reground_point(pose)
-	point[7] = pose[5]
-	point[8] = pose[6]
-	point[4] = _pose_y(pose)
-
-
 func _on_surface_changed(index: int) -> void:
 	_reground_chunks[index] = true
 	if _reground_timer < 0.0:
@@ -761,10 +752,6 @@ func _update_mill_shadows(camera_distance: float, force := false) -> void:
 	_mill_shadows = shadows
 	var setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_windmill_bodies.cast_shadow = setting
-
-
-func mill_shadows() -> bool:
-	return _mill_shadows
 
 
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:

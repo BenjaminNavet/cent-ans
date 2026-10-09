@@ -67,10 +67,6 @@ func marker_count() -> int:
 	return _positions.size()
 
 
-func has_marker(id: String) -> bool:
-	return _ids.has(id)
-
-
 func update_scale(camera_distance: float) -> void:
 	var size := clampf(camera_distance * 0.022, 1.2, 16.0)
 	if is_equal_approx(size, _scale):
