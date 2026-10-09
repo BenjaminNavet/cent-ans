@@ -510,17 +510,16 @@ fn load_json_refuses_a_version_1_save_with_a_clear_french_message() {
         "\"state_version\":1",
     );
     let err = CampaignState::load_json(&json).unwrap_err();
-    // Lot C4: any save older than v5 predates the settlements.
     assert!(matches!(
         err,
-        sim_campaign::CampaignError::PreSettlementSave {
+        sim_campaign::CampaignError::OlderSave {
             found: 1,
             expected: sim_campaign::STATE_VERSION
         }
     ));
     let message = err.to_string();
     assert!(
-        message.contains("version") && message.contains("refonte des colonies"),
+        message.contains("version antérieure"),
         "message should be a clear French explanation: {message}"
     );
 }

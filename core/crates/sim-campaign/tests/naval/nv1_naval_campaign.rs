@@ -209,13 +209,3 @@ fn a_held_sea_blockades_enemy_ports_and_fades() {
     // The French shipyards rebuild.
     assert!(state.naval.ships_of(&fac("fac_france")) > 0);
 }
-
-#[test]
-fn older_saves_without_naval_state_load() {
-    let data = game_data();
-    let (state, _, _, _) = crossing(data, 1);
-    let mut json = serde_json::to_value(&state).unwrap();
-    json.as_object_mut().unwrap().remove("naval");
-    let back: CampaignState = serde_json::from_value(json).unwrap();
-    assert!(!back.naval.initialised);
-}

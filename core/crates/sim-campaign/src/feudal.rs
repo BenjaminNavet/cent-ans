@@ -87,7 +87,6 @@ pub struct FeudalState {
     /// `FactionState::suzerain` is derived from the titles. `false` in the
     /// version 7 saves written before F1: [`sync_suzerains`] then adopts
     /// their stored suzerains as liege overrides once.
-    #[serde(default)]
     pub derived: bool,
 }
 

@@ -322,7 +322,7 @@ fn black_death_strikes_south_first_once_per_province() {
 }
 
 #[test]
-fn chronicle_state_survives_save_and_old_saves_load() {
+fn chronicle_state_survives_save() {
     let data = game_data();
     let mut state = start(data, "fac_france", 9);
     set_war(&mut state, "fac_england", "fac_france", true);
@@ -333,14 +333,7 @@ fn chronicle_state_survives_save_and_old_saves_load() {
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded.chronicle, state.chronicle);
     assert_eq!(loaded.state_version, STATE_VERSION);
-    assert_eq!(STATE_VERSION, 8);
-
-    // A save without the `chronicle` key (written before M10) still loads.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    value.as_object_mut().unwrap().remove("chronicle");
-    let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
-    assert!(old.chronicle.fired_events.is_empty());
-    assert!(old.chronicle.pending_decisions.is_empty());
+    assert_eq!(STATE_VERSION, 9);
 }
 
 #[test]

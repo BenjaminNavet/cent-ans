@@ -716,7 +716,7 @@ fn rolls_are_deterministic_and_leave_the_main_stream_alone() {
 }
 
 #[test]
-fn saves_without_agents_still_load() {
+fn agents_survive_a_save() {
     let data = game_data();
     let mut state = start(data, "fac_france", 7);
     let france = fac("fac_france");
@@ -729,12 +729,6 @@ fn saves_without_agents_still_load() {
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded.agents, state.agents);
-    // A v5 save written before lot C6 has no `agents` key.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    value.as_object_mut().unwrap().remove("agents");
-    let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
-    assert!(old.agents.agents.is_empty());
-    assert_eq!(old.state_version, sim_campaign::STATE_VERSION);
 }
 
 #[test]

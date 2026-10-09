@@ -439,7 +439,8 @@ func _setup_campaign() -> void:
 	if not ok:
 		sim = null
 		ui.set_date("Simulation indisponible")
-		ui.show_toast("Impossible de démarrer la campagne.", true)
+		var start_error: String = SimFacade.last_load_error
+		ui.show_toast(start_error if start_error != "" else "Impossible de démarrer la campagne.", true)
 		push_error("CampaignMap: campaign could not start")
 		return
 	player_faction = str(sim.call("get_player_faction"))
@@ -1437,7 +1438,8 @@ func _on_load(path: String) -> void:
 		ui.show_toast("Attendez la fin des mouvements adverses (Espace pour passer).", true)
 		return
 	if not SimFacade.load_game(path):
-		ui.show_toast("Impossible de charger cette sauvegarde.", true)
+		var reason: String = SimFacade.last_load_error
+		ui.show_toast(reason if reason != "" else "Impossible de charger cette sauvegarde.", true)
 		return
 	sim = SimFacade.sim
 	player_faction = str(sim.call("get_player_faction"))

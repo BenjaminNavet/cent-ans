@@ -47,7 +47,7 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// (`feudal`: title holders, primary titles, felony cases). `8`: lot OM1
 /// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 8;
+pub const STATE_VERSION: u32 = 9;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -474,13 +474,8 @@ pub struct SettlementState {
     pub recruit_pool: BTreeMap<UnitTypeId, u32>,
 }
 
-/// Turn marker of a queue entry loaded from a save written before B7b (a
-/// bare unit id, always ordered in the turn being played).
-pub const LEGACY_RECRUIT_TURN: u32 = u32::MAX;
-
 /// One recruit of a settlement's queue (B7b).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(from = "QueuedRecruitRepr")]
 pub struct QueuedRecruit {
     pub unit_type: UnitTypeId,
     /// End-of-turn phases left before the unit joins the garrison (1: at
@@ -498,45 +493,7 @@ pub struct QueuedRecruit {
 impl QueuedRecruit {
     /// `true` when the entry uses one of the recruitment slots of `turn`.
     pub fn ordered_during(&self, turn: u32) -> bool {
-        self.ordered_turn == turn || self.ordered_turn == LEGACY_RECRUIT_TURN
-    }
-}
-
-/// Save compatibility: before B7b the queue held bare unit ids.
-#[derive(Deserialize)]
-#[serde(untagged)]
-enum QueuedRecruitRepr {
-    Legacy(UnitTypeId),
-    Full {
-        unit_type: UnitTypeId,
-        turns_left: u32,
-        ordered_turn: u32,
-        #[serde(default)]
-        drawn: BTreeMap<data_model::ResourceId, u32>,
-    },
-}
-
-impl From<QueuedRecruitRepr> for QueuedRecruit {
-    fn from(repr: QueuedRecruitRepr) -> Self {
-        match repr {
-            QueuedRecruitRepr::Legacy(unit_type) => QueuedRecruit {
-                unit_type,
-                turns_left: 1,
-                ordered_turn: LEGACY_RECRUIT_TURN,
-                drawn: BTreeMap::new(),
-            },
-            QueuedRecruitRepr::Full {
-                unit_type,
-                turns_left,
-                ordered_turn,
-                drawn,
-            } => QueuedRecruit {
-                unit_type,
-                turns_left,
-                ordered_turn,
-                drawn,
-            },
-        }
+        self.ordered_turn == turn
     }
 }
 
@@ -599,7 +556,6 @@ pub struct FactionState {
     /// What the last resolved turn booked, cached so
     /// [`CampaignState::faction_summary`] (which does not take [`GameData`])
     /// can still report it.
-    #[serde(default)]
     pub last_budget: crate::economy::TurnBudget,
     /// RS-C: seasons in a row closed in deficit (income below upkeep); the
     /// AI demolishes buildings after `economy.json` `ai_demolition`.
@@ -668,11 +624,9 @@ pub struct FactionState {
     // ----- H3: La Table -------------------------------------------------------
     // ----- H5: coinage (`coinage.rs`) ---------------------------------------
     /// Silver content of the faction's coins.
-    #[serde(default)]
     pub coinage: crate::coinage::CoinageLevel,
     /// Price level in per cent of the 1337 prices (100 = base); scales
     /// recruitment, upkeep and construction.
-    #[serde(default = "crate::coinage::default_price_level")]
     pub price_level: u32,
     /// Year of the last `set_coinage` (one change per year).
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1010,44 +964,34 @@ pub struct CampaignState {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub pending_events: Vec<GameEvent>,
     /// Chronicle events fired, player decisions, Black Death wave (M10).
-    #[serde(default)]
     pub chronicle: crate::chronicle::ChronicleState,
     /// The player's campaign outcome, once reached (M10).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub outcome: Option<crate::victory::Outcome>,
     /// Consecutive seasons the player has met all objectives (F9).
-    #[serde(default)]
     pub victory_streak: u32,
     /// Lot C6: spies, heralds and preachers (absent from older saves; no
     /// change of [`STATE_VERSION`]).
-    #[serde(default)]
     pub agents: crate::agents::AgentsState,
     /// Lot NV1: warship pools, sea control, intercepted crossings (absent
     /// from older saves; no change of [`STATE_VERSION`]).
-    #[serde(default)]
     pub naval: crate::naval::NavalState,
     /// Lot DF1: difficulty level, frozen after the first turn (absent from
     /// older saves, which load as `normal`; no change of [`STATE_VERSION`]).
-    #[serde(default)]
     pub difficulty: crate::difficulty::Difficulty,
     /// Lot CV3-3: map encounter sites, player encounters awaiting a choice,
     /// encounter battles in progress (absent from older saves; no change of
     /// [`STATE_VERSION`]).
-    #[serde(default)]
     pub encounters: crate::encounter::EncounterState,
     /// TW2-T1: captures waiting for the player's choice and razed places in
-    /// ruins (absent from older saves; no change of [`STATE_VERSION`]).
-    #[serde(default)]
+    /// ruins .
     pub captures: crate::capture::CaptureState,
     /// TW2-T3: mercenary reserves and this turn's hires (absent from older
     /// saves; no change of [`STATE_VERSION`]).
-    #[serde(default)]
     pub mercenaries: crate::mercenaries::MercenaryState,
     /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
-    #[serde(default)]
     pub feudal: crate::feudal::FeudalState,
-    /// Lot NT3: the player's short-term missions (absent from older saves;
-    /// no change of [`STATE_VERSION`]).
+    /// Lot NT3: the player's short-term missions .
     #[serde(default)]
     pub missions: crate::missions::MissionsState,
     /// Lot JR1: the crusader faction's fervour (`None` without

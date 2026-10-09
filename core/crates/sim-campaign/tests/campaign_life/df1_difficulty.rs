@@ -193,16 +193,11 @@ fn ai_morale_against_the_player_in_3d_and_auto_resolve() {
 }
 
 #[test]
-fn level_survives_a_save_and_old_saves_load_as_normal() {
+fn level_survives_a_save() {
     let data = game_data();
     let hard = campaign(data, Difficulty::Hard);
     let loaded = CampaignState::load_json(&hard.save_json()).expect("loads");
     assert_eq!(loaded.difficulty(), Difficulty::Hard);
-
-    let mut json: serde_json::Value = serde_json::from_str(&hard.save_json()).expect("json");
-    json.as_object_mut().unwrap().remove("difficulty");
-    let old = CampaignState::load_json(&json.to_string()).expect("old save loads");
-    assert_eq!(old.difficulty(), Difficulty::Normal);
 }
 
 #[test]

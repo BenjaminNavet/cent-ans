@@ -170,7 +170,7 @@ fn campaign_with_trade_is_deterministic() {
 }
 
 #[test]
-fn trade_state_survives_saves_and_old_saves_load() {
+fn trade_state_survives_saves() {
     let data = game_data();
     let mut state = france(data, 8);
     sign_trade_treaty(&mut state, data, "fac_flanders", "fac_england");
@@ -178,17 +178,6 @@ fn trade_state_survives_saves_and_old_saves_load() {
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
-
-    // A save written before C5 lacks the new fields entirely.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    for faction in value["factions"].as_object_mut().unwrap().values_mut() {
-        let f = faction.as_object_mut().unwrap();
-        f.remove("last_budget");
-    }
-    let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
-    let f = &old.factions[&fac("fac_flanders")];
-    assert_eq!(f.last_budget.trade_income, 0);
-    assert!(old.has_trade_agreement(&fac("fac_flanders"), &fac("fac_england")));
 }
 
 #[test]

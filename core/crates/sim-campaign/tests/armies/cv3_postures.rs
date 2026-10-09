@@ -647,8 +647,8 @@ fn entrenched_camp_needs_the_open_field_and_saves_supply() {
 // --------------------------------------------------------------- old saves
 
 #[test]
-fn old_saves_without_the_stance_fields_still_load() {
-    let (data, mut state, french, _) = ambush_setup(1.0, false);
+fn stance_fields_survive_a_save() {
+    let (_, mut state, french, _) = ambush_setup(1.0, false);
     state
         .armies
         .get_mut(&french)
@@ -661,19 +661,4 @@ fn old_saves_without_the_stance_fields_still_load() {
     let restored = CampaignState::load_json(&saved).expect("round trip");
     assert_eq!(restored.armies[&french].stance, Stance::Ambush);
     assert_eq!(restored.armies[&french].morale_modifier(), 5);
-
-    // A pre-CV3 save: no morale modifiers, no outcome, old stances only.
-    let mut json: serde_json::Value = serde_json::from_str(&saved).unwrap();
-    for army in json["armies"].as_object_mut().unwrap().values_mut() {
-        let object = army.as_object_mut().unwrap();
-        object.remove("morale_modifiers");
-        object.insert("stance".to_owned(), serde_json::json!("raid"));
-    }
-    json.as_object_mut().unwrap().remove("last_battle_outcome");
-    let old = CampaignState::load_json(&json.to_string()).expect("pre-CV3 save loads");
-    assert!(old.armies.values().all(|a| a.morale_modifiers.is_empty()));
-    assert!(old.armies.values().all(|a| a.stance == Stance::Raid));
-    assert!(old.last_battle_outcome.is_none());
-    assert_eq!(old.state_version, state.state_version);
-    let _ = data;
 }

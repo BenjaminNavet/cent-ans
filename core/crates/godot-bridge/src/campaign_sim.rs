@@ -165,6 +165,8 @@ pub struct CampaignSim {
     pub(crate) pending_turn: Option<crate::turn_job::TurnJob>,
     /// PB3d: bumped by every call that may change the state.
     pub(crate) revision: u64,
+    /// Reason of the last refused `load_from_string` (shown by the UI).
+    load_error: GString,
     base: Base<RefCounted>,
 }
 
@@ -178,6 +180,7 @@ impl IRefCounted for CampaignSim {
             state: None,
             pending_turn: None,
             revision: 0,
+            load_error: GString::new(),
             base,
         }
     }
@@ -239,9 +242,16 @@ impl CampaignSim {
             }
             Err(error) => {
                 godot_error!("CampaignSim.load_from_string failed: {error}");
+                self.load_error = GString::from(&error.to_string());
                 false
             }
         }
+    }
+
+    /// French reason of the last refused `load_from_string` (empty if none).
+    #[func]
+    fn get_load_error(&self) -> GString {
+        self.load_error.clone()
     }
 
     /// Zero-based turn counter (-1 before `new_campaign`).

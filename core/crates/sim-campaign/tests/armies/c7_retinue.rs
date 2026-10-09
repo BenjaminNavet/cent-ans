@@ -282,7 +282,7 @@ fn companions_move_between_generals_standing_together() {
 }
 
 #[test]
-fn old_saves_without_the_new_fields_still_load() {
+fn new_fields_survive_a_save() {
     let data = game_data();
     let mut state = start_quiet(data, "fac_france", 9);
     state
@@ -304,17 +304,6 @@ fn old_saves_without_the_new_fields_still_load() {
         restored.characters[&chr("chr_edward_iii")].death_year,
         Some(state.year)
     );
-
-    let mut json: serde_json::Value = serde_json::from_str(&saved).unwrap();
-    for character in json["characters"].as_object_mut().unwrap().values_mut() {
-        let object = character.as_object_mut().unwrap();
-        object.remove("retinue");
-        object.remove("death_year");
-    }
-    let old = CampaignState::load_json(&json.to_string()).expect("pre-C7 save loads");
-    assert!(old.characters.values().all(|c| c.retinue.is_empty()));
-    assert!(old.characters.values().all(|c| c.death_year.is_none()));
-    assert_eq!(old.state_version, state.state_version);
 }
 
 #[test]

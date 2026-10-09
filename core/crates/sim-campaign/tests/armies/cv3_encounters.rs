@@ -462,7 +462,7 @@ fn a_campaign_runs_with_encounters_and_leaves_no_troop_behind() {
 }
 
 #[test]
-fn old_saves_without_encounters_still_load() {
+fn encounters_survive_a_save() {
     let data = game_data();
     let mut state = start_quiet(data, "fac_france", 17);
     let _ = meet(&mut state, data, "enc_peage_pont");
@@ -471,13 +471,6 @@ fn old_saves_without_encounters_still_load() {
     assert!(saved.contains("\"encounters\""));
     let restored = CampaignState::load_json(&saved).expect("round trip");
     assert_eq!(restored.encounters, state.encounters);
-
-    let mut json: serde_json::Value = serde_json::from_str(&saved).unwrap();
-    json.as_object_mut().unwrap().remove("encounters");
-    let old = CampaignState::load_json(&json.to_string()).expect("pre-CV3 save loads");
-    assert!(old.encounters.sites.is_empty());
-    assert!(old.encounters.pending.is_empty());
-    assert_eq!(old.state_version, state.state_version);
 }
 
 #[test]

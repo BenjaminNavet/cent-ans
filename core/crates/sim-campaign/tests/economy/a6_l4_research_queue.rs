@@ -119,11 +119,11 @@ fn queue_is_bounded_and_dequeue_works() {
 }
 
 #[test]
-fn old_saves_without_the_queue_load() {
+fn research_queue_survives_a_save() {
     let data = game_data();
     let mut s = state(data);
     let json = serde_json::to_value(&s).unwrap();
-    // An empty queue is not serialised at all: an old save looks the same.
+    // An empty queue is not serialised at all.
     assert!(!json.to_string().contains("research_queue"));
     let back: CampaignState = serde_json::from_value(json).unwrap();
     assert!(back.factions[&fac()].research_queue.is_empty());

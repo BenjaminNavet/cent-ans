@@ -199,8 +199,13 @@ func read_save(path: String) -> Dictionary:
 	return parsed
 
 
+## Raison (en français) du dernier refus de `load_game`, pour l'affichage.
+var last_load_error: String = ""
+
+
 ## Restaure l'état de la sim depuis un fichier ; le moteur (réel/factice) doit correspondre.
 func load_game(path: String) -> bool:
+	last_load_error = ""
 	var wrapper := read_save(path)
 	if wrapper.is_empty():
 		push_error("SimFacade: invalid save %s" % path)
@@ -213,6 +218,7 @@ func load_game(path: String) -> bool:
 	var previous_sim: Object = sim
 	_init_sim()
 	if not bool(sim.call("load_from_string", str(wrapper["state"]))):
+		last_load_error = str(sim.call("get_load_error"))
 		sim = previous_sim
 		return false
 	return true

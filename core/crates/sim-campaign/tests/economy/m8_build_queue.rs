@@ -147,7 +147,7 @@ fn cancelling_refunds_half_and_promotes() {
 }
 
 #[test]
-fn old_saves_load_without_a_queue() {
+fn build_queue_survives_a_save() {
     let data = game_data();
     let (mut state, town) = setup(data);
     let options = available(&state, data, &town);

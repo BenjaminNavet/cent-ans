@@ -712,7 +712,7 @@ fn garter_and_star_events_found_their_orders() {
 // ----- saves and determinism ---------------------------------------------------------
 
 #[test]
-fn h5_h6_state_survives_saves_and_old_saves_load() {
+fn h5_h6_state_survives_saves() {
     let data = game_data();
     let mut state = start_quiet(data, "fac_france", 30);
     set_coinage(&mut state, data, CoinageLevel::Debased).unwrap();
@@ -723,30 +723,6 @@ fn h5_h6_state_survives_saves_and_old_saves_load() {
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
     assert_eq!(loaded, state);
-
-    // A save written before H5/H6 lacks every new field.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    for faction in value["factions"].as_object_mut().unwrap().values_mut() {
-        let f = faction.as_object_mut().unwrap();
-        for key in [
-            "coinage",
-            "price_level",
-            "coinage_changed_year",
-            "last_budget",
-            "ransom_debts",
-            "chivalric_order",
-        ] {
-            f.remove(key);
-        }
-    }
-    for character in value["characters"].as_object_mut().unwrap().values_mut() {
-        character.as_object_mut().unwrap().remove("ransom_terms");
-    }
-    let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
-    let f = &old.factions[&fac("fac_france")];
-    assert_eq!(f.coinage, CoinageLevel::Sound);
-    assert_eq!(f.price_level, PRICE_BASE);
-    assert!(f.ransom_debts.is_empty() && f.chivalric_order.is_none());
 }
 
 #[test]

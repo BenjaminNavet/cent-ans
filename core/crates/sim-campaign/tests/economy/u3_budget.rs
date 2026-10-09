@@ -69,18 +69,3 @@ fn history_chains_the_treasury_and_keeps_twelve_seasons() {
         .unwrap();
     assert_eq!(other.last, Some(last.other));
 }
-
-#[test]
-fn old_saves_without_history_load() {
-    let data = game_data();
-    let france = fac("fac_france");
-    let mut state = CampaignState::new_1337(data, france.clone(), 5).expect("1337 start");
-    state.end_turn(data);
-    let mut json = serde_json::to_value(&state).expect("serialize");
-    for faction in json["factions"].as_object_mut().unwrap().values_mut() {
-        faction.as_object_mut().unwrap().remove("budget_history");
-    }
-    let restored: CampaignState = serde_json::from_value(json).expect("old save loads");
-    assert!(restored.budget_history(&france).is_empty());
-    assert!(restored.last_budget(&france).is_none());
-}

@@ -26,7 +26,7 @@ use data_model::{GameData, ProvinceId, SettlementId};
 use serde::{Deserialize, Serialize};
 
 use crate::population::{weighted_unrest, FAMINE_DEVASTATION_THRESHOLD, PLAGUE_HEALTH_THRESHOLD};
-use crate::state::{Season, LEGACY_RECRUIT_TURN};
+use crate::state::Season;
 use crate::CampaignState;
 
 /// Recruits in the queue for a full-intensity `muster` scene.
@@ -166,7 +166,6 @@ fn settlement_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mu
                 .recruit_queue
                 .iter()
                 .map(|r| r.ordered_turn)
-                .filter(|t| *t != LEGACY_RECRUIT_TURN)
                 .min()
                 .unwrap_or(turn);
             let intensity =

@@ -317,9 +317,4 @@ fn mercenary_state_survives_a_save() {
     let json = serde_json::to_string(&state).unwrap();
     let loaded: CampaignState = serde_json::from_str(&json).unwrap();
     assert_eq!(loaded.mercenaries, state.mercenaries);
-    // An older save without the field starts with full reserves.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    value.as_object_mut().unwrap().remove("mercenaries");
-    let old: CampaignState = serde_json::from_value(value).unwrap();
-    assert!(old.mercenaries.pools.is_empty());
 }

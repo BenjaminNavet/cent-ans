@@ -817,29 +817,9 @@ fn save_load_round_trip() {
     .unwrap_err();
     assert!(matches!(
         err,
-        sim_campaign::CampaignError::PreSettlementSave { found: 1, .. }
+        sim_campaign::CampaignError::OlderSave { found: 1, .. }
     ));
-    // Lot M2: a v5 save (armies on settlements) is refused too.
-    let err = CampaignState::load_json(&json.replace(
-        &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
-        "\"state_version\":5",
-    ))
-    .unwrap_err();
-    assert!(matches!(
-        err,
-        sim_campaign::CampaignError::PreFreeMovementSave { found: 5, .. }
-    ));
-    assert!(err.to_string().contains("mouvement libre"), "{err}");
-    // Lot C4: a v4 save is refused with an explicit message.
-
-    let err = CampaignState::load_json(&json.replace(
-        &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
-        "\"state_version\":4",
-    ))
-    .unwrap_err();
-    assert!(err
-        .to_string()
-        .contains("antérieure à la refonte des colonies"));
+    assert!(err.to_string().contains("version antérieure"), "{err}");
     let err = CampaignState::load_json(&json.replace(
         &format!("\"state_version\":{}", sim_campaign::STATE_VERSION),
         "\"state_version\":99",

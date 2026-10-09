@@ -584,7 +584,7 @@ fn ai_diets_are_valid_and_deterministic() {
 }
 
 #[test]
-fn diets_survive_saves_and_old_saves_load() {
+fn diets_survive_saves() {
     let data = game_data();
     let mut state = start_quiet(data, "fac_france", 14);
     set_diet(&mut state, data, "prov_normandie", "diet_pulses").unwrap();
@@ -596,20 +596,6 @@ fn diets_survive_saves_and_old_saves_load() {
         diet("diet_pulses")
     );
     assert_eq!(loaded, state);
-
-    // A save written before H3 has neither `diet` nor `last_budget`.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    for province in value["provinces"].as_object_mut().unwrap().values_mut() {
-        province.as_object_mut().unwrap().remove("diet");
-    }
-    for faction in value["factions"].as_object_mut().unwrap().values_mut() {
-        faction.as_object_mut().unwrap().remove("last_budget");
-    }
-    let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
-    assert_eq!(
-        old.province_diet(&prov("prov_normandie")).as_str(),
-        DEFAULT_DIET
-    );
 }
 
 #[test]
