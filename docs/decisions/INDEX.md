@@ -223,8 +223,10 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0257 | [Équilibrage de campagne après la revue d'experts (lot RX equil)](0257-equilibrage-campagne-rx-equil.md) | accepté |
 | 0258 | [L'IA de campagne lit la difficulté et tient ses sièges](0258-ia-difficulte-et-sieges.md) | accepté |
 | 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
-| 0271 | [Lecture de la carte au survol (lot WH hover)](0271-lecture-de-la-carte-au-survol.md) | n/d |
 | 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
+| 0271 | [Lecture de la carte au survol (lot WH hover)](0271-lecture-de-la-carte-au-survol.md) | n/d |
+| 0274 | [Économie lisible : décompositions, impôt par province, édits à coût](0274-economie-lisible-wh.md) | accepté |
+| 0275 | [Plafond d'emplacements de bâtiments et bâtiments de cité](0275-plafond-emplacements-batiments.md) | accepté |
 | 0276 | [Actes royaux à recharge](0276-actes-royaux.md) | accepté |
 | 0277 | [Capitaines recrutables, blessures temporaires, XP élargie](0277-capitaines-blessures-xp.md) | accepté |
 | 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |

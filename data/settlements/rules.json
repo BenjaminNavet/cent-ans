@@ -52,11 +52,11 @@
     "village": 1
   },
   "building_slot_cap": {
-    "city": 8,
-    "town": 4,
-    "castle": 3,
-    "abbey": 3,
-    "village": 2
+    "city": 10,
+    "town": 5,
+    "castle": 4,
+    "abbey": 4,
+    "village": 3
   },
   "province_effect_percent": {
     "city": 100,
