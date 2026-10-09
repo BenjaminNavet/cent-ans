@@ -246,6 +246,15 @@ func blend(x: float, z: float, generated: float, river_distance: float = INF) ->
 	return lerpf(generated, real_height(x, z), w)
 
 
+## SC BT7 : relief réel confié au noyau Rust du terrain (`BattleTerrainKernel.set_horizon`).
+func kernel_params() -> Dictionary:
+	return {
+		"heights": _heights, "n": _n, "step": _step, "half": _half, "centre": centre,
+		"field_size": field_size, "cos": _cos, "sin": _sin, "offset_y": offset_y,
+		"blend_start": _blend_start, "blend_end": _blend_end, "river_keep": _river_keep,
+	}
+
+
 ## Limite des neiges de la saison en hauteur du monde de bataille.
 func snow_line_world() -> float:
 	var snow: Dictionary = (_cfg.get("relief", {}) as Dictionary).get("snow_line_m", {})

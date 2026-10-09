@@ -31,6 +31,8 @@ mod battle_sim_state;
 mod battle_sim_terrain;
 mod battle_sim_units;
 mod battle_step_job;
+mod battle_terrain_field;
+mod battle_terrain_kernel;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_ai_replay;

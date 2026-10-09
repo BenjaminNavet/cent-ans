@@ -4,6 +4,10 @@
 //! texels. Rendering only, no game rule: the GDScript keeps deciding what to
 //! stamp and where; this class only fills the bytes and uploads them.
 //!
+//! Lot SC PF-08 adds the RGBA8 splatmaps of `battle_terrain.gd` (4 channels):
+//! `stamp_soft_disc`, `raise_pixel` and `image` replace its per-texel
+//! `Image.get_pixel` / `set_pixel` loops.
+//!
 //! The arithmetic follows the GDScript it replaces (`Vector2` in single
 //! precision, `float` in double), so the maps are the same texel for texel.
 
@@ -54,6 +58,72 @@ impl Marks {
             0..0
         } else {
             lo as usize..hi as usize
+        }
+    }
+
+    /// See [`StampMap::stamp_soft_disc`]. Follows `battle_terrain.gd::_stamp_disc`
+    /// (`Image.get_pixel` / `set_pixel` on RGBA8: reads `byte / 255`, writes the
+    /// truncated `value * 255`), the texel corner (not centre) being the sample.
+    fn stamp_soft_disc(
+        &mut self,
+        center: (f32, f32),
+        radius: f64,
+        channel: usize,
+        feather: f64,
+        strength: f64,
+    ) {
+        if self.bytes.is_empty() || channel >= self.channels {
+            return;
+        }
+        let texel = f64::from(self.texel);
+        let cx = (f64::from(center.0) - f64::from(self.origin.0)) / texel;
+        let cz = (f64::from(center.1) - f64::from(self.origin.1)) / texel;
+        let r = (radius + feather) / texel;
+        let x0 = ((cx - r) as i64).max(0);
+        let x1 = (((cx + r) as i64) + 1).min(self.width as i64 - 1);
+        let z0 = ((cz - r) as i64).max(0);
+        let z1 = (((cz + r) as i64) + 1).min(self.height as i64 - 1);
+        for iz in z0..=z1 {
+            for ix in x0..=x1 {
+                let v = ((ix as f64 - cx) as f32, (iz as f64 - cz) as f32);
+                let d = f64::from((v.0 * v.0 + v.1 * v.1).sqrt()) * texel;
+                if d > radius + feather {
+                    continue;
+                }
+                let v =
+                    (1.0 - Self::smooth(radius - feather * 0.5, radius + feather, d)) * strength;
+                let i = (iz as usize * self.width + ix as usize) * self.channels + channel;
+                let current = f64::from((f64::from(self.bytes[i]) / 255.0) as f32);
+                if v > current {
+                    self.bytes[i] = (f64::from(v as f32) * 255.0).clamp(0.0, 255.0) as u8;
+                    self.dirty = true;
+                }
+            }
+        }
+    }
+
+    /// Godot `smoothstep` (equal edges: a step).
+    fn smooth(from: f64, to: f64, x: f64) -> f64 {
+        if from == to || (from - to).abs() < (1e-5 * from.abs()).max(1e-5) {
+            return if x <= from { 0.0 } else { 1.0 };
+        }
+        let s = ((x - from) / (to - from)).clamp(0.0, 1.0);
+        s * s * (3.0 - 2.0 * s)
+    }
+
+    /// See [`StampMap::raise_pixel`].
+    fn raise_pixel(&mut self, ix: i64, iz: i64, channel: usize, value: f64) {
+        if ix < 0 || iz < 0 || ix >= self.width as i64 || iz >= self.height as i64 {
+            return;
+        }
+        if channel >= self.channels {
+            return;
+        }
+        let i = (iz as usize * self.width + ix as usize) * self.channels + channel;
+        let current = f64::from((f64::from(self.bytes[i]) / 255.0) as f32);
+        if value > current {
+            self.bytes[i] = (f64::from(value as f32) * 255.0).clamp(0.0, 255.0) as u8;
+            self.dirty = true;
         }
     }
 
@@ -152,7 +222,11 @@ impl StampMap {
     #[func]
     fn setup(&mut self, width: i64, height: i64, channels: i64, origin: Vector2, texel: f64) {
         let (width, height) = (width.max(0) as usize, height.max(0) as usize);
-        let channels = channels.clamp(1, 2) as usize;
+        let channels = match channels {
+            ..=1 => 1,
+            2 => 2,
+            _ => 4,
+        };
         self.marks = Marks {
             width,
             height,
@@ -194,6 +268,62 @@ impl StampMap {
             .stamp_disc(vec2_pair(center), radius, r_value, g_value);
     }
 
+    /// Soft-edged disc into `channel`, keeping the maximum (`strength` ceiling):
+    /// the splatmap stamp of `battle_terrain.gd`, `feather` metres of fade.
+    #[func]
+    fn stamp_soft_disc(
+        &mut self,
+        center: Vector2,
+        radius: f64,
+        channel: i64,
+        feather: f64,
+        strength: f64,
+    ) {
+        self.marks.stamp_soft_disc(
+            vec2_pair(center),
+            radius,
+            channel.max(0) as usize,
+            feather,
+            strength,
+        );
+    }
+
+    /// Raises `channel` of texel (ix, iz) to `value` (0-1) if it is lower.
+    #[func]
+    fn raise_pixel(&mut self, ix: i64, iz: i64, channel: i64, value: f64) {
+        self.marks
+            .raise_pixel(ix, iz, channel.max(0) as usize, value);
+    }
+
+    /// Raises `channel` of the whole column `ix` to `value` (0-1) where it is lower.
+    #[func]
+    fn raise_column(&mut self, ix: i64, channel: i64, value: f64) {
+        for iz in 0..self.marks.height as i64 {
+            self.marks
+                .raise_pixel(ix, iz, channel.max(0) as usize, value);
+        }
+    }
+
+    /// Texel value (0-1) of `channel` at (ix, iz), 0 outside.
+    #[func]
+    fn pixel(&self, ix: i64, iz: i64, channel: i64) -> f64 {
+        let m = &self.marks;
+        let ch = channel.max(0) as usize;
+        if ix < 0 || iz < 0 || ix >= m.width as i64 || iz >= m.height as i64 || ch >= m.channels {
+            return 0.0;
+        }
+        f64::from(m.bytes[(iz as usize * m.width + ix as usize) * m.channels + ch]) / 255.0
+    }
+
+    /// The map as a new `Image` (RGBA8 for 4 channels).
+    #[func]
+    fn image(&self) -> Gd<Image> {
+        let m = &self.marks;
+        let bytes = PackedByteArray::from(m.bytes.as_slice());
+        Image::create_from_data(m.width as i32, m.height as i32, false, m.format(), &bytes)
+            .unwrap_or_else(Image::new_gd)
+    }
+
     /// Byte of `channel` at world point (x, z), 0-1 (0 outside).
     #[func]
     fn sample(&self, x: f64, z: f64, channel: i64) -> f64 {
@@ -231,10 +361,10 @@ impl Marks {
 
 impl Marks {
     fn format(&self) -> Format {
-        if self.channels == 2 {
-            Format::RG8
-        } else {
-            Format::L8
+        match self.channels {
+            4 => Format::RGBA8,
+            2 => Format::RG8,
+            _ => Format::L8,
         }
     }
 }
@@ -269,5 +399,31 @@ mod tests {
         assert_eq!(at(&m, 20.0, 20.0), 150);
         assert_eq!(at(&m, 20.0, 40.0), 0);
         assert!(m.dirty);
+    }
+
+    #[test]
+    fn soft_disc_keeps_the_maximum_and_fades() {
+        // 4-channel map, 4 m texels from (-40, -40): the GDScript `_stamp_disc` arithmetic.
+        let mut m = map(40, 40, 4);
+        m.stamp_soft_disc((20.0, 20.0), 12.0, 1, 8.0, 1.0);
+        let at = |m: &Marks, x: f32, z: f32, ch: usize| {
+            let ix = ((x - m.origin.0) / m.texel) as usize;
+            let iz = ((z - m.origin.1) / m.texel) as usize;
+            m.bytes[(iz * m.width + ix) * 4 + ch]
+        };
+        assert_eq!(at(&m, 20.0, 20.0, 1), 255);
+        assert_eq!(at(&m, 20.0, 20.0, 0), 0);
+        assert_eq!(at(&m, 20.0, 60.0, 1), 0);
+        let edge = at(&m, 36.0, 20.0, 1);
+        assert!(edge > 0 && edge < 255, "edge {edge}");
+        // A weaker second stamp never lowers the first.
+        m.stamp_soft_disc((20.0, 20.0), 12.0, 1, 8.0, 0.4);
+        assert_eq!(at(&m, 20.0, 20.0, 1), 255);
+        // Reference from the GDScript run before the port: strength 0.5 truncates to 127.
+        let mut m = map(40, 40, 4);
+        m.stamp_soft_disc((20.0, 20.0), 12.0, 2, 8.0, 0.5);
+        assert_eq!(at(&m, 20.0, 20.0, 2), 127);
+        m.raise_pixel(0, 0, 3, 0.2);
+        assert_eq!(m.bytes[3], 51);
     }
 }

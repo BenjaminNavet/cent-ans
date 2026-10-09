@@ -45,13 +45,11 @@ var NEAR_RECT := Rect2(-900, -900, 3000, 2600)
 const NEAR_STEP := 20.0
 var FAR_RECT := Rect2(-7000, -7000, 15200, 14800)
 const FAR_STEP := 200.0
-const RIVER_CARVE := 1.6
 ## Arbres : taille des tuiles (m), distance de passage au maillage allégé, portée des buissons.
 const TREE_TILE := 160.0
 const TREE_LOD_DISTANCE := 260.0
 const BUSH_DISTANCE := 520.0
-const RIVER_SPAN := 27.0  # demi-largeur creusée (width * 1.5), comme la simulation
-## B5 : creusement visuel des mares (m) et portée des haies.
+## B5 : creusement visuel des mares (m, valeur reprise par le noyau Rust) et portée des haies.
 const POOL_CARVE := 0.7
 const HEDGE_DISTANCE := 1100.0
 ## B5 : réglages de rendu par terrain de province. `relief` = échelle des collines de l'horizon,
@@ -180,6 +178,10 @@ var _streams: Array = []  # [{points: PackedVector2Array, width, kind}]
 var _stream_chunks: Array = []
 const STREAM_CHUNK := 24
 var bridges_view: BattleBridges
+## SC PF-08/BT7 : hauteurs, rivière, grilles et maillages du sol calculés en Rust.
+var _kernel := BattleTerrainKernel.new()
+var _splat_w: int = 0
+var _splat_h: int = 0
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
 ## R2 : crêtes et ondulations de l'horizon, carte de relief du sol (pente, creux, crêtes).
@@ -269,6 +271,7 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 
 func build(p_terrain: Dictionary, weather: String) -> void:
 	terrain = p_terrain
+	_kernel = BattleTerrainKernel.new()
 	weather_key = weather
 	terrain_key = str(terrain.get("terrain", "plains"))
 	season_key = str(terrain.get("season", "summer"))
@@ -318,6 +321,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_prepare_decor()
 	_extend_river()
 	_setup_horizon()
+	_configure_kernel()
 	_plan_roads()
 	_build_textures()
 	_build_material(weather)
@@ -463,17 +467,6 @@ func pool_level(center: Vector2, radius: float) -> float:
 	return total / float(n) + 0.08
 
 
-## Creusement visuel des mares en (x, z) (0 hors des mares).
-func _pool_carve(x: float, z: float) -> float:
-	var carve := 0.0
-	for pool in _pools:
-		var d := Vector2(x - float(pool["x"]), z - float(pool["z"])).length()
-		var r := float(pool["radius"])
-		if d < r * 1.1:
-			carve = maxf(carve, POOL_CARVE * (1.0 - smoothstep(r * 0.55, r * 1.1, d)))
-	return carve
-
-
 ## Normales de vagues partagées par la rivière, les mares et la mer.
 func water_waves() -> NoiseTexture2D:
 	if _waves == null:
@@ -498,57 +491,31 @@ func sky_reflection() -> Color:
 
 ## Hauteur bilinéaire du champ (même formule que la simulation) ; bornée au champ.
 func height_at(x: float, z: float) -> float:
-	if _nx < 2:
-		return 0.0
-	var fx := clampf(x / _resolution, 0.0, float(_nx - 1))
-	var fz := clampf(z / _resolution, 0.0, float(_nz - 1))
-	var ix := int(floor(fx))
-	var iz := int(floor(fz))
-	var ix1 := mini(ix + 1, _nx - 1)
-	var iz1 := mini(iz + 1, _nz - 1)
-	var tx := fx - ix
-	var tz := fz - iz
-	var top := _heights[iz * _nx + ix] * (1.0 - tx) + _heights[iz * _nx + ix1] * tx
-	var bottom := _heights[iz1 * _nx + ix] * (1.0 - tx) + _heights[iz1 * _nx + ix1] * tx
-	return top * (1.0 - tz) + bottom * tz
+	return _kernel.height_at(x, z)
 
 
-## Hauteur décorative partout : le champ dedans, collines et vallée de la rivière dehors.
+## Hauteur décorative partout : le champ dedans, collines et vallée de la rivière dehors
+## (calculée en Rust : champ, collines, lit, relief réel de l'horizon, côte).
 func world_height(x: float, z: float) -> float:
-	var cx := clampf(x, 0.0, FIELD_W)
-	var cz := clampf(z, 0.0, FIELD_D)
-	var base := height_at(cx, cz)
-	var d := Vector2(x - cx, z - cz).length()
-	if d <= 0.0:
-		return base
-	var t := smoothstep(0.0, 450.0, d)
-	var n := _hills.get_noise_2d(x, z) * 0.5 + 0.5
-	var ridge_share := float(biome.get("ridges", 0.0))
-	if ridge_share > 0.0:
-		# R2 : crêtes et croupes de l'horizon (collines, montagnes), comme le champ.
-		n = lerpf(n, clampf(_ridges.get_noise_2d(x, z) * 0.6 + 0.35, 0.0, 1.0), ridge_share)
-	var hills := pow(n, 1.6) * lerpf(22.0, 160.0, smoothstep(300.0, 4500.0, d)) * float(biome["relief"])
-	# R2 : ondulations moyennes qui prolongent le relief du champ (pas de plateau lisse au bord).
-	hills += _rolls.get_noise_2d(x, z) * float(biome.get("rolls", 3.0)) * smoothstep(0.0, 250.0, d)
-	var rd := river_distance(x, z)
-	if rd < INF:
-		hills *= smoothstep(25.0, 320.0, rd)
-	var h := lerpf(base, _mean_height + hills, t)
-	var span := river_span_at(x)
-	if rd < span:
-		# Le lit : même profil que la simulation, raccordé au bord du champ.
-		h -= RIVER_CARVE * (1.0 - rd / span) * t
+	return _kernel.world_height(x, z)
+
+
+## SC PF-08/BT7 : confie au noyau Rust la grille de la simulation, le bruit des collines, la
+## rivière prolongée, la côte, mares et relief réel (après `_extend_river` et `_setup_horizon`).
+func _configure_kernel() -> void:
+	_kernel.set_field(_heights, _nx, _nz, _resolution, FIELD_W, FIELD_D)
+	_kernel.set_noise(_hills, _ridges, _rolls)
+	_kernel.set_biome(float(biome["relief"]), float(biome.get("ridges", 0.0)), float(biome.get("rolls", 3.0)))
+	_kernel.set_river(_river_points, _river_widths, float(terrain.get("river", {}).get("width", 0.0)))
+	if _coast.is_empty():
+		_kernel.clear_coast()
+	else:
+		_kernel.set_coast(str(_coast["flank"]) == "west", float(_coast["shore_x"]), BattleSiteFeatures.SEA_LEVEL)
+	_kernel.set_pools(_pools)
 	if horizon != null and horizon.active:
-		# EP2 : relief réel au loin, raccordé au relief généré (rivière et côte gardent la main).
-		h = horizon.blend(x, z, h, rd)
-	if not _coast.is_empty():
-		# B5 : au-delà du bord côtier, le sol plonge sous la mer (plage puis estran).
-		var west := str(_coast["flank"]) == "west"
-		var beyond := -x if west else x - FIELD_W
-		if beyond > 0.0:
-			var offset := absf(float(_coast["shore_x"]) - (0.0 if west else FIELD_W))
-			h = lerpf(base, BattleSiteFeatures.SEA_LEVEL - 4.0, smoothstep(0.0, offset * 2.5 + 40.0, beyond))
-	return h
+		_kernel.set_horizon(horizon.kernel_params())
+	else:
+		_kernel.clear_horizon()
 
 
 func _in_zones(zones: Array, x: float, z: float, margin: float = 0.0) -> bool:
@@ -582,15 +549,7 @@ func _zones_edge_distance(zones: Array, x: float, z: float) -> float:
 
 ## Distance au lit de la rivière (prolongée au-delà du champ), INF sans rivière.
 func river_distance(x: float, z: float) -> float:
-	if _river_points.size() < 2:
-		return INF
-	var best := INF
-	var first_x := _river_points[0].x
-	var center := int((x - first_x) / 10.0)
-	for i in range(maxi(center - 4, 0), mini(center + 4, _river_points.size() - 1)):
-		var p := Geometry2D.get_closest_point_to_segment(Vector2(x, z), _river_points[i], _river_points[i + 1])
-		best = minf(best, p.distance_to(Vector2(x, z)))
-	return best
+	return _kernel.river_distance(x, z)
 
 
 func _in_ford(x: float) -> bool:
@@ -611,17 +570,12 @@ func _river_index(x: float) -> float:
 
 ## EP3 : largeur de l'eau au droit de x (prolongée hors du champ comme le cours).
 func river_width_at(x: float) -> float:
-	var f := _river_index(x)
-	if f < 0.0 or _river_widths.is_empty():
-		return float(terrain.get("river", {}).get("width", 0.0))
-	var i := mini(int(f), _river_widths.size() - 2)
-	return lerpf(_river_widths[i], _river_widths[i + 1], f - i)
+	return _kernel.river_width_at(x)
 
 
 ## EP3 : demi-largeur creusée du lit (1,5 × la largeur, comme la simulation).
 func river_span_at(x: float) -> float:
-	var w := river_width_at(x)
-	return w * 1.5 if w > 0.0 else RIVER_SPAN
+	return _kernel.river_span_at(x)
 
 
 ## EP3 : z du milieu de la rivière au droit de x.
@@ -694,21 +648,9 @@ func _extend_river() -> void:
 	river_flow = float(terrain["river"].get("flow", 1))
 	if points.size() < 2:
 		return
-	var span := points[points.size() - 1].x - points[0].x
-	var reach := 2600.0
-	var x := points[0].x - reach
-	while x <= points[points.size() - 1].x + reach:
-		var m := fposmod(x - points[0].x, 2.0 * span)
-		if m > span:
-			m = 2.0 * span - m
-		var f := m / span * float(points.size() - 1)
-		var i := mini(int(f), points.size() - 2)
-		_river_points.append(Vector2(x, lerpf(points[i].y, points[i + 1].y, f - i)))
-		if widths.size() == points.size():
-			_river_widths.append(lerpf(widths[i], widths[i + 1], f - i))
-		else:
-			_river_widths.append(float(terrain["river"]["width"]))
-		x += 10.0
+	var extended: Dictionary = _kernel.extend_river(points, widths, float(terrain["river"]["width"]), 2600.0)
+	_river_points = extended["points"]
+	_river_widths = extended["widths"]
 
 
 ## EP3 : routes de la simulation (ponts, gués, bords du champ), prolongées hors du
@@ -815,12 +757,13 @@ static func _smooth(points: PackedVector2Array) -> PackedVector2Array:
 
 
 func _build_textures() -> void:
-	var sw := int(SPLAT_RECT.size.x / SPLAT_TEXEL)
-	var sh := int(SPLAT_RECT.size.y / SPLAT_TEXEL)
-	var a := Image.create_empty(sw, sh, false, Image.FORMAT_RGBA8)
-	var b := Image.create_empty(sw, sh, false, Image.FORMAT_RGBA8)
-	a.fill(Color(0, 0, 0, 0))
-	b.fill(Color(0, 0, 0, 0))
+	_splat_w = int(SPLAT_RECT.size.x / SPLAT_TEXEL)
+	_splat_h = int(SPLAT_RECT.size.y / SPLAT_TEXEL)
+	# SC PF-08 : splatmaps RGBA8 tamponnées en Rust (`StampMap`), converties en images à la fin.
+	var a := StampMap.new()
+	var b := StampMap.new()
+	a.setup(_splat_w, _splat_h, 4, SPLAT_RECT.position, SPLAT_TEXEL)
+	b.setup(_splat_w, _splat_h, 4, SPLAT_RECT.position, SPLAT_TEXEL)
 	# Sous-bois et boue : disques des zones de la simulation (bord adouci).
 	for zone in terrain.get("forests", []):
 		_stamp_disc(a, Vector2(float(zone["x"]), float(zone["z"])), float(zone["radius"]) + 5.0, 0, 12.0)
@@ -886,24 +829,16 @@ func _build_textures() -> void:
 		# VN : terre battue moins couvrante (vue de haut : ville posée sur du sable uniforme).
 		_stamp_disc(a, center, 150.0, 1, 30.0, 0.4)
 		_stamp_disc(b, center, 260.0, 1, 60.0)
-	splat_a = ImageTexture.create_from_image(a)
-	splat_b = ImageTexture.create_from_image(b)
-	# Carte de hauteurs (herbe) : le champ à 10 m, prolongé par `world_height`.
+	splat_a = ImageTexture.create_from_image(a.image())
+	splat_b = ImageTexture.create_from_image(b.image())
+	# Carte de hauteurs (herbe) : le champ à 10 m, prolongé par `world_height` (grille en Rust).
 	var hw := int(SPLAT_RECT.size.x / HEIGHT_TEXEL) + 1
 	var hh := int(SPLAT_RECT.size.y / HEIGHT_TEXEL) + 1
-	var hdata := PackedFloat32Array()
-	hdata.resize(hw * hh)
-	for iz in hh:
-		var z := SPLAT_RECT.position.y + iz * HEIGHT_TEXEL
-		for ix in hw:
-			var x := SPLAT_RECT.position.x + ix * HEIGHT_TEXEL
-			if x >= 0.0 and x <= FIELD_W and z >= 0.0 and z <= FIELD_D:
-				hdata[iz * hw + ix] = height_at(x, z)
-			else:
-				hdata[iz * hw + ix] = world_height(x, z)
+	var hdata: PackedFloat32Array = _kernel.height_grid(SPLAT_RECT.position, HEIGHT_TEXEL, hw, hh)
 	var himage := Image.create_from_data(hw, hh, false, Image.FORMAT_RF, hdata.to_byte_array())
 	height_texture = ImageTexture.create_from_image(himage)
-	relief_texture = _relief_map(hdata, hw, hh)
+	var relief_bytes: PackedByteArray = _kernel.relief_from_heights(hdata, hw, hh, HEIGHT_TEXEL)
+	relief_texture = ImageTexture.create_from_image(Image.create_from_data(hw, hh, false, Image.FORMAT_RGBA8, relief_bytes))
 	var noise := FastNoiseLite.new()
 	noise.seed = 7
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -914,34 +849,9 @@ func _build_textures() -> void:
 	macro_noise = ImageTexture.create_from_image(noise_image)
 
 
-## R2 : carte de relief du sol, cuite sur la grille de 10 m des hauteurs (rendu seulement) :
-## r = pente (0,5 = 50 %), g = creux (> 0,5) ou bosse (< 0,5) à l'échelle de 30 m (talus, crêtes
-## fines), b = idem à 90 m (vallons, croupes). Le shader de sol en tire roche affleurante, terre
-## et cailloux des crêtes, herbe grasse et humidité des creux, ombre des fonds.
-func _relief_map(hdata: PackedFloat32Array, hw: int, hh: int) -> ImageTexture:
-	var bytes := PackedByteArray()
-	bytes.resize(hw * hh * 4)
-	var at := func(ix: int, iz: int) -> float:
-		return hdata[clampi(iz, 0, hh - 1) * hw + clampi(ix, 0, hw - 1)]
-	for iz in hh:
-		for ix in hw:
-			var h: float = hdata[iz * hw + ix]
-			var gx: float = (at.call(ix + 1, iz) - at.call(ix - 1, iz)) / (2.0 * HEIGHT_TEXEL)
-			var gz: float = (at.call(ix, iz + 1) - at.call(ix, iz - 1)) / (2.0 * HEIGHT_TEXEL)
-			var near: float = (at.call(ix + 3, iz) + at.call(ix - 3, iz) + at.call(ix, iz + 3) + at.call(ix, iz - 3)) * 0.25 - h
-			var far: float = (at.call(ix + 9, iz) + at.call(ix - 9, iz) + at.call(ix, iz + 9) + at.call(ix, iz - 9)) * 0.25 - h
-			var i := (iz * hw + ix) * 4
-			bytes[i] = int(clampf(sqrt(gx * gx + gz * gz) / 0.5, 0.0, 1.0) * 255.0)
-			bytes[i + 1] = int(clampf(0.5 + near / 4.0, 0.0, 1.0) * 255.0)
-			bytes[i + 2] = int(clampf(0.5 + far / 10.0, 0.0, 1.0) * 255.0)
-			bytes[i + 3] = 255
-	var image := Image.create_from_data(hw, hh, false, Image.FORMAT_RGBA8, bytes)
-	return ImageTexture.create_from_image(image)
-
-
 ## B5 : mares (vase et berges humides), fossés (vase),
 ## plage (sable, sans parcelles) dans les splatmaps.
-func _stamp_site(a: Image, b: Image) -> void:
+func _stamp_site(a: StampMap, b: StampMap) -> void:
 	for pool in _pools:
 		var c := Vector2(float(pool["x"]), float(pool["z"]))
 		var r := float(pool["radius"])
@@ -969,42 +879,22 @@ func _stamp_site(a: Image, b: Image) -> void:
 		x0 = minf(x0, SPLAT_RECT.position.x) if west else x0
 		x1 = maxf(x1, SPLAT_RECT.end.x) if not west else x1
 		var ix0 := maxi(int((x0 - SPLAT_RECT.position.x) / SPLAT_TEXEL), 0)
-		var ix1 := mini(int((x1 - SPLAT_RECT.position.x) / SPLAT_TEXEL), a.get_width() - 1)
-		for iz in a.get_height():
-			for ix in range(ix0, ix1 + 1):
-				var x := SPLAT_RECT.position.x + ix * SPLAT_TEXEL
-				var inland := (x - shore) if west else (shore - x)
-				var edge := beach - (x if west else FIELD_W - x)
-				var v := clampf(edge / 12.0 + 0.5, 0.0, 1.0)
-				var ca := a.get_pixel(ix, iz)
-				ca.g = maxf(ca.g, v)
-				a.set_pixel(ix, iz, ca)
-				var cb := b.get_pixel(ix, iz)
-				cb.g = maxf(cb.g, v)
-				if inland < 6.0:
-					cb.r = maxf(cb.r, clampf(1.0 - inland / 6.0, 0.0, 1.0) * 0.8)
-				b.set_pixel(ix, iz, cb)
+		var ix1 := mini(int((x1 - SPLAT_RECT.position.x) / SPLAT_TEXEL), _splat_w - 1)
+		# La valeur ne dépend que de x : une colonne entière à la fois.
+		for ix in range(ix0, ix1 + 1):
+			var x := SPLAT_RECT.position.x + ix * SPLAT_TEXEL
+			var inland := (x - shore) if west else (shore - x)
+			var edge := beach - (x if west else FIELD_W - x)
+			var v := clampf(edge / 12.0 + 0.5, 0.0, 1.0)
+			a.raise_column(ix, 1, v)
+			b.raise_column(ix, 1, v)
+			if inland < 6.0:
+				b.raise_column(ix, 0, clampf(1.0 - inland / 6.0, 0.0, 1.0) * 0.8)
 
 
 ## Disque adouci dans le canal `channel` de `image` (coordonnées monde) ; garde le maximum.
-func _stamp_disc(image: Image, center: Vector2, radius: float, channel: int, feather: float, strength: float = 1.0) -> void:
-	var cx := (center.x - SPLAT_RECT.position.x) / SPLAT_TEXEL
-	var cz := (center.y - SPLAT_RECT.position.y) / SPLAT_TEXEL
-	var r := (radius + feather) / SPLAT_TEXEL
-	var x0 := maxi(int(cx - r), 0)
-	var x1 := mini(int(cx + r) + 1, image.get_width() - 1)
-	var z0 := maxi(int(cz - r), 0)
-	var z1 := mini(int(cz + r) + 1, image.get_height() - 1)
-	for iz in range(z0, z1 + 1):
-		for ix in range(x0, x1 + 1):
-			var d := Vector2(ix - cx, iz - cz).length() * SPLAT_TEXEL
-			if d > radius + feather:
-				continue
-			var v := (1.0 - smoothstep(radius - feather * 0.5, radius + feather, d)) * strength
-			var c := image.get_pixel(ix, iz)
-			if v > c[channel]:
-				c[channel] = v
-				image.set_pixel(ix, iz, c)
+func _stamp_disc(image: StampMap, center: Vector2, radius: float, channel: int, feather: float, strength: float = 1.0) -> void:
+	image.stamp_soft_disc(center, radius, channel, feather, strength)
 
 
 ## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
@@ -1117,89 +1007,12 @@ func _add_mesh(node_name: String, mesh: ArrayMesh, shadows: bool) -> MeshInstanc
 
 ## Grille du champ (10 m, hauteurs de la simulation) avec une jupe verticale sur le pourtour.
 func _field_mesh() -> ArrayMesh:
-	var vertices := PackedVector3Array()
-	var normals := PackedVector3Array()
-	vertices.resize(_nx * _nz)
-	normals.resize(_nx * _nz)
-	for iz in _nz:
-		for ix in _nx:
-			var i := iz * _nx + ix
-			var carve := _pool_carve(ix * _resolution, iz * _resolution) if not _pools.is_empty() else 0.0
-			vertices[i] = Vector3(ix * _resolution, _heights[i] - carve, iz * _resolution)
-			var hl := _heights[iz * _nx + maxi(ix - 1, 0)]
-			var hr := _heights[iz * _nx + mini(ix + 1, _nx - 1)]
-			var hd := _heights[maxi(iz - 1, 0) * _nx + ix]
-			var hu := _heights[mini(iz + 1, _nz - 1) * _nx + ix]
-			normals[i] = Vector3(hl - hr, 2.0 * _resolution, hd - hu).normalized()
-	var indices := PackedInt32Array()
-	for iz in range(_nz - 1):
-		for ix in range(_nx - 1):
-			var a := iz * _nx + ix
-			var b := a + 1
-			var c := a + _nx
-			var d := c + 1
-			indices.append_array([a, b, c, b, d, c])
-	# Jupe : chaque sommet du bord dupliqué 3 m plus bas.
-	var border: Array[int] = []
-	for ix in _nx:
-		border.append(ix)
-	for iz in range(1, _nz):
-		border.append(iz * _nx + _nx - 1)
-	for ix in range(_nx - 2, -1, -1):
-		border.append((_nz - 1) * _nx + ix)
-	for iz in range(_nz - 2, -1, -1):
-		border.append(iz * _nx)
-	var base := vertices.size()
-	for k in border.size():
-		vertices.append(vertices[border[k]] - Vector3(0, 3.0, 0))
-		normals.append(normals[border[k]])
-	for k in border.size():
-		var k1 := (k + 1) % border.size()
-		var top0 := border[k]
-		var top1 := border[k1]
-		indices.append_array([top0, base + k, top1, top1, base + k, base + k1])
-	return _commit(vertices, normals, indices)
+	return _kernel.field_mesh()
 
 
 ## Anneau de terrain (grille `step`) autour de `hole` (quads entièrement dedans omis).
 func _ring_mesh(rect: Rect2, step: float, hole: Rect2, sink: float) -> ArrayMesh:
-	var nx := int(rect.size.x / step) + 1
-	var nz := int(rect.size.y / step) + 1
-	var vertices := PackedVector3Array()
-	var normals := PackedVector3Array()
-	vertices.resize(nx * nz)
-	normals.resize(nx * nz)
-	var heights := PackedFloat32Array()
-	heights.resize(nx * nz)
-	for iz in nz:
-		for ix in nx:
-			var x := rect.position.x + ix * step
-			var z := rect.position.y + iz * step
-			var h := world_height(x, z)
-			if hole.has_point(Vector2(x, z)):
-				h -= sink
-			heights[iz * nx + ix] = h
-			vertices[iz * nx + ix] = Vector3(x, h, z)
-	for iz in nz:
-		for ix in nx:
-			var hl := heights[iz * nx + maxi(ix - 1, 0)]
-			var hr := heights[iz * nx + mini(ix + 1, nx - 1)]
-			var hd := heights[maxi(iz - 1, 0) * nx + ix]
-			var hu := heights[mini(iz + 1, nz - 1) * nx + ix]
-			normals[iz * nx + ix] = Vector3(hl - hr, 2.0 * step, hd - hu).normalized()
-	var indices := PackedInt32Array()
-	for iz in range(nz - 1):
-		for ix in range(nx - 1):
-			var x0 := rect.position.x + ix * step
-			var z0 := rect.position.y + iz * step
-			if hole.encloses(Rect2(x0, z0, step, step)):
-				continue
-			var a := iz * nx + ix
-			var b := a + 1
-			var c := a + nx
-			var d := c + 1
-			indices.append_array([a, b, c, b, d, c])
-	return _commit(vertices, normals, indices)
+	return _kernel.ring_mesh(rect, step, hole, sink)
 
 
 static func _commit(vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array) -> ArrayMesh:
@@ -1477,12 +1290,12 @@ func _in_decor(p: Vector2) -> bool:
 
 ## Parcelles du décor peintes au sol (texture `decor_fields`) ; terre battue des cours, des abords
 ## des maisons et du camp ; boue du fossé du manoir ; pas de parcelles procédurales sous le décor.
-func _stamp_decor(a: Image, b: Image) -> void:
+func _stamp_decor(a: StampMap, b: StampMap) -> void:
 	var decor: Dictionary = terrain.get("decor", {})
 	if decor.is_empty():
 		return
-	var sw := a.get_width()
-	var sh := a.get_height()
+	var sw := _splat_w
+	var sh := _splat_h
 	var fields := Image.create_empty(sw, sh, false, Image.FORMAT_RGBA8)
 	fields.fill(Color(0, 0, 0, 0))
 	var codes := {"ploughed": 1, "crop": 2, "sown": 4, "stubble": 6}
@@ -1513,14 +1326,10 @@ func _stamp_decor(a: Image, b: Image) -> void:
 				if edge < 0.0:
 					continue
 				# Pas de parcelles procédurales sous le décor.
-				var cb := b.get_pixel(ix, iz)
-				cb.g = maxf(cb.g, 1.0)
-				b.set_pixel(ix, iz, cb)
+				b.raise_pixel(ix, iz, 1, 1.0)
 				if code == 0:
 					# Hameau, ferme, cimetière, manoir, camp : herbe foulée et terre par endroits.
-					var ca := a.get_pixel(ix, iz)
-					ca.g = maxf(ca.g, 0.25 if kind in ["hamlet", "church"] else 0.35)
-					a.set_pixel(ix, iz, ca)
+					a.raise_pixel(ix, iz, 1, 0.25 if kind in ["hamlet", "church"] else 0.35)
 					continue
 				# DA6 : rampe de lisière sur 8 m (fondu, bord bruité dans les shaders), 3 m sinon.
 				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / 8.0, 0.0, 1.0), 1.0))
