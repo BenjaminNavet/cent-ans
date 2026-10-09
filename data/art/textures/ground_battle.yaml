@@ -14,7 +14,8 @@ style_prefix: >-
   image covers about {tile_m} metres of ground on each side.
 style_suffix: >-
   No horizon, no sky, no people, no animals, no objects, no buildings, no water, no text, no border, no
-  frame, no vignette.
+  frame, no vignette. Medieval pre-industrial land: no tractor tracks, no tramlines, no machinery marks, no
+  modern objects.
 entries:
 - id: grass_atlantic
   role: grass

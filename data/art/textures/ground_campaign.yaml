@@ -18,7 +18,8 @@ style_prefix: >-
   metres of ground on each side.
 style_suffix: >-
   No roads, no paths, no buildings, no people, no animals, no water, no text, no border, no frame, no
-  vignette, no lens distortion.
+  vignette, no lens distortion. Medieval pre-industrial land: no tractor tracks, no tramlines, no machinery
+  marks, no modern objects.
 entries:
 - id: bg_grass_bare_b01
   role: grass_bare
@@ -265,8 +266,8 @@ entries:
   role: grass_bare
   biomes: [8]
   prompt: >-
-    Bare desert ground: pale ochre sand and fine gravel pavement, tiny dry tufts very far apart, wind
-    ripples.
+    Bare desert ground: mottled pale ochre and tan sand, clearly visible wind ripples, patches of gravel
+    pavement with dark varnished pebbles, a few cracked crusts and tiny dry tufts far apart, rich fine detail.
   seed: 1210
   tile_m: 150
   checks:
@@ -536,8 +537,9 @@ entries:
   role: parcel_crop
   biomes: [1, 2, 3, 4, 7]
   prompt: >-
-    A single field of ripe golden wheat in July, dense even stalks seen from above, faint parallel drill
-    lines of the sowing, slight wind ripples, a few pale patches.
+    A single field of ripe golden wheat in July, broadcast-sown medieval crop seen from above, slightly
+    irregular density, red poppies and blue cornflowers scattered here and there, slight wind ripples, a few
+    pale patches.
   seed: 1450
   tile_m: 120
   checks:
