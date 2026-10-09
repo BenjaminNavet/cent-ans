@@ -155,7 +155,7 @@ pub use entities::settlement::{
     CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
     SettlementGraph, SettlementKind, SettlementRules, StartingBudget,
 };
-pub use entities::skill::{Skill, SkillBranch};
+pub use entities::skill::{Skill, SkillBranch, SkillRole};
 pub use entities::starting_armies::{StartingArmies, StartingGarrisons};
 pub use entities::starting_fit::StartingFit;
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};

@@ -1,0 +1,28 @@
+{
+  "id": "skill_chatelain",
+  "name": {
+    "display": "Châtelain"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_intendant"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "governor"
+  ],
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 1,
+      "mode": "add"
+    },
+    {
+      "effect": "garrison",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Entretient murs et guet : la province est mieux gardée."
+}

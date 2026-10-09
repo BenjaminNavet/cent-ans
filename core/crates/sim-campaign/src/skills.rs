@@ -12,7 +12,7 @@
 use data_model::EffectKind;
 use std::collections::BTreeSet;
 
-use data_model::{CharacterId, GameData, SkillId, TraitId};
+use data_model::{CharacterId, GameData, SkillId, SkillRole, TraitId};
 
 use crate::buildings::EffectTotals;
 use crate::events::{EventKind, GameEvent};
@@ -88,6 +88,43 @@ pub enum LearnSkillError {
     MissingPrerequisite(SkillId),
     #[error("points de compétence insuffisants")]
     InsufficientPoints,
+    #[error("compétence réservée à un autre rôle")]
+    WrongRole,
+}
+
+/// Roles `id` holds right now (WH charsb): ruler of its faction, consort of
+/// the ruler, general (leads an army), governor (holds a province).
+pub fn roles_of(state: &CampaignState, id: &CharacterId) -> Vec<SkillRole> {
+    let Some(c) = state.characters.get(id) else {
+        return Vec::new();
+    };
+    let ruler = state
+        .factions
+        .get(&c.faction)
+        .and_then(|f| f.ruler.as_ref());
+    let mut roles = Vec::new();
+    if ruler == Some(id) {
+        roles.push(SkillRole::Ruler);
+    }
+    if ruler.is_some_and(|r| c.spouse.as_ref() == Some(r)) {
+        roles.push(SkillRole::Consort);
+    }
+    if c.army.is_some() {
+        roles.push(SkillRole::General);
+    }
+    if c.governor_of.is_some() {
+        roles.push(SkillRole::Governor);
+    }
+    roles
+}
+
+/// `true` when `id` may learn `skill` as far as roles go (WH charsb).
+pub fn role_allows(state: &CampaignState, id: &CharacterId, skill: &data_model::Skill) -> bool {
+    if skill.requires_role.is_empty() {
+        return true;
+    }
+    let roles = roles_of(state, id);
+    skill.requires_role.iter().any(|r| roles.contains(r))
 }
 
 /// Learnable skills of `character` (spec § 2 `get_learnable`): known,
@@ -103,6 +140,7 @@ pub fn learnable_skills(state: &CampaignState, data: &GameData, id: &CharacterId
         .values()
         .filter(|skill| {
             !character.skills_learned.contains(&skill.id)
+                && role_allows(state, id, skill)
                 && skill
                     .prerequisites
                     .iter()
@@ -137,6 +175,9 @@ pub fn learn_skill(
         if !character.skills_learned.contains(prereq) {
             return Err(LearnSkillError::MissingPrerequisite(prereq.clone()));
         }
+    }
+    if !role_allows(state, id, skill) {
+        return Err(LearnSkillError::WrongRole);
     }
     if character.skill_points < skill.cost {
         return Err(LearnSkillError::InsufficientPoints);

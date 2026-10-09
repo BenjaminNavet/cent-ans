@@ -1,0 +1,28 @@
+{
+  "id": "skill_tresorier_royal",
+  "name": {
+    "display": "Trésorier royal"
+  },
+  "branch": "governance",
+  "tier": 3,
+  "prerequisites": [
+    "skill_reformateur_fiscal"
+  ],
+  "cost": 3,
+  "requires_role": [
+    "ruler"
+  ],
+  "effects": [
+    {
+      "effect": "wealth",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "recruit_cost",
+      "value": -5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Tient les comptes de l’hôtel du prince et achète au meilleur prix."
+}

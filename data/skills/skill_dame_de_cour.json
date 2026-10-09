@@ -1,0 +1,28 @@
+{
+  "id": "skill_dame_de_cour",
+  "name": {
+    "display": "Dame de cour"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_beau_parleur"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "consort"
+  ],
+  "effects": [
+    {
+      "effect": "diplomacy",
+      "value": 3,
+      "mode": "add"
+    },
+    {
+      "effect": "prestige",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "description": "Tient salon et noue les alliances par la conversation."
+}

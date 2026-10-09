@@ -1,0 +1,28 @@
+{
+  "id": "skill_mere_de_famille",
+  "name": {
+    "display": "Mère de famille"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_piete"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "consort"
+  ],
+  "effects": [
+    {
+      "effect": "fertility",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "piety",
+      "value": 5,
+      "mode": "add"
+    }
+  ],
+  "description": "Veille sur la maison, la lignée et les œuvres pieuses."
+}

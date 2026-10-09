@@ -1,0 +1,28 @@
+{
+  "id": "skill_fourrageur",
+  "name": {
+    "display": "Fourrageur"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_discipline"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "supply",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "attrition_resistance",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Sait nourrir une troupe en campagne sans piller le pays."
+}

@@ -1,0 +1,28 @@
+{
+  "id": "skill_banneret",
+  "name": {
+    "display": "Banneret"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_hardiesse"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "battle_charge",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "army_morale",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Mène sa bannière au premier rang de la chevauchée."
+}

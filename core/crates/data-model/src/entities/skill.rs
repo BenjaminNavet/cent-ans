@@ -16,6 +16,22 @@ pub enum SkillBranch {
 }
 }
 
+key_enum! {
+/// Role a character must hold to learn a specialty skill (WH charsb).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SkillRole {
+    /// Head of a faction.
+    Ruler => "ruler",
+    /// Leads an army.
+    General => "general",
+    /// Governs a province.
+    Governor => "governor",
+    /// Spouse of the faction head.
+    Consort => "consort",
+}
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Skill {
@@ -27,6 +43,9 @@ pub struct Skill {
     /// Prerequisite skills, always in the same branch.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub prerequisites: Vec<SkillId>,
+    /// Roles allowed to learn the skill (any one suffices); empty: everyone.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub requires_role: Vec<SkillRole>,
     /// Skill points cost (equal to `tier`).
     pub cost: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -44,5 +63,6 @@ mod key_enum_tests {
     #[test]
     fn keys_match_serde_names() {
         assert_keys_match_serde::<SkillBranch>();
+        assert_keys_match_serde::<SkillRole>();
     }
 }

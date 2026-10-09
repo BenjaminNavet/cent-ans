@@ -19,6 +19,12 @@
       "uniqueItems": true
     },
     "cost": { "type": "integer", "minimum": 1, "description": "Coût en points de compétence (= tier)." },
+    "requires_role": {
+      "type": "array",
+      "description": "Rôles autorisés à apprendre la compétence (au moins un doit être tenu) ; vide : tous (WH charsb, ADR 0284).",
+      "items": { "type": "string", "enum": ["ruler", "general", "governor", "consort"] },
+      "uniqueItems": true
+    },
     "effects": {
       "type": "array",
       "items": { "$ref": "common.schema.json#/$defs/effect" }

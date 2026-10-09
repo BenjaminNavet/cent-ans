@@ -1,0 +1,28 @@
+{
+  "id": "skill_connetable",
+  "name": {
+    "display": "Connétable"
+  },
+  "branch": "command",
+  "tier": 3,
+  "prerequisites": [
+    "skill_ordre_de_bataille"
+  ],
+  "cost": 3,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 8,
+      "mode": "add"
+    },
+    {
+      "effect": "army_experience",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Rompu à l’office de chef de l’ost : sa troupe se bat avec cohésion."
+}

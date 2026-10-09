@@ -11,3 +11,4 @@ mod m4;
 mod nt3_missions;
 mod wh_chars;
 mod wh_turn;
+mod wh_charsb;

@@ -1304,9 +1304,28 @@ fn skill_dict(skill: &Skill) -> VarDictionary {
         "tier" => i64::from(skill.tier),
         "prerequisites" => &ids(skill.prerequisites.iter()),
         "cost" => i64::from(skill.cost),
-        "description" => skill.description.as_str(),
+        "description" => skill_description(skill),
+        "requires_role" => &skill.requires_role.iter().map(|r| GString::from(r.key())).collect::<PackedStringArray>(),
         "effects" => &effects_array(&skill.effects),
     }
+}
+
+/// Description with the roles a specialty skill is reserved for (WH charsb).
+fn skill_description(skill: &Skill) -> String {
+    if skill.requires_role.is_empty() {
+        return skill.description.clone();
+    }
+    let roles: Vec<&str> = skill
+        .requires_role
+        .iter()
+        .map(|r| match r {
+            data_model::SkillRole::Ruler => "souverain",
+            data_model::SkillRole::General => "général",
+            data_model::SkillRole::Governor => "gouverneur",
+            data_model::SkillRole::Consort => "épouse du souverain",
+        })
+        .collect();
+    format!("{} Réservé : {}.", skill.description, roles.join(", "))
 }
 
 fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) -> VarDictionary {

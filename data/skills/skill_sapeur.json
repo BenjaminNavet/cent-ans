@@ -1,0 +1,23 @@
+{
+  "id": "skill_sapeur",
+  "name": {
+    "display": "Sapeur"
+  },
+  "branch": "command",
+  "tier": 2,
+  "prerequisites": [
+    "skill_discipline"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "general"
+  ],
+  "effects": [
+    {
+      "effect": "siege_speed",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "Mineurs et sapeurs sous ses ordres : les murs tombent plus vite."
+}

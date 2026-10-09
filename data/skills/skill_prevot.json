@@ -1,0 +1,28 @@
+{
+  "id": "skill_prevot",
+  "name": {
+    "display": "Prévôt"
+  },
+  "branch": "governance",
+  "tier": 2,
+  "prerequisites": [
+    "skill_bon_justicier"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "governor"
+  ],
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -5,
+      "mode": "add"
+    },
+    {
+      "effect": "garrison",
+      "value": 5,
+      "mode": "percent"
+    }
+  ],
+  "description": "Le prévôt tient les routes et châtie les malandrins."
+}

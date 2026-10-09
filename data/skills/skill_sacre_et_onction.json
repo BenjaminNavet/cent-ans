@@ -1,0 +1,28 @@
+{
+  "id": "skill_sacre_et_onction",
+  "name": {
+    "display": "Sacre et onction"
+  },
+  "branch": "court",
+  "tier": 2,
+  "prerequisites": [
+    "skill_piete"
+  ],
+  "cost": 2,
+  "requires_role": [
+    "ruler"
+  ],
+  "effects": [
+    {
+      "effect": "prestige",
+      "value": 5,
+      "mode": "add"
+    },
+    {
+      "effect": "loyalty",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "L’onction sacrée affermit le respect des vassaux."
+}

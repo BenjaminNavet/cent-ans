@@ -20,7 +20,12 @@ fn tier1_and_successor(data: &GameData, branch: SkillBranch) -> (SkillId, SkillI
     let successor = data
         .skills
         .values()
-        .filter(|s| s.branch == branch && s.tier == 2 && s.prerequisites.len() == 1)
+        .filter(|s| {
+            s.branch == branch
+                && s.tier == 2
+                && s.prerequisites.len() == 1
+                && s.requires_role.is_empty()
+        })
         .min_by_key(|s| s.id.clone())
         .expect("a tier-2 skill with one prerequisite");
     (successor.prerequisites[0].clone(), successor.id.clone())
