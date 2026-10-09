@@ -33,7 +33,16 @@ impl Article {
             Article::Mediation { turns } => {
                 format!("Trêve de {} an(s) par médiation", (turns / 4).max(1))
             }
-            Article::Alliance => "Alliance défensive et offensive".to_owned(),
+            Article::Alliance => "Alliance militaire (défensive et offensive)".to_owned(),
+            Article::DefensiveAlliance => "Alliance défensive".to_owned(),
+            Article::NonAggression { turns } => {
+                format!("Pacte de non-agression de {} an(s)", (turns / 4).max(1))
+            }
+            Article::JoinWar { giver, target } => format!(
+                "{} rejoint la guerre contre {}",
+                who(giver),
+                data.faction_name(target)
+            ),
             Article::MilitaryAccess { giver } => {
                 format!("Accès militaire : {} ouvre ses terres", who(giver))
             }
@@ -106,6 +115,9 @@ impl Article {
                     data.faction_name(target)
                 )
             }
+            Article::AllyCall { aggressor } => {
+                format!("Appel à l'aide contre {}", data.faction_name(aggressor))
+            }
         }
     }
 
@@ -123,7 +135,17 @@ impl Article {
                 "Par la médiation du pape, {name} propose une trêve de {} ans.",
                 turns / 4
             ),
-            Article::Alliance => format!("{name} propose une alliance."),
+            Article::Alliance => format!("{name} propose une alliance militaire."),
+            Article::DefensiveAlliance => format!("{name} propose une alliance défensive."),
+            Article::NonAggression { turns } => format!(
+                "{name} propose un pacte de non-agression de {} an(s).",
+                (turns / 4).max(1)
+            ),
+            Article::AllyCall { aggressor } => format!(
+                "{name}, votre allié, est attaqué par {} et réclame votre aide. Refuser, c'est \
+                 rompre l'alliance.",
+                data.faction_name(aggressor)
+            ),
             Article::Vassalage {
                 giver: super::Party::Recipient,
             } => format!("{name} exige que vous deveniez son vassal."),

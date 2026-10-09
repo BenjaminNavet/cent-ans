@@ -61,6 +61,24 @@ impl CampaignState {
             .is_some_and(|until| *until > self.turn)
     }
 
+    /// `true` while a non-aggression pact between `a` and `b` runs (WH
+    /// `diplob`).
+    pub fn has_non_aggression(&self, a: &FactionId, b: &FactionId) -> bool {
+        self.factions
+            .get(a)
+            .and_then(|f| f.ledger.non_aggression.get(b))
+            .is_some_and(|until| *until > self.turn)
+    }
+
+    /// `true` when `a` and `b` are allied by a defensive alliance only (WH
+    /// `diplob`): they answer each other's calls to arms but do not follow
+    /// each other's offensive wars.
+    pub fn is_defensive_alliance(&self, a: &FactionId, b: &FactionId) -> bool {
+        self.factions
+            .get(a)
+            .is_some_and(|f| f.allies.contains(b) && f.ledger.defensive_allies.contains(b))
+    }
+
     /// `true` when `a` and `b` control provinces bordering on the map (land
     /// borders as armies walk them, [`crate::movement::land_neighbors`]: the
     /// geometry graph, not the province files' partial `neighbors`).
@@ -204,6 +222,14 @@ impl CampaignState {
         }
         if fa.allies.iter().any(|ally| self.is_at_war(ally, b)) {
             return Some("défense d'un allié".to_owned());
+        }
+        // WH `diplob`: a refused ultimatum is the casus belli of its sender.
+        if fa.ledger.ultimatum_refused.contains_key(b) {
+            return Some("ultimatum refusé".to_owned());
+        }
+        // WH `diplob`: nobody needs another motive against the hegemon.
+        if self.league_target_of(data, a) == Some(b) {
+            return Some(crate::diplomacy::LEAGUE_CASUS_BELLI.to_owned());
         }
         // DP2: armies camping on our lands without right of passage.
         if crate::passage::has_grievance(self, a, b) {

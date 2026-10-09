@@ -295,9 +295,18 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
     // for the main crown claimed.
     let main_first = data.ai_diplomacy.war.main_claim_first;
     let mut declared = false;
-    if able && (rested || main_first) && (turn + slot).is_multiple_of(2) {
+    // WH `diplob`: a refused ultimatum is followed by war, whatever the rest.
+    if let Some(target) = ultimatum_war(state, faction) {
+        orders.push(Order::DeclareWar { target });
+        declared = true;
+    }
+    if !declared && able && (rested || main_first) && (turn + slot).is_multiple_of(2) {
         if let Some(target) = war_target(cache, data, faction, aggression, rested) {
-            orders.push(Order::DeclareWar { target });
+            match ultimatum_step(cache, data, faction, &target) {
+                UltimatumStep::NotApplicable => orders.push(Order::DeclareWar { target }),
+                UltimatumStep::Send(order) => orders.push(order),
+                UltimatumStep::Wait => {}
+            }
             declared = true;
         }
     }
@@ -437,6 +446,7 @@ fn war_target(
                 && !state.is_allied(faction, id)
                 && !state.is_at_war(faction, id)
                 && !state.has_truce(faction, id)
+                && !state.has_non_aggression(faction, id)
                 && (rested || main.as_ref() == Some(*id))
         })
         .filter_map(|(id, _)| {
@@ -488,12 +498,123 @@ fn war_target(
                 && cache.attitude(data, faction, id).0 < 0
             {
                 let ratio = my_power / cache.coalition_power(id).max(1.0);
+                // WH `diplob`: the league finds the hegemon easier to attack.
+                let league = &data.ai_diplomacy.league;
+                if state.league_target_of(data, faction) == Some(id) {
+                    return (ratio >= OPPORTUNIST_RATIO * demand * league.war_ratio_factor)
+                        .then(|| (id.clone(), ratio / league.war_ratio_factor.max(0.1)));
+                }
                 return (ratio >= OPPORTUNIST_RATIO * demand).then(|| (id.clone(), ratio));
             }
             None
         })
         .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(&a.0)))
         .map(|(id, _)| id)
+}
+
+/// Seasons after a refused ultimatum during which the war it promised may
+/// still be declared (afterwards the matter is forgotten).
+const ULTIMATUM_WAR_WINDOW: u32 = 4;
+
+/// What an AI that wants war on the player does first (WH `diplob`).
+enum UltimatumStep {
+    /// Declare war at once (not the player, off, or too weak to bully).
+    NotApplicable,
+    /// Send this demand; war follows its refusal.
+    Send(Order),
+    /// An ultimatum is pending or was answered lately: no war yet.
+    Wait,
+}
+
+/// The target `faction` declares war on because it refused its ultimatum.
+fn ultimatum_war(state: &CampaignState, faction: &FactionId) -> Option<FactionId> {
+    let me = state.factions.get(faction)?;
+    let player = &state.player_faction;
+    let refused = *me.ledger.ultimatum_refused.get(player)?;
+    let open = state.turn > refused
+        && state.turn <= refused + ULTIMATUM_WAR_WINDOW
+        && state.factions.get(player).is_some_and(|f| f.alive)
+        && !state.is_at_war(faction, player)
+        && !state.is_allied(faction, player)
+        && !state.has_truce(faction, player);
+    open.then(|| player.clone())
+}
+
+/// Before a war on the player, a strong AI demands a province or a tribute
+/// (« cédez ou ce sera la guerre », ADR 0283).
+fn ultimatum_step(
+    cache: &PlanCache,
+    data: &GameData,
+    faction: &FactionId,
+    target: &FactionId,
+) -> UltimatumStep {
+    let state = cache.state();
+    let rules = &data.ai_diplomacy.ultimatum;
+    if !rules.enabled || target != &state.player_faction {
+        return UltimatumStep::NotApplicable;
+    }
+    if cache.coalition_power(faction)
+        < rules.min_power_ratio * cache.coalition_power(target).max(1.0)
+    {
+        return UltimatumStep::NotApplicable;
+    }
+    let sent = state
+        .factions
+        .get(faction)
+        .and_then(|f| f.ledger.ultimatum_sent.get(target))
+        .copied();
+    if sent.is_some_and(|t| t + rules.cooldown_turns > state.turn) {
+        return UltimatumStep::Wait;
+    }
+    match ultimatum_demand(cache, data, faction, target) {
+        Some(articles) => UltimatumStep::Send(Order::ProposeTreaty {
+            target: target.clone(),
+            articles,
+        }),
+        None => UltimatumStep::NotApplicable,
+    }
+}
+
+/// A border province the AI claims and the player holds, else a tribute.
+fn ultimatum_demand(
+    cache: &PlanCache,
+    data: &GameData,
+    faction: &FactionId,
+    target: &FactionId,
+) -> Option<Vec<Article>> {
+    let state = cache.state();
+    let rules = &data.ai_diplomacy.ultimatum;
+    let claimed = claimed_provinces(state, faction);
+    let capital = state.factions.get(target).map(|f| f.capital.clone());
+    let province = claimed
+        .iter()
+        .filter(|p| state.province_owner(p) == Some(target) && capital.as_ref() != Some(*p))
+        .find(|p| {
+            crate::movement::land_neighbors(data, p)
+                .iter()
+                .any(|n| state.province_owner(n) == Some(faction))
+        });
+    let articles = match province {
+        Some(province) => vec![Article::CedeProvince {
+            giver: crate::negotiation::Party::Recipient,
+            province: province.clone(),
+        }],
+        None => {
+            let income = cache.faction_income(data, target).max(0);
+            let per_season = income * rules.tribute_income_percent / 100;
+            if per_season <= 0 {
+                return None;
+            }
+            vec![Article::Tribute {
+                giver: crate::negotiation::Party::Recipient,
+                per_season,
+                seasons: rules.tribute_seasons,
+            }]
+        }
+    };
+    crate::negotiation::check_treaty(state, data, faction, target, &articles)
+        .is_ok()
+        .then_some(articles)
 }
 
 /// An ally's war `faction` joins (co-belligerence, F4): the Low Countries
@@ -511,7 +632,9 @@ fn ally_war_to_join(cache: &PlanCache, data: &GameData, faction: &FactionId) -> 
         let Some(ally_state) = state.factions.get(ally) else {
             continue;
         };
+        // WH `diplob`: a defensive alliance does not follow offensive wars.
         if !ally_state.alive
+            || state.is_defensive_alliance(faction, ally)
             || cache.attitude(data, faction, ally).0 <= rules.min_attitude
             || cache.faction_power(ally) < rules.min_ally_power_ratio * my_power
         {
@@ -522,6 +645,7 @@ fn ally_war_to_join(cache: &PlanCache, data: &GameData, faction: &FactionId) -> 
                 || state.is_allied(faction, enemy)
                 || state.is_at_war(faction, enemy)
                 || state.has_truce(faction, enemy)
+                || state.has_non_aggression(faction, enemy)
                 || !state.factions.get(enemy).is_some_and(|f| f.alive)
             {
                 continue;
@@ -554,10 +678,20 @@ fn plan_alliances(
     orders: &mut Vec<Order>,
 ) {
     let state = cache.state();
-    if (state.turn + slot) % 4 != 1 || alliance_count(state, faction) >= MAX_ALLIANCES {
+    // WH `diplob`: a faction standing in the league looks for partners
+    // twice as often, and counts the hegemon among its rivals.
+    let in_league = state.league_target_of(data, faction).is_some();
+    let period = if in_league { 2 } else { 4 };
+    if (state.turn + slot) % period != 1 % period || alliance_count(state, faction) >= MAX_ALLIANCES
+    {
         return;
     }
-    let my_rivals = cache.rivals(faction);
+    let rivals_of = |id: &FactionId| {
+        let mut rivals = cache.rivals(id);
+        rivals.extend(state.league_target_of(data, id).cloned());
+        rivals
+    };
+    let my_rivals = rivals_of(faction);
     if my_rivals.is_empty() {
         return;
     }
@@ -575,7 +709,7 @@ fn plan_alliances(
                 && f.allies.iter().all(|a| !my_rivals.contains(a))
         })
         .filter(|(id, _)| {
-            let theirs = cache.rivals(id);
+            let theirs = rivals_of(id);
             !theirs.is_disjoint(&my_rivals)
                 || my_rivals.iter().any(|r| {
                     let towards_rival = cache.attitude(data, id, r).0;
@@ -583,21 +717,42 @@ fn plan_alliances(
                 })
         })
         .map(|(id, _)| (id.clone(), cache.attitude(data, id, faction).0))
-        .filter(|(id, _)| cache.attitude(data, faction, id).0 > 0)
         .filter(|(id, _)| {
-            id == &state.player_faction
-                || crate::negotiation::evaluate_treaty_with(
-                    cache,
-                    data,
-                    faction,
-                    id,
-                    &[Article::Alliance],
-                )
-                .accept
+            let floor = if state.league_peers(data, faction, id) {
+                data.ai_diplomacy.league.partner_attitude
+            } else {
+                0
+            };
+            cache.attitude(data, faction, id).0 > floor
+        })
+        .filter_map(|(id, liking)| {
+            let article = if id == state.player_faction {
+                Article::Alliance
+            } else {
+                [Article::Alliance, Article::DefensiveAlliance]
+                    .into_iter()
+                    .find(|a| {
+                        crate::negotiation::evaluate_treaty_with(
+                            cache,
+                            data,
+                            faction,
+                            &id,
+                            std::slice::from_ref(a),
+                        )
+                        .accept
+                    })?
+            };
+            Some((id, liking, article))
         })
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
-    if let Some((target, _)) = candidate {
-        orders.push(Order::ProposeAlliance { target });
+    if let Some((target, _, article)) = candidate {
+        orders.push(match article {
+            Article::Alliance => Order::ProposeAlliance { target },
+            other => Order::ProposeTreaty {
+                target,
+                articles: vec![other],
+            },
+        });
     }
 }
 

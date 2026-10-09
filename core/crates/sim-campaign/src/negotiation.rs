@@ -93,19 +93,25 @@ pub enum Article {
     /// Ends the war; truce of [`diplomacy::TRUCE_TURNS`].
     Peace,
     /// Ends the war with a short truce.
-    Truce {
-        turns: u32,
-    },
+    Truce { turns: u32 },
     /// White peace of `turns` seasons obtained through the pope's or a
     /// herald's mediation: the recipient owes it a good turn.
-    Mediation {
-        turns: u32,
-    },
+    Mediation { turns: u32 },
+    /// Military alliance: the allies answer a call to arms and may join
+    /// each other's offensive wars (what `Alliance` always meant; saves
+    /// from before WH `diplob` read it so).
     Alliance,
+    /// WH `diplob` (ADR 0283): defensive alliance, answers only the call to
+    /// arms of an ally that is attacked.
+    DefensiveAlliance,
+    /// WH `diplob` (ADR 0283): neither party declares war on the other for
+    /// `turns` seasons (breaking it is perjury, as breaking a truce).
+    NonAggression { turns: u32 },
+    /// WH `diplob` (ADR 0282): `giver` declares war on `target`, the enemy of
+    /// the other party (« Rejoindre la guerre contre X »).
+    JoinWar { giver: Party, target: FactionId },
     /// `giver` opens its lands to the other party's armies.
-    MilitaryAccess {
-        giver: Party,
-    },
+    MilitaryAccess { giver: Party },
     /// Both parties trade freely (income bonus).
     TradeAgreement,
     /// `character` (the proposer's) marries `spouse` (the recipient's).
@@ -120,24 +126,16 @@ pub enum Article {
         seasons: u32,
     },
     /// `giver` pays `amount` livres at once.
-    Gold {
-        giver: Party,
-        amount: i64,
-    },
+    Gold { giver: Party, amount: i64 },
     /// `giver` cedes a province it owns (every settlement it holds there).
-    CedeProvince {
-        giver: Party,
-        province: ProvinceId,
-    },
+    CedeProvince { giver: Party, province: ProvinceId },
     /// `giver` cedes one secondary settlement (castle, town, abbey...).
     CedeSettlement {
         giver: Party,
         settlement: SettlementId,
     },
     /// `giver` becomes the other party's vassal.
-    Vassalage {
-        giver: Party,
-    },
+    Vassalage { giver: Party },
     /// `giver` frees a captive of the other party.
     ReleaseCaptive {
         giver: Party,
@@ -151,21 +149,14 @@ pub enum Article {
     /// FE (F3, spec § 4.6): `giver` gives up a feudal title it holds; the
     /// other party usurps it, or grants a lesser title to a direct vassal
     /// (`feudal::conquer_title`).
-    DemandTitle {
-        giver: Party,
-        title: TitleId,
-    },
+    DemandTitle { giver: Party, title: TitleId },
     /// Great Schism: the recipient switches to `religion`. Not a bargain:
     /// created by the core, answered by the player.
-    Obedience {
-        religion: data_model::ReligionId,
-    },
+    Obedience { religion: data_model::ReligionId },
     /// FE (§ 4.3): the proposer, a direct vassal of the recipient, is
     /// attacked by `aggressor` and calls for protection. Accept: intervene;
     /// refuse or let expire: shirk. Only sent to the player.
-    Protection {
-        aggressor: FactionId,
-    },
+    Protection { aggressor: FactionId },
     /// FE (§ 4.3.5): private war of `attacker` against `target`, both direct
     /// vassals of the recipient. Accept: impose peace; refuse or let expire:
     /// let be; `arbitrate` also takes a side. Only sent to the player.
@@ -177,9 +168,12 @@ pub enum Article {
     /// the player to end the private war it declared on `target`. Accept:
     /// imposed peace; refuse or let expire: the war goes on, at a cost in
     /// loyalty. Only sent to the player.
-    PeaceSummons {
-        target: FactionId,
-    },
+    PeaceSummons { target: FactionId },
+    /// WH `diplob` (ADR 0282): the proposer, an ally of the player, is
+    /// attacked by `aggressor` and calls for help. Accept: war against the
+    /// aggressor; refuse or let expire: the call is shirked (grudge, the
+    /// alliance breaks). Only sent to the player.
+    AllyCall { aggressor: FactionId },
 }
 
 impl Article {
@@ -194,7 +188,8 @@ impl Article {
             | Article::Vassalage { giver }
             | Article::ReleaseCaptive { giver, .. }
             | Article::Hostage { giver, .. }
-            | Article::DemandTitle { giver, .. } => Some(*giver),
+            | Article::DemandTitle { giver, .. }
+            | Article::JoinWar { giver, .. } => Some(*giver),
             _ => None,
         }
     }
@@ -216,6 +211,7 @@ impl Article {
                 | Article::Protection { .. }
                 | Article::Arbitration { .. }
                 | Article::PeaceSummons { .. }
+                | Article::AllyCall { .. }
         )
     }
 
@@ -226,6 +222,9 @@ impl Article {
             Article::Truce { .. } => "truce",
             Article::Mediation { .. } => "mediation",
             Article::Alliance => "alliance",
+            Article::DefensiveAlliance => "defensive_alliance",
+            Article::NonAggression { .. } => "non_aggression",
+            Article::JoinWar { .. } => "join_war",
             Article::MilitaryAccess { .. } => "military_access",
             Article::TradeAgreement => "trade_agreement",
             Article::Marriage { .. } => "marriage",
@@ -241,6 +240,7 @@ impl Article {
             Article::Protection { .. } => "protection",
             Article::Arbitration { .. } => "arbitration",
             Article::PeaceSummons { .. } => "peace_summons",
+            Article::AllyCall { .. } => "ally_call",
         }
     }
 }
@@ -311,6 +311,32 @@ impl Treaty {
                     | Article::PeaceSummons { .. }
             )
         })
+    }
+
+    /// An ally's call for help, created by the core when the player's ally
+    /// is attacked (WH `diplob`).
+    pub fn is_ally_call(&self) -> bool {
+        self.articles
+            .iter()
+            .any(|a| matches!(a, Article::AllyCall { .. }))
+    }
+
+    /// An ultimatum of the AI to the player (WH `diplob`): a demand, with
+    /// nothing in return and no war to end, that the recipient alone pays.
+    pub fn is_ultimatum(&self) -> bool {
+        let demands = |a: &Article| {
+            matches!(
+                a,
+                Article::CedeProvince {
+                    giver: Party::Recipient,
+                    ..
+                } | Article::Tribute {
+                    giver: Party::Recipient,
+                    ..
+                }
+            )
+        };
+        self.articles.iter().any(demands) && self.articles.iter().all(demands)
     }
 
     pub fn is_obedience(&self) -> bool {
@@ -412,6 +438,21 @@ pub struct DiplomaticLedger {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub history: Vec<TreatyRecord>,
     /// Armies of other factions trespassing on our lands.
+    /// WH `diplob`: allies bound by a defensive alliance only (the others
+    /// are military allies, what an alliance was before).
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub defensive_allies: BTreeSet<FactionId>,
+    /// WH `diplob`: non-aggression pacts in force, with the last turn.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub non_aggression: BTreeMap<FactionId, u32>,
+    /// WH `diplob`: turn of the last ultimatum this faction sent to each
+    /// target (cooldown).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub ultimatum_sent: BTreeMap<FactionId, u32>,
+    /// WH `diplob`: targets that refused an ultimatum of this faction, with
+    /// the turn of the refusal: war is declared on them next season.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub ultimatum_refused: BTreeMap<FactionId, u32>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub trespassers: BTreeMap<FactionId, crate::passage::Trespass>,
 }

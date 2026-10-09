@@ -36,6 +36,19 @@ impl CampaignState {
         if recent || duplicate {
             return;
         }
+        self.push_offer(data, from, proposal);
+    }
+
+    /// Adds an offer to the player's pending ones, without the cooldown: the
+    /// calls of an attacked ally cannot wait (WH `diplob`).
+    pub(crate) fn push_offer(&mut self, data: &GameData, from: &FactionId, proposal: Treaty) {
+        let player = self.player_faction.clone();
+        if proposal.is_ultimatum() {
+            let turn = self.turn;
+            if let Some(f) = self.factions.get_mut(from) {
+                f.ledger.ultimatum_sent.insert(player.clone(), turn);
+            }
+        }
         let text = offer_text(self, data, from, &proposal);
         let id = self.next_offer_id;
         self.next_offer_id += 1;
@@ -93,11 +106,45 @@ impl CampaignState {
                 .remove(index);
             if offer.proposal.is_feudal_call() {
                 crate::feudal::refuse_feudal_call(self, data, faction, &offer);
+            } else if offer.proposal.is_ally_call() {
+                self.shirk_ally_call(data, faction, &offer);
+            } else if offer.proposal.is_ultimatum() {
+                self.ultimatum_declined(data, faction, &offer);
             } else if !offer.proposal.is_obedience() {
                 self.add_modifier(&offer.from, faction, -10, "Offre repoussée", 20);
             }
             Ok(())
         }
+    }
+}
+
+impl CampaignState {
+    /// The player refused (or let expire) an ultimatum of `offer.from`: it
+    /// takes offence, holds a casus belli and declares war next season
+    /// (`plan_diplomacy`).
+    pub(crate) fn ultimatum_declined(
+        &mut self,
+        data: &GameData,
+        player: &FactionId,
+        offer: &Offer,
+    ) {
+        let rules = &data.ai_diplomacy.ultimatum;
+        let turn = self.turn;
+        if let Some(f) = self.factions.get_mut(&offer.from) {
+            f.ledger.ultimatum_refused.insert(player.clone(), turn);
+        }
+        self.add_modifier(
+            &offer.from,
+            player,
+            rules.refused_attitude,
+            "Ultimatum refusé",
+            rules.refused_duration,
+        );
+        let text = format!(
+            "{} tient votre refus pour une insulte : la guerre menace.",
+            data.faction_name(&offer.from)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(&offer.from));
     }
 }
 
@@ -113,6 +160,13 @@ fn offer_text(
         }
     }
     let player = state.player_faction.clone();
+    if proposal.is_ultimatum() {
+        return format!(
+            "{} vous adresse un ultimatum : {}. Refusez, et ce sera la guerre.",
+            data.faction_name(from),
+            crate::negotiation::treaty_text(state, data, from, &player, &proposal.articles)
+        );
+    }
     format!(
         "{} propose un traité. {}",
         data.faction_name(from),

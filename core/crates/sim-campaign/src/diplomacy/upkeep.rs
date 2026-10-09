@@ -9,8 +9,10 @@ pub(crate) fn resolve_diplomacy(
     events: &mut Vec<GameEvent>,
 ) {
     crate::negotiation::resolve_negotiation(state, data, events);
+    super::update_league(state, data, events);
     let turn = state.turn;
     for f in state.factions.values_mut() {
+        f.ledger.non_aggression.retain(|_, until| *until > turn);
         f.modifiers.retain(|m| m.expires_turn > turn);
         f.claims.retain(|c| c.expires_turn.is_none_or(|t| t > turn));
         f.truces.retain(|_, until| *until > turn);
@@ -36,6 +38,14 @@ pub(crate) fn resolve_diplomacy(
         }
         if offer.proposal.is_feudal_call() {
             crate::feudal::refuse_feudal_call(state, data, &player, &offer);
+            continue;
+        }
+        if offer.proposal.is_ally_call() {
+            state.shirk_ally_call(data, &player, &offer);
+            continue;
+        }
+        if offer.proposal.is_ultimatum() {
+            state.ultimatum_declined(data, &player, &offer);
             continue;
         }
         events.push(

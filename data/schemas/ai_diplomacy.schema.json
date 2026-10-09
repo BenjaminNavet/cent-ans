@@ -97,10 +97,246 @@
       },
       "additionalProperties": false
     },
+    "league": {
+      "type": "object",
+      "description": "Ligue anti-hégémon (WH diplob) : une puissance qui domine trop se voit opposer ses voisins.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "La ligue est active."
+        },
+        "include_player": {
+          "type": "boolean",
+          "description": "Le joueur peut être l'hégémon visé."
+        },
+        "province_share": {
+          "type": "number",
+          "description": "Part des provinces possédées au-delà de laquelle une faction domine.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "power_ratio": {
+          "type": "number",
+          "description": "Puissance militaire de l'hégémon, en multiple de celle de la deuxième puissance.",
+          "minimum": 1
+        },
+        "attitude": {
+          "type": "integer",
+          "description": "Attitude de chacun envers l'hégémon (non allié, non vassal)."
+        },
+        "join_bonus": {
+          "type": "integer",
+          "description": "Points de traité d'une alliance entre deux ennemis de l'hégémon."
+        },
+        "partner_attitude": {
+          "type": "integer",
+          "description": "Attitude minimale envers un autre ennemi de l'hégémon pour lui proposer une alliance."
+        },
+        "duration_turns": {
+          "type": "integer",
+          "description": "Durée minimale (saisons) d'une ligue constituée.",
+          "minimum": 1
+        },
+        "war_ratio_factor": {
+          "type": "number",
+          "description": "Facteur appliqué au rapport de puissance exigé pour déclarer la guerre à l'hégémon (< 1 : plus facile).",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "enabled",
+        "include_player",
+        "province_share",
+        "power_ratio",
+        "attitude",
+        "join_bonus",
+        "duration_turns",
+        "war_ratio_factor"
+      ],
+      "additionalProperties": false
+    },
+    "ally_call": {
+      "type": "object",
+      "description": "Appel d'un allié attaqué au joueur (WH diplob).",
+      "properties": {
+        "refuse_attitude": {
+          "type": "integer",
+          "description": "Attitude du défenseur envers le joueur qui refuse (ou laisse expirer) l'appel."
+        },
+        "refuse_duration": {
+          "type": "integer",
+          "description": "Durée (saisons) de ce ressentiment.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "refuse_attitude",
+        "refuse_duration"
+      ],
+      "additionalProperties": false
+    },
+    "non_aggression": {
+      "type": "object",
+      "description": "Pacte de non-agression (WH diplob).",
+      "properties": {
+        "attitude": {
+          "type": "integer",
+          "description": "Attitude mutuelle tant que le pacte tient."
+        },
+        "min_turns": {
+          "type": "integer",
+          "description": "Durée minimale d'un pacte (saisons).",
+          "minimum": 1
+        },
+        "max_turns": {
+          "type": "integer",
+          "description": "Durée maximale d'un pacte (saisons).",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "attitude",
+        "min_turns",
+        "max_turns"
+      ],
+      "additionalProperties": false
+    },
+    "ultimatum": {
+      "type": "object",
+      "description": "Ultimatums de l'IA au joueur (WH diplob) : cession ou tribut, sinon la guerre.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "L'IA adresse des ultimatums avant de déclarer la guerre au joueur."
+        },
+        "min_power_ratio": {
+          "type": "number",
+          "description": "Puissance de coalition de l'IA, en multiple de celle du joueur, exigée pour un ultimatum.",
+          "minimum": 0
+        },
+        "tribute_income_percent": {
+          "type": "integer",
+          "description": "Tribut exigé, en pourcentage du revenu saisonnier du joueur.",
+          "minimum": 1
+        },
+        "tribute_seasons": {
+          "type": "integer",
+          "description": "Durée (saisons) du tribut exigé.",
+          "minimum": 1
+        },
+        "cooldown_turns": {
+          "type": "integer",
+          "description": "Saisons avant qu'une même IA adresse un nouvel ultimatum au joueur.",
+          "minimum": 0
+        },
+        "refused_attitude": {
+          "type": "integer",
+          "description": "Attitude de l'IA envers le joueur après un ultimatum refusé."
+        },
+        "refused_duration": {
+          "type": "integer",
+          "description": "Durée (saisons) de ce ressentiment.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "enabled",
+        "min_power_ratio",
+        "tribute_income_percent",
+        "tribute_seasons",
+        "cooldown_turns",
+        "refused_attitude",
+        "refused_duration"
+      ],
+      "additionalProperties": false
+    },
     "treaty_weights": {
       "type": "object",
       "description": "Poids, en points de traité, des raisons que pèse le destinataire d'un traité, par type d'article (core : sim-campaign negotiation/value.rs). Les valeurs absentes gardent le défaut du core, égal à ce fichier.",
       "properties": {
+        "join_war": {
+          "type": "object",
+          "description": "Clause « Rejoindre la guerre contre X ».",
+          "properties": {
+            "base": {
+              "type": "integer",
+              "description": "Rejoindre une guerre : engagement de base."
+            },
+            "receives": {
+              "type": "integer",
+              "description": "Le demandeur promet de rejoindre notre guerre."
+            },
+            "favourable_ratio": {
+              "type": "number",
+              "description": "Puissance de coalition (nous / la cible) à partir de laquelle la guerre est favorable."
+            },
+            "favourable": {
+              "type": "integer",
+              "description": "Points d'une guerre favorable."
+            },
+            "outmatched_ratio": {
+              "type": "number",
+              "description": "Rapport en dessous duquel la cible nous écrase."
+            },
+            "outmatched": {
+              "type": "integer",
+              "description": "Points d'une cible trop puissante."
+            },
+            "common_enemy": {
+              "type": "integer",
+              "description": "Points quand nous haïssons déjà la cible."
+            },
+            "weariness_divisor": {
+              "type": "integer",
+              "description": "Fatigue de guerre par point retiré."
+            },
+            "weariness_cap": {
+              "type": "integer",
+              "description": "Plafond de ce retrait."
+            },
+            "at_war_elsewhere": {
+              "type": "integer",
+              "description": "Points par autre guerre en cours (au plus un)."
+            }
+          },
+          "required": [
+            "base",
+            "receives",
+            "favourable_ratio",
+            "favourable",
+            "outmatched_ratio",
+            "outmatched",
+            "common_enemy",
+            "weariness_divisor",
+            "weariness_cap",
+            "at_war_elsewhere"
+          ],
+          "additionalProperties": false
+        },
+        "non_aggression": {
+          "type": "object",
+          "description": "Pacte de non-agression.",
+          "properties": {
+            "base": {
+              "type": "integer",
+              "description": "Base."
+            },
+            "rival": {
+              "type": "integer",
+              "description": "Le demandeur est un rival."
+            },
+            "menaced": {
+              "type": "integer",
+              "description": "Le demandeur nous écrase et nous voisine."
+            }
+          },
+          "required": [
+            "base",
+            "rival",
+            "menaced"
+          ],
+          "additionalProperties": false
+        },
         "peace": {
           "type": "object",
           "description": "Paix, trêve et médiation",
@@ -126,6 +362,7 @@
           "type": "object",
           "description": "Alliance",
           "properties": {
+          "defensive_commitment": {"type": "integer", "description": "Engagement d'une alliance défensive seule (points de traité)."},
             "military_commitment": {"type": "integer", "description": "military commitment (points de traité)."},
             "war_on_our_allies": {"type": "integer", "description": "war on our allies (points de traité)."},
             "common_enemy": {"type": "integer", "description": "common enemy (points de traité)."},

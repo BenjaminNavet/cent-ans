@@ -118,11 +118,93 @@ pub struct AiDiplomacy {
     /// Weights of the reasons a recipient weighs in a treaty.
     #[serde(default)]
     pub treaty_weights: TreatyWeights,
+    /// WH `diplob`: league against a hegemon.
+    #[serde(default)]
+    pub league: LeagueRules,
+    /// WH `diplob`: an ally's call for help to the player.
+    #[serde(default)]
+    pub ally_call: AllyCallRules,
+    /// WH `diplob`: non-aggression pact.
+    #[serde(default)]
+    pub non_aggression: NonAggressionRules,
+    /// WH `diplob`: AI ultimatums to the player.
+    #[serde(default)]
+    pub ultimatum: UltimatumRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
 crate::bundled_rules!(AiDiplomacy, "ai/diplomacy.json", default);
+
+/// WH `diplob` (ADR 0282): the league against a faction that dominates.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LeagueRules {
+    pub enabled: bool,
+    /// The player can be the hegemon the others league against.
+    pub include_player: bool,
+    /// Share of the provinces held (of those owned) from which a faction
+    /// dominates.
+    pub province_share: f64,
+    /// Military power over that of the second power from which it dominates.
+    pub power_ratio: f64,
+    /// Attitude of everyone (not allied, not vassal) towards the hegemon.
+    pub attitude: i32,
+    /// Alliance treaty points between two enemies of the hegemon.
+    pub join_bonus: i32,
+    /// Attitude above which an AI in the league proposes an alliance to
+    /// another enemy of the hegemon.
+    pub partner_attitude: i32,
+    /// Seasons a constituted league lasts at least.
+    pub duration_turns: u32,
+    /// Factor on the power ratio needed to declare war on the hegemon.
+    pub war_ratio_factor: f64,
+}
+
+crate::bundled_rules!(LeagueRules, "ai/diplomacy.json", at "/league", default);
+
+/// WH `diplob` (ADR 0282): an ally attacked calls the player.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AllyCallRules {
+    /// Attitude of the defender towards a player who shirks the call.
+    pub refuse_attitude: i32,
+    /// Seasons of that grudge.
+    pub refuse_duration: u32,
+}
+
+crate::bundled_rules!(AllyCallRules, "ai/diplomacy.json", at "/ally_call", default);
+
+/// WH `diplob` (ADR 0283): non-aggression pact.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NonAggressionRules {
+    /// Mutual attitude while the pact holds.
+    pub attitude: i32,
+    pub min_turns: u32,
+    pub max_turns: u32,
+}
+
+crate::bundled_rules!(NonAggressionRules, "ai/diplomacy.json", at "/non_aggression", default);
+
+/// WH `diplob` (ADR 0283): ultimatums of the AI to the player.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UltimatumRules {
+    pub enabled: bool,
+    /// Coalition power over the player's from which the AI dares.
+    pub min_power_ratio: f64,
+    /// Tribute demanded, percent of the player's seasonal income.
+    pub tribute_income_percent: i64,
+    pub tribute_seasons: u32,
+    /// Seasons before the same AI sends another ultimatum.
+    pub cooldown_turns: u32,
+    /// Attitude of the AI towards the player after a refused ultimatum.
+    pub refused_attitude: i32,
+    pub refused_duration: u32,
+}
+
+crate::bundled_rules!(UltimatumRules, "ai/diplomacy.json", at "/ultimatum", default);
 
 /// ADR 0025: how treaties are valued, war goals scored and war
 /// weariness accumulated. `enabled: false` (the default without the data
@@ -258,6 +340,8 @@ pub struct TreatyWeights {
     pub marriage: MarriageWeights,
     pub exchange: ExchangeWeights,
     pub context: ContextWeights,
+    pub join_war: JoinWarWeights,
+    pub non_aggression: NonAggressionWeights,
 }
 
 crate::bundled_rules!(TreatyWeights, "ai/diplomacy.json", at "/treaty_weights", default);
@@ -297,6 +381,8 @@ pub struct PeaceWeights {
 #[serde(deny_unknown_fields)]
 pub struct AllianceWeights {
     pub military_commitment: i32,
+    /// Commitment of a defensive alliance (WH `diplob`): lighter.
+    pub defensive_commitment: i32,
     pub war_on_our_allies: i32,
     pub common_enemy: i32,
     /// Proposer power over ours above which it is a strong ally.
@@ -307,6 +393,40 @@ pub struct AllianceWeights {
     pub weak_ally: i32,
     pub common_rival: i32,
     pub friend_of_rival: i32,
+}
+
+/// « Rejoindre la guerre contre X » (WH `diplob`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct JoinWarWeights {
+    /// Base commitment of joining a war.
+    pub base: i32,
+    /// Points when the proposer promises to join our war.
+    pub receives: i32,
+    /// Coalition power over the target from which the war is favourable.
+    pub favourable_ratio: f64,
+    pub favourable: i32,
+    /// Ratio below which the target crushes us.
+    pub outmatched_ratio: f64,
+    pub outmatched: i32,
+    /// We already hate the target.
+    pub common_enemy: i32,
+    /// Weariness points per point removed.
+    pub weariness_divisor: i32,
+    pub weariness_cap: i32,
+    /// Points when already at war elsewhere.
+    pub at_war_elsewhere: i32,
+}
+
+/// Non-aggression pact (WH `diplob`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NonAggressionWeights {
+    pub base: i32,
+    /// The proposer is a rival.
+    pub rival: i32,
+    /// The proposer is a menacing neighbour: the pact calms it.
+    pub menaced: i32,
 }
 
 /// Vassalage.

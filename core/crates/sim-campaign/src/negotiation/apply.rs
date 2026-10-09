@@ -46,9 +46,38 @@ impl Article {
                 state.make_peace(data, proposer, recipient, &[], 0, (*turns).max(1));
             }
             Article::Alliance => {
+                if state.is_allied(proposer, recipient) {
+                    // Upgrade of a defensive alliance.
+                    state.set_defensive_alliance(proposer, recipient, false);
+                } else {
+                    state.form_alliance(data, proposer, recipient);
+                }
+            }
+            Article::DefensiveAlliance => {
                 if !state.is_allied(proposer, recipient) {
                     state.form_alliance(data, proposer, recipient);
                 }
+                state.set_defensive_alliance(proposer, recipient, true);
+            }
+            Article::NonAggression { turns } => {
+                let until = state.turn + turns;
+                for (a, b) in [(proposer, recipient), (recipient, proposer)] {
+                    state
+                        .factions
+                        .get_mut(a)
+                        .expect("checked")
+                        .ledger
+                        .non_aggression
+                        .insert(b.clone(), until);
+                }
+            }
+            Article::JoinWar { target, .. } => {
+                state
+                    .declare_war(data, &giver.expect("giver"), target)
+                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
+            }
+            Article::AllyCall { aggressor } => {
+                state.join_ally_call(data, recipient, proposer, aggressor);
             }
             Article::Marriage { character, spouse } => {
                 marry(state, data, parties, character, spouse)?;

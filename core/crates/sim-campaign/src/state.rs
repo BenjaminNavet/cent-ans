@@ -997,6 +997,9 @@ pub struct CampaignState {
     pub schism: bool,
     #[serde(default)]
     pub(crate) next_offer_id: u32,
+    /// WH `diplob`: the standing league against a hegemon, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub league: Option<crate::diplomacy::League>,
     /// Events produced by orders (they apply immediately); they open the
     /// next turn's journal.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -1091,6 +1094,7 @@ impl CampaignState {
             next_army_index: 1,
             schism: false,
             next_offer_id: 1,
+            league: None,
             pending_events: Vec::new(),
             chronicle: crate::chronicle::ChronicleState::default(),
             outcome: None,

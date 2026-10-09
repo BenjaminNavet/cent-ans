@@ -77,6 +77,16 @@ impl PlanCache<'_> {
         {
             add("Voisin menaçant", menace.attitude);
         }
+        // WH `diplob`: the league stands against the hegemon.
+        if state.league_target_of(data, a) == Some(b) {
+            add(LEAGUE_REASON, data.ai_diplomacy.league.attitude);
+        }
+        if state.has_non_aggression(a, b) {
+            add(
+                "Pacte de non-agression",
+                data.ai_diplomacy.non_aggression.attitude,
+            );
+        }
         if let Some(fb) = state.factions.get(b) {
             let claims_on_us = fb.claims.iter().any(|c| match c.kind {
                 ClaimKind::Throne => c.faction.as_ref() == Some(a),

@@ -101,7 +101,8 @@
       "weak_ratio": 0.3,
       "weak_ally": -10,
       "common_rival": 15,
-      "friend_of_rival": -40
+      "friend_of_rival": -40,
+      "defensive_commitment": -5
     },
     "vassalage": {
       "power_margin_scale": 10.0,
@@ -160,6 +161,52 @@
       "abandoned_ally": -6,
       "abandoned_allies_max": 3,
       "prudence": -3
+    },
+    "join_war": {
+      "base": -10,
+      "receives": 20,
+      "favourable_ratio": 1.0,
+      "favourable": 15,
+      "outmatched_ratio": 0.5,
+      "outmatched": -30,
+      "common_enemy": 20,
+      "weariness_divisor": 4,
+      "weariness_cap": 25,
+      "at_war_elsewhere": -10
+    },
+    "non_aggression": {
+      "base": 10,
+      "rival": -10,
+      "menaced": 10
     }
+  },
+  "league": {
+    "enabled": true,
+    "include_player": false,
+    "province_share": 0.18,
+    "power_ratio": 2.0,
+    "attitude": -25,
+    "join_bonus": 15,
+    "partner_attitude": -10,
+    "duration_turns": 40,
+    "war_ratio_factor": 0.7
+  },
+  "ally_call": {
+    "refuse_attitude": -30,
+    "refuse_duration": 40
+  },
+  "non_aggression": {
+    "attitude": 5,
+    "min_turns": 4,
+    "max_turns": 80
+  },
+  "ultimatum": {
+    "enabled": true,
+    "min_power_ratio": 1.5,
+    "tribute_income_percent": 30,
+    "tribute_seasons": 8,
+    "cooldown_turns": 24,
+    "refused_attitude": -20,
+    "refused_duration": 20
   }
 }

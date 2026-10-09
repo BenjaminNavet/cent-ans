@@ -16,7 +16,7 @@ impl CampaignState {
         attacker: &FactionId,
         target: &FactionId,
     ) -> i32 {
-        if self.has_truce(attacker, target) {
+        if self.has_truce(attacker, target) || self.has_non_aggression(attacker, target) {
             PERJURY_PRESTIGE
         } else if self.casus_belli(data, attacker, target).is_none() {
             AGGRESSION_PRESTIGE
@@ -50,6 +50,8 @@ impl CampaignState {
             return Err(DiplomacyError::Allied);
         }
         let truce_broken = self.has_truce(attacker, target);
+        // WH `diplob`: a non-aggression pact binds like a truce.
+        let pact_broken = !truce_broken && self.has_non_aggression(attacker, target);
         let casus_belli = self.casus_belli(data, attacker, target);
         let others: Vec<FactionId> = self
             .factions
@@ -60,15 +62,25 @@ impl CampaignState {
         let mut motive = casus_belli
             .clone()
             .unwrap_or_else(|| "aucun motif".to_owned());
-        if truce_broken {
-            motive = "rupture de trêve".to_owned();
+        if truce_broken || pact_broken {
+            motive = if truce_broken {
+                "rupture de trêve"
+            } else {
+                "rupture du pacte de non-agression"
+            }
+            .to_owned();
             for other in &others {
                 self.add_modifier(other, attacker, -40, PERJURY_REASON, 40);
             }
             religion::change_favor(self, attacker, -30);
             self.change_ruler_prestige(attacker, PERJURY_PRESTIGE);
+            let bond = if truce_broken {
+                "la trêve"
+            } else {
+                "le pacte de non-agression"
+            };
             let text = format!(
-                "{} rompt la trêve qui le liait à {} : parjure.",
+                "{} rompt {bond} qui le liait à {} : parjure.",
                 data.faction_name(attacker),
                 data.faction_name(target)
             );
@@ -77,7 +89,11 @@ impl CampaignState {
                 attacker,
                 target,
                 crate::negotiation::Rupture::Perjury,
-                &["truce"],
+                &[if truce_broken {
+                    "truce"
+                } else {
+                    "non_aggression"
+                }],
                 &text,
             );
         } else if casus_belli.is_none() {
@@ -169,6 +185,8 @@ impl CampaignState {
             let f = self.factions.get_mut(x).expect("exists");
             f.allies.remove(y);
             f.truces.remove(y);
+            f.ledger.non_aggression.remove(y);
+            f.ledger.ultimatum_refused.remove(y);
             f.at_war_with.insert(y.clone());
             f.war_started.insert(y.clone(), turn);
             f.war_scores.insert(y.clone(), 0);
@@ -198,53 +216,139 @@ impl CampaignState {
             if self.is_allied(&ally, aggressor) {
                 continue; // bound to both sides: stays out
             }
+            // WH `diplob`: the player's ally calls for help by an offer, the
+            // player answers (a feudal tie keeps its own rules).
+            let feudal_tie = self.factions[&ally].suzerain.as_ref() == Some(defender)
+                || self.factions[defender].suzerain.as_ref() == Some(&ally);
+            if ally == self.player_faction && !feudal_tie {
+                self.send_ally_call(data, defender, aggressor);
+                continue;
+            }
             let joins = answers_call_to_arms(self, data, &ally, defender, aggressor);
             if joins {
-                self.start_war(&ally, aggressor);
-                let text = format!(
-                    "{} répond à l'appel aux armes de {} contre {}.",
-                    data.faction_name(&ally),
-                    data.faction_name(defender),
-                    data.faction_name(aggressor)
-                );
-                self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&ally));
+                self.answer_call_joined(data, &ally, defender, aggressor);
             } else {
-                self.factions
-                    .get_mut(&ally)
-                    .expect("exists")
-                    .allies
-                    .remove(defender);
-                self.factions
-                    .get_mut(defender)
-                    .expect("exists")
-                    .allies
-                    .remove(&ally);
-                if self.factions[&ally].suzerain.as_ref() == Some(defender) {
-                    crate::feudal::release_from_liege(self, &ally);
+                self.answer_call_shirked(data, &ally, defender, aggressor);
+            }
+        }
+    }
+
+    /// `ally` marches with `defender` against `aggressor`.
+    fn answer_call_joined(
+        &mut self,
+        data: &GameData,
+        ally: &FactionId,
+        defender: &FactionId,
+        aggressor: &FactionId,
+    ) {
+        self.start_war(ally, aggressor);
+        let text = format!(
+            "{} répond à l'appel aux armes de {} contre {}.",
+            data.faction_name(ally),
+            data.faction_name(defender),
+            data.faction_name(aggressor)
+        );
+        self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(ally));
+    }
+
+    /// `ally` stays out: the alliance breaks, `defender` keeps a grudge.
+    pub(crate) fn answer_call_shirked(
+        &mut self,
+        data: &GameData,
+        ally: &FactionId,
+        defender: &FactionId,
+        aggressor: &FactionId,
+    ) {
+        self.factions
+            .get_mut(ally)
+            .expect("exists")
+            .allies
+            .remove(defender);
+        self.factions
+            .get_mut(defender)
+            .expect("exists")
+            .allies
+            .remove(ally);
+        if self.factions[ally].suzerain.as_ref() == Some(defender) {
+            crate::feudal::release_from_liege(self, ally);
+        }
+        let grudge = &data.ai_diplomacy.ally_call;
+        self.add_modifier(
+            defender,
+            ally,
+            grudge.refuse_attitude,
+            "A refusé l'appel aux armes",
+            grudge.refuse_duration,
+        );
+        let refusal = format!(
+            "{} refuse l'appel aux armes de {} contre {}.",
+            data.faction_name(ally),
+            data.faction_name(defender),
+            data.faction_name(aggressor)
+        );
+        crate::negotiation::record_rupture(
+            self,
+            ally,
+            defender,
+            crate::negotiation::Rupture::RefusedCall,
+            &["alliance"],
+            &refusal,
+        );
+        let text = format!(
+            "{} refuse de soutenir {} : l'alliance est rompue.",
+            data.faction_name(ally),
+            data.faction_name(defender)
+        );
+        self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(ally));
+    }
+
+    /// Offer from the attacked `defender` to the player, its ally.
+    fn send_ally_call(&mut self, data: &GameData, defender: &FactionId, aggressor: &FactionId) {
+        let proposal = Treaty::single(Article::AllyCall {
+            aggressor: aggressor.clone(),
+        });
+        self.push_offer(data, defender, proposal);
+    }
+
+    /// The player accepted the call of `defender` against `aggressor`.
+    pub(crate) fn join_ally_call(
+        &mut self,
+        data: &GameData,
+        player: &FactionId,
+        defender: &FactionId,
+        aggressor: &FactionId,
+    ) {
+        let alive = |s: &Self, f: &FactionId| s.factions.get(f).is_some_and(|f| f.alive);
+        if !alive(self, aggressor)
+            || !alive(self, defender)
+            || !self.is_at_war(defender, aggressor)
+            || self.is_at_war(player, aggressor)
+        {
+            return; // the war ended or changed meanwhile
+        }
+        self.answer_call_joined(data, player, defender, aggressor);
+    }
+
+    /// The player shirked (refused or let expire) the call of the offer.
+    pub(crate) fn shirk_ally_call(&mut self, data: &GameData, player: &FactionId, offer: &Offer) {
+        for article in &offer.proposal.articles {
+            if let Article::AllyCall { aggressor } = article {
+                if self.is_allied(player, &offer.from) {
+                    self.answer_call_shirked(data, player, &offer.from, aggressor);
                 }
-                self.add_modifier(defender, &ally, -30, "A refusé l'appel aux armes", 40);
-                let refusal = format!(
-                    "{} refuse l'appel aux armes de {} contre {}.",
-                    data.faction_name(&ally),
-                    data.faction_name(defender),
-                    data.faction_name(aggressor)
-                );
-                crate::negotiation::record_rupture(
-                    self,
-                    &ally,
-                    defender,
-                    crate::negotiation::Rupture::RefusedCall,
-                    &["alliance"],
-                    &refusal,
-                );
-                let text = format!(
-                    "{} refuse de soutenir {} : l'alliance est rompue.",
-                    data.faction_name(&ally),
-                    data.faction_name(defender)
-                );
-                self.push_order_event(
-                    GameEvent::new(EventKind::AllianceBroken, text).faction(&ally),
-                );
+            }
+        }
+    }
+
+    /// Marks the alliance between `a` and `b` defensive (or military).
+    pub(crate) fn set_defensive_alliance(&mut self, a: &FactionId, b: &FactionId, defensive: bool) {
+        for (x, y) in [(a, b), (b, a)] {
+            if let Some(f) = self.factions.get_mut(x) {
+                if defensive {
+                    f.ledger.defensive_allies.insert(y.clone());
+                } else {
+                    f.ledger.defensive_allies.remove(y);
+                }
             }
         }
     }
@@ -423,6 +527,7 @@ impl CampaignState {
     }
 
     pub(crate) fn form_alliance(&mut self, data: &GameData, a: &FactionId, b: &FactionId) {
+        self.set_defensive_alliance(a, b, false); // military unless made defensive
         self.factions
             .get_mut(a)
             .expect("exists")

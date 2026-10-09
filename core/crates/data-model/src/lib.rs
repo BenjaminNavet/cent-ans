@@ -48,9 +48,10 @@ pub use entities::ai_alignment::{
 };
 pub use entities::ai_campaign::AiCampaign;
 pub use entities::ai_diplomacy::{
-    AiDiplomacy, AllianceWeights, ContextWeights, ExchangeWeights, JoinWarRules, MarriageWeights,
-    MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules, PeaceWeights,
-    TreatyWeights, VassalageWeights, WarPlanningRules,
+    AiDiplomacy, AllianceWeights, AllyCallRules, ContextWeights, ExchangeWeights, JoinWarRules,
+    JoinWarWeights, LeagueRules, MarriageWeights, MenacingNeighbourRules, NegotiationRules,
+    NonAggressionRules, NonAggressionWeights, PassageRules, PeaceRules, PeaceWeights,
+    TreatyWeights, UltimatumRules, VassalageWeights, WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy, ShareCap};
 pub use entities::ai_feudal::AiFeudal;

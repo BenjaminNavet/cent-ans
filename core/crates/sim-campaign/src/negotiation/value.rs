@@ -32,7 +32,12 @@ impl Article {
                 reasons.push("Médiation pontificale", deal.weights().peace.mediation);
                 blocked = crusade_vow(deal);
             }
-            Article::Alliance => alliance_factors(deal, &mut reasons),
+            Article::Alliance => alliance_factors(deal, &mut reasons, true),
+            Article::DefensiveAlliance => alliance_factors(deal, &mut reasons, false),
+            Article::NonAggression { .. } => non_aggression_factors(deal, &mut reasons),
+            Article::JoinWar { giver, target } => {
+                join_war_factors(deal, *giver, target, &mut reasons);
+            }
             Article::Marriage { character, spouse } => {
                 marriage_factors(deal, character, spouse, &mut reasons);
             }
@@ -64,7 +69,8 @@ impl Article {
             Article::Obedience { .. }
             | Article::Protection { .. }
             | Article::Arbitration { .. }
-            | Article::PeaceSummons { .. } => {}
+            | Article::PeaceSummons { .. }
+            | Article::AllyCall { .. } => {}
         }
         ArticleValue {
             label: self.label(deal.state, deal.data, deal.proposer, deal.recipient),
@@ -186,11 +192,23 @@ fn crusade_vow(deal: &Deal) -> Option<String> {
 
 // ----- alliance, vassalage, marriage -------------------------------------
 
-fn alliance_factors(deal: &Deal, reasons: &mut ReasonList) {
+fn alliance_factors(deal: &Deal, reasons: &mut ReasonList, military: bool) {
     let (state, data) = (deal.state, deal.data);
     let (proposer, recipient) = (deal.proposer, deal.recipient);
     let weights = &deal.weights().alliance;
-    reasons.push("Engagement militaire", weights.military_commitment);
+    if military {
+        reasons.push("Engagement militaire", weights.military_commitment);
+    } else {
+        reasons.push("Engagement défensif", weights.defensive_commitment);
+    }
+    // WH `diplob`: two enemies of the hegemon band together.
+    if state.league_peers(data, proposer, recipient) {
+        let target = state.league.as_ref().map(|l| data.faction_name(&l.target));
+        reasons.push(
+            format!("Ligue contre {}", target.unwrap_or_default()),
+            data.ai_diplomacy.league.join_bonus,
+        );
+    }
     let at_war_with_our_allies = state
         .factions
         .get(recipient)
@@ -240,6 +258,63 @@ fn alliance_factors(deal: &Deal, reasons: &mut ReasonList) {
         friend_of_rival,
         "Allié de nos rivaux",
         weights.friend_of_rival,
+    );
+}
+
+/// Non-aggression pact (WH `diplob`): welcome, above all from a rival or a
+/// neighbour that out-weighs us.
+fn non_aggression_factors(deal: &Deal, reasons: &mut ReasonList) {
+    let (proposer, recipient) = (deal.proposer, deal.recipient);
+    let weights = &deal.weights().non_aggression;
+    reasons.push("Pacte de non-agression", weights.base);
+    reasons.push_if(
+        deal.cache.rivals(recipient).contains(proposer),
+        "Rival déclaré",
+        weights.rival,
+    );
+    let menace = &deal.data.ai_diplomacy.menacing_neighbour;
+    let menaced = deal.cache.faction_power(proposer)
+        > menace.power_ratio * deal.cache.faction_power(recipient).max(1.0)
+        && deal.cache.are_neighbors(deal.data, recipient, proposer);
+    reasons.push_if(menaced, "Voisin puissant à ménager", weights.menaced);
+}
+
+/// « Rejoindre la guerre contre X » (WH `diplob`): the giver weighs the war
+/// as it would an ally's war (coalition odds, grudge, weariness).
+fn join_war_factors(
+    deal: &Deal,
+    giver: Party,
+    target: &data_model::FactionId,
+    reasons: &mut ReasonList,
+) {
+    let weights = &deal.weights().join_war;
+    if giver == Party::Proposer {
+        reasons.push("Renfort promis dans notre guerre", weights.receives);
+        return;
+    }
+    let (state, recipient) = (deal.state, deal.recipient);
+    reasons.push("Entrer en guerre", weights.base);
+    let ratio = deal.cache.coalition_power(recipient) / deal.cache.coalition_power(target).max(1.0);
+    if ratio >= weights.favourable_ratio {
+        reasons.push("Guerre favorable", weights.favourable);
+    } else if ratio < weights.outmatched_ratio {
+        reasons.push("Cible trop puissante", weights.outmatched);
+    }
+    let grudge = deal.cache.rivals(recipient).contains(target)
+        || deal.cache.attitude(deal.data, recipient, target).0 < 0;
+    reasons.push_if(grudge, "Rancune contre la cible", weights.common_enemy);
+    let tired = (super::weariness(state, recipient) as i32 / weights.weariness_divisor.max(1))
+        .min(weights.weariness_cap);
+    reasons.push("Épuisement par la guerre", -tired);
+    let elsewhere = state.factions.get(recipient).is_some_and(|f| {
+        f.at_war_with
+            .iter()
+            .any(|e| e != target && e != deal.proposer && !e.is_rebels())
+    });
+    reasons.push_if(
+        elsewhere,
+        "Déjà en guerre ailleurs",
+        weights.at_war_elsewhere,
     );
 }
 

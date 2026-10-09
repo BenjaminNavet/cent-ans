@@ -185,6 +185,7 @@ pub use ai::{
     DESERTION_WAR_SCORE, MAX_ALLIANCES, OPPORTUNIST_AGGRESSION, OPPORTUNIST_RATIO,
     PRETENDER_AGGRESSION, PRETENDER_PEACE_RELUCTANCE, SURRENDER_WAR_SCORE, WAR_REST_TURNS,
 };
+pub(crate) use league::update_league;
 pub use upkeep::loyalty_target;
 pub(crate) use upkeep::{on_line_extinct, resolve_diplomacy};
 pub use view::DiplomacyEntry;
@@ -192,6 +193,8 @@ pub use war::{AGGRESSION_PRESTIGE, PERJURY_PRESTIGE};
 
 mod ai;
 mod attitude;
+mod league;
+pub use league::{League, LEAGUE_CASUS_BELLI, LEAGUE_REASON};
 
 #[cfg(test)]
 mod key_enum_tests {

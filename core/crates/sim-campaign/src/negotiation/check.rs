@@ -26,7 +26,10 @@ impl Article {
                     Err(DiplomacyError::NotAtWar)
                 }
             }
-            Article::Alliance => check_alliance(deal, needs_peace),
+            Article::Alliance => check_alliance(deal, needs_peace, true),
+            Article::DefensiveAlliance => check_alliance(deal, needs_peace, false),
+            Article::NonAggression { turns } => check_non_aggression(deal, needs_peace, *turns),
+            Article::JoinWar { target, .. } => check_join_war(self, deal, needs_peace, target),
             Article::MilitaryAccess { .. } | Article::TradeAgreement => {
                 check_pact(self, deal, needs_peace)
             }
@@ -132,13 +135,19 @@ impl Article {
             Article::Obedience { .. }
             | Article::Protection { .. }
             | Article::Arbitration { .. }
-            | Article::PeaceSummons { .. } => refused("un appel féodal ne se propose pas"),
+            | Article::PeaceSummons { .. }
+            | Article::AllyCall { .. } => refused("un appel féodal ne se propose pas"),
         }
     }
 }
 
-fn check_alliance(deal: &Deal, needs_peace: bool) -> Check {
-    if deal.state.is_allied(deal.proposer, deal.recipient) {
+fn check_alliance(deal: &Deal, needs_peace: bool, military: bool) -> Check {
+    // A defensive alliance can be upgraded to a military one.
+    let upgrade = military
+        && deal
+            .state
+            .is_defensive_alliance(deal.proposer, deal.recipient);
+    if deal.state.is_allied(deal.proposer, deal.recipient) && !upgrade {
         return Err(DiplomacyError::AlreadyAllied);
     }
     if crate::feudal::direct_tie(deal.state, deal.data, deal.proposer, deal.recipient) {
@@ -203,6 +212,86 @@ fn check_marriage(
     });
     if wed_twice {
         return refused("un même époux dans deux mariages");
+    }
+    Ok(())
+}
+
+/// Non-aggression pact (WH `diplob`): between parties at peace and not yet
+/// bound, for a duration within `non_aggression.min_turns..=max_turns`.
+fn check_non_aggression(deal: &Deal, needs_peace: bool, turns: u32) -> Check {
+    let rules = &deal.data.ai_diplomacy.non_aggression;
+    if turns < rules.min_turns || turns > rules.max_turns {
+        return Err(DiplomacyError::InvalidAmount);
+    }
+    if needs_peace {
+        return Err(DiplomacyError::AlreadyAtWar);
+    }
+    if deal.state.is_allied(deal.proposer, deal.recipient) {
+        return refused("déjà liés par une alliance ou la vassalité");
+    }
+    if deal.state.has_non_aggression(deal.proposer, deal.recipient) {
+        return refused("pacte déjà en vigueur");
+    }
+    Ok(())
+}
+
+/// « Rejoindre la guerre contre X » (WH `diplob`): the giver goes to war
+/// against an enemy of the other party, as a declaration would allow.
+fn check_join_war(
+    article: &Article,
+    deal: &Deal,
+    needs_peace: bool,
+    target: &data_model::FactionId,
+) -> Check {
+    if needs_peace {
+        return Err(DiplomacyError::AlreadyAtWar);
+    }
+    let (state, data) = (deal.state, deal.data);
+    let giver = deal.giver(article).expect("giver");
+    let taker = deal.taker(article).expect("taker");
+    let name = |f: &data_model::FactionId| data.faction_name(f);
+    if !state.factions.get(target).is_some_and(|f| f.alive)
+        || target.is_rebels()
+        || target.as_str() == crate::diplomacy::PAPACY_FACTION
+    {
+        return refused("cible inconnue ou disparue");
+    }
+    if target == giver || target == taker {
+        return refused("on ne rejoint pas une guerre contre l'un des signataires");
+    }
+    if !state.is_at_war(taker, target) {
+        return Err(DiplomacyError::Refused(format!(
+            "{} n'est pas en guerre contre {}",
+            name(taker),
+            name(target)
+        )));
+    }
+    if state.is_at_war(giver, target) {
+        return Err(DiplomacyError::Refused(format!(
+            "{} est déjà en guerre contre {}",
+            name(giver),
+            name(target)
+        )));
+    }
+    if state.is_allied(giver, target) {
+        return Err(DiplomacyError::Refused(format!(
+            "{} est lié à {} par une alliance ou la vassalité",
+            name(giver),
+            name(target)
+        )));
+    }
+    if state.has_truce(giver, target) || state.has_non_aggression(giver, target) {
+        return Err(DiplomacyError::Refused(format!(
+            "{} a donné sa parole à {} (trêve ou non-agression)",
+            name(giver),
+            name(target)
+        )));
+    }
+    if state.factions[giver].treasury < 0 {
+        return Err(DiplomacyError::Refused(format!(
+            "{} n'a plus de quoi partir en guerre (trésor vide)",
+            name(giver)
+        )));
     }
     Ok(())
 }
