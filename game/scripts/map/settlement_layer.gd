@@ -434,7 +434,7 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	label.text = str(entry["name"])
 	label.font_size = UiType.size(str(LABEL_TYPE.get(kind, UiType.CAPTION)))
 	label.font = _label_font(int(LABEL_WEIGHT.get(kind, 500)))
-	label.outline_size = LABEL_OUTLINE_PX
+	label.outline_size = int(MapReadability.section("labels").get("outline_px", LABEL_OUTLINE_PX))  # RX mapb
 	label.modulate = label_color
 	label.outline_modulate = _halo(1.0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1295,7 +1295,7 @@ func _refresh_label_inks(sim: Object, known_stances: Variant = null) -> void:
 ## Couleur du halo de parchemin pour une opacité d'étiquette `alpha`.
 func _halo(alpha: float) -> Color:
 	var outline := label_outline
-	outline.a = alpha * LABEL_HALO_ALPHA
+	outline.a = alpha * float(MapReadability.section("labels").get("halo_alpha", LABEL_HALO_ALPHA))  # RX mapb
 	return outline
 
 

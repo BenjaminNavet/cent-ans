@@ -13,7 +13,7 @@
     "enabled": true,
     "base_height": 34.0,
     "layer_height": 1.6,
-    "opacity": 0.6,
+    "opacity": 0.34,
     "soft": 0.2,
     "fray": 0.05,
     "fray_scale": 0.08,
@@ -23,10 +23,7 @@
       260.0,
       520.0
     ],
-    "distance_out": [
-      1000.0,
-      1250.0
-    ],
+    "distance_out": [650.0, 950.0],
     "lit_color": [
       1.0,
       0.97,
@@ -37,11 +34,8 @@
       0.56,
       0.67
     ],
-    "description": "Bancs : champ RV-C basse fréquence (domaine déformé, dérive et champ régional RV-C) seuillé haut, mer pénalisée ; trois plans empilés ; opacité max au centre 0,6.",
-    "bank_band": [
-      0.66,
-      0.8
-    ],
+    "description": "Bancs : champ RV-C basse fréquence (domaine déformé, dérive et champ régional RV-C) seuillé haut, mer pénalisée ; trois plans empilés ; RX mapb : opacité max au centre 0,34, bancs plus rares (seuil 0,72-0,86), fondu de 650 à 950 de distance caméra : la vue de jeu (d≈900) reste lisible.",
+    "bank_band": [0.72, 0.86],
     "bank_scale": 0.45,
     "sea_penalty": 0.14
   },

@@ -6,6 +6,9 @@
 
 // Hachures : pas (pixels carte) et direction de la lumière (nord-ouest, repère carte).
 uniform float pm_hatch_px = 5.0;
+uniform vec3 pm_river_ink = vec3(0.16, 0.30, 0.37);  // RX mapb
+uniform float pm_river_half_px = 0.4;
+uniform float pm_river_alpha = 0.7;
 uniform vec2 pm_light_dir = vec2(-0.7, -0.7);
 // Montagnes dessinées : cellule (px carte), altitude de départ (m).
 uniform float pm_mount_cell_px = 26.0;
@@ -159,7 +162,8 @@ vec3 parchment_terrain(vec2 p, vec2 uv, float footprint, float coast, float lake
 	// --- Fleuves : trait d'encre bleue (distance signée du lit, lot V4) ---
 	if (has_river_bed) {
 		float sd = river_sd_at(p, map_size);
-		col = mix(col, vec3(0.05, 0.13, 0.16), pm_line(max(sd, 0.0), 0.7, footprint) * 0.85 * land);
+		// RX mapb : fleuve plus fin et plus clair que les frontières de royaume (hiérarchie : politique d'abord).
+		col = mix(col, pm_river_ink, pm_line(max(sd, 0.0), pm_river_half_px, footprint) * pm_river_alpha * land);
 	}
 
 	// --- Eaux : lacs au lavis bleu-vert, côtes et rives cernées d'un trait d'encre ---

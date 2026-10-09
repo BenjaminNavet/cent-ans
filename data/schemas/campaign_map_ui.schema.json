@@ -282,6 +282,18 @@
           "minimum": 400,
           "maximum": 800,
           "description": "Graisse maximale des lieux de rang 1 et 2 (romain)."
+        },
+        "outline_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "RX mapb : épaisseur du contour (halo) des noms de lieux."
+        },
+        "halo_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "RX mapb : opacité du halo de parchemin des noms de lieux."
         }
       }
     },
