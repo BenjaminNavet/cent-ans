@@ -27,7 +27,7 @@ RT8 | À FAIRE | fusion petits tests/tautologies (data-model 1 binaire, ok) | co
 RT9 | FAIT f663a1c46 | core/checks garde data_store_check et png_decode_check (garder campaign_sim_check seul) | core/checks/ | oui
 
 ## GB godot-bridge (304 #[func] contre 337)
-GB6 | À FAIRE | TerrainMesher.build_patch, scatter() transforms, phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
+GB6 | PARTIEL 24bbff975 : terrain fait (maillages sol/anneaux et grille de hauteurs en Rust ; les tirages RNG du semis restent en GDScript pour garder les mêmes arbres) ; reste soldier_buffers/anim (autre agent) | phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
 GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crates/godot-bridge/src | oui
 
 ## CB sim-campaign
@@ -57,7 +57,7 @@ PF-07 | FAIT (sc/bench) | map_bench.gd 534, release_journey.gd 525, perf_probe.g
 PF-04 | PARTIEL | chargeur Rust vectoriel fait (DT4, ~500->200 ms) ; bake .bin geojson non | tools/cent_ans_tools/geo, core/crates/godot-bridge/src/map_geo.rs | oui
 PF-01 | À FAIRE | OutbuildingPacker Rust [GELÉ FL] | game/scripts/map/outbuilding_layer.gd | oui
 PF-10 | À FAIRE | declutter Rust (marker_declutter.gd) [GELÉ FL] | game/scripts/map/marker_declutter.gd | oui
-PF-08 | À FAIRE | StampMap stamp_soft_disc + relief_from_heights pour battle_terrain | core/crates/godot-bridge/src/stamp_map.rs, game/scripts/battle/battle_terrain.gd | oui
+PF-08 | FAIT 24bbff975 | StampMap stamp_soft_disc + relief_from_heights pour battle_terrain | core/crates/godot-bridge/src/stamp_map.rs, game/scripts/battle/battle_terrain.gd | oui
 PF-09 | À FAIRE | parchment_decor précalc | game/scripts/map/parchment_decor.gd | non
 PF-11 | À FAIRE | heights_m batch | game/scripts/map | oui
 PF-12 | À FAIRE | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
@@ -108,7 +108,7 @@ BT3 | À FAIRE | figurine rigide : battle_meshes.gd 1093 l, battle_soldier.gdsha
 BT4 | PARTIEL | = PF-06 (sc/devflags, 34 flags A/B + 64 has_method) | game/scripts/battle | non
 BT5 | À FAIRE | buffers fine_near/hide/loosen en Rust (perf) | game/scripts/battle/battle_soldiers.gd, core/crates/godot-bridge | oui
 BT6 | À FAIRE | manifeste skinné cuit hors ligne, suppr NT12/NT13 mocap trials | game/scripts/battle/battle_skinned.gd, tools | non
-BT7 | À FAIRE | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
+BT7 | FAIT 24bbff975 (Rust: hauteurs, rivière, relief, maillages ; split Splat/Mesh/Scatter) | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (2060 l) | game/scripts/battle/battle_terrain.gd | oui
 BT8 | À FAIRE | plan_deployment en Rust | game/scripts/battle/deployment_controller.gd | oui
 BT9 | FAIT c6ad59bfc (KINDS seul ; constantes visuelles -> data non faites) | constantes -> data, KINDS dupliqué (soldiers+scene) | game/scripts/battle | non
 BT10 | À FAIRE | MultiMeshKit/ParticleKit | game/scripts/battle | non
