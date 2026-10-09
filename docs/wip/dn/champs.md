@@ -36,7 +36,8 @@ Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ 
 - [fait] catalogue `data/art/dn_catalog_fields.json` (11 parcelles `field_<clé>`), classe d'ingest `field`,
   `dn_batch.py` accepte `style_suffix` par entrée (le suffixe décor interdit sol/socle).
 - [fait] `FieldPlan`/`FieldLayer` : une instance par parcelle, `dn_fields.json` + schéma + tests mis à jour.
-- BLOQUÉ : **génération fal impossible** (« User is locked. Reason: Exhausted balance », fal.ai).
+- [FAIT 10-09, après recharge, 0,28 $] 11 parcelles générées (images Z-Image relues : toutes des parcelles entières, bord à bord), TRELLIS 1, ingérées (`--class field --length 900`), manifeste à jour, `dn_fields_test` OK (12 modèles chargés, 0 manquant). Planche : `chantiers/champs2/`. Reste : mesures ms ON/OFF et captures `dn_fields_shot.gd` (non refaites), publication `art models-update` (empaqueté seulement, accord joueur requis). Hauteur des glb : 60-150 m pour 900 m de long (herbes hautes), compensée par `height_scale`.
+- (historique) BLOQUÉ : **génération fal impossible** (« User is locked. Reason: Exhausted balance », fal.ai).
   0 $ dépensé, aucun appel TRELLIS ni multivue parti. Un repli mflux local s'est lancé tout seul (pas de
   `--no-local-fallback` au premier essai) et a été tué : aucun fichier produit. Pas de repli local en session.
 - Reprise après recharge du solde fal :

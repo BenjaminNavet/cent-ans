@@ -3840,7 +3840,23 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "bird_starling_flying",
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "flocks:starling_murmuration (automne, champs)",
+        "region": null,
+        "catalogue_prompt": "common starling in flight, small dark bird, seen from the side, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single common starling in flight, small dark bird, seen from the side, wings spread mid-flap, strict side view, plain uniform medium grey background, whole bird visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "seeds": [
+          1337
+        ],
+        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
+        "models_3d": [
+          "fal__s1337.glb"
+        ],
+        "reconstructed": true
+      }
     },
     "bird_stork_nest": {
       "id": "bird_stork_nest",
@@ -4200,7 +4216,72 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "bombard",
+        "images": [
+          {
+            "ts": "2026-10-08T22:39:13",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": "1024x1024",
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle.json",
+        "target": "siege:bombard",
+        "region": "Medieval European siege works circa 1400, heavy,",
+        "catalogue_prompt": "large forged iron bombard of the 14th century on a heavy oak timber bed with iron hoops, a raised wooden mantlet and stone balls beside it",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single large forged iron bombard of the 14th century on a heavy oak timber bed with iron hoops, a raised wooden mantlet and stone balls beside it Medieval European siege works circa 1400, heavy, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 4,
+          "class": "siege_engine"
+        },
+        "views": [
+          {
+            "ts": "2026-10-08T22:39:38",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-08T22:39:52",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:40:28",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "bridge_gate": {
       "id": "bridge_gate",
@@ -7512,7 +7593,75 @@
         },
         "gamma": 0.9317
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "cart_litter_noble",
+        "images": [
+          {
+            "ts": "2026-10-08T22:49:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_mobile.json",
+        "target": "folk:litter (suite des dames, évêques, convois nobles)",
+        "region": "French and Burgundian court circa 1380, elegant,",
+        "catalogue_prompt": "noble litter carried between two mules, curtained wooden cabin with a painted roof and poles, no animals, no passenger, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single noble litter carried between two mules, curtained wooden cabin with a painted roof and poles, no animals, no passenger, isolated single object, plain uniform medium grey background, no ground, no shadow, no text, no flag French and Burgundian court circa 1380, elegant, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 5,
+          "class": "cart"
+        },
+        "views": [
+          {
+            "ts": "2026-10-08T22:56:25",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-08T22:57:15",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:57:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "cart_litter_palanquin": {
       "id": "cart_litter_palanquin",
@@ -8249,53 +8398,35 @@
       ],
       "dimensions_m": {
         "length": 2.001,
-        "width": 1.635,
-        "height": 0.857
+        "width": 1.817,
+        "height": 0.882
       },
       "triangles": [
         14999,
-        4000,
-        1000
+        3999,
+        1013
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_balt/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_balt/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1685,
-          "mean_s": 0.601,
+          "mean_luma": 0.1969,
+          "mean_s": 0.6002,
           "p95_s": 1.0
         },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.3563,
-          "p95_s": 0.3744
+          "mean_luma": 0.2073,
+          "mean_s": 0.3857,
+          "p95_s": 0.4
         },
-        "gamma": 1.089
+        "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_balt/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_balt/mv/cut/s1337.png",
       "generation": {
         "id": "castle_balt",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:50",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:castle/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Teutonic Prussia-Livonia circa 1340, imposing,",
@@ -8308,31 +8439,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:00:21",
+            "ts": "2026-10-09T12:09:26",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:09:51",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:01:18",
+            "ts": "2026-10-09T12:11:18",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "castle_byz": {
@@ -8345,8 +8486,8 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.918,
-        "height": 0.974
+        "width": 1.99,
+        "height": 1.035
       },
       "triangles": [
         14999,
@@ -8354,44 +8495,26 @@
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2279,
-          "mean_s": 0.3833,
-          "p95_s": 0.5763
+          "mean_luma": 0.1855,
+          "mean_s": 0.464,
+          "p95_s": 1.0
         },
         "after": {
-          "mean_luma": 0.2304,
-          "mean_s": 0.3423,
+          "mean_luma": 0.1875,
+          "mean_s": 0.344,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_byz/mv/cut/s1337.png",
       "generation": {
         "id": "castle_byz",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:41",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:castle/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Byzantine Balkans circa 1340, austere,",
@@ -8404,31 +8527,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T22:53:59",
+            "ts": "2026-10-09T15:15:25",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T15:16:03",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T22:54:36",
+            "ts": "2026-10-09T15:16:56",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "castle_byz_serbia": {
@@ -8729,53 +8862,35 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.932,
-        "height": 1.334
+        "width": 1.92,
+        "height": 1.341
       },
       "triangles": [
         15000,
-        4000,
+        3999,
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_iber/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_iber/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.197,
-          "mean_s": 0.4053,
+          "mean_luma": 0.1833,
+          "mean_s": 0.4472,
           "p95_s": 1.0
         },
         "after": {
-          "mean_luma": 0.199,
-          "mean_s": 0.3034,
+          "mean_luma": 0.1854,
+          "mean_s": 0.3175,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_iber/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_iber/mv/cut/s1337.png",
       "generation": {
         "id": "castle_iber",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:10",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:castle/med_iber (sous-famille med_iber : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Castile-Aragon circa 1340, imposing,",
@@ -8788,31 +8903,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:07:53",
+            "ts": "2026-10-09T15:15:26",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T15:16:11",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:08:42",
+            "ts": "2026-10-09T15:17:13",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "castle_isl": {
@@ -9165,53 +9290,35 @@
       ],
       "dimensions_m": {
         "length": 2.0,
-        "width": 1.974,
-        "height": 1.21
+        "width": 1.839,
+        "height": 1.197
       },
       "triangles": [
-        15000,
+        14999,
         4000,
-        1000
+        999
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_ital_rocca/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_ital_rocca/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.19,
-          "mean_s": 0.3062,
-          "p95_s": 0.5152
+          "mean_luma": 0.1848,
+          "mean_s": 0.3071,
+          "p95_s": 0.5
         },
         "after": {
-          "mean_luma": 0.1912,
-          "mean_s": 0.2879,
+          "mean_luma": 0.1856,
+          "mean_s": 0.2901,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_ital_rocca/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_ital_rocca/mv/cut/s1337.png",
       "generation": {
         "id": "castle_ital_rocca",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:07",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:castle/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Italy circa 1340, imposing,",
@@ -9224,31 +9331,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:06:09",
+            "ts": "2026-10-09T12:12:08",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:13:17",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:06:47",
+            "ts": "2026-10-09T15:15:56",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "castle_med": {
@@ -9973,7 +10090,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_balt/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_balt",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/balt (sous-famille balt : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+        "region": "Baltic Hansa circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century Baltic Hanseatic seaport (Danzig-Riga) with brick gothic stepped gable merchant houses on a quay, a huge brick hall church, a crane house on the water, brick walls and gate towers, stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Baltic Hanseatic seaport (Danzig-Riga) with brick gothic stepped gable merchant houses on a quay, a huge brick hall church, a crane house on the water, brick walls and gate towers, stylised miniature maquette, whole settlement on a small plain base Baltic Hansa circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:43:19",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:43:57",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:44:42",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "city_byz": {
       "id": "city_byz",
@@ -10009,7 +10178,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_byz/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_byz",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/byz (sous-famille byz : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+        "region": "Byzantine Constantinople-Thessalonica circa 1340, ancient,",
+        "catalogue_prompt": "14th-century Byzantine city, brick-and-stone banded walls with square towers, domed churches with cross-in-square plan, red tiled roofs, a cistern and a harbour wall, stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Byzantine city, brick-and-stone banded walls with square towers, domed churches with cross-in-square plan, red tiled roofs, a cistern and a harbour wall, stylised miniature maquette, whole settlement on a small plain base Byzantine Constantinople-Thessalonica circa 1340, ancient, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:40:53",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:41:55",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:42:59",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "city_hansa": {
       "id": "city_hansa",
@@ -10141,7 +10362,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_hungpol/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_hungpol",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+        "region": "Poland-Hungary circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century Kraków-Buda style royal city with a hilltop castle of brick and stone, a huge brick Gothic church with two uneven towers, a cloth hall in the market square, gate barbican, stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Kraków-Buda style royal city with a hilltop castle of brick and stone, a huge brick Gothic church with two uneven towers, a cloth hall in the market square, gate barbican, stylised miniature maquette, whole settlement on a small plain base Poland-Hungary circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:40:54",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:41:55",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:43:00",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "city_iber_mudejar": {
       "id": "city_iber_mudejar",
@@ -10273,7 +10546,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_isl",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/isl",
+        "region": "Islamic Mediterranean city circa 1340, monumental,",
+        "catalogue_prompt": "14th-century large walled city with a great mosque and tall minaret, a citadel, flat roofs and massive gates, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century large walled city with a great mosque and tall minaret, a citadel, flat roofs and massive gates, Maghreb and Levantine Islamic architecture (whitewashed mud brick and stone, flat roofs, a square minaret, horseshoe-arch gate), stylised miniature maquette, whole settlement on a small plain base Islamic Mediterranean city circa 1340, monumental, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 3.6,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:40:52",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:41:50",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:42:39",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "city_isl_andalus": {
       "id": "city_isl_andalus",
@@ -10286,52 +10611,34 @@
       "dimensions_m": {
         "length": 2.003,
         "width": 2.003,
-        "height": 0.778
+        "height": 0.79
       },
       "triangles": [
         15000,
         4000,
-        999
+        1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_andalus/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_andalus/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2241,
-          "mean_s": 0.418,
-          "p95_s": 0.5714
+          "mean_luma": 0.1331,
+          "mean_s": 0.4315,
+          "p95_s": 1.0
         },
         "after": {
-          "mean_luma": 0.2293,
-          "mean_s": 0.3646,
-          "p95_s": 0.4
+          "mean_luma": 0.197,
+          "mean_s": 0.2764,
+          "p95_s": 0.3268
         },
-        "gamma": 1.0
+        "gamma": 1.2907
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_andalus/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_andalus/mv/cut/s1337.png",
       "generation": {
         "id": "city_isl_andalus",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:31",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:city/isl_andalus (sous-famille isl_andalus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Nasrid al-Andalus circa 1340, refined,",
@@ -10344,31 +10651,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T22:50:49",
+            "ts": "2026-10-09T12:09:18",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:09:48",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T22:51:33",
+            "ts": "2026-10-09T12:11:05",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "city_isl_mamluk": {
@@ -10382,52 +10699,34 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.377
+        "height": 1.424
       },
       "triangles": [
-        15000,
+        14998,
         4000,
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_mamluk/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_mamluk/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2561,
-          "mean_s": 0.3659,
-          "p95_s": 0.6034
+          "mean_luma": 0.224,
+          "mean_s": 0.36,
+          "p95_s": 0.6
         },
         "after": {
-          "mean_luma": 0.2595,
-          "mean_s": 0.3239,
+          "mean_luma": 0.2267,
+          "mean_s": 0.3153,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_mamluk/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_isl_mamluk/mv/cut/s1337.png",
       "generation": {
         "id": "city_isl_mamluk",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:37",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:city/isl_mamluk (sous-famille isl_mamluk : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Mamluk Egypt circa 1340, monumental,",
@@ -10440,31 +10739,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T22:51:49",
+            "ts": "2026-10-09T12:09:26",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:09:49",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T22:52:41",
+            "ts": "2026-10-09T12:11:10",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "city_ital_commune": {
@@ -10477,53 +10786,35 @@
       ],
       "dimensions_m": {
         "length": 2.002,
-        "width": 1.579,
-        "height": 0.885
+        "width": 1.907,
+        "height": 0.953
       },
       "triangles": [
         15000,
         4000,
-        1000
+        999
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_commune/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_commune/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1275,
-          "mean_s": 0.4905,
+          "mean_luma": 0.163,
+          "mean_s": 0.4266,
           "p95_s": 1.0
         },
         "after": {
           "mean_luma": 0.197,
-          "mean_s": 0.2604,
-          "p95_s": 0.3166
+          "mean_s": 0.2871,
+          "p95_s": 0.3636
         },
-        "gamma": 1.3417
+        "gamma": 1.1302
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_commune/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_ital_commune/mv/cut/s1337.png",
       "generation": {
         "id": "city_ital_commune",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:06",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:city/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Italian commune circa 1340, prosperous,",
@@ -10536,31 +10827,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:06:06",
+            "ts": "2026-10-09T09:43:42",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:44:09",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:06:46",
+            "ts": "2026-10-09T15:40:42",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "city_ital_maritime": {
@@ -10668,34 +10969,34 @@
         "dn/buildings/city_med_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 3.601,
-        "width": 3.601,
-        "height": 2.266
+        "length": 3.602,
+        "width": 3.602,
+        "height": 2.12
       },
       "triangles": [
         15000,
-        4000,
+        3999,
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_med/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_med/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1491,
-          "mean_s": 0.4277,
+          "mean_luma": 0.1473,
+          "mean_s": 0.4141,
           "p95_s": 1.0
         },
         "after": {
           "mean_luma": 0.197,
-          "mean_s": 0.2517,
-          "p95_s": 0.336
+          "mean_s": 0.2356,
+          "p95_s": 0.3308
         },
-        "gamma": 1.2477
+        "gamma": 1.2719
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_med/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_med/mv/cut/s1337.png",
       "generation": {
         "id": "city_med",
         "catalogue": "dn_catalog_campaign.json",
@@ -10703,12 +11004,48 @@
         "region": "Mediterranean Italian seaport city circa 1340, prosperous,",
         "catalogue_prompt": "14th-century large walled seaport city with a cathedral and campanile, tall tower houses, terracotta roofs, harbour wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
         "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century large walled seaport city with a cathedral and campanile, tall tower houses, terracotta roofs, harbour wall, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base Mediterranean Italian seaport city circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 3.6,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T12:49:28",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:49:51",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
         ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:50:43",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "city_nord": {
@@ -10722,52 +11059,34 @@
       "dimensions_m": {
         "length": 2.0,
         "width": 2.0,
-        "height": 1.088
+        "height": 1.112
       },
       "triangles": [
-        15000,
-        4000,
-        1000
+        14999,
+        3999,
+        998
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_nord/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_nord/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1864,
-          "mean_s": 0.3528,
-          "p95_s": 1.0
+          "mean_luma": 0.214,
+          "mean_s": 0.2644,
+          "p95_s": 0.525
         },
         "after": {
-          "mean_luma": 0.1885,
-          "mean_s": 0.2771,
+          "mean_luma": 0.2151,
+          "mean_s": 0.2488,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_nord/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_nord/mv/cut/s1337.png",
       "generation": {
         "id": "city_nord",
-        "images": [
-          {
-            "ts": "2026-10-08T22:49:48",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:city/nord (sous-famille nord : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Scandinavia circa 1340, prosperous,",
@@ -10780,31 +11099,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T22:58:55",
+            "ts": "2026-10-09T12:09:25",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:09:48",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T22:59:29",
+            "ts": "2026-10-09T12:10:37",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "city_rus": {
@@ -10841,7 +11170,59 @@
         },
         "gamma": 1.2245
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_rus/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_rus",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/rus (sous-famille rus : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
+        "region": "Rus' Novgorod-Pskov circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century Rus' great city, a stone kremlin with white-limestone walls and towers, several white stone churches with golden helmet domes beside timber houses with plank roofs, wooden market quarter, stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century Rus' great city, a stone kremlin with white-limestone walls and towers, several white stone churches with golden helmet domes beside timber houses with plank roofs, wooden market quarter, stylised miniature maquette, whole settlement on a small plain base Rus' Novgorod-Pskov circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:40:52",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:41:52",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:42:43",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "city_steppe": {
       "id": "city_steppe",
@@ -10973,7 +11354,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/city_west/mv/cut/s1337.png",
+      "generation": {
+        "id": "city_west",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:city/west",
+        "region": "Gothic northern France circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century large walled city with a double ring of crenellated walls, dense roofs, a gothic cathedral with twin towers and a river gate, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century large walled city with a double ring of crenellated walls, dense roofs, a gothic cathedral with twin towers and a river gate, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern France circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 3.6,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:38:13",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:38:30",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:39:30",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "crop_barley_ripe": {
       "id": "crop_barley_ripe",
@@ -13086,7 +13519,75 @@
         },
         "gamma": 0.8437
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "debris_ram_wreck",
+        "images": [
+          {
+            "ts": "2026-10-08T23:34:08",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle_extra.json",
+        "target": "battle_siege.gd : bélier détruit",
+        "region": "Medieval European battlefield circa 1340-1450, weathered,",
+        "catalogue_prompt": "wrecked battering ram, split roof frame and fallen iron-capped log",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single wrecked battering ram, split roof frame and fallen iron-capped log Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 5,
+          "class": "siege_engine"
+        },
+        "views": [
+          {
+            "ts": "2026-10-08T23:41:19",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-08T23:41:32",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:42:05",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "debris_shot_pile_stone": {
       "id": "debris_shot_pile_stone",
@@ -19425,7 +19926,96 @@
         },
         "gamma": 0.7403
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "econ_saltpan_mediterranean",
+        "images": [
+          {
+            "ts": "2026-10-09T07:16:46",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:16:47",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_economy.json",
+        "target": "outbuildings:saltworks (Peccais, Ibiza, Trapani, Cervia)",
+        "region": "Medieval Mediterranean coast circa 1340, sun-bleached,",
+        "catalogue_prompt": "Mediterranean solar salt pans with flat shallow basins, white salt cones, a small windmill pump and a stone store hut. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours.",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Mediterranean solar salt pans with flat shallow basins, white salt cones, a small windmill pump and a stone store hut. Strongly desaturated, muted grey-brown ashen dusty natural palette, low saturation, overcast flat diffuse light, no vivid colours. Medieval Mediterranean coast circa 1340, sun-bleached, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 20,
+          "class": "house"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T07:29:09",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T07:29:31",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "econ_sawmill_waterdriven": {
       "id": "econ_sawmill_waterdriven",
@@ -20325,7 +20915,51 @@
         },
         "gamma": 0.8933
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "econ_terrace_olive_grove",
+        "images": [
+          {
+            "ts": "2026-10-08T22:50:28",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_economy.json",
+        "target": "nouveau : biome mediterraneen (huile)",
+        "region": "Medieval Mediterranean circa 1340, silver,",
+        "catalogue_prompt": "Terraced olive grove with ancient twisted olives and a stone wall and rock steps",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single Terraced olive grove with ancient twisted olives and a stone wall and rock steps Medieval Mediterranean circa 1340, silver, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 14,
+          "class": "prop"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:12:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "econ_terrace_wall_dry_stone": {
       "id": "econ_terrace_wall_dry_stone",
@@ -25620,7 +26254,48 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "env_glacier_ice_tongue",
+        "images": [
+          {
+            "ts": "2026-10-08T22:39:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": "1024x1024",
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "relief:glacier (Alpes, Norvege, Islande)",
+        "region": null,
+        "catalogue_prompt": "glacier tongue snout with blue-white crevassed ice and moraine debris",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single glacier tongue snout with blue-white crevassed ice and moraine debris Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 30.0,
+          "class": "rock"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:57:44",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "env_glassworks": {
       "id": "env_glassworks",
@@ -26389,7 +27064,48 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "env_iceberg_floe",
+        "images": [
+          {
+            "ts": "2026-10-08T22:39:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": "1024x1024",
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "sea:ice_floe (banquise, Mer Blanche, Groenland)",
+        "region": null,
+        "catalogue_prompt": "drifting ice floe with a jagged blue-white top, seen from slightly above",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single drifting ice floe with a jagged blue-white top, seen from slightly above Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 14.0,
+          "class": "rock"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:58:02",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "env_lighthouse_medieval": {
       "id": "env_lighthouse_medieval",
@@ -28062,7 +28778,48 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "env_reef_rocks_awash",
+        "images": [
+          {
+            "ts": "2026-10-08T22:39:50",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": "1024x1024",
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_map_extra.json",
+        "target": "coast:reef (Bretagne, Cornouailles)",
+        "region": null,
+        "catalogue_prompt": "low dark rocky reef with kelp and barnacle crust, tidal flat",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single low dark rocky reef with kelp and barnacle crust, tidal flat Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 12.0,
+          "class": "rock"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:58:27",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "env_rock_pinnacle_karst": {
       "id": "env_rock_pinnacle_karst",
@@ -31648,6 +32405,616 @@
         "chosen_seed": 1337
       }
     },
+    "field_apple_orchard": {
+      "id": "field_apple_orchard",
+      "class": "field",
+      "files": [
+        "dn/props/field_apple_orchard_lod0.glb",
+        "dn/props/field_apple_orchard_lod1.glb",
+        "dn/props/field_apple_orchard_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 903.337,
+        "width": 849.241,
+        "height": 115.573
+      },
+      "triangles": [
+        5000,
+        1525,
+        267
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_apple_orchard/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1823,
+          "mean_s": 0.3686,
+          "p95_s": 0.5833
+        },
+        "after": {
+          "mean_luma": 0.1836,
+          "mean_s": 0.3298,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_apple_orchard/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_apple_orchard",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.apple_orchard",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an orchard, regular grid of apple and cherry trees with rounded crowns, grass between the rows",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an orchard, regular grid of apple and cherry trees with rounded crowns, grass between the rows Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:49:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_barley_green": {
+      "id": "field_barley_green",
+      "class": "field",
+      "files": [
+        "dn/props/field_barley_green_lod0.glb",
+        "dn/props/field_barley_green_lod1.glb",
+        "dn/props/field_barley_green_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 885.934,
+        "width": 885.934,
+        "height": 147.029
+      },
+      "triangles": [
+        5000,
+        1413,
+        400
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_barley_green/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3834,
+          "mean_s": 0.5447,
+          "p95_s": 0.7333
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.3973,
+          "p95_s": 0.4
+        },
+        "gamma": 0.7875
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_barley_green/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_barley_green",
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.barley_green",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense green-gold barley growing in straight parallel rows running along the long side, slightly paler than wheat",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense green-gold barley growing in straight parallel rows running along the long side, slightly paler than wheat Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:47:38",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_buckwheat_field": {
+      "id": "field_buckwheat_field",
+      "class": "field",
+      "files": [
+        "dn/props/field_buckwheat_field_lod0.glb",
+        "dn/props/field_buckwheat_field_lod1.glb",
+        "dn/props/field_buckwheat_field_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 897.685,
+        "width": 897.685,
+        "height": 48.92
+      },
+      "triangles": [
+        5000,
+        1499,
+        400
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_buckwheat_field/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3574,
+          "mean_s": 0.4467,
+          "p95_s": 0.8571
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.3324,
+          "p95_s": 0.4
+        },
+        "gamma": 0.8961
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_buckwheat_field/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_buckwheat_field",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.buckwheat_field",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot in straight parallel rows of blooming pale blue flax and yellow woad, running along the long side",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot in straight parallel rows of blooming pale blue flax and yellow woad, running along the long side Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:48:16",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_fruit_orchard_rows": {
+      "id": "field_fruit_orchard_rows",
+      "class": "field",
+      "files": [
+        "dn/props/field_fruit_orchard_rows_lod0.glb",
+        "dn/props/field_fruit_orchard_rows_lod1.glb",
+        "dn/props/field_fruit_orchard_rows_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 899.639,
+        "width": 891.247,
+        "height": 86.361
+      },
+      "triangles": [
+        4999,
+        1499,
+        264
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_fruit_orchard_rows/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2295,
+          "mean_s": 0.4366,
+          "p95_s": 0.6154
+        },
+        "after": {
+          "mean_luma": 0.2318,
+          "mean_s": 0.3792,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_fruit_orchard_rows/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_fruit_orchard_rows",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.fruit_orchard_rows",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a southern fruit orchard, regular grid of pear, pomegranate, orange and mulberry trees, bare earth between the rows",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a southern fruit orchard, regular grid of pear, pomegranate, orange and mulberry trees, bare earth between the rows Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:49:46",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_huerta_plots": {
+      "id": "field_huerta_plots",
+      "class": "field",
+      "files": [
+        "dn/props/field_huerta_plots_lod0.glb",
+        "dn/props/field_huerta_plots_lod1.glb",
+        "dn/props/field_huerta_plots_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 899.685,
+        "width": 898.609,
+        "height": 63.165
+      },
+      "triangles": [
+        5000,
+        1500,
+        400
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_huerta_plots/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2194,
+          "mean_s": 0.5156,
+          "p95_s": 0.7727
+        },
+        "after": {
+          "mean_luma": 0.2278,
+          "mean_s": 0.3791,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_huerta_plots/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_huerta_plots",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:51",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.huerta_plots",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an irrigated huerta, many small narrow raised planks of beans, cabbages and turnips separated by thin irrigation channels, parallel to the long side",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an irrigated huerta, many small narrow raised planks of beans, cabbages and turnips separated by thin irrigation channels, parallel to the long side Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:50:51",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_med_terraces": {
+      "id": "field_med_terraces",
+      "class": "field",
+      "files": [
+        "dn/props/field_med_terraces_lod0.glb",
+        "dn/props/field_med_terraces_lod1.glb",
+        "dn/props/field_med_terraces_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 899.459,
+        "width": 771.526,
+        "height": 105.967
+      },
+      "triangles": [
+        4999,
+        1499,
+        363
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_med_terraces/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3473,
+          "mean_s": 0.359,
+          "p95_s": 0.5979
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.3308,
+          "p95_s": 0.4
+        },
+        "gamma": 0.9482
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_med_terraces/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_med_terraces",
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T14:13:04",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_olive_grove": {
+      "id": "field_olive_grove",
+      "class": "field",
+      "files": [
+        "dn/props/field_olive_grove_lod0.glb",
+        "dn/props/field_olive_grove_lod1.glb",
+        "dn/props/field_olive_grove_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 892.597,
+        "width": 846.095,
+        "height": 129.21
+      },
+      "triangles": [
+        5000,
+        1499,
+        196
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_olive_grove/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2559,
+          "mean_s": 0.3303,
+          "p95_s": 0.6
+        },
+        "after": {
+          "mean_luma": 0.2576,
+          "mean_s": 0.2974,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_olive_grove/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_olive_grove",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:48",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.olive_grove",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an olive grove, regular grid of gnarled silver-green olive trees with dry grass and bare earth between them",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an olive grove, regular grid of gnarled silver-green olive trees with dry grass and bare earth between them Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:49:17",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_rice_paddy": {
+      "id": "field_rice_paddy",
+      "class": "field",
+      "files": [
+        "dn/props/field_rice_paddy_lod0.glb",
+        "dn/props/field_rice_paddy_lod1.glb",
+        "dn/props/field_rice_paddy_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 900.171,
+        "width": 900.171,
+        "height": 82.53
+      },
+      "triangles": [
+        5000,
+        1500,
+        400
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_rice_paddy/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.1422,
+          "mean_s": 0.5593,
+          "p95_s": 1.0
+        },
+        "after": {
+          "mean_luma": 0.197,
+          "mean_s": 0.3189,
+          "p95_s": 0.3392
+        },
+        "gamma": 1.233
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_rice_paddy/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_rice_paddy",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:50",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.rice_paddy",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a rice paddy divided into small flooded rectangular basins by low earth dikes, shallow muddy water and young bright-green rice rows",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a rice paddy divided into small flooded rectangular basins by low earth dikes, shallow muddy water and young bright-green rice rows Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:50:14",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "field_rocks": {
       "id": "field_rocks",
       "class": "prop",
@@ -31728,6 +33095,70 @@
         "chosen_seed": 1337
       }
     },
+    "field_rye_field": {
+      "id": "field_rye_field",
+      "class": "field",
+      "files": [
+        "dn/props/field_rye_field_lod0.glb",
+        "dn/props/field_rye_field_lod1.glb",
+        "dn/props/field_rye_field_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 898.113,
+        "width": 898.113,
+        "height": 114.068
+      },
+      "triangles": [
+        5000,
+        1499,
+        399
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_rye_field/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.3937,
+          "mean_s": 0.4582,
+          "p95_s": 0.6
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.3996,
+          "p95_s": 0.4
+        },
+        "gamma": 0.7714
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_rye_field/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_rye_field",
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.rye_field",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in tall grey-green rye with a few oats, growing in straight parallel rows running along the long side",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in tall grey-green rye with a few oats, growing in straight parallel rows running along the long side Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:47:03",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
     "field_tent": {
       "id": "field_tent",
       "class": "prop",
@@ -31806,6 +33237,159 @@
           }
         ],
         "chosen_seed": 1337
+      }
+    },
+    "field_vineyard_rows": {
+      "id": "field_vineyard_rows",
+      "class": "field",
+      "files": [
+        "dn/props/field_vineyard_rows_lod0.glb",
+        "dn/props/field_vineyard_rows_lod1.glb",
+        "dn/props/field_vineyard_rows_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 898.748,
+        "width": 898.748,
+        "height": 88.567
+      },
+      "triangles": [
+        4999,
+        1258,
+        168
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_vineyard_rows/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.2579,
+          "mean_s": 0.5184,
+          "p95_s": 0.6667
+        },
+        "after": {
+          "mean_luma": 0.2676,
+          "mean_s": 0.3985,
+          "p95_s": 0.4
+        },
+        "gamma": 1.0
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_vineyard_rows/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_vineyard_rows",
+        "images": [
+          {
+            "ts": "2026-10-09T12:10:47",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.vineyard_rows",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot of a medieval vineyard, many straight parallel rows of low vines tied to short wooden stakes (echalas), bare brown soil between the rows, rows running along the long side",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot of a medieval vineyard, many straight parallel rows of low vines tied to short wooden stakes (echalas), bare brown soil between the rows, rows running along the long side Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:48:45",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    "field_wheat_ripe": {
+      "id": "field_wheat_ripe",
+      "class": "field",
+      "files": [
+        "dn/props/field_wheat_ripe_lod0.glb",
+        "dn/props/field_wheat_ripe_lod1.glb",
+        "dn/props/field_wheat_ripe_lod2.glb"
+      ],
+      "dimensions_m": {
+        "length": 891.637,
+        "width": 883.129,
+        "height": 139.306
+      },
+      "triangles": [
+        4999,
+        1500,
+        290
+      ],
+      "tex": 1024,
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_wheat_ripe/3d/fal__s1337.glb",
+      "yaw_deg": 0.0,
+      "grade": {
+        "before": {
+          "mean_luma": 0.4558,
+          "mean_s": 0.5522,
+          "p95_s": 0.7273
+        },
+        "after": {
+          "mean_luma": 0.333,
+          "mean_s": 0.3999,
+          "p95_s": 0.4
+        },
+        "gamma": 0.5127
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_wheat_ripe/cut/s1337.png",
+      "model_3d": "fal-ai/trellis",
+      "cost_usd": 0.02,
+      "generation": {
+        "id": "field_wheat_ripe",
+        "catalogue": "dn_catalog_fields.json",
+        "target": "fields: parcelle entière (DN-CHAMPS révision), crops.wheat_ripe",
+        "region": "Medieval open fields 1340",
+        "catalogue_prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense ripe golden wheat growing in straight parallel furrows and rows running along the long side, uneven medieval stand, bearded ears",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense ripe golden wheat growing in straight parallel furrows and rows running along the long side, uneven medieval stand, bearded ears Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+        "ingest": {
+          "class": "field",
+          "target_length_m": 900,
+          "yaw_fix": 0
+        },
+        "fallbacks": [
+          {
+            "ts": "2026-10-09T09:50:58",
+            "step": "image",
+            "note": "local mflux, 3 more seeds"
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:12:16",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "fort_barbican_gatehouse": {
@@ -44175,7 +45759,204 @@
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_bombard_hooped_1380/cut/s1337.png",
       "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.1
+      "cost_usd": 0.1,
+      "generation": {
+        "id": "siege_bombard_hooped_1380",
+        "images": [
+          {
+            "ts": "2026-10-08T23:34:41",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:12",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:12",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:12",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:52",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:54",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:54",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle_extra.json",
+        "target": "battle_siege.gd : bombarde 1380 (complète bombard)",
+        "region": "Medieval European battlefield circa 1340-1450, weathered,",
+        "catalogue_prompt": "hooped wrought-iron bombard of the 1380s, a smaller Dulle Griet: a thick barrel made of long iron staves held by many wide iron hoops, huge open muzzle with the dark bore clearly visible at the front, a narrower powder chamber at the rear, lying horizontally in a heavy timber box-shaped cradle of oak planks resting flat on the ground, held by wooden wedges and driven stakes, side view, no wheels, no ring handle",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single hooped wrought-iron bombard of the 1380s, a smaller Dulle Griet: a thick barrel made of long iron staves held by many wide iron hoops, huge open muzzle with the dark bore clearly visible at the front, a narrower powder chamber at the rear, lying horizontally in a heavy timber box-shaped cradle of oak planks resting flat on the ground, held by wooden wedges and driven stakes, side view, no wheels, no ring handle Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 4,
+          "class": "siege_engine"
+        },
+        "views": [
+          {
+            "ts": "2026-10-08T23:53:23",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-08T23:53:35",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T07:47:32",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T07:47:57",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:54:14",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          },
+          {
+            "ts": "2026-10-09T07:48:34",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "siege_camp": {
       "id": "siege_camp",
@@ -44265,7 +46046,204 @@
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_cannon_early_1340/cut/s1338.png",
       "model_3d": "fal-ai/trellis/multi",
-      "cost_usd": 0.1
+      "cost_usd": 0.1,
+      "generation": {
+        "id": "siege_cannon_early_1340",
+        "images": [
+          {
+            "ts": "2026-10-08T23:34:40",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:11",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:12",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:45:12",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:52",
+            "seed": 1339,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1339.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1339,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:53",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          },
+          {
+            "ts": "2026-10-09T07:46:53",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle_extra.json",
+        "target": "battle_siege.gd : canon primitif 1340 (pot-de-fer)",
+        "region": "Medieval European battlefield circa 1340-1450, weathered,",
+        "catalogue_prompt": "tiny primitive 1330s pot-de-fer gun from the Milemete manuscript: a short, fat, bottle-shaped bronze barrel only about 60 cm long, a swollen round belly at the rear and a narrow neck flaring to a small open muzzle with a dark bore, laid horizontally and strapped with iron bands onto a low rough oak beam lying flat on the ground, side view, no wheels, no handle, no spout, no long barrel, small",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single tiny primitive 1330s pot-de-fer gun from the Milemete manuscript: a short, fat, bottle-shaped bronze barrel only about 60 cm long, a swollen round belly at the rear and a narrow neck flaring to a small open muzzle with a dark bore, laid horizontally and strapped with iron bands onto a low rough oak beam lying flat on the ground, side view, no wheels, no handle, no spout, no long barrel, small Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 1.5,
+          "class": "siege_engine"
+        },
+        "views": [
+          {
+            "ts": "2026-10-08T23:53:19",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-08T23:53:32",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T07:47:31",
+            "seed": 1338,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1338.png",
+            "file": "views/back_s1338.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T07:47:57",
+            "seed": 1338,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "source": "img/s1338.png",
+            "file": "views/side_s1338.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:54:04",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          },
+          {
+            "ts": "2026-10-09T07:48:51",
+            "seed": 1338,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1338.png",
+              "views/back_cut_s1338.png",
+              "views/side_cut_s1338.png"
+            ],
+            "file": "3d/fal__s1338.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "siege_gun_battery_mantlet": {
       "id": "siege_gun_battery_mantlet",
@@ -44515,7 +46493,51 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "siege_handgonne_pair",
+        "images": [
+          {
+            "ts": "2026-10-08T23:34:42",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_battle_extra.json",
+        "target": "battle_soldiers.gd : couleuvrine à main",
+        "region": "Medieval European battlefield circa 1340-1450, weathered,",
+        "catalogue_prompt": "two hand gonnes iron barrels on wooden tillers, 1340s, on a rest",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single two hand gonnes iron barrels on wooden tillers, 1340s, on a rest Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 1.2,
+          "class": "prop"
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:54:41",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "siege_ladder_array": {
       "id": "siege_ladder_array",
@@ -48047,47 +50069,83 @@
         "dn/buildings/town_byz_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.001,
-        "width": 2.001,
-        "height": 1.02
+        "length": 1.996,
+        "width": 1.996,
+        "height": 0.919
       },
       "triangles": [
-        15000,
-        4000,
-        1000
+        14999,
+        3999,
+        968
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1998,
-          "mean_s": 0.4704,
-          "p95_s": 0.65
+          "mean_luma": 0.2228,
+          "mean_s": 0.4385,
+          "p95_s": 0.6196
         },
         "after": {
-          "mean_luma": 0.2086,
-          "mean_s": 0.3752,
+          "mean_luma": 0.2302,
+          "mean_s": 0.3675,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_byz/mv/cut/s1337.png",
       "generation": {
         "id": "town_byz",
-        "catalogue": "dn_catalog_campaign.json",
+        "catalogue": "camp1.json",
         "target": "town_maquettes:town/byz",
         "region": "Byzantine Balkan walled town circa 1340, solid,",
         "catalogue_prompt": "14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base",
         "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled town with domed churches, red tile roofs, brick-and-stone towers, Byzantine and Balkan architecture (alternating brick and stone courses, shallow domes, red tile roofs), stylised miniature maquette, whole settlement on a small plain base Byzantine Balkan walled town circa 1340, solid, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T15:21:48",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T15:22:18",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
         ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T15:22:54",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "town_byz_serbia": {
@@ -48293,52 +50351,34 @@
       "dimensions_m": {
         "length": 2.001,
         "width": 1.94,
-        "height": 1.417
+        "height": 1.373
       },
       "triangles": [
-        14999,
-        4000,
+        15000,
+        3999,
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.0954,
-          "mean_s": 0.4108,
+          "mean_luma": 0.1023,
+          "mean_s": 0.4369,
           "p95_s": 1.0
         },
         "after": {
           "mean_luma": 0.197,
-          "mean_s": 0.2186,
-          "p95_s": 0.2735
+          "mean_s": 0.2381,
+          "p95_s": 0.2852
         },
-        "gamma": 1.599
+        "gamma": 1.5217
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_empire_south/mv/cut/s1337.png",
       "generation": {
         "id": "town_empire_south",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:02",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:town/west_alp (sous-famille west_alp : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Holy Roman Empire south Germany circa 1340, tidy,",
@@ -48351,31 +50391,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:03:38",
+            "ts": "2026-10-09T12:11:18",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:11:34",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:04:24",
+            "ts": "2026-10-09T15:40:46",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "town_gate": {
@@ -48577,8 +50627,8 @@
       ],
       "dimensions_m": {
         "length": 1.999,
-        "width": 1.984,
-        "height": 1.537
+        "width": 1.999,
+        "height": 1.622
       },
       "triangles": [
         15000,
@@ -48586,44 +50636,26 @@
         1000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2058,
-          "mean_s": 0.38,
-          "p95_s": 0.8571
+          "mean_luma": 0.2385,
+          "mean_s": 0.3401,
+          "p95_s": 0.75
         },
         "after": {
-          "mean_luma": 0.2109,
-          "mean_s": 0.2952,
+          "mean_luma": 0.2419,
+          "mean_s": 0.2767,
           "p95_s": 0.4
         },
         "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_hungpol/mv/cut/s1337.png",
       "generation": {
         "id": "town_hungpol",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:14",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:town/west_east (sous-famille west_east : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Poland-Hungary circa 1340, orderly,",
@@ -48636,31 +50668,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:09:35",
+            "ts": "2026-10-09T12:46:55",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:47:43",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:10:13",
+            "ts": "2026-10-09T12:48:41",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "town_iber": {
@@ -49108,54 +51150,36 @@
         "dn/buildings/town_ital_towers_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.004,
-        "width": 2.0,
-        "height": 1.106
+        "length": 2.005,
+        "width": 2.001,
+        "height": 1.168
       },
       "triangles": [
         15000,
         4000,
-        1000
+        689
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1132,
-          "mean_s": 0.5264,
+          "mean_luma": 0.1188,
+          "mean_s": 0.5198,
           "p95_s": 1.0
         },
         "after": {
           "mean_luma": 0.197,
-          "mean_s": 0.2621,
-          "p95_s": 0.2992
+          "mean_s": 0.2478,
+          "p95_s": 0.2999
         },
-        "gamma": 1.4368
+        "gamma": 1.4325
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_ital_towers/mv/cut/s1337.png",
       "generation": {
         "id": "town_ital_towers",
-        "images": [
-          {
-            "ts": "2026-10-08T22:50:05",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
         "catalogue": "dn_catalog_architecture.json",
         "target": "town_maquettes:town/med_towers (sous-famille med_towers : families + regions de data/art/town_maquettes.json, table dn_campaign_models.json)",
         "region": "Tuscany circa 1340, tall,",
@@ -49168,31 +51192,41 @@
         },
         "views": [
           {
-            "ts": "2026-10-08T23:05:13",
+            "ts": "2026-10-09T12:11:24",
             "seed": 1337,
             "view": "back",
             "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
             "source": "img/s1337.png",
             "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:11:43",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
             "usd": 0.024
           }
         ],
         "calls_3d": [
           {
-            "ts": "2026-10-08T23:05:50",
+            "ts": "2026-10-09T15:40:17",
             "seed": 1337,
             "endpoint": "fal-ai/trellis/multi",
             "mode": "multi-view",
             "views": [
               "cut/s1337.png",
-              "views/back_cut_s1337.png"
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
             ],
             "file": "3d/fal__s1337.glb",
             "usd": 0.02
           }
-        ],
-        "chosen_seed": 1337
+        ]
       }
     },
     "town_med": {
@@ -49204,34 +51238,34 @@
         "dn/buildings/town_med_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.0,
-        "width": 2.0,
-        "height": 1.167
+        "length": 1.999,
+        "width": 1.892,
+        "height": 1.153
       },
       "triangles": [
         14999,
         4000,
-        1000
+        999
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/mv/3d/fal__s1337.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.1159,
-          "mean_s": 0.4525,
+          "mean_luma": 0.1261,
+          "mean_s": 0.4632,
           "p95_s": 1.0
         },
         "after": {
           "mean_luma": 0.197,
-          "mean_s": 0.232,
-          "p95_s": 0.2949
+          "mean_s": 0.2491,
+          "p95_s": 0.3094
         },
-        "gamma": 1.4619
+        "gamma": 1.3797
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_med/mv/cut/s1337.png",
       "generation": {
         "id": "town_med",
         "catalogue": "dn_catalog_campaign.json",
@@ -49239,12 +51273,48 @@
         "region": "Mediterranean Italian hill town circa 1340, dense,",
         "catalogue_prompt": "14th-century walled hill town with terracotta roofs, tower houses, stone walls and a campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base",
         "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled hill town with terracotta roofs, tower houses, stone walls and a campanile, Mediterranean architecture (pale stone, terracotta canal tiles, tower houses, campanile), stylised miniature maquette, whole settlement on a small plain base Mediterranean Italian hill town circa 1340, dense, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "seeds": [
-          1337
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T12:49:30",
+            "seed": 1337,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/back_s1337.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T12:49:50",
+            "seed": 1337,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1337.png",
+            "file": "views/side_s1337.png",
+            "usd": 0.024
+          }
         ],
-        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
-        "reconstructed": true,
-        "chosen_seed": 1337
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T12:50:55",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1337.png",
+              "views/back_cut_s1337.png",
+              "views/side_cut_s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
       }
     },
     "town_nord": {
@@ -49377,7 +51447,59 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_port_harbour/mv/cut/s1337.png",
+      "generation": {
+        "id": "town_port_harbour",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:town/port",
+        "region": "Gothic northern European seaport circa 1340, prosperous,",
+        "catalogue_prompt": "14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled harbour town maquette: a ring of crenellated town walls with a sea gate, dense half-timbered and stone houses with steep roofs, a parish church with a square tower, stone quays and a long stone jetty enclosing a small harbour basin of calm water, a tall wooden treadwheel harbour crane on the quay, one or two moored medieval cogs with a single mast, North Sea and Channel port architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern European seaport circa 1340, prosperous, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:38:14",
+            "seed": 1339,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1339.png",
+            "file": "views/back_s1339.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:38:31",
+            "seed": 1339,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1339.png",
+            "file": "views/side_s1339.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:39:35",
+            "seed": 1339,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1339.png",
+              "views/back_cut_s1339.png",
+              "views/side_cut_s1339.png"
+            ],
+            "file": "3d/fal__s1339.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "town_rus": {
       "id": "town_rus",
@@ -49709,7 +51831,59 @@
         },
         "gamma": 1.1117
       },
-      "model_3d": "fal-ai/trellis"
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.07,
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_west/mv/cut/s1337.png",
+      "generation": {
+        "id": "town_west",
+        "catalogue": "mv_catalog.json",
+        "target": "town_maquettes:town/west",
+        "region": "Gothic northern France circa 1340, bustling,",
+        "catalogue_prompt": "14th-century walled market town with a stone curtain wall, towers, dense timber and slate roofs and a central church spire, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single 14th-century walled market town with a stone curtain wall, towers, dense timber and slate roofs and a central church spire, Gothic and half-timbered northern French architecture (limestone, oak framing, slate and thatch), stylised miniature maquette, whole settlement on a small plain base Gothic northern France circa 1340, bustling, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "yaw_fix": 0,
+          "target_width_m": 2.0,
+          "class": "major_building"
+        },
+        "views": [
+          {
+            "ts": "2026-10-09T09:38:14",
+            "seed": 1338,
+            "view": "back",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1338.png",
+            "file": "views/back_s1338.png",
+            "usd": 0.024
+          },
+          {
+            "ts": "2026-10-09T09:38:34",
+            "seed": 1338,
+            "view": "side",
+            "endpoint": "fal-ai/flux-2/edit",
+            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground. Evenly and brightly lit overall, the whole far side fully textured and visible in daylight, no black or dark areas, no deep shadow.",
+            "source": "img/s1338.png",
+            "file": "views/side_s1338.png",
+            "usd": 0.024
+          }
+        ],
+        "calls_3d": [
+          {
+            "ts": "2026-10-09T09:39:29",
+            "seed": 1338,
+            "endpoint": "fal-ai/trellis/multi",
+            "mode": "multi-view",
+            "views": [
+              "cut/s1338.png",
+              "views/back_cut_s1338.png",
+              "views/side_cut_s1338.png"
+            ],
+            "file": "3d/fal__s1338.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "townhouse_siege": {
       "id": "townhouse_siege",
@@ -50157,7 +52331,51 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "tree_argan",
+        "images": [
+          {
+            "ts": "2026-10-08T23:17:58",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:argan (Maroc atlantique)",
+        "region": "Southwest Morocco",
+        "catalogue_prompt": "argan tree (Argania spinosa), gnarled twisted trunk with a low wide thorny crown of small leaves and round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single argan tree (Argania spinosa), gnarled twisted trunk with a low wide thorny crown of small leaves and round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Southwest Morocco heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 7,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:29:29",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "tree_ash": {
       "id": "tree_ash",
@@ -52784,7 +55002,53 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "tree_orchard_apple",
+        "catalogue": "dn_catalog_nature.json",
+        "target": "tree_species/battle trees:orchard_apple (atlantique, continental, vergers)",
+        "region": null,
+        "catalogue_prompt": "mature old apple orchard tree (Malus domestica), short trunk, low spreading gnarled crown pruned to an open goblet shape, small green apples, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single mature old apple orchard tree (Malus domestica), short trunk, low spreading gnarled crown pruned to an open goblet shape, small green apples, mature summer foliage in muted desaturated olive green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Rural medieval France circa 1340, humble, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "seeds": [
+          1337
+        ],
+        "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
+        "models_3d": [],
+        "images": [
+          {
+            "ts": "2026-10-08T22:43:55",
+            "seed": 1338,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1338.png",
+            "arguments": {
+              "image_size": "1024x1024",
+              "seed": 1338,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 5,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T22:46:55",
+            "seed": 1338,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1338.png"
+            ],
+            "file": "3d/fal__s1338.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "tree_orchard_cherry": {
       "id": "tree_orchard_cherry",
@@ -53981,7 +56245,51 @@
         },
         "gamma": 1.0
       },
-      "model_3d": "fal-ai/trellis-2"
+      "model_3d": "fal-ai/trellis-2",
+      "generation": {
+        "id": "tree_pomegranate",
+        "images": [
+          {
+            "ts": "2026-10-08T23:17:55",
+            "seed": 1337,
+            "endpoint": "fal-ai/z-image/turbo",
+            "file": "img/s1337.png",
+            "arguments": {
+              "image_size": {
+                "width": 1024,
+                "height": 1024
+              },
+              "seed": 1337,
+              "enable_prompt_expansion": false,
+              "output_format": "png"
+            },
+            "usd": 0.005
+          }
+        ],
+        "catalogue": "dn_catalog_nature_extra.json",
+        "target": "tree_species/battle trees:pomegranate (Andalousie, Levant)",
+        "region": "Andalusia and Levant gardens",
+        "catalogue_prompt": "pomegranate tree (Punica granatum), small many-stemmed tree with narrow glossy leaves and red round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible",
+        "full_prompt": "Photorealistic matte-painted reference photograph of a single pomegranate tree (Punica granatum), small many-stemmed tree with narrow glossy leaves and red round fruits, mature summer foliage in muted desaturated green tones, natural unsaturated bark colours, single adult specimen only, trunk base visible Andalusia and Levant gardens heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
+        "ingest": {
+          "class": "tree",
+          "target_height_m": 4,
+          "yaw_fix": 0
+        },
+        "calls_3d": [
+          {
+            "ts": "2026-10-08T23:27:51",
+            "seed": 1337,
+            "endpoint": "fal-ai/trellis",
+            "mode": "single-view",
+            "views": [
+              "cut/s1337.png"
+            ],
+            "file": "3d/fal__s1337.glb",
+            "usd": 0.02
+          }
+        ]
+      }
     },
     "tree_poplar": {
       "id": "tree_poplar",
