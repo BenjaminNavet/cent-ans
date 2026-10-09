@@ -120,10 +120,10 @@ SH1 | PARTIEL | fx_noise fait pour fx ; ~24 copies hash/vnoise/fbm restent, nois
 SH2 | À FAIRE | campaign_map_data.gdshaderinc + river_common (terrain GELÉ) | game/shaders | non
 SH5 | PARTIEL | = BT4/PF-06 (uniform bool da6/ga*/sr2 restent dans battle_ground, battle_soldier_skinned) | game/shaders | non
 SH6 | À FAIRE | sea_nearby cache terrain (GELÉ) | game/shaders/terrain.gdshader | non
-SH7 | À FAIRE | uniformes/fonctions morts | game/shaders | non
+SH7 | FAIT 31cca7fa1 (2 uniformes morts ; fonctions mortes non traitées) | uniformes/fonctions morts | game/shaders | non
 SH8 | À FAIRE | battle_ground detail_height 9 lectures -> dFdx (change le rendu, écarté par battledev) | game/shaders/battle_ground.gdshader | non | [visuel]
 SH9 | PARTIEL | flipbook fx fait ; dupliqué dans fire_*/life_* (carte) | game/shaders | non
-SH10 | À FAIRE | uniformes jamais posés -> const | game/shaders | non
+SH10 | ÉCARTÉ : beaucoup d'uniformes posés par nom construit (prefix + clé, clés des données) ; const = réglage ignoré en silence, invérifiable sans rendu GPU | uniformes jamais posés -> const | game/shaders | non
 
 ## AD ai/data-model/relief-lod/vegetation
 AD7 | FAIT (ADR 0204, sc/veg) | vegetation V4 legacy (species None) + repli GD vegetation_tile_job | core/crates/vegetation/src/lib.rs, game/scripts/map/vegetation_tile_job.gd | oui
@@ -177,7 +177,7 @@ TL6 | À FAIRE | pipeline payant OpenRouter/fal/TTS -8k | tools/cent_ans_tools/{
 TL7 | À FAIRE | audio/UI art gen -5.9k [ADR] | tools/cent_ans_tools/{ui_ornaments,audio_bank,ui_sounds,era_music}.py | non
 TL10 | FAIT 3aab598d7 | cli.py 2051 l à découper | tools/cent_ans_tools/cli.py | non
 TL12 | FAIT 3db03ba04 (rien à factoriser : aucune fonction identique, implémentations distinctes) | battle_skinned vs fine doublons | tools/cent_ans_tools | non
-TL13 | À FAIRE | kit_geometry | tools/cent_ans_tools | non
+TL13 | RIEN À FAIRE (pas de doublon) | kit_geometry | tools/cent_ans_tools | non
 TL14 | PARTIEL 3db03ba04 (paths.py fait ; imaging.py non : pas de helper dupliqué) | paths.py/imaging.py | tools/cent_ans_tools | non
 TLR | PARTIEL | descriptions schémas / commentaire siege_engines_fx.gd:89 citant outils supprimés | data/schemas, game/scripts/battle/siege_engines_fx.gd | non
 
