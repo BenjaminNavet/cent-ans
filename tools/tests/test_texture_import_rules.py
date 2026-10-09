@@ -31,6 +31,30 @@ def test_fix_import_rewrites_params(tmp_path: Path) -> None:
     assert not rules.fix_import(normal)
 
 
+ARRAY_SAMPLE = """[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+mipmaps/generate=true
+"""
+
+
+def test_normal_array_goes_bc7(tmp_path: Path) -> None:
+    """Les tableaux de normales passent en BC7, les albédos restent tels quels."""
+    normal = tmp_path / "tx_normal_array.jpg.import"
+    normal.write_text(ARRAY_SAMPLE, encoding="utf-8")
+    assert rules.fix_import(normal)
+    assert "compress/high_quality=true" in normal.read_text(encoding="utf-8")
+    albedo = tmp_path / "tx_albedo_array.jpg.import"
+    albedo.write_text(ARRAY_SAMPLE, encoding="utf-8")
+    assert not rules.violations(albedo)
+
+
 def test_albedo_keeps_normal_map_detection(tmp_path: Path) -> None:
     albedo = tmp_path / "m_Image_0.jpg.import"
     albedo.write_text(SAMPLE, encoding="utf-8")

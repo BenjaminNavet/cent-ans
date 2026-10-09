@@ -2,15 +2,23 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://bofn3asa4udqo"
+path.bptc="res://.godot/imported/tx_campaign_parcels_normal_array.jpg-65166ca1861fbf09e0da36b8541c6e17.bptc.ctexarray"
+path.astc="res://.godot/imported/tx_campaign_parcels_normal_array.jpg-65166ca1861fbf09e0da36b8541c6e17.astc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/terrain/tx_campaign_parcels_normal_array.jpg"
+dest_files=["res://.godot/imported/tx_campaign_parcels_normal_array.jpg-65166ca1861fbf09e0da36b8541c6e17.bptc.ctexarray", "res://.godot/imported/tx_campaign_parcels_normal_array.jpg-65166ca1861fbf09e0da36b8541c6e17.astc.ctexarray"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
