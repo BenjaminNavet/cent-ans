@@ -49,7 +49,6 @@
 //!
 //! Everything is data-driven: constants come from `data/`, not from the code.
 
-
 pub(crate) mod abilities;
 pub mod ai;
 pub mod ai_rules;
