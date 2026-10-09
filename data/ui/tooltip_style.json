@@ -11,6 +11,12 @@
     "max_bubbles": 10,
     "breadcrumb_from_depth": 3
   },
+  "decor_hover": {
+    "delay_s": 1.5,
+    "still_px": 3,
+    "leave_px": 12,
+    "choices": [0.75, 1.5, 3.0, 0.0]
+  },
   "kind_colors": {
     "unit": "#7a2e1e",
     "building": "#5a4a2a",

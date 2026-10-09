@@ -1122,3 +1122,43 @@ func _evict() -> void:
 		_tiles.erase(index)
 		_ground_dirty.erase(index)
 	stats["tiles"] = _tiles.size()
+
+
+## NA (ADR 0217) : arbres (haies exclues) susceptibles d'être sous le curseur, lus dans les copies
+## processeur des tampons déjà en mémoire. `ground` : point du sol visé (x, z monde) ; `reach_scale`
+## élargit la fenêtre de recherche (hauteur de l'arbre × cette valeur : la tête d'un grand arbre
+## se projette loin de son pied sous une caméra rasante). Renvoie [{species, position: Vector3 (pied),
+## height, radius}] (unités monde) ; l'appelant départage en espace écran. Tuiles et parties
+## masquées, instances éclaircies (au-delà de `visible_instance_count`) ignorées.
+func decor_candidates(ground: Vector2, reach_scale: float = 3.0) -> Array:
+	var found: Array = []
+	var species_table := TreeSpecies.shared()
+	for entry: Dictionary in _tiles.values():
+		if not (entry["node"] as Node3D).visible:
+			continue
+		for part: Dictionary in entry["parts"]:
+			if not (part["node"] as Node3D).visible:
+				continue
+			var mmis: Array = part["mmis"]
+			for kind in mini(mmis.size(), VegetationTileJob.Kind.HEDGE):
+				var mmi: MultiMeshInstance3D = mmis[kind]
+				if mmi == null or not mmi.is_visible_in_tree():
+					continue
+				var multimesh := mmi.multimesh
+				var shown := multimesh.visible_instance_count if multimesh.visible_instance_count >= 0 else multimesh.instance_count
+				var buffer: PackedFloat32Array = (entry["buffers"] as Array)[int(part["slot0"]) + kind]
+				var mesh_box := multimesh.mesh.get_aabb() if multimesh.mesh != null else AABB(Vector3.ZERO, Vector3.ONE)
+				shown = mini(shown, buffer.size() / VegetationTileJob.FLOATS_PER_INSTANCE)
+				for n in shown:
+					var k := n * VegetationTileJob.FLOATS_PER_INSTANCE
+					var scale_y := Vector3(buffer[k + 1], buffer[k + 5], buffer[k + 9]).length()
+					var height := mesh_box.size.y * scale_y
+					var reach := height * reach_scale
+					if absf(buffer[k + 3] - ground.x) > reach or absf(buffer[k + 11] - ground.y) > reach:
+						continue
+					var species_row := int(floorf(buffer[k + 12] / TreeSpecies.CUSTOM_STRIDE)) - 1
+					if species_row < 0 or species_row >= species_table.ids.size():
+						continue
+					var scale_x := Vector3(buffer[k], buffer[k + 4], buffer[k + 8]).length()
+					found.append({"species": species_table.ids[species_row], "position": Vector3(buffer[k + 3], buffer[k + 7], buffer[k + 11]), "height": height, "radius": mesh_box.size.x * 0.5 * scale_x})
+	return found

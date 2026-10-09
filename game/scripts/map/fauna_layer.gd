@@ -671,3 +671,34 @@ func _evict() -> void:
 		for node: Node in entry["nodes"]:
 			node.queue_free()
 		_cells.erase(keys[n])
+
+
+## NA (ADR 0217) : bêtes des troupeaux visibles près de `ground` (px carte), calculées d'après les
+## cellules installées (le mouvement est dans le shader : on vise la position de repos du
+## troupeau). Renvoie [{species, position: Vector3, height, radius}] ; `reach` : rayon de
+## recherche (px). Seules les cellules dont le MultiMesh est affiché comptent.
+func decor_candidates(ground: Vector2, reach: float = 1.0) -> Array:
+	var found: Array = []
+	var side := _cell_px()
+	var lo := Vector2i(floori((ground.x - reach) / side), floori((ground.y - reach) / side))
+	var hi := Vector2i(floori((ground.x + reach) / side), floori((ground.y + reach) / side))
+	for cy in range(lo.y, hi.y + 1):
+		for cx in range(lo.x, hi.x + 1):
+			var key := Vector2i(cx, cy)
+			if not _cells.has(key):
+				continue
+			var shown := {}
+			for node: MultiMeshInstance3D in (_cells[key]["nodes"] as Array):
+				if is_instance_valid(node) and node.is_visible_in_tree():
+					shown[str(node.get_meta("species", ""))] = true
+			if shown.is_empty():
+				continue
+			for herd: Dictionary in cell_herds(key):
+				if not shown.has(herd["species"]):
+					continue
+				var centre: Vector2 = herd["center"]
+				if absf(centre.x - ground.x) > reach or absf(centre.y - ground.y) > reach:
+					continue
+				var state := _species_state(str(herd["species"]))
+				found.append({"species": herd["species"], "position": Vector3(centre.x, maxf(_map_data.height_m_at(centre.x, centre.y), 0.0), centre.y), "height": float(state["base_scale"]), "radius": float(state["base_scale"])})
+	return found

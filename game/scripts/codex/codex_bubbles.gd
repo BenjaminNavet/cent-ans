@@ -639,6 +639,8 @@ func _process(delta: float) -> void:
 
 ## Bulle refermée à la grâce : non épinglée, ou verrouillée par la chaîne une fois Alt relâché.
 func _closable(bubble: PanelContainer) -> bool:
+	if bubble.get_meta("decor_hold", false) and not bubble.get_meta("pinned", false):
+		return false  # NA : bulle du décor, fermée par `DecorHover` quand la souris s'éloigne
 	if not bubble.get_meta("pinned", false):
 		return true
 	return bubble.get_meta("chain_locked", false) and not _explore_held
@@ -724,6 +726,9 @@ func _entry_bbcode(id: String) -> String:
 		meta.append(era)
 	head += "  [color=%s][i]%s[/i][/color]" % [MUTED, " · ".join(meta)]
 	var entry: Dictionary = codex.call("entry", id)
+	var latin := str(entry.get("latin", ""))
+	if latin != "":  # NA : nom savant des fiches de la nature
+		head += "\n[i][color=%s]%s[/color][/i]" % [MUTED, latin]
 	var text := "%s\n%s" % [head, CodexText.format(str(entry.get("summary", "")))]
 	var gameplay := first_sentence(str(entry.get("gameplay", "")))
 	if gameplay != "":

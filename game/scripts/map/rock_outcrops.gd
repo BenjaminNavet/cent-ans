@@ -1009,3 +1009,29 @@ func _evict() -> void:
 		_tiles.erase(key)
 		_dirty.erase(key)
 	stats["tiles"] = _tiles.size()
+
+
+## NA (ADR 0217) : rochers susceptibles d'être sous le curseur, lus dans les copies processeur
+## déjà en mémoire. `ground` : point du sol visé (px carte) ; renvoie [{species (id du modèle),
+## position: Vector3 (pied), height, radius}] pour les rochers visibles à moins de
+## `reach_scale` rayons du point (l'appelant départage en espace écran).
+func decor_candidates(ground: Vector2, reach_scale: float = 2.0) -> Array:
+	var found: Array = []
+	for entry: Dictionary in _tiles.values():
+		for part: Dictionary in entry["parts"]:
+			var mmi: MultiMeshInstance3D = part["mmi"]
+			if not mmi.is_visible_in_tree():
+				continue
+			var multimesh := mmi.multimesh
+			var shown := multimesh.visible_instance_count if multimesh.visible_instance_count >= 0 else multimesh.instance_count
+			var buffer: PackedFloat32Array = part["buffer"]
+			var radii: PackedFloat32Array = part["radii"]
+			var id: String = models[int(part["model"])]["id"]
+			for n in mini(shown, radii.size()):
+				var o := n * FLOATS_PER_INSTANCE
+				var radius := radii[n]
+				var reach := radius * reach_scale
+				if absf(buffer[o + 3] - ground.x) > reach or absf(buffer[o + 11] - ground.y) > reach:
+					continue
+				found.append({"species": id, "position": Vector3(buffer[o + 3], buffer[o + 7], buffer[o + 11]), "height": Vector3(buffer[o + 1], buffer[o + 5], buffer[o + 9]).length(), "radius": radius})
+	return found

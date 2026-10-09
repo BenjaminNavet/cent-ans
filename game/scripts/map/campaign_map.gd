@@ -365,6 +365,65 @@ func _setup_settlements() -> void:
 	life.name = "CampaignLife"
 	add_child(life)
 	life.setup(self)
+	_setup_decor_hover()
+
+
+## NA (ADR 0217) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).
+var decor_hover: DecorHover = null
+## Rayons minimaux de visée (px écran) par type de décor, et fenêtre de recherche du sol (px écran).
+const DECOR_MIN_RADIUS_PX := {"tree": 10.0, "rock": 12.0, "fauna": 16.0}
+const DECOR_SEARCH_PX := 40.0
+
+
+func _setup_decor_hover() -> void:
+	decor_hover = DecorHover.new()
+	decor_hover.name = "DecorHover"
+	decor_hover.provider = pick_decor
+	decor_hover.blocker = func(screen_position: Vector2) -> bool:
+		return not pick_target(screen_position).is_empty()  # armées et villes d'abord
+	add_child(decor_hover)
+
+
+## NA : élément du décor naturel sous un point écran : {kind: "tree" | "fauna" | "rock" (pour
+## `CodexStore.entry_for_decor` : tree, fauna, rock), species} ou {}. Point du sol visé par le
+## rayon, puis candidats lus dans les tampons déjà en mémoire (`Vegetation`, `FaunaLayer`,
+## `RockOutcrops`), départagés en espace écran : le plus proche de son centre, dans son rayon
+## projeté (au moins `DECOR_MIN_RADIUS_PX`). Aucune armée ni colonie n'est testée ici (voir `pick_target`).
+func pick_decor(screen_position: Vector2) -> Dictionary:
+	if camera == null or picker == null or (strategic != null and strategic.weight > 0.3):
+		return {}
+	var hit := picker.pick_ray_screen(screen_position)
+	if hit.is_empty():
+		return {}
+	var ground := Vector2(float(hit["x"]), float(hit["z"]))
+	var probe := picker.pick_ray_screen(screen_position + Vector2(DECOR_SEARCH_PX, 0.0))
+	var reach := ground.distance_to(Vector2(float(probe["x"]), float(probe["z"]))) if not probe.is_empty() else 0.0
+	var sources: Array = []
+	var vegetation := get_node_or_null("Vegetation")
+	if vegetation != null and vegetation.has_method("decor_candidates"):
+		sources.append(["tree", vegetation.call("decor_candidates", ground)])
+	var outcrops := get_node_or_null("RockOutcrops")
+	if outcrops != null and outcrops.has_method("decor_candidates"):
+		sources.append(["rock", outcrops.call("decor_candidates", ground)])
+	if life != null and life.fauna != null and reach > 0.0:
+		sources.append(["fauna", life.fauna.decor_candidates(ground, reach)])
+	var right := camera.global_transform.basis.x
+	var best := {}
+	var best_score := 1.0
+	for source: Array in sources:
+		var kind := str(source[0])
+		for candidate: Dictionary in source[1]:
+			var foot: Vector3 = candidate["position"]
+			var centre := foot + Vector3.UP * float(candidate["height"]) * 0.5
+			if camera.is_position_behind(centre):
+				continue
+			var at := camera.unproject_position(centre)
+			var radius := maxf(at.distance_to(camera.unproject_position(centre + right * float(candidate["radius"]))), float(DECOR_MIN_RADIUS_PX[kind]))
+			var score := at.distance_to(screen_position) / radius
+			if score < best_score:
+				best_score = score
+				best = {"kind": kind, "species": candidate["species"]}
+	return best
 
 
 ## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).

@@ -6,9 +6,9 @@ faune… ; survol d'un élément du décor → petite bulle après quelques seco
 ## Lots
 - [x] NA0 squelette : schéma (`decor`, `latin`, catégories), validateur, `CodexStore.entry_for_decor`, famille Nature, ADR.
 - [ ] NA1 fiches (3 agents Sonnet) : arbres / animaux / oiseaux+roches, liste ci-dessous.
-- [ ] NA2 pick campagne : arbres (instances MultiMesh de `map/vegetation.gd`, espèce dans custom data), troupeaux (`fauna_layer.cell_herds`), rochers.
-- [ ] NA3 pick bataille : arbres par espèce (`battle_terrain.gd` by_species).
-- [ ] NA4 bulle différée (1,5 s, réglage Réglages, 0 = off) + test headless.
+- [~] NA2 pick campagne (code écrit : `Vegetation/RockOutcrops/FaunaLayer.decor_candidates`, `CampaignMap.pick_decor`; à vérifier) : arbres (instances MultiMesh de `map/vegetation.gd`, espèce dans custom data), troupeaux (`fauna_layer.cell_herds`), rochers.
+- [~] NA3 pick bataille (code écrit : `BattleTerrain.decor_candidates`, `BattleScene.pick_decor`; à vérifier) : arbres par espèce (`battle_terrain.gd` by_species).
+- [~] NA4 bulle différée (`ui/decor_hover.gd`, réglage `interface/decor_hover_delay`, test `tests/decor_hover_test.gd`; à vérifier) (1,5 s, réglage Réglages, 0 = off) + test headless.
 - [ ] NA5 bundle, validate, smoke, revue, fusion main.
 
 ## Fiches à écrire (id → décor)
@@ -39,4 +39,5 @@ Roches (`roche`) : rock:limestone_cliff, granite_chaos, stratified_ridge, alpine
 (ids libres, ex. cdx_falaises_calcaires, cdx_chaos_granitiques…).
 
 ## État / prochaine étape
-NA0 commité. Suite : lancer NA1 (agents) et NA2-4.
+NA0 commité. NA2-4 (agent UI) : code écrit, non encore exécuté (import Godot du worktree en cours).
+Prochaine étape : `godot --headless --path game --script res://tests/decor_hover_test.gd` puis smoke, corriger, cocher.

@@ -1760,9 +1760,39 @@ func _build_trees() -> void:
 
 
 
+## NA (ADR 0217) : copie légère des arbres plantés (essence, pied, échelles), rangée par tuile de
+## `TREE_TILE` m, pour retrouver l'arbre sous le curseur sans nœud ni collision.
+var _decor_trees: Dictionary = {}  # Vector2i → Array de {species, position, height, radius}
+
+
+func _index_decor_tree(species: String, t: Transform3D) -> void:
+	var params: Dictionary = BattleTrees.SPECIES.get(species, {})
+	if params.is_empty():
+		return
+	var key := Vector2i(floori(t.origin.x / TREE_TILE), floori(t.origin.z / TREE_TILE))
+	if not _decor_trees.has(key):
+		_decor_trees[key] = []
+	(_decor_trees[key] as Array).append({"species": species, "position": t.origin, "height": float(params["height"]) * t.basis.y.length(), "radius": float(params["width"]) * 0.5 * t.basis.x.length()})
+
+
+## Arbres plantés à moins de `reach` m (plan horizontal) de `ground`, pour la bulle du décor.
+func decor_candidates(ground: Vector2, reach: float) -> Array:
+	var found: Array = []
+	var lo := Vector2i(floori((ground.x - reach) / TREE_TILE), floori((ground.y - reach) / TREE_TILE))
+	var hi := Vector2i(floori((ground.x + reach) / TREE_TILE), floori((ground.y + reach) / TREE_TILE))
+	for ty in range(lo.y, hi.y + 1):
+		for tx in range(lo.x, hi.x + 1):
+			for tree: Dictionary in _decor_trees.get(Vector2i(tx, ty), []):
+				var at: Vector3 = tree["position"]
+				if absf(at.x - ground.x) <= reach and absf(at.z - ground.y) <= reach:
+					found.append(tree)
+	return found
+
+
 ## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
 ## niveau de détail (choix par instance dans les shaders) et imposteurs au-delà de 300 m.
 func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
+	_decor_trees.clear()
 	tree_view = BattleTrees.new()
 	tree_view.name = "Trees"
 	add_child(tree_view)
@@ -1786,6 +1816,7 @@ func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
 			if kind != "far":
 				by_species[species][0].append(t)
 				by_species[species][1].append(tints[kind][i])
+				_index_decor_tree(species, t)
 			var row := BattleTrees.impostor_row(species)
 			if row >= 0:
 				var key := Vector2i(floori(t.origin.x / (TREE_TILE * 4.0)), floori(t.origin.z / (TREE_TILE * 4.0)))

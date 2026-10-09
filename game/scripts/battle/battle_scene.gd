@@ -253,6 +253,7 @@ func _ready() -> void:
 	input.markers_toggled.connect(_on_input_markers_toggled)
 	input.screenshot_requested.connect(_on_input_screenshot_requested)
 	input.tactical_view_toggled.connect(_on_input_tactical_view_toggled)
+	_setup_decor_hover()
 	# CB3 : vue tactique (Tab).
 	tactical_view = BattleTacticalView.new()
 	tactical_view.name = "BattleTacticalView"
@@ -1833,6 +1834,48 @@ func _exit_tree() -> void:
 ## CB-M2 : position de la souris notée par `BattleInput` ; le curseur est recalculé au plus une
 ## fois par image, et seulement si la case de 2 m visée, le régiment survolé ou la sélection
 ## changent.
+## NA (ADR 0217) : bulle codex différée au survol d'un arbre ou d'un buisson de la bataille.
+var decor_hover: DecorHover = null
+const DECOR_MIN_RADIUS_PX := 12.0
+const DECOR_REACH_M := 40.0  # grand arbre : la tête se projette loin du pied sous une caméra rasante
+
+
+func _setup_decor_hover() -> void:
+	decor_hover = DecorHover.new()
+	decor_hover.name = "DecorHover"
+	decor_hover.provider = pick_decor
+	decor_hover.blocker = func(screen_position: Vector2) -> bool:
+		if markers != null and markers.world_hover >= 0:
+			return true  # une troupe est visée : elle prime
+		return pick_unit(screen_position, "attacker") >= 0 or pick_unit(screen_position, "defender") >= 0
+	add_child(decor_hover)
+
+
+## NA : arbre ou buisson sous un point écran : {kind: "battle_tree", species} ou {}. Point du sol
+## visé, puis arbres plantés alentour (`BattleTerrain.decor_candidates`) départagés en espace
+## écran (centre du houppier, rayon projeté, au moins `DECOR_MIN_RADIUS_PX`).
+func pick_decor(screen_position: Vector2) -> Dictionary:
+	var camera := camera_rig.camera
+	if terrain == null or camera == null:
+		return {}
+	var ground := ground_point(screen_position)
+	var reach := DECOR_REACH_M
+	var right := camera.global_transform.basis.x
+	var best := {}
+	var best_score := 1.0
+	for tree: Dictionary in terrain.decor_candidates(Vector2(ground.x, ground.z), reach):
+		var centre: Vector3 = (tree["position"] as Vector3) + Vector3.UP * float(tree["height"]) * 0.55
+		if camera.is_position_behind(centre):
+			continue
+		var at := camera.unproject_position(centre)
+		var radius := maxf(at.distance_to(camera.unproject_position(centre + right * float(tree["radius"]))), DECOR_MIN_RADIUS_PX)
+		var score := at.distance_to(screen_position) / radius
+		if score < best_score:
+			best_score = score
+			best = {"kind": "battle_tree", "species": tree["species"]}
+	return best
+
+
 func note_mouse(position: Vector2) -> void:
 	_hover_mouse = position
 	_hover_dirty = true
