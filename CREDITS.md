@@ -530,7 +530,8 @@ domaine public ; seules les courbes mesurées sont versionnées
   - CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>) : lion couronné (et sa
     couronne, extraite), lion rampant ailé, château donjonné de trois tours — Jpgibert,
     « Meuble héraldique … », Wikimedia Commons ; recolorés.
-- **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`).
+- **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`),
+  ou par IA pour une partie des décors, figurines et maquettes (voir « Contenus générés par IA »).
 - **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
   procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances
   (`battle/`, `ambience/`) viennent de Freesound (CC0, voir plus haut).
@@ -539,14 +540,55 @@ domaine public ; seules les courbes mesurées sont versionnées
 - **Engins de siège** (`game/assets/models/siege/`, lot SG2) : trébuchet, mangonneau, bombarde,
   bélier et beffroi modélisés par script Blender (`tools/blender_scripts/siege_engines.py`),
   textures de bois Poly Haven (CC0) déjà créditées.
-- **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
-  (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
+- **Portraits** (`game/assets/portraits/`) : images générées par IA, voir « Contenus générés par IA ».
 - **Voix** (`game/assets/audio/voice/` : répliques des unités, discours des généraux,
   conseiller) : voix **générées par synthèse vocale** (OpenAI `gpt-4o-mini-tts` via OpenRouter ;
   répliques criées et cris de guerre en chœur : ElevenLabs v3 via fal.ai), à partir des
   textes du projet (`data/voice/`, `data/speeches/`) ; aucune voix d'acteur. Outil
   reproductible `tools/cent_ans_tools/voice_tts.py` (liste des fichiers, voix et coût dans
   `game/assets/audio/voice/manifest.json`), dépenses consignées dans `docs/budget.md`.
+
+## Contenus générés par IA
+
+Une partie des assets du jeu est produite par des modèles d'IA générative, pilotés par les outils
+du projet (`tools/`) à partir de prompts et de textes du projet ; aucune œuvre d'un artiste
+identifié n'est imitée à dessein, et aucune voix réelle n'est clonée. Chaque asset généré est
+retouché ou filtré par le projet (détourage, contrôle de la charte, normalisation, LOD). Dépenses
+consignées dans `docs/budget.md`. Les conditions des modèles sont résumées dans
+[`LICENSE-ASSETS.md`](LICENSE-ASSETS.md).
+
+**Modèles 3D** (décors, accessoires, végétation, figurines, maquettes de villes ; chaîne
+`docs/pipeline-assets-3d.md`, ADR 0140 et 0210) :
+
+- **TRELLIS** (Microsoft) : image → 3D, via fal.ai (`fal-ai/trellis`, `fal-ai/trellis/multi`) et via le
+  Space Hugging Face `trellis-community/TRELLIS`. Produit la plupart des modèles générés de
+  `game/assets/models/`.
+- **Stable Fast 3D (SF3D)** (Stability AI), en local : modèle 3D de repli quand TRELLIS est indisponible.
+- Détourage : `rembg` (local) et `fal-ai/bria/background/remove`.
+- Quelques essais avec TRELLIS 2 (`fal-ai/trellis-2`) ont été faits les 30/09 et 09/10 ; le joueur
+  a ensuite écarté ce modèle (voir `docs/pipeline-assets-3d.md`).
+
+**Images** (sources des modèles 3D, portraits, miniatures, illustrations, matières, éléments d'interface) :
+
+- **Z-Image Turbo** (Tongyi-MAI), en local (mflux, ADR 0190) ou via fal.ai (`fal-ai/z-image/turbo`) :
+  images de décors, d'accessoires et de végétation, point de départ des modèles 3D ; miniatures de factions.
+- **Qwen-Image-Edit-2511** (Alibaba/Qwen), en local, avec le LoRA Multiple-Angles : figurines
+  à partir d'une référence validée, vues de profil et de dos.
+- **FLUX.2 edit** (Black Forest Labs), via fal.ai (`fal-ai/flux-2/edit`, et `fal-ai/flux-2` pour
+  quelques essais) : vues de dos et de côté des maquettes et figures avant la 3D multi-vues.
+- **gpt-5-image-mini** (OpenAI), via OpenRouter : portraits des personnages, miniatures
+  d'événements, illustrations de l'encyclopédie et du codex, planches illustrées
+  (`game/assets/portraits/`, `events/`, `illustrations/`).
+- **Gemini flash image / Gemini 3 Pro image** (Google, « Nano Banana 2 » : `google/gemini-3.1-flash-image`,
+  `fal-ai/nano-banana-2/edit`), via OpenRouter et fal.ai : planche de style, éléments d'interface
+  (cartouches, panneaux, fleurons), figurines semi-réalistes, matières d'eau, miniatures d'unités
+  et de bâtiments, sondes de direction artistique.
+
+**Voix** (`game/assets/audio/voice/`) :
+
+- **ElevenLabs v3**, via fal.ai : répliques criées et cris de guerre en chœur (ADR 0145).
+- **gpt-audio-mini** (OpenAI), via OpenRouter : voix des répliques, du conseiller et des discours
+  (`gpt-4o-mini-tts` pour des essais) ; aucune voix d'acteur.
 
 ## Mouvement des bêtes et charrettes (lot AS8c)
 

@@ -8,6 +8,9 @@ $``) and opens a fresh cumulative column and, per the design doc, its own spendi
 the very first table (before any ``##`` heading) has no title. Money is handled with
 ``Decimal`` to avoid float drift.
 
+``grand_total()``/``service_totals()``/``render_summary()`` cover every table; costs are summed
+from the "Coût réel" column, never from the hand-edited cumul column.
+
 ``check()``/``add_entry()``/``total()`` all operate on the *current* session, i.e. the last
 table in the file: new spending is recorded there, and the cap is checked against its own
 cumulative column, not the grand total of every past session. Use ``session_totals()`` for a
@@ -250,17 +253,48 @@ class BudgetLedger:
 
         The untitled first table's key is ``"principal"``.
         """
-        return {
-            session.label: (
-                session.entries[-1].cumulative if session.entries else Decimal("0.00")
+        return {session.label: self._session_sum(session) for session in self.sessions}
+
+    @staticmethod
+    def _session_sum(session: BudgetSession) -> Decimal:
+        """Sum of the real costs of a session (does not trust the hand-edited cumul column)."""
+        return to_money(sum((entry.actual for entry in session.entries), Decimal("0")))
+
+    def grand_total(self) -> Decimal:
+        """Real spend of every table in the file, all envelopes and services together."""
+        return to_money(sum(self.session_totals().values(), Decimal("0")))
+
+    def service_totals(self) -> dict[str, Decimal]:
+        """Real spend per service (OpenRouter, fal.ai...), over every table."""
+        totals: dict[str, Decimal] = {}
+        for entry in self.entries:
+            totals[entry.service] = (
+                totals.get(entry.service, Decimal("0")) + entry.actual
             )
-            for session in self.sessions
+        return {
+            service: to_money(amount)
+            for service, amount in totals.items()
+            if amount != 0
         }
 
     def total(self) -> Decimal:
-        """Cumulative real spend of the current session (the last table in the file)."""
-        session = self.current_session
-        return session.entries[-1].cumulative if session.entries else Decimal("0.00")
+        """Real spend of the current session (the last table in the file)."""
+        return self._session_sum(self.current_session)
+
+    def render_summary(self) -> str:
+        """Markdown synthesis: total per envelope, per service, and the grand total."""
+        lines = ["| Enveloppe | Dépensé |", "|---|---|"]
+        lines += [
+            f"| {label} | {format_amount(amount)} |"
+            for label, amount in self.session_totals().items()
+        ]
+        lines += ["", "| Fournisseur | Dépensé |", "|---|---|"]
+        lines += [
+            f"| {service} | {format_amount(amount)} |"
+            for service, amount in sorted(self.service_totals().items())
+        ]
+        lines += ["", f"Total général : **{format_amount(self.grand_total())}**"]
+        return "\n".join(lines)
 
     def check(self, estimated: Decimal | float | int | str) -> bool:
         """Return True if the current session's ``total() + estimated`` stays within the cap."""

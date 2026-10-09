@@ -28,8 +28,29 @@ Attribution demandée : « Cent Ans — Benjamin Navet et contributeurs, https:/
 
 ## Contenus générés par IA
 
-Les portraits, miniatures de chronique, illustrations de l'encyclopédie et du codex
-(`game/assets/portraits/`, `game/assets/events/`, `game/assets/illustrations/`) ont été générés par
-un modèle d'images, et les voix (`game/assets/audio/voice/`) par synthèse vocale (voir `CREDITS.md`).
-Ils sont distribués aux mêmes conditions (CC BY-SA 4.0) dans la mesure où un droit d'auteur s'y
-applique. Les voix sont synthétiques et ne reproduisent aucune personne réelle.
+Les assets générés par IA (modèles 3D, images, voix ; liste des modèles et de ce que chacun a
+produit dans [`CREDITS.md`](CREDITS.md), § « Contenus générés par IA ») sont **couverts par la
+même licence CC BY-SA 4.0**, dans la mesure où un droit d'auteur s'y applique : le droit sur un
+contenu purement généré est incertain selon les pays, et le projet ne revendique que sa part
+créative (prompts, sélection, retouches, assemblage). Les voix sont synthétiques et ne
+reproduisent aucune personne réelle.
+
+Conditions connues des modèles utilisés (état au 09/10/2026 ; ne pas en déduire plus que ce qui
+est écrit) :
+
+| Modèle | Condition connue |
+|---|---|
+| TRELLIS (Microsoft) | MIT (ADR 0140) ; l'offre hébergée fal.ai et le Space HF ont leurs propres conditions d'utilisation : à vérifier |
+| Z-Image Turbo (Tongyi-MAI) | Apache 2.0, usage commercial libre (ADR 0190) |
+| Qwen-Image-Edit-2511 | Apache 2.0 (`docs/pipeline-assets-3d.md`) ; licence du LoRA Multiple-Angles : à vérifier |
+| Stable Fast 3D (Stability AI) | licence communautaire Stability, gratuite sous 1 M$ de revenus (`docs/wip/i3d-local.md`) ; conditions sur les sorties : à vérifier |
+| TRELLIS 2 (fal) | quelques essais seulement, modèle écarté ; licence : à vérifier |
+| FLUX.2 edit (Black Forest Labs) | licence dépendant de la variante hébergée (dev non commerciale, ou offre fal) : à vérifier ; FLUX.1 dev a été écarté pour cette raison (ADR 0190) |
+| Bria background remove (fal) | conditions de l'offre hébergée : à vérifier |
+| gpt-5-image-mini, gpt-audio-mini (OpenAI) | conditions d'utilisation d'OpenAI via OpenRouter : sorties utilisables par le client ; à vérifier avant publication commerciale |
+| Gemini flash image, Nano Banana 2 (Google) | conditions d'utilisation de Google via OpenRouter / fal.ai ; marquage SynthID possible dans les images : à vérifier |
+| ElevenLabs v3 | droits d'usage commercial selon l'offre souscrite, accès via fal.ai : à vérifier |
+
+Les modèles ne sont pas redistribués avec le jeu : seuls leurs résultats le sont. Si une
+condition ci-dessus s'avère incompatible avec CC BY-SA 4.0 ou avec une distribution commerciale,
+l'asset concerné devra être régénéré ou retiré.

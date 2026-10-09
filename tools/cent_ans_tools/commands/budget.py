@@ -37,6 +37,12 @@ def budget_show() -> None:
     )
 
 
+@budget_app.command("summary")
+def budget_summary() -> None:
+    """Affiche le total par enveloppe, par fournisseur et le total général."""
+    console.print(budget.BudgetLedger().render_summary())
+
+
 @budget_app.command("check")
 def budget_check(
     amount: float = typer.Argument(..., help="Montant estimé en dollars"),

@@ -1,6 +1,64 @@
 # Budget cloud (v1)
 
-Plafond : **50,00 $** pour la v1. En dessous, aucune confirmation demandée.
+**Synthèse (2026-10-09)**
+
+Générée par `cent-ans budget summary` (`BudgetLedger.render_summary()`), qui lit **toutes** les tables ci-dessous
+et somme la colonne « Coût réel » (la colonne « Cumul » est recalculée, plus jamais lue). À régénérer quand une
+enveloppe bouge.
+
+**Plafond v1 de 50 $ dépassé : ~117 $ (116,78 $) dépensés, sur 16 enveloppes — décision du joueur à prendre.**
+Plafond d'origine : 50,00 $ pour la v1, non modifié ici ; chaque enveloppe garde son plafond propre (voir ses titres), et la règle
+« en dessous du plafond, aucune confirmation » ne vaut que pour le plafond de 50 $ de l'enveloppe en cours.
+
+Par fournisseur :
+
+- OpenRouter : 59,82 $
+- fal.ai : 56,96 $
+- OpenAI, local, Poly Haven, Freesound (CC0), données ouvertes : 0,00 $
+- **Total général : 116,78 $**
+
+Par enveloppe (plafond propre) :
+
+- Principal (sessions 1-5, plafond v1 50 $) : 19,20 $
+- Session 7 (50 $) : 1,07 $
+- Batailles épiques (20 $) : 0,57 $
+- Direction artistique (50 $) : 21,34 $
+- Polish PO (≤ 3 $) : 0,00 $
+- Assets générés GA (15 $) : 9,50 $
+- Féodalité FE (15 $) : 5,13 $
+- Oural–Méditerranée OM (10 $) : 8,40 $
+- Nano Banana NB (10 $) : 3,10 $
+- Figurines SR (3 $) : 0,42 $
+- Voix criées VX (2 $) : 0,76 $
+- Rivières RC (5 $) : 0,00 $
+- Biomes HB (8 $) : 3,82 $
+- Nuit visuelle VN (5 $) : 1,04 $
+- Campagne TB (25 $, annulée ADR 0152) : 0,00 $
+- **Nuit DN (≤ 10 $, ADR 0210)** : **42,43 $** (**dépassement de ~32,4 $ sur l'enveloppe**)
+
+
+Dépassements à signaler :
+
+- **Plafond global v1** : 50 $ annoncés, ~117 $ réels (OpenRouter 59,82 $ + fal.ai 56,96 $). Les enveloppes
+  propres (50 + 20 + 50 + 15 + 15 + 10 + 10 + …) ont été ouvertes au fil des sessions sans relever le plafond de
+  l'en-tête.
+- **Nuit DN** : enveloppe ≤ 10 $ (ADR 0210), 42,43 $ consignés, dont 9,00 $ de TRELLIS 2 (30 appels,
+  `fal-ai/trellis-2`) alors que le joueur interdit TRELLIS 2 (lot B du plan QW le retire du code).
+- **Plafonds contradictoires dans le code** : `tools/experiments/dn_batch.py` lit `DN_FAL_CAP_USD` avec une valeur par
+  défaut de **43,5 $** ; la valeur de 29,50 $ citée ailleurs n'existe plus dans l'arbre (non retrouvée) ; l'ADR
+  fixe ≤ 10 $. Aucune des trois valeurs n'est cohérente avec les autres : à trancher avec le plafond ci-dessus.
+- **Colonne « Cumul » de la table DN** : mélangeait cumul du journal, « cumul chantier » par lot et texte ; elle
+  était lue comme 0,02 $ par l'ancien `budget.py`. Recalculée ici (dernière ligne : 42,43 $).
+
+Rapprochement avec le journal fal (`~/dev/cent-ans-raw/dn/fal_spend.jsonl`, 2 667 appels, 8-9/10) : **43,14 $**
+au journal contre **42,43 $** au registre, soit **0,71 $ d'écart** (le registre est plus bas). Journal par
+endpoint : `flux-2/edit` 11,52 $, `trellis/multi` 8,06 $, `trellis` 7,72 $, `z-image/turbo` 6,84 $, `trellis-2`
+9,00 $. Cause non établie (appels de comparaison hors journal ou arrondis par lot) ; le journal, plus fin, est la
+référence pour DN. Le solde fal du compte n'a pas été relu (aucun accès réseau pris).
+
+Harmonisation (2026-10-09) : décimales en virgule et à deux chiffres partout (la table DN mêlait « 1.43 $ » et
+« 1,43 $ ») ; une ligne datée `2026-10-10` (reprise locale Z-Image mflux, 0 $, rangée entre des lignes du
+09/10) corrigée en `2026-10-09`, faute de frappe évidente puisque nous sommes le 09/10.
 
 Note (2026-09-23, M10) : la clé OpenRouter a en plus sa propre limite mensuelle (100 $, consommée
 hors projet) ; elle bloquait les portraits après le premier (402). Les lots M10 sont consignés
@@ -281,29 +339,29 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 |---|---|---|---|---|---|
 | 2026-10-08 | fal.ai | banc `dn_batch.py` : test de solde (cavalier I3D) + moulin + chariot, 3 × `fal-ai/trellis` | 0,06 $ | 0,06 $ | 0,06 $ |
 | 2026-10-08 | fal.ai | comparatif cavalier `fal-ai/trellis` (1024) vs `fal-ai/trellis-2` (1024, 100 k faces), `cent-ans-raw/cmp-trellis/cav/` | 0,32 $ | 0,32 $ | 0,38 $ |
-| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : images Z-Image fal (`fal-ai/z-image/turbo`), 285 appels | 1.43 $ | 1.43 $ | 1.81 $ |
-| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : vues dos/côté `fal-ai/flux-2/edit`, 68 appels | 1.63 $ | 1.63 $ | 3.44 $ |
-| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : 3D `fal-ai/trellis` / `trellis/multi`, 190 appels | 3.80 $ | 3.80 $ | 7.24 $ |
-| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : images Z-Image fal (`fal-ai/z-image/turbo`), 257 appels | 1.28 $ | 1.28 $ | 8.52 $ |
-| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : vues dos/côté `fal-ai/flux-2/edit`, 175 appels | 4.20 $ | 4.20 $ | 12.72 $ |
-| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : 3D `fal-ai/trellis` / `trellis/multi`, 205 appels | 4.10 $ | 4.10 $ | 16.82 $ |
-| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : images Z-Image fal (`fal-ai/z-image/turbo`), 109 appels | 0.55 $ | 0.55 $ | 17.37 $ |
-| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : vues dos/côté `fal-ai/flux-2/edit`, 69 appels | 1.66 $ | 1.66 $ | 19.02 $ |
-| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : 3D `fal-ai/trellis` / `trellis/multi`, 171 appels | 3.42 $ | 3.42 $ | 22.44 $ |
-| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : images Z-Image fal (`fal-ai/z-image/turbo`), 403 appels | 2.02 $ | 2.02 $ | 24.46 $ |
-| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : vues dos/côté `fal-ai/flux-2/edit`, 10 appels | 0.24 $ | 0.24 $ | 24.70 $ |
-| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : 3D `fal-ai/trellis` / `trellis/multi`, 23 appels | 0.46 $ | 0.46 $ | 25.16 $ |
-| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : images Z-Image fal (`fal-ai/z-image/turbo`), 22 appels | 0.11 $ | 0.11 $ | 25.27 $ |
-| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : vues dos/côté `fal-ai/flux-2/edit`, 67 appels | 1.61 $ | 1.61 $ | 26.88 $ |
-| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : 3D `fal-ai/trellis` / `trellis/multi`, 104 appels | 2.08 $ | 2.08 $ | 28.96 $ |
-| 2026-10-10 | local | reprise locale des assets refusés (Z-Image mflux, 5 ids sur 27 faits, pause) | 0 $ | 0 $ | 28.96 $ |
-| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : images Z-Image fal (`fal-ai/z-image/turbo`), 202 appels | 1,01 $ | 1,01 $ | cumul chantier 2,67 $ |
-| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : vues dos/côté `fal-ai/flux-2/edit`, 29 appels | 0,70 $ | 0,70 $ | cumul chantier 2,67 $ |
-| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis`, 20 appels | 0,40 $ | 0,40 $ | cumul chantier 2,67 $ |
-| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis/multi`, 28 appels | 0,56 $ | 0,56 $ | cumul chantier 2,67 $ |
-| 2026-10-09 | fal.ai | DN-FIX3 : 2 canons + 6 figures montées refaits (images Z-Image 30 appels, vues `flux-2/edit` 10, 3D `trellis/multi` 13) | 0.65 $ | 0.65 $ | cumul chantier 0,65 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : images Z-Image fal (`fal-ai/z-image/turbo`, port 3 graines, 13 flagrants refaits, 2 figures), 68 appels | 0,34 $ | 0,34 $ | cumul chantier 10,12 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : 3D TRELLIS 2 (`fal-ai/trellis-2`, 1024), 30 appels : 13 flagrants de la revue, port x2, 15 maquettes de ville/abbaye/village essayées (puis repassées en TRELLIS 1 : à 4000 triangles le LOD1 d'un maillage TRELLIS 2 de 100 000 faces s'effondre) | 9,00 $ | 9,00 $ | cumul chantier 10,12 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : vues dos/côté `fal-ai/flux-2/edit`, 24 appels (8 maquettes multi-vues, contrôle de luminance) + 2 figures | 0,58 $ | 0,58 $ | cumul chantier 10,12 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : 3D `fal-ai/trellis/multi`, 10 appels (8 maquettes + 2 figures). Solde fal épuisé en cours de lot (« Exhausted balance ») : le reste des maquettes en liste d'attente | 0,20 $ | 0,20 $ | cumul chantier 10,12 $ |
-| 2026-10-09 | fal.ai | env_harvest_sheaves : comparaison 3D `fal-ai/trellis`, 1 appel (image Z-Image locale ; SF3D local retenu par le joueur) | 0,02 $ | 0,02 $ | cumul chantier 0,02 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : images Z-Image fal (`fal-ai/z-image/turbo`), 285 appels | 1,43 $ | 1,43 $ | 1,81 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : vues dos/côté `fal-ai/flux-2/edit`, 68 appels | 1,63 $ | 1,63 $ | 3,44 $ |
+| 2026-10-08 | fal.ai | paquet campagne + nature + animaux (cumul log) : 3D `fal-ai/trellis` / `trellis/multi`, 190 appels | 3,80 $ | 3,80 $ | 7,24 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : images Z-Image fal (`fal-ai/z-image/turbo`), 257 appels | 1,28 $ | 1,28 $ | 8,52 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : vues dos/côté `fal-ai/flux-2/edit`, 175 appels | 4,20 $ | 4,20 $ | 12,72 $ |
+| 2026-10-08 | fal.ai | paquet battle + env_* + nature + animaux : 3D `fal-ai/trellis` / `trellis/multi`, 205 appels | 4,10 $ | 4,10 $ | 16,82 $ |
+| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : images Z-Image fal (`fal-ai/z-image/turbo`), 109 appels | 0,55 $ | 0,55 $ | 17,37 $ |
+| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : vues dos/côté `fal-ai/flux-2/edit`, 69 appels | 1,66 $ | 1,66 $ | 19,03 $ |
+| 2026-10-08 | fal.ai | paquet architecture + mobile + economy : 3D `fal-ai/trellis` / `trellis/multi`, 171 appels | 3,42 $ | 3,42 $ | 22,45 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : images Z-Image fal (`fal-ai/z-image/turbo`), 403 appels | 2,02 $ | 2,02 $ | 24,47 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : vues dos/côté `fal-ai/flux-2/edit`, 10 appels | 0,24 $ | 0,24 $ | 24,71 $ |
+| 2026-10-08 | fal.ai | illustrations (308 images, 1 graine) : 3D `fal-ai/trellis` / `trellis/multi`, 23 appels | 0,46 $ | 0,46 $ | 25,17 $ |
+| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : images Z-Image fal (`fal-ai/z-image/turbo`), 22 appels | 0,11 $ | 0,11 $ | 25,28 $ |
+| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : vues dos/côté `fal-ai/flux-2/edit`, 67 appels | 1,61 $ | 1,61 $ | 26,89 $ |
+| 2026-10-09 | fal.ai | paquet nature_extra + battle_extra + reprises : 3D `fal-ai/trellis` / `trellis/multi`, 104 appels | 2,08 $ | 2,08 $ | 28,97 $ |
+| 2026-10-09 | local | reprise locale des assets refusés (Z-Image mflux, 5 ids sur 27 faits, pause) | 0,00 $ | 0,00 $ | 28,97 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : images Z-Image fal (`fal-ai/z-image/turbo`), 202 appels | 1,01 $ | 1,01 $ | 29,98 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : vues dos/côté `fal-ai/flux-2/edit`, 29 appels | 0,70 $ | 0,70 $ | 30,68 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis`, 20 appels | 0,40 $ | 0,40 $ | 31,08 $ |
+| 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis/multi`, 28 appels | 0,56 $ | 0,56 $ | 31,64 $ |
+| 2026-10-09 | fal.ai | DN-FIX3 : 2 canons + 6 figures montées refaits (images Z-Image 30 appels, vues `flux-2/edit` 10, 3D `trellis/multi` 13) | 0,65 $ | 0,65 $ | 32,29 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : images Z-Image fal (`fal-ai/z-image/turbo`, port 3 graines, 13 flagrants refaits, 2 figures), 68 appels | 0,34 $ | 0,34 $ | 32,63 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : 3D TRELLIS 2 (`fal-ai/trellis-2`, 1024), 30 appels : 13 flagrants de la revue, port x2, 15 maquettes de ville/abbaye/village essayées (puis repassées en TRELLIS 1 : à 4000 triangles le LOD1 d'un maillage TRELLIS 2 de 100 000 faces s'effondre) | 9,00 $ | 9,00 $ | 41,63 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : vues dos/côté `fal-ai/flux-2/edit`, 24 appels (8 maquettes multi-vues, contrôle de luminance) + 2 figures | 0,58 $ | 0,58 $ | 42,21 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : 3D `fal-ai/trellis/multi`, 10 appels (8 maquettes + 2 figures). Solde fal épuisé en cours de lot (« Exhausted balance ») : le reste des maquettes en liste d'attente | 0,20 $ | 0,20 $ | 42,41 $ |
+| 2026-10-09 | fal.ai | env_harvest_sheaves : comparaison 3D `fal-ai/trellis`, 1 appel (image Z-Image locale ; SF3D local retenu par le joueur) | 0,02 $ | 0,02 $ | 42,43 $ |

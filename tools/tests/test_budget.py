@@ -238,3 +238,26 @@ def test_real_budget_file_parses_and_round_trips() -> None:
     ledger = BudgetLedger(DEFAULT_BUDGET_PATH)
     assert len(ledger.sessions) >= 2
     assert ledger.render() == before
+
+
+def test_grand_total_and_service_totals_cover_every_table(
+    multi_session_budget_file: Path,
+) -> None:
+    """The grand total sums every table; the cumul column is not trusted."""
+    ledger = BudgetLedger(multi_session_budget_file)
+    ledger.add_entry("2026-09-25", "fal.ai", "trellis", 1, 2.5)
+    assert ledger.total() == Decimal("3.14")
+    assert ledger.grand_total() == Decimal("22.34")
+    services = ledger.service_totals()
+    assert services["fal.ai"] == Decimal("2.50")
+    assert sum(services.values()) == ledger.grand_total()
+    assert "Total général : **22,34 $**" in ledger.render_summary()
+
+
+def test_total_ignores_stale_cumul_column(budget_file: Path) -> None:
+    """A hand-written cumul cell does not change the sum of real costs."""
+    ledger = BudgetLedger(budget_file)
+    ledger.add_entry("2026-09-25", "fal.ai", "a", 1, 1)
+    ledger.add_entry("2026-09-25", "fal.ai", "b", 1, 2)
+    ledger.current_session.entries[-1].cumulative = Decimal("0.02")
+    assert ledger.total() == Decimal("3.00")
