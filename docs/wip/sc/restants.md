@@ -71,7 +71,7 @@ BA9 | FAIT b19d13f32 | cache figure_positions layout local | core/crates/sim-bat
 BA10 | PARTIEL | sim/commands.rs existe ; apply_command découpé à vérifier | core/crates/sim-battle/src/sim/commands.rs | oui
 BA11 | PARTIEL | missile_arc.json existe ; table missiles + fire() découpé (sim/fire.rs 625 l) | core/crates/sim-battle/src/sim/fire.rs | oui
 BA12 | À FAIRE | géométrie grille formations unifiée (group_formation.rs 825 l) | core/crates/sim-battle/src/group_formation.rs, formations.rs | oui
-BA13 | À FAIRE | MovementRules data (sim/movement.rs 624 l) | core/crates/sim-battle/src/sim/movement.rs | oui
+BA13 | FAIT c55198a89 | MovementRules data (sim/movement.rs 624 l) | core/crates/sim-battle/src/sim/movement.rs | oui
 BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs | oui
 
 ## MC map
