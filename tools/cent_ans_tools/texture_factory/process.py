@@ -112,7 +112,11 @@ def process_entry(
     size: int,
     raw_dir: Path | None = None,
 ) -> Path:
-    """Raw image -> ``<id>_albedo.png`` + ``<id>_normal.png`` (size²); cached."""
+    """Raw image -> ``<id>_albedo.png`` + ``<id>_normal.png`` (size²); cached.
+
+    An entry ``target_luminance`` equalises that entry even when the family does not
+    (delete its cached tiles after changing it).
+    """
     tiles = tile_dir(document, size, raw_dir)
     albedo_path = tiles / f"{entry['id']}_albedo.png"
     normal_path = tiles / f"{entry['id']}_normal.png"
@@ -132,7 +136,9 @@ def process_entry(
         linear, int(params["blend_width"] * scale), feather=params["feather"] * scale
     )
     tiled = flatten_lighting(tiled, sigma=source.width / 8)
-    if params["equalize"]:
+    if "target_luminance" in entry:
+        tiled = equalize_luminance(tiled, entry["target_luminance"])
+    elif params["equalize"]:
         tiled = equalize_luminance(tiled, params["target_luminance"])
     albedo = Image.fromarray(
         np.clip(np.rint(linear_to_srgb(tiled) * 255), 0, 255).astype(np.uint8)

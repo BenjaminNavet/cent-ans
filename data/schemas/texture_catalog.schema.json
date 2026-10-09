@@ -76,6 +76,7 @@
           "size": {"enum": [1024, 1536, 2048]},
           "alpha": {"type": "boolean"},
           "species": {"type": "string", "pattern": "^[a-z0-9_]+$", "description": "Facultatif : id d'une essence de data/art/tree_species.yaml (famille foliage_bark)."},
+          "target_luminance": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Facultatif : luminance linéaire moyenne imposée à cette entrée (même avec equalize: false)."},
           "checks": {
             "type": "object",
             "additionalProperties": false,

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFile
 
 from cent_ans_tools.texture_factory.color import srgb_to_linear
 
@@ -116,6 +116,10 @@ def pack(
     texture_dir.mkdir(parents=True, exist_ok=True)
     albedo_path = texture_dir / albedo_name
     normal_path = texture_dir / normal_name
+    # `optimize` needs the whole JPEG in Pillow's output buffer (large grids fail otherwise).
+    ImageFile.MAXBLOCK = max(
+        ImageFile.MAXBLOCK, albedo_grid.width * albedo_grid.height * 3
+    )
     albedo_grid.save(albedo_path, quality=albedo_quality, subsampling=0, optimize=True)
     normal_grid.save(normal_path, quality=normal_quality, subsampling=0, optimize=True)
     for path in (albedo_path, normal_path):
@@ -184,6 +188,8 @@ def write_texture_import(
     imported = Path(f"{path}.import")
     if overwrite or not imported.exists():
         imported.write_text(
-            texture_import("res://" + path.relative_to(game_dir).as_posix(), normal=normal)
+            texture_import(
+                "res://" + path.relative_to(game_dir).as_posix(), normal=normal
+            )
         )
     return imported

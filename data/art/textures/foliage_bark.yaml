@@ -66,6 +66,8 @@ entries:
   role: bark
   species: beech
   biomes: [1, 2, 6, 13]
+  # Generated as light as birch (sRGB mean 179): pulled to a mid grey, oak ~112.
+  target_luminance: 0.24
   prompt: >-
     Flat front view of smooth pale silver-grey beech bark with fine horizontal wrinkles and faint lichen specks, the bark surface filling the whole frame edge to edge, seamless and tileable, evenly lit, uniform coverage.
   seed: 8020
