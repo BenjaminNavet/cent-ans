@@ -128,7 +128,8 @@ entries:
   role: grass
   biomes: [8]
   prompt: >-
-    Pale ochre sand and fine gravel with a few tiny dry grass tufts far apart.
+    Pale ochre sand and fine gravel with a few tiny dry grass tufts far apart. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5100
   tile_m: 5.0
   checks:
@@ -319,7 +320,9 @@ entries:
 - id: understory_dry
   role: understory
   biomes: [7, 8]
-  prompt: Sparse dry leaf litter, thorny twigs and stones on dusty beige earth.
+  prompt: >-
+    Sparse dry leaf litter, thorny twigs and stones on dusty beige earth. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5280
   tile_m: 4.0
   checks:
@@ -349,7 +352,9 @@ entries:
 - id: dirt_terra_rossa
   role: dirt
   biomes: [3, 14]
-  prompt: Packed red-ochre Mediterranean earth with white limestone pebbles.
+  prompt: >-
+    Packed red-ochre Mediterranean earth with white limestone pebbles. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5310
   tile_m: 5.0
   checks:
@@ -400,7 +405,9 @@ entries:
 - id: dirt_desert
   role: dirt
   biomes: [8]
-  prompt: Pale tan sandy earth, fine packed sand with tiny pebbles.
+  prompt: >-
+    Pale tan sandy earth, fine packed sand with tiny pebbles. Rich fine-grained detail: individual
+    grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5360
   tile_m: 5.0
   checks:
@@ -461,7 +468,9 @@ entries:
 - id: mud_alpine
   role: mud
   biomes: [6]
-  prompt: Grey wet glacial silt mud with small stones and ruts.
+  prompt: >-
+    Grey wet glacial silt mud with small stones and ruts. Rich fine-grained detail: individual grains,
+    tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5420
   tile_m: 4.5
   checks:
@@ -534,7 +543,8 @@ entries:
   role: gravel
   biomes: [7, 8]
   prompt: >-
-    Tan and ochre desert gravel pavement, flat small stones packed over sand.
+    Tan and ochre desert gravel pavement, flat small stones packed over sand. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5490
   tile_m: 3.5
   checks:
@@ -554,7 +564,9 @@ entries:
 - id: rock_sandstone_continental
   role: rock
   biomes: [2, 12]
-  prompt: Beige-grey sandstone and limestone slabs with cracks and thin lichen.
+  prompt: >-
+    Beige-grey sandstone and limestone slabs with cracks and thin lichen. Natural rough weathered rock
+    with irregular natural fractures, pits, lichen spots and grit, completely natural.
   seed: 5510
   tile_m: 8.0
   checks:
@@ -586,7 +598,8 @@ entries:
   role: rock
   biomes: [4, 10]
   prompt: >-
-    Pale tan weathered sandstone and chalky rock slabs with sparse dry grass.
+    Pale tan weathered sandstone and chalky rock slabs with sparse dry grass. Natural rough weathered
+    rock with irregular natural fractures, pits, lichen spots and grit, completely natural.
   seed: 5540
   tile_m: 8.0
   checks:
@@ -608,7 +621,8 @@ entries:
   role: rock
   biomes: [6]
   prompt: >-
-    Grey-white alpine limestone and gneiss with jagged edges, ledges and fine scree.
+    Grey-white alpine limestone and gneiss with jagged edges, ledges and fine scree. Natural rough
+    weathered rock with irregular natural fractures, pits, lichen spots and grit, completely natural.
   seed: 5560
   tile_m: 8.0
   checks:
@@ -629,7 +643,8 @@ entries:
   role: rock
   biomes: [8]
   prompt: >-
-    Dark red-brown desert sandstone with angular cracks and polished surface.
+    Dark red-brown desert sandstone with angular cracks and polished surface. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5580
   tile_m: 8.0
   checks:
@@ -640,7 +655,9 @@ entries:
   role: plowed
   biomes: [1, 11, 13]
   prompt: >-
-    Ploughed field, parallel furrows of brown soil about thirty centimetres apart, clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    parallel furrows of brown soil about thirty centimetres apart, clods, no plants.
   seed: 5590
   tile_m: 4.0
   checks:
@@ -651,7 +668,9 @@ entries:
   role: plowed
   biomes: [2, 12]
   prompt: >-
-    Ploughed field, parallel furrows of medium brown loam, clods and small stones, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    parallel furrows of medium brown loam, clods and small stones, no plants.
   seed: 5600
   tile_m: 4.0
   checks:
@@ -662,7 +681,9 @@ entries:
   role: plowed
   biomes: [3, 14]
   prompt: >-
-    Ploughed field, parallel furrows of red-ochre stony soil, clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    parallel furrows of red-ochre stony soil, clods, no plants.
   seed: 5610
   tile_m: 4.0
   checks:
@@ -673,7 +694,9 @@ entries:
   role: plowed
   biomes: [4, 10]
   prompt: >-
-    Ploughed field, parallel furrows of very dark black earth, fine clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    parallel furrows of very dark black earth, fine clods, no plants.
   seed: 5620
   tile_m: 4.0
   checks:
@@ -684,7 +707,9 @@ entries:
   role: plowed
   biomes: [5, 9]
   prompt: >-
-    Ploughed field, parallel furrows of grey-brown sandy soil with stones, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    parallel furrows of grey-brown sandy soil with stones, no plants.
   seed: 5630
   tile_m: 4.0
   checks:
@@ -695,7 +720,9 @@ entries:
   role: plowed
   biomes: [6]
   prompt: >-
-    Ploughed field, furrows of dark stony brown soil with many stones, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    furrows of dark stony brown soil with many stones, no plants.
   seed: 5640
   tile_m: 4.0
   checks:
@@ -705,7 +732,10 @@ entries:
 - id: plowed_semi_arid
   role: plowed
   biomes: [7]
-  prompt: Ploughed field, furrows of dry pale ochre clods, dust, no plants.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Ploughed field,
+    furrows of dry pale ochre clods, dust, no plants.
   seed: 5650
   tile_m: 4.0
   checks:
@@ -715,7 +745,10 @@ entries:
 - id: plowed_desert
   role: plowed
   biomes: [8]
-  prompt: Hoed pale sandy soil with shallow furrows, no plants.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Hoed pale sandy soil
+    with shallow furrows, no plants.
   seed: 5660
   tile_m: 4.0
   checks:
@@ -726,7 +759,9 @@ entries:
   role: snow
   biomes: [1, 2, 3, 11, 12, 13, 14]
   prompt: >-
-    Wet heavy snow cover, slightly grey, trampled in places with dark soil and dead grass poking through.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Wet heavy snow cover,
+    slightly grey, trampled in places with dark soil and dead grass poking through.
   seed: 5670
   tile_m: 6.0
   checks:
@@ -737,7 +772,9 @@ entries:
   role: snow
   biomes: [4, 7, 8, 10]
   prompt: >-
-    Thin patchy snow over dry brown grass and soil, wind-swept, about half the ground bare.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Thin patchy snow over
+    dry brown grass and soil, wind-swept, about half the ground bare.
   seed: 5680
   tile_m: 6.0
   checks:
@@ -758,7 +795,9 @@ entries:
 - id: snow_alpine
   role: snow
   biomes: [6]
-  prompt: Hard glittering alpine snow crust with wind ripples and ice grains.
+  prompt: >-
+    Hard glittering alpine snow crust with wind ripples and ice grains. Rich fine-grained detail:
+    individual grains, tiny pebbles, small cracks, specks and natural mottling clearly visible.
   seed: 5700
   tile_m: 6.0
   checks:
@@ -929,7 +968,9 @@ entries:
   role: stubble
   biomes: [1, 11, 13]
   prompt: >-
-    Cut wheat stubble field, short golden-brown straw stalks in rows over brown soil.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut wheat stubble
+    field, short golden-brown straw stalks in rows over brown soil.
   seed: 5860
   tile_m: 5.0
   checks:
@@ -940,7 +981,9 @@ entries:
   role: stubble
   biomes: [2, 12]
   prompt: >-
-    Cut grain stubble field, short pale golden straw stalks in rows over brown earth.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut grain stubble
+    field, short pale golden straw stalks in rows over brown earth.
   seed: 5870
   tile_m: 5.0
   checks:
@@ -950,7 +993,10 @@ entries:
 - id: stubble_mediterranean
   role: stubble
   biomes: [3, 14]
-  prompt: Cut barley stubble, short pale straw stalks over dry red-ochre soil.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut barley stubble,
+    short pale straw stalks over dry red-ochre soil.
   seed: 5880
   tile_m: 5.0
   checks:
@@ -961,7 +1007,9 @@ entries:
   role: stubble
   biomes: [4, 10]
   prompt: >-
-    Cut grain stubble, short golden straw stalks over dark earth with weeds.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut grain stubble,
+    short golden straw stalks over dark earth with weeds.
   seed: 5890
   tile_m: 5.0
   checks:
@@ -971,7 +1019,10 @@ entries:
 - id: stubble_northern
   role: stubble
   biomes: [5, 9]
-  prompt: Cut rye stubble, short grey-gold straw over grey-brown sandy soil.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut rye stubble, short
+    grey-gold straw over grey-brown sandy soil.
   seed: 5900
   tile_m: 5.0
   checks:
@@ -981,7 +1032,10 @@ entries:
 - id: stubble_alpine
   role: stubble
   biomes: [6]
-  prompt: Cut barley stubble, short straw stalks over dark stony earth.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Cut barley stubble,
+    short straw stalks over dark stony earth.
   seed: 5910
   tile_m: 5.0
   checks:
@@ -991,7 +1045,10 @@ entries:
 - id: stubble_arid
   role: stubble
   biomes: [7, 8]
-  prompt: Sparse cut barley stubble, thin short straw over dry pale soil.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Sparse cut barley
+    stubble, thin short straw over dry pale soil.
   seed: 5920
   tile_m: 5.0
   checks:
@@ -1002,7 +1059,9 @@ entries:
   role: fresh_plow
   biomes: [1, 11, 13]
   prompt: >-
-    Freshly turned dark brown soil, deep wet furrows and glossy clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned dark
+    brown soil, deep wet furrows and glossy clods, no plants.
   seed: 5930
   tile_m: 4.0
   checks:
@@ -1013,7 +1072,9 @@ entries:
   role: fresh_plow
   biomes: [2, 12]
   prompt: >-
-    Freshly turned medium brown soil, deep furrows with moist clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned medium
+    brown soil, deep furrows with moist clods, no plants.
   seed: 5940
   tile_m: 4.0
   checks:
@@ -1024,7 +1085,9 @@ entries:
   role: fresh_plow
   biomes: [3, 14]
   prompt: >-
-    Freshly turned red-brown stony soil, deep furrows with moist clods, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned red-
+    brown stony soil, deep furrows with moist clods, no plants.
   seed: 5950
   tile_m: 4.0
   checks:
@@ -1034,7 +1097,10 @@ entries:
 - id: fresh_plow_black_earth
   role: fresh_plow
   biomes: [4, 10]
-  prompt: Freshly turned very dark black earth, deep glossy furrows, no plants.
+  prompt: >-
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned very
+    dark black earth, deep glossy furrows, no plants.
   seed: 5960
   tile_m: 4.0
   checks:
@@ -1045,7 +1111,9 @@ entries:
   role: fresh_plow
   biomes: [5, 9]
   prompt: >-
-    Freshly turned dark grey-brown sandy soil with stones, deep furrows, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned dark
+    grey-brown sandy soil with stones, deep furrows, no plants.
   seed: 5970
   tile_m: 4.0
   checks:
@@ -1056,7 +1124,9 @@ entries:
   role: fresh_plow
   biomes: [6]
   prompt: >-
-    Freshly turned dark stony soil, rough furrows with many stones, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned dark
+    stony soil, rough furrows with many stones, no plants.
   seed: 5980
   tile_m: 4.0
   checks:
@@ -1067,7 +1137,9 @@ entries:
   role: fresh_plow
   biomes: [7, 8]
   prompt: >-
-    Freshly turned pale ochre soil, rough furrows with dry clods and dust, no plants.
+    Seen from a drone hovering ten metres straight above, orthographic like a flat scan: perfectly
+    parallel, evenly spaced rows that keep the same width across the whole image. Freshly turned pale
+    ochre soil, rough furrows with dry clods and dust, no plants.
   seed: 5990
   tile_m: 4.0
   checks:

@@ -20,6 +20,11 @@ local (mflux + Real-ESRGAN) en secours seulement.
   plats ou rayés → `tile_m` 15-40 m pour eux. 7 entrées restées faibles après 3 essais, meilleur essai
   choisi à la main (manifeste `review`) : grass_bare_b03, rock_b07, understory_b08, rock_b12,
   sand_shared, loess_plain, ploughed. Planche : scratchpad de session (non versionnée).
+- 2026-10-09 : sols de bataille générés (100 images 2048²) et 35 refaits ; 7,65 $ cumulés sur 10 $.
+  Préfixe « drone à dix mètres, vue orthographique, rangs parallèles » : plus de fuyante, mais quadrillage
+  sur une partie des chaumes et labours. 10 entrées gardées faibles (manifeste `review`) ;
+  `rock_sandstone_continental` flagged (dalles maçonnées aux 3 essais) → repli sur la roche du parent.
+  Reste 2,35 $ : plus de reprise de sol, garder pour la végétation et les bâtiments ou passer en local.
 
 ## Prochaine étape
 
