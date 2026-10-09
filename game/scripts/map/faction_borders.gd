@@ -16,7 +16,7 @@ extends Node
 ##   pleine intensité est réservée aux royaumes des provinces sélectionnée et survolée
 ##   (`set_focus_provinces`), aux modes de carte marqués `full` (Diplomatie) et au parchemin.
 ## Réglages : `data/map/faction_borders.json` (schéma `faction_borders.schema.json`).
-## Option (après `--`) : `--no-faction-borders` (A/B de perf). Purement visuel.
+## Purement visuel.
 
 const TUNING_PATH := "map/faction_borders.json"
 const PALETTE_SIZE := 256
@@ -44,7 +44,6 @@ var _player: String = ""
 var _band_saved: Variant = null
 var _last_distance: float = -1.0
 var _last_mode: String = ""
-var _cli_disabled: bool = false
 ## Lot EN (ADR 0155) : position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie
 ## le trait dit la relation (ennemis en rouge, héraldique assourdie en paix). Vide : héraldique.
 var _stances: Dictionary = {}
@@ -61,7 +60,6 @@ var _focus_factions := Vector2i(-1, -1)
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = CmdArgs.has("--no-faction-borders")
 	tuning = load_tuning()
 	_apply_tuning()
 	add_to_group(RenderQuality.CLIENT_GROUP)
@@ -107,7 +105,7 @@ func set_enabled(value: bool) -> void:
 
 
 func _active() -> bool:
-	return enabled and _quality_on and not _cli_disabled
+	return enabled and _quality_on
 
 
 func _apply_enabled() -> void:

@@ -5,7 +5,7 @@ extends TestCase
 ## données sont ceux de `data/fx/animal_motion_measured.json`, ils arrivent dans les uniformes des
 ## accessoires, le shader les lit, et les chevaux de camp reçoivent la durée de descente de la tête
 ## et le mâchonnement mesurés.
-## Usage : godot --headless --path game --script res://tests/as8c_test.gd [-- --no-as1]
+## Usage : godot --headless --path game --script res://tests/as8c_test.gd
 
 const SHADER_INC := "res://shaders/animal_motion.gdshaderinc"
 const CAMP_SHADER_PATH := "res://shaders/camp_horse.gdshader"
@@ -24,7 +24,6 @@ func _camp_file() -> Dictionary:
 
 
 func _init() -> void:
-	var off := CmdArgs.has("--no-as1")
 	var measured := _measured()
 	check(not measured.is_empty(), "données mesurées absentes")
 	var defaults: Dictionary = AnimalMotion.settings().get("campaign", {}).get("defaults", {})
@@ -55,7 +54,7 @@ func _init() -> void:
 			continue
 		var mat := mesh.surface_get_material(0) as ShaderMaterial
 		var p := AnimalMotion.model_params(str(FolkModels.PROPS[role]["model"]))
-		if off or p.is_empty():
+		if p.is_empty():
 			continue
 		var arr: PackedFloat32Array = mat.get_shader_parameter("am_swing")
 		check(arr.size() == 16, "%s : am_swing posé (%d)" % [role, arr.size()])

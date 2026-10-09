@@ -8,8 +8,7 @@ extends SceneTree
 ##     un glb par lieu du kit concerné, une bannière procédurale par glb, mêmes emplacements ;
 ##  3. bascule par distance : glb opaque et maquette cachée sous `near_distance`, fondu croisé
 ##     au-dessus, maquette seule au-delà de `near + marge` ; modèle absent = maquette seule.
-## Usage : godot --headless --path game --script res://tests/dn_campaign_models_test.gd -- --no-tb3
-## (`--no-tb3` : sans la couche de bâtiments hors murs, dont le fil de préchauffe bloque les scripts de test isolés).
+## Usage : godot --headless --path game --script res://tests/dn_campaign_models_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 

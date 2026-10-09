@@ -5,22 +5,21 @@ extends TestCase
 ## - l'étape du trajet suit la phase de rechargement (repos, aller, saisie, retour, charge) ;
 ## - le porteur s'éloigne du poste vers le tas puis revient, à une vitesse de marche plausible ;
 ## - l'objet n'est en main qu'à la saisie finie, au retour et au début de la charge ;
-## - les tas sont dessinés même au repos ; `--no-as4` (banc A/B) ne dessine rien.
-## Usage : godot --headless --path game --script res://tests/as4_test.gd [-- --no-as4]
+## - les tas sont dessinés même au repos .
+## Usage : godot --headless --path game --script res://tests/as4_test.gd
 
 
 func _init() -> void:
-	var off := CmdArgs.has("--no-as4")
 	var crew := SiegeCrewFx.new()
 	crew.cfg = SiegeEnginesFx.settings().get("crew", {})
 	check(not crew.cfg.is_empty() and crew.cfg.has("haul"), "réglages crew.haul")
-	check(crew.haul_enabled() == not off, "haul_enabled selon --no-as4")
+	check(crew.haul_enabled(), "haul_enabled selon les réglages")
 	var haul: Dictionary = crew.cfg.get("haul", {})
 	for model in ["trebuchet", "mangonel", "bombard"]:
 		var spec: Dictionary = haul.get("by_engine", {}).get(model, {})
 		check(not spec.is_empty(), "%s : porteurs définis" % model)
 		check((spec.get("haulers", []) as Array).size() in [1, 2], "%s : un ou deux porteurs" % model)
-		_check_engine(crew, model, spec, haul, off)
+		_check_engine(crew, model, spec, haul)
 	_check_stage()
 	crew.free()
 	finish()
@@ -36,12 +35,12 @@ func _check_stage() -> void:
 	check(not bool(SiegeCrewFx.haul_stage(trip, 0.78)["holding"]), "objet lâché en fin de charge")
 
 
-func _check_engine(crew: SiegeCrewFx, model: String, spec: Dictionary, haul: Dictionary, off: bool) -> void:
-	if off or spec.is_empty():
+func _check_engine(crew: SiegeCrewFx, model: String, spec: Dictionary, haul: Dictionary) -> void:
+	if spec.is_empty():
 		crew.begin(0.0)
 		crew.add_haulers(1, model, Transform3D.IDENTITY, 0.5, "attacker")
 		crew.finish(null)
-		check(crew.shown == 0 and crew.props_shown == 0, "--no-as4 : rien de dessiné")
+		check(crew.shown == 0 and crew.props_shown == 0, "engin sans porteurs : rien de dessiné")
 		return
 	var piles: Array = spec["piles"]
 	for h in spec["haulers"]:

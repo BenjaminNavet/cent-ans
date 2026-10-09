@@ -7,7 +7,7 @@ extends TestCase
 ##     s'arrêtant à ≈ 30 unités) : tuiles lointaines en imposteurs (matériau
 ##     dédié), tuiles proches en maillage détaillé, haies inchangées ; triangles lointains avant /
 ##     après ;
-##  3. repli `--no-fc2` (use_impostors = false puis reconstruction) : maillages bas au loin.
+##  3. repli (use_impostors = false puis reconstruction) : maillages bas au loin.
 ## Usage : godot --headless --path game --script res://tests/fc2_impostors_test.gd
 
 const ORLEANS_FOREST := Vector2(2180.0, 3333.0)
@@ -101,22 +101,22 @@ func _test_map() -> void:
 		check(vegetation.foliage_material().shader == Vegetation.FOLIAGE_WINTER_SHADER, "winter foliage variant")
 		check(vegetation.impostor_material().shader == Vegetation.IMPOSTOR_SHADER, "impostors keep their shader in winter")
 		(seasons as SeasonVisuals).set_season("summer", true)
-	# FC5 repli (`--no-fc5`) : maillages détaillés de près, imposteurs au loin.
+	# FC5 repli (`use_near_cards = false`) : maillages détaillés de près, imposteurs au loin.
 	vegetation.use_near_cards = false
 	vegetation.build(data)
 	await _settle(rig, focus, 25.0, vegetation)
 	var no_cards := vegetation.lod_census()
-	print("fc2: census without leaf cards (--no-fc5) %s" % no_cards)
-	check(not vegetation.near_cards_active() and int(no_cards["near"]) == 0 and int(no_cards["detailed"]) > 0, "--no-fc5 falls back to the detailed meshes")
+	print("fc2: census without leaf cards (no near cards) %s" % no_cards)
+	check(not vegetation.near_cards_active() and int(no_cards["near"]) == 0 and int(no_cards["detailed"]) > 0, "no near cards falls back to the detailed meshes")
 	# Repli : maillages bas au loin.
 	vegetation.use_impostors = false
 	vegetation.detail_distance = 1.0  # toutes les parties au niveau lointain
 	vegetation.build(data)
 	await _settle(rig, focus, 25.0, vegetation)
 	var before := vegetation.lod_census()
-	print("fc2: census without impostors (--no-fc2) %s" % before)
-	check(not vegetation.impostors_active(), "--no-fc2 disables the impostor material")
-	check(int(before["impostor"]) == 0 and int(before["low"]) > 0, "--no-fc2 falls back to the low meshes")
+	print("fc2: census without impostors (no impostors) %s" % before)
+	check(not vegetation.impostors_active(), "no impostors disables the impostor material")
+	check(int(before["impostor"]) == 0 and int(before["low"]) > 0, "no impostors falls back to the low meshes")
 	if int(before["low_triangles"]) > 0 and int(after["impostor_triangles"]) > 0:
 		print("fc2: far tree triangles %d (low meshes) -> %d (impostors)" % [before["low_triangles"], after["impostor_triangles"]])
 		check(int(after["impostor_triangles"]) < int(before["low_triangles"]), "fewer far triangles with impostors")

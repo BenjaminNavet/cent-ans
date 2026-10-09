@@ -3,7 +3,7 @@ extends SceneTree
 ## Lot AS5 : planche de contrôle pour la session principale (écrit user://as5_shot.png, non
 ## commitée) et compilation réelle des trois shaders (fenêtre requise : sans `--headless`).
 ## Foyers de carte (flammes + fumées), bannière de maquette ondulante, imposteur d'arbre.
-## Usage : godot --path game --script res://tests/as5_shot.gd [-- --no-as5]
+## Usage : godot --path game --script res://tests/as5_shot.gd
 
 func _init() -> void:
 	var env := WorldEnvironment.new()

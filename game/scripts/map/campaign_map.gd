@@ -10,7 +10,7 @@ extends Node3D
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
 ##   --select-settlement=<id>    sélectionne une colonie ; --hide-armies masque les marqueurs d'armée.
 ##   --fps-probe, --bench-map    mesures de fluidité ; --camera-min/--camera-yaw/--static-exaggeration/
-##   --rescale-settle-ms/--no-fine-terrain/--fine-step  réglages d'essai du terrain et de la caméra.
+##   --rescale-settle-ms/--fine-step  réglages d'essai du terrain et de la caméra.
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -1677,8 +1677,6 @@ func _parse_cmdline() -> void:
 	if CmdArgs.has("--camera-yaw"):  # degrés, 0 = regard vers le nord
 		camera_rig.target_yaw = deg_to_rad(CmdArgs.number("--camera-yaw"))
 		camera_rig.snap()
-	if CmdArgs.has("--no-fine-terrain"):
-		terrain.fine_enabled = false
 	if CmdArgs.has("--fine-step"):  # pas fixe (mesure) : désactive le choix adaptatif
 		terrain.fine_step = int(CmdArgs.number("--fine-step"))
 		terrain.fine_step_auto = false

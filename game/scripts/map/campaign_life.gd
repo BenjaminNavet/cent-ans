@@ -12,12 +12,9 @@ extends Node3D
 ## Options (ligne de commande, après `--`) :
 ##   --season=spring|summer|autumn|winter   force la saison affichée (captures) ;
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
-##   --no-life                               désactive la couche (mesures A/B) ;
-##   --life-off=terrain,smoke,mills,ambient,scars,fauna  désactive une partie (mesures de coût) ;
-##   --no-fauna                              pas de troupeaux ni de faune (lot DN-ME2, A/B).
+##   --life-off=terrain,smoke,mills,ambient,scars,fauna  désactive une partie (mesures de coût).
 ## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
 ## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
-##   --no-folk                                        désactive les figurines (mesures A/B) ;
 ##   --folk-off=routine,caravans,scenes,incidents     désactive une partie ;
 ##   --scene=<province>:<kind>[,...]                  force une scène de province (FK4, captures).
 
@@ -34,9 +31,9 @@ var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
 var folk_scenes: FolkScenes = null
-## FK5 : sceaux des incidents (nul : `--no-life`, `--no-folk`, `--folk-off=incidents`).
+## FK5 : sceaux des incidents (nul : `--folk-off=incidents`).
 var incidents: IncidentMarkers = null
-## TB4 : traces de la guerre et des fléaux (nul : `--no-life`, `--life-off=scars`).
+## TB4 : traces de la guerre et des fléaux (nul : `--life-off=scars`).
 var scars: WarScars = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
@@ -105,9 +102,9 @@ func setup(map: Node) -> void:
 	_setup_scars()
 
 
-## DN-ME2 : troupeaux et faune sauvage (rendu seul, `--no-fauna` ou `--life-off=fauna`).
+## DN-ME2 : troupeaux et faune sauvage (rendu seul, `--life-off=fauna`).
 func _setup_fauna() -> void:
-	if _off.has("fauna") or CmdArgs.has("--no-fauna"):
+	if _off.has("fauna"):
 		return
 	var towns := PackedVector2Array()
 	if _settlements != null and _settlements.data != null:
@@ -222,12 +219,8 @@ func _setup_incidents() -> void:
 
 
 func _parse_cmdline() -> void:
-	if CmdArgs.has("--no-life"):
-		enabled = false
 	for part in CmdArgs.list("--life-off"):
 		_off[part] = true
-	if CmdArgs.has("--no-folk"):
-		folk_enabled = false
 	for part in CmdArgs.list("--folk-off"):
 		folk_off[part] = true
 	if CmdArgs.has("--scene"):

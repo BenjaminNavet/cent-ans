@@ -4,7 +4,7 @@ extends RefCounted
 ## Lot AS5 : paramètres des restes statiques passés en shader (flammes de la carte, vent des
 ## bannières de maquette, balancement des imposteurs d'arbres de bataille), lus dans
 ## `data/fx/map_fire_wind.json` (schéma `fx_map_fire_wind.schema.json`). Rendu seulement. Fichier
-## absent (fixtures de test) : effets éteints. Éteint aussi par `enabled` et par `--no-as5` (A/B).
+## absent (fixtures de test) : effets éteints. Éteint aussi par `enabled`.
 
 const DATA_PATH := "fx/map_fire_wind.json"
 
@@ -16,7 +16,7 @@ static func data() -> Dictionary:
 
 
 static func enabled() -> bool:
-	return bool(data().get("enabled", false)) and not CmdArgs.has("--no-as5")
+	return bool(data().get("enabled", false))
 
 
 ## Section `name` (`fire`, `maquette_banner`, `battle_tree_impostor`), {} si éteint ou absente.

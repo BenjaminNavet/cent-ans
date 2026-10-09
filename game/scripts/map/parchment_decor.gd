@@ -38,7 +38,7 @@ var roses: Array[Vector3] = []  # x, y, rayon (px carte)
 var ships: Array[Vector3] = []  # x, y, cap (radians, 0 = vers l'est)
 var monsters: Array[Vector3] = []  # x, y, variante
 ## FA6 : ornements peints par genre, {texture, anchor (0-1), height (unités du dessin), faces_left}.
-## Vide = dessin par code d'origine (`use` du catalogue à `drawn`, `--no-fa-parchment`, catalogue
+## Vide = dessin par code d'origine (`use` du catalogue à `drawn`, catalogue
 ## ou textures absents).
 var ship_ornaments: Array[Dictionary] = []
 var monster_ornaments: Array[Dictionary] = []
@@ -171,18 +171,11 @@ static func _clear_water(sea_at: Callable, p: Vector2, radius: float) -> bool:
 	return true
 
 
-## `--no-fa-parchment` après `--` : ornements dessinés par code d'avant FA6 (captures A/B).
-static func painted_enabled() -> bool:
-	return not CmdArgs.has("--no-fa-parchment")
-
-
 ## Lit le catalogue des ornements peints et pose la rose sur le shader de la mer.
 func _load_ornaments() -> void:
 	var sea_shader := load(SEA_SHADER_PATH) as Shader if ResourceLoader.exists(SEA_SHADER_PATH) else null
 	if sea_shader != null:
 		sea_shader.set_default_texture_parameter(ROSE_UNIFORM, null)
-	if not painted_enabled():
-		return
 	if not DataFile.exists(ORNAMENTS_FILE):
 		return
 	var catalogue: Variant = DataFile.read_json(ORNAMENTS_FILE)

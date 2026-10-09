@@ -57,10 +57,8 @@ var _task_max_usec := 0
 ## Villes dont le finage est envoyé au parcellaire (taille du tableau `fp_towns` du shader).
 const FINAGE_SLOTS := 16
 var _finage_key := ""
-## Captures et mesures : `--town-lod=blocks` (blocs seuls), `--town-lod=detail` (kit partout),
-## `--no-towns` (rendu d'avant ZG6).
+## Captures et mesures : `--town-lod=blocks` (blocs seuls), `--town-lod=detail` (kit partout).
 var _detail_override := 1.0
-var _disabled := false
 var _soot: Dictionary = {}  # id → suie 0-1 (TB3)
 
 
@@ -74,11 +72,10 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	TownBuilder.manifest()  # chargé ici : les fils de travail le lisent (`TownBuilder.prepare`)
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_ids.clear()
-	# Une colonie qui a une ville 1:1 v2 est rendue par `LandmarkCityLayer`, pas ici (sauf `--no-landmarks-1to1`).
-	var v2_enabled := not CmdArgs.has("--no-landmarks-1to1")
+	# Une colonie qui a une ville 1:1 v2 est rendue par `LandmarkCityLayer`, pas ici.
 	for id in settlement_ids:
 		var sid := str(id)
-		if v2_enabled and not LandmarkV2Library.for_settlement(sid).is_empty():
+		if not LandmarkV2Library.for_settlement(sid).is_empty():
 			continue
 		if data.has_town(sid):
 			_ids.append(sid)
@@ -96,8 +93,6 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 			_detail_override = 0.001
 		"detail":
 			_detail_override = 10.0
-	if CmdArgs.has("--no-towns"):
-		_disabled = true
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {"towns": _ids.size()}
@@ -184,7 +179,7 @@ func _configure(b: TownBuilder) -> void:
 func update_view(rig_distance: float) -> void:
 	if data == null or _ids.is_empty():
 		return
-	var usable := not _disabled and (force_active or (terrain != null and terrain.quadtree != null))
+	var usable := (force_active or (terrain != null and terrain.quadtree != null))
 	var limit := profile.max_rig_distance * (1.0 + profile.rig_hysteresis if active else 1.0)
 	var now_active := usable and rig_distance < limit
 	if now_active != active:

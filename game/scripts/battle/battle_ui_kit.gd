@@ -111,7 +111,7 @@ static func rule(width: float = 0.0) -> Control:
 static func faction_color(faction_id: String, fallback: Color = Color(0.5, 0.45, 0.35)) -> Color:
 	var tree := Engine.get_main_loop() as SceneTree
 	var facade: Node = tree.root.get_node_or_null("SimFacade") if tree != null else null
-	if facade == null or faction_id == "" or not facade.has_method("faction_color"):
+	if facade == null or faction_id == "":
 		return fallback
 	var color: Color = facade.call("faction_color", faction_id)
 	return fallback if color == Color(0.5, 0.5, 0.5) else color

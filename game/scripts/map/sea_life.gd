@@ -4,7 +4,7 @@ extends RefCounted
 ## Lot ME1 (chantier DN, mer vivante) : fonds clairs, crêtes du large, saturation bornée, liseré de
 ## ressac lisible, estrans et sillages des flottes. Réglages dans `data/fx/sea_life.json` (schéma
 ## `fx_sea_life.schema.json`), jamais codés en dur ; shader `sea_life.gdshaderinc`. Rendu seulement.
-## `--no-sea-life` ou fichier absent : le shader garde `sea_life_on` = false (rendu d'avant).
+## Fichier absent : le shader garde `sea_life_on` = false (rendu d'avant).
 
 const SPEC_FILE := "fx/sea_life.json"
 
@@ -14,7 +14,7 @@ static var _tide_size: Vector2i = Vector2i.ZERO
 
 
 static func enabled() -> bool:
-	return not CmdArgs.has("--no-sea-life") and not spec().is_empty()
+	return not spec().is_empty()
 
 
 static func spec() -> Dictionary:

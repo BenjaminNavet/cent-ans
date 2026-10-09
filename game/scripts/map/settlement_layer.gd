@@ -360,7 +360,7 @@ func _ground_footprint(i: int) -> void:
 func landmark_floor_zones() -> PackedVector3Array:
 	var zones := PackedVector3Array()
 	for i in _landmarks:
-		if landmark_cities != null and landmark_cities.is_enabled() and landmark_cities.has_city(str(data.settlements[i]["id"])):
+		if landmark_cities != null and landmark_cities.has_city(str(data.settlements[i]["id"])):
 			continue
 		zones.append(_landmarks[i])
 	return zones

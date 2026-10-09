@@ -269,7 +269,7 @@ func give_burn() -> Dictionary:
 		result = scene.call("issue", burn["command"])
 	else:
 		result = {"ok": false, "error": str(burn.get("reason", "incendie impossible"))}
-		if bool(burn.get("siege", false)) and scene.get("hud") != null and scene.hud.has_method("show_toast"):
+		if bool(burn.get("siege", false)) and scene.get("hud") != null:
 			scene.hud.show_toast("Incendier : %s" % result["error"])
 	_timer = 0.0
 	return result
@@ -284,7 +284,7 @@ func give(id: String) -> Dictionary:
 	var units: Array[int] = []
 	# La sélection disponible est tenue par `BattleInput` (CB0), pas par la scène.
 	var input: Object = scene.get("input")
-	if input != null and input.has_method("_available_selection"):
+	if input != null:
 		units = input.call("_available_selection")
 	var command := {"type": "leader_order", "order": id, "units": units}
 	var result: Dictionary = scene.call("issue", command)

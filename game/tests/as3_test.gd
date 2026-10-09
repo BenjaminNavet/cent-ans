@@ -4,7 +4,7 @@ extends TestCase
 ## cuits (trot en boucle d'une foulée, virages, chute allongée à 4,5 s), que chaque style de
 ## cavalerie sert ses états d'allure avec des clips présents (aussi avec `--coarse-figures`), que
 ## la cadence de chaque clip d'allure est dans `data/fx/battle_gore.json`, et le choix d'allure
-## (bandes de vitesse, hystérésis, sens du virage, désactivation par `--no-as3`).
+## (bandes de vitesse, hystérésis, sens du virage).
 ## Usage : godot --headless --path game --script res://tests/as3_test.gd [-- --coarse-figures]
 
 const GAIT_STATES := ["trotting", "turn_l", "turn_r", "trot_turn_l", "trot_turn_r"]

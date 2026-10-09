@@ -5,7 +5,7 @@ extends Node3D
 ## Rendu seulement.
 ## - Index de ville stable (masque `TownFarMask`) : ordre de `towns_1340.json`, puis les villes v2
 ##   (`LandmarkV2Library.all()`, triées par colonie). Une colonie qui a une ville v2 prend son
-##   lointain v2 (F1 et F2) au lieu de F1/F2 (sauf `--no-landmarks-1to1`).
+##   lointain v2 (F1 et F2) au lieu de F1/F2.
 ## - Génération au chargement dans `WorkerThreadPool` (tâche de groupe, un élément = une tuile :
 ##   `TownFarBuilder` puis `mesh_arrays`) ; le fil principal ne fait que créer les `ArrayMesh` et
 ##   les nœuds, par petites étapes (`build_budget_ms` et `FrameBudget.has_time()`, au moins une
@@ -17,7 +17,6 @@ extends Node3D
 ##   `LandmarkCityLayer`) → `TownFarMask` ; le shader enfonce ces villes sous
 ##   `sink_factor` × portée des blocs (`TownRenderProfile.block_range` × qualité). Au-delà de
 ##   `max_rig_distance`, les calques 1:1 sont inactifs, `built_ids()` est vide : masque vidé.
-## Options : `--no-town-far` (calque coupé).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const SHADER := preload("res://shaders/town_far.gdshader")
@@ -82,7 +81,6 @@ var _masked: Dictionary = {}  # index → vrai
 var _mask_key: Array = []
 var _shadows_on := false
 var _camera := Vector3(INF, INF, INF)
-var _disabled := false
 var _frame_max_usec := 0
 var _step_max_usec := 0
 
@@ -94,8 +92,6 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	tiers = p_tiers if p_tiers != null else ZoomTiers.new()
 	sources = p_sources
 	profile = TownRenderProfile.load_default()
-	if CmdArgs.has("--no-town-far"):
-		_disabled = true
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_mpu = data.meters_per_unit
 	_wall_params = data.params.get("walls", {})
@@ -104,9 +100,6 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 		terrain.vertical_scale_changed.connect(_on_vertical_scale_changed)
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
-	if _disabled:
-		stats = {"disabled": true}
-		return
 	_plan_tiles(settlement_ids)
 	_start_generation()
 
@@ -166,14 +159,13 @@ func _plan_tiles(settlement_ids: Array) -> void:
 	var wanted: Dictionary = {}
 	for id in settlement_ids:
 		wanted[str(id)] = true
-	var v2_enabled := not CmdArgs.has("--no-landmarks-1to1")
 	# Index stable : ordre du fichier, puis villes v2 triées par colonie.
 	var n := 0
 	var town_index: Dictionary = {}
 	for id: String in data.towns:
 		town_index[id] = n
 		n += 1
-	var cities: Array = LandmarkV2Library.all() if v2_enabled else []  # chargée ici, avant les fils
+	var cities: Array = LandmarkV2Library.all()  # chargée ici, avant les fils
 	cities.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.get("settlement", "")) < str(b.get("settlement", "")))
 	var f1: Dictionary = {}  # Vector2i → items
 	var f2: Dictionary = {}
@@ -292,7 +284,7 @@ func _run_tile(t: int) -> void:
 
 
 func update_view(rig_distance: float) -> void:
-	if _disabled or _tiles.is_empty():
+	if _tiles.is_empty():
 		return
 	var t_start := Time.get_ticks_usec()
 	var tp := t_start

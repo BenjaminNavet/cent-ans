@@ -216,7 +216,7 @@ func active_radius(camera_distance: float) -> float:
 	return minf(activity_radius, maxf(camera_distance * 1.3, 6.0))
 
 
-## Vide le réservoir (palier moyen ou lointain, `--no-folk`).
+## Vide le réservoir (palier moyen ou lointain).
 func clear() -> void:
 	for key in _groups:
 		var group: Dictionary = _groups[key]

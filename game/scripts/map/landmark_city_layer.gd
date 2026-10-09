@@ -37,7 +37,6 @@ var _results: Dictionary = {}
 var _mutex := Mutex.new()
 var _last_distance := INF
 var _quality: Dictionary = {}
-var _disabled := false
 ## Point visé imposé (tests sans caméra), unités carte.
 var focus_override: Variant = null
 
@@ -64,8 +63,6 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 			terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 		if not terrain.vertical_scale_changed.is_connected(_on_vertical_scale_changed):
 			terrain.vertical_scale_changed.connect(_on_vertical_scale_changed)
-	if CmdArgs.has("--no-landmarks-1to1"):
-		_disabled = true
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	stats = {"cities": _cities.size()}
@@ -111,11 +108,6 @@ static func _dated_signature(city: Dictionary, p_year: int) -> String:
 				if (g.has("from_year") or g.has("until_year")) and LandmarkV2Library.present(g, p_year):
 					sig += str(g.get("name", "")) + ","
 	return sig
-
-
-## Faux avec `--no-landmarks-1to1` (rendu d'avant VH4).
-func is_enabled() -> bool:
-	return not _disabled
 
 
 func has_city(id: String) -> bool:
@@ -174,7 +166,7 @@ func update_view(rig_distance: float) -> void:
 	if _cities.is_empty():
 		return
 	_last_distance = rig_distance
-	var usable := not _disabled and (force_active or (terrain != null and terrain.quadtree != null))
+	var usable := (force_active or (terrain != null and terrain.quadtree != null))
 	var limit := profile.max_rig_distance * (1.0 + profile.rig_hysteresis if visible else 1.0)
 	var now_visible := usable and rig_distance < limit
 	if now_visible != visible:

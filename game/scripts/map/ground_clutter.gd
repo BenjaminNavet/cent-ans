@@ -22,7 +22,7 @@ extends Node3D
 ## - Lot GA3-L2 : touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
 ##   (3 variantes × 3 niveaux de détail) sur roche/lande, pentes et reliefs : un `MultiMesh`
 ##   enfant de celui de la cellule (même visibilité, même éviction), variante tirée par cellule,
-##   niveau de détail commun choisi par la distance caméra. `--no-ga3-veg` : état FC.
+##   niveau de détail commun choisi par la distance caméra.
 ## Purement visuel : aucune règle de jeu.
 
 const SHADER := preload("res://shaders/ground_clutter.gdshader")
@@ -75,7 +75,6 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 @export var rock_size_m: float = 1.0
 @export var rock_lod_distances: Vector2 = Vector2(0.8, 1.6)
 
-## Lot L5 : `--no-clutter` coupe les touffes (A/B).
 var enabled: bool = true
 ## Préréglage de qualité : densité (0 : rien).
 var quality_density: float = 1.0
@@ -113,8 +112,6 @@ func _ready() -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	if CmdArgs.has("--no-clutter"):  # L5 : captures et mesures A/B
-		enabled = false
 
 
 func apply_render_quality(p: Dictionary) -> void:

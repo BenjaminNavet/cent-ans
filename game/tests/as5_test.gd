@@ -1,12 +1,12 @@
 extends TestCase
 
 ## Test du lot AS5 (restes statiques en shader) : vérifie par propriétés, sans rendu :
-##  - données `fx/map_fire_wind.json` lues, sections présentes, éteintes par `enabled`/`--no-as5` ;
+##  - données `fx/map_fire_wind.json` lues, sections présentes, éteintes par `enabled` ;
 ##  - `LifeEffects` : flammes MultiMesh sur les foyers d'incendie, matériau (planche FA2, couleurs,
 ##    cadence) posé, lumières vacillantes allumées de près et éteintes de loin ;
 ##  - bannières de maquette : amplitude et taille de toile posées sur le matériau ;
 ##  - imposteurs d'arbres de bataille : balancement posé sur le matériau.
-## Usage : godot --headless --path game --script res://tests/as5_test.gd [-- --no-as5]
+## Usage : godot --headless --path game --script res://tests/as5_test.gd
 
 
 func _init() -> void:
@@ -16,16 +16,10 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var off := CmdArgs.has("--no-as5")
-	check(MapFireWind.enabled() == not off, "enabled() follows --no-as5")
+	check(MapFireWind.enabled(), "enabled() follows the data")
 	var effects := LifeEffects.new()
 	root.add_child(effects)
 	effects.setup(null, null)
-	if off:
-		check(effects.get("_flames") == null, "no flames with --no-as5")
-		check(MapFireWind.section("maquette_banner").is_empty(), "no banner wind with --no-as5")
-		check(MapFireWind.section("battle_tree_impostor").is_empty(), "no tree sway with --no-as5")
-		return
 	var cfg := MapFireWind.section("fire")
 	check(not cfg.is_empty(), "fire section loaded")
 	var flames: MultiMeshInstance3D = effects.get("_flames")

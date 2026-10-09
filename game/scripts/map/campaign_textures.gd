@@ -5,8 +5,8 @@ extends RefCounted
 ## carte et eau (normales animées, couleur de profondeur). Identité des couches et réglages dans
 ## `data/fx/campaign_terrain_textures.json` (schéma `fx_campaign_terrain_textures.schema.json`),
 ## jamais codés en dur ici ; seul l'ordre des couches est un contrat du shader (index fixes de
-## `terrain.gdshader`). `--no-ga4` restaure l'ancien chemin (JPEG 1k par couche, tableaux RGBA8
-## non compressés, houle procédurale) pour la comparaison A/B.
+## `terrain.gdshader`). Si les tableaux manquent,
+## `TerrainBuilder` retombe sur l'ancien chemin (JPEG 1k par couche).
 
 const SPEC_FILE := "fx/campaign_terrain_textures.json"
 ## Contrat d'index de `terrain.gdshader` (sample_layer(0..6)).
@@ -17,10 +17,6 @@ const NORMAL_ARRAY_PATH := TEXTURE_DIR + "terrain_normal_array.jpg"
 const WATER_NORMAL_PATH := TEXTURE_DIR + "water_normal.png"
 
 static var _lookup := JsonLookup.new(SPEC_FILE, {}, "", "layers")
-
-
-static func enabled() -> bool:
-	return not CmdArgs.has("--no-ga4")
 
 
 ## Données GA4 (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.
@@ -69,7 +65,7 @@ static func _vec3(values: Array) -> Vector3:
 
 
 ## Réglages GA4 du shader terrain : macro-variation, échelle de tuilage, couleur de profondeur de
-## la mer peinte (mêmes valeurs que `water.gdshader`). Sans effet sous `--no-ga4`.
+## la mer peinte (mêmes valeurs que `water.gdshader`).
 static func apply_terrain(material: ShaderMaterial) -> void:
 	var data := spec()
 	var on := enabled() and not data.is_empty()
@@ -91,7 +87,7 @@ static func apply_terrain(material: ShaderMaterial) -> void:
 
 
 ## Réglages GA4 de la mer (`water.gdshader`) : normale CC0 (procédurale, cf. README) en deux
-## couches défilantes et couleur de profondeur à trois paliers. Sans effet sous `--no-ga4`.
+## couches défilantes et couleur de profondeur à trois paliers.
 static func apply_water(material: ShaderMaterial) -> void:
 	var data := spec()
 	var on := enabled() and not data.is_empty() and ResourceLoader.exists(WATER_NORMAL_PATH)

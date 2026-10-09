@@ -305,7 +305,7 @@ func _make_ruin(index: int, p: Vector2, radius: float) -> void:
 	root.name = "Ruin%d" % index
 	root.position = Vector3(p.x, ground, p.y)
 	add_child(root)
-	if siege_view != null and siege_view.has_method("ruin_site") and siege_view.ruin_site(index):
+	if siege_view != null and siege_view.ruin_site(index):
 		# BR1 : les ruines calcinées du kit remplacent la maison ; il ne reste que les braises.
 		var kit_embers := _emitter({"amount": int(ruin_params["embers"]), "lifetime_s": 2.5, "spread_m": radius * 0.6, "velocity_m_s": [0.5, 1.5], "size_m": [0.15, 0.35]}, _ember_mat, radius, Color(1.0, 0.45, 0.1, 1.0), Color(0.6, 0.1, 0.0, 0.0))
 		kit_embers.position.y = 1.0

@@ -20,8 +20,8 @@ extends Node3D
 ## `ReliefQuadtree` dessine tout le terrain (patchs déplacés au GPU, pages streamées) et les
 ## morceaux E0 sont masqués ; `surface_height_at` rend alors la surface de la page chargée la plus
 ## fine, `surface_grid` un instantané de ces pages, et `chunk_surface_changed` signale aussi
-## l'arrivée d'une page (au plus toutes les `surface_flush_interval_ms`). Sans cache (ou
-## `--no-pyramid`), comportement inchangé.
+## l'arrivée d'une page (au plus toutes les `surface_flush_interval_ms`). Sans cache,
+## comportement inchangé.
 
 signal chunk_surface_changed(index: int)
 ## Lot ZG2 : rectangle carte dont la surface a changé (page de la pyramide arrivée ou évincée),
@@ -621,8 +621,6 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 func _setup_quadtree() -> void:
 	pyramid = null
 	var manifest := pyramid_manifest_path
-	if CmdArgs.has("--no-pyramid"):
-		return
 	if CmdArgs.has("--pyramid-dir"):
 		manifest = CmdArgs.value("--pyramid-dir").path_join("relief_pyramid.json")
 	if CmdArgs.has("--qt-debug"):
@@ -1141,15 +1139,14 @@ static func _mipmapped_texture(image: Image) -> ImageTexture:
 ## Moyenne linéaire de chaque albédo (dernier niveau de mipmap) : le shader s'en sert pour
 ## teinter les textures vers des couleurs réalistes réglables sans perdre leur détail.
 func _build_material_arrays() -> void:
-	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. `--no-ga4` ou
-	# tableaux absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
-	if CampaignTextures.enabled():
-		var ga4 := CampaignTextures.load_arrays()
-		if not ga4.is_empty():
-			_albedo_array = ga4["albedo"]
-			_normal_array = ga4["normal"]
-			_layer_means = ga4["means"]
-			return
+	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. Tableaux
+	# absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
+	var ga4 := CampaignTextures.load_arrays()
+	if not ga4.is_empty():
+		_albedo_array = ga4["albedo"]
+		_normal_array = ga4["normal"]
+		_layer_means = ga4["means"]
+		return
 	var albedo_images: Array[Image] = []
 	var normal_images: Array[Image] = []
 	_layer_means = PackedVector3Array()

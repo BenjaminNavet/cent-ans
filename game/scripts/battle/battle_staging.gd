@@ -168,7 +168,7 @@ func _refresh_time(force: bool) -> void:
 		return
 	_last_hour = hour
 	time_of_day.apply(hour)
-	if _horizon != null and _horizon.has_method("apply_atmosphere"):
+	if _horizon != null:
 		_horizon.call("apply_atmosphere", _env, _sun, _weather)
 	if clouds != null:
 		clouds.set_light_level(time_of_day.light_level)

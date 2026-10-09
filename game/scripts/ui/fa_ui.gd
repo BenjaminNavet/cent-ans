@@ -5,8 +5,7 @@ extends RefCounted
 ## matières découpés dans des œuvres du domaine public (`game/assets/ui/fa/`, sources dans
 ## `SOURCE.md`). Le catalogue des découpes est `data/ui/fa_ui_assets.json` (schéma
 ## `data/schemas/ui_fa_assets.schema.json`), lu ici pour savoir quelle initiale existe.
-## Rendu seulement. `enabled = false` (option `--no-fa` des scripts de capture) rend l'ancien
-## habillage pour les comparaisons avant/après.
+## Rendu seulement. `enabled = false` rend l'ancien habillage.
 
 const DATA_PATH := "ui/fa_ui_assets.json"
 const ASSET_DIR := "res://assets/ui/fa/"

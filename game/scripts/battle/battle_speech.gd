@@ -163,7 +163,7 @@ func _schedule_voice(speech: Dictionary) -> void:
 	_voice_player.bus = "Voix" if AudioServer.get_bus_index("Voix") >= 0 else "Master"
 	add_child(_voice_player)
 	var director := get_node_or_null("/root/AudioDirector")
-	if director != null and director.has_method("duck_music"):
+	if director != null:
 		director.call("duck_music", -8.0, total_seconds())
 
 

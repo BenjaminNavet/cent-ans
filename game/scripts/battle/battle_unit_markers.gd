@@ -532,6 +532,6 @@ func _icon_for(unit: Dictionary) -> Texture2D:
 		var category := "unit_category_" + str(unit.get("render", "infantry"))
 		var icon_id: String = category if icon_library.call("has_icon", category) else str(unit.get("type", ""))
 		texture = icon_library.call("get_icon", icon_id, "unit")
-		_miniature[id] = icon_library.has_method("is_entity") and bool(icon_library.call("is_entity", icon_id, "unit"))
+		_miniature[id] = bool(icon_library.call("is_entity", icon_id, "unit"))
 	_icons[id] = texture
 	return texture

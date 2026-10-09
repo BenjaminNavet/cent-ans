@@ -8,13 +8,12 @@ extends RefCounted
 ##   format que l'atlas FC2 (3 lignes × 8 azimuts de 256², cadrage `ortho` / `foot` identique).
 ##   Ils remplacent aussi les cartes de feuillage des arbres proches (FC5) : 2 triangles au lieu
 ##   de ≈ 250 par arbre proche.
-## - Atlas des cartes de feuillage `LEAF_CARDS` (même normalisation que FC5), employé si les
-##   cartes proches restent actives (`--no-ga3-near`).
+## - Atlas des cartes de feuillage `LEAF_CARDS` (même normalisation que FC5), employé pour
+##   les cartes proches.
 ## - Touffe d'herbe dense `GRASS_TUFT` (`GroundClutter`, teinte du shader conservée).
 ## - Rochers TRELLIS (`ROCKS`, 3 variantes × 3 niveaux de détail) semés par `GroundClutter`.
 ##
-## `--no-ga3-veg` : retour aux ressources FC (comparaisons A/B). Chaque ressource manquante
-## retombe aussi sur l'existant.
+## Chaque ressource manquante retombe sur l'existant (FC).
 
 const DIR := "res://assets/textures/vegetation/ga3/"
 const IMPOSTOR_ALBEDO := DIR + "ga3_impostors_albedo.png"
@@ -26,23 +25,22 @@ const ROCK_DIR := "res://assets/models/vegetation/ga3/"
 const ROCKS: Array[String] = ["ga3_rock_a", "ga3_rock_b", "ga3_rock_c"]
 const ROCK_LODS := 3
 
-static var _forced: int = -1  # tests : -1 = ligne de commande, 0 = inactif, 1 = actif
+static var _forced: int = -1  # tests : -1 = défaut (actif), 0 = inactif, 1 = actif
 
 
-## Végétation GA3 active (pas de `--no-ga3-veg`).
+## Végétation GA3 active.
 static func enabled() -> bool:
 	if _forced >= 0:
 		return _forced == 1
-	return not CmdArgs.has("--no-ga3-veg")
+	return true
 
 
-## Imposteurs GA3 aussi pour les arbres proches (à la place des cartes FC5) ; `--no-ga3-near`
-## garde les cartes (avec l'atlas de feuilles GA3).
+## Imposteurs GA3 aussi pour les arbres proches (à la place des cartes FC5) .
 static func near_impostors() -> bool:
-	return enabled() and not CmdArgs.has("--no-ga3-near") and has_impostors()
+	return enabled() and has_impostors()
 
 
-## Tests : force l'état (`true` / `false`), ou `null` pour relire la ligne de commande.
+## Tests : force l'état (`true` / `false`), ou `null` pour revenir à l'état par défaut (actif).
 static func force(state: Variant) -> void:
 	_forced = -1 if state == null else int(bool(state))
 

@@ -6,8 +6,7 @@ extends RefCounted
 ## lissée du régiment et la variation de son orientation, entre le pas (`c_walk`), le trot
 ## (`c_trot`, bande intermédiaire), le galop (`c_gallop`) et les virages (`c_turn_l/r`,
 ## `c_trot_turn_l/r` : corps incliné, encolure fléchie vers l'intérieur). Seuils dans
-## `data/fx/battle_animation.json` (`cavalry_gaits`) ; `--no-as3` après `--` les désactive (pas et
-## galop seuls, comme avant).
+## `data/fx/battle_animation.json` (`cavalry_gaits`).
 
 const BAND_WALK := 0
 const BAND_TROT := 1
@@ -28,8 +27,6 @@ static func set_override(values: Dictionary) -> void:
 
 
 static func enabled() -> bool:
-	if CmdArgs.has("--no-as3"):
-		return false
 	var cfg := settings()
 	return not cfg.is_empty() and bool(cfg.get("enabled", true))
 

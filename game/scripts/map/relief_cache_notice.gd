@@ -24,9 +24,9 @@ var close_button: Button
 
 ## Contrôle le cache de `map_dir`, écrit le résultat dans le journal et, s'il manque tout ou
 ## partie, ajoute l'avis à `parent` (couche UI de la carte). Renvoie l'état contrôlé (null si
-## la pyramide est désactivée par `--no-pyramid` ou remplacée par `--pyramid-dir=`).
+## la pyramide est remplacée par `--pyramid-dir=`).
 static func report(parent: Node, map_dir: String, relief_root: String) -> ReliefCacheStatus:
-	if CmdArgs.has("--no-pyramid") or CmdArgs.has("--pyramid-dir"):
+	if CmdArgs.has("--pyramid-dir"):
 		return null
 	var checked := ReliefCacheStatus.check(map_dir, relief_root)
 	if checked.needs_notice():

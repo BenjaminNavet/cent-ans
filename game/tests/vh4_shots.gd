@@ -9,7 +9,6 @@ extends SceneTree
 ## Fenêtre réelle (pas headless) :
 ##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear
 ##   [--only=a,b] [--no-fps] [--city=rouen|paris] (VH5 : Paris vers 1340)
-##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
 ## JPEG ≤ 960 px, `<ville>_<vue>.jpg`.
 
 const ROUEN := Vector2(2096.54, 3099.88)

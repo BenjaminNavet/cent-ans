@@ -13,7 +13,7 @@ extends Node3D
 ## - Torrents : rubans d'écume sur les tronçons de forte pente (écoulement animé par shader).
 ## - Cascades et gués : sites historiques ; glb de `dn_manifest.json` (ids du catalogue) sinon
 ##   substitut procédural. Brancher un modèle = une ligne de données.
-## Rien sous la vue parchemin (fondu `fade_start` → `fade_end`). `--no-freshwater` : A/B.
+## Rien sous la vue parchemin (fondu `fade_start` → `fade_end`).
 ## Purement visuel : aucune règle de jeu.
 
 const CONFIG_FILE := "map/map_freshwater.json"
@@ -55,8 +55,6 @@ var _total_instances := 0
 
 func _ready() -> void:
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	if CmdArgs.has("--no-freshwater"):
-		enabled = false
 
 
 func setup(data: MapData, terrain_builder: TerrainBuilder, exclusion_circles := PackedVector3Array(), config_override := {}, sites_override := {}) -> void:

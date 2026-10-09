@@ -9,7 +9,7 @@ extends Node3D
 ## - aurore boréale au bord nord (hiver, soirée dorée).
 ## Chaque famille est un `MultiMesh` ou un seul plan : aucun nœud par instance. Rien sous le seuil
 ## parchemin (le fondu `parchment` les éteint) ; rien devant le point visé. Fumées de villes et de
-## feux : déjà `LifeEffects` (cheminées, panaches RV-F, incendies). `--no-me5` éteint le tout.
+## feux : déjà `LifeEffects` (cheminées, panaches RV-F, incendies).
 
 const DATA_PATH := "fx/map_atmosphere.json"
 const CUMULUS_SHADER := preload("res://shaders/map_atmo_cumulus.gdshader")
@@ -109,7 +109,7 @@ func setup(map: Node, weather_view: CampaignWeatherView) -> void:
 	_map_data = map.get("map_data")
 	_weather_view = weather_view
 	tuning = data()
-	enabled = bool(tuning.get("enabled", false)) and not CmdArgs.has("--no-me5") and _map_data != null
+	enabled = bool(tuning.get("enabled", false)) and _map_data != null
 	if not enabled:
 		return
 	_sun = map.get_node_or_null("Sun") as DirectionalLight3D

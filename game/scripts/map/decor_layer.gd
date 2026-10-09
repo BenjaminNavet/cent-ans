@@ -19,7 +19,6 @@ extends Node3D
 ## - Fumée : les types `smoke` (forges, charbonnières, verreries) portent un panache (shader
 ##   `life_smoke`, un MultiMesh pour toute la couche).
 ## - Vue parchemin : rien n'est affiché au-delà de `view_range_units` (bien sous le palier 1200).
-## - `--no-me6` coupe la couche (A/B).
 
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const MANIFEST_FILE := "art/dn_manifest.json"
@@ -80,7 +79,7 @@ func setup(layer: Node, map: MapData, terrain: TerrainBuilder, data: SettlementD
 	var data_dir := OutbuildingLayer.data_dir()
 	config = DecorPlanner.load_config(data_dir)
 	_maquette = TownMaquetteData.enabled()
-	enabled = enabled and not config.is_empty() and not CmdArgs.has("--no-me6")
+	enabled = enabled and not config.is_empty()
 	visible = false
 	_root = Node3D.new()
 	_root.name = "Batches"

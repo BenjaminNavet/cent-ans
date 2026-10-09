@@ -123,7 +123,7 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 ## `rayon + true_scale_full_units`, fondu linéaire sur `true_scale_fade_units`) : les coteaux de
 ## Rouen ne deviennent pas des murs à côté de maisons à l'échelle.
 static func _add_true_scale_zones(squash: PackedFloat32Array, side: Vector2i, cell: int, profile: ReliefExaggerationProfile) -> void:
-	if not profile.enabled or profile.true_scale_squash <= 0.0 or CmdArgs.has("--no-landmarks-1to1"):
+	if not profile.enabled or profile.true_scale_squash <= 0.0:
 		return
 	for city: Dictionary in LandmarkV2Library.all():
 		var center := LandmarkV2Library.anchor_units(city)

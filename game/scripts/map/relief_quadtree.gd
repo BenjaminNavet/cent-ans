@@ -27,8 +27,8 @@ extends Node3D
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
 ## - PB3g (ADR 0092) : sélection, résidence (LRU) et paramètres d'instance calculés par la classe
 ##   native `ReliefLod` (crate `relief-lod`) quand l'extension l'expose ; GDScript ne fait que
-##   créer, déplacer et masquer les nœuds signalés. Repli GDScript complet sans l'extension ou
-##   avec `--no-native-quadtree` (mêmes nœuds sélectionnés, `pb3g_quadtree_test.gd`).
+##   créer, déplacer et masquer les nœuds signalés. Repli GDScript complet sans l'extension
+##   (mêmes nœuds sélectionnés, `pb3g_quadtree_test.gd`).
 ## - Processeur : les octets des pages chargées sont gardés ; `surface_height_at` rend la surface
 ##   bilinéaire de la page chargée la plus fine (indépendante de la vue), `surface_changed(rect)`
 ##   signale l'arrivée ou l'éviction d'une page.
@@ -223,7 +223,7 @@ func root_depth_used() -> int:
 func _setup_native() -> void:
 	_native = null
 	_wanted_order = PackedInt64Array()
-	if not use_native_select or not ClassDB.class_exists("ReliefLod") or CmdArgs.has("--no-native-quadtree"):
+	if not use_native_select or not ClassDB.class_exists("ReliefLod"):
 		return
 	_native = ClassDB.instantiate("ReliefLod")
 	var tiles: Array = []

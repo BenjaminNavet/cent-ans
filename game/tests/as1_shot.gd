@@ -3,7 +3,7 @@ extends SceneTree
 ## Lot AS1 : planches des bêtes animées (carte et camp), écrites en PNG pour un regard humain, et
 ## mesure numérique du mouvement (écart moyen entre images successives, imprimé).
 ## Usage (avec affichage) :
-##   godot --path game --resolution 1280x720 --script res://tests/as1_shot.gd -- --out=<dossier> [--no-as1]
+##   godot --path game --resolution 1280x720 --script res://tests/as1_shot.gd -- --out=<dossier>
 ## Sorties : <dossier>/idle_N.png, walk_N.png, cart_N.png, camp_N.png (N = 0..3).
 
 const BEASTS := ["ox", "cow", "horse", "sheep"]

@@ -93,7 +93,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	settlements = settlement_layer
 	tiers = ZoomTiers.load_default()
 	enabled = false
-	if terrain == null or terrain.quadtree == null or CmdArgs.has("--no-fine-geo"):
+	if terrain == null or terrain.quadtree == null:
 		return false
 	store = FineGeoStore.new()
 	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)  # ZG7b

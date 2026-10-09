@@ -802,7 +802,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 
 
 ## AS5 : matériau et instances des flammes ; sans données (`map_fire_wind.json`), sans planche
-## importée ou avec `--no-as5`, aucune flamme (les fumées restent).
+## importée, aucune flamme (les fumées restent).
 func _setup_flames() -> void:
 	_flame_cfg = MapFireWind.section("fire")
 	var flipbook_path := str(_flame_cfg.get("flipbook", FLAME_FLIPBOOK))

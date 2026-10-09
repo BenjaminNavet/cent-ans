@@ -16,7 +16,7 @@ extends Node3D
 ##   Errance lente, pas, rebond et tête basse à l'arrêt dans `fauna.gdshader` (pas d'armature).
 ##   Taille tenue à l'écran (`length_k` × distance^`length_exponent`), jamais sous la taille réelle.
 ## - Visible sous `max_distance` (donc jamais sur le parchemin) ; amincissement par rang au-delà de
-##   `max_visible_instances`. `--no-fauna` : état d'avant (A/B).
+##   `max_visible_instances`.
 
 const SHADER := preload("res://shaders/fauna.gdshader")
 const DATA_FILE := "map/map_fauna.json"
@@ -59,11 +59,6 @@ var _wet: Image
 static func load_config() -> Dictionary:
 	var parsed: Variant = DataFile.read_json(DATA_FILE)
 	return parsed if parsed is Dictionary else {}
-
-
-func _ready() -> void:
-	if CmdArgs.has("--no-fauna"):
-		enabled = false
 
 
 ## Branche la couche sur la carte. `towns` : positions (px carte) des colonies à éviter.

@@ -4,7 +4,7 @@ extends TestCase
 ##  1. textures GA3 : grille d'imposteurs 8 azimuts × une ligne par essence (HB4 ; lignes 0-2
 ##     contrôlées ici, les autres par `hb4_species_test.gd`) de 256² (albédo + normale, VRAM, mipmaps),
 ##     atlas de feuilles 1024 × 512, touffe d'herbe 512 × 256 dense (couverture ≫ 13 %) ;
-##  2. option : `Ga3Vegetation.force(false)` (= `--no-ga3-veg`) rend les ressources FC ;
+##  2. option : `Ga3Vegetation.force(false)` (état FC) rend les ressources FC ;
 ##  3. rochers : 3 variantes × 3 niveaux (≤ 120 / 60 / 18 triangles), semis de `GroundClutter`,
 ##     un appel de dessin par cellule rocheuse, niveau de détail selon la distance ;
 ##  4. carte (forêt d'Orléans, d = 25) : arbres proches en imposteurs (plus de cartes), triangles
@@ -77,11 +77,11 @@ func _test_option() -> void:
 	var material := Vegetation._make_impostor_material()
 	check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == Ga3Vegetation.IMPOSTOR_ALBEDO, "GA3 impostor atlas")
 	Ga3Vegetation.force(false)
-	check(not Ga3Vegetation.near_impostors(), "--no-ga3-veg: no near impostors")
-	check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == "x", "--no-ga3-veg: FC grass")
-	check(Ga3Vegetation.rock_meshes().is_empty(), "--no-ga3-veg: no rocks")
+	check(not Ga3Vegetation.near_impostors(), "force(false): no near impostors")
+	check(Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, "x") == "x", "force(false): FC grass")
+	check(Ga3Vegetation.rock_meshes().is_empty(), "force(false): no rocks")
 	material = Vegetation._make_impostor_material()
-	check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == VegetationMeshes.IMPOSTOR_ALBEDO, "--no-ga3-veg: FC impostor atlas")
+	check(material != null and (material.get_shader_parameter("albedo_atlas") as Texture2D).resource_path == VegetationMeshes.IMPOSTOR_ALBEDO, "force(false): FC impostor atlas")
 	Ga3Vegetation.force(true)
 
 
@@ -140,8 +140,8 @@ func _test_rocks() -> void:
 	Ga3Vegetation.force(false)
 	var fc := _make_clutter()
 	fc.update_view(Vector2(500, 500), 0.5)
-	check(fc.rock_variants() == 0 and int(fc.rock_stats()["rocks"]) == 0, "--no-ga3-veg: no rocks")
-	check(fc.visible_instances() > 0, "--no-ga3-veg: grass still there")
+	check(fc.rock_variants() == 0 and int(fc.rock_stats()["rocks"]) == 0, "force(false): no rocks")
+	check(fc.visible_instances() > 0, "force(false): grass still there")
 	fc.free()
 	Ga3Vegetation.force(true)
 

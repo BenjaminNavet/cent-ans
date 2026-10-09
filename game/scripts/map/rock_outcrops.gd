@@ -21,7 +21,7 @@ extends Node3D
 ## - Taille réelle de près, grossie jusqu'à `far_scale` au loin (shader `rock_outcrops`), hauteur
 ##   suivant en partie l'exagération du relief ; niveau de détail par tuile selon la distance ;
 ##   triangles affichés bornés (`max_visible_triangles`) ; effacement de `fade_start` à
-##   `fade_end` (vue parchemin au-delà, ADR 0124). `--no-outcrops` coupe la couche (A/B).
+##   `fade_end` (vue parchemin au-delà, ADR 0124).
 ## Purement visuel : aucune règle de jeu.
 
 const CATALOGUE_FILE := "art/rock_outcrops.yaml"
@@ -75,8 +75,6 @@ var _log := false
 
 func _ready() -> void:
 	_rig = get_node_or_null(camera_rig_path) as Node3D
-	if CmdArgs.has("--no-outcrops"):
-		enabled = false
 	_log = CmdArgs.has("--outcrops-log")
 
 

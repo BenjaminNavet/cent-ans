@@ -312,9 +312,9 @@ static func walk_settings() -> Dictionary:
 	return _walk_lookup.data()
 
 
-## Éteint par les données (`enabled`) ou par `--no-as2` après `--` (banc A/B).
+## Éteint par les données (`enabled`).
 static func as2_enabled() -> bool:
-	return bool(walk_settings().get("enabled", false)) and not CmdArgs.has("--no-as2")
+	return bool(walk_settings().get("enabled", false))
 
 
 ## Facteur de cadence pour une vitesse au sol `ground_speed` (unités monde / s) d'un groupe dont

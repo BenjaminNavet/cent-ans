@@ -12,8 +12,7 @@ extends Node
 ## raster), refaite seulement quand contrôleurs ou positions changent ; aucune géométrie.
 ## Classification des positions : `StanceCues` (ADR 0155), non dupliquée ici.
 ## Réglages : `data/map/stance_fill.json` (schéma `stance_fill.schema.json`).
-## Option du joueur : `map/stance_fill` (Réglages › Carte). Option (après `--`) :
-## `--no-stance-fill` (A/B de perf). Purement visuel.
+## Option du joueur : `map/stance_fill` (Réglages › Carte). Purement visuel.
 
 const TUNING_PATH := "map/stance_fill.json"
 const SETTING_KEY := "map/stance_fill"
@@ -27,7 +26,6 @@ var enabled: bool = true
 var mode: String = "political"
 var effective_alpha: float = 0.0
 
-var _cli_disabled: bool = false
 var _texture: ImageTexture = null
 var _image: Image = null
 var _colors := PackedColorArray()
@@ -37,7 +35,6 @@ var _last_distance: float = -1.0
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
 	map = campaign_map
 	terrain = terrain_builder if terrain_builder != null else campaign_map.get("terrain") as TerrainBuilder
-	_cli_disabled = CmdArgs.has("--no-stance-fill")
 	tuning = load_tuning()
 	_set_param("sf_saturation", float(tuning.get("saturation", 0.6)))
 	_set_param("sf_flat", float(tuning.get("flat_mix", 0.0)))
@@ -185,7 +182,7 @@ func set_enabled(value: bool) -> void:
 
 func _update_alpha() -> void:
 	var alpha := 0.0
-	if enabled and not _cli_disabled:
+	if enabled:
 		alpha = float(tuning.get("modes", {}).get(mode, 0.0))
 		if _last_distance >= 0.0:
 			alpha *= zoom_factor(_last_distance)

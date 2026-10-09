@@ -6,8 +6,7 @@ extends Node3D
 ## G neige, B brouillard, A orage) posé sur le terrain (sol mouillé, neige fraîche, brouillard
 ## matinal qui se lève, ombre des nuées, éclairs) et sur un plan de nuées qui défilent avec le
 ## vent ; de près, pluie ou neige en particules autour du point visé et éclairs d'orage.
-## Options (après `--`) : `--map-weather=rain|snow|fog|storm|clear` (impose partout, captures),
-## `--no-map-weather` (A/B).
+## Options (après `--`) : `--map-weather=rain|snow|fog|storm|clear` (impose partout, captures).
 
 const CLOUD_SHADER := preload("res://shaders/campaign_clouds.gdshader")
 const FIELD_BAKE_SHADER := preload("res://shaders/weather_field_bake.gdshader")
@@ -94,8 +93,6 @@ func setup(map: Node) -> void:
 	_map = map
 	_map_data = map.get("map_data")
 	_terrain = map.get("terrain")
-	if CmdArgs.has("--no-map-weather"):
-		enabled = false
 	if CmdArgs.has("--map-weather"):
 		forced = CmdArgs.value("--map-weather")
 	if not enabled or _map_data == null:

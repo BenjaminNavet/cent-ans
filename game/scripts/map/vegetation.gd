@@ -74,21 +74,20 @@ var quality_max_distance: float = -1.0
 @export var max_ground_jobs: int = 2
 ## Lot FC2 : au-delà de `detail_distance`, chênes, hêtres et conifères en imposteurs (quadrilatère
 ## texturé par les atlas cuits sous Blender, 2 triangles) au lieu du maillage bas (≈ 20 triangles) ;
-## haies inchangées. `--no-fc2` rend les maillages bas (comparaisons A/B).
+## haies inchangées.
 @export var use_impostors: bool = true
 ## Lot FC5 : parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
 ## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 145-250 triangles) ; entre
 ## `near_distance` et `detail_distance`, imposteurs (ombres gardées) au lieu des maillages
-## détaillés de 90 triangles. `--no-fc5` rend les maillages détaillés.
+## détaillés de 90 triangles.
 @export var use_near_cards: bool = true
 @export var near_distance: float = 45.0
 ## Lot FC6 : largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
 @export var near_fade: float = 8.0
 ## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
-## arbre proche) ; faux avec `--no-ga3-veg` / `--no-ga3-near` ou sans imposteurs.
+## arbre proche) ; faux sans imposteurs.
 var ga3_near_impostors: bool = false
-## Lot HB4 (ADR 0143) : essences par biome (`TreeSpecies`, `data/art/tree_species.json`) ;
-## `--no-hb4-species` rend le semis V4 (chêne, hêtre, conifère) pour les comparaisons A/B.
+## Lot HB4 (ADR 0143) : essences par biome (`TreeSpecies`, `data/art/tree_species.json`) .
 @export var use_species: bool = true
 ## Table active (null : semis V4).
 var species: TreeSpecies = null
@@ -125,10 +124,10 @@ var enabled: bool = true
 var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": "", "regrounds": 0, "reground_ms_max": 0.0}
 
 var _material: ShaderMaterial
-## Lot FC2 : matériau des imposteurs (null : atlas absents ou `--no-fc2`) ; mêmes uniformes de
+## Lot FC2 : matériau des imposteurs (null : atlas absents) ; mêmes uniformes de
 ## feuillage que `_material` (`_set_foliage_param`).
 var _impostor_material: ShaderMaterial
-## Lot FC5 : matériau des cartes de feuillage (null : texture absente ou `--no-fc5`).
+## Lot FC5 : matériau des cartes de feuillage (null : texture absente).
 var _cards_material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
 var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int[, "native": id]}
@@ -174,16 +173,6 @@ func _ready() -> void:
 	_rig = get_node_or_null(camera_rig_path) as Node3D
 	if CmdArgs.has("--screenshot") or CmdArgs.has("--vegetation-stats"):
 		_log_bursts = true
-	if CmdArgs.has("--no-native-vegetation"):  # PB2 : comparaisons avec le semis GDScript
-		use_native_scatter = false
-	if CmdArgs.has("--no-forest-detail"):  # SZ4b : captures « avant », mesures A/B
-		use_forest_detail = false
-	if CmdArgs.has("--no-fc2"):  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
-		use_impostors = false
-	if CmdArgs.has("--no-fc5"):  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
-		use_near_cards = false
-	if CmdArgs.has("--no-hb4-species"):  # HB4 : semis V4 sans essences par biome (A/B)
-		use_species = false
 
 
 
@@ -287,7 +276,7 @@ static func _generalised_species(props: MapPropScale) -> TreeSpecies:
 
 
 ## Lot FC2 : matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
-## GA3-L2 : grille générée (`Ga3Vegetation`) sauf `--no-ga3-veg`, même cadrage.
+## GA3-L2 : grille générée (`Ga3Vegetation`), même cadrage.
 static func _make_impostor_material() -> ShaderMaterial:
 	var ga3 := Ga3Vegetation.enabled() and Ga3Vegetation.has_impostors()
 	var albedo_path := Ga3Vegetation.IMPOSTOR_ALBEDO if ga3 else VegetationMeshes.IMPOSTOR_ALBEDO
@@ -670,7 +659,7 @@ func update_view(camera_position: Vector3, camera_distance: float, focus: Vector
 	# VT3 : plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
 	_set_foliage_param("density", density)
 	if _cards_material != null:
-		# Sans imposteurs (`--no-fc2`), cartes jusqu'au bout des parties proches.
+		# Sans imposteurs, cartes jusqu'au bout des parties proches.
 		var near_end := near_distance * quality_detail if _impostor_material != null else 1e9
 		_cards_material.set_shader_parameter("near_end", near_end)
 		_cards_material.set_shader_parameter("near_start", near_end - near_fade)
@@ -805,7 +794,7 @@ func _meshes(lod: int) -> Array:
 
 
 ## Lot FC5 : maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
-## (`near`), imposteurs sinon ; `--no-fc5` : maillages bas partout (comportement SZ4b).
+## (`near`), imposteurs sinon.
 func forest_meshes(near: bool) -> Array:
 	if _cards_material == null and not ga3_near_impostors:
 		return [VegetationMeshes.essence("oak", false), VegetationMeshes.essence("beech", false),

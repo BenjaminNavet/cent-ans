@@ -7,7 +7,7 @@ extends RefCounted
 ##   modèle sur le matériau d'une surface.
 ## - Bataille : chevaux au piquet des camps (`camp_horse.gdshader`), un `MultiMesh` par modèle.
 ## Réglages : `data/fx/animal_motion.json` (schéma `fx_animal_motion.schema.json`) ; éteint par
-## `enabled` ou par `--no-as1` après `--` (banc A/B).
+## `enabled`.
 
 const FX_PATH := "fx/animal_motion.json"
 const CAMP_FX_PATH := "fx/camp_horse_motion.json"  # AS8c : valeurs tirées de vidéos CC BY-SA, fichier propre
@@ -39,7 +39,7 @@ static func _merge_camp_horse_motion(camp: Dictionary) -> void:
 
 
 static func enabled() -> bool:
-	return bool(settings().get("enabled", false)) and not CmdArgs.has("--no-as1")
+	return bool(settings().get("enabled", false))
 
 
 ## Réglages fusionnés d'un modèle de la carte : `defaults` < `base` < entrée du modèle ; {} si

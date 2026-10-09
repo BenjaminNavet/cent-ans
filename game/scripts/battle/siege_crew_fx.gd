@@ -151,9 +151,9 @@ func finish(camera: Variant) -> void:
 # --- AS4 : servants porteurs de munitions ------------------------------------------------
 
 
-## Vrai quand les porteurs sont actifs : réglage `crew.haul.enabled` et pas de `--no-as4` (banc A/B).
+## Vrai quand les porteurs sont actifs : réglage `crew.haul.enabled`.
 func haul_enabled() -> bool:
-	return bool(cfg.get("haul", {}).get("enabled", false)) and not CmdArgs.has("--no-as4")
+	return bool(cfg.get("haul", {}).get("enabled", false))
 
 
 ## Étape du trajet d'un porteur à la phase `phase` du rechargement (0 : vient de tirer, 1 : prêt ;

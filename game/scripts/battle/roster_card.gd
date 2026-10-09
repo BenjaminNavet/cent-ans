@@ -42,7 +42,7 @@ func setup(data: Dictionary, color: Color, faction_id: String, is_general: bool 
 	var library := HudStyle.icon_library()
 	if library != null:
 		class_icon = library.call("get_icon", type_id, "unit")
-		class_icon_is_miniature = library.has_method("is_entity") and bool(library.call("is_entity", type_id, "unit"))
+		class_icon_is_miniature = bool(library.call("is_entity", type_id, "unit"))
 	_refresh_tooltip()
 	return self
 

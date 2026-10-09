@@ -8,7 +8,7 @@ extends Control
 ## rejeux], Réglages, Crédits, Quitter), légende du plan en bas à droite.
 ## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
 ## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
-## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
+## au premier lancement, puis depuis le menu. Sans rendu (headless) : fond
 ## illustré 2D (`MenuBackground`).
 ##
 ## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=faction`
@@ -125,7 +125,7 @@ static func _headless() -> bool:
 
 
 func _build_backdrop() -> void:
-	var use_3d := not _headless() and not CmdArgs.has("--no-menu-3d")
+	var use_3d := not _headless()
 	if use_3d:
 		var scene := MenuBackdrop3D.new()
 		scene.name = "Backdrop3D"

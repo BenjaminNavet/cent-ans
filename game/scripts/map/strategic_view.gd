@@ -7,7 +7,7 @@ extends Node
 ## `parchment_*.gdshaderinc`), la couche 2D (`ParchmentOverlay` : noms, vignettes, jetons,
 ## navires et monstres) et retire en fondu les couches 3D qui la doublent (étiquettes de
 ## provinces, étendards et plaques d'armées). Purement visuel.
-## Options (après `--`) : `--no-parchment` (A/B), `--parchment=<0..1>` (poids imposé).
+## Option (après `--`) : `--parchment=<0..1>` (poids imposé).
 
 ## Lot DV (ADR 0124) : la bande de fondu vue normale → parchemin est celle de
 ## `ZoomTiers.strategic_weight` (seuil 1200, largeur 200), seule source des deux vues.
@@ -35,8 +35,6 @@ var _markers_hidden: bool = false
 
 func setup(map: Node) -> void:
 	_map = map
-	if CmdArgs.has("--no-parchment"):
-		enabled = false
 	if CmdArgs.has("--parchment"):
 		forced = clampf(CmdArgs.number("--parchment"), 0.0, 1.0)
 	RenderingServer.global_shader_parameter_set("campaign_parchment", 0.0)

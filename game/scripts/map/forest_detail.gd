@@ -249,8 +249,7 @@ func _swap_meshes(entry: Dictionary, part: Dictionary, near: bool) -> void:
 		mmi.material_override = vegetation.forest_material(kind, near)
 
 
-## Lot FC5 : cartes de feuillage au plus près, imposteurs ailleurs (`Vegetation.forest_meshes`) ;
-## maillages bas avec `--no-fc5`.
+## Lot FC5 : cartes de feuillage au plus près, imposteurs ailleurs (`Vegetation.forest_meshes`).
 func _meshes(near: bool) -> Array:
 	return vegetation.forest_meshes(near)
 

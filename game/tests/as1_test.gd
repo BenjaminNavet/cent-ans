@@ -5,7 +5,7 @@ extends TestCase
 ## uniformes posés sur les surfaces des accessoires de la carte, et que les masques du shader
 ## (pattes, tête, queue, roues) touchent bien de la géométrie des modèles FK2 et des chevaux du
 ## kit ; chevaux de camp : une surface animée par matière d'origine.
-## Usage : godot --headless --path game --script res://tests/as1_test.gd [-- --no-as1]
+## Usage : godot --headless --path game --script res://tests/as1_test.gd
 
 const BEASTS := ["ox", "cow", "horse", "sheep"]
 const CARTS := ["stone_cart", "merchant_cart"]
@@ -40,8 +40,7 @@ func _mask_counts(verts: PackedVector3Array, p: Dictionary) -> Dictionary:
 
 
 func _init() -> void:
-	var off := CmdArgs.has("--no-as1")
-	check(AnimalMotion.enabled() == not off, "enabled() ne suit pas --no-as1")
+	check(AnimalMotion.enabled(), "enabled() devrait suivre les données")
 	var settings := AnimalMotion.settings()
 	check(settings.has("campaign") and settings.has("camp_horse"), "données absentes")
 	# Fusion des réglages.
@@ -61,11 +60,11 @@ func _init() -> void:
 		var on := float(mat.get_shader_parameter("am_on"))
 		var described: bool = not AnimalMotion.model_params(str(FolkModels.PROPS[role]["model"])).is_empty()
 		var beast: bool = role in BEASTS or role in CARTS
-		if off or not beast:
+		if not beast:
 			check(on == 0.0, "%s : am_on devrait être 0" % role)
 		else:
 			check(on == 1.0, "%s : am_on devrait être 1" % role)
-		if off or not described:
+		if not described:
 			continue
 		var p := AnimalMotion.model_params(str(FolkModels.PROPS[role]["model"]))
 		var counts := _mask_counts(_vertices(mesh), p)
@@ -109,8 +108,7 @@ func _init() -> void:
 	var made := AnimalMotion.build_camp_horses(parent, {"horse_0": [Transform3D.IDENTITY, Transform3D(Basis(), Vector3(5, 0, 0))]}, 100.0)
 	check(made.size() == 1 and made[0].multimesh.instance_count == 2, "build_camp_horses")
 	check(is_equal_approx(made[0].visibility_range_end, 100.0), "portée des chevaux")
-	# Décor de bataille : les chevaux d'une ligne sont des MultiMesh animés (ou le lot du kit sous
-	# --no-as1).
+	# Décor de bataille : les chevaux d'une ligne sont des MultiMesh animés.
 	var terrain := BattleTerrain.new()
 	root.add_child(terrain)
 	var decor := BattleDecor.new()
@@ -127,5 +125,5 @@ func _init() -> void:
 			animated += mmi.multimesh.instance_count
 		else:
 			plain += mmi.multimesh.instance_count
-	check(animated == (0 if off else 6) and plain == (6 if off else 0), "décor : %d animés, %d fixes" % [animated, plain])
+	check(animated == 6 and plain == 0, "décor : %d animés, %d fixes" % [animated, plain])
 	finish()

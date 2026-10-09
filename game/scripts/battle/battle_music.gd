@@ -242,7 +242,7 @@ func _make_player(player_name: String, path: String, loop: bool) -> AudioStreamP
 func _pick_base_track() -> String:
 	var director: Node = get_node_or_null("/root/AudioDirector")
 	var tracks: Array = []
-	if director != null and director.has_method("playlist"):
+	if director != null:
 		tracks = director.call("playlist", "battle")
 		if tracks.is_empty():
 			tracks = director.call("playlist", "war")
