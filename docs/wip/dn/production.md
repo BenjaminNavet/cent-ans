@@ -19,6 +19,7 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 - (rien : tout est généré ; voir « Non générés »).
 
 ## Non générés (D5 refusé deux fois ou échec fal) — journalisés
+Reprise locale (mflux, gratuit) : voir « Repris en local » ci-dessous et `docs/wip/dn/local-retry.md` (EN PAUSE).
 - campaign : ship_nef
 - map_extra : env_cliff_chalk_coast, env_autumn_oak_gold, env_harvest_sheaves
 - architecture : house_andalus_courtyard, house_maghreb_dar
@@ -31,7 +32,7 @@ Provenance : `~/dev/cent-ans-raw/dn/<id>/generation.json` + `prompt.txt`, copié
 nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
 
 ## Ratés / retirés
-- econ_sheep_shearing_pen : refusé par le filtre de contenu fal (faux positif), non généré.
+- econ_sheep_shearing_pen : le filtre fal était un faux positif ; le modèle existe (`game/assets/models/dn/buildings/econ_sheep_shearing_pen_lod0.glb`), pas de reprise.
 - ship_nef (galion à 3 mâts, anachronique pour 1340) retiré.
 - animal_cattle_red etc. refusés D5 (seconde graine).
 
@@ -40,3 +41,9 @@ nature_extra, battle_extra, illus (kind image : à ajouter dans dn_batch.py).
 - LOD2 : le dn-ingest calait au-dessus du budget sur les maillages à nombreux îlots UV ; repli par soudure de sommets ajouté (`decimate`).
 - Classe `bridge` ajoutée (copie de `house`).
 - Scratchpad partagé avec d'autres agents : mes scripts sont dans `scratchpad/dn/`.
+
+## Repris en local (10/10, EN PAUSE)
+Images Z-Image locales 3 graines faites pour 5 ids (choix = 1re graine, pas encore de 3D) :
+cart_relic_procession, pack_camel_bactrian_laden, pack_camel_laden, ship_galley_aragonese, ship_galley_genoese
+(S moyen 0,44-0,50 pour chariot/chameaux : encore hors charte stricte ; galères 0,18-0,31, conformes).
+Les 22 autres restent non repris ; aucune 3D locale produite à ce stade.

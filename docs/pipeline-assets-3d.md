@@ -284,3 +284,8 @@ uv run --with rembg --with onnxruntime --with fal-client --with pillow --with nu
   meilleur (tour de pierre et ardoise nettes, roue à aubes lisible, chariot propre aux 4 roues, couleurs
   sombres et sobres); SF3D : formes correctes mais texture floue, trop claire et saturée, roue du moulin
   déchiquetée, chariot bruité. SF3D reste un repli.
+
+### Repli local automatique (`dn_batch.py`, désactivable par `--no-local-fallback`)
+- 3D : si fal échoue (erreur, filtre de contenu, solde, plafond `DN_FAL_CAP_USD`), le lot enchaîne seul TRELLIS HF (si quota) puis SF3D local sous `gpu.lock` ; vue de dos Qwen-Image-Edit local (LoRA Multiple-Angles, ≈ 25 min) pour les classes orientées ; le repli est journalisé (`failures.jsonl`, `generation.json` : `fallbacks`, `backend3d_used`).
+- Image : entrée refusée par la charte D5 ou sans image fal (filtre de contenu) → 3 graines de plus en mflux local avant d'abandonner.
+- Test : `uv run --project tools pytest tools/tests/test_dn_batch_fallback.py` (fal simulé en échec).
