@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 textures_app = typer.Typer(
@@ -83,6 +85,57 @@ def upscale_command(
         raise typer.Exit(1) from error
     for path in written:
         typer.echo(str(path))
+
+
+@textures_app.command("alpha")
+def alpha_command(
+    family: str = typer.Argument(..., help="Famille (voir `textures families`)."),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiant d'entrée à traiter (répétable)."
+    ),
+) -> None:
+    """Détoure (rembg local) les entrées `alpha: true` (dans `<famille>/alpha/`)."""
+    from cent_ans_tools.texture_factory.alpha import alpha_family
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+
+    try:
+        document = load_catalog(family)
+        written = alpha_family(document, only=only or None)
+    except CatalogError as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(str(path))
+
+
+@textures_app.command("micro")
+def micro_command(
+    family: str = typer.Argument(..., help="Famille (voir `textures families`)."),
+    out: Path = typer.Option(..., "--out", help="PNG de sortie."),  # noqa: B008
+    size: int = typer.Option(2048, "--size", help="Côté de la tuile (px)."),
+    normal: bool = typer.Option(False, "--normal", help="Variante normal map."),
+) -> None:
+    """Tuile de micro-détail sans couture (jusqu'à 8 images brutes retenues)."""
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+    from cent_ans_tools.texture_factory.generate import image_path, load_manifest
+    from cent_ans_tools.texture_factory.pbr import micro_detail, micro_detail_normal
+
+    try:
+        document = load_catalog(family)
+    except CatalogError as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    manifest = load_manifest(document)
+    sources = [
+        image_path(document, entry_id, record["attempt"])
+        for entry_id, record in sorted(manifest.items())
+        if record.get("status") == "ok"
+    ][:8]
+    if not sources:
+        typer.echo("Erreur : aucune image brute retenue pour cette famille.", err=True)
+        raise typer.Exit(1)
+    build = micro_detail_normal if normal else micro_detail
+    typer.echo(str(build(sources, out, size)))
 
 
 @textures_app.command("families")

@@ -58,3 +58,25 @@ def saturation_in_range(image: np.ndarray, low: float, high: float) -> bool:
 def _unit_range(image: np.ndarray) -> np.ndarray:
     data = image.astype(np.float64)
     return data / 255.0 if image.dtype == np.uint8 else data
+
+
+def _alpha_channel(image) -> np.ndarray:
+    data = np.asarray(image)
+    if data.ndim != 3 or data.shape[-1] != 4:
+        raise ValueError("image RGBA attendue")
+    alpha = data[..., 3].astype(np.float64)
+    return alpha / 255.0 if data.dtype == np.uint8 else alpha
+
+
+def alpha_fill_ratio(image) -> float:
+    """Fraction of pixels that are mostly opaque (alpha > 0.5) in an RGBA image."""
+    return float((_alpha_channel(image) > 0.5).mean())
+
+
+def alpha_touches_border(image, margin: int = 2) -> bool:
+    """True if any opaque pixel lies within ``margin`` px of the image border (cut-off card)."""
+    mask = _alpha_channel(image) > 0.5
+    band = np.zeros_like(mask)
+    band[:margin] = band[-margin:] = True
+    band[:, :margin] = band[:, -margin:] = True
+    return bool((mask & band).any())

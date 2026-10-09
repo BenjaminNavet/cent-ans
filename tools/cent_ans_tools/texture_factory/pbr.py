@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
+from PIL import Image
 from scipy.ndimage import gaussian_filter
 
-from cent_ans_tools.texture_factory.color import LUMA
-from cent_ans_tools.texture_factory.seamless import low_pass
+from cent_ans_tools.texture_factory.color import LUMA, srgb_to_linear
+from cent_ans_tools.texture_factory.seamless import low_pass, make_seamless
 
 
 def flatten_lighting(
@@ -54,3 +57,48 @@ def derive_normal_rough(
     rough = np.clip(base_roughness + 0.1 * (-height), 0.0, 1.0)
     packed = np.stack([nx / norm * 0.5 + 0.5, ny / norm * 0.5 + 0.5, rough], axis=-1)
     return np.clip(np.rint(packed * 255), 0, 255).astype(np.uint8)
+
+
+MICRO_STD = 0.12
+
+
+def _micro_height(src_images: list[Path], size: int) -> np.ndarray:
+    """Seamless height tile in [0, 1] (mean 0.5, std ~0.12) from high-passed luminance."""
+    if not src_images:
+        raise ValueError("aucune image source pour le micro-détail")
+    accumulated = np.zeros((size, size))
+    for path in src_images:
+        image = Image.open(path).convert("RGB").resize((size, size), Image.LANCZOS)
+        luminance = srgb_to_linear(np.asarray(image) / 255.0) @ LUMA
+        detail = luminance - gaussian_filter(luminance, 6.0, mode="wrap")
+        accumulated += detail / max(float(detail.std()), 1e-6)
+    accumulated /= len(src_images)
+    half_band = max(16, min(size // 8, size // 2 - 1))
+    tile = make_seamless(accumulated[..., np.newaxis].repeat(3, axis=-1), half_band)[
+        ..., 0
+    ]
+    tile = (tile - tile.mean()) / max(float(tile.std()), 1e-6)
+    return np.clip(0.5 + MICRO_STD * tile, 0.0, 1.0)
+
+
+def micro_detail(src_images: list[Path], dst: Path, size: int = 2048) -> Path:
+    """Seamless grayscale fine-grain height tile (8-bit PNG) from the inputs' fine detail."""
+    height = _micro_height(src_images, size)
+    dst = Path(dst)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    Image.fromarray(np.rint(height * 255).astype(np.uint8), "L").save(dst)
+    return dst
+
+
+def micro_detail_normal(
+    src_images: list[Path], dst: Path, size: int = 2048, strength: float = 1.0
+) -> Path:
+    """Normal-map (RGB, OpenGL; blue holds roughness) variant of :func:`micro_detail`."""
+    height = _micro_height(src_images, size)
+    packed = derive_normal_rough(
+        np.repeat(height[..., np.newaxis], 3, axis=-1), strength, 0.5
+    )
+    dst = Path(dst)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    Image.fromarray(packed, "RGB").save(dst)
+    return dst
