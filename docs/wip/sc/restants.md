@@ -58,7 +58,7 @@ PF-04 | PARTIEL | chargeur Rust vectoriel fait (DT4, ~500->200 ms) ; bake .bin g
 PF-01 | À FAIRE | OutbuildingPacker Rust [GELÉ FL] | game/scripts/map/outbuilding_layer.gd | oui
 PF-10 | À FAIRE | declutter Rust (marker_declutter.gd) [GELÉ FL] | game/scripts/map/marker_declutter.gd | oui
 PF-08 | FAIT 24bbff975 | StampMap stamp_soft_disc + relief_from_heights pour battle_terrain | core/crates/godot-bridge/src/stamp_map.rs, game/scripts/battle/battle_terrain.gd | oui
-PF-09 | À FAIRE | parchment_decor précalc | game/scripts/map/parchment_decor.gd | non
+PF-09 | FAIT | parchment_decor précalc (sea_items résolus au build) | game/scripts/map/parchment_decor.gd | non
 PF-11 | À FAIRE | heights_m batch | game/scripts/map | oui
 PF-12 | À FAIRE | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
 PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes restent (136 au départ) | game/scripts/** | non
@@ -141,7 +141,7 @@ MB3 | FAIT (ADR 0204, sc/veg ; vegetation_tile_job.gd gardé réduit à la requ�
 MB4 | À FAIRE | StreamedTileLayer commun (5 couches) [vegetation GELÉ] | game/scripts/map | non
 MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) ; voir PF-06 (sc/devflags 10-09) | game/scripts/map | non
 MB6 | FAIT (sc/dt2) | relief_cache_notice (117) + relief_cache_status (241) -> push_warning | game/scripts/map/relief_cache_*.gd | non
-MB7 | À FAIRE | parchemin décor marin animé suppr, redraw à la demande | game/scripts/map/parchment_decor.gd, shaders/parchment_sea.gdshaderinc | non | [MÉCANIQUE visuelle]
+MB7 | FAIT | parchemin décor marin statique, RedrawOnDemand (plus de redessin périodique ; shader sans TIME) | game/scripts/map/parchment_decor.gd, shaders/parchment_sea.gdshaderinc | non | [MÉCANIQUE visuelle]
 MB9 | À FAIRE | life_effects points typés (life reground GELÉ) | game/scripts/map/life_effects.gd | non
 MB10 | FAIT | war_scars voie events suppr | game/scripts/map/war_scars.gd | non
 MB11 | FAIT | vegetation_mask repli sans splat | game/scripts/map/vegetation_mask.gd | non
