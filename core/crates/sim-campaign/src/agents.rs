@@ -731,7 +731,7 @@ fn herald_may_ransom(state: &CampaignState, captive: &CharacterId) -> bool {
 }
 
 fn ransom_price(state: &CampaignState, data: &GameData, captive: &CharacterId, level: u8) -> i64 {
-    let effects = &rules(data).effects;
+    let effects = rules(data);
     let percent = (effects.ransom_price_percent
         - effects.ransom_price_per_level * i64::from(level.saturating_sub(1)))
     .max(effects.ransom_price_floor);

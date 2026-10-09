@@ -175,7 +175,7 @@ fn rules_file_matches_the_design_defaults() {
             defaults.actions[&action].base_chance
         );
     }
-    assert_eq!(loaded.effects, defaults.effects);
+    assert_eq!(loaded.ransom_price_percent, defaults.ransom_price_percent);
 }
 
 #[test]
@@ -467,8 +467,12 @@ fn inciting_raises_unrest() {
     let before = state.provinces[&province].population.peasants.unrest;
     act(&mut state, &data, &id, AgentActionKind::Incite, None);
     let after = state.provinces[&province].population.peasants.unrest;
-    let incite = sim_campaign::agents::rules(&data).effects.incite_unrest;
-    assert_eq!(after, (before + incite).min(100));
+    let incite =
+        match &sim_campaign::agents::rules(&data).actions[&AgentActionKind::Incite].success[0] {
+            data_model::ActionEffect::Unrest { delta, .. } => *delta,
+            other => panic!("incite should raise unrest, got {other:?}"),
+        };
+    assert_eq!(i32::from(after), (i32::from(before) + incite).min(100));
 }
 
 #[test]

@@ -311,5 +311,8 @@
   "passive_counter_base": 10,
   "passive_counter_per_level": 5,
   "passive_counter_cap": 60,
+  "ransom_price_percent": 70,
+  "ransom_price_per_level": 5,
+  "ransom_price_floor": 45,
   "ai_network_min_income": 500
 }

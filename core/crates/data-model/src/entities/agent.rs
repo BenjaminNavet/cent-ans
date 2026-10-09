@@ -341,10 +341,27 @@ pub struct AgentRules {
     /// faction keeps one agent of each kind.
     #[serde(default)]
     pub ai_network_min_income: i64,
+    /// Ransom bought by a herald: percent of the fair price at seal 1, minus
+    /// `ransom_price_per_level` per further seal, never under the floor.
+    #[serde(default = "default_ransom_percent")]
+    pub ransom_price_percent: i64,
+    #[serde(default = "default_ransom_per_level")]
+    pub ransom_price_per_level: i64,
+    #[serde(default = "default_ransom_floor")]
+    pub ransom_price_floor: i64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
+fn default_ransom_percent() -> i64 {
+    70
+}
+fn default_ransom_per_level() -> i64 {
+    5
+}
+fn default_ransom_floor() -> i64 {
+    45
+}
 fn default_xp_success() -> u32 {
     2
 }
