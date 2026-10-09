@@ -1,18 +1,19 @@
 extends Node
 
-## Autoload `CodexStore` (H2) : fiches du Codex (`data/codex/*.json`, schéma
-## `data/schemas/codex.schema.json`), index des alias pour les auto-liens, et découvertes du
+## Autoload `CodexStore` (H2) : fiches du Codex (bundle `data/codex_bundle.json` généré depuis
+## `data/codex/*.json`, schéma `data/schemas/codex.schema.json`), index des alias pour les auto-liens, et découvertes du
 ## joueur. Les découvertes sont une méta-progression (fichier `user://codex.json`), pas un état
 ## de partie : aucune règle de jeu ici.
 ##
-## `data/` est résolu comme `GameCatalog` : `MapPaths.data_dir` (éditeur ou export .app), avec
-## repli sur `<racine du dépôt>/data/codex` si ce dossier n'a pas de fiches (fixtures du smoke).
+## `data/` est résolu par `DataFile` : `MapPaths.data_dir` (éditeur ou export .app), avec repli
+## sur `<racine du dépôt>/data` si le bundle y est absent (fixtures du smoke).
 
 signal discovered(id: String)
 signal loaded
 
 const SAVE_PATH := "user://codex.json"
 const TEST_SAVE_PATH := "user://codex_test.json"
+const BUNDLE_FILE := "codex_bundle.json"  # relatif à data/
 
 ## Grandes familles de la fenêtre Codex (§1.4) : [libellé, catégories, libellé court d'onglet].
 const FAMILIES := [
@@ -37,7 +38,7 @@ const CATEGORY_LABELS := {
 }
 
 var entries: Dictionary = {}  # id → fiche
-var codex_dir: String = ""
+var bundle_path: String = ""
 var _aliases: Dictionary = {}  # alias en minuscules → id
 var _by_entity: Dictionary = {}  # entité de jeu → id
 var _exclusions: Dictionary = {}  # id → expressions en minuscules où l'alias n'est pas lié (B8)
@@ -51,40 +52,22 @@ func _ready() -> void:
 	_load_discoveries()
 
 
-## Recharge les fiches depuis `directory` (défaut : `data/codex` de `MapPaths`).
-func reload(directory: String = "") -> void:
-	codex_dir = directory if directory != "" else _default_dir()
+## Recharge les fiches depuis le bundle `bundle_path` (défaut : `data/codex_bundle.json` de
+## `DataFile`). Le bundle est généré depuis `data/codex/cdx_*.json` (`cent-ans codex-bundle`,
+## schéma `codex_bundle.schema.json`) : un seul fichier lu au démarrage au lieu de ~480.
+func reload(path: String = "") -> void:
+	bundle_path = path if path != "" else DataFile.path_of(BUNDLE_FILE)
 	entries.clear()
 	_aliases.clear()
 	_by_entity.clear()
 	_exclusions.clear()
 	_alias_regex = null
-	var dir := DirAccess.open(codex_dir)
-	if dir != null:
-		for file_name in dir.get_files():
-			if not file_name.begins_with("cdx_") or not file_name.ends_with(".json"):
-				continue
-			var parsed: Variant = DataFile.parse_file(codex_dir.path_join(file_name))
-			if parsed is Dictionary and parsed.has("id"):
-				_add(parsed)
+	var parsed: Variant = DataFile.parse_file(bundle_path)
+	if parsed is Dictionary:
+		for entry in parsed.get("entries", []):
+			if entry is Dictionary and entry.has("id"):
+				_add(entry)
 	loaded.emit()
-
-
-func _default_dir() -> String:
-	var candidate := DataFile.data_dir().path_join("codex")
-	if _has_entries(candidate):
-		return candidate
-	return ProjectSettings.globalize_path("res://").path_join("../data/codex").simplify_path()
-
-
-static func _has_entries(directory: String) -> bool:
-	var dir := DirAccess.open(directory)
-	if dir == null:
-		return false
-	for file_name in dir.get_files():
-		if file_name.begins_with("cdx_") and file_name.ends_with(".json"):
-			return true
-	return false
 
 
 func _add(entry: Dictionary) -> void:

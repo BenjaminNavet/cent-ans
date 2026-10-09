@@ -23,7 +23,7 @@ func _initialize() -> void:
 		"exclusions": store._exclusions,
 	}
 	var digest := JSON.stringify(snapshot, "", true).sha256_text()
-	print("codex_load_bench: dir=%s entries=%d median_ms=%.1f min_ms=%.1f max_ms=%.1f" % [
-		store.codex_dir, store.entries.size(), times[RUNS / 2], times[0], times[RUNS - 1]])
+	print("codex_load_bench: bundle=%s entries=%d median_ms=%.1f min_ms=%.1f max_ms=%.1f" % [
+		store.bundle_path, store.entries.size(), times[RUNS / 2], times[0], times[RUNS - 1]])
 	print("codex_load_bench: content_sha256=%s" % digest)
 	quit(0)

@@ -1870,7 +1870,7 @@ func _run_codex() -> void:
 	if not _check(store != null and bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
 		return
 	store.call("use_test_file", _test_codex_path)
-	store.call("reload", _project_root().path_join("data/codex"))
+	store.call("reload", _project_root().path_join("data/codex_bundle.json"))
 	var total: int = store.call("total_count")
 	_check(total >= 20, "codex should have at least 20 entries, got %d" % total)
 	_check(bool(store.call("has_entry", "cdx_crecy")) and bool(store.call("has_entry", "cdx_poitiers")), "codex seed entries missing")
@@ -1942,7 +1942,7 @@ func _run_codex_bubbles_b1() -> void:
 	if not _check(store != null and bubbles != null, "B1: CodexStore / CodexBubbles autoloads missing"):
 		return
 	store.call("use_test_file", _test_codex_path)
-	store.call("reload", _project_root().path_join("data/codex"))
+	store.call("reload", _project_root().path_join("data/codex_bundle.json"))
 	bubbles.call("close_all")
 	var failures_before := _failures
 
@@ -2790,7 +2790,7 @@ func _run_coinage_ransom() -> void:
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
 		store.call("use_test_file", _test_codex_path)
-		store.call("reload", _project_root().path_join("data/codex"))
+		store.call("reload", _project_root().path_join("data/codex_bundle.json"))
 
 	# Vraies données (noms de provinces, encyclopédie) ; dossier précédent restauré à la fin.
 	var previous_dir := str(paths.get("data_dir"))
