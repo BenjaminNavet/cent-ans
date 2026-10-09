@@ -59,7 +59,7 @@ impl CampaignState {
         // NT3: recruitments and hires count towards the player's missions.
         let recruits = u32::from(matches!(
             order,
-            Order::Recruit { .. } | Order::HireMercenary { .. }
+            Order::Recruit { .. } | Order::RecruitInto { .. } | Order::HireMercenary { .. }
         ));
         let outcome = self.apply_order_outcome(data, &player, order)?;
         if recruits > 0 {
@@ -174,7 +174,18 @@ impl CampaignState {
                 if crate::capture::is_ruined(self, &settlement) {
                     return Err(OrderError::SettlementRuined);
                 }
-                self.order_recruit(data, faction, &settlement, &unit_type)
+                self.order_recruit(data, faction, &settlement, &unit_type, None)
+            }
+            Order::RecruitInto {
+                settlement,
+                unit_type,
+                army,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
+                self.order_recruit(data, faction, &settlement, &unit_type, Some(&army))
             }
             Order::CreateArmy {
                 settlement,

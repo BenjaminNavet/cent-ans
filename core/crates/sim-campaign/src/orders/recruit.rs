@@ -434,7 +434,11 @@ impl CampaignState {
         faction: &FactionId,
         settlement: &SettlementId,
         unit_type: &UnitTypeId,
+        into_army: Option<&crate::state::ArmyId>,
     ) -> Result<(), OrderError> {
+        if let Some(army) = into_army {
+            self.check_recruit_destination(data, faction, settlement, army)?;
+        }
         // SV2: the resources come from the faction's producing provinces
         // (reserved while the recruit trains), the rest is imported and
         // paid (B7c rule, ADR 0053).
@@ -461,7 +465,37 @@ impl CampaignState {
                 turns_left,
                 ordered_turn,
                 drawn: price.draw.drawn,
+                into_army: into_army.cloned(),
             });
+        Ok(())
+    }
+
+    /// WH armyb: `army` must be the faction's own, stand in `settlement`
+    /// and have room for one more unit.
+    fn check_recruit_destination(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        army: &crate::state::ArmyId,
+    ) -> Result<(), OrderError> {
+        let found = self
+            .armies
+            .get(army)
+            .ok_or_else(|| OrderError::UnknownArmy(army.clone()))?;
+        if &found.faction != faction {
+            return Err(OrderError::NotYourArmy(faction.clone()));
+        }
+        if found.settlement() != Some(settlement) {
+            return Err(OrderError::RecruitUnavailable(
+                "l'armée n'est pas dans la place".to_owned(),
+            ));
+        }
+        if super::army::army_room(self, data, army) == 0 {
+            return Err(OrderError::ArmyFull {
+                cap: data.army_rules.cap(),
+            });
+        }
         Ok(())
     }
 

@@ -102,6 +102,15 @@ pub enum Order {
         settlement: Place,
         unit_type: UnitTypeId,
     },
+    /// Like `Recruit`, but the unit joins `army` (standing in the settlement)
+    /// on delivery instead of the garrison; it falls back to the garrison if
+    /// the army left or is full by then.
+    RecruitInto {
+        #[serde(alias = "province")]
+        settlement: Place,
+        unit_type: UnitTypeId,
+        army: ArmyId,
+    },
     /// Form a new army from garrison units (indices into the garrison).
     CreateArmy {
         #[serde(alias = "province")]

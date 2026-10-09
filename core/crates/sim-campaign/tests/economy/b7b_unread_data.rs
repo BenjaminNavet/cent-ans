@@ -252,6 +252,7 @@ fn queue_entries_round_trip() {
         turns_left: 2,
         ordered_turn: 5,
         drawn: Default::default(),
+        into_army: None,
     })
     .unwrap();
     let back: QueuedRecruit = serde_json::from_str(&full).unwrap();

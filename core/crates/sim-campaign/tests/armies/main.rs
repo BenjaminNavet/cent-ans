@@ -10,3 +10,4 @@ mod tw2_t2_replenish;
 mod tw2_t3_mercenaries;
 mod tw2_t5_traditions;
 mod wh_armya;
+mod wh_armyb;

@@ -492,6 +492,11 @@ pub struct QueuedRecruit {
     /// (like [`Construction::drawn`]); empty in older saves.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub drawn: BTreeMap<data_model::ResourceId, u32>,
+    /// WH armyb: the army that receives the unit on delivery (`None`: the
+    /// garrison). Falls back to the garrison when the army left, is gone or
+    /// is full.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub into_army: Option<ArmyId>,
 }
 
 impl QueuedRecruit {

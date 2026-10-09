@@ -778,6 +778,8 @@ pub(crate) fn resolve_economy(
             )
         })
         .collect();
+    // WH armyb: recruits bound for an army, placed once the settlements pass is done.
+    let mut bound_for_army: Vec<(SettlementId, crate::state::ArmyId, Unit)> = Vec::new();
     for (settlement_id, settlement) in state.settlements.iter_mut() {
         let Some(effects) = local_effects.get(settlement_id) else {
             continue;
@@ -795,7 +797,7 @@ pub(crate) fn resolve_economy(
             .partition(|r| r.turns_left == 0);
         settlement.recruit_queue = training;
         let bonus = morale_bonus.get(settlement_id).copied().unwrap_or(0.0);
-        for unit_type_id in ready.into_iter().map(|r| r.unit_type) {
+        for (unit_type_id, into_army) in ready.into_iter().map(|r| (r.unit_type, r.into_army)) {
             let Some(unit_type) = data.unit_types.get(&unit_type_id) else {
                 continue;
             };
@@ -804,6 +806,10 @@ pub(crate) fn resolve_economy(
             (unit.levy_armor, unit.levy_ranged) =
                 crate::buildings::levy_bonus(data, &settlement.buildings, unit_type.category);
             unit.morale = crate::research::boosted(unit.morale, bonus, 100);
+            if let Some(army) = into_army {
+                bound_for_army.push((settlement_id.clone(), army, unit));
+                continue;
+            }
             settlement.garrison.push(unit);
             if settlement.controller == player {
                 events.push(
@@ -819,6 +825,57 @@ pub(crate) fn resolve_economy(
                     .faction(&player),
                 );
             }
+        }
+    }
+    deliver_to_armies(state, data, bound_for_army, events);
+}
+
+/// WH armyb: units recruited « into an army » join it when it still stands
+/// in the settlement, under the same flag and below the unit cap; otherwise
+/// they join the garrison.
+fn deliver_to_armies(
+    state: &mut CampaignState,
+    data: &GameData,
+    deliveries: Vec<(SettlementId, crate::state::ArmyId, Unit)>,
+    events: &mut Vec<GameEvent>,
+) {
+    let player = state.player_faction.clone();
+    let cap = data.army_rules.cap();
+    for (settlement_id, army_id, unit) in deliveries {
+        let controller = state.settlements[&settlement_id].controller.clone();
+        let name = data
+            .unit_types
+            .get(&unit.unit_type)
+            .map_or_else(|| unit.unit_type.to_string(), |t| t.name.display.clone());
+        let province = state.settlements[&settlement_id].province.clone();
+        let joins = state.armies.get(&army_id).is_some_and(|a| {
+            a.faction == controller && a.settlement() == Some(&settlement_id) && a.units.len() < cap
+        });
+        let message = if joins {
+            let army = state.armies.get_mut(&army_id).expect("checked");
+            army.units.push(unit);
+            format!(
+                "{name} rejoignent l'armée à {}.",
+                data.settlement_name(&settlement_id)
+            )
+        } else {
+            state
+                .settlements
+                .get_mut(&settlement_id)
+                .expect("exists")
+                .garrison
+                .push(unit);
+            format!(
+                "{name} rejoignent la garnison de {}.",
+                data.settlement_name(&settlement_id)
+            )
+        };
+        if controller == player {
+            events.push(
+                GameEvent::new(EventKind::Recruited, message)
+                    .province(&province)
+                    .faction(&player),
+            );
         }
     }
 }

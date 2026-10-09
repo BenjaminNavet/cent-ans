@@ -99,6 +99,7 @@ fn map_scenes_are_deterministic() {
             turns_left: 1,
             ordered_turn: turn,
             drawn: BTreeMap::new(),
+            into_army: None,
         });
     }
     // A recent fair (event fired at the end of the previous turn).
