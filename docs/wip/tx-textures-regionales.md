@@ -12,6 +12,7 @@ local (mflux + Real-ESRGAN) en secours seulement.
 
 - 2026-10-09 : joueur valide fal (10 $). Backend fal dans `generate.py` (parallèle ×8, `--max-cost`,
   coût estimé affiché) ; essai prairie 2048 natif concluant (0,02 $).
+- 2026-10-09 : T1e `alpha.py` (cut_out, alpha_family), `micro_detail`/`micro_detail_normal` (pbr), checks alpha, CLI `textures alpha|micro`.
 
 ## Prochaine étape
 
