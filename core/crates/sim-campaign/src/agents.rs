@@ -282,16 +282,6 @@ impl CampaignState {
             .collect()
     }
 
-    /// Agents standing on `settlement`, in id order.
-    pub fn agents_at(&self, settlement: &SettlementId) -> Vec<&AgentId> {
-        self.agents
-            .agents
-            .iter()
-            .filter(|(_, a)| &a.location == settlement)
-            .map(|(id, _)| id)
-            .collect()
-    }
-
     fn agents_in_province<'a>(
         &'a self,
         province: &'a ProvinceId,

@@ -303,21 +303,6 @@ pub fn garrison_relief_percent(rules: &EconomyRules, effects: &EffectTotals) -> 
 }
 
 impl CampaignState {
-    /// Share (0-1) of the tax of `province` that `faction` collects this
-    /// turn: the normalised weights of the settlements it controls that are
-    /// not besieged (lot C4). Needs the data for the weights.
-    pub fn province_tax_share(
-        &self,
-        data: &GameData,
-        province: &ProvinceId,
-        faction: &FactionId,
-    ) -> f64 {
-        self.settlements_of(province)
-            .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
-            .map(|(id, _)| crate::settlements::weight_share(data, id))
-            .sum()
-    }
-
     /// Seasonal tax a settlement's share of its province yields (lot C4):
     /// the province's tax under the buildings of its city and of the
     /// settlement itself, the governor (M4) and `tech` (M6), times the
