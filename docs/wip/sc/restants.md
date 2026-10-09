@@ -15,7 +15,7 @@ GT3 | PARTIEL | 151/197 *_test.gd sur TestCase, 46 non migrés | game/tests/*_te
 GT4 | PARTIEL | tools/run_godot_tests.sh existe mais CI windows.yml ne lance que smoke.gd | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
 GT5 | À FAIRE | suppr tests rouges/orphelins (inventaire à faire via run_all) | game/tests | non
 GT6 | À FAIRE | fusion des tests par thème | game/tests | non
-GT7 | À FAIRE | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
+GT7 | FAIT (sc/smoke, 5 smoke_*.gd) | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
 GT8 | PARTIEL | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences _stage_/stage_screenshot/--stage restent | game/scripts/battle/battle_scene.gd, ui/*, map/* | non
 HOOKS | PARTIEL | retirer stage_screenshot()/stage_example restants + smoke.gd:1150 | idem | non
 
@@ -37,11 +37,11 @@ CB8 | PARTIEL | hostile_settlement_cells toujours fonction non cachée, passe-pl
 CB10 | À FAIRE | debug_* (encounter.rs, battle_request.rs) pas dans staging.rs ; sg3_assault_probe.rs reste | core/crates/sim-campaign/src/battle_request.rs, tests/siege_battle/sg3_assault_probe.rs | oui
 CB12 | PARTIEL | constantes naval en data faites ; mémo win_chance non vérifié | core/crates/sim-battle/src/naval | oui
 CB13 | PARTIEL | constantes siège/débarquement en data (movement) ; pub->pub(crate), doc Order non vérifiés | core/crates/sim-campaign/src | oui
-PROBES | À FAIRE | examples diplomacy_probe, dynasty_probe, income_probe (sim-campaign) ; tests century/settlements/ia_quality probes à revérifier | core/crates/sim-campaign/examples | oui
+PROBES | FAIT (sc/cc) | examples diplomacy_probe, dynasty_probe, income_probe (sim-campaign) ; tests century/settlements/ia_quality probes à revérifier | core/crates/sim-campaign/examples | oui
 
 ## BB sim-battle
-BB1 | À FAIRE | village B5 : battle_village.gd 612 l + props/obstacles/ai/field/setup/bridge | game/scripts/battle/battle_village.gd, core/crates/sim-battle/src/{town,props,site}.rs | oui | [MÉCANIQUE]
-BB14 | À FAIRE | générateurs borough/castle de siege_layouts.rs (912 l) à supprimer | core/crates/sim-battle/src/siege_layouts.rs | oui | [MÉCANIQUE]
+BB1 | FAIT (sc/bb1, ADR 0205) | village B5 : battle_village.gd 612 l + props/obstacles/ai/field/setup/bridge | game/scripts/battle/battle_village.gd, core/crates/sim-battle/src/{town,props,site}.rs | oui | [MÉCANIQUE]
+BB14 | FAIT (sc/bb14) | générateurs borough/castle de siege_layouts.rs (912 l) à supprimer | core/crates/sim-battle/src/siege_layouts.rs | oui | [MÉCANIQUE]
 BB5 | À FAIRE | WallPiece::new, SiegeWorks::skeleton, from_layout découpé (après BB14) | core/crates/sim-battle/src/siege_layout.rs, siege.rs | oui
 BB6 | PARTIEL | battle_terrain.json fait ; battle_relief/site.json non | core/crates/sim-battle/src/{relief,site}.rs, data/rules | oui
 BB8 | PARTIEL | place_plot/place_manor encore pub, decor_effect_at unique à vérifier | core/crates/sim-battle/src/decor_gen | oui
@@ -53,7 +53,7 @@ BB12 | À FAIRE | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui
 PF-02 | FAIT (sc/relief, ADR 0203) | suppr relief_quadtree.gd (1295 l) sélection GD + fine_terrain_job.gd (167) + repli sans pyramide terrain_builder (1493) | game/scripts/map/{relief_quadtree,fine_terrain_job,terrain_builder}.gd | non (Rust optionnel) | [MÉCANIQUE visuelle]
 PF-03 | FAIT (ADR 0204, sc/veg) | suppr vegetation_tile_job.gd (649 l) + repli GD vegetation.gd [GELÉ vegetation.gd] | game/scripts/map/vegetation_tile_job.gd, vegetation.gd | non
 PF-06 | PARTIEL | CmdArgs partout ; 46 interrupteurs --no-* encore présents ; sc/devflags prêt (1f7987144) mais NON fusionné (attend settlement_layer propre) | game/scripts/**, branche sc/devflags (../gp-sc-devflags) | non
-PF-07 | À FAIRE | map_bench.gd 534, release_journey.gd 525, perf_probe.gd, _bench_* battle_scene (campaign_map ex-gelé FL) | game/scripts/dev/*.gd | non
+PF-07 | FAIT (sc/bench) | map_bench.gd 534, release_journey.gd 525, perf_probe.gd, _bench_* battle_scene (campaign_map ex-gelé FL) | game/scripts/dev/*.gd | non
 PF-04 | PARTIEL | chargeur Rust vectoriel fait (DT4, ~500->200 ms) ; bake .bin geojson non | tools/cent_ans_tools/geo, core/crates/godot-bridge/src/map_geo.rs | oui
 PF-01 | À FAIRE | OutbuildingPacker Rust [GELÉ FL] | game/scripts/map/outbuilding_layer.gd | oui
 PF-10 | À FAIRE | declutter Rust (marker_declutter.gd) [GELÉ FL] | game/scripts/map/marker_declutter.gd | oui
@@ -62,7 +62,7 @@ PF-09 | À FAIRE | parchment_decor précalc | game/scripts/map/parchment_decor.g
 PF-11 | À FAIRE | heights_m batch | game/scripts/map | oui
 PF-12 | À FAIRE | TileJobPool commun (15 fichiers) | game/scripts/map/*_job.gd | non
 PF-13 | PARTIEL | DataFile/JsonLookup largement posés ; 92 lectures JSON brutes restent (136 au départ) | game/scripts/** | non
-PF-14 | À FAIRE | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
+PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) | game/scripts/map/relief_landcover.gd, tools/cent_ans_tools/export_data.py | non
 
 ## BA sim-battle moteur
 BA1 | PARTIEL | sim-battle/ai propres ; seuls restent les examples sim-campaign (voir PROBES) | core/crates/sim-campaign/examples | oui
@@ -94,11 +94,11 @@ CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
 ## CC sim-campaign reste
 CC3 | PARTIEL | = CA5 | - | oui
 CC5 | PARTIEL | TurnBudget fait ; economy legacy (province_income, alias) à vérifier | core/crates/sim-campaign/src/economy.rs | oui
-CC7 | À FAIRE | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
+CC7 | ÉCARTÉ (déjà une table, sc/cc) | rule_constants table | core/crates/sim-campaign/src/rule_constants.rs | oui
 CC8 | À FAIRE | table.rs+edicts.rs ProvincePolicy, medicine->population | core/crates/sim-campaign/src/{table,edicts,medicine}.rs | oui
 CC9 | À FAIRE | ajustement garnisons JR4b -> data pré-calculée | core/crates/sim-campaign/src/setup_1337.rs | oui | [MÉCANIQUE]
 CC11 | PARTIEL | ai/examples nettoyés ; sg3_assault_probe + jr4b_budget_probe (voir PROBES) | core/crates/sim-campaign/tests | oui
-CC12 | À FAIRE | code mort 15 fns | core/crates/sim-campaign/src | oui
+CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
 CC14 | PARTIEL | ai découpé (AITURN) ; fonctions géantes sim-campaign (diplomacy 2276, agents 2019, crusade 1850) | core/crates/sim-campaign/src | oui
 CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
 
@@ -140,7 +140,7 @@ MB2 | FAIT (sc/relief, ADR 0203) | relief_quadtree sélection GD (= AD8b) | game
 MB3 | FAIT (ADR 0204, sc/veg ; vegetation_tile_job.gd gardé réduit à la requête) | = PF-03 | game/scripts/map/vegetation_tile_job.gd | non
 MB4 | À FAIRE | StreamedTileLayer commun (5 couches) [vegetation GELÉ] | game/scripts/map | non
 MB5 | PARTIEL | flags A/B végétation GA3/FC (--no-ga3-veg x7, --no-fc2/5) | game/scripts/map | non
-MB6 | À FAIRE | relief_cache_notice (117) + relief_cache_status (241) -> push_warning | game/scripts/map/relief_cache_*.gd | non
+MB6 | FAIT (sc/dt2) | relief_cache_notice (117) + relief_cache_status (241) -> push_warning | game/scripts/map/relief_cache_*.gd | non
 MB7 | À FAIRE | parchemin décor marin animé suppr, redraw à la demande | game/scripts/map/parchment_decor.gd, shaders/parchment_sea.gdshaderinc | non | [MÉCANIQUE visuelle]
 MB9 | À FAIRE | life_effects points typés (life reground GELÉ) | game/scripts/map/life_effects.gd | non
 MB10 | À FAIRE | war_scars voie events suppr | game/scripts/map/war_scars.gd | non
@@ -161,7 +161,7 @@ MA2 | À FAIRE | landmarks v2 + tools paris_v2_author [réserve] | data/landmark
 MA4 | À FAIRE | settlement_layer découpe labels/hamlets/picking [GELÉ] | game/scripts/map/settlement_layer.gd | non
 MA5 | À FAIRE | = PF-10 | - | oui
 MA6 | À FAIRE | map_ui (1851 l) JournalView/TopBarFit + JOURNAL_STYLES | game/scripts/map/map_ui.gd | non
-MA7 | À FAIRE | = PF-07 (PerfProbe + map_bench) | game/scripts/dev | non
+MA7 | FAIT (= PF-07) | = PF-07 (PerfProbe + map_bench) | game/scripts/dev | non
 MA8 | PARTIEL | PF-05 mock fait ; 246 has_method restent (campaign_map, settlement_*) | game/scripts/map | non
 MA9 | À FAIRE | règles visuelles villes + governable/commandable -> core | game/scripts/map/settlement_*.gd, core | oui
 MA11 | À FAIRE | outbuilding_layer découpe (1718 l) [GELÉ] | game/scripts/map/outbuilding_layer.gd | non
@@ -182,18 +182,18 @@ TL14 | À FAIRE | paths.py/imaging.py (dernier) | tools/cent_ans_tools | non
 TLR | PARTIEL | descriptions schémas / commentaire siege_engines_fx.gd:89 citant outils supprimés | data/schemas, game/scripts/battle/siege_engines_fx.gd | non
 
 ## MS scripts divers
-MS2 | À FAIRE | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
+MS2 | FAIT (= PF-07) | = PF-07 (MapBench/PerfProbe/--bench-map/gen_synthetic_map) | game/scripts/dev, game/tools/gen_synthetic_map.gd | non
 MS3 | PARTIEL | DataFile/JsonLookup posés ; battle/ui restants (voir PF-13) | game/scripts | non
 MS4 | À FAIRE | codex_bubbles (1215 l) BubbleLayout + set_process conditionnel | game/scripts/codex/codex_bubbles.gd | non
 MS5 | PARTIEL | VoicePool créé ; play_sfx round-robin hors pool, volumes/EVENT_SFX JSON à vérifier | game/scripts/audio | non
 MS6 | FAIT? render_quality.json existe -> voir FAIT
 MS7 | À FAIRE | assets sans référence (textures/buildings brutes 26 Mo ; quaternius 95 fichiers suivis) | game/assets, tools | non
 MS8 | À FAIRE | LUT étalonnage atmosphere_library.grade_lut port Rust/précuisson | game/scripts/visual/atmosphere_library.gd | oui
-MS9 | À FAIRE | release_journey --map-ab/--ab-configs/--uncapped | game/scripts/dev/release_journey.gd | non
+MS9 | FAIT (release_journey suppr) | release_journey --map-ab/--ab-configs/--uncapped | game/scripts/dev/release_journey.gd | non
 MS10 | À FAIRE | passe commentaires visual/ audio/, constantes battle_audio -> sound_bank.json | game/scripts/{visual,audio} | non
 
 ## DT / divers
-DT2 | À FAIRE | relief_shade_[0-3].png (131 Mo) toujours suivis ; supprimer repli + dé-suivre | data/map/relief_shade_*.png, game/scripts/map/relief_landcover.gd | non
+DT2 | FAIT (sc/dt2, PNG dé-suivis gardés pour geo) | relief_shade_[0-3].png (131 Mo) toujours suivis ; supprimer repli + dé-suivre | data/map/relief_shade_*.png, game/scripts/map/relief_landcover.gd | non
 DT3 | REPORTÉ | fusion landmarks v1->v2 (= MA1/MA2 sales) | - | non
 DT5 | À FAIRE | defs communes color_hex/rgb3/snake_id dans common.schema.json | data/schemas | non
 DT8 | PARTIEL | schémas town_footprint, forced_sea_edges, 4 orphelins à vérifier | data/schemas | non
