@@ -23,3 +23,10 @@ a ete interrompue a 60 % sur consigne du coordinateur (passage a fal : Z-Image T
 `docs/budget.md`). L'appel `dn_batch.py` fal (catalogue `fig_yaya`, `DN_FAL_CAP_USD`=44.512, `--until 3d`) a ete refuse par
 le systeme de permissions (depense cloud sans autorisation directe du joueur) : aucun appel fait, cout 0.
 Reprise : soit autoriser la depense fal, soit relancer la commande Qwen locale (~45 min) puis TRELLIS HF / SF3D.
+
+## QW-E : TERMINE (09/10)
+- Image/3D faites par le coordinateur (fal, 0,049 $, `docs/budget.md`) : `~/dev/cent-ans-raw/dn/yaya_archer_6/` (face `img/s1337.png`, glb `3d/fal__s1337.glb`). Copies dans `~/dev/cent-ans-raw/ga3/l5/yaya/` (`multi_front_back.glb`, `sheet.png`).
+- Bake : `blender -b --factory-startup --python tools/blender_scripts/ga3_figures.py -- yaya` -> `battle_ga3/archer_6_*` (LOD 11633/1310/260 tris, 1 tete, pas de variante de visage).
+- `archer_6` : maillages fins copies d'`archer_3` (`battle_fine/archer_6_lod*.mesh.bin`, necessaires au bake pour les mains) ; `unit_yaya.figure = archer_6`.
+- Tests : `ga3_l3_figures_test.gd` OK (archer_6 ajoute, sans buste en livree : cuirasse cloutee), `test_ga3_figures_manifest.py` 4 OK. `smoke.gd` : echecs sans rapport (erreurs de compilation `parchment_overlay.gd`/`strategic_view.gd` de l'arbre de travail d'autres agents).
+- Verif visuelle : rendu Blender (bind/dos/marche/tir), pas de capture Godot. Defaut : en tir, la jupe rouge (livree) s'etire en lamelles ; pas d'armoiries sur la poitrine.

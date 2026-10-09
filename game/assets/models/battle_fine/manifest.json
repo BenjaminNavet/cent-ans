@@ -112,9 +112,9 @@
    "atlas_layer": 15,
    "fine": true,
    "lods": [
-    "archer_3_lod0.mesh.bin",
-    "archer_3_lod1.mesh.bin",
-    "archer_3_lod2.mesh.bin"
+    "archer_6_lod0.mesh.bin",
+    "archer_6_lod1.mesh.bin",
+    "archer_6_lod2.mesh.bin"
    ],
    "noble": false,
    "rig": "human",

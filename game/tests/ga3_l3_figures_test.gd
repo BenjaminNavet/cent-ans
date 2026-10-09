@@ -24,9 +24,11 @@ const C_ARMS := 6
 const GENERATED := [
 	["archer", 0], ["infantry", 0], ["archer", 2], ["infantry", 1], ["infantry", 5], ["cavalry", 0],
 	["infantry", 2], ["infantry", 3], ["infantry", 4], ["infantry", 6], ["infantry", 7], ["infantry", 8],
-	["archer", 1], ["archer", 4], ["cavalry", 3], ["standard", 1],
+	["archer", 1], ["archer", 4], ["archer", 6], ["cavalry", 3], ["standard", 1],
 ]
-const SINGLE_HEAD := ["standard_1"]
+const SINGLE_HEAD := ["standard_1", "archer_6"]
+## QW-E : le yaya porte une cuirasse cloutée, sans buste en livrée (pas d'armoiries sur la poitrine).
+const NO_CHEST_LIVERY := ["archer_6"]
 const UNTOUCHED := [["archer", 3], ["cavalry", 1], ["standard", 0]]
 
 
@@ -106,7 +108,7 @@ func _check_generated(kind: String, variant: int) -> void:
 	for v in heads if heads > 1 else 0:
 		if not seen.has(1 << v):
 			check(false, "ga3_l3: %s sans tête de variante %d" % [name, v])
-	if BattleSkinned.chest_box(kind, variant).is_empty():
+	if BattleSkinned.chest_box(kind, variant).is_empty() and not name in NO_CHEST_LIVERY:
 		check(false, "ga3_l3: %s sans buste en livrée (armoiries)" % name)
 	var mat := ShaderMaterial.new()
 	mat.shader = BattleSkinned.SHADER
