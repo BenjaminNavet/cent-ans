@@ -16,9 +16,8 @@ Stages, each cached in ``RAW_DIR/<unit>[_<attempt>]/`` (an existing output is ne
 3. ``front.png``: the leftmost figure of the cut sheet (alpha columns), padded square.
 4. ``multi.glb`` (default, ``--model multi``): ``fal-ai/trellis/multi`` (0.02 $) on the
    A-pose views (``--views front,back``: the generated profile often holds something);
-   ``trellis.glb`` (``--model trellis``, 0.02 $) on ``front.png``; ``trellis2.glb``
-   (``--model trellis2``, 0.30 $, lot L3a comparison only: the player keeps to the cheap
-   models) at 1024 on ``front.png`` (2048 texture).
+   ``trellis.glb`` (``--model trellis``, 0.02 $) on ``front.png``. TRELLIS 2 is forbidden
+   (player rule 09/10).
 
 Raw responses are kept as ``result_<stage>.json``; the estimated cost of every paid call is
 appended to ``RAW_DIR/costs.json``.
@@ -37,12 +36,11 @@ import numpy as np
 from PIL import Image
 
 SR3 = Path.home() / "dev/cent-ans-raw/sr3"
-# Catalogue prices (USD): nano-banana-2 edit at 2K (1.5 x 0.08), bria, trellis-2 at 1024.
+# Catalogue prices (USD): nano-banana-2 edit at 2K (1.5 x 0.08), bria.
 PRICES = {
     "sheet": 0.12,
     "sheet1k": 0.08,
     "cut": 0.018,
-    "trellis2": 0.30,
     "trellis": 0.02,
     "multi": 0.02,
 }
@@ -329,12 +327,6 @@ VARIANTS = {
 }
 # SR3 source sheet per unit when it is not ``<unit>.png``.
 SOURCES = {"knight": "knight_mounted.png"}
-TRELLIS2_ARGS = {
-    "resolution": 1024,
-    "texture_size": 2048,
-    "decimation_target": 100000,
-    "remesh": True,
-}
 COST_LOG: list[dict] = []
 
 
@@ -411,9 +403,7 @@ def main() -> None:
     parser.add_argument("--unit", required=True, choices=sorted(UNITS))
     parser.add_argument("--attempt", type=int, default=1)
     parser.add_argument("--seed", type=int, default=1337)
-    parser.add_argument(
-        "--model", choices=("multi", "trellis", "trellis2"), default="multi"
-    )
+    parser.add_argument("--model", choices=("multi", "trellis"), default="multi")
     parser.add_argument("--views", default="front,back")
     parser.add_argument(
         "--variant",
@@ -488,7 +478,7 @@ def main() -> None:
                 "multi",
             )
             download(res["model_mesh"]["url"], glb)
-    elif args.model == "trellis":
+    else:
         glb = out / "trellis.glb"
         if not glb.exists():
             url = fal_client.upload_file(str(front))
@@ -499,17 +489,6 @@ def main() -> None:
                 "trellis",
             )
             download(res["model_mesh"]["url"], glb)
-    else:
-        glb = out / "trellis2.glb"
-        if not glb.exists() and not (out / "STOP").exists():
-            url = fal_client.upload_file(str(front))
-            res = run(
-                "fal-ai/trellis-2",
-                {"image_url": url, "seed": args.seed, **TRELLIS2_ARGS},
-                out,
-                "trellis2",
-            )
-            download(res["model_glb"]["url"], glb)
     log_path = args.raw / "costs.json"
     log = json.loads(log_path.read_text()) if log_path.exists() else []
     log.extend(COST_LOG)

@@ -30,7 +30,7 @@ $R data/art/dn_catalog_nature_extra.json --only <ids> --seeds 3 --image-backend 
 ```
 
 ## DN-RESTE (09/10) : les 67 restants, voie fal seule (règle du joueur : pas de repli local)
-- Fait avec fal (Z-Image turbo, TRELLIS, flux-2/edit + trellis/multi), 3 graines, meilleure par heuristique (`--select-best`, charte `warn`), prompts des refusés D5 désaturés (« strongly desaturated ... ») : 27 objets ingérés (`dn_manifest.json`, 694 assets) ; 21 figures : glb brut `dn/<id>/3d/fal__s*.glb` (pas de classe d'ingest `figure` : passage par `ga3_figures.py`) ; 14 cartes `card_*` dans `game/assets/textures/vegetation/dn_cards/` + `dn_cards_manifest.json` (`dn_cards.py`, fal d'abord, `--fal-only`). Dépense 2,67 $.
+- Fait avec fal (Z-Image turbo, TRELLIS, flux-2/edit + trellis/multi), 3 graines (historique : fait avant la règle ; depuis, le meilleur-de-N est refusé sur un modèle payant, `dn_batch` : un seul appel fal par image, les graines multiples restent pour le local), meilleure par heuristique (`--select-best`, charte `warn`), prompts des refusés D5 désaturés (« strongly desaturated ... ») : 27 objets ingérés (`dn_manifest.json`, 694 assets) ; 21 figures : glb brut `dn/<id>/3d/fal__s*.glb` (pas de classe d'ingest `figure` : passage par `ga3_figures.py`) ; 14 cartes `card_*` dans `game/assets/textures/vegetation/dn_cards/` + `dn_cards_manifest.json` (`dn_cards.py`, fal d'abord, `--fal-only`). Dépense 2,67 $.
 - Ordre des figures : archer_3_jack, archer_5_handgunner, cavalry_1_druzhina, cavalry_4_routier, cavalry_5_jinete, standard_0_bearer, army_lord_mounted, 14 fig_* mobile.
 - Anciennes images : `dn/<id>/rc_prev/`.
 

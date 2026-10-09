@@ -112,10 +112,8 @@ une même entrée). Piège d'installation (libomp) : voir `docs/wip/i3d-local.md
 ### Payant (dernier recours)
 TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul appel, ligne dans
 `docs/budget.md`. Meshy : trop cher.
-**TRELLIS 2 (`fal-ai/trellis-2`, 0,30 $ à 1024, autorisé le 09/10)** : dn_batch `--backend3d fal2` (une vue, glb `3d/fal2__s<seed>.glb`,
-`DN_T2_FACES` règle `decimation_target`). Bon pour les objets isolés que TRELLIS 1 rate (arbres à couronne, bombarde, charrette,
-objets fusionnés avec une maison). **Pas pour les maquettes de ville** (décision du joueur 09/10) : le LOD1 (4 000 triangles) d'un
-maillage TRELLIS 2 de 100 000 faces s'effondre en éclats ; une maquette de ville/cité/château/port se fait en **TRELLIS 1 multi-vues**
+**TRELLIS 2 (`fal-ai/trellis-2`) : INTERDIT** (règle du joueur, 09/10). `dn_batch` rejette `--backend3d fal2` avec un message clair ;
+seuls TRELLIS 1 (+ multi) et le modèle de vues côté/dos sont autorisés sur fal. Une maquette de ville/cité/château/port se fait en **TRELLIS 1 multi-vues**
 (`--backend3d fal --side-view` : face + dos + côté générés par `flux-2/edit`). Chaque vue générée est contrôlée avant la 3D
 (luminance moyenne ≥ 0,7 × celle de la face, silhouette non vide, `view_checks.jsonl`), régénérée jusqu'à 3 fois (graine +13), la
 plus claire gardée sinon. Après la 3D : `tools/experiments/dn_back_check.py` rend face et dos (Blender) et signale un dos plus
@@ -304,7 +302,9 @@ uv run --with rembg --with onnxruntime --with fal-client --with pillow --with nu
   sombres et sobres); SF3D : formes correctes mais texture floue, trop claire et saturée, roue du moulin
   déchiquetée, chariot bruité. SF3D reste un repli.
 
-### Repli local automatique (`dn_batch.py`, désactivable par `--no-local-fallback`)
-- 3D : si fal échoue (erreur, filtre de contenu, solde, plafond `DN_FAL_CAP_USD`), le lot enchaîne seul TRELLIS HF (si quota) puis SF3D local sous `gpu.lock` ; vue de dos Qwen-Image-Edit local (LoRA Multiple-Angles, ≈ 25 min) pour les classes orientées ; le repli est journalisé (`failures.jsonl`, `generation.json` : `fallbacks`, `backend3d_used`).
-- Image : entrée refusée par la charte D5 ou sans image fal (filtre de contenu) → 3 graines de plus en mflux local avant d'abandonner.
+### Repli local (`dn_batch.py`), désactivé par défaut (règle du joueur)
+- Par défaut, si fal échoue (erreur, filtre de contenu, solde, plafond `DN_FAL_CAP_USD`), l'échec est seulement journalisé (`failures.jsonl`) et listé pour une **session locale séparée** : jamais de repli local dans la même session. L'option explicite `--local-fallback` l'active.
+- Avec `--local-fallback` : 3D : le lot enchaîne seul TRELLIS HF (si quota) puis SF3D local sous `gpu.lock` ; vue de dos Qwen-Image-Edit local (LoRA Multiple-Angles, ≈ 25 min) pour les classes orientées ; le repli est journalisé (`failures.jsonl`, `generation.json` : `fallbacks`, `backend3d_used`).
+- Meilleur-de-N : refusé sur un modèle payant (`--image-backend fal` avec `--seeds`/`seeds` > 1) ; autorisé en local.
+- Image (avec `--local-fallback` seulement) : entrée refusée par la charte D5 ou sans image fal (filtre de contenu) → 3 graines de plus en mflux local avant d'abandonner.
 - Test : `uv run --project tools pytest tools/tests/test_dn_batch_fallback.py` (fal simulé en échec).

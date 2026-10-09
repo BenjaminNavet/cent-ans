@@ -1,7 +1,7 @@
 """Non-interactive, resumable batch of the image -> 3D procedure (docs/pipeline-assets-3d.md).
 
 Catalogue JSON: a list of ``{"id", "kind": "decor"|"figure", "prompt", "seeds": N,
-"backend3d": "fal"|"fal2"|"sf3d"|"hf"|"both"}`` (``both`` = fal + sf3d; ``fal2`` = TRELLIS 2, 0.30 $; ``hf`` = free TRELLIS Space,
+"backend3d": "fal"|"sf3d"|"hf"|"both"}`` (``both`` = fal + sf3d; ``hf`` = free TRELLIS Space,
 best effort, a failure is logged and skipped). Run::
 
     uv run --with rembg --with onnxruntime --with fal-client --with pillow --with numpy \
@@ -72,7 +72,9 @@ FIGURE_SUFFIX = (
 )
 # Mounted figures (entry ``"mounted": true``): the standing-soldier template yields a standing man
 # with small horses on the side, so the rider gets its own template (DN-FIX3).
-MOUNTED_PREFIX = "Photorealistic reference sheet of a single horse with one rider seated on it:"
+MOUNTED_PREFIX = (
+    "Photorealistic reference sheet of a single horse with one rider seated on it:"
+)
 MOUNTED_SUFFIX = (
     "ONE single large horse and ONE single rider seated in the saddle on its back, rider and "
     "horse in one group in the middle of the frame. The horse is a full-size 14th-century "
@@ -147,7 +149,9 @@ def check_cap(cost: float = 0.0) -> None:
     """Refuse a fal call when the cumulative spend of ``fal_spend.jsonl`` reached the cap."""
     path = DN / "fal_spend.jsonl"
     if path.exists():
-        total = sum(json.loads(line)["usd"] for line in path.read_text().splitlines() if line)
+        total = sum(
+            json.loads(line)["usd"] for line in path.read_text().splitlines() if line
+        )
         if total + cost > SPEND_CAP_USD:
             raise RuntimeError(f"fal cap {SPEND_CAP_USD} $ reached ({total:.2f} $)")
 
@@ -224,7 +228,49 @@ def full_prompt(entry: dict) -> str:
 def backends(entry: dict) -> set[str]:
     """The 3D backends of an entry (``both`` = fal + sf3d)."""
     value = entry.get("backend3d", "both")
-    return {"fal", "sf3d"} if value == "both" else set(value.split("+"))
+    names = {"fal", "sf3d"} if value == "both" else set(value.split("+"))
+    unknown = names - ALLOWED_BACKENDS3D
+    if unknown:
+        raise ValueError(backend_error(unknown))
+    return names
+
+
+ALLOWED_BACKENDS3D = {"fal", "sf3d", "hf"}
+PAID_BACKENDS3D = {"fal"}
+
+
+def backend_error(unknown: set[str]) -> str:
+    """Message for a refused 3D backend (TRELLIS 2 = ``fal2`` is forbidden by the player)."""
+    if "fal2" in unknown:
+        return (
+            "backend3d 'fal2' (TRELLIS 2, fal-ai/trellis-2) is forbidden (player rule 09/10): "
+            "use fal (TRELLIS 1, + multi), hf or sf3d"
+        )
+    return f"unknown backend3d {sorted(unknown)} (allowed: fal, sf3d, hf, both)"
+
+
+def validate_options(
+    backend3d: str, seeds: int, image_backend: str, entries: list[dict] | None = None
+) -> None:
+    """Refuse forbidden or costly option combinations (raises ``ValueError``).
+
+    TRELLIS 2 is forbidden; best-of-N (several seeds) is refused on a paid model: images from
+    fal, or a catalogue/CLI ``seeds`` above 1 with the fal 3D backend (a single call only).
+    Several seeds stay allowed in local (free) image generation, 3D from the one chosen seed.
+    """
+    candidates = [{"backend3d": backend3d, "seeds": seeds}] if backend3d else []
+    candidates += [e for e in entries or [] if "backend3d" in e]
+    for entry in candidates:
+        value = entry["backend3d"]
+        names = {"fal", "sf3d"} if value == "both" else set(value.split("+"))
+        if names - ALLOWED_BACKENDS3D:
+            raise ValueError(backend_error(names - ALLOWED_BACKENDS3D))
+    wanted_seeds = [seeds] + [int(e.get("seeds", 1)) for e in entries or []]
+    if image_backend == "fal" and max(wanted_seeds) > 1:
+        raise ValueError(
+            "best-of-N refused on a paid model (--image-backend fal with seeds > 1): "
+            "one call only; use --image-backend local for several seeds"
+        )
 
 
 # --- stage image / cut ----------------------------------------------------------------------
@@ -325,7 +371,10 @@ def finalise_image(entry: dict, source: Path) -> Path:
     image = Image.open(source).convert("RGB")
     scale = max(width / image.width, height / image.height)
     resized = image.resize(
-        (max(width, round(image.width * scale)), max(height, round(image.height * scale))),
+        (
+            max(width, round(image.width * scale)),
+            max(height, round(image.height * scale)),
+        ),
         Image.LANCZOS,
     )
     left, top = (resized.width - width) // 2, (resized.height - height) // 2
@@ -520,7 +569,9 @@ def stage_select(entry: dict, out_dir: Path, select_best: bool) -> int | None:
     """Contact sheet + scores; returns the chosen seed (chosen.json > best > first)."""
     from PIL import Image, ImageDraw
 
-    seeds = [s for s in seed_list(entry) if (out_dir / "cut_raw" / f"s{s}.png").exists()]
+    seeds = [
+        s for s in seed_list(entry) if (out_dir / "cut_raw" / f"s{s}.png").exists()
+    ]
     scores_path = out_dir / "scores.json"
     if scores_path.exists():
         scores = json.loads(scores_path.read_text())
@@ -638,52 +689,6 @@ def fal_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
     )  # fmt: skip
 
 
-FAL2_ENDPOINT = "fal-ai/trellis-2"
-FAL2_COST_USD = 0.30
-TRELLIS2_ARGS = {
-    "resolution": "1024",
-    "texture_size": 2048,
-    "decimation_target": 100000,
-    "remesh": True,
-}
-
-
-def fal2_trellis(entry_id: str, cut: Path, target: Path, seed: int) -> None:
-    """One ``fal-ai/trellis-2`` call (0.30 $ at 1024), glb saved to ``target``, spend logged."""
-    import fal_client
-
-    check_cap(FAL2_COST_USD)
-    with timed(entry_id, "trellis2-fal", seed=seed):
-        url = fal_client.upload_file(str(cut))
-        result = fal_client.subscribe(
-            FAL2_ENDPOINT,
-            arguments={
-                "image_url": url, "seed": seed, **TRELLIS2_ARGS,
-                "decimation_target": int(os.environ.get("DN_T2_FACES", TRELLIS2_ARGS["decimation_target"])),
-            },
-        )
-        glb = result.get("model_glb") or result.get("model_mesh") or result["model_file"]
-        urllib.request.urlretrieve(glb["url"], target)  # noqa: S310
-    log_spend(entry_id, FAL2_ENDPOINT, seed, FAL2_COST_USD, "3d")
-    gen_event(
-        entry_id, "calls_3d",
-        {
-            "seed": seed, "endpoint": FAL2_ENDPOINT, "mode": "single-view",
-            "views": [str(cut.relative_to(work_dir(entry_id)))],
-            "file": f"3d/{target.name}", "usd": FAL2_COST_USD,
-        },
-    )  # fmt: skip
-
-
-def fal2_job(entry_id: str, cut: Path, target: Path, seed: int) -> None:
-    """Wrapper logging a trellis-2 failure instead of killing the batch."""
-    try:
-        fal2_trellis(entry_id, cut, target, seed)
-    except Exception as error:  # noqa: BLE001
-        append_jsonl(DN / "failures.jsonl", {"id": entry_id, "step": "fal2", "error": str(error)[:400]})
-        print(f"[{entry_id}] fal2 failed: {str(error)[:200]}", flush=True)
-
-
 def sf3d_run(entry_id: str, cut: Path, target: Path, seed: int) -> None:
     """SF3D local (MPS) under the lock; the glb is copied to ``target``."""
     work = target.parent / f"sf3d_out_s{seed}"
@@ -758,7 +763,9 @@ def is_multi_view(entry: dict) -> bool:
     return entry.get("ingest", {}).get("class") in MULTI_VIEW_CLASSES
 
 
-def log_spend(entry_id: str, endpoint: str, seed: int, usd: float, category: str) -> None:
+def log_spend(
+    entry_id: str, endpoint: str, seed: int, usd: float, category: str
+) -> None:
     """One line of ``fal_spend.jsonl``."""
     append_jsonl(
         DN / "fal_spend.jsonl",
@@ -805,7 +812,9 @@ def view_ok(front: Path, view: Path) -> tuple[bool, dict]:
     }  # fmt: skip
 
 
-def make_view(entry: dict, out_dir: Path, seed: int, name: str, front_cut: Path) -> Path:
+def make_view(
+    entry: dict, out_dir: Path, seed: int, name: str, front_cut: Path
+) -> Path:
     """One generated view (flux-2/edit then rembg), checked against the front, retried when dark.
 
     The best try (highest luminance) is kept when every try fails (a dark back beats no model).
@@ -852,7 +861,10 @@ def make_view(entry: dict, out_dir: Path, seed: int, name: str, front_cut: Path)
             {"id": entry_id, "view": name, "attempt": attempt, "ok": ok, **stats,
              "file": str(framed)},
         )  # fmt: skip
-        print(f"[{entry_id}] view {name} try {attempt}: {'ok' if ok else 'DARK'} {stats}", flush=True)
+        print(
+            f"[{entry_id}] view {name} try {attempt}: {'ok' if ok else 'DARK'} {stats}",
+            flush=True,
+        )
         if stats["luma"] > best_luma:
             best, best_luma = framed, stats["luma"]
         if ok:
@@ -863,14 +875,15 @@ def make_view(entry: dict, out_dir: Path, seed: int, name: str, front_cut: Path)
 def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
     """Back (and side) views by flux-2/edit, rembg, then ``fal-ai/trellis/multi``."""
     import fal_client
-    from PIL import Image
 
     check_cap()
     entry_id = entry["id"]
     views = out_dir / "views"
     views.mkdir(exist_ok=True)
     names = ["back"] + (
-        ["side"] if entry["ingest"]["class"] in SIDE_VIEW_CLASSES or entry.get("side_view") else []
+        ["side"]
+        if entry["ingest"]["class"] in SIDE_VIEW_CLASSES or entry.get("side_view")
+        else []
     )
     cuts = [out_dir / "cut" / f"s{seed}.png"]
     for name in names:
@@ -916,10 +929,14 @@ def fal_job(
 
 # --- automatic local fallback (fal failure, charter refusal, content filter) --------------------
 
-LOCAL_FALLBACK = True
+LOCAL_FALLBACK = False  # off by default; ``--local-fallback`` enables it
 QWEN_MODEL = Path.home() / "models" / "mflux" / "qwen-image-edit-2511-q6"
 QWEN_LORA = (
-    Path.home() / "models" / "mflux" / "loras" / "qwen-image-edit-2511-multiple-angles-lora.safetensors"
+    Path.home()
+    / "models"
+    / "mflux"
+    / "loras"
+    / "qwen-image-edit-2511-multiple-angles-lora.safetensors"
 )
 QWEN_VIEW_PROMPTS = {
     "back": "<sks> back view eye-level shot medium shot",
@@ -980,7 +997,9 @@ def local_3d_fallback(entry: dict, out_dir: Path, seed: int) -> str | None:
     if is_multi_view(entry):
         views = out_dir / "views"
         views.mkdir(exist_ok=True)
-        raw = views / f"back_local_s{seed}.png"  # one extra view: a 25 min Qwen call each
+        raw = (
+            views / f"back_local_s{seed}.png"
+        )  # one extra view: a 25 min Qwen call each
         if qwen_view(entry_id, out_dir / "img" / f"s{seed}.png", "back", seed, raw):
             framed = views / f"back_local_cut_s{seed}.png"
             if not framed.exists():
@@ -1113,16 +1132,15 @@ def process(
     if "fal" in wanted and not (out_dir / "3d" / f"fal__s{seed}.glb").exists():
         futures.append(
             executor.submit(
-                fal_job, entry["id"], cut, out_dir / "3d" / f"fal__s{seed}.glb", seed, entry
+                fal_job,
+                entry["id"],
+                cut,
+                out_dir / "3d" / f"fal__s{seed}.glb",
+                seed,
+                entry,
             )
         )
         pending_fal.append((entry, out_dir, seed))
-    if "fal2" in wanted and not (out_dir / "3d" / f"fal2__s{seed}.glb").exists():
-        futures.append(
-            executor.submit(
-                fal2_job, entry["id"], cut, out_dir / "3d" / f"fal2__s{seed}.glb", seed
-            )
-        )
     if "hf" in wanted and not (out_dir / "3d" / f"hf__s{seed}.glb").exists():
         hf_trellis(entry["id"], cut, out_dir / "3d" / f"hf__s{seed}.glb", seed)
     if "sf3d" in wanted and not (out_dir / "3d" / f"sf3d__s{seed}.glb").exists():
@@ -1156,28 +1174,43 @@ def main() -> None:
     parser.add_argument("--charter-s-p95", type=float, default=MAX_SAT_P95)
     parser.add_argument("--charter-s-mean", type=float, default=MAX_SAT_MEAN)
     parser.add_argument("--fal-workers", type=int, default=4)
-    parser.add_argument("--backend3d", default="", help="override every entry (fal|fal2|sf3d|hf|both)")
+    parser.add_argument(
+        "--backend3d", default="", help="override every entry (fal|sf3d|hf|both)"
+    )
     parser.add_argument("--seeds", type=int, default=0, help="override seeds per entry")
     parser.add_argument("--image-backend", choices=("local", "fal"), default="local")
     parser.add_argument("--image-workers", type=int, default=6)
     parser.add_argument(
-        "--variant", default="", help="write to <id>/<variant>/ (old artefacts untouched)"
+        "--variant",
+        default="",
+        help="write to <id>/<variant>/ (old artefacts untouched)",
     )
     parser.add_argument(
-        "--reuse-image", action="store_true",
+        "--reuse-image",
+        action="store_true",
         help="copy the existing image/cut/chosen of <id>/ into the variant (no new image)",
     )
     parser.add_argument(
-        "--side-view", action="store_true", help="multi-view entries also get a generated side view"
+        "--side-view",
+        action="store_true",
+        help="multi-view entries also get a generated side view",
     )
     parser.add_argument("--kind", default="", help="keep only this kind (decor|figure)")
     parser.add_argument(
-        "--no-local-fallback", action="store_true", help="disable the automatic local fallback"
+        "--local-fallback",
+        action="store_true",
+        help="enable the local fallback (HF/SF3D/Qwen) when fal fails; off by default "
+        "(player rule: failures are listed for a separate local session)",
+    )
+    parser.add_argument(
+        "--no-local-fallback",
+        action="store_true",
+        help="deprecated no-op (now the default)",
     )
     args = parser.parse_args()
     global LOCAL_FALLBACK, VARIANT
     VARIANT = args.variant
-    LOCAL_FALLBACK = not args.no_local_fallback
+    LOCAL_FALLBACK = args.local_fallback
     CHARTER_MODE, MAX_SAT_P95, MAX_SAT_MEAN = (
         args.charter,
         args.charter_s_p95,
@@ -1186,6 +1219,10 @@ def main() -> None:
     global CATALOG_NAME
     CATALOG_NAME = Path(args.catalog).name
     entries = json.loads(Path(args.catalog).read_text())
+    try:
+        validate_options(args.backend3d, args.seeds, args.image_backend, entries)
+    except ValueError as error:
+        parser.error(str(error))
     if args.only:
         entries = [e for e in entries if e["id"] in args.only.split(",")]
     if args.kind:
@@ -1219,7 +1256,9 @@ def main() -> None:
             future.result()
     for entry, out_dir, seed in pending_fal:  # fal failed (error, filter, balance, cap)
         if LOCAL_FALLBACK and not (out_dir / "3d" / f"fal__s{seed}.glb").exists():
-            log_fallback(entry["id"], "3d", "fal produced no glb: TRELLIS HF then SF3D local")
+            log_fallback(
+                entry["id"], "3d", "fal produced no glb: TRELLIS HF then SF3D local"
+            )
             used = local_3d_fallback(entry, out_dir, seed)
             gen_event(entry["id"], "backend3d_used", {"backend3d": used})
     until = STAGES.index(args.until)

@@ -3,15 +3,15 @@
 Run with the fal client (``FAL_KEY`` in the environment)::
 
     uv run --with fal-client python tools/experiments/ga3_fal_decor.py OUT_DIR \
-        --prompt-file PROMPT.txt [--seed 1337] [--models trellis,trellis-2]
+        --prompt-file PROMPT.txt [--seed 1337] [--models trellis,multi]
 
 Each stage is cached in ``OUT_DIR`` (an existing output is never paid for twice):
 
 1. ``src.png``: ``fal-ai/flux-2`` 1024x1024 (0.012 $/Mpx).
 2. ``cut.png``: ``fal-ai/bria/background/remove`` (0.018 $), transparent background, so the
    3D model does not rebuild a ground patch.
-3. ``trellis.glb`` (``fal-ai/trellis``, 0.02 $) and/or ``trellis-2.glb``
-   (``fal-ai/trellis-2`` at 1024, 0.30 $, PBR textures).
+3. ``trellis.glb`` (``fal-ai/trellis``, 0.02 $) and/or ``multi.glb``. TRELLIS 2 is forbidden
+   (player rule 09/10).
 
 Free local 2D stages (ADR 0190): ``--image-backend local`` replaces flux-2 and flux-2/edit by
 Z-Image Turbo (mflux; the edit views are img2img from ``src.png``), ``--cut-backend local``
@@ -54,13 +54,12 @@ IMAGE_BACKEND = "fal"
 CUT_BACKEND = "fal"
 
 # Catalogue prices (USD) used for the cost log: flux-2 1 Mpx, edit (1 Mpx in + out), bria,
-# trellis, trellis-2 at 1024, trellis/multi.
+# trellis, trellis/multi (TRELLIS 2 is forbidden).
 PRICES = {
     "flux2": 0.012,
     "edit": 0.024,
     "bria": 0.018,
     "trellis": 0.02,
-    "trellis-2": 0.30,
     "multi": 0.02,
 }
 VIEW_PROMPTS = {
@@ -74,12 +73,6 @@ VIEW_PROMPTS = {
 COST_LOG: list[dict] = []
 
 TRELLIS_ARGS = {"texture_size": 1024, "mesh_simplify": 0.95}
-TRELLIS2_ARGS = {
-    "resolution": "1024",
-    "texture_size": 2048,
-    "decimation_target": 100000,
-    "remesh": True,
-}
 
 
 def run(endpoint: str, arguments: dict, out_dir: Path, stage: str) -> dict:
@@ -177,7 +170,7 @@ def views_stage(out_dir: Path, seed: int) -> list[Path]:
 
 
 def model_stage(out_dir: Path, models: list[str], seed: int) -> None:
-    """Image-to-3D calls (``trellis``, ``trellis-2``, ``multi``), cached."""
+    """Image-to-3D calls (``trellis``, ``multi``), cached."""
     cut_url = None
     for model in models:
         glb = out_dir / f"{model}.glb"
@@ -195,8 +188,7 @@ def model_stage(out_dir: Path, models: list[str], seed: int) -> None:
         else:
             cut_url = cut_url or fal_client.upload_file(str(out_dir / "cut.png"))
             endpoint = f"fal-ai/{model}"
-            extra = TRELLIS2_ARGS if model == "trellis-2" else TRELLIS_ARGS
-            arguments = {"image_url": cut_url, "seed": seed, **extra}
+            arguments = {"image_url": cut_url, "seed": seed, **TRELLIS_ARGS}
         result = run(endpoint, arguments, out_dir, model)
         urllib.request.urlretrieve(
             first_url(result, ("model_glb", "model_mesh", "model_file")), glb
@@ -236,7 +228,7 @@ def main() -> None:
     parser.add_argument("out_dir")
     parser.add_argument("--prompt-file", default="")
     parser.add_argument("--seed", type=int, default=1337)
-    parser.add_argument("--models", default="trellis,trellis-2")
+    parser.add_argument("--models", default="trellis,multi")
     parser.add_argument("--catalog", default="")
     parser.add_argument("--only", default="")
     parser.add_argument("--attempt", type=int, default=1)
