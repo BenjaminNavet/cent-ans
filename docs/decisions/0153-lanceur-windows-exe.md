@@ -42,4 +42,4 @@ forcément Rust, et c'est justement le lanceur qui le lui dit.
 - Le binaire commité peut prendre du retard sur sa source si on oublie `build.sh`. La CI ne le
   détecte pas (une compilation croisée n'est pas reproductible à l'octet près depuis Windows) ;
   elle exécute les tests unitaires de la source et le binaire commité.
-- Pas d'icône ni d'informations de version dans l'exécutable pour l'instant.
+- L'icône (`icon.ico`) est embarquée par `build.rs` + `embed-resource` (cible windows seulement, `llvm-rc` requis en compilation croisée) ; pas d'informations de version pour l'instant.

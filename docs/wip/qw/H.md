@@ -9,4 +9,4 @@
 
 ## Restes
 - Windows : `application/modify_resources` reste à `false` ; l'icône n'est intégrée à l'`.exe` exporté que si `rcedit` (et `wine` hors Windows) est installé, puis passer à `true`.
-- Lanceur `Lancer Cent Ans.exe` : pas d'icône embarquée. `winresource`/`embed-resource` exigent `rc.exe`/`llvm-rc` ; la cross-compilation `cargo xwin` depuis macOS ne le garantit pas, et l'exe committé n'est pas reconstruit ici. Suite : ajouter `build.rs` + `winresource` (`set_icon("icon.ico")`) en CI Windows, ou `llvm-rc` installé, puis relancer `tools/launcher-windows/build.sh`.
+- Lanceur `Lancer Cent Ans.exe` : icône embarquée (10-09). `tools/launcher-windows/build.rs` compile `icon.rc` (`1 ICON "icon.ico"`) avec `embed-resource` 3 (build-dependency) uniquement si la cible est windows ; `cargo xwin` depuis macOS trouve `llvm-rc` (Homebrew llvm), section `.rsrc` de 57 Ko vérifiée dans l'exe reconstruit. Non vérifié : affichage de l'icône dans l'Explorateur (seul un vrai Windows le montre) et build natif sur runner CI.
