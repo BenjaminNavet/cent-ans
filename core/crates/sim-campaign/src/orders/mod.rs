@@ -369,6 +369,10 @@ impl CampaignState {
                 crate::captains::hire_captain(self, data, faction, &settlement)?;
                 Ok(())
             }
+            Order::SetProvinceTax { province, rate } => {
+                crate::province_tax::set_province_tax(self, faction, &province, rate)?;
+                Ok(())
+            }
             Order::SetCoinage { level } => {
                 crate::coinage::set_coinage(self, data, faction, level)?;
                 Ok(())

@@ -233,6 +233,56 @@ fn goods_target(effects: &EffectTotals, class: SocialClass, goods_category_count
         + class_points(effects.classes.get(class).goods_satisfaction)
 }
 
+/// WH econ: signed terms of the unrest target of one class (before the
+/// 0-100 clamp), in the order they are added. The target is their sum.
+fn unrest_terms(
+    effects: &EffectTotals,
+    class: SocialClass,
+    goods_satisfaction: f64,
+    health: f64,
+    shared: &SharedModifiers,
+    rules: &data_model::PopulationRules,
+) -> Vec<(&'static str, f64)> {
+    // E2 (`data/rules/population.json`): taxes bite, garrisons and plenty
+    // soothe only so much; LR-07: a garrison soothes per head.
+    let garrison_relief = rules.garrison_relief(shared.garrison_strength, shared.population_total);
+    let mut terms = vec![
+        ("tax", shared.tax_burden * rules.tax_unrest_weight),
+        ("devastation", f64::from(shared.devastation) / 2.0),
+        (
+            "goods",
+            ((50.0 - goods_satisfaction) / 3.0).max(-rules.goods_relief_max),
+        ),
+        ("health", (50.0 - health) / 4.0),
+        ("garrison", -garrison_relief),
+    ];
+    if shared.occupied {
+        terms.push(("occupation", rules.occupation_unrest));
+    }
+    if shared.foreign_religion {
+        terms.push(("foreign_religion", rules.foreign_religion_unrest));
+    }
+    // EQ1: recent captures, raids and regencies (the province's own
+    // disorder gauge, which fades by itself).
+    terms.push((
+        "disorder",
+        (f64::from(shared.disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max),
+    ));
+    // Building `Unrest` effects: negative values are appeasement.
+    terms.push((
+        "buildings",
+        effects[EffectKind::Unrest].flat
+            + effects[EffectKind::Unrest].percent
+            + class_points(effects.classes.get(class).unrest),
+    ));
+    // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
+    // to its lord.
+    if class == SocialClass::Nobility {
+        terms.push(("loyalty", -effects[EffectKind::Loyalty].apply(0.0)));
+    }
+    terms
+}
+
 /// Unrest target (0-100) given the class's goods satisfaction and health.
 fn unrest_target(
     effects: &EffectTotals,
@@ -242,34 +292,10 @@ fn unrest_target(
     shared: &SharedModifiers,
     rules: &data_model::PopulationRules,
 ) -> f64 {
-    // E2 (`data/rules/population.json`): taxes bite, garrisons and plenty
-    // soothe only so much; LR-07: a garrison soothes per head.
-    let garrison_relief = rules.garrison_relief(shared.garrison_strength, shared.population_total);
-    let mut unrest_target = shared.tax_burden * rules.tax_unrest_weight
-        + f64::from(shared.devastation) / 2.0
-        + ((50.0 - goods_satisfaction) / 3.0).max(-rules.goods_relief_max)
-        + (50.0 - health) / 4.0
-        - garrison_relief;
-    if shared.occupied {
-        unrest_target += rules.occupation_unrest;
-    }
-    if shared.foreign_religion {
-        unrest_target += rules.foreign_religion_unrest;
-    }
-    // EQ1: recent captures, raids and regencies (the province's own
-    // disorder gauge, which fades by itself).
-    unrest_target +=
-        (f64::from(shared.disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
-    // Building `Unrest` effects: negative values are appeasement.
-    unrest_target += effects[EffectKind::Unrest].flat
-        + effects[EffectKind::Unrest].percent
-        + class_points(effects.classes.get(class).unrest);
-    // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
-    // to its lord.
-    if class == SocialClass::Nobility {
-        unrest_target -= effects[EffectKind::Loyalty].apply(0.0);
-    }
-    unrest_target.clamp(0.0, 100.0)
+    unrest_terms(effects, class, goods_satisfaction, health, shared, rules)
+        .iter()
+        .fold(0.0, |sum, (_, value)| sum + value)
+        .clamp(0.0, 100.0)
 }
 
 /// Values the gauges of one class tend towards (IB5), each within 0-100.
@@ -316,12 +342,16 @@ fn province_inputs(
         )
     };
     let province_data = data.provinces.get(id)?;
-    let tax_burden = state
-        .factions
-        .get(&controller)
-        .map_or(data.economy_rules.tax_rates.normal.burden, |f| {
-            f.tax_rate.burden(&data.economy_rules)
-        });
+    // WH econ: the province's own bracket, else the controller's.
+    let tax_burden =
+        state
+            .factions
+            .get(&controller)
+            .map_or(data.economy_rules.tax_rates.normal.burden, |f| {
+                state
+                    .province_tax_rate(id, f.tax_rate)
+                    .burden(&data.economy_rules)
+            });
     let goods = state
         .factions
         .get(&controller)
@@ -381,6 +411,37 @@ pub fn equilibrium(
     data: &GameData,
     province: &ProvinceId,
 ) -> Option<Vec<(SocialClass, u64, GaugeTargets)>> {
+    Some(
+        equilibrium_detail(state, data, province)?
+            .into_iter()
+            .map(|(class, count, targets, _)| (class, count, targets))
+            .collect(),
+    )
+}
+
+/// WH econ: signed terms of the unrest target of each class of `province`
+/// (label key, value), in [`SocialClass::ALL`] order. Their sum, clamped to
+/// 0-100, is `GaugeTargets::unrest`.
+pub fn unrest_breakdown(
+    state: &CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+) -> Option<Vec<(SocialClass, Vec<(&'static str, f64)>)>> {
+    Some(
+        equilibrium_detail(state, data, province)?
+            .into_iter()
+            .map(|(class, _, _, terms)| (class, terms))
+            .collect(),
+    )
+}
+
+type ClassEquilibrium = (SocialClass, u64, GaugeTargets, Vec<(&'static str, f64)>);
+
+fn equilibrium_detail(
+    state: &CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+) -> Option<Vec<ClassEquilibrium>> {
     let inputs = province_inputs(state, data, province)?;
     let population = &state.provinces.get(province)?.population;
     let shared = SharedModifiers {
@@ -401,20 +462,24 @@ pub fn equilibrium(
                 let categories = goods_categories(data, &inputs.goods, class);
                 let goods = goods_target(effects, class, categories).clamp(0.0, 100.0);
                 let health = health_target(effects, class, goods, &shared).clamp(0.0, 100.0);
+                let terms = unrest_terms(
+                    effects,
+                    class,
+                    goods,
+                    health,
+                    &shared,
+                    &data.population_rules,
+                );
                 let targets = GaugeTargets {
                     health,
                     wealth: wealth_target(effects, class, &shared).clamp(0.0, 100.0),
                     goods_satisfaction: goods,
-                    unrest: unrest_target(
-                        effects,
-                        class,
-                        goods,
-                        health,
-                        &shared,
-                        &data.population_rules,
-                    ),
+                    unrest: terms
+                        .iter()
+                        .fold(0.0, |sum, (_, value)| sum + value)
+                        .clamp(0.0, 100.0),
                 };
-                (class, population.get(class).count, targets)
+                (class, population.get(class).count, targets, terms)
             })
             .collect(),
     )

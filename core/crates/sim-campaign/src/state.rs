@@ -434,6 +434,10 @@ pub struct ProvinceState {
     /// `edict_none`); see [`CampaignState::province_edict`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub edict: Option<crate::edicts::EdictChoice>,
+    /// WH econ: tax bracket of this province alone (`None`: the controller's
+    /// own bracket); see [`CampaignState::province_tax_rate`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tax_override: Option<crate::province_tax::TaxChoice>,
 }
 
 /// Dynamic state of a settlement (spec § 4.2).

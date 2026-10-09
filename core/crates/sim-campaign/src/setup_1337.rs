@@ -232,6 +232,7 @@ fn init_provinces(state: &mut CampaignState, data: &GameData) -> Result<(), Camp
                 heresy_religion: None,
                 diet: None,
                 edict: None,
+                tax_override: None,
             },
         );
     }

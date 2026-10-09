@@ -345,6 +345,8 @@ impl CampaignState {
         if settlement != &province.city {
             buildings.extend(state.buildings.iter().cloned());
         }
+        // WH econ: a province may carry its own bracket.
+        let tax_rate = self.province_tax_rate(&state.province, tax_rate);
         province_income(data, province, &buildings, tax_rate, extra)
             * crate::settlements::weight_share(data, settlement)
     }

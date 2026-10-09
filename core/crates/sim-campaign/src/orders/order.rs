@@ -333,6 +333,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// WH econ: sets the tax bracket of one province alone (`None`: back to
+    /// the faction's bracket); one change per province and per turn.
+    SetProvinceTax {
+        province: ProvinceId,
+        #[serde(default)]
+        rate: Option<TaxRate>,
+    },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
         level: crate::coinage::CoinageLevel,

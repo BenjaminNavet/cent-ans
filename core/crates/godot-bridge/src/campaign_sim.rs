@@ -322,7 +322,29 @@ impl CampaignSim {
             return VarDictionary::new();
         };
         let place = state.province_city_id(&id).map(|city| (state, city));
-        province_city_dict(data, &city, place)
+        let mut dict = province_city_dict(data, &city, place);
+        // WH econ: signed terms of each class's unrest target.
+        if let Some(breakdown) = sim_campaign::population::unrest_breakdown(state, data, &id) {
+            let mut classes: VarDictionary = dict
+                .get("classes")
+                .and_then(|v| v.try_to().ok())
+                .unwrap_or_default();
+            for (class, terms) in breakdown {
+                let rows: VarArray = terms
+                    .iter()
+                    .map(|(key, value)| vdict! { "key" => *key, "value" => *value }.to_variant())
+                    .collect();
+                if let Some(mut entry) = classes
+                    .get(class.key())
+                    .and_then(|v| v.try_to::<VarDictionary>().ok())
+                {
+                    entry.set("unrest_terms", &rows);
+                    classes.set(class.key(), &entry);
+                }
+            }
+            dict.set("classes", &classes);
+        }
+        dict
     }
 
     /// Full economic panel of a faction (spec M3 § 2), or an empty

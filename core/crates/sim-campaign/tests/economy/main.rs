@@ -30,3 +30,4 @@ mod rs_b_weighted_sums;
 mod sv2_unit_resources;
 mod u3_budget;
 mod ur1_units;
+mod wh_econ;

@@ -846,10 +846,41 @@ static func population_class(class_id: String, data: Dictionary = {}) -> String:
 	return _join(lines)
 
 
-static func gauge(key: String, value: float = -1.0) -> String:
+## Libellés des termes de la cible de mécontentement (`unrest_terms` du cœur).
+const UNREST_TERM_LABELS := {
+	"tax": "Impôt",
+	"devastation": "Dévastation",
+	"goods": "Biens de consommation",
+	"health": "Santé",
+	"garrison": "Garnison",
+	"occupation": "Occupation",
+	"foreign_religion": "Religion étrangère",
+	"disorder": "Désordre récent",
+	"buildings": "Bâtiments, gouverneur, techniques",
+	"loyalty": "Loyauté de la noblesse",
+}
+
+
+## Lignes « terme signé » de la cible de mécontentement (WH econ) : seuls les termes
+## d'au moins 0,5 point, puis la cible bornée. `terms` : `[{key, value}]`.
+static func unrest_terms_lines(terms: Array) -> String:
+	if terms.is_empty():
+		return ""
+	var lines: Array = ["Cible d'équilibre du mécontentement :"]
+	var total := 0.0
+	for term in terms:
+		var value := float(term.get("value", 0.0))
+		total += value
+		if absf(value) >= 0.5:
+			lines.append("%s : %+.1f" % [UNREST_TERM_LABELS.get(str(term.get("key", "")), str(term.get("key", ""))), value])
+	lines.append("Cible : %d / 100" % int(round(clampf(total, 0.0, 100.0))))
+	return "\n".join(lines)
+
+
+static func gauge(key: String, value: float = -1.0, terms: Array = []) -> String:
 	var spec: Array = gauge_entry(key)
 	var head := _title("gauge_" + key, str(spec[0]), "%d / 100" % int(round(value)) if value >= 0.0 else "", "gauge")
-	return _join([head, RuleValues.format(str(spec[1]))])
+	return _join([head, RuleValues.format(str(spec[1])), unrest_terms_lines(terms)])
 
 
 static func hud(id: String, extra: String = "") -> String:

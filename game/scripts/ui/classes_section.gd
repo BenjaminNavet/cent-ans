@@ -51,17 +51,17 @@ func _make_class_row(class_id: String, data: Dictionary) -> Control:
 		var key: String = spec[0]
 		var invert: bool = spec[2]
 		var value := float(data.get(key, 0))
-		row.add_child(_make_gauge(value, invert, spec[1], key))
+		row.add_child(_make_gauge(value, invert, spec[1], key, data.get("unrest_terms", []) if key == "unrest" else []))
 	return row
 
 
 ## Petite jauge colorée (fond gris, remplissage vert → rouge selon `invert`), icône et
 ## infobulle d'explication (F2).
-func _make_gauge(value: float, invert: bool, label_text: String, key: String = "") -> Control:
+func _make_gauge(value: float, invert: bool, label_text: String, key: String = "", terms: Array = []) -> Control:
 	var holder := RichPanel.new()
 	holder.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	holder.mouse_filter = Control.MOUSE_FILTER_STOP
-	holder.tooltip_text = RichTooltip.gauge(key, value) if key != "" else label_text
+	holder.tooltip_text = RichTooltip.gauge(key, value, terms) if key != "" else label_text
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
 	box.custom_minimum_size = Vector2(46, 0)
