@@ -1,3 +1,3 @@
 # SC missions (CC13)
-État : moteur unique codé (data-model missions.rs, sim-campaign missions.rs, data/missions.json + schéma, ADR 0207). Reste : tests Rust complets, build.sh, tests Godot nt3_missions + smoke.
-Rançon/chevalerie/hérésie : non touchés (voir ADR).
+Terminé : moteur unique (target/goal/counter dans data/missions.json + schéma, ADR 0207). Tests : nt3 Rust 11/11, data-model, pytest schémas, nt3_missions_test.gd OK, smoke.gd OK.
+Rançon/chevalerie/hérésie : non touchés (voir ADR 0207).
