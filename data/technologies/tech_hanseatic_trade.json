@@ -8,8 +8,9 @@
   "cost": 220,
   "prerequisites": [],
   "historical_year": {
-    "value": "1356",
-    "note": "Première diète générale de la Hanse à Lübeck (1356) ; comptoirs de Bruges et de Londres."
+    "value": "1290",
+    "note": "Jalon d'origine : la Hanse des marchands existe dès la seconde moitié du XIIIe siècle (Lübeck, Visby, Cologne) ; la diète générale de Lübeck (1356) l'institutionnalise.",
+    "uncertain": true
   },
   "unlocks": {},
   "effects": [

@@ -8,10 +8,10 @@
   "faction": "fac_england",
   "role": "consort",
   "birth": {
-    "value": "1310-06-24",
+    "value": "1314-06-24",
     "uncertain": true,
     "place": "Valenciennes",
-    "note": "Date disputée entre 1310 et 1314."
+    "note": "Née le 24 juin 1314 selon l'historiographie courante (mariée à treize ans en 1328, premier enfant en 1330) ; 1310 est une date plus ancienne, écartée."
   },
   "death": {
     "value": "1369-08-15",

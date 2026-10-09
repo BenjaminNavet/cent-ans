@@ -1,0 +1,85 @@
+{
+  "id": "evt_reprise_d_edimbourg",
+  "title": "La reprise d'Édimbourg",
+  "text": "Au printemps 1341, William Douglas et quelques hommes entrent dans le château d'Édimbourg, tenu par les Anglais depuis 1335, déguisés en marchands avec des barils de vin et d'avoine ; la garnison est massacrée. En juin, David II rentre de France après sept ans d'exil et reprend possession de son royaume.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341,
+      "season": "spring"
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_scotland"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_david_ii"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_england",
+        "province": "prov_lothian"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_scotland"
+  },
+  "options": [
+    {
+      "text": "Reprendre le Lothian et accueillir David II",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_lothian",
+          "from": "fac_england"
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_england",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -20,
+          "reason": "Perte d'Édimbourg"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Laisser les Anglais tenir leurs garnisons",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "siege",
+  "historical_date": {
+    "value": "1341-04",
+    "note": "Édimbourg repris en avril 1341 ; David II revient en Écosse le 2 juin 1341."
+  },
+  "sources": [
+    "Siège d'Édimbourg (1341)",
+    "David II d'Écosse",
+    "William Douglas",
+    "Michael Brown, The Wars of Scotland 1214-1371, 2004"
+  ]
+}

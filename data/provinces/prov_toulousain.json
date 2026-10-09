@@ -84,7 +84,8 @@
     "bld_weaving_workshop",
     "bld_cathedral",
     "bld_castle",
-    "bld_muster_field"
+    "bld_muster_field",
+    "bld_university"
   ],
   "fortification_level": 3,
   "base_supply": 6000,

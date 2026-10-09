@@ -31,8 +31,7 @@
     "tech_water_mills",
     "tech_three_field_rotation",
     "tech_masonry",
-    "tech_bookkeeping",
-    "tech_urban_sanitation"
+    "tech_bookkeeping"
   ],
   "relations": [
     {

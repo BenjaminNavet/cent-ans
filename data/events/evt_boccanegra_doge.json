@@ -1,0 +1,70 @@
+{
+  "id": "evt_boccanegra_doge",
+  "title": "Simone Boccanegra, premier doge de Gênes",
+  "text": "Le 23 septembre 1339, une émeute populaire chasse les capitaines gibelins Spinola et Doria et porte Simone Boccanegra, plébéien gibelin, à la tête de la République avec le titre, nouveau, de doge à vie. Les grandes familles, nobles Doria, Spinola, Grimaldi, Fieschi, prennent le chemin de l'exil.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1339,
+      "season": "autumn"
+    },
+    "until_year": 1340,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_genoa"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_simone_boccanegra"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_genoa"
+  },
+  "options": [
+    {
+      "text": "Élire Simone Boccanegra doge à vie",
+      "effects": [
+        {
+          "type": "set_ruler",
+          "character": "chr_simone_boccanegra"
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Maintenir les capitaines du peuple",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "revolt",
+  "historical_date": {
+    "value": "1339-09-23"
+  },
+  "sources": [
+    "Simone Boccanegra",
+    "République de Gênes",
+    "Steven Epstein, Genoa and the Genoese, 958-1528, 1996"
+  ]
+}

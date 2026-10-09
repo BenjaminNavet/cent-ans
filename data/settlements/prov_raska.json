@@ -83,8 +83,8 @@
     "province": "prov_raska",
     "kind": "town",
     "name": {
-      "display": "Novi Pazar",
-      "local": "Нови Пазар",
+      "display": "Trgovište (Ras)",
+      "local": "Трговиште",
       "local_language": "serbe"
     },
     "lonlat": [

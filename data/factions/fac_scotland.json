@@ -57,7 +57,7 @@
     "trade": 30,
     "piety": 55
   },
-  "description": "Royaume dévasté par la guerre contre Édouard III et Balliol ; gouverné par le Gardien Andrew Murray en l'absence du jeune roi.",
+  "description": "Royaume dévasté par la guerre contre Édouard III et Balliol ; gouverné par le Gardien Andrew Murray en l'absence du jeune roi ; Édimbourg (prov_lothian), sa capitale, est tenue par les Anglais au départ (château anglais de 1335 à avril 1341, voir evt_reprise_d_edimbourg), ce qui est historique.",
   "sources": [
     "David II",
     "Seconde guerre d'indépendance écossaise",

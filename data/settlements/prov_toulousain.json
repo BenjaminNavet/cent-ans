@@ -22,7 +22,8 @@
       "bld_weaving_workshop",
       "bld_cathedral",
       "bld_castle",
-      "bld_muster_field"
+      "bld_muster_field",
+      "bld_university"
     ],
     "port": false,
     "description": "Capitale du Languedoc, sénéchaussée royale depuis 1271, grande ville du pastel et du blé du Lauragais.",

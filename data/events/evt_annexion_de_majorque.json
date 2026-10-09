@@ -1,0 +1,99 @@
+{
+  "id": "evt_annexion_de_majorque",
+  "title": "L'annexion de Majorque",
+  "text": "Pierre IV d'Aragon reproche à son cousin Jacques III de Majorque d'avoir refusé de lui prêter hommage lige. Il débarque aux Baléares au printemps 1343, puis envahit le Roussillon et la Cerdagne ; Jacques III, abandonné par Philippe VI, vend Montpellier à la France en 1349 et meurt à Llucmajor en tentant de reprendre son île.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1343,
+      "season": "spring"
+    },
+    "until_year": 1345,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_aragon"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_majorca"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_pedro_iv"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_majorca",
+        "province": "prov_mallorca"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_aragon"
+  },
+  "options": [
+    {
+      "text": "Réunir le royaume de Majorque à la couronne d'Aragon",
+      "effects": [
+        {
+          "type": "transfer_title",
+          "title": "tit_majorca",
+          "from": "fac_majorca"
+        },
+        {
+          "type": "prestige",
+          "amount": 20
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_majorca",
+          "amount": -20
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_majorca",
+          "amount": -30,
+          "reason": "Annexion de Majorque"
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Se contenter de l'hommage lige de Jacques III",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_majorca",
+          "amount": -10,
+          "reason": "Hommage lige imposé"
+        },
+        {
+          "type": "treasury",
+          "amount": 1000
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "muster",
+  "historical_date": {
+    "value": "1343-05",
+    "note": "Débarquement aux Baléares ; Perpignan capitule en juillet 1344, Jacques III meurt à Llucmajor le 25 octobre 1349."
+  },
+  "sources": [
+    "Royaume de Majorque",
+    "Pierre IV d'Aragon",
+    "Jacques III de Majorque",
+    "Alan Ryder, The Crown of Aragon, 1990"
+  ]
+}
