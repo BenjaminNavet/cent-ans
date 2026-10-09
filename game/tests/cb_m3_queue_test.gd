@@ -103,7 +103,7 @@ func _check_integration() -> void:
 	check((_unit(own).get("queue", []) as Array).size() == limit, "queue filled to %d" % limit)
 	check(BattlePathPreview.queue_full(_scene.units, _scene.selected), "queue_full sees the full queue")
 	var refused: Dictionary = _scene.battle.call("issue_command", {"type": "move", "units": [own], "x": start.x, "z": start.z + 120.0, "queue": true})
-	check(not bool(refused.get("ok", true)) and str(refused.get("error", "")).contains("file d’ordres pleine"), "core refuses a ninth queued order in French: %s" % [refused])
+	check(not bool(refused.get("ok", true)) and str(refused.get("error", "")).contains("file d'ordres pleine"), "core refuses a ninth queued order in French: %s" % [refused])  # apostrophe droite : texte du cœur
 	_scene.issued_log.clear()
 	var spot := camera.unproject_position(_ground(goals[0]))
 	_right_click(spot, true)

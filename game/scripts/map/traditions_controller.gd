@@ -85,7 +85,7 @@ func kept_title(id: String) -> String:
 	if not bool(info.get("named", false)):
 		return ""
 	var name := str(info.get("name", ""))
-	return "Ost" + name.substr(5) if name.begins_with("L’ost") else name
+	return "Ost" + name.substr(5) if name.begins_with("L'ost") else name  # apostrophe droite : texte du cœur
 
 
 func open_for(id: String) -> void:

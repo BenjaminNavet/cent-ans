@@ -93,7 +93,7 @@ def convert_gd_file(path: Path, write: bool) -> int:
     out = []
     for line in path.read_text(encoding="utf-8").split("\n"):
         stripped = line.lstrip()
-        if stripped.startswith("#") or stripped.startswith("##"):
+        if stripped.startswith("#") or "apostrophe droite" in line:
             out.append(line)
             continue
 

@@ -88,8 +88,8 @@ func _run() -> void:
 
 	# Fenêtre de capture : rappel « occuper n'est pas posséder ».
 	var captures: Array = sim.call("get_pending_captures")
-	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("Occuper n’est pas posséder"), "capture decision should remind that occupying is not possessing")
-	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("C’est la cité de"), "capture of a city should say it gives the province’s control")
+	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("Occuper n'est pas posséder"), "capture decision should remind that occupying is not possessing")  # apostrophe droite : texte du cœur
+	check(not captures.is_empty() and str(captures[0].get("text", "")).contains("C'est la cité de"), "capture of a city should say it gives the province’s control")  # apostrophe droite : texte du cœur
 
 	# 3. UI.
 	map.refresh_all()
