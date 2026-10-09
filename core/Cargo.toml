@@ -64,11 +64,11 @@ opt-level = 2
 opt-level = 2
 [profile.dev.package."*"]
 opt-level = 3
+# Workspace crates optimised at level 3 (data-model: 4096² rasters; vegetation: Lot PB2 tile
+# scattering; relief-lod: Lot PB3g quadtree selection). `"*"` does not cover workspace members.
 [profile.dev.package.data-model]
 opt-level = 3
-# Lot PB2: vegetation tile scattering (millions of scalar operations per tile).
 [profile.dev.package.vegetation]
 opt-level = 3
-# Lot PB3g: relief quadtree selection (every frame while the camera moves).
 [profile.dev.package.relief-lod]
 opt-level = 3

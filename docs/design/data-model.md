@@ -346,8 +346,7 @@ règle de validation.
 | `get_character_ids() -> PackedStringArray` | Ids triés. |
 | `get_character(id) -> Dictionary` | `id`, `name`, `epithet`, `birth` / `death` (`{value, uncertain, year}` ; vide si inconnu), `faction`, `role`, `titles` (`PackedStringArray`), `skills` (`{command, governance, court}`), `starting_location`. |
 
-Vérification headless : `godot --headless --path game --script "$PWD/core/checks/data_store_check.gd"`
-(après `core/build.sh`) charge `data/` et vérifie que `prov_normandie` appartient à `fac_france`.
+Vérification : tests Rust de `data-model` / `godot-bridge` (`cargo test`) ; le script headless `data_store_check.gd` a été retiré (SC RT9).
 
 ### 7.4 `CampaignSim` (M2)
 

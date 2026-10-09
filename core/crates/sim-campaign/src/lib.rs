@@ -173,8 +173,4 @@ pub use weather::{MapWeather, ProvinceWeather};
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
-mod review_tests;
-#[cfg(test)]
-mod rs_c_tests;
-#[cfg(test)]
-mod rs_n_tests;
+mod tests;
