@@ -1,4 +1,4 @@
-extends SceneTree
+extends TestCase
 
 ## Lot TF : colombage `TimberFrame` câblé et choix régional des maisons.
 ## - données : `wired: true`, couches 14 (torchis, `high`) et 15 (lattis, `low`) de l'atlas `Building` ; matériau atlas : couches unies
@@ -11,35 +11,27 @@ extends SceneTree
 ##   maillage et une seule surface (pas d'appel de rendu en plus).
 ## Usage : godot --headless --path game --script res://tests/tf_timber_frame_test.gd
 
-var _ok := true
-
-
-func _check(cond: bool, label: String) -> void:
-	print("%s %s" % ["ok  " if cond else "FAIL", label])
-	if not cond:
-		_ok = false
-
 
 func _init() -> void:
 	var layers := BuildingMaterials.atlas_layers()
 	var index := layers.find("TimberFrame")
-	_check(index == 14, "TimberFrame est la couche 14 de l'atlas (trouvé %d)" % index)
+	check(index == 14, "TimberFrame est la couche 14 de l'atlas (trouvé %d)" % index)
 	var doc: Variant = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../data/art/building_materials.json")))
 	var wired := false
 	for entry in (doc as Dictionary)["textured"]:
 		if str(entry["name"]) == "TimberFrame":
 			wired = bool(entry.get("wired", true))
-	_check(wired, "TimberFrame marquée wired: true")
+	check(wired, "TimberFrame marquée wired: true")
 	var atlas := BuildingMaterials.material("Building") as ShaderMaterial
 	var first_plain := int(atlas.get_shader_parameter("first_plain"))
 	var plain_last := int(atlas.get_shader_parameter("plain_last"))
-	_check(first_plain == 11 and plain_last == 13, "couches unies 11..13 (trouvé %d..%d)" % [first_plain, plain_last])
-	_check(index > plain_last, "TimberFrame après le bloc uni : texturée")
+	check(first_plain == 11 and plain_last == 13, "couches unies 11..13 (trouvé %d..%d)" % [first_plain, plain_last])
+	check(index > plain_last, "TimberFrame après le bloc uni : texturée")
 	var far_index := layers.find("TimberFrameFar")
-	_check(far_index == 15, "TimberFrameFar est la couche 15 (trouvé %d)" % far_index)
-	_check(str(BuildingMaterials.SPECS["TimberFrame"][0]).contains("daub"), "TimberFrame (niveau high) : torchis sans poutres peintes")
+	check(far_index == 15, "TimberFrameFar est la couche 15 (trouvé %d)" % far_index)
+	check(str(BuildingMaterials.SPECS["TimberFrame"][0]).contains("daub"), "TimberFrame (niveau high) : torchis sans poutres peintes")
 	var albedo := atlas.get_shader_parameter("albedo_array") as TextureLayered
-	_check(albedo != null and albedo.get_layers() == layers.size(), "tableau d'albédos à %d tranches (trouvé %d)" % [layers.size(), albedo.get_layers() if albedo != null else -1])
+	check(albedo != null and albedo.get_layers() == layers.size(), "tableau d'albédos à %d tranches (trouvé %d)" % [layers.size(), albedo.get_layers() if albedo != null else -1])
 
 	# Modèles exportés : faces de la couche 14 dans un modèle marqué `framed`.
 	var manifest := BuildingKit.manifest()
@@ -51,39 +43,38 @@ func _init() -> void:
 			framed.append(model_name)
 		if bool(entry.get("southern", false)):
 			southern += 1
-	_check(framed.size() >= 1, "%d modèles de bataille à colombage" % framed.size())
-	_check(southern >= 3, "%d variantes du Midi" % southern)
+	check(framed.size() >= 1, "%d modèles de bataille à colombage" % framed.size())
+	check(southern >= 3, "%d variantes du Midi" % southern)
 	if not framed.is_empty():
-		_check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 14) > 0, "%s : faces TimberFrame (couche 14)" % framed[0])
-		_check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 15) == 0, "%s : pas de lattis peint sous les poutres modelées" % framed[0])
-	_check(_count_layer("res://assets/models/town_kit/timber_0.glb", 15) > 0, "kit des villes (low) : lattis peint TimberFrameFar")
+		check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 14) > 0, "%s : faces TimberFrame (couche 14)" % framed[0])
+		check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 15) == 0, "%s : pas de lattis peint sous les poutres modelées" % framed[0])
+	check(_count_layer("res://assets/models/town_kit/timber_0.glb", 15) > 0, "kit des villes (low) : lattis peint TimberFrameFar")
 
 	# Choix régional.
 	var north := BuildingRegions.style_for_province("prov_normandie")
 	var south := BuildingRegions.style_for_province("prov_guyenne")
-	_check(BuildingRegions.region_of("prov_normandie") == "france_nord", "Normandie → france_nord")
-	_check(float(north.get("framed", 0)) >= 0.7 and not bool(north.get("southern", true)), "Normandie : colombage courant")
-	_check(float(south.get("framed", 1)) <= 0.1 and bool(south.get("southern", false)), "Guyenne : pierre et enduit (Midi)")
+	check(BuildingRegions.region_of("prov_normandie") == "france_nord", "Normandie → france_nord")
+	check(float(north.get("framed", 0)) >= 0.7 and not bool(north.get("southern", true)), "Normandie : colombage courant")
+	check(float(south.get("framed", 1)) <= 0.1 and bool(south.get("southern", false)), "Guyenne : pierre et enduit (Midi)")
 	var north_share := _framed_share(north)
 	var south_share := _framed_share(south)
-	_check(north_share > 0.6, "Normandie : %.0f %% de maisons à colombage" % (north_share * 100.0))
-	_check(south_share < 0.2, "Guyenne : %.0f %% de maisons à colombage" % (south_share * 100.0))
-	_check(_southern_picks(north) == 0, "pas de variante du Midi en Normandie")
-	_check(_southern_picks(south) > 0, "variantes du Midi en Guyenne")
+	check(north_share > 0.6, "Normandie : %.0f %% de maisons à colombage" % (north_share * 100.0))
+	check(south_share < 0.2, "Guyenne : %.0f %% de maisons à colombage" % (south_share * 100.0))
+	check(_southern_picks(north) == 0, "pas de variante du Midi en Normandie")
+	check(_southern_picks(south) > 0, "variantes du Midi en Guyenne")
 	BuildingKit.region_style = {}
 
 	# Château Kenney : atlas, ardoise, une surface.
 	var castle := SettlementGrowth.kenney_castle()
-	_check(castle != null, "château Kenney construit")
+	check(castle != null, "château Kenney construit")
 	if castle != null:
 		var mesh: Mesh = castle.mesh
-		_check(mesh.get_surface_count() == 1, "château : une seule surface")
-		_check(mesh.surface_get_material(0) == BuildingMaterials.material("Building", "far"), "château : matériau atlas partagé")
-		_check(_mesh_layer_count(mesh, layers.find("RoofSlate")) > 0, "château : toits d'ardoise (RoofSlate)")
-		_check(_mesh_layer_count(mesh, layers.find("Masonry")) > 0, "château : murs de pierre (Masonry)")
+		check(mesh.get_surface_count() == 1, "château : une seule surface")
+		check(mesh.surface_get_material(0) == BuildingMaterials.material("Building", "far"), "château : matériau atlas partagé")
+		check(_mesh_layer_count(mesh, layers.find("RoofSlate")) > 0, "château : toits d'ardoise (RoofSlate)")
+		check(_mesh_layer_count(mesh, layers.find("Masonry")) > 0, "château : murs de pierre (Masonry)")
 		castle.free()
-	print("TF: %s" % ("OK" if _ok else "ÉCHEC"))
-	quit(0 if _ok else 1)
+	finish()
 
 
 ## Part des maisons à colombage tirées pour un style (types régionaux, 300 tirages).

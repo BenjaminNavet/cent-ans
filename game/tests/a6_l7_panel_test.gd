@@ -1,16 +1,8 @@
-extends SceneTree
+extends TestCase
 
 ## A6-L7 : panneau de colonie sans défilement imbriqué, recrutement groupé (U13), raison de
 ## construction sur sa ligne (U12), file de construction (M8). Maquette de données, sans simulation.
 ## `godot --headless --path game --script res://tests/a6_l7_panel_test.gd`
-
-var _failed := 0
-
-
-func _check(ok: bool, message: String) -> void:
-	if not ok:
-		_failed += 1
-		printerr("FAIL: ", message)
 
 
 func _init() -> void:
@@ -31,28 +23,28 @@ func _init() -> void:
 	]
 	var buildable := [{"building": "bld_c", "name": "Halle", "cost": 5, "turns": 2, "available": false, "reason": "file de construction pleine (3 chantiers)"}]
 	panel.show_settlement(detail, recruits, buildable, true)
-	_check(panel.find_children("*", "ScrollContainer", true, false).is_empty(), "no scroll inside the panel")
+	check(panel.find_children("*", "ScrollContainer", true, false).is_empty(), "no scroll inside the panel")
 	var texts: Array = []
 	for button in panel.recruit_list.find_children("*", "Button", true, false):
 		texts.append(button.text)
 	var joined := " | ".join(texts)
-	_check(joined.contains("Milice"), "ready unit listed")
-	_check(not joined.contains("Mamelouks"), "elsewhere unit hidden")
-	_check(joined.contains("Bientôt (1)"), "soon section header: %s" % joined)
-	_check(joined.find("Milice") < joined.find("Lanciers"), "ready before blocked")
+	check(joined.contains("Milice"), "ready unit listed")
+	check(not joined.contains("Mamelouks"), "elsewhere unit hidden")
+	check(joined.contains("Bientôt (1)"), "soon section header: %s" % joined)
+	check(joined.find("Milice") < joined.find("Lanciers"), "ready before blocked")
 	var soon_body := panel.recruit_list.find_child("SoonList", true, false) as Control
-	_check(soon_body != null and not soon_body.visible, "soon section folded by default")
-	_check(panel.queue_box.visible and panel.queue_box.get_child_count() == 1, "one queued building shown")
-	_check(panel.queue_box.find_child("CancelQueuedButton", true, false) != null, "queued entry has a cancel button")
+	check(soon_body != null and not soon_body.visible, "soon section folded by default")
+	check(panel.queue_box.visible and panel.queue_box.get_child_count() == 1, "one queued building shown")
+	check(panel.queue_box.find_child("CancelQueuedButton", true, false) != null, "queued entry has a cancel button")
 	var fired: Array = []
 	panel.cancel_queued_build_requested.connect(func(id: String, index: int) -> void: fired.append([id, index]))
 	(panel.queue_box.find_child("CancelQueuedButton", true, false) as Button).pressed.emit()
-	_check(fired == [["set_x", 0]], "cancel queued emits settlement and index: %s" % str(fired))
+	check(fired == [["set_x", 0]], "cancel queued emits settlement and index: %s" % str(fired))
 	# U12 : la raison est un enfant direct de la liste (ligne pleine largeur), pas dans la ligne du bouton.
 	var reason_direct := false
 	for child in panel.buildable_list.get_children():
 		if child is Label and (child as Label).text.begins_with("file de construction"):
 			reason_direct = true
-	_check(reason_direct, "build reason on its own full-width line")
-	print("a6_l7_panel_test: %s" % ("OK" if _failed == 0 else "%d failure(s)" % _failed))
-	quit(1 if _failed > 0 else 0)
+	check(reason_direct, "build reason on its own full-width line")
+	print("a6_l7_panel_test: %s" % ("OK" if failures == 0 else "%d failure(s)" % failures))
+	finish()

@@ -24,6 +24,10 @@ for script in "$root"/game/tests/*_test.gd; do
 	started=$SECONDS
 	godot --headless --path "$root/game" --script "res://tests/$name.gd" >"$log_dir/$name.log" 2>&1
 	code=$?
+	# Godot sort en code 0 sur une erreur d'analyse : le journal fait foi.
+	if [ "$code" -eq 0 ] && grep -q "Failed to load script" "$log_dir/$name.log"; then
+		code=2
+	fi
 	if [ "$code" -eq 0 ]; then
 		passed=$((passed + 1))
 		echo "PASS $name ($((SECONDS - started)) s)"
