@@ -94,8 +94,9 @@ func _test_formula() -> void:
 	var inc := FileAccess.get_file_as_string("res://shaders/campaign_relief.gdshaderinc")
 	check(inc.contains("return campaign_vertical_scale * (h_m - k * max(h_m - fields.y, 0.0)"), "shader formula changed: update MapData.display_height_fields and the Rust twin")
 	check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0));"), "shader gain term changed: update the twins")
-	var map_data_code := FileAccess.get_file_as_string("res://scripts/map/map_data.gd")
-	check(map_data_code.contains("return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))"), "GDScript twin changed")
+	# Le double GDScript vit dans `ReliefState` (`MapData.display_height_fields` y délègue).
+	var relief_state_code := FileAccess.get_file_as_string("res://scripts/map/relief_state.gd")
+	check(relief_state_code.contains("return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))"), "GDScript twin changed")
 	var rust := FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../core/crates/vegetation/src/lib.rs"))
 	if check(rust != "", "Rust twin readable"):
 		check(rust.contains("* (h_m - squash * (h_m - base).max(0.0)") and rust.contains("self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0)"), "Rust twin (vegetation) changed")
