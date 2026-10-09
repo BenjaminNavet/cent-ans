@@ -58,7 +58,12 @@ impl IRefCounted for BattleTerrainKernel {
 }
 
 fn float_of(dict: &VarDictionary, key: &str, default: f64) -> f64 {
-    dict.get(key).map_or(default, |v| v.to::<f64>())
+    // GDScript hands over `int` or `float` indifferently.
+    dict.get(key).map_or(default, |v| {
+        v.try_to::<f64>()
+            .or_else(|_| v.try_to::<i64>().map(|i| i as f64))
+            .unwrap_or(default)
+    })
 }
 
 fn mesh_of(data: &MeshData) -> Gd<ArrayMesh> {
