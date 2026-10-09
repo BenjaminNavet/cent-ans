@@ -9,3 +9,10 @@
 
 ## Restes sans bonne figure
 - `unit_yaya` reste sur `archer_3` (francs-archers) : aucune figure d'infanterie orientale à arc n'existe (`infantry_*` sont épée/pique/milice, sans tir). Nécessite une nouvelle figurine (audit 05, ligne 3).
+
+## QW-E suite — figurine yaya (09/10, session de reprise)
+Etat : chaine gratuite en cours (cout 0). Plan : feuille Qwen-Image-Edit local depuis la feuille `longbowman`
+(`~/dev/cent-ans-raw/ga3/l5/yaya/`) -> decoupe rembg -> TRELLIS HF multivue (ou SF3D de face) ->
+`ga3_figures.py` (nouvelle unite `yaya`, figure `archer_6`, copie de `archer_3` dans FIGURES et le manifeste fin)
+-> `unit_yaya.figure = archer_6`.
+Prochaine etape : verifier `l5/yaya/sheet.png`, puis 3D.
