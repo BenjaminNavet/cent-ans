@@ -120,3 +120,7 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
   - Reprise : pour chaque worktree, relire `git log main..sc/<lot>` + diff, finir le lot (agent avec le même brief), rebase main, vérifier, fusion ff-only.
 - Attention : d'autres sessions (QW, TX, battle bow_walk) commitent sur main ; ne fusionner que quand le checkout principal n'a pas de modifs non commitées sur les mêmes fichiers.
 - Ensuite : vagues 16+ (restants.md À FAIRE/PARTIEL), lots doc en dernier, puis fmt/clippy/test workspace complets, pytest, smoke, push.
+
+## Reprise 09/10 soir (vague 15 suite)
+- Consignes communes désormais dans le dépôt : `docs/wip/sc/brief-common.md` (le brief du scratchpad est perdu).
+- Agents relancés sur hooks, army, bscene, codexaudio, mapjobs, parchment (worktrees existants). gt3 fini : rebasé sur main, vérif des 7 tests dn_* en cours. rt (Rust, tests) relancé après cette vague.
