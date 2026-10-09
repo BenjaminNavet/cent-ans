@@ -31,10 +31,10 @@ GB6 | À FAIRE | TerrainMesher.build_patch, scatter() transforms, phases d'anim 
 GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crates/godot-bridge/src | oui
 
 ## CB sim-campaign
-CB1 | À FAIRE | settle_side_outcomes/losses_percent/retreat_losers introuvables (battle_flow absent) ; hash playthrough | core/crates/sim-campaign/src/battle_outcome.rs, battle_request.rs | oui
+CB1 | RIEN À FAIRE | settle_side_outcomes/losses_percent/retreat_losers n'existent plus nulle part dans core/ (grep `fn`), battle_flow absent : déjà refondu | - | -
 CB7 | PARTIEL | GameData::province_name/faction_name existent ; restes bridge (campaign_sim.rs, treaty, feudal), custom.rs faction_name, From<Season>/dist | core/crates/godot-bridge/src, sim-battle/src/custom.rs | oui
 CB8 | PARTIEL | hostile_settlement_cells toujours fonction non cachée, passe-plats/depart() à vérifier | core/crates/sim-campaign/src/march.rs, movement/ | oui
-CB10 | À FAIRE | debug_* (encounter.rs, battle_request.rs) pas dans staging.rs ; sg3_assault_probe.rs reste | core/crates/sim-campaign/src/battle_request.rs, tests/siege_battle/sg3_assault_probe.rs | oui
+CB10 | FAIT 7822c9ba6 | debug_stage_siege/landmark_siege/battle + debug_put_encounter_site regroupés dans src/staging.rs ; sg3_assault_probe.rs conservé (2 tests avec assertions, sonde en --ignored) | core/crates/sim-campaign/src/staging.rs | oui
 CB12 | PARTIEL | constantes naval en data faites ; mémo win_chance non vérifié | core/crates/sim-battle/src/naval | oui
 CB13 | PARTIEL | constantes siège/débarquement en data (movement) ; pub->pub(crate), doc Order non vérifiés | core/crates/sim-campaign/src | oui
 PROBES | FAIT (sc/cc) | examples diplomacy_probe, dynasty_probe, income_probe (sim-campaign) ; tests century/settlements/ia_quality probes à revérifier | core/crates/sim-campaign/examples | oui
