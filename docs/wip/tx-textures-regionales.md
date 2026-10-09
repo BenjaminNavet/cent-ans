@@ -6,11 +6,12 @@ Spécification : `docs/superpowers/specs/2026-10-09-textures-regionales-design.m
 
 ## État
 
-- 2026-10-09 : spec commitée (43354418e) ; plan écrit ; squelette T1a en cours.
+- 2026-10-09 : spec (43354418e), squelette T1a (78cf8abdd), T1b (c1faeeb19) et T1c (446ad06f6) fusionnés dans main ; 33 tests verts.
+- Real-ESRGAN ncnn-vulkan installé dans `~/models/realesrgan/` (v0.2.5.0, modèles x4plus, x4plus-anime, animevideov3).
 
 ## Prochaine étape
 
-T1b et T1c (agents Sonnet en parallèle), puis T1d.
+T1d (upscale) : trancher le point ouvert Real-ESRGAN ci-dessous, puis T1e.
 
 ## Réservations
 
@@ -88,8 +89,10 @@ Partie pilote du joueur ; supprimer les textures Poly Haven (ou les garder pour 
 
 ## Points ouverts
 
-- Temps réel de Real-ESRGAN sur M4 Pro (T1d) : s'il dépasse ~30 s par image, réduire à 1536 →
-  2048 seulement pour les sols de bataille.
+- Real-ESRGAN `realesrgan-x4plus` mesuré sur M4 Pro : **118 s** pour 1024 → 4096 (grass_albedo), soit
+  ~11 h pour ~330 images, plus que la génération. Pistes T1d : modèle léger `realesr-general-x4v3`
+  (à télécharger), ou génération native en 1536 + Lanczos vers 2048 + micro-détail, Real-ESRGAN
+  réservé aux sols de bataille. Comparer sur 3 matières avant de choisir.
 
 ## État T1c (catalogue + génération)
 
