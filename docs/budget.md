@@ -365,3 +365,4 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-09 | fal.ai | DN-TROUS : vues dos/côté `fal-ai/flux-2/edit`, 24 appels (8 maquettes multi-vues, contrôle de luminance) + 2 figures | 0,58 $ | 0,58 $ | 42,21 $ |
 | 2026-10-09 | fal.ai | DN-TROUS : 3D `fal-ai/trellis/multi`, 10 appels (8 maquettes + 2 figures). Solde fal épuisé en cours de lot (« Exhausted balance ») : le reste des maquettes en liste d'attente | 0,20 $ | 0,20 $ | 42,41 $ |
 | 2026-10-09 | fal.ai | env_harvest_sheaves : comparaison 3D `fal-ai/trellis`, 1 appel (image Z-Image locale ; SF3D local retenu par le joueur) | 0,02 $ | 0,02 $ | 42,43 $ |
+| 2026-10-09 | fal.ai | DN-CHAMPS (abandonné, branche supprimée) : 3D `fal-ai/trellis`, 12 appels (11 parcelles entières + terrasses refaites ; images Z-Image locales, 0 $) | 0,24 $ | 0,24 $ | 42,67 $ |
