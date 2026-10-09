@@ -4,7 +4,7 @@ extends RefCounted
 ## TX T2c (ADR 0240) : sols de bataille régionaux générés. Un paquet par biome (13 couches, une par
 ## rôle de `data/fx/battle_ground_layers.json`, dans l'ordre fixe du shader `battle_ground`) ; seul le
 ## paquet du biome du lieu est chargé. Repli : biome, parent (`BiomeParents`), biome par défaut, puis
-## `{}` (l'appelant retombe sur le jeu Poly Haven). Jamais de plantage : un paquet absent, non
+## `{}` (sol sans texture ; ADR 0244 : plus de jeu Poly Haven). Jamais de plantage : un paquet absent, non
 ## importé ou incohérent est ignoré avec un avertissement. Rendu seulement, aucune règle de jeu.
 ##
 ## Qualité : « haute » préfère la variante 2k locale (`hi/`, manifeste `*_2048.json`) si elle est
@@ -74,7 +74,7 @@ static func pack_for(biome: int) -> Dictionary:
 		var pack := _load_pack(candidate)
 		if not pack.is_empty():
 			return pack
-	push_warning("BattleGroundTextures: aucun paquet pour le biome %d, repli Poly Haven" % biome)
+	push_warning("BattleGroundTextures: aucun paquet importé pour le biome %d (ni parent, ni biome par défaut)" % biome)
 	return {}
 
 

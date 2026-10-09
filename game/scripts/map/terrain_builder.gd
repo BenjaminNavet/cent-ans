@@ -28,9 +28,6 @@ signal vertical_scale_changed(old_scale: float, new_scale: float)
 const LEGACY_CHUNKS := 16
 const ROOT_TILE_UNITS := 256
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
-## Couches de matériaux, dans l'ordre des Texture2DArray : GA4, lues dans les données
-## (`CampaignTextures.layer_ids()`, `data/fx/campaign_terrain_textures.json`).
-const TEXTURE_DIR := "res://assets/textures/terrain/"
 
 ## Pas (en pixels) entre deux sommets des morceaux E0 (vue parchemin, bornes).
 @export var far_step: int = 8
@@ -90,7 +87,7 @@ var _coast_texture: ImageTexture
 var _occlusion_texture: ImageTexture  # RV-D : occlusion de vallée (null si absente)
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
-var _albedo_array: TextureLayered  # CompressedTexture2DArray importé ou Texture2DArray (1k)
+var _albedo_array: TextureLayered  # Tableau importé du fond régional
 var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
 var _regional: Dictionary = {}  # TX (ADR 0243) : fond par biome, {} = couches GA4
@@ -813,68 +810,20 @@ static func _mipmapped_texture(image: Image) -> ImageTexture:
 	return ImageTexture.create_from_image(copy)
 
 
-## Deux Texture2DArray (albédo ; normale XY + rugosité) depuis les JPEG Poly Haven importés.
-## Moyenne linéaire de chaque albédo (dernier niveau de mipmap) : le shader s'en sert pour
-## teinter les textures vers des couleurs réalistes réglables sans perdre leur détail.
+## Tableaux du fond régional TX (ADR 0243) : albédo, normale XY + rugosité, et moyenne linéaire de
+## chaque couche (le shader teinte le détail autour de cette moyenne). Sans paquet, terrain sans
+## texture (`has_textures` faux).
 func _build_material_arrays() -> void:
-	# Tableaux 2k importés (compressés en VRAM), moyennes dans les données. Tableaux
-	# absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
 	_regional = CampaignTextures.load_regional()
 	_micro = CampaignTextures.load_micro()
-	if not _regional.is_empty():
-		_albedo_array = _regional["albedo"]
-		_normal_array = _regional["normal"]
-		_layer_means = _regional["means"]
+	if _regional.is_empty():
+		_albedo_array = null
+		_normal_array = null
+		_layer_means = PackedVector3Array()
 		return
-	var ga4 := CampaignTextures.load_arrays()
-	if not ga4.is_empty():
-		_albedo_array = ga4["albedo"]
-		_normal_array = ga4["normal"]
-		_layer_means = ga4["means"]
-		return
-	var albedo_images: Array[Image] = []
-	var normal_images: Array[Image] = []
-	_layer_means = PackedVector3Array()
-	for layer in CampaignTextures.layer_ids():
-		var albedo := _load_layer_image(TEXTURE_DIR + layer + "_albedo.jpg")
-		var normal := _load_layer_image(TEXTURE_DIR + layer + "_normal_rough.jpg")
-		if albedo == null or normal == null:
-			push_warning("TerrainBuilder: missing texture layer %s, terrain textures disabled" % layer)
-			_albedo_array = null
-			_normal_array = null
-			return
-		albedo_images.append(albedo)
-		normal_images.append(normal)
-		var last := albedo.get_mipmap_count()
-		var offset := albedo.get_mipmap_offset(last)
-		var data := albedo.get_data()
-		var mean := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
-		_layer_means.append(Vector3(mean.r, mean.g, mean.b))
-	var albedo_array := Texture2DArray.new()
-	albedo_array.create_from_images(albedo_images)
-	_albedo_array = albedo_array
-	var normal_array := Texture2DArray.new()
-	normal_array.create_from_images(normal_images)
-	_normal_array = normal_array
-
-
-static func _load_layer_image(path: String) -> Image:
-	if not ResourceLoader.exists(path):
-		return null
-	var texture := load(path) as Texture2D
-	if texture == null:
-		return null
-	var image := texture.get_image()
-	if image == null:
-		return null
-	if image.is_compressed():
-		image.decompress()
-	if image.get_format() != Image.FORMAT_RGBA8:
-		image.convert(Image.FORMAT_RGBA8)
-	if image.get_size() != Vector2i(1024, 1024):
-		image.resize(1024, 1024, Image.INTERPOLATE_LANCZOS)
-	image.generate_mipmaps()
-	return image
+	_albedo_array = _regional["albedo"]
+	_normal_array = _regional["normal"]
+	_layer_means = _regional["means"]
 
 
 func _build_faction_texture() -> void:

@@ -13,16 +13,11 @@ def _document() -> dict:
     return json.loads((DATA / "fx" / "battle_ground_layers.json").read_text(encoding="utf-8"))
 
 
-def test_battle_ground_layers_ids_unique() -> None:
-    """Legacy layer ``id`` values are unique (used as GDScript role lookup keys)."""
-    ids = [layer["id"] for layer in _document()["legacy"]["layers"]]
-    assert len(ids) == len(set(ids))
-
-
-def test_legacy_layers_follow_roles_order() -> None:
-    """The Poly Haven set keeps the shader's layer order."""
+def test_no_poly_haven_ground_set() -> None:
+    """ADR 0244: the Poly Haven ground set (``legacy``) is gone; packs are the only way."""
     document = _document()
-    assert [layer["role"] for layer in document["legacy"]["layers"]] == document["roles"]
+    assert "legacy" not in document
+    assert "poly_haven" not in json.dumps(document)
 
 
 def test_every_role_has_a_material_for_every_biome() -> None:

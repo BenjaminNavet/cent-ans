@@ -2,8 +2,11 @@ class_name TextureQuality
 extends RefCounted
 ## TX (ADR 0236) : choix des textures régionales générées.
 ##
-## `use_tx()` : faux avec `--legacy-textures` (anciennes textures Poly Haven / HB, jusqu'à la partie
-## pilote). `hi_path(path)` : variante 2k locale d'un paquet (`<dossier>/hi/<fichier>`, manifeste
+## `use_tx()` : faux avec `--legacy-textures` (anciennes textures d'avant TX, jusqu'à la partie
+## pilote) pour le parcellaire HB, la couche par défaut des bâtiments, la végétation, l'eau et les
+## écorces. Il n'affecte PLUS le sol de bataille ni le sol de campagne (ADR 0244 : plus de Poly
+## Haven, les paquets TX régionaux sont la seule voie).
+## `hi_path(path)` : variante 2k locale d'un paquet (`<dossier>/hi/<fichier>`, manifeste
 ## `<nom>_2048.json`) quand « Qualité des textures » vaut « haute » et qu'elle existe, sinon `path`.
 
 const LEGACY_FLAG := "--legacy-textures"

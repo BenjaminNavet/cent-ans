@@ -244,13 +244,11 @@ def geo_navgrid(
 
 
 @geo_app.command("textures")
-def geo_textures(
-    force: bool = typer.Option(False, "--force", help="Retélécharge les textures"),
-) -> None:
-    """Télécharge les textures PBR CC0 (Poly Haven) du terrain de campagne."""
+def geo_textures() -> None:
+    """Écrit la normale de mer procédurale du terrain de campagne (le sol vient des paquets TX)."""
     from cent_ans_tools.geo import textures as geo_textures_step
 
-    paths = geo_textures_step.build(force=force)
+    paths = geo_textures_step.build()
     _print_sizes("Textures du terrain", paths)
 
 

@@ -1,62 +1,28 @@
 class_name CampaignTextures
 extends RefCounted
 
-## Textures 2k du terrain de campagne, macro-variation à l'échelle de la (ADR 0105)
-## carte et eau (normales animées, couleur de profondeur). Identité des couches et réglages dans
-## `data/fx/campaign_terrain_textures.json` (schéma `fx_campaign_terrain_textures.schema.json`),
-## jamais codés en dur ici ; seul l'ordre des couches est un contrat du shader (index fixes de
-## `terrain.gdshader`). Si les tableaux manquent,
-## `TerrainBuilder` retombe sur l'ancien chemin (JPEG 1k par couche).
+## Fond régional TX du terrain de campagne (ADR 0243),
+## macro-variation à l'échelle de la carte et eau (normales animées, couleur de profondeur).
+## Réglages dans `data/fx/campaign_terrain_textures.json` (schéma
+## `fx_campaign_terrain_textures.schema.json`), jamais codés en dur ici ; seul l'ordre des 7 rôles
+## est un contrat du shader (index fixes de `terrain.gdshader`). Plus de couches Poly Haven
+## globales : si le paquet régional manque, le terrain est sans texture (avertissement).
 
 const SPEC_FILE := "fx/campaign_terrain_textures.json"
 ## Contrat d'index de `terrain.gdshader` (sample_layer(0..6)).
 const SHADER_LAYER_ORDER: Array[String] = ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]
 const TEXTURE_DIR := "res://assets/textures/terrain/"
-const ALBEDO_ARRAY_PATH := TEXTURE_DIR + "terrain_albedo_array.jpg"
-const NORMAL_ARRAY_PATH := TEXTURE_DIR + "terrain_normal_array.jpg"
 const WATER_NORMAL_PATH := TEXTURE_DIR + "water_normal.png"
 
-static var _lookup := JsonLookup.new(SPEC_FILE, {}, "", "layers")
+static var _lookup := JsonLookup.new(SPEC_FILE, {}, "", "regional")
 
 
-## Données GA4 (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.
+## Données (dossier de données du jeu, puis `data/` du dépôt) ; {} si introuvables.
 static func spec() -> Dictionary:
 	return _lookup.data()
 
 
-## Identifiants des couches dans l'ordre des données (repli : contrat du shader).
-static func layer_ids() -> Array[String]:
-	var ids: Array[String] = []
-	for layer in spec().get("layers", []):
-		ids.append(str((layer as Dictionary).get("id", "")))
-	return ids if not ids.is_empty() else SHADER_LAYER_ORDER.duplicate()
-
-
-## Tableaux importés (albédo 2k, normale + rugosité, compressés en VRAM) et moyennes linéaires
-## des albédos (données) : {"albedo", "normal", "means"}, {} si indisponibles (repli 1k).
-static func load_arrays() -> Dictionary:
-	var data := spec()
-	if data.is_empty():
-		return {}
-	if layer_ids() != SHADER_LAYER_ORDER:
-		push_warning("CampaignTextures: ordre des couches %s différent du contrat du shader" % [layer_ids()])
-		return {}
-	if not ResourceLoader.exists(ALBEDO_ARRAY_PATH) or not ResourceLoader.exists(NORMAL_ARRAY_PATH):
-		push_warning("CampaignTextures: tableaux GA4 absents, repli sur les couches 1k")
-		return {}
-	var albedo := load(ALBEDO_ARRAY_PATH) as TextureLayered
-	var normal := load(NORMAL_ARRAY_PATH) as TextureLayered
-	if albedo == null or normal == null or albedo.get_layers() != SHADER_LAYER_ORDER.size() or normal.get_layers() != SHADER_LAYER_ORDER.size():
-		push_warning("CampaignTextures: tableaux GA4 invalides, repli sur les couches 1k")
-		return {}
-	var means := PackedVector3Array()
-	for layer in data["layers"]:
-		var m: Array = (layer as Dictionary).get("mean_linear", [0.1, 0.1, 0.1])
-		means.append(Vector3(float(m[0]), float(m[1]), float(m[2])))
-	return {"albedo": albedo, "normal": normal, "means": means}
-
-
-## Taille fixe du tableau `layer_mean` du shader (couches d'origine : 7 ; fond régional : 45).
+## Taille fixe du tableau `layer_mean` du shader (fond régional : 45 couches).
 const MEAN_SLOTS := 48
 ## TX (ADR 0243) : table `bg_layers` = 15 biomes (0 = mer, repli biome 1) x 7 rôles.
 const BIOME_COUNT := 15
@@ -186,17 +152,17 @@ static func _load_l8_texture(rel_path: String) -> ImageTexture:
 	return ImageTexture.create_from_image(image)
 
 
-## TX : fond régional {"albedo", "normal", "means", "layers" (bg_layers), "ab", "dist"} ; {} avec
-## `--legacy-textures`, sans le bloc `regional` ou si un fichier manque (repli : couches GA4).
+## TX : fond régional {"albedo", "normal", "means", "layers" (bg_layers), "ab", "dist"} ; {} sans
+## le bloc `regional` ou si un fichier manque. Repli par biome : parent puis couche 0 (`build_layer_table`).
 static func load_regional() -> Dictionary:
 	var regional := regional_spec()
-	if regional.is_empty() or not TextureQuality.use_tx():
+	if regional.is_empty():
 		return {}
 	var pack := _load_pack(pack_manifest(str(regional["pack"])))
 	var ab := _load_l8_texture(str(regional["blend_ab"]))
 	var dist := _load_l8_texture(str(regional["blend_dist"]))
 	if pack.is_empty() or ab == null or dist == null:
-		push_warning("CampaignTextures: fond régional indisponible, repli sur les couches GA4")
+		push_warning("CampaignTextures: fond régional indisponible, terrain sans texture")
 		return {}
 	var layers: Array = pack["manifest"]["layers"]
 	return {
@@ -221,10 +187,10 @@ static func apply_regional(material: ShaderMaterial, regional: Dictionary, meter
 	material.set_shader_parameter("bg_min_w", float(block.get("min_blend_weight", 0.03)))
 
 
-## TX : grain de sol {"albedo", "layers" (micro_layers), "means"} ; {} avec `--legacy-textures`.
+## TX : grain de sol {"albedo", "layers" (micro_layers), "means"} ; {} sans le bloc `micro`.
 static func load_micro() -> Dictionary:
 	var block: Dictionary = spec().get("micro", {})
-	if block.is_empty() or not TextureQuality.use_tx():
+	if block.is_empty():
 		return {}
 	var manifest := pack_manifest(str(block["pack"]))
 	var pack := _load_pack(manifest)

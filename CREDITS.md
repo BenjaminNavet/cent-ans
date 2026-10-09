@@ -258,17 +258,12 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   (découpes `data/map/parchment_ornaments.json`) : `game/assets/textures/parchment/` (détail
   dans son `SOURCE.md`).
 
-### Détail proche du sol de bataille — CC0 1.0
+### Sols de bataille et de campagne — plus de source tierce
 
-- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,
-  albédo et normale sans retouche (lot PO4, `game/assets/textures/battle/near_detail/`).
-
-### Textures du terrain de campagne — CC0 1.0
-
-- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Aerial Grass Rock, Aerial Mud 1,
-  Forrest Ground 01, Aerial Rocks 01, Sparse Grass, Snow Field Aerial, Aerial Beach 01 (1k),
-  téléchargées par `tools/cent_ans_tools/geo/textures.py` et réduites en albédo + normale/rugosité
-  (`game/assets/textures/terrain/`).
+Depuis l'ADR 0244, les sols de bataille (`game/assets/textures/battle/tx/`) et de campagne
+(`game/assets/textures/terrain/tx_*`) sont des textures générées par le projet (fabrique TX,
+ADR 0236) ; les anciennes textures Poly Haven du sol (jeu de bataille, détail proche, couches GA4
+de campagne) ont été retirées.
 
 ### Ciels HDRI — CC0 1.0
 

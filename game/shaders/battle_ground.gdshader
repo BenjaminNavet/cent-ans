@@ -85,18 +85,9 @@ uniform float detail_bump = 0.7;
 // DA6 : lisières douces des parcelles et détail du sol de près.
 uniform float decor_saturation = 0.6; // DA6 : part de la saturation gardée (bible § 3.3)
 uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
-// PO4 : texture de détail proche (Poly Haven CC0, terre et herbe rase, `near_detail/SOURCE.md`),
-// relue à l'échelle réelle sous la caméra rapprochée : sa luminance relative module l'albédo, sa
-// normale s'ajoute ; fondue avec la distance (au-delà de `near_detail_dist`, aucun échantillon).
-uniform sampler2D near_detail_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D near_detail_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform float near_detail_size = 1.4; // m par tuile
-uniform float near_detail_dist = 32.0;
-uniform float near_detail_strength = 0.6;
-// TX T2c : sols générés par biome (`tx_ground` = 1) : les teintes calées sur l'ancien jeu Poly Haven
-// (herbe, terre, boue) sont atténuées ; grain fin (`micro_*`, paquet `micro_battle`) à la place du
-// détail proche Poly Haven, une couche de grain par couche de sol (`micro_layer_of[]`,
-// `micro_tile_m[]`), fondu avec la distance comme `near_detail_*`.
+// TX T2c : sols générés par biome (`tx_ground` = 1) : les teintes d'herbe, de terre et de boue sont
+// atténuées ; grain fin (`micro_*`, paquet `micro_battle`), une couche de grain par couche de sol
+// (`micro_layer_of[]`, `micro_tile_m[]`), fondu avec la distance (`micro_dist`).
 uniform float tx_ground = 0.0;
 uniform float micro_on = 0.0;
 uniform sampler2DArray micro_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -104,6 +95,7 @@ uniform sampler2DArray micro_normal : hint_normal, filter_linear_mipmap_anisotro
 uniform float micro_layer_of[MAX_GROUND_LAYERS];
 uniform float micro_tile_m[MAX_GROUND_LAYERS];
 uniform float micro_strength = 0.7;
+uniform float micro_dist = 32.0; // m : au-delà, aucun échantillon de grain
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -361,9 +353,9 @@ void fragment() {
 		n_near.xy += (dn.xy * 2.0 - 1.0) * near_k * 0.6;
 		nrm = normalize(n_near) * 0.5 + 0.5;
 	}
-	// PO4 : détail proche réel (grain de terre, brins ras) sur l'herbe, les prés, la terre et la
+	// PO4 : grain fin du sol de près (paquet TX `micro_battle`) sur l'herbe, les prés, la terre et la
 	// boue ; pas sur la roche ni la neige. Lecture tournée (axes du champ).
-	float nd_k = (1.0 - smoothstep(near_detail_dist * 0.45, near_detail_dist, view_dist));
+	float nd_k = (1.0 - smoothstep(micro_dist * 0.45, micro_dist, view_dist));
 	nd_k *= clamp(1.0 - w[int(L_ROCK)] - w[int(L_SNOW)] - w[int(L_PEBBLES)] * 0.5, 0.0, 1.0);
 	if (nd_k > 0.01 && micro_on > 0.5) {
 		float mdom = 0.0;
@@ -382,16 +374,6 @@ void fragment() {
 		vec3 n_mi = nrm * 2.0 - 1.0;
 		n_mi.xy += (mnn.xy * 2.0 - 1.0) * nd_k * 0.8;
 		nrm = normalize(n_mi) * 0.5 + 0.5;
-	} else if (nd_k > 0.01) {
-		vec2 nuv = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / near_detail_size + vec2(0.37, 0.11);
-		vec3 ncol = texture(near_detail_albedo, nuv).rgb;
-		float nref = bt_luma(textureLod(near_detail_albedo, nuv, 10.0).rgb);
-		float nl = bt_luma(ncol) / max(nref, 0.02);
-		albedo *= mix(1.0, clamp(nl, 0.45, 1.6), nd_k * near_detail_strength);
-		vec3 nn = texture(near_detail_normal, nuv).rgb;
-		vec3 n_nd = nrm * 2.0 - 1.0;
-		n_nd.xy += (nn.xy * 2.0 - 1.0) * nd_k * 0.8;
-		nrm = normalize(n_nd) * 0.5 + 0.5;
 	}
 	// Sillons des labours.
 	if (w_plough > 0.0) {

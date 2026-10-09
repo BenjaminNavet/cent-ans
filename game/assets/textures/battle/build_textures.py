@@ -1,21 +1,15 @@
-"""Construit les textures de bataille (lot V4, 2k GA2) depuis Poly Haven (CC0) et par procédure.
+"""Construit les textures de bataille (murailles, toits, écorce, feuillage) depuis Poly Haven (CC0) et par procédure.
 
 Usage : uv run --with pillow --with numpy python build_textures.py <dossier_telechargements>
 
-Le dossier doit contenir, pour les couches du sol listées dans
-`data/fx/battle_ground_layers.json` (lot GA2, schéma `fx_battle_ground_layers.schema.json`),
-les fichiers Poly Haven `<id>_diff_2k.jpg` (albédo, 2k) et `<id>_nor_gl_1k.jpg` (normale, 1k —
-mesure mémoire GA2 : 13 couches en 2k/2k dépasseraient 120 Mo, 2k/1k tient à ~87 Mo) ; pour les
-couches uniques (bâtiments, écorce), `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg`
-(https://api.polyhaven.com/files/<id>). Produit, à côté de ce script :
-- `ground_albedo_array.jpg` (2048 px/couche) / `ground_normal_array.jpg` (1024 px/couche) :
-  couches du sol empilées verticalement (importées en Texture2DArray), ordre et identifiants
-  Poly Haven tirés de `data/fx/battle_ground_layers.json` (jamais codés en dur ici) ;
+Le dossier doit contenir, pour les couches uniques (bâtiments, écorce), `<id>_diff_1k.jpg` et
+`<id>_nor_gl_1k.jpg` (2k / 1k pour les matières GA5), voir https://api.polyhaven.com/files/<id>.
+Le sol de bataille n'est plus produit ici (ADR 0244 : paquets TX, `data/art/tx_battle_*_pack.json`).
+Produit, à côté de ce script :
 - `<id>_diff.jpg` / `<id>_nor.jpg` : textures des murailles, toits, maisons, écorce ;
 - `foliage_leaves.png`, `grass_clump.png` : cartes alpha procédurales (feuillage, touffes d'herbe).
 """
 
-import json
 import math
 import random
 import sys
@@ -25,14 +19,6 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 HERE = Path(__file__).parent
-DATA_ROOT = HERE.parents[3] / "data"
-
-GROUND_LAYERS = [
-    layer["poly_haven_id"]
-    for layer in json.loads(
-        (DATA_ROOT / "fx" / "battle_ground_layers.json").read_text(encoding="utf-8")
-    )["layers"]
-]
 
 SINGLE = [
     "castle_wall_varriation",
@@ -50,15 +36,6 @@ SINGLE = [
 # convention que GA2), contrairement aux autres `SINGLE` (écorce, sol, restées en 1k/512,
 # hors périmètre GA5).
 GA5_BUILDING_SINGLE = {"castle_wall_varriation", "roof_slates_02", "thatch_roof_angled"}
-
-
-def stack(src: Path, suffix: str, source_res: str, size: int, out: str) -> None:
-    """Empile les couches du sol (ordre de `battle_ground_layers.json`) verticalement."""
-    sheet = Image.new("RGB", (size, size * len(GROUND_LAYERS)))
-    for i, layer in enumerate(GROUND_LAYERS):
-        image = Image.open(src / f"{layer}_{suffix}_{source_res}.jpg").convert("RGB")
-        sheet.paste(image.resize((size, size), Image.Resampling.LANCZOS), (0, i * size))
-    sheet.save(HERE / out, quality=88)
 
 
 def singles(src: Path) -> None:
@@ -171,9 +148,6 @@ def grass(width: int = 512, height: int = 256) -> None:
 
 if __name__ == "__main__":
     downloads = Path(sys.argv[1])
-    # GA2 : albédo 2k, normale 1k (mesure mémoire, cf. docs/wip/ga.md section GA2).
-    stack(downloads, "diff", "2k", 2048, "ground_albedo_array.jpg")
-    stack(downloads, "nor_gl", "1k", 1024, "ground_normal_array.jpg")
     singles(downloads)
     leaves()
     grass()
