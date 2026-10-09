@@ -1,0 +1,954 @@
+# TX 3a (spec docs/superpowers/specs/2026-10-09-textures-regionales-design.md § 3): ground
+# vegetation cards, one isolated plant per image, extracted by the alpha step (rembg). 5 cards per
+# biome (1-14, see ground_campaign.yaml) + battle grass: roles grass_blades / grass_tufts / grass_clump
+# x 5 groups (green: biomes 1,2,10,11,12,13; dry: 3,7,14; steppe: 4,8; alpine: 6; arctic: 5,9).
+# `tile_m` = real height/width of the plant in metres. Prompts are positive-only (Z-Image has no
+# negative prompt). Seeds: 7000 + index * 10. Cost: 85 x 1024 px x 0.005 $ ~ 0.43 $.
+family: vegetation_cards
+backend: fal
+size: 1024
+output_size: 2048
+upscale: native
+style_prefix: >-
+  Photorealistic botanical photograph of a single plant, seen from the side, the whole plant complete
+  and centred in the frame, surrounded by a wide margin of plain uniform light neutral grey background,
+  soft diffuse even lighting. The plant is about {tile_m} metres across.
+style_suffix: >-
+  The plant stands alone on a flat plain light grey backdrop, fully inside the frame with empty grey
+  space on every side, crisp detail on every leaf and stem, natural colours.
+entries:
+- id: card_heather_oceanic_b01
+  role: ground_card
+  biomes: [1]
+  alpha: true
+  prompt: >-
+    A clump of flowering purple heather with woody stems.
+  seed: 7000
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_bracken_fern_b01
+  role: ground_card
+  biomes: [1]
+  alpha: true
+  prompt: >-
+    A bracken fern frond cluster with arching green fronds.
+  seed: 7010
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_foxglove_b01
+  role: ground_card
+  biomes: [1]
+  alpha: true
+  prompt: >-
+    A tall foxglove with a spike of pink bell flowers.
+  seed: 7020
+  tile_m: 1.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_gorse_low_b01
+  role: ground_card
+  biomes: [1]
+  alpha: true
+  prompt: >-
+    A low gorse bush with yellow flowers and green spines.
+  seed: 7030
+  tile_m: 0.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_bluebell_clump_b01
+  role: ground_card
+  biomes: [1]
+  alpha: true
+  prompt: >-
+    A clump of bluebells with narrow leaves and nodding blue flowers.
+  seed: 7040
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_cornflower_b02
+  role: ground_card
+  biomes: [2]
+  alpha: true
+  prompt: >-
+    A cornflower plant with blue flowers and narrow grey-green leaves.
+  seed: 7050
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_oxeye_daisy_b02
+  role: ground_card
+  biomes: [2]
+  alpha: true
+  prompt: >-
+    An oxeye daisy plant with several white and yellow flowers.
+  seed: 7060
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_nettle_patch_b02
+  role: ground_card
+  biomes: [2]
+  alpha: true
+  prompt: >-
+    A stinging nettle plant with serrated green leaves.
+  seed: 7070
+  tile_m: 0.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_cow_parsley_b02
+  role: ground_card
+  biomes: [2]
+  alpha: true
+  prompt: >-
+    A cow parsley plant with lacy white umbels.
+  seed: 7080
+  tile_m: 1.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_dock_plant_b02
+  role: ground_card
+  biomes: [2]
+  alpha: true
+  prompt: >-
+    A broad-leaved dock plant with a tall reddish seed stem.
+  seed: 7090
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_rosemary_shrub_b03
+  role: ground_card
+  biomes: [3]
+  alpha: true
+  prompt: >-
+    A small rosemary shrub with narrow dark green leaves and pale blue flowers.
+  seed: 7100
+  tile_m: 0.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_thyme_cushion_b03
+  role: ground_card
+  biomes: [3]
+  alpha: true
+  prompt: >-
+    A low cushion of wild thyme with pink flowers.
+  seed: 7110
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_lavender_clump_b03
+  role: ground_card
+  biomes: [3]
+  alpha: true
+  prompt: >-
+    A lavender clump with violet flower spikes.
+  seed: 7120
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_acanthus_b03
+  role: ground_card
+  biomes: [3]
+  alpha: true
+  prompt: >-
+    An acanthus plant with large deeply lobed glossy leaves.
+  seed: 7130
+  tile_m: 1.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_broom_spanish_b03
+  role: ground_card
+  biomes: [3]
+  alpha: true
+  prompt: >-
+    A Spanish broom shrub with green rush-like stems and yellow flowers.
+  seed: 7140
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_feather_grass_stipa_b04
+  role: ground_card
+  biomes: [4]
+  alpha: true
+  prompt: >-
+    A clump of feather grass (stipa) with long silky plumed awns.
+  seed: 7150
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_sagebrush_steppe_b04
+  role: ground_card
+  biomes: [4]
+  alpha: true
+  prompt: >-
+    A steppe wormwood plant with silvery finely cut leaves.
+  seed: 7160
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_steppe_tulip_b04
+  role: ground_card
+  biomes: [4]
+  alpha: true
+  prompt: >-
+    A wild steppe tulip with a red flower and grey-green leaves.
+  seed: 7170
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_fescue_tussock_b04
+  role: ground_card
+  biomes: [4]
+  alpha: true
+  prompt: >-
+    A dense tussock of blue-grey fescue grass.
+  seed: 7180
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_sage_steppe_b04
+  role: ground_card
+  biomes: [4]
+  alpha: true
+  prompt: >-
+    A steppe sage plant with violet flower spikes and woolly leaves.
+  seed: 7190
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_blueberry_boreal_b05
+  role: ground_card
+  biomes: [5]
+  alpha: true
+  prompt: >-
+    A bilberry shrub with small green leaves and dark blue berries.
+  seed: 7200
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_lingonberry_b05
+  role: ground_card
+  biomes: [5]
+  alpha: true
+  prompt: >-
+    A lingonberry sprig with glossy leaves and red berries.
+  seed: 7210
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_reindeer_lichen_boreal_b05
+  role: ground_card
+  biomes: [5]
+  alpha: true
+  prompt: >-
+    A cushion of pale grey-green reindeer lichen.
+  seed: 7220
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_fern_boreal_b05
+  role: ground_card
+  biomes: [5]
+  alpha: true
+  prompt: >-
+    A lady fern with delicate arching fronds.
+  seed: 7230
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_labrador_tea_b05
+  role: ground_card
+  biomes: [5]
+  alpha: true
+  prompt: >-
+    A Labrador tea shrub with leathery leaves and white flower clusters.
+  seed: 7240
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_edelweiss_b06
+  role: ground_card
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    An edelweiss plant with woolly white star-shaped flowers.
+  seed: 7250
+  tile_m: 0.25
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_gentian_alpine_b06
+  role: ground_card
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    A spring gentian with deep blue star flowers and a small leaf rosette.
+  seed: 7260
+  tile_m: 0.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_alpine_rose_b06
+  role: ground_card
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    An alpenrose shrub with glossy leaves and pink flower clusters.
+  seed: 7270
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_alpine_aster_b06
+  role: ground_card
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    An alpine aster with violet daisy flowers.
+  seed: 7280
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_cushion_saxifrage_b06
+  role: ground_card
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    A compact green cushion of saxifrage with tiny white flowers.
+  seed: 7290
+  tile_m: 0.25
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_wormwood_arid_b07
+  role: ground_card
+  biomes: [7]
+  alpha: true
+  prompt: >-
+    An armoise wormwood shrub with silvery grey finely divided leaves.
+  seed: 7300
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_esparto_tuft_b07
+  role: ground_card
+  biomes: [7]
+  alpha: true
+  prompt: >-
+    A tuft of esparto grass with stiff thin wiry blades.
+  seed: 7310
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_thorny_burnet_b07
+  role: ground_card
+  biomes: [7]
+  alpha: true
+  prompt: >-
+    A dome-shaped thorny burnet cushion shrub.
+  seed: 7320
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_rockrose_arid_b07
+  role: ground_card
+  biomes: [7]
+  alpha: true
+  prompt: >-
+    A rockrose shrub with crinkled leaves and white flowers.
+  seed: 7330
+  tile_m: 0.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_dry_thistle_b07
+  role: ground_card
+  biomes: [7]
+  alpha: true
+  prompt: >-
+    A dry spiny thistle plant with a purple flower head.
+  seed: 7340
+  tile_m: 0.8
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_tamarisk_b08
+  role: ground_card
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A tamarisk shrub with feathery grey-green foliage and pink flower plumes.
+  seed: 7350
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_halfa_grass_b08
+  role: ground_card
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A tussock of halfa grass with long tough pale blades.
+  seed: 7360
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_desert_acacia_sapling_b08
+  role: ground_card
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A small thorny acacia shrub with tiny leaflets.
+  seed: 7370
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_colocynth_vine_b08
+  role: ground_card
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A colocynth vine with lobed leaves and round yellow gourds.
+  seed: 7380
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_saltbush_desert_b08
+  role: ground_card
+  biomes: [8]
+  alpha: true
+  prompt: >-
+    A grey-green saltbush with small fleshy leaves.
+  seed: 7390
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_reindeer_lichen_b09
+  role: ground_card
+  biomes: [9]
+  alpha: true
+  prompt: >-
+    A spreading mat of pale cream reindeer lichen with branching tips.
+  seed: 7400
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_crowberry_camarine_b09
+  role: ground_card
+  biomes: [9]
+  alpha: true
+  prompt: >-
+    A crowberry (camarine) mat with needle-like leaves and black berries.
+  seed: 7410
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_arctic_willow_b09
+  role: ground_card
+  biomes: [9]
+  alpha: true
+  prompt: >-
+    A dwarf arctic willow with rounded leaves and catkins.
+  seed: 7420
+  tile_m: 0.25
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_cotton_grass_b09
+  role: ground_card
+  biomes: [9]
+  alpha: true
+  prompt: >-
+    A clump of arctic cotton grass with white fluffy seed heads.
+  seed: 7430
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_moss_campion_b09
+  role: ground_card
+  biomes: [9]
+  alpha: true
+  prompt: >-
+    A compact green moss campion cushion with pink flowers.
+  seed: 7440
+  tile_m: 0.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_meadow_sage_forest_steppe_b10
+  role: ground_card
+  biomes: [10]
+  alpha: true
+  prompt: >-
+    A meadow sage with violet flower whorls.
+  seed: 7450
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_tansy_b10
+  role: ground_card
+  biomes: [10]
+  alpha: true
+  prompt: >-
+    A tansy plant with golden button flowers and fern-like leaves.
+  seed: 7460
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_fireweed_b10
+  role: ground_card
+  biomes: [10]
+  alpha: true
+  prompt: >-
+    A fireweed with a tall spike of magenta flowers.
+  seed: 7470
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_bedstraw_clump_b10
+  role: ground_card
+  biomes: [10]
+  alpha: true
+  prompt: >-
+    A lady's bedstraw clump with frothy yellow flowers.
+  seed: 7480
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_knapweed_b10
+  role: ground_card
+  biomes: [10]
+  alpha: true
+  prompt: >-
+    A knapweed plant with purple thistle-like flowers.
+  seed: 7490
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_heather_atlantic_b11
+  role: ground_card
+  biomes: [11]
+  alpha: true
+  prompt: >-
+    A bell heather shrub with pink-purple flowers.
+  seed: 7500
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_gorse_ajonc_b11
+  role: ground_card
+  biomes: [11]
+  alpha: true
+  prompt: >-
+    A large gorse (ajonc) bush covered in yellow flowers and green spines.
+  seed: 7510
+  tile_m: 1.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_broom_atlantic_b11
+  role: ground_card
+  biomes: [11]
+  alpha: true
+  prompt: >-
+    A common broom shrub with green stems and yellow flowers.
+  seed: 7520
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_gorse_dwarf_b11
+  role: ground_card
+  biomes: [11]
+  alpha: true
+  prompt: >-
+    A dwarf western gorse mound with golden flowers.
+  seed: 7530
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_royal_fern_b11
+  role: ground_card
+  biomes: [11]
+  alpha: true
+  prompt: >-
+    A royal fern with tall bright green fronds.
+  seed: 7540
+  tile_m: 1.1
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_pannonian_feather_grass_b12
+  role: ground_card
+  biomes: [12]
+  alpha: true
+  prompt: >-
+    A clump of feather grass with flowing silvery awns.
+  seed: 7550
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_steppe_sage_pannonian_b12
+  role: ground_card
+  biomes: [12]
+  alpha: true
+  prompt: >-
+    A pannonian sage with violet flowers on tall spikes.
+  seed: 7560
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_poppy_field_b12
+  role: ground_card
+  biomes: [12]
+  alpha: true
+  prompt: >-
+    A field poppy with a bright red flower and hairy stem.
+  seed: 7570
+  tile_m: 0.6
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_chicory_b12
+  role: ground_card
+  biomes: [12]
+  alpha: true
+  prompt: >-
+    A chicory plant with sky-blue flowers on a branching stem.
+  seed: 7580
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_yarrow_b12
+  role: ground_card
+  biomes: [12]
+  alpha: true
+  prompt: >-
+    A yarrow plant with flat white flower heads and feathery leaves.
+  seed: 7590
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_blueberry_hemiboreal_b13
+  role: ground_card
+  biomes: [13]
+  alpha: true
+  prompt: >-
+    A bilberry bush with small leaves and blue berries.
+  seed: 7600
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_wood_sorrel_b13
+  role: ground_card
+  biomes: [13]
+  alpha: true
+  prompt: >-
+    A wood sorrel clump with clover-like leaves and white flowers.
+  seed: 7610
+  tile_m: 0.25
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_lily_valley_b13
+  role: ground_card
+  biomes: [13]
+  alpha: true
+  prompt: >-
+    A lily of the valley with broad leaves and white bell flowers.
+  seed: 7620
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_wood_anemone_b13
+  role: ground_card
+  biomes: [13]
+  alpha: true
+  prompt: >-
+    A wood anemone clump with white star flowers.
+  seed: 7630
+  tile_m: 0.3
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_male_fern_b13
+  role: ground_card
+  biomes: [13]
+  alpha: true
+  prompt: >-
+    A male fern with a shuttlecock of green fronds.
+  seed: 7640
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_rockrose_cistus_b14
+  role: ground_card
+  biomes: [14]
+  alpha: true
+  prompt: >-
+    A ciste (cistus) shrub with pink papery flowers and grey-green leaves.
+  seed: 7650
+  tile_m: 0.9
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_lentisk_b14
+  role: ground_card
+  biomes: [14]
+  alpha: true
+  prompt: >-
+    A lentisk (mastic) shrub with glossy compound leaves and red berries.
+  seed: 7660
+  tile_m: 1.2
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_kermes_oak_shrub_b14
+  role: ground_card
+  biomes: [14]
+  alpha: true
+  prompt: >-
+    A low kermes oak shrub with spiny glossy leaves.
+  seed: 7670
+  tile_m: 1.0
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_phrygana_thyme_b14
+  role: ground_card
+  biomes: [14]
+  alpha: true
+  prompt: >-
+    A spiny cushion of Greek phrygana with small grey leaves.
+  seed: 7680
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: card_sage_aegean_b14
+  role: ground_card
+  biomes: [14]
+  alpha: true
+  prompt: >-
+    An Aegean sage plant with woolly grey leaves and violet flowers.
+  seed: 7690
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_blades_green
+  role: grass_blades
+  biomes: [1, 2, 10, 11, 12, 13]
+  alpha: true
+  prompt: >-
+    A single clump of long separate grass blades, fresh lush green blades.
+  seed: 7700
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_blades_dry
+  role: grass_blades
+  biomes: [3, 7, 14]
+  alpha: true
+  prompt: >-
+    A single clump of long separate grass blades, dry straw-coloured golden blades with a few green bases.
+  seed: 7710
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_blades_steppe
+  role: grass_blades
+  biomes: [4, 8]
+  alpha: true
+  prompt: >-
+    A single clump of long separate grass blades, pale yellow-green fine wiry steppe blades with silvery seed heads.
+  seed: 7720
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_blades_alpine
+  role: grass_blades
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    A single clump of long separate grass blades, short stiff blue-green alpine blades with a few tiny white flowers.
+  seed: 7730
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_blades_arctic
+  role: grass_blades
+  biomes: [5, 9]
+  alpha: true
+  prompt: >-
+    A single clump of long separate grass blades, short pale yellow-green tundra blades mixed with brownish dry tips.
+  seed: 7740
+  tile_m: 0.5
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_tufts_green
+  role: grass_tufts
+  biomes: [1, 2, 10, 11, 12, 13]
+  alpha: true
+  prompt: >-
+    A compact tuft of grass with several short curved blades, fresh lush green blades.
+  seed: 7750
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_tufts_dry
+  role: grass_tufts
+  biomes: [3, 7, 14]
+  alpha: true
+  prompt: >-
+    A compact tuft of grass with several short curved blades, dry straw-coloured golden blades with a few green bases.
+  seed: 7760
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_tufts_steppe
+  role: grass_tufts
+  biomes: [4, 8]
+  alpha: true
+  prompt: >-
+    A compact tuft of grass with several short curved blades, pale yellow-green fine wiry steppe blades with silvery seed heads.
+  seed: 7770
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_tufts_alpine
+  role: grass_tufts
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    A compact tuft of grass with several short curved blades, short stiff blue-green alpine blades with a few tiny white flowers.
+  seed: 7780
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_tufts_arctic
+  role: grass_tufts
+  biomes: [5, 9]
+  alpha: true
+  prompt: >-
+    A compact tuft of grass with several short curved blades, short pale yellow-green tundra blades mixed with brownish dry tips.
+  seed: 7790
+  tile_m: 0.4
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_clump_green
+  role: grass_clump
+  biomes: [1, 2, 10, 11, 12, 13]
+  alpha: true
+  prompt: >-
+    A dense clump of grass, a rounded mound of many leaning blades, fresh lush green blades.
+  seed: 7800
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_clump_dry
+  role: grass_clump
+  biomes: [3, 7, 14]
+  alpha: true
+  prompt: >-
+    A dense clump of grass, a rounded mound of many leaning blades, dry straw-coloured golden blades with a few green bases.
+  seed: 7810
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_clump_steppe
+  role: grass_clump
+  biomes: [4, 8]
+  alpha: true
+  prompt: >-
+    A dense clump of grass, a rounded mound of many leaning blades, pale yellow-green fine wiry steppe blades with silvery seed heads.
+  seed: 7820
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_clump_alpine
+  role: grass_clump
+  biomes: [6]
+  alpha: true
+  prompt: >-
+    A dense clump of grass, a rounded mound of many leaning blades, short stiff blue-green alpine blades with a few tiny white flowers.
+  seed: 7830
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]
+- id: grass_clump_arctic
+  role: grass_clump
+  biomes: [5, 9]
+  alpha: true
+  prompt: >-
+    A dense clump of grass, a rounded mound of many leaning blades, short pale yellow-green tundra blades mixed with brownish dry tips.
+  seed: 7840
+  tile_m: 0.7
+  checks:
+    luminance: [0.1, 0.85]
+    saturation: [0.0, 0.8]

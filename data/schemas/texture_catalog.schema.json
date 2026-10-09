@@ -69,6 +69,7 @@
           "regions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
           "size": {"enum": [1024, 1536, 2048]},
           "alpha": {"type": "boolean"},
+          "species": {"type": "string", "pattern": "^[a-z0-9_]+$", "description": "Facultatif : id d'une essence de data/art/tree_species.yaml (famille foliage_bark)."},
           "checks": {
             "type": "object",
             "additionalProperties": false,
