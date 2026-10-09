@@ -190,7 +190,8 @@ func _check_layer(map_data: MapData, data: SettlementData, config: Dictionary) -
 	decor.update_view(12.0)
 	_check(decor.visible, "decor shown at close range")
 	# 3d bis. Brancher un modèle = une entrée du manifeste DN (ici un glb existant en bouche-trou).
-	_check(decor.model_source("wayside_cross") == "procedural", "no DN glb yet: procedural fallback expected")
+	decor.set_manifest({})
+	_check(decor.model_source("wayside_cross") == "procedural", "empty manifest: procedural fallback expected")
 	decor.set_manifest({"env_cross_wayside_stone": {"files": ["folk/procession_cross.glb"]}})
 	_check(decor.model_source("wayside_cross") == "glb", "manifest entry must switch the type to its glb")
 	_check(decor.model_source("milestone") == "procedural", "other types keep their fallback")
