@@ -128,6 +128,11 @@
           "type": "integer",
           "description": "Points de traité d'une alliance entre deux ennemis de l'hégémon."
         },
+        "max_alliances": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Alliances qu'un membre de la ligue ne dépasse pas en en cherchant contre l'hégémon (au-delà, la ligue ferait basculer toute la carte dans la guerre)."
+        },
         "partner_attitude": {
           "type": "integer",
           "description": "Attitude minimale envers un autre ennemi de l'hégémon pour lui proposer une alliance."

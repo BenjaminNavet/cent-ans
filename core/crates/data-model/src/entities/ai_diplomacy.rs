@@ -155,6 +155,9 @@ pub struct LeagueRules {
     /// Attitude above which an AI in the league proposes an alliance to
     /// another enemy of the hegemon.
     pub partner_attitude: i32,
+    /// Alliances a member of the league stops seeking partners at (the
+    /// league otherwise drags the whole map into war).
+    pub max_alliances: usize,
     /// Seasons a constituted league lasts at least.
     pub duration_turns: u32,
     /// Factor on the power ratio needed to declare war on the hegemon.

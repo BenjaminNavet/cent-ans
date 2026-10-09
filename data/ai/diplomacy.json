@@ -188,6 +188,7 @@
     "attitude": -25,
     "join_bonus": 15,
     "partner_attitude": -10,
+    "max_alliances": 1,
     "duration_turns": 40,
     "war_ratio_factor": 0.7
   },

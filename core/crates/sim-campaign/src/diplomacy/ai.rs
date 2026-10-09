@@ -682,8 +682,12 @@ fn plan_alliances(
     // twice as often, and counts the hegemon among its rivals.
     let in_league = state.league_target_of(data, faction).is_some();
     let period = if in_league { 2 } else { 4 };
-    if (state.turn + slot) % period != 1 % period || alliance_count(state, faction) >= MAX_ALLIANCES
-    {
+    let most = if in_league {
+        data.ai_diplomacy.league.max_alliances.min(MAX_ALLIANCES)
+    } else {
+        MAX_ALLIANCES
+    };
+    if (state.turn + slot) % period != 1 % period || alliance_count(state, faction) >= most {
         return;
     }
     let rivals_of = |id: &FactionId| {
@@ -739,15 +743,15 @@ fn plan_alliances(
                 )
                 .accept
             };
-            // Only the league settles for a defensive pact: elsewhere an AI
-            // that proposed one more alliance made more calls to arms, hence
-            // more wars (ADR 0283).
-            let league = state.league_peers(data, faction, &id);
-            [Article::Alliance, Article::DefensiveAlliance]
-                .into_iter()
-                .take(if league { 2 } else { 1 })
-                .find(|a| accepts(a))
-                .map(|article| (id, liking, article))
+            // The league binds its members by a defensive pact only (a
+            // military alliance each would drag the whole map into war,
+            // ADR 0283).
+            let article = if state.league_peers(data, faction, &id) {
+                Article::DefensiveAlliance
+            } else {
+                Article::Alliance
+            };
+            accepts(&article).then_some((id, liking, article))
         })
         .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)));
     if let Some((target, _, article)) = candidate {
