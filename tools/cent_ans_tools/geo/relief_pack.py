@@ -17,6 +17,7 @@ import hashlib
 import json
 import shutil
 import tarfile
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -180,7 +181,7 @@ def _tree_bytes(path: Path) -> int:
     return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
 
 
-class _SplitWriter:
+class SplitWriter:
     """File-like sink for :mod:`tarfile`'s stream mode, rolling to new parts.
 
     Splits the raw tar byte stream on :data:`MAX_PART_BYTES` boundaries,
@@ -197,6 +198,7 @@ class _SplitWriter:
     def __init__(
         self, out_dir: Path, package: str, version: int, max_bytes: int
     ) -> None:
+        """Open the first part under ``out_dir`` (``max_bytes`` per part)."""
         self._out_dir = out_dir
         self._package = package
         self._version = version
@@ -229,6 +231,7 @@ class _SplitWriter:
         self._index += 1
 
     def write(self, data: bytes) -> int:
+        """Append ``data`` to the current part, rolling to a new one when full."""
         if self._current_size >= self._max_bytes:
             self._open_next()
         self._current_file.write(data)
@@ -239,10 +242,59 @@ class _SplitWriter:
         return len(data)
 
     def close(self) -> None:
+        """Close the last part and record its checksum."""
         if self._current_file is not None:
             self._current_file.close()
             self.part_sha256.append(self._part_digest.hexdigest())
             self._current_file = None
+
+
+def archive_tree(
+    source_dir: Path,
+    arcname: str,
+    out_dir: Path,
+    package: str,
+    version: int,
+    description: str,
+    extra: dict,
+    max_part_bytes: int = MAX_PART_BYTES,
+    tar_filter: Callable[[tarfile.TarInfo], tarfile.TarInfo | None] | None = None,
+) -> PackResult:
+    """Stream ``source_dir`` (stored as ``arcname``) into split tar parts plus a manifest.
+
+    Shared by the relief package and the generated models package (ADR 0212).
+    ``extra`` is merged into the manifest (``bake``/``credits`` or ``content``).
+    """
+    writer = SplitWriter(Path(out_dir), package, version, max_part_bytes)
+    with tarfile.open(fileobj=writer, mode="w|") as tar:
+        tar.add(source_dir, arcname=arcname, filter=tar_filter)
+    writer.close()
+
+    parts_info = [
+        {"name": path.name, "bytes": path.stat().st_size, "sha256": sha}
+        for path, sha in zip(writer.parts, writer.part_sha256, strict=True)
+    ]
+    manifest = {
+        "description": description,
+        "package_name": package,
+        "version": version,
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "total_bytes": writer.total_bytes,
+        "sha256": writer.global_sha256.hexdigest(),
+        **extra,
+        "parts": parts_info,
+    }
+    manifest_path = Path(out_dir) / MANIFEST_NAME
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return PackResult(
+        out_dir=Path(out_dir),
+        manifest_path=manifest_path,
+        parts=writer.parts,
+        total_bytes=writer.total_bytes,
+        version=version,
+    )
 
 
 def pack(
@@ -278,35 +330,17 @@ def pack(
     package = str(hosting["package_name"])
     write_installed_marker(pyramid_dir, hosting)
 
-    writer = _SplitWriter(out_dir, package, version, max_part_bytes)
-    with tarfile.open(fileobj=writer, mode="w|") as tar:
-        tar.add(pyramid_dir, arcname="pyramid")
-    writer.close()
-
-    parts_info = [
-        {"name": path.name, "bytes": path.stat().st_size, "sha256": sha}
-        for path, sha in zip(writer.parts, writer.part_sha256, strict=True)
-    ]
-    manifest = {
-        "description": "Manifeste du paquet « Cent Ans relief » (lot SZ7, ADR 0077). "
+    return archive_tree(
+        pyramid_dir,
+        "pyramid",
+        out_dir,
+        package,
+        version,
+        description="Manifeste du paquet « Cent Ans relief » (lot SZ7, ADR 0077). "
         "Concaténer les parts dans l'ordre reconstitue le flux tar (data/map/pyramid/).",
-        "package_name": package,
-        "version": version,
-        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "total_bytes": writer.total_bytes,
-        "sha256": writer.global_sha256.hexdigest(),
-        "bake": hosting.get("bake", {}),
-        "parts": parts_info,
-        "credits": extract_credits(credits_file),
-    }
-    manifest_path = out_dir / MANIFEST_NAME
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    return PackResult(
-        out_dir=out_dir,
-        manifest_path=manifest_path,
-        parts=writer.parts,
-        total_bytes=writer.total_bytes,
-        version=version,
+        extra={
+            "bake": hosting.get("bake", {}),
+            "credits": extract_credits(credits_file),
+        },
+        max_part_bytes=max_part_bytes,
     )

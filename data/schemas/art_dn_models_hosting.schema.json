@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_models_hosting.schema.json",
+  "title": "Hébergement du paquet « Cent Ans modèles »",
+  "description": "Fichier data/art/dn_models_hosting.json (ADR 0212) : où télécharger les glb générés de game/assets/models/dn/ (hors git). `version` est incrémentée par `cent-ans art models-pack` quand l'empreinte `content.signature` change. `base_url` contient le gabarit `{version}` (Releases `models-v<N>`). Lu par `cent_ans_tools.models_package`. Outillage seulement, aucune règle de jeu.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "package_name": { "type": "string", "minLength": 1 },
+    "base_url": { "type": "string", "pattern": "\\{version\\}" },
+    "version": { "type": "integer", "minimum": 1 },
+    "manifest_name": { "type": "string", "minLength": 1 },
+    "content": {
+      "type": "object",
+      "description": "Empreinte des modèles correspondant à `version`.",
+      "properties": {
+        "files": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "signature": { "type": ["string", "null"], "description": "SHA-256 sur (chemin relatif, SHA-256 du fichier) triés." }
+      },
+      "required": ["signature"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["package_name", "base_url", "version", "manifest_name"],
+  "additionalProperties": false
+}

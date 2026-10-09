@@ -209,24 +209,34 @@ def verify_parts(parts_dir: Path, manifest: dict) -> None:
             )
 
 
-def extract_atomic(parts: list[Path], dest_dir: Path, log=print) -> Path:  # noqa: ANN001
-    """Stream-extract the chained parts into ``dest_dir``, swapped in atomically."""
+def extract_atomic(
+    parts: list[Path],
+    dest_dir: Path,
+    log=print,  # noqa: ANN001
+    root: str = "pyramid",
+    label: str = "Relief",
+) -> Path:
+    """Stream-extract the chained parts into ``dest_dir``, swapped in atomically.
+
+    ``root`` is the single folder at the archive's root (``pyramid`` for the relief,
+    ``dn`` for the generated models package, ADR 0212).
+    """
     dest_dir.mkdir(parents=True, exist_ok=True)
-    tmp_dir = dest_dir / f".pyramid.tmp-{os.getpid()}"
+    tmp_dir = dest_dir / f".{root}.tmp-{os.getpid()}"
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir()
     reader = _ChainedReader(parts)
     with tarfile.open(fileobj=reader, mode="r|") as tar:
         tar.extractall(tmp_dir, filter="data")  # noqa: S202
-    extracted = tmp_dir / "pyramid"
+    extracted = tmp_dir / root
     if not extracted.is_dir():
         shutil.rmtree(tmp_dir)
-        raise ValueError("Archive invalide : aucun dossier « pyramid » à la racine")
-    final = dest_dir / "pyramid"
+        raise ValueError(f"Archive invalide : aucun dossier « {root} » à la racine")
+    final = dest_dir / root
     old = None
     if final.exists():
-        old = dest_dir / f".pyramid.old-{os.getpid()}"
+        old = dest_dir / f".{root}.old-{os.getpid()}"
         if old.exists():
             shutil.rmtree(old)
         os.rename(final, old)
@@ -234,7 +244,7 @@ def extract_atomic(parts: list[Path], dest_dir: Path, log=print) -> Path:  # noq
     shutil.rmtree(tmp_dir, ignore_errors=True)
     if old is not None:
         shutil.rmtree(old, ignore_errors=True)
-    log(f"Relief installé : {final}")
+    log(f"{label} installé : {final}")
     return final
 
 

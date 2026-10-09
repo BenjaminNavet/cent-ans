@@ -3,17 +3,20 @@
 #   0. fast-forwards the clone when it follows the `stable` branch (ADR 0159; never fatal),
 #   1. rebuilds the Rust GDExtension when core/ changed (cargo decides; core/build.sh only
 #      replaces the library in game/bin/ when it changed),
+#   1b. downloads the generated 3D models package when absent or older than the published one
+#      (ADR 0212; never fatal: maquettes procédurales de repli),
 #   2. runs the headless Godot import when game/ changed since the last import (files added,
 #      removed or modified, other Godot version, first launch after a clone),
 #   3. downloads the fine relief cache when it is absent or older than the published package
 #      (ADR 0149; never fatal: without it the close zoom is only limited),
 #   4. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
-# Usage: tools/launch.sh [--no-update] [--no-build] [--import] [--no-relief] [-- <extra Godot arguments>]
+# Usage: tools/launch.sh [--no-update] [--no-build] [--import] [--no-relief] [--no-models] [-- <extra Godot arguments>]
 #   --no-update  skip the update check (also: CENT_ANS_NO_UPDATE=1)
 #   --no-build   skip the Rust build (the library already in game/bin/ is used)
 #   --import     force the headless import
 #   --no-relief  skip the fine relief check (no download)
+#   --no-models  skip the generated models check (no download)
 # Godot: $GODOT if set, else `godot`/`godot4` on the PATH, else the usual install places.
 # Must stay compatible with the bash 3.2 shipped with macOS.
 set -euo pipefail
@@ -35,12 +38,14 @@ UPDATE=1
 BUILD=1
 FORCE_IMPORT=0
 RELIEF=1
+MODELS=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --no-update) UPDATE=0 ;;
         --no-build) BUILD=0 ;;
         --import) FORCE_IMPORT=1 ;;
         --no-relief) RELIEF=0 ;;
+        --no-models) MODELS=0 ;;
         --)
             shift
             break
@@ -258,6 +263,30 @@ if [[ $BUILD -eq 1 ]]; then
 fi
 [[ -f "$LIB" ]] || fail "Bibliothèque du cœur absente : $LIB (relancer sans --no-build)."
 
+# First top-level "version" of a JSON file written one key per line (empty if absent).
+json_version() {
+    [[ -f "$1" ]] || return 0
+    sed -n 's/^ *"version": *\([0-9][0-9]*\).*/\1/p' "$1" | head -n 1
+}
+
+# --- 1b. Generated models (before the import: Godot must see the glb) --------------------
+
+# Same scheme as the relief (ADR 0212): dn/package.json says which package is installed. The game
+# runs without it (procedural maquettes), so a failure never blocks the launch.
+if [[ $MODELS -eq 1 ]]; then
+    MODELS_WANTED="$(json_version data/art/dn_models_hosting.json)"
+    MODELS_HAVE="$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json")"
+    if [[ -n "$MODELS_WANTED" && "$MODELS_HAVE" != "$MODELS_WANTED" ]]; then
+        if command -v uv >/dev/null; then
+            say "Modèles générés : vérification du paquet v$MODELS_WANTED (téléchargement ≈ 0,9 Go s'il manque ; --no-models pour passer)…"
+            uv run --project tools cent-ans art models-fetch --if-needed ||
+                say "Modèles générés non mis à jour (maquettes de repli) ; nouvel essai au prochain lancement."
+        else
+            say "Modèles générés absents ou anciens, et uv introuvable (https://docs.astral.sh/uv/) : maquettes de repli."
+        fi
+    fi
+fi
+
 # --- 2. Headless import ----------------------------------------------------------------------
 
 # Fingerprint of game/: Godot version + list of files (catches additions and removals). The
@@ -300,12 +329,6 @@ else
 fi
 
 # --- 3. Fine relief --------------------------------------------------------------------------
-
-# First top-level "version" of a JSON file written one key per line (empty if absent).
-json_version() {
-    [[ -f "$1" ]] || return 0
-    sed -n 's/^ *"version": *\([0-9][0-9]*\).*/\1/p' "$1" | head -n 1
-}
 
 # The installed cache says which package it holds (pyramid/package.json). Only when it differs
 # from the published version does the Python tool decide (and download).

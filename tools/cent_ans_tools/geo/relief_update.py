@@ -87,8 +87,12 @@ def release_repo(hosting: dict) -> str:
     return match.group(1)
 
 
-def published_signature(hosting: dict) -> str | None:
-    """Bake signature of the published package (``None``: version not published)."""
+def published_signature(hosting: dict, section: str = "bake") -> str | None:
+    """Signature of the published package (``None``: version not published).
+
+    ``section`` is the manifest key holding ``signature`` (``bake`` for the relief,
+    ``content`` for the models package, ADR 0212).
+    """
     base = str(hosting["base_url"]).format(version=hosting["version"])
     url = base.rstrip("/") + "/" + relief_pack.MANIFEST_NAME
     try:
@@ -100,7 +104,7 @@ def published_signature(hosting: dict) -> str | None:
         raise
     except URLError as error:
         raise OSError(f"{url} injoignable : {error.reason}") from error
-    return (manifest.get("bake") or {}).get("signature")
+    return (manifest.get(section) or {}).get("signature")
 
 
 def _run(command: list[str]) -> int:
@@ -108,21 +112,27 @@ def _run(command: list[str]) -> int:
 
 
 def publish(
-    result: relief_pack.PackResult, hosting: dict, run: Runner = _run, log: Log = print
+    result: relief_pack.PackResult,
+    hosting: dict,
+    run: Runner = _run,
+    log: Log = print,
+    tag_prefix: str = "v",
+    title: str = "Cent Ans relief",
+    notes: str = RELEASE_NOTES,
 ) -> None:
-    """Create the Release ``v<version>`` (or complete it) with the parts and the manifest.
+    """Create the Release ``<tag_prefix><version>`` (or complete it) with the parts and the manifest.
 
     The manifest goes last: it is what :func:`published_signature` and
     ``relief-fetch`` read first, so a Release interrupted mid-upload stays
     "not published" and the next run completes it.
     """
     repo = release_repo(hosting)
-    tag = f"v{result.version}"
+    tag = f"{tag_prefix}{result.version}"
     files = [str(path) for path in result.parts]
     if run(["gh", "release", "view", tag, "--repo", repo, "--json", "tagName"]) != 0:
         log(f"Création de la Release {tag} sur {repo}…")
         create = ["gh", "release", "create", tag, "--repo", repo]
-        create += ["--title", f"Cent Ans relief {tag}", "--notes", RELEASE_NOTES]
+        create += ["--title", f"{title} {tag}", "--notes", notes]
         if run(create) != 0:
             raise RuntimeError(f"gh release create {tag} a échoué (voir ci-dessus)")
     upload = ["gh", "release", "upload", tag, "--repo", repo, "--clobber"]
