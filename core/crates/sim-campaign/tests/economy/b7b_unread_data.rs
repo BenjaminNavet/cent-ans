@@ -67,9 +67,24 @@ fn builder_ruler_shortens_constructions() {
     let mut state = start(data, "fac_france", 7);
     clear_builders(&mut state, data);
     state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
-    let city = capital_city(&state);
-    let (building, base) = longest_build(&state, data, &city);
-    assert!(base >= 4, "a long build exists ({building}: {base})");
+    // The capital may already hold every long build (Paris has its walls and university since
+    // the RX historian lot): take the first French city with a build of 4 turns or more, so the
+    // 15 % of Bâtisseur still rounds to a shorter time.
+    let mut cities: Vec<SettlementId> = state
+        .provinces
+        .values()
+        .map(|province| province.city.clone())
+        .filter(|city| state.settlements[city].owner == france())
+        .collect();
+    cities.sort();
+    let (city, building, base) = cities
+        .into_iter()
+        .map(|city| {
+            let (building, turns) = longest_build(&state, data, &city);
+            (city, building, turns)
+        })
+        .find(|(_, _, turns)| *turns >= 4)
+        .expect("a French city with a long build");
     assert_eq!(option_turns(&state, data, &city, &building), base);
 
     let ruler = state.factions[&france()].ruler.clone().expect("ruler");

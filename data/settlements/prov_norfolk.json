@@ -333,6 +333,7 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
+      "bld_collegiate_church",
       "bld_university"
     ],
     "port": false,
