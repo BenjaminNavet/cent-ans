@@ -17,16 +17,7 @@ pub fn closest_on_segment(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> (f64, 
 }
 
 /// Distance from `p` to the segment `a`-`b`.
-pub fn segment_distance(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
-    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
-    let len2 = dx * dx + dz * dz;
-    let t = if len2 < 1e-9 {
-        0.0
-    } else {
-        (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
-    };
-    (p.0 - a.0 - dx * t).hypot(p.1 - a.1 - dz * t)
-}
+pub use data_model::util::segment_distance_xz as segment_distance;
 
 /// Is `p` inside the closed polygon `ring` (even-odd rule)?
 pub fn point_in_polygon(ring: &[(f64, f64)], p: (f64, f64)) -> bool {

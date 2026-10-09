@@ -401,15 +401,7 @@ impl ExclusionGrid {
 
 /// Distance from (x, y) to the segment `[x0, y0, x1, y1, _]`.
 fn segment_distance(c: &[f64; 5], x: f64, y: f64) -> f64 {
-    let (dx, dy) = (c[2] - c[0], c[3] - c[1]);
-    let len2 = dx * dx + dy * dy;
-    let t = if len2 > 0.0 {
-        (((x - c[0]) * dx + (y - c[1]) * dy) / len2).clamp(0.0, 1.0)
-    } else {
-        0.0
-    };
-    let (px, py) = (c[0] + t * dx - x, c[1] + t * dy - y);
-    (px * px + py * py).sqrt()
+    data_model::util::segment_distance_xz((x, y), (c[0], c[1]), (c[2], c[3]))
 }
 
 /// Per-slot MultiMesh buffers (`part * KIND_COUNT + kind`).

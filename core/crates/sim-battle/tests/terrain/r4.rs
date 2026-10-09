@@ -309,7 +309,7 @@ fn english_archers_take_the_hedge_on_the_crest() {
         .filter(|u| u.side == SideId::Defender && u.can_shoot())
     {
         assert!(
-            u.z > 500.0 && u.z < 500.0 + sim_battle::site::HEDGE_COVER_REACH,
+            u.z > 500.0 && u.z < 500.0 + sim_battle::site::SiteRules::bundled().hedge_cover_reach_m,
             "{} at ({:.0}, {:.0}), not behind the crest hedge",
             u.name,
             u.x,

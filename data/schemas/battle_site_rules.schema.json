@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_site_rules.schema.json",
+  "title": "Obstacles de site en bataille",
+  "description": "Fichier data/rules/battle_site.json (SC BB6). Lu par sim-battle (SiteRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "obstacle_reach_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance (m) en deçà de laquelle une unité franchit un obstacle."
+    },
+    "hedge_cover_reach_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance (m) derrière une haie où une unité est couverte."
+    },
+    "hedge_cover_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Multiplicateur des pertes de tir derrière une haie."
+    }
+  },
+  "required": [
+    "obstacle_reach_m",
+    "hedge_cover_reach_m",
+    "hedge_cover_factor"
+  ],
+  "additionalProperties": false
+}

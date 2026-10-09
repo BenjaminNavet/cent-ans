@@ -43,10 +43,10 @@ PROBES | FAIT (sc/cc) | examples diplomacy_probe, dynasty_probe, income_probe (s
 BB1 | FAIT (sc/bb1, ADR 0205) | village B5 : battle_village.gd 612 l + props/obstacles/ai/field/setup/bridge | game/scripts/battle/battle_village.gd, core/crates/sim-battle/src/{town,props,site}.rs | oui | [MÉCANIQUE]
 BB14 | FAIT (sc/bb14) | générateurs borough/castle de siege_layouts.rs (912 l) à supprimer | core/crates/sim-battle/src/siege_layouts.rs | oui | [MÉCANIQUE]
 BB5 | FAIT (sc/bb5) | WallPiece::new, SiegeWorks::skeleton, from_layout découpé (après BB14) | core/crates/sim-battle/src/siege_layout.rs, siege.rs | oui
-BB6 | PARTIEL | battle_terrain.json fait ; battle_relief/site.json non | core/crates/sim-battle/src/{relief,site}.rs, data/rules | oui
-BB8 | PARTIEL | place_plot/place_manor encore pub, decor_effect_at unique à vérifier | core/crates/sim-battle/src/decor_gen | oui
-BB9 | À FAIRE | cache crossings/bridge_at (piste water_kind par SegmentGrid) | core/crates/sim-battle/src/{hydro,sim/movement}.rs | oui
-BB10 | PARTIEL | rng::hash01 commun fait ; siege_fx::hash01 garde son flux ; vegetation/lib.rs a sa copie | core/crates/sim-battle/src/siege_fx.rs | oui
+BB6 | FAIT | battle_relief.json (shelf) et battle_site.json (portées obstacle/haie, couvert) + schémas + test_schemas | core/crates/sim-battle/src/{relief,site}.rs, data/rules | oui
+BB8 | FAIT | place_plot/place_manor restent pub (tests d'intégration ep6_decor les appellent) ; decor_effect_at déjà unique | core/crates/sim-battle/src/decor.rs | oui
+BB9 | NON RETENU | crossings déjà en cache (OnceLock, sim/water.rs) ; bridge_at = scan de ≤ quelques ponts, un index SegmentGrid n'apporterait rien et exigerait une invalidation sur Battlefield (champs pub mutables) | core/crates/sim-battle/src/hydro.rs | non
+BB10 | FAIT | siege_fx::hash01 renommé jitter01 (flux conservé) ; copie vegetation de segment_distance supprimée ; hash01 de vegetation = miroir du shader, conservé | core/crates/sim-battle/src/siege_fx.rs | oui
 BB12 | À FAIRE | pub->pub(crate) (dernier) | core/crates/sim-battle/src | oui
 
 ## PF perf transverse
@@ -128,7 +128,7 @@ SH10 | ÉCARTÉ : beaucoup d'uniformes posés par nom construit (prefix + clé, 
 ## AD ai/data-model/relief-lod/vegetation
 AD7 | FAIT (ADR 0204, sc/veg) | vegetation V4 legacy (species None) + repli GD vegetation_tile_job | core/crates/vegetation/src/lib.rs, game/scripts/map/vegetation_tile_job.gd | oui
 AD8 | FAIT (sc/relief, ADR 0203) | relief_quadtree.gd repli GD (= PF-02), has_page mort | core/crates/relief-lod, game/scripts/map/relief_quadtree.gd | oui
-AD9 | PARTIEL | data-model/util.rs créé ; segment_distance et hash01 dupliqués dans vegetation/lib.rs, siege_fx.rs, splitmix bridge | core/crates/data-model/src/util.rs, vegetation/src/lib.rs | oui
+AD9 | FAIT | data_model::util::segment_distance_xz (f64) partagé par sim-battle::geom et vegetation | core/crates/data-model/src/util.rs | oui
 AD10 | FAIT f663a1c46 | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
 AD11 | FAIT | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui ; RIEN À FAIRE : fallback_edges/fallback_city_id sont testés (c4_settlements) et servent aux données réduites
 AD12 | FAIT 99a2b89fa | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui

@@ -78,8 +78,9 @@ pub(super) fn detour(view: &View, i: usize, j: usize) -> Option<(f64, f64)> {
     for _ in 0..tuning().detour_hops {
         let blocking = field.obstacles.iter().find(|o| {
             o.kind.breaks_charge()
-                && o.distance(to.0, to.1) <= crate::site::HEDGE_COVER_REACH
-                && (o.crosses(probe, to) || o.distance(probe.0, probe.1) <= 2.0 * OBSTACLE_REACH)
+                && o.distance(to.0, to.1) <= crate::site::SiteRules::bundled().hedge_cover_reach_m
+                && (o.crosses(probe, to)
+                    || o.distance(probe.0, probe.1) <= 2.0 * SiteRules::bundled().obstacle_reach_m)
         });
         let Some(blocking) = blocking else {
             return moved.then_some(probe);

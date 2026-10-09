@@ -89,7 +89,7 @@ use crate::relief_ai::ReliefMap;
 use crate::setup::SideId;
 use crate::siege::SiegeWorks;
 use crate::sim::{attack_angle, BattleSim};
-use crate::site::{Obstacle, OBSTACLE_REACH};
+use crate::site::{Obstacle, SiteRules};
 use crate::unit::{Unit, UnitState};
 
 /// The battle AI's tuning (`data/rules/battle_ai.json`).

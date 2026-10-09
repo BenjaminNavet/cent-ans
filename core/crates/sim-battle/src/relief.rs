@@ -466,10 +466,19 @@ pub(crate) fn shape_relief(
     }
 }
 
-/// Half-depth (m) of the shelf of a deployment line (full weight), and of
-/// its blend into the surrounding relief.
-const SHELF_HALF: f64 = 55.0;
-const SHELF_BLEND: f64 = 135.0;
+/// Shelf of a deployment line (`data/rules/battle_relief.json`, SC BB6):
+/// half-depth (m) at full weight, and distance of its blend into the
+/// surrounding relief.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ReliefRules {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub shelf_half_m: f64,
+    pub shelf_blend_m: f64,
+}
+
+data_model::bundled_rules!(ReliefRules, "rules/battle_relief.json", default);
 
 /// Lays each deployment line on a gentle shelf: across the line, the ground
 /// keeps its mean height and a bounded grade; along the line, the profile is
@@ -480,7 +489,9 @@ fn soften_lines(heights: &mut [f64], size: &FieldSize, max_slope: f64) {
     let (center, half) = (size.center_x(), size.line_half());
     for line in [size.attacker_line_z(), size.defender_line_z()] {
         let rows: Vec<usize> = (0..nz)
-            .filter(|&iz| (iz as f64 * GRID_RESOLUTION - line).abs() <= SHELF_HALF)
+            .filter(|&iz| {
+                (iz as f64 * GRID_RESOLUTION - line).abs() <= ReliefRules::bundled().shelf_half_m
+            })
             .collect();
         // Per column: mean height and grade across the line (least squares).
         let mut level = vec![0.0; nx];
@@ -521,7 +532,12 @@ fn soften_lines(heights: &mut [f64], size: &FieldSize, max_slope: f64) {
         }
         for iz in 0..nz {
             let dz = iz as f64 * GRID_RESOLUTION - line;
-            let wz = 1.0 - smoothstep(SHELF_HALF, SHELF_BLEND, dz.abs());
+            let wz = 1.0
+                - smoothstep(
+                    ReliefRules::bundled().shelf_half_m,
+                    ReliefRules::bundled().shelf_blend_m,
+                    dz.abs(),
+                );
             if wz <= 0.0 {
                 continue;
             }

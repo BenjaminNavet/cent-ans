@@ -105,7 +105,7 @@ pub enum SiegeFxKind {
 /// Deterministic value in [0, 1) from two integers (no random stream used).
 /// The shot and assault jitter keep this stream (not `rng::hash01`) so that
 /// battles replay unchanged.
-pub fn hash01(a: u64, b: u64) -> f64 {
+pub fn jitter01(a: u64, b: u64) -> f64 {
     let mut h = a
         .wrapping_mul(0x9E37_79B9_7F4A_7C15)
         .wrapping_add(b.wrapping_mul(0xC2B2_AE3D_27D4_EB4F));

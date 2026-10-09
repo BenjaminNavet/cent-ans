@@ -174,13 +174,22 @@ impl ObstacleKind {
     }
 }
 
-/// Distance within which a unit counts as crossing (or standing at) an
-/// obstacle, in metres.
-pub const OBSTACLE_REACH: f64 = 4.0;
-/// A unit whose centre is within this distance behind a hedge is covered.
-pub const HEDGE_COVER_REACH: f64 = 14.0;
-/// Multiplier on missile casualties behind a hedge.
-pub const HEDGE_COVER: f64 = 0.6;
+/// Constants of the site obstacles (`data/rules/battle_site.json`, SC BB6).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SiteRules {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// Distance within which a unit counts as crossing (or standing at) an
+    /// obstacle, in metres.
+    pub obstacle_reach_m: f64,
+    /// A unit whose centre is within this distance behind a hedge is covered.
+    pub hedge_cover_reach_m: f64,
+    /// Multiplier on missile casualties behind a hedge.
+    pub hedge_cover_factor: f64,
+}
+
+data_model::bundled_rules!(SiteRules, "rules/battle_site.json", default);
 
 /// A straight hedge, fence or ditch from `a` to `b` (x, z).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]

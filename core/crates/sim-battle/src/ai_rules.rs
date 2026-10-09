@@ -16,10 +16,10 @@ pub struct BattleAiRules {
     /// ... and this far behind it.
     pub cover_behind: f64,
     /// Shooters stand this far behind a hedge, a fence or a ditch (well within
-    /// [`crate::site::HEDGE_COVER_REACH`]).
+    /// `hedge_cover_reach_m` of [`crate::site::SiteRules`]).
     pub cover_setback: f64,
     /// R4: setbacks tried in turn behind a hedge on a crest (the last one still
-    /// clear of the obstacle's [`OBSTACLE_REACH`]).
+    /// clear of the obstacle's `obstacle_reach_m`).
     pub cover_setbacks: [f64; 3],
     /// Shooters stand this far inside the edge of a village.
     pub village_setback: f64,

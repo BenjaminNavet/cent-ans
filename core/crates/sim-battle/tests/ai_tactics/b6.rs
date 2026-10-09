@@ -251,7 +251,7 @@ fn english_archers(sim: &BattleSim) -> Vec<&Unit> {
 fn behind_hedge(u: &Unit) -> bool {
     let hedge = hedge_across(ObstacleKind::Hedge);
     let enemy = (600.0, ATTACKER_LINE_Z);
-    hedge.distance(u.x, u.z) <= sim_battle::site::HEDGE_COVER_REACH
+    hedge.distance(u.x, u.z) <= sim_battle::site::SiteRules::bundled().hedge_cover_reach_m
         && hedge.crosses(enemy, (u.x, u.z))
 }
 

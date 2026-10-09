@@ -168,7 +168,7 @@ impl BattleSim {
             .field
             .hedge_between((shooter.x, shooter.z), (target.x, target.z))
         {
-            kills *= crate::site::HEDGE_COVER;
+            kills *= crate::site::SiteRules::bundled().hedge_cover_factor;
         }
         kills *= self.missile_cover(target, attack_angle(target, shooter.x, shooter.z));
         // RJ-a: formation and reform (a schiltron is a dense target).
@@ -396,8 +396,8 @@ impl BattleSim {
         }
         // SG1: where the stone struck (deterministic hash, no random draw).
         let id = self.units[i].id;
-        let along = 0.15 + 0.7 * crate::siege_fx::hash01(self.ticks, u64::from(id));
-        let height = 0.25 + 0.6 * crate::siege_fx::hash01(self.ticks ^ 0x5eed, u64::from(id));
+        let along = 0.15 + 0.7 * crate::siege_fx::jitter01(self.ticks, u64::from(id));
+        let height = 0.25 + 0.6 * crate::siege_fx::jitter01(self.ticks ^ 0x5eed, u64::from(id));
         self.push_fx(crate::siege_fx::SiegeFxKind::EngineShot {
             unit: id,
             piece,

@@ -24,7 +24,7 @@
 
 use crate::field::Battlefield;
 use crate::relief_ai::ReliefMap;
-use crate::site::{Obstacle, ObstacleKind, HEDGE_COVER_REACH};
+use crate::site::{Obstacle, ObstacleKind, SiteRules};
 
 /// A full front of hedge (or the houses of a village) is worth this many
 /// metres of height.
@@ -221,10 +221,13 @@ pub fn reverse_slope(field: &Battlefield, front: Front) -> Option<(f64, f64)> {
 
 /// Cover of the front: the houses of a village it stands in, or the best
 /// hedge, ditch or fence running just in front of it (within
-/// [`HEDGE_COVER_REACH`]), by the share of the front it covers.
+/// `hedge_cover_reach_m`), by the share of the front it covers.
 pub fn cover_points(field: &Battlefield, front: Front) -> f64 {
     let (x, z) = front.center;
-    let ahead = (x, z + front.forward * HEDGE_COVER_REACH);
+    let ahead = (
+        x,
+        z + front.forward * SiteRules::bundled().hedge_cover_reach_m,
+    );
     let width = front.width.max(60.0);
     field
         .obstacles

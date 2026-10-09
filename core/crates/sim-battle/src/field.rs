@@ -13,10 +13,7 @@ use crate::rng::BattleRng;
 use crate::scale::FieldSize;
 pub use crate::scale::GRID_RESOLUTION;
 use crate::setup::{BattleSeason, CrossingStructure};
-use crate::site::{
-    self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, HEDGE_COVER_REACH,
-    OBSTACLE_REACH,
-};
+use crate::site::{self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, SiteRules};
 use crate::terrain_rules::{Scatter, TerrainRules};
 
 /// Width of the standard field (skirmishes, sieges) along x, in metres.
@@ -634,7 +631,7 @@ impl Battlefield {
         if let Some(obstacle) = self
             .obstacles
             .iter()
-            .filter(|o| o.distance(x, z) <= OBSTACLE_REACH)
+            .filter(|o| o.distance(x, z) <= SiteRules::bundled().obstacle_reach_m)
             .min_by(|a, b| {
                 a.kind
                     .crossing_factor(mounted)
@@ -712,7 +709,7 @@ impl Battlefield {
         self.obstacles.iter().any(|o| {
             let target_distance = o.distance(to.0, to.1);
             o.kind.gives_cover()
-                && target_distance <= HEDGE_COVER_REACH
+                && target_distance <= SiteRules::bundled().hedge_cover_reach_m
                 && target_distance <= o.distance(from.0, from.1)
                 && o.crosses(from, to)
         })
@@ -724,8 +721,9 @@ impl Battlefield {
     pub fn breaks_charge(&self, from: (f64, f64), to: (f64, f64)) -> bool {
         self.obstacles.iter().any(|o| {
             o.kind.breaks_charge()
-                && o.distance(to.0, to.1) <= HEDGE_COVER_REACH
-                && (o.crosses(from, to) || o.distance(from.0, from.1) <= 2.0 * OBSTACLE_REACH)
+                && o.distance(to.0, to.1) <= SiteRules::bundled().hedge_cover_reach_m
+                && (o.crosses(from, to)
+                    || o.distance(from.0, from.1) <= 2.0 * SiteRules::bundled().obstacle_reach_m)
         })
     }
 

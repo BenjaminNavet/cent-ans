@@ -103,8 +103,9 @@ impl BattleSim {
         let lo = (len * 0.5 - room * 0.5) + span * 0.5;
         let hi = (len * 0.5 + room * 0.5) - span * 0.5;
         // Regiments at the same spot do not share the very same ladders.
-        let jitter =
-            (crate::siege_fx::hash01(u64::from(unit.id), 0x1add) - 0.5) * span / count as f64 * 0.9;
+        let jitter = (crate::siege_fx::jitter01(u64::from(unit.id), 0x1add) - 0.5) * span
+            / count as f64
+            * 0.9;
         let along0 = ((cx - p.a.0) * tx + (cz - p.a.1) * tz + jitter).clamp(lo, hi.max(lo));
         let face = works.thickness * 0.5;
         (0..count)

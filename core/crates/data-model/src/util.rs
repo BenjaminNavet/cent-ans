@@ -21,6 +21,18 @@ pub fn segment_distance(p: [f32; 2], a: [f32; 2], b: [f32; 2]) -> f32 {
     dist(p, [a[0] + t * dx, a[1] + t * dy])
 }
 
+/// Distance from `p` to the segment `a`-`b`, in f64 (x, z) coordinates.
+pub fn segment_distance_xz(p: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
+    let (dx, dz) = (b.0 - a.0, b.1 - a.1);
+    let len2 = dx * dx + dz * dz;
+    let t = if len2 < 1e-9 {
+        0.0
+    } else {
+        (((p.0 - a.0) * dx + (p.1 - a.1) * dz) / len2).clamp(0.0, 1.0)
+    };
+    (p.0 - a.0 - dx * t).hypot(p.1 - a.1 - dz * t)
+}
+
 /// SplitMix64 output stage: spreads the bits of `z` (no increment).
 pub fn splitmix_mix(mut z: u64) -> u64 {
     z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);

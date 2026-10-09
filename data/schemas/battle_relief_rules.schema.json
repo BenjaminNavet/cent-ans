@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_relief_rules.schema.json",
+  "title": "Relief de bataille",
+  "description": "Fichier data/rules/battle_relief.json (SC BB6). Lu par sim-battle (ReliefRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "shelf_half_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Demi-profondeur (m) de la terrasse d'une ligne de déploiement (poids plein)."
+    },
+    "shelf_blend_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance (m) où la terrasse se fond dans le relief."
+    }
+  },
+  "required": [
+    "shelf_half_m",
+    "shelf_blend_m"
+  ],
+  "additionalProperties": false
+}
