@@ -47,6 +47,7 @@ const KIND_LABELS := {
 	"crusade": "Croisade",  # JR3
 	"royal_act": "Acte royal",  # WH chars
 	"level_up": "Montée de niveau",
+	"loyalty": "Loyauté",
 	"captain": "Capitaine engagé",
 }
 ## Types d'événements de la simulation qui méritent une lettre (les autres restent au journal).
@@ -55,7 +56,7 @@ const NEWS_EVENT_KINDS := [
 	"succession", "province_captured", "faction_destroyed", "vassalage", "vassal_rebellion",
 	"excommunication", "regency", "general_captured", "revolt", "plague",
 	"coinage", "ransom", "chivalry",  # H11
-	"royal_act", "level_up", "captain",  # WH chars
+	"royal_act", "level_up", "captain", "loyalty",  # WH chars, charsb
 	"crusade"]  # JR3 (les nouvelles privées d'une croisade étrangère sont filtrées par `MapUI.journal_keeps` ; JR5 : les publiques passent)
 const LETTER_WIDTH := 300.0
 const SEAL_RADIUS := 21.0

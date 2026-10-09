@@ -64,11 +64,7 @@ pub fn loyalty_target(state: &CampaignState, data: &GameData, id: &CharacterId) 
 
 /// Seasonal phase (after the characters' own phase): drift, warnings,
 /// defections.
-pub fn resolve_loyalty(
-    state: &mut CampaignState,
-    data: &GameData,
-    events: &mut Vec<GameEvent>,
-) {
+pub fn resolve_loyalty(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
     let rules = rules();
     let ids: Vec<CharacterId> = state.characters.keys().cloned().collect();
     for id in ids {
@@ -109,9 +105,10 @@ pub fn resolve_loyalty(
     }
 }
 
-fn stable_hash(text: &str) -> u32 {
-    text.bytes()
-        .fold(2_166_136_261u32, |h, b| (h ^ u32::from(b)).wrapping_mul(16_777_619))
+pub(crate) fn stable_hash(text: &str) -> u32 {
+    text.bytes().fold(2_166_136_261u32, |h, b| {
+        (h ^ u32::from(b)).wrapping_mul(16_777_619)
+    })
 }
 
 /// The enemy a defecting general joins: the strongest (most settlements) of
@@ -152,13 +149,15 @@ fn defect(
     let name = state.character_name(data, id);
     let player = state.player_faction.clone();
     if let Some(army_id) = army_id {
-        let besieging = state.armies.get(&army_id).is_some_and(|a| match &a.position {
-            ArmyPosition::Settlement(s) => state
-                .settlements
-                .get(s)
-                .is_some_and(|s| s.siege.is_some()),
-            ArmyPosition::Field { .. } => false,
-        });
+        let besieging = state
+            .armies
+            .get(&army_id)
+            .is_some_and(|a| match &a.position {
+                ArmyPosition::Settlement(s) => {
+                    state.settlements.get(s).is_some_and(|s| s.siege.is_some())
+                }
+                ArmyPosition::Field { .. } => false,
+            });
         let host = defection_host(state, &from).filter(|_| !besieging);
         let Some(host) = host else {
             let c = state.characters.get_mut(id).expect("exists");

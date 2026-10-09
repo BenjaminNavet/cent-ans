@@ -1443,6 +1443,12 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
         "ransom_action" => ransom_action,
         "piety" => i64::from(view.piety),
         "prestige" => i64::from(view.prestige),
+        // WH charsb: loyalty of a general or governor (-1: no post), and the
+        // value it drifts towards.
+        "loyalty" => state.characters.get(&view.id).map_or(-1, |c| {
+            if sim_campaign::loyalty::loyalty_target(state, data, &view.id).is_some() { i64::from(c.loyalty) } else { -1 }
+        }),
+        "loyalty_target" => sim_campaign::loyalty::loyalty_target(state, data, &view.id).map_or(-1, i64::from),
         // C7: year of death (0 while alive or unknown), retinue and its cap.
         "birth_year" => i64::from(state.characters.get(&view.id).map_or(0, |c| c.birth_year)),
         "death_year" => i64::from(state.characters.get(&view.id).and_then(|c| c.death_year).unwrap_or(0)),

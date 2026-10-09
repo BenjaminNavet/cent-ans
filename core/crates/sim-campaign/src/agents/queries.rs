@@ -329,6 +329,22 @@ impl CampaignState {
                     .is_some_and(|m| m != faction && self.denounceable(data, faction, m)),
                 ActionCheck::PapalCity => controller.as_str() == PAPACY_FACTION,
                 ActionCheck::CatholicFaction => crate::religion::is_catholic(self, data, faction),
+                ActionCheck::HostileCharacter => {
+                    captive = self.strike_target(
+                        data,
+                        agent,
+                        spec.target_ruler_min_level,
+                        &target,
+                        character,
+                    );
+                    captive.is_some()
+                }
+                ActionCheck::FriendlyArmyNear => !self
+                    .armies_in_reach(data, &target, |a| self.is_allied(faction, &a.faction))
+                    .is_empty(),
+                ActionCheck::HostileArmyNear => !self
+                    .armies_in_reach(data, &target, |a| self.is_at_war(faction, &a.faction))
+                    .is_empty(),
             };
             if !met {
                 return Err(AgentError::InvalidTarget(condition.reason_fr.clone()));
@@ -380,6 +396,64 @@ impl CampaignState {
             chance: chance.max(0) as u32,
             cost,
         })
+    }
+
+    /// Armies (in the field or in a place) within `army_reach_km` of
+    /// `target` that satisfy `keep`.
+    pub(super) fn armies_in_reach(
+        &self,
+        data: &GameData,
+        target: &SettlementId,
+        keep: impl Fn(&crate::state::Army) -> bool,
+    ) -> Vec<crate::state::ArmyId> {
+        let Some(center) = data.settlement_point(target) else {
+            return Vec::new();
+        };
+        let reach = rules(data).army_reach_km as f32 * crate::march::px_per_km(data);
+        self.armies
+            .iter()
+            .filter(|(_, a)| keep(a))
+            .filter(|(_, a)| {
+                let [x, y] = self.army_point(data, a);
+                (x - center[0]).hypot(y - center[1]) <= reach
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// The general or governor of the master of `target` that a spy may
+    /// strike: `wanted` if it qualifies, else the first one by id. The
+    /// sovereign qualifies only from seal `ruler_min_level`.
+    pub(super) fn strike_target(
+        &self,
+        data: &GameData,
+        agent: &Agent,
+        ruler_min_level: Option<u8>,
+        target: &SettlementId,
+        wanted: Option<&CharacterId>,
+    ) -> Option<CharacterId> {
+        let settlement = self.settlements.get(target)?;
+        let master = &settlement.controller;
+        let ruler = self.factions.get(master).and_then(|f| f.ruler.clone());
+        let here = self.armies_in_reach(data, target, |a| &a.faction == master);
+        let qualifies = |id: &CharacterId, c: &crate::state::CharacterState| {
+            c.alive
+                && !c.captive
+                && &c.faction == master
+                && (c.governor_of.as_ref() == Some(&settlement.province)
+                    || c.army.as_ref().is_some_and(|a| here.contains(a)))
+                && (ruler.as_ref() != Some(id)
+                    || ruler_min_level.is_some_and(|min| agent.level >= min))
+        };
+        wanted
+            .filter(|id| self.characters.get(*id).is_some_and(|c| qualifies(id, c)))
+            .cloned()
+            .or_else(|| {
+                self.characters
+                    .iter()
+                    .find(|(id, c)| qualifies(id, c))
+                    .map(|(id, _)| id.clone())
+            })
     }
 
     pub(super) fn first_captive_held_by(

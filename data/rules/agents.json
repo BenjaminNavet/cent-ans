@@ -297,6 +297,145 @@
           "text_fr": "{agent} plaide la cause de son prince à la Curie : faveur pontificale +{value}."
         }
       ]
+    },
+    "assassinate": {
+      "name": "Assassiner",
+      "description": "Frappe un général posté dans la colonie ou le gouverneur de sa province, par le poignard ou la dague : mort ou blessure. Le crime se sait (Jean sans Peur fit tuer le duc d’Orléans en 1407) et brouille avec le maître des lieux ; le souverain n’est atteint qu’à partir du sceau 4.",
+      "base_chance": 30,
+      "per_level": 6,
+      "death_risk": 50,
+      "hostile": true,
+      "reveals": true,
+      "target_ruler_min_level": 4,
+      "conditions": [
+        {
+          "check": "at_war",
+          "reason_fr": "il faut être en guerre avec le maître des lieux"
+        },
+        {
+          "check": "not_rebels",
+          "reason_fr": "il faut être en guerre avec le maître des lieux"
+        },
+        {
+          "check": "hostile_character",
+          "reason_fr": "aucun général ni gouverneur ennemi à portée de poignard"
+        }
+      ],
+      "success": [
+        {
+          "kind": "strike",
+          "wound_trait": "trait_wounded",
+          "kill_percent": 35,
+          "kill_per_level": 5,
+          "wound_percent": 100,
+          "scandal": -20,
+          "scandal_turns": 12,
+          "killed_fr": "{agent} poignarde {captive} à {place} : il meurt de ses blessures.",
+          "wounded_fr": "{agent} blesse grièvement {captive} à {place}.",
+          "unharmed_fr": "{agent} manque {captive} à {place}."
+        }
+      ],
+      "failure": [
+        {
+          "kind": "opinion",
+          "reason_fr": "Tentative d'assassinat",
+          "value": -15,
+          "turns": 12
+        }
+      ],
+      "failure_extra_fr": " : {captive} est sur ses gardes"
+    },
+    "poison": {
+      "name": "Empoisonner",
+      "description": "Verse le poison à la table d’un général ou d’un gouverneur : il s’alite, parfois en meurt, et nul ne sait d’où vient le mal. Moins sûr que le poignard, plus discret ; le souverain n’est atteint qu’à partir du sceau 4.",
+      "base_chance": 40,
+      "per_level": 5,
+      "death_risk": 40,
+      "hostile": true,
+      "target_ruler_min_level": 4,
+      "conditions": [
+        {
+          "check": "at_war",
+          "reason_fr": "il faut être en guerre avec le maître des lieux"
+        },
+        {
+          "check": "not_rebels",
+          "reason_fr": "il faut être en guerre avec le maître des lieux"
+        },
+        {
+          "check": "hostile_character",
+          "reason_fr": "aucun général ni gouverneur ennemi à portée de coupe"
+        }
+      ],
+      "success": [
+        {
+          "kind": "strike",
+          "wound_trait": "trait_wounded",
+          "kill_percent": 12,
+          "kill_per_level": 3,
+          "wound_percent": 85,
+          "killed_fr": "{agent} empoisonne {captive} à {place} : on le trouve mort au matin.",
+          "wounded_fr": "{agent} empoisonne {captive} à {place} : il s’alite, malade.",
+          "unharmed_fr": "{agent} empoisonne {captive} à {place}, sans effet visible."
+        }
+      ],
+      "failure": [
+        {
+          "kind": "opinion",
+          "reason_fr": "Tentative d'empoisonnement",
+          "value": -10,
+          "turns": 12
+        }
+      ],
+      "failure_extra_fr": " : la coupe est découverte"
+    },
+    "guide_army": {
+      "name": "Guider une armée",
+      "description": "Le héraut conduit par les bons chemins une armée amie postée près de la colonie : elle marche plus loin cette saison et sa province est mise en vue.",
+      "base_chance": 80,
+      "per_level": 4,
+      "conditions": [
+        {
+          "check": "friendly_army_near",
+          "reason_fr": "aucune armée amie près de cette colonie"
+        }
+      ],
+      "success": [
+        {
+          "kind": "guide_army",
+          "movement_percent": 40,
+          "intel_turns": 2,
+          "text_fr": "{agent} guide les armées amies près de {place} : elles marchent plus loin cette saison."
+        }
+      ]
+    },
+    "ambush": {
+      "name": "Tendre une embuscade",
+      "description": "Harcèle une armée ennemie postée près de la colonie : fausses alertes, ponts coupés, convois pillés ; sa marche est retardée et ses hommes abattus.",
+      "base_chance": 50,
+      "per_level": 6,
+      "death_risk": 30,
+      "hostile": true,
+      "reveals": true,
+      "conditions": [
+        {
+          "check": "at_war",
+          "reason_fr": "il faut être en guerre avec le maître des lieux"
+        },
+        {
+          "check": "hostile_army_near",
+          "reason_fr": "aucune armée ennemie près de cette colonie"
+        }
+      ],
+      "success": [
+        {
+          "kind": "ambush",
+          "movement_percent": 50,
+          "morale": 8,
+          "morale_turns": 3,
+          "text_fr": "{agent} tend une embuscade près de {place} : l'armée ennemie est retardée et démoralisée."
+        }
+      ]
     }
   },
   "experience_thresholds": [2, 5, 9, 14],
@@ -314,5 +453,6 @@
   "ransom_price_percent": 70,
   "ransom_price_per_level": 5,
   "ransom_price_floor": 45,
+  "army_reach_km": 30,
   "ai_network_min_income": 500
 }

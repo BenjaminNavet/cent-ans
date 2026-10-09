@@ -1,6 +1,7 @@
 //! Effects of an agent action, in table order.
 
 use super::*;
+use crate::skills;
 
 /// Text variables shared by the effects of one action.
 struct EffectText {
@@ -197,6 +198,104 @@ impl CampaignState {
             ActionEffect::Release { text_fr } => {
                 let captive = plan.character.clone().expect("validated");
                 crate::chronicle::release_character(self, data, &captive, plan.cost, events);
+                say.say(text_fr, &[])
+            }
+            ActionEffect::Strike {
+                wound_trait,
+                kill_percent,
+                kill_per_level,
+                wound_percent,
+                scandal,
+                scandal_turns,
+                killed_fr,
+                wounded_fr,
+                unharmed_fr,
+            } => {
+                let Some(victim) = plan.character.clone() else {
+                    return String::new();
+                };
+                let serial = self.agents.action_serial;
+                let mut rng = derived_rng(
+                    self.seed,
+                    self.turn,
+                    crate::loyalty::stable_hash(victim.as_str()),
+                    serial as u32 ^ 0x57_0000,
+                );
+                let kill = kill_percent + kill_per_level * u32::from(agent.level - 1);
+                let (text, died) = if rng.below(100) < kill {
+                    (killed_fr, true)
+                } else if rng.below(100) < *wound_percent {
+                    skills::grant_trait(self, data, &victim, wound_trait);
+                    (wounded_fr, false)
+                } else {
+                    (unharmed_fr, false)
+                };
+                if *scandal != 0 && (died || text == wounded_fr) {
+                    self.add_capped_modifier(
+                        data,
+                        &plan.target_faction,
+                        faction,
+                        *scandal,
+                        "Attentat contre l'un des siens",
+                        *scandal_turns,
+                    );
+                }
+                let report = say.say(text, &[]);
+                if died {
+                    crate::characters::kill(self, data, &victim, events);
+                }
+                report
+            }
+            ActionEffect::GuideArmy {
+                movement_percent,
+                intel_turns,
+                text_fr,
+            } => {
+                let near = self
+                    .armies_in_reach(data, &plan.target, |a| self.is_allied(faction, &a.faction));
+                for id in &near {
+                    let Some(army) = self.armies.get(id) else {
+                        continue;
+                    };
+                    let bonus = self.army_grid_allowance(data, army) * movement_percent / 100;
+                    let province = self.army_province(data, army);
+                    if let Some(army) = self.armies.get_mut(id) {
+                        army.movement_left = army.movement_left.saturating_add(bonus);
+                    }
+                    if let Some(province) = province {
+                        self.agents
+                            .intel
+                            .retain(|i| !(&i.faction == faction && i.province == province));
+                        self.agents.intel.push(Intel {
+                            faction: faction.clone(),
+                            province,
+                            until_turn: self.turn + intel_turns,
+                        });
+                    }
+                }
+                say.say(text_fr, &[])
+            }
+            ActionEffect::Ambush {
+                movement_percent,
+                morale,
+                morale_turns,
+                text_fr,
+            } => {
+                let near = self
+                    .armies_in_reach(data, &plan.target, |a| self.is_at_war(faction, &a.faction));
+                for id in &near {
+                    let Some(army) = self.armies.get(id) else {
+                        continue;
+                    };
+                    let delay = self.army_grid_allowance(data, army) * movement_percent / 100;
+                    if let Some(army) = self.armies.get_mut(id) {
+                        army.movement_left = army.movement_left.saturating_sub(delay);
+                        army.morale_modifiers.push(crate::state::MoraleModifier {
+                            value: -i8::try_from(*morale).unwrap_or(i8::MAX),
+                            turns: *morale_turns,
+                        });
+                    }
+                }
                 say.say(text_fr, &[])
             }
             ActionEffect::Unmask {

@@ -388,6 +388,13 @@ func _fill_stats(character: Dictionary) -> void:
 		entries.append(["hud_army", "Niveau %d" % int(character["level"]),
 			"Niveau %d : chaque point de compétence gagné en monte un.\nExpérience : %d / %d avant le prochain." % [
 				int(character["level"]), int(character.get("experience", 0)), int(character.get("xp_to_next", 0))]])
+	# WH charsb : loyauté d'un général ou d'un gouverneur (le souverain n'en a pas).
+	if int(character.get("loyalty", -1)) >= 0:
+		var loyalty := int(character["loyalty"])
+		var mood := "sûr" if loyalty >= 60 else ("hésitant" if loyalty >= 30 else "prêt à trahir")
+		entries.append(["class_nobility", "Loyauté %d" % loyalty,
+			"Loyauté envers son seigneur : %d / 100 (%s), tend vers %d.\nSous 25 il peut passer à l'ennemi (général) ou abandonner sa province (gouverneur) ; au-dessus de 90 ses hommes combattent avec plus d'allant." % [
+				loyalty, mood, int(character.get("loyalty_target", loyalty))]])
 	if bool(character.get("captain", false)):
 		entries.append(["hud_governor", "Capitaine", "Chevalier banneret recruté à la solde de la faction."])
 	var sex_label := str(SEX_LABELS.get(character.get("sex", ""), ""))

@@ -119,6 +119,7 @@ pub use entities::feudal_rules::{
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
+pub use entities::loyalty::LoyaltyRules;
 pub use entities::map_scenes::{MapSceneRules, DEFAULT_SCENE_TURNS};
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::missions::{
@@ -150,9 +151,7 @@ pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
 pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
-pub use entities::loyalty::LoyaltyRules;
 pub use entities::royal_act::{CaptainRules, RoyalAct};
-pub use entities::trait_trigger::{TraitTrigger, TraitTriggerRules, TriggerCondition};
 pub use entities::settlement::{
     CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
     SettlementGraph, SettlementKind, SettlementRules, StartingBudget,
@@ -165,6 +164,7 @@ pub use entities::title::{
     FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,
 };
 pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
+pub use entities::trait_trigger::{TraitTrigger, TraitTriggerRules, TriggerCondition};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{

@@ -50,6 +50,14 @@ pub enum AgentActionKind {
     Denounce => "denounce",
     /// Preacher: pleads at the papal court (papal favour).
     Curia => "curia",
+    /// Spy: strikes a general or governor of the place (death or wound).
+    Assassinate => "assassinate",
+    /// Spy: poisons a general or governor of the place, in secret.
+    Poison => "poison",
+    /// Herald: guides a friendly army near the place (longer march, sight).
+    GuideArmy => "guide_army",
+    /// Spy: ambushes a hostile army near the place (morale, delay).
+    Ambush => "ambush",
 }
 }
 
@@ -60,11 +68,15 @@ impl AgentActionKind {
             AgentActionKind::Scout
             | AgentActionKind::Sabotage
             | AgentActionKind::Incite
-            | AgentActionKind::Counter => AgentKind::Spy,
+            | AgentActionKind::Counter
+            | AgentActionKind::Assassinate
+            | AgentActionKind::Poison
+            | AgentActionKind::Ambush => AgentKind::Spy,
             AgentActionKind::Parley
             | AgentActionKind::Truce
             | AgentActionKind::Bribe
-            | AgentActionKind::Ransom => AgentKind::Emissary,
+            | AgentActionKind::Ransom
+            | AgentActionKind::GuideArmy => AgentKind::Emissary,
             AgentActionKind::Preach | AgentActionKind::Denounce | AgentActionKind::Curia => {
                 AgentKind::Preacher
             }
@@ -130,6 +142,14 @@ pub enum ActionCheck {
     /// The settlement belongs to the Papacy.
     PapalCity,
     CatholicFaction,
+    /// A general standing at the place, or the governor of its province,
+    /// belongs to the master and may be struck (selects it; the sovereign
+    /// only from `target_ruler_min_level`).
+    HostileCharacter,
+    /// An army of the agent's faction or an ally is within `army_reach_km`.
+    FriendlyArmyNear,
+    /// An army at war with the agent's faction is within `army_reach_km`.
+    HostileArmyNear,
 }
 
 /// One condition of an action and its French refusal text.
@@ -229,6 +249,38 @@ pub enum ActionEffect {
     Capture { text_fr: String },
     /// Buys the selected captive back.
     Release { text_fr: String },
+    /// Strikes the selected character: dies with `kill_percent` (plus
+    /// `kill_per_level` per seal above the first), else is wounded with
+    /// `wound_percent`; a revealed killing costs the master's goodwill.
+    Strike {
+        wound_trait: crate::TraitId,
+        kill_percent: u32,
+        #[serde(default)]
+        kill_per_level: u32,
+        wound_percent: u32,
+        /// Opinion loss of the victim's faction towards the agent's (0: none).
+        #[serde(default)]
+        scandal: i32,
+        #[serde(default)]
+        scandal_turns: u32,
+        killed_fr: String,
+        wounded_fr: String,
+        unharmed_fr: String,
+    },
+    /// Friendly armies near the place march further this turn and their
+    /// province is kept in sight.
+    GuideArmy {
+        movement_percent: u32,
+        intel_turns: u32,
+        text_fr: String,
+    },
+    /// Hostile armies near the place lose movement and morale.
+    Ambush {
+        movement_percent: u32,
+        morale: u8,
+        morale_turns: u8,
+        text_fr: String,
+    },
     /// Rolls against every foreign agent of the province.
     Unmask {
         found_fr: String,
@@ -292,6 +344,10 @@ pub struct ActionSpec {
     #[serde(default)]
     pub conditions: Vec<ActionCondition>,
     pub success: Vec<ActionEffect>,
+    /// Lowest seal at which the sovereign himself may be a `HostileCharacter`
+    /// (absent: never).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_ruler_min_level: Option<u8>,
     /// Applied on failure (the base text is built by the engine).
     #[serde(default)]
     pub failure: Vec<ActionEffect>,
@@ -349,10 +405,17 @@ pub struct AgentRules {
     pub ransom_price_per_level: i64,
     #[serde(default = "default_ransom_floor")]
     pub ransom_price_floor: i64,
+    /// Reach (km) around a settlement within which `GuideArmy` and `Ambush`
+    /// find armies.
+    #[serde(default = "default_army_reach_km")]
+    pub army_reach_km: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
+fn default_army_reach_km() -> f64 {
+    30.0
+}
 fn default_ransom_percent() -> i64 {
     70
 }

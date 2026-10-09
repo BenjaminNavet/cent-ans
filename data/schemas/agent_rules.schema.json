@@ -128,6 +128,12 @@
         "reveals": {
           "type": "boolean"
         },
+        "target_ruler_min_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Sceau minimal pour frapper le souverain lui-même (absent : jamais). WH charsb, ADR 0284."
+        },
         "garrison_men_per_malus": {
           "type": "integer",
           "minimum": 0
@@ -203,13 +209,17 @@
           "ransom",
           "preach",
           "denounce",
-          "curia"
+          "curia",
+          "assassinate",
+          "poison",
+          "guide_army",
+          "ambush"
         ]
       },
       "additionalProperties": {
         "$ref": "#/$defs/action"
       },
-      "minProperties": 11
+      "minProperties": 15
     },
     "experience_thresholds": {
       "type": "array",
@@ -278,6 +288,11 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 100
+    },
+    "army_reach_km": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Rayon (km) autour d'une colonie où guide_army et ambush trouvent des armées (WH charsb)."
     },
     "ransom_price_floor": {
       "type": "integer",
