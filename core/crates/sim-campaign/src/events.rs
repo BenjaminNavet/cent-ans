@@ -83,6 +83,8 @@ pub enum EventKind {
     LevelUp,
     /// WH chars: a captain is hired, a wound heals.
     Captain,
+    /// WH charsb: a general or governor grumbles, defects or is dismissed.
+    Loyalty,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

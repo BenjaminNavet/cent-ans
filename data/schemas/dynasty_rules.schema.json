@@ -11,9 +11,6 @@
     "fertile_age_max": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Plus vieil âge fertile de la mère, inclus." },
     "base_birth_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Probabilité de base (pour mille) d'une naissance par couple fertile et par hiver." },
     "wounded_after_defeat_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) d'être blessé après une défaite." },
-    "veteran_battles": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Batailles livrées avant le trait vétéran." },
-    "siege_master_sieges": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Sièges gagnés avant le trait maître de siège." },
-    "cruel_raids": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Raids menés avant le trait cruel." },
     "general_death_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) qu'un général vaincu meure sur le champ." },
     "ruler_death_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Même chance pour un souverain en titre, mieux protégé et plus souvent rançonné." },
     "regency_unrest_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Troubles ajoutés à chaque province d'une faction en régence." },
@@ -27,6 +24,6 @@
     "treaty_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du souverain qui conclut un traité." },
     "ransom_xp": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "XP du captif dont la rançon est payée." }
   },
-  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "veteran_battles", "siege_master_sieges", "cruel_raids", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp"],
+  "required": ["majority_age", "marriage_min_age", "fertile_age_min", "fertile_age_max", "base_birth_permille", "wounded_after_defeat_permille", "general_death_permille", "ruler_death_permille", "regency_unrest_penalty", "prestige_victory", "prestige_marriage", "prestige_effect_divisor", "piety_effect_divisor", "max_yearly_building_piety", "siege_xp", "raid_xp", "treaty_xp", "ransom_xp"],
   "additionalProperties": false
 }

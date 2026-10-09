@@ -1,0 +1,72 @@
+{
+  "description": "Déclencheurs des traits acquis (lot WH charsb, ADR 0284) : chaque entrée donne `trait` à un personnage dont toutes les conditions de `when` sont vraies (et dont un rôle de `roles` est tenu, si présent). Évalués par sim-campaign::trait_triggers après chaque bataille, siège et chevauchée, et à chaque saison. Le trait blessé (aléatoire) reste dans dynasty.json.",
+  "triggers": [
+    {
+      "trait": "trait_veteran",
+      "when": {
+        "battles_fought_min": 5
+      },
+      "text_fr": "{name} est désormais un vétéran."
+    },
+    {
+      "trait": "trait_siege_master",
+      "when": {
+        "sieges_won_min": 3
+      },
+      "text_fr": "{name} s’est fait un nom devant les murailles."
+    },
+    {
+      "trait": "trait_cruel",
+      "when": {
+        "raids_led_min": 3
+      },
+      "text_fr": "{name} se fait craindre par ses chevauchées."
+    },
+    {
+      "trait": "trait_battle_hero",
+      "when": {
+        "battles_won_min": 4,
+        "last_battle_won": true
+      },
+      "text_fr": "{name} est acclamé comme un héros de bataille."
+    },
+    {
+      "trait": "trait_siege_scourge",
+      "when": {
+        "sieges_won_min": 6
+      },
+      "text_fr": "{name} devient le fléau des places fortes."
+    },
+    {
+      "trait": "trait_plunderer",
+      "when": {
+        "raids_led_min": 6
+      },
+      "text_fr": "{name} a la réputation d’un pillard."
+    },
+    {
+      "trait": "trait_devout",
+      "when": {
+        "piety_min": 85
+      },
+      "text_fr": "{name} est connu pour ses dons et sa dévotion."
+    },
+    {
+      "trait": "trait_debtor",
+      "roles": [
+        "ruler"
+      ],
+      "when": {
+        "treasury_below": 0
+      },
+      "text_fr": "{name} s’endette : la cour vit à crédit."
+    },
+    {
+      "trait": "trait_old_age",
+      "when": {
+        "age_min": 60
+      },
+      "text_fr": "{name} sent le poids des ans."
+    }
+  ]
+}

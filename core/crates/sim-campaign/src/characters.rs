@@ -78,6 +78,10 @@ pub(crate) fn resolve_characters(
     for id in &ids {
         heal_temporary_traits(state, data, id, events);
     }
+    // WH charsb: age, debt and piety traits come from the trigger table.
+    crate::trait_triggers::evaluate_all(state, data, events);
+    // WH charsb: generals and governors drift in loyalty, the disloyal defect.
+    crate::loyalty::resolve_loyalty(state, data, events);
     for id in ids {
         let permille = natural_death_permille(state, data, &id);
         if permille == 0 || !state.rng.chance_permille(permille) {

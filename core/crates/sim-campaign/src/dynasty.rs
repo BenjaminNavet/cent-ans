@@ -33,12 +33,6 @@ pub struct DynastyRules {
     pub base_birth_permille: u32,
     /// Chance (per mille) of being wounded after a defeat.
     pub wounded_after_defeat_permille: u32,
-    /// Battles fought before `trait_veteran` is granted.
-    pub veteran_battles: u32,
-    /// Sieges won before `trait_siege_master` is granted.
-    pub siege_master_sieges: u32,
-    /// Raids led before `trait_cruel` is granted.
-    pub cruel_raids: u32,
     /// Chance (per mille) that a defeated general dies on the field.
     pub general_death_permille: u32,
     /// Same for a reigning sovereign, better protected and more often
@@ -347,11 +341,8 @@ pub fn on_battle_resolved(
     c.battles_won += u32::from(won);
     c.last_battle_won = won;
     c.last_battle_turn = Some(turn);
-    let battles = c.battles_fought;
-    if battles >= rules().veteran_battles {
-        let veteran = TraitId::new("trait_veteran").expect("well-formed id");
-        skills::grant_trait(state, data, general, &veteran);
-    }
+    // WH charsb: veteran, battle hero... come from `data/rules/trait_triggers.json`.
+    crate::trait_triggers::evaluate(state, data, general, events);
     if !won {
         if state
             .rng
@@ -394,12 +385,10 @@ pub fn on_siege_won(state: &mut CampaignState, data: &GameData, general: &Charac
         return;
     };
     c.sieges_won += 1;
-    let reached = c.sieges_won;
     skills::grant_experience(state, data, general, rules().siege_xp);
-    if reached >= rules().siege_master_sieges {
-        let siege_master = TraitId::new("trait_siege_master").expect("well-formed id");
-        skills::grant_trait(state, data, general, &siege_master);
-    }
+    let mut events = Vec::new();
+    crate::trait_triggers::evaluate(state, data, general, &mut events);
+    state.pending_events.extend(events);
 }
 
 /// Called once per raid led by a general (spec § 2: `trait_cruel` after 3).
@@ -408,12 +397,10 @@ pub fn on_raid_led(state: &mut CampaignState, data: &GameData, general: &Charact
         return;
     };
     c.raids_led += 1;
-    let reached = c.raids_led;
     skills::grant_experience(state, data, general, rules().raid_xp);
-    if reached >= rules().cruel_raids {
-        let cruel = TraitId::new("trait_cruel").expect("well-formed id");
-        skills::grant_trait(state, data, general, &cruel);
-    }
+    let mut events = Vec::new();
+    crate::trait_triggers::evaluate(state, data, general, &mut events);
+    state.pending_events.extend(events);
 }
 
 /// Grants `trait_captive_ransomed` when a captive is freed (spec § 2).

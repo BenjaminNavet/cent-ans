@@ -1,0 +1,20 @@
+{
+  "id": "trait_devout",
+  "name": {
+    "display": "Dévot"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 8,
+      "mode": "add"
+    },
+    {
+      "effect": "unrest",
+      "value": -2,
+      "mode": "add"
+    }
+  ],
+  "description": "Ses aumônes et ses fondations pieuses sont connues de tout le diocèse."
+}

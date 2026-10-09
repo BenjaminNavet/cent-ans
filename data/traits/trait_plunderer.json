@@ -1,0 +1,20 @@
+{
+  "id": "trait_plunderer",
+  "name": {
+    "display": "Pillard"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "supply",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Vit sur le pays et laisse derrière lui des paysans ruinés."
+}

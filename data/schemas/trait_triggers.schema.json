@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/trait_triggers.schema.json",
+  "title": "Déclencheurs de traits",
+  "description": "Fichier data/rules/trait_triggers.json (lot WH charsb, ADR 0284) : conditions d'acquisition des traits acquis. Lu par sim-campaign::trait_triggers.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trait": {
+            "$ref": "common.schema.json#/$defs/trait_id"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ruler",
+                "general",
+                "governor",
+                "consort"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "when": {
+            "type": "object",
+            "properties": {
+              "battles_fought_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "battles_won_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sieges_won_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "raids_led_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "age_min": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 120
+              },
+              "piety_min": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "treasury_below": {
+                "type": "integer",
+                "description": "Trésor de la faction du personnage sous ce seuil (livres)."
+              },
+              "last_battle_won": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "minProperties": 1
+          },
+          "text_fr": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "trait",
+          "when",
+          "text_fr"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "triggers"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "description": "Loyauté des généraux et gouverneurs (lot WH charsb, ADR 0284). Chaque saison la loyauté (0-100) d'un général ou d'un gouverneur glisse de `drift` vers `base_target` plus ses modificateurs ; sous `defect_below`, il peut faire défection avec `defect_permille` ‰ par saison ; au-dessus de `high_above`, ses troupes gagnent `high_morale` de moral.",
+  "base_target": 65,
+  "drift": 5,
+  "effect_weight": 2,
+  "order_bonus": 15,
+  "unrest_threshold": 55,
+  "unrest_penalty": 25,
+  "debt_penalty": 10,
+  "defeat_penalty": 10,
+  "defeat_window_turns": 4,
+  "warn_below": 40,
+  "defect_below": 25,
+  "defect_permille": 200,
+  "recover_to": 40,
+  "defect_unrest": 15,
+  "high_above": 90,
+  "high_morale": 3.0
+}

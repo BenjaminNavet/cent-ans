@@ -1,0 +1,20 @@
+{
+  "id": "trait_old_age",
+  "name": {
+    "display": "Vieillesse"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "health",
+      "value": -8,
+      "mode": "add"
+    },
+    {
+      "effect": "prestige",
+      "value": 2,
+      "mode": "add"
+    }
+  ],
+  "description": "Les années pèsent, mais le grand âge impose le respect."
+}

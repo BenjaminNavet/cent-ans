@@ -1,0 +1,20 @@
+{
+  "id": "trait_siege_scourge",
+  "name": {
+    "display": "Fléau des sièges"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "siege_speed",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "siege_resistance",
+      "value": 10,
+      "mode": "percent"
+    }
+  ],
+  "description": "On dit que nulle muraille ne lui résiste, et que nul assaut ne l’étonne."
+}

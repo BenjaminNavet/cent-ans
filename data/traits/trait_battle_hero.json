@@ -1,0 +1,20 @@
+{
+  "id": "trait_battle_hero",
+  "name": {
+    "display": "Héros de bataille"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "army_morale",
+      "value": 6,
+      "mode": "add"
+    },
+    {
+      "effect": "prestige",
+      "value": 3,
+      "mode": "add"
+    }
+  ],
+  "description": "Une victoire éclatante l’a fait acclamer par l’ost entière."
+}

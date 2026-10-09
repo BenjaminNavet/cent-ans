@@ -219,6 +219,8 @@ pub fn character_effects(state: &CampaignState, data: &GameData, id: &CharacterI
     }
     // H6: companions of a chivalric order lead with more fire.
     totals[EffectKind::ArmyMorale].flat += crate::chivalry::member_morale(state, data, id);
+    // WH charsb: a loyal general's men fight with more spirit.
+    totals[EffectKind::ArmyMorale].flat += crate::loyalty::morale_bonus(state, id);
     // C7: companions of the retinue.
     crate::retinue::add_companion_effects(state, data, id, &mut totals);
     // WH chars: the running royal acts of the character's faction.

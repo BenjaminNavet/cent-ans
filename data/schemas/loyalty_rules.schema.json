@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/loyalty_rules.schema.json",
+  "title": "Loyauté des personnages",
+  "description": "Fichier data/rules/loyalty.json (lot WH charsb, ADR 0284). Lu par sim-campaign::loyalty.",
+  "type": "object",
+  "properties": {
+    "base_target": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "drift": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "effect_weight": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "order_bonus": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unrest_threshold": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unrest_penalty": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "debt_penalty": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "defeat_penalty": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "defeat_window_turns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "defect_permille": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "warn_below": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "defect_below": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "recover_to": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "defect_unrest": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "high_above": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "high_morale": {
+      "type": "number",
+      "minimum": 0
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "base_target",
+    "drift",
+    "effect_weight",
+    "order_bonus",
+    "unrest_threshold",
+    "unrest_penalty",
+    "debt_penalty",
+    "defeat_penalty",
+    "defeat_window_turns",
+    "defect_permille",
+    "warn_below",
+    "defect_below",
+    "recover_to",
+    "defect_unrest",
+    "high_above",
+    "high_morale"
+  ],
+  "additionalProperties": false
+}

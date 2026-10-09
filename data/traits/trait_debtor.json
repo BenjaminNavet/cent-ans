@@ -1,0 +1,21 @@
+{
+  "id": "trait_debtor",
+  "name": {
+    "display": "Endetté"
+  },
+  "category": "acquired",
+  "effects": [
+    {
+      "effect": "wealth",
+      "value": -5,
+      "mode": "percent"
+    },
+    {
+      "effect": "prestige",
+      "value": -2,
+      "mode": "add"
+    }
+  ],
+  "description": "Le prince doit aux Lombards et aux marchands plus qu’il ne peut rendre ; la dette s’oublie quand les coffres se remplissent.",
+  "expires_in_turns": 8
+}
