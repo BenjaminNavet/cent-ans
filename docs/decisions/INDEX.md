@@ -217,6 +217,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
 | 0254 | [Lissage lointain du sol de bataille et cadrage de gros plan hors bâtiments](0254-lissage-lointain-du-sol-de-bataille.md) | accepté |
 | 0255 | [Franchissement d'un pont, contagion de déroute et sonde d'issue (lot RX batsim)](0255-bataille-pont-contagion-sonde.md) | accepté |
+| 0256 | [Chaîne de migration des sauvegardes et erreurs de test attendues](0256-migration-sauvegardes-et-erreurs-attendues.md) | accepté |
 | 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
 | 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
 | 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |

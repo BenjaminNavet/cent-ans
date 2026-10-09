@@ -592,7 +592,7 @@ func _setup_campaign() -> void:
 		ui.set_date("Simulation indisponible")
 		var start_error: String = SimFacade.last_load_error
 		ui.show_toast(start_error if start_error != "" else "Impossible de démarrer la campagne.", true)
-		push_error("CampaignMap: campaign could not start")
+		ExpectedErrors.report("CampaignMap: campaign could not start")
 		return
 	player_faction = str(sim.call("get_player_faction"))
 	ui.journal_player_faction = player_faction

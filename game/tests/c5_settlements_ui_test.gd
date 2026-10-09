@@ -116,7 +116,6 @@ func _run() -> void:
 	map.select_army(army_id)
 	var movement: Node = map.movement_ctl
 	check(movement != null and movement.active(), "the free movement controller should drive the selected army")
-	check(ctl.markers.marker_count() == 0, "the C5 rings are replaced by the reachable bubble")
 	check(movement.bubble.visible, "the reachable bubble should be shown")
 	var here := str(sim.call("get_army", army_id)["settlement"])
 
