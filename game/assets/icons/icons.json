@@ -48,6 +48,18 @@
       "source": "delapouite/military-fort",
       "author": "Delapouite"
     },
+    "bld_bailiwick": {
+      "file": "lorc-scroll-unfurled.svg",
+      "category": "building",
+      "source": "lorc/scroll-unfurled",
+      "author": "Lorc"
+    },
+    "bld_banal_oven": {
+      "file": "delapouite-bread.svg",
+      "category": "building",
+      "source": "delapouite/bread",
+      "author": "Delapouite"
+    },
     "bld_castle": {
       "file": "lorc-castle.svg",
       "category": "building",
@@ -65,6 +77,12 @@
       "category": "building",
       "source": "delapouite/church",
       "author": "Delapouite"
+    },
+    "bld_corn_hall": {
+      "file": "lorc-wheat.svg",
+      "category": "building",
+      "source": "lorc/wheat",
+      "author": "Lorc"
     },
     "bld_counting_house": {
       "file": "delapouite-abacus.svg",
@@ -102,6 +120,12 @@
       "source": "lorc/hospital-cross",
       "author": "Lorc"
     },
+    "bld_manor_chapel": {
+      "file": "delapouite-church.svg",
+      "category": "building",
+      "source": "delapouite/church",
+      "author": "Delapouite"
+    },
     "bld_market": {
       "file": "delapouite-shop.svg",
       "category": "building",
@@ -132,6 +156,12 @@
       "source": "delapouite/harbor-dock",
       "author": "Delapouite"
     },
+    "bld_provostry": {
+      "file": "lorc-scales.svg",
+      "category": "building",
+      "source": "lorc/scales",
+      "author": "Lorc"
+    },
     "bld_scriptorium": {
       "file": "delapouite-scroll-quill.svg",
       "category": "building",
@@ -160,6 +190,24 @@
       "file": "delapouite-furnace.svg",
       "category": "building",
       "source": "delapouite/furnace",
+      "author": "Delapouite"
+    },
+    "bld_tithe_barn": {
+      "file": "delapouite-wooden-crate.svg",
+      "category": "building",
+      "source": "delapouite/wooden-crate",
+      "author": "Delapouite"
+    },
+    "bld_toll_post": {
+      "file": "delapouite-two-coins.svg",
+      "category": "building",
+      "source": "delapouite/two-coins",
+      "author": "Delapouite"
+    },
+    "bld_town_hall": {
+      "file": "delapouite-public-speaker.svg",
+      "category": "building",
+      "source": "delapouite/public-speaker",
       "author": "Delapouite"
     },
     "bld_university": {
