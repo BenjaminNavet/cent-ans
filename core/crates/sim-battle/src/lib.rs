@@ -105,8 +105,8 @@ pub use command::{Command, CommandError};
 pub use custom::{CustomBattle, CustomBattleRules, CustomData, CustomReport, CustomSide};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{
-    Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
-    FieldState, Hamlet, HamletLayout, Moat, Mound,
+    Area, AreaKind, Camp, Decor, DecorHover, DecorItem, DecorPlan, DecorProp, DecorPropKind,
+    DecorRules, FieldState, Hamlet, HamletLayout, Moat, Mound,
 };
 pub use duel::DuelRules;
 pub use field::{

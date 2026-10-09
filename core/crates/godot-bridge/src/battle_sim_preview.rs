@@ -192,6 +192,21 @@ impl BattleSim {
         if let Some(compare) = &hover.compare {
             dict.set("compare", &compare_dict(compare));
         }
+        // QW-G1: rule values of the decor under the cursor (the label).
+        if let Some(decor) = sim.field().decor_hover_at(x, z) {
+            dict.set(
+                "decor",
+                &vdict! {
+                    "kind" => decor.kind.key(),
+                    "label" => decor.label,
+                    "cover_pct" => decor.cover_pct,
+                    "foot_speed_pct" => decor.foot_speed_pct,
+                    "horse_speed_pct" => decor.horse_speed_pct,
+                    "defense_pct" => decor.defense_pct,
+                    "breaks_charge" => decor.breaks_charge,
+                },
+            );
+        }
         dict
     }
 }
