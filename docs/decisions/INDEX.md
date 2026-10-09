@@ -178,14 +178,26 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0200 | [Chantier SC : une seule voie de code](0200-chantier-simplification.md) | n/d |
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
-| 0204 | [Semis de végétation de campagne : Rust seul](0204-vegetation-semis-rust-seul.md) | accepté |
+| 0203 | [La pyramide de relief devient obligatoire](0203-pyramide-relief-obligatoire.md) | accepté |
+| 0204 | [Semis de végétation de campagne : Rust seul](0204-vegetation-semis-rust-seul.md) | n/d |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
+| 0205 bis | [Retrait du village de bataille B5](0205-retrait-village-bataille.md) | accepté |
 | 0206 | [Chargeur Rust des données vectorielles de la carte](0206-chargeur-carte-rust.md) | accepté |
-| 0207 | [Un seul moteur de missions piloté par les données](0207-missions-donnees.md) | accepté |
+| 0207 | [Un seul moteur de missions, piloté par `data/missions.json`](0207-missions-donnees.md) | accepté |
+| 0208 | [Sauvegardes : version 9, plus de compatibilité ascendante](0208-sauvegardes-version-9.md) | accepté |
+| 0209 | [Actions d'agents pilotées par une table `ActionSpec`](0209-agents-action-spec.md) | n/d |
 | 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
 | 0211 | [Charte semi-réaliste révisée (trois états, figurines générées, palette contrôlée)](0211-charte-semi-realiste.md) | accepté |
 | 0212 | [Les modèles 3D générés voyagent en paquet de release, pas par git](0212-paquet-de-modeles-generes.md) | n/d |
-| 0216 | [Plus de villages, moins de villes sur la carte de campagne](0216-plus-de-villages-moins-de-villes.md) | accepté |
+| 0213 | [Parcellaire du sol : parcelles de Voronoi, régions dominantes, clairières](0213-parcellaire-voronoi-clairieres.md) | n/d |
+| 0214 | [Les lieux de la carte affichent les glb générés, par sous-famille, à toute distance](0214-maquettes-modeles-generes.md) | n/d |
+| 0215 | [Eau des lacs façon mer ME1, routes maritimes discrètes](0215-eau-des-lacs-et-routes-maritimes-discretes.md) | n/d |
+| 0216 | [Plus de villages, moins de villes sur la carte de campagne](0216-plus-de-villages-moins-de-villes.md) | n/d |
+| 0217 | [glb générés sur et au bord de l'eau (lot DN-FLEUVE)](0217-glb-generes-sur-l-eau.md) | n/d |
+| 0218 | [Roches générées DN sur la carte de campagne](0218-roches-dn-campagne.md) | accepté |
 | 0219 | [Codex du décor naturel et bulle de survol différée](0219-codex-du-decor-naturel.md) | accepté |
+| 0220 | [La campagne vivante hors champs : une couche à règles en données, albédo partagé et réduit](0220-campagne-vivante-hors-champs.md) | n/d |
+| 0221 | [Forêts de campagne : modèles générés, peuplements par massif, forêt dominante](0221-forets-modeles-generes-et-peuplements.md) | n/d |
+| 0222 | [champs, vergers et vignes en modèles 3D générés (DN-CHAMPS)](0222-champs-modeles-generes.md) | n/d |
 | 0230 | [Effets secondaires de bataille retirés](0230-effets-secondaires-bataille-retires.md) | accepté |
 | 0231 | [Carte : suppression de replis morts](0231-carte-replis-morts.md) | accepté |
