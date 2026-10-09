@@ -104,3 +104,4 @@ siegedet (tests de siège instables + test assaut avec engin prêt), codex (DT7 
 - devflags (PF-06 + BT4) prêt sur sc/devflags, en attente : settlement_layer.gd modifié non commité par une autre session dans le checkout principal. Smoke à relancer sur main (non terminé, machine saturée).
 
 - 2026-10-09 Vague 10 lancée (8 worktrees gp-sc-*) : bb1 (village B5, option a : mer/mares/palissades gardées, ADR 0205), bb14, relief (ADR 0203), veg (ADR 0204), bench, smoke (GT7+GT3), dt2 (+MB6), cc (CC7+CC12).
+- 2026-10-09 Vague 10 fusionnée (bb1 bb14 relief veg bench smoke dt2 cc) ; 8 tests cassés par la migration TestCase réparés (48172e05a, 2907579fa). Vague 11 lancée (6, disque 20 Go) : bb5 (+BB14b donjon), bt11 (ADR 0230), tl10, mbdead (MB10/11/13, ADR 0231), ma6, gt9 (+DT5).

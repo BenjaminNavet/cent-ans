@@ -8,6 +8,13 @@ extends RefCounted
 ## Vert allié, bleu accord (commerce, accès militaire, mariage), jaune neutre, orange tension
 ## (hostilité, embargo, intrusion), rouge guerre, gris vassal ou suzerain.
 
+## Couleurs de relation de la carte diplomatique (aussi lues par la légende).
+const RELATION_COLORS := {
+	"self": Color(0.85, 0.75, 0.30), "war": Color(0.72, 0.12, 0.10), "truce": Color(0.85, 0.70, 0.20),
+	"peace": Color(0.55, 0.55, 0.52), "alliance": Color(0.20, 0.40, 0.78), "vassal": Color(0.50, 0.25, 0.65),
+	"suzerain": Color(0.50, 0.25, 0.65),
+}
+
 const COLORS := {
 	"self": Color(0.96, 0.93, 0.84),
 	"ally": Color(0.22, 0.60, 0.26),

@@ -137,6 +137,19 @@ pub const UNDER_ATTACK_CONTACT_S: f64 = 4.0;
 pub const UNDER_ATTACK_SHOT_S: f64 = 15.0;
 
 impl WallPiece {
+    /// A fresh piece from `a` to `b` with full `hp`.
+    pub fn new(kind: PieceKind, a: (f64, f64), b: (f64, f64), hp: f64) -> Self {
+        WallPiece {
+            kind,
+            a,
+            b,
+            hp,
+            max_hp: hp,
+            docked_tower: None,
+            attacked_for: 0.0,
+        }
+    }
+
     pub fn intact(&self) -> bool {
         self.hp > 0.0
     }
@@ -243,26 +256,10 @@ pub struct House {
     /// wall walk).
     #[serde(default = "two_rows")]
     pub rows: u8,
-    /// NT1 (ADR 0126): the keep of a castle (a stone tower: it blocks like
-    /// a block but never burns).
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub keep: bool,
-    /// NT8: height of a keep in metres from the ground (0: the renderer's
-    /// own height, every other building).
-    #[serde(default, skip_serializing_if = "zero_height")]
-    pub height: f64,
-    /// NT11: a keep roofed with a crenellated terrace (else a pavilion
-    /// roof), drawn from the place's seed.
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub terrace: bool,
 }
 
 fn two_rows() -> u8 {
     2
-}
-
-fn zero_height(value: &f64) -> bool {
-    *value == 0.0
 }
 
 impl House {
@@ -280,9 +277,6 @@ impl House {
             yaw,
             church: false,
             rows: 2,
-            keep: false,
-            height: 0.0,
-            terrace: false,
         }
     }
 
@@ -685,6 +679,38 @@ pub struct SiegeWorks {
 }
 
 impl SiegeWorks {
+    /// The walls shared by the generic town and the plan towns: the ring,
+    /// its pieces and towers around [`TOWN_CENTER`], with no house, prop,
+    /// fire or landmark yet. `wall` is `(thickness, wall_height)`.
+    pub(crate) fn skeleton(
+        fortification: u32,
+        wall: (f64, f64),
+        vertices: Vec<(f64, f64)>,
+        pieces: Vec<WallPiece>,
+        towers: Vec<Tower>,
+        gate: usize,
+    ) -> Self {
+        SiegeWorks {
+            fortification,
+            center: TOWN_CENTER,
+            vertices,
+            pieces,
+            towers,
+            thickness: wall.0,
+            wall_height: wall.1,
+            square_radius: SQUARE_RADIUS,
+            gate,
+            hold_time: 0.0,
+            points: Vec::new(),
+            houses: Vec::new(),
+            props: Vec::new(),
+            sortie: false,
+            gate_fire: Blaze::default(),
+            wind: (0.0, 0.0),
+            landmark: None,
+        }
+    }
+
     /// Builds the ring for `fortification` (0-3+), with `breach` percent
     /// (campaign siege damage) already done: from 50 one stretch facing the
     /// attacker is open, from 85 two; the other pieces lose up to 40 % HP.
@@ -710,15 +736,7 @@ impl SiegeWorks {
         for k in 0..RING_SIDES {
             let a = vertices[k];
             let b = vertices[(k + 1) % RING_SIDES];
-            let wall = |a, b| WallPiece {
-                kind: PieceKind::Wall,
-                a,
-                b,
-                hp: wall_hp,
-                max_hp: wall_hp,
-                docked_tower: None,
-                attacked_for: 0.0,
-            };
+            let wall = |a, b| WallPiece::new(PieceKind::Wall, a, b, wall_hp);
             if k == RING_SIDES / 2 - 1 {
                 // The side facing the attacker: wall, gate, wall.
                 let mid = ((a.0 + b.0) * 0.5, (a.1 + b.1) * 0.5);
@@ -734,15 +752,7 @@ impl SiegeWorks {
                 );
                 pieces.push(wall(a, g0));
                 gate = pieces.len();
-                pieces.push(WallPiece {
-                    kind: PieceKind::Gate,
-                    a: g0,
-                    b: g1,
-                    hp: gate_hp,
-                    max_hp: gate_hp,
-                    docked_tower: None,
-                    attacked_for: 0.0,
-                });
+                pieces.push(WallPiece::new(PieceKind::Gate, g0, g1, gate_hp));
                 pieces.push(wall(g1, b));
             } else {
                 pieces.push(wall(a, b));
@@ -766,25 +776,14 @@ impl SiegeWorks {
                 height: wall_height + 3.0,
             });
         }
-        let mut works = SiegeWorks {
-            houses: Vec::new(),
-            props: Vec::new(),
-            sortie: false,
-            gate_fire: Blaze::default(),
-            wind: (0.0, 0.0),
+        let mut works = SiegeWorks::skeleton(
             fortification,
-            center: TOWN_CENTER,
+            (thickness, wall_height),
             vertices,
             pieces,
             towers,
-            thickness,
-            wall_height,
-            square_radius: SQUARE_RADIUS,
             gate,
-            hold_time: 0.0,
-            points: Vec::new(),
-            landmark: None,
-        };
+        );
         works.lay_generic_town(TownRules::bundled());
         works.apply_campaign_breach(breach, rng);
         works
@@ -918,15 +917,7 @@ impl SiegeWorks {
             return true;
         }
         let margin = self.band() + 1.0;
-        let path = WallPiece {
-            kind: PieceKind::Wall,
-            a: p,
-            b: q,
-            hp: 0.0,
-            max_hp: 0.0,
-            docked_tower: None,
-            attacked_for: 0.0,
-        };
+        let path = WallPiece::new(PieceKind::Wall, p, q, 0.0);
         let start_clear =
             |end: (f64, f64)| ((end.0 - p.0).powi(2) + (end.1 - p.1).powi(2)).sqrt() > margin;
         self.pieces.iter().filter(|w| w.intact()).any(|w| {

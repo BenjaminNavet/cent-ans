@@ -302,6 +302,7 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis`, 20 appels | 0,40 $ | 0,40 $ | cumul chantier 2,67 $ |
 | 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis/multi`, 28 appels | 0,56 $ | 0,56 $ | cumul chantier 2,67 $ |
 | 2026-10-09 | fal.ai | DN-FIX3 : 2 canons + 6 figures montées refaits (images Z-Image 30 appels, vues `flux-2/edit` 10, 3D `trellis/multi` 13) | 0.65 $ | 0.65 $ | cumul chantier 0,65 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : images Z-Image fal (`fal-ai/z-image/turbo`, port 3 graines + 13 flagrants refaits + 2 figures, 68 appels) | 0,34 $ | 0,34 $ | cumul chantier 4,93 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : 3D TRELLIS 2 (`fal-ai/trellis-2`, 1024, 15 appels : port `town_port_harbour` x2 dont un essai à 20 000 faces, 13 flagrants de la revue) | 4,50 $ | 4,50 $ | cumul chantier 4,93 $ |
-| 2026-10-09 | fal.ai | DN-TROUS : 2 figures (`archer_3_jack`, `fig_sled_driver_north`) vue dos `flux-2/edit` x2 + `trellis/multi` x2 | 0,09 $ | 0,09 $ | cumul chantier 4,93 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : images Z-Image fal (`fal-ai/z-image/turbo`, port 3 graines, 13 flagrants refaits, 2 figures), 68 appels | 0,34 $ | 0,34 $ | cumul chantier 10,12 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : 3D TRELLIS 2 (`fal-ai/trellis-2`, 1024), 30 appels : 13 flagrants de la revue, port x2, 15 maquettes de ville/abbaye/village essayées (puis repassées en TRELLIS 1 : à 4000 triangles le LOD1 d'un maillage TRELLIS 2 de 100 000 faces s'effondre) | 9,00 $ | 9,00 $ | cumul chantier 10,12 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : vues dos/côté `fal-ai/flux-2/edit`, 24 appels (8 maquettes multi-vues, contrôle de luminance) + 2 figures | 0,58 $ | 0,58 $ | cumul chantier 10,12 $ |
+| 2026-10-09 | fal.ai | DN-TROUS : 3D `fal-ai/trellis/multi`, 10 appels (8 maquettes + 2 figures). Solde fal épuisé en cours de lot (« Exhausted balance ») : le reste des maquettes en liste d'attente | 0,20 $ | 0,20 $ | cumul chantier 10,12 $ |

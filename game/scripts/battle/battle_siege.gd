@@ -18,10 +18,6 @@ const WOOD_DARK := Color(0.30, 0.20, 0.12)
 const PAVING := Color(0.55, 0.52, 0.46)
 const PLASTER := Color(0.82, 0.77, 0.66)
 const LADDER := Color(0.72, 0.55, 0.30)
-## NT11 : escalier extérieur du donjon (seuil de la porte haute, largeur, hauteur de marche).
-const KEEP_DOOR_SILL_M := 6.5
-const KEEP_STAIR_WIDTH_M := 2.2
-const KEEP_STEP_RISE_M := 0.32
 
 var siege: Dictionary = {}
 var height_at: Callable
@@ -357,13 +353,12 @@ func _build_houses() -> void:
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
-	_build_keeps()
 	if BuildingKit.available():
 		_build_kit_town(houses_root, center)
 		return
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
-		if i != church_index and not bool(site["keep"]):
+		if i != church_index:
 			var h := 4.0 + 3.0 * Hash.vec24(i, 11)
 			_house(houses_root, site["p"], float(site["length"]) * 0.95, float(site["depth"]) * 0.95, h, -float(site["yaw"]))
 	BattleSiegeBatcher.batch_and_replace(houses_root)
@@ -406,9 +401,7 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 		var depth := float(site["depth"])
 		var yaw := float(site["yaw"])
 		var handles: Array = []
-		if bool(site["keep"]):
-			pass  # NT1 : le donjon est dessiné par `_build_keeps`.
-		elif bool(site["church"]):
+		if bool(site["church"]):
 			handles.append(_kit_place("church", p, length, depth, yaw, rng))
 		elif bool(site["suburb"]):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
@@ -908,223 +901,5 @@ func _house_sites() -> Array:
 			"yaw": float(house.get("yaw", 0.0)),
 			"rows": int(house.get("rows", 2)),
 			"church": bool(house.get("church", false)),
-			"keep": bool(house.get("keep", false)),
-			"height": float(house.get("height", 0.0)),
-			"terrace": bool(house.get("terrace", false)),
 		})
 	return sites
-
-
-## NT1 (ADR 0126) + NT8 : donjon carré d'un château (Vincennes, Largoët), posé sur l'emprise de
-## la simulation (`houses[].keep`) : talus, fût carré, cordon, mâchicoulis sur consoles, parapet
-## crénelé, échauguettes d'angle coiffées d'ardoise et toit en pavillon ou terrasse crénelée (NT11),
-## porte haute et escalier extérieur (NT11). Hauteur, emprise et
-## position viennent du cœur (`houses[].height`, règle `keep_height_above_wall_m`).
-func _build_keeps() -> void:
-	for site in house_sites:
-		if bool(site["keep"]):
-			_build_keep(site)
-
-
-func _build_keep(site: Dictionary) -> void:
-	var p: Vector2 = site["p"]
-	var length := float(site["length"])
-	var depth := float(site["depth"])
-	var yaw := float(site["yaw"])
-	var h := float(site.get("height", 0.0))
-	if h <= 0.0:
-		h = wall_height + 14.0  # anciennes parties sans hauteur de donjon
-	var low := INF
-	for corner in [Vector2(-length, -depth), Vector2(length, -depth), Vector2(length, depth), Vector2(-length, depth)]:
-		var q: Vector2 = p + (corner * 0.5).rotated(yaw)
-		low = minf(low, _ground(q.x, q.y))
-	var node := Node3D.new()
-	node.name = "Keep"
-	# Axe local X le long de la façade, +Z vers la basse-cour (convention du kit).
-	node.transform = Transform3D(Basis(Vector3.UP, -yaw), Vector3(p.x, low - 0.5, p.y))
-	add_child(node)
-	var stone := _textured("stone", STONE)
-	var dark := _textured("stone", STONE_DARK)
-	var slate := _textured("slate", Color(0.55, 0.56, 0.6), 0.75)
-	# NT11 : toit en terrasse crénelée ou en pavillon, tiré par le cœur (graine de la place).
-	var terrace := bool(site.get("terrace", false))
-	# Talus (base élargie) puis fût.
-	_keep_box(node, Vector3(length + 2.0, 4.0, depth + 2.0), Vector3(0, 2.0, 0), dark, "KeepBatter")
-	var body := _keep_box(node, Vector3(length, h, depth), Vector3(0, h * 0.5, 0), stone, "KeepBody")
-	body.set_meta("keep_height", h)
-	# Cordon à mi-hauteur.
-	_keep_box(node, Vector3(length + 0.5, 0.45, depth + 0.5), Vector3(0, h * 0.58, 0), dark)
-	# Mâchicoulis : galerie en encorbellement portée par des consoles.
-	var over := 0.9
-	var gallery_h := 1.5
-	_keep_box(node, Vector3(length + over * 2.0, gallery_h, depth + over * 2.0), Vector3(0, h + gallery_h * 0.5, 0), stone, "KeepMachicolations")
-	var corbels: Array = []
-	var merlons: Array = []
-	for face in 4:
-		var along_len := length if face % 2 == 0 else depth
-		var across := (depth if face % 2 == 0 else length) * 0.5
-		var basis := Basis(Vector3.UP, PI * 0.5 * face)
-		var n_corbel := maxi(int(along_len / 1.6), 4)
-		for k in n_corbel:
-			var x := -along_len * 0.5 + (float(k) + 0.5) * along_len / float(n_corbel)
-			corbels.append(Transform3D(basis, basis * Vector3(x, h - 0.6, across + 0.35)))
-		var span := along_len + over * 2.0
-		var n_merlon := maxi(int(span / 2.2), 4)
-		for k in n_merlon:
-			var x := -span * 0.5 + (float(k) + 0.5) * span / float(n_merlon)
-			merlons.append(Transform3D(basis, basis * Vector3(x, h + gallery_h + 0.65, across + over - 0.3)))
-	_multi(node, Vector3(0.55, 1.2, 0.8), corbels, dark)
-	_multi(node, Vector3(1.1, 1.3, 0.6), merlons, stone)
-	# Échauguettes aux quatre angles, coiffées d'un cône d'ardoise (crénelées sur un donjon en
-	# terrasse).
-	var turret_merlons: Array = []
-	for sx in [-1.0, 1.0]:
-		for sz in [-1.0, 1.0]:
-			var c := Vector3(sx * (length * 0.5 + over * 0.4), 0, sz * (depth * 0.5 + over * 0.4))
-			var turret := MeshInstance3D.new()
-			var cyl := CylinderMesh.new()
-			cyl.top_radius = 1.9
-			cyl.bottom_radius = 1.6
-			cyl.height = 5.5
-			cyl.radial_segments = 10
-			turret.mesh = cyl
-			turret.material_override = stone
-			turret.position = c + Vector3(0, h + 0.5, 0)
-			node.add_child(turret)
-			if terrace:
-				for k in 6:
-					var a := TAU * float(k) / 6.0
-					turret_merlons.append(Transform3D(Basis(Vector3.UP, -a), c + Vector3(cos(a) * 1.6, h + 3.25 + 0.6, sin(a) * 1.6)))
-				continue
-			var cap := MeshInstance3D.new()
-			var cone := CylinderMesh.new()
-			cone.top_radius = 0.0
-			cone.bottom_radius = 2.2
-			cone.height = 4.0
-			cone.radial_segments = 10
-			cap.mesh = cone
-			cap.material_override = slate
-			cap.position = c + Vector3(0, h + 3.25 + 2.0, 0)
-			node.add_child(cap)
-	if terrace:
-		_multi(node, Vector3(0.8, 1.1, 0.5), turret_merlons, stone)
-		_build_keep_terrace(node, length, depth, h + gallery_h, stone, dark, slate)
-	else:
-		# Toit en pavillon (pyramide à quatre pans) en retrait du chemin de ronde.
-		var roof := MeshInstance3D.new()
-		roof.name = "KeepRoof"
-		var pyramid := CylinderMesh.new()
-		var half := minf(length, depth) * 0.5
-		pyramid.top_radius = 0.0
-		pyramid.bottom_radius = half * sqrt(2.0) * 0.92
-		pyramid.height = half * 1.2
-		pyramid.radial_segments = 4
-		roof.mesh = pyramid
-		roof.material_override = slate
-		roof.rotation.y = PI * 0.25
-		roof.position = Vector3(0, h + gallery_h + pyramid.height * 0.5, 0)
-		node.add_child(roof)
-	# Fenêtres et archères, porte haute côté basse-cour.
-	if _slit_mat == null:
-		_slit_mat = _material(Color(0.05, 0.05, 0.05))
-	var slits: Array = []
-	for face in 4:
-		var along_len := length if face % 2 == 0 else depth
-		var across := (depth if face % 2 == 0 else length) * 0.5
-		var basis := Basis(Vector3.UP, PI * 0.5 * face)
-		for level in [0.3, 0.5, 0.72, 0.88]:
-			for k in 3:
-				var x := (float(k) - 1.0) * along_len * 0.28
-				var tall := 1.6 if level < 0.6 else 2.2
-				slits.append(Transform3D(basis.scaled(Vector3(1.0, tall / 1.6, 1.0)), basis * Vector3(x, h * level, across + 0.05)))
-	_multi(node, Vector3(0.35, 1.6, 0.3), slits, _slit_mat)
-	# NT11 : porte haute côté basse-cour, atteinte par un escalier de pierre extérieur (rendu
-	# seul : l'emprise de la simulation reste celle du fût).
-	_build_keep_stair(node, length, depth, minf(KEEP_DOOR_SILL_M, h * 0.35), dark)
-	_keep_box(node, Vector3(2.2, 3.4, 0.4), Vector3(0, 0.5 + minf(KEEP_DOOR_SILL_M, h * 0.35) + 1.7, depth * 0.5 + 0.15), _textured("wood", Color(0.55, 0.45, 0.38)), "KeepDoor")
-
-
-## NT11 : escalier droit adossé à la façade côté basse-cour (+Z), du pied de l'angle gauche au
-## palier devant la porte haute (seuil `sill` au-dessus du pied).
-func _build_keep_stair(node: Node3D, length: float, depth: float, sill: float, mat: Material) -> void:
-	var stair := Node3D.new()
-	stair.name = "KeepStair"
-	node.add_child(stair)
-	var base := 0.5  # pied du donjon (le nœud est posé 0,5 m sous le point le plus bas)
-	var landing := KEEP_STAIR_WIDTH_M + 1.2
-	var face := depth * 0.5
-	# Palier : du fût jusqu'au-delà du talus.
-	_keep_box(stair, Vector3(landing, base + sill, landing), Vector3(0, (base + sill) * 0.5, face + landing * 0.5), mat, "KeepStairLanding")
-	# Volée : marches pleines, de l'angle gauche jusqu'au palier.
-	var start := -length * 0.5 + 0.8
-	var run := -landing * 0.5 - start
-	var n := maxi(int(ceil(sill / KEEP_STEP_RISE_M)), 4)
-	var tread := run / float(n)
-	var z := face + 1.0 + KEEP_STAIR_WIDTH_M * 0.5
-	var steps: Array = []
-	for k in n:
-		var top := base + sill * float(k + 1) / float(n + 1)
-		var x := start + (float(k) + 0.5) * tread
-		steps.append(Transform3D(Basis().scaled(Vector3(1.0, top, 1.0)), Vector3(x, top * 0.5, z)))
-	_multi(stair, Vector3(tread, 1.0, KEEP_STAIR_WIDTH_M), steps, mat)
-	# Garde-corps plein du côté vide.
-	var rail_len := run
-	var rail := _keep_box(stair, Vector3(rail_len, 1.0, 0.35), Vector3(start + rail_len * 0.5, base + sill * 0.5 + 0.5, z + KEEP_STAIR_WIDTH_M * 0.5 - 0.17), mat)
-	rail.rotation.z = atan2(sill, rail_len)
-
-
-## NT11 : terrasse crénelée : dalle au niveau du chemin de ronde, guette d'angle carrée à
-## créneaux et lanterne d'escalier coiffée d'ardoise.
-func _build_keep_terrace(node: Node3D, length: float, depth: float, top: float, stone: Material, dark: Material, slate: Material) -> void:
-	_keep_box(node, Vector3(length, 0.4, depth), Vector3(0, top + 0.2, 0), dark, "KeepTerrace")
-	var g := Vector3(length * 0.5 - 2.2, 0, -depth * 0.5 + 2.2)
-	_keep_box(node, Vector3(4.0, 5.0, 4.0), g + Vector3(0, top + 2.5, 0), stone, "KeepWatch")
-	var merlons: Array = []
-	for face in 4:
-		var basis := Basis(Vector3.UP, PI * 0.5 * face)
-		for k in 3:
-			var x := (float(k) - 1.0) * 1.35
-			merlons.append(Transform3D(basis, g + basis * Vector3(x, top + 5.6, 1.8)))
-	_multi(node, Vector3(0.8, 1.2, 0.45), merlons, stone)
-	var hatch := Vector3(-length * 0.25, 0, depth * 0.2)
-	_keep_box(node, Vector3(2.4, 2.4, 2.4), hatch + Vector3(0, top + 1.2, 0), stone)
-	var cap := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.0
-	cone.bottom_radius = 2.0
-	cone.height = 2.2
-	cone.radial_segments = 4
-	cap.mesh = cone
-	cap.material_override = slate
-	cap.rotation.y = PI * 0.25
-	cap.position = hatch + Vector3(0, top + 2.4 + 1.1, 0)
-	node.add_child(cap)
-
-
-static func _keep_box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material, name := "") -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = size
-	mi.mesh = box
-	mi.material_override = mat
-	mi.position = pos
-	if name != "":
-		mi.name = name
-	parent.add_child(mi, name != "")
-	return mi
-
-
-## Instances d'une même boîte (`MultiMeshInstance3D`) enfant de `parent`.
-static func _multi(parent: Node3D, size: Vector3, xforms: Array, mat: Material) -> void:
-	var box := BoxMesh.new()
-	box.size = size
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = box
-	mm.instance_count = xforms.size()
-	for i in xforms.size():
-		mm.set_instance_transform(i, xforms[i])
-	var inst := MultiMeshInstance3D.new()
-	inst.multimesh = mm
-	inst.material_override = mat
-	parent.add_child(inst)

@@ -19,7 +19,6 @@ use std::f64::consts::PI;
 
 use serde::{Deserialize, Serialize};
 
-use crate::fire::Blaze;
 use crate::geom;
 use crate::rng::BattleRng;
 use crate::siege::{
@@ -333,219 +332,39 @@ impl SiegeWorks {
         let thickness = 2.5 + 0.5 * fort;
         let wall_height = 6.0 + 1.5 * fort;
         let (wall_hp, gate_hp) = SiegeWorkRules::bundled().hp(fortification);
-        // Frame: square at the centre, attacked gate towards −z.
-        let origin = layout.square.unwrap_or_else(|| centroid(&layout.ring));
         let gate_plan = snap_to_ring(&layout.ring, layout.gates[layout.gate].at);
-        // The wall of the gate faces the attacker: its outward normal (away
-        // from the square) is turned towards −z.
-        let n = layout.ring.len();
-        let edge = (0..n)
-            .min_by(|&i, &j| {
-                let d = |k: usize| {
-                    geom::segment_distance(gate_plan, layout.ring[k], layout.ring[(k + 1) % n])
-                };
-                d(i).total_cmp(&d(j)).then(i.cmp(&j))
-            })
-            .unwrap_or(0);
-        let (a, b) = (layout.ring[edge], layout.ring[(edge + 1) % n]);
-        let len = dist(a, b).max(1e-9);
-        let mut normal = ((b.1 - a.1) / len, -(b.0 - a.0) / len);
-        if normal.0 * (gate_plan.0 - origin.0) + normal.1 * (gate_plan.1 - origin.1) < 0.0 {
-            normal = (-normal.0, -normal.1);
-        }
-        let phi = normal.1.atan2(normal.0);
-        let theta = -PI / 2.0 - phi;
-        let mut transform = PlanTransform {
-            origin,
-            cos: theta.cos(),
-            sin: theta.sin(),
-            scale: 1.0,
-        };
-        // Scale: mean radius of the generic town, within the bounds.
-        let samples: Vec<(f64, f64)> = densify(&layout.ring, 5.0)
-            .into_iter()
-            .map(|p| transform.rotate((p.0 - origin.0, p.1 - origin.1)))
-            .collect();
-        let mean = samples.iter().map(|p| p.0.hypot(p.1)).sum::<f64>() / samples.len() as f64;
-        if mean < 1.0 {
-            return None;
-        }
-        let front = samples.iter().map(|p| -p.1).fold(1.0, f64::max);
-        let back = samples.iter().map(|p| p.1).fold(1.0, f64::max);
-        let side = samples.iter().map(|p| p.0.abs()).fold(1.0, f64::max);
-        let target = layout.radius_m.unwrap_or(RING_RADIUS);
-        transform.scale = (target / mean)
-            .min(MAX_FRONT / front)
-            .min(MAX_BACK / back)
-            .min(MAX_SIDE / side);
-        let mut ring: Vec<(f64, f64)> = layout.ring.iter().map(|&p| transform.apply(p)).collect();
-        // The quay edge (last → first) is remembered before simplification.
-        let quay_ends = layout.quay.then(|| (ring[ring.len() - 1], ring[0]));
-        simplify(&mut ring, SIMPLIFY_TOLERANCE);
-        // Same winding as the generic ring (negative area in x-z).
-        if signed_area(&ring) > 0.0 {
-            ring.reverse();
-        }
-        if !geom::point_in_polygon(&ring, TOWN_CENTER) {
-            return None;
-        }
-        // Pieces of at most MAX_PIECE metres.
-        let mut pieces: Vec<WallPiece> = Vec::new();
-        let n = ring.len();
-        for i in 0..n {
-            let (a, b) = (ring[i], ring[(i + 1) % n]);
-            let count = (dist(a, b) / MAX_PIECE).ceil().max(1.0) as usize;
-            for k in 0..count {
-                let t0 = k as f64 / count as f64;
-                let t1 = (k + 1) as f64 / count as f64;
-                pieces.push(WallPiece {
-                    kind: PieceKind::Wall,
-                    a: (a.0 + (b.0 - a.0) * t0, a.1 + (b.1 - a.1) * t0),
-                    b: (a.0 + (b.0 - a.0) * t1, a.1 + (b.1 - a.1) * t1),
-                    hp: wall_hp,
-                    max_hp: wall_hp,
-                    docked_tower: None,
-                    attacked_for: 0.0,
-                });
-            }
-        }
-        // The attacked gate, cut into the nearest piece.
+        let transform = plan_transform(layout, gate_plan)?;
+        let (ring, quay_ends) = scaled_ring(layout, &transform)?;
+        let mut pieces = ring_pieces(&ring, wall_hp);
         let gate_point = transform.apply(gate_plan);
-        let host = (0..pieces.len())
-            .min_by(|&i, &j| {
-                pieces[i]
-                    .distance(gate_point.0, gate_point.1)
-                    .total_cmp(&pieces[j].distance(gate_point.0, gate_point.1))
-                    .then(i.cmp(&j))
-            })
-            .unwrap_or(0);
-        let piece = pieces[host].clone();
-        let len = piece.length();
-        let jamb = 4.0;
-        let gate = if len < GATE_WIDTH + 2.0 * jamb {
-            pieces[host].kind = PieceKind::Gate;
-            pieces[host].hp = gate_hp;
-            pieces[host].max_hp = gate_hp;
-            host
-        } else {
-            let (tx, tz) = piece.tangent();
-            let along = ((gate_point.0 - piece.a.0) * tx + (gate_point.1 - piece.a.1) * tz)
-                .clamp(GATE_WIDTH * 0.5 + jamb, len - GATE_WIDTH * 0.5 - jamb);
-            let at = |s: f64| (piece.a.0 + tx * s, piece.a.1 + tz * s);
-            let (g0, g1) = (at(along - GATE_WIDTH * 0.5), at(along + GATE_WIDTH * 0.5));
-            let wall = |a, b| WallPiece {
-                kind: PieceKind::Wall,
-                a,
-                b,
-                hp: wall_hp,
-                max_hp: wall_hp,
-                docked_tower: None,
-                attacked_for: 0.0,
-            };
-            pieces.splice(
-                host..=host,
-                [
-                    wall(piece.a, g0),
-                    WallPiece {
-                        kind: PieceKind::Gate,
-                        a: g0,
-                        b: g1,
-                        hp: gate_hp,
-                        max_hp: gate_hp,
-                        docked_tower: None,
-                        attacked_for: 0.0,
-                    },
-                    wall(g1, piece.b),
-                ],
-            );
-            host + 1
-        };
-        // Every piece must face out of the town seen from the square.
-        for p in &pieces {
-            let (tx, tz) = p.tangent();
-            let winding = (-tz, tx);
-            let (ox, oz) = p.outward();
-            if ox * winding.0 + oz * winding.1 < 0.5 {
-                return None;
-            }
-            let (mx, mz) = p.midpoint();
-            if dist((mx, mz), TOWN_CENTER) < SQUARE_RADIUS + 25.0 {
-                return None;
-            }
+        let gate = cut_gate(&mut pieces, gate_point, wall_hp, gate_hp);
+        if !pieces_face_out(&pieces) {
+            return None;
         }
         let tower_radius = 5.0 + fort;
-        let mut towers: Vec<Tower> = Vec::new();
-        for (i, p) in pieces.iter().enumerate() {
-            let next_is_gate = pieces[(i + 1) % pieces.len()].kind == PieceKind::Gate;
-            if p.kind == PieceKind::Gate || next_is_gate {
-                continue;
-            }
-            towers.push(Tower {
-                x: p.b.0,
-                z: p.b.1,
-                radius: tower_radius,
-                height: wall_height + 4.0,
-            });
-        }
-        for end in [pieces[gate].a, pieces[gate].b] {
-            towers.push(Tower {
-                x: end.0,
-                z: end.1,
-                radius: tower_radius * 0.8,
-                height: wall_height + 3.0,
-            });
-        }
-        // Other gates: gatehouses on the ring.
-        let mut gatehouses = Vec::new();
-        for (k, g) in layout.gates.iter().enumerate() {
-            if k == layout.gate {
-                continue;
-            }
-            let on_ring = snap_to_ring(&ring, transform.apply(g.at));
-            if dist(on_ring, gate_point) < GATE_WIDTH + 10.0 {
-                continue;
-            }
-            towers.push(Tower {
-                x: on_ring.0,
-                z: on_ring.1,
-                radius: tower_radius * 1.25,
-                height: wall_height + 7.0,
-            });
-            gatehouses.push((g.name.clone(), on_ring.0, on_ring.1));
-        }
+        let mut towers = ring_towers(&pieces, gate, tower_radius, wall_height);
+        let gatehouses = gatehouse_towers(
+            layout,
+            &ring,
+            &transform,
+            gate_point,
+            (tower_radius * 1.25, wall_height + 7.0),
+            &mut towers,
+        );
         let streets: Vec<Vec<(f64, f64)>> = layout
             .streets
             .iter()
             .map(|s| s.iter().map(|&p| transform.apply(p)).collect())
             .collect();
-        let quay: Vec<usize> = match quay_ends {
-            Some((a, b)) => (0..pieces.len())
-                .filter(|&i| {
-                    let (mx, mz) = pieces[i].midpoint();
-                    geom::segment_distance((mx, mz), a, b) < 2.0
-                })
-                .collect(),
-            None => Vec::new(),
-        };
-        let mut works = SiegeWorks {
+        let quay = quay_pieces(&pieces, quay_ends);
+        let mut works = SiegeWorks::skeleton(
             fortification,
-            center: TOWN_CENTER,
-            vertices: ring,
+            (thickness, wall_height),
+            ring,
             pieces,
             towers,
-            thickness,
-            wall_height,
-            square_radius: SQUARE_RADIUS,
             gate,
-            hold_time: 0.0,
-            points: Vec::new(),
-            houses: Vec::new(),
-            props: Vec::new(),
-            sortie: false,
-            gate_fire: Blaze::default(),
-            wind: (0.0, 0.0),
-            landmark: None,
-        };
+        );
         if works.front_walls().is_empty() {
             return None;
         }
@@ -563,6 +382,206 @@ impl SiegeWorks {
         works.apply_campaign_breach(breach, rng);
         Some(works)
     }
+}
+
+/// The plan → battlefield similarity: the square (or the centroid) at the
+/// centre, the attacked gate (`gate_plan`, on the ring) towards −z, scaled
+/// to the mean radius of the generic town within the bounds.
+fn plan_transform(layout: &SiegeLayout, gate_plan: (f64, f64)) -> Option<PlanTransform> {
+    let origin = layout.square.unwrap_or_else(|| centroid(&layout.ring));
+    // The wall of the gate faces the attacker: its outward normal (away
+    // from the square) is turned towards −z.
+    let n = layout.ring.len();
+    let edge = (0..n)
+        .min_by(|&i, &j| {
+            let d = |k: usize| {
+                geom::segment_distance(gate_plan, layout.ring[k], layout.ring[(k + 1) % n])
+            };
+            d(i).total_cmp(&d(j)).then(i.cmp(&j))
+        })
+        .unwrap_or(0);
+    let (a, b) = (layout.ring[edge], layout.ring[(edge + 1) % n]);
+    let len = dist(a, b).max(1e-9);
+    let mut normal = ((b.1 - a.1) / len, -(b.0 - a.0) / len);
+    if normal.0 * (gate_plan.0 - origin.0) + normal.1 * (gate_plan.1 - origin.1) < 0.0 {
+        normal = (-normal.0, -normal.1);
+    }
+    let theta = -PI / 2.0 - normal.1.atan2(normal.0);
+    let mut transform = PlanTransform {
+        origin,
+        cos: theta.cos(),
+        sin: theta.sin(),
+        scale: 1.0,
+    };
+    let samples: Vec<(f64, f64)> = densify(&layout.ring, 5.0)
+        .into_iter()
+        .map(|p| transform.rotate((p.0 - origin.0, p.1 - origin.1)))
+        .collect();
+    let mean = samples.iter().map(|p| p.0.hypot(p.1)).sum::<f64>() / samples.len() as f64;
+    if mean < 1.0 {
+        return None;
+    }
+    let front = samples.iter().map(|p| -p.1).fold(1.0, f64::max);
+    let back = samples.iter().map(|p| p.1).fold(1.0, f64::max);
+    let side = samples.iter().map(|p| p.0.abs()).fold(1.0, f64::max);
+    let target = layout.radius_m.unwrap_or(RING_RADIUS);
+    transform.scale = (target / mean)
+        .min(MAX_FRONT / front)
+        .min(MAX_BACK / back)
+        .min(MAX_SIDE / side);
+    Some(transform)
+}
+
+/// The plan ring in battle metres, simplified and wound like the generic
+/// ring, with the ends of the quay edge when the plan has one.
+type ScaledRing = (Vec<(f64, f64)>, Option<((f64, f64), (f64, f64))>);
+
+fn scaled_ring(layout: &SiegeLayout, transform: &PlanTransform) -> Option<ScaledRing> {
+    let mut ring: Vec<(f64, f64)> = layout.ring.iter().map(|&p| transform.apply(p)).collect();
+    // The quay edge (last → first) is remembered before simplification.
+    let quay_ends = layout.quay.then(|| (ring[ring.len() - 1], ring[0]));
+    simplify(&mut ring, SIMPLIFY_TOLERANCE);
+    // Same winding as the generic ring (negative area in x-z).
+    if signed_area(&ring) > 0.0 {
+        ring.reverse();
+    }
+    geom::point_in_polygon(&ring, TOWN_CENTER).then_some((ring, quay_ends))
+}
+
+/// Wall pieces of at most [`MAX_PIECE`] metres along the closed ring.
+fn ring_pieces(ring: &[(f64, f64)], wall_hp: f64) -> Vec<WallPiece> {
+    let n = ring.len();
+    let mut pieces = Vec::new();
+    for i in 0..n {
+        let (a, b) = (ring[i], ring[(i + 1) % n]);
+        let count = (dist(a, b) / MAX_PIECE).ceil().max(1.0) as usize;
+        let at = |k: usize| {
+            let t = k as f64 / count as f64;
+            (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
+        };
+        for k in 0..count {
+            pieces.push(WallPiece::new(PieceKind::Wall, at(k), at(k + 1), wall_hp));
+        }
+    }
+    pieces
+}
+
+/// Cuts the attacked gate into the piece nearest `gate_point` (the whole
+/// piece when it is too short for jambs); returns the gate's index.
+fn cut_gate(
+    pieces: &mut Vec<WallPiece>,
+    gate_point: (f64, f64),
+    wall_hp: f64,
+    gate_hp: f64,
+) -> usize {
+    let host = (0..pieces.len())
+        .min_by(|&i, &j| {
+            pieces[i]
+                .distance(gate_point.0, gate_point.1)
+                .total_cmp(&pieces[j].distance(gate_point.0, gate_point.1))
+                .then(i.cmp(&j))
+        })
+        .unwrap_or(0);
+    let piece = pieces[host].clone();
+    let len = piece.length();
+    let jamb = 4.0;
+    if len < GATE_WIDTH + 2.0 * jamb {
+        pieces[host].kind = PieceKind::Gate;
+        pieces[host].hp = gate_hp;
+        pieces[host].max_hp = gate_hp;
+        return host;
+    }
+    let (tx, tz) = piece.tangent();
+    let along = ((gate_point.0 - piece.a.0) * tx + (gate_point.1 - piece.a.1) * tz)
+        .clamp(GATE_WIDTH * 0.5 + jamb, len - GATE_WIDTH * 0.5 - jamb);
+    let at = |s: f64| (piece.a.0 + tx * s, piece.a.1 + tz * s);
+    let (g0, g1) = (at(along - GATE_WIDTH * 0.5), at(along + GATE_WIDTH * 0.5));
+    pieces.splice(
+        host..=host,
+        [
+            WallPiece::new(PieceKind::Wall, piece.a, g0, wall_hp),
+            WallPiece::new(PieceKind::Gate, g0, g1, gate_hp),
+            WallPiece::new(PieceKind::Wall, g1, piece.b, wall_hp),
+        ],
+    );
+    host + 1
+}
+
+/// Every piece must face out of the town seen from the square.
+fn pieces_face_out(pieces: &[WallPiece]) -> bool {
+    pieces.iter().all(|p| {
+        let (tx, tz) = p.tangent();
+        let (ox, oz) = p.outward();
+        let (mx, mz) = p.midpoint();
+        ox * -tz + oz * tx >= 0.5 && dist((mx, mz), TOWN_CENTER) >= SQUARE_RADIUS + 25.0
+    })
+}
+
+/// Towers at the end of each wall piece (not beside the gate) and at the
+/// two jambs of the attacked gate.
+fn ring_towers(pieces: &[WallPiece], gate: usize, radius: f64, wall_height: f64) -> Vec<Tower> {
+    let mut towers = Vec::new();
+    for (i, p) in pieces.iter().enumerate() {
+        let next_is_gate = pieces[(i + 1) % pieces.len()].kind == PieceKind::Gate;
+        if p.kind == PieceKind::Gate || next_is_gate {
+            continue;
+        }
+        towers.push(Tower {
+            x: p.b.0,
+            z: p.b.1,
+            radius,
+            height: wall_height + 4.0,
+        });
+    }
+    for end in [pieces[gate].a, pieces[gate].b] {
+        towers.push(Tower {
+            x: end.0,
+            z: end.1,
+            radius: radius * 0.8,
+            height: wall_height + 3.0,
+        });
+    }
+    towers
+}
+
+/// The other gates become gatehouse towers on the ring (`size` is their
+/// `(radius, height)`); returns their `(name, x, z)`.
+fn gatehouse_towers(
+    layout: &SiegeLayout,
+    ring: &[(f64, f64)],
+    transform: &PlanTransform,
+    gate_point: (f64, f64),
+    size: (f64, f64),
+    towers: &mut Vec<Tower>,
+) -> Vec<(String, f64, f64)> {
+    let mut gatehouses = Vec::new();
+    for (k, g) in layout.gates.iter().enumerate() {
+        if k == layout.gate {
+            continue;
+        }
+        let on_ring = snap_to_ring(ring, transform.apply(g.at));
+        if dist(on_ring, gate_point) < GATE_WIDTH + 10.0 {
+            continue;
+        }
+        towers.push(Tower {
+            x: on_ring.0,
+            z: on_ring.1,
+            radius: size.0,
+            height: size.1,
+        });
+        gatehouses.push((g.name.clone(), on_ring.0, on_ring.1));
+    }
+    gatehouses
+}
+
+/// Pieces lying along the quay edge closing an open wall.
+fn quay_pieces(pieces: &[WallPiece], quay_ends: Option<((f64, f64), (f64, f64))>) -> Vec<usize> {
+    let Some((a, b)) = quay_ends else {
+        return Vec::new();
+    };
+    (0..pieces.len())
+        .filter(|&i| geom::segment_distance(pieces[i].midpoint(), a, b) < 2.0)
+        .collect()
 }
 
 /// House blocks on a hexagonal lattice inside the ring, off the streets, the

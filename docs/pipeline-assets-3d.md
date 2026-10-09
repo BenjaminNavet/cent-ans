@@ -112,18 +112,24 @@ une même entrée). Piège d'installation (libomp) : voir `docs/wip/i3d-local.md
 ### Payant (dernier recours)
 TRELLIS sur fal (0,02 $, `fal-ai/trellis`, `fal-ai/trellis/multi`) : un seul appel, ligne dans
 `docs/budget.md`. Meshy : trop cher.
-**TRELLIS 2 (`fal-ai/trellis-2`, 0,30 $ à 1024, autorisé par le joueur le 09/10 pour les sujets complexes)** :
-dn_batch `--backend3d fal2` (une vue, glb `3d/fal2__s<seed>.glb`). À réserver aux sujets que TRELLIS 1 rate
-(feuillages : arbres sans couronne, grands ensembles ville/port, objets fusionnés avec une maison) ; sur
-`tree_argan`, `tree_pomegranate`, `bombard`, `cart_litter_noble` il a rendu des modèles complets là où TRELLIS 1
-donnait un tronc nu ou une caisse. Sortie sans écraser l'ancien : `--variant rv2` (écrit `<id>/rv2/…`),
-`--reuse-image` (recopie l'image/découpe déjà choisie, aucune nouvelle image). Plafond `DN_FAL_CAP_USD` (43,5).
-Z-Image ignore les négations (« no house » fait apparaître une maison) : décrire le sujet seul, sans nommer ce
-qu'on ne veut pas ; à défaut recadrer la découpe `cut_raw` avant la 3D.
-**Trous des maquettes (DN-TROUS)** : la cause n'était pas TRELLIS mais la décimation de `dn_ingest.py` (sommets
-des coutures UV non soudés : les murs se déchiraient, des éclats flottaient). Depuis le soudage exact avant
-décimation, les LOD ont la même étanchéité que le brut. Mesure libre : `tools/experiments/dn_holes.py` (arêtes de
-bord ouvertes / √surface, composantes flottantes, faces allongées) ; ré-ingestion en masse :
+**TRELLIS 2 (`fal-ai/trellis-2`, 0,30 $ à 1024, autorisé le 09/10)** : dn_batch `--backend3d fal2` (une vue, glb `3d/fal2__s<seed>.glb`,
+`DN_T2_FACES` règle `decimation_target`). Bon pour les objets isolés que TRELLIS 1 rate (arbres à couronne, bombarde, charrette,
+objets fusionnés avec une maison). **Pas pour les maquettes de ville** (décision du joueur 09/10) : le LOD1 (4 000 triangles) d'un
+maillage TRELLIS 2 de 100 000 faces s'effondre en éclats ; une maquette de ville/cité/château/port se fait en **TRELLIS 1 multi-vues**
+(`--backend3d fal --side-view` : face + dos + côté générés par `flux-2/edit`). Chaque vue générée est contrôlée avant la 3D
+(luminance moyenne ≥ 0,7 × celle de la face, silhouette non vide, `view_checks.jsonl`), régénérée jusqu'à 3 fois (graine +13), la
+plus claire gardée sinon. Après la 3D : `tools/experiments/dn_back_check.py` rend face et dos (Blender) et signale un dos plus
+sombre que 0,6 × la face. Ordre de préférence du joueur : maquette avec une partie noire > maquette trouée > maquette polygonale.
+Sortie sans écraser l'ancien : `--variant <nom>` (écrit `<id>/<nom>/…`), `--reuse-image` (recopie l'image choisie, aucune nouvelle image).
+Plafond `DN_FAL_CAP_USD` (43,5). Z-Image ignore les négations (« no house » fait apparaître une maison) : décrire le sujet seul, ou
+recadrer `cut_raw` avant la 3D.
+**Trous des maquettes (DN-TROUS)** : cause trouvée dans `dn_ingest.py`, pas dans TRELLIS. (1) `clean()` appelait
+`recalc_face_normals` : sur une scène de nombreuses coques (une ville) cela retourne des bâtiments entiers, le back-face culling
+montre alors des murs déchirés et des intérieurs noirs (15 à 40 % de la surface retournée sur les maquettes de ville) ; la
+recalcul n'a lieu que pour une coque unique fermée. (2) Les coutures UV non soudées déchiraient les murs à la décimation et le
+repli soudait jusqu'à 25 % de la diagonale ; soudage exact préalable (1e-5 de la diagonale). (3) Classe `tree` : `island_min` 0
+(les cartes de feuillage étaient supprimées comme débris : couronnes perdues). Mesure libre : `tools/experiments/dn_holes.py`
+(arêtes de bord ouvertes / √surface, composantes flottantes, faces allongées, surface retournée), ré-ingestion en masse :
 `tools/experiments/dn_reingest.py`. Voir `docs/wip/dn/trous.md`.
 
 ### Objets orientés : au moins deux vues (règle du joueur, nuit DN 08/10)
