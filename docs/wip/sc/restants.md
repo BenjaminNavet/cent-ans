@@ -21,10 +21,10 @@ HOOKS | PARTIEL | retirer stage_screenshot()/stage_example restants + smoke.gd:1
 
 ## RT tests Rust
 RT2 | PARTIEL | 10 fichiers avec #[ignore] restent (fk_map_scenes, m3_grid_ai, ep13_replay, perf_step, cb6_group_formation, sb_siege_pace, br3, relief, ep1_scale, ai_relief) | core/crates/*/tests | oui
-RT6 | FAIT | review_tests/rs_c_tests/rs_n_tests toujours dans src (découpe) | core/crates/sim-campaign/src/review_tests.rs | oui
+RT6 | FAIT f663a1c46 | review_tests/rs_c_tests/rs_n_tests toujours dans src (découpe) | core/crates/sim-campaign/src/review_tests.rs | oui
 RT7 | À FAIRE | raccourcir tests lents (mesurer d'abord) | core/crates/*/tests | oui
 RT8 | À FAIRE | fusion petits tests/tautologies (data-model 1 binaire, ok) | core/crates/*/tests | oui
-RT9 | FAIT | core/checks garde data_store_check et png_decode_check (garder campaign_sim_check seul) | core/checks/ | oui
+RT9 | FAIT f663a1c46 | core/checks garde data_store_check et png_decode_check (garder campaign_sim_check seul) | core/checks/ | oui
 
 ## GB godot-bridge (304 #[func] contre 337)
 GB6 | À FAIRE | TerrainMesher.build_patch, scatter() transforms, phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
@@ -129,7 +129,7 @@ SH10 | ÉCARTÉ : beaucoup d'uniformes posés par nom construit (prefix + clé, 
 AD7 | FAIT (ADR 0204, sc/veg) | vegetation V4 legacy (species None) + repli GD vegetation_tile_job | core/crates/vegetation/src/lib.rs, game/scripts/map/vegetation_tile_job.gd | oui
 AD8 | FAIT (sc/relief, ADR 0203) | relief_quadtree.gd repli GD (= PF-02), has_page mort | core/crates/relief-lod, game/scripts/map/relief_quadtree.gd | oui
 AD9 | PARTIEL | data-model/util.rs créé ; segment_distance et hash01 dupliqués dans vegetation/lib.rs, siege_fx.rs, splitmix bridge | core/crates/data-model/src/util.rs, vegetation/src/lib.rs | oui
-AD10 | FAIT | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
+AD10 | FAIT f663a1c46 | Cargo.toml profils redondants (profile.dev.package.* x5) | core/Cargo.toml | oui
 AD11 | PARTIEL | fallback_edges/fallback_city_id toujours là | core/crates/data-model/src/{movement_graph,settlement_load}.rs | oui
 AD12 | FAIT 99a2b89fa | perf ai grid near spatial, threat_by_province, Arc<str> | core/crates/ai/src/grid.rs | oui
 AD13 | PARTIEL | ai/campaign découpé ; doc restante (plan_field.rs 862 l) | core/crates/ai | oui
