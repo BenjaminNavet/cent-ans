@@ -52,7 +52,6 @@ const MENU_SAVE := 0
 const MENU_LOAD := 1
 const MENU_MAIN := 3
 const MENU_QUIT := 4
-const MAX_LOG_LINES := 200
 const TOAST_SECONDS := 3.5
 ## Q2 : un panneau ouvert plus de tant de ms après le bandeau le fait disparaître s'il le
 ## chevauche (le message d'avant ne masque plus le titre du panneau suivant).
@@ -103,15 +102,13 @@ var slot_bar_beside: Control = null
 # C5 : commerce.
 @onready var trade_button: Button = %TradeButton
 
-var _log_lines: PackedStringArray = PackedStringArray()
-## A6-L6 (U6) : onglet « Monde » du journal (nouvelles sans rapport avec le joueur), replié.
-var _world_lines: PackedStringArray = PackedStringArray()
-var _world_open := false
-var world_toggle: Button
-var world_scroll: ScrollContainer
-var world_text: RichTextLabel
 var _toast_timer: SceneTreeTimer
 var _toast_shown_at := 0
+## Adaptation de la barre du haut à la largeur de l'écran (créée au `_ready`).
+var top_fit: TopBarFit
+## Journal des événements (créé au `_ready`).
+var journal: JournalView
+
 ## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
 var panels := PanelStack.new()
 ## Province affichée par le panneau de province (une autre province = nouvelle sélection).
@@ -123,6 +120,8 @@ var _held_toasts: Array = []
 
 
 func _ready() -> void:
+	top_fit = TopBarFit.new(self, $TopBar as PanelContainer, tech_button.get_parent() as HBoxContainer,
+		faction_label, research_box, research_label)
 	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le journal de campagne.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
@@ -131,8 +130,7 @@ func _ready() -> void:
 	modal_queue.drained.connect(_flush_held_toasts)
 	end_turn_cluster.modal_check = func() -> bool: return modal_queue.is_busy()
 	# « Son… » (Q2) : ajouté par `FlowController`, ouvre l'onglet Son des réglages.
-	log_toggle.pressed.connect(_toggle_log)
-	_build_world_tab()
+	journal = JournalView.new(log_title, log_toggle, log_scroll, log_text, news_letters, queue_layout)
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
 	province_panel.create_army_requested.connect(func(p: String, i: Array) -> void: create_army_requested.emit(p, i))
@@ -226,23 +224,23 @@ func _decorate_top_bar() -> void:
 	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
 	_decorate_button(court_button, "hud_court")
 	_add_keycap(court_button, "map_toggle_court")
-	_register_top_label(court_button, "Cour")
+	top_fit.register_label(court_button, "Cour")
 	_decorate_button(tech_button, "hud_technologies")
 	_add_keycap(tech_button, "map_toggle_tech")
-	_register_top_label(tech_button, "Techniques")
+	top_fit.register_label(tech_button, "Techniques")
 	_add_codex_button()
 	var objectives := _add_action_button("ObjectivesButton", "⚑", "Objectifs", "map_toggle_objectives",
 		"[b]Objectifs[/b]\nObjectifs historiques de votre faction et score.", tech_button.get_index() + 2)
-	_register_top_label(objectives, "Objectifs", "" if _apply_top_medallion(objectives, "hud_objectives") else "⚑")
+	top_fit.register_label(objectives, "Objectifs", "" if _apply_top_medallion(objectives, "hud_objectives") else "⚑")
 	var agents := _add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
 		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
-	_register_top_label(agents, "Agents", "" if _apply_top_medallion(agents, "hud_agents") else "✦")
+	top_fit.register_label(agents, "Agents", "" if _apply_top_medallion(agents, "hud_agents") else "✦")
 	var units := _add_action_button("UnitsButton", "⚔", "Unités", "map_toggle_units",
 		"[b]Mes unités[/b]\nListe de vos armées et agents, avec leur portée restante ; un clic y mène.", tech_button.get_index() + 4)
-	_register_top_label(units, "Unités", "" if _apply_top_medallion(units, "hud_army") else "⚔")
+	top_fit.register_label(units, "Unités", "" if _apply_top_medallion(units, "hud_army") else "⚔")
 	var holdings := _add_action_button("HoldingsButton", "⛫", "Colonies", "map_toggle_holdings",
 		"[b]Colonies[/b]\nRevenus, chantiers et menaces de vos colonies, par province ; un clic y mène.", tech_button.get_index() + 5)
-	_register_top_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
+	top_fit.register_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		UiType.apply(menu_button, UiType.CAPTION)
 	# U4 : le menu a aussi son infobulle (nom, contenu, raccourci).
@@ -277,10 +275,10 @@ func _add_fervor_indicator() -> void:
 func set_crusade(view: Dictionary) -> void:
 	var shown := not view.is_empty()
 	if not shown:
-		_top_texts.erase(fervor_label)
+		top_fit.forget_text(fervor_label)
 	else:
 		var fervor := int(view.get("fervor", 0))
-		_set_top_text(fervor_label, "%s Ferveur %d" % [CrusadeSection.GLYPH, fervor], "%s %d" % [CrusadeSection.GLYPH, fervor])
+		top_fit.set_text(fervor_label, "%s Ferveur %d" % [CrusadeSection.GLYPH, fervor], "%s %d" % [CrusadeSection.GLYPH, fervor])
 		var morale := int(view.get("zeal_morale", 0))
 		var failing := int(view.get("desertion_percent", 0)) > 0 or morale < 0
 		fervor_label.add_theme_color_override("font_color",
@@ -319,7 +317,7 @@ func _apply_top_medallion(button: Button, icon_id: String) -> bool:
 		return false
 	button.set_meta("medallion", true)
 	button.add_theme_constant_override("h_separation", 5)
-	_pad_for_keycap(button, true)
+	top_fit.pad_for_keycap(button, true)
 	return true
 
 
@@ -340,10 +338,10 @@ func _decorate_late_button(node: Node) -> void:
 	if button.text.begins_with("Diplomatie"):
 		_decorate_button(button, "hud_diplomacy")
 		_add_keycap(button, "map_toggle_diplomacy")
-		_register_top_label(button, "Diplomatie")
+		top_fit.register_label(button, "Diplomatie")
 	elif button.text.begins_with("Chronique"):
 		_decorate_button(button, "hud_chronicle")
-		_register_top_label(button, "Chronique")
+		top_fit.register_label(button, "Chronique")
 
 
 # --- Barre supérieure ------------------------------------------------------------
@@ -358,13 +356,13 @@ func set_faction(label: String, color: Color) -> void:
 ## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
 ## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
-	_set_top_text(treasury_label, "Trésor : %s" % Money.amount(treasury), Money.amount(treasury))
+	top_fit.set_text(treasury_label, "Trésor : %s" % Money.amount(treasury), Money.amount(treasury))
 	if economy.is_empty():
-		_set_top_text(income_label, "Revenu : %s" % Money.signed(income), Money.signed(income))
+		top_fit.set_text(income_label, "Revenu : %s" % Money.signed(income), Money.signed(income))
 		TooltipHost.attach_plain(income_label, "income_gross_last_turn")
 		return
 	var net := int(economy.get("net_income", 0))
-	_set_top_text(income_label, "Solde : %s / saison" % Money.signed(net), Money.signed(net))
+	top_fit.set_text(income_label, "Solde : %s / saison" % Money.signed(net), Money.signed(net))
 	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
 	income_label.tooltip_text = budget_tooltip(economy)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
@@ -422,7 +420,7 @@ static func _signed(value: int) -> String:
 
 
 func set_date(text: String) -> void:
-	_set_top_text(date_label, text, text.get_slice(" — ", 0))
+	top_fit.set_text(date_label, text, text.get_slice(" — ", 0))
 	var season := RichTooltip.season_of(text)
 	if _season_icon != null and season != "":
 		_season_icon.texture = IconLibrary.get_icon("hud_season_" + season)
@@ -520,280 +518,80 @@ func _flush_held_toasts() -> void:
 
 
 # --- Journal des événements ------------------------------------------------------------
+# La logique vit dans `JournalView` ; ces points d'entrée restent l'API de `MapUI`.
 
+const FOREIGN_MINOR_KINDS := JournalView.FOREIGN_MINOR_KINDS
+const RELEVANCE_FAR := JournalView.RELEVANCE_FAR
+const RELEVANCE_KEY := JournalView.RELEVANCE_KEY
 
 ## Faction du joueur et nom court d'une faction (`Callable(id) -> String`) : le journal
 ## masque les événements courants des autres factions et nomme la faction des autres.
-var journal_player_faction: String = ""
-var journal_faction_name: Callable = Callable()
+var journal_player_faction: String = "":
+	set(value):
+		journal.player_faction = value
+	get:
+		return journal.player_faction
+var journal_faction_name: Callable = Callable():
+	set(value):
+		journal.faction_name = value
+	get:
+		return journal.faction_name
+## Lot U5 : filtre d'intérêt des lettres et du bandeau, posé par `HudController.update_interest`.
+var news_interest: NewsInterest = null:
+	set(value):
+		journal.interest = value
+	get:
+		return journal.interest
+## A6-L6 : classeur de pertinence du cœur (`CampaignSim.classify_news`), posé par `HudController`.
+var news_classifier: Callable = Callable():
+	set(value):
+		journal.classifier = value
+	get:
+		return journal.classifier
 
-## Événements d'une autre faction sans intérêt pour le joueur (gestion interne).
-const FOREIGN_MINOR_KINDS := [
-	"income", "bankruptcy", "attrition", "recruited", "building_completed", "trait_acquired",
-	"skill_learned", "appointment", "technology_researched", "regency", "birth", "raid",
-]
 
-
-## Lot U5 : filtre d'intérêt des lettres et du bandeau (voisins, alliés, ennemis, grandes
-## puissances), recalculé en fin de tour par `HudController.update_interest` ; nul = tout passe.
-var news_interest: NewsInterest = null
-
-
-## A6-L6 (U6/U7) : pertinence d'un événement pour le joueur, calculée par le cœur
-## (`CampaignSim.classify_news` : sa faction, suzerain/vassaux, alliés, ennemis en guerre,
-## provinces voisines). Clés : `player`, `related`, `neighbor`, `far` (« Monde »). Le classeur
-## est posé par `HudController.update_interest` ; nul (maquette, ancien cœur) = repli sur
-## `news_interest`.
-const RELEVANCE_FAR := "far"
-const RELEVANCE_KEY := "relevance"
-var news_classifier: Callable = Callable()
-
-
-## Marque chaque événement de sa pertinence (un seul appel au cœur pour tout le lot).
 func ensure_relevance(events: Array) -> void:
-	if not news_classifier.is_valid() or events.is_empty():
-		return
-	var pending: Array = []
-	for event in events:
-		if event is Dictionary and not (event as Dictionary).has(RELEVANCE_KEY):
-			pending.append(event)
-	if pending.is_empty():
-		return
-	var classes: PackedStringArray = news_classifier.call(pending)
-	for i in mini(pending.size(), classes.size()):
-		(pending[i] as Dictionary)[RELEVANCE_KEY] = classes[i]
+	journal.ensure_relevance(events)
 
 
-## Pertinence d'un événement (`player`, `related`, `neighbor`, `far`) ; `player` quand elle est
-## inconnue (aucun classeur) pour ne rien cacher par erreur.
 func relevance_of(event: Dictionary) -> String:
-	if not event.has(RELEVANCE_KEY):
-		if not news_classifier.is_valid():
-			return "player" if news_interest == null or news_interest.keeps(event) else RELEVANCE_FAR
-		ensure_relevance([event])
-	return str(event.get(RELEVANCE_KEY, "player"))
+	return journal.relevance_of(event)
 
 
 static func relevance_label(relevance: String) -> String:
-	match relevance:
-		"player":
-			return "Votre royaume"
-		"related":
-			return "Allié, ennemi ou vassal"
-		"neighbor":
-			return "Voisin"
-	return "Nouvelle lointaine"
+	return JournalView.relevance_label(relevance)
 
 
-## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
 func keeps_news(event: Dictionary) -> bool:
-	if SeasonReport.is_public(event):  # JR5 : nouvelle publique (champ `public`), lue par tous
-		return true
-	var mode := news_interest.mode if news_interest != null else NewsInterest.MODE_INTEREST
-	if mode == NewsInterest.MODE_ALL:
-		return true
-	var relevance := relevance_of(event)
-	if mode == NewsInterest.MODE_OWN:
-		return relevance == "player"
-	return relevance != RELEVANCE_FAR
+	return journal.keeps_news(event)
 
 
-## Vrai si l'événement doit figurer au journal du joueur.
 func journal_keeps(event: Dictionary) -> bool:
-	var faction := str(event.get("faction", ""))
-	if faction == "" or journal_player_faction == "" or faction == journal_player_faction:
-		return true
-	if SeasonReport.is_private_crusade(event, journal_player_faction):  # JR3
-		return false
-	return not FOREIGN_MINOR_KINDS.has(str(event.get("kind", "")))
+	return journal.keeps(event)
 
 
-## Texte de l'événement, préfixé du nom de sa faction s'il ne la nomme pas déjà.
 func journal_text(event: Dictionary) -> String:
-	var text := str(event.get("text_fr", event.get("text", "")))
-	var faction := str(event.get("faction", ""))
-	if text == "" or faction == "" or faction == journal_player_faction or not journal_faction_name.is_valid():
-		return text
-	var name := str(journal_faction_name.call(faction))
-	if name == "" or text.contains(name):
-		return text
-	return "%s — %s" % [name, text]
+	return journal.text_of(event)
 
 
-## Ajoute les événements d'un tour en tête du journal (plus récents en haut). A6-L6 (U6/U7) :
-## ce qui ne concerne pas le joueur (calcul du cœur, `classify_news`) va dans l'onglet « Monde »,
-## replié, et ne pousse aucune lettre.
 func add_events(events: Array, date_text: String) -> void:
-	ensure_relevance(events)
-	var new_lines := PackedStringArray()
-	var new_world := PackedStringArray()
-	var new_news: Array = []  # lettres du tour, poussées en un seul lot (une reconstruction, un son)
-	for event in events:
-		if not journal_keeps(event):
-			continue
-		var text: String = journal_text(event)
-		var is_world := relevance_of(event) == RELEVANCE_FAR and not SeasonReport.is_public(event)
-		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
-		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt (« Toute l'Europe » garde tout)
-			news["interest"] = relevance_label(relevance_of(event))
-			new_news.append(news)
-		if text == "":
-			continue
-		if is_world:
-			new_world.append(_journal_line(event, CodexText.format(text, true)))
-			continue
-		new_lines.append(_journal_line(event, CodexText.format(text, true)))  # BP1 : liens du Codex
-	news_letters.push_news_batch(new_news)
-	if new_lines.is_empty():
-		new_lines.append("[i]Rien à signaler.[/i]")
-	var header := "[b]— %s —[/b]" % date_text
-	var block := PackedStringArray([header])
-	block.append_array(new_lines)
-	block.append_array(_log_lines)
-	_log_lines = block.slice(0, mini(block.size(), MAX_LOG_LINES))
-	if not new_world.is_empty():
-		var world_block := PackedStringArray(["[b]— %s —[/b]" % date_text])
-		world_block.append_array(new_world)
-		world_block.append_array(_world_lines)
-		_world_lines = world_block.slice(0, mini(world_block.size(), MAX_LOG_LINES))
-	_render_log()
-	log_title.text = "Journal (%d)" % new_lines.size()
-
-
-## Ligne mise en forme (BBCode) d'un événement du journal.
-func _journal_line(event: Dictionary, text: String) -> String:
-	var kind: String = str(event.get("kind", ""))
-	var line: String
-	if kind == "battle" or kind == "siege_started" or kind == "province_captured":
-		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_swords", "⚔"), text]
-	elif kind == "revolt":
-		line = "[color=#a1121a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_flag", "⚑"), text]
-	elif kind == "plague":
-		line = "[color=#4a6b2a][b]☠ %s[/b][/color]" % text
-	elif kind == "famine":
-		line = "[color=#8a5a10][b]⚠ %s[/b][/color]" % text
-	elif kind == "building_completed":
-		line = "[color=#1a5c8b]%s %s[/color]" % [InkGlyph.bbcode("glyph_hammer", "⚒"), text]
-	elif kind == "birth":
-		line = "[color=#2a7a4a]✚ %s[/color]" % text
-	elif kind == "marriage":
-		line = "[color=#8a3a8a][b]♥ %s[/b][/color]" % text
-	elif kind == "death":
-		line = "[color=#3a3a3a][b]✝ %s[/b][/color]" % text
-	elif kind == "succession":
-		line = "[color=#7a5a10][b]♔ %s[/b][/color]" % text
-	elif kind == "regency":
-		line = "[color=#7a5a10]⚖ %s[/color]" % text
-	elif kind == "trait_acquired":
-		line = "[color=#2a5a7a]✦ %s[/color]" % text
-	elif kind == "skill_learned":
-		line = "[color=#2a5a7a]%s %s[/color]" % [InkGlyph.bbcode("glyph_star", "★"), text]
-	elif kind == "appointment":
-		line = "[color=#4a3a10]%s %s[/color]" % [InkGlyph.bbcode("glyph_flag", "⚑"), text]
-	elif kind == "war_declared":
-		line = "[color=#8b1a1a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_swords", "⚔"), text]
-	elif kind == "peace_signed":
-		line = "[color=#2a6a2a][b]☮ %s[/b][/color]" % text
-	elif kind == "alliance_formed" or kind == "vassalage":
-		line = "[color=#1a3a8b][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_fleur", "⚜"), text]
-	elif kind == "alliance_broken" or kind == "vassal_rebellion":
-		line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
-	elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
-		line = "[color=#4a3a10]%s %s[/color]" % [InkGlyph.bbcode("glyph_letter", "✉"), text]
-	elif kind == "trade":  # C5
-		line = "[color=#4a3a10]⚓ %s[/color]" % text
-	elif kind == "excommunication" or kind == "schism" or kind == "heresy":
-		line = "[color=#5a2a6a][b]%s %s[/b][/color]" % [InkGlyph.bbcode("glyph_cross", "✠"), text]
-	elif kind == "chronicle":  # M10
-		line = "[color=#7a3b0c][b]§ %s[/b][/color]" % text
-	elif kind == "technology_researched":
-		line = "[color=#5a2a8a][b]⚙ %s[/b][/color]" % text
-	elif kind == "income":
-		line = "[color=#4a3a10]%s[/color]" % text
-	elif SeasonReport.KIND_STYLES.has(kind):  # H3/H4/H11 : table, médecine, monnaie, rançon, chevalerie
-		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
-		line = "[color=%s]%s %s[/color]" % [style["color"], InkGlyph.bbcode(str(style.get("icon", "")), str(style["glyph"])), text]
-	else:
-		line = text
-	return line
+	journal.add_events(events, date_text)
 
 
 func clear_log() -> void:
-	_log_lines = PackedStringArray()
-	_world_lines = PackedStringArray()
-	_render_world()
-	news_letters.clear()
-	log_text.text = "[i]Aucun événement pour l'instant.[/i]"
-	log_title.text = "Journal"
+	journal.clear()
 
 
-func _render_log() -> void:
-	log_text.text = "\n".join(_log_lines)
-	log_scroll.scroll_vertical = 0
-	_render_world()
-
-
-## Onglet « Monde » : bouton de dépli (visible journal déplié, s'il y a des nouvelles lointaines).
-func _build_world_tab() -> void:
-	var box := log_scroll.get_parent()
-	world_toggle = Button.new()
-	world_toggle.name = "WorldToggle"
-	world_toggle.flat = true
-	world_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	world_toggle.focus_mode = Control.FOCUS_NONE
-	world_toggle.pressed.connect(func() -> void:
-		_world_open = not _world_open
-		_render_world()
-		queue_layout())
-	box.add_child(world_toggle)
-	world_scroll = ScrollContainer.new()
-	world_scroll.name = "WorldScroll"
-	world_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	world_scroll.custom_minimum_size = Vector2(0, 120)
-	world_text = RichTextLabel.new()
-	world_text.bbcode_enabled = true
-	world_text.fit_content = true
-	world_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	world_text.add_theme_color_override("default_color", Color(0.30, 0.24, 0.16))
-	world_scroll.add_child(world_text)
-	box.add_child(world_scroll)
-	_render_world()
-
-
-func _render_world() -> void:
-	if world_toggle == null:
-		return
-	var has_world := not _world_lines.is_empty()
-	var expanded := log_scroll.visible
-	world_toggle.visible = expanded and has_world
-	world_toggle.text = "%s Monde (%d)" % ["▾" if _world_open else "▸", world_line_count()]
-	world_scroll.visible = expanded and has_world and _world_open
-	world_text.text = "\n".join(_world_lines)
-
-
-## Nombre de nouvelles lointaines gardées (sans les lignes de date).
 func world_line_count() -> int:
-	var count := 0
-	for line in _world_lines:
-		if not line.begins_with("[b]—"):
-			count += 1
-	return count
+	return journal.world_line_count()
 
 
-func _toggle_log() -> void:
-	set_log_expanded(not log_scroll.visible)
-
-
-## Journal déplié ou replié (replié par défaut : le sceau et le bandeau occupent le bas).
 func set_log_expanded(expanded: bool) -> void:
-	log_scroll.visible = expanded
-	log_toggle.text = "Replier" if expanded else "Déplier"
-	_render_world()
-	queue_layout()
+	journal.set_expanded(expanded)
 
 
 func log_line_count() -> int:
-	return _log_lines.size()
+	return journal.line_count()
 
 
 # --- Panneaux ----------------------------------------------------------------------
@@ -1007,14 +805,14 @@ func set_research_progress(research: Dictionary, points_per_turn: int, queue: Ar
 			names.append(str(entry.get("name", "")))
 		queue_text = "\nEn file : %s" % ", ".join(names)
 	if research.is_empty():
-		research_label.text = research_bar_text("", -1, _top_compact)
+		research_label.text = research_bar_text("", -1, top_fit.compact)
 		research_bar.max_value = maxi(1, int(reserve.get("cap", 1)))
 		research_bar.value = int(reserve.get("points", 0))
 		TooltipHost.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s'accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
 			points_per_turn, int(reserve.get("points", 0)), int(reserve.get("cap", 0)), queue_text]})
 		return
 	var turns := int(research.get("turns_left", -1))
-	research_label.text = research_bar_text(str(research.get("name", "")), turns, _top_compact)
+	research_label.text = research_bar_text(str(research.get("name", "")), turns, top_fit.compact)
 	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 	research_bar.value = int(research.get("progress", 0))
 	TooltipHost.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s%s" % [
@@ -1594,7 +1392,7 @@ func _add_codex_button() -> void:
 	UiType.apply(button, UiType.BODY)
 	TooltipHost.attach_plain(button, "codex_open_hint")
 	_add_keycap(button, "codex_open")
-	_register_top_label(button, "Codex")
+	top_fit.register_label(button, "Codex")
 
 
 # --- Raccourcis sur les boutons (lot U7) ------------------------------------------------
@@ -1684,160 +1482,17 @@ func press_action(action: String) -> void:
 
 
 # --- UX2 : libellés de la barre du haut (audit A3, C9) ------------------------------------
-
-## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
-const TOP_COLLAPSE_ORDER := ["Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
-## Marge laissée à droite de la barre (bord, respiration).
-const TOP_BAR_SLACK := 4.0
-
-## Boutons libellés : `{button, label, glyph, labelled}`.
-var _top_labels: Array[Dictionary] = []
-var _fit_queued := false
-## Q6 : barre compacte (écran étroit, grande taille d'interface) : libellés courts du trésor, du
-## solde et de la date (le détail reste en infobulle), nom de faction masqué, recherche étroite.
-var _top_compact := false
-var _top_texts: Dictionary = {}  # Label → [texte complet, texte compact]
-const RESEARCH_WIDTH := 190.0
-const RESEARCH_WIDTH_COMPACT := 100.0
-
-
-## Inscrit `button` dans la barre adaptative : `label` quand la place le permet, sinon l'icône
-## (ou `glyph` pour les boutons sans icône). Nombre en attente : méta `count` (Chronique).
-func _register_top_label(button: Button, label: String, glyph: String = "") -> void:
-	if button == null:
-		return
-	for entry in _top_labels:
-		if entry["button"] == button:
-			return
-	UiType.apply(button, UiType.CAPTION)
-	button.set_meta("top_label", label)
-	var entry := {"button": button, "label": label, "glyph": glyph, "labelled": true}
-	_top_labels.append(entry)
-	if glyph == "" and button.icon == null:
-		entry["glyph"] = label.left(1)
-	_apply_top_label(entry, true)
-	queue_fit_top_bar()
-
-
-func _apply_top_label(entry: Dictionary, labelled: bool) -> void:
-	var button: Button = entry["button"]
-	if not is_instance_valid(button):
-		return
-	entry["labelled"] = labelled
-	var count := int(button.get_meta("count", 0))
-	var glyph := str(entry["glyph"])
-	var parts := PackedStringArray()
-	if glyph != "":
-		parts.append(glyph)
-	if labelled:
-		parts.append(str(entry["label"]))
-	var text := " ".join(parts)
-	if count > 0:
-		text = ("%s (%d)" % [text, count]) if labelled else ("%s %d" % [text, count]).strip_edges()
-	button.text = text
-	_pad_for_keycap(button, labelled)
-	if button.has_meta("tooltip"):  # infobulle d'état fournie par le propriétaire (Chronique)
-		button.tooltip_text = str(button.get_meta("tooltip"))
-
-
-## États du bouton dont la marge droite s'élargit pour le cartouche de touche.
-const KEYCAP_PAD_STATES := ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]
-## Écart entre la fin du libellé et le cartouche.
-const KEYCAP_GAP := 4.0
-
-
-## Bouton libellé portant un cartouche (coin bas droit) : marge droite du style élargie de la
-## largeur du cartouche + `KEYCAP_GAP`, pour que le cartouche ne morde plus la dernière lettre.
-## La largeur minimale du bouton l'inclut, donc `fit_top_bar` en tient compte. Icône seule :
-## styles du thème (le cartouche se loge dans le coin, hors de l'icône).
-func _pad_for_keycap(button: Button, labelled: bool) -> void:
-	var cap := button.get_node_or_null("Keycap") as Label
-	for state: String in KEYCAP_PAD_STATES:
-		if button.has_theme_stylebox_override(state):
-			button.remove_theme_stylebox_override(state)
-	var medallion := bool(button.get_meta("medallion", false))
-	var padded_caps := cap != null and cap.visible and labelled
-	if not padded_caps and not medallion:
-		return
-	var cap_width := cap.get_combined_minimum_size().x + KEYCAP_GAP if padded_caps else 0.0
-	for state: String in KEYCAP_PAD_STATES:
-		var base := button.get_theme_stylebox(state)
-		if base == null:
-			continue
-		var padded: StyleBox = base.duplicate() as StyleBox
-		# DA5 : au repos, le médaillon se pose sur le bandeau sans cadre plat.
-		if medallion and state in ["normal", "disabled", "focus"]:
-			padded = StyleBoxEmpty.new()
-			for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-				padded.set_content_margin(side, maxf(base.get_margin(side), 0.0))
-		padded.content_margin_right = maxf(base.get_margin(SIDE_RIGHT), 0.0) + cap_width
-		button.add_theme_stylebox_override(state, padded)
+# La logique d'adaptation vit dans `TopBarFit` ; ces points d'entrée restent l'API de `MapUI`.
 
 
 ## Réapplique le libellé de `button` (après un changement de méta `count` ou `tooltip`).
 func refresh_top_button(button: Button) -> void:
-	for entry in _top_labels:
-		if entry["button"] == button:
-			_apply_top_label(entry, bool(entry["labelled"]))
-			queue_fit_top_bar()
-			return
+	top_fit.refresh_button(button)
 
 
 func queue_fit_top_bar() -> void:
-	if _fit_queued or not is_inside_tree():
-		return
-	_fit_queued = true
-	fit_top_bar.call_deferred()
+	top_fit.queue_fit()
 
 
-## Libellés partout si la barre a la place, sinon repli en icône seule dans l'ordre de
-## `TOP_COLLAPSE_ORDER` jusqu'à ce que la barre tienne dans la largeur de l'écran.
 func fit_top_bar() -> void:
-	_fit_queued = false
-	# Largeur de l'écran (la barre, ancrée, s'élargit au-delà quand son contenu déborde).
-	var available := get_viewport().get_visible_rect().size.x
-	for entry in _top_labels:
-		_apply_top_label(entry, true)
-	_set_top_compact(false)
-	for label in TOP_COLLAPSE_ORDER:
-		if _top_bar_width() <= available - TOP_BAR_SLACK:
-			break
-		for entry in _top_labels:
-			if str(entry["label"]) == label:
-				_apply_top_label(entry, false)
-	if _top_bar_width() > available - TOP_BAR_SLACK:
-		_set_top_compact(true)
-
-
-func _set_top_text(label: Label, full: String, compact: String) -> void:
-	_top_texts[label] = [full, compact]
-	label.text = compact if _top_compact else full
-
-
-func _set_top_compact(compact: bool) -> void:
-	_top_compact = compact
-	for label: Label in _top_texts:
-		label.text = str(_top_texts[label][1 if compact else 0])
-	faction_label.visible = not compact
-	research_box.custom_minimum_size.x = RESEARCH_WIDTH_COMPACT if compact else RESEARCH_WIDTH
-	research_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	research_label.clip_text = true
-
-
-## Largeur minimale de la barre (contenu et marges), calculée sur les enfants visibles.
-func _top_bar_width() -> float:
-	var top_bar := $TopBar as PanelContainer
-	var bar := tech_button.get_parent() as HBoxContainer
-	var width := 0.0
-	var count := 0
-	for child in bar.get_children():
-		var control := child as Control
-		if control == null or not control.visible or control.top_level:
-			continue
-		width += control.get_combined_minimum_size().x
-		count += 1
-	width += float(maxi(count - 1, 0) * bar.get_theme_constant("separation"))
-	var style := top_bar.get_theme_stylebox("panel")
-	if style != null:
-		width += style.get_margin(SIDE_LEFT) + style.get_margin(SIDE_RIGHT)
-	return width
+	top_fit.fit()
