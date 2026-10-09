@@ -5,7 +5,7 @@ Mandat : référence **Warhammer III** ; périmètre **carte de campagne, systè
 Session parallèle RX active (worktrees `../gp-rx-*`, ADR jusqu'à 0258) : ne pas toucher ses lots (docs/wip/rx/lots.md). ADR WH à partir de **0270**.
 
 ## État
-- [ ] Vague critique (7 Sonnet) → `docs/wip/wh/<rôle>.md`
+- [~] Vague critique lancée (7 Sonnet : carte, armees, economie, personnages, diplomatie, tour, ui ; brief docs/wip/wh/brief-critique.md) → `docs/wip/wh/<rôle>.md`
 - [ ] Synthèse + lots → `docs/wip/wh/lots.md`
 - [ ] Vagues de corrections (worktrees `../gp-wh-<lot>`, branches `wh/<lot>`, ff-only)
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
