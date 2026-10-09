@@ -11,6 +11,7 @@
     "backend": {"enum": ["fal", "local"], "description": "fal (défaut) : Z-Image Turbo sur fal.ai ; local : mflux (ADR 0190)."},
     "size": {"enum": [1024, 1536, 2048]},
     "output_size": {"const": 2048},
+    "upscale": {"enum": ["esrgan", "esrgan_light", "lanczos", "native"]},
     "style_prefix": {"type": "string"},
     "style_suffix": {"type": "string"},
     "entries": {

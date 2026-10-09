@@ -61,6 +61,30 @@ def generate_command(
         typer.echo(f"{entry_id}\t{record['status']}\tessai {record['attempt']}")
 
 
+@textures_app.command("upscale")
+def upscale_command(
+    family: str = typer.Argument(..., help="Famille (voir `textures families`)."),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiant d'entrée à traiter (répétable)."
+    ),
+    method: str = typer.Option(
+        "", "--method", help="esrgan, esrgan_light, lanczos (défaut : catalogue)."
+    ),
+) -> None:
+    """Agrandit à 2048 les images brutes retenues (dans `<famille>/upscaled/`)."""
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+    from cent_ans_tools.texture_factory.upscale import UpscaleError, upscale_family
+
+    try:
+        document = load_catalog(family)
+        written = upscale_family(document, only=only or None, method=method or None)
+    except (CatalogError, UpscaleError) as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(str(path))
+
+
 @textures_app.command("families")
 def families() -> None:
     """Liste les familles de textures connues."""
