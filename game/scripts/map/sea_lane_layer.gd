@@ -16,9 +16,15 @@ const LANES_FILE := "sea_lanes_px.json"
 ## Largeur monde des rubans (unités carte ≈ 719 m) ; la largeur écran minimale vient du shader.
 const WIDTH := 1.6
 const LIFT := 0.4
-const INK := Color(0.12, 0.20, 0.33, 0.8)
-const INK_OWN := Color(0.05, 0.22, 0.45, 0.9)
-const INK_HOSTILE := Color(0.55, 0.10, 0.07, 0.9)
+## DN-MER : encre discrète (traits fins, peu opaques) ; les tronçons communs à plusieurs routes
+## ne sont dessinés qu'une fois (voir `_build_runs`).
+const INK := Color(0.12, 0.20, 0.33, 0.5)
+const INK_OWN := Color(0.05, 0.22, 0.45, 0.6)
+const INK_HOSTILE := Color(0.55, 0.10, 0.07, 0.65)
+## Pas de rééchantillonnage (pixels carte) et distance en deçà de laquelle un tronçon est
+## considéré comme déjà tracé par une autre route.
+const RESAMPLE_STEP := 6.0
+const MERGE_DISTANCE := 22.0
 ## Tirets en pixels écran : haute mer longue, cabotage court.
 const DASH_OPEN := 16.0
 const DASH_COASTAL := 8.0
@@ -29,6 +35,9 @@ var map_data: MapData
 var _points: Dictionary = {}
 ## id -> {from, to}
 var _ends: Dictionary = {}
+## id -> Array de {pts, arcs} : tronçons à dessiner, sans les parties déjà couvertes par une
+## route plus longue (rendu seulement).
+var _runs: Dictionary = {}
 ## id -> dictionnaire `get_sea_lanes()` du tour.
 var _state: Dictionary = {}
 ## « style » -> MeshInstance3D (neutral_open, neutral_coastal, own_*, hostile_*).
@@ -48,6 +57,7 @@ func has_lanes() -> bool:
 func _load_geometry() -> void:
 	_points.clear()
 	_ends.clear()
+	_runs.clear()
 	if map_data == null:
 		return
 	var path := map_data.map_dir.path_join(LANES_FILE)
@@ -67,6 +77,78 @@ func _load_geometry() -> void:
 		var id := str(lane.get("id", ""))
 		_points[id] = points
 		_ends[id] = {"from": str(lane.get("from", "")), "to": str(lane.get("to", ""))}
+	_build_runs()
+
+
+static func _polyline_length(points: PackedVector2Array) -> float:
+	var total := 0.0
+	for i in range(1, points.size()):
+		total += points[i].distance_to(points[i - 1])
+	return total
+
+
+## Déduplique le rendu : routes les plus longues d'abord, chacune ne garde que les tronçons à
+## plus de `MERGE_DISTANCE` des routes déjà tracées (les couloirs partagés Manche / golfe de
+## Gascogne donnaient un faisceau de traits superposés aux phases de tirets différentes). Les
+## tracés complets restent dans `_points` (infobulle, trajets).
+func _build_runs() -> void:
+	var ids: Array = _points.keys()
+	ids.sort_custom(func(a: Variant, b: Variant) -> bool:
+		var la := _polyline_length(_points[a])
+		var lb := _polyline_length(_points[b])
+		return la > lb if not is_equal_approx(la, lb) else str(a) < str(b))
+	var cell := MERGE_DISTANCE
+	var grid: Dictionary = {}
+	for id in ids:
+		var points: PackedVector2Array = _points[id]
+		var samples := PackedVector2Array()
+		var arcs := PackedFloat32Array()
+		var arc := 0.0
+		samples.append(points[0])
+		arcs.append(0.0)
+		for i in range(1, points.size()):
+			var a := points[i - 1]
+			var b := points[i]
+			var seg := a.distance_to(b)
+			var steps := maxi(1, int(ceil(seg / RESAMPLE_STEP)))
+			for k in range(1, steps + 1):
+				samples.append(a.lerp(b, float(k) / steps))
+				arcs.append(arc + seg * float(k) / steps)
+			arc += seg
+		var runs: Array = []
+		var run_pts := PackedVector2Array()
+		var run_arcs := PackedFloat32Array()
+		for i in samples.size():
+			if _grid_near(grid, samples[i], cell):
+				if run_pts.size() >= 2:
+					runs.append({"pts": run_pts, "arcs": run_arcs})
+				run_pts = PackedVector2Array()
+				run_arcs = PackedFloat32Array()
+			else:
+				run_pts.append(samples[i])
+				run_arcs.append(arcs[i])
+		if run_pts.size() >= 2:
+			runs.append({"pts": run_pts, "arcs": run_arcs})
+		_runs[id] = runs
+		for sample in samples:
+			var key := Vector2i(int(floor(sample.x / cell)), int(floor(sample.y / cell)))
+			if not grid.has(key):
+				grid[key] = PackedVector2Array()
+			(grid[key] as PackedVector2Array).append(sample)
+
+
+static func _grid_near(grid: Dictionary, point: Vector2, cell: float) -> bool:
+	var cx := int(floor(point.x / cell))
+	var cy := int(floor(point.y / cell))
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
+			var key := Vector2i(cx + dx, cy + dy)
+			if not grid.has(key):
+				continue
+			for other in (grid[key] as PackedVector2Array):
+				if other.distance_to(point) < cell:
+					return true
+	return false
 
 
 ## Tracé de la route entre deux ports, orienté de `from` vers `to` ; vide si aucune route
@@ -132,7 +214,8 @@ func _mesh_for(style: String) -> MeshInstance3D:
 	var holder := style.get_slice("_", 0)
 	var ink := INK_HOSTILE if holder == "hostile" else (INK_OWN if holder == "own" else INK)
 	material.set_shader_parameter("color", ink)
-	material.set_shader_parameter("min_px", 2.2 if holder == "hostile" else 1.6)
+	material.set_shader_parameter("min_px", 1.8 if holder == "hostile" else 1.2)
+	material.set_shader_parameter("max_px", 2.2)
 	material.set_shader_parameter("dash_px", DASH_OPEN if style.ends_with("open") else DASH_COASTAL)
 	material.render_priority = 1
 	instance.material_override = material
@@ -150,27 +233,27 @@ func _build(ids: Array) -> ArrayMesh:
 	var uv2s := PackedVector2Array()
 	var indices := PackedInt32Array()
 	for id in ids:
-		var points: PackedVector2Array = _points[id]
-		var base := vertices.size()
-		var count := points.size()
-		var arc := 0.0
-		for i in count:
-			var p := points[i]
-			if i > 0:
-				arc += p.distance_to(points[i - 1])
-			var dir := (points[mini(i + 1, count - 1)] - points[maxi(i - 1, 0)]).normalized()
-			if dir == Vector2.ZERO:
-				dir = Vector2.RIGHT
-			var perp := Vector3(-dir.y, 0.0, dir.x)
-			var center := Vector3(p.x, map_data.surface_world_at(p.x, p.y) + LIFT, p.y)
-			for side: float in [1.0, -1.0]:
-				vertices.append(center)
-				normals.append(perp * side)
-				uvs.append(Vector2(WIDTH, side))
-				uv2s.append(Vector2(arc, 0.0))
-		for i in count - 1:
-			var a := base + i * 2
-			indices.append_array([a, a + 1, a + 3, a, a + 3, a + 2])
+		for run_variant in _runs.get(id, []):
+			var run: Dictionary = run_variant
+			var points: PackedVector2Array = run["pts"]
+			var arcs: PackedFloat32Array = run["arcs"]
+			var base := vertices.size()
+			var count := points.size()
+			for i in count:
+				var p := points[i]
+				var dir := (points[mini(i + 1, count - 1)] - points[maxi(i - 1, 0)]).normalized()
+				if dir == Vector2.ZERO:
+					dir = Vector2.RIGHT
+				var perp := Vector3(-dir.y, 0.0, dir.x)
+				var center := Vector3(p.x, map_data.surface_world_at(p.x, p.y) + LIFT, p.y)
+				for side: float in [1.0, -1.0]:
+					vertices.append(center)
+					normals.append(perp * side)
+					uvs.append(Vector2(WIDTH, side))
+					uv2s.append(Vector2(arcs[i], 0.0))
+			for i in count - 1:
+				var a := base + i * 2
+				indices.append_array([a, a + 1, a + 3, a, a + 3, a + 2])
 	var mesh := ArrayMesh.new()
 	if vertices.is_empty():
 		return mesh
