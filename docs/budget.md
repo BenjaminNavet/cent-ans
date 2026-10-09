@@ -384,3 +384,10 @@ estimé de chaque lot et refuse au-delà de `--max-cost` (2 $ par défaut). Sold
 | 2026-10-09 | fal.ai | sols de bataille `ground_battle` : lot complet 100 images 2048², 100 appels | 2,10 $ | 2,10 $ | 4,81 $ |
 | 2026-10-09 | fal.ai | sols de bataille : **reprise lancée par erreur sur les 100 entrées** (liste d'identifiants vide = tout ; script corrigé), anciens prompts, 100 appels | 2,10 $ | 2,10 $ | 6,91 $ |
 | 2026-10-09 | fal.ai | sols de bataille : reprises des ratés flagrants (sillons en perspective, roche maçonnée, sols plats), 35 appels 2048² | 0,74 $ | 0,74 $ | 7,65 $ |
+
+## Figurine yaya QW-E (09/10) — fal.ai Z-Image Turbo + TRELLIS 1, enveloppe propre 1 $ (validée par le joueur)
+
+Une seule graine, pas de meilleur-de-N, TRELLIS 2 interdit. Plafond par `DN_FAL_CAP_USD` = dépense DN cumulée + 1 $.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul QW-E |
+|---|---|---|---|---|---|
