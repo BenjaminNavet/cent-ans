@@ -26,6 +26,15 @@ pub(crate) fn apply_starting_fit(state: &mut CampaignState, data: &GameData) {
     let Some(fit) = data.starting_fit.as_ref() else {
         return;
     };
+    // The fit is precomputed from `starting_budget`: without that rule
+    // (tests checking the untrimmed role sizes) the start is not trimmed.
+    let budgeted = data
+        .settlement_rules
+        .as_ref()
+        .is_some_and(|rules| rules.starting_budget.is_some());
+    if !budgeted {
+        return;
+    }
     for (faction, treasury) in &fit.treasuries {
         if let Some(f) = state.factions.get_mut(faction) {
             f.treasury = f.treasury.min(*treasury);
