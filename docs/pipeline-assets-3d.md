@@ -219,6 +219,9 @@ uv run --project tools python tools/blender_scripts/ga3_vegetation_l2.py atlas
 `~/dev/cent-ans-raw/ga3/l2/<id>_sheet_cut.png`, que `atlas` lit : réécrit `ga3_impostors_{albedo,
 normal}.png` et compile `tree_species.json`. Le semis (MultiMesh d'imposteurs, rôles, biomes) est
 piloté par ce json (`ga3_vegetation.gd`) ; `fal` (ancien chemin image -> planche) reste disponible.
+Textures de sol, végétation et bâtiments (2D, raccordables) : fabrique `cent-ans textures`
+(ADR 0236, `tools/cent_ans_tools/texture_factory/`), pas ce pipeline 3D.
+
 Eau : `uv run --project tools python -m cent_ans_tools.water_procedural` régénère les textures de
 `game/assets/textures/water/`.
 
