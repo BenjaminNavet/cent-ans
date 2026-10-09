@@ -91,7 +91,6 @@ pub mod shot;
 pub mod siege;
 pub mod siege_fx;
 pub mod siege_layout;
-pub mod siege_layouts;
 pub mod sim;
 pub mod site;
 pub mod terrain_rules;
@@ -149,7 +148,6 @@ pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
-pub use siege_layouts::{place_seed, BoroughRules, CastleRules, PlaceKind, PlaceRules};
 pub use sim::{
     AmbushLayout, BattleSim, CampState, DeploymentZone, Ladder, SetupError, SiegeEngineKind,
     SiegeEngineView, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF,

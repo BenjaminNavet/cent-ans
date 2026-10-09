@@ -471,8 +471,6 @@ impl BattleSim {
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
-            // NT1 (ADR 0126): "city" | "borough" | "castle".
-            "place" => works.place.key(),
             "houses" => &houses,
             "props" => &props,
             "engines" => &engines,

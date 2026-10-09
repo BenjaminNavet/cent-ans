@@ -342,8 +342,6 @@ pub struct TownRules {
     pub suburb: SuburbRules,
     pub props: PropRules,
     pub figures: FigureRules,
-    /// NT1 (ADR 0126): kinds of besieged places and their plans.
-    pub places: crate::siege_layouts::PlaceRules,
 }
 
 data_model::bundled_rules!(TownRules, "rules/siege_town.json");

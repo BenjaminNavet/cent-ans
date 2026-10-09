@@ -58,49 +58,5 @@
   },
   "figures": {
     "margin_m": 0.3
-  },
-  "places": {
-    "by_settlement_kind": {
-      "city": "city",
-      "town": "borough",
-      "castle": "castle",
-      "abbey": "borough",
-      "village": "borough"
-    },
-    "borough_to_city_from_fortification": 4,
-    "city_to_borough_up_to_fortification": 1,
-    "castle": {
-      "sides": [5, 7],
-      "radius_m": [80.0, 94.0],
-      "radius_jitter": 0.07,
-      "rotation_deg": 14.0,
-      "gate_offset": 0.3,
-      "wall_height_bonus_m": 2.0,
-      "courtyard_m": 24.0,
-      "keep_side_m": [20.0, 26.0],
-      "keep_distance": [0.42, 0.58],
-      "keep_arc_deg": 110.0,
-      "buildings": [5, 8],
-      "wall_walk_m": 6.0,
-      "lane_m": 8.0,
-      "tower_radius_scale": 0.6,
-      "keep_height_above_wall_m": 17.0,
-      "keep_terrace_share": 0.4,
-      "bailey_props": [5, 8],
-      "bailey_kinds": ["cart", "barrels", "woodpile", "barrels", "woodpile"],
-      "lean_to_kinds": ["woodpile", "barrels", "cart", "woodpile"]
-    },
-    "borough": {
-      "sides": [6, 9],
-      "radius_m": [114.0, 134.0],
-      "radius_jitter": 0.06,
-      "rotation_deg": 12.0,
-      "gate_offset": 0.3,
-      "market_m": 26.0,
-      "main_street_m": 10.0,
-      "street_bend_m": 16.0,
-      "back_lane_offset_m": [40.0, 52.0],
-      "cross_lane_chance": 0.6
-    }
   }
 }

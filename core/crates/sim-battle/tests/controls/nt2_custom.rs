@@ -41,7 +41,6 @@ fn battle(attacker: CustomSide, defender: CustomSide) -> CustomBattle {
         hour: String::new(),
         siege: false,
         fortification: None,
-        place: None,
         player_side: "attacker".to_owned(),
         year: None,
         engines: None,
@@ -169,16 +168,6 @@ fn a_valid_composition_builds_and_fights() {
         .unwrap()
         .siege()
         .is_some());
-
-    // NT1: the chosen kind of place reaches the siege setup.
-    custom.place = Some(sim_battle::siege_layouts::PlaceKind::Castle);
-    let castle = custom
-        .battle_setup(&data, rules, Vec::new(), None, Vec::new())
-        .unwrap();
-    assert_eq!(
-        castle.siege.as_ref().map(|s| s.place),
-        Some(sim_battle::siege_layouts::PlaceKind::Castle)
-    );
 }
 
 // ----- NT11: period and siege engines ----------------------------------------

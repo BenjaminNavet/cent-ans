@@ -399,7 +399,6 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 	_kit_ruins.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1340
-	var castle := str(siege.get("place", "")) == "castle"
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
 		var p: Vector2 = site["p"]
@@ -411,15 +410,6 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 			pass  # NT1 : le donjon est dessiné par `_build_keeps`.
 		elif bool(site["church"]):
 			handles.append(_kit_place("church", p, length, depth, yaw, rng))
-		elif castle:
-			# NT8 : communs et écuries adossés à la courtine (granges, longères, maisons de pierre).
-			var n := clampi(int(round(length / 11.0)), 1, 3)
-			var tangent := Vector2(cos(yaw), sin(yaw))
-			var w := length / float(n)
-			for k in n:
-				var kind: String = ["barn", "longere", "stonehouse"][(i + k) % 3]
-				var q := p + tangent * (-length * 0.5 + w * (float(k) + 0.5))
-				handles.append(_kit_place(kind, q, w * 0.96, depth, yaw, rng))
 		elif bool(site["suburb"]):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
 			handles.append(_kit_place(kind, p, length, depth, yaw, rng))

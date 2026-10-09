@@ -1,5 +1,7 @@
 # ADR 0126 — Types de places assiégées (château, bourg fortifié, cité)
 
+> **Retiré (lot SC BB14, 2026-10-09)** : les générateurs bourg et château (`siege_layouts.rs`), `PlaceKind`, les règles `places` et le mode de démo `debug_stage_place_siege` sont supprimés. Une localité sans plan réel reçoit la cité en anneau (octogone de repli).
+
 Date : 2026-09-29. Statut : accepté. Lot NT1 du chantier NT
 (`docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md`). Suite des ADR 0026 (villes
 emblématiques) et 0047 (ville de siège dense).
