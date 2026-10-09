@@ -188,7 +188,7 @@ MS4 | FAIT | codex_bubbles 1215→1099 l, BubbleLayout (156 l), set_process cond
 MS5 | FAIT | play_sfx via VoicePool (plus de round-robin) ; aucun volume/EVENT_SFX codé en dur dans audio_director | game/scripts/audio | non
 MS6 | FAIT? render_quality.json existe -> voir FAIT
 MS7 | À FAIRE | assets sans référence (textures/buildings brutes 26 Mo ; quaternius 95 fichiers suivis) | game/assets, tools | non
-MS8 | À FAIRE | LUT étalonnage atmosphere_library.grade_lut port Rust/précuisson | game/scripts/visual/atmosphere_library.gd | oui
+MS8 | FAIT | LUT étalonnage atmosphere_library.grade_lut port Rust/précuisson | game/scripts/visual/atmosphere_library.gd | oui — port Rust `GradeLut` (core/crates/godot-bridge/src/grade_lut.rs), identique octet à octet, ~20x plus rapide (debug) ; test game/tests/ms8_grade_lut_test.gd
 MS9 | FAIT (release_journey suppr) | release_journey --map-ab/--ab-configs/--uncapped | game/scripts/dev/release_journey.gd | non
 MS10 | FAIT d3d86f0c0 | passe commentaires visual/ audio/, constantes battle_audio -> sound_bank.json | game/scripts/{visual,audio} | non
 
