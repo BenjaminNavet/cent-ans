@@ -1,5 +1,5 @@
 //! CB4: active abilities of the regiments (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` § CB4,
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` § CB4,
 //! `docs/research/cb4-capacites.md`): catalogue, cooldown, conditions, end
 //! with its reason, each effect, replay determinism, AI.
 

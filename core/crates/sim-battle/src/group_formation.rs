@@ -1,4 +1,4 @@
-//! Group formations (lot CB6, plan `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`,
+//! Group formations (lot CB6, plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`,
 //! historian's review `docs/research/cb6-formations.md`).
 //!
 //! A preset of `data/rules/group_formations.json` (« Ligne de bataille »,

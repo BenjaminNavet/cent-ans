@@ -1,7 +1,7 @@
 class_name BattleFormationPicker
 extends PanelContainer
 
-## CB6 : formations de groupe (plan `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`,
+## CB6 : formations de groupe (plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`,
 ## section CB6). Sélecteur de préréglage (Attaque / Défense / Marche, infobulle `description_fr`,
 ## Alt+Maj+1…6) posé en bas à droite, au-dessus du bandeau des cartes et sous le journal.
 ## Aucune règle ici : les places viennent du cœur (`BattleSim.formation_slots`, données

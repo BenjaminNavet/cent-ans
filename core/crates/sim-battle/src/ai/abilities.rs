@@ -1,5 +1,5 @@
 //! CB4: active abilities used by the battle AI (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` § CB4). One
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` § CB4). One
 //! simple rule per kind, its thresholds in the `ai` block of each file of
 //! `data/battle_abilities/` (an ability without it is left to the player):
 //!

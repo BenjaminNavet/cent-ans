@@ -3,9 +3,9 @@ Format : ID | état | reste | fichiers principaux | Rust? | [MÉCANIQUE]
 (GELÉ FL = fichier récemment sale par d'autres sessions : settlement_layer, town_maquette_data, zoom_tiers, battle_vegetation, landmarks_v2, tools/experiments)
 
 ## DC docs
-DC-3 | À FAIRE | docs/architecture.md absent, status.md non tronqué, lien README/CLAUDE.md | docs/status.md, README.md, CLAUDE.md | non
-DC-4 | PARTIEL | docs/audit garde a1..a6 + recettes q1/q3/q5, images research non traitées | docs/audit, docs/research, docs/img | non
-DC-5 | PARTIEL | docs/superpowers/plans (5) pas archivé, designs m1-m10 non marqués historique | docs/superpowers, docs/design | non
+DC-3 | FAIT | docs/architecture.md créé, status.md tronqué (historique dans docs/archive/status-historique.md), liens README/CLAUDE.md | docs/status.md, README.md, CLAUDE.md | non
+DC-4 | FAIT | a2-sonde absent ; aucune image docs/research ni docs/img non référencée (rien supprimé) ; q1/q5 condensés dans docs/archive/audits-condenses.md ; a1..a6, q3 et backlog-tw gardés (référencés par des ADR/notes) | docs/audit, docs/archive | non
+DC-5 | FAIT | plans déplacés vers docs/archive/superpowers-plans (liens corrigés hors docs/wip), bandeau « Historique » sur m1-m10 | docs/archive, docs/design | non
 (DC-1 : wip 508 -> ~170 fichiers, archive chantiers.md 2236 l, jugé FAIT ; DC-2 INDEX.md présent)
 
 ## GT tests Godot

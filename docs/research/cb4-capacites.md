@@ -2,7 +2,7 @@
 
 Relecture de l'historien, 27 septembre 2026, avant tout code du lot CB4.
 Références de travail : spec `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`
-(§ CB4), plan `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (§ CB4), ordres de
+(§ CB4), plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (§ CB4), ordres de
 chef `data/battle_orders/`, types d'unité `data/unit_types/`, fiches Codex `cdx_jeu_pieux`,
 `cdx_jeu_formations`, `cdx_pavois`.
 

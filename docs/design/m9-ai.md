@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M9, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M9 — IA de campagne et de bataille : spécification
 
 Date : 2026-09-23. Objectif : remplacer l'IA minimale (M2) par une IA de campagne stratégique et donner

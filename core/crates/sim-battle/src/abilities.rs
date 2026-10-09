@@ -1,5 +1,5 @@
 //! Active abilities of the regiments (lot CB4, plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` § CB4,
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` § CB4,
 //! historian review `docs/research/cb4-capacites.md`).
 //!
 //! The catalogue comes from `data/battle_abilities/` through

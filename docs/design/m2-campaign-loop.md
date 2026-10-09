@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M2, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M2 — Boucle de campagne minimale jouable : spécification
 
 Date : 2026-09-23. Objectif : jouer France, Angleterre ou Bourgogne au printemps 1337, déplacer des armées,

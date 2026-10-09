@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M3, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M3 — Villes et économie : spécification
 
 Date : 2026-09-23. Objectif : donner vie aux provinces. La population par classe évolue, les bâtiments se

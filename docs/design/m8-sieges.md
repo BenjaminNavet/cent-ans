@@ -1,3 +1,5 @@
+> **Historique** — document de conception du jalon M8, conservé pour mémoire ; l'état actuel est dans docs/architecture.md et les ADR.
+
 # M8 — Sièges : spécification
 
 Date : 2026-09-23. Deux volets : la guerre de siège sur la carte de campagne, puis la bataille de

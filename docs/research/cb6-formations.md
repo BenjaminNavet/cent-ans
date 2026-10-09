@@ -1,7 +1,7 @@
 # CB6 — Formations de groupe : relecture historique des préréglages
 
 Relecture de l'historien, 27 septembre 2026, pour `data/rules/group_formations.json` (lot CB6,
-plan `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`). Rôles du jeu : `infantry`,
+plan `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`). Rôles du jeu : `infantry`,
 `foot_ranged`, `cavalry` (y compris tireurs montés), `siege`, `general`.
 
 ## Vocabulaire de l'époque

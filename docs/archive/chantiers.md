@@ -399,7 +399,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 
 ### colonies-liste.md — Liste des colonies (touche B) — suivi (2026-09-27)
 - Spec : `docs/superpowers/specs/2026-09-27-liste-colonies-design.md`.
-- Plan : `docs/superpowers/plans/2026-09-27-liste-colonies.md`.
+- Plan : `docs/archive/superpowers-plans/2026-09-27-liste-colonies.md`.
 - `feat/holdings-core` : cœur (`sim-campaign::holdings::holdings_overview`, 7 tests
 - Réf. : ADR 0097 ; commits 8c926169, bc53e337
 
@@ -493,7 +493,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 
 ### p2a-court.md — P2a — cour, fiche personnage, arbre familial (fichier de reprise) (2026-09-28) [restes]
 - Lot Phase 2 du chantier PO (polish), ADR 0097, bible DA § 12. Brief : `docs/wip/po.md` §
-- « Phase 2 », plan `docs/superpowers/plans/2026-09-27-po-polish.md`.
+- « Phase 2 », plan `docs/archive/superpowers-plans/2026-09-27-po-polish.md`.
 - Fichiers du lot (ne pas en sortir) :
 - Réf. : ADR 0097, 0098
 - Restes : **Choix pris pour ce lot (mécanique, sans trancher la question) :** `CourtPanel` et / **À trancher plus tard** (orchestrateur / PO6b) : soit modifier `map_ui.gd` pour réclamer
@@ -1512,71 +1512,71 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 ## Grappe `cb`
 
 ### cb-m1-contours.md — CB-M1 — Contours de formation en décales (état) (2026-09-27)
-- Branche : `feat/cb-m1-outline`. Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`
+- Branche : `feat/cb-m1-outline`. Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`
 - (section CB-M1). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`
 - (« Contour de formation »).
 
 ### cb-m2-trajet-curseur.md — CB-M2 — Aperçu du trajet et curseur contextuel (état) (2026-09-27)
-- Branche : `feat/cb-m2-path-hover`. Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`
+- Branche : `feat/cb-m2-path-hover`. Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`
 - (section CB-M2, écart 1). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`.
 - Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
 
 ### cb-m3-file-ordres.md — CB-M3 — Ordres en file (état) (2026-09-27) [restes]
 - Branche : `feat/cb-m3-queue` (depuis `main` 88ec35be, qui contient CB-M2). Plan :
-- `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB-M3, écart 6).
+- `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (section CB-M3, écart 6).
 - Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm3`.
 - Réf. : ADR 0095 ; commits 88ec35be
 
 ### cb-m4-portee-comparaison.md — CB-M4 — Portée au sol et comparaison au survol (état) (2026-09-27) [restes]
 - Branche : `feat/cb-m4-range-compare` (partie de `main` 88ec35be, qui contient CB-M2 : la tête
 - initiale du worktree, be631979, précédait CB-M2 et n'avait pas `hover_context`).
-- Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB-M4).
+- Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (section CB-M4).
 - Réf. : commits 88ec35be, be631979
 
 ### cb0-entrees.md — CB0 — Extraction des entrées de bataille (état) (2026-09-27)
-- Branche : `feat/cb0-battle-input`. Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`
+- Branche : `feat/cb0-battle-input`. Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`
 - (section CB0). Orchestration : `docs/wip/cb.md` (lecture seule pour cet agent).
 - Squelette `game/scripts/battle/battle_input.gd` (signaux, pas encore utilisé par la scène).
 
 ### cb1-formation-glisser.md — CB1 — Formation au glisser et verrouillage de groupe (état) (2026-09-27) [restes]
 - Branche : `feat/cb1-drag-formation` (depuis `main` b985d752). Plan :
-- `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB1, écarts 5 et 6).
+- `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (section CB1, écarts 5 et 6).
 - Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cb1`.
 - Réf. : ADR 0095 ; commits b985d752
 
 ### cb6-formations-groupe.md — CB6 — Formations de groupe (état) (2026-09-27) [restes]
 - Branche : `feat/cb6-group-formations` (depuis `main` cad1ca05). Plan :
-- `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB6 et décisions après relecture).
+- `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (section CB6 et décisions après relecture).
 - Relecture historique : `docs/research/cb6-formations.md`.
 - Réf. : ADR 0095 ; commits cad1ca05
 
 ### cb.md — CB — Contrôles de bataille façon Total War (orchestration) (2026-09-28) [restes]
 - Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`.
-- Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réservée : `docs/decisions/0095-controles-bataille-tw.md`.
+- Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`. ADR réservée : `docs/decisions/0095-controles-bataille-tw.md`.
 - Icônes : les agents de la vague 4 dessinent des glyphes en code ; la session principale génère toutes les icônes DA5 (curseurs, cadenas, modes, états, alertes, capacités) en une fois après CB4 (≈ 2 $, `docs/budget.md`).
 - Réf. : ADR 0095 ; commits 135a7b36
 
 ### cb-icones.md — CB — icônes des contrôles de bataille (pipeline DA5) (2026-09-28)
-- Branche `feat/cb-icons` (depuis main 6d581bb2). Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` § Icônes.
+- Branche `feat/cb-icons` (depuis main 6d581bb2). Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` § Icônes.
 - Catalogue `data/ui/icons_ink.json` : 16 dessins nouveaux (groupe `cb`, préfixe `cb_`) + cibles ajoutées
 - à 6 dessins existants (réemploi gratuit : `stance_normal` → garde, `martial` → mêlée, `enemy_army` →
 - Réf. : commits 6d581bb2
 
 ### cb2-modes.md — CB2 — Modes d'unité, icônes d'état, remappage des touches (état) (2026-09-28) [restes]
 - Branche : `feat/cb2-modes` (depuis `main` 220a1e9f). Plan :
-- `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB2). Fusion **en dernier** de
+- `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (section CB2). Fusion **en dernier** de
 - la vague 4 (après CB3, CB5, CB6). Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cb2`.
 - Réf. : ADR 0095 ; commits 220a1e9f
 
 ### cb3-camera-vue-tactique.md — CB3 — Ralenti, caméra (lacet/tangage), vue tactique, `spotted` (2026-09-28) [restes]
 - Branche `feat/cb3-camera-tactical`, depuis `main` (cad1ca05 / 220a1e9f). Plan :
-- `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (§ Écarts point 2, Conventions
+- `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (§ Écarts point 2, Conventions
 - communes, CB3). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md` (§ CB3).
 - Réf. : commits cad1ca05, 220a1e9f
 
 ### cb4-capacites.md — CB4 — Capacités actives (état) (2026-09-28)
 - Branche : `feat/cb4-abilities` (depuis `main` 07eff33b, après « docs: CB wave 4 merged, CB4 next »).
-- Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (§ CB4) ; relecture
+- Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` (§ CB4) ; relecture
 - historique : `docs/research/cb4-capacites.md`. Cible cargo privée :
 - Réf. : ADR 0095 ; commits 07eff33b
 
@@ -1591,20 +1591,20 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 ## Grappe `po`
 
 ### po1-layout.md — PO1 — Disposition fixe (`feat/po1-layout`) (2026-09-27)
-- Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO1. Bible DA § 12.1, ADR 0097.
+- Plan : `docs/archive/superpowers-plans/2026-09-27-po-polish.md` § PO1. Bible DA § 12.1, ADR 0097.
 - 1. `UiLayout` implémenté + tests « UiLayout » dans `po_ui_test.gd`
 - 2. Migration carte de campagne (TOP_BAR, BOTTOM_SELECTION, MINIMAP, SIDE_PANEL, TOASTS, MODAL)
 - Réf. : ADR 0097
 
 ### po3-map.md — PO3 — Carte de campagne (lumière, forêts, étiquettes) (2026-09-27)
 - Branche `feat/po3-map` (depuis `feat/po-polish`, qui y est fusionnée : PO2, AN1a). Plan :
-- `docs/superpowers/plans/2026-09-27-po-polish.md` § PO3. Références : bible DA § 12.6, ADR 0097.
+- `docs/archive/superpowers-plans/2026-09-27-po-polish.md` § PO3. Références : bible DA § 12.6, ADR 0097.
 - **État : fait, prêt à fusionner** (l'orchestrateur fusionne).
 - Réf. : ADR 0097
 
 ### po5-motion.md — PO5 — Mouvement et transitions (wip) (2026-09-27)
 - Branche `feat/po5-motion` (depuis `feat/po-polish`, qui y est fusionnée). Plan :
-- `docs/superpowers/plans/2026-09-27-po-polish.md` § PO5.
+- `docs/archive/superpowers-plans/2026-09-27-po-polish.md` § PO5.
 - `SceneFader.go(path)` / `cover()` / `reveal()` (`game/scripts/ui/scene_fader.gd`, façade
 
 ## Grappe `proto`
@@ -1625,7 +1625,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 ## Grappe `fe`
 
 ### fe.md — FE — féodalité et petites factions (orchestration) (2026-09-28)
-- Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`. Plan : `docs/superpowers/plans/2026-09-28-feodalite.md`.
+- Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`. Plan : `docs/archive/superpowers-plans/2026-09-28-feodalite.md`.
 - ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 - **Vagues 1 et 2 dans `main`** (26bea252) : F0-F5 + registres F4a-F4e. 91 factions (dont `fac_rebels`),
 - Réf. : ADR 0085, 0110, 0113, 0114 ; commits 26bea252, f8c126d5
@@ -1636,7 +1636,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 - Ajout au moteur (`tools/cent_ans_tools/heraldry.py`) de dessins simples pour les
 
 ### fe1-deductions.md — FE1 — déductions, obligations, loyauté (`feat/fe1-deductions`) (2026-09-28) [restes]
-- Plan : `docs/superpowers/plans/2026-09-28-feodalite.md` § F1. ADR 0098.
+- Plan : `docs/archive/superpowers-plans/2026-09-28-feodalite.md` § F1. ADR 0098.
 - **F1 terminé** (branche `feat/fe1-deductions`), suites Rust et Python vertes hors points ci-dessous.
 - `FactionState::suzerain` = vue en cache de `feudal::liege_of`, recalculée par
 - Réf. : ADR 0098 ; commits dfe88244
@@ -1648,7 +1648,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 - Réf. : commits dfe88244
 
 ### fe3-titres.md — FE3 — transferts de titres (lot F3 du chantier FE) (2026-09-28)
-- Branche `feat/fe3-titres` (depuis `main` 1dcd6821). Plan : `docs/superpowers/plans/2026-09-28-feodalite.md` § F3.
+- Branche `feat/fe3-titres` (depuis `main` 1dcd6821). Plan : `docs/archive/superpowers-plans/2026-09-28-feodalite.md` § F3.
 - `sim-campaign/src/feudal.rs` : `FeudalState` étendu (`forfeitures`, `disputes`, `start_crowns`,
 - `streaks`, `objectives_met`), stubs F0 remplis par délégation, `liege_of` (titre vacant = indépendance).
 - Réf. : commits 1dcd6821
@@ -1800,7 +1800,7 @@ Notes `docs/wip/<x>.md` closes, condensées puis supprimées du dépôt (ménage
 
 ### om.md — OM — carte Oural–Méditerranée (orchestration) (2026-09-29)
 - Spec `docs/superpowers/specs/2026-09-28-oural-mediterranee-design.md`, plan
-- `docs/superpowers/plans/2026-09-28-oural-mediterranee.md`, ADR 0115-0116.
+- `docs/archive/superpowers-plans/2026-09-28-oural-mediterranee.md`, ADR 0115-0116.
 - Worktree d'intégration `../game_project-om` (`feat/om`). Lancé le 2026-09-28 à 23 h, joueur absent
 - Réf. : ADR 0115 ; commits 99b7e127, 5ca326bb, 9375189f
 

@@ -1,5 +1,5 @@
 //! CB4: regiments' active abilities on the GDExtension side (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` § CB4).
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md` § CB4).
 //! The `abilities` entry of `get_units` (state of each ability of the
 //! regiment), the catalogue texts (`BattleSim.get_ability_catalog`), and the
 //! rule values of the tooltips (`GameDataStore.get_rule_constants`). An

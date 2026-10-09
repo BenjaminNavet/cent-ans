@@ -1,5 +1,5 @@
 //! CB2: unit modes and display states on the GDExtension side (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, CB2). The
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, CB2). The
 //! mode entries of `get_units`; the modes are set by `issue_command`
 //! (`{type: "set_mode", units: [ids], mode: "run"|"guard"|"skirmish"
 //! |"melee"|"breach", enabled: bool}`).

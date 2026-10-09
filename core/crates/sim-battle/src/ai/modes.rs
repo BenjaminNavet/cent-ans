@@ -1,5 +1,5 @@
 //! CB2: unit modes chosen by the field-battle AI (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, CB2).
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, CB2).
 //!
 //! On the defensive, light shooters (armour at most
 //! `ai.light_shooter_max_armor` of `data/rules/unit_modes.json`, neither

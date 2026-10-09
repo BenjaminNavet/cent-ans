@@ -2,7 +2,7 @@
 
 Date : 2026-09-27, finalisée le 2026-09-28. Statut : accepté (tous les lots de code fusionnés, main 526853a4).
 Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-design.md`.
-Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`.
+Plan : `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`.
 
 ## Contexte
 

@@ -1,5 +1,5 @@
 //! CB6: group formations on the GDExtension side (plan
-//! `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`, « CB6 »).
+//! `docs/archive/superpowers-plans/2026-09-27-controles-bataille-tw.md`, « CB6 »).
 //!
 //! Two read-only queries: the presets of `data/rules/group_formations.json`
 //! and the places one of them proposes. Nothing moves and nothing is
