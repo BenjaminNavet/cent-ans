@@ -202,8 +202,6 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             }
         }
         live_sieges = now;
-}
-
         if state.league.is_some() {
             league_turns += 1;
         }
