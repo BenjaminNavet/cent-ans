@@ -1139,15 +1139,16 @@
   {
     "id": "fig_army_lord_mounted_islamic",
     "kind": "figure",
-    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Mamluk or Moorish commander on a horse in a quilted coat and mail with a turban, arms raised, hands off the reins",
-    "seeds": 2,
+    "prompt": "a Mamluk or Moorish commander in a quilted coat and mail with a turban, seated on a tall bay Arabian-type horse",
+    "seeds": 3,
     "backend3d": "fal",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 2.7,
-      "class": "figure"
+      "class": "figure_mounted"
     },
-    "target": "army_figures:lord (cultures islamiques)"
+    "target": "army_figures:lord (cultures islamiques)",
+    "mounted": true
   },
   {
     "id": "fig_army_lord_mounted_steppe",
@@ -1165,14 +1166,15 @@
   {
     "id": "fig_army_lord_mounted_rus",
     "kind": "figure",
-    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) person, historically accurate period clothing, plausible real-world proportions, hand-made wool, linen and leather with visible wear, matte finish. Muted earthy palette except the livery: tunic in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Russian boyar commander on a horse in a mail coat and pointed helmet with fur cuffs, arms raised, hands off the reins",
-    "seeds": 2,
+    "prompt": "a Russian boyar commander in a mail coat and pointed helmet with fur cuffs, seated on a sturdy horse",
+    "seeds": 3,
     "backend3d": "fal",
     "ingest": {
       "yaw_fix": 0,
       "target_height_m": 2.7,
-      "class": "figure"
+      "class": "figure_mounted"
     },
-    "target": "army_figures:lord (cultures rus)"
+    "target": "army_figures:lord (cultures rus)",
+    "mounted": true
   }
 ]

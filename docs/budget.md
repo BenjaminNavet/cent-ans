@@ -301,3 +301,4 @@ Compte fal : crédit OK le 08/10 (la mention « fal vide » de l'ADR 0152 est p�
 | 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : vues dos/côté `fal-ai/flux-2/edit`, 29 appels | 0,70 $ | 0,70 $ | cumul chantier 2,67 $ |
 | 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis`, 20 appels | 0,40 $ | 0,40 $ | cumul chantier 2,67 $ |
 | 2026-10-09 | fal.ai | DN-RESTE (67 restants : 22 refusés D5 + 5 sans 3D + 21 figures + 14 cartes `card_*`) : 3D `fal-ai/trellis/multi`, 28 appels | 0,56 $ | 0,56 $ | cumul chantier 2,67 $ |
+| 2026-10-09 | fal.ai | DN-FIX3 : 2 canons + 6 figures montées refaits (images Z-Image 30 appels, vues `flux-2/edit` 10, 3D `trellis/multi` 13) | 0.65 $ | 0.65 $ | cumul chantier 0,65 $ |

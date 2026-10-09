@@ -344,28 +344,30 @@
   {
     "id": "cavalry_4_routier",
     "kind": "figure",
-    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a lightly armoured mounted man-at-arms in a brigandine and open helm on a courser, hands off the reins.",
-    "seeds": 2,
+    "prompt": "a lightly armoured mounted man-at-arms in a brigandine and open helm, blue hose, seated on a tall bay courser",
+    "seeds": 3,
     "backend3d": "both",
     "ingest": {
       "class": "figure_mounted",
       "target_height_m": 3.0,
       "yaw_fix": 0
     },
-    "target": "battle_ga3:cavalry_4"
+    "target": "battle_ga3:cavalry_4",
+    "mounted": true
   },
   {
     "id": "cavalry_5_jinete",
     "kind": "figure",
-    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a light javelin rider in a leather jerkin and felt cap on a small horse, hands off the reins.",
-    "seeds": 2,
+    "prompt": "a light javelin rider (jinete) in a leather jerkin and felt cap, blue hose, seated on a lean Andalusian horse with a plain saddle cloth",
+    "seeds": 3,
     "backend3d": "both",
     "ingest": {
       "class": "figure_mounted",
       "target_height_m": 3.0,
       "yaw_fix": 0
     },
-    "target": "battle_ga3:cavalry_5"
+    "target": "battle_ga3:cavalry_5",
+    "mounted": true
   },
   {
     "id": "standard_0_bearer",
@@ -383,14 +385,15 @@
   {
     "id": "cavalry_1_druzhina",
     "kind": "figure",
-    "prompt": "Photorealistic reference sheet of a single 14th-century (1337-1453) European soldier, historically accurate period armour and clothing, plausible real-world proportions, hand-made wool, linen, quilted gambeson, boiled leather, riveted mail and hand-forged steel with visible wear, mud at the boots, matte finish. Muted earthy palette for all clothing and gear except the livery: surcoat/jupon in pure saturated green, hose in pure saturated blue. Arms raised almost horizontal like the Christ of Rio, palms open and empty, nothing in the hands or in front of the body, mounted figures with hands off the reins. Full body three-quarter front view, feet included, centred, filling 90 percent of a square frame, plain pure white background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons. Subject: a Rus' mounted noble in lamellar and mail with a pointed helm and a green kaftan, hands off the reins.",
-    "seeds": 2,
+    "prompt": "a Rus' mounted noble in lamellar and mail with a pointed helm and a green kaftan, blue trousers, seated on a strong bay steed",
+    "seeds": 3,
     "backend3d": "both",
     "ingest": {
       "class": "figure_mounted",
       "target_height_m": 3.0,
       "yaw_fix": 0
     },
-    "target": "battle_ga3:cavalry_1"
+    "target": "battle_ga3:cavalry_1",
+    "mounted": true
   }
 ]

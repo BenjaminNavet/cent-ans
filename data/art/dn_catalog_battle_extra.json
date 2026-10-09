@@ -1178,8 +1178,8 @@
  {
   "id": "siege_cannon_early_1340",
   "kind": "decor",
-  "prompt": "very early vase-shaped iron gun lying on a timber trestle bed, small, 1340s",
-  "seeds": 1,
+  "prompt": "tiny primitive 1330s pot-de-fer gun from the Milemete manuscript: a short, fat, bottle-shaped bronze barrel only about 60 cm long, a swollen round belly at the rear and a narrow neck flaring to a small open muzzle with a dark bore, laid horizontally and strapped with iron bands onto a low rough oak beam lying flat on the ground, side view, no wheels, no handle, no spout, no long barrel, small",
+  "seeds": 3,
   "backend3d": "fal",
   "ingest": {
    "yaw_fix": 0,
@@ -1192,8 +1192,8 @@
  {
   "id": "siege_bombard_hooped_1380",
   "kind": "decor",
-  "prompt": "big hooped iron bombard barrel on a timber sled with wedges, 1380s",
-  "seeds": 1,
+  "prompt": "hooped wrought-iron bombard of the 1380s, a smaller Dulle Griet: a thick barrel made of long iron staves held by many wide iron hoops, huge open muzzle with the dark bore clearly visible at the front, a narrower powder chamber at the rear, lying horizontally in a heavy timber box-shaped cradle of oak planks resting flat on the ground, held by wooden wedges and driven stakes, side view, no wheels, no ring handle",
+  "seeds": 3,
   "backend3d": "fal",
   "ingest": {
    "yaw_fix": 0,

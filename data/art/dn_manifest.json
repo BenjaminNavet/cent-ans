@@ -44976,9 +44976,9 @@
         "dn/siege/siege_bombard_hooped_1380_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 3.995,
-        "width": 2.654,
-        "height": 2.396
+        "length": 4.0,
+        "width": 4.0,
+        "height": 1.35
       },
       "triangles": [
         12000,
@@ -44990,89 +44990,20 @@
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.2079,
-          "mean_s": 0.2314,
-          "p95_s": 0.5
+          "mean_luma": 0.1619,
+          "mean_s": 0.3334,
+          "p95_s": 0.85
         },
         "after": {
-          "mean_luma": 0.2083,
-          "mean_s": 0.2176,
-          "p95_s": 0.4
+          "mean_luma": 0.197,
+          "mean_s": 0.2376,
+          "p95_s": 0.3587
         },
-        "gamma": 1.0
+        "gamma": 1.15
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_bombard_hooped_1380/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "siege_bombard_hooped_1380",
-        "images": [
-          {
-            "ts": "2026-10-08T23:34:41",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_battle_extra.json",
-        "target": "battle_siege.gd : bombarde 1380 (complète bombard)",
-        "region": "Medieval European battlefield circa 1340-1450, weathered,",
-        "catalogue_prompt": "big hooped iron bombard barrel on a timber sled with wedges, 1380s",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single big hooped iron bombard barrel on a timber sled with wedges, 1380s Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 4,
-          "class": "siege_engine"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:53:23",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-08T23:53:35",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:54:14",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.1
     },
     "siege_camp": {
       "id": "siege_camp",
@@ -45135,103 +45066,34 @@
         "dn/siege/siege_cannon_early_1340_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 1.499,
-        "width": 1.499,
-        "height": 1.561
+        "length": 1.5,
+        "width": 1.5,
+        "height": 0.392
       },
       "triangles": [
-        11999,
-        3500,
-        799
+        6488,
+        3499,
+        800
       ],
       "tex": 1024,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_cannon_early_1340/3d/fal__s1337.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_cannon_early_1340/3d/fal__s1338.glb",
       "yaw_deg": 0.0,
       "grade": {
         "before": {
-          "mean_luma": 0.139,
-          "mean_s": 0.2372,
-          "p95_s": 0.5152
+          "mean_luma": 0.1936,
+          "mean_s": 0.3277,
+          "p95_s": 0.725
         },
         "after": {
-          "mean_luma": 0.197,
-          "mean_s": 0.1841,
-          "p95_s": 0.337
+          "mean_luma": 0.1957,
+          "mean_s": 0.278,
+          "p95_s": 0.4
         },
-        "gamma": 1.2431
+        "gamma": 1.0
       },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_cannon_early_1340/cut/s1337.png",
-      "model_3d": "fal-ai/trellis",
-      "cost_usd": 0.02,
-      "generation": {
-        "id": "siege_cannon_early_1340",
-        "images": [
-          {
-            "ts": "2026-10-08T23:34:40",
-            "seed": 1337,
-            "endpoint": "fal-ai/z-image/turbo",
-            "file": "img/s1337.png",
-            "arguments": {
-              "image_size": {
-                "width": 1024,
-                "height": 1024
-              },
-              "seed": 1337,
-              "enable_prompt_expansion": false,
-              "output_format": "png"
-            },
-            "usd": 0.005
-          }
-        ],
-        "catalogue": "dn_catalog_battle_extra.json",
-        "target": "battle_siege.gd : canon primitif 1340 (pot-de-fer)",
-        "region": "Medieval European battlefield circa 1340-1450, weathered,",
-        "catalogue_prompt": "very early vase-shaped iron gun lying on a timber trestle bed, small, 1340s",
-        "full_prompt": "Photorealistic matte-painted reference photograph of a single very early vase-shaped iron gun lying on a timber trestle bed, small, 1340s Medieval European battlefield circa 1340-1450, weathered, heavily weathered and slightly irregular, hand-made natural materials (oak, lime plaster, fieldstone, thatch, hand-forged iron), real material scale and proportions, visible wear, moss, grime and mud at the base, no brick, no glass, no sheet metal, no modern elements, no text, no people, no animals. Muted earthy colour palette, low saturation, natural desaturated tones (greys, browns, ochres, olive greens), albedo like an overcast day, no neon, no bright primary colours. Three-quarter view from slightly above, the whole object fully visible, centred and filling about 85 percent of the frame, on a plain uniform medium grey studio background, no ground, no grass, no plants, no terrain, no base, no cast shadow on the floor, soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic material detail, physically based look.",
-        "ingest": {
-          "yaw_fix": 0,
-          "target_width_m": 1.5,
-          "class": "siege_engine"
-        },
-        "views": [
-          {
-            "ts": "2026-10-08T23:53:19",
-            "seed": 1337,
-            "view": "back",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from behind, seen from the back three-quarter opposite to the original view, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/back_s1337.png",
-            "usd": 0.024
-          },
-          {
-            "ts": "2026-10-08T23:53:32",
-            "seed": 1337,
-            "view": "side",
-            "endpoint": "fal-ai/flux-2/edit",
-            "prompt": "Show exactly the same object from its left side, seen straight from the side at eye level, same materials, same proportions, same lighting, same plain mid-grey background, whole object visible and centred, no ground.",
-            "source": "img/s1337.png",
-            "file": "views/side_s1337.png",
-            "usd": 0.024
-          }
-        ],
-        "calls_3d": [
-          {
-            "ts": "2026-10-08T23:54:04",
-            "seed": 1337,
-            "endpoint": "fal-ai/trellis/multi",
-            "mode": "multi-view",
-            "views": [
-              "cut/s1337.png",
-              "views/back_cut_s1337.png",
-              "views/side_cut_s1337.png"
-            ],
-            "file": "3d/fal__s1337.glb",
-            "usd": 0.02
-          }
-        ],
-        "chosen_seed": 1337
-      }
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_cannon_early_1340/cut/s1338.png",
+      "model_3d": "fal-ai/trellis/multi",
+      "cost_usd": 0.1
     },
     "siege_gun_battery_mantlet": {
       "id": "siege_gun_battery_mantlet",

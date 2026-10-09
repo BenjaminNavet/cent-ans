@@ -70,6 +70,23 @@ FIGURE_SUFFIX = (
     "of a square frame, plain pure white background, no ground, no shadow, soft even diffuse "
     "light, no text, no heraldic emblem, no modern elements, no fantasy, no weapons."
 )
+# Mounted figures (entry ``"mounted": true``): the standing-soldier template yields a standing man
+# with small horses on the side, so the rider gets its own template (DN-FIX3).
+MOUNTED_PREFIX = "Photorealistic reference sheet of a single horse with one rider seated on it:"
+MOUNTED_SUFFIX = (
+    "ONE single large horse and ONE single rider seated in the saddle on its back, rider and "
+    "horse in one group in the middle of the frame. The horse is a full-size 14th-century "
+    "warhorse, about 1.7 m at the withers, clearly much bigger than the man's body, the rider's "
+    "legs hang down along the horse's flanks, the horse stands square on four visible hooves, "
+    "head up. Whole horse visible from nose to tail with all four hooves, three-quarter front "
+    "view. Historically accurate period clothing and tack, hand-made wool, leather and riveted "
+    "mail with visible wear, matte finish. Muted earthy palette except the livery: tunic or "
+    "jupon in pure saturated green, hose in pure saturated blue. The rider's arms are raised "
+    "almost horizontal like the Christ of Rio, palms open and empty, hands completely off the "
+    "reins, nothing in the hands; the reins rest slack on the horse's neck. Plain pure white "
+    "background, no ground, no shadow, soft even diffuse light, no text, no heraldic emblem, no "
+    "modern elements, no fantasy, no weapons."
+)
 # Bible 14.2 colour check (D5): HSV on the cut-out, livery pixels (pure green/blue) excluded.
 MAX_SAT_MEAN, MAX_SAT_P95 = 0.40, 0.90
 VALUE_RANGE = (0.25, 0.60)
@@ -176,6 +193,8 @@ def full_prompt(entry: dict) -> str:
                 + suffix.removeprefix(DEFAULT_REGION).lstrip()
             )
         return f"{style['style_prefix']} {entry['prompt']} {suffix}"
+    if entry.get("mounted"):
+        return f"{MOUNTED_PREFIX} {entry['prompt']}. {MOUNTED_SUFFIX}"
     if entry["prompt"].startswith(
         FIGURE_PREFIX
     ):  # the catalogue holds the whole prompt
@@ -649,10 +668,24 @@ VIEW_PROMPTS = {
     "eye level, same materials, same proportions, same lighting, same plain mid-grey "
     "background, whole object visible and centred, no ground.",
 }
+VIEW_PROMPTS_MOUNTED = {
+    "back": "Show exactly the same horse and the same rider seated on it from behind, seen from "
+    "the back three-quarter opposite to the original view: one single large horse with the "
+    "rider on its back, same size ratio (horse much bigger than the man), same materials, "
+    "same arms raised, same lighting, same plain mid-grey background, whole horse and rider "
+    "visible and centred, all four hooves, no ground.",
+}
 FAL_EDIT_ENDPOINT = "fal-ai/flux-2/edit"
 FAL_EDIT_COST_USD = 0.024
 FAL_MULTI_ENDPOINT = "fal-ai/trellis/multi"
 _rembg_lock = threading.Lock()
+
+
+def view_prompt(entry: dict, name: str) -> str:
+    """Edit prompt of the ``name`` view; mounted figures get the horse-and-rider wording."""
+    if entry.get("mounted") and name in VIEW_PROMPTS_MOUNTED:
+        return VIEW_PROMPTS_MOUNTED[name]
+    return VIEW_PROMPTS[name]
 
 
 def is_multi_view(entry: dict) -> bool:
@@ -693,7 +726,7 @@ def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
                 result = fal_client.subscribe(
                     FAL_EDIT_ENDPOINT,
                     arguments={
-                        "prompt": VIEW_PROMPTS[name], "image_urls": [source_url],
+                        "prompt": view_prompt(entry, name), "image_urls": [source_url],
                         "image_size": {"width": SIZE, "height": SIZE}, "seed": seed,
                         "output_format": "png",
                     },
@@ -704,7 +737,7 @@ def fal_multi(entry: dict, out_dir: Path, seed: int, target: Path) -> None:
                 entry_id, "views",
                 {
                     "seed": seed, "view": name, "endpoint": FAL_EDIT_ENDPOINT,
-                    "prompt": VIEW_PROMPTS[name], "source": f"img/s{seed}.png",
+                    "prompt": view_prompt(entry, name), "source": f"img/s{seed}.png",
                     "file": f"views/{name}_s{seed}.png", "usd": FAL_EDIT_COST_USD,
                 },
             )  # fmt: skip
