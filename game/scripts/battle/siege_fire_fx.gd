@@ -58,7 +58,7 @@ func setup(p_siege_view: Node3D, p_height_at: Callable) -> void:
 	houses_root = p_siege_view.get_node_or_null("Houses")
 	siege_view = p_siege_view
 	_flame_mat = _flame_material(params["flames"])
-	_smoke_mat = _smoke_material(_color(params["smoke"]["color"]))
+	_smoke_mat = _smoke_material(_color(params["smoke"]["color"]), params["smoke"])
 	_ember_mat = ShaderMaterial.new()
 	_ember_mat.shader = EMBER_SHADER
 	_ember_mat.set_shader_parameter("energy", float(params["embers"]["energy"]))
@@ -263,13 +263,17 @@ func _flame_material(spec: Dictionary) -> Material:
 	return material
 
 
-func _smoke_material(color: Color) -> Material:
+func _smoke_material(color: Color, spec: Dictionary = {}) -> Material:
 	if not ResourceLoader.exists(SMOKE_FLIPBOOK):
 		return _particle_material(false)
 	var material := ShaderMaterial.new()
 	material.shader = SMOKE_SHADER
 	material.set_shader_parameter("flipbook", load(SMOKE_FLIPBOOK))
 	material.set_shader_parameter("smoke_color", Color(color, 1.0))
+	# QW-F : réglages de teinte et de densité en données (`data/fx/siege_fire.json`, bloc smoke).
+	for key in ["age_darken", "young_density", "point_light_share", "ember_glow_energy"]:
+		if spec.has(key):
+			material.set_shader_parameter(key, float(spec[key]))
 	return material
 
 

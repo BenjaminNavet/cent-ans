@@ -52,7 +52,10 @@
         "velocity_m_s": { "$ref": "#/$defs/range" },
         "spread_m": { "type": "number", "minimum": 0 },
         "color": { "$ref": "#/$defs/rgba" },
-        "wind_drift_m_s": { "type": "number", "minimum": 0, "description": "Dérive de la fumée par unité de force du vent." }
+        "wind_drift_m_s": { "type": "number", "minimum": 0, "description": "Dérive de la fumée par unité de force du vent." },
+        "age_darken": { "type": "number", "minimum": 0, "maximum": 1.5, "description": "QW-F : facteur de teinte atteint en fin de vie (1 = couleur constante)." },
+        "young_density": { "type": "number", "minimum": 0, "maximum": 1.5, "description": "QW-F : densité de la fumée toute jeune (1 = inchangé)." },
+        "point_light_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "QW-F : part de la lumière des foyers reçue par la fumée." }
       },
       "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "spread_m", "color", "wind_drift_m_s"],
       "additionalProperties": false
