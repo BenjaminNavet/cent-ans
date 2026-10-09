@@ -93,6 +93,8 @@ var _landuse_texture: ImageTexture
 var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
 var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
+var _regional: Dictionary = {}  # TX (ADR 0239) : fond par biome, {} = couches GA4
+var _micro: Dictionary = {}  # TX : grain de sol
 ## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
 ## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).
 var _smooth_bytes: PackedByteArray = PackedByteArray()
@@ -830,6 +832,13 @@ static func _mipmapped_texture(image: Image) -> ImageTexture:
 func _build_material_arrays() -> void:
 	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. Tableaux
 	# absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
+	_regional = CampaignTextures.load_regional()
+	_micro = CampaignTextures.load_micro()
+	if not _regional.is_empty():
+		_albedo_array = _regional["albedo"]
+		_normal_array = _regional["normal"]
+		_layer_means = _regional["means"]
+		return
 	var ga4 := CampaignTextures.load_arrays()
 	if not ga4.is_empty():
 		_albedo_array = ga4["albedo"]
@@ -944,7 +953,11 @@ func _build_material() -> void:
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
-		material.set_shader_parameter("layer_mean", _layer_means)
+		var padded := _layer_means.duplicate()
+		padded.resize(CampaignTextures.MEAN_SLOTS)
+		material.set_shader_parameter("layer_mean", padded)
+	CampaignTextures.apply_regional(material, _regional, map_data.meters_per_px)  # TX : fond par biome
+	CampaignTextures.apply_micro(material, _micro)  # TX : grain de près
 	CampaignTextures.apply_terrain(material)  # GA4 : macro-variation, tuilage, mer peinte
 
 

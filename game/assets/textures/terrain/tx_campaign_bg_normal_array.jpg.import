@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://pcmuunmfep3e"
+path.s3tc="res://.godot/imported/tx_campaign_bg_normal_array.jpg-d0dbd6a093ab7576b8c326cea86e1a5f.s3tc.ctexarray"
+path.etc2="res://.godot/imported/tx_campaign_bg_normal_array.jpg-d0dbd6a093ab7576b8c326cea86e1a5f.etc2.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/terrain/tx_campaign_bg_normal_array.jpg"
+dest_files=["res://.godot/imported/tx_campaign_bg_normal_array.jpg-d0dbd6a093ab7576b8c326cea86e1a5f.s3tc.ctexarray", "res://.godot/imported/tx_campaign_bg_normal_array.jpg-d0dbd6a093ab7576b8c326cea86e1a5f.etc2.ctexarray"]
 
 [params]
 

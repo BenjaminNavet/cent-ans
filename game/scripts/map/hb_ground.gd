@@ -34,15 +34,22 @@ const TINT_NORM := 2.0
 ## Pose les paramètres du matériau ; rend vrai si l'habillage est actif.
 static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	material.set_shader_parameter("has_hb", false)
+	var mix_text := FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE))
+	var mix: Variant = JSON.parse_string(mix_text) if not mix_text.is_empty() else null
+	GroundMaterials.source = parcels_source(mix as Dictionary if mix is Dictionary else {})
 	var arrays := GroundMaterials.load_arrays()
+	if arrays.is_empty() and GroundMaterials.source != GroundMaterials.SOURCE_HB:
+		push_warning("HbGround: paquet TX de parcellaire indisponible, retour au parcellaire HB")
+		GroundMaterials.source = GroundMaterials.SOURCE_HB
+		arrays = GroundMaterials.load_arrays()
 	if arrays.is_empty():
 		return false
 	var biomes := _load_raster(data_dir.path_join(BIOMES_FILE))
-	var mix_text := FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE))
-	var mix: Variant = JSON.parse_string(mix_text) if not mix_text.is_empty() else null
 	if biomes == null or not mix is Dictionary:
 		push_warning("HbGround: biomes.png ou ground_biome_mix.json absent, habillage désactivé")
 		return false
+	if GroundMaterials.source == GroundMaterials.SOURCE_TX:
+		mix = with_tx_overrides(mix as Dictionary)
 	var layer_ids: Dictionary = arrays["layers"]
 	var agri_doc := _read_json(data_dir.path_join(AGRI_FILE))
 	var landscapes := landscape_rows(agri_doc)
@@ -65,6 +72,30 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	material.set_shader_parameter("hb_table", ImageTexture.create_from_image(table))
 	material.set_shader_parameter("has_hb", true)
 	return true
+
+
+## TX (ADR 0239) : source du parcellaire demandée par le mélange (`parcels_source`, « hb » par
+## défaut) ; toujours « hb » avec `--legacy-textures`.
+static func parcels_source(mix: Dictionary) -> String:
+	if not TextureQuality.use_tx():
+		return GroundMaterials.SOURCE_HB
+	var forced := CmdArgs.value("--parcels-source", "")  # bancs et planches de comparaison
+	return forced if forced != "" else str(mix.get("parcels_source", GroundMaterials.SOURCE_HB))
+
+
+## TX : le mélange avec les entrées `tx_overrides` (par biome, champs remplacés) posées sur les
+## biomes ; ces entrées emploient les matières régionales du paquet TX (oasis, dunes, toundra...).
+static func with_tx_overrides(mix: Dictionary) -> Dictionary:
+	var merged := mix.duplicate(true)
+	var biomes: Dictionary = merged.get("biomes", {})
+	var overrides: Dictionary = mix.get("tx_overrides", {})
+	for key in overrides:
+		if not biomes.has(key):
+			continue
+		var entry: Dictionary = biomes[key]
+		for field in overrides[key]:
+			entry[field] = (overrides[key] as Dictionary)[field]
+	return merged
 
 
 static func _read_json(path: String) -> Dictionary:

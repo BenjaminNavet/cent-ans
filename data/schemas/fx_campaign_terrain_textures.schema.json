@@ -7,6 +7,11 @@
   "required": ["albedo_size", "normal_size", "tile_screen_px", "layers", "macro", "water"],
   "additionalProperties": false,
   "$defs": {
+    "role_map": {
+      "type": "object",
+      "propertyNames": {"enum": ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]},
+      "additionalProperties": {"type": "string"}
+    },
     "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "vec2": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}
   },
@@ -27,6 +32,39 @@
           "poly_haven_id": { "$ref": "common.schema.json#/$defs/snake_id" },
           "mean_linear": {"$ref": "#/$defs/rgb"}
         }
+      }
+    },
+    "regional": {
+      "type": "object",
+      "description": "TX (ADR 0239) : fond par biome. `roles` : rôle de la couche du shader (grass, farmland, forest, rock, heath, snow, sand) -> rôle du paquet `pack` (grass_bare, understory, rock, snow, sand, scree) ; `overrides` : par biome (1-14), rôles différents ; un biome sans couche d'un rôle prend celle de son parent. Fondu de `blend_km` entre deux biomes voisins (cartes `blend_ab` / `blend_dist` cuites par `cent-ans geo biome-blend`, un texel = `blend_texel_px` pixels carte).",
+      "required": ["pack", "blend_km", "blend_ab", "blend_dist", "blend_texel_px", "roles"],
+      "additionalProperties": false,
+      "properties": {
+        "pack": {"type": "string"},
+        "blend_km": {"type": "number", "minimum": 0, "maximum": 100},
+        "blend_ab": {"type": "string"},
+        "blend_dist": {"type": "string"},
+        "blend_texel_px": {"type": "integer", "minimum": 1},
+        "min_blend_weight": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "roles": {"$ref": "#/$defs/role_map"},
+        "overrides": {
+          "type": "object",
+          "propertyNames": {"pattern": "^([1-9]|1[0-4])$"},
+          "additionalProperties": {"$ref": "#/$defs/role_map"}
+        }
+      }
+    },
+    "micro": {
+      "type": "object",
+      "description": "TX : grain de sol fondu de près (ids du paquet `pack`, rôle micro_ground). `tile_m` : taille de la tuile au sol ; `fade_footprint` : empreinte (pixels carte par pixel écran) pleine force -> nulle ; `strength` : amplitude du grain en luminance.",
+      "required": ["pack", "tile_m", "strength", "fade_footprint", "roles"],
+      "additionalProperties": false,
+      "properties": {
+        "pack": {"type": "string"},
+        "tile_m": {"type": "number", "exclusiveMinimum": 0},
+        "strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "fade_footprint": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}},
+        "roles": {"$ref": "#/$defs/role_map"}
       }
     },
     "macro": {
