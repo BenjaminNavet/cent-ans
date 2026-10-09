@@ -220,6 +220,10 @@ func refresh() -> void:
 		if centroid.x < 0.0:
 			continue
 		dots.append({"pos": centroid, "color": facade.call("faction_color", faction) if facade != null else Color.WHITE, "player": faction == player})
+	var armies: ArmyMarkers = map.get("armies")
+	if armies != null:  # WH hover : armées ennemies perdues de vue (losange creux)
+		for ghost in armies.ghosts:
+			dots.append({"pos": ghost["pos"], "color": Color.WHITE, "player": false, "ghost": true})
 	minimap.set_armies(dots)
 
 

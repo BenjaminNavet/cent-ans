@@ -377,7 +377,10 @@ func _draw_overlay() -> void:
 	for army in _armies:
 		var center := map_to_view(army["pos"])
 		var color: Color = army["color"]
-		if bool(army.get("player", false)):
+		if bool(army.get("ghost", false)):
+			var hollow := PackedVector2Array([center + Vector2(0, -4), center + Vector2(4, 0), center + Vector2(0, 4), center + Vector2(-4, 0), center + Vector2(0, -4)])
+			_overlay.draw_polyline(hollow, Color(HudStyle.INK, StanceCues.ghost_alpha()), 1.5)
+		elif bool(army.get("player", false)):
 			_overlay.draw_circle(center, 4.5, PLAYER_RING)
 			_overlay.draw_circle(center, 3.0, color)
 		else:

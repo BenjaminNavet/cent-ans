@@ -363,6 +363,103 @@ func _setup_settlements() -> void:
 	add_child(life)
 	life.setup(self)
 	_setup_decor_hover()
+	_setup_object_hover()
+
+
+## WH hover (ADR 0271) : bulle riche différée au survol d'une armée, d'une colonie ou d'une armée
+## perdue de vue (même décompte que la bulle du décor naturel).
+var object_hover: ObjectHover = null
+## Rayon (px écran) de visée d'un fantôme d'armée.
+const GHOST_PICK_PX := 22.0
+
+
+func _setup_object_hover() -> void:
+	object_hover = ObjectHover.new()
+	object_hover.name = "ObjectHover"
+	object_hover.text_provider = hover_bubble_text
+	add_child(object_hover)
+
+
+## Texte de la bulle riche sous un point écran ("" : rien à dire). Ne lit que ce que la carte
+## montre déjà (marqueurs filtrés par le brouillard, fantômes de `ArmyMemory`).
+func hover_bubble_text(screen_position: Vector2) -> String:
+	if sim == null or armies == null:
+		return ""
+	var ordering := movement_ctl != null and movement_ctl.active()
+	var target: Dictionary = pick_target(screen_position, selected_army if ordering else "")
+	match str(target.get("kind", "")):
+		"army":
+			return army_bubble_text(str(target["id"]))
+		"settlement":
+			return settlement_bubble_text(str(target["id"]))
+	var ghost := ghost_at(screen_position)
+	return ghost_bubble_text(ghost) if not ghost.is_empty() else ""
+
+
+## BBCode de la bulle d'une armée montrée (`MapHoverText.army_text`).
+func army_bubble_text(army_id: String) -> String:
+	var army: Dictionary = sim.call("get_army", army_id)
+	if army.is_empty():
+		return ""
+	var faction := str(army.get("faction", ""))
+	var opts := {"is_player": faction == player_faction, "faction_name": SimFacade.faction_short_name(faction)}
+	if sim.has_method("get_feudal_sheet"):
+		opts["liege_name"] = str(sim.call("get_feudal_sheet", faction).get("liege_name", ""))
+	var path: Array = army.get("path", [])
+	if not path.is_empty() and settlement_data != null:
+		opts["destination_name"] = str(settlement_data.get_settlement(str(path[0])).get("name", ""))
+	return MapHoverText.army_text(army, opts)
+
+
+## BBCode de la bulle d'une colonie (`MapHoverText.settlement_text`) ; garnison et siège
+## seulement si la province est en vue ou nous appartient.
+func settlement_bubble_text(settlement_id: String) -> String:
+	if not sim.has_method("settlement_detail"):
+		return ""
+	var detail: Dictionary = sim.call("settlement_detail", settlement_id)
+	if detail.is_empty():
+		return ""
+	var owner := str(detail.get("owner", ""))
+	var controller := str(detail.get("controller", ""))
+	var province := str(detail.get("province", ""))
+	var seen := owner == player_faction or controller == player_faction or minimap_ctl == null or minimap_ctl.is_province_visible(province)
+	var opts := {"visible": seen, "is_player": controller == player_faction, "level": -1,
+		"owner_name": SimFacade.faction_short_name(owner), "controller_name": SimFacade.faction_short_name(controller)}
+	if seen:
+		var population := 0.0
+		if sim.has_method("get_provinces_snapshot"):
+			var snapshot: Dictionary = sim.call("get_provinces_snapshot", PackedStringArray([province]))
+			var totals = snapshot.get("population_total", [])
+			population = float(totals[0]) if totals.size() > 0 else 0.0
+		var entry: Dictionary = settlement_data.get_settlement(settlement_id) if settlement_data != null else {}
+		opts["level"] = SettlementGrowth.level_of(entry, detail, population)
+		var siege: Dictionary = detail.get("siege", {})
+		if not siege.is_empty():
+			opts["attacker_name"] = SimFacade.faction_short_name(str(siege.get("attacker", "")))
+	return MapHoverText.settlement_text(detail, opts)
+
+
+## Fantôme (armée ennemie perdue de vue) sous un point écran : entrée de `armies.ghosts` ou {}.
+func ghost_at(screen_position: Vector2) -> Dictionary:
+	if armies == null or camera == null:
+		return {}
+	var best := {}
+	var best_distance := GHOST_PICK_PX
+	for ghost: Dictionary in armies.ghosts:
+		var world: Vector3 = armies.world_at_pixel(ghost["pos"])
+		if camera.is_position_behind(world):
+			continue
+		var distance := camera.unproject_position(world).distance_to(screen_position)
+		if distance < best_distance:
+			best_distance = distance
+			best = ghost
+	return best
+
+
+func ghost_bubble_text(ghost: Dictionary) -> String:
+	var faction := str(ghost.get("faction", ""))
+	var army := {"faction": faction, "general_name": ghost.get("general_name", "")}
+	return MapHoverText.army_text(army, {"faction_name": SimFacade.faction_short_name(faction), "men": int(ghost.get("men", 0)), "seen_ago": int(ghost.get("ago", 0))})
 
 
 ## NA (ADR 0219) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).

@@ -246,6 +246,7 @@ func _draw() -> void:
 		for realm in _realms:
 			placed.append_array(_draw_arched(realm, s, text_alpha))
 		_draw_province_names(s, text_alpha, view, placed)
+	_draw_ghost_tokens(s, smoothstep(0.4, 0.75, a), view)
 	_draw_army_tokens(s, smoothstep(0.4, 0.75, a), view)
 
 
@@ -795,6 +796,28 @@ static func token_cues(cue: String, stance: String, status: String, is_player: b
 		"badge": shown_stance,
 		"moving": status == "moving",
 	}
+
+
+## WH hover : fantômes (armées ennemies perdues de vue) — disque gris au contour tireté.
+func _draw_ghost_tokens(s: float, a: float, view: Rect2) -> void:
+	if armies == null:
+		return
+	var r := 10.0 * s
+	var alpha := StanceCues.ghost_alpha() * a
+	for ghost in armies.ghosts:
+		var at: Vector2 = ghost["pos"]
+		var world: Vector3 = armies.world_at_pixel(at)
+		var p := camera.unproject_position(world)
+		if camera.is_position_behind(world) or not view.has_point(p):
+			continue
+		draw_circle(p, r, Color(0.55, 0.53, 0.5, alpha))
+		draw_arc(p, r, 0.0, TAU, 24, Color(INK, alpha), 1.4, true)
+		var text := ArmyPlate.format_men(int(ghost["men"]))
+		var fs := int(clampf(12.0 * s, 11.0, 15.0))
+		var w := FONT_ROMAN.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var origin := p + Vector2(-w * 0.5, r + fs + 2.0)
+		draw_string_outline(FONT_ROMAN, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(PAPER, alpha))
+		draw_string(FONT_ROMAN, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(INK, alpha))
 
 
 func _heraldry(faction: String) -> Texture2D:
