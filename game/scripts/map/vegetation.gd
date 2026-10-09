@@ -1115,7 +1115,7 @@ func _evict() -> void:
 	stats["tiles"] = _tiles.size()
 
 
-## NA (ADR 0217) : arbres (haies exclues) susceptibles d'être sous le curseur, lus dans les copies
+## NA (ADR 0219) : arbres (haies exclues) susceptibles d'être sous le curseur, lus dans les copies
 ## processeur des tampons déjà en mémoire. `ground` : point du sol visé (x, z monde) ; `reach_scale`
 ## élargit la fenêtre de recherche (hauteur de l'arbre × cette valeur : la tête d'un grand arbre
 ## se projette loin de son pied sous une caméra rasante). Renvoie [{species, position: Vector3 (pied),

@@ -1,4 +1,4 @@
-# 0217 — Codex du décor naturel et bulle de survol différée
+# 0219 — Codex du décor naturel et bulle de survol différée
 
 - Statut : accepté (2026-10-09, chantier NA)
 

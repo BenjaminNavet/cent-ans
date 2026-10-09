@@ -68,7 +68,7 @@ const DEFAULTS := {
 	# FE6 : guide de la féodalité (trois étapes) vu une fois.
 	"feudal_tutorial/done": false,
 	"interface/next_hint": true,
-	# NA (ADR 0217) : délai (s) de la bulle du décor naturel ; 0 = désactivée (choix : `decor_hover.choices`
+	# NA (ADR 0219) : délai (s) de la bulle du décor naturel ; 0 = désactivée (choix : `decor_hover.choices`
 	# de `data/ui/tooltip_style.json`).
 	"interface/decor_hover_delay": 1.5,
 	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines

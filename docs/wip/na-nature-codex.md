@@ -1,4 +1,4 @@
-# NA — codex du décor naturel + bulle de survol (ADR 0217)
+# NA — codex du décor naturel + bulle de survol (ADR 0219)
 
 Worktree `../gp-na`, branche `feat/na`. Demande joueur 2026-10-09 : le codex couvre-t-il arbres,
 faune… ; survol d'un élément du décor → petite bulle après quelques secondes.

@@ -103,7 +103,7 @@
     },
     "decor": {
       "type": "array",
-      "description": "Éléments du décor naturel couverts par la fiche (NA, ADR 0217) : `tree:<id>` (data/art/tree_species.json), `battle_tree:<id>` (data/art/battle_tree_leaves.json), `fauna:<id>` (data/map/map_fauna.json), `bird:<id>` (data/map/map_birds.json), `rock:<id>` (data/art/rock_outcrops.yaml). Survoler l'élément en jeu ouvre la bulle de cette fiche.",
+      "description": "Éléments du décor naturel couverts par la fiche (NA, ADR 0219) : `tree:<id>` (data/art/tree_species.json), `battle_tree:<id>` (data/art/battle_tree_leaves.json), `fauna:<id>` (data/map/map_fauna.json), `bird:<id>` (data/map/map_birds.json), `rock:<id>` (data/art/rock_outcrops.yaml). Survoler l'élément en jeu ouvre la bulle de cette fiche.",
       "items": {
         "type": "string",
         "pattern": "^(tree|battle_tree|fauna|bird|rock):[a-z0-9_]+$"

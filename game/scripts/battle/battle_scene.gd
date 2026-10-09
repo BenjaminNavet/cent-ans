@@ -1583,7 +1583,7 @@ func _exit_tree() -> void:
 ## CB-M2 : position de la souris notée par `BattleInput` ; le curseur est recalculé au plus une
 ## fois par image, et seulement si la case de 2 m visée, le régiment survolé ou la sélection
 ## changent.
-## NA (ADR 0217) : bulle codex différée au survol d'un arbre ou d'un buisson de la bataille.
+## NA (ADR 0219) : bulle codex différée au survol d'un arbre ou d'un buisson de la bataille.
 var decor_hover: DecorHover = null
 const DECOR_MIN_RADIUS_PX := 12.0
 const DECOR_REACH_M := 40.0  # grand arbre : la tête se projette loin du pied sous une caméra rasante

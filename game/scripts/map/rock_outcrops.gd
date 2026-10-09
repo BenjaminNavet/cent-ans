@@ -1081,7 +1081,7 @@ func _evict() -> void:
 	stats["tiles"] = _tiles.size()
 
 
-## NA (ADR 0217) : rochers susceptibles d'être sous le curseur, lus dans les copies processeur
+## NA (ADR 0219) : rochers susceptibles d'être sous le curseur, lus dans les copies processeur
 ## déjà en mémoire. `ground` : point du sol visé (px carte) ; renvoie [{species (id du modèle),
 ## position: Vector3 (pied), height, radius}] pour les rochers visibles à moins de
 ## `reach_scale` rayons du point (l'appelant départage en espace écran).

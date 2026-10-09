@@ -1,6 +1,6 @@
-extends SceneTree
+extends TestCase
 
-## Test headless du chantier NA (ADR 0217), bulle différée du décor naturel :
+## Test headless du chantier NA (ADR 0219), bulle différée du décor naturel :
 ##  1. `CodexStore.entry_for_decor` (clés tree, battle_tree, fauna ; inconnue → vide) ;
 ##  2. minuterie de `DecorHover` : rien avant le délai, une bulle après, fermée quand la souris
 ##     s'éloigne, aucune répétition tant que la souris reste immobile, rien si désactivée, si un
@@ -10,7 +10,6 @@ extends SceneTree
 ##  4. bataille : `BattleTerrain.decor_candidates` rend les arbres plantés autour d'un point.
 ## Usage : godot --headless --path game --script res://tests/decor_hover_test.gd
 
-var _failures := 0
 var _provider_calls := 0
 
 
@@ -20,30 +19,19 @@ func _init() -> void:
 	await _test_timer()
 	await _test_campaign()
 	await _test_battle_index()
-	if _failures > 0:
-		push_error("decor_hover_test: %d failure(s)" % _failures)
-		quit(1)
-		return
-	print("decor_hover_test: OK")
-	quit(0)
+	finish()
 
-
-func _check(condition: bool, label: String) -> bool:
-	if not condition:
-		_failures += 1
-		push_error("FAIL: " + label)
-	return condition
 
 
 func _test_mapping() -> void:
 	var codex := CodexText.store()
-	if not _check(codex != null, "CodexStore autoload"):
+	if not check(codex != null, "CodexStore autoload"):
 		return
-	_check(str(codex.call("entry_for_decor", "tree", "willow")) == "cdx_saule", "tree:willow -> cdx_saule")
-	_check(str(codex.call("entry_for_decor", "battle_tree", "willow")) == "cdx_saule", "battle_tree:willow -> cdx_saule")
-	_check(str(codex.call("entry_for_decor", "tree", "juniper")) == "cdx_genievre", "tree:juniper -> cdx_genievre")
-	_check(str(codex.call("entry_for_decor", "fauna", "animal_wolf_grey")) == "cdx_loups_et_louveterie", "fauna:animal_wolf_grey")
-	_check(str(codex.call("entry_for_decor", "tree", "no_such_tree")) == "", "unknown species -> empty")
+	check(str(codex.call("entry_for_decor", "tree", "willow")) == "cdx_saule", "tree:willow -> cdx_saule")
+	check(str(codex.call("entry_for_decor", "battle_tree", "willow")) == "cdx_saule", "battle_tree:willow -> cdx_saule")
+	check(str(codex.call("entry_for_decor", "tree", "juniper")) == "cdx_genievre", "tree:juniper -> cdx_genievre")
+	check(str(codex.call("entry_for_decor", "fauna", "animal_wolf_grey")) == "cdx_loups_et_louveterie", "fauna:animal_wolf_grey")
+	check(str(codex.call("entry_for_decor", "tree", "no_such_tree")) == "", "unknown species -> empty")
 
 
 func _hover(delay: float, hit: Dictionary, blocked: bool = false) -> DecorHover:
@@ -62,29 +50,29 @@ func _hover(delay: float, hit: Dictionary, blocked: bool = false) -> DecorHover:
 
 func _test_timer() -> void:
 	var bubbles := root.get_node_or_null("CodexBubbles")
-	if not _check(bubbles != null, "CodexBubbles autoload"):
+	if not check(bubbles != null, "CodexBubbles autoload"):
 		return
 	bubbles.call("close_all")
 	var willow := {"kind": "tree", "species": "willow"}
 	var hover := _hover(1.0, willow)
 	hover.note_mouse(Vector2(300, 300))
 	hover.tick(0.9)
-	_check(int(bubbles.call("bubble_count")) == 0, "no bubble before the delay")
+	check(int(bubbles.call("bubble_count")) == 0, "no bubble before the delay")
 	hover.tick(0.2)
-	_check(int(bubbles.call("bubble_count")) == 1 and hover.shown_id == "cdx_saule", "one bubble after the delay (cdx_saule)")
-	_check(str(bubbles.call("top_id")) == "cdx_saule", "bubble is the codex entry")
+	check(int(bubbles.call("bubble_count")) == 1 and hover.shown_id == "cdx_saule", "one bubble after the delay (cdx_saule)")
+	check(str(bubbles.call("top_id")) == "cdx_saule", "bubble is the codex entry")
 	# Quelques px : la bulle reste, aucun nouvel essai.
 	hover.note_mouse(Vector2(304, 302))
 	hover.tick(5.0)
-	_check(int(bubbles.call("bubble_count")) == 1 and _provider_calls == 1, "stays open and no repeat while still")
+	check(int(bubbles.call("bubble_count")) == 1 and _provider_calls == 1, "stays open and no repeat while still")
 	# La bulle n'est pas refermée par la grâce propre de CodexBubbles.
 	await create_timer(0.7).timeout
-	_check(int(bubbles.call("bubble_count")) == 1, "bubble survives the codex grace delay")
+	check(int(bubbles.call("bubble_count")) == 1, "bubble survives the codex grace delay")
 	# Souris loin : fermeture, puis nouveau décompte.
 	hover.note_mouse(Vector2(700, 500))
-	_check(int(bubbles.call("bubble_count")) == 0, "closed when the mouse leaves")
+	check(int(bubbles.call("bubble_count")) == 0, "closed when the mouse leaves")
 	hover.tick(1.1)
-	_check(int(bubbles.call("bubble_count")) == 1 and _provider_calls == 2, "re-armed after a move")
+	check(int(bubbles.call("bubble_count")) == 1 and _provider_calls == 2, "re-armed after a move")
 	hover.note_mouse(Vector2(100, 100))
 	bubbles.call("close_all")
 	hover.queue_free()
@@ -92,13 +80,13 @@ func _test_timer() -> void:
 	var off := _hover(0.0, willow)
 	off.note_mouse(Vector2(50, 50))
 	off.tick(10.0)
-	_check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 0, "disabled: no lookup, no bubble")
+	check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 0, "disabled: no lookup, no bubble")
 	off.queue_free()
 	# Objet prioritaire dessous.
 	var blocked := _hover(1.0, willow, true)
 	blocked.note_mouse(Vector2(50, 50))
 	blocked.tick(2.0)
-	_check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 0, "blocker: army/settlement first")
+	check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 0, "blocker: army/settlement first")
 	blocked.queue_free()
 	# Rien sous le curseur, ou espèce sans fiche : une seule consultation, pas de bulle.
 	for hit in [{}, {"kind": "tree", "species": "no_such_tree"}]:
@@ -106,11 +94,11 @@ func _test_timer() -> void:
 		empty.note_mouse(Vector2(50, 50))
 		empty.tick(2.0)
 		empty.tick(2.0)
-		_check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 1, "no entry: one lookup, no bubble (%s)" % str(hit))
+		check(int(bubbles.call("bubble_count")) == 0 and _provider_calls == 1, "no entry: one lookup, no bubble (%s)" % str(hit))
 		empty.queue_free()
 	# Réglage du joueur : -1 suit les données (1,5 s).
 	var settings := _hover(-1.0, willow)
-	_check(settings.delay() >= 0.0, "delay read from Settings")
+	check(settings.delay() >= 0.0, "delay read from Settings")
 	settings.queue_free()
 
 
@@ -119,11 +107,11 @@ func _test_campaign() -> void:
 	root.add_child(map)
 	for i in 5:
 		await process_frame
-	if not _check(map.get("load_ok") == true, "campaign map loads"):
+	if not check(map.get("load_ok") == true, "campaign map loads"):
 		map.queue_free()
 		return
 	var vegetation: Vegetation = map.get_node_or_null("Vegetation")
-	if not _check(vegetation != null, "Vegetation node"):
+	if not check(vegetation != null, "Vegetation node"):
 		map.queue_free()
 		return
 	var data: MapData = map.map_data
@@ -147,7 +135,7 @@ func _test_campaign() -> void:
 		if candidates.size() >= 3:
 			chosen = {"hit": hit, "candidates": candidates}
 			break
-	if not _check(not chosen.is_empty(), "built trees found in a campaign view"):
+	if not check(not chosen.is_empty(), "built trees found in a campaign view"):
 		map.queue_free()
 		return
 	# Arbre le plus isolé à l'écran : sans voisin à moins de 12 px.
@@ -166,13 +154,13 @@ func _test_campaign() -> void:
 		if gap > best_gap and map.get_viewport().get_visible_rect().has_point(screens[i]):
 			best_gap = gap
 			best_index = i
-	if _check(best_index >= 0, "an on-screen tree"):
+	if check(best_index >= 0, "an on-screen tree"):
 		var target: Vector2 = screens[best_index]
 		var expected := str(candidates[best_index]["species"])
 		var got: Dictionary = map.pick_decor(target)
 		print("decor_hover: %d candidates, isolated gap %.1f px, expected %s, got %s" % [candidates.size(), best_gap, expected, str(got)])
-		_check(got.get("kind") == "tree" and got.get("species") == expected or best_gap < 12.0, "pick_decor finds the tree species")
-		_check(map.pick_decor(Vector2(-500.0, -500.0)).is_empty(), "nothing off screen")
+		check(got.get("kind") == "tree" and got.get("species") == expected or best_gap < 12.0, "pick_decor finds the tree species")
+		check(map.pick_decor(Vector2(-500.0, -500.0)).is_empty(), "nothing off screen")
 	# Priorité : une colonie sous le curseur bloque la bulle.
 	var settlement_id := str(map.settlement_layer.data.settlements[0]["id"])
 	var world: Vector3 = map.settlement_layer.world_position_of(settlement_id)
@@ -182,9 +170,9 @@ func _test_campaign() -> void:
 		await process_frame
 	var at := camera.unproject_position(world)
 	var target_info: Dictionary = map.pick_target(at)
-	if _check(not target_info.is_empty(), "settlement is picked at its position"):
-		_check(bool(map.decor_hover.blocker.call(at)), "blocker true over a settlement")
-	_check(not bool(map.decor_hover.blocker.call(Vector2(-500.0, -500.0))), "blocker false on empty ground")
+	if check(not target_info.is_empty(), "settlement is picked at its position"):
+		check(bool(map.decor_hover.blocker.call(at)), "blocker true over a settlement")
+	check(not bool(map.decor_hover.blocker.call(Vector2(-500.0, -500.0))), "blocker false on empty ground")
 	await _test_fauna_and_rocks(map, data, rig, camera)
 	map.queue_free()
 	await process_frame
@@ -209,7 +197,7 @@ func _test_fauna_and_rocks(map: Node3D, data: MapData, rig: CampaignCamera, came
 			species_found = species_found or candidate["species"] == herd["species"]
 		print("decor_hover: fauna visible cells %d, candidates near a herd: %d" % [int(fauna.stats["visible_cells"]), found.size()])
 		if int(fauna.stats["visible_cells"]) > 0:
-			_check(species_found, "fauna candidates include the herd species")
+			check(species_found, "fauna candidates include the herd species")
 	var outcrops := map.get_node_or_null("RockOutcrops")
 	if outcrops != null and outcrops.tile_count() > 0:
 		var any_rock := false
@@ -234,7 +222,7 @@ func _test_battle_index() -> void:
 	terrain.build({"nx": nx, "nz": nz, "resolution": 10.0, "heights": heights, "terrain": "forest", "season": "summer", "ground": "dry", "woodland": 0.8}, "clear")
 	var all := terrain.decor_candidates(Vector2(600.0, 400.0), 2000.0)
 	print("decor_hover: battle trees indexed: %d" % all.size())
-	if not _check(all.size() > 50, "battle trees indexed (%d)" % all.size()):
+	if not check(all.size() > 50, "battle trees indexed (%d)" % all.size()):
 		world.queue_free()
 		return
 	var sample: Dictionary = all[all.size() / 2]
@@ -243,9 +231,9 @@ func _test_battle_index() -> void:
 	var found := false
 	for tree: Dictionary in near:
 		found = found or (tree["position"] as Vector3).is_equal_approx(at)
-		_check(BattleTrees.SPECIES.has(tree["species"]) and absf((tree["position"] as Vector3).x - at.x) <= 5.0, "indexed tree is a known species within reach")
-	_check(found, "the sampled tree is found near its own position")
+		check(BattleTrees.SPECIES.has(tree["species"]) and absf((tree["position"] as Vector3).x - at.x) <= 5.0, "indexed tree is a known species within reach")
+	check(found, "the sampled tree is found near its own position")
 	var codex := CodexText.store()
-	_check(codex != null and codex.call("entry_for_decor", "battle_tree", "willow") == "cdx_saule", "battle_tree key resolves")
+	check(codex != null and codex.call("entry_for_decor", "battle_tree", "willow") == "cdx_saule", "battle_tree key resolves")
 	world.queue_free()
 	await process_frame

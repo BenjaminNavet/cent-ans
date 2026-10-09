@@ -1742,7 +1742,7 @@ func _build_trees() -> void:
 
 
 
-## NA (ADR 0217) : copie légère des arbres plantés (essence, pied, échelles), rangée par tuile de
+## NA (ADR 0219) : copie légère des arbres plantés (essence, pied, échelles), rangée par tuile de
 ## `TREE_TILE` m, pour retrouver l'arbre sous le curseur sans nœud ni collision.
 var _decor_trees: Dictionary = {}  # Vector2i → Array de {species, position, height, radius}
 

@@ -1,7 +1,7 @@
 class_name DecorHover
 extends Node
 
-## NA (ADR 0217) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).
+## NA (ADR 0219) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).
 ## Surveille la souris : immobile (≤ `still_px`) pendant `delay` secondes, hors interface et
 ## sans objet prioritaire (`blocker`), elle interroge `provider` (point écran → {kind, species}),
 ## traduit par `CodexStore.entry_for_decor` et ouvre une bulle codex ordinaire près du curseur

@@ -673,7 +673,7 @@ func _evict() -> void:
 		_cells.erase(keys[n])
 
 
-## NA (ADR 0217) : bêtes des troupeaux visibles près de `ground` (px carte), calculées d'après les
+## NA (ADR 0219) : bêtes des troupeaux visibles près de `ground` (px carte), calculées d'après les
 ## cellules installées (le mouvement est dans le shader : on vise la position de repos du
 ## troupeau). Renvoie [{species, position: Vector3, height, radius}] ; `reach` : rayon de
 ## recherche (px). Seules les cellules dont le MultiMesh est affiché comptent.

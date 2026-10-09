@@ -365,7 +365,7 @@ func _setup_settlements() -> void:
 	_setup_decor_hover()
 
 
-## NA (ADR 0217) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).
+## NA (ADR 0219) : bulle codex différée au survol du décor naturel (arbres, troupeaux, rochers).
 var decor_hover: DecorHover = null
 ## Rayons minimaux de visée (px écran) par type de décor, et fenêtre de recherche du sol (px écran).
 const DECOR_MIN_RADIUS_PX := {"tree": 10.0, "rock": 12.0, "fauna": 16.0}
