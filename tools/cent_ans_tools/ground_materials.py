@@ -29,10 +29,31 @@ from typing import Any
 
 import numpy as np
 import yaml
+from PIL import Image
+
 from cent_ans_tools.codex import schema_validator
-from PIL import Image, ImageDraw, ImageFont
-from scipy.ndimage import gaussian_filter
 from cent_ans_tools.paths import REPO_DIR as ROOT
+from cent_ans_tools.texture_factory.board import board as factory_board
+from cent_ans_tools.texture_factory.checks import blotch_score, seam_ratio
+from cent_ans_tools.texture_factory.color import LUMA, linear_to_srgb, srgb_to_linear
+from cent_ans_tools.texture_factory.pack import (  # noqa: F401  (re-exported)
+    _resize_normal,
+    grid_shape,
+    import_file,
+)
+from cent_ans_tools.texture_factory.pack import pack as factory_pack
+from cent_ans_tools.texture_factory.pbr import (
+    derive_normal_rough,
+    equalize_luminance,
+    flatten_gradients,
+    flatten_lighting,
+)
+from cent_ans_tools.texture_factory.seamless import (  # noqa: F401  (re-exported)
+    _loop_cut,
+    _seam_mask,
+    low_pass,
+    make_seamless,
+)
 
 CATALOG_PATH = ROOT / "data" / "art" / "ground_materials.yaml"
 SCHEMA_PATH = ROOT / "data" / "schemas" / "ground_materials.schema.json"
@@ -50,7 +71,6 @@ MAX_PACK_BYTES = 40_000_000
 ALBEDO_QUALITY = 88
 NORMAL_QUALITY = 90
 # Rec. 709 luma weights (linear RGB).
-_LUMA = np.array([0.2126, 0.7152, 0.0722])
 # Base roughness per role (matte crops, slightly glossier rock).
 ROLE_ROUGHNESS = {"crop": 0.9, "canopy": 0.85, "ground": 0.8}
 DEFAULT_HEIGHT_STRENGTH = 2.0
@@ -196,204 +216,10 @@ def _generate_local(
 
 
 # ------------------------------------------------------------------ seamless
-def _srgb_to_linear(values: np.ndarray) -> np.ndarray:
-    return np.where(
-        values <= 0.04045, values / 12.92, ((values + 0.055) / 1.055) ** 2.4
-    )
-
-
-def _linear_to_srgb(values: np.ndarray) -> np.ndarray:
-    values = np.clip(values, 0.0, 1.0)
-    return np.where(
-        values <= 0.0031308, values * 12.92, 1.055 * values ** (1 / 2.4) - 0.055
-    )
-
-
-def _loop_cut(error: np.ndarray) -> np.ndarray:
-    """Minimum-error path through ``error`` (rows x cols), one column per row.
-
-    Steps of at most one column between rows; the path starts and ends on the same
-    column (the best one of the first row) so it closes when the image wraps.
-    """
-    rows, cols = error.shape
-    start = int(np.argmin(error[0]))
-    cost = np.full(cols, np.inf)
-    cost[start] = error[0, start]
-    back = np.zeros((rows, cols), dtype=np.int64)
-    index = np.arange(cols)
-    for row in range(1, rows):
-        left = np.concatenate(([np.inf], cost[:-1]))
-        right = np.concatenate((cost[1:], [np.inf]))
-        stacked = np.stack([left, cost, right])
-        choice = np.argmin(stacked, axis=0)
-        back[row] = index + choice - 1
-        cost = stacked[choice, index] + error[row]
-    path = np.empty(rows, dtype=np.int64)
-    path[-1] = start
-    for row in range(rows - 1, 0, -1):
-        path[row - 1] = back[row, path[row]]
-    return path
-
-
-def _seam_mask(
-    error: np.ndarray, centre: int, half_band: int, feather: float
-) -> np.ndarray:
-    """Weight (0..1) along columns: 1 between two loop cuts around column ``centre``.
-
-    ``error`` is rows x cols; the left cut runs in ``[centre - half_band, centre - margin)``,
-    the right one in ``[centre + margin, centre + half_band)``.
-    """
-    rows, cols = error.shape
-    margin = int(np.ceil(3 * feather)) + 1  # keep the feathered cut off the seam itself
-    left = (
-        _loop_cut(error[:, centre - half_band : centre - margin]) + centre - half_band
-    )
-    right = _loop_cut(error[:, centre + margin : centre + half_band]) + centre + margin
-    columns = np.arange(cols)[np.newaxis, :]
-    mask = (
-        (columns >= left[:, np.newaxis]) & (columns <= right[:, np.newaxis])
-    ).astype(np.float64)
-    if feather > 0:
-        mask = gaussian_filter(mask, feather, mode="wrap")
-    return mask
-
-
-def make_seamless(
-    image: np.ndarray, half_band: int, feather: float = 1.5
-) -> np.ndarray:
-    """Seamlessly tileable copy of ``image`` (H x W x 3 float) by min-error cuts.
-
-    After a half-tile roll the original borders meet on a central cross. The vertical arm
-    is replaced, between two minimum-error cuts, by a copy rolled on rows only (continuous
-    across that arm), the horizontal arm by a copy rolled on columns only, and their
-    crossing by the unrolled source. Cuts close on themselves so the result wraps.
-    """
-    height, width = image.shape[:2]
-    if not 16 <= half_band < min(height, width) // 2:
-        raise ValueError(f"demi-bande hors bornes : {half_band}")
-    source = image.astype(np.float64)
-    rolled_xy = np.roll(source, (height // 2, width // 2), axis=(0, 1))
-    rolled_y = np.roll(source, height // 2, axis=0)
-    rolled_x = np.roll(source, width // 2, axis=1)
-    error_x = ((rolled_xy - rolled_y) ** 2).sum(axis=-1)
-    weight_x = _seam_mask(error_x, width // 2, half_band, feather)
-    error_y = (1 - weight_x) * ((rolled_xy - rolled_x) ** 2).sum(axis=-1) + weight_x * (
-        (rolled_y - source) ** 2
-    ).sum(axis=-1)
-    weight_y = _seam_mask(error_y.T, height // 2, half_band, feather).T
-    wx = weight_x[..., np.newaxis]
-    wy = weight_y[..., np.newaxis]
-    return (
-        rolled_xy * (1 - wx) * (1 - wy)
-        + rolled_y * wx * (1 - wy)
-        + rolled_x * (1 - wx) * wy
-        + source * wx * wy
-    )
-
-
-def low_pass(values: np.ndarray, sigma: float, mode: str) -> np.ndarray:
-    """Wide Gaussian blur of a H x W (x C) image, computed at reduced resolution.
-
-    The image is block-averaged by ``factor`` (sigma / 4, power of two), blurred there and
-    brought back by linear interpolation: a sigma of ~150 px costs milliseconds.
-    """
-    from scipy.ndimage import zoom
-
-    height, width = values.shape[:2]
-    factor = 1
-    while (
-        factor * 2 <= sigma / 4
-        and height % (factor * 2) == 0
-        and width % (factor * 2) == 0
-    ):
-        factor *= 2
-    extra = values.shape[2:]
-    small = values.reshape(
-        height // factor, factor, width // factor, factor, *extra
-    ).mean(axis=(1, 3))
-    sigmas = (sigma / factor, sigma / factor) + (0,) * len(extra)
-    small = gaussian_filter(small, sigmas, mode=mode)
-    if factor == 1:
-        return small
-    zoom_mode = "grid-wrap" if mode == "wrap" else "nearest"
-    factors = (factor, factor) + (1,) * len(extra)
-    return zoom(small, factors, order=1, mode=zoom_mode, grid_mode=True)
-
-
-def flatten_lighting(
-    linear: np.ndarray, sigma: float, strength: float = 0.7
-) -> np.ndarray:
-    """Divide out large-scale luminance variation (wrap-around blur), keeping chroma."""
-    luminance = linear @ _LUMA
-    low = low_pass(luminance, sigma, "wrap")
-    ratio = (low.mean() / np.maximum(low, 1e-4)) ** strength
-    return linear * ratio[..., np.newaxis]
-
-
-def flatten_gradients(linear: np.ndarray, sigma: float) -> np.ndarray:
-    """Remove large-scale colour gradients of a non-tiling image (vignetting, haze).
-
-    Each channel is divided by its own mirrored-edge blur (times its mean), so the regions
-    the seam cuts bring together share the same low-frequency colour and the cuts leave no
-    visible band.
-    """
-    low = low_pass(linear, sigma, "reflect")
-    means = linear.reshape(-1, linear.shape[-1]).mean(axis=0)
-    return linear * (means / np.maximum(low, 1e-4))
-
-
-def equalize_luminance(linear: np.ndarray, target: float) -> np.ndarray:
-    """Scale linear RGB so its mean luminance equals ``target``."""
-    mean = float((linear @ _LUMA).mean())
-    return np.clip(linear * (target / max(mean, 1e-4)), 0.0, 1.0)
-
-
-def derive_normal_rough(
-    linear: np.ndarray, strength: float, base_roughness: float
-) -> np.ndarray:
-    """Normal (R, G, OpenGL) + roughness (B) from the high-passed luminance, uint8."""
-    luminance = linear @ _LUMA
-    height = luminance - gaussian_filter(luminance, 8.0, mode="wrap")
-    height = gaussian_filter(height, 0.8, mode="wrap")
-    scale = max(float(np.percentile(np.abs(height), 98)), 1e-5)
-    height = np.clip(height / scale, -1.0, 1.0)
-    dx = (np.roll(height, -1, axis=1) - np.roll(height, 1, axis=1)) * 0.5
-    dy = (np.roll(height, -1, axis=0) - np.roll(height, 1, axis=0)) * 0.5
-    nx, ny = -dx * strength, dy * strength  # OpenGL: +Y up, image rows go down
-    nz = np.ones_like(nx)
-    norm = np.sqrt(nx * nx + ny * ny + nz * nz)
-    rough = np.clip(base_roughness + 0.1 * (-height), 0.0, 1.0)
-    packed = np.stack([nx / norm * 0.5 + 0.5, ny / norm * 0.5 + 0.5, rough], axis=-1)
-    return np.clip(np.rint(packed * 255), 0, 255).astype(np.uint8)
-
-
-def seam_ratio(image: np.ndarray) -> float:
-    """Wrap seam jump relative to the typical jump between neighbouring pixels.
-
-    ~1 means the seam is as smooth as the texture interior; a hard seam scores several.
-    """
-    data = image.astype(np.float64)
-    interior = np.concatenate(
-        [np.abs(np.diff(data, axis=0)).ravel(), np.abs(np.diff(data, axis=1)).ravel()]
-    ).mean()
-    wrap = np.concatenate(
-        [np.abs(data[0] - data[-1]).ravel(), np.abs(data[:, 0] - data[:, -1]).ravel()]
-    ).mean()
-    return float(wrap / max(interior, 1e-6))
-
-
-def blotch_score(image: np.ndarray, blocks: int = 4) -> float:
-    """Coefficient of variation of block-mean luminances (a dominant blotch scores high)."""
-    luminance = image.astype(np.float64)
-    if luminance.ndim == 3:
-        luminance = luminance[..., :3] @ _LUMA
-    size = luminance.shape[0] // blocks
-    means = (
-        luminance[: size * blocks, : size * blocks]
-        .reshape(blocks, size, blocks, size)
-        .mean(axis=(1, 3))
-    )
-    return float(means.std() / max(means.mean(), 1e-6))
+# Processing lives in the texture factory (TX T1b); names kept for HB callers.
+_srgb_to_linear = srgb_to_linear
+_linear_to_srgb = linear_to_srgb
+_LUMA = LUMA
 
 
 def process(
@@ -454,51 +280,6 @@ def seamless(
 
 
 # ------------------------------------------------------------------ packing
-def grid_shape(count: int) -> tuple[int, int]:
-    """(columns, rows) with columns * rows == count, as square as possible, <= 16 k px."""
-    columns = max(c for c in range(1, int(np.sqrt(count)) + 1) if count % c == 0)
-    return columns, count // columns
-
-
-def import_file(columns: int, rows: int, source: str) -> str:
-    """Godot ``.import`` of a grid image as a VRAM-compressed Texture2DArray (as GA4)."""
-    return f"""[remap]
-
-importer="2d_array_texture"
-type="CompressedTexture2DArray"
-
-[deps]
-
-source_file="{RES_DIR}{source}"
-
-[params]
-
-compress/mode=2
-compress/high_quality=false
-compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
-compress/hdr_compression=1
-compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=-1
-slices/horizontal={columns}
-slices/vertical={rows}
-"""
-
-
-def _resize_normal(normal: Image.Image, size: int) -> Image.Image:
-    """Downsample a normal + roughness tile, renormalising the XY normal."""
-    small = (
-        np.asarray(normal.resize((size, size), Image.Resampling.BOX), dtype=np.float64)
-        / 255.0
-    )
-    xy = small[..., :2] * 2 - 1
-    length = np.sqrt((xy**2).sum(-1) + np.clip(1 - (xy**2).sum(-1), 0, 1))
-    small[..., :2] = xy / np.maximum(length, 1e-6)[..., np.newaxis] * 0.5 + 0.5
-    return Image.fromarray(np.clip(np.rint(small * 255), 0, 255).astype(np.uint8))
-
-
 def pack(
     document: dict[str, Any],
     raw_dir: Path = RAW_DIR,
@@ -506,93 +287,21 @@ def pack(
     manifest_path: Path = MANIFEST_PATH,
 ) -> dict[str, Any]:
     """Assemble the tiles into the two grid images, their imports and the manifest."""
-    materials = document["materials"]
-    size = document["layer_size"]
-    normal_size = document.get("normal_size", size)
-    columns, rows = grid_shape(len(materials))
-    albedo_grid = Image.new("RGB", (columns * size, rows * size))
-    normal_grid = Image.new("RGB", (columns * normal_size, rows * normal_size))
-    layers = []
-    tiles = raw_dir / "tiles"
-    for entry in materials:
-        albedo = Image.open(tiles / f"{entry['id']}_albedo.png").convert("RGB")
-        normal = Image.open(tiles / f"{entry['id']}_normal.png").convert("RGB")
-        if albedo.size != (size, size) or normal.size != (size, size):
-            raise ValueError(
-                f"{entry['id']} : tuile de taille {albedo.size}, {size}² attendu"
-            )
-        column, row = entry["layer"] % columns, entry["layer"] // columns
-        albedo_grid.paste(albedo, (column * size, row * size))
-        if normal_size != size:
-            normal = _resize_normal(normal, normal_size)
-        normal_grid.paste(normal, (column * normal_size, row * normal_size))
-        mean = _srgb_to_linear(np.asarray(albedo, dtype=np.float64) / 255.0)
-        layers.append(
-            {
-                "id": entry["id"],
-                "layer": entry["layer"],
-                "role": entry["role"],
-                "biomes": entry["biomes"],
-                "tile_m": entry["tile_m"],
-                "mean_linear": [
-                    round(float(v), 4) for v in mean.reshape(-1, 3).mean(0)
-                ],
-            }
-        )
-    texture_dir.mkdir(parents=True, exist_ok=True)
-    albedo_path = texture_dir / ALBEDO_NAME
-    normal_path = texture_dir / NORMAL_NAME
-    albedo_grid.save(albedo_path, quality=ALBEDO_QUALITY, subsampling=0)
-    normal_grid.save(normal_path, quality=NORMAL_QUALITY, subsampling=0)
-    for path in (albedo_path, normal_path):
-        imported = Path(f"{path}.import")
-        slicing = f"slices/horizontal={columns}\nslices/vertical={rows}"
-        # Keep Godot's own .import (uid, imported paths) while the grid is unchanged.
-        if not imported.exists() or slicing not in imported.read_text():
-            imported.write_text(import_file(columns, rows, path.name))
-    total = albedo_path.stat().st_size + normal_path.stat().st_size
-    if total > MAX_PACK_BYTES:
-        raise ValueError(f"tableaux trop lourds : {total / 1e6:.1f} Mo > 40 Mo")
-    manifest = {
-        "layer_size": size,
-        "normal_size": normal_size,
-        "grid": [columns, rows],
-        "albedo": RES_DIR + ALBEDO_NAME,
-        "normal": RES_DIR + NORMAL_NAME,
-        "layers": layers,
-    }
-    manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")
-    return {"grid": [columns, rows], "bytes": total, "layers": len(layers)}
+    return factory_pack(
+        document,
+        raw_dir,
+        texture_dir,
+        manifest_path,
+        albedo_name=ALBEDO_NAME,
+        normal_name=NORMAL_NAME,
+        res_dir=RES_DIR,
+        max_bytes=MAX_PACK_BYTES,
+        albedo_quality=ALBEDO_QUALITY,
+        normal_quality=NORMAL_QUALITY,
+    )
 
 
 # ------------------------------------------------------------------ review sheet
-def _font(size: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
-    try:
-        return ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", size)
-    except OSError:
-        return ImageFont.load_default()
-
-
 def board(document: dict[str, Any], raw_dir: Path = RAW_DIR, cell: int = 512) -> Path:
     """Review sheet: each albedo tile repeated 2 x 2 (seams at the cell centre lines)."""
-    materials = document["materials"]
-    columns = 6
-    rows = -(-len(materials) // columns)
-    sheet = Image.new("RGB", (columns * cell, rows * (cell + 28)), (30, 30, 30))
-    draw = ImageDraw.Draw(sheet)
-    font = _font(20)
-    for index, entry in enumerate(materials):
-        path = raw_dir / "tiles" / f"{entry['id']}_albedo.png"
-        if not path.exists():
-            continue
-        tile = Image.open(path).convert("RGB").resize((cell // 2, cell // 2))
-        x, y = index % columns * cell, index // columns * (cell + 28)
-        for dx in (0, cell // 2):
-            for dy in (0, cell // 2):
-                sheet.paste(tile, (x + dx, y + 28 + dy))
-        draw.text(
-            (x + 6, y + 3), f"{entry['layer']} {entry['id']}", fill="white", font=font
-        )
-    target = raw_dir / "board_2x2.jpg"
-    sheet.save(target, quality=85)
-    return target
+    return factory_board(document, raw_dir, cell)
