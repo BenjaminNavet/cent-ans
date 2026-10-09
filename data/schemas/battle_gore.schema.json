@@ -127,6 +127,13 @@
       "propertyNames": { "pattern": "^[a-z_]+$" },
       "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 }
     },
+    "cadence_unit": {
+      "type": "object",
+      "description": "Facteur de foulée par type d’unité (RX anim, ADR 0251) : > 1 foulée plus longue, < 1 plus courte ; absent = 1.",
+      "properties": { "description": { "type": "string" } },
+      "propertyNames": { "pattern": "^[a-z_0-9]+$" },
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 }
+    },
     "sprays": {
       "type": "object",
       "properties": {

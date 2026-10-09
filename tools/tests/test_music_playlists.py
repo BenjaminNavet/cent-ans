@@ -15,7 +15,8 @@ def test_music_tracks_exist_and_are_credited() -> None:
     """Every track exists; third-party tracks appear in their folder's SOURCE.md."""
     for context, playlist in _load("audio/music.json")["playlists"].items():
         # DA4: {primary, fallback}; the fallback tier (MIDI renders, Kevin MacLeod) still varies.
-        tracks = playlist["primary"] + playlist["fallback"]
+        # RX audio (ADR 0247): `battle` has Kevin MacLeod as primary and no fallback tier.
+        tracks = playlist["primary"] + playlist.get("fallback", [])
         assert len(tracks) >= 3, f"{context}: playlist too short to vary"
         for track in tracks:
             path = ROOT / "game" / track
