@@ -28,6 +28,7 @@ use serde::{Deserialize, Serialize};
 use crate::buildings::EffectTotals;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::province_policy::{self, changed_this_turn, controller_choice, ProvincePolicy};
 use crate::state::CampaignState;
 
 /// Edict every province starts with (free, no effect).
@@ -51,6 +52,15 @@ pub struct EdictChoice {
     /// until `turn + delay_turns` (the chosen edict's `delay_turns`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub previous: Option<EdictId>,
+}
+
+impl ProvincePolicy for EdictChoice {
+    fn faction(&self) -> &FactionId {
+        &self.faction
+    }
+    fn turn(&self) -> u32 {
+        self.turn
+    }
 }
 
 /// Why a `SetEdict` order was refused (French messages for the UI).
@@ -90,11 +100,9 @@ impl CampaignState {
     /// Edict chosen for `province`, ignoring the activation delay (what the
     /// controller picked, `None`: the default).
     fn edict_choice(&self, province: &ProvinceId) -> Option<&EdictChoice> {
-        self.provinces.get(province).and_then(|p| {
-            p.edict
-                .as_ref()
-                .filter(|choice| self.province_controller(province) == Some(&choice.faction))
-        })
+        self.provinces
+            .get(province)
+            .and_then(|p| controller_choice(self, province, p.edict.as_ref()))
     }
 
     /// Edict actually in effect in `province`: the controller's choice once
@@ -181,10 +189,7 @@ pub fn set_edict(
         return Err(EdictError::NotWhollyControlled(name));
     }
     let p = state.provinces.get(province).expect("checked above");
-    if p.edict
-        .as_ref()
-        .is_some_and(|c| c.turn == state.turn && &c.faction == faction)
-    {
+    if changed_this_turn(state, p.edict.as_ref(), faction) {
         return Err(EdictError::AlreadyChanged(name));
     }
     let previous = Some(state.province_edict(data, province));
@@ -198,7 +203,7 @@ pub fn set_edict(
     Ok(())
 }
 
-/// Diet-style event, only journaled for the player.
+/// Edict event, only journaled for the player.
 fn push_player_event(
     state: &CampaignState,
     faction: &FactionId,
@@ -206,13 +211,13 @@ fn push_player_event(
     text: String,
     events: &mut Vec<GameEvent>,
 ) {
-    if faction != &state.player_faction {
-        return;
-    }
-    events.push(
-        GameEvent::new(EventKind::Edict, text)
-            .faction(faction)
-            .province(province),
+    province_policy::push_player_event(
+        state,
+        EventKind::Edict,
+        faction,
+        Some(province),
+        text,
+        events,
     );
 }
 

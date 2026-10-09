@@ -706,8 +706,8 @@ fn apply_option(
     };
     // H4: medicine softens the harm of a local epidemic.
     let resistance = match &ctx.province {
-        Some(province) if crate::medicine::is_epidemic(&event.id) => {
-            crate::medicine::plague_resistance(state, data, province)
+        Some(province) if crate::population::is_epidemic(&event.id) => {
+            crate::population::plague_resistance(state, data, province)
         }
         _ => 0.0,
     };
@@ -726,10 +726,10 @@ fn mitigate_effect(effect: &EventEffect, resistance: f64) -> EventEffect {
     let mut effect = effect.clone();
     match &mut effect {
         EventEffect::Health { amount, .. } => {
-            *amount = crate::medicine::mitigated(*amount, resistance);
+            *amount = crate::population::mitigated(*amount, resistance);
         }
         EventEffect::Population { percent, .. } => {
-            *percent = crate::medicine::mitigated(*percent, resistance);
+            *percent = crate::population::mitigated(*percent, resistance);
         }
         _ => {}
     }
@@ -845,9 +845,9 @@ fn fire(
     // H4: a local epidemic may be contained before it spreads.
     if let Some(p) = province
         .as_ref()
-        .filter(|_| crate::medicine::is_epidemic(&event.id))
+        .filter(|_| crate::population::is_epidemic(&event.id))
     {
-        let resistance = crate::medicine::plague_resistance(state, data, p);
+        let resistance = crate::population::plague_resistance(state, data, p);
         if resistance > 0.0 && state.rng.unit_f64() < resistance {
             if decider.as_ref() == Some(&state.player_faction) {
                 events.push(
@@ -1264,17 +1264,17 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         let loss = low + state.rng.below(high - low + 1);
         // H4: plague resistance may spare the province (the roll only
         // happens with some resistance) and softens the blow.
-        let resistance = crate::medicine::plague_resistance(state, data, &id);
+        let resistance = crate::population::plague_resistance(state, data, &id);
         if resistance > 0.0
             && state.rng.unit_f64()
-                < resistance * crate::medicine::BLACK_DEATH_SPARE_PERCENT / 100.0
+                < resistance * crate::population::BLACK_DEATH_SPARE_PERCENT / 100.0
         {
             spared.push(id);
             continue;
         }
         let factor = 1.0 - f64::from(loss) / 100.0 * (1.0 - resistance);
-        let health = crate::medicine::mitigated(-PLAGUE_HEALTH_LOSS, resistance);
-        let unrest = -crate::medicine::mitigated(-PLAGUE_UNREST, resistance);
+        let health = crate::population::mitigated(-PLAGUE_HEALTH_LOSS, resistance);
+        let unrest = -crate::population::mitigated(-PLAGUE_UNREST, resistance);
         if let Some(p) = state.provinces.get_mut(&id) {
             for c in p.population.iter_mut() {
                 c.health = add_clamped(c.health, health);

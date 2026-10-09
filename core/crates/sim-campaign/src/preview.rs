@@ -197,7 +197,7 @@ fn read_stat(
             Some(state.recruit_slots(data, settlement) as f64)
         }
         (K::PlagueResistance, Context::Settlement { province, .. }) => {
-            let percent = crate::medicine::plague_resistance(state, data, province) * 100.0;
+            let percent = crate::population::plague_resistance(state, data, province) * 100.0;
             Some((percent * 10.0).round() / 10.0)
         }
         _ => None,

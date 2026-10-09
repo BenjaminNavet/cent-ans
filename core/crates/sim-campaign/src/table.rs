@@ -39,6 +39,7 @@ use serde::{Deserialize, Serialize};
 use crate::buildings::EffectTotals;
 use crate::events::{EventKind, GameEvent};
 use crate::orders::Order;
+use crate::province_policy::{self, changed_this_turn, controller_choice, ProvincePolicy};
 use crate::state::{CampaignState, Season};
 
 /// Diet every province starts with (neutral and free).
@@ -70,6 +71,15 @@ pub struct DietChoice {
     pub faction: FactionId,
     /// Turn of the last change (one change per province and per turn).
     pub turn: u32,
+}
+
+impl ProvincePolicy for DietChoice {
+    fn faction(&self) -> &FactionId {
+        &self.faction
+    }
+    fn turn(&self) -> u32 {
+        self.turn
+    }
 }
 
 /// Why a `SetDiet` order was refused (French messages for the UI).
@@ -197,10 +207,7 @@ impl CampaignState {
         self.provinces
             .get(province)
             .and_then(|p| {
-                p.diet
-                    .as_ref()
-                    .filter(|choice| self.province_controller(province) == Some(&choice.faction))
-                    .map(|choice| choice.diet.clone())
+                controller_choice(self, province, p.diet.as_ref()).map(|choice| choice.diet.clone())
             })
             .unwrap_or_else(default_diet)
     }
@@ -272,10 +279,7 @@ pub fn set_diet(
     if !state.controls_province(faction, province) {
         return Err(DietError::NotControlled(name));
     }
-    if p.diet
-        .as_ref()
-        .is_some_and(|c| c.turn == state.turn && &c.faction == faction)
-    {
+    if changed_this_turn(state, p.diet.as_ref(), faction) {
         return Err(DietError::AlreadyChanged(name));
     }
     let reasons = diet_blockers(state, data, faction, province, definition);
@@ -313,14 +317,7 @@ fn push_player_event(
     text: String,
     events: &mut Vec<GameEvent>,
 ) {
-    if faction != &state.player_faction {
-        return;
-    }
-    let mut event = GameEvent::new(EventKind::Table, text).faction(faction);
-    if let Some(province) = province {
-        event = event.province(province);
-    }
-    events.push(event);
+    province_policy::push_player_event(state, EventKind::Table, faction, province, text, events);
 }
 
 /// Turn phase (after the goods): diets whose requirements no longer hold

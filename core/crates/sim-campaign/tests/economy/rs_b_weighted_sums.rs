@@ -65,7 +65,7 @@ fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f6
         .map(|(id, s)| (id.clone(), s.province.clone()))
         .next()
         .expect("a French place without apothecary in its province");
-    let before = sim_campaign::medicine::plague_resistance(&state, data, &province);
+    let before = sim_campaign::population::plague_resistance(&state, data, &province);
     state
         .settlements
         .get_mut(&place)
@@ -74,7 +74,7 @@ fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f6
         .push(apothecary);
     (
         before,
-        sim_campaign::medicine::plague_resistance(&state, data, &province),
+        sim_campaign::population::plague_resistance(&state, data, &province),
     )
 }
 

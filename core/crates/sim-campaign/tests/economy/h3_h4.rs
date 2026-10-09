@@ -9,7 +9,7 @@ use sim_battle::{BattleOutcome, SideId, SideResult};
 use sim_campaign::table::{self, DEFAULT_DIET, LENT_FISH_PIETY, LENT_PIETY_PENALTY};
 use sim_campaign::test_support::{first_army, idle, start_quiet};
 use sim_campaign::{
-    medicine, ArmyId, CampaignState, DietError, EventKind, Order, OrderError, Season,
+    population, ArmyId, CampaignState, DietError, EventKind, Order, OrderError, Season,
 };
 
 use data_model::test_support::{fac, game_data, prov};
@@ -392,19 +392,22 @@ fn plague_resistance_softens_the_local_plague() {
     let normandie = prov("prov_normandie");
     let mut reference = start_quiet(data, "fac_france", 10);
     assert_eq!(
-        medicine::plague_resistance(&reference, data, &normandie),
+        population::plague_resistance(&reference, data, &normandie),
         0.0
     );
     let mut resistant = reference.clone();
     give_medicine(&mut resistant, &normandie);
     // 15 + 10 + 10 (techs) + 10 (apothecary) = 45 %.
-    assert!((medicine::plague_resistance(&resistant, data, &normandie) - 0.45).abs() < 1e-9);
+    assert!((population::plague_resistance(&resistant, data, &normandie) - 0.45).abs() < 1e-9);
     // Capped at 50 %.
     let mut capped = resistant.clone();
     city_mut(&mut capped, &normandie)
         .buildings
         .extend(["bld_apothecary", "bld_apothecary"].map(|b| BuildingId::new(b).unwrap()));
-    assert_eq!(medicine::plague_resistance(&capped, data, &normandie), 0.5);
+    assert_eq!(
+        population::plague_resistance(&capped, data, &normandie),
+        0.5
+    );
 
     make_plague(&mut reference, &normandie);
     make_plague(&mut resistant, &normandie);
@@ -527,9 +530,9 @@ fn wound_recovery_returns_part_of_the_losses() {
             france.technologies.insert(tech(id));
         }
     }
-    assert!((medicine::wound_recovery(&tended, data, &fac("fac_france")) - 0.35).abs() < 1e-9);
+    assert!((population::wound_recovery(&tended, data, &fac("fac_france")) - 0.35).abs() < 1e-9);
     assert_eq!(
-        medicine::wound_recovery(&tended, data, &fac("fac_england")),
+        population::wound_recovery(&tended, data, &fac("fac_england")),
         0.0
     );
     let attacker = first_army(&base, "fac_france");
@@ -548,7 +551,7 @@ fn wound_recovery_returns_part_of_the_losses() {
         assert_eq!(*plain, strength - lost);
         assert_eq!(
             *tended,
-            strength - lost + medicine::recovered_wounded(lost, 0.35)
+            strength - lost + population::recovered_wounded(lost, 0.35)
         );
     }
     // England has no surgeons: same losses in both runs.

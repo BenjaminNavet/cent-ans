@@ -349,7 +349,7 @@ pub(crate) fn apply_outcome(
     events: &mut Vec<GameEvent>,
 ) {
     // H4: barber-surgeons tend the wounded of the surviving units.
-    let recovery = crate::medicine::army_wound_recovery(state, data, army_id);
+    let recovery = crate::population::army_wound_recovery(state, data, army_id);
     // TW2-T2: no replenishment this season.
     crate::replenish::mark_fought(state, army_id);
     let Some(army) = state.armies.get_mut(army_id) else {
@@ -361,7 +361,7 @@ pub(crate) fn apply_outcome(
         unit.strength -= lost;
         let survives = unit.strength > 0 && unit.strength * 20 >= unit.max_strength;
         if survives && recovery > 0.0 {
-            let wounded = crate::medicine::recovered_wounded(lost, recovery);
+            let wounded = crate::population::recovered_wounded(lost, recovery);
             unit.strength = (unit.strength + wounded).min(unit.max_strength);
             tended += wounded;
         }
