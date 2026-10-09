@@ -1,6 +1,6 @@
 //! SG3: assault durations of the landmark towns (Paris, Avignon, Bruges,
 //! Calais, Rouen) with both sides under AI, over several seeds. The probe
-//! (`cargo test -p sim-campaign --test sg3_assault_probe -- --ignored
+//! (`cargo test -p sim-campaign --test siege_battle -- --ignored
 //! --nocapture`) prints one line per town; the plain test checks that a
 //! wooden gate falls to the ram within a few minutes while stone walls hold
 //! much longer.

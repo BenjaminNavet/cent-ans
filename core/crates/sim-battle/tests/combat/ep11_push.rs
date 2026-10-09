@@ -6,7 +6,7 @@
 //! of a wide regiment wrap round a narrow one; a regiment pushed against a
 //! friend or the edge of the field cannot give ground and compresses.
 //!
-//! `cargo test --release -p sim-battle --test ep11_push -- --ignored --nocapture probe`
+//! `cargo test --release -p sim-battle --test combat -- --ignored --nocapture probe`
 
 use crate::common;
 

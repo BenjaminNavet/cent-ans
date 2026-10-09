@@ -214,7 +214,8 @@ fn no_figure_stands_in_a_house_or_a_prop_during_a_siege() {
     }
 }
 
-/// Plan of each town as SVG in `$BR3_SVG_DIR` (layout review).
+/// Plan of each town as SVG in `$BR3_SVG_DIR` (layout review):
+/// `cargo test -p sim-battle --test siege dump_town_plans -- --ignored`.
 #[test]
 #[ignore = "debug: writes the town plans as SVG"]
 fn dump_town_plans() {

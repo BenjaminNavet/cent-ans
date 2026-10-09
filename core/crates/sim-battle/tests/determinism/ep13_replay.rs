@@ -312,84 +312,14 @@ fn jumps_land_on_the_state_of_straight_playback() {
     assert!(player.keyframe_count() <= rules.max_keyframes + 1);
 }
 
-/// Probe (ignored): costs of replaying and jumping, for ADR 0072.
-/// `cargo test -p sim-battle --release --test ep13_replay measure -- --ignored --nocapture`
-#[test]
-#[ignore]
-fn measure() {
-    let (live, replay) = record_demo(1337);
-    println!(
-        "demo: {} regiments, {:.0} s, {} inputs, {} checkpoints, file {} KB",
-        live.units().len(),
-        replay.duration(),
-        replay.actions.len(),
-        replay.checkpoints.len(),
-        replay.to_json().len() / 1024
-    );
-    report(replay);
-    let data = data();
-    for id in ["crecy", "azincourt"] {
-        let map = map(id);
-        let setup = map
-            .battle_setup(
-                &data.unit_types,
-                data.battle_orders.values().cloned().collect(),
-                Some(data.battle_standard_rules.clone()),
-                None,
-            )
-            .unwrap();
-        let start = ReplayStart::new(setup, 7).historical(map);
-        let mut live = start.build().unwrap();
-        let mut recorder = ReplayRecorder::new(start, &live);
-        let clock = Instant::now();
-        while !live.is_finished() && live.elapsed() < 1800.0 {
-            live.tick(0.8);
-            recorder.observe(&live);
-        }
-        println!(
-            "{id}: {} regiments, {:.0} s simulated in {:.2} s live, file {} KB",
-            live.units().len(),
-            live.elapsed(),
-            clock.elapsed().as_secs_f64(),
-            recorder.replay().to_json().len() / 1024
-        );
-        report(recorder.finish(id, 0));
-    }
-}
-
-fn report(replay: BattleReplay) {
-    let duration = replay.duration();
-    let clock = Instant::now();
-    let (mut player, mut sim) = ReplayPlayer::load(replay).unwrap();
-    let load = clock.elapsed().as_secs_f64();
-    let clock = Instant::now();
-    player.seek(&mut sim, duration);
-    let full = clock.elapsed().as_secs_f64();
-    let clock = Instant::now();
-    player.seek(&mut sim, duration * 0.5 + 7.0);
-    let back = clock.elapsed().as_secs_f64();
-    let clock = Instant::now();
-    let copy = sim.clone();
-    let clone = clock.elapsed().as_secs_f64();
-    drop(copy);
-    println!(
-        "  load {load:.3} s, full re-simulation {full:.2} s ({:.0}× real time), \
-         jump back {back:.3} s, {} copies, one copy {:.2} ms, divergence {:?}",
-        duration / full.max(1e-6),
-        player.keyframe_count(),
-        clone * 1000.0,
-        player.divergence()
-    );
-}
-
 /// Sample replay file, validated by `tools/tests/test_battle_replay_schema.py`.
 const SAMPLE: &str = "tests/fixtures/replay_sample.json";
 
 /// Rewrites the sample (after a deliberate format change, with
-/// `REPLAY_FORMAT` bumped): `cargo test -p sim-battle --test ep13_replay
+/// `REPLAY_FORMAT` bumped): `cargo test -p sim-battle --test determinism
 /// write_sample -- --ignored`.
 #[test]
-#[ignore]
+#[ignore = "regenerates tests/fixtures/replay_sample.json"]
 fn write_sample() {
     let (_, replay) = record_demo(1337);
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(SAMPLE);

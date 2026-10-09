@@ -277,17 +277,3 @@ fn woods_and_mud_are_irregular_and_follow_the_relief() {
         "woods {wood_slope} vs {any_slope}"
     );
 }
-
-/// Diagnostic (`cargo test -p sim-battle --test relief -- --ignored --nocapture`).
-#[test]
-#[ignore]
-fn print_relief_stats() {
-    for terrain in TERRAINS {
-        let r = mean(terrain, &range);
-        let micro = mean(terrain, &roughness);
-        let slope = (0..16)
-            .map(|s| line_slope(&field(terrain, true, s)))
-            .fold(0.0, f64::max);
-        println!("{terrain:?}: range {r:.1} m, roughness {micro:.2} m, max line slope {slope:.3}");
-    }
-}

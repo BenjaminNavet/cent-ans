@@ -125,9 +125,10 @@ fn golden_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cb6_deploy_golden.json")
 }
 
-/// Writes the golden file (run once on the code before CB6).
+/// Rewrites the golden file (only after a deliberate deployment change):
+/// `cargo test -p sim-battle --test controls write_deploy_golden -- --ignored`.
 #[test]
-#[ignore]
+#[ignore = "regenerates tests/fixtures/cb6_deploy_golden.json"]
 fn write_deploy_golden() {
     let map: std::collections::BTreeMap<String, Vec<[u64; 3]>> = golden_scenarios()
         .into_iter()

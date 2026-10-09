@@ -326,7 +326,7 @@ const MAX_BANKRUPT_SEASONS_TOTAL: u32 = 4;
 /// Spec § 7: 50 turns of AI against AI on 8 seeds stay in the band measured
 /// after C7a (`docs/archive/chantiers.md`, `docs/archive/chantiers.md`).
 /// About a minute in release; run with
-/// `cargo test --release -p ai --test m3_grid_ai -- --ignored`.
+/// `cargo test --release -p ai --test movement -- --ignored`.
 #[test]
 #[ignore = "50 turns x 8 seeds: run in release with --ignored"]
 fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {

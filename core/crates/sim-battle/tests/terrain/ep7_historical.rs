@@ -4,7 +4,7 @@
 //! historical deployment; with the AI on both sides the historical result
 //! is the most likely one, never a certainty.
 //!
-//! `cargo test --release -p sim-battle --test ep7_historical -- --ignored --nocapture survey`
+//! `cargo test --release -p sim-battle --test terrain -- --ignored --nocapture survey`
 //! prints the survey (winner, end, duration, losses) over more seeds.
 
 use crate::common;
