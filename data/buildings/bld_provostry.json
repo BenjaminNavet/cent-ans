@@ -1,0 +1,32 @@
+{
+  "id": "bld_provostry",
+  "name": {
+    "display": "Prévôté"
+  },
+  "category": "military",
+  "tier": 1,
+  "cost": {
+    "money": 500
+  },
+  "build_time_turns": 2,
+  "upkeep": 10,
+  "settlement_kinds": [
+    "city"
+  ],
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -5
+    },
+    {
+      "effect": "garrison",
+      "value": 1
+    }
+  ],
+  "description": "Siège du prévôt, de ses sergents et de la prison : guet, maintien de l'ordre et basse justice de la province. Bâtiment de la cité de la province.",
+  "sources": [
+    "Prévôt",
+    "Sergent (Moyen Âge)",
+    "Guet (Moyen Âge)"
+  ]
+}

@@ -130,7 +130,8 @@ func _fill_slot_bar(id: String, place_name: String, player_owner: bool) -> void:
 	if slot_bar == null:
 		return
 	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
-	slot_bar.set_slots(id, rows, player_owner, place_name)
+	var usage: Dictionary = map.sim.call("settlement_slot_usage", id) if map.sim.has_method("settlement_slot_usage") else {}
+	slot_bar.set_slots(id, rows, player_owner, place_name, usage)
 	slot_bar.visible = panel.visible and not rows.is_empty()
 
 

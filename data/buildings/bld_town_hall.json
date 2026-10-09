@@ -1,0 +1,38 @@
+{
+  "id": "bld_town_hall",
+  "name": {
+    "display": "Hôtel de ville"
+  },
+  "category": "commerce",
+  "tier": 2,
+  "cost": {
+    "money": 600
+  },
+  "build_time_turns": 3,
+  "upkeep": 12,
+  "settlement_kinds": [
+    "city"
+  ],
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -4
+    },
+    {
+      "effect": "tax_income",
+      "value": 6,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 2
+    }
+  ],
+  "description": "Maison commune où siègent échevins, capitouls ou jurats : la bourgeoisie gère elle-même la police, les impôts et les murailles. Bâtiment de la cité de la province.",
+  "sources": [
+    "Hôtel de ville",
+    "Commune (Moyen Âge)",
+    "Capitoul de Toulouse"
+  ]
+}

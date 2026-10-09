@@ -1,0 +1,39 @@
+{
+  "id": "bld_banal_oven",
+  "name": {
+    "display": "Four banal"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 200
+  },
+  "build_time_turns": 1,
+  "upkeep": 3,
+  "settlement_kinds": [
+    "village",
+    "castle",
+    "town"
+  ],
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 2,
+      "mode": "percent"
+    },
+    {
+      "effect": "goods_satisfaction",
+      "value": 2
+    },
+    {
+      "effect": "unrest",
+      "class": "peasants",
+      "value": 1
+    }
+  ],
+  "description": "Four obligatoire du seigneur, où chacun cuit son pain contre redevance. Bâtiment des colonies mineures.",
+  "sources": [
+    "Banalités",
+    "Four banal"
+  ]
+}

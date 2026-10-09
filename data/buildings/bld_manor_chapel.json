@@ -1,0 +1,32 @@
+{
+  "id": "bld_manor_chapel",
+  "name": {
+    "display": "Chapelle seigneuriale"
+  },
+  "category": "religious",
+  "tier": 1,
+  "cost": {
+    "money": 220
+  },
+  "build_time_turns": 1,
+  "upkeep": 3,
+  "settlement_kinds": [
+    "village",
+    "castle"
+  ],
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -2
+    },
+    {
+      "effect": "piety",
+      "value": 1
+    }
+  ],
+  "description": "Chapelle du manoir ou du château, desservie par un chapelain : la messe sans quitter le domaine. Bâtiment des colonies mineures.",
+  "sources": [
+    "Chapelle",
+    "Chapelain"
+  ]
+}

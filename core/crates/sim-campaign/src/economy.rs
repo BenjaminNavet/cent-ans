@@ -146,7 +146,10 @@ impl TurnBudget {
             recoinage,
             army_upkeep: state.faction_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
-            administration: state.administration_upkeep_for(data, faction, tax_income) + recoinage,
+            // WH econ: the edicts in force are paid by the court.
+            administration: state.administration_upkeep_for(data, faction, tax_income)
+                + recoinage
+                + state.faction_edict_upkeep(data, faction),
             table: 0,
             trade_income: 0,
         }
@@ -621,6 +624,14 @@ pub(crate) fn resolve_economy(
         }
         // H5: seigniorage is income, the recoinage of strong money upkeep.
         let mut budget = TurnBudget::compute(state, data, &faction_id);
+        // WH econ: edicts the purse cannot carry are dropped.
+        let balance = state.factions[&faction_id].treasury + budget.income
+            - (budget.army_upkeep + budget.building_upkeep + budget.administration);
+        if balance < 0
+            && crate::edicts::drop_unaffordable(state, data, &faction_id, -balance, events)
+        {
+            budget = TurnBudget::compute(state, data, &faction_id);
+        }
         let available = state.factions[&faction_id].treasury + budget.income
             - (budget.army_upkeep + budget.building_upkeep + budget.administration);
         // H3: the diets of the provinces (« Table »), those the purse cannot

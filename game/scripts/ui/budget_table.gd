@@ -22,7 +22,7 @@ const RUBRIC_HINTS := {
 	"armies": "Solde et vivres des armées et des garnisons (plus chers si la monnaie est affaiblie).",
 	"buildings": "Entretien des bâtiments des colonies ; réduit par la dévastation.",
 	"table": "Régimes alimentaires des provinces (La Table).",
-	"administration": "Part du revenu prise par la cour et l’administration (plus de provinces, plus de frais), refonte des monnaies comprise.",
+	"administration": "Part du revenu prise par la cour et l’administration (plus de provinces, plus de frais), refonte des monnaies et prix des édits en vigueur compris.",
 	"other": "Ce que le budget n’explique pas : rançons, tributs, agents, choix de la chronique, butin des chevauchées. Connu seulement après coup.",
 }
 const PREMIUM_NAME := "Surprime des mercenaires"
@@ -57,6 +57,7 @@ func show_budget(economy: Dictionary) -> void:
 	for line in lines:
 		if not bool(line.get("charge", false)) and str(line.get("key", "")) == "receipts":
 			_line_row(line, has_past)
+			_source_rows(economy.get("income_lines", []))
 	_section_row("Dépenses")
 	for line in lines:
 		if bool(line.get("charge", false)):
@@ -109,6 +110,22 @@ func _premium_row(premium: int, last: int) -> void:
 	_grid.add_child(last_label)
 	_grid.add_child(Control.new())
 	cells["mercenary_premium"] = {"projected": projected_label.text, "last": last_label.text, "delta": "—"}
+
+
+## Sous-lignes des recettes, une par source (WH econ) ; leur somme est la ligne « Impôts et commerce ».
+func _source_rows(sources: Array) -> void:
+	for source in sources:
+		var key := str(source.get("key", ""))
+		var value := int(source.get("value", 0))
+		var name_label := _cell("      · " + IncomeLines.label_of(key), false, FONT_SIZE - 2)
+		TooltipHost.attach_plain(name_label, "budget_line_hint", {"title": IncomeLines.label_of(key), "body": "Part de la ligne « Impôts et commerce »."})
+		_grid.add_child(name_label)
+		var value_label := _cell(Money.signed(value), true, FONT_SIZE - 2)
+		value_label.add_theme_color_override("font_color", Money.LOSS_COLOR if value < 0 else Money.INK_COLOR)
+		_grid.add_child(value_label)
+		_grid.add_child(Control.new())
+		_grid.add_child(Control.new())
+		cells["receipts/" + key] = {"projected": value_label.text}
 
 
 func _rule_row() -> void:

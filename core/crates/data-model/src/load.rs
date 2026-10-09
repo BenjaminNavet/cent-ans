@@ -831,6 +831,7 @@ impl GameData {
         checker.check_traits();
         checker.check_skills();
         checker.check_diets();
+        checker.check_edicts();
         checker.check_chivalric_orders();
         checker.check_retinue();
         checker.check_trade();
@@ -1202,6 +1203,21 @@ impl ReferenceChecker<'_> {
                     }),
                     Some(_) => {}
                 }
+            }
+        }
+    }
+
+    fn check_edicts(&mut self) {
+        let data = self.data;
+        for (id, edict) in &data.edicts {
+            if let Some(building) = &edict.requires.building {
+                self.require(id, "requires.building", building, &data.buildings);
+            }
+            if let Some(tech) = &edict.requires.technology {
+                self.require(id, "requires.technology", tech, &data.technologies);
+            }
+            if let Some(religion) = &edict.requires.religion {
+                self.require(id, "requires.religion", religion, &data.religions);
             }
         }
     }

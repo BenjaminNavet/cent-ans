@@ -99,7 +99,7 @@ pub use entities::diplomacy_rules::{
 pub use entities::economy_rules::{
     AiDemolition, EconomyRules, TaxBracket, TaxBrackets, TaxPerHead,
 };
-pub use entities::edict::Edict;
+pub use entities::edict::{Edict, EdictCost, EdictRequirements};
 pub use entities::encounter::{
     Encounter, EncounterOption, EncounterOutcome, EncounterResult, EncounterRules, EncounterSpawn,
     EncounterUnits, SpawnWar, ARMY_EFFECT_KINDS,

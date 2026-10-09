@@ -1,0 +1,37 @@
+{
+  "id": "edict_banalites",
+  "name": {
+    "display": "Banalités"
+  },
+  "description": "Le seigneur impose l'usage obligatoire de son moulin, de son four et de son pressoir contre redevance, selon le droit de ban ([[cdx_banalites_et_moulin|banalités]]) : la recette augmente, les paysans s'en plaignent.",
+  "delay_turns": 1,
+  "requires": {
+    "building": "bld_water_mill"
+  },
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 10,
+      "mode": "percent"
+    },
+    {
+      "effect": "production",
+      "value": 5,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "class": "peasants",
+      "value": 5
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": -3
+    }
+  ],
+  "sources": [
+    "Banalités",
+    "Seigneurie banale"
+  ]
+}

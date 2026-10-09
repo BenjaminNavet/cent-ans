@@ -11,11 +11,15 @@ use crate::buildings::BuildOption;
 use crate::state::CampaignState;
 
 /// Reasons that do not lock a slot (money or an ongoing build, ownership).
-const TRANSIENT_REASONS: [&str; 3] = [
+const TRANSIENT_REASONS: [&str; 4] = [
     "trésor insuffisant",
     "une construction est déjà en cours",
     "la colonie doit être possédée",
+    SLOTS_FULL,
 ];
+
+/// Start of the French reason given when a settlement has no free slot left.
+pub const SLOTS_FULL: &str = "emplacements pleins";
 
 /// One slot of the grid.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -37,7 +41,49 @@ pub struct BuildingSlot {
     pub locked_reason: Option<String>,
 }
 
+/// Building slots a settlement uses and can use (WH econ).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SlotUsage {
+    /// Chains standing or being built.
+    pub used: usize,
+    /// Cap of the settlement's kind (`None`: uncapped).
+    pub max: Option<usize>,
+}
+
+impl SlotUsage {
+    /// `true` when no new chain can be started.
+    pub fn full(&self) -> bool {
+        self.max.is_some_and(|max| self.used >= max)
+    }
+}
+
 impl CampaignState {
+    /// WH econ: slots of `settlement` against the cap of its kind
+    /// (`settlements/rules.json` `building_slot_cap`). Standing buildings
+    /// and builds under way (construction and queue) each hold a chain; an
+    /// upgrade shares the chain of the step it replaces.
+    pub fn slot_usage(&self, data: &GameData, settlement: &SettlementId) -> SlotUsage {
+        let Some(state) = self.settlement_state(settlement) else {
+            return SlotUsage { used: 0, max: None };
+        };
+        let mut all: Vec<BuildingId> = state.buildings.clone();
+        all.extend(
+            state
+                .construction
+                .iter()
+                .chain(state.build_queue.iter())
+                .map(|c| c.building.clone()),
+        );
+        SlotUsage {
+            used: data.normalize_building_tiers(&all).len(),
+            max: data
+                .settlement_rules
+                .as_ref()
+                .and_then(|rules| rules.building_slot_cap.get(&state.kind))
+                .copied(),
+        }
+    }
+
     /// The building slots of `settlement`, by category then id; empty for an
     /// unknown settlement.
     pub fn building_slots(&self, data: &GameData, settlement: &SettlementId) -> Vec<BuildingSlot> {

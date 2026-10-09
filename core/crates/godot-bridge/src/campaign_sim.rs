@@ -367,6 +367,13 @@ impl CampaignSim {
             state.faction_net_last_turn(&faction).unwrap_or(0),
         );
         budget_into_dict(&mut dict, &economy, state.budget_history(&faction));
+        // WH econ: the receipts line by source.
+        dict.set(
+            "income_lines",
+            &crate::campaign_sim_econ::lines_array(&crate::campaign_sim_econ::income_lines(
+                state, data, &faction, &economy,
+            )),
+        );
         // NT6b: the mercenary premium is paid on top of the balance above
         // (see `resolve_mercenaries`): expected next turn and last paid.
         dict.set("mercenary_premium", state.mercenary_premium(data, &faction));

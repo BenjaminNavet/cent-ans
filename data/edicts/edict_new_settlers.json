@@ -1,0 +1,33 @@
+{
+  "id": "edict_new_settlers",
+  "name": {
+    "display": "Hôtes et défrichements"
+  },
+  "description": "Le seigneur appelle des « hôtes » en leur consentant des franchises pour défricher les landes et fonder des villes neuves (bastides, sauvetés), selon le mouvement du grand défrichement : la population croît, les nobles regrettent leurs redevances.",
+  "delay_turns": 2,
+  "cost": {
+    "money": 30
+  },
+  "effects": [
+    {
+      "effect": "growth",
+      "value": 4,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": 2
+    },
+    {
+      "effect": "unrest",
+      "class": "nobility",
+      "value": 2
+    }
+  ],
+  "sources": [
+    "Grand défrichement",
+    "Bastides du Sud-Ouest",
+    "Hôtes (Moyen Âge)"
+  ]
+}

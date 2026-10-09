@@ -79,6 +79,12 @@ impl CampaignSim {
         } else {
             state.settlement_tax(data, &id, tax_rate, &tech).round() as i64
         };
+        let income_lines: VarArray = state
+            .settlement_income_breakdown(data, &id, tax_rate, &tech)
+            .named_lines()
+            .iter()
+            .map(|(key, value)| vdict! { "key" => *key, "value" => *value }.to_variant())
+            .collect();
         let lonlat = Vector2::new(entry.lonlat[0] as f32, entry.lonlat[1] as f32);
         let is_city = state.province_city_id(&live.province) == Some(&id);
         let garrison_cap: Option<usize> = data
@@ -108,6 +114,7 @@ impl CampaignSim {
                 .map(|r| r.turns_left as i32)
                 .collect::<PackedInt32Array>(),
             "income" => income,
+            "income_lines" => &income_lines,
             "is_city" => is_city,
             "buildings_info" => &buildings_array(data, &live.buildings),
             "recruit_slots" => state.recruit_slots(data, &id) as i64,
@@ -197,6 +204,26 @@ impl CampaignSim {
                 .to_variant()
             })
             .collect()
+    }
+
+    /// WH econ: building slots a settlement uses against the cap of its
+    /// kind: `{used, max}` (`max` -1: no cap). Empty for an unknown id.
+    #[func]
+    fn settlement_slot_usage(&self, id: GString) -> VarDictionary {
+        let Some(Ctx { state, data }) = self.ctx() else {
+            return VarDictionary::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarDictionary::new();
+        };
+        if state.settlement_state(&id).is_none() {
+            return VarDictionary::new();
+        }
+        let usage = state.slot_usage(data, &id);
+        vdict! {
+            "used" => usage.used as i64,
+            "max" => usage.max.map_or(-1, |max| max as i64),
+        }
     }
 
     /// RS-N: demolition preview of every built building of a settlement, for

@@ -305,6 +305,9 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		_show_row(siege_value, true)
 		siege_value.text = "%s, %s, brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), FrText.count(int(siege.get("turns_left", 0)), "tour"), int(siege.get("breach", 0))]
 	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
+	# WH econ : d'où vient ce revenu, source par source.
+	income_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	TooltipHost.attach_plain(income_value, "income_breakdown", {"body": IncomeLines.as_text(detail.get("income_lines", []))})
 	# Garnison et recrutement.
 	var garrison: Array = detail.get("garrison", [])
 	garrison_header.text = "Garnison (%d unité%s, %s hommes)" % [garrison.size(), "s" if garrison.size() > 1 else "", Money.digits(int(detail.get("garrison_strength", 0)))]

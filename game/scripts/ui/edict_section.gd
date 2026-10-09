@@ -30,8 +30,23 @@ func _refresh_extra(state: Dictionary, _current: Dictionary) -> void:
 	TooltipHost.attach_plain(choose_button, "choose_edict")
 
 
+## « 40 ℔ par saison, 5 de prestige » (vide pour un édit gratuit).
+static func _cost_text(option: Dictionary) -> String:
+	var parts := PackedStringArray()
+	var money := int(option.get("cost_money", 0))
+	if money > 0:
+		parts.append("%s par saison" % Money.amount(money))
+	var prestige := int(option.get("cost_prestige", 0))
+	if prestige > 0:
+		parts.append("%d de prestige (une fois)" % prestige)
+	return ", ".join(parts)
+
+
 func _option_text(option: Dictionary) -> String:
 	var text := super(option)
+	var cost_text := _cost_text(option)
+	if cost_text != "" and not bool(option.get("current", false)):
+		text += "  — " + cost_text
 	if bool(option.get("current", false)):
 		text += "  (actuel)" if bool(option.get("active", false)) else "  (en attente)"
 	return text
@@ -51,6 +66,11 @@ func _option_tooltip(option: Dictionary) -> String:
 	var delay := int(option.get("delay_turns", 0))
 	if delay > 0:
 		lines.append("Délai avant effet : %d tour(s)" % delay)
+	var cost_text := _cost_text(option)
+	if cost_text != "":
+		lines.append("Coût : " + cost_text)
+	for requirement in option.get("requirements", []):
+		lines.append("%s %s" % ["✓" if bool(requirement.get("met", false)) else "✗", str(requirement.get("text", ""))])
 	var effects_block: String = RichTooltip._effects_block(option.get("effects", []))
 	if effects_block != "":
 		lines.append(effects_block)

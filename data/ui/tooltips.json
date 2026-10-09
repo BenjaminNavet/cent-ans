@@ -557,6 +557,8 @@
     "end_turn_modal": {"title": "Fenêtre ouverte"},
     "end_turn_finish": {"title": "Finir la saison", "hint": "Entrée"},
     "trade_income_detail": {"title": "Revenus du commerce"},
+    "income_breakdown": {"title": "Revenu par source"},
+    "province_tax": {"title": "Impôt de la province", "body": "Taux propre à cette province : il remplace le taux de la faction ici seulement. « Bas » rapporte moins mais apaise ; « Haut » rapporte plus mais irrite."},
     "table_upkeep_detail": {"title": "La Table"},
     "trade_routes_panel": {
       "title": "Routes commerciales",

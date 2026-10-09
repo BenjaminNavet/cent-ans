@@ -1,0 +1,39 @@
+{
+  "id": "edict_free_fair",
+  "name": {
+    "display": "Foire franche"
+  },
+  "description": "Le seigneur accorde à la ville une [[cdx_foire|foire]] franche, exemptée de péages pendant quelques jours, sur le modèle des foires de Champagne : les marchands affluent, la noblesse voit d'un mauvais œil ces privilèges.",
+  "delay_turns": 1,
+  "cost": {
+    "money": 50
+  },
+  "requires": {
+    "building": "bld_market"
+  },
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 15,
+      "mode": "percent"
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": 3
+    },
+    {
+      "effect": "goods_satisfaction",
+      "value": 3
+    },
+    {
+      "effect": "unrest",
+      "class": "nobility",
+      "value": 2
+    }
+  ],
+  "sources": [
+    "Foires de Champagne",
+    "Franchise (droit médiéval)"
+  ]
+}

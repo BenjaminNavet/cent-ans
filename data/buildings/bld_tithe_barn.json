@@ -1,0 +1,35 @@
+{
+  "id": "bld_tithe_barn",
+  "name": {
+    "display": "Grange dîmière"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 250
+  },
+  "build_time_turns": 1,
+  "upkeep": 4,
+  "settlement_kinds": [
+    "village",
+    "abbey",
+    "castle"
+  ],
+  "effects": [
+    {
+      "effect": "goods_satisfaction",
+      "value": 4
+    },
+    {
+      "effect": "tax_income",
+      "value": 3,
+      "mode": "percent"
+    }
+  ],
+  "description": "Grange où l'on entasse la dîme et les redevances en nature (abbayes cisterciennes, seigneuries) : réserves en cas de mauvaise récolte. Bâtiment des colonies mineures.",
+  "sources": [
+    "Grange dîmière",
+    "Dîme",
+    "Grange cistercienne"
+  ]
+}

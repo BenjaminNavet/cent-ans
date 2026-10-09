@@ -790,6 +790,22 @@ impl CampaignState {
         if data.has_building(&state.buildings, &building.id) {
             return Some("déjà construit".to_owned());
         }
+        // WH econ: a new chain needs a free slot (upgrades reuse theirs).
+        let starts_chain = building
+            .upgrades_from
+            .as_ref()
+            .is_none_or(|parent| !state.buildings.contains(parent));
+        if starts_chain {
+            let usage = self.slot_usage(data, settlement);
+            if usage.full() {
+                return Some(format!(
+                    "{} ({}/{})",
+                    crate::building_slots::SLOTS_FULL,
+                    usage.used,
+                    usage.max.unwrap_or(0)
+                ));
+            }
+        }
         if let Some(from) = &building.upgrades_from {
             if !state.buildings.contains(from) {
                 let name = data.building_name(from);

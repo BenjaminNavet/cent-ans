@@ -74,6 +74,8 @@ pub enum EdictError {
     NotWhollyControlled(String),
     #[error("l'édit de {0} a déjà été changé ce tour-ci")]
     AlreadyChanged(String),
+    #[error("édit impossible à {0} : {1}")]
+    Unavailable(String, String),
 }
 
 /// One line of the province panel's edict selector.
@@ -88,6 +90,12 @@ pub struct EdictOption {
     pub current: bool,
     /// Currently in effect (`false` while a delayed change is pending).
     pub active: bool,
+    /// WH econ: livres per season while in force.
+    pub cost_money: i64,
+    /// WH econ: ruler's prestige spent once at adoption.
+    pub cost_prestige: i32,
+    /// WH econ: French prerequisites (met or not), for the tooltip.
+    pub requirements: Vec<(String, bool)>,
 }
 
 fn edict_name(data: &GameData, id: &EdictId) -> String {
@@ -147,15 +155,15 @@ impl CampaignState {
             .edict_choice(province)
             .map_or_else(default_edict, |c| c.edict.clone());
         let active = self.province_edict(data, province);
-        let whole = self.holds_whole_province(controller, province);
         data.edicts
             .values()
             .map(|edict| {
-                let reason = if edict.id.as_str() != DEFAULT_EDICT && !whole {
-                    Some("la province doit être entièrement contrôlée".to_owned())
+                let blockers = if edict.id.as_str() == DEFAULT_EDICT {
+                    Vec::new()
                 } else {
-                    None
+                    self.edict_blockers(data, controller, province, edict)
                 };
+                let reason = blockers.first().cloned();
                 EdictOption {
                     edict: edict.id.clone(),
                     name: edict.name.display.clone(),
@@ -163,9 +171,99 @@ impl CampaignState {
                     reason,
                     current: edict.id == current,
                     active: edict.id == active,
+                    cost_money: edict.cost.money,
+                    cost_prestige: edict.cost.prestige,
+                    requirements: self.edict_requirement_lines(data, controller, province, edict),
                 }
             })
             .collect()
+    }
+
+    /// WH econ: the prerequisites of `edict` in `province` for `faction`, as
+    /// `(French text, met)`.
+    fn edict_requirement_lines(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+        edict: &Edict,
+    ) -> Vec<(String, bool)> {
+        let requires = &edict.requires;
+        let mut lines = Vec::new();
+        if let Some(building) = &requires.building {
+            let met = self
+                .province_city_id(province)
+                .and_then(|city| self.settlements.get(city))
+                .is_some_and(|city| data.has_building(&city.buildings, building));
+            lines.push((format!("Bâtiment : {}", data.building_name(building)), met));
+        }
+        if let Some(tech) = &requires.technology {
+            let met = self
+                .factions
+                .get(faction)
+                .is_some_and(|f| f.technologies.contains(tech));
+            lines.push((format!("Technologie : {}", data.tech_name(tech)), met));
+        }
+        if let Some(religion) = &requires.religion {
+            let met = crate::religion::faction_religion(self, data, faction)
+                .is_some_and(|own| crate::religion::same_faith(data, &own, religion));
+            let name = data
+                .religions
+                .get(religion)
+                .map_or_else(|| religion.to_string(), |r| r.name.display.clone());
+            lines.push((format!("Foi : {name}"), met));
+        }
+        lines
+    }
+
+    /// WH econ: why `faction` cannot adopt `edict` in `province` right now
+    /// (French, empty when it can): the whole province, prerequisites,
+    /// prestige.
+    pub fn edict_blockers(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        province: &ProvinceId,
+        edict: &Edict,
+    ) -> Vec<String> {
+        let mut reasons = Vec::new();
+        if !self.holds_whole_province(faction, province) {
+            reasons.push("la province doit être entièrement contrôlée".to_owned());
+        }
+        reasons.extend(
+            self.edict_requirement_lines(data, faction, province, edict)
+                .into_iter()
+                .filter(|(_, met)| !met)
+                .map(|(line, _)| format!("prérequis manquant — {line}")),
+        );
+        if edict.cost.prestige > 0 && self.ruler_prestige(faction) < edict.cost.prestige {
+            reasons.push(format!(
+                "prestige insuffisant ({} nécessaires)",
+                edict.cost.prestige
+            ));
+        }
+        reasons
+    }
+
+    /// Prestige of the ruler of `faction` (0 without one).
+    fn ruler_prestige(&self, faction: &FactionId) -> i32 {
+        self.factions
+            .get(faction)
+            .and_then(|f| f.ruler.as_ref())
+            .and_then(|r| self.characters.get(r))
+            .map_or(0, |c| c.prestige)
+    }
+
+    /// WH econ: seasonal livres `faction` pays for the edicts in force in
+    /// its provinces (`Edict::cost.money`).
+    pub fn faction_edict_upkeep(&self, data: &GameData, faction: &FactionId) -> i64 {
+        self.controlled_provinces(faction)
+            .map(|id| {
+                data.edicts
+                    .get(&self.province_edict(data, id))
+                    .map_or(0, |e| e.cost.money)
+            })
+            .sum()
     }
 }
 
@@ -188,12 +286,35 @@ pub fn set_edict(
     if definition.id.as_str() != DEFAULT_EDICT && !state.holds_whole_province(faction, province) {
         return Err(EdictError::NotWhollyControlled(name));
     }
+    if definition.id.as_str() != DEFAULT_EDICT {
+        if let Some(reason) = state
+            .edict_blockers(data, faction, province, definition)
+            .into_iter()
+            .next()
+        {
+            return Err(EdictError::Unavailable(name, reason));
+        }
+    }
     let p = state.provinces.get(province).expect("checked above");
     if changed_this_turn(state, p.edict.as_ref(), faction) {
         return Err(EdictError::AlreadyChanged(name));
     }
     let previous = Some(state.province_edict(data, province));
     let turn = state.turn;
+    // WH econ: the prestige price is paid once, by the ruler, when the choice
+    // changes (re-choosing the edict already chosen costs nothing).
+    let already = state
+        .provinces
+        .get(province)
+        .and_then(|p| p.edict.as_ref())
+        .is_some_and(|c| c.edict == *edict && &c.faction == faction);
+    if definition.cost.prestige > 0 && !already {
+        if let Some(ruler) = state.factions.get(faction).and_then(|f| f.ruler.clone()) {
+            if let Some(character) = state.characters.get_mut(&ruler) {
+                character.prestige -= definition.cost.prestige;
+            }
+        }
+    }
     state.provinces.get_mut(province).expect("checked").edict = Some(EdictChoice {
         edict: edict.clone(),
         faction: faction.clone(),
@@ -236,19 +357,76 @@ pub(crate) fn resolve_requirements(
         if choice.edict.as_str() == DEFAULT_EDICT {
             continue;
         }
-        if state.holds_whole_province(&choice.faction, &id) {
+        let prerequisites_met = data.edicts.get(&choice.edict).is_none_or(|e| {
+            state
+                .edict_requirement_lines(data, &choice.faction, &id, e)
+                .iter()
+                .all(|(_, met)| *met)
+        });
+        if state.holds_whole_province(&choice.faction, &id) && prerequisites_met {
             continue;
         }
-        let text = format!(
-            "Édits : {} n'est plus entièrement tenue ; l'édit « {} » cesse.",
-            data.province_name(&id),
-            edict_name(data, &choice.edict),
-        );
+        let text = if prerequisites_met {
+            format!(
+                "Édits : {} n'est plus entièrement tenue ; l'édit « {} » cesse.",
+                data.province_name(&id),
+                edict_name(data, &choice.edict),
+            )
+        } else {
+            format!(
+                "Édits : les prérequis de l'édit « {} » ne sont plus réunis à {} ; il cesse.",
+                edict_name(data, &choice.edict),
+                data.province_name(&id),
+            )
+        };
         if let Some(p) = state.provinces.get_mut(&id) {
             p.edict = None;
         }
         push_player_event(state, &choice.faction, &id, text, events);
     }
+}
+
+/// WH econ: a faction whose purse cannot carry the seasonal price of its
+/// edicts drops them, dearest first, until it can (or none is left). `true`
+/// when something was dropped.
+pub(crate) fn drop_unaffordable(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    shortfall: i64,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let mut costly: Vec<(i64, ProvinceId)> = state
+        .controlled_provinces(faction)
+        .filter_map(|id| {
+            let cost = data
+                .edicts
+                .get(&state.province_edict(data, id))
+                .map_or(0, |e| e.cost.money);
+            (cost > 0).then(|| (cost, id.clone()))
+        })
+        .collect();
+    costly.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
+    let mut missing = shortfall;
+    let mut dropped = false;
+    for (cost, id) in costly {
+        if missing <= 0 {
+            break;
+        }
+        let edict = state.province_edict(data, &id);
+        if let Some(p) = state.provinces.get_mut(&id) {
+            p.edict = None;
+        }
+        missing -= cost;
+        dropped = true;
+        let text = format!(
+            "Édits : le trésor ne peut plus payer l'édit « {} » de {} ({cost} livres par saison) ; il cesse.",
+            edict_name(data, &edict),
+            data.province_name(&id),
+        );
+        push_player_event(state, faction, &id, text, events);
+    }
+    dropped
 }
 
 /// Effects of the edict in force in `province` (province-wide targets:
@@ -299,6 +477,10 @@ const AI_EDICT_RESERVE_SEASONS: i64 = 3;
 /// levied on the vassals), and their weight each.
 const AI_EDICT_MAX_VASSALS: usize = 3;
 const AI_EDICT_VASSAL_WEIGHT: f64 = 0.25;
+/// WH econ: livres of seasonal price that weigh one score point for the AI,
+/// and the share of the last season's income a costly edict may take.
+const AI_EDICT_LIVRES_PER_POINT: f64 = 20.0;
+const AI_EDICT_MAX_COST_PERCENT: i64 = 4;
 
 /// Weight of a tax edict's income for the AI (EQ2): 1 at peace with a
 /// balanced budget, 2 at war or in deficit, 4 when the treasury is also
@@ -399,12 +581,29 @@ pub fn ai_choose_edicts(state: &CampaignState, data: &GameData, faction: &Factio
                 })
                 .sum()
         };
-        let current_score = data.edicts.get(&current).map_or(0.0, score);
+        // WH econ: a priced edict is weighed against its price, and only
+        // adopted when its prerequisites hold and the purse and the ruler can
+        // carry it.
+        let priced = |edict: &Edict| -> f64 {
+            score(edict) - edict.cost.money as f64 / AI_EDICT_LIVRES_PER_POINT
+        };
+        let income = f.last_budget.income.max(0);
+        let affordable = |edict: &Edict| -> bool {
+            edict.cost.money == 0
+                || (edict.cost.money * 100 <= income * AI_EDICT_MAX_COST_PERCENT
+                    && f.treasury >= edict.cost.money * AI_EDICT_RESERVE_SEASONS)
+        };
+        let current_score = data.edicts.get(&current).map_or(0.0, priced);
         let best = data
             .edicts
             .values()
             .filter(|e| e.id != current)
-            .map(|e| (score(e), e.id.clone()))
+            .filter(|e| affordable(e))
+            .filter(|e| {
+                e.id.as_str() == DEFAULT_EDICT
+                    || state.edict_blockers(data, faction, &id, e).is_empty()
+            })
+            .map(|e| (priced(e), e.id.clone()))
             .max_by(|a, b| a.0.total_cmp(&b.0).then_with(|| b.1.cmp(&a.1)));
         if let Some((best_score, edict)) = best {
             if best_score > current_score + SWITCH_MARGIN {

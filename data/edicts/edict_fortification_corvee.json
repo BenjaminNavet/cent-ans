@@ -1,0 +1,39 @@
+{
+  "id": "edict_fortification_corvee",
+  "name": {
+    "display": "Corvées de fortifications"
+  },
+  "description": "Les sujets sont astreints aux corvées de terrassement et de maçonnerie pour relever les murailles, comme les villes du roi à partir des ordonnances de Charles V sur les fortifications : la province se couvre mieux, les paysans maugréent.",
+  "delay_turns": 2,
+  "cost": {
+    "money": 40
+  },
+  "requires": {
+    "technology": "tech_masonry"
+  },
+  "effects": [
+    {
+      "effect": "fortification_level",
+      "value": 1
+    },
+    {
+      "effect": "garrison",
+      "value": 1
+    },
+    {
+      "effect": "unrest",
+      "class": "peasants",
+      "value": 4
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": -3
+    }
+  ],
+  "sources": [
+    "Ordonnance de 1367 sur les fortifications (Charles V)",
+    "Corvée",
+    "Murage"
+  ]
+}

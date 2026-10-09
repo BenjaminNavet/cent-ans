@@ -20,6 +20,7 @@ struct Spending {
 /// The faction's economy for the turn, stage by stage.
 pub(super) fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     plan_tax_rate(ctx, orders);
+    plan_province_taxes(ctx, orders);
     // RS-C: a realm whose buildings outgrew its income raze the least useful.
     orders.extend(plan_demolitions(ctx));
     if relieve_debt(ctx, orders) {
@@ -114,6 +115,36 @@ fn plan_tax_rate(ctx: &Context, orders: &mut Vec<Order>) {
     };
     if rate != me.tax_rate {
         orders.push(Order::SetTaxRate { rate });
+    }
+}
+
+/// WH econ: a province that grumbles while the realm's bracket is heavier
+/// than « Bas » is eased to « Bas » on its own, and goes back to the realm's
+/// bracket once calm again (below the unrest that would allow « Haut »).
+/// Never raises a single province: the realm-wide choice stays with
+/// [`plan_tax_rate`].
+fn plan_province_taxes(ctx: &Context, orders: &mut Vec<Order>) {
+    let (state, eco) = (ctx.state, &ctx.rules.economy);
+    let realm_rate = state.factions[ctx.faction].tax_rate;
+    for (id, province) in &state.provinces {
+        if !state.controls_province(ctx.faction, id) {
+            continue;
+        }
+        let unrest = weighted_unrest(&province.population);
+        let own = state.has_province_tax(id);
+        let order = if !own && realm_rate != TaxRate::Low && unrest > eco.low_tax_min_unrest {
+            Some(Some(TaxRate::Low))
+        } else if own && unrest < eco.high_tax_max_unrest {
+            Some(None)
+        } else {
+            None
+        };
+        if let Some(rate) = order {
+            orders.push(Order::SetProvinceTax {
+                province: id.clone(),
+                rate,
+            });
+        }
     }
 }
 

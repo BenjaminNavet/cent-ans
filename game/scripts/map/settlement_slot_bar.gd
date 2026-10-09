@@ -49,7 +49,8 @@ func _init() -> void:
 
 ## `rows` : `CampaignSim.settlement_slots(id)`. `player_owner` : les cases ne se cliquent que
 ## pour une colonie du joueur. `place_name` titre la bande (nom de la colonie).
-func set_slots(id: String, rows: Array, player_owner: bool, place_name: String = "") -> void:
+## `usage` : `settlement_slot_usage` (WH econ), plafond d'emplacements du type de colonie.
+func set_slots(id: String, rows: Array, player_owner: bool, place_name: String = "", usage: Dictionary = {}) -> void:
 	settlement_id = id
 	slots = rows
 	for child in cells_box.get_children():
@@ -61,6 +62,9 @@ func set_slots(id: String, rows: Array, player_owner: bool, place_name: String =
 			built += 1
 		cells_box.add_child(_cell(slot, player_owner))
 	title_label.text = "%s\n%d / %d" % ["Bâtiments" if place_name == "" else place_name, built, rows.size()]
+	if not usage.is_empty() and int(usage.get("max", -1)) >= 0:
+		# WH econ : le plafond du type de colonie, pas le nombre de chaînes possibles.
+		title_label.text = "%s\nEmplacements %d/%d" % ["Bâtiments" if place_name == "" else place_name, int(usage.get("used", built)), int(usage.get("max", 0))]
 	fit(max_width)
 
 

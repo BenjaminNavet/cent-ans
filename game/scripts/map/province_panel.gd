@@ -65,6 +65,7 @@ var table_section: TableSection
 ## Classes de population de l'onglet Ville (remplace le conteneur `ClassesList` de la scène).
 var classes_list: ClassesSection
 var edict_section: EdictSection
+var tax_section: ProvinceTaxSection
 ## Onglet « Colonies » (construit en code). `settlement_rows_provider(province_id)`
 ## renvoie les lignes `[{id, name, kind, controller, owner, garrison_units, garrison_strength,
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
@@ -122,6 +123,9 @@ func _ready() -> void:
 	city_box.add_child(edict_rule)
 	city_box.move_child(edict_rule, 1)
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
+	tax_section = ProvinceTaxSection.new()  # WH econ : impôt par province, sous l'édit
+	city_box.add_child(tax_section)
+	city_box.move_child(tax_section, 2)
 	_build_settlements_tab()  # C5
 	get_viewport().size_changed.connect(queue_fit_height)  # Q6
 	minimum_size_changed.connect(queue_fit_height)  # VN : l'en-tête grandit (fil d'Ariane…) après coup
@@ -255,6 +259,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	_fill_city(city, is_player_owner)
 	table_section.show_for(province_id, is_player_owner and not state.is_empty())  # H9
 	edict_section.show_for(province_id, is_player_owner and not state.is_empty())
+	tax_section.show_for(province_id, is_player_owner and not state.is_empty())
 	_fill_settlements(label_of, is_player_owner)  # C5
 	_fill_breadcrumb()  # FE6
 	show()

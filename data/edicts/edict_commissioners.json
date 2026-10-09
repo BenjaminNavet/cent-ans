@@ -1,0 +1,35 @@
+{
+  "id": "edict_commissioners",
+  "name": {
+    "display": "Enquêteurs-réformateurs"
+  },
+  "description": "Des commissaires du prince parcourent la province pour contrôler les baillis et les prévôts, à la manière des enquêteurs-réformateurs de Saint Louis et de Philippe le Bel : moins de malversations, plus de recettes, et la noblesse locale s'en offusque.",
+  "delay_turns": 2,
+  "cost": {
+    "money": 45
+  },
+  "requires": {
+    "technology": "tech_bookkeeping"
+  },
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 6,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "value": -3
+    },
+    {
+      "effect": "unrest",
+      "class": "nobility",
+      "value": 3
+    }
+  ],
+  "sources": [
+    "Enquêteurs-réformateurs",
+    "Enquêtes de Louis IX",
+    "Ordonnance de réformation de 1303"
+  ]
+}

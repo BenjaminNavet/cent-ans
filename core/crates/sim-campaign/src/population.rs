@@ -419,6 +419,9 @@ pub fn equilibrium(
     )
 }
 
+/// Signed terms of an unrest target: (label key, value).
+pub type UnrestTerms = Vec<(&'static str, f64)>;
+
 /// WH econ: signed terms of the unrest target of each class of `province`
 /// (label key, value), in [`SocialClass::ALL`] order. Their sum, clamped to
 /// 0-100, is `GaugeTargets::unrest`.
@@ -426,7 +429,7 @@ pub fn unrest_breakdown(
     state: &CampaignState,
     data: &GameData,
     province: &ProvinceId,
-) -> Option<Vec<(SocialClass, Vec<(&'static str, f64)>)>> {
+) -> Option<Vec<(SocialClass, UnrestTerms)>> {
     Some(
         equilibrium_detail(state, data, province)?
             .into_iter()

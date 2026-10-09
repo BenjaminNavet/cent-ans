@@ -17,6 +17,25 @@
       "default": 0,
       "description": "Tours entre le choix et la prise d'effet (0 : immédiat). Le précédent édit reste actif pendant le délai."
     },
+    "cost": {
+      "type": "object",
+      "description": "Prix de l'édit : `money` en livres par saison tant qu'il est en vigueur (ligne « Cour et administration » du budget), `prestige` du souverain dépensé une fois à l'adoption.",
+      "properties": {
+        "money": { "type": "integer", "minimum": 0, "default": 0 },
+        "prestige": { "type": "integer", "minimum": 0, "default": 0 }
+      },
+      "additionalProperties": false
+    },
+    "requires": {
+      "type": "object",
+      "description": "Prérequis : bâtiment dans la cité de la province (ou une amélioration), technologie du contrôleur, foi du contrôleur.",
+      "properties": {
+        "building": { "$ref": "common.schema.json#/$defs/building_id" },
+        "technology": { "$ref": "common.schema.json#/$defs/technology_id" },
+        "religion": { "$ref": "common.schema.json#/$defs/religion_id" }
+      },
+      "additionalProperties": false
+    },
     "effects": {
       "type": "array",
       "description": "Effets appliqués à la province (et, pour ceux ciblant une colonie, à ses colonies).",

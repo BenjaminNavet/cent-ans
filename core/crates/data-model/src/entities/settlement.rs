@@ -189,6 +189,11 @@ pub struct SettlementRules {
     /// (`Order::GarrisonUnits`); kinds left out have no cap.
     #[serde(default)]
     pub garrison_cap: BTreeMap<SettlementKind, usize>,
+    /// WH econ: most building chains a settlement of each kind can stand at
+    /// once (« Emplacements n/m »). Buildings already standing beyond it
+    /// are kept; only new chains are refused. Kinds left out have no cap.
+    #[serde(default)]
+    pub building_slot_cap: BTreeMap<SettlementKind, usize>,
     /// Where the loser of a battle falls back.
     #[serde(default)]
     pub retreat: RetreatRules,

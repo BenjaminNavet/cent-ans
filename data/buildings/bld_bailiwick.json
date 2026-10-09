@@ -1,0 +1,37 @@
+{
+  "id": "bld_bailiwick",
+  "name": {
+    "display": "Cour du bailli"
+  },
+  "category": "commerce",
+  "tier": 2,
+  "cost": {
+    "money": 700
+  },
+  "build_time_turns": 3,
+  "upkeep": 15,
+  "settlement_kinds": [
+    "city"
+  ],
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": 8,
+      "mode": "percent"
+    },
+    {
+      "effect": "loyalty",
+      "value": 4
+    },
+    {
+      "effect": "unrest",
+      "value": -2
+    }
+  ],
+  "description": "Siège du bailli ou du sénéchal, qui rend la justice du prince, lève ses recettes et contrôle prévôts et châtelains de la province. Bâtiment de la cité de la province.",
+  "sources": [
+    "Bailli",
+    "Sénéchal",
+    "Bailliage"
+  ]
+}

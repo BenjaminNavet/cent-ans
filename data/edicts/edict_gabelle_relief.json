@@ -1,0 +1,33 @@
+{
+  "id": "edict_gabelle_relief",
+  "name": {
+    "display": "Remise de la gabelle"
+  },
+  "description": "Le prince allège la [[cdx_gabelle|gabelle]] du sel et les fouages, comme Charles V les supprima en 1380 sur son lit de mort : le peuple respire, les recettes baissent.",
+  "delay_turns": 1,
+  "effects": [
+    {
+      "effect": "tax_income",
+      "value": -15,
+      "mode": "percent"
+    },
+    {
+      "effect": "unrest",
+      "value": -6
+    },
+    {
+      "effect": "goods_satisfaction",
+      "value": 2
+    },
+    {
+      "effect": "wealth",
+      "class": "peasants",
+      "value": 3
+    }
+  ],
+  "sources": [
+    "Gabelle",
+    "Fouage",
+    "Ordonnance de Charles V du 16 septembre 1380"
+  ]
+}

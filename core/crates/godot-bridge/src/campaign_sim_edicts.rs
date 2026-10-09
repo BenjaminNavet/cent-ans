@@ -42,7 +42,8 @@ impl CampaignSim {
     }
 
     /// Every edict for `province` as its controller sees it, in id order:
-    /// `[{id, name, description, delay_turns, effects[{kind, value, mode,
+    /// `[{id, name, description, delay_turns, cost_money, cost_prestige,
+    /// requirements[{text, met}], effects[{kind, value, mode,
     /// unit_category, class}], available, reason, current, active,
     /// sources[]}]`. `current`: chosen (even if still pending); `active`:
     /// actually in effect right now.
@@ -60,12 +61,22 @@ impl CampaignSim {
             .filter_map(|option| {
                 let edict = data.edicts.get(&option.edict)?;
                 let sources: PackedStringArray = edict.sources.iter().map(GString::from).collect();
+                let requirements: VarArray = option
+                    .requirements
+                    .iter()
+                    .map(|(text, met)| {
+                        vdict! { "text" => text.as_str(), "met" => *met }.to_variant()
+                    })
+                    .collect();
                 Some(
                     vdict! {
                         "id" => edict.id.as_str(),
                         "name" => option.name.as_str(),
                         "description" => edict.description.as_str(),
                         "delay_turns" => edict.delay_turns,
+                        "cost_money" => option.cost_money,
+                        "cost_prestige" => i64::from(option.cost_prestige),
+                        "requirements" => &requirements,
                         "effects" => &effects_array(&edict.effects),
                         "available" => option.available,
                         "reason" => option.reason.as_deref().unwrap_or(""),

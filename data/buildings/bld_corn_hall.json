@@ -1,0 +1,36 @@
+{
+  "id": "bld_corn_hall",
+  "name": {
+    "display": "Halle aux grains"
+  },
+  "category": "production",
+  "tier": 1,
+  "cost": {
+    "money": 450
+  },
+  "build_time_turns": 2,
+  "upkeep": 8,
+  "settlement_kinds": [
+    "city"
+  ],
+  "effects": [
+    {
+      "effect": "goods_satisfaction",
+      "value": 8
+    },
+    {
+      "effect": "health",
+      "value": 1
+    },
+    {
+      "effect": "unrest",
+      "value": -1
+    }
+  ],
+  "description": "Halle et greniers publics où la ville stocke le blé et en règle le prix pour parer aux disettes. Bâtiment de la cité de la province.",
+  "sources": [
+    "Halle (construction)",
+    "Grenier public",
+    "Disette au Moyen Âge"
+  ]
+}

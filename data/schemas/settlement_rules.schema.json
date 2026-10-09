@@ -197,6 +197,17 @@
         "minimum": 0
       }
     },
+    "building_slot_cap": {
+      "type": "object",
+      "description": "WH econ : nombre maximal de chaînes de bâtiments (emplacements) qu'une colonie tient à la fois, selon son type ; améliorer réutilise l'emplacement, un bâtiment déjà au-delà du plafond est conservé. Un type absent n'a pas de plafond.",
+      "propertyNames": {
+        "enum": ["city", "town", "castle", "abbey", "village"]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
     "province_effect_percent": {
       "type": "object",
       "description": "Poids, en pour cent, des bâtiments d'une colonie dans les effets sur toute sa province (ordre public, santé, biens, ravitaillement, place pour croître), selon le type de colonie (lot DC3, ADR 0082). Un type absent pèse 100 %.",

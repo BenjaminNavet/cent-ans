@@ -1,0 +1,33 @@
+{
+  "id": "edict_royal_alms",
+  "name": {
+    "display": "Aumône royale"
+  },
+  "description": "Distribution régulière de pain et de deniers aux pauvres par l'aumônier du prince, à la manière des rois de France et d'Angleterre : la faim recule et la piété du prince grandit, au prix du trésor.",
+  "delay_turns": 1,
+  "cost": {
+    "money": 60
+  },
+  "requires": {
+    "building": "bld_parish_church"
+  },
+  "effects": [
+    {
+      "effect": "unrest",
+      "value": -4
+    },
+    {
+      "effect": "goods_satisfaction",
+      "class": "peasants",
+      "value": 4
+    },
+    {
+      "effect": "piety",
+      "value": 2
+    }
+  ],
+  "sources": [
+    "Aumône",
+    "Aumônerie royale (France)"
+  ]
+}

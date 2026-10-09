@@ -1,0 +1,45 @@
+{
+  "id": "edict_inquisition",
+  "name": {
+    "display": "Inquisition"
+  },
+  "description": "Le prince seconde les inquisiteurs dominicains dans la recherche des hérétiques, comme en Languedoc depuis le XIIIe siècle : l'orthodoxie y gagne, mais bourgeois et nobles redoutent les dénonciations.",
+  "delay_turns": 2,
+  "cost": {
+    "money": 40,
+    "prestige": 5
+  },
+  "requires": {
+    "religion": "rel_catholic"
+  },
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 3
+    },
+    {
+      "effect": "unrest",
+      "class": "clergy",
+      "value": -5
+    },
+    {
+      "effect": "unrest",
+      "class": "burghers",
+      "value": 4
+    },
+    {
+      "effect": "unrest",
+      "class": "nobility",
+      "value": 2
+    },
+    {
+      "effect": "wealth",
+      "class": "burghers",
+      "value": -2
+    }
+  ],
+  "sources": [
+    "Inquisition médiévale",
+    "Bernard Gui, Practica inquisitionis (vers 1320)"
+  ]
+}

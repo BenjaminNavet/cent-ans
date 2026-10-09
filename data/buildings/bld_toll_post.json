@@ -1,0 +1,34 @@
+{
+  "id": "bld_toll_post",
+  "name": {
+    "display": "Péage"
+  },
+  "category": "commerce",
+  "tier": 1,
+  "cost": {
+    "money": 300
+  },
+  "build_time_turns": 1,
+  "upkeep": 5,
+  "settlement_kinds": [
+    "village",
+    "castle",
+    "town"
+  ],
+  "effects": [
+    {
+      "effect": "trade_income",
+      "value": 4,
+      "mode": "percent"
+    },
+    {
+      "effect": "tax_income",
+      "value": 2
+    }
+  ],
+  "description": "Barrière de péage sur le pont ou le chemin, tenue par le châtelain ou le seigneur du lieu. Bâtiment des colonies mineures.",
+  "sources": [
+    "Péage",
+    "Tonlieu"
+  ]
+}
