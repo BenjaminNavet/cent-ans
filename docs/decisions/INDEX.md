@@ -223,6 +223,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0257 | [Équilibrage de campagne après la revue d'experts (lot RX equil)](0257-equilibrage-campagne-rx-equil.md) | accepté |
 | 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
 | 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
+| 0276 | [Actes royaux à recharge](0276-actes-royaux.md) | accepté |
+| 0277 | [Capitaines recrutables, blessures temporaires, XP élargie](0277-capitaines-blessures-xp.md) | accepté |
 | 0278 | [Diplomatie lisible (lot WH `diploa`)](0278-diplomatie-lisible.md) | n/d |
 | 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
 | 0146 bis | [Sommation de paix du suzerain au joueur](0146-sommation-de-paix-du-suzerain.md) | n/d |
