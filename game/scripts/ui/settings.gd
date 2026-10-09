@@ -43,6 +43,7 @@ const DEFAULTS := {
 	# Accessibilité.
 	"audio/bus_Master": 1.0,
 	"audio/bus_Musique": 0.6,
+	"audio/bus_BatailleMusique": 1.0,  # RX audio : réglage propre à la musique de bataille
 	"audio/bus_Ambiance": 0.8,
 	"audio/bus_Bataille": 0.9,
 	"audio/bus_Interface": 0.8,

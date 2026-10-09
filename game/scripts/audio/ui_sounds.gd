@@ -95,7 +95,7 @@ func play_event(event_name: String) -> bool:
 		return false
 	var player := voice["player"] as AudioStreamPlayer
 	player.stream = stream
-	player.volume_db = float(entry.get("volume_db", 0.0))
+	player.volume_db = float(entry.get("volume_db", 0.0)) + bank.last_gain_db(event_name)
 	player.pitch_scale = bank.random_pitch(event_name)
 	VoicePool.assign(voice, event_name, priority, now)
 	player.play()

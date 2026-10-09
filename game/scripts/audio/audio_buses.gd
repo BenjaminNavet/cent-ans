@@ -18,6 +18,7 @@ extends RefCounted
 
 const MASTER := "Master"
 const MUSIC := "Musique"
+const BATTLE_MUSIC := "BatailleMusique"
 const AMBIENCE := "Ambiance"
 const BATTLE := "Bataille"
 const BATTLE_FAR := "BatailleLointain"
@@ -28,6 +29,7 @@ const VOICE := "Voix"
 const PLAYER_BUSES := [
 	[MASTER, "Général"],
 	[MUSIC, "Musique"],
+	[BATTLE_MUSIC, "Musique de bataille"],
 	[AMBIENCE, "Ambiance"],
 	[BATTLE, "Bataille"],
 	[INTERFACE, "Interface"],
@@ -44,6 +46,7 @@ const FAR_REVERB_EFFECT := 1  # BatailleLointain : AudioEffectReverb
 static func ensure_layout() -> void:
 	_ensure_master()
 	_ensure(MUSIC, MASTER, _music_effects)
+	_ensure(BATTLE_MUSIC, MUSIC, func() -> Array: return [])
 	_ensure(AMBIENCE, MASTER, func() -> Array: return [_compressor(-14.0, 3.0, 20.0, 250.0)])
 	_ensure(BATTLE, MASTER, func() -> Array: return [_compressor(-16.0, 4.0, 10.0, 180.0)])
 	_ensure(BATTLE_FAR, BATTLE, _far_effects)

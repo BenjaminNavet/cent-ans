@@ -26,6 +26,9 @@ const PLAYLISTS_PATH := "audio/music.json"
 const SFX_VOICES := 6
 const SFX_PRIORITY := 3
 const FADE_SECONDS := 1.5
+## Valeurs par défaut des clés optionnelles de `music.json` (RX audio, ADR 0247).
+const DEFAULT_CROSSFADE_SECONDS := 3.0
+const DEFAULT_FALLBACK_EVERY := 4
 ## Ambiances de la carte de campagne (créées par `attach_campaign`).
 var campaign_ambience: CampaignAmbience = null
 var current_context: String = ""
@@ -59,6 +62,14 @@ var _current_track := ""  # dernier morceau tiré, jamais rejoué aussitôt (mê
 ## Liste de campagne régionale mêlée à `war` tant que le joueur est en guerre ("" = aucune).
 var _war_blend := ""
 var _music_rng := RandomNumberGenerator.new()
+## Gain par morceau (dB, `track_gain_db` de `music.json`) : sonie commune des morceaux.
+var _track_gain_db: Dictionary = {}
+var _crossfade_seconds := DEFAULT_CROSSFADE_SECONDS
+## Un morceau « fallback » après autant de morceaux « primary » d'affilée (0 = jamais).
+var _fallback_every := DEFAULT_FALLBACK_EVERY
+var _primary_streak: Dictionary = {}  # contexte → morceaux primary joués depuis le dernier fallback
+var _playing_path := ""  # morceau en cours sur le lecteur actif ("" = flux de repli du dossier music)
+var _chaining := false  # enchaînement déjà lancé pour le morceau en cours
 
 
 func _ready() -> void:
@@ -174,6 +185,9 @@ func has_music(context: String) -> bool:
 func load_playlists(path: String) -> bool:
 	_playlists.clear()
 	_culture_regions.clear()
+	_track_gain_db.clear()
+	_crossfade_seconds = DEFAULT_CROSSFADE_SECONDS
+	_fallback_every = DEFAULT_FALLBACK_EVERY
 	if not FileAccess.file_exists(path):
 		return false
 	var parsed: Variant = DataFile.parse_file(path)
@@ -195,6 +209,11 @@ func load_playlists(path: String) -> bool:
 			for track in entry:
 				primary.append("res://" + str(track))
 		_playlists[str(context)] = {"primary": primary, "fallback": fallback}
+	var gains: Dictionary = (parsed as Dictionary).get("track_gain_db", {})
+	for track in gains:
+		_track_gain_db["res://" + str(track)] = float(gains[track])
+	_crossfade_seconds = float((parsed as Dictionary).get("crossfade_seconds", DEFAULT_CROSSFADE_SECONDS))
+	_fallback_every = int((parsed as Dictionary).get("fallback_every", DEFAULT_FALLBACK_EVERY))
 	for culture in (parsed as Dictionary).get("culture_regions", {}):
 		_culture_regions[str(culture)] = str((parsed as Dictionary)["culture_regions"][culture])
 	return true
@@ -222,7 +241,7 @@ func tier_tracks(context: String, tier: String) -> Array:
 ## Tire le prochain morceau du contexte dans sa rotation mélangée et l'en retire : `primary`
 ## d'abord, `fallback` si `primary` ne fournit aucun fichier présent. "" si rien n'est jouable.
 func next_track(context: String) -> String:
-	for tier in TIERS:
+	for tier in _tier_order(context):
 		var tracks := tier_tracks(context, tier)
 		var key := "%s/%s" % [context, tier]
 		var bag: Array = []
@@ -240,10 +259,34 @@ func next_track(context: String) -> String:
 			if _load_music(path) != null:
 				_rotation[key] = bag
 				_current_track = path
+				_primary_streak[context] = int(_primary_streak.get(context, 0)) + 1 if tier == "primary" else 0
 				save_rotation()
 				return path
 		_rotation[key] = bag
 	return ""
+
+
+## Ordre des listes pour le prochain tirage : `primary` d'abord, sauf toutes les
+## `_fallback_every` pièces où la liste `fallback` (si elle existe) passe devant (ADR 0247).
+func _tier_order(context: String) -> Array:
+	if _fallback_every > 0 and int(_primary_streak.get(context, 0)) >= _fallback_every and not tier_tracks(context, "fallback").is_empty():
+		return ["fallback", "primary"]
+	return TIERS
+
+
+## Gain (dB) du morceau `path` (chemin res://), 0 s'il n'a pas de mesure.
+func track_gain_db(path: String) -> float:
+	return float(_track_gain_db.get(path, 0.0))
+
+
+func crossfade_seconds() -> float:
+	return _crossfade_seconds
+
+
+## Vrai quand le morceau en cours entre dans sa dernière `fade` secondes (assez long pour un
+## fondu : au moins 4 × `fade`) et que le suivant doit se fondre dessus.
+static func should_crossfade(position: float, length: float, fade: float) -> bool:
+	return fade > 0.0 and length > 4.0 * fade and length - position <= fade
 
 
 ## Mélange de Fisher-Yates sur le générateur de la musique (graine aléatoire à chaque session).
@@ -282,6 +325,7 @@ func save_rotation() -> void:
 func _pick_track(context: String, advance: bool = true) -> AudioStream:
 	if advance:
 		var path := next_track(context)
+		_playing_path = path
 		if path != "":
 			return _load_music(path)
 	else:
@@ -328,11 +372,23 @@ func _load_music(path: String) -> AudioStream:
 func _on_music_finished(player: AudioStreamPlayer) -> void:
 	if player != _music_players[_active_music] or current_context == "":
 		return
+	_advance_music()
+
+
+## Fin de morceau proche : pas de coupure sèche, le suivant monte en fondu sur l'autre lecteur.
+func _process(_delta: float) -> void:
+	if silent or current_context == "" or _chaining or _music_players.size() < 2:
+		return
+	var player := _music_players[_active_music]
+	if player.playing and player.stream != null and should_crossfade(player.get_playback_position(), player.stream.get_length(), _crossfade_seconds):
+		_advance_music()
+
+
+func _advance_music() -> void:
+	_chaining = true
 	var stream := _pick_track(current_context)
-	if stream != null and not silent:
-		player.stream = stream
-		player.volume_db = 0.0
-		player.play()
+	if stream != null and not silent and _music_players.size() >= 2:
+		_crossfade_to(stream, _crossfade_seconds)
 
 
 func play_sfx(clip: String) -> bool:
@@ -359,6 +415,14 @@ func play_music(context: String) -> void:
 	current_context = context
 	if stream == null or _music_players.size() < 2 or silent:
 		return
+	_crossfade_to(stream, FADE_SECONDS)
+
+
+## Lance `stream` (gain du morceau `_playing_path`) sur l'autre lecteur en fondu de `seconds`
+## depuis le silence ; l'ancien lecteur s'éteint dans le même temps.
+func _crossfade_to(stream: AudioStream, seconds: float) -> void:
+	var gain := track_gain_db(_playing_path)
+	_chaining = false
 	var old_player := _music_players[_active_music]
 	_active_music = 1 - _active_music
 	var new_player := _music_players[_active_music]
@@ -371,9 +435,9 @@ func play_music(context: String) -> void:
 	var tween := create_tween()
 	_music_tween = tween
 	tween.set_parallel(true)
-	tween.tween_property(new_player, "volume_db", 0.0, FADE_SECONDS)
+	tween.tween_property(new_player, "volume_db", gain, seconds)
 	if old_player.playing:
-		tween.tween_property(old_player, "volume_db", -40.0, FADE_SECONDS)
+		tween.tween_property(old_player, "volume_db", -40.0, seconds)
 		tween.chain().tween_callback(old_player.stop)
 
 
@@ -387,8 +451,9 @@ func _on_node_added(node: Node) -> void:
 			button.pressed.connect(_on_button_pressed)
 
 
+## Clic de bouton : un seul chemin, l'événement `ui_click` de la banque (`ui/click.wav`).
 func _on_button_pressed() -> void:
-	play_sfx("ui_click")
+	UiSounds.play("ui_click")
 
 
 ## Écran de démarrage : musique de menu.

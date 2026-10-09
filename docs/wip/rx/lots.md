@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | victory | mecaniques #1 #2 #11 | dev | 0245 | PARTIEL (ec50ccc7d) : #1 #2 faits ; #11 victoire non signalée sans bloc `victory` → lot équilibrage |
 | probe | mecaniques #3 (sonde de campagne) | mech | 0246 | FAIT (campaign_probe, ADR 0246) |
-| audio | audio (tous) | mech | 0247 | à faire |
+| audio | audio (tous) | mech | 0247 | FAIT sauf : nouvelles voix (65 factions slaves/turques/arabes/grecques…), mp3→ogg (proposition), écoute à faire |
 | histoire | historien (tous) | mech | 0248 | à faire |
 | uifin | ui (tous) | mech | 0249 | à faire |
 | anim | animation (tous) | dev | 0250-0251 | à faire |

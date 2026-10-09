@@ -110,6 +110,7 @@
       "properties": {
         "description": {"type": "string"},
         "files": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+        "file_gain_db": {"type": "object", "additionalProperties": {"type": "number", "minimum": -12, "maximum": 12}, "description": "Gain (dB) par variante de `files` (RX audio, ADR 0247) : ramène les extrêmes à ± 3 dB de la médiane du groupe sans écrêter ; s'ajoute à volume_db."},
         "layers": {"type": "array", "items": {"type": "string"}},
         "bus": {"$ref": "#/$defs/bus"},
         "priority": {"type": "integer", "minimum": 0, "maximum": 10},
