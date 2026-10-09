@@ -7,7 +7,6 @@ extends Node
 ## bataille » (ou Entrée) appelle `start_battle`. Toute la règle (zone, refus) est en Rust :
 ## ce contrôleur ne fait que traduire les clics et afficher les refus.
 
-const UNIT_GAP := 6.0
 
 var scene: Node = null  # BattleScene
 var active: bool = false
@@ -90,55 +89,10 @@ func place(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> int:
 ## `share` : largeur demandée au cœur, 0 sans glisser ; `width`/`depth` : taille retenue).
 ## Sert aussi aux fantômes du glisser en direct.
 func plan(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> Array:
-	var out: Array = []
 	if ids.is_empty():
-		return out
-	var line := FormationDrag.drag_line(p0, p1, camera_pos)
-	var dragged := bool(line["ok"])
-	var facing := float(line["facing"]) if dragged else NAN
-	var along := Vector2.ZERO
-	var order: Array = ids.duplicate()
-	var shares: Array[float] = []
-	if dragged:
-		along = Vector2(p1.x - p0.x, p1.z - p0.z).normalized()
-		# Ordre gauche-droite courant, projeté sur l'axe du glisser.
-		var keyed: Array = []
-		for k in ids.size():
-			var unit := _unit(int(ids[k]))
-			keyed.append([Vector2(float(unit.get("x", 0.0)), float(unit.get("z", 0.0))).dot(along), k])
-		keyed.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
-		order = []
-		var counts: Array = []
-		for entry in keyed:
-			var id := int(ids[int(entry[1])])
-			order.append(id)
-			counts.append(int(_unit(id).get("soldiers", 1)))
-		shares = FormationDrag.split_widths(counts, float(line["width"]), UNIT_GAP)
-	else:
-		var first := _unit(int(ids[0]))
-		var f := float(first.get("facing", 0.0))
-		along = Vector2(cos(f), -sin(f))  # perpendiculaire au front (facing = atan2(dx, dz))
-	var sizes: Array[Vector2] = []
-	var total := 0.0
-	for k in order.size():
-		var unit := _unit(int(order[k]))
-		var size := Vector2(float(unit.get("width", 30.0)), float(unit.get("depth", 6.0)))
-		if dragged:
-			size = scene.battle.call("formation_extent", int(order[k]), shares[k])
-		sizes.append(size)
-		total += size.x + UNIT_GAP
-	total -= UNIT_GAP
-	var center := Vector2((p0.x + p1.x) * 0.5, (p0.z + p1.z) * 0.5)
-	var cursor := -total * 0.5
-	for k in order.size():
-		var offset := cursor + sizes[k].x * 0.5
-		var target := center + along * offset
-		cursor += sizes[k].x + UNIT_GAP
-		out.append({"id": int(order[k]), "x": target.x, "z": target.y, "facing": facing if dragged else float(_unit(int(order[k])).get("facing", 0.0)), "share": shares[k] if dragged else 0.0, "width": sizes[k].x, "depth": sizes[k].y})
-	if not dragged:
-		for spot in out:
-			spot["facing"] = NAN
-	return out
+		return []
+	# Règle dans le cœur (`sim-battle/src/deployment.rs`, SC BT8).
+	return scene.battle.call("plan_deployment", PackedInt32Array(ids), p0, p1, camera_pos)
 
 
 func _unit(id: int) -> Dictionary:

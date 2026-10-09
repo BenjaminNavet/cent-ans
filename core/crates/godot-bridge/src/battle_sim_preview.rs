@@ -167,6 +167,64 @@ impl BattleSim {
         })
     }
 
+    /// SC BT8: places the deployment phase gives `unit_ids` for a right
+    /// click (`p0 == p1`) or a right-drag `p0 -> p1` (ground points; `y`
+    /// ignored), `camera` the camera's position: `[{id, x, z, facing,
+    /// share, width, depth}]`. `facing` is NaN to keep the present one,
+    /// `share` the width asked of the core (0 without a drag).
+    #[func]
+    fn plan_deployment(
+        &self,
+        unit_ids: PackedInt32Array,
+        p0: Vector3,
+        p1: Vector3,
+        camera: Vector3,
+    ) -> VarArray {
+        let Some(sim) = &self.sim else {
+            return VarArray::new();
+        };
+        let spots = sim_battle::deployment::plan_deployment(
+            &Self::ids_of(&unit_ids),
+            (f64::from(p0.x), f64::from(p0.z)),
+            (f64::from(p1.x), f64::from(p1.z)),
+            (f64::from(camera.x), f64::from(camera.z)),
+            |id| {
+                sim.unit(id)
+                    .map(|u| {
+                        let (width, depth) = u.extent();
+                        sim_battle::deployment::DeployUnit {
+                            x: u.x,
+                            z: u.z,
+                            facing: u.facing,
+                            soldiers: u.soldiers(),
+                            width,
+                            depth,
+                        }
+                    })
+                    .unwrap_or_default()
+            },
+            |id, share| {
+                sim.unit(id)
+                    .map_or((0.0, 0.0), |u| u.extent_for_width(Self::drag_width(share)))
+            },
+        );
+        spots
+            .iter()
+            .map(|s| {
+                vdict! {
+                    "id" => i64::from(s.id),
+                    "x" => s.x,
+                    "z" => s.z,
+                    "facing" => s.facing,
+                    "share" => s.share,
+                    "width" => s.width,
+                    "depth" => s.depth,
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
     /// CB-M2: what a right click at (x, z) would do with the player's
     /// regiments `selected_ids`: `{context, target, piece, compare}` —
     /// `context` one of `move`, `melee`, `ranged`, `ranged_blocked`,

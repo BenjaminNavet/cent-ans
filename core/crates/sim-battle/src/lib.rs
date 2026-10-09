@@ -53,6 +53,7 @@ pub mod custom;
 pub mod decision;
 pub mod decor;
 mod decor_gen;
+pub mod deployment;
 pub mod duel;
 pub mod field;
 pub mod fire;
