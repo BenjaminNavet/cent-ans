@@ -105,6 +105,7 @@ func setup(data: MapData, terrain_builder: TerrainBuilder, vegetation: Node = nu
 	for c in exclusion_circles:
 		exclusions.append(Vector3(c.x, c.y, c.z + margin))
 	_load_models()
+	CoastLook.data()  # lu une fois ici : les tâches de semis ne font que lire
 	_load_biomes()
 	_index_roads(road_lines)
 	if terrain != null:
@@ -184,7 +185,7 @@ func _load_models() -> void:
 		var meshes: Array = []
 		var triangles: Array = []
 		for lod in LODS:
-			var mesh := Ga3Vegetation._load_mesh(MODEL_DIR + "%s_lod%d.glb" % [entry["id"], lod])
+			var mesh := _entry_mesh(entry, lod)
 			if mesh == null:
 				break
 			meshes.append(mesh)
@@ -203,6 +204,39 @@ func _load_models() -> void:
 		if source != null and source.albedo_texture != null:
 			material.set_shader_parameter("albedo_texture", source.albedo_texture)
 		models.append({"id": entry["id"], "entry": entry, "meshes": meshes, "triangles": triangles, "material": material, "biomes": _biome_mask(entry)})
+
+
+## Maillage d'un niveau : modèle HB (`rocks/hb/<id>`, déjà à 1 m) ou modèle DN (`model`, en mètres
+## réels, ramené à 1 m par `model_length_m`). Copie normalisée mise en cache (DN).
+static var _dn_cache: Dictionary = {}
+
+
+static func _entry_mesh(entry: Dictionary, lod: int) -> Mesh:
+	if not entry.has("model"):
+		return Ga3Vegetation._load_mesh(MODEL_DIR + "%s_lod%d.glb" % [entry["id"], lod])
+	var path := "res://assets/models/%s_lod%d.glb" % [entry["model"], lod]
+	if _dn_cache.has(path):
+		return _dn_cache[path]
+	var source := Ga3Vegetation._load_mesh(path)
+	var result: Mesh = null
+	if source != null:
+		result = normalized_mesh(source, 1.0 / maxf(float(entry.get("model_length_m", 1.0)), 1e-3))
+	_dn_cache[path] = result
+	return result
+
+
+## Copie de `source` dont les sommets sont multipliés par `factor` (matériaux conservés).
+static func normalized_mesh(source: Mesh, factor: float) -> ArrayMesh:
+	var result := ArrayMesh.new()
+	for s in source.get_surface_count():
+		var arrays := source.surface_get_arrays(s)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for i in vertices.size():
+			vertices[i] *= factor
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		result.surface_set_material(s, source.surface_get_material(s))
+	return result
 
 
 ## Gain d'albédo (linéaire) ramenant la moyenne mesurée `albedo_mean` à la couleur visée `color`
@@ -480,7 +514,7 @@ func _terrain_probe(x: float, y: float) -> Dictionary:
 	var s := map_data.height_m_at(x, y + 2.0)
 	var n := map_data.height_m_at(x, y - 2.0)
 	var grad := Vector2(e - w, s - n) / (4.0 * map_data.meters_per_px)
-	return {"h": h, "slope": grad.length(), "ridge": h - (e + w + s + n) * 0.25, "grad": grad}
+	return {"h": h, "slope": grad.length(), "ridge": h - (e + w + s + n) * 0.25, "grad": grad, "x": x, "y": y}
 
 
 ## Aptitude [0, 1] du modèle `model` au point sondé `probe` (biome `biome`, lande `heath`).
@@ -492,6 +526,8 @@ func suitability(model: Dictionary, probe: Dictionary, biome: int, heath: float,
 	var window := smoothstep(float(entry["min_altitude_m"]) - 80.0, float(entry["min_altitude_m"]) + 80.0, h) * (1.0 - smoothstep(float(entry["max_altitude_m"]) - 150.0, float(entry["max_altitude_m"]) + 150.0, h))
 	if window <= 0.0:
 		return 0.0
+	if entry.has("coast"):  # roche de côte : seul le littoral compte (ni pente, ni crête, ni lande)
+		return clampf(_coast_term(entry, probe), 0.0, 1.0) * window * float(entry["density"])
 	var slope: float = probe["slope"]
 	var min_slope := float(entry["min_slope"])
 	var slope_term := smoothstep(min_slope, min_slope * 2.5 + 0.05, slope)
@@ -500,6 +536,35 @@ func suitability(model: Dictionary, probe: Dictionary, biome: int, heath: float,
 	var treeline := _treeline_m(y)
 	var alpine := 0.8 * smoothstep(treeline - 200.0, treeline + 300.0, h) * smoothstep(min_slope * 0.5, min_slope * 1.5, slope)
 	return clampf(maxf(maxf(slope_term, ridge_term), maxf(heath_term, alpine)), 0.0, 1.0) * window * float(entry["density"])
+
+
+## Distance signée au rivage (px carte, > 0 sur terre) ; grande sans `coast_dist.png`.
+func _coast_px_at(at: Vector2) -> float:
+	var image := map_data.coast_dist_image
+	if image == null or image.is_empty():
+		return 1e6
+	var px := clampi(int(at.x * image.get_width() / float(map_data.size.x)), 0, image.get_width() - 1)
+	var py := clampi(int(at.y * image.get_height() / float(map_data.size.y)), 0, image.get_height() - 1)
+	return (image.get_pixel(px, py).r * 255.0 - 128.0) / 2.0
+
+
+## Terme de roche de côte (`coast` du catalogue) : 0 sans ce champ, loin du rivage ou sur une
+## géologie non admise. `probe` porte "x"/"y" (px carte) du point sondé.
+func _coast_term(entry: Dictionary, probe: Dictionary) -> float:
+	var coast: Dictionary = entry.get("coast", {})
+	if coast.is_empty() or map_data == null or map_data.coast_dist_image == null or not probe.has("x"):
+		return 0.0
+	var at := Vector2(probe["x"], probe["y"])
+	var distance := _coast_px_at(at)
+	var max_px := float(coast["max_px"])
+	if distance <= 0.0 or distance > max_px:
+		return 0.0
+	var term := float(coast["weight"]) * (1.0 - smoothstep(max_px * 0.5, max_px, distance))
+	if coast.has("rock") and not (coast["rock"] as Array).has(CoastLook.region_at(at)["rock"]):
+		return 0.0
+	if bool(coast.get("cliff_only", false)) and not CoastLook.kind_at(at, map_data).ends_with("_cliff"):
+		return 0.0
+	return term
 
 
 ## Semis d'une tuile (sans nœud ni terrain : appelable depuis une tâche) :
@@ -692,8 +757,11 @@ func _tile_may_hold(rect: Rect2, side: int) -> bool:
 	var min_slope := INF
 	var min_alt := INF
 	var any_heath := false
+	var coast_reach := 0.0
 	for model: Dictionary in models:
 		var entry: Dictionary = model["entry"]
+		if entry.has("coast"):
+			coast_reach = maxf(coast_reach, float(entry["coast"]["max_px"]))
 		min_slope = minf(min_slope, float(entry["min_slope"]))
 		min_alt = minf(min_alt, float(entry["min_altitude_m"]))
 		any_heath = any_heath or float(entry["heath"]) > 0.0
@@ -703,6 +771,8 @@ func _tile_may_hold(rect: Rect2, side: int) -> bool:
 			if not map_data.is_land_px(int(p.x), int(p.y)):
 				continue
 			var probe := _terrain_probe(p.x, p.y)
+			if coast_reach > 0.0 and _coast_px_at(p) <= coast_reach + rect.size.x / side:
+				return true
 			if float(probe["h"]) < min_alt - 80.0:
 				continue
 			if float(probe["slope"]) >= min_slope * 0.5:
