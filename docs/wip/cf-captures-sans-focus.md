@@ -25,4 +25,8 @@ lui prendre le focus.
   `docker build` de l'image ; build échoué (I/O error containerd), démon Docker en erreur 500.
   Après coup : 25 Gio libres. Image `cent-ans-shot:probe` (779 Mo) à supprimer.
 - Besoin disque estimé : image ~1,5 Gio + cible cargo Linux (plusieurs Gio) + clone APFS de .godot.
-- En attente du joueur : place disque / redémarrage de Docker Desktop.
+- Docker Desktop redémarré de force (bloqué sur une fenêtre d'erreur), image probe et cache de
+  build supprimés, puis Docker éteint à la demande du joueur. EN PAUSE (09/10).
+- Reprise : vérifier ≥ 15-20 Gio libres, `docker desktop start`, lancer
+  `tools/godot_shot.sh --path game --script res://tests/as5_shot.gd` (surveiller le premier plan
+  avec `lsappinfo front`), puis étapes 4-5. ADR 0219 pris par NA : prendre le suivant libre.

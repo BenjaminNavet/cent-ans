@@ -1,4 +1,4 @@
-# Image des captures sans fenêtre sur le Mac (chantier CF, ADR 0219) : Godot Linux arm64 sous
+# Image des captures sans fenêtre sur le Mac (chantier CF) : Godot Linux arm64 sous
 # écran virtuel (Xvfb) avec rendu logiciel Mesa (lavapipe pour Vulkan/Forward+, llvmpipe pour
 # OpenGL), plus la chaîne Rust pour compiler la GDExtension Linux. Construite par
 # tools/godot_shot.sh ; la version de Godot suit celle de l'hôte (argument GODOT).

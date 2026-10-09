@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Lance Godot dans un conteneur Linux (Xvfb + rendu logiciel Mesa) : aucune fenêtre sur le Mac,
-# donc aucun vol de focus, même pendant que le joueur joue (chantier CF, ADR 0219). Pour les
+# donc aucun vol de focus, même pendant que le joueur joue (chantier CF). Pour les
 # captures `*_shot.gd`, sondes et bancs qui demandent un vrai rendu ; même interface que
 # tools/godot_bg.sh, mais le code de sortie de Godot est transmis.
 # Usage : tools/godot_shot.sh [--no-build] --path game --script res://tests/as5_shot.gd
