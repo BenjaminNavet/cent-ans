@@ -18,13 +18,14 @@ func _init() -> void:
 ## (x = min, y = max).
 func _range_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> Vector2:
 	var t := ReliefPyramid.tile_at(level, x, y)
-	var decoded := Png16.load_gray16(pyramid.tile_path(level, t.x, t.y))
-	if decoded.is_empty():
+	var store: Object = ClassDB.instantiate("GameDataStore")
+	var data: PackedByteArray = store.call("load_heightmap_u16", pyramid.tile_path(level, t.x, t.y))
+	if data.is_empty():
 		return Vector2(NAN, NAN)
+	var decoded := {"width": ReliefPyramid.TILE_PX, "height": ReliefPyramid.TILE_PX}
 	var origin := ReliefPyramid.tile_origin(level, t.x, t.y)
 	var px := int((x - origin.x) / ReliefPyramid.pixel_units(level))
 	var py := int((y - origin.y) / ReliefPyramid.pixel_units(level))
-	var data: PackedByteArray = decoded["data"]
 	var width := int(decoded["width"])
 	var lo := INF
 	var hi := -INF
@@ -33,7 +34,7 @@ func _range_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> Vector
 			var cx := clampi(px + dx, 0, width - 1)
 			var cy := clampi(py + dy, 0, int(decoded["height"]) - 1)
 			var o := (cy * width + cx) * 2
-			var h := pyramid.height_min_m + float((int(data[o]) << 8) | int(data[o + 1])) / 65535.0 * pyramid.height_range_m
+			var h := pyramid.height_min_m + float(int(data[o]) | (int(data[o + 1]) << 8)) / 65535.0 * pyramid.height_range_m
 			lo = minf(lo, h)
 			hi = maxf(hi, h)
 	return Vector2(lo, hi)

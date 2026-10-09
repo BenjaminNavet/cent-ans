@@ -47,15 +47,13 @@ var meters_per_px: float = 718.9765625  # map.json (échelle ADR 0082)
 var height_min_m: float = -200.0
 var height_max_m: float = 4800.0
 
-## Image L8 (8 bits, repli) ou LA8 (16 bits, deux octets par pixel). L'ordre des octets
-## dépend de la source : `GameDataStore.load_heightmap_u16` livre du little-endian
-## (L = octet faible, A = octet fort), `Png16` du big-endian (L = octet fort).
+## Image LA8 (16 bits little-endian, L = octet faible, A = octet fort) livrée par
+## `GameDataStore.load_heightmap_u16` (seul décodeur, obligatoire).
 var height_image: Image
 var height_bytes: PackedByteArray
-var height_bpp: int = 1
-var height_little_endian: bool = false
-## "rust" (GameDataStore), "png16" (GDScript) ou "8bit" (repli Image.load_from_file).
-var height_decoder: String = ""
+const height_bpp: int = 2
+const height_little_endian: bool = true
+const height_decoder: String = "rust"
 ## Fichier d'altitude chargé : `heightmap_render.png` (lot R1 : Copernicus 90 m moyenné, relief
 ## local rehaussé pour le rendu, même trait de côte) s'il existe (`map.json.render_heightmap`),
 ## sinon `heightmap.png` (source des règles : grille de navigation). Surface unique du rendu :
@@ -396,22 +394,8 @@ func _load_heightmap() -> bool:
 		return _fail("%s missing" % height_file)
 	var raw16 := _load_heightmap_rust(path)
 	if raw16.is_empty():
-		raw16 = _load_heightmap_16(path)
-	if raw16.is_empty():
-		var img := Image.load_from_file(path)
-		if img == null:
-			return _fail("%s unreadable" % height_file)
-		if img.get_format() != Image.FORMAT_L8:
-			img.convert(Image.FORMAT_L8)
-		height_image = img
-		height_bpp = 1
-		height_decoder = "8bit"
-		push_warning("MapData: heightmap loaded as 8-bit (precision ~%.1f m)" % ((height_max_m - height_min_m) / 255.0))
-	else:
-		height_image = Image.create_from_data(raw16.width, raw16.height, false, Image.FORMAT_LA8, raw16.data)
-		height_bpp = 2
-		height_little_endian = raw16.get("little_endian", false)
-		height_decoder = raw16.get("decoder", "png16")
+		return _fail("%s unreadable (GameDataStore.load_heightmap_u16 required)" % height_file)
+	height_image = Image.create_from_data(raw16.width, raw16.height, false, Image.FORMAT_LA8, raw16.data)
 	if height_image.get_size() != size:
 		return _fail("%s size %s != map.json size_px %s" % [height_file, height_image.get_size(), size])
 	height_bytes = height_image.get_data()
@@ -434,27 +418,6 @@ func _load_heightmap_rust(path: String) -> Dictionary:
 		push_warning("MapData: load_heightmap_u16 returned %d bytes for %s" % [data.size(), image_size])
 		return {}
 	return {"width": image_size.x, "height": image_size.y, "data": data, "little_endian": true, "decoder": "rust"}
-
-
-## Décodage 16 bits en GDScript (repli) avec cache disque (`user://cache/`) : le défiltrage PNG en
-## GDScript est lent sur 4096², mais le tampon brut se relit instantanément.
-func _load_heightmap_16(path: String) -> Dictionary:
-	var mtime := FileAccess.get_modified_time(path)
-	var cache_dir := "user://cache"
-	var cache_path := cache_dir.path_join("heightmap_%s_%d.u16be" % [path.md5_text(), mtime])
-	if FileAccess.file_exists(cache_path):
-		var cached := FileAccess.get_file_as_bytes(cache_path)
-		if cached.size() == size.x * size.y * 2:
-			return {"width": size.x, "height": size.y, "data": cached, "decoder": "png16"}
-	var decoded := Png16.load_gray16(path)
-	if decoded.is_empty():
-		return {}
-	DirAccess.make_dir_recursive_absolute(cache_dir)
-	var file := FileAccess.open(cache_path, FileAccess.WRITE)
-	if file != null:
-		file.store_buffer(decoded.data)
-		file.close()
-	return decoded
 
 
 func _load_image_optional(file_name: String, format: int = -1) -> Image:
@@ -520,12 +483,8 @@ func height01_px(px: int, py: int) -> float:
 	px = clampi(px, 0, size.x - 1)
 	py = clampi(py, 0, size.y - 1)
 	var offset := py * size.x + px
-	if height_bpp == 2:
-		offset *= 2
-		if height_little_endian:
-			return float(height_bytes[offset] | (height_bytes[offset + 1] << 8)) / 65535.0
-		return float((height_bytes[offset] << 8) | height_bytes[offset + 1]) / 65535.0
-	return float(height_bytes[offset]) / 255.0
+	offset *= 2
+	return float(height_bytes[offset] | (height_bytes[offset + 1] << 8)) / 65535.0
 
 
 ## Altitude en mètres, interpolée bilinéairement en coordonnées carte (SZ2b, ADR 0086 : le

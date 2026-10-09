@@ -75,7 +75,7 @@ BA13 | FAIT c55198a89 | MovementRules data (sim/movement.rs 624 l) | core/crates
 BA14 | À FAIRE | pub(crate) + docs lib.rs | core/crates/sim-battle/src/lib.rs | oui
 
 ## MC map
-MC1 | PARTIEL | relief_decoder.rs Rust existe ; png16.gd (GD) et chemins 8bit toujours là | game/scripts/map/png16.gd | oui
+MC1 | FAIT (sc/mc1) | png16.gd + replis 8 bits/big-endian/PageJob.run supprimés ; décodeur Rust obligatoire (shaders gardent la branche height_bpp==2, inerte) | - | non
 MC3 | PARTIEL | = PF-06 (sc/devflags) ; 5 get_cmdline restants ; voir PF-06 (sc/devflags 10-09) | game/scripts/util/cmd_args.gd | non
 MC6 | À FAIRE | folk_scenes 680 l, 10 archétypes -> 4 | game/scripts/map/life_folk/folk_scenes.gd | non | [MÉCANIQUE visuelle]
 MC8 | PARTIEL | army_markers 656 l non découpé | game/scripts/map/army_markers.gd | non

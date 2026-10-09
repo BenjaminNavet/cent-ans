@@ -1573,7 +1573,7 @@ func _drape_material() -> ShaderMaterial:
 	if _drape_mat == null:
 		_drape_mat = TownBuilder.material(0, false, 0.0, _mpu).duplicate() as ShaderMaterial
 		var texture: Texture2D = _terrain.height_texture() if _terrain != null and _terrain.has_method("height_texture") else null
-		if texture != null and _map != null and _terrain.height_texture_mode() == 1:
+		if texture != null and _map != null:
 			_drape_mat.set_shader_parameter("drape_heightmap", texture)
 			_drape_mat.set_shader_parameter("drape_info", Vector4(float(_map.size.x), float(_map.size.y), _map.height_min_m, _map.height_max_m - _map.height_min_m))
 			_drape_ready = true

@@ -23,7 +23,7 @@ extends Node3D
 ## - Pages : `Texture2DArray` R16 (entier 16 bits normalisé, pas de demi-flottant) + mipmaps,
 ##   `max_pages` couches de 512² (0,67 Mo chacune : 256 couches = 171 Mo de VRAM). Paramètres de
 ##   nœud et table des pages en `instance uniform` (couche, emprise, couches des 8 voisines).
-##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`, repli `Png16`),
+##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`),
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
 ## - PB3g (ADR 0092, 0203) : sélection, résidence (LRU) et paramètres d'instance calculés par la
 ##   classe native `ReliefLod` (crate `relief-lod`), obligatoire ; GDScript ne fait que créer,
@@ -51,7 +51,6 @@ const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_f
 @export var max_jobs: int = 4
 @export var max_uploads_per_frame: int = 2
 ## Décodage Rust sur le fil principal (≈ 3 ms par tuile) : au plus N tuiles et ce budget par image.
-@export var use_rust_decoder: bool = true
 @export var max_main_decodes_per_frame: int = 2
 @export var main_decode_budget_ms: float = 4.0
 @export var fade_seconds: float = 0.35
@@ -151,11 +150,13 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	_decoder = null
 	_main_store = null
 	_requested.clear()
-	if use_rust_decoder and ClassDB.class_exists("ReliefDecoder"):
+	if ClassDB.class_exists("ReliefDecoder"):
 		_decoder = ClassDB.instantiate("ReliefDecoder")
 		_decoder.call("start", max_jobs)
-	elif use_rust_decoder and ClassDB.class_exists("GameDataStore"):
+	elif ClassDB.class_exists("GameDataStore"):
 		_main_store = ClassDB.instantiate("GameDataStore")
+	else:
+		push_error("ReliefQuadtree: GDExtension decoder (ReliefDecoder/GameDataStore) required")
 	_main_queue.clear()
 	_chunk_top.resize(_root_cols * _root_rows)
 	_chunk_top.fill(-1)
@@ -412,7 +413,7 @@ static func _build_patch(quads: int) -> ArrayMesh:
 
 ## Pages voulues non chargées, par priorité (étage le plus grossier puis distance) : décodées au
 ## début de l'image suivante sur le fil principal par Rust (`_main_queue`, budget
-## `main_decode_budget_ms`), sinon confiées à `WorkerThreadPool` (repli GDScript `Png16`).
+## `main_decode_budget_ms`).
 func _start_jobs() -> void:
 	_main_queue.clear()
 	if _wanted_order.is_empty():
@@ -434,18 +435,6 @@ func _start_jobs() -> void:
 			if not _jobs.has(key):
 				_main_queue.append(key)
 		return
-	if _jobs.size() >= max_jobs:
-		return
-	for key: int in _wanted_order:
-		if _jobs.size() >= max_jobs:
-			break
-		if _jobs.has(key):
-			continue
-		var job := PageJob.new()
-		job.key = key
-		job.path = pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
-		var task := WorkerThreadPool.add_task(job.run, false, "relief page %d" % key)
-		_jobs[key] = {"task": task, "job": job}
 
 
 ## Récupère les décodages terminés et en téléverse au plus `max_uploads_per_frame` (tous avec
@@ -891,8 +880,7 @@ static func sample_pages_m(pages: Dictionary, top_level: int, h_min: float, h_ra
 	return NAN
 
 
-## Décodage d'une tuile : octets little-endian (Rust sur le fil principal avec `decode_with`, ou
-## `Png16` + inversion des octets dans un fil de travail avec `run`) et image R16 avec mipmaps
+## Décodage d'une tuile : octets little-endian (Rust sur le fil principal avec `decode_with`) et image R16 avec mipmaps
 ## prête à téléverser.
 class PageJob:
 	extends RefCounted
@@ -920,23 +908,6 @@ class PageJob:
 		var decoded := decode_ms
 		_finish(t0)
 		decode_ms += decoded
-
-	func run() -> void:
-		var t0 := Time.get_ticks_usec()
-		var expected := PAGE_PX * PAGE_PX * 2
-		if not FileAccess.file_exists(path):
-			return
-		if bytes.size() != expected:
-			bytes = PackedByteArray()
-			var decoded := Png16.load_gray16(path)
-			if decoded.is_empty() or int(decoded["width"]) != PAGE_PX or int(decoded["height"]) != PAGE_PX:
-				return
-			var big: PackedByteArray = decoded["data"]
-			bytes.resize(expected)
-			for o in range(0, expected, 2):
-				bytes[o] = big[o + 1]
-				bytes[o + 1] = big[o]
-		_finish(t0)
 
 	## Décodage Rust (fil principal seulement).
 	func decode_with(store: Object) -> void:

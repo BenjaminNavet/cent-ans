@@ -758,29 +758,16 @@ func _build_textures() -> void:
 ## à LA8 où octets fort et faible sont interpolés séparément (stries au dézoom). Mipmaps pour
 ## que l'ombrage lointain moyenne le relief au lieu de l'échantillonner (aliasing).
 func _height_image_for_gpu() -> Image:
-	var image: Image
-	if map_data.height_bpp == 2 and map_data.height_little_endian:
-		image = Image.create_from_data(map_data.size.x, map_data.size.y, false, Image.FORMAT_R16, map_data.height_bytes)
-	else:
-		image = map_data.height_image.duplicate()
-	if map_data.height_bpp == 1 or image.get_format() == Image.FORMAT_R16:
-		image.generate_mipmaps()
+	var image := Image.create_from_data(map_data.size.x, map_data.size.y, false, Image.FORMAT_R16, map_data.height_bytes)
+	image.generate_mipmaps()
 	_smooth_bytes = PackedByteArray()
 	_smooth_size = Vector2i.ZERO
-	if image.get_format() == Image.FORMAT_R16 and image.get_mipmap_count() >= 2:
+	if image.get_mipmap_count() >= 2:
 		var level_size := image.get_size() / 4
 		var start := image.get_mipmap_offset(2)
 		_smooth_bytes = image.get_data().slice(start, start + level_size.x * level_size.y * 2)
 		_smooth_size = level_size
 	return image
-
-
-## Mode de décodage de la heightmap dans le shader : 1 = canal R normalisé (R16 ou L8),
-## 2 = LA8 big-endian (repli Png16, sans mipmaps).
-func height_texture_mode() -> int:
-	if _height_texture != null and _height_texture.get_format() == Image.FORMAT_LA8:
-		return 2
-	return 1
 
 
 func height_texture() -> Texture2D:
@@ -910,7 +897,6 @@ func _build_material() -> void:
 	material = ShaderMaterial.new()
 	material.shader = TERRAIN_SHADER
 	material.set_shader_parameter("heightmap", _height_texture)
-	material.set_shader_parameter("height_bpp", height_texture_mode())
 	material.set_shader_parameter("height_little_endian", map_data.height_little_endian)
 	material.set_shader_parameter("height_min_m", map_data.height_min_m)
 	material.set_shader_parameter("height_max_m", map_data.height_max_m)
@@ -999,8 +985,6 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var width := map_data.size.x
 	var height := map_data.size.y
 	var bytes := map_data.height_bytes
-	var bpp := map_data.height_bpp
-	var little_endian := map_data.height_little_endian
 	var h_min := map_data.height_min_m
 	var h_range := map_data.height_max_m - map_data.height_min_m
 	var scale := MapData.HEIGHT_SCALE
@@ -1072,14 +1056,9 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 				var c := sb.decode_u16(r1 + col_k0[i])
 				var d := sb.decode_u16(r1 + col_k1[i])
 				v01 = ((a * 0.375 + b * 0.625) * 0.375 + (c * 0.375 + d * 0.625) * 0.625) / 65535.0
-			elif bpp == 2:
-				var o := (row + px) * 2
-				if little_endian:
-					v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
-				else:
-					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
-				v01 = float(bytes[row + px]) / 255.0
+				var o := (row + px) * 2
+				v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
 			var h_m := h_min + v01 * h_range
 			var y: float
 			if plain:
@@ -1111,8 +1090,6 @@ func _chunk_vertices_reference(cx: int, cy: int, step: int, heights: PackedFloat
 	var width := map_data.size.x
 	var height := map_data.size.y
 	var bytes := map_data.height_bytes
-	var bpp := map_data.height_bpp
-	var little_endian := map_data.height_little_endian
 	var h_min := map_data.height_min_m
 	var h_range := map_data.height_max_m - map_data.height_min_m
 	var scale := MapData.HEIGHT_SCALE
@@ -1141,14 +1118,9 @@ func _chunk_vertices_reference(cx: int, cy: int, step: int, heights: PackedFloat
 				var c := _smooth_bytes.decode_u16((ky1 * sw + kx0) * 2)
 				var d := _smooth_bytes.decode_u16((ky1 * sw + kx1) * 2)
 				v01 = ((a * 0.375 + b * 0.625) * 0.375 + (c * 0.375 + d * 0.625) * 0.625) / 65535.0
-			elif bpp == 2:
-				var o := (row + px) * 2
-				if little_endian:
-					v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
-				else:
-					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
-				v01 = float(bytes[row + px]) / 255.0
+				var o := (row + px) * 2
+				v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
 			var y := MapData.display_height_with(h_min + v01 * h_range, px, py, scale, gain, squash)
 			vertices[k] = Vector3(px - x0, y, py - y0)
 			heights[k] = y
