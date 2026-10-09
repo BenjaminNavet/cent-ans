@@ -20,7 +20,7 @@ sable) ne distinguent pas les régions. Les paquets `tx_campaign_bg` (45 couches
   (coût : 2 lectures de la carte, tuilage supplémentaire seulement près des frontières).
 - **Micro-détail** : paquet `tx_micro_ground`, un grain par rôle, fondu en luminance de près
   (`fade_footprint`), `micro_on` faux sans lui.
-- **Parcellaire** : drapeau `parcels_source` (`hb` par défaut, `tx`) dans `ground_biome_mix.json` ;
+- **Parcellaire** : drapeau `parcels_source` (`tx` par défaut, `hb`) dans `ground_biome_mix.json` ;
   `tx_overrides` donne les matières régionales (oasis, dunes, toundra...) quand la source est `tx`.
   `GroundMaterials.source` choisit le manifeste ; le plan des champs DN (`FieldPlan`) lit le mélange
   d'origine, non modifié.
@@ -31,5 +31,6 @@ sable) ne distinguent pas les régions. Les paquets `tx_campaign_bg` (45 couches
 ## Conséquences
 - `layer_mean` passe à 48 entrées ; `sample_layer` utilise `textureGrad` (dérivées hors branches).
 - Mémoire : 45 couches 1k (≈ 15 Mo VRAM compressées) ou 2k (≈ 250 Mo).
-- Point ouvert : bascule du défaut `parcels_source` à `tx` après jugement visuel (planche
-  `fields_compare.png`).
+- Défaut `parcels_source = tx` (planche `fields_compare.png`, 2026-10-09) : les trois vues sont quasi
+  identiques, `tx` ajoute les matières régionales absentes de `hb` ; champs 3D DN inchangés.
+  `hue_keep` relevé à 0,9 (fond régional trop discret à 0,6).

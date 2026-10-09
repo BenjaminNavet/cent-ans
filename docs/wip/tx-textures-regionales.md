@@ -45,6 +45,25 @@ la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-dét
 - Prochaine étape : fusionner tx-merge, puis chaque branche d'agent, juger la planche champs
   (`fields_compare.png`), choisir `parcels_source`, push.
 
+## Fusion 09/10 nuit (fait)
+
+- Les 3 branches d'agents + tx-merge dans main (20c72032e) ; worktrees et branches d'agents supprimés.
+  pytest : seuls les 5 échecs préexistants (rock_outcrops, budget DN, navgrid, tooltip_style, tree_species).
+- ADR renumérotés à la fusion (0238 et 0239 pris par SC) : biomes 0242, campagne 0243.
+- Choix planche champs : les trois vues (DN/sol hb, DN/sol tx, sol tx seul) sont quasi identiques ;
+  `parcels_source = "tx"` (matières régionales oasis, toundra, maquis… absentes de hb), champs 3D DN gardés.
+- Fond régional de campagne trop discret sur les captures de l'agent : `hue_keep` 0,6 → 0,9.
+- Deux paquets de grain de sol (`micro_ground` campagne, `micro_battle` bataille), mêmes images ;
+  à fusionner en un seul plus tard (5 Mo de doublon).
+- Points ouverts (détail dans tx-campaign.md, tx-battle.md, tx-veg-build.md) :
+  - niveau 2k « haute » jamais construit (`cent-ans textures pack <famille> --size 2048`, disque) ;
+  - micro-grain jamais vu de près (caméra de campagne ≥ ~25, bataille trop loin sur les captures) ;
+  - cartes au sol `GroundClutter` actives sous 2,6 alors que la caméra descend rarement sous 7 ;
+  - taïga dorée au printemps en bataille ; hêtre très clair ;
+  - `BattleGrassGroups.biome_for` duplique `BattleGroundTextures.biome_for` ;
+  - 14 paquets de bataille = 77 Mo dans le dépôt (doublons entre biomes).
+- Reste : partie pilote du joueur ; suppression de Poly Haven ensuite (TX meilleur en bataille, verdict ADR 0240).
+
 ## Réservations
 
 - ADR 0236 : fabrique de textures locale (T1f).
@@ -52,6 +71,7 @@ la prairie. Fusionné dans main. Prochaine étape : T1e (alpha rembg, micro-dét
 - ADR 0243 : sols de campagne régionaux (T2b3-4 ; 0239 pris par SC, renuméroté à la fusion).
 - ADR 0240 : sols de bataille régionaux (T2c).
 - ADR 0241 : végétation, bâtiments et eau régionaux (T3-T4).
+- Toutes écrites et dans l'INDEX.
 
 ## Tranches et lots
 
