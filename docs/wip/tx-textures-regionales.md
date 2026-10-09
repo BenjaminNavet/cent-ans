@@ -26,6 +26,10 @@ local (mflux + Real-ESRGAN) en secours seulement.
   `rock_sandstone_continental` flagged (dalles maçonnées aux 3 essais) → repli sur la roche du parent.
   Reste 2,35 $ : plus de reprise de sol, garder pour la végétation et les bâtiments ou passer en local.
 
+## T2a (14 biomes) — en cours (branche worktree-agent-a102b886d837ae888)
+
+Squelette : classes 8-14 + `parent` dans `biomes.yaml`, table des parents partagée, recuisson, consommateurs, ADR 0237. Statut mis à jour à chaque commit wip.
+
 ## Prochaine étape
 
 T1d fait (module `upscale` + `cent-ans textures upscale`, voie locale de repli) ; voie par défaut
