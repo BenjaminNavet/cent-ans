@@ -20,7 +20,6 @@ func _run() -> void:
 			await process_frame
 		var menu: Node = current_scene
 		var select: FactionSelect = menu.get("faction_select")
-		menu.call("open_faction_select") if menu.has_method("open_faction_select") else null
 		select.visible = true
 		for _i in 5:
 			await process_frame

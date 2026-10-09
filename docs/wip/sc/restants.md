@@ -203,7 +203,7 @@ SIMSPLIT | PARTIEL | ai/plan_field.rs 862 l | core/crates/sim-battle/src/ai/plan
 NAVAL-reste | PARTIEL | constantes ship.rs en dur, pending.remove(0) | core/crates/sim-battle/src/naval/ship.rs, sim-campaign/src/naval.rs | oui
 BATTLEDEV | PARTIEL | RenderQuality.override_level/upscale_override, da6/site_render/fa_on (battle_vegetation GELÉ) | game/scripts/battle/battle_vegetation.gd | non
 UIKIT | PARTIEL | RichTooltip.thousands (encyclopedia), délégués make_panel/attach_plain | game/scripts/ui/rich_tooltip.gd | non
-BUGS-ouverts | À FAIRE | 2 tests Godot préexistants (cb0 golden ?), LOOKUPS2 balayage call() has_method morts (close_all_dialogs, open_faction_select) | game/scripts | non
+BUGS-ouverts | À FAIRE | 2 tests Godot préexistants (cb0 golden ?), LOOKUPS2 FAIT (sc/lk2 : game/scripts propre, 2 lookups morts retirés dans tests pb1_turns/q8_start_faction) | game/scripts | non
 
 ## FAITS
 DC-1 DC-2 | GT3(partiel) | RT1 RT3 RT4 RT5 | GB1 GB2 GB3 GB4 GB5 | CB4 CB5 CB6 CB9 CB11 | BB2 BB3 BB4 BB7 BB11 BB13 | PF-05 | BA2 BA3 BA4 BA5 BA6 BA7 | MC2 MC4 MC5 MC7 MC9 MC12 MC14 | CA1 CA3 CA4 CA6 CA8 | CC1 CC2 CC4 CC6 CC10 CC13 CC16 | BT1 | SH3 | AD1 AD2 AD3 AD4 AD5 AD6 AD14 | MB8 MB12 | UI1 UI2 UI3 UI5 UI6 UI7 UI8 | MA3 MA10 | TL8 | MS1 MS6 | DT1 DT4 DT6(refusé) DT7 | NV2 RL1 | MA3 | CB2/CB3 annulés

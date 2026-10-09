@@ -41,10 +41,6 @@ func _run() -> void:
 		print("PB1_TURN %d total %.1f ms worst frame %.1f ms %s %s" % [turn, total, timing["worst_frame_ms"], parts, map.get("last_end_turn_stats")])
 		for i in 5:
 			await process_frame
-		# Fenêtres ouvertes par la fin de tour (rapport, batailles) : fermées pour enchaîner.
-		var ui: Object = map.get("ui")
-		if ui != null and ui.has_method("close_all_dialogs"):
-			ui.call("close_all_dialogs")
 	print("PB1_TURNS ", totals)
 	print("PB1_WORST_FRAMES ", worst_frames)
 	quit(0)
