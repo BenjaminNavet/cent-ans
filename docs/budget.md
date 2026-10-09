@@ -379,3 +379,4 @@ estimé de chaque lot et refuse au-delà de `--max-cost` (2 $ par défaut). Sold
 | 2026-10-09 | fal.ai | DN-TROUS 2 : 3D `fal-ai/trellis/multi`, 21 appels (3 refaits : glb tronqués par une coupure réseau) + 1 `fal-ai/trellis` | 0,44 $ | 0,44 $ | cumul chantier 1,58 $ |
 | 2026-10-09 | fal.ai | DN-CHAMPS 2 (11 parcelles entières, + 2 objets associés) : images Z-Image fal (`fal-ai/z-image/turbo`), 8 appels | 0,04 $ | 0,04 $ | cumul chantier 0,28 $ |
 | 2026-10-09 | fal.ai | DN-CHAMPS 2 : 3D `fal-ai/trellis`, 12 appels | 0,24 $ | 0,24 $ | cumul chantier 0,28 $ |
+| 2026-10-09 | fal.ai | sols de campagne `ground_campaign` : pilote 6 images 2048² puis lot complet 83 images 2048² (`fal-ai/z-image/turbo`), 89 appels | 1,87 $ | 1,87 $ | 1,89 $ |
