@@ -24,7 +24,9 @@ func _run() -> void:
 	var plan := _make_plan(config, map_data, data_dir)
 	check(plan.is_ready(), "plan not ready (splat or biomes missing)")
 	_check_plan(plan, config, map_data)
-	await _check_layer(map_data)
+	# Modèles de parcelles coupés par les données (rejet joueur 10-09) : pas de couche à mesurer.
+	if bool(config.get("enabled", true)):
+		await _check_layer(map_data)
 	finish()
 
 

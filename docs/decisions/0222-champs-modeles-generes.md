@@ -38,3 +38,9 @@ d'un carré de blé ou une vigne »). Les touffes `crop_*` grossies et chevauch�
   taille +- `size_jitter`. Disparus : `spacing_m`, `row_m`, `height_scale`, `size_m`, accents (pressoirs,
   pergolas). Plafond d'instances 14 000 -> 1 500.
 - Conséquence : sans glb `field_*` ingéré, la couche ne dessine rien (modèles absents ignorés).
+
+## Révision : modèles coupés (retour joueur 10-09 soir)
+Motif : même en parcelles entières, les glb `field_*` donnent des dalles crème froissées posées sur le
+relief, jusque sur l'eau (« les champs complètement ratés »). Décision : `"enabled": false` dans
+`data/art/dn_fields.json` ; `FieldLayer` ne pose plus rien, les champs restent peints dans le sol
+(`hb_ground.gdshaderinc`, matières TX). Le code et le catalogue sont gardés pour un éventuel retour.

@@ -8,6 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
+    "enabled": {"type": "boolean", "description": "Faux : aucun modèle de parcelle posé, les champs restent peints dans le sol (rejet joueur 10-09)."},
     "render": {
       "type": "object",
       "additionalProperties": false,

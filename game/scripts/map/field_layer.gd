@@ -59,7 +59,7 @@ func setup(map: MapData, terrain: TerrainBuilder, towns: PackedVector2Array) -> 
 	stats = {"instances": 0, "nodes": 0, "cells": 0, "plan_ms": 0.0, "build_ms": 0.0, "build_ms_max": 0.0, "plan_ms_max": 0.0}
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
-	if config.is_empty():
+	if config.is_empty() or not bool(config.get("enabled", true)):
 		enabled = false
 		return
 	var mix := _read_json(data_dir.path_join(HbGround.MIX_FILE))
