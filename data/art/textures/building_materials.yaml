@@ -7,7 +7,7 @@
 # Prompt sent = style_prefix ({tile_m} substituted) + prompt + style_suffix. Seeds: 9000 + index * 10.
 family: building_materials
 backend: fal
-size: 2048
+size: 1536  # 1536 : tient dans l’enveloppe TX (normales et rugosité en 1k)
 output_size: 2048
 style_prefix: >-
   Front view of a surface seen exactly face-on, the camera straight in front of a perfectly flat
