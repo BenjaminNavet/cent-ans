@@ -1,9 +1,11 @@
 {
-  "description": "Lot DN camp-bati (D1, ADR 0211) : glb générés semi-réalistes des lieux de la carte de campagne, affichés aux zooms proche et moyen à la place des maquettes stylisées (`town_maquette_layer.gd`), qui restent l'état généralisé du lointain. Table vide = comportement actuel inchangé. Branchement d'un nouveau modèle = une entrée dans table[type][famille] (ou famille `*`, repli) : { \"path\": \"dn/<categorie>/<nom>\" } suffit ; la largeur native est mesurée sur le maillage si `native_width` manque. Les modèles sont mono-surface texturés (albédo baké) ; la couleur du contrôleur ne teinte qu'une bannière procédurale posée au-dessus.",
+  "description": "Lot DN camp-bati (D1, ADR 0211) : glb générés semi-réalistes des lieux de la carte de campagne, affichés aux zooms proche et moyen à la place des maquettes stylisées (`town_maquette_layer.gd`), qui restent l'état généralisé du lointain. Table vide = comportement actuel inchangé. Branchement d'un nouveau modèle = une entrée dans table[type][famille] (ou famille `*`, repli) : { \"path\": \"dn/<categorie>/<nom>\" } suffit ; la largeur native est mesurée sur le maillage si `native_width` manque. Les modèles sont mono-surface texturés (albédo baké) ; la couleur du contrôleur ne teinte qu'une bannière procédurale posée au-dessus. Sous-familles (DN-MAQ) : `subfamilies` (l'ordre est la priorité ; première règle de la famille de la province dont culture, région ou religion correspond) ; la recherche essaie la sous-famille, ses `also`, la famille, puis `*`.",
   "defaults": {
-    "near_distance": 300.0,
+    "near_distance": 1300.0,
     "fade_margin": 60.0,
-    "banner_pole_ratio": 0.12
+    "banner_pole_ratio": 0.12,
+    "lod": 1,
+    "albedo_gain": 2.4
   },
   "table": {
     "city": {
@@ -21,6 +23,66 @@
         {
           "path": "dn/buildings/city_isl"
         }
+      ],
+      "rus": [
+        {
+          "path": "dn/buildings/city_rus"
+        }
+      ],
+      "byz": [
+        {
+          "path": "dn/buildings/city_byz"
+        }
+      ],
+      "steppe": [
+        {
+          "path": "dn/buildings/city_steppe"
+        }
+      ],
+      "west_hansa": [
+        {
+          "path": "dn/buildings/city_hansa"
+        }
+      ],
+      "west_east": [
+        {
+          "path": "dn/buildings/city_hungpol"
+        }
+      ],
+      "nord": [
+        {
+          "path": "dn/buildings/city_nord"
+        }
+      ],
+      "balt": [
+        {
+          "path": "dn/buildings/city_balt"
+        }
+      ],
+      "med_towers": [
+        {
+          "path": "dn/buildings/city_ital_commune"
+        }
+      ],
+      "med_sea": [
+        {
+          "path": "dn/buildings/city_ital_maritime"
+        }
+      ],
+      "med_iber": [
+        {
+          "path": "dn/buildings/city_iber_mudejar"
+        }
+      ],
+      "isl_andalus": [
+        {
+          "path": "dn/buildings/city_isl_andalus"
+        }
+      ],
+      "isl_mamluk": [
+        {
+          "path": "dn/buildings/city_isl_mamluk"
+        }
       ]
     },
     "castle": {
@@ -37,6 +99,71 @@
       "isl": [
         {
           "path": "dn/buildings/castle_isl"
+        }
+      ],
+      "byz": [
+        {
+          "path": "dn/buildings/castle_byz"
+        }
+      ],
+      "rus": [
+        {
+          "path": "dn/buildings/castle_rus"
+        }
+      ],
+      "steppe": [
+        {
+          "path": "dn/buildings/castle_steppe"
+        }
+      ],
+      "west_alp": [
+        {
+          "path": "dn/buildings/castle_empire_rhine"
+        }
+      ],
+      "west_east": [
+        {
+          "path": "dn/buildings/castle_hungpol"
+        }
+      ],
+      "nord": [
+        {
+          "path": "dn/buildings/castle_nord"
+        }
+      ],
+      "balt": [
+        {
+          "path": "dn/buildings/castle_balt"
+        }
+      ],
+      "med_towers": [
+        {
+          "path": "dn/buildings/castle_ital_rocca"
+        }
+      ],
+      "med_iber": [
+        {
+          "path": "dn/buildings/castle_iber"
+        }
+      ],
+      "byz_serbia": [
+        {
+          "path": "dn/buildings/castle_byz_serbia"
+        }
+      ],
+      "isl_andalus": [
+        {
+          "path": "dn/buildings/castle_isl_andalus"
+        }
+      ],
+      "isl_mamluk": [
+        {
+          "path": "dn/buildings/castle_isl_mamluk"
+        }
+      ],
+      "isl_anatolia": [
+        {
+          "path": "dn/buildings/castle_isl_anatolia"
         }
       ]
     },
@@ -60,12 +187,162 @@
         {
           "path": "dn/buildings/village_rus"
         }
+      ],
+      "byz": [
+        {
+          "path": "dn/buildings/village_byz"
+        }
+      ],
+      "steppe": [
+        {
+          "path": "dn/buildings/village_steppe"
+        }
+      ],
+      "west_alp": [
+        {
+          "path": "dn/buildings/village_empire"
+        }
+      ],
+      "west_east": [
+        {
+          "path": "dn/buildings/village_hungpol"
+        }
+      ],
+      "west_carpathian": [
+        {
+          "path": "dn/buildings/village_carpathian"
+        }
+      ],
+      "nord": [
+        {
+          "path": "dn/buildings/village_nord"
+        }
+      ],
+      "balt": [
+        {
+          "path": "dn/buildings/village_balt"
+        }
+      ],
+      "balt_pagan": [
+        {
+          "path": "dn/buildings/village_balt_pagan"
+        }
+      ],
+      "med_towers": [
+        {
+          "path": "dn/buildings/village_ital"
+        }
+      ],
+      "med_iber": [
+        {
+          "path": "dn/buildings/village_iber"
+        }
+      ],
+      "med_galicia": [
+        {
+          "path": "dn/buildings/village_iber_galicia"
+        }
+      ],
+      "byz_wallachia": [
+        {
+          "path": "dn/buildings/village_byz_wallachia"
+        }
+      ],
+      "rus_ural": [
+        {
+          "path": "dn/buildings/village_ural"
+        }
+      ],
+      "isl_andalus": [
+        {
+          "path": "dn/buildings/village_isl_andalus"
+        }
+      ],
+      "isl_mamluk": [
+        {
+          "path": "dn/buildings/village_isl_mamluk"
+        }
+      ],
+      "isl_anatolia": [
+        {
+          "path": "dn/buildings/village_isl_anatolia"
+        }
+      ],
+      "steppe_bashkir": [
+        {
+          "path": "dn/buildings/village_bashkir"
+        }
       ]
     },
     "abbey": {
       "west": [
         {
           "path": "dn/buildings/abbey_west"
+        }
+      ],
+      "med": [
+        {
+          "path": "dn/buildings/abbey_ital"
+        }
+      ],
+      "byz": [
+        {
+          "path": "dn/buildings/abbey_byz"
+        }
+      ],
+      "rus": [
+        {
+          "path": "dn/buildings/abbey_rus"
+        }
+      ],
+      "steppe": [
+        {
+          "path": "dn/buildings/abbey_steppe"
+        }
+      ],
+      "isl": [
+        {
+          "path": "dn/buildings/abbey_isl_anatolia"
+        }
+      ],
+      "nord": [
+        {
+          "path": "dn/buildings/abbey_nord"
+        }
+      ],
+      "balt": [
+        {
+          "path": "dn/buildings/abbey_balt"
+        }
+      ],
+      "med_towers": [
+        {
+          "path": "dn/buildings/abbey_ital"
+        }
+      ],
+      "med_iber": [
+        {
+          "path": "dn/buildings/abbey_iber"
+        }
+      ],
+      "byz_serbia": [
+        {
+          "path": "dn/buildings/abbey_byz_serbia"
+        }
+      ],
+      "rus_ural": [
+        {
+          "path": "dn/buildings/abbey_ural_shrine"
+        }
+      ],
+      "isl_anatolia": [
+        {
+          "path": "dn/buildings/abbey_isl_anatolia"
+        }
+      ],
+      "isl_maghreb": [
+        {
+          "path": "dn/buildings/abbey_isl_maghreb"
         }
       ]
     },
@@ -99,7 +376,320 @@
         {
           "path": "dn/buildings/town_west"
         }
+      ],
+      "west_hansa": [
+        {
+          "path": "dn/buildings/town_hansa"
+        }
+      ],
+      "west_alp": [
+        {
+          "path": "dn/buildings/town_empire_south"
+        }
+      ],
+      "west_east": [
+        {
+          "path": "dn/buildings/town_hungpol"
+        }
+      ],
+      "nord": [
+        {
+          "path": "dn/buildings/town_nord"
+        }
+      ],
+      "balt": [
+        {
+          "path": "dn/buildings/town_balt"
+        }
+      ],
+      "med_towers": [
+        {
+          "path": "dn/buildings/town_ital_towers"
+        }
+      ],
+      "med_iber": [
+        {
+          "path": "dn/buildings/town_iber"
+        }
+      ],
+      "byz_serbia": [
+        {
+          "path": "dn/buildings/town_byz_serbia"
+        }
+      ],
+      "rus_ural": [
+        {
+          "path": "dn/buildings/town_ural"
+        }
+      ],
+      "isl_andalus": [
+        {
+          "path": "dn/buildings/town_isl_andalus"
+        }
+      ],
+      "isl_mamluk": [
+        {
+          "path": "dn/buildings/town_isl_mamluk"
+        }
+      ],
+      "isl_anatolia": [
+        {
+          "path": "dn/buildings/town_isl_anatolia"
+        }
+      ],
+      "steppe_circassian": [
+        {
+          "path": "dn/buildings/town_circassian"
+        }
+      ],
+      "steppe_volga": [
+        {
+          "path": "dn/buildings/town_volga_bulgar"
+        }
       ]
     }
-  }
+  },
+  "subfamilies": [
+    {
+      "id": "med_galicia",
+      "family": "med",
+      "also": [
+        "med_iber"
+      ],
+      "cultures": [
+        "cul_galician"
+      ]
+    },
+    {
+      "id": "med_sea",
+      "family": "med",
+      "also": [
+        "med_towers"
+      ],
+      "cultures": [
+        "cul_venetian",
+        "cul_ligurian",
+        "cul_sicilian",
+        "cul_neapolitan",
+        "cul_dalmatian",
+        "cul_sardinian"
+      ]
+    },
+    {
+      "id": "med_towers",
+      "family": "med",
+      "cultures": [
+        "cul_tuscan",
+        "cul_lombard"
+      ],
+      "regions": [
+        "italie_nord",
+        "italie_centre"
+      ]
+    },
+    {
+      "id": "med_iber",
+      "family": "med",
+      "cultures": [
+        "cul_castilian",
+        "cul_catalan",
+        "cul_portuguese",
+        "cul_navarrese",
+        "cul_basque"
+      ],
+      "regions": [
+        "aragon",
+        "iberie_centre",
+        "iberie_nord",
+        "iberie_sud",
+        "portugal"
+      ]
+    },
+    {
+      "id": "west_carpathian",
+      "family": "west",
+      "also": [
+        "west_east"
+      ],
+      "regions": [
+        "transylvanie"
+      ]
+    },
+    {
+      "id": "west_east",
+      "family": "west",
+      "cultures": [
+        "cul_hungarian",
+        "cul_polish",
+        "cul_czech",
+        "cul_slovak",
+        "cul_croatian",
+        "cul_slovene"
+      ],
+      "regions": [
+        "hongrie",
+        "pologne",
+        "mazovie",
+        "silesie",
+        "croatie"
+      ]
+    },
+    {
+      "id": "balt",
+      "family": "west",
+      "cultures": [
+        "cul_estonian",
+        "cul_latvian"
+      ],
+      "regions": [
+        "livonie",
+        "prusse"
+      ]
+    },
+    {
+      "id": "nord",
+      "family": "west",
+      "cultures": [
+        "cul_swedish",
+        "cul_danish",
+        "cul_norwegian",
+        "cul_finnish"
+      ],
+      "regions": [
+        "scandinavie",
+        "norvege",
+        "finlande"
+      ]
+    },
+    {
+      "id": "west_hansa",
+      "family": "west",
+      "regions": [
+        "empire_nord",
+        "pomeranie"
+      ]
+    },
+    {
+      "id": "west_alp",
+      "family": "west",
+      "regions": [
+        "empire_sud",
+        "empire_rhin",
+        "empire_est"
+      ]
+    },
+    {
+      "id": "byz_wallachia",
+      "family": "byz",
+      "also": [
+        "byz"
+      ],
+      "cultures": [
+        "cul_romanian"
+      ],
+      "regions": [
+        "valachie"
+      ]
+    },
+    {
+      "id": "byz_serbia",
+      "family": "byz",
+      "cultures": [
+        "cul_serbian",
+        "cul_bosnian",
+        "cul_albanian"
+      ]
+    },
+    {
+      "id": "balt_pagan",
+      "family": "rus",
+      "also": [
+        "balt"
+      ],
+      "cultures": [
+        "cul_lithuanian"
+      ],
+      "regions": [
+        "lituanie"
+      ]
+    },
+    {
+      "id": "rus_ural",
+      "family": "rus",
+      "cultures": [
+        "cul_permian",
+        "cul_mordvin",
+        "cul_karelian"
+      ]
+    },
+    {
+      "id": "isl_andalus",
+      "family": "isl",
+      "cultures": [
+        "cul_andalusi"
+      ]
+    },
+    {
+      "id": "isl_mamluk",
+      "family": "isl",
+      "regions": [
+        "egypte",
+        "levant"
+      ]
+    },
+    {
+      "id": "isl_anatolia",
+      "family": "isl",
+      "cultures": [
+        "cul_turkish"
+      ],
+      "regions": [
+        "anatolie"
+      ]
+    },
+    {
+      "id": "isl_maghreb",
+      "family": "isl",
+      "also": [
+        "isl"
+      ],
+      "cultures": [
+        "cul_berber",
+        "cul_maghrebi"
+      ],
+      "regions": [
+        "maghreb"
+      ]
+    },
+    {
+      "id": "steppe_circassian",
+      "family": "steppe",
+      "also": [
+        "steppe"
+      ],
+      "cultures": [
+        "cul_circassian"
+      ]
+    },
+    {
+      "id": "steppe_volga",
+      "family": "steppe",
+      "also": [
+        "steppe"
+      ],
+      "cultures": [
+        "cul_volga_bulgar"
+      ]
+    },
+    {
+      "id": "steppe_bashkir",
+      "family": "steppe",
+      "also": [
+        "steppe"
+      ],
+      "cultures": [
+        "cul_bashkir"
+      ]
+    }
+  ]
 }

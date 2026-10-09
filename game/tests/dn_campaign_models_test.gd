@@ -53,7 +53,7 @@ func _run() -> void:
 	for kind in shipped:
 		for family in shipped[kind]:
 			for entry in shipped[kind][family]:
-				lod0_paths.append("res://assets/models/%s_lod0.glb" % entry["path"])
+				lod0_paths.append("res://assets/models/%s.glb" % DnCampaignModels.model_name(entry))
 	var package_installed := FileAccess.file_exists("res://assets/models/dn/package.json")
 	for lod0 in lod0_paths:
 		package_installed = package_installed or ResourceLoader.exists(lod0)
@@ -72,6 +72,24 @@ func _run() -> void:
 	_check(DnCampaignModels.entry_for("village", "west", 3)["path"] == "props_ga/ga3_house_lod1", "exact family entry")
 	_check(DnCampaignModels.entry_for("village", "med", 0)["path"] == "props_ga/ga3_church_lod1", "wildcard entry")
 	_check(DnCampaignModels.entry_for("abbey", "west", 0).is_empty(), "no entry for an unlisted kind")
+	# Sous-familles (DN-MAQ) : sous-famille, ses `also`, famille, `*`.
+	DnCampaignModels.set_document({"subfamilies": [
+		{"id": "med_sea", "family": "med", "also": ["med_towers"], "cultures": ["cul_venetian"]},
+		{"id": "med_towers", "family": "med", "regions": ["italie_nord"]},
+	], "table": {
+		"city": {"med_sea": [{"path": "a"}], "med_towers": [{"path": "b"}], "med": [{"path": "c"}]},
+		"town": {"med_towers": [{"path": "b"}], "med": [{"path": "c"}]},
+		"abbey": {"west": [{"path": "w"}]},
+	}})
+	_check(DnCampaignModels.subfamily_for("med", "cul_venetian", "italie_nord", "") == "med_sea", "first matching rule wins")
+	_check(DnCampaignModels.subfamily_for("med", "cul_x", "italie_nord", "") == "med_towers", "region rule")
+	_check(DnCampaignModels.subfamily_for("west", "cul_venetian", "", "") == "", "rule of another family ignored")
+	_check(DnCampaignModels.entry_for("city", "med", 0, "med_sea")["path"] == "a", "subfamily entry first")
+	_check(DnCampaignModels.entry_for("town", "med", 0, "med_sea")["path"] == "b", "also chain")
+	_check(DnCampaignModels.entry_for("abbey", "med", 0, "med_sea").is_empty(), "no entry anywhere")
+	_check(DnCampaignModels.entry_for("city", "med", 0)["path"] == "c", "family entry without subfamily")
+	_check(DnCampaignModels.model_name({"path": "dn/buildings/x"}) == "dn/buildings/x_lod1", "default lod suffix")
+	_check(DnCampaignModels.model_name({"path": "a_lod2"}) == "a_lod2", "explicit lod kept")
 	DnCampaignModels.set_document({"table": {}})  # cas 1 : table vide
 
 	var data_dir := MAP_PATHS.default_data_dir()

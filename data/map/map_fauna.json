@@ -2,8 +2,8 @@
  "description": "Faune et troupeaux de la carte de campagne (lot DN-ME2, `game/scripts/map/fauna_layer.gd`) : especes (ids des animaux de `data/art/dn_catalog_map_extra.json`), zones geographiques (ellipses lon/lat, EPSG:3035 via `map.json`), densites par region et biome. Rendu seulement, aucune regle de jeu. Brancher un nouveau modele = ajouter/modifier une entree `species` (le glb ingere `game/assets/models/dn/fauna/<id>_lod{0,1,2}.glb` prime sur `placeholder`).",
  "version": 1,
  "render": {
-  "max_distance": 110.0,
-  "fade_from": 70.0,
+  "max_distance": 230.0,
+  "fade_from": 150.0,
   "cell_px": 96.0,
   "load_factor": 2.6,
   "min_radius_px": 24.0,
@@ -11,7 +11,7 @@
   "max_visible_instances": 3000,
   "max_cached_cells": 48,
   "cells_per_frame": 1,
-  "length_k": 0.02,
+  "length_k": 0.03,
   "length_exponent": 0.85,
   "spread_exponent": 0.5,
   "lod_distances": [

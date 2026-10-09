@@ -1,11 +1,11 @@
 {
   "description": "GC2 (ADR 0158) : maquettes stylisées des lieux de la carte de campagne. sizes : largeur monde (unités, 1 unité ≈ 719 m) par type ; native_width : largeur du modèle à l'échelle 1 (unités Blender) ; landmark_scale : grossissement des villes emblématiques (LandmarkModel) ; visibility : distance maximale par type, fondu sur fade_margin ; collision : un lieu dont le disque touche celui d'un lieu plus important est réduit jusqu'à min_scale ; families : famille d'architecture d'une province (culture, puis région, puis religion, sinon default_family). Modèles : assets/models/settlements/<type>_<famille>_<a|b>.glb (famille par défaut : <type>_<a|b>.glb), repli sur la famille par défaut si le fichier manque. Purement visuel, aucune règle de jeu. weight_gain : la largeur d'un lieu est multipliée par un gain de min à max selon son poids (champ weight de data/settlements), entre les bornes [poids bas, poids haut] de son type (racine carrée : les très gros lieux ne dominent pas).",
   "sizes": {
-    "city": 14.0,
-    "town": 8.0,
-    "castle": 4.6,
-    "abbey": 4.4,
-    "village": 4.0
+    "city": 17.5,
+    "town": 10.0,
+    "castle": 5.8,
+    "abbey": 5.5,
+    "village": 5.0
   },
   "weight_gain": {
     "min": 0.85,
@@ -41,11 +41,11 @@
   "landmark_scale": 2.2,
   "props": {
     "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig).",
-    "hamlet_ratio": 0.7,
-    "windmill_ratio": 0.5,
-    "windmill_range": 220.0,
-    "chimney_ratio": 0.3,
-    "chimney_range": 220.0
+    "hamlet_ratio": 0.9,
+    "windmill_ratio": 0.65,
+    "windmill_range": 300.0,
+    "chimney_ratio": 0.4,
+    "chimney_range": 300.0
   },
   "visibility": {
     "city": 1250.0,

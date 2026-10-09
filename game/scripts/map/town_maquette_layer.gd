@@ -57,6 +57,7 @@ var _dn_scale: PackedFloat32Array = PackedFloat32Array()  # échelle du glb gén
 var _dn_model_of: PackedInt32Array = PackedInt32Array()  # index dans `_dn_list`, -1 sinon
 var _color: PackedColorArray = PackedColorArray()
 var _family: PackedStringArray = PackedStringArray()
+var _subfamily: PackedStringArray = PackedStringArray()  # sous-famille des glb générés (DN-MAQ), "" si aucune
 ## Modèles préparés : nom → index ; liste de {mesh, local: Transform3D, top, banner: Color}.
 var _models: Dictionary = {}
 var _model_list: Array[Dictionary] = []
@@ -118,6 +119,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	_dn_model_of.resize(count)
 	_dn_model_of.fill(-1)
 	_family.resize(count)
+	_subfamily.resize(count)
 	_tiles_by_kind.clear()
 	_fade_by_kind.clear()
 	for k in TownMaquetteData.KINDS.size():
@@ -146,6 +148,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		_radius[i] = TownMaquetteData.width(kind) * 0.5 * _gain[i]
 		_yaw[i] = TownMaquetteData.yaw_of(id)
 		_family[i] = TownMaquetteData.family_of_province(str(entry.get("province", "")))
+		_subfamily[i] = TownMaquetteData.subfamily_of_province(str(entry.get("province", "")))
 		centers[i] = layer.model_px(i)
 		var plan := LandmarkLibrary.for_settlement(id)
 		if not plan.is_empty():
@@ -629,7 +632,7 @@ func _dn_for(i: int, kind: String) -> int:
 	if DnCampaignModels.is_empty():
 		return -1
 	var variant_index := absi(str(_layer.data.settlements[i]["id"]).hash())
-	var entry := DnCampaignModels.entry_for(kind, _family[i], variant_index)
+	var entry := DnCampaignModels.entry_for(kind, _family[i], variant_index, _subfamily[i])
 	if entry.is_empty():
 		return -1
 	return _dn_index(entry)
@@ -642,7 +645,7 @@ func _dn_index(entry: Dictionary) -> int:
 	if _dn_models.has(path):
 		return _dn_models[path]
 	var index := -1
-	var scene := ModelLibrary.get_scene(path)
+	var scene := ModelLibrary.get_scene(DnCampaignModels.model_name(entry))
 	var root: Node3D = null
 	if scene != null:
 		root = scene.instantiate() as Node3D
@@ -658,6 +661,7 @@ func _dn_index(entry: Dictionary) -> int:
 				local = node.transform * local
 				node = node.get_parent() as Node3D
 			var mesh := mesh_instance.mesh.duplicate() as Mesh
+			DnCampaignModels.brighten(mesh, entry)
 			var box := local * mesh.get_aabb()
 			var width := float(entry.get("native_width", maxf(box.size.x, box.size.z)))
 			index = _dn_list.size()

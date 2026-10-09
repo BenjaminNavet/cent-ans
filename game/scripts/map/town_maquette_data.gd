@@ -20,7 +20,7 @@ const KINDS: Array[String] = ["city", "town", "castle", "abbey", "village"]
 static var _doc: Dictionary = {}
 static var _loaded := false
 static var _style := ""
-static var _province_family: Dictionary = {}  # id de province → famille
+static var _province_family: Dictionary = {}  # id de province → {family, subfamily}
 static var _lookup: Dictionary = {}  # "cultures|cul_x" → famille
 static var _model_names: Dictionary = {}  # "type|famille|variante" → nom de modèle
 
@@ -156,14 +156,28 @@ static func family_for(culture: String, region: String, religion: String) -> Str
 static func family_of_province(province_id: String) -> String:
 	if province_id == "":
 		return default_family()
+	return str(_province_info(province_id)["family"])
+
+
+## Sous-famille d'architecture des modèles générés (DN-MAQ, `DnCampaignModels`), "" si aucune.
+static func subfamily_of_province(province_id: String) -> String:
+	if province_id == "":
+		return ""
+	return str(_province_info(province_id)["subfamily"])
+
+
+static func _province_info(province_id: String) -> Dictionary:
 	if not _province_family.has(province_id):
 		var parsed: Variant = _read_json("provinces/%s.json" % province_id)
 		var province: Dictionary = parsed if parsed is Dictionary else {}
-		_province_family[province_id] = family_for(str(province.get("culture", "")), str(province.get("region", "")), str(province.get("religion", "")))
+		var culture := str(province.get("culture", ""))
+		var region := str(province.get("region", ""))
+		var religion := str(province.get("religion", ""))
+		var family := family_for(culture, region, religion)
+		_province_family[province_id] = {"family": family, "subfamily": DnCampaignModels.subfamily_for(family, culture, region, religion)}
 	return _province_family[province_id]
 
 
-## Variante de modèle d'un lieu, tirée par son id (déterministe).
 static func variant_of(id: String) -> String:
 	var list := variants()
 	return str(list[absi(id.hash()) % list.size()]) if not list.is_empty() else ""
