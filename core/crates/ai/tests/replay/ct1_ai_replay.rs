@@ -1,4 +1,4 @@
-//! Lot CT1: the record of the AI turn replayed on the campaign map (ADR
+//! The record of the AI turn replayed on the campaign map (ADR
 //! 0073) — deterministic, harmless to the game, and telling which moves
 //! concern the player.
 use data_model::test_support::fac;

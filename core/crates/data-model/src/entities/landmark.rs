@@ -1,8 +1,8 @@
-//! Landmark cities (`data/landmarks/<id>.json`, lots L1-L3), siege subset.
+//! Landmark cities (`data/landmarks/<id>.json`), siege subset.
 //!
 //! The file describes the whole historical plan for the Blender generator
 //! (`tools/blender_scripts/landmark_city.py`); the core only reads what the
-//! siege battle needs (lot L3, ADR 0026): the walls with their gates, the
+//! siege battle needs (ADR 0026): the walls with their gates, the
 //! streets and the `siege.battle` block naming the walls of the besieged
 //! town, the attacked gate and the streets kept as lanes. Unknown fields are
 //! ignored; the full file is validated by `data/schemas/landmark.schema.json`.

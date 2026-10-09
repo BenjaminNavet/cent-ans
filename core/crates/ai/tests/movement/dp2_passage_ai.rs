@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0075): the AI's routes respect the right of passage at
+//! ADR 0075: the AI's routes respect the right of passage at
 //! peace and break it at war according to its temper.
 
 use ai::grid::GridPlanner;

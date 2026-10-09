@@ -6,6 +6,11 @@
 //! Convention : une `#[func]` doit avoir un appelant dans `game/` (ou `tools/`).
 //! Une `#[func]` sans appelant est supprimée, avec les fonctions du cœur qu'elle
 //! seule utilisait.
+//!
+//! Organisation : `campaign_sim*` (one module per API family of `CampaignSim`, each a secondary
+//! `#[godot_api]` block), `battle_sim*` and `battle_*` (the `BattleSim` API, its step job, replay
+//! and renderer buffers), `turn_job` (off-thread turn resolution), `convert` (Godot/Rust value
+//! conversion), and the terrain, relief, vegetation and map-data helpers.
 
 use crate::convert::vec2_f64;
 use std::fs::File;

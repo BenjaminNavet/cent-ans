@@ -1,4 +1,4 @@
-//! The crusader faction's « Ferveur » (lot JR1, ADR 0165), mirroring
+//! The crusader faction's « Ferveur » (ADR 0165), mirroring
 //! `data/schemas/crusade_rules.schema.json` (`data/rules/crusade.json`).
 //! Spec `docs/superpowers/specs/2026-10-02-jr-croises-jerusalem-design.md` § 4.
 //!
@@ -36,7 +36,7 @@ pub struct CrusadeRules {
     pub starting_army: Vec<UnitTypeId>,
     /// Prestige the ruler gains when the target province is taken.
     pub target_taken_prestige: i32,
-    /// Lot JR4b: the master of a besieged place of the Holy Land calls its
+    /// The master of a besieged place of the Holy Land calls its
     /// defence (absent: no relief).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relief: Option<CrusadeRelief>,

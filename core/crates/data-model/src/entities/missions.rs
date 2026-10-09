@@ -1,4 +1,4 @@
-//! Short-term campaign missions (lot NT3, ADR 0127), mirroring
+//! Short-term campaign missions (ADR 0127), mirroring
 //! `data/schemas/missions.schema.json` (`data/missions.json`).
 
 use crate::key_enum;

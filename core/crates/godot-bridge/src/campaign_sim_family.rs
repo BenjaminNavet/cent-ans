@@ -1,4 +1,4 @@
-//! `CampaignSim` family tree (lot C3, court panel « Arbre familial »), read
+//! `CampaignSim` family tree (court panel « Arbre familial »), read
 //! only: no rule, only a walk over the parenthood links already kept in
 //! `CampaignState::characters` (M4).
 

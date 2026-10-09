@@ -1,4 +1,4 @@
-//! Lot DP1 (ADR 0025): treaties of friendship planned by the AI, beside the
+//! ADR 0025: treaties of friendship planned by the AI, beside the
 //! war and peace of `sim_campaign::diplomacy::plan_diplomacy` (whose treaty
 //! peace lives in `sim_campaign::negotiation::plan_peace`).
 //!

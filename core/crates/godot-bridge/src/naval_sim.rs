@@ -8,7 +8,7 @@ use crate::campaign_sim::{events_array, CampaignSim, Ctx, CtxMut};
 
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Naval battles waiting for the player (lot NV1): `[{index, army, from,
+    /// Naval battles waiting for the player: `[{index, army, from,
     /// to, sea, sea_name, interceptor, interceptor_name, faction,
     /// faction_name, interceptor_ships, transport_ships, interceptor_men,
     /// army_men, win_chance, player_side, seed}]`.

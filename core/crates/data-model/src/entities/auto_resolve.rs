@@ -1,4 +1,4 @@
-//! Coefficients of the phased auto-resolve (lot N1), mirroring
+//! Coefficients of the phased auto-resolve, mirroring
 //! `data/schemas/auto_resolve_rules.schema.json` (`data/rules/auto_resolve.json`).
 
 use std::collections::BTreeMap;

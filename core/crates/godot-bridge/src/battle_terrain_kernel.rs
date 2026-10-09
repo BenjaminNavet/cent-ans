@@ -1,4 +1,4 @@
-//! Lot SC PF-08 / BT7 / GB6: Godot handle on the battle ground computed in
+//! Godot handle on the battle ground computed in
 //! Rust (`battle_terrain_field.rs`). `battle_terrain.gd` hands over the
 //! simulation grid, the river, the coast, the horizon relief and the noise
 //! resources once at build time, then asks for heights, grids and meshes.

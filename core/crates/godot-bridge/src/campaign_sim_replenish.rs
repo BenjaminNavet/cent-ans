@@ -1,5 +1,5 @@
-//! `CampaignSim` army replenishment and recruitment pools (lot TW2-T2,
-//! ADR 0102): the season's replenishment of an army with the factors of its
+//! `CampaignSim` army replenishment and recruitment pools
+//! (ADR 0102): the season's replenishment of an army with the factors of its
 //! rate (army sheet tooltip). The pools themselves ride on
 //! `get_recruitable` (`pool_*` keys).
 

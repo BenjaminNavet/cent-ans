@@ -1,4 +1,4 @@
-//! Diplomacy rules (lot RS-C), schema
+//! Diplomacy rules, schema
 //! `data/schemas/diplomacy_rules.schema.json` (`data/rules/diplomacy.json`).
 
 use std::collections::BTreeMap;

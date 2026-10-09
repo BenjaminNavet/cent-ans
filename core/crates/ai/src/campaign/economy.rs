@@ -203,7 +203,7 @@ fn recruit_sites(ctx: &Context, cityless: bool) -> Vec<SettlementId> {
 /// Seasonal upkeep the armies may reach: armies are paid from what
 /// buildings leave of the net income, plus the hoard spent over
 /// `hoard_spending_turns`; small realms live within their means.
-/// Lot C7a: garrisons are a fixed cost of the realm like buildings (a
+/// Garrisons are a fixed cost of the realm like buildings (a
 /// hundred places since the settlements); the share applies to what both
 /// leave, and the garrisons are paid on top.
 /// LR-04: the capital city's garrison is where recruits muster, not a fixed
@@ -381,7 +381,7 @@ fn recruit(
 }
 
 /// Garrisons of cities beyond need become field armies (merged next turn);
-/// the need grows with the threat around the city (lot C4). The small
+/// the need grows with the threat around the city. The small
 /// garrisons of the other settlements stay where they are.
 fn release_surplus_garrisons(ctx: &Context, cityless: bool, orders: &mut Vec<Order>) {
     let (state, data) = (ctx.state, ctx.data);

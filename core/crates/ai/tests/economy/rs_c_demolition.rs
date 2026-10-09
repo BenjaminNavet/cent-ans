@@ -1,4 +1,4 @@
-//! Lot RS-C: a realm whose buildings outgrew its income razes the least
+//! A realm whose buildings outgrew its income razes the least
 //! useful after a prolonged deficit (`economy.json` `ai_demolition`).
 
 use data_model::{BuildingId, GameData, SettlementKind};

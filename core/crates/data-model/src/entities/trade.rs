@@ -1,4 +1,4 @@
-//! Trade hubs and routes (lot C5), mirroring `data/schemas/trade.schema.json`
+//! Trade hubs and routes, mirroring `data/schemas/trade.schema.json`
 //! (`data/economy/trade.json`).
 //!
 //! A [`TradeHub`] is a historic marketplace settlement (Bruges, Bordeaux,

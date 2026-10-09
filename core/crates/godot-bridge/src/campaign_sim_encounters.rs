@@ -1,6 +1,6 @@
-//! `CampaignSim` map encounters API (lot CV3-3, spec
+//! `CampaignSim` map encounters API (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 2), in a secondary
-//! `#[godot_api]` block. Read-only views plus the choice; the UI is lot CV3-4.
+//! `#[godot_api]` block. Read-only views plus the choice; the UI lives in `game/`.
 
 use data_model::EncounterId;
 use godot::prelude::*;

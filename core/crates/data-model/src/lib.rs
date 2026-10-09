@@ -6,6 +6,12 @@
 //! them from disk and checks cross-references. No game rules live here.
 //!
 //! Entry point: [`GameData::load`].
+//!
+//! Organisation: `entities` (one module per schema), `load` and `bundled` (reading and embedded
+//! data), `ids` and `key_enum` (typed identifiers and enum helpers), `map`, `map_geo`, `cover`,
+//! `navgrid`, `movement_graph`, `settlement_grid`, `pathfinding` and `trade_paths` (map and
+//! graph structures), `title_check` / `event_check` (cross-reference checks), `util` and
+//! `test_support` (shared helpers).
 
 pub mod bundled;
 pub mod common;

@@ -1,4 +1,4 @@
-//! Lot NT6c: a weakened AI army rests to rebuild its ranks (in a friendly
+//! A weakened AI army rests to rebuild its ranks (in a friendly
 //! place or entrenched on friendly lands) when no enemy is near, and leaves
 //! once rebuilt (`stances::rest_plan`, `postures.rest` of `data/ai/grid.json`).
 use data_model::test_support::fac;

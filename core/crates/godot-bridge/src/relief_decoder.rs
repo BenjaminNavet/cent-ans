@@ -1,4 +1,4 @@
-//! Off-main-thread decoding of relief pyramid tiles (lot ZG2, ADR 0036).
+//! Off-main-thread decoding of relief pyramid tiles (ADR 0036).
 //!
 //! godot-rust bindings are single-threaded: no Godot API may be called from a
 //! worker thread. `ReliefDecoder` therefore runs its own native threads that

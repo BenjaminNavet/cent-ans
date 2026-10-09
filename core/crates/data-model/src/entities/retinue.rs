@@ -1,4 +1,4 @@
-//! General's retinue (lot C7), mirroring
+//! General's retinue, mirroring
 //! `data/schemas/retinue.schema.json` (`data/retinue.json`).
 //!
 //! The rules that read it (acquisition, inheritance, transfer, effects)

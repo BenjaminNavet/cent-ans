@@ -52,7 +52,7 @@ pub struct Settlement {
     pub port: bool,
     /// Sea the port opens onto, when its province touches several (Calais
     /// and Dover on the Channel, not the North Sea): the sea of a crossing
-    /// and of its interception (lot NV2).
+    /// and of its interception.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sea_zone: Option<SeaZoneId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -63,7 +63,7 @@ pub struct Settlement {
 
 impl Settlement {
     /// The fallback city generated from `Province::capital_city` for a
-    /// province that has no settlement file (lot C1). `id` is chosen by the
+    /// province that has no settlement file. `id` is chosen by the
     /// caller (see [`city_id_for`]).
     pub fn fallback_city(province: &Province, id: SettlementId) -> Settlement {
         let city = &province.capital_city;
@@ -154,54 +154,54 @@ pub struct SettlementRules {
     /// Starting garrison of a settlement by kind (unit type ids, may repeat).
     pub starting_garrison: BTreeMap<SettlementKind, Vec<UnitTypeId>>,
     pub full_province_bonus: FullProvinceBonus,
-    /// Movement on the settlement graph (lot C4).
+    /// Movement on the settlement graph.
     #[serde(default)]
     pub movement: MovementRules,
     /// Share of a garrison's unit upkeep paid by the controller, in per
-    /// cent, by settlement kind (lot C4). Kinds left out pay the campaign
+    /// cent, by settlement kind. Kinds left out pay the campaign
     /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
     #[serde(default)]
     pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
-    /// Lot OMR R3 (ADR 0117): the lord's household guard, the cheapest units
+    /// ADR 0117: the lord's household guard, the cheapest units
     /// of the capital city's garrison, paid by the domain rather than by the
     /// treasury. Absent: every garrison unit pays its kind's share.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub capital_guard: Option<CapitalGuard>,
-    /// Lot JR4b: starting garrisons of the great realms sized to their
+    /// Starting garrisons of the great realms sized to their
     /// means. Absent: every settlement keeps its full starting garrison.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub starting_budget: Option<StartingBudget>,
     /// Share of the upkeep of a settlement's buildings paid by its
-    /// controller, in per cent, by settlement kind (lot C7a); kinds left out
+    /// controller, in per cent, by settlement kind; kinds left out
     /// pay in full.
     #[serde(default)]
     pub building_upkeep_percent: BTreeMap<SettlementKind, i64>,
     /// Weight, in per cent, of a settlement's buildings in the effects on its whole
-    /// province (population, supply, growth room), by settlement kind (lot DC3,
-    /// ADR 0082); kinds left out weigh in full.
+    /// province (population, supply, growth room), by settlement kind
+    /// (ADR 0082); kinds left out weigh in full.
     #[serde(default)]
     pub province_effect_percent: BTreeMap<SettlementKind, u32>,
     /// Weight, in per cent, of a settlement's buildings in its controller's research
-    /// points, by settlement kind (lot DC6b, ADR 0082); kinds left out weigh in full.
+    /// points, by settlement kind (ADR 0082); kinds left out weigh in full.
     #[serde(default)]
     pub research_percent: BTreeMap<SettlementKind, u32>,
     /// Most units an army can leave as a settlement's garrison, by kind
-    /// (lot C7a, `Order::GarrisonUnits`); kinds left out have no cap.
+    /// (`Order::GarrisonUnits`); kinds left out have no cap.
     #[serde(default)]
     pub garrison_cap: BTreeMap<SettlementKind, usize>,
-    /// Where the loser of a battle falls back (lot C7a).
+    /// Where the loser of a battle falls back.
     #[serde(default)]
     pub retreat: RetreatRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
-/// Lot JR4b: a realm of at least `min_provinces` provinces whose starting
+/// A realm of at least `min_provinces` provinces whose starting
 /// garrisons, armies, buildings and court cost more than its receipts plus
 /// `max_deficit_percent` % of them starts with lighter garrisons: the
 /// costliest garrison units are sent home, never a settlement's last one nor
 /// the capital's (the idle hoard's share of the court is not counted: it
-/// melts with the treasury). Lot LR-15: when the garrisons are down to that
+/// melts with the treasury). When the garrisons are down to that
 /// floor and the deficit remains, the costliest units of its starting field
 /// armies go home too, down to `min_field_units` (absent: the field armies
 /// are left whole); and last the costliest of the capital's garrison, down
@@ -223,7 +223,7 @@ pub struct StartingBudget {
     pub min_capital_units: Option<usize>,
 }
 
-/// Household guard of a faction's capital city (lot OMR R3, ADR 0117,
+/// Household guard of a faction's capital city (ADR 0117,
 /// `rules.json` § `capital_guard`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -234,7 +234,7 @@ pub struct CapitalGuard {
     pub upkeep_percent: i64,
 }
 
-/// Retreat of a beaten army (lot C7a, `rules.json` § `retreat`). Radii are
+/// Retreat of a beaten army (`rules.json` § `retreat`). Radii are
 /// in v1 province steps (times `MovementRules::points_per_step`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -254,7 +254,7 @@ pub struct RetreatRules {
     /// maximum strength; otherwise the survivors rally at the nearest
     /// reachable friendly settlement (or disperse if there is none).
     pub rout_dissolve_below_percent: u32,
-    /// Lot M5b: a beaten army that lost at least this share (per cent) of
+    /// A beaten army that lost at least this share (per cent) of
     /// its men in the battle and has no friendly place within reach cannot
     /// fall back in order: it routs. 100 disables the rule.
     #[serde(default = "default_heavy_defeat_losses_percent")]
@@ -267,15 +267,14 @@ fn default_heavy_defeat_losses_percent() -> u32 {
 
 crate::bundled_rules!(RetreatRules, "settlements/rules.json", at "/retreat", default);
 
-/// Movement tuning of `rules.json` (lot C4). The unit of edge costs and
+/// Movement tuning of `rules.json`. The unit of edge costs and
 /// movement points is the kilometre of plain: great-circle distance times
 /// the terrain cost, halved on a road.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MovementRules {
-    /// Movement points worth one v1 province step. C4 set it to the mean
-    /// distance between the cities of neighbouring provinces (140 km); lot
-    /// DC1 (ADR 0082) halves it to 70 km to slow the campaign down.
+    /// Movement points worth one v1 province step. Originally the mean
+    /// distance between the cities of neighbouring provinces (140 km); ADR 0082 halves it to 70 km to slow the campaign down.
     pub points_per_step: f64,
     /// Cost of a port-to-port crossing in steps (fallback graph).
     pub sea_crossing_steps: f64,
@@ -283,12 +282,11 @@ pub struct MovementRules {
     /// neighbouring provinces, on top of the city-to-city link.
     pub fallback_links_per_neighbor: u32,
     /// Share of the v1 seasonal steps (3, 2 in winter) an army marches on
-    /// the settlement graph (lot C7a); flat and percent `Movement` effects
+    /// the settlement graph; flat and percent `Movement` effects
     /// are scaled with it.
     #[serde(default = "one")]
     pub season_scale: f64,
-    /// Cost of a road edge relative to the same distance off-road (lot
-    /// C7a). The C3 graph bakes a factor of 0.5 into its road edges; the
+    /// Cost of a road edge relative to the same distance off-road. The settlement graph bakes a factor of 0.5 into its road edges; the
     /// loader rescales them to this factor.
     #[serde(default = "baked_road_factor")]
     pub road_cost_factor: f64,
@@ -298,7 +296,7 @@ fn one() -> f64 {
     1.0
 }
 
-/// Road factor baked into the costs of `settlement_graph.json` (lot C3).
+/// Road factor baked into the costs of `settlement_graph.json`.
 pub const BAKED_ROAD_COST_FACTOR: f64 = 0.5;
 
 fn baked_road_factor() -> f64 {

@@ -1,4 +1,4 @@
-//! `CampaignSim` settlements quick-access API (lot HL1, touche B).
+//! `CampaignSim` settlements quick-access API (touche B).
 //! `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 1.
 
 use data_model::FactionId;
@@ -92,7 +92,7 @@ fn province_row_dict(row: &ProvinceRow) -> VarDictionary {
 
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Settlements quick-access overview of `faction` (touche B, lot HL1):
+    /// Settlements quick-access overview of `faction` (touche B):
     /// `{treasury, net_income_last_turn, settlement_income_total, count_idle,
     /// count_upgrade, count_endangered, provinces: [{province, name, income,
     /// unrest, revolt_seasons, revolt_seasons_needed, revolt_threshold,

@@ -1,4 +1,4 @@
-//! Lot SV2: the campaign AI prices its recruits of one turn against the
+//! The campaign AI prices its recruits of one turn against the
 //! resource supply its earlier recruits of the same turn drew.
 
 use std::collections::BTreeMap;

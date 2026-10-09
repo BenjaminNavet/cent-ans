@@ -1,4 +1,4 @@
-//! `CampaignSim` end of turn off the main thread (lot PB3d, ADR 0081).
+//! `CampaignSim` end of turn off the main thread (ADR 0081).
 //!
 //! `begin_end_turn()` hands a clone of the state to a worker thread;
 //! `poll_end_turn()` returns `null` while it runs, then installs the resolved

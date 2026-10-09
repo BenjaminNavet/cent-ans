@@ -1,4 +1,4 @@
-//! `CampaignSim` free army movement (lot M4, spec
+//! `CampaignSim` free army movement (spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 6): the reachable
 //! "bubble" as a mask image, the turn-by-turn path preview, and the move,
 //! attack and embark orders with the march they caused.
@@ -48,7 +48,7 @@ impl CampaignSim {
         dict
     }
 
-    /// Cells the army can reach this turn and, lot CV3-5, by the end of the
+    /// Cells the army can reach this turn and, by the end of the
     /// next one, as a mask cropped to their bounding box: `{image, origin,
     /// size, cell_px, cells, budget, next_cells, next_budget}`. `image` is an
     /// RGB8 image of one texel per grid cell: R = 255 inside this turn's

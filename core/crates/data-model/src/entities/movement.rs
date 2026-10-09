@@ -1,4 +1,4 @@
-//! Free army movement on the navigation grid (lot M2), mirroring
+//! Free army movement on the navigation grid, mirroring
 //! `data/schemas/movement_rules.schema.json` (`data/movement/rules.json`).
 //!
 //! Grid costs have no unit: 10 is one plain cell of the navigation grid
@@ -56,7 +56,7 @@ pub enum EmbarkCost {
     All,
 }
 
-/// Contents of `data/movement/rules.json` (lots M1 and M2).
+/// Contents of `data/movement/rules.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FreeMovementRules {
@@ -69,9 +69,9 @@ pub struct FreeMovementRules {
     /// Fallback of a beaten army away from the victor when no friendly
     /// place is within reach.
     pub retreat_fallback_km: f64,
-    /// Line of sight around an army (lot M5).
+    /// Line of sight around an army.
     pub vision_army_km: f64,
-    /// Line of sight around a settlement (lot M5).
+    /// Line of sight around a settlement.
     pub vision_settlement_km: f64,
     /// Grid cost per terrain; `plains` is the unit (10) of movement points.
     pub terrain_costs: TerrainCosts,
@@ -81,13 +81,13 @@ pub struct FreeMovementRules {
     pub minor_river_extra: u8,
     /// Slope above which a cell is impassable (pipeline only).
     pub slope_impassable_threshold: f64,
-    /// Lot M5b (pipeline only): an Itiner-e road / major river crossing
+    /// Pipeline only: an Itiner-e road / major river crossing
     /// opens a passage only within this distance of a settlement or of a
     /// known bridge or ford; `None` keeps them all.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub road_crossing_radius_km: Option<f64>,
     pub embark_cost: EmbarkCost,
-    /// Lot EM (ADR 0167): sea edges a voyage may chain in one season, from
+    /// ADR 0167: sea edges a voyage may chain in one season, from
     /// the port of departure to the destination (1 = a single crossing).
     #[serde(default = "default_max_voyage_legs")]
     pub max_voyage_legs: u32,

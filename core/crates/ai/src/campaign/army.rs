@@ -323,7 +323,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
         let cap = state.army_movement_allowance(data, army);
-        // Lot M3: cached for the turn; stronger enemy armies are avoided.
+        // Cached for the turn; stronger enemy armies are avoided.
         let table = ctx.grid.table(&anchor, self.range, cap, power);
         let besieging = army
             .settlement()
@@ -371,7 +371,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         }
     }
 
-    /// Lot C7a: give up a fortress that holds out far beyond patience.
+    /// Give up a fortress that holds out far beyond patience.
     fn give_up_hopeless(&mut self, turn: &mut ArmyTurn) {
         let ctx = self.ctx;
         let (state, data) = (ctx.state, ctx.data);
@@ -437,7 +437,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         ControlFlow::Continue(())
     }
 
-    /// Lot M3: engage an enemy army within the bubble when the odds are
+    /// Engage an enemy army within the bubble when the odds are
     /// good. The strategic orders below still follow: they fail harmlessly
     /// once the battle has spent the army's movement, and apply when the
     /// attack was refused (target out of reach).
@@ -712,7 +712,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         }
     }
 
-    /// Lot C7a: an idle army outside friendly places (after a peace, a lost
+    /// An idle army outside friendly places (after a peace, a lost
     /// siege...) goes back to the nearest place of its own.
     fn pick_return_home(&self, turn: &mut ArmyTurn) {
         let ctx = self.ctx;
@@ -861,7 +861,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
     }
 }
 
-/// Lot C7a: one unit (the cheapest to keep) left as the garrison of an
+/// One unit (the cheapest to keep) left as the garrison of an
 /// empty, unbesieged place the army holds, when the place was taken from
 /// an enemy or lies on a threatened border, and the army can spare it.
 pub(super) fn garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {

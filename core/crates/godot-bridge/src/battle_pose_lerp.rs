@@ -1,4 +1,4 @@
-//! Lot RJ-b: figure and regiment poses blended between the two latest
+//! Figure and regiment poses blended between the two latest
 //! simulation steps.
 //!
 //! The battle moves by fixed 0.1 s steps; drawn as they are, the figures

@@ -1,4 +1,4 @@
-//! Colour-grade LUT baking (lot SC MS8). Rendering support only, no game rule.
+//! Colour-grade LUT baking. Rendering support only, no game rule.
 //!
 //! Port of the former GDScript `AtmosphereLibrary.grade_lut` texel loop: grades (white balance,
 //! lift/gain, gamma, shadow/highlight toning, S contrast, saturation) are composed in order and

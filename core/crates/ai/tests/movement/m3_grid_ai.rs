@@ -1,4 +1,4 @@
-//! Lot M3: the AI on the navigation grid (spec
+//! The AI on the navigation grid (spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 4 and § 7) — attacks in
 //! the bubble, avoidance of stronger armies, embarkations, determinism and
 //! the time an AI faction takes to play its turn.

@@ -1,4 +1,4 @@
-//! `CampaignSim` settlements API (lot C1, `docs/design/2026-09-24-echelle-colonies.md` § 4.6).
+//! `CampaignSim` settlements API (`docs/design/2026-09-24-echelle-colonies.md` § 4.6).
 
 use data_model::{ProvinceId, SettlementId};
 use godot::prelude::*;
@@ -42,14 +42,14 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Detail of one settlement (lot C4): `{id, province, kind, name, lonlat,
+    /// Detail of one settlement: `{id, province, kind, name, lonlat,
     /// owner, controller, fortification_level, weight_share, garrison[],
     /// buildings[], recruit_queue[] (unit ids; B7b: `recruit_queue_turns[]`
     /// gives each one's turns of training left), construction?, siege?, income,
-    /// is_city}`. Lot C5 adds `buildings_info[]` (`{id, name, category,
+    /// is_city}`. Also gives `buildings_info[]` (`{id, name, category,
     /// upkeep, …}` as in `get_province_city`), `recruit_slots`,
     /// `recruit_slots_free`, `garrison_strength` (sum of unit strengths),
-    /// `port` and `province_name`. Lot C7d adds `garrison_cap` (max units a
+    /// `port` and `province_name`. Also gives `garrison_cap` (max units a
     /// `garrison_units` order may hold here, -1 if `data/settlements/rules.json`
     /// sets none for this kind) and `garrison_free` (`garrison_cap` minus the
     /// current garrison size, -1 if uncapped). `income` is the settlement's tax
@@ -141,7 +141,7 @@ impl CampaignSim {
         dict
     }
 
-    /// Build options of a settlement for its controller (lot C5):
+    /// Build options of a settlement for its controller:
     /// `[{building, name, category, cost, turns, available, reason}]`, only
     /// the buildings allowed in its kind (`Building::allowed_in`). Empty for
     /// an unknown id. Recruitment options: `get_recruitable(settlement_id)`.
@@ -242,7 +242,7 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Settlement ids of a province, the city first then by id (lot C4).
+    /// Settlement ids of a province, the city first then by id.
     #[func]
     fn province_settlements(&self, province: GString) -> PackedStringArray {
         let Some(Ctx { state, .. }) = self.ctx() else {

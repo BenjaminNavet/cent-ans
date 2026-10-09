@@ -1,4 +1,4 @@
-//! Army stances of the campaign (lot CV3-1: ambush, forced march, entrenched
+//! Army stances of the campaign (ambush, forced march, entrenched
 //! camp), mirroring `data/schemas/posture_rules.schema.json`
 //! (`data/rules/postures.json`). Spec `docs/design/2026-09-27-campagne-vivante.md` § 1.
 

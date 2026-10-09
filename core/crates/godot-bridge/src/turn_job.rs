@@ -1,4 +1,4 @@
-//! Lot PB3d (ADR 0081): the end of turn resolved on a worker thread.
+//! ADR 0081: the end of turn resolved on a worker thread.
 //!
 //! The job works on a *clone* of the campaign state, so the Godot side keeps
 //! reading the state of before while the AI plays; the resolved state is
@@ -23,8 +23,8 @@ const WORKER_STACK_BYTES: usize = 64 * 1024 * 1024;
 /// A resolved turn: the new state and the turn's events.
 pub(crate) type TurnOutcome = (CampaignState, Vec<GameEvent>);
 
-/// The one end-of-turn resolution of the Godot bridge (lot M9: every AI
-/// faction plays with the strategic planner). Lot PB3f may parallelise the
+/// The one end-of-turn resolution of the Godot bridge (every AI
+/// faction plays with the strategic planner). The planner may parallelise the
 /// planner inside; this signature stays.
 pub(crate) fn resolve_turn(state: &mut CampaignState, data: &GameData) -> Vec<GameEvent> {
     state.end_turn_with(data, ai::plan_turn)

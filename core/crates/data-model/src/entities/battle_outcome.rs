@@ -1,4 +1,4 @@
-//! Nuanced battle outcomes (lot CV3-1), mirroring
+//! Nuanced battle outcomes, mirroring
 //! `data/schemas/battle_outcome_rules.schema.json`
 //! (`data/rules/battle_outcome.json`). Spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 3.

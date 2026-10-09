@@ -1,4 +1,4 @@
-//! Invariants of the feudal title registry (lot FE, spec § 3.1).
+//! Invariants of the feudal title registry (spec § 3.1).
 //!
 //! Checked at load time, once `data/titles/` exists:
 //! - every reference (liege, provinces, 1337 holder, primary title) resolves;

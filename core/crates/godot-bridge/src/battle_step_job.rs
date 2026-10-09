@@ -1,4 +1,4 @@
-//! Lot PB3e (ADR 0090): the next battle step computed on a worker thread.
+//! ADR 0090: the next battle step computed on a worker thread.
 //!
 //! The fixed step (0.1 s, the AI every 2 s) used to fall whole into one
 //! frame out of six: a spike. [`StepPipeline::tick`] advances the battle

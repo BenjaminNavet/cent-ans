@@ -1,4 +1,4 @@
-//! Fate of a captured place (lot TW2-T1: occupy, ransom, sack, raze),
+//! Fate of a captured place (occupy, ransom, sack, raze),
 //! mirroring `data/schemas/capture_rules.schema.json`
 //! (`data/rules/capture.json`). Spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T1.
 

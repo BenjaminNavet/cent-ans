@@ -1,4 +1,4 @@
-//! Naval warfare data (lot NV1, ADR 0028): ship classes
+//! Naval warfare data (ADR 0028): ship classes
 //! (`data/naval/ships/*.json`, `ship_class.schema.json`), naval rules
 //! (`data/naval/rules.json`, `naval_rules.schema.json`) and the fleets of
 //! 1337 (`data/naval/fleets.json`, `naval_fleets.schema.json`).
@@ -312,7 +312,7 @@ pub struct NavalFleets {
     #[serde(default)]
     pub sea_names: BTreeMap<SeaZoneId, String>,
     /// Waters of a crossing from or to a port, instead of the sea's name
-    /// (`set_calais` → « le pas de Calais »), lot NV2.
+    /// (`set_calais` → « le pas de Calais »).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub port_waters: BTreeMap<SettlementId, String>,
     /// Marines of fleets that give none.
@@ -322,7 +322,7 @@ pub struct NavalFleets {
     pub sources: Sources,
 }
 
-/// Historical ship names of one faction (lot NV2).
+/// Historical ship names of one faction.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FactionShipNames {
@@ -334,7 +334,7 @@ pub struct FactionShipNames {
     pub ports: BTreeMap<SettlementId, Vec<String>>,
 }
 
-/// `data/naval/ship_names.json` (lot NV2).
+/// `data/naval/ship_names.json`.
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NavalShipNames {
@@ -352,7 +352,7 @@ impl NavalShipNames {
 }
 
 key_enum! {
-/// Coastal navigation or open sea (lot SL1, ADR 0139).
+/// Coastal navigation or open sea (ADR 0139).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SeaLaneKind {
@@ -461,7 +461,7 @@ impl SeaLaneRules {
     }
 }
 
-/// A sea lane between two ports (lot SL1, ADR 0139).
+/// A sea lane between two ports (ADR 0139).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SeaLane {
@@ -522,7 +522,7 @@ pub struct NavalData {
     pub fleets: NavalFleets,
     /// Ship names per faction and port (absent: « Nef n°1 »).
     pub ship_names: NavalShipNames,
-    /// Sea lanes between ports (lot SL1).
+    /// Sea lanes between ports.
     pub sea_lanes: SeaLanes,
     /// Routed length (km) of each lane, from `data/map/sea_lanes_px.json`;
     /// a lane missing there falls back to its great-circle length × 1.25.

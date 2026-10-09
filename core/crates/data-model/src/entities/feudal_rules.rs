@@ -1,4 +1,4 @@
-//! Feudal tuning (lot FE, ADR 0098), mirroring
+//! Feudal tuning (ADR 0098), mirroring
 //! `data/schemas/feudal_rules.schema.json` (`data/rules/feudal.json`).
 //!
 //! The defaults are the values of the former `sim_campaign::diplomacy`
@@ -31,22 +31,22 @@ pub struct FeudalRules {
     pub ascension_turns: u32,
     pub loyalty: LoyaltyWeights,
     /// Liege's war score against the felon, at the peace, needed to seize
-    /// the forfeited titles (§ 4.4, lot F3).
+    /// the forfeited titles (§ 4.4).
     pub forfeiture_win_war_score: i32,
     /// Treaty value (negotiation points) of a title demanded in a peace,
-    /// on top of its provinces (§ 4.6, lot F3).
+    /// on top of its provinces (§ 4.6).
     pub title_loss_penalty: i32,
     /// Chance (%) that a dynastic realm whose direct line dies out, with no
     /// kin in another faction, passes to a cadet branch of the house instead
     /// of escheating to its liege (LR-05). `0`: always escheats.
     pub collateral_line_percent: u32,
-    /// How a suzerain arbitrates a contested succession (§ 4.5, lot F3).
+    /// How a suzerain arbitrates a contested succession (§ 4.5).
     pub arbitration: ArbitrationWeights,
-    /// War escalation and private war (§ 4.3, lot F2).
+    /// War escalation and private war (§ 4.3).
     pub escalation: EscalationRules,
-    /// Which direct vassals the host reaches (lot F8, ADR 0114).
+    /// Which direct vassals the host reaches (ADR 0114).
     pub host: HostRules,
-    /// Felony cases open at the start of the 1337 campaign (lot F8: Edward
+    /// Felony cases open at the start of the 1337 campaign (Edward
     /// III harbours Robert of Artois, banished by Philip VI).
     pub start_felonies: Vec<StartFelony>,
 }
@@ -58,11 +58,11 @@ pub enum FelonyReason {
     RefusedHost,
     AlliedWithEnemy,
     Revolt,
-    /// The vassal harbours a man banished by its suzerain (lot F8).
+    /// The vassal harbours a man banished by its suzerain.
     HarbouredFelon,
 }
 
-/// A felony case open at the start of the campaign (lot F8).
+/// A felony case open at the start of the campaign.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct StartFelony {
@@ -71,7 +71,7 @@ pub struct StartFelony {
     pub reason: FelonyReason,
 }
 
-/// Which direct vassals a suzerain's host can summon (lot F8, ADR 0114):
+/// Which direct vassals a suzerain's host can summon (ADR 0114):
 /// a vassal too far from both the muster and the theatre, or strong enough
 /// to be independent in fact, is not summoned (and commits no felony).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -1,4 +1,4 @@
-//! Living map tuning (lot FK1), mirroring
+//! Living map tuning, mirroring
 //! `data/schemas/map_scenes_rules.schema.json` (`data/rules/map_scenes.json`).
 //! Spec `docs/design/2026-09-29-carte-vivante-folk.md` §§ 2.1.1, 2.1.4.
 //!

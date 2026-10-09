@@ -1,4 +1,4 @@
-//! River crossings of the campaign map (chantier RC, ADR 0141): the rules
+//! River crossings of the campaign map (ADR 0141): the rules
 //! `data/rules/river_crossings.json` (schema
 //! `data/schemas/river_crossings_rules.schema.json`), the crossings of
 //! `data/map/crossings_px.json` and the French river names of

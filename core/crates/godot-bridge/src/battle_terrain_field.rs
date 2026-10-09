@@ -1,4 +1,4 @@
-//! Lot SC PF-08 / BT7 / GB6 (terrain part): the height field, the river and
+//! Battle ground terrain: the height field, the river and
 //! the meshes of the battle ground (`battle_terrain.gd`), computed in plain
 //! Rust instead of GDScript loops. Rendering only, no game rule: the
 //! simulation still owns `heights`, rivers and fords; this module blends them

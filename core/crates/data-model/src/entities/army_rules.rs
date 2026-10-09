@@ -1,4 +1,4 @@
-//! Campaign army rules (lot NT5, N6, ADR 0128), mirroring
+//! Campaign army rules (ADR 0128), mirroring
 //! `data/schemas/army_rules.schema.json` (`data/rules/armies.json`), and the
 //! siege engines built on the spot (N7), mirroring
 //! `data/schemas/siege_engine_rules.schema.json`

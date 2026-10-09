@@ -1,5 +1,5 @@
 //! Seasonal replenishment of field armies and recruitment pools of the
-//! settlements (lot TW2-T2, ADR 0102), mirroring
+//! settlements (ADR 0102), mirroring
 //! `data/schemas/replenishment_rules.schema.json` (`data/rules/replenishment.json`).
 //! Spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T2.
 

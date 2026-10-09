@@ -1,4 +1,4 @@
-//! `CampaignSim` API of the fate of captured places (lot TW2-T1, ADR 0101),
+//! `CampaignSim` API of the fate of captured places (ADR 0101),
 //! in a secondary `#[godot_api]` block.
 
 use godot::prelude::*;

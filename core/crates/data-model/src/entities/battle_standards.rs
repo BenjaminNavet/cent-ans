@@ -1,4 +1,4 @@
-//! Regimental standards in battle (lot EP5, ADR 0034), mirroring
+//! Regimental standards in battle (ADR 0034), mirroring
 //! `data/schemas/battle_standard_rules.schema.json`
 //! (`data/rules/battle_standards.json`).
 

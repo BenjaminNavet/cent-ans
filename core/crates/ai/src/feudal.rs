@@ -1,4 +1,4 @@
-//! Feudal AI (lot FE5, spec FE § 5, ADR 0110).
+//! Feudal AI (spec FE § 5, ADR 0110).
 //!
 //! Every decision is a score of the weights of `data/ai/feudal.json`,
 //! shifted by the faction's `ai_personality`:
@@ -348,7 +348,7 @@ pub fn plan_commise(cache: &PlanCache, data: &GameData, faction: &FactionId) -> 
         .map(|v| Order::DeclareCommise { vassal: v.clone() })
 }
 
-/// Balance of forces of a forfeiture (lot F8): the suzerain's coalition
+/// Balance of forces of a forfeiture: the suzerain's coalition
 /// (itself, its allies and its direct vassals) against the felon's, each
 /// without the other. Before F8 the suzerain counted alone against the
 /// felon's whole coalition.

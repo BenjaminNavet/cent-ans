@@ -1,4 +1,4 @@
-//! `CampaignSim` map weather (lot CM2), read only: rain, snow, morning fog
+//! `CampaignSim` map weather, read only: rain, snow, morning fog
 //! and storms per province for the current turn (`sim_campaign::weather`).
 
 use godot::prelude::*;

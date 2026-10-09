@@ -1,4 +1,4 @@
-//! Native node selection of the streamed relief quadtree (lot PB3g, ADR 0092).
+//! Native node selection of the streamed relief quadtree (ADR 0092).
 //!
 //! `ReliefLod` wraps `relief_lod::Selector` for `ReliefQuadtree`: the GDScript side mirrors
 //! page residency (`add_page` / `remove_page`), calls `update` once per frame and only

@@ -1,4 +1,4 @@
-//! The AI's stances and encounter detours (lot CV3-6, spec
+//! The AI's stances and encounter detours (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 5), called by
 //! `campaign::plan_armies` for each army.
 //!

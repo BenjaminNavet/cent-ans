@@ -1,7 +1,7 @@
-//! Movement graph over the settlements (lot C4, spec § 4.4).
+//! Movement graph over the settlements (spec § 4.4).
 //!
 //! [`GameData::build_movement_graph`] indexes the edges of
-//! `data/map/settlement_graph.json` (lot C3). When that file is absent or
+//! `data/map/settlement_graph.json`. When that file is absent or
 //! empty, it builds a deterministic fallback graph instead:
 //!
 //! - the settlements of a province are all linked together, cost = distance
@@ -175,14 +175,14 @@ impl GameData {
     }
 
     /// Free movement rules (`data/movement/rules.json`, defaults when
-    /// absent, lot M2).
+    /// absent).
     pub fn free_movement_rules(&self) -> &crate::entities::movement::FreeMovementRules {
         self.free_movement
             .as_ref()
             .unwrap_or_else(|| crate::entities::movement::FreeMovementRules::bundled())
     }
 
-    /// Retreat tuning (`rules.json`, defaults when absent, lot C7a).
+    /// Retreat tuning (`rules.json`, defaults when absent).
     pub fn retreat_rules(&self) -> RetreatRules {
         self.settlement_rules
             .as_ref()
@@ -227,7 +227,7 @@ impl GameData {
                 graph.add(&edge);
             }
         } else {
-            // Lot C7a: road edges carry the factor baked by C3; rescale
+            // Road edges carry the factor baked by C3; rescale
             // them to the one of `rules.json`.
             let road_scale = self.movement_rules().road_cost_factor
                 / crate::entities::settlement::BAKED_ROAD_COST_FACTOR;
@@ -241,7 +241,7 @@ impl GameData {
                 }
             }
         }
-        // Lot SL1: the sea lanes of `data/naval/sea_lanes.json`.
+        // The sea lanes of `data/naval/sea_lanes.json`.
         for edge in self.sea_lane_edges() {
             graph.add(&edge);
         }

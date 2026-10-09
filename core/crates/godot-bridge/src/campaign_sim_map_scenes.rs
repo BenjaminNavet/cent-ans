@@ -1,4 +1,4 @@
-//! `CampaignSim` living map (lot FK1, spec
+//! `CampaignSim` living map (spec
 //! `docs/design/2026-09-29-carte-vivante-folk.md` § 2.1.3), read only:
 //! province scenes of the current turn (`sim_campaign::map_scenes`) and the
 //! tuning of the figurines (`data/rules/map_scenes.json`).

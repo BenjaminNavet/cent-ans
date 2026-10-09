@@ -47,7 +47,7 @@ pub struct Building {
     pub requires_river: bool,
     #[serde(default)]
     pub unique_per_faction: bool,
-    /// Settlement kinds where it can be built (lot C4); `None`: every kind
+    /// Settlement kinds where it can be built; `None`: every kind
     /// but `village`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub settlement_kinds: Option<Vec<SettlementKind>>,

@@ -1,4 +1,4 @@
-//! Loader of the vector map data for GDScript (lot SC DT4, ADR 0206).
+//! Loader of the vector map data for GDScript (ADR 0206).
 //!
 //! Parses `provinces.geojson`, `rivers.geojson`, `coastline.geojson`, `roads.geojson` and
 //! `rivers_render.json` with serde (`data_model::map_geo`) and hands back ready-to-use Godot values

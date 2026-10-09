@@ -1,4 +1,4 @@
-//! Lot TW2-T3 (ADR 0103): the campaign AI hires mercenary companies when it
+//! ADR 0103: the campaign AI hires mercenary companies when it
 //! is rich and one of its armies is threatened (`data/rules/mercenaries.json`,
 //! `ai`).
 //!

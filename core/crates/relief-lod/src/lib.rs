@@ -1,6 +1,6 @@
-//! Node selection of the streamed relief quadtree (lot PB3g, ADR 0092).
+//! Node selection of the streamed relief quadtree (ADR 0092).
 //!
-//! Native port of `ReliefQuadtree._select` / `_apply_items` (lot ZG2, ADR 0036): CDLOD
+//! Native port of `ReliefQuadtree._select` / `_apply_items` (ADR 0036): CDLOD
 //! selection by screen-space vertex spacing, page residency (layers, LRU), per-node page
 //! parameters and the difference with the previous frame. The GDScript side only creates,
 //! moves and hides the `MeshInstance3D` nodes this crate reports. Rendering support only,

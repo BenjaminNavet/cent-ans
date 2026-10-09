@@ -1,4 +1,4 @@
-//! Lot N1: the phased auto-resolve agrees with the 3D battle simulation.
+//! The phased auto-resolve agrees with the 3D battle simulation.
 //!
 //! `tests/fixtures/auto_resolve_scenarios.json` holds 20 matchups and the
 //! result of each in `sim-battle` (AI against AI, 6 seeds), produced by

@@ -1,4 +1,4 @@
-//! Lot M3: time each AI faction takes to play its turn on the real grid
+//! Time each AI faction takes to play its turn on the real grid
 //! (marches resumed, planning, orders executed), spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 4: under 50 ms per faction
 //! and turn in release.

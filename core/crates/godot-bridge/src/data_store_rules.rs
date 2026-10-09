@@ -1,4 +1,4 @@
-//! `GameDataStore.get_rule_constants` (lot SV4): the rule values the
+//! `GameDataStore.get_rule_constants`: the rule values the
 //! interface quotes in its texts, by name, so that no GDScript copies a
 //! number of the core or of `data/rules`.
 

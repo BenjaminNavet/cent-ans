@@ -1,4 +1,4 @@
-//! `CampaignSim` grouped province reads for the map refresh (lot PB3d).
+//! `CampaignSim` grouped province reads for the map refresh.
 //!
 //! `refresh_all()` used to call `get_province_state` — a full dictionary
 //! with garrison and governor — once per province in several loops. The map
@@ -12,7 +12,7 @@ use sim_campaign::CampaignState;
 use crate::campaign_sim::{ids, CampaignSim};
 
 /// One row of `get_provinces_snapshot`, in plain Rust types — kept apart
-/// from the `#[func]` method so the siege fields (lot RS-L) can be unit
+/// from the `#[func]` method so the siege fields can be unit
 /// tested without a live Godot engine (`CampaignSim` needs one to build a
 /// `Base<RefCounted>`).
 pub(crate) struct ProvinceSnapshotRow<'a> {
@@ -60,7 +60,7 @@ impl CampaignSim {
     /// siege_turns_elapsed: PackedInt32Array}`, the fields of
     /// `get_province_state` of the same name; `constructing` = the city has
     /// a construction under way (as `get_province_city().construction`).
-    /// The `siege_*` fields (lot RS-L) are the same-named fields of
+    /// The `siege_*` fields are the same-named fields of
     /// `get_province_state`'s `siege` dict, read straight from
     /// `get_provinces_snapshot` so callers such as `alerts.gd` no longer
     /// need a per-province `get_province_state` for the siege detail; empty

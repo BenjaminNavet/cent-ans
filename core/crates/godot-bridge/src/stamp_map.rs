@@ -1,10 +1,10 @@
-//! Lot PB3e (ADR 0090): ground marks of the battle (trampled snow or mud of
+//! ADR 0090: ground marks of the battle (trampled snow or mud of
 //! `battle_terrain.gd`, flattened and bloodied grass of
 //! `battle_grass_flatten.gd`) stamped in Rust instead of GDScript loops over
 //! texels. Rendering only, no game rule: the GDScript keeps deciding what to
 //! stamp and where; this class only fills the bytes and uploads them.
 //!
-//! Lot SC PF-08 adds the RGBA8 splatmaps of `battle_terrain.gd` (4 channels):
+//! Also holds the RGBA8 splatmaps of `battle_terrain.gd` (4 channels):
 //! `stamp_soft_disc`, `raise_pixel` and `image` replace its per-texel
 //! `Image.get_pixel` / `set_pixel` loops.
 //!

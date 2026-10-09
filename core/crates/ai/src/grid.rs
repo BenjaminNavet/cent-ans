@@ -1,4 +1,4 @@
-//! The AI armies on the navigation grid (lot M3, spec
+//! The AI armies on the navigation grid (spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 4).
 //!
 //! Strategy stays on the settlement graph (C3/C7a): [`GridPlanner::table`]
@@ -56,7 +56,7 @@ pub struct GridPlanner<'a> {
     /// Settlements held by an enemy or holding an enemy army: reached (a
     /// siege, a battle) but never passed through.
     stops: BTreeSet<SettlementId>,
-    /// Lot DP2: settlements in the lands of a faction at peace that this
+    /// Settlements in the lands of a faction at peace that this
     /// faction's AI will not cross without right of passage
     /// (`passage::ai_may_trespass`), with that faction: never reached nor
     /// passed through. EQ5: places the faction holds itself are never
@@ -407,7 +407,7 @@ impl<'a> GridPlanner<'a> {
     /// `power` (cached for the turn). Like `movement::dijkstra`, hostile
     /// places and places holding an enemy army end a route; so do the
     /// places inside the zone of control of an enemy army stronger than
-    /// `power` (lot M3): the army may head for them, never through them.
+    /// `power`: the army may head for them, never through them.
     /// EQ5: from a start in forbidden lands (an army caught there by a
     /// peace), the lands of that same owner are open: the army can leave.
     pub fn table(&self, start: &SettlementId, budget: u32, cap: u32, power: f64) -> Arc<Table> {
@@ -493,7 +493,7 @@ impl<'a> GridPlanner<'a> {
     }
 
     /// `Attack` on the nearest enemy army within `army_id`'s bubble that
-    /// its side outweighs by `attack_ratio` (lot M3). Enemies behind the
+    /// its side outweighs by `attack_ratio`. Enemies behind the
     /// walls of a place hostile to us are left to the siege planner.
     ///
     /// Our side is `army_id` itself plus every friendly army within the
@@ -589,7 +589,7 @@ impl<'a> GridPlanner<'a> {
     }
 
     /// Orders walking `army` from `anchor` towards `target` along `table`
-    /// (lot M3): one `MoveArmy` per settlement-graph leg, up to the first
+    /// : one `MoveArmy` per settlement-graph leg, up to the first
     /// leg beyond this season's allowance or `max_legs_per_turn`; the grid
     /// march stops by itself when the points run out. A sea crossing ends
     /// the legs: the army walks to the port, and embarks there once it

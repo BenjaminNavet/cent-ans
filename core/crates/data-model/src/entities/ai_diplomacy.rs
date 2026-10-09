@@ -1,5 +1,5 @@
-//! Tuning of the AI's wars, alliances and peaces around its borders (lot
-//! G5), mirroring `data/schemas/ai_diplomacy.schema.json` (file
+//! Tuning of the AI's wars, alliances and peaces around its borders,
+//! mirroring `data/schemas/ai_diplomacy.schema.json` (file
 //! `data/ai/diplomacy.json`). Without the file the simulation keeps the F4
 //! constants ([`AiDiplomacy::default`]).
 
@@ -101,10 +101,10 @@ pub struct AiDiplomacy {
     pub war: WarPlanningRules,
     pub join_war: JoinWarRules,
     pub peace: PeaceRules,
-    /// Lot DP1: multi-article treaties, war goals and war weariness.
+    /// Multi-article treaties, war goals and war weariness.
     #[serde(default)]
     pub negotiation: NegotiationRules,
-    /// Lot DP2: right of passage, trespass incidents, diplomatic map.
+    /// Right of passage, trespass incidents, diplomatic map.
     #[serde(default)]
     pub passage: PassageRules,
     /// Weights of the reasons a recipient weighs in a treaty.
@@ -116,7 +116,7 @@ pub struct AiDiplomacy {
 
 crate::bundled_rules!(AiDiplomacy, "ai/diplomacy.json", default);
 
-/// Lot DP1 (ADR 0025): how treaties are valued, war goals scored and war
+/// ADR 0025: how treaties are valued, war goals scored and war
 /// weariness accumulated. `enabled: false` (the default without the data
 /// file) keeps the G5 peace of `plan_diplomacy`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -206,7 +206,7 @@ pub struct NegotiationRules {
 
 crate::bundled_rules!(NegotiationRules, "ai/diplomacy.json", at "/negotiation", default);
 
-/// Lot DP2 (ADR 0029): an army ending its season in the lands of a faction
+/// ADR 0029: an army ending its season in the lands of a faction
 /// at peace, without military access, creates a diplomatic incident whose
 /// malus grows with its duration and gives the victim a casus belli.
 /// `enabled: false` (the default without the data file) ignores trespass.

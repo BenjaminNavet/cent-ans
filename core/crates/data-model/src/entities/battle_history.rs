@@ -1,4 +1,4 @@
-//! Battle history bounds (chantier TB, lot « historique des batailles »),
+//! Battle history bounds,
 //! mirroring `data/schemas/battle_history_rules.schema.json`
 //! (`data/rules/battle_history.json`).
 //!

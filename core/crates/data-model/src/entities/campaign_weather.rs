@@ -1,4 +1,4 @@
-//! Campaign map weather (lot CM2), mirroring
+//! Campaign map weather, mirroring
 //! `data/schemas/campaign_weather_rules.schema.json` (`data/rules/campaign_weather.json`).
 
 use serde::{Deserialize, Serialize};

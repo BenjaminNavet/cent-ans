@@ -1,7 +1,7 @@
-//! Navigation grid and province raster of the campaign map (lot M2, spec
+//! Navigation grid and province raster of the campaign map (spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 2 and § 3.1).
 //!
-//! - `data/map/navgrid.png` (lot M1): one 8-bit cost per cell, 10 = plain,
+//! - `data/map/navgrid.png`: one 8-bit cost per cell, 10 = plain,
 //!   255 = impassable; each cell covers `scale` × `scale` map pixels. When
 //!   the file is absent, a uniform fallback grid is built from
 //!   `land_mask.png` (cost of a plain on land, 255 at sea, subsampled by
@@ -537,7 +537,7 @@ impl GameData {
         &self.rasters.get().navgrid
     }
 
-    /// The decoded `province_ids.png`, when present (lot M5a: vision
+    /// The decoded `province_ids.png`, when present (vision
     /// counts seen land per province).
     pub fn province_raster(&self) -> Option<&ProvinceRaster> {
         self.rasters.get().provinces.as_ref()

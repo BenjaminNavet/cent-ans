@@ -1,4 +1,4 @@
-//! Lot LR-15: the capital of a faction that holds no city (ADR 0165) — the
+//! The capital of a faction that holds no city (ADR 0165) — the
 //! seat that stands for it never is another realm's city, the start and both
 //! AIs neither panic nor act in a place the faction does not control.
 use data_model::test_support::fac;

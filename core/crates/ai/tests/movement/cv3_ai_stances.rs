@@ -1,4 +1,4 @@
-//! Lot CV3-6: the AI's stances and encounter detours (spec
+//! The AI's stances and encounter detours (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 5).
 //!
 //! The ambush cases run on the real data over an all-plain synthetic grid

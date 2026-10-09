@@ -1,4 +1,4 @@
-//! `CampaignSim` general's retinue (lot C7): catalogue and per-character
+//! `CampaignSim` general's retinue: catalogue and per-character
 //! retinue, read only (the rules live in `sim_campaign::retinue`; a
 //! transfer goes through `submit_order({"type": "transfer_companion"})`).
 

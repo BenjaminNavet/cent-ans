@@ -1,4 +1,4 @@
-//! `CampaignSim` API of lot DP2 (ADR 0075), in a secondary `#[godot_api]`
+//! `CampaignSim` API of diplomacy and passage (ADR 0075), in a secondary `#[godot_api]`
 //! block: right of passage (path warning, incidents), diplomatic stances of
 //! the map, and readable negotiations (every weighted reason, the single
 //! blocking point and its counter-offer). The rules live in
@@ -94,7 +94,7 @@ impl CampaignSim {
     }
 
     /// Same as `get_province_stances`, seen by `viewer` instead of the player
-    /// (lot DZ: the map shows who a selected faction is at war with). Empty
+    /// (the map shows who a selected faction is at war with). Empty
     /// when `viewer` is unknown.
     #[func]
     fn get_province_stances_for(
@@ -130,8 +130,8 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Stance of `viewer` towards every faction of the campaign (lot DZ:
-    /// colours of the realm borders in the « Diplomatie » map mode):
+    /// Stance of `viewer` towards every faction of the campaign
+    /// (colours of the realm borders in the « Diplomatie » map mode):
     /// `{faction_id: key}`, same keys as `get_province_stances`; rebels are
     /// always "war". Empty when `viewer` is unknown.
     #[func]

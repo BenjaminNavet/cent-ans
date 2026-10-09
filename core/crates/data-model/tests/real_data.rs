@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use data_model::test_support::{data_dir, game_data};
 use data_model::{GameData, SocialClass};
 
-/// Lot M2: the navigation grid (or its land-mask fallback) and the province
+/// The navigation grid (or its land-mask fallback) and the province
 /// raster decode, and the settlements stand on passable cells.
 #[test]
 fn real_rasters_load() {
@@ -254,7 +254,7 @@ fn real_data_loads_without_errors() {
     );
 }
 
-/// Lot C1: every province has settlements, exactly one city first in its list.
+/// Every province has settlements, exactly one city first in its list.
 #[test]
 fn every_province_has_exactly_one_city() {
     let data = game_data();
@@ -283,7 +283,7 @@ fn every_province_has_exactly_one_city() {
     );
 }
 
-/// Lot CV3-1: the cover map is decoded from the real rasters and finds
+/// The cover map is decoded from the real rasters and finds
 /// forests and wetlands somewhere.
 #[test]
 fn cover_map_reads_the_rasters() {

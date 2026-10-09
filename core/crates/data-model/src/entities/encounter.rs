@@ -1,4 +1,4 @@
-//! Map encounters (lot CV3-3, spec `docs/design/2026-09-27-campagne-vivante.md`
+//! Map encounters (spec `docs/design/2026-09-27-campagne-vivante.md`
 //! § 2): points of interest that appear on the campaign map, mirroring
 //! `data/schemas/encounter.schema.json` (`data/encounters/enc_*.json`) and
 //! `data/schemas/encounter_rules.schema.json` (`data/rules/encounters.json`).

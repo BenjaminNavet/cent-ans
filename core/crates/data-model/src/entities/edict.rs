@@ -1,5 +1,5 @@
 //! Regional edict: a province-level policy choice (`edict.schema.json`),
-//! lot C4 (`docs/design/2026-09-24-analyse-total-war.md` § 2.1 « Édits
+//! (`docs/design/2026-09-24-analyse-total-war.md` § 2.1 « Édits
 //! régionaux »).
 //!
 //! An edict has population/economy/military effects (the shared

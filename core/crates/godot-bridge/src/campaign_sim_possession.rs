@@ -1,4 +1,4 @@
-//! `CampaignSim` possession reads (lot RJ-c, ADR 0175): what is the
+//! `CampaignSim` possession reads (ADR 0175): what is the
 //! viewer's, what is occupied, and by whom — the statuses the province and
 //! settlement panels and the map hover explain. No rule here: the
 //! classification comes from `sim_campaign::possession`.

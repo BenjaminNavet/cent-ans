@@ -28,7 +28,7 @@ RT9 | FAIT f663a1c46 | core/checks garde data_store_check et png_decode_check (g
 
 ## GB godot-bridge (304 #[func] contre 337)
 GB6 | PARTIEL (partie soldats FAITE 6f0943c15 : poses écrites en place dans le paquet, sans Vec intermédiaire ni copie, -18 % en micro-bench ; reste TerrainMesher/scatter, autre agent) | TerrainMesher.build_patch, scatter() transforms, phases d'anim soldier_buffers (perf rendu) | core/crates/godot-bridge/src, game/scripts/battle | oui
-GB7 | PARTIEL | key_enum! fait ; doc-comments restants (en dernier) | core/crates/godot-bridge/src | oui
+GB7 | FAIT (hors sim-campaign/sim-battle, traités par leurs lots) | key_enum! ; doc-comments : balises de lot retirées des commentaires de godot-bridge, ai, data-model, vegetation ; tous les modules ont un //! ; lib.rs ai/data-model/godot-bridge décrivent l organisation. Reste : clippy -D warnings échoue sur grade_lut.rs (code, hors périmètre) | core/crates/godot-bridge/src | oui
 
 ## CB sim-campaign
 CB1 | RIEN À FAIRE | settle_side_outcomes/losses_percent/retreat_losers n'existent plus nulle part dans core/ (grep `fn`), battle_flow absent : déjà refondu | - | -

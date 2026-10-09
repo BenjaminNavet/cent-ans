@@ -1,4 +1,4 @@
-//! `CampaignSim` short-term missions (lot NT3, ADR 0127): the « Missions »
+//! `CampaignSim` short-term missions (ADR 0127): the « Missions »
 //! section of the objectives panel and the toasts of the last resolution.
 
 use godot::prelude::*;

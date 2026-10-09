@@ -1,4 +1,4 @@
-//! Campaign agents (lot C6: spies, heralds, preachers), mirroring
+//! Campaign agents (spies, heralds, preachers), mirroring
 //! `data/schemas/agent_rules.schema.json` (`data/rules/agents.json`).
 //! See `docs/design/2026-09-24-agents.md`.
 
@@ -335,7 +335,7 @@ pub struct AgentRules {
     pub passive_counter_per_level: i32,
     #[serde(default = "default_passive_counter_cap")]
     pub passive_counter_cap: i32,
-    /// Lot F8: seasonal income (livres) under which an AI faction keeps no
+    /// Seasonal income (livres) under which an AI faction keeps no
     /// more than a spy in wartime, like a minor power (FE made about ninety
     /// factions playable, counties of 80 livres included). 0: every playable
     /// faction keeps one agent of each kind.

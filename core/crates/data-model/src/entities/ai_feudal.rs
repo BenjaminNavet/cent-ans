@@ -1,4 +1,4 @@
-//! Weights of the feudal AI (lot FE5, spec § 5), mirroring
+//! Weights of the feudal AI (spec § 5), mirroring
 //! `data/schemas/ai_feudal.schema.json` (`data/ai/feudal.json`).
 //!
 //! Every decision of a lord or a vassal (protection, arbitration, host,

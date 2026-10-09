@@ -1,4 +1,4 @@
-//! Public order tuning (lot E2), mirroring
+//! Public order tuning, mirroring
 //! `data/schemas/population_rules.schema.json` (`data/rules/population.json`).
 
 use serde::{Deserialize, Serialize};

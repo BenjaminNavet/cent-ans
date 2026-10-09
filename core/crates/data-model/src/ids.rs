@@ -96,12 +96,12 @@ define_id!(
     "prov_"
 );
 define_id!(
-    /// Identifier of a feudal title (`tit_guyenne`), lot FE.
+    /// Identifier of a feudal title (`tit_guyenne`).
     TitleId,
     "tit_"
 );
 define_id!(
-    /// Identifier of a settlement inside a province (`set_rouen`), lot C1.
+    /// Identifier of a settlement inside a province (`set_rouen`).
     SettlementId,
     "set_"
 );
@@ -171,7 +171,7 @@ define_id!(
     "ord_"
 );
 define_id!(
-    /// Identifier of a general's companion (`ret_heraut`), lot C7.
+    /// Identifier of a general's companion (`ret_heraut`).
     CompanionId,
     "ret_"
 );
@@ -181,17 +181,17 @@ define_id!(
     "sea_"
 );
 define_id!(
-    /// Identifier of a ship class (`ship_cog`), lot NV1.
+    /// Identifier of a ship class (`ship_cog`).
     ShipClassId,
     "ship_"
 );
 define_id!(
-    /// Identifier of a regional edict (`edict_peace_of_god`), lot C4.
+    /// Identifier of a regional edict (`edict_peace_of_god`).
     EdictId,
     "edict_"
 );
 define_id!(
-    /// Identifier of a map encounter (`enc_grandes_compagnies`), lot CV3-3.
+    /// Identifier of a map encounter (`enc_grandes_compagnies`).
     EncounterId,
     "enc_"
 );

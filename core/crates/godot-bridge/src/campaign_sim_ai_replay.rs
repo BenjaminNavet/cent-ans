@@ -1,4 +1,4 @@
-//! `CampaignSim` record of the AI turn (lot CT1, ADR 0073): the AI armies'
+//! `CampaignSim` record of the AI turn (ADR 0073): the AI armies'
 //! moves of the last `end_turn`, replayed by `game/scripts/map/ai_turn_replay.gd`.
 
 use godot::prelude::*;
@@ -35,7 +35,7 @@ fn move_dict(record: &AiMoveRecord) -> VarDictionary {
 
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Turns the record of the AI turn on or off (lot CT1). Off (the
+    /// Turns the record of the AI turn on or off. Off (the
     /// default, « Masquer »), `end_turn` records nothing and costs nothing
     /// more. `notable_radius_km`: a move ending that close to a player army
     /// or settlement concerns the player (`data/ui/ai_turn_replay.json`).

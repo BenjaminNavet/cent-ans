@@ -1,4 +1,4 @@
-//! Recruitment doctrines of the AI (lot E1), mirroring
+//! Recruitment doctrines of the AI, mirroring
 //! `data/schemas/ai_doctrine.schema.json` (`data/ai/doctrines.json`).
 
 use std::collections::BTreeMap;
@@ -28,11 +28,11 @@ pub struct AiDoctrines {
     #[serde(default)]
     pub factions: BTreeMap<FactionId, Doctrine>,
     /// Strategic doctrine by rank of the primary title (`county`, `duchy`,
-    /// `kingdom`), lot FE5: « survival first » for the counties.
+    /// `kingdom`): « survival first » for the counties.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub rank_strategies: BTreeMap<String, RankStrategy>,
     /// Cap on the share of a unit type among a faction's regiments, field
-    /// armies and garrisons together (lot A6-L3b, ADR 0183): an option whose
+    /// armies and garrisons together (ADR 0183): an option whose
     /// recruit would push the type above its cap is not taken.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub share_caps: BTreeMap<UnitTypeId, ShareCap>,
@@ -51,7 +51,7 @@ pub struct ShareCap {
     pub min_field_units: u32,
 }
 
-/// Strategic doctrine of the factions of one rank (lot FE5, spec § 5).
+/// Strategic doctrine of the factions of one rank (spec § 5).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RankStrategy {

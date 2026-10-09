@@ -1,4 +1,4 @@
-//! Tree species and their distribution by biome (lot HB4, ADR 0143).
+//! Tree species and their distribution by biome (ADR 0143).
 //!
 //! Mirror of `TreeSpecies` (`game/scripts/map/tree_species.gd`): the table compiled from
 //! `data/art/tree_species.yaml` arrives flattened from GDScript (`VegetationScatter.set_species`)
@@ -102,7 +102,7 @@ pub struct SpeciesTable {
     /// no fallback. A biome whose rows are all zero takes its parent's.
     pub biome_parent: Vec<i32>,
     pub dist: Distribution,
-    /// Forest stand types (lot DN-FORET); `count == 0` = none.
+    /// Forest stand types; `count == 0` = none.
     pub stands: crate::stands::StandTable,
 }
 

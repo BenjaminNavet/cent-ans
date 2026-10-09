@@ -1,4 +1,4 @@
-//! PB3f (ADR 0091): the planner's read-only work on the performance cores.
+//! ADR 0091: the planner's read-only work on the performance cores.
 //!
 //! The factions still play one after the other (spec § 3.4); inside one
 //! faction's [`crate::plan_turn`], pure computations on `&CampaignState`

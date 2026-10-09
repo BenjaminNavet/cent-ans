@@ -1,12 +1,11 @@
-//! Cover of the campaign map at the resolution of the navigation grid (lot
-//! CV3-1, ambushes: spec `docs/design/2026-09-27-campagne-vivante.md` § 1.2).
+//! Cover of the campaign map at the resolution of the navigation grid (ambushes: spec `docs/design/2026-09-27-campagne-vivante.md` § 1.2).
 //!
 //! Two rasters of `data/map/`, both optional and decoded lazily once per
 //! process (like [`crate::navgrid`]):
 //!
 //! - the forest cover named by `forest_cover.json` (`cover.file` /
-//!   `cover.channel`: `splat.png`, channel B, forests about 1340, lot R1);
-//! - `wetlands.png` (lot R1, RGB: marshes, ponds, wet meadows), the raster of
+//!   `cover.channel`: `splat.png`, channel B, forests about 1340);
+//! - `wetlands.png` (RGB: marshes, ponds, wet meadows), the raster of
 //!   the zones of `wetlands.json`.
 //!
 //! Both are sampled at the centre of every grid cell. Bocage has no raster:

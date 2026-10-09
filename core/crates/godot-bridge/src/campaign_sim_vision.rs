@@ -1,5 +1,4 @@
-//! `CampaignSim` line of sight (lot C1 fog of war, per-cell radius since lot
-//! M5a), read only.
+//! `CampaignSim` line of sight (fog of war, per-cell radius), read only.
 
 use data_model::FactionId;
 use godot::classes::image::Format;
@@ -34,7 +33,7 @@ impl CampaignSim {
             .collect()
     }
 
-    /// `true` when map pixel `point` is seen by `faction` (lot M5a).
+    /// `true` when map pixel `point` is seen by `faction`.
     #[func]
     fn is_point_visible(&self, faction: GString, point: Vector2) -> bool {
         let Some(data) = &self.data else {
@@ -44,7 +43,7 @@ impl CampaignSim {
             .is_some_and(|v| v.mask.sees_point(data, [point.x, point.y]))
     }
 
-    /// Everything the map needs for the fog in one call (lot M5a):
+    /// Everything the map needs for the fog in one call:
     /// `{image: Image R8 (512², 255 = seen, soft edges, seen from 128),
     /// size: Vector2 (map pixels covered by the image), texel_px,
     /// provinces: PackedStringArray, armies: PackedStringArray,

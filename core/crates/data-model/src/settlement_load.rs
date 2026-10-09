@@ -1,5 +1,5 @@
-//! Loading of `data/settlements/` and `data/map/settlement_graph.json` (lot C1,
-//! `docs/design/2026-09-24-echelle-colonies.md` § 3.1 and § 4.1).
+//! Loading of `data/settlements/` and `data/map/settlement_graph.json`
+//! (`docs/design/2026-09-24-echelle-colonies.md` § 3.1 and § 4.1).
 //!
 //! Every inconsistency is a [`Warning`], never an error, like province
 //! references: the settlement files are written region by region, so the data

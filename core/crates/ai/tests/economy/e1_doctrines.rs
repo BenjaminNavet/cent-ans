@@ -1,4 +1,4 @@
-//! Lot E1: the AI recruits after its faction's doctrine.
+//! The AI recruits after its faction's doctrine.
 
 use std::collections::BTreeMap;
 

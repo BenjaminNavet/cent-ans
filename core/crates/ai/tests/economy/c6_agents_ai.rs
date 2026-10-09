@@ -1,4 +1,4 @@
-//! Lot C6: the strategic AI recruits and employs agents with valid orders.
+//! The strategic AI recruits and employs agents with valid orders.
 use sim_campaign::plan_cache::PlanCache;
 
 use std::collections::BTreeMap;

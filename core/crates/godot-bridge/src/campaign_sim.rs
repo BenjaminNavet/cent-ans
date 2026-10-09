@@ -103,7 +103,7 @@ pub(crate) fn loaded_data_dir() -> Option<PathBuf> {
 }
 
 /// Game data already loaded by any `CampaignSim` of this process, if any
-/// (lot DF1: the faction screen lists the difficulty levels before a
+/// (the faction screen lists the difficulty levels before a
 /// campaign starts).
 pub(crate) fn loaded_data() -> Option<Arc<GameData>> {
     shared_data(None)
@@ -203,7 +203,7 @@ impl CampaignSim {
         };
         match CampaignState::new_1337(&data, player, seed as u64) {
             Ok(mut state) => {
-                // Lot FE: the suzerains are a view of the title holdings.
+                // The suzerains are a view of the title holdings.
                 sim_campaign::feudal::sync_suzerains(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
@@ -356,7 +356,7 @@ impl CampaignSim {
 
     /// `{owner, controller, garrison[], siege?, unrest, disorder,
     /// revolt_seasons, revolt_threshold, revolt_seasons_needed, devastation,
-    /// population_total, city, settlements[]}`. Lot C4: owner, controller,
+    /// population_total, city, settlements[]}`. Owner, controller,
     /// garrison and siege are those of the province's city (derived).
     #[func]
     fn get_province_state(&self, id: GString) -> VarDictionary {
@@ -430,7 +430,7 @@ impl CampaignSim {
     }
 
     /// `{province_id: cost}` for every province the army can reach this turn
-    /// (lot C4: the cheapest reachable settlement of each province other
+    /// (the cheapest reachable settlement of each province other
     /// than the army's own; see `get_reachable_settlements`).
     #[func]
     fn get_reachable(&self, army_id: GString) -> VarDictionary {
@@ -467,8 +467,8 @@ impl CampaignSim {
     }
 
     /// `[target]` when `army` can reach `target` — a settlement id, or a
-    /// province id standing for its city — on the navigation grid (lot M2:
-    /// the march itself is computed by the core), empty when unreachable or
+    /// province id standing for its city — on the navigation grid
+    /// (the march itself is computed by the core), empty when unreachable or
     /// already there. The result feeds a `move_army` order as is.
     #[func]
     fn find_path(&self, army_id: GString, target: GString) -> PackedStringArray {
@@ -490,7 +490,7 @@ impl CampaignSim {
             .unwrap_or_default()
     }
 
-    /// Provinces crossed by `find_path` (lot C4: for the v1 map preview,
+    /// Provinces crossed by `find_path` (for the v1 map preview,
     /// which draws province to province).
     #[func]
     fn find_path_provinces(&self, army_id: GString, target: GString) -> PackedStringArray {
@@ -512,7 +512,7 @@ impl CampaignSim {
         else {
             return PackedStringArray::new();
         };
-        // Lot M2: the provinces under the cells of the grid path.
+        // The provinces under the cells of the grid path.
         let grid = data.navgrid();
         let mut last = state.army_province(data, entry);
         let mut out = PackedStringArray::new();
@@ -715,7 +715,7 @@ impl CampaignSim {
 }
 
 /// Provinces crossed by a settlement path starting at `start`: consecutive
-/// duplicates and the starting province are dropped (lot C4, v1 UI).
+/// duplicates and the starting province are dropped (v1 UI).
 pub(crate) fn provinces_of_path(
     state: &CampaignState,
     start: &SettlementId,
@@ -734,7 +734,7 @@ pub(crate) fn provinces_of_path(
     out
 }
 
-/// A settlement id, or the city of a province id (lot C4 compatibility).
+/// A settlement id, or the city of a province id (compatibility).
 pub(crate) fn settlement_or_city(state: &CampaignState, raw: &str) -> Option<SettlementId> {
     if let Ok(id) = SettlementId::new(raw) {
         return state.settlement_state(&id).map(|_| id);
@@ -786,9 +786,9 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .general
         .as_ref()
         .map_or_else(String::new, |id| state.character_name(data, id));
-    // Lot M2: crossings take the whole turn at once (no pending crossing).
+    // Crossings take the whole turn at once (no pending crossing).
     let embarked = false;
-    // Lot M2 (compatibility until M4): "location" is the army's settlement,
+    // "location" is the army's settlement,
     // or the nearest one in the field; "path" the destination of a march
     // spanning several turns.
     let location = state.army_anchor(data, army);
@@ -811,7 +811,7 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         .map_or(Vector2::ZERO, |s| {
             Vector2::new(s.lonlat[0] as f32, s.lonlat[1] as f32)
         });
-    // Lot M4: free position on the map (map pixels), the settlement the
+    // Free position on the map (map pixels), the settlement the
     // army stands in ("" in the field), points left and allowance, and the
     // corners of the rest of a multi-turn march.
     let grid = data.navgrid();
@@ -1124,7 +1124,7 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
     }
 }
 
-/// UI audit A3, lot U3: signed budget lines (`budget_lines`: `{key,
+/// Signed budget lines (`budget_lines`: `{key,
 /// projected, last?, delta?, charge}`), the change of the projected balance
 /// against the season just resolved (`net_change`, absent before the first
 /// turn) and the purse history (`budget_history`: `{turn, treasury, net,

@@ -1,4 +1,4 @@
-//! Mercenary companies (lot TW2-T3, ADR 0103), mirroring
+//! Mercenary companies (ADR 0103), mirroring
 //! `data/schemas/mercenary_rules.schema.json` (`data/rules/mercenaries.json`).
 //! Spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T3.
 

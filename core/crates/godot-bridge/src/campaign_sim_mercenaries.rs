@@ -1,4 +1,4 @@
-//! `CampaignSim` mercenary companies (lot TW2-T3, ADR 0103): what an army
+//! `CampaignSim` mercenary companies (ADR 0103): what an army
 //! may hire where it stands (« Mercenaires » panel of the army sheet) and
 //! the hiring order.
 

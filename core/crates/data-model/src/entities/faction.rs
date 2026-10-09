@@ -179,7 +179,7 @@ pub struct Faction {
     /// Faction this one is a vassal of at campaign start.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub suzerain: Option<FactionId>,
-    /// Main title of the faction (lot FE, ADR 0098): its rank and *de jure*
+    /// Main title of the faction (ADR 0098): its rank and *de jure*
     /// liege place the faction in the feudal tree.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub primary_title: Option<TitleId>,

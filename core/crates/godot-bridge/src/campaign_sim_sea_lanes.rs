@@ -1,4 +1,4 @@
-//! `CampaignSim` sea lane API (lot SL1, ADR 0139): the lanes of
+//! `CampaignSim` sea lane API (ADR 0139): the lanes of
 //! `data/naval/sea_lanes.json` resolved against the current turn, for the
 //! map layer (`SeaLaneLayer`) and its tooltip. Read only; the geometry
 //! (`data/map/sea_lanes_px.json`) is read by Godot directly.
@@ -75,7 +75,7 @@ impl CampaignSim {
         sim_campaign::movement::is_sea_crossing(data, &from, &to)
     }
 
-    /// Lot EM (ADR 0167): ports of call of the voyage of `army_id` from the
+    /// ADR 0167: ports of call of the voyage of `army_id` from the
     /// port it stands in to `to_port` this season (destination last; empty
     /// when the army is not in a port or no voyage reaches `to_port`).
     #[func]
@@ -101,7 +101,7 @@ impl CampaignSim {
             .collect()
     }
 
-    /// Lot EM: the port `army_id` can sail to this season nearest map pixel
+    /// The port `army_id` can sail to this season nearest map pixel
     /// `(x, y)` (a right click on the water); "" when none.
     #[func]
     fn sea_port_near(&self, army_id: GString, x: f64, y: f64) -> GString {

@@ -1,4 +1,4 @@
-//! Active abilities of a regiment in battle (lot CB4, `battle_ability.schema.json`,
+//! Active abilities of a regiment in battle (`battle_ability.schema.json`,
 //! `data/battle_abilities/`, historian review `docs/research/cb4-capacites.md`).
 //! The rules live in `sim-battle` (`abilities.rs`); this is only the catalogue:
 //! names, texts, eligibility and every number of the ability.

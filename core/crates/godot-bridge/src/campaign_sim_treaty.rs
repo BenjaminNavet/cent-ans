@@ -1,4 +1,4 @@
-//! `CampaignSim` negotiation API (lot DP1, ADR 0025), in a secondary
+//! `CampaignSim` negotiation API (ADR 0025), in a secondary
 //! `#[godot_api]` block: multi-article treaties, their evaluation by the
 //! recipient (chance of acceptance), counter-proposals, what each side can
 //! put on the table, and the treaty history.

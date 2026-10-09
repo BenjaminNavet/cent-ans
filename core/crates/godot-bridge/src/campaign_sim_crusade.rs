@@ -1,4 +1,4 @@
-//! `CampaignSim` crusade view (lot JR1, ADR 0165): the « Ferveur » section
+//! `CampaignSim` crusade view (ADR 0165): the « Ferveur » section
 //! of the faction panel. The command is the generic order
 //! `{"type": "preach_passage"}`.
 

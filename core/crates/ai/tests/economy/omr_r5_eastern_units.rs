@@ -1,4 +1,4 @@
-//! Lot OMR R5: eastern unit types of 1337 (mamluks, steppe horse archers,
+//! Eastern unit types of 1337 (mamluks, steppe horse archers,
 //! akıncı, yaya, Serbian heavy cavalry, pronoiars, druzhina, Lithuanian
 //! light cavalry, Teutonic knights, almogavars). Recruitment uses the
 //! existing culture / faction / period rules; the AI levies them through

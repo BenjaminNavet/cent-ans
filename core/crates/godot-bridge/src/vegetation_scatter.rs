@@ -1,4 +1,4 @@
-//! Native thread pool for vegetation tile scattering (lot PB2).
+//! Native thread pool for vegetation tile scattering.
 //!
 //! godot-rust bindings are single-threaded: the main thread converts the
 //! GDScript job fields into plain data, native threads run
@@ -42,7 +42,7 @@ struct Done {
 pub struct VegetationScatter {
     map: Arc<MapRasters>,
     floor: Arc<ReliefFloor>,
-    /// Lot HB4: species table (`TreeSpecies.table()`); required to scatter (ADR 0204, no V4 scatter).
+    /// Species table (`TreeSpecies.table()`); required to scatter (ADR 0204, no V4 scatter).
     species: Option<Arc<SpeciesTable>>,
     jobs: Option<Sender<Job>>,
     done: Option<Receiver<Done>>,
@@ -84,7 +84,7 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         .get("qt_pages")
         .and_then(|v| v.try_to::<VarDictionary>().ok())
     {
-        // Lot PB3g: pages already held by the quadtree's native store are shared, not copied
+        // Pages already held by the quadtree's native store are shared, not copied
         // (a snapshot holds up to 256 pages of 512 KB).
         let store = grid
             .get("qt_store")
@@ -138,7 +138,7 @@ fn ints_of(dict: &VarDictionary, key: &str) -> Vec<i32> {
         .unwrap_or_default()
 }
 
-/// Lot HB4: `TreeSpecies.table()` → `SpeciesTable` (`None` when malformed).
+/// `TreeSpecies.table()` → `SpeciesTable` (`None` when malformed).
 fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
     let dist = table
         .get("distribution")
@@ -190,7 +190,7 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
     parsed.is_valid().then_some(parsed)
 }
 
-/// Lot DN-FORET: `ForestStands.table()` -> `StandTable` (validated by the caller).
+/// `ForestStands.table()` -> `StandTable` (validated by the caller).
 fn stands_of(d: &VarDictionary) -> StandTable {
     let flat = floats_of(d, "regions");
     let regions = flat
@@ -230,7 +230,7 @@ fn stands_of(d: &VarDictionary) -> StandTable {
     }
 }
 
-/// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
+/// Optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
 /// `corridors` PackedFloat32Array of `x0, y0, x1, y1, half_width` segments kept free of trees).
 fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
     let rect = params.get("detail_rect")?.try_to::<Rect2>().ok()?;
@@ -299,8 +299,8 @@ impl VegetationScatter {
         });
     }
 
-    /// Shares the valley floor of the local relief exaggeration (`MapData.relief_floor_grid`,
-    /// lot ZG8) with later requests; an empty grid disables it.
+    /// Shares the valley floor of the local relief exaggeration (`MapData.relief_floor_grid`),
+    /// with later requests; an empty grid disables it.
     #[func]
     fn set_floor(&mut self, data: PackedFloat32Array, side_x: i64, side_y: i64, cell: f64) {
         let side = (side_x.max(0) as usize, side_y.max(0) as usize);
@@ -314,7 +314,7 @@ impl VegetationScatter {
         });
     }
 
-    /// Lot SZ1: uncapped base and mountain squash factor of the current floor grid
+    /// Uncapped base and mountain squash factor of the current floor grid
     /// (`MapData.relief_floor_grid` "base" / "squash"); call after `set_floor`. Arrays of another
     /// size are ignored (base = floor, k = 0).
     #[func]
@@ -335,7 +335,7 @@ impl VegetationScatter {
         });
     }
 
-    /// Lot HB4: species table for later requests (`TreeSpecies.table()`); an empty or malformed
+    /// Species table for later requests (`TreeSpecies.table()`); an empty or malformed
     /// dictionary clears it and scatter requests are then refused. True when a table is active.
     #[func]
     fn set_species(&mut self, table: VarDictionary) -> bool {
@@ -343,13 +343,13 @@ impl VegetationScatter {
         self.species.is_some()
     }
 
-    /// Lot DN-FORET: number of forest stand types of the active species table (0 = none).
+    /// Number of forest stand types of the active species table (0 = none).
     #[func]
     fn stand_count(&self) -> i64 {
         self.species.as_ref().map_or(0, |t| t.stands.count as i64)
     }
 
-    /// Lot DN-FORET: splits a tree MultiMesh buffer (16 floats per instance, the tint in
+    /// Splits a tree MultiMesh buffer (16 floats per instance, the tint in
     /// `custom.r = tint + 4 x (atlas row + 1)`) by species row: `{row: PackedFloat32Array}`, the
     /// instance order kept (the thinning by seed stays valid), only the instances within `radius` of
     /// `(cx, cz)` (map pixels). Rows below 0 (old format) are

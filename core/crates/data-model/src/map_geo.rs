@@ -1,4 +1,4 @@
-//! Parsing of the vector map data (lot SC DT4, ADR 0206) : provinces, rivers, coastline, roads and
+//! Parsing of the vector map data (ADR 0206) : provinces, rivers, coastline, roads and
 //! rendered rivers, from the GeoJSON / JSON files of `data/map/`. Pure Rust (no Godot type) so it
 //! can be unit-tested; the GDExtension converts the result into packed arrays.
 //!

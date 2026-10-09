@@ -1,4 +1,4 @@
-//! `CampaignSim` map filter API (lot MF1): per-province values of the
+//! `CampaignSim` map filter API: per-province values of the
 //! campaign map filters (wealth, population, unrest, vassal loyalty,
 //! supply, claims), seen from the player. Read only.
 

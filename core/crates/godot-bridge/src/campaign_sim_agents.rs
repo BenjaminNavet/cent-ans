@@ -1,4 +1,4 @@
-//! `CampaignSim` agents API (lot C6, `docs/design/2026-09-24-agents.md`).
+//! `CampaignSim` agents API (`docs/design/2026-09-24-agents.md`).
 //!
 //! Read-only views; orders go through `submit_order` (`recruit_agent`,
 //! `move_agent`, `agent_action`, `dismiss_agent`).

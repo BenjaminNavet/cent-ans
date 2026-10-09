@@ -1,4 +1,4 @@
-//! Lot SC BT5: buffer post-processing of the soldier renderer, moved out of
+//! Buffer post-processing of the soldier renderer, moved out of
 //! GDScript (`battle_soldiers.gd`) so that one native call replaces the
 //! per-figure loops of the frame.
 //!

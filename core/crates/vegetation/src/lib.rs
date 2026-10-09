@@ -1,4 +1,4 @@
-//! Scattering of campaign-map vegetation tiles (lot PB2), pure Rust.
+//! Scattering of campaign-map vegetation tiles, pure Rust.
 //!
 //! Port of the scatter, hedge and pack stages of `VegetationTileJob`
 //! (`game/scripts/map/vegetation_tile_job.gd`) and of the parcel lattice of
@@ -28,7 +28,7 @@ const CANOPY_SPREAD: f64 = 0.4;
 const PARTS_SIDE: usize = 2;
 #[cfg(test)]
 const PARTS: usize = PARTS_SIDE * PARTS_SIDE;
-/// Detail cells (lot SZ4b): at most this many parts per side.
+/// Detail cells: at most this many parts per side.
 const MAX_DETAIL_PARTS_SIDE: usize = 8;
 pub const FLOATS_PER_INSTANCE: usize = 16;
 const GROUND_SINK: f64 = 0.08;
@@ -113,8 +113,8 @@ impl MapRasters {
 }
 
 /// Relief fields of the displayed height (`MapData.relief_fields_at`), bilinear between cell
-/// centres, edges replicated: valley floor of the local relief exaggeration (lot ZG8, metres),
-/// uncapped base and mountain squash factor k (lot SZ1). Empty `base` / `squash`: base = floor,
+/// centres, edges replicated: valley floor of the local relief exaggeration (metres),
+/// uncapped base and mountain squash factor k. Empty `base` / `squash`: base = floor,
 /// k = 0.
 #[derive(Default)]
 pub struct ReliefFloor {
@@ -166,7 +166,7 @@ impl ReliefFloor {
     }
 }
 
-/// Bytes of a quadtree page, shared with the page store of `ReliefLod` (lot PB3g: no copy per
+/// Bytes of a quadtree page, shared with the page store of `ReliefLod` (no copy per
 /// request).
 pub type PageBytes = std::sync::Arc<Vec<u8>>;
 
@@ -224,8 +224,8 @@ pub struct TileRequest {
     pub coarse_step: f64,
     pub tree_scale: f64,
     pub vertical_scale: f64,
-    /// Local relief gain (`MapData.relief_gain`, lot ZG8), mountain squash weight
-    /// (`MapData.relief_squash`, lot SZ1) and their relief fields.
+    /// Local relief gain (`MapData.relief_gain`), mountain squash weight
+    /// (`MapData.relief_squash`) and their relief fields.
     pub relief_gain: f64,
     pub relief_squash: f64,
     pub floor: std::sync::Arc<ReliefFloor>,
@@ -234,22 +234,22 @@ pub struct TileRequest {
     pub side: usize,
     pub exclusions: Vec<(f64, f64, f64)>,
     pub ground: Ground,
-    /// Lot SZ4b: dense forest cell scattered inside the tile whose coarse grids are given.
+    /// Dense forest cell scattered inside the tile whose coarse grids are given.
     pub detail: Option<DetailArea>,
-    /// Lot HB4: biome index per coarse cell (`side × side`, nearest; empty = default biome).
+    /// Biome index per coarse cell (`side × side`, nearest; empty = default biome).
     pub biome: Vec<f32>,
-    /// Lot HB4: species table, required to scatter (ADR 0204: no V4 fallback); `None` only for
+    /// Species table, required to scatter (ADR 0204: no V4 fallback); `None` only for
     /// ground re-seating requests.
     pub species: Option<Arc<SpeciesTable>>,
 }
 
-/// Lot SZ4b (dense forest near the camera at the valley tier): a sub-rectangle of the tile
+/// Dense forest near the camera at the valley tier: a sub-rectangle of the tile
 /// (`TileRequest::origin`, `size_px` still describe the coarse grids), scattered without hedges.
 /// Only instances whose random seed is at least `1 − keep` are kept; the random stream does not
 /// depend on `keep`, so a cell scattered with a smaller `keep` is an exact subset of the same
 /// cell scattered with a larger one. Parts: `parts_side²` slots per kind over the rectangle.
 /// `corridors`: segments `[x0, y0, x1, y1, half_width]` (world units) kept free of trees (fine
-/// rivers and draped roads of lot ZG5b, which the map-wide river raster does not know).
+/// rivers and draped roads of the valley tier, which the map-wide river raster does not know).
 #[derive(Clone, Debug, Default)]
 pub struct DetailArea {
     pub rect: (f64, f64, f64, f64),
@@ -544,7 +544,7 @@ fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f6
 }
 
 impl TileRequest {
-    /// `MapData.display_height` (lots ZG8, SZ1):
+    /// `MapData.display_height`:
     /// s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − floor, 0)), K = c·k.
     fn display_height(&self, h_m: f64, x: f64, z: f64) -> f64 {
         if self.relief_gain == 0.0 && self.relief_squash == 0.0 {
@@ -873,7 +873,7 @@ impl<'a> Scatter<'a> {
         };
         if tree < table.dist.hedge_tree {
             let tree_yaw = self.rng.randf() * TAU;
-            // Lot HB4: hedge trees of the local biome (role "isolated").
+            // Hedge trees of the local biome (role "isolated").
             let roll = self.rng.randf();
             let (b, conifer) = self.biome_and_conifer(table, gx, gy);
             let sd = self.map.river_sd_at(px, py);
@@ -900,7 +900,7 @@ impl<'a> Scatter<'a> {
         self.emit(KIND_HEDGE, x, ground, y, yaw, 1.0, height, width, tint);
     }
 
-    /// Lot HB4: biome (nearest coarse cell, default on sea / missing grid) and conifer share.
+    /// Biome (nearest coarse cell, default on sea / missing grid) and conifer share.
     fn biome_and_conifer(&self, table: &SpeciesTable, gx: f64, gy: f64) -> (usize, f64) {
         let side = self.req.side;
         let default = table.dist.default_biome;
@@ -917,7 +917,7 @@ impl<'a> Scatter<'a> {
         (b, self.lerp_grid(CONIFER, gx, gy).clamp(0.0, 1.0))
     }
 
-    /// Lot HB4: 1 inside the orchard ring around a settlement clearing (`ring` px wide beyond
+    /// 1 inside the orchard ring around a settlement clearing (`ring` px wide beyond
     /// its exclusion radius), fading to 0 at its outer edge.
     fn village_ring(&self, x: f64, y: f64, ring: f64) -> f64 {
         if ring <= 0.0 {
@@ -930,7 +930,7 @@ impl<'a> Scatter<'a> {
         1.0 - smoothstep(0.5 * ring, ring, best)
     }
 
-    /// Lot HB4: role of a candidate (forest core or edge, riparian, orchard, isolated, scrub),
+    /// Role of a candidate (forest core or edge, riparian, orchard, isolated, scrub),
     /// then its species; same rejection tests as the V4 scatter.
     #[allow(clippy::too_many_arguments)]
     fn species_candidate(
@@ -950,7 +950,7 @@ impl<'a> Scatter<'a> {
         let tree_roll = self.rng.randf();
         let (b, conifer) = self.biome_and_conifer(table, gx, gy);
         let forest = (forest_raw * table.biome(b, B_FOREST)).clamp(0.0, 1.0);
-        // Lot DN-FORET: stand type of the massif (species mix, tint, density, height).
+        // Stand type of the massif (species mix, tint, density, height).
         let stand = (table.stands.count > 0 && forest > 0.0)
             .then(|| {
                 let alt = self.map.height_m_at(x, y);
@@ -1051,7 +1051,7 @@ impl<'a> Scatter<'a> {
         self.push_species(table, sp, x, ground, y, yaw, scale_factor, forest_stand);
     }
 
-    /// Lot HB4: one tree of species `sp` (size range of the catalogue, generic tint); the atlas
+    /// One tree of species `sp` (size range of the catalogue, generic tint); the atlas
     /// row and season class are encoded in the tint (`CUSTOM_STRIDE`).
     #[allow(clippy::too_many_arguments)]
     fn push_species(

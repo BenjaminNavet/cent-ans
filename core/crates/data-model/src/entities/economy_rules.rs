@@ -1,4 +1,4 @@
-//! Economy tuning (lots EQ1, B7a, SV4, RS-B), mirroring
+//! Economy tuning (RS-B), mirroring
 //! `data/schemas/economy_rules.schema.json` (`data/rules/economy.json`).
 
 use std::collections::BTreeMap;
@@ -317,7 +317,7 @@ fn default_starvation_loss_percent() -> u32 {
 fn default_devastation_decay() -> u8 {
     5
 }
-/// Lot C4: 0.09 / 1.1 — in 1337 almost every province is held whole, so the
+/// 0.09 / 1.1 — in 1337 almost every province is held whole, so the
 /// full-province bonus (+10 %, `settlements/rules.json`) would otherwise
 /// inflate every treasury; the base is lowered to keep the v1 economy.
 fn default_tax_efficiency() -> f64 {

@@ -48,10 +48,10 @@ struct Context<'a> {
     army_upkeep: i64,
     building_upkeep: i64,
     treasury: i64,
-    /// Lot M2: the settlement standing for every army on the settlement
+    /// The settlement standing for every army on the settlement
     /// graph (its own, or the nearest one in the field).
     anchors: BTreeMap<ArmyId, SettlementId>,
-    /// Lot M3: routes on the settlement graph and orders on the grid.
+    /// Routes on the settlement graph and orders on the grid.
     grid: crate::grid::GridPlanner<'a>,
     /// PB3f: sequential reference or planner's pool (ADR 0091).
     mode: Mode,
@@ -184,8 +184,8 @@ impl<'a> Context<'a> {
     }
 
     /// Estimated seasonal tax of `province` at the normal rate, its places'
-    /// buildings weighing their kind's `province_effect_percent` (lot RS-B:
-    /// a market in a village no longer counts as one in the city).
+    /// buildings weighing their kind's `province_effect_percent`
+    /// (a market in a village no longer counts as one in the city).
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
             sim_campaign::economy::province_income(
@@ -215,9 +215,9 @@ impl<'a> Context<'a> {
             .sum()
     }
 
-    /// Hostile army power anchored on `settlement` or one edge away (lot
-    /// M2: an army in the field counts at its nearest settlement).
-    /// Lot SL1: an army across the sea counts for `sea_threat_factor`.
+    /// Hostile army power anchored on `settlement` or one edge away
+    /// (an army in the field counts at its nearest settlement).
+    /// An army across the sea counts for `sea_threat_factor`.
     fn threat_at(&self, settlement: &SettlementId) -> f64 {
         let mut nodes = vec![settlement.clone()];
         nodes.extend(edges(self.data, settlement).into_iter().map(|(s, _)| s));

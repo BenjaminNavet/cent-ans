@@ -1,4 +1,4 @@
-//! Tuning of the AI armies on the navigation grid (lot M3), mirroring
+//! Tuning of the AI armies on the navigation grid, mirroring
 //! `data/schemas/ai_grid.schema.json` (file `data/ai/grid.json`). Without
 //! the file, [`AiGrid::default`] applies.
 

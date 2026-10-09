@@ -1,4 +1,4 @@
-//! `CampaignSim` API of lot C4 (regional edicts, province panel selector),
+//! `CampaignSim` API of regional edicts and the province panel selector,
 //! kept in its own secondary `#[godot_api]` block (ADR 0002). The
 //! `set_edict` order goes through `submit_order({"type": "set_edict",
 //! "province": …, "edict": …})`.

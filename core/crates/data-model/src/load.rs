@@ -42,7 +42,7 @@ use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 pub mod folders {
     pub const FACTIONS: &str = "factions";
     pub const PROVINCES: &str = "provinces";
-    /// Feudal titles (lot FE); optional.
+    /// Feudal titles; optional.
     pub const TITLES: &str = "titles";
     pub const UNIT_TYPES: &str = "unit_types";
     pub const BUILDINGS: &str = "buildings";
@@ -61,17 +61,17 @@ pub mod folders {
     pub const BATTLE_ABILITIES: &str = "battle_abilities";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
-    /// Regional edicts (lot C4); optional folder.
+    /// Regional edicts; optional folder.
     pub const EDICTS: &str = "edicts";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
-    /// Landmark cities (lots L1-L3); optional folder.
+    /// Landmark cities; optional folder.
     pub const LANDMARKS: &str = "landmarks";
-    /// Map encounters (lot CV3-3); optional folder.
+    /// Map encounters; optional folder.
     pub const ENCOUNTERS: &str = "encounters";
-    /// Tuning of the map encounters (lot CV3-3), inside `rules/`; optional.
+    /// Tuning of the map encounters, inside `rules/`; optional.
     pub const ENCOUNTER_RULES: &str = "encounters.json";
-    /// Settlements, one file per province (lot C1); optional folder.
+    /// Settlements, one file per province; optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
     pub const SETTLEMENT_RULES: &str = "rules.json";
@@ -83,47 +83,47 @@ pub mod folders {
     pub const AI_ALIGNMENT: &str = "alignment.json";
     /// Inside `AI`: wars, alliances and peaces around borders (G5).
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
-    /// Inside `AI`: recruitment doctrines (lot E1); optional.
+    /// Inside `AI`: recruitment doctrines; optional.
     pub const AI_DOCTRINES: &str = "doctrines.json";
-    /// Inside `AI`: weights of the feudal AI (lot FE5); optional.
+    /// Inside `AI`: weights of the feudal AI; optional.
     pub const AI_FEUDAL: &str = "feudal.json";
-    /// Inside `AI`: the AI armies on the navigation grid (lot M3).
+    /// Inside `AI`: the AI armies on the navigation grid.
     pub const AI_GRID: &str = "grid.json";
-    /// Global rule tuning (lot C1: `vision.json`); optional folder.
+    /// Global rule tuning (`vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
-    /// Phased auto-resolve coefficients (lot N1), inside `rules/`; optional.
+    /// Phased auto-resolve coefficients, inside `rules/`; optional.
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
-    /// Public order tuning (lot E2), inside `rules/`; optional.
+    /// Public order tuning, inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
     pub const ECONOMY_RULES: &str = "economy.json";
-    /// Diplomacy tuning (lot RS-C: opinion caps), inside `rules/`; optional.
+    /// Diplomacy tuning (opinion caps), inside `rules/`; optional.
     pub const DIPLOMACY_RULES: &str = "diplomacy.json";
-    /// Feudal tuning (lot FE), inside `rules/`; optional.
+    /// Feudal tuning, inside `rules/`; optional.
     pub const FEUDAL_RULES: &str = "feudal.json";
-    /// Campaign map weather (lot CM2), inside `rules/`; optional.
+    /// Campaign map weather, inside `rules/`; optional.
     pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
-    /// Campaign difficulty levels (lot DF1), inside `rules/`; optional.
+    /// Campaign difficulty levels, inside `rules/`; optional.
     pub const DIFFICULTY_RULES: &str = "difficulty.json";
-    /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
+    /// General's retinue catalogue, at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
-    /// Campaign agents (lot C6), inside `rules/`; optional.
+    /// Campaign agents, inside `rules/`; optional.
     pub const AGENT_RULES: &str = "agents.json";
-    /// Regimental standards in battle (lot EP5), inside `rules/`; optional.
+    /// Regimental standards in battle, inside `rules/`; optional.
     pub const BATTLE_STANDARD_RULES: &str = "battle_standards.json";
-    /// Army stances (lot CV3-1), inside `rules/`; optional.
+    /// Army stances, inside `rules/`; optional.
     pub const POSTURE_RULES: &str = "postures.json";
-    /// Fate of captured places (lot TW2-T1), inside `rules/`; optional.
+    /// Fate of captured places, inside `rules/`; optional.
     pub const CAPTURE_RULES: &str = "capture.json";
-    /// Army replenishment and recruitment pools (lot TW2-T2), inside
+    /// Army replenishment and recruitment pools, inside
     /// `rules/`; optional.
     pub const REPLENISHMENT_RULES: &str = "replenishment.json";
-    /// Mercenary companies (lot TW2-T3), inside `rules/`; optional.
+    /// Mercenary companies, inside `rules/`; optional.
     pub const MERCENARY_RULES: &str = "mercenaries.json";
-    /// The crusader faction's fervour (lot JR1), inside `rules/`; optional.
+    /// The crusader faction's fervour, inside `rules/`; optional.
     pub const CRUSADE_RULES: &str = "crusade.json";
-    /// Starting armies and garrisons of 1337 (lot A6-L3b), inside `rules/`;
+    /// Starting armies and garrisons of 1337, inside `rules/`;
     /// optional.
     pub const STARTING_ARMIES: &str = "starting_armies.json";
     /// Precomputed JR4b fit of the garrisons (ADR 0233), inside `rules/`;
@@ -131,32 +131,32 @@ pub mod folders {
     pub const STARTING_FIT: &str = "starting_fit.json";
     pub const ARMY_RULES: &str = "armies.json";
     pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
-    /// Short-term campaign missions (lot NT3), at the data root; optional.
+    /// Short-term campaign missions, at the data root; optional.
     pub const MISSIONS: &str = "missions.json";
-    /// Army traditions (lot TW2-T5), inside `rules/`; optional.
+    /// Army traditions, inside `rules/`; optional.
     pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
-    /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
+    /// Nuanced battle outcomes, inside `rules/`; optional.
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
-    /// Living map scenes and figurines (lot FK1), inside `rules/`; optional.
+    /// Living map scenes and figurines, inside `rules/`; optional.
     pub const MAP_SCENE_RULES: &str = "map_scenes.json";
-    /// Bounds of the battle history (chantier TB), inside `rules/`; optional.
+    /// Bounds of the battle history, inside `rules/`; optional.
     pub const BATTLE_HISTORY_RULES: &str = "battle_history.json";
-    /// River crossing battles (chantier RC), inside `rules/`; optional.
+    /// River crossing battles, inside `rules/`; optional.
     pub const RIVER_CROSSING_RULES: &str = "river_crossings.json";
-    /// Trade hubs and routes (lot C5); optional folder.
+    /// Trade hubs and routes; optional folder.
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
     pub const TRADE: &str = "trade.json";
     pub const MAP: &str = "map";
-    /// Free movement rules folder (lot M2); optional.
+    /// Free movement rules folder; optional.
     pub const MOVEMENT: &str = "movement";
     /// Inside `MOVEMENT`: zone of control, engagement, retreat, grid costs.
     pub const MOVEMENT_RULES: &str = "rules.json";
-    /// Inside `MAP`: map-pixel position of each settlement (lot C3).
+    /// Inside `MAP`: map-pixel position of each settlement.
     pub const SETTLEMENT_PX: &str = "settlements_px.json";
-    /// Inside `MAP`: bridges, fords and ferries in map pixels (chantier RC).
+    /// Inside `MAP`: bridges, fords and ferries in map pixels.
     pub const CROSSINGS_PX: &str = "crossings_px.json";
-    /// Inside `MAP`: French names of the rivers (chantier RC).
+    /// Inside `MAP`: French names of the rivers.
     pub const RIVER_NAMES: &str = "river_names.json";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
@@ -273,9 +273,9 @@ fn format_reference_errors(errors: &[ReferenceError]) -> String {
 pub struct GameData {
     pub factions: BTreeMap<FactionId, Faction>,
     pub provinces: BTreeMap<ProvinceId, Province>,
-    /// Feudal titles (lot FE), empty when `data/titles/` is absent.
+    /// Feudal titles, empty when `data/titles/` is absent.
     pub titles: BTreeMap<crate::ids::TitleId, crate::entities::title::FeudalTitle>,
-    /// `data/rules/feudal.json` (lot FE); [`crate::FeudalRules::default`]
+    /// `data/rules/feudal.json`; [`crate::FeudalRules::default`]
     /// when absent.
     pub feudal_rules: crate::entities::feudal_rules::FeudalRules,
     pub unit_types: BTreeMap<UnitTypeId, UnitType>,
@@ -296,23 +296,23 @@ pub struct GameData {
     pub battle_abilities: BTreeMap<String, BattleAbility>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
-    /// Regional edicts (lot C4), empty when `data/edicts/` is absent.
+    /// Regional edicts, empty when `data/edicts/` is absent.
     pub edicts: BTreeMap<EdictId, Edict>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
     /// Landmark cities (L3: siege battles in the historical plan), empty
     /// when `data/landmarks/` is absent.
     pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
-    /// Map encounters (lot CV3-3), empty when `data/encounters/` is absent.
+    /// Map encounters, empty when `data/encounters/` is absent.
     pub encounters: BTreeMap<crate::ids::EncounterId, crate::entities::encounter::Encounter>,
-    /// `data/rules/encounters.json` (lot CV3-3);
+    /// `data/rules/encounters.json`;
     /// [`crate::EncounterRules::default`] when absent.
     pub encounter_rules: crate::entities::encounter::EncounterRules,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
     pub province_geometry: BTreeMap<ProvinceId, ProvinceGeometry>,
-    /// Every settlement (lot C1): read from `data/settlements/<province>.json`,
+    /// Every settlement: read from `data/settlements/<province>.json`,
     /// plus one city generated from `capital_city` for each province without
     /// a file (or without a `city` entry).
     pub settlements: BTreeMap<SettlementId, Settlement>,
@@ -331,114 +331,114 @@ pub struct GameData {
     /// `data/ai/diplomacy.json` (G5); the F4 constants
     /// ([`AiDiplomacy::default`]) when absent.
     pub ai_diplomacy: AiDiplomacy,
-    /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
+    /// `data/ai/doctrines.json`, absent until written: the AI then
     /// ranks units by value alone.
     pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
-    /// `data/ai/feudal.json` (lot FE5); [`AiFeudal::default`] when absent.
+    /// `data/ai/feudal.json`; [`AiFeudal::default`] when absent.
     pub ai_feudal: crate::entities::ai_feudal::AiFeudal,
-    /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
+    /// `data/ai/grid.json`; [`AiGrid::default`] when absent.
     pub ai_grid: AiGrid,
-    /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
+    /// `data/rules/vision.json` (fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
-    /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
+    /// `data/rules/auto_resolve.json`; [`crate::AutoResolveRules::default`]
     /// when absent.
     pub auto_resolve: crate::entities::auto_resolve::AutoResolveRules,
-    /// `data/rules/population.json` (lot E2);
+    /// `data/rules/population.json`;
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
-    /// `data/rules/economy.json` (lot EQ1); [`crate::EconomyRules::default`]
+    /// `data/rules/economy.json`; [`crate::EconomyRules::default`]
     /// when absent.
     pub economy_rules: crate::entities::economy_rules::EconomyRules,
-    /// `data/rules/diplomacy.json` (lot RS-C); [`crate::DiplomacyRules::default`]
+    /// `data/rules/diplomacy.json`; [`crate::DiplomacyRules::default`]
     /// when absent.
     pub diplomacy_rules: crate::entities::diplomacy_rules::DiplomacyRules,
-    /// `data/rules/campaign_weather.json` (lot CM2);
+    /// `data/rules/campaign_weather.json`;
     /// [`crate::CampaignWeatherRules::default`] when absent.
     pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
-    /// `data/rules/difficulty.json` (lot DF1);
+    /// `data/rules/difficulty.json`;
     /// [`crate::DifficultyRules::default`] when absent.
     pub difficulty: crate::entities::difficulty::DifficultyRules,
-    /// `data/retinue.json` (lot C7), absent until written: no companion
+    /// `data/retinue.json`, absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
-    /// `data/rules/agents.json` (lot C6, campaign agents); the defaults of
+    /// `data/rules/agents.json` (campaign agents); the defaults of
     /// [`AgentRules::default`] when absent.
     pub agent_rules: Option<AgentRules>,
-    /// `data/rules/battle_standards.json` (lot EP5, regimental standards);
+    /// `data/rules/battle_standards.json` (regimental standards);
     /// [`crate::BattleStandardRules::default`] when absent.
     pub battle_standard_rules: crate::entities::battle_standards::BattleStandardRules,
-    /// `data/rules/postures.json` (lot CV3-1, army stances);
+    /// `data/rules/postures.json` (army stances);
     /// [`crate::PostureRules::default`] when absent.
     pub posture_rules: crate::entities::posture::PostureRules,
-    /// `data/rules/capture.json` (lot TW2-T1, fate of captured places);
+    /// `data/rules/capture.json` (fate of captured places);
     /// [`crate::CaptureRules::default`] when absent.
     pub capture_rules: crate::entities::capture::CaptureRules,
-    /// `data/rules/replenishment.json` (lot TW2-T2, army replenishment and
+    /// `data/rules/replenishment.json` (army replenishment and
     /// recruitment pools); the bundled file when absent.
     pub replenishment_rules: crate::entities::replenishment::ReplenishmentRules,
-    /// `data/rules/mercenaries.json` (lot TW2-T3, mercenary companies); the
+    /// `data/rules/mercenaries.json` (mercenary companies); the
     /// bundled file when absent.
     pub mercenary_rules: crate::entities::mercenaries::MercenaryRules,
-    /// `data/rules/crusade.json` (lot JR1, ADR 0165: the crusader faction's
+    /// `data/rules/crusade.json` (ADR 0165: the crusader faction's
     /// fervour); `None` when absent: the mechanic is inert.
     pub crusade_rules: Option<crate::entities::crusade::CrusadeRules>,
-    /// `data/rules/starting_armies.json` (lot A6-L3b, ADR 0183); without
+    /// `data/rules/starting_armies.json` (ADR 0183); without
     /// it the 1337 start raises no army and no city garrison.
     pub starting_armies: Option<crate::entities::starting_armies::StartingArmies>,
     /// `data/rules/starting_fit.json` (ADR 0233): the JR4b removals,
     /// precomputed; without it the start keeps its full garrisons.
     pub starting_fit: Option<crate::entities::starting_fit::StartingFit>,
-    /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled
+    /// `data/rules/armies.json` (army unit cap); the bundled
     /// file when absent.
     pub army_rules: crate::entities::army_rules::ArmyRules,
-    /// `data/rules/siege_engines.json` (lot NT5, N7: engines built during
+    /// `data/rules/siege_engines.json` (engines built during
     /// a siege); the bundled file when absent.
     pub siege_engine_rules: crate::entities::army_rules::SiegeEngineRules,
-    /// `data/missions.json` (lot NT3, short-term missions); the bundled file
+    /// `data/missions.json` (short-term missions); the bundled file
     /// when absent.
     pub mission_rules: crate::entities::missions::MissionRules,
-    /// `data/rules/army_traditions.json` (lot TW2-T5, army traditions); the
+    /// `data/rules/army_traditions.json` (army traditions); the
     /// bundled file when absent.
     pub army_tradition_rules: crate::entities::army_traditions::ArmyTraditionRules,
-    /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
+    /// `data/rules/battle_outcome.json` (nuanced outcomes);
     /// [`crate::BattleOutcomeRules::default`] when absent.
     pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
-    /// `data/rules/map_scenes.json` (lot FK1, living map);
+    /// `data/rules/map_scenes.json` (living map);
     /// [`crate::MapSceneRules::default`] when absent.
     pub map_scene_rules: crate::entities::map_scenes::MapSceneRules,
-    /// `data/rules/battle_history.json` (chantier TB, battle history bounds);
+    /// `data/rules/battle_history.json` (battle history bounds);
     /// [`crate::BattleHistoryRules::default`] when absent.
     pub battle_history_rules: crate::entities::battle_history::BattleHistoryRules,
-    /// `data/rules/river_crossings.json` (chantier RC, ADR 0141); the
+    /// `data/rules/river_crossings.json` (ADR 0141); the
     /// bundled file when absent.
     pub river_crossing_rules: crate::entities::river_crossing::RiverCrossingRules,
-    /// `data/map/crossings_px.json` (chantier RC): bridges, fords and
+    /// `data/map/crossings_px.json`: bridges, fords and
     /// ferries of the campaign map; empty when absent.
     pub crossings: Vec<crate::entities::river_crossing::MapCrossing>,
     /// `data/map/river_names.json`: French name of each river (source name
     /// → display name); see [`GameData::river_display_name`].
     pub river_names: BTreeMap<String, String>,
-    /// Forest and wetland cover of the grid cells (lot CV3-1), decoded on
+    /// Forest and wetland cover of the grid cells, decoded on
     /// first use; see [`GameData::cover_map`].
     pub cover: crate::cover::CoverHandle,
-    /// Movement graph over the settlements (lot C4): `settlement_graph`, or
+    /// Movement graph over the settlements: `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
-    /// `data/economy/trade.json` (lot C5), absent until written: no trade
+    /// `data/economy/trade.json`, absent until written: no trade
     /// route exists.
     pub trade: Option<TradeCatalog>,
     /// Paths of the trade routes, precomputed by
     /// [`GameData::build_trade_paths`] (review point 18c).
     pub trade_paths: crate::trade_paths::TradePaths,
-    /// `data/movement/rules.json` (lot M2, free movement), absent until
+    /// `data/movement/rules.json` (free movement), absent until
     /// written: [`FreeMovementRules::default`] then applies.
     pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
     /// `data/map/settlements_px.json`: map-pixel position of each
     /// settlement (see [`GameData::settlement_point`]).
     pub settlement_px: BTreeMap<SettlementId, [f32; 2]>,
-    /// Navigation grid and province raster, decoded on first use (lot M2).
+    /// Navigation grid and province raster, decoded on first use.
     pub rasters: crate::navgrid::RasterHandle,
-    /// `data/naval/` (lot NV1): ship classes, naval rules, fleets of 1337.
+    /// `data/naval/`: ship classes, naval rules, fleets of 1337.
     pub naval: crate::entities::naval::NavalData,
     /// OMR R1: settlements on a coarse grid, built on first use
     /// ([`GameData::nearest_settlement`]).
@@ -1164,7 +1164,7 @@ impl ReferenceChecker<'_> {
         }
     }
 
-    /// Lot SL1: each sea lane links two known port settlements.
+    /// Each sea lane links two known port settlements.
     fn check_sea_lanes(&mut self) {
         let data = self.data;
         let mut seen = std::collections::BTreeSet::new();

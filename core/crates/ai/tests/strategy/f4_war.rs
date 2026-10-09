@@ -138,7 +138,7 @@ fn a_hoarding_realm_spends() {
     let data = data();
     let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let empire = fac("fac_france");
-    // Lot C4: 300 000 (was 400 000). The settlements' buildings add upkeep,
+    // 300 000 (was 400 000). The settlements' buildings add upkeep,
     // and at 400 000 the court's opulence (20 % of the excess) made the war
     // runway rule dismiss troops before the hoard could be spent.
     state.factions.get_mut(&empire).unwrap().treasury = 300_000;

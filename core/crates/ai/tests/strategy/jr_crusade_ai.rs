@@ -1,4 +1,4 @@
-//! Lot JR1 (ADR 0165): the crusader faction led by the campaign AI.
+//! ADR 0165: the crusader faction led by the campaign AI.
 
 use data_model::FactionId;
 use sim_campaign::{CampaignState, EventKind, Order};

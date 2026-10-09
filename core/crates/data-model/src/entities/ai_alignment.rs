@@ -1,4 +1,4 @@
-//! Tuning of the AI's historical side changes (lots G2 and G4), mirroring
+//! Tuning of the AI's historical side changes, mirroring
 //! `data/schemas/ai_alignment.schema.json` (file `data/ai/alignment.json`).
 
 use serde::{Deserialize, Serialize};

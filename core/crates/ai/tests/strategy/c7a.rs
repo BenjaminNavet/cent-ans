@@ -1,4 +1,4 @@
-//! Lot C7a: the AI on the settlements — it wins back lost places, leaves a
+//! The AI on the settlements — it wins back lost places, leaves a
 //! garrison in the places it takes, goes home when idle abroad; and the
 //! `GarrisonUnits` order it relies on.
 
@@ -12,7 +12,7 @@ fn set(id: &str) -> SettlementId {
     SettlementId::new(id).unwrap()
 }
 
-/// Destination of the last move order of `army` (lot M3: one order per
+/// Destination of the last move order of `army` (one order per
 /// leg of the route), if any.
 fn destination(orders: &[Order], army: &ArmyId) -> Option<SettlementId> {
     orders.iter().rev().find_map(|o| match o {
@@ -118,7 +118,7 @@ fn the_ai_wins_back_a_lost_place() {
     let s = state.settlements.get_mut(&meaux).unwrap();
     s.controller = fac("fac_england");
     s.garrison.clear();
-    // Lot SL1: the English host in London stands one crossing from Calais
+    // The English host in London stands one crossing from Calais
     // (route de l'Étape) and France rightly defends Calais first; keep it
     // in York so that only the lost place is at stake.
     let english = state

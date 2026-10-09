@@ -18,7 +18,7 @@ fn starting_garrisons_follow_the_shared_classification() {
     }
     let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
     for id in state.provinces.keys() {
-        // Lot C4: the province garrison is held by its city.
+        // The province garrison is held by its city.
         let owner = state.province_owner(id).unwrap();
         let role = state.garrison_role(&data, owner, id);
         let garrison = &state.city_state(id).unwrap().garrison;

@@ -1,4 +1,4 @@
-//! `CampaignSim` battle history (chantier TB, ADR 0157 « révision »), read
+//! `CampaignSim` battle history (ADR 0157 « révision »), read
 //! only: the recent land battles kept in the campaign state
 //! (`sim_campaign::battle_history`), for the battlefield marks of the map.
 

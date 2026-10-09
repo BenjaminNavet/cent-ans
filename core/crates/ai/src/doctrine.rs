@@ -1,4 +1,4 @@
-//! Recruitment doctrines (lot E1, audit A2 § 5.1).
+//! Recruitment doctrines (audit A2 § 5.1).
 //!
 //! Each faction aims at a mix of unit types (`data/ai/doctrines.json`):
 //! England archers and dismounted men-at-arms, France knights and

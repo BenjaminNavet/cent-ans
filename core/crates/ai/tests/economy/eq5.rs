@@ -1,4 +1,4 @@
-//! Lot EQ5: the campaign AI's budget counts its commitments (tributes of a
+//! The campaign AI's budget counts its commitments (tributes of a
 //! lost war), and its armies do not camp in the lands of a realm at peace
 //! without right of passage.
 

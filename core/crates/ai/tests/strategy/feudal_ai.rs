@@ -1,4 +1,4 @@
-//! Lot FE5: the feudal AI (spec FE § 5, ADR 0110).
+//! The feudal AI (spec FE § 5, ADR 0110).
 
 use data_model::GameData;
 use sim_campaign::feudal::{self, FelonyReason, PROTECTION_REFUSED_REASON};
