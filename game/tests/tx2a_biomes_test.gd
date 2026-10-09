@@ -75,8 +75,8 @@ func _test_tree_species() -> void:
 	_check(species.base[(12 * TreeSpecies.ROLE_COUNT + role) * n] == species.base[(2 * TreeSpecies.ROLE_COUNT + role) * n], "weight inherited")
 	_check(species.base[(10 * TreeSpecies.ROLE_COUNT + role) * n + 1] == 0.0, "explicit zero cuts the weight")
 	_check(species.base[(10 * TreeSpecies.ROLE_COUNT + role) * n] > 0.0, "other species inherited")
-	_check(species.biome_param(12, 0) == 0.9, "params inherited")
-	_check(species.biome_param(9, 0) == 0.05, "explicit params kept")
+	_check(is_equal_approx(species.biome_param(12, 0), 0.9), "params inherited")
+	_check(is_equal_approx(species.biome_param(9, 0), 0.05), "explicit params kept")
 	_check(species.table()["biome_parent"].size() == 15, "table carries the parents")
 
 
