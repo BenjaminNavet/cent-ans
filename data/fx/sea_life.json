@@ -1,0 +1,251 @@
+{
+  "description": "ME1 (chantier DN, mer vivante) : réglages visuels de la mer de campagne, rendu seulement, aucune règle de jeu. `shallows` : fonds clairs et caustiques près des côtes (profondeur en mètres). `crests` : lignes de crêtes qui avancent au large (profondeur en mètres). `tide` : estrans, vase découverte à marée basse dans les zones listées (polygones en pixels carte, grille de map.json ; `width_px` = largeur maximale de vase découverte ; la dernière zone qui contient un point l'emporte). `wake` : sillage des flottes en mer (unités du marqueur). Lu par game/scripts/map/sea_life.gd, game/shaders/sea_life.gdshaderinc et game/shaders/fleet_wake.gdshader. `--no-sea-life` désactive le tout (A/B).",
+  "cell_px": 16,
+  "color": {
+    "saturation_max": 0.4,
+    "brightness": 1.45,
+    "cloud_shadow_gain": 0.45
+  },
+  "surf": {
+    "min_screen_px": 2.2
+  },
+  "shallows": {
+    "color": [
+      0.2,
+      0.4,
+      0.37
+    ],
+    "depth_m": 60.0,
+    "amount": 0.55,
+    "caustic": 0.22,
+    "caustic_scale": 0.9
+  },
+  "crests": {
+    "color": [
+      0.46,
+      0.55,
+      0.58
+    ],
+    "amount": 0.08,
+    "depth_m": [
+      40.0,
+      140.0
+    ],
+    "frequency": 1.6,
+    "speed": 0.55,
+    "direction": [
+      0.8,
+      0.6
+    ]
+  },
+  "tide": {
+    "period_s": 150.0,
+    "max_px": 8.0,
+    "high_cover": 0.9,
+    "mud_color": [
+      0.13,
+      0.115,
+      0.085
+    ],
+    "wet_color": [
+      0.22,
+      0.22,
+      0.19
+    ],
+    "mud_alpha": 0.96,
+    "zones": [
+      {
+        "id": "mont_saint_michel",
+        "width_px": 6.0,
+        "polygon_px": [
+          [
+            1778,
+            3160
+          ],
+          [
+            1850,
+            3160
+          ],
+          [
+            1850,
+            3198
+          ],
+          [
+            1778,
+            3198
+          ]
+        ]
+      },
+      {
+        "id": "wadden",
+        "width_px": 4.0,
+        "polygon_px": [
+          [
+            2480,
+            2480
+          ],
+          [
+            2900,
+            2480
+          ],
+          [
+            2900,
+            2610
+          ],
+          [
+            2480,
+            2610
+          ]
+        ]
+      },
+      {
+        "id": "wash",
+        "width_px": 4.5,
+        "polygon_px": [
+          [
+            2045,
+            2520
+          ],
+          [
+            2115,
+            2520
+          ],
+          [
+            2115,
+            2580
+          ],
+          [
+            2045,
+            2580
+          ]
+        ]
+      },
+      {
+        "id": "somme",
+        "width_px": 2.5,
+        "polygon_px": [
+          [
+            2140,
+            2965
+          ],
+          [
+            2180,
+            2965
+          ],
+          [
+            2180,
+            3012
+          ],
+          [
+            2140,
+            3012
+          ]
+        ]
+      },
+      {
+        "id": "morecambe",
+        "width_px": 3.5,
+        "polygon_px": [
+          [
+            1785,
+            2306
+          ],
+          [
+            1855,
+            2306
+          ],
+          [
+            1855,
+            2350
+          ],
+          [
+            1785,
+            2350
+          ]
+        ]
+      },
+      {
+        "id": "solway",
+        "width_px": 3.0,
+        "polygon_px": [
+          [
+            1785,
+            2184
+          ],
+          [
+            1850,
+            2184
+          ],
+          [
+            1850,
+            2204
+          ],
+          [
+            1785,
+            2204
+          ]
+        ]
+      },
+      {
+        "id": "bourgneuf",
+        "width_px": 2.5,
+        "polygon_px": [
+          [
+            1695,
+            3408
+          ],
+          [
+            1750,
+            3408
+          ],
+          [
+            1750,
+            3448
+          ],
+          [
+            1695,
+            3448
+          ]
+        ]
+      },
+      {
+        "id": "arcachon",
+        "width_px": 3.0,
+        "polygon_px": [
+          [
+            1738,
+            3782
+          ],
+          [
+            1792,
+            3782
+          ],
+          [
+            1792,
+            3822
+          ],
+          [
+            1738,
+            3822
+          ]
+        ]
+      }
+    ]
+  },
+  "wake": {
+    "enabled": true,
+    "length": 34.0,
+    "width_start": 4.0,
+    "width_end": 15.0,
+    "stern_x": -6.5,
+    "y": 0.12,
+    "alpha_moving": 0.75,
+    "alpha_idle": 0.18,
+    "speed": 0.9,
+    "color": [
+      0.8,
+      0.86,
+      0.86
+    ]
+  }
+}

@@ -64,6 +64,7 @@ var men: int = 0
 ## Figurines : clé "kind_variant" → {mm: MultiMeshInstance3D, kind, variant, material}.
 var _groups: Dictionary = {}
 var _ships: Array[Node3D] = []
+var _wakes: Array[MeshInstance3D] = []  # ME1 : sillages, un par navire
 var _smokes: Array[GPUParticles3D] = []
 var _anim_time: float = 0.0
 var _level: int = -1
@@ -284,6 +285,8 @@ func set_walking(value: bool) -> void:
 	if value == walking:
 		return
 	walking = value
+	for wake in _wakes:
+		SeaLife.set_wake_strength(wake, walking)
 	for key in _groups:
 		var group: Dictionary = _groups[key]
 		BattleSkinned.apply_config(group["material"], _state_config(str(group["kind"]), int(group["variant"])), float(group["clock"]))
@@ -455,6 +458,11 @@ func _build_fleet() -> void:
 			(geometry as GeometryInstance3D).layers = 2
 		add_child(ship)
 		_ships.append(ship)
+		var wake := SeaLife.make_wake(1.0 if i == 0 else 0.85)  # ME1
+		if wake != null:
+			wake.position += Vector3(slot.x, 0.0, slot.y)
+			add_child(wake)
+			_wakes.append(wake)
 
 
 ## Voile aux couleurs de la faction (matériau `Sail` remplacé, maillage dupliqué par couleur ;

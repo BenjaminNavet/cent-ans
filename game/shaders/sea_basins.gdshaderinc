@@ -41,13 +41,15 @@ vec3 long_swell(vec2 p, float footprint, float amount) {
 		return vec3(0.0);
 	}
 	float fade = 1.0 - smoothstep(long_swell_length_px * 0.12, long_swell_length_px * 0.4, footprint);
+	fade = min(fade, smoothstep(4.0, 16.0, long_swell_length_px / max(footprint, 1e-4)));  // ME1 : période à l'écran
 	if (fade <= 0.0) {
 		return vec3(0.0);
 	}
 	float k = 6.2832 / long_swell_length_px;
 	float t = TIME * long_swell_speed;
-	vec2 d1 = vec2(0.87, 0.5);
-	vec2 d2 = vec2(0.64, -0.77);
+	float jit = (value_noise(p * 0.02 + 5.0) - 0.5) * 0.9;  // ME1 : direction dérivant lentement
+	vec2 d1 = mat2(vec2(cos(jit), sin(jit)), vec2(-sin(jit), cos(jit))) * vec2(0.87, 0.5);
+	vec2 d2 = mat2(vec2(cos(-jit), sin(-jit)), vec2(-sin(-jit), cos(-jit))) * vec2(0.64, -0.77);
 	float ph1 = dot(p, d1) * k - t + value_noise(p * 0.07) * 4.0;
 	float ph2 = dot(p, d2) * k * 0.61 - t * 0.7 + value_noise(p * 0.045 + vec2(7.0, 3.0)) * 4.0;
 	float h = sin(ph1) * 0.62 + sin(ph2) * 0.38;

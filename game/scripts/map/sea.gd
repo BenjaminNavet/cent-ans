@@ -41,6 +41,7 @@ func setup(map_size: Vector2i) -> void:
 		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])
 	SeaBasins.apply(material, map_size)  # TB5 : mers par bassin
 	CoastLook.apply(material, map_size, false)  # TB5 : géologie de la côte et ressac
+	SeaLife.apply(material, map_size)  # ME1 : fonds clairs, crêtes, estrans, saturation bornée
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
 	floor_instance.name = "Abyss"

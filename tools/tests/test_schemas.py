@@ -101,6 +101,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "fx_fire_flipbooks.schema.json": ("fx/fire_flipbooks.json",),
     "fx_horizon.schema.json": ("fx/horizon.json",),
     "fx_siege_fire.schema.json": ("fx/siege_fire.json",),
+    "fx_sea_life.schema.json": ("fx/sea_life.json",),
     "fx_water_detail.schema.json": ("fx/water_detail.json",),
     "ground_biome_mix.schema.json": ("art/ground_biome_mix.json",),
     "group_formations.schema.json": ("rules/group_formations.json",),

@@ -22,3 +22,4 @@ Priorité quand le temps machine manque : **campagne > bataille > UI**. 20 agent
 - Suite : catalogue de production (campagne d'abord : bâtiments par famille, navires, camp, ponts, folk ; puis siège/figurines ; UI : 36 événements, codex, icônes religions/ordres/édits, curseurs campagne, ornements).
 
 - ME2/3/4/8 fusionnés f4963ebcf (faune, oiseaux, marais/névés, paysages agricoles).
+- ME1 mer (10-09) : fusionnée dans main (55f48ba84), motif de vaguelettes supprimé (fondu selon la période écran, houle déformée par bruit) ; note docs/wip/dn/me1-mer.md.
