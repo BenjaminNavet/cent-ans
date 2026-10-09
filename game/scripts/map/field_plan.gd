@@ -1,7 +1,7 @@
 class_name FieldPlan
 extends RefCounted
 
-## Lot DN-CHAMPS (ADR 0220) : placement des champs en modèles 3D générés sur la carte de campagne.
+## Lot DN-CHAMPS (ADR 0222) : placement des champs en modèles 3D générés sur la carte de campagne.
 ## Pur calcul, sans nœud, déterministe (hachage entier : le `sin` du shader n'est pas reproductible
 ## côté CPU). Les données sont celles du sol peint : poids de cultures par biome
 ## (`ground_biome_mix.json`) et par paysage régional (`agri_landscapes.json` + masque), splat

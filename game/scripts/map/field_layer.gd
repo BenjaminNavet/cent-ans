@@ -1,7 +1,7 @@
 class_name FieldLayer
 extends Node3D
 
-## Lot DN-CHAMPS (ADR 0220) : champs, vergers, vignes et terrasses de la carte de campagne en
+## Lot DN-CHAMPS (ADR 0222) : champs, vergers, vignes et terrasses de la carte de campagne en
 ## modèles 3D générés (`crop_*`, `tree_*`, `econ_*`), posés par-dessus le sol peint. Rendu seulement.
 ## - Placement : `FieldPlan` (parcelles, cultures par région dominante, rangées), par cellules de
 ##   `cell_px` planifiées à la demande autour du point visé, sous un budget de ms par image, et mises

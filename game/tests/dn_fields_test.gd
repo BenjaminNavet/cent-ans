@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du lot DN-CHAMPS (ADR 0220) : champs en modèles générés.
+## Test headless du lot DN-CHAMPS (ADR 0222) : champs en modèles générés.
 ##  1. données : table lue, glb présents (si le paquet de modèles est installé) ;
 ##  2. `FieldPlan` : déterministe, cultures dominantes par région cohérentes avec les tables du sol
 ##     (vignes au sud, blé au nord), aucune parcelle en forêt dense ;

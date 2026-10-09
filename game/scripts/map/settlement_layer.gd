@@ -188,7 +188,7 @@ var _town_data: TownData
 var outbuildings: OutbuildingLayer
 ## Lots DN ME6/ME7/ME9 : décor ponctuel hors les villes (croix, gibets, phares, mines, ruines…).
 var decor: DecorLayer
-var fields: FieldLayer  # DN-CHAMPS (ADR 0220)
+var fields: FieldLayer  # DN-CHAMPS (ADR 0222)
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
 var _soot_turn := -1
@@ -2172,7 +2172,7 @@ func _setup_decor() -> void:
 	decor.name = "Decor"
 	add_child(decor)
 	decor.setup(self, map_data, terrain, data, 719.0)
-	# DN-CHAMPS (ADR 0220) : champs, vergers et vignes en modèles générés.
+	# DN-CHAMPS (ADR 0222) : champs, vergers et vignes en modèles générés.
 	var town_px := PackedVector2Array()
 	for entry: Dictionary in data.settlements:
 		town_px.append(entry["px"])

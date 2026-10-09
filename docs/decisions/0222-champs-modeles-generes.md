@@ -1,4 +1,4 @@
-# 0220 : champs, vergers et vignes en modèles 3D générés (DN-CHAMPS)
+# 0222 : champs, vergers et vignes en modèles 3D générés (DN-CHAMPS)
 
 Numéro provisoire (renumérotation à la fusion).
 

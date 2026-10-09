@@ -1,6 +1,6 @@
 # DN-CHAMPS : champs, vergers, vignes en modèles générés
 
-État : fait (ADR 0220, numéro provisoire). Branche du worktree, non fusionnée.
+État : fait (ADR 0222, numéro provisoire). Branche du worktree, non fusionnée.
 
 ## Fait
 - `data/art/dn_fields.json` + schéma `art_dn_fields.schema.json` + `tools/tests/test_art_dn_fields_schema.py`.
@@ -32,7 +32,7 @@ petites instances) : +3 à +5 ms. Pas de LOD de distance au-delà des 3 niveaux 
 - Premier affichage : ~1 s de chargement des glb (préchargés en arrière-plan au setup).
 
 ## Révision : une parcelle = un modèle (retour joueur 10-09)
-Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ entier »). Voir ADR 0220.
+Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ entier »). Voir ADR 0222.
 - [fait] catalogue `data/art/dn_catalog_fields.json` (11 parcelles `field_<clé>`), classe d'ingest `field`,
   `dn_batch.py` accepte `style_suffix` par entrée (le suffixe décor interdit sol/socle).
 - [fait] `FieldPlan`/`FieldLayer` : une instance par parcelle, `dn_fields.json` + schéma + tests mis à jour.
