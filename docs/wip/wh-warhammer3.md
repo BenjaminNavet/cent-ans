@@ -7,6 +7,9 @@ Session parallèle RX active (worktrees `../gp-rx-*`, ADR jusqu'à 0258) : ne pa
 ## État
 - [x] Vague critique faite (7 Sonnet : carte, armees, economie, personnages, diplomatie, tour, ui ; brief docs/wip/wh/brief-critique.md) → `docs/wip/wh/<rôle>.md`
 - [x] Synthèse + lots → `docs/wip/wh/lots.md` (12 lots, 2 vagues)
-- [~] Vague 1 lancée (idle, hover, armya, econ, chars, diploa ; agents cent-ans-mech) ; vague 2 ensuite (armyb, uicards, turn, diplob, charsb, mapb2)
+- [~] Vague 1 : hover + idle FUSIONNÉS (62e2cae95) ; turn + mapb2 (vague 2) lancés ; reste vague 1 en cours. Vague 1 lancée (idle, hover, armya, econ, chars, diploa ; agents cent-ans-mech) ; vague 2 ensuite (armyb, uicards, turn, diplob, charsb, mapb2)
 - [ ] Vagues de corrections (worktrees `../gp-wh-<lot>`, branches `wh/<lot>`, ff-only)
 - [ ] Vérif finale (fmt/clippy/test/pytest/smoke) + push
+
+## Notes de fusion
+- Worktree : après rebase, `godot --headless --path game --import` (nouveaux class_name) avant les tests ; `tools/run_godot_tests.sh` avec LOG_DIR dans le scratchpad.
