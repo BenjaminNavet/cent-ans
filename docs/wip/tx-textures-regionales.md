@@ -14,6 +14,13 @@ local (mflux + Real-ESRGAN) en secours seulement.
   coût estimé affiché) ; essai prairie 2048 natif concluant (0,02 $).
 - 2026-10-09 : T1e `alpha.py` (cut_out, alpha_family), `micro_detail`/`micro_detail_normal` (pbr), checks alpha, CLI `textures alpha|micro`.
 
+- 2026-10-09 : sols de campagne générés sur fal (87 images 2048², 2 min ; 2,69 $ avec reprises). Leçons :
+  Z-Image ne connaît pas de prompt négatif, « no roads / no tramlines » FAIT apparaître des pistes →
+  suffixe positif (« même sol continu partout ») ; les sols secs et beiges vus à 80-150 m deviennent
+  plats ou rayés → `tile_m` 15-40 m pour eux. 7 entrées restées faibles après 3 essais, meilleur essai
+  choisi à la main (manifeste `review`) : grass_bare_b03, rock_b07, understory_b08, rock_b12,
+  sand_shared, loess_plain, ploughed. Planche : scratchpad de session (non versionnée).
+
 ## Prochaine étape
 
 T1d fait (module `upscale` + `cent-ans textures upscale`, voie locale de repli) ; voie par défaut

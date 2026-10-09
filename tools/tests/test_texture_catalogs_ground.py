@@ -66,7 +66,7 @@ def test_campaign_parcel_materials(campaign):
     parcels = [e for e in campaign["entries"] if e["id"].startswith("parcel_")]
     assert len(parcels) == 27 + 15
     for entry in campaign["entries"]:
-        assert 50 <= entry["tile_m"] <= 200
+        assert 10 <= entry["tile_m"] <= 200
         assert entry["checks"]["seam_max"] == 0.08
 
 

@@ -12,14 +12,14 @@ size: 2048
 output_size: 2048
 style_prefix: >-
   Vertical nadir aerial orthophoto taken straight down from directly above, like a satellite or drone
-  orthomosaic: strictly top-down, no perspective, no horizon, no sky, ground filling the whole frame edge
-  to edge, seamless and tileable, uniform coverage without a dominant central feature. Flat diffuse overcast
-  daylight, no cast shadows, natural colours, photorealistic, high detail. The image covers about {tile_m}
+  orthomosaic, the camera pointing exactly straight down at flat ground, the ground filling the whole frame
+  edge to edge, seamless and tileable, uniform coverage without a dominant central feature. Flat diffuse overcast
+  daylight, soft even lighting, natural colours, photorealistic, high detail. The image covers about {tile_m}
   metres of ground on each side.
 style_suffix: >-
-  No roads, no paths, no buildings, no people, no animals, no water, no text, no border, no frame, no
-  vignette, no lens distortion. Medieval pre-industrial land: no tractor tracks, no tramlines, no machinery
-  marks, no modern objects.
+  The same continuous, unbroken ground everywhere, rich fine-grained natural detail and gentle variation of
+  colour at every scale, as untouched medieval countryside. Only ground and plants, nothing written, nothing
+  framed.
 entries:
 - id: bg_grass_bare_b01
   role: grass_bare
@@ -98,7 +98,7 @@ entries:
     Dry green-yellow grass with scattered thyme and pale ochre soil showing through, warm Provence hillside
     ground.
   seed: 1060
-  tile_m: 120
+  tile_m: 35
   checks:
     luminance: [0.12, 0.5]
     saturation: [0.1, 0.65]
@@ -257,7 +257,7 @@ entries:
   prompt: >-
     Beige-ochre eroded marl and limestone plateau rock with flaking layers and gravel.
   seed: 1200
-  tile_m: 80
+  tile_m: 30
   checks:
     luminance: [0.25, 0.85]
     saturation: [0.02, 0.45]
@@ -269,7 +269,7 @@ entries:
     Bare desert ground: mottled pale ochre and tan sand, clearly visible wind ripples, patches of gravel
     pavement with dark varnished pebbles, a few cracked crusts and tiny dry tufts far apart, rich fine detail.
   seed: 1210
-  tile_m: 150
+  tile_m: 30
   checks:
     luminance: [0.3, 0.75]
     saturation: [0.04, 0.45]
@@ -280,7 +280,7 @@ entries:
   prompt: >-
     Dry wadi bed with palm litter and tamarisk debris: coarse beige sand, dry twigs and small stones.
   seed: 1220
-  tile_m: 80
+  tile_m: 30
   checks:
     luminance: [0.1, 0.5]
     saturation: [0.08, 0.6]
@@ -289,9 +289,9 @@ entries:
   role: rock
   biomes: [8]
   prompt: >-
-    Dark brown-red desert sandstone and basalt rock surface, polished, with angular cracks and gravel.
+    Dark brown-red desert sandstone and black basalt rock surface with sharp angular cracks, fractured slabs, loose gravel and dust in the cracks, strong rocky relief.
   seed: 1230
-  tile_m: 80
+  tile_m: 30
   checks:
     luminance: [0.1, 0.55]
     saturation: [0.02, 0.45]
@@ -426,7 +426,7 @@ entries:
   prompt: >-
     Pale yellow-grey loess crust and eroded limestone outcrop with cracks and sparse grass.
   seed: 1350
-  tile_m: 80
+  tile_m: 30
   checks:
     luminance: [0.25, 0.85]
     saturation: [0.02, 0.45]
@@ -471,7 +471,7 @@ entries:
     Very dry pale straw grass with sparse low aromatic shrubs on white stony limestone soil, Greek hillside
     ground.
   seed: 1390
-  tile_m: 120
+  tile_m: 35
   checks:
     luminance: [0.3, 0.75]
     saturation: [0.1, 0.65]
@@ -514,9 +514,9 @@ entries:
   role: sand
   biomes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
   prompt: >-
-    Fine pale beach and river sand with subtle ripples and a few tiny pebbles and shell fragments.
+    Fine pale sand with clearly visible small wind ripples, scattered tiny pebbles, shell fragments and a few dry seaweed bits, grainy detail.
   seed: 1430
-  tile_m: 80
+  tile_m: 25
   checks:
     luminance: [0.35, 0.85]
     saturation: [0.06, 0.45]
@@ -541,7 +541,7 @@ entries:
     irregular density, red poppies and blue cornflowers scattered here and there, slight wind ripples, a few
     pale patches.
   seed: 1450
-  tile_m: 120
+  tile_m: 40
   checks:
     luminance: [0.25, 0.85]
     saturation: [0.1, 0.7]
@@ -562,10 +562,9 @@ entries:
   role: parcel_crop
   biomes: [1, 2, 3, 4, 5, 7]
   prompt: >-
-    A freshly ploughed field of brown earth, regular parallel furrows about thirty centimetres apart running
-    across the whole image, clods of soil, no vegetation.
+    A freshly ploughed medieval field of brown earth turned by an ox plough: broad irregular ridges and furrows, big crumbly clods, a few stones and stubble remnants, no vegetation.
   seed: 1470
-  tile_m: 100
+  tile_m: 15
   checks:
     luminance: [0.1, 0.7]
     saturation: [0.1, 0.7]
@@ -925,10 +924,9 @@ entries:
   role: parcel_crop
   biomes: [2, 4, 10, 12]
   prompt: >-
-    Fertile loess farmland seen from above: pale yellow-beige fine soil with faint darker humus patches
-    and sparse sprouting crop, smooth uniform ground.
+    Fertile loess farmland: pale yellow-beige crumbly fine soil with darker humus patches, small clods and a sparse young green crop sprouting in irregular tufts.
   seed: 1770
-  tile_m: 150
+  tile_m: 40
   checks:
     luminance: [0.25, 0.75]
     saturation: [0.1, 0.5]

@@ -10,12 +10,12 @@ output_size: 2048
 style_prefix: >-
   Close-up top-down view of the ground, camera pointing straight down from about one metre, ground filling
   the whole frame edge to edge, seamless and tileable, uniform coverage without a dominant central feature.
-  Flat diffuse overcast light, no cast shadows, natural colours, photorealistic, sharp fine detail. The
+  Flat diffuse overcast light, soft even lighting, natural colours, photorealistic, sharp fine detail. The
   image covers about {tile_m} metres of ground on each side.
 style_suffix: >-
-  No horizon, no sky, no people, no animals, no objects, no buildings, no water, no text, no border, no
-  frame, no vignette. Medieval pre-industrial land: no tractor tracks, no tramlines, no machinery marks, no
-  modern objects.
+  The same continuous, unbroken ground everywhere, rich fine-grained natural detail and gentle variation of
+  colour at every scale, as untouched medieval countryside. Only ground and plants, nothing written, nothing
+  framed.
 entries:
 - id: grass_atlantic
   role: grass
