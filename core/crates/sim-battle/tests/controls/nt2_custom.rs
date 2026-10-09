@@ -144,7 +144,7 @@ fn a_valid_composition_builds_and_fights() {
     assert_eq!(setup.player_side, Some(SideId::Attacker));
     assert!(setup.attacker.general.is_some());
     assert_eq!(setup.terrain, data_model::Terrain::Hills);
-    let start = ReplayStart::plain(setup.clone(), 11).with_weather(Some(Weather::Fog));
+    let start = ReplayStart::new(setup.clone(), 11).with_weather(Some(Weather::Fog));
     let mut sim = start.build().unwrap();
     assert_eq!(sim.weather(), Weather::Fog);
     for _ in 0..10 {
@@ -163,7 +163,7 @@ fn a_valid_composition_builds_and_fights() {
         siege.siege.as_ref().map(|s| s.fortification),
         Some(rules.default_fortification)
     );
-    assert!(ReplayStart::plain(siege, 3)
+    assert!(ReplayStart::new(siege, 3)
         .build()
         .unwrap()
         .siege()

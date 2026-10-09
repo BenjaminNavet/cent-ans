@@ -202,7 +202,7 @@ impl BattleSim {
             let mut setup = map.battle_setup(&units, orders, standards, side)?;
             setup.abilities = abilities;
             // EP13: built through the replay start, recorded.
-            let start = sim_battle::ReplayStart::historical(setup, seed as u64, map.clone());
+            let start = sim_battle::ReplayStart::new(setup, seed as u64).historical(map.clone());
             let sim = start.build()?;
             Ok((map, sim, start))
         })();

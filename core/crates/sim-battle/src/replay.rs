@@ -79,14 +79,10 @@ pub struct ReplayStart {
 }
 
 impl ReplayStart {
-    /// A battle at the scale of its head count (`BattleSim::new`).
-    pub fn plain(setup: BattleSetup, seed: u64) -> Self {
+    /// A battle at the scale of its head count (`BattleSim::new`); refine
+    /// with [`Self::with_scale`], [`Self::on_site`] or [`Self::historical`].
+    pub fn new(setup: BattleSetup, seed: u64) -> Self {
         let scale = BattleScale::for_setup(&setup);
-        Self::scaled(setup, seed, scale)
-    }
-
-    /// A battle at a forced scale (`BattleSim::new_scaled`).
-    pub fn scaled(setup: BattleSetup, seed: u64, scale: BattleScale) -> Self {
         ReplayStart {
             setup,
             seed,
@@ -97,28 +93,26 @@ impl ReplayStart {
         }
     }
 
-    /// A campaign battle fought on a historical site.
-    pub fn on_site(setup: BattleSetup, seed: u64, map: HistoricalMap) -> Self {
-        ReplayStart {
-            setup,
-            seed,
-            scale: map.scale(),
-            site: Some(map),
-            scripted: false,
-            weather: None,
-        }
+    /// The same start at a forced scale (`BattleSim::new_scaled`).
+    pub fn with_scale(mut self, scale: BattleScale) -> Self {
+        self.scale = scale;
+        self
     }
 
-    /// The historical battle of `map`.
-    pub fn historical(setup: BattleSetup, seed: u64, map: HistoricalMap) -> Self {
-        ReplayStart {
-            setup,
-            seed,
-            scale: map.scale(),
-            site: Some(map),
-            scripted: true,
-            weather: None,
-        }
+    /// A campaign battle fought on a historical site (map scale).
+    pub fn on_site(mut self, map: HistoricalMap) -> Self {
+        self.scale = map.scale();
+        self.site = Some(map);
+        self.scripted = false;
+        self
+    }
+
+    /// The historical battle of `map` (orders of battle, weather, hour).
+    pub fn historical(mut self, map: HistoricalMap) -> Self {
+        self.scale = map.scale();
+        self.site = Some(map);
+        self.scripted = true;
+        self
     }
 
     /// NT2: the same start with the weather forced (custom battle).
@@ -381,82 +375,92 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
         Some(SideId::Defender) => 2,
     });
     for unit in sim.units() {
-        hash.u64(u64::from(unit.id));
-        for value in [
-            unit.hp,
-            unit.x,
-            unit.z,
-            unit.facing,
-            unit.morale,
-            unit.fatigue,
-        ] {
-            hash.u64(value.to_bits());
-        }
-        hash.u64(u64::from(unit.ammo));
-        hash.u64(u64::from(unit.left_field));
-        hash.bytes(format!("{:?}", unit.state).as_bytes());
-        // CB1: a dragged width and a grouped pace, only when set (the
-        // digests of replays recorded before CB1 are unchanged).
-        if let Some(files) = unit.line_files {
-            hash.u64(0x4c46);
-            hash.u64(u64::from(files));
-        }
-        // RJ-a: a change of formation under way, only when there is one.
-        if let Some(r) = &unit.reform {
-            hash.u64(0x5246);
-            hash.bytes(r.from.key().as_bytes());
-            hash.bytes(unit.formation.key().as_bytes());
-            hash.u64(r.elapsed.to_bits());
-            hash.u64(r.duration.to_bits());
-        }
-        if unit.match_speed || unit.group_tag.is_some() {
-            hash.u64(0x4754);
-            hash.u64(u64::from(unit.match_speed));
-            hash.u64(unit.group_tag.map_or(u64::MAX, u64::from));
-        }
-        // CB2: the mode flags are not hashed. They follow from recorded
-        // commands and the deterministic AI, and what they change (pace,
-        // pursuit, step back, shots) shows in the positions, soldiers and
-        // states above; hashing the flags would report replays recorded
-        // before CB2 as diverging (the defensive AI now puts its line on
-        // guard) while the battle they show has not changed.
-        // CB-M3: queued orders, only when there are some (the digests of
-        // replays recorded before CB are unchanged).
-        if !unit.order_queue.is_empty() {
-            hash.u64(unit.order_queue.len() as u64);
-            for order in &unit.order_queue {
-                match order {
-                    QueuedOrder::Move {
-                        x,
-                        z,
-                        facing,
-                        run,
-                        width,
-                        match_speed,
-                        group_tag,
-                    } => {
-                        hash.u64(1);
-                        hash.u64(x.to_bits());
-                        hash.u64(z.to_bits());
-                        hash.u64(facing.map_or(u64::MAX, f64::to_bits));
-                        hash.u64(u64::from(*run));
-                        // CB1: only when set (digests of CB-M3 replays kept).
-                        if width.is_some() || *match_speed || group_tag.is_some() {
-                            hash.u64(width.map_or(u64::MAX, f64::to_bits));
-                            hash.u64(u64::from(*match_speed));
-                            hash.u64(group_tag.map_or(u64::MAX, u64::from));
-                        }
-                    }
-                    QueuedOrder::Attack { target, run } => {
-                        hash.u64(2);
-                        hash.u64(u64::from(*target));
-                        hash.u64(u64::from(*run));
-                    }
+        hash_unit(&mut hash, unit);
+    }
+    hash.finish()
+}
+
+/// Hashes one regiment; the optional sections only when set, so digests
+/// recorded before each feature stay valid.
+fn hash_unit(hash: &mut Fnv1a, unit: &crate::unit::Unit) {
+    hash.u64(u64::from(unit.id));
+    for value in [
+        unit.hp,
+        unit.x,
+        unit.z,
+        unit.facing,
+        unit.morale,
+        unit.fatigue,
+    ] {
+        hash.u64(value.to_bits());
+    }
+    hash.u64(u64::from(unit.ammo));
+    hash.u64(u64::from(unit.left_field));
+    hash.bytes(format!("{:?}", unit.state).as_bytes());
+    // CB1: a dragged width and a grouped pace, only when set (the
+    // digests of replays recorded before CB1 are unchanged).
+    if let Some(files) = unit.line_files {
+        hash.u64(0x4c46);
+        hash.u64(u64::from(files));
+    }
+    // RJ-a: a change of formation under way, only when there is one.
+    if let Some(r) = &unit.reform {
+        hash.u64(0x5246);
+        hash.bytes(r.from.key().as_bytes());
+        hash.bytes(unit.formation.key().as_bytes());
+        hash.u64(r.elapsed.to_bits());
+        hash.u64(r.duration.to_bits());
+    }
+    if unit.match_speed || unit.group_tag.is_some() {
+        hash.u64(0x4754);
+        hash.u64(u64::from(unit.match_speed));
+        hash.u64(unit.group_tag.map_or(u64::MAX, u64::from));
+    }
+    // CB2: the mode flags are not hashed. They follow from recorded
+    // commands and the deterministic AI, and what they change (pace,
+    // pursuit, step back, shots) shows in the positions, soldiers and
+    // states above; hashing the flags would report replays recorded
+    // before CB2 as diverging (the defensive AI now puts its line on
+    // guard) while the battle they show has not changed.
+    hash_queue(hash, &unit.order_queue);
+}
+
+/// CB-M3: queued orders, only when there are some.
+fn hash_queue(hash: &mut Fnv1a, queue: &std::collections::VecDeque<QueuedOrder>) {
+    if queue.is_empty() {
+        return;
+    }
+    hash.u64(queue.len() as u64);
+    for order in queue {
+        match order {
+            QueuedOrder::Move {
+                x,
+                z,
+                facing,
+                run,
+                width,
+                match_speed,
+                group_tag,
+            } => {
+                hash.u64(1);
+                hash.u64(x.to_bits());
+                hash.u64(z.to_bits());
+                hash.u64(facing.map_or(u64::MAX, f64::to_bits));
+                hash.u64(u64::from(*run));
+                // CB1: only when set (digests of CB-M3 replays kept).
+                if width.is_some() || *match_speed || group_tag.is_some() {
+                    hash.u64(width.map_or(u64::MAX, f64::to_bits));
+                    hash.u64(u64::from(*match_speed));
+                    hash.u64(group_tag.map_or(u64::MAX, u64::from));
                 }
+            }
+            QueuedOrder::Attack { target, run } => {
+                hash.u64(2);
+                hash.u64(u64::from(*target));
+                hash.u64(u64::from(*run));
             }
         }
     }
-    hash.finish()
 }
 
 fn digest_hex(sim: &BattleSim) -> String {

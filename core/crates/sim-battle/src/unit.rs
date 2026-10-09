@@ -85,6 +85,31 @@ impl StandardState {
     }
 }
 
+/// BA9: what a figure layout depends on (formation, width, scale, head
+/// count and the unit class that picks ranks and width bounds).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct LayoutKey {
+    formation: &'static str,
+    line_files: Option<u32>,
+    scale_bits: u64,
+    figures: u32,
+    soldiers: u32,
+    siege: bool,
+    ranged: bool,
+    mounted: bool,
+    pikemen: bool,
+}
+
+/// Layouts kept per thread; emptied when full (a battle uses a few dozen).
+const LAYOUT_CACHE_MAX: usize = 512;
+
+type FigureLayout = std::rc::Rc<(Vec<(f64, f64)>, f64)>;
+
+thread_local! {
+    static LAYOUT_CACHE: std::cell::RefCell<std::collections::HashMap<LayoutKey, FigureLayout>> =
+        std::cell::RefCell::new(std::collections::HashMap::new());
+}
+
 /// A regiment on the field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Unit {
@@ -753,17 +778,18 @@ impl Unit {
     /// rectangle ([`Self::extent`]): more figures stand closer together
     /// rather than widening the formation, so what the player sees still
     /// matches the footprint the rules use for contact and collisions. At
-    /// `scale` = 1 this is exactly [`Self::soldier_positions`].
+    /// `scale` = 1 these are the simulated soldiers, one figure each.
     pub fn figure_positions(&self, scale: f64) -> Vec<(f64, f64, f64)> {
         let m = self.figure_count(scale);
         if m == 0 {
             return Vec::new();
         }
-        let (mut local, squeeze) = self.figure_layout(self.formation, self.line_files, scale, m);
+        let layout = self.figure_layout(self.formation, self.line_files, scale, m);
+        let (mut local, squeeze) = (layout.0.clone(), layout.1);
         // RJ-a: changing formation, each man walks from his old place to
         // his new one (all arrive when the change ends).
         if let Some(r) = self.reform {
-            let (old, _) = self.figure_layout(r.from, r.from_files, scale, m);
+            let old = &self.figure_layout(r.from, r.from_files, scale, m).0;
             let rules = &FormationRules::bundled().reform;
             let walk = if self.mounted {
                 rules.walk_mps.mounted
@@ -777,7 +803,7 @@ impl Unit {
                 .fold(0.0, f64::max);
             let pace = walk.max(farthest / r.duration.max(1e-6));
             let walked = r.elapsed * pace;
-            for (to, from) in local.iter_mut().zip(&old) {
+            for (to, from) in local.iter_mut().zip(old.iter()) {
                 let d = (to.0 - from.0).hypot(to.1 - from.1);
                 let p = if d <= 1e-9 {
                     1.0
@@ -820,6 +846,39 @@ impl Unit {
     /// in `formation`, and the factor of the jitter (figures squeezed into
     /// the simulated rectangle jitter less).
     fn figure_layout(
+        &self,
+        formation: Formation,
+        line_files: Option<u32>,
+        scale: f64,
+        m: u32,
+    ) -> std::rc::Rc<(Vec<(f64, f64)>, f64)> {
+        let key = LayoutKey {
+            formation: formation.key(),
+            line_files,
+            scale_bits: scale.to_bits(),
+            figures: m,
+            soldiers: self.soldiers(),
+            siege: self.category == UnitCategory::Siege,
+            ranged: self.category == UnitCategory::Ranged,
+            mounted: self.mounted,
+            pikemen: self.has(Ability::PikeSquare),
+        };
+        LAYOUT_CACHE.with(|cache| {
+            let mut cache = cache.borrow_mut();
+            if let Some(hit) = cache.get(&key) {
+                return std::rc::Rc::clone(hit);
+            }
+            if cache.len() >= LAYOUT_CACHE_MAX {
+                cache.clear();
+            }
+            let layout =
+                std::rc::Rc::new(self.compute_figure_layout(formation, line_files, scale, m));
+            cache.insert(key, std::rc::Rc::clone(&layout));
+            layout
+        })
+    }
+
+    fn compute_figure_layout(
         &self,
         formation: Formation,
         line_files: Option<u32>,
@@ -954,12 +1013,6 @@ impl Unit {
     /// battle-only ram).
     pub fn has_standard(&self) -> bool {
         !self.synthetic && self.category != UnitCategory::Siege
-    }
-
-    /// World (x, z, angle) of every living soldier, with a small stable jitter
-    /// (larger when routing or in melee).
-    pub fn soldier_positions(&self) -> Vec<(f64, f64, f64)> {
-        self.figure_positions(1.0)
     }
 }
 

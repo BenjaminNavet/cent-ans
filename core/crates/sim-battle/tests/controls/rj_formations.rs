@@ -110,21 +110,21 @@ fn each_formation_is_allowed_to_its_troops_only() {
 #[test]
 fn a_change_of_formation_takes_time_and_the_men_walk() {
     let mut sim = lab_sim(2);
-    let before = sim.units()[0].soldier_positions();
+    let before = sim.units()[0].figure_positions(1.0);
     form(&mut sim, 0, "column").unwrap();
     let unit = &sim.units()[0];
     assert_eq!(unit.formation, Formation::of("column"));
     let reform = unit.reform.expect("a formation order is not instantaneous");
     assert!(reform.duration >= 3.0, "{}", reform.duration);
     // Right after the order, every man still stands in his old place.
-    assert_eq!(unit.soldier_positions(), before);
+    assert_eq!(unit.figure_positions(1.0), before);
     let target = {
         let mut done = unit.clone();
         done.reform = None;
-        done.soldier_positions()
+        done.figure_positions(1.0)
     };
     sim.step();
-    let early = sim.units()[0].soldier_positions();
+    let early = sim.units()[0].figure_positions(1.0);
     let moved = |a: &[(f64, f64, f64)], b: &[(f64, f64, f64)]| {
         a.iter()
             .zip(b)
@@ -139,7 +139,7 @@ fn a_change_of_formation_takes_time_and_the_men_walk() {
     run(&mut sim, reform.duration + DT);
     let unit = &sim.units()[0];
     assert!(unit.reform.is_none(), "formed once the duration is over");
-    assert!(moved(&unit.soldier_positions(), &target) < 1e-9);
+    assert!(moved(&unit.figure_positions(1.0), &target) < 1e-9);
 }
 
 #[test]
@@ -147,7 +147,7 @@ fn ordering_back_the_formation_being_left_turns_the_men_round() {
     let mut sim = lab_sim(3);
     form(&mut sim, 0, "column").unwrap();
     run(&mut sim, 2.0);
-    let halfway = sim.units()[0].soldier_positions();
+    let halfway = sim.units()[0].figure_positions(1.0);
     let done = sim.units()[0].reform.unwrap().progress();
     form(&mut sim, 0, "line").unwrap();
     let unit = &sim.units()[0];
@@ -157,7 +157,7 @@ fn ordering_back_the_formation_being_left_turns_the_men_round() {
     form(&mut sim, 0, "line").unwrap();
     assert_eq!(sim.units()[0].reform, Some(reform));
     // Nobody jumps when the order changes.
-    let now = sim.units()[0].soldier_positions();
+    let now = sim.units()[0].figure_positions(1.0);
     let jump = now
         .iter()
         .zip(&halfway)
@@ -235,7 +235,11 @@ fn reforming_is_deterministic() {
         run(&mut sim, 3.0);
         let mid = state_digest(&sim);
         run(&mut sim, 20.0);
-        (mid, state_digest(&sim), sim.units()[3].soldier_positions())
+        (
+            mid,
+            state_digest(&sim),
+            sim.units()[3].figure_positions(1.0),
+        )
     };
     assert_eq!(digest(11), digest(11));
 }

@@ -43,7 +43,7 @@ fn b6_digest(sim: &BattleSim) -> String {
 /// a march, an attack, a halt and a formation change, at uneven frame
 /// rates, to the end.
 fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
-    let start = ReplayStart::plain(demo_setup(), seed);
+    let start = ReplayStart::new(demo_setup(), seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     drive(
@@ -210,7 +210,7 @@ fn a_historical_battle_replays_without_divergence() {
             None,
         )
         .unwrap();
-    let start = ReplayStart::historical(setup, 7, map);
+    let start = ReplayStart::new(setup, 7).historical(map);
     let mut live = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &live);
     play_frames(&mut live, &mut recorder, 150.0, 0.25);
@@ -227,7 +227,7 @@ fn a_historical_battle_replays_without_divergence() {
 fn a_campaign_battle_on_a_site_replays() {
     let mut setup = demo_setup();
     setup.player_side = None;
-    let start = ReplayStart::on_site(setup, 5, map("azincourt"));
+    let start = ReplayStart::new(setup, 5).on_site(map("azincourt"));
     let mut live = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &live);
     play_frames(&mut live, &mut recorder, 90.0, 0.5);
@@ -338,7 +338,7 @@ fn measure() {
                 None,
             )
             .unwrap();
-        let start = ReplayStart::historical(setup, 7, map);
+        let start = ReplayStart::new(setup, 7).historical(map);
         let mut live = start.build().unwrap();
         let mut recorder = ReplayRecorder::new(start, &live);
         let clock = Instant::now();

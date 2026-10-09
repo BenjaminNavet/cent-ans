@@ -230,7 +230,7 @@ impl BattleSim {
                 abilities,
             )?;
             let start =
-                sim_battle::ReplayStart::plain(setup, seed as u64).with_weather(custom.weather()?);
+                sim_battle::ReplayStart::new(setup, seed as u64).with_weather(custom.weather()?);
             let sim = start.build()?;
             Ok((sim, start))
         })();

@@ -20,7 +20,7 @@ const KINDS: [&str; 5] = [
 fn demo_sim() -> BattleSim {
     let setup: BattleSetup =
         serde_json::from_str(include_str!("../fixtures/demo_battle_1337.json")).unwrap();
-    let mut sim = ReplayStart::plain(setup, 42).build().unwrap();
+    let mut sim = ReplayStart::new(setup, 42).build().unwrap();
     let _ = sim.start_battle();
     sim
 }

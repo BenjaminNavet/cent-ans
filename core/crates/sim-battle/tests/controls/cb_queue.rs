@@ -271,7 +271,7 @@ fn the_queue_preview_starts_from_the_last_queued_point() {
 /// Records the 1337 demo with queued orders for a minute of battle.
 fn record_with_queue(seed: u64) -> (BattleSim, BattleReplay) {
     let setup = serde_json::from_str(include_str!("../fixtures/demo_battle_1337.json")).unwrap();
-    let start = ReplayStart::plain(setup, seed);
+    let start = ReplayStart::new(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     let drive = |sim: &mut BattleSim, recorder: &mut ReplayRecorder, action: ReplayAction| {

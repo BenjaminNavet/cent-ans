@@ -111,9 +111,11 @@ impl BattleSim {
             );
         // EP13: one construction path, recorded for the replay.
         let start = from_dict::<BattleSetup>(&setup).map(|setup| match (&site, forced) {
-            (Some(map), _) => sim_battle::ReplayStart::on_site(setup, seed as u64, map.clone()),
-            (None, Some(scale)) => sim_battle::ReplayStart::scaled(setup, seed as u64, scale),
-            (None, None) => sim_battle::ReplayStart::plain(setup, seed as u64),
+            (Some(map), _) => sim_battle::ReplayStart::new(setup, seed as u64).on_site(map.clone()),
+            (None, Some(scale)) => {
+                sim_battle::ReplayStart::new(setup, seed as u64).with_scale(scale)
+            }
+            (None, None) => sim_battle::ReplayStart::new(setup, seed as u64),
         });
         let parsed = start.and_then(|start| start.build().map(|sim| (start, sim)));
         self.historical = site;

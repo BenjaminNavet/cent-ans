@@ -71,7 +71,6 @@ fn figures_fill_the_simulated_rectangle() {
         for id in 0..2u32 {
             sim.units_mut()[id as usize].formation = formation;
             let unit = &sim.units()[id as usize];
-            assert_eq!(unit.figure_positions(1.0), unit.soldier_positions());
             assert_eq!(unit.figure_count(1.0), unit.soldiers());
             let (w, d) = unit.extent();
             for scale in [0.5, 1.5, 2.5] {

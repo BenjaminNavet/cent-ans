@@ -535,7 +535,7 @@ fn record_with_abilities(seed: u64) -> (BattleSim, BattleReplay) {
     let mut setup: sim_battle::BattleSetup =
         serde_json::from_str(include_str!("../fixtures/demo_battle_1337.json")).unwrap();
     setup.abilities = data().battle_abilities.values().cloned().collect();
-    let start = ReplayStart::plain(setup, seed);
+    let start = ReplayStart::new(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     let drive = |sim: &mut BattleSim, recorder: &mut ReplayRecorder, action: ReplayAction| {

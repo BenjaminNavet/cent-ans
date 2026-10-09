@@ -283,7 +283,7 @@ mod tests {
             "../../sim-battle/tests/fixtures/demo_battle_1337.json"
         ))
         .unwrap();
-        let start = sim_battle::ReplayStart::plain(setup, 1);
+        let start = sim_battle::ReplayStart::new(setup, 1);
         let sim = start.build().unwrap();
         let recorder = ReplayRecorder::new(start, &sim);
         for stamp in [100, 300, 200, 300] {

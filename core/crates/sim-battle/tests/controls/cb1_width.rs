@@ -106,7 +106,7 @@ fn widths_out_of_bounds_are_brought_back_and_every_soldier_kept() {
                 ranks >= bounds.min_ranks.min(n) && ranks <= bounds.max_ranks,
                 "{name} {width}: {ranks} ranks outside {bounds:?}"
             );
-            assert_eq!(u.soldier_positions().len() as u32, n, "{name} {width}");
+            assert_eq!(u.figure_positions(1.0).len() as u32, n, "{name} {width}");
         }
     }
 }
@@ -329,7 +329,7 @@ fn deployment_takes_a_width() {
 /// Records the 1337 demo with dragged, grouped and queued orders.
 fn record_with_widths(seed: u64) -> (BattleSim, BattleReplay) {
     let setup = serde_json::from_str(include_str!("../fixtures/demo_battle_1337.json")).unwrap();
-    let start = ReplayStart::plain(setup, seed);
+    let start = ReplayStart::new(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     let drive = |sim: &mut BattleSim, recorder: &mut ReplayRecorder, action: ReplayAction| {

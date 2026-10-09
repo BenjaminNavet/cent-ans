@@ -449,7 +449,7 @@ fn an_old_setup_without_the_fields_opens_as_before() {
 fn an_ambush_replays_to_the_same_battle() {
     let mut setup = ambush_setup();
     setup.player_side = Some(SideId::Attacker);
-    let start = ReplayStart::plain(setup, SEED);
+    let start = ReplayStart::new(setup, SEED);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     let drive = |sim: &mut BattleSim, recorder: &mut ReplayRecorder, action: ReplayAction| {

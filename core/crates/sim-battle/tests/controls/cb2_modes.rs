@@ -519,7 +519,7 @@ fn the_core_computes_the_display_states() {
 /// Records the 1337 demo with modes set during a minute of battle.
 fn record_with_modes(seed: u64) -> (BattleSim, BattleReplay) {
     let setup = serde_json::from_str(include_str!("../fixtures/demo_battle_1337.json")).unwrap();
-    let start = ReplayStart::plain(setup, seed);
+    let start = ReplayStart::new(setup, seed);
     let mut sim = start.build().unwrap();
     let mut recorder = ReplayRecorder::new(start, &sim);
     let drive = |sim: &mut BattleSim, recorder: &mut ReplayRecorder, action: ReplayAction| {
