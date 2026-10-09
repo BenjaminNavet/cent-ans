@@ -112,7 +112,7 @@ BT7 | À FAIRE | height/river battle_terrain en Rust, split Terrain/Mesh/Decor (
 BT8 | À FAIRE | plan_deployment en Rust | game/scripts/battle/deployment_controller.gd | oui
 BT9 | À FAIRE | constantes -> data, KINDS dupliqué (soldiers+scene) | game/scripts/battle | non
 BT10 | À FAIRE | MultiMeshKit/ParticleKit | game/scripts/battle | non
-BT11 | À FAIRE | suppr duels/birds/cloud_shadows/queue_tip/secondary_motion (fichiers présents) -800 | game/scripts/battle/battle_{duels,birds,cloud_shadows,queue_tip,secondary_motion}.gd | non | [MÉCANIQUE cosmétique]
+BT11 | FAIT 5a8c696d2, ADR 0230 (queue_tip gardé) | suppr duels/birds/cloud_shadows/queue_tip/secondary_motion (fichiers présents) -800 | game/scripts/battle/battle_{duels,birds,cloud_shadows,queue_tip,secondary_motion}.gd | non | [MÉCANIQUE cosmétique]
 BT12 | À FAIRE | battle_scene structure replay/banners/audio, perf _refresh_view | game/scripts/battle/battle_scene.gd | non
 
 ## SH shaders
@@ -159,8 +159,8 @@ UI12 | À FAIRE | menu_backdrop_3d.gd, living_portrait.gd suppr ? (liés MM1 men
 MA1 | À FAIRE | style `real` : town_builder 1107, landmark_city_layer 416, landmark_plan/model/monuments, town_far_* [landmarks_v2/towns sales] | game/scripts/map/town_*.gd, landmark_*.gd | non
 MA2 | À FAIRE | landmarks v2 + tools paris_v2_author [réserve] | data/landmarks_v2, game/scripts/map/landmark_v2_library.gd | non
 MA4 | À FAIRE | settlement_layer découpe labels/hamlets/picking [GELÉ] | game/scripts/map/settlement_layer.gd | non
-MA5 | À FAIRE | = PF-10 | - | oui
-MA6 | À FAIRE | map_ui (1851 l) JournalView/TopBarFit + JOURNAL_STYLES | game/scripts/map/map_ui.gd | non
+MA5 | = PF-10 GELÉ | = PF-10 | - | oui
+MA6 | FAIT ef8dc7976 | map_ui (1851 l) JournalView/TopBarFit + JOURNAL_STYLES | game/scripts/map/map_ui.gd | non
 MA7 | FAIT (= PF-07) | = PF-07 (PerfProbe + map_bench) | game/scripts/dev | non
 MA8 | PARTIEL | PF-05 mock fait ; 246 has_method restent (campaign_map, settlement_*) | game/scripts/map | non
 MA9 | À FAIRE | règles visuelles villes + governable/commandable -> core | game/scripts/map/settlement_*.gd, core | oui
@@ -175,7 +175,7 @@ TL4 | PARTIEL | outils GA3 gardés (session i3d/dn-fig-bake) | tools/blender_scr
 TL5 | À FAIRE | mocap/FA3/AN1b/FG blender -4.8k (tools/video_mocap, blender) | tools/blender, video_mocap | non
 TL6 | À FAIRE | pipeline payant OpenRouter/fal/TTS -8k | tools/cent_ans_tools/{openrouter,voice_tts,portraits,material_gen,local_art}.py | non
 TL7 | À FAIRE | audio/UI art gen -5.9k [ADR] | tools/cent_ans_tools/{ui_ornaments,audio_bank,ui_sounds,era_music}.py | non
-TL10 | À FAIRE | cli.py 2051 l à découper | tools/cent_ans_tools/cli.py | non
+TL10 | FAIT 3aab598d7 | cli.py 2051 l à découper | tools/cent_ans_tools/cli.py | non
 TL12 | À FAIRE | battle_skinned vs fine doublons | tools/cent_ans_tools | non
 TL13 | À FAIRE | kit_geometry | tools/cent_ans_tools | non
 TL14 | À FAIRE | paths.py/imaging.py (dernier) | tools/cent_ans_tools | non
@@ -195,7 +195,7 @@ MS10 | À FAIRE | passe commentaires visual/ audio/, constantes battle_audio -> 
 ## DT / divers
 DT2 | FAIT (sc/dt2, PNG dé-suivis gardés pour geo) | relief_shade_[0-3].png (131 Mo) toujours suivis ; supprimer repli + dé-suivre | data/map/relief_shade_*.png, game/scripts/map/relief_landcover.gd | non
 DT3 | REPORTÉ | fusion landmarks v1->v2 (= MA1/MA2 sales) | - | non
-DT5 | À FAIRE | defs communes color_hex/rgb3/snake_id dans common.schema.json | data/schemas | non
+DT5 | FAIT 7d3292c3b | defs communes color_hex/rgb3/snake_id dans common.schema.json | data/schemas | non
 DT8 | PARTIEL | schémas town_footprint, forced_sea_edges, 4 orphelins à vérifier | data/schemas | non
 SCH | PARTIEL | ~10 tests tools avec Draft202012Validator nu, 12 schémas sans registre | tools/tests, tools/cent_ans_tools/geo | non
 PRE | À FAIRE | test_relief_update bake tier3 5 vs 6 (autre session) | tools/tests/test_relief_update.py | non
