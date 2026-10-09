@@ -15,3 +15,7 @@ Lot : armees top4, top5, top6, top9 ; ui top9. ADR 0279. FAIT (branche wh/armyb)
 
 ## Sonde campaign_probe (120 tours, graines 1,2)
 voir fin de fichier
+`campaign_probe --turns 120 --seeds 1,2` (seek_place activé / désactivé par `CENT_ANS_DATA_DIR`) :
+- graine 1 : identique (FR-EN 69 %, 96 banqueroutes, 1 révolte) ;
+- graine 2 : FR-EN 62 % / 66 %, guerres actives 31,6 / 33,0, éliminées 18 / 17, révoltes 0 / 3, banqueroutes 127 / 98.
+Dans la cible FR-EN 55-75 % ; pas de dérive nette (les banqueroutes de la graine 2 varient avec le flux aléatoire).
