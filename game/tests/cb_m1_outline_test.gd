@@ -133,9 +133,14 @@ func _check_integration() -> void:
 	if check(int(_unit(own).get("target", -1)) == foe, "attack order did not set target"):
 		check(outlines.state_of(foe) == S.ENEMY_TARGETED, "targeted enemy pulses")
 		var first := outlines.decal_of(foe).modulate.a
-		for _i in 20:
+		# Le pouls suit l'horloge, pas le nombre d'images : on attend qu'il bouge (au plus ~4 s).
+		var moved := false
+		for _i in 240:
 			await process_frame
-		check(absf(outlines.decal_of(foe).modulate.a - first) > 0.01, "pulse animates modulate alpha")
+			if absf(outlines.decal_of(foe).modulate.a - first) > 0.01:
+				moved = true
+				break
+		check(moved, "pulse animates modulate alpha")
 	# Désélection : plus de contour ; régiment absent : décale cachée.
 	_scene.selected.clear()
 	_scene._refresh_view(true)

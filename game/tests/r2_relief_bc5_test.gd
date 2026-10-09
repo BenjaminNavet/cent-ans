@@ -43,6 +43,11 @@ func _init() -> void:
 	strip.convert(Image.FORMAT_RG8)
 	var band_rows := int(meta["relief_shade"]["bands"]["rows"])
 	var band_name := str(meta["relief_shade"]["bands"]["pattern"]).replace("{band}", str(ROW0 / band_rows))
+	if not FileAccess.file_exists(map_dir.path_join(band_name)):
+		# Les PNG sources (`relief_shade_N.png`, ignorés par git) ne sont pas livrés : rien à comparer.
+		print("r2_relief_bc5_test: source %s absente, comparaison sautée" % band_name)
+		finish()
+		return
 	var band := Image.load_from_file(map_dir.path_join(band_name))
 	band.convert(Image.FORMAT_LA8)
 	var source := band.get_data()

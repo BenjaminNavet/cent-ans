@@ -31,6 +31,11 @@ func _press_enter() -> void:
 		Input.flush_buffered_events()
 		await _wait(2)
 	await _wait(20)
+	# Une offre de poids de l'IA ouvre seule le panneau de diplomatie en fin de tour (Q6) : il
+	# recouvre la scène et n'est pas l'objet de ce test.
+	if map != null and map.get("diplomacy") != null:
+		map.diplomacy.panel.hide()
+		await _wait(2)
 
 
 func _run() -> void:
@@ -77,6 +82,10 @@ func _run() -> void:
 	# Relecture du tour de l'IA en cours : Entrée la passe, la saison ne change pas.
 	var replay: Node = map.ai_replay
 	if check(replay != null, "no AiTurnReplay"):
+		# La relecture précède le rapport de saison : cloche (et Entrée) sont inertes tant qu'une
+		# fenêtre modale est ouverte (A6-L6), donc on ferme celle du tour précédent.
+		report.hide()
+		await _wait(3)
 		replay.playing = true
 		replay.set("_skip", false)
 		before = _date()

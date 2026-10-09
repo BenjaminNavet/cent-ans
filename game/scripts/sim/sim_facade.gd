@@ -153,7 +153,7 @@ func faction_short_name(id: String) -> String:
 func army_unit_cap() -> int:
 	if sim != null and sim.has_method("army_unit_cap"):
 		return int(sim.call("army_unit_cap"))
-	return 20
+	return 40
 
 
 # --- Sauvegardes ----------------------------------------------------------------

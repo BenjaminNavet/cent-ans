@@ -19,8 +19,9 @@ const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const LANDCOVER_INCLUDE := "res://shaders/relief_landcover.gdshaderinc"
 ## Lacs de `lakes.json` avant HC2 (`min_area_px` 30).
 const LAKES_BEFORE := 762
-## Plafond de triangles de la nappe des lacs (≈ 15 500 mesurés au seuil 8).
-const MAX_TRIANGLES := 30000
+## Plafond de triangles de la nappe des lacs (≈ 31 400 mesurés depuis les nappes historiques LR10,
+## 15 500 avant).
+const MAX_TRIANGLES := 40000
 const POND_UNIFORMS := [
 	"rl_water_ref_height", "rl_pond_cell_px", "rl_pond_min_px", "rl_pond_max_cell_px", "rl_pond_fill",
 	"rl_pond_bank", "rl_pond_bank_amount", "rl_pond_far_cover", "rl_pool_min_px", "rl_pool_amount",

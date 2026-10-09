@@ -115,7 +115,9 @@ func _test_recruitment(sim: Object, army_id: String) -> void:
 	var widgets: GDScript = load("res://scripts/map/panel_widgets.gd")
 	widgets.call("fill_recruitable", list, rows, func(_unit: String) -> void: pass)
 	var labels := list.find_children("PoolLabel", "Label", true, false)
-	check(labels.size() == rows.size(), "one reserve label per row (%d for %d)" % [labels.size(), rows.size()])
+	# Les lignes du groupe « elsewhere » (autre faction ou culture) ne sont pas montrées (U13).
+	var shown := rows.filter(func(row: Dictionary) -> bool: return str(row.get("group", "")) != "elsewhere")
+	check(labels.size() == shown.size(), "one reserve label per shown row (%d for %d)" % [labels.size(), shown.size()])
 	if not labels.is_empty():
 		check((labels[0] as Label).text.contains("disponible"), "reserve label: %s" % (labels[0] as Label).text)
 	list.queue_free()

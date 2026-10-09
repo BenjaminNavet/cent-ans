@@ -185,9 +185,12 @@ func _test_signs(map: Node3D) -> void:
 		check(worst <= limit, "at most %d sign per town at distance %.0f, got %d" % [limit, distance, worst])
 		check(extras.is_empty(), "no hammer, seal or encounter sign on the political map at distance %.0f" % distance)
 		if distance >= 400.0:
-			# Vue moyenne et large : l'écu est réservé aux lieux majeurs (rang 3 et 4).
+			# Vue moyenne et large : l'écu est réservé aux lieux majeurs ; les cités (rang 2) le
+			# gardent jusqu'à 700 (choix joueur RJ-c, `shield.max_distance_by_rank`), les petits lieux
+			# le perdent dès 380.
 			for i: int in signs_of:
-				check(int(signs_of[i]) == 0 or layer._marker_rank[i] >= 3, "minor place %s should lose its shield at distance %.0f" % [layer.data.settlements[i]["id"], distance])
+				var rank := int(layer._marker_rank[i])
+				check(int(signs_of[i]) == 0 or layer.markers.shield_until(rank) > distance, "minor place %s should lose its shield at distance %.0f" % [layer.data.settlements[i]["id"], distance])
 		print("tb2 signs: distance %.0f -> %d places named on screen, %d shields, %d other signs, max %d per place" % [distance, towns, shields, extras.size(), worst])
 	# Sceau d'incident : caché en mode politique (sauf dernier tour), montré par la couche et par
 	# le mode Mécontentement.

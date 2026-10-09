@@ -13,7 +13,7 @@ GT1 | PARTIEL | ~14 *_shot/probe/bench encore là (as1_shot, as5_shot, as8c_shad
 GT2 | PARTIEL | q3_playtest.gd reste (pb1_turns à garder) | game/tests/q3_playtest.gd | non
 GT3 | PARTIEL | 151/197 *_test.gd sur TestCase, 46 non migrés | game/tests/*_test.gd, game/tests/lib/test_case.gd | non
 GT4 | PARTIEL | tools/run_godot_tests.sh existe mais CI windows.yml ne lance que smoke.gd | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
-GT5 | À FAIRE | suppr tests rouges/orphelins (inventaire à faire via run_all) | game/tests | non
+GT5 | FAIT (sc/gt5) | inventaire docs/wip/sc/gt5-inventaire.md : 200 tests, 25 rouges -> 6 restants (po_ui = bug layout, hb5/dn_* = paquet DN absent, 2 blocages à l'arrêt) ; bug SC fine_geo_layer is_enabled corrigé | game/tests | non
 GT6 | À FAIRE | fusion des tests par thème | game/tests | non
 GT7 | FAIT (sc/smoke, 5 smoke_*.gd) | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
 GT8 | PARTIEL | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences _stage_/stage_screenshot/--stage restent | game/scripts/battle/battle_scene.gd, ui/*, map/* | non

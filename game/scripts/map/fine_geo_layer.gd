@@ -263,7 +263,7 @@ func _update_open() -> void:
 func _landmark_cities_in(circle: Vector3) -> PackedStringArray:
 	var ids := PackedStringArray()
 	var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
-	if lc == null or not lc.is_enabled():
+	if lc == null:
 		return ids
 	for id: String in lc.city_ids():
 		var z := lc.zone_of(id)

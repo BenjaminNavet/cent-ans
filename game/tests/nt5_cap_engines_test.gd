@@ -1,7 +1,7 @@
 extends TestCase
 
 ## Test headless du lot NT5 (N6 plafond d'unités, N7 engins de siège), par l'état des nœuds :
-##  1. le pont expose `army_unit_cap` (20, donnée du cœur) et `get_assault_odds` ;
+##  1. le pont expose `army_unit_cap` (40, donnée du cœur) et `get_assault_odds` ;
 ##  2. « Former une armée » est grisé, avec une infobulle « army_full », dès 21 unités cochées,
 ##     et redevient actif à 20 ;
 ##  3. la ligne des engins de siège du panneau de siège (prêts / tours restants).
@@ -21,9 +21,9 @@ func _run() -> void:
 		check(sim.has_method("army_unit_cap"), "CampaignSim.army_unit_cap missing")
 		check(sim.has_method("get_assault_odds"), "CampaignSim.get_assault_odds missing")
 		if sim.has_method("army_unit_cap"):
-			check(int(sim.call("army_unit_cap")) == 20, "army cap is not 20 without data")
+			check(int(sim.call("army_unit_cap")) == 40, "army cap is not 40 without data")
 	var facade: Node = root.get_node_or_null("/root/SimFacade")
-	check(facade != null and int(facade.call("army_unit_cap")) == 20, "SimFacade.army_unit_cap != 20")
+	check(facade != null and int(facade.call("army_unit_cap")) == 40, "SimFacade.army_unit_cap != 40")
 
 	# 2. « Former une armée » borné.
 	var widgets: GDScript = load("res://scripts/map/panel_widgets.gd")

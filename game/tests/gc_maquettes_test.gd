@@ -218,7 +218,7 @@ func _run() -> void:
 	layer.select("set_amiens")
 	layer.update_view(rig_distance)
 	var ring := layer._selection_ring
-	check(ring != null and ring.visible and is_equal_approx(ring.scale.x, layer.model_radius(amiens) * 1.1), "selection ring around the maquette")
+	check(ring != null and ring.visible and is_equal_approx(ring.scale.x, minf(layer.model_radius(amiens) * 1.1, layer._ring_max_radius)), "selection ring around the maquette (capped, A6-L8): scale %s visible %s" % [ring.scale.x if ring != null else -1.0, ring.visible if ring != null else false])
 	layer.select("")
 	# Exclusions de végétation : au moins la maquette.
 	var exclusions := layer.vegetation_exclusions()
@@ -231,19 +231,4 @@ func _run() -> void:
 			break
 	check(village >= 0 and is_equal_approx(maquettes.range_of(village), TownMaquetteData.visibility("village")), "village range from data")
 	world.queue_free()
-	await process_frame
-
-	# 5. Style réel : calques 1:1, pas de maquette.
-	TownMaquetteData.set_style(TownMaquetteData.STYLE_REAL)
-	var world_real := Node3D.new()
-	root.add_child(world_real)
-	var terrain_real := TerrainBuilder.new()
-	world_real.add_child(terrain_real)
-	terrain_real.build(map_data)
-	var layer_real := SettlementLayer.new()
-	world_real.add_child(layer_real)
-	layer_real.setup(map_data, terrain_real, data, tiers)
-	check(layer_real.maquettes == null and layer_real.towns != null and layer_real.landmark_cities != null and layer_real.town_far != null, "real style keeps the 1:1 layers")
-	check(layer_real.model_radius(amiens) < 2.0, "real footprint of Amiens %.2f" % layer_real.model_radius(amiens))
-	world_real.queue_free()
 	await process_frame

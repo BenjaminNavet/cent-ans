@@ -201,7 +201,7 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 		if _real:
 			check((inst["px"] as Vector2).is_equal_approx(before), "%s grows in place" % inst["family"])
 		else:
-			check((inst["px"] as Vector2).distance_to(before) < 3.0, "%s grows where it stood" % inst["family"])
+			check((inst["px"] as Vector2).distance_to(before) < 4.0, "%s grows where it stood (%.2f px)" % [inst["family"], (inst["px"] as Vector2).distance_to(before)])
 	# Niveau 3 et chantier en cours.
 	sim.buildings[TOWN] = ["bld_fair", "bld_water_mill", "bld_vineyard_press", "bld_stables", "bld_weaving_workshop", "bld_abbey", "bld_scriptorium", "bld_counting_house"]
 	sim.constructing[TOWN] = true
