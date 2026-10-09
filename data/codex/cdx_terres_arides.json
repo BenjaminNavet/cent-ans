@@ -1,0 +1,15 @@
+{
+  "id": "cdx_terres_arides",
+  "title": "Les terres arides",
+  "category": "roche",
+  "aliases": ["désert de pierres", "hamada", "badlands", "terres arides", "gypse", "plâtre", "Bardenas", "semi-désert", "sierra aride"],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Plateaux caillouteux et collines de gypse d'Ibérie, du Maghreb et d'Anatolie : pays de transhumance, dont la pierre donne le plâtre.",
+  "body": "Au sud de l'Europe, du Maghreb à l'Anatolie, de vastes régions sont trop sèches pour la culture. Les déserts de pierres, que l'on nomme hamadas au Sahara, sont des plateaux couverts de cailloux anguleux, sans sol ni eau. Les badlands de gypse, collines érodées en ravines, forment des paysages blancs ou grisâtres presque sans végétation, comme les Bardenas Reales en Navarre ou le désert de Tabernas, en Andalousie.\n\nCes terres sont peu peuplées, mais elles servent de pâturage. En Castille, les troupeaux de moutons mérinos parcourent chaque année de longues routes de transhumance entre les montagnes du nord, l'été, et les plaines du sud, l'hiver. La Mesta, association des éleveurs de moutons, est reconnue par la Couronne au XIIIe siècle et reçoit de grands privilèges ; voir [[cdx_castille|la Castille]] et [[cdx_mouton|le mouton]]. Dans les Bardenas, les rois de [[cdx_navarre|Navarre]] accordent aux villages voisins le droit d'y faire paître. Ces espaces sont aussi des refuges de bandits et des zones d'accès difficile pour les armées.\n\nLe gypse, sulfate de calcium, est une pierre tendre qui, cuite puis broyée, donne le plâtre. Au Moyen Âge, le plâtre de Paris, tiré des carrières de gypse de Montmartre et de ses environs, sert à enduire les murs, à fixer les pierres et à faire les planchers ; voir [[cdx_paris|Paris]]. En Espagne et en Orient, le plâtre sculpté orne aussi les palais.\n\nCe qu'en dit la science moderne : le gypse se forme par évaporation de mers et de lagunes anciennes. Dans un climat aride, les pluies rares mais violentes creusent les ravines des badlands, et le vent et les écarts de température fragmentent la roche des déserts de pierres.",
+  "decor": ["rock:hamada", "rock:gypsum_badland"],
+  "see_also": ["cdx_castille", "cdx_navarre", "cdx_mouton", "cdx_pierre"],
+  "sources": ["Hamada", "Badlands", "Gypse", "Plâtre de Paris", "Bardenas Reales", "Désert de Tabernas", "Mesta"]
+}

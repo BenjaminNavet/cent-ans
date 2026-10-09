@@ -1,0 +1,15 @@
+{
+  "id": "cdx_megalithes",
+  "title": "Les mégalithes",
+  "category": "roche",
+  "aliases": ["mégalithe", "mégalithes", "menhir", "menhirs", "dolmen", "dolmens", "cromlech", "alignement de pierres", "pierres dressées", "Stonehenge", "Carnac"],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Menhirs, dolmens et cercles de pierres, dressés au Néolithique, sont pour les gens du Moyen Âge l'œuvre de géants, de fées ou de Merlin.",
+  "body": "Les mégalithes sont des monuments de grandes pierres dressées, érigés au Néolithique, entre 4500 et 2000 av. J.-C. environ : menhirs isolés ou alignés, dolmens (chambres funéraires de dalles couvertes), cercles de pierres. Les plus fameux sont les alignements de Carnac en Bretagne et le cercle de Stonehenge en Angleterre. Personne, au Moyen Âge, ne sait qui les a bâtis ni pourquoi.\n\nOn les explique par la légende. Vers 1136, Geoffroi de Monmouth raconte dans son Historia regum Britanniae que Merlin fit venir d'Irlande, par sa science, les pierres de Stonehenge pour en faire un monument aux Bretons tués par les Saxons. Ailleurs, on parle de géants qui les ont portées, de fées, du diable, ou de soldats pétrifiés. Beaucoup de dolmens sont nommés « tables », « maisons » ou « pierres » de géants ou de fées.\n\nL'Église voit dans ces pierres un reste de paganisme. Des conciles et des capitulaires du haut Moyen Âge condamnent le culte rendu aux pierres, aux arbres et aux fontaines, et prescrivent de détruire ou d'enterrer les pierres qui reçoivent des offrandes. Quand on ne peut pas les abattre, on les christianise : une croix est gravée ou plantée au sommet d'un menhir, une chapelle est élevée à côté, un saint est dit l'avoir déplacé. Certains menhirs servent de bornes ou de lieux de justice et de rassemblement. Voir aussi [[cdx_blocs_erratiques|les blocs erratiques]], avec lesquels on les confond souvent.\n\nCe qu'en dit la science moderne : les mégalithes sont l'œuvre de sociétés néolithiques d'agriculteurs, plus de trois mille ans avant l'époque du jeu. Beaucoup servaient de sépultures collectives, et certains alignements sont orientés sur le soleil. Leur datation précise et leur fonction restent discutées.",
+  "decor": ["rock:dolmen", "rock:menhir_row", "rock:stone_circle"],
+  "see_also": ["cdx_blocs_erratiques", "cdx_chaos_granitiques", "cdx_pelerinage"],
+  "sources": ["Mégalithe", "Alignements de Carnac", "Stonehenge", "Historia regum Britanniae", "Menhir", "Dolmen"]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "cdx_roches_volcaniques",
+  "title": "Les roches volcaniques",
+  "category": "roche",
+  "aliases": ["basalte", "basaltes", "volcan", "volcans", "puy", "puys", "roche volcanique", "roches volcaniques", "orgues basaltiques", "cheminées de fée", "pierre de Volvic", "lave"],
+  "era": {
+    "from": "1000",
+    "to": "1500"
+  },
+  "summary": "Basalte, lave et tuf marquent l'Auvergne, la Sicile, la Campanie et la Cappadoce, où l'on bâtit avec la pierre noire ou l'on creuse des églises.",
+  "body": "Les roches volcaniques sont rares en Europe occidentale mais marquent fortement certaines régions. En Auvergne, la chaîne des Puys aligne des cônes éteints, et la lave noire de Volvic fournit une pierre de construction. La cathédrale de Clermont, commencée en 1248, est bâtie en pierre de lave, ce qui lui donne sa teinte sombre. Le basalte, quand il refroidit, se fend parfois en colonnes régulières, les orgues basaltiques, que l'on voit en Auvergne, en Écosse et en Irlande.\n\nDans le sud, les volcans actifs frappent les chroniqueurs. L'Etna, en Sicile, a de nombreuses éruptions décrites au Moyen Âge, et le Vésuve, près de Naples, est connu par les récits anciens et les éruptions rapportées par les chroniques ; on y voit parfois une bouche de l'enfer. La fumée et le feu de ces montagnes nourrissent les images de l'au-delà.\n\nEn Cappadoce, en Anatolie, le tuf volcanique tendre a été érodé en cheminées, que l'on appelle aujourd'hui cheminées de fées. Dès l'époque byzantine, des moines y creusent dans la roche des églises, des monastères et des villages souterrains, dont les églises décorées de fresques de Göreme. Ce pays passe peu à peu sous domination turque aux XIe-XIIIe siècles ; voir [[cdx_empire_byzantin|l'Empire byzantin]].\n\nLes légendes s'attachent aux orgues basaltiques. La Chaussée des Géants, en Irlande du Nord, est liée dans la tradition au géant Finn McCool, qui l'aurait bâtie pour rejoindre l'Écosse ; il s'agit d'une tradition orale, mise par écrit bien plus tard, et on ne doit pas l'attribuer à des sources médiévales précises.\n\nCe qu'en dit la science moderne : ces roches naissent du refroidissement de la lave. Le basalte se contracte en refroidissant et se fend en prismes ; le tuf est fait de cendres volcaniques consolidées.",
+  "decor": ["rock:cliff_basalt", "rock:basalt_columns", "rock:volcanic_cone", "rock:tuff_chimneys"],
+  "see_also": ["cdx_pierre", "cdx_cathedrale", "cdx_empire_byzantin", "cdx_ecosse"],
+  "sources": ["Chaîne des Puys", "Pierre de Volvic", "Cathédrale Notre-Dame-de-l'Assomption de Clermont-Ferrand", "Etna", "Vésuve", "Cappadoce", "Parc national de Göreme", "Chaussée des Géants", "Orgue basaltique"]
+}
