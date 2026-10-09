@@ -30,6 +30,11 @@ const PALE_GOLD := Color(0.93, 0.84, 0.6)
 const LIVERY_TINT := 0.2
 const MARGIN := 3.0  # m ajoutés au front et à la profondeur (comme l'ancien anneau)
 const HEIGHT := 30.0  # m : hauteur de projection, couvre le relief sous la formation
+## RX restes : au-dessus d'une eau plus profonde que `WET_DEPTH` (m), la boîte de projection se
+## réduit à `WET_BOX` m autour de la surface de l'eau : seule la surface (transparente) reçoit le
+## trait, pas le lit de la rivière vu à travers.
+const WET_DEPTH := 0.4
+const WET_BOX := 0.5
 ## Textures à échelle fixe : `PX_PER_M` pixels par mètre, taille de décale arrondie au pas
 ## `SIZE_STEP` (m) ; le trait fait donc `LINE_M` mètres quelle que soit la formation.
 const PX_PER_M := 6
@@ -47,6 +52,9 @@ const EMISSION := 0.7  # le trait reste lisible dans l'ombre et au crépuscule
 static var _textures: Dictionary = {}
 
 var _side_colors: Dictionary = {}
+## Profondeur d'eau (m) au point (x, z) ; invalide = pas de rivière (tests).
+var _water_depth: Callable
+var _water_surface: Callable
 var _player_side := "attacker"
 ## id -> Decal ; id -> [état, clé de texture, x, z, facing, y].
 var _decals: Dictionary = {}
@@ -75,8 +83,11 @@ static func outline_state(unit: Dictionary, selected: bool, hovered: bool, targe
 	return State.NONE
 
 
-func setup(side_colors: Dictionary, player_side: String) -> void:
+## `bed_at(x, z)` : hauteur du lit ; `surface_at(x, z)` : hauteur de la surface (eau comprise).
+func setup(side_colors: Dictionary, player_side: String, bed_at: Callable = Callable(), surface_at: Callable = Callable()) -> void:
 	name = "FormationOutlines"
+	_water_depth = bed_at
+	_water_surface = surface_at
 	_side_colors = side_colors
 	_player_side = player_side
 
@@ -113,6 +124,7 @@ func update(units: Array, selected: Array, hovered: Array) -> void:
 		var facing := float(unit["facing"])
 		if not decal.visible or x != float(entry[2]) or z != float(entry[3]) or y != float(entry[5]):
 			decal.position = Vector3(x, y, z)
+			entry[6] = true  # boîte à reprendre (déplacement)
 			entry[2] = x
 			entry[3] = z
 			entry[5] = y
@@ -120,12 +132,16 @@ func update(units: Array, selected: Array, hovered: Array) -> void:
 			decal.rotation = Vector3(0, facing, 0)
 			entry[4] = facing
 		var key := texture_key(float(unit["width"]) + MARGIN, float(unit["depth"]) + MARGIN, state == State.ENEMY_HOVERED)
-		if key != entry[1]:
+		var key_changed: bool = key != entry[1]
+		if key_changed:
 			entry[1] = key
 			decal.size = Vector3(key.x * SIZE_STEP, HEIGHT, key.y * SIZE_STEP)
 			var pair := _texture_pair(key)
 			decal.texture_albedo = pair[0]
 			decal.texture_emission = pair[1]
+		if bool(entry[6]) or key_changed:
+			entry[6] = false
+			fit_to_water(decal, _water_depth, _water_surface)
 		if state_changed:
 			decal.modulate = _color(state, str(unit["side"]))
 		decal.visible = true
@@ -144,6 +160,20 @@ func _process(delta: float) -> void:
 	var alpha := lerpf(PULSE_MIN, 1.0, wave)
 	for decal in _pulsing:
 		decal.modulate = Color(_Access.enemy_red(ENEMY_RED), alpha)
+
+
+## Boîte de projection de `decal` (déjà posée, taille en x/z fixée) : normale (`HEIGHT`) sur terre
+## ou en eau peu profonde ; réduite autour de la surface de l'eau au-dessus d'un lit profond.
+static func fit_to_water(decal: Decal, bed_at: Callable, surface_at: Callable) -> void:
+	var height := HEIGHT
+	if bed_at.is_valid() and surface_at.is_valid():
+		var x := decal.position.x
+		var z := decal.position.z
+		var surface := float(surface_at.call(x, z))
+		if surface - float(bed_at.call(x, z)) > WET_DEPTH:
+			decal.position.y = surface
+			height = WET_BOX
+	decal.size = Vector3(decal.size.x, height, decal.size.z)
 
 
 ## Nombre de décales créées (tests).
@@ -174,7 +204,7 @@ func _make_decal(id: int) -> Decal:
 	decal.cull_mask = BattleTerrain.DECAL_LAYER  # Sol seulement, jamais les figurines
 	add_child(decal)
 	_decals[id] = decal
-	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, 0.0]
+	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, 0.0, true]
 	return decal
 
 

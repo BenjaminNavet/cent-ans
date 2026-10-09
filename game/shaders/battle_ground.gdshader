@@ -137,6 +137,13 @@ void sample_layer(float layer, vec2 p, float blend, float far_k, inout vec3 albe
 		a = mix(a, textureLod(albedo_array, vec3(uv1, layer), 9.0).rgb, far_k);
 		n = mix(n, vec3(0.5, 0.5, 1.0), far_k);
 	}
+	// RX restes : la couche de neige générée (`snow_wet`) porte de fortes rayures verticales
+	// (lattes visibles sur tout le sol sous `--weather=snow`) : on n'en garde que la teinte moyenne
+	// et un reste de grain, les congères viennent du bruit macro.
+	if (layer == L_SNOW) {
+		a = mix(a, textureLod(albedo_array, vec3(uv1, layer), 9.0).rgb, 0.88);
+		n = mix(n, vec3(0.5, 0.5, 1.0), 0.8);
+	}
 	albedo += a * w;
 	nrm += n * w;
 }
@@ -415,7 +422,8 @@ void fragment() {
 		vec3 snow_col = vec3(mix(0.9, 1.04, drift) * mix(0.97, 1.02, drift2));
 		snow_col = mix(snow_col, snow_col * vec3(0.8, 0.87, 1.0), lee * 0.8 + (1.0 - crest) * 0.12);
 		snow_col *= mix(0.97, 1.03, fine);
-		albedo = mix(albedo, albedo * snow_col, snowy_w);
+		// La couche `snow_wet` est un gris moyen (~0,45 sRGB) : on l'éclaircit vers la neige.
+		albedo = mix(albedo, albedo * snow_col * 1.9, snowy_w);
 		// Piétinement : neige tassée grise, mêlée de boue.
 		albedo = mix(albedo, albedo * vec3(0.8, 0.79, 0.77), trampled * snowy_w);
 	}

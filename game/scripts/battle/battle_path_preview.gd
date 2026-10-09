@@ -39,6 +39,7 @@ const ORDERS_NEAR_HIDE_M := 30.0
 
 var battle: Object = null
 var _height_at: Callable
+var _bed_at: Callable  # RX restes : lit sous l'eau (invalide : pas de réduction de boîte)
 var _color := Color(0.9, 0.8, 0.3, 0.9)
 
 var recompute_distance := 5.0
@@ -65,10 +66,11 @@ var _order_labels: Array[Label3D] = []
 var _segment_cache: Dictionary = {}  # "id:fx,fz>tx,tz" -> PackedVector3Array
 
 
-func setup(p_battle: Object, height_at: Callable, color: Color) -> void:
+func setup(p_battle: Object, height_at: Callable, color: Color, bed_at: Callable = Callable()) -> void:
 	name = "PathPreview"
 	battle = p_battle
 	_height_at = height_at
+	_bed_at = bed_at
 	_color = Color(color.lerp(Color.WHITE, 0.3), 0.9)
 	recompute_distance = RuleValues.value("hover_preview_recompute_m", 5.0)
 	min_interval = 1.0 / maxf(1.0, RuleValues.value("hover_preview_max_per_s", 10.0))
@@ -520,6 +522,7 @@ func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facin
 	ghost.texture_emission = pair[1]
 	ghost.size = Vector3(key.x * BattleFormationOutline.SIZE_STEP, BattleFormationOutline.HEIGHT, key.y * BattleFormationOutline.SIZE_STEP)
 	ghost.position = at
+	BattleFormationOutline.fit_to_water(ghost, _bed_at, _height_at)
 	ghost.rotation = Vector3(0, facing, 0)
 	ghost.modulate = Color(color, GHOST_ALPHA)
 	ghost.visible = true

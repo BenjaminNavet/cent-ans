@@ -148,6 +148,16 @@ func _check_integration() -> void:
 	var gone := {"id": own, "side": _scene.player_side, "present": false, "state": "idle", "x": 0.0, "z": 0.0, "y": 0.0, "facing": 0.0, "width": 10.0, "depth": 4.0}
 	outlines.update([gone], [own], [own])
 	check(not outlines.decal_of(own).visible, "absent regiment hides its decal")
+	# RX restes : au-dessus d'une eau profonde, la boîte se réduit autour de la surface (pas de trait sur le lit).
+	var probe := Decal.new()
+	probe.position = Vector3(10, 2.0, 10)
+	probe.size = Vector3(4, BattleFormationOutline.HEIGHT, 4)
+	BattleFormationOutline.fit_to_water(probe, func(_x: float, _z: float) -> float: return 0.0, func(_x: float, _z: float) -> float: return 1.5)
+	check(is_equal_approx(probe.size.y, BattleFormationOutline.WET_BOX) and is_equal_approx(probe.position.y, 1.5), "deep water: thin box at the surface")
+	probe.position.y = 2.0
+	BattleFormationOutline.fit_to_water(probe, func(_x: float, _z: float) -> float: return 1.4, func(_x: float, _z: float) -> float: return 1.5)
+	check(is_equal_approx(probe.size.y, BattleFormationOutline.HEIGHT) and is_equal_approx(probe.position.y, 2.0), "shallow ford: normal box")
+	probe.free()
 
 
 func _unit(id: int) -> Dictionary:
