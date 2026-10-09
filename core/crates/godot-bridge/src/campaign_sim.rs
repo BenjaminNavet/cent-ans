@@ -1287,11 +1287,19 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
                 .traits
                 .get(&t.id)
                 .map_or("", |d| d.description.as_str());
+            // WH chars: turns before a temporary trait (a wound) wears off.
+            let turns_left = state
+                .characters
+                .get(&view.id)
+                .and_then(|c| c.trait_expiry.get(&t.id))
+                .copied()
+                .unwrap_or(0);
             vdict! {
                 "id" => t.id.as_str(),
                 "name" => t.name.as_str(),
                 "category" => t.category.as_str(),
                 "description" => description,
+                "turns_left" => i64::from(turns_left),
             }
             .to_variant()
         })
@@ -1390,5 +1398,27 @@ fn character_dict(state: &CampaignState, data: &GameData, view: &CharacterView) 
         "death_year" => i64::from(state.characters.get(&view.id).and_then(|c| c.death_year).unwrap_or(0)),
         "retinue" => &crate::campaign_sim_retinue::retinue_array(state, data, &view.id),
         "retinue_max" => sim_campaign::retinue::max_per_character(data) as i64,
+        // WH chars: level and feats of arms for the sheet.
+        "level" => state.characters.get(&view.id).map_or(1, |c| i64::from(sim_campaign::skills::level_of(c))),
+        "captain" => state.characters.get(&view.id).is_some_and(|c| c.captain),
+        "feats" => &feats_dict(state, &view.id),
+    }
+}
+
+/// WH chars: the counters of the sheet's « Faits d'armes » block.
+fn feats_dict(state: &CampaignState, id: &CharacterId) -> VarDictionary {
+    let Some(c) = state.characters.get(id) else {
+        return VarDictionary::new();
+    };
+    let turns_ago = c
+        .last_battle_turn
+        .map_or(-1, |t| i64::from(state.turn.saturating_sub(t)));
+    vdict! {
+        "battles_fought" => i64::from(c.battles_fought),
+        "battles_won" => i64::from(c.battles_won),
+        "sieges_won" => i64::from(c.sieges_won),
+        "raids_led" => i64::from(c.raids_led),
+        "last_battle_turns_ago" => turns_ago,
+        "last_battle_won" => c.last_battle_won,
     }
 }
