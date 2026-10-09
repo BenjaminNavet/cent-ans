@@ -17,6 +17,9 @@ const INK := Color(0.22, 0.14, 0.07)
 const RED := "#8b1a1a"
 const GREEN := "#2a6a2a"
 const MUTED := "#6b5a40"
+## QW-G3 : règle commune bon/mauvais, jamais la couleur seule (daltonisme).
+const UP := "▲"
+const DOWN := "▼"
 const POUND := Money.SYMBOL
 
 ## Branches de technologies (H9 : médecine) ; forme adjectivale pour les sous-titres.
@@ -337,6 +340,11 @@ static func _live_effects(live: Dictionary) -> Array:
 
 
 ## BBCode d'une spec (repli, tests, Codex) : toutes les sections, version complète.
+## Marque lisible sans couleur : « ▲ » (bon), « ▼ » (mauvais), rien si `sign` vaut 0.
+static func mark(sign: int) -> String:
+	return UP + " " if sign > 0 else (DOWN + " " if sign < 0 else "")
+
+
 static func to_bbcode(spec: Dictionary) -> String:
 	if spec.is_empty():
 		return ""
@@ -354,16 +362,16 @@ static func to_bbcode(spec: Dictionary) -> String:
 	for effect in spec.get("effects", []):
 		var text := effect_line(effect)
 		var sign := int(effect.get("sign", 0))
-		lines.append("[color=%s]%s[/color]" % [GREEN if sign > 0 else RED, text] if sign != 0 else text)
+		lines.append("[color=%s]%s%s[/color]" % [GREEN if sign > 0 else RED, mark(sign), text] if sign != 0 else text)
 	parts = PackedStringArray()
 	for stat in spec.get("stats", []):
 		parts.append("%s %s" % [stat.get("label", ""), stat.get("value", "")])
 	lines.append(" · ".join(parts))
 	var traits: Dictionary = spec.get("traits", {})
 	if not (traits.get("strengths", []) as Array).is_empty():
-		lines.append("[color=%s]Forces : %s[/color]" % [GREEN, ", ".join(PackedStringArray(traits["strengths"]))])
+		lines.append("[color=%s]%sForces : %s[/color]" % [GREEN, mark(1), ", ".join(PackedStringArray(traits["strengths"]))])
 	if not (traits.get("weaknesses", []) as Array).is_empty():
-		lines.append("[color=%s]Faiblesses : %s[/color]" % [RED, ", ".join(PackedStringArray(traits["weaknesses"]))])
+		lines.append("[color=%s]%sFaiblesses : %s[/color]" % [RED, mark(-1), ", ".join(PackedStringArray(traits["weaknesses"]))])
 	if not (traits.get("abilities", []) as Array).is_empty():
 		lines.append("Capacités : " + ", ".join(PackedStringArray(traits["abilities"])))
 	parts = PackedStringArray()
@@ -931,23 +939,23 @@ static func coinage(option: Dictionary, changed_this_year: bool = false) -> Stri
 	var lines: Array = [_title("hud_treasury", str(option.get("label", option.get("level", ""))), "monnaie actuelle" if current else "", "hud")]
 	var seigniorage := int(option.get("seigniorage", 0))
 	var recoinage := int(option.get("recoinage", 0))
-	lines.append("Seigneuriage : [color=%s]%s / saison[/color]" % [GREEN if seigniorage > 0 else MUTED, _signed_pounds(seigniorage)])
+	lines.append("Seigneuriage : [color=%s]%s%s / saison[/color]" % [GREEN if seigniorage > 0 else MUTED, mark(1 if seigniorage > 0 else 0), _signed_pounds(seigniorage)])
 	if recoinage > 0:
-		lines.append("Refonte des espèces : [color=%s]−%s %s / saison[/color] (administration)" % [RED, Money.digits(recoinage), POUND])
+		lines.append("Refonte des espèces : [color=%s]%s−%s %s / saison[/color] (administration)" % [RED, mark(-1), Money.digits(recoinage), POUND])
 	var inflation := int(option.get("inflation", 0))
 	var deflation := int(option.get("deflation", 0))
 	if inflation > 0:
-		lines.append("Prix : [color=%s]+%d / saison[/color] (recrutement, entretien et constructions renchérissent)" % [RED, inflation])
+		lines.append("Prix : [color=%s]%s+%d / saison[/color] (recrutement, entretien et constructions renchérissent)" % [RED, mark(-1), inflation])
 	elif deflation > 0:
-		lines.append("Prix : [color=%s]−%d / saison[/color] (jusqu'aux prix de 1337)" % [GREEN, deflation])
+		lines.append("Prix : [color=%s]%s−%d / saison[/color] (jusqu'aux prix de 1337)" % [GREEN, mark(1), deflation])
 	else:
 		lines.append("Prix : stables")
 	var unrest := float(option.get("burgher_unrest", 0.0))
 	if not is_zero_approx(unrest):
-		lines.append("Mécontentement des bourgeois : [color=%s]%s%s[/color] (cible)" % [RED if unrest > 0 else GREEN, "+" if unrest > 0 else "", _number(unrest)])
+		lines.append("Mécontentement des bourgeois : [color=%s]%s%s%s[/color] (cible)" % [RED if unrest > 0 else GREEN, mark(-1 if unrest > 0 else 1), "+" if unrest > 0 else "", _number(unrest)])
 	var prestige := int(option.get("prestige", 0))
 	if prestige != 0:
-		lines.append("Prestige du souverain : [color=%s]%s%d / saison[/color]" % [GREEN if prestige > 0 else RED, "+" if prestige > 0 else "", prestige])
+		lines.append("Prestige du souverain : [color=%s]%s%s%d / saison[/color]" % [GREEN if prestige > 0 else RED, mark(1 if prestige > 0 else -1), "+" if prestige > 0 else "", prestige])
 	lines.append("[color=%s][i]Un seul changement de monnaie par année civile.[/i][/color]" % MUTED)
 	if changed_this_year and not current:
 		lines.append("[color=%s]Refusé cette année : la monnaie a déjà été changée ; prochain changement possible l'an prochain.[/color]" % RED)
