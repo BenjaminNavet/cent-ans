@@ -82,7 +82,7 @@ def build_job(
         "gamma": gamma,
         "roughness": spec["roughness"],
         "strip_base": spec["strip_base"],
-        "island_min": classes["island_min"],
+        "island_min": spec.get("island_min", classes["island_min"]),
         "saturation_cap": classes["grade"]["saturation_cap"],
         "luma_range": [
             classes["grade"]["albedo_mean_min"],

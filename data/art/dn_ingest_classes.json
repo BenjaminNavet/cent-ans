@@ -97,7 +97,8 @@
       "tex": 1024,
       "scale_axis": "height",
       "roughness": 0.95,
-      "strip_base": true
+      "strip_base": true,
+      "island_min": 0.0
     },
     "rock": {
       "label": "Rocher",

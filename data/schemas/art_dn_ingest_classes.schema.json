@@ -35,7 +35,8 @@
           "tex": {"type": "integer", "enum": [256, 512, 1024, 2048]},
           "scale_axis": {"enum": ["length", "width", "height"]},
           "roughness": {"type": "number", "minimum": 0, "maximum": 1},
-          "strip_base": {"type": "boolean"}
+          "strip_base": {"type": "boolean"},
+          "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "Remplace island_min global pour cette classe (0 = aucun îlot supprimé : feuillages en cartes)."}
         }
       }
     }
