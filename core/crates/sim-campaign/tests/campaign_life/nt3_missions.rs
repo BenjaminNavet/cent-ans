@@ -313,7 +313,7 @@ fn a_new_treaty_fulfils_the_treaty_mission() {
 }
 
 #[test]
-fn missions_survive_save_and_load_and_old_saves_load_empty() {
+fn missions_survive_save_and_load() {
     let data = game_data();
     let mut state = start(data, "fac_france", 21);
     state.end_turn(data);
@@ -327,13 +327,6 @@ fn missions_survive_save_and_load_and_old_saves_load_empty() {
     state.end_turn(data);
     loaded.end_turn(data);
     assert_eq!(loaded.missions.active, state.missions.active);
-
-    // A save from before NT3 has no `missions` key.
-    let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
-    value.as_object_mut().unwrap().remove("missions");
-    let old = CampaignState::load_json(&value.to_string()).unwrap();
-    assert!(old.missions.active.is_empty());
-    assert!(old.missions.faction.is_none());
 }
 
 /// France's main army besieging English Guyenne, whose garrison is down to

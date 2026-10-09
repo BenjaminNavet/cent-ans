@@ -984,14 +984,14 @@ pub struct CampaignState {
     /// [`STATE_VERSION`]).
     pub encounters: crate::encounter::EncounterState,
     /// TW2-T1: captures waiting for the player's choice and razed places in
-    /// ruins .
+    /// ruins.
     pub captures: crate::capture::CaptureState,
     /// TW2-T3: mercenary reserves and this turn's hires (absent from older
     /// saves; no change of [`STATE_VERSION`]).
     pub mercenaries: crate::mercenaries::MercenaryState,
     /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
     pub feudal: crate::feudal::FeudalState,
-    /// Lot NT3: the player's short-term missions .
+    /// Lot NT3: the player's short-term missions.
     #[serde(default)]
     pub missions: crate::missions::MissionsState,
     /// Lot JR1: the crusader faction's fervour (`None` without
