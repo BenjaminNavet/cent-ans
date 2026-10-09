@@ -10,11 +10,6 @@ Colour and material codes per vertex as in ``battle_skinned``: the coat is ``C_C
 per-vertex shade (``fg_shade``) that the shader's robe tint multiplies (bay, chestnut, black,
 grey, dun by soldier); mane and tail follow the robe, darker.
 
-Check renders (Eevee, several frames per clip, horse builds and robes, LODs):
-
-    blender -b --factory-startup --python tools/blender_scripts/battle_fine_cavalry.py \
-        -- --render DIR [--only cavalry_0,cavalry_1]
-    uv run --project tools python tools/blender_scripts/fg4_planche.py DIR
 """
 
 import contextlib
@@ -1153,15 +1148,7 @@ def _tris(objs):
 
 
 def main():
-    """Check renders (``--render DIR``) of the fine mounted figures."""
-    args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
-    names = MOUNTED
-    if "--only" in args:
-        names = [n for n in args[args.index("--only") + 1].split(",") if n in MOUNTED]
-    if "--render" in args:
-        import fg4_render
-
-        fg4_render.render_all(args[args.index("--render") + 1], names)
+    """Entry point kept for the module self-check (the render helper was removed, SC TL5)."""
     print("OK")
 
 

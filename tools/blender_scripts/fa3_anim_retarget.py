@@ -5,7 +5,6 @@ Run from the repository root (source GLB files in ``$CENT_ANS_FA_ANIM_SRC``, def
 
     blender -b --factory-startup --python tools/blender_scripts/fa3_anim_retarget.py
     blender -b --factory-startup --python tools/blender_scripts/fa3_anim_retarget.py -- render DIR
-    uv run --project tools python tools/blender_scripts/fa3_anim_board.py DIR BOARD_DIR
 
 Sources and clip table: ``data/fx/fa3_anim_sources.json`` (Mesh2Motion and KayKit, CC0). Only
 the baked skinning frames leave this script (never the source files).
@@ -908,8 +907,7 @@ def render_fractions(spec, count):
 def render(out, only=None):
     """Workbench renders of each clip: keyframed ``k``, NT14 default ``d``, FA3 ``f``.
 
-    Files ``<family>__<clip>__<k|d|f>__<i>.png`` in `out` (fractions ``RENDER_FRACS``),
-    composed into boards by ``fa3_anim_board.py``.
+    Files ``<family>__<clip>__<k|d|f>__<i>.png`` in `out` (fractions ``RENDER_FRACS``).
     """
     import battle_fine_figures as ff
     import battle_fine_proto as fp
