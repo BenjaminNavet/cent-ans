@@ -1,0 +1,21 @@
+{
+  "description": "Constantes de déplacement des régiments en bataille (SC BA13) : contact, vitesses par terrain, pente, virage, charge.",
+  "contact_range_m": 250.0,
+  "base_speed_per_stat": 0.04,
+  "siege_tower_min_speed": 0.55,
+  "cavalry_charge_speed_factor": 2.5,
+  "run_or_rout_speed_factor": 2.0,
+  "forest_speed_factor_foot": 0.65,
+  "forest_speed_factor_mounted": 0.4,
+  "mud_speed_factor": 0.55,
+  "mud_speed_factor_rain": 0.45,
+  "snow_speed_factor": 0.8,
+  "grade_probe_m": 3.0,
+  "uphill_grade_penalty": 6.0,
+  "downhill_bonus_cap": 0.1,
+  "fatigue_speed_divisor": 200.0,
+  "turn_rate_foot_deg_per_s": 15.0,
+  "turn_rate_mounted_deg_per_s": 40.0,
+  "charge_distance_foot_m": 40.0,
+  "charge_distance_cavalry_m": 120.0
+}

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_movement_rules.schema.json",
+  "title": "Déplacement en bataille",
+  "description": "Fichier data/rules/battle_movement.json (SC BA13) : constantes de déplacement des régiments. Lu par sim-battle (MovementRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "contact_range_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance centre à centre au-delà de laquelle deux régiments ne se touchent jamais (m)."
+    },
+    "base_speed_per_stat": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Mètres par seconde par point de vitesse de l'unité."
+    },
+    "siege_tower_min_speed": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Vitesse minimale d'une tour de siège poussée (m/s)."
+    },
+    "cavalry_charge_speed_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse d'une cavalerie qui charge."
+    },
+    "run_or_rout_speed_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse d'une course ou d'une déroute (autres cas que la charge de cavalerie)."
+    },
+    "forest_speed_factor_foot": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse d'un fantassin en forêt."
+    },
+    "forest_speed_factor_mounted": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse d'un cavalier en forêt."
+    },
+    "mud_speed_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse dans la boue (temps sec)."
+    },
+    "mud_speed_factor_rain": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse dans la boue sous la pluie."
+    },
+    "snow_speed_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Facteur de vitesse sous la neige."
+    },
+    "grade_probe_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance en avant où l'on mesure la pente (m)."
+    },
+    "uphill_grade_penalty": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Coefficient k du ralentissement en montée : vitesse / (1 + pente * k)."
+    },
+    "downhill_bonus_cap": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Bonus maximal de vitesse en descente (fraction)."
+    },
+    "fatigue_speed_divisor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Diviseur de la fatigue : vitesse * (1 - fatigue / diviseur)."
+    },
+    "turn_rate_foot_deg_per_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Vitesse de virage de l'infanterie (degrés par seconde)."
+    },
+    "turn_rate_mounted_deg_per_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Vitesse de virage de la cavalerie (degrés par seconde)."
+    },
+    "charge_distance_foot_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance de la cible sous laquelle l'infanterie en course charge (m)."
+    },
+    "charge_distance_cavalry_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Distance de la cible sous laquelle la cavalerie en course charge (m)."
+    }
+  },
+  "required": [
+    "contact_range_m",
+    "base_speed_per_stat",
+    "siege_tower_min_speed",
+    "cavalry_charge_speed_factor",
+    "run_or_rout_speed_factor",
+    "forest_speed_factor_foot",
+    "forest_speed_factor_mounted",
+    "mud_speed_factor",
+    "mud_speed_factor_rain",
+    "snow_speed_factor",
+    "grade_probe_m",
+    "uphill_grade_penalty",
+    "downhill_bonus_cap",
+    "fatigue_speed_divisor",
+    "turn_rate_foot_deg_per_s",
+    "turn_rate_mounted_deg_per_s",
+    "charge_distance_foot_m",
+    "charge_distance_cavalry_m"
+  ],
+  "additionalProperties": false
+}

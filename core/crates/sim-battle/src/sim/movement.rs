@@ -2,14 +2,13 @@
 
 use super::*;
 
-/// Regiments further apart than this (centre to centre) never touch (metres).
-const CONTACT_RANGE: f64 = 250.0;
+use crate::movement_rules::MovementRules;
 
 impl BattleSim {
     /// For each unit, the enemy units in contact with it (in id order).
     pub(super) fn contacts(&self) -> Vec<Vec<usize>> {
         let mut result = vec![Vec::new(); self.units.len()];
-        for (i, j) in self.near_pairs(CONTACT_RANGE, Unit::present) {
+        for (i, j) in self.near_pairs(MovementRules::bundled().contact_range_m, Unit::present) {
             let (a, b) = (&self.units[i], &self.units[j]);
             if a.side == b.side {
                 continue;
@@ -59,7 +58,8 @@ impl BattleSim {
 
     /// Movement speed of `unit` heading along `dir`, in m/s.
     pub(super) fn speed(&self, unit: &Unit, dir: (f64, f64)) -> f64 {
-        let mut speed = f64::from(unit.stats.speed) * 0.04;
+        let rules = MovementRules::bundled();
+        let mut speed = f64::from(unit.stats.speed) * rules.base_speed_per_stat;
         let pace = self.pace();
         if unit.state != UnitState::Routing
             && !unit.running
@@ -71,7 +71,7 @@ impl BattleSim {
         }
         if unit.siege_tower() {
             // Pushed along by the assault troops.
-            speed = speed.max(0.55);
+            speed = speed.max(rules.siege_tower_min_speed);
         }
         let routing = unit.state == UnitState::Routing;
         if unit.running || routing {
@@ -79,9 +79,9 @@ impl BattleSim {
                 speed *= self.pace().run_speed_factor;
             }
             speed *= if unit.is_cavalry() && unit.state == UnitState::Charging {
-                2.5
+                rules.cavalry_charge_speed_factor
             } else {
-                2.0
+                rules.run_or_rout_speed_factor
             };
             // CB2: a run under the run mode (1 in the bundled data).
             speed *= unit.run_mode_speed();
@@ -89,34 +89,39 @@ impl BattleSim {
         // RJ-a: formation pace, slower while reforming.
         speed *= unit.formation_speed();
         if self.field.in_forest(unit.x, unit.z) {
-            speed *= if unit.mounted { 0.4 } else { 0.65 };
+            speed *= if unit.mounted {
+                rules.forest_speed_factor_mounted
+            } else {
+                rules.forest_speed_factor_foot
+            };
         }
         if self.field.in_mud(unit.x, unit.z) {
             speed *= if self.weather == Weather::Rain {
-                0.45
+                rules.mud_speed_factor_rain
             } else {
-                0.55
+                rules.mud_speed_factor
             };
         }
         // EP3: fords, deep water, streams, banks, bridges, roads.
         speed *= self.water_speed(unit);
         if self.weather == Weather::Snow {
-            speed *= 0.8;
+            speed *= rules.snow_speed_factor;
         }
         speed *= self
             .field
             .site_speed_factor(unit.x, unit.z, unit.mounted, self.weather);
         let here = self.field.height(unit.x, unit.z);
+        let probe = rules.grade_probe_m;
         let ahead = self
             .field
-            .height(unit.x + dir.0 * 3.0, unit.z + dir.1 * 3.0);
-        let grade = (ahead - here) / 3.0;
+            .height(unit.x + dir.0 * probe, unit.z + dir.1 * probe);
+        let grade = (ahead - here) / probe;
         speed *= if grade > 0.0 {
-            1.0 / (1.0 + grade * 6.0)
+            1.0 / (1.0 + grade * rules.uphill_grade_penalty)
         } else {
-            1.0 + (-grade).min(0.1)
+            1.0 + (-grade).min(rules.downhill_bonus_cap)
         };
-        let speed = speed * (1.0 - unit.fatigue / 200.0);
+        let speed = speed * (1.0 - unit.fatigue / rules.fatigue_speed_divisor);
         // CB4: close ranks walk slower.
         let speed = speed * self.ability_effects(unit).map_or(1.0, |e| e.speed_factor);
         // CB1: a `match_speed` group keeps the pace of its slowest regiment.
@@ -128,7 +133,12 @@ impl BattleSim {
     }
 
     pub(super) fn turn_rate(unit: &Unit) -> f64 {
-        let degrees: f64 = if unit.mounted { 40.0 } else { 15.0 };
+        let rules = MovementRules::bundled();
+        let degrees: f64 = if unit.mounted {
+            rules.turn_rate_mounted_deg_per_s
+        } else {
+            rules.turn_rate_foot_deg_per_s
+        };
         degrees.to_radians() * DT
     }
 
@@ -496,7 +506,12 @@ impl BattleSim {
                     continue;
                 }
                 let unit = &self.units[i];
-                let charge_distance = if unit.is_cavalry() { 120.0 } else { 40.0 };
+                let rules = MovementRules::bundled();
+                let charge_distance = if unit.is_cavalry() {
+                    rules.charge_distance_cavalry_m
+                } else {
+                    rules.charge_distance_foot_m
+                };
                 let charging = unit.running && dist < charge_distance && !unit.shoots();
                 if charging && self.units[i].state != UnitState::Charging {
                     self.units[i].state = UnitState::Charging;

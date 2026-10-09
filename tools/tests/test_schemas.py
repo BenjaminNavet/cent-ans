@@ -51,6 +51,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "battle_order.schema.json": ("battle_orders/*.json",),
     "battle_outcome_rules.schema.json": ("rules/battle_outcome.json",),
     "battle_pace_rules.schema.json": ("rules/battle_pace.json",),
+    "battle_movement_rules.schema.json": ("rules/battle_movement.json",),
     "battle_prologue.schema.json": ("tutorial/battle_prologue.json",),
     "battle_push_rules.schema.json": ("rules/battle_push.json",),
     "battle_queue_rules.schema.json": ("rules/battle_queue.json",),

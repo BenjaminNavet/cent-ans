@@ -70,6 +70,7 @@ pub mod missile_arc;
 pub mod missile_morale;
 pub mod modes;
 pub mod morale;
+pub mod movement_rules;
 pub mod naval;
 pub mod opening;
 pub mod orders;
