@@ -1,0 +1,13 @@
+{
+  "id": "cdx_pommier",
+  "title": "Le pommier",
+  "category": "arbre",
+  "aliases": ["pommier", "pommiers", "pomme", "pommes", "verger", "vergers", "cidre", "poiré"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre du verger, le pommier donne des fruits de garde, des pommes à cuire et, en Normandie et dans les pays atlantiques, du cidre. Le verger entoure villages et abbayes.",
+  "body": "Le pommier (Malus domestica) est l'arbre fruitier le plus répandu en Europe du Nord et de l'Ouest. On le plante dans les vergers clos qui entourent les villages, les manoirs et les monastères, souvent mêlé à des poiriers, à des cerisiers et à des pruniers. La greffe, pratiquée de longue date, permet de multiplier les bonnes variétés ; les « calvilles » et les « reinettes » apparaissent plus tard, mais le XIVe siècle connaît déjà plusieurs sortes de pommes, douces, acides et d'hiver.\n\nLes pommes fraîches se mangent à l'automne ; les variétés de garde, conservées dans les caves et les greniers, tiennent jusqu'au printemps. On les cuit en compotes et en tartes, on les sèche en rondelles. Les pommes acides, ou le suc de pommes sauvages, remplacent parfois le verjus en cuisine ([[cdx_verjus|le verjus]]).\n\nDans les régions où la vigne vient mal, Normandie, Bretagne, Pays basque, sud de l'Angleterre, les pommes sont pressées pour faire du cidre (le pressoir à pommes est attesté dès le XIIe siècle en Normandie, et la boisson se répand aux XIVe et XVe siècles à côté de la cervoise, [[cdx_cervoise|la cervoise]], et du vin, [[cdx_vin|le vin]]). Les poires, elles, donnent le poiré.\n\nLes vergers sont souvent clos de haies ou de murs, protégés des bêtes errantes, et font l'objet de baux et de redevances ; la cueillette des fruits tombés relève des coutumes locales ([[cdx_seigneurie|la seigneurie]]). Le pommier fleuri est un motif de l'enluminure des mois ([[cdx_travaux_des_mois|les travaux des mois]]).\n\nCe qu'en dit la science moderne : le pommier domestique descend d'un pommier sauvage d'Asie centrale, et l'espèce s'est diffusée en Europe avec les routes commerciales de l'Antiquité.",
+  "latin": "Malus domestica",
+  "decor": ["tree:apple", "battle_tree:fruit"],
+  "see_also": ["cdx_verjus", "cdx_cervoise", "cdx_vin", "cdx_travaux_des_mois", "cdx_haies_et_buissons"],
+  "sources": ["Pommier", "Cidre", "Verger"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_pin_d_alep",
+  "title": "Le pin d'Alep",
+  "category": "arbre",
+  "aliases": ["pin d'Alep", "pins d'Alep", "pinède d'Alep", "pin blanc de Provence"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Pin du littoral méditerranéen, le pin d'Alep colonise les terres pauvres et les friches. Son bois tordu est un maigre combustible, sa résine est utile aux navires.",
+  "body": "Le pin d'Alep (Pinus halepensis) est un pin des régions les plus chaudes et sèches de la Méditerranée : littoral de la Provence, du Languedoc, de la Catalogne, de la Grèce, de l'Afrique du Nord. Il supporte les sols calcaires, secs et pauvres, où d'autres arbres ne poussent pas. Reconnaissable à son écorce grise et à ses aiguilles fines et claires, il forme des pinèdes claires sur les collines et sur les falaises.\n\nSon bois, léger et mal conformé, plein de nœuds, donne des charpentes médiocres. Il sert surtout de combustible, de bois de feu et de charbon de bois, ainsi que de planches pour les caisses. Sa résine, récoltée par entaille, fournit de la poix pour calfater les navires, de la térébenthine et des torches. Les chantiers navals des ports provençaux et languedociens (voir [[cdx_arsenal|l'arsenal]]) l'emploient avec celle d'autres pins.\n\nLe pin d'Alep est un arbre pionnier des terres abandonnées : quand les champs, les vignes ou les pâtures sont désertés, par la guerre, la peste ([[cdx_peste_noire|la peste noire]]) ou la dépopulation, il y gagne facilement du terrain. Les graines, légères, sont disséminées par le vent. Les pinèdes d'Alep sont aussi très inflammables, ce qui rend les incendies de forêt fréquents en été.\n\nLes coupes sont encadrées, comme pour les autres forêts, par les seigneurs et par la monarchie, et les communautés en défendent les usages pour le bois de chauffe et le parcours des troupeaux (voir [[cdx_bois|le bois]]).\n\nCe qu'en dit la science moderne : le pin d'Alep se régénère après les incendies grâce à des cônes qui libèrent leurs graines sous l'effet de la chaleur.",
+  "latin": "Pinus halepensis",
+  "decor": ["tree:aleppo_pine"],
+  "see_also": ["cdx_pin_parasol", "cdx_pin_maritime", "cdx_chene_vert", "cdx_peste_noire"],
+  "sources": ["Pin d'Alep", "Pinus halepensis"]
+}

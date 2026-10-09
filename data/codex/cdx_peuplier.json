@@ -1,0 +1,13 @@
+{
+  "id": "cdx_peuplier",
+  "title": "Le peuplier",
+  "category": "arbre",
+  "aliases": ["peuplier", "peupliers", "peuplier noir", "peupleraie", "ypréau", "peuplier blanc"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre des bords de rivière, le peuplier pousse vite et donne un bois léger et tendre. On en fait des planches, des caisses, des fûts de flèches et des panneaux à peindre.",
+  "body": "Le peuplier noir (Populus nigra) et le peuplier blanc, appelé aussi ypréau (Populus alba), accompagnent les cours d'eau d'Europe : ils forment avec les saules et les aulnes la ripisylve, cette bande de bois qui borde les rives. Leur croissance rapide en fait des arbres communs dans les plaines alluviales de la Loire, de la Seine, du Rhône, du Pô, de l'Escaut.\n\nLeur bois est blanc, léger, tendre, peu résistant à l'humidité, mais facile à scier et à tailler. Il sert à faire des planches, des volets, des caisses, des sabots, des auges, des chevrons de toitures légères, et des fûts de flèches. Pour la peinture sur panneau, les artistes italiens, comme plus tard Léonard de Vinci, utilisent volontiers le peuplier, qui se travaille bien et se déforme peu. Les panneaux peints de retables en bois et les coffres décoratifs sont souvent de peuplier.\n\nLes feuilles servent de fourrage d'appoint, et l'on recueille les bourgeons odorants pour des onguents, notamment l'onguent « populeum », que la pharmacopée médiévale prépare à partir de bourgeons de peuplier, de pavot, de jusquiame et d'autres plantes (voir [[cdx_pavot|le pavot]] et [[cdx_jusquiame|la jusquiame]]).\n\nLes arbres du bord de l'eau relèvent souvent des seigneurs qui détiennent les droits sur les rivières et leurs berges ([[cdx_bateliers_et_peages|bateliers et péages]]). Les berges plantées sont aussi un moyen de fixer les rives contre l'érosion.\n\nCe qu'en dit la science moderne : le peuplier noir est l'une des essences caractéristiques des forêts alluviales, aujourd'hui rares ; le peuplier pyramidal dit « d'Italie », si commun dans les paysages d'aujourd'hui, n'a été répandu en France qu'à partir du XVIIIe siècle.",
+  "latin": "Populus nigra",
+  "decor": ["tree:poplar", "battle_tree:poplar"],
+  "see_also": ["cdx_saule", "cdx_pavot", "cdx_jusquiame", "cdx_bois"],
+  "sources": ["Peuplier noir", "Peuplier blanc", "Populus nigra", "Ripisylve"]
+}

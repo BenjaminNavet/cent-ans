@@ -1,0 +1,13 @@
+{
+  "id": "cdx_meleze",
+  "title": "Le mélèze",
+  "category": "arbre",
+  "aliases": ["mélèze", "mélèzes", "mélèze d'Europe", "mélézin", "mélézins", "térébenthine de Venise"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Seul conifère d'Europe à perdre ses aiguilles l'hiver, le mélèze pousse dans les Alpes. Son bois rouge et résineux, presque imputrescible, fait chalets, bardeaux et conduites d'eau.",
+  "body": "Le mélèze d'Europe (Larix decidua) croît dans les Alpes, à haute altitude, jusqu'à la limite des arbres, ainsi que dans les Carpates et quelques massifs d'Europe centrale. Contrairement aux autres conifères, il perd ses aiguilles en automne, après les avoir teintées de jaune d'or, et il en repousse de nouvelles au printemps.\n\nSon bois, rougeâtre, très résineux, est l'un des plus durables des conifères d'Europe : il résiste à l'humidité et aux insectes. Dans les vallées alpines (Briançonnais, Valais, Tyrol, Piémont), on en fait des chalets, des granges, des bardeaux de toit, des conduites d'eau creusées dans des troncs, des planches de plancher et de fenêtres, des bacs et des abreuvoirs. Les troncs sont descendus par flottage vers la plaine, où les marchands italiens du Nord, Venise en particulier, les emploient dans leurs chantiers.\n\nLe mélèze produit aussi une résine claire, la térébenthine de Venise, que l'on récolte en perçant le tronc ; cette résine entre dans la fabrication de vernis, de médicaments et d'onguents, ainsi que dans la peinture, où elle sert de liant et de vernis (voir [[cdx_medecine_medievale|la médecine médiévale]]).\n\nLes forêts de mélèzes d'altitude sont souvent des biens communaux. Les montagnards y pratiquent la coupe du bois, l'alpage des troupeaux et le pâturage sous les arbres, car la lumière qui passe entre les aiguilles laisse l'herbe pousser.\n\nCe qu'en dit la science moderne : le mélèze est un arbre pionnier de montagne et un des conifères les mieux adaptés au froid ; son bois est très apprécié encore aujourd'hui pour les bardeaux et les façades.",
+  "latin": "Larix decidua",
+  "decor": ["tree:larch"],
+  "see_also": ["cdx_sapin", "cdx_epicea", "cdx_bois", "cdx_medecine_medievale"],
+  "sources": ["Mélèze d'Europe", "Larix decidua", "Térébenthine de Venise"]
+}

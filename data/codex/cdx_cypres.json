@@ -1,0 +1,13 @@
+{
+  "id": "cdx_cypres",
+  "title": "Le cyprès",
+  "category": "arbre",
+  "aliases": ["cyprès", "cyprès toscan", "cyprès commun", "cyprès d'Italie"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre sombre et élancé de la Méditerranée, le cyprès se plante près des tombes et dans les jardins. Son bois odorant, qui résiste au temps, fait des coffres et des portes.",
+  "body": "Le cyprès commun (Cupressus sempervirens) est un conifère méditerranéen à la silhouette fuselée, qui vient de l'Orient et pousse depuis l'Antiquité dans les jardins, les cimetières et les abords des églises de Toscane, d'Italie centrale, de Provence, du Languedoc et d'Espagne. Dans les textes et l'iconographie, il évoque la mort et le deuil, héritage de l'Antiquité, mais aussi la pérennité, car son feuillage reste vert toute l'année.\n\nSon bois est dense, odorant, riche en essences qui repoussent les insectes et résistent à la pourriture. Les menuisiers l'emploient pour fabriquer des coffres à vêtements et à documents, des portes, des cercueils, des poutres et des instruments de musique ; on dit qu'il protège les étoffes des mites. Le bois de cyprès sert aussi à la construction navale en Méditerranée, notamment pour les parties exposées à l'humidité (voir [[cdx_galee|la galée]] et [[cdx_arsenal|l'arsenal]]).\n\nLes jardins des riches demeures et des couvents le plantent pour son port élégant ; les cimetières et les cloîtres accueillent quelques sujets. Les cônes et les rameaux entrent dans la pharmacopée, comme astringents, selon la tradition de Dioscoride et de Galien ([[cdx_medecine_medievale|la médecine médiévale]]).\n\nLe genévrier, autre conifère du Midi, est un proche cousin (voir [[cdx_genievre|le genévrier]]).\n\nCe qu'en dit la science moderne : le cyprès est un arbre à longévité remarquable, certains sujets vivant plus d'un millénaire.",
+  "latin": "Cupressus sempervirens",
+  "decor": ["tree:cypress"],
+  "see_also": ["cdx_genievre", "cdx_arsenal", "cdx_medecine_medievale", "cdx_olivier"],
+  "sources": ["Cyprès de Provence", "Cupressus sempervirens"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "cdx_pin_noir",
+  "title": "Le pin noir",
+  "category": "arbre",
+  "aliases": ["pin noir", "pins noirs", "pin laricio", "pin laricio de Corse", "pin noir d'Autriche"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Pin des montagnes du Sud, le pin noir forme des forêts sombres sur les calcaires des Alpes du Sud et de l'Europe centrale. Les pins laricio de Corse donnent de grands mâts.",
+  "body": "Le pin noir (Pinus nigra) est un pin rustique des montagnes méditerranéennes et d'Europe centrale : Alpes du Sud, Cévennes, Pyrénées, Corse, Calabre, Balkans, Autriche. Plusieurs sous-espèces existent ; la plus connue est le pin laricio de Corse (Pinus nigra subsp. laricio), dont les fûts droits et élevés atteignent de grandes hauteurs. Son feuillage dense, vert sombre, et son écorce brun-noir lui donnent son nom.\n\nLe bois du pin noir est résineux, résistant et d'un grain assez fin. On en tire des poutres, des planches et des mâts. Les grands fûts du pin laricio de Corse sont des mâts naturels pour les marines méditerranéennes, et les marines modernes les rechercheront encore (voir [[cdx_arsenal|l'arsenal]] et [[cdx_galee|la galée]]). Le pin noir donne aussi de la résine, qu'on transforme en poix et en térébenthine.\n\nIl pousse sur les sols pauvres, calcaires et caillouteux, que d'autres arbres évitent ; il supporte le froid de l'altitude comme la chaleur d'été. Dans les montagnes, les communautés l'exploitent pour le bois de charpente, pour les torches de pin et le chauffage, et ses forêts sont souvent des biens communaux ([[cdx_seigneurie|la seigneurie]]).\n\nLe pin noir est parfois confondu avec le pin sylvestre, dont il se distingue par la couleur plus sombre de son feuillage et de son écorce (voir [[cdx_pin_sylvestre|le pin sylvestre]]).\n\nCe qu'en dit la science moderne : les populations de pin noir sont fragmentées en îlots dans les montagnes d'Europe du Sud, vestiges d'une aire plus large aux périodes plus froides.",
+  "latin": "Pinus nigra",
+  "decor": ["tree:black_pine"],
+  "see_also": ["cdx_pin_sylvestre", "cdx_pin_d_alep", "cdx_arsenal", "cdx_bois"],
+  "sources": ["Pin noir", "Pin laricio", "Pinus nigra"]
+}
