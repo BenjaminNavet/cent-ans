@@ -1,0 +1,13 @@
+{
+  "id": "cdx_hetre",
+  "title": "Le hêtre",
+  "category": "arbre",
+  "aliases": ["hêtre", "hêtres", "hêtraie", "hêtraies", "faîne", "faînes", "fayard"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grand arbre des forêts fraîches du nord et de l'est, le hêtre sert surtout de bois de feu et de charbon, et ses faînes nourrissent les porcs. Son bois, peu durable dehors, convient à l'outillage et aux sabots.",
+  "body": "Le hêtre commun (Fagus sylvatica) forme de grandes hêtraies sur les sols frais et bien drainés : Normandie, Picardie, Champagne, Ardenne, Vosges, Jura, ainsi qu'en Angleterre du Sud et en Allemagne. L'ombre épaisse qu'il projette étouffe le sous-bois, ce qui donne à ces forêts leur allure de cathédrale. On l'appelle aussi fau ou fayard, noms qui subsistent dans de nombreux toponymes.\n\nSon bois est dur, dense et facile à fendre, mais pourrit vite lorsqu'il reste exposé à l'humidité ; on le réserve donc plutôt aux emplois à l'abri ou à l'usage court : manches d'outils, ustensiles de cuisine, pelles, sabots, rouleaux, meubles simples. Sa grande qualité est de brûler très bien. Le hêtre fournit une part importante du bois de chauffage et du charbon de bois qu'exigent les villes, les forges ([[cdx_fer|le fer]]) et les verreries, qui s'installent en forêt pour trouver leur combustible et leurs cendres, riches en potasse (voir [[cdx_bois|le bois]]).\n\nLes faînes, petites graines triangulaires, tombent en automne en quantités très variables d'une année à l'autre. Les années de fort fruitage, les porcs mis en forêt s'y engraissent, comme à la glandée du chêne (voir [[cdx_chene|le chêne]]). On sait aussi en tirer une huile, utilisée pour l'éclairage ou la cuisine dans certaines régions, mais les textes la mentionnent peu pour cette période.\n\nLes forêts à hêtres sont gérées selon les règles des eaux et forêts, tantôt en taillis, tantôt en futaie, avec des droits d'usage que les communautés défendent âprement : le ramassage du bois mort et la coupe d'affouage y sont souvent contestés.\n\nCe qu'en dit la science moderne : le hêtre est très sensible aux sécheresses et aux étés chauds, ce qui explique qu'il soit surtout abondant sur les reliefs et dans les régions humides.",
+  "latin": "Fagus sylvatica",
+  "decor": ["tree:beech", "battle_tree:beech"],
+  "see_also": ["cdx_chene", "cdx_bois", "cdx_charbonniers_et_droits_d_usage", "cdx_fer"],
+  "sources": ["Hêtre commun", "Faîne", "Fagus sylvatica"]
+}

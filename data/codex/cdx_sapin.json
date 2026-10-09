@@ -1,0 +1,13 @@
+{
+  "id": "cdx_sapin",
+  "title": "Le sapin",
+  "category": "arbre",
+  "aliases": ["sapin", "sapins", "sapin pectiné", "sapinière", "sapinières"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grand résineux des montagnes humides, le sapin pectiné donne des planches, des poutres, des bardeaux et des mâts. On le descend des Vosges, du Jura et des Alpes par flottage.",
+  "body": "Le sapin pectiné (Abies alba) croît dans les montagnes d'Europe moyenne : Vosges, Jura, Alpes, Pyrénées, Massif central. Reconnaissable à ses aiguilles plates aux deux bandes blanches sous la face et à ses cônes dressés, il forme dans les forêts de montagne des peuplements denses, souvent mêlés de hêtres. Son tronc droit et élancé en fait un bois de construction apprécié.\n\nOn en tire des poutres, des chevrons, des planches pour les charpentes, les planchers, les portes et les meubles ordinaires. Dans l'habitat de montagne, il fournit les bardeaux ou tavaillons qui couvrent les toits. Sa résine sert à fabriquer poix et goudron pour calfater, et ses grands fûts sont des mâts possibles pour les navires, même si les mâts de qualité viennent plus souvent du nord, par la Baltique (voir [[cdx_hanse|la Hanse]]).\n\nLe transport est la grande affaire. Dans les vallées, on débite les grumes en haute montagne puis on les fait descendre par les rivières : les troncs flottent seuls ou assemblés en radeaux, que des équipes de flotteurs conduisent jusqu'aux ports et aux chantiers. Les péages des ponts et des écluses taxent ce commerce ([[cdx_bateliers_et_peages|bateliers et péages]]).\n\nLes forêts de sapins sont souvent propriété de seigneurs ou de communautés. Les usages locaux, droit de chauffage, de construction, d'élagage, de pâturage, sont consignés dans des coutumes ou des chartes ([[cdx_seigneurie|la seigneurie]]), et la surexploitation de certains massifs provoque très tôt des règlements locaux.\n\nCe qu'en dit la science moderne : le sapin pectiné préfère l'air humide et supporte mal les étés chauds ; son aire naturelle s'est réduite en plaine, où l'épicéa l'a souvent remplacé dans les plantations.",
+  "latin": "Abies alba",
+  "decor": ["tree:fir"],
+  "see_also": ["cdx_epicea", "cdx_meleze", "cdx_bois", "cdx_hanse"],
+  "sources": ["Sapin pectiné", "Abies alba", "Flottage du bois"]
+}

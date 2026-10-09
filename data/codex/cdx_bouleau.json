@@ -1,0 +1,13 @@
+{
+  "id": "cdx_bouleau",
+  "title": "Le bouleau",
+  "category": "arbre",
+  "aliases": ["bouleau", "bouleaux", "bouleau verruqueux", "boulaie"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre pionnier du Nord, le bouleau donne son écorce blanche, ses balais, son goudron et sa sève. À Novgorod, on y écrit même des lettres.",
+  "body": "Le bouleau verruqueux (Betula pendula) colonise vite les terrains dégagés, les sols pauvres, les landes et les clairières ; on le rencontre dans toute l'Europe, mais il devient dominant dans le Nord et à l'Est, de la Scandinavie à la Russie. Son tronc blanc, sa cime légère et son feuillage tremblant le rendent reconnaissable de loin.\n\nSon bois, clair et assez tendre, est peu durable à l'extérieur mais facile à travailler : manches, sabots, ustensiles, jougs, fûts de flèches, cuillers. Les rameaux fins, liés en faisceaux, deviennent des balais et aussi des verges pour la discipline des écoliers et la correction des fautes. Comme combustible, il brûle bien même quand il est vert.\n\nL'écorce est plus précieuse encore. Imperméable et souple, elle sert à fabriquer des récipients, des semelles, des torches, de la colle et du goudron de bouleau, dont les artisans enduisent le cuir pour le protéger de l'eau. À Novgorod, les fouilles archéologiques ont livré plusieurs centaines de lettres gravées sur écorce de bouleau, courriers de marchands, comptes, notes de la vie quotidienne, datées du XIe au XVe siècle (voir [[cdx_novgorod|Novgorod]]).\n\nLa sève, récoltée au printemps, se boit fraîche ou fermentée ; dans les régions du Nord, elle est une boisson saisonnière, mais les textes médiévaux en parlent peu. Le bouleau figure aussi dans de nombreuses coutumes locales, notamment l'arbre de mai, planté en mai devant les maisons.\n\nCe qu'en dit la science moderne : le bouleau est un arbre pionnier de courte vie, qui prépare le terrain à des essences plus durables ; sa production de pollen est abondante.",
+  "latin": "Betula pendula",
+  "decor": ["tree:birch"],
+  "see_also": ["cdx_novgorod", "cdx_bois", "cdx_pin_sylvestre"],
+  "sources": ["Bouleau verruqueux", "Betula pendula", "Lettres sur écorce de bouleau"]
+}

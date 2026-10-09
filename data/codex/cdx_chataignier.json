@@ -1,0 +1,13 @@
+{
+  "id": "cdx_chataignier",
+  "title": "Le châtaignier",
+  "category": "arbre",
+  "aliases": ["châtaignier", "châtaigniers", "châtaigneraie", "châtaigneraies", "châtaigne", "châtaignes"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Dans les montagnes de la France du Sud, de la Corse et de l'Italie, le châtaignier nourrit des familles entières grâce à ses fruits séchés et moulus. Son bois, résistant à l'humidité, sert d'échalas et de merrain.",
+  "body": "Le châtaignier (Castanea sativa) prospère sur sols siliceux et acides, en moyenne montagne : Cévennes, Limousin, Périgord, Vivarais, Corse, Apennins, Ligurie. Le Moyen Âge en étend la culture, par plantation et par greffe, sur les pentes difficiles où le blé vient mal. Là, le châtaignier devient un véritable arbre nourricier, qui donne son nom à toute une économie rurale, la civilisation du châtaignier.\n\nLes châtaignes, récoltées à l'automne, se consomment fraîches, bouillies ou rôties, mais surtout séchées dans des séchoirs, les clèdes, au-dessus d'un feu de bois qui les fume lentement. On les conserve ensuite des mois, entières ou réduites en farine pour faire des bouillies, des galettes et des pains grossiers. Cet apport est précieux en période de disette (voir [[cdx_jeu_famine|la famine]]), et d'autant plus apprécié que la farine de blé manque dans ces montagnes.\n\nLe bois du châtaignier est riche en tanin, ce qui le rend résistant au pourrissement ; il rejette bien de souche, ce qui permet de le couper en taillis tous les quinze à vingt ans. On en fait des piquets et des échalas pour les vignes ([[cdx_vin|le vin]]), des douelles de tonneaux, des poutres et des bardeaux. Il sert aussi au tanin des tanneries.\n\nLes châtaigneraies relèvent de droits particuliers : certaines sont privées, d'autres communes, et la cueillette des fruits tombés est parfois encadrée par les coutumes locales ([[cdx_seigneurie|la seigneurie]]).\n\nCe qu'en dit la science moderne : originaire du bassin méditerranéen oriental, l'espèce a été largement répandue par l'homme depuis l'Antiquité ; la châtaigne contient beaucoup d'amidon et peu de gluten, ce qui l'oblige à être mélangée à d'autres farines pour faire du pain.",
+  "latin": "Castanea sativa",
+  "decor": ["tree:chestnut"],
+  "see_also": ["cdx_bois", "cdx_vin", "cdx_jeu_famine"],
+  "sources": ["Châtaignier", "Châtaigne", "Castanea sativa"]
+}

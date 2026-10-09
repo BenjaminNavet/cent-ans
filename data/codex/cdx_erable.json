@@ -1,0 +1,13 @@
+{
+  "id": "cdx_erable",
+  "title": "L'érable",
+  "category": "arbre",
+  "aliases": ["érable", "érables", "érable sycomore", "sycomore"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Arbre de montagne et de lisière, l'érable sycomore a un bois clair, dense et fin. Les tourneurs en font bols et cuillers, les luthiers le fond de leurs instruments.",
+  "body": "L'érable sycomore (Acer pseudoplatanus) pousse dans les forêts fraîches de montagne et de moyenne altitude, en mélange avec le hêtre et le sapin. L'érable champêtre (Acer campestre), plus petit, s'accommode des haies et des lisières de plaine. On les reconnaît aux feuilles palmées et aux fruits ailés, les samares, qui tournoient en tombant.\n\nSon bois est blanc, dense, à grain fin, de teinte uniforme. Il convient à ce qu'il faut ciseler ou tourner : bols, écuelles, hanaps et cuillers, planches à découper, manches de couteau, jouets et petits objets de la vie domestique. Dans les montagnes d'Europe, les artisans en font aussi des instruments de musique, notamment le dos et les éclisses des luths, des harpes et des vièles, et plus tard des violes ; l'érable ondé, dont les fibres ont un joli dessin, est particulièrement recherché.\n\nL'arbre offre en outre un feuillage dense qui donne de l'ombre aux pâtures et aux cours de ferme de montagne. On l'a planté près des habitations, parfois aux abords d'un chalet d'alpage. Ses jeunes feuilles servent aussi à nourrir les bêtes lorsque le foin manque.\n\nCe n'est pas un bois de construction principal, car il pourrit vite sous la pluie ; on le laisse donc aux ateliers du tourneur et du luthier, et ses grumes se vendent comme bois d'œuvre de belle qualité (voir [[cdx_bois|le bois]]).\n\nCe qu'en dit la science moderne : l'érable sycomore est attesté en Europe depuis la préhistoire dans les montagnes ; sa sève est sucrée, mais l'usage de la transformer en sirop est propre à l'Amérique du Nord, avec d'autres espèces.",
+  "latin": "Acer pseudoplatanus",
+  "decor": ["tree:maple"],
+  "see_also": ["cdx_bois", "cdx_hetre", "cdx_sapin"],
+  "sources": ["Érable sycomore", "Érable champêtre", "Acer pseudoplatanus"]
+}
