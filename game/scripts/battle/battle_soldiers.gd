@@ -115,6 +115,7 @@ var _lag: Dictionary = {}  # unit id -> retard d'horloge d'animation (chevaux ra
 var _slow: Dictionary = {}  # unit id -> {since, kind}
 var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entrent dans la masse
 var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
+var _hit_local: Dictionary = {}  # unit id -> instant (horloge du régiment) de la dernière perte (RX anim)
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
 var _turn: Dictionary = {}  # Unit id -> variation d'orientation lissée (rad/s, > 0 = vers la gauche)
@@ -594,7 +595,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt
 		# Cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
 		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
-		var cadence := _cadence(id, config)
+		var cadence := _cadence(id, config, str(unit.get("type", "")))
 		if cadence != 1.0:
 			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt * (1.0 - cadence)
 	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
@@ -603,6 +604,10 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var sent := _sent_of(mat)
 	_param(mat, sent, &"anim_time", local)
 	_param(mat, sent, &"anim_state", anim_state(unit))
+	if _hit_local.has(id):
+		var hit_cfg: Dictionary = BattleSkinned.animation_settings().get("melee_hit", {})
+		_param(mat, sent, &"hit_time", float(_hit_local[id]))
+		_param(mat, sent, &"hit_share", float(hit_cfg.get("cavalry_share" if kind == "cavalry" else "share", 0.3)))
 	_param(mat, sent, &"highlight", 1.0 if is_selected else 0.0)
 	_param(mat, sent, &"far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
 	# Décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
@@ -857,6 +862,12 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var limits: Dictionary = _gore.get("corpses", {})
 	var level := _level
 	var cause := str(unit.get("loss_cause", "other"))
+	# Perte résolue par le cœur : une part des soldats du régiment réagit (clips `hit`, ADR 0250).
+	var hit_id := int(unit["id"])
+	var hit_cfg: Dictionary = BattleSkinned.animation_settings().get("melee_hit", {})
+	var hit_now := anim_time - float(_lag.get(hit_id, 0.0))
+	if hit_now - float(_hit_local.get(hit_id, -1000.0)) >= float(hit_cfg.get("window_s", 0.7)):
+		_hit_local[hit_id] = hit_now
 	var deaths: Dictionary = _gore.get("deaths", {})
 	var death: Dictionary = deaths.get(cause, deaths.get("other", {}))
 	var names: Array = death.get(("mounted" if mounted else "foot"), [])
@@ -1276,9 +1287,16 @@ func _find_braced(units: Array) -> void:
 				_braced[int(other["id"])] = true
 
 
+## Vitesse nominale (m/s) du clip de locomotion `clip` pour le type d'unité `unit_type` : table
+## par clip (`cadence`) × facteur de foulée de l'unité (`cadence_unit`, 1 si absent).
+static func nominal_cadence(gore: Dictionary, clip: String, unit_type: String) -> float:
+	var base := float((gore.get("cadence", {}) as Dictionary).get(clip, 1.0))
+	return base * float((gore.get("cadence_unit", {}) as Dictionary).get(unit_type, 1.0))
+
+
 ## Facteur de cadence d'un régiment en marche : vitesse lissée / vitesse nominale du clip de
 ## locomotion (`cadence` de battle_gore.json, m/s à la vitesse 1) ; 1 hors locomotion.
-func _cadence(id: int, config: Dictionary) -> float:
+func _cadence(id: int, config: Dictionary, unit_type: String = "") -> float:
 	# La charge des lanciers est un cycle (trébuchement) dont le premier clip est le galop.
 	var mode := int(config.get("mode", 0))
 	if mode != BattleSkinned.M_LOOP and not (mode == BattleSkinned.M_CYCLE and str(config.get("key", "")).ends_with("/charging")):
@@ -1287,7 +1305,7 @@ func _cadence(id: int, config: Dictionary) -> float:
 	var table: Dictionary = _gore.get("cadence", {})
 	if names.is_empty() or not table.has(str(names[0])):
 		return 1.0
-	var nominal := float(table[str(names[0])]) * float(config.get("speed", 1.0))
+	var nominal := nominal_cadence(_gore, str(names[0]), unit_type) * float(config.get("speed", 1.0))
 	return clampf(float(_speed.get(id, nominal)) / maxf(nominal, 0.1), 0.35, 1.8)
 
 

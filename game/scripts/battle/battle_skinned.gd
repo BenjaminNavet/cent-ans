@@ -531,9 +531,57 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 	var ids: Array[int] = []
 	for c in names:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "names": names, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var mode := int(entry.get("mode", M_LOOP))
+	var cycle := float(entry.get("cycle", 1.5))
+	if mode == M_CYCLE and key.begins_with("melee"):
+		cycle = melee_cycle_s(rig_entry, names, cycle)
+	var config := {"key": cache_key, "names": names, "set": ids, "mode": mode, "speed": float(entry.get("speed", 1.0)), "cycle": cycle, "release": float(entry.get("release", 1.0)), "jitter": rate_jitter(key, mode)}
+	# Réactions aux pertes (RX anim, ADR 0250) : clips `hit*` joués par une part des soldats
+	# à l'instant d'une perte du régiment, hors du tirage de base.
+	var hit_names := _present(rig_entry, entry.get("hit", []))
+	var hit_ids: Array[int] = []
+	for c in hit_names:
+		hit_ids.append(clip_index(rig_entry, str(c)))
+	config["hit"] = hit_ids
+	config["hit_seconds"] = clip_seconds_in(rig_entry, hit_names)
 	_configs[cache_key] = config
 	return config
+
+
+## États de locomotion : cadence asservie à la vitesse, jitter de cadence réduit.
+const LOCOMOTION_STATES := ["marching", "running", "charging", "routing", "trotting", "turn_l", "turn_r", "trot_turn_l", "trot_turn_r"]
+
+
+## Amplitude (± part) du jitter de cadence par soldat : réduite en locomotion en boucle (les
+## pieds suivent la vitesse du régiment), pleine pour les attentes (RX anim).
+static func rate_jitter(state_key: String, mode: int) -> float:
+	var settings := animation_settings()
+	if mode == M_LOOP and LOCOMOTION_STATES.has(state_key):
+		return float(settings.get("loco_rate_jitter", 0.07))
+	return float(settings.get("idle_rate_jitter", 0.07))
+
+
+## Durée (s) du plus long clip non bouclé de `names` (le cycle de mêlée ne coupe aucun coup et
+## ne tient pas la pose finale plus que nécessaire) ; `fallback_s` si tous bouclent.
+static func melee_cycle_s(rig_entry: Dictionary, names: Array, fallback_s: float) -> float:
+	var longest := 0.0
+	var clips: Dictionary = rig_entry.get("clips", {})
+	var fps := float(rig_entry.get("fps", 24))
+	for c in names:
+		var clip: Dictionary = clips.get(str(c), {})
+		if clip.is_empty() or bool(clip.get("loop", false)):
+			continue
+		longest = maxf(longest, float(clip.get("frames", 24)) / fps)
+	return longest if longest > 0.0 else fallback_s
+
+
+## Plus longue durée (s) des clips `names` du rig (0 si vide).
+static func clip_seconds_in(rig_entry: Dictionary, names: Array) -> float:
+	var longest := 0.0
+	var clips: Dictionary = rig_entry.get("clips", {})
+	for c in names:
+		longest = maxf(longest, float((clips.get(str(c), {}) as Dictionary).get("frames", 24)) / float(rig_entry.get("fps", 24)))
+	return longest
 
 
 ## Clips de `names` présents dans le rig (ordre et doublons gardés : les doublons pèsent dans
@@ -753,7 +801,7 @@ const STYLES := {
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
-		"melee": {"set": ["slash", "thrust", "overhead", "parry", "hit", "hit_b", "hit_c", "guard"], "mode": M_CYCLE, "cycle": 1.3},
+		"melee": {"set": ["slash", "thrust", "overhead", "parry", "slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.3, "hit": ["hit", "hit_b", "hit_c"]},
 		"victory": {"set": ["victory", "victory_b"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
@@ -765,7 +813,7 @@ const STYLES := {
 		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
-		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
+		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3, "hit": ["hit", "hit_b"]},
 		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
@@ -776,7 +824,7 @@ const STYLES := {
 		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
-		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
+		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2, "hit": ["hit", "hit_b"]},
 		# Piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
@@ -788,7 +836,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
-		"melee": {"set": ["slash", "thrust", "parry", "hit", "hit_b", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"melee": {"set": ["push", "push_shoulder", "parry", "push", "guard"], "mode": M_CYCLE, "cycle": 1.5, "hit": ["hit", "hit_b"], "fallback": ["slash", "thrust", "parry", "guard"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"victory": {"set": ["victory", "victory_b"]},
 	},
@@ -798,7 +846,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
-		"melee": {"set": ["slash", "thrust", "parry", "hit", "hit_c", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"melee": {"set": ["push", "push_shoulder", "parry", "push", "guard"], "mode": M_CYCLE, "cycle": 1.5, "hit": ["hit", "hit_c"], "fallback": ["slash", "thrust", "parry", "guard"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"victory": {"set": ["victory"]},
 	},
@@ -807,7 +855,7 @@ const STYLES := {
 		"marching": {"set": ["c_walk"]},
 		"running": {"set": ["c_gallop"]},
 		"charging": CAVALRY_CHARGE,
-		"melee": {"set": ["c_thrust", "c_thrust", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee": {"set": ["c_thrust", "c_thrust", "c_rear", "c_turn_l", "c_thrust", "c_turn_r", "c_idle"], "mode": M_CYCLE, "cycle": 1.4, "hit": ["c_rear"]},
 		"melee_pikes": {"set": ["c_rear", "c_thrust", "c_rear", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"trotting": {"set": ["c_trot"]},
 		"turn_l": {"set": ["c_turn_l"]},
@@ -823,7 +871,7 @@ const STYLES := {
 		"running": {"set": ["c_gallop"]},
 		"charging": {"set": ["c_gallop"]},
 		"shooting": {"set": ["c_bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
-		"melee": {"set": ["c_thrust", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee": {"set": ["c_thrust", "c_bow_turn_l", "c_thrust", "c_bow_turn_r", "c_rear", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4, "hit": ["c_rear"]},
 		"melee_pikes": {"set": ["c_rear", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"trotting": {"set": ["c_bow_trot"]},
 		"turn_l": {"set": ["c_bow_turn_l"]},
@@ -864,7 +912,7 @@ const STYLES := {
 		"running": {"set": ["c_gallop"]},
 		"charging": {"set": ["c_gallop"]},
 		"shooting": {"set": ["c_javelin_throw"], "mode": M_VOLLEY, "release": 0.69},
-		"melee": {"set": ["c_thrust", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee": {"set": ["c_thrust", "c_javelin_turn_l", "c_thrust", "c_javelin_turn_r", "c_rear", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4, "hit": ["c_rear"]},
 		"melee_pikes": {"set": ["c_rear", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"trotting": {"set": ["c_javelin_trot"]},
 		"turn_l": {"set": ["c_javelin_turn_l"]},
@@ -895,6 +943,11 @@ static func apply_config(mat: ShaderMaterial, config: Dictionary, anim_time: flo
 	mat.set_shader_parameter("anim_speed", float(config["speed"]))
 	mat.set_shader_parameter("cycle_len", float(config["cycle"]))
 	mat.set_shader_parameter("release_at", float(config["release"]))
+	mat.set_shader_parameter("rate_jitter", float(config.get("jitter", 0.07)))
+	var hit_ids: Array = config.get("hit", [])
+	mat.set_shader_parameter("hit_set", _ivec(hit_ids))
+	mat.set_shader_parameter("hit_set_size", hit_ids.size())
+	mat.set_shader_parameter("hit_len", float(config.get("hit_seconds", 0.6)))
 	mat.set_meta("v2_config", config)
 
 
