@@ -1,5 +1,5 @@
 {
-  "description": "Missions de campagne à court terme (lot NT3, ADR 0127) : gabarits tirés selon la situation de la faction du joueur, 1 à 2 actives, 3 à 12 tours, récompense à la réussite, faible perte de prestige à l'échéance. L'IA n'en reçoit pas. Voir docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md (NT3).",
+  "description": "Missions de campagne à court terme (lot NT3, ADR 0127) : gabarits tirés selon la situation de la faction du joueur, 1 à 2 actives, 3 à 12 tours, récompense à la réussite, faible perte de prestige à l'échéance. L'IA n'en reçoit pas. Un seul moteur paramétré par cette table (ADR 0207) : cible, but, compteur, textes. Voir docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md (NT3).",
   "max_active": 2,
   "first_turn": 1,
   "offer_cooldown_turns": 1,
@@ -7,59 +7,104 @@
   "templates": [
     {
       "id": "take_neighbour",
-      "kind": "take_province",
+      "target": "enemy_neighbour",
+      "goal": "control",
       "title": "Prendre {cible}",
       "objective": "Prenez la cité de {cible}, tenue par l'ennemi à nos frontières.",
       "duration": 10,
       "weight": 3,
-      "reward": { "gold": 800, "prestige": 15, "public_order": 10 }
+      "steps": [
+        "tenue par {holder}",
+        "prise"
+      ],
+      "reward": {
+        "gold": 800,
+        "prestige": 15,
+        "public_order": 10
+      }
     },
     {
       "id": "win_battle",
-      "kind": "win_battle",
+      "target": "at_war",
+      "goal": "count",
+      "counter": "battle_won",
       "title": "Une victoire en rase campagne",
       "objective": "Remportez {n} bataille(s) contre nos ennemis.",
       "duration": 6,
       "count": 1,
       "weight": 3,
-      "reward": { "gold": 400, "prestige": 10, "free_unit": true }
+      "progress": "{done}/{n} victoire(s)",
+      "reward": {
+        "gold": 400,
+        "prestige": 10,
+        "free_unit": true
+      }
     },
     {
       "id": "build_works",
-      "kind": "construct_building",
+      "target": "buildable",
+      "goal": "build",
       "title": "Bâtir : {cible}",
       "objective": "Faites achever {cible} à {lieu}.",
       "duration": 8,
       "weight": 2,
-      "reward": { "gold": 300, "public_order": 8 }
+      "steps": [
+        "pas encore commencé",
+        "en chantier",
+        "achevé"
+      ],
+      "reward": {
+        "gold": 300,
+        "public_order": 8
+      }
     },
     {
       "id": "raise_levies",
-      "kind": "recruit_units",
+      "target": "can_recruit",
+      "goal": "count",
+      "counter": "units_recruited",
       "title": "Lever des troupes",
       "objective": "Recrutez ou engagez {n} unités.",
       "duration": 4,
       "count": 3,
       "weight": 2,
-      "reward": { "gold": 350, "prestige": 5 }
+      "progress": "{done}/{n} unités",
+      "reward": {
+        "gold": 350,
+        "prestige": 5
+      }
     },
     {
       "id": "treaty",
-      "kind": "conclude_treaty",
+      "target": "treaty_partner",
+      "goal": "treaty",
       "title": "Un traité",
       "objective": "Concluez une paix, une alliance ou un lien de vassalité avec une autre faction.",
       "duration": 12,
       "weight": 1,
-      "reward": { "prestige": 12, "public_order": 5 }
+      "steps": [
+        "aucun traité nouveau",
+        "conclu"
+      ],
+      "reward": {
+        "prestige": 12,
+        "public_order": 5
+      }
     },
     {
       "id": "hold_border",
-      "kind": "hold_place",
+      "target": "threatened_own",
+      "goal": "hold",
       "title": "Tenir {cible}",
       "objective": "Gardez la cité de {cible}, menacée par l'ennemi, pendant {n} saisons.",
       "duration": 4,
       "weight": 2,
-      "reward": { "gold": 500, "prestige": 8, "public_order": 6 }
+      "progress": "{done}/{n} saisons tenues",
+      "reward": {
+        "gold": 500,
+        "prestige": 8,
+        "public_order": 6
+      }
     }
   ]
 }

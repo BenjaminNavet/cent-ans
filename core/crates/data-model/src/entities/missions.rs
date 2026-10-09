@@ -24,38 +24,81 @@ pub struct MissionRules {
 crate::bundled_rules!(MissionRules, "missions.json", default);
 
 key_enum! {
-/// What a mission asks for.
+/// Where a mission points to: the places the generator may draw from (empty:
+/// the template is not offered).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum MissionKind {
-    /// Take a neighbouring province held by a faction at war with the player.
-    TakeProvince => "take_province",
-    /// Win `count` battles.
-    WinBattle => "win_battle",
-    /// Complete a given building in a given place.
-    ConstructBuilding => "construct_building",
-    /// Recruit or hire `count` units.
-    RecruitUnits => "recruit_units",
-    /// Sign a new peace, alliance or vassalage.
-    ConcludeTreaty => "conclude_treaty",
-    /// Keep a threatened border place until the deadline.
-    HoldPlace => "hold_place",
+pub enum MissionTarget {
+    /// No place; offered while the player is at war with a living faction.
+    AtWar => "at_war",
+    /// No place; offered while the player can raise a unit somewhere.
+    CanRecruit => "can_recruit",
+    /// No place; offered while another faction could sign a treaty.
+    TreatyPartner => "treaty_partner",
+    /// A province next to the player's, held by a faction at war with it.
+    EnemyNeighbour => "enemy_neighbour",
+    /// A province of the player's, next to an enemy-held one.
+    ThreatenedOwn => "threatened_own",
+    /// A building the player can start in one of its cities (`{lieu}`).
+    Buildable => "buildable",
 }
 }
 
-/// One mission template.
+key_enum! {
+/// When a mission is fulfilled.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MissionGoal {
+    /// The target province is controlled by the player.
+    Control => "control",
+    /// The target province is still the player's at the deadline (lost: failed).
+    Hold => "hold",
+    /// The target building stands in the target city.
+    Build => "build",
+    /// A peace, alliance or vassalage the player did not have at the offer.
+    Treaty => "treaty",
+    /// The template's `counter` reached `count`.
+    Count => "count",
+}
+}
+
+key_enum! {
+/// What a `count` goal tallies since the mission was given.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MissionCounter {
+    /// Battles (assaults and sorties included) won by the player.
+    BattleWon => "battle_won",
+    /// Units recruited or hired by the player.
+    UnitsRecruited => "units_recruited",
+}
+}
+
+/// One mission template: a target generator, a goal, a counter, texts and a
+/// reward; one engine serves them all (ADR 0207).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MissionTemplate {
     pub id: String,
-    pub kind: MissionKind,
+    pub target: MissionTarget,
+    pub goal: MissionGoal,
+    /// Only for the `count` goal.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub counter: Option<MissionCounter>,
     /// French title; `{cible}`, `{lieu}` and `{n}` are filled in.
     pub title: String,
     /// French objective text; same placeholders.
     pub objective: String,
-    /// Turns before the deadline (3-12).
+    /// Progress labels by step, for the objectives panel (`{holder}`: the
+    /// target's holder). The ratio is `step / (len - 1)`. Without steps the
+    /// `progress` text is used (`{done}`, `{n}`) and the ratio is done / n.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub steps: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub progress: String,
+    /// Turns before the deadline (3-12); for `hold`, the duration to hold.
     pub duration: u32,
-    /// Number asked for (battles, units).
+    /// Number asked for (battles, units); for `hold`, the seasons.
     #[serde(default = "one")]
     pub count: u32,
     /// Relative weight of the template among the plausible ones.
@@ -91,25 +134,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn bundled_file_parses_with_every_kind() {
+    fn bundled_file_parses_and_is_consistent() {
         let rules = MissionRules::default();
         assert!((1..=2).contains(&rules.max_active));
-        for kind in [
-            MissionKind::TakeProvince,
-            MissionKind::WinBattle,
-            MissionKind::ConstructBuilding,
-            MissionKind::RecruitUnits,
-            MissionKind::ConcludeTreaty,
-            MissionKind::HoldPlace,
-        ] {
-            assert!(
-                rules.templates.iter().any(|t| t.kind == kind),
-                "{}",
-                kind.key()
-            );
-        }
+        assert!(rules.templates.len() >= 6);
+        let mut ids = std::collections::BTreeSet::new();
         for t in &rules.templates {
+            assert!(ids.insert(&t.id), "{}", t.id);
             assert!((3..=12).contains(&t.duration), "{}", t.id);
+            assert_eq!(
+                t.goal == MissionGoal::Count,
+                t.counter.is_some(),
+                "{}: counter only for count",
+                t.id
+            );
+            assert!(!t.steps.is_empty() || !t.progress.is_empty(), "{}", t.id);
         }
     }
 }
@@ -121,6 +160,8 @@ mod key_enum_tests {
 
     #[test]
     fn keys_match_serde_names() {
-        assert_keys_match_serde::<MissionKind>();
+        assert_keys_match_serde::<MissionTarget>();
+        assert_keys_match_serde::<MissionGoal>();
+        assert_keys_match_serde::<MissionCounter>();
     }
 }

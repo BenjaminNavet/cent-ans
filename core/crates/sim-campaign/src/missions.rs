@@ -13,8 +13,8 @@ use data_model::key_enum;
 use std::collections::BTreeSet;
 
 use data_model::{
-    BuildingId, FactionId, GameData, MissionKind, MissionReward, MissionTemplate, ProvinceId,
-    SettlementId,
+    BuildingId, FactionId, GameData, MissionCounter, MissionGoal, MissionReward, MissionTarget,
+    MissionTemplate, ProvinceId, SettlementId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -44,8 +44,12 @@ pub struct MissionsState {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Mission {
     pub id: u32,
+    /// Id of the [`MissionTemplate`] it was drawn from (progress labels).
     pub template: String,
-    pub kind: MissionKind,
+    pub goal: MissionGoal,
+    /// What a `count` goal tallies.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub counter: Option<MissionCounter>,
     pub title: String,
     pub objective: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -54,17 +58,17 @@ pub struct Mission {
     pub settlement: Option<SettlementId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub building: Option<BuildingId>,
-    /// Number asked for (battles, units; seasons for `hold_place`).
+    /// Number asked for (battles, units; seasons for `hold`).
     pub count: u32,
     /// Battles won or units recruited since the mission was given.
     #[serde(default)]
     pub progress: u32,
     pub issued_turn: u32,
     /// Turn at the start of which the mission is failed (or, for
-    /// `hold_place`, fulfilled).
+    /// `hold`, fulfilled).
     pub deadline_turn: u32,
     pub reward: MissionReward,
-    /// `conclude_treaty`: the faction's treaties when the mission was given.
+    /// `treaty`: the faction's treaties when the mission was given.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub baseline: Vec<String>,
 }
@@ -182,45 +186,58 @@ enum Verdict {
 }
 
 fn verdict(state: &CampaignState, player: &FactionId, mission: &Mission) -> Verdict {
-    let turn = state.turn;
-    let achieved = match mission.kind {
-        MissionKind::TakeProvince => mission
-            .province
-            .as_ref()
-            .is_some_and(|p| state.controls_province(player, p)),
-        MissionKind::WinBattle | MissionKind::RecruitUnits => mission.progress >= mission.count,
-        MissionKind::ConstructBuilding => {
-            match (mission.settlement.as_ref(), mission.building.as_ref()) {
-                (Some(s), Some(b)) => state
-                    .settlements
-                    .get(s)
-                    .is_some_and(|s| &s.controller == player && s.buildings.contains(b)),
-                _ => false,
-            }
-        }
-        MissionKind::ConcludeTreaty => {
-            let baseline: BTreeSet<&String> = mission.baseline.iter().collect();
-            treaty_tokens(state, player)
-                .iter()
-                .any(|t| !baseline.contains(t))
-        }
-        MissionKind::HoldPlace => {
-            let held = mission
-                .province
-                .as_ref()
-                .is_some_and(|p| state.controls_province(player, p));
-            if !held {
-                return Verdict::Failure("la place est perdue");
-            }
-            turn >= mission.deadline_turn
-        }
-    };
-    if achieved {
+    if mission.goal == MissionGoal::Hold && !controls_target(state, player, mission) {
+        return Verdict::Failure("la place est perdue");
+    }
+    let (done, of) = measure(state, player, mission);
+    if done >= of {
         Verdict::Success
-    } else if turn >= mission.deadline_turn {
+    } else if state.turn >= mission.deadline_turn {
         Verdict::Failure("l'échéance est passée")
     } else {
         Verdict::Ongoing
+    }
+}
+
+fn controls_target(state: &CampaignState, player: &FactionId, mission: &Mission) -> bool {
+    mission
+        .province
+        .as_ref()
+        .is_some_and(|p| state.controls_province(player, p))
+}
+
+/// How far a mission is: `(done, of)`, fulfilled when `done >= of`. Steps of
+/// a `build` goal: 0 not begun, 1 under construction, 2 standing.
+fn measure(state: &CampaignState, player: &FactionId, mission: &Mission) -> (u32, u32) {
+    match mission.goal {
+        MissionGoal::Control => (u32::from(controls_target(state, player, mission)), 1),
+        MissionGoal::Count => (mission.progress, mission.count),
+        MissionGoal::Hold => (
+            state.turn.saturating_sub(mission.issued_turn),
+            mission.deadline_turn - mission.issued_turn,
+        ),
+        MissionGoal::Build => {
+            let settlement = mission
+                .settlement
+                .as_ref()
+                .and_then(|s| state.settlements.get(s))
+                .filter(|s| &s.controller == player);
+            let step = match (settlement, mission.building.as_ref()) {
+                (Some(s), Some(b)) if s.buildings.contains(b) => 2,
+                (Some(s), Some(b)) if s.construction.as_ref().is_some_and(|c| &c.building == b) => {
+                    1
+                }
+                _ => 0,
+            };
+            (step, 2)
+        }
+        MissionGoal::Treaty => {
+            let baseline: BTreeSet<&String> = mission.baseline.iter().collect();
+            let new = treaty_tokens(state, player)
+                .iter()
+                .any(|t| !baseline.contains(t));
+            (u32::from(new), 1)
+        }
     }
 }
 
@@ -311,19 +328,24 @@ fn free_unit_type<'a>(
 
 /// A battle was won by `faction` (hook of the battle outcome).
 pub(crate) fn note_battle_won(state: &mut CampaignState, faction: &FactionId) {
-    bump(state, faction, MissionKind::WinBattle, 1);
+    bump(state, faction, MissionCounter::BattleWon, 1);
 }
 
 /// `units` were recruited or hired by `faction` (hook of the player's orders).
 pub(crate) fn note_units_recruited(state: &mut CampaignState, faction: &FactionId, units: u32) {
-    bump(state, faction, MissionKind::RecruitUnits, units);
+    bump(state, faction, MissionCounter::UnitsRecruited, units);
 }
 
-fn bump(state: &mut CampaignState, faction: &FactionId, kind: MissionKind, amount: u32) {
+fn bump(state: &mut CampaignState, faction: &FactionId, counter: MissionCounter, amount: u32) {
     if faction != &state.player_faction || state.missions.faction.as_ref() != Some(faction) {
         return;
     }
-    for mission in state.missions.active.iter_mut().filter(|m| m.kind == kind) {
+    for mission in state
+        .missions
+        .active
+        .iter_mut()
+        .filter(|m| m.counter == Some(counter))
+    {
         mission.progress = mission.progress.saturating_add(amount);
     }
 }
@@ -351,12 +373,16 @@ fn offer_mission(
     {
         return;
     }
-    let active_kinds: BTreeSet<MissionKind> =
-        state.missions.active.iter().map(|m| m.kind).collect();
+    let active_templates: BTreeSet<&str> = state
+        .missions
+        .active
+        .iter()
+        .map(|m| m.template.as_str())
+        .collect();
     let pool: Vec<(&MissionTemplate, Vec<Target>)> = rules
         .templates
         .iter()
-        .filter(|t| !active_kinds.contains(&t.kind))
+        .filter(|t| !active_templates.contains(t.id.as_str()))
         .map(|t| (t, candidates(state, data, player, t)))
         .filter(|(_, c)| !c.is_empty())
         .collect();
@@ -378,7 +404,7 @@ fn offer_mission(
         return;
     };
     let target = targets[rng.below(targets.len() as u32) as usize].clone();
-    let count = if template.kind == MissionKind::HoldPlace {
+    let count = if template.goal == MissionGoal::Hold {
         template.duration
     } else {
         template.count.max(1)
@@ -393,7 +419,8 @@ fn offer_mission(
     let mission = Mission {
         id,
         template: template.id.clone(),
-        kind: template.kind,
+        goal: template.goal,
+        counter: template.counter,
         title: fill(&template.title),
         objective: fill(&template.objective),
         province: target.province.clone(),
@@ -404,7 +431,7 @@ fn offer_mission(
         issued_turn: turn,
         deadline_turn: turn + template.duration,
         reward: template.reward.clone(),
-        baseline: if template.kind == MissionKind::ConcludeTreaty {
+        baseline: if template.goal == MissionGoal::Treaty {
             treaty_tokens(state, player)
         } else {
             Vec::new()
@@ -463,8 +490,15 @@ fn candidates(
             .province_controller(p)
             .is_some_and(|c| enemies.contains(c))
     };
-    match template.kind {
-        MissionKind::TakeProvince => {
+    let single = |ok: bool| {
+        if ok {
+            vec![Target::default()]
+        } else {
+            Vec::new()
+        }
+    };
+    match template.target {
+        MissionTarget::EnemyNeighbour => {
             let mut targets = BTreeSet::new();
             for p in &held {
                 for n in data.provinces.get(*p).map_or(&[][..], |p| &p.neighbors) {
@@ -483,7 +517,7 @@ fn candidates(
                 })
                 .collect()
         }
-        MissionKind::HoldPlace => held
+        MissionTarget::ThreatenedOwn => held
             .iter()
             .filter(|p| {
                 data.provinces
@@ -497,26 +531,13 @@ fn candidates(
                 ..Target::default()
             })
             .collect(),
-        MissionKind::WinBattle => {
-            if enemies.is_empty() {
-                Vec::new()
-            } else {
-                vec![Target::default()]
-            }
-        }
-        MissionKind::RecruitUnits => {
-            let can_recruit = held.iter().any(|p| {
-                state
-                    .province_city_id(p)
-                    .is_some_and(|city| state.recruitable(data, city).iter().any(|o| o.available))
-            });
-            if can_recruit {
-                vec![Target::default()]
-            } else {
-                Vec::new()
-            }
-        }
-        MissionKind::ConstructBuilding => {
+        MissionTarget::AtWar => single(!enemies.is_empty()),
+        MissionTarget::CanRecruit => single(held.iter().any(|p| {
+            state
+                .province_city_id(p)
+                .is_some_and(|city| state.recruitable(data, city).iter().any(|o| o.available))
+        })),
+        MissionTarget::Buildable => {
             let mut targets = Vec::new();
             for p in &held {
                 let Some(city) = state.province_city_id(p) else {
@@ -542,19 +563,9 @@ fn candidates(
             }
             targets
         }
-        MissionKind::ConcludeTreaty => {
-            let partner = state.factions.iter().any(|(id, f)| {
-                id != player
-                    && f.alive
-                    && !faction.allies.contains(id)
-                    && id != &state.player_faction
-            });
-            if partner {
-                vec![Target::default()]
-            } else {
-                Vec::new()
-            }
-        }
+        MissionTarget::TreatyPartner => single(state.factions.iter().any(|(id, f)| {
+            id != player && f.alive && !faction.allies.contains(id) && id != &state.player_faction
+        })),
     }
 }
 
@@ -618,68 +629,40 @@ fn deadline_label(state: &CampaignState, deadline_turn: u32) -> String {
     format!("{} {year}", season.label_fr())
 }
 
+/// The label and the 0-1 ratio of a mission, from its template's texts.
 fn progress_of(state: &CampaignState, data: &GameData, mission: &Mission) -> (String, f64) {
-    let player = &state.player_faction;
-    let ratio = |done: u32, of: u32| f64::from(done.min(of)) / f64::from(of.max(1));
-    match mission.kind {
-        MissionKind::TakeProvince => {
-            let holder = mission
-                .province
-                .as_ref()
-                .and_then(|p| state.province_controller(p));
-            match holder {
-                Some(h) if h == player => ("prise".to_owned(), 1.0),
-                Some(h) => {
-                    let name = data.faction_name(h);
-                    (format!("tenue par {name}"), 0.0)
-                }
-                None => ("introuvable".to_owned(), 0.0),
-            }
-        }
-        MissionKind::WinBattle => (
-            format!(
-                "{}/{} victoire{}",
-                mission.progress.min(mission.count),
-                mission.count,
-                if mission.count > 1 { "s" } else { "" }
-            ),
-            ratio(mission.progress, mission.count),
-        ),
-        MissionKind::RecruitUnits => (
-            format!(
-                "{}/{} unités",
-                mission.progress.min(mission.count),
-                mission.count
-            ),
-            ratio(mission.progress, mission.count),
-        ),
-        MissionKind::ConstructBuilding => {
-            let settlement = mission
-                .settlement
-                .as_ref()
-                .and_then(|s| state.settlements.get(s));
-            let building = mission.building.as_ref();
-            match (settlement, building) {
-                (Some(s), Some(b)) if s.buildings.contains(b) => ("achevé".to_owned(), 1.0),
-                (Some(s), Some(b)) if s.construction.as_ref().is_some_and(|c| &c.building == b) => {
-                    ("en chantier".to_owned(), 0.5)
-                }
-                _ => ("pas encore commencé".to_owned(), 0.0),
-            }
-        }
-        MissionKind::ConcludeTreaty => ("aucun traité nouveau".to_owned(), 0.0),
-        MissionKind::HoldPlace => {
-            let held = state.turn.saturating_sub(mission.issued_turn);
-            (
-                format!(
-                    "{}/{} saisons tenues",
-                    held.min(mission.count),
-                    mission.count
-                ),
-                ratio(held, mission.count),
-            )
-        }
-    }
+    let (done, of) = measure(state, &state.player_faction, mission);
+    let done = done.min(of);
+    let ratio = f64::from(done) / f64::from(of.max(1));
+    let Some(template) = data
+        .mission_rules
+        .templates
+        .iter()
+        .find(|t| t.id == mission.template)
+    else {
+        return (format!("{done}/{of}"), ratio);
+    };
+    let text = template
+        .steps
+        .get(done as usize)
+        .unwrap_or(&template.progress);
+    let holder = || {
+        mission
+            .province
+            .as_ref()
+            .and_then(|p| state.province_controller(p))
+            .map_or_else(|| "personne".to_owned(), |h| data.faction_name(h))
+    };
+    let text = if text.contains("{holder}") {
+        text.replace("{holder}", &holder())
+    } else {
+        text.clone()
+    };
+    (
+        text.replace("{done}", &done.to_string())
+            .replace("{n}", &of.to_string()),
+        ratio,
+    )
 }
 
 impl CampaignState {
@@ -692,7 +675,7 @@ impl CampaignState {
                 let (progress, progress_ratio) = progress_of(self, data, m);
                 MissionView {
                     id: m.id,
-                    kind: m.kind.key().to_owned(),
+                    kind: m.template.clone(),
                     title: m.title.clone(),
                     objective: m.objective.clone(),
                     progress,

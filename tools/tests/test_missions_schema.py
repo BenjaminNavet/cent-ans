@@ -5,14 +5,7 @@ from pathlib import Path
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
-KINDS = {
-    "take_province",
-    "win_battle",
-    "construct_building",
-    "recruit_units",
-    "conclude_treaty",
-    "hold_place",
-}
+GOALS = {"control", "hold", "build", "treaty", "count"}
 
 
 def _load(path: Path) -> dict:
@@ -23,10 +16,13 @@ def _missions() -> dict:
     return _load(DATA / "missions.json")
 
 
-def test_every_kind_has_a_template_with_unique_ids() -> None:
-    """The six kinds of the spec are offered; template ids are unique."""
+def test_every_goal_has_a_template_with_unique_ids() -> None:
+    """Every goal is offered; a counter exists exactly for the count goal."""
     templates = _missions()["templates"]
-    assert {t["kind"] for t in templates} == KINDS
+    assert {t["goal"] for t in templates} == GOALS
+    for t in templates:
+        assert (t["goal"] == "count") == ("counter" in t), t["id"]
+        assert "steps" in t or "progress" in t, t["id"]
     ids = [t["id"] for t in templates]
     assert len(ids) == len(set(ids))
 
@@ -41,4 +37,4 @@ def test_placeholders_are_known() -> None:
             )
             assert "{" not in stripped and "}" not in stripped, (template["id"], text)
             if "{lieu}" in text:
-                assert template["kind"] == "construct_building", template["id"]
+                assert template["target"] == "buildable", template["id"]

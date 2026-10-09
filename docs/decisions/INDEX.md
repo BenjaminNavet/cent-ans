@@ -180,6 +180,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
 | 0206 | [Chargeur Rust des données vectorielles de la carte](0206-chargeur-carte-rust.md) | accepté |
+| 0207 | [Un seul moteur de missions piloté par les données](0207-missions-donnees.md) | accepté |
 | 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
 | 0211 | [Charte semi-réaliste révisée (trois états, figurines générées, palette contrôlée)](0211-charte-semi-realiste.md) | accepté |
 | 0212 | [Les modèles 3D générés voyagent en paquet de release, pas par git](0212-paquet-de-modeles-generes.md) | n/d |

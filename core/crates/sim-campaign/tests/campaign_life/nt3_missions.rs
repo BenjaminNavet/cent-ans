@@ -3,7 +3,7 @@
 use data_model::test_support::{fac, game_data};
 use sim_campaign::test_support::start;
 
-use data_model::{FactionId, GameData, MissionKind, MissionReward, SettlementId};
+use data_model::{FactionId, GameData, MissionGoal, MissionReward, SettlementId};
 use sim_campaign::missions::{resolve_missions, treaty_tokens, Mission, NoticeKind};
 use sim_campaign::{CampaignState, Order, Place};
 
@@ -17,12 +17,20 @@ fn prestige(state: &CampaignState) -> i32 {
     state.characters[&ruler].prestige
 }
 
-/// A hand-made mission of `kind`, due at `deadline_turn`.
-fn mission(state: &CampaignState, kind: MissionKind, deadline_turn: u32) -> Mission {
+/// A hand-made mission of the bundled template `template`, due at `deadline_turn`.
+fn mission(state: &CampaignState, template: &str, deadline_turn: u32) -> Mission {
+    let data = game_data();
+    let t = data
+        .mission_rules
+        .templates
+        .iter()
+        .find(|t| t.id == template)
+        .unwrap();
     Mission {
         id: 99,
-        template: "test".to_owned(),
-        kind,
+        template: template.to_owned(),
+        goal: t.goal,
+        counter: t.counter,
         title: "Mission d'essai".to_owned(),
         objective: "Essai.".to_owned(),
         province: None,
@@ -75,7 +83,12 @@ fn the_player_gets_missions_and_the_ai_none() {
     for _ in 0..6 {
         state.end_turn(data);
         assert!(state.missions.active.len() <= 2);
-        let mut kinds: Vec<_> = state.missions.active.iter().map(|m| m.kind).collect();
+        let mut kinds: Vec<_> = state
+            .missions
+            .active
+            .iter()
+            .map(|m| m.template.clone())
+            .collect();
         kinds.dedup();
         assert_eq!(kinds.len(), state.missions.active.len());
     }
@@ -135,8 +148,8 @@ fn the_generator_follows_the_situation() {
         let mut events = Vec::new();
         resolve_missions(&mut s, data, &mut events);
         for m in &s.missions.active {
-            seen.insert(m.kind);
-            if m.kind == MissionKind::TakeProvince {
+            seen.insert(m.goal);
+            if m.goal == MissionGoal::Control {
                 let p = m.province.as_ref().unwrap();
                 assert_eq!(s.province_controller(p), Some(&england));
                 let neighbours = s
@@ -146,20 +159,20 @@ fn the_generator_follows_the_situation() {
                     .any(|q| data.provinces[q].neighbors.contains(p));
                 assert!(neighbours, "{p} borders the player");
             }
-            if m.kind == MissionKind::ConstructBuilding {
+            if m.goal == MissionGoal::Build {
                 assert!(m.building.is_some() && m.settlement.is_some());
             }
         }
     }
     assert!(seen.len() >= 4, "several kinds are offered: {seen:?}");
-    assert!(seen.contains(&MissionKind::TakeProvince));
+    assert!(seen.contains(&MissionGoal::Control));
 }
 
 #[test]
 fn recruiting_counts_and_success_pays_the_reward() {
     let data = game_data();
     let state = start(data, "fac_france", 7);
-    let m = mission(&state, MissionKind::RecruitUnits, state.turn + 4);
+    let m = mission(&state, "raise_levies", state.turn + 4);
     let mut state = with_mission(state, m);
     state
         .factions
@@ -209,7 +222,7 @@ fn recruiting_counts_and_success_pays_the_reward() {
 fn a_won_battle_counts_through_the_counter() {
     let data = game_data();
     let state = start(data, "fac_france", 7);
-    let mut m = mission(&state, MissionKind::WinBattle, state.turn + 6);
+    let mut m = mission(&state, "win_battle", state.turn + 6);
     m.count = 1;
     m.progress = 1;
     let mut state = with_mission(state, m);
@@ -222,7 +235,7 @@ fn a_won_battle_counts_through_the_counter() {
 fn the_deadline_fails_the_mission_with_a_small_loss() {
     let data = game_data();
     let state = start(data, "fac_france", 7);
-    let m = mission(&state, MissionKind::WinBattle, state.turn);
+    let m = mission(&state, "win_battle", state.turn);
     let mut state = with_mission(state, m);
     let player = state.player_faction.clone();
     let treasury = state.factions[&player].treasury;
@@ -246,7 +259,7 @@ fn a_held_place_succeeds_at_the_deadline_and_fails_when_lost() {
     let data = game_data();
     let base = start(data, "fac_france", 7);
     let capital = base.factions[&base.player_faction].capital.clone();
-    let mut m = mission(&base, MissionKind::HoldPlace, base.turn + 1);
+    let mut m = mission(&base, "hold_border", base.turn + 1);
     m.province = Some(capital.clone());
     m.reward = MissionReward {
         gold: 100,
@@ -276,7 +289,7 @@ fn a_held_place_succeeds_at_the_deadline_and_fails_when_lost() {
 fn a_new_treaty_fulfils_the_treaty_mission() {
     let data = game_data();
     let state = start(data, "fac_france", 7);
-    let m = mission(&state, MissionKind::ConcludeTreaty, state.turn + 8);
+    let m = mission(&state, "treaty", state.turn + 8);
     let mut state = with_mission(state, m);
     let player = state.player_faction.clone();
     state.missions.active[0].baseline = treaty_tokens(&state, &player);
@@ -388,7 +401,7 @@ fn besiege_guyenne_as(
 fn a_won_assault_counts_as_a_won_battle() {
     let data = game_data();
     let (state, army, city) = besiege_guyenne(data);
-    let mut m = mission(&state, MissionKind::WinBattle, state.turn + 6);
+    let mut m = mission(&state, "win_battle", state.turn + 6);
     m.count = 1;
     let mut state = with_mission(state, m);
     state.submit_order(data, Order::Assault { army }).unwrap();
@@ -409,7 +422,7 @@ fn a_won_assault_counts_as_a_won_battle() {
 fn a_won_sortie_counts_as_a_won_battle() {
     let data = game_data();
     let (state, army, city) = besiege_guyenne_as(data, "fac_england");
-    let m = mission(&state, MissionKind::WinBattle, state.turn + 6);
+    let m = mission(&state, "win_battle", state.turn + 6);
     let mut state = with_mission(state, m);
     state.armies.get_mut(&army).unwrap().units.truncate(1);
     let knights = sim_campaign::Unit {

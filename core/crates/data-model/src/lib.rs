@@ -111,7 +111,9 @@ pub use entities::landmark::{
 };
 pub use entities::map_scenes::{MapSceneRules, DEFAULT_SCENE_TURNS};
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
-pub use entities::missions::{MissionKind, MissionReward, MissionRules, MissionTemplate};
+pub use entities::missions::{
+    MissionCounter, MissionGoal, MissionReward, MissionRules, MissionTarget, MissionTemplate,
+};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{
