@@ -1,7 +1,7 @@
 class_name AnimalMotion
 extends RefCounted
 
-## Lot AS1 (ADR 0188) : mouvement procédural des bêtes, en déplacement de sommets. Rendu seulement.
+## Mouvement procédural des bêtes, en déplacement de sommets. Rendu seulement.
 ## - Campagne : bœufs, vaches, moutons, chevaux de trait et bêtes attelées des charrettes
 ##   (`folk_prop.gdshader` + `animal_motion.gdshaderinc`) ; `apply_prop` pose les mesures d'un
 ##   modèle sur le matériau d'une surface.
@@ -10,7 +10,7 @@ extends RefCounted
 ## `enabled`.
 
 const FX_PATH := "fx/animal_motion.json"
-const CAMP_FX_PATH := "fx/camp_horse_motion.json"  # AS8c : valeurs tirées de vidéos CC BY-SA, fichier propre
+const CAMP_FX_PATH := "fx/camp_horse_motion.json"  # valeurs tirées de vidéos CC BY-SA, fichier propre
 const CAMP_SHADER := preload("res://shaders/camp_horse.gdshader")
 
 static var _motion := JsonLookup.new(FX_PATH)
@@ -60,7 +60,7 @@ static func model_params(model: String) -> Dictionary:
 
 
 ## Pose les uniformes de `animal_motion.gdshaderinc` sur `material` (modèle `model`). Sans effet
-## (bêtes immobiles, roues fixes) si le lot est éteint ou le modèle absent des données.
+## (bêtes immobiles, roues fixes) si le mouvement est éteint ou le modèle absent des données.
 static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	var p := model_params(model)
 	if p.is_empty() or not enabled():
@@ -79,7 +79,7 @@ static func apply_prop(material: ShaderMaterial, model: String) -> void:
 	# Le cahot suit la foulée de la bête attelée ; sans bête, la période des données.
 	var period := float(p["stride_m"]) if has_beast else float(p["jolt_period_m"])
 	material.set_shader_parameter("am_cart", Vector4(float(p.get("wheel_radius_m", 0.0)), float(p.get("wheel_x_min_m", 0.65)), 1.0, period))
-	# Lot AS8c : courbes de pas, cahot et roulis mesurés (data/fx/animal_motion_measured.json).
+	# Courbes de pas, cahot et roulis mesurés (data/fx/animal_motion_measured.json).
 	material.set_shader_parameter("am_extra", Vector4(float(p["graze_ramp_s"]), float(p["roll_rad"]), 0.0, 0.0))
 	material.set_shader_parameter("am_swing", _lut(p["swing_lut"]))
 	material.set_shader_parameter("am_lift", _lut(p["lift_lut"]))
@@ -131,7 +131,7 @@ static func camp_horse_material(source: Material, hair: bool) -> ShaderMaterial:
 
 
 ## Chevaux animés d'un camp à la place du `BuildingKit.Batch` : `transforms` = nom de modèle
-## (`horse_N`) → Array[Transform3D]. Renvoie les `MultiMeshInstance3D` créés (aucun si le lot est
+## (`horse_N`) → Array[Transform3D]. Renvoie les `MultiMeshInstance3D` créés (aucun si le mouvement est
 ## éteint : l'appelant pose alors les chevaux comme avant).
 static func build_camp_horses(parent: Node3D, transforms: Dictionary, visibility_end: float) -> Array[MultiMeshInstance3D]:
 	var out: Array[MultiMeshInstance3D] = []

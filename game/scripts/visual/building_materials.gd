@@ -1,7 +1,7 @@
 class_name BuildingMaterials
 extends RefCounted
 
-## Lot BR1 (ADR 0021) : matériaux PBR partagés des bâtiments du kit Blender
+## Matériaux PBR partagés des bâtiments du kit Blender
 ## (`tools/blender_scripts/building_kit.py`). Les GLB du kit ne portent que des matériaux
 ## *nommés* (`Plaster`, `Rubble`, `RoofTile`…), des UV en mètres réels et des couleurs de sommet
 ## (teinte du bâtiment × occlusion cuite × patine) ; ce script remplace chaque surface par un
@@ -9,11 +9,11 @@ extends RefCounted
 ## `snow` (toits enneigés) et `far` (campagne : sans carte normale, moins de lectures de texture).
 ## Purement visuel. Les teintes par matériau reprennent `MATERIAL_TINT` de `kit_export.py`.
 ##
-## Lot GA5 : `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` viennent de `data/art/building_materials.json`
+## `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` viennent de `data/art/building_materials.json`
 ## (schéma `art_building_materials.schema.json`), jamais codés en dur ici — même repli que
 ## `BattleTerrain.ground_layers()`.
 ##
-## Lot TF : panneaux des murs à pans de bois du kit Blender, deux couches ajoutées en fin d'atlas
+## Panneaux des murs à pans de bois du kit Blender, deux couches ajoutées en fin d'atlas
 ## (indices déjà bakés dans les `.glb` inchangés), texturées malgré leur place après les couches
 ## unies (`first_plain`..`plain_last` du shader) : `TimberFrame` (14, torchis clair sous les
 ## poutres modelées, niveau `high`) et `TimberFrameFar` (15, lattis peint, niveau `low` sans
@@ -33,9 +33,9 @@ static var ROOFS: Array = []
 ## `building_albedo_array.jpg` / `building_normal_array.jpg`.
 static var ATLAS_LAYERS: Array = []
 const ATLAS_SHADER := preload("res://shaders/building_atlas.gdshader")
-## Lot SR5b : matériau partagé des matières nommées (usure procédurale, `building_aging`).
+## Matériau partagé des matières nommées (usure procédurale, `building_aging`).
 const PBR_SHADER := preload("res://shaders/building_pbr.gdshader")
-## Lot SR5 : intensité par défaut de l'usure des bâtiments (0 : rendu d'avant SR5).
+## Intensité par défaut de l'usure des bâtiments (0 : pas d'usure).
 const SR5_AGING := 0.5
 ## Mousse sur les faces au ciel par matière (défaut : `SR5_WALL_MOSS`, sommets de mur).
 const SR5_MOSS := {"RoofTile": 1.0, "Thatch": 0.8, "RoofSlate": 0.5, "RoofFlat": 0.6}
@@ -48,7 +48,7 @@ static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh
 static var _data_loaded: bool = false
 
 
-## Lot GA5 : charge `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` depuis les données (dossier de données
+## Charge `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` depuis les données (dossier de données
 ## du jeu, puis `data/` du dépôt). Sans repli chiffré : si le fichier est introuvable ou invalide,
 ## les tables restent vides et `material()`/`_atlas()` ne trouvent aucune matière (avertissement).
 static func _ensure_data() -> void:
@@ -88,7 +88,7 @@ static func clear_cache() -> void:
 	_meshes.clear()
 
 
-## Lot GA5 : ordre des couches de l'atlas `Building` (`ATLAS_LAYERS`, chargé depuis les données).
+## Ordre des couches de l'atlas `Building` (`ATLAS_LAYERS`, chargé depuis les données).
 static func atlas_layers() -> Array:
 	_ensure_data()
 	return ATLAS_LAYERS
@@ -144,7 +144,7 @@ static func _atlas(variant: String) -> ShaderMaterial:
 			tiles.append(1.0)
 	mat.set_shader_parameter("layer_tint", tints)
 	mat.set_shader_parameter("layer_tile", tiles)
-	# Lot TF : les couches unies forment un bloc contigu (`first_plain`..`plain_last`) ; les
+	# Les couches unies forment un bloc contigu (`first_plain`..`plain_last`) ; les
 	# couches texturées ajoutées après lui (`TimberFrame`) gardent leur texture.
 	var plain_first := -1
 	var plain_last := -2
@@ -164,7 +164,7 @@ static func _atlas(variant: String) -> ShaderMaterial:
 	return mat
 
 
-## Lot SR5b : même rendu que `_textured_standard` (mêmes textures, teinte, UV en mètres, neige)
+## Même rendu que `_textured_standard` (mêmes textures, teinte, UV en mètres, neige)
 ## dans `building_pbr.gdshader`, plus l'usure procédurale.
 static func _textured(name: String, variant: String) -> ShaderMaterial:
 	var spec: Array = SPECS[name]

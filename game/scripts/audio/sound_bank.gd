@@ -28,6 +28,8 @@ var voices: Dictionary = {"max_voices": 28, "near_distance_m": 70.0}
 var fronts: Dictionary = {"max_emitters": 6, "near_m": 40.0, "mid_m": 200.0, "engaged_full": 250.0, "event_period_s": [0.5, 1.6], "beds": ["melee_bed_1", "melee_bed_2"]}
 ## Réglages de bataille (clé `battle` : `missile_speed_mps`, `near_events`, `dedup_window_s`).
 var battle: Dictionary = {"missile_speed_mps": {}, "near_events": [], "dedup_window_s": {}}
+## Constantes d'ambiance de la bataille (clé `tuning`, lues par `BattleAudio`).
+var tuning: Dictionary = {}
 var events: Dictionary = {}
 var beds: Dictionary = {}
 var ambience: Dictionary = {}
@@ -62,6 +64,7 @@ func load_file(path: String) -> bool:
 	voices.merge(data.get("voices", {}), true)
 	fronts.merge(data.get("fronts", {}), true)
 	battle.merge(data.get("battle", {}), true)
+	tuning.merge(data.get("tuning", {}), true)
 	for event_name in data.get("events", {}):
 		var entry: Dictionary = EVENT_DEFAULTS.duplicate(true)
 		entry.merge(data["events"][event_name], true)

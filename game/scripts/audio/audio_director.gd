@@ -189,7 +189,7 @@ func load_playlists(path: String) -> bool:
 			for track in (entry as Dictionary).get("fallback", []):
 				fallback.append("res://" + str(track))
 		elif entry is Array:
-			# Compat : ancien format (liste simple), toute la liste en primary.
+			# Format historique (liste simple), toute la liste en primary.
 			for track in entry:
 				primary.append("res://" + str(track))
 		_playlists[str(context)] = {"primary": primary, "fallback": fallback}
@@ -386,7 +386,7 @@ func _on_button_pressed() -> void:
 	play_sfx("ui_click")
 
 
-## Écran de démarrage : musique de menu (DA4).
+## Écran de démarrage : musique de menu.
 func enter_menu() -> void:
 	_campaign = null
 	if campaign_ambience != null:

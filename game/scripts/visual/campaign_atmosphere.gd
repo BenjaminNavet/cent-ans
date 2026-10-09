@@ -1,11 +1,11 @@
 class_name CampaignAtmosphere
 extends Node
 
-## Atmosphère de la carte de campagne (lot V1, ADR 0004) : oriente le soleil (lumière
+## Atmosphère de la carte de campagne : oriente le soleil (lumière
 ## rasante venue du nord-ouest, convention cartographique qui fait « sortir » le relief)
 ## et adapte à la distance de la caméra le brouillard de profondeur, la portée des ombres
 ## et le flou de profondeur (effet maquette de près, brume de l'horizon de loin).
-## Lot V3 (A1-05, A1-14) : ciel HDRI et étalonnage de la saison courante (`AtmosphereLibrary`,
+## Ciel HDRI et étalonnage de la saison courante (`AtmosphereLibrary`,
 ## `data/fx/atmosphere.json`), suivis au fil des tours ; effets réglés par `RenderQuality`.
 ## Purement visuel : aucune règle de jeu ici.
 
@@ -13,7 +13,7 @@ extends Node
 @export var sun_path: NodePath = ^"../Sun"
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 
-## Lot PO3 (bible DA § 12.6, ADR 0097) : soleil rasant de fin d'après-midi par saison (hauteur,
+## Soleil rasant de fin d'après-midi par saison (hauteur,
 ## azimut d'où vient la lumière — 0° = nord, sens horaire —, couleur, énergie), perspective
 ## aérienne teintée et étalonnage de carte, lus dans `atmosphere.json` (`campaign.seasons.<saison>`,
 ## `resolve_preset`). Aucune valeur de soleil dans le code : sans préréglage, le soleil de la scène
@@ -35,7 +35,7 @@ var sun_azimuth_deg: float = -1.0
 @export var dof_transition_factor: float = 2.5
 @export var dof_amount_near: float = 0.08
 @export var dof_max_distance: float = 700.0
-## Lot ZG4 : vue rapprochée (sous `close_begin_distance`, pleinement sous `close_full_distance`) :
+## Vue rapprochée (sous `close_begin_distance`, pleinement sous `close_full_distance`) :
 ## le brouillard ne se règle plus sur la distance caméra (il noierait l'horizon à 2 km en vue
 ## rasante) mais laisse voir crêtes et vallées lointaines (`close_fog_begin` / `close_fog_end`
 ## unités) ; flou de profondeur coupé ; ombres plus serrées ; rayon de l'occlusion ambiante
@@ -56,15 +56,15 @@ var _last_distance: float = -1.0
 var _world_env: WorldEnvironment
 var _season: String = ""
 var _season_check_s: float = 0.0
-## PF1 : facteur de portée et cascades des ombres selon le préréglage (`RenderQuality`).
+## Facteur de portée et cascades des ombres selon le préréglage (`RenderQuality`).
 var _quality_range: float = 1.0
 var _quality_splits: int = 4
 var _base_ssao_radius: float = -1.0
-## PO3 : soleil de la saison à (ré)appliquer : au chargement (le relief ZG8 impose sa hauteur au
+## Soleil de la saison à (ré)appliquer : au chargement (le relief impose sa hauteur au
 ## soleil pendant la construction du terrain) et au changement de saison, hors soir de fin de tour.
 var _sun_dirty: bool = false
 var _preset: Dictionary = {}
-## RV-B (`CampaignLighting`, `data/fx/campaign_lighting.json`) : soleil, ambiance et brume visés
+## Soleil, ambiance et brume visés
 ## (saison + phase du tour) et courants ; la lumière glisse de l'un à l'autre, sans saut.
 var _turn: int = -1
 var _sun_target: Dictionary = {}
@@ -95,7 +95,7 @@ func _ready() -> void:
 	_update_season()
 
 
-## RV-B : numéro du tour (`--light-turn=N` force la phase pour les captures), -1 sans simulation.
+## Numéro du tour (`--light-turn=N` force la phase pour les captures), -1 sans simulation.
 func current_turn() -> int:
 	if CmdArgs.has("--light-turn"):
 		return int(CmdArgs.number("--light-turn"))
@@ -129,7 +129,7 @@ func _update_season() -> void:
 		_retarget_light("turn")
 
 
-## PO3 : préréglage complet de la carte pour `season` : `campaign_look` (ciel, étalonnage de
+## Préréglage complet de la carte pour `season` : `campaign_look` (ciel, étalonnage de
 ## saison) augmenté de l'étalonnage de saison de la carte (TB1, `SeasonLook.grade`) puis de
 ## l'étalonnage de carte (`grade`, appliqué après), du soleil (`sun_elevation`,
 ## `sun_azimuth`, `sun_color`, `sun_energy`) et de la brume (`fog_color`, `fog_sun_scatter`).
@@ -143,7 +143,7 @@ static func resolve_preset(season: String) -> Dictionary:
 		if not look.has(key):
 			return {}
 	var grades: Array = (resolved["grades"] as Array).duplicate()
-	# TB1 (ADR 0150) : étalonnage de saison propre à la carte (`data/ui/campaign_seasons.json`),
+	# Étalonnage de saison propre à la carte (`data/ui/campaign_seasons.json`),
 	# entre l'étalonnage de saison commun aux batailles et l'étalonnage de carte.
 	var season_grade := SeasonLook.grade(AtmosphereLibrary.normalize_season(season))
 	if not season_grade.is_empty():
@@ -174,7 +174,7 @@ func apply_season(season: String) -> void:
 	AtmosphereLibrary.apply_to_environment(_environment, _preset, fog, fog.darkened(0.5))
 
 
-## RV-B : nouvelle cible de lumière (saison ou tour) ; la première est posée d'emblée, les
+## Nouvelle cible de lumière (saison ou tour) ; la première est posée d'emblée, les
 ## suivantes sont rejointes en `transition_s.<reason>` secondes.
 func _retarget_light(reason: String) -> void:
 	if _preset.is_empty():
@@ -193,12 +193,12 @@ func _retarget_light(reason: String) -> void:
 	_apply_sun_if_free()
 
 
-## RV-B : soleil visé (saison + tour) : {elevation, azimuth, color, energy}, {} sans préréglage.
+## Soleil visé (saison + tour) : {elevation, azimuth, color, energy}, {} sans préréglage.
 func light_target() -> Dictionary:
 	return _sun_target
 
 
-## RV-B : pose la lumière visée d'emblée (tests, captures), hors soir de fin de tour.
+## Pose la lumière visée d'emblée (tests, captures), hors soir de fin de tour.
 func settle_light() -> void:
 	if _sun_target.is_empty():
 		return
@@ -221,7 +221,7 @@ func _apply_environment_light(k: float) -> void:
 		_environment.fog_light_color = _environment.fog_light_color.lerp(_fog_target, k)
 
 
-## RV-B : un pas d'interpolation de la lumière (soleil, ambiance, brume) vers la cible.
+## Un pas d'interpolation de la lumière (soleil, ambiance, brume) vers la cible.
 func _step_light(delta: float) -> void:
 	if _lighting_settled or _sun_target.is_empty() or not _sun_free():
 		return
@@ -236,7 +236,7 @@ func _step_light(delta: float) -> void:
 	_apply_sun_if_free()
 
 
-## PO3 : pose le soleil de la saison sauf pendant le soir doré de fin de tour (`TurnLight`, qui
+## Pose le soleil de la saison sauf pendant le soir doré de fin de tour (`TurnLight`, qui
 ## rend ensuite la lumière mémorisée) ; sinon réessayé à la vérification suivante.
 func _apply_sun_if_free() -> void:
 	if not _sun_dirty or _sun == null or _preset.is_empty() or _sun_current.is_empty():
@@ -298,7 +298,7 @@ func apply_render_quality(p: Dictionary) -> void:
 func apply_distance(distance: float) -> void:
 	var close := 1.0 - smoothstep(close_full_distance, close_begin_distance, distance)
 	if _environment != null:
-		# RV-B : perspective aérienne selon l'inclinaison (nette en vue basse, légère de dessus).
+		# Perspective aérienne selon l'inclinaison (nette en vue basse, légère de dessus).
 		var begin_factor := fog_begin_factor
 		var end_factor := fog_end_factor
 		var aerial := CampaignLighting.aerial(_rig.pitch_deg() if _rig != null else 50.0)
@@ -326,7 +326,7 @@ func apply_distance(distance: float) -> void:
 		_attributes.dof_blur_amount = dof_amount_near * closeness
 
 
-## PO3 : une fois la carte chargée (terrain construit, hauteur du soleil ZG8 posée), le soleil de
+## Une fois la carte chargée (terrain construit, hauteur du soleil posée), le soleil de
 ## la saison reprend la main.
 var _map_loaded: bool = false
 

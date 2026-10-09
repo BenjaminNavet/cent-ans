@@ -1,7 +1,7 @@
 class_name CampaignLighting
 extends RefCounted
 
-## Lot RV-B : éclairage de jeu de la carte de campagne, lu dans `data/fx/campaign_lighting.json`
+## Éclairage de jeu de la carte de campagne, lu dans `data/fx/campaign_lighting.json`
 ## (schéma `data/schemas/fx_campaign_lighting.schema.json`). Le soleil de base de chaque saison
 ## reste dans `data/fx/atmosphere.json` (`campaign.seasons`) ; ce fichier y ajoute :
 ## - une ambiance de ciel froide (versants à l'ombre bleutés, opposés aux versants au soleil chauds) ;

@@ -31,6 +31,26 @@
         "beds": {"type": "array", "items": {"type": "string"}, "minItems": 1}
       }
     },
+    "tuning": {
+      "description": "Constantes d'ambiance de la bataille lues par BattleAudio (rayons en m, durées en s).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bed_radius_m", "melee_full", "march_full", "cavalry_full", "bed_smoothing", "death_groan_chance", "bell_period_s", "bell_until_s", "front_near_spread_m", "front_mid_spread_m", "dedup_radius_m"],
+      "properties": {
+        "description": {"type": "string"},
+        "bed_radius_m": {"type": "number", "exclusiveMinimum": 0},
+        "melee_full": {"type": "number", "exclusiveMinimum": 0},
+        "march_full": {"type": "number", "exclusiveMinimum": 0},
+        "cavalry_full": {"type": "number", "exclusiveMinimum": 0},
+        "bed_smoothing": {"type": "number", "exclusiveMinimum": 0},
+        "death_groan_chance": {"type": "number", "exclusiveMinimum": 0},
+        "bell_period_s": {"type": "number", "exclusiveMinimum": 0},
+        "bell_until_s": {"type": "number", "exclusiveMinimum": 0},
+        "front_near_spread_m": {"type": "number", "exclusiveMinimum": 0},
+        "front_mid_spread_m": {"type": "number", "exclusiveMinimum": 0},
+        "dedup_radius_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
     "battle": {
       "type": "object",
       "additionalProperties": false,

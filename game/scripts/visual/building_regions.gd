@@ -1,7 +1,7 @@
 class_name BuildingRegions
 extends RefCounted
 
-## Lot TF : style régional des maisons du kit (`data/art/building_regions.json`, schéma
+## Style régional des maisons du kit (`data/art/building_regions.json`, schéma
 ## `art_building_regions.schema.json`). Par région de province (`data/provinces/<id>.json`,
 ## champ `region`) : part des maisons à colombage (`framed`, 0..1) et variantes du Midi
 ## (`southern` : enduit ou pierre, tuiles canal, faible pente). Normandie, Île-de-France, Picardie,

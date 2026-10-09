@@ -19,19 +19,20 @@ static var active: BattleAudio = null
 static var auto_volley: bool = true
 
 const ENGAGED_STATES := {"melee": true}
-## Rayon (m) autour du point visé par la caméra où les régiments nourrissent les nappes.
-const BED_RADIUS := 260.0
-## Soldats engagés (pondérés par la distance) pour une nappe de mêlée à pleine intensité.
-const MELEE_FULL := 420.0
-const MARCH_FULL := 500.0
-const CAVALRY_FULL := 120.0
-const BED_SMOOTHING := 2.5
-const DEATH_GROAN_CHANCE := 0.25
-const BELL_PERIOD := 22.0
-const BELL_UNTIL := 150.0
-## Distance (m) autour d'un front dans laquelle les chocs individuels sont dispersés.
-const FRONT_NEAR_SPREAD := 6.0
-const FRONT_MID_SPREAD := 14.0
+
+## Réglages d'ambiance de bataille (`bank.tuning`, lus à `setup`) : rayon des nappes, effectifs
+## pour pleine intensité, lissage, cloche, dispersion des chocs, rayon de déduplication.
+var _bed_radius := 260.0
+var _melee_full := 420.0
+var _march_full := 500.0
+var _cavalry_full := 120.0
+var _bed_smoothing := 2.5
+var _death_groan_chance := 0.25
+var _bell_period := 22.0
+var _bell_until := 150.0
+var _front_near_spread := 6.0
+var _front_mid_spread := 14.0
+var _dedup_radius_m := 40.0
 
 var bank: SoundBank
 var silent: bool = false
@@ -46,8 +47,7 @@ var bed_levels: Dictionary = {}
 var _pool := VoicePool.new(_voice_busy)
 var _last_played: Dictionary = {}  # événement → temps
 ## Un cri joué à la fois par une transition d'état et par la colonne d'alertes ne sonne qu'une fois
-## dans la fenêtre `bank.battle.dedup_window_s` et ce rayon.
-const DEDUP_RADIUS_M := 40.0
+## dans la fenêtre `bank.battle.dedup_window_s` et le rayon `dedup_radius_m`.
 var _dedup_last: Dictionary = {}  # événement → {time, position}
 var _scheduled: Array = []  # [{time, event, position, gain}]
 var _beds: Dictionary = {}  # nom → AudioStreamPlayer3D
@@ -78,6 +78,7 @@ func setup(weather: String, cam: Camera3D, sound_bank: SoundBank = null) -> void
 	bank = sound_bank if sound_bank != null else SoundBank.load_default()
 	camera = cam
 	_weather = weather
+	_read_tuning()
 	for i in int(bank.voices.get("max_voices", 28)):
 		var player := AudioStreamPlayer3D.new()
 		player.name = "Voice%d" % i
@@ -119,6 +120,21 @@ func setup(weather: String, cam: Camera3D, sound_bank: SoundBank = null) -> void
 	if weather == "rain":
 		_ambience_targets["rain"] = _ambience_db("rain", 0.0)
 	active = self
+
+
+func _read_tuning() -> void:
+	var t: Dictionary = bank.tuning
+	_bed_radius = float(t.get("bed_radius_m", _bed_radius))
+	_melee_full = float(t.get("melee_full", _melee_full))
+	_march_full = float(t.get("march_full", _march_full))
+	_cavalry_full = float(t.get("cavalry_full", _cavalry_full))
+	_bed_smoothing = float(t.get("bed_smoothing", _bed_smoothing))
+	_death_groan_chance = float(t.get("death_groan_chance", _death_groan_chance))
+	_bell_period = float(t.get("bell_period_s", _bell_period))
+	_bell_until = float(t.get("bell_until_s", _bell_until))
+	_front_near_spread = float(t.get("front_near_spread_m", _front_near_spread))
+	_front_mid_spread = float(t.get("front_mid_spread_m", _front_mid_spread))
+	_dedup_radius_m = float(t.get("dedup_radius_m", _dedup_radius_m))
 
 
 func _exit_tree() -> void:
@@ -264,8 +280,8 @@ func update_siege(siege: Dictionary, elapsed: float) -> void:
 		return
 	var center_v: Vector2 = siege.get("center", Vector2.ZERO)
 	var center := Vector3(center_v.x, 0.0, center_v.y)
-	if elapsed < BELL_UNTIL and elapsed >= _next_bell:
-		_next_bell = elapsed + BELL_PERIOD
+	if elapsed < _bell_until and elapsed >= _next_bell:
+		_next_bell = elapsed + _bell_period
 		play_event("bell_toll", center + Vector3(0, 25, 0))
 	for piece in siege.get("pieces", []):
 		var index := int(piece.get("index", -1))
@@ -321,7 +337,7 @@ static func _forward(unit: Dictionary) -> Vector3:
 
 ## Sans le cœur (`auto_volley`, `_no_bv1`) : mêmes deux cas particuliers que
 ## `sim.rs::missile_kind` (`data/unit_types/*.missile`), reconnus ici par id faute d'accès aux
-## données ; le reste suit l'ancienne heuristique.
+## données ; le reste suit l'heuristique par défaut.
 static func missile_kind(unit: Dictionary) -> String:
 	var type := str(unit.get("type", ""))
 	if str(unit.get("render", "")) == "siege":
@@ -342,7 +358,7 @@ func _is_duplicate_cry(event_name: String, position: Vector3) -> bool:
 		return false
 	var last: Dictionary = _dedup_last.get(event_name, {})
 	if not last.is_empty() and _time - float(last["time"]) < float(bank.battle["dedup_window_s"][event_name]) \
-			and position.distance_to(last["position"]) <= DEDUP_RADIUS_M:
+			and position.distance_to(last["position"]) <= _dedup_radius_m:
 		return true
 	_dedup_last[event_name] = {"time": _time, "position": position}
 	return false
@@ -396,7 +412,7 @@ func _detect_events(units: Array, elapsed: float) -> void:
 		if auto_volley and ammo < int(prev["ammo"]):
 			_on_volley(unit, by_id)
 		var lost := int(prev["soldiers"]) - soldiers
-		if lost > 0 and state == "melee" and _rng.randf() < DEATH_GROAN_CHANCE * minf(float(lost), 3.0):
+		if lost > 0 and state == "melee" and _rng.randf() < _death_groan_chance * minf(float(lost), 3.0):
 			play_event("death_groan", pos + Vector3(_rng.randf_range(-5, 5), 0, _rng.randf_range(-5, 5)))
 
 
@@ -468,20 +484,20 @@ func _update_beds(units: Array, focus: Vector3, real_dt: float) -> void:
 		if key == "":
 			continue
 		var d := Vector2(pos.x - focus.x, pos.z - focus.z).length()
-		if d > BED_RADIUS:
+		if d > _bed_radius:
 			continue
-		var weight := soldiers * (1.0 - d / BED_RADIUS)
+		var weight := soldiers * (1.0 - d / _bed_radius)
 		var acc: Array = sums[key]
 		acc[0] += weight
 		acc[1] += pos * weight
 		acc[2] += soldiers
-	var melee_level := _level(float(sums["melee"][0]), MELEE_FULL)
+	var melee_level := _level(float(sums["melee"][0]), _melee_full)
 	var near := 1.0 - far01 * 0.7
 	_drive_bed("melee_bed_1", melee_level * near, sums["melee"], focus, real_dt)
 	_drive_bed("melee_bed_2", clampf(melee_level * 1.6 - 0.6, 0.0, 1.0) * near, sums["melee"], focus, real_dt)
 	_drive_bed("clamor_bed", melee_level * (0.6 + 0.4 * near), sums["melee"], focus, real_dt)
-	_drive_bed("march_bed", _level(float(sums["march"][0]), MARCH_FULL) * near, sums["march"], focus, real_dt)
-	_drive_bed("cavalry_bed", _level(float(sums["cavalry"][0]), CAVALRY_FULL) * near, sums["cavalry"], focus, real_dt)
+	_drive_bed("march_bed", _level(float(sums["march"][0]), _march_full) * near, sums["march"], focus, real_dt)
+	_drive_bed("cavalry_bed", _level(float(sums["cavalry"][0]), _cavalry_full) * near, sums["cavalry"], focus, real_dt)
 	var fires: Array = _siege_track.get("fires", [])
 	var fire_acc := [0.0, Vector3.ZERO, 0.0]
 	var fire_best := INF
@@ -493,7 +509,7 @@ func _update_beds(units: Array, focus: Vector3, real_dt: float) -> void:
 	var fire_level := clampf(float(fires.size()) / 4.0, 0.0, 1.0) if not fires.is_empty() else 0.0
 	_drive_bed("fire_bed", fire_level, fire_acc, focus, real_dt)
 	# Vue haute : la bataille entière en 2D, étouffée ; d'autant plus que la mêlée est large.
-	var distant := _level(engaged_total, MELEE_FULL * 3.0) * clampf(far01 * 1.4, 0.0, 1.0)
+	var distant := _level(engaged_total, _melee_full * 3.0) * clampf(far01 * 1.4, 0.0, 1.0)
 	_ambience_targets["battle_distant"] = _ambience_db("battle_distant", 0.0) + linear_to_db(maxf(distant, 0.0001)) if distant > 0.01 else -80.0
 
 
@@ -507,7 +523,7 @@ func _drive_bed(bed_name: String, target: float, acc: Array, focus: Vector3, rea
 		return
 	var bed: AudioStreamPlayer3D = _beds[bed_name]
 	var level := float(bed_levels.get(bed_name, 0.0))
-	level = lerpf(level, target, clampf(real_dt * BED_SMOOTHING, 0.0, 1.0))
+	level = lerpf(level, target, clampf(real_dt * _bed_smoothing, 0.0, 1.0))
 	bed_levels[bed_name] = level
 	if float(acc[0]) > 0.0:
 		var center: Vector3 = acc[1] / float(acc[0])
@@ -591,7 +607,7 @@ func _update_fronts(units: Array, dt: float, real_dt: float) -> void:
 		var level := _level(float(c["engaged"]), full)
 		var burst := clampf(float(c["losses"]) / 6.0, 0.0, 1.0)
 		var emitter := _front_emitter(key, bed_names, i)
-		emitter["level"] = lerpf(float(emitter.get("level", 0.0)), level, clampf(real_dt * BED_SMOOTHING, 0.0, 1.0))
+		emitter["level"] = lerpf(float(emitter.get("level", 0.0)), level, clampf(real_dt * _bed_smoothing, 0.0, 1.0))
 		var bed: AudioStreamPlayer3D = emitter["bed"]
 		bed.global_position = pos
 		# Couche moyenne (nappe massive) : montee entre `near_m` et `mid_m`, coupee tout pres (les
@@ -610,7 +626,7 @@ func _update_fronts(units: Array, dt: float, real_dt: float) -> void:
 			var sparse := 1.0 if dist < near_m else 2.6
 			var density := clampf(level * (1.0 + burst), 0.05, 2.0)
 			emitter["timer"] = sparse * lerpf(float(period[1]), float(period[0]), clampf(density, 0.0, 1.0))
-			var spread := FRONT_NEAR_SPREAD if dist < near_m else FRONT_MID_SPREAD
+			var spread := _front_near_spread if dist < near_m else _front_mid_spread
 			var count := 2 if (dist < near_m and burst > 0.3) else 1
 			for n in count:
 				var offset := Vector3(_rng.randf_range(-spread, spread), 0.0, _rng.randf_range(-spread, spread))

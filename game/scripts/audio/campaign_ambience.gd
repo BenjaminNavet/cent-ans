@@ -153,7 +153,7 @@ func current_season() -> String:
 	return season if season != "" else "spring"
 
 
-## Météo de la carte au point visé (lot CM2, source : le cœur) ; repli saisonnier sans elle.
+## Météo de la carte au point visé (source : le cœur) ; repli saisonnier sans elle.
 func map_weather(point: Vector2, season: String) -> String:
 	var view: Variant = _campaign.get("weather_view") if _campaign != null else null
 	if view is CampaignWeatherView and not (view as CampaignWeatherView).weather.is_empty():

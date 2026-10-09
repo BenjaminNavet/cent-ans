@@ -13,6 +13,20 @@
     ],
     "dedup_window_s": {"rout_cry": 2.0, "general_death": 2.0}
   },
+  "tuning": {
+    "description": "Constantes d'ambiance de la bataille : rayon (m) des nappes autour de la caméra, soldats engagés pour pleine intensité (mêlée, marche, cavalerie), lissage, chance de râle, cloche (période et fin en s), dispersion (m) des chocs de front, rayon (m) de déduplication des cris.",
+    "bed_radius_m": 260.0,
+    "melee_full": 420.0,
+    "march_full": 500.0,
+    "cavalry_full": 120.0,
+    "bed_smoothing": 2.5,
+    "death_groan_chance": 0.25,
+    "bell_period_s": 22.0,
+    "bell_until_s": 150.0,
+    "front_near_spread_m": 6.0,
+    "front_mid_spread_m": 14.0,
+    "dedup_radius_m": 40.0
+  },
   "event_sfx": {
     "description": "Effet de la campagne par type d'événement du journal, par priorité décroissante (le premier type présent gagne).",
     "order": [

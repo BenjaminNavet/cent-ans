@@ -1,7 +1,7 @@
 class_name AtmosphereLibrary
 extends RefCounted
 
-## Ciels HDRI et étalonnage (lot V3, A1-05), lus dans `data/fx/atmosphere.json` (schéma
+## Ciels HDRI et étalonnage, lus dans `data/fx/atmosphere.json` (schéma
 ## `data/schemas/fx_atmosphere.schema.json`) : matériau de ciel (`hdri_sky.gdshader`, panorama
 ## Poly Haven CC0 aligné sur le soleil de la scène) et LUT 3D d'étalonnage générée à partir de
 ## paramètres lisibles (température, lift/gamma/gain, contraste, saturation, virage), appliquée par
@@ -10,7 +10,7 @@ extends RefCounted
 const DATA_PATH := "fx/atmosphere.json"
 const SKY_SHADER := preload("res://shaders/hdri_sky.gdshader")
 const SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
-## Repli de `battle_decor_saturation` si la saison n'en donne pas (valeur DA6).
+## Repli de `battle_decor_saturation` si la saison n'en donne pas.
 const DEFAULT_DECOR_SATURATION := 0.6
 
 static var _lookup := JsonLookup.new(DATA_PATH)
@@ -41,7 +41,7 @@ static func battle_look(weather: String, season: String) -> Dictionary:
 	return {"sky_id": sky_id, "sky": sky_info(sky_id), "look": look, "grades": [season_grade, look.get("grade", {})], "strength": 1.0}
 
 
-## DA7b : étalonnage de saison des batailles (`battle_seasons.<saison>.grade`, sinon celui de
+## Étalonnage de saison des batailles (`battle_seasons.<saison>.grade`, sinon celui de
 ## `seasons`, commun à la campagne).
 static func battle_season_grade(season: String) -> Dictionary:
 	var key := normalize_season(season)
@@ -51,7 +51,7 @@ static func battle_season_grade(season: String) -> Dictionary:
 	return (data().get("seasons", {}) as Dictionary).get(key, {})
 
 
-## DA6/DA7b (bible § 3.3) : part de saturation gardée par l'albédo du sol et de l'herbe de bataille
+## Part de saturation gardée par l'albédo du sol et de l'herbe de bataille
 ## (`battle_seasons.<saison>.decor_saturation`, 0,6 par défaut).
 static func battle_decor_saturation(season: String) -> float:
 	var battle_season: Dictionary = (data().get("battle_seasons", {}) as Dictionary).get(normalize_season(season), {})
@@ -197,7 +197,7 @@ static func _grade(c: Vector3, g: Dictionary) -> Vector3:
 	if not is_equal_approx(saturation, 1.0):
 		luma = c.dot(Vector3(0.2126, 0.7152, 0.0722))
 		c = Vector3.ONE * luma + (c - Vector3.ONE * luma) * saturation
-	# DA7b : ombres désaturées (la saturation HSV des tons sombres gonfle : max - min rapporté à
+	# Ombres désaturées (la saturation HSV des tons sombres gonfle : max - min rapporté à
 	# un max faible) ; pleine sur les tons sombres, nulle au-delà de la luminance 0,5.
 	var shadow_saturation := float(g["shadow_saturation"])
 	if not is_equal_approx(shadow_saturation, 1.0):

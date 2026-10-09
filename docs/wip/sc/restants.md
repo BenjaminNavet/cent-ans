@@ -190,7 +190,7 @@ MS6 | FAIT? render_quality.json existe -> voir FAIT
 MS7 | À FAIRE | assets sans référence (textures/buildings brutes 26 Mo ; quaternius 95 fichiers suivis) | game/assets, tools | non
 MS8 | À FAIRE | LUT étalonnage atmosphere_library.grade_lut port Rust/précuisson | game/scripts/visual/atmosphere_library.gd | oui
 MS9 | FAIT (release_journey suppr) | release_journey --map-ab/--ab-configs/--uncapped | game/scripts/dev/release_journey.gd | non
-MS10 | À FAIRE | passe commentaires visual/ audio/, constantes battle_audio -> sound_bank.json | game/scripts/{visual,audio} | non
+MS10 | FAIT SHA | passe commentaires visual/ audio/, constantes battle_audio -> sound_bank.json | game/scripts/{visual,audio} | non
 
 ## DT / divers
 DT2 | FAIT (sc/dt2, PNG dé-suivis gardés pour geo) | relief_shade_[0-3].png (131 Mo) toujours suivis ; supprimer repli + dé-suivre | data/map/relief_shade_*.png, game/scripts/map/relief_landcover.gd | non
