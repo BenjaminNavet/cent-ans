@@ -117,7 +117,7 @@ func _test_parcels() -> void:
 	if not _check(mix_doc is Dictionary, "ground_biome_mix.json illisible"):
 		return
 	var mix := mix_doc as Dictionary
-	_check(HbGround.parcels_source(mix) == "hb", "parcels_source par défaut doit être hb")
+	_check(HbGround.parcels_source(mix) == "tx", "parcels_source par défaut doit être tx (ADR 0243)")
 	var manifest := CampaignTextures.pack_manifest(GroundMaterials.TX_MANIFEST_FILE)
 	var layer_ids := {}
 	for entry in manifest.get("layers", []):
