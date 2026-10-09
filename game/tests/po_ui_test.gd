@@ -14,7 +14,7 @@ extends TestCase
 const PICK_PROVINCE_INDEX := 3
 ## Bible DA § 12.2 : Title 26, Heading 20, Body 17, Caption 14 (base 900 px). Rien en dessous ;
 ## 4 valeurs au plus.
-const MIN_SIZE := 14
+const MIN_SIZE := 15
 const MAX_DISTINCT_SIZES := 4
 ## Classes dont le texte compte pour C3 (les autres — Panel, TextureRect… — n'affichent rien).
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",

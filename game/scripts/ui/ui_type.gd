@@ -14,14 +14,14 @@ const TITLE := "Title"
 const HEADING := "Heading"
 ## Texte courant (17 px de base, taille par défaut du thème).
 const BODY := "Body"
-## Légendes, chiffres secondaires, nom de bourg (14 px de base — rien en dessous).
+## Légendes, chiffres secondaires, nom de bourg (15 px de base — rien en dessous ; plancher 720p, QW-G4).
 const CAPTION := "Caption"
 
 const _BASE_SIZES := {
 	TITLE: 26,
 	HEADING: 20,
 	BODY: 17,
-	CAPTION: 14,
+	CAPTION: 15,
 }
 
 
