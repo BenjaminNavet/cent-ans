@@ -6,7 +6,8 @@
     "max_weight": 3,
     "beside_depth_m": 15,
     "behind_depth_m": 50,
-    "behind_weight": 0.15
+    "behind_weight": 0.15,
+    "untouched_factor": 0.35
   },
   "flight": {
     "lookahead_m": 80,

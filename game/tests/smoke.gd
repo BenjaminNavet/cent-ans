@@ -51,6 +51,8 @@ extends "res://tests/smoke_battle.gd"
 ##     (4 actions avec pourcentage), déplacement par ordre, contre-espionnage dans une colonie amie
 ##     → rapport, ligne « agent » au journal de la saison suivante, onglet Agents de l'encyclopédie.
 ## Usage : godot --headless --path game --script res://tests/smoke.gd
+## Bataille seule : `CENT_ANS_SMOKE_ONLY=battle_short` (court, quelques secondes) ou `=battle` (long : bataille
+## entière, scène, déploiement, siège ; une ligne `smoke stage …` par étape).
 ## Code de sortie 0 si tout passe, 1 sinon.
 ##
 ## GT7 : le corps des sections vit dans `smoke_<thème>.gd`, chaînés par héritage
@@ -89,7 +91,13 @@ func _init() -> void:
 		_cleanup_test_dir()
 		finish()
 		return
-	# Batailles seules (bataille rangée avec déploiement, puis siège) : CENT_ANS_SMOKE_ONLY=battle.
+	# RX batsim : bataille courte (60 s simulées, sans scène) : CENT_ANS_SMOKE_ONLY=battle_short.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "battle_short":
+		_run_battle_short()
+		_cleanup_test_dir()
+		finish()
+		return
+	# Batailles seules, test long (bataille rangée avec déploiement, puis siège) : CENT_ANS_SMOKE_ONLY=battle.
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "battle":
 		await _run_battle()
 		await _run_siege_battle()

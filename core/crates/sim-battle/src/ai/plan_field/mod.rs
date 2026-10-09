@@ -279,9 +279,35 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
         slots.extend(view.line_slots(&second, behind, facing));
         slots
     };
+    // RX batsim: the crossing is filed through a few regiments at a time, and the
+    // regiments already across hold the bridgehead until the line is across.
+    let queue = crossing.map(|plan| crossing_queue(view, &plan, &roles.line));
     for (i, x, z) in slots {
         if !view.free(i) {
             continue;
+        }
+        if let (Some(plan), Some(q)) = (crossing, queue.as_ref()) {
+            let near_foe = view
+                .nearest_enemy(i, |e| e.state != UnitState::Routing)
+                .is_some_and(|(_, d)| d < tuning().counter_charge_distance);
+            if q.waiting.contains(&i) {
+                view.halt(i);
+                continue;
+            }
+            if q.across.contains(&i) {
+                if !near_foe {
+                    view.move_to(i, x, z, false, Some(facing));
+                    continue;
+                }
+            } else if !near_foe && !crossing_now(view, i) {
+                // Make for the entry of the crossing rather than swim across
+                // (men drowned by the dozen off the bridge).
+                let u = &view.units[i];
+                if (u.x - plan.near.0).hypot(u.z - plan.near.1) > tuning().crossing_entry_m {
+                    view.move_to(i, plan.near.0, plan.near.1, false, Some(facing));
+                    continue;
+                }
+            }
         }
         // ADR 0052: archers out of arrows fall only on horsemen already held
         // in a melee (Agincourt); they do not walk alone into fresh knights.

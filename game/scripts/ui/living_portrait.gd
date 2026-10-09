@@ -303,6 +303,9 @@ static func character_for(character_id: String) -> Dictionary:
 	var sim := _sim()
 	if character_id == "" or sim == null or not sim.has_method("get_character"):
 		return {}
+	# RX batsim : bataille lancée seule (sans campagne), `get_character` avertirait dans le journal.
+	if sim.has_method("get_date_label") and str(sim.call("get_date_label")) == "":
+		return {}
 	var result: Variant = sim.call("get_character", character_id)
 	return result if result is Dictionary else {}
 

@@ -15,6 +15,11 @@ var zone_view: DeploymentZone = null
 ## Zones supplémentaires (second flanc d'une embuscade), dessinées comme la première.
 var extra_views: Array[DeploymentZone] = []
 var banner: PanelContainer = null
+## Refus du cœur (« Les Chevaliers doivent être placés… ») : sous l'invite, effacé après `ERROR_SECONDS`
+## ou dès qu'un régiment est placé, jamais au milieu de la carte (RX batsim).
+var error_label: Label = null
+var _error_serial: int = 0
+const ERROR_SECONDS := 6.0
 
 
 ## Ouvre la phase juste après `setup` ; `false` si la simulation la refuse.
@@ -63,7 +68,7 @@ func finish() -> bool:
 		return false
 	var result: Dictionary = scene.battle.call("start_battle")
 	if not bool(result.get("ok", false)):
-		scene.hud.show_toast(str(result.get("error", "?")))
+		_show_error(str(result.get("error", "?")))
 		return false
 	dismiss()
 	scene.hud.add_events([{"time": 0.0, "text_fr": "La bataille commence."}])
@@ -98,7 +103,9 @@ func place(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> int:
 		if bool(result.get("ok", false)):
 			placed += 1
 		else:
-			scene.hud.show_toast(str(result.get("error", "?")))
+			_show_error(str(result.get("error", "?")))
+	if placed > 0:
+		_clear_error()
 	return placed
 
 
@@ -128,10 +135,20 @@ func _build_banner() -> void:
 	banner.offset_right = 260
 	banner.offset_top = 104  # sous le bandeau de siège
 	scene.hud.root.add_child(banner)
+	var column := VBoxContainer.new()
+	banner.add_child(column)
 	var box := HBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 16)
-	banner.add_child(box)
+	column.add_child(box)
+	error_label = Label.new()
+	error_label.name = "DeploymentError"
+	error_label.visible = false
+	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	error_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10))
+	column.add_child(error_label)
 	var label := Label.new()
 	label.text = "Déploiement — placez vos troupes"
 	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
@@ -142,3 +159,22 @@ func _build_banner() -> void:
 	button.text = "Commencer la bataille (Entrée)"
 	button.pressed.connect(finish)
 	box.add_child(button)
+
+
+func _show_error(text: String) -> void:
+	if error_label == null or not is_instance_valid(error_label):
+		scene.hud.show_toast(text)
+		return
+	error_label.text = text
+	error_label.visible = true
+	_error_serial += 1
+	var serial := _error_serial
+	scene.get_tree().create_timer(ERROR_SECONDS).timeout.connect(func() -> void:
+		if serial == _error_serial:
+			_clear_error())
+
+
+func _clear_error() -> void:
+	_error_serial += 1
+	if error_label != null and is_instance_valid(error_label):
+		error_label.visible = false

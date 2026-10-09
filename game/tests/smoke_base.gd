@@ -53,3 +53,13 @@ func _check(condition: bool, message: String) -> bool:
 
 func _fail(message: String) -> void:
 	check(false, message)
+
+
+## RX batsim : une ligne par étape avec l'heure écoulée, pour distinguer lenteur et blocage sur machine chargée.
+var _stage_start_ms: int = 0
+
+
+func _stage(name: String) -> void:
+	if _stage_start_ms == 0:
+		_stage_start_ms = Time.get_ticks_msec()
+	print("smoke stage %s (+%d ms)" % [name, Time.get_ticks_msec() - _stage_start_ms])
