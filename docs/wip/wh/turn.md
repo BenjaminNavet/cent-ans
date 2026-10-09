@@ -1,10 +1,8 @@
 # WH turn — état
 
-Branche `wh/turn` (worktree `../gp-wh-turn`). Spec : `docs/wip/wh/tour.md` §3 points 2, 5, 7, 8, 9, 10. ADR 0281.
+Branche `wh/turn`. Spec : `docs/wip/wh/tour.md` §3 points 2, 5, 7, 8, 9, 10. ADR 0281. **FAIT.**
 
-- [x] Cœur : `requires`/`requires_reason` des options (chronicle.rs), `allowed/reason` dans `decision_views` + pont.
-- [x] Cœur : missions de faction (`faction`, `after`, `province`, cible `fixed`, `MissionsState.done`), 8 missions en données.
-- [x] Cœur : `campaign_stats.rs` + `get_campaign_report` (bilan de fin).
-- [x] Godot : autosave par saison / 5 emplacements / `auto_battle`, rapport `always|auto|off`, `MissionTracker`, alerte `mission_due`.
-- [ ] Godot : bilan de fin (victory_controller), option grisée (chronicle_window), tests.
-- [ ] Tests Rust + headless, ADR 0281, ligne lots.md.
+- Cœur : `requires`/`requires_reason` (chronicle.rs), missions de faction (missions.rs, 8 en données), `campaign_stats.rs` + `get_campaign_report`.
+- Godot : autosave par saison (5 + `auto_battle`), rapport `always|auto|off`, `MissionTracker`, cloche `mission_due`, bilan de fin.
+- Tests : `cargo test -p sim-campaign --test campaign_life wh_turn`, `res://tests/wh_turn_test.gd`.
+- Restes : offre de mission en dilemme ; annoter d'autres événements ; échecs de base hors lot (starting_fit, eq2_balance, b7b).

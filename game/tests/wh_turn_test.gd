@@ -19,7 +19,12 @@ func _init() -> void:
 	finish()
 
 
+## Chargées à l'exécution : leur compilation tire la chaîne `MapUI`, qui exige les autoloads.
 func _run() -> void:
+	var MissionTrackerScript: GDScript = load("res://scripts/ui/mission_tracker.gd")
+	var AlertsScript: GDScript = load("res://scripts/ui/alerts.gd")
+	var ClusterScript: GDScript = load("res://scripts/ui/end_turn_cluster.gd")
+	var VictoryScript: GDScript = load("res://scripts/map/victory_controller.gd")
 	# 1. Sauvegarde automatique.
 	check(SaveSlots.AUTOSAVE_SLOTS == 5, "five rotating autosave slots")
 	check(SaveSlots.autosave_name_for(1, 1) == "auto_1" and SaveSlots.autosave_name_for(5, 1) == "auto_5"
@@ -57,7 +62,7 @@ func _run() -> void:
 			"objective": "o", "reward": "800 livres", "province": "prov_boulonnais", "source": "Froissart"},
 		{"id": 2, "title": "Une victoire", "progress": "0/1", "progress_ratio": 0.0, "turns_left": 1,
 			"objective": "o", "reward": "400 livres", "province": ""}]
-	var tracker := MissionTracker.new()
+	var tracker: Control = MissionTrackerScript.new()
 	root.add_child(tracker)
 	var activated: Array = []
 	tracker.mission_activated.connect(func(m: Dictionary) -> void: activated.append(m))
@@ -78,18 +83,18 @@ func _run() -> void:
 	tracker.queue_free()
 	var fake := FakeSim.new()
 	fake.missions = missions
-	var alerts := CampaignAlerts.mission_alerts(fake)
+	var alerts: Array = AlertsScript.mission_alerts(fake)
 	check(alerts.size() == 1 and alerts[0]["kind"] == "mission_due" and int(alerts[0]["mission_id"]) == 2, "only the due mission rings the bell")
-	check("mission_due" in EndTurnCluster.KIND_ORDER and EndTurnCluster.SHORT_LABELS.has("mission_due"), "bell knows mission_due")
+	check("mission_due" in ClusterScript.KIND_ORDER and ClusterScript.SHORT_LABELS.has("mission_due"), "bell knows mission_due")
 
 	# 4. Bilan de fin.
 	var report := {"start_year": 1337, "year": 1360, "turns": 92, "provinces_start": 20, "provinces_peak": 30, "provinces_end": 25,
 		"battles_won": 7, "battles_lost": 2, "objectives_done": 2, "objectives_total": 4, "prestige": 50,
 		"score_provinces": 250, "score_objectives": 200, "score_prestige": 50, "score_treasury": 3, "score_other": 0, "score": 503}
-	var lines := VictoryController.report_lines(report)
+	var lines: PackedStringArray = VictoryScript.report_lines(report)
 	check(lines.size() == 5 and lines[2].contains("7 gagnée"), "report lines: %s" % str(lines))
-	check(VictoryController.score_breakdown(report).ends_with("= 503"), "score breakdown ends with the total")
-	check(VictoryController.report_lines({}).is_empty(), "no lines without a report")
+	check(VictoryScript.score_breakdown(report).ends_with("= 503"), "score breakdown ends with the total")
+	check(VictoryScript.report_lines({}).is_empty(), "no lines without a report")
 
 	# 5. Vraie simulation : bilan, missions de faction, options de dilemme.
 	if not ClassDB.class_exists("CampaignSim") or not ClassDB.instantiate("CampaignSim").has_method("get_campaign_report"):
@@ -113,6 +118,7 @@ func _run() -> void:
 	for key in ["start_year", "year", "turns", "provinces_start", "provinces_end", "battles_won", "battles_lost", "score", "score_other"]:
 		check(real.has(key), "report key %s" % key)
 	check(int(real.get("provinces_start", 0)) > 0, "provinces at the start counted")
+	map.victory.show_mission_notices()  # comme `after_end_turn` : avis puis suivi
 	check(map.victory.tracker != null and map.victory.tracker.missions.size() == (sim.call("get_missions") as Array).size(),
 		"the tracker follows get_missions")
 	for mission: Dictionary in sim.call("get_missions"):

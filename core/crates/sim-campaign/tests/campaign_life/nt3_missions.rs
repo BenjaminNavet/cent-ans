@@ -149,7 +149,7 @@ fn the_generator_follows_the_situation() {
         resolve_missions(&mut s, data, &mut events);
         for m in &s.missions.active {
             seen.insert(m.goal);
-            if m.goal == MissionGoal::Control {
+            if m.goal == MissionGoal::Control && !m.template.starts_with("fr_") {
                 let p = m.province.as_ref().unwrap();
                 assert_eq!(s.province_controller(p), Some(&england));
                 let neighbours = s
