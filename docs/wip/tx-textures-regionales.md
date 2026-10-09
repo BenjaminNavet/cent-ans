@@ -79,9 +79,12 @@ Mandat joueur : « occupe toi de ça » sur les 5 points ouverts. Branche `tx-fi
   ni pour les feuilles (pas de `hi_dir` : `--size 2048` les saute désormais).
 - Grain fin jugé (capture b05, caméra au plancher 12 m) : l'herbe couvre le sol, chemin propre, ni
   motif ni bruit ; aucune retouche. Boréal confirmé vert.
-- Reste : niveau 2k local (`textures pack <famille> --size 2048` dans le checkout principal),
-  retrait des sols Poly Haven (agent, ADR 0244), puis fusion des deux paquets de grain et
-  `BattleGrassGroups.biome_for`, capture de près du grain.
+- Fait ensuite : 2k construit localement, grain jugé de près, sols Poly Haven retirés (ADR 0244,
+  `docs/wip/tx-polyhaven.md` ; `micro_battle` remplace `near_detail`), `BattleGrassGroups.biome_for`
+  délègue à `BattleGroundTextures.biome_for`, garde tableau vide dans `building_materials.gd`,
+  `decor_hover_test` réessaie la sélection de la ville (échec intermittent sous charge).
+- Reste (optionnel) : fusionner les deux paquets de grain (`micro_battle` de bataille et
+  `tx_micro_ground` de campagne) ; vérification visuelle du sol de bataille sans `near_detail`.
 
 ## Réservations
 

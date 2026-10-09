@@ -24,7 +24,7 @@ func _check_ground_cards() -> void:
 
 
 func _check_grass_groups() -> void:
-	var expected := {1: "green", 2: "green", 3: "dry", 4: "steppe", 5: "arctic", 6: "alpine", 7: "dry", 8: "steppe", 9: "arctic", 10: "green", 11: "green", 12: "green", 13: "green", 14: "dry"}
+	var expected := {1: "green", 2: "green", 3: "dry", 4: "steppe", 5: "green", 6: "alpine", 7: "dry", 8: "steppe", 9: "arctic", 10: "green", 11: "green", 12: "green", 13: "green", 14: "dry"}
 	for biome: int in expected:
 		check(BattleGrassGroups.group_of(biome) == expected[biome], "biome %d -> %s (got %s)" % [biome, expected[biome], BattleGrassGroups.group_of(biome)])
 	var cards := BattleGrassGroups.cards(4)

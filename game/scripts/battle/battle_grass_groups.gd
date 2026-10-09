@@ -12,9 +12,6 @@ extends RefCounted
 ## renvoie {} et l'herbe reste celle d'avant. Purement visuel.
 
 const PACK_FILE := "art/tx_battle_grass_pack.json"
-const PROVINCES_FILE := "fx/battle_province_biomes.json"
-const BIOME_FLAG := "--battle-biome"
-const DEFAULT_BIOME := 2
 ## Cases de l'atlas FA7 remplacées hors du groupe vert (variantes d'herbe haute, à épis, folle),
 ## carte du groupe qui les remplit (rôle). Les cases de chaume (`short_a`/`short_b`) et de blé
 ## (`wheat_*`) sont conservées.
@@ -40,19 +37,9 @@ static func clear_cache() -> void:
 	_fa_cache = {}
 
 
-## Biome (1..14) de la bataille : `--battle-biome N` (captures), sinon celui de la province
-## (`fx/battle_province_biomes.json`), sinon le biome par défaut.
+## Biome (1..14) de la bataille : même règle que le sol (`BattleGroundTextures.biome_for`).
 static func biome_for(province_id: String) -> int:
-	var forced := CmdArgs.value(BIOME_FLAG, "")
-	if forced.is_valid_int():
-		return clampi(int(forced), 1, BiomeParents.COUNT - 1)
-	if province_id != "" and DataFile.exists(PROVINCES_FILE):
-		var table: Variant = DataFile.load_cached(PROVINCES_FILE)
-		if table is Dictionary:
-			var biome := int(((table as Dictionary).get("provinces", {}) as Dictionary).get(province_id, 0))
-			if biome > 0:
-				return biome
-	return DEFAULT_BIOME
+	return BattleGroundTextures.biome_for(province_id, "")
 
 
 static func _ensure() -> void:
