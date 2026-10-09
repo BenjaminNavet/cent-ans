@@ -204,8 +204,8 @@ def full_prompt(entry: dict) -> str:
         return entry["prompt"]
     if entry["kind"] == "decor":
         style = json.loads(DECOR_STYLE.read_text())
-        suffix = style["style_suffix"]
-        if entry.get("region"):
+        suffix = entry.get("style_suffix") or style["style_suffix"]
+        if entry.get("region") and not entry.get("style_suffix"):
             suffix = (
                 entry["region"].strip()
                 + " "

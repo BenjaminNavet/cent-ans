@@ -21,7 +21,20 @@
       "roughness": 0.85,
       "strip_base": true
     },
-    "house": {
+    "field": {
+   "label": "Parcelle de culture enti\u00e8re (maquette plate)",
+   "category": "props",
+   "lod_tris": [
+    5000,
+    1500,
+    400
+   ],
+   "tex": 1024,
+   "scale_axis": "length",
+   "roughness": 0.95,
+   "strip_base": false
+  },
+  "house": {
       "label": "Maison, grange, moulin, puits",
       "category": "buildings",
       "lod_tris": [

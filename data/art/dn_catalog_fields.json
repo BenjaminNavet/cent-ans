@@ -1,0 +1,167 @@
+[
+ {
+  "id": "field_wheat_ripe",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense ripe golden wheat growing in straight parallel furrows and rows running along the long side, uneven medieval stand, bearded ears",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.wheat_ripe",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_barley_green",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in dense green-gold barley growing in straight parallel rows running along the long side, slightly paler than wheat",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.barley_green",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_rye_field",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot covered in tall grey-green rye with a few oats, growing in straight parallel rows running along the long side",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.rye_field",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_buckwheat_field",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot in straight parallel rows of blooming pale blue flax and yellow woad, running along the long side",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.buckwheat_field",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_vineyard_rows",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot of a medieval vineyard, many straight parallel rows of low vines tied to short wooden stakes (echalas), bare brown soil between the rows, rows running along the long side",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.vineyard_rows",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_olive_grove",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an olive grove, regular grid of gnarled silver-green olive trees with dry grass and bare earth between them",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.olive_grove",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_apple_orchard",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an orchard, regular grid of apple and cherry trees with rounded crowns, grass between the rows",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.apple_orchard",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_fruit_orchard_rows",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a southern fruit orchard, regular grid of pear, pomegranate, orange and mulberry trees, bare earth between the rows",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.fruit_orchard_rows",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_med_terraces",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as Mediterranean hillside terraces, three or four stepped dry-stone-walled terraces in gradins, each planted with olive trees and vines, the steps running along the long side",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.med_terraces",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_rice_paddy",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as a rice paddy divided into small flooded rectangular basins by low earth dikes, shallow muddy water and young bright-green rice rows",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.rice_paddy",
+  "region": "Medieval open fields 1340"
+ },
+ {
+  "id": "field_huerta_plots",
+  "kind": "decor",
+  "prompt": "whole rectangular medieval open-field parcel as a miniature diorama tile, one single plot seen from a high three-quarter view, the whole plot visible edge to edge on a thin flat rectangular slab of earth with a narrow grassy headland border and a low discreet earth bank, the entire plot as an irrigated huerta, many small narrow raised planks of beans, cabbages and turnips separated by thin irrigation channels, parallel to the long side",
+  "style_suffix": "Rural medieval France circa 1340. Muted earthy colour palette, low saturation, natural desaturated tones (ochres, straw yellows, olive greens, browns), albedo like an overcast day, no neon, no bright colours. The whole parcel is fully visible from edge to edge, centred and filling about 90 percent of the frame, seen from a high three-quarter view, standing alone on a plain uniform medium grey studio background. Soft even diffuse overcast light, no baked directional shadow, no reflections, sharp realistic detail. No buildings, no people, no animals, no vehicles, no fence, no text, nothing else in the scene.",
+  "seeds": 1,
+  "backend3d": "fal",
+  "ingest": {
+   "class": "field",
+   "target_length_m": 900,
+   "yaw_fix": 0
+  },
+  "target": "fields: parcelle entière (DN-CHAMPS révision), crops.huerta_plots",
+  "region": "Medieval open fields 1340"
+ }
+]

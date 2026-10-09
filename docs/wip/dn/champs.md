@@ -30,3 +30,11 @@ petites instances) : +3 à +5 ms. Pas de LOD de distance au-delà des 3 niveaux 
 - Le modèle de blé est une touffe pointue : rendu en « éclats » de près ; un impostor/carte découpée
   dans l'asset donnerait un tapis plus lisse.
 - Premier affichage : ~1 s de chargement des glb (préchargés en arrière-plan au setup).
+
+## Révision : une parcelle = un modèle (retour joueur 10-09)
+Le joueur rejette le remplissage en touffes (« il faut faire un asset du champ entier »). En cours :
+1. [fait] catalogue `data/art/dn_catalog_fields.json` (11 parcelles `field_<clé>`), classe d'ingest `field`
+   (props, axe long, base conservée), `dn_batch.py` accepte `style_suffix` par entrée.
+2. [à faire] génération fal (image Z-Image + TRELLIS), vérif des images, ingest, budget.
+3. [à faire] `FieldPlan`/`FieldLayer` : une instance par parcelle, échelle = parcelle - headland.
+4. [à faire] tests, schéma, mesures ON/OFF, captures, ADR 0220 section révision.
