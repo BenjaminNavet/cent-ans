@@ -10,6 +10,27 @@ textures_app = typer.Typer(
 )
 
 
+@textures_app.command("generate")
+def generate_command(
+    family: str = typer.Argument(..., help="Famille (voir `textures families`)."),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiant d'entrée à produire (répétable)."
+    ),
+) -> None:
+    """Génère les images brutes d'une famille (reprenable, cache respecté)."""
+    from cent_ans_tools.texture_factory.catalog import CatalogError, load_catalog
+    from cent_ans_tools.texture_factory.generate import generate
+
+    try:
+        document = load_catalog(family)
+        manifest = generate(document, only=only or None)
+    except CatalogError as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    for entry_id, record in manifest.items():
+        typer.echo(f"{entry_id}\t{record['status']}\tessai {record['attempt']}")
+
+
 @textures_app.command("families")
 def families() -> None:
     """Liste les familles de textures connues."""

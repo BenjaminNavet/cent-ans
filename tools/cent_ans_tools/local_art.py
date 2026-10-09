@@ -104,6 +104,7 @@ def render_image(
     seed: int | None = None,
     strength: float | None = None,
     runner: Runner | None = None,
+    size: tuple[int, int] | None = None,
 ) -> bytes:
     """One PNG image for ``prompt``; ``reference`` (PNG/JPEG) is the img2img start.
 
@@ -137,7 +138,7 @@ def render_image(
                 job,
                 prompt_file,
                 output,
-                size_for(aspect_ratio),
+                size or size_for(aspect_ratio),
                 zlib.crc32(prompt.encode("utf-8")) if seed is None else seed,
                 strength,
             )
