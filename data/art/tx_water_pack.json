@@ -1,0 +1,114 @@
+{
+ "layer_size": 2048,
+ "layers": [
+  {
+   "id": "water_sea_atlantic",
+   "role": "sea",
+   "biomes": [
+    1,
+    2,
+    11
+   ],
+   "tile_m": 40,
+   "slope": 0.3699,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_sea_atlantic_albedo.jpg",
+   "normal": "res://assets/textures/water/water_sea_atlantic_normal.jpg"
+  },
+  {
+   "id": "water_ocean_open",
+   "role": "ocean",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "tile_m": 120,
+   "slope": 0.373,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_ocean_open_albedo.jpg",
+   "normal": "res://assets/textures/water/water_ocean_open_normal.jpg"
+  },
+  {
+   "id": "water_sea_mediterranean",
+   "role": "sea",
+   "biomes": [
+    3,
+    7,
+    8,
+    14
+   ],
+   "tile_m": 40,
+   "slope": 0.4519,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_sea_mediterranean_albedo.jpg",
+   "normal": "res://assets/textures/water/water_sea_mediterranean_normal.jpg"
+  },
+  {
+   "id": "water_sea_northern",
+   "role": "sea",
+   "biomes": [
+    5,
+    9,
+    13
+   ],
+   "tile_m": 40,
+   "slope": 0.3916,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_sea_northern_albedo.jpg",
+   "normal": "res://assets/textures/water/water_sea_northern_normal.jpg"
+  },
+  {
+   "id": "water_sea_black",
+   "role": "sea",
+   "biomes": [
+    4,
+    10,
+    12
+   ],
+   "tile_m": 40,
+   "slope": 0.3811,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_sea_black_albedo.jpg",
+   "normal": "res://assets/textures/water/water_sea_black_normal.jpg"
+  },
+  {
+   "id": "water_river_small_clear",
+   "role": "river_small",
+   "biomes": [
+    1,
+    2,
+    6,
+    13
+   ],
+   "tile_m": 8,
+   "slope": 0.2648,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_river_small_clear_albedo.jpg",
+   "normal": "res://assets/textures/water/water_river_small_clear_normal.jpg"
+  },
+  {
+   "id": "water_torrent_alpine",
+   "role": "river_small",
+   "biomes": [
+    6
+   ],
+   "tile_m": 8,
+   "slope": 0.2336,
+   "flat": false,
+   "albedo": "res://assets/textures/water/water_torrent_alpine_albedo.jpg",
+   "normal": "res://assets/textures/water/water_torrent_alpine_normal.jpg"
+  }
+ ]
+}

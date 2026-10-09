@@ -118,3 +118,19 @@ vec2 sea_whitecaps(vec2 p, float footprint, float amount) {
 	result.x = crest * near;
 	return result;
 }
+
+// TX (ADR 0241) : emplacement (0 = mer par défaut, 1-4 = bassins dans l'ordre du fichier) dont le poids
+// est le plus fort au point uv ; choisit la texture de détail du bassin (`water.gdshader`).
+int basin_dominant(vec2 uv) {
+	if (!basin_on) {
+		return 0;
+	}
+	vec4 w = clamp(textureLod(sea_basins, clamp(uv, vec2(0.0), vec2(1.0)), 0.0), 0.0, 1.0);
+	float best = max(1.0 - (w.r + w.g + w.b + w.a), 0.0);
+	int slot = 0;
+	if (w.r > best) { best = w.r; slot = 1; }
+	if (w.g > best) { best = w.g; slot = 2; }
+	if (w.b > best) { best = w.b; slot = 3; }
+	if (w.a > best) { slot = 4; }
+	return slot;
+}

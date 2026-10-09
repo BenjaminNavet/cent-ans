@@ -119,6 +119,10 @@ def build_pack(
     ``size`` overrides the pack's ``layer_size`` (normals at half size) and writes the
     arrays under the pack's ``hi_dir`` (outside the repository budget) instead.
     """
+    if pack_spec.get("kind") == "tiles":
+        from cent_ans_tools.texture_factory.tiles import build_tile_files
+
+        return build_tile_files(document, pack_spec, raw_dir, repo_root)
     if pack_spec.get("kind", "tile") != "tile":
         from cent_ans_tools.texture_factory.cards import build_card_pack
 

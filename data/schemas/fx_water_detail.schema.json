@@ -21,9 +21,16 @@
           "strength": {"type": "number", "minimum": 0, "maximum": 1},
           "scale": {"type": "number", "exclusiveMinimum": 0},
           "flow_speed": {"type": "number", "minimum": 0},
-          "turbidity": {"type": "number", "minimum": 0, "maximum": 1}
+          "turbidity": {"type": "number", "minimum": 0, "maximum": 1},
+          "tx": {"type": "string", "pattern": "^[a-z0-9_]+$", "description": "Surface générée (TX, ADR 0241) qui remplace la texture 512 px."}
         }
       }
+    },
+    "basins": {
+      "type": "object",
+      "description": "Emplacement de `data/map/sea_basins.json` (default, puis l'id de chaque bassin) -> matière de mer.",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+      "additionalProperties": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
     }
   }
 }

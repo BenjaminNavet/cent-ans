@@ -37,7 +37,7 @@
         "properties": {
           "name": {"type": "string", "pattern": "^[a-z0-9_]+$"},
           "roles": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-          "kind": {"enum": ["tile", "cards", "sheet", "files"], "description": "tile (défaut) : raccord + normale ; cards : cartes détourées recadrées en tableau RGBA (WebP) ; sheet : planches détourées entières en tableau RGBA ; files : une carte WebP par entrée."},
+          "kind": {"enum": ["tile", "cards", "sheet", "files", "tiles"], "description": "tile (défaut) : raccord + normale ; cards : cartes détourées recadrées en tableau RGBA (WebP) ; sheet : planches détourées entières en tableau RGBA ; files : une carte WebP par entrée ; tiles : albédo et normale JPEG 2k par entrée (eau)."},
           "texture_dir": {"type": "string"},
           "hi_dir": {"type": "string"},
           "albedo": {"type": "string"},

@@ -8,6 +8,23 @@ output_size: 2048
 style_prefix: Photorealistic aerial photograph, soft diffuse overcast lighting, natural colours, high
   detail.
 style_suffix: Seamless tileable texture, sharp fine detail across the whole image, realistic colours.
+# `textures pack water_surfaces` : albédo + normale 2k par surface (la normale vient du relief des
+# rides) ; les surfaces presque lisses (fleuves limoneux) restent à l'eau procédurale.
+processing:
+  blend_width: 128
+  feather: 8.0
+  equalize: false
+  height_strength: 2.5
+  roughness: 0.3
+packs:
+  - name: water
+    kind: tiles
+    roles: [sea, ocean, river_small]  # fleuves limoneux (lisses), lacs, marais, oasis : eau procédurale
+    texture_dir: assets/textures/water/
+    manifest: data/art/tx_water_pack.json
+    layer_size: 2048
+    albedo_quality: 76
+    normal_quality: 80
 entries:
 - id: water_sea_atlantic
   role: sea
