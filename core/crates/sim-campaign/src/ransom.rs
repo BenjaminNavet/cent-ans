@@ -378,7 +378,7 @@ pub fn cedable_provinces(
 }
 
 /// The province passes to the captor (as in a peace treaty, without claim);
-/// also used by the `transfer_province` event effect (G1). Lot C4: every
+/// also used by the `transfer_province` event effect (G1). Every
 /// settlement the payer owns there changes hands (enclaves of third parties
 /// stay).
 pub(crate) fn cede_province(

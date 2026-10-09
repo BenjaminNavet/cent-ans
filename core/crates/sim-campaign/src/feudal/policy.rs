@@ -1,4 +1,4 @@
-//! Call points of the feudal AI (lot FE5, ADR 0110).
+//! Call points of the feudal AI (ADR 0110).
 //!
 //! The reactive feudal decisions happen inside the resolution of another
 //! faction's order (a declaration of war calls the target's suzerain, who

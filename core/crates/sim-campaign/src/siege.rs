@@ -2,7 +2,7 @@
 //! the besieging general's `SiegeSpeed` and the `trait_siege_master`/
 //! `trait_cruel` triggers).
 //!
-//! Lot C4: sieges and captures apply to settlements (M8 logic unchanged);
+//! Sieges and captures apply to settlements (M8 logic unchanged);
 //! the chevauchée still devastates the whole province. A village held by an
 //! enemy is taken as soon as an army enters it when it has no garrison;
 //! otherwise it is stormed at once (no walls) and besieged by any hostile
@@ -152,7 +152,7 @@ pub(crate) fn resolve_sieges(
         let turn = state.turn;
         let settlement = state.settlements.get_mut(&settlement_id).expect("exists");
         match &mut settlement.siege {
-            // Lot M2: a siege begun during this turn (an army entered the
+            // A siege begun during this turn (an army entered the
             // place) only starts counting at the next one. Its engines are
             // built from the start: marches are immediate, the army spends
             // the rest of the turn in camp (the ETA shown counts this turn).
@@ -504,7 +504,7 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
             .is_some_and(|a| a.faction == state.player_faction)
     });
     let player_involved = player_ally || controller == state.player_faction;
-    // Lot M3: an assault during an AI faction's turn is auto-resolved.
+    // An assault during an AI faction's turn is auto-resolved.
     if state.interactive_battles && player_involved && state.ai_turn.is_none() {
         let already = state
             .pending_battles

@@ -1,5 +1,4 @@
-//! Pre-battle forecast and withdrawal (lot UB1, pre-battle
-//! screen).
+//! Pre-battle forecast and withdrawal (pre-battle screen).
 //!
 //! [`CampaignState::battle_forecast`] estimates, without touching the
 //! campaign RNG, the balance of power of a pending battle. The sides and

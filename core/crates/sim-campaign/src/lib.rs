@@ -20,6 +20,23 @@
 //!   [`CampaignState::player_faction`].
 //! - Persistence: [`CampaignState::save_json`], [`CampaignState::load_json`].
 //!
+//! # Organisation
+//!
+//! Flat modules hold one rule each (`economy`, `siege`, `population`, `weather`, ...);
+//! `state` owns [`CampaignState`] and its serialisable parts, `save` its JSON
+//! persistence and `setup_1337` the historical start. Larger rules are split in
+//! sub-directories, each with its own module documentation:
+//!
+//! - `orders/`: validation and application of player and AI [`Order`]s;
+//! - `movement/`: settlement-graph movement, sea crossings, field battles, retreat;
+//! - `diplomacy/`: relations, casus belli, war and peace, alliances, offers, diplomatic AI;
+//! - `negotiation/` (with `negotiation.rs`): treaty articles, their value and acceptance;
+//! - `feudal/` (with `feudal.rs`): titles above factions, vassal acts, felony, inheritance;
+//! - `agents/` and `crusade/`: spies/heralds/preachers and the crusader faction's fervour;
+//! - `preview/`, `tests/`: read-only previews and private-item unit tests.
+//!
+//! The `test-support` feature exposes `test_support` helpers to other crates.
+//!
 //! # Deviations from `docs/design/m2-campaign-loop.md`
 //!
 //! - The `ai` crate depends on this crate, so `end_turn` cannot call

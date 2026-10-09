@@ -1,4 +1,4 @@
-//! Two-tone reachable area of an army (lot CV3-5, spec
+//! Two-tone reachable area of an army (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 4): the cells it can
 //! reach this turn, and those it can reach by the end of the next one.
 //!

@@ -32,7 +32,7 @@ use crate::research;
 use crate::skills;
 use crate::state::{Army, ArmyId, CampaignState, MoveTarget};
 
-/// What an order did, for the orders whose effect the UI shows (lot M2).
+/// What an order did, for the orders whose effect the UI shows.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum OrderOutcome {
@@ -49,7 +49,7 @@ impl CampaignState {
     }
 
     /// Validates and applies an order of the player faction, and says what
-    /// it did (lot M2: the march of a move order).
+    /// it did (the march of a move order).
     pub fn submit_order_outcome(
         &mut self,
         data: &GameData,

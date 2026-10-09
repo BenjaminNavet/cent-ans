@@ -66,7 +66,7 @@ pub struct DiplomacyEntry {
     pub casus_belli: Option<String>,
     pub claims: Vec<String>,
     pub loyalty: Option<u8>,
-    /// Lot C5: a formal trade agreement is in force (erased by war, its
+    /// A formal trade agreement is in force (erased by war, its
     /// routes suspended by an embargo — see [`CampaignState::has_trade_agreement`]).
     #[serde(default)]
     pub trade_agreement: bool,

@@ -66,7 +66,7 @@ impl CampaignState {
         Ok(())
     }
 
-    /// Lot C5: ends a trade agreement concluded by a DP1 treaty article
+    /// Ends a trade agreement concluded by a DP1 treaty article
     /// ([`crate::negotiation::Article::TradeAgreement`]); the player's call,
     /// the AI never breaks one on its own.
     pub fn break_trade_agreement(

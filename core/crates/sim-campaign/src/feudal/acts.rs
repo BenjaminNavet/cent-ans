@@ -1,4 +1,4 @@
-//! Deliberate acts of a vassal (lot FE5, spec § 4.2): revolt and change of
+//! Deliberate acts of a vassal (spec § 4.2): revolt and change of
 //! allegiance, issued as orders by the feudal AI (`crates/ai`).
 
 use data_model::{FactionId, GameData};

@@ -1,4 +1,4 @@
-//! Lot RS-N: read-only demolition preview (`buildings::demolition_preview`)
+//! Read-only demolition preview (`buildings::demolition_preview`)
 //! for the UI's « Raser » button, on the real data of 1337.
 
 use data_model::{BuildingId, GameData, SettlementId};

@@ -948,7 +948,7 @@ pub(crate) fn resolve_chronicle(
 }
 
 // =========================================================================
-// Staging (UI tests and screenshots, lot FK5)
+// Staging (UI tests and screenshots)
 // =========================================================================
 
 impl CampaignState {

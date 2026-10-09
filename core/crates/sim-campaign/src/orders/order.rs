@@ -57,7 +57,7 @@ impl CampaignState {
     }
 }
 
-/// Destination of a `move_army` order (lot M2): a settlement (or a
+/// Destination of a `move_army` order: a settlement (or a
 /// province, standing for its city), a map point `{x, y}` in pixels of the
 /// map, or a v1/C4 path whose last place is the destination.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -75,7 +75,7 @@ pub enum MoveOrderTarget {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Order {
-    /// Walks the army towards `target` at once (lot M2, `march.rs`): it
+    /// Walks the army towards `target` at once (`march.rs`): it
     /// stops at the target, when its points run out (the rest of the march
     /// resumes next turn), in an enemy zone of control, or by entering a
     /// settlement (siege, capture or stop). `path` is accepted for `target`.
@@ -85,13 +85,13 @@ pub enum Order {
         target: MoveOrderTarget,
     },
     /// Closes in on an enemy army within `engage_radius_km` and fights it
-    /// at once (lot M2); the attacker cannot move afterwards.
+    /// at once; the attacker cannot move afterwards.
     Attack {
         army: ArmyId,
         target_army: ArmyId,
     },
     /// Crosses the sea from the port the army stands in to `to_port` (a
-    /// `sea` edge of the settlement graph); costs the whole turn (lot M2).
+    /// `sea` edge of the settlement graph); costs the whole turn.
     Embark {
         army: ArmyId,
         to_port: SettlementId,
@@ -120,7 +120,7 @@ pub enum Order {
         army: ArmyId,
         unit_indices: Vec<usize>,
     },
-    /// Lot C7a: leave `unit_indices` of `army` as the garrison of the
+    /// Leave `unit_indices` of `army` as the garrison of the
     /// settlement it stands on (held by the army's faction, not besieged).
     /// An army giving all its units disappears (its general stays in the
     /// province).
@@ -202,7 +202,7 @@ pub enum Order {
         character: CharacterId,
         amount: u32,
     },
-    /// Headless-only debug order (smoke test, lot C7): `companion` joins
+    /// Headless-only debug order (smoke test): `companion` joins
     /// `character`'s retinue if he may gain it (cap, conditions).
     DebugGrantCompanion {
         character: CharacterId,
@@ -224,7 +224,7 @@ pub enum Order {
     ProposeAlliance {
         target: FactionId,
     },
-    /// Lot DP1: a treaty of several articles (`negotiation::Article`).
+    /// A treaty of several articles (`negotiation::Article`).
     ProposeTreaty {
         target: FactionId,
         articles: Vec<crate::negotiation::Article>,
@@ -313,7 +313,7 @@ pub enum Order {
         province: ProvinceId,
         diet: data_model::DietId,
     },
-    /// Lot C4: adopts `edict` in `province` (regional edict, one active at a
+    /// Adopts `edict` in `province` (regional edict, one active at a
     /// time, delayed effect); one change per province and per turn.
     SetEdict {
         province: ProvinceId,
@@ -380,7 +380,7 @@ pub enum Order {
     },
     // ----- C5: trade (`trade.rs`) --------------------------------------------
     /// Ends an existing trade agreement with `target` (agreements are
-    /// concluded by a treaty article, `ProposeTreaty`, lot DP1; ADR 0012).
+    /// concluded by a treaty article, `ProposeTreaty`; ADR 0012).
     BreakTradeAgreement {
         target: FactionId,
     },

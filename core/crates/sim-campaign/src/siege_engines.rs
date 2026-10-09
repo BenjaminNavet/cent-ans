@@ -1,4 +1,4 @@
-//! Siege engines built on the spot (lot NT5, N7, ADR 0128;
+//! Siege engines built on the spot (ADR 0128;
 //! `data/rules/siege_engines.json`).
 //!
 //! Every turn a siege progresses, the men of the besieging armies put

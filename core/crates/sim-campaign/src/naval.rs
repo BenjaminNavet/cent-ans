@@ -184,7 +184,7 @@ impl NavalState {
     }
 }
 
-/// Sea crossed between two ports: the sea of their lane (lot SL1), else the
+/// Sea crossed between two ports: the sea of their lane, else the
 /// sea the arrival port opens onto
 /// (`Settlement::sea_zone`: Calais, Dover on the Channel), else the
 /// departure port's if the arrival province touches it, else a sea both
@@ -275,7 +275,7 @@ pub(crate) fn intercept(
     let Some((hostile, chance)) = interceptor(state, data, &faction, &sea) else {
         return Crossing::Clear;
     };
-    // Lot SL1: open-sea lanes are harder to watch than the coasts.
+    // Open-sea lanes are harder to watch than the coasts.
     let chance = chance * crate::sea_lanes::intercept_factor(data, from, to);
     if chance <= 0.0 || state.rng.unit_f64() >= chance {
         return Crossing::Clear;
@@ -381,8 +381,8 @@ fn ship_name(data: &GameData, class: &ShipClassId, n: usize) -> String {
     format!("{display} n°{}", n + 1)
 }
 
-/// Hands out the historical names of a fleet (`data/naval/ship_names.json`,
-/// lot NV2): the names of its home ports first, in order, then the
+/// Hands out the historical names of a fleet (`data/naval/ship_names.json`):
+/// the names of its home ports first, in order, then the
 /// faction's names from an offset drawn from the battle's seed, then the
 /// names of its other ports; « Nef n°3 » once they run out. No name is
 /// given twice.
@@ -815,7 +815,7 @@ pub(crate) fn apply_outcome(
 }
 
 impl CampaignState {
-    /// Pending naval battles of the player (lot NV1).
+    /// Pending naval battles of the player.
     pub fn pending_naval_views(&self, data: &GameData) -> Vec<PendingNavalBattle> {
         self.naval
             .pending

@@ -81,7 +81,7 @@ impl CampaignState {
         if source == target {
             return Err(OrderError::NotSameProvince);
         }
-        // Lot M2: the same settlement, or two armies within reach of an
+        // The same settlement, or two armies within reach of an
         // engagement.
         if !self.armies_together(data, source_army, target_army) {
             return Err(OrderError::NotSameProvince);
@@ -140,7 +140,7 @@ impl CampaignState {
         Ok(())
     }
 
-    /// Lot C7a: units of an army become the garrison of the place it holds.
+    /// Units of an army become the garrison of the place it holds.
     pub(super) fn order_garrison(
         &mut self,
         data: &GameData,

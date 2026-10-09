@@ -1,4 +1,4 @@
-//! Settlements quick-access list (touche B), lot HL1.
+//! Settlements quick-access list (touche B).
 //! `docs/superpowers/specs/2026-09-27-liste-colonies-design.md` § 1.
 //!
 //! [`holdings_overview`] is a pure query, without side effect: it never

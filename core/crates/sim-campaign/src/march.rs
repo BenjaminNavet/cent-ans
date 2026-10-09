@@ -1,5 +1,5 @@
-//! Free army movement on the navigation grid, executed immediately (lot
-//! M2, spec `docs/design/2026-09-24-mouvement-libre.md` § 3).
+//! Free army movement on the navigation grid, executed immediately
+//! (spec `docs/design/2026-09-24-mouvement-libre.md` § 3).
 //!
 //! An army stands at a free point of the map or in a settlement
 //! ([`ArmyPosition`]). A move order walks it at once, cell by cell, along
@@ -48,11 +48,11 @@ pub enum StopReason {
     EnemySettlement { settlement: SettlementId },
     /// The path is no longer passable.
     Blocked,
-    /// The army closed in on an enemy army and fought it (order `Attack`, lot M4).
+    /// The army closed in on an enemy army and fought it (order `Attack`).
     Engaged { army: ArmyId },
 }
 
-/// What a move order did (lot M2): the points walked (map pixels, for the
+/// What a move order did: the points walked (map pixels, for the
 /// animation), their cost and why the march stopped.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MoveReport {
@@ -613,7 +613,7 @@ pub(crate) fn enter_settlement(
 }
 
 impl CampaignState {
-    /// Order `MoveArmy` (lot M2): walks `army` towards `target` at once.
+    /// Order `MoveArmy`: walks `army` towards `target` at once.
     pub(crate) fn order_move_army(
         &mut self,
         data: &GameData,
@@ -669,7 +669,7 @@ impl CampaignState {
             .and_then(|a| a.settlement().cloned())
     }
 
-    /// Order `Attack` (lot M2): `army` closes in on `target` (whose own zone
+    /// Order `Attack`: `army` closes in on `target` (whose own zone
     /// of control does not stop it) until within `engage_radius_km`, then
     /// fights at once. A target beyond this turn's reach is marched on: the
     /// army spends its movement towards it and keeps the rest of the path
@@ -799,9 +799,9 @@ impl CampaignState {
         }
     }
 
-    /// Order `Embark` (lot M2): a voyage from the army's port to `to_port`
+    /// Order `Embark`: a voyage from the army's port to `to_port`
     /// along sea edges of the settlement graph (C3, SL1), with up to
-    /// `max_voyage_legs` legs (lot EM, ADR 0167); costs the whole turn. Each
+    /// `max_voyage_legs` legs (ADR 0167); costs the whole turn. Each
     /// leg may be intercepted and brings its gales; the army puts in at the
     /// ports on the way.
     pub(crate) fn order_embark(
@@ -839,7 +839,7 @@ impl CampaignState {
         }
         let mut leg_from = from;
         for (index, leg_to) in voyage.iter().enumerate() {
-            // Lot NV1: an enemy squadron may bar the way.
+            // An enemy squadron may bar the way.
             match crate::naval::intercept(self, data, army, &leg_from, leg_to, events) {
                 crate::naval::Crossing::Clear | crate::naval::Crossing::Fought(true) => {}
                 crate::naval::Crossing::Pending | crate::naval::Crossing::Fought(false) => {
@@ -849,7 +849,7 @@ impl CampaignState {
             if index + 1 == voyage.len() {
                 self.land_crossing(data, army, leg_to, events);
             } else {
-                // Lot EM: a port of call on the way (never an enemy's).
+                // A port of call on the way (never an enemy's).
                 crate::sea_lanes::weather_the_crossing(self, data, army, leg_to, events);
                 if let Some(a) = self.armies.get_mut(army) {
                     a.position = ArmyPosition::Settlement(leg_to.clone());
@@ -872,7 +872,7 @@ impl CampaignState {
         let Some(army_faction) = self.armies.get(army).map(|a| a.faction.clone()) else {
             return;
         };
-        // Lot SL1: gales on the way (the army still stands in its port).
+        // Gales on the way (the army still stands in its port).
         crate::sea_lanes::weather_the_crossing(self, data, army, to_port, events);
         if let Some(a) = self.armies.get_mut(army) {
             a.movement_left = 0;

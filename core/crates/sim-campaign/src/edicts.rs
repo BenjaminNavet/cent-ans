@@ -1,4 +1,4 @@
-//! Lot C4: regional edicts (`docs/design/2026-09-24-analyse-total-war.md`
+//! Regional edicts (`docs/design/2026-09-24-analyse-total-war.md`
 //! § 2.1 « Édits régionaux »), one active per province.
 //!
 //! Modelled on H3 « La Table » (`table.rs`), with three differences: an
@@ -270,7 +270,7 @@ pub fn edict_effects(
     totals
 }
 
-/// Yearly piety the ruler of `faction` draws from its edicts (lot B7b): the
+/// Yearly piety the ruler of `faction` draws from its edicts: the
 /// flat `Piety` of the edict in force in each province it wholly holds —
 /// only the best province counts, so that a big realm does not multiply it
 /// (same rule as the court table, `table::resolve_lent`). Paid each winter
@@ -634,7 +634,7 @@ mod tests {
 
     #[test]
     fn old_save_without_edict_field_defaults() {
-        // A `ProvinceState` JSON without an `edict` key (pre-lot-C4 save)
+        // A `ProvinceState` JSON without an `edict` key (pre-edict save)
         // must still deserialize, falling back to the default edict.
         let json = r#"{
             "city": "set_test",

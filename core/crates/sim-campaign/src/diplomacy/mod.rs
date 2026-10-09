@@ -28,7 +28,7 @@ pub const PERJURY_REASON: &str = "Parjure : trêve rompue";
 pub const AGGRESSION_REASON: &str = "Agression sans motif";
 /// Attitude reason of two factions at war.
 pub const AT_WAR_REASON: &str = "En guerre";
-/// Attitude reason of the campaign difficulty (lot DF1), AI towards the player.
+/// Attitude reason of the campaign difficulty, AI towards the player.
 pub const DIFFICULTY_REASON: &str = "Niveau de difficulté";
 /// Opinion reason of a marriage between two ruling houses.
 pub const MARRIAGE_REASON: &str = "Mariage entre nos maisons";

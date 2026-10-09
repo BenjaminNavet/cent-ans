@@ -1,4 +1,4 @@
-//! Inheritance of titles (lot F3, spec § 4.5).
+//! Inheritance of titles (spec § 4.5).
 //!
 //! - **Contested succession**: when the heir designated by the late ruler
 //!   and the heir by law differ, and the faction has a suzerain, the

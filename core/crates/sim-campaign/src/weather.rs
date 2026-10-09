@@ -1,4 +1,4 @@
-//! Campaign map weather (lot CM2): rain, snow, morning fog and storms that
+//! Campaign map weather: rain, snow, morning fog and storms that
 //! sweep across the map, per province and per turn.
 //!
 //! The weather is a pure function of the game seed, the turn (and its

@@ -285,7 +285,7 @@ pub(crate) fn succeed(
 }
 
 /// Marks `id` dead: its wars, alliances, truces, embargoes and vassal ties
-/// end (also used when a faction without title is absorbed, lot F3).
+/// end (also used when a faction without title is absorbed).
 pub(crate) fn dissolve_faction(state: &mut CampaignState, id: &FactionId) {
     let dead = state.factions.get_mut(id).expect("exists");
     dead.alive = false;

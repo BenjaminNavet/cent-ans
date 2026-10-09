@@ -1,4 +1,4 @@
-//! Map encounters (lot CV3-3, spec `docs/design/2026-09-27-campagne-vivante.md`
+//! Map encounters (spec `docs/design/2026-09-27-campagne-vivante.md`
 //! § 2).
 //!
 //! Encounter sites (`data/encounters/enc_*.json`) appear at the start of each

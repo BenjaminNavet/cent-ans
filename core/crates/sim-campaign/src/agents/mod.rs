@@ -1,4 +1,4 @@
-//! Campaign agents (lot C6): spies, heralds and preachers.
+//! Campaign agents: spies, heralds and preachers.
 //!
 //! See `docs/design/2026-09-24-agents.md` and ADR 0009. Agents are light
 //! entities (not dynasty characters) kept in [`CampaignState::agents`]; they
@@ -153,7 +153,7 @@ pub struct Intel {
 }
 
 /// Every agent of the campaign (`CampaignState::agents`, `serde(default)`:
-/// saves written before lot C6 load with none).
+/// saves written before agents existed load with none).
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct AgentsState {
     #[serde(default)]

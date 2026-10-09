@@ -39,12 +39,12 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// technologies (research in progress, progress, banked progress), M7
 /// battles (`interactive_battles`, pending battles kept across `end_turn`,
 /// `BattleRequest::attacker_origin`), M8 siege supplies and breach, M10
-/// outcome. `5`: lot C4 settlements (garrison, siege, buildings,
+/// outcome. `5`: settlements (garrison, siege, buildings,
 /// construction and recruitment move from provinces to settlements; armies
-/// stand on settlements). `6`: lot M2 free movement (`Army::position`,
+/// stand on settlements). `6`: free movement (`Army::position`,
 /// `movement_left`, `planned_path` replace `location`, `movement_points`,
-/// `path`; field battles carry a point). `7`: lot FE feudal titles
-/// (`feudal`: title holders, primary titles, felony cases). `8`: lot OM1
+/// `path`; field battles carry a point). `7`: feudal titles
+/// (`feudal`: title holders, primary titles, felony cases). `8`:
 /// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout).
 /// [`CampaignState::load_json`] refuses any other version.
 pub const STATE_VERSION: u32 = 9;
@@ -235,7 +235,7 @@ impl Unit {
     }
 }
 
-/// Where an army stands (lot M2, spec § 3.1).
+/// Where an army stands (spec § 3.1).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ArmyPosition {
@@ -255,7 +255,7 @@ impl ArmyPosition {
     }
 }
 
-/// Destination of a move order (lot M2): a point of the map, or a
+/// Destination of a move order: a point of the map, or a
 /// settlement to enter (siege, capture or stop).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -270,7 +270,7 @@ pub struct Army {
     pub faction: FactionId,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub general: Option<CharacterId>,
-    /// Where the army stands (lot M2).
+    /// Where the army stands.
     pub position: ArmyPosition,
     pub units: Vec<Unit>,
     /// Movement points left this turn, in grid costs (10 = one plain cell
@@ -370,7 +370,7 @@ pub struct SiegeState {
     /// no longer suffers the wall penalty.
     #[serde(default)]
     pub breach: u8,
-    /// Lot M2: turn the siege began (an army entering the place starts it
+    /// Turn the siege began (an army entering the place starts it
     /// at once; it progresses from the next end of turn).
     #[serde(default)]
     pub started_turn: u32,
@@ -401,7 +401,7 @@ pub struct Construction {
 
 /// Dynamic state of a province (static data stays in [`GameData`]).
 ///
-/// Lot C4: the land and the people stay here; owner, controller, garrison,
+/// The land and the people stay here; owner, controller, garrison,
 /// siege, buildings, construction and recruitment belong to the settlements
 /// ([`SettlementState`]). The province's owner and controller are those of
 /// its city ([`CampaignState::province_owner`],
@@ -430,7 +430,7 @@ pub struct ProvinceState {
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diet: Option<crate::table::DietChoice>,
-    /// Lot C4: regional edict chosen by the controller (`None`: the default
+    /// Regional edict chosen by the controller (`None`: the default
     /// `edict_none`); see [`CampaignState::province_edict`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub edict: Option<crate::edicts::EdictChoice>,
@@ -638,12 +638,12 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
-    // ----- UI audit A3, lot U3: budget history ------------------------------
+    // ----- UI audit A3: budget history ------------------------------
     /// Last resolved seasons of the purse, oldest first (at most
     /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub budget_history: Vec<crate::economy_balance::BudgetRecord>,
-    // ----- Lot DP1: treaties, war goals, war weariness ------------------------
+    // ----- Treaties, war goals, war weariness ------------------------
     #[serde(
         default,
         skip_serializing_if = "crate::negotiation::DiplomaticLedger::is_empty"
@@ -892,7 +892,7 @@ pub struct BattleRequest {
     pub attacker: ArmyId,
     pub defender: ArmyId,
     /// Settlement where the battle takes place (the nearest one to a field
-    /// battle, lot M2).
+    /// battle).
     pub location: SettlementId,
     /// Its province (terrain, names).
     pub province: ProvinceId,
@@ -940,7 +940,7 @@ pub struct CampaignState {
     pub rng: CampaignRng,
     pub player_faction: FactionId,
     pub provinces: BTreeMap<ProvinceId, ProvinceState>,
-    /// Settlements inside provinces (lot C4: they hold garrisons, sieges,
+    /// Settlements inside provinces (they hold garrisons, sieges,
     /// buildings, construction and recruitment).
     pub settlements: BTreeMap<SettlementId, SettlementState>,
     pub factions: BTreeMap<FactionId, FactionState>,
@@ -970,16 +970,16 @@ pub struct CampaignState {
     pub outcome: Option<crate::victory::Outcome>,
     /// Consecutive seasons the player has met all objectives (F9).
     pub victory_streak: u32,
-    /// Lot C6: spies, heralds and preachers (absent from older saves; no
+    /// Spies, heralds and preachers (absent from older saves; no
     /// change of [`STATE_VERSION`]).
     pub agents: crate::agents::AgentsState,
-    /// Lot NV1: warship pools, sea control, intercepted crossings (absent
+    /// Warship pools, sea control, intercepted crossings (absent
     /// from older saves; no change of [`STATE_VERSION`]).
     pub naval: crate::naval::NavalState,
-    /// Lot DF1: difficulty level, frozen after the first turn (absent from
+    /// Difficulty level, frozen after the first turn (absent from
     /// older saves, which load as `normal`; no change of [`STATE_VERSION`]).
     pub difficulty: crate::difficulty::Difficulty,
-    /// Lot CV3-3: map encounter sites, player encounters awaiting a choice,
+    /// Map encounter sites, player encounters awaiting a choice,
     /// encounter battles in progress (absent from older saves; no change of
     /// [`STATE_VERSION`]).
     pub encounters: crate::encounter::EncounterState,
@@ -989,21 +989,21 @@ pub struct CampaignState {
     /// TW2-T3: mercenary reserves and this turn's hires (absent from older
     /// saves; no change of [`STATE_VERSION`]).
     pub mercenaries: crate::mercenaries::MercenaryState,
-    /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
+    /// Title holdings (feudal hierarchy, ADR 0098).
     pub feudal: crate::feudal::FeudalState,
-    /// Lot NT3: the player's short-term missions.
+    /// The player's short-term missions.
     #[serde(default)]
     pub missions: crate::missions::MissionsState,
-    /// Lot JR1: the crusader faction's fervour (`None` without
+    /// The crusader faction's fervour (`None` without
     /// `data/rules/crusade.json` or its faction, and in older saves; no
     /// change of [`STATE_VERSION`]).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub crusade: Option<crate::crusade::CrusadeState>,
-    /// Lot M3: the AI faction whose turn is being played inside `end_turn`
+    /// The AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
     pub(crate) ai_turn: Option<FactionId>,
-    /// Lot CT1: record of the AI armies' moves of the last turn, for the
+    /// Record of the AI armies' moves of the last turn, for the
     /// replay on the map (off unless the interface turns it on); never saved.
     #[serde(skip)]
     pub(crate) ai_replay: crate::ai_replay::AiReplayLog,
@@ -1213,7 +1213,7 @@ impl CampaignState {
                 .is_some_and(|f| f.suzerain.as_ref() == Some(a))
     }
 
-    /// Lot C5: a formal trade agreement is in force between `a` and `b` (also
+    /// A formal trade agreement is in force between `a` and `b` (also
     /// `true` for a faction and itself, its own trade always flows). Single
     /// representation: the DP1 ledger (`FactionState::ledger`), filled by
     /// the treaty article [`crate::negotiation::Article::TradeAgreement`]

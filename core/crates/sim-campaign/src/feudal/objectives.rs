@@ -1,5 +1,5 @@
 //! Historical objectives of the primary titles and generic victories of
-//! the vassals (lot F3, spec § 4.8), plus the feudal phase of the turn.
+//! the vassals (spec § 4.8), plus the feudal phase of the turn.
 //!
 //! Generic victories, for a faction that started as a vassal:
 //! - independence held `feudal_rules.independence_turns` turns;

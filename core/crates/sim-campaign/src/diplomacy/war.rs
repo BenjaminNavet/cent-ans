@@ -309,7 +309,7 @@ impl CampaignState {
             } else {
                 continue;
             };
-            // Lot C4: every settlement `from` owns in the province is ceded.
+            // Every settlement `from` owns in the province is ceded.
             self.cede_province(province, Some(&from), &to);
             for character in self.characters.values_mut() {
                 if character.governor_of.as_ref() == Some(province) {
@@ -393,7 +393,7 @@ impl CampaignState {
     }
 
     /// `vassal` pays homage to `suzerain`: the effective liege of its
-    /// primary title changes (lot FE, ADR 0098).
+    /// primary title changes (ADR 0098).
     pub(crate) fn make_vassal(
         &mut self,
         data: &GameData,

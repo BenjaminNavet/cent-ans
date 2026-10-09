@@ -1,4 +1,4 @@
-//! Title transfers (lot F3, spec § 4.5-4.7): moving a holding with its
+//! Title transfers (spec § 4.5-4.7): moving a holding with its
 //! provinces, personal unions (a faction left without title vanishes into
 //! the new holder), factions created by a grant to a courtier, vacant
 //! titles freeing their vassals, titles demanded after a victory.

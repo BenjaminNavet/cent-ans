@@ -1,8 +1,6 @@
-//! Bounded history of the recent land battles (chantier TB, lot
-//! « historique des batailles », ADR 0157 « révision »).
+//! Bounded history of the recent land battles (ADR 0157 « révision »).
 //!
-//! The map marks a battlefield for a few turns (mound, crows, debris, lot
-//! TB4). The marks used to live in the renderer's memory and were lost on a
+//! The map marks a battlefield for a few turns (mound, crows, debris). The marks used to live in the renderer's memory and were lost on a
 //! reload; the campaign state now remembers where and when the land battles
 //! were fought: field battles (`movement::apply_battle_result`, auto-resolved
 //! or fought in 3D), assaults (`siege::apply_assault_result`) and garrison

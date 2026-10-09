@@ -1,6 +1,6 @@
 //! Spring 1337 start derived from `GameData` (spec § 1.6).
 //!
-//! Garrisons (lot C4: held by the city of the province): 4 units in
+//! Garrisons (held by the city of the province): 4 units in
 //! capitals, 3 in frontier provinces (ports and provinces next to another
 //! faction, [`crate::frontier`]), 2 elsewhere; the other settlements
 //! receive the `starting_garrison` of their kind
@@ -90,7 +90,7 @@ fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError>
         .collect()
 }
 
-/// One [`SettlementState`] per settlement of a known province (lots C1, C4).
+/// One [`SettlementState`] per settlement of a known province.
 ///
 /// Owner is the settlement's enclave owner or the province owner; the
 /// controller is the owner. The city receives the province's starting
@@ -190,7 +190,7 @@ impl CampaignState {
 
         // Provinces, then their settlements, then the city garrisons (P1:
         // frontiers classified by `CampaignState::is_frontier`, like the AI
-        // does; lot C4: control is derived from the cities, so the
+        // does; control is derived from the cities, so the
         // settlements must exist first).
         init_provinces(&mut state, data)?;
         init_settlements(&mut state, data)?;
@@ -265,7 +265,7 @@ fn init_factions(state: &mut CampaignState, data: &GameData) {
             ruler: faction.ruler.clone(),
             heir: faction.heir.clone(),
             technologies: faction.starting_technologies.iter().cloned().collect(),
-            // Lot FE: a view of the title holdings (ADR 0098).
+            // A view of the title holdings (ADR 0098).
             suzerain: crate::feudal::liege_of(state, data, id),
             claims: faction
                 .claims

@@ -1,4 +1,4 @@
-//! Automatic battle resolution (spec § 1.4, refounded by lot N1).
+//! Automatic battle resolution (spec § 1.4, refounded).
 //!
 //! A battle is fought in phases between unit families, with the
 //! coefficients of `data/rules/auto_resolve.json`
@@ -49,7 +49,7 @@ pub struct BattleUnit {
     pub is_ranged: bool,
 }
 
-/// Family of a unit in the auto-resolve (lot N1).
+/// Family of a unit in the auto-resolve.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UnitFamily {
@@ -203,7 +203,7 @@ pub struct BattleContext {
     pub crossing: Option<crate::river_crossing::CrossingEffect>,
 }
 
-/// Field, season and weather of a battle (lot N1). `weather: None` draws
+/// Field, season and weather of a battle. `weather: None` draws
 /// it from the season; no season means clear weather.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct FieldConditions {
@@ -322,7 +322,7 @@ pub fn coalition_profiles(
         .collect()
 }
 
-/// Auto-resolves a field battle of the campaign (lot N1): the coalitions
+/// Auto-resolves a field battle of the campaign: the coalitions
 /// `attackers` and `defenders` (whose sides are given) fight on
 /// `province`'s terrain, in the current season and a weather drawn from
 /// it, with the rules of `data`.

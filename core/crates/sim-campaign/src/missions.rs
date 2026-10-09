@@ -1,4 +1,4 @@
-//! Short-term campaign missions (lot NT3, ADR 0127).
+//! Short-term campaign missions (ADR 0127).
 //!
 //! The player's faction (never the AI) receives 1 or 2 missions drawn from
 //! `data/missions.json` according to its situation (a neighbour at war to

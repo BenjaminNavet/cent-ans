@@ -42,7 +42,7 @@ impl CampaignState {
     pub fn is_frontier(&self, data: &GameData, faction: &FactionId, province: &ProvinceId) -> bool {
         data.provinces.get(province).is_some_and(|p| p.has_port())
             || land_neighbors(data, province).iter().any(|neighbour| {
-                // Lot C4: the controller of a province is its city's.
+                // The controller of a province is its city's.
                 self.province_controller(neighbour)
                     .is_some_and(|controller| controller != faction)
             })

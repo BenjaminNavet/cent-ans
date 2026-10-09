@@ -25,13 +25,13 @@ pub enum Retreat {
 const FALLBACK_ANGLES: [f32; 5] = [0.0, 45.0, -45.0, 90.0, -90.0];
 
 /// Where `army_id`, just beaten at `battlefield` (map pixels), falls back
-/// (pure, lot M2 on the C7a rule):
+/// (pure):
 ///
 /// 1. the nearest settlement held by the army's faction or an ally, free of
 ///    enemy armies, within `friendly_radius_steps` × `points_per_step`
 ///    kilometres of march on the grid, without crossing an enemy zone of
 ///    control (those around the battlefield excepted) nor an enemy place;
-/// 2. otherwise, when the army still has a refuge (lot M5b, the C7a
+/// 2. otherwise, when the army still has a refuge (the C7a
 ///    « neutral » rule on the grid: a settlement no enemy holds, free of
 ///    enemy armies, within `neutral_radius_steps` of march by the same
 ///    rules), a point `retreat_fallback_km` away from the victor (or
@@ -52,7 +52,7 @@ pub fn retreat_target(
 
 /// [`retreat_target`] for an army that lost `losses_percent` of its men in
 /// the battle: at `heavy_defeat_losses_percent` or more, without a friendly
-/// place within reach, it cannot fall back in order and routs (lot M5b).
+/// place within reach, it cannot fall back in order and routs.
 pub fn retreat_target_after(
     state: &CampaignState,
     data: &GameData,
@@ -117,7 +117,7 @@ pub fn retreat_target_after(
     {
         return Some(Retreat::Friendly(friendly[&cell].clone()));
     }
-    // Lot M5b: a crushed army, or one with no refuge left in reach (deep in
+    // A crushed army, or one with no refuge left in reach (deep in
     // enemy land, or hemmed in by enemy zones of control), routs.
     let heavy = losses_percent >= rules.heavy_defeat_losses_percent;
     let refuges: std::collections::BTreeSet<Cell> = state

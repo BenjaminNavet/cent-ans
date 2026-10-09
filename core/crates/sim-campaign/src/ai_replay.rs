@@ -1,12 +1,12 @@
-//! Lot CT1: the record of the AI turn, for the Total War-style replay of the
+//! The record of the AI turn, for the Total War-style replay of the
 //! AI armies' marches on the campaign map (ADR 0073).
 //!
-//! The AI turn is resolved at once inside `end_turn` (lot M3). When the
+//! The AI turn is resolved at once inside `end_turn`. When the
 //! interface asks for it ([`CampaignState::set_ai_replay_recording`]), each
 //! AI army move of that turn is recorded as an [`AiMoveRecord`]: the path it
 //! walked (map pixels, start included), what the move ended in (march,
 //! siege, capture, battle, landing), whether the player may see it (his
-//! vision before or after the AI turn, lot M5a) and whether it concerns him
+//! vision before or after the AI turn) and whether it concerns him
 //! (its notability, which the camera follows). Nothing here changes the
 //! game: recording only reads the state, and costs nothing when it is off.
 //!
@@ -96,7 +96,7 @@ impl AiMoveNotability {
     }
 }
 
-/// One AI army move of the last AI turn (lot CT1).
+/// One AI army move of the last AI turn.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct AiMoveRecord {
     /// Order of the move in the AI turn (0, 1, …): factions by id, each
@@ -144,7 +144,7 @@ struct PlayerSnapshot {
 }
 
 impl CampaignState {
-    /// Turns the AI turn record on or off (lot CT1); `notable_radius_km`
+    /// Turns the AI turn record on or off; `notable_radius_km`
     /// tunes [`AiMoveNotability::NearPlayer`].
     pub fn set_ai_replay_recording(&mut self, enabled: bool, notable_radius_km: f64) {
         self.ai_replay.enabled = enabled;

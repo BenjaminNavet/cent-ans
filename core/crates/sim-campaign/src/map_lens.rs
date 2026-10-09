@@ -1,4 +1,4 @@
-//! Campaign map filters (« filtres de carte », lot MF1): the per-province
+//! Campaign map filters (« filtres de carte »): the per-province
 //! values the map tints by, seen from one faction. Read only; computed in
 //! one pass so the claims of every faction are gathered once, not per
 //! province. The rendering (colours, legend) lives in Godot.

@@ -1,4 +1,4 @@
-//! General's retinue (lot C7).
+//! General's retinue.
 //!
 //! Companions are defined in `data/retinue.json` (`GameData::retinue`); a
 //! character keeps the ids of his companions in

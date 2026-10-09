@@ -1,4 +1,4 @@
-//! Sea voyages (lot EM, ADR 0167).
+//! Sea voyages (ADR 0167).
 //!
 //! An army standing in a port sails, in one season, to any port reached by
 //! a chain of at most `max_voyage_legs` sea edges of the settlement graph

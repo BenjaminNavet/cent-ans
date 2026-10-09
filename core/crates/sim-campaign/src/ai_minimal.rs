@@ -4,17 +4,17 @@
 //! capital's city when affordable; fold surplus capital garrison into the
 //! army standing there; send every idle army to the best weakly defended
 //! hostile settlement in `Siege` stance (cities first, then the others by
-//! weight and fortification, lot C4), otherwise towards the most threatened
+//! weight and fortification), otherwise towards the most threatened
 //! friendly settlement.
 //!
 //! Lives here rather than in the `ai` crate because `ai` depends on this crate;
 //! `ai::plan_turn` re-exports [`plan_turn`].
 //!
-//! Lot M2: the plans
+//! The plans
 //! are still made on the settlement graph from each army's anchor (its
 //! settlement, or the nearest one in the field); the orders are `MoveArmy`
 //! towards the chosen settlement, walked on the navigation grid. It neither
-//! attacks armies in the field nor crosses the sea: the grid AI of lot M3
+//! attacks armies in the field nor crosses the sea: the grid AI
 //! (`ai::grid`, used by the game) does.
 
 use std::collections::BTreeMap;
@@ -32,7 +32,7 @@ pub const OFFENSIVE_RANGE: u32 = 4;
 /// Preference (in province steps) for a hostile city over another settlement.
 pub const CITY_PREFERENCE_STEPS: f64 = 2.0;
 /// Preference (in province steps) for a place the faction owns de jure
-/// but an enemy holds (lot C7a: win back lost places).
+/// but an enemy holds (win back lost places).
 pub const RECLAIM_PREFERENCE_STEPS: f64 = 1.5;
 /// The AI attacks when its power exceeds the defence by this factor.
 pub const ATTACK_SUPERIORITY: f64 = 1.5;
@@ -69,7 +69,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     if let Some(city) = capital_city.as_ref() {
         orders.extend(fold_capital_garrison(state, faction, city, &own_armies));
     }
-    // Lot M2: where every army stands on the settlement graph.
+    // Where every army stands on the settlement graph.
     let turn = ArmyPlanner {
         state,
         data,
@@ -248,7 +248,7 @@ impl ArmyPlanner<'_> {
     }
 
     /// Defence: the most threatened friendly settlement within reach; else
-    /// (lot C7a, lot M2: an army in the field too) an idle army outside
+    /// (an army in the field too) an idle army outside
     /// friendly and hostile places goes home; else it drops its stance.
     fn defend_or_go_home(
         &self,
@@ -309,7 +309,7 @@ impl ArmyPlanner<'_> {
     }
 
     /// Strength of hostile armies anchored on or one edge away from
-    /// `settlement` (lot M2: an army in the field is anchored on the
+    /// `settlement` (an army in the field is anchored on the
     /// nearest settlement).
     fn threat_at(&self, settlement: &SettlementId) -> f64 {
         let mut places = vec![settlement.clone()];

@@ -1,4 +1,4 @@
-//! Named rule values quoted by the interface (lot SV4).
+//! Named rule values quoted by the interface.
 //!
 //! Help texts, tooltips and the encyclopedia explain the rules with numbers
 //! ("+10 % per missed installment", "revolt above 75 for three seasons").
@@ -185,7 +185,7 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
         economy_rules.upkeep_months_per_season as f64,
     );
 
-    // Army stances (`data/rules/postures.json`, lot CV3-4 tooltips).
+    // Army stances (`data/rules/postures.json`, tooltips).
     let postures = &data.posture_rules;
     values.insert(
         "ambush_min_movement_percent",

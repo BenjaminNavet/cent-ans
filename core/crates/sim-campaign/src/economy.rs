@@ -6,7 +6,7 @@
 //! Unit upkeep in `data/unit_types` is a monthly figure; a season bills
 //! `upkeep_months_per_season` months (`economy.json`).
 //!
-//! Lot C4: the tax of a province is shared between the controllers of its
+//! The tax of a province is shared between the controllers of its
 //! settlements in proportion to their normalised `weight` (a besieged
 //! settlement yields nothing that turn); holding every settlement of a
 //! province adds `full_province_bonus.income_percent` (`rules.json`). The
@@ -225,8 +225,8 @@ pub fn province_base_income(data: &GameData, province: &ProvinceState) -> f64 {
     )
 }
 
-/// Share of a garrison's upkeep paid by its controller, in per cent (lot C4:
-/// `garrison_upkeep_percent` of `rules.json` by settlement kind — town
+/// Share of a garrison's upkeep paid by its controller, in per cent
+/// (`garrison_upkeep_percent` of `rules.json` by settlement kind — town
 /// militias and castellans were mostly paid locally —, otherwise
 /// `economy.json` `garrison_upkeep_percent`).
 pub fn garrison_upkeep_percent(data: &GameData, kind: data_model::SettlementKind) -> i64 {
@@ -240,7 +240,7 @@ pub fn garrison_upkeep_percent(data: &GameData, kind: data_model::SettlementKind
 /// each unit pays its settlement kind's share ([`garrison_upkeep_percent`]),
 /// except in the capital city (`capital`), where the cheapest
 /// `capital_guard.units` form the lord's household guard and pay
-/// `capital_guard.upkeep_percent` (lot OMR R3, ADR 0117: a one-province lordship
+/// `capital_guard.upkeep_percent` (ADR 0117: a one-province lordship
 /// could not pay the one unit the AI never dismisses).
 pub fn garrison_share(
     data: &GameData,
@@ -266,7 +266,7 @@ pub fn garrison_share(
 }
 
 /// Share (per cent) of the upkeep of a settlement's buildings paid by its
-/// controller, by settlement kind (lot C7a, `rules.json`
+/// controller, by settlement kind (`rules.json`
 /// `building_upkeep_percent`; 100 when absent).
 pub fn building_upkeep_percent(data: &GameData, kind: data_model::SettlementKind) -> i64 {
     data.settlement_rules
@@ -303,7 +303,7 @@ pub fn garrison_relief_percent(rules: &EconomyRules, effects: &EffectTotals) -> 
 }
 
 impl CampaignState {
-    /// Seasonal tax a settlement's share of its province yields (lot C4):
+    /// Seasonal tax a settlement's share of its province yields:
     /// the province's tax under the buildings of its city and of the
     /// settlement itself, the governor (M4) and `tech` (M6), times the
     /// settlement's normalised weight.
@@ -323,7 +323,7 @@ impl CampaignState {
     }
 
     /// [`CampaignState::settlement_tax`] with the governor and technology effects of the
-    /// settlement's province already merged in `extra` (lot DC3: computed once per province).
+    /// settlement's province already merged in `extra` (computed once per province).
     fn settlement_tax_with(
         &self,
         data: &GameData,
@@ -430,7 +430,7 @@ impl CampaignState {
     }
 
     /// The city of the faction's capital province, when the faction holds it
-    /// (lot OMR R3: home of the household guard, [`garrison_share`]).
+    /// (home of the household guard, [`garrison_share`]).
     pub fn faction_capital_city(&self, faction: &FactionId) -> Option<&SettlementId> {
         let capital = &self.factions.get(faction)?.capital;
         self.province_city_id(capital).filter(|city| {
@@ -493,7 +493,7 @@ impl CampaignState {
     }
 
     /// Seasonal revenue of the lord's own demesne (`economy.json`
-    /// `domain_income`, lot LR-04): paid while the faction holds its capital
+    /// `domain_income`): paid while the faction holds its capital
     /// city, nothing otherwise (a landless or exiled lord has no domain).
     pub fn faction_domain_income(&self, data: &GameData, faction: &FactionId) -> i64 {
         let amount = data.economy_rules.domain_income;
@@ -895,7 +895,7 @@ pub(crate) fn resolve_attrition(
         let Some(location) = province else {
             continue;
         };
-        // Lot C4: supplied in friendly territory or on a friendly settlement.
+        // Supplied in friendly territory or on a friendly settlement.
         let friendly = state.is_friendly_territory(&faction, &location)
             || settlement
                 .as_ref()
@@ -959,7 +959,7 @@ pub(crate) fn resolve_goods(state: &mut CampaignState, data: &GameData) {
 
 /// Phase 7: unrest and devastation slowly recover; a province whose
 /// settlements are all held by one faction calms down by
-/// `full_province_bonus.unrest_per_season` (lot C4).
+/// `full_province_bonus.unrest_per_season`.
 pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
     let bonus = data
         .settlement_rules

@@ -1,4 +1,4 @@
-//! Lot TW2-T2 (ADR 0102): recruitment pools, Medieval II style.
+//! ADR 0102: recruitment pools, Medieval II style.
 //!
 //! Every settlement holds, for every unit type, a reserve of recruitable
 //! units capped by its kind and buildings (`data/rules/replenishment.json`,

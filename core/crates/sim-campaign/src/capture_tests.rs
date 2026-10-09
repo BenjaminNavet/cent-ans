@@ -1,4 +1,4 @@
-//! Lot TW2-T1: fate of a captured place (occupy, ransom, sack, raze), on the
+//! Fate of a captured place (occupy, ransom, sack, raze), on the
 //! real data of 1337.
 
 use data_model::{GameData, ProvinceId, SettlementId};

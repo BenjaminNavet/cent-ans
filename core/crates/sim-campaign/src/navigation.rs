@@ -1,4 +1,4 @@
-//! Path finding on the navigation grid (lot M2, spec § 3.2).
+//! Path finding on the navigation grid (spec § 3.2).
 //!
 //! Pure algorithms over a [`NavGrid`]: A* on 8 neighbours with the octile
 //! heuristic, a line-of-sight smoothing pass (theta*-like string pulling)

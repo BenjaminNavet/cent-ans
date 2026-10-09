@@ -1,7 +1,7 @@
 //! Player battles deferred to the 3D battle (M7, spec `docs/design/m7-battles.md` § 2).
 //!
 //! When [`CampaignState::interactive_battles`] is on and an army of the
-//! player attacks or is attacked by an enemy army (lot M2), the battle is stored
+//! player attacks or is attacked by an enemy army, the battle is stored
 //! in [`CampaignState::pending_battles`] instead of being auto-resolved; both
 //! armies stop. The UI then either fights it with `sim-battle`
 //! ([`CampaignState::battle_setup`] then
@@ -37,8 +37,8 @@ pub struct PendingBattle {
     pub index: usize,
     pub attacker: ArmyId,
     pub defender: ArmyId,
-    /// Settlement where the battle takes place (lot C4), or the nearest one
-    /// to a field battle (lot M2).
+    /// Settlement where the battle takes place, or the nearest one
+    /// to a field battle.
     pub location: SettlementId,
     pub province: ProvinceId,
     pub attacker_name: String,
@@ -98,7 +98,7 @@ pub(crate) fn defer_player_battle(
         return false;
     }
     if let Some(ai) = state.ai_turn.clone() {
-        // Lot M3: during an AI faction's turn the battle is auto-resolved
+        // During an AI faction's turn the battle is auto-resolved
         // at once; the player reads about it in the season report.
         let place = defender
             .settlement()
@@ -188,7 +188,7 @@ pub(crate) fn auto_resolve_all_pending(
 }
 
 /// Both armies still exist and are at war (they cannot move once the battle
-/// is pending, lot M2); siege: the besiegers still besiege a garrisoned
+/// is pending); siege: the besiegers still besiege a garrisoned
 /// settlement.
 pub(crate) fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
     if request.siege {

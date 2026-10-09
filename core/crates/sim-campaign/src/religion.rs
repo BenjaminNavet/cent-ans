@@ -311,7 +311,7 @@ fn religious_buildings(data: &GameData, buildings: &[data_model::BuildingId]) ->
 }
 
 /// Religious buildings of every place of `province` against heresy, each place weighing
-/// its kind's `province_effect_percent` (lot DC6b, ADR 0082: the dense map's doubled
+/// its kind's `province_effect_percent` (ADR 0082: the dense map's doubled
 /// parish churches and abbeys would otherwise stamp a heresy out twice as fast).
 pub fn weighted_religious_buildings(
     state: &CampaignState,

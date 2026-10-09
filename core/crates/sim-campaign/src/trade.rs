@@ -1,5 +1,5 @@
-//! Trade routes and agreements (lot C5,
-//! `docs/design/2026-09-24-rapprochement-total-war.md` § C5).
+//! Trade routes and agreements
+//! (spec `docs/design/2026-09-24-rapprochement-total-war.md` § C5).
 //!
 //! Historic marketplaces and the routes that link them live in
 //! `data/economy/trade.json` ([`data_model::TradeCatalog`]). Every season
@@ -18,7 +18,7 @@
 //!   stored once in the ledger, see [`CampaignState::has_trade_agreement`])
 //!   raises the value by [`AGREEMENT_BONUS_PERCENT`]; war erases it;
 //! - **coinage**: a debased currency trades less well (H5);
-//! - **sea legs** (lot SL1, [`crate::sea_lanes::trade_sea_legs`]): an enemy
+//! - **sea legs** ([`crate::sea_lanes::trade_sea_legs`]): an enemy
 //!   holding a sea crossed or blockading a port of the way cuts the route,
 //!   lesser enemy control lowers its security, gales lower its value in
 //!   autumn and winter.
@@ -185,7 +185,7 @@ fn resolve_route(
         from_faction != to_faction && state.has_trade_agreement(&from_faction, &to_faction);
 
     let (security, threat_reason) = path_security(state, data, &path, &from_faction, &to_faction);
-    // Lot SL1: sea legs (enemy squadrons, blockades, gales).
+    // Sea legs (enemy squadrons, blockades, gales).
     let sea = crate::sea_lanes::trade_sea_legs(state, data, &path, &from_faction, &to_faction);
     if let Some(reason) = sea.cut_reason {
         view.cut_reason = Some(reason);

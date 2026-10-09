@@ -1,5 +1,5 @@
-//! Line of sight on the campaign map (lot C1 fog of war, per-cell sight
-//! radius since lot M5a).
+//! Line of sight on the campaign map (fog of war, per-cell sight
+//! radius).
 //!
 //! A map point is seen by a faction when it lies within `vision_army_km` of
 //! one of its armies, or within `vision_settlement_km` of a settlement it
@@ -22,7 +22,7 @@
 //! The front end veils what is not seen and hides the foreign armies whose
 //! point is not seen. Nothing in the simulation depends on it: vision is
 //! recomputed on demand and never saved. **The AI does not use it** (it
-//! reads the whole state, as before lot M5a: the AI "cheats" by design in
+//! reads the whole state, as before the per-cell radius: the AI "cheats" by design in
 //! v1, see `docs/archive/chantiers.md`).
 
 use std::collections::{BTreeMap, BTreeSet};

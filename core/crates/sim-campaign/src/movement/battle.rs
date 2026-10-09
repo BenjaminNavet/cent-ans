@@ -90,7 +90,7 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
 /// A field battle between two armies within reach of each other: deferred
 /// to the player when interactive battles are on and the player takes part
 /// (M7, see `battle_request`), auto-resolved otherwise. Neither side moves
-/// again this turn (lot M2).
+/// again this turn.
 pub(crate) fn fight(
     state: &mut CampaignState,
     data: &GameData,
@@ -139,7 +139,7 @@ pub(crate) fn fight_with_opening(
 /// Armies fighting on `lead`'s side (F1): `lead` first, then every other
 /// army of `lead`'s faction or of an ally of it, at war with `enemy`, and
 /// standing in the same settlement or within `engage_radius_km` of `lead`
-/// (lot M2), in id order.
+///, in id order.
 pub fn battle_coalition(
     state: &CampaignState,
     data: &GameData,
@@ -493,7 +493,7 @@ pub(crate) fn apply_battle_result(
         .faction(winner_faction),
     );
 
-    // Lot M5b: strength before the battle, to weigh the defeat of the losers.
+    // Strength before the battle, to weigh the defeat of the losers.
     let strength_before: BTreeMap<ArmyId, u32> = attackers
         .iter()
         .chain(defenders)

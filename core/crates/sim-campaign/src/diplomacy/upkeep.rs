@@ -47,7 +47,7 @@ pub(crate) fn resolve_diplomacy(
         );
     }
 
-    // Vassals: the suzerains are a view of the titles (lot FE).
+    // Vassals: the suzerains are a view of the titles.
     crate::feudal::forget_expired(state);
     crate::feudal::sync_suzerains(state, data);
     let vassals: Vec<(FactionId, FactionId)> = state

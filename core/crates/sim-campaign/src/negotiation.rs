@@ -1,4 +1,4 @@
-//! Lot DP1 (ADR 0025): diplomatic negotiation.
+//! ADR 0025: diplomatic negotiation.
 //!
 //! Every diplomatic proposal is a [`Treaty`] of [`Article`]s (ADR 0202): an
 //! alliance, a feudal call or a ten-article peace alike. Each article checks
@@ -17,7 +17,7 @@
 //!   answer during a season.
 //! - **Counter-proposals** ([`counter_proposal`]): what the recipient would
 //!   need to accept (captives, occupied lands, gold, tribute, fewer demands).
-//! - **War goals, war score and war weariness** (audit A2, lot N2): each
+//! - **War goals, war score and war weariness** (audit A2): each
 //!   belligerent targets provinces ([`DiplomaticLedger::war_goals`]); holding
 //!   them fills the war score (`CampaignState::war_score`); weariness grows
 //!   with every season of war and pushes towards peace (and unrest).
@@ -384,7 +384,7 @@ pub struct DiplomaticLedger {
     /// Latest treaties, oldest first.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub history: Vec<TreatyRecord>,
-    /// Lot DP2: armies of other factions trespassing on our lands.
+    /// Armies of other factions trespassing on our lands.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub trespassers: BTreeMap<FactionId, crate::passage::Trespass>,
 }

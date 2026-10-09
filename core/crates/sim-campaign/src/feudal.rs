@@ -1,4 +1,4 @@
-//! Feudal titles above factions (lot FE, ADR 0098, spec
+//! Feudal titles above factions (ADR 0098, spec
 //! `docs/superpowers/specs/2026-09-28-feodalite-design.md`).
 //!
 //! The *de jure* hierarchy lives in the data (`data/titles/`); the campaign
@@ -6,7 +6,7 @@
 //! and province allegiances are deduced from it, never stored (§ 3.3).
 //!
 //! F0 provides the state and the deductions; escalation (F2), felony,
-//! forfeiture, transfers and objectives (F3) are filled by later lots.
+//! forfeiture, transfers and objectives (F3) are filled later.
 
 use data_model::key_enum;
 use std::collections::{BTreeMap, BTreeSet};
@@ -469,7 +469,7 @@ pub fn evaluate_objectives(state: &CampaignState, data: &GameData) -> Vec<Object
 }
 
 // =========================================================================
-// War escalation and private war (§ 4.3, lot F2)
+// War escalation and private war (§ 4.3)
 // =========================================================================
 
 /// Opinion modifier of an attacked vassal whose suzerain came to its help
@@ -957,8 +957,7 @@ pub fn summon_host(
     }
 }
 
-/// Can `vassal` be summoned to the host of `liege` against `enemy` (lot F8,
-/// ADR 0114, `feudal_rules.host`)? Not when it is independent in fact (its
+/// Can `vassal` be summoned to the host of `liege` against `enemy` (ADR 0114, `feudal_rules.host`)? Not when it is independent in fact (its
 /// power reaches `independent_power_ratio` of its suzerain's), nor when none
 /// of its settlements lies within `max_muster_km` of its suzerain's capital
 /// or of a settlement of the enemy.

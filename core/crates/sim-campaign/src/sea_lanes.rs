@@ -1,4 +1,4 @@
-//! Sea lanes (lot SL1, ADR 0139).
+//! Sea lanes (ADR 0139).
 //!
 //! The lanes of `data/naval/sea_lanes.json` ([`data_model::SeaLanes`]) are
 //! sea edges of the settlement movement graph (`GameData::build_movement_graph`):

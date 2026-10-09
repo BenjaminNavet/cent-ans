@@ -2,7 +2,7 @@
 //! of the « solde » shown by the top bar and the faction panel, so that the
 //! interface never sums the budget lines itself.
 //!
-//! Lot U3 (« économie lisible ») adds the signed budget lines with the
+//! This adds the signed budget lines with the
 //! season just resolved beside the projection, and a short history of the
 //! purse (last [`BUDGET_HISTORY_SEASONS`] seasons) for the treasury curve.
 //! Nothing here changes the economy: it only records and reports it.

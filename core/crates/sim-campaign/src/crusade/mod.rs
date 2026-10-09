@@ -1,4 +1,4 @@
-//! Lot JR1 « Ferveur » (ADR 0165): the crusader faction lives on the zeal of
+//! « Ferveur » (ADR 0165): the crusader faction lives on the zeal of
 //! its vow instead of land.
 //!
 //! Everything is read from `data/rules/crusade.json`

@@ -1,4 +1,4 @@
-//! Army stances of the living campaign (lot CV3-1, spec
+//! Army stances of the living campaign (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 1): ambush, forced march,
 //! entrenched camp. Numbers in `data/rules/postures.json`
 //! ([`data_model::PostureRules`]).

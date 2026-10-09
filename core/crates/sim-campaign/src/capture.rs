@@ -1,4 +1,4 @@
-//! Fate of a captured place (lot TW2-T1, spec
+//! Fate of a captured place (spec
 //! `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T1, ADR 0101).
 //!
 //! Every capture goes through [`crate::siege::capture`], which hands the

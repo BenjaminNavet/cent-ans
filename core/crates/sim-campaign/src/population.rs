@@ -490,7 +490,7 @@ pub(crate) fn resolve_population(
             // as many seasons of high unrest again.
             province.revolt_seasons = 0;
             let province_name = province_data.name.display.clone();
-            // Lot C4: the rebels rise at the city.
+            // The rebels rise at the city.
             let city_id = province.city.clone();
             let Some(city) = state.settlements.get_mut(&city_id) else {
                 continue;
@@ -642,7 +642,7 @@ pub fn is_epidemic(event: &data_model::EventId) -> bool {
 }
 
 /// Plague resistance of `province` as a fraction (0 to 0.5): its buildings
-/// (each place weighing its kind's `province_effect_percent`, lot RS-B) plus
+/// (each place weighing its kind's `province_effect_percent`) plus
 /// its controller's technologies.
 pub fn plague_resistance(state: &CampaignState, data: &GameData, province: &ProvinceId) -> f64 {
     let Some(controller) = state.province_controller(province) else {
@@ -664,7 +664,7 @@ pub fn wound_recovery(state: &CampaignState, data: &GameData, faction: &FactionI
 
 /// Wound recovery of `army` as a fraction (0 to 0.5): its faction's
 /// technologies plus its general's `WoundRecovery` (a barber-surgeon in the
-/// retinue, lot C7).
+/// retinue).
 pub fn army_wound_recovery(
     state: &CampaignState,
     data: &GameData,

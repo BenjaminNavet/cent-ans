@@ -1,6 +1,6 @@
 //! Buildings: construction, effects and the province "city" view (spec § 1.2).
 //!
-//! Lot C4: buildings stand in settlements; each settlement holds at most one
+//! Buildings stand in settlements; each settlement holds at most one
 //! [`Construction`] at a time and only accepts the buildings whose
 //! `settlement_kinds` include its kind. Effects are summed into an
 //! [`EffectTotals`] per province (every settlement's buildings,
@@ -377,7 +377,7 @@ pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]
     capacity_with_tiers_percent(data, province, bonus_tiers * 100)
 }
 
-/// [`capacity`] for production tiers counted in hundredths (lot DC3: weighed tiers).
+/// [`capacity`] for production tiers counted in hundredths (weighed tiers).
 fn capacity_with_tiers_percent(data: &GameData, province: &ProvinceId, tiers_percent: u64) -> u64 {
     // The 1337 population is the reference: a province can grow ~25 % above
     // it before crowding hurts health, plus 10 % per production tier.
@@ -390,7 +390,7 @@ fn capacity_with_tiers_percent(data: &GameData, province: &ProvinceId, tiers_per
 }
 
 /// Weight, in per cent, of the buildings of a settlement of `kind` in the effects on
-/// its whole province (lot DC3, `rules.json` `province_effect_percent`; 100 when absent).
+/// its whole province (`rules.json` `province_effect_percent`; 100 when absent).
 pub fn province_effect_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
     data.settlement_rules
         .as_ref()
@@ -399,7 +399,7 @@ pub fn province_effect_percent(data: &GameData, kind: data_model::SettlementKind
 }
 
 /// Weight, in per cent, of the buildings of a settlement of `kind` in its controller's
-/// research points (lot DC6b, `rules.json` `research_percent`; 100 when absent).
+/// research points (`rules.json` `research_percent`; 100 when absent).
 pub fn research_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
     data.settlement_rules
         .as_ref()
@@ -473,7 +473,7 @@ pub fn resource_draw(
 
 /// Snapshot of a province's city panel (bridge input, spec § 2): the
 /// province's population, resources and effects, the buildings,
-/// construction and build options of its city (lot C4).
+/// construction and build options of its city.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProvinceCity {
     pub classes: data_model::PopulationClasses,
@@ -491,7 +491,7 @@ pub struct ProvinceCity {
 impl CampaignState {
     /// Sum of the building effects of every settlement of `province`, plus
     /// its governor's trait/skill effects and its active regional edict
-    /// (spec § 2, lot C4).
+    /// (spec § 2).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
         let mut totals = self.province_building_effects(data, province);
         totals.merge(&self.governor_effects(data, province));
@@ -500,7 +500,7 @@ impl CampaignState {
     }
 
     /// Effects of the buildings of every settlement of `province` on the whole province,
-    /// each settlement's weighing its kind's `province_effect_percent` (lot DC3, ADR 0082:
+    /// each settlement's weighing its kind's `province_effect_percent` (ADR 0082:
     /// the secondary places count for half, so that twice as many of them do not double
     /// the appeasement of their churches and abbeys).
     pub fn province_building_effects(
@@ -531,7 +531,7 @@ impl CampaignState {
     }
 
     /// Population capacity of `province` ([`capacity`]), its places' production
-    /// buildings weighing their kind's `province_effect_percent` (lot DC3).
+    /// buildings weighing their kind's `province_effect_percent`.
     pub fn province_capacity(&self, data: &GameData, province: &ProvinceId) -> u64 {
         // Production tiers in hundredths, so that full weights give exactly `capacity`.
         let tiers_percent: u64 = self
@@ -551,7 +551,7 @@ impl CampaignState {
     }
 
     /// Sum of the building effects of `settlement`, plus the trait/skill
-    /// effects of its province's governor (lot C4: garrison, walls,
+    /// effects of its province's governor (garrison, walls,
     /// recruitment) and its province's active regional edict.
     pub fn settlement_effects(&self, data: &GameData, settlement: &SettlementId) -> EffectTotals {
         let Some(state) = self.settlements.get(settlement) else {
@@ -615,8 +615,7 @@ impl CampaignState {
         (buildings + defence + siegecraft).clamp(0.0, 80.0)
     }
 
-    /// Buildable options of `settlement` for its controller (spec § 1.2,
-    /// lot C4).
+    /// Buildable options of `settlement` for its controller (spec § 1.2).
     pub fn buildable(&self, data: &GameData, settlement: &SettlementId) -> Vec<BuildOption> {
         let Some(state) = self.settlements.get(settlement) else {
             return Vec::new();

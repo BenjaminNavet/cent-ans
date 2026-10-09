@@ -1,10 +1,10 @@
-//! Felony and forfeiture (lot F3, spec § 4.4). A refused host, an alliance
+//! Felony and forfeiture (spec § 4.4). A refused host, an alliance
 //! with the suzerain's enemy or a revolt opens a felony case for
 //! `feudal_rules.felony_window_turns` turns; the suzerain may then declare
 //! forfeiture, a casus belli against the felon alone; at the peace, the
 //! forfeited titles go to the suzerain if it won.
 //!
-//! Call points for the other lots: [`on_host_refused`] (F1, `rally_vassals`),
+//! Call points for the other modules: [`on_host_refused`] (F1, `rally_vassals`),
 //! [`open_felony_towards`] with [`FelonyReason::Revolt`] (vassal revolt in
 //! `diplomacy::resolve_diplomacy`), [`has_forfeiture`] (casus belli),
 //! [`settle_forfeitures`] (`make_peace_between`). Alliances with an enemy

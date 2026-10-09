@@ -28,7 +28,7 @@ impl CampaignState {
 
     /// [`CampaignState::end_turn_with`], also returning the time each AI
     /// faction took to play its turn (marches, planning, orders), in the
-    /// order they played (lot M3 performance probe).
+    /// order they played (performance probe).
     pub fn end_turn_profiled<P>(
         &mut self,
         data: &GameData,
@@ -115,7 +115,7 @@ impl CampaignState {
         economy::resolve_goods(self, data);
         // H3: diets whose requirements no longer hold fall back to the default.
         table::resolve_requirements(self, data, events);
-        // Lot C4: edicts of a province no longer fully held fall back to the
+        // Edicts of a province no longer fully held fall back to the
         // default, and a change becomes active once its delay has elapsed.
         edicts::resolve_requirements(self, data, events);
 

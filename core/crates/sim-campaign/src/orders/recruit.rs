@@ -359,7 +359,7 @@ impl<'a> RecruitContext<'a> {
                 return Some(format!("technologie requise : {name}"));
             }
         }
-        // Lot UR1: period units (compagnies d'ordonnance from 1445, routiers
+        // Period units (compagnies d'ordonnance from 1445, routiers
         // until the bands are hired away to Castile...).
         if let Some(from) = unit_type.available_from {
             if self.state.year < from {
@@ -381,7 +381,7 @@ impl<'a> RecruitContext<'a> {
         {
             return Some("culture locale inadaptée".to_owned());
         }
-        // Lot C4: the province provides the men, capped by the settlement's share.
+        // The province provides the men, capped by the settlement's share.
         let class = province_state.population.get(unit_type.source_class);
         let share = crate::settlements::weight_share(data, self.settlement_id);
         if (class.count as f64 * share) < f64::from(unit_type.soldiers) * 10.0 {

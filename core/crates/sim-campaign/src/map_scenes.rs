@@ -1,4 +1,4 @@
-//! Lot FK1: province scenes shown on the close campaign view
+//! Province scenes shown on the close campaign view
 //! (`docs/design/2026-09-29-carte-vivante-folk.md` § 2.1.1).
 //!
 //! Purely visual, like the weather (ADR 0027): a pure function of the state

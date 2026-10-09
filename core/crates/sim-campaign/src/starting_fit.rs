@@ -1,7 +1,7 @@
 //! JR4b fit of the 1337 garrisons, precomputed (ADR 0233).
 //!
 //! A great realm whose starting forces outrun its receipts sends home its
-//! costliest units and buildings (lot JR4b, LR-15, A6-L3). The result no
+//! costliest units and buildings (LR-15, A6-L3). The result no
 //! longer depends on the data at start: `data/rules/starting_fit.json`
 //! lists what is removed and [`apply_starting_fit`] applies it. The
 //! computation lives in the tests, which check the file equals it and
@@ -86,7 +86,7 @@ pub(crate) mod compute {
         )
     }
 
-    /// Lot JR4b (`settlement_rules.starting_budget`): a great realm whose
+    /// Starting budget (`settlement_rules.starting_budget`): a great realm whose
     /// starting forces outrun its receipts sends home its costliest garrison
     /// units, one at a time, until the deficit is within the allowed share —
     /// never a settlement's last unit nor the capital's garrison; then (LR-15)
@@ -242,7 +242,7 @@ pub(crate) mod compute {
         }
     }
 
-    /// Lot LR-15: the second step of [`fit_starting_garrisons`] — with its
+    /// The second step of [`fit_starting_garrisons`] — with its
     /// garrisons at the floor, a realm still beyond the allowed deficit sends
     /// home the costliest units of its starting field armies, keeping at least
     /// `min_units` of them and never emptying an army. (Serbia and Lithuania

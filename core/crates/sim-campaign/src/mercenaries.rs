@@ -1,4 +1,4 @@
-//! Lot TW2-T3 (ADR 0103): mercenary companies, Total War style.
+//! ADR 0103: mercenary companies, Total War style.
 //!
 //! Every province belongs to a `region` (`data/provinces`). Each company of
 //! `data/rules/mercenaries.json` (`bands`) is offered in some regions over a

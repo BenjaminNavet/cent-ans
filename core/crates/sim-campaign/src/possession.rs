@@ -1,4 +1,4 @@
-//! Lot RJ-c (ADR 0175): possession versus occupation, as a viewer sees it.
+//! ADR 0175: possession versus occupation, as a viewer sees it.
 //!
 //! The rule itself lives elsewhere and is unchanged (`settlements.rs`): the
 //! city of a province gives its control; possession (`owner`) changes only by

@@ -89,7 +89,7 @@ CA2 | FAIT sc/ca2 | chronicle 1361 -> ~870 l (event_actions.rs, plague.rs) ; app
 CA5 | FAIT sc/ca2 | copies splitmix (retinue, ai/alignment) et alias label (ai/feudal, march) supprimés ; siege_fx hash01 gardé (stream de bataille) | core/crates/data-model/src/{load,util}.rs, godot-bridge | oui
 CA7 | FAIT sc/ca2 | dynasty -> data/rules/dynasty.json + schéma (DynastyRules) ; feudal MAX_DEPTH = garde-fou structurel, laissé | core/crates/sim-campaign/src/{dynasty,feudal}.rs | oui
 CA9 | FAIT fdf3c8465 | dynasty marriage_blocker partagé, crusade/tests.rs (feudal/escalation.rs absent) | core/crates/sim-campaign/src/{dynasty,crusade}.rs | oui
-CA10 | À FAIRE | doc Lot tags (dernier) | core/crates/sim-campaign/src | oui
+CA10 | FAIT | doc Lot tags : 198 lignes nettoyées (sim-campaign) | core/crates/sim-campaign/src | oui
 
 ## CC sim-campaign reste
 CC3 | FAIT sc/ca2 (= CA5) | - | oui
@@ -100,7 +100,7 @@ CC9 | FAIT aa98fbad0 | ajustement garnisons JR4b -> data pré-calculée | core/c
 CC11 | FAIT | sg3_assault_probe.rs réduit à ses 2 tests (réglages ENV ENGINES/ATTACKER_SHARE/DUMP, dump_units et champs inutilisés supprimés ; nom gardé, cité par des ADR) ; jr4b_starting_budget est un vrai test ; aucune autre sonde (century/settlements/ia_quality : rien de tel) | core/crates/sim-campaign/tests | oui
 CC12 | FAIT (12 fns, sc/cc) | code mort 15 fns | core/crates/sim-campaign/src | oui
 CC14 | FAIT | ai découpé (AITURN) ; diplomacy/, agents/, crusade/ en sous-modules, apply_effects (195 l) découpée | core/crates/sim-campaign/src | oui
-CC15 | À FAIRE | doc tags (620) + lib.rs sous-dossiers (dernier) | core/crates/sim-campaign/src | oui
+CC15 | FAIT | tous les modules ont un //!, lib.rs décrit les sous-dossiers (sim-campaign) | core/crates/sim-campaign/src | oui
 
 ## BT battle (3D)
 BT2 | FAIT (sc/bscene) | stages/hooks/captures dans BattleCaptureStage ; plus de bench ni flag A/B dans battle_scene (1599 l) | game/scripts/battle/battle_scene.gd | non

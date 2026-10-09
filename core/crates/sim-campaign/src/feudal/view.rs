@@ -1,4 +1,4 @@
-//! Read-only views of the feudal state for the interface (lot FE6, spec
+//! Read-only views of the feudal state for the interface (spec
 //! § 6): vassal status badges, faction sheets, obligations, the province
 //! breadcrumb and the feudal map filter. Everything is deduced from the
 //! title holdings; nothing here changes the state.

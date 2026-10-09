@@ -1,4 +1,4 @@
-//! Lot RS-C: opinion caps per motive (`data/rules/diplomacy.json`) and the
+//! Opinion caps per motive (`data/rules/diplomacy.json`) and the
 //! demolition order, on the real data of 1337.
 
 use data_model::{BuildingId, GameData, OpinionMotive, SettlementId};

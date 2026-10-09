@@ -1,10 +1,10 @@
-//! Campaign difficulty (lot DF1, ADR 0037): the level chosen at launch and
+//! Campaign difficulty (ADR 0037): the level chosen at launch and
 //! frozen for the campaign, and the rule hooks that read its modifiers
 //! (`data/rules/difficulty.json`).
 //!
 //! Every hook is exactly neutral at [`Difficulty::Normal`]: percentages of
 //! 100 leave the value untouched (no rounding), offsets of 0 add nothing, so
-//! a normal campaign plays bit for bit as before the lot.
+//! a normal campaign plays bit for bit as before the difficulty levels.
 //!
 //! Levers (who they touch):
 //! - income of the AI factions / of the player ([`CampaignState::faction_income`]);

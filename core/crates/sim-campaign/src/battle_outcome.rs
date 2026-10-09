@@ -1,4 +1,4 @@
-//! Nuanced battle outcomes (lot CV3-1, spec
+//! Nuanced battle outcomes (spec
 //! `docs/design/2026-09-27-campagne-vivante.md` § 3): heroic, decisive,
 //! Pyrrhic victories; honourable defeat, disaster. Thresholds and
 //! consequences in `data/rules/battle_outcome.json`

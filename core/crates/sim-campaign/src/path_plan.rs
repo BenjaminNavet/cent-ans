@@ -1,4 +1,4 @@
-//! Path preview for the campaign map (lot M4, spec
+//! Path preview for the campaign map (spec
 //! `docs/design/2026-09-24-mouvement-libre.md` § 6): the polyline a march
 //! would follow, split by turn. Pure query, the state is not touched.
 //!

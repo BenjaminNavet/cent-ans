@@ -1,4 +1,4 @@
-//! Lot TW2-T2 (ADR 0102): seasonal replenishment of field armies.
+//! ADR 0102: seasonal replenishment of field armies.
 //!
 //! Every season, an army that did not fight regains a share of its missing
 //! men (`data/rules/replenishment.json`, `replenishment`):
