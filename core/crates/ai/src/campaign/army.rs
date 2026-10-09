@@ -265,7 +265,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
 
     /// RX iaplay: the settlement the army is already marching to, if any
     /// (the memory of its target from one turn to the next).
-    fn marching_to(turn: &ArmyTurn) -> Option<&SettlementId> {
+    fn marching_to<'t>(turn: &'t ArmyTurn) -> Option<&'t SettlementId> {
         match &turn.army.destination {
             Some(sim_campaign::MoveTarget::Settlement(id)) => Some(id),
             _ => None,
