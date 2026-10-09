@@ -83,3 +83,6 @@ Règle machine : 3 lots Rust en parallèle au plus (5 → charge 200, agents ren
 Préexistant à corriger : at1_attack_order_test (siège commencé au lieu d'assaut, pending 0 → 0).
 Constats pour le joueur : bouton « scinder l'armée » toujours caché (hud split_supported lit supports_order absent du pont) ; OutbuildingLayer._finish_warm peut bloquer si une vue est demandée dans la frame du setup ; test_relief_update (bake 5≠6) vient d'une autre session.
 Vagues suivantes (≈ 5) : restes dans « Vague 7 » ci-dessus ; docs en dernier ; à la fin : push origin main, mémoire project-hyw-sc.
+
+## Reprise (09/10)
+main avancé de 93 commits DN depuis la base de la vague 7 (07b1c0bd8), aucun dans core/. Agents lancés : keyenum, orders, battlepower (vérif Rust + commit), gdtests (migration des tests Godot). movement attend orders (own_army). Intégration ensuite dans feat/sc avancé sur main, puis ff main.
