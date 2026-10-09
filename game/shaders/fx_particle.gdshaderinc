@@ -15,11 +15,11 @@ mat4 particle_billboard(mat4 view, mat4 inv_view, mat4 model, float angle) {
 }
 
 // Facteur 0-1 de fondu au contact : distance entre la scène (profondeur `depth` lue au pixel
-// `screen_uv`) et le fragment (`vertex_z`, espace vue), ramenée à `soft_distance`.
-float particle_contact_fade(float depth, vec2 screen_uv, mat4 inv_projection, float vertex_z, float soft_distance) {
+// `screen_uv`) et le fragment (`vertex_z`, espace vue), ramenée à `fade_distance`.
+float particle_contact_fade(float depth, vec2 screen_uv, mat4 inv_projection, float vertex_z, float fade_distance) {
 	vec4 scene = inv_projection * vec4(screen_uv * 2.0 - 1.0, depth, 1.0);
 	float scene_distance = -scene.z / scene.w;
-	return clamp((scene_distance + vertex_z) / soft_distance, 0.0, 1.0);
+	return clamp((scene_distance + vertex_z) / fade_distance, 0.0, 1.0);
 }
 
 #endif
