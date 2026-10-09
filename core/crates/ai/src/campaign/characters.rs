@@ -19,6 +19,17 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         .map(|(id, _)| id.clone())
         .collect();
     assign_generals(ctx, &mut busy, orders);
+    // WH armya (ADR 0272): a new army needs a general; keep the best free
+    // commander out of the governorships while the faction has room for one.
+    if state.faction_army_count(ctx.faction) < ctx.data.army_rules.upkeep.free_armies as usize {
+        let reserve = state
+            .characters
+            .iter()
+            .filter(|(id, _)| available(ctx, id) && !busy.contains(*id))
+            .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
+            .map(|(id, _)| id.clone());
+        busy.extend(reserve);
+    }
     assign_governors(ctx, &busy, orders);
     learn_skills(ctx, orders);
     // WH chars: a royal act when the realm can afford it, and a captain for an

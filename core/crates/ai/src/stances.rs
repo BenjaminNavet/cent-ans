@@ -202,6 +202,8 @@ pub fn ambush_orders(
         || army.units.is_empty()
         || army.movement_left == 0
         || matches!(army.stance, Stance::Ambush | Stance::ForcedMarch)
+        // WH armya (ADR 0272): no ambush without a general.
+        || (army.general.is_none() && data.army_rules.leaderless.no_ambush)
     {
         return None;
     }

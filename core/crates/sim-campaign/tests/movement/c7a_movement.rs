@@ -22,7 +22,11 @@ fn road_edges_are_rescaled_to_the_rules_factor() {
 
 #[test]
 fn a_season_covers_one_or_two_provinces_from_paris() {
-    let data = game_data();
+    // The leaderless handicap (WH armya, ADR 0272) is tested apart.
+    let mut owned = game_data().clone();
+    owned.army_rules.leaderless.movement_percent = 0.0;
+    owned.army_rules.pace_percent_by_category.cavalry = 0.0;
+    let data = &owned;
     let france = FactionId::new("fac_france").unwrap();
     let mut state = CampaignState::new_1337(data, france.clone(), 1).unwrap();
     let paris = SettlementId::new("set_paris").unwrap();

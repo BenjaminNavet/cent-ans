@@ -418,8 +418,9 @@ fn recruit(
 fn release_surplus_garrisons(ctx: &Context, cityless: bool, orders: &mut Vec<Order>) {
     let (state, data) = (ctx.state, ctx.data);
     // WH armya (ADR 0272): a new army gets a general first; without one, the
-    // faction forms no army beyond the free ones (it would pay a surcharge
-    // and march at a handicap).
+    // faction forms at most `free_armies` armies (a chiefless host cannot
+    // besiege nor ambush and marches at a handicap: it serves as a convoy
+    // that joins a led army) and never pays the surcharge for them.
     let mut armies_kept = state.faction_army_count(ctx.faction);
     let free_armies = data.army_rules.upkeep.free_armies as usize;
     let mut chosen: std::collections::BTreeSet<data_model::CharacterId> = Default::default();
@@ -495,7 +496,6 @@ fn free_general(
                 && c.governor_of.is_none()
                 && c.location.as_ref() == Some(province)
                 && !chosen.contains(*id)
-                && ctx.state.factions[ctx.faction].ruler.as_ref() != Some(*id)
         })
         .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
         .map(|(id, _)| id.clone())

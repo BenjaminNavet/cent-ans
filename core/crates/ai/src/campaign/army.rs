@@ -303,7 +303,11 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
 
     /// Orders `stance` unless the army already holds it.
     fn ensure_stance(&mut self, turn: &ArmyTurn, stance: Stance) {
-        if turn.army.stance != stance {
+        // WH armya (ADR 0272): a leaderless army cannot take the siege stance.
+        let leaderless_siege = stance == Stance::Siege
+            && turn.army.general.is_none()
+            && self.ctx.data.army_rules.leaderless.no_siege;
+        if turn.army.stance != stance && !leaderless_siege {
             self.push_stance(turn.id, stance);
         }
     }

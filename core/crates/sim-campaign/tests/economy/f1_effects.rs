@@ -286,7 +286,10 @@ fn recruit_cost_technology_targets_its_family() {
 
 #[test]
 fn siege_trains_slow_armies_until_field_artillery() {
-    let data = game_data();
+    // The leaderless handicap (WH armya, ADR 0272) is tested apart.
+    let mut owned = game_data().clone();
+    owned.army_rules.leaderless.movement_percent = 0.0;
+    let data = &owned;
     let mut state = quiet_france(data, 14);
     let army_id = first_army_of(&state, "fac_france");
     let trebuchet = Unit::fresh(&data.unit_types[&unit_type("unit_trebuchet")]);

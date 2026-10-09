@@ -34,7 +34,9 @@ fn a_stronger_faction_at_war_besieges() {
     let mut state = start(data, "fac_england", 2);
     let france = fac("fac_france");
     let mut besieged = false;
-    for _ in 0..12 {
+    // WH armya (ADR 0272): armies need a general to besiege, so the first
+    // siege comes later (within 20 turns instead of 12).
+    for _ in 0..20 {
         apply(&mut state, data, &france);
         state.end_turn_with(data, ai::plan_turn);
         besieged |= state
