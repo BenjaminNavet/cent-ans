@@ -1,0 +1,187 @@
+{
+  "description": "Lot DN-FLEUVE (ADR 0216 provisoire) : glb générés de tout ce qui est sur ou au bord de l'eau sur la carte de campagne. Un registre `models` (identifiant -> chemin sans `_lodN`, longueur monde en unités carte, 1 unité = 719 m) et des règles qui choisissent des identifiants : navires d'armée par bassin et culture, navires de commerce des lignes maritimes par bassin, bateaux de fleuve par nom de fleuve, ponts par structure, moulins à eau, ports, chantiers navals, épaves. Sans fichier ou sans glb importé : l'ancien rendu (modèles procéduraux) reste. Purement visuel. Les orientations (`yaw_deg`) rangent la proue sur +X.",
+  "defaults": {
+    "year": 1337,
+    "lod_main": 1,
+    "lod_ambient": 2,
+    "prop_range": 420.0,
+    "bridge_boost": 1.5,
+    "bridge_range": 300.0,
+    "lane_ship_scale": 1.0,
+    "river_boat_scale": 1.0
+  },
+  "models": {
+    "cog": {"path": "dn/ships/ship_cog", "length": 4.4},
+    "cog_baltic": {"path": "dn/ships/ship_cog_baltic_large", "length": 5.2},
+    "hulk": {"path": "dn/ships/ship_hulk_hourque", "length": 4.6},
+    "knarr": {"path": "dn/ships/ship_knarr_norse", "length": 3.8},
+    "longship": {"path": "dn/ships/env_boat_longship_viking", "length": 3.8},
+    "balinger": {"path": "dn/ships/ship_balinger_english", "length": 3.8},
+    "keel_humber": {"path": "dn/ships/ship_keel_humber", "length": 3.2},
+    "carrack": {"path": "dn/ships/ship_carrack_genoese", "length": 6.0},
+    "caravel": {"path": "dn/ships/ship_caravel_iberian", "length": 4.2, "from_year": 1430},
+    "nao": {"path": "dn/ships/ship_nao_castilian", "length": 4.6},
+    "galley": {"path": "dn/ships/ship_galley", "length": 5.2},
+    "galley_venetian": {"path": "dn/ships/ship_galley_venetian", "length": 5.6},
+    "galley_merchant_venetian": {"path": "dn/ships/ship_galley_merchant_venetian", "length": 5.6},
+    "galley_genoese": {"path": "dn/ships/ship_galley_genoese", "length": 5.6},
+    "galley_aragonese": {"path": "dn/ships/ship_galley_aragonese", "length": 5.6},
+    "dromon": {"path": "dn/ships/ship_dromon_byzantine", "length": 5.6},
+    "fusta": {"path": "dn/ships/ship_fusta_ottoman", "length": 4.2},
+    "ghurab": {"path": "dn/ships/ship_galley_mamluk_ghurab", "length": 5.2},
+    "felucca": {"path": "dn/ships/ship_felucca_nile", "length": 3.4},
+    "dhow": {"path": "dn/ships/env_dhow", "length": 3.8},
+    "sambuk": {"path": "dn/ships/ship_sambuk_redsea", "length": 3.8},
+    "lateen": {"path": "dn/ships/env_boat_lateen", "length": 3.2},
+    "barca": {"path": "dn/ships/ship_barca_mediterranean", "length": 3.6},
+    "ushkuy": {"path": "dn/ships/ship_ushkuy_novgorod", "length": 3.6},
+    "lodka": {"path": "dn/ships/ship_lodka_rus", "length": 2.8},
+    "volga_ladia": {"path": "dn/ships/ship_barge_volga_ladia", "length": 3.6},
+    "rhine_barge": {"path": "dn/ships/ship_barge_rhine", "length": 4.0},
+    "river_barge": {"path": "dn/ships/env_barge_river", "length": 3.6},
+    "tow_barge": {"path": "dn/ships/env_barge_tow_horses", "length": 4.2},
+    "dugout": {"path": "dn/ships/ship_dugout_canoe_nordic", "length": 1.8},
+    "dugout_reeds": {"path": "dn/ships/env_boat_dugout_reeds", "length": 1.8},
+    "fishing_boat": {"path": "dn/ships/env_boat_fishing_small", "length": 2.2},
+    "ferry_cable": {"path": "dn/ships/ship_ferry_cable", "length": 3.2},
+    "shipwreck": {"path": "dn/ships/env_shipwreck_hull", "length": 3.4},
+    "shipyard_slip": {"path": "dn/ships/env_shipyard_slip", "length": 3.6},
+    "bridge_stone_arch": {"path": "dn/buildings/bridge_stone_arch"},
+    "bridge_stone": {"path": "dn/buildings/bridge_stone"},
+    "bridge_gothic": {"path": "dn/buildings/econ_bridge_stone_pointed_gothic"},
+    "bridge_roman": {"path": "dn/buildings/econ_bridge_stone_roman_round"},
+    "bridge_avignon": {"path": "dn/buildings/econ_bridge_stone_fortified_avignon"},
+    "bridge_andalusi": {"path": "dn/buildings/econ_bridge_arched_andalusi"},
+    "bridge_gate": {"path": "dn/buildings/bridge_gate"},
+    "bridge_wood": {"path": "dn/buildings/bridge_wood"},
+    "bridge_trestle": {"path": "dn/buildings/econ_bridge_timber_trestle"},
+    "bridge_covered": {"path": "dn/buildings/econ_bridge_timber_covered"},
+    "bridge_pontoon": {"path": "dn/buildings/econ_bridge_pontoon_boats"},
+    "mill_small": {"path": "dn/buildings/village_mill_watermill_small", "length": 1.7},
+    "mill_undershot": {"path": "dn/buildings/econ_mill_water_undershot", "length": 1.9},
+    "mill_horizontal": {"path": "dn/buildings/econ_mill_horizontal_wheel", "length": 1.7},
+    "mill_tidal": {"path": "dn/buildings/env_tidal_mill", "length": 2.2},
+    "mill_floating": {"path": "dn/buildings/econ_mill_floating_boat", "length": 2.4},
+    "port_pier": {"path": "dn/buildings/econ_port_quay_timber_pier", "length": 3.4},
+    "port_crane": {"path": "dn/buildings/econ_port_treadwheel_crane", "length": 1.6},
+    "port_beach": {"path": "dn/buildings/econ_port_beach_landing_boats", "length": 2.6},
+    "port_arsenal": {"path": "dn/buildings/econ_port_arsenal_galley_shed", "length": 3.6}
+  },
+  "fleet": {
+    "description": "Navires d'une armée embarquée : liste du bassin (SeaBasins.basin_at) ou, sans bassin, `default` ; la culture de la faction passe devant (`by_culture`). Les navires suivants de la même flotte tournent dans la liste.",
+    "default": ["cog", "nao"],
+    "by_basin": {
+      "north_sea_channel": ["cog", "hulk", "balinger", "cog_baltic"],
+      "baltic": ["cog_baltic", "hulk", "knarr", "cog"],
+      "atlantic": ["cog", "nao", "caravel", "hulk", "carrack"],
+      "mediterranean": ["galley", "carrack", "barca", "nao"]
+    },
+    "by_culture": {
+      "cul_venetian": ["galley_venetian", "galley_merchant_venetian"],
+      "cul_ligurian": ["galley_genoese", "carrack"],
+      "cul_catalan": ["galley_aragonese", "nao"],
+      "cul_sicilian": ["galley_aragonese", "galley"],
+      "cul_sardinian": ["galley_aragonese", "barca"],
+      "cul_castilian": ["nao", "galley_aragonese", "caravel"],
+      "cul_portuguese": ["caravel", "nao"],
+      "cul_greek": ["dromon", "galley"],
+      "cul_turkish": ["fusta", "galley"],
+      "cul_arabic": ["ghurab", "dhow"],
+      "cul_maghrebi": ["ghurab", "barca"],
+      "cul_andalusi": ["barca", "galley_aragonese"],
+      "cul_danish": ["knarr", "cog_baltic"],
+      "cul_swedish": ["knarr", "cog_baltic"],
+      "cul_scottish": ["knarr", "balinger"],
+      "cul_irish": ["knarr", "longship"],
+      "cul_english": ["cog", "balinger", "hulk"],
+      "cul_flemish": ["hulk", "cog"],
+      "cul_dutch": ["hulk", "cog"],
+      "cul_breton": ["cog", "nao"],
+      "cul_novgorodian": ["ushkuy", "lodka"],
+      "cul_russian": ["ushkuy", "lodka"]
+    }
+  },
+  "sea_lanes": {
+    "description": "Navires de commerce des lignes maritimes entre ports voisins (LifeAmbient), par bassin du milieu de la ligne.",
+    "default": ["cog", "barca"],
+    "by_basin": {
+      "north_sea_channel": ["cog", "hulk", "fishing_boat"],
+      "baltic": ["cog_baltic", "hulk", "knarr"],
+      "atlantic": ["cog", "nao", "hulk"],
+      "mediterranean": ["galley_merchant_venetian", "carrack", "barca", "lateen", "felucca"]
+    }
+  },
+  "river_boats": {
+    "description": "Bateaux des grands fleuves (LifeAmbient) : la première règle dont `rivers` contient le nom du fleuve, sinon `default`.",
+    "default": ["river_barge", "tow_barge", "fishing_boat"],
+    "rules": [
+      {"rivers": ["Volga", "Don", "Oka", "Kama", "Dnepre", "Dnipro", "Desna", "Neva", "Svir", "Velikaya", "Severnaya Dvina", "Sukhona", "Vychegda", "Onega", "Pechora", "Mezen", "Tobol", "Ural", "Donets", "Kuban", "Pripyat", "Daugava", "Neman", "Neris", "Narva", "Vuoksi", "Volga-Don Canal", "Dniester", "Prut"], "ships": ["ushkuy", "lodka", "volga_ladia"]},
+      {"rivers": ["Rhein", "Rhin", "Rhine", "Waal", "Nederrijn", "Lek", "IJssel", "Mosel", "Elbe", "Weser", "Oder", "Vistula"], "ships": ["rhine_barge", "tow_barge", "fishing_boat"]},
+      {"rivers": ["Danube", "Donau", "Tisa", "Tisza", "Sava", "Drau", "Mur", "Morava", "Soroksari Duna", "Ferenc Csatorna"], "ships": ["rhine_barge", "river_barge", "dugout_reeds"]},
+      {"rivers": ["Nile", "Damietta Branch", "Rosetta Branch", "Ismailiya Canal", "Suez Canal"], "ships": ["felucca", "lateen", "dugout_reeds"]},
+      {"rivers": ["Tigris", "Dicle", "Euphrates", "Firat", "Al Furat", "Jordan"], "ships": ["lateen", "dugout_reeds"]},
+      {"rivers": ["Thames"], "ships": ["keel_humber", "river_barge", "fishing_boat"]},
+      {"rivers": ["Dalälven", "Glomma", "Göta älv", "Kemijoki", "Kokemäenjoki", "Lule lv", "Stora Lule lv", "Skelleftelven", "Tornelven", "Ångermanälven", "Vorma", "Kem", "Lotta"], "ships": ["dugout", "fishing_boat"]}
+    ]
+  },
+  "bridges": {
+    "description": "Ponts de RiverCrossings : par structure (`BridgeMeshes`), variante tirée par id d'ouvrage ; `by_id` : sous-chaîne de l'id (ou du nom) -> modèle. La portée du modèle est mise à celle du fleuve, le tablier suit l'axe du franchissement. Gués : maillage procédural conservé (aucune entrée).",
+    "by_structure": {
+      "stone": ["bridge_stone_arch", "bridge_gothic", "bridge_stone", "bridge_roman"],
+      "wood": ["bridge_wood", "bridge_trestle", "bridge_wood", "bridge_covered"],
+      "gate": ["bridge_gate", "bridge_gothic"],
+      "boats": ["bridge_pontoon"]
+    },
+    "by_id": {
+      "avignon": "bridge_avignon",
+      "benezet": "bridge_avignon",
+      "cordoue": "bridge_andalusi",
+      "cordoba": "bridge_andalusi",
+      "tolede": "bridge_andalusi",
+      "alcantara": "bridge_roman",
+      "merida": "bridge_roman"
+    }
+  },
+  "mills": {
+    "description": "Moulins à eau : un par lieu possédant `bld_water_mill` au départ, posé sur la berge du fleuve le plus proche (dans `river_max_px`) ; marée si la côte est à moins de `coast_max_px` ; bateau-moulin sur les fleuves d'importance >= `floating_min_importance` pour les lieux listés dans `floating_places`.",
+    "building": "bld_water_mill",
+    "river_max_px": 8.0,
+    "coast_max_px": 4.0,
+    "bank_offset_px": 0.9,
+    "default": ["mill_small", "mill_undershot"],
+    "tidal": ["mill_tidal"],
+    "floating": ["mill_floating"],
+    "floating_min_importance": 6,
+    "floating_places": ["set_toulouse", "set_bordeaux", "set_avignon", "set_nantes", "set_tours", "set_orleans", "set_lyon"],
+    "by_family": {"med": ["mill_horizontal", "mill_undershot"]}
+  },
+  "ports": {
+    "description": "Ports (lieux `port` ou `bld_port`) : sur la côte du lieu (recherche de l'eau dans `search_px`), jetée vers la mer, grue, navires amarrés en nombre croissant avec le poids ; les bourgs sans jetée ont des barques tirées au sec. Fleuve : repli sur le fleuve le plus proche. Les villes et bourgs ont leurs propres glb de camp-bati : pas d'entrepôt ajouté.",
+    "search_px": 14.0,
+    "by_kind": {
+      "city": {"props": ["port_pier", "port_crane"], "moored": 3},
+      "town": {"props": ["port_pier", "port_crane"], "moored": 2},
+      "castle": {"props": ["port_beach"], "moored": 1},
+      "abbey": {"props": ["port_beach"], "moored": 0},
+      "village": {"props": ["port_beach"], "moored": 1}
+    },
+    "moored_by_basin": {
+      "north_sea_channel": ["cog", "hulk", "fishing_boat"],
+      "baltic": ["cog_baltic", "hulk", "fishing_boat"],
+      "atlantic": ["cog", "nao", "fishing_boat"],
+      "mediterranean": ["galley", "barca", "carrack", "lateen"]
+    },
+    "moored_default": ["cog", "fishing_boat"],
+    "arsenal_places": ["set_venise", "set_genes", "set_barcelone", "set_pisa", "set_constantinople", "set_marseille"]
+  },
+  "shipyards": {
+    "description": "Chantiers navals (cale de lancement) : lieux listés, à côté de la jetée.",
+    "places": ["set_venise", "set_genes", "set_barcelone", "set_rouen", "set_bordeaux", "set_bristol", "set_lubeck", "set_danzig", "set_hamburg", "set_bergen", "set_stockholm", "set_la_rochelle", "set_southampton", "set_amsterdam", "set_pisa", "set_lisbonne", "set_seville", "set_riga", "set_reval", "set_dieppe", "set_constantinople", "set_antwerp", "set_naples"]
+  },
+  "wrecks": {
+    "description": "Épaves échouées : un port sur `every` (tri par identifiant), le long de la côte à `distance_px` du port.",
+    "every": 9,
+    "distance_px": 6.0,
+    "model": "shipwreck"
+  }
+}

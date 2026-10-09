@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_dn_water_models.schema.json",
+  "title": "Modèles générés des eaux de la carte de campagne (DN-FLEUVE)",
+  "description": "Lu par `DnWaterModels` (`game/scripts/map/dn_water_models.gd`). Registre `models` (identifiant -> glb) et règles qui désignent des identifiants du registre : navires d'armée, lignes maritimes, bateaux de fleuve, ponts, moulins, ports, chantiers, épaves. Purement visuel.",
+  "type": "object",
+  "required": ["defaults", "models", "fleet", "sea_lanes", "river_boats", "bridges", "mills", "ports", "shipyards", "wrecks"],
+  "additionalProperties": false,
+  "$defs": {
+    "ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "description": "Identifiants du registre `models`."},
+    "id_table": {"type": "object", "additionalProperties": {"$ref": "#/$defs/ids"}}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["year", "lod_main", "lod_ambient", "prop_range", "bridge_boost", "bridge_range"],
+      "properties": {
+        "year": {"type": "integer", "description": "Année de repli pour `from_year` / `until_year`."},
+        "lod_main": {"type": "integer", "minimum": 0, "maximum": 2, "description": "Niveau de détail des glb posés (armées, ports, ponts, moulins)."},
+        "lod_ambient": {"type": "integer", "minimum": 0, "maximum": 2, "description": "Niveau de détail des navires ambiants (lignes maritimes, fleuves) : nombreux, vus de loin."},
+        "prop_range": {"type": "number", "exclusiveMinimum": 0, "description": "Portée de visibilité (distance caméra) des décors de rive."},
+        "bridge_boost": {"type": "number", "exclusiveMinimum": 0, "description": "Grossissement des ponts glb à la carte (lisibilité), pas en mode fin."},
+        "bridge_range": {"type": "number", "exclusiveMinimum": 0},
+        "lane_ship_scale": {"type": "number", "exclusiveMinimum": 0},
+        "river_boat_scale": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "models": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string", "pattern": "^dn/[a-z_]+/[a-z0-9_]+$", "description": "Relatif à assets/models/, sans `_lodN.glb`."},
+          "length": {"type": "number", "exclusiveMinimum": 0, "description": "Plus grande dimension horizontale du modèle en unités carte (1 unité = 719 m) ; absente pour un pont (portée du fleuve)."},
+          "yaw_deg": {"type": "number", "description": "Rotation (degrés) qui range la proue (ou l'axe du tablier) sur +X."},
+          "lift": {"type": "number", "description": "Décalage vertical (unités) : un navire s'enfonce de cette hauteur."},
+          "from_year": {"type": "integer"},
+          "until_year": {"type": "integer"}
+        }
+      }
+    },
+    "fleet": {
+      "type": "object",
+      "required": ["default", "by_basin", "by_culture"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "default": {"$ref": "#/$defs/ids"},
+        "by_basin": {"$ref": "#/$defs/id_table"},
+        "by_culture": {"$ref": "#/$defs/id_table"}
+      }
+    },
+    "sea_lanes": {
+      "type": "object",
+      "required": ["default", "by_basin"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "default": {"$ref": "#/$defs/ids"},
+        "by_basin": {"$ref": "#/$defs/id_table"}
+      }
+    },
+    "river_boats": {
+      "type": "object",
+      "required": ["default", "rules"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "default": {"$ref": "#/$defs/ids"},
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rivers", "ships"],
+            "additionalProperties": false,
+            "properties": {
+              "rivers": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+              "ships": {"$ref": "#/$defs/ids"}
+            }
+          }
+        }
+      }
+    },
+    "bridges": {
+      "type": "object",
+      "required": ["by_structure"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "by_structure": {"$ref": "#/$defs/id_table"},
+        "by_id": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "mills": {
+      "type": "object",
+      "required": ["building", "river_max_px", "default", "tidal", "floating"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "building": {"type": "string"},
+        "river_max_px": {"type": "number", "exclusiveMinimum": 0},
+        "coast_max_px": {"type": "number", "minimum": 0},
+        "bank_offset_px": {"type": "number", "minimum": 0},
+        "default": {"$ref": "#/$defs/ids"},
+        "tidal": {"$ref": "#/$defs/ids"},
+        "floating": {"$ref": "#/$defs/ids"},
+        "floating_min_importance": {"type": "integer"},
+        "floating_places": {"type": "array", "items": {"type": "string"}},
+        "by_family": {"$ref": "#/$defs/id_table"}
+      }
+    },
+    "ports": {
+      "type": "object",
+      "required": ["search_px", "by_kind", "moored_by_basin", "moored_default"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "search_px": {"type": "number", "exclusiveMinimum": 0},
+        "by_kind": {
+          "type": "object",
+          "propertyNames": {"enum": ["city", "town", "castle", "abbey", "village"]},
+          "additionalProperties": {
+            "type": "object",
+            "required": ["props", "moored"],
+            "additionalProperties": false,
+            "properties": {
+              "props": {"$ref": "#/$defs/ids"},
+              "moored": {"type": "integer", "minimum": 0, "maximum": 4}
+            }
+          }
+        },
+        "moored_by_basin": {"$ref": "#/$defs/id_table"},
+        "moored_default": {"$ref": "#/$defs/ids"},
+        "arsenal_places": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "shipyards": {
+      "type": "object",
+      "required": ["places"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "places": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "wrecks": {
+      "type": "object",
+      "required": ["every", "distance_px", "model"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "every": {"type": "integer", "minimum": 1},
+        "distance_px": {"type": "number", "exclusiveMinimum": 0},
+        "model": {"type": "string"}
+      }
+    }
+  }
+}
