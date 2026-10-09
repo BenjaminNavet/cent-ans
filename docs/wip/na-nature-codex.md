@@ -6,9 +6,9 @@ faune… ; survol d'un élément du décor → petite bulle après quelques seco
 ## Lots
 - [x] NA0 squelette : schéma (`decor`, `latin`, catégories), validateur, `CodexStore.entry_for_decor`, famille Nature, ADR.
 - [ ] NA1 fiches (3 agents Sonnet) : arbres / animaux / oiseaux+roches, liste ci-dessous.
-- [~] NA2 pick campagne (code écrit : `Vegetation/RockOutcrops/FaunaLayer.decor_candidates`, `CampaignMap.pick_decor`; à vérifier) : arbres (instances MultiMesh de `map/vegetation.gd`, espèce dans custom data), troupeaux (`fauna_layer.cell_herds`), rochers.
-- [~] NA3 pick bataille (code écrit : `BattleTerrain.decor_candidates`, `BattleScene.pick_decor`; à vérifier) : arbres par espèce (`battle_terrain.gd` by_species).
-- [~] NA4 bulle différée (`ui/decor_hover.gd`, réglage `interface/decor_hover_delay`, test `tests/decor_hover_test.gd`; à vérifier) (1,5 s, réglage Réglages, 0 = off) + test headless.
+- [x] NA2 pick campagne : `Vegetation/RockOutcrops/FaunaLayer.decor_candidates`, `CampaignMap.pick_decor` (écran, priorité armées/villes via `pick_target`) : arbres (instances MultiMesh de `map/vegetation.gd`, espèce dans custom data), troupeaux (`fauna_layer.cell_herds`), rochers.
+- [x] NA3 pick bataille : `BattleTerrain.decor_candidates` (index par tuile), `BattleScene.pick_decor` (troupes d'abord) : arbres par espèce (`battle_terrain.gd` by_species).
+- [x] NA4 bulle différée : `ui/decor_hover.gd`, réglage `interface/decor_hover_delay` (Réglages > Carte, défaut `decor_hover` de tooltip_style.json), latin dans la bulle, test `tests/decor_hover_test.gd` (1,5 s, réglage Réglages, 0 = off) + test headless.
 - [ ] NA5 bundle, validate, smoke, revue, fusion main.
 
 ## Fiches à écrire (id → décor)
@@ -39,5 +39,5 @@ Roches (`roche`) : rock:limestone_cliff, granite_chaos, stratified_ridge, alpine
 (ids libres, ex. cdx_falaises_calcaires, cdx_chaos_granitiques…).
 
 ## État / prochaine étape
-NA0 commité. NA2-4 (agent UI) : code écrit, non encore exécuté (import Godot du worktree en cours).
-Prochaine étape : `godot --headless --path game --script res://tests/decor_hover_test.gd` puis smoke, corriger, cocher.
+NA0, NA2-NA4 faits et testés (decor_hover_test OK, smoke OK, ib_chain_test, p2e_ui_test). Reste NA1 (fiches) et NA5.
+Non vérifié à l'œil : placement réel de la bulle en jeu (une capture via tools/godot_bg.sh pourrait servir à NA5).

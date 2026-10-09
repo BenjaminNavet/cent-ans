@@ -19,6 +19,7 @@ func _init() -> void:
 	_test_mapping()
 	await _test_timer()
 	await _test_campaign()
+	await _test_battle_index()
 	if _failures > 0:
 		push_error("decor_hover_test: %d failure(s)" % _failures)
 		quit(1)
@@ -139,10 +140,10 @@ func _test_campaign() -> void:
 			await process_frame
 			if i > 5 and vegetation.pending_jobs() == 0 and vegetation.tile_count() > 0:
 				break
-		var hit := map.picker.pick_ray_screen(map.get_viewport().get_visible_rect().size * 0.5)
+		var hit: Dictionary = map.picker.pick_ray_screen(map.get_viewport().get_visible_rect().size * 0.5)
 		if hit.is_empty():
 			continue
-		var candidates := vegetation.decor_candidates(Vector2(float(hit["x"]), float(hit["z"])), 3.0)
+		var candidates: Array = vegetation.decor_candidates(Vector2(float(hit["x"]), float(hit["z"])), 3.0)
 		if candidates.size() >= 3:
 			chosen = {"hit": hit, "candidates": candidates}
 			break
@@ -184,5 +185,67 @@ func _test_campaign() -> void:
 	if _check(not target_info.is_empty(), "settlement is picked at its position"):
 		_check(bool(map.decor_hover.blocker.call(at)), "blocker true over a settlement")
 	_check(not bool(map.decor_hover.blocker.call(Vector2(-500.0, -500.0))), "blocker false on empty ground")
+	await _test_fauna_and_rocks(map, data, rig, camera)
 	map.queue_free()
+	await process_frame
+
+
+func _test_fauna_and_rocks(map: Node3D, data: MapData, rig: CampaignCamera, camera: Camera3D) -> void:
+	var fauna: FaunaLayer = map.life.fauna
+	var camargue := FaunaLayer.lonlat_to_px(4.55, 43.52, data)
+	rig.look_at_point(Vector3(camargue.x, data.surface_world_at(camargue.x, camargue.y), camargue.y), 8.0)
+	rig.snap()
+	for i in 60:
+		await process_frame
+	var herds: Array = []
+	for cy in range(floori((camargue.y - 40.0) / 96.0), floori((camargue.y + 40.0) / 96.0) + 1):
+		for cx in range(floori((camargue.x - 40.0) / 96.0), floori((camargue.x + 40.0) / 96.0) + 1):
+			herds.append_array(fauna.cell_herds(Vector2i(cx, cy)))
+	if not herds.is_empty():
+		var herd: Dictionary = herds[0]
+		var found := fauna.decor_candidates(herd["center"], 0.5)
+		var species_found := false
+		for candidate: Dictionary in found:
+			species_found = species_found or candidate["species"] == herd["species"]
+		print("decor_hover: fauna visible cells %d, candidates near a herd: %d" % [int(fauna.stats["visible_cells"]), found.size()])
+		if int(fauna.stats["visible_cells"]) > 0:
+			_check(species_found, "fauna candidates include the herd species")
+	var outcrops := map.get_node_or_null("RockOutcrops")
+	if outcrops != null and outcrops.tile_count() > 0:
+		var any_rock := false
+		for tile_key: Vector2i in outcrops._tiles:
+			for part: Dictionary in outcrops._tiles[tile_key]["parts"]:
+				var points: PackedVector2Array = part["points"]
+				if points.size() > 0 and (part["mmi"] as MultiMeshInstance3D).is_visible_in_tree():
+					var found: Array = outcrops.decor_candidates(points[0])
+					any_rock = any_rock or found.size() > 0
+		print("decor_hover: rock tiles %d, candidate found: %s" % [outcrops.tile_count(), any_rock])
+
+
+func _test_battle_index() -> void:
+	var world := Node3D.new()
+	root.add_child(world)
+	var terrain := BattleTerrain.new()
+	world.add_child(terrain)
+	var nx := 121
+	var nz := 81
+	var heights := PackedFloat32Array()
+	heights.resize(nx * nz)
+	terrain.build({"nx": nx, "nz": nz, "resolution": 10.0, "heights": heights, "terrain": "forest", "season": "summer", "ground": "dry", "woodland": 0.8}, "clear")
+	var all := terrain.decor_candidates(Vector2(600.0, 400.0), 2000.0)
+	print("decor_hover: battle trees indexed: %d" % all.size())
+	if not _check(all.size() > 50, "battle trees indexed (%d)" % all.size()):
+		world.queue_free()
+		return
+	var sample: Dictionary = all[all.size() / 2]
+	var at: Vector3 = sample["position"]
+	var near := terrain.decor_candidates(Vector2(at.x, at.z), 5.0)
+	var found := false
+	for tree: Dictionary in near:
+		found = found or (tree["position"] as Vector3).is_equal_approx(at)
+		_check(BattleTrees.SPECIES.has(tree["species"]) and absf((tree["position"] as Vector3).x - at.x) <= 5.0, "indexed tree is a known species within reach")
+	_check(found, "the sampled tree is found near its own position")
+	var codex := CodexText.store()
+	_check(codex != null and codex.call("entry_for_decor", "battle_tree", "willow") == "cdx_saule", "battle_tree key resolves")
+	world.queue_free()
 	await process_frame
