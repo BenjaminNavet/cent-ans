@@ -180,7 +180,7 @@
         "valley_km": {"type": "number", "minimum": 0},
         "classes": {
           "type": "object",
-          "propertyNames": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]},
+          "propertyNames": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid", "desert", "tundra", "continental_east", "atlantic_south", "pannonian", "hemiboreal", "aegean_maquis"]},
           "additionalProperties": {"$ref": "#/$defs/biome_style"}
         }
       }

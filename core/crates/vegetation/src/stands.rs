@@ -47,6 +47,9 @@ pub struct StandTable {
     pub height: Vec<f32>,
     /// Eligibility: bit `b` set = biome `b` allowed.
     pub biome_mask: Vec<i32>,
+    /// Parent of every biome (ADR 0237); empty = no fallback. A biome that no stand type
+    /// mentions is treated as its parent.
+    pub biome_parent: Vec<i32>,
     /// `(min, max)` pairs.
     pub altitude: Vec<f32>,
     pub lat: Vec<f32>,
@@ -99,6 +102,24 @@ impl StandTable {
         (lon.to_degrees(), lat.to_degrees())
     }
 
+    /// Biome used for the eligibility masks: `biome`, or its nearest ancestor when no stand
+    /// type mentions it.
+    pub fn resolve_biome(&self, biome: usize) -> usize {
+        let known = self.biome_mask.iter().fold(0i32, |acc, m| acc | m);
+        let mut b = biome.min(30);
+        for _ in 0..16 {
+            let Some(&parent) = self.biome_parent.get(b) else {
+                break;
+            };
+            let parent = parent.max(0) as usize;
+            if parent == b || known & (1 << b) != 0 {
+                break;
+            }
+            b = parent;
+        }
+        b
+    }
+
     fn eligible(&self, s: usize, biome: usize, alt: f64, conifer: f64, lonlat: (f64, f64)) -> bool {
         if self.biome_mask[s] & (1 << biome.min(30)) == 0 {
             return false;
@@ -112,6 +133,7 @@ impl StandTable {
 
     /// Stand of a point; `None` when the table has no stand eligible there.
     pub fn stand_at(&self, x: f64, y: f64, biome: usize, alt: f64, conifer: f64) -> Option<usize> {
+        let biome = self.resolve_biome(biome);
         let mut best: Option<(f64, usize)> = None;
         for r in &self.regions {
             let (dx, dy) = (x - r.cx, y - r.cy);
@@ -186,6 +208,7 @@ mod tests {
             density: vec![1.0, 0.8],
             height: vec![1.0, 1.1],
             biome_mask: vec![0b110, 0b110],
+            biome_parent: Vec::new(),
             altitude: vec![0.0, 3000.0, 0.0, 3000.0],
             lat: vec![-90.0, 90.0, -90.0, 90.0],
             lon: vec![-180.0, 180.0, -180.0, 180.0],
@@ -216,6 +239,25 @@ mod tests {
         assert_eq!(t.stand_at(500.0, 500.0, 2, 100.0, 0.1), Some(0));
         assert_eq!(t.stand_at(500.0, 500.0, 2, 100.0, 0.9), Some(1));
         assert_eq!(t.stand_at(500.0, 500.0, 0, 100.0, 0.1), None);
+    }
+
+    #[test]
+    fn unmentioned_regional_biome_uses_its_parent() {
+        let mut t = table();
+        t.regions.clear();
+        // Stand masks mention biomes 1 and 2 only: 10 (continental east) behaves as 2.
+        assert_eq!(t.stand_at(500.0, 500.0, 10, 100.0, 0.1), None);
+        t.biome_parent = crate::species::tests::PARENTS.to_vec();
+        assert_eq!(t.resolve_biome(10), 2);
+        assert_eq!(t.resolve_biome(11), 1);
+        assert_eq!(t.resolve_biome(2), 2);
+        assert_eq!(
+            t.stand_at(500.0, 500.0, 10, 100.0, 0.1),
+            t.stand_at(500.0, 500.0, 2, 100.0, 0.1)
+        );
+        // A mentioned biome keeps its own eligibility.
+        t.biome_mask = vec![0b110 | (1 << 9), 0b110];
+        assert_eq!(t.resolve_biome(9), 9);
     }
 
     #[test]

@@ -458,7 +458,12 @@ def test_biome_bake_is_band_independent(style: dict) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _refined(legend: dict, code: str, base: int, **overrides) -> np.ndarray:
+def _refined(legend: dict, code: str | None, base: int, **overrides) -> np.ndarray:
+    # No edge warp: synthetic rasters are tiny and the boxes are tested at their centre.
+    legend = {
+        **legend,
+        "refine": {**legend["refine"], "edge_noise": {"km": 1.0, "amp_deg": 0.0, "seed": 0}},
+    }
     inputs = _inputs(legend, code, **overrides)
     return biomes.refine(np.full(inputs.shape, base, dtype=np.uint8), inputs, legend)
 

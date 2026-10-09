@@ -434,6 +434,33 @@ def _box_mask(inputs: BiomeInputs, boxes: list[list[float]]) -> np.ndarray:
     return inside
 
 
+def _warped(inputs: BiomeInputs, legend: dict) -> BiomeInputs:
+    """Inputs whose lon / lat are shifted by low-frequency noise (``refine.edge_noise``).
+
+    The sub-class boxes and latitude limits then follow irregular, natural-looking
+    edges instead of straight meridians and parallels.
+    """
+    import dataclasses
+
+    from cent_ans_tools.geo import colormap
+
+    rule = legend["refine"]["edge_noise"]
+    if rule["amp_deg"] <= 0:
+        return inputs
+    shifts = []
+    for index in range(2):
+        noise = colormap._grid_noise(
+            inputs.shape,
+            inputs.meters_per_px,
+            rule["km"] * 1000.0,
+            int(rule["seed"]) + 31 * index,
+        )
+        shifts.append(((noise - 0.5) * 2.0 * rule["amp_deg"]).astype(np.float32))
+    return dataclasses.replace(
+        inputs, lon=inputs.lon + shifts[0], lat=inputs.lat + shifts[1]
+    )
+
+
 def refine(biome: np.ndarray, inputs: BiomeInputs, legend: dict) -> np.ndarray:
     """Carve the regional sub-classes 8-14 out of their parents (``refine`` rules).
 
@@ -442,9 +469,11 @@ def refine(biome: np.ndarray, inputs: BiomeInputs, legend: dict) -> np.ndarray:
     Pannonian, south Atlantic, Aegean maquis, desert, then continental east (what
     remains of continental east of ``min_lon``). Rules asking for Köppen codes
     ignore the condition without the Köppen source (``desert`` uses ``dryness_min``).
+    Longitudes and latitudes are warped by ``edge_noise`` so box edges are irregular.
     """
     ids = indices(legend)
     rules = legend["refine"]
+    inputs = _warped(inputs, legend)
 
     def source(rule: dict) -> np.ndarray:
         return np.isin(biome, [ids[name] for name in rule["from"]])

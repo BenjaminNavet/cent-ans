@@ -104,6 +104,9 @@ rules:
 # [lon_min, lat_min, lon_max, lat_max]. `koppen` : codes Köppen exigés (sans source Köppen, la
 # condition est ignorée ; le désert se rabat alors sur `dryness_min`).
 refine:
+  # Bruit basse fréquence ajouté à lon / lat avant les tests de boîtes et de latitude : lisières
+  # irrégulières (amplitude en degrés, échelle en km).
+  edge_noise: {km: 260.0, amp_deg: 1.1, seed: 1359}
   # Köppen BW (Sahara, Arabie, Sinaï) parmi les semi-arides.
   desert:
     from: [semi_arid]

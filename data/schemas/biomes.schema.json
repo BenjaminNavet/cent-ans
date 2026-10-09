@@ -533,6 +533,7 @@
       "type": "object",
       "description": "Sous-classes régionales 8-14 (ADR 0237), appliquées avant le lissage.",
       "required": [
+        "edge_noise",
         "desert",
         "tundra",
         "hemiboreal",
@@ -543,6 +544,30 @@
       ],
       "additionalProperties": false,
       "properties": {
+        "edge_noise": {
+          "type": "object",
+          "required": [
+            "km",
+            "amp_deg",
+            "seed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "km": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "amp_deg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
         "desert": {
           "type": "object",
           "required": [

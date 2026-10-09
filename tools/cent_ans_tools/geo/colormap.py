@@ -411,9 +411,20 @@ def biome_weights(
     section = style.get("biomes")
     if biomes is None or not section:
         return [], None, 1
-    ids = geo_biomes.indices(geo_biomes.load_legend())
+    legend = geo_biomes.load_legend()
+    ids = geo_biomes.indices(legend)
     step = int(section["weight_step"])
     small = np.ascontiguousarray(biomes[::step, ::step])
+    # A regional class (8-14, ADR 0237) without a palette of its own takes its parent's.
+    parent = geo_biomes.parents(legend)
+    styled = {ids[name] for name in section["classes"]}
+    lut = np.arange(256, dtype=np.uint8)
+    for index in range(len(parent)):
+        ancestor = index
+        while ancestor not in styled and parent[ancestor] != ancestor:
+            ancestor = parent[ancestor]
+        lut[index] = ancestor
+    small = lut[small]
     known = small > 0
     if not known.any():
         return [], None, 1
