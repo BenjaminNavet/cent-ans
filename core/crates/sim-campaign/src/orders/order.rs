@@ -117,6 +117,12 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// WH armyb: the besieger calls on the garrison of `settlement` to
+    /// surrender (chance by supplies and breach; one answer per turn).
+    DemandSurrender {
+        #[serde(alias = "province")]
+        settlement: Place,
+    },
     /// Form a new army from garrison units (indices into the garrison).
     CreateArmy {
         #[serde(alias = "province")]

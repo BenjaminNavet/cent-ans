@@ -66,7 +66,19 @@
     "siege": {
       "type": "object",
       "properties": {
-        "base_turns": { "type": "integer", "minimum": 0, "maximum": 20, "description": "Durée de base d'un siège en tours, ajoutée au niveau de fortification." }
+        "base_turns": { "type": "integer", "minimum": 0, "maximum": 20, "description": "Durée de base d'un siège en tours, ajoutée au niveau de fortification." },
+        "surrender": {
+          "type": "object",
+          "description": "Sommation de reddition du siège (lot WH armyb, ADR 0279).",
+          "properties": {
+            "refuse_from_supplies": { "$ref": "#/$defs/points", "description": "La garnison refuse d'office tant que ses vivres sont à ce niveau ou au-dessus." },
+            "supplies_weight": { "type": "number", "minimum": 0, "maximum": 10, "description": "Chance (%) de céder par point de vivres sous le seuil de refus." },
+            "breach_weight": { "type": "number", "minimum": 0, "maximum": 10, "description": "Chance (%) de céder par point de brèche." },
+            "breach_open": { "$ref": "#/$defs/points", "description": "Brèche à partir de laquelle les murs sont ouverts : avec des vivres à 0, la garnison cède toujours." }
+          },
+          "required": ["refuse_from_supplies", "supplies_weight", "breach_weight", "breach_open"],
+          "additionalProperties": false
+        }
       },
       "required": ["base_turns"],
       "additionalProperties": false

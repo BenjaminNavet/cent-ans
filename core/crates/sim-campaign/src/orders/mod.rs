@@ -184,6 +184,19 @@ impl CampaignState {
                 self.pending_events.extend(events);
                 result.map(|_| ())
             }
+            Order::DemandSurrender { settlement } => {
+                let settlement = self.resolve_place(&settlement)?;
+                let mut events = Vec::new();
+                let result = crate::siege::order_demand_surrender(
+                    self,
+                    data,
+                    faction,
+                    &settlement,
+                    &mut events,
+                );
+                self.pending_events.extend(events);
+                result.map(|_| ())
+            }
             Order::RecruitInto {
                 settlement,
                 unit_type,

@@ -254,3 +254,64 @@ fn sortie_order_needs_a_siege_and_your_own_place() {
         )
         .is_err());
 }
+
+fn demand(state: &mut CampaignState, place: &data_model::SettlementId) -> Result<(), OrderError> {
+    state.apply_order(
+        game_data(),
+        &fac("fac_england"),
+        Order::DemandSurrender {
+            settlement: place.clone().into(),
+        },
+    )
+}
+
+#[test]
+fn surrender_is_refused_with_stores_and_accepted_when_starved_and_breached() {
+    let data = game_data();
+    let (mut state, boulogne, _) = besieged_boulogne(8, 8);
+    let set_siege = |state: &mut CampaignState, supplies: u8, breach: u8| {
+        let siege = state
+            .settlements
+            .get_mut(&boulogne)
+            .unwrap()
+            .siege
+            .as_mut()
+            .unwrap();
+        siege.supplies = supplies;
+        siege.breach = breach;
+    };
+    set_siege(&mut state, 50, 100);
+    assert_eq!(
+        sim_campaign::siege::surrender_chance(&state, data, &boulogne),
+        Some(0)
+    );
+    demand(&mut state, &boulogne).unwrap();
+    assert_eq!(state.settlements[&boulogne].controller, fac("fac_france"));
+    set_siege(&mut state, 20, 40);
+    assert_eq!(
+        sim_campaign::siege::surrender_chance(&state, data, &boulogne),
+        Some(50)
+    );
+    set_siege(&mut state, 0, 50);
+    assert_eq!(
+        sim_campaign::siege::surrender_chance(&state, data, &boulogne),
+        Some(100)
+    );
+    demand(&mut state, &boulogne).unwrap();
+    let place = &state.settlements[&boulogne];
+    assert_eq!(place.controller, fac("fac_england"));
+    assert!(place.siege.is_none() && place.garrison.is_empty());
+}
+
+#[test]
+fn only_the_besieger_may_demand_surrender() {
+    let (mut state, boulogne, _) = besieged_boulogne(8, 8);
+    let result = state.apply_order(
+        game_data(),
+        &fac("fac_france"),
+        Order::DemandSurrender {
+            settlement: boulogne.clone().into(),
+        },
+    );
+    assert!(matches!(result, Err(OrderError::SurrenderUnavailable(_))));
+}

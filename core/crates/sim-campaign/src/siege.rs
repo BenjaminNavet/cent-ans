@@ -1059,6 +1059,112 @@ pub(crate) fn order_sortie(
     Ok(sortie(state, data, settlement, &besiegers, true, events))
 }
 
+/// WH armyb: chance (%) that the garrison of the besieged `settlement`
+/// yields to a surrender demand now; `None` without a siege. Below
+/// `refuse_from_supplies` it grows with the hunger and the breach; with
+/// empty stores and open walls it is certain.
+pub fn surrender_chance(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+) -> Option<u32> {
+    let siege = state.settlements.get(settlement)?.siege.as_ref()?;
+    let rules = &data.capture_rules.siege.surrender;
+    if siege.supplies >= rules.refuse_from_supplies {
+        return Some(0);
+    }
+    if siege.supplies == 0 && siege.breach >= rules.breach_open {
+        return Some(100);
+    }
+    let hunger = f64::from(rules.refuse_from_supplies - siege.supplies) * rules.supplies_weight;
+    let breach = f64::from(siege.breach) * rules.breach_weight;
+    Some((hunger + breach).round().clamp(0.0, 100.0) as u32)
+}
+
+/// Stable roll (0-99) of a surrender demand: the same siege on the same
+/// turn always gets the same answer, so repeating the demand gains nothing.
+fn surrender_roll(state: &CampaignState, settlement: &SettlementId) -> u32 {
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    let seed = format!("{}:{}:{}", state.turn, settlement, state.seed);
+    for byte in seed.bytes() {
+        hash ^= u64::from(byte);
+        hash = hash.wrapping_mul(0x0100_0000_01b3);
+    }
+    (hash % 100) as u32
+}
+
+/// WH armyb: the besieger's `DemandSurrender` order. Returns `true` when
+/// the garrison yields (the place is taken without assault, the garrison
+/// is disbanded as after a starvation); `false` when it holds out.
+pub(crate) fn order_demand_surrender(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    settlement: &SettlementId,
+    events: &mut Vec<GameEvent>,
+) -> Result<bool, crate::orders::OrderError> {
+    use crate::orders::OrderError;
+    let place = state
+        .settlements
+        .get(settlement)
+        .ok_or_else(|| OrderError::UnknownSettlement(settlement.clone()))?;
+    if !place.siege.as_ref().is_some_and(|s| &s.attacker == faction) {
+        return Err(OrderError::SurrenderUnavailable(
+            "vous n'assiégez pas cette place".to_owned(),
+        ));
+    }
+    let chance = surrender_chance(state, data, settlement).unwrap_or(0);
+    let province_id = province_of(state, settlement);
+    if surrender_roll(state, settlement) >= chance {
+        events.push(
+            GameEvent::new(
+                EventKind::SiegeStarted,
+                format!(
+                    "La garnison de {} refuse de se rendre.",
+                    data.settlement_name(settlement)
+                ),
+            )
+            .province(&province_id)
+            .faction(faction),
+        );
+        return Ok(false);
+    }
+    let general = besiegers_of(state, settlement)
+        .into_iter()
+        .find(|id| &state.armies[id].faction == faction)
+        .and_then(|id| state.armies[&id].general.clone());
+    state
+        .settlements
+        .get_mut(settlement)
+        .expect("checked")
+        .garrison
+        .clear();
+    events.push(
+        GameEvent::new(
+            EventKind::ProvinceCaptured,
+            format!(
+                "La garnison de {} se rend sans combattre.",
+                data.settlement_name(settlement)
+            ),
+        )
+        .province(&province_id)
+        .faction(faction),
+    );
+    capture(state, data, settlement, faction, events);
+    if let Some(general) = general {
+        dynasty::on_siege_won(state, data, &general);
+        crate::retinue::try_acquire(
+            state,
+            data,
+            &general,
+            data_model::AcquisitionTrigger::SiegeWon,
+            &[],
+            events,
+        );
+    }
+    Ok(true)
+}
+
 /// The armies still besieging `settlement` (its current controller).
 fn besiegers_of(state: &CampaignState, settlement: &SettlementId) -> Vec<ArmyId> {
     state

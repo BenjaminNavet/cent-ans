@@ -95,6 +95,8 @@ pub enum OrderError {
     ArmyFull { cap: usize },
     #[error("sortie impossible : {0}")]
     SortieUnavailable(String),
+    #[error("sommation impossible : {0}")]
+    SurrenderUnavailable(String),
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
     #[error(transparent)]

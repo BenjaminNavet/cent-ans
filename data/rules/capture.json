@@ -13,7 +13,13 @@
     "diminishing_loot_percent": 50
   },
   "siege": {
-    "base_turns": 2
+    "base_turns": 2,
+    "surrender": {
+      "refuse_from_supplies": 50,
+      "supplies_weight": 1.0,
+      "breach_weight": 0.5,
+      "breach_open": 50
+    }
   },
   "ransom": {
     "gold_income_share": 1.5,

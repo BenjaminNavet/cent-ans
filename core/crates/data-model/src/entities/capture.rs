@@ -74,6 +74,36 @@ fn full_percent() -> u32 {
 pub struct SiegeRules {
     /// Base duration in turns, added to the fortification level.
     pub base_turns: u32,
+    /// WH armyb: the besieger's call to surrender.
+    #[serde(default)]
+    pub surrender: SurrenderRules,
+}
+
+/// WH armyb: when a garrison yields to a surrender demand.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SurrenderRules {
+    /// The garrison refuses outright while the siege supplies (0-100) are at
+    /// least this much.
+    pub refuse_from_supplies: u8,
+    /// Chance (%) per supply point below `refuse_from_supplies`.
+    pub supplies_weight: f64,
+    /// Chance (%) per point of breach in the walls.
+    pub breach_weight: f64,
+    /// Breach (0-100) from which the walls count as open: with the stores
+    /// empty too, the garrison always yields.
+    pub breach_open: u8,
+}
+
+impl Default for SurrenderRules {
+    fn default() -> Self {
+        Self {
+            refuse_from_supplies: 50,
+            supplies_weight: 1.0,
+            breach_weight: 0.5,
+            breach_open: 50,
+        }
+    }
 }
 
 /// Extra effects of ransom and sack, on top of the occupation.
