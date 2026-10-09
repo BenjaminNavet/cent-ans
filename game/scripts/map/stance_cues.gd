@@ -90,3 +90,25 @@ static func army_ring(cue: String) -> Dictionary:
 static func town_label_color(cue: String, ordinary: Color) -> Color:
 	var labels: Dictionary = tuning().get("town", {}).get("label", {})
 	return Color.html(str(labels[cue])) if labels.has(cue) else ordinary
+
+
+## WH hover (ADR 0271) : cercles de zone de contrôle des ennemis en vue — plafond de cercles.
+static func zoc_max_rings() -> int:
+	return maxi(1, int(tuning().get("zoc", {}).get("max_rings", 16)))
+
+
+## Couleur (alpha compris) des cercles de zone de contrôle ennemis (rouge ADR 0155).
+static func zoc_color() -> Color:
+	var zoc: Dictionary = tuning().get("zoc", {})
+	var color := Color.html(str(zoc.get("color", "#e0241b")))
+	color.a = float(zoc.get("alpha", 0.8))
+	return color
+
+
+## Saisons pendant lesquelles une armée ennemie perdue de vue reste en mémoire (0 : aucune).
+static func fog_memory_turns() -> int:
+	return int(tuning().get("fog_memory", {}).get("turns", 0))
+
+
+static func ghost_alpha() -> float:
+	return float(tuning().get("fog_memory", {}).get("ghost_alpha", 0.6))

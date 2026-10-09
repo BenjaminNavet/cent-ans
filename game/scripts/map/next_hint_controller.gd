@@ -190,17 +190,13 @@ func gather_state() -> Dictionary:
 
 ## Première armée du joueur sans ordre (l'armée royale d'abord), ou `""`.
 func idle_army() -> String:
-	var sim := _sim()
-	var ids: Array = Array(map.call("player_army_ids"))
+	var ids: Array = CampaignAlerts.idle_armies(map)
 	var tutorial: TutorialController = map.get("tutorial")
 	var royal := tutorial.find_royal_army() if tutorial != null and not ids.is_empty() else ""
 	if royal in ids:
 		ids.erase(royal)
 		ids.push_front(royal)
-	for army_id in ids:
-		if NextHint.army_is_idle(sim.call("get_army", army_id)):
-			return str(army_id)
-	return ""
+	return str(ids[0]) if not ids.is_empty() else ""
 
 
 func _army_name(army_id: String) -> String:
@@ -249,6 +245,11 @@ func _look_at(world: Vector3) -> void:
 	var map_data: MapData = map.get("map_data")
 	if rig != null and map_data != null and world != Vector3.ZERO:
 		rig.look_at_point(world, maxf(map_data.size.x, map_data.size.y) * 0.12)
+
+
+## Touche « capitale » : même chemin que le conseil « Ouvrez votre capitale ».
+func open_capital() -> void:
+	_open_capital_city()
 
 
 ## Ville de la capitale : caméra dessus et panneau de la colonie (onglets Bâtiments…).

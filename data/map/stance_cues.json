@@ -31,6 +31,15 @@
       "friend": {"color": "#3a9a42", "alpha": 0.6, "emission": 0.15}
     }
   },
+  "fog_memory": {
+    "turns": 4,
+    "ghost_alpha": 0.6
+  },
+  "zoc": {
+    "max_rings": 16,
+    "color": "#e0241b",
+    "alpha": 0.8
+  },
   "town": {
     "label": {
       "enemy": "#8f1510"

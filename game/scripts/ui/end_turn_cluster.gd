@@ -23,13 +23,15 @@ signal alert_activated(alert: Dictionary)
 
 ## Ordre d'affichage des types dans l'éventail (du bas-gauche vers le haut).
 const KIND_ORDER := [
-	"chronicle_decision", "enemy_army", "siege", "debt", "idle_character", "construction_done", "research_done"]
+	"chronicle_decision", "enemy_army", "siege", "debt", "idle_army", "idle_character", "research_idle", "free_slot", "construction_done", "research_done"]
 ## Libellés courts des pastilles, écrits sur la pastille.
 const SHORT_LABELS := {
 	"chronicle_decision": "Décision",
 	"enemy_army": "Armée ennemie",
 	"siege": "Siège",
 	"debt": "Dette",
+	"idle_army": "Armée sans ordre",
+	"free_slot": "Chantier libre",
 	"idle_character": "Sans charge",
 	"construction_done": "Chantier fini",
 	"research_done": "Recherche finie",
@@ -49,6 +51,8 @@ const KIND_LABELS := {
 	"enemy_army": "Armée ennemie",
 	"siege": "Siège",
 	"debt": "Dette",
+	"idle_army": "Armée sans ordre de marche",
+	"free_slot": "Emplacement de construction libre",
 	"idle_character": "Personnage sans affectation",
 	"construction_done": "Construction achevée",
 	"research_done": "Recherche achevée",

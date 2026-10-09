@@ -26,6 +26,8 @@ var _points := PackedVector2Array()
 var _stop_index := 0
 var _turn_ends := PackedInt32Array()
 var _warning := false
+## WH hover : numéros de tour posés sur les jalons (pool de `Label3D` réutilisé).
+var _turn_labels: Array[Label3D] = []
 
 
 func setup(data: MapData) -> void:
@@ -108,6 +110,7 @@ func hide_path() -> void:
 	_points = PackedVector2Array()
 	_turn_ends = PackedInt32Array()
 	_stop_index = 0
+	_set_label_count(0)
 	visible = false
 
 
@@ -141,6 +144,7 @@ func _place_markers(camera_distance: float) -> void:
 		if index > 0 and index < _points.size():
 			ends.append(index)
 	multimesh.instance_count = ends.size()
+	_set_label_count(ends.size())
 	for i in ends.size():
 		var p := _points[ends[i]]
 		var basis := Basis().scaled(Vector3(size, size * 0.25, size))
@@ -149,6 +153,51 @@ func _place_markers(camera_distance: float) -> void:
 		var last := i == ends.size() - 1
 		var color := marker_color if ends[i] == _stop_index and not last else (now_color if ends[i] <= _stop_index else later_color)
 		multimesh.set_instance_color(i, trespass_color if _warning else color)
+		var label := _turn_labels[i]
+		label.text = turn_label_text(i, ends.size())
+		label.position = origin + Vector3(0.0, size * 1.6, 0.0)
+		label.pixel_size = clampf(camera_distance * 0.00045, 0.02, 0.4)
+		label.modulate = trespass_color.lightened(0.35) if _warning else Color(1.0, 0.95, 0.8)
+
+
+## Libellé du jalon `index` (0 = fin du premier tour) parmi `count` : « 1 », « 2 »… et « T3 » au
+## dernier quand il y en a plusieurs (arrivée au tour 3), « 1 » s'il n'y a qu'un tour.
+static func turn_label_text(index: int, count: int) -> String:
+	return "T%d" % (index + 1) if count > 1 and index == count - 1 else str(index + 1)
+
+
+## Nombre de numéros de tour affichés (tests).
+func turn_label_count() -> int:
+	var shown := 0
+	for label in _turn_labels:
+		if label.visible:
+			shown += 1
+	return shown
+
+
+func turn_label_texts() -> PackedStringArray:
+	var texts := PackedStringArray()
+	for label in _turn_labels:
+		if label.visible:
+			texts.append(label.text)
+	return texts
+
+
+func _set_label_count(count: int) -> void:
+	while _turn_labels.size() < count:
+		var label := Label3D.new()
+		label.name = "TurnNumber%d" % _turn_labels.size()
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.no_depth_test = true
+		label.render_priority = 6
+		label.font_size = 48
+		label.outline_size = 14
+		label.outline_modulate = Color(0.05, 0.04, 0.03, 0.9)
+		label.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(label)
+		_turn_labels.append(label)
+	for i in _turn_labels.size():
+		_turn_labels[i].visible = i < count
 
 
 func _subdivide(points: PackedVector2Array) -> PackedVector2Array:

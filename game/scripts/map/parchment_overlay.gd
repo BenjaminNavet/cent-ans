@@ -246,6 +246,7 @@ func _draw() -> void:
 		for realm in _realms:
 			placed.append_array(_draw_arched(realm, s, text_alpha))
 		_draw_province_names(s, text_alpha, view, placed)
+	_draw_ghost_tokens(s, smoothstep(0.4, 0.75, a), view)
 	_draw_army_tokens(s, smoothstep(0.4, 0.75, a), view)
 
 
@@ -753,7 +754,23 @@ func _draw_army_tokens(s: float, a: float, view: Rect2) -> void:
 			var side := r * 1.25
 			draw_texture_rect(tex, Rect2(p - Vector2(side, side) * 0.5, Vector2(side, side)), false, Color(1, 1, 1, a))
 		draw_arc(p, r, 0.0, TAU, 32, Color(INK, a), 1.6, true)
-		draw_arc(p, r + 2.0, 0.0, TAU, 32, Color(GOLD if marker.is_player else PAPER, a), 1.4, true)
+		var cues := token_cues(marker.cue, marker.stance, marker.status, marker.is_player)
+		var hostile_ring: Color = cues["ring"]
+		draw_arc(p, r + 2.0, 0.0, TAU, 32, Color(GOLD if marker.is_player else PAPER, a) if hostile_ring.a <= 0.0 else Color(hostile_ring, hostile_ring.a * a), 1.4 if hostile_ring.a <= 0.0 else 2.6, true)
+		var glyph_text := str(cues["glyph"])
+		if glyph_text != "":
+			var gs := int(clampf(12.0 * s, 11.0, 16.0))
+			var glyph_color := Color(hostile_ring, a).darkened(0.1)
+			draw_string_outline(FONT_ROMAN, p + Vector2(-r - gs * 0.9, -r * 0.4), glyph_text, HORIZONTAL_ALIGNMENT_LEFT, -1, gs, 3, Color(PAPER, a))
+			draw_string(FONT_ROMAN, p + Vector2(-r - gs * 0.9, -r * 0.4), glyph_text, HORIZONTAL_ALIGNMENT_LEFT, -1, gs, glyph_color)
+		var badge_tex: Texture2D = StanceBadge.texture_for(str(cues["badge"])) if str(cues["badge"]) != "" else null
+		if badge_tex != null:
+			var bside := r * 1.1
+			draw_texture_rect(badge_tex, Rect2(p + Vector2(r * 0.8, -r * 0.8) - Vector2(bside, bside) * 0.5, Vector2(bside, bside)), false, Color(1, 1, 1, a))
+		if bool(cues["moving"]):
+			var ms := int(clampf(14.0 * s, 12.0, 18.0))
+			draw_string_outline(FONT_ROMAN, p + Vector2(r + 3.0, ms * 0.35), "»", HORIZONTAL_ALIGNMENT_LEFT, -1, ms, 3, Color(PAPER, a))
+			draw_string(FONT_ROMAN, p + Vector2(r + 3.0, ms * 0.35), "»", HORIZONTAL_ALIGNMENT_LEFT, -1, ms, Color(INK, a))
 		if selected:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
 			draw_arc(p, r + 5.0 + pulse * 2.0, 0.0, TAU, 40, Color(GOLD, a), 2.0, true)
@@ -763,6 +780,44 @@ func _draw_army_tokens(s: float, a: float, view: Rect2) -> void:
 		var origin := p + Vector2(-w * 0.5, r + fs + 3.0)
 		draw_string_outline(FONT_ROMAN, origin, men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(PAPER, a))
 		draw_string(FONT_ROMAN, origin, men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(INK, a))
+
+
+## WH hover : signes d'un jeton d'armée du parchemin — anneau d'hostilité (`StanceCues.army_ring`,
+## alpha 0 = aucun), glyphe ennemi, posture à afficher ("" = aucune ; l'embuscade ennemie
+## n'est jamais montrée) et indicateur « en marche ». Pur : testable sans rendu.
+static func token_cues(cue: String, stance: String, status: String, is_player: bool) -> Dictionary:
+	var ring := StanceCues.army_ring(cue)
+	var shown_stance := stance if stance != "normal" and stance != "" else ""
+	if shown_stance == "ambush" and not is_player:
+		shown_stance = ""
+	return {
+		"ring": ring["color"] if not ring.is_empty() else Color(0, 0, 0, 0),
+		"glyph": StanceCues.plate_glyph(cue),
+		"badge": shown_stance,
+		"moving": status == "moving",
+	}
+
+
+## WH hover : fantômes (armées ennemies perdues de vue) — disque gris au contour tireté.
+func _draw_ghost_tokens(s: float, a: float, view: Rect2) -> void:
+	if armies == null:
+		return
+	var r := 10.0 * s
+	var alpha := StanceCues.ghost_alpha() * a
+	for ghost in armies.ghosts:
+		var at: Vector2 = ghost["pos"]
+		var world: Vector3 = armies.world_at_pixel(at)
+		var p := camera.unproject_position(world)
+		if camera.is_position_behind(world) or not view.has_point(p):
+			continue
+		draw_circle(p, r, Color(0.55, 0.53, 0.5, alpha))
+		draw_arc(p, r, 0.0, TAU, 24, Color(INK, alpha), 1.4, true)
+		var text := ArmyPlate.format_men(int(ghost["men"]))
+		var fs := int(clampf(12.0 * s, 11.0, 15.0))
+		var w := FONT_ROMAN.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var origin := p + Vector2(-w * 0.5, r + fs + 2.0)
+		draw_string_outline(FONT_ROMAN, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(PAPER, alpha))
+		draw_string(FONT_ROMAN, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(INK, alpha))
 
 
 func _heraldry(faction: String) -> Texture2D:

@@ -87,7 +87,9 @@
     "bld_hotel_dieu",
     "bld_castle",
     "bld_muster_field",
-    "bld_stables"
+    "bld_stables",
+    "bld_university",
+    "bld_stone_walls"
   ],
   "fortification_level": 3,
   "base_supply": 7000,

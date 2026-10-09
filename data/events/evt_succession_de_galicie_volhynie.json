@@ -1,0 +1,98 @@
+{
+  "id": "evt_succession_de_galicie_volhynie",
+  "title": "La succession de Galicie-Volhynie",
+  "text": "Bolesław-Iouri II meurt empoisonné par ses boyards en avril 1340, sans héritier. Casimir III de Pologne, son cousin, entre en Ruthénie à la tête de son armée ; Lubart de Lituanie, gendre de la dynastie, prétend à la Volhynie. Le royaume de Daniel de Galicie ne se relèvera pas de ce partage.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "spring"
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_galicia_volhynia"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_poland"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_casimir_iii_de_pologne"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_galicia_volhynia",
+        "province": "prov_halych"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_poland"
+  },
+  "options": [
+    {
+      "text": "Occuper la Galicie au nom de ses droits",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_halych",
+          "from": "fac_galicia_volhynia"
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_lviv"
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_galicia_volhynia",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_galicia_volhynia",
+          "amount": -30,
+          "reason": "Invasion de la Galicie"
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "S'en tenir à une revendication diplomatique",
+      "effects": [
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_halych"
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "muster",
+  "historical_date": {
+    "value": "1340-04",
+    "note": "Mort d'Iouri II le 7 avril 1340 ; première campagne de Casimir III à Lviv en 1340, partage définitif avec la Lituanie dans les années suivantes."
+  },
+  "sources": [
+    "Royaume de Galicie-Volhynie",
+    "Casimir III le Grand",
+    "Boleslas-Iouri II de Galicie-Volhynie"
+  ]
+}

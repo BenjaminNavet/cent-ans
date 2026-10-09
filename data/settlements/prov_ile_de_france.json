@@ -23,7 +23,9 @@
       "bld_hotel_dieu",
       "bld_castle",
       "bld_muster_field",
-      "bld_stables"
+      "bld_stables",
+      "bld_university",
+      "bld_stone_walls"
     ],
     "port": false,
     "description": "Capitale du royaume, cœur politique, fiscal et intellectuel avec son université, autour du Louvre et de Notre-Dame.",

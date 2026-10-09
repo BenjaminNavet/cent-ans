@@ -14,7 +14,7 @@ const _TerrainTip := preload("res://scripts/battle/battle_terrain_tip.gd")
 ## `replay` (BattleReplayController : rejeu EP13), `audio` (BattleAudioDirector : musique, sons,
 ## répliques) et `capture` (BattleCaptureStage : `--screenshot=` et cadrages).
 ## Options (après `--`) : `--screenshot=<png>` (joue la bataille jusqu'au contact, capture, quitte),
-## `--units=<n>` (complète chaque camp à n régiments, essai sans retour campagne), `--autoplay` (IA des deux camps),
+## `--units=<n>` (complète chaque camp à n régiments, essai sans retour campagne), `--autoplay` (IA des deux camps ; écrit une ligne « autoplay: seed=… winner=… end=… t=… losses=… » à la fin), `--seed=<n>` (graine de la bataille),
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
 ## `--closeup` (capture : caméra rapprochée sur la mêlée, à `--closeup-distance=<m>`, 26 par
 ## défaut), `--weather=<clear|fog|rain|snow>`
@@ -133,6 +133,7 @@ var _drag_rect: ColorRect  # Rectangle de sélection, lu et positionné par `inp
 var _hud_timer: float = 0.0
 var capture: BattleCaptureStage = null  # SC BT12 : `--screenshot=` et cadrages de capture
 var _pad_units: int = 0
+var _seed_arg: int = -1  # `--seed=<n>` : graine imposée (sonde d'issue `--autoplay`, reproductible)
 var _scale_tier: String = ""  # Palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _weather_override: String = ""
 var deployment: DeploymentController = null  # Phase de déploiement du joueur
@@ -341,6 +342,8 @@ func begin() -> bool:
 	battle = ClassDB.instantiate("BattleSim")
 	if _scale_tier != "":
 		battle.call("set_scale_tier", _scale_tier)  # --scale=<skirmish|large|epic>
+	if _seed_arg >= 0:
+		battle_seed = _seed_arg
 	if not battle.call("setup", setup, battle_seed):
 		return false
 	if _hour_override != "":
@@ -901,7 +904,21 @@ func _process(delta: float) -> void:
 	elif battle.call("is_finished") and not finished_shown:
 		_end_wait += delta
 		if _end_wait >= _victory_hold():
+			if autoplay:
+				print(outcome_line())  # Sonde d'issue : une ligne de texte par bataille
+				if DisplayServer.get_name() == "headless" and standalone:
+					get_tree().quit()
+					return
 			_show_end()
+
+
+## RX batsim : issue d'une bataille finie en une ligne de texte (`--autoplay --seed=<n>`) :
+## `autoplay: seed=… winner=… end=… t=…s losses=att/def`.
+func outcome_line() -> String:
+	var outcome: Dictionary = battle.call("get_outcome")
+	var attacker: Dictionary = outcome.get("attacker", {})
+	var defender: Dictionary = outcome.get("defender", {})
+	return "autoplay: seed=%d winner=%s end=%s t=%ds losses=%d/%d" % [battle_seed, outcome.get("winner", "?"), outcome.get("end", "?"), int(battle.call("get_elapsed")), int(attacker.get("total_losses", 0)), int(defender.get("total_losses", 0))]
 
 
 ## Le pas de simulation suivant se calcule sur un fil pendant que l'image
@@ -1544,6 +1561,8 @@ func _parse_cmdline() -> void:
 			autoplay = autoplay or capture.screenshot_path != ""
 		elif arg.begins_with("--units="):
 			_pad_units = int(arg.trim_prefix("--units="))
+		elif arg.begins_with("--seed="):
+			_seed_arg = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--scale="):
 			_scale_tier = arg.trim_prefix("--scale=")
 		elif arg.begins_with("--replay="):

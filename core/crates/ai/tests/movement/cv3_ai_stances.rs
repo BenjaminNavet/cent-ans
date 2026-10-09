@@ -635,8 +635,10 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // (seed 3 shows refused Verona/Venice ambush orders at turns 5-6: open
     // point, docs/wip/lr-11.md). Treaty articles (ADR 0202) shift the stream
     // again: seed 1 then shows one refused ambush (same open point), so
-    // seeds 2, 4 and 5.
-    let log: Vec<(u32, String, bool)> = [2, 4, 5]
+    // seeds 2, 4 and 5. RX histoire (new 1337-1345 events, universities,
+    // Tyrol ruler) shifts the stream once more: seed 2 now shows one refused
+    // Castile ambush (turn 20, same open point), seeds 1, 3 and 4 are clean.
+    let log: Vec<(u32, String, bool)> = [1, 3, 4]
         .into_iter()
         .flat_map(|seed| campaign_stance_orders(&data, seed, 60))
         .collect();

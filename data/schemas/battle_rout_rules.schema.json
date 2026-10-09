@@ -47,6 +47,12 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Poids d'un ami en déroute déjà derrière le régiment, qui s'éloigne de l'ennemi."
+        },
+        "untouched_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "RX batsim : facteur sur la contagion d'un régiment qui n'a perdu personne et n'est pas au contact de l'ennemi (arbalétriers en déroute avec 0 perte)."
         }
       },
       "required": [
@@ -55,7 +61,8 @@
         "max_weight",
         "beside_depth_m",
         "behind_depth_m",
-        "behind_weight"
+        "behind_weight",
+        "untouched_factor"
       ],
       "additionalProperties": false
     },

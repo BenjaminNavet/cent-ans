@@ -83,7 +83,8 @@
     "bld_vineyard_press",
     "bld_cathedral",
     "bld_stone_walls",
-    "bld_muster_field"
+    "bld_muster_field",
+    "bld_university"
   ],
   "fortification_level": 2,
   "base_supply": 5000,

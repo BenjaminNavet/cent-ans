@@ -27,6 +27,7 @@ var last_events: Array = []
 var last_autosave: String = ""
 var _last_saved_turn: int = 0
 var _pause_snapshot: Image = null
+var _last_settlement: String = ""  # WH idle : dernière colonie visitée par la touche « colonie suivante »
 var _end_turn_confirmed := false
 var _confirm_panel: ConfirmPanel = null
 var _settings_menu: SettingsMenu = null
@@ -60,6 +61,7 @@ func setup(campaign_map: Node) -> void:
 		if settings != null:
 			settings.call("set_value", "interface/season_report", false))
 	ui.end_turn_gate = end_turn_would_proceed  # Bandeau des autres factions
+	ui.hotkey_pressed.connect(handle_hotkey)
 	ui.save_requested.connect(_on_save_requested)
 	ui.load_requested.connect(_on_load_requested)
 	var popup: PopupMenu = ui.menu_button.get_popup()
@@ -251,35 +253,88 @@ func autosave() -> String:
 # --- Fin de tour ------------------------------------------------------------------
 
 
+## Modes du réglage `interface/confirm_end_turn` : jamais, seulement s'il y a des oublis
+## (défaut), toujours. L'ancien booléen est migré par `Settings` (vrai → toujours).
+const CONFIRM_OFF := "off"
+const CONFIRM_WARNINGS := "warnings"
+const CONFIRM_ALWAYS := "always"
+## Alertes de la cloche qui déclenchent la confirmation en mode `warnings` (non bloquantes).
+const FORGOTTEN_KINDS := ["idle_army", "free_slot", "research_idle"]
+
+
+func end_turn_mode() -> String:
+	var mode := str(_setting("interface/confirm_end_turn", CONFIRM_WARNINGS))
+	return mode if mode in [CONFIRM_OFF, CONFIRM_WARNINGS, CONFIRM_ALWAYS] else CONFIRM_WARNINGS
+
+
+## Oublis du joueur à lister avant de finir la saison (état courant, recalculé).
+func end_turn_warnings() -> Array:
+	var result: Array = []
+	for alert: Dictionary in CampaignAlerts.collect(map, last_events):
+		if str(alert.get("kind", "")) in FORGOTTEN_KINDS:
+			result.append(alert)
+	return result
+
+
+func _needs_confirmation() -> bool:
+	match end_turn_mode():
+		CONFIRM_ALWAYS:
+			return true
+		CONFIRM_WARNINGS:
+			return not end_turn_warnings().is_empty()
+	return false
+
+
 ## Vrai si `before_end_turn` laissera passer la fin de tour (sans effet de bord).
 func end_turn_would_proceed() -> bool:
-	return not is_paused() and (_end_turn_confirmed or not bool(_setting("interface/confirm_end_turn", false)))
+	return not is_paused() and (_end_turn_confirmed or not _needs_confirmation())
 
 
 ## Vrai si la fin de tour peut avoir lieu ; sinon ouvre la confirmation (réglage).
 func before_end_turn() -> bool:
 	if is_paused():
 		return false
-	if _end_turn_confirmed or not bool(_setting("interface/confirm_end_turn", false)):
+	if _end_turn_confirmed or not _needs_confirmation():
 		_end_turn_confirmed = false
 		return true
 	_show_end_turn_confirm()
 	return false
 
 
+## Maj+Entrée : fin de tour sans confirmation.
+func end_turn_fast() -> void:
+	if is_paused():
+		return
+	_end_turn_confirmed = true
+	map.get("ui").call("request_end_turn")
+
+
+## Texte de la confirmation : la date, puis une ligne par type d'oubli (armées, chantiers,
+## recherche) d'après `warnings` (alertes de la cloche).
+static func confirm_text(date_label: String, warnings: Array) -> String:
+	var text := "Terminer le tour (%s) ?" % date_label
+	var idle_armies := 0
+	for alert: Dictionary in warnings:
+		match str(alert.get("kind", "")):
+			"idle_army":
+				idle_armies += 1
+			_:
+				text += "\n" + str(alert.get("text", ""))
+	if idle_armies > 0:
+		text += "\n%s sans ordre de marche." % FrText.count(idle_armies, "armée")
+	return text
+
+
 func _show_end_turn_confirm() -> void:
-	var armies_idle := 0
 	var sim: Object = map.get("sim")
-	for army_id in map.call("player_army_ids"):
-		var army: Dictionary = sim.call("get_army", army_id)
-		if (army.get("path", []) as Array).is_empty() and int(army.get("movement_points", 0)) > 0:
-			armies_idle += 1
-	var question := "Terminer le tour (%s) ?" % sim.call("get_date_label")
-	if armies_idle > 0:
-		question += "\n%d armée%s sans ordre de marche." % [armies_idle, "s" if armies_idle > 1 else ""]
+	var warnings := end_turn_warnings()
+	var question := confirm_text(str(sim.call("get_date_label")), warnings)
 	if _confirm_panel != null and is_instance_valid(_confirm_panel):
 		_confirm_panel.queue_free()
-	_confirm_panel = ConfirmDialog.ask(map.get("ui"), "", question, confirm_end_turn, "Terminer le tour", "Pas encore")
+	_confirm_panel = ConfirmDialog.ask(map.get("ui"), "", question, confirm_end_turn, "Terminer le tour", "Voir" if not warnings.is_empty() else "Pas encore")
+	if not warnings.is_empty():  # « Voir » : mène à la première alerte (même chemin que la cloche)
+		var first: Dictionary = warnings[0]
+		_confirm_panel.cancelled.connect(func() -> void: map.get("ui").alert_activated.emit(first))
 
 
 func confirm_end_turn() -> void:
@@ -418,6 +473,82 @@ func _on_report_entry(event: Dictionary) -> void:
 		focus_army(army_id)
 	else:
 		focus_province(str(event.get("province", "")))
+
+
+## WH idle : exécute un raccourci de `CampaignHotkeys.ACTIONS`.
+func handle_hotkey(action: String) -> void:
+	var ui: MapUI = map.get("ui")
+	match action:
+		"campaign_next_idle":
+			focus_next_idle(1)
+		"campaign_prev_idle":
+			focus_next_idle(-1)
+		"campaign_next_settlement":
+			focus_next_settlement(1)
+		"campaign_capital":
+			var hint: Node = map.get("next_hint")
+			if hint != null:
+				hint.call("open_capital")
+		"campaign_end_turn_fast":
+			end_turn_fast()
+		"army_center":
+			var selected := str(map.get("selected_army"))
+			if selected == "":
+				ui.show_toast("Aucune armée sélectionnée.")
+			else:
+				focus_army(selected)
+		"army_split":
+			if _player_army_selected(ui):
+				ui.army_strip.call("_on_split_pressed")
+		"army_garrison":
+			if _player_army_selected(ui):
+				ui.army_strip.call("_on_garrison_pressed")
+		_:
+			var stance := CampaignHotkeys.stance_of(action)
+			if stance != "" and _player_army_selected(ui):
+				ui.stance_changed.emit(str(map.get("selected_army")), stance)
+
+
+## Vrai si une armée du joueur est sélectionnée ; sinon l'indique au joueur.
+func _player_army_selected(ui: MapUI) -> bool:
+	var selected := str(map.get("selected_army"))
+	if selected != "" and selected in Array(map.call("player_army_ids")):
+		return true
+	ui.show_toast("Sélectionnez d'abord une de vos armées.")
+	return false
+
+
+## Armée inactive suivante (`step` 1) ou précédente (-1) : centre la caméra et la sélectionne.
+## Renvoie son identifiant, "" s'il n'y en a aucune.
+func focus_next_idle(step: int) -> String:
+	var idle := CampaignAlerts.idle_armies(map)
+	var target := CampaignHotkeys.next_in_cycle(idle, str(map.get("selected_army")), step)
+	if target == "":
+		map.get("ui").show_toast("Aucune armée inactive.")
+		return ""
+	focus_army(target)
+	return target
+
+
+## Colonie du joueur suivante (ordre alphabétique des identifiants) : porte la caméra et ouvre son panneau.
+func focus_next_settlement(step: int) -> String:
+	var sim: Object = map.get("sim")
+	var ids: Array = []
+	if sim != null and sim.has_method("get_holdings_overview"):
+		for province: Dictionary in (sim.call("get_holdings_overview", str(map.get("player_faction"))) as Dictionary).get("provinces", []):
+			for place: Dictionary in province.get("settlements", []):
+				if not bool(place.get("occupied", false)):
+					ids.append(str(place.get("id", "")))
+	ids.sort()
+	var target := CampaignHotkeys.next_in_cycle(ids, _last_settlement, step)
+	if target == "":
+		map.get("ui").show_toast("Aucune colonie.")
+		return ""
+	_last_settlement = target
+	var controller: Object = map.get("settlements_ctl")
+	if controller != null:
+		controller.call("open_settlement", target, true)
+	return target
 
 
 func focus_province(province_id: String) -> void:

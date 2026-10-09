@@ -12,7 +12,9 @@ extends RefCounted
 ## Alertes du joueur d'après l'état de la carte (`CampaignMap`) et les événements du dernier
 ## tour. Chaque alerte, au format de `EndTurnCluster.set_alerts` : `{id, kind, text, tooltip,
 ## severity, province_id?, army_id?, blocking?}` ; types `siege`, `enemy_army`, `debt`,
-## `research_idle`, `chronicle_decision` (bloquante), `construction_done`.
+## `research_idle`, `chronicle_decision` (bloquante), `construction_done`, `idle_army`
+## (armée du joueur sans ordre, WH `idle`), `free_slot` (emplacements de construction libres,
+## groupés en une alerte).
 static func collect(map: Node, last_events: Array) -> Array:
 	var result: Array = []
 	var sim: Object = map.get("sim")
@@ -46,6 +48,9 @@ static func collect(map: Node, last_events: Array) -> Array:
 		var faction := str(army.get("faction", ""))
 		if not (faction in enemies):
 			continue
+		# WH idle : jamais d'alerte sur une armée que le brouillard cache au joueur.
+		if not army_in_view(map, str(army_id), army):
+			continue
 		var location := str(army.get("location_province", army.get("location", "")))
 		var threatened := location if owned.has(location) else ""
 		if threatened == "":
@@ -72,8 +77,17 @@ static func collect(map: Node, last_events: Array) -> Array:
 			"text": "Trésor endetté : %s" % Money.amount(int(summary.get("treasury", 0))),
 			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l'impôt.",
 		})
-	# CV3-0 (#8) : alerte "research_idle" retirée, doublon de la barre du haut (`HudController.
-	# set_research_progress` affiche déjà « Aucune recherche » en permanence quand c'est le cas).
+	# WH idle : « recherche inactive » rétablie en pastille de la cloche (le conseil `research_idle`
+	# et la confirmation de fin de tour en dépendent ; la barre du haut seule se faisait oublier).
+	if sim.has_method("get_research") and sim.has_method("get_research_points") \
+			and (sim.call("get_research", player) as Dictionary).is_empty() and int(sim.call("get_research_points", player)) > 0:
+		result.append({
+			"id": "research_idle", "kind": "research_idle", "severity": "warning",
+			"text": "Aucune recherche en cours",
+			"tooltip": "Les points de recherche de la saison seront perdus : choisissez une technique (T).",
+		})
+	result.append_array(idle_army_alerts(map))
+	result.append_array(free_slot_alerts(sim, player, int(summary.get("treasury", 0))))
 	if sim.has_method("get_offers"):  # Offres en attente, sans rouvrir la diplomatie à chaque tour
 		var offers: Array = sim.call("get_offers")
 		if not offers.is_empty():
@@ -105,6 +119,89 @@ static func collect(map: Node, last_events: Array) -> Array:
 	var relevance: Callable = Callable(ui, "relevance_of") if ui != null and ui.has_method("relevance_of") else Callable()
 	result.append_array(table_medicine_alerts(sim, player, last_events, relevance))
 	result.append_array(ransom_alerts(sim))
+	return result
+
+
+## L'armée `army_id` (dictionnaire `get_army`) est-elle visible du joueur ? Une armée ennemie
+## hors de vue (brouillard) ne doit apparaître dans aucune alerte. Sans contrôleur de brouillard
+## (simulation factice), tout est visible.
+static func army_in_view(map: Node, army_id: String, army: Dictionary) -> bool:
+	var fog: Object = map.get("minimap_ctl")
+	if fog == null or not fog.has_method("is_army_visible"):
+		return true
+	return bool(fog.call("is_army_visible", army_id, army))
+
+
+## Armée du joueur « inactive » : ni chemin ni marche planifiée, du mouvement restant, hors
+## siège et hors embarquement. Condition unique de la cloche, du conseil (`NextHint`), de la
+## plaque d'armée et de la confirmation de fin de tour.
+static func army_is_idle(army: Dictionary) -> bool:
+	if army.is_empty() or bool(army.get("embarked", false)) or bool(army.get("at_sea", false)):
+		return false
+	if str(army.get("stance", "")) == "siege":
+		return false
+	if not (army.get("path", []) as Array).is_empty():
+		return false
+	var planned: Variant = army.get("planned_path", [])
+	if (planned is Array or planned is PackedVector2Array) and planned.size() > 0:
+		return false
+	return int(army.get("movement_points", army.get("movement_left", 0))) > 0
+
+
+## Identifiants des armées inactives du joueur, dans l'ordre de `player_army_ids`.
+static func idle_armies(map: Node) -> Array:
+	var result: Array = []
+	var sim: Object = map.get("sim")
+	if sim == null:
+		return result
+	for army_id in map.call("player_army_ids"):
+		if army_is_idle(sim.call("get_army", army_id)):
+			result.append(str(army_id))
+	return result
+
+
+static func idle_army_alerts(map: Node) -> Array:
+	var result: Array = []
+	var sim: Object = map.get("sim")
+	for army_id in idle_armies(map):
+		var general := str((sim.call("get_army", army_id) as Dictionary).get("general_name", ""))
+		result.append({
+			"id": "idle:" + army_id, "kind": "idle_army", "severity": "warning", "glyph": "⚔",
+			"army_id": army_id,
+			"text": "Armée sans ordre : %s" % (general if general != "" else "ost"),
+			"tooltip": "Cette armée n'a pas d'ordre de marche et garde du mouvement. Tab : armée inactive suivante.",
+		})
+	return result
+
+
+## Une seule alerte pour toutes les colonies du joueur sans chantier où un bâtiment est
+## constructible avec le trésor (`get_holdings_overview` : `idle`, `options_available[].cost`).
+static func free_slot_alerts(sim: Object, player: String, treasury: int) -> Array:
+	var result: Array = []
+	if not sim.has_method("get_holdings_overview"):
+		return result
+	var count := 0
+	var first_province := ""
+	for province: Dictionary in (sim.call("get_holdings_overview", player) as Dictionary).get("provinces", []):
+		for place: Dictionary in province.get("settlements", []):
+			if not bool(place.get("idle", false)):
+				continue
+			var cheapest := -1
+			for option: Dictionary in place.get("options_available", []):
+				var cost := int(option.get("cost", 0))
+				cheapest = cost if cheapest < 0 else mini(cheapest, cost)
+			if cheapest < 0 or cheapest > treasury:
+				continue
+			count += 1
+			if first_province == "":
+				first_province = str(province.get("province", ""))
+	if count > 0:
+		result.append({
+			"id": "free_slot", "kind": "free_slot", "severity": "info", "glyph": "⛫",
+			"province_id": first_province,
+			"text": FrText.count(count, "emplacement de construction libre", "emplacements de construction libres"),
+			"tooltip": "Colonies sans chantier où le trésor permet de bâtir. Colonies (B) pour la liste.",
+		})
 	return result
 
 

@@ -1,0 +1,86 @@
+{
+  "id": "evt_mort_d_artevelde",
+  "title": "La mort d'Artevelde",
+  "text": "Artevelde veut faire reconnaître le fils d'Édouard III, le prince de Galles, comme comte de Flandre à la place de Louis de Nevers. Les métiers gantois, soupçonneux d'une vente de la ville aux Anglais, s'ameutent : le 24 juillet 1345, le « sage homme de Gand » est massacré devant sa maison. Édouard III perd son meilleur allié aux Pays-Bas.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1345,
+      "season": "summer"
+    },
+    "until_year": 1345,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_flanders"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_jacob_van_artevelde"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_flanders"
+  },
+  "options": [
+    {
+      "text": "Laisser la foule se faire justice",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_jacob_van_artevelde"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -20,
+          "reason": "Mort d'Artevelde"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Étouffer l'émeute et protéger le capitaine",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 10,
+          "reason": "Artevelde protégé"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Artevelde protégé"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "revolt",
+  "historical_date": {
+    "value": "1345-07-24",
+    "note": "17 ou 24 juillet 1345 selon les sources."
+  },
+  "sources": [
+    "Jacob van Artevelde",
+    "Jonathan Sumption, The Hundred Years War, vol. 1, 1990"
+  ]
+}

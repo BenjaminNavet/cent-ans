@@ -16,7 +16,9 @@
 //!   front of it, [`ContagionRules::behind_weight`] only once it is
 //!   [`ContagionRules::behind_depth_m`] behind it, running away from the
 //!   enemy. The morale loss is [`ContagionRules::morale_per_second`] per unit
-//!   of weight, at most [`ContagionRules::max_weight`].
+//!   of weight, at most [`ContagionRules::max_weight`]. A shooter regiment that has
+//!   lost no one and is not in contact takes it at
+//!   [`ContagionRules::untouched_factor`] (RX batsim).
 
 use serde::{Deserialize, Serialize};
 
@@ -48,6 +50,10 @@ pub(crate) struct ContagionRules {
     pub(crate) behind_depth_m: f64,
     /// Weight of a routing friend already behind the regiment.
     pub(crate) behind_weight: f64,
+    /// RX batsim: factor on the contagion of a shooter regiment that has lost
+    /// no one and is not in contact with the enemy (crossbowmen routing with 0 loss
+    /// because the line beside them gave way).
+    pub(crate) untouched_factor: f64,
 }
 
 /// Where a routing regiment runs.

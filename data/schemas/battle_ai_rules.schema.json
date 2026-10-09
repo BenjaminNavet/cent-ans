@@ -61,6 +61,19 @@
       "type": "number",
       "description": "EP3: the line forms this far beyond a crossing."
     },
+    "crossing_flow_max": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "RX batsim : au plus ce nombre de régiments dans l'eau ou sur le tablier d'un franchissement à la fois ; les autres attendent sur leur rive."
+    },
+    "crossing_queue_reach_m": {
+      "type": "number",
+      "description": "RX batsim : un régiment à moins de cette distance (m) de l'entrée du franchissement fait la queue."
+    },
+    "crossing_entry_m": {
+      "type": "number",
+      "description": "RX batsim : au-delà de cette distance (m) de l'entrée du franchissement, un régiment s'y rend au lieu de traverser à la nage."
+    },
     "cover_threshold": {
       "type": "number",
       "description": "B6 score a cover must reach to be considered at all."
@@ -310,6 +323,9 @@
     "crossing_patience",
     "crossing_exposure",
     "bridgehead_depth",
+    "crossing_flow_max",
+    "crossing_queue_reach_m",
+    "crossing_entry_m",
     "cover_threshold",
     "village_cover_max",
     "wing_behind_foot",

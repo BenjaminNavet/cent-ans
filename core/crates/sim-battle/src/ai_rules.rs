@@ -37,6 +37,15 @@ pub struct BattleAiRules {
     pub(crate) crossing_exposure: f64,
     /// EP3: the line forms this far beyond a crossing.
     pub(crate) bridgehead_depth: f64,
+    /// RX batsim: at most this many regiments in the water or on the deck of a
+    /// crossing at once; the others wait on the own bank (no endless column).
+    pub(crate) crossing_flow_max: usize,
+    /// RX batsim: a regiment within this distance of the near end of the
+    /// crossing queues for it (metres).
+    pub(crate) crossing_queue_reach_m: f64,
+    /// RX batsim: farther than this from the entry of the crossing, a regiment
+    /// heads for the entry (it does not swim across, metres).
+    pub(crate) crossing_entry_m: f64,
     /// B6 score a cover must reach to be considered at all.
     pub(crate) cover_threshold: f64,
     /// EP6: decor areas whose missile cover is at most this good count as a

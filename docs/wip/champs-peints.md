@@ -1,4 +1,4 @@
-# Champs peints lisibles (ADR 0255)
+# Champs peints lisibles (ADR 0272)
 
 État : fait, en attente de fusion (branche de l'agent, non fusionnée).
 

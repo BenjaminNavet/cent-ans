@@ -220,4 +220,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0252 | [Gain d'albédo linéaire des modèles générés de la carte](0252-gain-albedo-lineaire-modeles-carte.md) | n/d |
 | 0253 | [Lisibilité de la carte de campagne (revue RX)](0253-lisibilite-carte-rx-mapb.md) | accepté |
 | 0254 | [Lissage lointain du sol de bataille et cadrage de gros plan hors bâtiments](0254-lissage-lointain-du-sol-de-bataille.md) | accepté |
-| 0255 | [Champs peints lisibles à distance de jeu](0255-champs-peints-lisibles.md) | accepté |
+| 0255 | [Franchissement d'un pont, contagion de déroute et sonde d'issue (lot RX batsim)](0255-bataille-pont-contagion-sonde.md) | accepté |
+| 0270 | [Armées inactives, alertes d'oubli et confirmation de fin de tour](0270-armees-inactives-et-confirmation-de-fin-de-tour.md) | n/d |
+| 0271 | [Lecture de la carte au survol](0271-lecture-de-la-carte-au-survol.md) | accepté |
+| 0272 | [Champs peints lisibles à distance de jeu](0272-champs-peints-lisibles.md) | accepté |

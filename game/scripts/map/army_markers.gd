@@ -32,6 +32,11 @@ var hidden_provinces: Dictionary = {}
 ## étrangère n'a de marqueur que si son point est vu.
 var visible_armies: Dictionary = {}
 var army_filter_active: bool = false
+## WH hover (ADR 0271) : mémoire des armées ennemies perdues de vue, et leurs fantômes au
+## dernier `refresh` (seulement avec le brouillard par cellule ; vide sinon).
+var memory := ArmyMemory.new()
+var ghosts: Array[Dictionary] = []
+var _ghost_labels: Dictionary = {}  # id → Label3D grisé
 ## Zones des grandes villes détaillées L1-L3 (`SettlementLayer.landmark_zones()`,
 ## (x, z, rayon) en pixels de carte) ; une armée stationnée dans l'une d'elles se tient devant
 ## ses murs plutôt qu'au milieu de la maquette (lisible et cliquable séparément).
@@ -173,12 +178,72 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		marker.queue_free()
 	for plate in previous_plates.values():
 		plate.queue_free()
+	_update_ghosts(sim)
 	if not _markers.has(selected_army):
 		selected_army = ""
 	if not _markers.has(hovered_army):
 		hovered_army = ""
 	_layout.mark_dirty()
 	_update_plates()
+
+
+## WH hover : retient les armées ennemies en vue et calcule les fantômes de celles perdues de vue.
+func _update_ghosts(sim: Object) -> void:
+	ghosts.clear()
+	var ttl := StanceCues.fog_memory_turns()
+	if not army_filter_active or ttl <= 0 or not sim.has_method("get_turn"):
+		memory.clear()
+		return
+	var turn := int(sim.call("get_turn"))
+	for id in _markers:
+		var marker: ArmyMarker = _markers[id]
+		if marker.cue != StanceCues.ENEMY:
+			continue
+		var army: Dictionary = sim.call("get_army", id)
+		var point: Vector2 = army.get("position", Vector2(-1.0, -1.0))
+		if point.x < 0.0:
+			point = Vector2(marker.base_position.x, marker.base_position.z)
+		memory.note(str(id), army, turn, point)
+	ghosts = memory.ghosts(turn, _markers, ttl)
+	_sync_ghost_labels()
+
+
+## Pastille grisée « ✕ 1 200 » (billboard) à la dernière position connue de chaque fantôme.
+func _sync_ghost_labels() -> void:
+	var wanted: Dictionary = {}
+	for ghost in ghosts:
+		wanted[ghost["id"]] = ghost
+	for id in _ghost_labels.keys():
+		if not wanted.has(id):
+			(_ghost_labels[id] as Label3D).queue_free()
+			_ghost_labels.erase(id)
+	var pixel := clampf(maxf(_camera_distance, 0.0) * 0.0006, 0.02, 0.3)
+	for id in wanted:
+		var ghost: Dictionary = wanted[id]
+		var label: Label3D = _ghost_labels.get(id)
+		if label == null:
+			label = Label3D.new()
+			label.name = "Ghost_" + str(id)
+			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			label.no_depth_test = true
+			label.render_priority = 5
+			label.font_size = 40
+			label.outline_size = 12
+			label.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(label)
+			_ghost_labels[id] = label
+		var at: Vector2 = ghost["pos"]
+		label.position = Vector3(at.x, _ground(at) + 6.0 * _current_scale, at.y)
+		label.pixel_size = pixel
+		label.text = "✕ %s" % ArmyPlate.format_men(int(ghost["men"]))
+		var alpha := StanceCues.ghost_alpha()
+		label.modulate = Color(0.62, 0.6, 0.58, alpha)
+		label.outline_modulate = Color(0.1, 0.1, 0.1, alpha * 0.8)
+
+
+## Nombre de pastilles fantômes affichées (tests).
+func ghost_label_count() -> int:
+	return _ghost_labels.size()
 
 
 ## Tout ce que `ArmyMarker.setup` lit de l'armée, sauf sa position (replacée à chaque refresh).
@@ -363,6 +428,8 @@ func update_scale(camera_distance: float) -> void:
 	if absf(new_scale - _current_scale) < minf(0.005, new_scale * 0.02):
 		return
 	_current_scale = new_scale
+	if not _ghost_labels.is_empty():
+		_sync_ghost_labels()
 	for marker in _markers.values():
 		marker.apply_scale(_current_scale)
 

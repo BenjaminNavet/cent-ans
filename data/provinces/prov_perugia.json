@@ -79,7 +79,8 @@
     "bld_market",
     "bld_cathedral",
     "bld_stone_walls",
-    "bld_muster_field"
+    "bld_muster_field",
+    "bld_university"
   ],
   "fortification_level": 3,
   "base_supply": 3400,

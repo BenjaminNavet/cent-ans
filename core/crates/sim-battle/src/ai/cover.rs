@@ -119,6 +119,48 @@ pub(super) fn crossing_plan(view: &View, from: (f64, f64), line: &[usize]) -> Op
         .map(|(plan, _)| plan)
 }
 
+/// RX batsim: who waits for the crossing and who is already across.
+#[derive(Debug, Default)]
+pub(super) struct CrossingQueue {
+    /// Regiments near the entry that must wait: the crossing is full.
+    pub(super) waiting: Vec<usize>,
+    /// Regiments of the line across the river, holding the bridgehead.
+    pub(super) across: Vec<usize>,
+}
+
+/// RX batsim: a crossing takes `crossing_flow_max` regiments at a
+/// time (the nearest to the entry first); those across wait for the others.
+pub(super) fn crossing_queue(view: &View, plan: &CrossingPlan, line: &[usize]) -> CrossingQueue {
+    let field = view.sim.field();
+    let Some(river) = field.river.as_ref() else {
+        return CrossingQueue::default();
+    };
+    let near_bank = river.north_of(plan.near.0, plan.near.1);
+    let mut queue = CrossingQueue::default();
+    let mut crossing = 0;
+    let mut candidates: Vec<(f64, usize)> = Vec::new();
+    for &i in line {
+        let u = &view.units[i];
+        if !u.able() {
+            continue;
+        }
+        if crossing_now(view, i) {
+            crossing += 1;
+        } else if river.north_of(u.x, u.z) != near_bank {
+            queue.across.push(i);
+        } else {
+            let d = (u.x - plan.near.0).hypot(u.z - plan.near.1);
+            if d < tuning().crossing_queue_reach_m {
+                candidates.push((d, i));
+            }
+        }
+    }
+    candidates.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
+    let room = tuning().crossing_flow_max.saturating_sub(crossing);
+    queue.waiting = candidates.iter().skip(room).map(|c| c.1).collect();
+    queue
+}
+
 /// EP3: in the river or on a bridge (a regiment finishing its crossing).
 pub(super) fn crossing_now(view: &View, i: usize) -> bool {
     let (u, field) = (&view.units[i], view.sim.field());

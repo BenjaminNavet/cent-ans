@@ -314,5 +314,31 @@
     "sources": [
       "North Walsham"
     ]
+  },
+  {
+    "id": "set_cambridge",
+    "province": "prov_norfolk",
+    "kind": "town",
+    "name": {
+      "display": "Cambridge",
+      "local": "Cantebrigge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.119,
+      52.205
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_university"
+    ],
+    "port": false,
+    "description": "Université née vers 1209 d'une dispersion des maîtres d'Oxford ; Peterhouse (1284), Clare (1326) et Pembroke (1347) sont déjà ou bientôt fondés. Voir [[cdx_universite_paris]].",
+    "sources": [
+      "Université de Cambridge"
+    ]
   }
 ]

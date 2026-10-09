@@ -40,6 +40,9 @@ var map: Node = null  # CampaignMap
 var bubble: ArmyMovementBubble = null
 var path_line: ArmyMovementPath = null
 var zoc_ring: Decal = null
+## WH hover (ADR 0271) : cercles de zone de contrôle de toutes les armées ennemies en vue
+## (pool de `Decal`, au plus `StanceCues.zoc_max_rings()`), montrés pendant un ordre.
+var enemy_zoc_rings: Array[Decal] = []
 ## Dernière cible survolée : {kind: "ground"|"army"|"settlement", id, point: Vector2}.
 var hover_target: Dictionary = {}
 ## Dernier aperçu de chemin (`find_path_points`), vide si aucun.
@@ -127,6 +130,7 @@ func on_army_selected(army_id: String, army: Dictionary, is_player: bool) -> boo
 	if not is_player:
 		bubble.hide_bubble()
 		path_line.hide_path()
+		refresh_enemy_zoc()
 		return true
 	refresh_bubble(army_id)
 	show_current_path(army)
@@ -143,9 +147,11 @@ func on_army_deselected() -> void:
 		bubble.hide_bubble()
 	if path_line != null:
 		path_line.hide_path()
+	refresh_enemy_zoc()
 
 
 func refresh_bubble(army_id: String) -> void:
+	refresh_enemy_zoc()
 	var area: Dictionary = map.sim.call("get_reachable_area", army_id)
 	if area.is_empty():
 		bubble.hide_bubble()
@@ -714,6 +720,66 @@ func _update_zoc_ring() -> void:
 	zoc_ring.size = Vector3(radius * 2.0, 80.0, radius * 2.0)
 	zoc_ring.position = Vector3(point.x, y, point.y)
 	zoc_ring.visible = true
+
+
+## WH hover : réglage `map/show_zoc` (vrai par défaut).
+func show_zoc_enabled() -> bool:
+	var settings := get_node_or_null("/root/Settings")
+	return settings == null or bool(settings.call("get_value", "map/show_zoc"))
+
+
+## Armées ennemies (en guerre avec le joueur) actuellement montrées, dans l'ordre des marqueurs.
+## Les marqueurs sont déjà filtrés par le brouillard : rien hors de vue.
+func visible_enemy_armies() -> PackedStringArray:
+	var ids := PackedStringArray()
+	if map == null or map.armies == null:
+		return ids
+	for id in map.armies._markers:
+		var marker: ArmyMarker = map.armies._markers[id]
+		if marker != null and is_instance_valid(marker) and marker.cue == StanceCues.ENEMY:
+			ids.append(str(id))
+	return ids
+
+
+## Pose un cercle de zone de contrôle sous chaque armée ennemie en vue (≤ `max_rings`) tant
+## qu'une armée du joueur est sélectionnée ; les masque sinon.
+func refresh_enemy_zoc() -> void:
+	var ids := PackedStringArray()
+	var radius := float(_rules().get("zoc_radius_px", 0.0)) if available() else 0.0
+	if active() and show_zoc_enabled() and radius > 0.0:
+		ids = visible_enemy_armies()
+	var count := mini(ids.size(), StanceCues.zoc_max_rings())
+	while enemy_zoc_rings.size() < count:
+		var ring := Decal.new()
+		ring.name = "EnemyZoc%d" % enemy_zoc_rings.size()
+		ring.texture_albedo = ArmyMarker.ring_texture(false)
+		ring.texture_emission = ArmyMarker.ring_texture(true)
+		ring.emission_energy = 0.4
+		ring.upper_fade = 0.2
+		ring.lower_fade = 0.2
+		ring.visible = false
+		map.add_child(ring)
+		enemy_zoc_rings.append(ring)
+	for i in enemy_zoc_rings.size():
+		var ring := enemy_zoc_rings[i]
+		if i >= count:
+			ring.visible = false
+			continue
+		var army: Dictionary = map.sim.call("get_army", ids[i])
+		var point: Vector2 = army.get("position", Vector2.ZERO)
+		ring.modulate = StanceCues.zoc_color()
+		ring.size = Vector3(radius * 2.0, 80.0, radius * 2.0)
+		ring.position = Vector3(point.x, map.map_data.surface_world_at(point.x, point.y), point.y)
+		ring.visible = true
+
+
+## Nombre de cercles ennemis visibles (tests).
+func enemy_zoc_count() -> int:
+	var shown := 0
+	for ring in enemy_zoc_rings:
+		if ring.visible:
+			shown += 1
+	return shown
 
 
 func _exit_tree() -> void:

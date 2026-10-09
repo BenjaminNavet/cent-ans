@@ -4,6 +4,46 @@ extends "res://tests/smoke_ui.gd"
 ## Découpage de `smoke.gd` (SC GT7) : les sections se chaînent par héritage et partagent l'état.
 ## Ne se lance pas seul : point d'entrée `res://tests/smoke.gd`.
 
+## RX batsim : smoke « bataille court » (`CENT_ANS_SMOKE_ONLY=battle_short`, quelques secondes) : même
+## mise en scène que `_run_battle`, mais 60 s simulées (600 ticks) au lieu de la bataille entière, sans
+## scène ni siège. Le test long (`CENT_ANS_SMOKE_ONLY=battle` : bataille entière, sans ordre, scène,
+## déploiement, siège) reste à part ; chaque étape écrit une ligne `smoke stage …`.
+func _run_battle_short() -> void:
+	_stage("battle_short: start")
+	if not ClassDB.class_exists("BattleSim") or not ClassDB.instantiate("CampaignSim").has_method("debug_stage_battle"):
+		_fail("battle_short: BattleSim / CampaignSim.debug_stage_battle not registered (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), "fac_france", 1337), "battle_short: new_campaign failed"):
+		return
+	var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
+	if not _check(armies.size() == 2, "battle_short: no French or English army"):
+		return
+	var index: int = sim.call("debug_stage_battle", armies[0], armies[1])
+	var pending: Array = sim.call("get_pending_battles")
+	if not _check(index == 0 and pending.size() == 1, "battle_short: debug_stage_battle should record 1 pending battle"):
+		return
+	_stage("battle_short: staged")
+	var setup: Dictionary = sim.call("get_battle_setup", index)
+	var battle: Object = ClassDB.instantiate("BattleSim")
+	if not _check(battle.call("setup", setup, int(pending[0]["seed"])), "battle_short: BattleSim.setup refused the campaign setup"):
+		return
+	battle.call("set_ai", "attacker", true)
+	var units: Array = battle.call("get_units")
+	_check(units.size() == (setup["attacker"]["units"] as Array).size() + (setup["defender"]["units"] as Array).size(), "battle_short: unit count mismatch")
+	var soldiers: PackedFloat32Array = battle.call("get_soldier_transforms", "attacker")
+	_check(soldiers.size() > 0 and soldiers.size() % 4 == 0, "battle_short: soldier transforms empty")
+	_stage("battle_short: set up")
+	for _i in 600:
+		battle.call("tick", 0.1)
+		if battle.call("is_finished"):
+			break
+	_check(float(battle.call("get_elapsed")) > 30.0 or battle.call("is_finished"), "battle_short: simulation did not advance")
+	_check(not (battle.call("get_events") as Array).is_empty(), "battle_short: no battle journal")
+	_stage("battle_short: 60 s played")
+	print("smoke battle short: %d s simulated, finished %s" % [int(battle.call("get_elapsed")), battle.call("is_finished")])
+
+
 ## M7 (docs/design/m7-battles.md § 4) : bataille réelle France–Angleterre mise en scène par
 ## `debug_stage_battle`, ≤ 12 000 ticks headless de `BattleSim` (IA des deux camps), fin atteinte,
 ## `resolve_battle` accepté ; puis la boucle complète par la carte : dialogue d'avant-bataille,
@@ -52,6 +92,7 @@ func _run_battle() -> void:
 		_check(str(orders[0]["label"]) == "Montjoie ! Saint-Denis !", "battle: French war cry label is %s" % orders[0]["label"])
 		var cry: Dictionary = battle.call("issue_command", {"type": "leader_order", "order": "order_war_cry", "units": []})
 		_check(bool(cry.get("ok", false)) or str(cry.get("error", "")).contains("impossible"), "battle: war cry command malformed: %s" % cry.get("error", "?"))
+	_stage("battle: armies staged, playing")
 	var ticks := 0
 	for _i in 12000:
 		battle.call("tick", 0.1)
@@ -80,7 +121,9 @@ func _run_battle() -> void:
 		var idle_outcome: Dictionary = idle.call("get_outcome")
 		_check(str(idle_outcome.get("end", "")) in ["rout", "broken", "refused", "lull"], "battle: no-order battle end is %s" % idle_outcome.get("end", "?"))
 		print("smoke battle without orders: over at %d s, %s, winner %s" % [int(idle.call("get_elapsed")), idle_outcome.get("end", "?"), idle_outcome.get("winner", "?")])
+	_stage("battle: no-order battle done")
 	await _check_ambush_opening_cv3(setup, pending[0])
+	_stage("battle: ambush done")
 
 	# Boucle complète par la carte de campagne (vraies données).
 	facade.set_data_dir(data_dir)
@@ -103,6 +146,7 @@ func _run_battle() -> void:
 		return
 	_check(str(dialog.body_label.text).contains("Météo prévue"), "battle: dialog should show the weather forecast")
 	_check(str(dialog.body_label.text).contains("Site : ") and dialog.site_label_text != "", "battle: dialog should show the battle site (B6)")
+	_stage("battle: pre-battle dialog, opening the scene")
 	dialog.fight_button.emit_signal("pressed")
 	# AR1 : la bataille se construit derrière l'écran de chargement illustré (quelques images).
 	var scene: Node = null
@@ -134,6 +178,7 @@ func _run_battle() -> void:
 	for key in scene._mm:
 		drawn += (scene._mm[key] as MultiMeshInstance3D).multimesh.visible_instance_count
 	_check(drawn > 0, "battle scene: no soldier instances")
+	_stage("battle: scene built")
 	await _check_battle_deployment_f5c(scene)  # F5c
 	_check_battle_hud_f5b(scene)
 	_check_battle_markers_b2(scene)

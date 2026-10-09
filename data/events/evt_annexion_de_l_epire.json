@@ -1,0 +1,90 @@
+{
+  "id": "evt_annexion_de_l_epire",
+  "title": "L'Épire passe à Byzance",
+  "text": "À la mort du despote Jean II Orsini, empoisonné par sa femme Anne Paléologine, l'Épire est gouvernée au nom du jeune Nicéphore II. Andronic III y envoie son armée à l'automne 1337 : Arta et Janina se rendent et le despotat est ramené sous l'autorité de l'empereur ; Nicéphore II, bientôt rétabli dans le gouvernement local, ne sera plus qu'un vassal éphémère.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1337,
+      "season": "autumn"
+    },
+    "until_year": 1339,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_byzantium"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_epirus"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_andronikos_iii"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_epirus",
+        "province": "prov_epirus"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_byzantium"
+  },
+  "options": [
+    {
+      "text": "Soumettre le despotat d'Épire",
+      "effects": [
+        {
+          "type": "transfer_title",
+          "title": "tit_epirus",
+          "from": "fac_epirus"
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_epirus",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_epirus",
+          "amount": -25,
+          "reason": "Annexion de l'Épire"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Accepter l'hommage de la régente sans occuper Arta",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_epirus",
+          "amount": 5,
+          "reason": "Hommage de la régente"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "muster",
+  "historical_date": {
+    "value": "1337-10",
+    "note": "Reddition d'Arta à l'automne 1337 ; les sources hésitent entre 1337 et 1340 pour la soumission complète."
+  },
+  "sources": [
+    "Despotat d'Épire",
+    "Andronic III Paléologue",
+    "Donald M. Nicol, The Despotate of Epiros 1267-1479, 1984"
+  ]
+}
