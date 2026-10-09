@@ -111,7 +111,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0117 | [Garde du seigneur : l'unité de la capitale entretenue par le domaine (lot OMR R3)](0117-garde-du-seigneur.md) | accepté |
 | 0117 bis | [Lanceur depuis les sources (macOS, Linux, Windows)](0117-lanceur-depuis-les-sources.md) | accepté |
 | 0118 | [Copies GPU compressées des rasters monde de la carte de campagne](0118-copies-gpu-compressees-de-la-carte.md) | accepté |
-| 0119 | [Portée de planification de l'IA (index partagés en lecture seule)](0119-portee-de-planification-ia.md) | remplacé (0205) |
+| 0119 | [Portée de planification de l'IA (index partagés en lecture seule)](0119-portee-de-planification-ia.md) | remplacé par l'ADR 0205 |
 | 0121 | [Relief fin dans le cadre monde, palier 1 étendu à tout le monde OM](0121-relief-fin-cadre-monde.md) | accepté |
 | 0122 | [Une décision expirée applique l'option de l'IA](0122-expiration-par-choix-ia.md) | accepté |
 | 0123 | [Budget de pixels de la mise à l'échelle 3D sur écran HiDPI](0123-budget-de-pixels-hidpi.md) | acceptée |
@@ -179,6 +179,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0201 | [Suppression de la bataille navale 3D](0201-suppression-bataille-navale-3d.md) | n/d |
 | 0202 | [Une proposition diplomatique est un traité d'articles](0202-traites-articles.md) | accepté |
 | 0205 | [Le cache de planification est un objet explicite](0205-plancache.md) | accepté |
+| 0206 | [Chargeur Rust des données vectorielles de la carte](0206-chargeur-carte-rust.md) | accepté |
 | 0210 | [Procédé gratuit des assets 3D : Qwen / Z-Image → TRELLIS (HF) → SF3D](0210-procede-assets-3d-gratuit.md) | accepté |
 | 0211 | [Charte semi-réaliste révisée (trois états, figurines générées, palette contrôlée)](0211-charte-semi-realiste.md) | accepté |
-| 0212 | [Les modèles 3D générés voyagent en paquet de release, pas par git](0212-paquet-de-modeles-generes.md) | accepté |
+| 0212 | [Les modèles 3D générés voyagent en paquet de release, pas par git](0212-paquet-de-modeles-generes.md) | n/d |
