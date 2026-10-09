@@ -66,8 +66,8 @@ PF-14 | FAIT (= DT2) | PNG replis relief (relief_shade_[0-3].png 131 Mo = DT2) |
 
 ## BA sim-battle moteur
 BA1 | PARTIEL | sim-battle/ai propres ; seuls restent les examples sim-campaign (voir PROBES) | core/crates/sim-campaign/examples | oui
-BA8 | À FAIRE | replay digest simplifié, builder ReplayStart, suppr soldier_positions alias (unit.rs:961) | core/crates/sim-battle/src/replay.rs, unit.rs | oui
-BA9 | À FAIRE | cache figure_positions layout local | core/crates/sim-battle/src/unit.rs | oui
+BA8 | FAIT b19d13f32 | replay digest simplifié, builder ReplayStart, suppr soldier_positions alias (unit.rs:961) | core/crates/sim-battle/src/replay.rs, unit.rs | oui
+BA9 | FAIT b19d13f32 | cache figure_positions layout local | core/crates/sim-battle/src/unit.rs | oui
 BA10 | PARTIEL | sim/commands.rs existe ; apply_command découpé à vérifier | core/crates/sim-battle/src/sim/commands.rs | oui
 BA11 | PARTIEL | missile_arc.json existe ; table missiles + fire() découpé (sim/fire.rs 625 l) | core/crates/sim-battle/src/sim/fire.rs | oui
 BA12 | À FAIRE | géométrie grille formations unifiée (group_formation.rs 825 l) | core/crates/sim-battle/src/group_formation.rs, formations.rs | oui
