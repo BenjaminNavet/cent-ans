@@ -560,29 +560,9 @@ func _prop_state(prop_id: String) -> Dictionary:
 	return state
 
 
-## Maillage d'un glb DN. Chemin rapide : une seule instance de maillage sans transformation (cas des
-## glb générés) → on reprend le maillage tel quel, sans repasser par les sommets en GDScript ;
-## sinon `FaunaLayer.flat_mesh_of` (nœuds aplatis).
+## Maillage d'un glb DN (nœuds aplatis, un seul `ArrayMesh`).
 static func mesh_of(path: String) -> ArrayMesh:
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return null
-	var root := scene.instantiate()
-	var meshes := root.find_children("*", "MeshInstance3D", true, false)
-	var direct: ArrayMesh = null
-	if meshes.size() == 1:
-		var instance := meshes[0] as MeshInstance3D
-		var xf := instance.transform
-		var parent := instance.get_parent()
-		while parent != null and parent != root and parent is Node3D:
-			xf = (parent as Node3D).transform * xf
-			parent = parent.get_parent()
-		if root is Node3D:
-			xf = (root as Node3D).transform * xf
-		if xf.is_equal_approx(Transform3D.IDENTITY) and instance.mesh is ArrayMesh:
-			direct = (instance.mesh as ArrayMesh).duplicate() as ArrayMesh
-	root.free()
-	return direct if direct != null else FaunaLayer.flat_mesh_of(path)
+	return FaunaLayer.flat_mesh_of(path)
 
 
 ## Demande le chargement en tâche de fond de tous les niveaux de détail des modèles (décodage des
@@ -756,7 +736,7 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 	missing.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _cell_rect(a).get_center().distance_squared_to(at) < _cell_rect(b).get_center().distance_squared_to(at))
 	for n in mini(missing.size(), int(_render("cells_per_frame", 1.0))):
 		_install_cell(missing[n])
-	var total := 0
+	var counts: Dictionary = {}
 	var shown_cells := 0
 	var draws := 0
 	for key: Vector2i in _cells:
@@ -766,17 +746,23 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 			node.visible = shown
 		if shown:
 			entry["last_seen"] = _frame
-			total += int(entry["count"])
 			shown_cells += 1
 			draws += (entry["nodes"] as Array).size()
+			for prop_id: String in entry["counts"]:
+				counts[prop_id] = int(counts.get(prop_id, 0)) + int(entry["counts"][prop_id])
 	_evict()
-	var budget := _render("max_visible_instances", 2500.0)
-	var thin := 1.0 if total <= budget else budget / float(total)
+	# Amincissement par rang, modèle par modèle (un enclos très dense ne chasse pas les puits).
+	var thin: Dictionary = {}
+	var visible_total := 0
+	for prop_id: String in counts:
+		var budget := float(((config["props"] as Dictionary)[prop_id] as Dictionary).get("max_instances", _render("max_instances_per_prop", 700.0)))
+		thin[prop_id] = minf(1.0, budget / float(counts[prop_id]))
+		visible_total += int(minf(float(counts[prop_id]), budget))
 	_apply_view(rig_distance, thin)
 	stats["cells"] = _cells.size()
 	stats["visible_cells"] = shown_cells
 	stats["draw_calls"] = draws
-	stats["visible"] = int(minf(float(total), budget))
+	stats["visible"] = visible_total
 	var sum := 0
 	for entry: Dictionary in _cells.values():
 		sum += int(entry["count"])
@@ -784,7 +770,7 @@ func update_view(at: Vector2, rig_distance: float) -> void:
 
 
 ## Taille tenue à l'écran, fondu par modèle, amincissement et niveau de détail pour le rig.
-func _apply_view(rig_distance: float, thin: float) -> void:
+func _apply_view(rig_distance: float, thin: Dictionary) -> void:
 	var target := _render("size_k", 0.0045) * pow(maxf(rig_distance, 0.01), _render("size_exponent", 0.85))
 	var spread_exponent := _render("spread_exponent", 0.5)
 	var lod_distances: Array = (config["render"] as Dictionary)["lod_distances"]
@@ -799,7 +785,7 @@ func _apply_view(rig_distance: float, thin: float) -> void:
 		_set_uniform(state, "spread_mult", spread)
 		_set_uniform(state, "x_mult", spread if state["stretched"] else mult)
 		_set_uniform(state, "fade", fade)
-		_set_uniform(state, "thin", thin)
+		_set_uniform(state, "thin", float(thin.get(str(state["id"]), 1.0)))
 		state["last_mult"] = mult
 	if lod != _lod:
 		_lod = lod
@@ -813,7 +799,7 @@ func _apply_view(rig_distance: float, thin: float) -> void:
 func _install_cell(key: Vector2i) -> void:
 	var t0 := Time.get_ticks_usec()
 	var instances := cell_instances(key)
-	var entry := {"nodes": [], "count": 0, "last_seen": _frame}
+	var entry := {"nodes": [], "count": 0, "counts": {}, "last_seen": _frame}
 	var by_prop: Dictionary = {}
 	for inst: Dictionary in instances:
 		by_prop[inst["prop"]] = true
@@ -841,6 +827,7 @@ func _install_cell(key: Vector2i) -> void:
 		add_child(mmi)
 		(entry["nodes"] as Array).append(mmi)
 		entry["count"] = int(entry["count"]) + multimesh.instance_count
+		(entry["counts"] as Dictionary)[prop_id] = multimesh.instance_count
 	_cells[key] = entry
 	stats["build_ms_max"] = maxf(float(stats["build_ms_max"]), (Time.get_ticks_usec() - t0) / 1000.0)
 

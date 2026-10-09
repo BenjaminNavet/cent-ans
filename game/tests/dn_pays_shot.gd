@@ -43,6 +43,8 @@ func _init() -> void:
 	var data: MapData = map.get("map_data")
 	var layer_node: CountrysideLayer = map.life.countryside
 	layer_node.force_active = true
+	# Sans simulation, personne ne pose la saison (poids du shader des props) : plein été.
+	RenderingServer.global_shader_parameter_set("campaign_season", Vector4(0.0, 1.0, 0.0, 0.0))
 	DirAccess.make_dir_recursive_absolute(out)
 	for view in VIEWS:
 		if only != "" and not String(view[0]).contains(only):
@@ -65,6 +67,34 @@ func _init() -> void:
 			await RenderingServer.frame_post_draw
 			var path := out.path_join("%s_d%s.png" % [view[0], dist_text])
 			root.get_texture().get_image().save_png(path)
+			var st: Dictionary = layer_node._states.get("wattle_fence", {})
+			print("season=", RenderingServer.global_shader_parameter_get("campaign_season"), " fence mult=", st.get("last_mult"), " real=", st.get("real_units"))
+			for node in layer_node.get_children():
+				var mmi := node as MultiMeshInstance3D
+				if mmi != null and str(mmi.get_meta("prop")) == "wattle_fence":
+					var mat := mmi.multimesh.mesh.surface_get_material(0) as ShaderMaterial
+					print("MMI ", mmi.name, " vis=", mmi.is_visible_in_tree(), " n=", mmi.multimesh.instance_count, " xf0=", mmi.multimesh.get_instance_transform(0), " custom0=", mmi.multimesh.get_instance_custom_data(0), " aabb=", mmi.multimesh.mesh.get_aabb(), " size_mult=", mat.get_shader_parameter("size_mult"), " x_mult=", mat.get_shader_parameter("x_mult"), " fade=", mat.get_shader_parameter("fade"), " thin=", mat.get_shader_parameter("thin"), " origin=", mat.get_shader_parameter("mesh_origin"))
+					break
+			print("rig focus=", rig.get("focus"), " dist=", rig.get("distance"), " cam=", root.get_camera_3d().global_position if root.get_camera_3d() else "none", " target=", best)
+			var cam := root.get_camera_3d()
+			for node in layer_node.get_children():
+				var mmi2 := node as MultiMeshInstance3D
+				if mmi2 == null or not mmi2.visible:
+					continue
+				var mm := mmi2.multimesh
+				var st2: Dictionary = layer_node._states[str(mmi2.get_meta("prop"))]
+				var spread: float = pow(float(st2.get("last_mult", 1.0)), 0.5)
+				var onscreen := 0
+				for n in mm.instance_count:
+					var xf := mm.get_instance_transform(n)
+					var cd := mm.get_instance_custom_data(n)
+					var wx := xf.origin.x + cd.r * (spread - 1.0)
+					var wz := xf.origin.z + cd.g * (spread - 1.0)
+					var world := Vector3(wx, data.display_height(xf.origin.y, wx, wz), wz)
+					var sp := cam.unproject_position(world)
+					if not cam.is_position_behind(world) and sp.x > 0 and sp.y > 0 and sp.x < 800 and sp.y < 500:
+						onscreen += 1
+				print("PROJ ", mmi2.name, " onscreen=", onscreen, " mult=", st2.get("last_mult"))
 			print("dn_pays_shot: ", path, " px=", best, " stats=", layer_node.stats)
 	map.queue_free()
 	await process_frame

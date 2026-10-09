@@ -11,12 +11,12 @@
     "version": {"const": 1},
     "render": {
       "type": "object",
-      "required": ["max_visible_instances", "cell_px", "load_factor", "min_radius_px", "max_radius_px", "max_cached_cells", "cells_per_frame", "size_k", "size_exponent", "spread_exponent", "lod_distances", "town_clearance_px", "defaults"],
+      "required": ["max_instances_per_prop", "cell_px", "load_factor", "min_radius_px", "max_radius_px", "max_cached_cells", "cells_per_frame", "size_k", "size_exponent", "spread_exponent", "lod_distances", "town_clearance_px", "defaults"],
       "additionalProperties": false,
       "properties": {
         "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Portee par defaut (distance du rig) d'un modele sans `max_distance`."},
         "fade_from": {"type": "number", "exclusiveMinimum": 0},
-        "max_visible_instances": {"type": "integer", "minimum": 1, "description": "Plafond d'instances affichees (amincissement par rang au-dela)."},
+        "max_instances_per_prop": {"type": "integer", "minimum": 1, "description": "Plafond d'instances affichees par modele (amincissement par rang au-dela), sauf `max_instances` du modele."},
         "cell_px": {"type": "number", "exclusiveMinimum": 0},
         "load_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon du disque garni = distance du rig x ce facteur, borne par min/max."},
         "min_radius_px": {"type": "number", "exclusiveMinimum": 0},
@@ -65,6 +65,7 @@
           "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
           "fade_from": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig ou commence le fondu de sortie."},
           "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-dela de laquelle le modele disparait."},
+          "max_instances": {"type": "integer", "minimum": 1},
           "stretched": {"type": "boolean", "description": "Segment etire a la longueur de l'enclos (clôtures)."}
         }
       }

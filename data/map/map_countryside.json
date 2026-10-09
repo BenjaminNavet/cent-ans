@@ -2,14 +2,14 @@
   "description": "Campagne vivante hors champs (lot DN-PAYS, `game/scripts/map/countryside_layer.gd`) : haies et clôtures de bocage, puits, croix de chemin et calvaires, moulins à vent, salines, ruines, piloris, charrettes et caravanes au bord des routes. Les modèles sont les glb générés `dn/<dossier>/<nom>_lod{0,1,2}.glb` (paquet de release, ADR 0212) ; sans glb, une boîte de 2 m. Une règle = un mode de placement (`scatter` semis par aire, `paddock` enclos de clôtures, `village` à côté des colonies et hameaux, `road` au bord des routes), des modèles pondérés, des régions (ellipses lon/lat) et des filtres de site. Troupeaux : `map_fauna.json`. Rendu seulement.",
   "version": 1,
   "render": {
-    "max_visible_instances": 2500,
+    "max_instances_per_prop": 700,
     "cell_px": 96,
     "load_factor": 2.4,
     "min_radius_px": 24,
     "max_radius_px": 200,
     "max_cached_cells": 64,
     "cells_per_frame": 1,
-    "size_k": 0.007,
+    "size_k": 0.02,
     "size_exponent": 0.85,
     "spread_exponent": 0.5,
     "lod_distances": [
@@ -41,253 +41,255 @@
   "props": {
     "wattle_fence": {
       "model": "props/wattle_fence",
-      "max_mult": 12,
+      "max_mult": 70,
       "size_scale": 1.0,
       "fade_from": 26,
       "max_distance": 42,
-      "stretched": true
+      "stretched": true,
+      "max_instances": 1800,
+      "albedo_gain": 1.6
     },
     "well_stone": {
       "model": "props/well_stone",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "village_well_stone": {
       "model": "props/terrain_village_well_stone",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "well_covered": {
       "model": "props/econ_well_covered_bruges",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "well_sweep": {
       "model": "props/econ_well_sweep_shaduf",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "pillory_post": {
       "model": "props/econ_pillory_post_stone",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "pillory_wheel": {
       "model": "props/econ_pillory_wheel_post",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "wayside_cross": {
       "model": "props/wayside_cross",
-      "max_mult": 30,
+      "max_mult": 90,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "cross_stone": {
       "model": "props/env_cross_wayside_stone",
-      "max_mult": 28,
+      "max_mult": 84,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "cross_wood": {
       "model": "props/terrain_wayside_cross_wood",
-      "max_mult": 14,
+      "max_mult": 42,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "calvary": {
       "model": "props/terrain_wayside_cross_calvary",
-      "max_mult": 14,
+      "max_mult": 42,
       "size_scale": 1.0,
       "fade_from": 50,
       "max_distance": 90
     },
     "shrine": {
       "model": "props/env_wayside_shrine",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
     },
     "windmill_post": {
       "model": "props/windmill_post",
-      "max_mult": 12,
+      "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
       "max_distance": 120
     },
     "windmill_field": {
       "model": "buildings/village_windmill_post_field",
-      "max_mult": 12,
+      "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
       "max_distance": 120
     },
     "windmill_polder": {
       "model": "buildings/env_windmill_dutch_polder",
-      "max_mult": 10,
+      "max_mult": 30,
       "size_scale": 1.0,
       "fade_from": 70,
       "max_distance": 120
     },
     "windmill_tower": {
       "model": "buildings/env_windmill_tower_med",
-      "max_mult": 10,
+      "max_mult": 30,
       "size_scale": 1.0,
       "fade_from": 70,
       "max_distance": 120
     },
     "windmill_italian": {
       "model": "buildings/econ_mill_windmill_post_italian",
-      "max_mult": 12,
+      "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
       "max_distance": 120
     },
     "saltpan_atlantic": {
       "model": "buildings/econ_saltpan_atlantic",
-      "max_mult": 8,
+      "max_mult": 24,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "saltpan_med": {
       "model": "buildings/econ_saltpan_mediterranean",
-      "max_mult": 6,
+      "max_mult": 18,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "ruin_village": {
       "model": "buildings/env_ruin_village_abandoned",
-      "max_mult": 6,
+      "max_mult": 18,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "ruin_burnt": {
       "model": "buildings/env_ruin_burnt_hamlet",
-      "max_mult": 8,
+      "max_mult": 24,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "roman_temple": {
       "model": "buildings/env_roman_temple_ruin",
-      "max_mult": 6,
+      "max_mult": 18,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "roman_arch": {
       "model": "buildings/env_roman_arch_triumph",
-      "max_mult": 6,
+      "max_mult": 18,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "roman_arena": {
       "model": "buildings/env_roman_arena_ruin",
-      "max_mult": 5,
+      "max_mult": 15,
       "size_scale": 1.0,
       "fade_from": 60,
       "max_distance": 110
     },
     "cart_merchant": {
       "model": "props/cart_merchant",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "cart_ox": {
       "model": "props/env_cart_ox_peasant",
-      "max_mult": 22,
+      "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "wagon_four_wheel": {
       "model": "props/wagon_four_wheel",
-      "max_mult": 20,
+      "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "haywain": {
       "model": "props/terrain_haywain_wagon",
-      "max_mult": 20,
+      "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "cart_wool": {
       "model": "props/cart_wool_bales",
-      "max_mult": 22,
+      "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "cart_wine": {
       "model": "props/cart_wine_barrel_wagon",
-      "max_mult": 20,
+      "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "carreta": {
       "model": "props/cart_carreta_iberian",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "arba": {
       "model": "props/cart_arba_steppe",
-      "max_mult": 20,
+      "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "mule_train": {
       "model": "fauna/env_cart_pack_train_mules",
-      "max_mult": 24,
+      "max_mult": 72,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "camel_caravan": {
       "model": "fauna/env_merchant_caravan_camels",
-      "max_mult": 18,
+      "max_mult": 54,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "drover_cattle": {
       "model": "fauna/herd_drover_cattle",
-      "max_mult": 20,
+      "max_mult": 60,
       "size_scale": 1.0,
       "fade_from": 40,
       "max_distance": 70
     },
     "shepherd_hut": {
       "model": "props/env_shepherd_hut_wheeled",
-      "max_mult": 22,
+      "max_mult": 66,
       "size_scale": 1.0,
       "fade_from": 45,
       "max_distance": 80
@@ -539,13 +541,13 @@
         "bocage_irlande",
         "bocage_galice"
       ],
-      "density_per_1000km2": 9,
+      "density_per_1000km2": 45,
       "paddock": {
         "size_m": [
           90,
           220
         ],
-        "segment_m": 30,
+        "segment_m": 80,
         "gap": 0.1
       },
       "filters": {
