@@ -11,10 +11,10 @@ DC-5 | FAIT | plans déplacés vers docs/archive/superpowers-plans (liens corrig
 ## GT tests Godot
 GT1 | FAIT (sc/hooks) | ~14 *_shot/probe/bench encore là (as1_shot, as5_shot, as8c_shader_probe, dn_*_shot, me1/me2/me5_shot, fl_weather_field_shot, tree_flicker_probe, codex_load_bench, mapload_bench) | game/tests/*_shot.gd | non
 GT2 | FAIT (sc/hooks) | q3_playtest.gd reste (pb1_turns à garder) | game/tests/q3_playtest.gd | non
-GT3 | PARTIEL | 151/197 *_test.gd sur TestCase, 46 non migrés | game/tests/*_test.gd, game/tests/lib/test_case.gd | non
-GT4 | FAIT | windows.yml : étape « Godot tests » (shell bash, GODOT console) lance tools/run_godot_tests.sh (qui honore maintenant $GODOT) ; non exécuté sur Windows réel | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
+GT3 | FAIT | les 7 derniers *_test.gd (dn_*) migrés sur TestCase ; dn_campaign_models bloque aussi sur main (arrêt) | game/tests/*_test.gd | non
+GT4 | FAIT | windows.yml : sous-ensemble rapide run_godot_tests.sh dn_ui_kit dn_freshwater (continue-on-error, GODOT console) | .github/workflows/windows.yml, tools/run_godot_tests.sh | non
 GT5 | FAIT (sc/gt5) | inventaire docs/wip/sc/gt5-inventaire.md : 200 tests, 25 rouges -> 6 restants (po_ui = bug layout, hb5/dn_* = paquet DN absent, 2 blocages à l'arrêt) ; bug SC fine_geo_layer is_enabled corrigé | game/tests | non
-GT6 | À FAIRE | fusion des tests par thème | game/tests | non
+GT6 | RIEN À FAIRE | aucun test minuscule redondant évident | game/tests | non
 GT7 | FAIT (sc/smoke, 5 smoke_*.gd) | smoke.gd 2893 l non découpé | game/tests/smoke.gd | non
 GT8 | FAIT (sc/hooks) | .uid suivis (fait) ; hooks de capture orphelins : 20 occurrences _stage_/stage_screenshot/--stage restent | game/scripts/battle/battle_scene.gd, ui/*, map/* | non
 HOOKS | FAIT (sc/hooks) | retirer stage_screenshot()/stage_example restants + smoke.gd:1150 | idem | non
