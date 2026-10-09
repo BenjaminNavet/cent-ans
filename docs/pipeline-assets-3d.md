@@ -130,9 +130,10 @@ objets longs).
   (0,02 $, `multiimage_algo: stochastic`). Bilan de la nuit : 389 vues = **9,34 $, premier poste**
   (sur 28,58 $), plus cher que l'image de face et la 3D réunies (0,025 $). Un bâtiment multivue coûte
   ≈ 0,05-0,07 $ contre 0,025 $ en vue unique.
-- **Piège coûteux** : 52 vues sont parties sur des décors `env_*` (falaises, rochers, décors classés
-  bâtiment) qui n'ont ni face ni dos. Vérifier la classe d'ingest avant un lot : un décor sans
-  orientation doit rester en vue unique.
+- **La classe d'ingest décide seule** : vérifier la classe avant un lot. Les 52 vues `env_*` de la nuit
+  étaient justifiées (barges, bateaux, chapelles, hospices, chariots : classes `house`, `major_building`,
+  `ship`, `cart`) ; seuls quelques objets symétriques ou plaqués (pigeonnier rond, front de carrière)
+  auraient pu rester en vue unique — les classer `prop` ou `rock` pour éviter la dépense.
 - Les vues générées sont gardées dans `dn/<id>/views/` et listées dans `generation.json` (galerie).
 
 ## 6. Contrôle et rangement
