@@ -1,13 +1,14 @@
-# SC mapload (DT4) — chargeur Rust des données vectorielles de la carte
+# SC mapload (DT4) - chargeur Rust des donnees vectorielles de la carte
 
-Branche `sc/mapload`. Objectif : remplacer les parseurs GDScript de provinces / rivières / côte /
-routes / rivières rendues par un chargeur Rust (GDExtension) avec cache des provinces.
+Branche `sc/mapload`. ADR 0206.
 
-## État
-- Mesure de départ : `game/tests/mapload_bench.gd` (parse JSON seul : ~250 ms ; construction des
-  dictionnaires en plus, à chronométrer dans le banc).
-- Squelette Rust : `data-model/src/map_geo.rs` (parsing pur) + `godot-bridge/src/map_geo.rs` (classe `MapGeoLoader`).
-
-## Prochaine étape
-Implémenter le parsing, brancher `MapDataLoader` (GDScript, point d'accès unique), test
-ancien/nouveau, supprimer les parseurs GDScript.
+## Etat : TERMINE (a merger)
+- `data-model/src/map_geo.rs` : parsing serde pur + 4 tests unitaires.
+- `godot-bridge/src/map_geo.rs` : classe `MapGeoLoader` (cache provinces par chemin).
+- `game/scripts/map/map_data_loader.gd` : point d'acces unique `MapDataLoader`.
+- Sites migres : `MapData` (provinces, rivieres, cote), `FactionMapPicker`, `SettlementData` (routes),
+  `RiversRenderer` (rivieres rendues). Parseurs GDScript supprimes (-155 / +16 lignes).
+- Mesure (`tests/mapload_bench.gd`, machine chargee) : GDScript 490-530 ms -> Rust 160-230 ms
+  (provinces 6 ms, selecteur depuis le cache 0-1 ms).
+- Ecart voulu : nom de riviere JSON null -> "" (avant "<null>").
+- Tests : smoke, settlements_render_test, hb7_river_width_test, mapload_bench OK.

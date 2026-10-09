@@ -231,35 +231,16 @@ func _load_river_names() -> Dictionary:
 func _load_rivers() -> void:
 	rivers.clear()
 	zones.clear()
-	var path := map_data.map_dir.path_join(RENDER_FILE)
-	var parsed: Variant = null
-	if FileAccess.file_exists(path):
-		parsed = DataFile.parse_file(path)
-	if parsed is Dictionary:
-		bank_px = float(parsed.get("bank_px", 1.1))
+	var parsed := MapDataLoader.rendered_rivers(map_data.map_dir, RENDER_FILE)
+	if not parsed.is_empty():
+		bank_px = parsed["bank_px"]
 		# GC (ADR 0158) : la maquette d'une ville emblématique est grossie (`landmark_scale`) ; le
 		# rendu générique du fleuve se retire sur toute son emprise (pas de second fleuve autour).
 		var zone_scale := TownMaquetteData.landmark_scale() if TownMaquetteData.enabled() else 1.0
-		for zone: Dictionary in parsed.get("custom_zones", []):
-			var center: Array = zone.get("px", [0, 0])
-			zones.append({
-				"id": str(zone.get("id", "")),
-				"name": str(zone.get("name", "")),
-				"px": Vector2(float(center[0]), float(center[1])),
-				"radius_px": float(zone.get("radius_px", 0.0)) * zone_scale,
-				"boundary_bridges": bool(zone.get("boundary_bridges", true)),
-			})
-		for entry: Dictionary in parsed.get("rivers", []):
-			var coords: Array = entry.get("points", [])
-			var raw_widths: Array = entry.get("widths", [])
-			var points := PackedVector2Array()
-			points.resize(coords.size())
-			var widths := PackedFloat32Array()
-			widths.resize(coords.size())
-			for i in coords.size():
-				points[i] = Vector2(float(coords[i][0]), float(coords[i][1]))
-				widths[i] = float(raw_widths[i]) if i < raw_widths.size() else 0.3
-			rivers.append({"name": str(entry.get("name", "")), "importance": int(entry.get("importance", 0)), "points": points, "widths": widths})
+		for zone: Dictionary in parsed["zones"]:
+			zone["radius_px"] = float(zone["radius_px"]) * zone_scale
+			zones.append(zone)
+		rivers.assign(parsed["rivers"])
 		return
 	# Repli : ancien rendu (largeur constante selon l'importance).
 	for river in map_data.rivers:

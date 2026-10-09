@@ -498,97 +498,23 @@ func _load_province_ids() -> bool:
 
 
 func _load_provinces() -> bool:
-	var geo: Variant = _read_json("provinces.geojson")
-	if geo == null or not (geo is Dictionary):
+	var entries := MapDataLoader.provinces(map_dir)
+	if entries.is_empty():
 		return _fail("provinces.geojson missing or invalid")
-	var features: Array = geo.get("features", [])
-	var position := 0
-	for feature in features:
-		position += 1
-		var props: Dictionary = feature.get("properties", {})
-		var index := int(props.get("index", position))
-		var id: String = str(props.get("id", feature.get("id", "prov_%d" % index)))
-		var centroid := _to_vec2(props.get("centroid", [0, 0]))
-		var entry := {
-			"index": index,
-			"id": id,
-			"name": str(props.get("name", id)),
-			"owner": str(props.get("owner", "")),
-			"terrain": str(props.get("terrain", "")),
-			"capital_name": str(props.get("capital_name", "")),
-			"centroid": centroid,
-			"capital_px": _to_vec2(props.get("capital_px", [centroid.x, centroid.y])),
-			"neighbors": props.get("neighbors", []),
-			"area_px": float(props.get("area_px", 0.0)),
-			"rings": _outer_rings(feature.get("geometry", {})),
-		}
+	for entry: Dictionary in entries:
+		var index: int = entry["index"]
 		provinces[index] = entry
-		province_index_by_id[id] = index
+		province_index_by_id[entry["id"]] = index
 		province_count = maxi(province_count, index)
 	return true
 
 
 func _load_rivers() -> void:
-	var geo: Variant = _read_json("rivers.geojson")
-	if geo == null or not (geo is Dictionary):
-		return
-	for feature in geo.get("features", []):
-		var props: Dictionary = feature.get("properties", {})
-		var importance: int
-		if props.has("strahler"):
-			importance = clampi(int(props["strahler"]), 1, 6)
-		else:
-			importance = clampi(12 - int(props.get("scalerank", 10)), 0, 6)
-		for line in _linestrings(feature.get("geometry", {})):
-			rivers.append({"name": str(props.get("name", "")), "importance": importance, "points": line})
+	rivers.assign(MapDataLoader.rivers(map_dir))
 
 
 func _load_coastline() -> void:
-	var geo: Variant = _read_json("coastline.geojson")
-	if geo == null or not (geo is Dictionary):
-		return
-	for feature in geo.get("features", []):
-		for line in _linestrings(feature.get("geometry", {})):
-			coastlines.append(line)
-
-
-static func _to_vec2(value: Variant) -> Vector2:
-	if value is Array and value.size() >= 2:
-		return Vector2(float(value[0]), float(value[1]))
-	return Vector2.ZERO
-
-
-static func _to_line(coords: Array) -> PackedVector2Array:
-	var line := PackedVector2Array()
-	line.resize(coords.size())
-	for i in coords.size():
-		line[i] = _to_vec2(coords[i])
-	return line
-
-
-static func _linestrings(geometry: Dictionary) -> Array[PackedVector2Array]:
-	var lines: Array[PackedVector2Array] = []
-	var kind: String = geometry.get("type", "")
-	var coords: Array = geometry.get("coordinates", [])
-	if kind == "LineString":
-		lines.append(_to_line(coords))
-	elif kind == "MultiLineString":
-		for part in coords:
-			lines.append(_to_line(part))
-	return lines
-
-
-static func _outer_rings(geometry: Dictionary) -> Array[PackedVector2Array]:
-	var rings: Array[PackedVector2Array] = []
-	var kind: String = geometry.get("type", "")
-	var coords: Array = geometry.get("coordinates", [])
-	if kind == "Polygon" and coords.size() > 0:
-		rings.append(_to_line(coords[0]))
-	elif kind == "MultiPolygon":
-		for polygon in coords:
-			if polygon.size() > 0:
-				rings.append(_to_line(polygon[0]))
-	return rings
+	coastlines.assign(MapDataLoader.coastline(map_dir))
 
 
 # --- Accès aux échantillons ---------------------------------------------------

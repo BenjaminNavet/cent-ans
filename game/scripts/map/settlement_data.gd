@@ -114,25 +114,7 @@ func _load_hamlets(map_dir: String) -> void:
 
 
 func _load_roads(map_dir: String) -> void:
-	var collection: Variant = _read_json(map_dir.path_join("roads.geojson"))
-	if not (collection is Dictionary):
-		return
-	for feature in collection.get("features", []):
-		var geometry: Dictionary = feature.get("geometry", {})
-		var properties: Dictionary = feature.get("properties", {})
-		var road_type := str(properties.get("type", "secondary"))
-		var lines: Array = []
-		match str(geometry.get("type", "")):
-			"LineString":
-				lines = [geometry.get("coordinates", [])]
-			"MultiLineString":
-				lines = geometry.get("coordinates", [])
-		for coords in lines:
-			var points := PackedVector2Array()
-			for c in coords:
-				points.append(Vector2(float(c[0]), float(c[1])))
-			if points.size() >= 2:
-				roads.append({"type": road_type, "main": road_type == "main", "points": points})
+	roads.assign(MapDataLoader.roads(map_dir))
 
 
 func _load_edge_paths(map_dir: String) -> void:

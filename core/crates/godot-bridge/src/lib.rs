@@ -73,6 +73,7 @@ mod convert;
 mod custom_battle;
 mod data_store_rules;
 mod historical_battles;
+mod map_geo;
 mod naval_sim;
 mod relief_decoder;
 mod relief_lod_bridge;

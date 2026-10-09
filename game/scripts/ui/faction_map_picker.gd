@@ -66,7 +66,7 @@ func _ready() -> void:
 ## Lit la géométrie et les fiches ; `false` si l'une manque (le choix par cartes reste possible).
 func load_data(geojson_path: String = "") -> bool:
 	var path := geojson_path if geojson_path != "" else DataFile.data_dir().path_join("map/provinces.geojson")
-	provinces = read_provinces(path)
+	provinces = MapDataLoader.province_polygons(path)
 	var facade := _facade()
 	var store: Object = facade.get("store") if facade != null else null
 	sheets.clear()
@@ -119,34 +119,6 @@ func playable_bounds() -> Rect2:
 		first = false
 	return bounds.grow_individual(bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN,
 		bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN)
-
-
-static func read_provinces(path: String) -> Array:
-	var result: Array = []
-	var text := FileAccess.get_file_as_string(path)
-	var parsed: Variant = JSON.parse_string(text) if text != "" else null
-	if not (parsed is Dictionary):
-		return result
-	for feature in parsed.get("features", []):
-		var props: Dictionary = feature.get("properties", {})
-		var geometry: Dictionary = feature.get("geometry", {})
-		var polygons: Array = []
-		var coords: Array = geometry.get("coordinates", [])
-		var parts: Array = [coords] if str(geometry.get("type", "")) == "Polygon" else coords
-		for part in parts:
-			if (part as Array).is_empty():
-				continue
-			var ring := PackedVector2Array()
-			for point in part[0]:
-				ring.append(Vector2(float(point[0]), float(point[1])))
-			if ring.size() >= 3:
-				polygons.append(ring)
-		var entry := {"id": str(props.get("id", "")), "owner": str(props.get("owner", "")), "polygons": polygons}
-		var seat: Variant = props.get("capital_px", props.get("centroid", null))
-		if seat is Array and (seat as Array).size() >= 2:
-			entry["seat"] = Vector2(float(seat[0]), float(seat[1]))
-		result.append(entry)
-	return result
 
 
 const NO_POSITION := Vector2(-1, -1)

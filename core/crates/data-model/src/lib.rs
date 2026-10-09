@@ -15,6 +15,7 @@ mod event_check;
 pub mod ids;
 pub mod load;
 pub mod map;
+pub mod map_geo;
 pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_grid;
